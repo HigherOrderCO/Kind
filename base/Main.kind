@@ -1,5 +1,4 @@
 Main: IO<Unit>
   IO {
-    get checked = IO.request("http://localhost:3030/api/check_term?code=type Foo { new(num: Nat) }")
-    IO.print(checked)
+    IO.print("oi")
   }

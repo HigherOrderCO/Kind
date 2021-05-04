@@ -39,22 +39,6 @@ Web.Playground.exe_event(id: String, stt: Web.Playground.State): Web.Playground.
       // } 
   }
 
-// Web.Playground.request(stt: Web.Playground.State): Web.Playground.State
-//   open stt
-//   let code = "type Bar {new(a: Bool)}"
-//   IO {
-//     get checked = IO.request("http://localhost:3030/api/check_term?code=" | code)
-//     // App.store!(Web.Playground.State.new(
-//     //   stt.device, stt.window, 
-//     //   stt.mouse_over, stt.code,
-//     //   checked))
-//     ?a
-//   }
-//   App.store!(Web.Playground.State.new(
-//       stt.device, stt.window, 
-//       stt.mouse_over, stt.code,
-//       checked))
-
 Web.Playground.set_mouse_over(id: String, stt: Web.Playground.State): Web.Playground.State
   open stt
   Web.Playground.State.new(stt.device, stt.window, id, stt.code, stt.output)
@@ -66,13 +50,21 @@ Web.playground.body(stt: Web.Playground.State): DOM
     "height": "500px"
   },[Web.Playground.draw(stt)])
 
+Web.Playground.input(code: String, key: Char): String
+  let backspace = 8#16
+  let delete = 127#16
+  let new_code = 
+    if Bool.or(Char.eql(key, backspace), Char.eql(key, delete)) 
+    then String.drop(1, code) 
+    else String.concat(Char.to_string(key), code)
+  new_code
+
 // Executes the application
 Web.Playground: App(Web.Playground.State)
 
   init = 
     Web.Playground.State.new(
-      Device.big_desktop, Web.Playground.Window.input, "", "", "none"
-    )
+      Device.big_desktop, Web.Playground.Window.input, "", "", "")
 
   draw = (state)
     Web.playground.body(state)
@@ -80,23 +72,28 @@ Web.Playground: App(Web.Playground.State)
   when = (event, state)
     open state
     case event {
-      // init: 
-      //   open event.info
-      //   open event.info.screen_size as screen_size
-      //   let device = Device.classify(screen_size.fst)
-      //   App.store!(
-      //     Web.Playground.State.new(device, Web.Playground.Window.input, "", "", "")
-      //   )
+      tick: 
+        open event.info
+        open event.info.screen_size as screen_size
+        let device = Device.classify(screen_size.fst)
+        App.store!(
+          Web.Playground.State.new(device, Web.Playground.Window.input, "", "", "")
+        )
+
+      key_down:
+        App.store!(Web.Playground.State.new(
+          state.device, state.window, 
+          state.mouse_over, Web.Playground.input(state.code, event.code),
+          state.output))
       
       // TODO: check if this is being called
       mouse_click: 
         switch String.eql(event.id) {
-          "btn_run_code": 
-            log("btn clicked!")
+          "btn_run_code": // Send a request to typecheck the code
+              log("State: " | state.code)
             IO {
-              // let code = "type Bar {new(a: Bool)}"
-              get checked = IO.request("http://localhost:3030/api/check_term?code=type Foo { new(num: Nat) }")
-              log("Checked: " | checked)
+              // TODO: check if state.code is not empty
+              get checked = IO.request("http://localhost:3030/api/check_term?code=" | state.code)
               App.store!(Web.Playground.State.new(
                 state.device, state.window, 
                 state.mouse_over, state.code,

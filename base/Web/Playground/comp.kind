@@ -1,4 +1,5 @@
 Web.Playground.comp.header(stt: Web.Playground.State): DOM
+  open stt
   let tab = 
     DOM.node("div", {}, {
       "font-size": "14px"
@@ -11,7 +12,7 @@ Web.Playground.comp.header(stt: Web.Playground.State): DOM
   let title = 
     DOM.node("div", {}, {"font-size": "18px"}, [DOM.text("KIND Playground")])
 
-  let btn_run = Web.Playground.comp.btn_run_code(false, ">")  
+  let btn_run = Web.Playground.comp.btn_run_code(stt.mouse_over)  
 
   DOM.node("div", {}, {
     "display": "flex"
@@ -22,16 +23,21 @@ Web.Playground.comp.header(stt: Web.Playground.State): DOM
   }, [tab, btn_run])
 
 
-Web.Playground.comp.btn_run_code(is_hover: Bool, title: String): DOM
+Web.Playground.comp.btn_run_code(mouse_over: String): DOM
+  let is_hover = String.eql("btn_run_code", mouse_over)
   let normal = {
-    "width" : "40px"
-    "height": "20px"
+    "width" : "50px"
+    "height": "25px"
     "margin": "5px 0px"
     "background-color": Web.Kind.constant.secondary_color
     "color": "white"
     "cursor": "pointer"
     "border": "none"
     "border-radius": "4px"
+    "display": "flex"
+    "justify-content": "center"
+    "align-content": "center"
+    "align-items": "center"
   }
   let hover = {
     "background-color": "#44B8D3"
@@ -39,7 +45,7 @@ Web.Playground.comp.btn_run_code(is_hover: Bool, title: String): DOM
   DOM.node("div", {"id": "btn_run_code"},
     if is_hover then Map.union!(normal, hover)
     else normal,
-    [])
+    [DOM.text("check")])
 
 Web.Playground.comp.input(code: String): DOM
   DOM.node("textarea", {
@@ -67,12 +73,12 @@ Web.Playground.comp.main_area(stt: Web.Playground.State): DOM
 
 Web.Playground.comp.output_area(output: String): DOM
   DOM.node("div", {}, {
-    "width": "300px"
+    "width": "400px"
     "heigh": "100%"
-    "margin-top": "30px"
+    "margin-top": "35px"
     "padding": "10px"
     "background-color": Web.Playground.constant.light_gray_color
-  }, [DOM.text(output)])
+  }, [DOM.node("pre", {}, {}, [DOM.text(output)])])
 
 
 
