@@ -1,7 +1,7 @@
 Kind.Parser.case.case: Parser(Pair<List<Kind.Name>, Kind.Term>)
   Parser {
-    get names = Parser.until!(Kind.Parser.text(":"), Kind.Parser.name1);
-    get term = Kind.Parser.term;
+    get names = Parser.until!(Kind.Parser.text(":"), Parser.override_error!(Kind.Parser.name1, "Expected name of case branch."));
+    get term = Parser.append_error!(Kind.Parser.term, "\nIn case branch.");
     Parser.maybe!(Kind.Parser.text(","));
     return {names, term};
   }
