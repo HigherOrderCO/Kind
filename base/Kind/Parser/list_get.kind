@@ -1,7 +1,7 @@
 Kind.Parser.list_get(init: Nat, list: Kind.Term): Parser(Kind.Term)
   Parser {
     Parser.text("[");
-    get indx = Kind.Parser.term;
+    get indx = Parser.append_error!(Kind.Parser.term, "\nIn list get.");
     Kind.Parser.text("]");
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("List.get");

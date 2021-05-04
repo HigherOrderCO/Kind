@@ -3,7 +3,7 @@ Kind.Parser.right: Parser(Kind.Term)
     get init = Kind.Parser.init;
     Kind.Parser.text("right(");
     get expr = Kind.Parser.term;
-    Kind.Parser.text(")");
+    Kind.Parser.text_error(")", "No matching '(' for right");
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Either.right");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));

@@ -1,7 +1,7 @@
 Kind.Parser.switch.case: Parser(Pair<Kind.Term, Kind.Term>)
   Parser {
     get key = Kind.Parser.term;
-    Kind.Parser.text(":");
+    get u = Kind.Parser.text_error(":", "Switch cases need to be separated by a ':'");
     get val = Kind.Parser.term;
     return {key, val};
   }
@@ -9,11 +9,11 @@ Kind.Parser.switch.case: Parser(Pair<Kind.Term, Kind.Term>)
 Kind.Parser.switch: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text("switch ");
+    get u = Kind.Parser.text_error("switch", "Expected \"switch \"");
     get cond = Kind.Parser.term;
-    Kind.Parser.text("{");
+    get u = Kind.Parser.text_error("{", "A switch needs an opening '{'");
     get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.switch.case);
-    Kind.Parser.text("default ");
+    Kind.Parser.text_error("default", "A switch needs a \"default\"");
     get dflt = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = List.fold!(cses)!(dflt, (cse, rest)

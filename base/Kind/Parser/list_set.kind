@@ -2,8 +2,8 @@ Kind.Parser.list_set(init: Nat, list: Kind.Term): Parser(Kind.Term)
   Parser {
     Parser.text("[");
     get indx = Kind.Parser.term;
-    Kind.Parser.text("]");
-    Kind.Parser.text("<-");
+    Kind.Parser.text_error("]", "Found no matching ']'");
+    Kind.Parser.text_error("<-", "Expected a \"<-\"");
     get xval = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("List.set");

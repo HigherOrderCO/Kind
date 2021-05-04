@@ -1,6 +1,6 @@
 Kind.Parser.constructor(namespace: Kind.Name): Parser(Kind.Constructor)
   Parser {
-    get name = Kind.Parser.name1;
+    get name = Parser.override_error!(Kind.Parser.name1, "Constructors must be identifiers");
     get args = Parser.maybe!(Kind.Parser.binder(":"));
     get inds = Parser.maybe!(Parser {
       Kind.Parser.text("~");

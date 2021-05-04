@@ -1,12 +1,12 @@
 Kind.Parser.map: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text("{");
+    Kind.Parser.text_error("{", "A map needs an opening '{'");
     get vals = Parser.until!(
-      Kind.Parser.text("}"),
+      Kind.Parser.text_error("}", "Found no matching '}'"),
       Kind.Parser.item!(Parser {
         get key = Kind.Parser.term;
-        Kind.Parser.text(":");
+        Kind.Parser.text_error(":", "In a map key and value must be separated by ':'");
         get val = Kind.Parser.term;
         return {key, val}
       }));

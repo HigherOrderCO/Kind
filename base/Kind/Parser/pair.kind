@@ -2,11 +2,11 @@ Kind.Parser.pair: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     Kind.Parser.text("{");
-    get val0 = Kind.Parser.term;
+    get val0 = Parser.append_error!(Kind.Parser.term, "\nIn left term of pair.");
     Parser.maybe!(Kind.Parser.text(","));
-    get val1 = Kind.Parser.term;
+    get val1 = Parser.append_error!(Kind.Parser.term, "\nIn right term of pair.");
     Parser.maybe!(Kind.Parser.text(","));
-    Kind.Parser.text("}");
+    Kind.Parser.text_error("}", "Found no closing '}'");
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Pair.new");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));

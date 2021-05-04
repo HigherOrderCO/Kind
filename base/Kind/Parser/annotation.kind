@@ -1,7 +1,7 @@
 Kind.Parser.annotation(init: Nat, term: Kind.Term): Parser(Kind.Term)
   Parser {
-    Kind.Parser.text("::");
-    get type = Kind.Parser.term;
+    get u = Kind.Parser.text_error("::", "Expected an annotation \":: …\"");
+    get type = Parser.append_error!(Kind.Parser.term, "\nIn annotation.");
     get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.ann(Bool.false, term, type));
   }

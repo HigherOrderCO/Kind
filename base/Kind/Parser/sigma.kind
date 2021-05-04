@@ -1,7 +1,7 @@
 Kind.Parser.sigma(init: Nat, val0: Kind.Term): Parser(Kind.Term)
   Parser {
     Kind.Parser.text("~");
-    get val1 = Kind.Parser.term;
+    get val1 = Parser.append_error!(Kind.Parser.term, "\nIn right hand of sigma.");
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Sigma.new");
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));

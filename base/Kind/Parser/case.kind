@@ -8,7 +8,7 @@ Kind.Parser.case: Parser(Kind.Term)
       get expr = Parser.avoiding!(Kind.Parser.text("{"), Kind.Parser.term)
       get name = Parser.maybe!(Parser {
         Kind.Parser.text("as");
-        get name = Kind.Parser.name1;
+        get name = Parser.override_error!(Kind.Parser.name1, "Expected identifier after \"as\"");
         Parser.maybe!(Kind.Parser.text(";"));
         return name;
       })
@@ -20,21 +20,21 @@ Kind.Parser.case: Parser(Kind.Term)
     get wyth = Kind.Parser.case.with;
 
     // Cases
-    Kind.Parser.text("{");
-    get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.case.case);
+    Kind.Parser.text_error("{", "Missing '{' after \"case …\"");
+    get cses = Parser.until!(Kind.Parser.text("}"), Parser.append_error!(Kind.Parser.case.case, "\nInside case.\""));
     get smrt = Parser.maybe!(Kind.Parser.text("!"));
 
     // Default value
     get dflt = Parser.maybe!(Parser {
       Kind.Parser.text("default");
-      get term = Kind.Parser.term;
+      get term = Parser.append_error!(Kind.Parser.term, "\nInside default.");
       return term;
     });
 
     // Motive
     get moti = Parser.maybe!(Parser {
       Kind.Parser.text(":");
-      Kind.Parser.term;
+      Parser.append_error!(Kind.Parser.term, "\nInside motive.");
     })
     let moti = case moti {
       none: case smrt {
@@ -47,8 +47,6 @@ Kind.Parser.case: Parser(Kind.Term)
     get orig = Kind.Parser.stop(init);
 
     return Kind.Parser.case.build(vals, wyth, cses, dflt, moti, orig)
-    //let moti = case moti { none: Kind.Term.hol(Bits.e), some: moti.value };
-    //return Kind.Term.ori(orig, Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti));
   }
 
 Kind.Parser.case.build(
@@ -93,52 +91,3 @@ Kind.Parser.case.group(
           Kind.Map.set!(cse_names.head, {cse_names.tail, cse_value} & rest, map)
       }
   }
-
-  //cse(
-    //path: Bits,
-    //expr: Kind.Term,
-    //name: Kind.Name,
-    //with: List<Kind.Ann>,
-    //cses: BitsMap<Kind.Term>,
-    //moti: Maybe<Kind.Term>,
-  //),
-
-      
-//VALS = [x, y, z]
-//CSES = 
-//[
-  //{["A", "A", "A"], 1}
-  //{["A", "A", "B"], 2}
-  //{["A", "B", "A"], 3}
-  //...
-//]
-//GROUP =
-//{"A": [
-  //{["A","A"], 1}
-  //{["A","B"], 2}
-  //{["B","A"], 3}
-  //{["B","B"], 4}
-//],
-//...
-
-
-
-//case x {
-  //A: case y {
-    //A: case z {
-      //A: 1
-      //B: 2
-    //},
-    //B: case z {
-      //A: 3
-      //B: ...
-    //}
-  //},
-  //B: case y {
-  //  ...
-  //},
-  //....
-//}
-
-
-

@@ -66,6 +66,16 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.u8,
       Kind.Parser.nat,
       Kind.Parser.reference,
+      Parser.fail!("Expected a term.") // if no parser consumes input, that'll be the error
     ]);
-    Kind.Parser.suffix(init, term);
+    log("---------- log_long") // DEBUG
+    Parser.log_long // DEBUG
+    log("actual code: ") // DEBUG
+    Parser.log_code // DEBUG
+    get term = Kind.Parser.suffix(init, term);
+    log("---------- log_long") // DEBUG
+    Parser.log_long // DEBUG
+    log("actual code: ") // DEBUG
+    Parser.log_code // DEBUG
+    return term
   }

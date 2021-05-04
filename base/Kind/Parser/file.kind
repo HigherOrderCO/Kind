@@ -8,7 +8,9 @@ Kind.Parser.file(file: String, code: String, defs: Kind.Defs): Parser(Kind.Defs)
         Kind.Parser.file.def(file, code, defs),
         Kind.Parser.file.adt(file, code, defs),
         Kind.Parser.file.end(file, code, defs),
+        Parser.fail!("Expected a top-level definition or a type declaration.") // if no parser consumes input, that'll be the error
       ]);
-      Kind.Parser.file(file, code, defs);
+      get p = Kind.Parser.file(file, code, defs);
+      return p
     }
   }

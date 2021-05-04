@@ -1,11 +1,11 @@
 Kind.Parser.goal_rewrite: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text("rewrite ");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text("in");
+    Kind.Parser.text_error("rewrite ", "Expected \"rewrite\"");
+    get name = Parser.override_error!(Kind.Parser.name1, "Expected an identifier after rewrite");
+    get u = Kind.Parser.text_error("in", "expected \"in\" after \"rewrite …\"");
     get type = Kind.Parser.term;
-    Kind.Parser.text("with");
+    get u = Kind.Parser.text_error("with", "expected \"with\" after \"rewrite … in …\"");
     get iseq = Kind.Parser.term;
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);

@@ -1,11 +1,11 @@
 Kind.Parser.rewrite(init: Nat, subt: Kind.Term): Parser(Kind.Term)
   Parser {
     Kind.Parser.text("::");
-    Kind.Parser.text("rewrite");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text("in");
+    Kind.Parser.text_error("rewrite", "Did you mean \"rewrite\"?");
+    get name = Parser.override_error!(Kind.Parser.name1, "Expected identifier after \"rewrite\"");
+    Kind.Parser.text_error("in", "Expected \"in\" after \"rewrite …\"");
     get type = Kind.Parser.term;
-    Kind.Parser.text("with");
+    Kind.Parser.text_error("with", "Expected \"with\" after \"in …\"");
     get iseq = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Equal.rewrite");

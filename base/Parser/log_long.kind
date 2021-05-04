@@ -1,0 +1,7 @@
+Parser.log_long: Parser(Unit)
+  (long, idx, code) case long {
+    none: Debug.log!("none", (x) Parser.Reply.value!(long, idx, code, Unit.new))
+    some:
+      open long.value
+      Debug.log!("code: " | long.value.code | "\nerror: " | long.value.err | "\nidx: " | Nat.show(long.value.idx), (x) Parser.Reply.value!(long, idx, code, Unit.new))
+  }

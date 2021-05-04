@@ -1,6 +1,6 @@
 Kind.Parser.arrow(init: Nat, xtyp: Kind.Term): Parser(Kind.Term)
   Parser {
-    Kind.Parser.text("->");
+    Kind.Parser.text_error("->", "Expected \"->\" in arrow");
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.all(Bool.false, "", "", xtyp, (s,x) body));

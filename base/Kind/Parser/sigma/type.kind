@@ -2,10 +2,10 @@ Kind.Parser.sigma.type: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     Kind.Parser.text("[");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text(":");
+    get name = Parser.override_error!(Kind.Parser.name1, "Expected an identifier at start of sigma type");
+    Kind.Parser.text_error(":", "Expected ':' after identifier in sigma");
     get typ0 = Kind.Parser.term;
-    Kind.Parser.text("]");
+    Kind.Parser.text_error("]", "Found no matchin ']' in sigma");
     get typ1 = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = Kind.Term.ref("Sigma");

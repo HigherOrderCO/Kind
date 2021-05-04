@@ -1,14 +1,14 @@
 Kind.Parser.letforin: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text("let ");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text("=");
-    Kind.Parser.text("for ");
-    get elem = Kind.Parser.name1;
-    Kind.Parser.text("in");
+    get u = Kind.Parser.text_error("let ", "Expected a \"let\" in letforin");
+    get name = Parser.override_error!(Kind.Parser.name1, "Expected an identifier in letforin");
+    get u = Kind.Parser.text_error("=", "Expected an '=' in letforin");
+    get u = Kind.Parser.text_error("for ", "Expected a \"for\" in letforin");
+    get elem = Parser.override_error!(Kind.Parser.name1, "Expected an identifier in letforin");
+    get u = Kind.Parser.text_error("in", "Expected \"in\" in letforin");
     get list = Kind.Parser.term;
-    Kind.Parser.text(":");
+    get u = Kind.Parser.text_error(":", "Expected ':' after letforin");
     get loop = Kind.Parser.term;
     Parser.maybe!(Kind.Parser.text(";"));
     get body = Kind.Parser.term;
@@ -31,9 +31,9 @@ Kind.Parser.letforin.with: Parser(Kind.Term)
     get elem = Kind.Parser.name1;
     Kind.Parser.text("in");
     get list = Kind.Parser.term;
-    Kind.Parser.text("with ");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text(":");
+    Kind.Parser.text_error("with", "Missing \"with\" after \"for … in … \"");
+    get name = Parser.override_error!(Kind.Parser.name1, "Expected an identifier after \"with\"");
+    Kind.Parser.text_error(":", "Missing ':' after \"for … in … with\"");
     get loop = Kind.Parser.term;
     Parser.maybe!(Kind.Parser.text(";"));
     get body = Kind.Parser.term;

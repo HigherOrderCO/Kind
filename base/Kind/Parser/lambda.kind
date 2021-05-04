@@ -4,8 +4,8 @@ Kind.Parser.lambda: Parser(Kind.Term)
     Kind.Parser.text("(");
     get name = Parser.until1!(
       Kind.Parser.text(")"),
-      Kind.Parser.item!(Kind.Parser.name1));
-    get body = Kind.Parser.term;
+      Parser.append_error!(Kind.Parser.item!(Kind.Parser.name1), "\nIn lambda parameter list."));
+    get body = Parser.append_error!(Kind.Parser.term, "\nIn lambda body.");
     get orig = Kind.Parser.stop(init);
     let expr = Kind.Parser.make_lambda(name, body);
     return Kind.Term.ori(orig, expr);

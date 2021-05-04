@@ -2,8 +2,8 @@ Kind.Parser.without: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
     Kind.Parser.text("without ");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text(":");
+    get name = Parser.override_error!(Kind.Parser.name1, "Expected identifier after \"without …\"");
+    Kind.Parser.text_error(":", "Missing ':' after \"without …\"");
     get dflt = Kind.Parser.term;
     get rest = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);

@@ -1,11 +1,11 @@
 Kind.Parser.if: Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text("if ");
+    get u = Kind.Parser.text_error("if ", "Expected \"if \"");
     get cond = Kind.Parser.term;
-    Kind.Parser.text("then");
+    get u = Kind.Parser.text_error("then", "Expected \"then\" after \"if …\"");
     get tcse = Kind.Parser.term;
-    Kind.Parser.text("else");
+    get u = Kind.Parser.text_error("else", "Expected \"else\" after \"if … then …\"");
     get fcse = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
     let term = cond;

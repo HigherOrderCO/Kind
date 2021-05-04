@@ -1,5 +1,5 @@
 Kind.Parser.suffix(init: Nat, term: Kind.Term): Parser(Kind.Term)
-  (idx, code)
+  (long, idx, code)
   let suffix_parser = Parser.first_of!([
    Kind.Parser.application(init, term),
    Kind.Parser.application.erased(init, term),
@@ -8,6 +8,8 @@ Kind.Parser.suffix(init: Nat, term: Kind.Term): Parser(Kind.Term)
    Kind.Parser.map_set(init, term),
    Kind.Parser.map_get(init, term),
    Kind.Parser.arrow(init, term),
+   Kind.Parser.concat(init, term),
+   Kind.Parser.equality(init, term),
    Kind.Parser.add(init, term),
    Kind.Parser.sub(init, term),
    Kind.Parser.mul(init, term),
@@ -22,21 +24,18 @@ Kind.Parser.suffix(init: Nat, term: Kind.Term): Parser(Kind.Term)
    Kind.Parser.or(init, term),
    Kind.Parser.default(init, term),
    Kind.Parser.cons(init, term),
-   Kind.Parser.concat(init, term),
    Kind.Parser.string_concat(init, term),
    Kind.Parser.sigma(init, term),
-   Kind.Parser.equality(init, term),
    Kind.Parser.inequality(init, term),
    Kind.Parser.rewrite(init, term),
    Kind.Parser.annotation(init, term),
    Kind.Parser.application.hole(init, term),
   ]);
-  case suffix_parser(idx, code) as suffix_parsed {
+  case suffix_parser(long, idx, code) as suffix_parsed {
     error:
-      log("suffix error: " | suffix_parsed.err)
-      Parser.Reply.value!(idx, code, term),
+      open suffix_parsed.val
+      val = Parser.ErrorAt.maybe_combine(long, some(suffix_parsed.val))
+      Parser.Reply.value!(val, idx, code, term),
     value: 
-      log("suffix parsed: " | Kind.Term.show(suffix_parsed.val))
-      log("suffix from:\n" | code)
-      Kind.Parser.suffix(init, suffix_parsed.val, suffix_parsed.idx, suffix_parsed.code),
+      Kind.Parser.suffix(init, suffix_parsed.val, suffix_parsed.long, suffix_parsed.idx, suffix_parsed.code),
   }

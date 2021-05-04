@@ -9,9 +9,9 @@ Kind.Parser.datatype: Parser(Kind.Datatype)
     });
     let pars = Maybe.default!(pars, []);
     let inds = Maybe.default!(inds, []);
-    Kind.Parser.text("{");
+    Kind.Parser.text_error("{", "Expected a '{' in datatype declaration");
     get ctrs = Parser.until!(
       Kind.Parser.text("}"),
-      Kind.Parser.item!(Kind.Parser.constructor(name)));
+      Parser.append_error!(Kind.Parser.item!(Kind.Parser.constructor(name)), "\nIn body of datatype definition."));
     return Kind.Datatype.new(name, pars, inds, ctrs);
   }

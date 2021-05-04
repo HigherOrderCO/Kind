@@ -3,7 +3,7 @@ Kind.Parser.application(init: Nat, func: Kind.Term): Parser(Kind.Term)
     Parser.text("(");
     get args = Parser.until1!(
       Kind.Parser.text(")"),
-      Kind.Parser.item!(Kind.Parser.term));
+      Parser.append_error!(Kind.Parser.item!(Kind.Parser.term), "\nIn application."));
     get orig = Kind.Parser.stop(init);
     let expr = List.for!(args)!(func, (x,f) Kind.Term.app(f, x));
     return Kind.Term.ori(orig, expr);
