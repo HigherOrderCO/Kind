@@ -40,15 +40,8 @@ module.exports = class AppPlay extends Component {
     };
   }
 
-  async type_check() {
-    const code = "type Foo { new(a: Nat)} "
-    await kind.run(kind["Kind.api.io.check_file"]("Main.kind"))
-    // console.log("Check: ", res)
-  }
-
   // Loads the application from Moonad, which was pre-compiled to JavaScript
   async init_app() {
-    await this.type_check()
     if (!this.app && apps[this.name]) {
       //console.log("loading app...");
       this.app = (await apps[this.name])[this.name];
@@ -152,6 +145,7 @@ module.exports = class AppPlay extends Component {
     document.body.addEventListener("keyup", this.listeners.keyup);
 
     // Resize event
+    // TODO: remove it
     this.listeners.resize = (e) => {
       this.register_event({
         _: "App.Event.resize",

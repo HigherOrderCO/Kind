@@ -1,22 +1,22 @@
 Test.main: IO(Unit)
+  let code = "type Bar {new(a: Bool)}"
   IO {
-    IO.print("What is your name?")
-    get name = IO.get_line
-    IO.print("Hello, " | name)
+    get checked = IO.request("localhost:3030/code=" | code)
+    checked
   }
 
-Test: IO(Unit)
-  IO {
-    let name = "Test.main"
-    IO.print("Compiling "|name|" to Scheme...")
-    get defs = Kind.Synth.one(name, Kind.Map.new!)
-    case defs {
-      none: IO.print("Something is wrong.")
-      some: IO {
-        let defs = Kind.Comp.Defs.compile(defs.value)
-        let file = Kind.Comp.Target.Scheme(defs)|"(run_io ("|name|"))\n"
-        IO.print(file)
-        IO.set_file("./main.scm", file)
-      }
-    }
-  }
+// Test: IO(Unit)
+//   IO {
+//     let name = "Test.main"
+//     IO.print("Compiling "|name|" to Scheme...")
+//     get defs = Kind.Synth.one(name, Kind.Map.new!)
+//     case defs {
+//       none: IO.print("Something is wrong.")
+//       some: IO {
+//         let defs = Kind.Comp.Defs.compile(defs.value)
+//         let file = Kind.Comp.Target.Scheme(defs)|"(run_io ("|name|"))\n"
+//         IO.print(file)
+//         IO.set_file("./main.scm", file)
+//       }
+//     }
+//   }

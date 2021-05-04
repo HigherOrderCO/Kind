@@ -3,7 +3,8 @@ type Web.Playground.State {
     device: Device, 
     window: Web.Playground.Window,
     mouse_over: String,
-    code: String)
+    code: String,
+    output: String)
 }
 
 type Web.Playground.Window {
@@ -34,14 +35,29 @@ Web.Playground.exe_event(id: String, stt: Web.Playground.State): Web.Playground.
     some: stt
       // TODO: add state change
       // case event.value{
-      //   check_terms: Web.Playground.State.new(stt.device, Web.Playground.Page.home, stt.mouse_over)
-      //   go_to_apps : Web.Playground.State.new(stt.device, Web.Playground.Page.apps, stt.mouse_over)
+      //   btn_check_terms: 
       // } 
   }
 
+// Web.Playground.request(stt: Web.Playground.State): Web.Playground.State
+//   open stt
+//   let code = "type Bar {new(a: Bool)}"
+//   IO {
+//     get checked = IO.request("http://localhost:3030/api/check_term?code=" | code)
+//     // App.store!(Web.Playground.State.new(
+//     //   stt.device, stt.window, 
+//     //   stt.mouse_over, stt.code,
+//     //   checked))
+//     ?a
+//   }
+//   App.store!(Web.Playground.State.new(
+//       stt.device, stt.window, 
+//       stt.mouse_over, stt.code,
+//       checked))
+
 Web.Playground.set_mouse_over(id: String, stt: Web.Playground.State): Web.Playground.State
   open stt
-  Web.Playground.State.new(stt.device, stt.window, id, stt.code)
+  Web.Playground.State.new(stt.device, stt.window, id, stt.code, stt.output)
 
 // Represents a page containing the Playground
 Web.playground.body(stt: Web.Playground.State): DOM
@@ -54,19 +70,40 @@ Web.playground.body(stt: Web.Playground.State): DOM
 Web.Playground: App(Web.Playground.State)
 
   init = 
-    Web.Playground.State.new(Device.big_desktop, Web.Playground.Window.input, "", "")
+    Web.Playground.State.new(
+      Device.big_desktop, Web.Playground.Window.input, "", "", "none"
+    )
 
   draw = (state)
     Web.playground.body(state)
 
   when = (event, state)
+    open state
     case event {
-      init: 
-        open event.info
-        open event.info.screen_size as screen_size
-        let device = Device.classify(screen_size.fst)
-        App.store!(Web.Playground.State.new(device, Web.Playground.Window.input, "", ""))
-      mouse_click: App.store!(Web.Playground.exe_event(event.id, state))
+      // init: 
+      //   open event.info
+      //   open event.info.screen_size as screen_size
+      //   let device = Device.classify(screen_size.fst)
+      //   App.store!(
+      //     Web.Playground.State.new(device, Web.Playground.Window.input, "", "", "")
+      //   )
+      
+      // TODO: check if this is being called
+      mouse_click: 
+        switch String.eql(event.id) {
+          "btn_run_code": 
+            log("btn clicked!")
+            IO {
+              // let code = "type Bar {new(a: Bool)}"
+              get checked = IO.request("http://localhost:3030/api/check_term?code=type Foo { new(num: Nat) }")
+              log("Checked: " | checked)
+              App.store!(Web.Playground.State.new(
+                state.device, state.window, 
+                state.mouse_over, state.code,
+                checked))
+            }
+        } default App.pass
+        
       mouse_over : App.store!(Web.Playground.set_mouse_over(event.id, state))
       resize: 
         open event.info
@@ -75,13 +112,6 @@ Web.Playground: App(Web.Playground.State)
         let device = Device.classify(screen_size.fst)
         App.store!(Web.Playground.State.new(device, state.window, state.mouse_over, state.code))
       onsubmit:
-        // OBS: Can't check the code on Kind now because it depends on
-        // reading the dir in search of terms from the 'base'
-        // let full_code = event.value | event.response
-        // OBS: unable to build it. Error :(
-        // log("Submit ", event.response)
-        let res = Kind.api.check_code(event.response)
-        // log("Playground res: ", res)
         App.pass
     } default App.pass
   

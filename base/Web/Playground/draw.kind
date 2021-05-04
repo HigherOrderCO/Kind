@@ -1,8 +1,11 @@
 Web.Playground.draw(stt: Web.Playground.State): DOM
+  open stt
   DOM.node("div", {}, {
     "width": "100%"
     "height": "100%"
     "margin": "20px 0x"
+    "display": "flex"
   }, [
-    Web.Playground.comp.main_area(stt)
+    Web.Playground.comp.main_area(stt),
+    Web.Playground.comp.output_area(stt.output)
   ])
