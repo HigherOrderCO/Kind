@@ -1,5 +1,5 @@
 Nat.read(str: String): Nat
-  let p = Parser.nat(0, str)
+  let p = Parser.nat(none, 0, str)
   case p {
     error: 0
     value: p.val

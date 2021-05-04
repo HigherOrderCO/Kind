@@ -36,13 +36,13 @@ Kind.Parser.letforrange.u32.with: Parser(Kind.Term)
     get u = Kind.Parser.text_error(":", "Expected ':' after \"for …\"");
     get u = Kind.Parser.text_error("U32", "Expected range type after \"for … :\"");
     get u = Kind.Parser.text_error("from", "Expected \"from\" after \"U32\"");
-    get idx0 = Kind.Parser.term;
+    get idx0 = Parser.append_error!(Kind.Parser.term, "\nInside for lower bound.");
     get u = Kind.Parser.text_error("to", "Expected \"to\" after \"from …\"");
-    get idx1 = Kind.Parser.term;
+    get idx1 = Parser.append_error!(Kind.Parser.term, "\nInside for upper bound.");
     get u = Kind.Parser.text_error("with ", "Expected \"with\" after \"to …\"");
     get name = Parser.override_error!(Kind.Parser.name1, "Expected identifier after \"with\"");
     get u = Kind.Parser.text_error(":", "Missing ':' after \"with …\"");
-    get loop = Kind.Parser.term;
+    get loop = Parser.append_error!(Kind.Parser.term, "\nInside for body.");
     Parser.maybe!(Kind.Parser.text(";"));
     get body = Kind.Parser.term;
     get orig = Kind.Parser.stop(init);
