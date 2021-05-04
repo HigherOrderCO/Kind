@@ -1,2 +1,4 @@
 U256.shl(n: U256, a: U256): U256
-  U256.shl(n, a)
+  open n
+  open a
+  U256.new(Word.shl!(n.value, a.value))

@@ -1,5 +1,0 @@
-Word.signed_shr<size: Nat>(n: Nat, value: Word(size)): Word(size)
-  case n {
-    zero: value,
-    succ: Word.signed_shr<size>(n.pred, Word.signed_shr.one<size>(value))
-  }: Word(size)
