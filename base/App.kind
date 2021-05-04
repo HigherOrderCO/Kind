@@ -55,24 +55,11 @@ type App.Event {
     time: U64
     id: String
   )
-  // The event occurs when a user moves the mouse pointer out of an element, or out of one of its children
-  mouse_out(
-    time: U64
-    id: String
-  )
   // The event occurs when the user clicks on an element. It's fired after the mousedown and mouseup events
   mouse_click(
     time: U64
     id: String
     action: String
-  )
-  resize(
-    time: U64
-    info: App.EnvInfo
-  )
-  onsubmit(
-    time: U64
-    value: String
   )
 }
 

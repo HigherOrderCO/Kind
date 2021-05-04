@@ -95,15 +95,6 @@ module.exports = class AppPlay extends Component {
     };
     document.body.addEventListener("mouseover", this.listeners.mouseover); 
 
-    this.listeners.mouseover = (e) => {
-      this.register_event({
-        _: "App.Event.mouse_out",
-        time: BigInt(Date.now()),
-        id: e.target.id
-      });
-    };
-    document.body.addEventListener("mouseout", this.listeners.mouseout);
-
     this.listeners.click = (e) => {
       this.register_event({
         _: "App.Event.mouse_click",
@@ -143,35 +134,6 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
-
-    // Resize event
-    // TODO: remove it
-    this.listeners.resize = (e) => {
-      this.register_event({
-        _: "App.Event.resize",
-        time: BigInt(Date.now()),
-        info: {
-          _: "App.EnvInfo.new",
-          screen_size: {
-            _: "Pair.new",
-            fst: e.target.innerWidth,
-            snd: e.target.innerHeight,
-          },
-          mouse_pos: this.mouse_pos,
-        }
-      });
-    };
-    window.addEventListener("resize", this.listeners.resize);
-
-    this.listeners.submit = (e) => {
-      e.preventDefault(); // prevents page to reload on submit
-      this.register_event({
-        _: "App.Event.onsubmit",
-        time: BigInt(Date.now()),
-        value: event.target[0].value
-      });
-    };
-    document.body.addEventListener("submit", this.listeners.submit);
 
     //Tick event
     this.intervals.tick = () => {
