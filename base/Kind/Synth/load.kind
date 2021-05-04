@@ -1,11 +1,13 @@
 Kind.Synth.load.cached.def(name: Kind.Name): IO<Maybe<Kind.Def>>
   IO {
-    //IO.print("-- getting " | name)
+    //IO.print("-- getting cache of " | name)
     get cache_file = IO.get_file(".cache/"|name|".file")
     if Bool.not(String.is_empty(cache_file)) then IO {
+      //IO.print("-- cache file isn't empty " | name)
       get cache_time = IO.get_file(".cache/"|name|".time")
       get cache_file_time = IO.get_file_mtime(cache_file)
       if String.eql(cache_time, cache_file_time) then IO {
+        //IO.print("-- cache time is correct " | name)
         get cache_term = IO.get_file(".cache/"|name|".term")
         get cache_type = IO.get_file(".cache/"|name|".type")
         get cache_isct = IO.get_file(".cache/"|name|".isct")
@@ -83,9 +85,11 @@ Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
     get cached_defs = Kind.Synth.load.cached([name], defs)
     case cached_defs {
       some: IO {
+        //IO.print("- cached " | name)
         return some(cached_defs.value)
       }
       none: IO {
+        //IO.print("- uncached " | name)
         Kind.Synth.load.go(name, Kind.Synth.files_of(name), defs)
       }
     }

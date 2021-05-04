@@ -66,8 +66,8 @@
 ; Converts a date to a string, in milliseconds
 (define (time_to_string time)
   (number->string
-    (+ (* (time-second (current-time)) 1000)
-      (div (time-nanosecond (current-time)) 1000000))))
+    (+ (* (time-second time) 1000)
+      (div (time-nanosecond time) 1000000))))
 
 ; Prints a text with a newline
 (define (print txt)
