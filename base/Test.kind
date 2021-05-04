@@ -1,21 +1,18 @@
-Test.main: Nat
-  let n = ((P,z,s) s(3)) :: Nat
-  let m = Nat.succ(Nat.succ(Nat.zero))
-  case Nat.add(n,m) as got {
-    zero: 0
-    succ: Nat.mul(got.pred,got.pred)
-  }
+Test: _
+  let a = TestGmap
+  "done"
 
-Test: IO(Unit)
-  IO {
-    let name = "Test.main"
-    IO.print("Compiling "|name|" to Scheme...")
-    get defs = Kind.Synth.one(name, Kind.Map.new!)
-    case defs {
-      none: IO.print("Something is wrong.")
-      some: IO {
-        let defs = Kind.Comp.Defs.compile(defs.value)
-        IO.print(Kind.Comp.Target.Scheme(defs)|"(print ("|name|"))\n")
-      }
-    }
-  }
+TestGmap: GMap<U32, U32>
+  let map = GMap.tip!!
+  
+  for i:U32 from 0u to 1000000u with map:
+    GMap.insert!!(U32.cmp, i, i, map)
+  map
+
+// TestBits: _
+//   let map = BitsMap.new!
+
+//   for i:U32 from 0u to 1000000u with map:
+//     let key = U32.to_bits(i)
+//     BitsMap.set!(key, i, map)
+//   map
