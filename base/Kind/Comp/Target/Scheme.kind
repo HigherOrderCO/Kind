@@ -134,7 +134,7 @@ Kind.Comp.Target.Scheme.optimized: Map(Pair(Nat,String))
     "U16.gtn": {2, "(> $0 $1)"},
     "U16.inc": {2, "(+ $0 1)"},
     "U16.to_nat": {1, "$0"},
-    "String.eql": {2, "(eq? $0 $1)"},
+    "String.eql": {2, "(string=? $0 $1)"},
     "String.concat": {2, "(string-append $0 $1)"},
   }
 
@@ -149,9 +149,9 @@ Kind.Comp.Target.Scheme.base: String
 (define (word-to-u16 w)
   (define (word-to-u16-go i w x)
     (cond ((= 16 i) x)
-      ((eq? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x))
-      ((eq? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x))
-      ((eq? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
+      ((symbol=? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x))
+      ((symbol=? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x))
+      ((symbol=? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
   (word-to-u16-go 0 w 0))
 
 ; Converts a native integer to a Kind word
@@ -174,17 +174,34 @@ Kind.Comp.Target.Scheme.base: String
 
 ; Returns the last index that chr occurs in str, -1 otherwise
 (define (last_index_of chr str idx)
-  (if (eq? idx (string-length str))
+  (if (= idx (string-length str))
     -1
     (let ((rest (last_index_of chr str (+ idx 1))))
-      (if (eq? (string-ref str idx) chr)
+      (if (char=? (string-ref str idx) chr)
         (max idx rest)
         rest))))
+
+; Returns the first index that chr occurs in str, -1 otherwise
+(define (first_index_of chr str idx)
+  (if (= idx (string-length str))
+    -1
+    (if (char=? (string-ref str idx) chr)
+      idx
+      (first_index_of chr str (+ idx 1)))))
+
+; Splits a string using an identifier
+(define (split_at_first chr str)
+  (let ((split_idx (first_index_of chr str 0)))
+    (if (= split_idx -1)
+      str
+      (cons
+        (substring str 0 split_idx)
+        (substring str (+ split_idx 1) (string-length str))))))
 
 ; Splits a string using an identifier
 (define (split_at_last chr str)
   (let ((split_idx (last_index_of chr str 0)))
-    (if (eq? split_idx -1)
+    (if (= split_idx -1)
       str
       (cons
         (substring str 0 split_idx)
@@ -192,8 +209,9 @@ Kind.Comp.Target.Scheme.base: String
 
 ; Converts a date to a string, in milliseconds
 (define (time_to_string time)
-  (+ (* (time-second (current-time)) 1000)
-     (div (time-nanosecond (current-time)) 1000000)))
+  (number->string
+    (+ (* (time-second (current-time)) 1000)
+      (div (time-nanosecond (current-time)) 1000000))))
 
 ; Prints a text with a newline
 (define (print txt)
@@ -239,7 +257,7 @@ Kind.Comp.Target.Scheme.base: String
 
 ; Returns the current time
 (define (get_time)
-  (time_to_string (get-time)))
+  (time_to_string (current-time)))
 
 ; Performs a single Kind IO action
 (define (io_action name)
@@ -248,10 +266,11 @@ Kind.Comp.Target.Scheme.base: String
     ("put_string" (lambda (x) (display x)))
     ("get_line" (lambda (x) (get_line)))
     ("del_file" (lambda (x) (del_file x)))
-    ("set_file" (lambda (x) (let ((file_text (split_at_last #\= x))) (set_file (car file_text) (cdr file_text)))))
+    ("get_file" (lambda (x) (get_file x)))
+    ("set_file" (lambda (x) (let ((file_text (split_at_first #\= x))) (set_file (car file_text) (cdr file_text)))))
     ("get_dir" (lambda (x) (get_dir x)))
     ("get_file_mtime" (lambda (x) (get_file_mtime x)))
-    ("get_time" (lambda (x) (get_time x)))))
+    ("get_time" (lambda (x) (get_time)))))
 
 ; Runs a Kind IO program
 (define (run_io io)
@@ -277,8 +296,8 @@ Kind.Comp.Target.Scheme.inst(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
       if List.length!(shape.inst) =? List.length!(vars) then
         let {expr,args} = Kind.Comp.get_args(expr)
         case expr { 
-          var: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args, defs)
-          ref: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args, defs)
+          var: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args, depth, defs)
+          ref: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args, depth, defs)
         } default none
       else
         none
@@ -290,6 +309,7 @@ Kind.Comp.Target.Scheme.inst.go(
   inst: List(Pair(Nat,String))
   vars: List(String)
   args: List(Kind.Comp)
+  depth: Nat
   defs: Kind.Comp.Defs
 ): Maybe(String)
   case inst vars {
@@ -300,17 +320,17 @@ Kind.Comp.Target.Scheme.inst.go(
       if String.eql(name, vars.head) then
         let {ctor_arity, ctor_maker} = inst.head
         if ctor_arity =? List.length!(args) then
-          some(Kind.Comp.replace(ctor_maker, List.mapped!(args)!((x) Kind.Comp.Target.Scheme.term(x,defs))))
+          some(Kind.Comp.replace(ctor_maker, List.mapped!(args)!((x) Kind.Comp.Target.Scheme.term(x,depth,defs))))
         else
           none
       else
-        Kind.Comp.Target.Scheme.inst.go(name, inst.tail, vars.tail, args, defs)
+        Kind.Comp.Target.Scheme.inst.go(name, inst.tail, vars.tail, args, depth, defs)
   }
 
 // Creates an instantiator function. This is like inst, but instead of being
 // applied to an inline argument, it generates a whole function.
 // - instantiator(`Nat`) == "(lambda (t) (t 0 (lambda (pred) (+ pred 1))))"
-Kind.Comp.Target.Scheme.instantiator(prim: Kind.Comp.Prim, defs: Kind.Comp.Defs): String
+Kind.Comp.Target.Scheme.instantiator(prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
   let shape = Kind.Comp.Target.Scheme.shape_of(prim) open shape
   let text = "x"
   for ctor in shape.inst with text:
@@ -345,8 +365,7 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
           if arity =? List.length!(args) then
             let code = "($" | term.name
             let code = for arg in args:
-              log("pass " | Kind.Comp.show(arg)) 
-              code | " " | Kind.Comp.Target.Scheme.term(arg, defs)
+              code | " " | Kind.Comp.Target.Scheme.term(arg, depth, defs)
             let code = code | ")"
             some(code)
           else
@@ -361,7 +380,7 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
       let args = for i from 0 to lams_len: args ++ [Kind.Comp.var("c"|Nat.show(i))]
       let self = "self" | Nat.show(depth)
       let text = ""
-      let text = text | "(let (("|self|" "|Kind.Comp.Target.Scheme.term(term.expr,defs)|")) "
+      let text = text | "(let (("|self|" "|Kind.Comp.Target.Scheme.term(term.expr,depth,defs)|")) "
       let text = text | "(case " | Kind.Comp.replace(ctag,[self])
       let text = for j from 0 to cses_len:
         let {name,flds} = cses[j] <> {"",[]}
@@ -376,7 +395,7 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
         let argj = Kind.Comp.apply(args[j] <> Kind.Comp.ref("?"), keys)
         let body = ""
         let body = for i from 0 to lams_len: body|"(lambda (c"|Nat.show(i)|") "
-        let body = body | Kind.Comp.Target.Scheme.term.go(argj, Nat.add(Nat.add(depth,flds_len),lams_len), defs)
+        let body = body | Kind.Comp.Target.Scheme.term(argj, Nat.add(Nat.add(depth,flds_len),lams_len), defs)
         let body = for i from 0 to lams_len: body|")"
         text | ") " | body | "))"
       let text = text | "))"
@@ -386,11 +405,11 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
 // Creates an elimination function. This is like "elim", but instead of being
 // applied to an inline argument, it generates a whole function.
 // - eliminator(Nat) == "(lambda (n) (if (= n 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s (- n 1))))))"
-Kind.Comp.Target.Scheme.eliminator(prim: Kind.Comp.Prim, defs: Kind.Comp.Defs): String
+Kind.Comp.Target.Scheme.eliminator(prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
   let term = Kind.Comp.eli(prim,Kind.Comp.var("x"))
   let text = Kind.Comp.Target.Scheme.elim(term, 0, defs) <> ""
   let term = Kind.Comp.lam("x", Kind.Comp.txt(text))
-  Kind.Comp.Target.Scheme.term(term,defs)
+  Kind.Comp.Target.Scheme.term(term, depth, defs)
       
 // Compilers
 // =========
@@ -415,11 +434,8 @@ Kind.Comp.Target.Scheme.string(str: String): String
   }
 
 // Converts a Comp term to a Scheme expression.
-Kind.Comp.Target.Scheme.term(comp: Kind.Comp, defs: Kind.Comp.Defs): String
-  Kind.Comp.Target.Scheme.term.go(comp, 0, defs)
-
-Kind.Comp.Target.Scheme.term.go(comp: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): String
-  let go = Kind.Comp.Target.Scheme.term.go
+Kind.Comp.Target.Scheme.term(comp: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): String
+  let go = Kind.Comp.Target.Scheme.term
   case Kind.Comp.Target.Scheme.inst(comp,depth,defs) as got {
     some: got.value
     none: case Kind.Comp.Target.Scheme.elim(comp,depth,defs) as got {
@@ -471,7 +487,7 @@ Kind.Comp.Target.Scheme.definition(name: String, term: Kind.Comp, defs: Kind.Com
   let code = for v in vars: code | " " | v
   let code = code | ") "
   let code = code | case Kind.Comp.Target.Scheme.optimized{name} as opt {
-    none: Kind.Comp.Target.Scheme.term(body, defs)
+    none: Kind.Comp.Target.Scheme.term(body, 0, defs)
     some: Kind.Comp.replace(Pair.snd!!(opt.value), vars)
   }
   let code = code | ")\n"
@@ -494,8 +510,8 @@ Kind.Comp.Target.Scheme(defs: Kind.Comp.Defs): String
   // Instantiatior and Eliminator functions
   for nati in Kind.Comp.Prim.natives with code:
     let {name,prim} = nati
-    let code = code|"(define "|name|"-inst "|Kind.Comp.Target.Scheme.instantiator(prim,defs)|")\n"
-    let code = code|"(define "|name|"-elim "|Kind.Comp.Target.Scheme.eliminator(prim,defs)|")\n"
+    let code = code|"(define "|name|"-inst "|Kind.Comp.Target.Scheme.instantiator(prim,0,defs)|")\n"
+    let code = code|"(define "|name|"-elim "|Kind.Comp.Target.Scheme.eliminator(prim,0,defs)|")\n"
     code
   // Top-level definitions
   for defn in defs_list with code:
