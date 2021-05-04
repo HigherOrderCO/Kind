@@ -39,15 +39,32 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
                 case origin {
                   none : App.pass
                   some :
-                   let path = Web.Kaelin.Coord.path(origin.value, pos)
-                   case path {
-                     none : App.pass
-                     some :
-                        let moves = List.foldr!(List<Web.Kaelin.State -> Web.Kaelin.State>, [],
-                          (pos, xs) Web.Kaelin.Player.move(pos, event.addr) & xs, path.value)
-                        let interval = Web.Kaelin.Timer.interval(List.reverse!(moves), (x) Nat.mul(x, 7), state)
-                        App.store<Web.Kaelin.State>(interval)
-                   }
+                    App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state))
+                    //changed move to skill from action, needs update
+                    // Old movement w/ pathing
+                    
+        //case Web.Kaelin.Event.deserialize(String.drop(2, event.data)) as data { // drop the 0x thing
+           //none : App.pass
+           //some : case data.value as eventdata {
+             //start_game : App.pass
+             //create_user : App.pass
+             //create_hero : App.pass
+             //user_input : 
+               //let pos = eventdata.coord
+               //open pos
+                //let origin = Web.Kaelin.Map.player.to_coord(event.addr, state.map)
+                //case origin {
+                  //none : App.pass
+                  //some :
+                   //let path = Web.Kaelin.Coord.path(origin.value, pos)
+                   //case path {
+                     //none : App.pass
+                     //some :
+                        //let moves = List.foldr!(List<Web.Kaelin.State -> Web.Kaelin.State>, [],
+                          //(pos, xs) Web.Kaelin.Player.move(pos, event.addr) & xs, path.value)
+                        //let interval = Web.Kaelin.Timer.interval(List.reverse!(moves), (x) Nat.mul(x, 7), state)
+                        //App.store<Web.Kaelin.State>(interval)
+
                 }
             }
           }

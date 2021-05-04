@@ -2,6 +2,7 @@ type Web.Kaelin.Skill{
 	new(
   	id: U8
 		range: Nat
+    //condition: Web.Kaelin.Skill.condition // to be added
 		effects: List(Web.Kaelin.Skill.Effect)
 		key: Char
 	)
