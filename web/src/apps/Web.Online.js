@@ -120,6 +120,86 @@ module.exports = (function() {
     function buffer32_to_depth(b) {
         return BigInt(Math.log(b.length) / Math.log(2));
     };
+    var bitsmap_new = {
+        _: 'BitsMap.new'
+    };
+    var bitsmap_tie = function(val, lft, rgt) {
+        return {
+            _: 'BitsMap.tip',
+            val,
+            lft,
+            rgt
+        };
+    }
+    var maybe_none = {
+        _: 'Maybe.none'
+    };
+    var maybe_some = function(value) {
+        return {
+            _: 'Maybe.some',
+            value
+        };
+    }
+    var bitsmap_get = function(bits, map) {
+        for (var i = bits.length - 1; i >= 0; --i) {
+            if (map._ !== 'BitsMap.new') {
+                map = bits[i] === '0' ? map.lft : map.rgt;
+            }
+        }
+        return map._ === 'BitsMap.new' ? maybe_none : map.val;
+    }
+    var bitsmap_set = function(bits, val, map, mode) {
+        var res = {
+            value: map
+        };
+        var key = 'value';
+        var obj = res;
+        for (var i = bits.length - 1; i >= 0; --i) {
+            var map = obj[key];
+            if (map._ === 'BitsMap.new') {
+                obj[key] = {
+                    _: 'BitsMap.tie',
+                    val: maybe_none,
+                    lft: bitsmap_new,
+                    rgt: bitsmap_new
+                };
+            } else {
+                obj[key] = {
+                    _: 'BitsMap.tie',
+                    val: map.val,
+                    lft: map.lft,
+                    rgt: map.rgt
+                };
+            }
+            obj = obj[key];
+            key = bits[i] === '0' ? 'lft' : 'rgt';
+        }
+        var map = obj[key];
+        if (map._ === 'BitsMap.new') {
+            var x = mode === 'del' ? maybe_none : {
+                _: 'Maybe.some',
+                value: val
+            };
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: x,
+                lft: bitsmap_new,
+                rgt: bitsmap_new
+            };
+        } else {
+            var x = mode === 'set' ? {
+                _: 'Maybe.some',
+                value: val
+            } : mode === 'del' ? maybe_none : map.val;
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: x,
+                lft: map.lft,
+                rgt: map.rgt
+            };
+        }
+        return res.value;
+    };
     var list_for = list => nil => cons => {
         while (list._ !== 'List.nil') {
             nil = cons(list.head)(nil);
@@ -144,10 +224,10 @@ module.exports = (function() {
         var $4 = (() => c0 => c1 => {
             var self = x;
             if (self) {
-                var $2 = c2;
+                var $2 = c0;
                 return $2;
             } else {
-                var $3 = c2;
+                var $3 = c1;
                 return $3;
             };
         })();
@@ -158,11 +238,11 @@ module.exports = (function() {
         var $8 = (() => c0 => c1 => {
             var self = x;
             if (self === 0n) {
-                var $5 = c2;
+                var $5 = c0;
                 return $5;
             } else {
                 var $6 = (self - 1n);
-                var $7 = c2($6);
+                var $7 = c1($6);
                 return $7;
             };
         })();
@@ -232,12 +312,12 @@ module.exports = (function() {
         var $28 = (() => c0 => c1 => {
             var self = x;
             if (self.length === 0) {
-                var $24 = c2;
+                var $24 = c0;
                 return $24;
             } else {
                 var $25 = self.charCodeAt(0);
                 var $26 = self.slice(1);
-                var $27 = c2($25)($26);
+                var $27 = c1($25)($26);
                 return $27;
             };
         })();
@@ -1711,66 +1791,7 @@ module.exports = (function() {
     const Maybe$none = ({
         _: 'Maybe.none'
     });
-
-    function BitsMap$set$(_bits$2, _val$3, _map$4) {
-        var self = _bits$2;
-        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-            case 'o':
-                var $358 = self.slice(0, -1);
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $360 = self.val;
-                        var $361 = self.lft;
-                        var $362 = self.rgt;
-                        var $363 = BitsMap$tie$($360, BitsMap$set$($358, _val$3, $361), $362);
-                        var $359 = $363;
-                        break;
-                    case 'BitsMap.new':
-                        var $364 = BitsMap$tie$(Maybe$none, BitsMap$set$($358, _val$3, BitsMap$new), BitsMap$new);
-                        var $359 = $364;
-                        break;
-                };
-                var $357 = $359;
-                break;
-            case 'i':
-                var $365 = self.slice(0, -1);
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $367 = self.val;
-                        var $368 = self.lft;
-                        var $369 = self.rgt;
-                        var $370 = BitsMap$tie$($367, $368, BitsMap$set$($365, _val$3, $369));
-                        var $366 = $370;
-                        break;
-                    case 'BitsMap.new':
-                        var $371 = BitsMap$tie$(Maybe$none, BitsMap$new, BitsMap$set$($365, _val$3, BitsMap$new));
-                        var $366 = $371;
-                        break;
-                };
-                var $357 = $366;
-                break;
-            case 'e':
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $373 = self.lft;
-                        var $374 = self.rgt;
-                        var $375 = BitsMap$tie$(Maybe$some$(_val$3), $373, $374);
-                        var $372 = $375;
-                        break;
-                    case 'BitsMap.new':
-                        var $376 = BitsMap$tie$(Maybe$some$(_val$3), BitsMap$new, BitsMap$new);
-                        var $372 = $376;
-                        break;
-                };
-                var $357 = $372;
-                break;
-        };
-        return $357;
-    };
-    const BitsMap$set = x0 => x1 => x2 => BitsMap$set$(x0, x1, x2);
+    const BitsMap$set = a0 => a1 => a2 => (bitsmap_set(a0, a1, a2, 'set'));
     const Bits$e = '';
     const Bits$o = a0 => (a0 + '0');
     const Bits$i = a0 => (a0 + '1');
@@ -1780,21 +1801,21 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $378 = self.pred;
-                var $379 = (Word$to_bits$($378) + '0');
-                var $377 = $379;
+                var $358 = self.pred;
+                var $359 = (Word$to_bits$($358) + '0');
+                var $357 = $359;
                 break;
             case 'Word.i':
-                var $380 = self.pred;
-                var $381 = (Word$to_bits$($380) + '1');
-                var $377 = $381;
+                var $360 = self.pred;
+                var $361 = (Word$to_bits$($360) + '1');
+                var $357 = $361;
                 break;
             case 'Word.e':
-                var $382 = Bits$e;
-                var $377 = $382;
+                var $362 = Bits$e;
+                var $357 = $362;
                 break;
         };
-        return $377;
+        return $357;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
     const U16$to_bits = a0 => (u16_to_bits(a0));
@@ -1802,15 +1823,15 @@ module.exports = (function() {
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $384 = Bits$e;
-            var $383 = $384;
+            var $364 = Bits$e;
+            var $363 = $364;
         } else {
-            var $385 = self.charCodeAt(0);
-            var $386 = self.slice(1);
-            var $387 = (String$to_bits$($386) + (u16_to_bits($385)));
-            var $383 = $387;
+            var $365 = self.charCodeAt(0);
+            var $366 = self.slice(1);
+            var $367 = (String$to_bits$($366) + (u16_to_bits($365)));
+            var $363 = $367;
         };
-        return $383;
+        return $363;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -1818,42 +1839,42 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $389 = self.head;
-                var $390 = self.tail;
-                var self = $389;
+                var $369 = self.head;
+                var $370 = self.tail;
+                var self = $369;
                 switch (self._) {
                     case 'Pair.new':
-                        var $392 = self.fst;
-                        var $393 = self.snd;
-                        var $394 = BitsMap$set$(String$to_bits$($392), $393, Map$from_list$($390));
-                        var $391 = $394;
+                        var $372 = self.fst;
+                        var $373 = self.snd;
+                        var $374 = (bitsmap_set(String$to_bits$($372), $373, Map$from_list$($370), 'set'));
+                        var $371 = $374;
                         break;
                 };
-                var $388 = $391;
+                var $368 = $371;
                 break;
             case 'List.nil':
-                var $395 = BitsMap$new;
-                var $388 = $395;
+                var $375 = BitsMap$new;
+                var $368 = $375;
                 break;
         };
-        return $388;
+        return $368;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
 
     function IO$(_A$1) {
-        var $396 = null;
-        return $396;
+        var $376 = null;
+        return $376;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $397 = ({
+        var $377 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $397;
+        return $377;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -1861,92 +1882,92 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $399 = self.value;
-                var $400 = _f$4($399);
-                var $398 = $400;
+                var $379 = self.value;
+                var $380 = _f$4($379);
+                var $378 = $380;
                 break;
             case 'IO.ask':
-                var $401 = self.query;
-                var $402 = self.param;
-                var $403 = self.then;
-                var $404 = IO$ask$($401, $402, (_x$8 => {
-                    var $405 = IO$bind$($403(_x$8), _f$4);
-                    return $405;
+                var $381 = self.query;
+                var $382 = self.param;
+                var $383 = self.then;
+                var $384 = IO$ask$($381, $382, (_x$8 => {
+                    var $385 = IO$bind$($383(_x$8), _f$4);
+                    return $385;
                 }));
-                var $398 = $404;
+                var $378 = $384;
                 break;
         };
-        return $398;
+        return $378;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $406 = ({
+        var $386 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $406;
+        return $386;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $407 = _new$2(IO$bind)(IO$end);
-        return $407;
+        var $387 = _new$2(IO$bind)(IO$end);
+        return $387;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function IO$do$(_call$1, _param$2) {
-        var $408 = IO$ask$(_call$1, _param$2, (_answer$3 => {
-            var $409 = IO$end$(Unit$new);
-            return $409;
+        var $388 = IO$ask$(_call$1, _param$2, (_answer$3 => {
+            var $389 = IO$end$(Unit$new);
+            return $389;
         }));
-        return $408;
+        return $388;
     };
     const IO$do = x0 => x1 => IO$do$(x0, x1);
 
     function Dynamic$new$(_value$2) {
-        var $410 = ({
+        var $390 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $410;
+        return $390;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $411 = _m$pure$2;
-        return $411;
+        var $391 = _m$pure$2;
+        return $391;
     }))(Dynamic$new$(Unit$new));
 
     function App$do$(_call$1, _param$2) {
-        var $412 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $413 = _m$bind$3;
-            return $413;
+        var $392 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $393 = _m$bind$3;
+            return $393;
         }))(IO$do$(_call$1, _param$2))((_$3 => {
-            var $414 = App$pass;
-            return $414;
+            var $394 = App$pass;
+            return $394;
         }));
-        return $412;
+        return $392;
     };
     const App$do = x0 => x1 => App$do$(x0, x1);
 
     function App$watch$(_room$1) {
-        var $415 = App$do$("watch", _room$1);
-        return $415;
+        var $395 = App$do$("watch", _room$1);
+        return $395;
     };
     const App$watch = x0 => App$watch$(x0);
     const Web$Online$room = "0x196581625483";
     const U16$eql = a0 => a1 => (a0 === a1);
 
     function String$cons$(_head$1, _tail$2) {
-        var $416 = (String.fromCharCode(_head$1) + _tail$2);
-        return $416;
+        var $396 = (String.fromCharCode(_head$1) + _tail$2);
+        return $396;
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
 
     function App$post$(_room$1, _data$2) {
-        var $417 = App$do$("post", (_room$1 + (";" + _data$2)));
-        return $417;
+        var $397 = App$do$("post", (_room$1 + (";" + _data$2)));
+        return $397;
     };
     const App$post = x0 => x1 => App$post$(x0, x1);
     const Web$Online$command$A = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -1955,152 +1976,89 @@ module.exports = (function() {
     const Web$Online$command$S = "0x0000000000000000000000000000000000000000000000000000000000000002";
 
     function App$store$(_value$2) {
-        var $418 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $419 = _m$pure$4;
-            return $419;
+        var $398 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $399 = _m$pure$4;
+            return $399;
         }))(Dynamic$new$(_value$2));
-        return $418;
+        return $398;
     };
     const App$store = x0 => App$store$(x0);
 
     function Maybe$(_A$1) {
-        var $420 = null;
-        return $420;
+        var $400 = null;
+        return $400;
     };
     const Maybe = x0 => Maybe$(x0);
-
-    function BitsMap$get$(_bits$2, _map$3) {
-        var BitsMap$get$ = (_bits$2, _map$3) => ({
-            ctr: 'TCO',
-            arg: [_bits$2, _map$3]
-        });
-        var BitsMap$get = _bits$2 => _map$3 => BitsMap$get$(_bits$2, _map$3);
-        var arg = [_bits$2, _map$3];
-        while (true) {
-            let [_bits$2, _map$3] = arg;
-            var R = (() => {
-                var self = _bits$2;
-                switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-                    case 'o':
-                        var $421 = self.slice(0, -1);
-                        var self = _map$3;
-                        switch (self._) {
-                            case 'BitsMap.tie':
-                                var $423 = self.lft;
-                                var $424 = BitsMap$get$($421, $423);
-                                var $422 = $424;
-                                break;
-                            case 'BitsMap.new':
-                                var $425 = Maybe$none;
-                                var $422 = $425;
-                                break;
-                        };
-                        return $422;
-                    case 'i':
-                        var $426 = self.slice(0, -1);
-                        var self = _map$3;
-                        switch (self._) {
-                            case 'BitsMap.tie':
-                                var $428 = self.rgt;
-                                var $429 = BitsMap$get$($426, $428);
-                                var $427 = $429;
-                                break;
-                            case 'BitsMap.new':
-                                var $430 = Maybe$none;
-                                var $427 = $430;
-                                break;
-                        };
-                        return $427;
-                    case 'e':
-                        var self = _map$3;
-                        switch (self._) {
-                            case 'BitsMap.tie':
-                                var $432 = self.val;
-                                var $433 = $432;
-                                var $431 = $433;
-                                break;
-                            case 'BitsMap.new':
-                                var $434 = Maybe$none;
-                                var $431 = $434;
-                                break;
-                        };
-                        return $431;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const BitsMap$get = x0 => x1 => BitsMap$get$(x0, x1);
+    const BitsMap$get = a0 => a1 => (bitsmap_get(a0, a1));
     const Bool$and = a0 => a1 => (a0 && a1);
     const String$eql = a0 => a1 => (a0 === a1);
     const U32$sub = a0 => a1 => ((a0 - a1) >>> 0);
 
     function Web$Online$command$(_user$1, _cmd$2, _state$3) {
         var _key$4 = String$to_bits$(_user$1);
-        var self = BitsMap$get$(_key$4, _state$3);
+        var self = (bitsmap_get(_key$4, _state$3));
         switch (self._) {
             case 'Maybe.some':
-                var $436 = self.value;
-                var self = $436;
+                var $402 = self.value;
+                var self = $402;
                 switch (self._) {
                     case 'Pair.new':
-                        var $438 = self.fst;
-                        var $439 = self.snd;
+                        var $404 = self.fst;
+                        var $405 = self.snd;
                         var _spd$8 = 3;
-                        var _p_x$9 = $438;
-                        var _p_y$10 = $439;
+                        var _p_x$9 = $404;
+                        var _p_y$10 = $405;
                         var self = (_cmd$2 === Web$Online$command$A);
                         if (self) {
-                            var $441 = BitsMap$set$(_key$4, Pair$new$(((_p_x$9 - _spd$8) >>> 0), _p_y$10), _state$3);
-                            var $440 = $441;
+                            var $407 = (bitsmap_set(_key$4, Pair$new$(((_p_x$9 - _spd$8) >>> 0), _p_y$10), _state$3, 'set'));
+                            var $406 = $407;
                         } else {
                             var self = (_cmd$2 === Web$Online$command$D);
                             if (self) {
-                                var $443 = BitsMap$set$(_key$4, Pair$new$(((_p_x$9 + _spd$8) >>> 0), _p_y$10), _state$3);
-                                var $442 = $443;
+                                var $409 = (bitsmap_set(_key$4, Pair$new$(((_p_x$9 + _spd$8) >>> 0), _p_y$10), _state$3, 'set'));
+                                var $408 = $409;
                             } else {
                                 var self = (_cmd$2 === Web$Online$command$W);
                                 if (self) {
-                                    var $445 = BitsMap$set$(_key$4, Pair$new$(_p_x$9, ((_p_y$10 - _spd$8) >>> 0)), _state$3);
-                                    var $444 = $445;
+                                    var $411 = (bitsmap_set(_key$4, Pair$new$(_p_x$9, ((_p_y$10 - _spd$8) >>> 0)), _state$3, 'set'));
+                                    var $410 = $411;
                                 } else {
                                     var self = (_cmd$2 === Web$Online$command$S);
                                     if (self) {
-                                        var $447 = BitsMap$set$(_key$4, Pair$new$(_p_x$9, ((_p_y$10 + _spd$8) >>> 0)), _state$3);
-                                        var $446 = $447;
+                                        var $413 = (bitsmap_set(_key$4, Pair$new$(_p_x$9, ((_p_y$10 + _spd$8) >>> 0)), _state$3, 'set'));
+                                        var $412 = $413;
                                     } else {
-                                        var $448 = _state$3;
-                                        var $446 = $448;
+                                        var $414 = _state$3;
+                                        var $412 = $414;
                                     };
-                                    var $444 = $446;
+                                    var $410 = $412;
                                 };
-                                var $442 = $444;
+                                var $408 = $410;
                             };
-                            var $440 = $442;
+                            var $406 = $408;
                         };
-                        var $437 = $440;
+                        var $403 = $406;
                         break;
                 };
-                var $435 = $437;
+                var $401 = $403;
                 break;
             case 'Maybe.none':
-                var $449 = BitsMap$set$(_key$4, Pair$new$(128, 128), _state$3);
-                var $435 = $449;
+                var $415 = (bitsmap_set(_key$4, Pair$new$(128, 128), _state$3, 'set'));
+                var $401 = $415;
                 break;
         };
-        return $435;
+        return $401;
     };
     const Web$Online$command = x0 => x1 => x2 => Web$Online$command$(x0, x1, x2);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $450 = ({
+        var $416 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $450;
+        return $416;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Online = (() => {
@@ -2109,74 +2067,74 @@ module.exports = (function() {
         var _draw$3 = (_state$3 => {
             var _vbox$4 = VoxBox$clear$(_vbox$1);
             var _vbox$5 = (() => {
-                var $454 = _vbox$4;
-                var $455 = BitsMap$values$(_state$3);
-                let _vbox$6 = $454;
+                var $420 = _vbox$4;
+                var $421 = BitsMap$values$(_state$3);
+                let _vbox$6 = $420;
                 let _pos$5;
-                while ($455._ === 'List.cons') {
-                    _pos$5 = $455.head;
+                while ($421._ === 'List.cons') {
+                    _pos$5 = $421.head;
                     var self = _pos$5;
                     switch (self._) {
                         case 'Pair.new':
-                            var $456 = self.fst;
-                            var $457 = self.snd;
-                            var $458 = VoxBox$Draw$image$($456, $457, 0, Web$Online$hero, _vbox$6);
-                            var $454 = $458;
+                            var $422 = self.fst;
+                            var $423 = self.snd;
+                            var $424 = VoxBox$Draw$image$($422, $423, 0, Web$Online$hero, _vbox$6);
+                            var $420 = $424;
                             break;
                     };
-                    _vbox$6 = $454;
-                    $455 = $455.tail;
+                    _vbox$6 = $420;
+                    $421 = $421.tail;
                 }
                 return _vbox$6;
             })();
-            var $452 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), _vbox$5);
-            return $452;
+            var $418 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), _vbox$5);
+            return $418;
         });
         var _when$4 = (_event$4 => _state$5 => {
             var self = _event$4;
             switch (self._) {
                 case 'App.Event.key_down':
-                    var $460 = self.code;
-                    var self = ($460 === 65);
+                    var $426 = self.code;
+                    var self = ($426 === 65);
                     if (self) {
-                        var $462 = App$post$(Web$Online$room, Web$Online$command$A);
-                        var $461 = $462;
+                        var $428 = App$post$(Web$Online$room, Web$Online$command$A);
+                        var $427 = $428;
                     } else {
-                        var self = ($460 === 68);
+                        var self = ($426 === 68);
                         if (self) {
-                            var $464 = App$post$(Web$Online$room, Web$Online$command$D);
-                            var $463 = $464;
+                            var $430 = App$post$(Web$Online$room, Web$Online$command$D);
+                            var $429 = $430;
                         } else {
-                            var self = ($460 === 87);
+                            var self = ($426 === 87);
                             if (self) {
-                                var $466 = App$post$(Web$Online$room, Web$Online$command$W);
-                                var $465 = $466;
+                                var $432 = App$post$(Web$Online$room, Web$Online$command$W);
+                                var $431 = $432;
                             } else {
-                                var self = ($460 === 83);
+                                var self = ($426 === 83);
                                 if (self) {
-                                    var $468 = App$post$(Web$Online$room, Web$Online$command$S);
-                                    var $467 = $468;
+                                    var $434 = App$post$(Web$Online$room, Web$Online$command$S);
+                                    var $433 = $434;
                                 } else {
-                                    var $469 = App$pass;
-                                    var $467 = $469;
+                                    var $435 = App$pass;
+                                    var $433 = $435;
                                 };
-                                var $465 = $467;
+                                var $431 = $433;
                             };
-                            var $463 = $465;
+                            var $429 = $431;
                         };
-                        var $461 = $463;
+                        var $427 = $429;
                     };
-                    var $459 = $461;
+                    var $425 = $427;
                     break;
                 case 'App.Event.post':
-                    var $470 = self.addr;
-                    var $471 = self.data;
-                    var $472 = App$store$(Web$Online$command$($470, $471, _state$5));
-                    var $459 = $472;
+                    var $436 = self.addr;
+                    var $437 = self.data;
+                    var $438 = App$store$(Web$Online$command$($436, $437, _state$5));
+                    var $425 = $438;
                     break;
                 case 'App.Event.init':
-                    var $473 = App$watch$(Web$Online$room);
-                    var $459 = $473;
+                    var $439 = App$watch$(Web$Online$room);
+                    var $425 = $439;
                     break;
                 case 'App.Event.tick':
                 case 'App.Event.mouse_down':
@@ -2186,14 +2144,14 @@ module.exports = (function() {
                 case 'App.Event.mouse_out':
                 case 'App.Event.mouse_click':
                 case 'App.Event.resize':
-                    var $474 = App$pass;
-                    var $459 = $474;
+                    var $440 = App$pass;
+                    var $425 = $440;
                     break;
             };
-            return $459;
+            return $425;
         });
-        var $451 = App$new$(_init$2, _draw$3, _when$4);
-        return $451;
+        var $417 = App$new$(_init$2, _draw$3, _when$4);
+        return $417;
     })();
     return {
         'Buffer32.new': Buffer32$new,

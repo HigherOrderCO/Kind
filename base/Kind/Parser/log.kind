@@ -12,7 +12,7 @@ Kind.Parser.log: Parser(Kind.Term)
       let arg = Kind.Term.app(arg, xs);
       arg);
     let term = Kind.Term.app(term, args);
-    let term = Kind.Term.app(term, Kind.Term.lam("x", (x) cont));
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) cont));
     get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, term);
   }

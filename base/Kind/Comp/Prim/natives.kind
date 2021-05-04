@@ -1,3 +1,4 @@
+// Types that are optimized to native values
 Kind.Comp.Prim.natives: List(Pair(String, Kind.Comp.Prim))
   [
     {"Bool", Kind.Comp.Prim.bool}

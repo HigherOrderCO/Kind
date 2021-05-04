@@ -1,0 +1,28 @@
+// Saves well-typed definitions on cache directory
+Kind.Defs.cache(defs: Kind.Defs): IO(Unit)
+  Kind.Defs.cache.go(Kind.Map.to_list!(defs))
+
+Kind.Defs.cache.go(kvs: List(Pair(String,Kind.Def))): IO(Unit)
+  case kvs {
+    nil: IO {
+      return unit
+    }
+    cons:
+      let {name,defn} = kvs.head
+      open defn
+      case defn.stat {
+        done: IO {
+          get time = IO.get_file_mtime(defn.file)
+          IO.set_file(".cache/" | name | ".term", Kind.Core.show(defn.term))
+          IO.set_file(".cache/" | name | ".type", Kind.Core.show(defn.type))
+          IO.set_file(".cache/" | name | ".isct", Bool.show(defn.isct))
+          IO.set_file(".cache/" | name | ".arit", Nat.show(defn.arit))
+          IO.set_file(".cache/" | name | ".file", defn.file)
+          IO.set_file(".cache/" | name | ".time", time)
+          Kind.Defs.cache.go(kvs.tail)
+        }
+      } default IO {
+        Kind.Defs.cache.go(kvs.tail)
+      }
+  }
+

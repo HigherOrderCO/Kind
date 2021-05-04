@@ -1,0 +1,7 @@
+Web.Kaelin.Heroes.Croni.croni: Web.Kaelin.Hero
+  Web.Kaelin.Hero.new(
+    1#8, 
+    Web.Kaelin.Assets.hero.croni0_d_1
+    +25#32
+    Web.Kaelin.Heroes.Croni.skills
+  )

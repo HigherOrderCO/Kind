@@ -1,0 +1,24 @@
+type Web.Kaelin.Skill.area{
+  self
+  single
+  radial(range: Nat)
+  line(range: Nat)
+}
+
+Web.Kaelin.Skill.area.to_list(
+area: Web.Kaelin.Skill.area,
+origin: Web.Kaelin.Coord, 
+target: Web.Kaelin.Coord
+): List<Web.Kaelin.Coord>
+  case area {
+    self: [origin]
+    single: [target]
+    radial: Web.Kaelin.Coord.range(target, area.range)
+  }default [origin]
+
+type Web.Kaelin.Skill.area.indicator{
+  green
+  red
+  yellow
+  blue
+}

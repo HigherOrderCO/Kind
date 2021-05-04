@@ -1,3 +1,3 @@
 I32.abs(a: I32): I32
-  open a
-  I32.new(Word.abs!(a.value))
+  let mask = I32.shr(a, +31#32)
+  I32.xor(I32.add(mask, a), mask)

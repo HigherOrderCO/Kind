@@ -1,0 +1,10 @@
+Web.Kaelin.Coord.path(c : Web.Kaelin.Coord, goal : Web.Kaelin.Coord) : Maybe<List<Web.Kaelin.Coord>>
+  let path_min = Web.Kaelin.Coord.Path.minimum(c, goal)
+  case path_min {
+      none :  none
+      some : if (Web.Kaelin.Coord.eql(path_min.value, goal)) then
+               some([path_min.value])
+            else
+               let ls = Web.Kaelin.Coord.path(path_min.value, goal)
+               Maybe.extract!(ls, Maybe<List<Web.Kaelin.Coord>>, none, (a) some(path_min.value & a))
+  }
