@@ -10,8 +10,8 @@ Test: IO(Unit)
       none: IO.print("Something is wrong.")
       some: IO {
         let defs = Kind.Comp.Defs.compile(defs.value)
-        let file = Kind.Comp.Target.Scheme(defs)|"(run_io ("|name|"))\n"
-        IO.print(file)
+        let file = Kind.Comp.Target.Scheme(name, defs)
+        //IO.print(file)
         IO.set_file("./main.scm", file)
       }
     }

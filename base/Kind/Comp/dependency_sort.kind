@@ -1,0 +1,60 @@
+Kind.Comp.dependency_sort(main: String, defs: Kind.Comp.Defs): List(Pair(String,Kind.Comp))
+  let term = Kind.Comp.ref(main)
+  let seen = Kind.Map.new!
+  let list = []
+  let {seen,list} = Kind.Comp.dependency_sort.go(term, defs, seen, list)
+  List.reverse!(list)
+
+//type Kind.Comp {
+  //nil
+  //var(name: Kind.Name)
+  //ref(name: Kind.Name)
+  //lam(name: Kind.Name, body: Kind.Comp)
+  //app(func: Kind.Comp, argm: Kind.Comp)
+  //let(name: Kind.Name, expr: Kind.Comp, body: Kind.Comp)
+  //eli(prim: Kind.Comp.Prim, expr: Kind.Comp)
+  //ins(prim: Kind.Comp.Prim, expr: Kind.Comp)
+  //nat(natx: Nat)
+  //chr(chrx: Char)
+  //str(strx: String)
+  //txt(text: String)
+//}
+
+  
+Kind.Comp.dependency_sort.go(
+  term: Kind.Comp
+  defs: Kind.Comp.Defs
+  seen: Kind.Map(Unit)
+  list: List(Pair(String,Kind.Comp))
+): Pair(BitsSet, List(Pair(String, Kind.Comp)))
+  case term {
+    ref: case Kind.Map.get!(term.name, seen) as got_seen {
+      some: {seen,list}
+      none: case Kind.Map.get!(term.name, defs) as got_term {
+        none: {seen,list}
+        some: 
+          let term = got_term.value
+          let seen = Kind.Map.set!(term.name, unit, seen)
+          let {seen,list} = Kind.Comp.dependency_sort.go(term, defs, seen, list)
+          let list = List.cons!({term.name,got_term.value}, list)
+          {seen, list}
+      }
+    }
+    lam:
+      let {seen,list} = Kind.Comp.dependency_sort.go(term.body, defs, seen, list)
+      {seen,list}
+    app:
+      let {seen,list} = Kind.Comp.dependency_sort.go(term.func, defs, seen, list)
+      let {seen,list} = Kind.Comp.dependency_sort.go(term.argm, defs, seen, list)
+      {seen,list}
+    let:
+      let {seen,list} = Kind.Comp.dependency_sort.go(term.expr, defs, seen, list)
+      let {seen,list} = Kind.Comp.dependency_sort.go(term.body, defs, seen, list)
+      {seen,list}
+    eli:
+      let {seen,list} = Kind.Comp.dependency_sort.go(term.expr, defs, seen, list)
+      {seen,list}
+    ins:
+      let {seen,list} = Kind.Comp.dependency_sort.go(term.expr, defs, seen, list)
+      {seen,list}
+  } default {seen,list}
