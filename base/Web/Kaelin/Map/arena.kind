@@ -12,14 +12,16 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
     case sprite.indicator{
       none: case sprite.effect {
         normal: Web.Kaelin.Assets.tile.green_2
-        movement: Web.Kaelin.Assets.tile.effect.light_blue2
+        movement: Web.Kaelin.Assets.tile.effect.light_blue2 // to be removed, 
         skill: Web.Kaelin.Assets.tile.effect.dark_blue2
       }
       some: case sprite.indicator.value {
         green: Web.Kaelin.Assets.tile.effect.blue_green2
         red: Web.Kaelin.Assets.tile.effect.dark_red2
         yellow: Web.Kaelin.Assets.tile.effect.light_red2
+        blue: Web.Kaelin.Assets.tile.effect.light_blue2
       }
+
 
   }
 
