@@ -1,9 +1,12 @@
 Test.main: IO(Unit)
-  IO {
-    IO.print("What is your name?")
-    get name = IO.get_line
-    IO.print("Hello, " | name)
-  }
+  let map = {}
+  let sum = 0
+  let lim = 200000
+  for i from 0 to lim with map:
+    map{Nat.show(i)} <- i
+  for i from 0 to lim with sum:
+    sum + (map{Nat.show(i)} <> 0)
+  IO.print(Nat.show(sum))
 
 Test: IO(Unit)
   IO {
@@ -20,3 +23,4 @@ Test: IO(Unit)
       }
     }
   }
+  //Test.main
