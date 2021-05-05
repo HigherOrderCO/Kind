@@ -1,10 +1,12 @@
+// Types that are optimized to primitive values.
+// To learn more, see Kind/Comp/Prim/Shape.kind.
 type Kind.Comp.Prim {
   unit,
   bool,
   nat,
   u16,
   string,
-  data(ctrs: Kind.Comp.Prim.ADT),
+  data(name: String, ctrs: Kind.Comp.Prim.ADT),
 }
 
 Kind.Comp.Prim.ADT: Type

@@ -1,0 +1,9 @@
+List.merge_sort.unpack(A : Type, f : A -> A -> Bool, xs : List<List<A>>) : List<A>
+  case xs {
+      nil : []
+      cons : case xs.tail {
+          nil : xs.head
+          cons : 
+            List.merge_sort.unpack!(f, List.merge_sort.merge_pair!(f, xs))
+      }
+  }

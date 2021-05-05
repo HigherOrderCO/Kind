@@ -1,0 +1,10 @@
+type Web.Kaelin.Skill.Modifier.status {
+    burn
+    poison
+    stun
+    slow
+    haste
+    cleanse
+    root
+}
+

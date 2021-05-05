@@ -1,12 +1,257 @@
-Kind.Name.from_bits(bits: Bits): Kind.Name
-  let list = Bits.chunks_of(6, bits);
-  let name = List.fold!(list)!(String.nil, (bts, name)
-    let u16 = U16.new(Word.from_bits(16, Bits.reverse(bts)));
-    let chr = 
-      if      U16.btw( Nat.to_u16(0), u16, Nat.to_u16(25)) then U16.add(u16, Nat.to_u16(65))
-      else if U16.btw(Nat.to_u16(26), u16, Nat.to_u16(51)) then U16.add(u16, Nat.to_u16(71))
-      else if U16.btw(Nat.to_u16(52), u16, Nat.to_u16(61)) then U16.sub(u16, Nat.to_u16(4))
-      else if U16.eql(Nat.to_u16(62), u16)                 then Nat.to_u16(46)
-      else                                                      Nat.to_u16(95);
-    String.cons(chr, name));
-  name
+// Converts a sequence of Bits to a Kind name
+// This function is fully expanded to ensure good performance in any target,
+// independent of the performance of maps, chunking functions, or primitives.
+Kind.Name.from_bits(bs: Bits): Kind.Name
+  case bs {
+    e: String.nil
+    o: let bs = bs.pred; case bs {
+      e: String.nil
+      o: let bs = bs.pred; case bs {
+        e: String.nil
+        o: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('A',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('B',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('C',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('D',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('E',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('F',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('G',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('H',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+        i: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('I',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('J',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('K',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('L',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('M',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('N',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('O',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('P',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+      }
+      i: let bs = bs.pred; case bs {
+        e: String.nil
+        o: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('Q',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('R',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('S',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('T',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('U',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('V',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('W',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('X',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+        i: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('Y',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('Z',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('a',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('b',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('c',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('d',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('e',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('f',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+      }
+    }
+    i: let bs = bs.pred; case bs {
+      e: String.nil
+      o: let bs = bs.pred; case bs {
+        e: String.nil
+        o: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('g',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('h',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('i',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('j',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('k',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('l',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('m',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('n',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+        i: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('o',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('p',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('q',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('r',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('s',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('t',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('u',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('v',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+      }
+      i: let bs = bs.pred; case bs {
+        e: String.nil
+        o: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('w',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('x',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('y',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('z',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('0',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('1',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('2',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('3',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+        i: let bs = bs.pred; case bs {
+          e: String.nil
+          o: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('4',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('5',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('6',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('7',Kind.Name.from_bits(bs))
+            }
+          }
+          i: let bs = bs.pred; case bs {
+            e: String.nil
+            o: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('8',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('9',Kind.Name.from_bits(bs))
+            }
+            i: let bs = bs.pred; case bs {
+              e: String.nil
+              o: let bs = bs.pred; String.cons('.',Kind.Name.from_bits(bs))
+              i: let bs = bs.pred; String.cons('_',Kind.Name.from_bits(bs))
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,4 +1,5 @@
 Kind.Parser.string.go(
+  delim: Char,
   str: String,
   idx: Nat,
   code: String,
@@ -7,21 +8,21 @@ Kind.Parser.string.go(
     nil:
       Parser.Reply.error<String>(idx, code, "Non-terminating string.")
     cons:
-      if U16.eql(code.head, '"') then
+      if U16.eql(code.head, delim) then
         Parser.Reply.value<String>(Nat.succ(idx), code.tail, String.reverse(str))
       else case Kind.Parser.char.single(idx, code) as parsed {
         error:
           Parser.Reply.error<String>(parsed.idx, parsed.code, parsed.err)
         value:
-          Kind.Parser.string.go(String.cons(parsed.val,str), parsed.idx, parsed.code)
+          Kind.Parser.string.go(delim, String.cons(parsed.val,str), parsed.idx, parsed.code)
       }
   }
 
-Kind.Parser.string: Parser(Kind.Term)
+Kind.Parser.string(delim: Char): Parser(Kind.Term)
   Parser {
     get init = Kind.Parser.init;
-    Kind.Parser.text(String.cons('"', String.nil));
-    get strx = Kind.Parser.string.go("");
+    Kind.Parser.text(String.cons(delim, String.nil));
+    get strx = Kind.Parser.string.go(delim, "");
     get orig = Kind.Parser.stop(init);
     return Kind.Term.ori(orig, Kind.Term.str(strx));
   }

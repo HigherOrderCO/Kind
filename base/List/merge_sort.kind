@@ -1,0 +1,2 @@
+List.merge_sort(A : Type, f : A -> A -> Bool, xs : List<A>): List<A>
+  List.merge_sort.unpack!(f, List.chunks_of!(1, xs))

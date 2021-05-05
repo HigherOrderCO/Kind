@@ -1,3 +1,5 @@
+// Applies a term to a list of arguments, inlining if possible.
+// - apply(`λx.λy.((k x) y)`, [`A`, `B`, `C`]) == `(((k A) B) C)`
 Kind.Comp.apply(term: Kind.Comp, args: List(Kind.Comp)): Kind.Comp
   case args {
     nil:
