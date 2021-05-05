@@ -21,7 +21,7 @@ Kind.Parser.case: Parser(Kind.Term)
 
     // Cases
     Kind.Parser.text_error("{", "Missing '{' after \"case …\"");
-    get cses = Parser.until!(Kind.Parser.text("}"), Parser.append_error!(Kind.Parser.case.case, "\nInside case.\""));
+    get cses = Parser.until!(Kind.Parser.text("}"), Parser.append_error!(Kind.Parser.case.case, "\nInside case."));
     get smrt = Parser.maybe!(Kind.Parser.text("!"));
 
     // Default value
