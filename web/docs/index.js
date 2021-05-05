@@ -2889,7 +2889,7 @@ const h = __webpack_require__(86).h;
 const apps = __webpack_require__(649);
 const sign = __webpack_require__(216);
 const utils = __webpack_require__(555);
-const SHOW_FPS = true;
+const DEBUG_SHOW_FPS = false;
 
 module.exports = class AppPlay extends Component {
 
@@ -3080,13 +3080,13 @@ module.exports = class AppPlay extends Component {
   // Initializes the main render loop
   
   async init_renderer() {
-    if (SHOW_FPS) {
+    if (DEBUG_SHOW_FPS) {
       var last_time = Date.now();
       var fps_count = 0;
     }
     this.intervals.renderer = setInterval(() => {
       if (this.app) {
-        if (SHOW_FPS) {
+        if (DEBUG_SHOW_FPS) {
           if (Date.now() - last_time > 1000) {
             console.log("FPS: ", fps_count);
             fps_count = 0;
