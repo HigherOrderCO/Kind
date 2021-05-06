@@ -1,9 +1,48 @@
+// TODO: move "health" fields of Web.Kaelin.Hero to inside Web.Kaelin.Entity.Creature
+// TODO: Web.Kaelin.Hero contains *static* hero info (ex: max hp, skills...)
+
 // will the attributes of the heroes be placed here?
 type Web.Kaelin.Hero {
   new(
-    id: U8
+    id: U8 // TODO: remove, use Name instead
+    // name: String // TODO: create
     img: VoxBox
-    health: I32
+    health: I32 // TODO: move to Web.Kaelin.Entity.creature
     skills: List<Web.Kaelin.Skill>
   )
 }
+
+// TODO
+// Web.Kaelin.Entity.damage(damage: I32, entity: Web.Kaelin.Entity): Web.Kaelin.Entity
+//   case entity {
+//     background: ... nao muda nada ...
+//     creature: ... muda a vida ...
+//   }
+
+// TODO
+// Web.Kaelin.Hero.Croni: Web.Kaelin.Hero
+//   let name = "Croni"
+//   let img = ... imagem da croni ...
+//   let skills = [ ... skills da croni ... ]
+//   Web.Kaelin.Hero.new(name, img, skills)
+
+// TODO
+// Web.Kaelin.Hero.info(name: String): Hero.Kaelin.Hero
+//   switch String.eql(name) {
+//     "Croni": Web.Kaelin.Hero.Croni
+//     "Tophoro": Web.Kaelin.Hero.Tophoro
+//     ...
+//    }
+
+// TODO
+// Web.Kaelin.Hero.create(name: String): Hero.Kaelin.Entity
+//   ...
+
+// TODO? discuss changing Tile from List(Creature) to Web.Kaelin.Tile
+//type Web.Kaelin.Tile {
+//  new(
+//    creature: Maybe(Web.Kaelin.Entity)
+//    background: Web.Kaelin.Background
+//  )
+//}
+

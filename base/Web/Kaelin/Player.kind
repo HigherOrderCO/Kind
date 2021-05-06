@@ -1,8 +1,8 @@
 type Web.Kaelin.Player {
   new(
     addr: String
-    team: String
-    current_hp: I32
-    current_status: List<Web.Kaelin.Skill.Modifier.status>
+    team: String // TODO: move to creature inside map
+    current_hp: I32 // TODO: move to creature inside map
+    current_status: List<Web.Kaelin.Skill.Modifier.status> // TODO: move to creature inside map
   )
 }

@@ -6,7 +6,7 @@ type Web.Kaelin.State {
   game(
     user: String
     room: String
-    players: Map(Web.Kaelin.Player)
+    players: Map(Web.Kaelin.Player) // TODO: Map(String) ?
     cast_info: Maybe<Web.Kaelin.CastInfo>
     map: Web.Kaelin.Map,
     internal : Web.Kaelin.Internal

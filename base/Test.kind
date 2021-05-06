@@ -1,18 +1,48 @@
-Test.main: IO(Unit)
-  Kind.api.io.check_file("./Kind/api/export.kind")
+Test: _
+  let nums = NatMap.new!
+  let nums = NatMap.set!(1, unit, nums)
+  let nums = NatMap.set!(2, unit, nums)
+  let nums = NatMap.set!(3, unit, nums)
+  let nums = NatMap.set!(4, unit, nums)
+  let nums = NatMap.set!(5, unit, nums)
+  let nums = NatMap.set!(6, unit, nums)
+  NatMap.get!(3, nums)
 
-Test: IO(Unit)
-  IO {
-    let name = "Test.main"
-    IO.print("Compiling "|name|" to Scheme...")
-    get defs = Kind.Synth.one(name, Kind.Map.new!)
-    case defs {
-      none: IO.print("Something is wrong.")
-      some: IO {
-        let defs = Kind.Comp.Defs.compile(defs.value)
-        let file = Kind.Comp.Target.Scheme(name, defs)
-        //IO.print(file)
-        IO.set_file("./main.scm", file)
-      }
-    }
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Test.main: IO(Unit)
+  //Kind.api.io.check_file("./Kind/api/export.kind")
+
+//Test: IO(Unit)
+  //IO {
+    //let name = "Test.main"
+    //IO.print("Compiling "|name|" to Scheme...")
+    //get defs = Kind.Synth.one(name, Kind.Map.new!)
+    //case defs {
+      //none: IO.print("Something is wrong.")
+      //some: IO {
+        //let defs = Kind.Comp.Defs.compile(defs.value)
+        //let file = Kind.Comp.Target.Scheme(name, defs)
+        ////IO.print(file)
+        //IO.set_file("./main.scm", file)
+      //}
+    //}
+  //}
