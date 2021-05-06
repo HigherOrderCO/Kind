@@ -1,0 +1,6 @@
+Web.Kaelin.Effect(A: Type): Type
+  ((tick: Nat) ->
+   (center: Web.Kaelin.Coord) ->
+   (target: Web.Kaelin.Coord) ->
+   (map: Web.Kaelin.Map) ->
+   Web.Kaelin.Effect.Result(A))

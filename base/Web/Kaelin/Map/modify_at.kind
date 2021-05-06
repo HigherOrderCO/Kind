@@ -1,0 +1,14 @@
+// TODO: applies a function to the entity at a coord
+Web.Kaelin.Map.modify_at(
+  mod: Web.Kaelin.Entity -> Web.Kaelin.Entity
+  pos: Web.Kaelin.Coord
+  map: Web.Kaelin.Map
+): Web.Kaelin.Map
+  let key = Web.Kaelin.Coord.Convert.axial_to_nat(pos)
+  let tile = NatMap.get!(key, map)
+  case tile {
+    none: map
+    some:
+      let tile = List.map!!(mod, tile.value)
+      NatMap.set!(key, tile, map)
+  }

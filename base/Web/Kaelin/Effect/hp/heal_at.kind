@@ -1,0 +1,2 @@
+Web.Kaelin.Effect.hp.heal_at(dmg: I32, pos: Web.Kaelin.Coord): Web.Kaelin.Effect<I32>
+  Web.Kaelin.Effect.hp.change_at(I32.neg(dmg), pos)

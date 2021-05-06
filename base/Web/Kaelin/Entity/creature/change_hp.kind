@@ -1,0 +1,11 @@
+Web.Kaelin.Entity.creature.change_hp(change: I32, entity: Web.Kaelin.Entity): Web.Kaelin.Entity
+  case entity {
+    creature: 
+      open entity.hero
+      case I32.eql(entity.hp, +0#32) {
+        true: entity
+        false:
+          def new_hp = I32.min(I32.add(entity.hp, change), entity.hero.max_hp)
+          Web.Kaelin.Entity.creature(entity.player, entity.hero, entity.team, new_hp, entity.status)
+      }
+  } default entity

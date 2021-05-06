@@ -1,0 +1,7 @@
+Web.Kaelin.Map.change_hp_at(
+  dmg: I32
+  pos: Web.Kaelin.Coord
+  map: Web.Kaelin.Map
+): Pair(I32, Web.Kaelin.Map)
+  let map = Web.Kaelin.Map.modify_at(Web.Kaelin.Entity.creature.change_hp(dmg), pos, map)
+  Web.Kaelin.Map.change_hp_at(dmg, pos, map) // TODO -> done

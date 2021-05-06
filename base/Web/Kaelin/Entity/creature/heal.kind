@@ -1,11 +1,2 @@
 Web.Kaelin.Entity.creature.heal(heal: I32, entity: Web.Kaelin.Entity): Web.Kaelin.Entity
-  case entity {
-    creature: 
-      open entity.hero
-      case I32.eql(entity.hp, +0#32) {
-        true: Web.Kaelin.Entity.creature(entity.player, entity.hero, entity.hp)
-        false:
-          def new_hp = I32.min(I32.add(entity.hp, heal), entity.hero.max_hp)
-          Web.Kaelin.Entity.creature(entity.player, entity.hero, new_hp)
-      }
-  } default entity
+  Web.Kaelin.Entity.creature.change_hp(heal, entity)

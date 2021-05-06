@@ -1,0 +1,8 @@
+type Web.Kaelin.Effect.Result <A: Type> {
+  new(
+    value: A
+    map: Web.Kaelin.Map
+    futures: List(Web.Kaelin.Future)
+    indicators: List(Web.Kaelin.Indicator)
+  )
+}
