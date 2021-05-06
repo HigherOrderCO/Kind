@@ -1,0 +1,19 @@
+Word.shift_left.one<size: Nat>(word: Word(size)): Word(size)
+  case word {
+    e: Word.e,
+    o: Word.o<word.size>(Word.shift_left.one.go<word.size>(word.pred, Bool.false)),
+    i: Word.o<word.size>(Word.shift_left.one.go<word.size>(word.pred, Bool.true))
+  }: Word(word.size)
+
+Word.shift_left.one.go<size: Nat>(word: Word(size), prev: Bool): Word(size)
+  case word {
+    e: Word.e,
+    o: case prev {
+      true : Word.i<word.size>(Word.shift_left.one.go<word.size>(word.pred, Bool.false)),
+      false: Word.o<word.size>(Word.shift_left.one.go<word.size>(word.pred, Bool.false))
+    }
+    i: case prev {
+      true : Word.i<word.size>(Word.shift_left.one.go<word.size>(word.pred, Bool.true)),
+      false: Word.o<word.size>(Word.shift_left.one.go<word.size>(word.pred, Bool.true))
+    }
+  }: Word(word.size)

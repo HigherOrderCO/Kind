@@ -9,5 +9,4 @@ Web.Kaelin.Coord.Convert.nat_to_axial(a: Nat): Web.Kaelin.Coord
   let coord_j = U32.mod(a_32, 1000#32)
   let coord_j = U32.to_i32(coord_j)
   let coord_j = I32.sub(coord_j, +100#32)
-  
   Web.Kaelin.Coord.new(coord_i, coord_j)
