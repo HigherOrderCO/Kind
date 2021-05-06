@@ -1842,43 +1842,15 @@ module.exports = (function() {
                     var $331 = App$store$(Web$Kind$exe_event$($330, _state$4));
                     var $321 = $331;
                     break;
-                case 'App.Event.resize':
-                    var $332 = self.info;
-                    var self = $332;
-                    switch (self._) {
-                        case 'App.EnvInfo.new':
-                            var $334 = self.screen_size;
-                            var self = $334;
-                            switch (self._) {
-                                case 'Pair.new':
-                                    var $336 = self.fst;
-                                    var self = _state$4;
-                                    switch (self._) {
-                                        case 'Web.Kind.State.new':
-                                            var $338 = self.page;
-                                            var $339 = self.mouse_over;
-                                            var _device$14 = Device$classify$($336);
-                                            var $340 = App$store$(Web$Kind$State$new$(_device$14, $338, $339));
-                                            var $337 = $340;
-                                            break;
-                                    };
-                                    var $335 = $337;
-                                    break;
-                            };
-                            var $333 = $335;
-                            break;
-                    };
-                    var $321 = $333;
-                    break;
                 case 'App.Event.tick':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_down':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
-                case 'App.Event.mouse_out':
-                    var $341 = App$pass;
-                    var $321 = $341;
+                case 'App.Event.input':
+                    var $332 = App$pass;
+                    var $321 = $332;
                     break;
             };
             return $321;

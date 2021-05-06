@@ -1979,9 +1979,8 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_over':
-                case 'App.Event.mouse_out':
                 case 'App.Event.mouse_click':
-                case 'App.Event.resize':
+                case 'App.Event.input':
                     var $391 = App$pass;
                     var $390 = $391;
                     break;

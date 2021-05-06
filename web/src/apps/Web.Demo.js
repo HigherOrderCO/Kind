@@ -1921,8 +1921,7 @@ module.exports = (function() {
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_over':
-                case 'App.Event.mouse_out':
-                case 'App.Event.resize':
+                case 'App.Event.input':
                     var $385 = App$pass;
                     var $371 = $385;
                     break;
