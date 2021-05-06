@@ -647,7 +647,6 @@ module.exports = (function() {
     const Word$eql = x0 => x1 => Word$eql$(x0, x1);
     const U16$eql = a0 => a1 => (a0 === a1);
     const String$eql = a0 => a1 => (a0 === a1);
-    const Web$Kind$constant$secondary_color = "#3891A6";
 
     function BitsMap$union$(_a$2, _b$3) {
         var self = _a$2;
@@ -696,18 +695,18 @@ module.exports = (function() {
         return $106;
     };
     const Map$union = x0 => x1 => Map$union$(x0, x1);
+    const Web$Kind$constant$secondary_color = "#3891A6";
 
     function Web$Playground$comp$btn_run_code$(_mouse_over$1) {
         var _is_hover$2 = ("btn_run_code" === _mouse_over$1);
-        var _normal$3 = Map$from_list$(List$cons$(Pair$new$("width", "50px"), List$cons$(Pair$new$("height", "25px"), List$cons$(Pair$new$("margin", "5px 0px"), List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("border", "none"), List$cons$(Pair$new$("border-radius", "4px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil)))))))))))));
-        var _hover$4 = Map$from_list$(List$cons$(Pair$new$("background-color", "#44B8D3"), List$nil));
+        var _normal$3 = Map$from_list$(List$cons$(Pair$new$("width", "50px"), List$cons$(Pair$new$("height", "25px"), List$cons$(Pair$new$("margin", "5px 0px"), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("border", "none"), List$cons$(Pair$new$("border-radius", "4px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil))))))))))));
         var $107 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "btn_run_code"), List$nil)), (() => {
             var self = _is_hover$2;
             if (self) {
-                var $108 = Map$union$(_normal$3, _hover$4);
+                var $108 = Map$union$(_normal$3, Map$from_list$(List$cons$(Pair$new$("background-color", "#44B8D3"), List$nil)));
                 return $108;
             } else {
-                var $109 = _normal$3;
+                var $109 = Map$union$(_normal$3, Map$from_list$(List$cons$(Pair$new$("background-color", Web$Kind$constant$secondary_color), List$nil)));
                 return $109;
             };
         })(), List$cons$(DOM$text$("check"), List$nil));
@@ -715,85 +714,77 @@ module.exports = (function() {
     };
     const Web$Playground$comp$btn_run_code = x0 => Web$Playground$comp$btn_run_code$(x0);
 
-    function Web$Playground$comp$header$(_stt$1) {
-        var self = _stt$1;
+    function Web$Playground$comp$header$(_device$1, _mouse_over$2, _window$3) {
+        var _playground$4 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "input_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
+            var self = _window$3;
+            switch (self._) {
+                case 'Web.Playground.Window.input':
+                    var $111 = Web$Playground$constant$light_gray_color;
+                    return $111;
+                case 'Web.Playground.Window.terminal':
+                    var $112 = Web$Playground$constant$white_smoke;
+                    return $112;
+            };
+        })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("playground.kind"), List$nil));
+        var _btn_run$5 = Web$Playground$comp$btn_run_code$(_mouse_over$2);
+        var _style_header$6 = Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))));
+        var self = _device$1;
         switch (self._) {
-            case 'Web.Playground.State.new':
-                var $111 = self.device;
-                var $112 = self.window;
-                var $113 = self.mouse_over;
-                var _playground$7 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "input_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
-                    var self = $112;
+            case 'Device.phone':
+                var _terminal$7 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "terminal_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
+                    var self = _window$3;
                     switch (self._) {
                         case 'Web.Playground.Window.input':
+                            var $114 = Web$Playground$constant$white_smoke;
+                            return $114;
+                        case 'Web.Playground.Window.terminal':
                             var $115 = Web$Playground$constant$light_gray_color;
                             return $115;
-                        case 'Web.Playground.Window.terminal':
-                            var $116 = Web$Playground$constant$white_smoke;
-                            return $116;
                     };
-                })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("playground.kind"), List$nil));
-                var _btn_run$8 = Web$Playground$comp$btn_run_code$($113);
-                var self = $111;
-                switch (self._) {
-                    case 'Device.phone':
-                        var _terminal$9 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "terminal_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
-                            var self = $112;
-                            switch (self._) {
-                                case 'Web.Playground.Window.input':
-                                    var $118 = Web$Playground$constant$white_smoke;
-                                    return $118;
-                                case 'Web.Playground.Window.terminal':
-                                    var $119 = Web$Playground$constant$light_gray_color;
-                                    return $119;
-                            };
-                        })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("output"), List$nil));
-                        var $117 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), List$cons$(_playground$7, List$cons$(_terminal$9, List$nil))), List$cons$(_btn_run$8, List$nil)));
-                        var $114 = $117;
-                        break;
-                    case 'Device.tablet':
-                    case 'Device.desktop':
-                    case 'Device.big_desktop':
-                        var $120 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil)))))), List$cons$(_playground$7, List$cons$(_btn_run$8, List$nil)));
-                        var $114 = $120;
-                        break;
-                };
-                var $110 = $114;
+                })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("output"), List$nil));
+                var $113 = DOM$node$("div", Map$from_list$(List$nil), _style_header$6, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), List$cons$(_playground$4, List$cons$(_terminal$7, List$nil))), List$cons$(_btn_run$5, List$nil)));
+                var $110 = $113;
+                break;
+            case 'Device.tablet':
+            case 'Device.desktop':
+            case 'Device.big_desktop':
+                var $116 = DOM$node$("div", Map$from_list$(List$nil), _style_header$6, List$cons$(_playground$4, List$cons$(_btn_run$5, List$nil)));
+                var $110 = $116;
                 break;
         };
         return $110;
     };
-    const Web$Playground$comp$header = x0 => Web$Playground$comp$header$(x0);
+    const Web$Playground$comp$header = x0 => x1 => x2 => Web$Playground$comp$header$(x0, x1, x2);
 
     function String$cons$(_head$1, _tail$2) {
-        var $121 = (String.fromCharCode(_head$1) + _tail$2);
-        return $121;
+        var $117 = (String.fromCharCode(_head$1) + _tail$2);
+        return $117;
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
 
     function Web$Playground$comp$input$(_code$1) {
-        var $122 = DOM$node$("textarea", Map$from_list$(List$cons$(Pair$new$("id", "input_code"), List$cons$(Pair$new$("placeholder", "Write Kind code in this online editor and run it <3"), List$nil))), Map$from_list$(List$cons$(Pair$new$("cols", "100"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("border", ("solid 5px " + Web$Playground$constant$light_gray_color)), List$cons$(Pair$new$("resize", "none"), List$cons$(Pair$new$("padding", "10px"), List$nil)))))), List$cons$(DOM$text$(_code$1), List$nil));
-        return $122;
+        var $118 = DOM$node$("textarea", Map$from_list$(List$cons$(Pair$new$("id", "input_code"), List$cons$(Pair$new$("placeholder", "Write Kind code in this online editor and run it <3"), List$nil))), Map$from_list$(List$cons$(Pair$new$("cols", "100"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("border", ("solid 5px " + Web$Playground$constant$light_gray_color)), List$cons$(Pair$new$("resize", "none"), List$cons$(Pair$new$("padding", "10px"), List$nil)))))), List$cons$(DOM$text$(_code$1), List$nil));
+        return $118;
     };
     const Web$Playground$comp$input = x0 => Web$Playground$comp$input$(x0);
 
     function Web$Playground$comp$output_area$(_output$1, _device$2) {
         var _style$3 = Map$from_list$(List$cons$(Pair$new$("width", "400px"), List$cons$(Pair$new$("max-width", "500px"), List$cons$(Pair$new$("overflow", "auto"), List$cons$(Pair$new$("padding", "10px"), List$cons$(Pair$new$("background-color", Web$Playground$constant$light_gray_color), List$nil))))));
-        var $123 = DOM$node$("div", Map$from_list$(List$nil), (() => {
+        var $119 = DOM$node$("div", Map$from_list$(List$nil), (() => {
             var self = _device$2;
             switch (self._) {
                 case 'Device.phone':
-                    var $124 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin-top", "0px"), List$nil))));
-                    return $124;
+                    var $120 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin-top", "0px"), List$nil))));
+                    return $120;
                 case 'Device.tablet':
                 case 'Device.desktop':
                 case 'Device.big_desktop':
-                    var $125 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100% - 35px"), List$cons$(Pair$new$("margin-top", "35px"), List$nil))));
-                    return $125;
+                    var $121 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100% - 35px"), List$cons$(Pair$new$("margin-top", "35px"), List$nil))));
+                    return $121;
             };
-        })(), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(_output$1), List$nil)), List$nil));
-        return $123;
+        })(), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("kind-lang@1.0.44"), List$nil)), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(DOM$text$(_output$1), List$nil)), List$nil)));
+        return $119;
     };
     const Web$Playground$comp$output_area = x0 => x1 => Web$Playground$comp$output_area$(x0, x1);
 
@@ -801,37 +792,41 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Playground.State.new':
-                var $127 = self.device;
-                var $128 = self.window;
-                var $129 = self.code;
-                var $130 = self.output;
-                var self = $127;
+                var $123 = self.device;
+                var $124 = self.window;
+                var $125 = self.mouse_over;
+                var $126 = self.code;
+                var $127 = self.output;
+                var _header$7 = Web$Playground$comp$header$($123, $125, $124);
+                var _input_view$8 = Web$Playground$comp$input$($126);
+                var _output_view$9 = Web$Playground$comp$output_area$($127, $123);
+                var self = $123;
                 switch (self._) {
                     case 'Device.phone':
-                        var $132 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$nil))))), List$cons$(Web$Playground$comp$header$(_stt$1), List$cons$((() => {
-                            var self = $128;
+                        var $129 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$nil))))), List$cons$(_header$7, List$cons$((() => {
+                            var self = $124;
                             switch (self._) {
                                 case 'Web.Playground.Window.input':
-                                    var $133 = Web$Playground$comp$input$($129);
-                                    return $133;
+                                    var $130 = _input_view$8;
+                                    return $130;
                                 case 'Web.Playground.Window.terminal':
-                                    var $134 = Web$Playground$comp$output_area$($130, $127);
-                                    return $134;
+                                    var $131 = _output_view$9;
+                                    return $131;
                             };
                         })(), List$nil)));
-                        var $131 = $132;
+                        var $128 = $129;
                         break;
                     case 'Device.tablet':
                     case 'Device.desktop':
                     case 'Device.big_desktop':
-                        var $135 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil))))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("width", "60%"), List$nil)))), List$cons$(Web$Playground$comp$header$(_stt$1), List$cons$(Web$Playground$comp$input$($129), List$nil))), List$cons$(Web$Playground$comp$output_area$($130, $127), List$nil)));
-                        var $131 = $135;
+                        var $132 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil))))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("width", "60%"), List$nil)))), List$cons$(_header$7, List$cons$(_input_view$8, List$nil))), List$cons$(_output_view$9, List$nil)));
+                        var $128 = $132;
                         break;
                 };
-                var $126 = $131;
+                var $122 = $128;
                 break;
         };
-        return $126;
+        return $122;
     };
     const Web$Playground$comp$main_area = x0 => Web$Playground$comp$main_area$(x0);
 
@@ -839,11 +834,11 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Playground.State.new':
-                var $137 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin", "20px 0x"), List$cons$(Pair$new$("display", "flex"), List$nil))))), List$cons$(Web$Playground$comp$main_area$(_stt$1), List$nil));
-                var $136 = $137;
+                var $134 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin", "20px 0x"), List$cons$(Pair$new$("display", "flex"), List$nil))))), List$cons$(Web$Playground$comp$main_area$(_stt$1), List$nil));
+                var $133 = $134;
                 break;
         };
-        return $136;
+        return $133;
     };
     const Web$Playground$draw = x0 => Web$Playground$draw$(x0);
 
@@ -851,41 +846,41 @@ module.exports = (function() {
         var self = _stt$1;
         switch (self._) {
             case 'Web.Playground.State.new':
-                var $139 = self.device;
-                var self = $139;
+                var $136 = self.device;
+                var self = $136;
                 switch (self._) {
                     case 'Device.phone':
-                        var $141 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "10px"), List$cons$(Pair$new$("height", "300px"), List$nil))), List$cons$(Web$Playground$draw$(_stt$1), List$nil));
-                        var $140 = $141;
+                        var $138 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "10px"), List$cons$(Pair$new$("height", "300px"), List$nil))), List$cons$(Web$Playground$draw$(_stt$1), List$nil));
+                        var $137 = $138;
                         break;
                     case 'Device.tablet':
                     case 'Device.desktop':
                     case 'Device.big_desktop':
-                        var $142 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "100px"), List$cons$(Pair$new$("height", "500px"), List$nil))), List$cons$(Web$Playground$draw$(_stt$1), List$nil));
-                        var $140 = $142;
+                        var $139 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "100px"), List$cons$(Pair$new$("height", "500px"), List$nil))), List$cons$(Web$Playground$draw$(_stt$1), List$nil));
+                        var $137 = $139;
                         break;
                 };
-                var $138 = $140;
+                var $135 = $137;
                 break;
         };
-        return $138;
+        return $135;
     };
     const Web$playground$body = x0 => Web$playground$body$(x0);
 
     function IO$(_A$1) {
-        var $143 = null;
-        return $143;
+        var $140 = null;
+        return $140;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $144 = ({
+        var $141 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $144;
+        return $141;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -893,52 +888,52 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $146 = self.value;
-                var $147 = _f$4($146);
-                var $145 = $147;
+                var $143 = self.value;
+                var $144 = _f$4($143);
+                var $142 = $144;
                 break;
             case 'IO.ask':
-                var $148 = self.query;
-                var $149 = self.param;
-                var $150 = self.then;
-                var $151 = IO$ask$($148, $149, (_x$8 => {
-                    var $152 = IO$bind$($150(_x$8), _f$4);
-                    return $152;
+                var $145 = self.query;
+                var $146 = self.param;
+                var $147 = self.then;
+                var $148 = IO$ask$($145, $146, (_x$8 => {
+                    var $149 = IO$bind$($147(_x$8), _f$4);
+                    return $149;
                 }));
-                var $145 = $151;
+                var $142 = $148;
                 break;
         };
-        return $145;
+        return $142;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $153 = ({
+        var $150 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $153;
+        return $150;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $154 = _new$2(IO$bind)(IO$end);
-        return $154;
+        var $151 = _new$2(IO$bind)(IO$end);
+        return $151;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $155 = ({
+        var $152 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $155;
+        return $152;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $156 = _m$pure$2;
-        return $156;
+        var $153 = _m$pure$2;
+        return $153;
     }))(Dynamic$new$(Unit$new));
 
     function Cmp$as_lte$(_cmp$1) {
@@ -946,28 +941,28 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.eql':
-                var $158 = Bool$true;
-                var $157 = $158;
+                var $155 = Bool$true;
+                var $154 = $155;
                 break;
             case 'Cmp.gtn':
-                var $159 = Bool$false;
-                var $157 = $159;
+                var $156 = Bool$false;
+                var $154 = $156;
                 break;
         };
-        return $157;
+        return $154;
     };
     const Cmp$as_lte = x0 => Cmp$as_lte$(x0);
 
     function Word$lte$(_a$2, _b$3) {
-        var $160 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
-        return $160;
+        var $157 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
+        return $157;
     };
     const Word$lte = x0 => x1 => Word$lte$(x0, x1);
     const U32$lte = a0 => a1 => (a0 <= a1);
 
     function U32$new$(_value$1) {
-        var $161 = word_to_u32(_value$1);
-        return $161;
+        var $158 = word_to_u32(_value$1);
+        return $158;
     };
     const U32$new = x0 => U32$new$(x0);
 
@@ -983,12 +978,12 @@ module.exports = (function() {
             var R = (() => {
                 var self = _n$2;
                 if (self === 0n) {
-                    var $162 = _x$4;
-                    return $162;
+                    var $159 = _x$4;
+                    return $159;
                 } else {
-                    var $163 = (self - 1n);
-                    var $164 = Nat$apply$($163, _f$3, _f$3(_x$4));
-                    return $164;
+                    var $160 = (self - 1n);
+                    var $161 = Nat$apply$($160, _f$3, _f$3(_x$4));
+                    return $161;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -998,8 +993,8 @@ module.exports = (function() {
     const Nat$apply = x0 => x1 => x2 => Nat$apply$(x0, x1, x2);
 
     function Word$(_size$1) {
-        var $165 = null;
-        return $165;
+        var $162 = null;
+        return $162;
     };
     const Word = x0 => Word$(x0);
     const Word$e = ({
@@ -1007,20 +1002,20 @@ module.exports = (function() {
     });
 
     function Word$i$(_pred$2) {
-        var $166 = ({
+        var $163 = ({
             _: 'Word.i',
             'pred': _pred$2
         });
-        return $166;
+        return $163;
     };
     const Word$i = x0 => Word$i$(x0);
 
     function Word$o$(_pred$2) {
-        var $167 = ({
+        var $164 = ({
             _: 'Word.o',
             'pred': _pred$2
         });
-        return $167;
+        return $164;
     };
     const Word$o = x0 => Word$o$(x0);
 
@@ -1028,41 +1023,41 @@ module.exports = (function() {
         var self = _word$2;
         switch (self._) {
             case 'Word.o':
-                var $169 = self.pred;
-                var $170 = Word$i$($169);
-                var $168 = $170;
+                var $166 = self.pred;
+                var $167 = Word$i$($166);
+                var $165 = $167;
                 break;
             case 'Word.i':
-                var $171 = self.pred;
-                var $172 = Word$o$(Word$inc$($171));
-                var $168 = $172;
+                var $168 = self.pred;
+                var $169 = Word$o$(Word$inc$($168));
+                var $165 = $169;
                 break;
             case 'Word.e':
-                var $173 = Word$e;
-                var $168 = $173;
+                var $170 = Word$e;
+                var $165 = $170;
                 break;
         };
-        return $168;
+        return $165;
     };
     const Word$inc = x0 => Word$inc$(x0);
 
     function Word$zero$(_size$1) {
         var self = _size$1;
         if (self === 0n) {
-            var $175 = Word$e;
-            var $174 = $175;
+            var $172 = Word$e;
+            var $171 = $172;
         } else {
-            var $176 = (self - 1n);
-            var $177 = Word$o$(Word$zero$($176));
-            var $174 = $177;
+            var $173 = (self - 1n);
+            var $174 = Word$o$(Word$zero$($173));
+            var $171 = $174;
         };
-        return $174;
+        return $171;
     };
     const Word$zero = x0 => Word$zero$(x0);
 
     function Nat$to_word$(_size$1, _n$2) {
-        var $178 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
-        return $178;
+        var $175 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
+        return $175;
     };
     const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
     const Nat$to_u32 = a0 => (Number(a0) >>> 0);
@@ -1079,36 +1074,36 @@ module.exports = (function() {
     function Device$classify$(_width$1) {
         var self = (_width$1 <= 600);
         if (self) {
-            var $180 = Device$phone;
-            var $179 = $180;
+            var $177 = Device$phone;
+            var $176 = $177;
         } else {
             var self = (_width$1 <= 768);
             if (self) {
-                var $182 = Device$tablet;
-                var $181 = $182;
+                var $179 = Device$tablet;
+                var $178 = $179;
             } else {
                 var self = (_width$1 <= 992);
                 if (self) {
-                    var $184 = Device$desktop;
-                    var $183 = $184;
+                    var $181 = Device$desktop;
+                    var $180 = $181;
                 } else {
-                    var $185 = Device$big_desktop;
-                    var $183 = $185;
+                    var $182 = Device$big_desktop;
+                    var $180 = $182;
                 };
-                var $181 = $183;
+                var $178 = $180;
             };
-            var $179 = $181;
+            var $176 = $178;
         };
-        return $179;
+        return $176;
     };
     const Device$classify = x0 => Device$classify$(x0);
 
     function App$store$(_value$2) {
-        var $186 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $187 = _m$pure$4;
-            return $187;
+        var $183 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $184 = _m$pure$4;
+            return $184;
         }))(Dynamic$new$(_value$2));
-        return $186;
+        return $183;
     };
     const App$store = x0 => App$store$(x0);
 
@@ -1116,15 +1111,15 @@ module.exports = (function() {
         var self = _stt$2;
         switch (self._) {
             case 'Web.Playground.State.new':
-                var $189 = self.device;
-                var $190 = self.window;
-                var $191 = self.code;
-                var $192 = self.output;
-                var $193 = Web$Playground$State$new$($189, $190, _id$1, $191, $192);
-                var $188 = $193;
+                var $186 = self.device;
+                var $187 = self.window;
+                var $188 = self.code;
+                var $189 = self.output;
+                var $190 = Web$Playground$State$new$($186, $187, _id$1, $188, $189);
+                var $185 = $190;
                 break;
         };
-        return $188;
+        return $185;
     };
     const Web$Playground$set_mouse_over = x0 => x1 => Web$Playground$set_mouse_over$(x0, x1);
     const Web$Playground$Window$terminal = ({
@@ -1134,143 +1129,143 @@ module.exports = (function() {
     function String$is_empty$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $195 = Bool$true;
-            var $194 = $195;
+            var $192 = Bool$true;
+            var $191 = $192;
         } else {
-            var $196 = self.charCodeAt(0);
-            var $197 = self.slice(1);
-            var $198 = Bool$false;
-            var $194 = $198;
+            var $193 = self.charCodeAt(0);
+            var $194 = self.slice(1);
+            var $195 = Bool$false;
+            var $191 = $195;
         };
-        return $194;
+        return $191;
     };
     const String$is_empty = x0 => String$is_empty$(x0);
 
     function IO$request$(_url$1) {
-        var $199 = IO$ask$("request", _url$1, (_text$2 => {
-            var $200 = IO$end$(_text$2);
-            return $200;
+        var $196 = IO$ask$("request", _url$1, (_text$2 => {
+            var $197 = IO$end$(_text$2);
+            return $197;
         }));
-        return $199;
+        return $196;
     };
     const IO$request = x0 => IO$request$(x0);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $201 = ({
+        var $198 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $201;
+        return $198;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Playground = (() => {
         var _init$1 = Web$Playground$State$new$(Device$big_desktop, Web$Playground$Window$input, "", "", "");
         var _draw$2 = (_state$2 => {
-            var $203 = Web$playground$body$(_state$2);
-            return $203;
+            var $200 = Web$playground$body$(_state$2);
+            return $200;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _state$4;
             switch (self._) {
                 case 'Web.Playground.State.new':
-                    var $205 = self.device;
-                    var $206 = self.window;
-                    var $207 = self.mouse_over;
-                    var $208 = self.code;
-                    var $209 = self.output;
+                    var $202 = self.device;
+                    var $203 = self.window;
+                    var $204 = self.mouse_over;
+                    var $205 = self.code;
+                    var $206 = self.output;
                     var self = _event$3;
                     switch (self._) {
                         case 'App.Event.tick':
-                            var $211 = self.info;
-                            var self = $211;
+                            var $208 = self.info;
+                            var self = $208;
                             switch (self._) {
                                 case 'App.EnvInfo.new':
-                                    var $213 = self.screen_size;
-                                    var self = $213;
+                                    var $210 = self.screen_size;
+                                    var self = $210;
                                     switch (self._) {
                                         case 'Pair.new':
-                                            var $215 = self.fst;
-                                            var _device$16 = Device$classify$($215);
-                                            var $216 = App$store$(Web$Playground$State$new$(_device$16, $206, $207, $208, $209));
-                                            var $214 = $216;
+                                            var $212 = self.fst;
+                                            var _device$16 = Device$classify$($212);
+                                            var $213 = App$store$(Web$Playground$State$new$(_device$16, $203, $204, $205, $206));
+                                            var $211 = $213;
                                             break;
                                     };
-                                    var $212 = $214;
+                                    var $209 = $211;
                                     break;
                             };
-                            var $210 = $212;
+                            var $207 = $209;
                             break;
                         case 'App.Event.mouse_over':
-                            var $217 = self.id;
-                            var $218 = App$store$(Web$Playground$set_mouse_over$($217, _state$4));
-                            var $210 = $218;
+                            var $214 = self.id;
+                            var $215 = App$store$(Web$Playground$set_mouse_over$($214, _state$4));
+                            var $207 = $215;
                             break;
                         case 'App.Event.mouse_click':
-                            var $219 = self.id;
-                            var self = ($219 === "btn_run_code");
+                            var $216 = self.id;
+                            var self = ($216 === "btn_run_code");
                             if (self) {
-                                var self = $205;
+                                var self = $202;
                                 switch (self._) {
                                     case 'Device.phone':
-                                        var $222 = Web$Playground$Window$terminal;
-                                        var _window$13 = $222;
+                                        var $219 = Web$Playground$Window$terminal;
+                                        var _window$13 = $219;
                                         break;
                                     case 'Device.tablet':
                                     case 'Device.desktop':
                                     case 'Device.big_desktop':
-                                        var $223 = Web$Playground$Window$input;
-                                        var _window$13 = $223;
+                                        var $220 = Web$Playground$Window$input;
+                                        var _window$13 = $220;
                                         break;
                                 };
-                                var self = String$is_empty$($208);
+                                var self = String$is_empty$($205);
                                 if (self) {
-                                    var $224 = App$store$(Web$Playground$State$new$($205, _window$13, $207, $208, "How can I type check an empty code? haha"));
-                                    var $221 = $224;
+                                    var $221 = App$store$(Web$Playground$State$new$($202, _window$13, $204, $205, "How can I type check an empty code? haha"));
+                                    var $218 = $221;
                                 } else {
-                                    var $225 = IO$monad$((_m$bind$14 => _m$pure$15 => {
-                                        var $226 = _m$bind$14;
-                                        return $226;
-                                    }))(IO$request$(("http://localhost:3030/api/check_term?code=" + $208)))((_checked$14 => {
-                                        var $227 = App$store$(Web$Playground$State$new$($205, _window$13, $207, $208, _checked$14));
-                                        return $227;
+                                    var $222 = IO$monad$((_m$bind$14 => _m$pure$15 => {
+                                        var $223 = _m$bind$14;
+                                        return $223;
+                                    }))(IO$request$(("http://localhost:3030/api/check_term?code=" + $205)))((_checked$14 => {
+                                        var $224 = App$store$(Web$Playground$State$new$($202, _window$13, $204, $205, _checked$14));
+                                        return $224;
                                     }));
-                                    var $221 = $225;
+                                    var $218 = $222;
                                 };
-                                var $220 = $221;
+                                var $217 = $218;
                             } else {
-                                var self = ($219 === "terminal_view");
+                                var self = ($216 === "terminal_view");
                                 if (self) {
-                                    var $229 = App$store$(Web$Playground$State$new$($205, Web$Playground$Window$terminal, $207, $208, $209));
-                                    var $228 = $229;
+                                    var $226 = App$store$(Web$Playground$State$new$($202, Web$Playground$Window$terminal, $204, $205, $206));
+                                    var $225 = $226;
                                 } else {
-                                    var self = ($219 === "input_view");
+                                    var self = ($216 === "input_view");
                                     if (self) {
-                                        var $231 = App$store$(Web$Playground$State$new$($205, Web$Playground$Window$input, $207, $208, $209));
-                                        var $230 = $231;
+                                        var $228 = App$store$(Web$Playground$State$new$($202, Web$Playground$Window$input, $204, $205, $206));
+                                        var $227 = $228;
                                     } else {
-                                        var $232 = App$pass;
-                                        var $230 = $232;
+                                        var $229 = App$pass;
+                                        var $227 = $229;
                                     };
-                                    var $228 = $230;
+                                    var $225 = $227;
                                 };
-                                var $220 = $228;
+                                var $217 = $225;
                             };
-                            var $210 = $220;
+                            var $207 = $217;
                             break;
                         case 'App.Event.input':
-                            var $233 = self.id;
-                            var $234 = self.text;
-                            var self = ($233 === "input_code");
+                            var $230 = self.id;
+                            var $231 = self.text;
+                            var self = ($230 === "input_code");
                             if (self) {
-                                var $236 = App$store$(Web$Playground$State$new$($205, $206, $207, $234, $209));
-                                var $235 = $236;
+                                var $233 = App$store$(Web$Playground$State$new$($202, $203, $204, $231, $206));
+                                var $232 = $233;
                             } else {
-                                var $237 = App$pass;
-                                var $235 = $237;
+                                var $234 = App$pass;
+                                var $232 = $234;
                             };
-                            var $210 = $235;
+                            var $207 = $232;
                             break;
                         case 'App.Event.init':
                         case 'App.Event.mouse_down':
@@ -1278,17 +1273,17 @@ module.exports = (function() {
                         case 'App.Event.key_down':
                         case 'App.Event.key_up':
                         case 'App.Event.post':
-                            var $238 = App$pass;
-                            var $210 = $238;
+                            var $235 = App$pass;
+                            var $207 = $235;
                             break;
                     };
-                    var $204 = $210;
+                    var $201 = $207;
                     break;
             };
-            return $204;
+            return $201;
         });
-        var $202 = App$new$(_init$1, _draw$2, _when$3);
-        return $202;
+        var $199 = App$new$(_init$1, _draw$2, _when$3);
+        return $199;
     })();
     return {
         'Web.Playground.State.new': Web$Playground$State$new,
@@ -1331,9 +1326,9 @@ module.exports = (function() {
         'Word.eql': Word$eql,
         'U16.eql': U16$eql,
         'String.eql': String$eql,
-        'Web.Kind.constant.secondary_color': Web$Kind$constant$secondary_color,
         'BitsMap.union': BitsMap$union,
         'Map.union': Map$union,
+        'Web.Kind.constant.secondary_color': Web$Kind$constant$secondary_color,
         'Web.Playground.comp.btn_run_code': Web$Playground$comp$btn_run_code,
         'Web.Playground.comp.header': Web$Playground$comp$header,
         'String.cons': String$cons,

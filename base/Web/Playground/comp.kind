@@ -1,5 +1,7 @@
-Web.Playground.comp.header(stt: Web.Playground.State): DOM
-  open stt
+Web.Playground.comp.header(
+  device: Device, 
+  mouse_over: String, 
+  window: Web.Playground.Window): DOM
 
   let playground =
     DOM.node("div", {"id": "input_view"}, {
@@ -7,16 +9,22 @@ Web.Playground.comp.header(stt: Web.Playground.State): DOM
       "height": "35px"
       "padding": "8px 15px 0px 15px"
       "background-color": 
-        case stt.window {
+        case window {
           input: Web.Playground.constant.light_gray_color
           terminal: Web.Playground.constant.white_smoke 
         }
       "display": "flex"
     }, [DOM.text("playground.kind")])
+  let btn_run = Web.Playground.comp.btn_run_code(mouse_over)  
+  let style_header = {
+    "display": "flex"
+    "flex-direction": "row"
+    "justify-content": "space-between"
+    "align-content": "center"
+    "justify-content": "center"
+  }
 
-  let btn_run = Web.Playground.comp.btn_run_code(stt.mouse_over)  
-
-  case stt.device{
+  case device{
     phone:
       let terminal = 
         DOM.node("div", {"id": "terminal_view"}, {
@@ -24,20 +32,14 @@ Web.Playground.comp.header(stt: Web.Playground.State): DOM
           "height": "35px"
           "padding": "8px 15px 0px 15px"
           "background-color": 
-            case stt.window{
+            case window{
               input: Web.Playground.constant.white_smoke
               terminal: Web.Playground.constant.light_gray_color
             }
           "display": "flex"
         }, [DOM.text("output")])
 
-      DOM.node("div", {}, {
-        "display": "flex"
-        "flex-direction": "row"
-        "justify-content": "space-between"
-        "align-content": "center"
-        "justify-content": "center"
-      }, [
+      DOM.node("div", {}, style_header, [
         DOM.node("div", {}, {
           "display": "flex"
           "justify-content": "flex-start"
@@ -46,14 +48,7 @@ Web.Playground.comp.header(stt: Web.Playground.State): DOM
         btn_run
       ])
   } default 
-
-    DOM.node("div", {}, {
-      "display": "flex"
-      "flex-direction": "row"
-      "justify-content": "space-between"
-      "align-content": "center"
-      "justify-content": "center"
-    }, [playground, btn_run])
+    DOM.node("div", {}, style_header, [playground, btn_run])
 
 
 Web.Playground.comp.btn_run_code(mouse_over: String): DOM
@@ -62,7 +57,6 @@ Web.Playground.comp.btn_run_code(mouse_over: String): DOM
     "width" : "50px"
     "height": "25px"
     "margin": "5px 0px"
-    "background-color": Web.Kind.constant.secondary_color
     "color": "white"
     "cursor": "pointer"
     "border": "none"
@@ -72,12 +66,10 @@ Web.Playground.comp.btn_run_code(mouse_over: String): DOM
     "align-content": "center"
     "align-items": "center"
   }
-  let hover = {
-    "background-color": "#44B8D3"
-  }
   DOM.node("div", {"id": "btn_run_code"},
-    if is_hover then Map.union!(normal, hover)
-    else normal,
+    if is_hover 
+    then Map.union!(normal, {"background-color": "#44B8D3"})
+    else Map.union!(normal, {"background-color": Web.Kind.constant.secondary_color}),
     [DOM.text("check")])
 
 Web.Playground.comp.input(code: String): DOM
@@ -94,6 +86,10 @@ Web.Playground.comp.input(code: String): DOM
 
 Web.Playground.comp.main_area(stt: Web.Playground.State): DOM
   open stt
+  let header = Web.Playground.comp.header(stt.device, stt.mouse_over, stt.window)
+  let input_view = Web.Playground.comp.input(stt.code)
+  let output_view = Web.Playground.comp.output_area(stt.output, stt.device)
+
   case stt.device {
     phone: 
     DOM.node("div", {}, {
@@ -101,11 +97,11 @@ Web.Playground.comp.main_area(stt: Web.Playground.State): DOM
       "height": "100%"
       "display": "flex"
       "flex-direction": "column"
-    }, [
-      Web.Playground.comp.header(stt)
+    }, [ 
+      header
       case stt.window {
-        input: Web.Playground.comp.input(stt.code)
-        terminal: Web.Playground.comp.output_area(stt.output, stt.device)
+        input: input_view
+        terminal: output_view
       }
     ])
   } default 
@@ -119,11 +115,8 @@ Web.Playground.comp.main_area(stt: Web.Playground.State): DOM
       "display": "flex"
       "flex-direction": "column"
       "width": "60%"
-    }, [
-      Web.Playground.comp.header(stt)
-      Web.Playground.comp.input(stt.code)
-    ])
-    Web.Playground.comp.output_area(stt.output, stt.device)
+    }, [ header, input_view ])
+    output_view
   ])
 
 Web.Playground.comp.output_area(output: String, device: Device): DOM
@@ -145,6 +138,8 @@ Web.Playground.comp.output_area(output: String, device: Device): DOM
       Map.union<String>(style, {
         "height": "100% - 35px"
         "margin-top": "35px"}), 
-    [DOM.node("pre", {}, {}, [DOM.text(output)])])
+    [ DOM.node("div", {}, {}, [DOM.text("kind-lang@1.0.44")])
+      DOM.node("pre", {}, {"margin-top": "10px"}, [DOM.text(output)])]
+)
 
 
