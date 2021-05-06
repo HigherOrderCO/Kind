@@ -18,7 +18,7 @@ module.exports = class AppPlay extends Component {
     this.listeners = {}; // event listeners
     this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
     this.rendered = null; // document rendered by app, coming from Kind
-    this.container = null; // container that holds rendered app
+    this.container = props.container; // container that holds rendered app
     this.canvas = {}; // canvas that holds rendered pixel-art apps
   }
 
@@ -71,8 +71,8 @@ module.exports = class AppPlay extends Component {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: this.container ? this.container.offsetWidth : 0,
-          snd: this.container ? this.container.offsetHeight : 0,
+          fst: this.container ? this.container.width  : 0,
+          snd: this.container ? this.container.height : 0,
         },
         mouse_pos: this.mouse_pos,
       }
@@ -173,8 +173,8 @@ module.exports = class AppPlay extends Component {
               _: "App.EnvInfo.new",
               screen_size: {
                 _: "Pair.new",
-                fst: this.container ? this.container.offsetWidth : 0,
-                snd: this.container ? this.container.offsetHeight : 0,
+                fst: this.container ? this.container.width  : 0,
+                snd: this.container ? this.container.height : 0,
               },
               mouse_pos: this.mouse_pos,
             }

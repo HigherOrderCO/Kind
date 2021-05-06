@@ -5,7 +5,4 @@ Web.Playground.draw(stt: Web.Playground.State): DOM
     "height": "100%"
     "margin": "20px 0x"
     "display": "flex"
-  }, [
-    Web.Playground.comp.main_area(stt),
-    Web.Playground.comp.output_area(stt.output)
-  ])
+  }, [ Web.Playground.comp.main_area(stt) ])

@@ -1,2 +1,5 @@
 Web.Playground.constant.light_gray_color: String
-  "#F3F4F7"
+  "#E0E0E0"//"#F3F4F7"
+
+Web.Playground.constant.white_smoke: String
+  "#F5F5F5"

@@ -19,32 +19,24 @@ type Web.Playground.Event {
   display_output
 }
 
-// Web.Playground.Actions: Map(Web.Playground.Event)
-//   { 
-//     "btn_check_terms": Web.Playground.Event.check_terms
-//     "btn_run_code": Web.Playground.Event.run_code
-//     // "btn_output": Web.Playground.Event.
-//     "display_output": Web.Playground.Event.display_output
-//   } 
-  
-// Web.Playground.exe_event(id: String, stt: Web.Playground.State): Web.Playground.State
-//   open stt
-//   let actions = Web.Playground.Actions
-//   case Map.get!(id, actions) as event {
-//     none: stt
-//     some: stt
-//   }
-
 Web.Playground.set_mouse_over(id: String, stt: Web.Playground.State): Web.Playground.State
   open stt
   Web.Playground.State.new(stt.device, stt.window, id, stt.code, stt.output)
 
 // Represents a page containing the Playground
 Web.playground.body(stt: Web.Playground.State): DOM
-  DOM.node("div", {"id": "page"}, {
-    "margin": "100px"
-    "height": "500px"
-  },[Web.Playground.draw(stt)])
+  open stt
+  case stt.device {
+    phone:
+      DOM.node("div", {"id": "page"}, {
+      "margin": "10px"
+      "height": "300px"
+    },[Web.Playground.draw(stt)])
+  } default
+    DOM.node("div", {"id": "page"}, {
+      "margin": "100px"
+      "height": "500px"
+    },[Web.Playground.draw(stt)])
 
 
 // Executes the application
@@ -64,6 +56,7 @@ Web.Playground: App(Web.Playground.State)
         open event.info
         open event.info.screen_size as screen_size
         let device = Device.classify(screen_size.fst)
+        // log("Size: " | U32.show(screen_size.fst))
         App.store!(
           Web.Playground.State.new(
             device, state.window, 
@@ -85,21 +78,37 @@ Web.Playground: App(Web.Playground.State)
         switch String.eql(event.id) {
           // Send a request to typecheck the code
           "btn_run_code": 
+          let window = 
+            case state.device {
+              phone: Web.Playground.Window.terminal
+            } default Web.Playground.Window.input
+
           if String.is_empty(state.code)
           then 
             App.store!(Web.Playground.State.new(
-              state.device, state.window, 
+              state.device, window, 
               state.mouse_over, state.code,
               "How can I type check an empty code? haha"))
           else 
             IO {
               get checked = IO.request("http://localhost:3030/api/check_term?code=" | state.code)
               App.store!(Web.Playground.State.new(
-                state.device, state.window, 
+                state.device, window, 
                 state.mouse_over, state.code,
                 checked))
             }
-        } default App.pass
+
+          "terminal_view":
+          App.store!(Web.Playground.State.new(
+            state.device, Web.Playground.Window.terminal,
+            state.mouse_over, state.code, state.output))
+          
+          "input_view": 
+          App.store!(Web.Playground.State.new(
+            state.device, Web.Playground.Window.input,
+            state.mouse_over, state.code, state.output))
+          
+          } default App.pass
         
       mouse_over : App.store!(Web.Playground.set_mouse_over(event.id, state))
       resize: 
