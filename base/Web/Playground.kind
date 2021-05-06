@@ -3,8 +3,8 @@ type Web.Playground.State {
     device: Device, 
     window: Web.Playground.Window,
     mouse_over: String,
-    code: String,
-    output: String)
+    code: String, // code to be type checked
+    output: String) // output from the type check
 }
 
 type Web.Playground.Window {
@@ -19,25 +19,21 @@ type Web.Playground.Event {
   display_output
 }
 
-Web.Playground.Actions: Map(Web.Playground.Event)
-  { 
-    "btn_check_terms": Web.Playground.Event.check_terms
-    "btn_run_code": Web.Playground.Event.run_code
-    // "btn_output": Web.Playground.Event.
-    "display_output": Web.Playground.Event.display_output
-  } 
+// Web.Playground.Actions: Map(Web.Playground.Event)
+//   { 
+//     "btn_check_terms": Web.Playground.Event.check_terms
+//     "btn_run_code": Web.Playground.Event.run_code
+//     // "btn_output": Web.Playground.Event.
+//     "display_output": Web.Playground.Event.display_output
+//   } 
   
-Web.Playground.exe_event(id: String, stt: Web.Playground.State): Web.Playground.State
-  open stt
-  let actions = Web.Playground.Actions
-  case Map.get!(id, actions) as event {
-    none: stt
-    some: stt
-      // TODO: add state change
-      // case event.value{
-      //   btn_check_terms: 
-      // } 
-  }
+// Web.Playground.exe_event(id: String, stt: Web.Playground.State): Web.Playground.State
+//   open stt
+//   let actions = Web.Playground.Actions
+//   case Map.get!(id, actions) as event {
+//     none: stt
+//     some: stt
+//   }
 
 Web.Playground.set_mouse_over(id: String, stt: Web.Playground.State): Web.Playground.State
   open stt
@@ -50,14 +46,6 @@ Web.playground.body(stt: Web.Playground.State): DOM
     "height": "500px"
   },[Web.Playground.draw(stt)])
 
-Web.Playground.input(code: String, key: Char): String
-  let backspace = 8#16
-  let delete = 127#16
-  let new_code = 
-    if Bool.or(Char.eql(key, backspace), Char.eql(key, delete)) 
-    then String.drop(1, code) 
-    else String.concat(Char.to_string(key), code)
-  new_code
 
 // Executes the application
 Web.Playground: App(Web.Playground.State)
@@ -77,22 +65,34 @@ Web.Playground: App(Web.Playground.State)
         open event.info.screen_size as screen_size
         let device = Device.classify(screen_size.fst)
         App.store!(
-          Web.Playground.State.new(device, Web.Playground.Window.input, "", "", "")
+          Web.Playground.State.new(
+            device, state.window, 
+            state.mouse_over, state.code, state.output)
         )
 
-      key_down:
-        App.store!(Web.Playground.State.new(
-          state.device, state.window, 
-          state.mouse_over, Web.Playground.input(state.code, event.code),
-          state.output))
+      input:
+        IO {
+          switch String.eql(event.id) {
+            "input_code": 
+              App.store!(Web.Playground.State.new(
+              state.device, state.window, 
+              state.mouse_over, event.text, state.output)
+            )
+          } default App.pass
+        }
       
-      // TODO: check if this is being called
       mouse_click: 
         switch String.eql(event.id) {
-          "btn_run_code": // Send a request to typecheck the code
-              log("State: " | state.code)
+          // Send a request to typecheck the code
+          "btn_run_code": 
+          if String.is_empty(state.code)
+          then 
+            App.store!(Web.Playground.State.new(
+              state.device, state.window, 
+              state.mouse_over, state.code,
+              "How can I type check an empty code? haha"))
+          else 
             IO {
-              // TODO: check if state.code is not empty
               get checked = IO.request("http://localhost:3030/api/check_term?code=" | state.code)
               App.store!(Web.Playground.State.new(
                 state.device, state.window, 
@@ -111,8 +111,5 @@ Web.Playground: App(Web.Playground.State)
       onsubmit:
         App.pass
     } default App.pass
-  
-  // The application
+
   App.new!(init, draw, when)
-
-

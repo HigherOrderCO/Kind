@@ -61,5 +61,10 @@ type App.Event {
     id: String
     action: String
   )
+  input(
+    time: U64
+    id: String
+    text: String
+  )
 }
 
