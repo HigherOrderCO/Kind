@@ -1832,25 +1832,52 @@ module.exports = (function() {
                     };
                     var $321 = $323;
                     break;
-                case 'App.Event.mouse_over':
-                    var $328 = self.id;
-                    var $329 = App$store$(Web$Kind$set_mouse_over$($328, _state$4));
+                case 'App.Event.tick':
+                    var $328 = self.info;
+                    var self = $328;
+                    switch (self._) {
+                        case 'App.EnvInfo.new':
+                            var $330 = self.screen_size;
+                            var self = $330;
+                            switch (self._) {
+                                case 'Pair.new':
+                                    var $332 = self.fst;
+                                    var self = _state$4;
+                                    switch (self._) {
+                                        case 'Web.Kind.State.new':
+                                            var $334 = self.page;
+                                            var $335 = self.mouse_over;
+                                            var _device$14 = Device$classify$($332);
+                                            var $336 = App$store$(Web$Kind$State$new$(_device$14, $334, $335));
+                                            var $333 = $336;
+                                            break;
+                                    };
+                                    var $331 = $333;
+                                    break;
+                            };
+                            var $329 = $331;
+                            break;
+                    };
                     var $321 = $329;
                     break;
-                case 'App.Event.mouse_click':
-                    var $330 = self.id;
-                    var $331 = App$store$(Web$Kind$exe_event$($330, _state$4));
-                    var $321 = $331;
+                case 'App.Event.mouse_over':
+                    var $337 = self.id;
+                    var $338 = App$store$(Web$Kind$set_mouse_over$($337, _state$4));
+                    var $321 = $338;
                     break;
-                case 'App.Event.tick':
+                case 'App.Event.mouse_click':
+                    var $339 = self.id;
+                    var $340 = App$store$(Web$Kind$exe_event$($339, _state$4));
+                    var $321 = $340;
+                    break;
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_down':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.input':
-                    var $332 = App$pass;
-                    var $321 = $332;
+                    var $341 = App$pass;
+                    var $321 = $341;
                     break;
             };
             return $321;
