@@ -5,6 +5,8 @@ type Web.Kaelin.Entity {
   creature(
     player: Maybe(String)
     hero: Web.Kaelin.Hero
-    // hp: I32 // TODO
+    team: String
+    hp: I32
+    status: List<Web.Kaelin.Skill.Modifier.status>    
   )
 }

@@ -4,11 +4,10 @@
 // will the attributes of the heroes be placed here?
 type Web.Kaelin.Hero {
   new(
-    id: U8 // TODO: remove, use Name instead
-    // name: String // TODO: create
+    name: String // TODO: create
     img: VoxBox
-    health: I32 // TODO: move to Web.Kaelin.Entity.creature
-    skills: List<Web.Kaelin.Skill>
+    max_hp: I32 // TODO: move to Web.Kaelin.Entity.creature
+    // skills: List<Web.Kaelin.Skill>
   )
 }
 

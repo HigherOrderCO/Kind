@@ -9,6 +9,6 @@ Web.Kaelin.Resources.heroes: Map(Web.Kaelin.Hero)
 
   List.fold!(heroes)!({}, (hero, map) 
     open hero
-    map{U8.show(hero.id)} <- hero
+    map{U8.show(hero.name)} <- hero
   )
   
