@@ -3,7 +3,7 @@ Parser.append_error<V: Type>(parse: Parser(V), suff: String): Parser(V)
     let reply = parse(long, idx, code)
     case reply {
       error:
-        open reply.val
-        Parser.Reply.error_long!(reply.val.idx, reply.val.code, reply.val.err | suff)
+        open reply.err
+        Parser.Reply.error_long!(reply.err.idx, reply.err.code, reply.err.err | suff)
       value: reply
     }

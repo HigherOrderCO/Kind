@@ -1,9 +1,9 @@
 Kind.Defs.read(file: String, code: String, defs: Kind.Defs): Either<String, Kind.Defs>
   case Kind.Parser.file(file, code, defs, none, 0, code) as parsed {
     error:
-      open parsed.val
-      let err = parsed.val.err
-      let hig = Kind.Code.highlight(code, parsed.val.idx, Nat.succ(parsed.val.idx))
+      open parsed.err
+      let err = parsed.err.err
+      let hig = Kind.Code.highlight(code, parsed.err.idx, Nat.succ(parsed.err.idx))
       let str = String.flatten([err, "\n", hig])
       Either.left!!(str)
     value:

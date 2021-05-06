@@ -2,18 +2,18 @@ Kind.Parser.string.go(
   delim: Char,
   str: String,
 ): Parser<String>
-  (long, idx, code)
+  (err, idx, code)
   case code {
     nil:
       Parser.Reply.error_long<String>(idx, code, "Non-terminating string.")
     cons:
       if U16.eql(code.head, delim) then
-        Parser.Reply.value<String>(long, Nat.succ(idx), code.tail, String.reverse(str))
-      else case Kind.Parser.char.single(long, idx, code) as parsed {
+        Parser.Reply.value<String>(err, Nat.succ(idx), code.tail, String.reverse(str))
+      else case Kind.Parser.char.single(err, idx, code) as parsed {
         error:
-          Parser.Reply.error<String>(parsed.val)
+          Parser.Reply.error<String>(parsed.err)
         value:
-          Kind.Parser.string.go(delim, String.cons(parsed.val,str), long, parsed.idx, parsed.code)
+          Kind.Parser.string.go(delim, String.cons(parsed.val,str), err, parsed.idx, parsed.code)
       }
   }
 

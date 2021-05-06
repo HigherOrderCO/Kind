@@ -1,7 +1,7 @@
 Parser.text(text: String): Parser(Unit)
-  (long, idx, code) case Parser.text.go(text, long, idx, code) as reply {
+  (err, idx, code) case Parser.text.go(text, err, idx, code) as reply {
     error:
-      Parser.Reply.error<Unit>(reply.val),
+      Parser.Reply.error<Unit>(reply.err),
     value:
-      Parser.Reply.value<Unit>(reply.long, reply.idx, reply.code, reply.val),
+      Parser.Reply.value<Unit>(reply.err, reply.idx, reply.code, reply.val),
   }

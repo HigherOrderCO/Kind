@@ -1,5 +1,2 @@
 Parser(V: Type): Type
-  Maybe(Parser.ErrorAt) -> // error that got the furthest in the code
-                           // shouldn't be used inside a parser, only in monads,
-                           // this changes unpredictably
-  Nat -> String -> Parser.Reply<V>
+  Maybe(Parser.ErrorAt) -> Nat -> String -> Parser.Reply<V>

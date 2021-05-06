@@ -1,21 +1,21 @@
 Parser.first_of.go<A: Type>(pars: List<Parser(A)>): Parser(A)
-  (long, idx, code) 
+  (err, idx, code) 
     case pars {
       nil:
-        case long {
+        case err {
           none: Parser.Reply.error_long!(idx, code, "No parse.")
-          some: Parser.Reply.error!(long.value)
+          some: Parser.Reply.error!(err.value)
         }
       cons:
-        let parsed = pars.head(long, idx, code)
+        let parsed = pars.head(err, idx, code)
         case parsed {
           error:
-            curr_err = Maybe.some!(parsed.val)
-            open parsed.val
-            furthest_err = Parser.ErrorAt.maybe_combine(long, curr_err)
+            curr_err = Maybe.some!(parsed.err)
+            open parsed.err
+            furthest_err = Parser.ErrorAt.maybe_combine(err, curr_err)
             Parser.first_of.go!(pars.tail, furthest_err, idx, code)
           value:
-            furthest_err = Parser.ErrorAt.maybe_combine(long, parsed.long)
+            furthest_err = Parser.ErrorAt.maybe_combine(err, parsed.err)
             Parser.Reply.value!(furthest_err, parsed.idx, parsed.code, parsed.val)
         }
     }

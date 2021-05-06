@@ -33,9 +33,9 @@ Kind.Parser.suffix(init: Nat, term: Kind.Term): Parser(Kind.Term)
   ]);
   case suffix_parser(long, idx, code) as suffix_parsed {
     error:
-      open suffix_parsed.val
-      val = Parser.ErrorAt.maybe_combine(long, some(suffix_parsed.val))
+      open suffix_parsed.err
+      val = Parser.ErrorAt.maybe_combine(long, some(suffix_parsed.err))
       Parser.Reply.value!(val, idx, code, term),
     value: 
-      Kind.Parser.suffix(init, suffix_parsed.val, suffix_parsed.long, suffix_parsed.idx, suffix_parsed.code),
+      Kind.Parser.suffix(init, suffix_parsed.val, suffix_parsed.err, suffix_parsed.idx, suffix_parsed.code),
   }

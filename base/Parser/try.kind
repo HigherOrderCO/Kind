@@ -1,7 +1,7 @@
 Parser.try<V: Type>(parse: Parser(V)): Parser(Bool)
-  (long, idx, code) case parse(long, idx, code) as reply {
+  (err, idx, code) case parse(err, idx, code) as reply {
     error:
-      new_long = Parser.ErrorAt.maybe_combine(long, some(reply.val))
+      new_long = Parser.ErrorAt.maybe_combine(err, some(reply.err))
       Parser.Reply.value<Bool>(new_long, idx, code, false),
-    value: Parser.Reply.value<Bool>(long, idx, code, true),
+    value: Parser.Reply.value<Bool>(err, idx, code, true),
   }

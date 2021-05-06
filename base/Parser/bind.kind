@@ -1,15 +1,15 @@
 Parser.bind<A: Type, B: Type>(parse: Parser(A), next: A -> Parser(B)): Parser(B)
-  (long, idx, code)
-    reply = parse(long, idx, code)
+  (err, idx, code)
+    reply = parse(err, idx, code)
     case reply {
-      error: case long {
+      error: case err {
         none:
-          Parser.Reply.error<B>(reply.val),
+          Parser.Reply.error<B>(reply.err),
         some:
-          val = Parser.ErrorAt.combine(long.value, reply.val)
+          val = Parser.ErrorAt.combine(err.value, reply.err)
           Parser.Reply.error<B>(val)
       }
       value:
-        l = Parser.ErrorAt.maybe_combine(long, reply.long)
+        l = Parser.ErrorAt.maybe_combine(err, reply.err)
         next(reply.val, l, reply.idx, reply.code),
     }
