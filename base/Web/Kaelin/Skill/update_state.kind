@@ -1,0 +1,64 @@
+Web.Kaelin.Skill.update_state(
+state: Web.Kaelin.State,
+hero_pos: Web.Kaelin.Coord,
+target: Web.Kaelin.Coord,
+effect: Web.Kaelin.Skill.Effect, 
+): Web.Kaelin.State
+  case state {
+    game:
+    player = Web.Kaelin.Map.coord_to_address(target, state.map)
+        case effect { 
+          hp: 
+            case player{ 
+              none: state
+              some: 
+               let player.address = state.players{player.value}
+                case player.address { 
+                  none: state
+                  some:
+                    let new_hp = 
+                    Web.Kaelin.Skill.updated_player_hp(
+                    player.address.value, 
+                    effect.modifier,
+                    effect.value
+                    )
+                    let new_players_hp = Map.set!(player.value, new_hp, state.players)
+                    Web.Kaelin.State.game(state.user, state.room, new_players_hp, state.cast_info, state.map, state.internal, state.env_info)
+              }
+            }
+
+          position:
+                let new_map = 
+                Web.Kaelin.Skill.updated_player_position(
+                  state.map,
+                  hero_pos,
+                  target,
+                  effect.modifier,
+                  effect.value
+                  )
+          if Bool.not(Web.Kaelin.Map.is_occupied(target, state.map)) then
+                Web.Kaelin.State.game(state.user, state.room, state.players, state.cast_info, new_map, state.internal, state.env_info)
+          else
+            state
+
+          status:
+            case player{ 
+              none: state
+              some: 
+               let player.address = state.players{player.value}
+                case player.address { 
+                  none: state
+                  some:
+                let new_effect = 
+                Web.Kaelin.Skill.updated_player_status(
+                player.address.value,
+                effect.modifier,
+                effect.duration
+                )
+                let new_players_effect = Map.set!(player.value, new_effect, state.players)
+                Web.Kaelin.State.game(state.user, state.room, new_players_effect, state.cast_info, state.map, state.internal, state.env_info)
+        }
+      }
+    }
+  }default state
+

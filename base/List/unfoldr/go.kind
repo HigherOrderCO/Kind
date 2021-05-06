@@ -1,4 +1,4 @@
-List.unfoldr.go<A: Type, B: Type>(f: A -> Maybe(Pair(A,B)), a: A, bs: List(B)): List(B)
+List.unfoldr.go<A: Type, B: Type>(f: A -> Maybe<Pair<A,B>>, a: A, bs: List<B>): List<B>
   case f(a) as res {
     none: List.nil<B>,
     some: 

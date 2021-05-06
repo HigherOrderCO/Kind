@@ -1,0 +1,6 @@
+Word.count_ones.go<size: Nat>(word: Word(size), n: Nat): Nat
+  case word {
+    e: n,
+    o: Word.count_ones.go<word.size>(word.pred, n),
+    i: Word.count_ones.go<word.size>(word.pred, Nat.succ(n))
+  }: Nat

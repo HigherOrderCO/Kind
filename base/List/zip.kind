@@ -1,4 +1,4 @@
-List.zip<A: Type, B: Type>(as: List(A), bs: List(B)): List(Pair(A,B))
+List.zip<A: Type, B: Type>(as: List<A>, bs: List<B>): List<Pair<A,B>>
   case as {
     nil: List.nil!,
     cons: case bs {

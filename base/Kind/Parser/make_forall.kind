@@ -1,4 +1,4 @@
-Kind.Parser.make_forall(binds: List(Kind.Binder), body: Kind.Term): Kind.Term
+Kind.Parser.make_forall(binds: List<Kind.Binder>, body: Kind.Term): Kind.Term
   case binds {
     nil: body,
     cons: case binds.head {

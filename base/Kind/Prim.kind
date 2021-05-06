@@ -3,6 +3,6 @@ type Kind.Prim {
   nat,
   u16,
   string,
-  data(ctrs: List(Nat)),
+  data(ctrs: List<Nat>),
   //bits,
 }

@@ -1,4 +1,4 @@
-Kind.Code.escapes: List(Pair(String, Char))
+Kind.Code.escapes: List<Pair<String, Char>>
   [
     {"\\b" , '\b'},
     {"\\f" , '\f'},

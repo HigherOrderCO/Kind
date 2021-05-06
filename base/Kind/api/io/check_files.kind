@@ -1,10 +1,13 @@
-Kind.api.io.check_files(files: List<String>): IO(Unit)
+Kind.api.io.check_files(files: List<String>): IO<Unit>
   IO {
     get loaded = Kind.Synth.files(files, Kind.Map.new!)
     let nams = Pair.fst!!(loaded)
     let defs = Pair.snd!!(loaded)
     case nams {
       nil: IO.print("No valid Kind file found.")
-      cons: IO.print(Kind.Defs.report(defs, nams))
+      cons: IO {
+        IO.print(Kind.Defs.report(defs, nams))
+        Kind.Defs.cache(defs)
+      }
     }
   }

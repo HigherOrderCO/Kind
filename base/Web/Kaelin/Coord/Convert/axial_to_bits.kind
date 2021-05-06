@@ -1,0 +1,3 @@
+Web.Kaelin.Coord.Convert.axial_to_bits(x : Web.Kaelin.Coord) : Bits
+  let unique_nat = Web.Kaelin.Coord.Convert.axial_to_nat(x)
+  Nat.to_bits(unique_nat)

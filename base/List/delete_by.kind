@@ -1,4 +1,4 @@
-List.delete_by<A: Type>(p: A -> A -> Bool, a: A, as: List(A)): List(A)
+List.delete_by<A: Type>(p: A -> A -> Bool, a: A, as: List<A>): List<A>
   case as {
     nil : List.nil!,
     cons: case p(a, as.head) {

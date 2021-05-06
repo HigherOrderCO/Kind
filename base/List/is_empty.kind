@@ -1,4 +1,4 @@
-List.is_empty<A: Type>(list: List(A)): Bool
+List.is_empty<A: Type>(list: List<A>): Bool
   case list {
     nil: Bool.true,
     cons: Bool.false,

@@ -1,0 +1,6 @@
+Web.Kaelin.Event.Buffer.next(buffer : Web.Kaelin.Event.Buffer) : Web.Kaelin.Event.Buffer
+  open buffer
+  case buffer.snd as xs {
+      nil : buffer
+      cons : {String.drop(U8.to_nat(xs.head), buffer.fst), xs.tail}
+  }

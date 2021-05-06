@@ -1,4 +1,12 @@
 type Web.Kaelin.Entity {
-  background(img: VoxBox)
-  char(img: VoxBox)
+  background(
+    terrain: Web.Kaelin.Terrain
+  )
+  creature(
+    player: Maybe(String)
+    hero: Web.Kaelin.Hero
+    team: String
+    hp: I32
+    status: List<Web.Kaelin.Skill.Modifier.status>    
+  )
 }

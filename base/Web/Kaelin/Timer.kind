@@ -1,0 +1,3 @@
+type Web.Kaelin.Timer{
+  new(time : Nat, action : Web.Kaelin.State -> Web.Kaelin.State)
+} 

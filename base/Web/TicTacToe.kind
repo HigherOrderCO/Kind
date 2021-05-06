@@ -1,4 +1,4 @@
-Web.TicTacToe: App(List(List(String)))
+Web.TicTacToe: App<List<List<String>>>
 
   place_style = {
     "cursor": "pointer"
@@ -43,7 +43,7 @@ Web.TicTacToe: App(List(List(String)))
         let key = String.cons(event.code, String.nil)
         App.store!([[key,key,key],[key,key,key],[key,key,key]])
       }
-      dom: IO {
+      mouse_click: IO {
         let id = event.id
         App.store!([[id,id,id],[id,id,id],[id,id,id]])
       }

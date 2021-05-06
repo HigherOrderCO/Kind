@@ -1,5 +1,0 @@
-Web.Kaelin.Hero.octoking: Web.Kaelin.Hero
-  Web.Kaelin.Hero.new(
-    "0x00000004", 
-    Web.Kaelin.Entity.char(Kaelin.Assets.chars.octoking_d_1)
-  )

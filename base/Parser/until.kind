@@ -1,2 +1,2 @@
-Parser.until<V: Type>(until: Parser(Unit), parse: Parser(V)): Parser(List(V))
+Parser.until<V: Type>(until: Parser(Unit), parse: Parser(V)): Parser(List<V>)
   Parser.until.go<V>(until, parse, [])

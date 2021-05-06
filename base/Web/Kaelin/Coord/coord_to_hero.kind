@@ -1,0 +1,10 @@
+Web.Kaelin.Coord.coord_to_hero(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Maybe(Web.Kaelin.Hero)
+  let tile = Web.Kaelin.Map.get(coord, map) <> []
+  let heroi = none
+    for entity in tile with heroi:
+      case entity {
+      background: heroi
+      creature: some(entity.hero)              
+    }
+    heroi
+      

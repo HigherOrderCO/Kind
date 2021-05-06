@@ -1,4 +1,4 @@
-GMap.split_ltn<K: Type, V: Type>(cmp: K -> K-> Cmp, cut: K, map: GMap(K,V)): GMap(K,V)
+GMap.split_ltn<K: Type, V: Type>(cmp: K -> K-> Cmp, cut: K, map: GMap<K,V>): GMap<K,V>
   case map {
     tip: map,
     bin: case cmp(cut, map.key) {

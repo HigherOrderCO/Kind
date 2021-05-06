@@ -1,0 +1,57 @@
+equivalence (A : Type) (B : Type) (f : A -> B) (g : B -> A) : Type
+  self(x : A) g(f(x)) == Function.id(A, x)
+
+eqv (A : Type) (B : Type) : Type
+  Sigma(Pair<A -> B, B -> A>, (p) 
+  def f = Pair.fst(_, _, p)
+  def g = Pair.snd(_, _, p)
+  Pair<equivalence(A, B, f, g), equivalence(B, A, g, f)>)
+
+section(A : Type, B : Type, x : eqv(A, B)) : A -> B
+  let sigma = Sigma.fst(_, _, x)
+  Pair.fst(_, _, sigma)
+
+section_eq(A : Type, B : Type, x : Equal(_, A, B)) : A -> B
+   (y) case x with y {
+     refl : y
+   }!
+
+type Obligation (A : Type) ~ (B : Type) (i : B)  {
+  compromises(B : Type, j : A) ~ (B = A, i = j)
+}
+
+//axiom_k (A : Type, a : A, e : (a == a)) : e == Equal.refl(A, a)
+ //  let test = case e {
+   //  refl : Obligation.compromises(a == a, a == a, Equal.refl(A, a))
+  // } : case e  {
+  //     refl : Obligation(a == a, a == e.b, e)
+ //  } : Type
+ //  case Equal.refl(A, a) {
+//     refl : 
+ //      let t = test :: Obligation(a == a,a == a,e)
+ //      ?d
+ //  }
+   
+UPair(A: Type): Type
+  self(P: UPair(A) -> Type) ->
+  (make: (a: A) -> (b: A) -> P(UPair.make(A, a,b))) ->
+  (conv : (a: A) -> (b: A) -> Equal(_, P(UPair.make(A, a, b)), P(UPair.make(A, b, a))))
+  (swap: (a: A) -> (b: A) -> 
+    Equal(_, make(a, b), 
+      section_eq(P(UPair.make(A, b, a)), P(UPair.make(A, a, b)), conv(b, a), make(b, a))))
+   ->
+  P(self)
+
+UPair.make(A: Type, a: A, b: A): UPair(A)
+  (P, make, conv, swap) make(a, b)
+
+
+Web.Kaelin.App.test : String
+  let origin = Web.Kaelin.Coord.new(+0#32, -1#32)
+  let goal = Web.Kaelin.Coord.new(+3#32, -3#32)
+  let path = Web.Kaelin.Coord.path(origin, goal)
+  case path {
+    none : "none"
+    some : List.show!(Web.Kaelin.Coord.show, path.value)
+  }
+  

@@ -1,7 +1,7 @@
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   case dir {
-    right: Pos32.add(pos, Pos32.new(1u, 0u, 0u)),
-    up   : Pos32.sub(pos, Pos32.new(0u, 1u, 0u)),
-    left : Pos32.sub(pos, Pos32.new(1u, 0u, 0u)),
-    down : Pos32.add(pos, Pos32.new(0u, 1u, 0u))
+    right: Pos32.add(pos, Pos32.new(1#32, 0#32, 0#32)),
+    up   : Pos32.sub(pos, Pos32.new(0#32, 1#32, 0#32)),
+    left : Pos32.sub(pos, Pos32.new(1#32, 0#32, 0#32)),
+    down : Pos32.add(pos, Pos32.new(0#32, 1#32, 0#32))
   }

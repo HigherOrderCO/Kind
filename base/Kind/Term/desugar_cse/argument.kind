@@ -1,6 +1,6 @@
 Kind.Term.desugar_cse.argument(
   name: Kind.Name,
-  wyth: List(Kind.Ann),
+  wyth: List<Kind.Ann>,
   type: Kind.Term,
   body: Kind.Term,
   defs: Kind.Defs,

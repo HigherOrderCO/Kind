@@ -7,6 +7,7 @@ Kind.Code.escape.go(str: String, result: String): String
 Kind.Code.escape(str: String): String
   Kind.Code.escape.go(str, "")
 
+// TODO: avoid passing \\, \" and \' to core?
 Kind.Code.escape.char(chr: Char): String
   if U16.eql(chr, Kind.Code.backslash) then
     String.cons(Kind.Code.backslash, String.cons(chr, String.nil))

@@ -4,7 +4,7 @@ Nat.mul.distrib_left(a: Nat, b: Nat, c: Nat):
     zero: refl 
     succ: 
       let final = Equal.refl<_, (a + (a * b.pred)) + (a * c)>
-      let final2 = final :: rewrite x in x == (a + (a * b.pred)) + (a* c) with Nat.add.assoc(a, a*b.pred, a*c)
+      let final2 = final :: rewrite x in x == (a + (a * b.pred)) + (a * c) with Nat.add.assoc(a, a * b.pred, a * c)
       let f = final2 :: rewrite x in (a + x) == (a + (a * b.pred)) + (a*c) with mirror(Nat.mul.distrib_left(a, b.pred, c))
       f
   }!

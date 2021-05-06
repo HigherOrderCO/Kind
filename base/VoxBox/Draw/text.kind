@@ -7,7 +7,7 @@ VoxBox.Draw.text(
   let scr = 
     for pair in List.indices.u32!(String.to_list(txt)):
       let {i, chr} = pair
-      let add_pos = Pos32.new(U32.mul(i,6u), 0u, 0u)
+      let add_pos = Pos32.new(U32.mul(i,6#32), 0#32, 0#32)
       VoxBox.Draw.text.char(chr, font_map, Pos32.add(pos, add_pos), scr)
   scr
 

@@ -7,8 +7,8 @@ Kind.Constructor.build_term.go(
   type: Kind.Datatype,
   ctor: Kind.Constructor,
   name: Kind.Name,
-  pars: List(Kind.Binder),
-  args: List(Kind.Binder),
+  pars: List<Kind.Binder>,
+  args: List<Kind.Binder>,
 ): Kind.Term
   case pars {
     cons: case pars.head {
@@ -38,7 +38,7 @@ Kind.Constructor.build_term.opt(type: Kind.Datatype, ctor: Kind.Constructor): Ki
 Kind.Constructor.build_term.opt.go(
   type: Kind.Datatype,
   ctor: Kind.Constructor,
-  ctrs: List(Kind.Constructor),
+  ctrs: List<Kind.Constructor>,
 ): Kind.Term
   case ctrs {
     cons: case ctrs.head {

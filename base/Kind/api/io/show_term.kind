@@ -1,5 +1,5 @@
 // TODO: remove duplicate code on Kind/api/io/check_term.kind
-Kind.api.io.show_term(name: String): IO(Unit)
+Kind.api.io.show_term(name: String): IO<Unit>
   IO {
     get new_defs = Kind.Synth.one(name, Kind.Map.new!)
     IO.print(case new_defs {

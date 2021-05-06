@@ -2,8 +2,8 @@ GMap.adjust_with_key<K: Type, V: Type>(
   cmp : K -> K -> Cmp,
   f   : K -> V -> V, 
   k   : K, 
-  map : GMap(K,V) 
-) : GMap(K,V)
+  map : GMap<K,V> 
+) : GMap<K,V>
   case map {
    tip: map,
    bin:  

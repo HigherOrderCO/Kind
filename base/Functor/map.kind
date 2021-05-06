@@ -1,3 +1,3 @@
-Functor.map<F: Type -> Type>(f: Functor(F)): <A: Type, B: Type> -> (A -> B) -> F(A) -> F(B)
+Functor.map<F: Type -> Type>(f: Functor<F>): <A: Type, B: Type> -> (A -> B) -> F(A) -> F(B)
   open f
   f.map

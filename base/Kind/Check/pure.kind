@@ -1,2 +1,2 @@
-Kind.Check.pure<V: Type>(value: V): Kind.Check(V)
+Kind.Check.pure<V: Type>(value: V): Kind.Check<V>
   Kind.Check.result<V>(Maybe.some<V>(value), [])

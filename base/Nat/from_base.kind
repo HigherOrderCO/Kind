@@ -1,2 +1,2 @@
-Nat.from_base(base: Nat, ds: List(Nat)) : Nat
+Nat.from_base(base: Nat, ds: List<Nat>) : Nat
   Nat.from_base.go(base, List.reverse!(ds),1,0)

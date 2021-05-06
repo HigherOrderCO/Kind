@@ -1,0 +1,10 @@
+append_2_go(x : Nat, y : Nat, z : Nat) : Nat
+  let shift1_Nat = ((x) Bits.to_nat(Bits.shift_right(1, Nat.to_bits(x)))) :: Nat -> Nat
+  let n = Nat.mul(2, Nat.mod(x, 2))
+  let z = Nat.add(z, 1)
+  if (Nat.gtn(x, 0)) then append_2_go(shift1_Nat(x), Nat.add(y, Nat.pow(n, z)), z)
+  else
+    y
+
+Nat.append_2(b : Nat, x : Nat, y : Nat): Nat
+  append_2_go(x, y, b)

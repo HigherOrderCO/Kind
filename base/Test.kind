@@ -1,11 +1,12 @@
 Test: _
-  // Web.Kaelin.Coord.show(Web.Kaelin.Coord.to_axial({144u, 136u}))
-  let n1 = Bits.from_string("001101")
-  let n2 = Bits.from_string("000111")
-  let n3 = Bits.shift_right(4, n1)
-  let n5 = Bits.shift_right(4, n3)
-  let n4 = Bits.mask(n1, n2)
-  List.show!(Bits.to_string, asd(Bits.from_string("00010010001101000101011000101000")))
+  let nums = NatMap.new!
+  let nums = NatMap.set!(1, unit, nums)
+  let nums = NatMap.set!(2, unit, nums)
+  let nums = NatMap.set!(3, unit, nums)
+  let nums = NatMap.set!(4, unit, nums)
+  let nums = NatMap.set!(5, unit, nums)
+  let nums = NatMap.set!(6, unit, nums)
+  NatMap.get!(3, nums)
 
 asd(b: Bits): List(Bits)
   let aux = Bits.mask(b, Bits.from_string("1111"))
@@ -13,3 +14,41 @@ asd(b: Bits): List(Bits)
   case tail {
     e: List.nil!
   } default List.cons!(aux, asd(tail))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Test.main: IO(Unit)
+  //Kind.api.io.check_file("./Kind/api/export.kind")
+
+//Test: IO(Unit)
+  //IO {
+    //let name = "Test.main"
+    //IO.print("Compiling "|name|" to Scheme...")
+    //get defs = Kind.Synth.one(name, Kind.Map.new!)
+    //case defs {
+      //none: IO.print("Something is wrong.")
+      //some: IO {
+        //let defs = Kind.Comp.Defs.compile(defs.value)
+        //let file = Kind.Comp.Target.Scheme(name, defs)
+        ////IO.print(file)
+        //IO.set_file("./main.scm", file)
+      //}
+    //}
+  //}

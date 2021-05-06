@@ -1,2 +1,2 @@
-Either.monad<A: Type>: Monad(Either(A))
-  Monad.new<Either(A)>(Either.bind<A>, Either.right<A>)
+Either.monad<A: Type>: Monad<Either<A>>
+  Monad.new<Either<A>>(Either.bind<A>, Either.right<A>)

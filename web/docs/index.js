@@ -2889,6 +2889,7 @@ const h = __webpack_require__(86).h;
 const apps = __webpack_require__(649);
 const sign = __webpack_require__(216);
 const utils = __webpack_require__(555);
+const DEBUG_SHOW_FPS = false;
 
 module.exports = class AppPlay extends Component {
 
@@ -2943,13 +2944,13 @@ module.exports = class AppPlay extends Component {
     this.register_event({
       _: "App.Event.init",
       time: BigInt(0),
-      user: sign.addressFromKey(KEY),
+      user: sign.addressFromKey(KEY).toLowerCase(),
       info: {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: this.container ? this.container.offsetWidth : 0,
-          snd: this.container ? this.container.offsetHeight : 0,
+          fst: window.innerWidth, // this.container ? this.container.offsetWidth : 0,
+          snd: window.innerHeight // this.container ? this.container.offsetHeight : 0,
         },
         mouse_pos: this.mouse_pos,
       }
@@ -2970,6 +2971,33 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("mousedown", this.listeners.mousedown);
+
+    this.listeners.mouseover = (e) => {
+      this.register_event({
+        _: "App.Event.mouse_over",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("mouseover", this.listeners.mouseover); 
+
+    this.listeners.mouseover = (e) => {
+      this.register_event({
+        _: "App.Event.mouse_out",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("mouseout", this.listeners.mouseout);
+
+    this.listeners.click = (e) => {
+      this.register_event({
+        _: "App.Event.mouse_click",
+        time: BigInt(Date.now()),
+        id: e.target.id
+      });
+    };
+    document.body.addEventListener("click", this.listeners.click); 
 
     // Mouse up event
     this.listeners.mouseup = (e) => {
@@ -3002,6 +3030,24 @@ module.exports = class AppPlay extends Component {
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
 
+    // Resize event
+    this.listeners.resize = (e) => {
+      this.register_event({
+        _: "App.Event.resize",
+        time: BigInt(Date.now()),
+        info: {
+          _: "App.EnvInfo.new",
+          screen_size: {
+            _: "Pair.new",
+            fst: e.target.innerWidth,
+            snd: e.target.innerHeight,
+          },
+          mouse_pos: this.mouse_pos,
+        }
+      });
+    };
+    window.addEventListener("resize", this.listeners.resize);
+
     //Tick event
     this.intervals.tick = () => {
       let time = performance.now()
@@ -3032,10 +3078,22 @@ module.exports = class AppPlay extends Component {
   }
   
   // Initializes the main render loop
+  
   async init_renderer() {
-    //console.log("to aqui!");
+    if (DEBUG_SHOW_FPS) {
+      var last_time = Date.now();
+      var fps_count = 0;
+    }
     this.intervals.renderer = setInterval(() => {
       if (this.app) {
+        if (DEBUG_SHOW_FPS) {
+          if (Date.now() - last_time > 1000) {
+            console.log("FPS: ", fps_count);
+            fps_count = 0;
+            last_time = Date.now();
+          }
+          fps_count++;
+        }
         this.rendered = this.app.draw(this.app_state);
         this.forceUpdate();
       }
@@ -3093,7 +3151,7 @@ module.exports = class AppPlay extends Component {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
                   var time = BigInt(parseInt(time.slice(2), 16));
-                  this.register_event({ _: "App.Event.post", time, room, addr, data });
+                  this.register_event({ _: "App.Event.post", time, room, addr : addr.toLowerCase(), data });
                 });
               } else {
                 console.log("Error: invalid input on App.Action.watch");
@@ -3123,16 +3181,7 @@ module.exports = class AppPlay extends Component {
         let style = utils.map_to_object(elem.style);
         return h(elem.tag, {
           ...props,
-          style: style,
-          onclick: (e) => {
-            if (props.id !== undefined) {
-              this.register_event({
-                _: "App.Event.dom",
-                id: props.id,
-                time: BigInt(Date.now()),
-              });
-            }
-          },
+          style: style
         }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":
@@ -3233,7 +3282,7 @@ module.exports = class AppPlay extends Component {
 module.exports = {
   'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
   'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
-  'Web.KindWebsite': __webpack_require__.e(/* import() */ 870).then(__webpack_require__.t.bind(__webpack_require__, 870, 23)),
+  'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),
   'Web.Online': __webpack_require__.e(/* import() */ 523).then(__webpack_require__.t.bind(__webpack_require__, 523, 23)),
   'Web.Senhas': __webpack_require__.e(/* import() */ 936).then(__webpack_require__.t.bind(__webpack_require__, 936, 23)),
   'Web.TicTacToe': __webpack_require__.e(/* import() */ 734).then(__webpack_require__.t.bind(__webpack_require__, 734, 23)),

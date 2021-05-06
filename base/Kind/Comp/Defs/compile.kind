@@ -1,0 +1,18 @@
+// Compile many defs to a target language
+Kind.Comp.Defs.compile(defs: Kind.Defs): Kind.Comp.Defs
+  let defs = BitsMap.map!!((x) Kind.Comp.Defs.compile.defn.adjust(x,defs), defs)
+  let defs = BitsMap.map!!((x) Kind.Comp.Defs.compile.defn(x,defs), defs)
+  defs
+
+// Inlines definitions
+Kind.Comp.Defs.compile.defn.adjust(defn: Kind.Def, defs: Kind.Defs): Kind.Def
+  open defn
+  let term = Kind.Term.inline(defn.term, defs);
+  let type = Kind.Term.inline(defn.type, defs);
+  Kind.Def.new(defn.file, defn.code, defn.orig, defn.name, term, type, defn.isct, defn.arit, defn.stat)
+
+// Compiles to Comp
+Kind.Comp.Defs.compile.defn(defn: Kind.Def, defs: Kind.Defs): Kind.Comp
+  open defn
+  let {comp,type} = Kind.Comp.compile(defn.term, some(defn.type), defs, 0)
+  comp

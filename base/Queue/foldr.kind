@@ -1,4 +1,4 @@
-Queue.foldr<A: Type, B: Type>(b: B, f: A -> B -> B, q: Queue(A)): B 
+Queue.foldr<A: Type, B: Type>(b: B, f: A -> B -> B, q: Queue<A>): B 
   open q
   let as_list = List.concat<A>(q.front, List.reverse<A>(q.rear))
   List.foldr<A,B>(b, f, as_list)

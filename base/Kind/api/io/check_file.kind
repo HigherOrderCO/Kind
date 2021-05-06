@@ -1,4 +1,4 @@
-Kind.api.io.check_file(file: String): IO(Unit)
+Kind.api.io.check_file(file: String): IO<Unit>
   IO {
     get loaded = Kind.Synth.file(file, Kind.Map.new!)
     case loaded {
@@ -12,7 +12,10 @@ Kind.api.io.check_file(file: String): IO(Unit)
           let defs = loaded.value.snd
           case nams {
             nil: IO.print("File not found or empty: '" | file | "'.")
-            cons: IO.print(Kind.Defs.report(defs, nams))
+            cons: IO {
+              IO.print(Kind.Defs.report(defs, nams))
+              Kind.Defs.cache(defs)
+            }
           }
         }
       }

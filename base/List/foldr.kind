@@ -1,2 +1,2 @@
-List.foldr<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List(A)): B
+List.foldr<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List<A>): B
   List.fold<A>(xs)<B>(b,f)

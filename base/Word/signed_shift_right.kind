@@ -1,0 +1,5 @@
+Word.signed_shift_right<size: Nat>(n: Nat, value: Word(size)): Word(size)
+  case n {
+    zero: value,
+    succ: Word.signed_shift_right<size>(n.pred, Word.signed_shift_right.one<size>(value))
+  }: Word(size)

@@ -1,4 +1,4 @@
-BitsMap.fold<A: Type>(map: BitsMap(A)): <P: Type> -> P -> (Maybe(A) -> P -> P -> P) -> P
+BitsMap.fold<A: Type>(map: BitsMap<A>): <P: Type> -> P -> (Maybe<A> -> P -> P -> P) -> P
   <P> (new, tie)
   case map {
     new: new,

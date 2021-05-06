@@ -5,8 +5,8 @@ Kind.Defs.core(defs: Kind.Defs): String
     case defn.stat {
       done:
         let name = defn.name
-        let term = Kind.Core.show(defn.term, 0, [])
-        let type = Kind.Core.show(defn.type, 0, [])
+        let term = Kind.Core.show(defn.term)
+        let type = Kind.Core.show(defn.type)
         String.flatten([result, name, " : ", type, " = ", term, ";\n"])
   } default result
   result

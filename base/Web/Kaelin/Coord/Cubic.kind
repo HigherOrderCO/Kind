@@ -1,3 +1,3 @@
 type Web.Kaelin.Coord.Cubic {
-    new(x:Int, y:Int, z:Int)
+    new(x:I32, y:I32, z:I32)
 }

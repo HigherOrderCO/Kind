@@ -1,4 +1,4 @@
-Maybe.or<A: Type>(a: Maybe(A), b: Maybe(A)): Maybe(A)
+Maybe.or<A: Type>(a: Maybe<A>, b: Maybe<A>): Maybe<A>
   case a {
     none: b,
     some: Maybe.some!(a.value),

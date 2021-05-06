@@ -125,6 +125,86 @@ module.exports = (function() {
     function buffer32_to_depth(b) {
         return BigInt(Math.log(b.length) / Math.log(2));
     };
+    var bitsmap_new = {
+        _: 'BitsMap.new'
+    };
+    var bitsmap_tie = function(val, lft, rgt) {
+        return {
+            _: 'BitsMap.tip',
+            val,
+            lft,
+            rgt
+        };
+    }
+    var maybe_none = {
+        _: 'Maybe.none'
+    };
+    var maybe_some = function(value) {
+        return {
+            _: 'Maybe.some',
+            value
+        };
+    }
+    var bitsmap_get = function(bits, map) {
+        for (var i = bits.length - 1; i >= 0; --i) {
+            if (map._ !== 'BitsMap.new') {
+                map = bits[i] === '0' ? map.lft : map.rgt;
+            }
+        }
+        return map._ === 'BitsMap.new' ? maybe_none : map.val;
+    }
+    var bitsmap_set = function(bits, val, map, mode) {
+        var res = {
+            value: map
+        };
+        var key = 'value';
+        var obj = res;
+        for (var i = bits.length - 1; i >= 0; --i) {
+            var map = obj[key];
+            if (map._ === 'BitsMap.new') {
+                obj[key] = {
+                    _: 'BitsMap.tie',
+                    val: maybe_none,
+                    lft: bitsmap_new,
+                    rgt: bitsmap_new
+                };
+            } else {
+                obj[key] = {
+                    _: 'BitsMap.tie',
+                    val: map.val,
+                    lft: map.lft,
+                    rgt: map.rgt
+                };
+            }
+            obj = obj[key];
+            key = bits[i] === '0' ? 'lft' : 'rgt';
+        }
+        var map = obj[key];
+        if (map._ === 'BitsMap.new') {
+            var x = mode === 'del' ? maybe_none : {
+                _: 'Maybe.some',
+                value: val
+            };
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: x,
+                lft: bitsmap_new,
+                rgt: bitsmap_new
+            };
+        } else {
+            var x = mode === 'set' ? {
+                _: 'Maybe.some',
+                value: val
+            } : mode === 'del' ? maybe_none : map.val;
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: x,
+                lft: map.lft,
+                rgt: map.rgt
+            };
+        }
+        return res.value;
+    };
     const inst_unit = x => x(null);
     const elim_unit = (x => {
         var $1 = (() => c0 => {
@@ -142,10 +222,10 @@ module.exports = (function() {
         var $4 = (() => c0 => c1 => {
             var self = x;
             if (self) {
-                var $2 = c2;
+                var $2 = c0;
                 return $2;
             } else {
-                var $3 = c2;
+                var $3 = c1;
                 return $3;
             };
         })();
@@ -156,11 +236,11 @@ module.exports = (function() {
         var $8 = (() => c0 => c1 => {
             var self = x;
             if (self === 0n) {
-                var $5 = c2;
+                var $5 = c0;
                 return $5;
             } else {
                 var $6 = (self - 1n);
-                var $7 = c2($6);
+                var $7 = c1($6);
                 return $7;
             };
         })();
@@ -230,12 +310,12 @@ module.exports = (function() {
         var $28 = (() => c0 => c1 => {
             var self = x;
             if (self.length === 0) {
-                var $24 = c2;
+                var $24 = c0;
                 return $24;
             } else {
                 var $25 = self.charCodeAt(0);
                 var $26 = self.slice(1);
-                var $27 = c2($25)($26);
+                var $27 = c1($25)($26);
                 return $27;
             };
         })();
@@ -293,66 +373,7 @@ module.exports = (function() {
     const Maybe$none = ({
         _: 'Maybe.none'
     });
-
-    function BitsMap$set$(_bits$2, _val$3, _map$4) {
-        var self = _bits$2;
-        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
-            case 'o':
-                var $38 = self.slice(0, -1);
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $40 = self.val;
-                        var $41 = self.lft;
-                        var $42 = self.rgt;
-                        var $43 = BitsMap$tie$($40, BitsMap$set$($38, _val$3, $41), $42);
-                        var $39 = $43;
-                        break;
-                    case 'BitsMap.new':
-                        var $44 = BitsMap$tie$(Maybe$none, BitsMap$set$($38, _val$3, BitsMap$new), BitsMap$new);
-                        var $39 = $44;
-                        break;
-                };
-                var $37 = $39;
-                break;
-            case 'i':
-                var $45 = self.slice(0, -1);
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $47 = self.val;
-                        var $48 = self.lft;
-                        var $49 = self.rgt;
-                        var $50 = BitsMap$tie$($47, $48, BitsMap$set$($45, _val$3, $49));
-                        var $46 = $50;
-                        break;
-                    case 'BitsMap.new':
-                        var $51 = BitsMap$tie$(Maybe$none, BitsMap$new, BitsMap$set$($45, _val$3, BitsMap$new));
-                        var $46 = $51;
-                        break;
-                };
-                var $37 = $46;
-                break;
-            case 'e':
-                var self = _map$4;
-                switch (self._) {
-                    case 'BitsMap.tie':
-                        var $53 = self.lft;
-                        var $54 = self.rgt;
-                        var $55 = BitsMap$tie$(Maybe$some$(_val$3), $53, $54);
-                        var $52 = $55;
-                        break;
-                    case 'BitsMap.new':
-                        var $56 = BitsMap$tie$(Maybe$some$(_val$3), BitsMap$new, BitsMap$new);
-                        var $52 = $56;
-                        break;
-                };
-                var $37 = $52;
-                break;
-        };
-        return $37;
-    };
-    const BitsMap$set = x0 => x1 => x2 => BitsMap$set$(x0, x1, x2);
+    const BitsMap$set = a0 => a1 => a2 => (bitsmap_set(a0, a1, a2, 'set'));
     const Bits$e = '';
     const Bits$o = a0 => (a0 + '0');
     const Bits$i = a0 => (a0 + '1');
@@ -362,27 +383,27 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $58 = self.pred;
-                var $59 = (Word$to_bits$($58) + '0');
-                var $57 = $59;
+                var $38 = self.pred;
+                var $39 = (Word$to_bits$($38) + '0');
+                var $37 = $39;
                 break;
             case 'Word.i':
-                var $60 = self.pred;
-                var $61 = (Word$to_bits$($60) + '1');
-                var $57 = $61;
+                var $40 = self.pred;
+                var $41 = (Word$to_bits$($40) + '1');
+                var $37 = $41;
                 break;
             case 'Word.e':
-                var $62 = Bits$e;
-                var $57 = $62;
+                var $42 = Bits$e;
+                var $37 = $42;
                 break;
         };
-        return $57;
+        return $37;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
 
     function Nat$succ$(_pred$1) {
-        var $63 = 1n + _pred$1;
-        return $63;
+        var $43 = 1n + _pred$1;
+        return $43;
     };
     const Nat$succ = x0 => Nat$succ$(x0);
     const Nat$zero = 0n;
@@ -391,15 +412,15 @@ module.exports = (function() {
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $65 = Bits$e;
-            var $64 = $65;
+            var $45 = Bits$e;
+            var $44 = $45;
         } else {
-            var $66 = self.charCodeAt(0);
-            var $67 = self.slice(1);
-            var $68 = (String$to_bits$($67) + (u16_to_bits($66)));
-            var $64 = $68;
+            var $46 = self.charCodeAt(0);
+            var $47 = self.slice(1);
+            var $48 = (String$to_bits$($47) + (u16_to_bits($46)));
+            var $44 = $48;
         };
-        return $64;
+        return $44;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -407,51 +428,51 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $70 = self.head;
-                var $71 = self.tail;
-                var self = $70;
+                var $50 = self.head;
+                var $51 = self.tail;
+                var self = $50;
                 switch (self._) {
                     case 'Pair.new':
-                        var $73 = self.fst;
-                        var $74 = self.snd;
-                        var $75 = BitsMap$set$(String$to_bits$($73), $74, Map$from_list$($71));
-                        var $72 = $75;
+                        var $53 = self.fst;
+                        var $54 = self.snd;
+                        var $55 = (bitsmap_set(String$to_bits$($53), $54, Map$from_list$($51), 'set'));
+                        var $52 = $55;
                         break;
                 };
-                var $69 = $72;
+                var $49 = $52;
                 break;
             case 'List.nil':
-                var $76 = BitsMap$new;
-                var $69 = $76;
+                var $56 = BitsMap$new;
+                var $49 = $56;
                 break;
         };
-        return $69;
+        return $49;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
 
     function List$cons$(_head$2, _tail$3) {
-        var $77 = ({
+        var $57 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $77;
+        return $57;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
 
     function Pair$(_A$1, _B$2) {
-        var $78 = null;
-        return $78;
+        var $58 = null;
+        return $58;
     };
     const Pair = x0 => x1 => Pair$(x0, x1);
 
     function Pair$new$(_fst$3, _snd$4) {
-        var $79 = ({
+        var $59 = ({
             _: 'Pair.new',
             'fst': _fst$3,
             'snd': _snd$4
         });
-        return $79;
+        return $59;
     };
     const Pair$new = x0 => x1 => Pair$new$(x0, x1);
     const List$nil = ({
@@ -459,8 +480,8 @@ module.exports = (function() {
     });
 
     function List$(_A$1) {
-        var $80 = null;
-        return $80;
+        var $60 = null;
+        return $60;
     };
     const List = x0 => List$(x0);
 
@@ -468,22 +489,22 @@ module.exports = (function() {
         var self = _m$2;
         switch (self._) {
             case 'Maybe.some':
-                var $82 = self.value;
-                var $83 = $82;
-                var $81 = $83;
+                var $62 = self.value;
+                var $63 = $62;
+                var $61 = $63;
                 break;
             case 'Maybe.none':
-                var $84 = _a$3;
-                var $81 = $84;
+                var $64 = _a$3;
+                var $61 = $64;
                 break;
         };
-        return $81;
+        return $61;
     };
     const Maybe$default = x0 => x1 => Maybe$default$(x0, x1);
 
     function Maybe$(_A$1) {
-        var $85 = null;
-        return $85;
+        var $65 = null;
+        return $65;
     };
     const Maybe = x0 => Maybe$(x0);
 
@@ -500,21 +521,21 @@ module.exports = (function() {
                 var self = _list$3;
                 switch (self._) {
                     case 'List.cons':
-                        var $86 = self.head;
-                        var $87 = self.tail;
+                        var $66 = self.head;
+                        var $67 = self.tail;
                         var self = _index$2;
                         if (self === 0n) {
-                            var $89 = Maybe$some$($86);
-                            var $88 = $89;
+                            var $69 = Maybe$some$($66);
+                            var $68 = $69;
                         } else {
-                            var $90 = (self - 1n);
-                            var $91 = List$get$($90, $87);
-                            var $88 = $91;
+                            var $70 = (self - 1n);
+                            var $71 = List$get$($70, $67);
+                            var $68 = $71;
                         };
-                        return $88;
+                        return $68;
                     case 'List.nil':
-                        var $92 = Maybe$none;
-                        return $92;
+                        var $72 = Maybe$none;
+                        return $72;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -524,29 +545,29 @@ module.exports = (function() {
     const List$get = x0 => x1 => List$get$(x0, x1);
 
     function DOM$node$(_tag$1, _props$2, _style$3, _children$4) {
-        var $93 = ({
+        var $73 = ({
             _: 'DOM.node',
             'tag': _tag$1,
             'props': _props$2,
             'style': _style$3,
             'children': _children$4
         });
-        return $93;
+        return $73;
     };
     const DOM$node = x0 => x1 => x2 => x3 => DOM$node$(x0, x1, x2, x3);
 
     function DOM$text$(_value$1) {
-        var $94 = ({
+        var $74 = ({
             _: 'DOM.text',
             'value': _value$1
         });
-        return $94;
+        return $74;
     };
     const DOM$text = x0 => DOM$text$(x0);
 
     function String$cons$(_head$1, _tail$2) {
-        var $95 = (String.fromCharCode(_head$1) + _tail$2);
-        return $95;
+        var $75 = (String.fromCharCode(_head$1) + _tail$2);
+        return $75;
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
@@ -564,13 +585,13 @@ module.exports = (function() {
                 var self = _xs$1;
                 switch (self._) {
                     case 'List.cons':
-                        var $96 = self.head;
-                        var $97 = self.tail;
-                        var $98 = String$flatten$go$($97, (_res$2 + $96));
-                        return $98;
+                        var $76 = self.head;
+                        var $77 = self.tail;
+                        var $78 = String$flatten$go$($77, (_res$2 + $76));
+                        return $78;
                     case 'List.nil':
-                        var $99 = _res$2;
-                        return $99;
+                        var $79 = _res$2;
+                        return $79;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -580,14 +601,14 @@ module.exports = (function() {
     const String$flatten$go = x0 => x1 => String$flatten$go$(x0, x1);
 
     function String$flatten$(_xs$1) {
-        var $100 = String$flatten$go$(_xs$1, "");
-        return $100;
+        var $80 = String$flatten$go$(_xs$1, "");
+        return $80;
     };
     const String$flatten = x0 => String$flatten$(x0);
 
     function List$pure$(_x$2) {
-        var $101 = List$cons$(_x$2, List$nil);
-        return $101;
+        var $81 = List$cons$(_x$2, List$nil);
+        return $81;
     };
     const List$pure = x0 => List$pure$(x0);
 
@@ -595,33 +616,33 @@ module.exports = (function() {
         var self = _xs$3;
         switch (self._) {
             case 'List.cons':
-                var $103 = self.head;
-                var $104 = self.tail;
-                var self = $104;
+                var $83 = self.head;
+                var $84 = self.tail;
+                var self = $84;
                 switch (self._) {
                     case 'List.nil':
-                        var $106 = List$pure$($103);
-                        var $105 = $106;
+                        var $86 = List$pure$($83);
+                        var $85 = $86;
                         break;
                     case 'List.cons':
-                        var $107 = List$cons$($103, List$cons$(_sep$2, List$intersperse$(_sep$2, $104)));
-                        var $105 = $107;
+                        var $87 = List$cons$($83, List$cons$(_sep$2, List$intersperse$(_sep$2, $84)));
+                        var $85 = $87;
                         break;
                 };
-                var $102 = $105;
+                var $82 = $85;
                 break;
             case 'List.nil':
-                var $108 = List$nil;
-                var $102 = $108;
+                var $88 = List$nil;
+                var $82 = $88;
                 break;
         };
-        return $102;
+        return $82;
     };
     const List$intersperse = x0 => x1 => List$intersperse$(x0, x1);
 
     function String$intercalate$(_sep$1, _xs$2) {
-        var $109 = String$flatten$(List$intersperse$(_sep$1, _xs$2));
-        return $109;
+        var $89 = String$flatten$(List$intersperse$(_sep$1, _xs$2));
+        return $89;
     };
     const String$intercalate = x0 => x1 => String$intercalate$(x0, x1);
 
@@ -629,23 +650,23 @@ module.exports = (function() {
         var self = _as$4;
         switch (self._) {
             case 'List.cons':
-                var $111 = self.head;
-                var $112 = self.tail;
-                var $113 = List$cons$(_f$3($111), List$map$(_f$3, $112));
-                var $110 = $113;
+                var $91 = self.head;
+                var $92 = self.tail;
+                var $93 = List$cons$(_f$3($91), List$map$(_f$3, $92));
+                var $90 = $93;
                 break;
             case 'List.nil':
-                var $114 = List$nil;
-                var $110 = $114;
+                var $94 = List$nil;
+                var $90 = $94;
                 break;
         };
-        return $110;
+        return $90;
     };
     const List$map = x0 => x1 => List$map$(x0, x1);
 
     function List$show$(_f$2, _xs$3) {
-        var $115 = String$flatten$(List$cons$("[", List$cons$(String$intercalate$(",", List$map$(_f$2, _xs$3)), List$cons$("]", List$nil))));
-        return $115;
+        var $95 = String$flatten$(List$cons$("[", List$cons$(String$intercalate$(",", List$map$(_f$2, _xs$3)), List$cons$("]", List$nil))));
+        return $95;
     };
     const List$show = x0 => x1 => List$show$(x0, x1);
     const Bool$false = false;
@@ -654,50 +675,50 @@ module.exports = (function() {
         var self = _list$2;
         switch (self._) {
             case 'List.cons':
-                var $117 = self.head;
-                var $118 = self.tail;
-                var $119 = String$flatten$(List$cons$((() => {
+                var $97 = self.head;
+                var $98 = self.tail;
+                var $99 = String$flatten$(List$cons$((() => {
                     var self = _fst$3;
                     if (self) {
-                        var $120 = "";
-                        return $120;
+                        var $100 = "";
+                        return $100;
                     } else {
-                        var $121 = _sep$1;
-                        return $121;
+                        var $101 = _sep$1;
+                        return $101;
                     };
-                })(), List$cons$($117, List$cons$(String$join$go$(_sep$1, $118, Bool$false), List$nil))));
-                var $116 = $119;
+                })(), List$cons$($97, List$cons$(String$join$go$(_sep$1, $98, Bool$false), List$nil))));
+                var $96 = $99;
                 break;
             case 'List.nil':
-                var $122 = "";
-                var $116 = $122;
+                var $102 = "";
+                var $96 = $102;
                 break;
         };
-        return $116;
+        return $96;
     };
     const String$join$go = x0 => x1 => x2 => String$join$go$(x0, x1, x2);
     const Bool$true = true;
 
     function String$join$(_sep$1, _list$2) {
-        var $123 = String$join$go$(_sep$1, _list$2, Bool$true);
-        return $123;
+        var $103 = String$join$go$(_sep$1, _list$2, Bool$true);
+        return $103;
     };
     const String$join = x0 => x1 => String$join$(x0, x1);
 
     function IO$(_A$1) {
-        var $124 = null;
-        return $124;
+        var $104 = null;
+        return $104;
     };
     const IO = x0 => IO$(x0);
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $125 = ({
+        var $105 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $125;
+        return $105;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -705,72 +726,72 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $127 = self.value;
-                var $128 = _f$4($127);
-                var $126 = $128;
+                var $107 = self.value;
+                var $108 = _f$4($107);
+                var $106 = $108;
                 break;
             case 'IO.ask':
-                var $129 = self.query;
-                var $130 = self.param;
-                var $131 = self.then;
-                var $132 = IO$ask$($129, $130, (_x$8 => {
-                    var $133 = IO$bind$($131(_x$8), _f$4);
-                    return $133;
+                var $109 = self.query;
+                var $110 = self.param;
+                var $111 = self.then;
+                var $112 = IO$ask$($109, $110, (_x$8 => {
+                    var $113 = IO$bind$($111(_x$8), _f$4);
+                    return $113;
                 }));
-                var $126 = $132;
+                var $106 = $112;
                 break;
         };
-        return $126;
+        return $106;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $134 = ({
+        var $114 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $134;
+        return $114;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $135 = _new$2(IO$bind)(IO$end);
-        return $135;
+        var $115 = _new$2(IO$bind)(IO$end);
+        return $115;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function Dynamic$new$(_value$2) {
-        var $136 = ({
+        var $116 = ({
             _: 'Dynamic.new',
             'value': _value$2
         });
-        return $136;
+        return $116;
     };
     const Dynamic$new = x0 => Dynamic$new$(x0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
-        var $137 = _m$pure$2;
-        return $137;
+        var $117 = _m$pure$2;
+        return $117;
     }))(Dynamic$new$(Unit$new));
-
-    function App$store$(_value$2) {
-        var $138 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $139 = _m$pure$4;
-            return $139;
-        }))(Dynamic$new$(_value$2));
-        return $138;
-    };
-    const App$store = x0 => App$store$(x0);
     const String$nil = '';
 
+    function App$store$(_value$2) {
+        var $118 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $119 = _m$pure$4;
+            return $119;
+        }))(Dynamic$new$(_value$2));
+        return $118;
+    };
+    const App$store = x0 => App$store$(x0);
+
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $140 = ({
+        var $120 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $140;
+        return $120;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$TicTacToe = (() => {
@@ -786,23 +807,23 @@ module.exports = (function() {
             var _v02$10 = Maybe$default$(List$get$(0n, Maybe$default$(List$get$(2n, _state$3), List$nil)), "");
             var _v12$11 = Maybe$default$(List$get$(1n, Maybe$default$(List$get$(2n, _state$3), List$nil)), "");
             var _v22$12 = Maybe$default$(List$get$(2n, Maybe$default$(List$get$(2n, _state$3), List$nil)), "");
-            var $142 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(("Estado: " + List$show$(String$join(","), _state$3))), List$cons$(DOM$node$("table", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("tr", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "00"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v00$4), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "10"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v10$5), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "20"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v20$6), List$nil)), List$nil)))), List$cons$(DOM$node$("tr", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "01"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v01$7), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "11"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v11$8), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "21"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v21$9), List$nil)), List$nil)))), List$cons$(DOM$node$("tr", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "02"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v02$10), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "12"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v12$11), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "22"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v22$12), List$nil)), List$nil)))), List$nil)))), List$nil)));
-            return $142;
+            var $122 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(("Estado: " + List$show$(String$join(","), _state$3))), List$cons$(DOM$node$("table", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("tr", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "00"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v00$4), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "10"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v10$5), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "20"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v20$6), List$nil)), List$nil)))), List$cons$(DOM$node$("tr", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "01"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v01$7), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "11"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v11$8), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "21"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v21$9), List$nil)), List$nil)))), List$cons$(DOM$node$("tr", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "02"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v02$10), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "12"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v12$11), List$nil)), List$cons$(DOM$node$("td", Map$from_list$(List$cons$(Pair$new$("id", "22"), List$nil)), _place_style$1, List$cons$(DOM$text$(_v22$12), List$nil)), List$nil)))), List$nil)))), List$nil)));
+            return $122;
         });
         var _when$4 = (_event$4 => _state$5 => {
             var self = _event$4;
             switch (self._) {
-                case 'App.Event.dom':
-                    var $144 = self.id;
-                    var _id$9 = $144;
-                    var $145 = App$store$(List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$nil))));
-                    var $143 = $145;
-                    break;
                 case 'App.Event.key_down':
-                    var $146 = self.code;
-                    var _key$8 = String$cons$($146, String$nil);
-                    var $147 = App$store$(List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$nil))));
-                    var $143 = $147;
+                    var $124 = self.code;
+                    var _key$8 = String$cons$($124, String$nil);
+                    var $125 = App$store$(List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$cons$(List$cons$(_key$8, List$cons$(_key$8, List$cons$(_key$8, List$nil))), List$nil))));
+                    var $123 = $125;
+                    break;
+                case 'App.Event.mouse_click':
+                    var $126 = self.id;
+                    var _id$9 = $126;
+                    var $127 = App$store$(List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$cons$(List$cons$(_id$9, List$cons$(_id$9, List$cons$(_id$9, List$nil))), List$nil))));
+                    var $123 = $127;
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
@@ -810,14 +831,17 @@ module.exports = (function() {
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
-                    var $148 = App$pass;
-                    var $143 = $148;
+                case 'App.Event.mouse_over':
+                case 'App.Event.mouse_out':
+                case 'App.Event.resize':
+                    var $128 = App$pass;
+                    var $123 = $128;
                     break;
             };
-            return $143;
+            return $123;
         });
-        var $141 = App$new$(_init$2, _draw$3, _when$4);
-        return $141;
+        var $121 = App$new$(_init$2, _draw$3, _when$4);
+        return $121;
     })();
     return {
         'BitsMap': BitsMap,
@@ -868,8 +892,8 @@ module.exports = (function() {
         'Dynamic.new': Dynamic$new,
         'Unit.new': Unit$new,
         'App.pass': App$pass,
-        'App.store': App$store,
         'String.nil': String$nil,
+        'App.store': App$store,
         'App.new': App$new,
         'Web.TicTacToe': Web$TicTacToe,
     };

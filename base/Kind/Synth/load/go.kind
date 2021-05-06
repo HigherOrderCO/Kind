@@ -1,4 +1,4 @@
-Kind.Synth.load.go(name: String, files: List(String), defs: Kind.Defs): IO(Maybe(Kind.Defs))
+Kind.Synth.load.go(name: String, files: List<String>, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
   case files {
     nil: IO {
       return none

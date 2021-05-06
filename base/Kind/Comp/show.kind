@@ -1,0 +1,16 @@
+// Converts a Comp term to a readable string
+Kind.Comp.show(comp: Kind.Comp): String
+  case comp {
+    nil: "?"
+    var: comp.name // name: Kind.Name),
+    ref: comp.name // name: Kind.Name),
+    lam: "λ" | comp.name | "." | Kind.Comp.show(comp.body) // name: Kind.Name, body: Kind.Comp),
+    app: "(" | Kind.Comp.show(comp.func) | " " | Kind.Comp.show(comp.argm) | ")" // func: Kind.Comp, argm: Kind.Comp),
+    let: "$" | comp.name | "=" | Kind.Comp.show(comp.expr) | ";" | Kind.Comp.show(comp.body)
+    eli: "eli{" | Kind.Comp.Prim.show(comp.prim) | " " | Kind.Comp.show(comp.expr) | "}" // prim: Kind.Comp.Prim, expr: Kind.Comp),
+    ins: "ins{" | Kind.Comp.Prim.show(comp.prim) | " " | Kind.Comp.show(comp.expr) | "}" // prim: Kind.Comp.Prim, expr: Kind.Comp),
+    nat: Nat.show(comp.natx) // natx: Nat),
+    chr: "'" | String.cons(comp.chrx, String.nil) | "'" // chrx: Char),
+    str: "\"" | comp.strx | "\"" // strx: String),
+    txt: comp.text
+  }

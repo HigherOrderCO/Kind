@@ -1,0 +1,3 @@
+Arith.NxN_to_N(pair : Pair<Nat, Nat>) : Nat
+  let {x, y} = pair
+  (((x + y) * (x + y + 1)) / 2) + y

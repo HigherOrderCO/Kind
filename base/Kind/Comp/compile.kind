@@ -1,0 +1,153 @@
+// Compiles a Term to a Comp, converting optimized datatypes to insts and elims 
+// Requires the term to be pre-type-checked, with all holes filled.
+Kind.Comp.compile(
+  term: Kind.Term
+  type: Maybe(Kind.Term)
+  defs: Kind.Defs
+  size: Nat
+): Pair(Kind.Comp, Kind.Term)
+  case type {
+    some:
+      let typv = Kind.Term.reduce(type.value, defs)
+      case term {
+        lam: 
+          case typv {
+          all:
+            let self_var = Kind.Term.ann(true, term, type.value)
+            let name_uid = term.name | "$" | Nat.show(size)
+            let name_var = Kind.Term.ann(true, Kind.Term.var(name_uid, size + 1), typv.xtyp)
+            let body_typ = typv.body(self_var, name_var)
+            let {body_cmp,body_typ} = Kind.Comp.compile(term.body(name_var), some(body_typ), defs, size + 1)
+            let term_cmp = if typv.eras
+              then body_cmp
+              else Kind.Comp.lam(name_uid, body_cmp)
+            let term_cmp = 
+              case Kind.Comp.compile.prim_of(type.value, defs) as got {
+                some: Kind.Comp.ins(got.value, term_cmp)
+                none: case Kind.Comp.compile.adt(type.value, defs) as got {
+                  some: Kind.Comp.ins(got.value, term_cmp)
+                  none: term_cmp
+                }
+              }
+            {term_cmp, type.value}
+        } default {Kind.Comp.nil, Kind.Term.typ}
+        let:
+          let {expr_cmp,expr_typ} = Kind.Comp.compile(term.expr, none, defs, size)
+          let name_uid = term.name | "$" | Nat.show(size)
+          let expr_var = Kind.Term.ann(true, Kind.Term.var(name_uid, size + 1), expr_typ)
+          let {body_cmp,body_typ} = Kind.Comp.compile(term.body(expr_var), type, defs, size + 1)
+          let term_cmp = Kind.Comp.let(name_uid, expr_cmp, body_cmp)
+          let term_typ = body_typ
+          {term_cmp, term_typ}
+        ori:
+          Kind.Comp.compile(term.expr, type, defs, size)
+      } default 
+        case typv {
+        typ: {Kind.Comp.nil, Kind.Term.typ}
+      } default 
+        {Pair.fst!!(Kind.Comp.compile(term,none,defs,size)), type.value}
+    none: case term {
+      var: {
+        Kind.Comp.var(term.name)
+        Kind.Term.var(term.name, term.indx)
+      }
+      ref:
+        case Kind.Map.get!(term.name, defs) as got {
+          none: {Kind.Comp.nil, Kind.Term.typ}
+          some: {Kind.Comp.ref(term.name), open got.value; got.value.type}
+        }
+      typ: {
+        Kind.Comp.nil
+        Kind.Term.typ
+      }
+      app:
+        let {func_cmp, func_typ} = Kind.Comp.compile(term.func, none, defs, size)
+        case Kind.Term.reduce(func_typ, defs) as func_typ {
+          all:
+            let {argm_cmp, argm_typ} = Kind.Comp.compile(term.argm, some(func_typ.xtyp), defs, size)
+            let term_typ = func_typ.body(term.func, term.argm)
+            let term_cmp = case Kind.Comp.compile.prim_of(func_typ, defs) as got {
+              some: Kind.Comp.eli(got.value, func_cmp)
+              none: case Kind.Comp.compile.adt(func_typ, defs) as got {
+                some: Kind.Comp.eli(got.value, func_cmp)
+                none: func_cmp
+              }
+            }
+            let term_cmp = if func_typ.eras
+              then term_cmp
+              else Kind.Comp.app(term_cmp, argm_cmp)
+            {term_cmp, term_typ}
+        } default {Kind.Comp.nil, Kind.Term.typ}
+      let:
+        let {expr_cmp, expr_typ} = Kind.Comp.compile(term.expr, none, defs, size)
+        let name_uid = term.name | "$" | Nat.show(size)
+        let expr_var = Kind.Term.ann(true, Kind.Term.var(name_uid, size + 1), expr_typ)
+        let {body_cmp, body_typ} = Kind.Comp.compile(term.body(expr_var), none, defs, size + 1)
+        {Kind.Comp.let(name_uid, expr_cmp, body_cmp), body_typ}
+      def:
+        Kind.Comp.compile(term.body(term.expr), none, defs, size)
+      all:
+        {Kind.Comp.nil, Kind.Term.typ}
+      ann:
+        Kind.Comp.compile(term.term, some(term.type), defs, size)
+      loc:
+        Kind.Comp.compile(term.term, none, defs, size)
+      nat:
+        {Kind.Comp.nat(term.natx), Kind.Term.ref("Nat")}
+      chr:
+        {Kind.Comp.chr(term.chrx), Kind.Term.ref("Char")}
+      str:
+        {Kind.Comp.str(term.strx), Kind.Term.ref("String")}
+      cse:
+        {Kind.Comp.nil, Kind.Term.typ}
+      ori:
+        Kind.Comp.compile(term.expr, none, defs, size)
+    } default {Kind.Comp.nil, Kind.Term.typ}
+  }
+
+Kind.Comp.compile.adt.get_fields(term: Kind.Term): List(String)
+  case term {
+    all:
+      let head = term.name
+      let tail = Kind.Comp.compile.adt.get_fields(term.body(Kind.Term.var("",0),Kind.Term.var("",0)))
+      if term.eras then
+        tail
+      else
+        head & tail
+  } default []
+
+Kind.Comp.compile.adt.get_constructors(term: Kind.Term): Kind.Comp.Prim.ADT
+  case term {
+    all:
+      let tail = Kind.Comp.compile.adt.get_constructors(term.body(Kind.Term.var("",0), Kind.Term.var("",0)))
+      let name = term.name
+      let flds = Kind.Comp.compile.adt.get_fields(term.xtyp)
+      {name,flds} & tail
+  } default []
+
+Kind.Comp.compile.adt(term: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
+  let term = Kind.Term.reduce(term, defs)
+  case term {
+    all:
+      if String.ends_with(term.self, ".Self") then
+        let body = term.body(Kind.Term.var("",0),Kind.Term.var("",0))
+        let data = Kind.Comp.compile.adt.get_constructors(body)
+        let name = String.take(String.length(term.self) - 5, term.self)
+        some(Kind.Comp.Prim.data(name, data))
+      else
+        none
+  } default none
+
+Kind.Comp.compile.prim_of(type: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
+  let result = none
+  for prim in Kind.Comp.Prim.natives with result:
+    open prim
+    case result {
+      none:
+        if Kind.Term.equal(type, Kind.Term.ref(prim.fst), defs) then
+          some(prim.snd)
+        else
+          none
+      some: result
+    }
+  result

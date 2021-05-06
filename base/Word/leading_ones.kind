@@ -1,0 +1,2 @@
+Word.leading_ones<size: Nat>(word: Word(size)): Nat
+  Word.leading_ones.go<size>(word, 0)

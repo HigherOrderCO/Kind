@@ -1,4 +1,4 @@
-GSet.balance<A: Type>(a: A, l: GSet(A), r: GSet(A)): GSet(A)
+GSet.balance<A: Type>(a: A, l: GSet<A>, r: GSet<A>): GSet<A>
   let size_l             = GSet.size!(l)
   let size_r             = GSet.size!(r)
   let size_l_plus_size_r = Nat.add(size_l, size_r)

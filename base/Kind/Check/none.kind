@@ -1,2 +1,2 @@
-Kind.Check.none<A: Type>: Kind.Check(A)
+Kind.Check.none<A: Type>: Kind.Check<A>
   Kind.Check.result<A>(Maybe.none<A>, [])

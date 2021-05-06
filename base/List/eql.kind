@@ -1,4 +1,4 @@
-List.eql<A: Type>(eql: A -> A -> Bool, a: List(A), b: List(A)): Bool
+List.eql<A: Type>(eql: A -> A -> Bool, a: List<A>, b: List<A>): Bool
   case a {
     nil: case b {
       nil: Bool.true,

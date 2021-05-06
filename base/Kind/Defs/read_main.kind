@@ -1,0 +1,5 @@
+Kind.Defs.read_main(code: String): Kind.Defs
+  case Kind.Defs.read("Main.kind", code, Kind.Map.new!) as got {
+    left: Kind.Map.new!
+    right: got.value
+  }

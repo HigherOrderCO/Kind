@@ -1,10 +1,8 @@
 type Web.Kaelin.Player {
   new(
-    // create type for player id?
     addr: String
-    coord: Web.Kaelin.Coord,
-    // change hero to entity
-    hero: Web.Kaelin.Hero,
-    team: String,
+    team: String // TODO: move to creature inside map
+    current_hp: I32 // TODO: move to creature inside map
+    current_status: List<Web.Kaelin.Skill.Modifier.status> // TODO: move to creature inside map
   )
 }

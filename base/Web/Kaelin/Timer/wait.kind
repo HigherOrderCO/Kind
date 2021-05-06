@@ -1,0 +1,9 @@
+Web.Kaelin.Timer.wait(frame : Nat,
+                     timer : List<Web.Kaelin.Timer>,
+                     state :  Web.Kaelin.State 
+                     ) : Web.Kaelin.State
+  
+  let {xs, ys} = List.take_while.go!((x) open x Nat.ltn(x.time, frame), timer)
+  def foldr = List.foldr(Web.Kaelin.Timer, Web.Kaelin.State -> Web.Kaelin.State)
+  Web.Kaelin.Timer.set_timer(ys, foldr((x) x, 
+    (x, f) open x Function.comp(_, _, _, f, x.action), xs, state))

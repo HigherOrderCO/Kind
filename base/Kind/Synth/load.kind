@@ -1,2 +1,96 @@
-Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO(Maybe(Kind.Defs))
-  Kind.Synth.load.go(name, Kind.Synth.files_of(name), defs)
+Kind.Synth.load.cached.def(name: Kind.Name): IO<Maybe<Kind.Def>>
+  IO {
+    //IO.print("-- getting cache of " | name)
+    get cache_file = IO.get_file(".cache/"|name|".file")
+    if Bool.not(String.is_empty(cache_file)) then IO {
+      //IO.print("-- cache file isn't empty " | name)
+      get cache_time = IO.get_file(".cache/"|name|".time")
+      get cache_file_time = IO.get_file_mtime(cache_file)
+      if String.eql(cache_time, cache_file_time) then IO {
+        //IO.print("-- cache time is correct " | name)
+        get cache_term = IO.get_file(".cache/"|name|".term")
+        get cache_type = IO.get_file(".cache/"|name|".type")
+        get cache_isct = IO.get_file(".cache/"|name|".isct")
+        get cache_arit = IO.get_file(".cache/"|name|".arit")
+        return Maybe {
+          let file = cache_file
+          let code = "<cached>"
+          let orig = {0,0}
+          get term = Kind.Core.read(cache_term)
+          get type = Kind.Core.read(cache_type)
+          get isct = Bool.read(cache_isct)
+          get arit = some(Nat.read(cache_arit))
+          let stat = Kind.Status.done(true)
+          //let msge = log("-- cache "|name|": "|Kind.Core.show(type)|" = "|Kind.Core.show(term)) unit
+          return Kind.Def.new(file, code, orig, name, term, type, isct, arit, stat)
+        }
+      } else IO { return none }
+    } else IO { return none }
+  }
+
+Kind.Synth.load.cached.is_loop(name: String, defs: Kind.Defs): Bool
+  case Kind.Map.get!(name, defs) as got {
+    some: 
+      open got.value
+      case got.value.stat {
+        done: got.value.stat.cached
+      } default false
+    none: false
+  }
+
+Kind.Synth.load.cached(names: List(Kind.Name), defs: Kind.Defs): IO<Maybe<Kind.Defs>>
+  //log("- kslc " | String.join(", ", names)) 
+  case names {
+    nil: IO {
+      return some(defs)
+    }
+    cons: if Kind.Synth.load.cached.is_loop(names.head, defs)
+      then IO {
+        //IO.print("-- " | names.head | " already cached")
+        Kind.Synth.load.cached(names.tail, defs)
+      }
+      else IO {
+        let name = names.head
+        get defn = Kind.Synth.load.cached.def(name)
+        case defn {
+          none: IO {
+            //IO.print("-- " | names.head | " cache failed")
+            return none
+          }
+          some: open defn.value; IO {
+            let defs = Kind.Map.set!(name, defn.value, defs)
+            let deps = Kind.Map.new!
+            let deps = Kind.Core.dependencies.go(defn.value.term, deps)
+            let deps = Kind.Core.dependencies.go(defn.value.type, deps)
+            let deps = Kind.Map.keys!(deps)
+            get defs = Kind.Synth.load.cached(deps, defs)
+            case defs {
+              none: IO {
+                //IO.print("-- " | names.head | " cache failed because of a dep")
+                return none
+              }
+              some: IO {
+                //IO.print("-- " | names.head | " cached!")
+                Kind.Synth.load.cached(names.tail, defs.value)
+              }
+            }
+          }
+        }
+      }
+  }
+
+Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
+  IO {
+    //IO.print("- load " | name)
+    get cached_defs = Kind.Synth.load.cached([name], defs)
+    case cached_defs {
+      some: IO {
+        //IO.print("- cached " | name)
+        return some(cached_defs.value)
+      }
+      none: IO {
+        //IO.print("- uncached " | name)
+        Kind.Synth.load.go(name, Kind.Synth.files_of(name), defs)
+      }
+    }
+  }

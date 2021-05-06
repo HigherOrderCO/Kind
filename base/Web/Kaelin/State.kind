@@ -4,10 +4,23 @@ type Web.Kaelin.State {
     room: String
   )
   game(
+    user: String
     room: String
-    tick: Nat
-    players: Map(Web.Kaelin.Player)
+    players: Map(Web.Kaelin.Player) // TODO: Map(String) ?
+    cast_info: Maybe<Web.Kaelin.CastInfo>
     map: Web.Kaelin.Map,
-    interface : App.EnvInfo
+    internal : Web.Kaelin.Internal
+    env_info : App.EnvInfo
   )
 }
+
+type Web.Kaelin.CastStatus {
+  new(
+    center_pos: Web.Kaelin.Coord
+    target_pos: Web.Kaelin.Coord
+    range: Nat
+  )
+}
+
+
+

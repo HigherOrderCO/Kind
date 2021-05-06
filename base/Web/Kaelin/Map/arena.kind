@@ -1,0 +1,47 @@
+// The 'Arena' map
+Web.Kaelin.Map.arena: Web.Kaelin.Map
+  let map = NatMap.new!
+  let map_size = Web.Kaelin.Constants.map_size
+  let width    = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
+  let height   = U32.add(U32.mul(map_size, 2#32), 1#32) // map_size * 2 + 1
+
+  // TODO: Define this elsewhere?
+  // Defines all possible images inside a tile
+  terrain_img = (sprite)
+    open sprite 
+    case sprite.indicator{
+      none: case sprite.effect {
+        normal: Web.Kaelin.Assets.tile.green_2
+        movement: Web.Kaelin.Assets.tile.effect.light_blue2 // to be removed, 
+        skill: Web.Kaelin.Assets.tile.effect.dark_blue2
+      }
+      some: case sprite.indicator.value {
+        green: Web.Kaelin.Assets.tile.effect.blue_green2
+        red: Web.Kaelin.Assets.tile.effect.dark_red2
+        yellow: Web.Kaelin.Assets.tile.effect.light_red2
+        blue: Web.Kaelin.Assets.tile.effect.light_blue2
+      }
+
+
+  }
+
+  let new_terrain = Web.Kaelin.Terrain.grass(terrain_img)
+  let new_terrain = Web.Kaelin.Entity.background(new_terrain)
+
+  //// loops through the half of the map_size
+  for j : U32 from 0#32 to height with map:
+    for i : U32 from 0#32 to width with map:
+      // generate int axial coordinate
+      let coord_i = I32.sub( U32.to_i32(i),  U32.to_i32(map_size)) // i - map_size
+      let coord_j = I32.sub( U32.to_i32(j),  U32.to_i32(map_size)) // j - map_size
+      let coord = Web.Kaelin.Coord.new(coord_i, coord_j)
+      let fit = Web.Kaelin.Coord.fit(coord, map_size)
+
+      case fit {
+        true:
+          Web.Kaelin.Map.push(coord, new_terrain, map)
+        false:
+          map
+      }
+    map
+  map

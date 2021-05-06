@@ -1,0 +1,22 @@
+// Returns a map with the player Address as the key to its respective coordinate 
+Web.Kaelin.Map.find_players(map: Web.Kaelin.Map): Map(Web.Kaelin.Coord)
+  let lmap = NatMap.to_list!(map)
+  let result   = []
+  let players  = []
+  for pair in lmap with result:
+    open pair
+    let coord = pair.fst
+    let tile = pair.snd
+    for entity in tile with players:
+      case entity { 
+        background: players
+        creature: case entity.player { 
+          none: players 
+          some:          
+            let axial_coord = Web.Kaelin.Coord.Convert.nat_to_axial(coord)
+            [{entity.player.value, axial_coord}]
+        }
+      }
+    result ++ players
+  Map.from_list!(result)
+

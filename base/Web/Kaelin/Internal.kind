@@ -1,0 +1,7 @@
+// TODO
+// Now we only support timer by datatime tick
+// Add support to frame timer by Web.Kaelin.Timer.Future 
+
+type Web.Kaelin.Internal {
+    new(tick : Nat, frame : Nat, timer : List<Web.Kaelin.Timer>)
+}

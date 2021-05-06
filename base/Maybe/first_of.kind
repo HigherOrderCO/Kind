@@ -1,0 +1,8 @@
+Maybe.first_of<A: Type>(list: List<Maybe<A>>): Maybe<A>
+  case list {
+    nil: none
+    cons: case list.head {
+      some: some(list.head.value)
+      none: Maybe.first_of<A>(list.tail)
+    }
+  }

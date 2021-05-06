@@ -1,4 +1,4 @@
-Kind.Context.get_name_skips(name: Kind.Name): Pair(Kind.Name, Nat)
+Kind.Context.get_name_skips(name: Kind.Name): Pair<Kind.Name, Nat>
   //log("get_name_skips ", name)
   case name {
     nil: {"", 0}
