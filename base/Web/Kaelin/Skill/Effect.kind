@@ -1,4 +1,10 @@
 // TODO: change to:
+// TODO: if player dies between any skill what we do?
+// - check in any entity.creature.(damage, heal, etc) function if player is dead
+// - monad
+// - receive map in entity.creature.(damage, heal, etc) and if player dies delete the entity from map
+// 
+
 
 Web.Kaelin.Skill.Effect: Type
   Web.Kaelin.Map -> Pair(Map(Indicators), Web.Kaelin.Map)
@@ -30,9 +36,10 @@ Web.Kaelin.Effect.bard_heal: Web.Kaelin.Effect
 
 Web.Kaelin.Skill.robadona(center: Web.Kaelin.Coord, target: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
   (state)
+  let state = Web.Kaelin.Skill.damage(8, center, state)
   let state = Web.Kaelin.Skill.heal(4, center, state)
-  let state = Web.Kaelin.Skill.damage(8, target, state)
   let state = Web.Kaelin.Skill.stun(target, state)
+
   let p_dir = Web.Kaelin.point_to(center, target)
   let {pos, state} = Web.Kaelin.Skill.push(target, p_dir, 2)
   case pos {
