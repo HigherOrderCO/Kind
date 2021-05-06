@@ -3,7 +3,6 @@ const h = require("inferno-hyperscript").h;
 const apps = require("./apps/index.js");
 const sign = require("nano-ethereum-signer");
 const utils = require("./utils.js");
-const kind = require("kind-lang");
 
 module.exports = class AppPlay extends Component {
 
@@ -50,6 +49,15 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  on_input(id) {
+    this.register_event({
+      _: "App.Event.input",
+      time: BigInt(Date.now()),
+      id,
+      text: document.getElementById(id).value
+    });
+  }
+
   // Initializes the input event listeners
   async init_input_events() {
     //this.events = []; // this application's events
@@ -63,12 +71,29 @@ module.exports = class AppPlay extends Component {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: window.innerWidth, // this.container ? this.container.offsetWidth : 0,
-          snd: window.innerHeight // this.container ? this.container.offsetHeight : 0,
+          fst: this.container ? this.container.offsetWidth : 0,
+          snd: this.container ? this.container.offsetHeight : 0,
         },
         mouse_pos: this.mouse_pos,
       }
     });
+
+    // TODO: how to get the event?
+    // this.register_event({
+    //   _: "App.Event.input",
+    //   time: BigInt(Date.now()),
+    //   id: "", // TODO: add id
+    //   text: document.getElementById("myTextarea").value // TODO: get id
+    // });
+    // OU isso?
+    // this.listeners.input = (e) => {
+    //   this.register_event({
+    //     _: "App.Event.input",
+    //     time: BigInt(Date.now()),
+    //     id: e.target.id
+    //   });
+    // };
+    // document.body.addEventListener("input", this.listeners.input);
 
    // Mouse movement event
     this.listeners.mousemove = (e) => {
@@ -252,6 +277,10 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  is_input_type(tag) {
+    return (tag === "input" || tag === "textarea")
+  }
+
   // Renders a document
   render_dom(elem) {
     //console.log("render_dom", elem);
@@ -261,18 +290,22 @@ module.exports = class AppPlay extends Component {
         let props = utils.map_to_object(elem.props);
         let style = utils.map_to_object(elem.style);
         return h(elem.tag, {
-          ...props,
-          style: style
-        }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
+        ...props,
+        style: style,
+        onInput: 
+          this.is_input_type(elem.tag) 
+          ? () => this.on_input(props.id)
+          : null
+      }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":
-        var id = elem.props ? elem.props.id || "" : "";
-        var width = Number(elem.props.width) || 256;
-        var height = Number(elem.props.height) || 256;
-        var canvas = this.get_canvas(id, width, height);
-        var length = elem.value.length;
+        var id       = elem.props ? elem.props.id || "" : "";
+        var width    = Number(elem.props.width) || 256;
+        var height   = Number(elem.props.height) || 256;
+        var canvas   = this.get_canvas(id, width, height);
+        var length   = elem.value.length;
         var capacity = elem.value.capacity;
-        var buffer = elem.value.buffer;
+        var buffer   = elem.value.buffer;
         // Renders pixels to buffers
         for (var i = 0; i < length; ++i) {
           var pos = buffer[i * 2 + 0];
