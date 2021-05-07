@@ -11,7 +11,7 @@ Web.Kaelin.Skill.indicator(
   pair = []
   // Returning each effect's List of affected coords
   
-  let result = skill.effect(tick, hero_pos, mouse_coord, map)
+  let result = skill.effect(tick, hero_pos, mouse_coord, map) //:: Web.Kaelin.Effect
   open result
   result.indicators
   //   let area = Web.Kaelin.Skill.area.to_list(effect.area, hero_pos,mouse_coord)
