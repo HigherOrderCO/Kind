@@ -1,0 +1,2 @@
+NatSet: Type
+  NatMap<Unit>

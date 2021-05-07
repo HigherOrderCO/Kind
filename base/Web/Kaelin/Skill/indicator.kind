@@ -7,8 +7,8 @@ Web.Kaelin.Skill.indicator(
   map: Web.Kaelin.Map
 ): NatMap<Web.Kaelin.Indicator>
   open skill
-  coords = []
-  pair = []
+  // coords = []
+  // pair = []
   // Returning each effect's List of affected coords
   
   let result = skill.effect(tick, hero_pos, mouse_coord, map) //:: Web.Kaelin.Effect
