@@ -1,0 +1,20 @@
+Web.Kaelin.Effect.all.move(distance: I32): Web.Kaelin.Effect<Unit>
+  Web.Kaelin.Effect { 
+    get map = Web.Kaelin.Effect.map.get
+    get center = Web.Kaelin.Effect.coord.get_center
+    get target = Web.Kaelin.Effect.coord.get_target
+    let key = Web.Kaelin.Coord.Convert.axial_to_nat(center)
+    let tile = NatMap.get!(key, map)
+      case tile { 
+        none: Web.Kaelin.Effect { return unit }
+        some: 
+        creature_key = List.find_index!(tile.value, Web.Kaelin.Entity.is_creature)
+        case creature_key {
+          none: Web.Kaelin.Effect { return unit }
+          some:  
+            open creature_key.value as key
+            new_map= Web.Kaelin.Map.swap(key.snd, center, target, map)
+            Web.Kaelin.Effect.map.set(new_map)
+        }
+      }
+    }

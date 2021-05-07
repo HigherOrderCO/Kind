@@ -1,0 +1,15 @@
+type Web.Kaelin.Status {
+  new(
+    duration: I32
+    effect: Web.Kaelin.Status.Effect
+  )
+}
+
+type Web.Kaelin.Status.Effect { 
+  burn
+  poison
+  stun
+  slow
+  haste
+  root
+}

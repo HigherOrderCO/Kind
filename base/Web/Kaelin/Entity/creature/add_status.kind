@@ -1,0 +1,11 @@
+Web.Kaelin.Entity.creature.add_status(
+  duration: I32
+  effect: Web.Kaelin.Status.Effect
+  entity: Web.Kaelin.Entity
+): Web.Kaelin.Entity
+  case entity {
+    creature: 
+      new_status = Web.Kaelin.Status.new(duration, effect)
+      new_status = List.cons!(new_status, entity.status)
+      Web.Kaelin.Entity.creature(entity.player, entity.hero, entity.team, entity.hp, new_status)
+  }default entity

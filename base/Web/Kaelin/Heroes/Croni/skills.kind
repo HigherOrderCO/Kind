@@ -2,7 +2,7 @@ Web.Kaelin.Heroes.Croni.skills: List<Web.Kaelin.Skill>
   [
     Web.Kaelin.Heroes.Croni.skills.quick_shot,
     Web.Kaelin.Heroes.Croni.skills.vampirism,
-    // Web.Kaelin.Skill.move(2)
+    Web.Kaelin.Skill.move(+2#32)
   ]
 
 Web.Kaelin.Heroes.Croni.skills.quick_shot: Web.Kaelin.Skill

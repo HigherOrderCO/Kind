@@ -7,6 +7,6 @@ type Web.Kaelin.Entity {
     hero: Web.Kaelin.Hero
     team: String
     hp: I32
-    status: List<Web.Kaelin.Skill.Modifier.status>    
+    status: List<Web.Kaelin.Status>    
   )
 }
