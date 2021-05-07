@@ -1,2 +1,4 @@
 U8.shr(n: U8, a: U8): U8
-  U8.shr(n, a)
+  open n
+  open a
+  U8.new(Word.shr!(n.value, a.value))

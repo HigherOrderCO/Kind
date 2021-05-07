@@ -950,7 +950,7 @@ All terms check.
 
 Great! This one was really hard, wasn't it? That's because the concept of
 induction is hard to grasp, yet, induction is nothing but a fancy name for
-recursion when used inside a proof. The lesson here is that there is that there
+recursion when used inside a proof. The lesson here is that there
 is a new way to "unstuck" a variable in a goal. Instead of pattern-matching on
 it (with case), we can apply the function recursively to it. This will give us
 "for free" a term of type `a == b` that is closer to the goal. Then, by
@@ -1597,7 +1597,7 @@ Proving an inequality with variables: not(b) != b
 Let's now prove that `not(b) != b`. We start as usual:
 
 ```
-not_a_neq_a(a: Bool): Bool.not(b) != b
+not_a_neq_a(b: Bool): Bool.not(b) != b
   ?a
 ```
 
