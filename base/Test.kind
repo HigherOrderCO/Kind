@@ -1,47 +1,7 @@
-Test: IO(Unit)
-  IO {
-    get defs = Kind.Synth.one("Web.Kaelin", Kind.Map.new!)
-    case defs {
-      none: IO.print("deu errado")
-      some: IO.print("deu certo")
+Test: _
+  let par =
+    Parser {
+      get k = Parser.text("oi")
+      return k
     }
-  }
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Test.main: IO(Unit)
-  //Kind.api.io.check_file("./Kind/api/export.kind")
-
-//Test: IO(Unit)
-  //IO {
-    //let name = "Test.main"
-    //IO.print("Compiling "|name|" to Scheme...")
-    //get defs = Kind.Synth.one(name, Kind.Map.new!)
-    //case defs {
-      //none: IO.print("Something is wrong.")
-      //some: IO {
-        //let defs = Kind.Comp.Defs.compile(defs.value)
-        //let file = Kind.Comp.Target.Scheme(name, defs)
-        ////IO.print(file)
-        //IO.set_file("./main.scm", file)
-      //}
-    //}
-  //}
+  par(0, "oi")
