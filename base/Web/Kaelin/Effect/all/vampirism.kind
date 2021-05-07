@@ -1,4 +1,4 @@
-Web.Kaelin.Effect.vampirism(dmg: I32): Web.Kaelin.Effect<Unit>
+Web.Kaelin.Effect.all.vampirism(dmg: I32): Web.Kaelin.Effect<Unit>
   Web.Kaelin.Effect {
     get center_pos = Web.Kaelin.Effect.coord.get_center
     get target_pos = Web.Kaelin.Effect.coord.get_target
