@@ -1,9 +1,8 @@
-type Web.Kaelin.Skill{
+type Web.Kaelin.Skill<A: Type>{
 	new(
-  	id: U8
+  	name: String
 		range: Nat
-    //condition: Web.Kaelin.Skill.condition // to be added
-		effects: List(Web.Kaelin.Skill.Effect)
+		effects: Web.Kaelin.Effect<A>
 		key: Char
 	)
 }
