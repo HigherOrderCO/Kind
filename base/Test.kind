@@ -1,19 +1,12 @@
-Test: _
-  let nums = NatMap.new!
-  let nums = NatMap.set!(1, unit, nums)
-  let nums = NatMap.set!(2, unit, nums)
-  let nums = NatMap.set!(3, unit, nums)
-  let nums = NatMap.set!(4, unit, nums)
-  let nums = NatMap.set!(5, unit, nums)
-  let nums = NatMap.set!(6, unit, nums)
-  NatMap.get!(3, nums)
-
-asd(b: Bits): List(Bits)
-  let aux = Bits.mask(b, Bits.from_string("1111"))
-  let tail = Bits.shift_right(4, b)
-  case tail {
-    e: List.nil!
-  } default List.cons!(aux, asd(tail))
+Test: IO(Unit)
+  IO {
+    get defs = Kind.Synth.one("Web.Kaelin", Kind.Map.new!)
+    case defs {
+      none: IO.print("deu errado")
+      some: IO.print("deu certo")
+    }
+  }
+  
 
 
 
