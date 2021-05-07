@@ -7,7 +7,7 @@ Web.Kaelin.Draw.support.area_of_effect(
     open cast_info
       case cast_info.hex_effect {
         skill:
-        if List.any!(Web.Kaelin.Coord.eql(cast_info.mouse_pos), cast_info.range) then 
+        if NatSet.has(coord_nat, cast_info.range) then
           NatMap.get!(coord_nat,area)
         else
           none 

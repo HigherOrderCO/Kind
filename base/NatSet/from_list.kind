@@ -1,0 +1,5 @@
+NatSet.from_list(xs: List(Nat)): NatSet
+  case xs {
+    nil: NatSet.new
+    cons: NatSet.set(xs.head, NatSet.from_list(xs.tail))
+  }
