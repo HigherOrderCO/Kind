@@ -1,13 +1,10 @@
 Kind.Parser.def: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    get u = Kind.Parser.text_error("def", "Expected \"def\"");
-    get u = Parser.override_error!(Parser.text(" "), "Missing space after def");
-    get name = Parser.override_error!(Kind.Parser.name, "Expected an identifier after def");
-    Kind.Parser.text_error("=", "Missing '=' after \"def … \"");
-    get expr = Kind.Parser.term;
-    Parser.maybe!(Kind.Parser.text(";"));
-    get body = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, Kind.Term.def(name, expr, (x) body));
-  }
+  Kind.Parser.block("def", Parser {
+    Kind.Parser.text("def ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text("=")
+    get expr = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = Kind.Parser.term
+    return Kind.Term.def(name, expr, (x) body)
+  })

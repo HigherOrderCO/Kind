@@ -1,7 +1,0 @@
-Kind.Parser.item<V: Type>(parser: Parser(V)): Parser(V)
-  Parser {
-    Kind.Parser.spaces;
-    get value = parser;
-    Parser.maybe!(Kind.Parser.text(","));
-    return value;
-  }

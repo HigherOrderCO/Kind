@@ -1,9 +1,7 @@
 Kind.Parser.parenthesis: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    get u = Kind.Parser.text("(");
-    get term = Kind.Parser.term;
-    get u = Kind.Parser.text_error(")", "Found no matching parenthesis");
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, term);
-  }
+  Kind.Parser.block("parenthesis", Parser {
+    Kind.Parser.text("(")
+    get term = Kind.Parser.term
+    Kind.Parser.text(")")
+    return term
+  })

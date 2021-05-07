@@ -1,2 +1,3 @@
 Parser.pure<V: Type>(value: V): Parser(V)
-  (long, idx, code) Parser.Reply.value<V>(long, idx, code, value)
+  (pst)
+  Parser.Reply.value<V>(pst, value)

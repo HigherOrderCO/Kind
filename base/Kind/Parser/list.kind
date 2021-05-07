@@ -1,17 +1,12 @@
 Kind.Parser.list: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("[");
-    get vals = Parser.until!(
-      Kind.Parser.text("]"),
-      Parser.append_error!(Kind.Parser.item!(Kind.Parser.term), "\nIn list."));
-    get orig = Kind.Parser.stop(init);
+  Kind.Parser.block("list", Parser {
+    get vals = Kind.Parser.items!("[", Kind.Parser.term, "]")
     return List.fold!(vals)!(
-      Kind.Term.ori(orig, Kind.Term.app(Kind.Term.ref(Kind.Name.read("List.nil")), Kind.Term.hol(Bits.e))),
+      Kind.Term.app(Kind.Term.ref(Kind.Name.read("List.nil")), Kind.Term.hol(Bits.e)),
       (x,xs)
-        let term = Kind.Term.ref(Kind.Name.read("List.cons"));
-        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-        let term = Kind.Term.app(term, x);
-        let term = Kind.Term.app(term, xs);
-        Kind.Term.ori(orig, term));
-  }
+        let term = Kind.Term.ref(Kind.Name.read("List.cons"))
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, x)
+        let term = Kind.Term.app(term, xs)
+        term)
+  })

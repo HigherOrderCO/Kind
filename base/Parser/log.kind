@@ -1,2 +1,3 @@
 Parser.log(str: String): Parser(Unit)
-  (long, idx, code) Debug.log!(str, (x) Parser.Reply.value!(long, idx, code, Unit.new))
+  (pst)
+  Debug.log!(str, (x) Parser.Reply.value!(pst, unit))

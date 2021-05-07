@@ -1,9 +1,18 @@
 Kind.Parser.char: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("'");
-    get chrx = Kind.Parser.char.single;
-    Kind.Parser.text_error("'", "Found no closing '");
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, Kind.Term.chr(chrx));
-  }
+  Kind.Parser.block("char", Parser {
+    Kind.Parser.text("'")
+    get chrx = Kind.Parser.char.single
+    Kind.Parser.text("'")
+    return Kind.Term.chr(chrx)
+  })
+
+Kind.Parser.char.single: Parser(Char)
+  Parser.first_of!([
+    Parser.first_of!(List.mapped!(Kind.Code.escapes)!((esc) case esc {
+      new: Parser {
+        Parser.text(esc.fst)
+        return esc.snd
+      }
+    })),
+    Parser.one,
+  ])

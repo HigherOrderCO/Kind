@@ -1,0 +1,20 @@
+Kind.Parser.block(name: String, parse: Parser<Kind.Term>): Parser<Kind.Term>
+  (pst)
+  open pst
+  let reply = Kind.Parser.spaces(pst)
+  case reply {
+    error: 
+      Parser.Reply.error!(reply.err)
+    value:
+      let pst = reply.pst
+      open pst
+      let reply = parse(Parser.State.new(pst.err, name, pst.idx, pst.idx, pst.str))
+      case reply {
+        error:
+          Parser.Reply.error!(reply.err)
+        value: 
+          open reply.pst
+          let new_pst = Parser.State.new(reply.pst.err, pst.nam, pst.ini, reply.pst.idx, reply.pst.str)
+          Parser.Reply.value!(new_pst, Kind.Term.ori({pst.idx,reply.pst.idx}, reply.val))
+      }
+  }

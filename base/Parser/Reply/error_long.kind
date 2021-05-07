@@ -1,2 +1,0 @@
-Parser.Reply.error_long<T: Type>(idx: Nat, code: String, err: String): Parser.Reply<T>
-  Parser.Reply.error!(Parser.ErrorAt.new(idx, code, err))

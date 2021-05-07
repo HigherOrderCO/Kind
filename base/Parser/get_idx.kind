@@ -1,0 +1,4 @@
+Parser.get_idx: Parser(Nat)
+  (pst)
+  open pst
+  Parser.Reply.value!(pst, pst.idx)

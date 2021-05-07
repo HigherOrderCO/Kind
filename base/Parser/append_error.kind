@@ -1,9 +1,13 @@
-Parser.append_error<V: Type>(parse: Parser(V), suff: String): Parser(V)
-  (long, idx, code)
-    let reply = parse(long, idx, code)
-    case reply {
-      error:
-        open reply.err
-        Parser.Reply.error_long!(reply.err.idx, reply.err.code, reply.err.err | suff)
-      value: reply
-    }
+Parser.append_error<V: Type>(parse: Parser(V), msg: String): Parser(V)
+  (pst)
+  let reply = parse(pst)
+  case reply {
+    error:
+      open reply.err
+      Parser.Reply.fail!(
+        reply.err.nam
+        reply.err.ini
+        reply.err.idx
+        reply.err.msg | msg)
+    value: reply
+  }

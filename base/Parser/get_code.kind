@@ -1,2 +1,0 @@
-Parser.get_code: Parser(String)
-  (long, idx, code) Parser.Reply.value!(long, idx, code, code)

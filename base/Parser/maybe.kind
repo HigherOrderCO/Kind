@@ -1,5 +1,7 @@
 Parser.maybe<V: Type>(parse: Parser(V)): Parser(Maybe<V>)
-  (err, idx, code) case parse(err, idx, code) as reply {
-    error: Parser.Reply.value<Maybe<V>>(some(reply.err), idx, code, Maybe.none<V>),
-    value: Parser.Reply.value<Maybe<V>>(reply.err, reply.idx, reply.code, Maybe.some<V>(reply.val)),
+  (pst)
+  open pst
+  case parse(pst) as reply {
+    error: Parser.Reply.value<Maybe<V>>(pst, none)
+    value: Parser.Reply.value<Maybe<V>>(reply.pst, some(reply.val))
   }

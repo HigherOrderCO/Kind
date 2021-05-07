@@ -1,5 +1,7 @@
 Parser.is_eof: Parser(Bool)
-  (long, idx, code) case code {
-    nil: Parser.Reply.value!(long, idx, code, Bool.true),
-    cons: Parser.Reply.value!(long, idx, code, Bool.false),
+  (pst)
+  open pst
+  case pst.str {
+    nil: Parser.Reply.value!(pst, true)
+    cons: Parser.Reply.value!(pst, false)
   }

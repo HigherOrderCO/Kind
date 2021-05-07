@@ -1,13 +1,11 @@
-Kind.Parser.concat(init: Nat, lst0: Kind.Term): Parser(Kind.Term)
+Kind.Parser.concat(lst0: Kind.Term): Parser(Kind.Term)
   Parser {
-    get u = Kind.Parser.text("++");
-    get u = Parser.override_error!(Parser.text(" "), "Operators need to be separated by a space");
-    get lst1 = Parser.append_error!(Kind.Parser.term, "\nIn right operand of \"++\"");
-    get orig = Kind.Parser.stop(init);
-    let term = Kind.Term.ref("List.concat");
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, lst0);
-    let term = Kind.Term.app(term, lst1);
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, term);
+    Kind.Parser.text("++")
+    Parser.text(" ")
+    get lst1 = Kind.Parser.term
+    let term = Kind.Term.ref("List.concat")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, lst0)
+    let term = Kind.Term.app(term, lst1)
+    return term
   }

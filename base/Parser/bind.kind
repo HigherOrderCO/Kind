@@ -1,15 +1,32 @@
 Parser.bind<A: Type, B: Type>(parse: Parser(A), next: A -> Parser(B)): Parser(B)
-  (err, idx, code)
-    reply = parse(err, idx, code)
-    case reply {
-      error: case err {
+  (pst)
+  open pst
+  let reply = parse(pst)
+  case reply {
+    error: 
+      case pst.err {
         none:
-          Parser.Reply.error<B>(reply.err),
+          Parser.Reply.error<B>(reply.err)
         some:
-          val = Parser.ErrorAt.combine(err.value, reply.err)
-          Parser.Reply.error<B>(val)
+          Parser.Reply.error<B>(Parser.Error.combine(pst.err.value, reply.err))
       }
-      value:
-        l = Parser.ErrorAt.maybe_combine(err, reply.err)
-        next(reply.val, l, reply.idx, reply.code),
-    }
+    value:
+      open reply.pst
+      let reply.pst = Parser.State.new(
+        Parser.Error.maybe_combine(pst.err, reply.pst.err)
+        reply.pst.nam
+        reply.pst.ini
+        reply.pst.idx
+        reply.pst.str)
+      next(reply.val, reply.pst)
+  }
+
+
+//type Parser.Reply <V: Type> {
+  //error(err: Parser.Error)
+  //value(pst: Parser.State, val: V)
+//}
+//type Parser.Reply <V: Type> {
+  //error(err: Parser.ErrorAt)
+  //value(idx: Nat, str: String, val: V)
+//}

@@ -1,0 +1,2 @@
+Kind.Parser.text_now(text: String): Parser(Unit)
+  Parser.text(text)

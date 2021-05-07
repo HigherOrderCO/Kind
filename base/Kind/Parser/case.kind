@@ -1,40 +1,39 @@
 Kind.Parser.case: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("case ");
+  Kind.Parser.block("case", Parser {
+    Kind.Parser.text("case ")
 
     // Matched values
     get vals = Parser.many1!(Parser {
       get expr = Parser.avoiding!(Kind.Parser.text("{"), Kind.Parser.term)
       get name = Parser.maybe!(Parser {
-        Kind.Parser.text("as");
-        get name = Parser.override_error!(Kind.Parser.name1, "Expected identifier after \"as\"");
-        Parser.maybe!(Kind.Parser.text(";"));
-        return name;
+        Kind.Parser.text("as")
+        get name = Kind.Parser.name1
+        Parser.maybe!(Kind.Parser.text(";"))
+        return name
       })
       let name = name <> Kind.Term.extract_name(expr)
       return {name, expr}
-    });
+    })
 
     // With variables
-    get wyth = Kind.Parser.case.with;
+    get wyth = Kind.Parser.case.with
+
 
     // Cases
-    Kind.Parser.text_error("{", "Missing '{' after \"case …\"");
-    get cses = Parser.until!(Kind.Parser.text("}"), Parser.append_error!(Kind.Parser.case.case, "\nInside case."));
-    get smrt = Parser.maybe!(Kind.Parser.text("!"));
+    get cses = Kind.Parser.items!("{", Kind.Parser.case.case, "}")
+    get smrt = Parser.maybe!(Kind.Parser.text("!"))
 
     // Default value
     get dflt = Parser.maybe!(Parser {
-      Kind.Parser.text("default");
-      get term = Parser.append_error!(Kind.Parser.term, "\nInside default.");
-      return term;
-    });
+      Kind.Parser.text("default")
+      get term = Kind.Parser.term
+      return term
+    })
 
     // Motive
     get moti = Parser.maybe!(Parser {
-      Kind.Parser.text(":");
-      Parser.append_error!(Kind.Parser.term, "\nInside motive.");
+      Kind.Parser.text(":")
+      Parser.append_error!(Kind.Parser.term, "\nInside motive.")
     })
     let moti = case moti {
       none: case smrt {
@@ -44,10 +43,8 @@ Kind.Parser.case: Parser(Kind.Term)
       some: some(moti.value)
     }
 
-    get orig = Kind.Parser.stop(init);
-
-    return Kind.Parser.case.build(vals, wyth, cses, dflt, moti, orig)
-  }
+    return Kind.Parser.case.build(vals, wyth, cses, dflt, moti)
+  })
 
 Kind.Parser.case.build(
   vals: List<Pair<Kind.Name, Kind.Term>>
@@ -55,19 +52,18 @@ Kind.Parser.case.build(
   cses: List<Pair<List<Kind.Name>, Kind.Term>>
   dflt: Maybe<Kind.Term>
   moti: Maybe<Kind.Term>
-  orig: Pair<Nat,Nat>
 ): Kind.Term
   case vals {
     nil: case cses {
-      nil: log("MISSING CASE") Kind.Term.ref("missing_case")
+      nil: Kind.Term.ref("missing_case")
       cons: Pair.snd!!(cses.head)
     }
     cons:
       let group = Kind.Parser.case.group(dflt,cses)
       let name = Pair.fst!!(vals.head)
       let expr = Pair.snd!!(vals.head)
-      let cses = Kind.Map.map!!((cses) Kind.Parser.case.build(vals.tail,wyth,cses,dflt,moti,orig), group)
-      Kind.Term.ori(orig, Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti))
+      let cses = Kind.Map.map!!((cses) Kind.Parser.case.build(vals.tail,wyth,cses,dflt,moti), group)
+      Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti)
   }
 
 Kind.Parser.case.group(
@@ -91,3 +87,37 @@ Kind.Parser.case.group(
           Kind.Map.set!(cse_names.head, {cse_names.tail, cse_value} & rest, map)
       }
   }
+
+Kind.Parser.case.case: Parser(Pair<List<Kind.Name>, Kind.Term>)
+  Parser {
+    get no_names = Parser.try!(Kind.Parser.text(":"))
+    if no_names then Parser {
+      Kind.Parser.spaces
+      Parser.fail!("Expected constructor names.")
+    } else Parser {
+      get names = Parser.until!(Kind.Parser.text(":"), Kind.Parser.name1)
+      get term = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(","))
+      return {names, term}
+    }
+  }
+
+Kind.Parser.case.with: Parser(List<Kind.Ann>)
+  Parser.first_of!([
+    Parser {
+      Kind.Parser.text("with ")
+      Parser.many!(Parser {
+        get name = Kind.Parser.name1
+        get type = Parser.maybe!(Parser {
+          Kind.Parser.text(":")
+          get type = Kind.Parser.term
+          Parser.maybe!(Kind.Parser.text(";"))
+          return type
+        })
+        return Kind.Ann.new(name, Kind.Term.ref(name), type)
+      })
+    }
+    Parser {
+      return []
+    }
+  ])

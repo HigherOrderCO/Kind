@@ -1,18 +1,12 @@
 Kind.Parser.log: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("log(");
-    get strs = Parser.until!(Kind.Parser.text(")"), Kind.Parser.item!(Kind.Parser.term));
-    get cont = Kind.Parser.term;
-    let term = Kind.Term.ref("Debug.log");
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let args = List.fold!(strs)!(Kind.Term.ref("String.nil"), (x,xs) 
-      let arg = Kind.Term.ref("String.concat");
-      let arg = Kind.Term.app(arg, x);
-      let arg = Kind.Term.app(arg, xs);
-      arg);
-    let term = Kind.Term.app(term, args);
-    let term = Kind.Term.app(term, Kind.Term.lam("", (x) cont));
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, term);
-  }
+  Kind.Parser.block("log", Parser {
+    Kind.Parser.text("log(")
+    get text = Kind.Parser.term
+    Kind.Parser.text(")")
+    get cont = Kind.Parser.term
+    let term = Kind.Term.ref("Debug.log")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, text)
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) cont))
+    return term
+  })

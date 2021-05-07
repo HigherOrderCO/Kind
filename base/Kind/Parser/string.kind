@@ -1,27 +1,22 @@
-Kind.Parser.string.go(
-  delim: Char,
-  str: String,
-): Parser<String>
-  (err, idx, code)
-  case code {
+Kind.Parser.string.go(delim: Char, str: String): Parser<String>
+  (pst)
+  open pst
+  case pst.str {
     nil:
-      Parser.Reply.error_long<String>(idx, code, "Non-terminating string.")
+      Parser.Reply.fail<String>(pst.nam, pst.ini, pst.idx, "Non-terminating string.")
     cons:
-      if U16.eql(code.head, delim) then
-        Parser.Reply.value<String>(err, Nat.succ(idx), code.tail, String.reverse(str))
-      else case Kind.Parser.char.single(err, idx, code) as parsed {
-        error:
-          Parser.Reply.error<String>(parsed.err)
-        value:
-          Kind.Parser.string.go(delim, String.cons(parsed.val,str), err, parsed.idx, parsed.code)
+      if U16.eql(pst.str.head, delim) then
+        let pst = Parser.State.new(pst.err, pst.nam, pst.ini, Nat.succ(pst.idx), pst.str.tail)
+        Parser.Reply.value<String>(pst, String.reverse(str))
+      else case Kind.Parser.char.single(pst) as parsed {
+        error: Parser.Reply.error<String>(parsed.err)
+        value: Kind.Parser.string.go(delim, String.cons(parsed.val,str), parsed.pst)
       }
   }
 
 Kind.Parser.string(delim: Char): Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text(String.cons(delim, String.nil));
-    get strx = Kind.Parser.string.go(delim, "");
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, Kind.Term.str(strx));
-  }
+  Kind.Parser.block("string", Parser {
+    Kind.Parser.text(String.cons(delim, String.nil))
+    get strx = Kind.Parser.string.go(delim, "")
+    return Kind.Term.str(strx)
+  })

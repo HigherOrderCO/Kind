@@ -1,5 +1,0 @@
-Kind.Parser.text_error(text: String, error: String): Parser(Unit)
-  Parser {
-    Kind.Parser.spaces;
-    Parser.override_error!(Parser.text(text), error);
-  }

@@ -1,29 +1,21 @@
 Kind.Parser.machine_integer.unsigned(size: Nat): Parser(Kind.Term)
-  Parser {
+  Kind.Parser.block("int", Parser {
     let size_str = Nat.show(size)
-
-    get init = Kind.Parser.init
-    Kind.Parser.spaces;
+    Kind.Parser.spaces
     get natx = Kind.Parser.nat
-    Parser.text("#" | Nat.show(size));
-
-    let term = Kind.Term.ref("Nat.to_u" | Nat.show(size));
-    let term = Kind.Term.app(term, natx);
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, term);
-  }
+    Parser.text("#" | Nat.show(size))
+    let term = Kind.Term.ref("Nat.to_u" | Nat.show(size))
+    let term = Kind.Term.app(term, natx)
+    return term
+  })
 
 Kind.Parser.machine_integer.signed(size: Nat): Parser(Kind.Term)
-  Parser {
+  Kind.Parser.block("int", Parser {
     let size_str = Nat.show(size)
-
-    get init = Kind.Parser.init;
-    Kind.Parser.spaces;
-
-    get intx = Kind.Parser.int;
-    Parser.text("#" | size_str);
-    let term = Kind.Term.ref("Int.to_i" | size_str);
-    let term = Kind.Term.app(term, intx);
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, term);
-  }
+    Kind.Parser.spaces
+    get intx = Kind.Parser.int
+    Parser.text("#" | size_str)
+    let term = Kind.Term.ref("Int.to_i" | size_str)
+    let term = Kind.Term.app(term, intx)
+    return term
+  })

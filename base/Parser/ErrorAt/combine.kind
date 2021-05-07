@@ -1,7 +1,0 @@
-Parser.ErrorAt.combine(
-  a: Parser.ErrorAt,
-  b: Parser.ErrorAt,
-): Parser.ErrorAt
-  open a
-  open b
-  if Nat.gtn(a.idx, b.idx) then a else b

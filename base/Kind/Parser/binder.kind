@@ -1,8 +1,18 @@
 Kind.Parser.binder(sep: String): Parser(List<Kind.Binder>)
   Parser {
     get lists = Parser.many1!(Parser.first_of!([
-      Kind.Parser.binder.homo(sep, Bool.true),
-      Kind.Parser.binder.homo(sep, Bool.false),
-    ]));
-    return List.flatten!(lists);
+      Kind.Parser.binder.homo(sep, true)
+      Kind.Parser.binder.homo(sep, false)
+    ]))
+    return List.flatten!(lists)
+  }
+
+Kind.Parser.binder.homo(sep: String, eras: Bool): Parser(List<Kind.Binder>)
+  Parser {
+    let open = if eras then "<" else "("
+    let clos = if eras then ">" else ")"
+    get bind = Kind.Parser.items1!(open, Kind.Parser.name_term(sep), clos)
+    return List.mapped!(bind)!((pair) case pair {
+      new: Kind.Binder.new(eras, pair.fst, pair.snd)
+    })
   }

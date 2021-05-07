@@ -1,2 +1,9 @@
-Test: String
-  "hello world!"
+Test: Nat
+  case true {
+    true:
+      // parse error test
+      let x = [1, 2
+      x
+    false:
+      90
+  }

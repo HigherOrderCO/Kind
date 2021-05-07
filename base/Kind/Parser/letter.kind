@@ -1,9 +1,13 @@
 Kind.Parser.letter: Parser(Kind.Letter)
-  (long, idx, code) case code {
-    nil: Parser.Reply.error_long!(idx, code, "Unexpected eof."),
+  (pst)
+  open pst
+  case pst.str {
+    nil:
+      Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Unexpected eof."),
     cons:
-      if Kind.Name.is_letter(code.head) then
-        Parser.Reply.value!(long, Nat.succ(idx), code.tail, code.head)
+      if Kind.Name.is_letter(pst.str.head) then
+        let pst = Parser.State.new(pst.err, pst.nam, pst.ini, Nat.succ(pst.idx), pst.str.tail)
+        Parser.Reply.value!(pst, pst.str.head)
       else
-        Parser.Reply.error_long!(idx, code, "Expected letter."),
+        Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Expected name."),
   }

@@ -1,2 +1,4 @@
 Parser.log_code: Parser(Unit)
-  (long, idx, code) Debug.log!(code, (x) Parser.Reply.value!(long, idx, code, Unit.new))
+  (pst)
+  open pst
+  Debug.log!(pst.str, (x) Parser.Reply.value!(pst, unit))

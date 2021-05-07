@@ -1,11 +1,10 @@
-Kind.Parser.op(sym: String, ref: String, init: Nat, val0: Kind.Term): Parser(Kind.Term)
+Kind.Parser.op(sym: String, ref: String, val0: Kind.Term): Parser(Kind.Term)
   Parser {
-    get u = Kind.Parser.text(sym);
-    get u = Parser.override_error!(Parser.text(" "), "Operators need to be separated by a space");
-    get val1 = Parser.append_error!(Kind.Parser.term, "\nIn right operand of \"" | sym | "\"");
-    get orig = Kind.Parser.stop(init);
-    let term = Kind.Term.ref(ref);
-    let term = Kind.Term.app(term, val0);
-    let term = Kind.Term.app(term, val1);
-    return Kind.Term.ori(orig, term);
+    Kind.Parser.text(sym)
+    //Kind.Parser.text_now(" ")
+    get val1 = Kind.Parser.term
+    let term = Kind.Term.ref(ref)
+    let term = Kind.Term.app(term, val0)
+    let term = Kind.Term.app(term, val1)
+    return term
   }

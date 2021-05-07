@@ -1,0 +1,105 @@
+Kind.Parser.letforrange.nat: Parser(Kind.Term)
+  Kind.Parser.block("let-for", Parser {
+    Kind.Parser.text("let ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text("=")
+    Kind.Parser.text("for ")
+    get elem = Kind.Parser.name1
+    Kind.Parser.text("from")
+    get idx0 = Kind.Parser.term
+    Kind.Parser.text("to")
+    get idx1 = Kind.Parser.term
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = Kind.Parser.term
+    let term = Kind.Term.ref("Nat.for")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.ref(name))
+    let term = Kind.Term.app(term, idx0)
+    let term = Kind.Term.app(term, idx1)
+    let lamb = Kind.Term.lam(elem, (e) Kind.Term.lam(name, (s) loop))
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.let(name, term, (x) body)
+    return term
+  })
+
+Kind.Parser.letforrange.nat.with: Parser(Kind.Term)
+  Kind.Parser.block("for", Parser {
+    Kind.Parser.text("for ")
+    get elem = Kind.Parser.name1
+    Kind.Parser.text("from")
+    get idx0 = Kind.Parser.term
+    Kind.Parser.text("to")
+    get idx1 = Kind.Parser.term
+    Kind.Parser.text("with ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = Kind.Parser.term
+    let term = Kind.Term.ref("Nat.for")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.ref(name))
+    let term = Kind.Term.app(term, idx0)
+    let term = Kind.Term.app(term, idx1)
+    let lamb = Kind.Term.lam(elem, (e) Kind.Term.lam(name, (s) loop))
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.let(name, term, (x) body)
+    return term
+  })
+
+Kind.Parser.letforrange.u32: Parser(Kind.Term)
+  Kind.Parser.block("let-for", Parser {
+    Kind.Parser.text("let ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text("=")
+    Kind.Parser.text("for ")
+    get elem = Kind.Parser.name1
+    Kind.Parser.text(":")
+    Kind.Parser.text("U32")
+    Kind.Parser.text("from")
+    get idx0 = Kind.Parser.term
+    Kind.Parser.text("to")
+    get idx1 = Kind.Parser.term
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = Kind.Parser.term
+    let term = Kind.Term.ref("U32.for")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.ref(name))
+    let term = Kind.Term.app(term, idx0)
+    let term = Kind.Term.app(term, idx1)
+    let lamb = Kind.Term.lam(elem, (e) Kind.Term.lam(name, (s) loop))
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.let(name, term, (x) body)
+    return term
+  })
+
+Kind.Parser.letforrange.u32.with: Parser(Kind.Term)
+  Kind.Parser.block("for", Parser {
+    Kind.Parser.text("for ")
+    get elem = Kind.Parser.name1
+    Kind.Parser.text(":")
+    Kind.Parser.text("U32")
+    Kind.Parser.text("from")
+    get idx0 = Kind.Parser.term
+    Kind.Parser.text("to")
+    get idx1 = Kind.Parser.term
+    Kind.Parser.text("with ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = Kind.Parser.term
+    let term = Kind.Term.ref("U32.for")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.ref(name))
+    let term = Kind.Term.app(term, idx0)
+    let term = Kind.Term.app(term, idx1)
+    let lamb = Kind.Term.lam(elem, (e) Kind.Term.lam(name, (s) loop))
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.let(name, term, (x) body)
+    return term
+  })

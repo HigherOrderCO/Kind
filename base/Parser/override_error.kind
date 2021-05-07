@@ -1,9 +1,0 @@
-Parser.override_error<V: Type>(parse: Parser(V), error: String): Parser(V)
-  (err, idx, code)
-    let reply = parse(err, idx, code)
-    case reply {
-      error:
-        open reply.err
-        Parser.Reply.error_long!(reply.err.idx, reply.err.code, error)
-      value: reply
-    }
