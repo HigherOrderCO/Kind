@@ -1,9 +1,9 @@
 type Web.Kaelin.Skill{
 	new(
-  	name: String
-		range: Nat
-		effects: Web.Kaelin.Effect<Unit>
-		key: Char
+  	name: String,
+		range: I32,
+		effect: Web.Kaelin.Effect<Unit>,
+		key: Char,
 	)
 }
 
