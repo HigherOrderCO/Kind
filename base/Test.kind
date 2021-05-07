@@ -1,9 +1,10 @@
-Test: Nat
-  case true {
-    true:
-      // parse error test
-      let x = [1, 2
-      x
-    false:
-      90
-  }
+Test: I32
+  (+1#32)
+  //case true {
+    //true:
+      //// parse error test
+      //let x = [1, 2
+      //x
+    //false:
+      //90
+  //}
