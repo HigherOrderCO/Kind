@@ -1,5 +1,5 @@
 Parser.nat: Parser(Nat)
   Parser {
-    var digits = Parser.many1<Nat>(Parser.digit);
-    return Nat.from_base(10, digits);
+    var digits = Parser.many1<Nat>(Parser.digit)
+    return Nat.from_base(10, digits)
   }

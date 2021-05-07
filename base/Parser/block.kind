@@ -1,0 +1,14 @@
+Parser.block<V: Type>(
+  name: String
+  parse: Parser<V>
+): Parser<V>
+  (pst)
+  open pst
+  let reply = parse(Parser.State.new(pst.err, name, pst.idx, pst.idx, pst.str))
+  case reply {
+    error: reply
+    value: 
+      open reply.pst
+      let new_pst = Parser.State.new(reply.pst.err, pst.nam, pst.ini, reply.pst.idx, reply.pst.str)
+      Parser.Reply.value!(new_pst, reply.val)
+  }

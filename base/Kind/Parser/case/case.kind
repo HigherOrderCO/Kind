@@ -1,7 +1,0 @@
-Kind.Parser.case.case: Parser(Pair<List<Kind.Name>, Kind.Term>)
-  Parser {
-    get names = Parser.until!(Kind.Parser.text(":"), Kind.Parser.name1);
-    get term = Kind.Parser.term;
-    Parser.maybe!(Kind.Parser.text(","));
-    return {names, term};
-  }

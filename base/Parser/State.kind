@@ -1,0 +1,9 @@
+type Parser.State {
+  new(
+    err: Maybe(Parser.Error) // farthest error recorded so far
+    nam: String              // name of the current parsed structure
+    ini: Nat                 // initial index of current parsed structure
+    idx: Nat                 // index of parser cursor
+    str: String              // remaining to-be-parsed string
+  )
+}

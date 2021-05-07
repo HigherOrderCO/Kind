@@ -1,36 +1,27 @@
 Kind.Parser.machine_integer.unsigned(size: Nat): Parser(Kind.Term)
-  Parser {
+  Kind.Parser.block("int", Parser {
     let size_str = Nat.show(size)
-
-    get init = Kind.Parser.init
-    Kind.Parser.spaces;
+    Kind.Parser.spaces
     get natx = Kind.Parser.nat
-    Parser.text("#" | Nat.show(size));
-
-    let term = Kind.Term.ref("Nat.to_u" | Nat.show(size));
-    let term = Kind.Term.app(term, natx);
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, term);
-  }
+    Parser.text("#" | Nat.show(size))
+    let term = Kind.Term.ref("Nat.to_u" | Nat.show(size))
+    let term = Kind.Term.app(term, natx)
+    return term
+  })
 
 Kind.Parser.machine_integer.signed(size: Nat): Parser(Kind.Term)
-  Parser {
+  Kind.Parser.block("int", Parser {
     let size_str = Nat.show(size)
 
-    get init = Kind.Parser.init;
-    Kind.Parser.spaces;
-
-    // TODO: shouldn't need, can the int parser return something different?
-    get intx = Kind.Parser.int;
-    let intx = case intx {
-      ori: case intx.expr {
-        app: intx.expr.argm
-      } default Kind.Term.ref("?")
-    } default Kind.Term.ref("?")
-
+    Kind.Parser.spaces
+    get sgn_num = Parser.first_of!([Kind.Parser.int_pos, Kind.Parser.int_neg])
     Parser.text("#" | size_str);
-    let term = Kind.Term.ref("Nat.to_i" | size_str);
-    let term = Kind.Term.app(term, intx);
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, term);
-  }
+    let term = Kind.Term.ref("Nat.to_i" | size_str)
+    let term = case sgn_num {
+      new: case sgn_num.fst {
+        true: Kind.Term.app(term, Kind.Term.nat(sgn_num.snd))
+        false: Kind.Term.app(Kind.Term.ref("I32.neg"), Kind.Term.app(term, Kind.Term.nat(sgn_num.snd)))
+      }
+    }
+    return term
+  })

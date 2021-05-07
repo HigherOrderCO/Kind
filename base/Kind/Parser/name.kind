@@ -1,6 +1,6 @@
 Kind.Parser.name: Parser(Kind.Name)
   Parser {
-    Kind.Parser.spaces;
-    get chrs = Parser.many<Kind.Letter>(Kind.Parser.letter);
-    return List.fold!(chrs)!(String.nil, String.cons);
+    Kind.Parser.spaces
+    get chrs = Parser.many<Kind.Letter>(Kind.Parser.letter)
+    return List.fold!(chrs)!(String.nil, String.cons)
   }

@@ -1,2 +1,23 @@
 Parser.until<V: Type>(until: Parser(Unit), parse: Parser(V)): Parser(List<V>)
   Parser.until.go<V>(until, parse, [])
+
+Parser.until.go<V: Type>(
+  until: Parser(Unit)
+  parse: Parser(V)
+  values: List<V>
+): Parser<List<V>>
+  (pst)
+  let until_reply = until(pst)
+  case until_reply {
+    error:
+      let reply = parse(pst)
+      case reply {
+        error:
+          Parser.Reply.error<List<V>>(Parser.Error.combine(reply.err, until_reply.err))
+        value:
+          def values = reply.val & values
+          Parser.until.go<V>(until, parse, values, reply.pst)
+      }
+    value:
+      Parser.Reply.value<List<V>>(until_reply.pst, List.reverse<V>(values))
+  }

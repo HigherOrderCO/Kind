@@ -1,2 +1,2 @@
-Kind.Parser.ltn: Nat -> Kind.Term -> Parser(Kind.Term)
+Kind.Parser.ltn: Kind.Term -> Parser(Kind.Term)
   Kind.Parser.op("<?", "Nat.ltn")

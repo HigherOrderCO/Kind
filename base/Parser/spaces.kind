@@ -1,5 +1,5 @@
 Parser.spaces: Parser(List<Unit>)
   Parser.many!(Parser.first_of!([
-    Parser.text(" "),
-    Parser.text("\n"),
+    Parser.text(" ")
+    Parser.text("\n")
   ]))

@@ -7,6 +7,6 @@ Kind.api.export: IO<Unit>
     let e = Kind.api.io.show_term
     let e = Kind.api.io.show_term_normal
     let e = Kind.api.check_code
-    let e = Kind.Term.read;
-    return unit;
+    let e = Kind.Term.read
+    return unit
   }

@@ -1,9 +1,0 @@
-Kind.Parser.lambda.nameless: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("()");
-    get body = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    let expr = Kind.Term.lam("", (x) body);
-    return Kind.Term.ori(orig, expr);
-  }

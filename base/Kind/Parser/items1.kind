@@ -1,0 +1,11 @@
+Kind.Parser.items1<V: Type>(ini: String, parser: Parser(V), end: String): Parser(List(V))
+    Parser.wrap1!(
+      Kind.Parser.text(ini)
+      Parser {
+        Kind.Parser.spaces
+        get value = parser
+        Parser.maybe!(Kind.Parser.text(","))
+        return value
+      }
+      Kind.Parser.text(end)
+    )

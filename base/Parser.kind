@@ -1,2 +1,2 @@
 Parser(V: Type): Type
-  Nat -> String -> Parser.Reply<V>
+  Parser.State -> Parser.Reply<V>

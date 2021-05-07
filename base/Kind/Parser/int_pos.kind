@@ -1,6 +1,8 @@
 Kind.Parser.int_pos: Parser(Pair<Bool, Nat>)
   Parser {
     get sgn = Parser.text("+")
+    //Parser.log("parsed +")
     get digits = Parser.many1<Nat>(Parser.digit)
+    //Parser.log("parsed digits: " | List.show!(Nat.show, digits))
     return {true, Nat.from_base(10, digits)}
   }

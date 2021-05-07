@@ -1,12 +1,12 @@
 Kind.Parser.constructor(namespace: Kind.Name): Parser(Kind.Constructor)
   Parser {
-    get name = Kind.Parser.name1;
-    get args = Parser.maybe!(Kind.Parser.binder(":"));
+    get name = Kind.Parser.name1
+    get args = Parser.maybe!(Kind.Parser.binder(":"))
     get inds = Parser.maybe!(Parser {
-      Kind.Parser.text("~");
-      Kind.Parser.binder("=");
-    });
-    let args = Maybe.default!(args, []);
-    let inds = Maybe.default!(inds, []);
-    return Kind.Constructor.new(name, args, inds);
+      Kind.Parser.text("~")
+      Kind.Parser.binder("=")
+    })
+    let args = Maybe.default!(args, [])
+    let inds = Maybe.default!(inds, [])
+    return Kind.Constructor.new(name, args, inds)
   }

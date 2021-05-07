@@ -1,0 +1,4 @@
+Parser.get_nam: Parser(String)
+  (pst)
+  open pst
+  Parser.Reply.value!(pst, pst.nam)

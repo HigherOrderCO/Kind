@@ -1,12 +1,25 @@
-Kind.Parser.sigma(init: Nat, val0: Kind.Term): Parser(Kind.Term)
-  Parser {
-    Kind.Parser.text("~");
-    get val1 = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    let term = Kind.Term.ref("Sigma.new");
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, val0);
-    let term = Kind.Term.app(term, val1);
-    return Kind.Term.ori(orig, term);
-  }
+Kind.Parser.sigma(val0: Kind.Term): Parser(Kind.Term)
+  Kind.Parser.block("sigma", Parser {
+    Kind.Parser.text("~")
+    get val1 = Kind.Parser.term
+    let term = Kind.Term.ref("Sigma.new")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, val0)
+    let term = Kind.Term.app(term, val1)
+    return term
+  })
+
+Kind.Parser.sigma.type: Parser(Kind.Term)
+  Kind.Parser.block("sigma", Parser {
+    Kind.Parser.text("[")
+    get name = Kind.Parser.name1
+    Kind.Parser.text(":")
+    get typ0 = Kind.Parser.term
+    Kind.Parser.text("]")
+    get typ1 = Kind.Parser.term
+    let term = Kind.Term.ref("Sigma")
+    let term = Kind.Term.app(term, typ0)
+    let term = Kind.Term.app(term, Kind.Term.lam(name, (x) typ1))
+    return term
+  })

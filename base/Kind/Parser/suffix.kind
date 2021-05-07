@@ -1,37 +1,43 @@
-Kind.Parser.suffix(init: Nat, term: Kind.Term): Parser(Kind.Term)
-  (idx, code)
+Kind.Parser.suffix(term: Kind.Term): Parser(Kind.Term)
+  (pst)
+  open pst
   let suffix_parser = Parser.first_of!([
-    Kind.Parser.application(init, term),
-    Kind.Parser.application.erased(init, term),
-    Kind.Parser.list_set(init, term),
-    Kind.Parser.list_get(init, term),
-    Kind.Parser.map_set(init, term),
-    Kind.Parser.map_get(init, term),
-    Kind.Parser.arrow(init, term),
-    Kind.Parser.add(init, term),
-    Kind.Parser.sub(init, term),
-    Kind.Parser.mul(init, term),
-    Kind.Parser.div(init, term),
-    Kind.Parser.mod(init, term),
-    Kind.Parser.ltn(init, term),
-    Kind.Parser.lte(init, term),
-    Kind.Parser.eql(init, term),
-    Kind.Parser.gte(init, term),
-    Kind.Parser.gtn(init, term),
-    Kind.Parser.and(init, term),
-    Kind.Parser.or(init, term),
-    Kind.Parser.default(init, term),
-    Kind.Parser.cons(init, term),
-    Kind.Parser.concat(init, term),
-    Kind.Parser.string_concat(init, term),
-    Kind.Parser.sigma(init, term),
-    Kind.Parser.equality(init, term),
-    Kind.Parser.inequality(init, term),
-    Kind.Parser.rewrite(init, term),
-    Kind.Parser.annotation(init, term),
-    Kind.Parser.application.hole(init, term),
+   Kind.Parser.application(term)
+   Kind.Parser.application.erased(term)
+   Kind.Parser.list_set(term)
+   Kind.Parser.list_get(term)
+   Kind.Parser.map_set(term)
+   Kind.Parser.map_get(term)
+   Kind.Parser.arrow(term)
+   Kind.Parser.concat(term)
+   Kind.Parser.equality(term)
+   Kind.Parser.add(term)
+   Kind.Parser.sub(term)
+   Kind.Parser.mul(term)
+   Kind.Parser.div(term)
+   Kind.Parser.mod(term)
+   Kind.Parser.ltn(term)
+   Kind.Parser.lte(term)
+   Kind.Parser.eql(term)
+   Kind.Parser.gte(term)
+   Kind.Parser.gtn(term)
+   Kind.Parser.and(term)
+   Kind.Parser.or(term)
+   Kind.Parser.default(term)
+   Kind.Parser.cons(term)
+   Kind.Parser.string_concat(term)
+   Kind.Parser.sigma(term)
+   Kind.Parser.inequality(term)
+   Kind.Parser.rewrite(term)
+   Kind.Parser.annotation(term)
+   Kind.Parser.application.hole(term)
   ]);
-  case suffix_parser(idx, code) as suffix_parsed {
-    error: Parser.Reply.value!(idx, code, term),
-    value: Kind.Parser.suffix(init, suffix_parsed.val, suffix_parsed.idx, suffix_parsed.code),
+  case suffix_parser(pst) as suffix_parsed {
+    error:
+      open suffix_parsed.err
+      let err = Parser.Error.maybe_combine(pst.err, some(suffix_parsed.err))
+      let pst = Parser.State.new(err, pst.nam, pst.ini, pst.idx, pst.str)
+      Parser.Reply.value!(pst, term)
+    value: 
+      Kind.Parser.suffix(suffix_parsed.val, suffix_parsed.pst)
   }

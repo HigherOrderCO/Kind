@@ -1,18 +1,16 @@
 Kind.Parser.apply: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("apply(");
-    get func = Kind.Parser.term;
-    Kind.Parser.text(",");
-    get equa = Kind.Parser.term;
-    Kind.Parser.text(")");
-    get orig = Kind.Parser.stop(init);
-    let term = Kind.Term.ref("Equal.apply");
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, func);
-    let term = Kind.Term.app(term, equa);
-    return Kind.Term.ori(orig, term);
-  }
+  Kind.Parser.block("apply", Parser {
+    Kind.Parser.text("apply(")
+    get func = Kind.Parser.term
+    Kind.Parser.text(",")
+    get equa = Kind.Parser.term
+    Kind.Parser.text(")")
+    let term = Kind.Term.ref("Equal.apply")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, func)
+    let term = Kind.Term.app(term, equa)
+    return term
+  })
