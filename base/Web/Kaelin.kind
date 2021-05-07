@@ -10,7 +10,7 @@ Web.Kaelin: App<Web.Kaelin.State>
   // Digite uma sala e aperte enter: 0x108309300
 
   // void
-  // Sala vazia. Digite um DraftString para começar um jogo:
+  // Sala vazia. Digite um DraftS tring para começar um jogo:
   // sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
 
   // Render function

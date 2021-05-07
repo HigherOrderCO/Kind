@@ -1,4 +1,6 @@
 type Web.Kaelin.Indicator {
-  red
   green
+  red
+  yellow
+  blue
 }

@@ -9,14 +9,14 @@ Web.Kaelin.Heroes.Croni.skills.quick_shot: Web.Kaelin.Skill
   Web.Kaelin.Skill.new(
     "Quick Shot",
     +2#32,
-    Web.Kaelin.Effect.all.vampirism(3),
+    Web.Kaelin.Effect.all.vampirism(+3#32),
     '0'
   )
 
 Web.Kaelin.Heroes.Croni.skills.vampirism: Web.Kaelin.Skill
   Web.Kaelin.Skill.new(
-    "Vampirism"
+    "Vampirism",
     +3#32,
-    Web.Kaelin.Effect.all.vampirism(3),
+    Web.Kaelin.Effect.all.vampirism(+3#32),
     'V'
   )

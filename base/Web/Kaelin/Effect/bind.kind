@@ -9,7 +9,7 @@ Web.Kaelin.Effect.bind<A: Type, B: Type>(
         let value = result_b.value
         let map = result_b.map
         let futures = result_a.futures ++ result_b.futures
-        let indicators = result_a.indicators ++ result_b.indicators
+        let indicators = NatMap.union!(result_a.indicators, result_b.indicators)
         Web.Kaelin.Effect.Result.new<B>(value, map, futures, indicators)
     }
   }

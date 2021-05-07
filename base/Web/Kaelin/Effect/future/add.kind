@@ -1,4 +1,4 @@
 // TODO LATER
 Web.Kaelin.Effect.future.add(futures: List(Web.Kaelin.Future)): Web.Kaelin.Effect<Unit>
   (tick, center, target, map)
-  Web.Kaelin.Effect.Result.new!(unit, map, futures, [])
+  Web.Kaelin.Effect.Result.new!(unit, map, futures, NatMap.new!)

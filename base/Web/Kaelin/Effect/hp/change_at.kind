@@ -7,11 +7,13 @@ Web.Kaelin.Effect.hp.change_at(
     let res = Web.Kaelin.Map.change_hp_at(change, pos, map)
     let dhp = Pair.fst!!(res)
     let map = Pair.snd!!(res)
+    let key = Web.Kaelin.Coord.Convert.axial_to_nat(pos)
+    let indicators = NatMap.new!
     Web.Kaelin.Effect.map.set(map)
     if I32.gte(dhp, +0#32) then
-      Web.Kaelin.Effect.indicators.add([Web.Kaelin.Indicator.green])
+      Web.Kaelin.Effect.indicators.add(NatMap.set!(key, Web.Kaelin.Indicator.green, indicators))
     else if I32.ltn(dhp, +0#32) then
-      Web.Kaelin.Effect.indicators.add([Web.Kaelin.Indicator.red])
+      Web.Kaelin.Effect.indicators.add(NatMap.set!(key, Web.Kaelin.Indicator.red, indicators))
     else
       Web.Kaelin.Effect { return unit }
     // TODO: if HP is <= 0, delete entity from map

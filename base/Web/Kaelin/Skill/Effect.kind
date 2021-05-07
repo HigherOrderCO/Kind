@@ -1,105 +1,105 @@
-// TODO: change to:
-// TODO: if player dies between any skill what we do?
-// - check in any entity.creature.(damage, heal, etc) function if player is dead
-// - monad
-// - receive map in entity.creature.(damage, heal, etc) and if player dies delete the entity from map
-// 
+// // TODO: change to:
+// // TODO: if player dies between any skill what we do?
+// // - check in any entity.creature.(damage, heal, etc) function if player is dead
+// // - monad
+// // - receive map in entity.creature.(damage, heal, etc) and if player dies delete the entity from map
+// // 
 
 
-Web.Kaelin.Skill.Effect: Type
-  Web.Kaelin.Map -> Pair(Map(Indicators), Web.Kaelin.Map)
+// Web.Kaelin.Skill.Effect: Type
+//   Web.Kaelin.Map -> Pair(Map(Indicators), Web.Kaelin.Map)
 
-//Web.Kaelin.Skill.Effect.damage(
-  //damage: I32
-  //pos: Web.Kaelin.Coord
-//): Web.Kaelin.Skill.Effect
-  // ... gets entity at pos and call Web.Kaelin.Entity.damage on it ...
+// //Web.Kaelin.Skill.Effect.damage(
+//   //damage: I32
+//   //pos: Web.Kaelin.Coord
+// //): Web.Kaelin.Skill.Effect
+//   // ... gets entity at pos and call Web.Kaelin.Entity.damage on it ...
 
-//Web.Kaelin.Skill.Effect.area(
-//  effect: Web.Kaelin.Effect
-//  area: List(Web.Kaelin.Coord)
-//): Web.Kaelin.Effect
-//  ...
+// //Web.Kaelin.Skill.Effect.area(
+// //  effect: Web.Kaelin.Effect
+// //  area: List(Web.Kaelin.Coord)
+// //): Web.Kaelin.Effect
+// //  ...
 
-//Web.Kaelin.Skill.Effect.croni_shadow_spell(pos: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
-//  Web.Kaelin.Skill.Effect.area(Web.Kaelin.Skill.Effect.damage(10#32, [pos0, pos1...]))
+// //Web.Kaelin.Skill.Effect.croni_shadow_spell(pos: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
+// //  Web.Kaelin.Skill.Effect.area(Web.Kaelin.Skill.Effect.damage(10#32, [pos0, pos1...]))
 
-//Web.Kaelin.Skill.Effect.vamp(pos: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
-//  (state)
-//  ... pegar o objeto na posicao ...
-//  ... ver se ele é um inimigo ...
+// //Web.Kaelin.Skill.Effect.vamp(pos: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
+// //  (state)
+// //  ... pegar o objeto na posicao ...
+// //  ... ver se ele é um inimigo ...
 
-Web.Kaelin.Effect.bard_heal: Web.Kaelin.Effect
-  Web.Kaelin.Effect.many([
-    Web.Kaelin.Effect.radial_area_heal(2, 3,  7)
-  ])
+// Web.Kaelin.Effect.bard_heal: Web.Kaelin.Effect
+//   Web.Kaelin.Effect.many([
+//     Web.Kaelin.Effect.radial_area_heal(2, 3,  7)
+//   ])
 
-Web.Kaelin.Skill.robadona(center: Web.Kaelin.Coord, target: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
-  (state)
-  let state = Web.Kaelin.Skill.damage(8, center, state)
-  let state = Web.Kaelin.Skill.heal(4, center, state)
-  let state = Web.Kaelin.Skill.stun(target, state)
+// Web.Kaelin.Skill.robadona(center: Web.Kaelin.Coord, target: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
+//   (state)
+//   let state = Web.Kaelin.Skill.damage(8, center, state)
+//   let state = Web.Kaelin.Skill.heal(4, center, state)
+//   let state = Web.Kaelin.Skill.stun(target, state)
 
-  let p_dir = Web.Kaelin.point_to(center, target)
-  let {pos, state} = Web.Kaelin.Skill.push(target, p_dir, 2)
-  case pos {
-    none: state
-    some: Web.Kaelin.Skill.damage(8, pos.value, state)
-  }
+//   let p_dir = Web.Kaelin.point_to(center, target)
+//   let {pos, state} = Web.Kaelin.Skill.push(target, p_dir, 2)
+//   case pos {
+//     none: state
+//     some: Web.Kaelin.Skill.damage(8, pos.value, state)
+//   }
 
-Web.Kaelin.Skill.Robadona.effect(center: Web.Kaelin.Coord, target: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
-  let enemy_hp = Web.Kaelin.Map.get_hp_at(target)
-  let targ_dir = Web.Kaelin.point_to(center, target)
-  let state = Web.Kaelin.Skill.push(target, targ_dir, I32.div(enemy_hp, 10))
-  state
-
-
-Web.Kaelin.Skill.Sabotage.effect(center: Web.Kaelin.Coord, target: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
-  (state)
-  let turret = Wrb.Kaelin.Map.get_at(center, state)
-  case turret {
-    none: state
-    some: Web.Kaelin.Effect.radial_damage(center, 3, state)
-  }
-
-Web.Kaelin.Skill.State.effect(center: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
-  (state)
-  [
-    {Web.Kaelin.Indicator.red, center}
-  ]
-
-Web.Kaelin.Skill.Robadona.indicators: Web.Kaelin.Skill.Indicator
-  Web.Kaelin.Skill.SingleTarget(1)
+// Web.Kaelin.Skill.Robadona.effect(center: Web.Kaelin.Coord, target: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
+//   let enemy_hp = Web.Kaelin.Map.get_hp_at(target)
+//   let targ_dir = Web.Kaelin.point_to(center, target)
+//   let state = Web.Kaelin.Skill.push(target, targ_dir, I32.div(enemy_hp, 10))
+//   state
 
 
-// da dano 8
-// stunna
-// empurra
-// se cura
-// causa dano nos inimigos atrás
+// Web.Kaelin.Skill.Sabotage.effect(center: Web.Kaelin.Coord, target: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
+//   (state)
+//   let turret = Wrb.Kaelin.Map.get_at(center, state)
+//   case turret {
+//     none: state
+//     some: Web.Kaelin.Effect.radial_damage(center, 3, state)
+//   }
 
-type Web.Kaelin.Skill.Effect {
-	hp(
-    value     : I32
-    modifier  : Web.Kaelin.Skill.Modifier.hp
-    area      : Web.Kaelin.Skill.area
-    indicator : Maybe(Web.Kaelin.Skill.area.indicator)
-  )
-	position(
-    value     : I32
-    modifier  : Web.Kaelin.Skill.Modifier.position
-    area      : Web.Kaelin.Skill.area
-    indicator : Maybe(Web.Kaelin.Skill.area.indicator)
-  )
-	status(
-    duration  : I32
-    modifier  : Web.Kaelin.Skill.Modifier.status,
-    area      : Web.Kaelin.Skill.area,
-    indicator : Maybe(Web.Kaelin.Skill.area.indicator)
-  )
+// Web.Kaelin.Skill.State.effect(center: Web.Kaelin.Coord): Web.Kaelin.Skill.Effect
+//   (state)
+//   [
+//     {Web.Kaelin.Indicator.red, center}
+//   ]
+
+// Web.Kaelin.Skill.Robadona.indicators: Web.Kaelin.Skill.Indicator
+//   Web.Kaelin.Skill.SingleTarget(1)
 
 
+// // da dano 8
+// // stunna
+// // empurra
+// // se cura
+// // causa dano nos inimigos atrás
+
+// type Web.Kaelin.Skill.Effect {
+// 	hp(
+//     value     : I32
+//     modifier  : Web.Kaelin.Skill.Modifier.hp
+//     area      : Web.Kaelin.Skill.area
+//     indicator : Maybe(Web.Kaelin.Indicator)
+//   )
+// 	position(
+//     value     : I32
+//     modifier  : Web.Kaelin.Skill.Modifier.position
+//     area      : Web.Kaelin.Skill.area
+//     indicator : Maybe(Web.Kaelin.Indicator)
+//   )
+// 	status(
+//     duration  : I32
+//     modifier  : Web.Kaelin.Skill.Modifier.status,
+//     area      : Web.Kaelin.Skill.area,
+//     indicator : Maybe(Web.Kaelin.Indicator)
+//   )
 
 
-}
+
+
+// }
 

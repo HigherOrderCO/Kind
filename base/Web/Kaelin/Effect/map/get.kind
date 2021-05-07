@@ -1,3 +1,3 @@
 Web.Kaelin.Effect.map.get: Web.Kaelin.Effect<Web.Kaelin.Map>
   (tick, center, target, map)
-  Web.Kaelin.Effect.Result.new!(map, map, [], [])
+  Web.Kaelin.Effect.Result.new!(map, map, [], NatMap.new!)
