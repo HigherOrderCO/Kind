@@ -26,3 +26,6 @@ Test: _
 
 - Inference on numeric literals and binary operators. Check `SYNTAX.md`.
 
+### Kind 1.0.50
+
+- Improve operator inference

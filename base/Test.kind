@@ -9,5 +9,5 @@ Test: _
   let h = (+7.2)
   let i = (-7.0)
   let z = g + g
-  z
-
+  let k = i + i
+  (k + k)

@@ -179,20 +179,20 @@ Kind.Term.check(
         }
       },
       ope: Kind.Check {
-        get otyp = case type {
-          some: Kind.Check { return type.value }
-          none: Kind.Check { 
-            get hmm = Kind.Term.check(term.arg0, none, defs, ctx, Kind.MPath.o(path), orig)
-            let uni = unit
-            return hmm
-          }
-        }
+        let otyp = type <> Kind.Term.hol(Bits.e)
         let dsug = Kind.Term.check.expand.ope(term.name, term.arg0, term.arg1, otyp, defs)
         case dsug {
-          none: Kind.Term.check.cant_infer(term, type, ctx, orig)
+          none: Kind.Check {
+            get otyp = Kind.Term.check(term.arg0, none, defs, ctx, Kind.MPath.o(path), orig)
+            let dsug = Kind.Term.check.expand.ope(term.name, term.arg0, term.arg1, otyp, defs)
+            case dsug {
+              none: Kind.Term.check.cant_infer(term, type, ctx, orig)
+              some: Kind.Term.check.patch(dsug.value, type, path)
+            }
+          },
           some: Kind.Term.check.patch(dsug.value, type, path)
         }
-      }
+      },
       gol: Kind.Check {
         Kind.Check.result!(type, [
           Kind.Error.show_goal(term.name, term.dref, term.verb, type, ctx)
