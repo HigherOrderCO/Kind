@@ -13,3 +13,7 @@ Test: _
   let bar = foo@y <- 80 // same as `case foo { new: Foo.new(80,foo.y) }`
   bar
 ```
+
+### Kind 1.0.47
+
+- Optimize float literals
