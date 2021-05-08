@@ -1,2 +1,0 @@
-Kind.Term.show.as_nat(term: Kind.Term): Maybe<String>
-  Maybe.mapped!(Kind.Term.show.as_nat.go(term))!(Nat.show)

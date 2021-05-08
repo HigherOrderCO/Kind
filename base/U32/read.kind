@@ -1,0 +1,2 @@
+U32.read(str: String): U32
+  Nat.to_u32(Nat.read(str))

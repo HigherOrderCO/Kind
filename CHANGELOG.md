@@ -21,3 +21,8 @@ Test: _
 ### Kind 1.0.48
 
 - Float literal bugfix
+
+### Kind 1.0.49
+
+- Inference on numeric literals and binary operators. Check `SYNTAX.md`.
+

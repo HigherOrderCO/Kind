@@ -1,0 +1,2 @@
+U128.from_nat(n: Nat): U128
+  U128.new(Nat.to_word!(n))

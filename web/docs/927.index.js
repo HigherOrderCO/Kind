@@ -1970,7 +1970,7 @@ module.exports = (function() {
     const Int$to_i32 = a0 => (Number(a0));
     const Int$new = a0 => a1 => (a0 - a1);
     const Int$from_nat = a0 => (a0);
-    const Nat$to_i32 = a0 => (Number(a0));
+    const I32$from_nat = a0 => (Number(a0));
 
     function List$cons$(_head$2, _tail$3) {
         var $369 = ({
@@ -2909,6 +2909,7 @@ module.exports = (function() {
     const Web$Kaelin$Constants$center_y = 128;
     const F64$sub = a0 => a1 => (a0 - a1);
     const F64$mul = a0 => a1 => (a0 * a1);
+    const U32$from_nat = a0 => (Number(a0) >>> 0);
     const F64$add = a0 => a1 => (a0 + a1);
 
     function Web$Kaelin$Coord$round$floor$(_n$1) {
@@ -8459,7 +8460,7 @@ module.exports = (function() {
         'Int.to_i32': Int$to_i32,
         'Int.new': Int$new,
         'Int.from_nat': Int$from_nat,
-        'Nat.to_i32': Nat$to_i32,
+        'I32.from_nat': I32$from_nat,
         'List.cons': List$cons,
         'Web.Kaelin.Skill.new': Web$Kaelin$Skill$new,
         'Web.Kaelin.Skill.Effect.hp': Web$Kaelin$Skill$Effect$hp,
@@ -8561,6 +8562,7 @@ module.exports = (function() {
         'Web.Kaelin.Constants.center_y': Web$Kaelin$Constants$center_y,
         'F64.sub': F64$sub,
         'F64.mul': F64$mul,
+        'U32.from_nat': U32$from_nat,
         'F64.add': F64$add,
         'Web.Kaelin.Coord.round.floor': Web$Kaelin$Coord$round$floor,
         'Web.Kaelin.Coord.round.round_F64': Web$Kaelin$Coord$round$round_F64,

@@ -1,0 +1,5 @@
+V3.look_at(a: V3, b: V3): V3
+  if V3.eql(a, b) then
+    {0.0#64, 0.0#64, 0.0#64}
+  else
+    V3.norm(V3.sub(b, a))

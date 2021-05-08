@@ -1,0 +1,3 @@
+V3.len(a: V3): F64
+  open a
+  F64.pow(F64.add(F64.mul(a.x,a.x), F64.add(F64.mul(a.y,a.y), F64.mul(a.z,a.z))), 0.5#64)

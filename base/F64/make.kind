@@ -1,0 +1,2 @@
+F64.make(s: Bool, a: Nat, b: Nat): F64
+  F64.make(s, a, b)

@@ -6,7 +6,8 @@ Kind.Term.check(
   path: Kind.MPath,
   orig: Maybe<Pair<Nat,Nat>>,
 ): Kind.Check<Kind.Term>
-  do Kind.Check {
+  //log("check " | Kind.Term.show(term) | " :: " | Kind.Term.show(type <> Kind.Term.ref("_")))
+  Kind.Check {
     get infr = case term {
       ref: case Kind.Map.get!(term.name, defs) as got {
         none: Kind.Check.result!(type, [Kind.Error.undefined_reference(orig, term.name)]),
@@ -26,12 +27,12 @@ Kind.Term.check(
       },
       var: case List.at_last!(term.indx, ctx) as got {
         none: Kind.Check.result!(type, [Kind.Error.undefined_reference(orig, term.name)]),
-        some: do Kind.Check { return case got.value { new: got.value.snd }; },
+        some: Kind.Check { return case got.value { new: got.value.snd }; },
       },
-      typ: do Kind.Check {
+      typ: Kind.Check {
         return Kind.Term.typ;
       },
-      all: do Kind.Check {
+      all: Kind.Check {
         let ctx_size = List.length!(ctx);
         let self_var = Kind.Term.var(term.self, ctx_size);
         let body_var = Kind.Term.var(term.name, Nat.succ(ctx_size));
@@ -41,19 +42,20 @@ Kind.Term.check(
         return Kind.Term.typ;
       },
       lam: case type {
-        none: do Kind.Check {
+        none: Kind.Check {
           //let lam_arit = Kind.Term.arity(term);
           //let lam_type = Nat.for!(Kind.Term.hol(Bits.e),0,lam_arit,(i,t) 
             //Kind.Term.all(Bool.false, "", "", Kind.Term.hol(Bits.e), (s,x) t));
           let lam_type = Kind.Term.hol(Bits.e);
           let lam_term = Kind.Term.ann(Bool.false, term, lam_type);
-          Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),lam_term)]);
+          Kind.Term.check.patch(lam_term, type, path)
+          //Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),lam_term)]);
           //Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)]);
         },
-        some: do Kind.Check {
+        some: Kind.Check {
           let typv = Kind.Term.reduce(type.value, defs);
           case typv {
-            all: do Kind.Check {
+            all: Kind.Check {
               let ctx_size = List.length!(ctx);
               let self_var = term;
               let body_var = Kind.Term.var(term.name, ctx_size);
@@ -62,12 +64,12 @@ Kind.Term.check(
               Kind.Term.check(term.body(body_var), Maybe.some!(body_typ), defs, body_ctx, Kind.MPath.o(path), orig);
               return type.value;
             },
-            //hol: do Kind.Check {
+            //hol: Kind.Check {
               //let lam_type = Kind.Term.all(Bool.false, "", "", Kind.Term.hol(Bits.e), (s,x) Kind.Term.hol(Bits.e));
               //let lam_term = Kind.Term.ann(Bool.false, term, lam_type);
               //Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),lam_term)]);
             //},
-            _: do Kind.Check {
+            _: Kind.Check {
               let expected = Either.left!!("function");
               let detected = Either.right!!(type.value);
               Kind.Check.result!(type, [Kind.Error.type_mismatch(orig, expected, detected, ctx)]);
@@ -75,15 +77,15 @@ Kind.Term.check(
           };
         }
       },
-      app: do Kind.Check {
+      app: Kind.Check {
         get func_typ = Kind.Term.check(term.func, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
         let func_typ = Kind.Term.reduce(func_typ, defs);
         case func_typ {
-          all: do Kind.Check {
+          all: Kind.Check {
             Kind.Term.check(term.argm, Maybe.some!(func_typ.xtyp), defs, ctx, Kind.MPath.i(path), orig);
             return func_typ.body(term.func, term.argm);
           },
-          _: do Kind.Check {
+          _: Kind.Check {
             let expected = Either.left!!("function");
             let detected = Either.right!!(func_typ);
             let orig = case term.func { ori: some(term.func.orig) } default orig
@@ -92,14 +94,14 @@ Kind.Term.check(
         };
       },
       ann:
-        if term.done then do Kind.Check {
+        if term.done then Kind.Check {
           return term.type;
-        } else do Kind.Check {
+        } else Kind.Check {
           Kind.Term.check(term.term, Maybe.some!(term.type), defs, ctx, Kind.MPath.o(path), orig);
           Kind.Term.check(term.type, Maybe.some!(Kind.Term.typ), defs, ctx, Kind.MPath.i(path), orig);
           return term.type;
         },
-      let: do Kind.Check {
+      let: Kind.Check {
         let ctx_size = List.length!(ctx);
         get expr_typ = Kind.Term.check(term.expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
         let body_val = term.body(Kind.Term.var(term.name, ctx_size));
@@ -107,7 +109,7 @@ Kind.Term.check(
         get body_typ = Kind.Term.check(body_val, type, defs, body_ctx, Kind.MPath.i(path), orig);
         return body_typ;
       },
-      def: do Kind.Check {
+      def: Kind.Check {
         let ctx_size = List.length!(ctx);
         get expr_typ = Kind.Term.check(term.expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
         let body_val = term.body(Kind.Term.ann(Bool.true, term.expr, expr_typ));
@@ -116,70 +118,101 @@ Kind.Term.check(
         return body_typ;
         //Kind.Term.check(term.body(term.expr), type, defs, ctx, path, orig);
       },
-      nat: do Kind.Check {
-        return Kind.Term.ref("Nat");
+      nat: case type {
+        none: Kind.Check { return Kind.Term.ref("Nat"); }
+        some: Kind.Check {
+          let tnam = Kind.Term.check.get_name_of_self_type(type.value, defs)
+          case tnam {
+            none: Kind.Check { return Kind.Term.ref("Nat") }
+            some: if String.eql(tnam.value, "Nat")
+              then Kind.Check { return Kind.Term.ref("Nat") }
+              else
+                let cast = Kind.Term.ref(tnam.value | ".from_nat")
+                let cast = Kind.Term.app(cast, term) 
+                Kind.Term.check.patch(cast, type, path)
+          }
+        }
       },
-      chr: do Kind.Check {
+      chr: Kind.Check {
         return Kind.Term.ref("Char");
       },
-      str: do Kind.Check {
+      str: Kind.Check {
         return Kind.Term.ref("String");
       },
-      cse: do Kind.Check {
+      num: Kind.Check {
+        let dsug = Kind.Term.check.expand.num(term.sign, term.numb, term.frac, type, defs)
+        Kind.Term.check.patch(dsug, type, path)
+      },
+      cse: Kind.Check {
         let expr = term.expr;
         get etyp = Kind.Term.check(expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
         get wyth = Kind.Term.check.infer_types_of_with(term.with, defs, ctx, path, orig)
         let dsug = Kind.Term.check.expand.cse(term.expr, term.name, wyth, term.cses, term.moti, etyp, type, defs, ctx)
         case dsug {
-          none: Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)]),
-          some: Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),dsug.value)]),
+          none: Kind.Term.check.cant_infer(term, type, ctx, orig)
+          some: Kind.Term.check.patch(dsug.value, type, path)
         };
       },
-      new: do Kind.Check {
+      new: Kind.Check {
         let dsug = Kind.Term.check.expand.new(term.args, type, defs)
         case dsug {
-          none: Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)])
-          some: Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),dsug.value)])
+          none: Kind.Term.check.cant_infer(term, type, ctx, orig)
+          some: Kind.Term.check.patch(dsug.value, type, path)
         }
       },
-      get: do Kind.Check {
+      get: Kind.Check {
         let expr = term.expr;
         get etyp = Kind.Term.check(expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
         let dsug = Kind.Term.check.expand.get(term.expr, term.fkey, etyp, defs)
         case dsug {
-          none: Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)])
-          some: Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),dsug.value)])
+          none: Kind.Term.check.cant_infer(term, type, ctx, orig)
+          some: Kind.Term.check.patch(dsug.value, type, path)
         }
       },
-      set: do Kind.Check {
+      set: Kind.Check {
         let expr = term.expr;
         get etyp = Kind.Term.check(expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
         let dsug = Kind.Term.check.expand.set(term.expr, term.fkey, term.fval, etyp, defs)
         case dsug {
-          none: Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)])
-          some: Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path),dsug.value)])
+          none: Kind.Term.check.cant_infer(term, type, ctx, orig)
+          some: Kind.Term.check.patch(dsug.value, type, path)
         }
       },
-      gol: do Kind.Check {
+      ope: Kind.Check {
+        get otyp = case type {
+          some: Kind.Check { return type.value }
+          none: Kind.Check { 
+            get hmm = Kind.Term.check(term.arg0, none, defs, ctx, Kind.MPath.o(path), orig)
+            let uni = unit
+            return hmm
+          }
+        }
+        let dsug = Kind.Term.check.expand.ope(term.name, term.arg0, term.arg1, otyp, defs)
+        case dsug {
+          none: Kind.Term.check.cant_infer(term, type, ctx, orig)
+          some: Kind.Term.check.patch(dsug.value, type, path)
+        }
+      }
+      gol: Kind.Check {
         Kind.Check.result!(type, [
           Kind.Error.show_goal(term.name, term.dref, term.verb, type, ctx)
         ]);
       },
-      hol: do Kind.Check {
+      hol: Kind.Check {
         Kind.Check.result!(type, []);
       },
-      ori: do Kind.Check {
+      ori: Kind.Check {
         Kind.Term.check(term.expr, type, defs, ctx, path, Maybe.some!(term.orig));
       },
     };
     case type {
       none:
         Kind.Check.result!(Maybe.some!(infr), []),
-      some: do Kind.Check {
+      some: Kind.Check {
         get eqls = Kind.Term.equal.go(type.value, infr, defs, List.length!(ctx), BitsSet.mut.new(unit));
-        if eqls then do Kind.Check {
+        if eqls then Kind.Check {
           return type.value;
-        } else do Kind.Check {
+        } else Kind.Check {
           Kind.Check.result!(type, [
             Kind.Error.type_mismatch(
               orig,
@@ -192,6 +225,109 @@ Kind.Term.check(
     };
   }
 
+Kind.Term.check.patch(term: Kind.Term, type: Maybe(Kind.Term), path: Kind.MPath): Kind.Check(Kind.Term)
+  Kind.Check {
+    Kind.Check.result!(type, [Kind.Error.patch(Kind.MPath.to_bits(path), term)])
+  }
+
+Kind.Term.check.cant_infer(term: Kind.Term, type: Maybe(Kind.Term), ctx: Kind.Context, orig: Maybe<Pair<Nat,Nat>>): Kind.Check(Kind.Term)
+  Kind.Check {
+    Kind.Check.result!(type, [Kind.Error.cant_infer(orig, term, ctx)])
+  }
+
+// Converts "Foo.Self" to "Foo"
+Kind.Term.check.get_name_of_self_type.slice(self: String): Maybe(String)
+  let len = String.length(self)
+  let ini = String.slice(0, Nat.sub(len,5), self)
+  let end = String.slice(Nat.sub(len,5), len, self)
+  if String.eql(end, ".Self") then
+    some(ini)
+  else
+    none
+
+// Extracts the name of a self type
+Kind.Term.check.get_name_of_self_type(type: Kind.Term, defs: Kind.Defs): Maybe(String)
+  case Kind.Term.reduce(type, Kind.Map.new!) as type {
+    ref: some(type.name)
+  } default case Kind.Term.reduce(type, defs) as type {
+    all: Kind.Term.check.get_name_of_self_type.slice(type.self)
+    ref: some(type.name)
+  } default none
+
+// Expands numeric literals into their proper types
+Kind.Term.check.expand.num(sign: Maybe<Bool>, numb: Nat, frac: Maybe<Nat>, type: Maybe<Kind.Term>, defs: Kind.Defs): Kind.Term
+  let got = case type {
+    none: none
+    some: case Kind.Term.check.get_name_of_self_type(type.value, defs) as self {
+      none: none
+      some: switch String.eql(self.value) {
+        "Nat": some(Kind.Term.check.expand.num.nat(numb))
+        "Int": some(Kind.Term.check.expand.num.int(sign, numb))
+      } default some(Kind.Term.check.expand.num.other(self.value, sign, numb, frac))
+    }
+  }
+  case got {
+    none: case frac {
+      none: case sign {
+        none: Kind.Term.check.expand.num.nat(numb)
+        some: Kind.Term.check.expand.num.int(sign, numb)
+      }
+      some: Kind.Term.check.expand.num.other("F64", sign, numb, frac)
+    }
+    some: got.value
+  }
+
+Kind.Term.check.expand.num.nat(numb: Nat): Kind.Term
+  Kind.Term.nat(numb)
+
+Kind.Term.check.expand.num.int(sign: Maybe<Bool>, numb: Nat): Kind.Term
+  let term = Kind.Term.nat(numb)
+  let term = Kind.Term.app(Kind.Term.ref("Int.from_nat"), term)
+  let term = case sign {
+    none: term
+    some: if sign.value
+      then term
+      else Kind.Term.app(Kind.Term.ref("Int.neg"), term)
+  }
+  term
+
+Kind.Term.check.expand.num.other(name: String, sign: Maybe<Bool>, numb: Nat, frac: Maybe<Nat>): Kind.Term
+  let text = case sign { none: "", some: if sign.value then "+" else "-" }
+  let text = text | Nat.show(numb)
+  let text = text | case frac { none: "", some: "." | Nat.show(frac.value) }
+  Kind.Term.app(Kind.Term.ref(name|".read"), Kind.Term.str(text))
+
+// Expands an operator like `a + b` into `Nat.add(a, b)`
+// Expands numeric literals into their proper types
+Kind.Term.check.expand.ope(oper: String, arg0: Kind.Term, arg1: Kind.Term, otyp: Kind.Term, defs: Kind.Defs): Maybe<Kind.Term>
+  let type_name = Kind.Term.check.get_name_of_self_type(otyp, defs)
+  case type_name {
+    none: none
+    some:
+      let oper_name = switch String.eql(oper) {
+        "+"   : some("add")
+        "-"   : some("sub")
+        "*"   : some("mul")
+        "/"   : some("pow")
+        "%"   : some("mod")
+        "<?"  : some("ltn")
+        "<=?" : some("lte")
+        "=?"  : some("eql")
+        ">=?" : some("gte")
+        ">?"  : some("gtn")
+        "&&"  : some("and")
+        "||"  :some( "or")
+      } default none
+      case oper_name {
+        none: none
+        some:
+          let term = Kind.Term.ref(type_name.value | "." | oper_name.value)
+          let term = Kind.Term.app(term, arg0)
+          let term = Kind.Term.app(term, arg1)
+          some(term)
+      }
+  }
+
 // Expands `{a,b,c}` into `Foo.new(a,b,c)`
 Kind.Term.check.expand.new(
   args: List(Kind.Term)
@@ -202,7 +338,7 @@ Kind.Term.check.expand.new(
     some: case Kind.Term.reduce(type.value, defs) as type {
       all: case Kind.Term.reduce(type.body(Kind.Term.typ,Kind.Term.typ), defs) as ctor {
         all: 
-          let tnam = String.slice(0, Nat.sub(String.length(type.self),5), type.self)
+          let tnam = Kind.Term.check.get_name_of_self_type.slice(type.self) <> ""
           let term = Kind.Term.ref(tnam | "." | ctor.name)
           let pars = Kind.Term.check.expand.set.count_params(type.xtyp)
           let term = for i from 0 to pars: Kind.Term.app(term, Kind.Term.hol(Bits.e))
@@ -240,7 +376,7 @@ Kind.Term.check.expand.get(
   defs: Kind.Defs
 ): Maybe<Kind.Term>
   case Kind.Term.reduce(etyp, defs) as etyp {
-    all: case Kind.term.reduce(etyp.body(Kind.Term.typ,Kind.Term.typ), defs) as ctor {
+    all: case Kind.Term.reduce(etyp.body(Kind.Term.typ,Kind.Term.typ), defs) as ctor {
       all: 
         let term = Kind.Term.app(expr, Kind.Term.lam("", () Kind.Term.hol(Bits.e)))
         let rett = Kind.Term.ref(fkey|"_field")
@@ -271,10 +407,10 @@ Kind.Term.check.expand.set(
   defs: Kind.Defs
 ): Maybe<Kind.Term>
   case Kind.Term.reduce(etyp, defs) as etyp {
-    all: case Kind.term.reduce(etyp.body(Kind.Term.typ,Kind.Term.typ), defs) as ctor {
+    all: case Kind.Term.reduce(etyp.body(Kind.Term.typ,Kind.Term.typ), defs) as ctor {
       all: 
         let term = Kind.Term.app(expr, Kind.Term.lam("", () Kind.Term.hol(Bits.e)))
-        let tnam = String.slice(0, Nat.sub(String.length(etyp.self),5), etyp.self)
+        let tnam = Kind.Term.check.get_name_of_self_type.slice(etyp.self) <> ""
         let rett = Kind.Term.ref(tnam | "." | ctor.name)
         let pars = Kind.Term.check.expand.set.count_params(etyp.xtyp)
         let rett = for i from 0 to pars: Kind.Term.app(rett, Kind.Term.hol(Bits.e))
@@ -314,18 +450,18 @@ Kind.Term.check.infer_types_of_with(
   orig: Maybe<Pair<Nat,Nat>>,
 ): Kind.Check<List<Kind.Ann>>
   case vars {
-    nil: do Kind.Check {
+    nil: Kind.Check {
       return []
     }
     cons: 
       open vars.head
-      do Kind.Check {
+      Kind.Check {
         get type = case vars.head.type {
-          none: do Kind.Check { 
+          none: Kind.Check { 
             get infer = Kind.Term.check(vars.head.term, none, defs, ctx, path, orig)
             return some(infer)
           }
-          some: do Kind.Check {
+          some: Kind.Check {
             return some(vars.head.type.value)
           }
         }

@@ -1,0 +1,5 @@
+List.imapped<A: Type>(as: List<A>)<B: Type>(f: Nat -> A -> B): List<B>
+  case as {
+    nil: List.nil!,
+    cons: List.cons!(f(0,as.head),List.imapped<A>(as.tail)<B>((n) f(Nat.succ(n))))
+  }

@@ -1,0 +1,2 @@
+V3.mul(a: V3, b: V3): V3
+  open a; open b; {F64.mul(a.x,b.x), F64.mul(a.y,b.y), F64.mul(a.z,b.z)}

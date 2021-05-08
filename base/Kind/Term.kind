@@ -68,6 +68,12 @@ type Kind.Term {
   str(
     strx: String,
   ),
+  // A numeric literal
+  num(
+    sign: Maybe(Bool)
+    numb: Nat
+    frac: Maybe(Nat)
+  ),
   // A case-of expression
   cse(
     path: Bits,
@@ -92,6 +98,12 @@ type Kind.Term {
     fkey: String,
     fval: Kind.Term,
   ),
+  // An operator
+  ope(
+    name: String,
+    arg0: Kind.Term,
+    arg1: Kind.Term,
+  )
   // An origin
   ori(
     orig: Pair<Nat,Nat>,

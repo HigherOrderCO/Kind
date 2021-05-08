@@ -1,2 +1,13 @@
 Test: _
-  V3.len({1.0#64, 1.0#64, 1.0#64})
+  let a = (7)
+  let b = (+7)
+  let c = (-7)
+  let d = (7#32)
+  let e = (+7#32)
+  let f = (-7#32)
+  let g = (7.2)
+  let h = (+7.2)
+  let i = (-7.0)
+  let z = g + g
+  z
+
