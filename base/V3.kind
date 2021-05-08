@@ -16,7 +16,7 @@ V3.sub(a: V3, b: V3): V3
 V3.mul(a: V3, b: V3): V3
   open a; open b; {F64.mul(a.x,b.x), F64.mul(a.y,b.y), F64.mul(a.z,b.z)}
 
-V3.len(a: V3, b: V3): F64
+V3.len(a: V3): F64
   open a
   F64.pow(F64.add(F64.mul(a.x,a.x), F64.add(F64.mul(a.y,a.y), F64.mul(a.z,a.z))), 0.5#64)
 

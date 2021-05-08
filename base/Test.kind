@@ -1,10 +1,2 @@
-type Foo {
-  new(x: Nat, y: Nat, z: Nat)
-}
-
-ata(a: Foo): Nat
-  a@x
-
 Test: _
-  let foo = {1,2,3} :: Foo
-  foo@x + foo@y
+  V3.len({1.0#64, 1.0#64, 1.0#64})
