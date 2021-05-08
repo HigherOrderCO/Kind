@@ -19,6 +19,7 @@ Web.Kaelin.Event.serialize(event: Web.Kaelin.Event): String
    user_input : 
      let cod = [
        Nat.to_bits(4),
+       Nat.to_bits(Hex.to_nat(event.player))
        Web.Kaelin.Resources.Action.to_bits(event.action),
        Web.Kaelin.Coord.Convert.axial_to_bits(event.coord)
        ]

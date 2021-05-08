@@ -988,7 +988,7 @@ module.exports = (function() {
         return $148;
     };
     const VoxBox$alloc_capacity = x0 => VoxBox$alloc_capacity$(x0);
-    const Web$Kaelin$Constants$room = "0x415512345292";
+    const Web$Kaelin$Constants$room = "0x415512345298";
 
     function BitsMap$(_A$1) {
         var $149 = null;
@@ -5996,11 +5996,10 @@ module.exports = (function() {
         var $1204 = (nat_to_bits(_unique_nat$2));
         return $1204;
     };
-    const Web$Kaelin$Coord$Convert$axial_to_bits = x0 => Web$Kaelin$Coord$Convert$axial_to_bits$(x0);
-    const Web$Kaelin$Event$Code$user_input = List$cons$(2, List$cons$(8, List$nil));
+    const Parser$State$new = x0 => x1 => x2 => x3 => x4 => Parser$State$new$(x0, x1, x2, x3, x4);
 
-    function Web$Kaelin$Event$serialize$(_event$1) {
-        var self = _event$1;
+    function Parser$run$(_parser$2, _code$3) {
+        var self = _parser$2(Parser$State$new$(Maybe$none, "", 0n, 0n, _code$3));
         switch (self._) {
             case 'Web.Kaelin.Event.create_hero':
                 var $1206 = self.hero_id;
@@ -6033,18 +6032,13 @@ module.exports = (function() {
         });
         return $1212;
     };
-    const Web$Kaelin$Event$user_input = x0 => x1 => Web$Kaelin$Event$user_input$(x0, x1);
-    const Web$Kaelin$Action$walk = ({
-        _: 'Web.Kaelin.Action.walk'
-    });
+    const Parser$run = x0 => x1 => Parser$run$(x0, x1);
 
     function App$post$(_room$1, _data$2) {
         var $1213 = App$do$("post", (_room$1 + (";" + _data$2)));
         return $1213;
     };
-    const App$post = x0 => x1 => App$post$(x0, x1);
-    const U16$eql = a0 => a1 => (a0 === a1);
-    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
+    const Parser$Reply = x0 => Parser$Reply$(x0);
 
     function Web$Kaelin$Player$new$(_addr$1, _team$2, _current_hp$3, _current_status$4) {
         var $1214 = ({
@@ -6056,7 +6050,7 @@ module.exports = (function() {
         });
         return $1214;
     };
-    const Web$Kaelin$Player$new = x0 => x1 => x2 => x3 => Web$Kaelin$Player$new$(x0, x1, x2, x3);
+    const Parser$Reply$value = x0 => x1 => Parser$Reply$value$(x0, x1);
 
     function Web$Kaelin$Action$create_player$(_user$1, _hero$2, _state$3) {
         var _key$4 = _user$1;
@@ -6106,12 +6100,12 @@ module.exports = (function() {
         };
         return $1215;
     };
-    const Web$Kaelin$Action$create_player = x0 => x1 => x2 => Web$Kaelin$Action$create_player$(x0, x1, x2);
+    const Parser$maybe = x0 => x1 => Parser$maybe$(x0, x1);
 
-    function String$eql_no_sensitive$(_a$1, _b$2) {
-        var String$eql_no_sensitive$ = (_a$1, _b$2) => ({
-            ctr: 'TCO',
-            arg: [_a$1, _b$2]
+    function Parser$Reply$error$(_err$2) {
+        var $1213 = ({
+            _: 'Parser.Reply.error',
+            'err': _err$2
         });
         var String$eql_no_sensitive = _a$1 => _b$2 => String$eql_no_sensitive$(_a$1, _b$2);
         var arg = [_a$1, _b$2];
@@ -6158,19 +6152,38 @@ module.exports = (function() {
             else return R;
         }
     };
-    const String$eql_no_sensitive = x0 => x1 => String$eql_no_sensitive$(x0, x1);
+    const Parser$Reply$error = x0 => Parser$Reply$error$(x0);
 
-    function Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2) {
-        var Web$Kaelin$Tile$player$to_entity$ = (_addr$1, _tile$2) => ({
-            ctr: 'TCO',
-            arg: [_addr$1, _tile$2]
+    function Parser$Error$new$(_nam$1, _ini$2, _idx$3, _msg$4) {
+        var $1214 = ({
+            _: 'Parser.Error.new',
+            'nam': _nam$1,
+            'ini': _ini$2,
+            'idx': _idx$3,
+            'msg': _msg$4
         });
-        var Web$Kaelin$Tile$player$to_entity = _addr$1 => _tile$2 => Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2);
-        var arg = [_addr$1, _tile$2];
+        return $1214;
+    };
+    const Parser$Error$new = x0 => x1 => x2 => x3 => Parser$Error$new$(x0, x1, x2, x3);
+
+    function Parser$Reply$fail$(_nam$2, _ini$3, _idx$4, _msg$5) {
+        var $1215 = Parser$Reply$error$(Parser$Error$new$(_nam$2, _ini$3, _idx$4, _msg$5));
+        return $1215;
+    };
+    const Parser$Reply$fail = x0 => x1 => x2 => x3 => Parser$Reply$fail$(x0, x1, x2, x3);
+    const U16$eql = a0 => a1 => (a0 === a1);
+
+    function Parser$text$go$(_ini_idx$1, _ini_txt$2, _text$3, _pst$4) {
+        var Parser$text$go$ = (_ini_idx$1, _ini_txt$2, _text$3, _pst$4) => ({
+            ctr: 'TCO',
+            arg: [_ini_idx$1, _ini_txt$2, _text$3, _pst$4]
+        });
+        var Parser$text$go = _ini_idx$1 => _ini_txt$2 => _text$3 => _pst$4 => Parser$text$go$(_ini_idx$1, _ini_txt$2, _text$3, _pst$4);
+        var arg = [_ini_idx$1, _ini_txt$2, _text$3, _pst$4];
         while (true) {
-            let [_addr$1, _tile$2] = arg;
+            let [_ini_idx$1, _ini_txt$2, _text$3, _pst$4] = arg;
             var R = (() => {
-                var self = _tile$2;
+                var self = _pst$4;
                 switch (self._) {
                     case 'List.cons':
                         var $1244 = self.head;
@@ -6215,19 +6228,14 @@ module.exports = (function() {
             else return R;
         }
     };
-    const Web$Kaelin$Tile$player$to_entity = x0 => x1 => Web$Kaelin$Tile$player$to_entity$(x0, x1);
+    const Parser$text$go = x0 => x1 => x2 => x3 => Parser$text$go$(x0, x1, x2, x3);
 
-    function Web$Kaelin$Map$player$info$go$(_addr$1, _map$2) {
-        var Web$Kaelin$Map$player$info$go$ = (_addr$1, _map$2) => ({
-            ctr: 'TCO',
-            arg: [_addr$1, _map$2]
-        });
-        var Web$Kaelin$Map$player$info$go = _addr$1 => _map$2 => Web$Kaelin$Map$player$info$go$(_addr$1, _map$2);
-        var arg = [_addr$1, _map$2];
-        while (true) {
-            let [_addr$1, _map$2] = arg;
-            var R = (() => {
-                var self = _map$2;
+    function Parser$text$(_text$1, _pst$2) {
+        var self = _pst$2;
+        switch (self._) {
+            case 'Parser.State.new':
+                var $1233 = self.idx;
+                var self = Parser$text$go$($1233, _text$1, _text$1, _pst$2);
                 switch (self._) {
                     case 'List.cons':
                         var $1256 = self.head;
@@ -6271,19 +6279,14 @@ module.exports = (function() {
         var $1266 = Web$Kaelin$Map$player$info$go$(_addr$1, _lmap$3);
         return $1266;
     };
-    const Web$Kaelin$Map$player$info = x0 => x1 => Web$Kaelin$Map$player$info$(x0, x1);
+    const Parser$text = x0 => x1 => Parser$text$(x0, x1);
 
-    function List$find$(_cond$2, _xs$3) {
-        var List$find$ = (_cond$2, _xs$3) => ({
-            ctr: 'TCO',
-            arg: [_cond$2, _xs$3]
-        });
-        var List$find = _cond$2 => _xs$3 => List$find$(_cond$2, _xs$3);
-        var arg = [_cond$2, _xs$3];
-        while (true) {
-            let [_cond$2, _xs$3] = arg;
-            var R = (() => {
-                var self = _xs$3;
+    function Parser$Error$combine$(_a$1, _b$2) {
+        var self = _a$1;
+        switch (self._) {
+            case 'Parser.Error.new':
+                var $1241 = self.idx;
+                var self = _b$2;
                 switch (self._) {
                     case 'List.cons':
                         var $1267 = self.head;
@@ -6518,10 +6521,10 @@ module.exports = (function() {
             else return R;
         }
     };
-    const String$drop = x0 => x1 => String$drop$(x0, x1);
+    const Parser$Error$combine = x0 => x1 => Parser$Error$combine$(x0, x1);
 
-    function Web$Kaelin$Event$Buffer$next$(_buffer$1) {
-        var self = _buffer$1;
+    function Parser$Error$maybe_combine$(_a$1, _b$2) {
+        var self = _a$1;
         switch (self._) {
             case 'Pair.new':
                 var $1329 = self.fst;
@@ -7022,7 +7025,304 @@ module.exports = (function() {
         var $1460 = null;
         return $1460;
     };
-    const Parser = x0 => Parser$(x0);
+    const Hex$to_nat = x0 => Hex$to_nat$(x0);
+
+    function Web$Kaelin$Resources$Action$to_bits$(_x$1) {
+        var self = _x$1;
+        switch (self._) {
+            case 'Web.Kaelin.Action.walk':
+                var $1432 = 0n;
+                var _n$2 = $1432;
+                break;
+            case 'Web.Kaelin.Action.ability_0':
+                var $1433 = 1n;
+                var _n$2 = $1433;
+                break;
+            case 'Web.Kaelin.Action.ability_1':
+                var $1434 = 2n;
+                var _n$2 = $1434;
+                break;
+        };
+        var $1431 = (nat_to_bits(_n$2));
+        return $1431;
+    };
+    const Web$Kaelin$Resources$Action$to_bits = x0 => Web$Kaelin$Resources$Action$to_bits$(x0);
+
+    function Web$Kaelin$Coord$Convert$axial_to_bits$(_x$1) {
+        var _unique_nat$2 = Web$Kaelin$Coord$Convert$axial_to_nat$(_x$1);
+        var $1435 = (nat_to_bits(_unique_nat$2));
+        return $1435;
+    };
+    const Web$Kaelin$Coord$Convert$axial_to_bits = x0 => Web$Kaelin$Coord$Convert$axial_to_bits$(x0);
+    const Web$Kaelin$Event$Code$user_input = List$cons$(40, List$cons$(2, List$cons$(8, List$nil)));
+
+    function Web$Kaelin$Event$serialize$(_event$1) {
+        var self = _event$1;
+        switch (self._) {
+            case 'Web.Kaelin.Event.create_hero':
+                var $1437 = self.hero_id;
+                var _cod$3 = List$cons$((nat_to_bits(1n)), List$cons$((nat_to_bits((BigInt($1437)))), List$nil));
+                var $1438 = generate_hex$(Web$Kaelin$Event$Code$create_hero, _cod$3);
+                var $1436 = $1438;
+                break;
+            case 'Web.Kaelin.Event.user_input':
+                var $1439 = self.player;
+                var $1440 = self.coord;
+                var $1441 = self.action;
+                var _cod$5 = List$cons$((nat_to_bits(4n)), List$cons$((nat_to_bits(Hex$to_nat$($1439))), List$cons$(Web$Kaelin$Resources$Action$to_bits$($1441), List$cons$(Web$Kaelin$Coord$Convert$axial_to_bits$($1440), List$nil))));
+                var $1442 = generate_hex$(Web$Kaelin$Event$Code$user_input, _cod$5);
+                var $1436 = $1442;
+                break;
+            case 'Web.Kaelin.Event.start_game':
+            case 'Web.Kaelin.Event.create_user':
+                var $1443 = "";
+                var $1436 = $1443;
+                break;
+        };
+        return $1436;
+    };
+    const Web$Kaelin$Event$serialize = x0 => Web$Kaelin$Event$serialize$(x0);
+
+    function Web$Kaelin$Event$user_input$(_player$1, _coord$2, _action$3) {
+        var $1444 = ({
+            _: 'Web.Kaelin.Event.user_input',
+            'player': _player$1,
+            'coord': _coord$2,
+            'action': _action$3
+        });
+        return $1444;
+    };
+    const Web$Kaelin$Event$user_input = x0 => x1 => x2 => Web$Kaelin$Event$user_input$(x0, x1, x2);
+    const Web$Kaelin$Action$walk = ({
+        _: 'Web.Kaelin.Action.walk'
+    });
+
+    function App$post$(_room$1, _data$2) {
+        var $1445 = App$do$("post", (_room$1 + (";" + _data$2)));
+        return $1445;
+    };
+    const App$post = x0 => x1 => App$post$(x0, x1);
+    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
+
+    function Web$Kaelin$Player$new$(_addr$1, _team$2, _current_hp$3, _current_status$4) {
+        var $1446 = ({
+            _: 'Web.Kaelin.Player.new',
+            'addr': _addr$1,
+            'team': _team$2,
+            'current_hp': _current_hp$3,
+            'current_status': _current_status$4
+        });
+        return $1446;
+    };
+    const Web$Kaelin$Player$new = x0 => x1 => x2 => x3 => Web$Kaelin$Player$new$(x0, x1, x2, x3);
+
+    function Web$Kaelin$Action$create_player$(_user$1, _hero$2, _state$3) {
+        var _key$4 = _user$1;
+        var _init_pos$5 = Web$Kaelin$Coord$new$((Number((0n))), (Number((0n))));
+        var self = _state$3;
+        switch (self._) {
+            case 'Web.Kaelin.State.game':
+                var $1448 = self.user;
+                var $1449 = self.room;
+                var $1450 = self.players;
+                var $1451 = self.cast_info;
+                var $1452 = self.map;
+                var $1453 = self.internal;
+                var $1454 = self.env_info;
+                var self = Map$get$(_key$4, $1450);
+                switch (self._) {
+                    case 'Maybe.none':
+                        var $1456 = ((console.log(($1448 + String$nil)), (_$13 => {
+                            var self = _hero$2;
+                            switch (self._) {
+                                case 'Web.Kaelin.Hero.new':
+                                    var $1458 = self.health;
+                                    var _creature$18 = Web$Kaelin$Entity$creature;
+                                    var _new_player$19 = Web$Kaelin$Player$new$(_user$1, "blue", $1458, List$nil);
+                                    var _map$20 = Web$Kaelin$Map$push$(_init_pos$5, _creature$18(Maybe$some$(_user$1))(_hero$2), $1452);
+                                    var _new_players$21 = Map$set$(_key$4, _new_player$19, $1450);
+                                    var $1459 = Web$Kaelin$State$game$($1448, $1449, _new_players$21, $1451, _map$20, $1453, $1454);
+                                    var $1457 = $1459;
+                                    break;
+                            };
+                            return $1457;
+                        })()));
+                        var $1455 = $1456;
+                        break;
+                    case 'Maybe.some':
+                        var $1460 = _state$3;
+                        var $1455 = $1460;
+                        break;
+                };
+                var $1447 = $1455;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1461 = _state$3;
+                var $1447 = $1461;
+                break;
+        };
+        return $1447;
+    };
+    const Web$Kaelin$Action$create_player = x0 => x1 => x2 => Web$Kaelin$Action$create_player$(x0, x1, x2);
+
+    function String$eql_no_sensitive$(_a$1, _b$2) {
+        var String$eql_no_sensitive$ = (_a$1, _b$2) => ({
+            ctr: 'TCO',
+            arg: [_a$1, _b$2]
+        });
+        var String$eql_no_sensitive = _a$1 => _b$2 => String$eql_no_sensitive$(_a$1, _b$2);
+        var arg = [_a$1, _b$2];
+        while (true) {
+            let [_a$1, _b$2] = arg;
+            var R = (() => {
+                var self = _a$1;
+                if (self.length === 0) {
+                    var self = _b$2;
+                    if (self.length === 0) {
+                        var $1463 = Bool$true;
+                        var $1462 = $1463;
+                    } else {
+                        var $1464 = self.charCodeAt(0);
+                        var $1465 = self.slice(1);
+                        var $1466 = Bool$false;
+                        var $1462 = $1466;
+                    };
+                    return $1462;
+                } else {
+                    var $1467 = self.charCodeAt(0);
+                    var $1468 = self.slice(1);
+                    var self = _b$2;
+                    if (self.length === 0) {
+                        var $1470 = Bool$false;
+                        var $1469 = $1470;
+                    } else {
+                        var $1471 = self.charCodeAt(0);
+                        var $1472 = self.slice(1);
+                        var self = (Char$to_lower$($1467) === Char$to_lower$($1471));
+                        if (self) {
+                            var $1474 = String$eql_no_sensitive$($1468, $1472);
+                            var $1473 = $1474;
+                        } else {
+                            var $1475 = Bool$false;
+                            var $1473 = $1475;
+                        };
+                        var $1469 = $1473;
+                    };
+                    return $1469;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const String$eql_no_sensitive = x0 => x1 => String$eql_no_sensitive$(x0, x1);
+
+    function Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2) {
+        var Web$Kaelin$Tile$player$to_entity$ = (_addr$1, _tile$2) => ({
+            ctr: 'TCO',
+            arg: [_addr$1, _tile$2]
+        });
+        var Web$Kaelin$Tile$player$to_entity = _addr$1 => _tile$2 => Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2);
+        var arg = [_addr$1, _tile$2];
+        while (true) {
+            let [_addr$1, _tile$2] = arg;
+            var R = (() => {
+                var self = _tile$2;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1476 = self.head;
+                        var $1477 = self.tail;
+                        var self = $1476;
+                        switch (self._) {
+                            case 'Web.Kaelin.Entity.creature':
+                                var $1479 = self.player;
+                                var self = $1479;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $1481 = self.value;
+                                        var self = String$eql_no_sensitive$(_addr$1, $1481);
+                                        if (self) {
+                                            var $1483 = Maybe$some$($1476);
+                                            var $1482 = $1483;
+                                        } else {
+                                            var $1484 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1477);
+                                            var $1482 = $1484;
+                                        };
+                                        var $1480 = $1482;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $1485 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1477);
+                                        var $1480 = $1485;
+                                        break;
+                                };
+                                var $1478 = $1480;
+                                break;
+                            case 'Web.Kaelin.Entity.background':
+                                var $1486 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1477);
+                                var $1478 = $1486;
+                                break;
+                        };
+                        return $1478;
+                    case 'List.nil':
+                        var $1487 = Maybe$none;
+                        return $1487;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Web$Kaelin$Tile$player$to_entity = x0 => x1 => Web$Kaelin$Tile$player$to_entity$(x0, x1);
+
+    function Web$Kaelin$Map$player$info$go$(_addr$1, _map$2) {
+        var Web$Kaelin$Map$player$info$go$ = (_addr$1, _map$2) => ({
+            ctr: 'TCO',
+            arg: [_addr$1, _map$2]
+        });
+        var Web$Kaelin$Map$player$info$go = _addr$1 => _map$2 => Web$Kaelin$Map$player$info$go$(_addr$1, _map$2);
+        var arg = [_addr$1, _map$2];
+        while (true) {
+            let [_addr$1, _map$2] = arg;
+            var R = (() => {
+                var self = _map$2;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1488 = self.head;
+                        var $1489 = self.tail;
+                        var self = $1488;
+                        switch (self._) {
+                            case 'Pair.new':
+                                var $1491 = self.fst;
+                                var $1492 = self.snd;
+                                var _coord$7 = Web$Kaelin$Coord$Convert$nat_to_axial$($1491);
+                                var _entity$8 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1492);
+                                var self = _entity$8;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $1494 = self.value;
+                                        var $1495 = Maybe$some$(Pair$new$(_coord$7, $1494));
+                                        var $1493 = $1495;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $1496 = Web$Kaelin$Map$player$info$go$(_addr$1, $1489);
+                                        var $1493 = $1496;
+                                        break;
+                                };
+                                var $1490 = $1493;
+                                break;
+                        };
+                        return $1490;
+                    case 'List.nil':
+                        var $1497 = Maybe$none;
+                        return $1497;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Web$Kaelin$Map$player$info$go = x0 => x1 => Web$Kaelin$Map$player$info$go$(x0, x1);
 
     function Parser$fail$(_error$2, _pst$3) {
         var self = _pst$3;
@@ -7107,17 +7407,17 @@ module.exports = (function() {
         return $1466;
     })();
 
-    function List$fold_right$(_A$1, _B$2, _b$3, _f$4, _xs$5) {
-        var List$fold_right$ = (_A$1, _B$2, _b$3, _f$4, _xs$5) => ({
+    function List$find$(_cond$2, _xs$3) {
+        var List$find$ = (_cond$2, _xs$3) => ({
             ctr: 'TCO',
-            arg: [_A$1, _B$2, _b$3, _f$4, _xs$5]
+            arg: [_cond$2, _xs$3]
         });
-        var List$fold_right = _A$1 => _B$2 => _b$3 => _f$4 => _xs$5 => List$fold_right$(_A$1, _B$2, _b$3, _f$4, _xs$5);
-        var arg = [_A$1, _B$2, _b$3, _f$4, _xs$5];
+        var List$find = _cond$2 => _xs$3 => List$find$(_cond$2, _xs$3);
+        var arg = [_cond$2, _xs$3];
         while (true) {
-            let [_A$1, _B$2, _b$3, _f$4, _xs$5] = arg;
+            let [_cond$2, _xs$3] = arg;
             var R = (() => {
-                var self = _xs$5;
+                var self = _xs$3;
                 switch (self._) {
                     case 'List.cons':
                         var $1488 = self.head;
@@ -7133,18 +7433,194 @@ module.exports = (function() {
             else return R;
         }
     };
-    const List$fold_right = x0 => x1 => x2 => x3 => x4 => List$fold_right$(x0, x1, x2, x3, x4);
-    const Nat$pow = a0 => a1 => (a0 ** a1);
+    const List$find = x0 => x1 => List$find$(x0, x1);
 
-    function append_2_go$(_x$1, _y$2, _z$3) {
-        var append_2_go$ = (_x$1, _y$2, _z$3) => ({
+    function Web$Kaelin$Skill$has_key$(_key$1, _skill$2) {
+        var self = _skill$2;
+        switch (self._) {
+            case 'Web.Kaelin.Skill.new':
+                var $1506 = self.key;
+                var $1507 = (_key$1 === $1506);
+                var $1505 = $1507;
+                break;
+        };
+        return $1505;
+    };
+    const Web$Kaelin$Skill$has_key = x0 => x1 => Web$Kaelin$Skill$has_key$(x0, x1);
+
+    function Web$Kaelin$Hero$skill$from_key$(_key$1, _hero$2) {
+        var self = _hero$2;
+        switch (self._) {
+            case 'Web.Kaelin.Hero.new':
+                var $1509 = self.skills;
+                var $1510 = List$find$(Web$Kaelin$Skill$has_key(_key$1), $1509);
+                var $1508 = $1510;
+                break;
+        };
+        return $1508;
+    };
+    const Web$Kaelin$Hero$skill$from_key = x0 => x1 => Web$Kaelin$Hero$skill$from_key$(x0, x1);
+    const Web$Kaelin$HexEffect$skill = ({
+        _: 'Web.Kaelin.HexEffect.skill'
+    });
+
+    function Web$Kaelin$State$game$set_cast_info$(_cast_info$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'Web.Kaelin.State.game':
+                var $1512 = self.user;
+                var $1513 = self.room;
+                var $1514 = self.players;
+                var $1515 = self.map;
+                var $1516 = self.internal;
+                var $1517 = self.env_info;
+                var $1518 = Web$Kaelin$State$game$($1512, $1513, $1514, Maybe$some$(_cast_info$1), $1515, $1516, $1517);
+                var $1511 = $1518;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1519 = _state$2;
+                var $1511 = $1519;
+                break;
+        };
+        return $1511;
+    };
+    const Web$Kaelin$State$game$set_cast_info = x0 => x1 => Web$Kaelin$State$game$set_cast_info$(x0, x1);
+
+    function Web$Kaelin$Action$start_cast$(_key_code$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'Web.Kaelin.State.game':
+                var $1521 = self.user;
+                var $1522 = self.map;
+                var $1523 = self.env_info;
+                var $1524 = ((console.log($1521), (_$10 => {
+                    var _player_info$11 = Web$Kaelin$Map$player$info$($1521, $1522);
+                    var self = _player_info$11;
+                    switch (self._) {
+                        case 'Maybe.some':
+                            var $1526 = self.value;
+                            var self = $1526;
+                            switch (self._) {
+                                case 'Pair.new':
+                                    var $1528 = self.fst;
+                                    var $1529 = self.snd;
+                                    var self = $1529;
+                                    switch (self._) {
+                                        case 'Web.Kaelin.Entity.creature':
+                                            var $1531 = self.hero;
+                                            var self = $1529;
+                                            switch (self._) {
+                                                case 'Web.Kaelin.Entity.creature':
+                                                    var $1533 = self.hero;
+                                                    var _skill$19 = Web$Kaelin$Hero$skill$from_key$(_key_code$1, $1533);
+                                                    var self = _skill$19;
+                                                    switch (self._) {
+                                                        case 'Maybe.some':
+                                                            var $1535 = self.value;
+                                                            var self = $1535;
+                                                            switch (self._) {
+                                                                case 'Web.Kaelin.Skill.new':
+                                                                    var $1537 = self.range;
+                                                                    var _range$25 = Web$Kaelin$Coord$range$($1528, $1537);
+                                                                    var self = $1523;
+                                                                    switch (self._) {
+                                                                        case 'App.EnvInfo.new':
+                                                                            var $1539 = self.mouse_pos;
+                                                                            var _mouse_coord$28 = Web$Kaelin$Coord$to_axial$($1539);
+                                                                            var _area$29 = Web$Kaelin$Skill$indicator$($1528, $1535, _mouse_coord$28);
+                                                                            var _cast$30 = Web$Kaelin$CastInfo$new$($1528, Web$Kaelin$HexEffect$skill, $1535, _range$25, _area$29, _mouse_coord$28);
+                                                                            var $1540 = Web$Kaelin$State$game$set_cast_info$(_cast$30, _state$2);
+                                                                            var $1538 = $1540;
+                                                                            break;
+                                                                    };
+                                                                    var $1536 = $1538;
+                                                                    break;
+                                                            };
+                                                            var $1534 = $1536;
+                                                            break;
+                                                        case 'Maybe.none':
+                                                            var $1541 = _state$2;
+                                                            var $1534 = $1541;
+                                                            break;
+                                                    };
+                                                    var $1532 = $1534;
+                                                    break;
+                                                case 'Web.Kaelin.Entity.background':
+                                                    var _skill$18 = Web$Kaelin$Hero$skill$from_key$(_key_code$1, $1531);
+                                                    var self = _skill$18;
+                                                    switch (self._) {
+                                                        case 'Maybe.some':
+                                                            var $1543 = self.value;
+                                                            var self = $1543;
+                                                            switch (self._) {
+                                                                case 'Web.Kaelin.Skill.new':
+                                                                    var $1545 = self.range;
+                                                                    var _range$24 = Web$Kaelin$Coord$range$($1528, $1545);
+                                                                    var self = $1523;
+                                                                    switch (self._) {
+                                                                        case 'App.EnvInfo.new':
+                                                                            var $1547 = self.mouse_pos;
+                                                                            var _mouse_coord$27 = Web$Kaelin$Coord$to_axial$($1547);
+                                                                            var _area$28 = Web$Kaelin$Skill$indicator$($1528, $1543, _mouse_coord$27);
+                                                                            var _cast$29 = Web$Kaelin$CastInfo$new$($1528, Web$Kaelin$HexEffect$skill, $1543, _range$24, _area$28, _mouse_coord$27);
+                                                                            var $1548 = Web$Kaelin$State$game$set_cast_info$(_cast$29, _state$2);
+                                                                            var $1546 = $1548;
+                                                                            break;
+                                                                    };
+                                                                    var $1544 = $1546;
+                                                                    break;
+                                                            };
+                                                            var $1542 = $1544;
+                                                            break;
+                                                        case 'Maybe.none':
+                                                            var $1549 = _state$2;
+                                                            var $1542 = $1549;
+                                                            break;
+                                                    };
+                                                    var $1532 = $1542;
+                                                    break;
+                                            };
+                                            var $1530 = $1532;
+                                            break;
+                                        case 'Web.Kaelin.Entity.background':
+                                            var $1550 = _state$2;
+                                            var $1530 = $1550;
+                                            break;
+                                    };
+                                    var $1527 = $1530;
+                                    break;
+                            };
+                            var $1525 = $1527;
+                            break;
+                        case 'Maybe.none':
+                            var $1551 = _state$2;
+                            var $1525 = $1551;
+                            break;
+                    };
+                    return $1525;
+                })()));
+                var $1520 = $1524;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1552 = _state$2;
+                var $1520 = $1552;
+                break;
+        };
+        return $1520;
+    };
+    const Web$Kaelin$Action$start_cast = x0 => x1 => Web$Kaelin$Action$start_cast$(x0, x1);
+
+    function String$drop$(_n$1, _xs$2) {
+        var String$drop$ = (_n$1, _xs$2) => ({
             ctr: 'TCO',
-            arg: [_x$1, _y$2, _z$3]
+            arg: [_n$1, _xs$2]
         });
-        var append_2_go = _x$1 => _y$2 => _z$3 => append_2_go$(_x$1, _y$2, _z$3);
-        var arg = [_x$1, _y$2, _z$3];
+        var String$drop = _n$1 => _xs$2 => String$drop$(_n$1, _xs$2);
+        var arg = [_n$1, _xs$2];
         while (true) {
-            let [_x$1, _y$2, _z$3] = arg;
+            let [_n$1, _xs$2] = arg;
             var R = (() => {
                 var _shift1_Nat$4 = (_x$4 => {
                     var $1493 = Bits$to_nat$(Bits$shift_right$(1n, (nat_to_bits(_x$4))));
@@ -7238,8 +7714,8 @@ module.exports = (function() {
         return $1497;
     })();
 
-    function Hex$to_nat$(_x$1) {
-        var self = Parser$run$(Hex$parser, _x$1);
+    function Web$Kaelin$Event$Buffer$next$(_buffer$1) {
+        var self = _buffer$1;
         switch (self._) {
             case 'Maybe.some':
                 var $1520 = self.value;
@@ -7253,7 +7729,7 @@ module.exports = (function() {
         };
         return $1519;
     };
-    const Hex$to_nat = x0 => Hex$to_nat$(x0);
+    const Web$Kaelin$Event$Buffer$next = x0 => Web$Kaelin$Event$Buffer$next$(x0);
 
     function String$take$(_n$1, _xs$2) {
         var self = _xs$2;
@@ -8754,6 +9230,34 @@ module.exports = (function() {
         'Web.Kaelin.Event.Code.generate_hex': Web$Kaelin$Event$Code$generate_hex,
         'generate_hex': generate_hex,
         'Web.Kaelin.Event.Code.create_hero': Web$Kaelin$Event$Code$create_hero,
+        'Parser.State.new': Parser$State$new,
+        'Parser.run': Parser$run,
+        'Parser.Reply': Parser$Reply,
+        'Parser.Reply.value': Parser$Reply$value,
+        'Parser.maybe': Parser$maybe,
+        'Parser.Reply.error': Parser$Reply$error,
+        'Parser.Error.new': Parser$Error$new,
+        'Parser.Reply.fail': Parser$Reply$fail,
+        'U16.eql': U16$eql,
+        'Parser.text.go': Parser$text$go,
+        'Parser.text': Parser$text,
+        'Parser.Error.combine': Parser$Error$combine,
+        'Parser.Error.maybe_combine': Parser$Error$maybe_combine,
+        'Parser.many.go': Parser$many$go,
+        'Parser.many': Parser$many,
+        'Parser.many1': Parser$many1,
+        'Parser.one': Parser$one,
+        'Char.eql': Char$eql,
+        'Hex.char_hex_to_nat': Hex$char_hex_to_nat,
+        'Parser': Parser,
+        'Parser.fail': Parser$fail,
+        'Hex.parser.char_hex': Hex$parser$char_hex,
+        'List.fold_right': List$fold_right,
+        'Nat.pow': Nat$pow,
+        'append_2_go': append_2_go,
+        'Nat.append_2': Nat$append_2,
+        'Hex.parser': Hex$parser,
+        'Hex.to_nat': Hex$to_nat,
         'Web.Kaelin.Resources.Action.to_bits': Web$Kaelin$Resources$Action$to_bits,
         'Web.Kaelin.Coord.Convert.axial_to_bits': Web$Kaelin$Coord$Convert$axial_to_bits,
         'Web.Kaelin.Event.Code.user_input': Web$Kaelin$Event$Code$user_input,
@@ -8761,7 +9265,6 @@ module.exports = (function() {
         'Web.Kaelin.Event.user_input': Web$Kaelin$Event$user_input,
         'Web.Kaelin.Action.walk': Web$Kaelin$Action$walk,
         'App.post': App$post,
-        'U16.eql': U16$eql,
         'Debug.log': Debug$log,
         'Web.Kaelin.Player.new': Web$Kaelin$Player$new,
         'Web.Kaelin.Action.create_player': Web$Kaelin$Action$create_player,
