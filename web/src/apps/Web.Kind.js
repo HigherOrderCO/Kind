@@ -366,61 +366,39 @@ module.exports = (function() {
         return $34;
     };
     const DOM$node = x0 => x1 => x2 => x3 => DOM$node$(x0, x1, x2, x3);
-    const BitsMap$new = ({
-        _: 'BitsMap.new'
-    });
-
-    function List$cons$(_head$2, _tail$3) {
-        var $35 = ({
-            _: 'List.cons',
-            'head': _head$2,
-            'tail': _tail$3
-        });
-        return $35;
-    };
-    const List$cons = x0 => x1 => List$cons$(x0, x1);
-
-    function DOM$text$(_value$1) {
-        var $36 = ({
-            _: 'DOM.text',
-            'value': _value$1
-        });
-        return $36;
-    };
-    const DOM$text = x0 => DOM$text$(x0);
-    const List$nil = ({
-        _: 'List.nil'
-    });
 
     function BitsMap$(_A$1) {
-        var $37 = null;
-        return $37;
+        var $35 = null;
+        return $35;
     };
     const BitsMap = x0 => BitsMap$(x0);
 
     function Map$(_V$1) {
-        var $38 = null;
-        return $38;
+        var $36 = null;
+        return $36;
     };
     const Map = x0 => Map$(x0);
+    const BitsMap$new = ({
+        _: 'BitsMap.new'
+    });
 
     function BitsMap$tie$(_val$2, _lft$3, _rgt$4) {
-        var $39 = ({
+        var $37 = ({
             _: 'BitsMap.tie',
             'val': _val$2,
             'lft': _lft$3,
             'rgt': _rgt$4
         });
-        return $39;
+        return $37;
     };
     const BitsMap$tie = x0 => x1 => x2 => BitsMap$tie$(x0, x1, x2);
 
     function Maybe$some$(_value$2) {
-        var $40 = ({
+        var $38 = ({
             _: 'Maybe.some',
             'value': _value$2
         });
-        return $40;
+        return $38;
     };
     const Maybe$some = x0 => Maybe$some$(x0);
     const Maybe$none = ({
@@ -436,27 +414,27 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $42 = self.pred;
-                var $43 = (Word$to_bits$($42) + '0');
-                var $41 = $43;
+                var $40 = self.pred;
+                var $41 = (Word$to_bits$($40) + '0');
+                var $39 = $41;
                 break;
             case 'Word.i':
-                var $44 = self.pred;
-                var $45 = (Word$to_bits$($44) + '1');
-                var $41 = $45;
+                var $42 = self.pred;
+                var $43 = (Word$to_bits$($42) + '1');
+                var $39 = $43;
                 break;
             case 'Word.e':
-                var $46 = Bits$e;
-                var $41 = $46;
+                var $44 = Bits$e;
+                var $39 = $44;
                 break;
         };
-        return $41;
+        return $39;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
 
     function Nat$succ$(_pred$1) {
-        var $47 = 1n + _pred$1;
-        return $47;
+        var $45 = 1n + _pred$1;
+        return $45;
     };
     const Nat$succ = x0 => Nat$succ$(x0);
     const Nat$zero = 0n;
@@ -465,15 +443,15 @@ module.exports = (function() {
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $49 = Bits$e;
-            var $48 = $49;
+            var $47 = Bits$e;
+            var $46 = $47;
         } else {
-            var $50 = self.charCodeAt(0);
-            var $51 = self.slice(1);
-            var $52 = (String$to_bits$($51) + (u16_to_bits($50)));
-            var $48 = $52;
+            var $48 = self.charCodeAt(0);
+            var $49 = self.slice(1);
+            var $50 = (String$to_bits$($49) + (u16_to_bits($48)));
+            var $46 = $50;
         };
-        return $48;
+        return $46;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -481,33 +459,55 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $54 = self.head;
-                var $55 = self.tail;
-                var self = $54;
+                var $52 = self.head;
+                var $53 = self.tail;
+                var self = $52;
                 switch (self._) {
                     case 'Pair.new':
-                        var $57 = self.fst;
-                        var $58 = self.snd;
-                        var $59 = (bitsmap_set(String$to_bits$($57), $58, Map$from_list$($55), 'set'));
-                        var $56 = $59;
+                        var $55 = self.fst;
+                        var $56 = self.snd;
+                        var $57 = (bitsmap_set(String$to_bits$($55), $56, Map$from_list$($53), 'set'));
+                        var $54 = $57;
                         break;
                 };
-                var $53 = $56;
+                var $51 = $54;
                 break;
             case 'List.nil':
-                var $60 = BitsMap$new;
-                var $53 = $60;
+                var $58 = BitsMap$new;
+                var $51 = $58;
                 break;
         };
-        return $53;
+        return $51;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
+    const List$nil = ({
+        _: 'List.nil'
+    });
 
     function Pair$(_A$1, _B$2) {
-        var $61 = null;
-        return $61;
+        var $59 = null;
+        return $59;
     };
     const Pair = x0 => x1 => Pair$(x0, x1);
+
+    function List$cons$(_head$2, _tail$3) {
+        var $60 = ({
+            _: 'List.cons',
+            'head': _head$2,
+            'tail': _tail$3
+        });
+        return $60;
+    };
+    const List$cons = x0 => x1 => List$cons$(x0, x1);
+
+    function DOM$text$(_value$1) {
+        var $61 = ({
+            _: 'DOM.text',
+            'value': _value$1
+        });
+        return $61;
+    };
+    const DOM$text = x0 => DOM$text$(x0);
 
     function Pair$new$(_fst$3, _snd$4) {
         var $62 = ({
@@ -596,7 +596,7 @@ module.exports = (function() {
     const Web$Kind$constant$primary_color = "#71558C";
 
     function Web$Kind$comp$heading$(_typography$1, _title$2) {
-        var $79 = DOM$node$("div", BitsMap$new, Map$union$(_typography$1, Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$nil))), List$cons$(DOM$text$(_title$2), List$nil));
+        var $79 = DOM$node$("div", Map$from_list$(List$nil), Map$union$(_typography$1, Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$nil))), List$cons$(DOM$text$(_title$2), List$nil));
         return $79;
     };
     const Web$Kind$comp$heading = x0 => x1 => Web$Kind$comp$heading$(x0, x1);
@@ -1086,7 +1086,7 @@ module.exports = (function() {
     const Web$Kind$typography$subtitle = Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$typography$xxl), List$cons$(Pair$new$("font-family", Web$Kind$typography$typeface_header), List$cons$(Pair$new$("font-weight", "700"), List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("line-height", "1.5"), List$nil))))));
 
     function Web$Kind$comp$title_phone$(_title$1) {
-        var $182 = DOM$node$("div", BitsMap$new, Map$union$(Web$Kind$typography$subtitle, Map$from_list$(List$cons$(Pair$new$("margin-top", "1em"), List$cons$(Pair$new$("width", "100%"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
+        var $182 = DOM$node$("div", Map$from_list$(List$nil), Map$union$(Web$Kind$typography$subtitle, Map$from_list$(List$cons$(Pair$new$("margin-top", "1em"), List$cons$(Pair$new$("width", "100%"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
         return $182;
     };
     const Web$Kind$comp$title_phone = x0 => Web$Kind$comp$title_phone$(x0);
@@ -1094,7 +1094,7 @@ module.exports = (function() {
     const Web$Kind$typography$title = Map$from_list$(List$cons$(Pair$new$("font-size", Web$Kind$typography$xxxl), List$cons$(Pair$new$("font-family", Web$Kind$typography$typeface_header), List$cons$(Pair$new$("font-weight", "700"), List$cons$(Pair$new$("text-align", "center"), List$cons$(Pair$new$("line-height", "1.5"), List$nil))))));
 
     function Web$Kind$comp$title$(_title$1) {
-        var $183 = DOM$node$("div", BitsMap$new, Map$union$(Web$Kind$typography$title, Map$from_list$(List$cons$(Pair$new$("margin-top", "1em"), List$cons$(Pair$new$("width", "100%"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
+        var $183 = DOM$node$("div", Map$from_list$(List$nil), Map$union$(Web$Kind$typography$title, Map$from_list$(List$cons$(Pair$new$("margin-top", "1em"), List$cons$(Pair$new$("width", "100%"), List$nil)))), List$cons$(DOM$text$(_title$1), List$nil));
         return $183;
     };
     const Web$Kind$comp$title = x0 => Web$Kind$comp$title$(x0);
@@ -1296,7 +1296,7 @@ module.exports = (function() {
                 var $227 = self.page;
                 var $228 = self.mouse_over;
                 var _tabs$5 = List$cons$(Web$Kind$comp$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$home, $227), ("tab_home" === $228), "Home", "tab_home"), List$cons$(Web$Kind$comp$header_tab$(Web$Kind$helper$is_eql$(Web$Kind$Page$apps, $227), ("tab_apps" === $228), "Apps", "tab_apps"), List$nil));
-                var $229 = DOM$node$("div", BitsMap$new, Map$union$(Web$Kind$typography$button, Map$from_list$(List$cons$(Pair$new$("padding-top", "0.5em"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil))))), _tabs$5);
+                var $229 = DOM$node$("div", Map$from_list$(List$nil), Map$union$(Web$Kind$typography$button, Map$from_list$(List$cons$(Pair$new$("padding-top", "0.5em"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil))))), _tabs$5);
                 var $226 = $229;
                 break;
         };
@@ -1310,7 +1310,7 @@ module.exports = (function() {
             case 'Web.Kind.State.new':
                 var $231 = self.device;
                 var _vbox$6 = VoxBox$alloc_capacity$(100);
-                var _line$7 = DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("margin", "auto"), List$cons$(Pair$new$("max-width", "65em"), List$cons$(Pair$new$("padding", "0.5em 0"), List$nil)))), List$cons$(DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("height", "3pt"), List$cons$(Pair$new$("border-top", (Web$Kind$constant$primary_color + " dashed 1pt")), List$cons$(Pair$new$("border-bottom", (Web$Kind$constant$primary_color + " dashed 1pt")), List$cons$(Pair$new$("margin-left", "10%"), List$cons$(Pair$new$("margin-right", "10%"), List$nil)))))), List$nil), List$nil));
+                var _line$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin", "auto"), List$cons$(Pair$new$("max-width", "65em"), List$cons$(Pair$new$("padding", "0.5em 0"), List$nil)))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "3pt"), List$cons$(Pair$new$("border-top", (Web$Kind$constant$primary_color + " dashed 1pt")), List$cons$(Pair$new$("border-bottom", (Web$Kind$constant$primary_color + " dashed 1pt")), List$cons$(Pair$new$("margin-left", "10%"), List$cons$(Pair$new$("margin-right", "10%"), List$nil)))))), List$nil), List$nil));
                 var $232 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "header"), List$nil)), _container_layout$2, List$cons$((() => {
                     var self = $231;
                     switch (self._) {
@@ -1351,13 +1351,13 @@ module.exports = (function() {
             let _item$3;
             while ($239._ === 'List.cons') {
                 _item$3 = $239.head;
-                var $238 = List$cons$(DOM$node$("li", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("line-height", "1.35"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
+                var $238 = List$cons$(DOM$node$("li", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("line-height", "1.35"), List$nil)), List$cons$(_item$3, List$nil)), _li$4);
                 _li$4 = $238;
                 $239 = $239.tail;
             }
             return _li$4;
         })();
-        var $236 = DOM$node$("ul", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
+        var $236 = DOM$node$("ul", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("list-style-type", "none"), List$nil)), _li$3);
         return $236;
     };
     const Web$Kind$comp$list = x0 => Web$Kind$comp$list$(x0);
@@ -1422,11 +1422,11 @@ module.exports = (function() {
                 var _heading_typography$6 = $249;
                 break;
         };
-        var _join_us_txt$7 = DOM$node$("div", BitsMap$new, BitsMap$new, List$cons$(Web$Kind$comp$heading$(_heading_typography$6, "Join Us"), List$cons$(DOM$node$("div", BitsMap$new, BitsMap$new, List$cons$(Web$Kind$comp$list$(List$cons$(Web$Kind$comp$link_white$("Github", _footer_font_size$4, "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$comp$link_white$("Telegram", _footer_font_size$4, "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
-        var _join_us$8 = DOM$node$("div", BitsMap$new, Map$union$(_container_layout$2, Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$nil)))))), List$cons$(_join_us_txt$7, List$cons$(DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("font-size", _footer_font_size$4), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
-        var _join_us_wrapper$9 = DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("padding", _vertical_padding$3), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$nil))), List$cons$(_join_us$8, List$nil));
-        var _msg_footer$10 = DOM$node$("div", BitsMap$new, Map$union$(_container_layout$2, Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil)))))), List$cons$(DOM$node$("p", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("font-size", _footer_font_size_s$5), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$comp$link_white$("*u* show me the code!", _footer_font_size_s$5, "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
-        var _msg_footer_wrapper$11 = DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("padding", "0.5em 0"), List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$nil))), List$cons$(_msg_footer$10, List$nil));
+        var _join_us_txt$7 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$Kind$comp$heading$(_heading_typography$6, "Join Us"), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$Kind$comp$list$(List$cons$(Web$Kind$comp$link_white$("Github", _footer_font_size$4, "https://github.com/uwu-tech/Kind"), List$cons$(Web$Kind$comp$link_white$("Telegram", _footer_font_size$4, "https://t.me/formality_lang"), List$nil))), List$nil)), List$nil)));
+        var _join_us$8 = DOM$node$("div", Map$from_list$(List$nil), Map$union$(_container_layout$2, Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-items", "flex-end"), List$nil)))))), List$cons$(_join_us_txt$7, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", _footer_font_size$4), List$nil)), List$cons$(DOM$text$("\u{2764} by UwU Tech"), List$nil)), List$nil)));
+        var _join_us_wrapper$9 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding", _vertical_padding$3), List$cons$(Pair$new$("background-color", Web$Kind$constant$primary_color), List$nil))), List$cons$(_join_us$8, List$nil));
+        var _msg_footer$10 = DOM$node$("div", Map$from_list$(List$nil), Map$union$(_container_layout$2, Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil)))))), List$cons$(DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-size", _footer_font_size_s$5), List$nil)), List$cons$(DOM$text$("This website was created using Kind!"), List$nil)), List$cons$(Web$Kind$comp$link_white$("*u* show me the code!", _footer_font_size_s$5, "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind"), List$nil)));
+        var _msg_footer_wrapper$11 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("padding", "0.5em 0"), List$cons$(Pair$new$("background-color", Web$Kind$constant$dark_pri_color), List$nil))), List$cons$(_msg_footer$10, List$nil));
         var $241 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "footer"), List$nil)), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("color", "white"), List$nil)))), List$cons$(_join_us_wrapper$9, List$cons$(_msg_footer_wrapper$11, List$nil)));
         return $241;
     };
@@ -1478,16 +1478,16 @@ module.exports = (function() {
             case 'Web.Kind.State.new':
                 var $258 = self.device;
                 var _span$5 = (_txt$5 => {
-                    var $260 = DOM$node$("span", BitsMap$new, BitsMap$new, List$cons$(DOM$text$(_txt$5), List$nil));
+                    var $260 = DOM$node$("span", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(_txt$5), List$nil));
                     return $260;
                 });
                 var _line$6 = (_txt$6 => {
-                    var $261 = DOM$node$("p", BitsMap$new, BitsMap$new, List$cons$(DOM$text$(_txt$6), List$nil));
+                    var $261 = DOM$node$("p", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(_txt$6), List$nil));
                     return $261;
                 });
-                var _line_break$7 = DOM$node$("br", BitsMap$new, BitsMap$new, List$nil);
+                var _line_break$7 = DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil);
                 var _span_bold$8 = (_txt$8 => {
-                    var $262 = DOM$node$("span", BitsMap$new, Web$Kind$typography$body_strong, List$cons$(DOM$text$(_txt$8), List$nil));
+                    var $262 = DOM$node$("span", Map$from_list$(List$nil), Web$Kind$typography$body_strong, List$cons$(DOM$text$(_txt$8), List$nil));
                     return $262;
                 });
                 var self = $258;
@@ -1516,11 +1516,11 @@ module.exports = (function() {
                         var _heading_typography$10 = $266;
                         break;
                 };
-                var _intro$11 = DOM$node$("div", BitsMap$new, Web$Kind$typography$body, List$cons$(_span$5("Kind is a cute "), List$cons$(_span_bold$8("proof"), List$cons$(_span$5("gramming language."), List$cons$(_line_break$7, List$cons$(_line_break$7, List$cons$(_span$5("It\'s "), List$cons$(_span_bold$8("capable of everything"), List$cons$(_line$6("from web apps to games to"), List$cons$(_line$6("advanced mathematical proofs."), List$nil))))))))));
-                var _croni$12 = DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("margin-left", "3em"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(_span$5("gl hf!"), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "2em"), List$cons$(Pair$new$("height", "2em"), List$nil))), List$nil), List$nil)));
-                var _call_to_apps$12 = DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("height", _go_to_apps_height$9), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$comp$btn_primary_solid$("GO TO APPS", "btn_pri_home_go_to_apps"), List$cons$(_croni$12, List$nil)));
-                var _instructions$13 = DOM$node$("div", BitsMap$new, Map$union$(Web$Kind$typography$code, Map$from_list$(List$cons$(Pair$new$("margin-top", "0.5em"), List$cons$(Pair$new$("padding", "0.5em"), List$cons$(Pair$new$("box-shadow", (Web$Kind$constant$primary_color + " -2px 2px 1px")), List$cons$(Pair$new$("border", "1px solid"), List$nil)))))), List$cons$(_line$6("npm i -g kind-lang"), List$cons$(_line$6("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$6("cd Kind/base"), List$cons$(_line$6("kind Main"), List$cons$(_line$6("kind Main --run"), List$nil))))));
-                var _install$13 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "instructions"), List$nil)), BitsMap$new, List$cons$(Web$Kind$comp$heading$(_heading_typography$10, "Install"), List$cons$(_instructions$13, List$nil)));
+                var _intro$11 = DOM$node$("div", Map$from_list$(List$nil), Web$Kind$typography$body, List$cons$(_span$5("Kind is a cute "), List$cons$(_span_bold$8("proof"), List$cons$(_span$5("gramming language."), List$cons$(_line_break$7, List$cons$(_line_break$7, List$cons$(_span$5("It\'s "), List$cons$(_span_bold$8("capable of everything"), List$cons$(_line$6("from web apps to games to"), List$cons$(_line$6("advanced mathematical proofs."), List$nil))))))))));
+                var _croni$12 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-left", "3em"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-end"), List$nil)))), List$cons$(_span$5("gl hf!"), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", Web$Kind$img$croni), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "2em"), List$cons$(Pair$new$("height", "2em"), List$nil))), List$nil), List$nil)));
+                var _call_to_apps$12 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", _go_to_apps_height$9), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))), List$cons$(Web$Kind$comp$btn_primary_solid$("GO TO APPS", "btn_pri_home_go_to_apps"), List$cons$(_croni$12, List$nil)));
+                var _instructions$13 = DOM$node$("div", Map$from_list$(List$nil), Map$union$(Web$Kind$typography$code, Map$from_list$(List$cons$(Pair$new$("margin-top", "0.5em"), List$cons$(Pair$new$("padding", "0.5em"), List$cons$(Pair$new$("box-shadow", (Web$Kind$constant$primary_color + " -2px 2px 1px")), List$cons$(Pair$new$("border", "1px solid"), List$nil)))))), List$cons$(_line$6("npm i -g kind-lang"), List$cons$(_line$6("git clone https://github.com/uwu-tech/Kind"), List$cons$(_line$6("cd Kind/base"), List$cons$(_line$6("kind Main"), List$cons$(_line$6("kind Main --run"), List$nil))))));
+                var _install$13 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "instructions"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$comp$heading$(_heading_typography$10, "Install"), List$cons$(_instructions$13, List$nil)));
                 var $259 = Web$Kind$comp$page$("home", _stt$1, List$cons$(_intro$11, List$cons$(_call_to_apps$12, List$cons$(_install$13, List$nil))));
                 var $257 = $259;
                 break;
@@ -1531,7 +1531,7 @@ module.exports = (function() {
 
     function Web$Kind$comp$game_card$(_src$1, _title$2, _path$3) {
         var _banner$4 = DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", _src$1), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "100px"), List$cons$(Pair$new$("height", "100px"), List$nil))), List$nil);
-        var $267 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _path$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("text-decoration", "none"), List$nil)))), List$cons$(DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(DOM$text$(_title$2), List$nil))), List$nil));
+        var $267 = DOM$node$("a", Map$from_list$(List$cons$(Pair$new$("href", _path$3), List$cons$(Pair$new$("target", "_blank"), List$nil))), Map$from_list$(List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("color", "black"), List$cons$(Pair$new$("text-decoration", "none"), List$nil)))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("height", "120px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("margin", "10px 20px"), List$cons$(Pair$new$("border", "solid 1px"), List$cons$(Pair$new$("padding", "2px"), List$nil))))))), List$cons$(_banner$4, List$cons$(DOM$text$(_title$2), List$nil))), List$nil));
         return $267;
     };
     const Web$Kind$comp$game_card = x0 => x1 => x2 => Web$Kind$comp$game_card$(x0, x1, x2);
@@ -1548,9 +1548,9 @@ module.exports = (function() {
     const Web$Kind$content_apps_text = Web$Kind$comp$list$(List$cons$(Web$Kind$comp$link_black$("Demo", "Web.Demo"), List$cons$(Web$Kind$comp$link_black$("Online", "Web.Online"), List$nil)));
 
     function Web$Kind$draw_page_apps$(_stt$1) {
-        var _with_banner$2 = DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
-        var _no_banner$3 = DOM$node$("div", BitsMap$new, Map$from_list$(List$cons$(Pair$new$("margin-top", "2em"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
-        var _games$2 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), BitsMap$new, List$cons$(Web$Kind$comp$heading$(Web$Kind$typography$h1, "Games"), List$cons$(_with_banner$2, List$cons$(_no_banner$3, List$nil))));
+        var _with_banner$2 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil))))), Web$Kind$content_apps);
+        var _no_banner$3 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "2em"), List$nil)), List$cons$(Web$Kind$content_apps_text, List$nil));
+        var _games$2 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "game-container"), List$nil)), Map$from_list$(List$nil), List$cons$(Web$Kind$comp$heading$(Web$Kind$typography$h1, "Games"), List$cons$(_with_banner$2, List$cons$(_no_banner$3, List$nil))));
         var $269 = Web$Kind$comp$page$("apps", _stt$1, List$cons$(_games$2, List$nil));
         return $269;
     };
@@ -1891,12 +1891,9 @@ module.exports = (function() {
         'Device.big_desktop': Device$big_desktop,
         'Web.Kind.Page.home': Web$Kind$Page$home,
         'DOM.node': DOM$node,
-        'BitsMap.new': BitsMap$new,
-        'List.cons': List$cons,
-        'DOM.text': DOM$text,
-        'List.nil': List$nil,
         'BitsMap': BitsMap,
         'Map': Map,
+        'BitsMap.new': BitsMap$new,
         'BitsMap.tie': BitsMap$tie,
         'Maybe.some': Maybe$some,
         'Maybe.none': Maybe$none,
@@ -1911,7 +1908,10 @@ module.exports = (function() {
         'U16.to_bits': U16$to_bits,
         'String.to_bits': String$to_bits,
         'Map.from_list': Map$from_list,
+        'List.nil': List$nil,
         'Pair': Pair,
+        'List.cons': List$cons,
+        'DOM.text': DOM$text,
         'Pair.new': Pair$new,
         'Web.Kind.typography.body_size': Web$Kind$typography$body_size,
         'Web.Kind.typography.typeface_body': Web$Kind$typography$typeface_body,

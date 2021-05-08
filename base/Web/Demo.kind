@@ -7,6 +7,6 @@ Web.Demo: App<Nat>
     ])
 
   when = (event, state)
-    App.pass!
+    App.pass
 
   App.new!(init, draw, when)

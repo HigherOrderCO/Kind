@@ -198,18 +198,7 @@ Kind.Term.check.expand.new(
   type: Maybe(Kind.Term)
   defs: Kind.Defs
 ): Maybe<Kind.Term>
-  case type {
-    none:
-      // TODO: make Triple, Quadruple, etc.
-      if Nat.eql(List.length!(args), 2) then
-        let term = Kind.Term.ref("Pair.new")
-        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
-        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
-        let term = Kind.Term.app(term, args[0] <> Kind.Term.ref("pair_fst"))
-        let term = Kind.Term.app(term, args[1] <> Kind.Term.ref("pair_snd"))
-        some(term)
-      else
-        none
+  let got = case type {
     some: case Kind.Term.reduce(type.value, defs) as type {
       all: case Kind.Term.reduce(type.body(Kind.Term.typ,Kind.Term.typ), defs) as ctor {
         all: 
@@ -221,7 +210,27 @@ Kind.Term.check.expand.new(
           some(term)
       } default none
     } default none
+  } default none
+  case got {
+    none: Kind.Term.check.expand.new.pair(args, type, defs)
+    some: some(got.value)
   }
+
+Kind.Term.check.expand.new.pair(
+  args: List(Kind.Term)
+  type: Maybe(Kind.Term)
+  defs: Kind.Defs
+): Maybe<Kind.Term>
+  // TODO: make Triple, Quadruple, etc.
+  if Nat.eql(List.length!(args), 2) then
+    let term = Kind.Term.ref("Pair.new")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, args[0] <> Kind.Term.ref("pair_fst"))
+    let term = Kind.Term.app(term, args[1] <> Kind.Term.ref("pair_snd"))
+    some(term)
+  else
+    none
 
 // Expands `term@a` into `term(() _)((a) (b) (c) a)
 Kind.Term.check.expand.get(

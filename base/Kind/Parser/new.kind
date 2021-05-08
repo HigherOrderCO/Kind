@@ -1,5 +1,5 @@
 Kind.Parser.new: Parser(Kind.Term)
   Kind.Parser.block("new-struct", Parser {
-    get args = Kind.Parser.items!("{", Kind.Parser.term, "}")
+    get args = Kind.Parser.items1!("{", Kind.Parser.term, "}")
     return Kind.Term.new(args)
   })
