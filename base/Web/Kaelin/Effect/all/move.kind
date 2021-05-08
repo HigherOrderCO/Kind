@@ -1,4 +1,4 @@
-Web.Kaelin.Effect.all.move(distance: I32): Web.Kaelin.Effect<Unit>
+Web.Kaelin.Effect.all.move: Web.Kaelin.Effect<Unit>
   Web.Kaelin.Effect { 
     get map = Web.Kaelin.Effect.map.get
     get center = Web.Kaelin.Effect.coord.get_center
@@ -13,8 +13,11 @@ Web.Kaelin.Effect.all.move(distance: I32): Web.Kaelin.Effect<Unit>
           none: Web.Kaelin.Effect { return unit }
           some:  
             open creature_key.value as key
-            new_map= Web.Kaelin.Map.swap(key.snd, center, target, map)
-            Web.Kaelin.Effect.map.set(new_map)
+            if Web.Kaelin.Map.is_occupied(target, map) then
+              Web.Kaelin.Effect { return unit }
+            else
+              new_map= Web.Kaelin.Map.swap(key.snd, center, target, map)
+              Web.Kaelin.Effect.map.set(new_map)
         }
       }
     }

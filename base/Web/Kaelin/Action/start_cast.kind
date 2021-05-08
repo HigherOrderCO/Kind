@@ -17,7 +17,7 @@ Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin
                 some:           
                   open skill.value as skill_value
                   // calculate range of skill
-                  let range = Web.Kaelin.Coord.range(player_coord, skill_value.range)
+                  let range = Web.Kaelin.Coord.range_natset(player_coord, skill_value.range)
                   open state.env_info as info
                   open state.internal
                   mouse_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)

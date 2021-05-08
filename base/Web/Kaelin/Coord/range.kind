@@ -1,7 +1,5 @@
-Web.Kaelin.Coord.range(coord: Web.Kaelin.Coord, distance: I32): NatSet
+Web.Kaelin.Coord.range(coord: Web.Kaelin.Coord, distance: I32): List<Web.Kaelin.Coord>
   let list_coords = Web.Kaelin.Coord.Axial.range(coord, distance)
   let fit = (x)
     Web.Kaelin.Coord.fit(x, Web.Kaelin.Constants.map_size)
-  let list      = List.filter!(fit, list_coords)
-  let list_nats = List.map!!(Web.Kaelin.Coord.Convert.axial_to_nat, list)
-  NatSet.from_list(list_nats)
+  List.filter!(fit, list_coords)

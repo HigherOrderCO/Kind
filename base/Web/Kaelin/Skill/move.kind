@@ -2,6 +2,6 @@ Web.Kaelin.Skill.move(range: I32): Web.Kaelin.Skill
   Web.Kaelin.Skill.new(
   "Move"
   range
-  Web.Kaelin.Effect.all.move(+2#32)
+  Web.Kaelin.Effect.all.move
   'X'
   )
