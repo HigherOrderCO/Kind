@@ -1,2 +1,4 @@
 V3.add(a: V3, b: V3): V3
-  open a; open b; {F64.add(a.x,b.x), F64.add(a.y,b.y), F64.add(a.z,b.z)}
+  open a
+  open b
+  {a.x + b.x, a.y + b.y, a.z + b.z}

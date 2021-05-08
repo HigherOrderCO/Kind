@@ -119,13 +119,13 @@ Kind.Term.check(
         //Kind.Term.check(term.body(term.expr), type, defs, ctx, path, orig);
       },
       nat: case type {
-        none: Kind.Check { return Kind.Term.ref("Nat"); }
+        none: Kind.Term.check.direct(Kind.Term.ref("Nat"), defs)
         some: Kind.Check {
           let tnam = Kind.Term.check.get_name_of_self_type(type.value, defs)
           case tnam {
-            none: Kind.Check { return Kind.Term.ref("Nat") }
+            none: Kind.Term.check.direct(Kind.Term.ref("Nat"), defs)
             some: if String.eql(tnam.value, "Nat")
-              then Kind.Check { return Kind.Term.ref("Nat") }
+              then Kind.Term.check.direct(Kind.Term.ref("Nat"), defs)
               else
                 let cast = Kind.Term.ref(tnam.value | ".from_nat")
                 let cast = Kind.Term.app(cast, term) 
@@ -133,12 +133,8 @@ Kind.Term.check(
           }
         }
       },
-      chr: Kind.Check {
-        return Kind.Term.ref("Char");
-      },
-      str: Kind.Check {
-        return Kind.Term.ref("String");
-      },
+      chr: Kind.Term.check.direct(Kind.Term.ref("Char"), defs),
+      str: Kind.Term.check.direct(Kind.Term.ref("String"), defs),
       num: Kind.Check {
         let dsug = Kind.Term.check.expand.num(term.sign, term.numb, term.frac, type, defs)
         Kind.Term.check.patch(dsug, type, path)
@@ -180,11 +176,11 @@ Kind.Term.check(
       },
       ope: Kind.Check {
         let otyp = type <> Kind.Term.hol(Bits.e)
-        let dsug = Kind.Term.check.expand.ope(term.name, term.arg0, term.arg1, otyp, defs)
+        let dsug = Kind.Term.check.expand.ope(true, term.name, term.arg0, term.arg1, otyp, defs)
         case dsug {
           none: Kind.Check {
             get otyp = Kind.Term.check(term.arg0, none, defs, ctx, Kind.MPath.o(path), orig)
-            let dsug = Kind.Term.check.expand.ope(term.name, term.arg0, term.arg1, otyp, defs)
+            let dsug = Kind.Term.check.expand.ope(false, term.name, term.arg0, term.arg1, otyp, defs)
             case dsug {
               none: Kind.Term.check.cant_infer(term, type, ctx, orig)
               some: Kind.Term.check.patch(dsug.value, type, path)
@@ -223,6 +219,12 @@ Kind.Term.check(
         }
       }
     };
+  }
+
+Kind.Term.check.direct(term: Kind.Term, defs: Kind.Defs): Kind.Check(Kind.Term)
+  Kind.Check {
+    Kind.Term.check(term, none, defs, [], Kind.MPath.nil, none)
+    return term
   }
 
 Kind.Term.check.patch(term: Kind.Term, type: Maybe(Kind.Term), path: Kind.MPath): Kind.Check(Kind.Term)
@@ -299,34 +301,37 @@ Kind.Term.check.expand.num.other(name: String, sign: Maybe<Bool>, numb: Nat, fra
 
 // Expands an operator like `a + b` into `Nat.add(a, b)`
 // Expands numeric literals into their proper types
-Kind.Term.check.expand.ope(oper: String, arg0: Kind.Term, arg1: Kind.Term, otyp: Kind.Term, defs: Kind.Defs): Maybe<Kind.Term>
-  let type_name = Kind.Term.check.get_name_of_self_type(otyp, defs)
-  case type_name {
-    none: none
-    some:
-      let oper_name = switch String.eql(oper) {
-        "+"   : some("add")
-        "-"   : some("sub")
-        "*"   : some("mul")
-        "/"   : some("pow")
-        "%"   : some("mod")
-        "<?"  : some("ltn")
-        "<=?" : some("lte")
-        "=?"  : some("eql")
-        ">=?" : some("gte")
-        ">?"  : some("gtn")
-        "&&"  : some("and")
-        "||"  :some( "or")
-      } default none
-      case oper_name {
-        none: none
-        some:
-          let term = Kind.Term.ref(type_name.value | "." | oper_name.value)
-          let term = Kind.Term.app(term, arg0)
-          let term = Kind.Term.app(term, arg1)
-          some(term)
-      }
-  }
+Kind.Term.check.expand.ope(skip_cmp: Bool, oper: String, arg0: Kind.Term, arg1: Kind.Term, otyp: Kind.Term, defs: Kind.Defs): Maybe<Kind.Term>
+  if U16.eql(String.last(oper) <> 'x', '?') && skip_cmp then
+    none
+  else
+    let type_name = Kind.Term.check.get_name_of_self_type(otyp, defs)
+    case type_name {
+      none: none
+      some:
+        let oper_name = switch String.eql(oper) {
+          "+"   : some("add")
+          "-"   : some("sub")
+          "*"   : some("mul")
+          "/"   : some("pow")
+          "%"   : some("mod")
+          "<?"  : some("ltn")
+          "<=?" : some("lte")
+          "=?"  : some("eql")
+          ">=?" : some("gte")
+          ">?"  : some("gtn")
+          "&&"  : some("and")
+          "||"  :some( "or")
+        } default none
+        case oper_name {
+          none: none
+          some:
+            let term = Kind.Term.ref(type_name.value | "." | oper_name.value)
+            let term = Kind.Term.app(term, arg0)
+            let term = Kind.Term.app(term, arg1)
+            some(term)
+        }
+    }
 
 // Expands `{a,b,c}` into `Foo.new(a,b,c)`
 Kind.Term.check.expand.new(

@@ -1,2 +1,2 @@
 V3.dist(a: V3, b: V3): F64
-  F64.pow(V3.sqrdist(a, b), 0.5#64)
+  F64.pow(V3.sqrdist(a, b), 0.5)

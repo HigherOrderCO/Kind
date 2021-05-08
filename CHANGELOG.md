@@ -14,18 +14,8 @@ Test: _
   bar
 ```
 
-### Kind 1.0.47
-
-- Optimize float literals
-
-### Kind 1.0.48
-
-- Float literal bugfix
-
-### Kind 1.0.49
+### Kind 1.0.51
 
 - Inference on numeric literals and binary operators. Check `SYNTAX.md`.
 
-### Kind 1.0.50
-
-- Improve operator inference
+- Many bugfixes

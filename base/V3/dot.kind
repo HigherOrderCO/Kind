@@ -1,4 +1,4 @@
 V3.dot(a: V3, b: V3): F64
   open a
   open b
-  F64.add(F64.mul(a.x,b.x), F64.add(F64.mul(a.y,b.y), F64.mul(a.z,b.z)))
+  (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
