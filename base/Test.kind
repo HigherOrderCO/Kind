@@ -1,13 +1,4 @@
 Test: _
-  let a = (7)
-  let b = (+7)
-  let c = (-7)
-  let d = (7#32)
-  let e = (+7#32)
-  let f = (-7#32)
-  let g = (7.2)
-  let h = (+7.2)
-  let i = (-7.0)
-  let z = g + g
-  let k = i + i
-  (k + k)
+  let a = {  1,    2,    3} :: V3
+  let b = {0.5, -0.5, -1.5} :: V3
+  a + b

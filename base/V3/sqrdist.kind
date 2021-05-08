@@ -1,6 +1,6 @@
 V3.sqrdist(a: V3, b: V3): F64
   open a
   open b
-  F64.add( F64.pow(F64.sub(a.x,b.x), 2.0#64),
-  F64.add( F64.pow(F64.sub(a.y,b.y), 2.0#64),
-           F64.pow(F64.sub(a.z,b.z), 2.0#64)))
+  F64.pow((a.x - b.x), 2) +
+  F64.pow((a.y - b.y), 2) +
+  F64.pow((a.z - b.z), 2)

@@ -9,10 +9,10 @@
 V3.rotate(theta: F64, v: V3, p: V3) : V3 
   open v
   open p
-  let rad = F64.mul(theta, F64.div(F64.pi, 180.0#64))
+  let rad = F64.mul(theta, F64.div(F64.pi, 180))
   let s   = F64.sin(rad)
   let c   = F64.cos(rad)
-  let x   = F64.sub(F64.add(p.x, F64.mul(F64.sub(v.x, p.x), c)), F64.mul(F64.sub(v.y, p.y), s))
-  let y   = F64.add(F64.add(p.y, F64.mul(F64.sub(v.x, p.x), s)), F64.mul(F64.sub(v.y, p.y), c))
-  let z   = 0.0#64
+  let x   = ((p.x + ((v.x - p.x) * c)) - ((v.y - p.y) * s))
+  let y   = ((p.y + ((v.x - p.x) * s)) + ((v.y - p.y) * c))
+  let z   = 0.0
   {x, y, z}

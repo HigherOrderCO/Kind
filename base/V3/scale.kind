@@ -1,3 +1,3 @@
 V3.scale(x: F64, a: V3): V3
   open a
-  {F64.mul(a.x,x), F64.mul(a.y,x), F64.mul(a.z,x)}
+  {(a.x * x), (a.y * x), (a.z * x)}
