@@ -1,0 +1,8 @@
+// Gets all the vars of a sequence of lambdas, returns the body.
+// - get_vars(`λx. λy. λz. f`) == {["x","y","z"], `f`}
+Kind.Term.get_vars(term: Kind.Term, depth: Nat): Pair(List(String), Kind.Term)
+  case term {
+    lam:
+      let {vars, body} = Kind.Term.get_vars(term.body(Kind.Term.var(term.name,depth)), Nat.succ(depth))
+      {term.name & vars, body}
+  } default {[], term}

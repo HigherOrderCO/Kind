@@ -77,6 +77,21 @@ type Kind.Term {
     cses: BitsMap<Kind.Term>,
     moti: Maybe<Kind.Term>,
   ),
+  // A record maker
+  new(
+    args: List(Kind.Term)
+  ),
+  // A field-get expression
+  get(
+    expr: Kind.Term,
+    fkey: String,
+  ),
+  // A field-set expression
+  set(
+    expr: Kind.Term,
+    fkey: String,
+    fval: Kind.Term,
+  ),
   // An origin
   ori(
     orig: Pair<Nat,Nat>,

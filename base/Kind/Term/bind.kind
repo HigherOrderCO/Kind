@@ -76,6 +76,19 @@ Kind.Term.bind(vars: Kind.Context, path: Kind.Path, term: Kind.Term): Kind.Term
       let cses = term.cses; // TODO
       let moti = term.moti; // TODO
       Kind.Term.cse(Kind.Path.to_bits(path), expr, name, wyth, cses, moti),
+    new:
+      let args = List.fold!(term.args)!(
+        ((path) []) :: Kind.Path -> List(Kind.Term),
+        (arg,res,path) List.cons!(Kind.Term.bind(vars, path, arg), res(Kind.Path.o(path))),
+        path);
+      Kind.Term.new(args)
+    get:
+      let expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
+      Kind.Term.get(expr, term.fkey)
+    set:
+      let expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
+      let fval = Kind.Term.bind(vars, Kind.Path.i(path), term.fval);
+      Kind.Term.set(expr, term.fkey, fval)
     ori:
       Kind.Term.ori(term.orig, Kind.Term.bind(vars, path, term.expr)),
   }

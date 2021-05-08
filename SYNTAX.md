@@ -1024,6 +1024,53 @@ case head {
 
 This is useful to flatten your code, reducing the required identation.
 
+Record literal
+--------------
+
+```
+{1, 2}
+```
+
+When a datatype has only one constructor, it can be seen as a record. The syntax
+above can be used to create an element of that type. It expands to:
+
+```
+Foo.ctor_name(1, 2)
+```
+
+Depending on where it is used, may require a type annotation: `{1, 2} :: Foo`.
+
+Record getter
+-------------
+
+```
+foo@x
+```
+
+The syntax above expands to:
+
+```
+case foo { new: foo.x }
+```
+
+It can be used to get a field of a single-constructor datatype.
+
+
+Record setter
+-------------
+
+```
+foo@x <- 100
+```
+
+The syntax above expands to:
+
+```
+case foo { new: Foo.new(100, foo.y) }
+```
+
+It can be used to set a field of a single-constructor datatype.
+
 List literal
 ------------
 

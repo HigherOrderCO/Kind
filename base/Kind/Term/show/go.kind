@@ -86,6 +86,19 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
           some: String.flatten([": ", Kind.Term.show.go(term.moti.value, Maybe.none!)]),
         };
         String.flatten(["case ",expr," as ",name,wyth," { ",cses,"}",moti]),
+      new:
+        let args = List.fold!(term.args)!(
+          ((path) []) :: Kind.MPath -> List(String),
+          (arg,res,path) List.cons!(Kind.Term.show.go(arg, path), res(Kind.MPath.o(path))),
+          path);
+        String.flatten(["{", String.join(",",args), "}"])
+      get:
+        let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
+        String.flatten([expr,"@",term.fkey])
+      set:
+        let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
+        let fval = Kind.Term.show.go(term.fval, Kind.MPath.i(path));
+        String.flatten([expr,"@",term.fkey," <- ",fval])
       ori:
         Kind.Term.show.go(term.expr, path),
     }

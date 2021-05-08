@@ -65,6 +65,12 @@ Kind.Core.show.go(term: Kind.Term, indx: Nat, vars: List<Kind.Name>): String
       String.flatten(["\"", Kind.Code.escape(term.strx), "\""])
     cse:
       "<CSE>"
+    new:
+      "<NEW>"
+    get:
+      "<GET>"
+    set:
+      "<SET>"
     ori:
       Kind.Core.show.go(term.expr, indx, vars)
   }

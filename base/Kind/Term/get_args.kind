@@ -1,0 +1,9 @@
+// Gets all arguments of a sequence of applications, returns function.
+// - get_args(`(((f x) y) z)`) == {`f`, [`x`,`y`,`z`]}
+Kind.Term.get_args(term: Kind.Term): Pair(Kind.Term, List(Kind.Term))
+  Kind.Term.get_args.go(term, [])
+
+Kind.Term.get_args.go(term: Kind.Term, args: List(Kind.Term)): Pair(Kind.Term, List(Kind.Term))
+  case term {
+    app: Kind.Term.get_args.go(term.func, term.argm & args)
+  } default {term, args}

@@ -25,7 +25,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.char
       Kind.Parser.string('"')
       Kind.Parser.string('`')
-      Kind.Parser.pair
+      Kind.Parser.new
       Kind.Parser.sigma.type
       Kind.Parser.some
       Kind.Parser.not
@@ -84,6 +84,8 @@ Kind.Parser.term.suffix(term: Kind.Term): Parser(Kind.Term)
    Kind.Parser.list_get(term)
    Kind.Parser.map_set(term)
    Kind.Parser.map_get(term)
+   Kind.Parser.field_set(term)
+   Kind.Parser.field_get(term)
    Kind.Parser.arrow(term)
    Kind.Parser.concat(term)
    Kind.Parser.equality(term)
