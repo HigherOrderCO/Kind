@@ -17,3 +17,7 @@ Test: _
 ### Kind 1.0.47
 
 - Optimize float literals
+
+### Kind 1.0.48
+
+- Float literal bugfix
