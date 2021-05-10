@@ -4,37 +4,39 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 (event, state)
     case event state{
       init game: 
-      let user = String.to_lower(event.user)
-      IO {
+        let user = String.to_lower(event.user)
+        IO {
           App.watch(Web.Kaelin.Constants.room)
           App.store!(Web.Kaelin.State.game(user, Web.Kaelin.Constants.room state.players, state.cast_info, state.map, state.internal, state.env_info))
         }
 
       key_down game:
         switch U16.eql(event.code) {
-          49#16: App.store<Web.Kaelin.State>(Web.Kaelin.Action.create_player(
+          49#16: App.store!(Web.Kaelin.Action.create_player(
           state.user, Web.Kaelin.Heroes.Croni.hero, state))
         } default App.store!(Web.Kaelin.Action.start_cast(event.code, state))
 
-       tick game:
-           let info = event.info
-           let state = Web.Kaelin.Action.update_interface(info, U64.to_nat(event.time), state)
-           App.store<Web.Kaelin.State>(Web.Kaelin.Action.update_area(state))       mouse_up game :
-         let info = state.env_info
-         open info
-         let {axial_x, axial_y} = Web.Kaelin.Coord.to_axial(info.mouse_pos)
-         let hex = Web.Kaelin.Event.serialize(Web.Kaelin.Event.user_input(state.user, Web.Kaelin.Coord.new(axial_x, axial_y), Web.Kaelin.Action.walk))
-         App.post(state.room, hex)
+      tick game:
+        let info = event.info
+        let state = Web.Kaelin.Action.update_interface(info, U64.to_nat(event.time), state)
+        App.store!(Web.Kaelin.Action.update_area(state))       
+      
+      mouse_up game:
+        let info = state.env_info
+        open info
+        let {axial_x, axial_y} = Web.Kaelin.Coord.to_axial(info.mouse_pos)
+        let hex = Web.Kaelin.Event.serialize(Web.Kaelin.Event.user_input(state.user, Web.Kaelin.Coord.new(axial_x, axial_y), Web.Kaelin.Action.walk))
+        App.post(state.room, hex)
+      
       post game:
          case Web.Kaelin.Event.deserialize(String.drop(2, event.data)) as data { // drop the 0x thing
-           none : App.pass
-           some : //App.pass
+           none: App.pass
+           some:
            case data.value as eventdata {
-             start_game : App.pass
-             create_user : App.pass
-             create_hero : App.pass
-             user_input : 
-               App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state))
+             start_game: App.pass
+             create_user: App.pass
+             create_hero: App.pass
+             user_input: App.store!(Web.Kaelin.Skill.skill_use(state))
                     //changed move to skill from action, needs update
                     // Old movement w/ pathing
                     
@@ -58,7 +60,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
                         //let moves = List.foldr!(List<Web.Kaelin.State -> Web.Kaelin.State>, [],
                           //(pos, xs) Web.Kaelin.Player.move(pos, event.addr) & xs, path.value)
                         //let interval = Web.Kaelin.Timer.interval(List.reverse!(moves), (x) Nat.mul(x, 7), state)
-                        //App.store<Web.Kaelin.State>(interval)
+                        //App.store!(interval)
 
              
             }
