@@ -1,0 +1,18 @@
+Kind.Parser.num: Parser(Kind.Term)
+  Parser {
+    get numb = Parser.num
+    open numb
+    case numb.sign {
+      none: case numb.frac {
+        none: Parser {
+          return Kind.Term.nat(numb.numb)
+        }
+        some: Parser {
+          return Kind.Term.num(numb.sign, numb.numb, numb.frac)
+        }
+      }
+      some: Parser {
+        return Kind.Term.num(numb.sign, numb.numb, numb.frac)
+      }
+    }
+  }

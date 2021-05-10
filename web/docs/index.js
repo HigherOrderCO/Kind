@@ -2944,7 +2944,7 @@ module.exports = class AppPlay extends Component {
     this.register_event({
       _: "App.Event.init",
       time: BigInt(0),
-      user: sign.addressFromKey(KEY).toLowerCase(),
+      user: sign.addressFromKey(KEY),
       info: {
         _: "App.EnvInfo.new",
         screen_size: {
@@ -3151,7 +3151,7 @@ module.exports = class AppPlay extends Component {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
                   var time = BigInt(parseInt(time.slice(2), 16));
-                  this.register_event({ _: "App.Event.post", time, room, addr : addr.toLowerCase(), data });
+                  this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
                 console.log("Error: invalid input on App.Action.watch");
@@ -3280,6 +3280,7 @@ module.exports = class AppPlay extends Component {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
+  'Web.ColD': __webpack_require__.e(/* import() */ 401).then(__webpack_require__.t.bind(__webpack_require__, 401, 23)),
   'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
   'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
   'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),

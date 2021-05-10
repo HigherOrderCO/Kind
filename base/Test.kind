@@ -1,7 +1,4 @@
 Test: _
-  let par =
-    Parser {
-      get k = Parser.text("oi")
-      return k
-    }
-  par(0, "oi")
+  let a = {  1,    2,    3} :: V3
+  let b = {0.5, -0.5, -1.5} :: V3
+  a + b

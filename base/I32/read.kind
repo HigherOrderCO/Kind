@@ -1,0 +1,8 @@
+I32.read(str: String): I32
+  case Parser.run!(Parser.num, str) as parsed {
+    none:
+      Nat.to_i32(true, 0)
+    some:
+      open parsed.value
+      Nat.to_i32(parsed.value.sign <> true, parsed.value.numb)
+  }

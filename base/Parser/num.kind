@@ -1,0 +1,18 @@
+Parser.num: Parser(Parser.Number)
+  Parser {
+    get sign = Parser.first_of!([
+      Parser { Parser.text("+"); return some(true) }
+      Parser { Parser.text("-"); return some(false) }
+      Parser { return none }
+    ])
+    get numb = Parser.first_of!([
+      Parser.hex_nat
+      Parser.nat
+    ])
+    get frac = Parser {
+      Parser.maybe!(Parser.text("."))
+      var frac = Parser.maybe!(Parser.nat)
+      return frac
+    }
+    return Parser.Number.new(sign, numb, frac)
+  }

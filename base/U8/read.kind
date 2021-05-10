@@ -1,0 +1,2 @@
+U8.read(str: String): U8
+  Nat.to_u8(Nat.read(str))

@@ -1,10 +1,11 @@
 Kind.Parser.op(sym: String, ref: String, val0: Kind.Term): Parser(Kind.Term)
   Parser {
     Kind.Parser.text(sym)
-    //Kind.Parser.text_now(" ")
     get val1 = Kind.Parser.term
-    let term = Kind.Term.ref(ref)
-    let term = Kind.Term.app(term, val0)
-    let term = Kind.Term.app(term, val1)
-    return term
+    return Kind.Term.ope(sym, val0, val1)
+    //Kind.Parser.text_now(" ")
+    //let term = Kind.Term.ref(ref)
+    //let term = Kind.Term.app(term, val0)
+    //let term = Kind.Term.app(term, val1)
+    //return term
   }

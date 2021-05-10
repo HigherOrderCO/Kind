@@ -23,7 +23,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
          let info = state.env_info
          open info
          let {axial_x, axial_y} = Web.Kaelin.Coord.to_axial(info.mouse_pos)
-         let hex = Web.Kaelin.Event.serialize(Web.Kaelin.Event.user_input(Web.Kaelin.Coord.new(axial_x, axial_y), Web.Kaelin.Action.walk))
+         let hex = Web.Kaelin.Event.serialize(Web.Kaelin.Event.user_input(state.user, Web.Kaelin.Coord.new(axial_x, axial_y), Web.Kaelin.Action.walk))
          App.post(state.room, hex)
       post game:
          case Web.Kaelin.Event.deserialize(String.drop(2, event.data)) as data { // drop the 0x thing
@@ -34,13 +34,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
              create_user : App.pass
              create_hero : App.pass
              user_input : 
-               let pos = eventdata.coord
-               open pos
-                let origin = Web.Kaelin.Map.player.to_coord(event.addr, state.map)
-                case origin {
-                  none : App.pass
-                  some :
-                    App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state))
+               App.store<Web.Kaelin.State>(Web.Kaelin.Skill.skill_use(state))
                     //changed move to skill from action, needs update
                     // Old movement w/ pathing
                     
@@ -66,7 +60,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
                         //let interval = Web.Kaelin.Timer.interval(List.reverse!(moves), (x) Nat.mul(x, 7), state)
                         //App.store<Web.Kaelin.State>(interval)
 
-             }   
+             
             }
           }
     } default App.pass

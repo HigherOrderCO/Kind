@@ -1,0 +1,2 @@
+F64.from_nat(a: Nat): F64
+  F64.make(true, a, 0)

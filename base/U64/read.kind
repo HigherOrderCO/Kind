@@ -1,0 +1,2 @@
+U64.read(str: String): U64
+  Nat.to_u64(Nat.read(str))
