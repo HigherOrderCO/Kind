@@ -138,7 +138,7 @@ Web.Playground.comp.output_area(output: String, device: Device): DOM
       Map.union<String>(style, {
         "height": "100% - 35px"
         "margin-top": "35px"}), 
-    [ DOM.node("div", {}, {}, [DOM.text("kind-lang@1.0.44")])
+    [ DOM.node("div", {}, {}, [DOM.text("kind-lang@1.0.51")])
       DOM.node("pre", {}, {"margin-top": "10px"}, [DOM.text(output)])]
 )
 

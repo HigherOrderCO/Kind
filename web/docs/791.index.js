@@ -783,7 +783,7 @@ module.exports = (function() {
                     var $121 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100% - 35px"), List$cons$(Pair$new$("margin-top", "35px"), List$nil))));
                     return $121;
             };
-        })(), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("kind-lang@1.0.44"), List$nil)), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(DOM$text$(_output$1), List$nil)), List$nil)));
+        })(), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("kind-lang@1.0.51"), List$nil)), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(DOM$text$(_output$1), List$nil)), List$nil)));
         return $119;
     };
     const Web$Playground$comp$output_area = x0 => x1 => Web$Playground$comp$output_area$(x0, x1);

@@ -79,23 +79,6 @@ module.exports = class AppPlay extends Component {
       }
     });
 
-    // TODO: how to get the event?
-    // this.register_event({
-    //   _: "App.Event.input",
-    //   time: BigInt(Date.now()),
-    //   id: "", // TODO: add id
-    //   text: document.getElementById("myTextarea").value // TODO: get id
-    // });
-    // OU isso?
-    // this.listeners.input = (e) => {
-    //   this.register_event({
-    //     _: "App.Event.input",
-    //     time: BigInt(Date.now()),
-    //     id: e.target.id
-    //   });
-    // };
-    // document.body.addEventListener("input", this.listeners.input);
-
    // Mouse movement event
     this.listeners.mousemove = (e) => {
       this.mouse_pos = {_ : "Pair.new", fst: e.offsetX, snd : e.offsetY}
@@ -260,7 +243,7 @@ module.exports = class AppPlay extends Component {
               localStorage.removeItem(io.param);
               return this.run_io(io.then("")).then(res).catch(err);
             case "request": 
-              return fetch(io.param)
+              return fetch(encodeURI(io.param))
               .then(result => result.text())
               .then(result => this.run_io(io.then(result)))
               .then(res)

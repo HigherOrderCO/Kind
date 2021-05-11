@@ -556,85 +556,9 @@ module.exports = (function() {
             var $74 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("oi, tudo bem?"), List$nil));
             return $74;
         });
-<<<<<<< HEAD
-        var _when$4 = (_event$4 => _state$5 => {
-            var self = _event$4;
-            switch (self._) {
-                case 'App.Event.key_down':
-                    var $372 = self.code;
-                    var self = _state$5;
-                    switch (self._) {
-                        case 'Pair.new':
-                            var $374 = self.fst;
-                            var $375 = self.snd;
-                            var self = ($372 === 65);
-                            if (self) {
-                                var $377 = App$store$(Pair$new$((($374 - 16) >>> 0), $375));
-                                var $376 = $377;
-                            } else {
-                                var self = ($372 === 68);
-                                if (self) {
-                                    var $379 = App$store$(Pair$new$((($374 + 16) >>> 0), $375));
-                                    var $378 = $379;
-                                } else {
-                                    var self = ($372 === 87);
-                                    if (self) {
-                                        var $381 = App$store$(Pair$new$($374, (($375 - 16) >>> 0)));
-                                        var $380 = $381;
-                                    } else {
-                                        var self = ($372 === 83);
-                                        if (self) {
-                                            var $383 = App$store$(Pair$new$($374, (($375 + 16) >>> 0)));
-                                            var $382 = $383;
-                                        } else {
-                                            var $384 = App$pass;
-                                            var $382 = $384;
-                                        };
-                                        var $380 = $382;
-                                    };
-                                    var $378 = $380;
-                                };
-                                var $376 = $378;
-                            };
-                            var $373 = $376;
-                            break;
-                    };
-                    var $371 = $373;
-                    break;
-                case 'App.Event.init':
-                case 'App.Event.tick':
-                case 'App.Event.mouse_down':
-                case 'App.Event.mouse_up':
-                case 'App.Event.key_up':
-                case 'App.Event.post':
-                case 'App.Event.mouse_over':
-                case 'App.Event.input':
-                    var $385 = App$pass;
-                    var $371 = $385;
-                    break;
-                case 'App.Event.mouse_click':
-                    var $386 = IO$monad$((_m$bind$9 => _m$pure$10 => {
-                        var $387 = _m$bind$9;
-                        return $387;
-                    }))(IO$prompt$("What is your name?"))((_line$9 => {
-                        var $388 = IO$monad$((_m$bind$10 => _m$pure$11 => {
-                            var $389 = _m$bind$10;
-                            return $389;
-                        }))(IO$print$(("You\'re breath-taking, " + (_line$9 + "!"))))((_$10 => {
-                            var $390 = App$pass;
-                            return $390;
-                        }));
-                        return $388;
-                    }));
-                    var $371 = $386;
-                    break;
-            };
-            return $371;
-=======
         var _when$3 = (_event$3 => _state$4 => {
             var $75 = App$pass;
             return $75;
->>>>>>> master
         });
         var $73 = App$new$(_init$1, _draw$2, _when$3);
         return $73;

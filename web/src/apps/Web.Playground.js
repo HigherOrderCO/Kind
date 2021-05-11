@@ -778,7 +778,7 @@ module.exports = (function() {
                     var $121 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100% - 35px"), List$cons$(Pair$new$("margin-top", "35px"), List$nil))));
                     return $121;
             };
-        })(), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("kind-lang@1.0.44"), List$nil)), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(DOM$text$(_output$1), List$nil)), List$nil)));
+        })(), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("kind-lang@1.0.51"), List$nil)), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(DOM$text$(_output$1), List$nil)), List$nil)));
         return $119;
     };
     const Web$Playground$comp$output_area = x0 => x1 => Web$Playground$comp$output_area$(x0, x1);
@@ -1222,7 +1222,7 @@ module.exports = (function() {
                                     var $222 = IO$monad$((_m$bind$14 => _m$pure$15 => {
                                         var $223 = _m$bind$14;
                                         return $223;
-                                    }))(IO$request$(("http://18.222.191.174:3030/api/check_term?code=" + $205)))((_checked$14 => {
+                                    }))(IO$request$(("http://localhost:3030/api/check_term?code=" + $205)))((_checked$14 => {
                                         var $224 = App$store$(Web$Playground$State$new$($202, _window$13, $204, $205, _checked$14));
                                         return $224;
                                     }));

@@ -2851,23 +2851,6 @@ module.exports = class AppPlay extends Component {
       }
     });
 
-    // TODO: how to get the event?
-    // this.register_event({
-    //   _: "App.Event.input",
-    //   time: BigInt(Date.now()),
-    //   id: "", // TODO: add id
-    //   text: document.getElementById("myTextarea").value // TODO: get id
-    // });
-    // OU isso?
-    // this.listeners.input = (e) => {
-    //   this.register_event({
-    //     _: "App.Event.input",
-    //     time: BigInt(Date.now()),
-    //     id: e.target.id
-    //   });
-    // };
-    // document.body.addEventListener("input", this.listeners.input);
-
    // Mouse movement event
     this.listeners.mousemove = (e) => {
       this.mouse_pos = {_ : "Pair.new", fst: e.offsetX, snd : e.offsetY}
@@ -3032,7 +3015,7 @@ module.exports = class AppPlay extends Component {
               localStorage.removeItem(io.param);
               return this.run_io(io.then("")).then(res).catch(err);
             case "request": 
-              return fetch(io.param)
+              return fetch(encodeURI(io.param))
               .then(result => result.text())
               .then(result => this.run_io(io.then(result)))
               .then(res)
@@ -3184,17 +3167,7 @@ module.exports = class AppPlay extends Component {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
-<<<<<<< HEAD
   'Web.Playground': __webpack_require__.e(/* import() */ 791).then(__webpack_require__.t.bind(__webpack_require__, 791, 23)),
-=======
-  'Web.ColD': __webpack_require__.e(/* import() */ 401).then(__webpack_require__.t.bind(__webpack_require__, 401, 23)),
-  'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
-  'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
-  'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),
-  'Web.Online': __webpack_require__.e(/* import() */ 523).then(__webpack_require__.t.bind(__webpack_require__, 523, 23)),
-  'Web.Senhas': __webpack_require__.e(/* import() */ 936).then(__webpack_require__.t.bind(__webpack_require__, 936, 23)),
-  'Web.TicTacToe': __webpack_require__.e(/* import() */ 734).then(__webpack_require__.t.bind(__webpack_require__, 734, 23)),
->>>>>>> master
 }
 
 
