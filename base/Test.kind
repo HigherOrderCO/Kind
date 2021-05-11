@@ -1,14 +1,2 @@
-Test.Busybusy(str: String): Nat
-  case str {
-    nil: 0
-    cons: String.length(str.tail) + Test.Busybusy(str.tail)
-  }
-
-Test: IO(Unit)
-  IO {
-    get defs = Kind.Synth.one("Test.Busybusy", Kind.Map.new!)
-    case defs {
-      none: IO.print("failed")
-      some: IO.print("got defs!")
-    }
-  }
+Test: _
+  (+1) + (+3)
