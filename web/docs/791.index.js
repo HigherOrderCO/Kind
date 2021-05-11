@@ -1227,7 +1227,7 @@ module.exports = (function() {
                                     var $222 = IO$monad$((_m$bind$14 => _m$pure$15 => {
                                         var $223 = _m$bind$14;
                                         return $223;
-                                    }))(IO$request$(("http://localhost:3030/api/check_term?code=" + $205)))((_checked$14 => {
+                                    }))(IO$request$(("http://18.222.191.174:3030/api/check_term?code=" + $205)))((_checked$14 => {
                                         var $224 = App$store$(Web$Playground$State$new$($202, _window$13, $204, $205, _checked$14));
                                         return $224;
                                     }));
