@@ -42,7 +42,11 @@ class Moonad extends Component {
     if (path === "") {
       return h(AppList);
     } else {
-      return h(AppPlay, {name: path});
+      return h(AppPlay, {
+        name: path, 
+        container: {
+          width : window.innerWidth,
+          height: window.innerHeight}});
     }
   }
 };

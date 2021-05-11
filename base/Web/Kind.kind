@@ -57,7 +57,7 @@ Web.Kind: App(Web.Kind.State)
         App.store!(Web.Kind.State.new(device, Web.Kind.Page.home, ""))
       mouse_click: App.store!(Web.Kind.exe_event(event.id, state))
       mouse_over : App.store!(Web.Kind.set_mouse_over(event.id, state))
-      resize: 
+      tick: 
         open event.info
         open event.info.screen_size as screen_size
         open state

@@ -10,3 +10,4 @@ tmp.js
 *.orig
 web/*.lock
 base/.cache
+/base/playground.kind
