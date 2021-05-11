@@ -1,0 +1,2 @@
+U16.read(str: String): U16
+  Nat.to_u16(Nat.read(str))

@@ -1,0 +1,2 @@
+U16.from_nat(n: Nat): U16
+  U16.new(Nat.to_word!(n))

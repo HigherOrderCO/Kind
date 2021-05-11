@@ -1,12 +1,11 @@
-Kind.Parser.inequality(init: Nat, val0: Kind.Term): Parser(Kind.Term)
+Kind.Parser.inequality(val0: Kind.Term): Parser(Kind.Term)
   Parser {
-    Kind.Parser.text("!=");
-    get val1 = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    let term = Kind.Term.ref("Equal");
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-    let term = Kind.Term.app(term, val0);
-    let term = Kind.Term.app(term, val1);
-    let term = Kind.Term.app(Kind.Term.ref("Not"), term);
-    return Kind.Term.ori(orig, term);
+    Kind.Parser.text("!=")
+    get val1 = Kind.Parser.term
+    let term = Kind.Term.ref("Equal")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, val0)
+    let term = Kind.Term.app(term, val1)
+    let term = Kind.Term.app(Kind.Term.ref("Not"), term)
+    return term
   }

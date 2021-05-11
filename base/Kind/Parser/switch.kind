@@ -1,27 +1,24 @@
 Kind.Parser.switch.case: Parser(Pair<Kind.Term, Kind.Term>)
   Parser {
-    get key = Kind.Parser.term;
-    Kind.Parser.text(":");
-    get val = Kind.Parser.term;
-    return {key, val};
+    get key = Kind.Parser.term
+    Kind.Parser.text(":")
+    get val = Kind.Parser.term
+    return {key, val}
   }
 
 Kind.Parser.switch: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("switch ");
-    get cond = Kind.Parser.term;
-    Kind.Parser.text("{");
-    get cses = Parser.until!(Kind.Parser.text("}"), Kind.Parser.switch.case);
-    Kind.Parser.text("default ");
-    get dflt = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
+  Kind.Parser.block("switch", Parser {
+    Kind.Parser.text("switch")
+    get cond = Kind.Parser.term
+    get cses = Kind.Parser.items!("{", Kind.Parser.switch.case, "}")
+    Kind.Parser.text("default")
+    get dflt = Kind.Parser.term
     let term = List.fold!(cses)!(dflt, (cse, rest)
       open cse
-      let term = Kind.Term.app(cond, cse.fst);
-      let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)));
-      let term = Kind.Term.app(term, cse.snd);
-      let term = Kind.Term.app(term, rest);
-      term);
-    return Kind.Term.ori(orig, term);
-  }
+      let term = Kind.Term.app(cond, cse.fst)
+      let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)))
+      let term = Kind.Term.app(term, cse.snd)
+      let term = Kind.Term.app(term, rest)
+      term)
+    return term
+  })

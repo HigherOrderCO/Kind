@@ -1,6 +1,33 @@
 Kind.Parser.name1: Parser(Kind.Name)
   Parser {
-    Kind.Parser.spaces;
-    get chrs = Parser.many1<Kind.Letter>(Kind.Parser.letter);
-    return List.fold!(chrs)!(String.nil, String.cons);
+    Kind.Parser.spaces
+    //get chrs = Parser.with_error!(Parser.many1<Kind.Letter>(Kind.Parser.letter), "Expected name.")
+    get chrs = Parser.many1<Kind.Letter>(Kind.Parser.letter)
+    let name = List.fold!(chrs)!(String.nil, String.cons)
+    let reserved = Parser.fail!("Reserved keyword.")
+    let numeric = Parser.fail!("Name can't start with number or sign.")
+    switch String.eql(name) {
+      "case"   : reserved
+      "do"     : reserved
+      "if"     : reserved
+      "with"   : reserved
+      "for"    : reserved
+      "else"   : reserved
+      "switch" : reserved
+    } default switch U16.eql(String.head(name) <> 'x') {
+      '+' : numeric
+      '-' : numeric
+      '0' : numeric
+      '1' : numeric
+      '2' : numeric
+      '3' : numeric
+      '4' : numeric
+      '5' : numeric
+      '6' : numeric
+      '7' : numeric
+      '8' : numeric
+      '9' : numeric
+    } default Parser {
+      return name
+    }
   }

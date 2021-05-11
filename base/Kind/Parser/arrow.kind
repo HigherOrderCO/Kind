@@ -1,7 +1,6 @@
-Kind.Parser.arrow(init: Nat, xtyp: Kind.Term): Parser(Kind.Term)
+Kind.Parser.arrow(xtyp: Kind.Term): Parser(Kind.Term)
   Parser {
-    Kind.Parser.text("->");
-    get body = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, Kind.Term.all(Bool.false, "", "", xtyp, (s,x) body));
+    Kind.Parser.text("->")
+    get body = Kind.Parser.term
+    return Kind.Term.all(false, "", "", xtyp, (s,x) body)
   }

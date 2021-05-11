@@ -1,0 +1,4 @@
+V3.norm(a: V3): V3
+  open a
+  let len = F64.pow((a.x * a.x) + (a.y * a.y) + (a.z * a.z), 0.5)
+  {(a.x / len), (a.y / len), (a.z / len)}

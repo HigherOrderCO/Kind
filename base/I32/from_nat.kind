@@ -1,0 +1,2 @@
+I32.from_nat(n: Nat): I32
+  Int.to_i32(Int.from_nat(n))

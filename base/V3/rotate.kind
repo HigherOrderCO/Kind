@@ -1,0 +1,18 @@
+// Rotates a vector around an arbitrary point
+// - theta : the angle (in degrees) to rotate, 
+//           positive values rotate clockwise,
+//           while negative rotate counterclockwise
+// - v     : the vector you want to rotate
+// - p     : pivot to be used, if p = v3(0,0,0) 
+//           it rotates a vector around the origin
+//           center of the screen 
+V3.rotate(theta: F64, v: V3, p: V3) : V3 
+  open v
+  open p
+  let rad = F64.mul(theta, F64.div(F64.pi, 180))
+  let s   = F64.sin(rad)
+  let c   = F64.cos(rad)
+  let x   = ((p.x + ((v.x - p.x) * c)) - ((v.y - p.y) * s))
+  let y   = ((p.y + ((v.x - p.x) * s)) + ((v.y - p.y) * c))
+  let z   = 0.0
+  {x, y, z}

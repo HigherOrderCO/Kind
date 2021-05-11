@@ -1,12 +1,37 @@
 Kind.Parser.lambda: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("(");
-    get name = Parser.until1!(
-      Kind.Parser.text(")"),
-      Kind.Parser.item!(Kind.Parser.name1));
-    get body = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    let expr = Kind.Parser.make_lambda(name, body);
-    return Kind.Term.ori(orig, expr);
+  Kind.Parser.block("lambda", Parser {
+    get nams = Kind.Parser.items!("(", Kind.Parser.name1, ")")
+    get body = Kind.Parser.term
+    return Kind.Parser.lambda.make.start(nams, body)
+  })
+
+Kind.Parser.lambda.erased: Parser(Kind.Term)
+  Kind.Parser.block("lambda", Parser {
+    get nams = Kind.Parser.items!("<", Kind.Parser.name1, ">")
+    get body = Kind.Parser.term
+    return Kind.Parser.lambda.make.start(nams, body)
+  })
+
+//Kind.Parser.lambda.nameless: Parser(Kind.Term)
+  //Kind.Parser.block("lambda", Parser {
+    //Parser.log("A")
+    //Parser.log_code
+    //Kind.Parser.text("()")
+    //Parser.log("B")
+    //get body = Kind.Parser.term
+    //Parser.log("C")
+    //return Kind.Term.lam("", (x) body)
+  //})
+
+Kind.Parser.lambda.make.start(names: List<Kind.Name>, body: Kind.Term): Kind.Term
+  case names {
+    nil: Kind.Term.lam("", (x) body)
+    cons: Kind.Parser.lambda.make(names, body)
   }
+
+Kind.Parser.lambda.make(names: List<Kind.Name>, body: Kind.Term): Kind.Term
+  case names {
+    nil: body
+    cons: Kind.Term.lam(names.head, (x) Kind.Parser.lambda.make(names.tail, body))
+  }
+

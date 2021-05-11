@@ -1,5 +1,7 @@
 Parser.if_not<A: Type>(a: Parser(Unit), b: Parser(A)): Parser(A)
-  (idx,code) case a(idx,code) {
-    error: b(idx,code),
-    value: Parser.Reply.error<A>(idx, code, "Prevented."),
+  (pst)
+  open pst
+  case a(pst) {
+    error: b(pst)
+    value: Parser.Reply.fail<A>(pst.nam, pst.ini, pst.idx, "Prevented.")
   }

@@ -1,3 +1,0 @@
-type Parser.ErrorAt {
-  new(idx: Nat, code: String, err: String)
-}

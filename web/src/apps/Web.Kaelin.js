@@ -988,7 +988,7 @@ module.exports = (function() {
         return $148;
     };
     const VoxBox$alloc_capacity = x0 => VoxBox$alloc_capacity$(x0);
-    const Web$Kaelin$Constants$room = "0x415512345292";
+    const Web$Kaelin$Constants$room = "0x415512345298";
 
     function BitsMap$(_A$1) {
         var $149 = null;
@@ -1965,7 +1965,11 @@ module.exports = (function() {
     const Int$to_i32 = a0 => (Number(a0));
     const Int$new = a0 => a1 => (a0 - a1);
     const Int$from_nat = a0 => (a0);
+<<<<<<< HEAD
     const Nat$to_i32 = a0 => (Number(a0));
+=======
+    const I32$from_nat = a0 => (Number(a0));
+>>>>>>> master
 
     function List$cons$(_head$2, _tail$3) {
         var $369 = ({
@@ -2203,11 +2207,20 @@ module.exports = (function() {
         var _cyclope$5 = Web$Kaelin$Heroes$Cyclope$cyclope;
         var _lela$6 = Web$Kaelin$Heroes$Lela$lela;
         var _octoking$7 = Web$Kaelin$Heroes$Octoking$octoking;
+<<<<<<< HEAD
         var _map$8 = Web$Kaelin$Map$push$(_new_coord$2(((-1)))(((-2))), _creature$3(Maybe$none)(_croni$4), _map$1);
         var _map$9 = Web$Kaelin$Map$push$(_new_coord$2(0)(3), _creature$3(Maybe$none)(_cyclope$5), _map$8);
         var _map$10 = Web$Kaelin$Map$push$(_new_coord$2(((-2)))(0), _creature$3(Maybe$none)(_lela$6), _map$9);
         var _map$11 = Web$Kaelin$Map$push$(_new_coord$2(3)(((-2))), _creature$3(Maybe$none)(_octoking$7), _map$10);
         var $397 = _map$11;
+=======
+        var _foo$8 = ((-1));
+        var _map$9 = Web$Kaelin$Map$push$(_new_coord$2(_foo$8)(((-2))), _creature$3(Maybe$none)(_croni$4), _map$1);
+        var _map$10 = Web$Kaelin$Map$push$(_new_coord$2(0)(3), _creature$3(Maybe$none)(_cyclope$5), _map$9);
+        var _map$11 = Web$Kaelin$Map$push$(_new_coord$2(((-2)))(0), _creature$3(Maybe$none)(_lela$6), _map$10);
+        var _map$12 = Web$Kaelin$Map$push$(_new_coord$2(3)(((-2))), _creature$3(Maybe$none)(_octoking$7), _map$11);
+        var $397 = _map$12;
+>>>>>>> master
         return $397;
     };
     const Web$Kaelin$Map$init = x0 => Web$Kaelin$Map$init$(x0);
@@ -2903,6 +2916,7 @@ module.exports = (function() {
     const Web$Kaelin$Constants$center_y = 128;
     const F64$sub = a0 => a1 => (a0 - a1);
     const F64$mul = a0 => a1 => (a0 * a1);
+    const U32$from_nat = a0 => (Number(a0) >>> 0);
     const F64$add = a0 => a1 => (a0 + a1);
 
     function Web$Kaelin$Coord$round$floor$(_n$1) {
@@ -2912,8 +2926,8 @@ module.exports = (function() {
     const Web$Kaelin$Coord$round$floor = x0 => Web$Kaelin$Coord$round$floor$(x0);
 
     function Web$Kaelin$Coord$round$round_F64$(_n$1) {
-        var _half$2 = (parseFloat("+0.5"));
-        var _big_number$3 = (parseFloat("+1000.0"));
+        var _half$2 = (+0.5);
+        var _big_number$3 = (+1000.0);
         var _n$4 = (_n$1 + _big_number$3);
         var _result$5 = Web$Kaelin$Coord$round$floor$((_n$4 + _half$2));
         var $534 = (_result$5 - _big_number$3);
@@ -2948,7 +2962,7 @@ module.exports = (function() {
     const F64$gtn = x0 => x1 => F64$gtn$(x0, x1);
 
     function Web$Kaelin$Coord$round$diff$(_x$1, _y$2) {
-        var _big_number$3 = (parseFloat("+1000.0"));
+        var _big_number$3 = (+1000.0);
         var _x$4 = (_x$1 + _big_number$3);
         var _y$5 = (_y$2 + _big_number$3);
         var self = F64$gtn$(_x$4, _y$5);
@@ -3011,15 +3025,22 @@ module.exports = (function() {
                 var $553 = self.snd;
                 var _f$4 = U32$to_f64;
                 var _i$5 = F64$to_i32;
-                var _float_hex_rad$6 = (_f$4(Web$Kaelin$Constants$hexagon_radius) / (parseFloat("+2.0")));
+                var _float_hex_rad$6 = (_f$4(Web$Kaelin$Constants$hexagon_radius) / (+2.0));
                 var _center_x$7 = Web$Kaelin$Constants$center_x;
                 var _center_y$8 = Web$Kaelin$Constants$center_y;
                 var _float_x$9 = ((_f$4($552) - _f$4(_center_x$7)) / _float_hex_rad$6);
                 var _float_y$10 = ((_f$4($553) - _f$4(_center_y$8)) / _float_hex_rad$6);
+<<<<<<< HEAD
                 var _fourth$11 = (parseFloat("+0.25"));
                 var _sixth$12 = ((parseFloat("+1.0")) / (parseFloat("+6.0")));
                 var _third$13 = ((parseFloat("+1.0")) / (parseFloat("+3.0")));
                 var _half$14 = (parseFloat("+0.5"));
+=======
+                var _fourth$11 = (+0.25);
+                var _sixth$12 = ((+1.0) / (+6.0));
+                var _third$13 = ((+1.0) / (+3.0));
+                var _half$14 = (+0.5);
+>>>>>>> master
                 var _axial_x$15 = ((_float_x$9 * _fourth$11) - (_float_y$10 * _sixth$12));
                 var _axial_y$16 = (_float_y$10 * _third$13);
                 var self = Web$Kaelin$Coord$round$(_axial_x$15, _axial_y$16);
@@ -3235,14 +3256,14 @@ module.exports = (function() {
                 var _i$6 = (_i$4);
                 var _j$7 = (_j$5);
                 var _int_rad$8 = (Web$Kaelin$Constants$hexagon_radius);
-                var _hlf$9 = (_int_rad$8 / (parseFloat("+2.0")));
+                var _hlf$9 = (_int_rad$8 / (+2.0));
                 var _int_screen_center_x$10 = (Web$Kaelin$Constants$center_x);
                 var _int_screen_center_y$11 = (Web$Kaelin$Constants$center_y);
                 var _cx$12 = (_int_screen_center_x$10 + (_j$7 * _int_rad$8));
-                var _cx$13 = (_cx$12 + (_i$6 * (_int_rad$8 * (parseFloat("+2.0")))));
-                var _cy$14 = (_int_screen_center_y$11 + (_j$7 * (_hlf$9 * (parseFloat("+3.0")))));
+                var _cx$13 = (_cx$12 + (_i$6 * (_int_rad$8 * (+2.0))));
+                var _cy$14 = (_int_screen_center_y$11 + (_j$7 * (_hlf$9 * (+3.0))));
                 var _cx$15 = ((_cx$13 >>> 0));
-                var _cy$16 = (_cy$14 + (parseFloat("+0.5")));
+                var _cy$16 = (_cy$14 + (+0.5));
                 var _cy$17 = ((_cy$16 >>> 0));
                 var $601 = Pair$new$(_cx$15, _cy$17);
                 var $598 = $601;
@@ -5844,32 +5865,56 @@ module.exports = (function() {
                                             } else {
                                                 var self = (Bits$to_nat$(_x$1) === 10n);
                                                 if (self) {
+<<<<<<< HEAD
                                                     var $1176 = "A";
+=======
+                                                    var $1176 = "a";
+>>>>>>> master
                                                     var $1175 = $1176;
                                                 } else {
                                                     var self = (Bits$to_nat$(_x$1) === 11n);
                                                     if (self) {
+<<<<<<< HEAD
                                                         var $1178 = "B";
+=======
+                                                        var $1178 = "b";
+>>>>>>> master
                                                         var $1177 = $1178;
                                                     } else {
                                                         var self = (Bits$to_nat$(_x$1) === 12n);
                                                         if (self) {
+<<<<<<< HEAD
                                                             var $1180 = "C";
+=======
+                                                            var $1180 = "c";
+>>>>>>> master
                                                             var $1179 = $1180;
                                                         } else {
                                                             var self = (Bits$to_nat$(_x$1) === 13n);
                                                             if (self) {
+<<<<<<< HEAD
                                                                 var $1182 = "D";
+=======
+                                                                var $1182 = "d";
+>>>>>>> master
                                                                 var $1181 = $1182;
                                                             } else {
                                                                 var self = (Bits$to_nat$(_x$1) === 14n);
                                                                 if (self) {
+<<<<<<< HEAD
                                                                     var $1184 = "E";
+=======
+                                                                    var $1184 = "e";
+>>>>>>> master
                                                                     var $1183 = $1184;
                                                                 } else {
                                                                     var self = (Bits$to_nat$(_x$1) === 15n);
                                                                     if (self) {
+<<<<<<< HEAD
                                                                         var $1186 = "F";
+=======
+                                                                        var $1186 = "f";
+>>>>>>> master
                                                                         var $1185 = $1186;
                                                                     } else {
                                                                         var $1187 = "?";
@@ -5969,6 +6014,7 @@ module.exports = (function() {
     const generate_hex = x0 => x1 => generate_hex$(x0, x1);
     const Web$Kaelin$Event$Code$create_hero = List$cons$(2, List$nil);
 
+<<<<<<< HEAD
     function Web$Kaelin$Resources$Action$to_bits$(_x$1) {
         var self = _x$1;
         switch (self._) {
@@ -5994,13 +6040,25 @@ module.exports = (function() {
         var _unique_nat$2 = Web$Kaelin$Coord$Convert$axial_to_nat$(_x$1);
         var $1204 = (nat_to_bits(_unique_nat$2));
         return $1204;
+=======
+    function Parser$State$new$(_err$1, _nam$2, _ini$3, _idx$4, _str$5) {
+        var $1200 = ({
+            _: 'Parser.State.new',
+            'err': _err$1,
+            'nam': _nam$2,
+            'ini': _ini$3,
+            'idx': _idx$4,
+            'str': _str$5
+        });
+        return $1200;
+>>>>>>> master
     };
-    const Web$Kaelin$Coord$Convert$axial_to_bits = x0 => Web$Kaelin$Coord$Convert$axial_to_bits$(x0);
-    const Web$Kaelin$Event$Code$user_input = List$cons$(2, List$cons$(8, List$nil));
+    const Parser$State$new = x0 => x1 => x2 => x3 => x4 => Parser$State$new$(x0, x1, x2, x3, x4);
 
-    function Web$Kaelin$Event$serialize$(_event$1) {
-        var self = _event$1;
+    function Parser$run$(_parser$2, _code$3) {
+        var self = _parser$2(Parser$State$new$(Maybe$none, "", 0n, 0n, _code$3));
         switch (self._) {
+<<<<<<< HEAD
             case 'Web.Kaelin.Event.create_hero':
                 var $1206 = self.hero_id;
                 var _cod$3 = List$cons$((nat_to_bits(1n)), List$cons$((nat_to_bits((BigInt($1206)))), List$nil));
@@ -6031,20 +6089,35 @@ module.exports = (function() {
             'action': _action$2
         });
         return $1212;
+=======
+            case 'Parser.Reply.value':
+                var $1202 = self.val;
+                var $1203 = Maybe$some$($1202);
+                var $1201 = $1203;
+                break;
+            case 'Parser.Reply.error':
+                var $1204 = Maybe$none;
+                var $1201 = $1204;
+                break;
+        };
+        return $1201;
+>>>>>>> master
     };
-    const Web$Kaelin$Event$user_input = x0 => x1 => Web$Kaelin$Event$user_input$(x0, x1);
-    const Web$Kaelin$Action$walk = ({
-        _: 'Web.Kaelin.Action.walk'
-    });
+    const Parser$run = x0 => x1 => Parser$run$(x0, x1);
 
+<<<<<<< HEAD
     function App$post$(_room$1, _data$2) {
         var $1213 = App$do$("post", (_room$1 + (";" + _data$2)));
         return $1213;
+=======
+    function Parser$Reply$(_V$1) {
+        var $1205 = null;
+        return $1205;
+>>>>>>> master
     };
-    const App$post = x0 => x1 => App$post$(x0, x1);
-    const U16$eql = a0 => a1 => (a0 === a1);
-    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
+    const Parser$Reply = x0 => Parser$Reply$(x0);
 
+<<<<<<< HEAD
     function Web$Kaelin$Player$new$(_addr$1, _team$2, _current_hp$3, _current_status$4) {
         var $1214 = ({
             _: 'Web.Kaelin.Player.new',
@@ -6054,9 +6127,19 @@ module.exports = (function() {
             'current_status': _current_status$4
         });
         return $1214;
+=======
+    function Parser$Reply$value$(_pst$2, _val$3) {
+        var $1206 = ({
+            _: 'Parser.Reply.value',
+            'pst': _pst$2,
+            'val': _val$3
+        });
+        return $1206;
+>>>>>>> master
     };
-    const Web$Kaelin$Player$new = x0 => x1 => x2 => x3 => Web$Kaelin$Player$new$(x0, x1, x2, x3);
+    const Parser$Reply$value = x0 => x1 => Parser$Reply$value$(x0, x1);
 
+<<<<<<< HEAD
     function Web$Kaelin$Action$create_player$(_user$1, _hero$2, _state$3) {
         var _key$4 = _user$1;
         var _init_pos$5 = Web$Kaelin$Coord$new$(0, 0);
@@ -6104,14 +6187,38 @@ module.exports = (function() {
                 break;
         };
         return $1215;
+=======
+    function Parser$maybe$(_parse$2, _pst$3) {
+        var self = _pst$3;
+        switch (self._) {
+            case 'Parser.State.new':
+                var self = _parse$2(_pst$3);
+                switch (self._) {
+                    case 'Parser.Reply.value':
+                        var $1209 = self.pst;
+                        var $1210 = self.val;
+                        var $1211 = Parser$Reply$value$($1209, Maybe$some$($1210));
+                        var $1208 = $1211;
+                        break;
+                    case 'Parser.Reply.error':
+                        var $1212 = Parser$Reply$value$(_pst$3, Maybe$none);
+                        var $1208 = $1212;
+                        break;
+                };
+                var $1207 = $1208;
+                break;
+        };
+        return $1207;
+>>>>>>> master
     };
-    const Web$Kaelin$Action$create_player = x0 => x1 => x2 => Web$Kaelin$Action$create_player$(x0, x1, x2);
+    const Parser$maybe = x0 => x1 => Parser$maybe$(x0, x1);
 
-    function String$eql_no_sensitive$(_a$1, _b$2) {
-        var String$eql_no_sensitive$ = (_a$1, _b$2) => ({
-            ctr: 'TCO',
-            arg: [_a$1, _b$2]
+    function Parser$Reply$error$(_err$2) {
+        var $1213 = ({
+            _: 'Parser.Reply.error',
+            'err': _err$2
         });
+<<<<<<< HEAD
         var String$eql_no_sensitive = _a$1 => _b$2 => String$eql_no_sensitive$(_a$1, _b$2);
         var arg = [_a$1, _b$2];
         while (true) {
@@ -6156,21 +6263,44 @@ module.exports = (function() {
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
         }
+=======
+        return $1213;
+>>>>>>> master
     };
-    const String$eql_no_sensitive = x0 => x1 => String$eql_no_sensitive$(x0, x1);
+    const Parser$Reply$error = x0 => Parser$Reply$error$(x0);
 
-    function Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2) {
-        var Web$Kaelin$Tile$player$to_entity$ = (_addr$1, _tile$2) => ({
-            ctr: 'TCO',
-            arg: [_addr$1, _tile$2]
+    function Parser$Error$new$(_nam$1, _ini$2, _idx$3, _msg$4) {
+        var $1214 = ({
+            _: 'Parser.Error.new',
+            'nam': _nam$1,
+            'ini': _ini$2,
+            'idx': _idx$3,
+            'msg': _msg$4
         });
-        var Web$Kaelin$Tile$player$to_entity = _addr$1 => _tile$2 => Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2);
-        var arg = [_addr$1, _tile$2];
+        return $1214;
+    };
+    const Parser$Error$new = x0 => x1 => x2 => x3 => Parser$Error$new$(x0, x1, x2, x3);
+
+    function Parser$Reply$fail$(_nam$2, _ini$3, _idx$4, _msg$5) {
+        var $1215 = Parser$Reply$error$(Parser$Error$new$(_nam$2, _ini$3, _idx$4, _msg$5));
+        return $1215;
+    };
+    const Parser$Reply$fail = x0 => x1 => x2 => x3 => Parser$Reply$fail$(x0, x1, x2, x3);
+    const U16$eql = a0 => a1 => (a0 === a1);
+
+    function Parser$text$go$(_ini_idx$1, _ini_txt$2, _text$3, _pst$4) {
+        var Parser$text$go$ = (_ini_idx$1, _ini_txt$2, _text$3, _pst$4) => ({
+            ctr: 'TCO',
+            arg: [_ini_idx$1, _ini_txt$2, _text$3, _pst$4]
+        });
+        var Parser$text$go = _ini_idx$1 => _ini_txt$2 => _text$3 => _pst$4 => Parser$text$go$(_ini_idx$1, _ini_txt$2, _text$3, _pst$4);
+        var arg = [_ini_idx$1, _ini_txt$2, _text$3, _pst$4];
         while (true) {
-            let [_addr$1, _tile$2] = arg;
+            let [_ini_idx$1, _ini_txt$2, _text$3, _pst$4] = arg;
             var R = (() => {
-                var self = _tile$2;
+                var self = _pst$4;
                 switch (self._) {
+<<<<<<< HEAD
                     case 'List.cons':
                         var $1244 = self.head;
                         var $1245 = self.tail;
@@ -6208,26 +6338,61 @@ module.exports = (function() {
                     case 'List.nil':
                         var $1255 = Maybe$none;
                         return $1255;
+=======
+                    case 'Parser.State.new':
+                        var $1216 = self.err;
+                        var $1217 = self.nam;
+                        var $1218 = self.ini;
+                        var $1219 = self.idx;
+                        var $1220 = self.str;
+                        var self = _text$3;
+                        if (self.length === 0) {
+                            var $1222 = Parser$Reply$value$(_pst$4, Unit$new);
+                            var $1221 = $1222;
+                        } else {
+                            var $1223 = self.charCodeAt(0);
+                            var $1224 = self.slice(1);
+                            var self = $1220;
+                            if (self.length === 0) {
+                                var _error_msg$12 = ("Expected \'" + (_ini_txt$2 + "\', found end of file."));
+                                var $1226 = Parser$Reply$fail$($1217, $1218, _ini_idx$1, _error_msg$12);
+                                var $1225 = $1226;
+                            } else {
+                                var $1227 = self.charCodeAt(0);
+                                var $1228 = self.slice(1);
+                                var self = ($1223 === $1227);
+                                if (self) {
+                                    var _pst$14 = Parser$State$new$($1216, $1217, $1218, Nat$succ$($1219), $1228);
+                                    var $1230 = Parser$text$go$(_ini_idx$1, _ini_txt$2, $1224, _pst$14);
+                                    var $1229 = $1230;
+                                } else {
+                                    var _chr$14 = String$cons$($1227, String$nil);
+                                    var _err$15 = ("Expected \'" + (_ini_txt$2 + ("\', found \'" + (_chr$14 + "\'."))));
+                                    var $1231 = Parser$Reply$fail$($1217, $1218, _ini_idx$1, _err$15);
+                                    var $1229 = $1231;
+                                };
+                                var $1225 = $1229;
+                            };
+                            var $1221 = $1225;
+                        };
+                        return $1221;
+>>>>>>> master
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
         }
     };
-    const Web$Kaelin$Tile$player$to_entity = x0 => x1 => Web$Kaelin$Tile$player$to_entity$(x0, x1);
+    const Parser$text$go = x0 => x1 => x2 => x3 => Parser$text$go$(x0, x1, x2, x3);
 
-    function Web$Kaelin$Map$player$info$go$(_addr$1, _map$2) {
-        var Web$Kaelin$Map$player$info$go$ = (_addr$1, _map$2) => ({
-            ctr: 'TCO',
-            arg: [_addr$1, _map$2]
-        });
-        var Web$Kaelin$Map$player$info$go = _addr$1 => _map$2 => Web$Kaelin$Map$player$info$go$(_addr$1, _map$2);
-        var arg = [_addr$1, _map$2];
-        while (true) {
-            let [_addr$1, _map$2] = arg;
-            var R = (() => {
-                var self = _map$2;
+    function Parser$text$(_text$1, _pst$2) {
+        var self = _pst$2;
+        switch (self._) {
+            case 'Parser.State.new':
+                var $1233 = self.idx;
+                var self = Parser$text$go$($1233, _text$1, _text$1, _pst$2);
                 switch (self._) {
+<<<<<<< HEAD
                     case 'List.cons':
                         var $1256 = self.head;
                         var $1257 = self.tail;
@@ -6269,21 +6434,35 @@ module.exports = (function() {
         var _lmap$3 = NatMap$to_list$(_map$2);
         var $1266 = Web$Kaelin$Map$player$info$go$(_addr$1, _lmap$3);
         return $1266;
+=======
+                    case 'Parser.Reply.error':
+                        var $1235 = self.err;
+                        var $1236 = Parser$Reply$error$($1235);
+                        var $1234 = $1236;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $1237 = self.pst;
+                        var $1238 = self.val;
+                        var $1239 = Parser$Reply$value$($1237, $1238);
+                        var $1234 = $1239;
+                        break;
+                };
+                var $1232 = $1234;
+                break;
+        };
+        return $1232;
+>>>>>>> master
     };
-    const Web$Kaelin$Map$player$info = x0 => x1 => Web$Kaelin$Map$player$info$(x0, x1);
+    const Parser$text = x0 => x1 => Parser$text$(x0, x1);
 
-    function List$find$(_cond$2, _xs$3) {
-        var List$find$ = (_cond$2, _xs$3) => ({
-            ctr: 'TCO',
-            arg: [_cond$2, _xs$3]
-        });
-        var List$find = _cond$2 => _xs$3 => List$find$(_cond$2, _xs$3);
-        var arg = [_cond$2, _xs$3];
-        while (true) {
-            let [_cond$2, _xs$3] = arg;
-            var R = (() => {
-                var self = _xs$3;
+    function Parser$Error$combine$(_a$1, _b$2) {
+        var self = _a$1;
+        switch (self._) {
+            case 'Parser.Error.new':
+                var $1241 = self.idx;
+                var self = _b$2;
                 switch (self._) {
+<<<<<<< HEAD
                     case 'List.cons':
                         var $1267 = self.head;
                         var $1268 = self.tail;
@@ -6516,12 +6695,32 @@ module.exports = (function() {
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
         }
+=======
+                    case 'Parser.Error.new':
+                        var $1243 = self.idx;
+                        var self = ($1241 > $1243);
+                        if (self) {
+                            var $1245 = _a$1;
+                            var $1244 = $1245;
+                        } else {
+                            var $1246 = _b$2;
+                            var $1244 = $1246;
+                        };
+                        var $1242 = $1244;
+                        break;
+                };
+                var $1240 = $1242;
+                break;
+        };
+        return $1240;
+>>>>>>> master
     };
-    const String$drop = x0 => x1 => String$drop$(x0, x1);
+    const Parser$Error$combine = x0 => x1 => Parser$Error$combine$(x0, x1);
 
-    function Web$Kaelin$Event$Buffer$next$(_buffer$1) {
-        var self = _buffer$1;
+    function Parser$Error$maybe_combine$(_a$1, _b$2) {
+        var self = _a$1;
         switch (self._) {
+<<<<<<< HEAD
             case 'Pair.new':
                 var $1329 = self.fst;
                 var $1330 = self.snd;
@@ -6587,21 +6786,56 @@ module.exports = (function() {
             'val': _val$4
         });
         return $1342;
-    };
-    const Parser$Reply$value = x0 => x1 => x2 => Parser$Reply$value$(x0, x1, x2);
-
-    function Parser$many$go$(_parse$2, _values$3, _idx$4, _code$5) {
-        var Parser$many$go$ = (_parse$2, _values$3, _idx$4, _code$5) => ({
-            ctr: 'TCO',
-            arg: [_parse$2, _values$3, _idx$4, _code$5]
-        });
-        var Parser$many$go = _parse$2 => _values$3 => _idx$4 => _code$5 => Parser$many$go$(_parse$2, _values$3, _idx$4, _code$5);
-        var arg = [_parse$2, _values$3, _idx$4, _code$5];
-        while (true) {
-            let [_parse$2, _values$3, _idx$4, _code$5] = arg;
-            var R = (() => {
-                var self = _parse$2(_idx$4)(_code$5);
+=======
+            case 'Maybe.some':
+                var $1248 = self.value;
+                var self = _b$2;
                 switch (self._) {
+                    case 'Maybe.some':
+                        var $1250 = self.value;
+                        var $1251 = Maybe$some$(Parser$Error$combine$($1248, $1250));
+                        var $1249 = $1251;
+                        break;
+                    case 'Maybe.none':
+                        var $1252 = _a$1;
+                        var $1249 = $1252;
+                        break;
+                };
+                var $1247 = $1249;
+                break;
+            case 'Maybe.none':
+                var self = _b$2;
+                switch (self._) {
+                    case 'Maybe.none':
+                        var $1254 = Maybe$none;
+                        var $1253 = $1254;
+                        break;
+                    case 'Maybe.some':
+                        var $1255 = _b$2;
+                        var $1253 = $1255;
+                        break;
+                };
+                var $1247 = $1253;
+                break;
+        };
+        return $1247;
+>>>>>>> master
+    };
+    const Parser$Error$maybe_combine = x0 => x1 => Parser$Error$maybe_combine$(x0, x1);
+
+    function Parser$many$go$(_parse$2, _values$3, _pst$4) {
+        var Parser$many$go$ = (_parse$2, _values$3, _pst$4) => ({
+            ctr: 'TCO',
+            arg: [_parse$2, _values$3, _pst$4]
+        });
+        var Parser$many$go = _parse$2 => _values$3 => _pst$4 => Parser$many$go$(_parse$2, _values$3, _pst$4);
+        var arg = [_parse$2, _values$3, _pst$4];
+        while (true) {
+            let [_parse$2, _values$3, _pst$4] = arg;
+            var R = (() => {
+                var self = _pst$4;
+                switch (self._) {
+<<<<<<< HEAD
                     case 'Parser.Reply.value':
                         var $1343 = self.idx;
                         var $1344 = self.code;
@@ -6614,26 +6848,55 @@ module.exports = (function() {
                     case 'Parser.Reply.error':
                         var $1348 = Parser$Reply$value$(_idx$4, _code$5, _values$3(List$nil));
                         return $1348;
+=======
+                    case 'Parser.State.new':
+                        var self = _parse$2(_pst$4);
+                        switch (self._) {
+                            case 'Parser.Reply.value':
+                                var $1257 = self.pst;
+                                var $1258 = self.val;
+                                var $1259 = Parser$many$go$(_parse$2, (_xs$12 => {
+                                    var $1260 = _values$3(List$cons$($1258, _xs$12));
+                                    return $1260;
+                                }), $1257);
+                                var $1256 = $1259;
+                                break;
+                            case 'Parser.Reply.error':
+                                var $1261 = Parser$Reply$value$(_pst$4, _values$3(List$nil));
+                                var $1256 = $1261;
+                                break;
+                        };
+                        return $1256;
+>>>>>>> master
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
         }
     };
-    const Parser$many$go = x0 => x1 => x2 => x3 => Parser$many$go$(x0, x1, x2, x3);
+    const Parser$many$go = x0 => x1 => x2 => Parser$many$go$(x0, x1, x2);
 
     function Parser$many$(_parser$2) {
+<<<<<<< HEAD
         var $1349 = Parser$many$go(_parser$2)((_x$3 => {
             var $1350 = _x$3;
             return $1350;
         }));
         return $1349;
+=======
+        var $1262 = Parser$many$go(_parser$2)((_x$3 => {
+            var $1263 = _x$3;
+            return $1263;
+        }));
+        return $1262;
+>>>>>>> master
     };
     const Parser$many = x0 => Parser$many$(x0);
 
-    function Parser$many1$(_parser$2, _idx$3, _code$4) {
-        var self = _parser$2(_idx$3)(_code$4);
+    function Parser$many1$(_parser$2, _pst$3) {
+        var self = _pst$3;
         switch (self._) {
+<<<<<<< HEAD
             case 'Parser.Reply.error':
                 var $1352 = self.idx;
                 var $1353 = self.code;
@@ -6681,18 +6944,142 @@ module.exports = (function() {
             var $1368 = $1372;
         };
         return $1368;
+=======
+            case 'Parser.State.new':
+                var $1265 = self.err;
+                var _reply$9 = _parser$2(_pst$3);
+                var self = _reply$9;
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $1267 = self.err;
+                        var self = $1265;
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $1269 = self.value;
+                                var $1270 = Parser$Reply$error$(Parser$Error$combine$($1269, $1267));
+                                var $1268 = $1270;
+                                break;
+                            case 'Maybe.none':
+                                var $1271 = Parser$Reply$error$($1267);
+                                var $1268 = $1271;
+                                break;
+                        };
+                        var $1266 = $1268;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $1272 = self.pst;
+                        var $1273 = self.val;
+                        var self = $1272;
+                        switch (self._) {
+                            case 'Parser.State.new':
+                                var $1275 = self.err;
+                                var $1276 = self.nam;
+                                var $1277 = self.ini;
+                                var $1278 = self.idx;
+                                var $1279 = self.str;
+                                var _reply$pst$17 = Parser$State$new$(Parser$Error$maybe_combine$($1265, $1275), $1276, $1277, $1278, $1279);
+                                var self = _reply$pst$17;
+                                switch (self._) {
+                                    case 'Parser.State.new':
+                                        var $1281 = self.err;
+                                        var _reply$23 = Parser$many$(_parser$2)(_reply$pst$17);
+                                        var self = _reply$23;
+                                        switch (self._) {
+                                            case 'Parser.Reply.error':
+                                                var $1283 = self.err;
+                                                var self = $1281;
+                                                switch (self._) {
+                                                    case 'Maybe.some':
+                                                        var $1285 = self.value;
+                                                        var $1286 = Parser$Reply$error$(Parser$Error$combine$($1285, $1283));
+                                                        var $1284 = $1286;
+                                                        break;
+                                                    case 'Maybe.none':
+                                                        var $1287 = Parser$Reply$error$($1283);
+                                                        var $1284 = $1287;
+                                                        break;
+                                                };
+                                                var $1282 = $1284;
+                                                break;
+                                            case 'Parser.Reply.value':
+                                                var $1288 = self.pst;
+                                                var $1289 = self.val;
+                                                var self = $1288;
+                                                switch (self._) {
+                                                    case 'Parser.State.new':
+                                                        var $1291 = self.err;
+                                                        var $1292 = self.nam;
+                                                        var $1293 = self.ini;
+                                                        var $1294 = self.idx;
+                                                        var $1295 = self.str;
+                                                        var _reply$pst$31 = Parser$State$new$(Parser$Error$maybe_combine$($1281, $1291), $1292, $1293, $1294, $1295);
+                                                        var $1296 = Parser$Reply$value$(_reply$pst$31, List$cons$($1273, $1289));
+                                                        var $1290 = $1296;
+                                                        break;
+                                                };
+                                                var $1282 = $1290;
+                                                break;
+                                        };
+                                        var $1280 = $1282;
+                                        break;
+                                };
+                                var $1274 = $1280;
+                                break;
+                        };
+                        var $1266 = $1274;
+                        break;
+                };
+                var $1264 = $1266;
+                break;
+        };
+        return $1264;
+>>>>>>> master
     };
-    const Parser$one = x0 => x1 => Parser$one$(x0, x1);
+    const Parser$many1 = x0 => x1 => Parser$many1$(x0, x1);
 
+<<<<<<< HEAD
     function Char$eql$(_a$1, _b$2) {
         var $1373 = (_a$1 === _b$2);
         return $1373;
+=======
+    function Parser$one$(_pst$1) {
+        var self = _pst$1;
+        switch (self._) {
+            case 'Parser.State.new':
+                var $1298 = self.err;
+                var $1299 = self.nam;
+                var $1300 = self.ini;
+                var $1301 = self.idx;
+                var $1302 = self.str;
+                var self = $1302;
+                if (self.length === 0) {
+                    var $1304 = Parser$Reply$fail$($1299, $1300, $1301, "Unexpected end of file.");
+                    var $1303 = $1304;
+                } else {
+                    var $1305 = self.charCodeAt(0);
+                    var $1306 = self.slice(1);
+                    var _pst$9 = Parser$State$new$($1298, $1299, $1300, Nat$succ$($1301), $1306);
+                    var $1307 = Parser$Reply$value$(_pst$9, $1305);
+                    var $1303 = $1307;
+                };
+                var $1297 = $1303;
+                break;
+        };
+        return $1297;
+    };
+    const Parser$one = x0 => Parser$one$(x0);
+
+    function Char$eql$(_a$1, _b$2) {
+        var $1308 = (_a$1 === _b$2);
+        return $1308;
+>>>>>>> master
     };
     const Char$eql = x0 => x1 => Char$eql$(x0, x1);
 
     function Hex$char_hex_to_nat$(_x$1) {
         var self = Char$eql$(_x$1, 48);
         if (self) {
+<<<<<<< HEAD
             var $1375 = Maybe$some$(0n);
             var $1374 = $1375;
         } else {
@@ -6847,15 +7234,841 @@ module.exports = (function() {
             var $1374 = $1376;
         };
         return $1374;
+=======
+            var $1310 = Maybe$some$(0n);
+            var $1309 = $1310;
+        } else {
+            var self = Char$eql$(_x$1, 49);
+            if (self) {
+                var $1312 = Maybe$some$(1n);
+                var $1311 = $1312;
+            } else {
+                var self = Char$eql$(_x$1, 50);
+                if (self) {
+                    var $1314 = Maybe$some$(2n);
+                    var $1313 = $1314;
+                } else {
+                    var self = Char$eql$(_x$1, 51);
+                    if (self) {
+                        var $1316 = Maybe$some$(3n);
+                        var $1315 = $1316;
+                    } else {
+                        var self = Char$eql$(_x$1, 52);
+                        if (self) {
+                            var $1318 = Maybe$some$(4n);
+                            var $1317 = $1318;
+                        } else {
+                            var self = Char$eql$(_x$1, 53);
+                            if (self) {
+                                var $1320 = Maybe$some$(5n);
+                                var $1319 = $1320;
+                            } else {
+                                var self = Char$eql$(_x$1, 54);
+                                if (self) {
+                                    var $1322 = Maybe$some$(6n);
+                                    var $1321 = $1322;
+                                } else {
+                                    var self = Char$eql$(_x$1, 55);
+                                    if (self) {
+                                        var $1324 = Maybe$some$(7n);
+                                        var $1323 = $1324;
+                                    } else {
+                                        var self = Char$eql$(_x$1, 56);
+                                        if (self) {
+                                            var $1326 = Maybe$some$(8n);
+                                            var $1325 = $1326;
+                                        } else {
+                                            var self = Char$eql$(_x$1, 57);
+                                            if (self) {
+                                                var $1328 = Maybe$some$(9n);
+                                                var $1327 = $1328;
+                                            } else {
+                                                var self = Char$eql$(_x$1, 65);
+                                                if (self) {
+                                                    var $1330 = Maybe$some$(10n);
+                                                    var $1329 = $1330;
+                                                } else {
+                                                    var self = Char$eql$(_x$1, 97);
+                                                    if (self) {
+                                                        var $1332 = Maybe$some$(10n);
+                                                        var $1331 = $1332;
+                                                    } else {
+                                                        var self = Char$eql$(_x$1, 66);
+                                                        if (self) {
+                                                            var $1334 = Maybe$some$(11n);
+                                                            var $1333 = $1334;
+                                                        } else {
+                                                            var self = Char$eql$(_x$1, 98);
+                                                            if (self) {
+                                                                var $1336 = Maybe$some$(11n);
+                                                                var $1335 = $1336;
+                                                            } else {
+                                                                var self = Char$eql$(_x$1, 67);
+                                                                if (self) {
+                                                                    var $1338 = Maybe$some$(12n);
+                                                                    var $1337 = $1338;
+                                                                } else {
+                                                                    var self = Char$eql$(_x$1, 99);
+                                                                    if (self) {
+                                                                        var $1340 = Maybe$some$(12n);
+                                                                        var $1339 = $1340;
+                                                                    } else {
+                                                                        var self = Char$eql$(_x$1, 68);
+                                                                        if (self) {
+                                                                            var $1342 = Maybe$some$(13n);
+                                                                            var $1341 = $1342;
+                                                                        } else {
+                                                                            var self = Char$eql$(_x$1, 100);
+                                                                            if (self) {
+                                                                                var $1344 = Maybe$some$(13n);
+                                                                                var $1343 = $1344;
+                                                                            } else {
+                                                                                var self = Char$eql$(_x$1, 69);
+                                                                                if (self) {
+                                                                                    var $1346 = Maybe$some$(14n);
+                                                                                    var $1345 = $1346;
+                                                                                } else {
+                                                                                    var self = Char$eql$(_x$1, 101);
+                                                                                    if (self) {
+                                                                                        var $1348 = Maybe$some$(14n);
+                                                                                        var $1347 = $1348;
+                                                                                    } else {
+                                                                                        var self = Char$eql$(_x$1, 70);
+                                                                                        if (self) {
+                                                                                            var $1350 = Maybe$some$(15n);
+                                                                                            var $1349 = $1350;
+                                                                                        } else {
+                                                                                            var self = Char$eql$(_x$1, 102);
+                                                                                            if (self) {
+                                                                                                var $1352 = Maybe$some$(15n);
+                                                                                                var $1351 = $1352;
+                                                                                            } else {
+                                                                                                var $1353 = Maybe$none;
+                                                                                                var $1351 = $1353;
+                                                                                            };
+                                                                                            var $1349 = $1351;
+                                                                                        };
+                                                                                        var $1347 = $1349;
+                                                                                    };
+                                                                                    var $1345 = $1347;
+                                                                                };
+                                                                                var $1343 = $1345;
+                                                                            };
+                                                                            var $1341 = $1343;
+                                                                        };
+                                                                        var $1339 = $1341;
+                                                                    };
+                                                                    var $1337 = $1339;
+                                                                };
+                                                                var $1335 = $1337;
+                                                            };
+                                                            var $1333 = $1335;
+                                                        };
+                                                        var $1331 = $1333;
+                                                    };
+                                                    var $1329 = $1331;
+                                                };
+                                                var $1327 = $1329;
+                                            };
+                                            var $1325 = $1327;
+                                        };
+                                        var $1323 = $1325;
+                                    };
+                                    var $1321 = $1323;
+                                };
+                                var $1319 = $1321;
+                            };
+                            var $1317 = $1319;
+                        };
+                        var $1315 = $1317;
+                    };
+                    var $1313 = $1315;
+                };
+                var $1311 = $1313;
+            };
+            var $1309 = $1311;
+        };
+        return $1309;
     };
     const Hex$char_hex_to_nat = x0 => Hex$char_hex_to_nat$(x0);
 
     function Parser$(_V$1) {
-        var $1419 = null;
-        return $1419;
+        var $1354 = null;
+        return $1354;
     };
     const Parser = x0 => Parser$(x0);
 
+    function Parser$fail$(_error$2, _pst$3) {
+        var self = _pst$3;
+        switch (self._) {
+            case 'Parser.State.new':
+                var $1356 = self.nam;
+                var $1357 = self.ini;
+                var $1358 = self.idx;
+                var $1359 = Parser$Reply$fail$($1356, $1357, $1358, _error$2);
+                var $1355 = $1359;
+                break;
+        };
+        return $1355;
+    };
+    const Parser$fail = x0 => x1 => Parser$fail$(x0, x1);
+    const Hex$parser$char_hex = (() => {
+        var _c$1 = Parser$one;
+        var $1360 = (_pst$2 => {
+            var self = _pst$2;
+            switch (self._) {
+                case 'Parser.State.new':
+                    var $1362 = self.err;
+                    var _reply$8 = _c$1(_pst$2);
+                    var self = _reply$8;
+                    switch (self._) {
+                        case 'Parser.Reply.error':
+                            var $1364 = self.err;
+                            var self = $1362;
+                            switch (self._) {
+                                case 'Maybe.some':
+                                    var $1366 = self.value;
+                                    var $1367 = Parser$Reply$error$(Parser$Error$combine$($1366, $1364));
+                                    var $1365 = $1367;
+                                    break;
+                                case 'Maybe.none':
+                                    var $1368 = Parser$Reply$error$($1364);
+                                    var $1365 = $1368;
+                                    break;
+                            };
+                            var $1363 = $1365;
+                            break;
+                        case 'Parser.Reply.value':
+                            var $1369 = self.pst;
+                            var $1370 = self.val;
+                            var self = $1369;
+                            switch (self._) {
+                                case 'Parser.State.new':
+                                    var $1372 = self.err;
+                                    var $1373 = self.nam;
+                                    var $1374 = self.ini;
+                                    var $1375 = self.idx;
+                                    var $1376 = self.str;
+                                    var _reply$pst$16 = Parser$State$new$(Parser$Error$maybe_combine$($1362, $1372), $1373, $1374, $1375, $1376);
+                                    var _k$17 = Hex$char_hex_to_nat$($1370);
+                                    var self = _k$17;
+                                    switch (self._) {
+                                        case 'Maybe.some':
+                                            var $1378 = self.value;
+                                            var $1379 = (_pst$19 => {
+                                                var $1380 = Parser$Reply$value$(_pst$19, $1378);
+                                                return $1380;
+                                            });
+                                            var $1377 = $1379;
+                                            break;
+                                        case 'Maybe.none':
+                                            var $1381 = Parser$fail("Hex lexical error");
+                                            var $1377 = $1381;
+                                            break;
+                                    };
+                                    var $1377 = $1377(_reply$pst$16);
+                                    var $1371 = $1377;
+                                    break;
+                            };
+                            var $1363 = $1371;
+                            break;
+                    };
+                    var $1361 = $1363;
+                    break;
+            };
+            return $1361;
+        });
+        return $1360;
+    })();
+
+    function List$fold_right$(_A$1, _B$2, _b$3, _f$4, _xs$5) {
+        var List$fold_right$ = (_A$1, _B$2, _b$3, _f$4, _xs$5) => ({
+            ctr: 'TCO',
+            arg: [_A$1, _B$2, _b$3, _f$4, _xs$5]
+        });
+        var List$fold_right = _A$1 => _B$2 => _b$3 => _f$4 => _xs$5 => List$fold_right$(_A$1, _B$2, _b$3, _f$4, _xs$5);
+        var arg = [_A$1, _B$2, _b$3, _f$4, _xs$5];
+        while (true) {
+            let [_A$1, _B$2, _b$3, _f$4, _xs$5] = arg;
+            var R = (() => {
+                var self = _xs$5;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1382 = self.head;
+                        var $1383 = self.tail;
+                        var $1384 = List$fold_right$(null, null, _f$4($1382)(_b$3), _f$4, $1383);
+                        return $1384;
+                    case 'List.nil':
+                        var $1385 = _b$3;
+                        return $1385;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const List$fold_right = x0 => x1 => x2 => x3 => x4 => List$fold_right$(x0, x1, x2, x3, x4);
+    const Nat$pow = a0 => a1 => (a0 ** a1);
+
+    function append_2_go$(_x$1, _y$2, _z$3) {
+        var append_2_go$ = (_x$1, _y$2, _z$3) => ({
+            ctr: 'TCO',
+            arg: [_x$1, _y$2, _z$3]
+        });
+        var append_2_go = _x$1 => _y$2 => _z$3 => append_2_go$(_x$1, _y$2, _z$3);
+        var arg = [_x$1, _y$2, _z$3];
+        while (true) {
+            let [_x$1, _y$2, _z$3] = arg;
+            var R = (() => {
+                var _shift1_Nat$4 = (_x$4 => {
+                    var $1387 = Bits$to_nat$(Bits$shift_right$(1n, (nat_to_bits(_x$4))));
+                    return $1387;
+                });
+                var _n$5 = (2n * (_x$1 % 2n));
+                var _z$6 = (_z$3 + 1n);
+                var self = (_x$1 > 0n);
+                if (self) {
+                    var $1388 = append_2_go$(_shift1_Nat$4(_x$1), (_y$2 + (_n$5 ** _z$6)), _z$6);
+                    var $1386 = $1388;
+                } else {
+                    var $1389 = _y$2;
+                    var $1386 = $1389;
+                };
+                return $1386;
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const append_2_go = x0 => x1 => x2 => append_2_go$(x0, x1, x2);
+
+    function Nat$append_2$(_b$1, _x$2, _y$3) {
+        var $1390 = append_2_go$(_x$2, _y$3, _b$1);
+        return $1390;
+    };
+    const Nat$append_2 = x0 => x1 => x2 => Nat$append_2$(x0, x1, x2);
+
+    function Hex$parser$(_pst$1) {
+        var self = _pst$1;
+        switch (self._) {
+            case 'Parser.State.new':
+                var $1392 = self.err;
+                var _reply$7 = Parser$maybe$(Parser$text("0x"), _pst$1);
+                var self = _reply$7;
+                switch (self._) {
+                    case 'Parser.Reply.error':
+                        var $1394 = self.err;
+                        var self = $1392;
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $1396 = self.value;
+                                var $1397 = Parser$Reply$error$(Parser$Error$combine$($1396, $1394));
+                                var $1395 = $1397;
+                                break;
+                            case 'Maybe.none':
+                                var $1398 = Parser$Reply$error$($1394);
+                                var $1395 = $1398;
+                                break;
+                        };
+                        var $1393 = $1395;
+                        break;
+                    case 'Parser.Reply.value':
+                        var $1399 = self.pst;
+                        var self = $1399;
+                        switch (self._) {
+                            case 'Parser.State.new':
+                                var $1401 = self.err;
+                                var $1402 = self.nam;
+                                var $1403 = self.ini;
+                                var $1404 = self.idx;
+                                var $1405 = self.str;
+                                var _reply$pst$15 = Parser$State$new$(Parser$Error$maybe_combine$($1392, $1401), $1402, $1403, $1404, $1405);
+                                var self = _reply$pst$15;
+                                switch (self._) {
+                                    case 'Parser.State.new':
+                                        var $1407 = self.err;
+                                        var _reply$21 = Parser$many1$(Hex$parser$char_hex, _reply$pst$15);
+                                        var self = _reply$21;
+                                        switch (self._) {
+                                            case 'Parser.Reply.error':
+                                                var $1409 = self.err;
+                                                var self = $1407;
+                                                switch (self._) {
+                                                    case 'Maybe.some':
+                                                        var $1411 = self.value;
+                                                        var $1412 = Parser$Reply$error$(Parser$Error$combine$($1411, $1409));
+                                                        var $1410 = $1412;
+                                                        break;
+                                                    case 'Maybe.none':
+                                                        var $1413 = Parser$Reply$error$($1409);
+                                                        var $1410 = $1413;
+                                                        break;
+                                                };
+                                                var $1408 = $1410;
+                                                break;
+                                            case 'Parser.Reply.value':
+                                                var $1414 = self.pst;
+                                                var $1415 = self.val;
+                                                var self = $1414;
+                                                switch (self._) {
+                                                    case 'Parser.State.new':
+                                                        var $1417 = self.err;
+                                                        var $1418 = self.nam;
+                                                        var $1419 = self.ini;
+                                                        var $1420 = self.idx;
+                                                        var $1421 = self.str;
+                                                        var _reply$pst$29 = Parser$State$new$(Parser$Error$maybe_combine$($1407, $1417), $1418, $1419, $1420, $1421);
+                                                        var $1422 = Parser$Reply$value$(_reply$pst$29, (() => {
+                                                            var self = $1415;
+                                                            switch (self._) {
+                                                                case 'List.cons':
+                                                                    var $1423 = self.head;
+                                                                    var $1424 = self.tail;
+                                                                    var $1425 = List$fold_right$(null, null, $1423, Function$flip(Nat$append_2(3n)), $1424);
+                                                                    return $1425;
+                                                                case 'List.nil':
+                                                                    var $1426 = 0n;
+                                                                    return $1426;
+                                                            };
+                                                        })());
+                                                        var $1416 = $1422;
+                                                        break;
+                                                };
+                                                var $1408 = $1416;
+                                                break;
+                                        };
+                                        var $1406 = $1408;
+                                        break;
+                                };
+                                var $1400 = $1406;
+                                break;
+                        };
+                        var $1393 = $1400;
+                        break;
+                };
+                var $1391 = $1393;
+                break;
+        };
+        return $1391;
+    };
+    const Hex$parser = x0 => Hex$parser$(x0);
+
+    function Hex$to_nat$(_x$1) {
+        var self = Parser$run$(Hex$parser, _x$1);
+        switch (self._) {
+            case 'Maybe.some':
+                var $1428 = self.value;
+                var $1429 = $1428;
+                var $1427 = $1429;
+                break;
+            case 'Maybe.none':
+                var $1430 = 0n;
+                var $1427 = $1430;
+                break;
+        };
+        return $1427;
+    };
+    const Hex$to_nat = x0 => Hex$to_nat$(x0);
+
+    function Web$Kaelin$Resources$Action$to_bits$(_x$1) {
+        var self = _x$1;
+        switch (self._) {
+            case 'Web.Kaelin.Action.walk':
+                var $1432 = 0n;
+                var _n$2 = $1432;
+                break;
+            case 'Web.Kaelin.Action.ability_0':
+                var $1433 = 1n;
+                var _n$2 = $1433;
+                break;
+            case 'Web.Kaelin.Action.ability_1':
+                var $1434 = 2n;
+                var _n$2 = $1434;
+                break;
+        };
+        var $1431 = (nat_to_bits(_n$2));
+        return $1431;
+    };
+    const Web$Kaelin$Resources$Action$to_bits = x0 => Web$Kaelin$Resources$Action$to_bits$(x0);
+
+    function Web$Kaelin$Coord$Convert$axial_to_bits$(_x$1) {
+        var _unique_nat$2 = Web$Kaelin$Coord$Convert$axial_to_nat$(_x$1);
+        var $1435 = (nat_to_bits(_unique_nat$2));
+        return $1435;
+    };
+    const Web$Kaelin$Coord$Convert$axial_to_bits = x0 => Web$Kaelin$Coord$Convert$axial_to_bits$(x0);
+    const Web$Kaelin$Event$Code$user_input = List$cons$(40, List$cons$(2, List$cons$(8, List$nil)));
+
+    function Web$Kaelin$Event$serialize$(_event$1) {
+        var self = _event$1;
+        switch (self._) {
+            case 'Web.Kaelin.Event.create_hero':
+                var $1437 = self.hero_id;
+                var _cod$3 = List$cons$((nat_to_bits(1n)), List$cons$((nat_to_bits((BigInt($1437)))), List$nil));
+                var $1438 = generate_hex$(Web$Kaelin$Event$Code$create_hero, _cod$3);
+                var $1436 = $1438;
+                break;
+            case 'Web.Kaelin.Event.user_input':
+                var $1439 = self.player;
+                var $1440 = self.coord;
+                var $1441 = self.action;
+                var _cod$5 = List$cons$((nat_to_bits(4n)), List$cons$((nat_to_bits(Hex$to_nat$($1439))), List$cons$(Web$Kaelin$Resources$Action$to_bits$($1441), List$cons$(Web$Kaelin$Coord$Convert$axial_to_bits$($1440), List$nil))));
+                var $1442 = generate_hex$(Web$Kaelin$Event$Code$user_input, _cod$5);
+                var $1436 = $1442;
+                break;
+            case 'Web.Kaelin.Event.start_game':
+            case 'Web.Kaelin.Event.create_user':
+                var $1443 = "";
+                var $1436 = $1443;
+                break;
+        };
+        return $1436;
+    };
+    const Web$Kaelin$Event$serialize = x0 => Web$Kaelin$Event$serialize$(x0);
+
+    function Web$Kaelin$Event$user_input$(_player$1, _coord$2, _action$3) {
+        var $1444 = ({
+            _: 'Web.Kaelin.Event.user_input',
+            'player': _player$1,
+            'coord': _coord$2,
+            'action': _action$3
+        });
+        return $1444;
+    };
+    const Web$Kaelin$Event$user_input = x0 => x1 => x2 => Web$Kaelin$Event$user_input$(x0, x1, x2);
+    const Web$Kaelin$Action$walk = ({
+        _: 'Web.Kaelin.Action.walk'
+    });
+
+    function App$post$(_room$1, _data$2) {
+        var $1445 = App$do$("post", (_room$1 + (";" + _data$2)));
+        return $1445;
+    };
+    const App$post = x0 => x1 => App$post$(x0, x1);
+    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
+
+    function Web$Kaelin$Player$new$(_addr$1, _team$2, _current_hp$3, _current_status$4) {
+        var $1446 = ({
+            _: 'Web.Kaelin.Player.new',
+            'addr': _addr$1,
+            'team': _team$2,
+            'current_hp': _current_hp$3,
+            'current_status': _current_status$4
+        });
+        return $1446;
+    };
+    const Web$Kaelin$Player$new = x0 => x1 => x2 => x3 => Web$Kaelin$Player$new$(x0, x1, x2, x3);
+
+    function Web$Kaelin$Action$create_player$(_user$1, _hero$2, _state$3) {
+        var _key$4 = _user$1;
+        var _init_pos$5 = Web$Kaelin$Coord$new$(0, 0);
+        var self = _state$3;
+        switch (self._) {
+            case 'Web.Kaelin.State.game':
+                var $1448 = self.user;
+                var $1449 = self.room;
+                var $1450 = self.players;
+                var $1451 = self.cast_info;
+                var $1452 = self.map;
+                var $1453 = self.internal;
+                var $1454 = self.env_info;
+                var self = Map$get$(_key$4, $1450);
+                switch (self._) {
+                    case 'Maybe.none':
+                        var $1456 = ((console.log($1448), (_$13 => {
+                            var self = _hero$2;
+                            switch (self._) {
+                                case 'Web.Kaelin.Hero.new':
+                                    var $1458 = self.health;
+                                    var _creature$18 = Web$Kaelin$Entity$creature;
+                                    var _new_player$19 = Web$Kaelin$Player$new$(_user$1, "blue", $1458, List$nil);
+                                    var _map$20 = Web$Kaelin$Map$push$(_init_pos$5, _creature$18(Maybe$some$(_user$1))(_hero$2), $1452);
+                                    var _new_players$21 = Map$set$(_key$4, _new_player$19, $1450);
+                                    var $1459 = Web$Kaelin$State$game$($1448, $1449, _new_players$21, $1451, _map$20, $1453, $1454);
+                                    var $1457 = $1459;
+                                    break;
+                            };
+                            return $1457;
+                        })()));
+                        var $1455 = $1456;
+                        break;
+                    case 'Maybe.some':
+                        var $1460 = _state$3;
+                        var $1455 = $1460;
+                        break;
+                };
+                var $1447 = $1455;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1461 = _state$3;
+                var $1447 = $1461;
+                break;
+        };
+        return $1447;
+    };
+    const Web$Kaelin$Action$create_player = x0 => x1 => x2 => Web$Kaelin$Action$create_player$(x0, x1, x2);
+
+    function String$eql_no_sensitive$(_a$1, _b$2) {
+        var String$eql_no_sensitive$ = (_a$1, _b$2) => ({
+            ctr: 'TCO',
+            arg: [_a$1, _b$2]
+        });
+        var String$eql_no_sensitive = _a$1 => _b$2 => String$eql_no_sensitive$(_a$1, _b$2);
+        var arg = [_a$1, _b$2];
+        while (true) {
+            let [_a$1, _b$2] = arg;
+            var R = (() => {
+                var self = _a$1;
+                if (self.length === 0) {
+                    var self = _b$2;
+                    if (self.length === 0) {
+                        var $1463 = Bool$true;
+                        var $1462 = $1463;
+                    } else {
+                        var $1464 = self.charCodeAt(0);
+                        var $1465 = self.slice(1);
+                        var $1466 = Bool$false;
+                        var $1462 = $1466;
+                    };
+                    return $1462;
+                } else {
+                    var $1467 = self.charCodeAt(0);
+                    var $1468 = self.slice(1);
+                    var self = _b$2;
+                    if (self.length === 0) {
+                        var $1470 = Bool$false;
+                        var $1469 = $1470;
+                    } else {
+                        var $1471 = self.charCodeAt(0);
+                        var $1472 = self.slice(1);
+                        var self = (Char$to_lower$($1467) === Char$to_lower$($1471));
+                        if (self) {
+                            var $1474 = String$eql_no_sensitive$($1468, $1472);
+                            var $1473 = $1474;
+                        } else {
+                            var $1475 = Bool$false;
+                            var $1473 = $1475;
+                        };
+                        var $1469 = $1473;
+                    };
+                    return $1469;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const String$eql_no_sensitive = x0 => x1 => String$eql_no_sensitive$(x0, x1);
+
+    function Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2) {
+        var Web$Kaelin$Tile$player$to_entity$ = (_addr$1, _tile$2) => ({
+            ctr: 'TCO',
+            arg: [_addr$1, _tile$2]
+        });
+        var Web$Kaelin$Tile$player$to_entity = _addr$1 => _tile$2 => Web$Kaelin$Tile$player$to_entity$(_addr$1, _tile$2);
+        var arg = [_addr$1, _tile$2];
+        while (true) {
+            let [_addr$1, _tile$2] = arg;
+            var R = (() => {
+                var self = _tile$2;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1476 = self.head;
+                        var $1477 = self.tail;
+                        var self = $1476;
+                        switch (self._) {
+                            case 'Web.Kaelin.Entity.creature':
+                                var $1479 = self.player;
+                                var self = $1479;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $1481 = self.value;
+                                        var self = String$eql_no_sensitive$(_addr$1, $1481);
+                                        if (self) {
+                                            var $1483 = Maybe$some$($1476);
+                                            var $1482 = $1483;
+                                        } else {
+                                            var $1484 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1477);
+                                            var $1482 = $1484;
+                                        };
+                                        var $1480 = $1482;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $1485 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1477);
+                                        var $1480 = $1485;
+                                        break;
+                                };
+                                var $1478 = $1480;
+                                break;
+                            case 'Web.Kaelin.Entity.background':
+                                var $1486 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1477);
+                                var $1478 = $1486;
+                                break;
+                        };
+                        return $1478;
+                    case 'List.nil':
+                        var $1487 = Maybe$none;
+                        return $1487;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Web$Kaelin$Tile$player$to_entity = x0 => x1 => Web$Kaelin$Tile$player$to_entity$(x0, x1);
+
+    function Web$Kaelin$Map$player$info$go$(_addr$1, _map$2) {
+        var Web$Kaelin$Map$player$info$go$ = (_addr$1, _map$2) => ({
+            ctr: 'TCO',
+            arg: [_addr$1, _map$2]
+        });
+        var Web$Kaelin$Map$player$info$go = _addr$1 => _map$2 => Web$Kaelin$Map$player$info$go$(_addr$1, _map$2);
+        var arg = [_addr$1, _map$2];
+        while (true) {
+            let [_addr$1, _map$2] = arg;
+            var R = (() => {
+                var self = _map$2;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1488 = self.head;
+                        var $1489 = self.tail;
+                        var self = $1488;
+                        switch (self._) {
+                            case 'Pair.new':
+                                var $1491 = self.fst;
+                                var $1492 = self.snd;
+                                var _coord$7 = Web$Kaelin$Coord$Convert$nat_to_axial$($1491);
+                                var _entity$8 = Web$Kaelin$Tile$player$to_entity$(_addr$1, $1492);
+                                var self = _entity$8;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $1494 = self.value;
+                                        var $1495 = Maybe$some$(Pair$new$(_coord$7, $1494));
+                                        var $1493 = $1495;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $1496 = Web$Kaelin$Map$player$info$go$(_addr$1, $1489);
+                                        var $1493 = $1496;
+                                        break;
+                                };
+                                var $1490 = $1493;
+                                break;
+                        };
+                        return $1490;
+                    case 'List.nil':
+                        var $1497 = Maybe$none;
+                        return $1497;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Web$Kaelin$Map$player$info$go = x0 => x1 => Web$Kaelin$Map$player$info$go$(x0, x1);
+
+    function Web$Kaelin$Map$player$info$(_addr$1, _map$2) {
+        var _lmap$3 = NatMap$to_list$(_map$2);
+        var $1498 = Web$Kaelin$Map$player$info$go$(_addr$1, _lmap$3);
+        return $1498;
+    };
+    const Web$Kaelin$Map$player$info = x0 => x1 => Web$Kaelin$Map$player$info$(x0, x1);
+
+    function List$find$(_cond$2, _xs$3) {
+        var List$find$ = (_cond$2, _xs$3) => ({
+            ctr: 'TCO',
+            arg: [_cond$2, _xs$3]
+        });
+        var List$find = _cond$2 => _xs$3 => List$find$(_cond$2, _xs$3);
+        var arg = [_cond$2, _xs$3];
+        while (true) {
+            let [_cond$2, _xs$3] = arg;
+            var R = (() => {
+                var self = _xs$3;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1499 = self.head;
+                        var $1500 = self.tail;
+                        var self = _cond$2($1499);
+                        if (self) {
+                            var $1502 = Maybe$some$($1499);
+                            var $1501 = $1502;
+                        } else {
+                            var $1503 = List$find$(_cond$2, $1500);
+                            var $1501 = $1503;
+                        };
+                        return $1501;
+                    case 'List.nil':
+                        var $1504 = Maybe$none;
+                        return $1504;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const List$find = x0 => x1 => List$find$(x0, x1);
+
+    function Web$Kaelin$Skill$has_key$(_key$1, _skill$2) {
+        var self = _skill$2;
+        switch (self._) {
+            case 'Web.Kaelin.Skill.new':
+                var $1506 = self.key;
+                var $1507 = (_key$1 === $1506);
+                var $1505 = $1507;
+                break;
+        };
+        return $1505;
+    };
+    const Web$Kaelin$Skill$has_key = x0 => x1 => Web$Kaelin$Skill$has_key$(x0, x1);
+
+    function Web$Kaelin$Hero$skill$from_key$(_key$1, _hero$2) {
+        var self = _hero$2;
+        switch (self._) {
+            case 'Web.Kaelin.Hero.new':
+                var $1509 = self.skills;
+                var $1510 = List$find$(Web$Kaelin$Skill$has_key(_key$1), $1509);
+                var $1508 = $1510;
+                break;
+        };
+        return $1508;
+>>>>>>> master
+    };
+    const Web$Kaelin$Hero$skill$from_key = x0 => x1 => Web$Kaelin$Hero$skill$from_key$(x0, x1);
+    const Web$Kaelin$HexEffect$skill = ({
+        _: 'Web.Kaelin.HexEffect.skill'
+    });
+
+<<<<<<< HEAD
+    function Parser$(_V$1) {
+        var $1419 = null;
+        return $1419;
+=======
+    function Web$Kaelin$State$game$set_cast_info$(_cast_info$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'Web.Kaelin.State.game':
+                var $1512 = self.user;
+                var $1513 = self.room;
+                var $1514 = self.players;
+                var $1515 = self.map;
+                var $1516 = self.internal;
+                var $1517 = self.env_info;
+                var $1518 = Web$Kaelin$State$game$($1512, $1513, $1514, Maybe$some$(_cast_info$1), $1515, $1516, $1517);
+                var $1511 = $1518;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1519 = _state$2;
+                var $1511 = $1519;
+                break;
+        };
+        return $1511;
+>>>>>>> master
+    };
+    const Web$Kaelin$State$game$set_cast_info = x0 => x1 => Web$Kaelin$State$game$set_cast_info$(x0, x1);
+
+<<<<<<< HEAD
     function Parser$fail$(_error$2, _idx$3, _code$4) {
         var $1420 = Parser$Reply$error$(_idx$3, _code$4, _error$2);
         return $1420;
@@ -6927,20 +8140,144 @@ module.exports = (function() {
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
         }
+=======
+    function Web$Kaelin$Action$start_cast$(_key_code$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'Web.Kaelin.State.game':
+                var $1521 = self.user;
+                var $1522 = self.map;
+                var $1523 = self.env_info;
+                var $1524 = ((console.log($1521), (_$10 => {
+                    var _player_info$11 = Web$Kaelin$Map$player$info$($1521, $1522);
+                    var self = _player_info$11;
+                    switch (self._) {
+                        case 'Maybe.some':
+                            var $1526 = self.value;
+                            var self = $1526;
+                            switch (self._) {
+                                case 'Pair.new':
+                                    var $1528 = self.fst;
+                                    var $1529 = self.snd;
+                                    var self = $1529;
+                                    switch (self._) {
+                                        case 'Web.Kaelin.Entity.creature':
+                                            var $1531 = self.hero;
+                                            var self = $1529;
+                                            switch (self._) {
+                                                case 'Web.Kaelin.Entity.creature':
+                                                    var $1533 = self.hero;
+                                                    var _skill$19 = Web$Kaelin$Hero$skill$from_key$(_key_code$1, $1533);
+                                                    var self = _skill$19;
+                                                    switch (self._) {
+                                                        case 'Maybe.some':
+                                                            var $1535 = self.value;
+                                                            var self = $1535;
+                                                            switch (self._) {
+                                                                case 'Web.Kaelin.Skill.new':
+                                                                    var $1537 = self.range;
+                                                                    var _range$25 = Web$Kaelin$Coord$range$($1528, $1537);
+                                                                    var self = $1523;
+                                                                    switch (self._) {
+                                                                        case 'App.EnvInfo.new':
+                                                                            var $1539 = self.mouse_pos;
+                                                                            var _mouse_coord$28 = Web$Kaelin$Coord$to_axial$($1539);
+                                                                            var _area$29 = Web$Kaelin$Skill$indicator$($1528, $1535, _mouse_coord$28);
+                                                                            var _cast$30 = Web$Kaelin$CastInfo$new$($1528, Web$Kaelin$HexEffect$skill, $1535, _range$25, _area$29, _mouse_coord$28);
+                                                                            var $1540 = Web$Kaelin$State$game$set_cast_info$(_cast$30, _state$2);
+                                                                            var $1538 = $1540;
+                                                                            break;
+                                                                    };
+                                                                    var $1536 = $1538;
+                                                                    break;
+                                                            };
+                                                            var $1534 = $1536;
+                                                            break;
+                                                        case 'Maybe.none':
+                                                            var $1541 = _state$2;
+                                                            var $1534 = $1541;
+                                                            break;
+                                                    };
+                                                    var $1532 = $1534;
+                                                    break;
+                                                case 'Web.Kaelin.Entity.background':
+                                                    var _skill$18 = Web$Kaelin$Hero$skill$from_key$(_key_code$1, $1531);
+                                                    var self = _skill$18;
+                                                    switch (self._) {
+                                                        case 'Maybe.some':
+                                                            var $1543 = self.value;
+                                                            var self = $1543;
+                                                            switch (self._) {
+                                                                case 'Web.Kaelin.Skill.new':
+                                                                    var $1545 = self.range;
+                                                                    var _range$24 = Web$Kaelin$Coord$range$($1528, $1545);
+                                                                    var self = $1523;
+                                                                    switch (self._) {
+                                                                        case 'App.EnvInfo.new':
+                                                                            var $1547 = self.mouse_pos;
+                                                                            var _mouse_coord$27 = Web$Kaelin$Coord$to_axial$($1547);
+                                                                            var _area$28 = Web$Kaelin$Skill$indicator$($1528, $1543, _mouse_coord$27);
+                                                                            var _cast$29 = Web$Kaelin$CastInfo$new$($1528, Web$Kaelin$HexEffect$skill, $1543, _range$24, _area$28, _mouse_coord$27);
+                                                                            var $1548 = Web$Kaelin$State$game$set_cast_info$(_cast$29, _state$2);
+                                                                            var $1546 = $1548;
+                                                                            break;
+                                                                    };
+                                                                    var $1544 = $1546;
+                                                                    break;
+                                                            };
+                                                            var $1542 = $1544;
+                                                            break;
+                                                        case 'Maybe.none':
+                                                            var $1549 = _state$2;
+                                                            var $1542 = $1549;
+                                                            break;
+                                                    };
+                                                    var $1532 = $1542;
+                                                    break;
+                                            };
+                                            var $1530 = $1532;
+                                            break;
+                                        case 'Web.Kaelin.Entity.background':
+                                            var $1550 = _state$2;
+                                            var $1530 = $1550;
+                                            break;
+                                    };
+                                    var $1527 = $1530;
+                                    break;
+                            };
+                            var $1525 = $1527;
+                            break;
+                        case 'Maybe.none':
+                            var $1551 = _state$2;
+                            var $1525 = $1551;
+                            break;
+                    };
+                    return $1525;
+                })()));
+                var $1520 = $1524;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1552 = _state$2;
+                var $1520 = $1552;
+                break;
+        };
+        return $1520;
+>>>>>>> master
     };
-    const List$fold_right = x0 => x1 => x2 => x3 => x4 => List$fold_right$(x0, x1, x2, x3, x4);
-    const Nat$pow = a0 => a1 => (a0 ** a1);
+    const Web$Kaelin$Action$start_cast = x0 => x1 => Web$Kaelin$Action$start_cast$(x0, x1);
 
-    function append_2_go$(_x$1, _y$2, _z$3) {
-        var append_2_go$ = (_x$1, _y$2, _z$3) => ({
+    function String$drop$(_n$1, _xs$2) {
+        var String$drop$ = (_n$1, _xs$2) => ({
             ctr: 'TCO',
-            arg: [_x$1, _y$2, _z$3]
+            arg: [_n$1, _xs$2]
         });
-        var append_2_go = _x$1 => _y$2 => _z$3 => append_2_go$(_x$1, _y$2, _z$3);
-        var arg = [_x$1, _y$2, _z$3];
+        var String$drop = _n$1 => _xs$2 => String$drop$(_n$1, _xs$2);
+        var arg = [_n$1, _xs$2];
         while (true) {
-            let [_x$1, _y$2, _z$3] = arg;
+            let [_n$1, _xs$2] = arg;
             var R = (() => {
+<<<<<<< HEAD
                 var _shift1_Nat$4 = (_x$4 => {
                     var $1440 = Bits$to_nat$(Bits$shift_right$(1n, (nat_to_bits(_x$4))));
                     return $1440;
@@ -6956,11 +8293,32 @@ module.exports = (function() {
                     var $1439 = $1442;
                 };
                 return $1439;
+=======
+                var self = _n$1;
+                if (self === 0n) {
+                    var $1553 = _xs$2;
+                    return $1553;
+                } else {
+                    var $1554 = (self - 1n);
+                    var self = _xs$2;
+                    if (self.length === 0) {
+                        var $1556 = String$nil;
+                        var $1555 = $1556;
+                    } else {
+                        var $1557 = self.charCodeAt(0);
+                        var $1558 = self.slice(1);
+                        var $1559 = String$drop$($1554, $1558);
+                        var $1555 = $1559;
+                    };
+                    return $1555;
+                };
+>>>>>>> master
             })();
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
         }
     };
+<<<<<<< HEAD
     const append_2_go = x0 => x1 => x2 => append_2_go$(x0, x1, x2);
 
     function Nat$append_2$(_b$1, _x$2, _y$3) {
@@ -7004,10 +8362,14 @@ module.exports = (function() {
         });
         return $1444;
     })();
+=======
+    const String$drop = x0 => x1 => String$drop$(x0, x1);
+>>>>>>> master
 
-    function Hex$to_nat$(_x$1) {
-        var self = Parser$run$(Hex$parser, _x$1);
+    function Web$Kaelin$Event$Buffer$next$(_buffer$1) {
+        var self = _buffer$1;
         switch (self._) {
+<<<<<<< HEAD
             case 'Maybe.some':
                 var $1459 = self.value;
                 var $1460 = $1459;
@@ -7019,12 +8381,35 @@ module.exports = (function() {
                 break;
         };
         return $1458;
+=======
+            case 'Pair.new':
+                var $1561 = self.fst;
+                var $1562 = self.snd;
+                var self = $1562;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1564 = self.head;
+                        var $1565 = self.tail;
+                        var $1566 = Pair$new$(String$drop$((BigInt($1564)), $1561), $1565);
+                        var $1563 = $1566;
+                        break;
+                    case 'List.nil':
+                        var $1567 = _buffer$1;
+                        var $1563 = $1567;
+                        break;
+                };
+                var $1560 = $1563;
+                break;
+        };
+        return $1560;
+>>>>>>> master
     };
-    const Hex$to_nat = x0 => Hex$to_nat$(x0);
+    const Web$Kaelin$Event$Buffer$next = x0 => Web$Kaelin$Event$Buffer$next$(x0);
 
     function String$take$(_n$1, _xs$2) {
         var self = _xs$2;
         if (self.length === 0) {
+<<<<<<< HEAD
             var $1463 = String$nil;
             var $1462 = $1463;
         } else {
@@ -7042,6 +8427,25 @@ module.exports = (function() {
             var $1462 = $1466;
         };
         return $1462;
+=======
+            var $1569 = String$nil;
+            var $1568 = $1569;
+        } else {
+            var $1570 = self.charCodeAt(0);
+            var $1571 = self.slice(1);
+            var self = _n$1;
+            if (self === 0n) {
+                var $1573 = String$nil;
+                var $1572 = $1573;
+            } else {
+                var $1574 = (self - 1n);
+                var $1575 = String$cons$($1570, String$take$($1574, $1571));
+                var $1572 = $1575;
+            };
+            var $1568 = $1572;
+        };
+        return $1568;
+>>>>>>> master
     };
     const String$take = x0 => x1 => String$take$(x0, x1);
 
@@ -7049,6 +8453,7 @@ module.exports = (function() {
         var self = _buffer$1;
         switch (self._) {
             case 'Pair.new':
+<<<<<<< HEAD
                 var $1471 = self.fst;
                 var $1472 = self.snd;
                 var self = $1472;
@@ -7067,6 +8472,26 @@ module.exports = (function() {
                 break;
         };
         return $1470;
+=======
+                var $1577 = self.fst;
+                var $1578 = self.snd;
+                var self = $1578;
+                switch (self._) {
+                    case 'List.cons':
+                        var $1580 = self.head;
+                        var $1581 = Hex$to_nat$(String$take$((BigInt($1580)), $1577));
+                        var $1579 = $1581;
+                        break;
+                    case 'List.nil':
+                        var $1582 = 0n;
+                        var $1579 = $1582;
+                        break;
+                };
+                var $1576 = $1579;
+                break;
+        };
+        return $1576;
+>>>>>>> master
     };
     const Web$Kaelin$Event$Buffer$get = x0 => Web$Kaelin$Event$Buffer$get$(x0);
 
@@ -7074,6 +8499,7 @@ module.exports = (function() {
         var self = _buffer$1;
         switch (self._) {
             case 'Pair.new':
+<<<<<<< HEAD
                 var $1478 = self.fst;
                 var $1479 = self.snd;
                 var $1480 = Pair$new$($1478, List$concat$(_list$2, $1479));
@@ -7081,21 +8507,43 @@ module.exports = (function() {
                 break;
         };
         return $1477;
+=======
+                var $1584 = self.fst;
+                var $1585 = self.snd;
+                var $1586 = Pair$new$($1584, List$concat$(_list$2, $1585));
+                var $1583 = $1586;
+                break;
+        };
+        return $1583;
+>>>>>>> master
     };
     const Web$Kaelin$Event$Buffer$push = x0 => x1 => Web$Kaelin$Event$Buffer$push$(x0, x1);
 
     function Web$Kaelin$Event$Buffer$new$(_fst$1, _snd$2) {
+<<<<<<< HEAD
         var $1481 = Pair$new$(_fst$1, _snd$2);
         return $1481;
+=======
+        var $1587 = Pair$new$(_fst$1, _snd$2);
+        return $1587;
+>>>>>>> master
     };
     const Web$Kaelin$Event$Buffer$new = x0 => x1 => Web$Kaelin$Event$Buffer$new$(x0, x1);
 
     function Web$Kaelin$Event$create_hero$(_hero_id$1) {
+<<<<<<< HEAD
         var $1482 = ({
             _: 'Web.Kaelin.Event.create_hero',
             'hero_id': _hero_id$1
         });
         return $1482;
+=======
+        var $1588 = ({
+            _: 'Web.Kaelin.Event.create_hero',
+            'hero_id': _hero_id$1
+        });
+        return $1588;
+>>>>>>> master
     };
     const Web$Kaelin$Event$create_hero = x0 => Web$Kaelin$Event$create_hero$(x0);
     const Web$Kaelin$Action$ability_0 = ({
@@ -7108,6 +8556,7 @@ module.exports = (function() {
     function Web$Kaelin$Resources$Action$to_action$(_x$1) {
         var self = (_x$1 === 0n);
         if (self) {
+<<<<<<< HEAD
             var $1484 = Maybe$some$(Web$Kaelin$Action$walk);
             var $1483 = $1484;
         } else {
@@ -7129,6 +8578,29 @@ module.exports = (function() {
             var $1483 = $1485;
         };
         return $1483;
+=======
+            var $1590 = Maybe$some$(Web$Kaelin$Action$walk);
+            var $1589 = $1590;
+        } else {
+            var self = (_x$1 === 1n);
+            if (self) {
+                var $1592 = Maybe$some$(Web$Kaelin$Action$ability_0);
+                var $1591 = $1592;
+            } else {
+                var self = (_x$1 === 2n);
+                if (self) {
+                    var $1594 = Maybe$some$(Web$Kaelin$Action$ability_1);
+                    var $1593 = $1594;
+                } else {
+                    var $1595 = Maybe$none;
+                    var $1593 = $1595;
+                };
+                var $1591 = $1593;
+            };
+            var $1589 = $1591;
+        };
+        return $1589;
+>>>>>>> master
     };
     const Web$Kaelin$Resources$Action$to_action = x0 => Web$Kaelin$Resources$Action$to_action$(x0);
 
@@ -7136,6 +8608,7 @@ module.exports = (function() {
         var self = _m$3;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $1491 = self.value;
                 var $1492 = _f$4($1491);
                 var $1490 = $1492;
@@ -7146,12 +8619,25 @@ module.exports = (function() {
                 break;
         };
         return $1490;
+=======
+                var $1597 = self.value;
+                var $1598 = _f$4($1597);
+                var $1596 = $1598;
+                break;
+            case 'Maybe.none':
+                var $1599 = Maybe$none;
+                var $1596 = $1599;
+                break;
+        };
+        return $1596;
+>>>>>>> master
     };
     const Maybe$bind = x0 => x1 => Maybe$bind$(x0, x1);
 
     function Web$Kaelin$Event$deserialize$(_code$1) {
         var _stream$2 = Web$Kaelin$Event$Buffer$new$(_code$1, Web$Kaelin$Event$Code$action);
         var self = ((_x$3 => {
+<<<<<<< HEAD
             var $1495 = Web$Kaelin$Event$Buffer$get$(_x$3);
             return $1495;
         })(_stream$2) === 1n);
@@ -7285,12 +8771,81 @@ module.exports = (function() {
     };
     const Web$Kaelin$Map$player$to_coord = x0 => x1 => Web$Kaelin$Map$player$to_coord$(x0, x1);
 
+=======
+            var $1601 = Web$Kaelin$Event$Buffer$get$(_x$3);
+            return $1601;
+        })(_stream$2) === 1n);
+        if (self) {
+            var _stream$3 = (_x$3 => {
+                var $1603 = Web$Kaelin$Event$Buffer$next$(_x$3);
+                return $1603;
+            })(_stream$2);
+            var _stream$4 = (_x$4 => _y$5 => {
+                var $1604 = Web$Kaelin$Event$Buffer$push$(_x$4, _y$5);
+                return $1604;
+            })(_stream$3)(Web$Kaelin$Event$Code$create_hero);
+            var $1602 = Maybe$some$(Web$Kaelin$Event$create_hero$((Number((_x$5 => {
+                var $1605 = Web$Kaelin$Event$Buffer$get$(_x$5);
+                return $1605;
+            })(_stream$4)) & 0xFF)));
+            var $1600 = $1602;
+        } else {
+            var self = ((_x$3 => {
+                var $1607 = Web$Kaelin$Event$Buffer$get$(_x$3);
+                return $1607;
+            })(_stream$2) === 4n);
+            if (self) {
+                var _stream$3 = (_x$3 => {
+                    var $1609 = Web$Kaelin$Event$Buffer$next$(_x$3);
+                    return $1609;
+                })(_stream$2);
+                var _stream$4 = (_x$4 => _y$5 => {
+                    var $1610 = Web$Kaelin$Event$Buffer$push$(_x$4, _y$5);
+                    return $1610;
+                })(_stream$3)(Web$Kaelin$Event$Code$user_input);
+                var _player$5 = Bits$to_hex_string$((nat_to_bits((_x$5 => {
+                    var $1611 = Web$Kaelin$Event$Buffer$get$(_x$5);
+                    return $1611;
+                })(_stream$4))));
+                var _stream$6 = (_x$6 => {
+                    var $1612 = Web$Kaelin$Event$Buffer$next$(_x$6);
+                    return $1612;
+                })(_stream$4);
+                var _action$7 = Web$Kaelin$Resources$Action$to_action$((_x$7 => {
+                    var $1613 = Web$Kaelin$Event$Buffer$get$(_x$7);
+                    return $1613;
+                })(_stream$6));
+                var _stream$8 = (_x$8 => {
+                    var $1614 = Web$Kaelin$Event$Buffer$next$(_x$8);
+                    return $1614;
+                })(_stream$6);
+                var _pos$9 = Web$Kaelin$Coord$Convert$nat_to_axial$((_x$9 => {
+                    var $1615 = Web$Kaelin$Event$Buffer$get$(_x$9);
+                    return $1615;
+                })(_stream$8));
+                var $1608 = Maybe$bind$(_action$7, (_action$10 => {
+                    var $1616 = Maybe$some$(Web$Kaelin$Event$user_input$(("0x" + _player$5), _pos$9, _action$10));
+                    return $1616;
+                }));
+                var $1606 = $1608;
+            } else {
+                var $1617 = Maybe$none;
+                var $1606 = $1617;
+            };
+            var $1600 = $1606;
+        };
+        return $1600;
+    };
+    const Web$Kaelin$Event$deserialize = x0 => Web$Kaelin$Event$deserialize$(x0);
+
+>>>>>>> master
     function Web$Kaelin$Map$coord_to_address$(_player_coord$1, _map$2) {
         var _tiles$3 = Web$Kaelin$Map$get$(_player_coord$1, _map$2);
         var _addr$4 = Maybe$none;
         var self = _tiles$3;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $1528 = self.value;
                 var _addr$6 = (() => {
                     var $1531 = _addr$4;
@@ -7336,6 +8891,53 @@ module.exports = (function() {
                 break;
         };
         return $1527;
+=======
+                var $1619 = self.value;
+                var _addr$6 = (() => {
+                    var $1622 = _addr$4;
+                    var $1623 = $1619;
+                    let _addr$7 = $1622;
+                    let _entity$6;
+                    while ($1623._ === 'List.cons') {
+                        _entity$6 = $1623.head;
+                        var self = _entity$6;
+                        switch (self._) {
+                            case 'Web.Kaelin.Entity.creature':
+                                var $1624 = self.player;
+                                var self = $1624;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $1626 = self.value;
+                                        var $1627 = Maybe$some$($1626);
+                                        var $1625 = $1627;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $1628 = _addr$7;
+                                        var $1625 = $1628;
+                                        break;
+                                };
+                                var $1622 = $1625;
+                                break;
+                            case 'Web.Kaelin.Entity.background':
+                                var $1629 = _addr$7;
+                                var $1622 = $1629;
+                                break;
+                        };
+                        _addr$7 = $1622;
+                        $1623 = $1623.tail;
+                    }
+                    return _addr$7;
+                })();
+                var $1620 = _addr$6;
+                var $1618 = $1620;
+                break;
+            case 'Maybe.none':
+                var $1630 = Maybe$none;
+                var $1618 = $1630;
+                break;
+        };
+        return $1618;
+>>>>>>> master
     };
     const Web$Kaelin$Map$coord_to_address = x0 => x1 => Web$Kaelin$Map$coord_to_address$(x0, x1);
 
@@ -7343,6 +8945,7 @@ module.exports = (function() {
         var self = _player$1;
         switch (self._) {
             case 'Web.Kaelin.Player.new':
+<<<<<<< HEAD
                 var $1541 = self.addr;
                 var $1542 = self.team;
                 var $1543 = self.current_hp;
@@ -7364,6 +8967,29 @@ module.exports = (function() {
                 break;
         };
         return $1540;
+=======
+                var $1632 = self.addr;
+                var $1633 = self.team;
+                var $1634 = self.current_hp;
+                var $1635 = self.current_status;
+                var self = _modifier$2;
+                switch (self._) {
+                    case 'Web.Kaelin.Skill.Modifier.hp.damage':
+                        var _damaged$8 = (($1634 - _value$3) >> 0);
+                        var $1637 = Web$Kaelin$Player$new$($1632, $1633, _damaged$8, $1635);
+                        var $1636 = $1637;
+                        break;
+                    case 'Web.Kaelin.Skill.Modifier.hp.heal':
+                        var _healed$8 = ((_value$3 + $1634) >> 0);
+                        var $1638 = Web$Kaelin$Player$new$($1632, $1633, _healed$8, $1635);
+                        var $1636 = $1638;
+                        break;
+                };
+                var $1631 = $1636;
+                break;
+        };
+        return $1631;
+>>>>>>> master
     };
     const Web$Kaelin$Skill$updated_player_hp = x0 => x1 => x2 => Web$Kaelin$Skill$updated_player_hp$(x0, x1, x2);
 
@@ -7382,6 +9008,7 @@ module.exports = (function() {
                     var self = _list$3;
                     switch (self._) {
                         case 'List.cons':
+<<<<<<< HEAD
                             var $1549 = self.head;
                             var $1550 = self.tail;
                             var $1551 = Pair$new$(Maybe$some$($1549), List$concat$(_searched_list$4, $1550));
@@ -7409,6 +9036,35 @@ module.exports = (function() {
                             break;
                     };
                     return $1554;
+=======
+                            var $1640 = self.head;
+                            var $1641 = self.tail;
+                            var $1642 = Pair$new$(Maybe$some$($1640), List$concat$(_searched_list$4, $1641));
+                            var $1639 = $1642;
+                            break;
+                        case 'List.nil':
+                            var $1643 = Pair$new$(Maybe$none, _searched_list$4);
+                            var $1639 = $1643;
+                            break;
+                    };
+                    return $1639;
+                } else {
+                    var $1644 = (self - 1n);
+                    var self = _list$3;
+                    switch (self._) {
+                        case 'List.cons':
+                            var $1646 = self.head;
+                            var $1647 = self.tail;
+                            var $1648 = List$pop_at$go$($1644, $1647, List$concat$(_searched_list$4, List$cons$($1646, List$nil)));
+                            var $1645 = $1648;
+                            break;
+                        case 'List.nil':
+                            var $1649 = Pair$new$(Maybe$none, _searched_list$4);
+                            var $1645 = $1649;
+                            break;
+                    };
+                    return $1645;
+>>>>>>> master
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -7418,8 +9074,13 @@ module.exports = (function() {
     const List$pop_at$go = x0 => x1 => x2 => List$pop_at$go$(x0, x1, x2);
 
     function List$pop_at$(_idx$2, _list$3) {
+<<<<<<< HEAD
         var $1559 = List$pop_at$go$(_idx$2, _list$3, List$nil);
         return $1559;
+=======
+        var $1650 = List$pop_at$go$(_idx$2, _list$3, List$nil);
+        return $1650;
+>>>>>>> master
     };
     const List$pop_at = x0 => x1 => List$pop_at$(x0, x1);
 
@@ -7428,6 +9089,7 @@ module.exports = (function() {
         var self = _tile$4;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $1561 = self.value;
                 var self = List$pop_at$(_idx$1, $1561);
                 switch (self._) {
@@ -7447,6 +9109,27 @@ module.exports = (function() {
                 break;
         };
         return $1560;
+=======
+                var $1652 = self.value;
+                var self = List$pop_at$(_idx$1, $1652);
+                switch (self._) {
+                    case 'Pair.new':
+                        var $1654 = self.fst;
+                        var $1655 = self.snd;
+                        var _map$8 = Web$Kaelin$Map$set$(_coord$2, $1655, _map$3);
+                        var $1656 = Pair$new$(_map$8, $1654);
+                        var $1653 = $1656;
+                        break;
+                };
+                var $1651 = $1653;
+                break;
+            case 'Maybe.none':
+                var $1657 = Pair$new$(_map$3, Maybe$none);
+                var $1651 = $1657;
+                break;
+        };
+        return $1651;
+>>>>>>> master
     };
     const Web$Kaelin$Map$pop_at = x0 => x1 => x2 => Web$Kaelin$Map$pop_at$(x0, x1, x2);
 
@@ -7454,6 +9137,7 @@ module.exports = (function() {
         var self = Web$Kaelin$Map$pop_at$(_idx$1, _ca$2, _map$4);
         switch (self._) {
             case 'Pair.new':
+<<<<<<< HEAD
                 var $1568 = self.fst;
                 var $1569 = self.snd;
                 var self = $1569;
@@ -7472,6 +9156,26 @@ module.exports = (function() {
                 break;
         };
         return $1567;
+=======
+                var $1659 = self.fst;
+                var $1660 = self.snd;
+                var self = $1660;
+                switch (self._) {
+                    case 'Maybe.some':
+                        var $1662 = self.value;
+                        var $1663 = Web$Kaelin$Map$push$(_cb$3, $1662, $1659);
+                        var $1661 = $1663;
+                        break;
+                    case 'Maybe.none':
+                        var $1664 = _map$4;
+                        var $1661 = $1664;
+                        break;
+                };
+                var $1658 = $1661;
+                break;
+        };
+        return $1658;
+>>>>>>> master
     };
     const Web$Kaelin$Map$swap = x0 => x1 => x2 => x3 => Web$Kaelin$Map$swap$(x0, x1, x2, x3);
 
@@ -7479,12 +9183,18 @@ module.exports = (function() {
         var self = _mod$4;
         switch (self._) {
             case 'Web.Kaelin.Skill.Modifier.position.move_to':
+<<<<<<< HEAD
                 var $1575 = Pair$new$(_hero_coord$2, _target_coord$3);
                 var self = $1575;
+=======
+                var $1666 = Pair$new$(_hero_coord$2, _target_coord$3);
+                var self = $1666;
+>>>>>>> master
                 break;
         };
         switch (self._) {
             case 'Pair.new':
+<<<<<<< HEAD
                 var $1576 = self.fst;
                 var $1577 = self.snd;
                 var $1578 = Web$Kaelin$Map$swap$(0n, $1576, $1577, _map$1);
@@ -7492,6 +9202,15 @@ module.exports = (function() {
                 break;
         };
         return $1574;
+=======
+                var $1667 = self.fst;
+                var $1668 = self.snd;
+                var $1669 = Web$Kaelin$Map$swap$(0n, $1667, $1668, _map$1);
+                var $1665 = $1669;
+                break;
+        };
+        return $1665;
+>>>>>>> master
     };
     const Web$Kaelin$Skill$updated_player_position = x0 => x1 => x2 => x3 => x4 => Web$Kaelin$Skill$updated_player_position$(x0, x1, x2, x3, x4);
     const Bool$not = a0 => (!a0);
@@ -7501,6 +9220,7 @@ module.exports = (function() {
         var _tile$3 = Maybe$default$(Web$Kaelin$Map$get$(_coord$1, _map$2), List$nil);
         var _is_occupied$4 = Bool$false;
         var _is_occupied$5 = (() => {
+<<<<<<< HEAD
             var $1581 = _is_occupied$4;
             var $1582 = _tile$3;
             let _is_occupied$6 = $1581;
@@ -7525,6 +9245,32 @@ module.exports = (function() {
         })();
         var $1579 = _is_occupied$5;
         return $1579;
+=======
+            var $1672 = _is_occupied$4;
+            var $1673 = _tile$3;
+            let _is_occupied$6 = $1672;
+            let _ent$5;
+            while ($1673._ === 'List.cons') {
+                _ent$5 = $1673.head;
+                var self = _ent$5;
+                switch (self._) {
+                    case 'Web.Kaelin.Entity.background':
+                        var $1674 = (_is_occupied$6 || Bool$false);
+                        var $1672 = $1674;
+                        break;
+                    case 'Web.Kaelin.Entity.creature':
+                        var $1675 = Bool$true;
+                        var $1672 = $1675;
+                        break;
+                };
+                _is_occupied$6 = $1672;
+                $1673 = $1673.tail;
+            }
+            return _is_occupied$6;
+        })();
+        var $1670 = _is_occupied$5;
+        return $1670;
+>>>>>>> master
     };
     const Web$Kaelin$Map$is_occupied = x0 => x1 => Web$Kaelin$Map$is_occupied$(x0, x1);
 
@@ -7532,10 +9278,17 @@ module.exports = (function() {
         var self = _player$1;
         switch (self._) {
             case 'Web.Kaelin.Player.new':
+<<<<<<< HEAD
                 var $1586 = self.addr;
                 var $1587 = self.team;
                 var $1588 = self.current_hp;
                 var $1589 = self.current_status;
+=======
+                var $1677 = self.addr;
+                var $1678 = self.team;
+                var $1679 = self.current_hp;
+                var $1680 = self.current_status;
+>>>>>>> master
                 var self = _modifier$2;
                 switch (self._) {
                     case 'Web.Kaelin.Skill.Modifier.status.burn':
@@ -7544,6 +9297,7 @@ module.exports = (function() {
                     case 'Web.Kaelin.Skill.Modifier.status.slow':
                     case 'Web.Kaelin.Skill.Modifier.status.haste':
                     case 'Web.Kaelin.Skill.Modifier.status.root':
+<<<<<<< HEAD
                         var $1591 = Web$Kaelin$Player$new$($1586, $1587, $1588, List$cons$(_modifier$2, $1589));
                         var $1590 = $1591;
                         break;
@@ -7556,6 +9310,20 @@ module.exports = (function() {
                 break;
         };
         return $1585;
+=======
+                        var $1682 = Web$Kaelin$Player$new$($1677, $1678, $1679, List$cons$(_modifier$2, $1680));
+                        var $1681 = $1682;
+                        break;
+                    case 'Web.Kaelin.Skill.Modifier.status.cleanse':
+                        var $1683 = Web$Kaelin$Player$new$($1677, $1678, $1679, List$nil);
+                        var $1681 = $1683;
+                        break;
+                };
+                var $1676 = $1681;
+                break;
+        };
+        return $1676;
+>>>>>>> master
     };
     const Web$Kaelin$Skill$updated_player_status = x0 => x1 => x2 => Web$Kaelin$Skill$updated_player_status$(x0, x1, x2);
 
@@ -7563,6 +9331,7 @@ module.exports = (function() {
         var self = _state$1;
         switch (self._) {
             case 'Web.Kaelin.State.game':
+<<<<<<< HEAD
                 var $1594 = self.user;
                 var $1595 = self.room;
                 var $1596 = self.players;
@@ -7659,6 +9428,104 @@ module.exports = (function() {
                 break;
         };
         return $1593;
+=======
+                var $1685 = self.user;
+                var $1686 = self.room;
+                var $1687 = self.players;
+                var $1688 = self.cast_info;
+                var $1689 = self.map;
+                var $1690 = self.internal;
+                var $1691 = self.env_info;
+                var _player$12 = Web$Kaelin$Map$coord_to_address$(_target$3, $1689);
+                var self = _effect$4;
+                switch (self._) {
+                    case 'Web.Kaelin.Skill.Effect.hp':
+                        var $1693 = self.value;
+                        var $1694 = self.modifier;
+                        var self = _player$12;
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $1696 = self.value;
+                                var _player$address$18 = Map$get$($1696, $1687);
+                                var self = _player$address$18;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $1698 = self.value;
+                                        var _new_hp$20 = Web$Kaelin$Skill$updated_player_hp$($1698, $1694, $1693);
+                                        var _new_players_hp$21 = Map$set$($1696, _new_hp$20, $1687);
+                                        var $1699 = Web$Kaelin$State$game$($1685, $1686, _new_players_hp$21, $1688, $1689, $1690, $1691);
+                                        var $1697 = $1699;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $1700 = _state$1;
+                                        var $1697 = $1700;
+                                        break;
+                                };
+                                var $1695 = $1697;
+                                break;
+                            case 'Maybe.none':
+                                var $1701 = _state$1;
+                                var $1695 = $1701;
+                                break;
+                        };
+                        var $1692 = $1695;
+                        break;
+                    case 'Web.Kaelin.Skill.Effect.position':
+                        var $1702 = self.value;
+                        var $1703 = self.modifier;
+                        var _new_map$17 = Web$Kaelin$Skill$updated_player_position$($1689, _hero_pos$2, _target$3, $1703, $1702);
+                        var self = (!Web$Kaelin$Map$is_occupied$(_target$3, $1689));
+                        if (self) {
+                            var $1705 = Web$Kaelin$State$game$($1685, $1686, $1687, $1688, _new_map$17, $1690, $1691);
+                            var $1704 = $1705;
+                        } else {
+                            var $1706 = _state$1;
+                            var $1704 = $1706;
+                        };
+                        var $1692 = $1704;
+                        break;
+                    case 'Web.Kaelin.Skill.Effect.status':
+                        var $1707 = self.duration;
+                        var $1708 = self.modifier;
+                        var self = _player$12;
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $1710 = self.value;
+                                var _player$address$18 = Map$get$($1710, $1687);
+                                var self = _player$address$18;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $1712 = self.value;
+                                        var _new_effect$20 = Web$Kaelin$Skill$updated_player_status$($1712, $1708, $1707);
+                                        var _new_players_effect$21 = Map$set$($1710, _new_effect$20, $1687);
+                                        var $1713 = Web$Kaelin$State$game$($1685, $1686, _new_players_effect$21, $1688, $1689, $1690, $1691);
+                                        var $1711 = $1713;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $1714 = _state$1;
+                                        var $1711 = $1714;
+                                        break;
+                                };
+                                var $1709 = $1711;
+                                break;
+                            case 'Maybe.none':
+                                var $1715 = _state$1;
+                                var $1709 = $1715;
+                                break;
+                        };
+                        var $1692 = $1709;
+                        break;
+                };
+                var $1684 = $1692;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1716 = _state$1;
+                var $1684 = $1716;
+                break;
+        };
+        return $1684;
+>>>>>>> master
     };
     const Web$Kaelin$Skill$update_state = x0 => x1 => x2 => x3 => Web$Kaelin$Skill$update_state$(x0, x1, x2, x3);
 
@@ -7666,6 +9533,7 @@ module.exports = (function() {
         var self = _state$1;
         switch (self._) {
             case 'Web.Kaelin.State.game':
+<<<<<<< HEAD
                 var $1627 = self.user;
                 var $1628 = self.room;
                 var $1629 = self.players;
@@ -7682,6 +9550,24 @@ module.exports = (function() {
                 break;
         };
         return $1626;
+=======
+                var $1718 = self.user;
+                var $1719 = self.room;
+                var $1720 = self.players;
+                var $1721 = self.map;
+                var $1722 = self.internal;
+                var $1723 = self.env_info;
+                var $1724 = Web$Kaelin$State$game$($1718, $1719, $1720, Maybe$none, $1721, $1722, $1723);
+                var $1717 = $1724;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1725 = _state$1;
+                var $1717 = $1725;
+                break;
+        };
+        return $1717;
+>>>>>>> master
     };
     const Web$Kaelin$Skills$skill_use$aux = x0 => Web$Kaelin$Skills$skill_use$aux$(x0);
 
@@ -7689,6 +9575,7 @@ module.exports = (function() {
         var self = _state$1;
         switch (self._) {
             case 'Web.Kaelin.State.game':
+<<<<<<< HEAD
                 var $1636 = self.cast_info;
                 var $1637 = self.env_info;
                 var self = $1636;
@@ -7817,6 +9704,136 @@ module.exports = (function() {
                 break;
         };
         return $1635;
+=======
+                var $1727 = self.cast_info;
+                var $1728 = self.env_info;
+                var self = $1727;
+                switch (self._) {
+                    case 'Maybe.some':
+                        var $1730 = self.value;
+                        var self = $1728;
+                        switch (self._) {
+                            case 'App.EnvInfo.new':
+                                var $1732 = self.mouse_pos;
+                                var self = $1730;
+                                switch (self._) {
+                                    case 'Web.Kaelin.CastInfo.new':
+                                        var $1734 = self.hero_pos;
+                                        var $1735 = self.skill;
+                                        var $1736 = self.range;
+                                        var $1737 = self.mouse_pos;
+                                        var _skill$18 = $1735;
+                                        var self = _skill$18;
+                                        switch (self._) {
+                                            case 'Web.Kaelin.Skill.new':
+                                                var $1739 = self.effects;
+                                                var _mouse_pos$23 = Web$Kaelin$Coord$to_axial$($1732);
+                                                var self = List$any$(Web$Kaelin$Coord$eql(_mouse_pos$23), $1736);
+                                                if (self) {
+                                                    var _state$24 = (() => {
+                                                        var $1743 = _state$1;
+                                                        var $1744 = $1739;
+                                                        let _state$25 = $1743;
+                                                        let _effect$24;
+                                                        while ($1744._ === 'List.cons') {
+                                                            _effect$24 = $1744.head;
+                                                            var self = _effect$24;
+                                                            switch (self._) {
+                                                                case 'Web.Kaelin.Skill.Effect.hp':
+                                                                    var $1745 = self.area;
+                                                                    var _area$30 = Web$Kaelin$Skill$area$to_list$($1745, $1734, $1737);
+                                                                    var _state$31 = (() => {
+                                                                        var $1748 = _state$25;
+                                                                        var $1749 = _area$30;
+                                                                        let _state$32 = $1748;
+                                                                        let _coord$31;
+                                                                        while ($1749._ === 'List.cons') {
+                                                                            _coord$31 = $1749.head;
+                                                                            var $1748 = Web$Kaelin$Skill$update_state$(_state$32, $1734, _coord$31, _effect$24);
+                                                                            _state$32 = $1748;
+                                                                            $1749 = $1749.tail;
+                                                                        }
+                                                                        return _state$32;
+                                                                    })();
+                                                                    var $1746 = Web$Kaelin$Skills$skill_use$aux$(_state$31);
+                                                                    var $1743 = $1746;
+                                                                    break;
+                                                                case 'Web.Kaelin.Skill.Effect.position':
+                                                                    var $1750 = self.area;
+                                                                    var _area$30 = Web$Kaelin$Skill$area$to_list$($1750, $1734, $1737);
+                                                                    var _state$31 = (() => {
+                                                                        var $1753 = _state$25;
+                                                                        var $1754 = _area$30;
+                                                                        let _state$32 = $1753;
+                                                                        let _coord$31;
+                                                                        while ($1754._ === 'List.cons') {
+                                                                            _coord$31 = $1754.head;
+                                                                            var $1753 = Web$Kaelin$Skill$update_state$(_state$32, $1734, _coord$31, _effect$24);
+                                                                            _state$32 = $1753;
+                                                                            $1754 = $1754.tail;
+                                                                        }
+                                                                        return _state$32;
+                                                                    })();
+                                                                    var $1751 = Web$Kaelin$Skills$skill_use$aux$(_state$31);
+                                                                    var $1743 = $1751;
+                                                                    break;
+                                                                case 'Web.Kaelin.Skill.Effect.status':
+                                                                    var $1755 = self.area;
+                                                                    var _area$30 = Web$Kaelin$Skill$area$to_list$($1755, $1734, $1737);
+                                                                    var _state$31 = (() => {
+                                                                        var $1758 = _state$25;
+                                                                        var $1759 = _area$30;
+                                                                        let _state$32 = $1758;
+                                                                        let _coord$31;
+                                                                        while ($1759._ === 'List.cons') {
+                                                                            _coord$31 = $1759.head;
+                                                                            var $1758 = Web$Kaelin$Skill$update_state$(_state$32, $1734, _coord$31, _effect$24);
+                                                                            _state$32 = $1758;
+                                                                            $1759 = $1759.tail;
+                                                                        }
+                                                                        return _state$32;
+                                                                    })();
+                                                                    var $1756 = Web$Kaelin$Skills$skill_use$aux$(_state$31);
+                                                                    var $1743 = $1756;
+                                                                    break;
+                                                            };
+                                                            _state$25 = $1743;
+                                                            $1744 = $1744.tail;
+                                                        }
+                                                        return _state$25;
+                                                    })();
+                                                    var $1741 = _state$24;
+                                                    var $1740 = $1741;
+                                                } else {
+                                                    var $1760 = _state$1;
+                                                    var $1740 = $1760;
+                                                };
+                                                var $1738 = $1740;
+                                                break;
+                                        };
+                                        var $1733 = $1738;
+                                        break;
+                                };
+                                var $1731 = $1733;
+                                break;
+                        };
+                        var $1729 = $1731;
+                        break;
+                    case 'Maybe.none':
+                        var $1761 = _state$1;
+                        var $1729 = $1761;
+                        break;
+                };
+                var $1726 = $1729;
+                break;
+            case 'Web.Kaelin.State.init':
+            case 'Web.Kaelin.State.void':
+                var $1762 = _state$1;
+                var $1726 = $1762;
+                break;
+        };
+        return $1726;
+>>>>>>> master
     };
     const Web$Kaelin$Skill$skill_use = x0 => Web$Kaelin$Skill$skill_use$(x0);
 
@@ -7824,6 +9841,7 @@ module.exports = (function() {
         var self = _event$1;
         switch (self._) {
             case 'App.Event.init':
+<<<<<<< HEAD
                 var $1673 = self.user;
                 var self = _state$2;
                 switch (self._) {
@@ -7854,10 +9872,43 @@ module.exports = (function() {
             case 'App.Event.tick':
                 var $1684 = self.time;
                 var $1685 = self.info;
+=======
+                var $1764 = self.user;
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.game':
+                        var $1766 = self.players;
+                        var $1767 = self.cast_info;
+                        var $1768 = self.map;
+                        var $1769 = self.internal;
+                        var $1770 = self.env_info;
+                        var _user$13 = String$to_lower$($1764);
+                        var $1771 = IO$monad$((_m$bind$14 => _m$pure$15 => {
+                            var $1772 = _m$bind$14;
+                            return $1772;
+                        }))(App$watch$(Web$Kaelin$Constants$room))((_$14 => {
+                            var $1773 = App$store$(Web$Kaelin$State$game$(_user$13, Web$Kaelin$Constants$room, $1766, $1767, $1768, $1769, $1770));
+                            return $1773;
+                        }));
+                        var $1765 = $1771;
+                        break;
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1774 = App$pass;
+                        var $1765 = $1774;
+                        break;
+                };
+                var $1763 = $1765;
+                break;
+            case 'App.Event.tick':
+                var $1775 = self.time;
+                var $1776 = self.info;
+>>>>>>> master
                 var self = _state$2;
                 switch (self._) {
                     case 'Web.Kaelin.State.init':
                     case 'Web.Kaelin.State.void':
+<<<<<<< HEAD
                         var $1687 = App$pass;
                         var $1686 = $1687;
                         break;
@@ -7897,9 +9948,55 @@ module.exports = (function() {
             case 'App.Event.post':
                 var $1696 = self.addr;
                 var $1697 = self.data;
+=======
+                        var $1778 = App$pass;
+                        var $1777 = $1778;
+                        break;
+                    case 'Web.Kaelin.State.game':
+                        var _info$12 = $1776;
+                        var _state$13 = Web$Kaelin$Action$update_interface$(_info$12, ($1775), _state$2);
+                        var $1779 = App$store$(Web$Kaelin$Action$update_area$(_state$13));
+                        var $1777 = $1779;
+                        break;
+                };
+                var $1763 = $1777;
+                break;
+            case 'App.Event.key_down':
+                var $1780 = self.code;
                 var self = _state$2;
                 switch (self._) {
                     case 'Web.Kaelin.State.game':
+                        var $1782 = self.user;
+                        var self = ($1780 === 49);
+                        if (self) {
+                            var $1784 = App$store$(Web$Kaelin$Action$create_player$($1782, Web$Kaelin$Heroes$Croni$croni, _state$2));
+                            var $1783 = $1784;
+                        } else {
+                            var $1785 = App$store$(Web$Kaelin$Action$start_cast$($1780, _state$2));
+                            var $1783 = $1785;
+                        };
+                        var $1781 = $1783;
+                        break;
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1786 = App$pass;
+                        var $1781 = $1786;
+                        break;
+                };
+                var $1763 = $1781;
+                break;
+            case 'App.Event.post':
+                var $1787 = self.data;
+>>>>>>> master
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1789 = App$pass;
+                        var $1788 = $1789;
+                        break;
+                    case 'Web.Kaelin.State.game':
+<<<<<<< HEAD
                         var $1699 = self.map;
                         var self = Web$Kaelin$Event$deserialize$(String$drop$(2n, $1697));
                         switch (self._) {
@@ -7953,6 +10050,36 @@ module.exports = (function() {
                         break;
                 };
                 var $1672 = $1698;
+=======
+                        var self = Web$Kaelin$Event$deserialize$(String$drop$(2n, $1787));
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $1791 = self.value;
+                                var self = $1791;
+                                switch (self._) {
+                                    case 'Web.Kaelin.Event.start_game':
+                                    case 'Web.Kaelin.Event.create_user':
+                                    case 'Web.Kaelin.Event.create_hero':
+                                        var $1793 = App$pass;
+                                        var $1792 = $1793;
+                                        break;
+                                    case 'Web.Kaelin.Event.user_input':
+                                        var $1794 = App$store$(Web$Kaelin$Skill$skill_use$(_state$2));
+                                        var $1792 = $1794;
+                                        break;
+                                };
+                                var $1790 = $1792;
+                                break;
+                            case 'Maybe.none':
+                                var $1795 = App$pass;
+                                var $1790 = $1795;
+                                break;
+                        };
+                        var $1788 = $1790;
+                        break;
+                };
+                var $1763 = $1788;
+>>>>>>> master
                 break;
             case 'App.Event.mouse_down':
             case 'App.Event.key_up':
@@ -7962,16 +10089,25 @@ module.exports = (function() {
                     case 'Web.Kaelin.State.init':
                     case 'Web.Kaelin.State.void':
                     case 'Web.Kaelin.State.game':
+<<<<<<< HEAD
                         var $1712 = App$pass;
                         var $1711 = $1712;
                         break;
                 };
                 var $1672 = $1711;
+=======
+                        var $1797 = App$pass;
+                        var $1796 = $1797;
+                        break;
+                };
+                var $1763 = $1796;
+>>>>>>> master
                 break;
             case 'App.Event.mouse_up':
                 var self = _state$2;
                 switch (self._) {
                     case 'Web.Kaelin.State.game':
+<<<<<<< HEAD
                         var $1714 = self.room;
                         var $1715 = self.env_info;
                         var _info$12 = $1715;
@@ -8001,6 +10137,38 @@ module.exports = (function() {
                         break;
                 };
                 var $1672 = $1713;
+=======
+                        var $1799 = self.user;
+                        var $1800 = self.room;
+                        var $1801 = self.env_info;
+                        var _info$12 = $1801;
+                        var self = _info$12;
+                        switch (self._) {
+                            case 'App.EnvInfo.new':
+                                var $1803 = self.mouse_pos;
+                                var self = Web$Kaelin$Coord$to_axial$($1803);
+                                switch (self._) {
+                                    case 'Web.Kaelin.Coord.new':
+                                        var $1805 = self.i;
+                                        var $1806 = self.j;
+                                        var _hex$17 = Web$Kaelin$Event$serialize$(Web$Kaelin$Event$user_input$($1799, Web$Kaelin$Coord$new$($1805, $1806), Web$Kaelin$Action$walk));
+                                        var $1807 = App$post$($1800, _hex$17);
+                                        var $1804 = $1807;
+                                        break;
+                                };
+                                var $1802 = $1804;
+                                break;
+                        };
+                        var $1798 = $1802;
+                        break;
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1808 = App$pass;
+                        var $1798 = $1808;
+                        break;
+                };
+                var $1763 = $1798;
+>>>>>>> master
                 break;
             case 'App.Event.mouse_click':
             case 'App.Event.input':
@@ -8009,6 +10177,7 @@ module.exports = (function() {
                     case 'Web.Kaelin.State.init':
                     case 'Web.Kaelin.State.void':
                     case 'Web.Kaelin.State.game':
+<<<<<<< HEAD
                         var $1724 = App$pass;
                         var $1723 = $1724;
                         break;
@@ -8017,17 +10186,35 @@ module.exports = (function() {
                 break;
         };
         return $1672;
+=======
+                        var $1810 = App$pass;
+                        var $1809 = $1810;
+                        break;
+                };
+                var $1763 = $1809;
+                break;
+        };
+        return $1763;
+>>>>>>> master
     };
     const Web$Kaelin$App$when = x0 => x1 => Web$Kaelin$App$when$(x0, x1);
 
     function App$new$(_init$2, _draw$3, _when$4) {
+<<<<<<< HEAD
         var $1725 = ({
+=======
+        var $1811 = ({
+>>>>>>> master
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
+<<<<<<< HEAD
         return $1725;
+=======
+        return $1811;
+>>>>>>> master
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kaelin = (() => {
@@ -8035,8 +10222,13 @@ module.exports = (function() {
         var _init$2 = Web$Kaelin$App$init;
         var _draw$3 = Web$Kaelin$App$draw(_img$1);
         var _when$4 = Web$Kaelin$App$when;
+<<<<<<< HEAD
         var $1726 = App$new$(_init$2, _draw$3, _when$4);
         return $1726;
+=======
+        var $1812 = App$new$(_init$2, _draw$3, _when$4);
+        return $1812;
+>>>>>>> master
     })();
     return {
         'Buffer32.new': Buffer32$new,
@@ -8157,7 +10349,11 @@ module.exports = (function() {
         'Int.to_i32': Int$to_i32,
         'Int.new': Int$new,
         'Int.from_nat': Int$from_nat,
+<<<<<<< HEAD
         'Nat.to_i32': Nat$to_i32,
+=======
+        'I32.from_nat': I32$from_nat,
+>>>>>>> master
         'List.cons': List$cons,
         'Web.Kaelin.Skill.new': Web$Kaelin$Skill$new,
         'Web.Kaelin.Skill.Effect.hp': Web$Kaelin$Skill$Effect$hp,
@@ -8259,6 +10455,7 @@ module.exports = (function() {
         'Web.Kaelin.Constants.center_y': Web$Kaelin$Constants$center_y,
         'F64.sub': F64$sub,
         'F64.mul': F64$mul,
+        'U32.from_nat': U32$from_nat,
         'F64.add': F64$add,
         'Web.Kaelin.Coord.round.floor': Web$Kaelin$Coord$round$floor,
         'Web.Kaelin.Coord.round.round_F64': Web$Kaelin$Coord$round$round_F64,
@@ -8520,33 +10717,19 @@ module.exports = (function() {
         'Web.Kaelin.Event.Code.generate_hex': Web$Kaelin$Event$Code$generate_hex,
         'generate_hex': generate_hex,
         'Web.Kaelin.Event.Code.create_hero': Web$Kaelin$Event$Code$create_hero,
-        'Web.Kaelin.Resources.Action.to_bits': Web$Kaelin$Resources$Action$to_bits,
-        'Web.Kaelin.Coord.Convert.axial_to_bits': Web$Kaelin$Coord$Convert$axial_to_bits,
-        'Web.Kaelin.Event.Code.user_input': Web$Kaelin$Event$Code$user_input,
-        'Web.Kaelin.Event.serialize': Web$Kaelin$Event$serialize,
-        'Web.Kaelin.Event.user_input': Web$Kaelin$Event$user_input,
-        'Web.Kaelin.Action.walk': Web$Kaelin$Action$walk,
-        'App.post': App$post,
-        'U16.eql': U16$eql,
-        'Debug.log': Debug$log,
-        'Web.Kaelin.Player.new': Web$Kaelin$Player$new,
-        'Web.Kaelin.Action.create_player': Web$Kaelin$Action$create_player,
-        'String.eql_no_sensitive': String$eql_no_sensitive,
-        'Web.Kaelin.Tile.player.to_entity': Web$Kaelin$Tile$player$to_entity,
-        'Web.Kaelin.Map.player.info.go': Web$Kaelin$Map$player$info$go,
-        'Web.Kaelin.Map.player.info': Web$Kaelin$Map$player$info,
-        'List.find': List$find,
-        'Web.Kaelin.Skill.has_key': Web$Kaelin$Skill$has_key,
-        'Web.Kaelin.Hero.skill.from_key': Web$Kaelin$Hero$skill$from_key,
-        'Web.Kaelin.HexEffect.skill': Web$Kaelin$HexEffect$skill,
-        'Web.Kaelin.State.game.set_cast_info': Web$Kaelin$State$game$set_cast_info,
-        'Web.Kaelin.Action.start_cast': Web$Kaelin$Action$start_cast,
-        'String.drop': String$drop,
-        'Web.Kaelin.Event.Buffer.next': Web$Kaelin$Event$Buffer$next,
+        'Parser.State.new': Parser$State$new,
         'Parser.run': Parser$run,
         'Parser.Reply': Parser$Reply,
-        'Parser.Reply.error': Parser$Reply$error,
         'Parser.Reply.value': Parser$Reply$value,
+        'Parser.maybe': Parser$maybe,
+        'Parser.Reply.error': Parser$Reply$error,
+        'Parser.Error.new': Parser$Error$new,
+        'Parser.Reply.fail': Parser$Reply$fail,
+        'U16.eql': U16$eql,
+        'Parser.text.go': Parser$text$go,
+        'Parser.text': Parser$text,
+        'Parser.Error.combine': Parser$Error$combine,
+        'Parser.Error.maybe_combine': Parser$Error$maybe_combine,
         'Parser.many.go': Parser$many$go,
         'Parser.many': Parser$many,
         'Parser.many1': Parser$many1,
@@ -8562,6 +10745,28 @@ module.exports = (function() {
         'Nat.append_2': Nat$append_2,
         'Hex.parser': Hex$parser,
         'Hex.to_nat': Hex$to_nat,
+        'Web.Kaelin.Resources.Action.to_bits': Web$Kaelin$Resources$Action$to_bits,
+        'Web.Kaelin.Coord.Convert.axial_to_bits': Web$Kaelin$Coord$Convert$axial_to_bits,
+        'Web.Kaelin.Event.Code.user_input': Web$Kaelin$Event$Code$user_input,
+        'Web.Kaelin.Event.serialize': Web$Kaelin$Event$serialize,
+        'Web.Kaelin.Event.user_input': Web$Kaelin$Event$user_input,
+        'Web.Kaelin.Action.walk': Web$Kaelin$Action$walk,
+        'App.post': App$post,
+        'Debug.log': Debug$log,
+        'Web.Kaelin.Player.new': Web$Kaelin$Player$new,
+        'Web.Kaelin.Action.create_player': Web$Kaelin$Action$create_player,
+        'String.eql_no_sensitive': String$eql_no_sensitive,
+        'Web.Kaelin.Tile.player.to_entity': Web$Kaelin$Tile$player$to_entity,
+        'Web.Kaelin.Map.player.info.go': Web$Kaelin$Map$player$info$go,
+        'Web.Kaelin.Map.player.info': Web$Kaelin$Map$player$info,
+        'List.find': List$find,
+        'Web.Kaelin.Skill.has_key': Web$Kaelin$Skill$has_key,
+        'Web.Kaelin.Hero.skill.from_key': Web$Kaelin$Hero$skill$from_key,
+        'Web.Kaelin.HexEffect.skill': Web$Kaelin$HexEffect$skill,
+        'Web.Kaelin.State.game.set_cast_info': Web$Kaelin$State$game$set_cast_info,
+        'Web.Kaelin.Action.start_cast': Web$Kaelin$Action$start_cast,
+        'String.drop': String$drop,
+        'Web.Kaelin.Event.Buffer.next': Web$Kaelin$Event$Buffer$next,
         'String.take': String$take,
         'Web.Kaelin.Event.Buffer.get': Web$Kaelin$Event$Buffer$get,
         'Web.Kaelin.Event.Buffer.push': Web$Kaelin$Event$Buffer$push,
@@ -8572,8 +10777,6 @@ module.exports = (function() {
         'Web.Kaelin.Resources.Action.to_action': Web$Kaelin$Resources$Action$to_action,
         'Maybe.bind': Maybe$bind,
         'Web.Kaelin.Event.deserialize': Web$Kaelin$Event$deserialize,
-        'Web.Kaelin.Map.find_players': Web$Kaelin$Map$find_players,
-        'Web.Kaelin.Map.player.to_coord': Web$Kaelin$Map$player$to_coord,
         'Web.Kaelin.Map.coord_to_address': Web$Kaelin$Map$coord_to_address,
         'Web.Kaelin.Skill.updated_player_hp': Web$Kaelin$Skill$updated_player_hp,
         'List.pop_at.go': List$pop_at$go,

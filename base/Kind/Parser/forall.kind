@@ -1,16 +1,27 @@
 Kind.Parser.forall: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    get self = Kind.Parser.name;
-    get bind = Kind.Parser.binder(":");
-    Parser.maybe!(Kind.Parser.text("->"));
-    get body = Kind.Parser.term;
+  Kind.Parser.block("forall", Parser {
+    get self = Kind.Parser.name
+    get bind = Kind.Parser.binder(":")
+    Parser.maybe!(Kind.Parser.text("->"))
+    get body = Kind.Parser.term
     let term = List.fold!(bind)!(body, (x,t) case x {
       new: Kind.Term.all(x.eras, "", x.name, x.term, (s,x) t)
-    });
-    get orig = Kind.Parser.stop(init);
+    })
     return case term {
-      all: Kind.Term.ori(orig, Kind.Term.all(term.eras, self, term.name, term.xtyp, term.body)),
-      _: term,
-    };
+      all: Kind.Term.all(term.eras, self, term.name, term.xtyp, term.body)
+    } default term
+  })
+
+Kind.Parser.forall.make(binds: List<Kind.Binder>, body: Kind.Term): Kind.Term
+  case binds {
+    nil: body
+    cons: case binds.head {
+      new:
+        def all_eras = binds.head.eras
+        def all_self = ""
+        def all_name = binds.head.name
+        def all_xtyp = binds.head.term
+        def all_body = (s,x) Kind.Parser.forall.make(binds.tail, body)
+        Kind.Term.all(all_eras, all_self, all_name, all_xtyp, all_body),
+    }
   }

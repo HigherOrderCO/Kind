@@ -1,32 +1,30 @@
 Kind.Parser.map: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("{");
-    get vals = Parser.until!(
-      Kind.Parser.text("}"),
-      Kind.Parser.item!(Parser {
-        get key = Kind.Parser.term;
-        Kind.Parser.text(":");
-        get val = Kind.Parser.term;
+  Kind.Parser.block("map", Parser {
+    get vals = Kind.Parser.items!(
+      "{", 
+      Parser {
+        get key = Kind.Parser.term
+        Kind.Parser.text(":")
+        get val = Kind.Parser.term
         return {key, val}
-      }));
-    get orig = Kind.Parser.stop(init);
+      },
+      "}")
     let list = List.fold!(vals)!(
-      Kind.Term.ori(orig, Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))),
+      Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e)),
       (kv,xs)
         let {key,val} = kv
-        let pair = Kind.Term.ref("Pair.new");
-        let pair = Kind.Term.app(pair, Kind.Term.hol(Bits.e));
-        let pair = Kind.Term.app(pair, Kind.Term.hol(Bits.e));
-        let pair = Kind.Term.app(pair, key);
-        let pair = Kind.Term.app(pair, val);
-        let term = Kind.Term.ref("List.cons");
-        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-        let term = Kind.Term.app(term, pair);
-        let term = Kind.Term.app(term, xs);
-        Kind.Term.ori(orig, term));
-      let term = Kind.Term.ref("Map.from_list");
-      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e));
-      let term = Kind.Term.app(term, list);
-      return Kind.Term.ori(orig, term);
-  }
+        let pair = Kind.Term.ref("Pair.new")
+        let pair = Kind.Term.app(pair, Kind.Term.hol(Bits.e))
+        let pair = Kind.Term.app(pair, Kind.Term.hol(Bits.e))
+        let pair = Kind.Term.app(pair, key)
+        let pair = Kind.Term.app(pair, val)
+        let term = Kind.Term.ref("List.cons")
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, pair)
+        let term = Kind.Term.app(term, xs)
+        term)
+      let term = Kind.Term.ref("Map.from_list")
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, list)
+      return term
+  })

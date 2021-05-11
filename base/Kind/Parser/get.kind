@@ -1,38 +1,34 @@
 Kind.Parser.get: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("let ");
-    Kind.Parser.text("{");
-    get nam0 = Kind.Parser.name;
-    Kind.Parser.text(",");
-    get nam1 = Kind.Parser.name;
-    Kind.Parser.text("}");
-    Kind.Parser.text("=");
-    get expr = Kind.Parser.term;
-    Parser.maybe!(Kind.Parser.text(";"));
-    get body = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    let term = expr;
-    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)));
-    let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)));
-    return Kind.Term.ori(orig, term);
-  }
+  Kind.Parser.block("let", Parser {
+    Kind.Parser.text("let ")
+    Kind.Parser.text("{")
+    get nam0 = Kind.Parser.name1
+    Kind.Parser.text(",")
+    get nam1 = Kind.Parser.name1
+    Kind.Parser.text("}")
+    Kind.Parser.text("=")
+    get expr = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = Kind.Parser.term
+    let term = expr
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)))
+    let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)))
+    return term
+  })
 
 Kind.Parser.get.omit: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("{");
-    get nam0 = Kind.Parser.name;
-    Kind.Parser.text(",");
-    get nam1 = Kind.Parser.name;
-    Kind.Parser.text("}");
-    Kind.Parser.text("= ");
-    get expr = Kind.Parser.term;
-    Parser.maybe!(Kind.Parser.text(";"));
-    get body = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    let term = expr;
-    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)));
-    let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)));
-    return Kind.Term.ori(orig, term);
-  }
+  Kind.Parser.block("let", Parser {
+    Kind.Parser.text("{")
+    get nam0 = Kind.Parser.name1
+    Kind.Parser.text(",")
+    get nam1 = Kind.Parser.name1
+    Kind.Parser.text("}")
+    Kind.Parser.text("= ")
+    get expr = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = Kind.Parser.term
+    let term = expr
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)))
+    let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)))
+    return term
+  })

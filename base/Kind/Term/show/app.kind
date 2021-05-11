@@ -1,6 +1,0 @@
-Kind.Term.show.app(term: Kind.Term, path: Maybe<Bits -> Bits>, args: List<String>): String
-  case term {
-    app: Kind.Term.show.app(term.func, Kind.MPath.o(path), Kind.Term.show.go(term.argm, Kind.MPath.i(path)) & args),
-    ori: Kind.Term.show.app(term.expr, path, args),
-    _  : Kind.Term.show.app.done(term, path, args)
-  }

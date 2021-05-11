@@ -727,71 +727,34 @@ let age = 2020 - Nat.read(year)
 Monad.pure<_>(IO.monad)<_>(Nat.read(year))))))
 ```
 
-Nat literal
------------
+Numeric literals
+----------------
 
-```
-42
-```
+type | full syntax
+---- | -----------
+Nat  | `42`
+Int  | `+42` or `-42`
+U8   | `42#8`
+U16  | `42#16`
+U32  | `42#32`
+U64  | `42#64`
+U128 | `42#128`
+U256 | `42#256`
+I8   | `+42#8` or `-42#256`
+I16  | `+42#16` or `-42#16`
+I32  | `+42#32` or `-42#32`
+I64  | `+42#64` or `-42#64`
+I128 | `+42#128` or `-42#128`
+I256 | `+42#256` or `-42#256`
+F64  | `42.0` or `+42.0` or `-42.0`
 
-A natural number can be written by its decimal notation. The literal above is
-expanded to:
+- Numbers literals allow you to create different types of numbers tersely.
 
-```
-Nat.succ(Nat.succ(Nat.succ ... 42 times ... (Nat.zero)))
-```
+- Bit-widths, signs and decimals may be omitted if sufficient type information is present.
 
-For efficiency purposes, Kind's type-checker keeps `Nat` literals
-represented as BigInts until they are needed for type-checking purposes. Also,
-Kind compiles every `Nat` (not just literals) to efficient BigInts, when
-available on the target language.
+- Parenthesis may be needed in certain locations (ex: `(+42)` instead of `+42`).
 
-Fixed width literals
-------------
-
-```
-42#8
-42#16
-0xff2a#32
-42#64
-```
-
-The literals above can be used to create unsigned integers of `8`, `16`, `32` and `64` bits
-respectively. There are also `32` bits signed integers:
-```
-+0#32
-+5#32
--120#32
-```
-So, for example:
-
-```
-num: U32
-  42#32
-```
-
-Is a 32-bit unsigned integer. These aren't primitive either. The code above is
-expanded to:
-
-```
-num: U32
-  Nat.to_u32(42)
-```
-
-Which uses the standard library `Nat.to_u32` function to convert a `Nat` to an
-`U32`, which is itself represented using the `Word` type, which is itself a list
-of bits of statically known length:
-
-```
-type Word ~ (size: Nat) {
-  e                              ~ (size = Nat.zero),
-  o<size: Nat>(pred: Word(size)) ~ (size = Nat.succ(size)),
-  i<size: Nat>(pred: Word(size)) ~ (size = Nat.succ(size)),
-}
-```
-
-Obviously `Nat.to_u32` is optimized by the compiler, so that uint literals
-become just numeric literals on the target language.
+- You can also use a hexadecimal (`0x123...`) wherever a decimal is expected.
 
 Char literal
 ------------
@@ -1023,6 +986,53 @@ case head {
 ```
 
 This is useful to flatten your code, reducing the required identation.
+
+Record literal
+--------------
+
+```
+{1, 2}
+```
+
+When a datatype has only one constructor, it can be seen as a record. The syntax
+above can be used to create an element of that type. It expands to:
+
+```
+Foo.ctor_name(1, 2)
+```
+
+Depending on where it is used, may require a type annotation: `{1, 2} :: Foo`.
+
+Record getter
+-------------
+
+```
+foo@x
+```
+
+The syntax above expands to:
+
+```
+case foo { new: foo.x }
+```
+
+It can be used to get a field of a single-constructor datatype.
+
+
+Record setter
+-------------
+
+```
+foo@x <- 100
+```
+
+The syntax above expands to:
+
+```
+case foo { new: Foo.new(100, foo.y) }
+```
+
+It can be used to set a field of a single-constructor datatype.
 
 List literal
 ------------
@@ -1292,36 +1302,26 @@ str
 
 While is expanded to use the `Function.while` function.
 
-Numeric operation
------------------
+Binary Operators
+----------------
 
-```
-24 + 24
-84 - 24
-24 * 2
-84 / 2
-128 % 43
-3 <? 2
-3 <=? 2
-3 =? 2
-3 >=? 2
-3 >? 2
-```
-
-The expressions above are desugared to:
-
-```
-Nat.add(24, 24)
-Nat.sub(84, 24)
-Nat.mul(24, 2)
-Nat.div(84, 2)
-Nat.mod(128, 43)
-Nat.ltn(3, 2)
-Nat.lte(3, 2)
-Nat.eql(3, 2)
-Nat.gte(3, 2)
-Nat.gtn(3, 2)
+syntax          | desugar
+---------       | -------
+`2 + 3`         | `Nat.add(2, 3)`
+`2 - 3`         | `Nat.sub(2, 3)`
+`2 * 3`         | `Nat.mul(2, 3)`
+`2 / 3`         | `Nat.div(2, 3)`
+`2 <? 3`        | `Nat.ltn(2, 3)`
+`2 <=? 3`       | `Nat.lte(2, 3)`
+`2 =? 3`        | `Nat.eql(2, 3)`
+`2 >=? 3`       | `Nat.gte(2, 3)`
+`2 >? 3`        | `Nat.gtn(2, 3)`
+`(+2) + (-3)`   | `Int.add((+2), (-3))`
+`2#32 + 3`      | `U32.add(2#32, 3#32)`
+`2.0 + 3.0`     | `F64.add(2.0, 3.0)`
+`true && false` | `Bool.and(Bool.true, Bool.false)`
+`true || false` | `Bool.and(Bool.true, Bool.false)`
 ```
 
-Note that spaces are required before and after operators, also that operators in Kind have no precedence and are always right associative. That
-means, for example, `a * b + c - d` is parsed as `(((a * b) + c) - d)`.
+Note that operators in Kind have no precedence and are always right associative.
+That means, for example, `a * b + c - d` is parsed as `(((a * b) + c) - d)`.

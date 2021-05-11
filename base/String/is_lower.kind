@@ -1,0 +1,2 @@
+String.is_lower(str: String): Bool
+  String.eql(String.to_lower(str), str)

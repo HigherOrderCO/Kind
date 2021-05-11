@@ -1,18 +1,16 @@
 Kind.Parser.goal: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("?");
-    get name = Kind.Parser.name;
+  Kind.Parser.block("goal", Parser {
+    Kind.Parser.text("?")
+    get name = Kind.Parser.name
     get dref = Parser.many!(Parser {
-      Kind.Parser.text("-");
-      get nat = Parser.nat;
-      let bits = Bits.reverse(Bits.tail(Bits.reverse(Nat.to_bits(nat))));
-      Parser { return bits; };
-    });
+      Kind.Parser.text("-")
+      get nat = Parser.nat
+      let bits = Bits.reverse(Bits.tail(Bits.reverse(Nat.to_bits(nat))))
+      Parser { return bits }
+    })
     get verb = Parser {
-      get verb = Parser.maybe!(Parser.text("-"));
-      return Maybe.is_some!(verb);
-    };
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, Kind.Term.gol(name, dref, verb));
-  }
+      get verb = Parser.maybe!(Parser.text("-"))
+      return Maybe.is_some!(verb)
+    }
+    return Kind.Term.gol(name, dref, verb)
+  })

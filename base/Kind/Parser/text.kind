@@ -1,5 +1,5 @@
 Kind.Parser.text(text: String): Parser(Unit)
   Parser {
-    Kind.Parser.spaces;
-    Parser.text(text);
+    Kind.Parser.spaces
+    Parser.text(text)
   }

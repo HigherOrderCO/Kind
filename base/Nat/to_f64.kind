@@ -1,2 +1,2 @@
-Nat.to_f64(s: Bool, a: Nat, b: Nat): F64
-  Nat.to_f64(s, a, b)
+Nat.to_f64(a: Nat): F64
+  F64.make(true, a, 0)
