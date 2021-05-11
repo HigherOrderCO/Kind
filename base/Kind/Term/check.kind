@@ -313,7 +313,8 @@ Kind.Term.check.expand.ope(skip_cmp: Bool, oper: String, arg0: Kind.Term, arg1: 
           "+"   : some("add")
           "-"   : some("sub")
           "*"   : some("mul")
-          "/"   : some("pow")
+          "/"   : some("div")
+          "**"  : some("pow")
           "%"   : some("mod")
           "<?"  : some("ltn")
           "<=?" : some("lte")
@@ -321,7 +322,7 @@ Kind.Term.check.expand.ope(skip_cmp: Bool, oper: String, arg0: Kind.Term, arg1: 
           ">=?" : some("gte")
           ">?"  : some("gtn")
           "&&"  : some("and")
-          "||"  :some( "or")
+          "||"  : some( "or")
         } default none
         case oper_name {
           none: none
