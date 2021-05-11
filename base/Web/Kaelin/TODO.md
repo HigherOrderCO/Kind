@@ -46,8 +46,26 @@ TODO list on Kaelin
 
 Kind:
 
-- [ ] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
+- [X] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
 
 - [ ] log inside a function that contains a variable named as 'x' brokes typecheck
 
 - [ ] maybe add I32.to_nat?
+
+- [ ] remove players from state
+
+- [ ] change tile type 
+
+- [ ] change Kaelin State to something like 
+  state {
+    ativo(game: Kaelin.Game)
+    menu(init: Kaelin.Init) // escolher os personagens e tudo mais
+  }
+
+- [ ] choose name for ativo in Kaelin.State
+
+- [ ] add turninfo? or add turn in Kaelin.Internal?
+
+- [ ] choose system points
+
+- [ ] choose system priority
