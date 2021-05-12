@@ -19,7 +19,7 @@ module.exports = class AppPlay extends Component {
     this.listeners = {}; // event listeners
     this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
     this.rendered = null; // document rendered by app, coming from Kind
-    this.container = null; // container that holds rendered app
+    this.container = props.container; // container that holds rendered app
     this.canvas = {}; // canvas that holds rendered pixel-art apps
   }
 
@@ -50,6 +50,15 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  on_input(id) {
+    this.register_event({
+      _: "App.Event.input",
+      time: BigInt(Date.now()),
+      id,
+      text: document.getElementById(id).value
+    });
+  }
+
   // Initializes the input event listeners
   async init_input_events() {
     //this.events = []; // this application's events
@@ -63,8 +72,8 @@ module.exports = class AppPlay extends Component {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: window.innerWidth, // this.container ? this.container.offsetWidth : 0,
-          snd: window.innerHeight // this.container ? this.container.offsetHeight : 0,
+          fst: this.container ? this.container.width  : 0,
+          snd: this.container ? this.container.height : 0,
         },
         mouse_pos: this.mouse_pos,
       }
@@ -94,15 +103,6 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("mouseover", this.listeners.mouseover); 
-
-    this.listeners.mouseover = (e) => {
-      this.register_event({
-        _: "App.Event.mouse_out",
-        time: BigInt(Date.now()),
-        id: e.target.id
-      });
-    };
-    document.body.addEventListener("mouseout", this.listeners.mouseout);
 
     this.listeners.click = (e) => {
       this.register_event({
@@ -144,24 +144,6 @@ module.exports = class AppPlay extends Component {
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
 
-    // Resize event
-    this.listeners.resize = (e) => {
-      this.register_event({
-        _: "App.Event.resize",
-        time: BigInt(Date.now()),
-        info: {
-          _: "App.EnvInfo.new",
-          screen_size: {
-            _: "Pair.new",
-            fst: e.target.innerWidth,
-            snd: e.target.innerHeight,
-          },
-          mouse_pos: this.mouse_pos,
-        }
-      });
-    };
-    window.addEventListener("resize", this.listeners.resize);
-
     //Tick event
     this.intervals.tick = () => {
       let time = performance.now()
@@ -175,8 +157,8 @@ module.exports = class AppPlay extends Component {
               _: "App.EnvInfo.new",
               screen_size: {
                 _: "Pair.new",
-                fst: this.container ? this.container.offsetWidth : 0,
-                snd: this.container ? this.container.offsetHeight : 0,
+                fst: this.container ? this.container.width  : 0,
+                snd: this.container ? this.container.height : 0,
               },
               mouse_pos: this.mouse_pos,
             }
@@ -260,6 +242,17 @@ module.exports = class AppPlay extends Component {
             case "del_file":
               localStorage.removeItem(io.param);
               return this.run_io(io.then("")).then(res).catch(err);
+            case "request": 
+              return fetch(encodeURI(io.param))
+              .then(result => result.text())
+              .then(result => this.run_io(io.then(result)))
+              .then(res)
+              .catch(err => {
+                let msg = err.message;
+                let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
+                this.run_io(
+                  io.then("Oops, something went wrong: "+ msg + call_fix))
+              });
             case "watch":
               if (utils.is_valid_hex(48, io.param)) {
                 window.KindEvents.watch_room(io.param);
@@ -285,6 +278,10 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  is_input_type(tag) {
+    return (tag === "input" || tag === "textarea")
+  }
+
   // Renders a document
   render_dom(elem) {
     //console.log("render_dom", elem);
@@ -294,18 +291,22 @@ module.exports = class AppPlay extends Component {
         let props = utils.map_to_object(elem.props);
         let style = utils.map_to_object(elem.style);
         return h(elem.tag, {
-          ...props,
-          style: style
-        }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
+        ...props,
+        style: style,
+        onInput: 
+          this.is_input_type(elem.tag) 
+          ? () => this.on_input(props.id)
+          : null
+      }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":
-        var id = elem.props ? elem.props.id || "" : "";
-        var width = Number(elem.props.width) || 256;
-        var height = Number(elem.props.height) || 256;
-        var canvas = this.get_canvas(id, width, height);
-        var length = elem.value.length;
+        var id       = elem.props ? elem.props.id || "" : "";
+        var width    = Number(elem.props.width) || 256;
+        var height   = Number(elem.props.height) || 256;
+        var canvas   = this.get_canvas(id, width, height);
+        var length   = elem.value.length;
         var capacity = elem.value.capacity;
-        var buffer = elem.value.buffer;
+        var buffer   = elem.value.buffer;
         // Renders pixels to buffers
         for (var i = 0; i < length; ++i) {
           var pos = buffer[i * 2 + 0];

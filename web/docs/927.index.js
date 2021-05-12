@@ -1971,7 +1971,7 @@ module.exports = (function() {
     const Int$to_i32 = a0 => (Number(a0));
     const Int$new = a0 => a1 => (a0 - a1);
     const Int$from_nat = a0 => (a0);
-    const I32$from_nat = a0 => (Number(a0));
+    const Nat$to_i32 = a0 => (Number(a0));
 
     function List$cons$(_head$2, _tail$3) {
         var $369 = ({
@@ -2910,7 +2910,6 @@ module.exports = (function() {
     const Web$Kaelin$Constants$center_y = 128;
     const F64$sub = a0 => a1 => (a0 - a1);
     const F64$mul = a0 => a1 => (a0 * a1);
-    const U32$from_nat = a0 => (Number(a0) >>> 0);
     const F64$add = a0 => a1 => (a0 + a1);
 
     function Web$Kaelin$Coord$round$floor$(_n$1) {
@@ -2920,8 +2919,8 @@ module.exports = (function() {
     const Web$Kaelin$Coord$round$floor = x0 => Web$Kaelin$Coord$round$floor$(x0);
 
     function Web$Kaelin$Coord$round$round_F64$(_n$1) {
-        var _half$2 = (+0.5);
-        var _big_number$3 = (+1000.0);
+        var _half$2 = (parseFloat("+0.5"));
+        var _big_number$3 = (parseFloat("+1000.0"));
         var _n$4 = (_n$1 + _big_number$3);
         var _result$5 = Web$Kaelin$Coord$round$floor$((_n$4 + _half$2));
         var $534 = (_result$5 - _big_number$3);
@@ -2956,7 +2955,7 @@ module.exports = (function() {
     const F64$gtn = x0 => x1 => F64$gtn$(x0, x1);
 
     function Web$Kaelin$Coord$round$diff$(_x$1, _y$2) {
-        var _big_number$3 = (+1000.0);
+        var _big_number$3 = (parseFloat("+1000.0"));
         var _x$4 = (_x$1 + _big_number$3);
         var _y$5 = (_y$2 + _big_number$3);
         var self = F64$gtn$(_x$4, _y$5);
@@ -3019,15 +3018,15 @@ module.exports = (function() {
                 var $553 = self.snd;
                 var _f$4 = U32$to_f64;
                 var _i$5 = F64$to_i32;
-                var _float_hex_rad$6 = (_f$4(Web$Kaelin$Constants$hexagon_radius) / (+2.0));
+                var _float_hex_rad$6 = (_f$4(Web$Kaelin$Constants$hexagon_radius) / (parseFloat("+2.0")));
                 var _center_x$7 = Web$Kaelin$Constants$center_x;
                 var _center_y$8 = Web$Kaelin$Constants$center_y;
                 var _float_x$9 = ((_f$4($552) - _f$4(_center_x$7)) / _float_hex_rad$6);
                 var _float_y$10 = ((_f$4($553) - _f$4(_center_y$8)) / _float_hex_rad$6);
-                var _fourth$11 = (+0.25);
-                var _sixth$12 = ((+1.0) / (+6.0));
-                var _third$13 = ((+1.0) / (+3.0));
-                var _half$14 = (+0.5);
+                var _fourth$11 = (parseFloat("+0.25"));
+                var _sixth$12 = ((parseFloat("+1.0")) / (parseFloat("+6.0")));
+                var _third$13 = ((parseFloat("+1.0")) / (parseFloat("+3.0")));
+                var _half$14 = (parseFloat("+0.5"));
                 var _axial_x$15 = ((_float_x$9 * _fourth$11) - (_float_y$10 * _sixth$12));
                 var _axial_y$16 = (_float_y$10 * _third$13);
                 var self = Web$Kaelin$Coord$round$(_axial_x$15, _axial_y$16);
@@ -3244,14 +3243,14 @@ module.exports = (function() {
                 var _i$6 = (_i$4);
                 var _j$7 = (_j$5);
                 var _int_rad$8 = (Web$Kaelin$Constants$hexagon_radius);
-                var _hlf$9 = (_int_rad$8 / (+2.0));
+                var _hlf$9 = (_int_rad$8 / (parseFloat("+2.0")));
                 var _int_screen_center_x$10 = (Web$Kaelin$Constants$center_x);
                 var _int_screen_center_y$11 = (Web$Kaelin$Constants$center_y);
                 var _cx$12 = (_int_screen_center_x$10 + (_j$7 * _int_rad$8));
-                var _cx$13 = (_cx$12 + (_i$6 * (_int_rad$8 * (+2.0))));
-                var _cy$14 = (_int_screen_center_y$11 + (_j$7 * (_hlf$9 * (+3.0))));
+                var _cx$13 = (_cx$12 + (_i$6 * (_int_rad$8 * (parseFloat("+2.0")))));
+                var _cy$14 = (_int_screen_center_y$11 + (_j$7 * (_hlf$9 * (parseFloat("+3.0")))));
                 var _cx$15 = ((_cx$13 >>> 0));
-                var _cy$16 = (_cy$14 + (+0.5));
+                var _cy$16 = (_cy$14 + (parseFloat("+0.5")));
                 var _cy$17 = ((_cy$16 >>> 0));
                 var $601 = Pair$new$(_cx$15, _cy$17);
                 var $598 = $601;
@@ -8260,8 +8259,6 @@ module.exports = (function() {
             case 'App.Event.mouse_down':
             case 'App.Event.key_up':
             case 'App.Event.mouse_over':
-            case 'App.Event.mouse_out':
-            case 'App.Event.resize':
                 var self = _state$2;
                 switch (self._) {
                     case 'Web.Kaelin.State.init':
@@ -8309,6 +8306,7 @@ module.exports = (function() {
                 var $1763 = $1798;
                 break;
             case 'App.Event.mouse_click':
+            case 'App.Event.input':
                 var self = _state$2;
                 switch (self._) {
                     case 'Web.Kaelin.State.init':
@@ -8462,7 +8460,7 @@ module.exports = (function() {
         'Int.to_i32': Int$to_i32,
         'Int.new': Int$new,
         'Int.from_nat': Int$from_nat,
-        'I32.from_nat': I32$from_nat,
+        'Nat.to_i32': Nat$to_i32,
         'List.cons': List$cons,
         'Web.Kaelin.Skill.new': Web$Kaelin$Skill$new,
         'Web.Kaelin.Skill.Effect.hp': Web$Kaelin$Skill$Effect$hp,
@@ -8564,7 +8562,6 @@ module.exports = (function() {
         'Web.Kaelin.Constants.center_y': Web$Kaelin$Constants$center_y,
         'F64.sub': F64$sub,
         'F64.mul': F64$mul,
-        'U32.from_nat': U32$from_nat,
         'F64.add': F64$add,
         'Web.Kaelin.Coord.round.floor': Web$Kaelin$Coord$round$floor,
         'Web.Kaelin.Coord.round.round_F64': Web$Kaelin$Coord$round$round_F64,

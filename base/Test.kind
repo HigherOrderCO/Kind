@@ -1,2 +1,4 @@
-Test: _
-  (+1) + (+3)
+Test: IO(Unit)
+  IO {
+    IO.print("test")
+  }
