@@ -1,0 +1,13 @@
+Web.Kaelin.Tile.creature.change_hp(
+  change: I32,
+  creature: Web.Kaelin.Creature
+): Web.Kaelin.Creature
+  open creature
+  open creature.hero as hero
+  case I32.eql(creature.hp, +0#32) {
+    true: creature
+    false:
+      def new_hp = I32.min(I32.add(creature.hp, change), hero.max_hp)
+      creature@hp <- new_hp
+      //Web.Kaelin.Creature.new(creature.player, creature.hero, creature.team, new_hp, creature.status)
+      }

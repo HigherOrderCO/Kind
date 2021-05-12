@@ -1,12 +1,12 @@
-type Web.Kaelin.Entity {
-  background(
-    terrain: Web.Kaelin.Terrain
-  )
-  creature(
-    player: Maybe(String)
-    hero: Web.Kaelin.Hero
-    team: String
-    hp: I32
-    status: List<Web.Kaelin.Status>    
-  )
-}
+//type Web.Kaelin.Entity {
+  //background(
+    //terrain: Web.Kaelin.Terrain
+  //)
+  //creature(
+    //player: Maybe(String)
+    //hero: Web.Kaelin.Hero
+    //team: String
+    //hp: I32
+    //status: List<Web.Kaelin.Status>    
+  //)
+//}

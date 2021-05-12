@@ -1,11 +1,10 @@
-Web.Kaelin.Draw.state.players_hp(cx: U32, cy: U32, player: Maybe<Web.Kaelin.Entity>, img: VoxBox): VoxBox
-  case player {
-  none: img
-  some: 
-    case player.value { 
-      creature:
-      let cy = U32.add(cy, Web.Kaelin.Constants.hexagon_radius)
-      let str = Int.show(I32.to_int(player.value.hp))
-      VoxBox.Draw.text(str, PixelFont.small_black, Pos32.new(cx,cy,0u), img)
-    }default img
-  }
+Web.Kaelin.Draw.state.players_hp(
+  cx: U32,
+  cy: U32, 
+  player: Web.Kaelin.Creature,
+  img: VoxBox
+): VoxBox
+  open player
+  let cy = U32.add(cy, Web.Kaelin.Constants.hexagon_radius)
+  let hp = Int.show(I32.to_int(player.hp))
+  VoxBox.Draw.text(hp, PixelFont.small_black, Pos32.new(cx,cy,0u), img)

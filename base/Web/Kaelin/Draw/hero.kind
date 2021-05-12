@@ -1,5 +1,11 @@
 // draw hero in some canvas coordinate (allows pass hexagons)
-Web.Kaelin.Draw.hero(cx: U32, cy: U32, z: U32, hero: Web.Kaelin.Hero, img: VoxBox): VoxBox
+Web.Kaelin.Draw.hero(
+  cx: U32,
+  cy: U32,
+  z: U32,
+  hero: Web.Kaelin.Hero,
+  img: VoxBox
+): VoxBox
   open hero
   let aux_y = U32.mul(Web.Kaelin.Constants.hexagon_radius, 2u)
   let cy = U32.sub(cy, aux_y)
