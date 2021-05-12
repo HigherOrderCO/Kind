@@ -1,0 +1,12 @@
+Web.Kaelin.Effect.Result.union<A: Type>(
+  a: Web.Kaelin.Effect.Result<A>, 
+  b: Web.Kaelin.Effect.Result<A>, 
+  value_union: A -> A -> A
+) : Web.Kaelin.Effect.Result<A>
+  Web.Kaelin.Effect.Result.new<A>(
+    value_union(a@value, b@value)
+    NatMap.union!(a@map, b@map)
+    a@futures ++ b@futures
+    NatMap.union!(a@indicators, b@indicators)
+  )
+  
