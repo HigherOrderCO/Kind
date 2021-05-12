@@ -1,0 +1,9 @@
+type Web.Kaelin.Creature {
+  new(
+    player: Maybe(String),
+    hero: Web.Kaelin.Hero,
+    team: String,
+    hp: I32,
+    status: List<Web.Kaelin.Status>
+  )
+}

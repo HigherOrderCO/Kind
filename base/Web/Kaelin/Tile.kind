@@ -1,2 +1,6 @@
-Web.Kaelin.Tile: Type
-  List<Web.Kaelin.Entity>
+type Web.Kaelin.Tile {
+  new(
+    background: Web.Kaelin.Terrain, 
+    creature: Web.Kaelin.Creature
+    )
+}
