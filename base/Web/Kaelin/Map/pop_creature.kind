@@ -9,7 +9,7 @@ Web.Kaelin.Map.pop_creature(
       open tile.value as old_tile
       creature = old_tile.creature
       remaining_tile =  Web.Kaelin.Tile.new(old_tile.background, none)
-       map = Web.Kaelin.Map.set(coord, remaining_tile, map)
-      {map, creature}
+      new_map = Web.Kaelin.Map.set(coord, remaining_tile, map)
+      {new_map, creature}
   }
 

@@ -9,5 +9,12 @@ Web.Kaelin.Map.modify_at(
   case tile {
     none: map
     some:
-      NatMap.set!(key, tile.value, map)
-  }
+      open tile.value as tile
+      case tile.creature as creature {
+        none: map
+        some:
+          let new_creature = mod(creature.value)
+          let new_tile = Web.Kaelin.Tile.new(tile.background, some(new_creature))
+          NatMap.set!(key, new_tile, map)
+      }
+    }

@@ -6,9 +6,9 @@ Web.Kaelin.Action.start_cast(key_code: U16, state: Web.Kaelin.State): Web.Kaelin
       case player_info {
         none: state
         some: 
-          let {player_coord, player_entity} = player_info.value
-          open player_entity as player
-          skill = Web.Kaelin.Hero.skill.from_key(key_code, player.hero)
+          let {player_coord, player_creature} = player_info.value
+          open player_creature as creature
+          skill = Web.Kaelin.Hero.skill.from_key(key_code, creature.hero)
           case skill {
             none: state
             some:           

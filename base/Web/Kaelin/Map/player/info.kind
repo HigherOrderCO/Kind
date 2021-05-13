@@ -1,24 +1,16 @@
-// convert a player address to the respective map's info associed with it (coord and Creature)
-Web.Kaelin.Map.player.info(
-  addr: String,
-  map: Web.Kaelin.Map
-): Maybe<Pair<Web.Kaelin.Coord, Web.Kaelin.Creature>>
-  let lmap = NatMap.to_list!(map)
-  Web.Kaelin.Map.player.info.go(addr, lmap)
-
-// aux function
-Web.Kaelin.Map.player.info.go(
-  addr: String,
-  map: List<Pair<Nat,Web.Kaelin.Tile>>
-): Maybe<Pair<Web.Kaelin.Coord, Web.Kaelin.Creature>>
-  case map{
-    nil: none
-    cons: 
-      let {coord, tile} = map.head
-      let coord = Web.Kaelin.Coord.Convert.nat_to_axial(coord)
-      open tile
-      case tile.creature as creature{ 
-        none: Web.Kaelin.Map.player.info.go(addr, map.tail)
-        some: some({coord, creature.value})
+Web.Kaelin.Map.player.info(address: String, map:Web.Kaelin.Map): Maybe<Pair<Web.Kaelin.Coord,Web.Kaelin.Creature>>
+  coord = Web.Kaelin.Map.player.to_coord(address,map)
+  case coord{
+    none: none
+    some: 
+      let tile = Web.Kaelin.Map.get(coord.value, map)
+      case tile {
+        none: none
+        some: 
+          open tile.value as tile
+          case tile.creature as creature{
+            none: none
+            some: some({coord.value,creature.value})
+          }
       }
   }

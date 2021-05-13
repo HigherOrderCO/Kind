@@ -5,7 +5,13 @@ Web.Kaelin.Map.push(
 ): Web.Kaelin.Map
   tile = Web.Kaelin.Map.get(coord, map)
   case tile { 
-    none: map
+    none: 
+      case entity {
+        left: 
+          new_tile = Web.Kaelin.Tile.new(entity.value, none)
+          Web.Kaelin.Map.set(coord, new_tile, map)
+        right: map
+    }
     some: 
       open tile.value as tile
       case entity { 

@@ -1,7 +1,7 @@
 // Returns a map with the player Address as the key to its respective coordinate 
 Web.Kaelin.Map.find_players(map: Web.Kaelin.Map): Map(Web.Kaelin.Coord)
   let lmap = NatMap.to_list!(map)
-  let players  = Map.new!
+  let players = []
   for pair in lmap with players:
     coord = Pair.fst!!(pair)
     tile = Pair.snd!!(pair)
@@ -13,7 +13,7 @@ Web.Kaelin.Map.find_players(map: Web.Kaelin.Map): Map(Web.Kaelin.Coord)
         open creature.value
         case creature.value.player as address{ 
           none: players
-          some: Map.set!(address.value, axial_coord, players)
+          some: players ++ [{address.value, axial_coord}]
         }
     }
-    players
+  Map.from_list!(players)
