@@ -52,8 +52,6 @@ Kind:
 
 - [ ] log inside a function that contains a variable named as 'x' brokes typecheck
 
-- [ ] maybe add I32.to_nat?
-
 - [ ] remove players from state
 
 - [ ] change tile type 
@@ -73,3 +71,5 @@ Kind:
 - [ ] choose system priority
 
 - [X] I32.show bug (when printing negative numbers goes to 2ˆ32 - absolute value) 
+
+- [ ] Remodel all draw functions
