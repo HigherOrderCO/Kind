@@ -1,0 +1,32 @@
+Web.Kaelin.Draw.state.map(map: Web.Kaelin.Map, cast_info: Maybe<Web.Kaelin.CastInfo>, env_info: App.EnvInfo, img:VoxBox): VoxBox
+  let map = NatMap.to_list!(map)
+  let mouse_coord = Web.Kaelin.Coord.to_axial(env_info@mouse_pos)
+
+  for pos in map with img:
+    let {coord, tile} = pos
+    let coord = Web.Kaelin.Coord.Convert.nat_to_axial(coord)
+
+    let img = Web.Kaelin.Draw.tile.background(tile@background, cast_info, coord, mouse_coord, img)
+    let img = Web.Kaelin.Draw.tile.creature(tile@creature, coord, img)
+    img
+  img
+    
+  
+  
+  // open env_info as info
+  // let list = NatMap.to_list!(map)
+  // let mouse_coord = Web.Kaelin.Coord.to_axial(info.mouse_pos)
+  // for pair in list with img:
+  //   open pair
+  //   let coord     = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
+  //   let coord_nat = pair.fst // Saves the coord as a nat so it doesn't convert again inside functions
+  //   let sprite    = Web.Kaelin.Draw.support.get_sprite(coord, coord_nat,cast_info)
+  //   let tile      = pair.snd
+  //   let {i, j} = Web.Kaelin.Draw.support.centralize(coord)
+  //   open tile
+  //   open tile.background as background
+  //     VoxBox.Draw.image(i, j, 0#32, background.draw(sprite), img)
+  // img
+
+
+// Web.Kaelin.Draw.state.map.go(map: Web.Kaelin.Map, cast_info: Maybe<Web.Kaelin.CastInfo>, env_info: App.EnvInfo, img: VoxBox)

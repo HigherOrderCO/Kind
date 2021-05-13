@@ -25,7 +25,7 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
 
   }
 
-  let new_terrain = Web.Kaelin.Terrain.grass(terrain_img)
+  let new_terrain = Web.Kaelin.Terrain.new(terrain_img)
   //let new_terrain = Web.Kaelin.Tile.new(background, new_terrain)
 
   //// loops through the half of the map_size

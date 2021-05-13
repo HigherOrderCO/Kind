@@ -1,0 +1,21 @@
+Web.Kaelin.Draw.tile.creature(
+  creature: Maybe<Web.Kaelin.Creature>,
+  coord: Web.Kaelin.Coord,
+  img: VoxBox
+): VoxBox
+  case creature {
+    none: img
+    some: 
+      let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+      let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
+      
+      // draw creature
+      let img = Web.Kaelin.Draw.hero(cx, cy, 0u, creature.value@hero, img)
+
+      // draw creature hp
+      if I32.gtn(+0#32, creature.value@hp) then
+        Web.Kaelin.Draw.state.creature.hp(cx, cy, creature.value, img)
+      else
+        img
+  }
+    
