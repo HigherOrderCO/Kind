@@ -4,6 +4,6 @@ Web.Kaelin.Effect.all.fireball(dmg: I32, range: I32): Web.Kaelin.Effect<Unit>
     get target_pos = Web.Kaelin.Effect.coord.get_target
     
     let coords = Web.Kaelin.Coord.range(target_pos, range)    
-    Web.Kaelin.Effect.area!(Web.Kaelin.Effect.hp.even(dmg), coords)
+    Web.Kaelin.Effect.area!(Web.Kaelin.Effect.hp.damage(dmg), coords)
     return unit
   }

@@ -2,7 +2,7 @@ TODO list on Kaelin
 
 - [ ] Web.Kaelin.Constants - randomize or update each build
 
-- [ ] Change from Entity to tile - Working on it
+- [ ] Fix Serialize and Room Constants (acumulating resources and lagging)
 
 - [ ] organize folders, files, and names
 
@@ -10,7 +10,9 @@ TODO list on Kaelin
 
 - [ ] Maybe organize main folder?
 
-- [ ] organize area.kind
+- [ ] organize Effect/area/area.kind - Rheidner doing it
+
+- [X] Change from Entity to tile
 
 - [X] Rename state.interface to env_info
 

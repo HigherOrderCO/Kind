@@ -1,4 +1,7 @@
-Web.Kaelin.Effect.area<A: Type>(eff: Web.Kaelin.Effect<A>, coords: List<Web.Kaelin.Coord>): Web.Kaelin.Effect<NatMap<A>>  
+Web.Kaelin.Effect.area<A: Type>(
+  eff: Web.Kaelin.Effect<A>,
+  coords: List<Web.Kaelin.Coord>
+): Web.Kaelin.Effect<NatMap<A>>  
   (tick, center, target, map)
     let map_result = NatMap.new!
     let eff_result = Web.Kaelin.Effect.pure!(map_result)
