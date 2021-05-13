@@ -1,0 +1,22 @@
+Web.Amanga: App<Nat>
+  img = VoxBox.alloc_capacity(65536#32)
+
+  init = 0
+
+  draw = (state)
+    let img = VoxBox.Draw.square(10#32, 10#32, 0#32, 5#32, 5#32, (x,y) Col32.new(255#32,0#32,0#32,255#32), img)
+    DOM.node("div", {}, {}, [
+      DOM.text(`
+        Bem-vindo ao Amanga! Esse é o primeiro deploy do joguinho, que se
+        tornará uma paródia de Among Us, porém o impostor é uma manga. A
+        intenção é replicar um protótipo jogável do Among Us no menor tempo
+        possível. Por enquanto, o app é apenas esse bloco de textos. Aos poucos,
+        ele vai evoluir. Quanto tempo vou levar?
+      `)
+      DOM.vbox({}, {}, img)
+    ])
+
+  when = (event, state)
+    App.pass
+
+  App.new!(init, draw, when)

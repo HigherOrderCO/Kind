@@ -1,5 +1,5 @@
 module.exports = {
-  'Web.ColD': import('./Web.ColD.js'),
+  'Web.Amanga': import('./Web.Amanga.js'),
   'Web.Demo': import('./Web.Demo.js'),
   'Web.Kaelin': import('./Web.Kaelin.js'),
   'Web.Kind': import('./Web.Kind.js'),
