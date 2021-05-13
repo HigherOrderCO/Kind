@@ -3281,7 +3281,7 @@ module.exports = class AppPlay extends Component {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
-  'Web.Amanga': __webpack_require__.e(/* import() */ 156).then(__webpack_require__.t.bind(__webpack_require__, 156, 23)),
+  'Web.AsManga': __webpack_require__.e(/* import() */ 190).then(__webpack_require__.t.bind(__webpack_require__, 190, 23)),
   'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
   'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
   'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),
