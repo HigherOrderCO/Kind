@@ -26,7 +26,7 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
   }
 
   let new_terrain = Web.Kaelin.Terrain.grass(terrain_img)
-  let new_terrain = Web.Kaelin.Entity.background(new_terrain)
+  //let new_terrain = Web.Kaelin.Tile.new(background, new_terrain)
 
   //// loops through the half of the map_size
   for j : U32 from 0#32 to height with map:
@@ -39,7 +39,7 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
 
       case fit {
         true:
-          Web.Kaelin.Map.push(coord, new_terrain, map)
+          Web.Kaelin.Map.push(coord, Either.left!!(new_terrain), map)
         false:
           map
       }

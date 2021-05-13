@@ -1,12 +1,11 @@
-// Moves the entity at coordinate "ca" to coordinate "cb"
+// Moves the creature  at coordinate "ca" to coordinate "cb"
 Web.Kaelin.Map.swap(
-  idx: Nat,
   ca: Web.Kaelin.Coord
   cb: Web.Kaelin.Coord
   map: Web.Kaelin.Map
 ) : Web.Kaelin.Map
-  {new_map, ent} = Web.Kaelin.Map.pop_at(idx, ca, map)
-  case ent {
+  {new_map, creature} = Web.Kaelin.Map.pop_creature(ca, map)
+  case creature {
     none: map
-    some: Web.Kaelin.Map.push(cb, ent.value, new_map)
+    some: Web.Kaelin.Map.push(cb, Either.right!!(creature.value), new_map)
   }

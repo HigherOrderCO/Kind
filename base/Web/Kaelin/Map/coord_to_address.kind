@@ -1,20 +1,16 @@
 Web.Kaelin.Map.coord_to_address(
-player_coord: Web.Kaelin.Coord,
-map: Web.Kaelin.Map
+  player_coord: Web.Kaelin.Coord,
+  map: Web.Kaelin.Map
 ): Maybe<String>
   tiles = Web.Kaelin.Map.get(player_coord, map)
-  addr = none
   case tiles { 
     none: none
-    some:
-      for entity in tiles.value with addr:
-        case entity {
-          creature: 
-            case entity.player { 
-              none: addr
-              some: some(entity.player.value)
-          }
-        }default addr
-      addr
+    some: 
+      open tiles.value
+      case tiles.value.creature as creature{
+        none: none
+        some:
+          open creature.value
+          creature.value.player
+    }
   }
-

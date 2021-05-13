@@ -6,4 +6,3 @@ Web.Kaelin.Effect.all.fireball(dmg: I32, range: I32): Web.Kaelin.Effect<NatMap<I
     let coords = Web.Kaelin.Coord.range(target_pos, range)    
     Web.Kaelin.Effect.area!(Web.Kaelin.Effect.hp.even(dmg), coords)
   }
-

@@ -1,6 +1,6 @@
 type Web.Kaelin.Tile {
   new(
     background: Web.Kaelin.Terrain, 
-    creature: Web.Kaelin.Creature
+    creature: Maybe(Web.Kaelin.Creature)
     )
 }

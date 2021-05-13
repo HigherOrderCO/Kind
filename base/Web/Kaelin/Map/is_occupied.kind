@@ -1,9 +1,15 @@
 // Checks if a tile is occupied by a creature
-Web.Kaelin.Map.is_occupied(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map): Bool
-tile = Web.Kaelin.Map.get(coord, map) <> []
-is_occupied = false
-for ent in tile with is_occupied:
-  case ent {
-    background: Bool.or(is_occupied, false)
-    } default true
-is_occupied
+Web.Kaelin.Map.is_occupied(
+  coord: Web.Kaelin.Coord,
+  map: Web.Kaelin.Map
+): Bool
+maybe_tile = Web.Kaelin.Map.get(coord, map)
+case maybe_tile { 
+  none: false
+  some:
+    open maybe_tile.value as tile
+    case tile.creature { 
+      none: false
+      some: true
+    }
+}
