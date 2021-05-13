@@ -1,4 +1,4 @@
-Web.Kaelin.Effect.Result.union<A: Type>(
+Web.Kaelin.Effect.result.union<A: Type>(
   a: Web.Kaelin.Effect.Result<A>, 
   b: Web.Kaelin.Effect.Result<A>, 
   value_union: A -> A -> A
