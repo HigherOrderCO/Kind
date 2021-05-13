@@ -6,8 +6,12 @@ Web.Kaelin.Map.init(map: Web.Kaelin.Map): Web.Kaelin.Map
   cyclope   = Web.Kaelin.Heroes.Cyclope.hero
   lela      = Web.Kaelin.Heroes.Lela.hero
   octoking  = Web.Kaelin.Heroes.Octoking.hero
-  //map       = Web.Kaelin.Map.push(new_coord(-1#32,-2#32), Either.right!!(creature("Croni",none,"blue")), map)
-  map       = Web.Kaelin.Map.push(new_coord(+0#32,+3#32), Either.right!!(creature("Cyclope",none,"blue")), map)
-  map       = Web.Kaelin.Map.push(new_coord(-2#32,+0#32), Either.right!!(creature("Lela",none,"blue")), map)
-  map       = Web.Kaelin.Map.push(new_coord(+3#32,-2#32), Either.right!!(creature("Octoking",none,"blue")), map)
+  entity_croni = Web.Kaelin.Map.Entity.creature(creature("Croni",none,"blue"))
+  entity_cyclope = Web.Kaelin.Map.Entity.creature(creature("Cyclope",none,"blue"))
+  entity_lela = Web.Kaelin.Map.Entity.creature(creature("Lela",none,"blue"))
+  entity_octoking = Web.Kaelin.Map.Entity.creature(creature("Octoking",none,"blue"))
+  map       = Web.Kaelin.Map.push(new_coord(-1#32,-2#32), entity_croni, map)
+  map       = Web.Kaelin.Map.push(new_coord(+0#32,+3#32), entity_cyclope, map)
+  map       = Web.Kaelin.Map.push(new_coord(-2#32,+0#32), entity_lela, map)
+  map       = Web.Kaelin.Map.push(new_coord(+3#32,-2#32), entity_octoking, map)
   map

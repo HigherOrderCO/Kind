@@ -1,5 +1,11 @@
 TODO list on Kaelin
 
+- [ ] Remove all non-local user address from when
+
+- [ ] remove user from user_input even in when.kind (URGENT!)
+
+- [ ] Web.Kaelin.Event.uset_input needs change
+
 - [ ] Web.Kaelin.Constants - randomize or update each build
 
 - [ ] Fix Serialize and Room Constants (acumulating resources and lagging)

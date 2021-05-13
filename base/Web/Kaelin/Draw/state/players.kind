@@ -11,13 +11,13 @@ Web.Kaelin.Draw.state.players(
       none: img
       some:
         open creature.value as player
-    let coord = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
-    let {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
-    let img = Web.Kaelin.Draw.hero(cx, cy, 0u, player.hero, img)
-    if I32.gtn(+0#32, player.hp) then
-      Web.Kaelin.Draw.state.players_hp(cx,U32.sub(cy, Web.Kaelin.Constants.hexagon_radius), creature.value, img)
-    else
-      img
+        coord = Web.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
+        {cx, cy} = Web.Kaelin.Coord.to_screen_xy(coord)
+        img = Web.Kaelin.Draw.hero(cx, cy, 0u, player.hero, img)
+        if I32.gtn(+0#32, player.hp) then
+          Web.Kaelin.Draw.state.players_hp(cx,U32.sub(cy, Web.Kaelin.Constants.hexagon_radius), creature.value, img)
+        else
+          img
     }
   img
   
