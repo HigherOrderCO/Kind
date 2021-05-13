@@ -1,0 +1,37 @@
+Web.Kaelin.Effect.hp.aoe<A: Type>(
+  eff: Web.Kaelin.Effect<A>
+  range: I32
+  pos: Web.Kaelin.Coord
+): Web.Kaelin.Effect<NatMap(A)>
+
+  Web.Kaelin.Effect {
+  get list = Web.Kaelin.Effect.hp.aoe_aux!(eff, range, pos)
+  let mapa = NatMap.new!
+  let new_map = ?a
+  let new_indicator = NatMap.new!
+  Web.Kaelin.Effect.indicators.add(new_indicator)
+  Web.Kaelin.Effect.map.set(new_map)
+    //for coord in list with new_map:
+  ?b
+}
+
+
+
+
+
+
+Web.Kaelin.Effect.hp.aoe_aux<A: Type>(
+  eff: Web.Kaelin.Effect<A>
+  range: I32
+  pos: Web.Kaelin.Coord
+): Web.Kaelin.Effect<List(Web.Kaelin.Coord)>
+  AOE = Web.Kaelin.Coord.range(pos, range)
+  Web.Kaelin.Effect.pure!(AOE)
+
+//Web.Kaelin.Effect.hp.change_at(
+  //change: I32
+  //pos: Web.Kaelin.Coord
+//): Web.Kaelin.Effect<I32>
+
+
+

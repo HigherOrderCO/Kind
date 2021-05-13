@@ -1,6 +1,6 @@
-// TODO: applies a function to the entity at a coord
+// TODO: applies a function to the Creature at a coord
 Web.Kaelin.Map.modify_at(
-  mod: Web.Kaelin.Entity -> Web.Kaelin.Entity
+  mod: Web.Kaelin.Creature -> Web.Kaelin.Creature
   pos: Web.Kaelin.Coord
   map: Web.Kaelin.Map
 ): Web.Kaelin.Map
@@ -9,6 +9,5 @@ Web.Kaelin.Map.modify_at(
   case tile {
     none: map
     some:
-      let tile = List.map!!(mod, tile.value)
-      NatMap.set!(key, tile, map)
+      NatMap.set!(key, tile.value, map)
   }

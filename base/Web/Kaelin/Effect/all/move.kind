@@ -5,19 +5,14 @@ Web.Kaelin.Effect.all.move: Web.Kaelin.Effect<Unit>
     get target = Web.Kaelin.Effect.coord.get_target
     let key = Web.Kaelin.Coord.Convert.axial_to_nat(center)
     let tile = NatMap.get!(key, map)
-      case tile { 
-        none: Web.Kaelin.Effect { return unit }
-        some: 
-        creature_key = List.find_index!(tile.value, Web.Kaelin.Entity.is_creature)
-        case creature_key {
-          none: Web.Kaelin.Effect { return unit }
-          some:  
-            open creature_key.value as key
-            if Web.Kaelin.Map.is_occupied(target, map) then
-              Web.Kaelin.Effect { return unit }
-            else
-              new_map= Web.Kaelin.Map.swap(key.snd, center, target, map)
-              Web.Kaelin.Effect.map.set(new_map)
-        }
-      }
+    case tile { 
+      none: Web.Kaelin.Effect { return unit }
+      some: 
+        open tile.value
+        if Web.Kaelin.Map.is_occupied(target, map) then
+          Web.Kaelin.Effect { return unit }
+        else
+          new_map= Web.Kaelin.Map.swap(center, target, map)
+          Web.Kaelin.Effect.map.set(new_map)
     }
+  }

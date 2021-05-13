@@ -1,4 +1,8 @@
-Web.Kaelin.Draw.support.get_sprite(coord: Web.Kaelin.Coord, coord_nat: Nat, cast_info: Maybe(Web.Kaelin.CastInfo)): Web.Kaelin.Terrain.Sprite
+Web.Kaelin.Draw.support.get_sprite(
+  coord: Web.Kaelin.Coord,
+  coord_nat: Nat,
+  cast_info: Maybe(Web.Kaelin.CastInfo)
+): Web.Kaelin.Terrain.Sprite
   let hex_effect =
     case cast_info {
       none: Web.Kaelin.HexEffect.normal

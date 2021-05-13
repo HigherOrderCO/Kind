@@ -1,4 +1,4 @@
-Web.Kaelin.Effect.all.fireball(dmg: I32): Web.Kaelin.Effect<Unit>
+Web.Kaelin.Effect.all.aoe(range: I32): Web.Kaelin.Effect<Unit>
   Web.Kaelin.Effect {
     get map = Web.Kaelin.Effect.map.get
     get center_pos = Web.Kaelin.Effect.coord.get_center
@@ -11,4 +11,3 @@ Web.Kaelin.Effect.all.fireball(dmg: I32): Web.Kaelin.Effect<Unit>
     //Web.Kaelin.Effect.create_entity_at(clone_pos, clone_ent)
     //return unit
   }
-
