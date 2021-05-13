@@ -2,14 +2,14 @@ Web.Kaelin.Heroes.Croni.skills: List<Web.Kaelin.Skill>
   [
     Web.Kaelin.Heroes.Croni.skills.quick_shot,
     Web.Kaelin.Heroes.Croni.skills.vampirism,
-    Web.Kaelin.Skill.move(+2#32)
+    Web.Kaelin.Skill.move(2)
   ]
 
 Web.Kaelin.Heroes.Croni.skills.quick_shot: Web.Kaelin.Skill
   Web.Kaelin.Skill.new(
     "Quick Shot",
     +2#32,
-    Web.Kaelin.Effect.all.fireball(+3#32, 1#32),
+    Web.Kaelin.Effect.all.fireball(3, 1),
     '0'
   )
 
@@ -17,6 +17,6 @@ Web.Kaelin.Heroes.Croni.skills.vampirism: Web.Kaelin.Skill
   Web.Kaelin.Skill.new(
     "Vampirism",
     +3#32,
-    Web.Kaelin.Effect.all.vampirism(+3#32),
+    Web.Kaelin.Effect.all.vampirism(3),
     'V'
   )
