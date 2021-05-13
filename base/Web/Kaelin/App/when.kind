@@ -36,7 +36,8 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
              start_game: App.pass
              create_user: App.pass
              create_hero: App.pass
-             user_input: App.store!(Web.Kaelin.Skill.skill_use(state))
+             user_input: 
+             App.store!(Web.Kaelin.Skill.skill_use(state))
                     //changed move to skill from action, needs update
                     // Old movement w/ pathing
                     

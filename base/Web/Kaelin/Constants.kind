@@ -12,4 +12,4 @@ Web.Kaelin.Constants.center_y : U32
 
 // TODO: Randomize or change it every time you build
 Web.Kaelin.Constants.room : String
-  "0x414562845298"
+  "0x414542342291"
