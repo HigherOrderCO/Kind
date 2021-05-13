@@ -1,19 +1,15 @@
-Web.Kaelin.Action.create_player(user: String, hero: Web.Kaelin.Hero, state: Web.Kaelin.State): Web.Kaelin.State
+Web.Kaelin.Action.create_player(user: String, hero: String, state: Web.Kaelin.State): Web.Kaelin.State
   let key = user
   let init_pos = Web.Kaelin.Coord.new(+0#32, +0#32)
   case state {
     game :
-      case Map.get!(key, state.players) as player {
+      case Web.Kaelin.Map.player.info(user, state.map) as player {
         none:
           log(state.user)
-          open hero
-          creature = Web.Kaelin.Tile.creature.create
-          new_player = Web.Kaelin.Player.new(user)
-          new_creature = creature(hero.name, some(user), "blue")
+          new_creature = Web.Kaelin.Tile.creature.create(hero, some(user), "blue")
           entity = Web.Kaelin.Map.Entity.creature(new_creature)
           map = Web.Kaelin.Map.push(init_pos, entity, state.map)
-          new_players = Map.set!(key, new_player, state.players)
-          Web.Kaelin.State.game(state.user, state.room, new_players, state.cast_info, map, state.internal, state.env_info)
+          Web.Kaelin.State.game(state.user, state.room, state.cast_info, map, state.internal, state.env_info)
         some:
           state
       }

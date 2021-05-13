@@ -3,5 +3,5 @@ Web.Kaelin.Timer.set_timer(timer : List<Web.Kaelin.Timer>, state : Web.Kaelin.St
       game :
         let internal = state.internal
         open internal
-        Web.Kaelin.State.game(state.user, state.room, state.players, state.cast_info, state.map, Web.Kaelin.Internal.new(internal.tick, internal.frame, timer), state.env_info)
+        Web.Kaelin.State.game(state.user, state.room, state.cast_info, state.map, Web.Kaelin.Internal.new(internal.tick, internal.frame, timer), state.env_info)
   } default state

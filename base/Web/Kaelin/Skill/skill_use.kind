@@ -15,7 +15,7 @@ state: Web.Kaelin.State,
             let tick = internal.tick
             let result = skill.effect(tick, cast.hero_pos, cast.mouse_pos, state.map)
             open result
-            Web.Kaelin.State.game(state.user, state.room, state.players, none, result.map, state.internal, state.env_info)
+            Web.Kaelin.State.game(state.user, state.room, none, result.map, state.internal, state.env_info)
 
                     //Old skill_use
             ////for effect in skill.effects with state:
