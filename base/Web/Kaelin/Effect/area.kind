@@ -15,5 +15,5 @@ Web.Kaelin.Effect.area<A: Type>(
         result_of_effect@futures
         result_of_effect@indicators
       )
-      Web.Kaelin.Effect.Result.union!(result, new_form, NatMap.union!)
+      Web.Kaelin.Effect.result.union!(result, new_form, NatMap.union!)
     result

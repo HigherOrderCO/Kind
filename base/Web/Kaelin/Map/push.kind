@@ -1,28 +1,31 @@
 Web.Kaelin.Map.push(
   coord: Web.Kaelin.Coord,
-  entity: Either<Web.Kaelin.Terrain, Web.Kaelin.Creature>
+  entity: Web.Kaelin.Map.Entity
   map: Web.Kaelin.Map
 ): Web.Kaelin.Map
   tile = Web.Kaelin.Map.get(coord, map)
   case tile { 
     none: 
-      case entity {
-        left: 
+      case entity { 
+        animation: map
+        background:
           new_tile = Web.Kaelin.Tile.new(entity.value, none)
           Web.Kaelin.Map.set(coord, new_tile, map)
-        right: map
-    }
-    some: 
+        creature: map
+      }
+    some:
       open tile.value as tile
-      case entity { 
-        left:  
-          //background_tile = tile.value@background <- entity.value
-          background_tile = Web.Kaelin.Tile.new(entity.value, tile.creature)
+      case entity {
+        animation: map
+        background:
+          background_tile = tile.value@background <- entity.value
           Web.Kaelin.Map.set(coord, background_tile, map)
-        right:
-          //creature_tile = tile.value@creature <- some(entity.value)
-          creature_tile = Web.Kaelin.Tile.new(tile.background, some(entity.value))
+        creature:
+          creature_tile = tile.value@creature <- some(entity.value)
           Web.Kaelin.Map.set(coord, creature_tile, map)
       }
-  }
-  
+    }
+
+
+
+
