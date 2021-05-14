@@ -13,7 +13,7 @@ Web.Kaelin.Draw.tile.creature(
       let img = Web.Kaelin.Draw.hero(cx, cy, 0u, creature.value@hero, img)
 
       // draw creature hp
-      if I32.gtn(+0#32, creature.value@hp) then
+      if I32.gtn(creature.value@hp, +0#32) then
         Web.Kaelin.Draw.creature.hp(cx, cy, creature.value, img)
       else
         img

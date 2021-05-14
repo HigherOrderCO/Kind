@@ -9,10 +9,11 @@ Web.Kaelin.Action.create_player(user: String, hero: Web.Kaelin.Hero, state: Web.
           open hero
           creature = Web.Kaelin.Tile.creature.create
           new_player = Web.Kaelin.Player.new(user)
+          open new_player
           new_creature = creature(hero.name, some(user), "blue")
           entity = Web.Kaelin.Map.Entity.creature(new_creature)
           map = Web.Kaelin.Map.push(init_pos, entity, state.map)
-          new_players = Map.set!(key, new_player, state.players)
+          new_players = Map.set!(key, new_player.addr, state.players)
           Web.Kaelin.State.game(state.user, state.room, new_players, state.cast_info, map, state.internal, state.env_info)
         some:
           state

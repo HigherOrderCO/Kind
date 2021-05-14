@@ -1,2 +1,10 @@
 //Should all images for each background type be listed here?
-//Web.Kaelin.Resources.terrains
+Web.Kaelin.Resources.terrains(
+  indicator: Web.Kaelin.Indicator
+):VoxBox
+    case indicator { 
+      green: Web.Kaelin.Assets.tile.green_2
+      red: Web.Kaelin.Assets.tile.effect.dark_red2
+      yellow: Web.Kaelin.Assets.tile.effect.light_red2
+      blue: Web.Kaelin.Assets.tile.effect.dark_blue2
+    }

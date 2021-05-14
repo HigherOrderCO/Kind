@@ -1,7 +1,6 @@
 type Web.Kaelin.CastInfo {
   new(
     hero_pos: Web.Kaelin.Coord
-    hex_effect: Web.Kaelin.HexEffect
     skill: Web.Kaelin.Skill
     range: NatSet
     area: NatMap<Web.Kaelin.Indicator>

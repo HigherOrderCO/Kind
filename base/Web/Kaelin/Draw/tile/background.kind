@@ -6,6 +6,6 @@ Web.Kaelin.Draw.tile.background(
   img: VoxBox
 ): VoxBox
   let coord_nat = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-  let sprite = Web.Kaelin.Draw.support.get_sprite(coord, cast_info)
+  let sprite = Web.Kaelin.Draw.support.get_indicator(coord, cast_info)
   let {i, j} = Web.Kaelin.Draw.support.centralize(coord)
   VoxBox.Draw.image(i, j, 0#32, terrain@draw(sprite), img)

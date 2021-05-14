@@ -3,6 +3,3 @@ type Web.Kaelin.Player {
     addr: String
   )
 }
-
-//Web.Kaelin.Player : Type
-  //String
