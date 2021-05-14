@@ -3,9 +3,9 @@ const UNWATCH = 1;
 const POST = 2;
 const SHOW = 3;
 
-// type RoomID    = U48
+// type RoomID    = U56
 // type PostID    = U48
-// type Time      = U48
+// type Time      = U40
 // type Address   = U160
 // type PostData  = U304
 // type Signature = U520
@@ -53,16 +53,36 @@ function hex_to_u8(hex) {
   return parseInt(hex.slice(2), 16);
 };
 
+function hex_to_u40(hex) {
+  return parseInt(hex.slice(-40), 16);
+};
+
 function hex_to_u48(hex) {
   return parseInt(hex.slice(-48), 16);
 };
 
-function u48_to_hex(num) {
+function hex_to_u56(hex) {
+  return parseInt(hex.slice(-56), 16);
+};
+
+function uN_to_hex(N, num) {
   var hex = "0x";
-  for (var i = 0; i < 12; ++i) {
-    hex += hex_char[(num / (2**((12-i-1)*4))) & 0xF];
+  for (var i = 0; i < N/4; ++i) {
+    hex += hex_char[(num / (2**((N/4-i-1)*4))) & 0xF];
   };
   return hex;
+};
+
+function u40_to_hex(num) {
+  return uN_to_hex(40, num);
+};
+
+function u48_to_hex(num) {
+  return uN_to_hex(48, num);
+};
+
+function u56_to_hex(num) {
+  return uN_to_hex(56, num);
 };
 
 function check_hex(bits, hex) {
@@ -107,8 +127,12 @@ module.exports = {
   hex_join,
   u8_to_hex,
   hex_to_u8,
+  u40_to_hex,
+  hex_to_u40,
   u48_to_hex,
   hex_to_u48,
+  u56_to_hex,
+  hex_to_u56,
   string_to_hex,
   hex_to_string,
   check_hex,

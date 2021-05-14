@@ -32,7 +32,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   // Sends a signed post to a room on the server
   function send_post(post_room, post_data, priv_key = key) {
     var priv_key = lib.check_hex(256, priv_key);
-    var post_room = lib.check_hex(48, post_room);
+    var post_room = lib.check_hex(56, post_room);
     var post_data = lib.check_hex(256, post_data);
     var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
     var post_sign = sig.signMessage(post_hash, priv_key);
@@ -50,7 +50,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   function watch_room(room_name) {
     if (!watching[room_name]) {
       watching[room_name] = true;
-      var room_name = lib.check_hex(48, room_name);
+      var room_name = lib.check_hex(56, room_name);
       var msge_buff = lib.hexs_to_bytes([
         lib.u8_to_hex(lib.WATCH),
         room_name,
@@ -64,7 +64,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   function unwatch_room(room_name) {
     if (watching[room_name]) {
       watching[room_name] = false;
-      var room_name = lib.check_hex(48, room_name);
+      var room_name = lib.check_hex(56, room_name);
       var msge_buff = lib.hexs_to_bytes([
         lib.u8_to_hex(lib.UNWATCH),
         room_name,
@@ -84,8 +84,8 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   ws.onmessage = (msge) => {
     var msge = new Uint8Array(msge.data);
     if (msge[0] === lib.SHOW) {
-      var room = lib.bytes_to_hex(msge.slice(1, 7));
-      var time = lib.bytes_to_hex(msge.slice(7, 13));
+      var room = lib.bytes_to_hex(msge.slice(1, 8));
+      var time = lib.bytes_to_hex(msge.slice(8, 13));
       var addr = lib.bytes_to_hex(msge.slice(13, 33));
       var data = lib.bytes_to_hex(msge.slice(33, 65));
       Posts[room].push({time, addr, data});
