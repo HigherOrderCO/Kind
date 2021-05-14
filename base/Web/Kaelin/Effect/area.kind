@@ -8,7 +8,6 @@ Web.Kaelin.Effect.area<A: Type>(
     let result = Web.Kaelin.Effect.Result.new!(map_result, map, [], NatMap.new!)
     for coord in coords with result:
       let result_of_effect = eff(tick, center, coord, result@map)
-      log(Web.Kaelin.Map.creature.show(result_of_effect@map))
       let key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
       let new_form = Web.Kaelin.Effect.Result.new!(
         NatMap.set!(key, result_of_effect@value, NatMap.new!)
