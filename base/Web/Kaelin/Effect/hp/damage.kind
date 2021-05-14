@@ -1,0 +1,2 @@
+Web.Kaelin.Effect.hp.damage(dmg: I32): Web.Kaelin.Effect<I32>
+  Web.Kaelin.Effect.hp.change(I32.neg(dmg))

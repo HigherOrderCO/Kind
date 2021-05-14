@@ -1,0 +1,10 @@
+// returns first creature found in tile
+//Web.Kaelin.Tile.creature.get(tile: Web.Kaelin.Tile): Maybe<Web.Kaelin.Entity>
+  //case tile {
+    //nil: none
+    //cons:
+      //case tile.head {
+        //creature: some(tile.head)
+      //} default Web.Kaelin.Tile.creature.get(tile.tail)
+  //}
+  //Useless : To remove

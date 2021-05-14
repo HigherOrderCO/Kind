@@ -6,29 +6,35 @@ state: Web.Kaelin.State,
       case state.cast_info {
         none: state
         some:
-          open state.env_info as info
-          open state.cast_info.value
-          skill = state.cast_info.value.skill
+          open state.cast_info.value as cast
+          skill = cast.skill
           open skill
-          let mouse_pos = Web.Kaelin.Coord.to_axial(info.mouse_pos)
-          if List.any!(Web.Kaelin.Coord.eql(mouse_pos), state.cast_info.value.range) then
-            for effect in skill.effects with state:
-            open effect
-            area = Web.Kaelin.Skill.area.to_list(effect.area, state.cast_info.value.hero_pos, state.cast_info.value.mouse_pos)
-              for coord in area with state:
-              Web.Kaelin.Skill.update_state(state, state.cast_info.value.hero_pos, coord, effect)
-              Web.Kaelin.Skills.skill_use.aux(state)
-              state
+          let mouse_nat = Web.Kaelin.Coord.Convert.axial_to_nat(cast.mouse_pos)
+          if NatSet.has(mouse_nat, cast.range) then
+            open state.internal as internal
+            let tick = internal.tick
+            let result = skill.effect(tick, cast.hero_pos, cast.mouse_pos, state.map)
+            open result
+            Web.Kaelin.State.game(state.user, state.room, none, result.map, state.internal, state.env_info)
+
+                    //Old skill_use
+            ////for effect in skill.effects with state:
+            ////open effect
+            ////area = Web.Kaelin.Skill.area.to_list(effect.area, state.cast_info.value.hero_pos, state.cast_info.value.mouse_pos)
+              ////for coord in area with state:
+              ////Web.Kaelin.Skill.update_state(state, state.cast_info.value.hero_pos, coord, effect)
+              ////Web.Kaelin.Skills.skill_use.aux(state)
+              ////state
           else
             state
       }
-
   }default state
 
-Web.Kaelin.Skills.skill_use.aux(state: Web.Kaelin.State): Web.Kaelin.State
-  case state { 
-    game:
-      Web.Kaelin.State.game(state.user, state.room, state.players, none, state.map,state.internal, state.env_info)
-    }default state
+          //Old aux for skill_use
+//Web.Kaelin.Skills.skill_use.aux(state: Web.Kaelin.State): Web.Kaelin.State
+  //case state { 
+    //game:
+      //Web.Kaelin.State.game(state.user, state.room, state.players, none, state.map,state.internal, state.env_info)
+    //}default state
 
   

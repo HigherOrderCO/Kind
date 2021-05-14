@@ -1,0 +1,11 @@
+Web.Kaelin.Draw.tile.background(
+  terrain: Web.Kaelin.Terrain, 
+  cast_info: Maybe<Web.Kaelin.CastInfo>, 
+  coord: Web.Kaelin.Coord,
+  mouse_coord: Web.Kaelin.Coord, 
+  img: VoxBox
+): VoxBox
+  let coord_nat = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
+  let sprite = Web.Kaelin.Draw.support.get_indicator(coord, cast_info)
+  let {i, j} = Web.Kaelin.Draw.support.centralize(coord)
+  VoxBox.Draw.image(i, j, 0#32, terrain@draw(sprite), img)

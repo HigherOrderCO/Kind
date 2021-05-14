@@ -3,5 +3,5 @@ Web.Kaelin.Draw.tile_coords(coord: Web.Kaelin.Coord, map: Web.Kaelin.Map, img: V
   open coord
   let {cx,cy} = Web.Kaelin.Coord.to_screen_xy(coord)
   let cx = U32.add(U32.sub(cx, Web.Kaelin.Constants.hexagon_radius), 3u)
-  let str = String.concat(Int.show(coord.i), Int.show(coord.j))
+  let str = String.concat(I32.show(coord.i), I32.show(coord.j))
   VoxBox.Draw.text(str, PixelFont.small_black, Pos32.new(cx,cy,0u), img)

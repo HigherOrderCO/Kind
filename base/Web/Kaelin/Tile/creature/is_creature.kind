@@ -1,0 +1,6 @@
+Web.Kaelin.Entity.is_creature(
+  creature: Web.Kaelin.Entity
+  ): Bool
+  case creature {
+    creature: true
+  }default false

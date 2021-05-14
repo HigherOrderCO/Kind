@@ -1,12 +1,11 @@
 // Returns a list with all coordinates within a certain range
-Web.Kaelin.Coord.Cubic.range(coord: Web.Kaelin.Coord.Cubic, distance: Nat): List<Web.Kaelin.Coord.Cubic>
-  let distance_32 = Nat.to_u32(distance)
-  let distance_i32 = U32.to_i32(distance_32)
+Web.Kaelin.Coord.Cubic.range(coord: Web.Kaelin.Coord.Cubic, distance: I32): List<Web.Kaelin.Coord.Cubic>
+  let distance_32 = I32.to_u32(distance)
   let double_distance = U32.add(U32.mul(distance_32, 2#32), 1#32) // distance * 2 + 1
   let result = []
   for j : U32 from 0#32 to double_distance with result:
-    let negative_distance = I32.neg(distance_i32)
-    let positive_distance = distance_i32
+    let negative_distance = I32.neg(distance)
+    let positive_distance = distance
     let x = I32.sub(U32.to_i32(j), 
                     positive_distance) // j - distance
     

@@ -1,0 +1,11 @@
+Web.Kaelin.Effect.all.vampirism(dmg: I32): Web.Kaelin.Effect<Unit>
+  Web.Kaelin.Effect {
+    get center_pos = Web.Kaelin.Effect.coord.get_center
+    get target_pos = Web.Kaelin.Effect.coord.get_target
+    get actual_dmg = Web.Kaelin.Effect.hp.damage_at(dmg, target_pos)
+    //let clone_pos = ...
+    //let clone_ent = Web.Kaelin.Hero.create(...)
+    Web.Kaelin.Effect.hp.heal_at(actual_dmg, center_pos)
+    //Web.Kaelin.Effect.create_entity_at(clone_pos, clone_ent)
+    return unit
+  }

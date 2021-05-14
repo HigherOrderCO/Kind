@@ -1,5 +1,0 @@
-type Web.Kaelin.Skill.Modifier.hp{
-    damage
-    heal
-}
-

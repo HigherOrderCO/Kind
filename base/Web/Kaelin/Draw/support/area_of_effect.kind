@@ -1,15 +1,15 @@
 Web.Kaelin.Draw.support.area_of_effect(
-  cast_info: Web.Kaelin.CastInfo,
   coord: Web.Kaelin.Coord,
   coord_nat: Nat,
-  area: NatMap(Web.Kaelin.Skill.area.indicator)
-  ): Maybe(Web.Kaelin.Skill.area.indicator)
-    open cast_info
-      case cast_info.hex_effect {
-        skill:
-        if List.any!(Web.Kaelin.Coord.eql(cast_info.mouse_pos), cast_info.range) then 
-          NatMap.get!(coord_nat,area)
+  cast_info: Maybe(Web.Kaelin.CastInfo),
+  ): Maybe(Web.Kaelin.Indicator)
+    case cast_info{ 
+      none: none
+      some: 
+        open cast_info.value as cast
+        mouse_pos = Web.Kaelin.Coord.Convert.axial_to_nat(cast.mouse_pos)
+        if NatSet.has(mouse_pos, cast.range) then
+          NatMap.get!(coord_nat, cast.area)
         else
-          none 
-      } default none
-
+          none
+  }

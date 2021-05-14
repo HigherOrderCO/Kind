@@ -1,0 +1,9 @@
+Web.Kaelin.Tile.creature.show(creature: Web.Kaelin.Creature): String
+  open creature
+  open creature.hero as hero
+  player = "player: " | (creature@player <> "")
+  hp = "hp: " | I32.show(creature@hp)
+  team = "team: " | creature@team
+  hero = "hero: " | hero.name
+
+  String.join(" | ", [player, hp, team, hero])

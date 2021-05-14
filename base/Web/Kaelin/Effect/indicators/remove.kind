@@ -1,0 +1,5 @@
+Web.Kaelin.Effect.indicators.remove<A: Type>(eff: Web.Kaelin.Effect<A>): Web.Kaelin.Effect<A>
+  (tick, center, target, map)
+  case eff(tick, center, target, map) as result {
+    new: Web.Kaelin.Effect.Result.new<A>(result.value, result.map, result.futures, NatMap.new!)
+  }
