@@ -26,6 +26,10 @@ type App.Event {
     time: U64
     info: App.EnvInfo
   )
+  frame(
+    time: U64
+    info: App.EnvInfo
+  )
   // The event occurs when the user presses a mouse button over an element and before it is released
   mouse_down(
     time: U64

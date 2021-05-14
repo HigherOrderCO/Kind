@@ -169,12 +169,30 @@ module.exports = class AppPlay extends Component {
       }
       return window.requestAnimationFrame(self)
     }
-
     this.intervals.tick()
+
+    // Frame event (60 fps)
+    this.intervals.frame = () => {
+      setInterval(() => {
+        this.register_event({
+          _: "App.Event.frame",
+          time: BigInt(Date.now()),
+          info: {
+            _: "App.EnvInfo.new",
+            screen_size: {
+              _: "Pair.new",
+              fst: this.container ? this.container.width  : 0,
+              snd: this.container ? this.container.height : 0,
+            },
+            mouse_pos: this.mouse_pos,
+          }
+        })
+      }, 1000 / 60);
+    };
+    this.intervals.frame()
   }
-  
+
   // Initializes the main render loop
-  
   async init_renderer() {
     if (DEBUG_SHOW_FPS) {
       var last_time = Date.now();
