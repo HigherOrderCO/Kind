@@ -7,26 +7,10 @@ Web.Kaelin.Map.arena: Web.Kaelin.Map
 
   // TODO: Define this elsewhere?
   // Defines all possible images inside a tile
-  terrain_img = (sprite)
-    open sprite 
-    case sprite.indicator{
-      none: case sprite.effect {
-        normal: Web.Kaelin.Assets.tile.green_2
-        movement: Web.Kaelin.Assets.tile.effect.light_blue2 // to be removed, 
-        skill: Web.Kaelin.Assets.tile.effect.dark_blue2
-      }
-      some: case sprite.indicator.value {
-        green: Web.Kaelin.Assets.tile.effect.blue_green2
-        red: Web.Kaelin.Assets.tile.effect.dark_red2
-        yellow: Web.Kaelin.Assets.tile.effect.light_red2
-        blue: Web.Kaelin.Assets.tile.effect.light_blue2
-      }
+  terrain_img = Web.Kaelin.Resources.terrains
 
-
-  }
-
-  let new_terrain = Web.Kaelin.Terrain.new(terrain_img)
-  let new_terrain = Web.Kaelin.Map.Entity.background(new_terrain)
+  new_terrain = Web.Kaelin.Terrain.new(terrain_img)
+  new_terrain = Web.Kaelin.Map.Entity.background(new_terrain)
 
   //// loops through the half of the map_size
   for j : U32 from 0#32 to height with map:

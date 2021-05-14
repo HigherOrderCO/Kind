@@ -1,9 +1,0 @@
-Hex.parser.char_hex : Parser(Nat)
-  let c = Parser.one
-  Parser.bind(Char, Nat, c, (c) 
-     let k = Hex.char_hex_to_nat(c)
-     case k {
-       none : Parser.fail(Nat, "Hex lexical error")
-       some : Parser.pure(Nat, k.value)
-     }
-  )
