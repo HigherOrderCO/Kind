@@ -16,6 +16,14 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     }
   }
 
+  // Time sync variables
+  var last_ask_time = null; // last time we pinged the server
+  var last_ask_numb = 0; // id of the last ask request
+  var best_ask_ping = Infinity; // best ping we got
+  var delta_time = 0; // estimated time on best ping
+  var ping = 0; // current ping
+
+  // User-defined callbacks
   var on_init_callback = null;
   var on_post_callback = null;
 
@@ -73,11 +81,31 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     }
   };
 
+  // Returns the best estimative of the server's current time
+  function get_time() {
+    return Date.now() + delta_time;  
+  };
+
+  // Asks the server for its current time
+  function ask_time() {
+    last_ask_time = Date.now();
+    last_ask_numb = ++last_ask_numb;
+    ws_send(lib.hexs_to_bytes([
+      lib.u8_to_hex(lib.TIME),
+      lib.u48_to_hex(last_ask_numb),
+    ]));
+  };
+
   ws.binaryType = "arraybuffer";
 
   ws.onopen = function() {
     if (on_init_callback) {
       on_init_callback();
+      // Pings time now, after 0.5s, after 1s, and then every 2s
+      setTimeout(ask_time, 0);
+      setTimeout(ask_time, 500);
+      setTimeout(ask_time, 1000);
+      setInterval(ask_time, 2000);
     }
   };
 
@@ -93,6 +121,19 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
         on_post_callback({room, time, addr, data}, Posts);
       }
     };
+    if (msge[0] === lib.TIME) {
+      var reported_server_time = lib.bytes_to_hex(msge.slice(1, 7));
+      var reply_numb = lib.hex_to_u48(lib.bytes_to_hex(msge.slice(7, 13)));
+      if (last_ask_time !== null && last_ask_numb === reply_numb) {
+        ping = (Date.now() - last_ask_time) / 2;
+        var local_time = Date.now();
+        var estimated_server_time = Number(reported_server_time) + ping;
+        if (ping < best_ask_ping) {
+          delta_time = estimated_server_time - local_time;
+          best_ask_ping = ping;
+        }
+      }
+    };
   };
 
   return {
@@ -101,6 +142,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     send_post,
     watch_room,
     unwatch_room,
+    get_time,
     lib,
   };
 };

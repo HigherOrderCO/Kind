@@ -22,6 +22,10 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     }
   }
 
+  var last_ask_time = null;
+  var best_ask_delay = Infinity;
+  var delta_time = 0;
+  var ping = 0;
   var on_init_callback = null;
   var on_post_callback = null;
 
@@ -79,11 +83,22 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     }
   };
 
+  function get_time() {
+    return Date.now() + delta_time;  
+  };
+
+  function ask_time() {
+    last_ask_time = Date.now();
+    ws_send(lib.hexs_to_bytes([lib.u8_to_hex(lib.TIME)]));
+  };
+
   ws.binaryType = "arraybuffer";
 
   ws.onopen = function() {
     if (on_init_callback) {
       on_init_callback();
+      ask_time();
+      setInterval(ask_time, 2000);
     }
   };
 
@@ -99,7 +114,22 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
         on_post_callback({room, time, addr, data}, Posts);
       }
     };
+    //if (msge[0] === lib.TIME) {
+      //var time = lib.bytes_to_hex(msge.slice(1, 7));
+      //if (last_ask_time !== null) {
+        //var delay = Date.now() - last_ask_time;
+        //if (delay < best_ask_delay) {
+          //var server_time = Number(time) + delay / 2;
+          //var local_time = Date.now();
+          //delta_time = server_time - local_time;
+          //console.log("Received time from server. Difference is: " + delta_time);
+        //}
+      //}
+    //};
   };
+
+  //se eu tenho uma estimativa do tempo do servidor razoável, porém o ping aumenta
+  //logo na sequência, minha estimativa do tempo vai ser comprometida
 
   return {
     on_init,
@@ -107,6 +137,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     send_post,
     watch_room,
     unwatch_room,
+    get_time,
     lib,
   };
 };
@@ -122,6 +153,7 @@ const WATCH = 0;
 const UNWATCH = 1;
 const POST = 2;
 const SHOW = 3;
+const TIME = 4;
 
 // type RoomID    = U56
 // type PostID    = U48

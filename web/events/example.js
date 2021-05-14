@@ -13,6 +13,13 @@ api.on_init(() => {
   // Watches the room
   api.watch_room(room);
 
+  //setInterval(() => {
+    //console.log("local_time  : ", Date.now());
+    //console.log("server_time : ", api.get_time());
+    //console.log("delta_time  : ", Date.now() - api.get_time());
+    //console.log("");
+  //}, 200);
+
   // Posts a 256-bit message to it
   api.send_post(room, post);
 });

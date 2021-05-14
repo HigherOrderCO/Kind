@@ -2,6 +2,7 @@ const WATCH = 0;
 const UNWATCH = 1;
 const POST = 2;
 const SHOW = 3;
+const TIME = 4;
 
 // type RoomID    = U56
 // type PostID    = U48
@@ -121,6 +122,7 @@ module.exports = {
   UNWATCH,
   POST,
   SHOW,
+  TIME,
   hex_to_bytes,
   bytes_to_hex,
   hexs_to_bytes,

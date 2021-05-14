@@ -91,9 +91,10 @@ Web.AsManga.AsManga: App<Web.AsManga.State>
       ])
       DOM.node("div", {}, {}, [
         DOM.text(`
-          No momento, estou programando a funcionalidade de networking.
-          Isso deve levar cerca de 3 horas. Espero que até 17h de hoje
-          já seja possível andar com outras pessoas online!
+          No momento: estou aproveitando a oportunidade pra melhorar
+          o framework de sincronia de tempo cliente/servidor dos apps
+          do Kind. Quando terminar isso, passarei a fazer o networking
+          do AsManga.
         `)
       ])
       DOM.node("div", {}, {}, [
