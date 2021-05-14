@@ -7792,176 +7792,211 @@ module.exports = (function() {
     const Web$Kaelin$Skill$skill_use = x0 => Web$Kaelin$Skill$skill_use$(x0);
 
     function Web$Kaelin$App$when$(_event$1, _state$2) {
-        var $1763 = (() => c10 => {
-            var self = _event$1;
-            switch (self._) {
-                case 'App.Event.init':
-                    var $1764 = self.user;
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.game':
-                            var $1766 = self.players;
-                            var $1767 = self.cast_info;
-                            var $1768 = self.map;
-                            var $1769 = self.internal;
-                            var $1770 = self.env_info;
-                            var _user$13 = String$to_lower$($1764);
-                            var $1771 = IO$monad$((_m$bind$14 => _m$pure$15 => {
-                                var $1772 = _m$bind$14;
-                                return $1772;
-                            }))(App$watch$(Web$Kaelin$Constants$room))((_$14 => {
-                                var $1773 = App$store$(Web$Kaelin$State$game$(_user$13, Web$Kaelin$Constants$room, $1766, $1767, $1768, $1769, $1770));
-                                return $1773;
-                            }));
-                            var $1765 = $1771;
-                            break;
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                            var $1774 = App$pass;
-                            var $1765 = $1774;
-                            break;
-                    };
-                    return $1765;
-                case 'App.Event.tick':
-                    var $1775 = self.time;
-                    var $1776 = self.info;
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                            var $1778 = App$pass;
-                            var $1777 = $1778;
-                            break;
-                        case 'Web.Kaelin.State.game':
-                            var _info$12 = $1776;
-                            var _state$13 = Web$Kaelin$Action$update_interface$(_info$12, ($1775), _state$2);
-                            var $1779 = App$store$(Web$Kaelin$Action$update_area$(_state$13));
-                            var $1777 = $1779;
-                            break;
-                    };
-                    return $1777;
-                case 'App.Event.mouse_up':
-                    var $1780 = self.button;
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.game':
-                            var $1782 = self.user;
-                            var self = ($1780 === 49);
-                            if (self) {
-                                var $1784 = App$store$(Web$Kaelin$Action$create_player$($1782, Web$Kaelin$Heroes$Croni$croni, _state$2));
-                                var $1783 = $1784;
-                            } else {
-                                var $1785 = App$store$(Web$Kaelin$Action$start_cast$($1780, _state$2));
-                                var $1783 = $1785;
-                            };
-                            var $1781 = $1783;
-                            break;
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                            var $1786 = App$pass;
-                            var $1781 = $1786;
-                            break;
-                    };
-                    return $1781;
-                case 'App.Event.post':
-                    var $1787 = self.time;
-                    var $1788 = self.room;
-                    var $1789 = self.addr;
-                    var $1790 = self.data;
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                        case 'Web.Kaelin.State.game':
-                            var $1792 = App$pass;
-                            var $1791 = $1792;
-                            break;
-                    };
-                    var $1791 = $1791($1789)($1790);
-                    return $1791;
-                case 'App.Event.input':
-                    var $1793 = self.time;
-                    var $1794 = self.id;
-                    var $1795 = self.text;
-                    var $1796 = c10($1793)($1794)($1795);
-                    return $1796;
-                case 'App.Event.frame':
-                case 'App.Event.key_down':
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                        case 'Web.Kaelin.State.game':
-                            var $1798 = App$pass;
-                            var $1797 = $1798;
-                            break;
-                    };
-                    return $1797;
-                case 'App.Event.mouse_down':
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.game':
-                            var $1800 = self.user;
-                            var $1801 = self.room;
-                            var $1802 = self.env_info;
-                            var _info$12 = $1802;
-                            var self = _info$12;
+        var self = _event$1;
+        switch (self._) {
+            case 'App.Event.init':
+                var $1685 = self.user;
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.game':
+                        var $1687 = self.cast_info;
+                        var $1688 = self.map;
+                        var $1689 = self.internal;
+                        var $1690 = self.env_info;
+                        var _user$12 = String$to_lower$($1685);
+                        var $1691 = IO$monad$((_m$bind$13 => _m$pure$14 => {
+                            var $1692 = _m$bind$13;
+                            return $1692;
+                        }))(App$watch$(Web$Kaelin$Constants$room))((_$13 => {
+                            var $1693 = App$store$(Web$Kaelin$State$game$(_user$12, Web$Kaelin$Constants$room, $1687, $1688, $1689, $1690));
+                            return $1693;
+                        }));
+                        var $1686 = $1691;
+                        break;
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1694 = App$pass;
+                        var $1686 = $1694;
+                        break;
+                };
+                var $1684 = $1686;
+                break;
+            case 'App.Event.tick':
+                var $1695 = self.time;
+                var $1696 = self.info;
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1698 = App$pass;
+                        var $1697 = $1698;
+                        break;
+                    case 'Web.Kaelin.State.game':
+                        var _info$11 = $1696;
+                        var _state$12 = Web$Kaelin$Action$update_interface$(_info$11, ($1695), _state$2);
+                        var $1699 = App$store$(Web$Kaelin$Action$update_area$(_state$12));
+                        var $1697 = $1699;
+                        break;
+                };
+                var $1684 = $1697;
+                break;
+            case 'App.Event.key_down':
+                var $1700 = self.code;
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.game':
+                        var $1702 = self.user;
+                        var $1703 = self.cast_info;
+                        var $1704 = self.map;
+                        var $1705 = self.internal;
+                        var $1706 = self.env_info;
+                        var self = ($1700 === 70);
+                        if (self) {
+                            var self = $1705;
                             switch (self._) {
-                                case 'App.EnvInfo.new':
-                                    var $1804 = self.mouse_pos;
-                                    var self = Web$Kaelin$Coord$to_axial$($1804);
-                                    switch (self._) {
-                                        case 'Web.Kaelin.Coord.new':
-                                            var $1806 = self.i;
-                                            var $1807 = self.j;
-                                            var _hex$17 = Web$Kaelin$Event$serialize$(Web$Kaelin$Event$user_input$($1800, Web$Kaelin$Coord$new$($1806, $1807), Web$Kaelin$Action$walk));
-                                            var $1808 = App$post$($1801, _hex$17);
-                                            var $1805 = $1808;
-                                            break;
-                                    };
-                                    var $1803 = $1805;
+                                case 'Web.Kaelin.Internal.new':
+                                    var _animation$14 = Web$Kaelin$Map$Entity$animation$(Web$Kaelin$Animation$new$(0n, Web$Kaelin$Sprite$fire));
+                                    var $1709 = App$store$(Web$Kaelin$State$game$($1702, Web$Kaelin$Constants$room, $1703, Web$Kaelin$Map$push$(Web$Kaelin$Coord$new$(0, 0), _animation$14, $1704), $1705, $1706));
+                                    var $1708 = $1709;
                                     break;
                             };
-                            var $1799 = $1803;
-                            break;
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                            var $1809 = App$pass;
-                            var $1799 = $1809;
-                            break;
-                    };
-                    return $1799;
-                case 'App.Event.key_up':
-                    var $1810 = null;
-                    return $1810;
-                case 'App.Event.mouse_over':
-                    var $1811 = null;
-                    return $1811;
-                case 'App.Event.mouse_click':
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'Web.Kaelin.State.init':
-                        case 'Web.Kaelin.State.void':
-                        case 'Web.Kaelin.State.game':
-                            var $1813 = App$pass;
-                            var $1812 = $1813;
-                            break;
-                    };
-                    return $1812;
-            };
-        })();
-        return $1763;
+                            var $1707 = $1708;
+                        } else {
+                            var self = ($1700 === 49);
+                            if (self) {
+                                var $1711 = App$store$(Web$Kaelin$Action$create_player$($1702, "Croni", _state$2));
+                                var $1710 = $1711;
+                            } else {
+                                var $1712 = App$store$(Web$Kaelin$Action$start_cast$($1700, _state$2));
+                                var $1710 = $1712;
+                            };
+                            var $1707 = $1710;
+                        };
+                        var $1701 = $1707;
+                        break;
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1713 = App$pass;
+                        var $1701 = $1713;
+                        break;
+                };
+                var $1684 = $1701;
+                break;
+            case 'App.Event.post':
+                var $1714 = self.data;
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1716 = App$pass;
+                        var $1715 = $1716;
+                        break;
+                    case 'Web.Kaelin.State.game':
+                        var self = Web$Kaelin$Event$deserialize$(String$drop$(2n, $1714));
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $1718 = self.value;
+                                var self = $1718;
+                                switch (self._) {
+                                    case 'Web.Kaelin.Event.start_game':
+                                    case 'Web.Kaelin.Event.create_user':
+                                    case 'Web.Kaelin.Event.create_hero':
+                                        var $1720 = App$pass;
+                                        var $1719 = $1720;
+                                        break;
+                                    case 'Web.Kaelin.Event.user_input':
+                                        var $1721 = App$store$(Web$Kaelin$Skill$skill_use$(_state$2));
+                                        var $1719 = $1721;
+                                        break;
+                                };
+                                var $1717 = $1719;
+                                break;
+                            case 'Maybe.none':
+                                var $1722 = App$pass;
+                                var $1717 = $1722;
+                                break;
+                        };
+                        var $1715 = $1717;
+                        break;
+                };
+                var $1684 = $1715;
+                break;
+            case 'App.Event.frame':
+            case 'App.Event.mouse_down':
+            case 'App.Event.key_up':
+            case 'App.Event.mouse_over':
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                    case 'Web.Kaelin.State.game':
+                        var $1724 = App$pass;
+                        var $1723 = $1724;
+                        break;
+                };
+                var $1684 = $1723;
+                break;
+            case 'App.Event.mouse_up':
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.game':
+                        var $1726 = self.user;
+                        var $1727 = self.room;
+                        var $1728 = self.env_info;
+                        var _info$11 = $1728;
+                        var self = _info$11;
+                        switch (self._) {
+                            case 'App.EnvInfo.new':
+                                var $1730 = self.mouse_pos;
+                                var self = Web$Kaelin$Coord$to_axial$($1730);
+                                switch (self._) {
+                                    case 'Web.Kaelin.Coord.new':
+                                        var $1732 = self.i;
+                                        var $1733 = self.j;
+                                        var _hex$16 = Web$Kaelin$Event$serialize$(Web$Kaelin$Event$user_input$($1726, Web$Kaelin$Coord$new$($1732, $1733), Web$Kaelin$Action$walk));
+                                        var $1734 = App$post$($1727, _hex$16);
+                                        var $1731 = $1734;
+                                        break;
+                                };
+                                var $1729 = $1731;
+                                break;
+                        };
+                        var $1725 = $1729;
+                        break;
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                        var $1735 = App$pass;
+                        var $1725 = $1735;
+                        break;
+                };
+                var $1684 = $1725;
+                break;
+            case 'App.Event.mouse_click':
+            case 'App.Event.input':
+                var self = _state$2;
+                switch (self._) {
+                    case 'Web.Kaelin.State.init':
+                    case 'Web.Kaelin.State.void':
+                    case 'Web.Kaelin.State.game':
+                        var $1737 = App$pass;
+                        var $1736 = $1737;
+                        break;
+                };
+                var $1684 = $1736;
+                break;
+        };
+        return $1684;
     };
     const Web$Kaelin$App$when = x0 => x1 => Web$Kaelin$App$when$(x0, x1);
 
     function App$new$(_init$2, _draw$3, _when$4) {
-        var $1814 = ({
+        var $1738 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
             'when': _when$4
         });
-        return $1814;
+        return $1738;
     };
     const App$new = x0 => x1 => x2 => App$new$(x0, x1, x2);
     const Web$Kaelin = (() => {
@@ -7969,8 +8004,8 @@ module.exports = (function() {
         var _init$2 = Web$Kaelin$App$init;
         var _draw$3 = Web$Kaelin$App$draw(_img$1);
         var _when$4 = Web$Kaelin$App$when;
-        var $1815 = App$new$(_init$2, _draw$3, _when$4);
-        return $1815;
+        var $1739 = App$new$(_init$2, _draw$3, _when$4);
+        return $1739;
     })();
     return {
         'Buffer32.new': Buffer32$new,

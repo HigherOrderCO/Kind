@@ -145,31 +145,31 @@ module.exports = class AppPlay extends Component {
     document.body.addEventListener("keyup", this.listeners.keyup);
 
     //Tick event
-    this.intervals.frame = () => {
-      let time = performance.now()
-      let frame = 1000/60
-      let self = (mileseconds) => {
-        if (mileseconds-time > frame) {
-          this.register_event({
-            _: "App.Event.tick",
-            time: BigInt(Date.now()),
-            info: {
-              _: "App.EnvInfo.new",
-              screen_size: {
-                _: "Pair.new",
-                fst: this.container ? this.container.width  : 0,
-                snd: this.container ? this.container.height : 0,
-              },
-              mouse_pos: this.mouse_pos,
-            }
-          })
-          time = performance.now()
-        }
-        window.requestAnimationFrame(self)
-      }
-      return window.requestAnimationFrame(self)
-    }
-    this.intervals.tick()
+    //this.intervals.frame = () => {
+      //let time = performance.now()
+      //let frame = 1000/60
+      //let self = (mileseconds) => {
+        //if (mileseconds-time > frame) {
+          //this.register_event({
+            //_: "App.Event.tick",
+            //time: BigInt(Date.now()),
+            //info: {
+              //_: "App.EnvInfo.new",
+              //screen_size: {
+                //_: "Pair.new",
+                //fst: this.container ? this.container.width  : 0,
+                //snd: this.container ? this.container.height : 0,
+              //},
+              //mouse_pos: this.mouse_pos,
+            //}
+          //})
+          //time = performance.now()
+        //}
+        //window.requestAnimationFrame(self)
+      //}
+      //return window.requestAnimationFrame(self)
+    //}
+    //this.intervals.tick()
 
     // Frame event (60 fps)
     this.intervals.frame = () => {

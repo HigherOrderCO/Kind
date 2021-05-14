@@ -810,22 +810,7 @@ module.exports = (function() {
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
-
-    function F64$show$(_x$1) {
-        var F64$show$ = (_x$1) => ({
-            ctr: 'TCO',
-            arg: [_x$1]
-        });
-        var F64$show = _x$1 => F64$show$(_x$1);
-        var arg = [_x$1];
-        while (true) {
-            let [_x$1] = arg;
-            var R = F64$show$(_x$1);
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const F64$show = x0 => F64$show$(x0);
+    const F64$show = a0 => (String(a0));
 
     function Web$AsManga$Sprite$render$(_spr$1, _pos$2) {
         var _attrs$3 = Map$from_list$(List$cons$(Pair$new$("src", (() => {
@@ -965,7 +950,7 @@ module.exports = (function() {
         }
     };
     const Word$to_f64 = x0 => Word$to_f64$(x0);
-    const U64$to_f64 = a0 => (a0);
+    const U64$to_f64 = a0 => (Number(a0));
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
         var $134 = _m$pure$2;
