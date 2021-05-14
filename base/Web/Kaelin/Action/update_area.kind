@@ -12,7 +12,7 @@ Web.Kaelin.Action.update_area(state: Web.Kaelin.State): Web.Kaelin.State
           state
           else
             open state.internal
-            area = Web.Kaelin.Skill.indicator(state.internal.tick, cast.hero_pos, cast.skill, mouse_coord, state.map)
+            area = Web.Kaelin.Effect.indicators.get_indicators(state.internal.tick, cast.hero_pos, cast.skill, mouse_coord, state.map)
             new_cast_info = some(Web.Kaelin.CastInfo.new(cast.hero_pos, cast.skill, cast.range, area, mouse_coord))
             new_state = Web.Kaelin.State.game(state.user, state.room,new_cast_info,state.map, state.internal, state.env_info)
             new_state

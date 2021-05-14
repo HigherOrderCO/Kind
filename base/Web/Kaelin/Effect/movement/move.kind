@@ -1,4 +1,4 @@
-Web.Kaelin.Effect.all.move: Web.Kaelin.Effect<Unit>
+Web.Kaelin.Effect.movement.move: Web.Kaelin.Effect<Unit>
   Web.Kaelin.Effect { 
     get map = Web.Kaelin.Effect.map.get
     get center = Web.Kaelin.Effect.coord.get_center
