@@ -1870,6 +1870,7 @@ module.exports = (function() {
                     var $340 = App$store$(Web$Kind$exe_event$($339, _state$4));
                     var $321 = $340;
                     break;
+                case 'App.Event.frame':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_down':

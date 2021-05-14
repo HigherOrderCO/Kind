@@ -38,7 +38,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   // Sends a signed post to a room on the server
   function send_post(post_room, post_data, priv_key = key) {
     var priv_key = lib.check_hex(256, priv_key);
-    var post_room = lib.check_hex(48, post_room);
+    var post_room = lib.check_hex(56, post_room);
     var post_data = lib.check_hex(256, post_data);
     var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
     var post_sign = sig.signMessage(post_hash, priv_key);
@@ -56,7 +56,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   function watch_room(room_name) {
     if (!watching[room_name]) {
       watching[room_name] = true;
-      var room_name = lib.check_hex(48, room_name);
+      var room_name = lib.check_hex(56, room_name);
       var msge_buff = lib.hexs_to_bytes([
         lib.u8_to_hex(lib.WATCH),
         room_name,
@@ -70,7 +70,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   function unwatch_room(room_name) {
     if (watching[room_name]) {
       watching[room_name] = false;
-      var room_name = lib.check_hex(48, room_name);
+      var room_name = lib.check_hex(56, room_name);
       var msge_buff = lib.hexs_to_bytes([
         lib.u8_to_hex(lib.UNWATCH),
         room_name,
@@ -90,8 +90,8 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   ws.onmessage = (msge) => {
     var msge = new Uint8Array(msge.data);
     if (msge[0] === lib.SHOW) {
-      var room = lib.bytes_to_hex(msge.slice(1, 7));
-      var time = lib.bytes_to_hex(msge.slice(7, 13));
+      var room = lib.bytes_to_hex(msge.slice(1, 8));
+      var time = lib.bytes_to_hex(msge.slice(8, 13));
       var addr = lib.bytes_to_hex(msge.slice(13, 33));
       var data = lib.bytes_to_hex(msge.slice(33, 65));
       Posts[room].push({time, addr, data});
@@ -123,9 +123,9 @@ const UNWATCH = 1;
 const POST = 2;
 const SHOW = 3;
 
-// type RoomID    = U48
+// type RoomID    = U56
 // type PostID    = U48
-// type Time      = U48
+// type Time      = U40
 // type Address   = U160
 // type PostData  = U304
 // type Signature = U520
@@ -173,16 +173,36 @@ function hex_to_u8(hex) {
   return parseInt(hex.slice(2), 16);
 };
 
+function hex_to_u40(hex) {
+  return parseInt(hex.slice(-40), 16);
+};
+
 function hex_to_u48(hex) {
   return parseInt(hex.slice(-48), 16);
 };
 
-function u48_to_hex(num) {
+function hex_to_u56(hex) {
+  return parseInt(hex.slice(-56), 16);
+};
+
+function uN_to_hex(N, num) {
   var hex = "0x";
-  for (var i = 0; i < 12; ++i) {
-    hex += hex_char[(num / (2**((12-i-1)*4))) & 0xF];
+  for (var i = 0; i < N/4; ++i) {
+    hex += hex_char[(num / (2**((N/4-i-1)*4))) & 0xF];
   };
   return hex;
+};
+
+function u40_to_hex(num) {
+  return uN_to_hex(40, num);
+};
+
+function u48_to_hex(num) {
+  return uN_to_hex(48, num);
+};
+
+function u56_to_hex(num) {
+  return uN_to_hex(56, num);
 };
 
 function check_hex(bits, hex) {
@@ -227,8 +247,12 @@ module.exports = {
   hex_join,
   u8_to_hex,
   hex_to_u8,
+  u40_to_hex,
+  hex_to_u40,
   u48_to_hex,
   hex_to_u48,
+  u56_to_hex,
+  hex_to_u56,
   string_to_hex,
   hex_to_string,
   check_hex,
@@ -3031,9 +3055,9 @@ module.exports = class AppPlay extends Component {
     document.body.addEventListener("keyup", this.listeners.keyup);
 
     //Tick event
-    this.intervals.tick = () => {
+    this.intervals.frame = () => {
       let time = performance.now()
-      let frame = 1000/16
+      let frame = 1000/60
       let self = (mileseconds) => {
         if (mileseconds-time > frame) {
           this.register_event({
@@ -3158,7 +3182,7 @@ module.exports = class AppPlay extends Component {
                   io.then("Oops, something went wrong: "+ msg + call_fix))
               });
             case "watch":
-              if (utils.is_valid_hex(48, io.param)) {
+              if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
                   var time = BigInt(parseInt(time.slice(2), 16));
@@ -3170,7 +3194,7 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "post":
               var [room, data] = io.param.split(";");
-              if (utils.is_valid_hex(48, room) && utils.is_valid_hex(256, data)) {
+              if (utils.is_valid_hex(56, room) && utils.is_valid_hex(256, data)) {
                 console.log("Posting: ", room, data);
                 window.KindEvents.send_post(room, data);
               } else {
@@ -3300,6 +3324,13 @@ module.exports = class AppPlay extends Component {
 
 module.exports = {
   'Web.AsManga': __webpack_require__.e(/* import() */ 190).then(__webpack_require__.t.bind(__webpack_require__, 190, 23)),
+  'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
+  'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
+  'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),
+  'Web.Online': __webpack_require__.e(/* import() */ 523).then(__webpack_require__.t.bind(__webpack_require__, 523, 23)),
+  'Web.Playground': __webpack_require__.e(/* import() */ 791).then(__webpack_require__.t.bind(__webpack_require__, 791, 23)),
+  'Web.Senhas': __webpack_require__.e(/* import() */ 936).then(__webpack_require__.t.bind(__webpack_require__, 936, 23)),
+  'Web.TicTacToe': __webpack_require__.e(/* import() */ 734).then(__webpack_require__.t.bind(__webpack_require__, 734, 23)),
 }
 
 

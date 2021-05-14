@@ -1,13 +1,14 @@
 var client = require("./client.js");
 var api = client({
-  url: "ws://uwu.tech:7171",
+  //url: "ws://uwu.tech:7171",
+  url: "ws://localhost:7171",
   key: "0x0000000000000000000000000000000000000000000000000000000000000001",
 });
 
 // When connected, watches room 0 and makes an example post.
 api.on_init(() => {
-  var room = "0x000000000777";
-  var post = "0x1890000000000000000000000000000000000000000000000000000000000777";
+  var room = "0x12300000000321";
+  var post = "0x1230000000000000000000000000000000000000000000000000000000000321";
 
   // Watches the room
   api.watch_room(room);
