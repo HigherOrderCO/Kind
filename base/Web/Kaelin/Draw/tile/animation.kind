@@ -7,6 +7,7 @@ Web.Kaelin.Draw.tile.animation(animation: Maybe<Web.Kaelin.Animation>, coord : W
       open internal
       let kalein_frame = 1000/16
       let indx = (((internal.frame - animation.fps) % (sprite.frame_info)) % List.length!(sprite.voxboxes))
+      log(Nat.show(indx))
       case sprite.voxboxes[indx] as frame {
         none : img
         some : Web.Kaelin.Draw.support.animation_frame(coord, 0u, frame.value, img)
