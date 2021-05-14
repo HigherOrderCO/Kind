@@ -1,14 +1,15 @@
 Web.AsManga.Sprite.render(spr: Web.AsManga.Sprite, pos: V3): DOM
-  DOM.node("img",
-  {
+  let attrs = {
     "src": spr@data
-  },
-  {
+  }
+  let pos_x = pos@x - spr@pivot_x
+  let pos_y = pos@y - spr@pivot_y
+  let style = {
     "position": "absolute"
-    "left": F64.show(pos@x) | "px"
-    "top": F64.show(pos@y) | "px"
-  },
-  [])
+    "left": F64.show(pos_x) | "px"
+    "top": F64.show(pos_y) | "px"
+  }
+  DOM.node("img", attrs, style, [])
 
 type Web.AsManga.Pad {
   new(
@@ -86,6 +87,14 @@ Web.AsManga.AsManga: App<Web.AsManga.State>
           intenção é replicar um protótipo jogável do Among Us no menor tempo
           possível. Por enquanto, o app é apenas esse bloco de textos. Aos poucos,
           ele vai evoluir. Quanto tempo vou levar?
+        `)
+      ])
+      DOM.node("div", {}, {}, [
+        DOM.text(`
+          No momento: estou aproveitando a oportunidade pra melhorar
+          o framework de sincronia de tempo cliente/servidor dos apps
+          do Kind. Quando terminar isso, passarei a fazer o networking
+          do AsManga.
         `)
       ])
       DOM.node("div", {}, {}, [

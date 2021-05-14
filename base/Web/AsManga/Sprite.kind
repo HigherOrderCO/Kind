@@ -2,6 +2,8 @@ type Web.AsManga.Sprite {
   new(
     width: F64
     height: F64
+    pivot_x: F64
+    pivot_y: F64
     data: String
   )
 }

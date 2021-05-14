@@ -9,20 +9,22 @@ Web.Kaelin.Map.push(
       case entity { 
         animation: map
         background:
-          new_tile = Web.Kaelin.Tile.new(entity.value, none)
+          new_tile = Web.Kaelin.Tile.new(entity.value, none, none)
           Web.Kaelin.Map.set(coord, new_tile, map)
         creature: map
       }
     some:
       open tile.value as tile
       case entity {
-        animation: map
         background:
           background_tile = tile.value@background <- entity.value
           Web.Kaelin.Map.set(coord, background_tile, map)
         creature:
           creature_tile = tile.value@creature <- some(entity.value)
           Web.Kaelin.Map.set(coord, creature_tile, map)
+        animation :
+          animation_tile = tile.value@animation <- some(entity.value)
+          Web.Kaelin.Map.set(coord, animation_tile, map)
       }
     }
 

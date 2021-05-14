@@ -2210,6 +2210,7 @@ module.exports = (function() {
                     var $438 = $452;
                     break;
                 case 'App.Event.tick':
+                case 'App.Event.frame':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':

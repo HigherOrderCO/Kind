@@ -145,31 +145,31 @@ module.exports = class AppPlay extends Component {
     document.body.addEventListener("keyup", this.listeners.keyup);
 
     //Tick event
-    this.intervals.tick = () => {
-      let time = performance.now()
-      let frame = 1000/16
-      let self = (mileseconds) => {
-        if (mileseconds-time > frame) {
-          this.register_event({
-            _: "App.Event.tick",
-            time: BigInt(Date.now()),
-            info: {
-              _: "App.EnvInfo.new",
-              screen_size: {
-                _: "Pair.new",
-                fst: this.container ? this.container.width  : 0,
-                snd: this.container ? this.container.height : 0,
-              },
-              mouse_pos: this.mouse_pos,
-            }
-          })
-          time = performance.now()
-        }
-        window.requestAnimationFrame(self)
-      }
-      return window.requestAnimationFrame(self)
-    }
-    this.intervals.tick()
+    //this.intervals.frame = () => {
+      //let time = performance.now()
+      //let frame = 1000/60
+      //let self = (mileseconds) => {
+        //if (mileseconds-time > frame) {
+          //this.register_event({
+            //_: "App.Event.tick",
+            //time: BigInt(Date.now()),
+            //info: {
+              //_: "App.EnvInfo.new",
+              //screen_size: {
+                //_: "Pair.new",
+                //fst: this.container ? this.container.width  : 0,
+                //snd: this.container ? this.container.height : 0,
+              //},
+              //mouse_pos: this.mouse_pos,
+            //}
+          //})
+          //time = performance.now()
+        //}
+        //window.requestAnimationFrame(self)
+      //}
+      //return window.requestAnimationFrame(self)
+    //}
+    //this.intervals.tick()
 
     // Frame event (60 fps)
     this.intervals.frame = () => {
@@ -272,7 +272,7 @@ module.exports = class AppPlay extends Component {
                   io.then("Oops, something went wrong: "+ msg + call_fix))
               });
             case "watch":
-              if (utils.is_valid_hex(48, io.param)) {
+              if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
                   var time = BigInt(parseInt(time.slice(2), 16));
@@ -284,7 +284,7 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "post":
               var [room, data] = io.param.split(";");
-              if (utils.is_valid_hex(48, room) && utils.is_valid_hex(256, data)) {
+              if (utils.is_valid_hex(56, room) && utils.is_valid_hex(256, data)) {
                 console.log("Posting: ", room, data);
                 window.KindEvents.send_post(room, data);
               } else {
