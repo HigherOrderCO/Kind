@@ -1,0 +1,7 @@
+type Web.AsManga.Sprite {
+  new(
+    width: F64
+    height: F64
+    data: String
+  )
+}

@@ -13,7 +13,6 @@ if (process.argv[2]) {
     return name.toLowerCase().indexOf(process.argv[2].toLowerCase()) !== -1
   });
 }
-// var files = ["Playground.kind"]
 
 var apps = [];
 
