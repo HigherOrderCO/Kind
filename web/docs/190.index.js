@@ -804,7 +804,22 @@ module.exports = (function() {
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
-    const F64$show = a0 => (String(a0));
+
+    function F64$show$(_x$1) {
+        var F64$show$ = (_x$1) => ({
+            ctr: 'TCO',
+            arg: [_x$1]
+        });
+        var F64$show = _x$1 => F64$show$(_x$1);
+        var arg = [_x$1];
+        while (true) {
+            let [_x$1] = arg;
+            var R = F64$show$(_x$1);
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const F64$show = x0 => F64$show$(x0);
 
     function Web$AsManga$Sprite$render$(_spr$1, _pos$2) {
         var $107 = DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", (() => {
@@ -815,7 +830,7 @@ module.exports = (function() {
                     var $109 = $108;
                     return $109;
             };
-        })()), List$nil)), Map$from_list$(List$cons$(Pair$new$("position", "absolute"), List$cons$(Pair$new$("left", ((String((() => {
+        })()), List$nil)), Map$from_list$(List$cons$(Pair$new$("position", "absolute"), List$cons$(Pair$new$("left", (F64$show$((() => {
             var self = _pos$2;
             switch (self._) {
                 case 'V3.new':
@@ -823,7 +838,7 @@ module.exports = (function() {
                     var $111 = $110;
                     return $111;
             };
-        })())) + "px")), List$cons$(Pair$new$("top", ((String((() => {
+        })()) + "px")), List$cons$(Pair$new$("top", (F64$show$((() => {
             var self = _pos$2;
             switch (self._) {
                 case 'V3.new':
@@ -831,7 +846,7 @@ module.exports = (function() {
                     var $113 = $112;
                     return $113;
             };
-        })())) + "px")), List$nil)))), List$nil);
+        })()) + "px")), List$nil)))), List$nil);
         return $107;
     };
     const Web$AsManga$Sprite$render = x0 => x1 => Web$AsManga$Sprite$render$(x0, x1);
@@ -924,7 +939,7 @@ module.exports = (function() {
         }
     };
     const Word$to_f64 = x0 => Word$to_f64$(x0);
-    const U64$to_f64 = a0 => (Number(a0));
+    const U64$to_f64 = a0 => (a0);
     const Unit$new = null;
     const App$pass = IO$monad$((_m$bind$1 => _m$pure$2 => {
         var $129 = _m$pure$2;
@@ -1192,7 +1207,7 @@ module.exports = (function() {
                                 var $196 = self.pad;
                                 var $197 = self.spd;
                                 var $198 = self.spr;
-                                var $199 = Web$AsManga$State$new$((Number($193)), $195, $196, $197, $198);
+                                var $199 = Web$AsManga$State$new$(($193), $195, $196, $197, $198);
                                 return $199;
                         };
                     })());
@@ -1207,7 +1222,7 @@ module.exports = (function() {
                             var $203 = self.pad;
                             var $204 = self.spd;
                             var $205 = self.spr;
-                            var $206 = Web$AsManga$State$new$((Number($200)), $202, $203, $204, $205);
+                            var $206 = Web$AsManga$State$new$(($200), $202, $203, $204, $205);
                             var _state$7 = $206;
                             break;
                     };

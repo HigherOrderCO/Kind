@@ -2,6 +2,7 @@ Web.Kaelin.Draw.state.map(
   map: Web.Kaelin.Map,
   cast_info: Maybe<Web.Kaelin.CastInfo>,
   env_info: App.EnvInfo,
+  internal : Web.Kaelin.Internal,
   img:VoxBox
 ): VoxBox
     map = NatMap.to_list!(map)
@@ -13,6 +14,7 @@ Web.Kaelin.Draw.state.map(
 
     img = Web.Kaelin.Draw.tile.background(tile@background, cast_info, coord, mouse_coord, img)
     img = Web.Kaelin.Draw.tile.creature(tile@creature, coord, img)
+    img = Web.Kaelin.Draw.tile.animation(tile@animation, coord, internal, img)
     img
   img
     

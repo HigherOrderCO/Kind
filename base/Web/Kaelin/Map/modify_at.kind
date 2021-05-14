@@ -14,7 +14,7 @@ Web.Kaelin.Map.modify_at(
         none: map
         some:
           let new_creature = mod(creature.value)
-          let new_tile = Web.Kaelin.Tile.new(tile.background, some(new_creature))
+          let new_tile = Web.Kaelin.Tile.new(tile.background, some(new_creature), tile.animation)
           NatMap.set!(key, new_tile, map)
       }
     }

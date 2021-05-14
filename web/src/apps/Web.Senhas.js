@@ -2168,6 +2168,7 @@ module.exports = (function() {
             switch (self._) {
                 case 'App.Event.init':
                 case 'App.Event.tick':
+                case 'App.Event.frame':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':

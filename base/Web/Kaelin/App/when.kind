@@ -12,6 +12,12 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
 
       key_down game:
         switch U16.eql(event.code) {
+          'F' : 
+            open state.internal as internal
+            let animation = Web.Kaelin.Map.Entity.animation(Web.Kaelin.Animation.new(0, Web.Kaelin.Sprite.fire))
+            // This gives me a bug on runtime we should investigate what is the cause
+            // let state = state@map <- Web.Kaelin.Map.push(Web.Kaelin.Coord.new(0, 0), animation, state.map)
+            App.store!(Web.Kaelin.State.game(state.user, Web.Kaelin.Constants.room, state.cast_info, Web.Kaelin.Map.push(Web.Kaelin.Coord.new(0, 0), animation, state.map), state.internal, state.env_info))
           49#16: App.store!(Web.Kaelin.Action.create_player(
           state.user, "Croni", state))
         } default App.store!(Web.Kaelin.Action.start_cast(event.code, state))
