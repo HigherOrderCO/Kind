@@ -1,4 +1,2 @@
-Test: IO(Unit)
-  IO {
-    IO.print("test")
-  }
+Test: _
+  U64.to_f64(500)
