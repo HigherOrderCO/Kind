@@ -171,6 +171,7 @@ wss.on("connection", function connection(ws) {
           lib.u48_to_hex(Date.now()),
           lib.bytes_to_hex(msge.slice(1, 7)),
         ]);
+        ws.send(msge_buff);
         break;
 
       // User wants to post a message
