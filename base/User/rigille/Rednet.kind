@@ -1,0 +1,213 @@
+type Packet<D: Type> {
+  new(
+    data: D,
+    address: List<Bool>
+  )
+}
+
+type RedTree<D: Type> {
+  leaf(
+    inbox: List<Packet<D>>
+  )
+
+  edge(
+    loaded: Bool
+    payload: Maybe<Packet<D>>
+    left: RedTree<D>
+    right: RedTree<D>
+  )
+}
+
+type RedTree.Transition<Data: Type> ~ (now: RedTree<Data>, after: RedTree<Data>) {
+  toggle(
+    loaded: Bool
+    payload: Maybe<Packet<Data>>
+    left: RedTree<Data>
+    right: RedTree<Data>
+  ) 
+ ~ (now =
+      RedTree.edge<Data>(
+        loaded
+        payload
+        left
+        right
+      )
+    after =
+      RedTree.edge<Data>(
+        Bool.not(loaded)
+        payload
+        left
+        right
+      )
+   )
+
+  send_left(
+    payload: Data
+    addr_tail: List<Bool>
+    their_left: RedTree<Data>
+    their_right: RedTree<Data>
+    my_right: RedTree<Data>
+  )
+ ~ (now =
+      RedTree.edge<Data>(
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(false, addr_tail)
+          )
+        )
+        RedTree.edge<Data>(
+          true
+          Maybe.none<Packet<Data>>
+          their_left
+          their_right
+        )
+        my_right
+      )
+    after =
+      RedTree.edge<Data>(
+        true
+        Maybe.none<Packet<Data>>
+        RedTree.edge<Data>(
+          true
+          Maybe.some<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+          )
+          their_left
+          their_right
+        )
+        my_right
+      )
+   )
+
+  send_right(
+    payload: Data
+    addr_tail: List<Bool>
+    my_left: RedTree<Data>
+    their_left: RedTree<Data>
+    their_right: RedTree<Data>
+  )
+ ~ (now =
+      RedTree.edge<Data>(
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(true, addr_tail)
+          )
+        )
+        my_left
+        RedTree.edge<Data>(
+          true
+          Maybe.none<Packet<Data>>
+          their_left
+          their_right
+        )
+      )
+    after =
+      RedTree.edge<Data>(
+        true
+        Maybe.none<Packet<Data>>
+        my_left
+        RedTree.edge<Data>(
+          true
+          Maybe.some<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+          )
+          their_left
+          their_right
+        )
+      )
+   )
+
+  mail_left(
+    payload: Data
+    addr_tail: List<Bool>
+    inbox: List<Packet<Data>>
+    my_right: RedTree<Data>
+  )
+ ~ (now =
+      RedTree.edge<Data>(
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(false, addr_tail)
+          )
+        )
+        RedTree.leaf<Data>(
+          inbox
+        )
+        my_right
+      )
+    after =
+      RedTree.edge<Data>(
+        true
+        Maybe.none<Packet<Data>>
+        RedTree.leaf<Data>(
+          List.cons<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+            inbox
+          )
+        )
+        my_right
+      )
+   )
+
+  mail_right(
+    payload: Data
+    addr_tail: List<Bool>
+    inbox: List<Packet<Data>>
+    my_left: RedTree<Data>
+  )
+ ~ (now =
+      RedTree.edge<Data>(
+        true
+        Maybe.some<Packet<Data>>(
+          Packet.new<Data>(
+            payload,
+            List.cons<Bool>(false, addr_tail)
+          )
+        )
+        my_left
+        RedTree.leaf<Data>(
+          inbox
+        )
+      )
+    after =
+      RedTree.edge<Data>(
+        true
+        Maybe.none<Packet<Data>>
+        my_left
+        RedTree.leaf<Data>(
+          List.cons<Packet<Data>>(
+            Packet.new<Data>(
+              payload,
+              addr_tail
+            )
+            inbox
+          )
+        )
+      )
+   )
+}
+
+type RedNet <D: Type> {
+  new(
+    outbox: List<Packet<D>>
+    outnet: RedTree<D>
+
+    inbox: List<Packet<D>>
+    innet: RedTree<D>
+  )
+}

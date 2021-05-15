@@ -1,0 +1,19 @@
+User.rigille.List.Monotone.head_ext<A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)>(
+  x: A,
+  xs: List<A>,
+  Hyp: User.rigille.List.Monotone<A, after, O>(x & xs)
+): User.rigille.List.Ext<A, after, O>(xs, x)
+  (y, Hyp1)
+  case xs with Hyp Hyp1 {
+    nil: Empty.absurd!(Hyp1)
+    cons: open Hyp
+          case Hyp1 {
+            left: qed = Hyp.fst :: rewrite X in after(x, X) with mirror(Hyp1.value)
+                  qed
+            right: ind = User.rigille.List.Monotone.head_ext<A, after, O>(xs.head, xs.tail, Hyp.snd)
+                   lem = ind(y, Hyp1.value)
+                   open O
+                   qed = O.chain!!!(Hyp.fst, lem)
+                   qed
+          }
+  }!

@@ -1,0 +1,27 @@
+// an element of a list is also an element of its permutations
+User.rigille.List.Perm.In<A: Type>(
+  x: A,
+  xs: List<A>,
+  ys: List<A>,
+  Hyp0: User.rigille.List.In!(xs, x),
+  Hyp1: User.rigille.List.Perm!(ys, xs)
+): User.rigille.List.In!(ys, x)
+  def this = User.rigille.List.Perm.In<A>
+  case Hyp1 with Hyp0 {
+    nil: Empty.absurd!(Hyp0)
+    skip: case Hyp0 {
+            left: Or.left!!(Hyp0.value)
+            right: ind = this(x, Hyp1.l1, Hyp1.l0, Hyp0.value, Hyp1.Hyp)
+                   Or.right!!(ind)
+          }
+    swap: case Hyp0 {
+            left: Or.right!!(Or.left!!(Hyp0.value))
+            right: case Hyp0.value {
+                     left: Or.left!!(Hyp0.value.value)
+                     right: Or.right!!(Or.right!!(Hyp0.value.value))
+                   }
+          }
+    trans: chain_first = this(x, Hyp1.l2, Hyp1.l1, Hyp0, Hyp1.Hyp1)
+           chain_second = this(x, Hyp1.l1, Hyp1.l0, chain_first, Hyp1.Hyp0)
+           chain_second
+  }!

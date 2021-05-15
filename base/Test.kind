@@ -1,11 +1,4 @@
-est(x: Fin(0)): Empty
-  let e = refl
-  case x with e : x.lim == 0 {
-    zero: ?a
-    succ: ?b
+Test: IO(Unit)
+  IO {
+    IO.print("hi")
   }
-
-//type Fin ~ <lim: Nat> {
-  //zero<n: Nat>               ~ (lim = Nat.succ(n))
-  //succ<n: Nat>(pred: Fin<n>) ~ (lim = Nat.succ(n))
-//}

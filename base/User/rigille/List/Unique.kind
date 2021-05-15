@@ -1,0 +1,7 @@
+User.rigille.List.Unique<A: Type>(xs: List<A>, x: A): Type
+  case xs {
+    nil: Empty
+    cons: Or<And<x == xs.head,
+                 Not(User.rigille.List.In<A>(xs.tail, x))>,
+             User.rigille.List.In<A>(xs.tail, x)>
+  }

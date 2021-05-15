@@ -1,0 +1,6 @@
+// Extreme of the list
+User.rigille.List.Ext<A: Type>(after: A -> A -> Type, O: User.rigille.Order<A>(after),
+  xs: List<A>,
+  x: A
+): Type
+  ((y: A) -> (Hyp: User.rigille.List.In!(xs, y)) -> after(x, y))

@@ -1,2 +1,12 @@
-User.rigille.List.sorting_fn<A: Type, after: A -> A -> Type, O: User.rigille.Order<A>(after)>(f: List<A> -> List<A>, xs: List<A>): Type
-  Pair<User.rigille.List.Perm<A>(f(xs), xs), User.rigille.List.monotone<A, after, O>(f(xs))>
+User.rigille.List.sorting_fn<
+  A: Type,
+  after: A -> A -> Type,
+  O: User.rigille.Order<A>(after)
+>(
+  f: List<A> -> List<A>
+): Type
+  (xs: List<A>) ->
+  Pair<
+    User.rigille.List.Perm<A>(f(xs), xs),
+    User.rigille.List.Monotone<A, after, O>(f(xs))
+  >
