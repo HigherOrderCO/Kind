@@ -1,4 +1,4 @@
-Web.Kaelin.Effect.all.fireball(dmg: I32, range: I32): Web.Kaelin.Effect<Unit>
+Web.Kaelin.Skill.fireball(dmg: I32, range: I32): Web.Kaelin.Effect<Unit>
   Web.Kaelin.Effect {
     get map = Web.Kaelin.Effect.map.get
     get target_pos = Web.Kaelin.Effect.coord.get_target

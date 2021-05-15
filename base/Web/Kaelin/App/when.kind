@@ -22,7 +22,7 @@ Web.Kaelin.App.when: App.Event -> Web.Kaelin.State -> IO<Dynamic>
           state.user, "Croni", state))
         } default App.store!(Web.Kaelin.Action.start_cast(event.code, state))
 
-      tick game:
+      frame game:
         let info = event.info
         let state = Web.Kaelin.Action.update_interface(info, U64.to_nat(event.time), state)
         App.store!(Web.Kaelin.Action.update_area(state))       

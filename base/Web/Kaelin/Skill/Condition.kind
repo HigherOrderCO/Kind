@@ -1,6 +1,0 @@
-type Web.Kaelin.Skill.condition{
-  target_hp(hp: I32)
-  self_hp(hp: I32)
-  target_status(status: Web.Kaelin.Skill.Modifier.status)
-  self_status(status: Web.Kaelin.Skill.Modifier.status)
-}
