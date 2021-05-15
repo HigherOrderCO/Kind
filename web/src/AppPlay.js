@@ -249,8 +249,11 @@ module.exports = class AppPlay extends Component {
         //console.log("- init app_global_tick");
         this.app_global_tick = this.app_global_begin;
       }
-      //var count_ticks = 0;
-      //var count_posts = 0;
+      var count_ticks = 0;
+      var count_posts = 0;
+      var begin_time = Date.now();
+      var total = tick - this.app_global_tick;
+      if (total > 1000) console.log("Computing " + total + " ticks...");
       for (var t = this.app_global_tick; t < tick; ++t) {
         //++count_ticks;
         var posts = this.app_global_posts[String(t)];
@@ -266,6 +269,7 @@ module.exports = class AppPlay extends Component {
         this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
         this.app_state.global = state;
       };
+      if (total > 1000) console.log("Computed in: " + (Date.now() - begin_time) + "s");
       //console.log("processed " + count_ticks + " ticks");
       //console.log("processed " + count_posts + " posts");
       this.app_global_tick = tick;
