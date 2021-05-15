@@ -4,23 +4,6 @@ type HexPlace {
   blue
 }
 
-HexBoard(n: Nat, m: Nat): Type
-  Vector<Vector<HexPlace>(m)>(n)
-
-HexBoard.empty.line(n: Nat): Vector<HexPlace>(n)
-  case n {
-    zero: Vector.nil<HexPlace>
-    succ: Vector.ext<HexPlace, n.pred>(HexPlace.empty, HexBoard.empty.line(n.pred))
-  }!
-
-HexBoard.empty(n: Nat, m: Nat): HexBoard(n, m)
-  case n {
-    zero: Vector.nil<Vector<HexPlace>(m)>
-    succ: let line = HexBoard.empty.line(m)
-          let tail = HexBoard.empty(n.pred, m)
-          Vector.ext<Vector<HexPlace>(m), n.pred>(line, tail)
-  }!
-
 Fin.is_empty<size: Nat>(contra: Fin<size>): Bool
   case size {
     zero: true
@@ -34,32 +17,69 @@ Fin.absurd<A: Type>(contra: Fin<0>): A
     succ: gotcha
   }!
 
-Vector.not_empty<A: Type, size: Nat>(vec: Vector<A, size>): Bool
-  case size {
-    zero: false
-    succ: true
+List.all<A: Type>(list: List<A>, Prop: A -> Type): Type
+  case list {
+    nil: Unit
+    cons: And<Prop(list.head), List.all<A>(list.tail, Prop)>
   }
 
-Vector.at<A: Type, size: Nat>(index: Fin<size>, vec: Vector<A, size>): A
-  case size with index vec {
-    zero: Fin.absurd!(index)
-    succ:
-      let gotcha = vec :: if Vector.not_empty<A, Nat.succ(size.pred)>(vec) then Vector(A,Nat.succ(size.pred)) else A
-      case vec with 
-        gotcha: if Vector.not_empty<A, Nat.succ(size.pred)>(vec) then Vector(A,Nat.succ(size.pred)) else A
-        index: Fin(Nat.succ(size.pred))
-        vec: Vector(A, Nat.succ(size.pred))
-      {
-        nil: gotcha
-        ext:
-          case index {
-            zero: vec.head
-            succ: ?a //Vector.at<A, size.pred>(index.pred, vec.tail)
-          }
+List.specialize<A: Type>(
+  list: List<A>
+  Prop: A -> Type
+  x: A
+  All: List.all<A>(list, Prop)
+  In: User.rigille.List.In<A>(list, x)
+): Prop(x)
+  case list with All In {
+    nil: Empty.absurd!(In)
+    cons:
+      open All
+      case In {
+        left:
+          let qed = All.fst :: rewrite X in Prop(X) with mirror(In.value)
+          qed
+        right:
+          List.specialize!!!!(All.snd, In.value)
+      }
+  }!
+
+Matrix<A: Type>(n: Nat, m: Nat, xs: List<List<A>>): Type
+  def lines = Equal<Nat>(List.length!(xs), n)
+  def columns = List.all<List<A>>(xs, (x) Equal<Nat>(List.length!(x), m))
+  And<lines, columns>
+
+List.safe_at<A: Type>(
+  index: Nat
+  list: List<A>
+  SafeIndex: Nat.ltn(index, List.length!(list)) == true
+): [x: A] User.rigille.List.In<A>(list, x)
+  case list with SafeIndex {
+    nil: Empty.absurd!(Bool.false_neq_true(SafeIndex))
+    cons:
+      case index with SafeIndex {
+        zero:
+          list.head ~ left(refl)
+        succ:
+          let ind = List.safe_at<A>(index.pred, list.tail, SafeIndex)
+          open ind
+          ind.fst ~ right(ind.snd)
       }!
   }!
 
-Test: IO(Unit)
-  IO {
-    IO.print("hi")
-  }
+Matrix.safe_at<A: Type>(
+  n: Nat
+  m: Nat
+  mat: List<List<A>>
+  lines: Nat
+  columns: Nat
+  SafeLine: Nat.ltn(n, lines) == true
+  SafeColumn: Nat.ltn(m, columns) == true
+  Mat: Matrix<A>(lines, columns, mat)
+): [x: A] [line: List<A>] And<User.rigille.List.In!(mat, line), User.rigille.List.In!(line, x)>
+  open Mat
+  def line_bound = SafeLine :: rewrite X in Nat.ltn(n,X) == Bool.true with mirror(Mat.fst)
+  let {line, line_in} = List.safe_at!(n, mat, line_bound)
+  def column_length = List.specialize!!!!(Mat.snd, line_in)
+  let column_bound = SafeColumn :: rewrite X in Nat.ltn(m,X) == Bool.true with mirror(column_length)
+  let {elem, elem_in} = List.safe_at!(m, line, column_bound)
+  elem ~ line ~ {line_in, elem_in}
