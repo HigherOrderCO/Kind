@@ -1,4 +1,0 @@
-App.pass: IO<Dynamic>
-  IO {
-    return Dynamic.new<Unit>(unit)
-  }

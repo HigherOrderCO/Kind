@@ -1,7 +1,7 @@
 var client = require("./client.js");
 var api = client({
-  //url: "ws://uwu.tech:7171",
-  url: "ws://localhost:7171",
+  url: "ws://uwu.tech:7171",
+  //url: "ws://localhost:7171",
   key: "0x0000000000000000000000000000000000000000000000000000000000000001",
 });
 
@@ -13,12 +13,14 @@ api.on_init(() => {
   // Watches the room
   api.watch_room(room);
 
-  //setInterval(() => {
-    //console.log("local_time  : ", Date.now());
-    //console.log("server_time : ", api.get_time());
-    //console.log("delta_time  : ", Date.now() - api.get_time());
-    //console.log("");
-  //}, 200);
+  function print_time() {
+    console.log("local_time  : ", Date.now());
+    console.log("server_time : ", api.get_time());
+    console.log("delta_time  : ", Date.now() - api.get_time());
+    console.log("");
+  }
+  print_time()
+  setInterval(print_time, 1000);
 
   // Posts a 256-bit message to it
   api.send_post(room, post);

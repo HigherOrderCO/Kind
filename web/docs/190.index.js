@@ -1207,256 +1207,260 @@ module.exports = (function() {
                     var _among_pos$4 = $196;
                     break;
             };
-            var $190 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("\u{a}          Bem-vindo ao AsManga! Esse \u{e9} o primeiro deploy do joguinho, que se\u{a}          tornar\u{e1} uma par\u{f3}dia de Among Us, por\u{e9}m o impostor \u{e9} uma manga. A\u{a}          inten\u{e7}\u{e3}o \u{e9} replicar um prot\u{f3}tipo jog\u{e1}vel do Among Us no menor tempo\u{a}          poss\u{ed}vel. Por enquanto, o app \u{e9} apenas esse bloco de textos. Aos poucos,\u{a}          ele vai evoluir. Quanto tempo vou levar?\u{a}        "), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("\u{a}          No momento: estou aproveitando a oportunidade pra melhorar\u{a}          o framework de sincronia de tempo cliente/servidor dos apps\u{a}          do Kind. Quando terminar isso, passarei a fazer o networking\u{a}          do AsManga.\u{a}        "), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$AsManga$Sprite$render$(_among_str$3, _among_pos$4), List$nil)), List$nil))));
+            var _line$5 = (_x$5 => {
+                var $197 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(_x$5), List$nil));
+                return $197;
+            });
+            var $190 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("\u{a}          Bem-vindo ao AsManga! Esse \u{e9} o primeiro deploy do joguinho, que se\u{a}          tornar\u{e1} uma par\u{f3}dia de Among Us, por\u{e9}m o impostor \u{e9} uma manga. A\u{a}          inten\u{e7}\u{e3}o \u{e9} replicar um prot\u{f3}tipo jog\u{e1}vel do Among Us no menor tempo\u{a}          poss\u{ed}vel. Por enquanto, o app \u{e9} apenas esse bloco de textos. Aos poucos,\u{a}          ele vai evoluir. Quanto tempo vou levar?\u{a}        "), List$nil)), List$cons$(DOM$node$("br", Map$from_list$(List$nil), Map$from_list$(List$nil), List$nil), List$cons$(_line$5("No momento: time sync com o servidor UwU.Tech funcionando."), List$cons$(_line$5("Next: implementar o rollback netcode no Kind.App & AppPlay.js"), List$cons$(_line$5("Then: tornar o AsManga online."), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(Web$AsManga$Sprite$render$(_among_str$3, _among_pos$4), List$nil)), List$nil)))))));
             return $190;
         });
         var _when$3 = (_event$3 => _state$4 => {
             var self = _event$3;
             switch (self._) {
                 case 'App.Event.init':
-                    var $198 = self.time;
-                    var $199 = App$store$((() => {
+                    var $199 = self.time;
+                    var $200 = App$store$((() => {
                         var self = _state$4;
                         switch (self._) {
                             case 'Web.AsManga.State.new':
-                                var $200 = self.pos;
-                                var $201 = self.pad;
-                                var $202 = self.spd;
-                                var $203 = self.spr;
-                                var $204 = Web$AsManga$State$new$((Number($198)), $200, $201, $202, $203);
-                                return $204;
+                                var $201 = self.pos;
+                                var $202 = self.pad;
+                                var $203 = self.spd;
+                                var $204 = self.spr;
+                                var $205 = Web$AsManga$State$new$((Number($199)), $201, $202, $203, $204);
+                                return $205;
                         };
                     })());
-                    var $197 = $199;
+                    var $198 = $200;
                     break;
                 case 'App.Event.frame':
-                    var $205 = self.time;
+                    var $206 = self.time;
                     var self = _state$4;
                     switch (self._) {
                         case 'Web.AsManga.State.new':
-                            var $207 = self.pos;
-                            var $208 = self.pad;
-                            var $209 = self.spd;
-                            var $210 = self.spr;
-                            var $211 = Web$AsManga$State$new$((Number($205)), $207, $208, $209, $210);
-                            var _state$7 = $211;
+                            var $208 = self.pos;
+                            var $209 = self.pad;
+                            var $210 = self.spd;
+                            var $211 = self.spr;
+                            var $212 = Web$AsManga$State$new$((Number($206)), $208, $209, $210, $211);
+                            var _state$7 = $212;
                             break;
                     };
                     var self = _state$7;
                     switch (self._) {
                         case 'Web.AsManga.State.new':
-                            var $212 = self.time;
-                            var $213 = self.pad;
-                            var $214 = self.spd;
-                            var $215 = self.spr;
-                            var $216 = Web$AsManga$State$new$($212, V3$add$((() => {
+                            var $213 = self.time;
+                            var $214 = self.pad;
+                            var $215 = self.spd;
+                            var $216 = self.spr;
+                            var $217 = Web$AsManga$State$new$($213, V3$add$((() => {
                                 var self = _state$7;
                                 switch (self._) {
                                     case 'Web.AsManga.State.new':
-                                        var $217 = self.pos;
-                                        var $218 = $217;
-                                        return $218;
+                                        var $218 = self.pos;
+                                        var $219 = $218;
+                                        return $219;
                                 };
                             })(), Web$AsManga$pad_dir$((() => {
                                 var self = _state$7;
                                 switch (self._) {
                                     case 'Web.AsManga.State.new':
-                                        var $219 = self.pad;
-                                        var $220 = $219;
-                                        return $220;
+                                        var $220 = self.pad;
+                                        var $221 = $220;
+                                        return $221;
                                 };
                             })(), (() => {
                                 var self = _state$7;
                                 switch (self._) {
                                     case 'Web.AsManga.State.new':
-                                        var $221 = self.spd;
-                                        var $222 = $221;
-                                        return $222;
+                                        var $222 = self.spd;
+                                        var $223 = $222;
+                                        return $223;
                                 };
-                            })())), $213, $214, $215);
-                            var _state$8 = $216;
+                            })())), $214, $215, $216);
+                            var _state$8 = $217;
                             break;
                     };
-                    var $206 = App$store$(_state$8);
-                    var $197 = $206;
+                    var $207 = App$store$(_state$8);
+                    var $198 = $207;
                     break;
                 case 'App.Event.key_down':
-                    var $223 = self.code;
+                    var $224 = self.code;
                     var self = _state$4;
                     switch (self._) {
                         case 'Web.AsManga.State.new':
-                            var $225 = self.pad;
-                            var $226 = $225;
-                            var _pad$7 = $226;
+                            var $226 = self.pad;
+                            var $227 = $226;
+                            var _pad$7 = $227;
                             break;
                     };
-                    var self = ($223 === 65);
+                    var self = ($224 === 65);
                     if (self) {
                         var self = _pad$7;
                         switch (self._) {
                             case 'Web.AsManga.Pad.new':
-                                var $228 = self.right;
-                                var $229 = self.up;
-                                var $230 = self.down;
-                                var $231 = Web$AsManga$Pad$new$(Bool$true, $228, $229, $230);
-                                var $227 = $231;
+                                var $229 = self.right;
+                                var $230 = self.up;
+                                var $231 = self.down;
+                                var $232 = Web$AsManga$Pad$new$(Bool$true, $229, $230, $231);
+                                var $228 = $232;
                                 break;
                         };
-                        var _pad$8 = $227;
+                        var _pad$8 = $228;
                     } else {
-                        var self = ($223 === 68);
+                        var self = ($224 === 68);
                         if (self) {
                             var self = _pad$7;
                             switch (self._) {
                                 case 'Web.AsManga.Pad.new':
-                                    var $234 = self.left;
-                                    var $235 = self.up;
-                                    var $236 = self.down;
-                                    var $237 = Web$AsManga$Pad$new$($234, Bool$true, $235, $236);
-                                    var $233 = $237;
+                                    var $235 = self.left;
+                                    var $236 = self.up;
+                                    var $237 = self.down;
+                                    var $238 = Web$AsManga$Pad$new$($235, Bool$true, $236, $237);
+                                    var $234 = $238;
                                     break;
                             };
-                            var $232 = $233;
+                            var $233 = $234;
                         } else {
-                            var self = ($223 === 87);
+                            var self = ($224 === 87);
                             if (self) {
                                 var self = _pad$7;
                                 switch (self._) {
                                     case 'Web.AsManga.Pad.new':
-                                        var $240 = self.left;
-                                        var $241 = self.right;
-                                        var $242 = self.down;
-                                        var $243 = Web$AsManga$Pad$new$($240, $241, Bool$true, $242);
-                                        var $239 = $243;
+                                        var $241 = self.left;
+                                        var $242 = self.right;
+                                        var $243 = self.down;
+                                        var $244 = Web$AsManga$Pad$new$($241, $242, Bool$true, $243);
+                                        var $240 = $244;
                                         break;
                                 };
-                                var $238 = $239;
+                                var $239 = $240;
                             } else {
-                                var self = ($223 === 83);
+                                var self = ($224 === 83);
                                 if (self) {
                                     var self = _pad$7;
                                     switch (self._) {
                                         case 'Web.AsManga.Pad.new':
-                                            var $246 = self.left;
-                                            var $247 = self.right;
-                                            var $248 = self.up;
-                                            var $249 = Web$AsManga$Pad$new$($246, $247, $248, Bool$true);
-                                            var $245 = $249;
+                                            var $247 = self.left;
+                                            var $248 = self.right;
+                                            var $249 = self.up;
+                                            var $250 = Web$AsManga$Pad$new$($247, $248, $249, Bool$true);
+                                            var $246 = $250;
                                             break;
                                     };
-                                    var $244 = $245;
+                                    var $245 = $246;
                                 } else {
-                                    var $250 = _pad$7;
-                                    var $244 = $250;
+                                    var $251 = _pad$7;
+                                    var $245 = $251;
                                 };
-                                var $238 = $244;
+                                var $239 = $245;
                             };
-                            var $232 = $238;
+                            var $233 = $239;
                         };
-                        var _pad$8 = $232;
+                        var _pad$8 = $233;
                     };
-                    var $224 = App$store$((() => {
+                    var $225 = App$store$((() => {
                         var self = _state$4;
                         switch (self._) {
                             case 'Web.AsManga.State.new':
-                                var $251 = self.time;
-                                var $252 = self.pos;
-                                var $253 = self.spd;
-                                var $254 = self.spr;
-                                var $255 = Web$AsManga$State$new$($251, $252, _pad$8, $253, $254);
-                                return $255;
+                                var $252 = self.time;
+                                var $253 = self.pos;
+                                var $254 = self.spd;
+                                var $255 = self.spr;
+                                var $256 = Web$AsManga$State$new$($252, $253, _pad$8, $254, $255);
+                                return $256;
                         };
                     })());
-                    var $197 = $224;
+                    var $198 = $225;
                     break;
                 case 'App.Event.key_up':
-                    var $256 = self.code;
+                    var $257 = self.code;
                     var self = _state$4;
                     switch (self._) {
                         case 'Web.AsManga.State.new':
-                            var $258 = self.pad;
-                            var $259 = $258;
-                            var _pad$7 = $259;
+                            var $259 = self.pad;
+                            var $260 = $259;
+                            var _pad$7 = $260;
                             break;
                     };
-                    var self = ($256 === 65);
+                    var self = ($257 === 65);
                     if (self) {
                         var self = _pad$7;
                         switch (self._) {
                             case 'Web.AsManga.Pad.new':
-                                var $261 = self.right;
-                                var $262 = self.up;
-                                var $263 = self.down;
-                                var $264 = Web$AsManga$Pad$new$(Bool$false, $261, $262, $263);
-                                var $260 = $264;
+                                var $262 = self.right;
+                                var $263 = self.up;
+                                var $264 = self.down;
+                                var $265 = Web$AsManga$Pad$new$(Bool$false, $262, $263, $264);
+                                var $261 = $265;
                                 break;
                         };
-                        var _pad$8 = $260;
+                        var _pad$8 = $261;
                     } else {
-                        var self = ($256 === 68);
+                        var self = ($257 === 68);
                         if (self) {
                             var self = _pad$7;
                             switch (self._) {
                                 case 'Web.AsManga.Pad.new':
-                                    var $267 = self.left;
-                                    var $268 = self.up;
-                                    var $269 = self.down;
-                                    var $270 = Web$AsManga$Pad$new$($267, Bool$false, $268, $269);
-                                    var $266 = $270;
+                                    var $268 = self.left;
+                                    var $269 = self.up;
+                                    var $270 = self.down;
+                                    var $271 = Web$AsManga$Pad$new$($268, Bool$false, $269, $270);
+                                    var $267 = $271;
                                     break;
                             };
-                            var $265 = $266;
+                            var $266 = $267;
                         } else {
-                            var self = ($256 === 87);
+                            var self = ($257 === 87);
                             if (self) {
                                 var self = _pad$7;
                                 switch (self._) {
                                     case 'Web.AsManga.Pad.new':
-                                        var $273 = self.left;
-                                        var $274 = self.right;
-                                        var $275 = self.down;
-                                        var $276 = Web$AsManga$Pad$new$($273, $274, Bool$false, $275);
-                                        var $272 = $276;
+                                        var $274 = self.left;
+                                        var $275 = self.right;
+                                        var $276 = self.down;
+                                        var $277 = Web$AsManga$Pad$new$($274, $275, Bool$false, $276);
+                                        var $273 = $277;
                                         break;
                                 };
-                                var $271 = $272;
+                                var $272 = $273;
                             } else {
-                                var self = ($256 === 83);
+                                var self = ($257 === 83);
                                 if (self) {
                                     var self = _pad$7;
                                     switch (self._) {
                                         case 'Web.AsManga.Pad.new':
-                                            var $279 = self.left;
-                                            var $280 = self.right;
-                                            var $281 = self.up;
-                                            var $282 = Web$AsManga$Pad$new$($279, $280, $281, Bool$false);
-                                            var $278 = $282;
+                                            var $280 = self.left;
+                                            var $281 = self.right;
+                                            var $282 = self.up;
+                                            var $283 = Web$AsManga$Pad$new$($280, $281, $282, Bool$false);
+                                            var $279 = $283;
                                             break;
                                     };
-                                    var $277 = $278;
+                                    var $278 = $279;
                                 } else {
-                                    var $283 = _pad$7;
-                                    var $277 = $283;
+                                    var $284 = _pad$7;
+                                    var $278 = $284;
                                 };
-                                var $271 = $277;
+                                var $272 = $278;
                             };
-                            var $265 = $271;
+                            var $266 = $272;
                         };
-                        var _pad$8 = $265;
+                        var _pad$8 = $266;
                     };
-                    var $257 = App$store$((() => {
+                    var $258 = App$store$((() => {
                         var self = _state$4;
                         switch (self._) {
                             case 'Web.AsManga.State.new':
-                                var $284 = self.time;
-                                var $285 = self.pos;
-                                var $286 = self.spd;
-                                var $287 = self.spr;
-                                var $288 = Web$AsManga$State$new$($284, $285, _pad$8, $286, $287);
-                                return $288;
+                                var $285 = self.time;
+                                var $286 = self.pos;
+                                var $287 = self.spd;
+                                var $288 = self.spr;
+                                var $289 = Web$AsManga$State$new$($285, $286, _pad$8, $287, $288);
+                                return $289;
                         };
                     })());
-                    var $197 = $257;
+                    var $198 = $258;
                     break;
                 case 'App.Event.tick':
                 case 'App.Event.mouse_down':
@@ -1465,11 +1469,11 @@ module.exports = (function() {
                 case 'App.Event.mouse_over':
                 case 'App.Event.mouse_click':
                 case 'App.Event.input':
-                    var $289 = App$pass;
-                    var $197 = $289;
+                    var $290 = App$pass;
+                    var $198 = $290;
                     break;
             };
-            return $197;
+            return $198;
         });
         var $189 = App$new$(_init$1, _draw$2, _when$3);
         return $189;

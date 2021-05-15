@@ -1,3 +1,35 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Pausa para lanchin
+// Volto 16h +-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Web.AsManga.Sprite.render(spr: Web.AsManga.Sprite, pos: V3): DOM
   let attrs = {
     "src": spr@data
@@ -79,6 +111,8 @@ Web.AsManga.AsManga: App<Web.AsManga.State>
     let among_str = Web.AsManga.sprite(state@time, Web.AsManga.is_walking(state@pad))
     let among_pos = state@pos
 
+    let line = ((x) DOM.node("div", {}, {}, [DOM.text(x)])) :: String -> _
+
     DOM.node("div", {}, {}, [
       DOM.node("div", {}, {}, [
         DOM.text(`
@@ -89,14 +123,10 @@ Web.AsManga.AsManga: App<Web.AsManga.State>
           ele vai evoluir. Quanto tempo vou levar?
         `)
       ])
-      DOM.node("div", {}, {}, [
-        DOM.text(`
-          No momento: estou aproveitando a oportunidade pra melhorar
-          o framework de sincronia de tempo cliente/servidor dos apps
-          do Kind. Quando terminar isso, passarei a fazer o networking
-          do AsManga.
-        `)
-      ])
+      DOM.node("br", {}, {}, [])
+      line("No momento: time sync com o servidor UwU.Tech funcionando."),
+      line("Next: implementar o rollback netcode no Kind.App & AppPlay.js"),
+      line("Then: tornar o AsManga online."),
       DOM.node("div", {}, {}, [
         Web.AsManga.Sprite.render(among_str, among_pos)
       ])

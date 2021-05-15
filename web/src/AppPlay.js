@@ -3,6 +3,7 @@ const h = require("inferno-hyperscript").h;
 const apps = require("./apps/index.js");
 const sign = require("nano-ethereum-signer");
 const utils = require("./utils.js");
+const StateList = require("./StateList.js");
 const DEBUG_SHOW_FPS = false;
 
 module.exports = class AppPlay extends Component {
@@ -15,12 +16,17 @@ module.exports = class AppPlay extends Component {
     this.app = null; // application module, compiled from Kind
     this.app_state = null; // the state of the application
 
+    this.app_global_states = null; // previous global states
+    this.app_global_tick = null; // global tick we're at
+    this.app_global_posts = {}; // map of global posts
+    this.app_global_begin = null; // the first tick of this app
+
     this.intervals = {}; // timed intervals
     this.listeners = {}; // event listeners
     this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
     this.rendered = null; // document rendered by app, coming from Kind
     this.container = props.container; // container that holds rendered app
-    this.canvas = {}; // canvas that holds rendered pixel-art apps
+    this.canvas = {}; // multiple canvas that holds rendered pixel-art apps
   }
 
   // Initializes everything
@@ -46,7 +52,7 @@ module.exports = class AppPlay extends Component {
       //console.log("loading app...");
       this.app = (await apps[this.name])[this.name];
       this.app_state = this.app.init;
-      //console.log("loaded: ", this.app);
+      //console.log("loaded: ", this.app_state);
     }
   }
 
@@ -144,32 +150,13 @@ module.exports = class AppPlay extends Component {
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
 
-    //Tick event
-    //this.intervals.frame = () => {
-      //let time = performance.now()
-      //let frame = 1000/60
-      //let self = (mileseconds) => {
-        //if (mileseconds-time > frame) {
-          //this.register_event({
-            //_: "App.Event.tick",
-            //time: BigInt(Date.now()),
-            //info: {
-              //_: "App.EnvInfo.new",
-              //screen_size: {
-                //_: "Pair.new",
-                //fst: this.container ? this.container.width  : 0,
-                //snd: this.container ? this.container.height : 0,
-              //},
-              //mouse_pos: this.mouse_pos,
-            //}
-          //})
-          //time = performance.now()
-        //}
-        //window.requestAnimationFrame(self)
-      //}
-      //return window.requestAnimationFrame(self)
-    //}
-    //this.intervals.tick()
+    // Tick event
+    this.intervals.tick = () => {
+      setInterval(() => {
+        this.register_tick(window.KindEvents.get_tick())
+      }, 1000 / 16);
+    };
+    this.intervals.tick()
 
     // Frame event (60 fps)
     this.intervals.frame = () => {
@@ -202,7 +189,7 @@ module.exports = class AppPlay extends Component {
       if (this.app) {
         if (DEBUG_SHOW_FPS) {
           if (Date.now() - last_time > 1000) {
-            console.log("FPS: ", fps_count);
+            //console.log("FPS: ", fps_count);
             fps_count = 0;
             last_time = Date.now();
           }
@@ -221,16 +208,81 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  // Registers a post
+  register_post(post) {
+    if (this.app) {
+      var key = String(post.time);
+      if (!this.app_global_posts[key]) {
+        this.app_global_posts[key] = [];
+      }
+      this.app_global_posts[key].push(post);
+      if (!this.app_global_begin || post.time < this.app_global_begin) {
+        this.app_global_begin = post.time;
+      }
+      this.register_tick(post.time);
+      //console.log(this.app_global_posts);
+      //console.log(this.app_global_begin);
+    }
+  }
+
+  // Computes the global state at given tick (rollback netcode)
+  register_tick(tick) {
+    if (this.app && this.app_global_begin !== null) {
+      //console.log("register_tick", tick);
+      // If the tick is older than the current state, rollback
+      if (this.app_global_tick !== null && tick < this.app_global_tick) {
+        //console.log("- older than " + this.app_global_tick);
+        var latest = StateList.latest(tick, this.app_global_states);
+        // If there is no previous state, reset to initial state
+        if (latest === null) {
+          //console.log("- RESET TO INIT");
+          this.app_global_tick = null;
+          this.app_state.global = this.app.init.global;
+        // Otherwise, restore found state
+        } else {
+          //console.log("- RESTORE TO " + latest.tick);
+          this.app_global_tick = latest.tick;
+          this.app_state.global = latest.state;
+        }
+      }
+      if (this.app_global_tick === null) {
+        //console.log("- init app_global_tick");
+        this.app_global_tick = this.app_global_begin;
+      }
+      //var count_ticks = 0;
+      //var count_posts = 0;
+      for (var t = this.app_global_tick; t < tick; ++t) {
+        //++count_ticks;
+        var posts = this.app_global_posts[String(t)];
+        var state = this.app_state.global;
+        if (posts) {
+          for (var i = 0; i < posts.length; ++i) {
+            var post = posts[i];
+            state = this.app.post(post.time)(post.room)(post.addr)(post.data)(state);
+            //++count_posts;
+          }
+        }
+        state = this.app.tick(t)(state);
+        this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
+        this.app_state.global = state;
+      };
+      //console.log("processed " + count_ticks + " ticks");
+      //console.log("processed " + count_posts + " posts");
+      this.app_global_tick = tick;
+    }
+  }
+
   // Performs an IO computation
   run_io(io) {
-    //console.log("Run IO", io);
     switch (io._) {
       case "IO.end":
-        if (io.value.value !== null) {
-          this.app_state = io.value.value;
-          return Promise.resolve(io.value.value);
+        switch (io.value._) {
+          case "none":
+            return Promise.resolve(null);
+          case "some": 
+            this.app_state = io.value.value;
+            return Promise.resolve(io.value.value);
         }
-        return Promise.resolve(null);
       case "IO.ask":
         //console.log("IO.ask", io.param);
         return new Promise((res, err) => {
@@ -275,8 +327,9 @@ module.exports = class AppPlay extends Component {
               if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
-                  var time = BigInt(parseInt(time.slice(2), 16));
-                  this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
+                  var time = parseInt(time.slice(2), 16);
+                  this.register_post({room,time,addr,data});
+                  //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
                 console.log("Error: invalid input on App.Action.watch");

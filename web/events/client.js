@@ -86,6 +86,11 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     return Date.now() + delta_time;  
   };
 
+  // Returns the best estimative of the server's current tick
+  function get_tick() {
+    return Math.floor((Date.now() + delta_time) / 62.5);
+  };
+
   // Asks the server for its current time
   function ask_time() {
     last_ask_time = Date.now();
@@ -143,6 +148,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     watch_room,
     unwatch_room,
     get_time,
+    get_tick,
     lib,
   };
 };

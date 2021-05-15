@@ -1,4 +1,4 @@
-// Compiles apps from `Kind/base/Web/*.kind to `src/apps/*.js`
+// Compiles apps from `Kind/base/App/*.kind to `src/apps/*.js`
 
 var fs = require("fs");
 var exec = require("child_process").execSync;
@@ -7,7 +7,7 @@ var code_dir = __dirname+"/src";
 var kind_dir = __dirname+"/../base";
 
 process.chdir(kind_dir);
-var files = fs.readdirSync("Web").filter(x => x.slice(-5) === ".kind");
+var files = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
 if (process.argv[2]) {
   files = files.filter(name => {
     return name.toLowerCase().indexOf(process.argv[2].toLowerCase()) !== -1
@@ -19,7 +19,7 @@ var apps = [];
 console.log("Compiling apps:");
 for (var file of files) {
   process.chdir(kind_dir);
-  var name = "Web."+file.slice(0,-5);
+  var name = "App."+file.slice(0,-5);
   console.log("- " + name);
   
   var code = String(exec("kind "+name+" --js --module | js-beautify"));

@@ -22,10 +22,14 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     }
   }
 
-  var last_ask_time = null;
-  var best_ask_delay = Infinity;
-  var delta_time = 0;
-  var ping = 0;
+  // Time sync variables
+  var last_ask_time = null; // last time we pinged the server
+  var last_ask_numb = 0; // id of the last ask request
+  var best_ask_ping = Infinity; // best ping we got
+  var delta_time = 0; // estimated time on best ping
+  var ping = 0; // current ping
+
+  // User-defined callbacks
   var on_init_callback = null;
   var on_post_callback = null;
 
@@ -83,13 +87,24 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     }
   };
 
+  // Returns the best estimative of the server's current time
   function get_time() {
     return Date.now() + delta_time;  
   };
 
+  // Returns the best estimative of the server's current tick
+  function get_tick() {
+    return Math.floor((Date.now() + delta_time) / 62.5);
+  };
+
+  // Asks the server for its current time
   function ask_time() {
     last_ask_time = Date.now();
-    ws_send(lib.hexs_to_bytes([lib.u8_to_hex(lib.TIME)]));
+    last_ask_numb = ++last_ask_numb;
+    ws_send(lib.hexs_to_bytes([
+      lib.u8_to_hex(lib.TIME),
+      lib.u48_to_hex(last_ask_numb),
+    ]));
   };
 
   ws.binaryType = "arraybuffer";
@@ -97,7 +112,10 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   ws.onopen = function() {
     if (on_init_callback) {
       on_init_callback();
-      ask_time();
+      // Pings time now, after 0.5s, after 1s, and then every 2s
+      setTimeout(ask_time, 0);
+      setTimeout(ask_time, 500);
+      setTimeout(ask_time, 1000);
       setInterval(ask_time, 2000);
     }
   };
@@ -114,22 +132,20 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
         on_post_callback({room, time, addr, data}, Posts);
       }
     };
-    //if (msge[0] === lib.TIME) {
-      //var time = lib.bytes_to_hex(msge.slice(1, 7));
-      //if (last_ask_time !== null) {
-        //var delay = Date.now() - last_ask_time;
-        //if (delay < best_ask_delay) {
-          //var server_time = Number(time) + delay / 2;
-          //var local_time = Date.now();
-          //delta_time = server_time - local_time;
-          //console.log("Received time from server. Difference is: " + delta_time);
-        //}
-      //}
-    //};
+    if (msge[0] === lib.TIME) {
+      var reported_server_time = lib.bytes_to_hex(msge.slice(1, 7));
+      var reply_numb = lib.hex_to_u48(lib.bytes_to_hex(msge.slice(7, 13)));
+      if (last_ask_time !== null && last_ask_numb === reply_numb) {
+        ping = (Date.now() - last_ask_time) / 2;
+        var local_time = Date.now();
+        var estimated_server_time = Number(reported_server_time) + ping;
+        if (ping < best_ask_ping) {
+          delta_time = estimated_server_time - local_time;
+          best_ask_ping = ping;
+        }
+      }
+    };
   };
-
-  //se eu tenho uma estimativa do tempo do servidor razoável, porém o ping aumenta
-  //logo na sequência, minha estimativa do tempo vai ser comprometida
 
   return {
     on_init,
@@ -138,6 +154,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     watch_room,
     unwatch_room,
     get_time,
+    get_tick,
     lib,
   };
 };
@@ -273,6 +290,7 @@ module.exports = {
   UNWATCH,
   POST,
   SHOW,
+  TIME,
   hex_to_bytes,
   bytes_to_hex,
   hexs_to_bytes,
@@ -2945,6 +2963,7 @@ const h = __webpack_require__(86).h;
 const apps = __webpack_require__(649);
 const sign = __webpack_require__(216);
 const utils = __webpack_require__(555);
+const StateList = __webpack_require__(321);
 const DEBUG_SHOW_FPS = false;
 
 module.exports = class AppPlay extends Component {
@@ -2957,12 +2976,17 @@ module.exports = class AppPlay extends Component {
     this.app = null; // application module, compiled from Kind
     this.app_state = null; // the state of the application
 
+    this.app_global_states = null; // previous global states
+    this.app_global_tick = null; // global tick we're at
+    this.app_global_posts = {}; // map of global posts
+    this.app_global_begin = null; // the first tick of this app
+
     this.intervals = {}; // timed intervals
     this.listeners = {}; // event listeners
     this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
     this.rendered = null; // document rendered by app, coming from Kind
     this.container = props.container; // container that holds rendered app
-    this.canvas = {}; // canvas that holds rendered pixel-art apps
+    this.canvas = {}; // multiple canvas that holds rendered pixel-art apps
   }
 
   // Initializes everything
@@ -2988,7 +3012,7 @@ module.exports = class AppPlay extends Component {
       //console.log("loading app...");
       this.app = (await apps[this.name])[this.name];
       this.app_state = this.app.init;
-      //console.log("loaded: ", this.app);
+      //console.log("loaded: ", this.app_state);
     }
   }
 
@@ -3086,32 +3110,13 @@ module.exports = class AppPlay extends Component {
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
 
-    //Tick event
-    //this.intervals.frame = () => {
-      //let time = performance.now()
-      //let frame = 1000/60
-      //let self = (mileseconds) => {
-        //if (mileseconds-time > frame) {
-          //this.register_event({
-            //_: "App.Event.tick",
-            //time: BigInt(Date.now()),
-            //info: {
-              //_: "App.EnvInfo.new",
-              //screen_size: {
-                //_: "Pair.new",
-                //fst: this.container ? this.container.width  : 0,
-                //snd: this.container ? this.container.height : 0,
-              //},
-              //mouse_pos: this.mouse_pos,
-            //}
-          //})
-          //time = performance.now()
-        //}
-        //window.requestAnimationFrame(self)
-      //}
-      //return window.requestAnimationFrame(self)
-    //}
-    //this.intervals.tick()
+    // Tick event
+    this.intervals.tick = () => {
+      setInterval(() => {
+        this.register_tick(window.KindEvents.get_tick())
+      }, 1000 / 16);
+    };
+    this.intervals.tick()
 
     // Frame event (60 fps)
     this.intervals.frame = () => {
@@ -3144,7 +3149,7 @@ module.exports = class AppPlay extends Component {
       if (this.app) {
         if (DEBUG_SHOW_FPS) {
           if (Date.now() - last_time > 1000) {
-            console.log("FPS: ", fps_count);
+            //console.log("FPS: ", fps_count);
             fps_count = 0;
             last_time = Date.now();
           }
@@ -3163,16 +3168,81 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  // Registers a post
+  register_post(post) {
+    if (this.app) {
+      var key = String(post.time);
+      if (!this.app_global_posts[key]) {
+        this.app_global_posts[key] = [];
+      }
+      this.app_global_posts[key].push(post);
+      if (!this.app_global_begin || post.time < this.app_global_begin) {
+        this.app_global_begin = post.time;
+      }
+      this.register_tick(post.time);
+      //console.log(this.app_global_posts);
+      //console.log(this.app_global_begin);
+    }
+  }
+
+  // Computes the global state at given tick (rollback netcode)
+  register_tick(tick) {
+    if (this.app && this.app_global_begin !== null) {
+      //console.log("register_tick", tick);
+      // If the tick is older than the current state, rollback
+      if (this.app_global_tick !== null && tick < this.app_global_tick) {
+        //console.log("- older than " + this.app_global_tick);
+        var latest = StateList.latest(tick, this.app_global_states);
+        // If there is no previous state, reset to initial state
+        if (latest === null) {
+          //console.log("- RESET TO INIT");
+          this.app_global_tick = null;
+          this.app_state.global = this.app.init.global;
+        // Otherwise, restore found state
+        } else {
+          //console.log("- RESTORE TO " + latest.tick);
+          this.app_global_tick = latest.tick;
+          this.app_state.global = latest.state;
+        }
+      }
+      if (this.app_global_tick === null) {
+        //console.log("- init app_global_tick");
+        this.app_global_tick = this.app_global_begin;
+      }
+      //var count_ticks = 0;
+      //var count_posts = 0;
+      for (var t = this.app_global_tick; t < tick; ++t) {
+        //++count_ticks;
+        var posts = this.app_global_posts[String(t)];
+        var state = this.app_state.global;
+        if (posts) {
+          for (var i = 0; i < posts.length; ++i) {
+            var post = posts[i];
+            state = this.app.post(post.time)(post.room)(post.addr)(post.data)(state);
+            //++count_posts;
+          }
+        }
+        state = this.app.tick(t)(state);
+        this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
+        this.app_state.global = state;
+      };
+      //console.log("processed " + count_ticks + " ticks");
+      //console.log("processed " + count_posts + " posts");
+      this.app_global_tick = tick;
+    }
+  }
+
   // Performs an IO computation
   run_io(io) {
-    //console.log("Run IO", io);
     switch (io._) {
       case "IO.end":
-        if (io.value.value !== null) {
-          this.app_state = io.value.value;
-          return Promise.resolve(io.value.value);
+        switch (io.value._) {
+          case "none":
+            return Promise.resolve(null);
+          case "some": 
+            this.app_state = io.value.value;
+            return Promise.resolve(io.value.value);
         }
-        return Promise.resolve(null);
       case "IO.ask":
         //console.log("IO.ask", io.param);
         return new Promise((res, err) => {
@@ -3217,8 +3287,9 @@ module.exports = class AppPlay extends Component {
               if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
-                  var time = BigInt(parseInt(time.slice(2), 16));
-                  this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
+                  var time = parseInt(time.slice(2), 16);
+                  this.register_post({room,time,addr,data});
+                  //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
                 console.log("Error: invalid input on App.Action.watch");
@@ -3351,18 +3422,50 @@ module.exports = class AppPlay extends Component {
 
 /***/ }),
 
+/***/ 321:
+/***/ ((module) => {
+
+// Adds a state to the list of states
+// It only keeps log(N) states, where N is the amount of ticks recorded
+function push(new_state, states) {
+  if (states === null) {
+    return {bit: 0, state: new_state, older: null};
+  } else {
+    var {bit, state, older} = states;
+    if (bit === 0) {
+      return {bit: 1, state, older};
+    } else {
+      return {bit: 0, state: new_state, older: push(state, older)};
+    }
+  }
+}
+
+// Finds the latest state that happened before a tick
+function latest(before_tick, states) {
+  if (states === null) {
+    return null;
+  } else {
+    if (states.state.tick < before_tick) {
+      return states.state;
+    } else {
+      return latest(before_tick, states.older);
+    }
+  }
+}
+
+module.exports = {
+  push,
+  latest,
+};
+
+
+/***/ }),
+
 /***/ 649:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
-  'Web.AsManga': __webpack_require__.e(/* import() */ 190).then(__webpack_require__.t.bind(__webpack_require__, 190, 23)),
-  'Web.Demo': __webpack_require__.e(/* import() */ 987).then(__webpack_require__.t.bind(__webpack_require__, 987, 23)),
-  'Web.Kaelin': __webpack_require__.e(/* import() */ 927).then(__webpack_require__.t.bind(__webpack_require__, 927, 23)),
-  'Web.Kind': __webpack_require__.e(/* import() */ 464).then(__webpack_require__.t.bind(__webpack_require__, 464, 23)),
-  'Web.Online': __webpack_require__.e(/* import() */ 523).then(__webpack_require__.t.bind(__webpack_require__, 523, 23)),
-  'Web.Playground': __webpack_require__.e(/* import() */ 791).then(__webpack_require__.t.bind(__webpack_require__, 791, 23)),
-  'Web.Senhas': __webpack_require__.e(/* import() */ 936).then(__webpack_require__.t.bind(__webpack_require__, 936, 23)),
-  'Web.TicTacToe': __webpack_require__.e(/* import() */ 734).then(__webpack_require__.t.bind(__webpack_require__, 734, 23)),
+  'App.MiniMMO': __webpack_require__.e(/* import() */ 661).then(__webpack_require__.t.bind(__webpack_require__, 661, 23)),
 }
 
 
