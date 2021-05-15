@@ -1,6 +1,0 @@
-Kind.Parser.init: Parser(Nat)
-  Parser {
-    Kind.Parser.spaces;
-    get from = Parser.get_index;
-    return from;
-  }

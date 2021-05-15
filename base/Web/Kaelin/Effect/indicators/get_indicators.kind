@@ -1,0 +1,13 @@
+////TODO: change name to Web.Kaelin.Skill.get_indicators
+Web.Kaelin.Effect.indicators.get_indicators(
+  tick: Nat
+  hero_pos: Web.Kaelin.Coord
+  skill: Web.Kaelin.Skill
+  mouse_coord: Web.Kaelin.Coord
+  map: Web.Kaelin.Map
+): NatMap<Web.Kaelin.Indicator>
+  open skill
+  //Returning each effect's List of affected coords
+  result = skill.effect(tick, hero_pos, mouse_coord, map)
+  open result
+  result.indicators

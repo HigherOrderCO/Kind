@@ -1,6 +1,0 @@
-// TODO: remove Parser.spaces_text
-Parser.consume(text: String): Parser(Unit)
-  Parser {
-    Parser.spaces;
-    Parser.text(text);
-  }

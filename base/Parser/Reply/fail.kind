@@ -1,0 +1,7 @@
+Parser.Reply.fail<T: Type>(
+  nam: String
+  ini: Nat
+  idx: Nat
+  msg: String
+): Parser.Reply<T>
+  Parser.Reply.error!(Parser.Error.new(nam, ini, idx, msg))

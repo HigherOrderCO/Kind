@@ -827,13 +827,13 @@ module.exports = (function() {
                     break;
                 case 'App.Event.init':
                 case 'App.Event.tick':
+                case 'App.Event.frame':
                 case 'App.Event.mouse_down':
                 case 'App.Event.mouse_up':
                 case 'App.Event.key_up':
                 case 'App.Event.post':
                 case 'App.Event.mouse_over':
-                case 'App.Event.mouse_out':
-                case 'App.Event.resize':
+                case 'App.Event.input':
                     var $128 = App$pass;
                     var $123 = $128;
                     break;

@@ -1,0 +1,19 @@
+// How to reproduce 
+// Just call the type checker for this file
+Example.bugs.bug1: _
+  let a = T1.new("asd", T2.new(3, "sand"))
+  a@ola@sand
+
+type T2 {
+  new(
+    why: U32,
+    sand: String
+  )
+}
+
+type T1 {
+  new (
+    alo: String,
+    ola: T2
+  )
+}

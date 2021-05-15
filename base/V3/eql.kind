@@ -1,0 +1,4 @@
+V3.eql(a: V3, b: V3): Bool
+  open a
+  open b
+  (a.x =? b.x) && (a.y =? b.y) && (a.z =? b.z)

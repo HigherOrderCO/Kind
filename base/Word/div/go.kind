@@ -10,7 +10,7 @@ Word.div.go<size: Nat>(shift: Nat, sub_copy: Word(size), shift_copy: Word(size),
     zero:
       new_value,
     succ:
-      let new_shift_copy = Word.shift_right1<size>(shift_copy)
+      let new_shift_copy = Word.shift_right<size>(1, shift_copy)
       if bit_on then
         Word.div.go<size>(shift.pred, Word.sub<size>(sub_copy, shift_copy), new_shift_copy, new_value)
       else

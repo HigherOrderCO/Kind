@@ -56,10 +56,6 @@ Kind.Comp.compile(
           none: {Kind.Comp.nil, Kind.Term.typ}
           some: {Kind.Comp.ref(term.name), open got.value; got.value.type}
         }
-      typ: {
-        Kind.Comp.nil
-        Kind.Term.typ
-      }
       app:
         let {func_cmp, func_typ} = Kind.Comp.compile(term.func, none, defs, size)
         case Kind.Term.reduce(func_typ, defs) as func_typ {
@@ -86,8 +82,6 @@ Kind.Comp.compile(
         {Kind.Comp.let(name_uid, expr_cmp, body_cmp), body_typ}
       def:
         Kind.Comp.compile(term.body(term.expr), none, defs, size)
-      all:
-        {Kind.Comp.nil, Kind.Term.typ}
       ann:
         Kind.Comp.compile(term.term, some(term.type), defs, size)
       loc:
@@ -98,8 +92,6 @@ Kind.Comp.compile(
         {Kind.Comp.chr(term.chrx), Kind.Term.ref("Char")}
       str:
         {Kind.Comp.str(term.strx), Kind.Term.ref("String")}
-      cse:
-        {Kind.Comp.nil, Kind.Term.typ}
       ori:
         Kind.Comp.compile(term.expr, none, defs, size)
     } default {Kind.Comp.nil, Kind.Term.typ}

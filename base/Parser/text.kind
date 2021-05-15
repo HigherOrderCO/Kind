@@ -1,5 +1,30 @@
 Parser.text(text: String): Parser(Unit)
-  (idx,code) case Parser.text.go(text, idx,code) as reply {
-    error: Parser.Reply.error<Unit>(idx, code, reply.err),
-    value: Parser.Reply.value<Unit>(reply.idx, reply.code, reply.val),
+  (pst)
+  open pst
+  case Parser.text.go(pst.idx, text, text, pst) as reply {
+    error:
+      Parser.Reply.error<Unit>(reply.err)
+    value:
+      Parser.Reply.value<Unit>(reply.pst, reply.val)
+  }
+
+Parser.text.go(ini_idx: Nat, ini_txt: String, text: String): Parser(Unit)
+  (pst)
+  open pst
+  case text {
+    nil:
+      Parser.Reply.value<Unit>(pst, unit)
+    cons: case pst.str {
+      nil:
+        let error_msg = "Expected '" | ini_txt | "', found end of file."
+        Parser.Reply.fail<Unit>(pst.nam, pst.ini, ini_idx, error_msg)
+      cons:
+        if U16.eql(text.head, pst.str.head) then
+          let pst = Parser.State.new(pst.err, pst.nam, pst.ini, Nat.succ(pst.idx), pst.str.tail)
+          Parser.text.go(ini_idx, ini_txt, text.tail, pst)
+        else
+          let chr = String.cons(pst.str.head, String.nil)
+          let err = "Expected '" | ini_txt | "', found '" | chr | "'."
+          Parser.Reply.fail<Unit>(pst.nam, pst.ini, ini_idx, err)
+    }
   }

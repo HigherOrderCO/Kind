@@ -1,0 +1,4 @@
+Parser.get_ini: Parser(Nat)
+  (pst)
+  open pst
+  Parser.Reply.value!(pst, pst.ini)

@@ -1,0 +1,8 @@
+type Parser.Error {
+  new(
+    nam: String // name of parsed block
+    ini: Nat    // first index of parsed block
+    idx: Nat    // last reached index
+    msg: String // error message
+  )
+}

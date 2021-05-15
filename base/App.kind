@@ -1,8 +1,114 @@
-type App <S: Type> {
+// The App type is parametric on two types: the local and global state types.
+App.State: Type
+  Pair<Type, Type>
+
+// Gets the local state type of the App type
+App.State.local: App.State -> Type
+  Pair.fst<Type,Type>
+
+// Gets the global state type of the App type
+App.State.global: App.State -> Type
+  Pair.snd<Type,Type>
+
+// Creates a new App type
+App.State.new<A: Type, B: Type>: App.State
+  Pair.new<Type,Type>(A, B)
+
+// The App's store holds its local and global states
+type App.Store <S: App.State> {
   new(
-    init: S
-    draw: S -> DOM
-    when: App.Event -> S -> IO<Dynamic>
+    local: App.State.local(S)
+    global: App.State.global(S)
+  )
+}
+
+// An App is a tuple of functions defining its behaviors
+type App <S: App.State> {
+  new(
+    init: App.Init<S> // initial state
+    draw: App.Draw<S> // render function
+    when: App.When<S> // local event handler
+    tick: App.Tick<S> // global tick handler
+    post: App.Post<S> // global post handler
+  )
+}
+
+// The initial state
+App.Init<S: App.State>: Type
+  App.Store<S>
+
+// The render function receives a state and returns a virtual DOM
+App.Draw<S: App.State>: Type
+  ((state: App.Store<S>) -> DOM)
+
+// The local event handler receives the event, the state, and returns an IO
+// action. That IO action may return an updated local state.
+App.When<S: App.State>: Type
+  ((event: App.Event, state: App.Store<S>) -> IO<Maybe<App.State.local(S)>>)
+
+// The global tick handler receives an interval of time, the global state, and
+// must return the updated global state.
+App.Tick<S: App.State>: Type
+  ((tick: U64, glob: App.State.global(S)) -> App.State.global(S))
+
+// The global post handler receives:
+// - time: 40 bits, representing time in 62.5s ticks. Equal to UTC_TIME / 62.5
+// - room: 56 bits, representing the room this post was posted to.
+// - addr: 160 bits, the user identifier, represented as its Ethereum address
+// - data: 256 bits, the contents of the post
+// - glob: the current global state of the app
+// It must return the updated global state.
+App.Post<S: App.State>: Type
+  ((time: U64, room: String, addr: String, data: String, glob: App.State.global(S)) -> App.State.global(S))
+
+type App.Event {
+  // Occurs when the app is initialized
+  init(
+    time: U64
+    user: App.UserAddress
+    info: App.EnvInfo
+  )
+  // Occurs 60 frames per second
+  frame(
+    time: U64
+    info: App.EnvInfo
+  )
+  // Occurs when the user presses a mouse button over an element and before it is released
+  mouse_down(
+    time: U64
+    button: U16
+  )
+  // Occurs when a user releases a mouse button over an element
+  mouse_up(
+    time: U64
+    button: U16
+  )
+  // Occurs when the user presses a keyboard key down
+  key_down(
+    time: U64
+    code: U16
+  )
+  // Occurs when the user releases a keyboard key up
+  key_up(
+    time: U64
+    code: U16
+  )
+  // The event occurs when the pointer is moved onto an element, or onto one of its children
+  mouse_over(
+    time: U64
+    id: String
+  )
+  // The event occurs when the user clicks on an element. It's fired after the mousedown and mouseup events
+  mouse_click(
+    time: U64
+    id: String
+    action: String
+  )
+  // Occurs when there is a new text input in a DOM element
+  input(
+    time: U64
+    id: String
+    text: String
   )
 }
 
@@ -16,58 +122,57 @@ type App.EnvInfo {
 App.UserAddress: Type
   String
 
-type App.Event {
-  init(
-    time: U64
-    user: App.UserAddress
-    info: App.EnvInfo
-  )
-  tick(
-    time: U64
-    info: App.EnvInfo
-  )
-  // The event occurs when the user presses a mouse button over an element and before it is released
-  mouse_down(
-    time: U64
-    button: U16
-  )
-  // The event occurs when a user releases a mouse button over an element
-  mouse_up(
-    time: U64
-    button: U16
-  )
-  key_down(
-    time: U64
-    code: U16
-  )
-  key_up(
-    time: U64
-    code: U16
-  )
-  post(
-    time: U64
-    room: String
-    addr: String
-    data: String
-  )
-  // The event occurs when the pointer is moved onto an element, or onto one of its children
-  mouse_over(
-    time: U64
-    id: String
-  )
-  // The event occurs when a user moves the mouse pointer out of an element, or out of one of its children
-  mouse_out(
-    time: U64
-    id: String
-  )
-  // The event occurs when the user clicks on an element. It's fired after the mousedown and mouseup events
-  mouse_click(
-    time: U64
-    id: String
-    action: String
-  )
-  resize(
-    time: U64
-    info: App.EnvInfo
-  )
-}
+// Default init
+App.no_init<S: App.State>: Unit
+  unit
+
+// Default draw
+App.no_draw<S: App.State>: App.Draw<S>
+  (state) DOM.text("")
+
+// Default when
+App.no_when<S: App.State>: App.When<S>
+  (event, state) App.pass!
+
+// Default tick
+App.no_tick<S: App.State>: App.Tick<S>
+  (tick, glob) glob
+
+// Default post
+App.no_post<S: App.State>: App.Post<S>
+  (time, room, addr, data, glob) glob
+
+App.do<S: App.State>(call: String, param: String): IO<Maybe<App.State.local<S>>>
+  IO {
+    IO.do(call, param)
+    App.pass<S>
+  }
+
+App.pass<S: App.State>: IO<Maybe<App.State.local(S)>>
+  IO {
+    return none
+  }
+
+App.new_post<S: App.State>(room: String, data: String): IO<Maybe<App.State.local<S>>>
+  IO {
+    App.do<S>("post", room | ";" | data)
+    App.pass<S>
+  }
+
+App.print<S: App.State>(str: String): IO<Maybe<App.State.local<S>>>
+  IO {
+    IO.print(str)
+    App.pass<S>
+  }
+
+App.store<S: App.State>(value: App.State.local<S>): IO<Maybe<App.State.local<S>>>
+  IO {
+    return some(value)
+  }
+
+App.watch<S: App.State>(room: String): IO<Maybe<App.State.local<S>>>
+  App.do<S>("watch", room)
+
+
+//foo: Type
+  //App.Post<App.State.new(Unit,Unit)>

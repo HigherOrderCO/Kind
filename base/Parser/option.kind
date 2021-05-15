@@ -1,0 +1,6 @@
+Parser.option(pars: List<Parser(Unit)>): Parser(Nat)
+  Parser.first_of<Nat>(List.imapped!(pars)!((n, parse)
+    Parser {
+      parse
+      return n
+    }))

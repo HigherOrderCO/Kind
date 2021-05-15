@@ -1,0 +1,13 @@
+Word.shift_right.one<size: Nat>(word: Word(size)): Word(size)
+  case word {
+    e: Word.e,
+    o: Word.shift_right.one.go<word.size>(word.pred),
+    i: Word.shift_right.one.go<word.size>(word.pred)
+  }: Word(word.size)
+
+Word.shift_right.one.go<size: Nat>(word: Word(size)): Word(Nat.succ(size))
+  case word {
+    e: Word.o!(Word.e),
+    o: Word.o<Nat.succ(word.size)>(Word.shift_right.one.go<word.size>(word.pred)),
+    i: Word.i<Nat.succ(word.size)>(Word.shift_right.one.go<word.size>(word.pred))
+  }: Word(Nat.succ(word.size))

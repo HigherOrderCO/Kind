@@ -40,6 +40,11 @@ for (var file of files) {
 // Methods
 // =======
 
+// Returns current tick
+function get_tick() {
+  return Math.floor(Date.now() / 62.5);
+}
+
 // Adds a user to a room's watchlist
 function watch_room(room_name, ws) {
   // Creates watcher list
@@ -86,8 +91,8 @@ function unwatch_room(room_name, ws) {
 
 // Saves a post (room id, user address, data)
 function save_post(post_room, post_user, post_data) {
-  var post_room = lib.check_hex(48, post_room);
-  var post_time = lib.u48_to_hex(Date.now());
+  var post_room = lib.check_hex(56, post_room);
+  var post_time = lib.u40_to_hex(get_tick());
   var post_user = lib.check_hex(160, post_user);
   var post_data = lib.check_hex(256, post_data);
   var post_buff = lib.hexs_to_bytes([
@@ -149,22 +154,32 @@ wss.on("connection", function connection(ws) {
     switch (msge[0]) {
       // User wants to watch a room
       case lib.WATCH:
-        var room = lib.bytes_to_hex(msge.slice(1, 7));
+        var room = lib.bytes_to_hex(msge.slice(1, 8));
         watch_room(room, ws);
         break;
 
       // User wants to unwatch a room
       case lib.UNWATCH:
-        var room = lib.bytes_to_hex(msge.slice(1, 7));
+        var room = lib.bytes_to_hex(msge.slice(1, 8));
         unwatch_room(room, ws);
+        break;
+
+      // User wants to know the time
+      case lib.TIME:
+        var msge_buff = lib.hexs_to_bytes([
+          lib.u8_to_hex(lib.TIME),
+          lib.u48_to_hex(Date.now()),
+          lib.bytes_to_hex(msge.slice(1, 7)),
+        ]);
+        ws.send(msge_buff);
         break;
 
       // User wants to post a message
       case lib.POST:
         //console.log("got post msge...", msge);
-        var post_room = lib.bytes_to_hex(msge.slice(1, 7));
-        var post_data = lib.bytes_to_hex(msge.slice(7, 39));
-        var post_sign = lib.bytes_to_hex(msge.slice(39, 104));
+        var post_room = lib.bytes_to_hex(msge.slice(1, 8));
+        var post_data = lib.bytes_to_hex(msge.slice(8, 40));
+        var post_sign = lib.bytes_to_hex(msge.slice(40, 105));
         var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
         var post_user = sig.signerAddress(post_hash, post_sign);
         save_post(post_room, post_user, post_data);

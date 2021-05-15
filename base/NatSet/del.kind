@@ -1,0 +1,2 @@
+NatSet.del(key: Nat, set: NatSet): NatSet
+  NatMap.del<Unit>(key, set)

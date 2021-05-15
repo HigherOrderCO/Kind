@@ -1,15 +1,13 @@
 Kind.Parser.without: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("without ");
-    get name = Kind.Parser.name1;
-    Kind.Parser.text(":");
-    get dflt = Kind.Parser.term;
-    get rest = Kind.Parser.term;
-    get orig = Kind.Parser.stop(init);
-    let term = Kind.Term.ref(name);
-    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)));
-    let term = Kind.Term.app(term, dflt);
-    let term = Kind.Term.app(term, Kind.Term.lam(name, (x) rest));
-    return Kind.Term.ori(orig, term);
-  }
+  Kind.Parser.block("without", Parser {
+    Kind.Parser.text("without ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text(":")
+    get dflt = Kind.Parser.term
+    get rest = Kind.Parser.term
+    let term = Kind.Term.ref(name)
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)))
+    let term = Kind.Term.app(term, dflt)
+    let term = Kind.Term.app(term, Kind.Term.lam(name, (x) rest))
+    return term
+  })

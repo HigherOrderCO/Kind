@@ -1,2 +1,2 @@
-Kind.Parser.gte: Nat -> Kind.Term -> Parser(Kind.Term)
+Kind.Parser.gte: Kind.Term -> Parser(Kind.Term)
   Kind.Parser.op(">=?", "Nat.gte")

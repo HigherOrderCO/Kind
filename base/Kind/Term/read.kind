@@ -1,5 +1,5 @@
 Kind.Term.read(code: String): Maybe<Kind.Term>
-  case Kind.Parser.term(0,code) as parsed {
-    error: Maybe.none!,
-    value: Maybe.some!(parsed.val),
+  case Kind.Parser.term(Parser.State.new(none, "", 0, 0, code)) as parsed {
+    error: none
+    value: some(parsed.val)
   }

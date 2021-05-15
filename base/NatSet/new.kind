@@ -1,0 +1,2 @@
+NatSet.new: NatSet
+  NatMap.new<Unit>

@@ -1,0 +1,6 @@
+type Web.Kaelin.Map.Entity {
+  animation(value: Web.Kaelin.Animation)
+  background(value: Web.Kaelin.Terrain)
+  creature(value: Web.Kaelin.Creature)
+}
+  

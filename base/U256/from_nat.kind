@@ -1,0 +1,2 @@
+U256.from_nat(n: Nat): U256
+  U256.new(Nat.to_word!(n))

@@ -3,6 +3,8 @@ const h = require("inferno-hyperscript").h;
 const apps = require("./apps/index.js");
 const sign = require("nano-ethereum-signer");
 const utils = require("./utils.js");
+const StateList = require("./StateList.js");
+const DEBUG_SHOW_FPS = false;
 
 module.exports = class AppPlay extends Component {
 
@@ -14,12 +16,17 @@ module.exports = class AppPlay extends Component {
     this.app = null; // application module, compiled from Kind
     this.app_state = null; // the state of the application
 
+    this.app_global_states = null; // previous global states
+    this.app_global_tick = null; // global tick we're at
+    this.app_global_posts = {}; // map of global posts
+    this.app_global_begin = null; // the first tick of this app
+
     this.intervals = {}; // timed intervals
     this.listeners = {}; // event listeners
     this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
     this.rendered = null; // document rendered by app, coming from Kind
-    this.container = null; // container that holds rendered app
-    this.canvas = {}; // canvas that holds rendered pixel-art apps
+    this.container = props.container; // container that holds rendered app
+    this.canvas = {}; // multiple canvas that holds rendered pixel-art apps
   }
 
   // Initializes everything
@@ -45,8 +52,17 @@ module.exports = class AppPlay extends Component {
       //console.log("loading app...");
       this.app = (await apps[this.name])[this.name];
       this.app_state = this.app.init;
-      //console.log("loaded: ", this.app);
+      //console.log("loaded: ", this.app_state);
     }
+  }
+
+  on_input(id) {
+    this.register_event({
+      _: "App.Event.input",
+      time: BigInt(Date.now()),
+      id,
+      text: document.getElementById(id).value
+    });
   }
 
   // Initializes the input event listeners
@@ -57,13 +73,13 @@ module.exports = class AppPlay extends Component {
     this.register_event({
       _: "App.Event.init",
       time: BigInt(0),
-      user: sign.addressFromKey(KEY).toLowerCase(),
+      user: sign.addressFromKey(KEY),
       info: {
         _: "App.EnvInfo.new",
         screen_size: {
           _: "Pair.new",
-          fst: window.innerWidth, // this.container ? this.container.offsetWidth : 0,
-          snd: window.innerHeight // this.container ? this.container.offsetHeight : 0,
+          fst: this.container ? this.container.width  : 0,
+          snd: this.container ? this.container.height : 0,
         },
         mouse_pos: this.mouse_pos,
       }
@@ -93,15 +109,6 @@ module.exports = class AppPlay extends Component {
       });
     };
     document.body.addEventListener("mouseover", this.listeners.mouseover); 
-
-    this.listeners.mouseover = (e) => {
-      this.register_event({
-        _: "App.Event.mouse_out",
-        time: BigInt(Date.now()),
-        id: e.target.id
-      });
-    };
-    document.body.addEventListener("mouseout", this.listeners.mouseout);
 
     this.listeners.click = (e) => {
       this.register_event({
@@ -143,58 +150,51 @@ module.exports = class AppPlay extends Component {
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
 
-    // Resize event
-    this.listeners.resize = (e) => {
-      this.register_event({
-        _: "App.Event.resize",
-        time: BigInt(Date.now()),
-        info: {
-          _: "App.EnvInfo.new",
-          screen_size: {
-            _: "Pair.new",
-            fst: e.target.innerWidth,
-            snd: e.target.innerHeight,
-          },
-          mouse_pos: this.mouse_pos,
-        }
-      });
-    };
-    window.addEventListener("resize", this.listeners.resize);
-
-    //Tick event
+    // Tick event
     this.intervals.tick = () => {
-      let time = performance.now()
-      let frame = 1000/16
-      let self = (mileseconds) => {
-        if (mileseconds-time > frame) {
-          this.register_event({
-            _: "App.Event.tick",
-            time: BigInt(Date.now()),
-            info: {
-              _: "App.EnvInfo.new",
-              screen_size: {
-                _: "Pair.new",
-                fst: this.container ? this.container.offsetWidth : 0,
-                snd: this.container ? this.container.offsetHeight : 0,
-              },
-              mouse_pos: this.mouse_pos,
-            }
-          })
-          time = performance.now()
-        }
-        window.requestAnimationFrame(self)
-      }
-      return window.requestAnimationFrame(self)
-    }
-
+      setInterval(() => {
+        this.register_tick(window.KindEvents.get_tick())
+      }, 1000 / 16);
+    };
     this.intervals.tick()
+
+    // Frame event (60 fps)
+    this.intervals.frame = () => {
+      setInterval(() => {
+        this.register_event({
+          _: "App.Event.frame",
+          time: BigInt(Date.now()),
+          info: {
+            _: "App.EnvInfo.new",
+            screen_size: {
+              _: "Pair.new",
+              fst: this.container ? this.container.width  : 0,
+              snd: this.container ? this.container.height : 0,
+            },
+            mouse_pos: this.mouse_pos,
+          }
+        })
+      }, 1000 / 60);
+    };
+    this.intervals.frame()
   }
-  
+
   // Initializes the main render loop
   async init_renderer() {
-    //console.log("to aqui!");
+    if (DEBUG_SHOW_FPS) {
+      var last_time = Date.now();
+      var fps_count = 0;
+    }
     this.intervals.renderer = setInterval(() => {
       if (this.app) {
+        if (DEBUG_SHOW_FPS) {
+          if (Date.now() - last_time > 1000) {
+            //console.log("FPS: ", fps_count);
+            fps_count = 0;
+            last_time = Date.now();
+          }
+          fps_count++;
+        }
         this.rendered = this.app.draw(this.app_state);
         this.forceUpdate();
       }
@@ -208,16 +208,81 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  // Registers a post
+  register_post(post) {
+    if (this.app) {
+      var key = String(post.time);
+      if (!this.app_global_posts[key]) {
+        this.app_global_posts[key] = [];
+      }
+      this.app_global_posts[key].push(post);
+      if (!this.app_global_begin || post.time < this.app_global_begin) {
+        this.app_global_begin = post.time;
+      }
+      this.register_tick(post.time);
+      //console.log(this.app_global_posts);
+      //console.log(this.app_global_begin);
+    }
+  }
+
+  // Computes the global state at given tick (rollback netcode)
+  register_tick(tick) {
+    if (this.app && this.app_global_begin !== null) {
+      //console.log("register_tick", tick);
+      // If the tick is older than the current state, rollback
+      if (this.app_global_tick !== null && tick < this.app_global_tick) {
+        //console.log("- older than " + this.app_global_tick);
+        var latest = StateList.latest(tick, this.app_global_states);
+        // If there is no previous state, reset to initial state
+        if (latest === null) {
+          //console.log("- RESET TO INIT");
+          this.app_global_tick = null;
+          this.app_state.global = this.app.init.global;
+        // Otherwise, restore found state
+        } else {
+          //console.log("- RESTORE TO " + latest.tick);
+          this.app_global_tick = latest.tick;
+          this.app_state.global = latest.state;
+        }
+      }
+      if (this.app_global_tick === null) {
+        //console.log("- init app_global_tick");
+        this.app_global_tick = this.app_global_begin;
+      }
+      //var count_ticks = 0;
+      //var count_posts = 0;
+      for (var t = this.app_global_tick; t < tick; ++t) {
+        //++count_ticks;
+        var posts = this.app_global_posts[String(t)];
+        var state = this.app_state.global;
+        if (posts) {
+          for (var i = 0; i < posts.length; ++i) {
+            var post = posts[i];
+            state = this.app.post(post.time)(post.room)(post.addr)(post.data)(state);
+            //++count_posts;
+          }
+        }
+        state = this.app.tick(t)(state);
+        this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
+        this.app_state.global = state;
+      };
+      //console.log("processed " + count_ticks + " ticks");
+      //console.log("processed " + count_posts + " posts");
+      this.app_global_tick = tick;
+    }
+  }
+
   // Performs an IO computation
   run_io(io) {
-    //console.log("Run IO", io);
     switch (io._) {
       case "IO.end":
-        if (io.value.value !== null) {
-          this.app_state = io.value.value;
-          return Promise.resolve(io.value.value);
+        switch (io.value._) {
+          case "none":
+            return Promise.resolve(null);
+          case "some": 
+            this.app_state = io.value.value;
+            return Promise.resolve(io.value.value);
         }
-        return Promise.resolve(null);
       case "IO.ask":
         //console.log("IO.ask", io.param);
         return new Promise((res, err) => {
@@ -247,12 +312,24 @@ module.exports = class AppPlay extends Component {
             case "del_file":
               localStorage.removeItem(io.param);
               return this.run_io(io.then("")).then(res).catch(err);
+            case "request": 
+              return fetch(encodeURI(io.param))
+              .then(result => result.text())
+              .then(result => this.run_io(io.then(result)))
+              .then(res)
+              .catch(err => {
+                let msg = err.message;
+                let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
+                this.run_io(
+                  io.then("Oops, something went wrong: "+ msg + call_fix))
+              });
             case "watch":
-              if (utils.is_valid_hex(48, io.param)) {
+              if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
-                  var time = BigInt(parseInt(time.slice(2), 16));
-                  this.register_event({ _: "App.Event.post", time, room, addr : addr.toLowerCase(), data });
+                  var time = parseInt(time.slice(2), 16);
+                  this.register_post({room,time,addr,data});
+                  //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
                 console.log("Error: invalid input on App.Action.watch");
@@ -260,7 +337,7 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "post":
               var [room, data] = io.param.split(";");
-              if (utils.is_valid_hex(48, room) && utils.is_valid_hex(256, data)) {
+              if (utils.is_valid_hex(56, room) && utils.is_valid_hex(256, data)) {
                 console.log("Posting: ", room, data);
                 window.KindEvents.send_post(room, data);
               } else {
@@ -272,6 +349,10 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  is_input_type(tag) {
+    return (tag === "input" || tag === "textarea")
+  }
+
   // Renders a document
   render_dom(elem) {
     //console.log("render_dom", elem);
@@ -281,18 +362,22 @@ module.exports = class AppPlay extends Component {
         let props = utils.map_to_object(elem.props);
         let style = utils.map_to_object(elem.style);
         return h(elem.tag, {
-          ...props,
-          style: style
-        }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
+        ...props,
+        style: style,
+        onInput: 
+          this.is_input_type(elem.tag) 
+          ? () => this.on_input(props.id)
+          : null
+      }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":
-        var id = elem.props ? elem.props.id || "" : "";
-        var width = Number(elem.props.width) || 256;
-        var height = Number(elem.props.height) || 256;
-        var canvas = this.get_canvas(id, width, height);
-        var length = elem.value.length;
+        var id       = elem.props ? elem.props.id || "" : "";
+        var width    = Number(elem.props.width) || 256;
+        var height   = Number(elem.props.height) || 256;
+        var canvas   = this.get_canvas(id, width, height);
+        var length   = elem.value.length;
         var capacity = elem.value.capacity;
-        var buffer = elem.value.buffer;
+        var buffer   = elem.value.buffer;
         // Renders pixels to buffers
         for (var i = 0; i < length; ++i) {
           var pos = buffer[i * 2 + 0];

@@ -1,0 +1,16 @@
+Web.Kaelin.Draw.tile.animation(animation: Maybe<Web.Kaelin.Animation>, coord : Web.Kaelin.Coord, internal : Web.Kaelin.Internal, img: VoxBox): VoxBox
+  case animation {
+    none : img  
+    some : 
+      open animation.value as animation
+      open animation.sprite as sprite
+      open internal
+      let kalein_frame = 1000/16
+      let indx = (((internal.frame - animation.fps) % (sprite.frame_info)) % List.length!(sprite.voxboxes))
+      log(Nat.show(indx))
+      case sprite.voxboxes[indx] as frame {
+        none : img
+        some : Web.Kaelin.Draw.support.animation_frame(coord, 0u, frame.value, img)
+      }
+  }
+  

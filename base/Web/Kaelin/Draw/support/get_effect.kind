@@ -1,13 +1,17 @@
 // Returns the cast affecting a tile
 Web.Kaelin.Draw.support.get_effect(
 coord: Web.Kaelin.Coord,
-cast_info: Web.Kaelin.CastInfo
-): Web.Kaelin.HexEffect
-  open cast_info
-  let is_in_range = List.any!(Web.Kaelin.Coord.eql(coord), cast_info.range)
-  case is_in_range {
-    true: cast_info.hex_effect
-    false: Web.Kaelin.HexEffect.normal
+coord_nat: Nat,
+cast_info: Maybe(Web.Kaelin.CastInfo)
+): Maybe(Web.Kaelin.Indicator)
+  case cast_info{ 
+    none: 
+      none
+    some: 
+      open cast_info.value as cast
+      is_in_range = NatSet.has(coord_nat, cast.range)
+      if is_in_range then
+        some(Web.Kaelin.Indicator.blue)
+      else
+        none
   }
-
-    

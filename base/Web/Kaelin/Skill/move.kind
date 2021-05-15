@@ -1,16 +1,7 @@
-Web.Kaelin.Skill.move(range: Nat): Web.Kaelin.Skill
+Web.Kaelin.Skill.move(range: I32): Web.Kaelin.Skill
   Web.Kaelin.Skill.new(
-  1#8
+  "Move"
   range
-  [Web.Kaelin.Skill.Effect.position(+0#32, Web.Kaelin.Skill.Modifier.position.move_to, Web.Kaelin.Skill.area.single, some(Web.Kaelin.Skill.area.indicator.blue))]
+  Web.Kaelin.Effect.movement.move
   'X'
   )
-
-
-
-
-
-
-
-
-

@@ -1,0 +1,10 @@
+// You must notice that sprite wiil run in a frame of kaelin
+// For example if you sprite runs in 150 ms, so you must divide by the actual tick length of Kaelin
+
+Web.Kaelin.Sprite.fire : Web.Kaelin.Sprite
+  Web.Kaelin.Sprite.new(150, 
+  [Web.Kaelin.Assets.effects.fire_1
+   Web.Kaelin.Assets.effects.fire_2,
+   Web.Kaelin.Assets.effects.fire_3,
+   Web.Kaelin.Assets.effects.fire_4,
+   Web.Kaelin.Assets.effects.fire_5])

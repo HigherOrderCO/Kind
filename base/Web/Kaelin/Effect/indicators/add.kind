@@ -1,0 +1,3 @@
+Web.Kaelin.Effect.indicators.add(indicators: NatMap(Web.Kaelin.Indicator)): Web.Kaelin.Effect<Unit>
+  (tick, center, target, map)
+  Web.Kaelin.Effect.Result.new!(unit, map, [], indicators)

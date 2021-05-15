@@ -1,0 +1,2 @@
+F64.to_nat(x: F64): Nat
+  U32.to_nat(F64.to_u32(x))

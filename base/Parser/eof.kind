@@ -1,5 +1,7 @@
 Parser.eof: Parser(Unit)
-  (idx,code) case code {
-    nil: Parser.Reply.value!(idx, code, Unit.new),
-    cons: Parser.Reply.error!(idx, code, "Expected end-of-file."),
+  (pst)
+  open pst
+  case pst.str {
+    nil: Parser.Reply.value!(pst, unit)
+    cons: Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Expected end-of-file.")
   }

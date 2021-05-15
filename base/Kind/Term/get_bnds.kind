@@ -1,0 +1,9 @@
+// Gets all the binders of a sequence of foralls, returns the body.
+// - get_bnds(`∀(x:A). ∀(y:B). f`) == {[{"x",A},{"y",B}], `f`}
+Kind.Term.get_bnds(term: Kind.Term, depth: Nat): Pair(List(Pair(String,Kind.Term)), Kind.Term)
+  case term {
+    all:
+      let b = term.body(Kind.Term.var(term.self,depth), Kind.Term.var(term.name,Nat.succ(depth)))
+      let {vars, body} = Kind.Term.get_bnds(b, Nat.succ(Nat.succ(depth)))
+      {{term.name,term.xtyp} & vars, body}
+  } default {[], term}

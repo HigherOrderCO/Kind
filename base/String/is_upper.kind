@@ -1,0 +1,2 @@
+String.is_upper(str: String): Bool
+  String.eql(String.to_upper(str), str)

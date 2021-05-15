@@ -1,0 +1,2 @@
+String.last(xs: String): Maybe<Char>
+  String.at(Nat.pred(String.length(xs)), xs)

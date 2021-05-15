@@ -1,5 +1,0 @@
-App.do(call: String, param: String): IO<Dynamic>
-  IO {
-    IO.do(call, param)
-    App.pass
-  }

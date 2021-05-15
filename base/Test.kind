@@ -1,10 +1,63 @@
-cert_sort: List<Nat> -> List<Nat>
-  (xs)
-  let certificate = User.rigille.List.Monotone.exists<Nat, User.rigille.Nat.after, User.rigille.Nat.Order>(xs)
-  open certificate
-  certificate.fst
+type HexPlace {
+  empty
+  red
+  blue
+}
 
-Test: String
-  show = List.show!(Nat.show)
-  let a = [3, 1, 2]
-  show(cert_sort(a))
+HexBoard(n: Nat, m: Nat): Type
+  Vector<Vector<HexPlace>(m)>(n)
+
+HexBoard.empty.line(n: Nat): Vector<HexPlace>(n)
+  case n {
+    zero: Vector.nil<HexPlace>
+    succ: Vector.ext<HexPlace, n.pred>(HexPlace.empty, HexBoard.empty.line(n.pred))
+  }!
+
+HexBoard.empty(n: Nat, m: Nat): HexBoard(n, m)
+  case n {
+    zero: Vector.nil<Vector<HexPlace>(m)>
+    succ: let line = HexBoard.empty.line(m)
+          let tail = HexBoard.empty(n.pred, m)
+          Vector.ext<Vector<HexPlace>(m), n.pred>(line, tail)
+  }!
+
+Fin.is_empty<size: Nat>(contra: Fin<size>): Bool
+  case size {
+    zero: true
+    succ: false
+  }
+
+Fin.absurd<A: Type>(contra: Fin<0>): A
+  let gotcha = contra :: if Fin.is_empty!(contra) then Fin<0> else A
+  case contra with gotcha {
+    zero: gotcha
+    succ: gotcha
+  }!
+
+Vector.not_empty<A: Type, size: Nat>(vec: Vector<A, size>): Bool
+  case size {
+    zero: false
+    succ: true
+  }
+
+Vector.at<A: Type, size: Nat>(index: Fin<size>, vec: Vector<A, size>): A
+  case size with index vec {
+    zero: Fin.absurd!(index)
+    succ:
+      let gotcha = vec :: if Vector.not_empty<A, Nat.succ(size.pred)>(vec) then Vector(A,Nat.succ(size.pred)) else A
+      case vec with 
+        gotcha: if Vector.not_empty<A, Nat.succ(size.pred)>(vec) then Vector(A,Nat.succ(size.pred)) else A
+        index: Fin(Nat.succ(size.pred))
+        vec: Vector(A, Nat.succ(size.pred))
+      {
+        nil: gotcha
+        ext:
+          case index {
+            zero: vec.head
+            succ: ?a //Vector.at<A, size.pred>(index.pred, vec.tail)
+          }
+      }!
+  }!
+
+Test: IO(Unit)
+  ?a

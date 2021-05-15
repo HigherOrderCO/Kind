@@ -4,5 +4,5 @@ type Web.Kaelin.Event {
   start_game(players: List<Web.Kaelin.Player>)
   create_user(player: Web.Kaelin.Player)
   create_hero(hero_id: U8)
-  user_input(coord: Web.Kaelin.Coord, action: Web.Kaelin.Action)
+  user_input(player : String, coord: Web.Kaelin.Coord, action: Web.Kaelin.Action)
 }

@@ -1,10 +1,19 @@
-Kind.Parser.application(init: Nat, func: Kind.Term): Parser(Kind.Term)
+Kind.Parser.application(func: Kind.Term): Parser(Kind.Term)
   Parser {
-    Parser.text("(");
-    get args = Parser.until1!(
-      Kind.Parser.text(")"),
-      Kind.Parser.item!(Kind.Parser.term));
-    get orig = Kind.Parser.stop(init);
-    let expr = List.for!(args)!(func, (x,f) Kind.Term.app(f, x));
-    return Kind.Term.ori(orig, expr);
+    get args = Kind.Parser.items_now!("(", Kind.Parser.term, ")")
+    let expr = List.for!(args)!(func, (x,f) Kind.Term.app(f, x))
+    return expr
+  }
+
+Kind.Parser.application.erased(func: Kind.Term): Parser(Kind.Term)
+  Parser {
+    get args = Kind.Parser.items_now!("<", Kind.Parser.term, ">")
+    let expr = List.for!(args)!(func, (x,f) Kind.Term.app(f, x))
+    return expr
+  }
+
+Kind.Parser.application.hole(term: Kind.Term): Parser(Kind.Term)
+  Parser {
+    Kind.Parser.text_now("!")
+    return Kind.Term.app(term, Kind.Term.hol(Bits.e))
   }

@@ -1,8 +1,2 @@
 Or<A: Type, B: Type>: Type
   Either<A, B>
-
-Or.left<A: Type, B: Type>(a: A): Or<A, B>
-  Either.left<A, B>(a)
-
-Or.right<A: Type, B: Type>(b: B): Or<A, B>
-  Either.right<A, B>(b)

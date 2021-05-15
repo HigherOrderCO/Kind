@@ -1,0 +1,4 @@
+V3.add(a: V3, b: V3): V3
+  open a
+  open b
+  {a.x + b.x, a.y + b.y, a.z + b.z}

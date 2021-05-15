@@ -1,2 +1,4 @@
 U64.shl(n: U64, a: U64): U64
-  U64.shl(n, a)
+  open n
+  open a
+  U64.new(Word.shl!(n.value, a.value))
