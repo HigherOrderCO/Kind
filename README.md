@@ -10,7 +10,7 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 4. Boostrapping: the language is fully implemented in itself! Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
 
-5. Efficient real-world compilers. Check [App.kind](https://github.com/uwu-tech/Kind/blob/master/base/App.kind), [MiniMMO.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/MiniMMO.kind), and [http://uwu.tech/](http://uwu.tech) for many apps.
+5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for many apps.
 
     *Currently disabled for a major update that will bring rollback netcode for all apps! Check on May 17!*
 
@@ -200,6 +200,8 @@ Output: [App.Hello.js](https://github.com/uwu-tech/Kind/blob/master/web/src/apps
 Live Demo: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
 
 You can create your own uwu-tech app by adding a file to `base/App`!
+
+Check [App.kind](https://github.com/uwu-tech/Kind/blob/master/base/App.kind) to see the App type.
 
 Resources
 ---------
