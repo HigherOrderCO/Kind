@@ -35,7 +35,7 @@ Examples
 
 ### A 'Hello, world!'
 
-```javascript
+```c
 Main: IO(Unit)
   IO {
     IO.print("Hello, world!")
@@ -44,7 +44,7 @@ Main: IO(Unit)
 
 ### Some algorithms
 
-```javascript
+```c
 // Quicksort
 quicksort(list: List<Nat>): List<Nat>
   case list {
@@ -58,7 +58,7 @@ quicksort(list: List<Nat>): List<Nat>
   }
 ```
 
-```javascript
+```c
 // Sum (using recursion)
 sum(list: List(Nat)): Nat
   case list {
@@ -67,13 +67,13 @@ sum(list: List(Nat)): Nat
   }
 ```
 
-```javascript
+```c
 // List (using fold)
 sum(list: List(Nat)): Nat
   List.fold!(list)!(0, Nat.add)
 ```
 
-```javascript
+```c
 // List (using loop)
 sum(list: List(Nat)): Nat
   let sum = 0
@@ -100,7 +100,7 @@ Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/
 
 ### Some types
 
-```javascript
+```c
 // A struct
 type User {
   new(name: String, birth: Date, avatar: Image)
@@ -138,7 +138,7 @@ Check all core types on [base](https://github.com/uwu-tech/Kind/tree/master/base
 
 ### Some proofs
 
-```javascript
+```c
 // Proof that `a == a + 0`
 Nat.add.zero(a: Nat): a == Nat.add(a, 0)
   case a {
