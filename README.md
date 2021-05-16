@@ -33,19 +33,18 @@ Haskell and Scheme compilers and releases expected around June.
 Examples
 --------
 
-### A 'Hello, world!'
+### Some programs
 
 ```javascript
+// A 'Hello, world!"
 Main: IO(Unit)
   IO {
     IO.print("Hello, world!")
   }
 ```
 
-### Some algorithms
-
 ```javascript
-// Recursion (quicksort)
+// Quicksort (using recursion)
 quicksort(list: List<Nat>): List<Nat>
   case list {
     nil:
@@ -59,8 +58,8 @@ quicksort(list: List<Nat>): List<Nat>
 ```
 
 ```javascript
-// Iteration (using folds)
-iter: String
+// List iteration (using folds)
+some_text: String
   List.foldl!!("",
     (str, result) 
       str = String.to_upper(str)
@@ -70,8 +69,8 @@ iter: String
 ```
 
 ```javascript
-// Iteration (using fors)
-iter: String
+// List iteration (using fors)
+some_text: String
   result = ""
   for str in ["cba","fed","ihg"] with result:
     str = String.to_upper(str)
@@ -82,7 +81,7 @@ iter: String
 
 ```c
 // Map, Maybe, String and Nat sugars
-maps: Nat
+sugars: Nat
   key  = "toe"
   map  = {"tic": 1, "tac": 2, key: 3} // Map.from_list!([{"tic",1}, ...])
   map  = map{"tic"} <- 100            // Map.set!("tic", 100, map)
