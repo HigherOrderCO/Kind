@@ -195,7 +195,7 @@ App.Hello.when: App.When<App.Hello.State>
 
 Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
 
-Output: [App.Hello.js](https://github.com/uwu-tech/Kind/blob/master/web/src/apps/App.Hello.js]
+Output: [App.Hello.js](https://github.com/uwu-tech/Kind/blob/master/web/src/apps/App.Hello.js)
 
 Live Demo: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
 
