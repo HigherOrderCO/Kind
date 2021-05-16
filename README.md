@@ -12,7 +12,7 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for many apps.
 
-    *Most apps disabled for a major update that will bring rollback netcode! Check again on May 17!*
+    *Most apps disabled for a major update that will bring rollback netcode. Check again on May 17!*
 
 Usage
 -----
