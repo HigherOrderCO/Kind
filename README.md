@@ -128,7 +128,7 @@ Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
   }!
 ```
 
-## A complete web app that tracks clicks and visitors!
+### A web app
 
 ```javascript
 // Render function
@@ -157,6 +157,8 @@ App.Hello.when: App.When<App.Hello.State>
 Code: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
 
 Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
+
+You can create your own uwu-tech app by adding a file to `base/App`!
 
 Resources
 ---------
