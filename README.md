@@ -1,6 +1,16 @@
 # Kind
 
-A cute proof and programming language.
+A minimal, efficient and practical proof and programming language. Compared to other proof assistants, Kind has:
+
+1. The smallest core. Check this [700-LOC](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) reference implementation.
+
+2. A more powerful type system. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
+
+3. A collection of syntax sugars that make it feel less expert-oriented, and as friendly as traditional languages.
+
+4. Efficient real-world compilers with multiple targets. Check [http://uwu-tech/](http://uwu-tech) for a collection of HTML5 apps built with Kind. 
+
+    *Currently disabled for a major update that will bring rollback netcode for all apps! Check again on May 17!*
 
 Usage
 -----
@@ -43,9 +53,10 @@ sum(list: List(Nat)): Nat
   List.fold!(list)!(0, Nat.add)
 
 // List sum using a loop
+// Since Kind is pure, loops need a "target variable"
 sum(list: List(Nat)): Nat
   let sum = 0
-  let sum = for x in list:
+  for x in list with sum:
     x + sum
   sum
 ```
@@ -59,7 +70,7 @@ type User {
 }
 
 // A simple pair
-type Pair <A: Type> <B: Type> {
+type Pair <A: Type, B: Type> {
   new(fst: A, snd: B)
 }
 
@@ -114,6 +125,8 @@ Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
       p0 :: rewrite X in Nat.succ(X) == _ with p1
   }!
 ```
+
+Kind has several syntax sugars that make address many of the conventional issues of pure functional programming. Check these on [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md)
 
 Resources
 ---------
