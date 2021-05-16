@@ -45,7 +45,7 @@ Main: IO(Unit)
 ### Some algorithms
 
 ```javascript
-// Quicksort
+// Recursion (quicksort)
 quicksort(list: List<Nat>): List<Nat>
   case list {
     nil:
@@ -59,31 +59,29 @@ quicksort(list: List<Nat>): List<Nat>
 ```
 
 ```javascript
-// Sum (using recursion)
-sum(list: List(Nat)): Nat
-  case list {
-    nil  : 0
-    cons : list.head + sum(list.tail)
-  }
+// Iteration (using folds)
+iter: String
+  List.foldl!!("",
+    (str, result) 
+      str = String.to_upper(str)
+      str = String.reverse(str)
+      result | str,
+    ["cba","fed","ihg"])
 ```
 
 ```javascript
-// List (using fold)
-sum(list: List(Nat)): Nat
-  List.fold!(list)!(0, Nat.add)
-```
-
-```javascript
-// List (using loop)
-sum(list: List(Nat)): Nat
-  sum = 0
-  for x in list with sum:
-    x + sum
-  sum
+// Iteration (using fors)
+iter: String
+  result = ""
+  for str in ["cba","fed","ihg"] with result:
+    str = String.to_upper(str)
+    str = String.reverse(str)
+    result | str
+  result
 ```
 
 ```c
-// Some Map, Maybe, String and Nat syntax sugars
+// Map, Maybe, String and Nat sugars
 maps: Nat
   key  = "toe"
   map  = {"tic": 1, "tac": 2, key: 3} // Map.from_list!([{"tic",1}, ...])
