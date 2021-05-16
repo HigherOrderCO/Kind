@@ -8,9 +8,9 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 3. A collection of friendly syntax sugars that make it less scary. Check [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md).
 
-4. Boostrapping: the language is fully implemented in itself! Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind)!
+4. Boostrapping: the language is fully implemented in itself! Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
 
-5. Efficient real-world compilers. Check [App.kind](https://github.com/uwu-tech/Kind/blob/master/base/App.kind), [MiniMMO.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/MiniMMO.kind), and [http://uwu.tech/](http://uwu.tech) for many apps. 
+5. Efficient real-world compilers. Check [App.kind](https://github.com/uwu-tech/Kind/blob/master/base/App.kind), [MiniMMO.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/MiniMMO.kind), and [http://uwu.tech/](http://uwu.tech) for many apps.
 
     *Currently disabled for a major update that will bring rollback netcode for all apps! Check on May 17!*
 
