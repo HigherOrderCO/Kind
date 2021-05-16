@@ -7,4 +7,4 @@ User.rigille.List.In<A: Type>(xs: List<A>, x: A): Type
 
 Test: User.rigille.List.In<Nat>([1], 1)
   let lem = refl :: (1 == 1)
-  Or.left!!(lem)
+  left(lem)
