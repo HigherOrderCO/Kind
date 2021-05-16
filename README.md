@@ -114,7 +114,7 @@ type Nat {
 ```
 
 ```javascript
-// A simple pair
+// A pair
 type Pair <A: Type, B: Type> {
   new(fst: A, snd: B)
 }
@@ -152,14 +152,24 @@ type Fin ~ <lim: Nat> {
 ```
 
 ```javascript
-// The propositional equality
+// The type used in equality proofs
 type Equal <A: Type, a: A> ~ (b: A) {
   refl ~ (b = a)
 }
 ```
 
+```javascript
+// A burrito
+type Monad <M: Type -> Type> {
+  new(
+    bind: <A: Type, B: Type> M(A) -> (A -> M(B)) -> M(B)
+    pure: <A: Type> A -> M(A)
+  )
+}
 ```
-// An example complete type
+
+```javascript
+// Some game entity
 type Entity {
   player(
     name: String
