@@ -83,7 +83,7 @@ sum(list: List(Nat)): Nat
 ```
 
 ```c
-// Some Map, String and Nat syntax sugars
+// Some Map, Maybe, String and Nat syntax sugars
 maps: Nat
   key  = "toe"
   map  = {"tic": 1, "tac": 2, key: 3} // Map.from_list!([{"tic",1}, ...])
