@@ -45,19 +45,30 @@ Main: IO(Unit)
 ### Some algorithms
 
 ```javascript
-// List sum using recursion
+// Quicksort
+List.quicksort(list: List<Nat>): List<Nat>
+  case list {
+    nil:
+      []
+    cons:
+      let fst = list.head
+      let min = List.filter!((x) x <? list.head, list.tail)
+      let max = List.filter!((x) x >? list.head, list.tail)
+      List.quicksort(min) ++ [fst] ++ List.quicksort(max)
+  }
+
+// Sum (using recursion)
 sum(list: List(Nat)): Nat
   case list {
     nil  : 0
     cons : list.head + sum(list.tail)
   }
 
-// List sum using a fold
+// List (using fold)
 sum(list: List(Nat)): Nat
   List.fold!(list)!(0, Nat.add)
 
-// List sum using a loop
-// Since Kind is pure, loops need a "target variable"
+// List (using loop)
 sum(list: List(Nat)): Nat
   let sum = 0
   for x in list with sum:

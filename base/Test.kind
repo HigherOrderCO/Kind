@@ -1,4 +1,4 @@
 Test: IO(Unit)
   IO {
-    IO.print("hi")
+    IO.print("Hi: " | List.show!(Nat.show, List.quicksort([1, 7, 6, 2, 5])))
   }
