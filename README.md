@@ -98,9 +98,18 @@ Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/
 ### Some types
 
 ```javascript
-// A struct
-type User {
-  new(name: String, birth: Date, avatar: Image)
+// A boolean
+type Bool {
+  true
+  false
+}
+```
+
+```javascript
+// A natural number
+type Nat {
+  zero
+  succ(pred: Nat)
 }
 ```
 
@@ -135,9 +144,35 @@ type Vector <A: Type> ~ (size: Nat) {
 ```
 
 ```javascript
+// A bounded natural number
+type Fin ~ <lim: Nat> {
+  zero<n: Nat>               ~ (lim = Nat.succ(n))
+  succ<n: Nat>(pred: Fin<n>) ~ (lim = Nat.succ(n))
+}
+```
+
+```javascript
 // The propositional equality
 type Equal <A: Type, a: A> ~ (b: A) {
   refl ~ (b = a)
+}
+```
+
+```
+// An example complete type
+type Entity {
+  player(
+    name: String
+    pos: V3
+    health: Nat
+    items: List(Item)
+    sprite: Image
+  )
+  wall(
+    hitbox: Pair(V3, V3)
+    collision: Entity -> Entity
+    sprite: Image
+  )
 }
 ```
 
