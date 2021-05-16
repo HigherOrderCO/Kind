@@ -10,7 +10,7 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 4. Boostrapping: the language is fully implemented in itself! Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
 
-5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for many apps.
+5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for a list of apps.
 
     *Most apps disabled for a major update that will bring rollback netcode. Check again on May 17!*
 
