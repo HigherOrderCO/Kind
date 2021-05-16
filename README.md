@@ -1,14 +1,14 @@
 # Kind
 
-A minimal, efficient and practical proof and programming language. Compared to other proof assistants, Kind has:
+A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. On the surface, it looks more like TypeScript. Compared to other proof assistants, Kind has:
 
 1. The smallest core. Check this [700-LOC](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) reference implementation.
 
-2. A more powerful type system. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
+2. Novel, powerful type-level features. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
 
-3. A collection of syntax sugars that make it feel less expert-oriented, and as friendly as traditional languages.
+3. A collection of friendly syntax sugars that make it feel less expert-oriented.
 
-4. Efficient real-world compilers with multiple targets. Check [http://uwu-tech/](http://uwu-tech) for a collection of HTML5 apps built with Kind. 
+4. Efficient real-world compilers. Check [http://uwu-tech/](http://uwu-tech) for a collection of Kind HTML5 apps. 
 
     *Currently disabled for a major update that will bring rollback netcode for all apps! Check again on May 17!*
 
