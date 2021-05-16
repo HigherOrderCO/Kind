@@ -51,9 +51,9 @@ quicksort(list: List<Nat>): List<Nat>
     nil:
       []
     cons:
-      let fst = list.head
-      let min = filter!((x) x <? list.head, list.tail)
-      let max = filter!((x) x >? list.head, list.tail)
+      fst = list.head
+      min = filter!((x) x <? list.head, list.tail)
+      max = filter!((x) x >? list.head, list.tail)
       quicksort(min) ++ [fst] ++ quicksort(max)
   }
 ```
@@ -76,7 +76,7 @@ sum(list: List(Nat)): Nat
 ```javascript
 // List (using loop)
 sum(list: List(Nat)): Nat
-  let sum = 0
+  sum = 0
   for x in list with sum:
     x + sum
   sum
@@ -159,8 +159,8 @@ Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
     zero:
       Nat.add.zero(b)
     succ: 
-      let p0 = Nat.add.succ(b, a.pred)
-      let p1 = Nat.add.comm(b, a.pred)
+      p0 = Nat.add.succ(b, a.pred)
+      p1 = Nat.add.comm(b, a.pred)
       p0 :: rewrite X in Nat.succ(X) == _ with p1
   }!
 ```
