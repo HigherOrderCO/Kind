@@ -46,15 +46,15 @@ Main: IO(Unit)
 
 ```javascript
 // Quicksort
-List.quicksort(list: List<Nat>): List<Nat>
+quicksort(list: List<Nat>): List<Nat>
   case list {
     nil:
       []
     cons:
       let fst = list.head
-      let min = List.filter!((x) x <? list.head, list.tail)
-      let max = List.filter!((x) x >? list.head, list.tail)
-      List.quicksort(min) ++ [fst] ++ List.quicksort(max)
+      let min = filter!((x) x <? list.head, list.tail)
+      let max = filter!((x) x >? list.head, list.tail)
+      quicksort(min) ++ [fst] ++ quicksort(max)
   }
 
 // Sum (using recursion)
@@ -75,6 +75,8 @@ sum(list: List(Nat)): Nat
     x + sum
   sum
 ```
+
+Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/master/base/List)!
 
 ### Some types
 
@@ -140,6 +142,8 @@ Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
       p0 :: rewrite X in Nat.succ(X) == _ with p1
   }!
 ```
+
+Check some Nat proofs on [base/Nat/add](https://github.com/uwu-tech/Kind/tree/master/base/Nat/add)!
 
 ### A web app
 
