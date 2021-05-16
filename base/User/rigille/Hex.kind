@@ -48,6 +48,29 @@ Matrix<A: Type>(n: Nat, m: Nat, xs: List<List<A>>): Type
   def columns = List.all<List<A>>(xs, (x) Equal<Nat>(List.length!(x), m))
   And<lines, columns>
 
+List.In.index<A: Type>(
+  list: List<A>
+  x: A
+  In: User.rigille.List.In<A>(list, x)
+): Nat
+  case list with In {
+    nil: Empty.absurd!(In)
+    cons:
+      case In {
+        left: 0
+        right: Nat.succ(List.In.index!!!(In.value))
+      }
+  }!
+
+List.safe_at.spec<A: Type>(
+  index: Nat
+  list: List<A>
+  SafeIndex: Nat.ltn(index, List.length!(list)) == true
+): A -> Type
+  (x)
+    def InProp = User.rigille.List.In<A>(list, x)
+    [In: InProp] List.In.index!!!(In) == index
+
 List.safe_at<A: Type>(
   index: Nat
   list: List<A>
@@ -83,3 +106,25 @@ Matrix.safe_at<A: Type>(
   let column_bound = SafeColumn :: rewrite X in Nat.ltn(m,X) == Bool.true with mirror(column_length)
   let {elem, elem_in} = List.safe_at!(m, line, column_bound)
   elem ~ line ~ {line_in, elem_in}
+
+Matrix.safe_at.val<A: Type>(
+  n: Nat
+  m: Nat
+  mat: List<List<A>>
+  lines: Nat
+  columns: Nat
+  SafeLine: Nat.ltn(n, lines) == true
+  SafeColumn: Nat.ltn(m, columns) == true
+  Mat: Matrix<A>(lines, columns, mat)
+): A
+  let {val, prop} = Matrix.safe_at<A>(n, m, mat, lines, columns, SafeLine, SafeColumn, Mat)
+  val
+
+
+//List.safe_set<A: Type>(
+//  index: Nat
+//  val: A
+//  list: List<A>
+//  SafeIndex: Nat.ltn(index, List.length!(list)) == true
+//): [new_list: List<A>] (n)
+//  ?a
