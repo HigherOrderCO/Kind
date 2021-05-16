@@ -74,6 +74,18 @@ sum(list: List(Nat)): Nat
   for x in list with sum:
     x + sum
   sum
+
+// Some Map, String and Nat syntax sugars
+maps: Nat
+  key  = "toe"
+  map  = {"tic": 1, "tac": 2, key: 3} // Map.from_list!([{"tic",1}, ...])
+  map  = map{"tic"} <- 100            // Map.set!("tic", 100, map)
+  map  = map{"tac"} <- 200            // Map.set!("tac", 200, map)
+  map  = map{ key } <- 300            // Map.set!(key, 300, map)
+  val0 = map{"tic"} <> 0              // Maybe.default!(Map.get!("tic",map), 0)
+  val1 = map{"tac"} <> 0              // Maybe.default!(Map.get!("tac",map), 0)
+  val2 = map{ key } <> 0              // Maybe.default!(Map.get!(key, map), 0)
+  val0 + val1 + val2
 ```
 
 Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/master/base/List)!
@@ -113,6 +125,8 @@ type Equal <A: Type> <a: A> ~ (b: A) {
   refl ~ (b = a)
 }
 ```
+
+Check all core types on [base](https://github.com/uwu-tech/Kind/tree/master/base)!
 
 ### Some proofs
 
