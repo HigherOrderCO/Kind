@@ -112,7 +112,7 @@ type Pair <A: Type, B: Type> {
 }
 
 // A dependent pair
-type Sigma <A: Type> <B: A -> Type> {
+type Sigma <A: Type, B: A -> Type> {
   new(fst: A, snd: B(fst))
 }
 
@@ -129,7 +129,7 @@ type Vector <A: Type> ~ (size: Nat) {
 }
 
 // The propositional equality
-type Equal <A: Type> <a: A> ~ (b: A) {
+type Equal <A: Type, a: A> ~ (b: A) {
   refl ~ (b = a)
 }
 ```
