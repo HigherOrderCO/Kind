@@ -1,4 +1,15 @@
-Test: IO(Unit)
-  IO {
-    IO.print("Hi: " | List.show!(Nat.show, List.quicksort([1, 7, 6, 2, 5])))
-  }
+//Test: String
+  //result = ""
+  //for str in ["cba","fed","ihg"] with result:
+    //str = String.to_upper(str)
+    //str = String.reverse(str)
+    //result | str
+  //result
+
+Test: String
+  List.foldl!!("",
+    (str, result) 
+      str = String.to_upper(str)
+      str = String.reverse(str)
+      result | str,
+    ["cba","fed","ihg"])
