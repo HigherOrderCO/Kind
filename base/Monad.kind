@@ -1,6 +1,6 @@
 type Monad <M: Type -> Type> {
   new(
-    bind: <A: Type, B: Type> M(A) -> (A -> M(B)) -> M(B)
-    pure: <A: Type> A -> M(A)
+    bind: <A: Type, B: Type> M<A> -> (A -> M<B>) -> M<B>
+    pure: <A: Type> A -> M<A>
   )
 }

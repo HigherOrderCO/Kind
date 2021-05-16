@@ -117,7 +117,7 @@ type Nat {
 // A polymorphic list
 type List <A: Type> {
   nil
-  cons(head: A, tail: List(A))
+  cons(head: A, tail: List<A>)
 }
 ```
 
@@ -139,15 +139,15 @@ type Sigma <A: Type, B: A -> Type> {
 // A polymorphic list with a statically known size
 type Vector <A: Type> ~ (size: Nat) {
   nil                                              ~ (size = 0) 
-  cons(size: Nat, head: Nat, tail: Vector(A,size)) ~ (size = 1 + size)
+  cons(size: Nat, head: Nat, tail: Vector<A,size>) ~ (size = 1 + size)
 }
 ```
 
 ```javascript
 // A bounded natural number
 type Fin ~ <lim: Nat> {
-  zero<n: Nat>               ~ (lim = Nat.succ(n))
-  succ<n: Nat>(pred: Fin<n>) ~ (lim = Nat.succ(n))
+  zero<N: Nat>               ~ (lim = Nat.succ(N))
+  succ<N: Nat>(pred: Fin<N>) ~ (lim = Nat.succ(N))
 }
 ```
 
@@ -162,8 +162,8 @@ type Equal <A: Type, a: A> ~ (b: A) {
 // A burrito
 type Monad <M: Type -> Type> {
   new(
-    bind: <A: Type, B: Type> M(A) -> (A -> M(B)) -> M(B)
-    pure: <A: Type> A -> M(A)
+    bind: <A: Type, B: Type> M<A> -> (A -> M<B>) -> M<B>
+    pure: <A: Type> A -> M<A>
   )
 }
 ```
@@ -175,11 +175,11 @@ type Entity {
     name: String
     pos: V3
     health: Nat
-    items: List(Item)
+    items: List<Item>
     sprite: Image
   )
   wall(
-    hitbox: Pair(V3, V3)
+    hitbox: Pair<V3, V3>
     collision: Entity -> Entity
     sprite: Image
   )
