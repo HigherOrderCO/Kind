@@ -114,21 +114,7 @@ type Nat {
 ```
 
 ```javascript
-// A pair
-type Pair <A: Type, B: Type> {
-  new(fst: A, snd: B)
-}
-```
-
-```javascript
-// A dependent pair
-type Sigma <A: Type, B: A -> Type> {
-  new(fst: A, snd: B(fst))
-}
-```
-
-```javascript
-// A list
+// A polymorphic list
 type List <A: Type> {
   nil
   cons(head: A, tail: List(A))
@@ -136,7 +122,21 @@ type List <A: Type> {
 ```
 
 ```javascript
-// A list with a statically known size
+// A polymorphic pair
+type Pair <A: Type, B: Type> {
+  new(fst: A, snd: B)
+}
+```
+
+```javascript
+// A polymorphic dependent pair
+type Sigma <A: Type, B: A -> Type> {
+  new(fst: A, snd: B(fst))
+}
+```
+
+```javascript
+// A polymorphic list with a statically known size
 type Vector <A: Type> ~ (size: Nat) {
   nil                                              ~ (size = 0) 
   cons(size: Nat, head: Nat, tail: Vector(A,size)) ~ (size = 1 + size)
