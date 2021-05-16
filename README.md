@@ -33,7 +33,7 @@ Examples
 
 ### A 'Hello, world!'
 
-```c
+```javascript
 Main: IO(Unit)
   IO {
     IO.print("Hello, world!")
@@ -42,7 +42,7 @@ Main: IO(Unit)
 
 ### Some algorithms
 
-```c
+```javascript
 // List sum using recursion
 sum(list: List(Nat)): Nat
   case list {
@@ -65,7 +65,7 @@ sum(list: List(Nat)): Nat
 
 ### Some types
 
-```c
+```javascript
 // A struct
 type User {
   new(name: String, birth: Date, avatar: Image)
@@ -101,7 +101,7 @@ type Equal <A: Type> <a: A> ~ (b: A) {
 
 ### Some proofs
 
-```
+```javascript
 // Proof that `a == a + 0`
 Nat.add.zero(a: Nat): a == Nat.add(a, 0)
   case a {
