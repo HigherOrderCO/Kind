@@ -8,7 +8,9 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 3. A collection of friendly syntax sugars that make it feel less expert-oriented.
 
-4. Efficient real-world compilers. Check [http://uwu-tech/](http://uwu-tech) for a collection of Kind HTML5 apps. 
+4. It is entirely implemented in itself. Browse the [base libs](https://github.com/uwu-tech/Kind/tree/master/base)!
+
+5. Efficient real-world compilers. Check [http://uwu-tech/](http://uwu-tech) for a collection of Kind HTML5 apps. 
 
     *Currently disabled for a major update that will bring rollback netcode for all apps! Check again on May 17!*
 
