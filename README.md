@@ -12,7 +12,7 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 5. Efficient real-world compilers. Check [http://uwu-tech/](http://uwu-tech) for a collection of Kind HTML5 apps. 
 
-    *Currently disabled for a major update that will bring rollback netcode for all apps! Check again on May 17!*
+    *Currently disabled for a major update that will bring rollback netcode for all apps! Check on May 17!*
 
 Usage
 -----
