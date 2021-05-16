@@ -102,29 +102,39 @@ Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/
 type User {
   new(name: String, birth: Date, avatar: Image)
 }
+```
 
+```javascript
 // A simple pair
 type Pair <A: Type, B: Type> {
   new(fst: A, snd: B)
 }
+```
 
+```javascript
 // A dependent pair
 type Sigma <A: Type, B: A -> Type> {
   new(fst: A, snd: B(fst))
 }
+```
 
+```javascript
 // A list
 type List <A: Type> {
   nil
   cons(head: A, tail: List(A))
 }
+```
 
+```javascript
 // A list with a statically known size
 type Vector <A: Type> ~ (size: Nat) {
   nil                                              ~ (size = 0) 
   cons(size: Nat, head: Nat, tail: Vector(A,size)) ~ (size = 1 + size)
 }
+```
 
+```javascript
 // The propositional equality
 type Equal <A: Type, a: A> ~ (b: A) {
   refl ~ (b = a)
@@ -142,14 +152,18 @@ Nat.add.zero(a: Nat): a == Nat.add(a, 0)
     zero: refl
     succ: apply(Nat.succ, Nat.add.zero(a.pred))
   }!
+  ```
 
+```javascript
 // Proof that `1 + (a + b) == a + (1 + b)`
 Nat.add.succ(a: Nat, b: Nat): Nat.succ(a + b) == (a + Nat.succ(b))
   case a {
     zero: refl
     succ: apply(Nat.succ, Nat.add.succ(a.pred, b))
   }!
+  ```
 
+```javascript
 // Proof that addition is commutative
 Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
   case a {
