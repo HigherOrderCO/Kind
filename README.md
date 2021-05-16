@@ -93,7 +93,7 @@ maps: Nat
   val0 = map{"tic"} <> 0              // Maybe.default!(Map.get!("tic",map), 0)
   val1 = map{"tac"} <> 0              // Maybe.default!(Map.get!("tac",map), 0)
   val2 = map{ key } <> 0              // Maybe.default!(Map.get!(key, map), 0)
-  val0 + val1 + val2
+  val0 + val1 + val2                  // Nat.add(val0, Nat.add(val1, val2))
 ```
 
 Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/master/base/List)!
