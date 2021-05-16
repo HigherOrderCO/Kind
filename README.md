@@ -10,7 +10,7 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 4. A self-hosted implementation. Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind)!
 
-5. Efficient real-world compilers. Check the [App type](https://github.com/uwu-tech/Kind/blob/master/base/App.kind), and [http://uwu-tech/](http://uwu-tech) for a list of HTML5 apps. 
+5. Efficient real-world compilers. Check the [App type](https://github.com/uwu-tech/Kind/blob/master/base/App.kind), and [http://uwu.tech/](http://uwu.tech) for a list of HTML5 apps. 
 
     *Currently disabled for a major update that will bring rollback netcode for all apps! Check on May 17!*
 
