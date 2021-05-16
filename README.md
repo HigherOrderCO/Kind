@@ -128,7 +128,35 @@ Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
   }!
 ```
 
-Kind has several syntax sugars that make address many of the conventional issues of pure functional programming. Check these on [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md)
+## A complete web app that tracks clicks and visitors!
+
+```javascript
+// Render function
+App.Hello.draw: App.Draw<App.Hello.State>
+  (state)
+  DOM.node("div", {}, {"border": "1px solid black"}, [
+    DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Hello, world!")])
+    DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
+    DOM.node("div", {}, {}, [DOM.text("Visits: " | Nat.show(state@global))])
+  ])
+
+// Event handler
+App.Hello.when: App.When<App.Hello.State>
+  (event, state)
+  case event {
+    init: IO {
+      App.watch!(App.room_zero)
+      App.new_post!(App.room_zero, App.empty_post)
+    }
+    mouse_down: IO {
+      App.set_local!(state@local + 1)
+    }
+  } default App.pass!
+```
+
+Code: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
+
+Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
 
 Resources
 ---------

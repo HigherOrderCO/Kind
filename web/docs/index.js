@@ -3238,17 +3238,19 @@ module.exports = class AppPlay extends Component {
 
   // Performs an IO computation
   run_io(io) {
+    //console.log("hmmm", io);
     switch (io._) {
       case "IO.end":
         switch (io.value._) {
-          case "none":
+          case "Maybe.none":
             return Promise.resolve(null);
-          case "some": 
-            this.app_state = io.value.value;
+          case "Maybe.some": 
+            this.app_state.local = io.value.value;
             return Promise.resolve(io.value.value);
         }
+        break;
       case "IO.ask":
-        //console.log("IO.ask", io.param);
+        console.log("IO.ask", io);
         return new Promise((res, err) => {
           switch (io.query) {
             case "print":
@@ -3469,6 +3471,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
+  'App.Hello': __webpack_require__.e(/* import() */ 130).then(__webpack_require__.t.bind(__webpack_require__, 130, 23)),
   'App.MiniMMO': __webpack_require__.e(/* import() */ 661).then(__webpack_require__.t.bind(__webpack_require__, 661, 23)),
 }
 
