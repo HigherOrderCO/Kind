@@ -28,6 +28,8 @@ kind Main --run                                # runs Main
 
 *Right now, you must be at `kind/base` to use the language.*
 
+Haskell and Scheme compilers and releases expected around June.
+
 Examples
 --------
 
