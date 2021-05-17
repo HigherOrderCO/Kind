@@ -69,7 +69,7 @@ Kind.Comp.Target.SchemeText.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
         // String.nil
         {0, "(string->text \"\")"}
         // String.cons
-        {2, "(text-append (make-text 1 (integer->char $0)) $1)"}
+        {2, "(textual-append (make-text 1 (integer->char $0)) $1)"}
       ]
       // Elim
       {"(= (text-length $0) 0)", [
@@ -135,14 +135,17 @@ Kind.Comp.Target.SchemeText.optimized: Map(Pair(Nat,String))
     "U16.inc": {2, "(+ $0 1)"},
     "U16.to_nat": {1, "$0"},
     "String.eql": {2, "(textual=? $0 $1)"},
-    "String.concat": {2, "(text-append $0 $1)"},
+    "String.concat": {2, "(textual-append $0 $1)"},
   }
 
 // Base deps
 // =========
 
 Kind.Comp.Target.SchemeText.base: String
-`; Short alias to vector-ref
+`; Use text data-structure instead of strings
+(import (srfi :135))
+
+; Short alias to vector-ref
 (define get vector-ref)
 
 ; Converts a Kind word to a native integer
