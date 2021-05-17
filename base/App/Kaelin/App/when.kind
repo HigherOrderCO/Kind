@@ -12,7 +12,7 @@ App.Kaelin.App.when: App.When<App.Kaelin.State>
 
     key_down game:
       switch U16.eql(event.code) {
-        'F' : 
+        'F' : //press F
           open state.internal as internal
           let animation = App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(0, App.Kaelin.Sprite.fire))
           // This gives me a bug on runtime we should investigate what is the cause

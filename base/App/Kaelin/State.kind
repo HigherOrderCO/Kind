@@ -1,21 +1,21 @@
 type App.Kaelin.State.global {
-  init
-  void(
-    room: String
-  )
-  game(
+  new(
     room: String
     map: App.Kaelin.Map,
     internal : App.Kaelin.Internal
+    fase: App.Kaelin.Stage
   )
 }
 
-type App.Kaelin.State.local {
+type App.Kaelin.Stage {
   init
-  void(
-    room: String
-  )
-  game(
+  void
+  planning
+  action
+}
+
+type App.Kaelin.State.local {
+  new(
     user: String
     cast_info: Maybe<App.Kaelin.CastInfo>
     env_info : App.EnvInfo
