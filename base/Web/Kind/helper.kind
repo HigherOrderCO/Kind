@@ -1,7 +1,0 @@
-// Check which is the current page. 
-Web.Kind.helper.is_eql(src: Web.Kind.Page, trg: Web.Kind.Page): Bool
-  case src trg {
-    home home: true
-    apps apps: true
-  } default false
-

@@ -1,0 +1,26 @@
+#!/bin/sh
+# Run this from anywhere to get a shell in the project environment  -*-sh-*-
+# To load in the current shell with bash: eval $(.akku/env -s)
+# For fish, use:                          .akku/env -f | source
+export AKKU_ENV=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+dir=$(pwd)
+if [ ! -d "$AKKU_ENV" ] || [ ! -e "$AKKU_ENV/.akku/bin/activate" ]; then
+    echo The .akku/env script should be run, not sourced
+else
+    cd "$AKKU_ENV" || exit 1
+    . "$AKKU_ENV/.akku/bin/activate"
+
+    if [ "$1" = "-s" ]; then
+        echo "AKKU_ENV=\"$AKKU_ENV\";"
+        sed -e "s/\$PWD/\$AKKU_ENV/g" "$AKKU_ENV/.akku/bin/activate"
+        cd "$dir" || exit 1
+    elif [ "$1" = "-f" ]; then
+        echo "set AKKU_ENV \"$AKKU_ENV\""
+        sed -e "s/\$PWD/\$AKKU_ENV/g" "$AKKU_ENV/.akku/bin/activate.fish"
+        cd "$dir" || exit 1
+    else
+        cd "$dir" || exit 1
+        SHELL=${SHELL:-/bin/sh}
+        exec "${@:-$SHELL}"
+    fi
+fi
