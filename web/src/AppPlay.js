@@ -278,17 +278,19 @@ module.exports = class AppPlay extends Component {
 
   // Performs an IO computation
   run_io(io) {
+    //console.log("hmmm", io);
     switch (io._) {
       case "IO.end":
         switch (io.value._) {
-          case "none":
+          case "Maybe.none":
             return Promise.resolve(null);
-          case "some": 
-            this.app_state = io.value.value;
+          case "Maybe.some": 
+            this.app_state.local = io.value.value;
             return Promise.resolve(io.value.value);
         }
+        break;
       case "IO.ask":
-        //console.log("IO.ask", io.param);
+        console.log("IO.ask", io);
         return new Promise((res, err) => {
           switch (io.query) {
             case "print":

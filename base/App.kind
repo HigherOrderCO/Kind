@@ -165,7 +165,7 @@ App.print<S: App.State>(str: String): IO<Maybe<App.State.local<S>>>
     App.pass<S>
   }
 
-App.store<S: App.State>(value: App.State.local<S>): IO<Maybe<App.State.local<S>>>
+App.set_local<S: App.State>(value: App.State.local<S>): IO<Maybe<App.State.local<S>>>
   IO {
     return some(value)
   }
@@ -173,6 +173,11 @@ App.store<S: App.State>(value: App.State.local<S>): IO<Maybe<App.State.local<S>>
 App.watch<S: App.State>(room: String): IO<Maybe<App.State.local<S>>>
   App.do<S>("watch", room)
 
+App.room_zero: String
+  "0x00000000000000"
+
+App.empty_post: String
+  "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 //foo: Type
   //App.Post<App.State.new(Unit,Unit)>
