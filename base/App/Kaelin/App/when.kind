@@ -2,33 +2,35 @@
 
 App.Kaelin.App.when: App.When<App.Kaelin.State>
 (event, state)
-  case event state{
-    init game: 
+open state
+open state.global as global
+open state.local as local
+  case event global.stage{
+    init planning: 
       let user = String.to_lower(event.user)
       IO {
         App.watch(App.Kaelin.Constants.room)
-        App.store!(App.Kaelin.State.game(user, App.Kaelin.Constants.room, state.cast_info, state.map, state.internal, state.env_info))
+        App.Store!(App.Kaelin.State.game(user, App.Kaelin.Constants.room, local.cast_info, global.map, global.internal, local.env_info))
       }
 
-    key_down game:
+    key_down planning:
       switch U16.eql(event.code) {
         'F' : //press F
-          open state.internal as internal
+          open global.internal as internal
           let animation = App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(0, App.Kaelin.Sprite.fire))
           // This gives me a bug on runtime we should investigate what is the cause
-          // let state = state@map <- App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, state.map)
-          App.store!(App.Kaelin.State.game(state.user, App.Kaelin.Constants.room, state.cast_info, App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, state.map), state.internal, state.env_info))
-        49#16: App.store!(App.Kaelin.Action.create_player(
-        state.user, "Croni", state))
-      } default App.store!(App.Kaelin.Action.start_cast(event.code, state))
+          // let state = state@map <- App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map)
+          App.Store!(App.Kaelin.State.game(state.user, App.Kaelin.Constants.room, local.cast_info, App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map), global.internal, local.env_info))
+        49#16: App.new_post!(global.room, App.event.serialize(App.Kaelin.Event.create_hero(0#8)))
+      } default App.Store!(App.Kaelin.Action.start_cast(event.code, state))
 
-    frame game:
+    frame planning:
       let info = event.info
       let state = App.Kaelin.Action.update_interface(info, U64.to_nat(event.time), state)
-      App.store!(App.Kaelin.Action.update_area(state))       
+      App.Store!(App.Kaelin.Action.update_area(state))       
     
-    mouse_up game:
-      let info = state.env_info
+    mouse_up planning:
+      let info = local.env_info
       open info
       let {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info.mouse_pos)
       let hex = App.Kaelin.Event.serialize(App.Kaelin.Event.user_input(state.user, App.Kaelin.Coord.new(axial_x, axial_y), App.Kaelin.Action.walk))
