@@ -1,26 +1,26 @@
-Web.Kind.comp.footer(device: Device, container_layout: Map(String)): DOM
+App.Kind.comp.footer(device: Device, container_layout: Map(String)): DOM
   let vertical_padding = case device {
     phone: "0.5em 0"
   } default "1em 0"
   let footer_font_size = case device {
-    phone: Web.Kind.typography.xs
-  } default Web.Kind.typography.body_size
+    phone: App.Kind.typography.xs
+  } default App.Kind.typography.body_size
 
   let footer_font_size_s = case device {
-    phone: Web.Kind.typography.xxs
-  } default Web.Kind.typography.s
+    phone: App.Kind.typography.xxs
+  } default App.Kind.typography.s
 
   let heading_typography = case device {
-    phone: Web.Kind.typography.h3
-  } default Web.Kind.typography.h2
+    phone: App.Kind.typography.h3
+  } default App.Kind.typography.h2
 
   let join_us_txt =
     DOM.node("div", {}, {}, [
-      Web.Kind.comp.heading(heading_typography, "Join Us"),
+      App.Kind.comp.heading(heading_typography, "Join Us"),
       DOM.node("div", {}, {}, [
-        Web.Kind.comp.list([
-          Web.Kind.comp.link_white("Github", footer_font_size, "https://github.com/uwu-tech/Kind"),
-          Web.Kind.comp.link_white("Telegram", footer_font_size, "https://t.me/formality_lang")
+        App.Kind.comp.list([
+          App.Kind.comp.link_white("Github", footer_font_size, "https://github.com/uwu-tech/Kind"),
+          App.Kind.comp.link_white("Telegram", footer_font_size, "https://t.me/formality_lang")
         ])
       ]) 
     ])
@@ -37,7 +37,7 @@ Web.Kind.comp.footer(device: Device, container_layout: Map(String)): DOM
 
   let join_us_wrapper = DOM.node("div", {}{
     "padding": vertical_padding
-    "background-color": Web.Kind.constant.primary_color
+    "background-color": App.Kind.constant.primary_color
   }, [join_us])
 
   let msg_footer =
@@ -48,12 +48,12 @@ Web.Kind.comp.footer(device: Device, container_layout: Map(String)): DOM
       "align-items": "center"
     }), [
       DOM.node("p", {}, {"font-size": footer_font_size_s}, [DOM.text("This website was created using Kind!")])
-      Web.Kind.comp.link_white("*u* show me the code!", footer_font_size_s, "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
+      App.Kind.comp.link_white("*u* show me the code!", footer_font_size_s, "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
     ])
 
   let msg_footer_wrapper = DOM.node("div", {}{
     "padding": "0.5em 0"
-    "background-color": Web.Kind.constant.dark_pri_color
+    "background-color": App.Kind.constant.dark_pri_color
   }, [msg_footer])
   
 

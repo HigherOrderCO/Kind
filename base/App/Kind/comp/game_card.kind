@@ -1,4 +1,4 @@
-Web.Kind.comp.game_card(src: String, title: String, path: String): DOM
+App.Kind.comp.game_card(src: String, title: String, path: String): DOM
   let banner =
     DOM.node("img", {"src": src}, 
     {"width": "100px", "height": "100px"}, []) 
