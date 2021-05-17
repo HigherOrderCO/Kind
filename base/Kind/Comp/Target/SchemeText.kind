@@ -481,7 +481,7 @@ Kind.Comp.Target.SchemeText.term(comp: Kind.Comp, depth: Nat, defs: Kind.Comp.De
         chr:
           Nat.show(U16.to_nat(comp.chrx))
         str:
-          "\"" | Kind.Comp.Target.SchemeText.string(comp.strx) | "\""
+          "(textual->text \"" | Kind.Comp.Target.SchemeText.string(comp.strx) | "\")"
         txt:
           comp.text
       }
