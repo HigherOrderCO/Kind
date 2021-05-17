@@ -1,4 +1,4 @@
-Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
+App.Kind.draw_page_home(stt: App.Kind.State.local): DOM
   open stt
   // Auxiliars
   // ----------
@@ -13,7 +13,7 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
   let line_break = DOM.node("br", {}, {}, [])
 
   let span_bold =
-    ((txt) DOM.node("span", {}, Web.Kind.typography.body_strong,
+    ((txt) DOM.node("span", {}, App.Kind.typography.body_strong,
     [DOM.text(txt)])) :: String -> DOM
 
   // Content
@@ -22,11 +22,11 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
     phone: "6em"
   } default "10em"
   let heading_typography = case stt.device {
-    phone: Web.Kind.typography.h2
-  } default Web.Kind.typography.h1
+    phone: App.Kind.typography.h2
+  } default App.Kind.typography.h1
 
   let intro =
-    DOM.node("div", {}, Web.Kind.typography.body, [
+    DOM.node("div", {}, App.Kind.typography.body, [
       span("Kind is a cute ") span_bold("proof")
       span("gramming language.") line_break line_break
       span("It's ") span_bold("capable of everything")
@@ -42,7 +42,7 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
         "justify-content": "flex-end"
       }, [
         span("gl hf!")
-        DOM.node("img", {"src": Web.Kind.img.croni}, {
+        DOM.node("img", {"src": App.Kind.img.croni}, {
           "width": "2em"
           "height": "2em"
         }, [])
@@ -54,17 +54,17 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
       "align-items": "center"
       "justify-content": "center"
     }, [
-      Web.Kind.comp.btn_primary_solid("GO TO APPS", "btn_pri_home_go_to_apps"),
+      App.Kind.comp.btn_primary_solid("GO TO APPS", "btn_pri_home_go_to_apps"),
       croni
     ])
     // Kaelin.Assets.chars.croni_idle_00
   
   let install =
     let instructions = 
-      DOM.node("div", {}, Map.union!(Web.Kind.typography.code, {
+      DOM.node("div", {}, Map.union!(App.Kind.typography.code, {
         "margin-top": "0.5em"
         "padding": "0.5em"
-        "box-shadow": Web.Kind.constant.primary_color | " -2px 2px 1px"
+        "box-shadow": App.Kind.constant.primary_color | " -2px 2px 1px"
         "border": "1px solid"}), [
           line("npm i -g kind-lang")
           line("git clone https://github.com/uwu-tech/Kind")
@@ -73,9 +73,9 @@ Web.Kind.draw_page_home(stt: Web.Kind.State): DOM
           line("kind Main --run")
         ])
     DOM.node("div", {"id": "instructions"}, {}, [
-      Web.Kind.comp.heading(heading_typography, "Install"), instructions
+      App.Kind.comp.heading(heading_typography, "Install"), instructions
     ])
-  Web.Kind.comp.page("home", stt, [
+  App.Kind.comp.page("home", stt, [
         intro,
         call_to_apps,
         install])

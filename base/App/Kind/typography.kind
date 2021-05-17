@@ -1,0 +1,126 @@
+// Typefaces
+// --
+App.Kind.typography.typeface_body: String
+  "'apl385', 'Anonymous Pro', 'Monaco', 'Courier New', monospace"
+
+App.Kind.typography.typeface_code: String
+  "'apl385', 'Anonymous Pro', 'Monaco', 'Courier New', monospace"
+
+App.Kind.typography.typeface_title: String
+  "'Lato', 'Helvetica', 'Verdana', sans-serif"
+
+App.Kind.typography.typeface_header: String
+  "'Lato', 'Helvetica', 'Verdana', sans-serif"
+
+// Font sizes
+// --
+App.Kind.typography.body_size: String
+  "12pt"
+
+App.Kind.typography.xxs: String
+  "8pt"
+
+App.Kind.typography.xs: String
+  "9pt"
+
+App.Kind.typography.s: String
+  "10pt"
+
+App.Kind.typography.l: String
+  "16pt"
+
+App.Kind.typography.xl: String
+  "18pt"
+
+App.Kind.typography.xxl: String
+  "21pt"
+
+App.Kind.typography.xxxl: String
+  "24pt"
+
+// Typography: font
+// --
+App.Kind.typography.body: Map(String)
+  {
+    "font-size": App.Kind.typography.body_size
+    "font-family": App.Kind.typography.typeface_body
+    "font-weight": "300"
+    "line-height": "1.35"
+  }
+
+App.Kind.typography.body_strong: Map(String)
+  {
+    "font-size": App.Kind.typography.body_size
+    "font-family": App.Kind.typography.typeface_body
+    "font-weight": "800"
+    "line-height": "1.35"
+  }
+
+App.Kind.typography.code: Map(String)
+  {
+    "font-size": App.Kind.typography.body_size
+    "font-family": App.Kind.typography.typeface_code
+    "font-weight": "400"
+    "line-height": "1.5"
+  }
+
+App.Kind.typography.title: Map(String)
+  {
+    "font-size": App.Kind.typography.xxxl
+    "font-family": App.Kind.typography.typeface_header
+    "font-weight": "700"
+    "text-align": "center"
+    "line-height": "1.5"
+  }
+
+App.Kind.typography.subtitle: Map(String)
+  {
+    "font-size": App.Kind.typography.xxl
+    "font-family": App.Kind.typography.typeface_header
+    "font-weight": "700"
+    "text-align": "center"
+    "line-height": "1.5"
+  }
+
+App.Kind.typography.h1: Map(String)
+  {
+    "font-size": App.Kind.typography.xl
+    "font-family": App.Kind.typography.typeface_header
+    "font-weight": "700"
+    "line-height": "1.5"
+  }
+
+App.Kind.typography.h2: Map(String)
+  {
+    "font-size": App.Kind.typography.l
+    "font-family": App.Kind.typography.typeface_header
+    "font-weight": "700"
+    "line-height": "1.5"
+  }
+
+App.Kind.typography.h3: Map(String)
+  {
+    "font-size": App.Kind.typography.body_size
+    "font-family": App.Kind.typography.typeface_header
+    "font-weight": "700"
+    "line-height": "1.5"
+  }
+
+App.Kind.typography.button: Map(String)
+  {
+    "text-align": "center"
+    "font-size": App.Kind.typography.body_size
+    "font-family": App.Kind.typography.typeface_header
+    "font-weight": "600"
+    "line-height": "1"
+  }
+
+
+// Typography: paragraph
+// --
+
+App.Kind.typography.paragraph(txt: String): DOM
+    DOM.node("p", {}, Map.union!(App.Kind.typography.body, {
+        "padding": "0.2em"
+        }),
+    [DOM.text(txt)])
