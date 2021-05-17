@@ -266,8 +266,8 @@ Kind.Comp.Target.SchemeText.base: String
 ; Performs a single Kind IO action
 (define (io_action name)
   (case name
-    ("print" (lambda (x) (print x)))
-    ("put_string" (lambda (x) (display x)))
+    ("print" (lambda (x) (print (textual->string x))))
+    ("put_string" (lambda (x) (display (textual->string x))))
     ("get_line" (lambda (x) (get_line)))
     ("del_file" (lambda (x) (del_file x)))
     ("get_file" (lambda (x) (get_file x)))
