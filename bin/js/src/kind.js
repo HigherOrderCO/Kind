@@ -22235,7 +22235,7 @@ module.exports = (function() {
         switch (self._) {
             case 'Parser.State.new':
                 var $7024 = self.err;
-                var _reply$7 = Parser$text$("0x", _pst$1);
+                var _reply$7 = Parser$maybe$(Parser$text("0x"), _pst$1);
                 var self = _reply$7;
                 switch (self._) {
                     case 'Parser.Reply.error':
