@@ -1,0 +1,17 @@
+App.Kind.content_apps: List(DOM)
+ [
+  App.Kind.comp.game_card(
+    App.Kind.img.app_senhas, "Senhas", "App.Senhas")
+
+  App.Kind.comp.game_card(
+    App.Kind.img.app_tic_tac_toe, "TicTacToe", "App.TicTacToe")
+
+  App.Kind.comp.game_card(
+    App.Kind.img.app_kaelin, "Kaelin", "App.Kaelin")
+ ] 
+
+App.Kind.content_apps_text: DOM
+  App.Kind.comp.list([
+    App.Kind.comp.link_black("Demo", "App.Demo"),
+    App.Kind.comp.link_black("Online", "App.Online")
+  ])
