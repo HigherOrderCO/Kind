@@ -1,9 +1,0 @@
-// Returns state with updated cast_info
-App.Kaelin.Action.update_interface(interface : App.EnvInfo, tick : Nat, state: App.Kaelin.State): App.Kaelin.State
-   case state {
-     game: 
-        let internal = state.internal
-        open internal
-        let new_state = App.Kaelin.State.game(state.user, state.room, state.cast_info, state.map, App.Kaelin.Internal.new(tick, internal.frame + 1, internal.timer), interface)
-        App.Kaelin.Timer.wait(internal.frame, internal.timer, new_state)
-   } default state

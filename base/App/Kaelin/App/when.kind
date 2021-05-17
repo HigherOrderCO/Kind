@@ -23,9 +23,9 @@ App.Kaelin.App.when: App.When<App.Kaelin.State>
       } default App.store!(App.Kaelin.Action.start_cast(event.code, state))
 
     frame game:
-      let info = event.info
-      let state = App.Kaelin.Action.update_interface(info, U64.to_nat(event.time), state)
-      App.store!(App.Kaelin.Action.update_area(state))       
+      let local = App.Kaelin.Action.local.env_info(event.info, state@local)
+      let local = App.Kaelin.Action.local.area(evnt.time, state@global, local)
+      App.set_local!(local)
     
     mouse_up game:
       let info = state.env_info
