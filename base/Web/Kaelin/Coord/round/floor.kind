@@ -1,2 +1,0 @@
-Web.Kaelin.Coord.round.floor(n: F64): F64
-  I32.to_f64(F64.to_i32(n))

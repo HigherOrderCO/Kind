@@ -1,0 +1,2 @@
+App.Kaelin.Entity.creature.heal(heal: I32, entity: App.Kaelin.Entity): App.Kaelin.Entity
+  App.Kaelin.Entity.creature.change_hp(heal, entity)

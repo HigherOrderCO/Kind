@@ -1,0 +1,22 @@
+App.Kaelin.Skill.skill_use(
+state: App.Kaelin.State, 
+): App.Kaelin.State
+  case state { 
+    game:
+      case state.cast_info {
+        none: state
+        some:
+          open state.cast_info.value as cast
+          skill = cast.skill
+          open skill
+          mouse_nat = App.Kaelin.Coord.Convert.axial_to_nat(cast.mouse_pos)
+          if NatSet.has(mouse_nat, cast.range) then
+            open state.internal as internal
+            tick = internal.tick
+            result = skill.effect(tick, cast.hero_pos, cast.mouse_pos, state.map)
+            open result
+            App.Kaelin.State.game(state.user, state.room, none, result.map, state.internal, state.env_info)
+          else
+            state
+      }
+  }default state

@@ -1,0 +1,11 @@
+App.Kaelin.Map.creature.get(
+  coord: App.Kaelin.Coord,
+  map: App.Kaelin.Map
+): Maybe<App.Kaelin.Tile>
+  let key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
+  let tile = NatMap.get!(key, map)
+  case tile {
+    none: none
+    some: some(tile.value)
+  }
+  

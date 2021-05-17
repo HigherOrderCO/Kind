@@ -1,0 +1,14 @@
+App.Kaelin.Map.creature.show(map: App.Kaelin.Map): String
+  let map = NatMap.to_list!(map)
+  let result = ""
+  for pos in map with result:
+    let key = pos@fst
+    let coord = App.Kaelin.Coord.Convert.nat_to_axial(key)
+    
+    let tile = pos@snd
+    open tile
+    case tile.creature {
+      none: result | ""
+      some: result | App.Kaelin.Coord.show(coord) | " " | App.Kaelin.Tile.creature.show(tile.creature.value) | "\n"
+    }
+  result

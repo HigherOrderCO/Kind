@@ -1,0 +1,32 @@
+// Converts a 256-bit hex string to an event
+// waiting for i32
+
+App.Kaelin.Event.deserialize(code: String) : Maybe(App.Kaelin.Event)
+  def next = ((x) App.Kaelin.Event.Buffer.next(x)) :: App.Kaelin.Event.Buffer -> App.Kaelin.Event.Buffer
+  def get = ((x) App.Kaelin.Event.Buffer.get(x)) :: App.Kaelin.Event.Buffer -> Nat
+  def push = ((x, y) App.Kaelin.Event.Buffer.push(x, y)) :: App.Kaelin.Event.Buffer -> List<U8> -> App.Kaelin.Event.Buffer
+  let stream = App.Kaelin.Event.Buffer.new(code, App.Kaelin.Event.Code.action)
+  switch (Nat.eql(get(stream))) {
+    1 : 
+     stream = next(stream)
+     // create_hero
+     stream = push(stream, App.Kaelin.Event.Code.create_hero)
+     Maybe.some!(App.Kaelin.Event.create_hero(Nat.to_u8(get(stream))))
+    4 : 
+      stream = next(stream)
+      // user_input
+      stream = push(stream, App.Kaelin.Event.Code.user_input)
+      let player = Bits.to_hex_string(Nat.to_bits(get(stream)))
+      stream = next(stream)
+      let action = App.Kaelin.Resources.Action.to_action(get(stream))
+      stream = next(stream)
+      let pos = App.Kaelin.Coord.Convert.nat_to_axial(get(stream))
+      Maybe.bind!(App.Kaelin.Event, action, (action) Maybe.some!(App.Kaelin.Event.user_input("0x" | player, pos, action)))
+      // TODO : VALIDATE THE POSITION OF CODIFICATION
+  } default Maybe.none!
+
+ // log(Nat.show(App.Kaelin.Event.Buffer.get(stream)))
+ // stream = App.Kaelin.Event.Buffer.next(stream)
+ // log(Nat.show(App.Kaelin.Event.Buffer.get(stream)))
+ // stream = App.Kaelin.Event.Buffer.next(stream)
+ // log(App.Kaelin.Coord.show(App.Kaelin.Coord.Convert.nat_to_axial(App.Kaelin.Event.Buffer.get(stream))))

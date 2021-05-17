@@ -1,3 +1,0 @@
-Web.Kaelin.Event.Buffer.push(buffer : Web.Kaelin.Event.Buffer, list : List<U8>) : Web.Kaelin.Event.Buffer
-  open buffer
-  {buffer.fst, list ++ buffer.snd }

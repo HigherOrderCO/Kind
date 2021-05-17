@@ -1,0 +1,21 @@
+// Returns state with cast_info with updated mouse_coord and area
+App.Kaelin.Action.update_area(state: App.Kaelin.State): App.Kaelin.State
+  case state {
+    game: 
+      open state.env_info as info
+      case state.cast_info {
+        none: state
+        some: 
+          open state.cast_info.value as cast
+          let mouse_coord = App.Kaelin.Coord.to_axial(info.mouse_pos)
+          if App.Kaelin.Coord.eql(mouse_coord, cast.mouse_pos) then 
+          state
+          else
+            open state.internal
+            area = App.Kaelin.Effect.indicators.get_indicators(state.internal.tick, cast.hero_pos, cast.skill, mouse_coord, state.map)
+            new_cast_info = some(App.Kaelin.CastInfo.new(cast.hero_pos, cast.skill, cast.range, area, mouse_coord))
+            new_state = App.Kaelin.State.game(state.user, state.room,new_cast_info,state.map, state.internal, state.env_info)
+            new_state
+      }        
+  }default state
+  

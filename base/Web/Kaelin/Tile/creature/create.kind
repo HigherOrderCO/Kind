@@ -1,8 +1,0 @@
-Web.Kaelin.Tile.creature.create(
-  hero_name: String,
-  player_addr: Maybe<String>,
-  team: String
-):Web.Kaelin.Creature
-  let hero = Web.Kaelin.Hero.info(hero_name)
-  open hero
-  Web.Kaelin.Creature.new(player_addr, hero, team, hero.max_hp, [])

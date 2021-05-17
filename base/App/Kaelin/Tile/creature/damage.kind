@@ -1,0 +1,2 @@
+App.Kaelin.Entity.creature.damage(damage: I32, entity: App.Kaelin.Entity): App.Kaelin.Entity
+  App.Kaelin.Entity.creature.change_hp(I32.neg(damage), entity)

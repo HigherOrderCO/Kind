@@ -1,3 +1,0 @@
-Web.Kaelin.Skill.has_key(key: U16, skill: Web.Kaelin.Skill): Bool
-  open skill
-  U16.eql(key, skill.key)

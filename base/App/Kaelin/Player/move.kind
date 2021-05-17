@@ -1,0 +1,22 @@
+//TODO: improve it
+App.Kaelin.Player.move(
+  coord_b: App.Kaelin.Coord,
+  address: String,
+  state: App.Kaelin.State
+): App.Kaelin.State
+  case state {
+    game: 
+      let coord_a = App.Kaelin.Map.player.to_coord(address,state.map)
+      let is_occupied = App.Kaelin.Map.is_occupied(coord_b,state.map)
+      let tile_b = App.Kaelin.Map.get(coord_b,state.map)
+      case tile_b{
+        none: state
+        some:if is_occupied then
+        state
+      else
+        new_map = App.Kaelin.Map.swap(0,coord_a <> coord_b ,coord_b,state.map)
+        App.Kaelin.State.game(state.user, state.room, state.players, state.cast_info, new_map, state.internal, state.env_info)
+      }      
+  }default state
+       
+      

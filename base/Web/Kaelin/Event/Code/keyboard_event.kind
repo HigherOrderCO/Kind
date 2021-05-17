@@ -1,5 +1,0 @@
-Web.Kaelin.Event.Code.keyboard_event : List<U8>
-  [
-    //2
-    4#8 // 6
-  ] //constraint 6 <= 64

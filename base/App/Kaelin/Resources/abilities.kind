@@ -1,0 +1,10 @@
+App.Kaelin.Resources.skills: Map(App.Kaelin.Skill)
+  let skills = [
+    App.Kaelin.Skill.skills.quick_shot
+  ]
+
+	List.fold!(skills)!({}, (ability, map) 
+  open ability
+    map{U8.show(Skill.id)} <- ability
+  )
+  

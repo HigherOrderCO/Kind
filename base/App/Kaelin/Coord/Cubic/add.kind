@@ -1,0 +1,7 @@
+App.Kaelin.Coord.Cubic.add(a: App.Kaelin.Coord.Cubic, b: App.Kaelin.Coord.Cubic): App.Kaelin.Coord.Cubic
+  open a
+  open b
+  let x = I32.add(a.x, b.x)
+  let y = I32.add(a.y, b.y)
+  let z = I32.add(a.z, b.z)
+  App.Kaelin.Coord.Cubic.new(x, y, z)

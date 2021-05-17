@@ -1,0 +1,13 @@
+App.Kaelin.Player.move_by(i: I32, j: I32, state: App.Kaelin.State, addr: String): App.Kaelin.State
+case state {
+  game:
+    coord_a = App.Kaelin.Map.player.to_coord(addr,state.map)
+    case coord_a{
+      none:state
+      some: 
+        coord = coord_a.value
+        open coord                  
+        coord_b = App.Kaelin.Coord.new(I32.add(coord.i,i), I32.add(coord.j,j))
+        App.Kaelin.Player.move(coord_b, state, addr)
+    }
+}default state

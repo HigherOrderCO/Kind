@@ -1,0 +1,5 @@
+App.Kaelin.Coord.range(coord: App.Kaelin.Coord, distance: I32): List<App.Kaelin.Coord>
+  let list_coords = App.Kaelin.Coord.Axial.range(coord, distance)
+  let fit = (x)
+    App.Kaelin.Coord.fit(x, App.Kaelin.Constants.map_size)
+  List.filter!(fit, list_coords)

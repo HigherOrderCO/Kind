@@ -1,0 +1,10 @@
+App.Kaelin.Timer.interval(
+  f :  List<App.Kaelin.State -> App.Kaelin.State>,
+  g : Nat -> Nat
+  state : App.Kaelin.State
+) : App.Kaelin.State
+  let acc = (f, pair)
+    let {state, i} = pair 
+    Pair.new(_, _, App.Kaelin.Timer.delay(g(i), f, state), Nat.add(i, 1))
+  let fold_f = List.foldr!(Pair<App.Kaelin.State, Nat>, {state, 0}, acc, f)
+  Pair.fst(_, _, fold_f)

@@ -1,9 +1,0 @@
-Web.Kaelin.Tile.show(tile: Web.Kaelin.Tile): String
-  open tile
-  let creature = case tile.creature {
-    none: ""
-    some:
-      Web.Kaelin.Tile.creature.show(tile.creature.value)
-  }
-  
-  creature

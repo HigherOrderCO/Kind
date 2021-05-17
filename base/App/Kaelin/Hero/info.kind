@@ -1,0 +1,8 @@
+App.Kaelin.Hero.info(name: String): App.Kaelin.Hero
+  switch String.eql(name) {
+    "Croni": App.Kaelin.Heroes.Croni.hero
+    "Cyclope": App.Kaelin.Heroes.Cyclope.hero
+    "Lela": App.Kaelin.Heroes.Lela.hero
+    "Octoking": App.Kaelin.Heroes.Octoking.hero
+   } default App.Kaelin.Heroes.Croni.hero
+   

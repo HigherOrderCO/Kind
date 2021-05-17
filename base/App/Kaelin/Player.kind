@@ -1,0 +1,5 @@
+type App.Kaelin.Player {
+  new(
+    addr: String
+  )
+}

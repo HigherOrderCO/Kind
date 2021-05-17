@@ -1,3 +1,0 @@
-type Web.Kaelin.Animation {
-  new(fps : Nat, sprite : Web.Kaelin.Sprite)
-}

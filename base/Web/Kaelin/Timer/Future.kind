@@ -1,4 +1,0 @@
-type Web.Kaelin.Timer.Future {
-    time(x : Nat)
-    frame(x : Nat)
-}

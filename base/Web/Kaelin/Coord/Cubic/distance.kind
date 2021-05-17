@@ -1,9 +1,0 @@
-// Returns the distance between 2 Coords
-// TODO: create I32.to_nat ?
-Web.Kaelin.Coord.Cubic.distance(a: Web.Kaelin.Coord.Cubic, b: Web.Kaelin.Coord.Cubic): Nat
-    open a
-    open b
-    let subx = I32.sub(a.x, b.x)
-    let suby = I32.sub(a.y, b.y)
-    let subz = I32.sub(a.z, b.z)
-    Int.to_nat(I32.to_int(I32.max(I32.max(I32.abs(subx), I32.abs(suby)), I32.abs(subz)))) 

@@ -1,0 +1,18 @@
+App.Kaelin.Effect.movement.move: App.Kaelin.Effect<Unit>
+  App.Kaelin.Effect { 
+    get map = App.Kaelin.Effect.map.get
+    get center = App.Kaelin.Effect.coord.get_center
+    get target = App.Kaelin.Effect.coord.get_target
+    let key = App.Kaelin.Coord.Convert.axial_to_nat(center)
+    let tile = NatMap.get!(key, map)
+    case tile { 
+      none: App.Kaelin.Effect { return unit }
+      some: 
+        open tile.value
+        if App.Kaelin.Map.is_occupied(target, map) then
+          App.Kaelin.Effect { return unit }
+        else
+          new_map= App.Kaelin.Map.swap(center, target, map)
+          App.Kaelin.Effect.map.set(new_map)
+    }
+  }

@@ -1,7 +1,0 @@
-Web.Kaelin.Resources.Action.to_bits(x : Web.Kaelin.Action) : Bits
-  let n = case x  {
-      walk : 0
-      ability_0 : 1
-      ability_1 : 2
-  }
-  Nat.to_bits(n)

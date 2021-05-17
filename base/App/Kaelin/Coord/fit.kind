@@ -1,0 +1,16 @@
+// Checks if a coord is inside the map boundaries
+App.Kaelin.Coord.fit(
+  coord: App.Kaelin.Coord,
+  map_size: U32
+) : Bool
+  let coord = App.Kaelin.Coord.Convert.axial_to_cubic(coord)
+  open coord
+  
+  let x = I32.abs(coord.x)
+  let y = I32.abs(coord.y)
+  let z = I32.abs(coord.z)
+
+  let greater = I32.max(x, I32.max(y, z))
+  let greater = I32.to_u32(greater)
+
+  U32.lte(greater, map_size)

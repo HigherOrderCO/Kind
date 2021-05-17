@@ -6,10 +6,13 @@
     //result | str
   //result
 
-Test: String
-  List.foldl!!("",
-    (str, result) 
-      str = String.to_upper(str)
-      str = String.reverse(str)
-      result | str,
-    ["cba","fed","ihg"])
+
+
+Test: _
+  // let f = ((x) 2 * x) :: Nat -> Nat
+  // let g = ((x) 3 + x) :: Nat -> Nat
+  // let h = Function.comp!!!(f, g)
+  // h(5)
+  // List.fold!(["a", "b", "c"])!("", String.concat)
+  List.foldr!!("", String.concat, ["a", "b", "c"])
+

@@ -1,0 +1,3 @@
+App.Kaelin.App.draw(img: VoxBox): App.Draw<App.Kaelin.State>
+(state)
+  DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))

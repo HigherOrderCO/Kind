@@ -1,0 +1,15 @@
+App.Kaelin.Timer.delay(frame : Nat,
+                     f : App.Kaelin.State -> App.Kaelin.State,
+                     state : App.Kaelin.State
+                     ) : App.Kaelin.State
+  let sort = ((x, y) 
+    open x
+    open y
+    Nat.gte(x.time, y.time)) :: App.Kaelin.Timer -> App.Kaelin.Timer -> Bool
+    case state {
+      game : 
+        let internal = state.internal
+        open internal
+        let timer = List.insert_sort!(sort, internal.timer, App.Kaelin.Timer.new(internal.frame + frame, f))
+        App.Kaelin.Timer.set_timer(timer, state)
+    } default state

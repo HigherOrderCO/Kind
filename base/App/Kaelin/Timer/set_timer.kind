@@ -1,0 +1,7 @@
+App.Kaelin.Timer.set_timer(timer : List<App.Kaelin.Timer>, state : App.Kaelin.State) : App.Kaelin.State
+  case state {
+      game :
+        let internal = state.internal
+        open internal
+        App.Kaelin.State.game(state.user, state.room, state.cast_info, state.map, App.Kaelin.Internal.new(internal.tick, internal.frame, timer), state.env_info)
+  } default state

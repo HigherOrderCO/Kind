@@ -1,6 +1,0 @@
-Web.Kaelin.Coord.round.round_F64(n: F64): F64
-  let half = 0.5#64
-  let big_number = 1000.0#64 // while F64.gtn, cmp and ltn is broken
-  let n = F64.add(n, big_number)
-  let result = Web.Kaelin.Coord.round.floor(F64.add(n, half))
-  F64.sub(result, big_number)

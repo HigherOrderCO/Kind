@@ -1,0 +1,7 @@
+App.Kaelin.Coord.Convert.axial_to_cubic(coord: App.Kaelin.Coord): App.Kaelin.Coord.Cubic
+    open coord
+    let x = coord.i
+    let z = coord.j
+    let y = I32.sub(I32.neg(x), z)
+
+    App.Kaelin.Coord.Cubic.new(x, y, z)

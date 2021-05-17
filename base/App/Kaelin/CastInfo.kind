@@ -1,0 +1,9 @@
+type App.Kaelin.CastInfo {
+  new(
+    hero_pos: App.Kaelin.Coord
+    skill: App.Kaelin.Skill
+    range: NatSet
+    area: NatMap<App.Kaelin.Indicator>
+    mouse_pos: App.Kaelin.Coord
+  )
+}

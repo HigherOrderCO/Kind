@@ -1,9 +1,0 @@
-Web.Kaelin.Map.player.info(address: String, map:Web.Kaelin.Map): Maybe<Pair<Web.Kaelin.Coord,Web.Kaelin.Creature>>
-  // usando monads
-  Maybe {
-    get coord = Web.Kaelin.Map.player.to_coord(address,map)
-    get tile = Web.Kaelin.Map.get(coord, map)
-    get creature = tile@creature
-    return {coord, creature}
-  }
-  

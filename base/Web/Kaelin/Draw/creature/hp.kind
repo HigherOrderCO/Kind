@@ -1,8 +1,0 @@
-Web.Kaelin.Draw.creature.hp(
-  cx: U32,
-  cy: U32, 
-  creature: Web.Kaelin.Creature,
-  img: VoxBox
-): VoxBox
-  let hp = Int.show(I32.to_int(creature@hp))
-  VoxBox.Draw.text(hp, PixelFont.small_black, Pos32.new(cx,cy,0u), img)
