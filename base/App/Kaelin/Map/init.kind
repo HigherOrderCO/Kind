@@ -6,10 +6,10 @@ App.Kaelin.Map.init(map: App.Kaelin.Map): App.Kaelin.Map
   cyclope   = App.Kaelin.Heroes.Cyclope.hero
   lela      = App.Kaelin.Heroes.Lela.hero
   octoking  = App.Kaelin.Heroes.Octoking.hero
-  entity_croni = App.Kaelin.Map.Entity.creature(creature("Croni",none,"blue"))
-  entity_cyclope = App.Kaelin.Map.Entity.creature(creature("Cyclope",none,"blue"))
-  entity_lela = App.Kaelin.Map.Entity.creature(creature("Lela",none,"blue"))
-  entity_octoking = App.Kaelin.Map.Entity.creature(creature("Octoking",none,"blue"))
+  entity_croni = App.Kaelin.Map.Entity.creature(creature(0,none,"blue"))
+  entity_cyclope = App.Kaelin.Map.Entity.creature(creature(1,none,"blue"))
+  entity_lela = App.Kaelin.Map.Entity.creature(creature(2,none,"blue"))
+  entity_octoking = App.Kaelin.Map.Entity.creature(creature(3,none,"blue"))
   map       = App.Kaelin.Map.push(new_coord(-1#32,-2#32), entity_croni, map)
   map       = App.Kaelin.Map.push(new_coord(+0#32,+3#32), entity_cyclope, map)
   map       = App.Kaelin.Map.push(new_coord(-2#32,+0#32), entity_lela, map)

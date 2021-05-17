@@ -1,25 +1,26 @@
-App.Kaelin.Action.start_cast(key_code: U16, state: App.Kaelin.State): App.Kaelin.State
-  case state {
-    game:
-      let result = Maybe {
-        // get player info and skill
-        get player_info = App.Kaelin.Map.player.info(state.user, state.map)
-        let player_coord = player_info@fst
-        let player_creature = player_info@snd
-        get skill = App.Kaelin.Hero.skill.from_key(key_code, player_creature@hero)
-        //calculate range and area of skill
-        let range = App.Kaelin.Coord.range_natset(player_coord, skill@range)
-        let mouse_coord = App.Kaelin.Coord.to_axial(state.env_info@mouse_pos)
-        let area = App.Kaelin.Effect.indicators.get_indicators(state.internal@tick, player_coord, skill, mouse_coord, state.map)
-        // create and return cast
-        let cast = App.Kaelin.CastInfo.new(
-          player_coord,
-          skill,
-          range,
-          area,
-          mouse_coord
-        )
-        return App.Kaelin.State.game.set_cast_info(cast, state) 
-      }
-      result <> state
-  } default state
+App.Kaelin.Action.start_cast(key_code: U16, global: App.Kaelin.State.global, local: App.Kaelin.State.local): App.Kaelin.State.local
+  open local
+  open global
+
+  let result = Maybe {
+    // get player info and skill
+    get player_info = App.Kaelin.Map.player.info(local.user, global.map)
+    let player_coord = player_info@fst
+    let player_creature = player_info@snd
+    get skill = App.Kaelin.Hero.skill.from_key(key_code, player_creature@hero)
+    //calculate range and area of skill
+    let range = App.Kaelin.Coord.range_natset(player_coord, skill@range)
+    let mouse_coord = App.Kaelin.Coord.to_axial(local.env_info@mouse_pos)
+    let area = App.Kaelin.Effect.indicators.get_indicators(global.internal@tick, player_coord, skill, mouse_coord, global.map)
+    // create and return cast
+    let cast = App.Kaelin.CastInfo.new(
+      player_coord,
+      skill,
+      range,
+      area,
+      mouse_coord
+    )
+    return (local@cast_info <- some(cast))
+  }
+
+  result <> local

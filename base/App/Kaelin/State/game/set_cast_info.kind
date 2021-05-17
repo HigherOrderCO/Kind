@@ -1,5 +1,0 @@
-App.Kaelin.State.game.set_cast_info(cast_info: App.Kaelin.CastInfo, state: App.Kaelin.State): App.Kaelin.State
-  case state {
-    game:
-      App.Kaelin.State.game(state.user, state.room, some(cast_info), state.map, state.internal, state.env_info)
-  } default state
