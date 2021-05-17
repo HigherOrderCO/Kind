@@ -3,7 +3,7 @@ type App.Kaelin.State.global {
     room: String
     map: App.Kaelin.Map,
     internal : App.Kaelin.Internal
-    fase: App.Kaelin.Stage
+    stage: App.Kaelin.Stage
   )
 }
 

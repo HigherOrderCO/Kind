@@ -1,16 +1,14 @@
-App.Kaelin.Action.create_player(user: String, hero: String, state: App.Kaelin.State): App.Kaelin.State
+App.Kaelin.Action.create_player(user: String, hero: U8, glob: App.Kaelin.State.global): App.State.global(App.Kaelin.State)
+  
   let key = user
   let init_pos = App.Kaelin.Coord.new(+0#32, +0#32)
-  case state {
-    game :
-      case App.Kaelin.Map.player.info(user, state.map) as player {
-        none:
-          log(state.user)
-          new_creature = App.Kaelin.Tile.creature.create(hero, some(user), "blue")
-          entity = App.Kaelin.Map.Entity.creature(new_creature)
-          map = App.Kaelin.Map.push(init_pos, entity, state.map)
-          App.Kaelin.State.game(state.user, state.room, state.cast_info, map, state.internal, state.env_info)
-        some:
-          state
-      }
-  } default state
+  case App.Kaelin.Map.player.info(user, glob@map) as player {
+    none:
+      new_creature = App.Kaelin.Tile.creature.create(hero, some(user), "blue")
+      entity = App.Kaelin.Map.Entity.creature(new_creature)
+      map = App.Kaelin.Map.push(init_pos, entity, glob@map)
+      glob@map <- map
+    some:
+      glob
+  }
+

@@ -6,7 +6,7 @@ App.Kaelin.App.post: App.Post<App.Kaelin.State>
       case data.value as eventdata {
         start_game: glob
         create_user: glob
-        create_hero: glob
+        create_hero: App.Kaelin.Action.create_player(addr, eventdata.hero_id, glob)
         user_input: 
           // TODO move this function to an apropriate dir
           // TODO this function should receive an state.global and update it
