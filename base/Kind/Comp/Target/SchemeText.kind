@@ -264,17 +264,19 @@ Kind.Comp.Target.SchemeText.base: String
   (time_to_string (current-time)))
 
 ; Performs a single Kind IO action
-(define (io_action name)
-  (case name
-    ("print" (lambda (x) (print (textual->string x))))
-    ("put_string" (lambda (x) (display (textual->string x))))
-    ("get_line" (lambda (x) (get_line)))
-    ("del_file" (lambda (x) (del_file x)))
-    ("get_file" (lambda (x) (get_file x)))
-    ("set_file" (lambda (x) (let ((file_text (split_at_first #\= x))) (set_file (car file_text) (cdr file_text)))))
-    ("get_dir" (lambda (x) (get_dir x)))
-    ("get_file_mtime" (lambda (x) (get_file_mtime x)))
-    ("get_time" (lambda (x) (get_time)))))
+(define (io_action text_name)
+  (let ((name (textual->string text_name)))
+    (case name
+      ("print" (lambda (x) (print (textual->string x))))
+      ("put_string" (lambda (x) (display x)))
+      ("get_line" (lambda (x) (textual->text (get_line))))
+      ("del_file" (lambda (x) (del_file (textual->string x))))
+      ("get_file" (lambda (x) (textual->text (get_file (textual->string x)))))
+      ("set_file" (lambda (x) (let ((file_text (split_at_first #\= x))) (set_file (car file_text) (cdr file_text))))) ; TODO
+      ("get_dir" (lambda (x) (textual->text (get_dir (textual->string x)))))
+      ("get_file_mtime" (lambda (x) (textual->text (get_file_mtime (textual->string x)))))
+      ("get_time" (lambda (x) (textual->text (get_time))))
+      (else (print (string-append "not found: " (textual->string name))))))) ; TODO remove?
 
 ; Runs a Kind IO program
 (define (run_io io)
@@ -284,6 +286,10 @@ Kind.Comp.Target.SchemeText.base: String
       (io_query (get io 1))
       (io_param (get io 2))
       (io_then (get io 3)))
+      (print "run_io ==============================")
+      (display (textual->string io_query)) (print " io_query \n")
+      (display io_param) (print " io_param \n")
+      (display io_then) (print " io_then \n")
       (run_io (io_then ((io_action io_query) io_param)))))))`
 
 
