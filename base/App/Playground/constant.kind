@@ -1,0 +1,5 @@
+App.Playground.constant.light_gray_color: String
+  "#E0E0E0"
+
+App.Playground.constant.white_smoke: String
+  "#F5F5F5"
