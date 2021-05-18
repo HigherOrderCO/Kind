@@ -23,6 +23,18 @@ App.Kaelin.Event.deserialize(code: String) : Maybe(App.Kaelin.Event)
       let pos = App.Kaelin.Coord.Convert.nat_to_axial(get(stream))
       Maybe.bind!(App.Kaelin.Event, action, (action) Maybe.some!(App.Kaelin.Event.user_input("0x" | player, pos, action)))
       // TODO : VALIDATE THE POSITION OF CODIFICATION
+    5 :
+      stream = next(stream)
+        //skill_use (hero_pos, mouse_pos, key)
+      stream = push(stream, App.Kaelin.Event.Code.skill_use)
+      hero_pos = App.Kaelin.Coord.Convert.nat_to_axial(get(stream))
+      stream = next(stream)
+      mouse_pos = App.Kaelin.Coord.Convert.nat_to_axial(get(stream))
+      stream = next(stream)
+      key = Nat.to_u16(get(stream))
+      Maybe.some!(App.Kaelin.Event.skill_use(hero_pos, mouse_pos, key))
+
+
   } default Maybe.none!
 
  // log(Nat.show(App.Kaelin.Event.Buffer.get(stream)))

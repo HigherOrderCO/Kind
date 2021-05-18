@@ -7,11 +7,11 @@ App.Kaelin.App.post: App.Post<App.Kaelin.State>
         start_game: glob
         create_user: glob
         create_hero: App.Kaelin.Action.create_player(addr, eventdata.hero_id, glob)
-        user_input: 
+        user_input: glob
+        skill_use: App.Kaelin.Skill.skill_use(eventdata.hero_pos, eventdata.target_pos, eventdata.key, glob)
           // TODO move this function to an apropriate dir
           // TODO this function should receive an state.global and update it
           // TODO cast info is no more in global state, the skill must be serialized in data
           // App.Kaelin.Skill.skill_use(glob)
-          glob
       }
     }

@@ -7,16 +7,16 @@ generate_hex(xs : List<U8>, ys : List<Bits>) : String
   "0x" | Hex.set_min_length(64, App.Kaelin.Event.Code.generate_hex(consumer))
 
 App.Kaelin.Event.serialize(event: App.Kaelin.Event): String
- case event {
-   create_hero :  
-     let cod = [
-         Nat.to_bits(1),
-         Nat.to_bits(U8.to_nat(event.hero_id))
+  case event {
+    create_hero :  
+      let cod = [
+        Nat.to_bits(1),
+        U8.to_bits(event.hero_id)
        ]
-      generate_hex(App.Kaelin.Event.Code.create_hero, cod)
-   create_user : ""
-   start_game : ""
-   user_input : 
+    generate_hex(App.Kaelin.Event.Code.create_hero, cod)
+    create_user : ""
+    start_game : ""
+    user_input : 
      let cod = [
        Nat.to_bits(4),
        Nat.to_bits(Hex.to_nat(event.player))
@@ -25,7 +25,15 @@ App.Kaelin.Event.serialize(event: App.Kaelin.Event): String
        ]
 
      generate_hex(App.Kaelin.Event.Code.user_input, cod)
-    }
+  skill_use:
+    let cod = [  
+      Nat.to_bits(5),
+      App.Kaelin.Coord.Convert.axial_to_bits(event.hero_pos),
+      App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
+      U16.to_bits(event.key)
+    ]
+    generate_hex(App.Kaelin.Event.Code.skill_use, cod)
+  }
 
   //case event {
     //// 0x

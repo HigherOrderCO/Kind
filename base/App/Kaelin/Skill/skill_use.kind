@@ -1,22 +1,32 @@
 App.Kaelin.Skill.skill_use(
-state: App.Kaelin.State, 
-): App.Kaelin.State
-  case state { 
-    game:
-      case state.cast_info {
-        none: state
-        some:
-          open state.cast_info.value as cast
-          skill = cast.skill
-          open skill
-          mouse_nat = App.Kaelin.Coord.Convert.axial_to_nat(cast.mouse_pos)
-          if NatSet.has(mouse_nat, cast.range) then
-            open state.internal as internal
-            tick = internal.tick
-            result = skill.effect(tick, cast.hero_pos, cast.mouse_pos, state.map)
-            open result
-            App.Kaelin.State.game(state.user, state.room, none, result.map, state.internal, state.env_info)
-          else
-            state
-      }
-  }default state
+  hero_pos: App.Kaelin.Coord
+  mouse_pos: App.Kaelin.Coord
+  key: U16
+  state: App.Kaelin.State.global, 
+): App.Kaelin.State.global
+open state
+open state.internal as internal
+mouse_nat = App.Kaelin.Coord.Convert.axial_to_nat(mouse_pos)
+creature = App.Kaelin.Map.creature.get(hero_pos, state.map)
+case creature {
+  none:
+    state
+  some:
+    open creature.value as creature
+    open creature.hero
+    which_skill = List.find!((x) U16.eql(x@key, key), creature.hero.skills)
+    case which_skill {
+      none:
+        state
+      some:
+        open which_skill.value as skill
+        result = skill.effect(internal.tick, hero_pos, mouse_pos, state.map)
+        tick = internal.tick
+        skill_range = App.Kaelin.Coord.range_natset(hero_pos, skill.range)
+        open result
+        if NatSet.has(mouse_nat, skill_range) then
+          App.Kaelin.State.global.new(state.room, result.map, state.internal, state.stage)
+        else
+          state
+    }
+  }

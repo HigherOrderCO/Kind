@@ -1,4 +1,5 @@
 //changes only for testing
+//Organize
 
 App.Kaelin.App.when: App.When<App.Kaelin.State>
 (event, state)
@@ -32,10 +33,20 @@ open state.local as local
       App.set_local!(new_local)
     
     mouse_up planning:
-      let info = local.env_info
-      open info
-      let {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info.mouse_pos)
-      let hex = App.Kaelin.Event.serialize(App.Kaelin.Event.user_input(local.user, App.Kaelin.Coord.new(axial_x, axial_y), App.Kaelin.Action.walk))
-      App.new_post!(global.room, hex)
+      case local.cast_info { // Organize here 
+        none:
+          App.pass!
+        some:
+          open local.cast_info.value as cast
+          open cast.skill as skill
+          let info = local.env_info
+          open info
+          let {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info.mouse_pos)
+          let hex = App.Kaelin.Event.serialize(App.Kaelin.Event.skill_use(cast.hero_pos, cast.mouse_pos, skill.key))
+          IO { 
+          App.new_post!(global.room, hex)
+          App.set_local!(state.local@cast_info <- none)
+          }
+    }
       
   } default App.pass!
