@@ -1,3 +1,0 @@
-[submodule "bin/scm/srfi-135"]
-	path = bin/scm/srfi-135
-	url = https://github.com/scheme-requests-for-implementation/srfi-135.git
