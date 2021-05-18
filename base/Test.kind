@@ -1,18 +1,28 @@
-//Test: String
-  //result = ""
-  //for str in ["cba","fed","ihg"] with result:
-    //str = String.to_upper(str)
-    //str = String.reverse(str)
-    //result | str
-  //result
-
-
+Test.main: IO(Unit)
+  IO {
+    thisfst = "aaa"
+    thissnd = "aaa"
+    ok = String.eql(thisfst, thissnd)
+    case ok {
+      true: IO.print("equal!")
+      false: IO.print("not equal!")
+    }
+  }
 
 Test: _
-  // let f = ((x) 2 * x) :: Nat -> Nat
-  // let g = ((x) 3 + x) :: Nat -> Nat
-  // let h = Function.comp!!!(f, g)
-  // h(5)
-  // List.fold!(["a", "b", "c"])!("", String.concat)
-  List.foldr!!("", String.concat, ["a", "b", "c"])
-
+  IO {
+    let name = "Test.main"
+    get defs = Kind.Synth.one(name, Kind.Map.new!)
+    case defs {
+      none: 
+        IO.print("failed")
+      some: IO {
+        let compiled = Kind.Comp.Defs.compile(defs.value)
+        let schemed = Kind.Comp.Target.Scheme(name, compiled)
+        get u = IO.set_file("./main.scm", schemed)
+        let schemed = Kind.Comp.Target.SchemeText(name, compiled)
+        get u = IO.set_file("./main_text.scm", schemed)
+        return u
+      }
+    }
+  }

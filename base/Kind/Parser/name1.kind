@@ -7,13 +7,13 @@ Kind.Parser.name1: Parser(Kind.Name)
     let reserved = Parser.fail!("Reserved keyword.")
     let numeric = Parser.fail!("Name can't start with number or sign.")
     switch String.eql(name) {
-      "case"   : reserved
-      "do"     : reserved
-      "if"     : reserved
-      "with"   : reserved
-      "for"    : reserved
-      "else"   : reserved
-      "switch" : reserved
+      "case"    : reserved
+      "do"      : reserved
+      "if"      : reserved
+      "with"    : reserved
+      "for"     : reserved
+      "else"    : reserved
+      "switch"  : reserved
     } default switch U16.eql(String.head(name) <> 'x') {
       '+' : numeric
       '-' : numeric

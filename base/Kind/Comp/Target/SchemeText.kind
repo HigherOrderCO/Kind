@@ -4,7 +4,7 @@
 // Describes the shape of each primitive when compiled to Scheme.
 // For example, Kind's λ-encoded Nats are converted to Scheme numbers. This
 // describes how to convert from λ-encodings to native numbers.
-Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
+Kind.Comp.Target.SchemeText.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
   case prim {
     unit: Kind.Comp.Prim.Shape.new(
       // Inst
@@ -69,7 +69,7 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
         // String.nil
         {0, "(string->text \"\")"}
         // String.cons
-        {2, "(text-append (make-text 1 (integer->char $0)) $1)"}
+        {2, "(textual-append (make-text 1 (integer->char $0)) $1)"}
       ]
       // Elim
       {"(= (text-length $0) 0)", [
@@ -102,7 +102,7 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
 // Optimized operations
 // ====================
 
-Kind.Comp.Target.Scheme.optimized: Map(Pair(Nat,String))
+Kind.Comp.Target.SchemeText.optimized: Map(Pair(Nat,String))
   {
     "Bool.not": {1, "(not $0)"},
     "Bool.and": {2, "(and $0 $1)"},
@@ -135,14 +135,17 @@ Kind.Comp.Target.Scheme.optimized: Map(Pair(Nat,String))
     "U16.inc": {2, "(+ $0 1)"},
     "U16.to_nat": {1, "$0"},
     "String.eql": {2, "(textual=? $0 $1)"},
-    "String.concat": {2, "(text-append $0 $1)"},
+    "String.concat": {2, "(textual-append $0 $1)"},
   }
 
 // Base deps
 // =========
 
-Kind.Comp.Target.Scheme.base: String
-`; Short alias to vector-ref
+Kind.Comp.Target.SchemeText.base: String
+`; Use text data-structure instead of strings
+(import (srfi :135))
+
+; Short alias to vector-ref
 (define get vector-ref)
 
 ; Converts a Kind word to a native integer
@@ -263,8 +266,8 @@ Kind.Comp.Target.Scheme.base: String
 ; Performs a single Kind IO action
 (define (io_action name)
   (case name
-    ("print" (lambda (x) (print x)))
-    ("put_string" (lambda (x) (display x)))
+    ("print" (lambda (x) (print (textual->string x))))
+    ("put_string" (lambda (x) (display (textual->string x))))
     ("get_line" (lambda (x) (get_line)))
     ("del_file" (lambda (x) (del_file x)))
     ("get_file" (lambda (x) (get_file x)))
@@ -289,23 +292,23 @@ Kind.Comp.Target.Scheme.base: String
 
 // Compiles an instantiation. Converts a λ-encoded layer to a native value.
 // - inst(`ins{Nat, `λz. λs. (s 5)`}`) == "(+ 5 1)"
-Kind.Comp.Target.Scheme.inst(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
+Kind.Comp.Target.SchemeText.inst(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
   case term {
     ins:
-      let shape = Kind.Comp.Target.Scheme.shape_of(term.prim) open shape
+      let shape = Kind.Comp.Target.SchemeText.shape_of(term.prim) open shape
       let {vars,expr} = Kind.Comp.get_vars(term.expr)
       if List.length!(shape.inst) =? List.length!(vars) then
         let {expr,args} = Kind.Comp.get_args(expr)
         case expr { 
-          var: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args, depth, defs)
-          ref: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args, depth, defs)
+          var: Kind.Comp.Target.SchemeText.inst.go(expr.name, shape.inst, vars, args, depth, defs)
+          ref: Kind.Comp.Target.SchemeText.inst.go(expr.name, shape.inst, vars, args, depth, defs)
         } default none
       else
         none
   } default none
 
 // Helper function
-Kind.Comp.Target.Scheme.inst.go(
+Kind.Comp.Target.SchemeText.inst.go(
   name: String
   inst: List(Pair(Nat,String))
   vars: List(String)
@@ -321,18 +324,18 @@ Kind.Comp.Target.Scheme.inst.go(
       if String.eql(name, vars.head) then
         let {ctor_arity, ctor_maker} = inst.head
         if ctor_arity =? List.length!(args) then
-          some(Kind.Comp.replace(ctor_maker, List.mapped!(args)!((x) Kind.Comp.Target.Scheme.term(x,depth,defs))))
+          some(Kind.Comp.replace(ctor_maker, List.mapped!(args)!((x) Kind.Comp.Target.SchemeText.term(x,depth,defs))))
         else
           none
       else
-        Kind.Comp.Target.Scheme.inst.go(name, inst.tail, vars.tail, args, depth, defs)
+        Kind.Comp.Target.SchemeText.inst.go(name, inst.tail, vars.tail, args, depth, defs)
   }
 
 // Creates an instantiator function. This is like inst, but instead of being
 // applied to an inline argument, it generates a whole function.
 // - instantiator(`Nat`) == "(lambda (t) (t 0 (lambda (pred) (+ pred 1))))"
-Kind.Comp.Target.Scheme.instantiator(prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
-  let shape = Kind.Comp.Target.Scheme.shape_of(prim) open shape
+Kind.Comp.Target.SchemeText.instantiator(prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
+  let shape = Kind.Comp.Target.SchemeText.shape_of(prim) open shape
   let text = "x"
   for ctor in shape.inst with text:
     let {ctor_arity, ctor_maker} = ctor
@@ -354,7 +357,7 @@ Kind.Comp.Target.Scheme.instantiator(prim: Kind.Comp.Prim, depth: Nat, defs: Kin
 // Inlines appications when possible.
 // - elim(`eli{Nat,5}`) == "(if (= 5 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s 4))))`
 // - elim(`((eli{Nat,5} Z) S)` == "(if (= 5 0) Z (S 4))"
-Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
+Kind.Comp.Target.SchemeText.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
   let {term,args} = Kind.Comp.get_args(term)
   case term {
     ref:
@@ -366,14 +369,14 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
           if (arity =? List.length!(args)) && (arity >? 0) then
             let code = "($" | term.name
             let code = for arg in args:
-              code | " " | Kind.Comp.Target.Scheme.term(arg, depth, defs)
+              code | " " | Kind.Comp.Target.SchemeText.term(arg, depth, defs)
             let code = code | ")"
             some(code)
           else
             none
       }
     eli:
-      let shape = Kind.Comp.Target.Scheme.shape_of(term.prim) open shape
+      let shape = Kind.Comp.Target.SchemeText.shape_of(term.prim) open shape
       let {ctag,cses} = shape.elim
       let args_len = List.length!(args)
       let cses_len = List.length!(cses)
@@ -384,7 +387,7 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
         let args = for i from 0 to lams_len: args ++ [Kind.Comp.var("c"|Nat.show(i))]
         let self = "self" | Nat.show(depth)
         let text = ""
-        let text = text | "(let (("|self|" "|Kind.Comp.Target.Scheme.term(term.expr,depth,defs)|")) "
+        let text = text | "(let (("|self|" "|Kind.Comp.Target.SchemeText.term(term.expr,depth,defs)|")) "
         let text = text | "(case " | Kind.Comp.replace(ctag,[self])
         let text = for j from 0 to cses_len:
           let {name,flds} = cses[j] <> {"",[]}
@@ -399,7 +402,7 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
           let argj = Kind.Comp.apply(args[j] <> Kind.Comp.ref("?"), keys)
           let body = ""
           let body = for i from 0 to lams_len: body|"(lambda (c"|Nat.show(i)|") "
-          let body = body | Kind.Comp.Target.Scheme.term(argj, Nat.add(Nat.add(depth,flds_len),lams_len), defs)
+          let body = body | Kind.Comp.Target.SchemeText.term(argj, Nat.add(Nat.add(depth,flds_len),lams_len), defs)
           let body = for i from 0 to lams_len: body|")"
           text | ") " | body | "))"
         let text = text | "))"
@@ -409,22 +412,22 @@ Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
 // Creates an elimination function. This is like "elim", but instead of being
 // applied to an inline argument, it generates a whole function.
 // - eliminator(Nat) == "(lambda (n) (if (= n 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s (- n 1))))))"
-Kind.Comp.Target.Scheme.eliminator(prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
+Kind.Comp.Target.SchemeText.eliminator(prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
   let term = Kind.Comp.eli(prim,Kind.Comp.var("x"))
-  let text = Kind.Comp.Target.Scheme.elim(term, 0, defs) <> ""
+  let text = Kind.Comp.Target.SchemeText.elim(term, 0, defs) <> ""
   let term = Kind.Comp.lam("x", Kind.Comp.txt(text))
-  Kind.Comp.Target.Scheme.term(term, depth, defs)
+  Kind.Comp.Target.SchemeText.term(term, depth, defs)
       
 // Compilers
 // =========
 
-Kind.Comp.Target.Scheme.name(name: String): String
+Kind.Comp.Target.SchemeText.name(name: String): String
   if String.is_empty(name) then
     "-"
   else
     name
 
-Kind.Comp.Target.Scheme.string(str: String): String
+Kind.Comp.Target.SchemeText.string(str: String): String
   case str {
     nil: ""
     cons:
@@ -434,29 +437,29 @@ Kind.Comp.Target.Scheme.string(str: String): String
         Char.to_string(str.head)
       else
         "\\x" | U16.show_hex(str.head) | ";"
-      ) | Kind.Comp.Target.Scheme.string(str.tail)
+      ) | Kind.Comp.Target.SchemeText.string(str.tail)
   }
 
-// Converts a Comp term to a Scheme expression.
-Kind.Comp.Target.Scheme.term(comp: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): String
-  let go = Kind.Comp.Target.Scheme.term
-  case Kind.Comp.Target.Scheme.inst(comp,depth,defs) as got {
+// Converts a Comp term to a SchemeText expression.
+Kind.Comp.Target.SchemeText.term(comp: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): String
+  let go = Kind.Comp.Target.SchemeText.term
+  case Kind.Comp.Target.SchemeText.inst(comp,depth,defs) as got {
     some: got.value
-    none: case Kind.Comp.Target.Scheme.elim(comp,depth,defs) as got {
+    none: case Kind.Comp.Target.SchemeText.elim(comp,depth,defs) as got {
       some: got.value
       none: case comp {
         nil:
           "'()"
         var: // TODO: generate safe Scheme name
-          Kind.Comp.Target.Scheme.name(comp.name)
+          Kind.Comp.Target.SchemeText.name(comp.name)
         ref: // TODO: generate safe Scheme name
-          Kind.Comp.Target.Scheme.name(comp.name)
+          Kind.Comp.Target.SchemeText.name(comp.name)
         lam:
-          "(lambda (" | Kind.Comp.Target.Scheme.name(comp.name) | ") " | go(comp.body,Nat.succ(depth),defs) | ")"
+          "(lambda (" | Kind.Comp.Target.SchemeText.name(comp.name) | ") " | go(comp.body,Nat.succ(depth),defs) | ")"
         app:
           "(" | go(comp.func,depth,defs) | " " | go(comp.argm,depth,defs) | ")"
         let:
-          "(let ((" | Kind.Comp.Target.Scheme.name(comp.name) | " " | go(comp.expr,depth,defs) | ")) " | go(comp.body,Nat.succ(depth),defs) | ")"
+          "(let ((" | Kind.Comp.Target.SchemeText.name(comp.name) | " " | go(comp.expr,depth,defs) | ")) " | go(comp.body,Nat.succ(depth),defs) | ")"
         eli: case comp.prim {
           unit: "(Unit-elim " | go(comp.expr,depth,defs) | ")"
           bool: "(Bool-elim " | go(comp.expr,depth,defs) | ")"
@@ -478,20 +481,20 @@ Kind.Comp.Target.Scheme.term(comp: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs):
         chr:
           Nat.show(U16.to_nat(comp.chrx))
         str:
-          "\"" | Kind.Comp.Target.Scheme.string(comp.strx) | "\""
+          "(textual->text \"" | Kind.Comp.Target.SchemeText.string(comp.strx) | "\")"
         txt:
           comp.text
       }
     }
   }
 
-Kind.Comp.Target.Scheme.definition(name: String, term: Kind.Comp, defs: Kind.Comp.Defs): String
+Kind.Comp.Target.SchemeText.definition(name: String, term: Kind.Comp, defs: Kind.Comp.Defs): String
   let {vars,body} = Kind.Comp.get_vars(term)
   let code = "(define ($"|name
   let code = for v in vars: code | " " | v
   let code = code | ") "
-  let code = code | case Kind.Comp.Target.Scheme.optimized{name} as opt {
-    none: Kind.Comp.Target.Scheme.term(body, 0, defs)
+  let code = code | case Kind.Comp.Target.SchemeText.optimized{name} as opt {
+    none: Kind.Comp.Target.SchemeText.term(body, 0, defs)
     some: Kind.Comp.replace(Pair.snd!!(opt.value), vars)
   }
   let code = code | ")\n"
@@ -510,16 +513,16 @@ Kind.Comp.Target.SchemeText(main: String, defs: Kind.Comp.Defs): String
   let defs_list = Kind.Comp.dependency_sort(main, defs)
 
   // Basic dependencies
-  let code = Kind.Comp.Target.Scheme.base | "\n\n"
+  let code = Kind.Comp.Target.SchemeText.base | "\n\n"
 
   // Instantiatior and Eliminator functions
   for nati in Kind.Comp.Prim.natives with code:
     let {name,prim} = nati
-    let code = code|"(define "|name|"-inst "|Kind.Comp.Target.Scheme.instantiator(prim,0,defs)|")\n"
-    let code = code|"(define "|name|"-elim "|Kind.Comp.Target.Scheme.eliminator(prim,0,defs)|")\n"
+    let code = code|"(define "|name|"-inst "|Kind.Comp.Target.SchemeText.instantiator(prim,0,defs)|")\n"
+    let code = code|"(define "|name|"-elim "|Kind.Comp.Target.SchemeText.eliminator(prim,0,defs)|")\n"
     code
   // Top-level definitions
   for defn in defs_list with code:
     let {name,term} = defn
-    code | Kind.Comp.Target.Scheme.definition(name, term, defs)
+    code | Kind.Comp.Target.SchemeText.definition(name, term, defs)
   code | "(run_io "|main|")\n"
