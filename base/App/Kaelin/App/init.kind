@@ -9,5 +9,10 @@ App.Kaelin.App.init: App.Init<App.Kaelin.State>
 
     App.Store.new!(
       App.Kaelin.State.local.new(user, cast_info, interface), 
-      App.Kaelin.State.global.new(room, map, App.Kaelin.Internal.new(tick, frame, []), App.Kaelin.Stage.planning)
+      App.Kaelin.State.global.new(room, map, App.Kaelin.Internal.new(tick, frame, []), App.Kaelin.Stage.draft)
     )
+// init // nick do player?
+// lobby [1,2,3,4] qtd //acho q da pra ver no tick
+// draft // por tempo?
+// planning // 20s?
+// action // tempo indefinido

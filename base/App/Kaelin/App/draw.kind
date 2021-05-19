@@ -1,3 +1,9 @@
 App.Kaelin.App.draw(img: VoxBox): App.Draw<App.Kaelin.State>
 (state)
-  DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))
+  global = state@global
+  stage = global@stage
+  case stage {
+    init: App.Kaelin.Draw.init
+    draft: App.Kaelin.Draw.draft
+    planning: DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))
+  } default DOM.text("Em breve")

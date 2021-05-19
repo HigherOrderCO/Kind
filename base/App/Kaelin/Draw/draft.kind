@@ -1,0 +1,36 @@
+App.Kaelin.Draw.draft: DOM
+  heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+  DOM.node("div", 
+          {}, 
+          { "width": "100vw", 
+            "height": "100vh", 
+            "display": "flex", 
+            "flex-direction": "column", 
+            "justify-content": "center", 
+            "align-items": "center",
+            "font-size": "2rem"
+          },
+          [
+            DOM.node("h1", {}, {"margin-bottom": "50px"}, [DOM.text("Choose a hero")]),
+            DOM.node("div", {}, {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "max-width": "70%"}, List.map!!(App.Kaelin.Draw.draft.hero_card, heroes)),
+          ]
+  )
+
+
+App.Kaelin.Draw.draft.hero_card(hero: App.Kaelin.Hero): DOM
+  DOM.node("div", {}, 
+    { 
+      "padding": "5px",
+      // "border": "2px solid black", 
+      "margin": "0 2px", 
+      "box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)", 
+      "width": "250px",
+      "border-radius": "5px"
+    }, 
+    [
+      DOM.node("div", {}, {}, []),
+      DOM.node("div", {}, {}, [DOM.text(hero@name)]),
+      DOM.node("div", {}, {"display": "flex", "justify-content": "flex-end"}, [DOM.node("button", {"id": hero@name, "action": hero@name}, {"font-size": "16px", "padding": "2px"}, [DOM.text("Choose")])]),
+    ]
+  )
+  
