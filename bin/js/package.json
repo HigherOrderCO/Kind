@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/uwu-tech/kind#readme",
   "dependencies": {
-    "formcore-js": "^0.1.78"
+    "formcore-js": "^0.1.79"
   }
 }
