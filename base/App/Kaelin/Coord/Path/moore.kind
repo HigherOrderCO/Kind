@@ -1,9 +1,15 @@
-App.Kaelin.Coord.Path.moore(c : App.Kaelin.Coord) : List<App.Kaelin.Coord>
-  open c
-  let U32_i = ((i) Int.to_i32(Int.sub(Int.from_nat(U32.to_nat(i)), +1))) :: U32 -> I32
-  let r = [] :: List<App.Kaelin.Coord>
-  for i : U32 from 0#32 to 3#32 with r:
-    for j : U32 from 0#32 to 3#32 with r:
-       if (U32.eql(i, j)) then r else App.Kaelin.Coord.new(I32.add(c.i, U32_i(i)), I32.add(c.j, U32_i(j))) & r
-    r
-  r
+App.Kaelin.Coord.Path.moore(
+  coord : App.Kaelin.Coord
+): List<App.Kaelin.Coord>
+
+  open coord
+  U32_i = ((i) Int.to_i32(Int.sub(Int.from_nat(U32.to_nat(i)), +1))) :: U32 -> I32
+  result = []
+  for x : U32 from 0 to 3 with result:
+    for y : U32 from 0 to 3 with result:
+       if (U32.eql(x, y)) then 
+        result 
+      else 
+        App.Kaelin.Coord.new(coord.i + U32_i(x), coord.j + U32_i(y)) & result // U32
+    result
+  result

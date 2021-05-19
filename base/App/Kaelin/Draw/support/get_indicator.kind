@@ -2,11 +2,12 @@ App.Kaelin.Draw.support.get_indicator(
   coord: App.Kaelin.Coord,
   cast_info: Maybe(App.Kaelin.CastInfo)
 ): App.Kaelin.Indicator
-  let coord_nat = App.Kaelin.Coord.Convert.axial_to_nat(coord)
+
   case cast_info {
     none: 
       App.Kaelin.Indicator.green
     some:
+      coord_nat = App.Kaelin.Coord.Convert.axial_to_nat(coord)
       range = App.Kaelin.Draw.support.get_effect(coord, coord_nat, cast_info)
       area  = App.Kaelin.Draw.support.area_of_effect(coord, coord_nat, cast_info)
       case area{ 

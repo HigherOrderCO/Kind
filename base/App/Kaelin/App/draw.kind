@@ -1,4 +1,7 @@
-App.Kaelin.App.draw(img: VoxBox): App.Draw<App.Kaelin.State>
+App.Kaelin.App.draw(
+  img: VoxBox
+): App.Draw<App.Kaelin.State>
+
 (state)
   global = state@global
   stage = global@stage

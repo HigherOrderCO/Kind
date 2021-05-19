@@ -1,8 +1,12 @@
-App.Kaelin.Action.start_cast(key_code: U16, global: App.Kaelin.State.global, local: App.Kaelin.State.local): App.Kaelin.State.local
+App.Kaelin.Action.start_cast(
+  key_code: U16,
+  global: App.Kaelin.State.global,
+  local: App.Kaelin.State.local
+): App.Kaelin.State.local
+
   open local
   open global
-
-  let result = Maybe {
+  result = Maybe {
     // get player info and skill
     get player_info = App.Kaelin.Map.player.info(local.user, global.map)
     let player_coord = player_info@fst

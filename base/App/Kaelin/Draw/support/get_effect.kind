@@ -4,6 +4,7 @@ coord: App.Kaelin.Coord,
 coord_nat: Nat,
 cast_info: Maybe(App.Kaelin.CastInfo)
 ): Maybe(App.Kaelin.Indicator)
+
   case cast_info{ 
     none: 
       none

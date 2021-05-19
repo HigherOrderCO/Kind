@@ -2,6 +2,7 @@ App.Kaelin.Map.pop_creature(
   coord: App.Kaelin.Coord, 
   map: App.Kaelin.Map
 ) : Pair<App.Kaelin.Map, Maybe<App.Kaelin.Creature>>
+
   tile = App.Kaelin.Map.get(coord, map)
   case tile {
     none:{map, none}
