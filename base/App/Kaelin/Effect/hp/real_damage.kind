@@ -1,0 +1,6 @@
+App.Kaelin.Effect.hp.real_damage(
+  dmg: I32
+  creature: App.Kaelin.Creature
+): I32
+
+I32.min(I32.add(I32.neg(dmg), creature@hp), creature@hp)
