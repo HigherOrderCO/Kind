@@ -1,7 +1,9 @@
 App.Kaelin.Effect.animation.push
-  (coords : List<App.Kaelin.Coord>): App.Kaelin.Effect<Unit>
-    (center, target, map)
-  let map = List.foldr!!(map, 
+  (coords : List<App.Kaelin.Coord>
+): App.Kaelin.Effect<Unit>
+
+  (center, target, map)
+  map = List.foldr!!(map, 
     (coord, map) 
       App.Kaelin.Map.push(coord, App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(16, App.Kaelin.Sprite.fire)),
      map), coords)

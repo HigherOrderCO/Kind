@@ -1,4 +1,7 @@
-App.Kaelin.Event.Code.Hex.to_nat (x : String): Nat
+App.Kaelin.Event.Code.Hex.to_nat(
+  x: String
+): Nat
+
   case (Parser.run!(Hex_to_nat.parser, x)) as k {
     some : k.value
     none : 0
