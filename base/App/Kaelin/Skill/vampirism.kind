@@ -6,17 +6,9 @@ App.Kaelin.Skill.vampirism(
     get center_pos = App.Kaelin.Effect.coord.get_center
     get target_pos = App.Kaelin.Effect.coord.get_target
     get map = App.Kaelin.Effect.map.get
-    get actual_dmg = App.Kaelin.Effect.hp.damage_at(dmg, target_pos)
-    let creature = App.Kaelin.Map.creature.get(center_pos, map)
-    let real_dmg = case creature { 
-      none:
-        +0#32
-      some:
-        App.Kaelin.Effect.hp.real_damage(dmg, creature.value)
-    }
-    if App.Kaelin.Map.is_occupied(target_pos, map) then
-      App.Kaelin.Effect.hp.heal_at(real_dmg, center_pos)
-    else
-      App.Kaelin.Effect.hp.heal_at(0, center_pos)
+    let creature = App.Kaelin.Map.creature.get(target_pos, map)
+    let actual_dmg = App.Kaelin.Effect.hp.real_damage(dmg, creature)
+    get real_dmg = App.Kaelin.Effect.hp.damage_at(actual_dmg, target_pos)
+    App.Kaelin.Effect.hp.heal_at(real_dmg, center_pos)
     return unit
   }

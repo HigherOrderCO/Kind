@@ -1,6 +1,15 @@
 App.Kaelin.Effect.hp.real_damage(
   dmg: I32
-  creature: App.Kaelin.Creature
+  creature: Maybe(App.Kaelin.Creature)
 ): I32
 
-I32.min(I32.add(I32.neg(dmg), creature@hp), creature@hp)
+case creature {
+  none:
+    0
+  some:
+    open creature.value as creature
+    open creature.hero as hero
+    new_hp = I32.max((creature.value@hp + I32.neg(dmg)) , 0)
+    new_hp = I32.min(new_hp, hero.max_hp)
+    creature.value@hp - new_hp
+}
