@@ -6,10 +6,10 @@ App.Kaelin.Effect.bind<A: Type, B: Type>(
   case effect(center, target, map) as result_a {
     new: case next(result_a.value)(center, target, result_a.map) as result_b {
       new:
-        let value = result_b.value
-        let map = result_b.map
-        let futures = result_a.futures ++ result_b.futures
-        let indicators = NatMap.union!(result_a.indicators, result_b.indicators)
+        value = result_b.value
+        map = result_b.map
+        futures = result_a.futures ++ result_b.futures
+        indicators = NatMap.union!(result_a.indicators, result_b.indicators)
         App.Kaelin.Effect.Result.new<B>(value, map, futures, indicators)
     }
   }

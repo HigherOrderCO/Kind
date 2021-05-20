@@ -3,9 +3,9 @@ App.Kaelin.Map.coord_to_address(
   map: App.Kaelin.Map
 ): Maybe<String>
 
-  result = Maybe { 
-    get tiles = App.Kaelin.Map.get(player_coord, map)
-    get creature = tiles@creature
-    return creature@player
+result = Maybe { 
+  get tiles = App.Kaelin.Map.get(player_coord, map)
+  get creature = tiles@creature
+  return creature@player
   }
 result <> none

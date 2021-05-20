@@ -1,7 +1,8 @@
 //Should all images for each background type be listed here?
 App.Kaelin.Resources.terrains(
   indicator: App.Kaelin.Indicator
-):VoxBox
+): VoxBox
+
     case indicator { 
       green: App.Kaelin.Assets.tile.green_2
       red: App.Kaelin.Assets.tile.effect.dark_red2

@@ -1,4 +1,7 @@
-App.Kaelin.Tile.creature.show(creature: App.Kaelin.Creature): String
+App.Kaelin.Tile.creature.show(
+  creature: App.Kaelin.Creature
+): String
+
   open creature
   open creature.hero as hero
   player = "player: " | (creature@player <> "")

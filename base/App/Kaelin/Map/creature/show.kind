@@ -1,4 +1,7 @@
-App.Kaelin.Map.creature.show(map: App.Kaelin.Map): String
+App.Kaelin.Map.creature.show(
+  map: App.Kaelin.Map
+): String
+
   map = NatMap.to_list!(map)
   result = ""
   for pos in map with result:
