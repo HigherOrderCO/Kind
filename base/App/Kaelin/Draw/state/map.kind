@@ -5,6 +5,7 @@ App.Kaelin.Draw.state.map(
   internal : App.Kaelin.Internal,
   img:VoxBox
 ): VoxBox
+
     map = NatMap.to_list!(map)
     mouse_coord = App.Kaelin.Coord.to_axial(env_info@mouse_pos)
 

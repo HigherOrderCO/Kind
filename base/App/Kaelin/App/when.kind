@@ -2,14 +2,20 @@
 //Organize
 
 App.Kaelin.App.when: App.When<App.Kaelin.State>
+
 (event, state)
 open state
 open state.global as global
 open state.local as local
   case event global.stage{
+    mouse_click draft:
+      log(event.id)
+      log(event.action)
+      App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0)))// u8
+
     init planning: 
-      let user = String.to_lower(event.user)
-      let new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info, local.internal)
+      user = String.to_lower(event.user)
+      new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info, local.internal)
       IO {
         App.watch!(App.Kaelin.Constants.room)
         App.set_local!(new_local)
@@ -24,20 +30,18 @@ open state.local as local
       App.set_local!(new_local)
     
     mouse_up planning:
-      case local.cast_info { // Organize here 
-        none:
-          App.pass!
+      case local.cast_info{ //Organize
         some:
           open local.cast_info.value as cast
           open cast.skill as skill
-          let info = local.env_info
+          info = local.env_info
           open info
-          let {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info.mouse_pos)
-          let hex = App.Kaelin.Event.serialize(App.Kaelin.Event.skill_use(cast.hero_pos, cast.mouse_pos, skill.key))
+          {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info.mouse_pos)
+          hex = App.Kaelin.Event.serialize(App.Kaelin.Event.skill_use(cast.hero_pos, cast.mouse_pos, skill.key))
           IO { 
-          App.new_post!(global.room, hex)
-          App.set_local!(state.local@cast_info <- none)
+            App.new_post!(global.room, hex)
+            App.set_local!(state.local@cast_info <- none)
           }
-    }
+      }default App.pass!
       
   } default App.pass!

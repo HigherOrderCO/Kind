@@ -9,6 +9,7 @@ type App.Kaelin.State.global {
 type App.Kaelin.Stage {
   init
   void
+  draft
   planning
   action
 }

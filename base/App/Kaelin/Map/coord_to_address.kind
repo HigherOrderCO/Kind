@@ -2,15 +2,10 @@ App.Kaelin.Map.coord_to_address(
   player_coord: App.Kaelin.Coord,
   map: App.Kaelin.Map
 ): Maybe<String>
-  tiles = App.Kaelin.Map.get(player_coord, map)
-  case tiles { 
-    none: none
-    some: 
-      open tiles.value
-      case tiles.value.creature as creature{
-        none: none
-        some:
-          open creature.value
-          creature.value.player
-    }
+
+  result = Maybe { 
+    get tiles = App.Kaelin.Map.get(player_coord, map)
+    get creature = tiles@creature
+    return creature@player
   }
+result <> none

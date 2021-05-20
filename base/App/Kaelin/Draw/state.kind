@@ -1,5 +1,9 @@
 // function to draw according the state
-App.Kaelin.Draw.state(img: VoxBox, state: App.Store<App.Kaelin.State>): VoxBox
+App.Kaelin.Draw.state(
+  img: VoxBox,
+  state: App.Store<App.Kaelin.State>
+): VoxBox
+
   open state
   open state.local
   open state.global

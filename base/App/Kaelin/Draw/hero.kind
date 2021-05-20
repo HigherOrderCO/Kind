@@ -6,9 +6,10 @@ App.Kaelin.Draw.hero(
   hero: App.Kaelin.Hero,
   img: VoxBox
 ): VoxBox
+
   open hero
-  let aux_y = U32.mul(App.Kaelin.Constants.hexagon_radius, 2u)
-  let cy = U32.sub(cy, aux_y)
-  let cx = U32.sub(cx, App.Kaelin.Constants.hexagon_radius)
+  aux_y = App.Kaelin.Constants.hexagon_radius * 2 //U32
+  cy = cy - aux_y //U32
+  cx = cx - App.Kaelin.Constants.hexagon_radius //U32
 
   VoxBox.Draw.image(cx, cy, 0u, hero.img, img)

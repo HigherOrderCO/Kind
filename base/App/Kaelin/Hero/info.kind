@@ -1,5 +1,5 @@
-App.Kaelin.Hero.info(name: U8): App.Kaelin.Hero
-  switch U8.eql(name) {
+App.Kaelin.Hero.info(id: U8): App.Kaelin.Hero
+  switch U8.eql(id) {
     0: App.Kaelin.Heroes.Croni.hero
     1: App.Kaelin.Heroes.Cyclope.hero
     2: App.Kaelin.Heroes.Lela.hero

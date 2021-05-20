@@ -1,23 +1,25 @@
-App.Kaelin.Coord.to_axial(coord: Pair(U32, U32)): App.Kaelin.Coord
-  let {x, y} = coord
+App.Kaelin.Coord.to_axial(
+  coord: Pair(U32, U32)
+): App.Kaelin.Coord
 
-  let f = U32.to_f64
-  let i = F64.to_i32
-  let float_hex_rad = F64.div(f(App.Kaelin.Constants.hexagon_radius), 2.0#64)
-  let center_x = App.Kaelin.Constants.center_x
-  let center_y = App.Kaelin.Constants.center_y
+  {x, y} = coord
 
-  let float_x = F64.div(F64.sub(f(x), f(center_x)), float_hex_rad)
-  let float_y = F64.div(F64.sub(f(y), f(center_y)), float_hex_rad)
+  f = U32.to_f64
+  i = F64.to_i32
+  float_hex_rad = F64.div(f(App.Kaelin.Constants.hexagon_radius), 2)
+  center_x = App.Kaelin.Constants.center_x
+  center_y = App.Kaelin.Constants.center_y
+
+  float_x = F64.div(F64.sub(f(x), f(center_x)), float_hex_rad)
+  float_y = F64.div(F64.sub(f(y), f(center_y)), float_hex_rad)
   
-  // {float_x, float_y}
 
-  let fourth = 0.25#64
-  let sixth = F64.div(1.0#64, 6.0#64)
-  let third = F64.div(1.0#64, 3.0#64)
-  let half = 0.5#64
+  fourth = 0.25
+  sixth = F64.div(1, 6)
+  third = F64.div(1, 3)
+  half = 0.5
 
-  let axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
-  let axial_y = F64.mul(float_y, third)
-  let {i, j}  = App.Kaelin.Coord.round(axial_x, axial_y)
+  axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
+  axial_y = F64.mul(float_y, third)
+  {i, j}  = App.Kaelin.Coord.round(axial_x, axial_y)
   App.Kaelin.Coord.new(i, j)

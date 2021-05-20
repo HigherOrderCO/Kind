@@ -1,4 +1,10 @@
-App.Kaelin.Draw.tile.animation(animation: Maybe<App.Kaelin.Animation>, coord : App.Kaelin.Coord, internal : App.Kaelin.Internal, img: VoxBox): VoxBox
+App.Kaelin.Draw.tile.animation(
+  animation: Maybe<App.Kaelin.Animation>,
+  coord : App.Kaelin.Coord,
+  internal : App.Kaelin.Internal,
+  img: VoxBox
+): VoxBox
+
   case animation {
     none : img  
     some : 

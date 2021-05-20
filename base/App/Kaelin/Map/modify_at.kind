@@ -4,17 +4,15 @@ App.Kaelin.Map.modify_at(
   pos: App.Kaelin.Coord
   map: App.Kaelin.Map
 ): App.Kaelin.Map
-  let key = App.Kaelin.Coord.Convert.axial_to_nat(pos)
-  let tile = NatMap.get!(key, map)
-  case tile {
-    none: map
-    some:
-      open tile.value as tile
-      case tile.creature as creature {
-        none: map
-        some:
-          let new_creature = mod(creature.value)
-          let new_tile = App.Kaelin.Tile.new(tile.background, some(new_creature), tile.animation)
-          NatMap.set!(key, new_tile, map)
-      }
-    }
+  
+  result = Maybe { 
+    let key = App.Kaelin.Coord.Convert.axial_to_nat(pos)
+    get tile = NatMap.get!(key, map)
+    get creature = tile@creature
+    let new_creature = mod(creature)
+    let new_tile = App.Kaelin.Tile.new(tile@background, some(new_creature), tile@animation)
+    let new_map = NatMap.set!(key, new_tile, map)
+    return new_map
+  }
+  result <> map
+

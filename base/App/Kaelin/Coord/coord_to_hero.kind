@@ -1,10 +1,12 @@
-App.Kaelin.Coord.coord_to_hero(coord: App.Kaelin.Coord, map: App.Kaelin.Map): Maybe(App.Kaelin.Hero)
-  let tile = App.Kaelin.Map.get(coord, map) <> []
-  let heroi = none
-    for entity in tile with heroi:
-      case entity {
-      background: heroi
-      creature: some(entity.hero)              
-    }
-    heroi
+//Finds a hero in the map within a coord
+App.Kaelin.Coord.coord_to_hero(
+  coord: App.Kaelin.Coord,
+  map: App.Kaelin.Map
+): Maybe(App.Kaelin.Hero)
+
+  Maybe {
+  get tile = App.Kaelin.Map.get(coord, map)
+  get creature = tile@creature
+  return creature@hero
+  }
       

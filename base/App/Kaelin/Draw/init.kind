@@ -1,0 +1,20 @@
+App.Kaelin.Draw.init: DOM
+  DOM.node("div", 
+          {}, 
+          { "width": "100vw", 
+            "height": "100vh", 
+            "display": "flex", 
+            "flex-direction": "column", 
+            "justify-content": "center", 
+            "align-items": "center",
+            "font-size": "2rem"
+          },
+          [
+            DOM.node("h1", {}, {"margin-bottom": "10px"}, [DOM.text("Welcome to Kaelin")]),
+            DOM.node("div", {}, {}, [
+              DOM.text("Enter a room number: "),
+              DOM.node("input", {}, {"font-size": "2rem", "font-family": "monospace", "outline": "transparent"}, [])
+              DOM.node("button",{"id": "enter-init"}, {"font-size": "2rem", "font-family": "monospace", "padding": "2px"}, [DOM.text("Enter")])
+            ]),
+          ]
+  )

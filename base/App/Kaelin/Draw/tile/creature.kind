@@ -3,14 +3,15 @@ App.Kaelin.Draw.tile.creature(
   coord: App.Kaelin.Coord,
   img: VoxBox
 ): VoxBox
+
   case creature {
     none: img
     some: 
-      let key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
-      let {cx, cy} = App.Kaelin.Coord.to_screen_xy(coord)
+      key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
+      {cx, cy} = App.Kaelin.Coord.to_screen_xy(coord)
       
       // draw creature
-      let img = App.Kaelin.Draw.hero(cx, cy, 0u, creature.value@hero, img)
+      img = App.Kaelin.Draw.hero(cx, cy, 0u, creature.value@hero, img)
 
       // draw creature hp
       if I32.gtn(creature.value@hp, +0#32) then

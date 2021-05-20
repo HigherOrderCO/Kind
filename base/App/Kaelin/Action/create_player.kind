@@ -1,7 +1,11 @@
-App.Kaelin.Action.create_player(user: String, hero: U8, glob: App.Kaelin.State.global): App.State.global(App.Kaelin.State)
+App.Kaelin.Action.create_player(
+  user: String,
+  hero: U8,
+  glob: App.Kaelin.State.global
+): App.State.global(App.Kaelin.State)
   
-  let key = user
-  let init_pos = App.Kaelin.Coord.new(+0#32, +0#32)
+  key = user
+  init_pos = App.Kaelin.Coord.new(0, 0) // U32
   case App.Kaelin.Map.player.info(user, glob@map) as player {
     none:
       new_creature = App.Kaelin.Tile.creature.create(hero, some(user), "blue")
