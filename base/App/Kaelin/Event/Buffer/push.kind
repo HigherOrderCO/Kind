@@ -1,3 +1,4 @@
-App.Kaelin.Event.Buffer.push(buffer : App.Kaelin.Event.Buffer, list : List<U8>) : App.Kaelin.Event.Buffer
-  open buffer
-  {buffer.fst, list ++ buffer.snd }
+App.Kaelin.Event.Buffer.push(list : List<U8>) : App.Kaelin.Event.Buffer<Unit>
+  (ls) Parser {
+    return {ls ++ list, Unit.new}
+  }

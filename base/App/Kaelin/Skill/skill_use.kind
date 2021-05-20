@@ -2,10 +2,8 @@ App.Kaelin.Skill.skill_use(
   hero_pos: App.Kaelin.Coord
   mouse_pos: App.Kaelin.Coord
   key: U16
-  state: App.Kaelin.State.global, 
-): App.Kaelin.State.global
+  state: App.Kaelin.State.global) : App.Kaelin.State.global
 open state
-open state.internal as internal
 mouse_nat = App.Kaelin.Coord.Convert.axial_to_nat(mouse_pos)
 creature = App.Kaelin.Map.creature.get(hero_pos, state.map)
 case creature {
@@ -20,12 +18,11 @@ case creature {
         state
       some:
         open which_skill.value as skill
-        result = skill.effect(internal.tick, hero_pos, mouse_pos, state.map)
-        tick = internal.tick
+        result = skill.effect(hero_pos, mouse_pos, state.map)
         skill_range = App.Kaelin.Coord.range_natset(hero_pos, skill.range)
         open result
         if NatSet.has(mouse_nat, skill_range) then
-          App.Kaelin.State.global.new(state.room, result.map, state.internal, state.stage)
+          App.Kaelin.State.global.new(state.room, result.map, state.stage)
         else
           state
     }

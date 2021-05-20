@@ -2,7 +2,6 @@ type App.Kaelin.State.global {
   new(
     room: String
     map: App.Kaelin.Map,
-    internal : App.Kaelin.Internal
     stage: App.Kaelin.Stage
   )
 }
@@ -18,7 +17,8 @@ type App.Kaelin.State.local {
   new(
     user: String
     cast_info: Maybe<App.Kaelin.CastInfo>
-    env_info : App.EnvInfo
+    env_info : App.EnvInfo,
+    internal : App.Kaelin.Internal
   )
 }
 

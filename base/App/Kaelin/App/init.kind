@@ -8,6 +8,6 @@ App.Kaelin.App.init: App.Init<App.Kaelin.State>
     interface = App.EnvInfo.new({256#32, 256#32}, {0#32, 0#32})
 
     App.Store.new!(
-      App.Kaelin.State.local.new(user, cast_info, interface), 
-      App.Kaelin.State.global.new(room, map, App.Kaelin.Internal.new(tick, frame, []), App.Kaelin.Stage.planning)
+      App.Kaelin.State.local.new(user, cast_info, interface, App.Kaelin.Internal.new(tick, frame, [])), 
+      App.Kaelin.State.global.new(room, map, App.Kaelin.Stage.planning)
     )

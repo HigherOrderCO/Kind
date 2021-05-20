@@ -1,0 +1,5 @@
+App.Kaelin.Effect.animation.push
+  (coord : App.Kaelin.Coord): App.Kaelin.Effect<Unit>
+    (center, target, map)
+  let map = App.Kaelin.Map.push(coord, App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(16, App.Kaelin.Sprite.fire)), map)
+  App.Kaelin.Effect.Result.new<Unit>(Unit.new, map, [], NatMap.new!)

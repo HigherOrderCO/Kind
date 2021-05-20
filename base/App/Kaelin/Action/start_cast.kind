@@ -11,7 +11,7 @@ App.Kaelin.Action.start_cast(key_code: U16, global: App.Kaelin.State.global, loc
     //calculate range and area of skill
     let range = App.Kaelin.Coord.range_natset(player_coord, skill@range)
     let mouse_coord = App.Kaelin.Coord.to_axial(local.env_info@mouse_pos)
-    let area = App.Kaelin.Effect.indicators.get_indicators(global.internal@tick, player_coord, skill, mouse_coord, global.map)
+    let area = App.Kaelin.Effect.indicators.get_indicators(player_coord, skill, mouse_coord, global.map)
     // create and return cast
     let cast = App.Kaelin.CastInfo.new(
       player_coord,
