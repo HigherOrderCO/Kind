@@ -1,3 +1,6 @@
-App.Kaelin.Coord.Axial.show(coord: App.Kaelin.Coord): String
+App.Kaelin.Coord.Axial.show(
+  coord: App.Kaelin.Coord
+): String
+
   open coord
   I32.show(coord.i) | " " | I32.show(coord.j)

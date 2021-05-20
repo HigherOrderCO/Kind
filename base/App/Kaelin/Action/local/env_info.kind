@@ -1,3 +1,7 @@
 // Returns state with updated cast_info
-App.Kaelin.Action.local.env_info(env_info: App.EnvInfo, local: App.Kaelin.State.local): App.Kaelin.State.local
+App.Kaelin.Action.local.env_info(
+  env_info: App.EnvInfo,
+  local: App.Kaelin.State.local
+): App.Kaelin.State.local
+
    local@env_info <- env_info

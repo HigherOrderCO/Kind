@@ -4,5 +4,6 @@ App.Kaelin.Draw.creature.hp(
   creature: App.Kaelin.Creature,
   img: VoxBox
 ): VoxBox
-  let hp = Int.show(I32.to_int(creature@hp))
+
+  hp = Int.show(I32.to_int(creature@hp))
   VoxBox.Draw.text(hp, PixelFont.small_black, Pos32.new(cx,cy,0u), img)

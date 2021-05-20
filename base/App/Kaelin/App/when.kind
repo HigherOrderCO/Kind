@@ -2,6 +2,7 @@
 //Organize
 
 App.Kaelin.App.when: App.When<App.Kaelin.State>
+
 (event, state)
 open state
 open state.global as global
@@ -10,11 +11,11 @@ open state.local as local
     mouse_click draft:
       log(event.id)
       log(event.action)
-      App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0#8)))
+      App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0)))// u8
 
     init planning: 
-      let user = String.to_lower(event.user)
-      let new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info)
+      user = String.to_lower(event.user)
+      new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info)
       IO {
         App.watch!(App.Kaelin.Constants.room)
         App.set_local!(new_local)
@@ -24,7 +25,7 @@ open state.local as local
       switch U16.eql(event.code) {
         'F' : //press F
           open global.internal as internal
-          let animation = App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(0, App.Kaelin.Sprite.fire))
+          animation = App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(0, App.Kaelin.Sprite.fire))
           // This gives me a bug on runtime we should investigate what is the cause
           // let state = state@map <- App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map)
           // App.Store!(App.Kaelin.State.game(state.user, App.Kaelin.Constants.room, local.cast_info, App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map), global.internal, local.env_info))
@@ -33,25 +34,23 @@ open state.local as local
       } default App.set_local!(App.Kaelin.Action.start_cast(event.code, state.global, state.local))
 
     frame planning:
-      let new_local = App.Kaelin.Action.local.env_info(event.info, state.local)
-      let new_local = App.Kaelin.Action.local.area(event.time, state.global, new_local)
+      new_local = App.Kaelin.Action.local.env_info(event.info, state.local)
+      new_local = App.Kaelin.Action.local.area(event.time, state.global, new_local)
       App.set_local!(new_local)
     
     mouse_up planning:
-      case local.cast_info { // Organize here 
-        none:
-          App.pass!
+      case local.cast_info{ //Organize
         some:
           open local.cast_info.value as cast
           open cast.skill as skill
-          let info = local.env_info
+          info = local.env_info
           open info
-          let {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info.mouse_pos)
-          let hex = App.Kaelin.Event.serialize(App.Kaelin.Event.skill_use(cast.hero_pos, cast.mouse_pos, skill.key))
+          {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info.mouse_pos)
+          hex = App.Kaelin.Event.serialize(App.Kaelin.Event.skill_use(cast.hero_pos, cast.mouse_pos, skill.key))
           IO { 
-          App.new_post!(global.room, hex)
-          App.set_local!(state.local@cast_info <- none)
+            App.new_post!(global.room, hex)
+            App.set_local!(state.local@cast_info <- none)
           }
-    }
+      }default App.pass!
       
   } default App.pass!
