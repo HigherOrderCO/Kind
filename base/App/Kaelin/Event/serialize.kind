@@ -4,7 +4,7 @@
 
 generate_hex(xs : List<U8>, ys : List<Bits>) : String
   let consumer = List.zip(U8, Bits, App.Kaelin.Event.Code.action ++ xs, ys)
-  "0x" | Hex.set_min_length(64, App.Kaelin.Event.Code.generate_hex(consumer))
+  "0x" | App.Kaelin.Event.Code.Hex.set_min_length(64, App.Kaelin.Event.Code.generate_hex(consumer))
 
 App.Kaelin.Event.serialize(event: App.Kaelin.Event): String
   case event {
@@ -19,7 +19,7 @@ App.Kaelin.Event.serialize(event: App.Kaelin.Event): String
     user_input : 
      let cod = [
        Nat.to_bits(4),
-       Nat.to_bits(Hex.to_nat(event.player))
+       Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
        App.Kaelin.Resources.Action.to_bits(event.action),
        App.Kaelin.Coord.Convert.axial_to_bits(event.coord)
        ]

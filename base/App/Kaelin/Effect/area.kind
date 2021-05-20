@@ -2,12 +2,12 @@ App.Kaelin.Effect.area<A: Type>(
   eff: App.Kaelin.Effect<A>,
   coords: List<App.Kaelin.Coord>
 ): App.Kaelin.Effect<NatMap<A>>  
-  (tick, center, target, map)
+  (center, target, map)
     let map_result = NatMap.new!
     let eff_result = App.Kaelin.Effect.pure!(map_result)
     let result = App.Kaelin.Effect.Result.new!(map_result, map, [], NatMap.new!)
     for coord in coords with result:
-      let result_of_effect = eff(tick, center, coord, result@map)
+      let result_of_effect = eff(center, coord, result@map)
       let key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
       let new_form = App.Kaelin.Effect.Result.new!(
         NatMap.set!(key, result_of_effect@value, NatMap.new!)
