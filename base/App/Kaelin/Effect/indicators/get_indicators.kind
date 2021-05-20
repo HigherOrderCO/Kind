@@ -1,6 +1,5 @@
 ////TODO: change name to App.Kaelin.Skill.get_indicators
 App.Kaelin.Effect.indicators.get_indicators(
-  tick: Nat
   hero_pos: App.Kaelin.Coord
   skill: App.Kaelin.Skill
   mouse_coord: App.Kaelin.Coord
@@ -9,5 +8,5 @@ App.Kaelin.Effect.indicators.get_indicators(
 
   open skill
   //Returning each effect's List of affected coords
-  result = skill.effect(tick, hero_pos, mouse_coord, map)
+  result = skill.effect(hero_pos, mouse_coord, map)
   result@indicators
