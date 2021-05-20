@@ -15,7 +15,7 @@ App.Kaelin.Draw.tile.animation(
       log(Nat.show(indx))
       case sprite.voxboxes[indx] as frame {
         none : img
-        some : App.Kaelin.Draw.support.animation_frame(coord, 0u, frame.value, img)
+        some : App.Kaelin.Draw.support.animation_frame(coord, 6u, frame.value, img)
       }
   }
   

@@ -7,4 +7,4 @@ App.Kaelin.Draw.support.animation_frame(
 ): VoxBox
 
   {cx, cy} = App.Kaelin.Draw.support.centralize(pos)
-  VoxBox.Draw.image(cx, cy-U32.div(App.Kaelin.Constants.hexagon_radius, 2), 0u, effect, img)
+  VoxBox.Draw.image(cx, cy-U32.div(App.Kaelin.Constants.hexagon_radius, 2), z, effect, img)
