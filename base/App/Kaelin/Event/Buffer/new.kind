@@ -1,2 +1,0 @@
-App.Kaelin.Event.Buffer.new(fst : String, snd : List<U8>) : App.Kaelin.Event.Buffer
-  {fst, snd}

@@ -1,6 +1,0 @@
-App.Kaelin.Entity.is_creature(
-  creature: App.Kaelin.Entity
-  ): Bool
-  case creature {
-    creature: true
-  }default false

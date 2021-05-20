@@ -1,9 +1,0 @@
-#!r6rs ; -*- mode: scheme; coding: utf-8 -*-
-(import (akku format manifest))
-
-(akku-package ("scm" "0.0.0-alpha.0")
-  (synopsis "I did not edit Akku.manifest")
-  (authors "Guy Q. Schemer")
-  (license "NOASSERTION")
-  (depends ("akku-r7rs" "^1.0.1"))
-)

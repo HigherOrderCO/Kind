@@ -1,0 +1,8 @@
+App.Playground.draw(stt: App.Playground.State.local): DOM
+  open stt
+  DOM.node("div", {}, {
+    "width": "100%"
+    "height": "100%"
+    "margin": "20px 0x"
+    "display": "flex"
+  }, [ App.Playground.comp.main_area(stt) ])

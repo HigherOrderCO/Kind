@@ -1,9 +1,13 @@
-App.Kaelin.Skill.fireball(dmg: I32, range: I32): App.Kaelin.Effect<Unit>
+App.Kaelin.Skill.fireball(
+  dmg: I32,
+  range: I32
+): App.Kaelin.Effect<Unit>
+
   App.Kaelin.Effect {
     get map = App.Kaelin.Effect.map.get
     get target_pos = App.Kaelin.Effect.coord.get_target
-    
     let coords = App.Kaelin.Coord.range(target_pos, range)    
+    App.Kaelin.Effect.animation.push(coords)
     App.Kaelin.Effect.area!(App.Kaelin.Effect.hp.damage(dmg), coords)
     return unit
   }

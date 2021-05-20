@@ -19,7 +19,7 @@ case global.stage{
     case event {
       init: 
       user = String.to_lower(event.user)
-      new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info)
+      new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info, local.internal)
       IO {
         App.watch!(App.Kaelin.Constants.room)
         App.set_local!(new_local)
@@ -28,18 +28,18 @@ case global.stage{
     key_down:
       switch U16.eql(event.code) {
         'F' : //press F
-          open global.internal as internal
+          open local.internal as internal
           animation = App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(0, App.Kaelin.Sprite.fire))
           // This gives me a bug on runtime we should investigate what is the cause
           // let state = state@map <- App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map)
           // App.Store!(App.Kaelin.State.game(state.user, App.Kaelin.Constants.room, local.cast_info, App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map), global.internal, local.env_info))
           App.pass!
         49#16: App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0#8)))
-      } default App.set_local!(App.Kaelin.Action.start_cast(event.code, state.global, state.local))
+    } default App.set_local!(App.Kaelin.Action.start_cast(event.code, state.global, state.local))
 
     frame:
-      new_local = App.Kaelin.Action.local.env_info(event.info, state.local)
-      new_local = App.Kaelin.Action.local.area(event.time, state.global, new_local)
+      let new_local = App.Kaelin.Action.local.env_info(event.time, event.info, state.local)
+      let new_local = App.Kaelin.Action.local.area(event.time, state.global, new_local)
       App.set_local!(new_local)
     
     mouse_up:

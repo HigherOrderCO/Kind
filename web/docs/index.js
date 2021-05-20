@@ -3358,8 +3358,10 @@ module.exports = {
 
 module.exports = {
   'App.Hello': __webpack_require__.e(/* import() */ 130).then(__webpack_require__.t.bind(__webpack_require__, 130, 23)),
+  'App.Kaelin': __webpack_require__.e(/* import() */ 635).then(__webpack_require__.t.bind(__webpack_require__, 635, 23)),
   'App.Kind': __webpack_require__.e(/* import() */ 317).then(__webpack_require__.t.bind(__webpack_require__, 317, 23)),
   'App.MiniMMO': __webpack_require__.e(/* import() */ 661).then(__webpack_require__.t.bind(__webpack_require__, 661, 23)),
+  'App.Playground': __webpack_require__.e(/* import() */ 737).then(__webpack_require__.t.bind(__webpack_require__, 737, 23)),
 }
 
 

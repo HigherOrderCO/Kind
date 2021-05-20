@@ -2,11 +2,12 @@ App.Kaelin.Effect.hp.change_at(
   change: I32
   pos: App.Kaelin.Coord
 ): App.Kaelin.Effect<I32>
+
   App.Kaelin.Effect {
     get map = App.Kaelin.Effect.map.get
     let res = App.Kaelin.Map.change_hp_at(change, pos, map)
-    let dhp = Pair.fst!!(res)
-    let map = Pair.snd!!(res)
+    let dhp = res@fst
+    let map = res@snd
     let key = App.Kaelin.Coord.Convert.axial_to_nat(pos)
     let indicators = NatMap.new!
     App.Kaelin.Effect.map.set(map)
