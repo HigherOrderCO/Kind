@@ -1,8 +1,15 @@
-App.Kaelin.Skill.vampirism(dmg: I32): App.Kaelin.Effect<Unit>
+App.Kaelin.Skill.vampirism(
+  dmg: I32
+): App.Kaelin.Effect<Unit>
+
   App.Kaelin.Effect {
     get center_pos = App.Kaelin.Effect.coord.get_center
     get target_pos = App.Kaelin.Effect.coord.get_target
+    get map = App.Kaelin.Effect.map.get
     get actual_dmg = App.Kaelin.Effect.hp.damage_at(dmg, target_pos)
-    App.Kaelin.Effect.hp.heal_at(actual_dmg, center_pos)
+    if App.Kaelin.Map.is_occupied(target_pos, map) then
+      App.Kaelin.Effect.hp.heal_at(actual_dmg, center_pos)
+    else
+      App.Kaelin.Effect.hp.heal_at(0, center_pos)
     return unit
   }

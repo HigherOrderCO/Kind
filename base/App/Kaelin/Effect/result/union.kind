@@ -2,7 +2,8 @@ App.Kaelin.Effect.result.union<A: Type>(
   a: App.Kaelin.Effect.Result<A>, 
   b: App.Kaelin.Effect.Result<A>, 
   value_union: A -> A -> A
-) : App.Kaelin.Effect.Result<A>
+): App.Kaelin.Effect.Result<A>
+
   App.Kaelin.Effect.Result.new<A>(
     value_union(a@value, b@value)
     b@map

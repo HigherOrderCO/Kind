@@ -1,4 +1,7 @@
-App.Kaelin.Event.Buffer.get(buffer : App.Kaelin.Event.Buffer) : Nat
+App.Kaelin.Event.Buffer.get(
+  buffer : App.Kaelin.Event.Buffer
+): Nat
+
   open buffer
   case buffer.snd as xs {
       nil : 0

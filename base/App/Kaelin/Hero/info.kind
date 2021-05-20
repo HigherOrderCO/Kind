@@ -1,20 +1,10 @@
-App.Kaelin.Hero.info(id: U8): App.Kaelin.Hero
+App.Kaelin.Hero.info(
+  id: U8
+): App.Kaelin.Hero
+
   switch U8.eql(id) {
     0: App.Kaelin.Heroes.Croni.hero
     1: App.Kaelin.Heroes.Cyclope.hero
     2: App.Kaelin.Heroes.Lela.hero
     3: App.Kaelin.Heroes.Octoking.hero
    } default App.Kaelin.Heroes.Croni.hero
-   
-
-
-
-
-// App.Kaelin.Hero.info(name: String): App.Kaelin.Hero
-//   switch String.eql(name) {
-//     "Croni": App.Kaelin.Heroes.Croni.hero
-//     "Cyclope": App.Kaelin.Heroes.Cyclope.hero
-//     "Lela": App.Kaelin.Heroes.Lela.hero
-//     "Octoking": App.Kaelin.Heroes.Octoking.hero
-//    } default App.Kaelin.Heroes.Croni.hero
-   

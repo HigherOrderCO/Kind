@@ -1,7 +1,10 @@
 // Converts a 256-bit hex string to an event
 // waiting for i32
 
-App.Kaelin.Event.deserialize(code: String) : Maybe(App.Kaelin.Event)
+App.Kaelin.Event.deserialize(
+  code: String
+): Maybe(App.Kaelin.Event)
+
   def next = ((x) App.Kaelin.Event.Buffer.next(x)) :: App.Kaelin.Event.Buffer -> App.Kaelin.Event.Buffer
   def get = ((x) App.Kaelin.Event.Buffer.get(x)) :: App.Kaelin.Event.Buffer -> Nat
   def push = ((x, y) App.Kaelin.Event.Buffer.push(x, y)) :: App.Kaelin.Event.Buffer -> List<U8> -> App.Kaelin.Event.Buffer

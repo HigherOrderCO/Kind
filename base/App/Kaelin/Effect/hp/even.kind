@@ -1,4 +1,7 @@
-App.Kaelin.Effect.hp.even(value: I32): App.Kaelin.Effect<I32>
+App.Kaelin.Effect.hp.even(
+  value: I32
+): App.Kaelin.Effect<I32>
+
   App.Kaelin.Effect {
     get target = App.Kaelin.Effect.coord.get_target
     let sum = target@i + target@j

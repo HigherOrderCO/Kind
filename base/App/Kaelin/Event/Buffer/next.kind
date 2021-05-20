@@ -1,4 +1,7 @@
-App.Kaelin.Event.Buffer.next(buffer : App.Kaelin.Event.Buffer) : App.Kaelin.Event.Buffer
+App.Kaelin.Event.Buffer.next(
+  buffer: App.Kaelin.Event.Buffer
+): App.Kaelin.Event.Buffer
+
   open buffer
   case buffer.snd as xs {
       nil : buffer
