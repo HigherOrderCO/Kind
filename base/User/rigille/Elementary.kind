@@ -1,0 +1,168 @@
+type User.rigille.Elementary.Expression {
+  bin(
+    op: User.rigille.Elementary.Op
+    fst_arg: User.rigille.Elementary.Expression
+    snd_arg: User.rigille.Elementary.Expression
+  )
+  fun(
+    name: User.rigille.Elementary.Function
+    arg: User.rigille.Elementary.Expression
+  )
+  const(
+    val: User.rigille.Elementary.Const
+  )
+  var(
+    idx: Nat
+  )
+}
+
+type User.rigille.Elementary.Op {
+  add
+  mult
+}
+
+type User.rigille.Elementary.Function {
+  sin
+  cos
+  exp
+  log
+  pow(exponent: Int)
+}
+
+type User.rigille.Elementary.Const {
+  pi
+  real(val: Int)
+}
+
+User.rigille.Elementary.Expression.add(
+  fst: User.rigille.Elementary.Expression
+  snd: User.rigille.Elementary.Expression
+): User.rigille.Elementary.Expression
+ User.rigille.Elementary.Expression.bin(
+   User.rigille.Elementary.Op.add
+   fst
+   snd
+ )
+
+User.rigille.Elementary.constexp(f: Int): User.rigille.Elementary.Expression
+  User.rigille.Elementary.Expression.const(
+    User.rigille.Elementary.Const.real(f)
+  )
+
+User.rigille.Elementary.Expression.sub(
+  fst: User.rigille.Elementary.Expression
+  snd: User.rigille.Elementary.Expression
+): User.rigille.Elementary.Expression
+  User.rigille.Elementary.Expression.bin(
+    User.rigille.Elementary.Op.add
+    fst
+    User.rigille.Elementary.constexp(-1)*snd
+  )
+
+User.rigille.Elementary.Expression.mul(
+  fst: User.rigille.Elementary.Expression
+  snd: User.rigille.Elementary.Expression
+): User.rigille.Elementary.Expression
+ User.rigille.Elementary.Expression.bin(
+   User.rigille.Elementary.Op.mult
+   fst
+   snd
+ )
+
+User.rigille.Elementary.Function.Derivative(
+  name: User.rigille.Elementary.Function
+): User.rigille.Elementary.Expression -> User.rigille.Elementary.Expression
+  (arg)
+  case name {
+    sin:
+      User.rigille.Elementary.Expression.fun(
+        User.rigille.Elementary.Function.cos
+        arg
+      )
+    cos:
+        User.rigille.Elementary.constexp(-1) * 
+        User.rigille.Elementary.Expression.fun(
+          User.rigille.Elementary.Function.sin
+          arg
+        )
+    exp:
+      User.rigille.Elementary.Expression.fun(
+        User.rigille.Elementary.Function.exp
+        arg
+      )
+    log:
+      User.rigille.Elementary.Expression.fun(
+        User.rigille.Elementary.Function.pow(-1)
+        arg
+      )
+    pow:
+      User.rigille.Elementary.Expression.bin(
+        User.rigille.Elementary.Op.mult
+        User.rigille.Elementary.constexp(name.exponent)
+        User.rigille.Elementary.Expression.fun(
+          User.rigille.Elementary.Function.pow(name.exponent - 1)
+          arg
+        )
+      )
+  }
+
+User.rigille.Elementary.Derivative(
+  idx: Nat
+  exp: User.rigille.Elementary.Expression
+): User.rigille.Elementary.Expression
+  def D = User.rigille.Elementary.Derivative(idx)
+  case exp {
+    bin:
+      case exp.op {
+        add:
+          D(exp.fst_arg) + D(exp.snd_arg)
+        mult:
+          D(exp.fst_arg)*exp.snd_arg + exp.fst_arg*D(exp.snd_arg)
+      }
+    fun:
+      outer_derivative = User.rigille.Elementary.Function.Derivative(exp.name)
+      outer_derivative(exp.arg)*D(exp.arg)
+    const:
+      User.rigille.Elementary.constexp(0)
+    var:
+      case Nat.eql(exp.idx, idx) as not_const {
+        true:
+          User.rigille.Elementary.constexp(1)
+        false:
+          User.rigille.Elementary.constexp(0)
+      }
+  }
+
+User.rigille.Elementary.Expression.show(
+  exp: User.rigille.Elementary.Expression
+): String
+  def this = User.rigille.Elementary.Expression.show
+  case exp {
+    bin:
+      case exp.op {
+        add:
+          "(" | this(exp.fst_arg) | ") + (" | this(exp.snd_arg) | ")"
+        mult:
+          "(" | this(exp.fst_arg) | ") * (" | this(exp.snd_arg) | ")"
+      }
+    fun:
+      case exp.name {
+        sin:
+          "sin(" | this(exp.arg) | ")"
+        cos:
+          "cos(" | this(exp.arg) | ")"
+        exp:
+          "exp(" | this(exp.arg) | ")"
+        log:
+          "log(" | this(exp.arg) | ")"
+        pow:
+          "pow(" | this(exp.arg) | ", " | Int.show(exp.name.exponent) | ")"
+      }
+    const:
+      case exp.val {
+        pi: "π"
+        real: Int.show(exp.val.val)
+      }
+    var:
+      "x_" | Nat.show(exp.idx)
+  }
