@@ -48,6 +48,8 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
    } default fail!
  }
 
+App.Kaelin.Event.deserialize(
+  code: String
+): Maybe(App.Kaelin.Event)
 
-App.Kaelin.Event.deserialize(code : String) : Maybe(App.Kaelin.Event)
-  App.Kaelin.Event.Buffer.monad.run!(App.Kaelin.Event.deserialize_scheme, code)
+  App.Kaelin.Event.Buffer.Monad.run!(App.Kaelin.Event.deserialize_scheme, code)
