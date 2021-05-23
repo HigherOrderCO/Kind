@@ -3244,7 +3244,7 @@ module.exports = class AppPlay extends Component {
             //++count_posts;
           }
         }
-        state = this.app.tick(t)(state);
+        state = this.app.tick(BigInt(t))(state);
         this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
         this.app_state.global = state;
       };

@@ -366,170 +366,51 @@ module.exports = (function() {
     };
     const Pair$new = x0 => x1 => Pair$new$(x0, x1);
     const App$State$new = Pair$new$(null, null);
-    const App$MiniMMO$State = App$State$new;
-
-    function App$Store$new$(_local$2, _global$3) {
-        var $35 = ({
-            _: 'App.Store.new',
-            'local': _local$2,
-            'global': _global$3
-        });
-        return $35;
-    };
-    const App$Store$new = x0 => x1 => App$Store$new$(x0, x1);
-    const Unit$new = null;
-
-    function App$MiniMMO$State$global$new$(_run$1, _map$2) {
-        var $36 = ({
-            _: 'App.MiniMMO.State.global.new',
-            'run': _run$1,
-            'map': _map$2
-        });
-        return $36;
-    };
-    const App$MiniMMO$State$global$new = x0 => x1 => App$MiniMMO$State$global$new$(x0, x1);
-
-    function U32$new$(_value$1) {
-        var $37 = word_to_u32(_value$1);
-        return $37;
-    };
-    const U32$new = x0 => U32$new$(x0);
-
-    function Nat$apply$(_n$2, _f$3, _x$4) {
-        var Nat$apply$ = (_n$2, _f$3, _x$4) => ({
-            ctr: 'TCO',
-            arg: [_n$2, _f$3, _x$4]
-        });
-        var Nat$apply = _n$2 => _f$3 => _x$4 => Nat$apply$(_n$2, _f$3, _x$4);
-        var arg = [_n$2, _f$3, _x$4];
-        while (true) {
-            let [_n$2, _f$3, _x$4] = arg;
-            var R = (() => {
-                var self = _n$2;
-                if (self === 0n) {
-                    var $38 = _x$4;
-                    return $38;
-                } else {
-                    var $39 = (self - 1n);
-                    var $40 = Nat$apply$($39, _f$3, _f$3(_x$4));
-                    return $40;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Nat$apply = x0 => x1 => x2 => Nat$apply$(x0, x1, x2);
-
-    function Word$(_size$1) {
-        var $41 = null;
-        return $41;
-    };
-    const Word = x0 => Word$(x0);
-    const Word$e = ({
-        _: 'Word.e'
-    });
-
-    function Word$i$(_pred$2) {
-        var $42 = ({
-            _: 'Word.i',
-            'pred': _pred$2
-        });
-        return $42;
-    };
-    const Word$i = x0 => Word$i$(x0);
-
-    function Word$o$(_pred$2) {
-        var $43 = ({
-            _: 'Word.o',
-            'pred': _pred$2
-        });
-        return $43;
-    };
-    const Word$o = x0 => Word$o$(x0);
-
-    function Word$inc$(_word$2) {
-        var self = _word$2;
-        switch (self._) {
-            case 'Word.o':
-                var $45 = self.pred;
-                var $46 = Word$i$($45);
-                var $44 = $46;
-                break;
-            case 'Word.i':
-                var $47 = self.pred;
-                var $48 = Word$o$(Word$inc$($47));
-                var $44 = $48;
-                break;
-            case 'Word.e':
-                var $49 = Word$e;
-                var $44 = $49;
-                break;
-        };
-        return $44;
-    };
-    const Word$inc = x0 => Word$inc$(x0);
-
-    function Word$zero$(_size$1) {
-        var self = _size$1;
-        if (self === 0n) {
-            var $51 = Word$e;
-            var $50 = $51;
-        } else {
-            var $52 = (self - 1n);
-            var $53 = Word$o$(Word$zero$($52));
-            var $50 = $53;
-        };
-        return $50;
-    };
-    const Word$zero = x0 => Word$zero$(x0);
-
-    function Nat$to_word$(_size$1, _n$2) {
-        var $54 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
-        return $54;
-    };
-    const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
-
-    function Nat$succ$(_pred$1) {
-        var $55 = 1n + _pred$1;
-        return $55;
-    };
-    const Nat$succ = x0 => Nat$succ$(x0);
-    const Nat$zero = 0n;
-    const Nat$to_u32 = a0 => (Number(a0) >>> 0);
 
     function BitsMap$(_A$1) {
-        var $56 = null;
-        return $56;
+        var $35 = null;
+        return $35;
     };
     const BitsMap = x0 => BitsMap$(x0);
 
     function Map$(_V$1) {
-        var $57 = null;
-        return $57;
+        var $36 = null;
+        return $36;
     };
     const Map = x0 => Map$(x0);
+    const App$MiniMMO$State = App$State$new;
+
+    function App$Store$new$(_local$2, _global$3) {
+        var $37 = ({
+            _: 'App.Store.new',
+            'local': _local$2,
+            'global': _global$3
+        });
+        return $37;
+    };
+    const App$Store$new = x0 => x1 => App$Store$new$(x0, x1);
+    const Unit$new = null;
     const BitsMap$new = ({
         _: 'BitsMap.new'
     });
 
     function BitsMap$tie$(_val$2, _lft$3, _rgt$4) {
-        var $58 = ({
+        var $38 = ({
             _: 'BitsMap.tie',
             'val': _val$2,
             'lft': _lft$3,
             'rgt': _rgt$4
         });
-        return $58;
+        return $38;
     };
     const BitsMap$tie = x0 => x1 => x2 => BitsMap$tie$(x0, x1, x2);
 
     function Maybe$some$(_value$2) {
-        var $59 = ({
+        var $39 = ({
             _: 'Maybe.some',
             'value': _value$2
         });
-        return $59;
+        return $39;
     };
     const Maybe$some = x0 => Maybe$some$(x0);
     const Maybe$none = ({
@@ -545,37 +426,44 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $61 = self.pred;
-                var $62 = (Word$to_bits$($61) + '0');
-                var $60 = $62;
+                var $41 = self.pred;
+                var $42 = (Word$to_bits$($41) + '0');
+                var $40 = $42;
                 break;
             case 'Word.i':
-                var $63 = self.pred;
-                var $64 = (Word$to_bits$($63) + '1');
-                var $60 = $64;
+                var $43 = self.pred;
+                var $44 = (Word$to_bits$($43) + '1');
+                var $40 = $44;
                 break;
             case 'Word.e':
-                var $65 = Bits$e;
-                var $60 = $65;
+                var $45 = Bits$e;
+                var $40 = $45;
                 break;
         };
-        return $60;
+        return $40;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
+
+    function Nat$succ$(_pred$1) {
+        var $46 = 1n + _pred$1;
+        return $46;
+    };
+    const Nat$succ = x0 => Nat$succ$(x0);
+    const Nat$zero = 0n;
     const U16$to_bits = a0 => (u16_to_bits(a0));
 
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $67 = Bits$e;
-            var $66 = $67;
+            var $48 = Bits$e;
+            var $47 = $48;
         } else {
-            var $68 = self.charCodeAt(0);
-            var $69 = self.slice(1);
-            var $70 = (String$to_bits$($69) + (u16_to_bits($68)));
-            var $66 = $70;
+            var $49 = self.charCodeAt(0);
+            var $50 = self.slice(1);
+            var $51 = (String$to_bits$($50) + (u16_to_bits($49)));
+            var $47 = $51;
         };
-        return $66;
+        return $47;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -583,25 +471,25 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $72 = self.head;
-                var $73 = self.tail;
-                var self = $72;
+                var $53 = self.head;
+                var $54 = self.tail;
+                var self = $53;
                 switch (self._) {
                     case 'Pair.new':
-                        var $75 = self.fst;
-                        var $76 = self.snd;
-                        var $77 = (bitsmap_set(String$to_bits$($75), $76, Map$from_list$($73), 'set'));
-                        var $74 = $77;
+                        var $56 = self.fst;
+                        var $57 = self.snd;
+                        var $58 = (bitsmap_set(String$to_bits$($56), $57, Map$from_list$($54), 'set'));
+                        var $55 = $58;
                         break;
                 };
-                var $71 = $74;
+                var $52 = $55;
                 break;
             case 'List.nil':
-                var $78 = BitsMap$new;
-                var $71 = $78;
+                var $59 = BitsMap$new;
+                var $52 = $59;
                 break;
         };
-        return $71;
+        return $52;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
     const List$nil = ({
@@ -609,40 +497,40 @@ module.exports = (function() {
     });
 
     function Pair$(_A$1, _B$2) {
-        var $79 = null;
-        return $79;
+        var $60 = null;
+        return $60;
     };
     const Pair = x0 => x1 => Pair$(x0, x1);
-    const App$MiniMMO$init = App$Store$new$(Unit$new, App$MiniMMO$State$global$new$(0, Map$from_list$(List$nil)));
+    const App$MiniMMO$init = App$Store$new$(Unit$new, Map$from_list$(List$nil));
 
     function Pair$snd$(_pair$3) {
         var self = _pair$3;
         switch (self._) {
             case 'Pair.new':
-                var $81 = self.snd;
-                var $82 = $81;
-                var $80 = $82;
+                var $62 = self.snd;
+                var $63 = $62;
+                var $61 = $63;
                 break;
         };
-        return $80;
+        return $61;
     };
     const Pair$snd = x0 => Pair$snd$(x0);
     const App$State$global = Pair$snd;
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
 
     function List$(_A$1) {
-        var $83 = null;
-        return $83;
+        var $64 = null;
+        return $64;
     };
     const List = x0 => List$(x0);
 
     function List$cons$(_head$2, _tail$3) {
-        var $84 = ({
+        var $65 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $84;
+        return $65;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
 
@@ -650,44 +538,44 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'BitsMap.tie':
-                var $86 = self.val;
-                var $87 = self.lft;
-                var $88 = self.rgt;
-                var self = $86;
+                var $67 = self.val;
+                var $68 = self.lft;
+                var $69 = self.rgt;
+                var self = $67;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $90 = self.value;
-                        var $91 = List$cons$($90, _list$3);
-                        var _list0$7 = $91;
+                        var $71 = self.value;
+                        var $72 = List$cons$($71, _list$3);
+                        var _list0$7 = $72;
                         break;
                     case 'Maybe.none':
-                        var $92 = _list$3;
-                        var _list0$7 = $92;
+                        var $73 = _list$3;
+                        var _list0$7 = $73;
                         break;
                 };
-                var _list1$8 = BitsMap$values$go$($87, _list0$7);
-                var _list2$9 = BitsMap$values$go$($88, _list1$8);
-                var $89 = _list2$9;
-                var $85 = $89;
+                var _list1$8 = BitsMap$values$go$($68, _list0$7);
+                var _list2$9 = BitsMap$values$go$($69, _list1$8);
+                var $70 = _list2$9;
+                var $66 = $70;
                 break;
             case 'BitsMap.new':
-                var $93 = _list$3;
-                var $85 = $93;
+                var $74 = _list$3;
+                var $66 = $74;
                 break;
         };
-        return $85;
+        return $66;
     };
     const BitsMap$values$go = x0 => x1 => BitsMap$values$go$(x0, x1);
 
     function Map$values$(_xs$2) {
-        var $94 = BitsMap$values$go$(_xs$2, List$nil);
-        return $94;
+        var $75 = BitsMap$values$go$(_xs$2, List$nil);
+        return $75;
     };
     const Map$values = x0 => Map$values$(x0);
 
     function String$cons$(_head$1, _tail$2) {
-        var $95 = (String.fromCharCode(_head$1) + _tail$2);
-        return $95;
+        var $76 = (String.fromCharCode(_head$1) + _tail$2);
+        return $76;
     };
     const String$cons = x0 => x1 => String$cons$(x0, x1);
     const String$concat = a0 => a1 => (a0 + a1);
@@ -696,41 +584,41 @@ module.exports = (function() {
         var self = _list$2;
         switch (self._) {
             case 'List.cons':
-                var $97 = self.head;
-                var $98 = self.tail;
-                var $99 = _cons$5($97)(List$fold$($98, _nil$4, _cons$5));
-                var $96 = $99;
+                var $78 = self.head;
+                var $79 = self.tail;
+                var $80 = _cons$5($78)(List$fold$($79, _nil$4, _cons$5));
+                var $77 = $80;
                 break;
             case 'List.nil':
-                var $100 = _nil$4;
-                var $96 = $100;
+                var $81 = _nil$4;
+                var $77 = $81;
                 break;
         };
-        return $96;
+        return $77;
     };
     const List$fold = x0 => x1 => x2 => List$fold$(x0, x1, x2);
 
     function Either$(_A$1, _B$2) {
-        var $101 = null;
-        return $101;
+        var $82 = null;
+        return $82;
     };
     const Either = x0 => x1 => Either$(x0, x1);
 
     function Either$left$(_value$3) {
-        var $102 = ({
+        var $83 = ({
             _: 'Either.left',
             'value': _value$3
         });
-        return $102;
+        return $83;
     };
     const Either$left = x0 => Either$left$(x0);
 
     function Either$right$(_value$3) {
-        var $103 = ({
+        var $84 = ({
             _: 'Either.right',
             'value': _value$3
         });
-        return $103;
+        return $84;
     };
     const Either$right = x0 => Either$right$(x0);
 
@@ -746,20 +634,20 @@ module.exports = (function() {
             var R = (() => {
                 var self = _m$2;
                 if (self === 0n) {
-                    var $104 = Either$left$(_n$1);
-                    return $104;
+                    var $85 = Either$left$(_n$1);
+                    return $85;
                 } else {
-                    var $105 = (self - 1n);
+                    var $86 = (self - 1n);
                     var self = _n$1;
                     if (self === 0n) {
-                        var $107 = Either$right$(Nat$succ$($105));
-                        var $106 = $107;
+                        var $88 = Either$right$(Nat$succ$($86));
+                        var $87 = $88;
                     } else {
-                        var $108 = (self - 1n);
-                        var $109 = Nat$sub_rem$($108, $105);
-                        var $106 = $109;
+                        var $89 = (self - 1n);
+                        var $90 = Nat$sub_rem$($89, $86);
+                        var $87 = $90;
                     };
-                    return $106;
+                    return $87;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -781,12 +669,12 @@ module.exports = (function() {
                 var self = Nat$sub_rem$(_n$1, _m$2);
                 switch (self._) {
                     case 'Either.left':
-                        var $110 = self.value;
-                        var $111 = Nat$div_mod$go$($110, _m$2, Nat$succ$(_d$3));
-                        return $111;
+                        var $91 = self.value;
+                        var $92 = Nat$div_mod$go$($91, _m$2, Nat$succ$(_d$3));
+                        return $92;
                     case 'Either.right':
-                        var $112 = Pair$new$(_d$3, _n$1);
-                        return $112;
+                        var $93 = Pair$new$(_d$3, _n$1);
+                        return $93;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -817,18 +705,18 @@ module.exports = (function() {
                 }));
                 switch (self._) {
                     case 'Pair.new':
-                        var $113 = self.fst;
-                        var $114 = self.snd;
-                        var self = $113;
+                        var $94 = self.fst;
+                        var $95 = self.snd;
+                        var self = $94;
                         if (self === 0n) {
-                            var $116 = List$cons$($114, _res$3);
-                            var $115 = $116;
+                            var $97 = List$cons$($95, _res$3);
+                            var $96 = $97;
                         } else {
-                            var $117 = (self - 1n);
-                            var $118 = Nat$to_base$go$(_base$1, $113, List$cons$($114, _res$3));
-                            var $115 = $118;
+                            var $98 = (self - 1n);
+                            var $99 = Nat$to_base$go$(_base$1, $94, List$cons$($95, _res$3));
+                            var $96 = $99;
                         };
-                        return $115;
+                        return $96;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -838,8 +726,8 @@ module.exports = (function() {
     const Nat$to_base$go = x0 => x1 => x2 => Nat$to_base$go$(x0, x1, x2);
 
     function Nat$to_base$(_base$1, _nat$2) {
-        var $119 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
-        return $119;
+        var $100 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
+        return $100;
     };
     const Nat$to_base = x0 => x1 => Nat$to_base$(x0, x1);
     const String$nil = '';
@@ -856,20 +744,20 @@ module.exports = (function() {
             var R = (() => {
                 var self = _m$2;
                 if (self === 0n) {
-                    var $120 = Nat$mod$go$(_n$1, _r$3, _m$2);
-                    return $120;
+                    var $101 = Nat$mod$go$(_n$1, _r$3, _m$2);
+                    return $101;
                 } else {
-                    var $121 = (self - 1n);
+                    var $102 = (self - 1n);
                     var self = _n$1;
                     if (self === 0n) {
-                        var $123 = _r$3;
-                        var $122 = $123;
+                        var $104 = _r$3;
+                        var $103 = $104;
                     } else {
-                        var $124 = (self - 1n);
-                        var $125 = Nat$mod$go$($124, $121, Nat$succ$(_r$3));
-                        var $122 = $125;
+                        var $105 = (self - 1n);
+                        var $106 = Nat$mod$go$($105, $102, Nat$succ$(_r$3));
+                        var $103 = $106;
                     };
-                    return $122;
+                    return $103;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -885,8 +773,8 @@ module.exports = (function() {
     const Nat$lte = a0 => a1 => (a0 <= a1);
 
     function Maybe$(_A$1) {
-        var $126 = null;
-        return $126;
+        var $107 = null;
+        return $107;
     };
     const Maybe = x0 => Maybe$(x0);
 
@@ -903,21 +791,21 @@ module.exports = (function() {
                 var self = _list$3;
                 switch (self._) {
                     case 'List.cons':
-                        var $127 = self.head;
-                        var $128 = self.tail;
+                        var $108 = self.head;
+                        var $109 = self.tail;
                         var self = _index$2;
                         if (self === 0n) {
-                            var $130 = Maybe$some$($127);
-                            var $129 = $130;
+                            var $111 = Maybe$some$($108);
+                            var $110 = $111;
                         } else {
-                            var $131 = (self - 1n);
-                            var $132 = List$at$($131, $128);
-                            var $129 = $132;
+                            var $112 = (self - 1n);
+                            var $113 = List$at$($112, $109);
+                            var $110 = $113;
                         };
-                        return $129;
+                        return $110;
                     case 'List.nil':
-                        var $133 = Maybe$none;
-                        return $133;
+                        var $114 = Maybe$none;
+                        return $114;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -934,36 +822,36 @@ module.exports = (function() {
             var self = List$at$(_m$3, _base64$4);
             switch (self._) {
                 case 'Maybe.some':
-                    var $136 = self.value;
-                    var $137 = $136;
-                    var $135 = $137;
+                    var $117 = self.value;
+                    var $118 = $117;
+                    var $116 = $118;
                     break;
                 case 'Maybe.none':
-                    var $138 = 35;
-                    var $135 = $138;
+                    var $119 = 35;
+                    var $116 = $119;
                     break;
             };
-            var $134 = $135;
+            var $115 = $116;
         } else {
-            var $139 = 35;
-            var $134 = $139;
+            var $120 = 35;
+            var $115 = $120;
         };
-        return $134;
+        return $115;
     };
     const Nat$show_digit = x0 => x1 => Nat$show_digit$(x0, x1);
 
     function Nat$to_string_base$(_base$1, _nat$2) {
-        var $140 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
-            var $141 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
-            return $141;
+        var $121 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
+            var $122 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
+            return $122;
         }));
-        return $140;
+        return $121;
     };
     const Nat$to_string_base = x0 => x1 => Nat$to_string_base$(x0, x1);
 
     function Nat$show$(_n$1) {
-        var $142 = Nat$to_string_base$(10n, _n$1);
-        return $142;
+        var $123 = Nat$to_string_base$(10n, _n$1);
+        return $123;
     };
     const Nat$show = x0 => Nat$show$(x0);
 
@@ -971,54 +859,54 @@ module.exports = (function() {
         var self = _word$6;
         switch (self._) {
             case 'Word.o':
-                var $144 = self.pred;
-                var $145 = _w0$4(Word$fold$(_nil$3, _w0$4, _w1$5, $144));
-                var $143 = $145;
+                var $125 = self.pred;
+                var $126 = _w0$4(Word$fold$(_nil$3, _w0$4, _w1$5, $125));
+                var $124 = $126;
                 break;
             case 'Word.i':
-                var $146 = self.pred;
-                var $147 = _w1$5(Word$fold$(_nil$3, _w0$4, _w1$5, $146));
-                var $143 = $147;
+                var $127 = self.pred;
+                var $128 = _w1$5(Word$fold$(_nil$3, _w0$4, _w1$5, $127));
+                var $124 = $128;
                 break;
             case 'Word.e':
-                var $148 = _nil$3;
-                var $143 = $148;
+                var $129 = _nil$3;
+                var $124 = $129;
                 break;
         };
-        return $143;
+        return $124;
     };
     const Word$fold = x0 => x1 => x2 => x3 => Word$fold$(x0, x1, x2, x3);
     const Nat$add = a0 => a1 => (a0 + a1);
     const Nat$mul = a0 => a1 => (a0 * a1);
 
     function Word$to_nat$(_word$2) {
-        var $149 = Word$fold$(0n, a1 => (2n * a1), (_x$4 => {
-            var $150 = Nat$succ$((2n * _x$4));
-            return $150;
+        var $130 = Word$fold$(0n, a1 => (2n * a1), (_x$4 => {
+            var $131 = Nat$succ$((2n * _x$4));
+            return $131;
         }), _word$2);
-        return $149;
+        return $130;
     };
     const Word$to_nat = x0 => Word$to_nat$(x0);
     const U32$to_nat = a0 => (BigInt(a0));
 
     function DOM$node$(_tag$1, _props$2, _style$3, _children$4) {
-        var $151 = ({
+        var $132 = ({
             _: 'DOM.node',
             'tag': _tag$1,
             'props': _props$2,
             'style': _style$3,
             'children': _children$4
         });
-        return $151;
+        return $132;
     };
     const DOM$node = x0 => x1 => x2 => x3 => DOM$node$(x0, x1, x2, x3);
 
     function DOM$text$(_value$1) {
-        var $152 = ({
+        var $133 = ({
             _: 'DOM.text',
             'value': _value$1
         });
-        return $152;
+        return $133;
     };
     const DOM$text = x0 => DOM$text$(x0);
 
@@ -1027,55 +915,49 @@ module.exports = (function() {
         var self = _state$1;
         switch (self._) {
             case 'App.Store.new':
-                var $154 = self.global;
-                var $155 = $154;
-                var self = $155;
+                var $135 = self.global;
+                var $136 = $135;
+                var _map$3 = $136;
                 break;
         };
-        switch (self._) {
-            case 'App.MiniMMO.State.global.new':
-                var $156 = self.map;
-                var _avatars$5 = (() => {
-                    var $159 = _avatars$2;
-                    var $160 = Map$values$($156);
-                    let _avatars$6 = $159;
-                    let _player$5;
-                    while ($160._ === 'List.cons') {
-                        _player$5 = $160.head;
-                        var _style$7 = Map$from_list$(List$cons$(Pair$new$("position", "absolute"), List$cons$(Pair$new$("left", (Nat$show$((BigInt((() => {
-                            var self = _player$5;
-                            switch (self._) {
-                                case 'App.MiniMMO.Player.new':
-                                    var $161 = self.x;
-                                    var $162 = $161;
-                                    return $162;
-                            };
-                        })()))) + "px")), List$cons$(Pair$new$("top", (Nat$show$((BigInt((() => {
-                            var self = _player$5;
-                            switch (self._) {
-                                case 'App.MiniMMO.Player.new':
-                                    var $163 = self.y;
-                                    var $164 = $163;
-                                    return $164;
-                            };
-                        })()))) + "px")), List$nil))));
-                        var $159 = List$cons$(DOM$node$("div", Map$from_list$(List$nil), _style$7, List$cons$(DOM$text$("X"), List$nil)), _avatars$6);
-                        _avatars$6 = $159;
-                        $160 = $160.tail;
-                    }
-                    return _avatars$6;
-                })();
-                var $157 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), _avatars$5);
-                var $153 = $157;
-                break;
-        };
-        return $153;
+        var _avatars$4 = (() => {
+            var $138 = _avatars$2;
+            var $139 = Map$values$(_map$3);
+            let _avatars$5 = $138;
+            let _player$4;
+            while ($139._ === 'List.cons') {
+                _player$4 = $139.head;
+                var _style$6 = Map$from_list$(List$cons$(Pair$new$("position", "absolute"), List$cons$(Pair$new$("left", (Nat$show$((BigInt((() => {
+                    var self = _player$4;
+                    switch (self._) {
+                        case 'App.MiniMMO.Player.new':
+                            var $140 = self.x;
+                            var $141 = $140;
+                            return $141;
+                    };
+                })()))) + "px")), List$cons$(Pair$new$("top", (Nat$show$((BigInt((() => {
+                    var self = _player$4;
+                    switch (self._) {
+                        case 'App.MiniMMO.Player.new':
+                            var $142 = self.y;
+                            var $143 = $142;
+                            return $143;
+                    };
+                })()))) + "px")), List$nil))));
+                var $138 = List$cons$(DOM$node$("div", Map$from_list$(List$nil), _style$6, List$cons$(DOM$text$("X"), List$nil)), _avatars$5);
+                _avatars$5 = $138;
+                $139 = $139.tail;
+            }
+            return _avatars$5;
+        })();
+        var $134 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), _avatars$4);
+        return $134;
     };
     const App$MiniMMO$draw = x0 => App$MiniMMO$draw$(x0);
 
     function IO$(_A$1) {
-        var $165 = null;
-        return $165;
+        var $144 = null;
+        return $144;
     };
     const IO = x0 => IO$(x0);
 
@@ -1083,24 +965,24 @@ module.exports = (function() {
         var self = _pair$3;
         switch (self._) {
             case 'Pair.new':
-                var $167 = self.fst;
-                var $168 = $167;
-                var $166 = $168;
+                var $146 = self.fst;
+                var $147 = $146;
+                var $145 = $147;
                 break;
         };
-        return $166;
+        return $145;
     };
     const Pair$fst = x0 => Pair$fst$(x0);
     const App$State$local = Pair$fst;
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $169 = ({
+        var $148 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $169;
+        return $148;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -1108,68 +990,68 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $171 = self.value;
-                var $172 = _f$4($171);
-                var $170 = $172;
+                var $150 = self.value;
+                var $151 = _f$4($150);
+                var $149 = $151;
                 break;
             case 'IO.ask':
-                var $173 = self.query;
-                var $174 = self.param;
-                var $175 = self.then;
-                var $176 = IO$ask$($173, $174, (_x$8 => {
-                    var $177 = IO$bind$($175(_x$8), _f$4);
-                    return $177;
+                var $152 = self.query;
+                var $153 = self.param;
+                var $154 = self.then;
+                var $155 = IO$ask$($152, $153, (_x$8 => {
+                    var $156 = IO$bind$($154(_x$8), _f$4);
+                    return $156;
                 }));
-                var $170 = $176;
+                var $149 = $155;
                 break;
         };
-        return $170;
+        return $149;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $178 = ({
+        var $157 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $178;
+        return $157;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $179 = _new$2(IO$bind)(IO$end);
-        return $179;
+        var $158 = _new$2(IO$bind)(IO$end);
+        return $158;
     };
     const IO$monad = x0 => IO$monad$(x0);
 
     function IO$do$(_call$1, _param$2) {
-        var $180 = IO$ask$(_call$1, _param$2, (_answer$3 => {
-            var $181 = IO$end$(Unit$new);
-            return $181;
+        var $159 = IO$ask$(_call$1, _param$2, (_answer$3 => {
+            var $160 = IO$end$(Unit$new);
+            return $160;
         }));
-        return $180;
+        return $159;
     };
     const IO$do = x0 => x1 => IO$do$(x0, x1);
     const App$pass = IO$monad$((_m$bind$2 => _m$pure$3 => {
-        var $182 = _m$pure$3;
-        return $182;
+        var $161 = _m$pure$3;
+        return $161;
     }))(Maybe$none);
 
     function App$do$(_call$2, _param$3) {
-        var $183 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-            var $184 = _m$bind$4;
-            return $184;
+        var $162 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+            var $163 = _m$bind$4;
+            return $163;
         }))(IO$do$(_call$2, _param$3))((_$4 => {
-            var $185 = App$pass;
-            return $185;
+            var $164 = App$pass;
+            return $164;
         }));
-        return $183;
+        return $162;
     };
     const App$do = x0 => x1 => App$do$(x0, x1);
 
     function App$watch$(_room$2) {
-        var $186 = App$do$("watch", _room$2);
-        return $186;
+        var $165 = App$do$("watch", _room$2);
+        return $165;
     };
     const App$watch = x0 => App$watch$(x0);
     const App$MiniMMO$room = "0xc910a02b7c8a12";
@@ -1179,15 +1061,15 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.gtn':
-                var $188 = Bool$false;
-                var $187 = $188;
+                var $167 = Bool$false;
+                var $166 = $167;
                 break;
             case 'Cmp.eql':
-                var $189 = Bool$true;
-                var $187 = $189;
+                var $168 = Bool$true;
+                var $166 = $168;
                 break;
         };
-        return $187;
+        return $166;
     };
     const Cmp$as_eql = x0 => Cmp$as_eql$(x0);
     const Cmp$ltn = ({
@@ -1201,83 +1083,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $191 = self.pred;
-                var $192 = (_b$7 => {
+                var $170 = self.pred;
+                var $171 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $194 = self.pred;
-                            var $195 = (_a$pred$10 => {
-                                var $196 = Word$cmp$go$(_a$pred$10, $194, _c$4);
-                                return $196;
+                            var $173 = self.pred;
+                            var $174 = (_a$pred$10 => {
+                                var $175 = Word$cmp$go$(_a$pred$10, $173, _c$4);
+                                return $175;
                             });
-                            var $193 = $195;
+                            var $172 = $174;
                             break;
                         case 'Word.i':
-                            var $197 = self.pred;
-                            var $198 = (_a$pred$10 => {
-                                var $199 = Word$cmp$go$(_a$pred$10, $197, Cmp$ltn);
-                                return $199;
+                            var $176 = self.pred;
+                            var $177 = (_a$pred$10 => {
+                                var $178 = Word$cmp$go$(_a$pred$10, $176, Cmp$ltn);
+                                return $178;
                             });
-                            var $193 = $198;
+                            var $172 = $177;
                             break;
                         case 'Word.e':
-                            var $200 = (_a$pred$8 => {
-                                var $201 = _c$4;
-                                return $201;
+                            var $179 = (_a$pred$8 => {
+                                var $180 = _c$4;
+                                return $180;
                             });
-                            var $193 = $200;
+                            var $172 = $179;
                             break;
                     };
-                    var $193 = $193($191);
-                    return $193;
+                    var $172 = $172($170);
+                    return $172;
                 });
-                var $190 = $192;
+                var $169 = $171;
                 break;
             case 'Word.i':
-                var $202 = self.pred;
-                var $203 = (_b$7 => {
+                var $181 = self.pred;
+                var $182 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $205 = self.pred;
-                            var $206 = (_a$pred$10 => {
-                                var $207 = Word$cmp$go$(_a$pred$10, $205, Cmp$gtn);
-                                return $207;
+                            var $184 = self.pred;
+                            var $185 = (_a$pred$10 => {
+                                var $186 = Word$cmp$go$(_a$pred$10, $184, Cmp$gtn);
+                                return $186;
                             });
-                            var $204 = $206;
+                            var $183 = $185;
                             break;
                         case 'Word.i':
-                            var $208 = self.pred;
-                            var $209 = (_a$pred$10 => {
-                                var $210 = Word$cmp$go$(_a$pred$10, $208, _c$4);
-                                return $210;
+                            var $187 = self.pred;
+                            var $188 = (_a$pred$10 => {
+                                var $189 = Word$cmp$go$(_a$pred$10, $187, _c$4);
+                                return $189;
                             });
-                            var $204 = $209;
+                            var $183 = $188;
                             break;
                         case 'Word.e':
-                            var $211 = (_a$pred$8 => {
-                                var $212 = _c$4;
-                                return $212;
+                            var $190 = (_a$pred$8 => {
+                                var $191 = _c$4;
+                                return $191;
                             });
-                            var $204 = $211;
+                            var $183 = $190;
                             break;
                     };
-                    var $204 = $204($202);
-                    return $204;
+                    var $183 = $183($181);
+                    return $183;
                 });
-                var $190 = $203;
+                var $169 = $182;
                 break;
             case 'Word.e':
-                var $213 = (_b$5 => {
-                    var $214 = _c$4;
-                    return $214;
+                var $192 = (_b$5 => {
+                    var $193 = _c$4;
+                    return $193;
                 });
-                var $190 = $213;
+                var $169 = $192;
                 break;
         };
-        var $190 = $190(_b$3);
-        return $190;
+        var $169 = $169(_b$3);
+        return $169;
     };
     const Word$cmp$go = x0 => x1 => x2 => Word$cmp$go$(x0, x1, x2);
     const Cmp$eql = ({
@@ -1285,27 +1167,27 @@ module.exports = (function() {
     });
 
     function Word$cmp$(_a$2, _b$3) {
-        var $215 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
-        return $215;
+        var $194 = Word$cmp$go$(_a$2, _b$3, Cmp$eql);
+        return $194;
     };
     const Word$cmp = x0 => x1 => Word$cmp$(x0, x1);
 
     function Word$eql$(_a$2, _b$3) {
-        var $216 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
-        return $216;
+        var $195 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
+        return $195;
     };
     const Word$eql = x0 => x1 => Word$eql$(x0, x1);
     const U16$eql = a0 => a1 => (a0 === a1);
 
     function App$new_post$(_room$2, _data$3) {
-        var $217 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-            var $218 = _m$bind$4;
-            return $218;
+        var $196 = IO$monad$((_m$bind$4 => _m$pure$5 => {
+            var $197 = _m$bind$4;
+            return $197;
         }))(App$do$("post", (_room$2 + (";" + _data$3))))((_$4 => {
-            var $219 = App$pass;
-            return $219;
+            var $198 = App$pass;
+            return $198;
         }));
-        return $217;
+        return $196;
     };
     const App$new_post = x0 => x1 => App$new_post$(x0, x1);
     const App$MiniMMO$command$a_down = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -1321,74 +1203,74 @@ module.exports = (function() {
         var self = _event$1;
         switch (self._) {
             case 'App.Event.key_down':
-                var $221 = self.code;
-                var self = ($221 === 65);
+                var $200 = self.code;
+                var self = ($200 === 65);
                 if (self) {
-                    var $223 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$a_down);
-                    var $222 = $223;
+                    var $202 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$a_down);
+                    var $201 = $202;
                 } else {
-                    var self = ($221 === 68);
+                    var self = ($200 === 68);
                     if (self) {
-                        var $225 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$d_down);
-                        var $224 = $225;
+                        var $204 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$d_down);
+                        var $203 = $204;
                     } else {
-                        var self = ($221 === 87);
+                        var self = ($200 === 87);
                         if (self) {
-                            var $227 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$w_down);
-                            var $226 = $227;
+                            var $206 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$w_down);
+                            var $205 = $206;
                         } else {
-                            var self = ($221 === 83);
+                            var self = ($200 === 83);
                             if (self) {
-                                var $229 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$s_down);
-                                var $228 = $229;
+                                var $208 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$s_down);
+                                var $207 = $208;
                             } else {
-                                var $230 = App$pass;
-                                var $228 = $230;
+                                var $209 = App$pass;
+                                var $207 = $209;
                             };
-                            var $226 = $228;
+                            var $205 = $207;
                         };
-                        var $224 = $226;
+                        var $203 = $205;
                     };
-                    var $222 = $224;
+                    var $201 = $203;
                 };
-                var $220 = $222;
+                var $199 = $201;
                 break;
             case 'App.Event.key_up':
-                var $231 = self.code;
-                var self = ($231 === 65);
+                var $210 = self.code;
+                var self = ($210 === 65);
                 if (self) {
-                    var $233 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$a_up);
-                    var $232 = $233;
+                    var $212 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$a_up);
+                    var $211 = $212;
                 } else {
-                    var self = ($231 === 68);
+                    var self = ($210 === 68);
                     if (self) {
-                        var $235 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$d_up);
-                        var $234 = $235;
+                        var $214 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$d_up);
+                        var $213 = $214;
                     } else {
-                        var self = ($231 === 87);
+                        var self = ($210 === 87);
                         if (self) {
-                            var $237 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$w_up);
-                            var $236 = $237;
+                            var $216 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$w_up);
+                            var $215 = $216;
                         } else {
-                            var self = ($231 === 83);
+                            var self = ($210 === 83);
                             if (self) {
-                                var $239 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$s_up);
-                                var $238 = $239;
+                                var $218 = App$new_post$(App$MiniMMO$room, App$MiniMMO$command$s_up);
+                                var $217 = $218;
                             } else {
-                                var $240 = App$pass;
-                                var $238 = $240;
+                                var $219 = App$pass;
+                                var $217 = $219;
                             };
-                            var $236 = $238;
+                            var $215 = $217;
                         };
-                        var $234 = $236;
+                        var $213 = $215;
                     };
-                    var $232 = $234;
+                    var $211 = $213;
                 };
-                var $220 = $232;
+                var $199 = $211;
                 break;
             case 'App.Event.init':
-                var $241 = App$watch$(App$MiniMMO$room);
-                var $220 = $241;
+                var $220 = App$watch$(App$MiniMMO$room);
+                var $199 = $220;
                 break;
             case 'App.Event.frame':
             case 'App.Event.mouse_down':
@@ -1396,318 +1278,395 @@ module.exports = (function() {
             case 'App.Event.mouse_over':
             case 'App.Event.mouse_click':
             case 'App.Event.input':
-                var $242 = App$pass;
-                var $220 = $242;
+                var $221 = App$pass;
+                var $199 = $221;
                 break;
         };
-        return $220;
+        return $199;
     };
     const App$MiniMMO$when = x0 => x1 => App$MiniMMO$when$(x0, x1);
-
-    function Cmp$as_gte$(_cmp$1) {
-        var self = _cmp$1;
-        switch (self._) {
-            case 'Cmp.ltn':
-                var $244 = Bool$false;
-                var $243 = $244;
-                break;
-            case 'Cmp.eql':
-            case 'Cmp.gtn':
-                var $245 = Bool$true;
-                var $243 = $245;
-                break;
-        };
-        return $243;
-    };
-    const Cmp$as_gte = x0 => Cmp$as_gte$(x0);
-
-    function Word$gte$(_a$2, _b$3) {
-        var $246 = Cmp$as_gte$(Word$cmp$(_a$2, _b$3));
-        return $246;
-    };
-    const Word$gte = x0 => x1 => Word$gte$(x0, x1);
-    const U32$gte = a0 => a1 => (a0 >= a1);
-    const U32$from_nat = a0 => (Number(a0) >>> 0);
 
     function BitsMap$map$(_fn$3, _map$4) {
         var self = _map$4;
         switch (self._) {
             case 'BitsMap.tie':
-                var $248 = self.val;
-                var $249 = self.lft;
-                var $250 = self.rgt;
-                var self = $248;
+                var $223 = self.val;
+                var $224 = self.lft;
+                var $225 = self.rgt;
+                var self = $223;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $252 = self.value;
-                        var $253 = Maybe$some$(_fn$3($252));
-                        var _val$8 = $253;
+                        var $227 = self.value;
+                        var $228 = Maybe$some$(_fn$3($227));
+                        var _val$8 = $228;
                         break;
                     case 'Maybe.none':
-                        var $254 = Maybe$none;
-                        var _val$8 = $254;
+                        var $229 = Maybe$none;
+                        var _val$8 = $229;
                         break;
                 };
-                var _lft$9 = BitsMap$map$(_fn$3, $249);
-                var _rgt$10 = BitsMap$map$(_fn$3, $250);
-                var $251 = BitsMap$tie$(_val$8, _lft$9, _rgt$10);
-                var $247 = $251;
+                var _lft$9 = BitsMap$map$(_fn$3, $224);
+                var _rgt$10 = BitsMap$map$(_fn$3, $225);
+                var $226 = BitsMap$tie$(_val$8, _lft$9, _rgt$10);
+                var $222 = $226;
                 break;
             case 'BitsMap.new':
-                var $255 = BitsMap$new;
-                var $247 = $255;
+                var $230 = BitsMap$new;
+                var $222 = $230;
                 break;
         };
-        return $247;
+        return $222;
     };
     const BitsMap$map = x0 => x1 => BitsMap$map$(x0, x1);
 
     function Map$map$(_fn$3, _map$4) {
-        var $256 = BitsMap$map$(_fn$3, _map$4);
-        return $256;
+        var $231 = BitsMap$map$(_fn$3, _map$4);
+        return $231;
     };
     const Map$map = x0 => x1 => Map$map$(x0, x1);
+
+    function U32$new$(_value$1) {
+        var $232 = word_to_u32(_value$1);
+        return $232;
+    };
+    const U32$new = x0 => U32$new$(x0);
+    const Word$e = ({
+        _: 'Word.e'
+    });
+
+    function Word$(_size$1) {
+        var $233 = null;
+        return $233;
+    };
+    const Word = x0 => Word$(x0);
+
+    function Word$i$(_pred$2) {
+        var $234 = ({
+            _: 'Word.i',
+            'pred': _pred$2
+        });
+        return $234;
+    };
+    const Word$i = x0 => Word$i$(x0);
+
+    function Word$o$(_pred$2) {
+        var $235 = ({
+            _: 'Word.o',
+            'pred': _pred$2
+        });
+        return $235;
+    };
+    const Word$o = x0 => Word$o$(x0);
 
     function Word$subber$(_a$2, _b$3, _c$4) {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $258 = self.pred;
-                var $259 = (_b$7 => {
+                var $237 = self.pred;
+                var $238 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $261 = self.pred;
-                            var $262 = (_a$pred$10 => {
+                            var $240 = self.pred;
+                            var $241 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $264 = Word$i$(Word$subber$(_a$pred$10, $261, Bool$true));
-                                    var $263 = $264;
+                                    var $243 = Word$i$(Word$subber$(_a$pred$10, $240, Bool$true));
+                                    var $242 = $243;
                                 } else {
-                                    var $265 = Word$o$(Word$subber$(_a$pred$10, $261, Bool$false));
-                                    var $263 = $265;
+                                    var $244 = Word$o$(Word$subber$(_a$pred$10, $240, Bool$false));
+                                    var $242 = $244;
                                 };
-                                return $263;
+                                return $242;
                             });
-                            var $260 = $262;
+                            var $239 = $241;
                             break;
                         case 'Word.i':
-                            var $266 = self.pred;
-                            var $267 = (_a$pred$10 => {
+                            var $245 = self.pred;
+                            var $246 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $269 = Word$o$(Word$subber$(_a$pred$10, $266, Bool$true));
-                                    var $268 = $269;
+                                    var $248 = Word$o$(Word$subber$(_a$pred$10, $245, Bool$true));
+                                    var $247 = $248;
                                 } else {
-                                    var $270 = Word$i$(Word$subber$(_a$pred$10, $266, Bool$true));
-                                    var $268 = $270;
+                                    var $249 = Word$i$(Word$subber$(_a$pred$10, $245, Bool$true));
+                                    var $247 = $249;
                                 };
-                                return $268;
+                                return $247;
                             });
-                            var $260 = $267;
+                            var $239 = $246;
                             break;
                         case 'Word.e':
-                            var $271 = (_a$pred$8 => {
-                                var $272 = Word$e;
-                                return $272;
+                            var $250 = (_a$pred$8 => {
+                                var $251 = Word$e;
+                                return $251;
                             });
-                            var $260 = $271;
+                            var $239 = $250;
                             break;
                     };
-                    var $260 = $260($258);
-                    return $260;
+                    var $239 = $239($237);
+                    return $239;
                 });
-                var $257 = $259;
+                var $236 = $238;
                 break;
             case 'Word.i':
-                var $273 = self.pred;
-                var $274 = (_b$7 => {
+                var $252 = self.pred;
+                var $253 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $276 = self.pred;
-                            var $277 = (_a$pred$10 => {
+                            var $255 = self.pred;
+                            var $256 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $279 = Word$o$(Word$subber$(_a$pred$10, $276, Bool$false));
-                                    var $278 = $279;
+                                    var $258 = Word$o$(Word$subber$(_a$pred$10, $255, Bool$false));
+                                    var $257 = $258;
                                 } else {
-                                    var $280 = Word$i$(Word$subber$(_a$pred$10, $276, Bool$false));
-                                    var $278 = $280;
+                                    var $259 = Word$i$(Word$subber$(_a$pred$10, $255, Bool$false));
+                                    var $257 = $259;
                                 };
-                                return $278;
+                                return $257;
                             });
-                            var $275 = $277;
+                            var $254 = $256;
                             break;
                         case 'Word.i':
-                            var $281 = self.pred;
-                            var $282 = (_a$pred$10 => {
+                            var $260 = self.pred;
+                            var $261 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $284 = Word$i$(Word$subber$(_a$pred$10, $281, Bool$true));
-                                    var $283 = $284;
+                                    var $263 = Word$i$(Word$subber$(_a$pred$10, $260, Bool$true));
+                                    var $262 = $263;
                                 } else {
-                                    var $285 = Word$o$(Word$subber$(_a$pred$10, $281, Bool$false));
-                                    var $283 = $285;
+                                    var $264 = Word$o$(Word$subber$(_a$pred$10, $260, Bool$false));
+                                    var $262 = $264;
                                 };
-                                return $283;
+                                return $262;
                             });
-                            var $275 = $282;
+                            var $254 = $261;
                             break;
                         case 'Word.e':
-                            var $286 = (_a$pred$8 => {
-                                var $287 = Word$e;
-                                return $287;
+                            var $265 = (_a$pred$8 => {
+                                var $266 = Word$e;
+                                return $266;
                             });
-                            var $275 = $286;
+                            var $254 = $265;
                             break;
                     };
-                    var $275 = $275($273);
-                    return $275;
+                    var $254 = $254($252);
+                    return $254;
                 });
-                var $257 = $274;
+                var $236 = $253;
                 break;
             case 'Word.e':
-                var $288 = (_b$5 => {
-                    var $289 = Word$e;
-                    return $289;
+                var $267 = (_b$5 => {
+                    var $268 = Word$e;
+                    return $268;
                 });
-                var $257 = $288;
+                var $236 = $267;
                 break;
         };
-        var $257 = $257(_b$3);
-        return $257;
+        var $236 = $236(_b$3);
+        return $236;
     };
     const Word$subber = x0 => x1 => x2 => Word$subber$(x0, x1, x2);
 
     function Word$sub$(_a$2, _b$3) {
-        var $290 = Word$subber$(_a$2, _b$3, Bool$false);
-        return $290;
+        var $269 = Word$subber$(_a$2, _b$3, Bool$false);
+        return $269;
     };
     const Word$sub = x0 => x1 => Word$sub$(x0, x1);
     const U32$sub = a0 => a1 => ((a0 - a1) >>> 0);
+
+    function Nat$apply$(_n$2, _f$3, _x$4) {
+        var Nat$apply$ = (_n$2, _f$3, _x$4) => ({
+            ctr: 'TCO',
+            arg: [_n$2, _f$3, _x$4]
+        });
+        var Nat$apply = _n$2 => _f$3 => _x$4 => Nat$apply$(_n$2, _f$3, _x$4);
+        var arg = [_n$2, _f$3, _x$4];
+        while (true) {
+            let [_n$2, _f$3, _x$4] = arg;
+            var R = (() => {
+                var self = _n$2;
+                if (self === 0n) {
+                    var $270 = _x$4;
+                    return $270;
+                } else {
+                    var $271 = (self - 1n);
+                    var $272 = Nat$apply$($271, _f$3, _f$3(_x$4));
+                    return $272;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Nat$apply = x0 => x1 => x2 => Nat$apply$(x0, x1, x2);
+
+    function Word$inc$(_word$2) {
+        var self = _word$2;
+        switch (self._) {
+            case 'Word.o':
+                var $274 = self.pred;
+                var $275 = Word$i$($274);
+                var $273 = $275;
+                break;
+            case 'Word.i':
+                var $276 = self.pred;
+                var $277 = Word$o$(Word$inc$($276));
+                var $273 = $277;
+                break;
+            case 'Word.e':
+                var $278 = Word$e;
+                var $273 = $278;
+                break;
+        };
+        return $273;
+    };
+    const Word$inc = x0 => Word$inc$(x0);
+
+    function Word$zero$(_size$1) {
+        var self = _size$1;
+        if (self === 0n) {
+            var $280 = Word$e;
+            var $279 = $280;
+        } else {
+            var $281 = (self - 1n);
+            var $282 = Word$o$(Word$zero$($281));
+            var $279 = $282;
+        };
+        return $279;
+    };
+    const Word$zero = x0 => Word$zero$(x0);
+
+    function Nat$to_word$(_size$1, _n$2) {
+        var $283 = Nat$apply$(_n$2, Word$inc, Word$zero$(_size$1));
+        return $283;
+    };
+    const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
+    const U32$from_nat = a0 => (Number(a0) >>> 0);
 
     function Word$adder$(_a$2, _b$3, _c$4) {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $292 = self.pred;
-                var $293 = (_b$7 => {
+                var $285 = self.pred;
+                var $286 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $295 = self.pred;
-                            var $296 = (_a$pred$10 => {
+                            var $288 = self.pred;
+                            var $289 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $298 = Word$i$(Word$adder$(_a$pred$10, $295, Bool$false));
-                                    var $297 = $298;
+                                    var $291 = Word$i$(Word$adder$(_a$pred$10, $288, Bool$false));
+                                    var $290 = $291;
                                 } else {
-                                    var $299 = Word$o$(Word$adder$(_a$pred$10, $295, Bool$false));
-                                    var $297 = $299;
+                                    var $292 = Word$o$(Word$adder$(_a$pred$10, $288, Bool$false));
+                                    var $290 = $292;
                                 };
-                                return $297;
+                                return $290;
                             });
-                            var $294 = $296;
+                            var $287 = $289;
                             break;
                         case 'Word.i':
-                            var $300 = self.pred;
-                            var $301 = (_a$pred$10 => {
+                            var $293 = self.pred;
+                            var $294 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $303 = Word$o$(Word$adder$(_a$pred$10, $300, Bool$true));
-                                    var $302 = $303;
+                                    var $296 = Word$o$(Word$adder$(_a$pred$10, $293, Bool$true));
+                                    var $295 = $296;
                                 } else {
-                                    var $304 = Word$i$(Word$adder$(_a$pred$10, $300, Bool$false));
-                                    var $302 = $304;
+                                    var $297 = Word$i$(Word$adder$(_a$pred$10, $293, Bool$false));
+                                    var $295 = $297;
                                 };
-                                return $302;
+                                return $295;
                             });
-                            var $294 = $301;
+                            var $287 = $294;
                             break;
                         case 'Word.e':
-                            var $305 = (_a$pred$8 => {
-                                var $306 = Word$e;
-                                return $306;
+                            var $298 = (_a$pred$8 => {
+                                var $299 = Word$e;
+                                return $299;
                             });
-                            var $294 = $305;
+                            var $287 = $298;
                             break;
                     };
-                    var $294 = $294($292);
-                    return $294;
+                    var $287 = $287($285);
+                    return $287;
                 });
-                var $291 = $293;
+                var $284 = $286;
                 break;
             case 'Word.i':
-                var $307 = self.pred;
-                var $308 = (_b$7 => {
+                var $300 = self.pred;
+                var $301 = (_b$7 => {
                     var self = _b$7;
                     switch (self._) {
                         case 'Word.o':
-                            var $310 = self.pred;
-                            var $311 = (_a$pred$10 => {
+                            var $303 = self.pred;
+                            var $304 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $313 = Word$o$(Word$adder$(_a$pred$10, $310, Bool$true));
-                                    var $312 = $313;
+                                    var $306 = Word$o$(Word$adder$(_a$pred$10, $303, Bool$true));
+                                    var $305 = $306;
                                 } else {
-                                    var $314 = Word$i$(Word$adder$(_a$pred$10, $310, Bool$false));
-                                    var $312 = $314;
+                                    var $307 = Word$i$(Word$adder$(_a$pred$10, $303, Bool$false));
+                                    var $305 = $307;
                                 };
-                                return $312;
+                                return $305;
                             });
-                            var $309 = $311;
+                            var $302 = $304;
                             break;
                         case 'Word.i':
-                            var $315 = self.pred;
-                            var $316 = (_a$pred$10 => {
+                            var $308 = self.pred;
+                            var $309 = (_a$pred$10 => {
                                 var self = _c$4;
                                 if (self) {
-                                    var $318 = Word$i$(Word$adder$(_a$pred$10, $315, Bool$true));
-                                    var $317 = $318;
+                                    var $311 = Word$i$(Word$adder$(_a$pred$10, $308, Bool$true));
+                                    var $310 = $311;
                                 } else {
-                                    var $319 = Word$o$(Word$adder$(_a$pred$10, $315, Bool$true));
-                                    var $317 = $319;
+                                    var $312 = Word$o$(Word$adder$(_a$pred$10, $308, Bool$true));
+                                    var $310 = $312;
                                 };
-                                return $317;
+                                return $310;
                             });
-                            var $309 = $316;
+                            var $302 = $309;
                             break;
                         case 'Word.e':
-                            var $320 = (_a$pred$8 => {
-                                var $321 = Word$e;
-                                return $321;
+                            var $313 = (_a$pred$8 => {
+                                var $314 = Word$e;
+                                return $314;
                             });
-                            var $309 = $320;
+                            var $302 = $313;
                             break;
                     };
-                    var $309 = $309($307);
-                    return $309;
+                    var $302 = $302($300);
+                    return $302;
                 });
-                var $291 = $308;
+                var $284 = $301;
                 break;
             case 'Word.e':
-                var $322 = (_b$5 => {
-                    var $323 = Word$e;
-                    return $323;
+                var $315 = (_b$5 => {
+                    var $316 = Word$e;
+                    return $316;
                 });
-                var $291 = $322;
+                var $284 = $315;
                 break;
         };
-        var $291 = $291(_b$3);
-        return $291;
+        var $284 = $284(_b$3);
+        return $284;
     };
     const Word$adder = x0 => x1 => x2 => Word$adder$(x0, x1, x2);
 
     function Word$add$(_a$2, _b$3) {
-        var $324 = Word$adder$(_a$2, _b$3, Bool$false);
-        return $324;
+        var $317 = Word$adder$(_a$2, _b$3, Bool$false);
+        return $317;
     };
     const Word$add = x0 => x1 => Word$add$(x0, x1);
     const U32$add = a0 => a1 => ((a0 + a1) >>> 0);
 
     function App$MiniMMO$Player$new$(_w$1, _a$2, _s$3, _d$4, _x$5, _y$6) {
-        var $325 = ({
+        var $318 = ({
             _: 'App.MiniMMO.Player.new',
             'w': _w$1,
             'a': _a$2,
@@ -1716,268 +1675,245 @@ module.exports = (function() {
             'x': _x$5,
             'y': _y$6
         });
-        return $325;
+        return $318;
     };
     const App$MiniMMO$Player$new = x0 => x1 => x2 => x3 => x4 => x5 => App$MiniMMO$Player$new$(x0, x1, x2, x3, x4, x5);
 
-    function App$MiniMMO$tick$(_tick$1, _glob$2) {
-        var self = _glob$2;
-        switch (self._) {
-            case 'App.MiniMMO.State.global.new':
-                var $327 = self.run;
-                var $328 = self.map;
-                var self = ($327 >= 256);
-                if (self) {
-                    var $330 = _glob$2;
-                    var $329 = $330;
-                } else {
-                    var _map$5 = Map$map$((_player$5 => {
-                        var self = _player$5;
-                        switch (self._) {
-                            case 'App.MiniMMO.Player.new':
-                                var $333 = self.w;
-                                var $334 = self.a;
-                                var $335 = self.s;
-                                var $336 = self.d;
-                                var $337 = self.x;
-                                var $338 = self.y;
-                                var _w$12 = $333;
-                                var _a$13 = $334;
-                                var _s$14 = $335;
-                                var _d$15 = $336;
-                                var _x$16 = $337;
-                                var _y$17 = $338;
-                                var self = $334;
-                                if (self) {
-                                    var $340 = ((_x$16 - 4) >>> 0);
-                                    var _x$18 = $340;
-                                } else {
-                                    var $341 = _x$16;
-                                    var _x$18 = $341;
-                                };
-                                var self = $336;
-                                if (self) {
-                                    var $342 = ((_x$18 + 4) >>> 0);
-                                    var _x$19 = $342;
-                                } else {
-                                    var $343 = _x$18;
-                                    var _x$19 = $343;
-                                };
-                                var self = $333;
-                                if (self) {
-                                    var $344 = ((_y$17 - 4) >>> 0);
-                                    var _y$20 = $344;
-                                } else {
-                                    var $345 = _y$17;
-                                    var _y$20 = $345;
-                                };
-                                var self = $335;
-                                if (self) {
-                                    var $346 = ((_y$20 + 4) >>> 0);
-                                    var _y$21 = $346;
-                                } else {
-                                    var $347 = _y$20;
-                                    var _y$21 = $347;
-                                };
-                                var $339 = App$MiniMMO$Player$new$(_w$12, _a$13, _s$14, _d$15, _x$19, _y$21);
-                                var $332 = $339;
-                                break;
-                        };
-                        return $332;
-                    }), $328);
-                    var $331 = App$MiniMMO$State$global$new$((($327 + 1) >>> 0), _map$5);
-                    var $329 = $331;
-                };
-                var $326 = $329;
-                break;
-        };
-        return $326;
+    function App$MiniMMO$tick$(_tick$1, _map$2) {
+        var _map$3 = Map$map$((_player$3 => {
+            var self = _player$3;
+            switch (self._) {
+                case 'App.MiniMMO.Player.new':
+                    var $321 = self.w;
+                    var $322 = self.a;
+                    var $323 = self.s;
+                    var $324 = self.d;
+                    var $325 = self.x;
+                    var $326 = self.y;
+                    var _w$10 = $321;
+                    var _a$11 = $322;
+                    var _s$12 = $323;
+                    var _d$13 = $324;
+                    var _x$14 = $325;
+                    var _y$15 = $326;
+                    var self = $322;
+                    if (self) {
+                        var $328 = ((_x$14 - 4) >>> 0);
+                        var _x$16 = $328;
+                    } else {
+                        var $329 = _x$14;
+                        var _x$16 = $329;
+                    };
+                    var self = $324;
+                    if (self) {
+                        var $330 = ((_x$16 + 4) >>> 0);
+                        var _x$17 = $330;
+                    } else {
+                        var $331 = _x$16;
+                        var _x$17 = $331;
+                    };
+                    var self = $321;
+                    if (self) {
+                        var $332 = ((_y$15 - 4) >>> 0);
+                        var _y$18 = $332;
+                    } else {
+                        var $333 = _y$15;
+                        var _y$18 = $333;
+                    };
+                    var self = $323;
+                    if (self) {
+                        var $334 = ((_y$18 + 4) >>> 0);
+                        var _y$19 = $334;
+                    } else {
+                        var $335 = _y$18;
+                        var _y$19 = $335;
+                    };
+                    var $327 = App$MiniMMO$Player$new$(_w$10, _a$11, _s$12, _d$13, _x$17, _y$19);
+                    var $320 = $327;
+                    break;
+            };
+            return $320;
+        }), _map$2);
+        var $319 = _map$3;
+        return $319;
     };
     const App$MiniMMO$tick = x0 => x1 => App$MiniMMO$tick$(x0, x1);
     const BitsMap$get = a0 => a1 => (bitsmap_get(a0, a1));
 
     function Map$get$(_key$2, _map$3) {
-        var $348 = (bitsmap_get(String$to_bits$(_key$2), _map$3));
-        return $348;
+        var $336 = (bitsmap_get(String$to_bits$(_key$2), _map$3));
+        return $336;
     };
     const Map$get = x0 => x1 => Map$get$(x0, x1);
     const String$eql = a0 => a1 => (a0 === a1);
 
     function Map$set$(_key$2, _val$3, _map$4) {
-        var $349 = (bitsmap_set(String$to_bits$(_key$2), _val$3, _map$4, 'set'));
-        return $349;
+        var $337 = (bitsmap_set(String$to_bits$(_key$2), _val$3, _map$4, 'set'));
+        return $337;
     };
     const Map$set = x0 => x1 => x2 => Map$set$(x0, x1, x2);
 
-    function App$MiniMMO$post$(_time$1, _room$2, _addr$3, _data$4, _glob$5) {
-        var self = _glob$5;
+    function App$MiniMMO$post$(_time$1, _room$2, _addr$3, _data$4, _map$5) {
+        var self = Map$get$(_addr$3, _map$5);
         switch (self._) {
-            case 'App.MiniMMO.State.global.new':
-                var $351 = self.map;
-                var self = Map$get$(_addr$3, $351);
-                switch (self._) {
-                    case 'Maybe.some':
-                        var $353 = self.value;
-                        var _player$9 = $353;
-                        var self = (_data$4 === App$MiniMMO$command$a_down);
+            case 'Maybe.some':
+                var $339 = self.value;
+                var _player$7 = $339;
+                var self = (_data$4 === App$MiniMMO$command$a_down);
+                if (self) {
+                    var self = _player$7;
+                    switch (self._) {
+                        case 'App.MiniMMO.Player.new':
+                            var $342 = self.w;
+                            var $343 = self.s;
+                            var $344 = self.d;
+                            var $345 = self.x;
+                            var $346 = self.y;
+                            var $347 = App$MiniMMO$Player$new$($342, Bool$true, $343, $344, $345, $346);
+                            var $341 = $347;
+                            break;
+                    };
+                    var _player$8 = $341;
+                } else {
+                    var self = (_data$4 === App$MiniMMO$command$s_down);
+                    if (self) {
+                        var self = _player$7;
+                        switch (self._) {
+                            case 'App.MiniMMO.Player.new':
+                                var $350 = self.w;
+                                var $351 = self.a;
+                                var $352 = self.d;
+                                var $353 = self.x;
+                                var $354 = self.y;
+                                var $355 = App$MiniMMO$Player$new$($350, $351, Bool$true, $352, $353, $354);
+                                var $349 = $355;
+                                break;
+                        };
+                        var $348 = $349;
+                    } else {
+                        var self = (_data$4 === App$MiniMMO$command$d_down);
                         if (self) {
-                            var self = _player$9;
+                            var self = _player$7;
                             switch (self._) {
                                 case 'App.MiniMMO.Player.new':
-                                    var $356 = self.w;
-                                    var $357 = self.s;
-                                    var $358 = self.d;
-                                    var $359 = self.x;
-                                    var $360 = self.y;
-                                    var $361 = App$MiniMMO$Player$new$($356, Bool$true, $357, $358, $359, $360);
-                                    var $355 = $361;
+                                    var $358 = self.w;
+                                    var $359 = self.a;
+                                    var $360 = self.s;
+                                    var $361 = self.x;
+                                    var $362 = self.y;
+                                    var $363 = App$MiniMMO$Player$new$($358, $359, $360, Bool$true, $361, $362);
+                                    var $357 = $363;
                                     break;
                             };
-                            var _player$10 = $355;
+                            var $356 = $357;
                         } else {
-                            var self = (_data$4 === App$MiniMMO$command$s_down);
+                            var self = (_data$4 === App$MiniMMO$command$w_down);
                             if (self) {
-                                var self = _player$9;
+                                var self = _player$7;
                                 switch (self._) {
                                     case 'App.MiniMMO.Player.new':
-                                        var $364 = self.w;
-                                        var $365 = self.a;
-                                        var $366 = self.d;
-                                        var $367 = self.x;
-                                        var $368 = self.y;
-                                        var $369 = App$MiniMMO$Player$new$($364, $365, Bool$true, $366, $367, $368);
-                                        var $363 = $369;
+                                        var $366 = self.a;
+                                        var $367 = self.s;
+                                        var $368 = self.d;
+                                        var $369 = self.x;
+                                        var $370 = self.y;
+                                        var $371 = App$MiniMMO$Player$new$(Bool$true, $366, $367, $368, $369, $370);
+                                        var $365 = $371;
                                         break;
                                 };
-                                var $362 = $363;
+                                var $364 = $365;
                             } else {
-                                var self = (_data$4 === App$MiniMMO$command$d_down);
+                                var self = (_data$4 === App$MiniMMO$command$a_up);
                                 if (self) {
-                                    var self = _player$9;
+                                    var self = _player$7;
                                     switch (self._) {
                                         case 'App.MiniMMO.Player.new':
-                                            var $372 = self.w;
-                                            var $373 = self.a;
-                                            var $374 = self.s;
-                                            var $375 = self.x;
-                                            var $376 = self.y;
-                                            var $377 = App$MiniMMO$Player$new$($372, $373, $374, Bool$true, $375, $376);
-                                            var $371 = $377;
+                                            var $374 = self.w;
+                                            var $375 = self.s;
+                                            var $376 = self.d;
+                                            var $377 = self.x;
+                                            var $378 = self.y;
+                                            var $379 = App$MiniMMO$Player$new$($374, Bool$false, $375, $376, $377, $378);
+                                            var $373 = $379;
                                             break;
                                     };
-                                    var $370 = $371;
+                                    var $372 = $373;
                                 } else {
-                                    var self = (_data$4 === App$MiniMMO$command$w_down);
+                                    var self = (_data$4 === App$MiniMMO$command$s_up);
                                     if (self) {
-                                        var self = _player$9;
+                                        var self = _player$7;
                                         switch (self._) {
                                             case 'App.MiniMMO.Player.new':
-                                                var $380 = self.a;
-                                                var $381 = self.s;
-                                                var $382 = self.d;
-                                                var $383 = self.x;
-                                                var $384 = self.y;
-                                                var $385 = App$MiniMMO$Player$new$(Bool$true, $380, $381, $382, $383, $384);
-                                                var $379 = $385;
+                                                var $382 = self.w;
+                                                var $383 = self.a;
+                                                var $384 = self.d;
+                                                var $385 = self.x;
+                                                var $386 = self.y;
+                                                var $387 = App$MiniMMO$Player$new$($382, $383, Bool$false, $384, $385, $386);
+                                                var $381 = $387;
                                                 break;
                                         };
-                                        var $378 = $379;
+                                        var $380 = $381;
                                     } else {
-                                        var self = (_data$4 === App$MiniMMO$command$a_up);
+                                        var self = (_data$4 === App$MiniMMO$command$d_up);
                                         if (self) {
-                                            var self = _player$9;
+                                            var self = _player$7;
                                             switch (self._) {
                                                 case 'App.MiniMMO.Player.new':
-                                                    var $388 = self.w;
-                                                    var $389 = self.s;
-                                                    var $390 = self.d;
-                                                    var $391 = self.x;
-                                                    var $392 = self.y;
-                                                    var $393 = App$MiniMMO$Player$new$($388, Bool$false, $389, $390, $391, $392);
-                                                    var $387 = $393;
+                                                    var $390 = self.w;
+                                                    var $391 = self.a;
+                                                    var $392 = self.s;
+                                                    var $393 = self.x;
+                                                    var $394 = self.y;
+                                                    var $395 = App$MiniMMO$Player$new$($390, $391, $392, Bool$false, $393, $394);
+                                                    var $389 = $395;
                                                     break;
                                             };
-                                            var $386 = $387;
+                                            var $388 = $389;
                                         } else {
-                                            var self = (_data$4 === App$MiniMMO$command$s_up);
+                                            var self = (_data$4 === App$MiniMMO$command$w_up);
                                             if (self) {
-                                                var self = _player$9;
+                                                var self = _player$7;
                                                 switch (self._) {
                                                     case 'App.MiniMMO.Player.new':
-                                                        var $396 = self.w;
-                                                        var $397 = self.a;
-                                                        var $398 = self.d;
-                                                        var $399 = self.x;
-                                                        var $400 = self.y;
-                                                        var $401 = App$MiniMMO$Player$new$($396, $397, Bool$false, $398, $399, $400);
-                                                        var $395 = $401;
+                                                        var $398 = self.a;
+                                                        var $399 = self.s;
+                                                        var $400 = self.d;
+                                                        var $401 = self.x;
+                                                        var $402 = self.y;
+                                                        var $403 = App$MiniMMO$Player$new$(Bool$false, $398, $399, $400, $401, $402);
+                                                        var $397 = $403;
                                                         break;
                                                 };
-                                                var $394 = $395;
+                                                var $396 = $397;
                                             } else {
-                                                var self = (_data$4 === App$MiniMMO$command$d_up);
-                                                if (self) {
-                                                    var self = _player$9;
-                                                    switch (self._) {
-                                                        case 'App.MiniMMO.Player.new':
-                                                            var $404 = self.w;
-                                                            var $405 = self.a;
-                                                            var $406 = self.s;
-                                                            var $407 = self.x;
-                                                            var $408 = self.y;
-                                                            var $409 = App$MiniMMO$Player$new$($404, $405, $406, Bool$false, $407, $408);
-                                                            var $403 = $409;
-                                                            break;
-                                                    };
-                                                    var $402 = $403;
-                                                } else {
-                                                    var self = (_data$4 === App$MiniMMO$command$w_up);
-                                                    if (self) {
-                                                        var self = _player$9;
-                                                        switch (self._) {
-                                                            case 'App.MiniMMO.Player.new':
-                                                                var $412 = self.a;
-                                                                var $413 = self.s;
-                                                                var $414 = self.d;
-                                                                var $415 = self.x;
-                                                                var $416 = self.y;
-                                                                var $417 = App$MiniMMO$Player$new$(Bool$false, $412, $413, $414, $415, $416);
-                                                                var $411 = $417;
-                                                                break;
-                                                        };
-                                                        var $410 = $411;
-                                                    } else {
-                                                        var $418 = _player$9;
-                                                        var $410 = $418;
-                                                    };
-                                                    var $402 = $410;
-                                                };
-                                                var $394 = $402;
+                                                var $404 = _player$7;
+                                                var $396 = $404;
                                             };
-                                            var $386 = $394;
+                                            var $388 = $396;
                                         };
-                                        var $378 = $386;
+                                        var $380 = $388;
                                     };
-                                    var $370 = $378;
+                                    var $372 = $380;
                                 };
-                                var $362 = $370;
+                                var $364 = $372;
                             };
-                            var _player$10 = $362;
+                            var $356 = $364;
                         };
-                        var $354 = _player$10;
-                        var _player$8 = $354;
-                        break;
-                    case 'Maybe.none':
-                        var $419 = App$MiniMMO$Player$new$(Bool$false, Bool$false, Bool$false, Bool$false, 0, 0);
-                        var _player$8 = $419;
-                        break;
+                        var $348 = $356;
+                    };
+                    var _player$8 = $348;
                 };
-                var _map$9 = Map$set$(_addr$3, _player$8, $351);
-                var $352 = App$MiniMMO$State$global$new$(0, _map$9);
-                var $350 = $352;
+                var $340 = _player$8;
+                var _player$6 = $340;
+                break;
+            case 'Maybe.none':
+                var $405 = App$MiniMMO$Player$new$(Bool$false, Bool$false, Bool$false, Bool$false, 0, 0);
+                var _player$6 = $405;
                 break;
         };
-        return $350;
+        var $338 = Map$set$(_addr$3, _player$6, _map$5);
+        return $338;
     };
     const App$MiniMMO$post = x0 => x1 => x2 => x3 => x4 => App$MiniMMO$post$(x0, x1, x2, x3, x4);
     const App$MiniMMO = App$new$(App$MiniMMO$init, App$MiniMMO$draw, App$MiniMMO$when, App$MiniMMO$tick, App$MiniMMO$post);
@@ -1985,24 +1921,11 @@ module.exports = (function() {
         'App.new': App$new,
         'Pair.new': Pair$new,
         'App.State.new': App$State$new,
+        'BitsMap': BitsMap,
+        'Map': Map,
         'App.MiniMMO.State': App$MiniMMO$State,
         'App.Store.new': App$Store$new,
         'Unit.new': Unit$new,
-        'App.MiniMMO.State.global.new': App$MiniMMO$State$global$new,
-        'U32.new': U32$new,
-        'Nat.apply': Nat$apply,
-        'Word': Word,
-        'Word.e': Word$e,
-        'Word.i': Word$i,
-        'Word.o': Word$o,
-        'Word.inc': Word$inc,
-        'Word.zero': Word$zero,
-        'Nat.to_word': Nat$to_word,
-        'Nat.succ': Nat$succ,
-        'Nat.zero': Nat$zero,
-        'Nat.to_u32': Nat$to_u32,
-        'BitsMap': BitsMap,
-        'Map': Map,
         'BitsMap.new': BitsMap$new,
         'BitsMap.tie': BitsMap$tie,
         'Maybe.some': Maybe$some,
@@ -2013,6 +1936,8 @@ module.exports = (function() {
         'Bits.i': Bits$i,
         'Bits.concat': Bits$concat,
         'Word.to_bits': Word$to_bits,
+        'Nat.succ': Nat$succ,
+        'Nat.zero': Nat$zero,
         'U16.to_bits': U16$to_bits,
         'String.to_bits': String$to_bits,
         'Map.from_list': Map$from_list,
@@ -2088,15 +2013,21 @@ module.exports = (function() {
         'App.MiniMMO.command.w_up': App$MiniMMO$command$w_up,
         'App.MiniMMO.command.s_up': App$MiniMMO$command$s_up,
         'App.MiniMMO.when': App$MiniMMO$when,
-        'Cmp.as_gte': Cmp$as_gte,
-        'Word.gte': Word$gte,
-        'U32.gte': U32$gte,
-        'U32.from_nat': U32$from_nat,
         'BitsMap.map': BitsMap$map,
         'Map.map': Map$map,
+        'U32.new': U32$new,
+        'Word.e': Word$e,
+        'Word': Word,
+        'Word.i': Word$i,
+        'Word.o': Word$o,
         'Word.subber': Word$subber,
         'Word.sub': Word$sub,
         'U32.sub': U32$sub,
+        'Nat.apply': Nat$apply,
+        'Word.inc': Word$inc,
+        'Word.zero': Word$zero,
+        'Nat.to_word': Nat$to_word,
+        'U32.from_nat': U32$from_nat,
         'Word.adder': Word$adder,
         'Word.add': Word$add,
         'U32.add': U32$add,
