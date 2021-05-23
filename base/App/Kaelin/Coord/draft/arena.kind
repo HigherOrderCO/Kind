@@ -1,0 +1,18 @@
+App.Kaelin.Coord.draft.arena: NatMap<String>
+  let a = App.Kaelin.Coord.new(1,-2)
+  let b = App.Kaelin.Coord.new(0,-1)
+  let c = App.Kaelin.Coord.new(1,-1)
+  let d = App.Kaelin.Coord.new(-1,0)
+  let e = App.Kaelin.Coord.new(0, 0)
+  let f = App.Kaelin.Coord.new(1, 0)
+  let g = App.Kaelin.Coord.new(-1,1)
+  let h = App.Kaelin.Coord.new(0, 1)  
+  let i = App.Kaelin.Coord.new(-1,2)
+  let list = [a,b,c,d,e,f,g,h,i]
+
+  let map  = NatMap.new<String>
+
+  for coord in list with map:
+    key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
+    NatMap.set!(key, "empty", map)
+  map

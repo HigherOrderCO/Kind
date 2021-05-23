@@ -33,8 +33,21 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
           App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
           Nat.to_u16(key))
       }
+    6 :
+      App.Kaelin.Event.Buffer {
+        push(App.Kaelin.Event.Code.draft_hero)
+        get id_hero = next
+        return App.Kaelin.Event.draft_hero(Nat.to_u8(id_hero))
+      }
+    7 :
+      App.Kaelin.Event.Buffer {
+        push(App.Kaelin.Event.Code.draft_coord)
+        get coord = next
+        return App.Kaelin.Event.draft_coord(App.Kaelin.Coord.Convert.nat_to_axial(coord)) 
+      }
    } default fail!
  }
 
+
 App.Kaelin.Event.deserialize(code : String) : Maybe(App.Kaelin.Event)
-  App.Kaelin.Event.Buffer.Monad.run!(App.Kaelin.Event.deserialize_scheme, code)
+  App.Kaelin.Event.Buffer.monad.run!(App.Kaelin.Event.deserialize_scheme, code)

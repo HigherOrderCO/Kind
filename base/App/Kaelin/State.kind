@@ -9,7 +9,7 @@ type App.Kaelin.State.global {
 type App.Kaelin.Stage {
   init
   void
-  draft
+  draft(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>)
   planning
   action
 }

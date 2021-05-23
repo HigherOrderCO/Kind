@@ -1,0 +1,26 @@
+App.Kaelin.Action.draft_coord(
+  user: String,
+  coord: App.Kaelin.Coord
+  glob: App.Kaelin.State.global
+): App.State.global(App.Kaelin.State)
+  key = user
+  open glob
+  case glob.stage{
+    draft:
+      let map      = glob.stage.coords
+      let key      = App.Kaelin.Coord.Convert.axial_to_nat(coord)
+      let coord_id = NatMap.get!(key, map) <> "empty"
+      if String.eql(coord_id, "empty") then 
+        let coords   = NatMap.to_list!(glob.stage.coords)
+        for pair in coords with map:
+          open pair
+          if String.eql(pair.snd, user) then
+            NatMap.set!(pair.fst, "empty", map)
+          else
+            map
+        let new_map = NatMap.set!(key, user, map)
+        let stage   = App.Kaelin.Stage.draft(glob.stage.players, new_map)
+        glob@stage <- stage
+      else 
+      glob                   
+  }default glob
