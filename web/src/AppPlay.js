@@ -18,8 +18,8 @@ module.exports = class AppPlay extends Component {
 
     this.app_global_states = null; // previous global states
     this.app_global_tick = null; // global tick we're at
-    this.app_global_posts = {}; // map of global posts
     this.app_global_begin = null; // the first tick of this app
+    this.app_global_posts = {}; // map of global posts
 
     this.display = null;
     this.intervals = {}; // timed intervals
@@ -229,6 +229,8 @@ module.exports = class AppPlay extends Component {
       //console.log("New post at " + post.time + "; local tick is " + window.KindEvents.get_tick() + "; delay is " + (Date.now() - window.KindEvents.get_time()));
       if (!this.app_global_begin || post.time < this.app_global_begin) {
         this.app_global_begin = post.time;
+        this.app_global_states = null;
+        this.app_global_tick = null;
       }
       this.register_tick(post.time);
       //console.log(this.app_global_posts);
