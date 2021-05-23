@@ -69,7 +69,7 @@ User.rigille.Elementary.Expression.mul(
    snd
  )
 
-User.rigille.Elementary.Function.Derivative(
+User.rigille.Elementary.Function.derive(
   name: User.rigille.Elementary.Function
 ): User.rigille.Elementary.Expression -> User.rigille.Elementary.Expression
   (arg)
@@ -106,11 +106,11 @@ User.rigille.Elementary.Function.Derivative(
       )
   }
 
-User.rigille.Elementary.Derivative(
+User.rigille.Elementary.derive(
   idx: Nat
   exp: User.rigille.Elementary.Expression
 ): User.rigille.Elementary.Expression
-  def D = User.rigille.Elementary.Derivative(idx)
+  def D = User.rigille.Elementary.derive(idx)
   case exp {
     bin:
       case exp.op {
@@ -120,7 +120,7 @@ User.rigille.Elementary.Derivative(
           D(exp.fst_arg)*exp.snd_arg + exp.fst_arg*D(exp.snd_arg)
       }
     fun:
-      outer_derivative = User.rigille.Elementary.Function.Derivative(exp.name)
+      outer_derivative = User.rigille.Elementary.Function.derive(exp.name)
       outer_derivative(exp.arg)*D(exp.arg)
     const:
       User.rigille.Elementary.constexp(0)
@@ -165,4 +165,75 @@ User.rigille.Elementary.Expression.show(
       }
     var:
       "x_" | Nat.show(exp.idx)
+  }
+
+// do constant on elementary operations and elim
+// operatins with identity elements
+User.rigille.Elementary.reduce(
+  e: User.rigille.Elementary.Expression
+): User.rigille.Elementary.Expression
+  case e {
+    bin:
+      // #TODO make this properly tail-recursive
+      red_fst = User.rigille.Elementary.reduce(e.fst_arg)
+      red_snd = User.rigille.Elementary.reduce(e.snd_arg)
+      case e.op red_fst red_snd {
+        add  const const:
+          case red_fst.val red_snd.val {
+            real real:
+              User.rigille.Elementary.constexp(red_fst.val.val + red_snd.val.val)
+          } default (red_fst + red_snd)
+        add  _     const:
+          case red_snd.val {
+            real:
+              if Int.eql(red_snd.val.val, 0) then
+                red_fst
+              else
+                (red_fst + red_snd)
+          } default (red_fst + red_snd)
+        add  const _    :
+          case red_fst.val {
+            real:
+              if Int.eql(red_fst.val.val, 0) then
+                red_snd
+              else
+                (red_fst + red_snd)
+          } default (red_fst + red_snd)
+        mult const const:
+          case red_fst.val red_snd.val {
+            real real:
+              User.rigille.Elementary.constexp(red_fst.val.val * red_snd.val.val)
+          } default (red_fst * red_snd)
+        mult _     const:
+          case red_snd.val {
+            real:
+              if Int.eql(red_snd.val.val, 0) then
+                User.rigille.Elementary.constexp(0)
+              else if Int.eql(red_snd.val.val, 1) then
+                red_fst
+              else
+                (red_fst + red_snd)
+          } default (red_fst + red_snd)
+        mult const _    :
+          case red_fst.val {
+            real:
+              if Int.eql(red_fst.val.val, 0) then
+                User.rigille.Elementary.constexp(0)
+              else if Int.eql(red_fst.val.val, 1) then
+                red_snd
+              else
+                (red_fst + red_snd)
+          } default (red_fst + red_snd)
+      } default
+        User.rigille.Elementary.Expression.bin(
+          e.op
+          red_fst
+          red_snd
+        )
+    fun:
+      e // #TODO
+    const:
+      e
+    var:
+      e
   }
