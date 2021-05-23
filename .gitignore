@@ -11,5 +11,5 @@ tmp.js
 web/*.lock
 base/.cache
 /base/playground.kind
-web/src/apps
-web/events/data
+web/src/apps/*.js
+web/events/data/*

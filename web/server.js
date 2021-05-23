@@ -18,6 +18,6 @@ app.get("*", async (req, res, next) => {
 })
 
 var port = process.argv[2] || "80";
-app.listen(80);
+app.listen(port);
 
 console.log("Listening on port " + port + ".");
