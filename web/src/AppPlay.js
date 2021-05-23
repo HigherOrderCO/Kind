@@ -263,7 +263,7 @@ module.exports = class AppPlay extends Component {
       var count_posts = 0;
       var begin_time = Date.now();
       var total = tick - this.app_global_tick;
-      if (total > 32) {
+      if (total > 16) {
         var from_date = new Date(this.app_global_tick * 62.5);
         var to_date = new Date(tick * 62.5);
         this.display = "Computing " + total + " ticks.\n";
@@ -272,7 +272,7 @@ module.exports = class AppPlay extends Component {
         this.forceUpdate();
       }
       var compute_from_tick = this.app_global_tick; 
-      var compute_to_tick = Math.min(compute_from_tick + 16 * 256, tick); // pauses after 16*256 ticks of no posts
+      var compute_to_tick = Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
       for (var t = compute_from_tick; t < compute_to_tick; ++t) {
         //++count_ticks;
         var posts = this.app_global_posts[String(t)];
