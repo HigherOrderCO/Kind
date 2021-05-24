@@ -1,6 +1,5 @@
 //TODO: check team in draft/arena and remove 1 coord
 //TODO: transition from draft to planning
-//TODO: do not allow repeated heroes
 //TODO: make it beautiful
 
 //TODO?: create additional tabs for checking stats or skills of a hero
@@ -33,7 +32,7 @@ App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<Str
           },
           [
             App.Kaelin.Draw.draft.top(players, coords, user),
-            App.Kaelin.Draw.draft.bottom
+            App.Kaelin.Draw.draft.bottom(players)
             
           ]
   )
@@ -100,7 +99,7 @@ App.Kaelin.Draw.draft.picks_right(map: Map<App.Kaelin.DraftInfo>): DOM
 
 
 
-App.Kaelin.Draw.draft.bottom: DOM
+App.Kaelin.Draw.draft.bottom(players: Map<App.Kaelin.DraftInfo>): DOM
 heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
   DOM.node("div", {},
   { "width": "100%",
