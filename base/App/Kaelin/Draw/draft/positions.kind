@@ -1,0 +1,36 @@
+App.Kaelin.Draw.draft.positions(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): List<DOM>
+  map = NatMap.to_list!(coords)
+  list = []
+  for pair in map with list:
+    open pair
+    let coord = App.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
+    App.Kaelin.Draw.draft.positions_go(players, coord, pair.fst, pair.snd, user) & list
+  list
+
+App.Kaelin.Draw.draft.positions_go(players: Map<App.Kaelin.DraftInfo>, coord: App.Kaelin.Coord, nat: Nat, id: String, user: String): DOM
+  let {x, y} =  App.Kaelin.Coord.draft.to_xy(coord)
+  let bottom =  Nat.show(U32.to_nat(y)) | "%"
+  let left   =  Nat.show(U32.to_nat(x)) | "%"
+  let size   =  Nat.show(U32.to_nat((App.Kaelin.Constants.draft_hexagon_radius*2) -1)) | "%"
+  let margin =  Nat.show(U32.to_nat((App.Kaelin.Constants.draft_hexagon_radius)))
+  let color  =  
+    if String.eql(user, id) then
+      "#4B97E2"
+    else
+      let x = players{id}
+      case x {
+        none: "#B97A57"
+        some: "#0FB735"
+      }
+DOM.node("div", {"id":"C" | Nat.show(nat)},
+    {
+  "width": size
+  "height": size
+  "margin": "0px 0px 0px -" | margin | "%"
+  "position": "absolute"
+  "bottom": bottom
+  "left": left
+  "clip-path": "polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%)"
+  "background": color
+   }
+   [])

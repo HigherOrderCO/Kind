@@ -1,15 +1,9 @@
 //TODO: check team in draft/arena and remove 1 coord
-//TODO: fill the allies tab with allies info
 //TODO: transition from draft to planning
 //TODO: do not allow repeated heroes
 //TODO: make it beautiful
-//TODO: organize
 
 //TODO?: create additional tabs for checking stats or skills of a hero
-
-
-
-
 
 App.Kaelin.Draw.draft(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): DOM
   heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
@@ -51,24 +45,24 @@ App.Kaelin.Draw.draft.top(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<Stri
    "display": "flex"
    "align-items": "center"}
    [
-     App.Kaelin.Draw.draft.coords(players, coords, user),
+     App.Kaelin.Draw.draft.map(players, coords, user),
      App.Kaelin.Draw.draft.picks(players, user),
    ])
 
-App.Kaelin.Draw.draft.coords(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): DOM
+App.Kaelin.Draw.draft.map(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): DOM
 DOM.node("div", {},
-  {"width": "30%"
-   "height": "0"
-   "padding-top": "30%"
-   "position": "relative"
-   "justify-content": "flex-start"}
+  { "width": "30%"
+    "height": "0"
+    "padding-top": "30%"
+    "position": "relative"
+    }
   
-    App.Kaelin.Draw.draft.hex(players, coords, user)
+    App.Kaelin.Draw.draft.positions(players, coords, user)
 )
-
 
 App.Kaelin.Draw.draft.picks(players: Map<App.Kaelin.DraftInfo>, user: String): DOM
 let player = players{user}
+let allies = Map.delete!(user, players)
 let hero   = case player{
   none: none
   some: player = player.value
@@ -79,58 +73,32 @@ DOM.node("div", {},
    "height": "100%",
    "display": "flex"}
   [
-    App.Kaelin.Draw.draft.my_hero(hero),
-    App.Kaelin.Draw.draft.my_allies
+    App.Kaelin.Draw.draft.picks_left(hero),
+    App.Kaelin.Draw.draft.picks_right(allies)
   ])
 
-App.Kaelin.Draw.draft.my_hero(hero: Maybe(U8)): DOM
+App.Kaelin.Draw.draft.picks_left(hero: Maybe(U8)): DOM
 DOM.node("div", {},
   {"width": "40%"
    "height": "100%"
    "display": "flex"
    "padding": "5%"
    "box-sizing": "border-box"}
-      [App.Kaelin.Draw.draft.hero_card(hero)])
+      [App.Kaelin.Draw.draft.player(hero)])
 
-App.Kaelin.Draw.draft.my_allies: DOM
-DOM.node("div", {},
-  { "width": "60%",
-    "height": "100%",
+App.Kaelin.Draw.draft.picks_right(map: Map<App.Kaelin.DraftInfo>): DOM
+  DOM.node("div", {},
+  { "width": "60%"
+    "height": "100%"
     "padding": "3%"
-    "display": "flex",
-    "flex-direction": "row",
+    "display": "flex"
+    "flex-direction": "row"
+    "align-items": "center"
     "box-sizing": "border-box"
     }
-    [
-      App.Kaelin.Draw.draft.ally_card,
-      App.Kaelin.Draw.draft.ally_card])
+    App.Kaelin.Draw.draft.allies_go(map))
 
 
-App.Kaelin.Draw.draft.ally_card: DOM
-  DOM.node("div", {},
-    {
-      "width": "100%"
-      "height": "80%"
-      "display": "flex"
-      "border": "3px solid gray"
-      "margin": "3%"
-      "border-radius": "5px"
-      "flex-direction": "column"
-      "justify-content": "space-between", 
-      "align-items": "center"
-      "box-sizing": "border-box",
-    }
-    [
-      DOM.node("div", {}, {"height": "10%" "margin-top":"5%"}, [DOM.text("hero@name")]),
-      DOM.node("div", {}, {"height": "auto", "width": "50%"}, [DOM.node("img", 
-      {"src": App.Kaelin.Draw.draft.croni}
-      {"width": "100%", "height": "auto", "image-rendering": "pixelated"}, [])])
-      DOM.node("div", {}, {
-      "width": "100%"
-      "height": "40%"
-      "background-color": "gray"} [])
-    
-    ])
 
 App.Kaelin.Draw.draft.bottom: DOM
 heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
@@ -143,138 +111,12 @@ heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
    [
      DOM.node("div", {},
      {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "width": "100%"},
-     List.map!!(App.Kaelin.Draw.draft.hero_select, heroes))
+     List.map!!(App.Kaelin.Draw.draft.selection, heroes))
    ]
 )
 
 
-App.Kaelin.Draw.draft.hero_card(hero: Maybe(U8)): DOM
-  let name =
-    case hero {
-      none: "Not Selected yet"
-      some: let hero = App.Kaelin.Hero.info(hero.value)
-        case hero {
-          none: "Not Selected yet"
-          some: hero.value@name
-        }
-    }
-  DOM.node("div", {},
-    {
-      "width": "100%"
-      "height": "100%"
-      "display": "flex"
-      "border": "3px solid cyan"
-      "border-radius": "5px"
-      "flex-direction": "column"
-      "justify-content": "flex-start", 
-      "align-items": "center",
-    }
-    [
-      DOM.node("div", {}, {"font-size": "2vw"}, [DOM.text(name)]),
-      
-      DOM.node("div", {}, 
-      {
-        "margin-top": "10%" 
-        "width":"40%" 
-        "height":"auto"
-        }, 
-        [DOM.node("img", {"src": App.Kaelin.Draw.draft.croni}
-      {
-        "width": "100%",
-        "height": "auto",
-        "image-rendering": 
-        "pixelated"}, 
-        [])
-        ])
-      
-      DOM.node("div", {}, {
-      "width": "100%"
-      "height": "100%"
-      "display": "flex"
-      "background-color": "gray"} [])
-    
-    ])
 
-App.Kaelin.Draw.draft.hero_select(hero: App.Kaelin.Hero): DOM
-  DOM.node("div", {"id": "H" | hero@name, "action": hero@name}, 
-    { 
-      "margin": "4px",
-      "border": "2px solid gray",
-      "box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
-      "height": "0",
-      "padding-bottom": "10%"
-      "width": "10%",
-      "border-radius": "5px"
-    }, 
-    [
-      DOM.node("div", {"id": "H" | hero@name, "action": hero@name}, {"display": "flex", "justify-content": "center", "font-size": "1.2vw"}, [DOM.text(hero@name)]),
-      DOM.node("div", {"id": "H" | hero@name, "action": hero@name}, {"display": "flex", "justify-content": "center", "height": "100%", "width":"100%"}, 
-      [
-        DOM.node("div",
-        {},
-        {"padding": "2px", "height": "100%", "width": "100%"},      
-        [
-          DOM.node("img", 
-          {"src": App.Kaelin.Draw.draft.croni, "id": "H" | hero@name, "action": hero@name}
-          {"width": "75%", "margin-left": "12.5%", "height": "auto", "image-rendering": "pixelated"}, [])
-        ])
-      ]),
-    ]
-  )
 
 App.Kaelin.Draw.draft.croni: String
 "data:image/gif;base64,R0lGODlhGAAYAPMAAAAAABYOIzUdTSojT1MeSN8+Rmo6hmlli4B9msPCzQAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/iZFZGl0ZWQgd2l0aCBlemdpZi5jb20gb25saW5lIEdJRiBtYWtlcgAh+QQNCgAKACwAAAAAGAAYAAAEkVDJSau9eIK9M95JmCCAR4HiWJoSkIYkq3C0ym6DoesDEHuA3G5o6GSCxKTRgkzucr5VBUAMBJ7U6AVw1VmtOpcP8TsRvmdwEUaWagpnAlztIreZ6UA+PLK7NV9WQnV+RwOHQgY9dmVMAwkHBwlYd4aQCJJYf1OPkWSTWJY+B22gBgmbGqgAAgKsrimpMrO0FREAIfkEDQoACgAsAAAAABgAGAAABI1QyUmrvVgBkLsGScJ5FhiKZGWGyJhqJ+umW721NDAYPD9sJF1vyJtdhEQi8LhL9nYAXIkYCDwBhqiUArDyqtWiCEE2aghgdDjLIm8lgAKaIF+b3O9zGixO4M1dYAFNG35uZnBNRD9/GDoJBwcJQ4x5E4+RZJNXiBoDYwdlmzwoJSEbAgIAqSunL6+wGBEAIfkEDQoACgAsAAAAABgAGAAABIxQyUmrvThrBfrWQJJ0wGeFYoJ45oSKyNpKLyybZK7eWTcYQOAAECv1fsGkgcirAJDKJNHohEYNv+kFoAwEgsNl8fQFer3AELNJI5zd6KWNzSm4CfY4KkYHwAN/aTtjZGcBSCR8VCcDCQcHCUlDWluNjzGRYENbTyMIB0WZQSNOKR0CAgCoNSKLM6+wEQAh+QQNCgAKACwAAAAAGAAYAAAEilDJSau9OOvNu1dAGH4TkJznSJpogqibKJ/Iq4WDoesDWwMYQG5HNPhsFWFxafolh0ue0eUsFQOBXW9aQ0oAWR0WqzMdvSDCWE2eorrAUkFNmLdZtOqXHeCX33olY1hDInloJQMJBwcJRD0AgYmLBzWOWpAWOAmRlS+XO5xJKCECAgCmeKQkrK0KEQAh+QQNCgAKACwAAAAAGAAYAAAEjlDJSau9OGsMwNZAknTfFYqIV1InqmZd3IloygGDoetDm9gW3G6oayGAEyGReDq+FMolz9BEQomBwK5HrT0BWl02WxzVrADCWE3u0o7ogpogbxudlfR6XD4/JWBjATlUVVYshEQ9cH+ICQcHCUOLjUkDjwdHkluVgJcACJkpmzojJiIdAgIAqj6mK7CxFxEAIfkEDQoACgAsAAAAABgAGAAABJBQyUmrvThrDfq+HZAkwEd144iUW+iqbNYNRl0P4srRdm8AOgyA5+sBYydi0UA7gnyBgA33C1YA0lo0WhMBEdYJgLAlc38qMFICKJAJ7rMoAQ6zzQF8l15fs7dRPHN1dmIDh0Q4hH6GCQcHCVNfjI0HCJCSlGwDjpYIkZIynECeIjYkMiQAAgKrrSmoJrKzGxEAOw=="
-
-
-
-
-
-
-
-
-
-
-
-
-
-App.Kaelin.Draw.draft.hex(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): List<DOM>
-  map = NatMap.to_list!(coords)
-  list = []
-  for pair in map with list:
-    open pair
-    let coord = App.Kaelin.Coord.Convert.nat_to_axial(pair.fst)
-    App.Kaelin.Draw.draft.hex_go(players, coord, pair.fst, pair.snd, user) & list
-  list
-
-App.Kaelin.Draw.draft.hex_go(players: Map<App.Kaelin.DraftInfo>, coord: App.Kaelin.Coord, nat: Nat, id: String, user: String): DOM
-  let {x, y} =  App.Kaelin.Coord.draft.to_xy(coord)
-  let bottom =  Nat.show(U32.to_nat(y)) | "%"
-  let left   =  Nat.show(U32.to_nat(x)) | "%"
-  let size   =  Nat.show(U32.to_nat((App.Kaelin.Constants.draft_hexagon_radius*2) -1)) | "%"
-  let margin =  Nat.show(U32.to_nat((App.Kaelin.Constants.draft_hexagon_radius)))
-  let color  =  
-    if String.eql(user, id) then
-      "blue"
-    else
-      let x = players{id}
-      case x {
-        none: "gray"
-        some: "green"
-      }
-          
-    
-  
-
-DOM.node("div", {"id":"C" | Nat.show(nat), },
-    {
-  "width": size
-  "height": size
-  "margin": "0px 0px 0px -" | margin | "%"
-  "position": "absolute"
-  "bottom": bottom
-  "left": left
-  "display": "inline-block"
-  "clip-path": "polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%)"
-  "background": color
-   }
-   [])
