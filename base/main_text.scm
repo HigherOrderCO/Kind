@@ -1,3 +1,6 @@
+; Use text data-structure instead of strings
+(import (srfi :135))
+
 ; Short alias to vector-ref
 (define get vector-ref)
 
@@ -23,25 +26,25 @@
 (define (string_join sep strs fst)
   (if (null? strs) 
     ""
-    (string-append
+    (textual-append
       (if fst "" sep)
       (car strs)
       (string_join sep (cdr strs) #f))))
 
 ; Returns the last index that chr occurs in str, -1 otherwise
 (define (last_index_of chr str idx)
-  (if (= idx (string-length str))
+  (if (= idx (text-length str))
     -1
     (let ((rest (last_index_of chr str (+ idx 1))))
-      (if (char=? (string-ref str idx) chr)
+      (if (char=? (text-ref str idx) chr)
         (max idx rest)
         rest))))
 
 ; Returns the first index that chr occurs in str, -1 otherwise
 (define (first_index_of chr str idx)
-  (if (= idx (string-length str))
+  (if (= idx (textual-length str))
     -1
-    (if (char=? (string-ref str idx) chr)
+    (if (char=? (text-ref str idx) chr)
       idx
       (first_index_of chr str (+ idx 1)))))
 
@@ -51,8 +54,8 @@
     (if (= split_idx -1)
       str
       (cons
-        (substring str 0 split_idx)
-        (substring str (+ split_idx 1) (string-length str))))))
+        (subtext str 0 split_idx)
+        (subtext str (+ split_idx 1) (text-length str))))))
 
 ; Splits a string using an identifier
 (define (split_at_last chr str)
@@ -60,14 +63,15 @@
     (if (= split_idx -1)
       str
       (cons
-        (substring str 0 split_idx)
-        (substring str (+ split_idx 1) (string-length str))))))
+        (subtext str 0 split_idx)
+        (subtext str (+ split_idx 1) (text-length str))))))
 
 ; Converts a date to a string, in milliseconds
 (define (time_to_string time)
-  (number->string
-    (+ (* (time-second time) 1000)
-      (div (time-nanosecond time) 1000000))))
+  (string->text
+    (number->string
+      (+ (* (time-second time) 1000)
+        (div (time-nanosecond time) 1000000)))))
 
 ; Prints a text with a newline
 (define (print txt)
@@ -97,7 +101,7 @@
 
 ; Sets the contents of a file
 (define (set_file file text)
-  (system (string-append "mkdir -p " (car (split_at_last #\/ file))))
+  (system (textual-append "mkdir -p " (car (split_at_last #\/ file))))
   (if (file-exists? file) (delete-file file))
   (let ((port (open-output-file file)))
     (begin
@@ -119,8 +123,8 @@
 ; Performs a single Kind IO action
 (define (io_action name)
   (case name
-    ("print" (lambda (x) (print x)))
-    ("put_string" (lambda (x) (display x)))
+    ("print" (lambda (x) (print (textual->string x))))
+    ("put_string" (lambda (x) (display (textual->string x))))
     ("get_line" (lambda (x) (get_line)))
     ("del_file" (lambda (x) (del_file x)))
     ("get_file" (lambda (x) (get_file x)))
@@ -145,8 +149,8 @@
 (define Nat-elim (lambda (x) (let ((self0 x)) (case (= self0 0) (#t (let () (lambda (c0) (lambda (c1) c0)))) (#f (let ((f0 (- self0 1))) (lambda (c0) (lambda (c1) (c1 f0)))))))))
 (define U16-inst (lambda (x) (x (lambda (x0) (word-to-u16 x0)))))
 (define U16-elim (lambda (x) (let ((self0 x)) (case #t (#t (let ((f0 (u16-to-word self0))) (lambda (c0) (c0 f0))))))))
-(define String-inst (lambda (x) ((x "") (lambda (x0) (lambda (x1) (string-append (make-string 1 (integer->char x0)) x1))))))
-(define String-elim (lambda (x) (let ((self0 x)) (case (= (string-length self0) 0) (#t (let () (lambda (c0) (lambda (c1) c0)))) (#f (let ((f0 (char->integer (string-ref self0 0)))(f1 (let ((_str_ self0)) (substring _str_ 1 (string-length _str_))))) (lambda (c0) (lambda (c1) ((c1 f0) f1)))))))))
-(define ($Test.main) (let ((thisfst$0 "aaa")) (let ((thissnd$1 "aaa")) (let ((ok$2 '())) '()))))
+(define String-inst (lambda (x) ((x (string->text "")) (lambda (x0) (lambda (x1) (textual-append (make-text 1 (integer->char x0)) x1))))))
+(define String-elim (lambda (x) (let ((self0 x)) (case (= (text-length self0) 0) (#t (let () (lambda (c0) (lambda (c1) c0)))) (#f (let ((f0 (char->integer (text-ref self0 0)))(f1 (let ((_str_ self0)) (subtext _str_ 1 (text-length _str_))))) (lambda (c0) (lambda (c1) ((c1 f0) f1)))))))))
+(define ($Test.main) (let ((thisfst$0 (textual->text "aaa"))) (let ((thissnd$1 (textual->text "aaa"))) (let ((ok$2 '())) '()))))
 (define Test.main ($Test.main))
 (run_io Test.main)

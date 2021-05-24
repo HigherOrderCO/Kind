@@ -1,0 +1,6 @@
+//changes only for testing
+//Organize
+
+App.TicTacToe.when: App.When<App.TicTacToe.State>
+  (event, state)
+   App.pass!

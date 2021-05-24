@@ -4,4 +4,5 @@ module.exports = {
   'App.Kind': import('./App.Kind.js'),
   'App.MiniMMO': import('./App.MiniMMO.js'),
   'App.Playground': import('./App.Playground.js'),
+  'App.TicTacToe': import('./App.TicTacToe.js'),
 }

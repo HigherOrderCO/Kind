@@ -1,0 +1,10 @@
+type App.TicTacToe.State.global {
+   new(board : Vector<App.TicTacToe.Entity, 9>)
+}
+
+type App.TicTacToe.State.local {
+  new
+}
+
+App.TicTacToe.State: App.State
+  App.State.new(App.TicTacToe.State.local, App.TicTacToe.State.global)

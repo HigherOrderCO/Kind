@@ -1,0 +1,9 @@
+App.TicTacToe: App<App.TicTacToe.State>
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  let init = App.TicTacToe.init 
+  let draw = App.TicTacToe.draw(img)
+  let when = App.TicTacToe.when
+  let tick = App.TicTacToe.tick
+  let post = App.TicTacToe.post
+  App.new!(init, draw, when, tick, post)
+  

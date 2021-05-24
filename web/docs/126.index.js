@@ -1,3 +1,8 @@
+(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[126],{
+
+/***/ 126:
+/***/ ((module) => {
+
 module.exports = (function() {
     function int_pos(i) {
         return i >= 0n ? i : 0n;
@@ -8666,7 +8671,7 @@ module.exports = (function() {
         return $1910;
     };
     const App$new = x0 => x1 => x2 => x3 => x4 => App$new$(x0, x1, x2, x3, x4);
-    const App$Kaelin = (() => {
+    const App$aaaaaaa = (() => {
         var _img$1 = VoxBox$alloc_capacity$(((65536 * 8) >>> 0));
         var _init$2 = App$Kaelin$App$init;
         var _draw$3 = App$Kaelin$App$draw(_img$1);
@@ -9276,6 +9281,11 @@ module.exports = (function() {
         'App.Kaelin.Skill.skill_use': App$Kaelin$Skill$skill_use,
         'App.Kaelin.App.post': App$Kaelin$App$post,
         'App.new': App$new,
-        'App.Kaelin': App$Kaelin,
+        'App.aaaaaaa': App$aaaaaaa,
     };
 })();
+
+/***/ })
+
+}]);
+//# sourceMappingURL=126.index.js.map
