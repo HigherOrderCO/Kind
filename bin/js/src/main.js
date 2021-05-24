@@ -28,11 +28,10 @@ function find_base_dir() {
     process.chdir(path.join(full_path, "base"));
     find_base_dir();
   } else {
-    console.log("Couldn't find Kind's repository. Please, clone it with:");
-    console.log("");
+    console.log("Couldn't find Kind/base directory.\n");
+    console.log("Go to the directory to run Kind commands or clone the repository:");
     console.log("  git clone https://github.com/uwu-tech/Kind");
-    console.log("");
-    console.log("And add your files to the Kind/base directory.");
+    console.log("New files must be added inside Kind/base directory.");
     process.exit();
   }
 };
