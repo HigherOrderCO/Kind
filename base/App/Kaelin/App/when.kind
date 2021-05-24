@@ -22,7 +22,6 @@ case global.stage{
         log(event.id)
         switch String.starts_with(event.id) {
           "C" :
-            log("draft_coord")
             let coord_nat = String.drop(1, event.id)
             let coord     = App.Kaelin.Coord.Convert.nat_to_axial(Nat.read(coord_nat))
             App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_coord(coord)))
@@ -38,7 +37,7 @@ case global.stage{
                 true
               else
                 taken
-            
+                     
             case hero_id {
               none:
                 App.pass!
@@ -48,9 +47,12 @@ case global.stage{
                 else 
                   App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_hero(hero_id.value)))
             }
-                     
-            
-        }default App.pass!
+          }default App.pass!
+      
+        key_down:
+          switch U16.eql(event.code) {
+            'F' : App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_end))
+          }default App.pass!
        
     }default App.pass!
   
@@ -74,7 +76,7 @@ case global.stage{
           // App.Store!(App.Kaelin.State.game(state.user, App.Kaelin.Constants.room, local.cast_info, App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map), global.internal, local.env_info))
           App.pass!
         49#16: App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0#8)))
-    } default App.set_local!(App.Kaelin.Action.start_cast(event.code, state.global, state.local))
+      } default App.set_local!(App.Kaelin.Action.start_cast(event.code, state.global, state.local))
 
     frame:
       let new_local = App.Kaelin.Action.local.env_info(event.time, event.info, state.local)

@@ -1,10 +1,9 @@
-//TODO: check team in draft/arena and remove 1 coord
-//TODO: transition from draft to planning
-//TODO: make it beautiful
+//TODO: get images from respective heroes
 
+//TODO: make it beautiful
 //TODO?: create additional tabs for checking stats or skills of a hero
 
-App.Kaelin.Draw.draft(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): DOM
+App.Kaelin.Draw.draft(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
   heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
   DOM.node("div", {},
     {
@@ -18,7 +17,7 @@ App.Kaelin.Draw.draft(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>,
       App.Kaelin.Draw.draft.main(players, coords, user)
     ])
   
-App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): DOM
+App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
   DOM.node("div", 
           {}, 
           { "width": "100vw"
@@ -37,7 +36,7 @@ App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<Str
           ]
   )
 
-App.Kaelin.Draw.draft.top(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): DOM
+App.Kaelin.Draw.draft.top(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
   DOM.node("div", {},
   {"width": "100%"
    "height": "60%"
@@ -48,7 +47,7 @@ App.Kaelin.Draw.draft.top(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<Stri
      App.Kaelin.Draw.draft.picks(players, user),
    ])
 
-App.Kaelin.Draw.draft.map(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): DOM
+App.Kaelin.Draw.draft.map(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
 DOM.node("div", {},
   { "width": "30%"
     "height": "0"

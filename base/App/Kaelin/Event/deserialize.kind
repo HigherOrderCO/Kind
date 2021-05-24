@@ -45,6 +45,10 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
         get coord = next
         return App.Kaelin.Event.draft_coord(App.Kaelin.Coord.Convert.nat_to_axial(coord)) 
       }
+    8 :
+      App.Kaelin.Event.Buffer {
+        return App.Kaelin.Event.draft_end
+      }
    } default fail!
  }
 

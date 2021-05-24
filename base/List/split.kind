@@ -2,7 +2,7 @@
 // - List.split([1, 2, 3], 2) == ([1, 2], [3])
 // - List.split(xs, n) == (List.take(xs, n), List.drop(xs, n))
 
-List.split(A : Type, xs : List<A>, n : Nat) : Pair<List<A>, List<A>>
+List.split<A: Type>(xs : List<A>, n : Nat) : Pair<List<A>, List<A>>
   case n {
     zero : {[], xs}
     succ : case xs {

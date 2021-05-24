@@ -1,5 +1,8 @@
-App.Kaelin.Draw.draft.positions(players: Map<App.Kaelin.DraftInfo>, coords:NatMap<String>, user: String): List<DOM>
-  map = NatMap.to_list!(coords)
+App.Kaelin.Draw.draft.positions(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): List<DOM>
+  open coords
+  team = App.Kaelin.Coord.draft.to_team(user, players)
+  map  = App.Kaelin.Coord.draft.to_map(team, coords)
+  map  = NatMap.to_list!(map)
   list = []
   for pair in map with list:
     open pair
@@ -8,7 +11,8 @@ App.Kaelin.Draw.draft.positions(players: Map<App.Kaelin.DraftInfo>, coords:NatMa
   list
 
 App.Kaelin.Draw.draft.positions_go(players: Map<App.Kaelin.DraftInfo>, coord: App.Kaelin.Coord, nat: Nat, id: String, user: String): DOM
-  let {x, y} =  App.Kaelin.Coord.draft.to_xy(coord)
+  let team   =  App.Kaelin.Coord.draft.to_team(user, players)
+  let {x, y} =  App.Kaelin.Coord.draft.to_xy(coord, team)
   let bottom =  Nat.show(U32.to_nat(y)) | "%"
   let left   =  Nat.show(U32.to_nat(x)) | "%"
   let size   =  Nat.show(U32.to_nat((App.Kaelin.Constants.draft_hexagon_radius*2) -1)) | "%"
