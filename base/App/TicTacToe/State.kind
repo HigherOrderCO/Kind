@@ -3,7 +3,7 @@ type App.TicTacToe.State.global {
 }
 
 type App.TicTacToe.State.local {
-  new
+  new(info : App.EnvInfo)
 }
 
 App.TicTacToe.State: App.State

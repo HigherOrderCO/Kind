@@ -1,0 +1,14 @@
+
+// Captura a informação em coordenadas cartesianas e transforam em coordenadas de pares do tabuleiro
+// Exemplo,
+// (58, 57) = (0, 0)
+// (50, 202) = (0, 2)
+App.TicTacToe.pair_to_board(pair : Pair<U32, U32>) : Pair<U32, U32>
+  ?a
+
+// Captura a informação em coordenadas de pares do tabuleiro e transforma pra posicao do vetor 1-9
+// Exemplo
+// (0, 0) = (0+1)+(0*3)=1
+App.TicTacToe.pair_to_pos(pair : Pair<U32, U32>) : U32
+  let trans = App.TicTacToe.pair_to_board(pair)
+  ?a

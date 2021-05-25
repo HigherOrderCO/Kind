@@ -1,4 +1,20 @@
+side_board : I32
+  App.TicTacToe.constant.size
+  
+App.TicTacToe.draw_vertical_lines(img : VoxBox) : VoxBox
+    let init = (side_board/3) :: I32
+    let void = (side_board/12) :: I32
+    let img = VoxBox.Draw.line(init, void, init, side_board-void, 0, Col32.new(0, 0, 0, 255), img)
+    VoxBox.Draw.line(side_board-init, void, side_board-init, side_board-void, 0, Col32.new(0, 0, 0, 255), img)
+
+App.TicTacToe.draw_horizontal_lines(img : VoxBox) : VoxBox
+    let init = (side_board/12) :: I32
+    let void = (side_board/3) :: I32
+    let img = VoxBox.Draw.line(init, void, side_board-init, void, 0, Col32.new(0, 0, 0, 255), img)
+    VoxBox.Draw.line(init, side_board - void, side_board-init, side_board - void, 0, Col32.new(0, 0, 0, 255), img)
+    
 App.TicTacToe.draw(img: VoxBox): App.Draw<App.TicTacToe.State>
 (state)
-     let img = VoxBox.Draw.deresagon(0, 0, 0, 10, Col32.new(0,0,0,1), true, true, true, true, true, true, img)
+     let img = App.TicTacToe.draw_vertical_lines(img)
+     let img = App.TicTacToe.draw_horizontal_lines(img)
      DOM.vbox({}, {}, img)

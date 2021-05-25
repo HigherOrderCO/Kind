@@ -1,3 +1,51 @@
+App.Kaelin.App.action (x : List<String>): IO(Unit)
+  case x {
+    nil : IO.end!(Unit.new)
+    cons : IO {
+      IO.print(x.head)
+      App.Kaelin.App.action(x.tail)
+    }
+  }
 
-App.Kaelin.App.test : Unit
-  Unit.new
+App.Kaelin.App.mapM(A : Type -> Type, B : Type,
+  C : Type, m : Monad<A>, b : A(C), f : B -> A(C), x : List<A(B)>): A(C)
+  case x {
+    nil : b
+    cons : 
+      open m
+      let k = App.Kaelin.App.mapM!!!(m, b, f, x.tail)
+      let ac = m.bind!!(x.head, f)
+      m.bind!!(ac, (c) k) // the >> operator
+  }  
+
+App.Kaelin.App.foldM(A : Type -> Type, B : Type,
+  C : Type, m : Monad<A>, b : A(C), f : B -> C -> A(C), x : List<A(B)>): A(C)
+  case x {
+    nil : b
+    cons : 
+      open m
+      let k = App.Kaelin.App.foldM!!!(m, b, f, x.tail)
+      m.bind!!(x.head, (b) m.bind!!(k, (c) f(b, c)))
+  }  
+
+App.Kaelin.App.action2 (ls : List<String>): IO(Unit)
+  let ls = [IO.end!(2), IO.end!(1), IO.end!(3), IO.end!(4), IO.end!(5)]
+  App.Kaelin.App.mapM!!!(IO.monad, IO.end!(Unit.new), (b) IO.print(Nat.show(b)), ls)
+
+App.Kaelin.App.action3 : IO(Nat)
+  let ls = [IO.get_line, IO.get_line, IO.get_line]
+  App.Kaelin.App.foldM!!!(IO.monad, IO.end!(0), 
+      (b, c) IO {
+        IO.end!(Nat.add(Nat.read(b), c))
+      },
+   ls)
+
+App.Kaelin.App.test : IO(Unit)
+  IO {
+    let ls = ["2", "1", "3", "4", "5"]
+    App.Kaelin.App.action(ls)
+    App.Kaelin.App.action2(ls)
+    get total = App.Kaelin.App.action3 
+    IO.print(Nat.show(total))2
+
+  }
