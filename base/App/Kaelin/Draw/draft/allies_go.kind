@@ -1,0 +1,10 @@
+App.Kaelin.Draw.draft.allies_go(map: Map<App.Kaelin.DraftInfo>): List<DOM>
+  lst   = Map.to_list!(map)
+  count = 2 - List.length!(lst)
+  dom   = []
+  for i from 0 to count with dom:
+    App.Kaelin.Draw.draft.ally("none", none) & dom
+  for pair in lst with dom:
+    open pair
+    App.Kaelin.Draw.draft.ally(pair.fst, some(pair.snd)) & dom
+  dom

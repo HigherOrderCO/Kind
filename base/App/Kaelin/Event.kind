@@ -6,4 +6,7 @@ type App.Kaelin.Event {
   create_hero(hero_id: U8)
   user_input(player : String, coord: App.Kaelin.Coord, action: App.Kaelin.Action)
   skill_use(hero_pos: App.Kaelin.Coord, target_pos: App.Kaelin.Coord, key: Char)
+  draft_hero(hero: U8)
+  draft_coord(coord: App.Kaelin.Coord)
+  draft_end
 }

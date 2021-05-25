@@ -1,0 +1,26 @@
+//TODOTEAM
+App.Kaelin.Action.draft_hero(
+  user: String,
+  hero: U8,
+  glob: App.Kaelin.State.global
+): App.State.global(App.Kaelin.State)
+  key = user
+  open glob
+  case glob.stage{
+    draft:
+      let map  = glob.stage.players
+      let player = map{user}
+      case player {
+        none: 
+          let new_player = App.Kaelin.DraftInfo.new(some(hero), "blue")
+          let new_map    = map{user} <- new_player
+          let new_stage  = App.Kaelin.Stage.draft(new_map, glob.stage.coords)
+          glob@stage <- new_stage
+        some: 
+          open player.value
+        let new_player = App.Kaelin.DraftInfo.new(some(hero), "blue")
+        let new_map    = map{user} <- new_player
+        let new_stage  = App.Kaelin.Stage.draft(new_map, glob.stage.coords)
+        glob@stage <- new_stage
+      }
+  }default glob

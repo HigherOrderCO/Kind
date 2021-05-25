@@ -7,13 +7,58 @@ App.Kaelin.App.when: App.When<App.Kaelin.State>
 open state
 open state.global as global
 open state.local as local
-  case event global.stage{
-    mouse_click draft:
-      log(event.id)
-      log(event.action)
-      App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0)))// u8
-
-    init planning: 
+case global.stage{
+  draft:
+    
+    case event {
+      init: 
+        user = String.to_lower(event.user)
+        new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info, local.internal)
+        IO {
+          App.watch!(App.Kaelin.Constants.room)
+          App.set_local!(new_local)
+        }
+      mouse_click:
+        log(event.id)
+        switch String.starts_with(event.id) {
+          "C" :
+            let coord_nat = String.drop(1, event.id)
+            let coord     = App.Kaelin.Coord.Convert.nat_to_axial(Nat.read(coord_nat))
+            App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_coord(coord)))
+          "H" :
+            let heroes_list = List.map!!(Pair.snd!!, Map.to_list!(global.stage.players))
+            let heroes_map  = App.Kaelin.Hero.info.map
+            let hero_name   = String.drop(1, event.id)
+            let hero_id     = heroes_map{hero_name}
+            let taken       = false
+            for player in heroes_list with taken:
+              open player
+              if U8.eql(player.hero<> 0, hero_id <> 0) then
+                true
+              else
+                taken
+                     
+            case hero_id {
+              none:
+                App.pass!
+              some:
+                if taken then
+                  App.pass!
+                else 
+                  App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_hero(hero_id.value)))
+            }
+          }default App.pass!
+      
+        key_down:
+          switch U16.eql(event.code) {
+            'F' : App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_end))
+          }default App.pass!
+       
+    }default App.pass!
+  
+  planning:
+    case event {
+      init: 
       user = String.to_lower(event.user)
       new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info, local.internal)
       IO {
@@ -21,16 +66,24 @@ open state.local as local
         App.set_local!(new_local)
       }
 
-    key_down planning: switch U16.eql(event.code) {
+    key_down:
+      switch U16.eql(event.code) {
+        'F' : //press F
+          open local.internal as internal
+          animation = App.Kaelin.Map.Entity.animation(App.Kaelin.Animation.new(0, App.Kaelin.Sprite.fire))
+          // This gives me a bug on runtime we should investigate what is the cause
+          // let state = state@map <- App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map)
+          // App.Store!(App.Kaelin.State.game(state.user, App.Kaelin.Constants.room, local.cast_info, App.Kaelin.Map.push(App.Kaelin.Coord.new(0, 0), animation, global.map), global.internal, local.env_info))
+          App.pass!
         49#16: App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0#8)))
-    } default App.set_local!(App.Kaelin.Action.start_cast(event.code, state.global, state.local))
+      } default App.set_local!(App.Kaelin.Action.start_cast(event.code, state.global, state.local))
 
-    frame planning:
+    frame:
       let new_local = App.Kaelin.Action.local.env_info(event.time, event.info, state.local)
       let new_local = App.Kaelin.Action.local.area(event.time, state.global, new_local)
       App.set_local!(new_local)
     
-    mouse_up planning:
+    mouse_up:
       case local.cast_info{ //Organize
         some:
           open local.cast_info.value as cast
@@ -45,4 +98,5 @@ open state.local as local
           }
       }default App.pass!
       
+  } default App.pass!
   } default App.pass!

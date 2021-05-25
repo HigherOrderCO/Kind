@@ -1,0 +1,20 @@
+App.Kaelin.Heroes.Cyclope.skills: List<App.Kaelin.Skill>
+  [
+    App.Kaelin.Skill.move(2)
+  ]
+
+
+// App.Kaelin.Heroes.Croni.skills.vampirism: App.Kaelin.Skill
+//   App.Kaelin.Skill.new(
+//     "Vampirism",
+//     +3#32,
+//     App.Kaelin.Skill.vampirism(3),
+//     'Q'
+//   )
+// App.Kaelin.Heroes.Croni.skills.fireball: App.Kaelin.Skill
+//   App.Kaelin.Skill.new(
+//     "Fireball",
+//     +2#32,
+//     App.Kaelin.Skill.fireball(3, 1),
+//     'W'
+//   )

@@ -1,18 +1,24 @@
-App.Kaelin.Coord.to_screen_xy(
+App.Kaelin.Coord.draft.to_xy(
   coord: App.Kaelin.Coord,
+  team: String
 ): Pair<U32,U32>
+
+  let centralizer = switch String.eql(team) {
+    "blue": (U32.to_i32(App.Kaelin.Constants.map_size - 1))
+    "red":  I32.neg(U32.to_i32(App.Kaelin.Constants.map_size -1 ))
+  }default +0#32
 
 
   open coord
-  i   = coord.i
+  i   = coord.i + centralizer
   j   = coord.j
   
   i = I32.to_f64(i)
   j = I32.to_f64(j)
-  int_rad = U32.to_f64(App.Kaelin.Constants.hexagon_radius)
+  int_rad = U32.to_f64(App.Kaelin.Constants.draft_hexagon_radius)
   hlf = F64.div(int_rad, 2.0#64)
-  int_screen_center_x = U32.to_f64(App.Kaelin.Constants.center_x)
-  int_screen_center_y = U32.to_f64(App.Kaelin.Constants.center_y)
+  int_screen_center_x = U32.to_f64(App.Kaelin.Constants.draft_center_x)
+  int_screen_center_y = U32.to_f64(App.Kaelin.Constants.draft_center_y)
   
   cx = int_screen_center_x + j * int_rad  // screen_center + j * rad
   cx = cx + i * int_rad * 2 // screen_center + j * rad + i * 2rad
