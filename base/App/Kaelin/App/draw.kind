@@ -9,5 +9,5 @@ App.Kaelin.App.draw(
     init: App.Kaelin.Draw.init
     draft: 
       App.Kaelin.Draw.draft(stage.players, stage.coords, state.local@user)
-      planning: DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))
+    planning: DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))
   } default DOM.text("Em breve")

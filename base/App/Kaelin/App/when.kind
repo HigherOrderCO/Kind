@@ -8,6 +8,7 @@ open state
 open state.global as global
 open state.local as local
 case global.stage{
+
   draft:
     
     case event {
@@ -22,6 +23,7 @@ case global.stage{
         log(event.id)
         switch String.starts_with(event.id) {
           "C" :
+            log(event.id)
             let coord_nat = String.drop(1, event.id)
             let coord     = App.Kaelin.Coord.Convert.nat_to_axial(Nat.read(coord_nat))
             App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_coord(coord)))
@@ -47,13 +49,10 @@ case global.stage{
                 else 
                   App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_hero(hero_id.value)))
             }
+          "R" : 
+            App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_end))
           }default App.pass!
       
-        key_down:
-          switch U16.eql(event.code) {
-            'F' : App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_end))
-          }default App.pass!
-       
     }default App.pass!
   
   planning:
