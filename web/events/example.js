@@ -14,13 +14,14 @@ api.on_init(() => {
   api.watch_room(room);
 
   function print_time() {
+    console.clear();
     console.log("local_time  : ", Date.now());
     console.log("server_time : ", api.get_time());
     console.log("delta_time  : ", Date.now() - api.get_time());
     console.log("");
   }
   print_time()
-  setInterval(print_time, 1000);
+  setInterval(print_time, 10);
 
   // Posts a 256-bit message to it
   api.send_post(room, post);
