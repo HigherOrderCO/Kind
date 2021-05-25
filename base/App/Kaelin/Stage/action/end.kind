@@ -1,0 +1,6 @@
+App.Kaelin.Stage.action.end(glob: App.Kaelin.State.global): App.Kaelin.State.global
+  open glob
+  case glob.stage {
+    action:
+      glob@stage <- App.Kaelin.Stage.planning(0, 0, glob.stage.round + 1, [])
+  } default glob

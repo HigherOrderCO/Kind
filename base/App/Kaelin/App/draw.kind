@@ -8,5 +8,6 @@ App.Kaelin.App.draw(
   case stage {
     init: App.Kaelin.Draw.init
     draft: App.Kaelin.Draw.draft
-    planning: DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))
+    planning: App.Kaelin.Draw.planning(img, state)
+    action: App.Kaelin.Draw.action(img, state)
   } default DOM.text("Em breve")

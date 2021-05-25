@@ -1,28 +1,18 @@
-Test.main: IO(Unit)
-  IO {
-    thisfst = "aaa"
-    thissnd = "aaa"
-    ok = String.eql(thisfst, thissnd)
-    case ok {
-      true: IO.print("equal!")
-      false: IO.print("not equal!")
-    }
+foo(a: Nat): Maybe<Nat>
+  case Nat.ltn(a, 10) {
+    true: some(a)
+    false: none
   }
 
-Test: _
-  IO {
-    let name = "Test.main"
-    get defs = Kind.Synth.one(name, Kind.Map.new!)
-    case defs {
-      none: 
-        IO.print("failed")
-      some: IO {
-        let compiled = Kind.Comp.Defs.compile(defs.value)
-        let schemed = Kind.Comp.Target.Scheme(name, compiled)
-        get u = IO.set_file("./main.scm", schemed)
-        let schemed = Kind.Comp.Target.SchemeText(name, compiled)
-        get u = IO.set_file("./main_text.scm", schemed)
-        return u
-      }
-    }
+f(a: Nat): Maybe<Nat>
+  foo(a * 2)
+
+g(a: Nat): Maybe<Nat>
+  foo(a - 1)
+
+Test: Maybe<Nat>
+  Maybe {
+    get a = f(2)
+    get b = g(3)
+    return (a + b)
   }

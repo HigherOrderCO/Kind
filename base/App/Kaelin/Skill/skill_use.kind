@@ -1,14 +1,16 @@
 App.Kaelin.Skill.skill_use(
-  hero_pos: App.Kaelin.Coord
+  player: String
   mouse_pos: App.Kaelin.Coord
   key: U16
   state: App.Kaelin.State.global, 
 ): App.Kaelin.State.global
 
   open state
-
+  log(U16.show(key))
   let result = Maybe { 
-    get creature = App.Kaelin.Map.creature.get(hero_pos, state.map)
+    get info = App.Kaelin.Map.player.info(player, state.map)
+    let creature = info@snd
+    let hero_pos = info@fst
     let hero = creature@hero
     get skill = List.find!((x) U16.eql(x@key, key), hero@skills)
     let effect = skill@effect(hero_pos, mouse_pos, state.map)
@@ -16,9 +18,13 @@ App.Kaelin.Skill.skill_use(
     let skill_range = App.Kaelin.Coord.range_natset(hero_pos, skill@range)
     let global =
     if NatSet.has(mouse_nat, skill_range) then
-      App.Kaelin.State.global.new(state.room, effect@map, state.stage)
+      App.Kaelin.State.global.new(state.tick, state.room, effect@map, state.stage)
     else
       state
      return global
     }
-    result <> state
+    
+    case result {
+      none: state
+      some: App.Kaelin.Stage.action.remove_skill(result.value)
+    }

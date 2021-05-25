@@ -1,0 +1,11 @@
+App.Kaelin.Draw.planning.skill_list(map: App.Kaelin.Map, cast: App.Kaelin.State.cast_info): DOM
+  let result = Maybe {
+    get info = App.Kaelin.Map.player.info(cast@player, map)
+    let creature = info@snd
+    get skill = App.Kaelin.Hero.skill.from_key(cast@key, creature@hero)
+    let coord = App.Kaelin.Coord.show(cast@target_pos)
+    return DOM.node("p", {}, {}, [DOM.text(coord | " " | skill@name)])
+  }
+
+  result <> DOM.text("ih rapaz")
+  

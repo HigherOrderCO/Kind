@@ -26,5 +26,4 @@ App.Kaelin.Action.start_cast(
     )
     return (local@cast_info <- some(cast))
   }
-
   result <> local

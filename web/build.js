@@ -22,7 +22,7 @@ for (var file of files) {
   var name = "App."+file.slice(0,-5);
   console.log("- " + name);
   
-  var code = String(exec("kind "+name+" --js --module | js-beautify"));
+  var code = String(exec("kind "+name+" --js --module | uglifyjs -b"));
   
   // console.log(code);
   process.chdir(code_dir);

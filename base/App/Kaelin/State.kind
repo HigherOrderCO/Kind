@@ -1,5 +1,6 @@
 type App.Kaelin.State.global {
   new(
+    tick: U64
     room: String
     map: App.Kaelin.Map,
     stage: App.Kaelin.Stage
@@ -10,8 +11,16 @@ type App.Kaelin.Stage {
   init
   void
   draft
-  planning
-  action
+  planning(local_tick: U64, seconds: U64, round: I32, skills_list: List<App.Kaelin.State.cast_info>)
+  action(round: I32, skills_list: List<App.Kaelin.State.cast_info>)
+}
+
+type App.Kaelin.State.cast_info {
+  new(
+    player: String,
+    target_pos: App.Kaelin.Coord,
+    key: U16
+  )
 }
 
 type App.Kaelin.State.local {

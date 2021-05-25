@@ -9,33 +9,44 @@ generate_hex(xs : List<U8>, ys : List<Bits>) : String
 App.Kaelin.Event.serialize(
   event: App.Kaelin.Event
 ): String
-
   case event {
-    create_hero :  
+    create_hero:  
       let cod = [
         Nat.to_bits(1),
         U8.to_bits(event.hero_id)
-       ]
-    generate_hex(App.Kaelin.Event.Code.create_hero, cod)
+      ]
+      generate_hex(App.Kaelin.Event.Code.create_hero, cod)
     create_user : ""
     start_game : ""
     user_input : 
-     let cod = [
-       Nat.to_bits(4),
-       Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
-       App.Kaelin.Resources.Action.to_bits(event.action),
-       App.Kaelin.Coord.Convert.axial_to_bits(event.coord)
-       ]
-
-     generate_hex(App.Kaelin.Event.Code.user_input, cod)
-  skill_use:
-    let cod = [  
-      Nat.to_bits(5),
-      App.Kaelin.Coord.Convert.axial_to_bits(event.hero_pos),
-      App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
-      U16.to_bits(event.key)
-    ]
-    generate_hex(App.Kaelin.Event.Code.skill_use, cod)
+      let cod = [
+        Nat.to_bits(4),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Resources.Action.to_bits(event.action),
+        App.Kaelin.Coord.Convert.axial_to_bits(event.coord)
+      ]
+      generate_hex(App.Kaelin.Event.Code.user_input, cod)
+    skill_use:
+      let cod = [  
+        Nat.to_bits(5),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
+        U16.to_bits(event.key)
+      ]
+      generate_hex(App.Kaelin.Event.Code.skill_use, cod)
+    save_skill:
+      let cod = [  
+        Nat.to_bits(6),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
+        U16.to_bits(event.key)
+      ]
+      generate_hex(App.Kaelin.Event.Code.save_skill, cod)
+    end_action:
+      let cod = [
+        Nat.to_bits(7)
+      ]
+      generate_hex(App.Kaelin.Event.Code.save_skill, cod)
   }
 
   //case event {

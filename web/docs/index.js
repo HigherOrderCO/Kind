@@ -3111,7 +3111,7 @@ module.exports = class AppPlay extends Component {
             //++count_posts;
           }
         }
-        state = this.app.tick(t)(state);
+        state = this.app.tick(BigInt(t))(state);
         this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
         this.app_state.global = state;
       };
@@ -3223,9 +3223,11 @@ module.exports = class AppPlay extends Component {
       }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":
-        var id       = elem.props ? elem.props.id || "" : "";
-        var width    = Number(elem.props.width) || 256;
-        var height   = Number(elem.props.height) || 256;
+        let canvas_props = utils.map_to_object(elem.props);
+        let canvas_style = utils.map_to_object(elem.style);
+        var id       = canvas_props ? canvas_props.id || "" : "";
+        var width    = Number(canvas_props.width) || 256;
+        var height   = Number(canvas_props.height) || 256;
         var canvas   = this.get_canvas(id, width, height);
         var length   = elem.value.length;
         var capacity = elem.value.capacity;
@@ -3245,6 +3247,8 @@ module.exports = class AppPlay extends Component {
             canvas.clear.data[canvas.clear.length++] = idx;
           }
         }
+        // Add custom style to canvas
+        canvas.style = canvas_style;
         // Renders buffers to canvas
         canvas.image_data.data.set(canvas.image_u8);
         canvas.context.putImageData(canvas.image_data, 0, 0);
