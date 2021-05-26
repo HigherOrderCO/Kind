@@ -5,14 +5,14 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
     stage = glob@stage
     case stage {
       init: glob@stage <- App.Kaelin.Stage.draft
-      draft: glob@stage <- App.Kaelin.Stage.planning(0, 0, 1, [])
+      draft: glob@stage <- App.Kaelin.Stage.planning(0, 0, [])
       planning: 
         stage_seconds = (20#64 - (stage.local_tick / 16)) - 1
-        ticks_round = 20#64 * 16
-        if U64.gte(stage.local_tick, ticks_round) then 
-          glob@stage <- App.Kaelin.Stage.action(stage.round, List.reverse!(stage.skills_list))
+        ticks_per_round = 20#64 * 16
+        if U64.gte(stage.local_tick, ticks_per_round) then 
+          glob@stage <- App.Kaelin.Stage.action(List.reverse!(stage.skills_list))
         else 
-          glob@stage <- App.Kaelin.Stage.planning(stage.local_tick + 1, stage_seconds, stage.round, stage.skills_list)
+          glob@stage <- App.Kaelin.Stage.planning(stage.local_tick + 1, stage_seconds, stage.skills_list)
       action:
         let glob = execute_skills!(stage.skills_list, glob)
         App.Kaelin.Stage.action.end(glob)

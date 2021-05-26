@@ -57,17 +57,4 @@ open state.local as local
       // }
       
   } default App.pass!
-
-
-execute_skills<S: App.State>(skills : List<App.Kaelin.State.cast_info>, room: String): IO<Maybe<App.State.local(S)>>
-  case skills {
-    nil:  
-      hex = App.Kaelin.Event.serialize(App.Kaelin.Event.end_action)
-      App.new_post!(room, hex)
-    cons:
-      IO {
-        let hex = App.Kaelin.Event.serialize(App.Kaelin.Event.skill_use(skills.head@player, skills.head@target_pos, skills.head@key))
-        App.new_post!(room, hex)
-        execute_skills!(skills.tail, room)
-      }
-  }
+  

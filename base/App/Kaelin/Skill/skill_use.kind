@@ -18,13 +18,10 @@ App.Kaelin.Skill.skill_use(
     let skill_range = App.Kaelin.Coord.range_natset(hero_pos, skill@range)
     let global =
     if NatSet.has(mouse_nat, skill_range) then
-      App.Kaelin.State.global.new(state.tick, state.room, effect@map, state.stage)
+      state@map <- effect@map
     else
       state
      return global
-    }
+    } 
     
-    case result {
-      none: state
-      some: App.Kaelin.Stage.action.remove_skill(result.value)
-    }
+    result <> state

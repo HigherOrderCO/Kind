@@ -10,7 +10,7 @@ App.Kaelin.App.init: App.Init<App.Kaelin.State>
 
     App.Store.new!(
       App.Kaelin.State.local.new(user, cast_info, interface, internal),
-      App.Kaelin.State.global.new(0, room, map, App.Kaelin.Stage.init)
+      App.Kaelin.State.global.new(0, 1, room, map, App.Kaelin.Stage.init)
     )
 // init // nick do player?
 // lobby [1,2,3,4] qtd //acho q da pra ver no tick

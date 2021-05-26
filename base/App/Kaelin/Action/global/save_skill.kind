@@ -7,6 +7,6 @@ App.Kaelin.Action.global.save_skill(
   stage = global@stage
   let new_stage = case stage {
     planning:
-      App.Kaelin.Stage.planning(stage.local_tick, stage.seconds, stage.round, List.cons!({user, target_pos, key}, stage.skills_list))
+      App.Kaelin.Stage.planning(stage.local_tick, stage.seconds, List.cons!({user, target_pos, key}, stage.skills_list))
   } default stage
   global@stage <- new_stage

@@ -6,6 +6,6 @@ App.Kaelin.Stage.action.remove_skill(global: App.Kaelin.State.global): App.Kaeli
         nil: global
         cons: 
           skills_list = global.stage.skills_list.tail
-          global@stage <- App.Kaelin.Stage.action(global.stage.round, skills_list)
+          global@stage <- App.Kaelin.Stage.action(skills_list)
       }
   } default global

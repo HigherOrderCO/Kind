@@ -14,7 +14,7 @@ App.Kaelin.Draw.planning(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
                 "position": "relative"
               },
               [
-                DOM.node("div", {}, {"margin-bottom": "10px"}, App.Kaelin.Draw.planning.round(stage.seconds, stage.round)),
+                DOM.node("div", {}, {"margin-bottom": "10px"}, App.Kaelin.Draw.planning.round(stage.seconds, global.round)),
                 DOM.node("div", {}, {}, [
                   DOM.vbox({"width": "512"}, {"border": "none"}, App.Kaelin.Draw.state(img, state))
                 ]),
