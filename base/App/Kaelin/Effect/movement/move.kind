@@ -1,12 +1,10 @@
-App.Kaelin.Effect.movement.move(
-  cost: I32
-): App.Kaelin.Effect<Unit>
-
+App.Kaelin.Effect.movement.move: App.Kaelin.Effect<Unit>
   App.Kaelin.Effect { 
     get map = App.Kaelin.Effect.map.get
     get center = App.Kaelin.Effect.coord.get_center
     get target = App.Kaelin.Effect.coord.get_target
-    get cost = App.Kaelin.Effect.ap.cost(cost, center)
+    let distance = I32.abs(App.Kaelin.Coord.distance(center, target))
+    get cost = App.Kaelin.Effect.ap.cost(distance, center)
     let creature = App.Kaelin.Map.creature.get(center, map)
     case creature{
       none:

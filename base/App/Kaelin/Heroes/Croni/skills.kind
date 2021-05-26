@@ -3,6 +3,7 @@ App.Kaelin.Heroes.Croni.skills: List<App.Kaelin.Skill>
     App.Kaelin.Heroes.Croni.skills.vampirism,
     App.Kaelin.Heroes.Croni.skills.fireball,
     App.Kaelin.Heroes.Croni.skills.ap_drain,
+    App.Kaelin.Heroes.Croni.skills.ap_recover,
     App.Kaelin.Skill.move(2,2)
   ]
 
@@ -28,4 +29,10 @@ App.Kaelin.Heroes.Croni.skills.ap_drain: App.Kaelin.Skill
     App.Kaelin.Skill.ap_drain(0, 2)
     'E'
   )
-
+App.Kaelin.Heroes.Croni.skills.ap_recover: App.Kaelin.Skill
+  App.Kaelin.Skill.new(
+    "Action Points Reovery"
+    0,
+    App.Kaelin.Skill.ap_recover(0,10)
+    'R'
+  )
