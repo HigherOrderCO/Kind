@@ -59,14 +59,18 @@ case global.stage{
             App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_coord(coord)))
           "H" :
             let heroes_list = List.map!!(Pair.snd!!, Map.to_list!(global.stage.players))
+            let team        = App.Kaelin.Coord.draft.to_team(local.user, global.stage.players)
             let heroes_map  = App.Kaelin.Hero.info.map
             let hero_name   = String.drop(1, event.id)
             let hero_id     = heroes_map{hero_name}
             let taken       = false
             for player in heroes_list with taken:
               open player
-              if U8.eql(player.hero<> 99, hero_id <> 0) then
-                true
+              if String.eql(team, player.team) then
+                if U8.eql(player.hero<> 99, hero_id <> 0) then
+                  true
+                else
+                  taken
               else
                 taken
             case hero_id {
