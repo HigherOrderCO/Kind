@@ -1,4 +1,4 @@
-App.Kaelin.Draw.planning.skill_list(map: App.Kaelin.Map, cast: App.Kaelin.State.cast_info): DOM
+App.Kaelin.Draw.planning.skill_list(map: App.Kaelin.Map, cast: App.Kaelin.CastInfo.global): DOM
   let result = Maybe {
     get info = App.Kaelin.Map.player.info(cast@player, map)
     let creature = info@snd

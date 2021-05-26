@@ -5,30 +5,14 @@ type App.Kaelin.State.global {
     room: String
     map: App.Kaelin.Map
     stage: App.Kaelin.Stage
-    skills_list: List<App.Kaelin.State.cast_info>
-  )
-}
-
-type App.Kaelin.Stage {
-  init
-  void
-  draft
-  planning(local_tick: U64, seconds: U64)
-  action
-}
-
-type App.Kaelin.State.cast_info {
-  new(
-    player: String,
-    target_pos: App.Kaelin.Coord,
-    key: U16
+    skills_list: List<App.Kaelin.CastInfo.global>
   )
 }
 
 type App.Kaelin.State.local {
   new(
     user: String
-    cast_info: Maybe<App.Kaelin.CastInfo>
+    cast_info: Maybe<App.Kaelin.CastInfo.local>
     env_info : App.EnvInfo,
     internal : App.Kaelin.Internal
   )

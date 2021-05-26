@@ -16,16 +16,6 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
         else 
           glob@stage <- App.Kaelin.Stage.planning(stage.local_tick + 1, stage_seconds)
       action:
-        let glob = execute_skills!(glob@skills_list, glob)
+        let glob = App.Kaelin.Action.global.exe_skills_list!(glob@skills_list, glob)
         App.Kaelin.Stage.action.end(glob)
     } default glob
-
-
-execute_skills<S: App.State>(skills : List<App.Kaelin.State.cast_info>, glob: App.Kaelin.State.global): App.Kaelin.State.global
-  case skills {
-    nil:  
-      glob
-    cons:
-      let new_glob = App.Kaelin.Skill.skill_use(skills.head@player, skills.head@target_pos, skills.head@key, glob)
-      execute_skills!(skills.tail, new_glob)
-  }

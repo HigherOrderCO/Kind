@@ -16,7 +16,7 @@ App.Kaelin.Action.local.area(
         local
       else
         area = App.Kaelin.Effect.indicators.get_indicators(cast.hero_pos, cast.skill, mouse_coord, global@map)
-        new_cast_info = some(App.Kaelin.CastInfo.new(cast.hero_pos, cast.skill, cast.range, area, mouse_coord))
+        new_cast_info = some(App.Kaelin.CastInfo.local.new(cast.hero_pos, cast.skill, cast.range, area, mouse_coord))
         new_local = App.Kaelin.State.local.new(local.user, new_cast_info, local.env_info, local.internal)
         new_local
   }

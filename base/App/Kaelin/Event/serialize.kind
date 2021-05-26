@@ -26,14 +26,14 @@ App.Kaelin.Event.serialize(
         App.Kaelin.Coord.Convert.axial_to_bits(event.coord)
       ]
       generate_hex(App.Kaelin.Event.Code.user_input, cod)
-    skill_use:
+    exe_skill:
       let cod = [  
         Nat.to_bits(5),
         Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
         App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
         U16.to_bits(event.key)
       ]
-      generate_hex(App.Kaelin.Event.Code.skill_use, cod)
+      generate_hex(App.Kaelin.Event.Code.exe_skill, cod)
     save_skill:
       let cod = [  
         Nat.to_bits(6),

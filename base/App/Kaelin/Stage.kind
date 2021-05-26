@@ -1,0 +1,7 @@
+type App.Kaelin.Stage {
+  init
+  void
+  draft
+  planning(local_tick: U64, seconds: U64)
+  action
+}

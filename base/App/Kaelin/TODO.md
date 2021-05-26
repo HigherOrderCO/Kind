@@ -26,7 +26,7 @@ TODO list on Kaelin
 
 - [X] App.Kaelin - update how movement works 
 
-- [X] App.Kaelin.Draw.background - change hexagon color based on App.Kaelin.CastInfo
+- [X] App.Kaelin.Draw.background - change hexagon color based on App.Kaelin.CastInfo.local
 
 - [X] Serialize.kind and Deserialize.kind
 

@@ -1,6 +1,6 @@
 App.Kaelin.Draw.tile.background(
   terrain: App.Kaelin.Terrain, 
-  cast_info: Maybe<App.Kaelin.CastInfo>, 
+  cast_info: Maybe<App.Kaelin.CastInfo.local>, 
   coord: App.Kaelin.Coord,
   mouse_coord: App.Kaelin.Coord, 
   img: VoxBox

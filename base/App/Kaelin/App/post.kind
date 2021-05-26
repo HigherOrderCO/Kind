@@ -3,17 +3,13 @@ App.Kaelin.App.post: App.Post<App.Kaelin.State>
     case App.Kaelin.Event.deserialize(String.drop(2, data)) as data { // drop the 0x thing
       none: glob
       some:
-      case data.value as eventdata {
-        start_game: glob
-        create_user: glob
-        create_hero: App.Kaelin.Action.create_player(addr, eventdata.hero_id, glob)
-        user_input: glob
-        skill_use: App.Kaelin.Skill.skill_use(eventdata.player, eventdata.target_pos, eventdata.key, glob)
-        save_skill: App.Kaelin.Action.global.save_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
-          // TODO move this function to an apropriate dir
-          // TODO this function should receive an state.global and update it
-          // TODO cast info is no more in global state, the skill must be serialized in data
-          // App.Kaelin.Skill.skill_use(glob)
-        end_action: App.Kaelin.Stage.action.end(glob)
-      }
+        case data.value as eventdata {
+          start_game  : glob
+          create_user : glob
+          create_hero : App.Kaelin.Action.create_player(addr, eventdata.hero_id, glob)
+          user_input  : glob
+          exe_skill   : App.Kaelin.Action.global.exe_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
+          save_skill  : App.Kaelin.Action.global.save_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
+          end_action  : App.Kaelin.Stage.action.end(glob)
+        }
     }

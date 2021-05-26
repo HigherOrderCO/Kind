@@ -1,4 +1,4 @@
-App.Kaelin.Event.Code.skill_use : List<U8>
+App.Kaelin.Event.Code.exe_skill : List<U8>
   [
     40#8
     8#8

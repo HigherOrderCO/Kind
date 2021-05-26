@@ -25,11 +25,11 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
         }
       5: 
         App.Kaelin.Event.Buffer {
-          push(App.Kaelin.Event.Code.skill_use)
+          push(App.Kaelin.Event.Code.exe_skill)
           get player = text
           get mouse_pos = next
           get key = next
-          return App.Kaelin.Event.skill_use("0x" | player,
+          return App.Kaelin.Event.exe_skill("0x" | player,
             App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
             Nat.to_u16(key))
         }

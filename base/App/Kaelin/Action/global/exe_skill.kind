@@ -1,4 +1,4 @@
-App.Kaelin.Skill.skill_use(
+App.Kaelin.Action.global.exe_skill(
   player: String
   mouse_pos: App.Kaelin.Coord
   key: U16
@@ -6,7 +6,7 @@ App.Kaelin.Skill.skill_use(
 ): App.Kaelin.State.global
 
   open state
-  log(U16.show(key))
+  
   let result = Maybe { 
     get info = App.Kaelin.Map.player.info(player, state.map)
     let creature = info@snd
