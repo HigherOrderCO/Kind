@@ -1,0 +1,14 @@
+App.Kaelin.Effect.ap.change(
+  change: I32
+): App.Kaelin.Effect<I32>
+
+  App.Kaelin.Effect {
+    get map = App.Kaelin.Effect.map.get
+    get target = App.Kaelin.Effect.coord.get_target
+    let res = App.Kaelin.Map.creature.change_ap(change, target, map)    
+    let apc = res@fst
+    let map = res@snd
+    let key = App.Kaelin.Coord.Convert.axial_to_nat(target)
+    App.Kaelin.Effect.map.set(map)
+    return apc
+  }

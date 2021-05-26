@@ -13,9 +13,13 @@ App.Kaelin.Draw.tile.creature(
       // draw creature
       img = App.Kaelin.Draw.hero(cx, cy, 0u, creature.value@hero, img)
 
-      // draw creature hp
-      if I32.gtn(creature.value@hp, +0#32) then
-        App.Kaelin.Draw.creature.hp(cx, cy, creature.value, img)
+      // draw creature hp and ap
+      if I32.gtn(creature.value@hp, 0) then
+        IO {
+          hp = App.Kaelin.Draw.creature.hp(cx - 5, cy - 31, creature.value, img)
+          ap = App.Kaelin.Draw.creature.ap(cx - 5, cy - 25, creature.value, img)
+          ap
+        }
       else
         img
   }

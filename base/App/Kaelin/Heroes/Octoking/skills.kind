@@ -1,6 +1,6 @@
 App.Kaelin.Heroes.Octoking.skills: List<App.Kaelin.Skill>
   [
-    App.Kaelin.Skill.move(2)
+    App.Kaelin.Skill.move(0, 1)
   ]
 
 

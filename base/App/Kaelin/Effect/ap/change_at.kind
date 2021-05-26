@@ -1,4 +1,4 @@
-App.Kaelin.Effect.hp.change_at(
+App.Kaelin.Effect.ap.change_at(
   change: I32
   pos: App.Kaelin.Coord
 ): App.Kaelin.Effect<I32>
@@ -7,22 +7,14 @@ App.Kaelin.Effect.hp.change_at(
     get map = App.Kaelin.Effect.map.get
     get center_pos = App.Kaelin.Effect.coord.get_center
     let key = App.Kaelin.Coord.Convert.axial_to_nat(pos)
-    let res = App.Kaelin.Map.creature.change_hp_at(change, pos, map)
-    let dhp = res@fst
+    let res = App.Kaelin.Map.creature.change_ap_at(change, pos, map)    
+    let apc = res@fst
     let map = res@snd
     let indicators = NatMap.new!
-    let occupied = App.Kaelin.Map.is_occupied(pos, map)
-    if occupied then 
-      App.Kaelin.Effect {
     App.Kaelin.Effect.map.set(map)
-    if I32.gtn(dhp, +0#32) then
+    if I32.gtn(apc, 0) then
       App.Kaelin.Effect.indicators.add(NatMap.set!(key, App.Kaelin.Indicator.green, indicators))
-    else if I32.ltn(dhp, +0#32) then
-      App.Kaelin.Effect.indicators.add(NatMap.set!(key, App.Kaelin.Indicator.red, indicators))
     else
       App.Kaelin.Effect { return unit }
-    return dhp
-     }
-     else
-      App.Kaelin.Effect { return +0#32 }
+    return apc
   }

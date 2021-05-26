@@ -1,8 +1,17 @@
 App.Kaelin.Heroes.Lela.skills: List<App.Kaelin.Skill>
   [
-    App.Kaelin.Skill.move(2)
+    App.Kaelin.Heroes.Lela.skills.vampirism,
+    App.Kaelin.Skill.move(2, 2)
   ]
 
+
+App.Kaelin.Heroes.Lela.skills.vampirism: App.Kaelin.Skill
+  App.Kaelin.Skill.new(
+    "Vampirism",
+    4
+    App.Kaelin.Skill.vampirism(2, 4),
+    'Q'
+  )
 
 // App.Kaelin.Heroes.Croni.skills.vampirism: App.Kaelin.Skill
 //   App.Kaelin.Skill.new(
