@@ -4,12 +4,13 @@ App.Kaelin.App.post: App.Post<App.Kaelin.State>
       none: glob
       some:
         case data.value as eventdata {
-          start_game  : glob
-          create_user : glob
-          create_hero : App.Kaelin.Action.create_player(addr, eventdata.hero_id, glob)
-          user_input  : glob
-          exe_skill   : App.Kaelin.Action.global.exe_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
-          save_skill  : App.Kaelin.Action.global.save_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
-          end_action  : App.Kaelin.Stage.action.end(glob)
+          start_game   : glob
+          create_user  : glob
+          create_hero  : App.Kaelin.Action.create_player(addr, eventdata.hero_id, glob)
+          user_input   : glob
+          exe_skill    : App.Kaelin.Action.global.exe_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
+          save_skill   : App.Kaelin.Action.global.save_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
+          remove_skill : App.Kaelin.Action.global.remove_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
+          end_action   : App.Kaelin.Stage.action.end(glob)
         }
     }

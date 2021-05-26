@@ -47,6 +47,16 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
         App.Kaelin.Event.Buffer {
           return App.Kaelin.Event.end_action
         }
+      8:
+        App.Kaelin.Event.Buffer {
+          push(App.Kaelin.Event.Code.remove_skill)
+          get player = text
+          get mouse_pos = next
+          get key = next
+          return App.Kaelin.Event.remove_skill("0x" | player,
+            App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
+            Nat.to_u16(key))
+        }
     } default fail!
   }
 

@@ -23,6 +23,9 @@ open state.local as local
     key_down planning: switch U16.eql(event.code) {
         49#16: App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0#8)))
     } default App.set_local!(App.Kaelin.Action.local.set_cast(event.code, state.local, state.global))
+    
+    mouse_click planning:
+      App.new_post!(global.room, event.id)
 
     frame planning:
       let new_local = App.Kaelin.Action.local.env_info(event.time, event.info, state.local)

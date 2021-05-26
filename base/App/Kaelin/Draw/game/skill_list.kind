@@ -1,11 +1,40 @@
-App.Kaelin.Draw.game.skill_list(map: App.Kaelin.Map, cast: App.Kaelin.CastInfo.global): DOM
+App.Kaelin.Draw.game.skill_list(
+  map: App.Kaelin.Map, 
+  show_remove_button: Bool, 
+  cast: App.Kaelin.CastInfo.global
+): DOM
   let result = Maybe {
     get info = App.Kaelin.Map.player.info(cast@player, map)
     let creature = info@snd
     get skill = App.Kaelin.Hero.skill.from_key(cast@key, creature@hero)
     let coord = App.Kaelin.Coord.show(cast@target_pos)
-    return DOM.node("p", {}, {}, [DOM.text(coord | " " | skill@name)])
+    let button = 
+      if show_remove_button then 
+        remove_button(cast)
+      else 
+        DOM.text("")
+      
+    return DOM.node("div", {}, {"display": "flex", "align-items": "center", "margin-bottom": "5px"}, [
+      DOM.node("p", {}, {"margin-right": "5px"}, [DOM.text(coord | " " | skill@name)]),
+      button,
+    ])
   }
 
   result <> DOM.text("")
   
+
+remove_button(cast: App.Kaelin.CastInfo.global): DOM
+  DOM.node(
+    "button", 
+    {"id": App.Kaelin.Event.serialize(App.Kaelin.Event.remove_skill(cast@player, cast@target_pos, cast@key))}, // is this safe?
+    {
+      "padding": "5px 10px",
+      "background-color": "red",
+      "font-weight": "bold",
+      "color": "white",
+      "border": "none",
+      "border-radius": "5px",
+      "box-shadow": "0 0 3px black",
+    },
+    [DOM.text("X")]
+  )

@@ -3,7 +3,8 @@ App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
   open state.global as global
   
   let seconds = case global.stage { planning: some(global.stage.seconds) } default none
-
+  let can_remove_skill = case global.stage { planning: true } default false
+  
   DOM.node("div", 
           {}, 
           { "width": "100vw", 
@@ -17,7 +18,7 @@ App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
           [
             DOM.node("div", {}, {"margin-bottom": "10px"}, App.Kaelin.Draw.game.round(seconds, global.round)),
             DOM.node("div", {}, {}, [
-              DOM.vbox({"width": "512"}, {"border": "none"}, App.Kaelin.Draw.map(img, state))
+              DOM.vbox({"width": "512"}, {"border": "none", "image-rendering": "pixelated"}, App.Kaelin.Draw.map(img, state))
             ]),
             DOM.node(
               "div", 
@@ -30,7 +31,7 @@ App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
                 "display": "flex",
                 "flex-direction": "column-reverse"
               },
-              List.map!!(App.Kaelin.Draw.game.skill_list(global.map), global.skills_list)
+              List.map!!(App.Kaelin.Draw.game.skill_list(global.map, can_remove_skill), global.skills_list)
             )
           ]
   )

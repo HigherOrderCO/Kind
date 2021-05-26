@@ -42,6 +42,14 @@ App.Kaelin.Event.serialize(
         U16.to_bits(event.key)
       ]
       generate_hex(App.Kaelin.Event.Code.save_skill, cod)
+    remove_skill:
+      let cod = [  
+        Nat.to_bits(8),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
+        U16.to_bits(event.key)
+      ]
+      generate_hex(App.Kaelin.Event.Code.remove_skill, cod)
     end_action:
       let cod = [
         Nat.to_bits(7)
