@@ -1,6 +1,7 @@
 //TODO: get images from respective heroes
+//TODO: get team from somewhere else instead of draft_hero
 
-//TODO: make it beautiful
+
 //TODO?: create additional tabs for checking stats or skills of a hero
 
 App.Kaelin.Draw.draft(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
@@ -21,7 +22,6 @@ App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMa
   DOM.node("div", 
           {}, 
           { "width": "100vw"
-            "max-width": "1440px" 
             "height": "100vh", 
             "display": "flex", 
             "flex-direction": "column", 
@@ -38,21 +38,40 @@ App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMa
 
 App.Kaelin.Draw.draft.top(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
   DOM.node("div", {},
-  {"width": "100%"
-   "height": "60%"
-   "display": "flex"
-   "align-items": "center"}
-   [
-     App.Kaelin.Draw.draft.map(players, coords, user),
-     App.Kaelin.Draw.draft.picks(players, user),
-   ])
+  { "width": "100%"
+    //"max-width": "1440px" 
+    "height": "60%"
+    "display": "flex"
+    "background-image": "linear-gradient(#3fbcf2, #3791d4)"
+    "align-items": "center"
+    "justify-content": "center"}
+  [
+    App.Kaelin.Draw.draft.map(players, coords, user),
+    App.Kaelin.Draw.draft.picks(players, user),
+  ])
 
 App.Kaelin.Draw.draft.map(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
 DOM.node("div", {},
   { "width": "30%"
+    "height": "100%"
+    "display": "flex"
+    "align-items": "center"
+    "padding": "10% 0px 10% 2%"}
+  [
+    App.Kaelin.Draw.draft.map_space(players, coords, user)
+  ])
+
+
+
+App.Kaelin.Draw.draft.map_space(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
+DOM.node("div", {},
+  { "width": "100%"
     "height": "0"
-    "padding-top": "30%"
+    "border": "5px solid #d6dadc"
+    "border-radius": "15px"
+    "background-color": "#d6dadc"
     "position": "relative"
+    "padding-top": "100%"
     }
   
     App.Kaelin.Draw.draft.positions(players, coords, user)
@@ -97,23 +116,59 @@ App.Kaelin.Draw.draft.picks_right(map: Map<App.Kaelin.DraftInfo>): DOM
     App.Kaelin.Draw.draft.allies_go(map))
 
 
+App.Kaelin.Draw.draft.bottom_right: DOM
+DOM.node("div", {},
+  { "width": "15%"
+    "height": "auto"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"}
+  [ 
+    DOM.node("button", {"id": "Ready"}
+    { "background-color": "#4CAF50"
+      "border": "none"
+      "color": "white"
+      "padding": "32px"
+      "text-align": "center"
+      "text-decoration": "none"
+      "display": "inline-block"
+      "font-size": "32px"
+      "margin": "4px 2px"
+      "cursor": "pointer"}
+    [DOM.text("Ready")]
+    )
+  ])
 
 App.Kaelin.Draw.draft.bottom(players: Map<App.Kaelin.DraftInfo>): DOM
 heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+  DOM.node("div", {}
+  { "width": "100%"
+    //"max-width": "1440px" 
+    "height": "40%"
+    "display": "flex"
+    "background-image": "linear-gradient(#0e0c0e, #242324)"
+    "justify-content": "center"
+    "align-items": "center"}
+   [
+     App.Kaelin.Draw.draft.bottom_left(players)
+     App.Kaelin.Draw.draft.bottom_right
+   ]
+)
+
+App.Kaelin.Draw.draft.bottom_left(players: Map<App.Kaelin.DraftInfo>): DOM
+heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
   DOM.node("div", {},
-  { "width": "100%",
-    "height": "40%",
-    "display": "flex",
-    "justify-content": "center", 
-    "align-items": "center",}
+  { "width": "85%",
+    "height": "100%"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"}
    [
      DOM.node("div", {},
      {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "width": "100%"},
      List.map!!(App.Kaelin.Draw.draft.selection, heroes))
    ]
 )
-
-
 
 
 App.Kaelin.Draw.draft.croni: String

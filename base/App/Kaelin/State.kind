@@ -19,7 +19,7 @@ type App.Kaelin.State.local {
     user: String
     cast_info: Maybe<App.Kaelin.CastInfo>
     env_info : App.EnvInfo,
-    internal : App.Kaelin.Internal
+    internal : App.Kaelin.Internal 
   )
 }
 

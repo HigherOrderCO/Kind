@@ -2,8 +2,9 @@ App.Kaelin.Draw.draft.selection(hero: App.Kaelin.Hero): DOM
   DOM.node("div", {"id": "H" | hero@name, "action": hero@name}, 
     { 
       "margin": "4px",
-      "border": "2px solid gray",
-      "box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
+      "border": "5px solid #d6dadc",
+      //"box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
+      "background-color": "#bac1c4"
       "height": "0",
       "padding-bottom": "10%"
       "width": "10%",

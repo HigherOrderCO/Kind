@@ -13,7 +13,7 @@ App.Kaelin.Draw.init: DOM
             DOM.node("h1", {}, {"margin-bottom": "10px"}, [DOM.text("Welcome to Kaelin")]),
             DOM.node("div", {}, {}, [
               DOM.text("Enter a room number: "),
-              DOM.node("input", {}, {"font-size": "2rem", "font-family": "monospace", "outline": "transparent"}, [])
+              DOM.node("input", {"id": "room"}, {"font-size": "2rem", "font-family": "monospace", "outline": "transparent"}, [])
               DOM.node("button",{"id": "enter-init"}, {"font-size": "2rem", "font-family": "monospace", "padding": "2px"}, [DOM.text("Enter")])
             ]),
           ]
