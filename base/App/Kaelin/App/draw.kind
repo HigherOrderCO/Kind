@@ -6,7 +6,7 @@ App.Kaelin.App.draw(
   open state
   stage = state.global@stage
   case stage {
-    init: App.Kaelin.Draw.init
+    init: App.Kaelin.Draw.init(state.local@input)
     draft: 
       App.Kaelin.Draw.draft(stage.players, stage.coords, state.local@user)
     planning: DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))

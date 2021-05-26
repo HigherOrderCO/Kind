@@ -49,6 +49,16 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
       App.Kaelin.Event.Buffer {
         return App.Kaelin.Event.draft_end
       }
+    9 :
+      App.Kaelin.Event.Buffer {
+        return App.Kaelin.Event.to_draft
+      }
+    10:
+      App.Kaelin.Event.Buffer {
+        push(App.Kaelin.Event.Code.draft_team)
+        get team = next
+        return App.Kaelin.Event.draft_team(Nat.to_u8(team))
+      }
    } default fail!
  }
 

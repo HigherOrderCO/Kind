@@ -16,6 +16,7 @@ type App.Kaelin.Stage {
 
 type App.Kaelin.State.local {
   new(
+    input: String
     user: String
     cast_info: Maybe<App.Kaelin.CastInfo>
     env_info : App.EnvInfo,

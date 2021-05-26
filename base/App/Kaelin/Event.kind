@@ -9,4 +9,6 @@ type App.Kaelin.Event {
   draft_hero(hero: U8)
   draft_coord(coord: App.Kaelin.Coord)
   draft_end
+  to_draft
+  draft_team(team: U8)
 }

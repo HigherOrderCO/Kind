@@ -9,18 +9,48 @@ open state.global as global
 open state.local as local
 case global.stage{
 
+  init:
+    case event {
+       init: 
+        user = String.to_lower(event.user)
+        new_local = App.Kaelin.State.local.new(local.input, user, local.cast_info, local.env_info, local.internal)
+        IO {
+          App.watch!(App.Kaelin.Constants.room)
+          App.set_local!(new_local)
+        }
+      input: 
+        log(event.text)
+        new_local = App.Kaelin.State.local.new(event.text, local.user, local.cast_info, local.env_info, local.internal)
+        App.set_local!(new_local)
+      mouse_click:
+        log(local.input)
+        switch String.eql(event.id) {
+          "random":
+            IO {
+              get rnd = IO.random(10000000000)
+              let str = Nat.show(rnd)
+              let room = "0x72214422" | String.drop(String.length(str)-6, str)
+              let new_local = App.Kaelin.State.local.new(room, local.user, local.cast_info, local.env_info, local.internal)
+              App.set_local!(new_local)
+            }
+          "ready": 
+            IO {
+              App.watch!(local.input)
+              App.new_post!(local.input, App.Kaelin.Event.serialize(App.Kaelin.Event.to_draft))
+            }
+        }default App.pass!
+    }default App.pass!
   draft:
-    
     case event {
       init: 
         user = String.to_lower(event.user)
-        new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info, local.internal)
+        new_local = App.Kaelin.State.local.new(local.input, user, local.cast_info, local.env_info, local.internal)
         IO {
           App.watch!(App.Kaelin.Constants.room)
           App.set_local!(new_local)
         }
       mouse_click:
-        log(event.id)
+        log("user:" | local.user)
         switch String.starts_with(event.id) {
           "C" :
             log(event.id)
@@ -35,15 +65,13 @@ case global.stage{
             let taken       = false
             for player in heroes_list with taken:
               open player
-              if U8.eql(player.hero<> 0, hero_id <> 0) then
+              if U8.eql(player.hero<> 99, hero_id <> 0) then
                 true
               else
                 taken
-                     
             case hero_id {
-              none:
-                App.pass!
-              some:
+              none: App.pass!
+              some: 
                 if taken then
                   App.pass!
                 else 
@@ -51,7 +79,20 @@ case global.stage{
             }
           "R" : 
             App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_end))
-          }default App.pass!
+          
+          "T" :
+            let player_count = String.drop(1, event.id)
+            if String.starts_with(player_count, "3") then
+              App.pass!
+            else
+              let team = String.drop(1, player_count)
+              switch String.eql(team){
+                "blue": App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_team(0)))
+                "red" : App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_team(1)))
+              }default App.pass!
+        }default App.pass!
+              
+
       
     }default App.pass!
   
@@ -59,7 +100,7 @@ case global.stage{
     case event {
       init: 
       user = String.to_lower(event.user)
-      new_local = App.Kaelin.State.local.new(user, local.cast_info, local.env_info, local.internal)
+      new_local = App.Kaelin.State.local.new(local.input, user, local.cast_info, local.env_info, local.internal)
       IO {
         App.watch!(App.Kaelin.Constants.room)
         App.set_local!(new_local)

@@ -15,4 +15,4 @@ App.Kaelin.Constants.draft_hexagon_radius: U32
 
 // TODO: Randomize or change it every time you build
 App.Kaelin.Constants.room : String
-  "0x72214442334129"
+  "0x72214442334138"

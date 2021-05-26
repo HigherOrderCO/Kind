@@ -1,4 +1,5 @@
 App.Kaelin.App.init: App.Init<App.Kaelin.State>
+    input        = ""
     user         = "" 
     room         = App.Kaelin.Constants.room
     tick         = 0
@@ -9,10 +10,11 @@ App.Kaelin.App.init: App.Init<App.Kaelin.State>
     draft_map    = Map.new!
     draft_natmap = App.Kaelin.Coord.draft.arena
     stage_draft  = App.Kaelin.Stage.draft(draft_map, draft_natmap)
+    stage_init   = App.Kaelin.Stage.init
 
     App.Store.new!(
-      App.Kaelin.State.local.new(user, cast_info, interface, App.Kaelin.Internal.new(tick, frame, [])), 
-      App.Kaelin.State.global.new(room, map, stage_draft)
+      App.Kaelin.State.local.new(input, user, cast_info, interface, App.Kaelin.Internal.new(tick, frame, [])), 
+      App.Kaelin.State.global.new(room, map, stage_init)
     )
 // init // nick do player?
 // lobby [1,2,3,4] qtd //acho q da pra ver no tick

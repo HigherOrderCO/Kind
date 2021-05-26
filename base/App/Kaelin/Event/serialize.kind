@@ -51,13 +51,29 @@ App.Kaelin.Event.serialize(
       ]
 
       generate_hex(App.Kaelin.Event.Code.draft_coord, cod)
-    
+
+     
     draft_end:
       let cod = [
         Nat.to_bits(8)
       ]
 
       generate_hex([], cod)
+
+    to_draft:
+      let cod = [
+        Nat.to_bits(9)
+      ]
+    
+      generate_hex([], cod)
+
+      draft_team:
+      let cod = [
+        Nat.to_bits(10)
+        U8.to_bits(event.team)
+      ]
+
+      generate_hex(App.Kaelin.Event.Code.draft_team, cod)
   }
 
 
