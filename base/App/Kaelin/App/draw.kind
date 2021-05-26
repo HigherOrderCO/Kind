@@ -8,6 +8,6 @@ App.Kaelin.App.draw(
   case stage {
     init: App.Kaelin.Draw.init
     draft: App.Kaelin.Draw.draft
-    planning: App.Kaelin.Draw.planning(img, state)
-    action: App.Kaelin.Draw.action(img, state)
-  } default DOM.text("Em breve")
+    planning: App.Kaelin.Draw.game(img, state)
+    action: App.Kaelin.Draw.game(img, state)
+  }

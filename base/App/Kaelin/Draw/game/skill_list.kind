@@ -1,4 +1,4 @@
-App.Kaelin.Draw.planning.skill_list(map: App.Kaelin.Map, cast: App.Kaelin.CastInfo.global): DOM
+App.Kaelin.Draw.game.skill_list(map: App.Kaelin.Map, cast: App.Kaelin.CastInfo.global): DOM
   let result = Maybe {
     get info = App.Kaelin.Map.player.info(cast@player, map)
     let creature = info@snd
@@ -7,5 +7,5 @@ App.Kaelin.Draw.planning.skill_list(map: App.Kaelin.Map, cast: App.Kaelin.CastIn
     return DOM.node("p", {}, {}, [DOM.text(coord | " " | skill@name)])
   }
 
-  result <> DOM.text("ih rapaz")
+  result <> DOM.text("")
   
