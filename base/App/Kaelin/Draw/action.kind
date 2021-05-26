@@ -29,7 +29,7 @@ App.Kaelin.Draw.action(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
                     "display": "flex",
                     "flex-direction": "column"
                   },
-                  List.map!!(App.Kaelin.Draw.planning.skill_list(global.map), stage.skills_list)
+                  List.map!!(App.Kaelin.Draw.planning.skill_list(global.map), global.skills_list)
                 )
               ]
       )

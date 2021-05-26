@@ -2,7 +2,8 @@ App.Kaelin.Stage.action.end(glob: App.Kaelin.State.global): App.Kaelin.State.glo
   open glob
   case glob.stage {
     action:
-      new_glob = glob@stage <- App.Kaelin.Stage.planning(0, 0, [])
+      new_glob = glob@stage <- App.Kaelin.Stage.planning(0, 0)
       new_glob = new_glob@round <- new_glob@round + 1
+      new_glob = new_glob@skills_list <- []
       new_glob
   } default glob

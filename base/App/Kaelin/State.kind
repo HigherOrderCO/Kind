@@ -3,8 +3,9 @@ type App.Kaelin.State.global {
     round: I32
     tick: U64
     room: String
-    map: App.Kaelin.Map,
+    map: App.Kaelin.Map
     stage: App.Kaelin.Stage
+    skills_list: List<App.Kaelin.State.cast_info>
   )
 }
 
@@ -12,8 +13,8 @@ type App.Kaelin.Stage {
   init
   void
   draft
-  planning(local_tick: U64, seconds: U64, skills_list: List<App.Kaelin.State.cast_info>)
-  action(skills_list: List<App.Kaelin.State.cast_info>)
+  planning(local_tick: U64, seconds: U64)
+  action
 }
 
 type App.Kaelin.State.cast_info {
