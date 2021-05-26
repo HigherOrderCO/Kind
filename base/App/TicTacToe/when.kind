@@ -1,12 +1,3 @@
-Pair.shows<A: Type, B: Type>(
-  show_a: A -> String,
-  show_b: B -> String,
-) : String
-  
-
-inf : Pair<Int, Int>
-  
-
 App.TicTacToe.when: App.When<App.TicTacToe.State>
   (event, state)
    case event {
@@ -14,7 +5,9 @@ App.TicTacToe.when: App.When<App.TicTacToe.State>
         open state
         let info = state.local@info
         open info
-        let k = Pair.shows!!(U32.show, U32.show, info.mouse_pos)
+        //let k = Pair.shows!!(U32.show, U32.show, info.mouse_pos)
+        let k = U32.show(App.TicTacToe.pair_to_pos(info.mouse_pos))
+        //let k = Pair.show!!(U32.show, U32.show, App.TicTacToe.pair_to_pos(info.mouse_pos))
         log(k)
         App.pass!
       frame : 

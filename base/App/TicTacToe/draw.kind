@@ -1,17 +1,17 @@
 side_board : I32
-  App.TicTacToe.constant.size
+  U32.to_i32(App.TicTacToe.constant.size)
   
 App.TicTacToe.draw_vertical_lines(img : VoxBox) : VoxBox
-    let init = (side_board/3) :: I32
-    let void = (side_board/12) :: I32
-    let img = VoxBox.Draw.line(init, void, init, side_board-void, 0, Col32.new(0, 0, 0, 255), img)
-    VoxBox.Draw.line(side_board-init, void, side_board-init, side_board-void, 0, Col32.new(0, 0, 0, 255), img)
+    let side_tale = (side_board/3) :: I32
+    let edge = (side_board/12) :: I32
+    let img = VoxBox.Draw.line(side_tale, edge, side_tale, side_board-edge, 0, Col32.new(0, 0, 0, 255), img)
+    VoxBox.Draw.line(side_board-side_tale, edge, side_board-side_tale, side_board-edge, 0, Col32.new(0, 0, 0, 255), img)
 
 App.TicTacToe.draw_horizontal_lines(img : VoxBox) : VoxBox
-    let init = (side_board/12) :: I32
-    let void = (side_board/3) :: I32
-    let img = VoxBox.Draw.line(init, void, side_board-init, void, 0, Col32.new(0, 0, 0, 255), img)
-    VoxBox.Draw.line(init, side_board - void, side_board-init, side_board - void, 0, Col32.new(0, 0, 0, 255), img)
+    let side_tale = (side_board/3) :: I32
+    let edge = (side_board/12) :: I32
+    let img = VoxBox.Draw.line(edge, side_tale, side_board-edge, side_tale, 0, Col32.new(0, 0, 0, 255), img)
+    VoxBox.Draw.line(edge, side_board - side_tale, side_board-edge, side_board - side_tale, 0, Col32.new(0, 0, 0, 255), img)
     
 App.TicTacToe.draw(img: VoxBox): App.Draw<App.TicTacToe.State>
 (state)

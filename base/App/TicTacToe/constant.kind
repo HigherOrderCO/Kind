@@ -1,2 +1,2 @@
-App.TicTacToe.constant.size : I32
+App.TicTacToe.constant.size : U32
   256
