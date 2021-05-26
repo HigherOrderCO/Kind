@@ -1,5 +1,5 @@
 // TODO: applies a function to the Creature at a coord
-App.Kaelin.Map.modify_at(
+App.Kaelin.Map.creature.modify_at(
   mod: App.Kaelin.Creature -> App.Kaelin.Creature
   pos: App.Kaelin.Coord
   map: App.Kaelin.Map

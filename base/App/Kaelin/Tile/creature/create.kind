@@ -5,4 +5,4 @@ App.Kaelin.Tile.creature.create(
 ): App.Kaelin.Creature
 
   hero = App.Kaelin.Hero.info(hero_id) <> App.Kaelin.Heroes.Croni.hero
-  App.Kaelin.Creature.new(player_addr, hero, team, hero@max_hp, [])
+  App.Kaelin.Creature.new(player_addr, hero, team, hero@max_hp, hero@max_ap, [])

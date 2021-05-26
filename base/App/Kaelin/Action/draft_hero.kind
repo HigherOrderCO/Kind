@@ -4,12 +4,13 @@ App.Kaelin.Action.draft_hero(
   hero: U8,
   glob: App.Kaelin.State.global
 ): App.State.global(App.Kaelin.State)
+
   key = user
   open glob
   case glob.stage{
     draft:
-      let map  = glob.stage.players
-      let player = map{user}
+      map  = glob.stage.players
+      player = map{user}
       case player {
         none: 
           glob

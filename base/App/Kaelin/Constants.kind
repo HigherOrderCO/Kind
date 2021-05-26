@@ -11,7 +11,14 @@ App.Kaelin.Constants.center_y : U32
   128#32
 
 App.Kaelin.Constants.draft_hexagon_radius: U32
-  10#32
+  8#32
+  
+App.Kaelin.Constants.draft_center_x : U32
+  50#32
+
+App.Kaelin.Constants.draft_center_y : U32
+  50#32
+
 
 // TODO: Randomize or change it every time you build
 App.Kaelin.Constants.room : String
