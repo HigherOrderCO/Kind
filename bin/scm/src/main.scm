@@ -1,4 +1,4 @@
-#! /usr/bin/scheme --script
+#!/usr/bin/env -S scheme --script
 (load "./kind.so")
 (let ([args (cdr (command-line))])
   (unless (null? args)
