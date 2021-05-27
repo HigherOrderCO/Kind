@@ -584,4 +584,4 @@ Kind.Comp.Target.SchemeIstr(main: String, defs: Kind.Comp.Defs): String
   for defn in defs_list with code:
     let {name,term} = defn
     code | Kind.Comp.Target.SchemeIstr.definition(name, term, defs)
-  code | "(run_io "|main|")\n"
+  code
