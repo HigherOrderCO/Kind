@@ -1,9 +1,10 @@
 App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
   open state
   open state.global as global
-  
+  open state.local as local
+
   let seconds = case global.stage { planning: some(global.stage.seconds) } default none
-  let can_remove_skill = case global.stage { planning: true } default false
+  let is_planning = case global.stage { planning: true } default false
   
   DOM.node("div", 
           {}, 
@@ -31,7 +32,7 @@ App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
                 "display": "flex",
                 "flex-direction": "column-reverse"
               },
-              List.map!!(App.Kaelin.Draw.game.skill_list(global.map, can_remove_skill), global.skills_list)
+              List.map!!(App.Kaelin.Draw.game.skill_list(local.user, global.map, is_planning), global.skills_list)
             )
           ]
   )

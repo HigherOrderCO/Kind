@@ -1,15 +1,16 @@
 App.Kaelin.Draw.game.skill_list(
+  local_player: String
   map: App.Kaelin.Map, 
-  show_remove_button: Bool, 
+  is_planning: Bool, 
   cast: App.Kaelin.CastInfo.global
 ): DOM
-  let result = Maybe {
+  result = Maybe {
     get info = App.Kaelin.Map.player.info(cast@player, map)
     let creature = info@snd
     get skill = App.Kaelin.Hero.skill.from_key(cast@key, creature@hero)
     let coord = App.Kaelin.Coord.show(cast@target_pos)
     let button = 
-      if show_remove_button then 
+      if is_planning then 
         remove_button(cast)
       else 
         DOM.text("")
@@ -20,7 +21,14 @@ App.Kaelin.Draw.game.skill_list(
     ])
   }
 
-  result <> DOM.text("")
+  result = result <> DOM.text("")
+ 
+  if is_planning then
+    if String.eql(cast@player, local_player) then
+      result
+    else DOM.text("")
+  else result
+  
   
 
 remove_button(cast: App.Kaelin.CastInfo.global): DOM
