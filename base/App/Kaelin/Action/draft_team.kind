@@ -9,9 +9,9 @@ App.Kaelin.Action.draft_team(
   case glob.stage{
     draft:
       let team = switch U8.eql(team) {
-        0 : "blue"
-        1 : "red"
-      }default "none"
+        0 : App.Kaelin.Team.blue
+        1 : App.Kaelin.Team.red
+      }default App.Kaelin.Team.neutral
       let map  = glob.stage.players
       let new_player = App.Kaelin.DraftInfo.new(none, team)
       let new_map    = map{user} <- new_player

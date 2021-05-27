@@ -12,6 +12,7 @@ type App.Kaelin.CastInfo.global {
   new(
     player: String,
     target_pos: App.Kaelin.Coord,
-    key: U16
+    key: U16,
+    team: App.Kaelin.Team
   )
 }

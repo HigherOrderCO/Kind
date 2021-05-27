@@ -13,6 +13,7 @@ type App.Kaelin.State.local {
   new(
     input: String
     user: String
+    team: App.Kaelin.Team
     cast_info: Maybe<App.Kaelin.CastInfo.local>
     env_info : App.EnvInfo,
     internal : App.Kaelin.Internal 

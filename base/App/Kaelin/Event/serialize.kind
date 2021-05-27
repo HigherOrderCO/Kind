@@ -43,6 +43,7 @@ App.Kaelin.Event.serialize(
         Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
         App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
         U16.to_bits(event.key)
+        U8.to_bits(App.Kaelin.Team.code(event.team))
       ]
       generate_hex(App.Kaelin.Event.Code.save_skill, cod)
 
@@ -52,6 +53,7 @@ App.Kaelin.Event.serialize(
         Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
         App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
         U16.to_bits(event.key)
+        U8.to_bits(App.Kaelin.Team.code(event.team))
       ]
       generate_hex(App.Kaelin.Event.Code.remove_skill, cod)
 

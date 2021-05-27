@@ -39,9 +39,10 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
           get player = text
           get mouse_pos = next
           get key = next
+          get team = next
           return App.Kaelin.Event.save_skill("0x" | player,
             App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
-            Nat.to_u16(key))
+            Nat.to_u16(key), App.Kaelin.Team.decode(Nat.to_u8(team)))
         }
       13:
         App.Kaelin.Event.Buffer {
@@ -53,9 +54,10 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
           get player = text
           get mouse_pos = next
           get key = next
+          get team = next
           return App.Kaelin.Event.remove_skill("0x" | player,
             App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
-            Nat.to_u16(key))
+            Nat.to_u16(key), App.Kaelin.Team.decode(Nat.to_u8(team)))
         }
       6:
         App.Kaelin.Event.Buffer {

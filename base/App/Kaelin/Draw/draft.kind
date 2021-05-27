@@ -25,7 +25,7 @@ App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMa
     case player {
       none: [App.Kaelin.Draw.draft.choose_team(players)]
       some: 
-        switch String.eql(player.value@team) {
+        switch String.eql(App.Kaelin.Team.show(player.value@team)) {
           "blue": normal
           "red": normal
         }default [App.Kaelin.Draw.draft.choose_team(players)]
@@ -50,7 +50,7 @@ App.Kaelin.Draw.draft.choose_team(players: Map<App.Kaelin.DraftInfo>): DOM
   for player in list with pair:
     open player
     open player.snd as info
-    switch String.eql(info.team) {
+    switch String.eql(App.Kaelin.Team.show(info.team)) {
       "blue": {player.fst & pair@fst, pair@snd} 
       "red" : {pair@fst, player.fst & pair@snd}
     }default pair
@@ -95,11 +95,11 @@ App.Kaelin.Draw.draft.red(players: Map<App.Kaelin.DraftInfo>, list: List<String>
 
 
 App.Kaelin.Draw.draft.top(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
-  let team   = App.Kaelin.Coord.draft.to_team(user, players)
-  let color  = switch String.eql(team) {
+  let team   = App.Kaelin.Coord.draft.to_team(user, players) <> App.Kaelin.Team.neutral
+  let color  = switch String.eql(App.Kaelin.Team.show(team)) {
     "blue": "linear-gradient(#3fbcf2, #3791d4)"
     "red" : "linear-gradient(#ff6666, #ff4d4d)"
-  }default  "linear-gradient(#94b8b8, #75a3a3)"
+  } default  "linear-gradient(#94b8b8, #75a3a3)"
   DOM.node("div", {},
   { "width": "100%"
     //"max-width": "1440px" 
@@ -141,7 +141,7 @@ DOM.node("div", {},
 )
 
 App.Kaelin.Draw.draft.picks(players: Map<App.Kaelin.DraftInfo>, user: String): DOM
-let team   = App.Kaelin.Coord.draft.to_team(user, players)
+let team   = App.Kaelin.Coord.draft.to_team(user, players) <> App.Kaelin.Team.neutral
 let player = players{user}
 let allies = Map.delete!(user, players)
 let hero   = case player{
@@ -167,7 +167,7 @@ DOM.node("div", {},
    "box-sizing": "border-box"}
       [App.Kaelin.Draw.draft.player(hero)])
 
-App.Kaelin.Draw.draft.picks_right(map: Map<App.Kaelin.DraftInfo>, team: String): DOM
+App.Kaelin.Draw.draft.picks_right(map: Map<App.Kaelin.DraftInfo>, team: App.Kaelin.Team): DOM
   DOM.node("div", {},
   { "width": "60%"
     "height": "100%"

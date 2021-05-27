@@ -10,7 +10,7 @@ open state.local as local
 case global.stage event{
   init init: 
     user = String.to_lower(event.user)
-    new_local = App.Kaelin.State.local.new(local.input, user, local.cast_info, local.env_info, local.internal)
+    new_local = state.local@user <- user
     IO {
       // App.watch!(App.Kaelin.Constants.room)
       App.set_local!(new_local)
@@ -18,7 +18,7 @@ case global.stage event{
 
   init input: 
     log(event.text)
-    new_local = App.Kaelin.State.local.new(event.text, local.user, local.cast_info, local.env_info, local.internal)
+    new_local = state.local@input <- event.text
     App.set_local!(new_local)
   
   init mouse_click:
@@ -28,7 +28,7 @@ case global.stage event{
           get rnd = IO.random(10000000000)
           let str = Nat.show(rnd)
           let room = "0x72214422" | String.drop(String.length(str)-6, str)
-          let new_local = App.Kaelin.State.local.new(room, local.user, local.cast_info, local.env_info, local.internal)
+          let new_local = state.local@input <- room
           App.set_local!(new_local)
         }
       "ready": 
@@ -52,14 +52,14 @@ case global.stage event{
         App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_coord(coord)))
       "H" :
         let heroes_list = List.map!!(Pair.snd!!, Map.to_list!(global.stage.players))
-        let team        = App.Kaelin.Coord.draft.to_team(local.user, global.stage.players)
+        let team        = App.Kaelin.Coord.draft.to_team(local.user, global.stage.players) <> App.Kaelin.Team.neutral
         let heroes_map  = App.Kaelin.Hero.info.map
         let hero_name   = String.drop(1, event.id)
         let hero_id     = heroes_map{hero_name}
         let taken       = false
         for player in heroes_list with taken:
           open player
-          if String.eql(team, player.team) then
+          if App.Kaelin.Team.eql(team, player.team) then
             if U8.eql(player.hero<> 99, hero_id <> 0) then
               true
             else
@@ -108,7 +108,7 @@ case global.stage event{
         open cast.skill as skill
         info = local.env_info
         {axial_x, axial_y} = App.Kaelin.Coord.to_axial(info@mouse_pos)
-        hex = App.Kaelin.Event.serialize(App.Kaelin.Event.save_skill(local.user, cast.mouse_pos, skill.key))
+        hex = App.Kaelin.Event.serialize(App.Kaelin.Event.save_skill(local.user, cast.mouse_pos, skill.key, local.team))
         IO { 
           App.new_post!(global.room, hex)
           App.set_local!(state.local@cast_info <- none)

@@ -1,9 +1,9 @@
-App.Kaelin.Draw.draft.allies(map: Map<App.Kaelin.DraftInfo>, team:String): List<DOM>
+App.Kaelin.Draw.draft.allies(map: Map<App.Kaelin.DraftInfo>, team: App.Kaelin.Team): List<DOM>
   lst       = Map.to_list!(map)
   teammates = []
   for info in lst with teammates:
     open info
-    if String.eql(team, info.snd@team) then
+    if App.Kaelin.Team.eql(team, info.snd@team) then
       info & teammates
     else
       teammates

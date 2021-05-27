@@ -1,9 +1,9 @@
 App.Kaelin.Coord.draft.to_xy(
   coord: App.Kaelin.Coord,
-  team: String
+  team: App.Kaelin.Team
 ): Pair<U32,U32>
 
-  let centralizer = switch String.eql(team) {
+  let centralizer = switch String.eql(App.Kaelin.Team.show(team)) {
     "blue": (U32.to_i32(App.Kaelin.Constants.map_size - 1))
     "red":  I32.neg(U32.to_i32(App.Kaelin.Constants.map_size -1 ))
   }default +0#32

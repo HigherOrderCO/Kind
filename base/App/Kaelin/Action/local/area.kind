@@ -10,14 +10,15 @@ App.Kaelin.Action.local.area(
   case local.cast_info {
     none: local
     some: 
-      open local.cast_info.value as cast
+      cast = local.cast_info.value
+      open cast
       mouse_coord = App.Kaelin.Coord.to_axial(info.mouse_pos)
       if App.Kaelin.Coord.eql(mouse_coord, cast.mouse_pos) then 
         local
       else
         area = App.Kaelin.Effect.indicators.get_indicators(cast.hero_pos, cast.skill, mouse_coord, global@map)
-        new_cast_info = some(App.Kaelin.CastInfo.local.new(cast.hero_pos, cast.skill, cast.range, area, mouse_coord))
-        new_local = App.Kaelin.State.local.new(local.input, local.user, new_cast_info, local.env_info, local.internal)
+        new_cast_info = some(cast@area <- area)
+        new_local = local@cast_info <- new_cast_info
         new_local
   }
   

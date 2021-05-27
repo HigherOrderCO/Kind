@@ -12,9 +12,10 @@ App.Kaelin.App.init: App.Init<App.Kaelin.State>
     draft_natmap = App.Kaelin.Coord.draft.arena
     stage_draft  = App.Kaelin.Stage.draft(draft_map, draft_natmap)
     stage_init   = App.Kaelin.Stage.init
+    team         = App.Kaelin.Team.neutral
     
     App.Store.new!(
-      App.Kaelin.State.local.new(input, user, cast_info, interface, internal), 
+      App.Kaelin.State.local.new(input, user, team, cast_info, interface, internal), 
       App.Kaelin.State.global.new(0, 1, room, map, stage_init, [])
     )
 // init // nick do player?

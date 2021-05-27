@@ -34,7 +34,7 @@ App.Kaelin.Draw.game.skill_list(
 remove_button(cast: App.Kaelin.CastInfo.global): DOM
   DOM.node(
     "button", 
-    {"id": App.Kaelin.Event.serialize(App.Kaelin.Event.remove_skill(cast@player, cast@target_pos, cast@key))}, // is this safe?
+    {"id": App.Kaelin.Event.serialize(App.Kaelin.Event.remove_skill(cast@player, cast@target_pos, cast@key, cast@team))}, // is this safe?
     {
       "padding": "5px 10px",
       "background-color": "red",

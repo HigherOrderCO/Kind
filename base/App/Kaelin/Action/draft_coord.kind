@@ -8,7 +8,7 @@ App.Kaelin.Action.draft_coord(
   case glob.stage{
     draft:
       let key      = App.Kaelin.Coord.Convert.axial_to_nat(coord)
-      let team     = App.Kaelin.Coord.draft.to_team(user, glob.stage.players)
+      let team     = App.Kaelin.Coord.draft.to_team(user, glob.stage.players) <> App.Kaelin.Team.neutral
       let map      = App.Kaelin.Coord.draft.to_map(team, glob.stage.coords)
             let coord_id = NatMap.get!(key, map) <> "empty"
       if String.eql(coord_id, "empty") then 
@@ -21,7 +21,7 @@ App.Kaelin.Action.draft_coord(
             map
         let new_map = NatMap.set!(key, user, map)
         let new_map = 
-          switch String.eql(team) {
+          switch String.eql(App.Kaelin.Team.show(team)) {
             "blue": Pair.new!!(new_map, Pair.snd!!(glob.stage.coords))
             "red":  Pair.new!!(Pair.fst!!(glob.stage.coords,) new_map)
           }default glob.stage.coords

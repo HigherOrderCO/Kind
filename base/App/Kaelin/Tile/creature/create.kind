@@ -1,7 +1,7 @@
 App.Kaelin.Tile.creature.create(
   hero_id: U8,
   player_addr: Maybe<String>,
-  team: String
+  team: App.Kaelin.Team
 ): App.Kaelin.Creature
 
   hero = App.Kaelin.Hero.info(hero_id) <> App.Kaelin.Heroes.Croni.hero

@@ -4,7 +4,7 @@ App.Kaelin.Action.to_draft(
   glob: App.Kaelin.State.global
 ): App.State.global(App.Kaelin.State)
   open glob
-  info = App.Kaelin.DraftInfo.new(none, "none")
+  info = App.Kaelin.DraftInfo.new(none, App.Kaelin.Team.neutral)
   log("user:" | user)
   log("room:" | room)
   case glob.stage {
