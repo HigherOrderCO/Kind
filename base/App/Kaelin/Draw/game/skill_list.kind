@@ -1,5 +1,6 @@
 App.Kaelin.Draw.game.skill_list(
-  local_player: String
+  local_player: String,
+  local_team: App.Kaelin.Team,
   map: App.Kaelin.Map, 
   is_planning: Bool, 
   cast: App.Kaelin.CastInfo.global
@@ -9,14 +10,16 @@ App.Kaelin.Draw.game.skill_list(
     let creature = info@snd
     get skill = App.Kaelin.Hero.skill.from_key(cast@key, creature@hero)
     let coord = App.Kaelin.Coord.show(cast@target_pos)
+    let is_local_player = String.eql(local_player, cast@player)
     let button = 
-      if is_planning then 
+      if Bool.and(is_planning, is_local_player) then 
         remove_button(cast)
       else 
         DOM.text("")
-      
+    let who_casted = if is_local_player then "You" else "Ally"
+
     return DOM.node("div", {}, {"display": "flex", "align-items": "center", "margin-bottom": "5px"}, [
-      DOM.node("p", {}, {"margin-right": "5px"}, [DOM.text(coord | " " | skill@name)]),
+      DOM.node("p", {}, {"margin-right": "5px"}, [DOM.text(who_casted | " casted " | skill@name | " in " | coord)]),
       button,
     ])
   }
@@ -24,7 +27,7 @@ App.Kaelin.Draw.game.skill_list(
   result = result <> DOM.text("")
  
   if is_planning then
-    if String.eql(cast@player, local_player) then
+    if App.Kaelin.Team.eql(cast@team, local_team) then
       result
     else DOM.text("")
   else result
