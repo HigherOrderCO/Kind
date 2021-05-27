@@ -2,7 +2,7 @@ App.Kaelin.Heroes.Cyclope.skills: List<App.Kaelin.Skill>
   [
     App.Kaelin.Heroes.Cyclope.skills.vampirism,
     App.Kaelin.Heroes.Cyclope.skills.ap_recover,
-    App.Kaelin.Skill.move(2, 3)
+    App.Kaelin.Skill.move(3)
   ]
 
 

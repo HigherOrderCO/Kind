@@ -4,5 +4,16 @@ App.Kaelin.Map.creature.change_ap(
   map: App.Kaelin.Map
 ): Pair(I32, App.Kaelin.Map)
 
-  map = App.Kaelin.Map.creature.modify_at(App.Kaelin.Tile.creature.change_ap(value), pos, map)
-  {value, map} // TODO change to real hp change
+  creature = App.Kaelin.Map.creature.get(pos, map)
+  case creature { 
+    none:
+      {+0#32, map}
+    some:
+      open creature.value as creature
+      open creature.hero as hero
+      new_ap = I32.max((creature.value@ap + value) , 0)
+      new_ap = I32.min(new_ap, hero.max_ap)
+      ap_diff = new_ap - creature.value@ap 
+      map = App.Kaelin.Map.creature.modify_at(App.Kaelin.Tile.creature.change_ap(ap_diff), pos, map)
+      {ap_diff, map}
+}
