@@ -18,9 +18,10 @@ module.exports = class AppPlay extends Component {
 
     this.app_global_states = null; // previous global states
     this.app_global_tick = null; // global tick we're at
-    this.app_global_posts = {}; // map of global posts
     this.app_global_begin = null; // the first tick of this app
+    this.app_global_posts = {}; // map of global posts
 
+    this.display = null;
     this.intervals = {}; // timed intervals
     this.listeners = {}; // event listeners
     this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
@@ -68,6 +69,15 @@ module.exports = class AppPlay extends Component {
   // Initializes the input event listeners
   async init_input_events() {
     //this.events = []; // this application's events
+
+    //function print_time() {
+      //console.clear();
+      //console.log("local_time  : ", Date.now());
+      //console.log("server_time : ", window.KindEvents.get_time());
+      //console.log("delta_time  : ", Date.now() - window.KindEvents.get_time());
+      //console.log("");
+    //}
+    //setInterval(print_time, 200);
 
     // Init event
     this.register_event({
@@ -154,7 +164,7 @@ module.exports = class AppPlay extends Component {
     this.intervals.tick = () => {
       setInterval(() => {
         this.register_tick(window.KindEvents.get_tick())
-      }, 1000 / 16);
+      }, 1000 / 60);
     };
     this.intervals.tick()
 
@@ -216,8 +226,11 @@ module.exports = class AppPlay extends Component {
         this.app_global_posts[key] = [];
       }
       this.app_global_posts[key].push(post);
+      //console.log("New post at " + post.time + "; local tick is " + window.KindEvents.get_tick() + "; delay is " + (Date.now() - window.KindEvents.get_time()));
       if (!this.app_global_begin || post.time < this.app_global_begin) {
         this.app_global_begin = post.time;
+        this.app_global_states = null;
+        this.app_global_tick = null;
       }
       this.register_tick(post.time);
       //console.log(this.app_global_posts);
@@ -228,7 +241,6 @@ module.exports = class AppPlay extends Component {
   // Computes the global state at given tick (rollback netcode)
   register_tick(tick) {
     if (this.app && this.app_global_begin !== null) {
-      //console.log("register_tick", tick);
       // If the tick is older than the current state, rollback
       if (this.app_global_tick !== null && tick < this.app_global_tick) {
         //console.log("- older than " + this.app_global_tick);
@@ -253,8 +265,17 @@ module.exports = class AppPlay extends Component {
       var count_posts = 0;
       var begin_time = Date.now();
       var total = tick - this.app_global_tick;
-      if (total > 1000) console.log("Computing " + total + " ticks...");
-      for (var t = this.app_global_tick; t < tick; ++t) {
+      if (total > 16) {
+        var from_date = new Date(this.app_global_tick * 62.5);
+        var to_date = new Date(tick * 62.5);
+        this.display = "Computing " + total + " ticks.\n";
+        this.display += "From : " + from_date.toUTCString().slice(5) + "\n";
+        this.display += "To   : " + to_date.toUTCString().slice(5) + "\n";
+        this.forceUpdate();
+      }
+      var compute_from_tick = this.app_global_tick; 
+      var compute_to_tick = Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
+      for (var t = compute_from_tick; t < compute_to_tick; ++t) {
         //++count_ticks;
         var posts = this.app_global_posts[String(t)];
         var state = this.app_state.global;
@@ -269,10 +290,11 @@ module.exports = class AppPlay extends Component {
         this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
         this.app_state.global = state;
       };
-      if (total > 1000) console.log("Computed in: " + (Date.now() - begin_time) + "s");
-      //console.log("processed " + count_ticks + " ticks");
-      //console.log("processed " + count_posts + " posts");
+      this.display = null;
       this.app_global_tick = tick;
+      //if (this.app_global_tick > (Date.now() - 1000) / 62.5) {
+        //console.log("At " + tick + "("+(compute_to_tick-compute_from_tick)+" computed)");
+      //}
     }
   }
 
@@ -333,6 +355,7 @@ module.exports = class AppPlay extends Component {
               if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
+                  //console.log("got post " + room);
                   var time = parseInt(time.slice(2), 16);
                   this.register_post({room,time,addr,data});
                   //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
@@ -430,16 +453,29 @@ module.exports = class AppPlay extends Component {
       return "Loading app...";
     } else if (!this.rendered) {
       return "Rendering app...";
-    } else {
-      var element = this.render_dom(this.rendered);
-      var container = h("div", {
-        id: "container",
-        style: {
-          "width": "100%",
-          "height": "100%",
+    } else if (this.display) {
+      return h("pre",
+        {
+          id: "container",
+          style: {
+            "width": "100%",
+            "height": "100%",
+            "display": "flex",
+            "justify-content": "center",
+            "align-items": "center",
+          },
         },
-      }, element);
-      return container;
+        [this.display]);
+    } else {
+      return h("div",
+        {
+          id: "container",
+          style: {
+            "width": "100%",
+            "height": "100%",
+          },
+        },
+        this.render_dom(this.rendered));
     }
   }
 

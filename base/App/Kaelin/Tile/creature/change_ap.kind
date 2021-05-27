@@ -1,0 +1,14 @@
+//Change creature Action Points
+App.Kaelin.Tile.creature.change_ap(
+  change: I32,
+  creature: App.Kaelin.Creature
+): App.Kaelin.Creature
+
+  open creature
+  open creature.hero as hero
+  if I32.lte(creature.hp, 0) then //I32
+    creature
+  else
+    def new_ap = I32.min(I32.add(creature.ap, change), hero.max_ap)
+    creature@ap <- new_ap
+  //TODO Fix so it doesnt allow negative AP

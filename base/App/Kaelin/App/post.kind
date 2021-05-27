@@ -12,5 +12,10 @@ App.Kaelin.App.post: App.Post<App.Kaelin.State>
           save_skill   : App.Kaelin.Action.global.save_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
           remove_skill : App.Kaelin.Action.global.remove_skill(eventdata.player, eventdata.target_pos, eventdata.key, glob)
           end_action   : App.Kaelin.Stage.action.end(glob)
+          draft_hero   : App.Kaelin.Action.draft_hero(addr, eventdata.hero, glob)
+          draft_coord  : App.Kaelin.Action.draft_coord(addr, eventdata.coord, glob)
+          draft_end    : App.Kaelin.Action.draft_end(glob)
+          to_draft     : App.Kaelin.Action.to_draft(addr, room, glob)
+          draft_team   : App.Kaelin.Action.draft_team(addr, eventdata.team, glob)
         }
     }

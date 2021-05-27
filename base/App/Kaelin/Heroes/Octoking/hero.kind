@@ -2,6 +2,7 @@ App.Kaelin.Heroes.Octoking.hero: App.Kaelin.Hero
   App.Kaelin.Hero.new(
     "Octoking", 
     App.Kaelin.Assets.hero.octoking_d_1,
-    +25#32,
-    []
+    40,
+    10,
+    App.Kaelin.Heroes.Octoking.skills
   )

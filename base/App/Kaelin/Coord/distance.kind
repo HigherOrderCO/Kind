@@ -1,8 +1,8 @@
 // Returns the distance between 2 Coords
-App.Kaelin.Coord.Axial.distance(
+App.Kaelin.Coord.distance(
   fst_coord: App.Kaelin.Coord,
   snd_coord:App.Kaelin.Coord
-): Nat
+): I32
 
     convert_fst = App.Kaelin.Coord.Convert.axial_to_cubic(fst_coord)
     convert_snd = App.Kaelin.Coord.Convert.axial_to_cubic(snd_coord)

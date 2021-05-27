@@ -33,7 +33,7 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
             App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
             Nat.to_u16(key))
         }
-      6:
+      11:
         App.Kaelin.Event.Buffer {
           push(App.Kaelin.Event.Code.save_skill)
           get player = text
@@ -43,11 +43,11 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
             App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
             Nat.to_u16(key))
         }
-      7:
+      13:
         App.Kaelin.Event.Buffer {
           return App.Kaelin.Event.end_action
         }
-      8:
+      12:
         App.Kaelin.Event.Buffer {
           push(App.Kaelin.Event.Code.remove_skill)
           get player = text
@@ -57,8 +57,37 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
             App.Kaelin.Coord.Convert.nat_to_axial(mouse_pos)
             Nat.to_u16(key))
         }
-    } default fail!
-  }
+      6:
+        App.Kaelin.Event.Buffer {
+          push(App.Kaelin.Event.Code.draft_hero)
+          get id_hero = next
+          return App.Kaelin.Event.draft_hero(Nat.to_u8(id_hero))
+        }
+      7:
+        App.Kaelin.Event.Buffer {
+          push(App.Kaelin.Event.Code.draft_coord)
+          get coord = next
+          return App.Kaelin.Event.draft_coord(App.Kaelin.Coord.Convert.nat_to_axial(coord)) 
+        }
+      8:
+        App.Kaelin.Event.Buffer {
+          return App.Kaelin.Event.draft_end
+        }
+      9:
+        App.Kaelin.Event.Buffer {
+          return App.Kaelin.Event.to_draft
+        }
+      10:
+        App.Kaelin.Event.Buffer {
+          push(App.Kaelin.Event.Code.draft_team)
+          get team = next
+          return App.Kaelin.Event.draft_team(Nat.to_u8(team))
+        }
+   } default fail!
+ }
 
-App.Kaelin.Event.deserialize(code : String) : Maybe(App.Kaelin.Event)
-  App.Kaelin.Event.Buffer.Monad.run!(App.Kaelin.Event.deserialize_scheme, code)
+App.Kaelin.Event.deserialize(
+  code: String
+): Maybe(App.Kaelin.Event)
+
+  App.Kaelin.Event.Buffer.monad.run!(App.Kaelin.Event.deserialize_scheme, code)

@@ -11,10 +11,11 @@ type App.Kaelin.State.global {
 
 type App.Kaelin.State.local {
   new(
+    input: String
     user: String
     cast_info: Maybe<App.Kaelin.CastInfo.local>
     env_info : App.EnvInfo,
-    internal : App.Kaelin.Internal
+    internal : App.Kaelin.Internal 
   )
 }
 

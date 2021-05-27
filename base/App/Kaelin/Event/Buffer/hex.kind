@@ -1,4 +1,8 @@
-App.Kaelin.Event.Buffer.hex(A : Type, f : String -> A) : App.Kaelin.Event.Buffer<A>
+App.Kaelin.Event.Buffer.hex(
+  A : Type,
+  f : String -> A
+): App.Kaelin.Event.Buffer<A>
+
   (ls)
     case ls {
       nil : Parser.fail!("The buffer is empty")

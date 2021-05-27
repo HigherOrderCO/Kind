@@ -4,8 +4,6 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
     glob = glob@tick <- U64.add(glob@tick, 1)
     stage = glob@stage
     case stage {
-      init     : glob@stage <- App.Kaelin.Stage.draft
-      draft    : glob@stage <- App.Kaelin.Stage.planning(0, 0)
       planning : 
                   stage_seconds = (20#64 - (stage.local_tick / 16)) - 1
                   ticks_per_round = 20#64 * 16
@@ -18,4 +16,4 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
       action   :
                   let glob = App.Kaelin.Action.global.exe_skills_list!(glob@skills_list, glob)
                   App.Kaelin.Stage.action.end(glob)
-    }
+    } default glob

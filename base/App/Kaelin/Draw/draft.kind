@@ -1,8 +1,39 @@
-App.Kaelin.Draw.draft: DOM
+//TODO: get images from respective heroes
+//TODO: get team from somewhere else instead of draft_hero
+
+
+//TODO?: create additional tabs for checking stats or skills of a hero
+
+App.Kaelin.Draw.draft(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
   heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+  DOM.node("div", {},
+    {
+      "width": "100vw"
+      "height": "100vh"
+      "display": "flex"
+      "justify-content": "center"
+      "align-items": "center"
+    }
+    [
+      App.Kaelin.Draw.draft.main(players, coords, user)
+    ])
+  
+App.Kaelin.Draw.draft.main(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
+  let player = players{user}
+  let normal = [App.Kaelin.Draw.draft.top(players, coords, user), App.Kaelin.Draw.draft.bottom(players)]            
+  let draw = 
+    case player {
+      none: [App.Kaelin.Draw.draft.choose_team(players)]
+      some: 
+        switch String.eql(player.value@team) {
+          "blue": normal
+          "red": normal
+        }default [App.Kaelin.Draw.draft.choose_team(players)]
+
+    }
   DOM.node("div", 
           {}, 
-          { "width": "100vw", 
+          { "width": "100vw"
             "height": "100vh", 
             "display": "flex", 
             "flex-direction": "column", 
@@ -10,114 +41,199 @@ App.Kaelin.Draw.draft: DOM
             "align-items": "center",
             "font-size": "2rem"
           },
-          [
-            App.Kaelin.Draw.draft.top,
-            App.Kaelin.Draw.draft.bottom
-            //DOM.node("h1", {}, {"margin-bottom": "50px"}, [DOM.text("Choose a hero")]),
-            //DOM.node("div", {}, {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "max-width": "70%"}, List.map!!(App.Kaelin.Draw.draft.hero_card, heroes)),
-          ]
+          draw
   )
 
-
-
-
-App.Kaelin.Draw.draft.top: DOM
+App.Kaelin.Draw.draft.choose_team(players: Map<App.Kaelin.DraftInfo>): DOM
+  list = Map.to_list!(players)
+  pair = {[],[]} :: Pair<List<String>, List<String>>
+  for player in list with pair:
+    open player
+    open player.snd as info
+    switch String.eql(info.team) {
+      "blue": {player.fst & pair@fst, pair@snd} 
+      "red" : {pair@fst, player.fst & pair@snd}
+    }default pair
+  let blue = pair@fst
+  let red  = pair@snd
+  
   DOM.node("div", {},
-  {"width": "100%",
-   "height": "60%",
-   "display": "flex"}
-   [
-     App.Kaelin.Draw.draft.hexes,
-     App.Kaelin.Draw.draft.picks,
-   ])
+  { "width": "60%"
+    "height": "30%"
+    "display": "flex"
+    "flex-direction": "row"
+    "justify-content": "space-between"
+    }
+    [
+      App.Kaelin.Draw.draft.blue(players, blue)
+      App.Kaelin.Draw.draft.red(players, red)
+    ])
 
-App.Kaelin.Draw.draft.hexes: DOM
-DOM.node("div", {},
-  {"width": "25%",
-   "height": "100%",
-   "display": "flex"}
-   [])
+App.Kaelin.Draw.draft.blue(players: Map<App.Kaelin.DraftInfo>, list: List<String>): DOM
+  let length = Nat.show(List.length!(list))
+  let text   = length | "/3 Players"
+  DOM.node("button", {"id": "T" | length | "blue"}
+  { "width": "40%"
+    "height": "100%"
+    "background-image": "linear-gradient(#38a5fa, #2081e0)"
+    "box-shadow": "2px -2px 2px black"
+    "font-size": "8rem"}
+    [DOM.text(text)]
+    )
 
-App.Kaelin.Draw.draft.picks: DOM
+App.Kaelin.Draw.draft.red(players: Map<App.Kaelin.DraftInfo>, list: List<String>): DOM
+  let length = Nat.show(List.length!(list))
+  let text   = length | "/3 Players"
+  DOM.node("button", {"id": "T" | length | "red"}
+  { "width": "40%"
+    "height": "100%"
+    "background-image": "linear-gradient(#ff3537, #d60f10)"
+    "box-shadow": "2px -2px 2px black"
+    "font-size": "8rem"}
+    [DOM.text(text)]
+    )
+
+
+App.Kaelin.Draw.draft.top(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
+  let team   = App.Kaelin.Coord.draft.to_team(user, players)
+  let color  = switch String.eql(team) {
+    "blue": "linear-gradient(#3fbcf2, #3791d4)"
+    "red" : "linear-gradient(#ff6666, #ff4d4d)"
+  }default  "linear-gradient(#94b8b8, #75a3a3)"
+  DOM.node("div", {},
+  { "width": "100%"
+    //"max-width": "1440px" 
+    "height": "60%"
+    "display": "flex"
+    "background-image": color
+    "align-items": "center"
+    "justify-content": "center"}
+  [
+    App.Kaelin.Draw.draft.map(players, coords, user),
+    App.Kaelin.Draw.draft.picks(players, user),
+  ])
+
+App.Kaelin.Draw.draft.map(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
 DOM.node("div", {},
-  {"width": "75%",
+  { "width": "30%"
+    "height": "100%"
+    "display": "flex"
+    "align-items": "center"
+    "padding": "10% 0px 10% 2%"}
+  [
+    App.Kaelin.Draw.draft.map_space(players, coords, user)
+  ])
+
+
+
+App.Kaelin.Draw.draft.map_space(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>,NatMap<String>>, user: String): DOM
+DOM.node("div", {},
+  { "width": "100%"
+    "height": "0"
+    "border": "5px solid #d6dadc"
+    "border-radius": "15px"
+    "background-color": "#d6dadc"
+    "position": "relative"
+    "padding-top": "100%"
+    }
+  
+    App.Kaelin.Draw.draft.positions(players, coords, user)
+)
+
+App.Kaelin.Draw.draft.picks(players: Map<App.Kaelin.DraftInfo>, user: String): DOM
+let team   = App.Kaelin.Coord.draft.to_team(user, players)
+let player = players{user}
+let allies = Map.delete!(user, players)
+let hero   = case player{
+  none: none
+  some: player = player.value
+    player@hero 
+}
+DOM.node("div", {},
+  {"width": "70%",
    "height": "100%",
    "display": "flex"}
   [
-    App.Kaelin.Draw.draft.my_hero,
-    App.Kaelin.Draw.draft.my_allies
+    App.Kaelin.Draw.draft.picks_left(hero),
+    App.Kaelin.Draw.draft.picks_right(allies, team)
   ])
 
-App.Kaelin.Draw.draft.my_hero: DOM
+App.Kaelin.Draw.draft.picks_left(hero: Maybe(U8)): DOM
 DOM.node("div", {},
-  {"width": "40%",
-   "height": "100%",
-   "display": "flex",
-   "background-color": "cyan"
-   "padding": "5%"}
-      [App.Kaelin.Draw.draft.hero_card])
-
-App.Kaelin.Draw.draft.my_allies: DOM
-DOM.node("div", {},
-  {"width": "60%",
-   "height": "100%",
+  {"width": "40%"
+   "height": "100%"
    "display": "flex"
-   "background-color": "green"}
-   [])
+   "padding": "5%"
+   "box-sizing": "border-box"}
+      [App.Kaelin.Draw.draft.player(hero)])
 
-
-App.Kaelin.Draw.draft.bottom: DOM
+App.Kaelin.Draw.draft.picks_right(map: Map<App.Kaelin.DraftInfo>, team: String): DOM
   DOM.node("div", {},
-  {"width": "100%",
-   "height": "40%",
-   "display": "flex"}
-   [])
-
-
-App.Kaelin.Draw.draft.hero_card: DOM
-  DOM.node("div", {},
-    {
-      "width": "100%"
-      "height": "100%"
-      "display": "flex"
-      "border": "3px solid cyan"
-      "border-radius": "5px"
-      "flex-direction": "column"
-      "justify-content": "flex-start", 
-      "align-items": "center",
+  { "width": "60%"
+    "height": "100%"
+    "padding": "3%"
+    "display": "flex"
+    "flex-direction": "row"
+    "align-items": "center"
+    "box-sizing": "border-box"
     }
-    [
-      DOM.node("div", {}, {}, [DOM.text("hero@name")]),
-      DOM.node("div", {}, {"padding-top": "10%"}, [DOM.node("img", 
-      {"src": "data:image/gif;base64,R0lGODlhGAAYAPMAAAAAABYOIzUdTSojT1MeSN8+Rmo6hmlli4B9msPCzQAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/iZFZGl0ZWQgd2l0aCBlemdpZi5jb20gb25saW5lIEdJRiBtYWtlcgAh+QQNCgAKACwAAAAAGAAYAAAEkVDJSau9eIK9M95JmCCAR4HiWJoSkIYkq3C0ym6DoesDEHuA3G5o6GSCxKTRgkzucr5VBUAMBJ7U6AVw1VmtOpcP8TsRvmdwEUaWagpnAlztIreZ6UA+PLK7NV9WQnV+RwOHQgY9dmVMAwkHBwlYd4aQCJJYf1OPkWSTWJY+B22gBgmbGqgAAgKsrimpMrO0FREAIfkEDQoACgAsAAAAABgAGAAABI1QyUmrvVgBkLsGScJ5FhiKZGWGyJhqJ+umW721NDAYPD9sJF1vyJtdhEQi8LhL9nYAXIkYCDwBhqiUArDyqtWiCEE2aghgdDjLIm8lgAKaIF+b3O9zGixO4M1dYAFNG35uZnBNRD9/GDoJBwcJQ4x5E4+RZJNXiBoDYwdlmzwoJSEbAgIAqSunL6+wGBEAIfkEDQoACgAsAAAAABgAGAAABIxQyUmrvThrBfrWQJJ0wGeFYoJ45oSKyNpKLyybZK7eWTcYQOAAECv1fsGkgcirAJDKJNHohEYNv+kFoAwEgsNl8fQFer3AELNJI5zd6KWNzSm4CfY4KkYHwAN/aTtjZGcBSCR8VCcDCQcHCUlDWluNjzGRYENbTyMIB0WZQSNOKR0CAgCoNSKLM6+wEQAh+QQNCgAKACwAAAAAGAAYAAAEilDJSau9OOvNu1dAGH4TkJznSJpogqibKJ/Iq4WDoesDWwMYQG5HNPhsFWFxafolh0ue0eUsFQOBXW9aQ0oAWR0WqzMdvSDCWE2eorrAUkFNmLdZtOqXHeCX33olY1hDInloJQMJBwcJRD0AgYmLBzWOWpAWOAmRlS+XO5xJKCECAgCmeKQkrK0KEQAh+QQNCgAKACwAAAAAGAAYAAAEjlDJSau9OGsMwNZAknTfFYqIV1InqmZd3IloygGDoetDm9gW3G6oayGAEyGReDq+FMolz9BEQomBwK5HrT0BWl02WxzVrADCWE3u0o7ogpogbxudlfR6XD4/JWBjATlUVVYshEQ9cH+ICQcHCUOLjUkDjwdHkluVgJcACJkpmzojJiIdAgIAqj6mK7CxFxEAIfkEDQoACgAsAAAAABgAGAAABJBQyUmrvThrDfq+HZAkwEd144iUW+iqbNYNRl0P4srRdm8AOgyA5+sBYydi0UA7gnyBgA33C1YA0lo0WhMBEdYJgLAlc38qMFICKJAJ7rMoAQ6zzQF8l15fs7dRPHN1dmIDh0Q4hH6GCQcHCVNfjI0HCJCSlGwDjpYIkZIynECeIjYkMiQAAgKrrSmoJrKzGxEAOw=="}
-      {"width": "192px", "height": "192px"}, [])])
-      DOM.node("div", {}, {
-      "width": "100%"
-      "height": "100%"
-      "display": "flex"
-      "background-color": "black"} [])
-    
-    ])
+    App.Kaelin.Draw.draft.allies(map, team))
 
 
+App.Kaelin.Draw.draft.bottom_right: DOM
+DOM.node("div", {},
+  { "width": "15%"
+    "height": "auto"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"}
+  [ 
+    DOM.node("button", {"id": "Ready"}
+    { "background-color": "#4CAF50"
+      "border": "none"
+      "color": "white"
+      "padding": "32px"
+      "text-align": "center"
+      "text-decoration": "none"
+      "display": "inline-block"
+      "font-size": "32px"
+      "margin": "4px 2px"
+      "cursor": "pointer"}
+    [DOM.text("Ready")]
+    )
+  ])
+
+App.Kaelin.Draw.draft.bottom(players: Map<App.Kaelin.DraftInfo>): DOM
+heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+  DOM.node("div", {}
+  { "width": "100%"
+    //"max-width": "1440px" 
+    "height": "40%"
+    "display": "flex"
+    "background-image": "linear-gradient(#0e0c0e, #242324)"
+    "justify-content": "center"
+    "align-items": "center"}
+   [
+     App.Kaelin.Draw.draft.bottom_left(players)
+     App.Kaelin.Draw.draft.bottom_right
+   ]
+)
+
+App.Kaelin.Draw.draft.bottom_left(players: Map<App.Kaelin.DraftInfo>): DOM
+heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+  DOM.node("div", {},
+  { "width": "85%",
+    "height": "100%"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"}
+   [
+     DOM.node("div", {},
+     {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "width": "100%"},
+     List.map!!(App.Kaelin.Draw.draft.selection, heroes))
+   ]
+)
 
 
-
-
-// App.Kaelin.Draw.draft.hero_card(hero: App.Kaelin.Hero): DOM
-//   DOM.node("div", {}, 
-//     { 
-//       "padding": "5px",
-//       // "border": "2px solid black", 
-//       "margin": "0 2px", 
-//       "box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)", 
-//       "width": "250px",
-//       "border-radius": "5px"
-//     }, 
-//     [
-//       DOM.node("div", {}, {}, []),
-//       DOM.node("div", {}, {}, [DOM.text(hero@name)]),
-//       DOM.node("div", {}, {"display": "flex", "justify-content": "flex-end"}, [DOM.node("button", {"id": hero@name, "action": hero@name}, {"font-size": "16px", "padding": "2px"}, [DOM.text("Choose")])]),
-//     ]
-//   )
-    
+App.Kaelin.Draw.draft.croni: String
+"data:image/gif;base64,R0lGODlhGAAYAPMAAAAAABYOIzUdTSojT1MeSN8+Rmo6hmlli4B9msPCzQAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/iZFZGl0ZWQgd2l0aCBlemdpZi5jb20gb25saW5lIEdJRiBtYWtlcgAh+QQNCgAKACwAAAAAGAAYAAAEkVDJSau9eIK9M95JmCCAR4HiWJoSkIYkq3C0ym6DoesDEHuA3G5o6GSCxKTRgkzucr5VBUAMBJ7U6AVw1VmtOpcP8TsRvmdwEUaWagpnAlztIreZ6UA+PLK7NV9WQnV+RwOHQgY9dmVMAwkHBwlYd4aQCJJYf1OPkWSTWJY+B22gBgmbGqgAAgKsrimpMrO0FREAIfkEDQoACgAsAAAAABgAGAAABI1QyUmrvVgBkLsGScJ5FhiKZGWGyJhqJ+umW721NDAYPD9sJF1vyJtdhEQi8LhL9nYAXIkYCDwBhqiUArDyqtWiCEE2aghgdDjLIm8lgAKaIF+b3O9zGixO4M1dYAFNG35uZnBNRD9/GDoJBwcJQ4x5E4+RZJNXiBoDYwdlmzwoJSEbAgIAqSunL6+wGBEAIfkEDQoACgAsAAAAABgAGAAABIxQyUmrvThrBfrWQJJ0wGeFYoJ45oSKyNpKLyybZK7eWTcYQOAAECv1fsGkgcirAJDKJNHohEYNv+kFoAwEgsNl8fQFer3AELNJI5zd6KWNzSm4CfY4KkYHwAN/aTtjZGcBSCR8VCcDCQcHCUlDWluNjzGRYENbTyMIB0WZQSNOKR0CAgCoNSKLM6+wEQAh+QQNCgAKACwAAAAAGAAYAAAEilDJSau9OOvNu1dAGH4TkJznSJpogqibKJ/Iq4WDoesDWwMYQG5HNPhsFWFxafolh0ue0eUsFQOBXW9aQ0oAWR0WqzMdvSDCWE2eorrAUkFNmLdZtOqXHeCX33olY1hDInloJQMJBwcJRD0AgYmLBzWOWpAWOAmRlS+XO5xJKCECAgCmeKQkrK0KEQAh+QQNCgAKACwAAAAAGAAYAAAEjlDJSau9OGsMwNZAknTfFYqIV1InqmZd3IloygGDoetDm9gW3G6oayGAEyGReDq+FMolz9BEQomBwK5HrT0BWl02WxzVrADCWE3u0o7ogpogbxudlfR6XD4/JWBjATlUVVYshEQ9cH+ICQcHCUOLjUkDjwdHkluVgJcACJkpmzojJiIdAgIAqj6mK7CxFxEAIfkEDQoACgAsAAAAABgAGAAABJBQyUmrvThrDfq+HZAkwEd144iUW+iqbNYNRl0P4srRdm8AOgyA5+sBYydi0UA7gnyBgA33C1YA0lo0WhMBEdYJgLAlc38qMFICKJAJ7rMoAQ6zzQF8l15fs7dRPHN1dmIDh0Q4hH6GCQcHCVNfjI0HCJCSlGwDjpYIkZIynECeIjYkMiQAAgKrrSmoJrKzGxEAOw=="

@@ -5,5 +5,6 @@ App.Kaelin.Stage.action.end(glob: App.Kaelin.State.global): App.Kaelin.State.glo
       new_glob = glob@stage <- App.Kaelin.Stage.planning(0, 0)
       new_glob = new_glob@round <- new_glob@round + 1
       new_glob = new_glob@skills_list <- []
+      new_glob = new_glob@map <- App.Kaelin.Map.creature.restore_all_ap(new_glob@map)
       new_glob
   } default glob

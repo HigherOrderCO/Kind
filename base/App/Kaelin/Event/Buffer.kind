@@ -1,2 +1,5 @@
-App.Kaelin.Event.Buffer(A : Type) : Type
+App.Kaelin.Event.Buffer(
+  A: Type
+): Type
+
   List<U8> -> Parser<Pair<List<U8>, A>>

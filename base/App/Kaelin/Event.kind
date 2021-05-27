@@ -9,4 +9,9 @@ type App.Kaelin.Event {
   save_skill   ( player: String, target_pos: App.Kaelin.Coord, key: Char )
   remove_skill ( player: String, target_pos: App.Kaelin.Coord, key: Char )
   end_action
+  draft_hero   (hero: U8)
+  draft_coord  (coord: App.Kaelin.Coord)
+  draft_end
+  to_draft
+  draft_team   (team: U8)
 }

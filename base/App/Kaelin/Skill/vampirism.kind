@@ -1,4 +1,5 @@
 App.Kaelin.Skill.vampirism(
+  cost: I32,
   dmg: I32
 ): App.Kaelin.Effect<Unit>
 
@@ -6,10 +7,22 @@ App.Kaelin.Skill.vampirism(
     get center_pos = App.Kaelin.Effect.coord.get_center
     get target_pos = App.Kaelin.Effect.coord.get_target
     get map = App.Kaelin.Effect.map.get
-    get actual_dmg = App.Kaelin.Effect.hp.damage_at(dmg, target_pos)
-    if App.Kaelin.Map.is_occupied(target_pos, map) then
-      App.Kaelin.Effect.hp.heal_at(actual_dmg, center_pos)
-    else
-      App.Kaelin.Effect.hp.heal_at(0, center_pos)
-    return unit
+    let block = App.Kaelin.Coord.eql(target_pos, center_pos)
+    case block {
+      true: 
+        App.Kaelin.Effect { return unit }
+      false:
+        App.Kaelin.Effect {
+        get dd = App.Kaelin.Effect.hp.damage_at(dmg, target_pos)
+        App.Kaelin.Effect.hp.damage_at(dmg, target_pos)
+        App.Kaelin.Effect.hp.heal_at(dd, center_pos)
+          if I32.gtn(dd, 0) then
+            App.Kaelin.Effect {
+            App.Kaelin.Effect.ap.cost(cost, center_pos)
+            return unit
+            }
+          else
+            App.Kaelin.Effect { return unit }
+        }
+    }
   }

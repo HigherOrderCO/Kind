@@ -1,4 +1,4 @@
-App.Kaelin.Cast.start(
+App.Kaelin.CastInfo.start(
   player: String,
   key_code: U16,
   target_pos: App.Kaelin.Coord,

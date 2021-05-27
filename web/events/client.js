@@ -106,12 +106,12 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   ws.onopen = function() {
     if (on_init_callback) {
       on_init_callback();
-      // Pings time now, after 0.5s, after 1s, and then every 2s
-      setTimeout(ask_time, 0);
-      setTimeout(ask_time, 500);
-      setTimeout(ask_time, 1000);
-      setInterval(ask_time, 2000);
     }
+    // Pings time now, after 0.5s, after 1s, and then every 2s
+    setTimeout(ask_time, 0);
+    setTimeout(ask_time, 500);
+    setTimeout(ask_time, 1000);
+    setInterval(ask_time, 2000);
   };
 
   ws.onmessage = (msge) => {

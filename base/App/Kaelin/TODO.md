@@ -1,5 +1,7 @@
 TODO list on Kaelin
 
+- [ ] Add move and abilities to all heroes
+
 - [ ] Remove all non-local user address from when
 
 - [ ] remove user from user_input even in when.kind (URGENT!)
