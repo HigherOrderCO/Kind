@@ -352,7 +352,7 @@ Kind.Comp.Target.Scheme.base: String
         (eq? (get term 0) 'IO.ask)
         (eq? (get term 0) 'IO.end)))
     (run_io term)
-    (display term)))`
+    (print term)))`
 
 
 // Instantiators
