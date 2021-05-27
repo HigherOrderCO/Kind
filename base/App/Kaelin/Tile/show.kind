@@ -1,4 +1,7 @@
-App.Kaelin.Tile.show(tile: App.Kaelin.Tile): String
+App.Kaelin.Tile.show(
+  tile: App.Kaelin.Tile
+): String
+
   open tile
   let creature = case tile.creature {
     none: ""

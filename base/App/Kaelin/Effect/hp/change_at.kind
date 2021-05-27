@@ -11,9 +11,6 @@ App.Kaelin.Effect.hp.change_at(
     let dhp = res@fst
     let map = res@snd
     let indicators = NatMap.new!
-    let occupied = App.Kaelin.Map.is_occupied(pos, map)
-    if occupied then 
-      App.Kaelin.Effect {
     App.Kaelin.Effect.map.set(map)
     if I32.gtn(dhp, +0#32) then
       App.Kaelin.Effect.indicators.add(NatMap.set!(key, App.Kaelin.Indicator.green, indicators))
@@ -22,7 +19,4 @@ App.Kaelin.Effect.hp.change_at(
     else
       App.Kaelin.Effect { return unit }
     return dhp
-     }
-     else
-      App.Kaelin.Effect { return +0#32 }
-  }
+      }
