@@ -28,6 +28,7 @@ function find_base_dir() {
     process.chdir(path.join(full_path, "base"));
     find_base_dir();
   } else {
+    console.log("# Kind "+require("./../package.json").version);
     console.log("Couldn't find Kind/base directory.\n");
     console.log("Go to the directory to run Kind commands or clone the repository:");
     console.log("  git clone https://github.com/uwu-tech/Kind");
