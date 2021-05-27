@@ -338,7 +338,7 @@ Kind.Comp.Target.Scheme.base: String
 ; Runs a Kind IO program
 (define (run_io io)
   (case (get io 0)
-    ('IO.end (get io 0))
+    ('IO.end (get io 1))
     ('IO.ask (let (
       (io_query (get io 1))
       (io_param (get io 2))
