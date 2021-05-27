@@ -8,7 +8,7 @@ App.Kaelin.Map.creature.change_ap_at(
   creature = App.Kaelin.Map.creature.get(pos, map)
   case creature { 
     none:
-      {0, map}
+      {+0#32, map}
     some:
       open creature.value as creature
       open creature.hero as hero

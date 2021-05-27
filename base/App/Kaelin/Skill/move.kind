@@ -1,5 +1,4 @@
 App.Kaelin.Skill.move(
-  max_cost: I32,
   range: I32
 ): App.Kaelin.Skill
     
