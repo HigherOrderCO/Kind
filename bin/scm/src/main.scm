@@ -32,7 +32,13 @@
           (case snd_arg
             ("--scm"
               (display (run_io (Kind.api.io.term_to_scheme fst_arg))))
-            ;("--run")
+            ("--run"
+              ; TODO avoid recompiling baselibs here
+              (let ((code (run_io (Kind.api.io.term_to_scheme fst_arg)))
+                    (file "./.tmp.scm"))
+                (set_file file code)
+                (load-program file)
+                (delete-file file)))
             ;("--show")
             ;("--norm")
             ;("--js")

@@ -343,7 +343,16 @@ Kind.Comp.Target.Scheme.base: String
       (io_query (get io 1))
       (io_param (get io 2))
       (io_then (get io 3)))
-      (run_io (io_then ((io_action io_query) io_param)))))))`
+      (run_io (io_then ((io_action io_query) io_param)))))))
+(define (run_kind term)
+  (if
+    (and
+      (vector? term)
+      (or
+        (eq? (get term 0) 'IO.ask)
+        (eq? (get term 0) 'IO.end)))
+    (run_io term)
+    (display term)))`
 
 
 // Instantiators
@@ -584,4 +593,4 @@ Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
   for defn in defs_list with code:
     let {name,term} = defn
     code | Kind.Comp.Target.Scheme.definition(name, term, defs)
-  code
+  code|"\n(run_kind "|main|")"
