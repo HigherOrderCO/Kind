@@ -1,0 +1,48 @@
+// App states (local = clicks, global = visitors)
+App.Home.State: App.State
+  App.State.new(Unit, Unit)
+
+// Initial state
+App.Hello.init: App.Init<App.Hello.State>
+  App.Store.new<App.Hello.State>(0, 0)
+
+// Render function
+App.Hello.draw: App.Draw<App.Hello.State>
+  (state)
+  DOM.node("div", {}, {"border": "1px solid black"}, [
+    DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Hello, world!")])
+    DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
+    DOM.node("div", {}, {}, [DOM.text("Visits: " | Nat.show(state@global))])
+  ])
+
+// Event handler
+App.Hello.when: App.When<App.Hello.State>
+  (event, state)
+  case event {
+    init: IO {
+      App.watch!(App.room_zero)
+      App.new_post!(App.room_zero, App.empty_post)
+    }
+    mouse_down: IO {
+      App.set_local!(state@local + 1)
+    }
+  } default App.pass!
+
+// Global ticker: not used
+App.Hello.tick: App.Tick<App.Hello.State>
+  App.no_tick<App.Hello.State>
+
+// Global visitor: counts posts to room_zero
+App.Hello.post: App.Post<App.Hello.State>
+  (time, room, addr, data, global_state)
+  global_state + 1
+
+// A "Hello, world!" + counter application
+App.Hello: App<App.Hello.State>
+  App.new<App.Hello.State>(
+    App.Hello.init
+    App.Hello.draw
+    App.Hello.when
+    App.Hello.tick
+    App.Hello.post
+  )

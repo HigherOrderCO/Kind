@@ -1,15 +1,5 @@
 Test: _
   IO {
-    let name = "Kind.api.export"
-    get defs = Kind.Synth.one(name, Kind.Map.new!)
-    case defs {
-      none: 
-        IO.print("failed")
-      some: IO {
-        let compiled = Kind.Comp.Defs.compile(defs.value)
-        let schemed = Kind.Comp.Target.SchemeIstr(name, compiled)
-        get u = IO.set_file("./../bin/scm/src/kind.scm", schemed)
-        return u
-      }
-    }
+    get file = IO.request("http://localhost:7172/../package.json")
+    IO.print(file)
   }
