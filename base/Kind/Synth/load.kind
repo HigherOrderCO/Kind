@@ -95,13 +95,24 @@ Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
     }
   }
 
+Kind.Synth.get_kind_code(file: String): IO(String)
+  IO {
+    get code = IO.get_file(file)
+    if String.eql(code,"") then IO {
+      get code = IO.request("http://uwu.tech:7172/" | file)
+      return code;
+    } else IO {
+      return code;
+    }
+  }
+
 Kind.Synth.load.go(name: String, files: List<String>, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
   case files {
     nil: IO {
       return none
     }
     cons: IO {
-      get code = IO.get_file(files.head)
+      get code = Kind.Synth.get_kind_code(files.head)
       let read = Kind.Defs.read(files.head, code, defs)
       case read {
         left: Kind.Synth.load.go(name, files.tail, defs)
