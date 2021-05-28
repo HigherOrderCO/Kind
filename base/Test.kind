@@ -1,5 +1,5 @@
 Test: _
   IO {
-    get file = IO.request("http://localhost:7172/../package.json")
+    get file = IO.request("http://uwu.tech:7172/fuu.kind")
     IO.print(file)
   }
