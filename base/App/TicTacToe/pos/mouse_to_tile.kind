@@ -11,6 +11,6 @@ side_tale : U32
 App.TicTacToe.pos.mouse_to_tile(pos : U32) : U32
   if U32.gtn(pos,edge) then 
     if U32.ltn(pos,(side_board-edge)) then
-      U32.div(pos,side_tale)
+      pos/side_tale
     else 10#32
   else 10#32

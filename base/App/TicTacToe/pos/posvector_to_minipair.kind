@@ -1,4 +1,4 @@
-// Captura a posicao em vetor (1-9) e transforma em coordenadas cartedianas
+// Captura a posicao em vetor (1-9) e transforma em coordenadas cartesianas simplificadas
 // Exemplo: 1 = (0, 0) 
 App.TicTacToe.pos.posvector_to_minipair(posvector : U32 ) : Pair<U32, U32>
-  Pair.new!!(U32.div((posvector-1),3), U32.mod((posvector-1),3))
+  Pair.new!!((posvector-1/3), U32.mod((posvector-1),3))

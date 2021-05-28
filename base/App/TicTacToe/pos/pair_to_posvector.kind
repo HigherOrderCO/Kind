@@ -13,4 +13,4 @@ side_tale : U32
 App.TicTacToe.pos.pair_to_posvector(pair : Pair<U32, U32>) : U32
   let trans = App.TicTacToe.pos.pair_to_minipair(pair)
   open trans
-  (trans.snd+1#32)+(trans.fst*3#32)
+  (trans.snd+1)+(trans.fst*3)
