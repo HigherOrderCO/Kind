@@ -24,9 +24,9 @@ function find_base_dir() {
   //} else if (local_dir.indexOf("Kind") !== -1) {
     //process.chdir(path.join(full_path, "Kind"));
     //find_base_dir();
-  //} else if (local_dir.indexOf("base") !== -1) {
-    //process.chdir(path.join(full_path, "base"));
-    //find_base_dir();
+  } else if (local_dir.indexOf("base") !== -1 && full_path.slice(-5).toLowerCase() === "/kind") {
+    process.chdir(path.join(full_path, "base"));
+    find_base_dir();
   //} else {
     //console.log("# Kind "+require("./../package.json").version);
     //console.log("Couldn't find Kind/base directory.\n");
