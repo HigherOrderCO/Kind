@@ -1,5 +1,58 @@
-Test: _
-  IO {
-    get file = IO.request("http://uwu.tech:7172/fuu.kind")
-    IO.print(file)
+Vector(A: Type, len: Nat): Type
+  case len {
+    zero:
+      self(P: (self: Vector(A,0)) Type) ->
+      (nil: P(Vector.nil(A))) ->
+      P(self)
+    succ:
+      self(P: (self: Vector(A,Nat.succ(len.pred))) Type) ->
+      (cons: (head: A) -> (tail: Vector(A, len.pred)) -> P(Vector.cons(A,len.pred,head,tail))) ->
+      P(self)
   }
+
+Vector.nil(A: Type): Vector(A, 0)
+  (self, nil) nil
+
+Vector.cons(A: Type, len: Nat, head: A, tail: Vector(A, len)): Vector(A, Nat.succ(len))
+  (self, cons) cons(head, tail)
+
+Test: _
+  let v = Vector.nil(Nat)
+  case v {
+    nil: "foo"
+  }
+
+
+
+
+
+
+
+
+
+//Test: _
+  //let v = Vector.from_list!([1, 2, 3])
+  //let e = refl
+  //case v with e: v.size == 3 {
+    //nil: 
+      //let e = mirror(apply((x) Nat.sub(x,2), e))
+      //let k = Nat.one_neq_zero(e)
+      //Empty.absurd!(k)
+    //ext:
+      //"foo"
+  //}
+
+
+
+
+
+
+//Vector
+
+
+//Test: _
+  //IO {
+    
+    ////get file = IO.request("http://uwu.tech:7172/fuu.kind")
+    ////IO.print(file)
+  //}

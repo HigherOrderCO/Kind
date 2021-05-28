@@ -3302,15 +3302,14 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "request": 
               return fetch(encodeURI(io.param))
-              .then(result => result.text())
-              .then(result => this.run_io(io.then(result)))
-              .then(res)
-              .catch(err => {
-                let msg = err.message;
-                let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
-                this.run_io(
-                  io.then("Oops, something went wrong: "+ msg + call_fix))
-              });
+                .then(result => result.text())
+                .then(result => this.run_io(io.then(result)))
+                .then(res)
+                .catch(err => {
+                  let msg = err.message;
+                  let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
+                  this.run_io(io.then("Oops, something went wrong: "+ msg + call_fix))
+                });
             case "watch":
               if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
@@ -3508,6 +3507,7 @@ module.exports = {
 
 module.exports = {
   'App.Hello': __webpack_require__.e(/* import() */ 130).then(__webpack_require__.t.bind(__webpack_require__, 130, 23)),
+  'App.Home': __webpack_require__.e(/* import() */ 821).then(__webpack_require__.t.bind(__webpack_require__, 821, 23)),
   'App.Kind': __webpack_require__.e(/* import() */ 317).then(__webpack_require__.t.bind(__webpack_require__, 317, 23)),
   'App.MiniMMO': __webpack_require__.e(/* import() */ 661).then(__webpack_require__.t.bind(__webpack_require__, 661, 23)),
   'App.Playground': __webpack_require__.e(/* import() */ 737).then(__webpack_require__.t.bind(__webpack_require__, 737, 23)),

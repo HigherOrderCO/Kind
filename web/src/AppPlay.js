@@ -342,15 +342,14 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "request": 
               return fetch(encodeURI(io.param))
-              .then(result => result.text())
-              .then(result => this.run_io(io.then(result)))
-              .then(res)
-              .catch(err => {
-                let msg = err.message;
-                let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
-                this.run_io(
-                  io.then("Oops, something went wrong: "+ msg + call_fix))
-              });
+                .then(result => result.text())
+                .then(result => this.run_io(io.then(result)))
+                .then(res)
+                .catch(err => {
+                  let msg = err.message;
+                  let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
+                  this.run_io(io.then("Oops, something went wrong: "+ msg + call_fix))
+                });
             case "watch":
               if (utils.is_valid_hex(56, io.param)) {
                 window.KindEvents.watch_room(io.param);
