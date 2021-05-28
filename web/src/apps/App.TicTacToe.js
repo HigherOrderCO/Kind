@@ -2794,7 +2794,6 @@ module.exports = (function() {
     };
     const Word$show = x0 => x1 => Word$show$(x0, x1);
     const U32$show = a0 => (a0 + "#32");
-    const U32$div = a0 => a1 => ((a0 / a1) >>> 0);
 
     function Word$gtn$(_a$2, _b$3) {
         var $529 = Cmp$as_gtn$(Word$cmp$(_a$2, _b$3));
@@ -2802,6 +2801,9 @@ module.exports = (function() {
     };
     const Word$gtn = x0 => x1 => Word$gtn$(x0, x1);
     const U32$gtn = a0 => a1 => (a0 > a1);
+    const U32$div = a0 => a1 => ((a0 / a1) >>> 0);
+    const App$TicTacToe$constant$edge = ((App$TicTacToe$constant$size / 12) >>> 0);
+    const edge = App$TicTacToe$constant$edge;
 
     function Word$ltn$(_a$2, _b$3) {
         var $530 = Cmp$as_ltn$(Word$cmp$(_a$2, _b$3));
@@ -2810,15 +2812,15 @@ module.exports = (function() {
     const Word$ltn = x0 => x1 => Word$ltn$(x0, x1);
     const U32$ltn = a0 => a1 => (a0 < a1);
     const U32$sub = a0 => a1 => ((a0 - a1) >>> 0);
+    const App$TicTacToe$constant$side_tale = ((App$TicTacToe$constant$size / 3) >>> 0);
+    const side_tale = App$TicTacToe$constant$side_tale;
 
     function App$TicTacToe$mouse_to_tile$(_pos$1) {
-        var _edge$2 = ((side_board / 12) >>> 0);
-        var _side_tale$3 = ((side_board / 3) >>> 0);
-        var self = (_pos$1 > _edge$2);
+        var self = (_pos$1 > edge);
         if (self) {
-            var self = (_pos$1 < ((side_board - _edge$2) >>> 0));
+            var self = (_pos$1 < ((side_board - edge) >>> 0));
             if (self) {
-                var $533 = ((_pos$1 / _side_tale$3) >>> 0);
+                var $533 = ((_pos$1 / side_tale) >>> 0);
                 var $532 = $533;
             } else {
                 var $534 = 10;
@@ -2834,8 +2836,6 @@ module.exports = (function() {
     const App$TicTacToe$mouse_to_tile = x0 => App$TicTacToe$mouse_to_tile$(x0);
 
     function App$TicTacToe$pair_to_board$(_pair$1) {
-        var _edge$2 = ((side_board / 12) >>> 0);
-        var _side_tale$3 = ((side_board / 3) >>> 0);
         var self = _pair$1;
         switch (self._) {
             case 'Pair.new':
@@ -3154,12 +3154,16 @@ module.exports = (function() {
         'Nat.show': Nat$show,
         'Word.show': Word$show,
         'U32.show': U32$show,
-        'U32.div': U32$div,
         'Word.gtn': Word$gtn,
         'U32.gtn': U32$gtn,
+        'U32.div': U32$div,
+        'App.TicTacToe.constant.edge': App$TicTacToe$constant$edge,
+        'edge': edge,
         'Word.ltn': Word$ltn,
         'U32.ltn': U32$ltn,
         'U32.sub': U32$sub,
+        'App.TicTacToe.constant.side_tale': App$TicTacToe$constant$side_tale,
+        'side_tale': side_tale,
         'App.TicTacToe.mouse_to_tile': App$TicTacToe$mouse_to_tile,
         'App.TicTacToe.pair_to_board': App$TicTacToe$pair_to_board,
         'App.TicTacToe.pair_to_pos': App$TicTacToe$pair_to_pos,

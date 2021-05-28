@@ -1,0 +1,16 @@
+side_board : U32
+  App.TicTacToe.constant.size
+  
+edge : U32
+  App.TicTacToe.constant.edge
+
+side_tale : U32
+  App.TicTacToe.constant.side_tale
+
+    
+// Captura a informação em coordenadas de pares do tabuleiro e transforma pra posicao do vetor 1-9
+// Exemplo: (0, 0) = (0+1)+(0*3)=1
+App.TicTacToe.pair_to_posvector(pair : Pair<U32, U32>) : U32
+  let trans = App.TicTacToe.pair_to_minipair(pair)
+  open trans
+  (trans.snd+1#32)+(trans.fst*3#32)

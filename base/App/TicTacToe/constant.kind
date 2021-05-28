@@ -1,2 +1,8 @@
 App.TicTacToe.constant.size : U32
   256
+
+App.TicTacToe.constant.edge : U32
+  App.TicTacToe.constant.size/12
+
+App.TicTacToe.constant.side_tale : U32
+  App.TicTacToe.constant.size/3
