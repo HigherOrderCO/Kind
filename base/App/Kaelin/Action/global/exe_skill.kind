@@ -4,29 +4,4 @@ App.Kaelin.Action.global.exe_skill(
   key: U16
   global: App.Kaelin.State.global, 
 ): App.Kaelin.State.global
-
-  open global
-  result = Maybe { 
-    get info = App.Kaelin.Map.player.info(player, global@map)
-    let creature = info@snd
-    let hero_pos = info@fst
-    let hero = creature@hero
-    get skill = List.find!((x) U16.eql(x@key, key), hero@skills)
-    let effect = skill@effect(hero_pos, mouse_pos, global.map)
-    let mouse_nat = App.Kaelin.Coord.Convert.axial_to_nat(mouse_pos)
-    let skill_range = App.Kaelin.Coord.range_natset(hero_pos, skill@range)
-    let AP = 
-    if I32.eql(creature@ap, 0) then
-      global
-    else
-      global@map <- effect@map
-
-    let global =
-    if NatSet.has(mouse_nat, skill_range) then
-      AP
-    else
-      global
-
-  return global
-  }
-  result <> global
+  global@map <- App.Kaelin.Map.exe_skill(player, mouse_pos, key, global@map)

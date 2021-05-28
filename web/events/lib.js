@@ -96,7 +96,7 @@ function check_hex(bits, hex) {
   if ((hex.length - 2) * 4 > bits) {
     hex = hex.slice(0, Math.floor(bits / 4) + 2);
   }
-  return hex;
+  return hex.toLowerCase();
 };
 
 var utf8_encoder = new TextEncoder("utf-8");

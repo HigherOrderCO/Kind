@@ -7,14 +7,16 @@ App.Kaelin.CastInfo.start(
 
   open global
   result = Maybe {
+    // get local map
+    get map = App.Kaelin.Stage.planning.get_map(global.stage)
     // get player info and skill
-    get player_info = App.Kaelin.Map.player.info(player, global.map)
+    get player_info = App.Kaelin.Map.player.info(player, map)
     let player_coord = player_info@fst
     let player_creature = player_info@snd
     get skill = App.Kaelin.Hero.skill.from_key(key_code, player_creature@hero)
     //calculate range and area of skill
     let range = App.Kaelin.Coord.range_natset(player_coord, skill@range)
-    let area = App.Kaelin.Effect.indicators.get_indicators(player_coord, skill, target_pos, global.map)
+    let area = App.Kaelin.Effect.indicators.get_indicators(player_coord, skill, target_pos, map)
     // create and return cast
     let cast = App.Kaelin.CastInfo.local.new(
       player_coord,
