@@ -5,7 +5,8 @@ App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
 
   let seconds = case global.stage { planning: some(global.stage.seconds) } default none
   let is_planning = case global.stage { planning: true } default false
-  
+  let map_to_draw = case global.stage { planning: global.stage.local_map } default global.map
+
   DOM.node("div", 
           {}, 
           { "width": "100vw", 
@@ -19,7 +20,7 @@ App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
           [
             DOM.node("div", {}, {"margin-bottom": "10px"}, App.Kaelin.Draw.game.round(seconds, global.round)),
             DOM.node("div", {}, {}, [
-              DOM.vbox({"width": "512"}, {"border": "none", "image-rendering": "pixelated"}, App.Kaelin.Draw.map(img, state))
+              DOM.vbox({"width": "512"}, {"border": "none", "image-rendering": "pixelated"}, App.Kaelin.Draw.map(img, map_to_draw, state))
             ]),
             DOM.node(
               "div", 
