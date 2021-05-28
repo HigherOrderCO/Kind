@@ -1,7 +1,6 @@
-Vector.fill(A : Type, v : A, size : Nat) : Vector<A, size>
+Vector.fill(A : Type, size : Nat, x : A) : Vector<A, size>
   case size {
-      zero : Vector.nil(A)
-      succ : 
-        let rec = Vector.fill(A, v, size.pred) :: Vector(A, size.pred)
-        Vector.ext(A, size.pred, v, rec) :: Vector(A, Nat.succ(size.pred))
+    zero : Vector.nil!
+    succ : let pred = Vector.fill(A, size.pred, x)
+           Vector.cons(A, size.pred, x, pred)
   }!

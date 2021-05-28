@@ -17,4 +17,6 @@ App.TicTacToe.draw(img: VoxBox): App.Draw<App.TicTacToe.State>
 (state)
      let img = App.TicTacToe.draw_vertical_lines(img)
      let img = App.TicTacToe.draw_horizontal_lines(img)
+     open state
+     
      DOM.vbox({}, {}, img)

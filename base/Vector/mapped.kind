@@ -1,8 +1,12 @@
 Vector.mapped<A: Type, size: Nat>(vector: Vector<A, size>)<B: Type>(fn: A -> B): Vector<B, size>
-  case vector {
-    nil:
-      Vector.nil<B>
-    ext: 
-      let rest = Vector.mapped<A, vector.size>(vector.tail)<B>(fn)
-      Vector.ext<B, vector.size>(fn(vector.head), rest)
+  case size with vector {
+    zero : case vector {
+      nil : Vector.nil!
+    }
+    succ : 
+      case vector {
+        cons : 
+          let pred = Vector.mapped(A, size.pred, vector.tail, B, fn)
+          Vector.cons(B, size.pred, fn(vector.head), pred)
+      }
   }!
