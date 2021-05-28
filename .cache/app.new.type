@@ -1,0 +1,1 @@
+%(S:App.State) @(init:(App.Init S)) @(draw:(App.Draw S)) @(when:(App.When S)) @(tick:(App.Tick S)) @(post:(App.Post S)) (App S)

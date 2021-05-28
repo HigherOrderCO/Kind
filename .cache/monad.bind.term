@@ -1,0 +1,1 @@
+#M #m ((m #m %(A:*) %(B:*) @(:(M A)) @(:@(:A) (M B)) (M B)) #m.bind #m.pure m.bind)

@@ -1,0 +1,3 @@
+type App.Kaelin.Terrain { 
+  new(draw: App.Kaelin.Indicator -> VoxBox)
+}

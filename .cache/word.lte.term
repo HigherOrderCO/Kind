@@ -1,0 +1,1 @@
+#size #a #b (Cmp.as_lte (((Word.cmp size) a) b))

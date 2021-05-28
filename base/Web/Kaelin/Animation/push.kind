@@ -1,8 +1,0 @@
-Web.Kaelin.Animation.push(coord : Web.Kaelin.Coord,
-                          sprite : Web.Kaelin.Sprite
-                          map : Web.Kaelin.Map,
-                          tick : Nat
-                          ) : Web.Kaelin.Map
-  
-  Web.Kaelin.Map.push(coord, Web.Kaelin.Entity.animation(Web.Kaelin.Animation.new(tick, sprite)), map)
-  

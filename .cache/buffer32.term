@@ -1,0 +1,1 @@
+%Buffer32.Self(P:@(:Buffer32) *) @(new:@(depth:Nat) @(array:((Array U32) depth)) (P ((Buffer32.new depth) array))) (P Buffer32.Self)

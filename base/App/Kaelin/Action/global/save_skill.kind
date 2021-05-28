@@ -1,0 +1,17 @@
+App.Kaelin.Action.global.save_skill(
+  user: String,
+  target_pos: App.Kaelin.Coord,
+  key: U16,
+  team: App.Kaelin.Team,
+  global: App.Kaelin.State.global
+): App.Kaelin.State.global
+  open global
+  log(App.Kaelin.Coord.show(target_pos))
+  case global.stage {
+    planning: 
+      new_map = App.Kaelin.Map.exe_skill(user, target_pos, key, global.stage.local_map)
+      global  = global@skills_list <- List.cons!({user, target_pos, key, team}, global@skills_list)
+      global  = global@stage <- App.Kaelin.Stage.planning(global.stage.local_tick, global.stage.seconds, new_map)
+      global
+  } default global
+  

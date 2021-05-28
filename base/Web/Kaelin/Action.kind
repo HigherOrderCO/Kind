@@ -1,5 +1,0 @@
-type Web.Kaelin.Action {
-  walk
-  ability_0
-  ability_1
-}

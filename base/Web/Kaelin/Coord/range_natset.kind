@@ -1,4 +1,0 @@
-Web.Kaelin.Coord.range_natset(coord: Web.Kaelin.Coord, distance: I32): NatSet
-  let range = Web.Kaelin.Coord.range(coord, distance)
-  let range = List.map!!(Web.Kaelin.Coord.Convert.axial_to_nat, range)
-  NatSet.from_list(range)

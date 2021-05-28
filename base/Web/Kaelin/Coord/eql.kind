@@ -1,4 +1,0 @@
-Web.Kaelin.Coord.eql(a:Web.Kaelin.Coord, b:Web.Kaelin.Coord): Bool
-  open a
-  open b
-  Bool.and(I32.eql(a.i,b.i), I32.eql(a.j, b.j))

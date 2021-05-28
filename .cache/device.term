@@ -1,0 +1,1 @@
+%Device.Self(P:@(:Device) *) @(phone:(P Device.phone)) @(tablet:(P Device.tablet)) @(desktop:(P Device.desktop)) @(big_desktop:(P Device.big_desktop)) (P Device.Self)

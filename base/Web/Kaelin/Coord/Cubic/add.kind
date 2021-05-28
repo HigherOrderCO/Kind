@@ -1,7 +1,0 @@
-Web.Kaelin.Coord.Cubic.add(a: Web.Kaelin.Coord.Cubic, b: Web.Kaelin.Coord.Cubic): Web.Kaelin.Coord.Cubic
-  open a
-  open b
-  let x = I32.add(a.x, b.x)
-  let y = I32.add(a.y, b.y)
-  let z = I32.add(a.z, b.z)
-  Web.Kaelin.Coord.Cubic.new(x, y, z)

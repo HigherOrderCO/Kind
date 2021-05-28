@@ -1,3 +1,0 @@
-Web.Kaelin.Effect.coord.get_center: Web.Kaelin.Effect<Web.Kaelin.Coord>
-  (tick, center, target, map)
-  Web.Kaelin.Effect.Result.new!(center, map, [], NatMap.new!)

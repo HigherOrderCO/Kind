@@ -1,0 +1,1 @@
+%DOM.Self(P:@(:DOM) *) @(node:@(tag:String) @(props:(Map String)) @(style:(Map String)) @(children:(List DOM)) (P ((((DOM.node tag) props) style) children))) @(vbox:@(props:(Map String)) @(style:(Map String)) @(value:VoxBox) (P (((DOM.vbox props) style) value))) @(text:@(value:String) (P (DOM.text value))) (P DOM.Self)

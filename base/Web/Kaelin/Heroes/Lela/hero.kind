@@ -1,7 +1,0 @@
-Web.Kaelin.Heroes.Lela.hero: Web.Kaelin.Hero
-  Web.Kaelin.Hero.new(
-    "Lela", 
-    Web.Kaelin.Assets.hero.lela_d_1,
-    +25#32,
-    []
-  )

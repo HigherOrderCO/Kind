@@ -1,2 +1,0 @@
-Web.Kaelin.Effect.hp.heal(heal: I32): Web.Kaelin.Effect<I32>
-  Web.Kaelin.Effect.hp.change(heal)

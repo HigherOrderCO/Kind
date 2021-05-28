@@ -1,0 +1,233 @@
+// App State
+// =========
+
+type App.Browser.State.Local {
+  new(
+    file: String
+    code: String
+    post: String
+  )
+}
+
+type App.Browser.State.Global {
+  new(
+    room: List(String)
+  )
+}
+
+App.Browser.State: App.State
+  App.State.new(App.Browser.State.Local, App.Browser.State.Global)
+
+App.Browser.init: App.Init<App.Browser.State>
+  let local = App.Browser.State.Local.new("", "", "")
+  let global = App.Browser.State.Global.new([])
+  App.Store.new<App.Browser.State>(local, global)
+
+App.Browser.State.Local.get_room_serial(local: App.Browser.State.Local): String
+  if String.eql(local@file, "") then
+    "0x96519848196548"
+  else
+    String.pad_right_exact(16, '0', String.serialize_ascii(local@file)) // TODO: hash
+
+App.Browser.State.Local.get_post_serial(local: App.Browser.State.Local): String
+  String.pad_right_exact(66, '0', String.serialize(local@post))
+
+// App Interface
+// =============
+
+App.Browser.draw.block(child: List(DOM)): DOM
+  DOM.node("div", {}, {
+      "border-radius": "16px"
+      "background-color": "rgb(245,245,245)"
+      "width": "100%"
+      "padding": "10px"
+      "margin-bottom": "12px"
+    }, child)
+
+App.Browser.draw: App.Draw<App.Browser.State>
+  (state)
+  let local = state@local
+  let global = state@global
+  DOM.node("div", {}, {
+    "display": "flex"
+    "flex-flow": "row nowrap"
+    "justify-content": "center"
+    "padding-top": "12px"
+  }, [
+
+    // Left menu
+    DOM.node("div", {}, {}, [
+      DOM.node("img", {
+        "src": App.Browser.img.uwu_logo
+      }, {
+        "transform": "scale(0.666)"
+      }, [])
+    ])
+
+    // Body
+    DOM.node("div", {}, {
+      "width": "640px"
+    }, [
+
+      // Code panel
+      App.Browser.draw.block([
+        // Code input
+        DOM.node("div", {}, {}, [
+          DOM.node("input",
+            {
+              "id": "file"
+              "placeholder": "File name"
+              "autocomplete": "off"
+            },
+            {
+              "outline": "none"
+            }, [])
+          DOM.node("span", {"id": "check"}, {"margin-left": "8px", "cursor": "pointer"}, [DOM.text("check")])
+          DOM.node("span", {"id": "run"}, {"margin-left": "8px", "cursor": "pointer"}, [DOM.text("run")])
+          DOM.node("span", {"id": "edit"}, {"margin-left": "8px", "cursor": "pointer"}, [DOM.text("edit")])
+        ])
+
+        // Code block
+        DOM.node("pre", {}, {
+          "margin-top": "8px",
+          "padding": "4px"
+          "font-family": "monospace"
+          "background-color": "rgb(230,230,230)"
+          "overflow-x": "scroll"
+        }, [
+          DOM.text(
+            if String.eql(local@code,"") then
+              "Empty file."
+            else
+              local@code
+          )
+        ])
+      ]),
+
+      // Comments list
+      let room = global@room
+      App.Browser.draw.block(case room {
+        nil: [DOM.text("No comment yet.")]
+        cons: List.mapped!(room)!((comment) DOM.node("div", {}, {}, [DOM.text(comment)]))
+      })
+
+      // Comment sender
+      App.Browser.draw.block([
+        DOM.node("div", {}, {}, [DOM.text("Write a short, kind comment:")])
+        DOM.node("textarea", {
+            "id": "comment"
+            "maxlength": "16"
+          }, {
+            "height": "64px"
+            "width": "calc(100% - 24px)"
+            "margin": "12px"
+            "padding": "6px"
+          }, [])
+        DOM.node("div", {"id": "post"}, {
+            "margin": "0px 12px"
+            "border": "1px solid rgb(120, 150, 120)"
+            "border-radius": "10px"
+            "width": "200px"
+            "height": "24px"
+            "cursor": "pointer"
+            "font-size": "14px"
+            "background-color": "rgb(200, 230, 200)",
+            "display": "flex"
+            "justify-content": "center"
+            "align-items": "center"
+          }, [DOM.text("Send post.") ])
+      ])
+
+    ])
+
+    // Right menu
+    DOM.node("div", {}, {
+      "font-weight": "bold"
+      "width": "42px"
+      "height": "42px"
+      "border-radius": "21px"
+      "background-color": "green"
+      "margin": "8px 16px",
+      "display": "flex"
+      "justify-content": "center"
+      "align-items": "center"
+      "color": "white"
+    }, [
+      DOM.text("User")
+    ])
+  ])
+
+// App Events
+// ==========
+
+App.Browser.when: App.When<App.Browser.State>
+  (event, state)
+  let local = state@local
+  case event {
+    init: IO { 
+      App.watch!(App.Browser.State.Local.get_room_serial(local))
+    }
+    input: switch String.eql(event.id) {
+      "file": IO {
+        get code = IO.request("http://uwu.tech:7172/" | event.text)
+        App.unwatch!(App.Browser.State.Local.get_room_serial(local))
+        let local = local@file <- event.text
+        let local = local@code <- code
+        App.watch!(App.Browser.State.Local.get_room_serial(local))
+        App.set_local!(local)
+      }
+      "comment": IO {
+        let local = local@post <- event.text
+        App.set_local!(local)
+      }
+    } default App.pass!
+    mouse_click: switch String.eql(event.id) {
+      "check": IO {
+        //IO.print("disabled")
+        get result = Kind.api.io.check_code(local@code)
+        IO.print(result)
+        App.pass!
+      }
+      "run": IO {
+        IO.print("TODO")
+        App.pass!
+      }
+      "edit": IO {
+        IO.print("TODO")
+        App.pass!
+      }
+      "post": IO {
+        //IO.print(local@post)
+        App.new_post!(
+          App.Browser.State.Local.get_room_serial(local),
+          App.Browser.State.Local.get_post_serial(local))
+        App.pass!
+      }
+    } default App.pass!
+  } default App.pass!
+
+// App Globals
+// ===========
+
+// Global ticker: not used
+App.Browser.tick: App.Tick<App.Browser.State>
+  App.no_tick<App.Browser.State>
+
+// Global visitor: counts posts to room_zero
+App.Browser.post: App.Post<App.Browser.State>
+  (time, room, addr, data, global)
+  //log("..." | room | " " | addr | " " | data)
+  global@room <- String.deserialize(data) & global@room
+
+// App
+// ===
+
+// A "Browser, world!" + counter application
+App.Browser: App<App.Browser.State>
+  App.new<App.Browser.State>(
+    App.Browser.init
+    App.Browser.draw
+    App.Browser.when
+    App.Browser.tick
+    App.Browser.post
+  )

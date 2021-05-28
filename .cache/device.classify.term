@@ -1,0 +1,1 @@
+#width (((((U32.lte width) (Nat.to_u32 +600)) # Device) Device.phone) (((((U32.lte width) (Nat.to_u32 +768)) # Device) Device.tablet) (((((U32.lte width) (Nat.to_u32 +992)) # Device) Device.desktop) Device.big_desktop)))

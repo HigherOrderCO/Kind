@@ -1,0 +1,1 @@
+@(head:Char) @(tail:String) String

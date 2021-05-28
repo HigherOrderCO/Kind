@@ -1,2 +1,0 @@
-Web.Kaelin.Event.Buffer : Type
-  Pair<String, List<U8>>

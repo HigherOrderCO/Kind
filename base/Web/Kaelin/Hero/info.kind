@@ -1,8 +1,0 @@
-Web.Kaelin.Hero.info(name: String): Web.Kaelin.Hero
-  switch String.eql(name) {
-    "Croni": Web.Kaelin.Heroes.Croni.hero
-    "Cyclope": Web.Kaelin.Heroes.Cyclope.hero
-    "Lela": Web.Kaelin.Heroes.Lela.hero
-    "Octoking": Web.Kaelin.Heroes.Octoking.hero
-   } default Web.Kaelin.Heroes.Croni.hero
-   

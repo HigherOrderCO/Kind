@@ -1,0 +1,20 @@
+App.Kaelin.Effect.ap.change_at(
+  change: I32
+  pos: App.Kaelin.Coord
+): App.Kaelin.Effect<I32>
+
+  App.Kaelin.Effect {
+    get map = App.Kaelin.Effect.map.get
+    get center_pos = App.Kaelin.Effect.coord.get_center
+    let key = App.Kaelin.Coord.Convert.axial_to_nat(pos)
+    let res = App.Kaelin.Map.creature.change_ap_at(change, pos, map)    
+    let apc = res@fst
+    let map = res@snd
+    let indicators = NatMap.new!
+    App.Kaelin.Effect.map.set(map)
+    if I32.gtn(apc, 0) then
+      App.Kaelin.Effect.indicators.add(NatMap.set!(key, App.Kaelin.Indicator.green, indicators))
+    else
+      App.Kaelin.Effect { return unit }
+    return apc
+    }

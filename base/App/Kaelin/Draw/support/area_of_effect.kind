@@ -1,0 +1,14 @@
+App.Kaelin.Draw.support.area_of_effect(
+  coord: App.Kaelin.Coord,
+  coord_nat: Nat,
+  cast_info: Maybe(App.Kaelin.CastInfo.local),
+): Maybe(App.Kaelin.Indicator)
+
+  Maybe { 
+    get cast = cast_info
+    mouse_pos = App.Kaelin.Coord.Convert.axial_to_nat(cast@mouse_pos)
+    if NatSet.has(mouse_pos, cast@range) then
+      NatMap.get!(coord_nat, cast@area)
+    else
+      none
+  }

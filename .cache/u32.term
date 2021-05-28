@@ -1,0 +1,1 @@
+%U32.Self(P:@(:U32) *) @(new:@(value:(Word +32)) (P (U32.new value))) (P U32.Self)

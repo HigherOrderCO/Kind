@@ -1,0 +1,1 @@
+#window #state ((state #state App.Playground.State.local) #state.device #state.window #state.mouse_over #state.code #state.output #state.kind_version ((((((App.Playground.State.local.new state.device) window) state.mouse_over) state.code) state.output) state.kind_version))

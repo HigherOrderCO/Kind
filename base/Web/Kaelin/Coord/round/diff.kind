@@ -1,9 +1,0 @@
-Web.Kaelin.Coord.round.diff(x: F64, y: F64): F64 // while F64.abs doesnt exist
-  let big_number = 1000.0#64 // while F64.gtn, cmp and ltn is broken
-  let x = F64.add(x, big_number)
-  let y = F64.add(y, big_number)
-
-  case F64.gtn(x, y) {
-    true: F64.sub(x, y)
-    false: F64.sub(y, x)
-  }

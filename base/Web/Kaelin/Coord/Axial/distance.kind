@@ -1,5 +1,0 @@
-// Returns the distance between 2 Coords
-Web.Kaelin.Coord.Axial.distance(a: Web.Kaelin.Coord, b:Web.Kaelin.Coord):Nat
-    let ac = Web.Kaelin.Coord.Convert.axial_to_cubic(a)
-    let bc = Web.Kaelin.Coord.Convert.axial_to_cubic(b)
-    Web.Kaelin.Coord.Cubic.distance(ac, bc)

@@ -1,0 +1,1 @@
+#length #capacity #buffer #P #new (((new length) capacity) buffer)

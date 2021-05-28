@@ -1,0 +1,1 @@
+#M %Monad.Self(P:@(:(Monad M)) *) @(new:@(bind:%(A:*) %(B:*) @(:(M A)) @(:@(:A) (M B)) (M B)) @(pure:%(A:*) @(:A) (M A)) (P (((Monad.new M) bind) pure))) (P Monad.Self)

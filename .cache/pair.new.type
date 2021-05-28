@@ -1,0 +1,1 @@
+%(A:*) %(B:*) @(fst:A) @(snd:B) ((Pair A) B)

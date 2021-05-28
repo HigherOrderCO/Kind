@@ -1,0 +1,1 @@
+#str (((str #str Bool) Bool.true) #str.head #str.tail Bool.false)

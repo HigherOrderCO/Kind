@@ -1,7 +1,0 @@
-Web.Kaelin.Map.player.to_tile(address: String, map:Web.Kaelin.Map): Maybe<Web.Kaelin.Tile>
-  coord = Web.Kaelin.Map.player.to_coord(address,map)
-  case coord{
-    none: none
-    some: 
-      Web.Kaelin.Map.get(coord.value, map)
-  }

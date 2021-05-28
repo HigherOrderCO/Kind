@@ -1,8 +1,6 @@
+type Foo {
+  new(pair: Pair<F64,F64>)
+}
+
 Test: _
-  let a = 
-    User.rigille.Elementary.Expression.var(0)
-  let b = 
-    User.rigille.Elementary.Expression.const(
-      User.rigille.Elementary.Const.real(0)
-    )
-  User.rigille.Elementary.Expression.show(User.rigille.Elementary.Derivative(0, a+b))
+  Foo.new({1,2}) @ pair @ fst

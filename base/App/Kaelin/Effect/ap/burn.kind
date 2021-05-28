@@ -1,0 +1,7 @@
+//Burns the target Action Points
+App.Kaelin.Effect.ap.burn(
+  value: I32,
+  pos: App.Kaelin.Coord
+): App.Kaelin.Effect<I32>
+
+  App.Kaelin.Effect.ap.change_at(I32.neg(value), pos)
