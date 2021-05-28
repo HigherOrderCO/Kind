@@ -1,7 +1,6 @@
 // Captura a informação em coordenadas de pares do tabuleiro e transforma pra posicao do vetor 1-9
 // Exemplo: (0, 0) = (0+1)+(0*3)=1
-App.TicTacToe.posvector_to_minipair(pair : Pair<U32, U32>) : U32
-  let trans = App.TicTacToe.pair_to_minipair(pair)
-  open trans
+App.TicTacToe.pos.posvector_to_minipair(posvector : U32 ) : Pair<U32, U32>
+  let trans = App.TicTacToe.pos.pair_to_minipair(pair)
   (trans.snd+1#32)+(trans.fst*3#32)
   // funcao que entre 4 e saia pair(0,2)
