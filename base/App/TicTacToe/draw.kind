@@ -25,7 +25,7 @@ App.TicTacToe.draw(img: VoxBox): App.Draw<App.TicTacToe.State>
        some : 
          let {x, y} = App.TicTacToe.pos.posvector_to_pair(pair.snd)
          log(U32.show(pair.snd))
-         let img = VoxBox.Draw.image(x, y, 1, Entity.to_assets(entity.value), pair.fst)
+         let img = VoxBox.Draw.image(x, y, 1, App.TicTacToe.Entity.to_assets(entity.value), pair.fst)
          {img, pair.snd-1}
      }, state.local@board)
      

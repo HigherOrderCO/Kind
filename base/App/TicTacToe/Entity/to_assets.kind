@@ -1,4 +1,4 @@
-Entity.to_assets(e : App.TicTacToe.Entity) : VoxBox
+App.TicTacToe.Entity.to_assets(e : App.TicTacToe.Entity) : VoxBox
   case e {
       Circle : App.TicTacToe.Assets.circle
       X : App.TicTacToe.Assets.x
