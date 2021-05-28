@@ -18,5 +18,15 @@ App.TicTacToe.draw(img: VoxBox): App.Draw<App.TicTacToe.State>
      let img = App.TicTacToe.draw_vertical_lines(img)
      let img = App.TicTacToe.draw_horizontal_lines(img)
      open state
+     let {img, count} = Vector.fold!!(9, {img, 8#32}, (entity, pair) 
+      open pair
+      case entity {
+       none : {pair.fst, pair.snd-1}
+       some : 
+         let {x, y} = App.TicTacToe.pos.posvector_to_pair(pair.snd)
+         log(U32.show(pair.snd))
+         let img = VoxBox.Draw.image(x, y, 1, Entity.to_assets(entity.value), pair.fst)
+         {img, pair.snd-1}
+     }, state.local@board)
      
      DOM.vbox({}, {}, img)

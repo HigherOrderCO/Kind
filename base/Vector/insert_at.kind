@@ -14,8 +14,10 @@ Vector.insert_at(A : Type, size : Nat, n : Nat, v : A) : Equal<_, Nat.ltn(n, siz
             Empty.absurd(_, k)
           succ : (h, vec) case vec {
               cons : 
-                let q = Nat.relations.ltn_pred(n, size.pred)
-                Vector.insert_at(A, size.pred, n, v, q(h), vec.tail)
+                let q = Nat.relations.ltn_pred(n, size.pred, h)
+                
+                Vector.cons(_, size.pred, vec.head,
+                Vector.insert_at(A, size.pred, n, v, q, vec.tail))
           }
       }!
   }!
