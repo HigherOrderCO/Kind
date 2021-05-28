@@ -173,6 +173,9 @@ App.set_local<S: App.State>(value: App.State.local<S>): IO<Maybe<App.State.local
 App.watch<S: App.State>(room: String): IO<Maybe<App.State.local<S>>>
   App.do<S>("watch", room)
 
+App.unwatch<S: App.State>(room: String): IO<Maybe<App.State.local<S>>>
+  App.do<S>("unwatch", room)
+
 App.room_zero: String
   "0x00000000000000"
 

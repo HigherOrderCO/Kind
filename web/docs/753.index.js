@@ -1,6 +1,6 @@
-(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[821],{
+(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[753],{
 
-/***/ 821:
+/***/ 753:
 /***/ ((module) => {
 
 module.exports = (function() {
@@ -450,27 +450,27 @@ module.exports = (function() {
     };
     const Pair$new = x0 => x1 => Pair$new$(x0, x1);
     const App$State$new = Pair$new$(null, null);
-    const App$Home$State = App$State$new;
+    const App$Browser$State = App$State$new;
 
-    function App$Home$State$Local$new$(_file$1, _code$2, _post$3) {
+    function App$Browser$State$Local$new$(_file$1, _code$2, _post$3) {
         var $35 = ({
-            _: 'App.Home.State.Local.new',
+            _: 'App.Browser.State.Local.new',
             'file': _file$1,
             'code': _code$2,
             'post': _post$3
         });
         return $35;
     };
-    const App$Home$State$Local$new = x0 => x1 => x2 => App$Home$State$Local$new$(x0, x1, x2);
+    const App$Browser$State$Local$new = x0 => x1 => x2 => App$Browser$State$Local$new$(x0, x1, x2);
 
-    function App$Home$State$Global$new$(_room$1) {
+    function App$Browser$State$Global$new$(_room$1) {
         var $36 = ({
-            _: 'App.Home.State.Global.new',
+            _: 'App.Browser.State.Global.new',
             'room': _room$1
         });
         return $36;
     };
-    const App$Home$State$Global$new = x0 => App$Home$State$Global$new$(x0);
+    const App$Browser$State$Global$new = x0 => App$Browser$State$Global$new$(x0);
     const List$nil = ({
         _: 'List.nil'
     });
@@ -484,9 +484,9 @@ module.exports = (function() {
         return $37;
     };
     const App$Store$new = x0 => x1 => App$Store$new$(x0, x1);
-    const App$Home$init = (() => {
-        var _local$1 = App$Home$State$Local$new$("", "", "");
-        var _global$2 = App$Home$State$Global$new$(List$nil);
+    const App$Browser$init = (() => {
+        var _local$1 = App$Browser$State$Local$new$("", "", "");
+        var _global$2 = App$Browser$State$Global$new$(List$nil);
         var $38 = App$Store$new$(_local$1, _global$2);
         return $38;
     })();
@@ -660,13 +660,13 @@ module.exports = (function() {
         return $71;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
-    const App$Home$img$uwu_logo = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QCCRXhpZgAATU0AKgAAAAgAAwESAAMAAAABAAEAAAExAAIAAAAeAAAAModpAAQAAAABAAAAUAAAAABBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKQAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAi6ADAAQAAAABAAAAQwAAAAD/4Qr8aHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJYTVAgQ29yZSA2LjAuMCI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkIwNERDOTg0QUNDNTExRUFBQUJGRjExQ0U1RkRFMzY1IiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkIwNERDOTgzQUNDNTExRUFBQUJGRjExQ0U1RkRFMzY1IiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDUzYgKFdpbmRvd3MpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6QjA0REM5ODFBQ0M1MTFFQUFBQkZGMTFDRTVGREUzNjUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6QjA0REM5ODJBQ0M1MTFFQUFBQkZGMTFDRTVGREUzNjUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPD94cGFja2V0IGVuZD0idyI/PgD/wAARCABDAIsDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9sAQwAGBAQEBQQGBQUGCQYFBgkLCAYGCAsMCgoLCgoMEAwMDAwMDBAMDg8QDw4MExMUFBMTHBsbGxwfHx8fHx8fHx8f/9sAQwEHBwcNDA0YEBAYGhURFRofHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8f/90ABAAS/9oADAMBAAIRAxEAPwD6M8Y+MNF8JaLLrOsytHZxMqARqXd3c4VE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";
+    const App$Browser$img$uwu_logo = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QCCRXhpZgAATU0AKgAAAAgAAwESAAMAAAABAAEAAAExAAIAAAAeAAAAModpAAQAAAABAAAAUAAAAABBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKQAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAi6ADAAQAAAABAAAAQwAAAAD/4Qr8aHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJYTVAgQ29yZSA2LjAuMCI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkIwNERDOTg0QUNDNTExRUFBQUJGRjExQ0U1RkRFMzY1IiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkIwNERDOTgzQUNDNTExRUFBQUJGRjExQ0U1RkRFMzY1IiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDUzYgKFdpbmRvd3MpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6QjA0REM5ODFBQ0M1MTFFQUFBQkZGMTFDRTVGREUzNjUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6QjA0REM5ODJBQ0M1MTFFQUFBQkZGMTFDRTVGREUzNjUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPD94cGFja2V0IGVuZD0idyI/PgD/wAARCABDAIsDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9sAQwAGBAQEBQQGBQUGCQYFBgkLCAYGCAsMCgoLCgoMEAwMDAwMDBAMDg8QDw4MExMUFBMTHBsbGxwfHx8fHx8fHx8f/9sAQwEHBwcNDA0YEBAYGhURFRofHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8f/90ABAAS/9oADAMBAAIRAxEAPwD6M8Y+MNF8JaLLrOsytHZxMqARqXd3c4VE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";
 
-    function App$Home$draw$block$(_child$1) {
+    function App$Browser$draw$block$(_child$1) {
         var $72 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("border-radius", "16px"), List$cons$(Pair$new$("background-color", "rgb(245,245,245)"), List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("padding", "10px"), List$cons$(Pair$new$("margin-bottom", "12px"), List$nil)))))), _child$1);
         return $72;
     };
-    const App$Home$draw$block = x0 => App$Home$draw$block$(x0);
+    const App$Browser$draw$block = x0 => App$Browser$draw$block$(x0);
 
     function DOM$text$(_value$1) {
         var $73 = ({
@@ -828,7 +828,7 @@ module.exports = (function() {
     };
     const List$mapped = x0 => x1 => List$mapped$(x0, x1);
 
-    function App$Home$draw$(_state$1) {
+    function App$Browser$draw$(_state$1) {
         var self = _state$1;
         switch (self._) {
             case 'App.Store.new':
@@ -845,11 +845,11 @@ module.exports = (function() {
                 var _global$3 = $114;
                 break;
         };
-        var $110 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-flow", "row nowrap"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("padding-top", "12px"), List$nil))))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", App$Home$img$uwu_logo), List$nil)), Map$from_list$(List$cons$(Pair$new$("transform", "scale(0.666)"), List$nil)), List$nil), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "640px"), List$nil)), List$cons$(App$Home$draw$block$(List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("input", Map$from_list$(List$cons$(Pair$new$("id", "file"), List$cons$(Pair$new$("placeholder", "File name"), List$cons$(Pair$new$("autocomplete", "off"), List$nil)))), Map$from_list$(List$cons$(Pair$new$("outline", "none"), List$nil)), List$nil), List$cons$(DOM$node$("span", Map$from_list$(List$cons$(Pair$new$("id", "check"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-left", "8px"), List$cons$(Pair$new$("cursor", "pointer"), List$nil))), List$cons$(DOM$text$("check"), List$nil)), List$cons$(DOM$node$("span", Map$from_list$(List$cons$(Pair$new$("id", "run"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-left", "8px"), List$cons$(Pair$new$("cursor", "pointer"), List$nil))), List$cons$(DOM$text$("run"), List$nil)), List$cons$(DOM$node$("span", Map$from_list$(List$cons$(Pair$new$("id", "edit"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-left", "8px"), List$cons$(Pair$new$("cursor", "pointer"), List$nil))), List$cons$(DOM$text$("edit"), List$nil)), List$nil))))), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "8px"), List$cons$(Pair$new$("padding", "4px"), List$cons$(Pair$new$("font-family", "monospace"), List$cons$(Pair$new$("background-color", "rgb(230,230,230)"), List$cons$(Pair$new$("overflow-x", "scroll"), List$nil)))))), List$cons$(DOM$text$((() => {
+        var $110 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-flow", "row nowrap"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("padding-top", "12px"), List$nil))))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("img", Map$from_list$(List$cons$(Pair$new$("src", App$Browser$img$uwu_logo), List$nil)), Map$from_list$(List$cons$(Pair$new$("transform", "scale(0.666)"), List$nil)), List$nil), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "640px"), List$nil)), List$cons$(App$Browser$draw$block$(List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$node$("input", Map$from_list$(List$cons$(Pair$new$("id", "file"), List$cons$(Pair$new$("placeholder", "File name"), List$cons$(Pair$new$("autocomplete", "off"), List$nil)))), Map$from_list$(List$cons$(Pair$new$("outline", "none"), List$nil)), List$nil), List$cons$(DOM$node$("span", Map$from_list$(List$cons$(Pair$new$("id", "check"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-left", "8px"), List$cons$(Pair$new$("cursor", "pointer"), List$nil))), List$cons$(DOM$text$("check"), List$nil)), List$cons$(DOM$node$("span", Map$from_list$(List$cons$(Pair$new$("id", "run"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-left", "8px"), List$cons$(Pair$new$("cursor", "pointer"), List$nil))), List$cons$(DOM$text$("run"), List$nil)), List$cons$(DOM$node$("span", Map$from_list$(List$cons$(Pair$new$("id", "edit"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin-left", "8px"), List$cons$(Pair$new$("cursor", "pointer"), List$nil))), List$cons$(DOM$text$("edit"), List$nil)), List$nil))))), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "8px"), List$cons$(Pair$new$("padding", "4px"), List$cons$(Pair$new$("font-family", "monospace"), List$cons$(Pair$new$("background-color", "rgb(230,230,230)"), List$cons$(Pair$new$("overflow-x", "scroll"), List$nil)))))), List$cons$(DOM$text$((() => {
             var self = ((() => {
                 var self = _local$2;
                 switch (self._) {
-                    case 'App.Home.State.Local.new':
+                    case 'App.Browser.State.Local.new':
                         var $115 = self.code;
                         var $116 = $115;
                         return $116;
@@ -861,7 +861,7 @@ module.exports = (function() {
             } else {
                 var self = _local$2;
                 switch (self._) {
-                    case 'App.Home.State.Local.new':
+                    case 'App.Browser.State.Local.new':
                         var $119 = self.code;
                         var $120 = $119;
                         var $118 = $120;
@@ -872,13 +872,13 @@ module.exports = (function() {
         })()), List$nil)), List$nil))), List$cons$((() => {
             var self = _global$3;
             switch (self._) {
-                case 'App.Home.State.Global.new':
+                case 'App.Browser.State.Global.new':
                     var $122 = self.room;
                     var $123 = $122;
                     var _room$4 = $123;
                     break;
             };
-            var $121 = App$Home$draw$block$((() => {
+            var $121 = App$Browser$draw$block$((() => {
                 var self = _room$4;
                 switch (self._) {
                     case 'List.nil':
@@ -893,10 +893,10 @@ module.exports = (function() {
                 };
             })());
             return $121;
-        })(), List$cons$(App$Home$draw$block$(List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Write a short, kind comment:"), List$nil)), List$cons$(DOM$node$("textarea", Map$from_list$(List$cons$(Pair$new$("id", "comment"), List$cons$(Pair$new$("maxlength", "16"), List$nil))), Map$from_list$(List$cons$(Pair$new$("height", "64px"), List$cons$(Pair$new$("width", "calc(100% - 24px)"), List$cons$(Pair$new$("margin", "12px"), List$cons$(Pair$new$("padding", "6px"), List$nil))))), List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "post"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "0px 12px"), List$cons$(Pair$new$("border", "1px solid rgb(120, 150, 120)"), List$cons$(Pair$new$("border-radius", "10px"), List$cons$(Pair$new$("width", "200px"), List$cons$(Pair$new$("height", "24px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("background-color", "rgb(200, 230, 200)"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil)))))))))))), List$cons$(DOM$text$("Send post."), List$nil)), List$nil)))), List$nil)))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("width", "42px"), List$cons$(Pair$new$("height", "42px"), List$cons$(Pair$new$("border-radius", "21px"), List$cons$(Pair$new$("background-color", "green"), List$cons$(Pair$new$("margin", "8px 16px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("color", "white"), List$nil))))))))))), List$cons$(DOM$text$("User"), List$nil)), List$nil))));
+        })(), List$cons$(App$Browser$draw$block$(List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("Write a short, kind comment:"), List$nil)), List$cons$(DOM$node$("textarea", Map$from_list$(List$cons$(Pair$new$("id", "comment"), List$cons$(Pair$new$("maxlength", "16"), List$nil))), Map$from_list$(List$cons$(Pair$new$("height", "64px"), List$cons$(Pair$new$("width", "calc(100% - 24px)"), List$cons$(Pair$new$("margin", "12px"), List$cons$(Pair$new$("padding", "6px"), List$nil))))), List$nil), List$cons$(DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "post"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "0px 12px"), List$cons$(Pair$new$("border", "1px solid rgb(120, 150, 120)"), List$cons$(Pair$new$("border-radius", "10px"), List$cons$(Pair$new$("width", "200px"), List$cons$(Pair$new$("height", "24px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("background-color", "rgb(200, 230, 200)"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil)))))))))))), List$cons$(DOM$text$("Send post."), List$nil)), List$nil)))), List$nil)))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$cons$(Pair$new$("width", "42px"), List$cons$(Pair$new$("height", "42px"), List$cons$(Pair$new$("border-radius", "21px"), List$cons$(Pair$new$("background-color", "green"), List$cons$(Pair$new$("margin", "8px 16px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("color", "white"), List$nil))))))))))), List$cons$(DOM$text$("User"), List$nil)), List$nil))));
         return $110;
     };
-    const App$Home$draw = x0 => App$Home$draw$(x0);
+    const App$Browser$draw = x0 => App$Browser$draw$(x0);
 
     function IO$(_A$1) {
         var $127 = null;
@@ -1425,11 +1425,11 @@ module.exports = (function() {
     };
     const String$serialize_ascii = x0 => String$serialize_ascii$(x0);
 
-    function App$Home$State$Local$get_room_serial$(_local$1) {
+    function App$Browser$State$Local$get_room_serial$(_local$1) {
         var self = ((() => {
             var self = _local$1;
             switch (self._) {
-                case 'App.Home.State.Local.new':
+                case 'App.Browser.State.Local.new':
                     var $232 = self.file;
                     var $233 = $232;
                     return $233;
@@ -1442,7 +1442,7 @@ module.exports = (function() {
             var $235 = String$pad_right_exact$(16n, 48, String$serialize_ascii$((() => {
                 var self = _local$1;
                 switch (self._) {
-                    case 'App.Home.State.Local.new':
+                    case 'App.Browser.State.Local.new':
                         var $236 = self.file;
                         var $237 = $236;
                         return $237;
@@ -1452,7 +1452,7 @@ module.exports = (function() {
         };
         return $231;
     };
-    const App$Home$State$Local$get_room_serial = x0 => App$Home$State$Local$get_room_serial$(x0);
+    const App$Browser$State$Local$get_room_serial = x0 => App$Browser$State$Local$get_room_serial$(x0);
 
     function Parser$Reply$(_V$1) {
         var $238 = null;
@@ -37560,11 +37560,11 @@ module.exports = (function() {
     };
     const String$serialize = x0 => String$serialize$(x0);
 
-    function App$Home$State$Local$get_post_serial$(_local$1) {
+    function App$Browser$State$Local$get_post_serial$(_local$1) {
         var $11388 = String$pad_right_exact$(66n, 48, String$serialize$((() => {
             var self = _local$1;
             switch (self._) {
-                case 'App.Home.State.Local.new':
+                case 'App.Browser.State.Local.new':
                     var $11389 = self.post;
                     var $11390 = $11389;
                     return $11390;
@@ -37572,7 +37572,7 @@ module.exports = (function() {
         })()));
         return $11388;
     };
-    const App$Home$State$Local$get_post_serial = x0 => App$Home$State$Local$get_post_serial$(x0);
+    const App$Browser$State$Local$get_post_serial = x0 => App$Browser$State$Local$get_post_serial$(x0);
 
     function App$unwatch$(_room$2) {
         var $11391 = App$do$("unwatch", _room$2);
@@ -37589,7 +37589,7 @@ module.exports = (function() {
     };
     const App$set_local = x0 => App$set_local$(x0);
 
-    function App$Home$when$(_event$1, _state$2) {
+    function App$Browser$when$(_event$1, _state$2) {
         var self = _state$2;
         switch (self._) {
             case 'App.Store.new':
@@ -37610,7 +37610,7 @@ module.exports = (function() {
                     }))(Kind$api$io$check_code$((() => {
                         var self = _local$3;
                         switch (self._) {
-                            case 'App.Home.State.Local.new':
+                            case 'App.Browser.State.Local.new':
                                 var $11401 = self.code;
                                 var $11402 = $11401;
                                 return $11402;
@@ -37654,7 +37654,7 @@ module.exports = (function() {
                                 var $11415 = IO$monad$((_m$bind$7 => _m$pure$8 => {
                                     var $11416 = _m$bind$7;
                                     return $11416;
-                                }))(App$new_post$(App$Home$State$Local$get_room_serial$(_local$3), App$Home$State$Local$get_post_serial$(_local$3)))((_$7 => {
+                                }))(App$new_post$(App$Browser$State$Local$get_room_serial$(_local$3), App$Browser$State$Local$get_post_serial$(_local$3)))((_$7 => {
                                     var $11417 = App$pass;
                                     return $11417;
                                 }));
@@ -37683,29 +37683,29 @@ module.exports = (function() {
                         var $11424 = IO$monad$((_m$bind$8 => _m$pure$9 => {
                             var $11425 = _m$bind$8;
                             return $11425;
-                        }))(App$unwatch$(App$Home$State$Local$get_room_serial$(_local$3)))((_$8 => {
+                        }))(App$unwatch$(App$Browser$State$Local$get_room_serial$(_local$3)))((_$8 => {
                             var self = _local$3;
                             switch (self._) {
-                                case 'App.Home.State.Local.new':
+                                case 'App.Browser.State.Local.new':
                                     var $11427 = self.code;
                                     var $11428 = self.post;
-                                    var $11429 = App$Home$State$Local$new$($11420, $11427, $11428);
+                                    var $11429 = App$Browser$State$Local$new$($11420, $11427, $11428);
                                     var _local$9 = $11429;
                                     break;
                             };
                             var self = _local$9;
                             switch (self._) {
-                                case 'App.Home.State.Local.new':
+                                case 'App.Browser.State.Local.new':
                                     var $11430 = self.file;
                                     var $11431 = self.post;
-                                    var $11432 = App$Home$State$Local$new$($11430, _code$7, $11431);
+                                    var $11432 = App$Browser$State$Local$new$($11430, _code$7, $11431);
                                     var _local$10 = $11432;
                                     break;
                             };
                             var $11426 = IO$monad$((_m$bind$11 => _m$pure$12 => {
                                 var $11433 = _m$bind$11;
                                 return $11433;
-                            }))(App$watch$(App$Home$State$Local$get_room_serial$(_local$10)))((_$11 => {
+                            }))(App$watch$(App$Browser$State$Local$get_room_serial$(_local$10)))((_$11 => {
                                 var $11434 = App$set_local$(_local$10);
                                 return $11434;
                             }));
@@ -37719,10 +37719,10 @@ module.exports = (function() {
                     if (self) {
                         var self = _local$3;
                         switch (self._) {
-                            case 'App.Home.State.Local.new':
+                            case 'App.Browser.State.Local.new':
                                 var $11437 = self.file;
                                 var $11438 = self.code;
-                                var $11439 = App$Home$State$Local$new$($11437, $11438, $11420);
+                                var $11439 = App$Browser$State$Local$new$($11437, $11438, $11420);
                                 var _local$7 = $11439;
                                 break;
                         };
@@ -37737,7 +37737,7 @@ module.exports = (function() {
                 var $11394 = $11421;
                 break;
             case 'App.Event.init':
-                var $11441 = App$watch$(App$Home$State$Local$get_room_serial$(_local$3));
+                var $11441 = App$watch$(App$Browser$State$Local$get_room_serial$(_local$3));
                 var $11394 = $11441;
                 break;
             case 'App.Event.frame':
@@ -37752,14 +37752,14 @@ module.exports = (function() {
         };
         return $11394;
     };
-    const App$Home$when = x0 => x1 => App$Home$when$(x0, x1);
+    const App$Browser$when = x0 => x1 => App$Browser$when$(x0, x1);
 
     function App$no_tick$(_tick$2, _glob$3) {
         var $11443 = _glob$3;
         return $11443;
     };
     const App$no_tick = x0 => x1 => App$no_tick$(x0, x1);
-    const App$Home$tick = App$no_tick;
+    const App$Browser$tick = App$no_tick;
 
     function Char$to_string$(_chr$1) {
         var $11444 = String$cons$(_chr$1, String$nil);
@@ -37799,14 +37799,14 @@ module.exports = (function() {
     };
     const String$deserialize = x0 => String$deserialize$(x0);
 
-    function App$Home$post$(_time$1, _room$2, _addr$3, _data$4, _global$5) {
+    function App$Browser$post$(_time$1, _room$2, _addr$3, _data$4, _global$5) {
         var self = _global$5;
         switch (self._) {
-            case 'App.Home.State.Global.new':
-                var $11454 = App$Home$State$Global$new$(List$cons$(String$deserialize$(_data$4), (() => {
+            case 'App.Browser.State.Global.new':
+                var $11454 = App$Browser$State$Global$new$(List$cons$(String$deserialize$(_data$4), (() => {
                     var self = _global$5;
                     switch (self._) {
-                        case 'App.Home.State.Global.new':
+                        case 'App.Browser.State.Global.new':
                             var $11455 = self.room;
                             var $11456 = $11455;
                             return $11456;
@@ -37817,18 +37817,18 @@ module.exports = (function() {
         };
         return $11453;
     };
-    const App$Home$post = x0 => x1 => x2 => x3 => x4 => App$Home$post$(x0, x1, x2, x3, x4);
-    const App$Home = App$new$(App$Home$init, App$Home$draw, App$Home$when, App$Home$tick, App$Home$post);
+    const App$Browser$post = x0 => x1 => x2 => x3 => x4 => App$Browser$post$(x0, x1, x2, x3, x4);
+    const App$Browser = App$new$(App$Browser$init, App$Browser$draw, App$Browser$when, App$Browser$tick, App$Browser$post);
     return {
         'App.new': App$new,
         'Pair.new': Pair$new,
         'App.State.new': App$State$new,
-        'App.Home.State': App$Home$State,
-        'App.Home.State.Local.new': App$Home$State$Local$new,
-        'App.Home.State.Global.new': App$Home$State$Global$new,
+        'App.Browser.State': App$Browser$State,
+        'App.Browser.State.Local.new': App$Browser$State$Local$new,
+        'App.Browser.State.Global.new': App$Browser$State$Global$new,
         'List.nil': List$nil,
         'App.Store.new': App$Store$new,
-        'App.Home.init': App$Home$init,
+        'App.Browser.init': App$Browser$init,
         'Pair.fst': Pair$fst,
         'App.State.local': App$State$local,
         'Pair.snd': Pair$snd,
@@ -37853,8 +37853,8 @@ module.exports = (function() {
         'Map.from_list': Map$from_list,
         'Pair': Pair,
         'List.cons': List$cons,
-        'App.Home.img.uwu_logo': App$Home$img$uwu_logo,
-        'App.Home.draw.block': App$Home$draw$block,
+        'App.Browser.img.uwu_logo': App$Browser$img$uwu_logo,
+        'App.Browser.draw.block': App$Browser$draw$block,
         'DOM.text': DOM$text,
         'Bool.true': Bool$true,
         'Bool.false': Bool$false,
@@ -37870,7 +37870,7 @@ module.exports = (function() {
         'String.eql': String$eql,
         'List': List,
         'List.mapped': List$mapped,
-        'App.Home.draw': App$Home$draw,
+        'App.Browser.draw': App$Browser$draw,
         'IO': IO,
         'Maybe': Maybe,
         'IO.ask': IO$ask,
@@ -37914,7 +37914,7 @@ module.exports = (function() {
         'String.serialize_ascii.char_to_hex8': String$serialize_ascii$char_to_hex8,
         'String.serialize_ascii.go': String$serialize_ascii$go,
         'String.serialize_ascii': String$serialize_ascii,
-        'App.Home.State.Local.get_room_serial': App$Home$State$Local$get_room_serial,
+        'App.Browser.State.Local.get_room_serial': App$Browser$State$Local$get_room_serial,
         'Parser.Reply': Parser$Reply,
         'Parser.Reply.value': Parser$Reply$value,
         'Parser.is_eof': Parser$is_eof,
@@ -38394,21 +38394,21 @@ module.exports = (function() {
         'String.serialize.char_to_hex16': String$serialize$char_to_hex16,
         'String.serialize.go': String$serialize$go,
         'String.serialize': String$serialize,
-        'App.Home.State.Local.get_post_serial': App$Home$State$Local$get_post_serial,
+        'App.Browser.State.Local.get_post_serial': App$Browser$State$Local$get_post_serial,
         'App.unwatch': App$unwatch,
         'App.set_local': App$set_local,
-        'App.Home.when': App$Home$when,
+        'App.Browser.when': App$Browser$when,
         'App.no_tick': App$no_tick,
-        'App.Home.tick': App$Home$tick,
+        'App.Browser.tick': App$Browser$tick,
         'Char.to_string': Char$to_string,
         'String.deserialize.go': String$deserialize$go,
         'String.deserialize': String$deserialize,
-        'App.Home.post': App$Home$post,
-        'App.Home': App$Home,
+        'App.Browser.post': App$Browser$post,
+        'App.Browser': App$Browser,
     };
 })();
 
 /***/ })
 
 }]);
-//# sourceMappingURL=821.index.js.map
+//# sourceMappingURL=753.index.js.map

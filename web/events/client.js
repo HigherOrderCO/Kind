@@ -56,6 +56,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
 
   // Starts watching a room
   function watch_room(room_name) {
+    var room_name = room_name.toLowerCase();
     if (!watching[room_name]) {
       watching[room_name] = true;
       var room_name = lib.check_hex(56, room_name);
@@ -70,6 +71,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
 
   // Stops watching a room
   function unwatch_room(room_name) {
+    var room_name = room_name.toLowerCase();
     if (watching[room_name]) {
       watching[room_name] = false;
       var room_name = lib.check_hex(56, room_name);

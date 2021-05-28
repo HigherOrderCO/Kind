@@ -1,0 +1,2 @@
+String.pad_left_exact(size: Nat, chr: Char, str: String): String
+  String.take(size, String.pad_left(size, chr, str))
