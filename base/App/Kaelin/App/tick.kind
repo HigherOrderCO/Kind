@@ -15,5 +15,5 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
                     glob@stage <- App.Kaelin.Stage.planning(stage.local_tick + 1, stage_seconds, stage.local_map)
       action   :
                   let glob = App.Kaelin.Action.global.exe_skills_list!(glob@skills_list, glob)
-                  App.Kaelin.Stage.action.end(glob)
+                  App.Kaelin.Action.end_action_turn(glob)
     } default glob
