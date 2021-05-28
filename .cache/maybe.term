@@ -1,1 +1,0 @@
-#A %Maybe.Self(P:@(:(Maybe A)) *) @(none:(P (Maybe.none A))) @(some:@(value:A) (P ((Maybe.some A) value))) (P Maybe.Self)

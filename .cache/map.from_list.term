@@ -1,1 +1,0 @@
-#A #xs (((xs #xs (Map A)) (BitsMap.new A)) #xs.head #xs.tail ((xs.head #p (Map A)) #p.fst #p.snd ((((BitsMap.set A) (String.to_bits p.fst)) p.snd) ((Map.from_list A) xs.tail))))

@@ -1,1 +1,0 @@
-%(A:*) @(query:String) @(param:String) @(then:@(response:String) (IO A)) (IO A)

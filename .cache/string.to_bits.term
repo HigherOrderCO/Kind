@@ -1,1 +1,0 @@
-#str (((str #str Bits) Bits.e) #str.head #str.tail ((Bits.concat (U16.to_bits str.head)) (String.to_bits str.tail)))

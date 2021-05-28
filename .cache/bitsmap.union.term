@@ -1,1 +1,0 @@
-#A #a #b (((a #a (BitsMap A)) b) #a.val #a.lft #a.rgt (((b #b (BitsMap A)) a) #b.val #b.lft #b.rgt (((a.val #a.val (BitsMap A)) ((((BitsMap.tie A) b.val) (((BitsMap.union A) a.lft) b.lft)) (((BitsMap.union A) a.rgt) b.rgt))) #a.val.value ((((BitsMap.tie A) a.val) (((BitsMap.union A) a.lft) b.lft)) (((BitsMap.union A) a.rgt) b.rgt)))))

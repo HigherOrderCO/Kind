@@ -1,1 +1,0 @@
-@(window:App.Playground.Window) @(state:App.Playground.State.local) App.Playground.State.local

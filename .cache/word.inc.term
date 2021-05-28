@@ -1,1 +1,0 @@
-#size #word ((((word #word.size #word (Word word.size)) Word.e) #word.size #word.pred ((Word.i word.size) word.pred)) #word.size #word.pred ((Word.o word.size) ((Word.inc word.size) word.pred)))

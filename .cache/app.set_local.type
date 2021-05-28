@@ -1,1 +1,0 @@
-%(S:App.State) @(value:(App.State.local S)) (IO (Maybe (App.State.local S)))

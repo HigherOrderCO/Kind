@@ -1,1 +1,0 @@
-#as #bs (((as #as String) bs) #as.head #as.tail ((String.cons as.head) ((String.concat as.tail) bs)))

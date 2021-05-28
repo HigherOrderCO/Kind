@@ -1,1 +1,0 @@
-@(device:Device) @(window:App.Playground.Window) @(mouse_over:String) @(code:String) @(output:String) @(kind_version:String) App.Playground.State.local

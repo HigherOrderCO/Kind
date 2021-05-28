@@ -1,1 +1,0 @@
-#S %App.Store.Self(P:@(:(App.Store S)) *) @(new:@(local:(App.State.local S)) @(global:(App.State.global S)) (P (((App.Store.new S) local) global))) (P App.Store.Self)

@@ -1,1 +1,0 @@
-#a #b ((((a #a Bits) b) #a.pred (Bits.o ((Bits.concat a.pred) b))) #a.pred (Bits.i ((Bits.concat a.pred) b)))

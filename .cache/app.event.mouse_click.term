@@ -1,1 +1,0 @@
-#time #id #action #P #init #frame #mouse_down #mouse_up #key_down #key_up #mouse_over #mouse_click #input (((mouse_click time) id) action)

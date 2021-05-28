@@ -1,1 +1,0 @@
-@(props:(Map String)) @(style:(Map String)) @(value:VoxBox) DOM

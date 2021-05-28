@@ -1,1 +1,0 @@
-#a #b (((a #a Bool) (((b #b Bool) Bool.true) #b.head #b.tail Bool.false)) #a.head #a.tail (((b #b Bool) Bool.false) #b.head #b.tail ((Bool.and ((U16.eql a.head) b.head)) ((String.eql a.tail) b.tail))))

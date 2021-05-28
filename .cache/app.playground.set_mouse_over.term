@@ -1,1 +1,0 @@
-#id #stt ((stt #stt App.Playground.State.local) #stt.device #stt.window #stt.mouse_over #stt.code #stt.output #stt.kind_version ((((((App.Playground.State.local.new stt.device) stt.window) id) stt.code) stt.output) stt.kind_version))

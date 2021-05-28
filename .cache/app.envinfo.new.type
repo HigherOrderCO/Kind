@@ -1,1 +1,0 @@
-@(screen_size:((Pair U32) U32)) @(mouse_pos:((Pair U32) U32)) App.EnvInfo

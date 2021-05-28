@@ -1,1 +1,0 @@
-%Unit.Self(P:@(:Unit) *) @(new:(P Unit.new)) (P Unit.Self)

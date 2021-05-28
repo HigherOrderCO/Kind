@@ -1,1 +1,0 @@
-%(A:*) %(depth:Nat) @(lft:((Array A) depth)) @(rgt:((Array A) depth)) ((Array A) (Nat.succ depth))

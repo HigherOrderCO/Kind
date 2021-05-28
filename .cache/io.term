@@ -1,1 +1,0 @@
-#A %IO.Self(P:@(:(IO A)) *) @(end:@(value:A) (P ((IO.end A) value))) @(ask:@(query:String) @(param:String) @(then:@(response:String) (IO A)) (P ((((IO.ask A) query) param) then))) (P IO.Self)

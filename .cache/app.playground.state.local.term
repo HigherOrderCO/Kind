@@ -1,1 +1,0 @@
-%App.Playground.State.local.Self(P:@(:App.Playground.State.local) *) @(new:@(device:Device) @(window:App.Playground.Window) @(mouse_over:String) @(code:String) @(output:String) @(kind_version:String) (P ((((((App.Playground.State.local.new device) window) mouse_over) code) output) kind_version))) (P App.Playground.State.local.Self)

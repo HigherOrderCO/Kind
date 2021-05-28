@@ -13,3 +13,4 @@ base/.cache
 /base/playground.kind
 web/src/apps/*.js
 web/events/data/*
+.cache
