@@ -20,6 +20,13 @@
           pref)
         #f))))
 
+(define run-all
+    (lambda (p)
+      (let ((code (get-datum p)))
+        (unless (eq? code #!eof)
+          (compile code)
+          (run-all p)))))
+
 (let ([args (cdr (command-line))])
   (unless (null? args)
     (let ((fst_arg (car args))
@@ -34,11 +41,8 @@
               (display (run_io (Kind.api.io.term_to_scheme fst_arg))))
             ("--run"
               ; TODO avoid recompiling baselibs here
-              (let ((code (run_io (Kind.api.io.term_to_scheme fst_arg)))
-                    (file "./.tmp.scm"))
-                (set_file file code)
-                (load-program file)
-                (delete-file file)))
+              (let ((code (open-string-input-port (run_io (Kind.api.io.term_to_scheme fst_arg)))))
+                (run-all code)))
             ;("--show")
             ;("--norm")
             ;("--js")

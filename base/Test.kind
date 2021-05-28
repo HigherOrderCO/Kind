@@ -1,6 +1,8 @@
-type Foo {
-  new(pair: Pair<F64,F64>)
-}
-
 Test: _
-  Foo.new({1,2}) @ pair @ fst
+  2 + 2
+//  IO {
+//    let name = "Kind.api.export"
+//    get schemed = Kind.api.io.term_to_scheme(name)
+//    get u = IO.set_file("./../bin/scm/src/kind.scm", schemed)
+//    return u
+//  }
