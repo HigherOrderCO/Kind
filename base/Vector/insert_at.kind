@@ -1,0 +1,21 @@
+Vector.insert_at(A : Type, size : Nat, n : Nat, v : A) : Equal<_, Nat.ltn(n, size), true> -> Vector<A, size> -> Vector<A, size>
+  case n {
+      zero : case size {
+          zero : 
+          (h) let k = Bool.true_neq_false(mirror(h))
+           Empty.absurd(_, k)
+          succ : (h, vec) case vec {
+              cons : Vector.cons(A, size.pred, v, vec.tail)
+          }
+      }!
+      succ : case size {
+          zero : (h) 
+            let k = Bool.true_neq_false(mirror(h))
+            Empty.absurd(_, k)
+          succ : (h, vec) case vec {
+              cons : 
+                let q = Nat.relations.ltn_pred(n, size.pred)
+                Vector.insert_at(A, size.pred, n, v, q(h), vec.tail)
+          }
+      }!
+  }!

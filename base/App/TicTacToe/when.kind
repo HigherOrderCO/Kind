@@ -5,11 +5,8 @@ App.TicTacToe.when: App.When<App.TicTacToe.State>
         open state
         let info = state.local@info
         open info
-        //let k = Pair.shows!!(U32.show, U32.show, info.mouse_pos)
-        let k = U32.show(App.TicTacToe.pair_to_pos(info.mouse_pos))
-        //let k = Pair.show!!(U32.show, U32.show, App.TicTacToe.pair_to_pos(info.mouse_pos))
-        log(k)
-        App.pass!
+        let state = App.TicTacToe.board.insert_entity(info.mouse_pos, App.TicTacToe.Entity.circle, state.local)        
+        App.set_local!(state)
       frame : 
         open state
         App.set_local!(state.local@info <- event.info)

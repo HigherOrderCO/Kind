@@ -1,0 +1,14 @@
+Nat.relations.ltn_pred(n : Nat, m : Nat) :
+  Equal<Bool, Nat.lte(Nat.succ(n), Nat.succ(m)), true> -> Equal<Bool, Nat.lte(n, m), true>
+  case n {
+      zero : case m {
+          zero : (h) refl
+          succ : (h) refl
+      }!
+      succ : case m {
+          zero : (h) 
+            let q = Bool.true_neq_false(mirror(h))
+            Empty.absurd(_, q)
+          succ : Nat.relations.ltn_pred(n.pred, m.pred)
+      }!
+  }!

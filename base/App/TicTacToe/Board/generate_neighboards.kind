@@ -1,0 +1,2 @@
+App.TicTacToe.Board.generate_neighboards : App.TicTacToe.State.global
+   ?a

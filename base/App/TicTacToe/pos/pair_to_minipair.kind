@@ -11,5 +11,5 @@ side_tale : U32
 // Exemplo: (50, 202) = (0, 2)
 App.TicTacToe.pos.pair_to_minipair(pair : Pair<U32, U32>) : Pair<U32, U32>
   open pair
-  Pair.new!!(App.TicTacToe.mouse_to_tile(pair.fst),App.TicTacToe.mouse_to_tile(pair.snd))
+  Pair.new!!(App.TicTacToe.pos.mouse_to_tile(pair.fst),App.TicTacToe.pos.mouse_to_tile(pair.snd))
 
