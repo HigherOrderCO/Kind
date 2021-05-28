@@ -1,13 +1,10 @@
 {
-  "name": "kind-lang",
-  "version": "1.0.58",
-  "description": "Kind-Lang in JavaScript",
-  "main": "src/kind.js",
+  "name": "kind-files",
+  "version": "0.1.0",
+  "description": "",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "bin": {
-    "kind": "src/main.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +17,6 @@
   },
   "homepage": "https://github.com/uwu-tech/kind#readme",
   "dependencies": {
-    "formcore-js": "^0.1.79"
+    "express": "^4.17.1"
   }
 }

@@ -69,18 +69,18 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
         // String.nil
         {0, "\"\""}
         // String.cons
-        {2, "(string-append (make-string 1 (integer->char $0)) $1)"}
+        {2, "(kstring-append (make-string 1 (integer->char $0)) $1)"}
       ]
       // Elim
-      {"(= (string-length $0) 0)", [
+      {"(<= (kstring-length $0) 0)", [
         // case nil
         {"#t", []}
         // case cons
         {"#f", [
           // x.head
-          "(char->integer (string-ref $0 0))",
+          "(char->integer (kstring-head $0))",
           // x.tail
-          "(let ((_str_ $0)) (substring _str_ 1 (string-length _str_)))",
+          "(kstring-tail $0)",
         ]}
       ]})
     data: Kind.Comp.Prim.Shape.new(
@@ -134,8 +134,9 @@ Kind.Comp.Target.Scheme.optimized: Map(Pair(Nat,String))
     "U16.gtn": {2, "(> $0 $1)"},
     "U16.inc": {2, "(+ $0 1)"},
     "U16.to_nat": {1, "$0"},
-    "String.eql": {2, "(string=? $0 $1)"},
-    "String.concat": {2, "(string-append $0 $1)"},
+    // TODO test if this is faster than non-optimized comparison
+    "String.eql": {2, "(string=? (kstring->string $0) (kstring->string $1))"},
+    "String.concat": {2, "(kstring-append $0 $1)"},
   }
 
 // Base deps
@@ -144,6 +145,61 @@ Kind.Comp.Target.Scheme.optimized: Map(Pair(Nat,String))
 Kind.Comp.Target.Scheme.base: String
 `; Short alias to vector-ref
 (define get vector-ref)
+
+; string-view record type (fast way to get a tail)
+(define-record string-view
+  ((immutable data)  ; underlying string
+   (immutable start) ; start position (inclusive)
+   (immutable end))) ; end position (exclusive)
+
+(define string-view-ref
+  (lambda (x y)
+    (string-ref (string-view-data x) (+ (string-view-start x) y))))
+
+(define kstring-tail
+  (lambda (x)
+    (if (string-view? x)
+      (make-string-view
+        (string-view-data x)
+        (+ (string-view-start x) 1)
+        (string-view-end x))
+      (make-string-view
+        x
+        1
+        (string-length x)))))
+
+(define kstring-head
+  (lambda (x)
+    (if (string-view? x)
+      (string-ref (string-view-data x) (string-view-start x))
+      (string-ref x 0))))
+
+(define kstring-length
+  (lambda (x)
+    (if (string-view? x)
+      (- (string-view-end x) (string-view-start x))
+      (string-length x))))
+
+(define kstring?
+  (lambda (x)
+    (or (string-view? x) (string? x))))
+
+(define kstring->string
+  (lambda (x)
+    (if (string-view? x)
+      (substring (string-view-data x) (string-view-start x) (string-view-end x))
+      x)))
+
+; TODO depending on x, we could safely append data at the end
+(define kstring-append
+  (lambda (x y)
+    (string-append (kstring->string x) (kstring->string y))))
+
+(define kstring-getter
+  (lambda (x)
+    (if (string-view? x)
+      string-view-ref
+      string-ref)))
 
 ; Converts a Kind word to a native integer
 (define (word-to-u16 w)
@@ -164,48 +220,52 @@ Kind.Comp.Target.Scheme.base: String
   (u16-to-word-go 0 x (vector 'Word.e)))
 
 ; Joins a list of strings with an intercalated separator
-(define (string_join sep strs fst)
+(define (kstring_join sep strs fst)
   (if (null? strs) 
     ""
-    (string-append
+    (kstring-append
       (if fst "" sep)
       (car strs)
-      (string_join sep (cdr strs) #f))))
+      (kstring_join sep (cdr strs) #f))))
 
 ; Returns the last index that chr occurs in str, -1 otherwise
-(define (last_index_of chr str idx)
-  (if (= idx (string-length str))
-    -1
-    (let ((rest (last_index_of chr str (+ idx 1))))
-      (if (char=? (string-ref str idx) chr)
-        (max idx rest)
-        rest))))
+(define (last_index_of chr kstr idx)
+  (let ((str (kstring->string kstr)))
+    (if (= idx (kstring-length str))
+      -1
+      (let ((rest (last_index_of chr str (+ idx 1))))
+        (if (char=? (string-ref str idx) chr)
+          (max idx rest)
+          rest)))))
 
 ; Returns the first index that chr occurs in str, -1 otherwise
-(define (first_index_of chr str idx)
-  (if (= idx (string-length str))
-    -1
-    (if (char=? (string-ref str idx) chr)
-      idx
-      (first_index_of chr str (+ idx 1)))))
+(define (first_index_of chr kstr idx)
+  (let ((str (kstring->string kstr)))
+    (if (= idx (string-length str))
+      -1
+      (if (char=? (string-ref str idx) chr)
+        idx
+        (first_index_of chr str (+ idx 1))))))
 
 ; Splits a string using an identifier
-(define (split_at_first chr str)
-  (let ((split_idx (first_index_of chr str 0)))
-    (if (= split_idx -1)
-      str
-      (cons
-        (substring str 0 split_idx)
-        (substring str (+ split_idx 1) (string-length str))))))
+(define (split_at_first chr kstr)
+  (let ((str (kstring->string kstr)))
+    (let ((split_idx (first_index_of chr str 0)))
+      (if (= split_idx -1)
+        str
+        (cons
+          (substring str 0 split_idx)
+          (substring str (+ split_idx 1) (string-length str)))))))
 
 ; Splits a string using an identifier
-(define (split_at_last chr str)
-  (let ((split_idx (last_index_of chr str 0)))
-    (if (= split_idx -1)
-      str
-      (cons
-        (substring str 0 split_idx)
-        (substring str (+ split_idx 1) (string-length str))))))
+(define (split_at_last chr kstr)
+  (let ((str (kstring->string kstr)))
+    (let ((split_idx (last_index_of chr str 0)))
+      (if (= split_idx -1)
+        str
+        (cons
+          (substring str 0 split_idx)
+          (substring str (+ split_idx 1) (string-length str)))))))
 
 ; Converts a date to a string, in milliseconds
 (define (time_to_string time)
@@ -215,7 +275,7 @@ Kind.Comp.Target.Scheme.base: String
 
 ; Prints a text with a newline
 (define (print txt)
-  (display txt)
+  (display (kstring->string txt))
   (display "\n"))
 
 ; Gets a line from stdin
@@ -225,18 +285,19 @@ Kind.Comp.Target.Scheme.base: String
 
 ; Deletes a file
 (define (del_file file)
-  (delete-file file))
+  (delete-file (kstring->string file)))
 
 ; Gets the contents of a file as a string
 ; If it doesn't exist, returns empty
-(define (get_file file)
-  (if (file-exists? file)
-    (let ((port (open-input-file file)))
-      (let ((text (get-string-all port)))
-        (begin
-          (close-input-port port)
-          text)))
-    ""))
+(define (get_file ifile)
+  (let ((file (kstring->string ifile)))
+    (if (file-exists? file)
+      (let ((port (open-input-file file)))
+        (let ((text (get-string-all port)))
+          (begin
+            (close-input-port port)
+            text)))
+      "")))
 
 ; Sets the contents of a file
 (define (set_file file text)
@@ -253,34 +314,45 @@ Kind.Comp.Target.Scheme.base: String
 
 ; Returns the time a file was modified. TODO: test on Windows/Linux
 (define (get_file_mtime file)
-  (time_to_string (file-modification-time file)))
+  (time_to_string (file-modification-time (kstring->string file))))
 
 ; Returns the current time
 (define (get_time)
   (time_to_string (current-time)))
 
 ; Performs a single Kind IO action
-(define (io_action name)
+(define (io_action iname)
+  (let ((name (kstring->string iname)))
   (case name
     ("print" (lambda (x) (print x)))
     ("put_string" (lambda (x) (display x)))
     ("get_line" (lambda (x) (get_line)))
     ("del_file" (lambda (x) (del_file x)))
     ("get_file" (lambda (x) (get_file x)))
-    ("set_file" (lambda (x) (let ((file_text (split_at_first #\= x))) (set_file (car file_text) (cdr file_text)))))
+    ("set_file" (lambda (x) (let ((file_text (split_at_first #\= (kstring->string x)))) (set_file (car file_text) (cdr file_text)))))
     ("get_dir" (lambda (x) (get_dir x)))
     ("get_file_mtime" (lambda (x) (get_file_mtime x)))
-    ("get_time" (lambda (x) (get_time)))))
+    ("get_time" (lambda (x) (get_time)))
+    (else (display (string-append "action not found: " name))))))
 
 ; Runs a Kind IO program
 (define (run_io io)
   (case (get io 0)
-    ('IO.end (get io 0))
+    ('IO.end (get io 1))
     ('IO.ask (let (
       (io_query (get io 1))
       (io_param (get io 2))
       (io_then (get io 3)))
-      (run_io (io_then ((io_action io_query) io_param)))))))`
+      (run_io (io_then ((io_action io_query) io_param)))))))
+(define (run_kind term)
+  (if
+    (and
+      (vector? term)
+      (or
+        (eq? (get term 0) 'IO.ask)
+        (eq? (get term 0) 'IO.end)))
+    (run_io term)
+    (print term)))`
 
 
 // Instantiators
@@ -521,4 +593,4 @@ Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
   for defn in defs_list with code:
     let {name,term} = defn
     code | Kind.Comp.Target.Scheme.definition(name, term, defs)
-  code | "(run_io "|main|")\n"
+  code|"\n(run_kind "|main|")"

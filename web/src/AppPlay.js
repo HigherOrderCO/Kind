@@ -20,8 +20,11 @@ module.exports = class AppPlay extends Component {
     this.app_global_tick = null; // global tick we're at
     this.app_global_begin = null; // the first tick of this app
     this.app_global_posts = {}; // map of global posts
+    this.app_has_ticker = false; // is there a tick function?
 
-    this.display = null;
+    this.received_posts = []; // list of posts in received order
+    this.display = null; // message to display (overrides render)
+    this.watching = {}; // rooms I'm watching
     this.intervals = {}; // timed intervals
     this.listeners = {}; // event listeners
     this.mouse_pos = { _: "Pair.new", fst: 0, snd: 0 };
@@ -52,18 +55,13 @@ module.exports = class AppPlay extends Component {
     if (!this.app && apps[this.name]) {
       //console.log("loading app...");
       this.app = (await apps[this.name])[this.name];
-      this.app_state = this.app.init;
-      //console.log("loaded: ", this.app_state);
+      this.app_has_ticker = this.app.tick.toString() !== "x0 => x1 => App$no_tick$(x0, x1)"; // lil hacker's optimization
+      this.app_state = {
+        _: "App.Store.new",
+        local: this.app.init.local,
+        global: this.app.init.global
+      };
     }
-  }
-
-  on_input(id) {
-    this.register_event({
-      _: "App.Event.input",
-      time: BigInt(Date.now()),
-      id,
-      text: document.getElementById(id).value
-    });
   }
 
   // Initializes the input event listeners
@@ -220,7 +218,7 @@ module.exports = class AppPlay extends Component {
 
   // Registers a post
   register_post(post) {
-    if (this.app) {
+    if (this.app && this.watching[post.room]) {
       var key = String(post.time);
       if (!this.app_global_posts[key]) {
         this.app_global_posts[key] = [];
@@ -247,7 +245,6 @@ module.exports = class AppPlay extends Component {
         var latest = StateList.latest(tick, this.app_global_states);
         // If there is no previous state, reset to initial state
         if (latest === null) {
-          //console.log("- RESET TO INIT");
           this.app_global_tick = null;
           this.app_state.global = this.app.init.global;
         // Otherwise, restore found state
@@ -265,7 +262,7 @@ module.exports = class AppPlay extends Component {
       var count_posts = 0;
       var begin_time = Date.now();
       var total = tick - this.app_global_tick;
-      if (total > 16) {
+      if (total > 16 && this.app_has_ticker) {
         var from_date = new Date(this.app_global_tick * 62.5);
         var to_date = new Date(tick * 62.5);
         this.display = "Computing " + total + " ticks.\n";
@@ -286,7 +283,9 @@ module.exports = class AppPlay extends Component {
             //++count_posts;
           }
         }
-        state = this.app.tick(BigInt(t))(state);
+        if (this.app_has_ticker) {
+          state = this.app.tick(BigInt(t))(state);
+        }
         this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
         this.app_state.global = state;
       };
@@ -295,6 +294,19 @@ module.exports = class AppPlay extends Component {
       //if (this.app_global_tick > (Date.now() - 1000) / 62.5) {
         //console.log("At " + tick + "("+(compute_to_tick-compute_from_tick)+" computed)");
       //}
+    }
+  }
+
+  // Resets the state and recomputes all posts
+  recompute_posts() {
+    this.app_global_states = null;
+    this.app_global_tick = null;
+    this.app_global_begin = null;
+    this.app_global_posts = {};
+    this.app_state.global = this.app.init.global;
+    for (var post of this.received_posts) {
+      //console.log("recompute post: " + JSON.stringify(post));
+      this.register_post(post);
     }
   }
 
@@ -342,22 +354,34 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "request": 
               return fetch(encodeURI(io.param))
-              .then(result => result.text())
-              .then(result => this.run_io(io.then(result)))
-              .then(res)
-              .catch(err => {
-                let msg = err.message;
-                let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
-                this.run_io(
-                  io.then("Oops, something went wrong: "+ msg + call_fix))
-              });
+                .then(result => result.text())
+                .then(result => this.run_io(io.then(result)))
+                .then(res)
+                .catch(err => {
+                  let msg = err.message;
+                  let call_fix = ".\nLet us know ..."; // TODO: add call to Github issue
+                  this.run_io(io.then("Oops, something went wrong: "+ msg + call_fix))
+                });
+            case "unwatch":
+              if (utils.is_valid_hex(56, io.param)) {
+                this.watching[io.param] = false;
+                window.KindEvents.unwatch_room(io.param);
+                this.recompute_posts();
+              } else {
+                console.log("Error: invalid input on App.Action.unwatch");
+              }
+              return this.run_io(io.then("")).then(res).catch(err);
             case "watch":
               if (utils.is_valid_hex(56, io.param)) {
+                //console.log('watch', io.param);
+                this.watching[io.param] = true;
                 window.KindEvents.watch_room(io.param);
+                this.recompute_posts();
                 window.KindEvents.on_post(({ room, time, addr, data }) => {
-                  //console.log("got post " + room);
                   var time = parseInt(time.slice(2), 16);
+                  //console.log("got post: " + JSON.stringify({room,time,addr,data}));
                   this.register_post({room,time,addr,data});
+                  this.received_posts.push({room,time,addr,data});
                   //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
@@ -378,10 +402,6 @@ module.exports = class AppPlay extends Component {
     }
   }
 
-  is_input_type(tag) {
-    return (tag === "input" || tag === "textarea")
-  }
-
   // Renders a document
   render_dom(elem) {
     //console.log("render_dom", elem);
@@ -391,13 +411,15 @@ module.exports = class AppPlay extends Component {
         let props = utils.map_to_object(elem.props);
         let style = utils.map_to_object(elem.style);
         return h(elem.tag, {
-        ...props,
-        style: style,
-        onInput: 
-          this.is_input_type(elem.tag) 
-          ? () => this.on_input(props.id)
-          : null
-      }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
+          ...props,
+          style: style,
+          onInput: (event) => {
+            if (elem.tag === "input" || elem.tag === "textarea") {
+              let time = BigInt(Date.now());
+              this.register_event({_: "App.Event.input", time, id: props.id, text: event.target.value});
+            }
+          },
+        }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":
         let canvas_props = utils.map_to_object(elem.props);

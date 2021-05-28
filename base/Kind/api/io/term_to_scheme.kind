@@ -1,0 +1,8 @@
+Kind.api.io.term_to_scheme(name: String): IO<String>
+  IO {
+    get defs = Kind.Synth.one(name, Kind.Map.new!)
+    let defs = (defs <> Kind.Map.new!)
+    let compiled = Kind.Comp.Defs.compile(defs)
+    let schemed = Kind.Comp.Target.Scheme(name, compiled)
+    return schemed;
+  }

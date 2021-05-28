@@ -18,22 +18,22 @@ function find_base_dir() {
       ADD_PATH = full_path.slice(kind_indx + 10).slice(1)+"/";
     }
     process.chdir(full_path.slice(0, kind_indx + 10));
-  } else if (local_dir.indexOf("kind") !== -1) {
-    process.chdir(path.join(full_path, "kind"));
-    find_base_dir();
-  } else if (local_dir.indexOf("Kind") !== -1) {
-    process.chdir(path.join(full_path, "Kind"));
-    find_base_dir();
-  } else if (local_dir.indexOf("base") !== -1) {
-    process.chdir(path.join(full_path, "base"));
-    find_base_dir();
-  } else {
-    console.log("Couldn't find Kind's repository. Please, clone it with:");
-    console.log("");
-    console.log("  git clone https://github.com/uwu-tech/Kind");
-    console.log("");
-    console.log("And add your files to the Kind/base directory.");
-    process.exit();
+  //} else if (local_dir.indexOf("kind") !== -1) {
+    //process.chdir(path.join(full_path, "kind"));
+    //find_base_dir();
+  //} else if (local_dir.indexOf("Kind") !== -1) {
+    //process.chdir(path.join(full_path, "Kind"));
+    //find_base_dir();
+  //} else if (local_dir.indexOf("base") !== -1) {
+    //process.chdir(path.join(full_path, "base"));
+    //find_base_dir();
+  //} else {
+    //console.log("# Kind "+require("./../package.json").version);
+    //console.log("Couldn't find Kind/base directory.\n");
+    //console.log("Go to the directory to run Kind commands or clone the repository:");
+    //console.log("  git clone https://github.com/uwu-tech/Kind");
+    //console.log("New files must be added inside Kind/base directory.");
+    //process.exit();
   }
 };
 find_base_dir();
