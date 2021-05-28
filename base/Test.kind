@@ -1,3 +1,6 @@
-Test: String
-  String.serialize_ascii("oi tudo bem?")
+type Foo {
+  new(pair: Pair<F64,F64>)
+}
 
+Test: _
+  Foo.new({1,2}) @ pair @ fst
