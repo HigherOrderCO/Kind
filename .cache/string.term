@@ -1,0 +1,1 @@
+%String.Self(P:@(:String) *) @(nil:(P String.nil)) @(cons:@(head:Char) @(tail:String) (P ((String.cons head) tail))) (P String.Self)

@@ -1,0 +1,1 @@
+%VoxBox.Self(P:@(:VoxBox) *) @(new:@(length:U32) @(capacity:U32) @(buffer:Buffer32) (P (((VoxBox.new length) capacity) buffer))) (P VoxBox.Self)

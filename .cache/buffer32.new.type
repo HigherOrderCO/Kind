@@ -1,0 +1,1 @@
+@(depth:Nat) @(array:((Array U32) depth)) Buffer32

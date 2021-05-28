@@ -1,0 +1,1 @@
+#A #depth %Array.Self(P:@(depth:Nat) @(:((Array A) depth)) *) @(tip:@(value:A) ((P Nat.zero) ((Array.tip A) value))) @(tie:%(depth:Nat) @(lft:((Array A) depth)) @(rgt:((Array A) depth)) ((P (Nat.succ depth)) ((((Array.tie A) depth) lft) rgt))) ((P depth) Array.Self)

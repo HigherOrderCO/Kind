@@ -1,0 +1,1 @@
+%(S:App.State) @(local:(App.State.local S)) @(global:(App.State.global S)) (App.Store S)

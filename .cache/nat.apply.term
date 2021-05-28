@@ -1,0 +1,1 @@
+#A #n #f #x (((n #n A) x) #n.pred ((((Nat.apply A) n.pred) f) (f x)))

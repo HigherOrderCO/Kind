@@ -1,0 +1,1 @@
+@(length:U32) @(capacity:U32) @(buffer:Buffer32) VoxBox

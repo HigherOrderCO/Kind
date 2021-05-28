@@ -1,0 +1,1 @@
+%App.Playground.Event.Self(P:@(:App.Playground.Event) *) @(check_terms:(P App.Playground.Event.check_terms)) @(run_code:(P App.Playground.Event.run_code)) @(display_output:(P App.Playground.Event.display_output)) (P App.Playground.Event.Self)

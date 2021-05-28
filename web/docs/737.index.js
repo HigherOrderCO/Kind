@@ -348,6 +348,7 @@ module.exports = function() {
     const Pair$new = x0 => x1 => Pair$new$(x0, x1);
     const App$State$new = Pair$new$(null, null);
     const App$Playground$State = App$State$new;
+<<<<<<< Updated upstream
     function App$Playground$State$local$new$(_device$1, _window$2, _mouse_over$3, _code$4, _output$5) {
         var $35 = {
             _: "App.Playground.State.local.new",
@@ -367,6 +368,29 @@ module.exports = function() {
         _: "App.Playground.Window.input"
     };
     const App$Playground$State$local_empty = App$Playground$State$local$new$(Device$big_desktop, App$Playground$Window$input, "", "", "");
+=======
+
+    function App$Playground$State$local$new$(_device$1, _window$2, _mouse_over$3, _code$4, _output$5, _kind_version$6) {
+        var $35 = ({
+            _: 'App.Playground.State.local.new',
+            'device': _device$1,
+            'window': _window$2,
+            'mouse_over': _mouse_over$3,
+            'code': _code$4,
+            'output': _output$5,
+            'kind_version': _kind_version$6
+        });
+        return $35;
+    };
+    const App$Playground$State$local$new = x0 => x1 => x2 => x3 => x4 => x5 => App$Playground$State$local$new$(x0, x1, x2, x3, x4, x5);
+    const Device$big_desktop = ({
+        _: 'Device.big_desktop'
+    });
+    const App$Playground$Window$input = ({
+        _: 'App.Playground.Window.input'
+    });
+    const App$Playground$State$local_empty = App$Playground$State$local$new$(Device$big_desktop, App$Playground$Window$input, "", "", "", "");
+>>>>>>> Stashed changes
     const Unit$new = null;
     function DOM$node$(_tag$1, _props$2, _style$3, _children$4) {
         var $36 = {
@@ -698,22 +722,40 @@ module.exports = function() {
     }
     const Map$union = x0 => x1 => Map$union$(x0, x1);
     const App$Kind$constant$secondary_color = "#3891A6";
+<<<<<<< Updated upstream
     function App$Playground$comp$btn_run_code$(_mouse_over$1) {
         var _is_hover$2 = "btn_run_code" === _mouse_over$1;
         var _normal$3 = Map$from_list$(List$cons$(Pair$new$("width", "50px"), List$cons$(Pair$new$("height", "25px"), List$cons$(Pair$new$("margin", "5px 0px"), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("border", "none"), List$cons$(Pair$new$("border-radius", "4px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil))))))))))));
         var $108 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "btn_run_code"), List$nil)), (() => {
             var self = _is_hover$2;
+=======
+
+    function App$Playground$comp$btn$(_mouse_over$1, _id$2, _text$3) {
+        var _is_hover$4 = (_id$2 === _mouse_over$1);
+        var _normal$5 = Map$from_list$(List$cons$(Pair$new$("width", "50px"), List$cons$(Pair$new$("height", "25px"), List$cons$(Pair$new$("margin", "5px 0px"), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("border", "none"), List$cons$(Pair$new$("border-radius", "4px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil))))))))))));
+        var $108 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$2), List$nil)), (() => {
+            var self = _is_hover$4;
+>>>>>>> Stashed changes
             if (self) {
-                var $109 = Map$union$(_normal$3, Map$from_list$(List$cons$(Pair$new$("background-color", "#44B8D3"), List$nil)));
+                var $109 = Map$union$(_normal$5, Map$from_list$(List$cons$(Pair$new$("background-color", "#44B8D3"), List$nil)));
                 return $109;
             } else {
-                var $110 = Map$union$(_normal$3, Map$from_list$(List$cons$(Pair$new$("background-color", App$Kind$constant$secondary_color), List$nil)));
+                var $110 = Map$union$(_normal$5, Map$from_list$(List$cons$(Pair$new$("background-color", App$Kind$constant$secondary_color), List$nil)));
                 return $110;
+<<<<<<< Updated upstream
             }
         })(), List$cons$(DOM$text$("check"), List$nil));
         return $108;
     }
     const App$Playground$comp$btn_run_code = x0 => App$Playground$comp$btn_run_code$(x0);
+=======
+            };
+        })(), List$cons$(DOM$text$(_text$3), List$nil));
+        return $108;
+    };
+    const App$Playground$comp$btn = x0 => x1 => x2 => App$Playground$comp$btn$(x0, x1, x2);
+
+>>>>>>> Stashed changes
     function App$Playground$comp$header$(_device$1, _mouse_over$2, _window$3) {
         var _playground$4 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "input_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
             var self = _window$3;
@@ -727,10 +769,13 @@ module.exports = function() {
                 return $113;
             }
         })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("playground.kind"), List$nil));
-        var _btn_run$5 = App$Playground$comp$btn_run_code$(_mouse_over$2);
-        var _style_header$6 = Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))));
+        var _btn_check$5 = App$Playground$comp$btn$(_mouse_over$2, "btn_type_check", "check");
+        var _btn_run$6 = App$Playground$comp$btn$(_mouse_over$2, "btn_run_code", "run");
+        var _style_header$7 = Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("justify-content", "center"), List$nil))))));
+        var _btn_area$8 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("width", "120px"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$nil))))), List$cons$(_btn_check$5, List$cons$(_btn_run$6, List$nil)));
         var self = _device$1;
         switch (self._) {
+<<<<<<< Updated upstream
           case "Device.phone":
             var _terminal$7 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "terminal_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
                 var self = _window$3;
@@ -755,6 +800,30 @@ module.exports = function() {
             var $111 = $117;
             break;
         }
+=======
+            case 'Device.phone':
+                var _terminal$9 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "terminal_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
+                    var self = _window$3;
+                    switch (self._) {
+                        case 'App.Playground.Window.input':
+                            var $115 = App$Playground$constant$white_smoke;
+                            return $115;
+                        case 'App.Playground.Window.terminal':
+                            var $116 = App$Playground$constant$light_gray_color;
+                            return $116;
+                    };
+                })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("output"), List$nil));
+                var $114 = DOM$node$("div", Map$from_list$(List$nil), _style_header$7, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), List$cons$(_playground$4, List$cons$(_terminal$9, List$nil))), List$cons$(_btn_area$8, List$nil)));
+                var $111 = $114;
+                break;
+            case 'Device.tablet':
+            case 'Device.desktop':
+            case 'Device.big_desktop':
+                var $117 = DOM$node$("div", Map$from_list$(List$nil), _style_header$7, List$cons$(_playground$4, List$cons$(_btn_area$8, List$nil)));
+                var $111 = $117;
+                break;
+        };
+>>>>>>> Stashed changes
         return $111;
     }
     const App$Playground$comp$header = x0 => x1 => x2 => App$Playground$comp$header$(x0, x1, x2);
@@ -791,6 +860,7 @@ module.exports = function() {
     function App$Playground$comp$main_area$(_stt$1) {
         var self = _stt$1;
         switch (self._) {
+<<<<<<< Updated upstream
           case "App.Playground.State.local.new":
             var $124 = self.device;
             var $125 = self.window;
@@ -816,6 +886,41 @@ module.exports = function() {
                     }
                 })(), List$nil)));
                 var $129 = $130;
+=======
+            case 'App.Playground.State.local.new':
+                var $124 = self.device;
+                var $125 = self.window;
+                var $126 = self.mouse_over;
+                var $127 = self.code;
+                var $128 = self.output;
+                var _header$8 = App$Playground$comp$header$($124, $126, $125);
+                var _input_view$9 = App$Playground$comp$input$($127);
+                var _output_view$10 = App$Playground$comp$output_area$($128, $124);
+                var self = $124;
+                switch (self._) {
+                    case 'Device.phone':
+                        var $130 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$nil))))), List$cons$(_header$8, List$cons$((() => {
+                            var self = $125;
+                            switch (self._) {
+                                case 'App.Playground.Window.input':
+                                    var $131 = _input_view$9;
+                                    return $131;
+                                case 'App.Playground.Window.terminal':
+                                    var $132 = _output_view$10;
+                                    return $132;
+                            };
+                        })(), List$nil)));
+                        var $129 = $130;
+                        break;
+                    case 'Device.tablet':
+                    case 'Device.desktop':
+                    case 'Device.big_desktop':
+                        var $133 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil))))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("width", "60%"), List$nil)))), List$cons$(_header$8, List$cons$(_input_view$9, List$nil))), List$cons$(_output_view$10, List$nil)));
+                        var $129 = $133;
+                        break;
+                };
+                var $123 = $129;
+>>>>>>> Stashed changes
                 break;
 
               case "Device.tablet":
@@ -1106,6 +1211,7 @@ module.exports = function() {
     function App$Playground$set_mouse_over$(_id$1, _stt$2) {
         var self = _stt$2;
         switch (self._) {
+<<<<<<< Updated upstream
           case "App.Playground.State.local.new":
             var $190 = self.device;
             var $191 = self.window;
@@ -1115,6 +1221,18 @@ module.exports = function() {
             var $189 = $194;
             break;
         }
+=======
+            case 'App.Playground.State.local.new':
+                var $190 = self.device;
+                var $191 = self.window;
+                var $192 = self.code;
+                var $193 = self.output;
+                var $194 = self.kind_version;
+                var $195 = App$Playground$State$local$new$($190, $191, _id$1, $192, $193, $194);
+                var $189 = $195;
+                break;
+        };
+>>>>>>> Stashed changes
         return $189;
     }
     const App$Playground$set_mouse_over = x0 => x1 => App$Playground$set_mouse_over$(x0, x1);
@@ -1124,9 +1242,10 @@ module.exports = function() {
     function String$is_empty$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $196 = Bool$true;
-            var $195 = $196;
+            var $197 = Bool$true;
+            var $196 = $197;
         } else {
+<<<<<<< Updated upstream
             var $197 = self.charCodeAt(0);
             var $198 = self.slice(1);
             var $199 = Bool$false;
@@ -1276,8 +1395,251 @@ module.exports = function() {
         }
         return $202;
     }
+=======
+            var $198 = self.charCodeAt(0);
+            var $199 = self.slice(1);
+            var $200 = Bool$false;
+            var $196 = $200;
+        };
+        return $196;
+    };
+    const String$is_empty = x0 => String$is_empty$(x0);
+
+    function App$Playground$set_output$(_output$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $202 = self.device;
+                var $203 = self.window;
+                var $204 = self.mouse_over;
+                var $205 = self.code;
+                var $206 = self.kind_version;
+                var $207 = App$Playground$State$local$new$($202, $203, $204, $205, _output$1, $206);
+                var $201 = $207;
+                break;
+        };
+        return $201;
+    };
+    const App$Playground$set_output = x0 => x1 => App$Playground$set_output$(x0, x1);
+
+    function IO$request$(_url$1) {
+        var $208 = IO$ask$("request", _url$1, (_text$2 => {
+            var $209 = IO$end$(_text$2);
+            return $209;
+        }));
+        return $208;
+    };
+    const IO$request = x0 => IO$request$(x0);
+
+    function App$Playground$set_window$(_window$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $211 = self.device;
+                var $212 = self.mouse_over;
+                var $213 = self.code;
+                var $214 = self.output;
+                var $215 = self.kind_version;
+                var $216 = App$Playground$State$local$new$($211, _window$1, $212, $213, $214, $215);
+                var $210 = $216;
+                break;
+        };
+        return $210;
+    };
+    const App$Playground$set_window = x0 => x1 => App$Playground$set_window$(x0, x1);
+
+    function App$Playground$set_code$(_input$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $218 = self.device;
+                var $219 = self.window;
+                var $220 = self.mouse_over;
+                var $221 = self.output;
+                var $222 = self.kind_version;
+                var $223 = App$Playground$State$local$new$($218, $219, $220, _input$1, $221, $222);
+                var $217 = $223;
+                break;
+        };
+        return $217;
+    };
+    const App$Playground$set_code = x0 => x1 => App$Playground$set_code$(x0, x1);
+
+    function App$Playground$when$(_event$1, _stt$2) {
+        var self = _stt$2;
+        switch (self._) {
+            case 'App.Store.new':
+                var $225 = self.local;
+                var $226 = $225;
+                var _state$3 = $226;
+                break;
+        };
+        var self = _state$3;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $227 = self.device;
+                var $228 = self.code;
+                var self = _event$1;
+                switch (self._) {
+                    case 'App.Event.frame':
+                        var $230 = self.info;
+                        var self = $230;
+                        switch (self._) {
+                            case 'App.EnvInfo.new':
+                                var $232 = self.screen_size;
+                                var self = $232;
+                                switch (self._) {
+                                    case 'Pair.new':
+                                        var $234 = self.fst;
+                                        var _device$16 = Device$classify$($234);
+                                        var self = _state$3;
+                                        switch (self._) {
+                                            case 'App.Playground.State.local.new':
+                                                var $236 = self.window;
+                                                var $237 = self.mouse_over;
+                                                var $238 = self.code;
+                                                var $239 = self.output;
+                                                var $240 = self.kind_version;
+                                                var $241 = App$Playground$State$local$new$(_device$16, $236, $237, $238, $239, $240);
+                                                var _stt$17 = $241;
+                                                break;
+                                        };
+                                        var $235 = App$set_local$(_stt$17);
+                                        var $233 = $235;
+                                        break;
+                                };
+                                var $231 = $233;
+                                break;
+                        };
+                        var $229 = $231;
+                        break;
+                    case 'App.Event.mouse_over':
+                        var $242 = self.id;
+                        var $243 = App$set_local$(App$Playground$set_mouse_over$($242, _state$3));
+                        var $229 = $243;
+                        break;
+                    case 'App.Event.mouse_click':
+                        var $244 = self.id;
+                        var self = $227;
+                        switch (self._) {
+                            case 'Device.phone':
+                                var $246 = App$Playground$Window$terminal;
+                                var _window$13 = $246;
+                                break;
+                            case 'Device.tablet':
+                            case 'Device.desktop':
+                            case 'Device.big_desktop':
+                                var $247 = App$Playground$Window$input;
+                                var _window$13 = $247;
+                                break;
+                        };
+                        var self = ($244 === "btn_type_check");
+                        if (self) {
+                            var self = String$is_empty$($228);
+                            if (self) {
+                                var _stt$14 = App$Playground$set_output$("How can I type check an empty code? haha", _state$3);
+                                var $249 = App$set_local$(_stt$14);
+                                var $248 = $249;
+                            } else {
+                                var $250 = IO$monad$((_m$bind$14 => _m$pure$15 => {
+                                    var $251 = _m$bind$14;
+                                    return $251;
+                                }))(IO$request$(("http://localhost:3030/api/check_term?code=" + $228)))((_checked$14 => {
+                                    var _stt$15 = App$Playground$set_output$(_checked$14, _state$3);
+                                    var _stt$16 = App$Playground$set_window$(_window$13, _stt$15);
+                                    var $252 = App$set_local$(_stt$16);
+                                    return $252;
+                                }));
+                                var $248 = $250;
+                            };
+                            var $245 = $248;
+                        } else {
+                            var self = ($244 === "btn_run_code");
+                            if (self) {
+                                var self = String$is_empty$($228);
+                                if (self) {
+                                    var self = _state$3;
+                                    switch (self._) {
+                                        case 'App.Playground.State.local.new':
+                                            var $256 = self.device;
+                                            var $257 = self.window;
+                                            var $258 = self.mouse_over;
+                                            var $259 = self.code;
+                                            var $260 = self.kind_version;
+                                            var $261 = App$Playground$State$local$new$($256, $257, $258, $259, "How can I type check an empty code? haha", $260);
+                                            var _stt$14 = $261;
+                                            break;
+                                    };
+                                    var $255 = App$set_local$(_stt$14);
+                                    var $254 = $255;
+                                } else {
+                                    var $262 = IO$monad$((_m$bind$14 => _m$pure$15 => {
+                                        var $263 = _m$bind$14;
+                                        return $263;
+                                    }))(IO$request$(("http://localhost:3030/api/run_term?code=" + $228)))((_checked$14 => {
+                                        var _stt$15 = App$Playground$set_output$(_checked$14, _state$3);
+                                        var _stt$16 = App$Playground$set_window$(_window$13, _stt$15);
+                                        var $264 = App$set_local$(_stt$16);
+                                        return $264;
+                                    }));
+                                    var $254 = $262;
+                                };
+                                var $253 = $254;
+                            } else {
+                                var self = ($244 === "terminal_view");
+                                if (self) {
+                                    var _stt$14 = App$Playground$set_window$(App$Playground$Window$terminal, _state$3);
+                                    var $266 = App$set_local$(_stt$14);
+                                    var $265 = $266;
+                                } else {
+                                    var self = ($244 === "input_view");
+                                    if (self) {
+                                        var _stt$14 = App$Playground$set_window$(App$Playground$Window$input, _state$3);
+                                        var $268 = App$set_local$(_stt$14);
+                                        var $267 = $268;
+                                    } else {
+                                        var $269 = App$pass;
+                                        var $267 = $269;
+                                    };
+                                    var $265 = $267;
+                                };
+                                var $253 = $265;
+                            };
+                            var $245 = $253;
+                        };
+                        var $229 = $245;
+                        break;
+                    case 'App.Event.input':
+                        var $270 = self.id;
+                        var $271 = self.text;
+                        var self = ($270 === "input_code");
+                        if (self) {
+                            var $273 = App$set_local$(App$Playground$set_code$($271, _state$3));
+                            var $272 = $273;
+                        } else {
+                            var $274 = App$pass;
+                            var $272 = $274;
+                        };
+                        var $229 = $272;
+                        break;
+                    case 'App.Event.init':
+                    case 'App.Event.mouse_down':
+                    case 'App.Event.mouse_up':
+                    case 'App.Event.key_down':
+                    case 'App.Event.key_up':
+                        var $275 = App$pass;
+                        var $229 = $275;
+                        break;
+                };
+                var $224 = $229;
+                break;
+        };
+        return $224;
+    };
+>>>>>>> Stashed changes
     const App$Playground$when = x0 => x1 => App$Playground$when$(x0, x1);
     function App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6) {
+<<<<<<< Updated upstream
         var $239 = {
             _: "App.new",
             init: _init$2,
@@ -1410,6 +1772,142 @@ module.exports = function() {
     };
 }();
 
+=======
+        var $276 = ({
+            _: 'App.new',
+            'init': _init$2,
+            'draw': _draw$3,
+            'when': _when$4,
+            'tick': _tick$5,
+            'post': _post$6
+        });
+        return $276;
+    };
+    const App$new = x0 => x1 => x2 => x3 => x4 => App$new$(x0, x1, x2, x3, x4);
+    const App$Playground = (() => {
+        var _init$1 = App$Store$new$(App$Playground$State$local_empty, Unit$new);
+        var _draw$2 = (_state$2 => {
+            var $278 = App$playground$body$((() => {
+                var self = _state$2;
+                switch (self._) {
+                    case 'App.Store.new':
+                        var $279 = self.local;
+                        var $280 = $279;
+                        return $280;
+                };
+            })());
+            return $278;
+        });
+        var _when$3 = App$Playground$when;
+        var _tick$4 = (_tick$4 => _glob$5 => {
+            var $281 = _glob$5;
+            return $281;
+        });
+        var _post$5 = (_time$5 => _room$6 => _addr$7 => _data$8 => _glob$9 => {
+            var $282 = _glob$9;
+            return $282;
+        });
+        var $277 = App$new$(_init$1, _draw$2, _when$3, _tick$4, _post$5);
+        return $277;
+    })();
+    return {
+        'App.Store.new': App$Store$new,
+        'Pair.new': Pair$new,
+        'App.State.new': App$State$new,
+        'App.Playground.State': App$Playground$State,
+        'App.Playground.State.local.new': App$Playground$State$local$new,
+        'Device.big_desktop': Device$big_desktop,
+        'App.Playground.Window.input': App$Playground$Window$input,
+        'App.Playground.State.local_empty': App$Playground$State$local_empty,
+        'Unit.new': Unit$new,
+        'DOM.node': DOM$node,
+        'BitsMap': BitsMap,
+        'Map': Map,
+        'BitsMap.new': BitsMap$new,
+        'BitsMap.tie': BitsMap$tie,
+        'Maybe.some': Maybe$some,
+        'Maybe.none': Maybe$none,
+        'BitsMap.set': BitsMap$set,
+        'Bits.e': Bits$e,
+        'Bits.o': Bits$o,
+        'Bits.i': Bits$i,
+        'Bits.concat': Bits$concat,
+        'Word.to_bits': Word$to_bits,
+        'Nat.succ': Nat$succ,
+        'Nat.zero': Nat$zero,
+        'U16.to_bits': U16$to_bits,
+        'String.to_bits': String$to_bits,
+        'Map.from_list': Map$from_list,
+        'List.cons': List$cons,
+        'Pair': Pair,
+        'List.nil': List$nil,
+        'App.Playground.constant.light_gray_color': App$Playground$constant$light_gray_color,
+        'App.Playground.constant.white_smoke': App$Playground$constant$white_smoke,
+        'DOM.text': DOM$text,
+        'Bool.true': Bool$true,
+        'Bool.false': Bool$false,
+        'Bool.and': Bool$and,
+        'Cmp.as_eql': Cmp$as_eql,
+        'Cmp.ltn': Cmp$ltn,
+        'Cmp.gtn': Cmp$gtn,
+        'Word.cmp.go': Word$cmp$go,
+        'Cmp.eql': Cmp$eql,
+        'Word.cmp': Word$cmp,
+        'Word.eql': Word$eql,
+        'U16.eql': U16$eql,
+        'String.eql': String$eql,
+        'BitsMap.union': BitsMap$union,
+        'Map.union': Map$union,
+        'App.Kind.constant.secondary_color': App$Kind$constant$secondary_color,
+        'App.Playground.comp.btn': App$Playground$comp$btn,
+        'App.Playground.comp.header': App$Playground$comp$header,
+        'String.cons': String$cons,
+        'String.concat': String$concat,
+        'App.Playground.comp.input': App$Playground$comp$input,
+        'App.Playground.comp.output_area': App$Playground$comp$output_area,
+        'App.Playground.comp.main_area': App$Playground$comp$main_area,
+        'App.Playground.draw': App$Playground$draw,
+        'App.playground.body': App$playground$body,
+        'Pair.fst': Pair$fst,
+        'App.State.local': App$State$local,
+        'IO': IO,
+        'Maybe': Maybe,
+        'IO.ask': IO$ask,
+        'IO.bind': IO$bind,
+        'IO.end': IO$end,
+        'IO.monad': IO$monad,
+        'App.pass': App$pass,
+        'Cmp.as_lte': Cmp$as_lte,
+        'Word.lte': Word$lte,
+        'U32.lte': U32$lte,
+        'U32.new': U32$new,
+        'Nat.apply': Nat$apply,
+        'Word': Word,
+        'Word.e': Word$e,
+        'Word.i': Word$i,
+        'Word.o': Word$o,
+        'Word.inc': Word$inc,
+        'Word.zero': Word$zero,
+        'Nat.to_word': Nat$to_word,
+        'Nat.to_u32': Nat$to_u32,
+        'Device.phone': Device$phone,
+        'Device.tablet': Device$tablet,
+        'Device.desktop': Device$desktop,
+        'Device.classify': Device$classify,
+        'App.set_local': App$set_local,
+        'App.Playground.set_mouse_over': App$Playground$set_mouse_over,
+        'App.Playground.Window.terminal': App$Playground$Window$terminal,
+        'String.is_empty': String$is_empty,
+        'App.Playground.set_output': App$Playground$set_output,
+        'IO.request': IO$request,
+        'App.Playground.set_window': App$Playground$set_window,
+        'App.Playground.set_code': App$Playground$set_code,
+        'App.Playground.when': App$Playground$when,
+        'App.new': App$new,
+        'App.Playground': App$Playground,
+    };
+})();
+>>>>>>> Stashed changes
 
 /***/ })
 

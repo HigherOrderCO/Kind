@@ -1,0 +1,1 @@
+#A %List.Self(P:@(:(List A)) *) @(nil:(P (List.nil A))) @(cons:@(head:A) @(tail:(List A)) (P (((List.cons A) head) tail))) (P List.Self)

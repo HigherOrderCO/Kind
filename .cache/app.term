@@ -1,0 +1,1 @@
+#S %App.Self(P:@(:(App S)) *) @(new:@(init:(App.Init S)) @(draw:(App.Draw S)) @(when:(App.When S)) @(tick:(App.Tick S)) @(post:(App.Post S)) (P ((((((App.new S) init) draw) when) tick) post))) (P App.Self)

@@ -1,0 +1,1 @@
+#size #a #b ((((Word.cmp.go size) a) b) Cmp.eql)

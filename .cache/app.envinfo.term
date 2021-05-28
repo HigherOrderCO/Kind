@@ -1,0 +1,1 @@
+%App.EnvInfo.Self(P:@(:App.EnvInfo) *) @(new:@(screen_size:((Pair U32) U32)) @(mouse_pos:((Pair U32) U32)) (P ((App.EnvInfo.new screen_size) mouse_pos))) (P App.EnvInfo.Self)

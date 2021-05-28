@@ -1,0 +1,1 @@
+#A %BitsMap.Self(P:@(:(BitsMap A)) *) @(new:(P (BitsMap.new A))) @(tie:@(val:(Maybe A)) @(lft:(BitsMap A)) @(rgt:(BitsMap A)) (P ((((BitsMap.tie A) val) lft) rgt))) (P BitsMap.Self)

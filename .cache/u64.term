@@ -1,0 +1,1 @@
+%U64.Self(P:@(:U64) *) @(new:@(value:(Word +64)) (P (U64.new value))) (P U64.Self)
