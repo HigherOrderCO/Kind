@@ -1,0 +1,5 @@
+Variadic(n: Nat, A: Type, B: Type): Type
+  case n {
+    zero: B
+    succ: A -> Variadic(n.pred, A, B)
+  }
