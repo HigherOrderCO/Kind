@@ -9,6 +9,7 @@ side_tale : U32
 
     
 // Captura a informação em posicao do vetor 0-8 e transforma em coordenadas cartesianas centralizadas
+// TO DO : Descontar tamanho da entity
 App.TicTacToe.pos.posvector_to_pair(pos : U32) : Pair<U32, U32>
   let trans = App.TicTacToe.pos.posvector_to_minipair(pos)
   open trans
