@@ -6,3 +6,6 @@ App.TicTacToe.constant.edge : U32
 
 App.TicTacToe.constant.side_tale : U32
   App.TicTacToe.constant.size/3
+
+App.TicTacToe.constant.side_entity : U32
+  34
