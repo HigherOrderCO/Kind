@@ -201,6 +201,33 @@ Kind.Comp.Target.Scheme.base: String
       string-view-ref
       string-ref)))
 
+(define suffix?
+  (lambda (str suff)
+    (let ((suff_length (string-length suff))
+          (str_length (string-length str)))
+      (if (<= suff_length str_length)
+        (string=?
+          (substring str (- str_length suff_length) str_length)
+          suff)
+        #f))))
+
+(define prefix?
+  (lambda (str pref)
+    (let ((pref_length (string-length pref))
+          (str_length (string-length str)))
+      (if (<= pref_length str_length)
+        (string=?
+          (substring str 0 pref_length)
+          pref)
+        #f))))
+
+(define run-all
+    (lambda (p)
+      (let ((code (get-datum p)))
+        (unless (eq? code #!eof)
+          (compile code)
+          (run-all p)))))
+
 ; Converts a Kind word to a native integer
 (define (word-to-u16 w)
   (define (word-to-u16-go i w x)
@@ -575,14 +602,8 @@ Kind.Comp.Target.Scheme.definition(name: String, term: Kind.Comp, defs: Kind.Com
   let code = code | ")\n"
   code
 
-// Converts Comp definitions to a Scheme program.
-Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
-  //let defs_list = Kind.Map.to_list!(defs)
-  let defs_list = Kind.Comp.dependency_sort(main, defs)
-
-  // Basic dependencies
-  let code = Kind.Comp.Target.Scheme.base | "\n\n"
-
+Kind.Comp.Target.Scheme.defines(defs_list: List<Pair<String, Kind.Comp>>, defs: Kind.Comp.Defs): String
+  let code = ""
   // Instantiatior and Eliminator functions
   for nati in Kind.Comp.Prim.natives with code:
     let {name,prim} = nati
@@ -593,4 +614,25 @@ Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
   for defn in defs_list with code:
     let {name,term} = defn
     code | Kind.Comp.Target.Scheme.definition(name, term, defs)
+  code
+
+// Converts Comp definitions to a Scheme program.
+Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
+  //let defs_list = Kind.Map.to_list!(defs)
+  let defs_list = Kind.Comp.dependency_sort(main, defs)
+
+  // Basic dependencies
+  let code = Kind.Comp.Target.Scheme.base | "\n\n"
+  let code = code|Kind.Comp.Target.Scheme.defines(defs_list, defs)
   code|"\n(run_kind "|main|")"
+
+Kind.Comp.Target.Scheme.module(name: String, exports: List<String>, defs: Kind.Comp.Defs): String
+  let defs_list = Kind.Comp.dependency_sort.module(exports, defs)
+  let code = "(library ("|name|") (export"
+  for export in exports with code:
+    code|" "|export
+  let code = code|")\n"
+  let code = code|"(import (chezscheme))\n"
+  let code = code|Kind.Comp.Target.Scheme.base | "\n\n"
+  let code = code|Kind.Comp.Target.Scheme.defines(defs_list, defs)|")"
+  code
