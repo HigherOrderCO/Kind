@@ -129,7 +129,7 @@
     ("get_dir" (lambda (x) (get_dir x)))
     ("get_file_mtime" (lambda (x) (get_file_mtime x)))
     ("get_time" (lambda (x) (get_time)))
-    (else (display (string-append "action not found: " name))))))
+    (else (display (string-append "IO action not found: " name))))))
 
 ; Runs a Kind IO program
 (define (run_io io)
