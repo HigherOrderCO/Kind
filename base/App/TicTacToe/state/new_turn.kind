@@ -1,0 +1,3 @@
+App.TicTacToe.state.new_turn(st : App.TicTacToe.State.local) : App.TicTacToe.State.local
+  open st
+  st@player <- App.TicTacToe.Entity.inverse(st@player)

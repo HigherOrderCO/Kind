@@ -1,5 +1,5 @@
 Maybe.join<A: Type>(m: Maybe<Maybe<A>>): Maybe<A>
-  case m{
-    none: Maybe.none<A>
-    some: m.value
+  Maybe {
+    get m1 = m
+    m1
   }

@@ -3,10 +3,10 @@ App.TicTacToe.when: App.When<App.TicTacToe.State>
    case event {
      mouse_up :
         open state
-        let info = state.local@info
-        open info
-        let state = App.TicTacToe.Board.insert_entity(info.mouse_pos, App.TicTacToe.Entity.circle, state.local)        
-        App.set_local!(state)
+        case App.TicTacToe.state.play(state.local) as st {
+          none : App.pass!
+          some  : App.set_local!(st.value)
+        }
       frame : 
         open state
         App.set_local!(state.local@info <- event.info)

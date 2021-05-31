@@ -973,15 +973,16 @@ module.exports = (function() {
     const App$State$new = Pair$new$(null, null);
     const App$TicTacToe$State = App$State$new;
 
-    function App$TicTacToe$State$local$new$(_board$1, _info$2) {
+    function App$TicTacToe$State$local$new$(_board$1, _player$2, _info$3) {
         var $148 = ({
             _: 'App.TicTacToe.State.local.new',
             'board': _board$1,
-            'info': _info$2
+            'player': _player$2,
+            'info': _info$3
         });
         return $148;
     };
-    const App$TicTacToe$State$local$new = x0 => x1 => App$TicTacToe$State$local$new$(x0, x1);
+    const App$TicTacToe$State$local$new = x0 => x1 => x2 => App$TicTacToe$State$local$new$(x0, x1, x2);
 
     function Vector$(_A$1, _len$2) {
         var $149 = null;
@@ -1024,6 +1025,9 @@ module.exports = (function() {
     const Maybe$none = ({
         _: 'Maybe.none'
     });
+    const App$TicTacToe$Entity$x = ({
+        _: 'App.TicTacToe.Entity.x'
+    });
 
     function App$EnvInfo$new$(_screen_size$1, _mouse_pos$2) {
         var $157 = ({
@@ -1038,7 +1042,7 @@ module.exports = (function() {
     const App$TicTacToe$State$global$new = ({
         _: 'App.TicTacToe.State.global.new'
     });
-    const App$TicTacToe$init = App$Store$new$(App$TicTacToe$State$local$new$(Vector$fill$(null, 9n, Maybe$none), App$EnvInfo$new$(Pair$new$(0, 0), Pair$new$(0, 0))), App$TicTacToe$State$global$new);
+    const App$TicTacToe$init = App$Store$new$(App$TicTacToe$State$local$new$(Vector$fill$(null, 9n, Maybe$none), App$TicTacToe$Entity$x, App$EnvInfo$new$(Pair$new$(0, 0), Pair$new$(0, 0))), App$TicTacToe$State$global$new);
 
     function I32$new$(_value$1) {
         var $158 = word_to_i32(_value$1);
@@ -2368,6 +2372,8 @@ module.exports = (function() {
     const App$TicTacToe$pos$posvector_to_minipair = x0 => App$TicTacToe$pos$posvector_to_minipair$(x0);
     const App$TicTacToe$constant$side_tale = ((App$TicTacToe$constant$size / 3) >>> 0);
     const side_tale = App$TicTacToe$constant$side_tale;
+    const App$TicTacToe$constant$side_entity = 34;
+    const side_entity = App$TicTacToe$constant$side_entity;
 
     function App$TicTacToe$pos$posvector_to_pair$(_pos$1) {
         var _trans$2 = App$TicTacToe$pos$posvector_to_minipair$(_pos$1);
@@ -2376,7 +2382,7 @@ module.exports = (function() {
             case 'Pair.new':
                 var $450 = self.fst;
                 var $451 = self.snd;
-                var $452 = Pair$new$((((($450 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0), (((($451 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0));
+                var $452 = Pair$new$((((((($450 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0) - ((side_entity / 2) >>> 0)) >>> 0), (((((($451 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0) - ((side_entity / 2) >>> 0)) >>> 0));
                 var $449 = $452;
                 break;
         };
@@ -2938,47 +2944,170 @@ module.exports = (function() {
     };
     const App$TicTacToe$pos$pair_to_posvector = x0 => App$TicTacToe$pos$pair_to_posvector$(x0);
 
+    function Maybe$bind$(_m$3, _f$4) {
+        var self = _m$3;
+        switch (self._) {
+            case 'Maybe.some':
+                var $575 = self.value;
+                var $576 = _f$4($575);
+                var $574 = $576;
+                break;
+            case 'Maybe.none':
+                var $577 = Maybe$none;
+                var $574 = $577;
+                break;
+        };
+        return $574;
+    };
+    const Maybe$bind = x0 => x1 => Maybe$bind$(x0, x1);
+
+    function Maybe$monad$(_new$2) {
+        var $578 = _new$2(Maybe$bind)(Maybe$some);
+        return $578;
+    };
+    const Maybe$monad = x0 => Maybe$monad$(x0);
+
+    function Maybe$join$(_m$2) {
+        var $579 = Maybe$monad$((_m$bind$3 => _m$pure$4 => {
+            var $580 = _m$bind$3;
+            return $580;
+        }))(_m$2)((_m1$3 => {
+            var $581 = _m1$3;
+            return $581;
+        }));
+        return $579;
+    };
+    const Maybe$join = x0 => Maybe$join$(x0);
+
+    function Vector$get_maybe$(_A$1, _size$2, _n$3, _vec$4) {
+        var self = _size$2;
+        if (self === 0n) {
+            var $583 = (_vec$5 => {
+                var $584 = Maybe$none;
+                return $584;
+            });
+            var $582 = $583;
+        } else {
+            var $585 = (self - 1n);
+            var $586 = (_vec$6 => {
+                var self = _n$3;
+                if (self === 0n) {
+                    var $588 = _vec$6((_vec$self$7 => {
+                        var $589 = null;
+                        return $589;
+                    }))((_vec$head$7 => _vec$tail$8 => {
+                        var $590 = Maybe$some$(_vec$head$7);
+                        return $590;
+                    }));
+                    var $587 = $588;
+                } else {
+                    var $591 = (self - 1n);
+                    var $592 = _vec$6((_vec$self$8 => {
+                        var $593 = null;
+                        return $593;
+                    }))((_vec$head$8 => _vec$tail$9 => {
+                        var $594 = Vector$get_maybe$(null, $585, $591, _vec$tail$9);
+                        return $594;
+                    }));
+                    var $587 = $592;
+                };
+                return $587;
+            });
+            var $582 = $586;
+        };
+        var $582 = $582(_vec$4);
+        return $582;
+    };
+    const Vector$get_maybe = x0 => x1 => x2 => x3 => Vector$get_maybe$(x0, x1, x2, x3);
+    const U32$to_nat = a0 => (BigInt(a0));
+    const App$TicTacToe$Entity$circle = ({
+        _: 'App.TicTacToe.Entity.circle'
+    });
+
+    function App$TicTacToe$Entity$inverse$(_x$1) {
+        var self = _x$1;
+        switch (self._) {
+            case 'App.TicTacToe.Entity.circle':
+                var $596 = App$TicTacToe$Entity$x;
+                var $595 = $596;
+                break;
+            case 'App.TicTacToe.Entity.x':
+                var $597 = App$TicTacToe$Entity$circle;
+                var $595 = $597;
+                break;
+        };
+        return $595;
+    };
+    const App$TicTacToe$Entity$inverse = x0 => App$TicTacToe$Entity$inverse$(x0);
+
+    function App$TicTacToe$state$new_turn$(_st$1) {
+        var self = _st$1;
+        switch (self._) {
+            case 'App.TicTacToe.State.local.new':
+                var self = _st$1;
+                switch (self._) {
+                    case 'App.TicTacToe.State.local.new':
+                        var $600 = self.board;
+                        var $601 = self.info;
+                        var $602 = App$TicTacToe$State$local$new$($600, App$TicTacToe$Entity$inverse$((() => {
+                            var self = _st$1;
+                            switch (self._) {
+                                case 'App.TicTacToe.State.local.new':
+                                    var $603 = self.player;
+                                    var $604 = $603;
+                                    return $604;
+                            };
+                        })()), $601);
+                        var $599 = $602;
+                        break;
+                };
+                var $598 = $599;
+                break;
+        };
+        return $598;
+    };
+    const App$TicTacToe$state$new_turn = x0 => App$TicTacToe$state$new_turn$(x0);
+
     function Vector$simply_insert$(_A$1, _size$2, _n$3, _v$4, _vec$5) {
         var self = _size$2;
         if (self === 0n) {
-            var $575 = (_vec$6 => {
-                var $576 = Vector$nil(null);
-                return $576;
+            var $606 = (_vec$6 => {
+                var $607 = Vector$nil(null);
+                return $607;
             });
-            var $574 = $575;
+            var $605 = $606;
         } else {
-            var $577 = (self - 1n);
-            var $578 = (_vec$7 => {
+            var $608 = (self - 1n);
+            var $609 = (_vec$7 => {
                 var self = _n$3;
                 if (self === 0n) {
-                    var $580 = _vec$7((_vec$self$8 => {
-                        var $581 = null;
-                        return $581;
+                    var $611 = _vec$7((_vec$self$8 => {
+                        var $612 = null;
+                        return $612;
                     }))((_vec$head$8 => _vec$tail$9 => {
-                        var $582 = Vector$cons(null)($577)(_v$4)(_vec$tail$9);
-                        return $582;
+                        var $613 = Vector$cons(null)($608)(_v$4)(_vec$tail$9);
+                        return $613;
                     }));
-                    var $579 = $580;
+                    var $610 = $611;
                 } else {
-                    var $583 = (self - 1n);
-                    var $584 = _vec$7((_vec$self$9 => {
-                        var $585 = null;
-                        return $585;
+                    var $614 = (self - 1n);
+                    var $615 = _vec$7((_vec$self$9 => {
+                        var $616 = null;
+                        return $616;
                     }))((_vec$head$9 => _vec$tail$10 => {
-                        var $586 = Vector$cons(null)($577)(_vec$head$9)(Vector$simply_insert$(null, $577, $583, _v$4, _vec$tail$10));
-                        return $586;
+                        var $617 = Vector$cons(null)($608)(_vec$head$9)(Vector$simply_insert$(null, $608, $614, _v$4, _vec$tail$10));
+                        return $617;
                     }));
-                    var $579 = $584;
+                    var $610 = $615;
                 };
-                return $579;
+                return $610;
             });
-            var $574 = $578;
+            var $605 = $609;
         };
-        var $574 = $574(_vec$5);
-        return $574;
+        var $605 = $605(_vec$5);
+        return $605;
     };
     const Vector$simply_insert = x0 => x1 => x2 => x3 => x4 => Vector$simply_insert$(x0, x1, x2, x3, x4);
-    const U32$to_nat = a0 => (BigInt(a0));
 
     function App$TicTacToe$Board$insert_entity$(_pos$1, _e$2, _state$3) {
         var self = _e$2;
@@ -2989,51 +3118,97 @@ module.exports = (function() {
                 var self = _state$3;
                 switch (self._) {
                     case 'App.TicTacToe.State.local.new':
-                        var $589 = self.info;
-                        var $590 = App$TicTacToe$State$local$new$(Vector$simply_insert$(null, 9n, (BigInt(_n$4)), Maybe$some$(_e$2), (() => {
+                        var $620 = self.player;
+                        var $621 = self.info;
+                        var $622 = App$TicTacToe$State$local$new$(Vector$simply_insert$(null, 9n, (BigInt(_n$4)), Maybe$some$(_e$2), (() => {
                             var self = _state$3;
                             switch (self._) {
                                 case 'App.TicTacToe.State.local.new':
-                                    var $591 = self.board;
-                                    var $592 = $591;
-                                    return $592;
+                                    var $623 = self.board;
+                                    var $624 = $623;
+                                    return $624;
                             };
-                        })()), $589);
-                        var $588 = $590;
+                        })()), $620, $621);
+                        var $619 = $622;
                         break;
                 };
-                var $587 = $588;
+                var $618 = $619;
                 break;
         };
-        return $587;
+        return $618;
     };
     const App$TicTacToe$Board$insert_entity = x0 => x1 => x2 => App$TicTacToe$Board$insert_entity$(x0, x1, x2);
-    const App$TicTacToe$Entity$circle = ({
-        _: 'App.TicTacToe.Entity.circle'
-    });
+
+    function App$TicTacToe$state$complete_state$(_st$1, _pos$2) {
+        var self = _st$1;
+        switch (self._) {
+            case 'App.TicTacToe.State.local.new':
+                var $626 = self.player;
+                var _st$6 = App$TicTacToe$state$new_turn$(_st$1);
+                var $627 = App$TicTacToe$Board$insert_entity$(_pos$2, $626, _st$6);
+                var $625 = $627;
+                break;
+        };
+        return $625;
+    };
+    const App$TicTacToe$state$complete_state = x0 => x1 => App$TicTacToe$state$complete_state$(x0, x1);
+
+    function App$TicTacToe$state$play$(_st$1) {
+        var self = _st$1;
+        switch (self._) {
+            case 'App.TicTacToe.State.local.new':
+                var $629 = self.board;
+                var $630 = self.info;
+                var _pos$5 = $630;
+                var self = _pos$5;
+                switch (self._) {
+                    case 'App.EnvInfo.new':
+                        var $632 = self.mouse_pos;
+                        var _n$8 = App$TicTacToe$pos$pair_to_posvector$($632);
+                        var self = Maybe$join$(Vector$get_maybe$(null, 9n, (BigInt(_n$8)), $629));
+                        switch (self._) {
+                            case 'Maybe.none':
+                                var $634 = Maybe$some$(App$TicTacToe$state$complete_state$(_st$1, $632));
+                                var $633 = $634;
+                                break;
+                            case 'Maybe.some':
+                                var $635 = Maybe$none;
+                                var $633 = $635;
+                                break;
+                        };
+                        var $631 = $633;
+                        break;
+                };
+                var $628 = $631;
+                break;
+        };
+        return $628;
+    };
+    const App$TicTacToe$state$play = x0 => App$TicTacToe$state$play$(x0);
 
     function App$TicTacToe$when$(_event$1, _state$2) {
         var self = _event$1;
         switch (self._) {
             case 'App.Event.frame':
-                var $594 = self.info;
+                var $637 = self.info;
                 var self = _state$2;
                 switch (self._) {
                     case 'App.Store.new':
-                        var $596 = self.local;
-                        var $597 = App$set_local$((() => {
-                            var self = $596;
+                        var $639 = self.local;
+                        var $640 = App$set_local$((() => {
+                            var self = $639;
                             switch (self._) {
                                 case 'App.TicTacToe.State.local.new':
-                                    var $598 = self.board;
-                                    var $599 = App$TicTacToe$State$local$new$($598, $594);
-                                    return $599;
+                                    var $641 = self.board;
+                                    var $642 = self.player;
+                                    var $643 = App$TicTacToe$State$local$new$($641, $642, $637);
+                                    return $643;
                             };
                         })());
-                        var $595 = $597;
+                        var $638 = $640;
                         break;
                 };
-                var $593 = $595;
+                var $636 = $638;
                 break;
             case 'App.Event.init':
             case 'App.Event.mouse_down':
@@ -3042,55 +3217,50 @@ module.exports = (function() {
             case 'App.Event.mouse_over':
             case 'App.Event.mouse_click':
             case 'App.Event.input':
-                var $600 = App$pass;
-                var $593 = $600;
+                var $644 = App$pass;
+                var $636 = $644;
                 break;
             case 'App.Event.mouse_up':
                 var self = _state$2;
                 switch (self._) {
                     case 'App.Store.new':
-                        var $602 = self.local;
-                        var self = $602;
+                        var $646 = self.local;
+                        var self = App$TicTacToe$state$play$($646);
                         switch (self._) {
-                            case 'App.TicTacToe.State.local.new':
-                                var $604 = self.info;
-                                var $605 = $604;
-                                var _info$7 = $605;
+                            case 'Maybe.some':
+                                var $648 = self.value;
+                                var $649 = App$set_local$($648);
+                                var $647 = $649;
+                                break;
+                            case 'Maybe.none':
+                                var $650 = App$pass;
+                                var $647 = $650;
                                 break;
                         };
-                        var self = _info$7;
-                        switch (self._) {
-                            case 'App.EnvInfo.new':
-                                var $606 = self.mouse_pos;
-                                var _state$10 = App$TicTacToe$Board$insert_entity$($606, App$TicTacToe$Entity$circle, $602);
-                                var $607 = App$set_local$(_state$10);
-                                var $603 = $607;
-                                break;
-                        };
-                        var $601 = $603;
+                        var $645 = $647;
                         break;
                 };
-                var $593 = $601;
+                var $636 = $645;
                 break;
         };
-        return $593;
+        return $636;
     };
     const App$TicTacToe$when = x0 => x1 => App$TicTacToe$when$(x0, x1);
 
     function App$TicTacToe$tick$(_tick$1, _glob$2) {
-        var $608 = _glob$2;
-        return $608;
+        var $651 = _glob$2;
+        return $651;
     };
     const App$TicTacToe$tick = x0 => x1 => App$TicTacToe$tick$(x0, x1);
 
     function App$TicTacToe$post$(_time$1, _room$2, _addr$3, _data$4, _glob$5) {
-        var $609 = _glob$5;
-        return $609;
+        var $652 = _glob$5;
+        return $652;
     };
     const App$TicTacToe$post = x0 => x1 => x2 => x3 => x4 => App$TicTacToe$post$(x0, x1, x2, x3, x4);
 
     function App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6) {
-        var $610 = ({
+        var $653 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
@@ -3098,7 +3268,7 @@ module.exports = (function() {
             'tick': _tick$5,
             'post': _post$6
         });
-        return $610;
+        return $653;
     };
     const App$new = x0 => x1 => x2 => x3 => x4 => App$new$(x0, x1, x2, x3, x4);
     const App$TicTacToe = (() => {
@@ -3108,8 +3278,8 @@ module.exports = (function() {
         var _when$4 = App$TicTacToe$when;
         var _tick$5 = App$TicTacToe$tick;
         var _post$6 = App$TicTacToe$post;
-        var $611 = App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6);
-        return $611;
+        var $654 = App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6);
+        return $654;
     })();
     return {
         'Buffer32.new': Buffer32$new,
@@ -3158,6 +3328,7 @@ module.exports = (function() {
         'Vector.fill': Vector$fill,
         'Maybe': Maybe,
         'Maybe.none': Maybe$none,
+        'App.TicTacToe.Entity.x': App$TicTacToe$Entity$x,
         'App.EnvInfo.new': App$EnvInfo$new,
         'U32.from_nat': U32$from_nat,
         'App.TicTacToe.State.global.new': App$TicTacToe$State$global$new,
@@ -3262,6 +3433,8 @@ module.exports = (function() {
         'App.TicTacToe.pos.posvector_to_minipair': App$TicTacToe$pos$posvector_to_minipair,
         'App.TicTacToe.constant.side_tale': App$TicTacToe$constant$side_tale,
         'side_tale': side_tale,
+        'App.TicTacToe.constant.side_entity': App$TicTacToe$constant$side_entity,
+        'side_entity': side_entity,
         'App.TicTacToe.pos.posvector_to_pair': App$TicTacToe$pos$posvector_to_pair,
         'VoxBox.get_len': VoxBox$get_len,
         'U32.eql': U32$eql,
@@ -3318,10 +3491,18 @@ module.exports = (function() {
         'App.TicTacToe.pos.mouse_to_tile': App$TicTacToe$pos$mouse_to_tile,
         'App.TicTacToe.pos.pair_to_minipair': App$TicTacToe$pos$pair_to_minipair,
         'App.TicTacToe.pos.pair_to_posvector': App$TicTacToe$pos$pair_to_posvector,
-        'Vector.simply_insert': Vector$simply_insert,
+        'Maybe.bind': Maybe$bind,
+        'Maybe.monad': Maybe$monad,
+        'Maybe.join': Maybe$join,
+        'Vector.get_maybe': Vector$get_maybe,
         'U32.to_nat': U32$to_nat,
-        'App.TicTacToe.Board.insert_entity': App$TicTacToe$Board$insert_entity,
         'App.TicTacToe.Entity.circle': App$TicTacToe$Entity$circle,
+        'App.TicTacToe.Entity.inverse': App$TicTacToe$Entity$inverse,
+        'App.TicTacToe.state.new_turn': App$TicTacToe$state$new_turn,
+        'Vector.simply_insert': Vector$simply_insert,
+        'App.TicTacToe.Board.insert_entity': App$TicTacToe$Board$insert_entity,
+        'App.TicTacToe.state.complete_state': App$TicTacToe$state$complete_state,
+        'App.TicTacToe.state.play': App$TicTacToe$state$play,
         'App.TicTacToe.when': App$TicTacToe$when,
         'App.TicTacToe.tick': App$TicTacToe$tick,
         'App.TicTacToe.post': App$TicTacToe$post,
