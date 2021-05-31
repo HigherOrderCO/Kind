@@ -1,10 +1,8 @@
 App.Kaelin.Skill.ap_recover(
-  cost: I32,
   restoration: I32
 ): App.Kaelin.Effect<Unit>
   
   App.Kaelin.Effect {
-  get self = App.Kaelin.Effect.coord.get_center 
-  App.Kaelin.Effect.ap.change_at(restoration, self)
+  App.Kaelin.Effect.ap.change(restoration)
   return unit
   }

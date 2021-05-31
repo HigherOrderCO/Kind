@@ -10,7 +10,8 @@ App.Kaelin.Heroes.Lela.skills.vampirism: App.Kaelin.Skill
   App.Kaelin.Skill.new(
     "Vampirism",
     4
-    App.Kaelin.Skill.vampirism(2, 4),
+    3
+    App.Kaelin.Skill.vampirism('Q', 4),
     'Q'
   )
 
@@ -32,6 +33,7 @@ App.Kaelin.Heroes.Lela.skills.ap_recover: App.Kaelin.Skill
   App.Kaelin.Skill.new(
     "Action Points Reovery"
     0,
-    App.Kaelin.Skill.ap_recover(0,10)
+    0,
+    App.Kaelin.Skill.ap_recover(10)
     'R'
   )

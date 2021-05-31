@@ -1,24 +1,22 @@
 App.Kaelin.Skill.ap_drain(
-  cost: I32
-  drain: I32
+  key: U16
 ): App.Kaelin.Effect<Unit>
 
 
   App.Kaelin.Effect {
-  get map = App.Kaelin.Effect.map.get
-  get center_pos = App.Kaelin.Effect.coord.get_center
-  get target_pos = App.Kaelin.Effect.coord.get_target
-  let block = App.Kaelin.Coord.eql(target_pos, center_pos)
-  case block {
-    true: 
-      App.Kaelin.Effect { return unit }
-    false:
-      App.Kaelin.Effect {
-        get burn = App.Kaelin.Effect.ap.burn(drain, target_pos)
-        App.Kaelin.Effect.ap.burn(drain, target_pos)
-        App.Kaelin.Effect.ap.restore(I32.neg(burn), center_pos)
-        return unit
-      }
-  }
+    get map = App.Kaelin.Effect.map.get
+    get center_pos = App.Kaelin.Effect.coord.get_center
+    get target_pos = App.Kaelin.Effect.coord.get_target
+    let block = App.Kaelin.Coord.eql(target_pos, center_pos)
+    case block {
+      true: 
+        App.Kaelin.Effect { return unit }
+      false:
+        App.Kaelin.Effect {
+          get burn = App.Kaelin.Effect.ap.burn(key, target_pos)
+          App.Kaelin.Effect.ap.restore(I32.neg(burn)+4)
+          return unit
+        }
+    }
   }
 

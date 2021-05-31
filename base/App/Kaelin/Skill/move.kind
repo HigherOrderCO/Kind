@@ -1,10 +1,11 @@
 App.Kaelin.Skill.move(
-  range: I32
+  max_range: I32
 ): App.Kaelin.Skill
     
   App.Kaelin.Skill.new(
   "Move"
-  range
+  max_range
+  0
   App.Kaelin.Effect.movement.move,
   'X'
   )
