@@ -13,8 +13,9 @@ App.Kaelin.Skill.ap_drain(
         App.Kaelin.Effect { return unit }
       false:
         App.Kaelin.Effect {
-          get burn = App.Kaelin.Effect.ap.burn(key, target_pos)
-          App.Kaelin.Effect.ap.restore(I32.neg(burn)+4)
+          get burn= App.Kaelin.Effect.ap.burn(key, target_pos)
+          App.Kaelin.Effect.ap.restore(1, target_pos)
+          App.Kaelin.Effect.ap.restore(I32.neg(burn +  3), center_pos)
           return unit
         }
     }

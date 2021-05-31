@@ -3,6 +3,7 @@ App.Kaelin.Skill.ap_recover(
 ): App.Kaelin.Effect<Unit>
   
   App.Kaelin.Effect {
-  App.Kaelin.Effect.ap.change(restoration)
+  get self = App.Kaelin.Effect.coord.get_center
+  App.Kaelin.Effect.ap.change(restoration, self)
   return unit
   }
