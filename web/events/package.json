@@ -21,6 +21,6 @@
     "fs-extra": "^9.1.0",
     "isomorphic-ws": "^4.0.1",
     "nano-ethereum-signer": "^0.1.2",
-    "ws": "^7.4.3"
+    "ws": "^7.4.6"
   }
 }
