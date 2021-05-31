@@ -2,5 +2,5 @@
 (generate-wpo-files #t)
 (compile-imported-libraries #t)
 (compile-program "main.scm")
-(compile-whole-program "./main.wpo" "./kind-scm")
+(compile-whole-program "./main.wpo" "./../bin/kind-scm")
 (exit)
