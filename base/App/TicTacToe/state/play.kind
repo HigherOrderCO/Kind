@@ -1,10 +1,10 @@
-App.TicTacToe.state.complete_state(st : App.TicTacToe.state.local, pos : Pair<U32, U32>) : App.TicTacToe.state.local
+App.TicTacToe.state.complete_state(st : App.TicTacToe.State.local, pos : Pair<U32, U32>) : App.TicTacToe.State.local
   open st
   let st = App.TicTacToe.state.new_turn(st)
   App.TicTacToe.Board.insert_entity(pos, st.player, st)
 
-App.TicTacToe.state.play(st : App.TicTacToe.state.local) : 
-  Maybe<App.TicTacToe.state.local>
+App.TicTacToe.state.play(st : App.TicTacToe.State.local) : 
+  Maybe<App.TicTacToe.State.local>
   open st
   let pos = st.info
   open pos
