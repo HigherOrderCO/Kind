@@ -8,7 +8,8 @@ App.Kaelin.CastInfo.start(
   open global
   result = Maybe {
     // get local map
-    get map = App.Kaelin.Stage.planning.get_map(global.stage)
+    // get map = App.Kaelin.Stage.planning.get_map(global.stage)
+    let map = global.map
     // get player info and skill
     get player_info = App.Kaelin.Map.player.info(player, map)
     let player_coord = player_info@fst

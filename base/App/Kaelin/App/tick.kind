@@ -12,7 +12,7 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
                     new_glob = new_glob@stage <- App.Kaelin.Stage.action
                     new_glob
                   else 
-                    glob@stage <- App.Kaelin.Stage.planning(stage.local_tick + 1, stage_seconds, stage.local_map)
+                    glob@stage <- App.Kaelin.Stage.planning(stage.local_tick + 1, stage_seconds)
       action   :
                   let glob = App.Kaelin.Action.global.exe_skills_list!(glob@skills_list, glob)
                   App.Kaelin.Action.end_action_turn(glob)
