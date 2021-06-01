@@ -1,0 +1,2 @@
+Parser.State.from_code(code: String): Parser.State
+  ({none, "", 0, 0, code})
