@@ -1,8 +1,3 @@
-App.TicTacToe.state.complete_state(st : App.TicTacToe.State.local, pos : Pair<U32, U32>) : App.TicTacToe.State.local
-  open st
-  let st = App.TicTacToe.state.new_turn(st)
-  App.TicTacToe.Board.insert_entity(pos, st.player, st)
-
 App.TicTacToe.state.play(st : App.TicTacToe.State.local) : 
   Maybe<App.TicTacToe.State.local>
   open st
@@ -12,6 +7,6 @@ App.TicTacToe.state.play(st : App.TicTacToe.State.local) :
   let n = App.TicTacToe.pos.pair_to_posvector(pos.mouse_pos)
 
   case Maybe.join!(Vector.get_maybe(Maybe<App.TicTacToe.Entity>, 9, U32.to_nat(n), st.board)) as entity {
-      none : some(App.TicTacToe.state.complete_state(st, pos.mouse_pos))
+      none : some(App.TicTacToe.board.insert_entity(pos.mouse_pos, st.player, st))
       some : none
   }

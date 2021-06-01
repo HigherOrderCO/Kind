@@ -1518,66 +1518,42 @@ module.exports = (function() {
     };
     const Word$div = x0 => x1 => Word$div$(x0, x1);
     const I32$div = a0 => a1 => ((a0 / a1) >> 0);
-    const F64$to_i32 = a0 => ((a0 >> 0));
-
-    function Word$to_f64$(_a$2) {
-        var Word$to_f64$ = (_a$2) => ({
-            ctr: 'TCO',
-            arg: [_a$2]
-        });
-        var Word$to_f64 = _a$2 => Word$to_f64$(_a$2);
-        var arg = [_a$2];
-        while (true) {
-            let [_a$2] = arg;
-            var R = Word$to_f64$(_a$2);
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Word$to_f64 = x0 => Word$to_f64$(x0);
-    const U32$to_f64 = a0 => (a0);
-
-    function U32$to_i32$(_n$1) {
-        var $277 = (((_n$1) >> 0));
-        return $277;
-    };
-    const U32$to_i32 = x0 => U32$to_i32$(x0);
     const App$TicTacToe$constant$size = 256;
-    const side_board = U32$to_i32$(App$TicTacToe$constant$size);
+    const side_board = App$TicTacToe$constant$size;
 
     function Word$neg$aux$(_word$2, _inc$3) {
         var self = _word$2;
         switch (self._) {
             case 'Word.o':
-                var $279 = self.pred;
+                var $278 = self.pred;
                 var self = _inc$3;
                 if (self) {
-                    var $281 = Word$o$(Word$neg$aux$($279, Bool$true));
-                    var $280 = $281;
+                    var $280 = Word$o$(Word$neg$aux$($278, Bool$true));
+                    var $279 = $280;
                 } else {
-                    var $282 = Word$i$(Word$neg$aux$($279, Bool$false));
-                    var $280 = $282;
+                    var $281 = Word$i$(Word$neg$aux$($278, Bool$false));
+                    var $279 = $281;
                 };
-                var $278 = $280;
+                var $277 = $279;
                 break;
             case 'Word.i':
-                var $283 = self.pred;
+                var $282 = self.pred;
                 var self = _inc$3;
                 if (self) {
-                    var $285 = Word$i$(Word$neg$aux$($283, Bool$false));
-                    var $284 = $285;
+                    var $284 = Word$i$(Word$neg$aux$($282, Bool$false));
+                    var $283 = $284;
                 } else {
-                    var $286 = Word$o$(Word$neg$aux$($283, Bool$false));
-                    var $284 = $286;
+                    var $285 = Word$o$(Word$neg$aux$($282, Bool$false));
+                    var $283 = $285;
                 };
-                var $278 = $284;
+                var $277 = $283;
                 break;
             case 'Word.e':
-                var $287 = Word$e;
-                var $278 = $287;
+                var $286 = Word$e;
+                var $277 = $286;
                 break;
         };
-        return $278;
+        return $277;
     };
     const Word$neg$aux = x0 => x1 => Word$neg$aux$(x0, x1);
 
@@ -1585,21 +1561,21 @@ module.exports = (function() {
         var self = _word$2;
         switch (self._) {
             case 'Word.o':
-                var $289 = self.pred;
-                var $290 = Word$o$(Word$neg$aux$($289, Bool$true));
-                var $288 = $290;
+                var $288 = self.pred;
+                var $289 = Word$o$(Word$neg$aux$($288, Bool$true));
+                var $287 = $289;
                 break;
             case 'Word.i':
-                var $291 = self.pred;
-                var $292 = Word$i$(Word$neg$aux$($291, Bool$false));
-                var $288 = $292;
+                var $290 = self.pred;
+                var $291 = Word$i$(Word$neg$aux$($290, Bool$false));
+                var $287 = $291;
                 break;
             case 'Word.e':
-                var $293 = Word$e;
-                var $288 = $293;
+                var $292 = Word$e;
+                var $287 = $292;
                 break;
         };
-        return $288;
+        return $287;
     };
     const Word$neg = x0 => Word$neg$(x0);
     const I32$neg = a0 => ((-a0));
@@ -1621,16 +1597,16 @@ module.exports = (function() {
                 var self = _word$2;
                 switch (self._) {
                     case 'Word.o':
-                        var $294 = self.pred;
-                        var $295 = Word$is_neg$go$($294, Bool$false);
-                        return $295;
+                        var $293 = self.pred;
+                        var $294 = Word$is_neg$go$($293, Bool$false);
+                        return $294;
                     case 'Word.i':
-                        var $296 = self.pred;
-                        var $297 = Word$is_neg$go$($296, Bool$true);
-                        return $297;
+                        var $295 = self.pred;
+                        var $296 = Word$is_neg$go$($295, Bool$true);
+                        return $296;
                     case 'Word.e':
-                        var $298 = _n$3;
-                        return $298;
+                        var $297 = _n$3;
+                        return $297;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1640,8 +1616,8 @@ module.exports = (function() {
     const Word$is_neg$go = x0 => x1 => Word$is_neg$go$(x0, x1);
 
     function Word$is_neg$(_word$2) {
-        var $299 = Word$is_neg$go$(_word$2, Bool$false);
-        return $299;
+        var $298 = Word$is_neg$go$(_word$2, Bool$false);
+        return $298;
     };
     const Word$is_neg = x0 => Word$is_neg$(x0);
 
@@ -1649,46 +1625,46 @@ module.exports = (function() {
         var self = _word$6;
         switch (self._) {
             case 'Word.o':
-                var $301 = self.pred;
-                var $302 = _w0$4(Word$fold$(_nil$3, _w0$4, _w1$5, $301));
-                var $300 = $302;
+                var $300 = self.pred;
+                var $301 = _w0$4(Word$fold$(_nil$3, _w0$4, _w1$5, $300));
+                var $299 = $301;
                 break;
             case 'Word.i':
-                var $303 = self.pred;
-                var $304 = _w1$5(Word$fold$(_nil$3, _w0$4, _w1$5, $303));
-                var $300 = $304;
+                var $302 = self.pred;
+                var $303 = _w1$5(Word$fold$(_nil$3, _w0$4, _w1$5, $302));
+                var $299 = $303;
                 break;
             case 'Word.e':
-                var $305 = _nil$3;
-                var $300 = $305;
+                var $304 = _nil$3;
+                var $299 = $304;
                 break;
         };
-        return $300;
+        return $299;
     };
     const Word$fold = x0 => x1 => x2 => x3 => Word$fold$(x0, x1, x2, x3);
     const Nat$add = a0 => a1 => (a0 + a1);
     const Nat$mul = a0 => a1 => (a0 * a1);
 
     function Word$to_nat$(_word$2) {
-        var $306 = Word$fold$(0n, a1 => (2n * a1), (_x$4 => {
-            var $307 = Nat$succ$((2n * _x$4));
-            return $307;
+        var $305 = Word$fold$(0n, a1 => (2n * a1), (_x$4 => {
+            var $306 = Nat$succ$((2n * _x$4));
+            return $306;
         }), _word$2);
-        return $306;
+        return $305;
     };
     const Word$to_nat = x0 => Word$to_nat$(x0);
 
     function Word$shl$(_n$2, _value$3) {
         var _n_nat$4 = Word$to_nat$(_n$2);
-        var $308 = Word$shift_left$(_n_nat$4, _value$3);
-        return $308;
+        var $307 = Word$shift_left$(_n_nat$4, _value$3);
+        return $307;
     };
     const Word$shl = x0 => x1 => Word$shl$(x0, x1);
 
     function Word$shr$(_n$2, _value$3) {
         var _n_nat$4 = Word$to_nat$(_n$2);
-        var $309 = Word$shift_right$(_n_nat$4, _value$3);
-        return $309;
+        var $308 = Word$shift_right$(_n_nat$4, _value$3);
+        return $308;
     };
     const Word$shr = x0 => x1 => Word$shr$(x0, x1);
 
@@ -1697,13 +1673,13 @@ module.exports = (function() {
         var self = _neg$4;
         if (self) {
             var _n$5 = Word$neg$(_n$2);
-            var $311 = Word$shl$(_n$5, _value$3);
-            var $310 = $311;
+            var $310 = Word$shl$(_n$5, _value$3);
+            var $309 = $310;
         } else {
-            var $312 = Word$shr$(_n$2, _value$3);
-            var $310 = $312;
+            var $311 = Word$shr$(_n$2, _value$3);
+            var $309 = $311;
         };
-        return $310;
+        return $309;
     };
     const Word$s_shr = x0 => x1 => Word$s_shr$(x0, x1);
     const I32$shr = a0 => a1 => (a0 >> a1);
@@ -1712,83 +1688,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $314 = self.pred;
-                var $315 = (_b$6 => {
+                var $313 = self.pred;
+                var $314 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $317 = self.pred;
-                            var $318 = (_a$pred$9 => {
-                                var $319 = Word$o$(Word$xor$(_a$pred$9, $317));
-                                return $319;
+                            var $316 = self.pred;
+                            var $317 = (_a$pred$9 => {
+                                var $318 = Word$o$(Word$xor$(_a$pred$9, $316));
+                                return $318;
                             });
-                            var $316 = $318;
+                            var $315 = $317;
                             break;
                         case 'Word.i':
-                            var $320 = self.pred;
-                            var $321 = (_a$pred$9 => {
-                                var $322 = Word$i$(Word$xor$(_a$pred$9, $320));
-                                return $322;
+                            var $319 = self.pred;
+                            var $320 = (_a$pred$9 => {
+                                var $321 = Word$i$(Word$xor$(_a$pred$9, $319));
+                                return $321;
                             });
-                            var $316 = $321;
+                            var $315 = $320;
                             break;
                         case 'Word.e':
-                            var $323 = (_a$pred$7 => {
-                                var $324 = Word$e;
-                                return $324;
+                            var $322 = (_a$pred$7 => {
+                                var $323 = Word$e;
+                                return $323;
                             });
-                            var $316 = $323;
+                            var $315 = $322;
                             break;
                     };
-                    var $316 = $316($314);
-                    return $316;
+                    var $315 = $315($313);
+                    return $315;
                 });
-                var $313 = $315;
+                var $312 = $314;
                 break;
             case 'Word.i':
-                var $325 = self.pred;
-                var $326 = (_b$6 => {
+                var $324 = self.pred;
+                var $325 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $328 = self.pred;
-                            var $329 = (_a$pred$9 => {
-                                var $330 = Word$i$(Word$xor$(_a$pred$9, $328));
-                                return $330;
+                            var $327 = self.pred;
+                            var $328 = (_a$pred$9 => {
+                                var $329 = Word$i$(Word$xor$(_a$pred$9, $327));
+                                return $329;
                             });
-                            var $327 = $329;
+                            var $326 = $328;
                             break;
                         case 'Word.i':
-                            var $331 = self.pred;
-                            var $332 = (_a$pred$9 => {
-                                var $333 = Word$o$(Word$xor$(_a$pred$9, $331));
-                                return $333;
+                            var $330 = self.pred;
+                            var $331 = (_a$pred$9 => {
+                                var $332 = Word$o$(Word$xor$(_a$pred$9, $330));
+                                return $332;
                             });
-                            var $327 = $332;
+                            var $326 = $331;
                             break;
                         case 'Word.e':
-                            var $334 = (_a$pred$7 => {
-                                var $335 = Word$e;
-                                return $335;
+                            var $333 = (_a$pred$7 => {
+                                var $334 = Word$e;
+                                return $334;
                             });
-                            var $327 = $334;
+                            var $326 = $333;
                             break;
                     };
-                    var $327 = $327($325);
-                    return $327;
+                    var $326 = $326($324);
+                    return $326;
                 });
-                var $313 = $326;
+                var $312 = $325;
                 break;
             case 'Word.e':
-                var $336 = (_b$4 => {
-                    var $337 = Word$e;
-                    return $337;
+                var $335 = (_b$4 => {
+                    var $336 = Word$e;
+                    return $336;
                 });
-                var $313 = $336;
+                var $312 = $335;
                 break;
         };
-        var $313 = $313(_b$3);
-        return $313;
+        var $312 = $312(_b$3);
+        return $312;
     };
     const Word$xor = x0 => x1 => Word$xor$(x0, x1);
     const I32$xor = a0 => a1 => (a0 ^ a1);
@@ -1796,8 +1772,8 @@ module.exports = (function() {
 
     function I32$abs$(_a$1) {
         var _mask$2 = (_a$1 >> 31);
-        var $338 = (((_mask$2 + _a$1) >> 0) ^ _mask$2);
-        return $338;
+        var $337 = (((_mask$2 + _a$1) >> 0) ^ _mask$2);
+        return $337;
     };
     const I32$abs = x0 => I32$abs$(x0);
     const I32$sub = a0 => a1 => ((a0 - a1) >> 0);
@@ -1806,16 +1782,16 @@ module.exports = (function() {
         var self = _cmp$1;
         switch (self._) {
             case 'Cmp.ltn':
-                var $340 = Bool$true;
-                var $339 = $340;
+                var $339 = Bool$true;
+                var $338 = $339;
                 break;
             case 'Cmp.eql':
             case 'Cmp.gtn':
-                var $341 = Bool$false;
-                var $339 = $341;
+                var $340 = Bool$false;
+                var $338 = $340;
                 break;
         };
-        return $339;
+        return $338;
     };
     const Cmp$as_ltn = x0 => Cmp$as_ltn$(x0);
 
@@ -1823,19 +1799,19 @@ module.exports = (function() {
         var self = _cmp$1;
         switch (self._) {
             case 'Cmp.ltn':
-                var $343 = Cmp$gtn;
-                var $342 = $343;
+                var $342 = Cmp$gtn;
+                var $341 = $342;
                 break;
             case 'Cmp.eql':
-                var $344 = Cmp$eql;
-                var $342 = $344;
+                var $343 = Cmp$eql;
+                var $341 = $343;
                 break;
             case 'Cmp.gtn':
-                var $345 = Cmp$ltn;
-                var $342 = $345;
+                var $344 = Cmp$ltn;
+                var $341 = $344;
                 break;
         };
-        return $342;
+        return $341;
     };
     const Cmp$inv = x0 => Cmp$inv$(x0);
 
@@ -1846,32 +1822,32 @@ module.exports = (function() {
         if (self) {
             var self = _neg_b$5;
             if (self) {
-                var $348 = Cmp$as_ltn$(Cmp$inv$(Word$cmp$(_a$2, _b$3)));
-                var $347 = $348;
+                var $347 = Cmp$as_ltn$(Cmp$inv$(Word$cmp$(_a$2, _b$3)));
+                var $346 = $347;
             } else {
-                var $349 = Bool$true;
-                var $347 = $349;
+                var $348 = Bool$true;
+                var $346 = $348;
             };
-            var $346 = $347;
+            var $345 = $346;
         } else {
             var self = _neg_b$5;
             if (self) {
-                var $351 = Bool$false;
-                var $350 = $351;
+                var $350 = Bool$false;
+                var $349 = $350;
             } else {
-                var $352 = Cmp$as_ltn$(Word$cmp$(_a$2, _b$3));
-                var $350 = $352;
+                var $351 = Cmp$as_ltn$(Word$cmp$(_a$2, _b$3));
+                var $349 = $351;
             };
-            var $346 = $350;
+            var $345 = $349;
         };
-        return $346;
+        return $345;
     };
     const Word$s_ltn = x0 => x1 => Word$s_ltn$(x0, x1);
     const I32$ltn = a0 => a1 => (a0 < a1);
 
     function List$(_A$1) {
-        var $353 = null;
-        return $353;
+        var $352 = null;
+        return $352;
     };
     const List = x0 => List$(x0);
 
@@ -1880,15 +1856,15 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.eql':
-                var $355 = Bool$false;
-                var $354 = $355;
+                var $354 = Bool$false;
+                var $353 = $354;
                 break;
             case 'Cmp.gtn':
-                var $356 = Bool$true;
-                var $354 = $356;
+                var $355 = Bool$true;
+                var $353 = $355;
                 break;
         };
-        return $354;
+        return $353;
     };
     const Cmp$as_gtn = x0 => Cmp$as_gtn$(x0);
 
@@ -1899,25 +1875,25 @@ module.exports = (function() {
         if (self) {
             var self = _neg_b$5;
             if (self) {
-                var $359 = Cmp$as_gtn$(Cmp$inv$(Word$cmp$(_a$2, _b$3)));
-                var $358 = $359;
+                var $358 = Cmp$as_gtn$(Cmp$inv$(Word$cmp$(_a$2, _b$3)));
+                var $357 = $358;
             } else {
-                var $360 = Bool$false;
-                var $358 = $360;
+                var $359 = Bool$false;
+                var $357 = $359;
             };
-            var $357 = $358;
+            var $356 = $357;
         } else {
             var self = _neg_b$5;
             if (self) {
-                var $362 = Bool$true;
-                var $361 = $362;
+                var $361 = Bool$true;
+                var $360 = $361;
             } else {
-                var $363 = Cmp$as_gtn$(Word$cmp$(_a$2, _b$3));
-                var $361 = $363;
+                var $362 = Cmp$as_gtn$(Word$cmp$(_a$2, _b$3));
+                var $360 = $362;
             };
-            var $357 = $361;
+            var $356 = $360;
         };
-        return $357;
+        return $356;
     };
     const Word$s_gtn = x0 => x1 => Word$s_gtn$(x0, x1);
     const I32$gtn = a0 => a1 => (a0 > a1);
@@ -1928,32 +1904,32 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.gtn':
-                var $365 = Bool$false;
-                var $364 = $365;
+                var $364 = Bool$false;
+                var $363 = $364;
                 break;
             case 'Cmp.eql':
-                var $366 = Bool$true;
-                var $364 = $366;
+                var $365 = Bool$true;
+                var $363 = $365;
                 break;
         };
-        return $364;
+        return $363;
     };
     const Cmp$as_eql = x0 => Cmp$as_eql$(x0);
 
     function Word$eql$(_a$2, _b$3) {
-        var $367 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
-        return $367;
+        var $366 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
+        return $366;
     };
     const Word$eql = x0 => x1 => Word$eql$(x0, x1);
     const I32$eql = a0 => a1 => (a0 === a1);
 
     function List$cons$(_head$2, _tail$3) {
-        var $368 = ({
+        var $367 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $368;
+        return $367;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
 
@@ -1969,22 +1945,22 @@ module.exports = (function() {
             var R = (() => {
                 var self = (_x0$1 === _x1$3);
                 if (self) {
-                    var $369 = List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9);
-                    return $369;
+                    var $368 = List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9);
+                    return $368;
                 } else {
                     var _new_x$10 = ((1 + _x0$1) >> 0);
                     var self = (_d$8 > 0);
                     if (self) {
                         var _new_y$11 = ((_yi$5 + _y0$2) >> 0);
                         var _new_d$12 = ((_d$8 + ((2 * ((_dy$7 - _dx$6) >> 0)) >> 0)) >> 0);
-                        var $371 = VoxBox$Draw$line$coords$low$go$(_new_x$10, _new_y$11, _x1$3, _y1$4, _yi$5, _dx$6, _dy$7, _new_d$12, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
-                        var $370 = $371;
+                        var $370 = VoxBox$Draw$line$coords$low$go$(_new_x$10, _new_y$11, _x1$3, _y1$4, _yi$5, _dx$6, _dy$7, _new_d$12, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
+                        var $369 = $370;
                     } else {
                         var _new_d$11 = ((_d$8 + ((2 * _dy$7) >> 0)) >> 0);
-                        var $372 = VoxBox$Draw$line$coords$low$go$(_new_x$10, _y0$2, _x1$3, _y1$4, _yi$5, _dx$6, _dy$7, _new_d$11, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
-                        var $370 = $372;
+                        var $371 = VoxBox$Draw$line$coords$low$go$(_new_x$10, _y0$2, _x1$3, _y1$4, _yi$5, _dx$6, _dy$7, _new_d$11, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
+                        var $369 = $371;
                     };
-                    return $370;
+                    return $369;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2001,15 +1977,15 @@ module.exports = (function() {
         var _dy$6 = I32$abs$(((_y1$4 - _y0$2) >> 0));
         var self = (_y1$4 > _y0$2);
         if (self) {
-            var $374 = 1;
-            var _yi$7 = $374;
+            var $373 = 1;
+            var _yi$7 = $373;
         } else {
-            var $375 = ((-1));
-            var _yi$7 = $375;
+            var $374 = ((-1));
+            var _yi$7 = $374;
         };
         var _d$8 = ((((2 * _dy$6) >> 0) - _dx$5) >> 0);
-        var $373 = VoxBox$Draw$line$coords$low$go$(_x0$1, _y0$2, _x1$3, _y1$4, _yi$7, _dx$5, _dy$6, _d$8, List$nil);
-        return $373;
+        var $372 = VoxBox$Draw$line$coords$low$go$(_x0$1, _y0$2, _x1$3, _y1$4, _yi$7, _dx$5, _dy$6, _d$8, List$nil);
+        return $372;
     };
     const VoxBox$Draw$line$coords$low = x0 => x1 => x2 => x3 => VoxBox$Draw$line$coords$low$(x0, x1, x2, x3);
 
@@ -2025,22 +2001,22 @@ module.exports = (function() {
             var R = (() => {
                 var self = (_y0$2 === _y1$4);
                 if (self) {
-                    var $376 = List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9);
-                    return $376;
+                    var $375 = List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9);
+                    return $375;
                 } else {
                     var _new_y$10 = ((1 + _y0$2) >> 0);
                     var self = (_d$8 > 0);
                     if (self) {
                         var _new_x$11 = ((_x0$1 + _xi$5) >> 0);
                         var _new_d$12 = ((_d$8 + ((2 * ((_dx$6 - _dy$7) >> 0)) >> 0)) >> 0);
-                        var $378 = VoxBox$Draw$line$coords$high$go$(_new_x$11, _new_y$10, _x1$3, _y1$4, _xi$5, _dx$6, _dy$7, _new_d$12, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
-                        var $377 = $378;
+                        var $377 = VoxBox$Draw$line$coords$high$go$(_new_x$11, _new_y$10, _x1$3, _y1$4, _xi$5, _dx$6, _dy$7, _new_d$12, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
+                        var $376 = $377;
                     } else {
                         var _new_d$11 = ((_d$8 + ((2 * _dx$6) >> 0)) >> 0);
-                        var $379 = VoxBox$Draw$line$coords$high$go$(_x0$1, _new_y$10, _x1$3, _y1$4, _xi$5, _dx$6, _dy$7, _new_d$11, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
-                        var $377 = $379;
+                        var $378 = VoxBox$Draw$line$coords$high$go$(_x0$1, _new_y$10, _x1$3, _y1$4, _xi$5, _dx$6, _dy$7, _new_d$11, List$cons$(Pair$new$(_x0$1, _y0$2), _coords$9));
+                        var $376 = $378;
                     };
-                    return $377;
+                    return $376;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2054,15 +2030,15 @@ module.exports = (function() {
         var _dy$6 = ((_y1$4 - _y0$2) >> 0);
         var self = (_x0$1 > _x1$3);
         if (self) {
-            var $381 = ((-1));
-            var _xi$7 = $381;
+            var $380 = ((-1));
+            var _xi$7 = $380;
         } else {
-            var $382 = 1;
-            var _xi$7 = $382;
+            var $381 = 1;
+            var _xi$7 = $381;
         };
         var _d$8 = ((((2 * _dx$5) >> 0) - _dy$6) >> 0);
-        var $380 = VoxBox$Draw$line$coords$high$go$(_x0$1, _y0$2, _x1$3, _y1$4, _xi$7, _dx$5, _dy$6, _d$8, List$nil);
-        return $380;
+        var $379 = VoxBox$Draw$line$coords$high$go$(_x0$1, _y0$2, _x1$3, _y1$4, _xi$7, _dx$5, _dy$6, _d$8, List$nil);
+        return $379;
     };
     const VoxBox$Draw$line$coords$high = x0 => x1 => x2 => x3 => VoxBox$Draw$line$coords$high$(x0, x1, x2, x3);
 
@@ -2074,25 +2050,25 @@ module.exports = (function() {
         if (self) {
             var self = (_x0$1 > _x1$3);
             if (self) {
-                var $385 = VoxBox$Draw$line$coords$low$(_x1$3, _y1$4, _x0$1, _y0$2);
-                var $384 = $385;
+                var $384 = VoxBox$Draw$line$coords$low$(_x1$3, _y1$4, _x0$1, _y0$2);
+                var $383 = $384;
             } else {
-                var $386 = VoxBox$Draw$line$coords$low$(_x0$1, _y0$2, _x1$3, _y1$4);
-                var $384 = $386;
+                var $385 = VoxBox$Draw$line$coords$low$(_x0$1, _y0$2, _x1$3, _y1$4);
+                var $383 = $385;
             };
-            var $383 = $384;
+            var $382 = $383;
         } else {
             var self = (_y0$2 > _y1$4);
             if (self) {
-                var $388 = VoxBox$Draw$line$coords$high$(_x1$3, _y1$4, _x0$1, _y0$2);
-                var $387 = $388;
+                var $387 = VoxBox$Draw$line$coords$high$(_x1$3, _y1$4, _x0$1, _y0$2);
+                var $386 = $387;
             } else {
-                var $389 = VoxBox$Draw$line$coords$high$(_x0$1, _y0$2, _x1$3, _y1$4);
-                var $387 = $389;
+                var $388 = VoxBox$Draw$line$coords$high$(_x0$1, _y0$2, _x1$3, _y1$4);
+                var $386 = $388;
             };
-            var $383 = $387;
+            var $382 = $386;
         };
-        return $383;
+        return $382;
     };
     const VoxBox$Draw$line$coords = x0 => x1 => x2 => x3 => VoxBox$Draw$line$coords$(x0, x1, x2, x3);
     const List$for = a0 => a1 => a2 => (list_for(a0)(a1)(a2));
@@ -2100,30 +2076,30 @@ module.exports = (function() {
     function Word$trim$(_new_size$2, _word$3) {
         var self = _new_size$2;
         if (self === 0n) {
-            var $391 = Word$e;
-            var $390 = $391;
+            var $390 = Word$e;
+            var $389 = $390;
         } else {
-            var $392 = (self - 1n);
+            var $391 = (self - 1n);
             var self = _word$3;
             switch (self._) {
                 case 'Word.o':
-                    var $394 = self.pred;
-                    var $395 = Word$o$(Word$trim$($392, $394));
-                    var $393 = $395;
+                    var $393 = self.pred;
+                    var $394 = Word$o$(Word$trim$($391, $393));
+                    var $392 = $394;
                     break;
                 case 'Word.i':
-                    var $396 = self.pred;
-                    var $397 = Word$i$(Word$trim$($392, $396));
-                    var $393 = $397;
+                    var $395 = self.pred;
+                    var $396 = Word$i$(Word$trim$($391, $395));
+                    var $392 = $396;
                     break;
                 case 'Word.e':
-                    var $398 = Word$o$(Word$trim$($392, Word$e));
-                    var $393 = $398;
+                    var $397 = Word$o$(Word$trim$($391, Word$e));
+                    var $392 = $397;
                     break;
             };
-            var $390 = $393;
+            var $389 = $392;
         };
-        return $390;
+        return $389;
     };
     const Word$trim = x0 => x1 => Word$trim$(x0, x1);
     const Unit$new = null;
@@ -2132,16 +2108,16 @@ module.exports = (function() {
         var self = _arr$2;
         switch (self._) {
             case 'Array.tip':
-                var $400 = self.value;
-                var $401 = $400;
-                var $399 = $401;
+                var $399 = self.value;
+                var $400 = $399;
+                var $398 = $400;
                 break;
             case 'Array.tie':
-                var $402 = Unit$new;
-                var $399 = $402;
+                var $401 = Unit$new;
+                var $398 = $401;
                 break;
         };
-        return $399;
+        return $398;
     };
     const Array$extract_tip = x0 => Array$extract_tip$(x0);
 
@@ -2149,17 +2125,17 @@ module.exports = (function() {
         var self = _arr$3;
         switch (self._) {
             case 'Array.tie':
-                var $404 = self.lft;
-                var $405 = self.rgt;
-                var $406 = Pair$new$($404, $405);
-                var $403 = $406;
+                var $403 = self.lft;
+                var $404 = self.rgt;
+                var $405 = Pair$new$($403, $404);
+                var $402 = $405;
                 break;
             case 'Array.tip':
-                var $407 = Unit$new;
-                var $403 = $407;
+                var $406 = Unit$new;
+                var $402 = $406;
                 break;
         };
-        return $403;
+        return $402;
     };
     const Array$extract_tie = x0 => Array$extract_tie$(x0);
 
@@ -2176,16 +2152,16 @@ module.exports = (function() {
                 var self = _word$6;
                 switch (self._) {
                     case 'Word.o':
-                        var $408 = self.pred;
-                        var $409 = Word$foldl$(_w0$4(_nil$3), _w0$4, _w1$5, $408);
-                        return $409;
+                        var $407 = self.pred;
+                        var $408 = Word$foldl$(_w0$4(_nil$3), _w0$4, _w1$5, $407);
+                        return $408;
                     case 'Word.i':
-                        var $410 = self.pred;
-                        var $411 = Word$foldl$(_w1$5(_nil$3), _w0$4, _w1$5, $410);
-                        return $411;
+                        var $409 = self.pred;
+                        var $410 = Word$foldl$(_w1$5(_nil$3), _w0$4, _w1$5, $409);
+                        return $410;
                     case 'Word.e':
-                        var $412 = _nil$3;
-                        return $412;
+                        var $411 = _nil$3;
+                        return $411;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -2195,42 +2171,42 @@ module.exports = (function() {
     const Word$foldl = x0 => x1 => x2 => x3 => Word$foldl$(x0, x1, x2, x3);
 
     function Array$mut$(_idx$3, _f$4, _arr$5) {
-        var $413 = Word$foldl$((_arr$6 => {
-            var $414 = Array$tip$(_f$4(Array$extract_tip$(_arr$6)));
+        var $412 = Word$foldl$((_arr$6 => {
+            var $413 = Array$tip$(_f$4(Array$extract_tip$(_arr$6)));
+            return $413;
+        }), (_rec$7 => _arr$8 => {
+            var self = Array$extract_tie$(_arr$8);
+            switch (self._) {
+                case 'Pair.new':
+                    var $415 = self.fst;
+                    var $416 = self.snd;
+                    var $417 = Array$tie$(_rec$7($415), $416);
+                    var $414 = $417;
+                    break;
+            };
             return $414;
         }), (_rec$7 => _arr$8 => {
             var self = Array$extract_tie$(_arr$8);
             switch (self._) {
                 case 'Pair.new':
-                    var $416 = self.fst;
-                    var $417 = self.snd;
-                    var $418 = Array$tie$(_rec$7($416), $417);
-                    var $415 = $418;
+                    var $419 = self.fst;
+                    var $420 = self.snd;
+                    var $421 = Array$tie$($419, _rec$7($420));
+                    var $418 = $421;
                     break;
             };
-            return $415;
-        }), (_rec$7 => _arr$8 => {
-            var self = Array$extract_tie$(_arr$8);
-            switch (self._) {
-                case 'Pair.new':
-                    var $420 = self.fst;
-                    var $421 = self.snd;
-                    var $422 = Array$tie$($420, _rec$7($421));
-                    var $419 = $422;
-                    break;
-            };
-            return $419;
+            return $418;
         }), _idx$3)(_arr$5);
-        return $413;
+        return $412;
     };
     const Array$mut = x0 => x1 => x2 => Array$mut$(x0, x1, x2);
 
     function Array$set$(_idx$3, _val$4, _arr$5) {
-        var $423 = Array$mut$(_idx$3, (_x$6 => {
-            var $424 = _val$4;
-            return $424;
+        var $422 = Array$mut$(_idx$3, (_x$6 => {
+            var $423 = _val$4;
+            return $423;
         }), _arr$5);
-        return $423;
+        return $422;
     };
     const Array$set = x0 => x1 => x2 => Array$set$(x0, x1, x2);
     const Buffer32$set = a0 => a1 => a2 => ((a2[a0] = a1, a2));
@@ -2242,13 +2218,13 @@ module.exports = (function() {
         var self = _img$2;
         switch (self._) {
             case 'VoxBox.new':
-                var $426 = self.capacity;
-                var $427 = self.buffer;
-                var $428 = VoxBox$new$(_length$1, $426, $427);
-                var $425 = $428;
+                var $425 = self.capacity;
+                var $426 = self.buffer;
+                var $427 = VoxBox$new$(_length$1, $425, $426);
+                var $424 = $427;
                 break;
         };
-        return $425;
+        return $424;
     };
     const VoxBox$set_length = x0 => x1 => VoxBox$set_length$(x0, x1);
     const VoxBox$push = a0 => a1 => a2 => ((a2.buffer[a2.length * 2] = a0, a2.buffer[a2.length * 2 + 1] = a1, a2.length++, a2));
@@ -2275,36 +2251,36 @@ module.exports = (function() {
     const I32$to_f64 = a0 => (a0);
 
     function I32$to_u32$(_n$1) {
-        var $429 = (((_n$1) >>> 0));
-        return $429;
+        var $428 = (((_n$1) >>> 0));
+        return $428;
     };
     const I32$to_u32 = x0 => I32$to_u32$(x0);
 
     function VoxBox$Draw$line$(_x0$1, _y0$2, _x1$3, _y1$4, _z$5, _col$6, _img$7) {
         var _coords$8 = VoxBox$Draw$line$coords$(_x0$1, _y0$2, _x1$3, _y1$4);
         var _img$9 = (() => {
-            var $432 = _img$7;
-            var $433 = _coords$8;
-            let _img$10 = $432;
+            var $431 = _img$7;
+            var $432 = _coords$8;
+            let _img$10 = $431;
             let _coord$9;
-            while ($433._ === 'List.cons') {
-                _coord$9 = $433.head;
+            while ($432._ === 'List.cons') {
+                _coord$9 = $432.head;
                 var self = _coord$9;
                 switch (self._) {
                     case 'Pair.new':
-                        var $434 = self.fst;
-                        var $435 = self.snd;
-                        var $436 = ((_img$10.buffer[_img$10.length * 2] = ((0 | I32$to_u32$($434) | (I32$to_u32$($435) << 12) | (I32$to_u32$(_z$5) << 24))), _img$10.buffer[_img$10.length * 2 + 1] = _col$6, _img$10.length++, _img$10));
-                        var $432 = $436;
+                        var $433 = self.fst;
+                        var $434 = self.snd;
+                        var $435 = ((_img$10.buffer[_img$10.length * 2] = ((0 | I32$to_u32$($433) | (I32$to_u32$($434) << 12) | (I32$to_u32$(_z$5) << 24))), _img$10.buffer[_img$10.length * 2 + 1] = _col$6, _img$10.length++, _img$10));
+                        var $431 = $435;
                         break;
                 };
-                _img$10 = $432;
-                $433 = $433.tail;
+                _img$10 = $431;
+                $432 = $432.tail;
             }
             return _img$10;
         })();
-        var $430 = _img$9;
-        return $430;
+        var $429 = _img$9;
+        return $429;
     };
     const VoxBox$Draw$line = x0 => x1 => x2 => x3 => x4 => x5 => x6 => VoxBox$Draw$line$(x0, x1, x2, x3, x4, x5, x6);
     const Col32$new = a0 => a1 => a2 => a3 => ((0 | a0 | (a1 << 8) | (a2 << 16) | (a3 << 24)));
@@ -2313,8 +2289,8 @@ module.exports = (function() {
         var _side_tale$2 = ((side_board / 3) >> 0);
         var _edge$3 = ((side_board / 12) >> 0);
         var _img$4 = VoxBox$Draw$line$(_side_tale$2, _edge$3, _side_tale$2, ((side_board - _edge$3) >> 0), 0, ((0 | 0 | (0 << 8) | (0 << 16) | (255 << 24))), _img$1);
-        var $437 = VoxBox$Draw$line$(((side_board - _side_tale$2) >> 0), _edge$3, ((side_board - _side_tale$2) >> 0), ((side_board - _edge$3) >> 0), 0, ((0 | 0 | (0 << 8) | (0 << 16) | (255 << 24))), _img$4);
-        return $437;
+        var $436 = VoxBox$Draw$line$(((side_board - _side_tale$2) >> 0), _edge$3, ((side_board - _side_tale$2) >> 0), ((side_board - _edge$3) >> 0), 0, ((0 | 0 | (0 << 8) | (0 << 16) | (255 << 24))), _img$4);
+        return $436;
     };
     const App$TicTacToe$draw_vertical_lines = x0 => App$TicTacToe$draw_vertical_lines$(x0);
 
@@ -2322,36 +2298,36 @@ module.exports = (function() {
         var _side_tale$2 = ((side_board / 3) >> 0);
         var _edge$3 = ((side_board / 12) >> 0);
         var _img$4 = VoxBox$Draw$line$(_edge$3, _side_tale$2, ((side_board - _edge$3) >> 0), _side_tale$2, 0, ((0 | 0 | (0 << 8) | (0 << 16) | (255 << 24))), _img$1);
-        var $438 = VoxBox$Draw$line$(_edge$3, ((side_board - _side_tale$2) >> 0), ((side_board - _edge$3) >> 0), ((side_board - _side_tale$2) >> 0), 0, ((0 | 0 | (0 << 8) | (0 << 16) | (255 << 24))), _img$4);
-        return $438;
+        var $437 = VoxBox$Draw$line$(_edge$3, ((side_board - _side_tale$2) >> 0), ((side_board - _edge$3) >> 0), ((side_board - _side_tale$2) >> 0), 0, ((0 | 0 | (0 << 8) | (0 << 16) | (255 << 24))), _img$4);
+        return $437;
     };
     const App$TicTacToe$draw_horizontal_lines = x0 => App$TicTacToe$draw_horizontal_lines$(x0);
 
     function Vector$fold$(_A$1, _B$2, _size$3, _b$4, _f$5, _vec$6) {
         var self = _size$3;
         if (self === 0n) {
-            var $440 = (_vec$7 => {
-                var $441 = _b$4;
-                return $441;
+            var $439 = (_vec$7 => {
+                var $440 = _b$4;
+                return $440;
             });
-            var $439 = $440;
+            var $438 = $439;
         } else {
-            var $442 = (self - 1n);
-            var $443 = (_vec$8 => {
-                var $444 = _vec$8((_vec$self$9 => {
-                    var $445 = null;
-                    return $445;
+            var $441 = (self - 1n);
+            var $442 = (_vec$8 => {
+                var $443 = _vec$8((_vec$self$9 => {
+                    var $444 = null;
+                    return $444;
                 }))((_vec$head$9 => _vec$tail$10 => {
-                    var _pred$11 = Vector$fold$(null, null, $442, _b$4, _f$5, _vec$tail$10);
-                    var $446 = _f$5(_vec$head$9)(_pred$11);
-                    return $446;
+                    var _pred$11 = Vector$fold$(null, null, $441, _b$4, _f$5, _vec$tail$10);
+                    var $445 = _f$5(_vec$head$9)(_pred$11);
+                    return $445;
                 }));
-                return $444;
+                return $443;
             });
-            var $439 = $443;
+            var $438 = $442;
         };
-        var $439 = $439(_vec$6);
-        return $439;
+        var $438 = $438(_vec$6);
+        return $438;
     };
     const Vector$fold = x0 => x1 => x2 => x3 => x4 => x5 => Vector$fold$(x0, x1, x2, x3, x4, x5);
     const U32$sub = a0 => a1 => ((a0 - a1) >>> 0);
@@ -2359,15 +2335,15 @@ module.exports = (function() {
 
     function Word$mod$(_a$2, _b$3) {
         var _q$4 = Word$div$(_a$2, _b$3);
-        var $447 = Word$sub$(_a$2, Word$mul$(_b$3, _q$4));
-        return $447;
+        var $446 = Word$sub$(_a$2, Word$mul$(_b$3, _q$4));
+        return $446;
     };
     const Word$mod = x0 => x1 => Word$mod$(x0, x1);
     const U32$mod = a0 => a1 => (a0 % a1);
 
     function App$TicTacToe$pos$posvector_to_minipair$(_posvector$1) {
-        var $448 = Pair$new$(((_posvector$1 / 3) >>> 0), (_posvector$1 % 3));
-        return $448;
+        var $447 = Pair$new$(((_posvector$1 / 3) >>> 0), (_posvector$1 % 3));
+        return $447;
     };
     const App$TicTacToe$pos$posvector_to_minipair = x0 => App$TicTacToe$pos$posvector_to_minipair$(x0);
     const App$TicTacToe$constant$side_tale = ((App$TicTacToe$constant$size / 3) >>> 0);
@@ -2380,13 +2356,13 @@ module.exports = (function() {
         var self = _trans$2;
         switch (self._) {
             case 'Pair.new':
-                var $450 = self.fst;
-                var $451 = self.snd;
-                var $452 = Pair$new$((((((($450 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0) - ((side_entity / 2) >>> 0)) >>> 0), (((((($451 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0) - ((side_entity / 2) >>> 0)) >>> 0));
-                var $449 = $452;
+                var $449 = self.fst;
+                var $450 = self.snd;
+                var $451 = Pair$new$((((((($449 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0) - ((side_entity / 2) >>> 0)) >>> 0), (((((($450 * side_tale) >>> 0) + ((side_tale / 2) >>> 0)) >>> 0) - ((side_entity / 2) >>> 0)) >>> 0));
+                var $448 = $451;
                 break;
         };
-        return $449;
+        return $448;
     };
     const App$TicTacToe$pos$posvector_to_pair = x0 => App$TicTacToe$pos$posvector_to_pair$(x0);
 
@@ -2394,12 +2370,12 @@ module.exports = (function() {
         var self = _img$1;
         switch (self._) {
             case 'VoxBox.new':
-                var $454 = self.length;
-                var $455 = $454;
-                var $453 = $455;
+                var $453 = self.length;
+                var $454 = $453;
+                var $452 = $454;
                 break;
         };
-        return $453;
+        return $452;
     };
     const VoxBox$get_len = x0 => VoxBox$get_len$(x0);
     const U32$eql = a0 => a1 => (a0 === a1);
@@ -2407,30 +2383,30 @@ module.exports = (function() {
     const U32$for = a0 => a1 => a2 => a3 => (u32_for(a0, a1, a2, a3));
 
     function Array$get$(_idx$3, _arr$4) {
-        var $456 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
+        var $455 = Word$foldl$(Array$extract_tip, (_rec$6 => _arr$7 => {
             var _arr_l$8 = Array$extract_tie$(_arr$7);
             var self = _arr_l$8;
             switch (self._) {
                 case 'Pair.new':
-                    var $458 = self.fst;
-                    var $459 = _rec$6($458);
-                    var $457 = $459;
+                    var $457 = self.fst;
+                    var $458 = _rec$6($457);
+                    var $456 = $458;
                     break;
             };
-            return $457;
+            return $456;
         }), (_rec$6 => _arr$7 => {
             var _arr_r$8 = Array$extract_tie$(_arr$7);
             var self = _arr_r$8;
             switch (self._) {
                 case 'Pair.new':
-                    var $461 = self.snd;
-                    var $462 = _rec$6($461);
-                    var $460 = $462;
+                    var $460 = self.snd;
+                    var $461 = _rec$6($460);
+                    var $459 = $461;
                     break;
             };
-            return $460;
+            return $459;
         }), _idx$3)(_arr$4);
-        return $456;
+        return $455;
     };
     const Array$get = x0 => x1 => Array$get$(x0, x1);
     const Buffer32$get = a0 => a1 => ((a1[a0]));
@@ -2441,83 +2417,83 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $464 = self.pred;
-                var $465 = (_b$6 => {
+                var $463 = self.pred;
+                var $464 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $467 = self.pred;
-                            var $468 = (_a$pred$9 => {
-                                var $469 = Word$o$(Word$and$(_a$pred$9, $467));
-                                return $469;
+                            var $466 = self.pred;
+                            var $467 = (_a$pred$9 => {
+                                var $468 = Word$o$(Word$and$(_a$pred$9, $466));
+                                return $468;
                             });
-                            var $466 = $468;
+                            var $465 = $467;
                             break;
                         case 'Word.i':
-                            var $470 = self.pred;
-                            var $471 = (_a$pred$9 => {
-                                var $472 = Word$o$(Word$and$(_a$pred$9, $470));
-                                return $472;
+                            var $469 = self.pred;
+                            var $470 = (_a$pred$9 => {
+                                var $471 = Word$o$(Word$and$(_a$pred$9, $469));
+                                return $471;
                             });
-                            var $466 = $471;
+                            var $465 = $470;
                             break;
                         case 'Word.e':
-                            var $473 = (_a$pred$7 => {
-                                var $474 = Word$e;
-                                return $474;
+                            var $472 = (_a$pred$7 => {
+                                var $473 = Word$e;
+                                return $473;
                             });
-                            var $466 = $473;
+                            var $465 = $472;
                             break;
                     };
-                    var $466 = $466($464);
-                    return $466;
+                    var $465 = $465($463);
+                    return $465;
                 });
-                var $463 = $465;
+                var $462 = $464;
                 break;
             case 'Word.i':
-                var $475 = self.pred;
-                var $476 = (_b$6 => {
+                var $474 = self.pred;
+                var $475 = (_b$6 => {
                     var self = _b$6;
                     switch (self._) {
                         case 'Word.o':
-                            var $478 = self.pred;
-                            var $479 = (_a$pred$9 => {
-                                var $480 = Word$o$(Word$and$(_a$pred$9, $478));
-                                return $480;
+                            var $477 = self.pred;
+                            var $478 = (_a$pred$9 => {
+                                var $479 = Word$o$(Word$and$(_a$pred$9, $477));
+                                return $479;
                             });
-                            var $477 = $479;
+                            var $476 = $478;
                             break;
                         case 'Word.i':
-                            var $481 = self.pred;
-                            var $482 = (_a$pred$9 => {
-                                var $483 = Word$i$(Word$and$(_a$pred$9, $481));
-                                return $483;
+                            var $480 = self.pred;
+                            var $481 = (_a$pred$9 => {
+                                var $482 = Word$i$(Word$and$(_a$pred$9, $480));
+                                return $482;
                             });
-                            var $477 = $482;
+                            var $476 = $481;
                             break;
                         case 'Word.e':
-                            var $484 = (_a$pred$7 => {
-                                var $485 = Word$e;
-                                return $485;
+                            var $483 = (_a$pred$7 => {
+                                var $484 = Word$e;
+                                return $484;
                             });
-                            var $477 = $484;
+                            var $476 = $483;
                             break;
                     };
-                    var $477 = $477($475);
-                    return $477;
+                    var $476 = $476($474);
+                    return $476;
                 });
-                var $463 = $476;
+                var $462 = $475;
                 break;
             case 'Word.e':
-                var $486 = (_b$4 => {
-                    var $487 = Word$e;
-                    return $487;
+                var $485 = (_b$4 => {
+                    var $486 = Word$e;
+                    return $486;
                 });
-                var $463 = $486;
+                var $462 = $485;
                 break;
         };
-        var $463 = $463(_b$3);
-        return $463;
+        var $462 = $462(_b$3);
+        return $462;
     };
     const Word$and = x0 => x1 => Word$and$(x0, x1);
     const U32$and = a0 => a1 => (a0 & a1);
@@ -2526,11 +2502,11 @@ module.exports = (function() {
     function VoxBox$Draw$image$(_x$1, _y$2, _z$3, _src$4, _img$5) {
         var _len$6 = VoxBox$get_len$(_src$4);
         var _img$7 = (() => {
-            var $489 = _img$5;
-            var $490 = 0;
-            var $491 = _len$6;
-            let _img$8 = $489;
-            for (let _i$7 = $490; _i$7 < $491; ++_i$7) {
+            var $488 = _img$5;
+            var $489 = 0;
+            var $490 = _len$6;
+            let _img$8 = $488;
+            for (let _i$7 = $489; _i$7 < $490; ++_i$7) {
                 var _pos$9 = ((_src$4.buffer[_i$7 * 2]));
                 var _col$10 = ((_src$4.buffer[_i$7 * 2 + 1]));
                 var _p_x$11 = (_pos$9 & 4095);
@@ -2540,13 +2516,13 @@ module.exports = (function() {
                 var _p_y$15 = ((_p_y$12 + _y$2) >>> 0);
                 var _p_z$16 = ((_p_z$13 + _z$3) >>> 0);
                 var _pos$17 = ((0 | _p_x$14 | (_p_y$15 << 12) | (_p_z$16 << 24)));
-                var $489 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
-                _img$8 = $489;
+                var $488 = ((_img$8.buffer[_img$8.length * 2] = _pos$17, _img$8.buffer[_img$8.length * 2 + 1] = _col$10, _img$8.length++, _img$8));
+                _img$8 = $488;
             };
             return _img$8;
         })();
-        var $488 = _img$7;
-        return $488;
+        var $487 = _img$7;
+        return $487;
     };
     const VoxBox$Draw$image = x0 => x1 => x2 => x3 => x4 => VoxBox$Draw$image$(x0, x1, x2, x3, x4);
     const U32$length = a0 => ((a0.length) >>> 0);
@@ -2571,8 +2547,8 @@ module.exports = (function() {
 
     function VoxBox$parse_byte$(_idx$1, _voxdata$2) {
         var _chr$3 = (_voxdata$2.slice(((_idx$1 * 2) >>> 0), ((((_idx$1 * 2) >>> 0) + 2) >>> 0)));
-        var $492 = (parseInt(_chr$3, 16));
-        return $492;
+        var $491 = (parseInt(_chr$3, 16));
+        return $491;
     };
     const VoxBox$parse_byte = x0 => x1 => VoxBox$parse_byte$(x0, x1);
 
@@ -2580,11 +2556,11 @@ module.exports = (function() {
         var _siz$2 = ((((_voxdata$1.length) >>> 0) / 12) >>> 0);
         var _img$3 = VoxBox$alloc_capacity$(_siz$2);
         var _img$4 = (() => {
-            var $494 = _img$3;
-            var $495 = 0;
-            var $496 = _siz$2;
-            let _img$5 = $494;
-            for (let _i$4 = $495; _i$4 < $496; ++_i$4) {
+            var $493 = _img$3;
+            var $494 = 0;
+            var $495 = _siz$2;
+            let _img$5 = $493;
+            for (let _i$4 = $494; _i$4 < $495; ++_i$4) {
                 var _x$6 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 0) >>> 0), _voxdata$1);
                 var _y$7 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 1) >>> 0), _voxdata$1);
                 var _z$8 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 2) >>> 0), _voxdata$1);
@@ -2593,13 +2569,13 @@ module.exports = (function() {
                 var _b$11 = VoxBox$parse_byte$(((((_i$4 * 6) >>> 0) + 5) >>> 0), _voxdata$1);
                 var _pos$12 = ((0 | _x$6 | (_y$7 << 12) | (_z$8 << 24)));
                 var _col$13 = ((0 | _r$9 | (_g$10 << 8) | (_b$11 << 16) | (255 << 24)));
-                var $494 = ((_img$5.buffer[_img$5.length * 2] = _pos$12, _img$5.buffer[_img$5.length * 2 + 1] = _col$13, _img$5.length++, _img$5));
-                _img$5 = $494;
+                var $493 = ((_img$5.buffer[_img$5.length * 2] = _pos$12, _img$5.buffer[_img$5.length * 2 + 1] = _col$13, _img$5.length++, _img$5));
+                _img$5 = $493;
             };
             return _img$5;
         })();
-        var $493 = _img$4;
-        return $493;
+        var $492 = _img$4;
+        return $492;
     };
     const VoxBox$parse = x0 => VoxBox$parse$(x0);
     const App$TicTacToe$Assets$circle = VoxBox$parse$("0d00020000000e00020000000f00020000001000020000001100020000001200020000001300020000001400020000001500020000001600020000000a01020000000b01020000000c01020000000d01020000000e01020000000f01020000001001020000001101020000001201020000001301020000001401020000001501020000001601020000001701020000001801020000000802020000000902020000000a02020000000b02020000000c02020000000d02020000000e02020000000f02020000001002020000001102020000001202020000001302020000001402020000001502020000001602020000001702020000001802020000001902020000000603020000000703020000000803020000000903020000000a03020000000b03020000000c03020000000d03020000000e03020000000f03020000001003020000001103020000001203020000001303020000001403020000001503020000001603020000001703020000001803020000001903020000001a03020000000504020000000604020000000704020000000804020000000904020000000a04020000000b04020000000c04020000000d04020000000e04020000000f04020000001004020000001104020000001204020000001304020000001404020000001504020000001604020000001704020000001804020000001904020000001a04020000001b04020000000405020000000505020000000605020000000705020000000805020000000905020000000a05020000000b05020000000c05020000000d05020000000e05020000001205020000001305020000001405020000001505020000001605020000001705020000001805020000001905020000001a05020000001b05020000001c05020000000306020000000406020000000506020000000606020000000706020000000806020000000906020000000a06020000001306020000001406020000001506020000001606020000001706020000001806020000001906020000001a06020000001b06020000001c06020000000207020000000307020000000407020000000507020000000607020000000707020000000807020000001407020000001507020000001607020000001707020000001807020000001907020000001a07020000001b07020000001c07020000001d07020000000208020000000308020000000408020000000508020000000608020000000708020000000808020000001608020000001708020000001808020000001908020000001a08020000001b08020000001c08020000001d08020000001e08020000000109020000000209020000000309020000000409020000000509020000000609020000000709020000001709020000001809020000001909020000001a09020000001b09020000001c09020000001d09020000001e0902000000010a02000000020a02000000030a02000000040a02000000050a02000000060a02000000170a02000000180a02000000190a020000001a0a020000001b0a020000001c0a020000001d0a020000001e0a020000001f0a02000000000b02000000010b02000000020b02000000030b02000000040b02000000050b02000000060b02000000180b02000000190b020000001a0b020000001b0b020000001c0b020000001d0b020000001e0b020000001f0b02000000000c02000000010c02000000020c02000000030c02000000040c02000000050c02000000060c02000000180c02000000190c020000001a0c020000001b0c020000001c0c020000001d0c020000001e0c020000001f0c02000000000d02000000010d02000000020d02000000030d02000000040d02000000050d02000000190d020000001a0d020000001b0d020000001c0d020000001d0d020000001e0d020000001f0d02000000000e02000000010e02000000020e02000000030e02000000040e02000000050e02000000190e020000001a0e020000001b0e020000001c0e020000001d0e020000001e0e020000001f0e02000000000f02000000010f02000000020f02000000030f02000000040f02000000050f02000000190f020000001a0f020000001b0f020000001c0f020000001d0f020000001e0f020000001f0f020000000010020000000110020000000210020000000310020000000410020000000510020000001a10020000001b10020000001c10020000001d10020000001e10020000001f10020000000011020000000111020000000211020000000311020000000411020000000511020000000611020000001a11020000001b11020000001c11020000001d11020000001e11020000001f11020000000012020000000112020000000212020000000312020000000412020000000512020000000612020000001a12020000001b12020000001c12020000001d12020000001e12020000001f12020000000013020000000113020000000213020000000313020000000413020000000513020000000613020000001a13020000001b13020000001c13020000001d13020000001e13020000001f13020000000014020000000114020000000214020000000314020000000414020000000514020000000614020000000714020000001a14020000001b14020000001c14020000001d14020000001e14020000001f14020000000015020000000115020000000215020000000315020000000415020000000515020000000615020000000715020000001a15020000001b15020000001c15020000001d15020000001e15020000001f15020000000016020000000116020000000216020000000316020000000416020000000516020000000616020000000716020000000816020000001a16020000001b16020000001c16020000001d16020000001e16020000001f16020000000117020000000217020000000317020000000417020000000517020000000617020000000717020000000817020000000917020000001a17020000001b17020000001c17020000001d17020000001e17020000001f17020000000118020000000218020000000318020000000418020000000518020000000618020000000718020000000818020000000918020000000a18020000001a18020000001b18020000001c18020000001d18020000001e18020000001f18020000000219020000000319020000000419020000000519020000000619020000000719020000000819020000000919020000000a19020000000b19020000001a19020000001b19020000001c19020000001d19020000001e19020000001f1902000000031a02000000041a02000000051a02000000061a02000000071a02000000081a02000000091a020000000a1a020000000b1a020000000c1a020000000d1a02000000191a020000001a1a020000001b1a020000001c1a020000001d1a020000001e1a020000001f1a02000000031b02000000041b02000000051b02000000061b02000000071b02000000081b02000000091b020000000a1b020000000b1b020000000c1b020000000d1b020000000e1b020000000f1b02000000191b020000001a1b020000001b1b020000001c1b020000001d1b020000001e1b020000001f1b02000000041c02000000051c02000000061c02000000071c02000000081c02000000091c020000000a1c020000000b1c020000000c1c020000000d1c020000000e1c020000000f1c02000000101c02000000111c02000000121c02000000181c02000000191c020000001a1c020000001b1c020000001c1c020000001d1c020000001e1c02000000051d02000000061d02000000071d02000000081d02000000091d020000000a1d020000000b1d020000000c1d020000000d1d020000000e1d020000000f1d02000000101d02000000111d02000000121d02000000131d02000000141d02000000151d02000000161d02000000171d02000000181d02000000191d020000001a1d020000001b1d020000001c1d020000001d1d020000001e1d02000000071e02000000081e02000000091e020000000a1e020000000b1e020000000c1e020000000d1e020000000e1e020000000f1e02000000101e02000000111e02000000121e02000000131e02000000141e02000000151e02000000161e02000000171e02000000181e02000000191e020000001a1e020000001b1e020000001c1e020000001d1e02000000091f020000000a1f020000000b1f020000000c1f020000000d1f020000000e1f020000000f1f02000000101f02000000111f02000000121f02000000131f02000000141f02000000151f02000000161f02000000171f02000000181f02000000191f020000001a1f020000001b1f020000001c1f020000000b20020000000c20020000000d20020000000e20020000000f20020000001020020000001120020000001220020000001320020000001420020000001520020000001620020000001720020000001820020000001920020000001a20020000000c21020000000d21020000000e21020000000f2102000000102102000000112102000000122102000000132102000000142102000000152102000000162102000000172102000000182102000000");
@@ -2609,38 +2585,38 @@ module.exports = (function() {
         var self = _e$1;
         switch (self._) {
             case 'App.TicTacToe.Entity.circle':
-                var $498 = App$TicTacToe$Assets$circle;
-                var $497 = $498;
+                var $497 = App$TicTacToe$Assets$circle;
+                var $496 = $497;
                 break;
             case 'App.TicTacToe.Entity.x':
-                var $499 = App$TicTacToe$Assets$x;
-                var $497 = $499;
+                var $498 = App$TicTacToe$Assets$x;
+                var $496 = $498;
                 break;
         };
-        return $497;
+        return $496;
     };
     const App$TicTacToe$entity$to_assets = x0 => App$TicTacToe$entity$to_assets$(x0);
 
     function DOM$vbox$(_props$1, _style$2, _value$3) {
-        var $500 = ({
+        var $499 = ({
             _: 'DOM.vbox',
             'props': _props$1,
             'style': _style$2,
             'value': _value$3
         });
-        return $500;
+        return $499;
     };
     const DOM$vbox = x0 => x1 => x2 => DOM$vbox$(x0, x1, x2);
 
     function BitsMap$(_A$1) {
-        var $501 = null;
-        return $501;
+        var $500 = null;
+        return $500;
     };
     const BitsMap = x0 => BitsMap$(x0);
 
     function Map$(_V$1) {
-        var $502 = null;
-        return $502;
+        var $501 = null;
+        return $501;
     };
     const Map = x0 => Map$(x0);
     const BitsMap$new = ({
@@ -2648,22 +2624,22 @@ module.exports = (function() {
     });
 
     function BitsMap$tie$(_val$2, _lft$3, _rgt$4) {
-        var $503 = ({
+        var $502 = ({
             _: 'BitsMap.tie',
             'val': _val$2,
             'lft': _lft$3,
             'rgt': _rgt$4
         });
-        return $503;
+        return $502;
     };
     const BitsMap$tie = x0 => x1 => x2 => BitsMap$tie$(x0, x1, x2);
 
     function Maybe$some$(_value$2) {
-        var $504 = ({
+        var $503 = ({
             _: 'Maybe.some',
             'value': _value$2
         });
-        return $504;
+        return $503;
     };
     const Maybe$some = x0 => Maybe$some$(x0);
     const BitsMap$set = a0 => a1 => a2 => (bitsmap_set(a0, a1, a2, 'set'));
@@ -2676,21 +2652,21 @@ module.exports = (function() {
         var self = _a$2;
         switch (self._) {
             case 'Word.o':
-                var $506 = self.pred;
-                var $507 = (Word$to_bits$($506) + '0');
-                var $505 = $507;
+                var $505 = self.pred;
+                var $506 = (Word$to_bits$($505) + '0');
+                var $504 = $506;
                 break;
             case 'Word.i':
-                var $508 = self.pred;
-                var $509 = (Word$to_bits$($508) + '1');
-                var $505 = $509;
+                var $507 = self.pred;
+                var $508 = (Word$to_bits$($507) + '1');
+                var $504 = $508;
                 break;
             case 'Word.e':
-                var $510 = Bits$e;
-                var $505 = $510;
+                var $509 = Bits$e;
+                var $504 = $509;
                 break;
         };
-        return $505;
+        return $504;
     };
     const Word$to_bits = x0 => Word$to_bits$(x0);
     const U16$to_bits = a0 => (u16_to_bits(a0));
@@ -2698,15 +2674,15 @@ module.exports = (function() {
     function String$to_bits$(_str$1) {
         var self = _str$1;
         if (self.length === 0) {
-            var $512 = Bits$e;
-            var $511 = $512;
+            var $511 = Bits$e;
+            var $510 = $511;
         } else {
-            var $513 = self.charCodeAt(0);
-            var $514 = self.slice(1);
-            var $515 = (String$to_bits$($514) + (u16_to_bits($513)));
-            var $511 = $515;
+            var $512 = self.charCodeAt(0);
+            var $513 = self.slice(1);
+            var $514 = (String$to_bits$($513) + (u16_to_bits($512)));
+            var $510 = $514;
         };
-        return $511;
+        return $510;
     };
     const String$to_bits = x0 => String$to_bits$(x0);
 
@@ -2714,25 +2690,25 @@ module.exports = (function() {
         var self = _xs$2;
         switch (self._) {
             case 'List.cons':
-                var $517 = self.head;
-                var $518 = self.tail;
-                var self = $517;
+                var $516 = self.head;
+                var $517 = self.tail;
+                var self = $516;
                 switch (self._) {
                     case 'Pair.new':
-                        var $520 = self.fst;
-                        var $521 = self.snd;
-                        var $522 = (bitsmap_set(String$to_bits$($520), $521, Map$from_list$($518), 'set'));
-                        var $519 = $522;
+                        var $519 = self.fst;
+                        var $520 = self.snd;
+                        var $521 = (bitsmap_set(String$to_bits$($519), $520, Map$from_list$($517), 'set'));
+                        var $518 = $521;
                         break;
                 };
-                var $516 = $519;
+                var $515 = $518;
                 break;
             case 'List.nil':
-                var $523 = BitsMap$new;
-                var $516 = $523;
+                var $522 = BitsMap$new;
+                var $515 = $522;
                 break;
         };
-        return $516;
+        return $515;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
 
@@ -2742,64 +2718,64 @@ module.exports = (function() {
         var self = _state$2;
         switch (self._) {
             case 'App.Store.new':
-                var $525 = self.local;
+                var $524 = self.local;
                 var self = Vector$fold$(null, null, 9n, Pair$new$(_img$4, 8), (_entity$7 => _pair$8 => {
                     var self = _pair$8;
                     switch (self._) {
                         case 'Pair.new':
-                            var $528 = self.fst;
-                            var $529 = self.snd;
+                            var $527 = self.fst;
+                            var $528 = self.snd;
                             var self = _entity$7;
                             switch (self._) {
                                 case 'Maybe.some':
-                                    var $531 = self.value;
-                                    var self = App$TicTacToe$pos$posvector_to_pair$($529);
+                                    var $530 = self.value;
+                                    var self = App$TicTacToe$pos$posvector_to_pair$($528);
                                     switch (self._) {
                                         case 'Pair.new':
-                                            var $533 = self.fst;
-                                            var $534 = self.snd;
-                                            var _img$14 = VoxBox$Draw$image$($533, $534, 1, App$TicTacToe$entity$to_assets$($531), $528);
-                                            var $535 = Pair$new$(_img$14, (($529 - 1) >>> 0));
-                                            var $532 = $535;
+                                            var $532 = self.fst;
+                                            var $533 = self.snd;
+                                            var _img$14 = VoxBox$Draw$image$($532, $533, 1, App$TicTacToe$entity$to_assets$($530), $527);
+                                            var $534 = Pair$new$(_img$14, (($528 - 1) >>> 0));
+                                            var $531 = $534;
                                             break;
                                     };
-                                    var $530 = $532;
+                                    var $529 = $531;
                                     break;
                                 case 'Maybe.none':
-                                    var $536 = Pair$new$($528, (($529 - 1) >>> 0));
-                                    var $530 = $536;
+                                    var $535 = Pair$new$($527, (($528 - 1) >>> 0));
+                                    var $529 = $535;
                                     break;
                             };
-                            var $527 = $530;
+                            var $526 = $529;
                             break;
                     };
-                    return $527;
+                    return $526;
                 }), (() => {
-                    var self = $525;
+                    var self = $524;
                     switch (self._) {
                         case 'App.TicTacToe.State.local.new':
-                            var $537 = self.board;
-                            var $538 = $537;
-                            return $538;
+                            var $536 = self.board;
+                            var $537 = $536;
+                            return $537;
                     };
                 })());
                 switch (self._) {
                     case 'Pair.new':
-                        var $539 = self.fst;
-                        var $540 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), $539);
-                        var $526 = $540;
+                        var $538 = self.fst;
+                        var $539 = DOM$vbox$(Map$from_list$(List$nil), Map$from_list$(List$nil), $538);
+                        var $525 = $539;
                         break;
                 };
-                var $524 = $526;
+                var $523 = $525;
                 break;
         };
-        return $524;
+        return $523;
     };
     const App$TicTacToe$draw = x0 => x1 => App$TicTacToe$draw$(x0, x1);
 
     function IO$(_A$1) {
-        var $541 = null;
-        return $541;
+        var $540 = null;
+        return $540;
     };
     const IO = x0 => IO$(x0);
 
@@ -2807,24 +2783,24 @@ module.exports = (function() {
         var self = _pair$3;
         switch (self._) {
             case 'Pair.new':
-                var $543 = self.fst;
-                var $544 = $543;
-                var $542 = $544;
+                var $542 = self.fst;
+                var $543 = $542;
+                var $541 = $543;
                 break;
         };
-        return $542;
+        return $541;
     };
     const Pair$fst = x0 => Pair$fst$(x0);
     const App$State$local = Pair$fst;
 
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $545 = ({
+        var $544 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $545;
+        return $544;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -2832,56 +2808,123 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $547 = self.value;
-                var $548 = _f$4($547);
-                var $546 = $548;
+                var $546 = self.value;
+                var $547 = _f$4($546);
+                var $545 = $547;
                 break;
             case 'IO.ask':
-                var $549 = self.query;
-                var $550 = self.param;
-                var $551 = self.then;
-                var $552 = IO$ask$($549, $550, (_x$8 => {
-                    var $553 = IO$bind$($551(_x$8), _f$4);
-                    return $553;
+                var $548 = self.query;
+                var $549 = self.param;
+                var $550 = self.then;
+                var $551 = IO$ask$($548, $549, (_x$8 => {
+                    var $552 = IO$bind$($550(_x$8), _f$4);
+                    return $552;
                 }));
-                var $546 = $552;
+                var $545 = $551;
                 break;
         };
-        return $546;
+        return $545;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $554 = ({
+        var $553 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $554;
+        return $553;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $555 = _new$2(IO$bind)(IO$end);
-        return $555;
+        var $554 = _new$2(IO$bind)(IO$end);
+        return $554;
     };
     const IO$monad = x0 => IO$monad$(x0);
     const App$pass = IO$monad$((_m$bind$2 => _m$pure$3 => {
-        var $556 = _m$pure$3;
-        return $556;
+        var $555 = _m$pure$3;
+        return $555;
     }))(Maybe$none);
 
     function App$set_local$(_value$2) {
-        var $557 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $558 = _m$pure$4;
-            return $558;
+        var $556 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $557 = _m$pure$4;
+            return $557;
         }))(Maybe$some$(_value$2));
-        return $557;
+        return $556;
     };
     const App$set_local = x0 => App$set_local$(x0);
+    const Debug$log = a0 => a1 => ((console.log(a0), a1()));
+
+    function Bool$show$(_b$1) {
+        var self = _b$1;
+        if (self) {
+            var $559 = "Bool.true";
+            var $558 = $559;
+        } else {
+            var $560 = "Bool.false";
+            var $558 = $560;
+        };
+        return $558;
+    };
+    const Bool$show = x0 => Bool$show$(x0);
+
+    function App$TicTacToe$entity$equal$(_x$1, _y$2) {
+        var self = _x$1;
+        switch (self._) {
+            case 'App.TicTacToe.Entity.circle':
+                var self = _y$2;
+                switch (self._) {
+                    case 'App.TicTacToe.Entity.circle':
+                        var $563 = Bool$true;
+                        var $562 = $563;
+                        break;
+                    case 'App.TicTacToe.Entity.x':
+                        var $564 = Bool$false;
+                        var $562 = $564;
+                        break;
+                };
+                var $561 = $562;
+                break;
+            case 'App.TicTacToe.Entity.x':
+                var self = _y$2;
+                switch (self._) {
+                    case 'App.TicTacToe.Entity.circle':
+                        var $566 = Bool$false;
+                        var $565 = $566;
+                        break;
+                    case 'App.TicTacToe.Entity.x':
+                        var $567 = Bool$true;
+                        var $565 = $567;
+                        break;
+                };
+                var $561 = $565;
+                break;
+        };
+        return $561;
+    };
+    const App$TicTacToe$entity$equal = x0 => x1 => App$TicTacToe$entity$equal$(x0, x1);
+    const App$TicTacToe$Entity$circle = ({
+        _: 'App.TicTacToe.Entity.circle'
+    });
+
+    function App$TicTacToe$pos$mini_pair_to_vector$(_pair$1) {
+        var self = _pair$1;
+        switch (self._) {
+            case 'Pair.new':
+                var $569 = self.fst;
+                var $570 = self.snd;
+                var $571 = (($570 + (($569 * 3) >>> 0)) >>> 0);
+                var $568 = $571;
+                break;
+        };
+        return $568;
+    };
+    const App$TicTacToe$pos$mini_pair_to_vector = x0 => App$TicTacToe$pos$mini_pair_to_vector$(x0);
 
     function Word$gtn$(_a$2, _b$3) {
-        var $559 = Cmp$as_gtn$(Word$cmp$(_a$2, _b$3));
-        return $559;
+        var $572 = Cmp$as_gtn$(Word$cmp$(_a$2, _b$3));
+        return $572;
     };
     const Word$gtn = x0 => x1 => Word$gtn$(x0, x1);
     const U32$gtn = a0 => a1 => (a0 > a1);
@@ -2889,8 +2932,8 @@ module.exports = (function() {
     const edge = App$TicTacToe$constant$edge;
 
     function Word$ltn$(_a$2, _b$3) {
-        var $560 = Cmp$as_ltn$(Word$cmp$(_a$2, _b$3));
-        return $560;
+        var $573 = Cmp$as_ltn$(Word$cmp$(_a$2, _b$3));
+        return $573;
     };
     const Word$ltn = x0 => x1 => Word$ltn$(x0, x1);
     const U32$ltn = a0 => a1 => (a0 < a1);
@@ -2900,18 +2943,18 @@ module.exports = (function() {
         if (self) {
             var self = (_pos$1 < ((App$TicTacToe$constant$size - edge) >>> 0));
             if (self) {
-                var $563 = ((_pos$1 / side_tale) >>> 0);
-                var $562 = $563;
+                var $576 = ((_pos$1 / side_tale) >>> 0);
+                var $575 = $576;
             } else {
-                var $564 = 10;
-                var $562 = $564;
+                var $577 = 10;
+                var $575 = $577;
             };
-            var $561 = $562;
+            var $574 = $575;
         } else {
-            var $565 = 10;
-            var $561 = $565;
+            var $578 = 10;
+            var $574 = $578;
         };
-        return $561;
+        return $574;
     };
     const App$TicTacToe$pos$mouse_to_tile = x0 => App$TicTacToe$pos$mouse_to_tile$(x0);
 
@@ -2919,28 +2962,19 @@ module.exports = (function() {
         var self = _pair$1;
         switch (self._) {
             case 'Pair.new':
-                var $567 = self.fst;
-                var $568 = self.snd;
-                var $569 = Pair$new$(App$TicTacToe$pos$mouse_to_tile$($567), App$TicTacToe$pos$mouse_to_tile$($568));
-                var $566 = $569;
+                var $580 = self.fst;
+                var $581 = self.snd;
+                var $582 = Pair$new$(App$TicTacToe$pos$mouse_to_tile$($580), App$TicTacToe$pos$mouse_to_tile$($581));
+                var $579 = $582;
                 break;
         };
-        return $566;
+        return $579;
     };
     const App$TicTacToe$pos$pair_to_minipair = x0 => App$TicTacToe$pos$pair_to_minipair$(x0);
 
     function App$TicTacToe$pos$pair_to_posvector$(_pair$1) {
-        var _trans$2 = App$TicTacToe$pos$pair_to_minipair$(_pair$1);
-        var self = _trans$2;
-        switch (self._) {
-            case 'Pair.new':
-                var $571 = self.fst;
-                var $572 = self.snd;
-                var $573 = (($572 + (($571 * 3) >>> 0)) >>> 0);
-                var $570 = $573;
-                break;
-        };
-        return $570;
+        var $583 = App$TicTacToe$pos$mini_pair_to_vector$(App$TicTacToe$pos$pair_to_minipair$(_pair$1));
+        return $583;
     };
     const App$TicTacToe$pos$pair_to_posvector = x0 => App$TicTacToe$pos$pair_to_posvector$(x0);
 
@@ -2948,125 +2982,78 @@ module.exports = (function() {
         var self = _m$3;
         switch (self._) {
             case 'Maybe.some':
-                var $575 = self.value;
-                var $576 = _f$4($575);
-                var $574 = $576;
+                var $585 = self.value;
+                var $586 = _f$4($585);
+                var $584 = $586;
                 break;
             case 'Maybe.none':
-                var $577 = Maybe$none;
-                var $574 = $577;
+                var $587 = Maybe$none;
+                var $584 = $587;
                 break;
         };
-        return $574;
+        return $584;
     };
     const Maybe$bind = x0 => x1 => Maybe$bind$(x0, x1);
 
     function Maybe$monad$(_new$2) {
-        var $578 = _new$2(Maybe$bind)(Maybe$some);
-        return $578;
+        var $588 = _new$2(Maybe$bind)(Maybe$some);
+        return $588;
     };
     const Maybe$monad = x0 => Maybe$monad$(x0);
 
     function Maybe$join$(_m$2) {
-        var $579 = Maybe$monad$((_m$bind$3 => _m$pure$4 => {
-            var $580 = _m$bind$3;
-            return $580;
+        var $589 = Maybe$monad$((_m$bind$3 => _m$pure$4 => {
+            var $590 = _m$bind$3;
+            return $590;
         }))(_m$2)((_m1$3 => {
-            var $581 = _m1$3;
-            return $581;
+            var $591 = _m1$3;
+            return $591;
         }));
-        return $579;
+        return $589;
     };
     const Maybe$join = x0 => Maybe$join$(x0);
 
     function Vector$get_maybe$(_A$1, _size$2, _n$3, _vec$4) {
         var self = _size$2;
         if (self === 0n) {
-            var $583 = (_vec$5 => {
-                var $584 = Maybe$none;
-                return $584;
+            var $593 = (_vec$5 => {
+                var $594 = Maybe$none;
+                return $594;
             });
-            var $582 = $583;
+            var $592 = $593;
         } else {
-            var $585 = (self - 1n);
-            var $586 = (_vec$6 => {
+            var $595 = (self - 1n);
+            var $596 = (_vec$6 => {
                 var self = _n$3;
                 if (self === 0n) {
-                    var $588 = _vec$6((_vec$self$7 => {
-                        var $589 = null;
-                        return $589;
+                    var $598 = _vec$6((_vec$self$7 => {
+                        var $599 = null;
+                        return $599;
                     }))((_vec$head$7 => _vec$tail$8 => {
-                        var $590 = Maybe$some$(_vec$head$7);
-                        return $590;
+                        var $600 = Maybe$some$(_vec$head$7);
+                        return $600;
                     }));
-                    var $587 = $588;
+                    var $597 = $598;
                 } else {
-                    var $591 = (self - 1n);
-                    var $592 = _vec$6((_vec$self$8 => {
-                        var $593 = null;
-                        return $593;
+                    var $601 = (self - 1n);
+                    var $602 = _vec$6((_vec$self$8 => {
+                        var $603 = null;
+                        return $603;
                     }))((_vec$head$8 => _vec$tail$9 => {
-                        var $594 = Vector$get_maybe$(null, $585, $591, _vec$tail$9);
-                        return $594;
+                        var $604 = Vector$get_maybe$(null, $595, $601, _vec$tail$9);
+                        return $604;
                     }));
-                    var $587 = $592;
+                    var $597 = $602;
                 };
-                return $587;
+                return $597;
             });
-            var $582 = $586;
+            var $592 = $596;
         };
-        var $582 = $582(_vec$4);
-        return $582;
+        var $592 = $592(_vec$4);
+        return $592;
     };
     const Vector$get_maybe = x0 => x1 => x2 => x3 => Vector$get_maybe$(x0, x1, x2, x3);
     const U32$to_nat = a0 => (BigInt(a0));
-    const App$TicTacToe$Entity$circle = ({
-        _: 'App.TicTacToe.Entity.circle'
-    });
-
-    function App$TicTacToe$Entity$inverse$(_x$1) {
-        var self = _x$1;
-        switch (self._) {
-            case 'App.TicTacToe.Entity.circle':
-                var $596 = App$TicTacToe$Entity$x;
-                var $595 = $596;
-                break;
-            case 'App.TicTacToe.Entity.x':
-                var $597 = App$TicTacToe$Entity$circle;
-                var $595 = $597;
-                break;
-        };
-        return $595;
-    };
-    const App$TicTacToe$Entity$inverse = x0 => App$TicTacToe$Entity$inverse$(x0);
-
-    function App$TicTacToe$state$new_turn$(_st$1) {
-        var self = _st$1;
-        switch (self._) {
-            case 'App.TicTacToe.State.local.new':
-                var self = _st$1;
-                switch (self._) {
-                    case 'App.TicTacToe.State.local.new':
-                        var $600 = self.board;
-                        var $601 = self.info;
-                        var $602 = App$TicTacToe$State$local$new$($600, App$TicTacToe$Entity$inverse$((() => {
-                            var self = _st$1;
-                            switch (self._) {
-                                case 'App.TicTacToe.State.local.new':
-                                    var $603 = self.player;
-                                    var $604 = $603;
-                                    return $604;
-                            };
-                        })()), $601);
-                        var $599 = $602;
-                        break;
-                };
-                var $598 = $599;
-                break;
-        };
-        return $598;
-    };
-    const App$TicTacToe$state$new_turn = x0 => App$TicTacToe$state$new_turn$(x0);
 
     function Vector$simply_insert$(_A$1, _size$2, _n$3, _v$4, _vec$5) {
         var self = _size$2;
@@ -3109,7 +3096,7 @@ module.exports = (function() {
     };
     const Vector$simply_insert = x0 => x1 => x2 => x3 => x4 => Vector$simply_insert$(x0, x1, x2, x3, x4);
 
-    function App$TicTacToe$Board$insert_entity$(_pos$1, _e$2, _state$3) {
+    function App$TicTacToe$board$insert_entity$(_pos$1, _e$2, _state$3) {
         var self = _e$2;
         switch (self._) {
             case 'App.TicTacToe.Entity.circle':
@@ -3137,78 +3124,976 @@ module.exports = (function() {
         };
         return $618;
     };
-    const App$TicTacToe$Board$insert_entity = x0 => x1 => x2 => App$TicTacToe$Board$insert_entity$(x0, x1, x2);
-
-    function App$TicTacToe$state$complete_state$(_st$1, _pos$2) {
-        var self = _st$1;
-        switch (self._) {
-            case 'App.TicTacToe.State.local.new':
-                var $626 = self.player;
-                var _st$6 = App$TicTacToe$state$new_turn$(_st$1);
-                var $627 = App$TicTacToe$Board$insert_entity$(_pos$2, $626, _st$6);
-                var $625 = $627;
-                break;
-        };
-        return $625;
-    };
-    const App$TicTacToe$state$complete_state = x0 => x1 => App$TicTacToe$state$complete_state$(x0, x1);
+    const App$TicTacToe$board$insert_entity = x0 => x1 => x2 => App$TicTacToe$board$insert_entity$(x0, x1, x2);
 
     function App$TicTacToe$state$play$(_st$1) {
         var self = _st$1;
         switch (self._) {
             case 'App.TicTacToe.State.local.new':
-                var $629 = self.board;
-                var $630 = self.info;
-                var _pos$5 = $630;
+                var $626 = self.board;
+                var $627 = self.player;
+                var $628 = self.info;
+                var _pos$5 = $628;
                 var self = _pos$5;
                 switch (self._) {
                     case 'App.EnvInfo.new':
-                        var $632 = self.mouse_pos;
-                        var _n$8 = App$TicTacToe$pos$pair_to_posvector$($632);
-                        var self = Maybe$join$(Vector$get_maybe$(null, 9n, (BigInt(_n$8)), $629));
+                        var $630 = self.mouse_pos;
+                        var _n$8 = App$TicTacToe$pos$pair_to_posvector$($630);
+                        var self = Maybe$join$(Vector$get_maybe$(null, 9n, (BigInt(_n$8)), $626));
                         switch (self._) {
                             case 'Maybe.none':
-                                var $634 = Maybe$some$(App$TicTacToe$state$complete_state$(_st$1, $632));
-                                var $633 = $634;
+                                var $632 = Maybe$some$(App$TicTacToe$board$insert_entity$($630, $627, _st$1));
+                                var $631 = $632;
                                 break;
                             case 'Maybe.some':
-                                var $635 = Maybe$none;
-                                var $633 = $635;
+                                var $633 = Maybe$none;
+                                var $631 = $633;
                                 break;
                         };
-                        var $631 = $633;
+                        var $629 = $631;
                         break;
                 };
-                var $628 = $631;
+                var $625 = $629;
                 break;
         };
-        return $628;
+        return $625;
     };
     const App$TicTacToe$state$play = x0 => App$TicTacToe$state$play$(x0);
+
+    function List$map$(_f$3, _as$4) {
+        var self = _as$4;
+        switch (self._) {
+            case 'List.cons':
+                var $635 = self.head;
+                var $636 = self.tail;
+                var $637 = List$cons$(_f$3($635), List$map$(_f$3, $636));
+                var $634 = $637;
+                break;
+            case 'List.nil':
+                var $638 = List$nil;
+                var $634 = $638;
+                break;
+        };
+        return $634;
+    };
+    const List$map = x0 => x1 => List$map$(x0, x1);
+
+    function List$fold$(_list$2, _nil$4, _cons$5) {
+        var self = _list$2;
+        switch (self._) {
+            case 'List.cons':
+                var $640 = self.head;
+                var $641 = self.tail;
+                var $642 = _cons$5($640)(List$fold$($641, _nil$4, _cons$5));
+                var $639 = $642;
+                break;
+            case 'List.nil':
+                var $643 = _nil$4;
+                var $639 = $643;
+                break;
+        };
+        return $639;
+    };
+    const List$fold = x0 => x1 => x2 => List$fold$(x0, x1, x2);
+
+    function List$foldr$(_b$3, _f$4, _xs$5) {
+        var $644 = List$fold$(_xs$5, _b$3, _f$4);
+        return $644;
+    };
+    const List$foldr = x0 => x1 => x2 => List$foldr$(x0, x1, x2);
+
+    function App$TicTacToe$board$pairs$check_pair$(_pair$1, _vec$2, _e$3) {
+        var _n$4 = App$TicTacToe$pos$mini_pair_to_vector$(_pair$1);
+        var $645 = Maybe$monad$((_m$bind$5 => _m$pure$6 => {
+            var $646 = _m$bind$5;
+            return $646;
+        }))(Maybe$join$(Vector$get_maybe$(null, 9n, (BigInt(_n$4)), _vec$2)))((_b$5 => {
+            var self = App$TicTacToe$entity$equal$(_b$5, _e$3);
+            if (self) {
+                var $648 = Maybe$some$(_b$5);
+                var $647 = $648;
+            } else {
+                var $649 = Maybe$none;
+                var $647 = $649;
+            };
+            return $647;
+        }));
+        return $645;
+    };
+    const App$TicTacToe$board$pairs$check_pair = x0 => x1 => x2 => App$TicTacToe$board$pairs$check_pair$(x0, x1, x2);
+
+    function Maybe$or$(_a$2, _b$3) {
+        var self = _a$2;
+        switch (self._) {
+            case 'Maybe.some':
+                var $651 = self.value;
+                var $652 = Maybe$some$($651);
+                var $650 = $652;
+                break;
+            case 'Maybe.none':
+                var $653 = _b$3;
+                var $650 = $653;
+                break;
+        };
+        return $650;
+    };
+    const Maybe$or = x0 => x1 => Maybe$or$(x0, x1);
+
+    function App$TicTacToe$board$check_pairs_of_board$(_board$1, _xs$2) {
+        var _maybe_entity_x$3 = List$foldr$(Maybe$some$(App$TicTacToe$Entity$x), (_x$3 => _b$4 => {
+            var $655 = Maybe$monad$((_m$bind$5 => _m$pure$6 => {
+                var $656 = _m$bind$5;
+                return $656;
+            }))(App$TicTacToe$board$pairs$check_pair$(_x$3, _board$1, App$TicTacToe$Entity$x))((_$5 => {
+                var $657 = _b$4;
+                return $657;
+            }));
+            return $655;
+        }), _xs$2);
+        var _maybe_entity_circle$4 = List$foldr$(Maybe$some$(App$TicTacToe$Entity$circle), (_x$4 => _b$5 => {
+            var $658 = Maybe$monad$((_m$bind$6 => _m$pure$7 => {
+                var $659 = _m$bind$6;
+                return $659;
+            }))(App$TicTacToe$board$pairs$check_pair$(_x$4, _board$1, App$TicTacToe$Entity$circle))((_$6 => {
+                var $660 = _b$5;
+                return $660;
+            }));
+            return $658;
+        }), _xs$2);
+        var $654 = Maybe$or$(_maybe_entity_x$3, _maybe_entity_circle$4);
+        return $654;
+    };
+    const App$TicTacToe$board$check_pairs_of_board = x0 => x1 => App$TicTacToe$board$check_pairs_of_board$(x0, x1);
+
+    function List$concat$(_as$2, _bs$3) {
+        var self = _as$2;
+        switch (self._) {
+            case 'List.cons':
+                var $662 = self.head;
+                var $663 = self.tail;
+                var $664 = List$cons$($662, List$concat$($663, _bs$3));
+                var $661 = $664;
+                break;
+            case 'List.nil':
+                var $665 = _bs$3;
+                var $661 = $665;
+                break;
+        };
+        return $661;
+    };
+    const List$concat = x0 => x1 => List$concat$(x0, x1);
+
+    function List$reverse$go$(_xs$2, _res$3) {
+        var List$reverse$go$ = (_xs$2, _res$3) => ({
+            ctr: 'TCO',
+            arg: [_xs$2, _res$3]
+        });
+        var List$reverse$go = _xs$2 => _res$3 => List$reverse$go$(_xs$2, _res$3);
+        var arg = [_xs$2, _res$3];
+        while (true) {
+            let [_xs$2, _res$3] = arg;
+            var R = (() => {
+                var self = _xs$2;
+                switch (self._) {
+                    case 'List.cons':
+                        var $666 = self.head;
+                        var $667 = self.tail;
+                        var $668 = List$reverse$go$($667, List$cons$($666, _res$3));
+                        return $668;
+                    case 'List.nil':
+                        var $669 = _res$3;
+                        return $669;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const List$reverse$go = x0 => x1 => List$reverse$go$(x0, x1);
+
+    function List$reverse$(_xs$2) {
+        var $670 = List$reverse$go$(_xs$2, List$nil);
+        return $670;
+    };
+    const List$reverse = x0 => List$reverse$(x0);
+
+    function List$chunks_of$go$(_len$2, _list$3, _need$4, _chunk$5) {
+        var self = _list$3;
+        switch (self._) {
+            case 'List.cons':
+                var $672 = self.head;
+                var $673 = self.tail;
+                var self = _need$4;
+                if (self === 0n) {
+                    var _head$8 = List$reverse$(_chunk$5);
+                    var _tail$9 = List$chunks_of$go$(_len$2, _list$3, _len$2, List$nil);
+                    var $675 = List$cons$(_head$8, _tail$9);
+                    var $674 = $675;
+                } else {
+                    var $676 = (self - 1n);
+                    var _chunk$9 = List$cons$($672, _chunk$5);
+                    var $677 = List$chunks_of$go$(_len$2, $673, $676, _chunk$9);
+                    var $674 = $677;
+                };
+                var $671 = $674;
+                break;
+            case 'List.nil':
+                var $678 = List$cons$(List$reverse$(_chunk$5), List$nil);
+                var $671 = $678;
+                break;
+        };
+        return $671;
+    };
+    const List$chunks_of$go = x0 => x1 => x2 => x3 => List$chunks_of$go$(x0, x1, x2, x3);
+
+    function List$chunks_of$(_len$2, _xs$3) {
+        var $679 = List$chunks_of$go$(_len$2, _xs$3, _len$2, List$nil);
+        return $679;
+    };
+    const List$chunks_of = x0 => x1 => List$chunks_of$(x0, x1);
+
+    function Function$flip$(_f$4, _y$5, _x$6) {
+        var $680 = _f$4(_x$6)(_y$5);
+        return $680;
+    };
+    const Function$flip = x0 => x1 => x2 => Function$flip$(x0, x1, x2);
+
+    function List$sequenceA$disjoin$(_A$1) {
+        var $681 = List$foldr(List$nil)((_y$2 => _ys$3 => {
+            var $682 = List$concat$(List$map$(Function$flip(List$cons)(List$nil), _y$2), _ys$3);
+            return $682;
+        }));
+        return $681;
+    };
+    const List$sequenceA$disjoin = x0 => List$sequenceA$disjoin$(x0);
+
+    function List$sequenceA$move$(_A$1, _xs$2, _ys$3) {
+        var $683 = List$foldr$(List$nil, (_a$4 => _s$5 => {
+            var $684 = List$concat$(List$map$(List$cons(_a$4), _ys$3), _s$5);
+            return $684;
+        }), _xs$2);
+        return $683;
+    };
+    const List$sequenceA$move = x0 => x1 => x2 => List$sequenceA$move$(x0, x1, x2);
+
+    function List$sequenceA$(_A$1, _xs$2) {
+        var self = _xs$2;
+        switch (self._) {
+            case 'List.cons':
+                var $686 = self.head;
+                var $687 = self.tail;
+                var self = $687;
+                switch (self._) {
+                    case 'List.cons':
+                        var $689 = self.head;
+                        var $690 = self.tail;
+                        var $691 = List$sequenceA$move$(null, $686, List$sequenceA$move$(null, $689, List$sequenceA$(null, $690)));
+                        var $688 = $691;
+                        break;
+                    case 'List.nil':
+                        var $692 = List$sequenceA$disjoin$(null)(_xs$2);
+                        var $688 = $692;
+                        break;
+                };
+                var $685 = $688;
+                break;
+            case 'List.nil':
+                var $693 = List$nil;
+                var $685 = $693;
+                break;
+        };
+        return $685;
+    };
+    const List$sequenceA = x0 => x1 => List$sequenceA$(x0, x1);
+
+    function App$TicTacToe$board$expand$(_xs$1, _ys$2) {
+        var _list$3 = List$foldr$(List$nil, (_y$3 => {
+            var $695 = List$concat(List$foldr$(List$nil, (_x$4 => {
+                var $696 = List$cons(Pair$new$(_y$3, _x$4));
+                return $696;
+            }), _ys$2));
+            return $695;
+        }), _xs$1);
+        var _list$4 = List$chunks_of$(3n, _list$3);
+        var $694 = List$sequenceA$(null, _list$4);
+        return $694;
+    };
+    const App$TicTacToe$board$expand = x0 => x1 => App$TicTacToe$board$expand$(x0, x1);
+
+    function Pair$swap$(_pair$3) {
+        var self = _pair$3;
+        switch (self._) {
+            case 'Pair.new':
+                var $698 = self.fst;
+                var $699 = self.snd;
+                var $700 = Pair$new$($699, $698);
+                var $697 = $700;
+                break;
+        };
+        return $697;
+    };
+    const Pair$swap = x0 => Pair$swap$(x0);
+
+    function App$TicTacToe$board$transpose$(_xs$1) {
+        var $701 = List$map$(Pair$swap, _xs$1);
+        return $701;
+    };
+    const App$TicTacToe$board$transpose = x0 => App$TicTacToe$board$transpose$(x0);
+
+    function List$filter$(_f$2, _xs$3) {
+        var self = _xs$3;
+        switch (self._) {
+            case 'List.cons':
+                var $703 = self.head;
+                var $704 = self.tail;
+                var self = _f$2($703);
+                if (self) {
+                    var $706 = List$cons$($703, List$filter$(_f$2, $704));
+                    var $705 = $706;
+                } else {
+                    var $707 = List$filter$(_f$2, $704);
+                    var $705 = $707;
+                };
+                var $702 = $705;
+                break;
+            case 'List.nil':
+                var $708 = List$nil;
+                var $702 = $708;
+                break;
+        };
+        return $702;
+    };
+    const List$filter = x0 => x1 => List$filter$(x0, x1);
+    const Bool$or = a0 => a1 => (a0 || a1);
+    const Bool$and = a0 => a1 => (a0 && a1);
+
+    function Pair$snd$(_pair$3) {
+        var self = _pair$3;
+        switch (self._) {
+            case 'Pair.new':
+                var $710 = self.snd;
+                var $711 = $710;
+                var $709 = $711;
+                break;
+        };
+        return $709;
+    };
+    const Pair$snd = x0 => Pair$snd$(x0);
+
+    function App$TicTacToe$board$same_line_limitation$(_xs$1) {
+        var self = _xs$1;
+        switch (self._) {
+            case 'List.cons':
+                var $713 = self.head;
+                var $714 = self.tail;
+                var self = $713;
+                switch (self._) {
+                    case 'Pair.new':
+                        var $716 = self.fst;
+                        var $717 = self.snd;
+                        var $718 = (List$foldr$(Bool$true, (_x$6 => _b$7 => {
+                            var $719 = (_b$7 && (Pair$fst$(_x$6) === $716));
+                            return $719;
+                        }), $714) || List$foldr$(Bool$true, (_x$6 => _b$7 => {
+                            var $720 = (_b$7 && (Pair$snd$(_x$6) === $717));
+                            return $720;
+                        }), $714));
+                        var $715 = $718;
+                        break;
+                };
+                var $712 = $715;
+                break;
+            case 'List.nil':
+                var $721 = Bool$false;
+                var $712 = $721;
+                break;
+        };
+        return $712;
+    };
+    const App$TicTacToe$board$same_line_limitation = x0 => App$TicTacToe$board$same_line_limitation$(x0);
+
+    function App$TicTacToe$board$horizontal_limitation$(_xs$1) {
+        var $722 = (List$foldr$(Bool$true, (_x$2 => _b$3 => {
+            var $723 = (_b$3 && (Pair$fst$(_x$2) === Pair$snd$(_x$2)));
+            return $723;
+        }), _xs$1) || List$foldr$(Bool$true, (_x$2 => _b$3 => {
+            var $724 = (_b$3 && (Pair$fst$(_x$2) === Pair$snd$(_x$2)));
+            return $724;
+        }), App$TicTacToe$board$transpose$(_xs$1)));
+        return $722;
+    };
+    const App$TicTacToe$board$horizontal_limitation = x0 => App$TicTacToe$board$horizontal_limitation$(x0);
+
+    function String$cons$(_head$1, _tail$2) {
+        var $725 = (String.fromCharCode(_head$1) + _tail$2);
+        return $725;
+    };
+    const String$cons = x0 => x1 => String$cons$(x0, x1);
+    const String$concat = a0 => a1 => (a0 + a1);
+
+    function String$flatten$go$(_xs$1, _res$2) {
+        var String$flatten$go$ = (_xs$1, _res$2) => ({
+            ctr: 'TCO',
+            arg: [_xs$1, _res$2]
+        });
+        var String$flatten$go = _xs$1 => _res$2 => String$flatten$go$(_xs$1, _res$2);
+        var arg = [_xs$1, _res$2];
+        while (true) {
+            let [_xs$1, _res$2] = arg;
+            var R = (() => {
+                var self = _xs$1;
+                switch (self._) {
+                    case 'List.cons':
+                        var $726 = self.head;
+                        var $727 = self.tail;
+                        var $728 = String$flatten$go$($727, (_res$2 + $726));
+                        return $728;
+                    case 'List.nil':
+                        var $729 = _res$2;
+                        return $729;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const String$flatten$go = x0 => x1 => String$flatten$go$(x0, x1);
+
+    function String$flatten$(_xs$1) {
+        var $730 = String$flatten$go$(_xs$1, "");
+        return $730;
+    };
+    const String$flatten = x0 => String$flatten$(x0);
+
+    function List$pure$(_x$2) {
+        var $731 = List$cons$(_x$2, List$nil);
+        return $731;
+    };
+    const List$pure = x0 => List$pure$(x0);
+
+    function List$intersperse$(_sep$2, _xs$3) {
+        var self = _xs$3;
+        switch (self._) {
+            case 'List.cons':
+                var $733 = self.head;
+                var $734 = self.tail;
+                var self = $734;
+                switch (self._) {
+                    case 'List.nil':
+                        var $736 = List$pure$($733);
+                        var $735 = $736;
+                        break;
+                    case 'List.cons':
+                        var $737 = List$cons$($733, List$cons$(_sep$2, List$intersperse$(_sep$2, $734)));
+                        var $735 = $737;
+                        break;
+                };
+                var $732 = $735;
+                break;
+            case 'List.nil':
+                var $738 = List$nil;
+                var $732 = $738;
+                break;
+        };
+        return $732;
+    };
+    const List$intersperse = x0 => x1 => List$intersperse$(x0, x1);
+
+    function String$intercalate$(_sep$1, _xs$2) {
+        var $739 = String$flatten$(List$intersperse$(_sep$1, _xs$2));
+        return $739;
+    };
+    const String$intercalate = x0 => x1 => String$intercalate$(x0, x1);
+
+    function List$show$(_f$2, _xs$3) {
+        var $740 = String$flatten$(List$cons$("[", List$cons$(String$intercalate$(",", List$map$(_f$2, _xs$3)), List$cons$("]", List$nil))));
+        return $740;
+    };
+    const List$show = x0 => x1 => List$show$(x0, x1);
+
+    function Pair$show$(_show_a$3, _show_b$4, _pair$5) {
+        var self = _pair$5;
+        switch (self._) {
+            case 'Pair.new':
+                var $742 = self.fst;
+                var $743 = self.snd;
+                var _str$8 = ("(" + _show_a$3($742));
+                var _str$9 = (_str$8 + ",");
+                var _str$10 = (_str$9 + _show_b$4($743));
+                var _str$11 = (_str$10 + ")");
+                var $744 = _str$11;
+                var $741 = $744;
+                break;
+        };
+        return $741;
+    };
+    const Pair$show = x0 => x1 => x2 => Pair$show$(x0, x1, x2);
+
+    function Either$(_A$1, _B$2) {
+        var $745 = null;
+        return $745;
+    };
+    const Either = x0 => x1 => Either$(x0, x1);
+
+    function Either$left$(_value$3) {
+        var $746 = ({
+            _: 'Either.left',
+            'value': _value$3
+        });
+        return $746;
+    };
+    const Either$left = x0 => Either$left$(x0);
+
+    function Either$right$(_value$3) {
+        var $747 = ({
+            _: 'Either.right',
+            'value': _value$3
+        });
+        return $747;
+    };
+    const Either$right = x0 => Either$right$(x0);
+
+    function Nat$sub_rem$(_n$1, _m$2) {
+        var Nat$sub_rem$ = (_n$1, _m$2) => ({
+            ctr: 'TCO',
+            arg: [_n$1, _m$2]
+        });
+        var Nat$sub_rem = _n$1 => _m$2 => Nat$sub_rem$(_n$1, _m$2);
+        var arg = [_n$1, _m$2];
+        while (true) {
+            let [_n$1, _m$2] = arg;
+            var R = (() => {
+                var self = _m$2;
+                if (self === 0n) {
+                    var $748 = Either$left$(_n$1);
+                    return $748;
+                } else {
+                    var $749 = (self - 1n);
+                    var self = _n$1;
+                    if (self === 0n) {
+                        var $751 = Either$right$(Nat$succ$($749));
+                        var $750 = $751;
+                    } else {
+                        var $752 = (self - 1n);
+                        var $753 = Nat$sub_rem$($752, $749);
+                        var $750 = $753;
+                    };
+                    return $750;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Nat$sub_rem = x0 => x1 => Nat$sub_rem$(x0, x1);
+
+    function Nat$div_mod$go$(_n$1, _m$2, _d$3) {
+        var Nat$div_mod$go$ = (_n$1, _m$2, _d$3) => ({
+            ctr: 'TCO',
+            arg: [_n$1, _m$2, _d$3]
+        });
+        var Nat$div_mod$go = _n$1 => _m$2 => _d$3 => Nat$div_mod$go$(_n$1, _m$2, _d$3);
+        var arg = [_n$1, _m$2, _d$3];
+        while (true) {
+            let [_n$1, _m$2, _d$3] = arg;
+            var R = (() => {
+                var self = Nat$sub_rem$(_n$1, _m$2);
+                switch (self._) {
+                    case 'Either.left':
+                        var $754 = self.value;
+                        var $755 = Nat$div_mod$go$($754, _m$2, Nat$succ$(_d$3));
+                        return $755;
+                    case 'Either.right':
+                        var $756 = Pair$new$(_d$3, _n$1);
+                        return $756;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Nat$div_mod$go = x0 => x1 => x2 => Nat$div_mod$go$(x0, x1, x2);
+    const Nat$div_mod = a0 => a1 => (({
+        _: 'Pair.new',
+        'fst': a0 / a1,
+        'snd': a0 % a1
+    }));
+
+    function Nat$to_base$go$(_base$1, _nat$2, _res$3) {
+        var Nat$to_base$go$ = (_base$1, _nat$2, _res$3) => ({
+            ctr: 'TCO',
+            arg: [_base$1, _nat$2, _res$3]
+        });
+        var Nat$to_base$go = _base$1 => _nat$2 => _res$3 => Nat$to_base$go$(_base$1, _nat$2, _res$3);
+        var arg = [_base$1, _nat$2, _res$3];
+        while (true) {
+            let [_base$1, _nat$2, _res$3] = arg;
+            var R = (() => {
+                var self = (({
+                    _: 'Pair.new',
+                    'fst': _nat$2 / _base$1,
+                    'snd': _nat$2 % _base$1
+                }));
+                switch (self._) {
+                    case 'Pair.new':
+                        var $757 = self.fst;
+                        var $758 = self.snd;
+                        var self = $757;
+                        if (self === 0n) {
+                            var $760 = List$cons$($758, _res$3);
+                            var $759 = $760;
+                        } else {
+                            var $761 = (self - 1n);
+                            var $762 = Nat$to_base$go$(_base$1, $757, List$cons$($758, _res$3));
+                            var $759 = $762;
+                        };
+                        return $759;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Nat$to_base$go = x0 => x1 => x2 => Nat$to_base$go$(x0, x1, x2);
+
+    function Nat$to_base$(_base$1, _nat$2) {
+        var $763 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
+        return $763;
+    };
+    const Nat$to_base = x0 => x1 => Nat$to_base$(x0, x1);
+    const String$nil = '';
+
+    function Nat$mod$go$(_n$1, _m$2, _r$3) {
+        var Nat$mod$go$ = (_n$1, _m$2, _r$3) => ({
+            ctr: 'TCO',
+            arg: [_n$1, _m$2, _r$3]
+        });
+        var Nat$mod$go = _n$1 => _m$2 => _r$3 => Nat$mod$go$(_n$1, _m$2, _r$3);
+        var arg = [_n$1, _m$2, _r$3];
+        while (true) {
+            let [_n$1, _m$2, _r$3] = arg;
+            var R = (() => {
+                var self = _m$2;
+                if (self === 0n) {
+                    var $764 = Nat$mod$go$(_n$1, _r$3, _m$2);
+                    return $764;
+                } else {
+                    var $765 = (self - 1n);
+                    var self = _n$1;
+                    if (self === 0n) {
+                        var $767 = _r$3;
+                        var $766 = $767;
+                    } else {
+                        var $768 = (self - 1n);
+                        var $769 = Nat$mod$go$($768, $765, Nat$succ$(_r$3));
+                        var $766 = $769;
+                    };
+                    return $766;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const Nat$mod$go = x0 => x1 => x2 => Nat$mod$go$(x0, x1, x2);
+    const Nat$mod = a0 => a1 => (a0 % a1);
+    const Nat$gtn = a0 => a1 => (a0 > a1);
+    const Nat$lte = a0 => a1 => (a0 <= a1);
+
+    function List$at$(_index$2, _list$3) {
+        var List$at$ = (_index$2, _list$3) => ({
+            ctr: 'TCO',
+            arg: [_index$2, _list$3]
+        });
+        var List$at = _index$2 => _list$3 => List$at$(_index$2, _list$3);
+        var arg = [_index$2, _list$3];
+        while (true) {
+            let [_index$2, _list$3] = arg;
+            var R = (() => {
+                var self = _list$3;
+                switch (self._) {
+                    case 'List.cons':
+                        var $770 = self.head;
+                        var $771 = self.tail;
+                        var self = _index$2;
+                        if (self === 0n) {
+                            var $773 = Maybe$some$($770);
+                            var $772 = $773;
+                        } else {
+                            var $774 = (self - 1n);
+                            var $775 = List$at$($774, $771);
+                            var $772 = $775;
+                        };
+                        return $772;
+                    case 'List.nil':
+                        var $776 = Maybe$none;
+                        return $776;
+                };
+            })();
+            if (R.ctr === 'TCO') arg = R.arg;
+            else return R;
+        }
+    };
+    const List$at = x0 => x1 => List$at$(x0, x1);
+
+    function Nat$show_digit$(_base$1, _n$2) {
+        var _m$3 = (_n$2 % _base$1);
+        var _base64$4 = List$cons$(48, List$cons$(49, List$cons$(50, List$cons$(51, List$cons$(52, List$cons$(53, List$cons$(54, List$cons$(55, List$cons$(56, List$cons$(57, List$cons$(65, List$cons$(66, List$cons$(67, List$cons$(68, List$cons$(69, List$cons$(70, List$cons$(71, List$cons$(72, List$cons$(73, List$cons$(74, List$cons$(75, List$cons$(76, List$cons$(77, List$cons$(78, List$cons$(79, List$cons$(80, List$cons$(81, List$cons$(82, List$cons$(83, List$cons$(84, List$cons$(85, List$cons$(86, List$cons$(87, List$cons$(88, List$cons$(89, List$cons$(90, List$cons$(97, List$cons$(98, List$cons$(99, List$cons$(100, List$cons$(101, List$cons$(102, List$cons$(103, List$cons$(104, List$cons$(105, List$cons$(106, List$cons$(107, List$cons$(108, List$cons$(109, List$cons$(110, List$cons$(111, List$cons$(112, List$cons$(113, List$cons$(114, List$cons$(115, List$cons$(116, List$cons$(117, List$cons$(118, List$cons$(119, List$cons$(120, List$cons$(121, List$cons$(122, List$cons$(43, List$cons$(47, List$nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+        var self = ((_base$1 > 0n) && (_base$1 <= 64n));
+        if (self) {
+            var self = List$at$(_m$3, _base64$4);
+            switch (self._) {
+                case 'Maybe.some':
+                    var $779 = self.value;
+                    var $780 = $779;
+                    var $778 = $780;
+                    break;
+                case 'Maybe.none':
+                    var $781 = 35;
+                    var $778 = $781;
+                    break;
+            };
+            var $777 = $778;
+        } else {
+            var $782 = 35;
+            var $777 = $782;
+        };
+        return $777;
+    };
+    const Nat$show_digit = x0 => x1 => Nat$show_digit$(x0, x1);
+
+    function Nat$to_string_base$(_base$1, _nat$2) {
+        var $783 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
+            var $784 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
+            return $784;
+        }));
+        return $783;
+    };
+    const Nat$to_string_base = x0 => x1 => Nat$to_string_base$(x0, x1);
+
+    function Nat$show$(_n$1) {
+        var $785 = Nat$to_string_base$(10n, _n$1);
+        return $785;
+    };
+    const Nat$show = x0 => Nat$show$(x0);
+
+    function Word$show$(_size$1, _a$2) {
+        var _n$3 = Word$to_nat$(_a$2);
+        var $786 = (Nat$show$(_n$3) + ("#" + Nat$show$(_size$1)));
+        return $786;
+    };
+    const Word$show = x0 => x1 => Word$show$(x0, x1);
+    const U32$show = a0 => (a0 + "#32");
+    const App$TicTacToe$board$expand_nodes = (() => {
+        var _ord$1 = List$cons$(0, List$cons$(1, List$cons$(2, List$nil)));
+        var _ls$2 = App$TicTacToe$board$expand$(_ord$1, _ord$1);
+        var _ls_transpose$3 = List$map$(App$TicTacToe$board$transpose, _ls$2);
+        var _ls$4 = List$filter$((_x$4 => {
+            var $788 = (App$TicTacToe$board$same_line_limitation$(_x$4) || App$TicTacToe$board$horizontal_limitation$(_x$4));
+            return $788;
+        }), List$concat$(_ls$2, _ls_transpose$3));
+        var $787 = ((console.log(List$show$(List$show(Pair$show(U32$show)(U32$show)), _ls$4)), (_$5 => {
+            var $789 = _ls$4;
+            return $789;
+        })()));
+        return $787;
+    })();
+
+    function App$TicTacToe$state$check_winner$(_st$1) {
+        var self = _st$1;
+        switch (self._) {
+            case 'App.TicTacToe.State.local.new':
+                var $791 = self.board;
+                var _plays$5 = List$map$((_x$5 => {
+                    var self = App$TicTacToe$board$check_pairs_of_board$($791, _x$5);
+                    switch (self._) {
+                        case 'Maybe.some':
+                            var $794 = self.value;
+                            var $795 = Maybe$some$(Pair$new$($794, _x$5));
+                            var $793 = $795;
+                            break;
+                        case 'Maybe.none':
+                            var $796 = Maybe$none;
+                            var $793 = $796;
+                            break;
+                    };
+                    return $793;
+                }), App$TicTacToe$board$expand_nodes);
+                var $792 = List$foldr$(Maybe$none, Maybe$or, _plays$5);
+                var $790 = $792;
+                break;
+        };
+        return $790;
+    };
+    const App$TicTacToe$state$check_winner = x0 => App$TicTacToe$state$check_winner$(x0);
+
+    function App$TicTacToe$entity$inverse$(_x$1) {
+        var self = _x$1;
+        switch (self._) {
+            case 'App.TicTacToe.Entity.circle':
+                var $798 = App$TicTacToe$Entity$x;
+                var $797 = $798;
+                break;
+            case 'App.TicTacToe.Entity.x':
+                var $799 = App$TicTacToe$Entity$circle;
+                var $797 = $799;
+                break;
+        };
+        return $797;
+    };
+    const App$TicTacToe$entity$inverse = x0 => App$TicTacToe$entity$inverse$(x0);
+
+    function App$TicTacToe$state$new_turn$(_st$1) {
+        var _p$2 = App$TicTacToe$state$check_winner$(_st$1);
+        var self = _p$2;
+        switch (self._) {
+            case 'Maybe.none':
+                var self = _p$2;
+                switch (self._) {
+                    case 'Maybe.some':
+                        var $802 = self.value;
+                        var $803 = Either$right$($802);
+                        var $801 = $803;
+                        break;
+                    case 'Maybe.none':
+                        var self = _st$1;
+                        switch (self._) {
+                            case 'App.TicTacToe.State.local.new':
+                                var $805 = Either$left$((() => {
+                                    var self = _st$1;
+                                    switch (self._) {
+                                        case 'App.TicTacToe.State.local.new':
+                                            var $806 = self.board;
+                                            var $807 = self.info;
+                                            var $808 = App$TicTacToe$State$local$new$($806, App$TicTacToe$entity$inverse$((() => {
+                                                var self = _st$1;
+                                                switch (self._) {
+                                                    case 'App.TicTacToe.State.local.new':
+                                                        var $809 = self.player;
+                                                        var $810 = $809;
+                                                        return $810;
+                                                };
+                                            })()), $807);
+                                            return $808;
+                                    };
+                                })());
+                                var $804 = $805;
+                                break;
+                        };
+                        var $801 = $804;
+                        break;
+                };
+                var $800 = $801;
+                break;
+            case 'Maybe.some':
+                var self = _p$2;
+                switch (self._) {
+                    case 'Maybe.some':
+                        var $812 = self.value;
+                        var $813 = Either$right$($812);
+                        var $811 = $813;
+                        break;
+                    case 'Maybe.none':
+                        var self = _st$1;
+                        switch (self._) {
+                            case 'App.TicTacToe.State.local.new':
+                                var $815 = Either$left$((() => {
+                                    var self = _st$1;
+                                    switch (self._) {
+                                        case 'App.TicTacToe.State.local.new':
+                                            var $816 = self.board;
+                                            var $817 = self.info;
+                                            var $818 = App$TicTacToe$State$local$new$($816, App$TicTacToe$entity$inverse$((() => {
+                                                var self = _st$1;
+                                                switch (self._) {
+                                                    case 'App.TicTacToe.State.local.new':
+                                                        var $819 = self.player;
+                                                        var $820 = $819;
+                                                        return $820;
+                                                };
+                                            })()), $817);
+                                            return $818;
+                                    };
+                                })());
+                                var $814 = $815;
+                                break;
+                        };
+                        var $811 = $814;
+                        break;
+                };
+                var $800 = $811;
+                break;
+        };
+        return $800;
+    };
+    const App$TicTacToe$state$new_turn = x0 => App$TicTacToe$state$new_turn$(x0);
+
+    function IO$put_string$(_text$1) {
+        var $821 = IO$ask$("put_string", _text$1, (_skip$2 => {
+            var $822 = IO$end$(Unit$new);
+            return $822;
+        }));
+        return $821;
+    };
+    const IO$put_string = x0 => IO$put_string$(x0);
+
+    function IO$print$(_text$1) {
+        var $823 = IO$put_string$((_text$1 + "\u{a}"));
+        return $823;
+    };
+    const IO$print = x0 => IO$print$(x0);
+
+    function App$print$(_str$2) {
+        var $824 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $825 = _m$bind$3;
+            return $825;
+        }))(IO$print$(_str$2))((_$3 => {
+            var $826 = App$pass;
+            return $826;
+        }));
+        return $824;
+    };
+    const App$print = x0 => App$print$(x0);
+
+    function App$TicTacToe$entity$show$(_e$1) {
+        var self = _e$1;
+        switch (self._) {
+            case 'App.TicTacToe.Entity.circle':
+                var $828 = "\u{25cb}";
+                var $827 = $828;
+                break;
+            case 'App.TicTacToe.Entity.x':
+                var $829 = "x";
+                var $827 = $829;
+                break;
+        };
+        return $827;
+    };
+    const App$TicTacToe$entity$show = x0 => App$TicTacToe$entity$show$(x0);
 
     function App$TicTacToe$when$(_event$1, _state$2) {
         var self = _event$1;
         switch (self._) {
             case 'App.Event.frame':
-                var $637 = self.info;
+                var $831 = self.info;
                 var self = _state$2;
                 switch (self._) {
                     case 'App.Store.new':
-                        var $639 = self.local;
-                        var $640 = App$set_local$((() => {
-                            var self = $639;
+                        var $833 = self.local;
+                        var $834 = App$set_local$((() => {
+                            var self = $833;
                             switch (self._) {
                                 case 'App.TicTacToe.State.local.new':
-                                    var $641 = self.board;
-                                    var $642 = self.player;
-                                    var $643 = App$TicTacToe$State$local$new$($641, $642, $637);
-                                    return $643;
+                                    var $835 = self.board;
+                                    var $836 = self.player;
+                                    var $837 = App$TicTacToe$State$local$new$($835, $836, $831);
+                                    return $837;
                             };
                         })());
-                        var $638 = $640;
+                        var $832 = $834;
                         break;
                 };
-                var $636 = $638;
+                var $830 = $832;
                 break;
             case 'App.Event.init':
             case 'App.Event.mouse_down':
@@ -3217,50 +4102,80 @@ module.exports = (function() {
             case 'App.Event.mouse_over':
             case 'App.Event.mouse_click':
             case 'App.Event.input':
-                var $644 = App$pass;
-                var $636 = $644;
+                var $838 = App$pass;
+                var $830 = $838;
                 break;
             case 'App.Event.mouse_up':
                 var self = _state$2;
                 switch (self._) {
                     case 'App.Store.new':
-                        var $646 = self.local;
-                        var self = App$TicTacToe$state$play$($646);
-                        switch (self._) {
-                            case 'Maybe.some':
-                                var $648 = self.value;
-                                var $649 = App$set_local$($648);
-                                var $647 = $649;
-                                break;
-                            case 'Maybe.none':
-                                var $650 = App$pass;
-                                var $647 = $650;
-                                break;
-                        };
-                        var $645 = $647;
+                        var $840 = self.local;
+                        var $841 = ((console.log(Bool$show$(App$TicTacToe$entity$equal$(App$TicTacToe$Entity$circle, App$TicTacToe$Entity$circle))), (_$7 => {
+                            var self = App$TicTacToe$state$play$($840);
+                            switch (self._) {
+                                case 'Maybe.some':
+                                    var $843 = self.value;
+                                    var self = App$TicTacToe$state$new_turn$($843);
+                                    switch (self._) {
+                                        case 'Either.left':
+                                            var $845 = self.value;
+                                            var $846 = App$set_local$($845);
+                                            var $844 = $846;
+                                            break;
+                                        case 'Either.right':
+                                            var $847 = self.value;
+                                            var _v$10 = $847;
+                                            var self = _v$10;
+                                            switch (self._) {
+                                                case 'Pair.new':
+                                                    var $849 = self.fst;
+                                                    var $850 = self.snd;
+                                                    var $851 = IO$monad$((_m$bind$13 => _m$pure$14 => {
+                                                        var $852 = _m$bind$13;
+                                                        return $852;
+                                                    }))(App$print$(("O jogador " + (App$TicTacToe$entity$show$($849) + " ganhou"))))((_$13 => {
+                                                        var $853 = App$print$(List$show$(Pair$show(U32$show)(U32$show), $850));
+                                                        return $853;
+                                                    }));
+                                                    var $848 = $851;
+                                                    break;
+                                            };
+                                            var $844 = $848;
+                                            break;
+                                    };
+                                    var $842 = $844;
+                                    break;
+                                case 'Maybe.none':
+                                    var $854 = App$pass;
+                                    var $842 = $854;
+                                    break;
+                            };
+                            return $842;
+                        })()));
+                        var $839 = $841;
                         break;
                 };
-                var $636 = $645;
+                var $830 = $839;
                 break;
         };
-        return $636;
+        return $830;
     };
     const App$TicTacToe$when = x0 => x1 => App$TicTacToe$when$(x0, x1);
 
     function App$TicTacToe$tick$(_tick$1, _glob$2) {
-        var $651 = _glob$2;
-        return $651;
+        var $855 = _glob$2;
+        return $855;
     };
     const App$TicTacToe$tick = x0 => x1 => App$TicTacToe$tick$(x0, x1);
 
     function App$TicTacToe$post$(_time$1, _room$2, _addr$3, _data$4, _glob$5) {
-        var $652 = _glob$5;
-        return $652;
+        var $856 = _glob$5;
+        return $856;
     };
     const App$TicTacToe$post = x0 => x1 => x2 => x3 => x4 => App$TicTacToe$post$(x0, x1, x2, x3, x4);
 
     function App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6) {
-        var $653 = ({
+        var $857 = ({
             _: 'App.new',
             'init': _init$2,
             'draw': _draw$3,
@@ -3268,7 +4183,7 @@ module.exports = (function() {
             'tick': _tick$5,
             'post': _post$6
         });
-        return $653;
+        return $857;
     };
     const App$new = x0 => x1 => x2 => x3 => x4 => App$new$(x0, x1, x2, x3, x4);
     const App$TicTacToe = (() => {
@@ -3278,8 +4193,8 @@ module.exports = (function() {
         var _when$4 = App$TicTacToe$when;
         var _tick$5 = App$TicTacToe$tick;
         var _post$6 = App$TicTacToe$post;
-        var $654 = App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6);
-        return $654;
+        var $858 = App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6);
+        return $858;
     })();
     return {
         'Buffer32.new': Buffer32$new,
@@ -3353,10 +4268,6 @@ module.exports = (function() {
         'Word.div.go': Word$div$go,
         'Word.div': Word$div,
         'I32.div': I32$div,
-        'F64.to_i32': F64$to_i32,
-        'Word.to_f64': Word$to_f64,
-        'U32.to_f64': U32$to_f64,
-        'U32.to_i32': U32$to_i32,
         'App.TicTacToe.constant.size': App$TicTacToe$constant$size,
         'side_board': side_board,
         'Word.neg.aux': Word$neg$aux,
@@ -3482,6 +4393,11 @@ module.exports = (function() {
         'IO.monad': IO$monad,
         'App.pass': App$pass,
         'App.set_local': App$set_local,
+        'Debug.log': Debug$log,
+        'Bool.show': Bool$show,
+        'App.TicTacToe.entity.equal': App$TicTacToe$entity$equal,
+        'App.TicTacToe.Entity.circle': App$TicTacToe$Entity$circle,
+        'App.TicTacToe.pos.mini_pair_to_vector': App$TicTacToe$pos$mini_pair_to_vector,
         'Word.gtn': Word$gtn,
         'U32.gtn': U32$gtn,
         'App.TicTacToe.constant.edge': App$TicTacToe$constant$edge,
@@ -3496,13 +4412,69 @@ module.exports = (function() {
         'Maybe.join': Maybe$join,
         'Vector.get_maybe': Vector$get_maybe,
         'U32.to_nat': U32$to_nat,
-        'App.TicTacToe.Entity.circle': App$TicTacToe$Entity$circle,
-        'App.TicTacToe.Entity.inverse': App$TicTacToe$Entity$inverse,
-        'App.TicTacToe.state.new_turn': App$TicTacToe$state$new_turn,
         'Vector.simply_insert': Vector$simply_insert,
-        'App.TicTacToe.Board.insert_entity': App$TicTacToe$Board$insert_entity,
-        'App.TicTacToe.state.complete_state': App$TicTacToe$state$complete_state,
+        'App.TicTacToe.board.insert_entity': App$TicTacToe$board$insert_entity,
         'App.TicTacToe.state.play': App$TicTacToe$state$play,
+        'List.map': List$map,
+        'List.fold': List$fold,
+        'List.foldr': List$foldr,
+        'App.TicTacToe.board.pairs.check_pair': App$TicTacToe$board$pairs$check_pair,
+        'Maybe.or': Maybe$or,
+        'App.TicTacToe.board.check_pairs_of_board': App$TicTacToe$board$check_pairs_of_board,
+        'List.concat': List$concat,
+        'List.reverse.go': List$reverse$go,
+        'List.reverse': List$reverse,
+        'List.chunks_of.go': List$chunks_of$go,
+        'List.chunks_of': List$chunks_of,
+        'Function.flip': Function$flip,
+        'List.sequenceA.disjoin': List$sequenceA$disjoin,
+        'List.sequenceA.move': List$sequenceA$move,
+        'List.sequenceA': List$sequenceA,
+        'App.TicTacToe.board.expand': App$TicTacToe$board$expand,
+        'Pair.swap': Pair$swap,
+        'App.TicTacToe.board.transpose': App$TicTacToe$board$transpose,
+        'List.filter': List$filter,
+        'Bool.or': Bool$or,
+        'Bool.and': Bool$and,
+        'Pair.snd': Pair$snd,
+        'App.TicTacToe.board.same_line_limitation': App$TicTacToe$board$same_line_limitation,
+        'App.TicTacToe.board.horizontal_limitation': App$TicTacToe$board$horizontal_limitation,
+        'String.cons': String$cons,
+        'String.concat': String$concat,
+        'String.flatten.go': String$flatten$go,
+        'String.flatten': String$flatten,
+        'List.pure': List$pure,
+        'List.intersperse': List$intersperse,
+        'String.intercalate': String$intercalate,
+        'List.show': List$show,
+        'Pair.show': Pair$show,
+        'Either': Either,
+        'Either.left': Either$left,
+        'Either.right': Either$right,
+        'Nat.sub_rem': Nat$sub_rem,
+        'Nat.div_mod.go': Nat$div_mod$go,
+        'Nat.div_mod': Nat$div_mod,
+        'Nat.to_base.go': Nat$to_base$go,
+        'Nat.to_base': Nat$to_base,
+        'String.nil': String$nil,
+        'Nat.mod.go': Nat$mod$go,
+        'Nat.mod': Nat$mod,
+        'Nat.gtn': Nat$gtn,
+        'Nat.lte': Nat$lte,
+        'List.at': List$at,
+        'Nat.show_digit': Nat$show_digit,
+        'Nat.to_string_base': Nat$to_string_base,
+        'Nat.show': Nat$show,
+        'Word.show': Word$show,
+        'U32.show': U32$show,
+        'App.TicTacToe.board.expand_nodes': App$TicTacToe$board$expand_nodes,
+        'App.TicTacToe.state.check_winner': App$TicTacToe$state$check_winner,
+        'App.TicTacToe.entity.inverse': App$TicTacToe$entity$inverse,
+        'App.TicTacToe.state.new_turn': App$TicTacToe$state$new_turn,
+        'IO.put_string': IO$put_string,
+        'IO.print': IO$print,
+        'App.print': App$print,
+        'App.TicTacToe.entity.show': App$TicTacToe$entity$show,
         'App.TicTacToe.when': App$TicTacToe$when,
         'App.TicTacToe.tick': App$TicTacToe$tick,
         'App.TicTacToe.post': App$TicTacToe$post,

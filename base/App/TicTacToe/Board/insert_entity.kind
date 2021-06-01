@@ -1,4 +1,4 @@
-App.TicTacToe.Board.insert_entity(pos : Pair<U32, U32>, e : App.TicTacToe.Entity, state : App.TicTacToe.State.local) : App.TicTacToe.State.local
+App.TicTacToe.board.insert_entity(pos : Pair<U32, U32>, e : App.TicTacToe.Entity, state : App.TicTacToe.State.local) : App.TicTacToe.State.local
   open e
   let n = App.TicTacToe.pos.pair_to_posvector(pos)
   state@board <- Vector.simply_insert!(9, U32.to_nat(n), some(e), state@board)

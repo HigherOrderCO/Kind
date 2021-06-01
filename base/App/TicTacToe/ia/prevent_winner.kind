@@ -1,0 +1,4 @@
+App.TicTacToe.ia.prevent_winner(st : App.TicTacToe.State.local) : Maybe<List<Pair<U32, U32>>>
+  open st
+  let options = List.map!!((xs) List.take!(2, xs), App.TicTacToe.board.expand_nodes)
+  ?a

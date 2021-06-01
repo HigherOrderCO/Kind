@@ -1,4 +1,9 @@
 
 
-App.Kaelin.App.test : Nat
-  List.fold_right!!(0, Nat.add, [1, 2, 3, 4, 5])
+App.Kaelin.App.test : _
+  let ls = [0, 1, 2]
+  let list = List.foldr!!([], 
+    (y) List.concat!(List.foldr!!([], (x) List.cons!({y, x}), ls)), ls)
+  let list = List.chunks_of!(3, list)
+  let list = List.sequenceA!(list)
+  List.show!(List.show!(Pair.show!!(Nat.show, Nat.show)), list)

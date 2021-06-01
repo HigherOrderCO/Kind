@@ -1,3 +1,10 @@
-App.TicTacToe.state.new_turn(st : App.TicTacToe.State.local) : App.TicTacToe.State.local
-  open st
-  st@player <- App.TicTacToe.entity.inverse(st@player)
+App.TicTacToe.state.new_turn(st : App.TicTacToe.State.local) : Either<App.TicTacToe.State.local,  Pair<App.TicTacToe.Entity, List<Pair<U32, U32>>>>
+  let p = App.TicTacToe.state.check_winner(st)
+  open p
+  case p as winner {
+    none : 
+      open st
+      Either.left!!(st@player <- App.TicTacToe.entity.inverse(st@player))
+    some : 
+      Either.right!!(winner.value)
+  }

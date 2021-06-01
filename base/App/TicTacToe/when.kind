@@ -3,9 +3,20 @@ App.TicTacToe.when: App.When<App.TicTacToe.State>
    case event {
      mouse_up :
         open state
+        log(Bool.show(App.TicTacToe.entity.equal(App.TicTacToe.Entity.circle, App.TicTacToe.Entity.circle)))
         case App.TicTacToe.state.play(state.local) as st {
           none : App.pass!
-          some  : App.set_local!(st.value)
+          some  : case App.TicTacToe.state.new_turn(st.value) as status {
+            left : App.set_local!(status.value)
+            right :
+              let v = status.value
+              open v
+              IO {
+                App.print!("O jogador " | App.TicTacToe.entity.show(v.fst) | " ganhou")
+                App.print!(List.show!(Pair.show!!(U32.show, U32.show), v.snd))
+                
+              }
+          } 
         }
       frame : 
         open state
