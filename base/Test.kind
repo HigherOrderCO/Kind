@@ -1,6 +1,6 @@
-type Foo {
-  new(pair: Pair<F64,F64>)
-}
+// type Foo {
+//   new(pair: Pair<F64,F64>)
+// }
 
 Test: _
-  Foo.new({1,2}) @ pair @ fst
+  and(true, true)
