@@ -12,12 +12,12 @@
       "  kind-scm Module/               # type-checks a module (TODO)"
       "  kind-scm Module/file.kind      # type-checks a file"
       "  kind-scm full_term_name --run  # runs a term"
-      "  kind-scm full_term_name --show # prints a term (TODO)"
-      "  kind-scm full_term_name --norm # prints a term's λ-normal form (TODO)"
+      "  kind-scm full_term_name --show # prints a term"
+      "  kind-scm full_term_name --norm # prints a term's λ-normal form"
       "  kind-scm full_term_name --scm  # compiles a term to Scheme"
       "  kind-scm full_term_name --js   # compiles a term to JavaScript (TODO)"
       "  kind-scm full_term_name --hs   # compiles a term to Haskell (TODO)"
-      "  kind-scm full_term_name --fmc  # compiles a term to FormCore (TODO)"
+      "  kind-scm full_term_name --fmc  # compiles a term to FormCore"
       ""
       "Examples:"
       ""
@@ -52,14 +52,25 @@
             ("--scm"
              (display (run_io (Kind.api.io.term_to_scheme fst_arg))))
             ("--run"
-             ; TODO avoid recompiling baselibs here
              (let ((code (open-string-input-port (run_io (Kind.api.io.term_to_scheme fst_arg)))))
                (run-all code)))
-            ;("--show")
-            ;("--norm")
-            ;("--js")
+            ("--show"
+              (display (run_io (Kind.api.io.show_term fst_arg))))
+            ("--norm"
+              (display (run_io (Kind.api.io.show_term_normal fst_arg))))
+            ("--js"
+              (let ((ports (process (string-append "fmc " (string-append "--js " fst_arg)))))
+                (let ((input_port (car ports))
+                      (output_port (car (cdr ports))))
+                  (display
+                    (run_io (Kind.api.io.term_to_core fst_arg))
+                    output_port)
+                  (flush-output-port)
+                  (close-output-port output_port)
+                  (display (get-string-all input_port)))))
             ;("--hs")
-            ;("--fmc")
+            ("--fmc"
+              (display (run_io (Kind.api.io.term_to_core fst_arg))))
             (else
               (display "unrecognized cli argument: ")
               (display snd_arg))))))))
