@@ -4,12 +4,3 @@ Test: _
     get u = IO.set_file("./../bin/scm/src/kind.sls", schemed)
     return u
   }
-
-Test.testoso(n: Nat): Nat
-  n+n
-
-Test.ok(a: Bool): Nat
-  case a {
-    true: 1
-    false: 0
-  }

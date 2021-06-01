@@ -22,15 +22,6 @@
         (vector 'Word.i w)))))
   (u16-to-word-go 0 x (vector 'Word.e)))
 
-; Joins a list of strings with an intercalated separator
-(define (kstring_join sep strs fst)
-  (if (null? strs) 
-    ""
-    (kstring-append
-      (if fst "" sep)
-      (car strs)
-      (kstring_join sep (cdr strs) #f))))
-
 (define Bool-inst (lambda (x) ((x #t) #f)))
 (define Bool-elim (lambda (x) (let ((self0 x)) (case self0 (#t (let () (lambda (c0) (lambda (c1) c0)))) (#f (let () (lambda (c0) (lambda (c1) c1))))))))
 (define Nat-inst (lambda (x) ((x 0) (lambda (x0) (+ x0 1)))))

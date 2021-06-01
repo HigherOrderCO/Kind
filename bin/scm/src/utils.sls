@@ -1,5 +1,5 @@
 #!chezscheme
-(library (utils) (export suffix? prefix? run-all run_io run_kind)
+(library (utils) (export suffix? prefix? run-all run_io run_kind print-lines)
   (import (chezscheme)
           (kstring))
 
@@ -129,7 +129,8 @@
     ("get_dir" (lambda (x) (get_dir x)))
     ("get_file_mtime" (lambda (x) (get_file_mtime x)))
     ("get_time" (lambda (x) (get_time)))
-    (else (display (string-append "action not found: " name))))))
+    ("request" (lambda (x) ""))
+    (else (display (string-append "IO action not found: " name))))))
 
 ; Runs a Kind IO program
 (define (run_io io)
@@ -151,9 +152,37 @@
     (run_io term)
     (print term)))
 
+(define (print-lines args)
+  (unless (null? args)
+    (display (car args))
+    (newline)
+    (print-lines (cdr args))))
+
 (define run-all
     (lambda (p)
       (let ((code (get-datum p)))
         (unless (eq? code #!eof)
           (compile code)
           (run-all p))))))
+
+; from https://github.com/gwatt/chez-exe/blob/master/utils.ss#L44
+;(define-syntax param-args
+;  (lambda (x)
+;    (syntax-case x ()
+;      [(_ arg-list-expr cases ...)
+;       #`(let loop ([args arg-list-expr])
+;           (if (null? args)
+;               '()
+;               (case (car args)
+;                 #,@(map (lambda (c)
+;                           (syntax-case c ()
+;                             [(#t case-expr func) #'(case-expr (func #t) (loop (cdr args)))]
+;                             [(#f case-expr func) #'(case-expr (func) (loop (cdr args)))]
+;                             [(case-expr func)
+;                              #'(case-expr
+;                                  (if (null? (cdr args))
+;                                      (errorf 'param-args "Missing required argument for ~a" 'case-expr))
+;                                  (func (cadr args))
+;                                  (loop (cddr args)))]))
+;                      #'(cases ...))
+;                   [else args])))])))

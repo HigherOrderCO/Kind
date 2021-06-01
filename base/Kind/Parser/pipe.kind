@@ -1,0 +1,6 @@
+Kind.Parser.pipe(arg: Kind.Term): Parser(Kind.Term)
+  Parser {
+    Kind.Parser.text("|>")
+    get func = Kind.Parser.term
+    return Kind.Term.app(func, arg)
+  }

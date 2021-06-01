@@ -2,7 +2,8 @@
   (export make-string-view string-view? string-view-end
           string-view-start kstring-length kstring-head
           kstring-tail string-view-ref kstring?
-          kstring->string kstring-append kstring-getter)
+          kstring->string kstring-append kstring-getter
+          kstring_join)
   (import (chezscheme))
 ; string-view record type (fast way to get a tail)
 (define-record string-view
@@ -57,4 +58,13 @@
   (lambda (x)
     (if (string-view? x)
       string-view-ref
-      string-ref))))
+      string-ref)))
+
+; Joins a list of strings with an intercalated separator
+(define (kstring_join sep strs fst)
+  (if (null? strs) 
+    ""
+    (kstring-append
+      (if fst "" sep)
+      (car strs)
+      (kstring_join sep (cdr strs) #f)))))
