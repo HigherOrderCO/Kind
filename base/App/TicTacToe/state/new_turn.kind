@@ -1,10 +1,9 @@
-App.TicTacToe.state.new_turn(st : App.TicTacToe.State.local) : Either<App.TicTacToe.State.local,  Pair<App.TicTacToe.Entity, List<Pair<U32, U32>>>>
-  let p = App.TicTacToe.state.check_winner(st)
-  open p
-  case p as winner {
-    none : 
-      open st
-      Either.left!!(st@player <- App.TicTacToe.entity.inverse(st@player))
-    some : 
-      Either.right!!(winner.value)
-  }
+App.TicTacToe.state.new_turn(st : App.TicTacToe.State.local) : Pair<App.TicTacToe.State.local,  Maybe<Pair<App.TicTacToe.Entity, List<Pair<U32, U32>>>>>
+  let m = Maybe {
+    get x = App.TicTacToe.state.check_winner(st)
+    get a = Pair.snd!!(x)[0]
+    get b = Pair.snd!!(x)[2]
+    return {App.TicTacToe.pos.mini_pair_to_vector(a), App.TicTacToe.pos.mini_pair_to_vector(b)}
+   }
+
+  {st@line <- m, App.TicTacToe.state.check_winner(st)}

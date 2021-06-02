@@ -15,14 +15,14 @@ App.TicTacToe.board.same_line_limitation(xs : List<Pair<U32, U32>>) : Bool
                List.foldr!!(true, (x, b) b && U32.eql(Pair.snd!!(x), v.snd), xs.tail))
   } 
 
-App.TicTacToe.board.diagonal_limitation(xs : List<Pair<U32, U32>>) : Bool
+App.TicTacToe.board.diagonal_limitation(ord : List<U32>, xs : List<Pair<U32, U32>>) : Bool
   Bool.or(
       List.foldr!!(true, (x, b) b && U32.eql(Pair.fst!!(x), Pair.snd!!(x)), xs),
-      List.foldr!!(true, (x, b) b && U32.eql(Pair.fst!!(x), Pair.snd!!(x)), App.TicTacToe.board.transpose(xs)))
+      List.foldr!!(true, (x, b) b && U32.eql(Pair.fst!!(x) + Pair.snd!!(x), Nat.to_u32(List.length!(ord) - 1)) xs))
 
 App.TicTacToe.board.expand_nodes : List<List<Pair<U32, U32>>>
   let ord = [0#32, 1#32, 2#32]
   let ls = App.TicTacToe.board.expand(ord, ord) // creates the combination of a board 3x3
   let ls_transpose = List.map!!(App.TicTacToe.board.transpose, ls)
-  List.filter!((x) Bool.or(App.TicTacToe.board.same_line_limitation(x), App.TicTacToe.board.diagonal_limitation(x)), List.concat!(ls, ls_transpose))
+  List.filter!((x) Bool.or(App.TicTacToe.board.same_line_limitation(x), App.TicTacToe.board.diagonal_limitation(ord, x)), List.concat!(ls, ls_transpose))
   

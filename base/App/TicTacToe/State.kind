@@ -3,7 +3,7 @@ type App.TicTacToe.State.global {
 }
 
 type App.TicTacToe.State.local {
-  new(board : Vector<Maybe<App.TicTacToe.Entity>, 9>, player : App.TicTacToe.Entity, info : App.EnvInfo)
+  new(board : Vector<Maybe<App.TicTacToe.Entity>, 9>, player : App.TicTacToe.Entity, line : Maybe<Pair<U32, U32>>, info : App.EnvInfo)
 }
 
 App.TicTacToe.State: App.State

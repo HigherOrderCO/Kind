@@ -1,0 +1,22 @@
+App.TicTacToe.ia.weight(vec : Vector<Maybe<App.TicTacToe.Entity>, 9>, e : App.TicTacToe.Entity, v : List<Pair<U32, U32>>) : U32
+  List.foldr!!(0#32, (x, y)
+    let check_entity = ((e) Maybe.is_some!(App.TicTacToe.board.pairs.check_pair(x, vec, e))) :: App.TicTacToe.Entity -> Bool
+    y + if check_entity(e) then
+          2#32
+        else 
+          if check_entity(App.TicTacToe.entity.inverse(e)) then
+            1#32
+          else
+            0#32 
+    , v) 
+
+
+App.TicTacToe.ia.heuristic(st : App.TicTacToe.State.local) : Maybe<Pair<U32, U32>>
+  open st
+  let fsort = App.TicTacToe.ia.weight(st.board, App.TicTacToe.entity.inverse(st.player))
+  let sort = List.merge_sort!((x, y) U32.gte(fsort(x), fsort(y)), App.TicTacToe.board.expand_nodes)
+  let msort = List.filter!((x) Nat.ltn(App.TicTacToe.board.pairs.get_free_spaces(st.board, x), 3), sort)
+  Maybe {
+    get a = msort[0]
+    App.TicTacToe.board.pairs.choose_free(st.board, a)
+  }

@@ -5,8 +5,16 @@ App.TicTacToe.state.play(st : App.TicTacToe.State.local) :
   open pos
 
   let n = App.TicTacToe.pos.pair_to_posvector(pos.mouse_pos)
-
   case Maybe.join!(Vector.get_maybe(Maybe<App.TicTacToe.Entity>, 9, U32.to_nat(n), st.board)) as entity {
-      none : some(App.TicTacToe.board.insert_entity(pos.mouse_pos, st.player, st))
+      none : 
+        if Bool.and(U32.ltn(n, 10), Maybe.is_none!(App.TicTacToe.state.check_winner(st))) then
+          let n = App.TicTacToe.pos.pair_to_posvector(pos.mouse_pos)
+          let st = App.TicTacToe.board.insert_entity(n, st.player, st)
+          case App.TicTacToe.ia.play(st) as k {
+            none : some(st)
+            some : 
+              let n = App.TicTacToe.pos.mini_pair_to_vector(k.value)
+              some(App.TicTacToe.board.insert_entity(n, App.TicTacToe.entity.inverse(st.player), st))
+          } else some(st)
       some : none
   }
