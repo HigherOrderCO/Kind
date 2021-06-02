@@ -5,8 +5,7 @@ App.Kaelin.Tile.creature.show(
   open creature
   open creature.hero as hero
   player = "player: " | (creature@player <> "")
-  hp = "HP: " | I32.show(creature@hp)
-  ap = "AP: " | I32.show(creature@ap)
+  hp = "hp: " | I32.show(creature@hp)
   team = "team: " | creature@team
   hero = "hero: " | hero.name
 

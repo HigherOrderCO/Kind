@@ -3,8 +3,12 @@ App.MiniMMO.State.local: Type
   Unit
 
 // MiniMMO's global state
-App.MiniMMO.State.global: Type
-  Map<App.MiniMMO.Player>
+type App.MiniMMO.State.global {
+  new(
+    run: U32
+    map: Map<App.MiniMMO.Player>
+  )
+}
 
 // MiniMMO's state types
 App.MiniMMO.State: App.State
@@ -24,13 +28,13 @@ type App.MiniMMO.Player {
 
 // The initial state
 App.MiniMMO.init: App.Init<App.MiniMMO.State>
-  App.Store.new<App.MiniMMO.State>(unit, {})
+  App.Store.new<App.MiniMMO.State>(unit, {0#32, {}})
 
 // The render function
 App.MiniMMO.draw: App.Draw<App.MiniMMO.State>
   (state)
   let avatars = []
-  let map = state@global
+  let {run, map} = state@global
   for player in Map.values!(map) with avatars:
     let style = {
       "position": "absolute"
@@ -69,26 +73,33 @@ App.MiniMMO.when: App.When<App.MiniMMO.State>
 
 // The global tick handler
 App.MiniMMO.tick: App.Tick<App.MiniMMO.State>
-  (tick, map)
-  let map = Map.map!!((player) 
-    open player
-    let w = player.w
-    let a = player.a
-    let s = player.s
-    let d = player.d
-    let x = player.x
-    let y = player.y
-    let x = if player.a then x - 4 else x
-    let x = if player.d then x + 4 else x
-    let y = if player.w then y - 4 else y
-    let y = if player.s then y + 4 else y
-    App.MiniMMO.Player.new(w, a, s, d, x, y)
-  , map)
-  map
+  (tick, glob)
+  let {run, map} = glob
+  // App is paused after 256 ticks of inactivity
+  if run >=? 256 then
+    glob
+  // Runs the global main loop
+  else
+    let map = Map.map!!((player) 
+      open player
+      let w = player.w
+      let a = player.a
+      let s = player.s
+      let d = player.d
+      let x = player.x
+      let y = player.y
+      let x = if player.a then x - 4 else x
+      let x = if player.d then x + 4 else x
+      let y = if player.w then y - 4 else y
+      let y = if player.s then y + 4 else y
+      App.MiniMMO.Player.new(w, a, s, d, x, y)
+    , map)
+    App.MiniMMO.State.global.new(run + 1, map)
 
 // The global post handler
 App.MiniMMO.post: App.Post(App.MiniMMO.State)
-  (time, room, addr, data, map)
+  (time, room, addr, data, glob)
+  let {run, map} = glob
 
   // Gets the user's player from the global state
   let player = case map{addr} as player {
@@ -118,7 +129,8 @@ App.MiniMMO.post: App.Post(App.MiniMMO.State)
   }
 
   // Updates the user's player on the global state
-  map{addr} <- player
+  let map = map{addr} <- player
+  App.MiniMMO.State.global.new(0, map)
 
 // A minimalist MMO
 App.MiniMMO: App<App.MiniMMO.State>

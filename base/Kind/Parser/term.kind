@@ -116,5 +116,5 @@ Kind.Parser.term.suffix(term: Kind.Term): Parser(Kind.Term)
       let pst = Parser.State.new(err, pst.nam, pst.ini, pst.idx, pst.str)
       Parser.Reply.value!(pst, term)
     value: 
-      Kind.Parser.term.suffix(suffix_parsed.val, suffix_parsed.pst)
+      Kind.Parser.suffix(suffix_parsed.val, suffix_parsed.pst)
   }

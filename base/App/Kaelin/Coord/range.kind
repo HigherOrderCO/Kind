@@ -3,8 +3,7 @@ App.Kaelin.Coord.range(
   distance: I32
 ): List<App.Kaelin.Coord>
 
-  center = App.Kaelin.Coord.Convert.axial_to_cubic(coord)
-  list_coords = List.map!!(App.Kaelin.Coord.Convert.cubic_to_axial, App.Kaelin.Coord.Cubic.range(center, distance))
+  list_coords = App.Kaelin.Coord.Axial.range(coord, distance)
   fit = (x)
   App.Kaelin.Coord.fit(x, App.Kaelin.Constants.map_size)
   List.filter!(fit, list_coords)

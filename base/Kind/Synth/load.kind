@@ -5,7 +5,7 @@ Kind.Synth.load.cached.def(name: Kind.Name): IO<Maybe<Kind.Def>>
     if Bool.not(String.is_empty(cache_file)) then IO {
       //IO.print("-- cache file isn't empty " | name)
       get cache_time = IO.get_file(String.to_lower(".cache/"|name|".time"))
-      get cache_file_time = IO.get_file_mtime(cache_file)
+      get cache_file_time = IO.get_file_mtime(String.to_lower(cache_file))
       if String.eql(cache_time, cache_file_time) then IO {
         //IO.print("-- cache time is correct " | name)
         get cache_term = IO.get_file(String.to_lower(".cache/"|name|".term"))
@@ -95,24 +95,13 @@ Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
     }
   }
 
-Kind.Synth.get_kind_code(file: String): IO(String)
-  IO {
-    get code = IO.get_file(file)
-    if String.eql(code,"") then IO {
-      get code = IO.request("http://uwu.tech:7172/" | file)
-      return code;
-    } else IO {
-      return code;
-    }
-  }
-
 Kind.Synth.load.go(name: String, files: List<String>, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
   case files {
     nil: IO {
       return none
     }
     cons: IO {
-      get code = Kind.Synth.get_kind_code(files.head)
+      get code = IO.get_file(files.head)
       let read = Kind.Defs.read(files.head, code, defs)
       case read {
         left: Kind.Synth.load.go(name, files.tail, defs)

@@ -251,9 +251,13 @@ App.Hello.when: App.When<App.Hello.State>
 
 Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
 
-Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
+Output: [App.Hello.js](https://github.com/uwu-tech/Kind/blob/master/web/src/apps/App.Hello.js)
 
-You can create your own UwU.Tech app by adding a file to `base/App`, with an `App.YourApp` `:` [App](https://github.com/uwu-tech/Kind/blob/master/base/App.kind)`(...)` definition.
+Live Demo: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
+
+You can create your own uwu-tech app by adding a file to `base/App`!
+
+Check [App.kind](https://github.com/uwu-tech/Kind/blob/master/base/App.kind) to see the App type.
 
 Resources
 ---------

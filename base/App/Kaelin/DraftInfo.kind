@@ -1,6 +1,7 @@
 type App.Kaelin.DraftInfo {
   new(
-    hero: Maybe(U8)
-    team: App.Kaelin.Team
+    player: String
+    hero: String
+    team: String
   )
 }

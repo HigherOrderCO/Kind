@@ -5,7 +5,6 @@ type App.Kaelin.Hero {
     name: String 
     img: VoxBox
     max_hp: I32
-    max_ap: I32
     skills: List<App.Kaelin.Skill>
   )
 }

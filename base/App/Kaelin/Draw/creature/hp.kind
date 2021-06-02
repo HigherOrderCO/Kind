@@ -5,6 +5,5 @@ App.Kaelin.Draw.creature.hp(
   img: VoxBox
 ): VoxBox
 
-  hp = I32.to_int(creature@hp)
-  hp = Nat.show(Int.to_nat(hp))
+  hp = Int.show(I32.to_int(creature@hp))
   VoxBox.Draw.text(hp, PixelFont.small_black, Pos32.new(cx,cy,0u), img)

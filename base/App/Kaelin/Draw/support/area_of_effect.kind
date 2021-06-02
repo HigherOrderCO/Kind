@@ -1,7 +1,7 @@
 App.Kaelin.Draw.support.area_of_effect(
   coord: App.Kaelin.Coord,
   coord_nat: Nat,
-  cast_info: Maybe(App.Kaelin.CastInfo.local),
+  cast_info: Maybe(App.Kaelin.CastInfo),
 ): Maybe(App.Kaelin.Indicator)
 
   Maybe { 

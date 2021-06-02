@@ -1,0 +1,24 @@
+App.Kaelin.Skill.skill_use(
+  hero_pos: App.Kaelin.Coord
+  mouse_pos: App.Kaelin.Coord
+  key: U16
+  state: App.Kaelin.State.global, 
+): App.Kaelin.State.global
+
+  open state
+
+  let result = Maybe { 
+    get creature = App.Kaelin.Map.creature.get(hero_pos, state.map)
+    let hero = creature@hero
+    get skill = List.find!((x) U16.eql(x@key, key), hero@skills)
+    let effect = skill@effect(hero_pos, mouse_pos, state.map)
+    let mouse_nat = App.Kaelin.Coord.Convert.axial_to_nat(mouse_pos)
+    let skill_range = App.Kaelin.Coord.range_natset(hero_pos, skill@range)
+    let global =
+    if NatSet.has(mouse_nat, skill_range) then
+      App.Kaelin.State.global.new(state.room, effect@map, state.stage)
+    else
+      state
+     return global
+    }
+    result <> state

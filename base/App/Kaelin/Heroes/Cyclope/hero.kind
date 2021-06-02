@@ -2,7 +2,6 @@ App.Kaelin.Heroes.Cyclope.hero: App.Kaelin.Hero
   App.Kaelin.Hero.new(
     "Cyclope", 
     App.Kaelin.Assets.hero.cyclope_d_1,
-    15,
-    10,
-    App.Kaelin.Heroes.Cyclope.skills
+    +25#32,
+    []
   )

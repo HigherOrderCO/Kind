@@ -499,7 +499,7 @@ switch String.eql(str) {
   "A": "a"
   "B": "b"
   "C": "c"
-} default "?"
+} else "?"
 ```
 
 Is equivalent to:

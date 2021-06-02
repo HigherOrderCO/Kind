@@ -1,0 +1,8 @@
+App.Kaelin.Map.change_hp_at(
+  value: I32
+  pos: App.Kaelin.Coord
+  map: App.Kaelin.Map
+): Pair(I32, App.Kaelin.Map)
+
+  map = App.Kaelin.Map.modify_at(App.Kaelin.Tile.creature.change_hp(value), pos, map)
+  {value, map} // TODO change to real hp change

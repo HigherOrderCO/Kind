@@ -1,7 +1,5 @@
 TODO list on Kaelin
 
-- [ ] Add move and abilities to all heroes
-
 - [ ] Remove all non-local user address from when
 
 - [ ] remove user from user_input even in when.kind (URGENT!)
@@ -28,7 +26,7 @@ TODO list on Kaelin
 
 - [X] App.Kaelin - update how movement works 
 
-- [X] App.Kaelin.Draw.background - change hexagon color based on App.Kaelin.CastInfo.local
+- [X] App.Kaelin.Draw.background - change hexagon color based on App.Kaelin.CastInfo
 
 - [X] Serialize.kind and Deserialize.kind
 

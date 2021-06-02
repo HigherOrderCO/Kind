@@ -1,6 +1,6 @@
 App.Kaelin.Draw.state.map(
   map: App.Kaelin.Map,
-  cast_info: Maybe<App.Kaelin.CastInfo.local>,
+  cast_info: Maybe<App.Kaelin.CastInfo>,
   env_info: App.EnvInfo,
   internal : App.Kaelin.Internal,
   img:VoxBox
@@ -19,4 +19,4 @@ App.Kaelin.Draw.state.map(
     img
   img
     
-// App.Kaelin.Draw.state.map.go(map: App.Kaelin.Map, cast_info: Maybe<App.Kaelin.CastInfo.local>, env_info: App.EnvInfo, img: VoxBox)
+// App.Kaelin.Draw.state.map.go(map: App.Kaelin.Map, cast_info: Maybe<App.Kaelin.CastInfo>, env_info: App.EnvInfo, img: VoxBox)

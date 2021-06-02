@@ -57,7 +57,7 @@ User.rigille.List.Monotone.exists<A: Type>(after: A -> A -> Type, O: User.rigill
                             nil: qed = unit :: User.rigille.List.Monotone<A, after, O>(ext.fst & [])
                                  qed
 
-                            cons: in_tail_call = right(left(refl)) :: User.rigille.List.In<A>(ext.fst & tail_call.fst.head & tail_call.fst.tail, tail_call.fst.head)
+                            cons: in_tail_call = Or.right!!(Or.left!!(refl)) :: User.rigille.List.In<A>(ext.fst & tail_call.fst.head & tail_call.fst.tail, tail_call.fst.head)
                                   in_param = User.rigille.List.Perm.In<A>(_, _, _,
                                                in_tail_call, User.rigille.List.Perm.symm<A>(_, _, ret_perm))
                                   qed = ext.snd.snd(_, in_param)

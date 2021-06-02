@@ -2,7 +2,6 @@ App.Kaelin.Coord.to_screen_xy(
   coord: App.Kaelin.Coord,
 ): Pair<U32,U32>
 
-
   open coord
   i   = coord.i
   j   = coord.j

@@ -1,0 +1,6 @@
+App.Kaelin.Event.Code.skill_use : List<U8>
+  [
+    8#8
+    8#8
+    4#8
+  ] //constraint 4 <= 64
