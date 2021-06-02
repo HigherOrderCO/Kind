@@ -6,11 +6,11 @@
 //AABBCCDD :: U32
 //[AA, BB, CC] :: List<U8>
 //AABBCC00 :: U32
-//Bytelist.bytes_to_u32([AA, BB], 0)
-//Bytelist.bytes_to_u32([BB], AA)
+//Buffer32.Bytelist.bytes_to_u32([AA, BB], 0)
+//Buffer32.Bytelist.bytes_to_u32([BB], AA)
 //AABB0000
 
-Bytelist.bytes_to_u32(bytes: List<U8>, u_aux: U32): U32
+Buffer32.Bytelist.bytes_to_u32(bytes: List<U8>, u_aux: U32): U32
   case bytes {
     nil:
       u_aux 
@@ -18,12 +18,12 @@ Bytelist.bytes_to_u32(bytes: List<U8>, u_aux: U32): U32
       let h = Nat.to_u32(U8.to_nat(bytes.head))
       let u_aux = U32.shl(8, u_aux)
       let u_aux = U32.or(h, u_aux)
-      Bytelist.bytes_to_u32(bytes.tail, u_aux)
+      Buffer32.Bytelist.bytes_to_u32(bytes.tail, u_aux)
   }
 
-Bytelist.to_buffer32(list: List<U8>, buf: Buffer32, idx: U32): Buffer32
+Buffer32.Bytelist.to_buffer32(list: List<U8>, buf: Buffer32, idx: U32): Buffer32
   let bytes = List.take!(4, list)
-  let u = Bytelist.bytes_to_u32(bytes, 0)
+  let u = Buffer32.Bytelist.bytes_to_u32(bytes, 0)
   let u = U32.shl(8*(4 - Nat.to_u32(List.length!(bytes))), u)
   let buf = Buffer32.set(idx, u, buf)
   let tail = List.drop!(4, list)
@@ -31,7 +31,7 @@ Bytelist.to_buffer32(list: List<U8>, buf: Buffer32, idx: U32): Buffer32
     nil:
       buf
     cons:
-      Bytelist.to_buffer32(tail, buf, U32.add(1#32, idx))
+      Buffer32.Bytelist.to_buffer32(tail, buf, U32.add(1#32, idx))
   }
 
 String.to_utf8_bytes(str: String): List<U8>
@@ -61,8 +61,12 @@ String.to_utf8_bytes(str: String): List<U8>
         b0 & b1 & b2 & b3 & String.to_utf8_bytes(str.tail)
   }
 
-Buffer32.from.go(str: String, buf: Buffer32, idx: U32): Buffer32
-  ?x
+Buffer32.from(str: String): Buffer32
+  let bytelist = String.to_utf8_bytes(str)
+  let buf_size = ((List.length!(bytelist)-1) / 4) + 1 // divide by 4 rounding up
+  let buf = Buffer32.alloc(buf_size)
+  Buffer32.Bytelist.to_buffer32(bytelist, buf, 0)
+ 
 
 // 1. calcular o comprimento em bytes (da str)
 // 2. passa escrevendo no buffer
