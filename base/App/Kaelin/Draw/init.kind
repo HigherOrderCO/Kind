@@ -1,4 +1,4 @@
-App.Kaelin.Draw.init: DOM
+App.Kaelin.Draw.init(room: String): DOM
   DOM.node("div", 
           {}, 
           { "width": "100vw", 
@@ -13,8 +13,10 @@ App.Kaelin.Draw.init: DOM
             DOM.node("h1", {}, {"margin-bottom": "10px"}, [DOM.text("Welcome to Kaelin")]),
             DOM.node("div", {}, {}, [
               DOM.text("Enter a room number: "),
-              DOM.node("input", {}, {"font-size": "2rem", "font-family": "monospace", "outline": "transparent"}, [])
-              DOM.node("button",{"id": "enter-init"}, {"font-size": "2rem", "font-family": "monospace", "padding": "2px"}, [DOM.text("Enter")])
+              DOM.node("input", {"id": "text" "value": room}, {"font-size": "2rem", "font-family": "monospace", "outline": "transparent"}, [])
+              DOM.node("button",{"id": "ready"}, {"font-size": "2rem", "font-family": "monospace", "margin-left": "10px","padding": "2px"}, [DOM.text("Enter")])
+              DOM.node("button",{"id": "random"}, {"font-size": "2rem", "font-family": "monospace", "margin-left": "10px","padding": "2px"}, [DOM.text("Random")])
+            
             ]),
           ]
   )

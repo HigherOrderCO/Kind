@@ -16,9 +16,9 @@ App.Kaelin: App<App.Kaelin.State>
   // sipher@Croni, sejagentil@Zeralul / stanci@Murlok, derenash@Keropao
 
   // Render function
-  //  0#16 - 10#16: contagem regressiva
+  // 0#16 - 10#16: contagem regressiva
   // 10#16 - 20#16: escolha do turno 0
   // 20#16 - 30#16: animação do turno 0®
   // 30#16 - 40#16: escolha do turno 1
   // 40#16 - 50#16: animação do turno 1
- // 50#16 - 60#16: escolha do turno 2
+ //  50#16 - 60#16: escolha do turno 2

@@ -2,7 +2,7 @@
 App.Kaelin.Draw.support.get_effect(
 coord: App.Kaelin.Coord,
 coord_nat: Nat,
-cast_info: Maybe(App.Kaelin.CastInfo)
+cast_info: Maybe(App.Kaelin.CastInfo.local)
 ): Maybe(App.Kaelin.Indicator)
 
   case cast_info{ 

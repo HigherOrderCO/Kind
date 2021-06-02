@@ -3,10 +3,11 @@ App.Kaelin.App.draw(
 ): App.Draw<App.Kaelin.State>
 
 (state)
-  global = state@global
-  stage = global@stage
+  open state
+  stage = state.global@stage
   case stage {
-    init: App.Kaelin.Draw.init
-    draft: App.Kaelin.Draw.draft
-    planning: DOM.vbox({}, {}, App.Kaelin.Draw.state(img, state))
-  } default DOM.text("Em breve")
+    init: App.Kaelin.Draw.init(state.local@input)
+    draft: App.Kaelin.Draw.draft(stage.players, stage.coords, state.local@user)
+    planning: App.Kaelin.Draw.game(img, state)
+    action: App.Kaelin.Draw.game(img, state)
+  }

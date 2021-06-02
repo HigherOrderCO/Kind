@@ -1,0 +1,34 @@
+App.Kaelin.App.when.planning(
+  event: App.Event,
+  state: App.Store<App.Kaelin.State>
+): IO<Maybe<App.State.local<App.Kaelin.State>>>
+
+  case event {
+    mouse_click:
+      App.new_post!(state@global@room, event.id)
+    
+    key_down:
+      switch U16.eql(event.code) {
+        49#16: App.new_post!(state@global@room, App.Kaelin.Event.serialize(App.Kaelin.Event.create_hero(0#8)))
+      } default App.set_local!(App.Kaelin.Action.local.set_cast(event.code, state@local, state@global)) // remove mouse pos from cast info as there is no more sense mantain it
+
+    frame:
+      let new_local = App.Kaelin.Action.local.env_info(event.time, event.info, state@local)
+      let new_local = App.Kaelin.Action.local.area(event.time, state@global, new_local)
+      App.set_local!(new_local)
+      
+    mouse_up:
+      let cast = state@local@cast_info
+      case cast { //Organize
+        some:
+          let info       = state@local@env_info
+          let target_pos = App.Kaelin.Coord.to_axial(info@mouse_pos)
+          let key        = cast.value@skill@key
+          let hex        = App.Kaelin.Event.serialize(App.Kaelin.Event.save_skill(state@local@user, target_pos, key, state@local@team))
+          IO { 
+            App.new_post!(state@global@room, hex)
+            App.set_local!(state@local@cast_info <- none)
+          }
+      } default App.pass!
+      
+  } default App.pass!

@@ -9,34 +9,94 @@ generate_hex(xs : List<U8>, ys : List<Bits>) : String
 App.Kaelin.Event.serialize(
   event: App.Kaelin.Event
 ): String
-
   case event {
-    create_hero :  
+    create_hero:  
       let cod = [
         Nat.to_bits(1),
         U8.to_bits(event.hero_id)
-       ]
-    generate_hex(App.Kaelin.Event.Code.create_hero, cod)
+      ]
+      generate_hex(App.Kaelin.Event.Code.create_hero, cod)
+    
     create_user : ""
     start_game : ""
     user_input : 
-     let cod = [
-       Nat.to_bits(4),
-       Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
-       App.Kaelin.Resources.Action.to_bits(event.action),
-       App.Kaelin.Coord.Convert.axial_to_bits(event.coord)
-       ]
+      let cod = [
+        Nat.to_bits(4),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Resources.Action.to_bits(event.action),
+        App.Kaelin.Coord.Convert.axial_to_bits(event.coord)
+      ]
+      generate_hex(App.Kaelin.Event.Code.user_input, cod)
 
-     generate_hex(App.Kaelin.Event.Code.user_input, cod)
-  skill_use:
-    let cod = [  
-      Nat.to_bits(5),
-      App.Kaelin.Coord.Convert.axial_to_bits(event.hero_pos),
-      App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
-      U16.to_bits(event.key)
-    ]
-    generate_hex(App.Kaelin.Event.Code.skill_use, cod)
+    exe_skill:
+      let cod = [  
+        Nat.to_bits(5),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
+        U16.to_bits(event.key)
+      ]
+      generate_hex(App.Kaelin.Event.Code.exe_skill, cod)
+
+    save_skill:
+      let cod = [  
+        Nat.to_bits(11),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
+        U16.to_bits(event.key)
+        U8.to_bits(App.Kaelin.Team.code(event.team))
+      ]
+      generate_hex(App.Kaelin.Event.Code.save_skill, cod)
+
+    remove_skill:
+      let cod = [  
+        Nat.to_bits(12),
+        Nat.to_bits(App.Kaelin.Event.Code.Hex.to_nat(event.player))
+        App.Kaelin.Coord.Convert.axial_to_bits(event.target_pos),
+        U16.to_bits(event.key)
+        U8.to_bits(App.Kaelin.Team.code(event.team))
+      ]
+      generate_hex(App.Kaelin.Event.Code.remove_skill, cod)
+
+    end_action:
+      let cod = [
+        Nat.to_bits(13)
+      ]
+      generate_hex([], cod)
+
+    draft_hero:
+      let cod = [
+        Nat.to_bits(6),
+        U8.to_bits(event.hero)
+      ]
+      generate_hex(App.Kaelin.Event.Code.draft_hero, cod)
+
+    draft_coord:
+      let cod = [
+        Nat.to_bits(7)
+        App.Kaelin.Coord.Convert.axial_to_bits(event.coord)
+      ]
+      generate_hex(App.Kaelin.Event.Code.draft_coord, cod)
+
+    draft_end:
+      let cod = [
+        Nat.to_bits(8)
+      ]
+      generate_hex([], cod)
+
+    to_draft:
+      let cod = [
+        Nat.to_bits(9)
+      ]
+      generate_hex([], cod)
+
+    draft_team:
+      let cod = [
+        Nat.to_bits(10)
+        U8.to_bits(event.team)
+      ]
+      generate_hex(App.Kaelin.Event.Code.draft_team, cod)
   }
+
 
   //case event {
     //// 0x

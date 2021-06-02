@@ -2,6 +2,7 @@ App.Kaelin.Heroes.Lela.hero: App.Kaelin.Hero
   App.Kaelin.Hero.new(
     "Lela", 
     App.Kaelin.Assets.hero.lela_d_1,
-    +25#32,
-    []
+    20,
+    10,
+    App.Kaelin.Heroes.Lela.skills
   )

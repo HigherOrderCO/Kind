@@ -1,0 +1,12 @@
+Kind.api.io.check_code(code: String): IO(String)
+  case Kind.Defs.read("Main.kind", code, Kind.Map.new!) as read {
+    left: IO {
+      return read.value
+    }
+    right: IO {
+      let defs = read.value
+      let nams = List.mapped!(BitsMap.keys!(defs))!(Kind.Name.from_bits)
+      get defs = Kind.Synth.many(nams, defs)
+      return Kind.Defs.report(defs, nams)
+    }
+  }

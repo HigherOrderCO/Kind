@@ -10,15 +10,15 @@ User.rigille.List.Perm.In<A: Type>(
   case Hyp1 with Hyp0 {
     nil: Empty.absurd!(Hyp0)
     skip: case Hyp0 {
-            left: Or.left!!(Hyp0.value)
+            left: left(Hyp0.value)
             right: ind = this(x, Hyp1.l1, Hyp1.l0, Hyp0.value, Hyp1.Hyp)
-                   Or.right!!(ind)
+                   right(ind)
           }
     swap: case Hyp0 {
-            left: Or.right!!(Or.left!!(Hyp0.value))
+            left: right(left(Hyp0.value))
             right: case Hyp0.value {
-                     left: Or.left!!(Hyp0.value.value)
-                     right: Or.right!!(Or.right!!(Hyp0.value.value))
+                     left: left(Hyp0.value.value)
+                     right: right(right(Hyp0.value.value))
                    }
           }
     trans: chain_first = this(x, Hyp1.l2, Hyp1.l1, Hyp0, Hyp1.Hyp1)
