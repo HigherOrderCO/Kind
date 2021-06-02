@@ -1,0 +1,16 @@
+Buffer32.from(str: String): Buffer32
+  let size = String.length(str)
+  Buffer32.from.go(str, Buffer32.alloc(size), 0#32)
+
+Buffer32.from.go(str: String, buf: Buffer32, idx: U32): Buffer32
+  case str {
+    nil : buf
+    cons: 
+      let char = Char.hex_value32(str.head)
+      let new_buf = Buffer32.set(idx, char, buf)
+      Buffer32.from.go(str.tail, new_buf, U32.add(1#32, idx))
+  }
+
+
+// 1. calcular o comprimento em bytes (da str)
+// 2. passa escrevendo no buffer
