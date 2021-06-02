@@ -1,0 +1,3 @@
+List.sequenceA.disjoin(A : Type) : List<List<A>> -> List<List<A>>
+  List.foldr!!([], (y, ys) List.concat!(List.map!!(Function.flip!!!(List.cons!, []), y), ys))
+  

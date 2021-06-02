@@ -3427,6 +3427,7 @@ module.exports = {
   'App.Kind': __webpack_require__.e(/* import() */ 317).then(__webpack_require__.t.bind(__webpack_require__, 317, 23)),
   'App.MiniMMO': __webpack_require__.e(/* import() */ 661).then(__webpack_require__.t.bind(__webpack_require__, 661, 23)),
   'App.Playground': __webpack_require__.e(/* import() */ 737).then(__webpack_require__.t.bind(__webpack_require__, 737, 23)),
+  'App.TicTacToe': __webpack_require__.e(/* import() */ 373).then(__webpack_require__.t.bind(__webpack_require__, 373, 23)),
 }
 
 

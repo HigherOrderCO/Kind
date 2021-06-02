@@ -1,5 +1,4 @@
-Vector.tail<A: Type, size: Nat>(vector: Vector<A, Nat.succ(size)>): Vector<A, size>
-  case vector {
-    nil: Unit.new
-    ext: vector.tail
-  }: case vector.size { zero: Unit, succ: Vector<A, Nat.pred(vector.size)> }
+Vector.tail(A: Type, len: Nat, vec: Vector(A, Nat.succ(len))): Vector<A, len>
+  case vec {
+    cons: vec.tail
+  }

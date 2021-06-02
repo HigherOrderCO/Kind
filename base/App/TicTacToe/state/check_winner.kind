@@ -1,0 +1,8 @@
+App.TicTacToe.state.check_winner(st : App.TicTacToe.State.local) : Maybe<Pair<App.TicTacToe.Entity, List<Pair<U32, U32>>>>
+  open st
+  let plays = List.map!!((x) case App.TicTacToe.board.check_pairs_of_board(st.board, x) as v {
+      none : none
+      some : some({v.value, x})
+  }, App.TicTacToe.board.expand_nodes)
+   List.foldr!!(none, Maybe.or!, plays)
+  
