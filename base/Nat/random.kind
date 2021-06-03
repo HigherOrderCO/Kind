@@ -1,3 +1,5 @@
+// TODO: make it at least 256-bits?
+
 // Linear congruential generator: generates pseudo random numbers.
 Nat.random(seed: Nat): Nat
   let m =	1664525
