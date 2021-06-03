@@ -1,0 +1,8 @@
+type Kind.Comp.Language {
+  new(
+    gram: Kind.Comp.Grammar
+    nati: Kind.Comp.Natives
+    opts: Kind.Comp.Optimizeds
+    base: Kind.Comp.Basics
+  )
+}

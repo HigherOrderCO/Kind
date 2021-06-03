@@ -1,0 +1,117 @@
+// Transpiles from Term.Comp to the target language's source code
+
+Kind.Comp.transpile.term(
+  lang: Kind.Comp.Language
+  comp: Kind.Comp
+  depth: Nat
+  defs: Kind.Comp.Defs
+): String
+  let go = Kind.Comp.transpile.term(lang)
+  case Kind.Comp.Prim.inst(lang, comp,depth,defs) as got {
+    some: got.value
+    none: case Kind.Comp.Prim.elim(lang, comp, depth, defs) as got {
+      some: got.value
+      none: case comp {
+        nil:
+          "'()"
+        var:
+          lang@gram@name(comp.name)
+        ref:
+          lang@gram@name(comp.name)
+        lam:
+          lang@gram@lambda(lang@gram@name(comp.name), go(comp.body,Nat.succ(depth),defs))
+        app:
+          lang@gram@application(go(comp.func,depth,defs), go(comp.argm,depth,defs))
+        let:
+          lang@gram@local_definition(lang@gram@name(comp.name), go(comp.expr,depth,defs), go(comp.body,Nat.succ(depth),defs))
+        eli: case comp.prim {
+          unit: "(Unit-elim " | go(comp.expr,depth,defs) | ")" // TODO
+          bool: "(Bool-elim " | go(comp.expr,depth,defs) | ")" // TODO
+          nat: "(Nat-elim " | go(comp.expr,depth,defs) | ")" // TODO
+          u16: "(U16-inst " | go(comp.expr,depth,defs) | ")" // TODO
+          string: "(String-elim " | go(comp.expr,depth,defs) | ")" // TODO
+          data: go(comp.expr,depth,defs)
+        }
+        ins: case comp.prim {
+          unit: "(Unit-inst " | go(comp.expr,depth,defs) | ")" // TODO
+          bool: "(Bool-inst " | go(comp.expr,depth,defs) | ")" // TODO
+          nat: "(Nat-inst " | go(comp.expr,depth,defs) | ")" // TODO
+          u16: "(U16-inst " | go(comp.expr,depth,defs) | ")" // TODO
+          string: "(String-inst " | go(comp.expr,depth,defs) | ")" // TODO
+          data: go(comp.expr,depth,defs)
+        }
+        nat:
+          Nat.show(comp.natx) // TODO: lang@gram@nat?
+        chr:
+          Nat.show(U16.to_nat(comp.chrx)) // TODO: lang@gram@char?
+        str:
+          "\"" | lang@gram@string_literal(comp.strx) | "\""
+        txt:
+          comp.text
+      }
+    }
+  }
+
+Kind.Comp.transpile.global_definitions(
+  lang: Kind.Comp.Language
+  defs_list: List<Pair<String, Kind.Comp>>
+  defs: Kind.Comp.Defs
+): String
+  let code = ""
+  // Instantiatior and Eliminator functions
+  for nati in Kind.Comp.Prim.natives with code:
+    let {name,prim} = nati
+    let code = code| "(define "|name|"-inst "|Kind.Comp.Prim.instantiator(lang,prim,0,defs)|")\n"
+    let code = code| "(define "|name|"-elim "|Kind.Comp.Prim.eliminator(lang,prim,0,defs)|")\n"
+    code
+  // Top-level definitions
+  for defn in defs_list with code:
+    let {name,term} = defn
+    let {vars,body} = Kind.Comp.get_vars(term)
+    let code = code | "(define ($"|name
+    let code = for v in vars: code | " " | v
+    let code = code | ") "
+    let code = code | case lang@opts{name} as opt {
+      none: Kind.Comp.transpile.term(lang, body, 0, defs)
+      some: Kind.Comp.replace(Pair.snd!!(opt.value), vars)
+    }
+    let code = code | ")\n"
+    let code = code | "(define "|name
+    let code = for v in vars: code | " (lambda ("|v|")"
+    let code = code | " ($"|name
+    let code = for v in vars: code | " " | v
+    let code = code | ")"
+    let code = for v in vars: code | ")"
+    let code = code | ")\n"
+    code
+  code
+
+Kind.Comp.transpile.module(
+  lang: Kind.Comp.Language
+  name: String
+  exports: List<String>
+  defs: Kind.Comp.Defs
+): String
+  let defs_list = Kind.Comp.dependency_sort.module(exports, defs)
+  let code = "(library ("|name|") (export"
+  for export in exports with code:
+    code|" "|export
+  let code = code|")\n"
+
+  let code = code|`(import (chezscheme)\n(kstring))\n`
+  //let code = code | Kind.Comp.Target.Scheme.insts | "\n\n" // TODO: should we have insts on Grammar?
+  let code = code | Kind.Comp.transpile.global_definitions(lang, defs_list, defs)|")"
+  code
+
+// Converts Comp definitions to a Scheme program.
+Kind.Comp.transpile(
+  lang: Kind.Comp.Language
+  main: String
+  defs: Kind.Comp.Defs
+): String
+  let defs_list = Kind.Comp.dependency_sort(main, defs)
+
+  // Basic dependencies
+  let code = lang@base | "\n\n"
+  let code = code|Kind.Comp.transpile.global_definitions(lang, defs_list, defs)
+  code|"\n(run_kind "|main|")"
