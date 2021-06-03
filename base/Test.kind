@@ -1,6 +1,0 @@
-Test: _
-  IO {
-    get schemed = Kind.api.io.terms_to_scheme_lib("kind", Kind.api.exports)
-    get u = IO.set_file("./../bin/scm/src/kind.sls", schemed)
-    return u
-  }

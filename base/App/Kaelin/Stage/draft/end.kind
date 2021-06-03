@@ -11,7 +11,7 @@ case glob.stage{
     nil : glob
     cons: 
       if ready then
-        new_stage = App.Kaelin.Stage.planning(0,0)
+        new_stage = App.Kaelin.Stage.planning(0,0,0)
         new_map   = App.Kaelin.Coord.draft.start_game(glob.map, glob.stage.coords, glob.stage.players)
         App.Kaelin.State.global.new(glob.round, glob.tick, glob.room, new_map, new_stage, glob.skills_list)
       else

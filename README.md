@@ -10,7 +10,7 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 4. A complete bootstrap: the language is implemented in itself. Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
 
-5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for a list of apps.
+5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for a list of apps. (WIP)
 
 Usage
 -----

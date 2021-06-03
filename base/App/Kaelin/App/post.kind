@@ -17,5 +17,6 @@ App.Kaelin.App.post: App.Post<App.Kaelin.State>
           to_draft     : App.Kaelin.Action.to_draft(addr, room, glob)
           draft_team   : App.Kaelin.Action.draft_team(addr, eventdata.team, glob)
           draft_ready  : App.Kaelin.Action.draft_ready(addr, eventdata.ready, glob)
+          control_map  : App.Kaelin.Action.control_map(glob)
         }
     }

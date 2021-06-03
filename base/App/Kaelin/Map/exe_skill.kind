@@ -4,8 +4,9 @@ App.Kaelin.Map.exe_skill(
   key: U16
   map: App.Kaelin.Map
 ): App.Kaelin.Map
-
-  result = Maybe { get info = App.Kaelin.Map.player.info(player, map)
+  
+  let result = Maybe { 
+    get info = App.Kaelin.Map.player.info(player, map)
     let creature = info@snd
     let hero_pos = info@fst
     let hero = creature@hero
