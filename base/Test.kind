@@ -1,6 +1,6 @@
 Test: _
-  IO {
-    get schemed = Kind.api.io.terms_to_scheme_lib("kind", Kind.api.exports)
-    get u = IO.set_file("./../bin/scm/src/kind.sls", schemed)
-    return u
-  }
+Kind.Parser.dom(Parser.State.new(none, "", 0, 0, 
+"<%div class=\"main\" id=\"link\" style=\"asd\" %> 
+  <%a id=\"link\" %>asd<%/a%>
+  <%a id=\"link\" %>asd<%/a%>
+  <%a id=\"link\" %>asd<%/a%>
