@@ -13,7 +13,7 @@ App.Kaelin.Effect.hp.change(
     App.Kaelin.Effect.map.set(map)
     if I32.gtn(dhp, +0#32) then
       App.Kaelin.Effect.indicators.add(NatMap.set!(key, App.Kaelin.Indicator.green, indicators))
-    else if I32.lte(dhp, +0#32) then
+    else if I32.ltn(dhp, +0#32) then
       App.Kaelin.Effect.indicators.add(NatMap.set!(key, App.Kaelin.Indicator.red, indicators))
     else
       App.Kaelin.Effect { return unit }
