@@ -1,6 +1,5 @@
 #!/usr/bin/env scheme-script
 (import (kind)
-        (utils)
         (chezscheme))
 (let ([args (cdr (command-line))])
   (if (null? args)

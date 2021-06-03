@@ -195,25 +195,131 @@ Kind.Comp.Target.Scheme.optimizeds: Kind.Comp.Optimizeds
 // Basic dependencies
 // ==================
 
-Kind.Comp.Target.Scheme.utils_lib: String
-`#!chezscheme
-(library (utils) (export suffix? prefix? run-all run_io print-lines run_kind)
-  (import (chezscheme)
-          (kstring))
-` | Kind.Comp.Target.Scheme.utils | ")"
+//Kind.Comp.Target.Scheme.utils_lib: String
+//`#!chezscheme
+//(library (utils) (export suffix? prefix? run-all run_io print-lines run_kind)
+//  (import (chezscheme)
+//          (kstring))
+//` | Kind.Comp.Target.Scheme.utils | ")"
+//
+//Kind.Comp.Target.Scheme.kstring_lib: String
+//`(library (kstring)
+//  (export make-string-view string-view? string-view-end
+//          string-view-start kstring-length kstring-head
+//          kstring-tail string-view-ref kstring?
+//          kstring->string kstring-append kstring-getter
+//          kstring_join)
+//  (import (chezscheme))
+//` | Kind.Comp.Target.Scheme.kstring | ")" 
 
-Kind.Comp.Target.Scheme.kstring_lib: String
-`(library (kstring)
-  (export make-string-view string-view? string-view-end
-          string-view-start kstring-length kstring-head
-          kstring-tail string-view-ref kstring?
-          kstring->string kstring-append kstring-getter
-          kstring_join)
-  (import (chezscheme))
-` | Kind.Comp.Target.Scheme.kstring | ")" 
+Kind.Comp.Target.Scheme.exports: Kind.Comp.Exports
+  ["suffix?"
+  "prefix?"
+  "run-all"
+  "run_io"
+  "print-lines"
+  "run_kind"
+  "make-string-view"
+  "string-view?"
+  "string-view-end"
+  "string-view-start"
+  "kstring-length"
+  "kstring-head"
+  "kstring-tail"
+  "string-view-ref"
+  "kstring?"
+  "kstring->string"
+  "kstring-append"
+  "kstring-getter"
+  "kstring_join"]
 
-Kind.Comp.Target.Scheme.utils: String
-`(define suffix?
+Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
+`; string-view record type (fast way to get a tail)
+(define-record string-view
+  ((immutable data)  ; underlying string
+   (immutable start) ; start position (inclusive)
+   (immutable end))) ; end position (exclusive)
+
+(define string-view-ref
+  (lambda (x y)
+    (string-ref (string-view-data x) (+ (string-view-start x) y))))
+
+(define kstring-tail
+  (lambda (x)
+    (if (string-view? x)
+      (make-string-view
+        (string-view-data x)
+        (+ (string-view-start x) 1)
+        (string-view-end x))
+      (make-string-view
+        x
+        1
+        (string-length x)))))
+
+(define kstring-head
+  (lambda (x)
+    (if (string-view? x)
+      (string-ref (string-view-data x) (string-view-start x))
+      (string-ref x 0))))
+
+(define kstring-length
+  (lambda (x)
+    (if (string-view? x)
+      (- (string-view-end x) (string-view-start x))
+      (string-length x))))
+
+(define kstring?
+  (lambda (x)
+    (or (string-view? x) (string? x))))
+
+(define kstring->string
+  (lambda (x)
+    (if (string-view? x)
+      (substring (string-view-data x) (string-view-start x) (string-view-end x))
+      x)))
+
+; TODO depending on x, we could safely append data at the end
+(define kstring-append
+  (lambda (x y)
+    (string-append (kstring->string x) (kstring->string y))))
+
+(define kstring-getter
+  (lambda (x)
+    (if (string-view? x)
+      string-view-ref
+      string-ref)))
+
+; Joins a list of strings with an intercalated separator
+(define (kstring_join sep strs fst)
+  (if (null? strs) 
+    ""
+    (kstring-append
+      (if fst "" sep)
+      (car strs)
+      (kstring_join sep (cdr strs) #f))))
+
+; Short alias to vector-ref
+(define get vector-ref)
+
+; Converts a Kind word to a native integer
+(define (word-to-u16 w)
+  (define (word-to-u16-go i w x)
+    (cond ((= 16 i) x)
+      ((symbol=? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x))
+      ((symbol=? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x))
+      ((symbol=? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
+  (word-to-u16-go 0 w 0))
+
+; Converts a native integer to a Kind word
+(define (u16-to-word x)
+  (define (u16-to-word-go i x w)
+    (if (= 16 i) w (u16-to-word-go (+ i 1) x
+      (if (= (fxand (fxarithmetic-shift-right x (- 15 i)) 1) 0)
+        (vector 'Word.o w)
+        (vector 'Word.i w)))))
+  (u16-to-word-go 0 x (vector 'Word.e)))
+
+(define suffix?
   (lambda (str suff)
     (let ((suff_length (string-length suff))
           (str_length (string-length str)))
@@ -373,94 +479,8 @@ Kind.Comp.Target.Scheme.utils: String
       (let ((code (get-datum p)))
         (unless (eq? code #!eof)
           (compile code)
-          (run-all p)))))`
-
-Kind.Comp.Target.Scheme.kstring: String
-`; string-view record type (fast way to get a tail)
-(define-record string-view
-  ((immutable data)  ; underlying string
-   (immutable start) ; start position (inclusive)
-   (immutable end))) ; end position (exclusive)
-
-(define string-view-ref
-  (lambda (x y)
-    (string-ref (string-view-data x) (+ (string-view-start x) y))))
-
-(define kstring-tail
-  (lambda (x)
-    (if (string-view? x)
-      (make-string-view
-        (string-view-data x)
-        (+ (string-view-start x) 1)
-        (string-view-end x))
-      (make-string-view
-        x
-        1
-        (string-length x)))))
-
-(define kstring-head
-  (lambda (x)
-    (if (string-view? x)
-      (string-ref (string-view-data x) (string-view-start x))
-      (string-ref x 0))))
-
-(define kstring-length
-  (lambda (x)
-    (if (string-view? x)
-      (- (string-view-end x) (string-view-start x))
-      (string-length x))))
-
-(define kstring?
-  (lambda (x)
-    (or (string-view? x) (string? x))))
-
-(define kstring->string
-  (lambda (x)
-    (if (string-view? x)
-      (substring (string-view-data x) (string-view-start x) (string-view-end x))
-      x)))
-
-; TODO depending on x, we could safely append data at the end
-(define kstring-append
-  (lambda (x y)
-    (string-append (kstring->string x) (kstring->string y))))
-
-(define kstring-getter
-  (lambda (x)
-    (if (string-view? x)
-      string-view-ref
-      string-ref)))
-
-; Joins a list of strings with an intercalated separator
-(define (kstring_join sep strs fst)
-  (if (null? strs) 
-    ""
-    (kstring-append
-      (if fst "" sep)
-      (car strs)
-      (kstring_join sep (cdr strs) #f))))`
-
-Kind.Comp.Target.Scheme.insts: String
-`; Short alias to vector-ref
-(define get vector-ref)
-
-; Converts a Kind word to a native integer
-(define (word-to-u16 w)
-  (define (word-to-u16-go i w x)
-    (cond ((= 16 i) x)
-      ((symbol=? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x))
-      ((symbol=? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x))
-      ((symbol=? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
-  (word-to-u16-go 0 w 0))
-
-; Converts a native integer to a Kind word
-(define (u16-to-word x)
-  (define (u16-to-word-go i x w)
-    (if (= 16 i) w (u16-to-word-go (+ i 1) x
-      (if (= (fxand (fxarithmetic-shift-right x (- 15 i)) 1) 0)
-        (vector 'Word.o w)
-        (vector 'Word.i w)))))
-  (u16-to-word-go 0 x (vector 'Word.e)))`
+          (run-all p)))))
+`
 
 // TODO translate this to kind somehow
 Kind.Comp.Target.Scheme.cli: String
@@ -540,13 +560,6 @@ Kind.Comp.Target.Scheme.cli: String
               (display "unrecognized cli argument: ")
               (display snd_arg))))))))`
 
-Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
-  Kind.Comp.Target.Scheme.kstring
-  | "\n"
-  | Kind.Comp.Target.Scheme.utils
-  | "\n"
-  | Kind.Comp.Target.Scheme.insts
-
 // a little script to produce the scheme sources for kind-scm
 // should be run in kind/base
 Kind.Comp.Target.Scheme.bootstrap: IO(Unit)
@@ -554,8 +567,6 @@ Kind.Comp.Target.Scheme.bootstrap: IO(Unit)
     let target_dir = "./../bin/scm/src/"
     get schemed = Kind.api.io.terms_to_scheme_lib("kind", Kind.api.exports)
 
-    get u = IO.set_file(target_dir|"utils.sls", Kind.Comp.Target.Scheme.utils_lib)
-    get u = IO.set_file(target_dir|"kstring.sls", Kind.Comp.Target.Scheme.kstring_lib)
     get u = IO.set_file(target_dir|"kind.sls", schemed)
     get u = IO.set_file(target_dir|"main.scm", Kind.Comp.Target.Scheme.cli)
     return u
@@ -566,8 +577,9 @@ Kind.Comp.Target.Scheme.bootstrap: IO(Unit)
 
 Kind.Comp.Target.Scheme.Language: Kind.Comp.Language
   Kind.Comp.Language.new(
-    Kind.Comp.Target.Scheme.grammar,
-    Kind.Comp.Target.Scheme.natives,
-    Kind.Comp.Target.Scheme.optimizeds,
-    Kind.Comp.Target.Scheme.basics,
+    Kind.Comp.Target.Scheme.grammar
+    Kind.Comp.Target.Scheme.natives
+    Kind.Comp.Target.Scheme.optimizeds
+    Kind.Comp.Target.Scheme.exports
+    Kind.Comp.Target.Scheme.basics
   )

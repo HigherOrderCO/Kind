@@ -93,12 +93,13 @@ Kind.Comp.transpile.module(
 ): String
   let defs_list = Kind.Comp.dependency_sort.module(exports, defs)
   let code = "(library ("|name|") (export"
+  for export in lang@exps with code:
+    code|" "|export
   for export in exports with code:
     code|" "|export
   let code = code|")\n"
-
-  let code = code|`(import (chezscheme)\n(kstring))\n`
-  let code = code | Kind.Comp.Target.Scheme.insts | "\n\n" // TODO: should we have insts on Grammar?
+  let code = code|`(import (chezscheme))\n`
+  let code = code | lang@base | "\n\n"
   let code = code | Kind.Comp.transpile.global_definitions(lang, defs_list, defs)|")"
   code
 

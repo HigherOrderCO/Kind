@@ -3,6 +3,7 @@ type Kind.Comp.Language {
     gram: Kind.Comp.Grammar
     nati: Kind.Comp.Natives
     opts: Kind.Comp.Optimizeds
+    exps: Kind.Comp.Exports
     base: Kind.Comp.Basics
   )
 }
