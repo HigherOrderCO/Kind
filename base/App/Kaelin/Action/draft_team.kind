@@ -13,7 +13,7 @@ App.Kaelin.Action.draft_team(
         1 : App.Kaelin.Team.red
       }default App.Kaelin.Team.neutral
       let map  = glob.stage.players
-      let new_player = App.Kaelin.DraftInfo.new(none, team)
+      let new_player = App.Kaelin.DraftInfo.new(none, team, false)
       let new_map    = map{user} <- new_player
       let new_stage  = App.Kaelin.Stage.draft(new_map, glob.stage.coords)
         glob@stage <- new_stage

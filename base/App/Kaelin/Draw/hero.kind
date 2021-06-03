@@ -12,4 +12,4 @@ App.Kaelin.Draw.hero(
   cy = cy - aux_y //U32
   cx = cx - App.Kaelin.Constants.hexagon_radius //U32
 
-  VoxBox.Draw.image(cx, cy, 0u, hero.img, img)
+  VoxBox.Draw.image(cx, cy, 0u, hero.assets@vbox, img)

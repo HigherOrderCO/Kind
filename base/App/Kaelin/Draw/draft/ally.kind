@@ -1,18 +1,13 @@
 App.Kaelin.Draw.draft.ally(user: String, info: Maybe(App.Kaelin.DraftInfo)): DOM
-  name = 
-    case info {
-    none: "Connecting"
+  {name, image} = case info {
+    none: {"Connecting", App.Kaelin.Draw.draft.interrogation}
     some:
-      open info.value as info
-      case info.hero {
-      none: "Choosing"
-      some: 
-        let hero = App.Kaelin.Hero.info(info.hero.value)
-        case hero {
-          none: "Choosing"
-          some: hero.value@name
-        }
-      } 
+      Maybe {
+        get info = info.value@hero
+        get hero = App.Kaelin.Hero.info(info)
+        let assets = hero@assets
+        return {hero@name, assets@base64}
+      } <> {"Choosing", App.Kaelin.Draw.draft.interrogation}
     }
 
   DOM.node("div", {},
@@ -40,7 +35,7 @@ App.Kaelin.Draw.draft.ally(user: String, info: Maybe(App.Kaelin.DraftInfo)): DOM
       "height": "auto"} 
     
     [
-      DOM.node("img", {"src": App.Kaelin.Draw.draft.croni}
+      DOM.node("img", {"src": image}
       { "width": "100%",
         "height": "auto",
         "image-rendering": "pixelated"}
