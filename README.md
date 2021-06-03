@@ -48,27 +48,21 @@ kind Main --run
 Things you can do with Kind:
 ----------------------------
 
-- Compile programs and modules to several languages.
+### Compile programs and modules to several targets.
 
-    Why ever write code in any other language?
+Kind has an universal compiler that targets several back-ends. Just find what you need on Kind, and compile it with `kind Main --lang`. For example, to generate a QuickSort function in JavaScript, just type `kind List.quicksort --js`. You may never write code in any other language! Available targets: `--js`, `--scm`. Several more will be available this month.
 
-    Just find what you need on Kind and compile it with `kind Main --lang`.
+### Create live applications.
 
-    Available targets:
+Kind has an interconnected back-end that allows you to create rich, interactive applications without ever touching databases, TCP packets or messing with apis. Just add a file to `base/App` and it will be available on [http://uwu.tech/](http://uwu.tech). You can fork entire applications - not just the front-end, but all of it, back-end, database, and networking - in seconds.
 
-        --js
-        --scm
-        ...TODO
+### Prove theorems.
 
-- Create interactive, online applications.
+No, theorems are not scary things mathematicians do. For programmers, they're more like unit tests, except they can involve symbols, allowing you to cover infinitely many test cases. If you like unit tests, you'll love theorems. To learn more, check [THEOREMS.md](THEOREMS.md).
 
-    Just add a file to `base/App`.
+### Deploy Smart-Contracts.
 
-    Apps are available on: http://uwu.tech/
-
-- Prove theorems.
-
-    To learn how, check [THEOREMS.md](THEOREMS.md).
+(TODO) *Ethereum: we're coming for you.*
 
 Examples
 --------
@@ -292,5 +286,3 @@ App.Hello.when: App.When<App.Hello.State>
 Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
 
 Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
-
-You can create your own UwU.Tech app by adding a file to `base/App`, with an `App.YourApp` `:` [App](https://github.com/uwu-tech/Kind/blob/master/base/App.kind)`(...)` definition.
