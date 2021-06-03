@@ -4,6 +4,6 @@ App.Kaelin.Skill.ap_recover(
   
   App.Kaelin.Effect {
   get self = App.Kaelin.Effect.coord.get_center
-  App.Kaelin.Effect.ap.change(restoration, self)
+  App.Kaelin.Effect.ap.restore(restoration, self)
   return unit
   }

@@ -11,7 +11,7 @@ App.Kaelin.Effect.ap.change_at(
     let map = res@snd
     let indicators = NatMap.new!
     App.Kaelin.Effect.map.set(map)
-    if I32.gtn(apc, 0) then
+    if I32.ltn(apc, 0) then
       App.Kaelin.Effect.indicators.add(NatMap.set!(key, App.Kaelin.Indicator.green, indicators))
     else
       App.Kaelin.Effect { return unit }
