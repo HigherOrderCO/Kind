@@ -14,7 +14,7 @@ A minimal, efficient and practical proof and programming language. Under the hoo
 
 Usage
 -----
-![npm](https://img.shields.io/npm/v/kind-lang)  
+![npm](https://img.shields.io/npm/v/kind-lang)  [![telegram](https://img.shields.io/badge/chat-on%20telegram-blue)](https://t.me/formality_lang)
 
 1. Install Kind using `npm` (alternative releases soon):
 
