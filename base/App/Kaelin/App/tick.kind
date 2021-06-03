@@ -4,6 +4,8 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
     glob = glob@tick <- U64.add(glob@tick, 1)
     stage = glob@stage
     case stage {
+      draft    :  
+                  App.Kaelin.Stage.draft.end(glob)
       planning : 
                   stage_seconds = (15#64 - (stage.local_tick / 16)) - 1
                   ticks_per_round = 15#64 * 16

@@ -6,9 +6,11 @@ App.Kaelin.Draw.support.area_of_effect(
 
   Maybe { 
     get cast = cast_info
+    open cast
     mouse_pos = App.Kaelin.Coord.Convert.axial_to_nat(cast@mouse_pos)
-    if NatSet.has(mouse_pos, cast@range) then
-      NatMap.get!(coord_nat, cast@area)
+    log(Nat.show(mouse_pos))
+    if NatSet.has(mouse_pos, cast.range) then
+      NatMap.get!(coord_nat, cast.area)
     else
       none
   }

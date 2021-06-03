@@ -2,5 +2,6 @@ type App.Kaelin.DraftInfo {
   new(
     hero: Maybe(U8)
     team: App.Kaelin.Team
+    ready: Bool
   )
 }
