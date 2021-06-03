@@ -46,6 +46,7 @@ kind Main --run
 5. Have fun!
 
 Things you can do with Kind:
+----------------------------
 
 - Compile programs and modules to several languages.
 
