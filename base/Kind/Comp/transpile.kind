@@ -1,5 +1,4 @@
 // Transpiles from Term.Comp to the target language's source code
-
 Kind.Comp.transpile.term(
   lang: Kind.Comp.Language
   comp: Kind.Comp
@@ -99,7 +98,7 @@ Kind.Comp.transpile.module(
   let code = code|")\n"
 
   let code = code|`(import (chezscheme)\n(kstring))\n`
-  //let code = code | Kind.Comp.Target.Scheme.insts | "\n\n" // TODO: should we have insts on Grammar?
+  let code = code | Kind.Comp.Target.Scheme.insts | "\n\n" // TODO: should we have insts on Grammar?
   let code = code | Kind.Comp.transpile.global_definitions(lang, defs_list, defs)|")"
   code
 
