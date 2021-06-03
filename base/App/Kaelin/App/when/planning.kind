@@ -15,14 +15,9 @@ App.Kaelin.App.when.planning(
 
     frame:
       let update    = Bool.not(I32.eql(state@local@control_map, state@global@round))
-      log(I32.show(state@local@control_map))
-      log(I32.show(state@global@round))
-      log(Bool.show(update))
       let new_local = App.Kaelin.Action.local.env_info(event.time, event.info, state@local)
       let new_local = App.Kaelin.Action.local.area(event.time, state@global, new_local)
       let new_local = new_local@local_map <- if update then state@global@map else new_local@local_map
-      // log(new_local@local_map)
-      log(U64.show(event.time))
       let new_local = new_local@control_map <- if update then state@local@control_map + 1 else state@local@control_map
       IO {
         
