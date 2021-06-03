@@ -1,34 +1,73 @@
 # Kind
 
-A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. On the surface, it looks more like TypeScript. Compared to most proof assistants, Kind has:
+A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. That means it can handle mathematical theorems just like Coq, Idris, Lean and Agda. On the surface, it aims to be more practical and looks more like TypeScript. Compared to other proof assistants, Kind has:
 
 1. The smallest core. Check this [700-LOC](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) reference implementation. It has the whole type system!
 
-2. More powerful type-level features. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
+2. Novel type-level features. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
 
-3. A collection of friendly syntax sugars that make it less scary. Check [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md).
+3. An accessible syntax that makes it less scary. Check [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md).
 
-4. Boostrapping: the language is fully implemented in itself! Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
+4. A complete bootstrap: the language is implemented in itself. Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
 
 5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for a list of apps.
-
-    *Most apps disabled for a major update that will bring rollback netcode. Check again on May 17!*
 
 Usage
 -----
 ![npm](https://img.shields.io/npm/v/kind-lang)  
 
+1. Install Kind using `npm` (alternative releases soon):
+
 ```bash
-npm i -g kind-lang                             # installs Kind
-git clone https://github.com/uwu-tech/Kind     # clones base libs
-cd Kind/base                                   # enters base libs
-kind Main                                      # checks Main.kind
-kind Main --run                                # runs Main
+npm i -g kind-lang
 ```
 
-*Right now, you must be at `kind/base` to use the language.*
+2. Save the file below as `Main.kind`:
 
-Haskell and Scheme compilers and releases expected around June.
+```
+Main: IO(Unit)
+  IO {
+    IO.print("Hello, world!")
+  }
+```
+
+3. Type-check it:
+
+```
+kind Main
+```
+
+4. Run it:
+
+```
+kind Main --run
+```
+
+5. Have fun!
+
+Things you can do with Kind:
+
+- Compile programs and modules to several languages.
+
+    Why ever write code in any other language?
+
+    Just find what you need on Kind and compile it with `kind Main --lang`.
+
+    Available targets:
+
+        --js
+        --scm
+        ...TODO
+
+- Create interactive, online applications.
+
+    Just add a file to `base/App`.
+
+    Apps are available on: http://uwu.tech/
+
+- Prove theorems.
+
+    To learn how, check [THEOREMS.md](THEOREMS.md).
 
 Examples
 --------
@@ -254,34 +293,3 @@ Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/
 Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
 
 You can create your own UwU.Tech app by adding a file to `base/App`, with an `App.YourApp` `:` [App](https://github.com/uwu-tech/Kind/blob/master/base/App.kind)`(...)` definition.
-
-Resources
----------
-
-- Syntax reference: [SYNTAX.md](SYNTAX.md).
-
-- Theorem proving tutorial: [THEOREMS.md](THEOREMS.md).
-
-- Base library: [base](https://github.com/uwu-tech/Kind/tree/master/base).
-
-- [Telegram chat](https://t.me/formality_lang)! 
-
-- Discord server (TODO)
-
-[trusted core]: https://github.com/moonad/FormCoreJS
-
-[FormCore-to-Haskell]: https://github.com/moonad/FormCoreJS/blob/master/FmcToHs.js
-
-[kind.js]: https://github.com/uwu-tech/Kind/blob/master/bin/js/base/kind.js
-
-[Agda]: https://github.com/agda/agda
-
-[Idris]: https://github.com/idris-lang/Idris-dev
-
-[Coq]: https://github.com/coq/coq
-
-[Lean]: https://github.com/leanprover/lean
-
-[Absal]: https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
-
-[JavaScript compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js
