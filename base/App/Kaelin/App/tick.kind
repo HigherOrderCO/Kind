@@ -5,8 +5,8 @@ App.Kaelin.App.tick: App.Tick<App.Kaelin.State>
     stage = glob@stage
     case stage {
       planning : 
-                  stage_seconds = (App.Kaelin.Constants.round_time - (stage.local_tick / 16)) - 1
-                  ticks_per_round = App.Kaelin.Constants.round_time * 16
+                  stage_seconds = (10#64 - (stage.local_tick / 16)) - 1
+                  ticks_per_round = 10#64 * 16
                   if U64.gte(stage.local_tick, ticks_per_round) then 
                     new_glob = glob@skills_list <- List.reverse!(glob@skills_list)
                     new_glob = new_glob@stage <- App.Kaelin.Stage.action

@@ -7,6 +7,6 @@ App.Kaelin.Draw.tile.background(
 ): VoxBox
 
   coord_nat = App.Kaelin.Coord.Convert.axial_to_nat(coord)
-  sprite = App.Kaelin.Draw.support.get_indicator(coord, cast_info)
+  sprite = App.Kaelin.Draw.support.get_indicator(coord, mouse_coord, cast_info)
   {i, j} = App.Kaelin.Draw.support.centralize(coord)
   VoxBox.Draw.image(i, j, 0#32, terrain@draw(sprite), img)
