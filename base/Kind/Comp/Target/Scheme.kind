@@ -27,12 +27,30 @@ Kind.Comp.Target.Scheme.local_definition(name: String, expr: String, body: Strin
 
 Kind.Comp.Target.Scheme.global_function(name: String, args: List<String>, body: String): String
   case args {
-    nil: "(define " | name | " " | body | ")"
-    cons: "(define (" | name | " " | String.join(" ", args) | ") " | body | ")"
+    nil: "(define " | name | " " | body | ")\n"
+    cons:
+      "(define ($" | name | " " | String.join(" ", args) | ") " | body | ")\n"
+      |Kind.Comp.Target.Scheme.nest_lambdas(name, args)
   }
 
 Kind.Comp.Target.Scheme.global_application(name: String, args: List<String>): String
   "($" | name | " " | String.join(" ", args) | ")"
+
+// TODO better names
+Kind.Comp.Target.Scheme.nest_lambdas(name: String, args: List<String>): String
+  let body = Kind.Comp.Target.Scheme.nest_lambdas.aux(name, args, args)
+  "(define " | name | " " | body | ")\n"
+
+// TODO better names
+Kind.Comp.Target.Scheme.nest_lambdas.aux(fun: String, args: List<String>, rem_args: List<String>): String
+  // first args won't change
+  def this = Kind.Comp.Target.Scheme.nest_lambdas.aux(fun, args)
+  case rem_args {
+    nil:
+      Kind.Comp.Target.Scheme.global_application(fun, args)
+    cons:
+      Kind.Comp.Target.Scheme.lambda(rem_args.head, this(rem_args.tail))
+  }
 
 Kind.Comp.Target.Scheme.string_literal(str: String): String
   case str {
@@ -52,6 +70,8 @@ Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(
     Kind.Comp.Target.Scheme.null
     Kind.Comp.Target.Scheme.name
+    Kind.Comp.Target.Scheme.inst_name
+    Kind.Comp.Target.Scheme.elim_name
     Kind.Comp.Target.Scheme.lambda
     Kind.Comp.Target.Scheme.application
     Kind.Comp.Target.Scheme.local_definition
@@ -492,7 +512,6 @@ Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
 Kind.Comp.Target.Scheme.cli: String
 `#!/usr/bin/env scheme-script
 (import (kind)
-        (utils)
         (chezscheme))
 (let ([args (cdr (command-line))])
   (if (null? args)
