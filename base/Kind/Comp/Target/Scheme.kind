@@ -66,6 +66,21 @@ Kind.Comp.Target.Scheme.string_literal(str: String): String
       ) | Kind.Comp.Target.Scheme.string_literal(str.tail)
   }
 
+Kind.Comp.Target.Scheme.module(name: String, exports: List(String), defs: String): String
+  let code = "#!chezscheme\n(library ("|name|") (export"
+  for export in Kind.Comp.Target.Scheme.exports with code:
+    code|" "|export
+  for export in exports with code:
+    code|" "|export
+  let code = code|")\n"
+  let code = code|`(import (chezscheme))\n`
+  let code = code|defs|")"
+  code
+
+Kind.Comp.Target.Scheme.program(main: String, defs: String): String
+  let code = defs|"(run_kind "|main|")"
+  code
+
 Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(
     Kind.Comp.Target.Scheme.null
@@ -78,6 +93,8 @@ Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
     Kind.Comp.Target.Scheme.global_function
     Kind.Comp.Target.Scheme.global_application
     Kind.Comp.Target.Scheme.string_literal
+    Kind.Comp.Target.Scheme.module
+    Kind.Comp.Target.Scheme.program
   )
 
 // Native types
@@ -605,6 +622,5 @@ Kind.Comp.Target.Scheme.Language: Kind.Comp.Language
     Kind.Comp.Target.Scheme.grammar
     Kind.Comp.Target.Scheme.natives
     Kind.Comp.Target.Scheme.optimizeds
-    Kind.Comp.Target.Scheme.exports
     Kind.Comp.Target.Scheme.basics
   )

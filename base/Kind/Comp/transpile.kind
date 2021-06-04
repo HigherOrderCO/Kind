@@ -81,17 +81,8 @@ Kind.Comp.transpile.module(
   exports: List<String>
   defs: Kind.Comp.Defs
 ): String
-  let code = "#!chezscheme\n(library ("|name|") (export"
-  for export in lang@exps with code:
-    code|" "|export
-  for export in exports with code:
-    code|" "|export
-  let code = code|")\n"
-  let code = code|`(import (chezscheme))\n`
-
   let defs_list = Kind.Comp.dependency_sort.module(exports, defs)
-  let code = code | lang@base | "\n\n"
-  let code = code | Kind.Comp.transpile.global_definitions(lang, defs_list, defs)|")"
+  let code = lang@gram@module(name, exports, lang@base|"\n\n"|Kind.Comp.transpile.global_definitions(lang, defs_list, defs))
   code
 
 // Converts Comp definitions to a Scheme program.
@@ -101,8 +92,5 @@ Kind.Comp.transpile(
   defs: Kind.Comp.Defs
 ): String
   let defs_list = Kind.Comp.dependency_sort(main, defs)
-
-  // Basic dependencies
-  let code = lang@base | "\n\n"
-  let code = code|Kind.Comp.transpile.global_definitions(lang, defs_list, defs)
-  code|"\n(run_kind "|main|")"
+  let code = lang@gram@program(main, lang@base|"\n\n"|Kind.Comp.transpile.global_definitions(lang, defs_list, defs))
+  code
