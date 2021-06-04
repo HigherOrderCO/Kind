@@ -2,6 +2,8 @@ type Kind.Comp.Grammar {
   new(
     null: String
     name: (name: String) -> String
+    inst_name: (name: String) -> String
+    elim_name: (name: String) -> String
     lambda: (name: String, body: String) -> String
     application: (func: String, argm: String) -> String
     local_definition: (name: String, expr: String, body: String) -> String

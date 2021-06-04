@@ -10,6 +10,12 @@ Kind.Comp.Target.Scheme.name(name: String): String
   else
     name
 
+Kind.Comp.Target.Scheme.inst_name(name: String): String
+  name|"-inst"
+
+Kind.Comp.Target.Scheme.elim_name(name: String): String
+  name|"-elim"
+
 Kind.Comp.Target.Scheme.lambda(name: String, body: String): String
   "(lambda (" | name | ") " | body | ")"
 
