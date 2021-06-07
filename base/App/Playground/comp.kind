@@ -15,7 +15,8 @@ App.Playground.comp.header(
         }
       "display": "flex"
     }, [DOM.text("playground.kind")])
-  let btn_run = App.Playground.comp.btn_run_code(mouse_over)  
+  let btn_check = App.Playground.comp.btn(mouse_over, "btn_type_check", "check")
+  let btn_run = App.Playground.comp.btn(mouse_over, "btn_run_code", "run")  
   let style_header = {
     "display": "flex"
     "flex-direction": "row"
@@ -23,6 +24,12 @@ App.Playground.comp.header(
     "align-content": "center"
     "justify-content": "center"
   }
+  let btn_area = DOM.node("div", {}, {
+    "display": "flex"
+    "width": "120px"
+    "flex-direction": "row"
+    "justify-content": "space-between"
+  }, [btn_check, btn_run])
 
   case device{
     phone:
@@ -45,14 +52,14 @@ App.Playground.comp.header(
           "justify-content": "flex-start"
           "flex-direction": "row"
         }, [playground, terminal])
-        btn_run
+        btn_area
       ])
   } default 
-    DOM.node("div", {}, style_header, [playground, btn_run])
+    DOM.node("div", {}, style_header, [playground, btn_area])
 
 
-App.Playground.comp.btn_run_code(mouse_over: String): DOM
-  let is_hover = String.eql("btn_run_code", mouse_over)
+App.Playground.comp.btn(mouse_over: String, id: String, text: String): DOM
+  let is_hover = String.eql(id, mouse_over)
   let normal = {
     "width" : "50px"
     "height": "25px"
@@ -66,11 +73,11 @@ App.Playground.comp.btn_run_code(mouse_over: String): DOM
     "align-content": "center"
     "align-items": "center"
   }
-  DOM.node("div", {"id": "btn_run_code"},
+  DOM.node("div", {"id": id},
     if is_hover 
     then Map.union!(normal, {"background-color": "#44B8D3"})
     else Map.union!(normal, {"background-color": App.Kind.constant.secondary_color}),
-    [DOM.text("check")])
+    [DOM.text(text)])
 
 App.Playground.comp.input(code: String): DOM
   DOM.node("textarea", {
@@ -140,6 +147,6 @@ App.Playground.comp.output_area(output: String, device: Device): DOM
         "margin-top": "35px"}), 
     [ DOM.node("div", {}, {}, [DOM.text("kind-lang@1.0.51")])
       DOM.node("pre", {}, {"margin-top": "10px"}, [DOM.text(output)])]
-)
+  )
 
 
