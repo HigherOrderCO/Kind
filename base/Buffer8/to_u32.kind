@@ -1,0 +1,17 @@
+Buffer8.to_u32(buf: Buffer8): U32
+  let size = Nat.to_u32(buf@depth)
+  let num = 0#32
+  for i: U32 from 0 to size with num:
+    let val = Buffer8.get(i, buf)
+    // log("to u32, byte: " | U32.show(i) |" "| Bits.show(U8.to_bits(val)))
+    Buffer8.to_u32.set(val, num)
+  num
+
+Buffer8.to_u32.set(val: U8, num: U32): U32
+  // log("num:     " | Bits.show(U32.to_bits(num)))
+  let aux = U32.shl(num, 8)
+  // log("u32 shl: " | Bits.show(U32.to_bits(aux)))
+  let or = U32.or(U8.to_u32(val), aux)
+  // log("u32 or:  " | Bits.show(U32.to_bits(or)))
+  // log(" ")
+  or

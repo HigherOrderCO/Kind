@@ -1,0 +1,2 @@
+U32.xors(n: Nat): Variadic(n, U32, U32)
+  Variadic.foldr!!(U32.xor, 0#32, n)

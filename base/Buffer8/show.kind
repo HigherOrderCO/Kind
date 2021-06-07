@@ -1,0 +1,7 @@
+Buffer8.show(buf: Buffer8): String
+  let str = "<Buffer8 "
+  for i from 0 to buf@depth with str:
+    let bits = U32.to_bits(Buffer32.get(i, buf)) // group of 4 bytes
+    let hex = Bits.to_hex_string(bits)
+    str | " " | hex
+  str | " >"

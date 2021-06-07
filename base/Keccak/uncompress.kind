@@ -1,0 +1,22 @@
+Keccak.uncompress(buf: Buffer32): Buffer32
+  def shr = U32.shr
+  def mod = U32.mod
+  def add = U32.add
+  let dep = buf@depth
+  let udep = Nat.add(dep, 2)
+  let ubuf = Buffer32.alloc(udep)
+  for i : U32 from 0 to Nat.to_u32(Nat.pow(2, dep)) with ubuf:
+    let j  = U32.mul(4u, i)
+    let w  = Buffer32.get(i, buf)
+    let b0 = mod(w, 256u)
+    let w  = shr(w, 8u)
+    let b1 = mod(w, 256u)
+    let w  = shr(w, 8u)
+    let b2 = mod(w, 256u)
+    let b3 = shr(w, 8u)
+    let ubuf = Buffer32.set(j, b0, ubuf)
+    let ubuf = Buffer32.set(add(j, 1u), b1, ubuf)
+    let ubuf = Buffer32.set(add(j, 2u), b2, ubuf)
+    let ubuf = Buffer32.set(add(j, 3u), b3, ubuf)
+    ubuf
+  ubuf

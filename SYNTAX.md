@@ -1305,22 +1305,22 @@ While is expanded to use the `Function.while` function.
 Binary Operators
 ----------------
 
-syntax          | desugar
----------       | -------
-`2 + 3`         | `Nat.add(2, 3)`
-`2 - 3`         | `Nat.sub(2, 3)`
-`2 * 3`         | `Nat.mul(2, 3)`
-`2 / 3`         | `Nat.div(2, 3)`
-`2 <? 3`        | `Nat.ltn(2, 3)`
-`2 <=? 3`       | `Nat.lte(2, 3)`
-`2 =? 3`        | `Nat.eql(2, 3)`
-`2 >=? 3`       | `Nat.gte(2, 3)`
-`2 >? 3`        | `Nat.gtn(2, 3)`
-`(+2) + (-3)`   | `Int.add((+2), (-3))`
-`2#32 + 3`      | `U32.add(2#32, 3#32)`
-`2.0 + 3.0`     | `F64.add(2.0, 3.0)`
-`true && false` | `Bool.and(Bool.true, Bool.false)`
-`true || false` | `Bool.and(Bool.true, Bool.false)`
+syntax              | desugar
+---------           | -------
+`2 + 3`             | `Nat.add(2, 3)`
+`2 - 3`             | `Nat.sub(2, 3)`
+`2 * 3`             | `Nat.mul(2, 3)`
+`2 / 3`             | `Nat.div(2, 3)`
+`2 <? 3`            | `Nat.ltn(2, 3)`
+`2 <=? 3`           | `Nat.lte(2, 3)`
+`2 =? 3`            | `Nat.eql(2, 3)`
+`2 >=? 3`           | `Nat.gte(2, 3)`
+`2 >? 3`            | `Nat.gtn(2, 3)`
+`(+2) + (-3)`       | `Int.add((+2), (-3))`
+`2#32 + 3`          | `U32.add(2#32, 3#32)`
+`2.0 + 3.0`         | `F64.add(2.0, 3.0)`
+`true && false`     | `Bool.and(Bool.true, Bool.false)`
+`true \|\| false`   | `Bool.or(Bool.true, Bool.false)`
 ```
 
 Note that operators in Kind have no precedence and are always right associative.
