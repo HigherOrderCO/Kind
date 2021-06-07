@@ -1,0 +1,36 @@
+BOOL: Type
+  (
+    b(P: BOOL -> Type)
+    (t: P(TRUE))
+    (f: P(FALSE))
+    P(b)
+  )
+
+TRUE: BOOL
+  (P, t, f) t
+
+FALSE: BOOL
+  (P, t, f) f
+
+NOT(x: BOOL): BOOL
+  x((b) BOOL, FALSE, TRUE)
+
+//Test(x: BOOL): Equal(BOOL, NOT(NOT(x)), x)
+  //ELIM(
+    //(x) Equal(BOOL, NOT(NOT(x)), x),
+    //refl,
+    //refl,
+    //x,
+  //)
+  
+ELIM(P: BOOL -> Type, t: P(TRUE), f: P(FALSE), b: BOOL): P(TRUE)
+  TRUE(
+    (x) P(x),
+    t, // P(true)
+    f, // P(false)
+  )
+
+
+
+
+
