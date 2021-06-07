@@ -1,0 +1,2 @@
+U16.to_hex(a: U16): U16
+  U16.to_hex(a)
