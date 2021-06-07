@@ -1,0 +1,15 @@
+App.TicTacToe.ia.prevent_winner(st : App.TicTacToe.State.local) : Maybe<Pair<U32, U32>>
+  open st
+  let pos = List.foldr!!(none,
+     (ys, xs) case 
+        App.TicTacToe.board.check_pairs_of_board(st@board, List.take!(2, ys)) as k {
+           some : some(ys)
+           none : xs
+       }, App.TicTacToe.board.expand_nodes)
+  
+   Maybe {
+     get a = pos
+     log(Maybe.show!(Pair.show!!(U32.show, U32.show), App.TicTacToe.board.pairs.choose_free(st.board, a)))
+     App.TicTacToe.board.pairs.choose_free(st.board, a)
+   }
+  

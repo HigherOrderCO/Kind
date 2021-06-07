@@ -1,0 +1,15 @@
+side_board : U32
+  App.TicTacToe.constant.size
+  
+edge : U32
+  App.TicTacToe.constant.edge
+
+side_tale : U32
+  App.TicTacToe.constant.side_tale
+
+// Captura a informação em coordenadas cartesianas e transforam em coordenadas simplificadas de pares do tabuleiro
+// Exemplo: (50, 202) = (0, 2)
+App.TicTacToe.pos.pair_to_minipair(pair : Pair<U32, U32>) : Pair<U32, U32>
+  open pair
+  Pair.new!!(App.TicTacToe.pos.mouse_to_tile(pair.fst), App.TicTacToe.pos.mouse_to_tile(pair.snd))
+

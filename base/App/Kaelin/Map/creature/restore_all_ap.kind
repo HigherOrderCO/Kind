@@ -1,14 +1,15 @@
 App.Kaelin.Map.creature.restore_all_ap(
   map: App.Kaelin.Map
 ): App.Kaelin.Map
-  let map = NatMap.to_list!(map)
-  let new_map = {}
+
+  map = NatMap.to_list!(map)
+  new_map = {}
   for pos in map with new_map:
     tile = pos@snd
     coord = pos@fst
     creature = tile@creature
 
-    let new_tile = case creature {
+    new_tile = case creature {
       none:       
         tile
       some:      

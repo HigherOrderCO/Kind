@@ -1,0 +1,20 @@
+side_board : U32
+  App.TicTacToe.constant.size
+  
+edge : U32
+  App.TicTacToe.constant.edge
+
+side_tale : U32
+  App.TicTacToe.constant.side_tale
+
+side_entity : U32
+  App.TicTacToe.constant.side_entity
+
+    
+// Captura a informação em posicao do vetor 0-8 e transforma em coordenadas cartesianas
+// centralizadas menos tamanho da entity
+App.TicTacToe.pos.posvector_to_pair(pos : U32) : Pair<U32, U32>
+  let trans = App.TicTacToe.pos.posvector_to_minipair(pos)
+  open trans
+    Pair.new!!(((trans.fst*side_tale)+(side_tale/2))-(side_entity/2),
+    ((trans.snd*side_tale)+(side_tale/2))-(side_entity/2))

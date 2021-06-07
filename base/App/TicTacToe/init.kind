@@ -1,0 +1,5 @@
+App.TicTacToe.init : App.Init<App.TicTacToe.State>
+    App.Store.new!(
+      App.TicTacToe.State.local.new(Vector.fill!(9, Maybe.none!), App.TicTacToe.Entity.x, none, App.EnvInfo.new({0, 0}, {0, 0})), 
+      App.TicTacToe.State.global.new
+    )

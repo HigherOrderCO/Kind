@@ -5,7 +5,7 @@ App.Kaelin.Draw.game(img: VoxBox, state: App.Store<App.Kaelin.State>): DOM
 
   let seconds = case global.stage { planning: some(global.stage.seconds) } default none
   let is_planning = case global.stage { planning: true } default false
-  let map_to_draw = case global.stage { planning: global.stage.local_map } default global.map
+  let map_to_draw = App.Kaelin.Stage.get_map(state)
 
   DOM.node("div", 
           {}, 

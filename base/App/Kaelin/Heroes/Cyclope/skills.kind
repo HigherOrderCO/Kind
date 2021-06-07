@@ -10,7 +10,8 @@ App.Kaelin.Heroes.Cyclope.skills.vampirism: App.Kaelin.Skill
   App.Kaelin.Skill.new(
     "Vampirism",
     2
-    App.Kaelin.Skill.vampirism(1, 2),
+    1
+    App.Kaelin.Skill.vampirism('Q', 2),
     'Q'
   )
 // App.Kaelin.Heroes.Croni.skills.fireball: App.Kaelin.Skill
@@ -24,6 +25,7 @@ App.Kaelin.Heroes.Cyclope.skills.ap_recover: App.Kaelin.Skill
   App.Kaelin.Skill.new(
     "Action Points Reovery"
     0,
-    App.Kaelin.Skill.ap_recover(0,10)
+    0,
+    App.Kaelin.Skill.ap_recover(10)
     'R'
   )

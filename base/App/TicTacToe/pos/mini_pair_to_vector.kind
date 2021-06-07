@@ -1,0 +1,3 @@
+App.TicTacToe.pos.mini_pair_to_vector(pair : Pair<U32, U32>) : U32
+  open pair
+  pair.snd + (pair.fst*3)

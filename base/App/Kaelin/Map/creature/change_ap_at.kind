@@ -1,6 +1,6 @@
 //Changes creature Action Point somewhere in the map
 App.Kaelin.Map.creature.change_ap_at(
-  value: I32
+  key: U16
   pos: App.Kaelin.Coord
   map: App.Kaelin.Map
 ): Pair(I32, App.Kaelin.Map)
@@ -10,11 +10,13 @@ App.Kaelin.Map.creature.change_ap_at(
     none:
       {+0#32, map}
     some:
-      open creature.value as creature
-      open creature.hero as hero
-      new_ap = I32.max((creature.value@ap + value) , 0)
-      new_ap = I32.min(new_ap, hero.max_ap)
-      ap_diff = new_ap - creature.value@ap 
-      map = App.Kaelin.Map.creature.modify_at(App.Kaelin.Tile.creature.change_ap(ap_diff), pos, map)
-      {ap_diff, map}
-  }
+      skill = App.Kaelin.Skill.get(key, creature.value)
+      case skill { 
+        none:
+          {+0#32, map}
+        some:
+          open skill.value as skill
+          map = App.Kaelin.Map.creature.modify_at(App.Kaelin.Tile.creature.change_ap(key), pos, map)
+          {skill.ap_cost, map}
+    }
+}

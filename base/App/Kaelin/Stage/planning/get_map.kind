@@ -1,4 +1,0 @@
-App.Kaelin.Stage.planning.get_map(stage: App.Kaelin.Stage): Maybe<App.Kaelin.Map>
-  case stage {
-    planning: some(stage.local_map)
-  } default none

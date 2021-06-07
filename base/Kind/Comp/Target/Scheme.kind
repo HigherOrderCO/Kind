@@ -142,91 +142,43 @@ Kind.Comp.Target.Scheme.optimized: Map(Pair(Nat,String))
 // Base deps
 // =========
 
-Kind.Comp.Target.Scheme.base: String
-`; Short alias to vector-ref
-(define get vector-ref)
+Kind.Comp.Target.Scheme.utils_lib: String
+`#!chezscheme
+(library (utils) (export suffix? prefix? run-all run_io print-lines run_kind)
+  (import (chezscheme)
+          (kstring))
+` | Kind.Comp.Target.Scheme.utils | ")"
 
-; string-view record type (fast way to get a tail)
-(define-record string-view
-  ((immutable data)  ; underlying string
-   (immutable start) ; start position (inclusive)
-   (immutable end))) ; end position (exclusive)
+Kind.Comp.Target.Scheme.kstring_lib: String
+`(library (kstring)
+  (export make-string-view string-view? string-view-end
+          string-view-start kstring-length kstring-head
+          kstring-tail string-view-ref kstring?
+          kstring->string kstring-append kstring-getter
+          kstring_join)
+  (import (chezscheme))
+` | Kind.Comp.Target.Scheme.kstring | ")" 
 
-(define string-view-ref
-  (lambda (x y)
-    (string-ref (string-view-data x) (+ (string-view-start x) y))))
+Kind.Comp.Target.Scheme.utils: String
+`(define suffix?
+  (lambda (str suff)
+    (let ((suff_length (string-length suff))
+          (str_length (string-length str)))
+      (if (<= suff_length str_length)
+        (string=?
+          (substring str (- str_length suff_length) str_length)
+          suff)
+        #f))))
 
-(define kstring-tail
-  (lambda (x)
-    (if (string-view? x)
-      (make-string-view
-        (string-view-data x)
-        (+ (string-view-start x) 1)
-        (string-view-end x))
-      (make-string-view
-        x
-        1
-        (string-length x)))))
-
-(define kstring-head
-  (lambda (x)
-    (if (string-view? x)
-      (string-ref (string-view-data x) (string-view-start x))
-      (string-ref x 0))))
-
-(define kstring-length
-  (lambda (x)
-    (if (string-view? x)
-      (- (string-view-end x) (string-view-start x))
-      (string-length x))))
-
-(define kstring?
-  (lambda (x)
-    (or (string-view? x) (string? x))))
-
-(define kstring->string
-  (lambda (x)
-    (if (string-view? x)
-      (substring (string-view-data x) (string-view-start x) (string-view-end x))
-      x)))
-
-; TODO depending on x, we could safely append data at the end
-(define kstring-append
-  (lambda (x y)
-    (string-append (kstring->string x) (kstring->string y))))
-
-(define kstring-getter
-  (lambda (x)
-    (if (string-view? x)
-      string-view-ref
-      string-ref)))
-
-; Converts a Kind word to a native integer
-(define (word-to-u16 w)
-  (define (word-to-u16-go i w x)
-    (cond ((= 16 i) x)
-      ((symbol=? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x))
-      ((symbol=? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x))
-      ((symbol=? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
-  (word-to-u16-go 0 w 0))
-
-; Converts a native integer to a Kind word
-(define (u16-to-word x)
-  (define (u16-to-word-go i x w)
-    (if (= 16 i) w (u16-to-word-go (+ i 1) x
-      (if (= (fxand (fxarithmetic-shift-right x (- 15 i)) 1) 0)
-        (vector 'Word.o w)
-        (vector 'Word.i w)))))
-  (u16-to-word-go 0 x (vector 'Word.e)))
-
-; Joins a list of strings with an intercalated separator
-(define (kstring_join sep strs fst)
-  (if (null? strs) 
-    ""
-    (kstring-append
-      (if fst "" sep)
-      (car strs)
-      (kstring_join sep (cdr strs) #f))))
+(define prefix?
+  (lambda (str pref)
+    (let ((pref_length (string-length pref))
+          (str_length (string-length str)))
+      (if (<= pref_length str_length)
+        (string=?
+          (substring str 0 pref_length)
+          pref)
+        #f))))
 
 ; Returns the last index that chr occurs in str, -1 otherwise
 (define (last_index_of chr kstr idx)
@@ -276,7 +228,8 @@ Kind.Comp.Target.Scheme.base: String
 ; Prints a text with a newline
 (define (print txt)
   (display (kstring->string txt))
-  (display "\n"))
+  (display "
+"))
 
 ; Gets a line from stdin
 (define (get_line)
@@ -333,26 +286,135 @@ Kind.Comp.Target.Scheme.base: String
     ("get_dir" (lambda (x) (get_dir x)))
     ("get_file_mtime" (lambda (x) (get_file_mtime x)))
     ("get_time" (lambda (x) (get_time)))
-    (else (display (string-append "action not found: " name))))))
+    ("request" (lambda (x) ""))
+    (else (display (string-append "IO action not found: " name))))))
 
 ; Runs a Kind IO program
 (define (run_io io)
-  (case (get io 0)
-    ('IO.end (get io 1))
+  (case (vector-ref io 0)
+    ('IO.end (vector-ref io 1))
     ('IO.ask (let (
-      (io_query (get io 1))
-      (io_param (get io 2))
-      (io_then (get io 3)))
+      (io_query (vector-ref io 1))
+      (io_param (vector-ref io 2))
+      (io_then (vector-ref io 3)))
       (run_io (io_then ((io_action io_query) io_param)))))))
+
 (define (run_kind term)
   (if
     (and
       (vector? term)
       (or
-        (eq? (get term 0) 'IO.ask)
-        (eq? (get term 0) 'IO.end)))
+        (eq? (vector-ref term 0) 'IO.ask)
+        (eq? (vector-ref term 0) 'IO.end)))
     (run_io term)
-    (print term)))`
+    (print term)))
+
+(define (print-lines args)
+  (unless (null? args)
+    (display (car args))
+    (newline)
+    (print-lines (cdr args))))
+
+(define run-all
+    (lambda (p)
+      (let ((code (get-datum p)))
+        (unless (eq? code #!eof)
+          (compile code)
+          (run-all p)))))`
+
+Kind.Comp.Target.Scheme.kstring: String
+`; string-view record type (fast way to get a tail)
+(define-record string-view
+  ((immutable data)  ; underlying string
+   (immutable start) ; start position (inclusive)
+   (immutable end))) ; end position (exclusive)
+
+(define string-view-ref
+  (lambda (x y)
+    (string-ref (string-view-data x) (+ (string-view-start x) y))))
+
+(define kstring-tail
+  (lambda (x)
+    (if (string-view? x)
+      (make-string-view
+        (string-view-data x)
+        (+ (string-view-start x) 1)
+        (string-view-end x))
+      (make-string-view
+        x
+        1
+        (string-length x)))))
+
+(define kstring-head
+  (lambda (x)
+    (if (string-view? x)
+      (string-ref (string-view-data x) (string-view-start x))
+      (string-ref x 0))))
+
+(define kstring-length
+  (lambda (x)
+    (if (string-view? x)
+      (- (string-view-end x) (string-view-start x))
+      (string-length x))))
+
+(define kstring?
+  (lambda (x)
+    (or (string-view? x) (string? x))))
+
+(define kstring->string
+  (lambda (x)
+    (if (string-view? x)
+      (substring (string-view-data x) (string-view-start x) (string-view-end x))
+      x)))
+
+; TODO depending on x, we could safely append data at the end
+(define kstring-append
+  (lambda (x y)
+    (string-append (kstring->string x) (kstring->string y))))
+
+(define kstring-getter
+  (lambda (x)
+    (if (string-view? x)
+      string-view-ref
+      string-ref)))
+
+; Joins a list of strings with an intercalated separator
+(define (kstring_join sep strs fst)
+  (if (null? strs) 
+    ""
+    (kstring-append
+      (if fst "" sep)
+      (car strs)
+      (kstring_join sep (cdr strs) #f))))`
+
+Kind.Comp.Target.Scheme.insts: String
+`; Short alias to vector-ref
+(define get vector-ref)
+
+; Converts a Kind word to a native integer
+(define (word-to-u16 w)
+  (define (word-to-u16-go i w x)
+    (cond ((= 16 i) x)
+      ((symbol=? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x))
+      ((symbol=? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x))
+      ((symbol=? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
+  (word-to-u16-go 0 w 0))
+
+; Converts a native integer to a Kind word
+(define (u16-to-word x)
+  (define (u16-to-word-go i x w)
+    (if (= 16 i) w (u16-to-word-go (+ i 1) x
+      (if (= (fxand (fxarithmetic-shift-right x (- 15 i)) 1) 0)
+        (vector 'Word.o w)
+        (vector 'Word.i w)))))
+  (u16-to-word-go 0 x (vector 'Word.e)))`
+
+Kind.Comp.Target.Scheme.base: String
+  Kind.Comp.Target.Scheme.kstring
+  | "\n"
+  | Kind.Comp.Target.Scheme.utils
+  | "\n"
+  | Kind.Comp.Target.Scheme.insts
 
 
 // Instantiators
@@ -575,14 +637,8 @@ Kind.Comp.Target.Scheme.definition(name: String, term: Kind.Comp, defs: Kind.Com
   let code = code | ")\n"
   code
 
-// Converts Comp definitions to a Scheme program.
-Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
-  //let defs_list = Kind.Map.to_list!(defs)
-  let defs_list = Kind.Comp.dependency_sort(main, defs)
-
-  // Basic dependencies
-  let code = Kind.Comp.Target.Scheme.base | "\n\n"
-
+Kind.Comp.Target.Scheme.defines(defs_list: List<Pair<String, Kind.Comp>>, defs: Kind.Comp.Defs): String
+  let code = ""
   // Instantiatior and Eliminator functions
   for nati in Kind.Comp.Prim.natives with code:
     let {name,prim} = nati
@@ -593,4 +649,26 @@ Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
   for defn in defs_list with code:
     let {name,term} = defn
     code | Kind.Comp.Target.Scheme.definition(name, term, defs)
+  code
+
+// Converts Comp definitions to a Scheme program.
+Kind.Comp.Target.Scheme(main: String, defs: Kind.Comp.Defs): String
+  //let defs_list = Kind.Map.to_list!(defs)
+  let defs_list = Kind.Comp.dependency_sort(main, defs)
+
+  // Basic dependencies
+  let code = Kind.Comp.Target.Scheme.base | "\n\n"
+  let code = code|Kind.Comp.Target.Scheme.defines(defs_list, defs)
   code|"\n(run_kind "|main|")"
+
+Kind.Comp.Target.Scheme.module(name: String, exports: List<String>, defs: Kind.Comp.Defs): String
+  let defs_list = Kind.Comp.dependency_sort.module(exports, defs)
+  let code = "(library ("|name|") (export"
+  for export in exports with code:
+    code|" "|export
+  let code = code|")\n"
+
+  let code = code|`(import (chezscheme)\n(kstring))\n`
+  let code = code | Kind.Comp.Target.Scheme.insts | "\n\n"
+  let code = code | Kind.Comp.Target.Scheme.defines(defs_list, defs)|")"
+  code

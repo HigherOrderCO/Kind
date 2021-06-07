@@ -1,13 +1,11 @@
 App.Kaelin.Draw.draft.player(hero: Maybe(U8)): DOM
-  let name =
-    case hero {
-      none: "Choosing"
-      some: let hero = App.Kaelin.Hero.info(hero.value)
-        case hero {
-          none: "Choosing"
-          some: hero.value@name
-        }
-    }
+  let {name, image} = Maybe {
+      get hero_id = hero
+      get hero = App.Kaelin.Hero.info(hero_id)
+      let assets = hero@assets
+      return {hero@name,assets@base64}
+    } <> {"Choosing", App.Kaelin.Draw.draft.interrogation}
+  
   DOM.node("div", {},
   { "width": "100%"
     "height": "100%"
@@ -32,7 +30,7 @@ App.Kaelin.Draw.draft.player(hero: Maybe(U8)): DOM
     { "width":"50%" 
       "height":"auto"}
     [
-      DOM.node("img", {"src": App.Kaelin.Draw.draft.croni}
+      DOM.node("img", {"src": image}
       { "width": "100%"
         "height": "auto"
         "image-rendering": "pixelated"} 

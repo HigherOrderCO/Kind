@@ -4,8 +4,9 @@ App.Kaelin.Resources.terrains(
 ): VoxBox
 
     case indicator { 
-      green: App.Kaelin.Assets.tile.green_2
+      green: App.Kaelin.Assets.tile.effect.blue_green2
       red: App.Kaelin.Assets.tile.effect.dark_red2
       yellow: App.Kaelin.Assets.tile.effect.light_red2
       blue: App.Kaelin.Assets.tile.effect.dark_blue2
+      background: App.Kaelin.Assets.tile.green_2
     }

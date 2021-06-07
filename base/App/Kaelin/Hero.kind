@@ -3,7 +3,7 @@
 type App.Kaelin.Hero {
   new(
     name: String 
-    img: VoxBox
+    assets: App.Kaelin.HeroAssets
     max_hp: I32
     max_ap: I32
     skills: List<App.Kaelin.Skill>

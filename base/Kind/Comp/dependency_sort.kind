@@ -1,3 +1,12 @@
+Kind.Comp.dependency_sort.module(exports: List<String>, defs: Kind.Comp.Defs): List(Pair(String,Kind.Comp))
+  let ret = {Kind.Map.new!, []} :: Pair<Kind.Map<Unit>, List<Pair<String, Kind.Comp>>>
+  for export in exports with ret:
+    let term = Kind.Comp.ref(export)
+    let {seen, list} = ret
+    Kind.Comp.dependency_sort.go(term, defs, seen, list)
+  let {seen, list} = ret
+  List.reverse!(list)
+
 Kind.Comp.dependency_sort(main: String, defs: Kind.Comp.Defs): List(Pair(String,Kind.Comp))
   let term = Kind.Comp.ref(main)
   let seen = Kind.Map.new!
@@ -36,7 +45,7 @@ Kind.Comp.dependency_sort.go(
           let term = got_term.value
           let seen = Kind.Map.set!(term.name, unit, seen)
           let {seen,list} = Kind.Comp.dependency_sort.go(term, defs, seen, list)
-          let list = List.cons!({term.name,got_term.value}, list)
+          let list = List.cons!({term.name, got_term.value}, list)
           {seen, list}
       }
     }

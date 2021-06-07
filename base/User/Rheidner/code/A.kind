@@ -1,0 +1,48 @@
+User.Rheidner.code.A: _
+  IO {
+    get line = IO.get_line
+    let n = Nat.read(line)
+    get xs = monta_lista(n, 0, [])
+    // IO.print(List.show!( (x) Nat.show(x@fst), xs ))
+    let xs = User.Rheidner.LeftistTree.sort!(xs, compare)
+    // IO.print(List.show!( (x) Nat.show(x@fst), xs ))
+    get result = solve(0, 0, 0, xs)
+    IO.put_string(Nat.show(result@snd) | " " | Nat.show(result@fst) | "\n")
+  }
+
+Year: Type
+  Pair<Nat, Bool>
+
+monta_lista(n: Nat, contador: Nat, xs: List<Year>): IO(List<Year>)
+  if Nat.eql(contador, n) then 
+    IO { return xs }
+  else 
+    IO {
+      get line_two = IO.get_line
+      let line_num = List.map!!(Nat.read, String.split(line_two, " "))
+      let b = line_num[0] <> 0
+      let d = line_num[1] <> 0
+      monta_lista(n, contador + 1, {b, true} & {d, false} & xs)
+    }
+
+compare(a: Year, b: Year): Cmp
+  if Nat.eql(a@fst, b@fst) then
+    if Bool.eql(a@snd, b@snd) then 
+      Cmp.eql 
+    else 
+      if a@snd then cmp.gtn else Cmp.ltn
+  else 
+    Nat.cmp(a@fst, b@fst)
+  
+solve(max: Nat, year_max: Nat, pessoas: Nat, xs: List<Year>): IO(Pair<Nat, Nat>)
+  IO {
+    case xs {
+      nil: IO { return Pair.new!!(max, year_max) }
+      cons: 
+        let new_pessoas = if xs.head@snd then pessoas + 1 else pessoas - 1
+        if Nat.gtn(new_pessoas, max) then
+          solve(new_pessoas, xs.head@fst, new_pessoas, xs.tail)
+        else
+          solve(max, year_max, new_pessoas, xs.tail)
+    }
+  }

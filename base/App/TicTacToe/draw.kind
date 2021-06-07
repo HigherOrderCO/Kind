@@ -1,0 +1,41 @@
+side_board : I32
+  U32.to_i32(App.TicTacToe.constant.size)
+  
+App.TicTacToe.draw_vertical_lines(img : VoxBox) : VoxBox
+    let side_tale = (side_board/3) :: I32
+    let edge = (side_board/12) :: I32
+    let img = VoxBox.Draw.line(side_tale, edge, side_tale, side_board-edge, 0, Col32.new(0, 0, 0, 255), img)
+    VoxBox.Draw.line(side_board-side_tale, edge, side_board-side_tale, side_board-edge, 0, Col32.new(0, 0, 0, 255), img)
+
+App.TicTacToe.draw_horizontal_lines(img : VoxBox) : VoxBox
+    let side_tale = (side_board/3) :: I32
+    let edge = (side_board/12) :: I32
+    let img = VoxBox.Draw.line(edge, side_tale, side_board-edge, side_tale, 0, Col32.new(0, 0, 0, 255), img)
+    VoxBox.Draw.line(edge, side_board - side_tale, side_board-edge, side_board - side_tale, 0, Col32.new(0, 0, 0, 255), img)
+    
+App.TicTacToe.draw(img: VoxBox): App.Draw<App.TicTacToe.State>
+(state)
+     let img = App.TicTacToe.draw_vertical_lines(img)
+     let img = App.TicTacToe.draw_horizontal_lines(img)
+     open state
+     let {img, count} = Vector.fold!!(9, {img, 8#32}, (entity, pair) 
+      open pair
+      case entity {
+       none : {pair.fst, pair.snd-1}
+       some : 
+         let {x, y} = App.TicTacToe.pos.posvector_to_pair(pair.snd)
+         let img = VoxBox.Draw.image(x, y, 1, App.TicTacToe.entity.to_assets(entity.value), pair.fst)
+         {img, pair.snd-1}
+     }, state.local@board)
+     open state.local
+     let img = case state.local.line as line {
+       some : 
+          let lines = line.value
+          open lines
+          let {x, y} = App.TicTacToe.pos.posvector_to_pair(lines.fst)
+          let {x1, y1} = App.TicTacToe.pos.posvector_to_pair(lines.snd)
+           img
+        //  VoxBox.Draw.line(U32.to_i32(x), U32.to_i32(y), U32.to_i32(x1), U32.to_i32(y1), 0, Col32.new(0, 0, 0, 255), img)
+       none : img
+     }
+     DOM.vbox({}, {}, img)

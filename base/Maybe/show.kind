@@ -1,0 +1,5 @@
+Maybe.show(A : Type, f : A -> String, m : Maybe<A>) : String
+  case m {
+      none : "none()"
+      some : "some" | "(" | f(m.value) | ")" 
+  } 
