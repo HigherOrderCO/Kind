@@ -1,3 +1,0 @@
-// Concatenate any number of chars
-String.conses: (n: Nat) -> Variadic(n, Char, String)
-  Variadic.foldr!!(String.cons, String.nil)
