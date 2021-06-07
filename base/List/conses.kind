@@ -1,0 +1,3 @@
+// Concatenate any number of elements
+List.conses<A: Type>(n: Nat): Variadic(n, A, List(A))
+  Variadic.foldr!!(List.cons<A>, List.nil<A>, n)
