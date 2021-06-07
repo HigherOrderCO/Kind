@@ -1,6 +1,4 @@
-// type Foo {
-//   new(pair: Pair<F64,F64>)
-// }
-
 Test: _
-  and(true, true)
+  Buffer32.show(Buffer32.from("abc"))
+
+// Test using 𐍈 nothing worked.
