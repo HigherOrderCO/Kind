@@ -1,0 +1,5 @@
+App.Kaelin.Assets.hero.croni: App.Kaelin.HeroAssets
+  App.Kaelin.HeroAssets.new(
+    App.Kaelin.Assets.hero.croni.vbox_idle
+    App.Kaelin.Assets.hero.croni.base64_idle
+  )

@@ -7,5 +7,7 @@ App.Kaelin.Tile.creature.restore_ap(
     true: 
       creature
     false:
-      creature@ap <- hero@max_ap
+      new_ap = I32.div(hero@max_ap, 2)
+      max_ap = I32.min(I32.add(creature.ap, new_ap), hero@max_ap)
+      creature@ap <- max_ap
   }

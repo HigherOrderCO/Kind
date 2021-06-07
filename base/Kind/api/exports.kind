@@ -1,0 +1,11 @@
+Kind.api.exports: List<String>
+  ["Kind.api.io.term_to_core"
+  "Kind.api.io.term_to_scheme"
+  "Kind.api.io.terms_to_scheme_lib"
+  "Kind.api.io.check_file"
+  "Kind.api.io.check_files"
+  "Kind.api.io.check_term"
+  "Kind.api.io.show_term"
+  "Kind.api.io.show_term_normal"
+  "Kind.api.check_code"
+  "Kind.Term.read"]

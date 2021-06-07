@@ -1,0 +1,58 @@
+Kind.Parser.dom: Parser(DOM)
+  Kind.Parser.dom.node
+
+Kind.Parser.dom.node: Parser(DOM)
+  Parser {
+    Kind.Parser.text("<%")
+    get tag = Kind.Parser.name1
+    Kind.Parser.spaces
+    get props = Parser.many!(Kind.Parser.dom.prop)
+    let props = Kind.Parser.dom.gen_props_style(props)
+    Kind.Parser.text("%>")
+    get children = Parser.many!(Parser.first_of!([
+      Kind.Parser.dom.node,
+      Kind.Parser.dom.text,
+    ]))
+    Kind.Parser.text("<%/"| tag |"%>")
+    return DOM.node(tag, props@fst, props@snd, children)
+  }
+
+Kind.Parser.dom.text: Parser(DOM)
+  Parser {
+    get name = Kind.Parser.name1
+    return DOM.text(name)
+  }
+
+Kind.Parser.dom.none: Parser(DOM)
+  Parser {
+    Kind.Parser.text("")
+    return DOM.text("")
+  }
+
+Prop: Type
+  Pair<String, String>
+
+Kind.Parser.dom.prop: Parser(Prop)
+  Parser {
+    get prop = Kind.Parser.name1
+    Kind.Parser.text("=")
+    Kind.Parser.text("\"")
+    get value = Kind.Parser.name1
+    Kind.Parser.text("\"")
+    Kind.Parser.spaces
+    return Pair.new!!(prop, value)
+  }
+
+Kind.Parser.dom.gen_props_style(values: List<Prop>): Pair<Map<String>, Map<String>>
+  Kind.Parser.dom.gen_props_style.go(values, {{}, {}})  
+
+Kind.Parser.dom.gen_props_style.go(values: List<Prop>, result: Pair<Map<String>, Map<String>>): Pair<Map<String>, Map<String>>
+  case values {
+    nil: result
+    cons: 
+      let {name, value} = values.head
+      if String.eql(name, "style") then
+        Kind.Parser.dom.gen_props_style.go(values.tail, {result@fst, result@snd{name} <- value})
+      else
+        Kind.Parser.dom.gen_props_style.go(values.tail, {result@fst{name} <- value, result@snd})
+  }

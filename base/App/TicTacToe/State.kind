@@ -1,0 +1,10 @@
+type App.TicTacToe.State.global {
+   new
+}
+
+type App.TicTacToe.State.local {
+  new(board : Vector<Maybe<App.TicTacToe.Entity>, 9>, player : App.TicTacToe.Entity, line : Maybe<Pair<U32, U32>>, info : App.EnvInfo)
+}
+
+App.TicTacToe.State: App.State
+  App.State.new(App.TicTacToe.State.local, App.TicTacToe.State.global)

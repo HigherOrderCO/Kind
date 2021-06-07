@@ -1,0 +1,2 @@
+List.sequenceA.move(A : Type, xs : List<A>, ys : List<List<A>>) : List<List<A>>
+  List.foldr!!([], ((a, s) List.concat!(List.map!!(List.cons!(a), ys), s)), xs)

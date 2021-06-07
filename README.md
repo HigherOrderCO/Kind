@@ -1,34 +1,68 @@
 # Kind
 
-A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. On the surface, it looks more like TypeScript. Compared to most proof assistants, Kind has:
+A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. That means it can handle mathematical theorems just like Coq, Idris, Lean and Agda. On the surface, it aims to be more practical and looks more like TypeScript. Compared to other proof assistants, Kind has:
 
 1. The smallest core. Check this [700-LOC](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) reference implementation. It has the whole type system!
 
-2. More powerful type-level features. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
+2. Novel type-level features. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
 
-3. A collection of friendly syntax sugars that make it less scary. Check [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md).
+3. An accessible syntax that makes it less scary. Check [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md).
 
-4. Boostrapping: the language is fully implemented in itself! Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
+4. A complete bootstrap: the language is implemented in itself. Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
 
-5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for a list of apps.
-
-    *Most apps disabled for a major update that will bring rollback netcode. Check again on May 17!*
+5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for a list of apps. (WIP)
 
 Usage
 -----
-![npm](https://img.shields.io/npm/v/kind-lang)  
+![npm](https://img.shields.io/npm/v/kind-lang)  [![telegram](https://img.shields.io/badge/chat-on%20telegram-blue)](https://t.me/formality_lang)
+
+1. Install Kind using `npm` (alternative releases soon):
 
 ```bash
-npm i -g kind-lang                             # installs Kind
-git clone https://github.com/uwu-tech/Kind     # clones base libs
-cd Kind/base                                   # enters base libs
-kind Main                                      # checks Main.kind
-kind Main --run                                # runs Main
+npm i -g kind-lang
 ```
 
-*Right now, you must be at `kind/base` to use the language.*
+2. Save the file below as `Main.kind`:
 
-Haskell and Scheme compilers and releases expected around June.
+```
+Main: IO(Unit)
+  IO {
+    IO.print("Hello, world!")
+  }
+```
+
+3. Type-check it:
+
+```
+kind Main
+```
+
+4. Run it:
+
+```
+kind Main --run
+```
+
+5. Have fun!
+
+Things you can do with Kind:
+----------------------------
+
+### Compile programs and modules to several targets.
+
+Kind has an universal compiler that targets several back-ends. Just find what you need on Kind, and compile it with `kind Main --lang`. For example, to generate a QuickSort function in JavaScript, just type `kind List.quicksort --js`. You may never write code in any other language! Available targets: `--js`, `--scm`. Several more will be available this month.
+
+### Create live applications.
+
+Kind has an interconnected back-end that allows you to create rich, interactive applications without ever touching databases, TCP packets or messing with apis. Just add a file to `base/App` and it will be available on [http://uwu.tech/](http://uwu.tech). You can fork entire applications - not just the front-end, but all of it, back-end, database, and networking - in seconds.
+
+### Prove theorems.
+
+No, theorems are not scary things mathematicians do. For programmers, they're more like unit tests, except they can involve symbols, allowing you to cover infinitely many test cases. If you like unit tests, you'll love theorems. To learn more, check [THEOREMS.md](THEOREMS.md).
+
+### Deploy Smart-Contracts.
+
+(TODO) *Ethereum: we're coming for you.*
 
 Examples
 --------
@@ -252,36 +286,3 @@ App.Hello.when: App.When<App.Hello.State>
 Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
 
 Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
-
-You can create your own UwU.Tech app by adding a file to `base/App`, with an `App.YourApp` `:` [App](https://github.com/uwu-tech/Kind/blob/master/base/App.kind)`(...)` definition.
-
-Resources
----------
-
-- Syntax reference: [SYNTAX.md](SYNTAX.md).
-
-- Theorem proving tutorial: [THEOREMS.md](THEOREMS.md).
-
-- Base library: [base](https://github.com/uwu-tech/Kind/tree/master/base).
-
-- [Telegram chat](https://t.me/formality_lang)! 
-
-- Discord server (TODO)
-
-[trusted core]: https://github.com/moonad/FormCoreJS
-
-[FormCore-to-Haskell]: https://github.com/moonad/FormCoreJS/blob/master/FmcToHs.js
-
-[kind.js]: https://github.com/uwu-tech/Kind/blob/master/bin/js/base/kind.js
-
-[Agda]: https://github.com/agda/agda
-
-[Idris]: https://github.com/idris-lang/Idris-dev
-
-[Coq]: https://github.com/coq/coq
-
-[Lean]: https://github.com/leanprover/lean
-
-[Absal]: https://medium.com/@maiavictor/solving-the-mystery-behind-abstract-algorithms-magical-optimizations-144225164b07
-
-[JavaScript compiler]:https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js

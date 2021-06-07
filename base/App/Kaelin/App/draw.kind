@@ -7,7 +7,7 @@ App.Kaelin.App.draw(
   stage = state.global@stage
   case stage {
     init: App.Kaelin.Draw.init(state.local@input)
-    draft: App.Kaelin.Draw.draft(stage.players, stage.coords, state.local@user)
+    draft: App.Kaelin.Draw.draft(state)
     planning: App.Kaelin.Draw.game(img, state)
     action: App.Kaelin.Draw.game(img, state)
   }

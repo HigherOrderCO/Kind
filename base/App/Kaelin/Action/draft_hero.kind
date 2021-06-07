@@ -16,7 +16,7 @@ App.Kaelin.Action.draft_hero(
           glob
         some: 
           open player.value
-          let new_player = App.Kaelin.DraftInfo.new(some(hero), player.value.team)
+          let new_player = App.Kaelin.DraftInfo.new(some(hero), player.value.team, false)
           let new_map    = map{user} <- new_player
           let new_stage  = App.Kaelin.Stage.draft(new_map, glob.stage.coords)
           glob@stage <- new_stage

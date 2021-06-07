@@ -5,7 +5,7 @@ Kind.Synth.load.cached.def(name: Kind.Name): IO<Maybe<Kind.Def>>
     if Bool.not(String.is_empty(cache_file)) then IO {
       //IO.print("-- cache file isn't empty " | name)
       get cache_time = IO.get_file(String.to_lower(".cache/"|name|".time"))
-      get cache_file_time = IO.get_file_mtime(String.to_lower(cache_file))
+      get cache_file_time = IO.get_file_mtime(cache_file)
       if String.eql(cache_time, cache_file_time) then IO {
         //IO.print("-- cache time is correct " | name)
         get cache_term = IO.get_file(String.to_lower(".cache/"|name|".term"))

@@ -2,6 +2,7 @@ type App.Kaelin.Skill{
 	new(
   	name: String,
 		range: I32,
+    ap_cost: I32,
 		effect: App.Kaelin.Effect<Unit>,
 		key: Char,
 	)

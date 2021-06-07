@@ -3,4 +3,5 @@ type App.Kaelin.Indicator {
   red
   yellow
   blue
+  background
 }

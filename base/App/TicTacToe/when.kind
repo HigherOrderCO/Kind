@@ -1,0 +1,24 @@
+App.TicTacToe.when: App.When<App.TicTacToe.State>
+  (event, state)
+   case event {
+     mouse_up :
+        open state
+        case App.TicTacToe.state.play(state.local) as st {
+          none : App.pass!
+          some  : 
+          open App.TicTacToe.state.new_turn(st.value) as turn
+          case turn.snd as winner {
+            none : App.set_local!(turn.fst)
+            some :
+              let v = winner.value
+              open v
+              IO {
+                App.print!("O jogador " | App.TicTacToe.entity.show(v.fst) | " ganhou")
+                App.set_local!(turn.fst)
+              }
+          } 
+        }
+      frame : 
+        open state
+        App.set_local!(state.local@info <- event.info)
+   } default App.pass!

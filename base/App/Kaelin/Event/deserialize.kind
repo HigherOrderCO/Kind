@@ -71,10 +71,6 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
           get coord = next
           return App.Kaelin.Event.draft_coord(App.Kaelin.Coord.Convert.nat_to_axial(coord)) 
         }
-      8:
-        App.Kaelin.Event.Buffer {
-          return App.Kaelin.Event.draft_end
-        }
       9:
         App.Kaelin.Event.Buffer {
           return App.Kaelin.Event.to_draft
@@ -84,6 +80,16 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
           push(App.Kaelin.Event.Code.draft_team)
           get team = next
           return App.Kaelin.Event.draft_team(Nat.to_u8(team))
+        }
+      14:
+        App.Kaelin.Event.Buffer {
+          push(App.Kaelin.Event.Code.draft_ready)
+          get ready = next
+          return App.Kaelin.Event.draft_ready(Nat.to_u8(ready))
+        }
+      15:
+        App.Kaelin.Event.Buffer {
+          return App.Kaelin.Event.control_map
         }
    } default fail!
  }

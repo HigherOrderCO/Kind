@@ -1,0 +1,8 @@
+//Linearly interpolates between A and B by the C
+F64.lerp(
+  a: F64
+  b: F64
+  c: F64
+): F64
+
+ a + ((b - a) * c)

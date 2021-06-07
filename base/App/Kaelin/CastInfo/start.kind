@@ -2,13 +2,15 @@ App.Kaelin.CastInfo.start(
   player: String,
   key_code: U16,
   target_pos: App.Kaelin.Coord,
-  global: App.Kaelin.State.global
+  state: App.Store<App.Kaelin.State>
 ): Maybe<App.Kaelin.CastInfo.local>
-
+  
+  let global = state@global
   open global
+
   result = Maybe {
     // get local map
-    get map = App.Kaelin.Stage.planning.get_map(global.stage)
+    let map = App.Kaelin.Stage.get_map(state)
     // get player info and skill
     get player_info = App.Kaelin.Map.player.info(player, map)
     let player_coord = player_info@fst

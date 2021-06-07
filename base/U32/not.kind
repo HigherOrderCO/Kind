@@ -1,0 +1,4 @@
+U32.not(a: U32): U32
+  let a_val = U32.add(1#32, a)@value
+  U32.new(Word.neg<32>(a_val))
+
