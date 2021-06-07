@@ -1,0 +1,101 @@
+// Core grammar
+// ============
+
+Kind.Comp.Target.Javascript.null: String
+  "null"
+
+Kind.Comp.Target.Javascript.name(name: String): String
+  def replace_dots = (x)
+    if Char.eql(x, '.') then
+      '$'
+    else
+      x
+  String.map(replace_dots, name)
+
+Kind.Comp.Target.Javascript.elim_name(name: String): String
+  name|"-elim"
+
+Kind.Comp.Target.Javascript.inst_name(name: String): String
+  name|"-inst"
+
+Kind.Comp.Target.Javascript.lambda(name: String, body: String): String
+  "(("|Kind.Comp.Target.Javascript.name(name)|") => { return "|body|";})"
+
+Kind.Comp.Target.Javascript.application(func: String, argm: String): String
+  func|"("|argm|")"
+
+Kind.Comp.Target.Javascript.local_definition(name: String, expr: String, body: String): String
+  "const "|Kind.Comp.Target.Javascript.name(name)|" = "|expr|";\n"
+  |body
+
+Kind.Comp.Target.Javascript.global_function(name: String, args: List<String>, body: String): String
+  case args {
+    nil:
+      "const "|Kind.Comp.Target.Javascript.name(name)
+      |" = "|body|";\n"
+    cons:
+      "function "|Kind.Comp.Target.Javascript.name(name)|"$("
+      |String.join(",", args)|"){"|body|"};\n"
+      |Kind.Comp.Target.Javascript.nest_lambdas(name, args)
+  }
+
+Kind.Comp.Target.Javascript.global_application(name: String, args: List<String>): String
+  // #TODO
+  Kind.Comp.Target.Javascript.name(name)
+  |"$("|String.join(",", args)|");"
+
+Kind.Comp.Target.Javascript.nest_lambdas(name: String, args: List<String>): String
+  let body = Kind.Comp.Target.Javascript.nest_lambdas.aux(name, args, args)
+  "(define " | name | " " | body | ")\n"
+
+Kind.Comp.Target.Javascript.nest_lambdas.aux(fun: String, args: List<String>, rem_args: List<String>): String
+  def this = Kind.Comp.Target.Javascript.nest_lambdas.aux(fun, args)
+  case rem_args {
+    nil:
+      Kind.Comp.Target.Javascript.global_application(fun, args)
+    cons:
+      Kind.Comp.Target.Javascript.lambda(rem_args.head, this(rem_args.tail))
+  }
+
+Kind.Comp.Target.Javascript.module(name: String, exports: List(String), defs: String): String
+  def make_export = (n)
+    "'"|n|"': "|Kind.Comp.Target.Javascript.name(n)
+  let ret = "module.exports = (function (){\n"|defs
+  let export_list = String.join(",\n",
+    List.map!!(make_export, exports))
+  let ret = ret|"return {\n"|export_list|"};\n})();"
+  ret
+
+Kind.Comp.Target.Javascript.program(main: String, defs: String): String
+  // #TODO
+  ?d
+
+Kind.Comp.Target.Javascript.string_literal(str: String): String
+  case str {
+    nil:
+      ""
+    cons:
+      (if U16.eql(str.head, '\\') || U16.eql(str.head, '"') then
+        "\\" | Char.to_string(str.head)
+      else if U16.gte(str.head, ' ') && U16.lte(str.head, '~') then
+        Char.to_string(str.head)
+      else
+        "\\x" | U16.show_hex(str.head) | ";"
+      ) | Kind.Comp.Target.Javascript.string_literal(str.tail)
+  }
+
+Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
+  Kind.Comp.Grammar.new(
+    Kind.Comp.Target.Javascript.null
+    Kind.Comp.Target.Javascript.name
+    Kind.Comp.Target.Javascript.inst_name
+    Kind.Comp.Target.Javascript.elim_name
+    Kind.Comp.Target.Javascript.lambda
+    Kind.Comp.Target.Javascript.application
+    Kind.Comp.Target.Javascript.local_definition
+    Kind.Comp.Target.Javascript.global_function
+    Kind.Comp.Target.Javascript.global_application
+    Kind.Comp.Target.Javascript.string_literal
+    Kind.Comp.Target.Javascript.module
+    Kind.Comp.Target.Javascript.program
+  )
