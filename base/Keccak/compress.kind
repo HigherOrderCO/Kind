@@ -1,0 +1,15 @@
+Keccak.compress(buf: Buffer32): Buffer32
+  def shl = U32.shl
+  def add = U32.add
+  let dep = buf@depth
+  let cdep = Nat.sub(dep, 2)
+  let cbuf = Buffer32.alloc(cdep)
+  for i : U32 from 0 to Nat.to_u32(Nat.pow(2, cdep)) with cbuf:
+    let j  = U32.mul(4u, i)
+    let b0 = Buffer32.get(j, buf)
+    let b1 = Buffer32.get(add(j, 1u), buf)
+    let b2 = Buffer32.get(add(j, 2u), buf)
+    let b3 = Buffer32.get(add(j, 3u), buf)
+    let w  = add(b0, shl(add(b1, shl(add(b2, shl(b3, 8u)), 8u)), 8u))
+    Buffer32.set(i, w, cbuf)
+  cbuf
