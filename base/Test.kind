@@ -1,0 +1,4 @@
+Test: _
+  Buffer32.show(Buffer32.from("abc"))
+
+// Test using 𐍈 nothing worked.

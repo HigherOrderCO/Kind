@@ -1,0 +1,8 @@
+Buffer32.copy(buf: Buffer32): Buffer32
+  let dep = buf@depth
+  let max = Nat.pow(2, dep)
+  let new_buf = Buffer32.alloc(dep)
+  for i from 0 to max with new_buf:
+    let aux = Nat.to_u32(i)
+    Buffer32.set(aux, Buffer32.get(aux, buf), new_buf)
+  new_buf

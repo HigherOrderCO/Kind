@@ -1,3 +1,4 @@
+// Shift 'n' a bits to the left
 U8.shl(n: U8, a: U8): U8
   open n
   open a
