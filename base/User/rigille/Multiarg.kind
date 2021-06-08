@@ -44,20 +44,19 @@ type Association <A: Type, op: A -> A -> A> ~ (c: Nat, exp: MultiArg<A, A>(c)) {
   ) ~ (c = Nat.add(n, m), exp = MultiArg.join<A, A, A, A>(n, m, op, fst, snd))
 }
 
-Associative<A: Type>(op: A -> A -> A): A -> A -> A -> Type
-  (a, b, c)
-    Equal<A>(op(op(a, b), c), op(a, op(b, c)))
+Associative<A: Type>(op: A -> A -> A): Type
+  (a: A, b: A, c: A) -> Equal<A>(op(op(a, b), c), op(a, op(b, c)));
 
-Association.unique<A: Type>(
-  op: A -> A -> A
-  Hyp0: Associative<A>(op)
-  n: Nat
-  fst: MultiArg<A, A>(n)
-  snd: MultiArg<A, A>(n)
-  Hyp1: Association<A, op, n>(fst)
-  Hyp2: Association<A, op, n>(snd)
-): MultiArg.equal<A, A>(n, fst, snd)
-  ?a
+//Association.unique<A: Type>(
+//  op: A -> A -> A
+//  Hyp0: Associative<A>(op)
+//  n: Nat
+//  fst: MultiArg<A, A>(n)
+//  snd: MultiArg<A, A>(n)
+//  Hyp1: Association<A, op, n>(fst)
+//  Hyp2: Association<A, op, n>(snd)
+//): MultiArg.equal<A, A>(n, fst, snd)
+//  ?a
 
 //Kind.Term.Shorthand(name: Kind.Name, n: Nat): MultiArg<Kind.Term>(n)
 //  case n {
