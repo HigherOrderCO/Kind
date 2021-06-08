@@ -67,8 +67,8 @@ Kind.Comp.Target.Javascript.module(name: String, exports: List(String), defs: St
   ret
 
 Kind.Comp.Target.Javascript.program(main: String, defs: String): String
-  // #TODO
-  ?d
+  Kind.Comp.Target.Javascript.module(main, [main], defs)|"\n"|
+  "var MAIN=module.exports['"|main|"']; try { console.log(JSON.stringify(MAIN,null,2) || '<unprintable>') } catch (e) { console.log(MAIN); };\n"
 
 Kind.Comp.Target.Javascript.string_literal(str: String): String
   case str {
