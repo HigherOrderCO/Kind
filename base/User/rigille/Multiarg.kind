@@ -1,14 +1,20 @@
-MultiArg<A: Type, B: Type>(n: Nat): Type
+// TODO use Variadic instead
+MultiArg(A: Type, B: Type, n: Nat): Type
   case n {
     zero: B
     succ: A -> MultiArg<A, B>(n.pred)
   }
 
+MultiForall(A: Type, n: Nat, B: MultiArg(A, Type, n)): Type
+  case n with B {
+    zero: B
+    succ: (a: A) -> MultiForall(A, n.pred, B(a))
+  }!
+
 MultiArg.wrap<A: Type, B: Type, C: Type>(n: Nat, outer: B -> C, inner: MultiArg<A, B>(n)): MultiArg<A, C>(n)
   case n with inner {
     zero:
-      let ret = outer(inner)
-      ret
+      outer(inner)
     succ:
       (x) MultiArg.wrap<A, B, C, n.pred>(outer, inner(x))
   }!
@@ -27,12 +33,25 @@ MultiArg.join<A: Type, B: Type, C: Type, D: Type>(
       (x) MultiArg.join<A, B, C, D>(n.pred, m, join, l(x), r)
   }!
 
+MultiArg.together<A: Type, B: Type, C: Type, D: Type>(
+  n: Nat
+  join: B -> C -> D
+  l: MultiArg<A, B>(n)
+  r: MultiArg<A, C>(n)
+): MultiArg<A, D>(n)
+  case n with l r {
+    zero:
+      join(l, r)
+    succ:
+      (x) MultiArg.together<A, B, C, D>(n.pred, join, l(x), r(x))
+  }!
+
 MultiArg.equal<A: Type, B: Type>(
   n: Nat
   l: MultiArg<A, B>(n)
   r: MultiArg<A, B>(n)
-): MultiArg<A, Type>(Nat.add(n, n))
-  MultiArg.join<A, B, B, Type, n, n>(Equal<B>, l, r)
+): MultiArg<A, Type>(n)
+  MultiArg.together<A, B, B, Type>(n, Equal<B>, l, r)
 
 type Association <A: Type, op: A -> A -> A> ~ (c: Nat, exp: MultiArg<A, A>(c)) {
   inst(a: A) ~ (c = 0, exp = a)
@@ -45,18 +64,24 @@ type Association <A: Type, op: A -> A -> A> ~ (c: Nat, exp: MultiArg<A, A>(c)) {
 }
 
 Associative<A: Type>(op: A -> A -> A): Type
-  (a: A, b: A, c: A) -> Equal<A>(op(op(a, b), c), op(a, op(b, c)));
+  def ret = (a: A, b: A, c: A) -> Equal<A>(op(op(a, b), c), op(a, op(b, c)));
+  ret
 
-//Association.unique<A: Type>(
-//  op: A -> A -> A
-//  Hyp0: Associative<A>(op)
-//  n: Nat
-//  fst: MultiArg<A, A>(n)
-//  snd: MultiArg<A, A>(n)
-//  Hyp1: Association<A, op, n>(fst)
-//  Hyp2: Association<A, op, n>(snd)
-//): MultiArg.equal<A, A>(n, fst, snd)
-//  ?a
+Association.unique<A: Type>(
+  op: A -> A -> A
+  Hyp0: Associative<A>(op)
+  n: Nat
+  fst: MultiArg(A, A, n)
+  snd: MultiArg(A, A, n)
+  Hyp1: Association(A, op, n, fst)
+  Hyp2: Association(A, op, n, snd)
+): MultiForall(A, n, MultiArg.equal(A, A, n, fst, snd))
+  case n with fst snd Hyp1 Hyp2 {
+    zero:
+      ?a
+    succ:
+      ?b
+  }!
 
 //Kind.Term.Shorthand(name: Kind.Name, n: Nat): MultiArg<Kind.Term>(n)
 //  case n {
