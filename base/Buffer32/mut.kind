@@ -1,0 +1,3 @@
+Buffer32.mut(idx: U32, f: U32 -> U32, buf: Buffer32): Buffer32
+  Buffer32.set(idx, f(Buffer32.get(idx, buf)), buf)
+

@@ -15,3 +15,4 @@ web/src/apps/*.js
 web/events/data/*
 *.so
 *.wpo
+.cache

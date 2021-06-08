@@ -15,8 +15,8 @@ App.Kaelin.App.init: App.Init<App.Kaelin.State>
     team         = App.Kaelin.Team.neutral
     
     App.Store.new!(
-      App.Kaelin.State.local.new(input, user, team, cast_info, interface, internal), 
-      App.Kaelin.State.global.new(0, 1, room, map, stage_init, [])
+      App.Kaelin.State.local.new(input, user, team, map, 0, cast_info, interface, internal), 
+      App.Kaelin.State.global.new(1, 1, room, map, stage_init, [])
     )
 // init // nick do player?
 // lobby [1,2,3,4] qtd //acho q da pra ver no tick

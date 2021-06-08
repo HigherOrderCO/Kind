@@ -14,4 +14,5 @@ type App.Kaelin.Event {
   to_draft
   draft_team   ( team: U8)
   draft_ready  ( ready: U8)
+  control_map  
 }

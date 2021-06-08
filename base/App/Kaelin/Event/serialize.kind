@@ -89,6 +89,7 @@ App.Kaelin.Event.serialize(
         U8.to_bits(event.team)
       ]
       generate_hex(App.Kaelin.Event.Code.draft_team, cod)
+    
     draft_ready:
       log("serialize ready")
       let cod = [
@@ -96,6 +97,12 @@ App.Kaelin.Event.serialize(
         U8.to_bits(event.ready)
       ]
       generate_hex(App.Kaelin.Event.Code.draft_ready, cod)
+    
+    control_map:
+      let cod = [
+        Nat.to_bits(15)
+      ]
+      generate_hex([], cod)
   }
 
 

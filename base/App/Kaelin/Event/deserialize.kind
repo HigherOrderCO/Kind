@@ -87,6 +87,10 @@ App.Kaelin.Event.deserialize_scheme : App.Kaelin.Event.Buffer<App.Kaelin.Event>
           get ready = next
           return App.Kaelin.Event.draft_ready(Nat.to_u8(ready))
         }
+      15:
+        App.Kaelin.Event.Buffer {
+          return App.Kaelin.Event.control_map
+        }
    } default fail!
  }
 
