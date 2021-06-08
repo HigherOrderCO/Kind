@@ -1,0 +1,10 @@
+App.Drawing.draw.pixel(local: App.Drawing.State.local): App.Drawing.State.local
+log("push")
+wb        = local@whiteboard
+info      = local@env_info@mouse_pos
+pos       = Pos32.new(info@fst, info@snd, 1)
+col       = local@color
+//new_board = VoxBox.push(pos, col, wb@live)
+new_board = VoxBox.Draw.text("teste", PixelFont.small_black, pos, wb@live)
+new_wb    = wb@live <- new_board
+local@whiteboard <- new_wb

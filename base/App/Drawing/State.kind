@@ -1,0 +1,20 @@
+type App.Drawing.State.global {
+  new(
+    room: String
+    players: Map<App.Drawing.Player>
+    stage: App.Drawing.Stage
+  )
+}
+
+type App.Drawing.State.local {
+  new(
+    input: String
+    user: String
+    color: Col32
+    whiteboard: App.Drawing.Whiteboard    
+    env_info: App.EnvInfo
+  )
+}
+
+App.Drawing.State: App.State
+  App.State.new(App.Drawing.State.local, App.Drawing.State.global)

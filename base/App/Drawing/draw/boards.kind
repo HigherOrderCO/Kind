@@ -1,0 +1,4 @@
+App.Drawing.draw.boards(state: App.Store<App.Drawing.State>): VoxBox
+  local       = state@local
+  whiteboard  = local@whiteboard
+  whiteboard@live

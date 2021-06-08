@@ -1,0 +1,11 @@
+App.Drawing.when.boards(event: App.Event, state: App.Store<App.Drawing.State>): IO(Maybe(App.State.local(App.Drawing.State)))
+open state
+case event{
+  mouse_down:
+    let new_local = App.Drawing.draw.pixel(state.local)
+    log("down")
+    App.set_local!(new_local)
+  frame:
+    let new_local = state.local@env_info <- env_info
+    App.set_local!(new_local)
+}default App.pass!

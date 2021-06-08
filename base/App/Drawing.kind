@@ -1,0 +1,8 @@
+App.Drawing: App<App.Drawing.State>
+  let init = App.Drawing.init
+  let draw = App.Drawing.draw
+  let when = App.Drawing.when
+  let tick = App.no_tick<App.Drawing.State>
+  let post = App.no_post<App.Drawing.State>
+  App.new!(init, draw, when, tick, post)
+  

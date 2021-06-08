@@ -1,0 +1,6 @@
+App.Drawing.when: App.When<App.Drawing.State>
+(event, state)
+stage = state@global@stage
+case stage {
+  boards: App.Drawing.when.boards(event, state)
+}default App.pass!

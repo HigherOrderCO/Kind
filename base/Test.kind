@@ -1,0 +1,5 @@
+Test: _
+  let a = {1, 2}
+  let b = {a, a}
+  open b@fst as b1
+  b1.fst
