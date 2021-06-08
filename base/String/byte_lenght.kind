@@ -1,0 +1,5 @@
+String.byte_length(str: String): Nat
+  case str {
+    nil : Nat.zero
+    cons: Nat.add(String.byte_length(str.tail), Char.byte_length(str.head))
+  }
