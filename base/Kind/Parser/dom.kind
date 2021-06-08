@@ -1,27 +1,96 @@
-Kind.Parser.dom: Parser(DOM)
+Kind.Parser.dom: Parser<Kind.Term>
   Kind.Parser.dom.node
 
-Kind.Parser.dom.node: Parser(DOM)
-  Parser {
-    Kind.Parser.text("<%")
+Kind.Parser.dom.node: Parser<Kind.Term>
+  Kind.Parser.block("DOM.node", Parser {
+    Kind.Parser.text("<")
+    
+    //name of tag
     get tag = Kind.Parser.name1
     Kind.Parser.spaces
-    get props = Parser.many!(Kind.Parser.dom.prop)
-    let props = Kind.Parser.dom.gen_props_style(props)
-    Kind.Parser.text("%>")
+
+    //props and style
+    get props = Parser.many!(Parser.first_of!([
+      Kind.Parser.dom.prop
+    ]))
+    let props = Kind.Parser.dom.gen_prop(props)
+    Kind.Parser.text(">")
+
+    //children
     get children = Parser.many!(Parser.first_of!([
+      Kind.Parser.dom.for
+      Kind.Parser.if
       Kind.Parser.dom.node,
       Kind.Parser.dom.text,
     ]))
-    Kind.Parser.text("<%/"| tag |"%>")
-    return DOM.node(tag, props@fst, props@snd, children)
+    let children = Kind.Parser.dom.transform_children(children)
+
+    //end of tag
+    Kind.Parser.text("</"| tag |">")
+
+    let term = Kind.Term.ref("DOM.node")
+    let term = Kind.Term.app(term, Kind.Term.str(tag))
+    let term = Kind.Term.app(term, props@fst)
+    let term = Kind.Term.app(term, props@snd)
+    let term = Kind.Term.app(term, children)
+
+    return term
+  })
+
+Kind.Parser.dom.for: Parser<Kind.Term>
+  Kind.Parser.block("for_dom", Parser {
+    Kind.Parser.text("for ")
+    get elem = Kind.Parser.name1
+    log(elem)
+    Kind.Parser.text("in")
+    get list = Kind.Parser.term
+    // create DOM wrapper node with style display: contents
+    let empty_list      = Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
+    let list_cons       = Kind.Term.app(Kind.Term.ref("List.cons"), Kind.Term.hol(Bits.e))
+    let empty_map       = Kind.Term.app(Kind.Term.ref("Map.new"),  Kind.Term.hol(Bits.e))
+    let display_content = Kind.Term.app(Kind.Term.ref("Map.set"),  Kind.Term.hol(Bits.e))
+    let display_content = Kind.Term.app(display_content, Kind.Term.str("display"))
+    let display_content = Kind.Term.app(display_content, Kind.Term.str("contents"))
+    let display_content = Kind.Term.app(display_content, empty_map)
+
+
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.dom
+    let term = Kind.Term.ref("List.fold")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, list)
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, empty_list)
+    let lamb = Kind.Term.lam(elem, (i) Kind.Term.lam("placeholder", (b) Kind.Term.app(Kind.Term.app(list_cons, loop), b)))
+    let term = Kind.Term.app(term, lamb)
+
+    let root = Kind.Term.ref("DOM.node")
+    let root = Kind.Term.app(root, Kind.Term.str("div"))
+    let root = Kind.Term.app(root, empty_map)
+    let root = Kind.Term.app(root, empty_map)
+    let root = Kind.Term.app(root, term)
+    return root
+  })
+
+Kind.Parser.dom.transform_children(a: List<Kind.Term>): Kind.Term
+  case a {
+    nil: 
+      Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
+    cons:
+      let term = Kind.Term.app(Kind.Term.ref("List.cons"), Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, a.head)
+      let term = Kind.Term.app(term, Kind.Parser.dom.transform_children(a.tail))
+      term
+      
   }
 
-Kind.Parser.dom.text: Parser(DOM)
-  Parser {
-    get name = Kind.Parser.name1
-    return DOM.text(name)
-  }
+Kind.Parser.dom.text: Parser<Kind.Term>
+  Kind.Parser.block("DOM_text", Parser {
+    let term = Kind.Term.ref("DOM.text")
+    get name = Kind.Parser.term
+    let term = Kind.Term.app(term, name)
+    return term
+  })
 
 Kind.Parser.dom.none: Parser(DOM)
   Parser {
@@ -30,29 +99,71 @@ Kind.Parser.dom.none: Parser(DOM)
   }
 
 Prop: Type
-  Pair<String, String>
+  Pair<String, Kind.Term>
 
-Kind.Parser.dom.prop: Parser(Prop)
+Kind.Parser.dom.prop: Parser<Prop>
   Parser {
     get prop = Kind.Parser.name1
     Kind.Parser.text("=")
-    Kind.Parser.text("\"")
-    get value = Kind.Parser.name1
-    Kind.Parser.text("\"")
+    get value = Kind.Parser.term
     Kind.Parser.spaces
     return Pair.new!!(prop, value)
   }
 
-Kind.Parser.dom.gen_props_style(values: List<Prop>): Pair<Map<String>, Map<String>>
-  Kind.Parser.dom.gen_props_style.go(values, {{}, {}})  
+Kind.Parser.dom.dynamic_prop: Parser<Prop>
+  Parser {
+    get prop = Kind.Parser.name1
+    Kind.Parser.text("=")
+    Kind.Parser.text("{")
+    get value = Kind.Parser.term
+    Kind.Parser.text("}")
+    Kind.Parser.spaces
+    return Pair.new!!(prop, value)
+  }
 
-Kind.Parser.dom.gen_props_style.go(values: List<Prop>, result: Pair<Map<String>, Map<String>>): Pair<Map<String>, Map<String>>
+Kind.Parser.dom.gen_prop(values: List<Prop>): Pair<Kind.Term, Kind.Term>
+  let empty_list = Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
+  let empty_map  = Kind.Term.app(Kind.Term.ref("Map.new") , Kind.Term.hol(Bits.e))
+  let {list_prop, styles} = Kind.Parser.dom.gen_prop.go(values, {empty_list, empty_map})
+
+  let term_prop = Kind.Term.ref("Map.from_list")
+  let term_prop = Kind.Term.app(term_prop, Kind.Term.hol(Bits.e))
+  let term_prop = Kind.Term.app(term_prop, list_prop)
+  {term_prop, styles}
+
+Kind.Parser.dom.style(styles: String): Map<String>
+  let styles = String.remove_spaces(styles)
+  let aux = String.split(styles, ";")
+  let map_result = {}
+  for style in aux with map_result:
+    let prop = String.split(style, ":")
+    Maybe {
+      get a = prop[0]
+      get b = prop[1]
+      return map_result{a} <- b
+    } <> map_result
+  
+  map_result
+
+Kind.Parser.dom.gen_prop.go(values: List<Prop>, result: Pair<Kind.Term, Kind.Term>): Pair<Kind.Term, Kind.Term>
   case values {
     nil: result
     cons: 
       let {name, value} = values.head
-      if String.eql(name, "style") then
-        Kind.Parser.dom.gen_props_style.go(values.tail, {result@fst, result@snd{name} <- value})
-      else
-        Kind.Parser.dom.gen_props_style.go(values.tail, {result@fst{name} <- value, result@snd})
+
+      if String.eql(name, "style") then 
+        let func = Kind.Term.ref("Kind.Parser.dom.style")
+        let term = Kind.Term.app(func, value)
+        Kind.Parser.dom.gen_prop.go(values.tail, {result@fst, term})
+      else 
+        let pair = Kind.Term.ref("Pair.new")
+        let pair = Kind.Term.app(pair, Kind.Term.hol(Bits.e))
+        let pair = Kind.Term.app(pair, Kind.Term.hol(Bits.e))
+        let pair = Kind.Term.app(pair, Kind.Term.str(name))
+        let pair = Kind.Term.app(pair, value)
+        let term = Kind.Term.ref("List.cons")
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, pair)
+        let term = Kind.Term.app(term, result@fst)
+        Kind.Parser.dom.gen_prop.go(values.tail, {term, result@snd})
   }

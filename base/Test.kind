@@ -1,0 +1,13 @@
+Test: _
+  let a = 
+    <div class="container" another=String.to_upper("alo") style="display: flex;" > 
+      <p id="ddadad asda" class="asd" >"asd"</p> 
+      <div class="main">"asd ad asd"</div> 
+    </div>
+  
+  case a {
+    node:
+      a.style{"display"} <> "falhou"
+  } default ""
+
+List.for!([0,1,2,3])!(DOM.node("div", {}, {"display":"contents"}, []), (x, y) DOM.)

@@ -1,0 +1,61 @@
+// App states (local = clicks, global = visitors)
+App.Syntax.State: App.State
+  App.State.new(Unit, Unit)
+
+// Initial state
+App.Syntax.init: App.Init<App.Syntax.State>
+  App.Store.new<App.Syntax.State>(Unit.new, Unit.new)
+
+// Event handler
+App.Syntax.when: App.When<App.Syntax.State>
+  App.no_when<App.Syntax.State>
+
+// Global ticker: not used
+App.Syntax.tick: App.Tick<App.Syntax.State>
+  App.no_tick<App.Syntax.State>
+
+// Global visitor: counts posts to room_zero
+App.Syntax.post: App.Post<App.Syntax.State>
+  App.no_post<App.Syntax.State>
+
+// Render function
+App.Syntax.draw: App.Draw<App.Syntax.State>
+  (state)
+    let team = "azul"
+    let lista = [0,1,2,3]
+    
+    <div id="asd" style="width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;" >
+      if String.eql(team, "azul") then
+        <p style="font-size: 2rem">"É do time azul"</p>
+      else
+        <p style="font-size: 2rem">"Não é do time azul"</p>
+      
+      // if Nat.eql(1,1) then
+      //   <p style="font-size: 2rem">String.to_upper("aparece if")</p>
+      // else
+      //   <p style="font-size: 2rem">String.to_upper("")</p>
+      
+      for i in lista:
+        <p>"return"</p>
+      
+      // <div display: contents>
+      //   <p>Nat.show(i)</p>
+      //   <p>Nat.show(i)</p>
+      //   <p>Nat.show(i)</p>
+      //   <p>Nat.show(i)</p>
+      // </div>
+      // for i in [0,1,2,3]:
+      //   <p>Nat.show(i)</p>
+
+      // <p>"Sempre aparece"</p>
+    </div>
+
+// A "Syntax, world!" + counter application
+App.Syntax: App<App.Syntax.State>
+  App.new<App.Syntax.State>(
+    App.Syntax.init
+    App.Syntax.draw
+    App.Syntax.when
+    App.Syntax.tick
+    App.Syntax.post
+  )
