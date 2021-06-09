@@ -19,10 +19,8 @@ App.Kaelin.App.when.planning(
       let new_local = App.Kaelin.Action.local.area(event.time, state@global, new_local)
       let new_local = new_local@local_map <- if update then state@global@map else new_local@local_map
       let new_local = new_local@control_map <- if update then state@local@control_map + 1 else state@local@control_map
-      IO {
-        
-        App.set_local!(new_local)
-      }
+      App.set_local!(new_local)
+      
       
     mouse_up:
       let cast = state.local@cast_info

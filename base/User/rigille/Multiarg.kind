@@ -1,96 +1,111 @@
-// TODO use Variadic instead
-MultiArg(A: Type, B: Type, n: Nat): Type
-  case n {
-    zero: B
-    succ: A -> MultiArg<A, B>(n.pred)
-  }
-
-MultiForall(A: Type, n: Nat, B: MultiArg(A, Type, n)): Type
+VariadicForall(n: Nat, A: Type, B: Variadic(n, A, Type)): Type
   case n with B {
     zero: B
-    succ: (a: A) -> MultiForall(A, n.pred, B(a))
+    succ: (a: A) -> VariadicForall(n.pred, A, B(a))
   }!
 
-MultiArg.wrap<A: Type, B: Type, C: Type>(n: Nat, outer: B -> C, inner: MultiArg<A, B>(n)): MultiArg<A, C>(n)
+Variadic.wrap<A: Type, B: Type, C: Type>(n: Nat, outer: B -> C, inner: Variadic(n)<A, B>): Variadic(n)<A, C>
   case n with inner {
     zero:
       outer(inner)
     succ:
-      (x) MultiArg.wrap<A, B, C, n.pred>(outer, inner(x))
+      (x) Variadic.wrap<A, B, C, n.pred>(outer, inner(x))
   }!
 
-MultiArg.join<A: Type, B: Type, C: Type, D: Type>(
+Variadic.join<A: Type, B: Type, C: Type, D: Type>(
   n: Nat
   m: Nat
   join: B -> C -> D
-  l: MultiArg<A, B>(n)
-  r: MultiArg<A, C>(m)
-): MultiArg<A, D>(Nat.add(n, m))
+  l: Variadic(n)<A, B>
+  r: Variadic(m)<A, C>
+): Variadic(Nat.add(n, m))<A, D>
   case n with l {
     zero:
-      MultiArg.wrap<A, C, D>(m, join(l), r)
+      Variadic.wrap<A, C, D>(m, join(l), r)
     succ:
-      (x) MultiArg.join<A, B, C, D>(n.pred, m, join, l(x), r)
+      (x) Variadic.join<A, B, C, D>(n.pred, m, join, l(x), r)
   }!
 
-MultiArg.together<A: Type, B: Type, C: Type, D: Type>(
+Variadic.together<A: Type, B: Type, C: Type, D: Type>(
   n: Nat
   join: B -> C -> D
-  l: MultiArg<A, B>(n)
-  r: MultiArg<A, C>(n)
-): MultiArg<A, D>(n)
+  l: Variadic(n)<A, B>
+  r: Variadic(n)<A, C>
+): Variadic(n)<A, D>
   case n with l r {
     zero:
       join(l, r)
     succ:
-      (x) MultiArg.together<A, B, C, D>(n.pred, join, l(x), r(x))
+      (x) Variadic.together<A, B, C, D>(n.pred, join, l(x), r(x))
   }!
 
-MultiArg.equal<A: Type, B: Type>(
+Variadic.equal<A: Type, B: Type>(
   n: Nat
-  l: MultiArg<A, B>(n)
-  r: MultiArg<A, B>(n)
-): MultiArg<A, Type>(n)
-  MultiArg.together<A, B, B, Type>(n, Equal<B>, l, r)
+  l: Variadic(n)<A, B>
+  r: Variadic(n)<A, B>
+): Variadic(n)<A, Type>
+  case n with l r {
+    zero:
+      Equal<B>(l, r)
+    succ:
+      (x) Variadic.equal<A, B>(n.pred, l(x), r(x))
+  }!
 
-type Association <A: Type, op: A -> A -> A> ~ (c: Nat, exp: MultiArg<A, A>(c)) {
-  inst(a: A) ~ (c = 0, exp = a)
+type Association <A: Type, op: A -> A -> A> ~ (c: Nat, exp: Variadic(c)<A, A>) {
+  inst ~ (c = 1, exp = (a) a)
   join(
     n: Nat
     m: Nat
-    fst: MultiArg<A, A>(n)
-    snd: MultiArg<A, A>(m)
-  ) ~ (c = Nat.add(n, m), exp = MultiArg.join<A, A, A, A>(n, m, op, fst, snd))
+    fst: Variadic(n)<A, A>
+    snd: Variadic(m)<A, A>
+    Hyp0: Association<A>(op, n, fst)
+    Hyp1: Association<A>(op, m, snd)
+  ) ~ (c = Nat.add(n, m), exp = Variadic.join<A, A, A, A>(n, m, op, fst, snd))
 }
 
 Associative<A: Type>(op: A -> A -> A): Type
   def ret = (a: A, b: A, c: A) -> Equal<A>(op(op(a, b), c), op(a, op(b, c)));
   ret
 
+Association.Right<A: Type>(op: A -> A -> A, n: Nat): Variadic(Nat.add(2, n))<A, A>
+  case n {
+    zero:
+      (x, y) op(x, y)
+    succ:
+      (x)
+        def out = (y) op(x, y) 
+        Variadic.wrap<A, A, A>(Nat.add(2, n.pred), out, Association.Right<A>(op, n.pred))
+  }!
+
+Association.Right.ok<A: Type>(op: A -> A -> A, n: Nat): Association<A>(op, Nat.add(2, n), Association.Right<A>(op, n))
+  def f = Association.inst<A>(op)
+  case n {
+    zero:
+      Association.join<A>(op, _, _, _, _, f, f)
+    succ:
+      def ind = Association.Right.ok<A>(op, n.pred)
+      Association.join<A>(op, 1, Nat.add(2, n.pred), _, _, f, ind)
+  }!
+
 Association.unique<A: Type>(
   op: A -> A -> A
   Hyp0: Associative<A>(op)
   n: Nat
-  fst: MultiArg(A, A, n)
-  snd: MultiArg(A, A, n)
+  fst: Variadic(n)<A, A>
+  snd: Variadic(n)<A, A>
   Hyp1: Association(A, op, n, fst)
   Hyp2: Association(A, op, n, snd)
-): MultiForall(A, n, MultiArg.equal(A, A, n, fst, snd))
-  case n with fst snd Hyp1 Hyp2 {
-    zero:
-      ?a
-    succ:
-      ?b
-  }!
+): VariadicForall(n, A, Variadic.equal(A, A, n, fst, snd))
+  ?x
 
-//Kind.Term.Shorthand(name: Kind.Name, n: Nat): MultiArg<Kind.Term>(n)
+//Kind.Term.Shorthand(name: Kind.Name, n: Nat): Variadic<Kind.Term>(n)
 //  case n {
 //    zero: Kind.Term.ref(name)
 //    succ:
 //      (out_arg)
 //        let outer = (inn_arg) Kind.Term.app(inn_arg, out_arg)
 //        let ind = Kind.Term.Shorthand(name, n.pred)
-//        MultiArg.wrap<Kind.Term, n.pred>(outer, ind)
+//        Variadic.wrap<Kind.Term, n.pred>(outer, ind)
 //  }!
 //
 //Test: _

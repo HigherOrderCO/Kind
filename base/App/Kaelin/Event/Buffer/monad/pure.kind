@@ -1,2 +1,0 @@
-App.Kaelin.Event.Buffer.monad.pure<A : Type>(x : A) : App.Kaelin.Event.Buffer<A>
-  (ls) Parser.pure!({ls, x}) 
