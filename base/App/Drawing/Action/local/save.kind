@@ -1,19 +1,9 @@
 App.Drawing.Action.local.save(local: App.Drawing.State.local): App.Drawing.State.local
   open local
   open local.whiteboard as wb
-  past = 
-    if Nat.gte(List.length!(wb.past), 10) then
-      List.tail!(wb.past)
-    else
-      wb.live & wb.past
+  past   = wb.live & wb.past
+  live   = wb.live 
+  future = []
   log(Nat.show(List.length!(past)))
-  new_wb = App.Drawing.Whiteboard.new(past, wb.live, [])
-  //local@whiteboard <- new_wb
-  App.Drawing.State.local.new(
-    local.input
-    local.user
-    local.drawing
-    local.style 
-    new_wb  
-    local.env_info
-  )
+  whiteboard = App.Drawing.Whiteboard.new(past,live,future)
+  local@whiteboard <- whiteboard

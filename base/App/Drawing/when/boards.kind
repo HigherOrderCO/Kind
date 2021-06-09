@@ -2,7 +2,7 @@ App.Drawing.when.boards(event: App.Event, state: App.Store<App.Drawing.State>): 
 local = state@local
 case event{
   key_down:
-    log(U16.show(event.code))
+    //log(U16.show(event.code))
     switch U16.eql(event.code) {
       'A': 
         style = local@style

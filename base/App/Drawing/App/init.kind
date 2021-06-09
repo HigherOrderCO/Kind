@@ -11,7 +11,7 @@ App.Drawing.App.init(img: VoxBox): App.Init<App.Drawing.State>
   tool        = App.Drawing.Tool.pencil
   size        = 3 :: U32
   color       = Col32.new(255#32,0#32,0#32,125#32)
-  whiteboard  = App.Drawing.Whiteboard.new([img], img, [])
+  whiteboard  = App.Drawing.Whiteboard.new([], img, [])
   style       = App.Drawing.Style.new(tool, size, color)
   
   
