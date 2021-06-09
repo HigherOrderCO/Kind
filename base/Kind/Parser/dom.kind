@@ -16,8 +16,6 @@ Kind.Parser.dom.node: Parser<Kind.Term>
 
     // children
     get children = Parser.many!(Parser.first_of!([
-      Kind.Parser.dom.for
-      Kind.Parser.if
       Kind.Parser.dom.node,
       Kind.Parser.dom.leaf,
     ]))
@@ -38,19 +36,21 @@ Kind.Parser.dom.node: Parser<Kind.Term>
 
 // for..in of dom 
 Kind.Parser.dom.for: Parser<Kind.Term>
+  log("asd asd")
   Kind.Parser.block("for_dom", Parser {
-
     // read variable
     Kind.Parser.text("for ")
     get elem = Kind.Parser.name1
+
+    log(elem)
     // read list
     Kind.Parser.text("in")
     get list = Kind.Parser.term
     
     // helpers
-    let empty_list      = Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
-    let list_cons       = Kind.Term.app(Kind.Term.ref("List.cons"), Kind.Term.hol(Bits.e))
-    let empty_map       = Kind.Term.app(Kind.Term.ref("Map.new"),  Kind.Term.hol(Bits.e))
+    let empty_list = Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
+    let list_cons  = Kind.Term.app(Kind.Term.ref("List.cons"), Kind.Term.hol(Bits.e))
+    let empty_map  = Kind.Term.app(Kind.Term.ref("Map.new"),  Kind.Term.hol(Bits.e))
     
     // read return 
     Kind.Parser.text(":")
@@ -104,7 +104,10 @@ Kind.Parser.dom.leaf: Parser<Kind.Term>
 Kind.Parser.dom.dynamic: Parser<Kind.Term>
   Kind.Parser.block("DOM_dynamic", Parser {
     Kind.Parser.text("{")
-    get term = Kind.Parser.term
+    get term = Parser.first_of!([
+      Kind.Parser.dom.for,
+      Kind.Parser.term
+    ])
     Kind.Parser.text("}")
     return term
   })
@@ -165,19 +168,19 @@ Kind.Parser.dom.gen_prop(values: List<Prop>): Pair<Kind.Term, Kind.Term>
   {term_prop, styles}
 
 // "parser" style string to Map of styles
-Kind.Parser.dom.style(styles: String): Map<String>
-  let aux = String.split(styles, ";")
-  let map_result = {}
-  for style in aux with map_result:
-    let prop = String.split(style, ":")
-    Maybe {
-      get a = prop[0]
-      get b = prop[1]
-      let a = String.trim(a)
-      return map_result{a} <- String.trim(b)
-    } <> map_result
+// Kind.Parser.dom.style(styles: String): Map<String>
+//   let aux = String.split(styles, ";")
+//   let map_result = {}
+//   for style in aux with map_result:
+//     let prop = String.split(style, ":")
+//     Maybe {
+//       get a = prop[0]
+//       get b = prop[1]
+//       let a = String.trim(a)
+//       return map_result{a} <- String.trim(b)
+//     } <> map_result
   
-  map_result
+//   map_result
 
 // get list of props and parses into a pair
 // first pos of pair will be a Kind.Term of a map of props
@@ -189,9 +192,7 @@ Kind.Parser.dom.gen_prop.go(values: List<Prop>, result: Pair<Kind.Term, Kind.Ter
       let {name, value} = values.head
 
       if String.eql(name, "style") then 
-        let func = Kind.Term.ref("Kind.Parser.dom.style")
-        let term = Kind.Term.app(func, value)
-        Kind.Parser.dom.gen_prop.go(values.tail, {result@fst, term})
+        Kind.Parser.dom.gen_prop.go(values.tail, {result@fst, value})
       else 
         let pair = Kind.Term.ref("Pair.new")
         let pair = Kind.Term.app(pair, Kind.Term.hol(Bits.e))

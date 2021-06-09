@@ -21,7 +21,7 @@ App.Syntax.post: App.Post<App.Syntax.State>
 
 
 App.Syntax.card(name: String, hp: Int): DOM
-  <div style="border: 2px solid black; padding: 5px">
+  <div style={"border": "2px solid black", "padding": "5px"} >
     <p>"Herói: " | name</p>
     <p>"HP: "| Int.show(hp)</p>
   </div>
@@ -29,25 +29,33 @@ App.Syntax.card(name: String, hp: Int): DOM
 // Render function
 App.Syntax.draw: App.Draw<App.Syntax.State>
   (state)
-    let team = "azul"
-    let heroes = [{"croni", +25}, {"cyclope", +30}, {"lela", +15}, {"octoking", +40}]
-    <div id="asd" style="width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;" >
-      
-      for i in heroes:
-        <p>{ App.Syntax.card(i@fst, i@snd) }</p>
+    let team      = "azul"
+    let heroes    = [{"croni", +25}, {"cyclope", +30}, {"lela", +15}, {"octoking", +40}]
+    let paragraph = {"font-size": "2rem"}
 
-      // <div id="teste-else">
-      //   if String.eql(team, "azul") then
-      //     <p style="font-size: 2rem">"É do time azul"</p>
-      //   else
-      //     <p style="font-size: 2rem">"Não é do time azul"</p>
-      // </div>
+    <div id="asd" style={"width": "100vw", "height": "100vh", "display": "flex", "flex-direction": "column", "justify-content": "center", "align-items": "center"} >
+      { 
+        for i in heroes:
+          App.Syntax.card(i@fst, i@snd)
+      }
+
+      
+      {
+        if String.eql(team, "azul") then
+          <p style=paragraph >"É do time azul"</p>
+        else
+          <p style=paragraph >"Não é do time azul"</p> 
+      }
+      {
+        if Nat.eql(1,1) then
+          <p style=paragraph >String.to_upper("Aparece if")</p>
+        else
+          <p style=paragraph >String.to_upper("Não aparece if")</p>
+      }
+      
 
       // <div id="teste-if">
-      //   if Nat.eql(1,1) then
-      //     <p style="font-size: 2rem">String.to_upper("Aparece if")</p>
-      //   else
-      //     <p style="font-size: 2rem">String.to_upper("Não aparece if")</p>
+       
       // </div>
       
       // <div id="teste-for">
