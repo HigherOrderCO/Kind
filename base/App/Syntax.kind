@@ -18,34 +18,42 @@ App.Syntax.tick: App.Tick<App.Syntax.State>
 App.Syntax.post: App.Post<App.Syntax.State>
   App.no_post<App.Syntax.State>
 
+
+
+App.Syntax.card(name: String, hp: Int): DOM
+  <div style="border: 2px solid black; padding: 5px">
+    <p>"Herói: " | name</p>
+    <p>"HP: "| Int.show(hp)</p>
+  </div>
+
 // Render function
 App.Syntax.draw: App.Draw<App.Syntax.State>
   (state)
     let team = "azul"
-    let lista = [0,1,2,3]
-    
+    let heroes = [{"croni", +25}, {"cyclope", +30}, {"lela", +15}, {"octoking", +40}]
     <div id="asd" style="width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;" >
-      if String.eql(team, "azul") then
-        <p style="font-size: 2rem">"É do time azul"</p>
-      else
-        <p style="font-size: 2rem">"Não é do time azul"</p>
       
-      // if Nat.eql(1,1) then
-      //   <p style="font-size: 2rem">String.to_upper("aparece if")</p>
-      // else
-      //   <p style="font-size: 2rem">String.to_upper("")</p>
-      
-      for i in lista:
-        <p>"return"</p>
-      
-      // <div display: contents>
-      //   <p>Nat.show(i)</p>
-      //   <p>Nat.show(i)</p>
-      //   <p>Nat.show(i)</p>
-      //   <p>Nat.show(i)</p>
+      for i in heroes:
+        <p>{ App.Syntax.card(i@fst, i@snd) }</p>
+
+      // <div id="teste-else">
+      //   if String.eql(team, "azul") then
+      //     <p style="font-size: 2rem">"É do time azul"</p>
+      //   else
+      //     <p style="font-size: 2rem">"Não é do time azul"</p>
       // </div>
-      // for i in [0,1,2,3]:
-      //   <p>Nat.show(i)</p>
+
+      // <div id="teste-if">
+      //   if Nat.eql(1,1) then
+      //     <p style="font-size: 2rem">String.to_upper("Aparece if")</p>
+      //   else
+      //     <p style="font-size: 2rem">String.to_upper("Não aparece if")</p>
+      // </div>
+      
+      // <div id="teste-for">
+      //   for i in [0,1,2,3]:
+      //     <p>"Paragrafo numero " | Nat.show(i)</p>
+      // </div>
 
       // <p>"Sempre aparece"</p>
     </div>

@@ -1,13 +1,12 @@
 Test: _
   let a = 
-    <div class="container" another=String.to_upper("alo") style="display: flex;" > 
+    <div class="container" another=String.to_upper("alo") style="display: flex; justify-content: center; border: 1px solid black" > 
       <p id="ddadad asda" class="asd" >"asd"</p> 
       <div class="main">"asd ad asd"</div> 
     </div>
   
   case a {
     node:
-      a.style{"display"} <> "falhou"
+      list = Map.to_list!(a.style)
+      List.show!(Pair.show!!(String.show, String.show), list)
   } default ""
-
-List.for!([0,1,2,3])!(DOM.node("div", {}, {"display":"contents"}, []), (x, y) DOM.)
