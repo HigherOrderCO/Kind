@@ -1,9 +1,9 @@
 all: kind-scm kind-scm.deb
 clean:
-	rm bin/*
 	rm src/*.wpo
 	rm src/*.so
-kind-scm: src/*.sls src/*.scm
+	rm bin/*
+kind-scm:
 	cd src/ && scheme compile.scm
 	chmod +x bin/kind-scm
 kind-scm.deb: kind-scm
