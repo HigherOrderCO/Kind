@@ -10,7 +10,8 @@ type App.Drawing.State.local {
   new(
     input: String
     user: String
-    color: Col32
+    drawing: Bool
+    style: App.Drawing.Style    
     whiteboard: App.Drawing.Whiteboard    
     env_info: App.EnvInfo
   )

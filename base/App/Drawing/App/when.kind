@@ -1,4 +1,4 @@
-App.Drawing.when: App.When<App.Drawing.State>
+App.Drawing.App.when: App.When<App.Drawing.State>
 (event, state)
 stage = state@global@stage
 case stage {

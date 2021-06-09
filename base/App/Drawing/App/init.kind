@@ -1,19 +1,21 @@
-App.Drawing.init: App.Init<App.Drawing.State>
+App.Drawing.App.init(img: VoxBox): App.Init<App.Drawing.State>
   room        = App.Drawing.Constants.room
   players     = Map.new!
   phase       = App.Drawing.Phase.active(0)
   arts        = [] :: List<Map<App.Drawing.Board>>
   stage       = App.Drawing.Stage.boards(phase, [])
 
-
   input       = ""
   user        = ""
   env_info    = App.EnvInfo.new({256, 256}, {0, 0})
-  col         = Col32.new(255#32,255#32,0#32,125#32)
-  img         = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
-  whiteboard  = App.Drawing.Whiteboard.new([], img, [])
+  tool        = App.Drawing.Tool.pencil
+  size        = 3 :: U32
+  color       = Col32.new(255#32,0#32,0#32,125#32)
+  whiteboard  = App.Drawing.Whiteboard.new([img], img, [])
+  style       = App.Drawing.Style.new(tool, size, color)
+  
   
   App.Store.new!(
-    App.Drawing.State.local.new(input, user, col, whiteboard, env_info)
+    App.Drawing.State.local.new(input, user, false, style, whiteboard, env_info)
     App.Drawing.State.global.new(room, players, stage)
   )

@@ -1,8 +1,0 @@
-App.Drawing.draw: App.Draw<App.Drawing.State>
-(state)
-  open state
-  stage = state.global@stage
-  let img = case stage {
-    boards: App.Drawing.draw.boards(state)
-  }default App.Drawing.draw.boards(state) // TDO: remove
-  DOM.vbox({"width": "256"}, {}, img)

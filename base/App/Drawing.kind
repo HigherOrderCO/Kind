@@ -1,8 +1,9 @@
 App.Drawing: App<App.Drawing.State>
-  let init = App.Drawing.init
-  let draw = App.Drawing.draw
-  let when = App.Drawing.when
-  let tick = App.no_tick<App.Drawing.State>
-  let post = App.no_post<App.Drawing.State>
+  let img  = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  let init = App.Drawing.App.init(img)
+  let draw = App.Drawing.App.draw(img)
+  let when = App.Drawing.App.when
+  let tick = App.Drawing.App.tick
+  let post = App.Drawing.App.post
   App.new!(init, draw, when, tick, post)
   

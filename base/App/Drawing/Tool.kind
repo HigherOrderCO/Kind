@@ -1,0 +1,4 @@
+type App.Drawing.Tool {
+  pencil
+  line
+}
