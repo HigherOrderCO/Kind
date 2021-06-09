@@ -1,15 +1,16 @@
 App.Drawing.Action.local.ctrl_z(local: App.Drawing.State.local): App.Drawing.State.local
   open local
   open local.whiteboard as wb
-  past          = List.tail!(wb.past)
+  past          = List.tail!(wb.past)  
   case past {
     nil:
       log("nil") 
       local
     cons:
       log("cons")
-      //square  = VoxBox.Draw.square(126, 126, 0, 20, 20, Col32.new(0#32,255#32,0#32,125#32), wb.live)
-      live      = past.head
+      square  = VoxBox.Draw.square(126, 126, 0, 20, 20, Col32.new(0#32,255#32,0#32,125#32), wb.live)
+      log("past_length: " | Nat.show(List.length!(past)))
+      live      = List.head!(past) <> square
       cleared   = VoxBox.clear(live)
       live      = VoxBox.Draw.image(0, 0, 0, live, cleared)
       future    = wb.live & wb.future
