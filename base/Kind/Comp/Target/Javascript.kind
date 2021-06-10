@@ -206,7 +206,20 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
 //  },
     data: Kind.Comp.Native.new(
       // Inst
-      []
+      let insts = []
+      for ctr in prim.ctrs with insts:
+        {ctr_name, ctr_fields} = ctr
+        let ctr_length = List.length!(ctr_fields)
+        if Nat.gtn(ctr_length, 0) then
+          let range = List.range(ctr_length)
+          let range = List.map!!((n) "$"|Nat.show(n - 1), range)
+          let args = String.join(", ", range)
+          // TODO do it inline instead of calling the function?
+          (Kind.Comp.Target.Javascript.name(prim.name|"."|ctr_name)|"("|args|")") & insts
+        else
+          Kind.Comp.Target.Javascript.name(prim.name|"."|ctr_name) & insts
+      let i_insts = List.imap!!((i, p) {i, p}, insts)
+      i_insts,
       // Elim
       {"$0._", 
         let cses = [] :: List<Pair<String, List<String>>>
@@ -218,30 +231,4 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
           {ctr_name, field_list} & cses
         cses
       })
-//  function adt_type(adt) {
-//    var inst = [];
-//    var elim = {
-//      ctag: x => x+"._",
-//      ctor: [],
-//    };
-//    var cnam = [];
-//    for (let i = 0; i < adt.length; ++i) {
-//      inst.push([adt[i].flds.length, (function go(j, ctx) {
-//        if (j < adt[i].flds.length) {
-//          return x => go(j + 1, ctx.concat([x]));
-//        } else {
-//          var res = "({_:'"+adt[i].name+"'";
-//          for (var k = 0; k < j; ++k) {
-//            res += ",'"+adt[i].flds[k]+"':"+ctx[k];
-//          };
-//          res += "})";
-//          return res;
-//        };
-//      })(0, [])]);
-//      elim.ctor.push(adt[i].flds.map((n,j) => (x => x+"."+adt[i].flds[j])));
-//      cnam.push(adt[i].name);
-//    };
-//    var cnam = {mode: "switch", nams: cnam};
-//    return {inst, elim, cnam};
-//  };
   }
