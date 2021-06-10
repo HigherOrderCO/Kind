@@ -33,17 +33,17 @@ App.Syntax.draw: App.Draw<App.Syntax.State>
     let heroes    = [{"croni", +25}, {"cyclope", +30}, {"lela", +15}, {"octoking", +40}]
     let paragraph = {"font-size": "2rem"}
 
-    <div id="asd" style={"width": "100vw", "height": "100vh", "display": "flex", "flex-direction": "column", "justify-content": "center", "align-items": "center"} >
-      { 
-        for i in heroes:
-          App.Syntax.card(i@fst, i@snd)
-      }
+    <div id="asd" style={"width": "100vw", "height": "100vh", "display": "flex", "flex-direction": "column", "justify-content": "center", "align-items": "center", "background-color": "#e4bbd9"} >
       {
         let a = []
         for i in heroes with a:
           a ++ [App.Syntax.card(i@fst, i@snd)]
         DOM.node("div", {}, {}, a)
       }
+      for i in heroes:
+        App.Syntax.card(i@fst, i@snd)
+      for i in heroes:
+        App.Syntax.card(i@fst, i@snd)
       {
         if String.eql(team, "azul") then
           <p style=paragraph >"É do time azul"</p>

@@ -21142,8 +21142,6 @@ module.exports = (function() {
                                 var $6697 = self.snd;
                                 var self = ($6696 === "style");
                                 if (self) {
-                                    var _func$7 = Kind$Term$ref$("Kind.Parser.dom.style");
-                                    var _term$8 = Kind$Term$app$(_func$7, $6697);
                                     var $6699 = Kind$Parser$dom$gen_prop$go$($6694, Pair$new$((() => {
                                         var self = _result$2;
                                         switch (self._) {
@@ -21152,7 +21150,7 @@ module.exports = (function() {
                                                 var $6701 = $6700;
                                                 return $6701;
                                         };
-                                    })(), _term$8));
+                                    })(), $6697));
                                     var $6698 = $6699;
                                 } else {
                                     var _pair$7 = Kind$Term$ref$("Pair.new");
@@ -21396,7 +21394,7 @@ module.exports = (function() {
                                                                                                                                 switch (self._) {
                                                                                                                                     case 'Parser.State.new':
                                                                                                                                         var $6790 = self.err;
-                                                                                                                                        var _reply$80 = Kind$Parser$dom(_reply$pst$74);
+                                                                                                                                        var _reply$80 = Kind$Parser$term(_reply$pst$74);
                                                                                                                                         var self = _reply$80;
                                                                                                                                         switch (self._) {
                                                                                                                                             case 'Parser.Reply.error':
@@ -21545,7 +21543,7 @@ module.exports = (function() {
                                 switch (self._) {
                                     case 'Parser.State.new':
                                         var $6824 = self.err;
-                                        var _reply$21 = Kind$Parser$term(_reply$pst$15);
+                                        var _reply$21 = Parser$first_of$(List$cons$(Kind$Parser$term, List$nil))(_reply$pst$15);
                                         var self = _reply$21;
                                         switch (self._) {
                                             case 'Parser.Reply.error':
@@ -21693,7 +21691,7 @@ module.exports = (function() {
         });
         return $6855;
     })());
-    const Kind$Parser$dom$leaf = Kind$Parser$block("DOM_leaf")(Parser$first_of$(List$cons$(Kind$Parser$dom$dynamic, List$cons$(Kind$Parser$dom$text, List$nil))));
+    const Kind$Parser$dom$leaf = Kind$Parser$block("DOM_leaf")(Parser$first_of$(List$cons$(Kind$Parser$dom$for, List$cons$(Kind$Parser$dom$dynamic, List$cons$(Kind$Parser$dom$text, List$nil)))));
 
     function Kind$Parser$dom$transform_children$(_a$1) {
         var self = _a$1;
@@ -21893,7 +21891,7 @@ module.exports = (function() {
                                                                                                                                 switch (self._) {
                                                                                                                                     case 'Parser.State.new':
                                                                                                                                         var $6956 = self.err;
-                                                                                                                                        var _reply$78 = Parser$many$(Parser$first_of$(List$cons$(Kind$Parser$dom$for, List$cons$(Kind$Parser$if, List$cons$(Kind$Parser$dom$node, List$cons$(Kind$Parser$dom$leaf, List$nil))))))(_reply$pst$72);
+                                                                                                                                        var _reply$78 = Parser$many$(Parser$first_of$(List$cons$(Kind$Parser$dom$node, List$cons$(Kind$Parser$dom$leaf, List$nil))))(_reply$pst$72);
                                                                                                                                         var self = _reply$78;
                                                                                                                                         switch (self._) {
                                                                                                                                             case 'Parser.Reply.error':

@@ -96,6 +96,7 @@ Kind.Parser.dom.transform_children(a: List<Kind.Term>): Kind.Term
 Kind.Parser.dom.leaf: Parser<Kind.Term>
   Kind.Parser.block("DOM_leaf", Parser {
     Parser.first_of!([
+      Kind.Parser.dom.for,
       Kind.Parser.dom.dynamic,
       Kind.Parser.dom.text
     ])
@@ -104,13 +105,11 @@ Kind.Parser.dom.leaf: Parser<Kind.Term>
 // parser of a dynamic DOM
 // the dynamic DOM must be inside {  }
 // the dynamic DOM can be:
-// - a for .. in of DOM (it can only be used here)
 // - any kind term that returns a DOM
 Kind.Parser.dom.dynamic: Parser<Kind.Term>
   Kind.Parser.block("DOM_dynamic", Parser {
     Kind.Parser.text("{")
     get term = Parser.first_of!([
-      Kind.Parser.dom.for,
       Kind.Parser.term
     ])
     Kind.Parser.text("}")
