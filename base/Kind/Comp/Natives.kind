@@ -1,0 +1,2 @@
+Kind.Comp.Natives: Type
+  Kind.Comp.Prim -> Kind.Comp.Native

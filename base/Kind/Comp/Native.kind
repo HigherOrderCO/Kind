@@ -16,15 +16,9 @@
 // - elim(`4`) == `λs. λz. s 3`.
 // 
 // To learn by example, just check Kind/Comp/Target/Scheme.kind's shapes.
-type Kind.Comp.Prim.Shape {
+type Kind.Comp.Native {
   new(
     inst: List(Pair(Nat, String))
     elim: Pair(String, List(Pair(String ,List(String))))
-  )
-}
-type Kind.Comp.Prim.Shape {
-  new(
-    inst: List(Pair(Nat, String))
-    elim: Pair(String, List(Pair(String, List(String))))
   )
 }

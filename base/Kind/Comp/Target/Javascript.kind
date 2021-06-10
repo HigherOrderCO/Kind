@@ -1,0 +1,247 @@
+// Core grammar
+// ============
+
+Kind.Comp.Target.Javascript.null: String
+  "null"
+
+Kind.Comp.Target.Javascript.name(name: String): String
+  def replace_dots = (x)
+    if Char.eql(x, '.') then
+      '$'
+    else
+      x
+  String.map(replace_dots, name)
+
+Kind.Comp.Target.Javascript.elim_name(name: String): String
+  name|"-elim"
+
+Kind.Comp.Target.Javascript.inst_name(name: String): String
+  name|"-inst"
+
+Kind.Comp.Target.Javascript.lambda(name: String, body: String): String
+  "(("|Kind.Comp.Target.Javascript.name(name)|") => { return "|body|";})"
+
+Kind.Comp.Target.Javascript.application(func: String, argm: String): String
+  func|"("|argm|")"
+
+Kind.Comp.Target.Javascript.local_definition(name: String, expr: String, body: String): String
+  "const "|Kind.Comp.Target.Javascript.name(name)|" = "|expr|";\n"
+  |body
+
+Kind.Comp.Target.Javascript.global_function(name: String, args: List<String>, body: String): String
+  case args {
+    nil:
+      "const "|Kind.Comp.Target.Javascript.name(name)
+      |" = "|body|";\n"
+    cons:
+      "function "|Kind.Comp.Target.Javascript.name(name)|"$("
+      |String.join(",", args)|"){"|body|"};\n"
+      |Kind.Comp.Target.Javascript.nest_lambdas(name, args)
+  }
+
+Kind.Comp.Target.Javascript.global_application(name: String, args: List<String>): String
+  // #TODO
+  Kind.Comp.Target.Javascript.name(name)
+  |"$("|String.join(",", args)|");"
+
+Kind.Comp.Target.Javascript.nest_lambdas(name: String, args: List<String>): String
+  let body = Kind.Comp.Target.Javascript.nest_lambdas.aux(name, args, args)
+  "(define " | name | " " | body | ")\n"
+
+Kind.Comp.Target.Javascript.nest_lambdas.aux(fun: String, args: List<String>, rem_args: List<String>): String
+  def this = Kind.Comp.Target.Javascript.nest_lambdas.aux(fun, args)
+  case rem_args {
+    nil:
+      Kind.Comp.Target.Javascript.global_application(fun, args)
+    cons:
+      Kind.Comp.Target.Javascript.lambda(rem_args.head, this(rem_args.tail))
+  }
+
+Kind.Comp.Target.Javascript.module(name: String, exports: List(String), defs: String): String
+  def make_export = (n)
+    "'"|n|"': "|Kind.Comp.Target.Javascript.name(n)
+  let ret = "module.exports = (function (){\n"|defs
+  let export_list = String.join(",\n",
+    List.map!!(make_export, exports))
+  let ret = ret|"return {\n"|export_list|"};\n})();"
+  ret
+
+Kind.Comp.Target.Javascript.program(main: String, defs: String): String
+  Kind.Comp.Target.Javascript.module(main, [main], defs)|"\n"|
+  "var MAIN=module.exports['"|main|"']; try { console.log(JSON.stringify(MAIN,null,2) || '<unprintable>') } catch (e) { console.log(MAIN); };\n"
+
+Kind.Comp.Target.Javascript.string_literal(str: String): String
+  case str {
+    nil:
+      ""
+    cons:
+      (if U16.eql(str.head, '\\') || U16.eql(str.head, '"') then
+        "\\" | Char.to_string(str.head)
+      else if U16.gte(str.head, ' ') && U16.lte(str.head, '~') then
+        Char.to_string(str.head)
+      else
+        "\\x" | U16.show_hex(str.head) | ";"
+      ) | Kind.Comp.Target.Javascript.string_literal(str.tail)
+  }
+
+Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
+  Kind.Comp.Grammar.new(
+    Kind.Comp.Target.Javascript.null
+    Kind.Comp.Target.Javascript.name
+    Kind.Comp.Target.Javascript.inst_name
+    Kind.Comp.Target.Javascript.elim_name
+    Kind.Comp.Target.Javascript.lambda
+    Kind.Comp.Target.Javascript.application
+    Kind.Comp.Target.Javascript.local_definition
+    Kind.Comp.Target.Javascript.global_function
+    Kind.Comp.Target.Javascript.global_application
+    Kind.Comp.Target.Javascript.string_literal
+    Kind.Comp.Target.Javascript.module
+    Kind.Comp.Target.Javascript.program
+  )
+
+// Native types
+// ============
+
+Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
+  (prim) case prim {
+    unit: Kind.Comp.Native.new(
+      // Inst
+      [
+        // Unit.new
+        {0, "null"},
+      ]
+      // Elim
+      { "true", [
+        {"true", []}
+      ]})
+//  Unit: {
+//    inst: [[0, "null"]],
+//    elim: {ctag: x => '"unit"', ctor: [[]]},
+//    cnam: {mode: "switch", nams: ['unit']},
+//  },
+    bool: Kind.Comp.Native.new(
+      // Inst
+      [
+        // Bool.true
+        {0, "true"}
+        // Bool.false
+        {0, "false"}
+      ]
+      {"$0", [
+        {"true", []}
+        {"false", []}
+      ]})
+//  Bool: {
+//    inst: [[0, "true"], [0, "false"]],
+//    elim: {ctag: x => x, ctor: [[], []]},
+//    cnam: {mode: "if"},
+//  },
+    nat: Kind.Comp.Native.new(
+      // Inst
+      [
+        // Nat.zero
+        {0, "0n"}
+        // Nat.succ
+        {1, "($0 - 1n)"}
+      ]
+      // Elim
+      {"($0 === 0n)", [
+        // case zero
+        {"true", []}
+        // case succ
+        {"false", ["($0 - 1n)"]}
+      ]})
+//  Nat: {
+//    inst: [[0, "0n"], [1, p => "1n+"+p]],
+//    elim: {
+//      ctag: x => x+"===0n",
+//      ctor: [[], [x => "("+x+"-1n)"]],
+//    },
+//    cnam: {mode: "if"},
+//  },
+    u16: Kind.Comp.Native.new(
+      // Inst
+      [
+        {1, "(word_to_u16($0)"}
+      ]
+      // Elim
+      {"true", [
+        {"true", [
+          "u16_to_word($0)"
+        ]}
+      ]})
+//  U16: {
+//    inst: [[1, x => "word_to_u16("+x+")"]],
+//    elim: {
+//      ctag: x => "'u16'",
+//      ctor: [[x => "u16_to_word("+x+")"]],
+//    },
+//    cnam: {mode: "switch", nams: ['u16']},
+//  },
+    string: Kind.Comp.Native.new(
+      // Inst
+      [
+        // String.nil
+        {0, `""`}
+        {2, `String.fromCharCode($0)+$1`}
+      ]
+      // Elim
+      {"($0).length === 0", [
+        {"true", []}
+        {"false", [
+          // x.head
+          "($0).charCodeAt(0)",
+          // x.tail
+          "($0).slice(1)",
+          ]}
+      ]})
+//  String: {
+//    inst: [[0,"''"], [2, h => t => "(String.fromCharCode("+h+")+"+t+")"]],
+//    elim: {
+//      ctag: x => x+".length===0",
+//      ctor: [[], [x => x+".charCodeAt(0)", x => x+".slice(1)"]],
+//    },
+//    cnam: {mode: "if"},
+//  },
+    data: Kind.Comp.Native.new(
+      // Inst
+      []
+      // Elim
+      {"$0._", 
+        let cses = [] :: List<Pair<String, List<String>>>
+        for cse in prim.ctrs with cses:
+          let {ctr_name, ctr_fields} = cse
+          let field_list = [] :: List<String>
+          for field in ctr_fields with field_list:
+             ("$0['"|field|"']") & field_list
+          {ctr_name, field_list} & cses
+        cses
+      })
+//  function adt_type(adt) {
+//    var inst = [];
+//    var elim = {
+//      ctag: x => x+"._",
+//      ctor: [],
+//    };
+//    var cnam = [];
+//    for (let i = 0; i < adt.length; ++i) {
+//      inst.push([adt[i].flds.length, (function go(j, ctx) {
+//        if (j < adt[i].flds.length) {
+//          return x => go(j + 1, ctx.concat([x]));
+//        } else {
+//          var res = "({_:'"+adt[i].name+"'";
+//          for (var k = 0; k < j; ++k) {
+//            res += ",'"+adt[i].flds[k]+"':"+ctx[k];
+//          };
+//          res += "})";
+//          return res;
+//        };
+//      })(0, [])]);
+//      elim.ctor.push(adt[i].flds.map((n,j) => (x => x+"."+adt[i].flds[j])));
+//      cnam.push(adt[i].name);
+//    };
+//    var cnam = {mode: "switch", nams: cnam};
+//    return {inst, elim, cnam};
+//  };
+  }

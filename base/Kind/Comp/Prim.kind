@@ -1,5 +1,8 @@
+// TODO: move terms below to files
+// TODO: use "lang" to remove Scheme-specific syntaxes and dependencies
+
 // Types that are optimized to primitive values.
-// To learn more, see Kind/Comp/Prim/Shape.kind.
+// To learn more, see Kind/Comp/Native.kind.
 type Kind.Comp.Prim {
   unit,
   bool,
@@ -11,3 +14,141 @@ type Kind.Comp.Prim {
 
 Kind.Comp.Prim.ADT: Type
   List(Pair(String, List(String)))
+
+// Instantiators
+// =============
+
+// Compiles an instantiation. Converts a λ-encoded layer to a native value.
+// - inst(`ins{Nat, `λz. λs. (s 5)`}`) == "(+ 5 1)"
+Kind.Comp.Prim.inst(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
+  case term {
+    ins:
+      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let {vars,expr} = Kind.Comp.get_vars(term.expr)
+      if List.length!(shape.inst) =? List.length!(vars) then
+        let {expr,args} = Kind.Comp.get_args(expr)
+        case expr { 
+          var: Kind.Comp.Prim.inst.go(lang, expr.name, shape.inst, vars, args, depth, defs)
+          ref: Kind.Comp.Prim.inst.go(lang, expr.name, shape.inst, vars, args, depth, defs)
+        } default none
+      else
+        none
+  } default none
+
+Kind.Comp.Prim.inst.go(
+  lang: Kind.Comp.Language
+  name: String
+  inst: List(Pair(Nat,String))
+  vars: List(String)
+  args: List(Kind.Comp)
+  depth: Nat
+  defs: Kind.Comp.Defs
+): Maybe(String)
+  case inst vars {
+    nil  nil : none
+    nil  cons: none
+    cons nil : none
+    cons cons: 
+      if String.eql(name, vars.head) then
+        let {ctor_arity, ctor_maker} = inst.head
+        if ctor_arity =? List.length!(args) then
+          some(Kind.Comp.replace(ctor_maker, List.mapped!(args)!((x) Kind.Comp.transpile.term(lang,x,depth,defs))))
+        else
+          none
+      else
+        Kind.Comp.Prim.inst.go(lang, name, inst.tail, vars.tail, args, depth, defs)
+  }
+
+// Creates an instantiator function. This is like inst, but instead of being
+// applied to an inline argument, it generates a whole function.
+// - instantiator(`Nat`) == "(lambda (t) (t 0 (lambda (pred) (+ pred 1))))"
+Kind.Comp.Prim.instantiator(lang: Kind.Comp.Language, prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
+  let shape = Kind.Comp.Target.Scheme.natives(prim) open shape
+  let text = "x"
+  for ctor in shape.inst with text:
+    lang@gram@application(text, Kind.Comp.Prim.instantiator.go(lang, prim, depth, defs, ctor, 0))
+  lang@gram@lambda("x", text)
+
+Kind.Comp.Prim.instantiator.go(
+  lang: Kind.Comp.Language
+  prim: Kind.Comp.Prim
+  depth: Nat
+  defs: Kind.Comp.Defs
+  ctor: Pair(Nat, String)
+  j: Nat
+): String
+  let {ctor_arity, ctor_maker} = ctor
+  if Nat.eql(j, ctor_arity) then
+    Kind.Comp.replace(ctor_maker, List.create!(ctor_arity, (j) "x" | Nat.show(j)))
+  else
+    lang@gram@lambda("x" | Nat.show(j), Kind.Comp.Prim.instantiator.go(lang, prim, depth, defs, ctor, Nat.succ(j)))
+
+// Eliminators
+// ===========
+
+// TODO: use `lang` (probably requires converting some fors into folds or recursion)
+// Compiles a complete elimination, extracting a λ-layer from a native value.
+// Compiles an instantiation. Converts a λ-encoded layer to a native value.
+// Inlines appications when possible.
+// - elim(`eli{Nat,5}`) == "(if (= 5 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s 4))))`
+// - elim(`((eli{Nat,5} Z) S)` == "(if (= 5 0) Z (S 4))"
+Kind.Comp.Prim.elim(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
+  let {term,args} = Kind.Comp.get_args(term)
+  case term {
+    ref:
+      case Kind.Map.get!(term.name, defs) as got {
+        none:
+          none
+        some:
+          let arity = Kind.Comp.get_arity(got.value)
+          if (arity =? List.length!(args)) && (arity >? 0) then
+            let code = "($" | term.name
+            let code = for arg in args:
+              code | " " | Kind.Comp.transpile.term(lang, arg, depth, defs)
+            let code = code | ")"
+            some(code)
+          else
+            none
+      }
+    eli:
+      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let {ctag,cses} = shape.elim
+      let args_len = List.length!(args)
+      let cses_len = List.length!(cses)
+      if args_len >? cses_len then
+        none
+      else
+        let lams_len = cses_len - args_len
+        let args = for i from 0 to lams_len: args ++ [Kind.Comp.var("c"|Nat.show(i))]
+        let self = "self" | Nat.show(depth)
+        let text = ""
+        let text = text | "(let (("|self|" "|Kind.Comp.transpile.term(lang, term.expr,depth,defs)|")) "
+        let text = text | "(case " | Kind.Comp.replace(ctag,[self])
+        let text = for j from 0 to cses_len:
+          let {name,flds} = cses[j] <> {"",[]}
+          let flds_len = List.length!(flds)
+          let text = text | " (" | name | " "
+          let text = text | "(let ("
+          let text = for k from 0 to flds_len:
+            let key = "f"|Nat.show(Nat.add(depth,k))
+            let val = Kind.Comp.replace(flds[k] <> "", [self])
+            text | "("|key|" "|val|")"
+          let keys = List.create!(flds_len, (k) Kind.Comp.var("f"|Nat.show(Nat.add(depth,k))))
+          let argj = Kind.Comp.apply(args[j] <> Kind.Comp.ref("?"), keys)
+          let body = ""
+          let body = for i from 0 to lams_len: body|"(lambda (c"|Nat.show(i)|") "
+          let body = body | Kind.Comp.transpile.term(lang, argj, Nat.add(Nat.add(depth,flds_len),lams_len), defs)
+          let body = for i from 0 to lams_len: body|")"
+          text | ") " | body | "))"
+        let text = text | "))"
+        some(text)
+  } default none
+
+// Creates an elimination function. This is like "elim", but instead of being
+// applied to an inline argument, it generates a whole function.
+// - eliminator(Nat) == "(lambda (n) (if (= n 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s (- n 1))))))"
+Kind.Comp.Prim.eliminator(lang: Kind.Comp.Language, prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
+  let term = Kind.Comp.eli(prim,Kind.Comp.var("x"))
+  let text = Kind.Comp.Prim.elim(lang, term, 0, defs) <> ""
+  let term = Kind.Comp.lam("x", Kind.Comp.txt(text))
+  Kind.Comp.transpile.term(lang, term, depth, defs)
