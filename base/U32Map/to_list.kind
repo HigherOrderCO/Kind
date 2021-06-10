@@ -1,0 +1,2 @@
+U32Map.to_list<V: Type>(map: U32Map<V>): List<Pair<U32,V>>
+  GMap.to_list!!(map)

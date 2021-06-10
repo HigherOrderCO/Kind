@@ -1,0 +1,2 @@
+U32Map<V: Type>: Type
+  GMap<U32, V>
