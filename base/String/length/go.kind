@@ -1,5 +1,8 @@
 String.length.go(xs: String, n: Nat): Nat
+  log("s length: " | xs | " nat: " | Nat.show(n))
   case xs {
     nil : n,
-    cons: String.length.go(xs.tail, Nat.succ(n))
+    cons: 
+    log("head: " | Bits.show(U16.to_bits(xs.head)))
+    String.length.go(xs.tail, Nat.succ(n))
   }
