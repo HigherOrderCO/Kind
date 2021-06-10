@@ -36,6 +36,19 @@ Kind.Term.SmartMotive.replace(term: Kind.Term, from: Kind.Term, to: Kind.Term, l
       let term = Kind.Term.SmartMotive.replace(term.term, from, to, lv);
       let type = Kind.Term.SmartMotive.replace(term.type, from, to, lv);
       Kind.Term.ann(term.done, term, type),
+    get:
+      let expr = Kind.Term.SmartMotive.replace(term.expr, from, to, lv);
+      let fkey = term.fkey;
+      Kind.Term.get(expr, fkey),
+    set:
+      let expr = Kind.Term.SmartMotive.replace(term.expr, from, to, lv);
+      let fkey = term.fkey;
+      let fval = Kind.Term.SmartMotive.replace(term.fval, from, to, lv);
+      Kind.Term.set(expr, fkey, fval),
+    ope:
+      let arg0 = Kind.Term.SmartMotive.replace(term.arg0, from, to, lv);
+      let arg1 = Kind.Term.SmartMotive.replace(term.arg1, from, to, lv);
+      Kind.Term.ope(term.name, arg0, arg1)
     ori:
       Kind.Term.SmartMotive.replace(term.expr, from, to, lv),
   } default term

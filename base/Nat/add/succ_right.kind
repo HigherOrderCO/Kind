@@ -1,10 +1,8 @@
-Nat.add.succ_right(a: Nat, b: Nat)
-  : (a + Nat.succ(b)) == Nat.succ(a + b)
+Nat.add.succ_right(a: Nat, b: Nat): (a + Nat.succ(b)) == Nat.succ(Nat.add(a,b))
   case a {
     zero: refl
     succ:
       let h = Nat.add.succ_right(a.pred, b)
       let h1 = apply(Nat.succ, h)
       h1
-
   }!
