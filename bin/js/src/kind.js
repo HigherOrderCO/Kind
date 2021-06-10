@@ -28915,18 +28915,18 @@ module.exports = (function() {
     };
     const Kind$Parser$file$def = x0 => x1 => x2 => x3 => Kind$Parser$file$def$(x0, x1, x2, x3);
 
-    function Kind$Constructor$new$(_name$1, _args$2, _inds$3) {
+    function Kind$Parser$ADT$Constructor$new$(_name$1, _args$2, _inds$3) {
         var $9229 = ({
-            _: 'Kind.Constructor.new',
+            _: 'Kind.Parser.ADT.Constructor.new',
             'name': _name$1,
             'args': _args$2,
             'inds': _inds$3
         });
         return $9229;
     };
-    const Kind$Constructor$new = x0 => x1 => x2 => Kind$Constructor$new$(x0, x1, x2);
+    const Kind$Parser$ADT$Constructor$new = x0 => x1 => x2 => Kind$Parser$ADT$Constructor$new$(x0, x1, x2);
 
-    function Kind$Parser$constructor$(_namespace$1, _pst$2) {
+    function Kind$Parser$ADT$ctor$(_namespace$1, _pst$2) {
         var self = _pst$2;
         switch (self._) {
             case 'Parser.State.new':
@@ -29080,7 +29080,7 @@ module.exports = (function() {
                                                                                 var _reply$pst$44 = Parser$State$new$(Parser$Error$maybe_combine$($9263, $9289), $9290, $9291, $9292, $9293);
                                                                                 var _args$45 = Maybe$default$($9255, List$nil);
                                                                                 var _inds$46 = Maybe$default$($9287, List$nil);
-                                                                                var $9294 = Parser$Reply$value$(_reply$pst$44, Kind$Constructor$new$($9239, _args$45, _inds$46));
+                                                                                var $9294 = Parser$Reply$value$(_reply$pst$44, Kind$Parser$ADT$Constructor$new$($9239, _args$45, _inds$46));
                                                                                 var $9288 = $9294;
                                                                                 break;
                                                                         };
@@ -29110,11 +29110,11 @@ module.exports = (function() {
         };
         return $9230;
     };
-    const Kind$Parser$constructor = x0 => x1 => Kind$Parser$constructor$(x0, x1);
+    const Kind$Parser$ADT$ctor = x0 => x1 => Kind$Parser$ADT$ctor$(x0, x1);
 
-    function Kind$Datatype$new$(_name$1, _pars$2, _inds$3, _ctrs$4) {
+    function Kind$Parser$ADT$Datatype$new$(_name$1, _pars$2, _inds$3, _ctrs$4) {
         var $9295 = ({
-            _: 'Kind.Datatype.new',
+            _: 'Kind.Parser.ADT.Datatype.new',
             'name': _name$1,
             'pars': _pars$2,
             'inds': _inds$3,
@@ -29122,9 +29122,9 @@ module.exports = (function() {
         });
         return $9295;
     };
-    const Kind$Datatype$new = x0 => x1 => x2 => x3 => Kind$Datatype$new$(x0, x1, x2, x3);
+    const Kind$Parser$ADT$Datatype$new = x0 => x1 => x2 => x3 => Kind$Parser$ADT$Datatype$new$(x0, x1, x2, x3);
 
-    function Kind$Parser$datatype$(_pst$1) {
+    function Kind$Parser$ADT$adt$(_pst$1) {
         var self = _pst$1;
         switch (self._) {
             case 'Parser.State.new':
@@ -29316,7 +29316,7 @@ module.exports = (function() {
                                                                                                         switch (self._) {
                                                                                                             case 'Parser.State.new':
                                                                                                                 var $9376 = self.err;
-                                                                                                                var _reply$65 = Kind$Parser$items$("{", Kind$Parser$constructor($9320), "}")(_reply$pst$57);
+                                                                                                                var _reply$65 = Kind$Parser$items$("{", Kind$Parser$ADT$ctor($9320), "}")(_reply$pst$57);
                                                                                                                 var self = _reply$65;
                                                                                                                 switch (self._) {
                                                                                                                     case 'Parser.Reply.error':
@@ -29347,7 +29347,7 @@ module.exports = (function() {
                                                                                                                                 var $9389 = self.idx;
                                                                                                                                 var $9390 = self.str;
                                                                                                                                 var _reply$pst$73 = Parser$State$new$(Parser$Error$maybe_combine$($9376, $9386), $9387, $9388, $9389, $9390);
-                                                                                                                                var $9391 = Parser$Reply$value$(_reply$pst$73, Kind$Datatype$new$($9320, _pars$58, _inds$59, $9384));
+                                                                                                                                var $9391 = Parser$Reply$value$(_reply$pst$73, Kind$Parser$ADT$Datatype$new$($9320, _pars$58, _inds$59, $9384));
                                                                                                                                 var $9385 = $9391;
                                                                                                                                 break;
                                                                                                                         };
@@ -29395,9 +29395,9 @@ module.exports = (function() {
         };
         return $9296;
     };
-    const Kind$Parser$datatype = x0 => Kind$Parser$datatype$(x0);
+    const Kind$Parser$ADT$adt = x0 => Kind$Parser$ADT$adt$(x0);
 
-    function Kind$Datatype$build_term$motive$go$(_type$1, _name$2, _inds$3) {
+    function Kind$Parser$ADT$Datatype$build_term$motive$go$(_type$1, _name$2, _inds$3) {
         var self = _inds$3;
         switch (self._) {
             case 'List.cons':
@@ -29410,7 +29410,7 @@ module.exports = (function() {
                         var $9397 = self.name;
                         var $9398 = self.term;
                         var $9399 = Kind$Term$all$($9396, "", $9397, $9398, (_s$9 => _x$10 => {
-                            var $9400 = Kind$Datatype$build_term$motive$go$(_type$1, _name$2, $9394);
+                            var $9400 = Kind$Parser$ADT$Datatype$build_term$motive$go$(_type$1, _name$2, $9394);
                             return $9400;
                         }));
                         var $9395 = $9399;
@@ -29421,7 +29421,7 @@ module.exports = (function() {
             case 'List.nil':
                 var self = _type$1;
                 switch (self._) {
-                    case 'Kind.Datatype.new':
+                    case 'Kind.Parser.ADT.Datatype.new':
                         var $9402 = self.pars;
                         var $9403 = self.inds;
                         var _slf$8 = Kind$Term$ref$(_name$2);
@@ -29479,21 +29479,21 @@ module.exports = (function() {
         };
         return $9392;
     };
-    const Kind$Datatype$build_term$motive$go = x0 => x1 => x2 => Kind$Datatype$build_term$motive$go$(x0, x1, x2);
+    const Kind$Parser$ADT$Datatype$build_term$motive$go = x0 => x1 => x2 => Kind$Parser$ADT$Datatype$build_term$motive$go$(x0, x1, x2);
 
-    function Kind$Datatype$build_term$motive$(_type$1) {
+    function Kind$Parser$ADT$Datatype$build_term$motive$(_type$1) {
         var self = _type$1;
         switch (self._) {
-            case 'Kind.Datatype.new':
+            case 'Kind.Parser.ADT.Datatype.new':
                 var $9417 = self.name;
                 var $9418 = self.inds;
-                var $9419 = Kind$Datatype$build_term$motive$go$(_type$1, $9417, $9418);
+                var $9419 = Kind$Parser$ADT$Datatype$build_term$motive$go$(_type$1, $9417, $9418);
                 var $9416 = $9419;
                 break;
         };
         return $9416;
     };
-    const Kind$Datatype$build_term$motive = x0 => Kind$Datatype$build_term$motive$(x0);
+    const Kind$Parser$ADT$Datatype$build_term$motive = x0 => Kind$Parser$ADT$Datatype$build_term$motive$(x0);
 
     function String$flatten$go$(_xs$1, _res$2) {
         var String$flatten$go$ = (_xs$1, _res$2) => ({
@@ -29529,7 +29529,7 @@ module.exports = (function() {
     };
     const String$flatten = x0 => String$flatten$(x0);
 
-    function Kind$Datatype$build_term$constructor$go$(_type$1, _ctor$2, _args$3) {
+    function Kind$Parser$ADT$Datatype$build_term$constructor$go$(_type$1, _ctor$2, _args$3) {
         var self = _args$3;
         switch (self._) {
             case 'List.cons':
@@ -29544,7 +29544,7 @@ module.exports = (function() {
                         var _eras$9 = $9429;
                         var _name$10 = $9430;
                         var _xtyp$11 = $9431;
-                        var _body$12 = Kind$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $9427);
+                        var _body$12 = Kind$Parser$ADT$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $9427);
                         var $9432 = Kind$Term$all$(_eras$9, "", _name$10, _xtyp$11, (_s$13 => _x$14 => {
                             var $9433 = _body$12;
                             return $9433;
@@ -29557,12 +29557,12 @@ module.exports = (function() {
             case 'List.nil':
                 var self = _type$1;
                 switch (self._) {
-                    case 'Kind.Datatype.new':
+                    case 'Kind.Parser.ADT.Datatype.new':
                         var $9435 = self.name;
                         var $9436 = self.pars;
                         var self = _ctor$2;
                         switch (self._) {
-                            case 'Kind.Constructor.new':
+                            case 'Kind.Parser.ADT.Constructor.new':
                                 var $9438 = self.name;
                                 var $9439 = self.args;
                                 var $9440 = self.inds;
@@ -29644,22 +29644,22 @@ module.exports = (function() {
         };
         return $9425;
     };
-    const Kind$Datatype$build_term$constructor$go = x0 => x1 => x2 => Kind$Datatype$build_term$constructor$go$(x0, x1, x2);
+    const Kind$Parser$ADT$Datatype$build_term$constructor$go = x0 => x1 => x2 => Kind$Parser$ADT$Datatype$build_term$constructor$go$(x0, x1, x2);
 
-    function Kind$Datatype$build_term$constructor$(_type$1, _ctor$2) {
+    function Kind$Parser$ADT$Datatype$build_term$constructor$(_type$1, _ctor$2) {
         var self = _ctor$2;
         switch (self._) {
-            case 'Kind.Constructor.new':
+            case 'Kind.Parser.ADT.Constructor.new':
                 var $9458 = self.args;
-                var $9459 = Kind$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $9458);
+                var $9459 = Kind$Parser$ADT$Datatype$build_term$constructor$go$(_type$1, _ctor$2, $9458);
                 var $9457 = $9459;
                 break;
         };
         return $9457;
     };
-    const Kind$Datatype$build_term$constructor = x0 => x1 => Kind$Datatype$build_term$constructor$(x0, x1);
+    const Kind$Parser$ADT$Datatype$build_term$constructor = x0 => x1 => Kind$Parser$ADT$Datatype$build_term$constructor$(x0, x1);
 
-    function Kind$Datatype$build_term$constructors$go$(_type$1, _name$2, _ctrs$3) {
+    function Kind$Parser$ADT$Datatype$build_term$constructors$go$(_type$1, _name$2, _ctrs$3) {
         var self = _ctrs$3;
         switch (self._) {
             case 'List.cons':
@@ -29667,10 +29667,10 @@ module.exports = (function() {
                 var $9462 = self.tail;
                 var self = $9461;
                 switch (self._) {
-                    case 'Kind.Constructor.new':
+                    case 'Kind.Parser.ADT.Constructor.new':
                         var $9464 = self.name;
-                        var $9465 = Kind$Term$all$(Bool$false, "", $9464, Kind$Datatype$build_term$constructor$(_type$1, $9461), (_s$9 => _x$10 => {
-                            var $9466 = Kind$Datatype$build_term$constructors$go$(_type$1, _name$2, $9462);
+                        var $9465 = Kind$Term$all$(Bool$false, "", $9464, Kind$Parser$ADT$Datatype$build_term$constructor$(_type$1, $9461), (_s$9 => _x$10 => {
+                            var $9466 = Kind$Parser$ADT$Datatype$build_term$constructors$go$(_type$1, _name$2, $9462);
                             return $9466;
                         }));
                         var $9463 = $9465;
@@ -29681,7 +29681,7 @@ module.exports = (function() {
             case 'List.nil':
                 var self = _type$1;
                 switch (self._) {
-                    case 'Kind.Datatype.new':
+                    case 'Kind.Parser.ADT.Datatype.new':
                         var $9468 = self.inds;
                         var _ret$8 = Kind$Term$ref$(Kind$Name$read$("P"));
                         var _ret$9 = (() => {
@@ -29714,23 +29714,23 @@ module.exports = (function() {
         };
         return $9460;
     };
-    const Kind$Datatype$build_term$constructors$go = x0 => x1 => x2 => Kind$Datatype$build_term$constructors$go$(x0, x1, x2);
+    const Kind$Parser$ADT$Datatype$build_term$constructors$go = x0 => x1 => x2 => Kind$Parser$ADT$Datatype$build_term$constructors$go$(x0, x1, x2);
 
-    function Kind$Datatype$build_term$constructors$(_type$1) {
+    function Kind$Parser$ADT$Datatype$build_term$constructors$(_type$1) {
         var self = _type$1;
         switch (self._) {
-            case 'Kind.Datatype.new':
+            case 'Kind.Parser.ADT.Datatype.new':
                 var $9476 = self.name;
                 var $9477 = self.ctrs;
-                var $9478 = Kind$Datatype$build_term$constructors$go$(_type$1, $9476, $9477);
+                var $9478 = Kind$Parser$ADT$Datatype$build_term$constructors$go$(_type$1, $9476, $9477);
                 var $9475 = $9478;
                 break;
         };
         return $9475;
     };
-    const Kind$Datatype$build_term$constructors = x0 => Kind$Datatype$build_term$constructors$(x0);
+    const Kind$Parser$ADT$Datatype$build_term$constructors = x0 => Kind$Parser$ADT$Datatype$build_term$constructors$(x0);
 
-    function Kind$Datatype$build_term$go$(_type$1, _name$2, _pars$3, _inds$4) {
+    function Kind$Parser$ADT$Datatype$build_term$go$(_type$1, _name$2, _pars$3, _inds$4) {
         var self = _pars$3;
         switch (self._) {
             case 'List.cons':
@@ -29741,7 +29741,7 @@ module.exports = (function() {
                     case 'Kind.Binder.new':
                         var $9483 = self.name;
                         var $9484 = Kind$Term$lam$($9483, (_x$10 => {
-                            var $9485 = Kind$Datatype$build_term$go$(_type$1, _name$2, $9481, _inds$4);
+                            var $9485 = Kind$Parser$ADT$Datatype$build_term$go$(_type$1, _name$2, $9481, _inds$4);
                             return $9485;
                         }));
                         var $9482 = $9484;
@@ -29760,7 +29760,7 @@ module.exports = (function() {
                             case 'Kind.Binder.new':
                                 var $9490 = self.name;
                                 var $9491 = Kind$Term$lam$($9490, (_x$10 => {
-                                    var $9492 = Kind$Datatype$build_term$go$(_type$1, _name$2, _pars$3, $9488);
+                                    var $9492 = Kind$Parser$ADT$Datatype$build_term$go$(_type$1, _name$2, _pars$3, $9488);
                                     return $9492;
                                 }));
                                 var $9489 = $9491;
@@ -29769,8 +29769,8 @@ module.exports = (function() {
                         var $9486 = $9489;
                         break;
                     case 'List.nil':
-                        var $9493 = Kind$Term$all$(Bool$true, (_name$2 + ".Self"), Kind$Name$read$("P"), Kind$Datatype$build_term$motive$(_type$1), (_s$5 => _x$6 => {
-                            var $9494 = Kind$Datatype$build_term$constructors$(_type$1);
+                        var $9493 = Kind$Term$all$(Bool$true, (_name$2 + ".Self"), Kind$Name$read$("P"), Kind$Parser$ADT$Datatype$build_term$motive$(_type$1), (_s$5 => _x$6 => {
+                            var $9494 = Kind$Parser$ADT$Datatype$build_term$constructors$(_type$1);
                             return $9494;
                         }));
                         var $9486 = $9493;
@@ -29781,24 +29781,24 @@ module.exports = (function() {
         };
         return $9479;
     };
-    const Kind$Datatype$build_term$go = x0 => x1 => x2 => x3 => Kind$Datatype$build_term$go$(x0, x1, x2, x3);
+    const Kind$Parser$ADT$Datatype$build_term$go = x0 => x1 => x2 => x3 => Kind$Parser$ADT$Datatype$build_term$go$(x0, x1, x2, x3);
 
-    function Kind$Datatype$build_term$(_type$1) {
+    function Kind$Parser$ADT$Datatype$build_term$(_type$1) {
         var self = _type$1;
         switch (self._) {
-            case 'Kind.Datatype.new':
+            case 'Kind.Parser.ADT.Datatype.new':
                 var $9496 = self.name;
                 var $9497 = self.pars;
                 var $9498 = self.inds;
-                var $9499 = Kind$Datatype$build_term$go$(_type$1, $9496, $9497, $9498);
+                var $9499 = Kind$Parser$ADT$Datatype$build_term$go$(_type$1, $9496, $9497, $9498);
                 var $9495 = $9499;
                 break;
         };
         return $9495;
     };
-    const Kind$Datatype$build_term = x0 => Kind$Datatype$build_term$(x0);
+    const Kind$Parser$ADT$Datatype$build_term = x0 => Kind$Parser$ADT$Datatype$build_term$(x0);
 
-    function Kind$Datatype$build_type$go$(_type$1, _name$2, _pars$3, _inds$4) {
+    function Kind$Parser$ADT$Datatype$build_type$go$(_type$1, _name$2, _pars$3, _inds$4) {
         var self = _pars$3;
         switch (self._) {
             case 'List.cons':
@@ -29810,7 +29810,7 @@ module.exports = (function() {
                         var $9504 = self.name;
                         var $9505 = self.term;
                         var $9506 = Kind$Term$all$(Bool$false, "", $9504, $9505, (_s$10 => _x$11 => {
-                            var $9507 = Kind$Datatype$build_type$go$(_type$1, _name$2, $9502, _inds$4);
+                            var $9507 = Kind$Parser$ADT$Datatype$build_type$go$(_type$1, _name$2, $9502, _inds$4);
                             return $9507;
                         }));
                         var $9503 = $9506;
@@ -29830,7 +29830,7 @@ module.exports = (function() {
                                 var $9512 = self.name;
                                 var $9513 = self.term;
                                 var $9514 = Kind$Term$all$(Bool$false, "", $9512, $9513, (_s$10 => _x$11 => {
-                                    var $9515 = Kind$Datatype$build_type$go$(_type$1, _name$2, _pars$3, $9510);
+                                    var $9515 = Kind$Parser$ADT$Datatype$build_type$go$(_type$1, _name$2, _pars$3, $9510);
                                     return $9515;
                                 }));
                                 var $9511 = $9514;
@@ -29848,24 +29848,24 @@ module.exports = (function() {
         };
         return $9500;
     };
-    const Kind$Datatype$build_type$go = x0 => x1 => x2 => x3 => Kind$Datatype$build_type$go$(x0, x1, x2, x3);
+    const Kind$Parser$ADT$Datatype$build_type$go = x0 => x1 => x2 => x3 => Kind$Parser$ADT$Datatype$build_type$go$(x0, x1, x2, x3);
 
-    function Kind$Datatype$build_type$(_type$1) {
+    function Kind$Parser$ADT$Datatype$build_type$(_type$1) {
         var self = _type$1;
         switch (self._) {
-            case 'Kind.Datatype.new':
+            case 'Kind.Parser.ADT.Datatype.new':
                 var $9518 = self.name;
                 var $9519 = self.pars;
                 var $9520 = self.inds;
-                var $9521 = Kind$Datatype$build_type$go$(_type$1, $9518, $9519, $9520);
+                var $9521 = Kind$Parser$ADT$Datatype$build_type$go$(_type$1, $9518, $9519, $9520);
                 var $9517 = $9521;
                 break;
         };
         return $9517;
     };
-    const Kind$Datatype$build_type = x0 => Kind$Datatype$build_type$(x0);
+    const Kind$Parser$ADT$Datatype$build_type = x0 => Kind$Parser$ADT$Datatype$build_type$(x0);
 
-    function Kind$Constructor$build_term$opt$go$(_type$1, _ctor$2, _ctrs$3) {
+    function Kind$Parser$ADT$Constructor$build_term$opt$go$(_type$1, _ctor$2, _ctrs$3) {
         var self = _ctrs$3;
         switch (self._) {
             case 'List.cons':
@@ -29873,10 +29873,10 @@ module.exports = (function() {
                 var $9524 = self.tail;
                 var self = $9523;
                 switch (self._) {
-                    case 'Kind.Constructor.new':
+                    case 'Kind.Parser.ADT.Constructor.new':
                         var $9526 = self.name;
                         var $9527 = Kind$Term$lam$($9526, (_x$9 => {
-                            var $9528 = Kind$Constructor$build_term$opt$go$(_type$1, _ctor$2, $9524);
+                            var $9528 = Kind$Parser$ADT$Constructor$build_term$opt$go$(_type$1, _ctor$2, $9524);
                             return $9528;
                         }));
                         var $9525 = $9527;
@@ -29887,7 +29887,7 @@ module.exports = (function() {
             case 'List.nil':
                 var self = _ctor$2;
                 switch (self._) {
-                    case 'Kind.Constructor.new':
+                    case 'Kind.Parser.ADT.Constructor.new':
                         var $9530 = self.name;
                         var $9531 = self.args;
                         var _ret$7 = Kind$Term$ref$($9530);
@@ -29921,22 +29921,22 @@ module.exports = (function() {
         };
         return $9522;
     };
-    const Kind$Constructor$build_term$opt$go = x0 => x1 => x2 => Kind$Constructor$build_term$opt$go$(x0, x1, x2);
+    const Kind$Parser$ADT$Constructor$build_term$opt$go = x0 => x1 => x2 => Kind$Parser$ADT$Constructor$build_term$opt$go$(x0, x1, x2);
 
-    function Kind$Constructor$build_term$opt$(_type$1, _ctor$2) {
+    function Kind$Parser$ADT$Constructor$build_term$opt$(_type$1, _ctor$2) {
         var self = _type$1;
         switch (self._) {
-            case 'Kind.Datatype.new':
+            case 'Kind.Parser.ADT.Datatype.new':
                 var $9539 = self.ctrs;
-                var $9540 = Kind$Constructor$build_term$opt$go$(_type$1, _ctor$2, $9539);
+                var $9540 = Kind$Parser$ADT$Constructor$build_term$opt$go$(_type$1, _ctor$2, $9539);
                 var $9538 = $9540;
                 break;
         };
         return $9538;
     };
-    const Kind$Constructor$build_term$opt = x0 => x1 => Kind$Constructor$build_term$opt$(x0, x1);
+    const Kind$Parser$ADT$Constructor$build_term$opt = x0 => x1 => Kind$Parser$ADT$Constructor$build_term$opt$(x0, x1);
 
-    function Kind$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, _pars$4, _args$5) {
+    function Kind$Parser$ADT$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, _pars$4, _args$5) {
         var self = _pars$4;
         switch (self._) {
             case 'List.cons':
@@ -29947,7 +29947,7 @@ module.exports = (function() {
                     case 'Kind.Binder.new':
                         var $9545 = self.name;
                         var $9546 = Kind$Term$lam$($9545, (_x$11 => {
-                            var $9547 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, $9543, _args$5);
+                            var $9547 = Kind$Parser$ADT$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, $9543, _args$5);
                             return $9547;
                         }));
                         var $9544 = $9546;
@@ -29966,7 +29966,7 @@ module.exports = (function() {
                             case 'Kind.Binder.new':
                                 var $9552 = self.name;
                                 var $9553 = Kind$Term$lam$($9552, (_x$11 => {
-                                    var $9554 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, _pars$4, $9550);
+                                    var $9554 = Kind$Parser$ADT$Constructor$build_term$go$(_type$1, _ctor$2, _name$3, _pars$4, $9550);
                                     return $9554;
                                 }));
                                 var $9551 = $9553;
@@ -29976,7 +29976,7 @@ module.exports = (function() {
                         break;
                     case 'List.nil':
                         var $9555 = Kind$Term$lam$(Kind$Name$read$("P"), (_x$6 => {
-                            var $9556 = Kind$Constructor$build_term$opt$(_type$1, _ctor$2);
+                            var $9556 = Kind$Parser$ADT$Constructor$build_term$opt$(_type$1, _ctor$2);
                             return $9556;
                         }));
                         var $9548 = $9555;
@@ -29987,19 +29987,19 @@ module.exports = (function() {
         };
         return $9541;
     };
-    const Kind$Constructor$build_term$go = x0 => x1 => x2 => x3 => x4 => Kind$Constructor$build_term$go$(x0, x1, x2, x3, x4);
+    const Kind$Parser$ADT$Constructor$build_term$go = x0 => x1 => x2 => x3 => x4 => Kind$Parser$ADT$Constructor$build_term$go$(x0, x1, x2, x3, x4);
 
-    function Kind$Constructor$build_term$(_type$1, _ctor$2) {
+    function Kind$Parser$ADT$Constructor$build_term$(_type$1, _ctor$2) {
         var self = _type$1;
         switch (self._) {
-            case 'Kind.Datatype.new':
+            case 'Kind.Parser.ADT.Datatype.new':
                 var $9558 = self.name;
                 var $9559 = self.pars;
                 var self = _ctor$2;
                 switch (self._) {
-                    case 'Kind.Constructor.new':
+                    case 'Kind.Parser.ADT.Constructor.new':
                         var $9561 = self.args;
-                        var $9562 = Kind$Constructor$build_term$go$(_type$1, _ctor$2, $9558, $9559, $9561);
+                        var $9562 = Kind$Parser$ADT$Constructor$build_term$go$(_type$1, _ctor$2, $9558, $9559, $9561);
                         var $9560 = $9562;
                         break;
                 };
@@ -30008,9 +30008,9 @@ module.exports = (function() {
         };
         return $9557;
     };
-    const Kind$Constructor$build_term = x0 => x1 => Kind$Constructor$build_term$(x0, x1);
+    const Kind$Parser$ADT$Constructor$build_term = x0 => x1 => Kind$Parser$ADT$Constructor$build_term$(x0, x1);
 
-    function Kind$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, _pars$4, _args$5) {
+    function Kind$Parser$ADT$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, _pars$4, _args$5) {
         var self = _pars$4;
         switch (self._) {
             case 'List.cons':
@@ -30023,7 +30023,7 @@ module.exports = (function() {
                         var $9568 = self.name;
                         var $9569 = self.term;
                         var $9570 = Kind$Term$all$($9567, "", $9568, $9569, (_s$11 => _x$12 => {
-                            var $9571 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, $9565, _args$5);
+                            var $9571 = Kind$Parser$ADT$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, $9565, _args$5);
                             return $9571;
                         }));
                         var $9566 = $9570;
@@ -30044,7 +30044,7 @@ module.exports = (function() {
                                 var $9577 = self.name;
                                 var $9578 = self.term;
                                 var $9579 = Kind$Term$all$($9576, "", $9577, $9578, (_s$11 => _x$12 => {
-                                    var $9580 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, _pars$4, $9574);
+                                    var $9580 = Kind$Parser$ADT$Constructor$build_type$go$(_type$1, _ctor$2, _name$3, _pars$4, $9574);
                                     return $9580;
                                 }));
                                 var $9575 = $9579;
@@ -30055,11 +30055,11 @@ module.exports = (function() {
                     case 'List.nil':
                         var self = _type$1;
                         switch (self._) {
-                            case 'Kind.Datatype.new':
+                            case 'Kind.Parser.ADT.Datatype.new':
                                 var $9582 = self.pars;
                                 var self = _ctor$2;
                                 switch (self._) {
-                                    case 'Kind.Constructor.new':
+                                    case 'Kind.Parser.ADT.Constructor.new':
                                         var $9584 = self.inds;
                                         var _type$13 = Kind$Term$ref$(_name$3);
                                         var _type$14 = (() => {
@@ -30119,19 +30119,19 @@ module.exports = (function() {
         };
         return $9563;
     };
-    const Kind$Constructor$build_type$go = x0 => x1 => x2 => x3 => x4 => Kind$Constructor$build_type$go$(x0, x1, x2, x3, x4);
+    const Kind$Parser$ADT$Constructor$build_type$go = x0 => x1 => x2 => x3 => x4 => Kind$Parser$ADT$Constructor$build_type$go$(x0, x1, x2, x3, x4);
 
-    function Kind$Constructor$build_type$(_type$1, _ctor$2) {
+    function Kind$Parser$ADT$Constructor$build_type$(_type$1, _ctor$2) {
         var self = _type$1;
         switch (self._) {
-            case 'Kind.Datatype.new':
+            case 'Kind.Parser.ADT.Datatype.new':
                 var $9597 = self.name;
                 var $9598 = self.pars;
                 var self = _ctor$2;
                 switch (self._) {
-                    case 'Kind.Constructor.new':
+                    case 'Kind.Parser.ADT.Constructor.new':
                         var $9600 = self.args;
-                        var $9601 = Kind$Constructor$build_type$go$(_type$1, _ctor$2, $9597, $9598, $9600);
+                        var $9601 = Kind$Parser$ADT$Constructor$build_type$go$(_type$1, _ctor$2, $9597, $9598, $9600);
                         var $9599 = $9601;
                         break;
                 };
@@ -30140,7 +30140,7 @@ module.exports = (function() {
         };
         return $9596;
     };
-    const Kind$Constructor$build_type = x0 => x1 => Kind$Constructor$build_type$(x0, x1);
+    const Kind$Parser$ADT$Constructor$build_type = x0 => x1 => Kind$Parser$ADT$Constructor$build_type$(x0, x1);
 
     function Kind$Parser$file$adt$(_file$1, _code$2, _defs$3, _pst$4) {
         var self = _pst$4;
@@ -30216,7 +30216,7 @@ module.exports = (function() {
                                                         switch (self._) {
                                                             case 'Parser.State.new':
                                                                 var $9634 = self.err;
-                                                                var _reply$38 = Kind$Parser$datatype$(_reply$pst$32);
+                                                                var _reply$38 = Kind$Parser$ADT$adt$(_reply$pst$32);
                                                                 var self = _reply$38;
                                                                 switch (self._) {
                                                                     case 'Parser.Reply.error':
@@ -30285,17 +30285,17 @@ module.exports = (function() {
                                                                                                         var _orig$61 = Pair$new$($9626, $9658);
                                                                                                         var self = $9642;
                                                                                                         switch (self._) {
-                                                                                                            case 'Kind.Datatype.new':
+                                                                                                            case 'Kind.Parser.ADT.Datatype.new':
                                                                                                                 var $9666 = self.name;
                                                                                                                 var $9667 = self.pars;
                                                                                                                 var $9668 = self.inds;
                                                                                                                 var $9669 = self.ctrs;
-                                                                                                                var _term$66 = Kind$Datatype$build_term$($9642);
+                                                                                                                var _term$66 = Kind$Parser$ADT$Datatype$build_term$($9642);
                                                                                                                 var _term$67 = Kind$Term$bind$(List$nil, (_x$67 => {
                                                                                                                     var $9671 = (_x$67 + '1');
                                                                                                                     return $9671;
                                                                                                                 }), _term$66);
-                                                                                                                var _type$68 = Kind$Datatype$build_type$($9642);
+                                                                                                                var _type$68 = Kind$Parser$ADT$Datatype$build_type$($9642);
                                                                                                                 var _type$69 = Kind$Term$bind$(List$nil, (_x$69 => {
                                                                                                                     var $9672 = (_x$69 + '0');
                                                                                                                     return $9672;
@@ -30307,7 +30307,7 @@ module.exports = (function() {
                                                                                                                     var _ctr_arit$75 = (_arit$70 + (list_length((() => {
                                                                                                                         var self = _ctr$72;
                                                                                                                         switch (self._) {
-                                                                                                                            case 'Kind.Constructor.new':
+                                                                                                                            case 'Kind.Parser.ADT.Constructor.new':
                                                                                                                                 var $9674 = self.args;
                                                                                                                                 var $9675 = $9674;
                                                                                                                                 return $9675;
@@ -30316,18 +30316,18 @@ module.exports = (function() {
                                                                                                                     var _ctr_name$76 = String$flatten$(List$cons$(_typ_name$74, List$cons$(Kind$Name$read$("."), List$cons$((() => {
                                                                                                                         var self = _ctr$72;
                                                                                                                         switch (self._) {
-                                                                                                                            case 'Kind.Constructor.new':
+                                                                                                                            case 'Kind.Parser.ADT.Constructor.new':
                                                                                                                                 var $9676 = self.name;
                                                                                                                                 var $9677 = $9676;
                                                                                                                                 return $9677;
                                                                                                                         };
                                                                                                                     })(), List$nil))));
-                                                                                                                    var _ctr_term$77 = Kind$Constructor$build_term$($9642, _ctr$72);
+                                                                                                                    var _ctr_term$77 = Kind$Parser$ADT$Constructor$build_term$($9642, _ctr$72);
                                                                                                                     var _ctr_term$78 = Kind$Term$bind$(List$nil, (_x$78 => {
                                                                                                                         var $9678 = (_x$78 + '1');
                                                                                                                         return $9678;
                                                                                                                     }), _ctr_term$77);
-                                                                                                                    var _ctr_type$79 = Kind$Constructor$build_type$($9642, _ctr$72);
+                                                                                                                    var _ctr_type$79 = Kind$Parser$ADT$Constructor$build_type$($9642, _ctr$72);
                                                                                                                     var _ctr_type$80 = Kind$Term$bind$(List$nil, (_x$80 => {
                                                                                                                         var $9679 = (_x$80 + '0');
                                                                                                                         return $9679;
@@ -42182,28 +42182,28 @@ module.exports = (function() {
         'Kind.Status.init': Kind$Status$init,
         'Kind.Map.def': Kind$Map$def,
         'Kind.Parser.file.def': Kind$Parser$file$def,
-        'Kind.Constructor.new': Kind$Constructor$new,
-        'Kind.Parser.constructor': Kind$Parser$constructor,
-        'Kind.Datatype.new': Kind$Datatype$new,
-        'Kind.Parser.datatype': Kind$Parser$datatype,
-        'Kind.Datatype.build_term.motive.go': Kind$Datatype$build_term$motive$go,
-        'Kind.Datatype.build_term.motive': Kind$Datatype$build_term$motive,
+        'Kind.Parser.ADT.Constructor.new': Kind$Parser$ADT$Constructor$new,
+        'Kind.Parser.ADT.ctor': Kind$Parser$ADT$ctor,
+        'Kind.Parser.ADT.Datatype.new': Kind$Parser$ADT$Datatype$new,
+        'Kind.Parser.ADT.adt': Kind$Parser$ADT$adt,
+        'Kind.Parser.ADT.Datatype.build_term.motive.go': Kind$Parser$ADT$Datatype$build_term$motive$go,
+        'Kind.Parser.ADT.Datatype.build_term.motive': Kind$Parser$ADT$Datatype$build_term$motive,
         'String.flatten.go': String$flatten$go,
         'String.flatten': String$flatten,
-        'Kind.Datatype.build_term.constructor.go': Kind$Datatype$build_term$constructor$go,
-        'Kind.Datatype.build_term.constructor': Kind$Datatype$build_term$constructor,
-        'Kind.Datatype.build_term.constructors.go': Kind$Datatype$build_term$constructors$go,
-        'Kind.Datatype.build_term.constructors': Kind$Datatype$build_term$constructors,
-        'Kind.Datatype.build_term.go': Kind$Datatype$build_term$go,
-        'Kind.Datatype.build_term': Kind$Datatype$build_term,
-        'Kind.Datatype.build_type.go': Kind$Datatype$build_type$go,
-        'Kind.Datatype.build_type': Kind$Datatype$build_type,
-        'Kind.Constructor.build_term.opt.go': Kind$Constructor$build_term$opt$go,
-        'Kind.Constructor.build_term.opt': Kind$Constructor$build_term$opt,
-        'Kind.Constructor.build_term.go': Kind$Constructor$build_term$go,
-        'Kind.Constructor.build_term': Kind$Constructor$build_term,
-        'Kind.Constructor.build_type.go': Kind$Constructor$build_type$go,
-        'Kind.Constructor.build_type': Kind$Constructor$build_type,
+        'Kind.Parser.ADT.Datatype.build_term.constructor.go': Kind$Parser$ADT$Datatype$build_term$constructor$go,
+        'Kind.Parser.ADT.Datatype.build_term.constructor': Kind$Parser$ADT$Datatype$build_term$constructor,
+        'Kind.Parser.ADT.Datatype.build_term.constructors.go': Kind$Parser$ADT$Datatype$build_term$constructors$go,
+        'Kind.Parser.ADT.Datatype.build_term.constructors': Kind$Parser$ADT$Datatype$build_term$constructors,
+        'Kind.Parser.ADT.Datatype.build_term.go': Kind$Parser$ADT$Datatype$build_term$go,
+        'Kind.Parser.ADT.Datatype.build_term': Kind$Parser$ADT$Datatype$build_term,
+        'Kind.Parser.ADT.Datatype.build_type.go': Kind$Parser$ADT$Datatype$build_type$go,
+        'Kind.Parser.ADT.Datatype.build_type': Kind$Parser$ADT$Datatype$build_type,
+        'Kind.Parser.ADT.Constructor.build_term.opt.go': Kind$Parser$ADT$Constructor$build_term$opt$go,
+        'Kind.Parser.ADT.Constructor.build_term.opt': Kind$Parser$ADT$Constructor$build_term$opt,
+        'Kind.Parser.ADT.Constructor.build_term.go': Kind$Parser$ADT$Constructor$build_term$go,
+        'Kind.Parser.ADT.Constructor.build_term': Kind$Parser$ADT$Constructor$build_term,
+        'Kind.Parser.ADT.Constructor.build_type.go': Kind$Parser$ADT$Constructor$build_type$go,
+        'Kind.Parser.ADT.Constructor.build_type': Kind$Parser$ADT$Constructor$build_type,
         'Kind.Parser.file.adt': Kind$Parser$file$adt,
         'Kind.Parser.file.end': Kind$Parser$file$end,
         'Kind.Parser.file': Kind$Parser$file,

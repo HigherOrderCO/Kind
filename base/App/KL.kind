@@ -1,0 +1,60 @@
+// STATE
+// =====
+
+type App.KL.State.Local {
+  lobby(state: App.KL.Lobby.State.Local)
+  game(state: App.KL.Game.State.Local)
+}
+
+type App.KL.State.Global {
+  new
+}
+
+App.KL.State: App.State
+  App.State.new(App.KL.State.Local, App.KL.State.Global)
+
+// APP
+// ===
+
+// Initial state
+App.KL.init: App.Init<App.KL.State>
+  let local = App.KL.State.Local.lobby(App.KL.Lobby.State.Local.new("", ""))
+  let global = App.KL.State.Global.new
+  App.Store.new<App.KL.State>(local, global)
+
+// Render function
+App.KL.draw: App.Draw<App.KL.State>
+  (state)
+  let {local, global} = state
+  case local {
+    lobby: App.KL.Lobby.draw(local.state)
+    game: App.KL.Game.draw(local.state)
+  }
+
+// Event handler
+App.KL.when: App.When<App.KL.State>
+  (event, state)
+  let {local, global} = state
+  case local {
+    lobby: App.KL.Lobby.when(local.state, event)
+    game: App.KL.Game.when(local.state, event)
+  }
+
+// Global ticker: not used
+App.KL.tick: App.Tick<App.KL.State>
+  App.no_tick<App.KL.State>
+
+// Global visitor: counts posts to room_zero
+App.KL.post: App.Post<App.KL.State>
+  (time, room, addr, data, global_state)
+  global_state
+
+// A "KL, world!" + counter application
+App.KL: App<App.KL.State>
+  App.new<App.KL.State>(
+    App.KL.init
+    App.KL.draw
+    App.KL.when
+    App.KL.tick
+    App.KL.post
+  )

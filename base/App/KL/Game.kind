@@ -1,0 +1,20 @@
+// GAME
+// ====
+
+type App.KL.Game.State.Local {
+  new(
+    user: String
+    room: String 
+  )
+}
+
+App.KL.Game.draw(local: App.KL.Game.State.Local): DOM
+  <div>
+    "TODO"
+  </div>
+
+App.KL.Game.when(
+  local: App.KL.Game.State.Local
+  event: App.Event
+): IO<Maybe<App.KL.State.Local>>
+  App.pass<App.KL.State>

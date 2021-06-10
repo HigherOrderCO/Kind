@@ -1,0 +1,93 @@
+// LOBBY
+// =====
+
+// Lobby.State
+// -----------
+
+type App.KL.Lobby.State.Local {
+  new(
+    user: String
+    room_input: String
+  )
+}
+
+// Lobby.Draw
+// ----------
+
+App.KL.Lobby.draw.button(id: String, content: String): DOM
+  let style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "margin-left": "10px",
+    "padding": "2px"
+  }
+  <button id=id style=style>
+    content
+  </button>
+
+App.KL.Lobby.draw.input(id: String, value: String): DOM
+  let style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "outline": "transparent"
+  }
+  <input id=id value=value style=style>
+  </input>
+
+App.KL.Lobby.draw(local: App.KL.Lobby.State.Local): DOM
+  open local
+  let style = {
+    "width": "100vw", 
+    "height": "100vh", 
+    "display": "flex", 
+    "flex-direction": "column", 
+    "justify-content": "center", 
+    "align-items": "center",
+    "font-size": "2rem"
+  }
+  <div style=style>
+    <h1 style={"margin-bottom": "10px"}>
+      "Welcome to Kaelin"
+    </h1>
+    <div>
+      "Enter a room number: "
+      {App.KL.Lobby.draw.input("text", local.room_input)}
+      {App.KL.Lobby.draw.button("ready", "Enter")}
+      {App.KL.Lobby.draw.button("random", "Random")}
+    </div>
+  </div>
+
+// Lobby.When
+// ----------
+
+App.KL.Lobby.when(
+  local: App.KL.Lobby.State.Local
+  event: App.Event
+): IO<Maybe<App.KL.State.Local>>
+  case event {
+    init:
+      let new_local = local@user <- String.to_lower(event.user)
+      App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+
+    input:
+      let new_local = local@room_input <- event.text
+      App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+
+    mouse_click:
+      switch String.eql(event.id) {
+        "random": IO {
+          get rnd = IO.random(10000000000)
+          let str = Nat.show(rnd)
+          let room = "0x72214422" | String.drop(String.length(str) - 6, str)
+          let new_local = local@room_input <- room
+          App.set_local!(App.KL.State.Local.lobby(new_local))
+        }
+        "ready": IO {
+          App.watch!(local@room_input)
+          App.new_post!(
+            local@room_input,
+            App.Kaelin.Event.serialize(App.Kaelin.Event.join_room),
+          )
+        }
+      } default App.pass!
+  } default App.pass!
