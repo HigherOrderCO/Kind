@@ -38,8 +38,12 @@ App.Syntax.draw: App.Draw<App.Syntax.State>
         for i in heroes:
           App.Syntax.card(i@fst, i@snd)
       }
-
-      
+      {
+        let a = []
+        for i in heroes with a:
+          a ++ [App.Syntax.card(i@fst, i@snd)]
+        DOM.node("div", {}, {}, a)
+      }
       {
         if String.eql(team, "azul") then
           <p style=paragraph >"É do time azul"</p>
@@ -52,18 +56,7 @@ App.Syntax.draw: App.Draw<App.Syntax.State>
         else
           <p style=paragraph >String.to_upper("Não aparece if")</p>
       }
-      
-
-      // <div id="teste-if">
-       
-      // </div>
-      
-      // <div id="teste-for">
-      //   for i in [0,1,2,3]:
-      //     <p>"Paragrafo numero " | Nat.show(i)</p>
-      // </div>
-
-      // <p>"Sempre aparece"</p>
+      <img src="https://avatars.githubusercontent.com/u/79022763?s=200&v=4" ></img>
     </div>
 
 // A "Syntax, world!" + counter application
