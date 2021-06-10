@@ -1,0 +1,9 @@
+String.remove_spaces(a: String): String
+  case a {
+    nil: String.nil
+    cons: 
+      if Char.eql(a.head, ' ') then
+        String.remove_spaces(a.tail)
+      else
+        String.cons(a.head, String.remove_spaces(a.tail))
+  }
