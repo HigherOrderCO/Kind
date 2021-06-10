@@ -1,0 +1,5 @@
+U32Map.get<V: Type>(
+  key : U32,
+  map : U32Map<V>
+) : Maybe<V>
+  GMap.lookup<U32>!(U32.cmp, key, map)

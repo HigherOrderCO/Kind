@@ -2,6 +2,6 @@ Kind.api.io.terms_to_scheme_lib(name: String, exports: List<String>): IO<String>
   IO {
     get defs = Kind.Synth.many(exports, Kind.Map.new!)
     let compiled = Kind.Comp.Defs.compile(defs)
-    let schemed = Kind.Comp.Target.Scheme.module(name, exports, compiled)
+    let schemed = Kind.Comp.transpile.module(Kind.Comp.Target.Scheme.Language, name, exports, compiled)
     return schemed;
   }

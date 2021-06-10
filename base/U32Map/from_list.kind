@@ -1,0 +1,4 @@
+U32Map.from_list<V: Type>(
+  xs  : List<Pair<U32,V>>
+): U32Map<V>
+  GMap.from_list!!(U32.cmp, xs)

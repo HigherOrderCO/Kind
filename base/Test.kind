@@ -1,12 +1,10 @@
 Test: _
-  let a = 
-    <div class="container" another=String.to_upper("alo") > 
-      <p id="ddadad asda" class="asd" >"asd"</p> 
-      <div class="main">"asd ad asd"</div> 
-    </div>
-
-  case a {
-    node:
-      list = Map.to_list!(a.style)
-      List.show!(Pair.show!!(String.show, String.show), list)
-  } default ""
+  let a = U32Map.new!
+  let a = U32Map.set!(0, "asd0", a)
+  let a = U32Map.set!(1, "asd1", a)
+  let a = U32Map.set!(2, "asd2", a)
+  let a = U32Map.set!(4, "asd4", a)
+  let a = U32Map.del!(4, a)
+  let value = U32Map.get!(4, a) <> "nao achou"
+  // List.show!(Pair.show!!(U32.show, String.show), U32Map.to_list!(a))
+  value

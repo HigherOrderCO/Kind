@@ -1,0 +1,96 @@
+// Transpiles from Term.Comp to the target language's source code
+Kind.Comp.transpile.term(
+  lang: Kind.Comp.Language
+  comp: Kind.Comp
+  depth: Nat
+  defs: Kind.Comp.Defs
+): String
+  let go = Kind.Comp.transpile.term(lang)
+  case Kind.Comp.Prim.inst(lang, comp,depth,defs) as got {
+    some: got.value
+    none: case Kind.Comp.Prim.elim(lang, comp, depth, defs) as got {
+      some: got.value
+      none: case comp {
+        nil:
+          lang@gram@null
+        var:
+          lang@gram@name(comp.name)
+        ref:
+          lang@gram@name(comp.name)
+        lam:
+          lang@gram@lambda(lang@gram@name(comp.name), go(comp.body,Nat.succ(depth),defs))
+        app:
+          lang@gram@application(go(comp.func,depth,defs), go(comp.argm,depth,defs))
+        let:
+          lang@gram@local_definition(lang@gram@name(comp.name), go(comp.expr,depth,defs), go(comp.body,Nat.succ(depth),defs))
+        eli: case comp.prim {
+          unit: lang@gram@application(lang@gram@inst_name("Unit"), go(comp.expr,depth,defs))
+          bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
+          nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
+          u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
+          string: lang@gram@application(lang@gram@inst_name("String"), go(comp.expr,depth,defs))
+          data: go(comp.expr,depth,defs)
+        }
+        ins: case comp.prim {
+          unit: lang@gram@application(lang@gram@inst_name("Unit"), go(comp.expr,depth,defs))
+          bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
+          nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
+          u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
+          string: lang@gram@application(lang@gram@inst_name("String"), go(comp.expr,depth,defs))
+          data: go(comp.expr,depth,defs)
+        }
+        nat:
+          Nat.show(comp.natx) // TODO: lang@gram@nat?
+        chr:
+          Nat.show(U16.to_nat(comp.chrx)) // TODO: lang@gram@char?
+        str:
+          "\"" | lang@gram@string_literal(comp.strx) | "\""
+        txt:
+          comp.text
+      }
+    }
+  }
+
+Kind.Comp.transpile.global_definitions(
+  lang: Kind.Comp.Language
+  defs_list: List<Pair<String, Kind.Comp>>
+  defs: Kind.Comp.Defs
+): String
+  let code = ""
+  // Instantiatior and Eliminator functions
+  for nati in Kind.Comp.Prim.natives with code:
+    let {name,prim} = nati
+    let code = code|lang@gram@global_function(lang@gram@inst_name(name), [], Kind.Comp.Prim.instantiator(lang,prim,0,defs))
+    let code = code|lang@gram@global_function(lang@gram@elim_name(name), [], Kind.Comp.Prim.eliminator(lang,prim,0,defs))
+    code
+  // Top-level definitions
+  for defn in defs_list with code:
+    let {name,term} = defn
+    let {vars,body} = Kind.Comp.get_vars(term)
+    // multiarg function
+    let code = code|lang@gram@global_function(name, vars, case lang@opts{name} as opt {
+      none: Kind.Comp.transpile.term(lang, body, 0, defs)
+      some: Kind.Comp.replace(Pair.snd!!(opt.value), vars)
+    })
+    code
+  code
+
+Kind.Comp.transpile.module(
+  lang: Kind.Comp.Language
+  name: String
+  exports: List<String>
+  defs: Kind.Comp.Defs
+): String
+  let defs_list = Kind.Comp.dependency_sort.module(exports, defs)
+  let code = lang@gram@module(name, exports, lang@base|"\n\n"|Kind.Comp.transpile.global_definitions(lang, defs_list, defs))
+  code
+
+// Converts Comp definitions to a Scheme program.
+Kind.Comp.transpile(
+  lang: Kind.Comp.Language
+  main: String
+  defs: Kind.Comp.Defs
+): String
+  let defs_list = Kind.Comp.dependency_sort(main, defs)
+  let code = lang@gram@program(main, lang@base|"\n\n"|Kind.Comp.transpile.global_definitions(lang, defs_list, defs))
+  code

@@ -1,0 +1,17 @@
+type Kind.Comp.Grammar {
+  new(
+    null: String
+    name: (name: String) -> String
+    inst_name: (name: String) -> String
+    elim_name: (name: String) -> String
+    lambda: (name: String, body: String) -> String
+    application: (func: String, argm: String) -> String
+    local_definition: (name: String, expr: String, body: String) -> String
+    global_function: (name: String, args: List(String), body: String) -> String
+    global_application: (name: String, args: List(String)) -> String
+    string_literal: (str: String) -> String
+    module: (name: String, exports: List(String), defs: String) -> String
+    program: (main: String, defs: String) -> String
+  )
+}
+

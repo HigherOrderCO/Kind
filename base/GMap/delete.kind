@@ -1,16 +1,16 @@
 GMap.delete<K: Type, V: Type>(
+  cmp : K -> K -> Cmp
   key: K, 
   map: GMap<K, V>, 
-  cmp : K -> K -> Cmp
 ) : GMap<K, V>
   case map {
     tip: GMap.tip!!
     bin: 
       case cmp(key, map.key) {
         // when recursion comes back rebalance the node
-        ltn: GMap.balance!!(map.key, map.val, GMap.delete!!(key, map.left, cmp), map.right)
+        ltn: GMap.balance!!(map.key, map.val, GMap.delete!!(cmp, key, map.left), map.right)
         // when recursion comes back rebalance the node
-        gtn: GMap.balance!!(map.key, map.val, map.left, GMap.delete!!(key, map.right, cmp))
+        gtn: GMap.balance!!(map.key, map.val, map.left, GMap.delete!!(cmp, key, map.right))
         eql: 
           // get min value from right subtree
           let min = GMap.min!!(map.right)
