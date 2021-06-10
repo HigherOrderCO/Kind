@@ -1,4 +1,6 @@
 all: kind-scm kind-scm.deb
+bootstrap:
+	cd ../../base && kind-scm Kind.Comp.Target.Scheme.bootstrap --run
 clean:
 	rm src/*.wpo
 	rm src/*.so
