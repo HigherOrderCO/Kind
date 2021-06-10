@@ -1,6 +1,7 @@
 Kind.Parser.term: Parser(Kind.Term)
   Kind.Parser.block("term", Parser {
     get term = Parser.first_of!([
+      Kind.Parser.dom
       Kind.Parser.forall
       Kind.Parser.lambda
       Kind.Parser.lambda.erased
@@ -44,7 +45,6 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.switch
       Kind.Parser.goal
       Kind.Parser.hole
-      Kind.Parser.dom
       Kind.Parser.float.64
       Kind.Parser.float.32
       Kind.Parser.machine_integer.signed(256)

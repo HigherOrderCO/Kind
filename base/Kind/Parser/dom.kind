@@ -5,15 +5,14 @@ Kind.Parser.dom: Parser<Kind.Term>
 Kind.Parser.dom.node: Parser<Kind.Term>
   Kind.Parser.block("DOM.node", Parser {
     Kind.Parser.text("<")
-    
+
     // name of tag
     get tag = Kind.Parser.name1
     Kind.Parser.spaces
 
     // props and style
-    get props = Parser.many!(Kind.Parser.dom.prop)
+    get props = Parser.until!(Kind.Parser.text(">"), Kind.Parser.dom.prop)
     let props = Kind.Parser.dom.gen_prop(props)
-    Kind.Parser.text(">")
 
     // children
     get children = Parser.many!(Parser.first_of!([

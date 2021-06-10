@@ -7,11 +7,15 @@ App.Kaelin.init: App.Init<App.Kaelin.State>
   App.Store.new<App.Kaelin.State>(0, 0)
 
 // Render function
-App.Kaelin.draw: App.Draw<App.Kaelin.State>
+App.Kaelin.draw: App.Draw<App.Kaelin.State> 
   (state)
   <div>
-    "test"
+    "oi, tudo bem?"
   </div>
+
+  //<div>
+    //"oi"
+  //</div>
   //DOM.node("div", {}, {"border": "1px solid black"}, [
     //DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Kaelin, world!")])
     //DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
