@@ -8,6 +8,8 @@ Currently the only way to install the scheme backend on MacOS is to build from s
 First you'll need to [build](https://github.com/racket/ChezScheme/blob/master/BUILDING) and install Racket's fork of ChezScheme. To do that clone the [repository](https://github.com/racket/ChezScheme) and run
 
 ```bash
+git submodule init
+git submodule update
 ./configure --disable-curses --disable-x11
 make
 sudo make install
