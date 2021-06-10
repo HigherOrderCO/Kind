@@ -1,27 +1,41 @@
 # MacOS
 
 ## Scheme
-Currently the only way to install the scheme backend on MacOS is to build from source.
+
+One of the benefits of the Scheme target is that it can handle recursion better than the JavaScript target (default). It means we don't have issues related to stack overflow in deep recursions.
+
+Currently, the only way to install the Scheme backend on macOS is to build from the source.
 
 ## Building from source
 
-First you'll need to [build](https://github.com/racket/ChezScheme/blob/master/BUILDING) and install Racket's fork of ChezScheme. To do that clone the [repository](https://github.com/racket/ChezScheme) and run
+**1.** First you'll need to [build](https://github.com/racket/ChezScheme/blob/master/BUILDING) and install [Racket's fork](https://github.com/racket/ChezScheme) of ChezScheme:
+
+```shell
+git clone https://github.com/racket/ChezScheme.git
+cd ChezScheme
+```
+
+**2.** Then install the dependencies and configure:
 
 ```bash
 git submodule init
 git submodule update
-./configure --disable-curses --disable-x11
-make
-sudo make install
+./configure --pb --disable-curses --disable-x11
 ```
 
-To check that ChezScheme really is installed run
+- For Macbook chip M1 run `make tarm64osx.bootquick`. It should output `Configuring for tarm64osx`.
+
+- For Macbook chip Intel run `make ta6osx.bootquick`. It should run without errors.
+
+**3.** To check if ChezScheme was successfully installed run:
 
 ```bash
 scheme --version
 ```
 
-and see if it prints a version number. If it does clone [Kind](https://github.com/uwu-tech/Kind) and run
+it should print the version, like `9.5.5.5`. 
+
+**4.** Go to the Kind directory (if you don't have it yet, just clone it) and run:
 
 ```bash
 cd bin/scm
@@ -29,10 +43,10 @@ make
 sudo make install
 ```
 
-Now `kind-scm` is installed, great! To check that run
+It may take some time. You can grab a cup of coffee while it finishes. 
 
-```bash
-kind-scm
-```
+**5.** Now `kind-scm` is installed, great! Run `kind-scm` inside the `Kind` repository and see if you're greeted with help text.
 
-and see if you're greeted with help text.
+   Obs: we just can't typecheck a module with Scheme (`kind-scm Module/`), all other commands are working.
+
+If you have any problem, [let us know](https://github.com/uwu-tech/Kind/issues).
