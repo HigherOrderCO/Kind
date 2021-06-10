@@ -1,0 +1,6 @@
+type App.Drawing.Whiteboard {
+  new(
+    past: List<VoxBox>
+    live: VoxBox
+    future: List<VoxBox>)
+}

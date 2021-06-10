@@ -4,7 +4,7 @@ VoxBox.Draw.square(
   z: U32,
   w: U32,
   h: U32,
-  col: U32 -> U32 -> Col32,
+  col: Col32, //U32 -> U32 -> Col32,
   img: VoxBox,
 ): VoxBox
   let siz = U32.mul(w, h)
@@ -16,7 +16,7 @@ VoxBox.Draw.square(
     let p_x = U32.sub(U32.add(x,v_x),w_2) // pixel x
     let p_y = U32.sub(U32.add(y,v_y),h_2) // pixel y
     let pos = Pos32.new(p_x, p_y, z) // pixel pos (forms a square)
-    let col = col(v_x, v_y)
+    //let col = col(v_x, v_y)
     let pix = VoxBox.push(pos, col, pix)
     pix)
 

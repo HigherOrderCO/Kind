@@ -1,0 +1,3 @@
+App.Drawing.App.tick: App.Tick<App.Drawing.State>
+  (tick, glob)
+    glob
