@@ -1,0 +1,3 @@
+// only remove spaces
+String.trim(xs: String): String
+  String.join(" ", List.filter!(String.not_empty, String.split(xs, " ")))
