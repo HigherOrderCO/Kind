@@ -9,10 +9,10 @@ TestGmap: GMap<U32, U32>
     GMap.insert!!(U32.cmp, i, i, map)
   map
 
-// TestBits: _
-//   let map = BitsMap.new!
+TestBits: _
+  let map = BitsMap.new!
 
-//   for i:U32 from 0u to 1000000u with map:
-//     let key = U32.to_bits(i)
-//     BitsMap.set!(key, i, map)
-//   map
+  for i:U32 from 0u to 1000000u with map:
+    let key = U32.to_bits(i)
+    BitsMap.set!(key, i, map)
+  map
