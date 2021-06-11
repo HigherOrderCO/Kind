@@ -1,0 +1,10 @@
+Kind.Parser.ADT.Datatype.Derive.by_name(deri: String, adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Parser.ADT.Derived>
+  open adt
+  switch String.eql(deri) {
+    "show": Maybe {
+      let name = adt.name | "." | deri
+      get term = Kind.Parser.ADT.Datatype.Derive.show.term(adt)
+      get type = Kind.Parser.ADT.Datatype.Derive.show.type(adt)
+      return Kind.Parser.ADT.Derived.new(name, 1, term, type)
+    }
+  } default none

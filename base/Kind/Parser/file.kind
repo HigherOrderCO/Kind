@@ -42,7 +42,7 @@ Kind.Parser.file.adt(file: String, code: String, defs: Kind.Defs): Parser(Kind.D
         let defs = List.fold!(adt.deri)!(Either.right<String,Kind.Defs>(defs), (deri, defs)
           case defs {
             left: Either.left!!(defs.value)
-            right: case Kind.Parser.ADT.Datatype.derive(deri, adt) as derived {
+            right: case Kind.Parser.ADT.Datatype.Derive.by_name(deri, adt) as derived {
               none: Either.left!!("Can't derive '" | deri | "' for '" | adt.name | "' type.")
               some: 
                 open derived.value
