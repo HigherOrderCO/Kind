@@ -7,8 +7,8 @@ Kind.Parser.char: Parser(Kind.Term)
   })
 
 Kind.Parser.char.single: Parser(Char)
-  Parser.first_of!([
-    Parser.first_of!(List.mapped!(Kind.Code.escapes)!((esc) case esc {
+  Parser.choice!([
+    Parser.choice!(List.mapped!(Kind.Code.escapes)!((esc) case esc {
       new: Parser {
         Parser.text(esc.fst)
         return esc.snd

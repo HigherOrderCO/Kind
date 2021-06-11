@@ -1,6 +1,6 @@
 Kind.Parser.binder(sep: String): Parser(List<Kind.Binder>)
   Parser {
-    get lists = Parser.many1!(Parser.first_of!([
+    get lists = Parser.many1!(Parser.choice!([
       Kind.Parser.binder.homo(sep, true)
       Kind.Parser.binder.homo(sep, false)
     ]))

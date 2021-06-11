@@ -11,10 +11,10 @@ Kind.Parser.do: Parser(Kind.Term)
   })
 
 Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
-  Parser.first_of!([
+  Parser.choice!([
     // Binding call: @ask x = expr rest@
     Kind.Parser.block("do-get", Parser {
-      Parser.first_of!([
+      Parser.choice!([
         Kind.Parser.text("var ")
         Kind.Parser.text("get ")
       ])

@@ -1,6 +1,6 @@
 Kind.Parser.term: Parser(Kind.Term)
   Kind.Parser.block("term", Parser {
-    get term = Parser.first_of!([
+    get term = Parser.choice!([
       Kind.Parser.dom
       Kind.Parser.forall
       Kind.Parser.lambda
@@ -77,7 +77,7 @@ Kind.Parser.term: Parser(Kind.Term)
 Kind.Parser.term.suffix(term: Kind.Term): Parser(Kind.Term)
   (pst)
   open pst
-  let suffix_parser = Parser.first_of!([
+  let suffix_parser = Parser.choice!([
    Kind.Parser.application(term)
    Kind.Parser.application.erased(term)
    Kind.Parser.list_set(term)

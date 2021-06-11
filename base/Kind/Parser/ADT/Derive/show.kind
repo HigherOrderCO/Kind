@@ -65,4 +65,3 @@ Kind.Parser.ADT.Constructor.Derive.show.term.args(args: List<Kind.Binder>, fst: 
       let term = Kind.Term.app(Kind.Term.app(Kind.Term.ref("String.concat"), Kind.Term.str(if fst then "(" else ",")), term)
       List.cons!(term, Kind.Parser.ADT.Constructor.Derive.show.term.args(args.tail, false))
   }
-  

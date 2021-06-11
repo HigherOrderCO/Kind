@@ -1,11 +1,11 @@
 Parser.num: Parser(Parser.Number)
   Parser {
-    get sign = Parser.first_of!([
+    get sign = Parser.choice!([
       Parser { Parser.text("+"); return some(true) }
       Parser { Parser.text("-"); return some(false) }
       Parser { return none }
     ])
-    get numb = Parser.first_of!([
+    get numb = Parser.choice!([
       Parser.hex_nat
       Parser.nat
     ])
