@@ -1,4 +1,4 @@
-Keccak.uncompress(buf: Buffer32): Buffer32
+Crypto.Keccak.uncompress(buf: Buffer32): Buffer32
   def shr = U32.shr
   def mod = U32.mod
   def add = U32.add

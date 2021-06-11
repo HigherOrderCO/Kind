@@ -1,4 +1,4 @@
-Keccak.compress(buf: Buffer32): Buffer32
+Crypto.Keccak.compress(buf: Buffer32): Buffer32
   def shl = U32.shl
   def add = U32.add
   let dep = buf@depth

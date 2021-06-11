@@ -1,4 +1,4 @@
-Keccak.RC: Buffer32
+Crypto.Keccak.RC: Buffer32
   let arr = Buffer32.alloc(6)
   let arr = Buffer32.set(0#32,  1#32,          arr)
   let arr = Buffer32.set(1#32,  0#32,          arr)
