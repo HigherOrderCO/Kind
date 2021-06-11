@@ -1,0 +1,68 @@
+Kind.Parser.ADT.Datatype.Derive.show.type(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    some(Kind.Term.all(false, "", "", Kind.Term.ref(adt.name), (s,x) Kind.Term.ref("String")))
+  else
+    none
+
+Kind.Parser.ADT.Datatype.Derive.show.term(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    some(Kind.Term.lam("x", (x) 
+      let ctrs = Kind.Parser.ADT.Datatype.Derive.show.term.ctrs(adt.name, adt.ctrs)
+      let cses = Kind.Map.new!
+      for ctr in ctrs with cses:
+        open ctr
+        Kind.Map.set!(ctr.fst, ctr.snd, cses)
+      Kind.Term.cse(Bits.e, x, "x", [], cses, none)
+    ))
+  else
+    none
+
+Kind.Parser.ADT.Datatype.Derive.show.term.ctrs(adt_name: String, ctrs: List<Kind.Parser.ADT.Constructor>): List<Pair<String,Kind.Term>>
+  case ctrs {
+    nil:
+      []
+    cons:
+      List.cons!(
+        Kind.Parser.ADT.Constructor.Derive.show.term(adt_name, ctrs.head),
+        Kind.Parser.ADT.Datatype.Derive.show.term.ctrs(adt_name, ctrs.tail))
+  }
+
+Kind.Parser.ADT.Constructor.Derive.show.term(adt_name: String, ctr: Kind.Parser.ADT.Constructor): Pair<String,Kind.Term>
+  open ctr
+  let func = Kind.Term.str(adt_name | "." | ctr.name)
+  case ctr.args {
+    nil: 
+      {ctr.name, func}
+    cons: 
+      let args = Kind.Parser.ADT.Constructor.Derive.show.term.args(ctr.args, true)
+      let term = List.fold!(args)!(Kind.Term.str(")"), (x,t) Kind.Term.app(Kind.Term.app(Kind.Term.ref("String.concat"), x), t))
+      let term = Kind.Term.app(Kind.Term.app(Kind.Term.ref("String.concat"), func), term)
+      {ctr.name, term}
+  }
+
+Kind.Parser.ADT.Constructor.Derive.show.term.cont(call: Kind.Term): Kind.Term
+  let {call_func, call_args} = Kind.Term.get_args(call)
+  let term = Kind.Term.ref(Kind.Term.extract_name(call_func) | ".show")
+  let term = for par in call_args: Kind.Term.app(term, Kind.Term.hol(Bits.e))
+  let term = for par in call_args: Kind.Term.app(term, Kind.Parser.ADT.Constructor.Derive.show.term.cont(par))
+  term
+
+Kind.Parser.ADT.Constructor.Derive.show.term.args(args: List<Kind.Binder>, fst: Bool): List<Kind.Term>
+  case args {
+    nil:
+      []
+    cons:
+      open args.head
+      //log(Kind.Term.show(args.head.term))
+      let {call_func, call_args} = Kind.Term.get_args(args.head.term)
+      //log("-> " | Kind.Term.show(call_func) | " ... " | String.join(",", List.mapped!(call_args)!(Kind.Term.show)))
+      let term = Kind.Parser.ADT.Constructor.Derive.show.term.cont(args.head.term)
+      //let term = for par in call_args: Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      //let term = for par in call_args: Kind.Term.app(term, Kind.Term.ref(Kind.Term.extract_name(par) | ".show"))
+      let term = Kind.Term.app(term, Kind.Term.ref("x." | args.head.name))
+      let term = Kind.Term.app(Kind.Term.app(Kind.Term.ref("String.concat"), Kind.Term.str(if fst then "(" else ",")), term)
+      List.cons!(term, Kind.Parser.ADT.Constructor.Derive.show.term.args(args.tail, false))
+  }
+  

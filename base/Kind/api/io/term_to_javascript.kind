@@ -1,0 +1,8 @@
+Kind.api.io.term_to_javascript(name: String): IO<String>
+  IO {
+    get defs = Kind.Synth.one(name, Kind.Map.new!)
+    let defs = (defs <> Kind.Map.new!)
+    let compiled = Kind.Comp.Defs.compile(defs)
+    let javascripted = Kind.Comp.transpile(Kind.Comp.Target.Javascript.Language, name, compiled)
+    return javascripted;
+  }

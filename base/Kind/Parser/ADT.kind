@@ -12,6 +12,16 @@ type Kind.Parser.ADT.Datatype {
     pars: List<Kind.Binder>,
     inds: List<Kind.Binder>,
     ctrs: List<Kind.Parser.ADT.Constructor>,
+    deri: List<String>,
+  )
+}
+
+type Kind.Parser.ADT.Derived {
+  new(
+    name: Kind.Name
+    arit: Nat
+    term: Kind.Term
+    type: Kind.Term
   )
 }
 
@@ -27,7 +37,15 @@ Kind.Parser.ADT.adt: Parser(Kind.Parser.ADT.Datatype)
     let pars = Maybe.default!(pars, [])
     let inds = Maybe.default!(inds, [])
     get ctrs = Kind.Parser.items!("{", Kind.Parser.ADT.ctor(name), "}")
-    return Kind.Parser.ADT.Datatype.new(name, pars, inds, ctrs)
+    get deri = Parser.maybe!(Parser {
+      Kind.Parser.text("deriving")
+      Kind.Parser.items!("(", Kind.Parser.name1, ")")
+    })
+    let deri = case deri {
+      none: []
+      some: deri.value
+    }
+    return Kind.Parser.ADT.Datatype.new(name, pars, inds, ctrs, deri)
   }
 
 Kind.Parser.ADT.ctor(namespace: Kind.Name): Parser(Kind.Parser.ADT.Constructor)

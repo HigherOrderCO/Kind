@@ -6,4 +6,5 @@ Kind.Term.get_args(term: Kind.Term): Pair(Kind.Term, List(Kind.Term))
 Kind.Term.get_args.go(term: Kind.Term, args: List(Kind.Term)): Pair(Kind.Term, List(Kind.Term))
   case term {
     app: Kind.Term.get_args.go(term.func, term.argm & args)
+    ori: Kind.Term.get_args.go(term.expr, args)
   } default {term, args}
