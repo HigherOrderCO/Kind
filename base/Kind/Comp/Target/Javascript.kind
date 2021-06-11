@@ -13,10 +13,10 @@ Kind.Comp.Target.Javascript.name(name: String): String
   String.map(replace_dots, name)
 
 Kind.Comp.Target.Javascript.elim_name(name: String): String
-  name|"-elim"
+  name|"_elim"
 
 Kind.Comp.Target.Javascript.inst_name(name: String): String
-  name|"-inst"
+  name|"_inst"
 
 Kind.Comp.Target.Javascript.lambda(name: String, body: String): String
   "(("|Kind.Comp.Target.Javascript.name(name)|") => { return "|body|";})"
@@ -232,3 +232,713 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
         cses
       })
   }
+
+Kind.Comp.Target.Javascript.optimizeds: Kind.Comp.Optimizeds
+  {
+    "Bool.not": {1,`!$0`},
+    "Bool.and": {2,`$0&&$1`},
+    "Bool.if": {3,`$0?$1:$2`},
+    "Bool.or": {2,`$0||$1`},
+    "Debug.log": {2,`(console.log($0),$1())`},
+    "Nat.add": {2,`$0+$1`},
+    "Nat.sub": {2,`$0-$1<=0n?0n:$0-$1`},
+    "Nat.mul": {2,`$0*$1`},
+    "Nat.div": {2,`$0/$1`},
+    "Nat.mod": {2,`$0%$1`},
+    "Nat.pow": {2,`$0**$1`},
+    "Nat.ltn": {2,`$0<$1`},
+    "Nat.lte": {2,`$0<=$1`},
+    "Nat.eql": {2,`$0===$1`},
+    "Nat.gte": {2,`$0>=$1`},
+    "Nat.gtn": {2,`$0>$1`},
+    "Nat.to_u16": {1,`Number($0)&0xFFFF`},
+    "Nat.show": {1,`($0).toString()`},
+    "U16.add": {2,`($0+$1)&0xFFFF`},
+    "U16.sub": {2,`($0-$1)&0xFFFF`},
+    "U16.mul": {2,`($0*$1)&0xFFFF`},
+    "U16.div": {2,`($0/$1)>>>0`},
+    "U16.mod": {2,`$0%$1`},
+    "U16.pow": {2,`($0**$1)&0xFFFF`},
+    "U16.ltn": {2,`$0<$1`},
+    "U16.lte": {2,`$0<=$1`},
+    "U16.eql": {2,`$0===$1`},
+    "U16.gte": {2,`$0>=$1`},
+    "U16.gtn": {2,`$0>$1`},
+    "U16.inc": {2,`($0+1)&0xFFFF`},
+    "U16.to_nat": {1,`BigInt($0)`},
+    // TODO test if this is faster than non-optimized comparison
+    "String.eql": {2,`$0===$1`},
+    "String.concat": {2,`$0+$1`},
+  }
+
+Kind.Comp.Target.Javascript.basics: String
+`function int_pos(i) {
+    return i >= 0n ? i : 0n;
+};
+
+function int_neg(i) {
+    return i < 0n ? -i : 0n;
+};
+
+function word_to_u8(w) {
+    var u = 0;
+    for (var i = 0; i < 8; ++i) {
+        u = u | (w._ === 'Word.i' ? 1 << i : 0);
+        w = w.pred;
+    };
+    return u;
+};
+
+function u8_to_word(u) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0; i < 8; ++i) {
+        w = {
+            _: (u >>> (8 - i - 1)) & 1 ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+
+function word_to_u16(w) {
+    var u = 0;
+    for (var i = 0; i < 16; ++i) {
+        u = u | (w._ === 'Word.i' ? 1 << i : 0);
+        w = w.pred;
+    };
+    return u;
+};
+
+function u16_to_word(u) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0; i < 16; ++i) {
+        w = {
+            _: (u >>> (16 - i - 1)) & 1 ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+
+function u16_to_bits(x) {
+    var s = '';
+    for (var i = 0; i < 16; ++i) {
+        s = (x & 1 ? '1' : '0') + s;
+        x = x >>> 1;
+    }
+    return s;
+};
+
+function word_to_u32(w) {
+    var u = 0;
+    for (var i = 0; i < 32; ++i) {
+        u = u | (w._ === 'Word.i' ? 1 << i : 0);
+        w = w.pred;
+    };
+    return u;
+};
+
+function u32_to_word(u) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0; i < 32; ++i) {
+        w = {
+            _: (u >>> (32 - i - 1)) & 1 ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+
+function u32_for(state, from, til, func) {
+    for (var i = from; i < til; ++i) {
+        state = func(i)(state);
+    }
+    return state;
+};
+
+function word_to_i32(w) {
+    var u = 0;
+    for (var i = 0; i < 32; ++i) {
+        u = u | (w._ === 'Word.i' ? 1 << i : 0);
+        w = w.pred;
+    };
+    return u;
+};
+
+function i32_to_word(u) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0; i < 32; ++i) {
+        w = {
+            _: (u >> (32 - i - 1)) & 1 ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+
+function i32_for(state, from, til, func) {
+    for (var i = from; i < til; ++i) {
+        state = func(i)(state);
+    }
+    return state;
+};
+
+function word_to_u64(w) {
+    var u = 0n;
+    for (var i = 0n; i < 64n; i += 1n) {
+        u = u | (w._ === 'Word.i' ? 1n << i : 0n);
+        w = w.pred;
+    };
+    return u;
+};
+
+function u64_to_word(u) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0n; i < 64n; i += 1n) {
+        w = {
+            _: (u >> (64n - i - 1n)) & 1n ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+
+function word_to_u128(w) {
+    var u = 0n;
+    for (var i = 0n; i < 128n; i += 1n) {
+        u = u | (w._ === 'Word.i' ? 1n << i : 0n);
+        w = w.pred;
+    };
+    return u;
+};
+
+function u128_to_word(u) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0n; i < 128n; i += 1n) {
+        w = {
+            _: (u >> (128n - i - 1n)) & 1n ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+
+function word_to_u256(w) {
+    var u = 0n;
+    for (var i = 0n; i < 256n; i += 1n) {
+        u = u | (w._ === 'Word.i' ? 1n << i : 0n);
+        w = w.pred;
+    };
+    return u;
+};
+
+function u256_to_word(u) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0n; i < 256n; i += 1n) {
+        w = {
+            _: (u >> (256n - i - 1n)) & 1n ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+var f64 = new Float64Array(1);
+var u32 = new Uint32Array(f64.buffer);
+
+function f64_get_bit(x, i) {
+    f64[0] = x;
+    if (i < 32) {
+        return (u32[0] >>> i) & 1;
+    } else {
+        return (u32[1] >>> (i - 32)) & 1;
+    }
+};
+
+function f64_set_bit(x, i) {
+    f64[0] = x;
+    if (i < 32) {
+        u32[0] = u32[0] | (1 << i);
+    } else {
+        u32[1] = u32[1] | (1 << (i - 32));
+    }
+    return f64[0];
+};
+
+function word_to_f64(w) {
+    var x = 0;
+    for (var i = 0; i < 64; ++i) {
+        x = w._ === 'Word.i' ? f64_set_bit(x, i) : x;
+        w = w.pred;
+    };
+    return x;
+};
+
+function f64_to_word(x) {
+    var w = {
+        _: 'Word.e'
+    };
+    for (var i = 0; i < 64; ++i) {
+        w = {
+            _: f64_get_bit(x, 64 - i - 1) ? 'Word.i' : 'Word.o',
+            pred: w
+        };
+    };
+    return w;
+};
+
+function f64_make(s, a, b) {
+    return (s ? 1 : -1) * Number(a) / 10 ** Number(b);
+};
+
+function u32array_to_buffer32(a) {
+    function go(a, buffer) {
+        switch (a._) {
+            case 'Array.tip':
+                buffer.push(a.value);
+                break;
+            case 'Array.tie':
+                go(a.lft, buffer);
+                go(a.rgt, buffer);
+                break;
+        }
+        return buffer;
+    };
+    return new Uint32Array(go(a, []));
+};
+
+function buffer32_to_u32array(b) {
+    function go(b) {
+        if (b.length === 1) {
+            return {
+                _: 'Array.tip',
+                value: b[0]
+            };
+        } else {
+            var lft = go(b.slice(0, b.length / 2));
+            var rgt = go(b.slice(b.length / 2));
+            return {
+                _: 'Array.tie',
+                lft,
+                rgt
+            };
+        };
+    };
+    return go(b);
+};
+
+function buffer32_to_depth(b) {
+    return BigInt(Math.log(b.length) / Math.log(2));
+};
+var bitsmap_new = {
+    _: 'BitsMap.new'
+};
+var bitsmap_tie = function(val, lft, rgt) {
+    return {
+        _: 'BitsMap.tip',
+        val,
+        lft,
+        rgt
+    };
+}
+var maybe_none = {
+    _: 'Maybe.none'
+};
+var maybe_some = function(value) {
+    return {
+        _: 'Maybe.some',
+        value
+    };
+}
+var bitsmap_get = function(bits, map) {
+    for (var i = bits.length - 1; i >= 0; --i) {
+        if (map._ !== 'BitsMap.new') {
+            map = bits[i] === '0' ? map.lft : map.rgt;
+        }
+    }
+    return map._ === 'BitsMap.new' ? maybe_none : map.val;
+}
+var bitsmap_set = function(bits, val, map, mode) {
+    var res = {
+        value: map
+    };
+    var key = 'value';
+    var obj = res;
+    for (var i = bits.length - 1; i >= 0; --i) {
+        var map = obj[key];
+        if (map._ === 'BitsMap.new') {
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: maybe_none,
+                lft: bitsmap_new,
+                rgt: bitsmap_new
+            };
+        } else {
+            obj[key] = {
+                _: 'BitsMap.tie',
+                val: map.val,
+                lft: map.lft,
+                rgt: map.rgt
+            };
+        }
+        obj = obj[key];
+        key = bits[i] === '0' ? 'lft' : 'rgt';
+    }
+    var map = obj[key];
+    if (map._ === 'BitsMap.new') {
+        var x = mode === 'del' ? maybe_none : {
+            _: 'Maybe.some',
+            value: val
+        };
+        obj[key] = {
+            _: 'BitsMap.tie',
+            val: x,
+            lft: bitsmap_new,
+            rgt: bitsmap_new
+        };
+    } else {
+        var x = mode === 'set' ? {
+            _: 'Maybe.some',
+            value: val
+        } : mode === 'del' ? maybe_none : map.val;
+        obj[key] = {
+            _: 'BitsMap.tie',
+            val: x,
+            lft: map.lft,
+            rgt: map.rgt
+        };
+    }
+    return res.value;
+};
+var list_for = list => nil => cons => {
+    while (list._ !== 'List.nil') {
+        nil = cons(list.head)(nil);
+        list = list.tail;
+    }
+    return nil;
+};
+var list_length = list => {
+    var len = 0;
+    while (list._ === 'List.cons') {
+        len += 1;
+        list = list.tail;
+    };
+    return BigInt(len);
+};
+var nat_to_bits = n => {
+    return n === 0n ? '' : n.toString(2);
+};
+var fm_name_to_bits = name => {
+    const TABLE = {
+        'A': '000000',
+        'B': '100000',
+        'C': '010000',
+        'D': '110000',
+        'E': '001000',
+        'F': '101000',
+        'G': '011000',
+        'H': '111000',
+        'I': '000100',
+        'J': '100100',
+        'K': '010100',
+        'L': '110100',
+        'M': '001100',
+        'N': '101100',
+        'O': '011100',
+        'P': '111100',
+        'Q': '000010',
+        'R': '100010',
+        'S': '010010',
+        'T': '110010',
+        'U': '001010',
+        'V': '101010',
+        'W': '011010',
+        'X': '111010',
+        'Y': '000110',
+        'Z': '100110',
+        'a': '010110',
+        'b': '110110',
+        'c': '001110',
+        'd': '101110',
+        'e': '011110',
+        'f': '111110',
+        'g': '000001',
+        'h': '100001',
+        'i': '010001',
+        'j': '110001',
+        'k': '001001',
+        'l': '101001',
+        'm': '011001',
+        'n': '111001',
+        'o': '000101',
+        'p': '100101',
+        'q': '010101',
+        'r': '110101',
+        's': '001101',
+        't': '101101',
+        'u': '011101',
+        'v': '111101',
+        'w': '000011',
+        'x': '100011',
+        'y': '010011',
+        'z': '110011',
+        '0': '001011',
+        '1': '101011',
+        '2': '011011',
+        '3': '111011',
+        '4': '000111',
+        '5': '100111',
+        '6': '010111',
+        '7': '110111',
+        '8': '001111',
+        '9': '101111',
+        '.': '011111',
+        '_': '111111',
+    }
+    var a = '';
+    for (var i = name.length - 1; i >= 0; --i) {
+        a += TABLE[name[i]];
+    }
+    return a;
+};
+var kind_name_to_bits = name => {
+    const TABLE = {
+        'A': '000000',
+        'B': '100000',
+        'C': '010000',
+        'D': '110000',
+        'E': '001000',
+        'F': '101000',
+        'G': '011000',
+        'H': '111000',
+        'I': '000100',
+        'J': '100100',
+        'K': '010100',
+        'L': '110100',
+        'M': '001100',
+        'N': '101100',
+        'O': '011100',
+        'P': '111100',
+        'Q': '000010',
+        'R': '100010',
+        'S': '010010',
+        'T': '110010',
+        'U': '001010',
+        'V': '101010',
+        'W': '011010',
+        'X': '111010',
+        'Y': '000110',
+        'Z': '100110',
+        'a': '010110',
+        'b': '110110',
+        'c': '001110',
+        'd': '101110',
+        'e': '011110',
+        'f': '111110',
+        'g': '000001',
+        'h': '100001',
+        'i': '010001',
+        'j': '110001',
+        'k': '001001',
+        'l': '101001',
+        'm': '011001',
+        'n': '111001',
+        'o': '000101',
+        'p': '100101',
+        'q': '010101',
+        'r': '110101',
+        's': '001101',
+        't': '101101',
+        'u': '011101',
+        'v': '111101',
+        'w': '000011',
+        'x': '100011',
+        'y': '010011',
+        'z': '110011',
+        '0': '001011',
+        '1': '101011',
+        '2': '011011',
+        '3': '111011',
+        '4': '000111',
+        '5': '100111',
+        '6': '010111',
+        '7': '110111',
+        '8': '001111',
+        '9': '101111',
+        '.': '011111',
+        '_': '111111',
+    }
+    var a = '';
+    for (var i = name.length - 1; i >= 0; --i) {
+        a += TABLE[name[i]];
+    }
+    return a;
+};
+var run = (p) => {
+  if (typeof window === 'undefined') {
+    var rl = eval(\"require('readline')\").createInterface({input:process.stdin,output:process.stdout,terminal:false});
+    var fs = eval(\"require('fs')\");
+    var pc = eval(\"process\");
+    var ht = eval(\"require('http')\");
+    var hs = eval(\"require('https')\");
+  } else {
+    var rl = {question: (x,f) => f(''), close: () => {}};
+    var fs = {readFileSync: () => ''};
+    var pc = {exit: () => {}, argv: []};
+    var ht = null;
+    var hs = null;
+  };
+  return run_io({rl,fs,pc,ht,hs},p).then((x) => { rl.close(); return x; }).catch((e) => { rl.close(); throw e; });
+};
+var set_file = (lib, param) => {
+  var path = '';
+  for (var i = 0; i < param.length && param[i] !== '='; ++i) {
+    path += param[i];
+  };
+  var data = param.slice(i+1);
+  lib.fs.mkdirSync(path.split('/').slice(0,-1).join('/'),{recursive:true});
+  lib.fs.writeFileSync(path,data);
+  return '';
+};
+var del_file = (lib, param) => {
+  try {
+    lib.fs.unlinkSync(param);
+    return '';
+  } catch (e) {
+    if (e.message.indexOf('EPERM') !== -1) {
+      lib.fs.rmdirSync(param);
+      return '';
+    } else {
+      throw e;
+    }
+  }
+};
+var get_file = (lib, param) => {
+  return lib.fs.readFileSync(param, 'utf8');
+}
+var get_dir = (lib, param) => {
+  return lib.fs.readdirSync(param).join(';');
+};
+var get_file_mtime = (lib, param) => {
+  return String(lib.fs.statSync(param).mtime.getTime());
+};
+var request = (lib, param) => {
+  if (typeof fetch === 'undefined') {
+    return new Promise((res,err) => {
+      (/^https/.test(param)?lib.hs:lib.ht).get(param, r => {
+        let data = '';
+        r.on('data', chunk => { data += chunk; });
+        r.on('end', () => res(data));
+      }).on('error', e => res(''));
+    });
+  } else {
+    return fetch(param).then(res => res.text()).catch(e => '');
+  }
+}
+
+
+var file_error = e => {
+  if (e.message.indexOf('NOENT') !== -1) {
+    return '';
+  } else {
+    throw e;
+  }
+};
+var io_action = {
+  print: async (lib, param) => {
+    console.log(param);
+    return '';
+  },
+  put_string: async (lib, param) => {
+    process.stdout.write(param);
+    return '';
+  },
+  get_file: async (lib, param) => {
+    try {
+      return get_file(lib, param);
+    } catch (e) {
+      return file_error(e);
+    }
+  },
+  set_file: async (lib, param) => {
+    try {
+      return set_file(lib, param)
+    } catch (e) {
+      return file_error(e);
+    }
+  },
+  del_file: async (lib, param) => {
+    try {
+      return del_file(lib, param);
+    } catch (e) {
+      return file_error(e);
+    }
+  },
+  get_dir: async (lib, param) => {
+    try {
+      return get_dir(lib, param);
+    } catch (e) {
+      return file_error(e);
+    }
+  },
+  get_file_mtime: async (lib, param) => {
+    try {
+      return get_file_mtime(lib, param);
+    } catch (e) {
+      return file_error(e);
+    }
+  },
+  get_time: async (lib, param) => {
+    return String(Date.now());
+  },
+  exit: async (lib, param) => {
+    lib.pc.exit();
+    return '';
+  },
+  request: async (lib, param) => {
+    return request(lib, param);
+  },
+  get_time: async (lib, param) => {
+    return String(Date.now());
+  },
+  get_line: async (lib, param) => {
+    return await new Promise((res,err) => {
+      lib.rl.question(param, (line) => res(line));
+    });
+  },
+  get_args: async (lib, param) => {
+    return lib.pc.argv[2] || '';
+  },
+};
+var run_io = async (lib, io, depth = 0) => {
+  switch (io._) {
+    case 'IO.end':
+      return Promise.resolve(io.value);
+    case 'IO.ask':
+      var action = io_action[io.query];
+      var answer = await action(lib, io.param);
+      return await run_io(lib, io.then(answer), depth + 1);
+    }
+};`
+
+
+Kind.Comp.Target.Javascript.Language: Kind.Comp.Language
+  Kind.Comp.Language.new(
+    Kind.Comp.Target.Javascript.grammar
+    Kind.Comp.Target.Javascript.natives
+    Kind.Comp.Target.Javascript.optimizeds
+    Kind.Comp.Target.Javascript.basics
+  )
