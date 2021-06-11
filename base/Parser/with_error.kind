@@ -1,0 +1,10 @@
+Parser.with_error<V: Type>(parse: Parser(V), error: String): Parser(V)
+  (pst)
+  let reply = parse(pst)
+  case reply {
+    error:
+      open reply.err
+      Parser.Reply.fail!(reply.err.nam, reply.err.ini, reply.err.idx, error)
+    value:
+      reply
+  }

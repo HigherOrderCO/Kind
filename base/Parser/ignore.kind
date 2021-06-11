@@ -1,0 +1,12 @@
+Parser.ignore(x : Nat): Parser<String>
+  Parser.drop.go(x, Parser.pure!(""))
+
+Parser.drop.go(x : Nat, p : Parser<String>) : Parser(String)
+  case x {
+    zero : p
+    succ : Parser.drop.go(x.pred, Parser {
+      get ch = Parser.one
+      get c = p
+      return (Char.to_string(ch) | c) 
+    })
+  }  

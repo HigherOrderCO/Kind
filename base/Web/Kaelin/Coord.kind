@@ -1,3 +1,0 @@
-type Web.Kaelin.Coord {
-  new(i: I32, j: I32) 
-}

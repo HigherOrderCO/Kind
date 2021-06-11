@@ -1,7 +1,5 @@
 Kind.Parser.hole: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
-    Kind.Parser.text("_");
-    get orig = Kind.Parser.stop(init);
-    return Kind.Term.ori(orig, Kind.Term.hol(Bits.e));
-  }
+  Kind.Parser.block("hole", Parser {
+    Kind.Parser.text("_")
+    return Kind.Term.hol(Bits.e)
+  })

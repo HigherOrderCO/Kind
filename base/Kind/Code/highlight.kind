@@ -1,9 +1,10 @@
 Kind.Code.highlight(
   code: String,
+  init: Nat,
   idx0: Nat,
   idx1: Nat,
 ): String
-  Kind.Code.highlight.go(code, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [])
+  Kind.Code.highlight.go(code|" \n", init, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [])
 
 Kind.Code.highlight.end(
   col: Nat,
@@ -14,6 +15,7 @@ Kind.Code.highlight.end(
 
 Kind.Code.highlight.go(
   code: String,
+  ixi: Nat,
   ix0: Nat,
   ix1: Nat,
   col: Nat,
@@ -50,24 +52,28 @@ Kind.Code.highlight.go(
             },
             succ: lft,
           };
+          let ixi = Nat.pred(ixi);
           let ix0 = Nat.pred(ix0);
           let ix1 = Nat.pred(ix1);
           let col = 0;
           let row = Nat.succ(row);
           let res = List.cons!(String.reverse(lin), res);
           let lin = String.reverse(String.flatten([String.pad_left(4, ' ', Nat.show(row)), " | "]));
-          Kind.Code.highlight.go(code.tail, ix0, ix1, col, row, lft, lin, res)
+          Kind.Code.highlight.go(code.tail, ixi, ix0, ix1, col, row, lft, lin, res)
       else
         let chr = String.cons(code.head, String.nil);
         let chr =
           if Bool.and(Nat.is_zero(ix0), Bool.not(Nat.is_zero(ix1))) then
+            String.reverse(Kind.Code.color("41", Kind.Code.color("37", chr)))
+          else if Bool.and(Nat.is_zero(ixi), Bool.not(Nat.is_zero(ix1))) then
             String.reverse(Kind.Code.color("31", Kind.Code.color("4", chr)))
           else
-            chr;
+            chr
         let res = if Nat.eql(ix0,1) then List.take!(spa,res) else res;
+        let ixi = Nat.pred(ixi);
         let ix0 = Nat.pred(ix0);
         let ix1 = Nat.pred(ix1);
         let col = Nat.succ(col);
         let lin = String.flatten([chr, lin]);
-        Kind.Code.highlight.go(code.tail, ix0, ix1, col, row, lft, lin, res)
+        Kind.Code.highlight.go(code.tail, ixi, ix0, ix1, col, row, lft, lin, res)
   }

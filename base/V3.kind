@@ -1,0 +1,157 @@
+type V3 {
+  new(x: F64, y: F64, z: F64)
+}
+
+//// A finite line segment between two points
+//T Segment
+//| segment(a: V3, b: V3)
+
+//// An infinite line
+//T Line
+//| line(pos: V3, dir: V3)
+
+//// A circle/sphere
+//T Circle
+//| circle(pos: V3, rad: Number)
+
+//// The boundary of a polygon
+//T Boundary
+//| boundary(points: List(V3))
+
+//// Squared distance between a point and a segment
+//point_segment_sqrdist(p: V3, s: Segment) : Number
+  //case s |segment
+  //case s.a as a |v3
+  //case s.b as b |v3
+  //case p |v3
+  //let l = 0
+  //let l = l + ((a.x - b.x) ** 2)
+  //let l = l + ((a.y - b.y) ** 2)
+  //let t = 0
+  //let t = t + ((p.x - a.x) * (b.x - a.x))
+  //let t = t + ((p.y - a.y) * (b.y - a.y))
+  //let t = t \ l
+  //let t = max(0, min(1, t))
+  //let d = 0
+  //let k = (p.x - (a.x + (t * (b.x - a.x)))) ** 2
+  //let d = d + k
+  //let k = (p.y - (a.y + (t * (b.y - a.y)))) ** 2
+  //let d = d + k
+  //d
+
+//// Distance between a point and a segment
+//point_segment_dist(p: V3, s: Segment): Number
+  //point_segment_sqrdist(p, s) ** 0.5
+
+//// The two intersection points of a circle and a line
+//circle_line_intersection(circle: Circle, line: Line)
+//: Maybe(Pair(V3,V3))
+  //case circle |circle
+  //case line |line
+  //case circle.pos |v3
+  //case line.pos |v3
+  //case line.dir |v3
+  //let cx = circle.pos.x
+  //let cy = circle.pos.y
+  //let dx = line.dir.x
+  //let dy = line.dir.y
+  //let x1 = line.pos.x - cx
+  //let y1 = line.pos.y - cy
+  //let x2 = (line.pos.x + dx) - cx
+  //let y2 = (line.pos.y + dy) - cy
+  //let dd = (x1 * y2) - (x2 * y1)
+  //let de = (circle.rad * circle.rad) - (dd * dd) 
+  //if (de < 0) || (de === 0) then
+    //none(_)
+  //else
+    //let sx = if dy < 0 then 0 - dx else dx
+    //let sy = if dy < 0 then 0 - dy else dy
+    //let px = sx * (de ** 0.5)
+    //let py = sy * (de ** 0.5)
+    //let qx = dd * dy
+    //let qy = (0 - dd) * dx
+    //let ax = qx - px
+    //let ay = qy - py
+    //let bx = qx + px
+    //let by = qy + py
+    //let ux = ax + cx
+    //let uy = ay + cy
+    //let vx = bx + cx
+    //let vy = by + cy
+    //some(_ pair(__ v3(ux,uy,0), v3(vx,vy,0)))
+
+//circle_to_circle_hit_dist(a: Circle, d: V3, b: Circle)
+//: Maybe(Number)
+  //case a |circle
+  //case b |circle
+  //let r = a.rad
+  //let c = circle(b.pos, a.rad + b.rad)
+  //let l = line(a.pos, norm_v3(d))
+  //let p = circle_line_intersection(c, l)
+  //case p
+  //| none => none(_)
+  //| some =>
+    //case p.value as p |pair
+    //let d0 = sqrdist_v3(a.pos, p.fst)
+    //let d1 = sqrdist_v3(a.pos, p.snd)
+    //let hp = if d0 < d1 then p.fst else p.snd
+    //let dt = dot_v3(d, sub_v3(hp, a.pos))
+    //let ds = sqrdist_v3(hp, a.pos)
+    //if dt > 0 then
+      //some(_ ds ** 0.5)
+    //else
+      //none(_)
+
+//// Circle-boundary intersection test
+//circle_boundary_intersects(c: Circle, b: Boundary): Number
+  //case b |boundary
+  //case c |circle
+  //case b.points as l0
+  //| nil => 0
+  //| cons => case l0.tail as l1
+    //| nil => 0
+    //| cons => 
+      //let p0 = l0.head
+      //let p1 = l1.head
+      //let sg = segment(p0, p1)
+      //let cd = point_segment_sqrdist(c.pos, sg)
+      //if cd < (c.rad * c.rad) then
+        //1
+      //else
+        //let boun = boundary(cons(_ l1.head, l1.tail))
+        //circle_boundary_intersects(c, boun)
+
+//// Polygon to segments
+//polygon_to_segments(pos: V3, dir: V3, pts: List(V3)) : List(Segment)
+  //let transform = (pnt: V3) =>
+    //case pnt |v3
+    //case dir |v3
+    //let a = atan(dir.y, dir.x)
+    //let x = (pnt.x * cos(a)) - (pnt.y * sin(a))
+    //let y = (pnt.x * sin(a)) + (pnt.y * cos(a))
+    //let z = pnt.z
+    //add_v3(pos, v3(x,y,z))
+  //let nil = (pt_a, pt_0) =>
+    //case pt_0
+    //|none => nil(_)
+    //|some => case pt_a
+      //|none => nil(_)
+      //|some =>
+        //let p0 = transform(pt_a.value)
+        //let p1 = transform(pt_0.value)
+        //let sg = segment(p0, p1)
+        //cons(_ sg, nil(_))
+  //let cons = (pt_b, segs, pt_a, pt_0) =>
+    //case pt_a
+    //with pt_b : V3
+    //with pt_0 : Maybe(V3)
+    //|none =>
+      //segs(some(_ pt_b), some(_ pt_b))
+    //|some =>
+      //let pt_0 = case pt_0 |none some(_ pt_b) |some pt_0
+      //let p0 = transform(pt_a.value)
+      //let p1 = transform(pt_b)
+      //let sg = segment(p0, p1)
+      //cons(_ sg, segs(some(_ pt_b), pt_0))
+  //fold(V3; Maybe(V3) -> Maybe(V3) -> List(Segment);
+    //nil, cons, pts, none(_), none(_))

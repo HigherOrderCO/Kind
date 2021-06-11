@@ -1,0 +1,6 @@
+Vector.fill(A : Type, size : Nat, x : A) : Vector<A, size>
+  case size {
+    zero : Vector.nil!
+    succ : let pred = Vector.fill(A, size.pred, x)
+           Vector.cons(A, size.pred, x, pred)
+  }!

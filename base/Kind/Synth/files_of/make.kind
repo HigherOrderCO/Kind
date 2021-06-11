@@ -1,9 +1,0 @@
-Kind.Synth.files_of.make(names: List<String>, last: String): List<String>
-  case names {
-    nil:
-      []
-    cons:
-      let head = last | names.head | ".kind"
-      let tail = Kind.Synth.files_of.make(names.tail, last | names.head | "/")
-      List.cons!(head, tail)
-  }

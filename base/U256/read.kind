@@ -1,0 +1,2 @@
+U256.read(str: String): U256
+  Nat.to_u256(Nat.read(str))

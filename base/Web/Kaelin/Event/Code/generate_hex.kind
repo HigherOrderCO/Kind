@@ -1,2 +1,0 @@
-Web.Kaelin.Event.Code.generate_hex(xs : Web.Kaelin.Event.Code) : String
-  List.foldr(Pair<U8, Bits>, String, "", (x) (y) Hex.append(y, U8.to_nat(Pair.fst(U8, Bits, x)), Pair.snd(U8, Bits, x)), List.reverse!(xs))

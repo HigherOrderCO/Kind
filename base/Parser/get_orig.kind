@@ -1,0 +1,6 @@
+Parser.get_orig: Parser(Pair(Nat, Nat))
+  Parser {
+    get from = Parser.get_ini
+    get upto = Parser.get_idx
+    return {from, upto}
+  }

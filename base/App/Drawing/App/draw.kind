@@ -1,0 +1,9 @@
+App.Drawing.App.draw(img: VoxBox): App.Draw<App.Drawing.State>
+(state)
+  open state
+  let img = App.Drawing.draw.boards(img, state)
+  //stage = state.global@stage
+  // case stage {
+  //   boards: App.Drawing.draw.boards(img, state)
+  // }default ?s
+  DOM.vbox({"width": "256"}, {}, img)

@@ -1,0 +1,10 @@
+App.Kaelin.Event.Buffer.monad.bind<A : Type, 
+                            B : Type>
+                            (x : App.Kaelin.Event.Buffer<A>,
+                             f : A -> App.Kaelin.Event.Buffer<B>
+                            ) : App.Kaelin.Event.Buffer<B>
+  (ls) Parser {
+      get y = x(ls)
+      get c = f(Pair.snd!!(y), Pair.fst!!(y))
+      Parser.pure!({ls ++ Pair.fst!!(c), Pair.snd!!(c)})
+  }

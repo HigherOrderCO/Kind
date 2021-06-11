@@ -1,0 +1,2 @@
+Buffer8.alloc(depth: Nat): Buffer8
+  Buffer8.new(depth, Array.alloc<U8>(depth, U8.zero))

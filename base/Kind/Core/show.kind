@@ -53,18 +53,12 @@ Kind.Core.show.go(term: Kind.Term, indx: Nat, vars: List<Kind.Name>): String
       let term = Kind.Core.show.go(term.term, indx, vars)
       let type = Kind.Core.show.go(term.type, indx, vars)
       String.flatten(["{",term,":",type,"}"])
-    gol:
-      "<GOL>"
-    hol:
-      "<HOL>"
     nat:
       String.flatten(["+", Nat.show(term.natx)])
     chr:
       String.flatten(["'", Kind.Code.escape.char(term.chrx), "'"])
     str:
       String.flatten(["\"", Kind.Code.escape(term.strx), "\""])
-    cse:
-      "<CSE>"
     ori:
       Kind.Core.show.go(term.expr, indx, vars)
-  }
+  } default "*"

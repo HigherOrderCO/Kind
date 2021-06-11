@@ -1,0 +1,6 @@
+Variadic.foldr.go<A: Type, B: Type>(acc: A -> B -> B, b: B, k: B -> B, n: Nat): Variadic(n, A, B)
+  case n {
+    zero: k(b)
+    succ: (a) Variadic.foldr.go<A, B>(acc, b, (r) k(acc(a, r)), n.pred)
+  } : Variadic(n, A, B)
+

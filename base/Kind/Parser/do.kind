@@ -1,9 +1,74 @@
 Kind.Parser.do: Parser(Kind.Term)
-  Parser {
-    Parser.maybe!(Kind.Parser.text("do "));
-    get name = Kind.Parser.name1;
-    Parser.text(" {");
-    get term = Kind.Parser.do.statements(name);
-    Kind.Parser.text("}");
-    return term;
-  }
+  Kind.Parser.block("do", Parser {
+    Parser.maybe!(Kind.Parser.text("do "))
+    get name = Kind.Parser.name1
+    if String.is_upper(String.slice(0,1,name)) then Parser {
+      Parser.text(" {")
+      get term = Kind.Parser.do.statements(name)
+      Kind.Parser.text("}")
+      return term
+    } else Parser.fail!("Not a do-block.")
+  })
+
+Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
+  Parser.first_of!([
+    // Binding call: @ask x = expr rest@
+    Kind.Parser.block("do-get", Parser {
+      Parser.first_of!([
+        Kind.Parser.text("var ")
+        Kind.Parser.text("get ")
+      ])
+      get name = Kind.Parser.name1
+      Kind.Parser.text("=")
+      get expr = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(";"))
+      get body = Kind.Parser.do.statements(monad_name)
+      let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), Kind.Term.ref(monad_name))
+      let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, expr)
+      let term = Kind.Term.app(term, Kind.Term.lam(name, (x) body))
+      return term
+    }),
+    // Local definition (let): @let x = expr rest@
+    Kind.Parser.block("do-let", Parser {
+      Kind.Parser.text("let ")
+      get name = Kind.Parser.name1
+      Kind.Parser.text("=")
+      get expr = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(";"))
+      get body = Kind.Parser.do.statements(monad_name)
+      return Kind.Term.let(name, expr, (x) body)
+    }),
+    // Return pure: @return expr@
+    Kind.Parser.block("do-return", Parser {
+      Kind.Parser.text("return ")
+      get expr = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(";"))
+      let term = Kind.Term.app(Kind.Term.ref("Monad.pure"), Kind.Term.ref(monad_name))
+      let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, expr)
+      return term
+    }),
+    // Non-binding call: @expr rest@
+    Kind.Parser.block("do-statement", Parser {
+      get expr = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(";"))
+      get body = Kind.Parser.do.statements(monad_name)
+      let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), Kind.Term.ref(monad_name))
+      let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, expr)
+      let term = Kind.Term.app(term, Kind.Term.lam("", (x) body))
+      return term
+    }),
+    // Return direct: @expr@
+    Kind.Parser.block("do-end", Parser {
+      get expr = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(";"))
+      return expr
+    }),
+  ])

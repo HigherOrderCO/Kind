@@ -1,0 +1,113 @@
+VariadicForall(n: Nat, A: Type, B: Variadic(n, A, Type)): Type
+  case n with B {
+    zero: B
+    succ: (a: A) -> VariadicForall(n.pred, A, B(a))
+  }!
+
+Variadic.wrap<A: Type, B: Type, C: Type>(n: Nat, outer: B -> C, inner: Variadic(n)<A, B>): Variadic(n)<A, C>
+  case n with inner {
+    zero:
+      outer(inner)
+    succ:
+      (x) Variadic.wrap<A, B, C, n.pred>(outer, inner(x))
+  }!
+
+Variadic.join<A: Type, B: Type, C: Type, D: Type>(
+  n: Nat
+  m: Nat
+  join: B -> C -> D
+  l: Variadic(n)<A, B>
+  r: Variadic(m)<A, C>
+): Variadic(Nat.add(n, m))<A, D>
+  case n with l {
+    zero:
+      Variadic.wrap<A, C, D>(m, join(l), r)
+    succ:
+      (x) Variadic.join<A, B, C, D>(n.pred, m, join, l(x), r)
+  }!
+
+Variadic.together<A: Type, B: Type, C: Type, D: Type>(
+  n: Nat
+  join: B -> C -> D
+  l: Variadic(n)<A, B>
+  r: Variadic(n)<A, C>
+): Variadic(n)<A, D>
+  case n with l r {
+    zero:
+      join(l, r)
+    succ:
+      (x) Variadic.together<A, B, C, D>(n.pred, join, l(x), r(x))
+  }!
+
+Variadic.equal<A: Type, B: Type>(
+  n: Nat
+  l: Variadic(n)<A, B>
+  r: Variadic(n)<A, B>
+): Variadic(n)<A, Type>
+  case n with l r {
+    zero:
+      Equal<B>(l, r)
+    succ:
+      (x) Variadic.equal<A, B>(n.pred, l(x), r(x))
+  }!
+
+type Association <A: Type, op: A -> A -> A> ~ (c: Nat, exp: Variadic(c)<A, A>) {
+  inst ~ (c = 1, exp = (a) a)
+  join(
+    n: Nat
+    m: Nat
+    fst: Variadic(n)<A, A>
+    snd: Variadic(m)<A, A>
+    Hyp0: Association<A>(op, n, fst)
+    Hyp1: Association<A>(op, m, snd)
+  ) ~ (c = Nat.add(n, m), exp = Variadic.join<A, A, A, A>(n, m, op, fst, snd))
+}
+
+Associative<A: Type>(op: A -> A -> A): Type
+  def ret = (a: A, b: A, c: A) -> Equal<A>(op(op(a, b), c), op(a, op(b, c)));
+  ret
+
+Association.Right<A: Type>(op: A -> A -> A, n: Nat): Variadic(Nat.add(2, n))<A, A>
+  case n {
+    zero:
+      (x, y) op(x, y)
+    succ:
+      (x)
+        def out = (y) op(x, y) 
+        Variadic.wrap<A, A, A>(Nat.add(2, n.pred), out, Association.Right<A>(op, n.pred))
+  }!
+
+Association.Right.ok<A: Type>(op: A -> A -> A, n: Nat): Association<A>(op, Nat.add(2, n), Association.Right<A>(op, n))
+  def f = Association.inst<A>(op)
+  case n {
+    zero:
+      Association.join<A>(op, _, _, _, _, f, f)
+    succ:
+      def ind = Association.Right.ok<A>(op, n.pred)
+      Association.join<A>(op, 1, Nat.add(2, n.pred), _, _, f, ind)
+  }!
+
+Association.unique<A: Type>(
+  op: A -> A -> A
+  Hyp0: Associative<A>(op)
+  n: Nat
+  fst: Variadic(n)<A, A>
+  snd: Variadic(n)<A, A>
+  Hyp1: Association(A, op, n, fst)
+  Hyp2: Association(A, op, n, snd)
+): VariadicForall(n, A, Variadic.equal(A, A, n, fst, snd))
+  ?x
+
+//Kind.Term.Shorthand(name: Kind.Name, n: Nat): Variadic<Kind.Term>(n)
+//  case n {
+//    zero: Kind.Term.ref(name)
+//    succ:
+//      (out_arg)
+//        let outer = (inn_arg) Kind.Term.app(inn_arg, out_arg)
+//        let ind = Kind.Term.Shorthand(name, n.pred)
+//        Variadic.wrap<Kind.Term, n.pred>(outer, ind)
+//  }!
+//
+//Test: _
+//  let add = Kind.Term.Shorthand("Nat.add", 2)
+//  add(Kind.Term.nat(2), Kind.Term.nat(3))

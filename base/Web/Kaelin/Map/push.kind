@@ -1,4 +1,0 @@
-Web.Kaelin.Map.push(coord: Web.Kaelin.Coord, entity: Web.Kaelin.Entity, map: Web.Kaelin.Map) : Web.Kaelin.Map
-  tile = Web.Kaelin.Map.get(coord, map) <> []
-  tile = entity & tile
-  Web.Kaelin.Map.set(coord, tile, map)

@@ -1,4 +1,0 @@
-Web.Kaelin.Event.Code.action : List<U8>
-  [
-    2#8 
-  ] //constraint 2 <= 64

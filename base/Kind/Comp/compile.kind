@@ -14,12 +14,13 @@ Kind.Comp.compile(
           case typv {
           all:
             let self_var = Kind.Term.ann(true, term, type.value)
-            let name_var = Kind.Term.ann(true, Kind.Term.var(term.name, size + 1), typv.xtyp)
+            let name_uid = term.name | "$" | Nat.show(size)
+            let name_var = Kind.Term.ann(true, Kind.Term.var(name_uid, size + 1), typv.xtyp)
             let body_typ = typv.body(self_var, name_var)
             let {body_cmp,body_typ} = Kind.Comp.compile(term.body(name_var), some(body_typ), defs, size + 1)
             let term_cmp = if typv.eras
               then body_cmp
-              else Kind.Comp.lam(term.name, body_cmp)
+              else Kind.Comp.lam(name_uid, body_cmp)
             let term_cmp = 
               case Kind.Comp.compile.prim_of(type.value, defs) as got {
                 some: Kind.Comp.ins(got.value, term_cmp)
@@ -32,9 +33,10 @@ Kind.Comp.compile(
         } default {Kind.Comp.nil, Kind.Term.typ}
         let:
           let {expr_cmp,expr_typ} = Kind.Comp.compile(term.expr, none, defs, size)
-          let expr_var = Kind.Term.ann(true, Kind.Term.var(term.name, size + 1), expr_typ)
+          let name_uid = term.name | "$" | Nat.show(size)
+          let expr_var = Kind.Term.ann(true, Kind.Term.var(name_uid, size + 1), expr_typ)
           let {body_cmp,body_typ} = Kind.Comp.compile(term.body(expr_var), type, defs, size + 1)
-          let term_cmp = Kind.Comp.let(term.name, expr_cmp, body_cmp)
+          let term_cmp = Kind.Comp.let(name_uid, expr_cmp, body_cmp)
           let term_typ = body_typ
           {term_cmp, term_typ}
         ori:
@@ -54,10 +56,6 @@ Kind.Comp.compile(
           none: {Kind.Comp.nil, Kind.Term.typ}
           some: {Kind.Comp.ref(term.name), open got.value; got.value.type}
         }
-      typ: {
-        Kind.Comp.nil
-        Kind.Term.typ
-      }
       app:
         let {func_cmp, func_typ} = Kind.Comp.compile(term.func, none, defs, size)
         case Kind.Term.reduce(func_typ, defs) as func_typ {
@@ -78,13 +76,12 @@ Kind.Comp.compile(
         } default {Kind.Comp.nil, Kind.Term.typ}
       let:
         let {expr_cmp, expr_typ} = Kind.Comp.compile(term.expr, none, defs, size)
-        let expr_var = Kind.Term.ann(true, Kind.Term.var(term.name, size + 1), expr_typ)
+        let name_uid = term.name | "$" | Nat.show(size)
+        let expr_var = Kind.Term.ann(true, Kind.Term.var(name_uid, size + 1), expr_typ)
         let {body_cmp, body_typ} = Kind.Comp.compile(term.body(expr_var), none, defs, size + 1)
-        {Kind.Comp.let(term.name, expr_cmp, body_cmp), body_typ}
+        {Kind.Comp.let(name_uid, expr_cmp, body_cmp), body_typ}
       def:
         Kind.Comp.compile(term.body(term.expr), none, defs, size)
-      all:
-        {Kind.Comp.nil, Kind.Term.typ}
       ann:
         Kind.Comp.compile(term.term, some(term.type), defs, size)
       loc:
@@ -95,8 +92,6 @@ Kind.Comp.compile(
         {Kind.Comp.chr(term.chrx), Kind.Term.ref("Char")}
       str:
         {Kind.Comp.str(term.strx), Kind.Term.ref("String")}
-      cse:
-        {Kind.Comp.nil, Kind.Term.typ}
       ori:
         Kind.Comp.compile(term.expr, none, defs, size)
     } default {Kind.Comp.nil, Kind.Term.typ}
@@ -129,7 +124,8 @@ Kind.Comp.compile.adt(term: Kind.Term, defs: Kind.Defs): Maybe(Kind.Comp.Prim)
       if String.ends_with(term.self, ".Self") then
         let body = term.body(Kind.Term.var("",0),Kind.Term.var("",0))
         let data = Kind.Comp.compile.adt.get_constructors(body)
-        some(Kind.Comp.Prim.data(data))
+        let name = String.take(String.length(term.self) - 5, term.self)
+        some(Kind.Comp.Prim.data(name, data))
       else
         none
   } default none

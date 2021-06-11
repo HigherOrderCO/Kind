@@ -1,71 +1,121 @@
 Kind.Parser.term: Parser(Kind.Term)
-  Parser {
-    get init = Kind.Parser.init;
+  Kind.Parser.block("term", Parser {
     get term = Parser.first_of!([
-      Kind.Parser.forall,
-      Kind.Parser.lambda,
-      Kind.Parser.lambda.erased,
-      Kind.Parser.lambda.nameless,
-      Kind.Parser.parenthesis,
-      Kind.Parser.letforrange.u32,
-      Kind.Parser.letforrange.u32.with,
-      Kind.Parser.letforrange.nat,
-      Kind.Parser.letforrange.nat.with,
-      Kind.Parser.letforin,
-      Kind.Parser.letforin.with,
-      Kind.Parser.letwhile,
-      Kind.Parser.letwhile.with,
-      Kind.Parser.let,
-      Kind.Parser.let.omit,
-      Kind.Parser.getwhile,
-      Kind.Parser.getwhile.with,
-      Kind.Parser.get,
-      Kind.Parser.get.omit,
-      Kind.Parser.def,
-      Kind.Parser.goal_rewrite,
-      Kind.Parser.if,
-      Kind.Parser.char,
-      Kind.Parser.string,
-      Kind.Parser.pair,
-      Kind.Parser.sigma.type,
-      Kind.Parser.some,
-      Kind.Parser.not,
-      Kind.Parser.left,
-      Kind.Parser.right,
-      Kind.Parser.apply,
-      Kind.Parser.chain,
-      Kind.Parser.mirror,
-      Kind.Parser.list,
-      Kind.Parser.map,
-      Kind.Parser.log,
-      Kind.Parser.do,
-      Kind.Parser.case,
-      Kind.Parser.open,
-      Kind.Parser.without,
-      Kind.Parser.switch,
-      Kind.Parser.goal,
-      Kind.Parser.hole,
-      Kind.Parser.float.64,
-      Kind.Parser.float.32,
-      Kind.Parser.machine_integer.signed(256),
-      Kind.Parser.machine_integer.signed(128),
-      Kind.Parser.machine_integer.signed(64),
-      Kind.Parser.machine_integer.signed(32),
-      Kind.Parser.machine_integer.signed(16),
-      Kind.Parser.machine_integer.signed(8),
-      Kind.Parser.int,
-      Kind.Parser.machine_integer.unsigned(256),
-      Kind.Parser.machine_integer.unsigned(128),
-      Kind.Parser.machine_integer.unsigned(64),
-      Kind.Parser.machine_integer.unsigned(32),
-      Kind.Parser.machine_integer.unsigned(16),
-      Kind.Parser.machine_integer.unsigned(8),
-      Kind.Parser.u64,
-      Kind.Parser.u32,
-      Kind.Parser.u16,
-      Kind.Parser.u8,
-      Kind.Parser.nat,
-      Kind.Parser.reference,
-    ]);
-    Kind.Parser.suffix(init, term);
+      Kind.Parser.dom
+      Kind.Parser.forall
+      Kind.Parser.lambda
+      Kind.Parser.lambda.erased
+      Kind.Parser.parenthesis
+      Kind.Parser.letforrange.u32
+      Kind.Parser.letforrange.u32.with
+      Kind.Parser.letforrange.nat
+      Kind.Parser.letforrange.nat.with
+      Kind.Parser.letforin
+      Kind.Parser.letforin.with
+      Kind.Parser.letwhile
+      Kind.Parser.letwhile.with
+      Kind.Parser.let
+      Kind.Parser.let.omit
+      Kind.Parser.getwhile
+      Kind.Parser.getwhile.with
+      Kind.Parser.get
+      Kind.Parser.get.omit
+      Kind.Parser.def
+      Kind.Parser.goal_rewrite
+      Kind.Parser.if
+      Kind.Parser.char
+      Kind.Parser.string('"')
+      Kind.Parser.string('`')
+      Kind.Parser.new
+      Kind.Parser.sigma.type
+      Kind.Parser.some
+      Kind.Parser.not
+      Kind.Parser.left
+      Kind.Parser.right
+      Kind.Parser.apply
+      Kind.Parser.chain
+      Kind.Parser.mirror
+      Kind.Parser.list
+      Kind.Parser.map
+      Kind.Parser.log
+      Kind.Parser.do
+      Kind.Parser.case
+      Kind.Parser.open
+      Kind.Parser.without
+      Kind.Parser.switch
+      Kind.Parser.goal
+      Kind.Parser.hole
+      Kind.Parser.float.64
+      Kind.Parser.float.32
+      Kind.Parser.machine_integer.signed(256)
+      Kind.Parser.machine_integer.signed(128)
+      Kind.Parser.machine_integer.signed(64)
+      Kind.Parser.machine_integer.signed(32)
+      Kind.Parser.machine_integer.signed(16)
+      Kind.Parser.machine_integer.signed(8)
+      Kind.Parser.machine_integer.unsigned(256)
+      Kind.Parser.machine_integer.unsigned(128)
+      Kind.Parser.machine_integer.unsigned(64)
+      Kind.Parser.machine_integer.unsigned(32)
+      Kind.Parser.machine_integer.unsigned(16)
+      Kind.Parser.machine_integer.unsigned(8)
+      Kind.Parser.u64 // TODO: deprecated
+      Kind.Parser.u32 // TODO: deprecated
+      Kind.Parser.u16 // TODO: deprecated
+      Kind.Parser.u8 // TODO: deprecated
+      Kind.Parser.num
+      Kind.Parser.reference
+      Parser {
+        Kind.Parser.spaces
+        Parser.fail!("Expected a term.")
+      }
+    ])
+    get term = Kind.Parser.term.suffix(term)
+    return term
+  })
+
+Kind.Parser.term.suffix(term: Kind.Term): Parser(Kind.Term)
+  (pst)
+  open pst
+  let suffix_parser = Parser.first_of!([
+   Kind.Parser.application(term)
+   Kind.Parser.application.erased(term)
+   Kind.Parser.list_set(term)
+   Kind.Parser.list_get(term)
+   Kind.Parser.map_set(term)
+   Kind.Parser.map_get(term)
+   Kind.Parser.field_set(term)
+   Kind.Parser.field_get(term)
+   Kind.Parser.arrow(term)
+   Kind.Parser.concat(term)
+   Kind.Parser.equality(term)
+   Kind.Parser.add(term)
+   Kind.Parser.sub(term)
+   Kind.Parser.mul(term)
+   Kind.Parser.div(term)
+   Kind.Parser.mod(term)
+   Kind.Parser.ltn(term)
+   Kind.Parser.lte(term)
+   Kind.Parser.eql(term)
+   Kind.Parser.gte(term)
+   Kind.Parser.gtn(term)
+   Kind.Parser.and(term)
+   Kind.Parser.or(term)
+   Kind.Parser.default(term)
+   Kind.Parser.cons(term)
+   Kind.Parser.string_concat(term)
+   Kind.Parser.sigma(term)
+   Kind.Parser.inequality(term)
+   Kind.Parser.rewrite(term)
+   Kind.Parser.annotation(term)
+   Kind.Parser.application.hole(term)
+  ]);
+  case suffix_parser(pst) as suffix_parsed {
+    error:
+      open suffix_parsed.err
+      let err = Parser.Error.maybe_combine(pst.err, some(suffix_parsed.err))
+      let pst = Parser.State.new(err, pst.nam, pst.ini, pst.idx, pst.str)
+      Parser.Reply.value!(pst, term)
+    value: 
+      Kind.Parser.term.suffix(suffix_parsed.val, suffix_parsed.pst)
   }

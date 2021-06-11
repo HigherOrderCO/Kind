@@ -1,0 +1,13 @@
+Vector.get_maybe(A : Type, size : Nat, n : Nat, vec : Vector<A, size>) : Maybe<A>
+  case size with vec {
+      zero : none
+      succ : case n {
+          zero : case vec {
+              cons : some(vec.head)
+          }
+          succ : case vec {
+              cons : 
+                   Vector.get_maybe(A, size.pred, n.pred, vec.tail)
+          }
+      }
+  }!

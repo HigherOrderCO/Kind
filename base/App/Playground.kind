@@ -1,0 +1,164 @@
+type App.Playground.State.local {
+  new(
+    device: Device, 
+    window: App.Playground.Window,
+    mouse_over: String,
+    code: String, // code to be type checked
+    output: String, // output from the type check
+    kind_version: String
+    ) 
+}
+
+App.Playground.State.local_empty: App.Playground.State.local 
+  App.Playground.State.local.new(
+    Device.big_desktop, App.Playground.Window.input, "", "", "", "")
+
+App.Playground.State.global: Type
+  Unit
+
+App.Playground.State: App.State
+  App.State.new(App.Playground.State.local, App.Playground.State.global)
+
+type App.Playground.Window {
+  input
+  terminal
+}
+
+type App.Playground.Event {
+  check_terms
+  run_code
+  // download_app
+  display_output
+}
+
+App.Playground.set_mouse_over(id: String, stt: App.Playground.State.local): App.Playground.State.local
+  open stt
+  App.Playground.State.local.new(stt.device, stt.window, id, stt.code, stt.output, stt.kind_version)
+
+// Represents a page containing the Playground
+App.playground.body(stt: App.Playground.State.local): DOM
+  open stt
+  case stt.device {
+    phone:
+      DOM.node("div", {"id": "page"}, {
+      "margin": "10px"
+      "height": "300px"
+    },[App.Playground.draw(stt)])
+  } default
+    DOM.node("div", {"id": "page"}, {
+      "margin": "100px"
+      "height": "500px"
+    },[App.Playground.draw(stt)])
+
+// App.Playground.init: App.Init<App.Playground.State>
+//   let stt = App.Playground.State.local_empty
+//   IO {
+//     get version = IO.request("http://localhost:3030/kind_version")
+//     let stt = stt@kind_version <- version
+//     App.Store.new<App.Playground.State>(
+//       App.Playground.State.local_empty, 
+//       unit)
+//   }
+
+App.Playground.set_output(output: String, state: App.Playground.State.local): App.Playground.State.local 
+  open state
+  App.Playground.State.local.new(
+    state.device, state.window, 
+    state.mouse_over, state.code, output, state.kind_version)
+
+App.Playground.set_code(input: String, state: App.Playground.State.local): App.Playground.State.local 
+  open state
+  App.Playground.State.local.new(
+    state.device, state.window, 
+    state.mouse_over, input, state.output, state.kind_version)
+
+App.Playground.set_window(window: App.Playground.Window, state: App.Playground.State.local): App.Playground.State.local 
+  open state
+  App.Playground.State.local.new(
+    state.device, window, 
+    state.mouse_over, state.code, state.output, state.kind_version)
+
+// The local event handler
+App.Playground.when: App.When<App.Playground.State>
+  (event, stt)
+  let state = stt@local
+  open state
+  case event {
+    frame: 
+      open event.info
+      open event.info.screen_size as screen_size
+      let device = Device.classify(screen_size.fst)
+      let stt = state@device <- device
+      App.set_local!(stt)
+
+    input:
+      IO {
+        switch String.eql(event.id) {
+          "input_code": 
+            App.set_local!(App.Playground.set_code(event.text, state))
+        } default App.pass!
+      }
+    
+    mouse_click:
+      let window = 
+        case state.device {
+          phone : App.Playground.Window.terminal
+        } default App.Playground.Window.input
+
+      switch String.eql(event.id) {
+        // Send a request to typecheck the code
+        "btn_type_check": 
+        if String.is_empty(state.code)
+        then 
+          let stt = App.Playground.set_output("How can I type check an empty code? haha", state)
+          App.set_local!(stt)
+        else 
+          IO {
+            get checked = IO.request("http://18.222.191.174:3030/api/check_term?code=" | state.code)
+            let stt = App.Playground.set_output(checked, state)
+            let stt = App.Playground.set_window(window, stt)
+            App.set_local!(stt)
+          }
+        
+        "btn_run_code":
+        if String.is_empty(state.code)
+        then
+          let stt = state@output <- "How can I type check an empty code? haha"
+          App.set_local!(stt)
+        else 
+          IO {
+            // 18.222.191.174
+            get checked = IO.request("http://18.222.191.174:3030/api/run_term?code=" | state.code)
+            let stt = App.Playground.set_output(checked, state)
+            let stt = App.Playground.set_window(window, stt)
+            App.set_local!(stt)
+          }  
+
+        "terminal_view":
+        let stt = App.Playground.set_window(App.Playground.Window.terminal, state)
+        App.set_local!(stt)
+        
+        "input_view":
+        let stt = App.Playground.set_window(App.Playground.Window.input, state)
+        App.set_local!(stt)
+        
+        } default App.pass!
+      
+    mouse_over : App.set_local!(App.Playground.set_mouse_over(event.id, state))
+
+    } default App.pass!
+
+
+
+// Executes the application
+App.Playground: App(App.Playground.State)
+  init = App.Store.new<App.Playground.State>(
+    App.Playground.State.local_empty, 
+    unit)
+  draw = (state) App.playground.body(state@local)
+  when = App.Playground.when
+  tick = (tick, glob) glob
+  post = (time, room, addr, data, glob) glob
+
+  App.new!(init, draw, when, tick, post)
+

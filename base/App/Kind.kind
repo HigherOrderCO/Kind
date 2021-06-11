@@ -1,0 +1,83 @@
+type App.Kind.State.local {
+  new(
+    device: Device, 
+    page: App.Kind.Page,
+    mouse_over: String
+  ) // element id
+}
+
+App.Kind.State.global: Type
+  Unit
+
+App.Kind.State: App.State
+  App.State.new(App.Kind.State.local, App.Kind.State.global)
+
+type App.Kind.Page {
+  home
+  apps
+}
+
+type App.Kind.Event {
+  go_to_home
+  go_to_apps
+}
+  
+App.Kind.exe_event(id: String, stt: App.Kind.State.local): App.Kind.State.local
+  open stt
+  let actions = App.Kind.comp.id_action
+  case Map.get!(id, actions) as event {
+    none: stt
+    some: 
+      case event.value{
+        go_to_home: App.Kind.State.local.new(stt.device, App.Kind.Page.home, stt.mouse_over)
+        go_to_apps: App.Kind.State.local.new(stt.device, App.Kind.Page.apps, stt.mouse_over)
+      } 
+  }
+
+App.Kind.set_mouse_over(id: String, stt: App.Kind.State.local): App.Kind.State.local
+  open stt
+  App.Kind.State.local.new(stt.device, stt.page, id)
+
+App.Kind.draw_page(stt: App.Kind.State.local): DOM
+  open stt
+  case stt.page {
+    home: App.Kind.draw_page_home(stt)
+    apps: App.Kind.draw_page_apps(stt)
+  }
+
+// Executes the application
+App.Kind: App(App.Kind.State)
+
+  init = 
+    App.Store.new!(App.Kind.State.local.new(Device.big_desktop, App.Kind.Page.home, ""), unit)
+
+  draw = (state)
+    App.Kind.draw_page(state@local)
+
+  when = (event, state)
+    case event {
+      init: 
+        open event.info
+        open event.info.screen_size as screen_size
+        let device = Device.classify(screen_size.fst)
+        App.set_local!(App.Kind.State.local.new(device, App.Kind.Page.home, ""))
+      mouse_click: App.set_local!(App.Kind.exe_event(event.id, state@local))
+      mouse_over : App.set_local!(App.Kind.set_mouse_over(event.id, state@local))
+      tick: 
+        open event.info
+        open event.info.screen_size as screen_size
+        open state
+        let device = Device.classify(screen_size.fst)
+        App.set_local!(App.Kind.State.local.new(device, state.page, state.mouse_over))
+    } default App.pass!
+  
+  tick = (tick, glob)
+    glob
+  
+  post = (time, room, addr, data, glob)
+    glob
+
+  // The application
+  App.new!(init, draw, when, tick, post)
+
+

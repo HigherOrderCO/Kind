@@ -1,0 +1,8 @@
+String.at(index: Nat, str: String): Maybe<Char>
+  case str {
+    nil: none
+    cons: case index {
+      zero: some(str.head)
+      succ: String.at(index.pred, str.tail)
+    }
+  }

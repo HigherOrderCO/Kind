@@ -1,0 +1,9 @@
+App.Drawing.Action.local.save(local: App.Drawing.State.local): App.Drawing.State.local
+  open local
+  open local.whiteboard as wb
+  past   = wb.live & wb.past
+  live   = wb.live 
+  future = []
+  log(Nat.show(List.length!(past)))
+  whiteboard = App.Drawing.Whiteboard.new(past,live,future)
+  local@whiteboard <- whiteboard

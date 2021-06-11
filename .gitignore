@@ -10,3 +10,9 @@ tmp.js
 *.orig
 web/*.lock
 base/.cache
+/base/playground.kind
+web/src/apps/*.js
+web/events/data/*
+*.so
+*.wpo
+.cache

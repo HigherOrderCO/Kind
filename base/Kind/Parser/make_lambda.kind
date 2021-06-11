@@ -1,5 +1,0 @@
-Kind.Parser.make_lambda(names: List<Kind.Name>, body: Kind.Term): Kind.Term
-  case names {
-    nil: body,
-    cons: Kind.Term.lam(names.head, (x) Kind.Parser.make_lambda(names.tail, body)),
-  }

@@ -1,0 +1,9 @@
+App.TicTacToe.board.pairs.check_pair(pair : Pair<U32, U32>, vec : Vector<Maybe<App.TicTacToe.Entity>, 9>, e : App.TicTacToe.Entity) : Maybe<App.TicTacToe.Entity>
+  let n = App.TicTacToe.pos.mini_pair_to_vector(pair)
+  Maybe { 
+      get b = Maybe.join!(Vector.get_maybe(Maybe<App.TicTacToe.Entity>, 9, U32.to_nat(n), vec))
+      if App.TicTacToe.entity.equal(b, e) then
+        some(b)
+      else 
+        none
+  }

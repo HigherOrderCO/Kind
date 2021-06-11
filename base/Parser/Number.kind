@@ -1,0 +1,7 @@
+type Parser.Number {
+  new(
+    sign: Maybe(Bool)
+    numb: Nat
+    frac: Maybe(Nat)
+  )
+}

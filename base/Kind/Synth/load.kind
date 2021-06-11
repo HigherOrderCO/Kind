@@ -1,15 +1,17 @@
 Kind.Synth.load.cached.def(name: Kind.Name): IO<Maybe<Kind.Def>>
   IO {
-    //IO.print("-- getting " | name)
-    get cache_file = IO.get_file(".cache/"|name|".file")
+    //IO.print("-- getting cache of " | name)
+    get cache_file = IO.get_file(String.to_lower(".cache/"|name|".file"))
     if Bool.not(String.is_empty(cache_file)) then IO {
-      get cache_time = IO.get_file(".cache/"|name|".time")
+      //IO.print("-- cache file isn't empty " | name)
+      get cache_time = IO.get_file(String.to_lower(".cache/"|name|".time"))
       get cache_file_time = IO.get_file_mtime(cache_file)
       if String.eql(cache_time, cache_file_time) then IO {
-        get cache_term = IO.get_file(".cache/"|name|".term")
-        get cache_type = IO.get_file(".cache/"|name|".type")
-        get cache_isct = IO.get_file(".cache/"|name|".isct")
-        get cache_arit = IO.get_file(".cache/"|name|".arit")
+        //IO.print("-- cache time is correct " | name)
+        get cache_term = IO.get_file(String.to_lower(".cache/"|name|".term"))
+        get cache_type = IO.get_file(String.to_lower(".cache/"|name|".type"))
+        get cache_isct = IO.get_file(String.to_lower(".cache/"|name|".isct"))
+        get cache_arit = IO.get_file(String.to_lower(".cache/"|name|".arit"))
         return Maybe {
           let file = cache_file
           let code = "<cached>"
@@ -83,10 +85,46 @@ Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
     get cached_defs = Kind.Synth.load.cached([name], defs)
     case cached_defs {
       some: IO {
+        //IO.print("- cached " | name)
         return some(cached_defs.value)
       }
       none: IO {
+        //IO.print("- uncached " | name)
         Kind.Synth.load.go(name, Kind.Synth.files_of(name), defs)
+      }
+    }
+  }
+
+Kind.Synth.get_kind_code(file: String): IO(String)
+  IO {
+    get code = IO.get_file(file)
+    if String.eql(code,"") then IO {
+      get code = IO.request("http://uwu.tech:7172/" | file)
+      return code;
+    } else IO {
+      return code;
+    }
+  }
+
+Kind.Synth.load.go(name: String, files: List<String>, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
+  case files {
+    nil: IO {
+      return none
+    }
+    cons: IO {
+      get code = Kind.Synth.get_kind_code(files.head)
+      let read = Kind.Defs.read(files.head, code, defs)
+      case read {
+        left: Kind.Synth.load.go(name, files.tail, defs)
+        right: IO {
+          let defs = read.value
+          case Kind.Map.get!(name, defs) as got {
+            none: Kind.Synth.load.go(name, files.tail, defs),
+            some: IO {
+              return some(defs)
+            }
+          }
+        }
       }
     }
   }

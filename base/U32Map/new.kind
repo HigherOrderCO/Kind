@@ -1,0 +1,2 @@
+U32Map.new<V: Type>: U32Map<V>
+  GMap.tip!!

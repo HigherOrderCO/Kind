@@ -1,0 +1,5 @@
+U32Map.del<V: Type>(
+  key: U32, 
+  map: U32Map<V>, 
+): U32Map<V>
+  GMap.delete!!(U32.cmp, key, map)

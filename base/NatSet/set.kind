@@ -1,0 +1,2 @@
+NatSet.set(nat: Nat, set: NatSet): NatSet
+  NatMap.set<Unit>(nat, Unit.new, set)

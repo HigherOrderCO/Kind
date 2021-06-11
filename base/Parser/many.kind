@@ -1,2 +1,18 @@
 Parser.many<V: Type>(parser: Parser(V)): Parser(List<V>)
   Parser.many.go<V>(parser, (x) x)
+
+Parser.many.go<V: Type>(
+  parse: Parser(V)
+  values: List<V> -> List<V>
+  //err: Maybe<Parser.ErrorAt>
+  //idx: Nat
+  //code: String
+): Parser<List<V>>
+  (pst)
+  open pst
+  case parse(pst) as reply {
+    error:
+      Parser.Reply.value<List<V>>(pst, values([]))
+    value:
+      Parser.many.go<V>(parse, (xs) values(reply.val & xs), reply.pst)
+  }

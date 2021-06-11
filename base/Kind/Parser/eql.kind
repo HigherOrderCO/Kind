@@ -1,2 +1,2 @@
-Kind.Parser.eql: Nat -> Kind.Term -> Parser(Kind.Term)
+Kind.Parser.eql: Kind.Term -> Parser(Kind.Term)
   Kind.Parser.op("=?", "Nat.eql")

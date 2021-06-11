@@ -48,9 +48,7 @@ Kind.Term.expand_ct(term: Kind.Term, defs: Kind.Defs, arity: Nat): Kind.Term
       Kind.Term.chr(term.chrx),
     str:
       Kind.Term.str(term.strx),
-    cse:
-      term,
     ori:
       def expr = Kind.Term.expand_ct(term.expr, defs, 0);
       Kind.Term.ori(term.orig, term.expr),
-  }
+  } default term

@@ -1,2 +1,5 @@
+// Shift 'n' a bits to the right
 U32.shr(n: U32, a: U32): U32
-  U32.shr(n, a)
+  open n
+  open a
+  U32.new(Word.shr!(n.value, a.value))

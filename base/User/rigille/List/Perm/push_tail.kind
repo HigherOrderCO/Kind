@@ -1,0 +1,23 @@
+User.rigille.List.Perm.push_tail<A: Type>(
+  xs: List<A>,
+  ys: List<A>,
+  zs: List<A>,
+  Hyp: User.rigille.List.Perm<A>(xs, ys)
+): User.rigille.List.Perm<A>(xs ++ zs, ys ++ zs)
+  def Perm = User.rigille.List.Perm<A>
+  case Hyp with Hyp {
+    nil:
+      User.rigille.List.Perm.refl<A>(zs)
+    skip:
+      ind = User.rigille.List.Perm.push_tail<A>(Hyp.l0, Hyp.l1, zs, Hyp.Hyp)
+      qed = User.rigille.List.Perm.skip<A>(Hyp.x, _, _, ind)
+      qed
+    swap:
+      qed = User.rigille.List.Perm.swap<A>(Hyp.x, Hyp.y, Hyp.l ++ zs)
+      qed
+    trans:
+      ind0 = User.rigille.List.Perm.push_tail<A>(Hyp.l0, Hyp.l1, zs, Hyp.Hyp0)
+      ind1 = User.rigille.List.Perm.push_tail<A>(Hyp.l1, Hyp.l2, zs, Hyp.Hyp1)
+      qed = User.rigille.List.Perm.trans<A>(_, _, _, ind0, ind1)
+      qed
+  }!

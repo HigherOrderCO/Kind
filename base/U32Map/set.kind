@@ -1,0 +1,6 @@
+U32Map.set<V: Type>(
+  key : U32, 
+  val : V, 
+  map : U32Map<V>
+) : U32Map<V>
+  GMap.insert<U32>!(U32.cmp, key, val, map)

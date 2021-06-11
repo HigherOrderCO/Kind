@@ -1,0 +1,13 @@
+Word.signed_shift_right.one<size: Nat>(word: Word(size)): Word(size)
+  case word {
+    e: Word.e,
+    o: Word.signed_shift_right.one.go<word.size>(word.pred, false),
+    i: Word.signed_shift_right.one.go<word.size>(word.pred, true)
+  }: Word(word.size)
+
+Word.signed_shift_right.one.go<size: Nat>(word: Word(size), neg: Bool): Word(Nat.succ(size))
+  case word {
+    e: if neg then Word.i!(Word.e) else Word.o!(Word.e),
+    o: Word.o<Nat.succ(word.size)>(Word.signed_shift_right.one.go<word.size>(word.pred, false)),
+    i: Word.i<Nat.succ(word.size)>(Word.signed_shift_right.one.go<word.size>(word.pred, true))
+  }: Word(Nat.succ(word.size))

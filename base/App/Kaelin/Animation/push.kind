@@ -1,0 +1,9 @@
+App.Kaelin.Animation.push(
+  coord : App.Kaelin.Coord,
+  sprite : App.Kaelin.Sprite
+  map : App.Kaelin.Map,
+  tick : Nat
+): App.Kaelin.Map
+  
+  App.Kaelin.Map.push(coord, App.Kaelin.Entity.animation(App.Kaelin.Animation.new(tick, sprite)), map)
+  

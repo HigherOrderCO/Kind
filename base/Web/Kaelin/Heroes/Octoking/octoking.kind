@@ -1,7 +1,0 @@
-Web.Kaelin.Heroes.Octoking.octoking: Web.Kaelin.Hero
-  Web.Kaelin.Hero.new(
-    4#8, 
-    Web.Kaelin.Assets.hero.octoking_d_1
-    +25#32
-    []
-  )

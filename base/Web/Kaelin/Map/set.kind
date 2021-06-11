@@ -1,3 +1,0 @@
-Web.Kaelin.Map.set(coord: Web.Kaelin.Coord, tile: Web.Kaelin.Tile, map:Web.Kaelin.Map): Web.Kaelin.Map
-key = Web.Kaelin.Coord.Convert.axial_to_nat(coord)
-NatMap.set!(key, tile, map)

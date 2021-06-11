@@ -1,0 +1,6 @@
+App.Drawing.Action.local.env_info(
+  time: U64,
+  env_info: App.EnvInfo,
+  local: App.Drawing.State.local
+): App.Drawing.State.local
+  local@env_info <- env_info

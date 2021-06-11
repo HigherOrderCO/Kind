@@ -1,0 +1,2 @@
+Char.from_nat: Nat -> Char
+  U16.from_nat

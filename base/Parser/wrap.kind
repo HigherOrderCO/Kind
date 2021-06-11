@@ -1,0 +1,9 @@
+Parser.wrap<V: Type>(
+  opens: Parser(Unit)
+  parse: Parser(V)
+  close: Parser(Unit)
+): Parser(List<V>)
+  Parser {
+    opens
+    Parser.until<V>(close, parse)
+  }

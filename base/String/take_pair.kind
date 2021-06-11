@@ -1,0 +1,12 @@
+String.take_pair(n: Nat, xs: String): Pair<String, String>
+  String.take_pair.go(n, xs, "")
+
+String.take_pair.go(n: Nat, xs: String, take_aux: String): Pair<String, String>
+  case xs {
+    nil : {take_aux, xs}
+    cons: case n {
+      zero : {take_aux, xs}
+      succ: 
+        String.take_pair.go(n.pred, xs.tail, String.cons(xs.head, take_aux))
+    }
+  }

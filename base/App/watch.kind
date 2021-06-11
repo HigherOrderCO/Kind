@@ -1,2 +1,0 @@
-App.watch(room: String): IO<Dynamic>
-  App.do("watch", room)

@@ -1,8 +1,0 @@
-type Web.Kaelin.Event {
-  // Will store draft info (player / hero / team)
-  // [Web.Kaelin.Drafted.new("0x01babFc", Web.Kaelin.Hero.Zeralul, Web.Kaelin.Team.Blue)]
-  start_game(players: List<Web.Kaelin.Player>)
-  create_user(player: Web.Kaelin.Player)
-  create_hero(hero_id: U8)
-  user_input(coord: Web.Kaelin.Coord, action: Web.Kaelin.Action)
-}

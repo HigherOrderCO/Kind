@@ -1,6 +1,0 @@
-Web.Kaelin.Resources.Action.to_action(x : Nat) : Maybe(Web.Kaelin.Action)
-  switch Nat.eql(x) {
-      0 : Maybe.some!(Web.Kaelin.Action.walk)
-      1 : Maybe.some!(Web.Kaelin.Action.ability_0)
-      2 : Maybe.some!(Web.Kaelin.Action.ability_1)
-  } default Maybe.none!

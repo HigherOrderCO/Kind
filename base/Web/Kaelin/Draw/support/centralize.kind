@@ -1,8 +1,0 @@
-// Centralizes an image in the hexagon 
-Web.Kaelin.Draw.support.centralize(coord: Web.Kaelin.Coord): Pair(U32, U32)
-      let {i,   j} = Web.Kaelin.Coord.to_screen_xy(coord)
-      let i = U32.sub(i, Web.Kaelin.Constants.hexagon_radius) 
-      let j = U32.sub(j, Web.Kaelin.Constants.hexagon_radius)
-      {i, j}
-
-

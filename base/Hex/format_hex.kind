@@ -1,3 +1,0 @@
-Hex.format_hex(min : Nat, hex : String) : String
-  let dif = min - String.length(hex)
-  if (Nat.ltn(String.length(hex), min)) then String.repeat("0", dif) | hex else hex

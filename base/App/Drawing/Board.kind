@@ -1,0 +1,4 @@
+type App.Drawing.Board {
+  title(txt: String)
+  art(img: VoxBox)
+}

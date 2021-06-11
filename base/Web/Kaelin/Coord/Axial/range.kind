@@ -1,6 +1,0 @@
-// Returns a list with all coordinates within a certain range
-Web.Kaelin.Coord.Axial.range(a: Web.Kaelin.Coord, distance:Nat): List<Web.Kaelin.Coord>
-    let ab = Web.Kaelin.Coord.Convert.axial_to_cubic(a)
-    let d = distance
-    List.map!!(Web.Kaelin.Coord.Convert.cubic_to_axial, Web.Kaelin.Coord.Cubic.range(ab, d))
-

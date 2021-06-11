@@ -1,8 +1,0 @@
-type Web.Kaelin.Player {
-  new(
-    addr: String
-    team: String
-    current_hp: I32
-    current_status: List<Web.Kaelin.Skill.Modifier.status>
-  )
-}

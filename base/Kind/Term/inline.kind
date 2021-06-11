@@ -39,8 +39,6 @@ Kind.Term.inline(term: Kind.Term, defs: Kind.Defs): Kind.Term
       Kind.Term.chr(term.chrx),
     str:
       Kind.Term.str(term.strx),
-    cse:
-      term,
     ori:
       Kind.Term.inline(term.expr, defs),
-  }
+  } default term

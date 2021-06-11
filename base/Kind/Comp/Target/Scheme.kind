@@ -1,12 +1,108 @@
-// Shapes
-// ======
+// Core grammar
+// ============
 
-// Describes the shape of each primitive when compiled to Scheme.
-// For example, Kind's λ-encoded Nats are converted to Scheme numbers. This
-// describes how to convert from λ-encodings to native numbers.
-Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
-  case prim {
-    unit: Kind.Comp.Prim.Shape.new(
+Kind.Comp.Target.Scheme.null: String
+  "'()"
+
+Kind.Comp.Target.Scheme.name(name: String): String
+  if String.is_empty(name) then
+    "-"
+  else
+    name
+
+Kind.Comp.Target.Scheme.inst_name(name: String): String
+  name|"-inst"
+
+Kind.Comp.Target.Scheme.elim_name(name: String): String
+  name|"-elim"
+
+Kind.Comp.Target.Scheme.lambda(name: String, body: String): String
+  "(lambda (" | name | ") " | body | ")"
+
+Kind.Comp.Target.Scheme.application(func: String, argm: String): String
+  "(" | func | " " | argm | ")"
+
+Kind.Comp.Target.Scheme.local_definition(name: String, expr: String, body: String): String
+  "(let ((" | name | " " | expr | ")) " | body | ")"
+
+Kind.Comp.Target.Scheme.global_function(name: String, args: List<String>, body: String): String
+  case args {
+    nil: "(define " | name | " " | body | ")\n"
+    cons:
+      "(define ($" | name | " " | String.join(" ", args) | ") " | body | ")\n"
+      |Kind.Comp.Target.Scheme.nest_lambdas(name, args)
+  }
+
+Kind.Comp.Target.Scheme.global_application(name: String, args: List<String>): String
+  "($" | name | " " | String.join(" ", args) | ")"
+
+// TODO better names
+Kind.Comp.Target.Scheme.nest_lambdas(name: String, args: List<String>): String
+  let body = Kind.Comp.Target.Scheme.nest_lambdas.aux(name, args, args)
+  "(define " | name | " " | body | ")\n"
+
+// TODO better names
+Kind.Comp.Target.Scheme.nest_lambdas.aux(fun: String, args: List<String>, rem_args: List<String>): String
+  // first args won't change
+  def this = Kind.Comp.Target.Scheme.nest_lambdas.aux(fun, args)
+  case rem_args {
+    nil:
+      Kind.Comp.Target.Scheme.global_application(fun, args)
+    cons:
+      Kind.Comp.Target.Scheme.lambda(rem_args.head, this(rem_args.tail))
+  }
+
+Kind.Comp.Target.Scheme.string_literal(str: String): String
+  case str {
+    nil:
+      ""
+    cons:
+      (if U16.eql(str.head, '\\') || U16.eql(str.head, '"') then
+        "\\" | Char.to_string(str.head)
+      else if U16.gte(str.head, ' ') && U16.lte(str.head, '~') then
+        Char.to_string(str.head)
+      else
+        "\\x" | U16.show_hex(str.head) | ";"
+      ) | Kind.Comp.Target.Scheme.string_literal(str.tail)
+  }
+
+Kind.Comp.Target.Scheme.module(name: String, exports: List(String), defs: String): String
+  let code = "#!chezscheme\n(library ("|name|") (export"
+  for export in Kind.Comp.Target.Scheme.exports with code:
+    code|" "|export
+  for export in exports with code:
+    code|" "|export
+  let code = code|")\n"
+  let code = code|`(import (chezscheme))\n`
+  let code = code|defs|")"
+  code
+
+Kind.Comp.Target.Scheme.program(main: String, defs: String): String
+  let code = defs|"(run_kind "|main|")"
+  code
+
+Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
+  Kind.Comp.Grammar.new(
+    Kind.Comp.Target.Scheme.null
+    Kind.Comp.Target.Scheme.name
+    Kind.Comp.Target.Scheme.inst_name
+    Kind.Comp.Target.Scheme.elim_name
+    Kind.Comp.Target.Scheme.lambda
+    Kind.Comp.Target.Scheme.application
+    Kind.Comp.Target.Scheme.local_definition
+    Kind.Comp.Target.Scheme.global_function
+    Kind.Comp.Target.Scheme.global_application
+    Kind.Comp.Target.Scheme.string_literal
+    Kind.Comp.Target.Scheme.module
+    Kind.Comp.Target.Scheme.program
+  )
+
+// Native types
+// ============
+
+Kind.Comp.Target.Scheme.natives: Kind.Comp.Natives
+  (prim) case prim {
+    unit: Kind.Comp.Native.new(
       // Inst
       [
         // Unit.new
@@ -17,7 +113,7 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
         // case new
         {"#t", []}
       ]})
-    bool: Kind.Comp.Prim.Shape.new(
+    bool: Kind.Comp.Native.new(
       // Inst
       [
         // Bool.true
@@ -32,7 +128,7 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
         // case false
         {"#f", []}
       ]})
-    nat: Kind.Comp.Prim.Shape.new(
+    nat: Kind.Comp.Native.new(
       // Inst
       [
         // Nat.zero
@@ -50,7 +146,7 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
           "(- $0 1)"
         ]}
       ]})
-    u16: Kind.Comp.Prim.Shape.new(
+    u16: Kind.Comp.Native.new(
       // Inst
       [
         // U16.new
@@ -63,234 +159,468 @@ Kind.Comp.Target.Scheme.shape_of(prim: Kind.Comp.Prim): Kind.Comp.Prim.Shape
           "(u16-to-word $0)" // x.value
         ]}
       ]})
-    string: Kind.Comp.Prim.Shape.new(
+    string: Kind.Comp.Native.new(
       // Inst
       [
         // String.nil
         {0, "\"\""}
         // String.cons
-        {2, "(string-append (make-string 1 (integer->char $0)) $1)"}
+        {2, "(kstring-append (make-string 1 (integer->char $0)) $1)"}
       ]
       // Elim
-      {"(= (string-length $0) 0)", [
+      {"(<= (kstring-length $0) 0)", [
         // case nil
-        {"#f", []}
+        {"#t", []}
         // case cons
-        {"#t", [
+        {"#f", [
           // x.head
-          "(char->integer (string-ref $0 0))",
+          "(char->integer (kstring-head $0))",
           // x.tail
-          "(let ((_str_ $0)) (substring _str_ 1 (string-length _str_)))",
+          "(kstring-tail $0)",
         ]}
       ]})
-    data: Kind.Comp.Prim.Shape.new(
+    data: Kind.Comp.Native.new(
       // Inst
       List.fold!(prim.ctrs)!([], (ctr, result)
         let {ctr_name, ctr_fields} = ctr
         let fields_size = List.length!(ctr_fields)
         let fields_vars = String.join("", List.create!(fields_size, (x) " $"|Nat.show(x)))
-        {fields_size, "(vector '"|ctr_name|fields_vars|")"} & result),
+        {fields_size, "(vector '"|prim.name|"."|ctr_name|fields_vars|")"} & result),
       // Elim
       {"(get $0 0)", List.fold!(prim.ctrs)!([], (ctr, result)
         let {ctr_name, ctr_fields} = ctr
         let fields_size = List.length!(ctr_fields)
-        let fields_gets = List.create!(fields_size, (i) "(get $0 "|Nat.show(i)|")")
-        {"'"|ctr_name, fields_gets} & result)
+        let fields_gets = List.create!(fields_size, (i) "(get $0 "|Nat.show(Nat.succ(i))|")")
+        {"'"|prim.name|"."|ctr_name, fields_gets} & result)
       })
   }
 
-// Instantiators
-// =============
+// Optimized functions
+// ===================
 
-// Compiles an instantiation. Converts a λ-encoded layer to a native value.
-// - inst(`ins{Nat, `λz. λs. (s 5)`}`) == "(+ 5 1)"
-Kind.Comp.Target.Scheme.inst(term: Kind.Comp, depth: Nat): Maybe(String)
-  case term {
-    ins:
-      let shape = Kind.Comp.Target.Scheme.shape_of(term.prim) open shape
-      let {vars,expr} = Kind.Comp.get_vars(term.expr)
-      if List.length!(shape.inst) =? List.length!(vars) then
-        let {expr,args} = Kind.Comp.get_args(expr)
-        case expr { 
-          var: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args)
-          ref: Kind.Comp.Target.Scheme.inst.go(expr.name, shape.inst, vars, args)
-        } default none
-      else
-        none
-  } default none
-
-// Helper function
-Kind.Comp.Target.Scheme.inst.go(
-  name: String
-  inst: List(Pair(Nat,String))
-  vars: List(String)
-  args: List(Kind.Comp)
-): Maybe(String)
-  case inst vars {
-    nil  nil : none
-    nil  cons: none
-    cons nil : none
-    cons cons: 
-      if String.eql(name, vars.head) then
-        let {ctor_arity, ctor_maker} = inst.head
-        if ctor_arity =? List.length!(args) then
-          some(Kind.Comp.replace(ctor_maker, List.mapped!(args)!(Kind.Comp.Target.Scheme.term)))
-        else
-          none
-      else
-        Kind.Comp.Target.Scheme.inst.go(name, inst.tail, vars.tail, args)
+Kind.Comp.Target.Scheme.optimizeds: Kind.Comp.Optimizeds
+  {
+    "Bool.not": {1, "(not $0)"},
+    "Bool.and": {2, "(and $0 $1)"},
+    "Bool.if": {3, "(if $0 $1 $2)"},
+    "Bool.or": {2, "(or $0 $1)"},
+    "Nat.add": {2, "(+ $0 $1)"},
+    "Nat.sub": {2, "(max (- $0 $1) 0)"},
+    "Nat.mul": {2, "(* $0 $1)"},
+    "Nat.div": {2, "(div $0 $1)"},
+    "Nat.mod": {2, "(mod $0 $1)"},
+    "Nat.pow": {2, "(expt $0 $1)"},
+    "Nat.ltn": {2, "(< $0 $1)"},
+    "Nat.lte": {2, "(<= $0 $1)"},
+    "Nat.eql": {2, "(= $0 $1)"},
+    "Nat.gte": {2, "(>= $0 $1)"},
+    "Nat.gtn": {2, "(> $0 $1)"},
+    "Nat.to_u16": {1, "$0"},
+    "Nat.show": {1, "(number->string $0)"},
+    "U16.add": {2, "(mod (+ $0 $1) 65536)"},
+    "U16.sub": {2, "(mod (- $0 $1) 65536)"},
+    "U16.mul": {2, "(mod (* $0 $1) 65536)"},
+    "U16.div": {2, "(div $0 $1)"},
+    "U16.mod": {2, "(mod $0 $1)"},
+    "U16.pow": {2, "(mod (expt $0 $1) 65536)"},
+    "U16.ltn": {2, "(< $0 $1)"},
+    "U16.lte": {2, "(<= $0 $1)"},
+    "U16.eql": {2, "(= $0 $1)"},
+    "U16.gte": {2, "(>= $0 $1)"},
+    "U16.gtn": {2, "(> $0 $1)"},
+    "U16.inc": {2, "(+ $0 1)"},
+    "U16.to_nat": {1, "$0"},
+    // TODO test if this is faster than non-optimized comparison
+    "String.eql": {2, "(string=? (kstring->string $0) (kstring->string $1))"},
+    "String.concat": {2, "(kstring-append $0 $1)"},
   }
 
+// Basic dependencies
+// ==================
 
-// Creates an instantiator function. This is like inst, but instead of being
-// applied to an inline argument, it generates a whole function.
-// - instantiator(`Nat`) == "(lambda (t) (t 0 (lambda (pred) (+ pred 1))))"
-Kind.Comp.Target.Scheme.instantiator(prim: Kind.Comp.Prim): String
-  let shape = Kind.Comp.Target.Scheme.shape_of(prim) open shape
-  let text = "x"
-  for ctor in shape.inst with text:
-    let {ctor_arity, ctor_maker} = ctor
-    let inst = ""
-    for j from 0 to ctor_arity with inst:
-      inst|"(lambda (x"|Nat.show(j)|") "
-    let vars = List.create!(ctor_arity, (j) "x" | Nat.show(j))
-    let inst = inst | Kind.Comp.replace(ctor_maker, vars)
-    for j from 0 to ctor_arity with inst:
-      inst | ")"
-    "(" | text | " " | inst | ")"
-  "(lambda (x) " | text | ")"
+//Kind.Comp.Target.Scheme.utils_lib: String
+//`#!chezscheme
+//(library (utils) (export suffix? prefix? run-all run_io print-lines run_kind)
+//  (import (chezscheme)
+//          (kstring))
+//` | Kind.Comp.Target.Scheme.utils | ")"
+//
+//Kind.Comp.Target.Scheme.kstring_lib: String
+//`(library (kstring)
+//  (export make-string-view string-view? string-view-end
+//          string-view-start kstring-length kstring-head
+//          kstring-tail string-view-ref kstring?
+//          kstring->string kstring-append kstring-getter
+//          kstring_join)
+//  (import (chezscheme))
+//` | Kind.Comp.Target.Scheme.kstring | ")" 
 
-// Eliminators
-// ===========
+Kind.Comp.Target.Scheme.exports: Kind.Comp.Exports
+  ["suffix?"
+  "prefix?"
+  "run-all"
+  "run_io"
+  "print-lines"
+  "run_kind"
+  "make-string-view"
+  "string-view?"
+  "string-view-end"
+  "string-view-start"
+  "kstring-length"
+  "kstring-head"
+  "kstring-tail"
+  "string-view-ref"
+  "kstring?"
+  "kstring->string"
+  "kstring-append"
+  "kstring-getter"
+  "kstring_join"]
 
-// Compiles a complete elimination, extracting a λ-layer from a native value.
-// Compiles an instantiation. Converts a λ-encoded layer to a native value.
-// Inlines appications when possible.
-// - elim(`eli{Nat,5}`) == "(if (= 5 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s 4))))`
-// - elim(`((eli{Nat,5} Z) S)` == "(if (= 5 0) Z (S 4))"
-Kind.Comp.Target.Scheme.elim(term: Kind.Comp, depth: Nat): Maybe(String)
-  let {term,args} = Kind.Comp.get_args(term)
-  case term {
-    eli:
-      let shape = Kind.Comp.Target.Scheme.shape_of(term.prim) open shape
-      let {ctag,cses} = shape.elim
-      let args_len = List.length!(args)
-      let cses_len = List.length!(cses)
-      let lams_len = cses_len - args_len
-      let args = for i from 0 to lams_len: args ++ [Kind.Comp.var("c"|Nat.show(i))]
-      let self = "self" | Nat.show(depth)
-      let text = ""
-      let text = text | "(let (("|self|" "|Kind.Comp.Target.Scheme.term(term.expr)|")) "
-      let text = text | "(case " | Kind.Comp.replace(ctag,[self])
-      let text = for j from 0 to cses_len:
-        let {name,flds} = cses[j] <> {"",[]}
-        let flds_len = List.length!(flds)
-        let text = text | " (" | name | " "
-        let text = text | "(let ("
-        let text = for k from 0 to flds_len:
-          let key = "f"|Nat.show(Nat.add(depth,k))
-          let val = Kind.Comp.replace(flds[k] <> "", [self])
-          text | "("|key|" "|val|")"
-        let keys = List.create!(flds_len, (k) Kind.Comp.var("f"|Nat.show(Nat.add(depth,k))))
-        let argj = Kind.Comp.apply(args[j] <> Kind.Comp.ref("?"), keys)
-        let body = ""
-        let body = for i from 0 to lams_len: body|"(lambda (c"|Nat.show(i)|") "
-        let body = body | Kind.Comp.Target.Scheme.term.go(argj, Nat.add(Nat.add(depth,flds_len),lams_len))
-        let body = for i from 0 to lams_len: body|")"
-        text | ") " | body | "))"
-      let text = text | "))"
-      some(text)
-  } default none
+Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
+`; string-view record type (fast way to get a tail)
+(define-record string-view
+  ((immutable data)  ; underlying string
+   (immutable start) ; start position (inclusive)
+   (immutable end))) ; end position (exclusive)
 
-// Creates an elimination function. This is like "elim", but instead of being
-// applied to an inline argument, it generates a whole function.
-// - eliminator(Nat) == "(lambda (n) (if (= n 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s (- n 1))))))"
-Kind.Comp.Target.Scheme.eliminator(prim: Kind.Comp.Prim): String
-  let term = Kind.Comp.eli(prim,Kind.Comp.var("x"))
-  let text = Kind.Comp.Target.Scheme.elim(term, 0) <> ""
-  let term = Kind.Comp.lam("x", Kind.Comp.txt(text))
-  Kind.Comp.Target.Scheme.term(term)
-      
-// Compilers
-// =========
+(define string-view-ref
+  (lambda (x y)
+    (string-ref (string-view-data x) (+ (string-view-start x) y))))
 
-// Converts a Comp term to a Scheme expression.
-Kind.Comp.Target.Scheme.term(comp: Kind.Comp): String
-  Kind.Comp.Target.Scheme.term.go(comp, 0)
+(define kstring-tail
+  (lambda (x)
+    (if (string-view? x)
+      (make-string-view
+        (string-view-data x)
+        (+ (string-view-start x) 1)
+        (string-view-end x))
+      (make-string-view
+        x
+        1
+        (string-length x)))))
 
-Kind.Comp.Target.Scheme.term.go(comp: Kind.Comp, depth: Nat): String
-  let go = Kind.Comp.Target.Scheme.term.go
-  Maybe.first_of!([
-    Kind.Comp.Target.Scheme.inst(comp,depth)
-    Kind.Comp.Target.Scheme.elim(comp,depth)
-    some(case comp {
-      nil:
-        "'()"
-      var: // TODO: generate safe Scheme name
-        comp.name
-      ref: // TODO: generate safe Scheme name
-        "(" | comp.name | ")"
-      lam:
-        "(lambda (" | comp.name | ") " | go(comp.body,Nat.succ(depth)) | ")"
-      app:
-        "(" | go(comp.func,depth) | " " | go(comp.argm,depth) | ")"
-      let:
-        "(let ((" | comp.name | " " | go(comp.expr,depth) | ")) " | go(comp.body,Nat.succ(depth)) | ")"
-      eli: case comp.prim {
-        unit: "(Unit-elim " | go(comp.expr,depth) | ")"
-        bool: "(Bool-elim " | go(comp.expr,depth) | ")"
-        nat: "(Nat-elim " | go(comp.expr,depth) | ")"
-        u16: "(U16-inst " | go(comp.expr,depth) | ")"
-        string: "(String-elim " | go(comp.expr,depth) | ")"
-        data: go(comp.expr,depth)
-      }
-      ins: case comp.prim {
-        unit: "(Unit-inst " | go(comp.expr,depth) | ")"
-        bool: "(Bool-inst " | go(comp.expr,depth) | ")"
-        nat: "(Nat-inst " | go(comp.expr,depth) | ")"
-        u16: "(U16-inst " | go(comp.expr,depth) | ")"
-        string: "(String-inst " | go(comp.expr,depth) | ")"
-        data: go(comp.expr,depth)
-      }
-      nat:
-        Nat.show(comp.natx)
-      chr:
-        "#\\x" | Nat.to_string_base(16, U16.to_nat(comp.chrx))
-      str:
-        "\"" | comp.strx | "\""
-      txt:
-        comp.text
-    })
-  ]) <> ""
+(define kstring-head
+  (lambda (x)
+    (if (string-view? x)
+      (string-ref (string-view-data x) (string-view-start x))
+      (string-ref x 0))))
 
+(define kstring-length
+  (lambda (x)
+    (if (string-view? x)
+      (- (string-view-end x) (string-view-start x))
+      (string-length x))))
 
-// Converts Comp definitions to a Scheme program.
-Kind.Comp.Target.Scheme(defs: Kind.Comp.Defs): String
-  let defs = Kind.Map.to_list!(defs)
-  // Basic dependencies
-  let code = String.join("\n", [
-    "(define-syntax def (syntax-rules () (($ name body) (define name (memo 'body)))))",
-    "(define-syntax λ (syntax-rules () ((λ var bod) (lambda (var) bod))))",
-    "(define (memo val) ((lambda (R) (lambda () (if (eq? R '_) (begin (set! R (eval val)) R) R))) '_))",
-    "(define (print x) (begin (display x) (display \"\\n\")))",
-    "(define get vector-ref)",
-    "(define (word-to-u16 w) (word-to-u16-go 0 w 0))",
-    "(define (word-to-u16 w) (word-to-u16-go 0 w 0))",
-    "(define (word-to-u16-go i w x) (cond ((= 16 i) x) ((eq? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x)) ((eq? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x)) ((eq? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))",
-    "(define (u16-to-word x) (u16-to-word-go 0 x (vector 'Word.e)))",
-    "(define (u16-to-word-go i x w) (if (= 16 i) w (u16-to-word-go (+ i 1) x (if (= (fxand (fxarithmetic-shift-right x (- 15 i)) 1) 0) (vector 'Word.o w) (vector 'Word.i w)))))(define (Bool-inst x) (lambda (x) ((x #t) #f)))",
-  ])
-  // Instantiatior and Eliminator functions
-  for nati in Kind.Comp.Prim.natives with code:
-    let {name,prim} = nati
-    let code = code|"(define "|name|"-inst "|Kind.Comp.Target.Scheme.instantiator(prim)|")\n"
-    let code = code|"(define "|name|"-elim "|Kind.Comp.Target.Scheme.eliminator(prim)|")\n"
-    code
-  // Top-level definitions
-  for defn in defs with code:
-    let {name, comp} = defn
-    code
-    | "(define (" | name | ") "
-      | Kind.Comp.Target.Scheme.term(comp)
-      | ")\n"
-  code
+(define kstring?
+  (lambda (x)
+    (or (string-view? x) (string? x))))
+
+(define kstring->string
+  (lambda (x)
+    (if (string-view? x)
+      (substring (string-view-data x) (string-view-start x) (string-view-end x))
+      x)))
+
+; TODO depending on x, we could safely append data at the end
+(define kstring-append
+  (lambda (x y)
+    (string-append (kstring->string x) (kstring->string y))))
+
+(define kstring-getter
+  (lambda (x)
+    (if (string-view? x)
+      string-view-ref
+      string-ref)))
+
+; Joins a list of strings with an intercalated separator
+(define (kstring_join sep strs fst)
+  (if (null? strs) 
+    ""
+    (kstring-append
+      (if fst "" sep)
+      (car strs)
+      (kstring_join sep (cdr strs) #f))))
+
+; Short alias to vector-ref
+(define get vector-ref)
+
+; Converts a Kind word to a native integer
+(define (word-to-u16 w)
+  (define (word-to-u16-go i w x)
+    (cond ((= 16 i) x)
+      ((symbol=? 'Word.e (get w 0)) (word-to-u16-go (+ i 1) (vector 'Word.e) x))
+      ((symbol=? 'Word.o (get w 0)) (word-to-u16-go (+ i 1) (get w 1) x))
+      ((symbol=? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
+  (word-to-u16-go 0 w 0))
+
+; Converts a native integer to a Kind word
+(define (u16-to-word x)
+  (define (u16-to-word-go i x w)
+    (if (= 16 i) w (u16-to-word-go (+ i 1) x
+      (if (= (fxand (fxarithmetic-shift-right x (- 15 i)) 1) 0)
+        (vector 'Word.o w)
+        (vector 'Word.i w)))))
+  (u16-to-word-go 0 x (vector 'Word.e)))
+
+(define suffix?
+  (lambda (str suff)
+    (let ((suff_length (string-length suff))
+          (str_length (string-length str)))
+      (if (<= suff_length str_length)
+        (string=?
+          (substring str (- str_length suff_length) str_length)
+          suff)
+        #f))))
+
+(define prefix?
+  (lambda (str pref)
+    (let ((pref_length (string-length pref))
+          (str_length (string-length str)))
+      (if (<= pref_length str_length)
+        (string=?
+          (substring str 0 pref_length)
+          pref)
+        #f))))
+
+; Returns the last index that chr occurs in str, -1 otherwise
+(define (last_index_of chr kstr idx)
+  (let ((str (kstring->string kstr)))
+    (if (= idx (kstring-length str))
+      -1
+      (let ((rest (last_index_of chr str (+ idx 1))))
+        (if (char=? (string-ref str idx) chr)
+          (max idx rest)
+          rest)))))
+
+; Returns the first index that chr occurs in str, -1 otherwise
+(define (first_index_of chr kstr idx)
+  (let ((str (kstring->string kstr)))
+    (if (= idx (string-length str))
+      -1
+      (if (char=? (string-ref str idx) chr)
+        idx
+        (first_index_of chr str (+ idx 1))))))
+
+; Splits a string using an identifier
+(define (split_at_first chr kstr)
+  (let ((str (kstring->string kstr)))
+    (let ((split_idx (first_index_of chr str 0)))
+      (if (= split_idx -1)
+        str
+        (cons
+          (substring str 0 split_idx)
+          (substring str (+ split_idx 1) (string-length str)))))))
+
+; Splits a string using an identifier
+(define (split_at_last chr kstr)
+  (let ((str (kstring->string kstr)))
+    (let ((split_idx (last_index_of chr str 0)))
+      (if (= split_idx -1)
+        str
+        (cons
+          (substring str 0 split_idx)
+          (substring str (+ split_idx 1) (string-length str)))))))
+
+; Converts a date to a string, in milliseconds
+(define (time_to_string time)
+  (number->string
+    (+ (* (time-second time) 1000)
+      (div (time-nanosecond time) 1000000))))
+
+; Prints a text with a newline
+(define (print txt)
+  (display (kstring->string txt))
+  (display "
+"))
+
+; Gets a line from stdin
+(define (get_line)
+  (let ((port (current-input-port)))
+    (get-line port)))
+
+; Deletes a file
+(define (del_file file)
+  (delete-file (kstring->string file)))
+
+; Gets the contents of a file as a string
+; If it doesn't exist, returns empty
+(define (get_file ifile)
+  (let ((file (kstring->string ifile)))
+    (if (file-exists? file)
+      (let ((port (open-input-file file)))
+        (let ((text (get-string-all port)))
+          (begin
+            (close-input-port port)
+            text)))
+      "")))
+
+; Sets the contents of a file
+(define (set_file file text)
+  (system (string-append "mkdir -p " (car (split_at_last #\/ file))))
+  (if (file-exists? file) (delete-file file))
+  (let ((port (open-output-file file)))
+    (begin
+      (display text port)
+      (close-output-port port))))
+
+; Returns a list of files in a directory
+(define (get_dir path)
+  (directory-list path)) 
+
+; Returns the time a file was modified. TODO: test on Windows/Linux
+(define (get_file_mtime file)
+  (time_to_string (file-modification-time (kstring->string file))))
+
+; Returns the current time
+(define (get_time)
+  (time_to_string (current-time)))
+
+; Performs a single Kind IO action
+(define (io_action iname)
+  (let ((name (kstring->string iname)))
+  (case name
+    ("print" (lambda (x) (print x)))
+    ("put_string" (lambda (x) (display x)))
+    ("get_line" (lambda (x) (get_line)))
+    ("del_file" (lambda (x) (del_file x)))
+    ("get_file" (lambda (x) (get_file x)))
+    ("set_file" (lambda (x) (let ((file_text (split_at_first #\= (kstring->string x)))) (set_file (car file_text) (cdr file_text)))))
+    ("get_dir" (lambda (x) (get_dir x)))
+    ("get_file_mtime" (lambda (x) (get_file_mtime x)))
+    ("get_time" (lambda (x) (get_time)))
+    ("request" (lambda (x) ""))
+    (else (display (string-append "IO action not found: " name))))))
+
+; Runs a Kind IO program
+(define (run_io io)
+  (case (vector-ref io 0)
+    ('IO.end (vector-ref io 1))
+    ('IO.ask (let (
+      (io_query (vector-ref io 1))
+      (io_param (vector-ref io 2))
+      (io_then (vector-ref io 3)))
+      (run_io (io_then ((io_action io_query) io_param)))))))
+
+(define (run_kind term)
+  (if
+    (and
+      (vector? term)
+      (or
+        (eq? (vector-ref term 0) 'IO.ask)
+        (eq? (vector-ref term 0) 'IO.end)))
+    (run_io term)
+    (print term)))
+
+(define (print-lines args)
+  (unless (null? args)
+    (display (car args))
+    (newline)
+    (print-lines (cdr args))))
+
+(define run-all
+    (lambda (p)
+      (let ((code (get-datum p)))
+        (unless (eq? code #!eof)
+          (compile code)
+          (run-all p)))))
+`
+
+// TODO translate this to kind somehow
+Kind.Comp.Target.Scheme.cli: String
+`#!/usr/bin/env scheme-script
+(import (kind)
+        (chezscheme))
+(let ([args (cdr (command-line))])
+  (if (null? args)
+    (print-lines
+    '("# Kind - Scheme Release"
+      ""
+      "Usage:"
+      ""
+      "  kind-scm Module/               # type-checks a module (TODO)"
+      "  kind-scm Module/file.kind      # type-checks a file"
+      "  kind-scm full_term_name --run  # runs a term"
+      "  kind-scm full_term_name --show # prints a term"
+      "  kind-scm full_term_name --norm # prints a term's λ-normal form"
+      "  kind-scm full_term_name --scm  # compiles a term to Scheme"
+      "  kind-scm full_term_name --js   # compiles a term to JavaScript"
+      "  kind-scm full_term_name --fmc  # compiles a term to FormCore"
+      ""
+      "Examples:"
+      ""
+      "  # Run the 'Main' term (outputs 'Hello, world'):"
+      "  kind-scm Main --run"
+      ""
+      "  # Type-check all files inside the 'Nat' module:"
+      "  kind-scm Nat/"
+      ""
+      "  # Type-check the 'Nat/add.kind' file:"
+      "  kind-scm Nat/add.kind"
+      ""
+      "  # Type-check the 'Nat.add' term:"
+      "  kind-scm Nat.add"
+      ""
+      "  # Compile the 'Nat.add' term to JavaScript:"
+      "  kind-scm Nat.add --js"
+      ""
+      "  # Print the λ-encoding of Nat:"
+      "  kind-scm Nat --show"
+      ""
+      "  # Print the λ-normal form of 2 + 2:"
+      "  kind-scm Example.two_plus_two --norm"))
+    (let ((fst_arg (car args))
+          (tail_args (cdr args)))
+      (if (null? tail_args)
+        (if (suffix? fst_arg ".kind")
+          (run_io (Kind.api.io.check_file fst_arg))
+          (run_io (Kind.api.io.check_term fst_arg)))
+        (let ((snd_arg (car tail_args)))
+          (case snd_arg
+            ("--scm"
+             (display (run_io (Kind.api.io.term_to_scheme fst_arg))))
+            ("--run"
+             (let ((code (open-string-input-port (run_io (Kind.api.io.term_to_scheme fst_arg)))))
+               (run-all code)))
+            ("--show"
+              (display (run_io (Kind.api.io.show_term fst_arg))))
+            ("--norm"
+              (display (run_io (Kind.api.io.show_term_normal fst_arg))))
+            ("--js"
+              (let ((ports (process (string-append "fmc " (string-append "--js " fst_arg)))))
+                (let ((input_port (car ports))
+                      (output_port (car (cdr ports))))
+                  (display
+                    (run_io (Kind.api.io.term_to_core fst_arg))
+                    output_port)
+                  (flush-output-port)
+                  (close-output-port output_port)
+                  (display (get-string-all input_port)))))
+            ;("--hs")
+            ("--fmc"
+              (display (run_io (Kind.api.io.term_to_core fst_arg))))
+            (else
+              (display "unrecognized cli argument: ")
+              (display snd_arg))))))))`
+
+// a little script to produce the scheme sources for kind-scm
+// should be run in kind/base
+Kind.Comp.Target.Scheme.bootstrap: IO(Unit)
+  IO {
+    let target_dir = "./../bin/scm/src/"
+    get schemed = Kind.api.io.terms_to_scheme_lib("kind", Kind.api.exports)
+
+    get u = IO.set_file(target_dir|"kind.sls", schemed)
+    get u = IO.set_file(target_dir|"main.scm", Kind.Comp.Target.Scheme.cli)
+    return u
+  }
+
+// Language
+// ========
+
+Kind.Comp.Target.Scheme.Language: Kind.Comp.Language
+  Kind.Comp.Language.new(
+    Kind.Comp.Target.Scheme.grammar
+    Kind.Comp.Target.Scheme.natives
+    Kind.Comp.Target.Scheme.optimizeds
+    Kind.Comp.Target.Scheme.basics
+  )

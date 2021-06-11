@@ -1,0 +1,5 @@
+NatSet.has(nat: Nat, set: NatSet): Bool
+  case NatMap.get!(nat, set) {
+    none: false
+    some: true
+  }

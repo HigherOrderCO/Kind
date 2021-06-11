@@ -1,0 +1,2 @@
+App.TicTacToe.ia.play(st : App.TicTacToe.State.local) : Maybe<Pair<U32, U32>>
+  Maybe.or!(App.TicTacToe.ia.prevent_winner(st), App.TicTacToe.ia.heuristic(st))

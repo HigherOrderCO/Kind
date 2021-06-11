@@ -1,9 +1,0 @@
-// will the attributes of the heroes be placed here?
-type Web.Kaelin.Hero {
-  new(
-    id: U8
-    img: VoxBox
-    health: I32
-    skills: List<Web.Kaelin.Skill>
-  )
-}

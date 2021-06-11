@@ -1,4 +1,0 @@
-Web.Kaelin.Map.player.to_coord(addr: String, map: Web.Kaelin.Map): Maybe(Web.Kaelin.Coord)
-  // let addr = String.to_lower(addr)
-  let list = Web.Kaelin.Map.find_players(map)
-  Map.get!(addr, list)

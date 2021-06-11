@@ -1,0 +1,5 @@
+List.foldl<A: Type, P: Type>(nil: P, cons: A -> P -> P, list: List<A>): P
+  case list {
+    nil : nil
+    cons: List.foldl<A,P>(cons(list.head, nil), cons, list.tail)
+  }

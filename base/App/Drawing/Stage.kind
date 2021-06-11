@@ -1,0 +1,5 @@
+type App.Drawing.Stage {
+  start
+  menu
+  boards(phase: App.Drawing.Phase, arts: List<Map<App.Drawing.Board>>)
+}

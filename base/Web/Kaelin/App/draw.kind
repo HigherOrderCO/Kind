@@ -1,6 +1,0 @@
-Web.Kaelin.App.draw(img: VoxBox): Web.Kaelin.State -> DOM
-(state)
-  case state {
-    // FIXME: background is displayed in front of entity
-    game: DOM.vbox({}, {}, Web.Kaelin.Draw.state(img, state))
-  } default DOM.text("TODO: create the renderer for this game state mode")
