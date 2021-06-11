@@ -5,4 +5,6 @@ Kind.Term.get_vars(term: Kind.Term, depth: Nat): Pair(List(String), Kind.Term)
     lam:
       let {vars, body} = Kind.Term.get_vars(term.body(Kind.Term.var(term.name,depth)), Nat.succ(depth))
       {term.name & vars, body}
+    ori:
+      Kind.Term.get_vars(term.expr, depth)
   } default {[], term}
