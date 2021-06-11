@@ -13,6 +13,6 @@ GMap.show_tree.go<K: Type, V: Type>(
                     | val_show(tree.val) 
                     | "\n"
       result 
-        | GMap.show_tree.go!!(tree.left, key_show, val_show, nivel+1) 
-        | GMap.show_tree.go!!(tree.right, key_show, val_show, nivel+1)
+        | GMap.show_tree.go!!(tree.left, key_show, val_show, nivel + 1) 
+        | GMap.show_tree.go!!(tree.right, key_show, val_show, nivel + 1)
   }!

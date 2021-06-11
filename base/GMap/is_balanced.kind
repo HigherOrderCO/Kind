@@ -4,14 +4,14 @@ GMap.is_balanced<K: Type, V: Type>(map: GMap<K,V>): Bool
     bin:  
       let size_l = GMap.size!!(map.left)
       let size_r = GMap.size!!(map.right)
-      let max_size_l = Nat.mul(GMap.w, size_r)
-      let max_size_r = Nat.mul(GMap.w, size_l)
-      let size_l_plus_r = Nat.add(size_l, size_r)
+      let max_size_l = U32.mul(GMap.w, size_r)
+      let max_size_r = U32.mul(GMap.w, size_l)
+      let size_l_plus_r = U32.add(size_l, size_r)
       let sizes_dont_exceed = List.and([
-          Nat.lte(size_l, max_size_r),
-          Nat.lte(size_r, max_size_l)
+          U32.lte(size_l, max_size_r),
+          U32.lte(size_r, max_size_l)
       ])
-      let subtrees_sizes_ok = Bool.or(sizes_dont_exceed, Nat.lte(size_l_plus_r, 1))
+      let subtrees_sizes_ok = Bool.or(sizes_dont_exceed, U32.lte(size_l_plus_r, 1#32))
       let left_is_balanced  = GMap.is_balanced!!(map.left)
       let right_is_balanced = GMap.is_balanced!!(map.right)
   

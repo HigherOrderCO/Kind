@@ -1,5 +1,5 @@
-GMap.size<K: Type, V: Type>(map: GMap<K,V>): Nat 
+GMap.size<K: Type, V: Type>(map: GMap<K,V>): U32 
   case map {
-    tip: 0,
+    tip: 0#32,
     bin: map.size
   }

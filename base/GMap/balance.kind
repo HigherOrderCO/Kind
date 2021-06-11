@@ -1,75 +1,74 @@
 GMap.balance<K: Type, V: Type>(k: K, v: V, l: GMap<K,V>, r: GMap<K,V>): GMap<K,V>
-  let size_l             = GMap.size<K,V>(l)
-  let size_r             = GMap.size<K,V>(r)
-  let size_l_plus_size_r = Nat.add(size_l, size_r)
-  let w_x_size_l         = Nat.mul(GMap.w, size_l)
-  let w_x_size_r         = Nat.mul(GMap.w, size_r)
-
+  let size_l             = GMap.size!!(l)
+  let size_r             = GMap.size!!(r)
+  let size_l_plus_size_r = U32.add(size_l, size_r)
+  let w_x_size_l         = U32.mul(GMap.w, size_l)
+  let w_x_size_r         = U32.mul(GMap.w, size_r)
   // size_l_plus_size_r < 2 means that one subtree is empty and the
   // other contains only one element, hence the tree cannot be balanced 
-  if Nat.ltn(size_l_plus_size_r, 2) then 
-    GMap.node<K,V>(k, v, l, r)
+  if U32.ltn(size_l_plus_size_r, 2#32) then 
+    GMap.node!!(k, v, l, r)
   // size_r > w * size_l means the right subtree is too heavy
-  else if Nat.gtn(size_r, w_x_size_l) then
+  else if U32.gtn(size_r, w_x_size_l) then
     case r {
     // this is an impossible case because we already know that
     // the right subtree is too heavy
     // question: how to deal with it?
-     tip: GMap.node<K,V>(k, v, l, r),
+     tip: GMap.node!!(k, v, l, r),
      bin:  
       let size_rl = GMap.size<K,V>(r.left)
       let size_rr = GMap.size<K,V>(r.right)
       // size_rl < size_rr means we should perform a single left rotation
-      if Nat.ltn(size_rl, size_rr) then 
+      if U32.ltn(size_rl, size_rr) then 
         let new_key   = r.key 
         let new_val   = r.val 
-        let new_left  = GMap.node<K,V>(k, v, l, r.left)
+        let new_left  = GMap.node!!(k, v, l, r.left)
         let new_right = r.right 
-        GMap.node<K,V>(new_key, new_val, new_left, new_right)
+        GMap.node!!(new_key, new_val, new_left, new_right)
       // size_rl > size_rr means we should perform a double left rotation
       else 
        // we need to branch on the left subtree of r in order to extract its components 
        case r.left {
-        tip: GMap.node<K,V>(k, v, l, r), // impossible case
+        tip: GMap.node!!(k, v, l, r), // impossible case
         bin:  
          let new_key   = r.left.key
          let new_val   = r.left.val 
-         let new_left  = GMap.node<K,V>(k, v, l, r.left.left) 
-         let new_right = GMap.node<K,V>(r.key, r.val, r.left.right, r.right)
-         GMap.node<K,V>(new_key, new_val, new_left, new_right)
+         let new_left  = GMap.node!!(k, v, l, r.left.left) 
+         let new_right = GMap.node!!(r.key, r.val, r.left.right, r.right)
+         GMap.node!!(new_key, new_val, new_left, new_right)
        }
     }
 
   // size_l > w * size_r means the left subtree is too heavy  
-  else if Nat.gtn(size_l, w_x_size_r) then 
+  else if U32.gtn(size_l, w_x_size_r) then 
     case l {
     // this is an impossible case because we already know that
     // the left subtree is too heavy
     // question: how to deal with it?
-     tip: GMap.node<K,V>(k, v, l, r),
+     tip: GMap.node!!(k, v, l, r),
      bin:  
       let size_ll = GMap.size<K,V>(l.left)
       let size_lr = GMap.size<K,V>(l.right)
       // size_lr < size_lln means we should perform a single right rotation
-      if Nat.ltn(size_lr, size_ll) then 
+      if U32.ltn(size_lr, size_ll) then 
         let new_key   = l.key 
         let new_val   = l.val 
         let new_left  = l.left
-        let new_right = GMap.node<K,V>(k, v, l.right, r)
-        GMap.node<K,V>(new_key, new_val, new_left, new_right)
+        let new_right = GMap.node!!(k, v, l.right, r)
+        GMap.node!!(new_key, new_val, new_left, new_right)
       // size_lr > size_ll means we should perform a double right rotation
       else 
         // we need to branch on the right subtree of l in order to 
         // extract its components and move them to the right
         case l.right {
-         tip: GMap.node<K,V>(k, v, l, r), // impossible case 
+         tip: GMap.node!!(k, v, l, r), // impossible case 
          bin:  
           let new_key   = l.right.key
           let new_val   = l.right.val 
-          let new_left  = GMap.node<K,V>(l.key, l.val, l.left, l.right.left)
-          let new_right = GMap.node<K,V>(k, v, l.right.right, r)
-          GMap.node<K,V>(new_key, new_val, new_left, new_right)
+          let new_left  = GMap.node!!(l.key, l.val, l.left, l.right.left)
+          let new_right = GMap.node!!(k, v, l.right.right, r)
+          GMap.node!!(new_key, new_val, new_left, new_right)
         }
     }
   else // neither subtrees are too heavy, no balancing is needed 
-    GMap.node<K,V>(k, v, l, r)
+    GMap.node!!(k, v, l, r)

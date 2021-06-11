@@ -19,8 +19,8 @@ GMap.concat3<K: Type, V: Type>(
       // "facing" the smaller tree that is small enough to balance 
       // with the smaller tree
       bin:  
-      let right_is_heavier = Nat.ltn(Nat.mul(GMap.w, left.size), right.size)
-      let left_is_heavier  = Nat.ltn(Nat.mul(GMap.w, right.size), left.size)
+      let right_is_heavier = U32.ltn(U32.mul(GMap.w, left.size), right.size)
+      let left_is_heavier  = U32.ltn(U32.mul(GMap.w, right.size), left.size)
 
       if right_is_heavier then 
         let new_key   = right.key 
