@@ -1,24 +1,18 @@
-type Foo {
-  aaa(x: Nat, xs: List<List<Nat>>)
-  bbb(foos: List<Foo>)
-} deriving (show)
+Test: _
+  let a = TestGmap
+  "done"
 
-Test: String
-  Foo.show(Foo.bbb([
-    Foo.aaa(5050, [[12, 34, 56], [78, 91, 23]])
-    Foo.aaa(1234, [[1, 3, 5], [7, 9, 2]])
-  ]))
+TestGmap: GMap<U32, U32>
+  let map = GMap.tip!!
+  
+  for i:U32 from 0u to 1000000u with map:
+    GMap.insert!!(U32.cmp, i, i, map)
+  map
 
-//Test: _
-  //let adt = Parser.run!(Kind.Parser.ADT.adt, `
-    //type Foo {
-      //aaa(a: A, x: Nat, xs: List<List<Nat>>)
-      //bbb
-    //} deriving (show)
-  //`) <> Kind.Parser.ADT.Datatype.new("Void", [], [], [], [])
-  //let typ = Kind.Term.show(Kind.Parser.ADT.Datatype.build_term(adt))
-  //IO {
-    //IO.print(Kind.Term.show(Kind.Parser.ADT.Datatype.derive_show.term(adt) <> Kind.Term.ref("?")))
-    //IO.print(Kind.Term.show(Kind.Parser.ADT.Datatype.derive_show.type(adt) <> Kind.Term.ref("?")))
-  //}
+TestBits: _
+  let map = BitsMap.new!
 
+  for i:U32 from 0u to 1000000u with map:
+    let key = U32.to_bits(i)
+    BitsMap.set!(key, i, map)
+  map

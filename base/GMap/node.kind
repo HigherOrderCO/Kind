@@ -1,5 +1,5 @@
 GMap.node<K: Type, V: Type>(key: K, val: V, left: GMap<K,V>, right: GMap<K,V>): GMap<K,V>
-  let size_left  = GMap.size<K,V>(left)
-  let size_right = GMap.size<K,V>(right)
-  let new_size   = List.sum([1, size_left, size_right])
-  GMap.bin<K,V>(new_size, key, val, left, right)
+  let size_left  = GMap.size!!(left)
+  let size_right = GMap.size!!(right)
+  let new_size   = U32.add(1u, U32.add(size_left, size_right))
+  GMap.bin!!(new_size, key, val, left, right)

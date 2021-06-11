@@ -1,4 +1,4 @@
 type GMap <K: Type, V: Type> {
   tip,
-  bin(size: Nat, key: K, val: V, left: GMap<K,V>, right: GMap<K,V>)
+  bin(size: U32, key: K, val: V, left: GMap<K,V>, right: GMap<K,V>)
 }
