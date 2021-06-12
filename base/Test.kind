@@ -1,18 +1,6 @@
 Test: _
-  let a = TestGmap
-  "done"
-
-TestGmap: GMap<U32, U32>
-  let map = GMap.tip!!
-  
-  for i:U32 from 0u to 1000000u with map:
-    GMap.insert!!(U32.cmp, i, i, map)
-  map
-
-TestBits: _
-  let map = BitsMap.new!
-
-  for i:U32 from 0u to 1000000u with map:
-    let key = U32.to_bits(i)
-    BitsMap.set!(key, i, map)
-  map
+  let buf = Buffer32.from("maisa")
+  log("buf: " | Buffer32.show(buf))
+  let kec = Crypto.Keccak(buf)
+  log("kec: " | Buffer32.show(kec))
+  1
