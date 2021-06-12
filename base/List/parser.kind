@@ -1,0 +1,17 @@
+List.parser<A: Type>(elem: Parser<A>): Parser<List<A>>
+  Parser.wrap!(
+    Parser {
+      Parser.spaces
+      Parser.text("[")
+    },
+    Parser {
+      Parser.spaces
+      Parser.maybe!(Parser.text(","))
+      Parser.spaces
+      elem
+    },
+    Parser {
+      Parser.spaces
+      Parser.text("]")
+    }
+  )

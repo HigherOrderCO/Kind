@@ -1,0 +1,2 @@
+Nat.parser: Parser<Nat>
+  Parser.nat

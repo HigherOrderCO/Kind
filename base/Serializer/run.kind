@@ -1,0 +1,2 @@
+Serializer.run<A: Type>(serializer: Serializer<A>, x: A): Bits
+  serializer(x, Bits.e)

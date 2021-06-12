@@ -1,0 +1,2 @@
+List.read<A: Type>(elem: Parser<A>, str: String): List<A>
+  Parser.run!(List.parser<A>(elem), str) <> []

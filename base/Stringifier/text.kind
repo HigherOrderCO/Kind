@@ -1,0 +1,2 @@
+Stringifier.text(txt: String): String -> String
+  String.concat(txt)

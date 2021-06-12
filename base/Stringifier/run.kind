@@ -1,0 +1,2 @@
+Stringifier.run<A: Type>(stringifier: Stringifier<A>, x: A): String
+  stringifier(x, "")

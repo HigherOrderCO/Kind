@@ -1,0 +1,4 @@
+I64.stringifier: Stringifier<I64>
+  (x, bs) 
+  open x
+  Word.stringifier<64>(x.value, bs)

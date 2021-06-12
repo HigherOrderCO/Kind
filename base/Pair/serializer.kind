@@ -1,0 +1,4 @@
+Pair.serializer<A: Type, B: Type>(a: Serializer<A>, b: Serializer<B>): Serializer<Pair<A,B>>
+  (x, bs) case x {
+    new: a(x.fst, b(x.snd, bs))
+  }

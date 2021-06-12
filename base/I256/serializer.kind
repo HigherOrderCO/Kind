@@ -1,0 +1,4 @@
+I256.serializer: Serializer<I256>
+  (x, bs) 
+  open x
+  Word.serializer<256>(x.value, bs)

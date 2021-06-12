@@ -1,10 +1,28 @@
-Kind.Parser.ADT.Datatype.Derive.by_name(deri: String, adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Parser.ADT.Derived>
+Kind.Parser.ADT.Derive.by_name(deri: String, adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Parser.ADT.Derived>
   open adt
   switch String.eql(deri) {
-    "show": Maybe {
+    "stringifier": Maybe {
       let name = adt.name | "." | deri
-      get term = Kind.Parser.ADT.Datatype.Derive.show.term(adt)
-      get type = Kind.Parser.ADT.Datatype.Derive.show.type(adt)
-      return Kind.Parser.ADT.Derived.new(name, 1, term, type)
+      get term = Kind.Parser.ADT.Derive.stringifier.term(adt)
+      get type = Kind.Parser.ADT.Derive.stringifier.type(adt)
+      return Kind.Parser.ADT.Derived.new(name, 0, term, type)
+    }
+    "parser": Maybe {
+      let name = adt.name | "." | deri
+      get term = Kind.Parser.ADT.Derive.parser.term(adt)
+      get type = Kind.Parser.ADT.Derive.parser.type(adt)
+      return Kind.Parser.ADT.Derived.new(name, 0, term, type)
+    }
+    "serializer": Maybe {
+      let name = adt.name | "." | deri
+      get term = Kind.Parser.ADT.Derive.serializer.term(adt)
+      get type = Kind.Parser.ADT.Derive.serializer.type(adt)
+      return Kind.Parser.ADT.Derived.new(name, 0, term, type)
+    }
+    "deserializer": Maybe {
+      let name = adt.name | "." | deri
+      get term = Kind.Parser.ADT.Derive.deserializer.term(adt)
+      get type = Kind.Parser.ADT.Derive.deserializer.type(adt)
+      return Kind.Parser.ADT.Derived.new(name, 0, term, type)
     }
   } default none

@@ -1,0 +1,5 @@
+U256.parser: Parser<U256>
+  Parser {
+    get word = Word.parser<256>
+    return U256.new(word)
+  }

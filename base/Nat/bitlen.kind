@@ -1,0 +1,6 @@
+Nat.bitlen(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: Nat.succ(Nat.bitlen(Nat.div(n, 2)))
+  }
+

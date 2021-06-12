@@ -1,0 +1,5 @@
+Deserializer.run<A: Type>(deserializer: Deserializer<A>, bs: Bits): Maybe<A>
+  case deserializer(bs) as deserialized {
+    none: none
+    some: some(deserialized.value@snd)
+  }

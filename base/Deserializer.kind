@@ -1,0 +1,5 @@
+Deserializer(A: Type): Type
+  Bits -> Deserializer.Reply<A>
+
+Deserializer.Reply(A: Type): Type
+  Maybe<Pair<Bits, A>>

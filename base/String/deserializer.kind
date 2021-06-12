@@ -1,0 +1,13 @@
+String.deserializer: Deserializer<String>
+  Deserializer.choice!([
+    Deserializer {
+      Deserializer.bits(Bits.o(Bits.e))
+      return String.nil
+    }
+    Deserializer {
+      Deserializer.bits(Bits.i(Bits.e))
+      get head = U16.deserializer
+      get tail = String.deserializer
+      return String.cons(head, tail)
+    }
+  ])

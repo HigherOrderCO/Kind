@@ -1,0 +1,5 @@
+I32.deserializer: Deserializer<I32>
+  Deserializer {
+    get word = Word.deserializer<32>
+    return I32.new(word)
+  }

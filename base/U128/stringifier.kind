@@ -1,0 +1,4 @@
+U128.stringifier: Stringifier<U128>
+  (x, bs) 
+  open x
+  Word.stringifier<128>(x.value, bs)

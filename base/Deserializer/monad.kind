@@ -1,0 +1,2 @@
+Deserializer.monad: Monad<Deserializer>
+  Monad.new<Deserializer>(Deserializer.bind, Deserializer.pure)

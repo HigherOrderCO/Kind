@@ -1,0 +1,2 @@
+Nat.stringifier: Stringifier<Nat>
+  (n) Stringifier.text(Nat.to_string_base(10, n))

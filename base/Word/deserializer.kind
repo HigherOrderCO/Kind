@@ -1,0 +1,18 @@
+Word.deserializer(size: Nat): Deserializer<Word<size>>
+  case size {
+    zero: Deserializer {
+      return Word.e
+    }
+    succ: Deserializer.choice!([
+      Deserializer {
+        Deserializer.bits(Bits.o(Bits.e))
+        get pred = Word.deserializer(size.pred)
+        return Word.o<size.pred>(pred)
+      }
+      Deserializer {
+        Deserializer.bits(Bits.i(Bits.e))
+        get pred = Word.deserializer(size.pred)
+        return Word.i<size.pred>(pred)
+      }
+    ])
+  }!

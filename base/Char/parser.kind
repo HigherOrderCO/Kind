@@ -1,0 +1,63 @@
+Char.parser: Parser<Char>
+  Parser {
+    Parser.text("'")
+    get chr = Char.parser.single
+    Parser.text("'")
+    return chr
+  }
+
+Char.parser.single: Parser<Char>
+  Parser.choice!([
+    Parser {
+      Parser.text("\\b")
+      return '\b'
+    }
+    Parser {
+      Parser.text("\\f")
+      return '\f'
+    }
+    Parser {
+      Parser.text("\\r")
+      return '\r'
+    }
+    Parser {
+      Parser.text("\\t")
+      return '\t'
+    }
+    Parser {
+      Parser.text("\\v")
+      return '\v'
+    }
+    Parser {
+      Parser.text("\\\"")
+      return '"'
+    }
+    Parser {
+      Parser.text("\\\\")
+      return '\\'
+    }
+    Parser {
+      Parser.text("\\0")
+      return '\0'
+    }
+    Parser {
+      Parser.text("\\'")
+      return '\''
+    }
+    Parser {
+      Parser.text("\\u{")
+      get digits = Parser.until!(Parser.text("}"), Parser.hex_digit)
+      return U16.from_nat(Nat.from_base(16, digits))
+    }
+    Parser.one
+  ])
+
+Char.parser.escapes: List<Parser<Char>>
+  let list = []
+  for esc in String.escape.sequences with list:
+    open esc
+    Parser {
+      Parser.text(esc.fst)
+      return esc.snd
+    } & list
+  list

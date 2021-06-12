@@ -1,0 +1,4 @@
+I8.stringifier: Stringifier<I8>
+  (x, bs) 
+  open x
+  Word.stringifier<8>(x.value, bs)

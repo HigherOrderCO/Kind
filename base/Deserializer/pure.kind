@@ -1,0 +1,3 @@
+Deserializer.pure<A: Type>(value: A): Deserializer<A>
+  (bs)
+  some({bs, value})

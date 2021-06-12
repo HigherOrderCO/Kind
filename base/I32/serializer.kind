@@ -1,0 +1,4 @@
+I32.serializer: Serializer<I32>
+  (x, bs) 
+  open x
+  Word.serializer<32>(x.value, bs)

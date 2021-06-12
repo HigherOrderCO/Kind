@@ -1,0 +1,4 @@
+String.stringifier: Stringifier<String>
+  (x, str)
+  let escaped = String.escape(x)
+  Stringifier.text("\"", Stringifier.text(escaped, Stringifier.text("\"", str)))

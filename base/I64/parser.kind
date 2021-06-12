@@ -1,0 +1,5 @@
+I64.parser: Parser<I64>
+  Parser {
+    get word = Word.parser<64>
+    return I64.new(word)
+  }

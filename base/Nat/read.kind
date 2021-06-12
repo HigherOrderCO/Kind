@@ -1,6 +1,2 @@
 Nat.read(str: String): Nat
-  let p = Parser.run!(Parser.nat, str)
-  case p {
-    none: 0
-    some: p.value
-  }
+  Parser.run!(Parser.nat, str) <> 0

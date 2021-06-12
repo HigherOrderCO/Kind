@@ -1,0 +1,5 @@
+Pair.stringifier<A: Type, B: Type>(a: Stringifier<A>, b: Stringifier<B>): Stringifier<Pair<A, B>>
+  (pair, str)
+  case pair {
+    new: Stringifier.text("{", a(pair.fst, Stringifier.text(",", b(pair.snd, Stringifier.text("}", str)))))
+  }

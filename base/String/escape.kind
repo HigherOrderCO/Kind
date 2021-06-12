@@ -1,0 +1,41 @@
+String.escape(str: String): String
+  String.escape.go(str, "")
+
+String.escape.go(str: String, result: String): String
+  case str {
+    nil: String.reverse(result)
+    cons: String.escape.go(str.tail, String.reverse(String.escape.char(str.head)) | result)
+  }
+
+String.escape.char(chr: Char): String
+  if U16.eql(chr, String.escape.backslash) then
+    String.cons(String.escape.backslash, String.cons(chr, String.nil))
+  else if U16.eql(chr, '"') then
+    String.cons(String.escape.backslash, String.cons(chr, String.nil))
+  else if U16.eql(chr, '\'') then
+    String.cons(String.escape.backslash, String.cons(chr, String.nil))
+  else if U16.btw(' ', chr, '~') then
+    String.cons(chr, String.nil)
+  else
+    String.cons(String.escape.backslash, String.nil) | "u{" | U16.show_hex(chr) | "}"
+
+String.escape.sequences: List<Pair<String, Char>>
+  [
+    {"\\b" , '\b'},
+    {"\\f" , '\f'},
+    {"\\n" , '\n'},
+    {"\\r" , '\r'},
+    {"\\t" , '\t'},
+    {"\\v" , '\v'},
+    {"\\\"", '"'},
+    {"\\0" , '\0'},
+    {"\\'" , '\''},
+    {
+      String.cons(String.escape.backslash, String.cons(String.escape.backslash, String.nil)),
+      String.escape.backslash
+    },
+  ]
+
+String.escape.backslash: Char
+  Nat.to_u16(92)
+

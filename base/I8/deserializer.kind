@@ -1,0 +1,5 @@
+I8.deserializer: Deserializer<I8>
+  Deserializer {
+    get word = Word.deserializer<8>
+    return I8.new(word)
+  }

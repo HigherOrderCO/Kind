@@ -1,0 +1,5 @@
+Parser.prefix<V: Type>(txt: String, parser: Parser<V>): Parser<V>
+  Parser {
+    Parser.text(txt)
+    parser
+  }

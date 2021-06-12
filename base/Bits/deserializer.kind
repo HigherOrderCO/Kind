@@ -1,0 +1,18 @@
+Bits.deserializer: Deserializer<Bits>
+  Deserializer.choice!([
+    Deserializer {
+      Deserializer.bits(Bits.o(Bits.o(Bits.e)))
+      return Bits.e
+    }
+    Deserializer {
+      Deserializer.bits(Bits.i(Bits.o(Bits.e)))
+      get pred = Bits.deserializer
+      return Bits.o(pred)
+    }
+    Deserializer {
+      Deserializer.bits(Bits.i(Bits.i(Bits.e)))
+      get pred = Bits.deserializer
+      return Bits.i(pred)
+    }
+  ])
+

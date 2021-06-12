@@ -1,0 +1,6 @@
+List.serializer<A: Type>(elem: Serializer<A>): Serializer<List<A>>
+  (xs, bs) case xs {
+    nil: Bits.o(bs)
+    cons: Bits.i(elem(xs.head, List.serializer<A>(elem, xs.tail, bs)))
+  }
+  

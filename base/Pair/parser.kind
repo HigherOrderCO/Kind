@@ -1,0 +1,13 @@
+Pair.parser<A: Type, B: Type>(a: Parser<A>, b: Parser<B>): Parser<Pair<A,B>>
+  Parser {
+    Parser.text("{")
+    Parser.spaces
+    get fst = a
+    Parser.spaces
+    Parser.text(",")
+    Parser.spaces
+    get snd = b
+    Parser.spaces
+    Parser.text("}")
+    return Pair.new<A,B>(fst, snd)
+  }

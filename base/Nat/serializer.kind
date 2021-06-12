@@ -1,0 +1,2 @@
+Nat.serializer: Serializer<Nat>
+  (x) Bits.serializer(Nat.to_bits(x))

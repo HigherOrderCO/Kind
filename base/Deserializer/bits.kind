@@ -1,0 +1,16 @@
+Deserializer.bits(bits: Bits): Deserializer(Unit)
+  (bs)
+  case bits {
+    e: some({bs, unit})
+    o: case bs {
+      e: none
+      o: Deserializer.bits(bits.pred, bs.pred)
+      i: none
+    }
+    i: case bs {
+      e: none
+      o: none
+      i: Deserializer.bits(bits.pred, bs.pred)
+    }
+  }
+

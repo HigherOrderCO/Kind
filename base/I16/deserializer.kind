@@ -1,0 +1,5 @@
+I16.deserializer: Deserializer<I16>
+  Deserializer {
+    get word = Word.deserializer<16>
+    return I16.new(word)
+  }

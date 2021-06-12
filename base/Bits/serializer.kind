@@ -1,0 +1,6 @@
+Bits.serializer: Serializer<Bits>
+  (x, bs) case x {
+    e: Bits.o(Bits.o(bs))
+    o: Bits.i(Bits.o(Bits.serializer(x.pred, bs)))
+    i: Bits.i(Bits.i(Bits.serializer(x.pred, bs)))
+  }

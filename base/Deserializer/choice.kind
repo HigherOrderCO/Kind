@@ -1,0 +1,12 @@
+Deserializer.choice<A: Type>(pars: List<Deserializer<A>>): Deserializer<A>
+  Deserializer.choice.go<A>(pars)
+
+Deserializer.choice.go<A: Type>(pars: List<Deserializer<A>>): Deserializer<A>
+  (bs)
+  case pars {
+    nil: none
+    cons: case pars.head(bs) as deserialized {
+      none: Deserializer.choice.go<A>(pars.tail, bs)
+      some: case deserialized.value { new: some({deserialized.value.fst, deserialized.value.snd}) }
+    }
+  }

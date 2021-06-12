@@ -1,0 +1,6 @@
+Pair.deserializer<A: Type, B: Type>(a: Deserializer<A>, b: Deserializer<B>): Deserializer<Pair<A,B>>
+  Deserializer {
+    get fst = a
+    get snd = b
+    return Pair.new<A,B>(fst, snd)
+  }

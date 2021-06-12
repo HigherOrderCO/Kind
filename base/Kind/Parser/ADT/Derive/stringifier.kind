@@ -1,0 +1,71 @@
+Kind.Parser.ADT.Derive.stringifier.type(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    some(Kind.Term.app(Kind.Term.ref("Stringifier"), Kind.Term.ref(adt.name)))
+  else
+    none
+
+Kind.Parser.ADT.Derive.stringifier.term(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    let term =
+      Kind.Term.lam("x", (x) 
+      Kind.Term.lam("str", (str)
+        let ctrs = Kind.Parser.ADT.Derive.stringifier.term.ctrs(adt.name, adt.ctrs)
+        let cses = Kind.Map.new!
+        for ctr in ctrs with cses:
+          open ctr
+          Kind.Map.set!(ctr.fst, ctr.snd, cses)
+        Kind.Term.cse(Bits.e, x, "x", [], cses, none)))
+    some(term)
+  else
+    none
+
+Kind.Parser.ADT.Derive.stringifier.term.ctrs(adt_name: String, ctrs: List<Kind.Parser.ADT.Constructor>): List<Pair<String,Kind.Term>>
+  case ctrs {
+    nil:
+      []
+    cons:
+      List.cons!(
+        Kind.Parser.ADT.Derive.stringifier.ctr(adt_name, ctrs.head),
+        Kind.Parser.ADT.Derive.stringifier.term.ctrs(adt_name, ctrs.tail))
+  }
+
+Kind.Parser.ADT.Derive.stringifier.ctr(adt_name: String, ctr: Kind.Parser.ADT.Constructor): Pair<String,Kind.Term>
+  open ctr
+  let term = Kind.Term.ref("Stringifier.text")
+  let term = Kind.Term.app(term, Kind.Term.str(adt_name|"."|ctr.name))
+  let term = Kind.Term.app(term, Kind.Parser.ADT.Derive.stringifier.term.args(ctr.args, true))
+  {ctr.name, term}
+
+Kind.Parser.ADT.Derive.stringifier.term.args(args: List<Kind.Binder>, fst: Bool): Kind.Term
+  case args {
+    nil:
+      let term = Kind.Term.ref("str")
+      let term = if fst then term else Kind.Term.app(Kind.Term.app(Kind.Term.ref("Stringifier.text"), Kind.Term.str(")")), term)
+      term
+    cons:
+      open args.head
+      let {call_func, call_args} = Kind.Term.get_args(args.head.term)
+      let rest = Kind.Parser.ADT.Derive.stringifier.term.args(args.tail, false)
+      let term = Kind.Parser.ADT.Derive.stringifier.term.cont(args.head.term, some({"x." | args.head.name, rest}))
+      let term = Kind.Term.app(Kind.Term.app(Kind.Term.ref("Stringifier.text"), Kind.Term.str(if fst then "(" else ",")), term)
+      term
+  }
+
+Kind.Parser.ADT.Derive.stringifier.term.cont(call: Kind.Term, rest: Maybe<Pair<String,Kind.Term>>): Kind.Term
+  let {call_func, call_args} = Kind.Term.get_args(call)
+  let term = Kind.Term.ref(Kind.Term.extract_name(call_func) | ".stringifier")
+  let term = for par in call_args: Kind.Term.app(term, Kind.Term.hol(Bits.e))
+  let term = for par in call_args: Kind.Term.app(term, Kind.Parser.ADT.Derive.stringifier.term.cont(par, none))
+  case rest {
+    none: term
+    some:
+      let {name, rest} = rest.value
+      let term = Kind.Term.app(term, Kind.Term.ref(name))
+      let term = Kind.Term.app(term, rest)
+      term
+      //log("ue" | Kind.Term.show(Kind.Term.app(term, rest.value)))
+      //Kind.Term.app(term, rest.value)
+  }
+
