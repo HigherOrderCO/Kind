@@ -1,0 +1,8 @@
+String.byte_length(str: String): Nat
+  String.byte_length.go(str, 0)
+
+String.byte_length.go(str: String, total: Nat): Nat
+  case str {
+    nil : total
+    cons: String.byte_length.go(str.tail, Nat.add(Char.byte_length(str.head), total))
+  }

@@ -1,2 +1,3 @@
+// Finds the remainder of division of n by m
 Nat.mod(n: Nat, m: Nat): Nat
   Nat.mod.go(n, m, 0)

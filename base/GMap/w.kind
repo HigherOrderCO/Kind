@@ -1,2 +1,2 @@
-GMap.w : Nat 
-  3
+GMap.w : U32
+  3#32
