@@ -1,0 +1,59 @@
+String.hex.decode.go(hexs: String): String
+  case hexs {
+    nil:
+      ""
+    cons: 
+      let init = String.take(4, hexs)
+      let rest = String.drop(4, hexs)
+      let numb = Parser.run!(Parser.hex_nat, "0x" | init) <> 0
+      let char = Nat.to_u16(numb)
+      if String.eql(init, "0000") then
+        ""
+      else
+        Char.to_string(char) | String.hex.decode.go(rest)
+  }
+
+String.hex.decode(hexs: String): String
+  String.hex.decode.go(String.drop(2, hexs))
+
+String.hex.decode.ascii.go(hexs: String): String
+  case hexs {
+    nil:
+      ""
+    cons: 
+      let init = String.take(2, hexs)
+      let rest = String.drop(2, hexs)
+      let numb = Parser.run!(Parser.hex_nat, "0x" | init) <> 0
+      let char = Nat.to_u16(numb)
+      if String.eql(init, "00") then
+        ""
+      else
+        Char.to_string(char) | String.hex.decode.ascii.go(rest)
+  }
+
+String.hex.decode.ascii(hexs: String): String
+  String.hex.decode.ascii.go(String.drop(2, hexs))
+
+String.hex.encode.char_to_hex16(chr: Char): String
+  String.pad_left(4, '0', U16.show_hex(chr))
+
+String.hex.encode.go(str: String, result: String): String
+  case str {
+    nil: result
+    cons: String.hex.encode.go(str.tail, result | String.hex.encode.char_to_hex16(str.head))
+  }
+
+String.hex.encode(str: String): String
+  "0x" | String.hex.encode.go(str, "")
+
+String.hex.encode.ascii.char_to_hex8(chr: Char): String
+  String.pad_left(2, '0', U16.show_hex(chr))
+
+String.hex.encode.ascii.go(str: String, result: String): String
+  case str {
+    nil: result
+    cons: String.hex.encode.ascii.go(str.tail, result | String.hex.encode.ascii.char_to_hex8(str.head))
+  }
+
+String.hex.encode.ascii(str: String): String
+  "0x" | String.hex.encode.ascii.go(str, "")

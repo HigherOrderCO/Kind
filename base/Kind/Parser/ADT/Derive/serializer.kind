@@ -1,0 +1,73 @@
+Kind.Parser.ADT.Derive.serializer.type(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    some(Kind.Term.app(Kind.Term.ref("Serializer"), Kind.Term.ref(adt.name)))
+  else
+    none
+
+Kind.Parser.ADT.Derive.serializer.term(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    let term =
+      Kind.Term.lam("x", (x) 
+      Kind.Term.lam("bs", (bs)
+        let ctrs = Kind.Parser.ADT.Derive.serializer.term.ctrs(adt.name, adt.ctrs, Bits.zeros(Nat.bitlen(Nat.pred(List.length!(adt.ctrs)))))
+        let cses = Kind.Map.new!
+        for ctr in ctrs with cses:
+          open ctr
+          Kind.Map.set!(ctr.fst, ctr.snd, cses)
+        Kind.Term.cse(Bits.e, x, "x", [], cses, none)))
+    some(term)
+  else
+    none
+
+Kind.Parser.ADT.Derive.serializer.term.ctrs(adt_name: String, ctrs: List<Kind.Parser.ADT.Constructor>, header: Bits): List<Pair<String,Kind.Term>>
+  case ctrs {
+    nil:
+      []
+    cons:
+      List.cons!(
+        Kind.Parser.ADT.Derive.serializer.ctr(adt_name, ctrs.head, header),
+        Kind.Parser.ADT.Derive.serializer.term.ctrs(adt_name, ctrs.tail, Bits.inc(header)))
+  }
+
+Kind.Parser.ADT.Derive.serializer.ctr(adt_name: String, ctr: Kind.Parser.ADT.Constructor, header: Bits): Pair<String,Kind.Term>
+  open ctr
+  let term = Kind.Parser.ADT.Derive.serializer.term.args(ctr.args)
+  let term = Kind.Parser.ADT.Derive.serializer.ctr.bits(header, term)
+  {ctr.name, term}
+
+Kind.Parser.ADT.Derive.serializer.ctr.bits(bs: Bits, rest: Kind.Term): Kind.Term
+  case bs {
+    e: rest
+    o: Kind.Term.app(Kind.Term.ref("Bits.o"), Kind.Parser.ADT.Derive.serializer.ctr.bits(bs.pred, rest))
+    i: Kind.Term.app(Kind.Term.ref("Bits.i"), Kind.Parser.ADT.Derive.serializer.ctr.bits(bs.pred, rest))
+  }
+  
+Kind.Parser.ADT.Derive.serializer.term.args(args: List<Kind.Binder>): Kind.Term
+  case args {
+    nil:
+      Kind.Term.ref("bs")
+    cons:
+      open args.head
+      let {call_func, call_args} = Kind.Term.get_args(args.head.term)
+      let rest = Kind.Parser.ADT.Derive.serializer.term.args(args.tail)
+      let term = Kind.Parser.ADT.Derive.serializer.term.cont(args.head.term, some({"x." | args.head.name, rest}))
+      term
+  }
+
+Kind.Parser.ADT.Derive.serializer.term.cont(call: Kind.Term, rest: Maybe<Pair<String,Kind.Term>>): Kind.Term
+  let {call_func, call_args} = Kind.Term.get_args(call)
+  let term = Kind.Term.ref(Kind.Term.extract_name(call_func) | ".serializer")
+  let term = for par in call_args: Kind.Term.app(term, Kind.Term.hol(Bits.e))
+  let term = for par in call_args: Kind.Term.app(term, Kind.Parser.ADT.Derive.serializer.term.cont(par, none))
+  case rest {
+    none: term
+    some:
+      let {name, rest} = rest.value
+      let term = Kind.Term.app(term, Kind.Term.ref(name))
+      let term = Kind.Term.app(term, rest)
+      term
+      //log("ue" | Kind.Term.show(Kind.Term.app(term, rest.value)))
+      //Kind.Term.app(term, rest.value)
+  }

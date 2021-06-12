@@ -1,0 +1,5 @@
+U128.deserializer: Deserializer<U128>
+  Deserializer {
+    get word = Word.deserializer<128>
+    return U128.new(word)
+  }

@@ -1,0 +1,5 @@
+Bits.zeros(n: Nat): Bits
+  case n {
+    zero: Bits.e
+    succ: Bits.o(Bits.zeros(n.pred))
+  }

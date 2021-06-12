@@ -1,0 +1,8 @@
+Deserializer.bind<A: Type, B: Type>(deserialize: Deserializer<A>, next: A -> Deserializer<B>): Deserializer<B>
+  (bs)
+  case deserialize(bs) as got {
+    none: none
+    some: case got.value {
+      new: next(got.value.snd, got.value.fst)
+    }
+  }

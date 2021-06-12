@@ -1,26 +1,26 @@
 Kind.Parser.term: Parser(Kind.Term)
   Kind.Parser.block("term", Parser {
-    get term = Parser.first_of!([
+    get term = Parser.choice!([
       Kind.Parser.dom
       Kind.Parser.forall
       Kind.Parser.lambda
       Kind.Parser.lambda.erased
       Kind.Parser.parenthesis
-      Kind.Parser.letforrange.u32
-      Kind.Parser.letforrange.u32.with
-      Kind.Parser.letforrange.nat
-      Kind.Parser.letforrange.nat.with
-      Kind.Parser.letforin
-      Kind.Parser.letforin.with
-      Kind.Parser.letwhile
-      Kind.Parser.letwhile.with
-      Kind.Parser.let
-      Kind.Parser.let.omit
-      Kind.Parser.getwhile
-      Kind.Parser.getwhile.with
-      Kind.Parser.get
-      Kind.Parser.get.omit
-      Kind.Parser.def
+      Kind.Parser.letforrange.u32((x) Kind.Parser.term)
+      Kind.Parser.letforrange.u32.with((x) Kind.Parser.term)
+      Kind.Parser.letforrange.nat((x) Kind.Parser.term)
+      Kind.Parser.letforrange.nat.with((x) Kind.Parser.term)
+      Kind.Parser.letforin((x) Kind.Parser.term)
+      Kind.Parser.letforin.with((x) Kind.Parser.term)
+      Kind.Parser.letwhile((x) Kind.Parser.term)
+      Kind.Parser.letwhile.with((x) Kind.Parser.term)
+      Kind.Parser.let((x) Kind.Parser.term)
+      Kind.Parser.let.omit((x) Kind.Parser.term)
+      Kind.Parser.getwhile((x) Kind.Parser.term)
+      Kind.Parser.getwhile.with((x) Kind.Parser.term)
+      Kind.Parser.get((x) Kind.Parser.term)
+      Kind.Parser.get.omit((x) Kind.Parser.term)
+      Kind.Parser.def((x) Kind.Parser.term)
       Kind.Parser.goal_rewrite
       Kind.Parser.if
       Kind.Parser.char
@@ -37,10 +37,10 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.mirror
       Kind.Parser.list
       Kind.Parser.map
-      Kind.Parser.log
+      Kind.Parser.log((x) Kind.Parser.term)
       Kind.Parser.do
       Kind.Parser.case
-      Kind.Parser.open
+      Kind.Parser.open((x) Kind.Parser.term)
       Kind.Parser.without
       Kind.Parser.switch
       Kind.Parser.goal
@@ -77,7 +77,7 @@ Kind.Parser.term: Parser(Kind.Term)
 Kind.Parser.term.suffix(term: Kind.Term): Parser(Kind.Term)
   (pst)
   open pst
-  let suffix_parser = Parser.first_of!([
+  let suffix_parser = Parser.choice!([
    Kind.Parser.application(term)
    Kind.Parser.application.erased(term)
    Kind.Parser.list_set(term)

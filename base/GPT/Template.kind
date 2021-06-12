@@ -1,0 +1,199 @@
+// The Bool type represents a boolean
+type Bool {
+  true
+  false
+}
+
+// The Nat type represents a positive integer
+type Nat {
+  zero
+  succ(pred: Nat)
+}
+
+// The CardSuit type represents a suit in a 52 card playing deck
+type CardSuit {
+  spades
+  hearts
+  clubs
+  diamonds
+}
+
+// The Bits type represent a bitstring, a finite sequence of bits
+type Bits {
+  e
+  o(pred: Bits)
+  i(pred: Bits)
+}
+
+// The Maybe type represents a value that may not exist
+type Maybe <A: Type> {
+  none
+  some(value: A)
+}
+
+// The Pair type represents a tuple of two values
+type Pair <A: Type, B: Type> {
+  new(fst: A, snd: B)
+}
+
+// The List type represents a finite sequence of values
+type List <A: Type> {
+  nil
+  cons(head: A, tail: List<A>)
+}
+
+// Negates its input
+Bool.not(a: Bool): Bool
+  case a {
+    true: Bool.false
+    false: Bool.true
+  }
+
+// Returns true if any of its inputs is true
+Bool.or(a: Bool, b: Bool): Bool
+  case a {
+    true: Bool.true
+    false: b
+  }
+
+// Returns true if both of its inputs is true
+Bool.and(a: Bool, b: Bool): Bool
+  case a {
+    true: b
+    false: Bool.false
+  }
+
+// Converts a Bool to a string
+Bool.show(a: Bool): String
+  case a {
+    true: "Bool.true"
+    false: "Bool.false"
+  }
+
+// Negates all bits in a bitstring
+Bits.not(bits: Bits): Bits
+  case bits {
+    e: Bits.e
+    o: Bits.i(Bits.not(bits.pred))
+    i: Bits.o(Bits.not(bits.pred))
+  }
+
+// Returns the concatenation of two bitstrings
+Bits.concat(a: Bits, b: Bits): Bits
+  case a {
+    e: b
+    o: Bits.o(Bits.concat(a.pred, b))
+    i: Bits.i(Bits.concat(a.pred, b))
+  }
+
+// Increments a bitstring by 1
+Bits.inc(a: Bits): Bits
+  case a {
+    e: Bits.i(Bits.e)
+    o: Bits.i(a.pred)
+    i: Bits.o(Bits.inc(a.pred))
+  }
+
+// Returns true if the Maybe is a some
+Maybe.is_none<A: Type>(m: Maybe<A>): Bool
+  case m {
+    none: true
+    some: false
+  }
+
+// Returns true if the Maybe is a some
+Maybe.is_some<A: Type>(m: Maybe<A>): Bool
+  case m {
+    none: false
+    some: true
+  }
+
+// Converts a Nat to a string
+Nat.show(n: Nat): String
+  case n {
+    zero: "Nat.zero"
+    succ: "Nat.succ(" | Nat.show(n.pred) | ")"
+  }
+
+// Doubles a Natural Number
+Nat.double(n: Nat): Nat
+  case n {
+    zero: Nat.zero
+    succ: Nat.succ(Nat.succ(Nat.double(n.pred)))
+  }
+
+// Adds two Natural Numbers
+Nat.add(n: Nat, m: Nat): Nat
+  case n {
+    zero: m
+    succ: Nat.succ(Nat.add(n.pred, m))
+  }
+
+// Multiplies two Natural Numbers
+Nat.mul(n: Nat, m: Nat): Nat
+  case m {
+    zero: Nat.zero
+    succ: Nat.add(n, Nat.mul(n, m.pred))
+  }
+
+// Tests whether two Natural Numbers are identical
+Nat.eql(n: Nat, m: Nat): Bool
+  case n {
+    zero: case m {
+      zero: Bool.true
+      succ: Bool.false
+    }
+    succ: case m {
+      zero: Bool.false
+      succ: Nat.eql(n.pred, m.pred)
+    }
+  }
+
+// Swaps the elements of a Pair
+Pair.swap<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  case pair {
+    new: Pair.new!!(pair.snd, pair.fst)
+  }
+
+// Returns the first element of a List, if any
+List.head<A: Type>(xs: List<A>): Maybe<A>
+  case xs {
+    nil: Maybe.none!
+    cons: Maybe.some!(xs.head)
+  }
+
+// Returns the same list, without the first element
+List.tail<A: Type>(xs: List<A>): List<A>
+  case xs {
+    nil: List.nil!
+    cons: xs.tail
+  }
+
+// Applies a function to every element of a List
+List.map<A: Type, B: Type>(f: A -> B, as: List<A>): List<B>
+  case as {
+    nil: List.nil!
+    cons: List.cons!(f(as.head), List.map!!(f,as.tail)),
+  }
+
+// The right fold of a List
+List.foldr<A: Type, B: Type>(nil: B, cons: A -> B -> B, xs: List<A>): B
+  case xs { 
+    nil: nil
+    cons: cons(xs.head, List.foldr<A,B>(nil, cons, xs.tail))
+  }
+
+// Returns the same list, with its elements sorted in ascending order
+List.quicksort(list: List<Nat>): List<Nat>
+  case list {
+    nil:
+      []
+    cons:
+      let fst = list.head
+      let min = List.filter!((x) Nat.ltn(x, list.head), list.tail)
+      let max = List.filter!((x) Nat.gtn(x, list.head), list.tail)
+      List.quicksort(min) ++ [fst] ++ List.quicksort(max)
+  }
+
+
+

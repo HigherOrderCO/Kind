@@ -1,0 +1,89 @@
+Kind.Parser.ADT.Derive.parser.type(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    some(Kind.Term.app(Kind.Term.ref("Parser"), Kind.Term.ref(adt.name)))
+  else
+    none
+
+Kind.Parser.ADT.Derive.parser.term(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    let term = Kind.Term.ref("Parser.choice")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Parser.ADT.Derive.parser.term.cses(adt, adt.ctrs))
+    some(term)
+  else
+    none
+
+Kind.Parser.ADT.Derive.parser.term.cses(adt: Kind.Parser.ADT.Datatype, cses: List<Kind.Parser.ADT.Constructor>): Kind.Term
+  open adt
+  case cses {
+    cons:
+      open cses.head
+      let cnam = adt.name|"."|cses.head.name
+      let term = Kind.Term.ref("Parser.bind")
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.app(Kind.Term.ref("Parser.text"), Kind.Term.str(cnam)))
+      let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Parser.ADT.Derive.parser.term.args(adt, cnam, cses.head.args, [], true)))
+      let list = Kind.Term.ref("List.cons")
+      let list = Kind.Term.app(list, Kind.Term.hol(Bits.e))
+      let list = Kind.Term.app(list, term)
+      let list = Kind.Term.app(list, Kind.Parser.ADT.Derive.parser.term.cses(adt, cses.tail))
+      list
+    nil: 
+      let fail = Kind.Term.ref("Parser.fail")
+      let fail = Kind.Term.app(fail, Kind.Term.hol(Bits.e))
+      let fail = Kind.Term.app(fail, Kind.Term.str(""))
+      let term = Kind.Term.ref("List.cons")
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, fail)
+      let term = Kind.Term.app(term, Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e)))
+      term
+  }
+
+Kind.Parser.ADT.Derive.parser.term.cont(call: Kind.Term): Kind.Term
+  let {call_func, call_args} = Kind.Term.get_args(call)
+  let term = Kind.Term.ref(Kind.Term.extract_name(call_func) | ".parser")
+  let term = for par in call_args: Kind.Term.app(term, Kind.Term.hol(Bits.e))
+  let term = for par in call_args: Kind.Term.app(term, Kind.Parser.ADT.Derive.parser.term.cont(par))
+  term
+  
+Kind.Parser.ADT.Derive.parser.term.args(
+  adt: Kind.Parser.ADT.Datatype
+  cnam: String
+  args: List<Kind.Binder>
+  vars: List<Kind.Term>
+  fst: Bool
+): Kind.Term
+  case args {
+    cons:
+      open args.head
+      let term = Kind.Term.ref("Parser.bind")
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let cont = Kind.Term.ref("Parser.prefix")
+      let cont = Kind.Term.app(cont, Kind.Term.hol(Bits.e))
+      let cont = Kind.Term.app(cont, Kind.Term.str(if fst then "(" else ","))
+      let cont = Kind.Term.app(cont, Kind.Parser.ADT.Derive.parser.term.cont(args.head.term))
+      let term = Kind.Term.app(term, cont)
+      let term = Kind.Term.app(term, Kind.Term.lam(args.head.name, (x)
+        Kind.Parser.ADT.Derive.parser.term.args(adt, cnam, args.tail, x & vars, false)))
+      term
+    nil:
+      let body = Kind.Term.ref("Parser.pure")
+      let body = Kind.Term.app(body, Kind.Term.hol(Bits.e))
+      let func = Kind.Term.ref(cnam)
+      let func = List.fold!(vars)!(func, ((var,func) Kind.Term.app(func, var)))
+      let body = Kind.Term.app(body, func)
+      if fst then
+        body
+      else
+        let term = Kind.Term.ref("Parser.bind")
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, Kind.Term.app(Kind.Term.ref("Parser.text"),Kind.Term.str(")")))
+        let term = Kind.Term.app(term, Kind.Term.lam("", (x) body))
+        term
+  }
+

@@ -1,0 +1,5 @@
+I256.deserializer: Deserializer<I256>
+  Deserializer {
+    get word = Word.deserializer<256>
+    return I256.new(word)
+  }

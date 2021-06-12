@@ -1,0 +1,10 @@
+type Empty {}
+type Unit { new }
+type Bool { true false }
+type Suit { spades clubs diamonds hearts }
+type Race { human orc elf dwarf }
+type Bit { zero one }
+Empty.show(x: Empty): String case x {}
+Unit.show(x: Unit): String case x { unit: "Unit.new" }
+Bool.show(x: Bool): String case x { true: "Bool.true" false: "Bool.false" }
+Suit.show(x: Suit): String case x

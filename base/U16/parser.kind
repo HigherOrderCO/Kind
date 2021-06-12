@@ -1,0 +1,5 @@
+U16.parser: Parser<U16>
+  Parser {
+    get word = Word.parser<16>
+    return U16.new(word)
+  }

@@ -1,0 +1,5 @@
+I256.parser: Parser<I256>
+  Parser {
+    get word = Word.parser<256>
+    return I256.new(word)
+  }

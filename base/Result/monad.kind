@@ -1,0 +1,2 @@
+Result.monad: Monad<Result>
+  Monad.new<Result>(Result.bind, Result.pure)

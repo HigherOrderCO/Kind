@@ -1,0 +1,27 @@
+type Example.serializers.MyType {
+  foo(n: List<Nat>, s: String, m: Example.serializers.MyType)
+  bar
+} deriving (stringifier, parser, serializer, deserializer)
+
+Example.serializers: _
+  IO {
+    let val = Example.serializers.MyType.foo([1,2,3], "Hello", Example.serializers.MyType.bar)
+
+    // Converts to string
+    let str = Stringifier.run!(Example.serializers.MyType.stringifier, val)
+    IO.print("str: " | str)
+
+    // Parses string to a value
+    let val = Parser.run!(Example.serializers.MyType.parser, str) <> Example.serializers.MyType.bar
+
+    // Serializes to bits
+    let bts = Serializer.run!(Example.serializers.MyType.serializer, val)
+    IO.print("bts: " | Bits.show(bts))
+
+    // Deserializes to a value
+    let val = Deserializer.run!(Example.serializers.MyType.deserializer, bts) <> Example.serializers.MyType.bar
+
+    // Converts to string again
+    let str = Stringifier.run!(Example.serializers.MyType.stringifier, val)
+    IO.print("str: " | str)
+  }

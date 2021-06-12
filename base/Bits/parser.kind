@@ -1,0 +1,21 @@
+Bits.parser: Parser<Bits>
+  Parser.choice!([
+    Parser {
+      Parser.text("Bits.e")
+      return Bits.e
+    }
+    Parser {
+      Parser.text("Bits.o")
+      Parser.text("(")
+      get pred = Bits.parser
+      Parser.text(")")
+      return Bits.o(pred)
+    }
+    Parser {
+      Parser.text("Bits.i")
+      Parser.text("(")
+      get pred = Bits.parser
+      Parser.text(")")
+      return Bits.i(pred)
+    }
+  ])

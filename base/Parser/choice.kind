@@ -1,0 +1,20 @@
+Parser.choice<A: Type>(pars: List<Parser(A)>): Parser(A)
+  (pst)
+  open pst
+  case pars {
+    nil: case pst.err {
+      none: Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "No parse.")
+      some: Parser.Reply.error!(pst.err.value)
+    }
+    cons:
+      let parsed = pars.head(pst)
+      case parsed {
+        error:
+          let cur_err = some(parsed.err)
+          let far_err = Parser.Error.maybe_combine(pst.err, cur_err)
+          let new_pst = Parser.State.new(far_err, pst.nam, pst.ini, pst.idx, pst.str)
+          Parser.choice!(pars.tail, new_pst)
+        value:
+          Parser.Reply.value!(parsed.pst, parsed.val)
+      }
+  }

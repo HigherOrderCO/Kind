@@ -1,0 +1,4 @@
+I64.serializer: Serializer<I64>
+  (x, bs) 
+  open x
+  Word.serializer<64>(x.value, bs)

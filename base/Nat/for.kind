@@ -3,3 +3,11 @@ Nat.for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
     state
   else
     Nat.for<S>(func(from, state), Nat.succ(from), til, func)
+
+Nat.for.IO(from: Nat, to: Nat, action: Nat -> IO<Unit>): IO<Unit>
+  if Nat.eql(from, to) then IO {
+    return unit
+  } else IO {
+    action(from)
+    Nat.for.IO(Nat.succ(from), to, action)
+  }

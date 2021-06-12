@@ -1,0 +1,2 @@
+Result.pure<A: Type>(a: A): Result<A>
+  Result.success<A>(a)

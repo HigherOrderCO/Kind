@@ -1,0 +1,5 @@
+I8.parser: Parser<I8>
+  Parser {
+    get word = Word.parser<8>
+    return I8.new(word)
+  }

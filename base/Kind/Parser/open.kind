@@ -1,4 +1,4 @@
-Kind.Parser.open: Parser(Kind.Term)
+Kind.Parser.open(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("open", Parser {
     Kind.Parser.text("open ")
     get expr = Kind.Parser.term
@@ -15,8 +15,8 @@ Kind.Parser.open: Parser(Kind.Term)
       some: name.value,
     }
     let wyth = []
-    get rest = Kind.Parser.term
-    let cses = Kind.Map.set!("_", rest, Kind.Map.new!)
+    get body = body(unit)
+    let cses = Kind.Map.set!("_", body, Kind.Map.new!)
     let moti = Maybe.some!(Kind.Term.hol(Bits.e))
     return Kind.Term.cse(Bits.e, expr, name, wyth, cses, moti)
   })

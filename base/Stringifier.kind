@@ -1,0 +1,3 @@
+Stringifier(A: Type): Type
+  A -> String -> String
+  

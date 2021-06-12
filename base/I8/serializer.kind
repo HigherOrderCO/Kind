@@ -1,0 +1,4 @@
+I8.serializer: Serializer<I8>
+  (x, bs) 
+  open x
+  Word.serializer<8>(x.value, bs)

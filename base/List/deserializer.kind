@@ -1,0 +1,13 @@
+List.deserializer<A: Type>(elem: Deserializer<A>): Deserializer<List<A>>
+  Deserializer.choice!([
+    Deserializer {
+      Deserializer.bits(Bits.o(Bits.e))
+      return List.nil<A>
+    }
+    Deserializer {
+      Deserializer.bits(Bits.i(Bits.e))
+      get head = elem
+      get tail = List.deserializer<A>(elem)
+      return List.cons<A>(head, tail)
+    }
+  ])

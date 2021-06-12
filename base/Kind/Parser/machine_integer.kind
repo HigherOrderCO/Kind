@@ -14,7 +14,7 @@ Kind.Parser.machine_integer.signed(size: Nat): Parser(Kind.Term)
     let size_str = Nat.show(size)
 
     Kind.Parser.spaces
-    get sgn_num = Parser.first_of!([Kind.Parser.int_pos, Kind.Parser.int_neg])
+    get sgn_num = Parser.choice!([Kind.Parser.int_pos, Kind.Parser.int_neg])
     Parser.text("#" | size_str);
     return case sgn_num {
       new:

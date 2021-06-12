@@ -1,2 +1,5 @@
-List.foldr<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List<A>): B
-  List.fold<A>(xs)<B>(b,f)
+List.foldr<A: Type, B: Type>(nil: B, cons: A -> B -> B, xs: List<A>): B
+  case xs { 
+    nil: nil
+    cons: cons(xs.head, List.foldr<A,B>(nil, cons, xs.tail))
+  }

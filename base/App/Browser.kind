@@ -27,10 +27,10 @@ App.Browser.State.Local.get_room_serial(local: App.Browser.State.Local): String
   if String.eql(local@file, "") then
     "0x96519848196548"
   else
-    String.pad_right_exact(16, '0', String.serialize_ascii(local@file)) // TODO: hash
+    String.pad_right_exact(16, '0', String.hex.encode.ascii(local@file)) // TODO: hash
 
 App.Browser.State.Local.get_post_serial(local: App.Browser.State.Local): String
-  String.pad_right_exact(66, '0', String.serialize(local@post))
+  String.pad_right_exact(66, '0', String.hex.encode(local@post))
 
 // App Interface
 // =============
@@ -217,7 +217,7 @@ App.Browser.tick: App.Tick<App.Browser.State>
 App.Browser.post: App.Post<App.Browser.State>
   (time, room, addr, data, global)
   //log("..." | room | " " | addr | " " | data)
-  global@room <- String.deserialize(data) & global@room
+  global@room <- String.hex.decode(data) & global@room
 
 // App
 // ===

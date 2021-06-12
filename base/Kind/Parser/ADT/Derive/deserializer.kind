@@ -1,0 +1,77 @@
+Kind.Parser.ADT.Derive.deserializer.type(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    some(Kind.Term.app(Kind.Term.ref("Deserializer"), Kind.Term.ref(adt.name)))
+  else
+    none
+
+Kind.Parser.ADT.Derive.deserializer.term(adt: Kind.Parser.ADT.Datatype): Maybe<Kind.Term>
+  open adt
+  if List.is_empty!(adt.pars) && List.is_empty!(adt.inds) then
+    let term = Kind.Term.ref("Deserializer.choice")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Parser.ADT.Derive.deserializer.term.cses(adt, adt.ctrs, Bits.zeros(Nat.bitlen(Nat.pred(List.length!(adt.ctrs))))))
+    some(term)
+  else
+    none
+
+Kind.Parser.ADT.Derive.deserializer.term.cses(adt: Kind.Parser.ADT.Datatype, cses: List<Kind.Parser.ADT.Constructor>, header: Bits): Kind.Term
+  open adt
+  case cses {
+    cons:
+      open cses.head
+      let cnam = adt.name|"."|cses.head.name
+      let term = Kind.Term.ref("Deserializer.bind")
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.app(Kind.Term.ref("Deserializer.bits"), Kind.Parser.ADT.Derive.serializer.term.bits(header)))
+      let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Parser.ADT.Derive.deserializer.term.args(adt, cnam, cses.head.args, [], true)))
+      let list = Kind.Term.ref("List.cons")
+      let list = Kind.Term.app(list, Kind.Term.hol(Bits.e))
+      let list = Kind.Term.app(list, term)
+      let list = Kind.Term.app(list, Kind.Parser.ADT.Derive.deserializer.term.cses(adt, cses.tail, Bits.inc(header)))
+      list
+    nil: 
+      Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
+  }
+
+Kind.Parser.ADT.Derive.serializer.term.bits(bits: Bits): Kind.Term
+  case bits {
+    e: Kind.Term.ref("Bits.e")
+    o: Kind.Term.app(Kind.Term.ref("Bits.o"), Kind.Parser.ADT.Derive.serializer.term.bits(bits.pred))
+    i: Kind.Term.app(Kind.Term.ref("Bits.i"), Kind.Parser.ADT.Derive.serializer.term.bits(bits.pred))
+  }
+
+Kind.Parser.ADT.Derive.deserializer.term.cont(call: Kind.Term): Kind.Term
+  let {call_func, call_args} = Kind.Term.get_args(call)
+  let term = Kind.Term.ref(Kind.Term.extract_name(call_func) | ".deserializer")
+  let term = for par in call_args: Kind.Term.app(term, Kind.Term.hol(Bits.e))
+  let term = for par in call_args: Kind.Term.app(term, Kind.Parser.ADT.Derive.deserializer.term.cont(par))
+  term
+  
+Kind.Parser.ADT.Derive.deserializer.term.args(
+  adt: Kind.Parser.ADT.Datatype
+  cnam: String
+  args: List<Kind.Binder>
+  vars: List<Kind.Term>
+  fst: Bool
+): Kind.Term
+  case args {
+    cons:
+      open args.head
+      let term = Kind.Term.ref("Deserializer.bind")
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, Kind.Parser.ADT.Derive.deserializer.term.cont(args.head.term))
+      let term = Kind.Term.app(term, Kind.Term.lam(args.head.name, (x)
+        Kind.Parser.ADT.Derive.deserializer.term.args(adt, cnam, args.tail, x & vars, false)))
+      term
+    nil:
+      let body = Kind.Term.ref("Deserializer.pure")
+      let body = Kind.Term.app(body, Kind.Term.hol(Bits.e))
+      let func = Kind.Term.ref(cnam)
+      let func = List.fold!(vars)!(func, ((var,func) Kind.Term.app(func, var)))
+      let body = Kind.Term.app(body, func)
+      body
+  }
+

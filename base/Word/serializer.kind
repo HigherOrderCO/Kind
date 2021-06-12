@@ -1,0 +1,7 @@
+Word.serializer<size: Nat>: Serializer<Word<size>>
+  (w, bs)
+  case w {
+    e: bs
+    o: Bits.o(Word.serializer<w.size>(w.pred, bs))
+    i: Bits.i(Word.serializer<w.size>(w.pred, bs))
+  }

@@ -1,0 +1,5 @@
+U32.parser: Parser<U32>
+  Parser {
+    get word = Word.parser<32>
+    return U32.new(word)
+  }

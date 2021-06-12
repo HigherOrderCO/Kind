@@ -1,0 +1,3 @@
+Serializer(A: Type): Type
+  A -> Bits -> Bits
+  

@@ -1,11 +1,11 @@
 Kind.Parser.spaces: Parser(List<Unit>)
-  Parser.many!(Parser.first_of!([
+  Parser.many!(Parser.choice!([
     Parser.text(" ")
     Parser.text("\t")
     Parser.text("\n")
     Parser {
       Parser.text("//")
-      let end = Parser.first_of!([Parser.text("\n"), Parser.eof])
+      let end = Parser.choice!([Parser.text("\n"), Parser.eof])
       Parser.until!(end, Parser.one)
       return unit
     }

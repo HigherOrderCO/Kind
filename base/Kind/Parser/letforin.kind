@@ -1,4 +1,4 @@
-Kind.Parser.letforin: Parser(Kind.Term)
+Kind.Parser.letforin(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("let-for", Parser {
     Kind.Parser.text("let ")
     get name = Kind.Parser.name1
@@ -10,7 +10,7 @@ Kind.Parser.letforin: Parser(Kind.Term)
     Kind.Parser.text(":")
     get loop = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     let term = Kind.Term.ref("List.for")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, list)
@@ -22,7 +22,7 @@ Kind.Parser.letforin: Parser(Kind.Term)
     return term
   })
 
-Kind.Parser.letforin.with: Parser(Kind.Term)
+Kind.Parser.letforin.with(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("for", Parser {
     Kind.Parser.text("for ")
     get elem = Kind.Parser.name1
@@ -33,7 +33,7 @@ Kind.Parser.letforin.with: Parser(Kind.Term)
     Kind.Parser.text(":")
     get loop = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     let term = Kind.Term.ref("List.for")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, list)

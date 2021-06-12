@@ -1,0 +1,5 @@
+Nat.deserializer: Deserializer<Nat>
+  Deserializer {
+    get bits = Bits.deserializer
+    return Bits.to_nat(bits)
+  }

@@ -1,20 +1,20 @@
-Kind.Parser.let: Parser(Kind.Term)
+Kind.Parser.let(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("let", Parser {
     Kind.Parser.text("let ")
     get name = Kind.Parser.name1
     Kind.Parser.text("=")
     get expr = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     return Kind.Term.let(name, expr, (x) body)
   })
 
-Kind.Parser.let.omit: Parser(Kind.Term)
+Kind.Parser.let.omit(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("let", Parser {
     get name = Kind.Parser.name1
     Kind.Parser.text("= ")
     get expr = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     return Kind.Term.let(name, expr, (x) body)
   })

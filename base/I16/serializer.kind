@@ -1,0 +1,4 @@
+I16.serializer: Serializer<I16>
+  (x, bs) 
+  open x
+  Word.serializer<16>(x.value, bs)

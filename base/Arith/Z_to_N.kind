@@ -1,3 +1,0 @@
-Arith.Z_to_N(n : Int) : Nat
-  let bij = if (Int.gtn(n, +0)) then Int.sub(Int.mul(+2, n), +1) else Int.mul(-2, n)
-  Int.to_nat(bij)

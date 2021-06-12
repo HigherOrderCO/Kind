@@ -1,12 +1,12 @@
-Kind.Parser.log: Parser(Kind.Term)
+Kind.Parser.log(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("log", Parser {
     Kind.Parser.text("log(")
     get text = Kind.Parser.term
     Kind.Parser.text(")")
-    get cont = Kind.Parser.term
+    get body = body(unit)
     let term = Kind.Term.ref("Debug.log")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, text)
-    let term = Kind.Term.app(term, Kind.Term.lam("", (x) cont))
+    let term = Kind.Term.app(term, Kind.Term.lam("", (x) body))
     return term
   })

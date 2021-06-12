@@ -1,0 +1,5 @@
+U128.parser: Parser<U128>
+  Parser {
+    get word = Word.parser<128>
+    return U128.new(word)
+  }

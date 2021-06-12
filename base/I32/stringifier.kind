@@ -1,0 +1,4 @@
+I32.stringifier: Stringifier<I32>
+  (x, bs) 
+  open x
+  Word.stringifier<32>(x.value, bs)

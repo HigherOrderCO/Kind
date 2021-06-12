@@ -92,7 +92,7 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
         let cses = String.join("", List.mapped!(cses)!((x)
           let name = Kind.Name.from_bits(Pair.fst!!(x));
           let term = Kind.Term.show.go(Pair.snd!!(x), Maybe.none!);
-          String.flatten([name, ": ", term, "; "])));
+          String.flatten([name, ": ", term, ", "])));
         let moti = case term.moti {
           none: "",
           some: String.flatten([": ", Kind.Term.show.go(term.moti.value, Maybe.none!)]),

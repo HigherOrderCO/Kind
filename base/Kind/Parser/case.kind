@@ -103,7 +103,7 @@ Kind.Parser.case.case: Parser(Pair<List<Kind.Name>, Kind.Term>)
   }
 
 Kind.Parser.case.with: Parser(List<Kind.Ann>)
-  Parser.first_of!([
+  Parser.choice!([
     Parser {
       Kind.Parser.text("with ")
       Parser.many!(Parser {

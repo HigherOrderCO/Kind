@@ -1,0 +1,4 @@
+U16.stringifier: Stringifier<U16>
+  (x, bs) 
+  open x
+  Word.stringifier<16>(x.value, bs)

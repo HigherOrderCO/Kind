@@ -1,6 +1,6 @@
 Kind.Parser.nat: Parser(Kind.Term)
   Kind.Parser.block("nat", Parser {
     Kind.Parser.spaces
-    get natx = Parser.first_of!([Parser.hex_nat, Parser.nat])
+    get natx = Parser.choice!([Parser.hex_nat, Parser.nat])
     return Kind.Term.nat(natx)
   })

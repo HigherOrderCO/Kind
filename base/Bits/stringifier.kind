@@ -1,0 +1,7 @@
+Bits.stringifier: Stringifier<Bits>
+  (bs, str)
+  case bs {
+    e: Stringifier.text("Bits.e", str)
+    o: Stringifier.text("Bits.o(", Bits.stringifier(bs.pred, Stringifier.text(")", str)))
+    i: Stringifier.text("Bits.i(", Bits.stringifier(bs.pred, Stringifier.text(")", str)))
+  }

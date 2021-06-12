@@ -15,7 +15,7 @@ Kind.Parser.dom.node: Parser<Kind.Term>
     let props = Kind.Parser.dom.gen_prop(props)
 
     // children
-    get children = Parser.many!(Parser.first_of!([
+    get children = Parser.many!(Parser.choice!([
       Kind.Parser.dom.node,
       Kind.Parser.dom.leaf,
     ]))
@@ -94,7 +94,7 @@ Kind.Parser.dom.transform_children(a: List<Kind.Term>): Kind.Term
 // can be a dynamic DOM or a text
 Kind.Parser.dom.leaf: Parser<Kind.Term>
   Kind.Parser.block("DOM_leaf", Parser {
-    Parser.first_of!([
+    Parser.choice!([
       Kind.Parser.dom.for,
       Kind.Parser.dom.dynamic,
       Kind.Parser.dom.text
@@ -108,7 +108,7 @@ Kind.Parser.dom.leaf: Parser<Kind.Term>
 Kind.Parser.dom.dynamic: Parser<Kind.Term>
   Kind.Parser.block("DOM_dynamic", Parser {
     Kind.Parser.text("{")
-    get term = Parser.first_of!([
+    get term = Parser.choice!([
       Kind.Parser.term
     ])
     Kind.Parser.text("}")

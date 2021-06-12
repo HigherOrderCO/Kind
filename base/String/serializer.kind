@@ -1,0 +1,6 @@
+String.serializer: Serializer<String>
+  (str, bs)
+  case str {
+    nil: Bits.o(bs)
+    cons: Bits.i(U16.serializer(str.head, String.serializer(str.tail, bs)))
+  }

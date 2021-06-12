@@ -1,5 +1,0 @@
-Arith.N_to_NxN(n : Nat) : Pair<Nat, Nat>
-  let w = (Nat.sqrt((Nat.mul(8, n)) + 1) - 1) / 2
-  let t = Nat.add(Nat.pow(w, 2), w) / 2
-  let y = Nat.sub(n, t)
-  Pair.new(Nat, Nat, Nat.sub(w, y), y)
