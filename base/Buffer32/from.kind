@@ -1,5 +1,5 @@
 Buffer32.from(str: String): Buffer32
-  let size = ((String.byte_length(str) - 1) / 4) + 1
+  let size = String.length(str) //((String.byte_length(str) - 1) / 4) + 1
   Buffer32.from.go(str, Buffer32.alloc(size), 0#32)
 
 Buffer32.from.go(str: String, buf: Buffer32, idx: U32): Buffer32
