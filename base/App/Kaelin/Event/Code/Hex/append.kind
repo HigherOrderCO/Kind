@@ -4,5 +4,5 @@ App.Kaelin.Event.Code.Hex.append(
   x: Bits
 ): String
 
-  hex2 = App.Kaelin.Event.Code.Hex.format_hex(size, String.reverse(Bits.to_hex_string(x)))
+  hex2 = App.Kaelin.Event.Code.Hex.format_hex(size, Bits.to_hex_string(x))
   hex | hex2
