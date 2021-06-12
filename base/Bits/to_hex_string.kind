@@ -1,23 +1,93 @@
+// This function is fully expanded for max performance
 Bits.to_hex_string (x : Bits): String
+  case x {
+    e: ""
+    o: case x.pred as x {
+      e: "0"
+      o: case x.pred as x {
+        e: "0"
+        o: case x.pred as x {
+          e: "0"
+          o: "0" | Bits.to_hex_string(x.pred)
+          i: "8" | Bits.to_hex_string(x.pred)
+        }
+        i: case x.pred as x {
+          e: "4"
+          o: "4" | Bits.to_hex_string(x.pred)
+          i: "c" | Bits.to_hex_string(x.pred)
+        }
+      }
+      i: case x.pred as x {
+        e: "2"
+        o: case x.pred as x {
+          e: "2" 
+          o: "2" | Bits.to_hex_string(x.pred)
+          i: "a" | Bits.to_hex_string(x.pred)
+        }
+        i: case x.pred as x {
+          e: "6"
+          o: "6" | Bits.to_hex_string(x.pred)
+          i: "e" | Bits.to_hex_string(x.pred)
+        }
+      }
+    }
+    i: case x.pred as x {
+      e: "1"
+      o: case x.pred as x {
+        e: "1"
+        o: case x.pred as x {
+          e: "1"
+          o: "1" | Bits.to_hex_string(x.pred)
+          i: "9" | Bits.to_hex_string(x.pred)
+        }
+        i: case x.pred as x {
+          e: "5"
+          o: "5" | Bits.to_hex_string(x.pred)
+          i: "d" | Bits.to_hex_string(x.pred)
+        }
+      }
+      i: case x.pred as x {
+        e: "3"
+        o: case x.pred as x {
+          e: "3" 
+          o: "3" | Bits.to_hex_string(x.pred)
+          i: "b" | Bits.to_hex_string(x.pred)
+        }
+        i: case x.pred as x {
+          e: "7"
+          o: "7" | Bits.to_hex_string(x.pred)
+          i: "f" | Bits.to_hex_string(x.pred)
+        }
+      }
+    }
+  }
+  
+Bits.to_hex_string.old(x: Bits): String
   let hex_to_string = ((x)
-    switch Nat.eql(Bits.to_nat(x)) {
-      0 : "0"
-      1 : "1"
-      2 : "2"
-      3 : "3"
-      4 : "4"
-      5 : "5"
-      6 : "6"
-      7 : "7"
-      8 : "8"
-      9 : "9"
-      10 : "a"
-      11 : "b"
-      12 : "c"
-      13 : "d"
-      14 : "e"
-      15 : "f"
+  switch Nat.eql(Bits.to_nat(x)) {
+    0 : "0"
+    1 : "1"
+    2 : "2"
+    3 : "3"
+    4 : "4"
+    5 : "5"
+    6 : "6"
+    7 : "7"
+    8 : "8"
+    9 : "9"
+    10 : "a"
+    11 : "b"
+    12 : "c"
+    13 : "d"
+    14 : "e"
+    15 : "f"
   } default "?") :: Bits -> String
   let ls = Bits.chunks_of(4, x)
-  List.foldr(Bits, String, "", 
-    (x) Function.flip(_, _ , _, String.concat)(hex_to_string(x)), ls)
+  List.foldr(Bits, String, "", (x) Function.flip(_, _ , _, String.concat)(hex_to_string(x)), ls)
+
+//Bits.to_hex_string.refactor_is_ok(x: Bits): Bits.to_hex_string.old(x) == Bits.to_hex_string(x)
+  //case x {
+    //e: ?a
+    //o: ?b
+    //i: ?c
+  //}!
