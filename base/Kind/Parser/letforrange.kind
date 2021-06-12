@@ -1,4 +1,4 @@
-Kind.Parser.letforrange.nat: Parser(Kind.Term)
+Kind.Parser.letforrange.nat(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("let-for", Parser {
     Kind.Parser.text("let ")
     get name = Kind.Parser.name1
@@ -12,7 +12,7 @@ Kind.Parser.letforrange.nat: Parser(Kind.Term)
     Kind.Parser.text(":")
     get loop = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     let term = Kind.Term.ref("Nat.for")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, Kind.Term.ref(name))
@@ -24,7 +24,7 @@ Kind.Parser.letforrange.nat: Parser(Kind.Term)
     return term
   })
 
-Kind.Parser.letforrange.nat.with: Parser(Kind.Term)
+Kind.Parser.letforrange.nat.with(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("for", Parser {
     Kind.Parser.text("for ")
     get elem = Kind.Parser.name1
@@ -37,7 +37,7 @@ Kind.Parser.letforrange.nat.with: Parser(Kind.Term)
     Kind.Parser.text(":")
     get loop = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     let term = Kind.Term.ref("Nat.for")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, Kind.Term.ref(name))
@@ -49,7 +49,7 @@ Kind.Parser.letforrange.nat.with: Parser(Kind.Term)
     return term
   })
 
-Kind.Parser.letforrange.u32: Parser(Kind.Term)
+Kind.Parser.letforrange.u32(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("let-for", Parser {
     Kind.Parser.text("let ")
     get name = Kind.Parser.name1
@@ -65,7 +65,7 @@ Kind.Parser.letforrange.u32: Parser(Kind.Term)
     Kind.Parser.text(":")
     get loop = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     let term = Kind.Term.ref("U32.for")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, Kind.Term.ref(name))
@@ -77,7 +77,7 @@ Kind.Parser.letforrange.u32: Parser(Kind.Term)
     return term
   })
 
-Kind.Parser.letforrange.u32.with: Parser(Kind.Term)
+Kind.Parser.letforrange.u32.with(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("for", Parser {
     Kind.Parser.text("for ")
     get elem = Kind.Parser.name1
@@ -92,7 +92,7 @@ Kind.Parser.letforrange.u32.with: Parser(Kind.Term)
     Kind.Parser.text(":")
     get loop = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     let term = Kind.Term.ref("U32.for")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, Kind.Term.ref(name))

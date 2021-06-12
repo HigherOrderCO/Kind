@@ -1,10 +1,10 @@
-Kind.Parser.def: Parser(Kind.Term)
+Kind.Parser.def(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("def", Parser {
     Kind.Parser.text("def ")
     get name = Kind.Parser.name1
     Kind.Parser.text("=")
     get expr = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
-    get body = Kind.Parser.term
+    get body = body(unit)
     return Kind.Term.def(name, expr, (x) body)
   })

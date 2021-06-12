@@ -29,7 +29,7 @@ Kind.Parser.ADT.Derive.deserializer.term.cses(adt: Kind.Parser.ADT.Datatype, cse
       let list = Kind.Term.ref("List.cons")
       let list = Kind.Term.app(list, Kind.Term.hol(Bits.e))
       let list = Kind.Term.app(list, term)
-      let list = Kind.term.app(list, Kind.Parser.ADT.Derive.deserializer.term.cses(adt, cses.tail, Bits.inc(header)))
+      let list = Kind.Term.app(list, Kind.Parser.ADT.Derive.deserializer.term.cses(adt, cses.tail, Bits.inc(header)))
       list
     nil: 
       Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))

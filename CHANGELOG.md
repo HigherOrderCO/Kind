@@ -54,5 +54,17 @@ Test: _
       }
     ```
 
+### Kind 1.0.64
 
+- Monadic block improvements
 
+  - Now it accepts most outside notations (let, open, log, for, etc.)
+
+  - When you use a "for" without a "with", it becomes a monadic loop:
+    
+      IO {
+        for i from 0 to 10:
+          IO.print(Nat.show(i))
+        for i from 100 to 110:
+          IO.print(Nat.show(i))
+      }

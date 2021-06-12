@@ -29,7 +29,7 @@ Kind.Parser.ADT.Derive.parser.term.cses(adt: Kind.Parser.ADT.Datatype, cses: Lis
       let list = Kind.Term.ref("List.cons")
       let list = Kind.Term.app(list, Kind.Term.hol(Bits.e))
       let list = Kind.Term.app(list, term)
-      let list = Kind.term.app(list, Kind.Parser.ADT.Derive.parser.term.cses(adt, cses.tail))
+      let list = Kind.Term.app(list, Kind.Parser.ADT.Derive.parser.term.cses(adt, cses.tail))
       list
     nil: 
       let fail = Kind.Term.ref("Parser.fail")
