@@ -1,0 +1,5 @@
+Result.bind<A: Type, B: Type>(r: Result<A>, f: A -> Result<B>): Result<B>
+  case r {
+    failure: Result.failure<B>(r.error)
+    success: f(r.value)
+  }
