@@ -16,7 +16,7 @@ Crypto.Keccak.hash.bytes.go(len: U32, bytes: Buffer8, i: U32, idx: U32, buf: Buf
   if U32.eql(i, len) then
     let idx = U32.mod(idx, 136u)
     let buf = Buffer32.set(idx, U32.xor(1u, Buffer32.get(idx, buf)), buf)
-    let buf = Buffer32.set(135u, U32.xor(128u, Buffer32.get(idx, buf)), buf)
+    let buf = Buffer32.set(135u, U32.xor(128u, Buffer32.get(135u, buf)), buf)
     Crypto.Keccak.f(buf)
   else
     let idx = U32.mod(idx, 136u)
