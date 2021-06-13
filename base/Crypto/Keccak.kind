@@ -15,13 +15,13 @@ Crypto.Keccak.hash.bytes(len_bytes: Pair<U32, Buffer8>): Pair<U32, Buffer8>
 Crypto.Keccak.hash.bytes.go(len: U32, bytes: Buffer8, i: U32, idx: U32, buf: Buffer32): Buffer32
   if U32.eql(i, len) then
     let idx = U32.mod(idx, 136u)
-    let buf = Buffer32.mut(idx, U32.xor(1u), buf)
-    let buf = Buffer32.mut(135u, U32.xor(128u), buf)
+    let buf = Buffer32.set(idx, U32.xor(1u, Buffer32.get(idx, buf)), buf)
+    let buf = Buffer32.set(135u, U32.xor(128u, Buffer32.get(idx, buf)), buf)
     Crypto.Keccak.f(buf)
   else
     let idx = U32.mod(idx, 136u)
     let val = U8.to_u32(Buffer8.get(i, bytes))
-    let buf = Buffer32.mut(idx, U32.xor(val), buf)
+    let buf = Buffer32.set(idx, U32.xor(val, Buffer32.get(idx, buf)), buf)
     let buf = if U32.eql(idx,135) then Crypto.Keccak.f(buf) else buf
     Crypto.Keccak.hash.bytes.go(len, bytes, U32.add(i,1), U32.add(idx,1), buf)
 
@@ -43,7 +43,6 @@ Crypto.Keccak.f(arr: Buffer32): Buffer32
   // Local definitions, for readability
   def read   = Buffer32.get
   def write  = Buffer32.set
-  def update = Buffer32.mut
   def or     = U32.or
   def xor    = U32.xor
   def nott   = U32.not
@@ -68,68 +67,68 @@ Crypto.Keccak.f(arr: Buffer32): Buffer32
 
     let h   = xor(c8, or(shl(c2, 1#32), shr(c3, 31#32)))
     let l   = xor(c9, or(shl(c3, 1#32), shr(c2, 31#32)))
-    let arr = update(0#32,  xor(h), arr)
-    let arr = update(1#32,  xor(l), arr)
-    let arr = update(10#32, xor(h), arr)
-    let arr = update(11#32, xor(l), arr)
-    let arr = update(20#32, xor(h), arr)
-    let arr = update(21#32, xor(l), arr)
-    let arr = update(30#32, xor(h), arr)
-    let arr = update(31#32, xor(l), arr)
-    let arr = update(40#32, xor(h), arr)
-    let arr = update(41#32, xor(l), arr)
+    let arr = write(0#32,  xor(h, read(0#32, arr)), arr)
+    let arr = write(1#32,  xor(l, read(1#32, arr)), arr)
+    let arr = write(10#32, xor(h, read(10#32, arr)), arr)
+    let arr = write(11#32, xor(l, read(11#32, arr)), arr)
+    let arr = write(20#32, xor(h, read(20#32, arr)), arr)
+    let arr = write(21#32, xor(l, read(21#32, arr)), arr)
+    let arr = write(30#32, xor(h, read(30#32, arr)), arr)
+    let arr = write(31#32, xor(l, read(31#32, arr)), arr)
+    let arr = write(40#32, xor(h, read(40#32, arr)), arr)
+    let arr = write(41#32, xor(l, read(41#32, arr)), arr)
 
     let h   = xor(c0, or(shl(c4, 1#32), shr(c5, 31#32)))
     let l   = xor(c1, or(shl(c5, 1#32), shr(c4, 31#32)))
-    let arr = update(2#32, xor(h), arr)
-    let arr = update(3#32,  xor(l), arr)
-    let arr = update(12#32,  xor(h), arr)
-    let arr = update(13#32, xor(l), arr)
-    let arr = update(22#32, xor(h), arr)
-    let arr = update(23#32, xor(l), arr)
-    let arr = update(32#32, xor(h), arr)
-    let arr = update(33#32, xor(l), arr)
-    let arr = update(42#32, xor(h), arr)
-    let arr = update(43#32, xor(l), arr)
+    let arr = write(2#32, xor(h, read(2#32, arr)), arr)
+    let arr = write(3#32,  xor(l, read(3#32, arr)), arr)
+    let arr = write(12#32,  xor(h, read(12#32, arr)), arr)
+    let arr = write(13#32, xor(l, read(13#32, arr)), arr)
+    let arr = write(22#32, xor(h, read(22#32, arr)), arr)
+    let arr = write(23#32, xor(l, read(23#32, arr)), arr)
+    let arr = write(32#32, xor(h, read(32#32, arr)), arr)
+    let arr = write(33#32, xor(l, read(33#32, arr)), arr)
+    let arr = write(42#32, xor(h, read(42#32, arr)), arr)
+    let arr = write(43#32, xor(l, read(43#32, arr)), arr)
 
     let h   = xor(c2, or(shl(c6, 1#32), shr(c7, 31#32)))
     let l   = xor(c3, or(shl(c7, 1#32), shr(c6, 31#32)))
-    let arr = update(4#32,  xor(h), arr)
-    let arr = update(5#32,  xor(l), arr)
-    let arr = update(14#32, xor(h), arr)
-    let arr = update(15#32, xor(l), arr)
-    let arr = update(24#32, xor(h), arr)
-    let arr = update(25#32, xor(l), arr)
-    let arr = update(34#32, xor(h), arr)
-    let arr = update(35#32, xor(l), arr)
-    let arr = update(44#32, xor(h), arr)
-    let arr = update(45#32, xor(l), arr)
+    let arr = write(4#32,  xor(h, read(4#32, arr)), arr)
+    let arr = write(5#32,  xor(l, read(5#32, arr)), arr)
+    let arr = write(14#32, xor(h, read(14#32, arr)), arr)
+    let arr = write(15#32, xor(l, read(15#32, arr)), arr)
+    let arr = write(24#32, xor(h, read(24#32, arr)), arr)
+    let arr = write(25#32, xor(l, read(25#32, arr)), arr)
+    let arr = write(34#32, xor(h, read(34#32, arr)), arr)
+    let arr = write(35#32, xor(l, read(35#32, arr)), arr)
+    let arr = write(44#32, xor(h, read(44#32, arr)), arr)
+    let arr = write(45#32, xor(l, read(45#32, arr)), arr)
 
     let h   = xor(c4, or(shl(c8, 1#32), shr(c9, 31#32)))
     let l   = xor(c5, or(shl(c9, 1#32), shr(c8, 31#32)))
-    let arr = update(6#32,  xor(h), arr)
-    let arr = update(7#32,  xor(l), arr)
-    let arr = update(16#32, xor(h), arr)
-    let arr = update(17#32, xor(l), arr)
-    let arr = update(26#32, xor(h), arr)
-    let arr = update(27#32, xor(l), arr)
-    let arr = update(36#32, xor(h), arr)
-    let arr = update(37#32, xor(l), arr)
-    let arr = update(46#32, xor(h), arr)
-    let arr = update(47#32, xor(l), arr)
+    let arr = write(6#32,  xor(h, read(6#32, arr)), arr)
+    let arr = write(7#32,  xor(l, read(7#32, arr)), arr)
+    let arr = write(16#32, xor(h, read(16#32, arr)), arr)
+    let arr = write(17#32, xor(l, read(17#32, arr)), arr)
+    let arr = write(26#32, xor(h, read(26#32, arr)), arr)
+    let arr = write(27#32, xor(l, read(27#32, arr)), arr)
+    let arr = write(36#32, xor(h, read(36#32, arr)), arr)
+    let arr = write(37#32, xor(l, read(37#32, arr)), arr)
+    let arr = write(46#32, xor(h, read(46#32, arr)), arr)
+    let arr = write(47#32, xor(l, read(47#32, arr)), arr)
 
     let h   = xor(c6, or(shl(c0, 1#32), shr(c1, 31#32)))
     let l   = xor(c7, or(shl(c1, 1#32), shr(c0, 31#32)))
-    let arr = update(8#32,  xor(h), arr)
-    let arr = update(9#32,  xor(l), arr)
-    let arr = update(18#32, xor(h), arr)
-    let arr = update(19#32, xor(l), arr)
-    let arr = update(28#32, xor(h), arr)
-    let arr = update(29#32, xor(l), arr)
-    let arr = update(38#32, xor(h), arr)
-    let arr = update(39#32, xor(l), arr)
-    let arr = update(48#32, xor(h), arr)
-    let arr = update(49#32, xor(l), arr)
+    let arr = write(8#32,  xor(h, read(8#32, arr)), arr)
+    let arr = write(9#32,  xor(l, read(9#32, arr)), arr)
+    let arr = write(18#32, xor(h, read(18#32, arr)), arr)
+    let arr = write(19#32, xor(l, read(19#32, arr)), arr)
+    let arr = write(28#32, xor(h, read(28#32, arr)), arr)
+    let arr = write(29#32, xor(l, read(29#32, arr)), arr)
+    let arr = write(38#32, xor(h, read(38#32, arr)), arr)
+    let arr = write(39#32, xor(l, read(39#32, arr)), arr)
+    let arr = write(48#32, xor(h, read(48#32, arr)), arr)
+    let arr = write(49#32, xor(l, read(49#32, arr)), arr)
 
     let b00 = read(0#32, arr)
     let b01 = read(1#32, arr)
@@ -233,8 +232,8 @@ Crypto.Keccak.f(arr: Buffer32): Buffer32
     let arr = write(48#32, xor(b48, and(nott(b40), b42)), arr)
     let arr = write(49#32, xor(b49, and(nott(b41), b43)), arr)
 
-    let arr = update(0#32, xor(read(n, Crypto.Keccak.RC)), arr)
-    let arr = update(1#32, xor(read(add(n, 1#32), Crypto.Keccak.RC)), arr)
+    let arr = write(0#32, xor(read(n, Crypto.Keccak.RC), read(0#32, arr)), arr)
+    let arr = write(1#32, xor(read(add(n, 1#32), Crypto.Keccak.RC), read(1#32, arr)), arr)
     arr
   Crypto.Keccak.uncompress(arr)
 
@@ -265,8 +264,6 @@ Crypto.Keccak.uncompress(buf: Buffer32): Buffer32
 Crypto.Keccak.compress(buf: Buffer32): Buffer32
   def shl  = U32.shl
   def add  = U32.add
-  let dep  = buf@depth
-  let cdep = Nat.sub(dep, 2)
   let cbuf = Crypto.Keccak.compress.buf
   for i: U32 from 0 to 64 with cbuf:
     let j  = U32.mul(4u, i)
