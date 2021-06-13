@@ -1,0 +1,4 @@
+U8.not(a: U8): U8
+  let a_val = U8.add(1#8, a)@value
+  U8.new(Word.neg<8>(a_val))
+

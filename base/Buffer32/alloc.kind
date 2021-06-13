@@ -1,2 +1,5 @@
+// Allocates a Buffer32 with capacity to store 2**depth elements
+// It uses an Array. See Array.kind for more information
+// It is optimized on some targets to use mutable buffers
 Buffer32.alloc(depth: Nat): Buffer32
   Buffer32.new(depth, Array.alloc<U32>(depth, U32.zero))

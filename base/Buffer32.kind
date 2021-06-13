@@ -1,3 +1,6 @@
+// Buffer32 is implemented with a pure Array, which is a perfect binary tree. In
+// some targets, it is optimized to use native mutable buffer instead. It can
+// hold up to depth**2 elements. It does NOT store its element count.
 type Buffer32 {
   new(depth: Nat, array: Array<U32, depth>)
 }

@@ -1,2 +1,5 @@
+// Allocates a Buffer8 with capacity to store 2**depth elements
+// It uses an Array. See Array.kind for more information
+// It is optimized on some targets to use mutable buffers
 Buffer8.alloc(depth: Nat): Buffer8
   Buffer8.new(depth, Array.alloc<U8>(depth, U8.zero))

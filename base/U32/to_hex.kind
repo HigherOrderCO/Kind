@@ -1,0 +1,31 @@
+U32.to_hex(u: U32): String
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,28),0xf)),
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,24),0xf)),
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,20),0xf)),
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,16),0xf)),
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,12),0xf)),
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,8),0xf)),
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,4),0xf)),
+  String.cons(U32.to_hex.4(U32.and(U32.shr(u,0),0xf)),
+  String.nil))))))))
+
+U32.to_hex.4(u: U32): Char
+  switch U32.eql(u) {
+     0#32: '0'
+     1#32: '1'
+     2#32: '2'
+     3#32: '3'
+     4#32: '4'
+     5#32: '5'
+     6#32: '6'
+     7#32: '7'
+     8#32: '8'
+     9#32: '9'
+    10#32: 'a'
+    11#32: 'b'
+    12#32: 'c'
+    13#32: 'd'
+    14#32: 'e'
+    15#32: 'f'
+  } default '0'
+  

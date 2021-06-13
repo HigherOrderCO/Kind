@@ -1,3 +1,13 @@
+// Arrays are represented as perfect binary trees of certain depth
+// For example, the following tree has type Array<Nat,3>:
+//                   _o_              depth=0
+//                _ /   \ _
+//              o           o         depth=1
+//            /   \       /   \  
+//           o     o     o     o      depth=2
+//          / \   / \   / \   / \
+//         0   1 2   3 4   5 6   7    depth=3
+// It can hold up to 8 elements (because `2 ** 3 == 8`)
 type Array<A: Type> ~ (depth: Nat) {
   tip(value: A)                                             ~ (depth = Nat.zero),
   tie<depth: Nat>(lft: Array<A,depth>, rgt: Array<A,depth>) ~ (depth = Nat.succ(depth))

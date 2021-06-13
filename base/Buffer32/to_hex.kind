@@ -1,0 +1,6 @@
+Buffer32.to_hex(lenbuf: Pair<U32, Buffer32>): String
+  let {len,buf} = lenbuf
+  let str = ""
+  for i: U32 from 0 to len with str:
+    str | U32.to_hex(Buffer32.get(i,buf))
+  str

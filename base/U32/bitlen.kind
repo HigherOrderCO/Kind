@@ -1,0 +1,6 @@
+U32.bitlen(n: U32): U32
+  if U32.eql(n, 0#32) then
+    0#32
+  else
+    U32.add(1#32, U32.bitlen(U32.div(n, 2#32)))
+

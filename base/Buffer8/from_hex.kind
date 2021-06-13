@@ -1,0 +1,17 @@
+Buffer8.from_hex(hex: String): Pair<U32, Buffer8>
+  let len = String.length(hex) // TODO: optimize by using U32?
+  let buf = Buffer8.alloc(Nat.bitlen(len))
+  Buffer8.from_hex.go(hex, 0, buf)
+
+Buffer8.from_hex.go(hex: String, idx: U32, buf: Buffer8): Pair<U32,Buffer8>
+  case hex {
+    nil: {idx, buf}
+    cons: case hex.tail {
+      nil: 
+        let val = U8.mul(Char.hex_value8(hex.head),16)
+        {idx, Buffer8.set(idx, val, buf)}
+      cons: 
+        let val = U8.add(Char.hex_value8(hex.tail.head), U8.mul(Char.hex_value8(hex.head),16))
+        Buffer8.from_hex.go(hex.tail.tail, U32.add(1,idx), Buffer8.set(idx, val, buf))
+    }
+  }

@@ -1,0 +1,7 @@
+Buffer32.to_buffer8.crop(buf32: Buffer32): Buffer8
+  open buf32
+  let buf8 = Buffer8.alloc(buf32.depth)
+  let size = U32.pow(2, Nat.to_u32(buf32.depth))
+  for idx: U32 from 0 to size with buf8:
+    Buffer8.set(idx, U32.to_u8(Buffer32.get(idx, buf32)), buf8)
+  buf8

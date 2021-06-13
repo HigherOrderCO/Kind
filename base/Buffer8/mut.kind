@@ -1,0 +1,3 @@
+Buffer8.mut(idx: U32, f: U8 -> U8, buf: Buffer8): Buffer8
+  Buffer8.set(idx, f(Buffer8.get(idx, buf)), buf)
+

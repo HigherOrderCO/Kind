@@ -1,6 +1,4 @@
 Test: _
-  let buf = Buffer32.from("abc")
-  log("buf: " | Buffer32.show(buf))
-  let kec = Crypto.Keccak(buf)
-  log("kec: " | Buffer32.show(kec))
-  1
+  let buf8 = Buffer8.from_hex("0102ff017fcafe8879124567")
+  let hash = Crypto.Keccak.hash.bytes(buf8)
+  Buffer8.to_hex(hash)

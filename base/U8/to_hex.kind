@@ -1,0 +1,25 @@
+U8.to_hex(u: U8): String
+  String.cons(U8.to_hex.4(U8.shr(u,4)),
+  String.cons(U8.to_hex.4(U8.and(u,0xf)),
+  String.nil))
+
+U8.to_hex.4(u: U8): Char
+  switch U8.eql(u) {
+     0#8: '0'
+     1#8: '1'
+     2#8: '2'
+     3#8: '3'
+     4#8: '4'
+     5#8: '5'
+     6#8: '6'
+     7#8: '7'
+     8#8: '8'
+     9#8: '9'
+    10#8: 'a'
+    11#8: 'b'
+    12#8: 'c'
+    13#8: 'd'
+    14#8: 'e'
+    15#8: 'f'
+  } default '0'
+  

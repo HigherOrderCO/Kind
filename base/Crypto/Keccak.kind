@@ -1,11 +1,51 @@
-Crypto.Keccak(arr: Buffer32): Buffer32
+// TODO
+Crypto.Keccak.hash(string: String): String
+  Crypto.Keccak.hash(string)
+
+Crypto.Keccak.hash.bytes(len_bytes: Pair<U32, Buffer8>): Pair<U32, Buffer8>
+  let {len, bytes} = len_bytes
+  let buf = Crypto.Keccak.hash.bytes.go.buf.clear(unit)
+  let buf = Crypto.Keccak.hash.bytes.go(len, bytes, 0, 0, buf)
+  let res = Buffer8.alloc(5)
+  for i: U32 from 0#32 to 32#32 with res:
+    let b = U32.to_u8(U32.mod(Buffer32.get(i, buf), 256u))
+    Buffer8.set(i, b, res)
+  {32,res}
+
+Crypto.Keccak.hash.bytes.go(len: U32, bytes: Buffer8, i: U32, idx: U32, buf: Buffer32): Buffer32
+  if U32.eql(i, len) then
+    let idx = U32.mod(idx, 136u)
+    let buf = Buffer32.mut(idx, U32.xor(1u), buf)
+    let buf = Buffer32.mut(135u, U32.xor(128u), buf)
+    Crypto.Keccak.f(buf)
+  else
+    let idx = U32.mod(idx, 136u)
+    let val = U8.to_u32(Buffer8.get(i, bytes))
+    let buf = Buffer32.mut(idx, U32.xor(val), buf)
+    let buf = if U32.eql(idx,135) then Crypto.Keccak.f(buf) else buf
+    Crypto.Keccak.hash.bytes.go(len, bytes, U32.add(i,1), U32.add(idx,1), buf)
+
+Crypto.Keccak.hash.bytes.go.buf: Buffer32
+  Buffer32.alloc(8)
+
+Crypto.Keccak.hash.bytes.go.buf.clear(unit: Unit): Buffer32
+  let buf = Crypto.Keccak.hash.bytes.go.buf
+  for i: U32 from 0 to 256 with buf:
+    Buffer32.set(i, 0, buf)
+  buf
+
+Crypto.Keccak.hash.bytes.test(unit: Unit): String
+  let buf8 = Buffer8.from_hex("0102ff017fcafe8879124567")
+  let hash = Crypto.Keccak.hash.bytes(buf8)
+  Buffer8.to_hex(hash)
+
+Crypto.Keccak.f(arr: Buffer32): Buffer32
   // Local definitions, for readability
   def read   = Buffer32.get
   def write  = Buffer32.set
   def update = Buffer32.mut
   def or     = U32.or
   def xor    = U32.xor
-  def xors   = U32.xors
   def nott   = U32.not
   def and    = U32.and
   def shl    = U32.shl
@@ -13,18 +53,18 @@ Crypto.Keccak(arr: Buffer32): Buffer32
   def add    = U32.add
 
   let arr = Crypto.Keccak.compress(arr)
-   for i : U32 from 0#32 to 24u with arr:
-    let n = U32.mul(2#32, i)
-    let c0 = xors(5)(read(0#32, arr), read(10#32, arr), read(20#32, arr), read(30#32, arr), read(40#32, arr))
-    let c1 = xors(5)(read(1#32, arr), read(11#32, arr), read(21#32, arr), read(31#32, arr), read(41#32, arr))
-    let c2 = xors(5)(read(2#32, arr), read(12#32, arr), read(22#32, arr), read(32#32, arr), read(42#32, arr))
-    let c3 = xors(5)(read(3#32, arr), read(13#32, arr), read(23#32, arr), read(33#32, arr), read(43#32, arr))
-    let c4 = xors(5)(read(4#32, arr), read(14#32, arr), read(24#32, arr), read(34#32, arr), read(44#32, arr))
-    let c5 = xors(5)(read(5#32, arr), read(15#32, arr), read(25#32, arr), read(35#32, arr), read(45#32, arr))
-    let c6 = xors(5)(read(6#32, arr), read(16#32, arr), read(26#32, arr), read(36#32, arr), read(46#32, arr))
-    let c7 = xors(5)(read(7#32, arr), read(17#32, arr), read(27#32, arr), read(37#32, arr), read(47#32, arr))
-    let c8 = xors(5)(read(8#32, arr), read(18#32, arr), read(28#32, arr), read(38#32, arr), read(48#32, arr))
-    let c9 = xors(5)(read(9#32, arr), read(19#32, arr), read(29#32, arr), read(39#32, arr), read(49#32, arr))
+   for i: U32 from 0#32 to 24u with arr:
+    let n  = U32.mul(2#32, i)
+    let c0 = xor(read(0#32, arr), xor(read(10#32, arr), xor(read(20#32, arr), xor(read(30#32, arr), read(40#32, arr)))))
+    let c1 = xor(read(1#32, arr), xor(read(11#32, arr), xor(read(21#32, arr), xor(read(31#32, arr), read(41#32, arr)))))
+    let c2 = xor(read(2#32, arr), xor(read(12#32, arr), xor(read(22#32, arr), xor(read(32#32, arr), read(42#32, arr)))))
+    let c3 = xor(read(3#32, arr), xor(read(13#32, arr), xor(read(23#32, arr), xor(read(33#32, arr), read(43#32, arr)))))
+    let c4 = xor(read(4#32, arr), xor(read(14#32, arr), xor(read(24#32, arr), xor(read(34#32, arr), read(44#32, arr)))))
+    let c5 = xor(read(5#32, arr), xor(read(15#32, arr), xor(read(25#32, arr), xor(read(35#32, arr), read(45#32, arr)))))
+    let c6 = xor(read(6#32, arr), xor(read(16#32, arr), xor(read(26#32, arr), xor(read(36#32, arr), read(46#32, arr)))))
+    let c7 = xor(read(7#32, arr), xor(read(17#32, arr), xor(read(27#32, arr), xor(read(37#32, arr), read(47#32, arr)))))
+    let c8 = xor(read(8#32, arr), xor(read(18#32, arr), xor(read(28#32, arr), xor(read(38#32, arr), read(48#32, arr)))))
+    let c9 = xor(read(9#32, arr), xor(read(19#32, arr), xor(read(29#32, arr), xor(read(39#32, arr), read(49#32, arr)))))
 
     let h   = xor(c8, or(shl(c2, 1#32), shr(c3, 31#32)))
     let l   = xor(c9, or(shl(c3, 1#32), shr(c2, 31#32)))
@@ -197,3 +237,98 @@ Crypto.Keccak(arr: Buffer32): Buffer32
     let arr = update(1#32, xor(read(add(n, 1#32), Crypto.Keccak.RC)), arr)
     arr
   Crypto.Keccak.uncompress(arr)
+
+Crypto.Keccak.uncompress.buf: Buffer32
+  Buffer32.alloc(8)
+
+Crypto.Keccak.uncompress(buf: Buffer32): Buffer32
+  def shr = U32.shr
+  def mod = U32.mod
+  def add = U32.add
+  let ubuf = Crypto.Keccak.uncompress.buf
+  for i: U32 from 0 to 256 with ubuf:
+    let j    = U32.mul(4u, i)
+    let w    = Buffer32.get(i, buf)
+    let b0   = mod(w, 256u)
+    let w    = shr(w, 8u)
+    let b1   = mod(w, 256u)
+    let w    = shr(w, 8u)
+    let b2   = mod(w, 256u)
+    let b3   = shr(w, 8u)
+    let ubuf = Buffer32.set(j, b0, ubuf)
+    let ubuf = Buffer32.set(add(j, 1u), b1, ubuf)
+    let ubuf = Buffer32.set(add(j, 2u), b2, ubuf)
+    let ubuf = Buffer32.set(add(j, 3u), b3, ubuf)
+    ubuf
+  ubuf
+
+Crypto.Keccak.compress(buf: Buffer32): Buffer32
+  def shl  = U32.shl
+  def add  = U32.add
+  let dep  = buf@depth
+  let cdep = Nat.sub(dep, 2)
+  let cbuf = Crypto.Keccak.compress.buf
+  for i: U32 from 0 to 64 with cbuf:
+    let j  = U32.mul(4u, i)
+    let b0 = Buffer32.get(j, buf)
+    let b1 = Buffer32.get(add(j, 1u), buf)
+    let b2 = Buffer32.get(add(j, 2u), buf)
+    let b3 = Buffer32.get(add(j, 3u), buf)
+    let w  = add(b0, shl(add(b1, shl(add(b2, shl(b3, 8u)), 8u)), 8u))
+    Buffer32.set(i, w, cbuf)
+  cbuf
+
+Crypto.Keccak.compress.buf: Buffer32
+  Buffer32.alloc(6)
+
+Crypto.Keccak.RC: Buffer32
+  let arr = Buffer32.alloc(6)
+  let arr = Buffer32.set(0#32,  1#32,          arr)
+  let arr = Buffer32.set(1#32,  0#32,          arr)
+  let arr = Buffer32.set(2#32,  32898#32,      arr)
+  let arr = Buffer32.set(3#32,  0#32,          arr)
+  let arr = Buffer32.set(4#32,  32906#32,      arr)
+  let arr = Buffer32.set(5#32,  2147483648#32, arr)
+  let arr = Buffer32.set(6#32,  2147516416#32, arr)
+  let arr = Buffer32.set(7#32,  2147483648#32, arr)
+  let arr = Buffer32.set(8#32,  32907#32,      arr)
+  let arr = Buffer32.set(9#32,  0#32,          arr)
+  let arr = Buffer32.set(10#32, 2147483649#32, arr)
+  let arr = Buffer32.set(11#32, 0#32,          arr)
+  let arr = Buffer32.set(12#32, 2147516545#32, arr)
+  let arr = Buffer32.set(13#32, 2147483648#32, arr)
+  let arr = Buffer32.set(14#32, 32777#32,      arr)
+  let arr = Buffer32.set(15#32, 2147483648#32, arr)
+  let arr = Buffer32.set(16#32, 138#32,        arr)
+  let arr = Buffer32.set(17#32, 0#32,          arr)
+  let arr = Buffer32.set(18#32, 136#32,        arr)
+  let arr = Buffer32.set(19#32, 0#32,          arr)
+  let arr = Buffer32.set(20#32, 2147516425#32, arr)
+  let arr = Buffer32.set(21#32, 0#32,          arr)
+  let arr = Buffer32.set(22#32, 2147483658#32, arr)
+  let arr = Buffer32.set(23#32, 0#32,          arr)
+  let arr = Buffer32.set(24#32, 2147516555#32, arr)
+  let arr = Buffer32.set(25#32, 0#32,          arr)
+  let arr = Buffer32.set(26#32, 139#32,        arr)
+  let arr = Buffer32.set(27#32, 2147483648#32, arr)
+  let arr = Buffer32.set(28#32, 32905#32,      arr)
+  let arr = Buffer32.set(29#32, 2147483648#32, arr)
+  let arr = Buffer32.set(30#32, 32771#32,      arr)
+  let arr = Buffer32.set(31#32, 2147483648#32, arr)
+  let arr = Buffer32.set(32#32, 32770#32,      arr)
+  let arr = Buffer32.set(33#32, 2147483648#32, arr)
+  let arr = Buffer32.set(34#32, 128#32,        arr)
+  let arr = Buffer32.set(35#32, 2147483648#32, arr)
+  let arr = Buffer32.set(36#32, 32778#32,      arr)
+  let arr = Buffer32.set(37#32, 0#32,          arr)
+  let arr = Buffer32.set(38#32, 2147483658#32, arr)
+  let arr = Buffer32.set(39#32, 2147483648#32, arr)
+  let arr = Buffer32.set(40#32, 2147516545#32, arr)
+  let arr = Buffer32.set(41#32, 2147483648#32, arr)
+  let arr = Buffer32.set(42#32, 32896#32,      arr)
+  let arr = Buffer32.set(43#32, 2147483648#32, arr)
+  let arr = Buffer32.set(44#32, 2147483649#32, arr)
+  let arr = Buffer32.set(45#32, 0#32,          arr)
+  let arr = Buffer32.set(46#32, 2147516424#32, arr)
+  let arr = Buffer32.set(47#32, 2147483648#32, arr)
+  arr
