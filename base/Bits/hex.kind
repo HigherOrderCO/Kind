@@ -1,0 +1,93 @@
+// This function is fully expanded for max performance
+Bits.hex.encode(x: Bits): String
+  case x {
+    e: ""
+    o: case x.pred as x {
+      e: "0"
+      o: case x.pred as x {
+        e: "0"
+        o: case x.pred as x {
+          e: "0"
+          o: "0" | Bits.hex.encode(x.pred)
+          i: "8" | Bits.hex.encode(x.pred)
+        }
+        i: case x.pred as x {
+          e: "4"
+          o: "4" | Bits.hex.encode(x.pred)
+          i: "c" | Bits.hex.encode(x.pred)
+        }
+      }
+      i: case x.pred as x {
+        e: "2"
+        o: case x.pred as x {
+          e: "2" 
+          o: "2" | Bits.hex.encode(x.pred)
+          i: "a" | Bits.hex.encode(x.pred)
+        }
+        i: case x.pred as x {
+          e: "6"
+          o: "6" | Bits.hex.encode(x.pred)
+          i: "e" | Bits.hex.encode(x.pred)
+        }
+      }
+    }
+    i: case x.pred as x {
+      e: "1"
+      o: case x.pred as x {
+        e: "1"
+        o: case x.pred as x {
+          e: "1"
+          o: "1" | Bits.hex.encode(x.pred)
+          i: "9" | Bits.hex.encode(x.pred)
+        }
+        i: case x.pred as x {
+          e: "5"
+          o: "5" | Bits.hex.encode(x.pred)
+          i: "d" | Bits.hex.encode(x.pred)
+        }
+      }
+      i: case x.pred as x {
+        e: "3"
+        o: case x.pred as x {
+          e: "3" 
+          o: "3" | Bits.hex.encode(x.pred)
+          i: "b" | Bits.hex.encode(x.pred)
+        }
+        i: case x.pred as x {
+          e: "7"
+          o: "7" | Bits.hex.encode(x.pred)
+          i: "f" | Bits.hex.encode(x.pred)
+        }
+      }
+    }
+  }
+
+Bits.hex.decode(x: String): Bits
+  case x {
+    nil: Bits.e
+    cons:
+      switch U16.eql(x.head) {
+        '0': Bits.o(Bits.o(Bits.o(Bits.o(Bits.hex.decode(x.tail)))))
+        '1': Bits.i(Bits.o(Bits.o(Bits.o(Bits.hex.decode(x.tail)))))
+        '2': Bits.o(Bits.i(Bits.o(Bits.o(Bits.hex.decode(x.tail)))))
+        '3': Bits.i(Bits.i(Bits.o(Bits.o(Bits.hex.decode(x.tail)))))
+        '4': Bits.o(Bits.o(Bits.i(Bits.o(Bits.hex.decode(x.tail)))))
+        '5': Bits.i(Bits.o(Bits.i(Bits.o(Bits.hex.decode(x.tail)))))
+        '6': Bits.o(Bits.i(Bits.i(Bits.o(Bits.hex.decode(x.tail)))))
+        '7': Bits.i(Bits.i(Bits.i(Bits.o(Bits.hex.decode(x.tail)))))
+        '8': Bits.o(Bits.o(Bits.o(Bits.i(Bits.hex.decode(x.tail)))))
+        '9': Bits.i(Bits.o(Bits.o(Bits.i(Bits.hex.decode(x.tail)))))
+        'a': Bits.o(Bits.i(Bits.o(Bits.i(Bits.hex.decode(x.tail)))))
+        'b': Bits.i(Bits.i(Bits.o(Bits.i(Bits.hex.decode(x.tail)))))
+        'c': Bits.o(Bits.o(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+        'd': Bits.i(Bits.o(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+        'e': Bits.o(Bits.i(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+        'f': Bits.i(Bits.i(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+        'A': Bits.o(Bits.i(Bits.o(Bits.i(Bits.hex.decode(x.tail)))))
+        'B': Bits.i(Bits.i(Bits.o(Bits.i(Bits.hex.decode(x.tail)))))
+        'C': Bits.o(Bits.o(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+        'D': Bits.i(Bits.o(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+        'E': Bits.o(Bits.i(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+        'F': Bits.i(Bits.i(Bits.i(Bits.i(Bits.hex.decode(x.tail)))))
+      } default Bits.e
+  }

@@ -2,7 +2,7 @@ List.stringifier<A: Type>(elem: Stringifier<A>): Stringifier<List<A>>
   (xs, str)
   List.stringifier.go<A>(elem, xs, true, str)
   
-List.stringifier.go<A: Type>(elem: stringifier<A>, xs: List<A>, fst: Bool, str: String): String
+List.stringifier.go<A: Type>(elem: Stringifier<A>, xs: List<A>, fst: Bool, str: String): String
   case xs {
     nil: Stringifier.text("]", str)
     cons: Stringifier.text(if fst then "[" else ",", elem(xs.head, List.stringifier.go<A>(elem, xs.tail, false, str)))

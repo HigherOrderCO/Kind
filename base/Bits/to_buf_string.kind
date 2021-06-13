@@ -1,6 +1,7 @@
 // Show pairs of hex values ignoring "00"
 Bits.to_buf_string(x: Bits): String
-  Bits.to_buf_string.clean(Bits.to_hex_string(x), "")
+  let full = Bits.to_hex_string(x)
+  Bits.to_buf_string.clean(String.reverse(full), "")
 
 Bits.to_buf_string.clean(xs: String, str: String): String
   case xs {
