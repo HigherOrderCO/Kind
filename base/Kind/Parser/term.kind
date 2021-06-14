@@ -1,6 +1,7 @@
 Kind.Parser.term: Parser(Kind.Term)
   Kind.Parser.block("term", Parser {
     get term = Parser.choice!([
+
       Kind.Parser.dom
       Kind.Parser.forall
       Kind.Parser.lambda
@@ -35,6 +36,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.apply
       Kind.Parser.chain
       Kind.Parser.mirror
+      Kind.Parser.comprehension
       Kind.Parser.list
       Kind.Parser.map
       Kind.Parser.log((x) Kind.Parser.term)
