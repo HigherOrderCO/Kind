@@ -5,12 +5,178 @@ type App.KL.Game.State.Local {
   new(
     user: String
     room: String 
+    // cast_info
+    // env_info
   )
 }
 
-App.KL.Game.draw(local: App.KL.Game.State.Local): DOM
+// Global State
+// ============
+
+type App.KL.Game {
+  new(
+    stage: App.KL.Game.Stage
+    players: Map<App.KL.Game.Player>
+    board: App.KL.Game.Board
+    tick: U64
+  )
+}
+
+type App.KL.Game.Stage {
+  draft
+  board
+}
+
+type App.KL.Game.Team {
+  blue
+  red
+  neutral
+}
+
+// Players
+// -------
+
+type App.KL.Game.Player {
+  new(
+    hero_id: Maybe<U8>
+    init_pos: App.KL.Game.Team
+    ready: Bool
+  )
+}
+
+type App.KL.Game.Creature {
+  new(
+    player: Maybe<String>
+    hero: App.Kaelin.Hero
+    team: App.Kaelin.Team
+    hp: I32
+    ap: I32
+  )
+}
+
+type App.KL.Game.Hero {
+  new(
+    name: String 
+    draw: App.KL.Game.Player -> VoxBox
+    max_hp: I32
+    max_ap: I32
+    skills: List<App.KL.Game.Skill>
+  )
+}
+
+type App.KL.Game.Skill {
+	new(
+  	name: String
+		range: I32
+    ap_cost: I32
+		effect: App.KL.Game.Effect<Unit>
+		key: Char
+	)
+}
+
+App.KL.Game.Effect(A: Type): Type
+  ((center: App.KL.Game.Coord) ->
+   (target: App.KL.Game.Coord) ->
+   (board: App.KL.Game.Board) ->
+   App.KL.Game.Effect.Result(A))
+
+type App.KL.Game.Effect.Result <A: Type> {
+  new(
+    value: A
+    board: App.KL.Game.Board
+    //futures: List(App.KL.Board.Future)
+    indicators: NatMap<App.KL.Game.Indicator>
+  )
+}
+
+type App.KL.Game.Indicator {
+  green
+  red
+  yellow
+  blue
+  background
+}
+
+// Terrains
+// --------
+
+type App.KL.Game.Field {
+  new(
+    draw: App.KL.Game.Terrain -> App.KL.Game.Indicator -> VoxBox
+  )
+}
+
+type App.KL.Game.Terrain {
+  new(
+    field_id: Maybe<U8>
+  )
+}
+
+type App.KL.Game.Tile {
+  new(
+    terrain: App.KL.Game.Terrain
+    creature: Maybe<App.KL.Game.Creature>
+  )
+}
+
+// Board
+// -----
+
+App.KL.Game.Board: Type
+  NatMap<App.KL.Game.Tile>
+
+// Math
+// ----
+
+type App.KL.Game.Coord {
+  new(i: I32, j: I32) 
+}
+
+
+
+
+
+//type App.Kaelin.State.global {
+  //new(
+    //round: I32
+    //tick: U64
+    //room: String
+    //map: App.Kaelin.Map
+    //stage: App.Kaelin.Stage
+    //skills_list: List<App.Kaelin.CastInfo.global>
+  //)
+//}
+
+//type App.Kaelin.State.local {
+  //new(
+    //input: String
+    //user: String
+    //team: App.Kaelin.Team
+    //local_map: App.Kaelin.Map
+    //control_map: I32
+    //cast_info: Maybe<App.Kaelin.CastInfo.local>
+    //env_info: App.EnvInfo,
+    //internal: App.Kaelin.Internal 
+  //)
+//}
+
+
+
+
+
+
+
+
+App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
   <div>
-    "TODO"
+    <div>"Sala: " | local@room</div>
+    {
+      let game = global@game
+      case game {
+        none: <div>"Not ingame."</div>
+        some: <div>"Players: " | Nat.show(List.length!(Map.to_list!(game.value@players)))</div>
+      }
+    }
   </div>
 
 App.KL.Game.when(
@@ -18,3 +184,32 @@ App.KL.Game.when(
   event: App.Event
 ): IO<Maybe<App.KL.State.Local>>
   App.pass<App.KL.State>
+
+App.KL.Game.start: App.KL.Game
+  App.KL.Game.new(
+    App.KL.Game.Stage.draft
+    Map.new!
+    NatMap.new!
+    0
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

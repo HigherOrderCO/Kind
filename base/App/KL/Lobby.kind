@@ -34,7 +34,7 @@ App.KL.Lobby.draw.input(id: String, value: String): DOM
   <input id=id value=value style=style>
   </input>
 
-App.KL.Lobby.draw(local: App.KL.Lobby.State.Local): DOM
+App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State): DOM
   open local
   let style = {
     "width": "100vw", 
@@ -84,10 +84,8 @@ App.KL.Lobby.when(
         }
         "ready": IO {
           App.watch!(local@room_input)
-          App.new_post!(
-            local@room_input,
-            App.Kaelin.Event.serialize(App.Kaelin.Event.join_room),
-          )
+          App.new_post!(local@room_input, App.KL.Global.Event.serialize_post(App.KL.Global.Event.join_room))
+          App.set_local!(App.KL.State.Local.game(App.KL.Game.State.Local.new(local@user, local@room_input)))
         }
       } default App.pass!
   } default App.pass!
