@@ -7,3 +7,11 @@ String.to_hex(str: String): String
       let hex = U16.to_hex.show(str.head)
       String.concat(hex, String.to_hex(str.tail))
   }
+
+//String.to_hex.test: TestSuite
+//base
+//  - test.kind
+//  - String
+//    - test.kind
+//    - to_hex
+//      - test.kind

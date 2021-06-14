@@ -1,0 +1,20 @@
+TestSuite.show(t: TestSuite, depth: Nat): String
+  let ind = ""
+  for n from 0 to depth with ind:
+    ind|"  "
+  case t {
+    test: 
+      ind|TestSuite.show.test(t.name, t.result)|"\n"
+    suite:
+      let result = ind|t.name|"\n"
+      for x in t.list with result:
+        result|TestSuite.show(x, 1 + depth)
+      result
+  }
+
+TestSuite.show.test(name: String, result: Bool): String
+  String.concat(String.concat(name, ": "), if result then "Pass" else "Fail")
+
+//TestSuit.check_fail(t: List<TestSuite>): String
+//  List
+  

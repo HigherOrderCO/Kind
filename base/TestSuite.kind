@@ -1,0 +1,4 @@
+type TestSuite {
+  test(name: String, result: Bool)
+  suite(name: String, list: List<TestSuite>)
+}
