@@ -1,27 +1,3 @@
-type MyType {
-  foo(n: List<Nat>, s: String, m: MyType)
-  bar
-} deriving (stringifier, parser, serializer, deserializer)
-
 Test: _
-  IO {
-    let val = MyType.foo([1,2,3], "Hello", MyType.bar)
-
-    // Converts to string
-    let str = Stringifier.run!(MyType.stringifier, val)
-    IO.print("str: " | str)
-
-    // Parses string to a value
-    let val = Parser.run!(MyType.parser, str) <> MyType.bar
-
-    // Serializes to bits
-    let bts = Serializer.run!(MyType.serializer, val)
-    IO.print("bts: " | Bits.show(bts))
-
-    // Deserializes to a value
-    let val = Deserializer.run!(MyType.deserializer, bts) <> MyType.bar
-
-    // Converts to string again
-    let str = Stringifier.run!(MyType.stringifier, val)
-    IO.print("str: " | str)
-  }
+  let hex = String.to_hex("abcdef")
+  hex

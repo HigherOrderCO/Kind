@@ -1,0 +1,4 @@
+String.test.to_hex.0: _
+  def hex = String.to_hex("abcdef")
+  refl :: String.eql(hex, "616263646566") == true
+  
