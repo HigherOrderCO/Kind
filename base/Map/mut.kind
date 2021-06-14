@@ -1,2 +1,0 @@
-Map.mut<A: Type>(key: String, ini: A, fun: A -> A, map: Map(A)): Map(A)
-  BitsMap.mut<A>(String.to_bits(key), ini, fun, map)

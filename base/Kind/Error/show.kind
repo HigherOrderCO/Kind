@@ -3,11 +3,11 @@ Kind.Error.show(error: Kind.Error, defs: Kind.Defs): String
     type_mismatch: 
       let expected = case error.expected {
         left: error.expected.value
-        right: Kind.Term.show(Kind.Term.normalize(error.expected.value, {}))
+        right: Kind.Term.show(Kind.Term.normalize(error.expected.value, BitsMap.new!))
       }
       let detected = case error.detected {
         left: error.detected.value
-        right: Kind.Term.show(Kind.Term.normalize(error.detected.value, {}))
+        right: Kind.Term.show(Kind.Term.normalize(error.detected.value, BitsMap.new!))
       }
       "Type mismatch.\n"
       | "- Expected: " | expected | "\n"

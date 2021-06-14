@@ -1,2 +1,4 @@
+// Copies all key and vals from b to a
+
 Map.assign<A: Type>(a: Map(A), b: Map(A)): Map(A)
-  BitsMap.assign<A>(a, b)
+  Avl.assign(String, A, String.cmp, b, a)

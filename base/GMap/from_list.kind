@@ -1,5 +1,0 @@
-GMap.from_list<K: Type, V: Type>(
-  cmp : K -> K -> Cmp, 
-  xs  : List<Pair<K,V>>
-) : GMap<K,V>
-  GMap.from_list.go<K,V>(cmp, GMap.tip<K,V>, xs)

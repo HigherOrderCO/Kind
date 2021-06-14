@@ -1,0 +1,2 @@
+Avl.not_member<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: Avl<K,V>): Bool
+  Bool.not(Avl.member<K,V>(cmp, key, map))

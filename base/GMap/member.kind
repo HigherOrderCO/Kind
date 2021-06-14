@@ -1,9 +1,0 @@
-GMap.member<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: GMap<K,V>): Bool
-  case map {
-    tip: Bool.false,
-    bin: case cmp(key, map.key) {
-      ltn: GMap.member<K,V>(cmp, key, map.left),
-      eql: Bool.true,
-      gtn: GMap.member<K,V>(cmp, key, map.right)
-    }
-  }

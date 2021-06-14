@@ -1,0 +1,6 @@
+Avl.to_list<K: Type, V: Type>(map: Avl<K,V>): List<Pair<K,V>>
+  Avl.foldr_with_key<K,V,List<Pair<K,V>>>(
+    (k, v, kvs) List.cons<Pair<K,V>>(Pair.new<K,V>(k,v), kvs),
+    List.nil<Pair<K,V>>,
+    map
+  )

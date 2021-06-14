@@ -1,0 +1,3 @@
+type Subset <A: Type, B: A -> Type> {
+  new(val: A)<prop: B(val)>
+}

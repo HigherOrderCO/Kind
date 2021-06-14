@@ -1,5 +1,0 @@
-GMap.null<K: Type, V: Type>(map: GMap<K,V>): Bool
-  case map {
-    tip: Bool.true,
-    bin: Bool.false
-  }

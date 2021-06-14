@@ -1,2 +1,2 @@
 Map.new<A: Type>: Map(A)
-  BitsMap.new<A>
+  Avl.tip!!
