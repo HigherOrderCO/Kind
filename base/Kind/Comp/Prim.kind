@@ -95,10 +95,10 @@ Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, d
         some:
           let arity = Kind.Comp.get_arity(got.value)
           if (arity =? List.length!(args)) && (arity >? 0) then
-            let code = "($" | term.name
-            let code = for arg in args:
-              code | " " | Kind.Comp.transpile.term(lang, arg, depth, defs)
-            let code = code | ")"
+            def inline_term = (arg)
+              Kind.Comp.transpile.term(lang, arg, depth, defs)
+            let inlined_args = List.map!!(inline_term, args)
+            let code = lang@gram@global_application(term.name, inlined_args)
             some(code)
           else
             none
@@ -114,12 +114,16 @@ Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, d
         let lams_len = cses_len - args_len
         let args = for i from 0 to lams_len: args ++ [Kind.Comp.var("c"|Nat.show(i))]
         let self = "self" | Nat.show(depth)
-        def build_cse = (cse)
+        def build_cse = (item)
+          {cse, arg} = item
           {name, flds} = cse
 
           let flds_len = List.length!(flds)
           let let_args_n = List.reverse!(List.seq(flds_len))
           let lam_args_n = List.reverse!(List.seq(lams_len))
+
+          let keys = List.create!(flds_len, (k) Kind.Comp.var("f"|Nat.show(Nat.add(depth,k))))
+          let argj = Kind.Comp.apply(arg, keys)
 
           let body = Kind.Comp.transpile.term(lang, argj, Nat.add(Nat.add(depth,flds_len),lams_len), defs)
           for i in lam_args_n with body:
@@ -133,7 +137,7 @@ Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, d
               text
             )
           {name, text}
-        let cse_body_list = List.map!!(build_cse, cses)
+        let cse_body_list = List.map!!(build_cse, List.zip!!(cses, args))
 
         some(lang@gram@select(cse_body_list))
   } default none
