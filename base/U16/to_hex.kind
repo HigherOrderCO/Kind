@@ -1,2 +1,6 @@
 U16.to_hex(a: U16): U16
   U16.to_hex(a)
+
+U16.to_hex.show(c: U16): String
+  let bits = U8.to_bits(U16.to_u8(c))
+  String.reverse(Bits.hex.encode(bits))
