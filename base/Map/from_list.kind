@@ -1,7 +1,6 @@
+// Construct a map from a list
+// Example Map.from_list!!([{"ab", 2}, {"cd", 4}]), gives a map
+// associated with "ab" on 2 and "cd" on 4
+
 Map.from_list<A: Type>(xs: List<Pair<String,A>>): Map(A)
-  case xs {
-    nil : BitsMap.new!,
-    cons: case xs.head as p {
-      new: BitsMap.set!(String.to_bits(p.fst), p.snd, Map.from_list!(xs.tail))
-    }
-  }
+  Avl.from_list!!(String.cmp, xs)

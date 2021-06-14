@@ -1,2 +1,0 @@
-Map.query<A: Type>(cpy: A -> Pair<A, A>, key: String, map: Map(A)): Pair<Map(A), Maybe<A>>
-  BitsMap.query<A>(cpy, String.to_bits(key), map)

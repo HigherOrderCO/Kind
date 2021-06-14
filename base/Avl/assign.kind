@@ -1,0 +1,6 @@
+Avl.assign(A : Type, 
+           B : Type, 
+           cmp : A -> A -> Cmp
+           ) : Avl<A, B> -> Avl<A, B> -> Avl<A, B>
+  Avl.foldr_with_key(A, B, Avl<A, B>, (key, value, map) Avl.insert!!(cmp, key, value, map))
+  

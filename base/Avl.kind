@@ -1,0 +1,4 @@
+type Avl <K: Type, V: Type> {
+  tip,
+  bin(size: U32, key: K, val: V, left: Avl<K,V>, right: Avl<K,V>)
+}

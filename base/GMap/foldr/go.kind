@@ -1,8 +1,0 @@
-GMap.foldr.go<K: Type, V: Type, Z: Type>(f: V -> Z -> Z, z: Z, map: GMap<K,V>): Z 
-  case map {
-    tip: z,
-    bin:  
-      let right_folded = GMap.foldr.go<K,V,Z>(f, z, map.right)
-      let new_z        = f(map.val, right_folded)
-      GMap.foldr.go<K,V,Z>(f, new_z, map.left)
-  }

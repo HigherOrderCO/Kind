@@ -1,9 +1,0 @@
-GMap.lookup<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: GMap<K,V>): Maybe<V>
-  case map {
-    tip: Maybe.none<V>,
-    bin: case cmp(key, map.key) {
-      ltn: GMap.lookup<K,V>(cmp, key, map.left),
-      eql: Maybe.some<V>(map.val),
-      gtn: GMap.lookup<K,V>(cmp, key, map.right)
-    }
-  }
