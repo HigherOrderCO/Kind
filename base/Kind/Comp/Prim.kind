@@ -85,6 +85,58 @@ Kind.Comp.Prim.instantiator.go(
 
 // Eliminators
 // ===========
+Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
+  let {term,args} = Kind.Comp.get_args(term)
+  case term {
+    ref:
+      case Kind.Map.get!(term.name, defs) as got {
+        none:
+          none
+        some:
+          let arity = Kind.Comp.get_arity(got.value)
+          if (arity =? List.length!(args)) && (arity >? 0) then
+            let code = "($" | term.name
+            let code = for arg in args:
+              code | " " | Kind.Comp.transpile.term(lang, arg, depth, defs)
+            let code = code | ")"
+            some(code)
+          else
+            none
+      }
+    eli:
+      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let {ctag,cses} = shape.elim
+      let args_len = List.length!(args)
+      let cses_len = List.length!(cses)
+      if args_len >? cses_len then
+        none
+      else
+        let lams_len = cses_len - args_len
+        let args = for i from 0 to lams_len: args ++ [Kind.Comp.var("c"|Nat.show(i))]
+        let self = "self" | Nat.show(depth)
+        def build_cse = (cse)
+          {name, flds} = cse
+
+          let flds_len = List.length!(flds)
+          let let_args_n = List.reverse!(List.seq(flds_len))
+          let lam_args_n = List.reverse!(List.seq(lams_len))
+
+          let body = Kind.Comp.transpile.term(lang, argj, Nat.add(Nat.add(depth,flds_len),lams_len), defs)
+          for i in lam_args_n with body:
+            lang@gram@lambda("c"|Nat.show(i), body)
+
+          let text = body
+          for k in let_args_n with text:
+            lang@gram@local_definition(
+              "f"|Nat.show(Nat.add(depth, k)),
+              Kind.Comp.replace(flds[k] <> "", [self]),
+              text
+            )
+          {name, text}
+        let cse_body_list = List.map!!(build_cse, cses)
+
+        some(lang@gram@select(cse_body_list))
+  } default none
 
 // TODO: use `lang` (probably requires converting some fors into folds or recursion)
 // Compiles a complete elimination, extracting a λ-layer from a native value.
