@@ -64,6 +64,13 @@ type App.KL.Game.Hero {
   )
 }
 
+type App.KL.Game.Hero.Assets {
+  new(
+    vbox  : VoxBox
+    base64: String
+  )
+}
+
 type App.KL.Game.Skill {
 	new(
   	name: String
@@ -119,6 +126,11 @@ type App.KL.Game.Tile {
   )
 }
 
+type App.KL.Game.Entity { // rename?
+  terrain (value: App.KL.Game.Terrain)
+  creature(value: App.KL.Game.Creature)
+}
+
 // Board
 // -----
 
@@ -133,8 +145,29 @@ type App.KL.Game.Coord {
 }
 
 
+type App.KL.Game.Coord.Cubic {
+    new(x:I32, y:I32, z:I32)
+}
 
+// CastInfo
+// ----
 
+type App.KL.Game.CastInfo {
+  new(
+    hero_pos: App.KL.Game.Coord
+    skill: App.KL.Game.Skill
+    range: NatSet // remove?
+    area: NatMap<App.KL.Game.Indicator> // remove?
+  )
+}
+
+type App.KL.Game.Action { // skill info to send on post
+  new(
+    player: String,
+    target_pos: App.KL.Game.Coord,
+    key: U16
+  )
+}
 
 //type App.Kaelin.State.global {
   //new(
