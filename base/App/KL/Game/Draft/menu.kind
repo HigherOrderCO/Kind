@@ -1,14 +1,14 @@
-// App.KL.Game.draft.bottom_left(players: Map<App.KL.Game.Player>): DOM
-//   heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
-//     DOM.node("div", {},
-//     { "width": "70%",
-//       "height": "100%"
-//       "display": "flex"
-//       "justify-content": "center"
-//       "align-items": "center"}
-//     [
-//       DOM.node("div", {},
-//       {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "width": "100%"},
-//       List.map!!(App.KL.Game.draft.selection, heroes))
-//     ]
-//   )
+App.KL.Game.draft.bottom_left(players: Map<App.KL.Game.Player>): DOM
+  heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+    DOM.node("div", {},
+    { "width": "70%",
+      "height": "100%"
+      "display": "flex"
+      "justify-content": "center"
+      "align-items": "center"}
+    [
+      // DOM.node("div", {},
+      // {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "width": "100%"},
+      // List.map!!(App.KL.Game.draft.selection, heroes))
+    ]
+  )
