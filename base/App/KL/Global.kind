@@ -7,6 +7,7 @@ type App.KL.Global.State {
 type App.KL.Global.Event {
   void
   join_room
+  set_team(team: App.KL.Game.Team)
   // Will store draft info (player / hero / team)
   // [App.Kaelin.Drafted.new("0x01babFc", App.Kaelin.Hero.Zeralul, App.Kaelin.Team.Blue)]
   //start_game   ( players: List<App.Kaelin.Player> )
@@ -45,6 +46,15 @@ App.KL.Global.post: App.Post<App.KL.State>
       log("- join_room")
       open glob
       let glob.game = glob.game <> App.KL.Game.start
-      //let glob.game = glob.game@players <- Map.set!(addr, App.KL.Game.Player.new, glob.game@players)
+      let glob.game = glob.game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), glob.game@players)
       glob@game <- some(glob.game)
+    set_team:
+      log("- set_team")
+      open glob
+      case glob.game as game {
+        none: glob
+        some:
+          let glob.game = game.value@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false), game.value@players)
+          glob@game <- some(glob.game)
+      }
   }

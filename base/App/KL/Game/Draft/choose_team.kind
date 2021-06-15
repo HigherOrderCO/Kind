@@ -1,0 +1,41 @@
+// CHOOSE TEAM SCREEN
+// ----------
+App.KL.Game.Draft.choose_team(players: Map<App.KL.Game.Player>): DOM
+  <div style={ 
+    "width": "60%"
+    "height": "30%"
+    "display": "flex"
+    "flex-direction": "row"
+    "justify-content": "space-between"
+  }>
+    {App.KL.Game.Draft.choose_team.button(players, App.KL.Game.Team.blue)}
+    {App.KL.Game.Draft.choose_team.button(players, App.KL.Game.Team.red)}
+  </div>
+
+// draft.blue and draft.red are the same function
+// the only thing that change is linear-gradient and id
+// the parameter players isnt used in both
+App.KL.Game.Draft.choose_team.button(players: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
+  let player_list   = Map.to_list!(players) // List<Pair<String, App.KL.Game.Player>>
+  let fun = 
+    (x)
+      let y = x@snd@team
+      App.KL.Game.Team.eql(y, team)
+  let player_count  = List.count!(fun, player_list) // Player count in respective team
+  let team_txt      = App.KL.Game.Draft.Team.show(team)
+  let gradient      = 
+    case team {
+      blue:     "linear-gradient(#38a5fa, #2081e0)" // blue
+      red:      "linear-gradient(#ff3537, #d60f10)" // red
+      neutral:  "linear-gradient(#f2f2f2, #e6e6e6)" // light gray - not used
+    }
+  
+  <button id = "T" | Nat.show(player_count) | team_txt style={ 
+    "width": "40%"
+    "height": "100%"
+    "background-image": gradient
+    "box-shadow": "2px -2px 2px black"
+    "font-size": "2rem"
+  }>
+    Nat.show(player_count) | "/3 Players"
+  </button>

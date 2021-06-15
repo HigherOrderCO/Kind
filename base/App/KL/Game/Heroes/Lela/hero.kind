@@ -1,0 +1,8 @@
+App.Kl.Game.Heroes.Lela.hero: App.Kl.Game.Hero
+  App.KL.Game.Hero.new(
+    "Lela", 
+    (player) App.Kl.Game.Lela.Assets.vbox_idle,
+    15,
+    10,
+    []
+  )

@@ -1,0 +1,14 @@
+// we can be heroes
+App.Kl.Game.Heroes.Resources: Map(App.Kl.Game.Hero)
+  let heroes = [
+    App.Kl.Game.Heroes.Croni.hero,
+    App.Kl.Game.Heroes.Cyclope.hero,
+    App.Kl.Game.Heroes.Lela.hero,
+    App.Kl.Game.Heroes.Octoking.hero,
+  ]
+
+  List.fold!(heroes)!({}, (hero, map) 
+    open hero
+    map{hero.name} <- hero
+  )
+  
