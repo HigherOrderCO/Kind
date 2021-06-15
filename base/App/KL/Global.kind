@@ -7,7 +7,7 @@ type App.KL.Global.State {
 type App.KL.Global.Event {
   void
   join_room
-  set_team(team: App.Kl.Game.Team)
+  set_team(team: App.KL.Game.Team)
   // Will store draft info (player / hero / team)
   // [App.Kaelin.Drafted.new("0x01babFc", App.Kaelin.Hero.Zeralul, App.Kaelin.Team.Blue)]
   //start_game   ( players: List<App.Kaelin.Player> )
