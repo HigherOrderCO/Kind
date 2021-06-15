@@ -81,12 +81,12 @@ Kind.Comp.Target.Scheme.program(main: String, defs: String): String
   let code = defs|"(run_kind "|main|")"
   code
 
-Kind.Comp.Target.Scheme.select(cse_body_list: List<Pair<String, String>>): String
+Kind.Comp.Target.Scheme.select(term: String, cse_body_list: List<Pair<String, String>>): String
   let cses = ""
   for cse_body in cse_body_list with cses:
     {cse, body} = cse_body
     "("|cse|" "|body|")"
-  "(case "|cses|")"
+  "(case "|term|" "|cses|")"
 
 Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(

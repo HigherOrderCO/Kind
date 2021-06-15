@@ -9,7 +9,7 @@ type Kind.Comp.Grammar {
     local_definition: (name: String, expr: String, body: String) -> String
     global_function: (name: String, args: List(String), body: String) -> String
     global_application: (name: String, args: List(String)) -> String
-    select: (cse_body_list: List<Pair<String, String>>) -> String // something that works like a js switch
+    select: (term: String, cse_body_list: List<Pair<String, String>>) -> String // something that works like a js switch
     string_literal: (str: String) -> String
     module: (name: String, exports: List(String), defs: String) -> String
     program: (main: String, defs: String) -> String
