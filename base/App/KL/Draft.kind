@@ -26,7 +26,7 @@ App.KL.Game.Draft.main(players: Map<App.KL.Game.Player>, room: String, user: Str
       some:
         switch String.eql(App.KL.Game.Draft.Team.show(player.value@team)) {
           "blue": normal
-          "red": normal
+          "red":  normal
         } default App.KL.Game.Draft.choose_team(players)
 
     }
@@ -43,6 +43,8 @@ App.KL.Game.Draft.main(players: Map<App.KL.Game.Player>, room: String, user: Str
     {draw}
   </div>
   
+// CHOOSE TEAM SCREEN
+// ----------
 
 App.KL.Game.Draft.choose_team(players: Map<App.KL.Game.Player>): DOM
   list = Map.to_list!(players)
@@ -68,6 +70,9 @@ App.KL.Game.Draft.choose_team(players: Map<App.KL.Game.Player>): DOM
     {App.KL.Game.draft.red(players, red)}
   </div>
 
+// draft.blue and draft.red are the same function
+// the only thing that change is linear-gradient and id
+// the parameter players isnt used in both
 App.KL.Game.draft.blue(players: Map<App.KL.Game.Player>, list: List<String>): DOM
   let length = Nat.show(List.length!(list))
   let text   = length | "/3 Players"
@@ -82,6 +87,7 @@ App.KL.Game.draft.blue(players: Map<App.KL.Game.Player>, list: List<String>): DO
     text
   </button>
 
+// comments 
 App.KL.Game.draft.red(players: Map<App.KL.Game.Player>, list: List<String>): DOM
   let length = Nat.show(List.length!(list))
   let text   = length | "/3 Players"
@@ -96,13 +102,21 @@ App.KL.Game.draft.red(players: Map<App.KL.Game.Player>, list: List<String>): DOM
     text
   </button>
 
+// TOP DRAFT LAYOUT
+// ------
+
+// draw top layout of draft screen
+// it contains position and card info about the player and allies
 App.KL.Game.Draft.top(players: Map<App.KL.Game.Player>, user: String): DOM
+  // get team of user
   let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  // choose color to show based on team
   let color  = switch String.eql(App.KL.Game.Draft.Team.show(team)) {
     "blue": "linear-gradient(#3fbcf2, #3791d4)"
     "red" : "linear-gradient(#ff6666, #ff4d4d)"
   } default  "linear-gradient(#94b8b8, #75a3a3)"
 
+  // mount top layout
   <div style={ 
     "width": "100%"
     "height": "60%"
@@ -120,11 +134,15 @@ App.KL.Game.Draft.top(players: Map<App.KL.Game.Player>, user: String): DOM
       "align-items": "center"
       "justify-content": "center"
     }>
-      {App.KL.Game.draft.map(players, user)}
-      {App.KL.Game.draft.picks(players, user)}
+      {App.KL.Game.draft.map(players, user)} // draw coord positions
+      {App.KL.Game.draft.picks(players, user)} // draw card info about user and allies
     </div>
   </div>
 
+// CHOICE OF COORDINATES 
+// -------
+
+// draw coord positions on the left of top layout
 App.KL.Game.draft.map(players: Map<App.KL.Game.Player>, user: String): DOM
   <div style={ 
     "width": "30%"
@@ -136,6 +154,7 @@ App.KL.Game.draft.map(players: Map<App.KL.Game.Player>, user: String): DOM
     {App.KL.Game.draft.map_space(players, user)}
   </div>
 
+// wrap hexagons in a div
 App.KL.Game.draft.map_space(players: Map<App.KL.Game.Player>, user: String): DOM
   <div style={ 
     "width": "100%"
@@ -149,6 +168,8 @@ App.KL.Game.draft.map_space(players: Map<App.KL.Game.Player>, user: String): DOM
     for div in App.KL.Game.Draft.tiles(players, user): div
   </div>
 
+// get all positions of the hexagons that will be draw
+// based on the user team
 App.KL.Game.Draft.tiles.get_pos(team: App.KL.Game.Team): List<App.KL.Game.Coord>
       
   let a = App.KL.Game.Coord.new(1,-2)
@@ -177,7 +198,7 @@ App.KL.Game.Draft.tiles.get_pos.offset(team: App.KL.Game.Team, coord: App.KL.Gam
     red : App.KL.Game.Coord.new(coord.i + map_size, coord.j)
   } default coord
 
-
+// get player at `coord` coordinate
 App.KL.Game.Draft.get_player_at(players: Map<App.KL.Game.Player>, coord: App.KL.Game.Coord): Maybe<Pair<String, App.KL.Game.Player>>
   let fun = 
     (x)
@@ -185,6 +206,7 @@ App.KL.Game.Draft.get_player_at(players: Map<App.KL.Game.Player>, coord: App.KL.
       App.KL.Game.Coord.eql(x.snd@init_pos, coord)
   List.find!(fun, Map.to_list!(players)) 
 
+// create all hexagons that will be draw
 App.KL.Game.Draft.tiles(players: Map<App.KL.Game.Player>, user: String): List<DOM> //tiles or tiles
   team        = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   coords      = App.KL.Game.Draft.tiles.get_pos(team)
@@ -206,9 +228,10 @@ App.KL.Game.Draft.tiles(players: Map<App.KL.Game.Player>, user: String): List<DO
   
   list
 
+// create one hexagon the will be draw
 App.KL.Game.Draft.tiles.go(team: App.KL.Game.Team, coord: App.KL.Game.Coord, id: Maybe(String), user: String): DOM
   let nat    =  App.KL.Game.Coord.axial_to_nat(coord)
-  let {x, y} =  App.KL.Game.Draft.tiles.to_xy(coord, team)
+  let {x, y} =  App.KL.Game.Draft.tiles.to_xy(coord, team) // calculate x,y position based on i,j coord
   let top    =  Nat.show(U32.to_nat(y)) | "%"
   let left   =  Nat.show(U32.to_nat(x)) | "%"
   let size   =  Nat.show(U32.to_nat((8#32*2) -1)) | "%" // TODO 8 -> App.KL.Game.Constants.draft_hexagon_radius
@@ -232,6 +255,7 @@ App.KL.Game.Draft.tiles.go(team: App.KL.Game.Team, coord: App.KL.Game.Coord, id:
     "background": color
   }></div>
 
+// calculate x,y position based on i,j coord
 App.KL.Game.Draft.tiles.to_xy(
   coord: App.KL.Game.Coord,
   team: App.KL.Game.Team
@@ -263,6 +287,11 @@ App.KL.Game.Draft.tiles.to_xy(
   cy = F64.to_u32(cy)
   {cx, cy}
 
+
+// CARD INFO FOR USER AND ALLIES
+// -------
+
+// draw card info for user and allies
 App.KL.Game.draft.picks(players: Map<App.KL.Game.Player>, user: String): DOM
   let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   let player = players{user}
@@ -278,10 +307,11 @@ App.KL.Game.draft.picks(players: Map<App.KL.Game.Player>, user: String): DOM
     "height": "100%"
     "display": "flex"
   }>
-    { App.KL.Game.draft.picks_left(hero)}
-    { App.KL.Game.draft.picks_right(allies, team)}
+    { App.KL.Game.draft.picks_left(hero)} // draw card info for user
+    { App.KL.Game.draft.picks_right(allies, team)} // draw card info for allies
   </div>
 
+// draw card info for user
 App.KL.Game.draft.picks_left(hero: Maybe(U8)): DOM
   <div style={
     "width": "40%"
@@ -293,6 +323,7 @@ App.KL.Game.draft.picks_left(hero: Maybe(U8)): DOM
     //{ App.KL.Game.draft.player(hero)}
   </div>
 
+// draw card info for allies
 App.KL.Game.draft.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
   <div style={ 
     "width": "60%"
@@ -306,6 +337,11 @@ App.KL.Game.draft.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Te
     //{ App.KL.Game.draft.allies(map, team)}
   </div>
 
+// BOTTOM DRAFT LAYOUT
+// ------
+
+// draw bottom of layout
+// it contains the heroes that can be choosen
 App.KL.Game.draft.bottom(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   <div style={ 
     "width": "100%"
@@ -342,6 +378,10 @@ App.KL.Game.draft.bottom(players: Map<App.KL.Game.Player>, room: String, user: S
 //     ]
 //   )
 
+// ROOM NUMBER AND READY BUTTON
+// -----
+
+// display room text, and ready/cancel button
 App.KL.Game.draft.bottom_right(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   info = players{user}
   let {color, text} = 
@@ -393,6 +433,10 @@ App.KL.Game.draft.bottom_right(players: Map<App.KL.Game.Player>, room: String, u
 // App.KL.Game.draft.interrogation: String
 //"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
 
+// AUX FUNCTIONS
+// ---------
+
+// get team string
 App.KL.Game.Draft.Team.show(team: App.KL.Game.Team): String
   case team {
     red: "red"
@@ -400,6 +444,7 @@ App.KL.Game.Draft.Team.show(team: App.KL.Game.Team): String
     neutral: "neutral"
   }
 
+// get team of a player
 App.KL.Game.Draft.to_team(players: Map<App.KL.Game.Player>, user: String): Maybe<App.KL.Game.Team>
   player = players{user}
   case player {
