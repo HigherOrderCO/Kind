@@ -3,10 +3,5 @@ Kind.Parser.spaces: Parser(List<Unit>)
     Parser.text(" ")
     Parser.text("\t")
     Parser.text("\n")
-    Parser {
-      Parser.text("//")
-      let end = Parser.choice!([Parser.text("\n"), Parser.eof])
-      Parser.until!(end, Parser.one)
-      return unit
-    }
+    Kind.Parser.comment
   ]))
