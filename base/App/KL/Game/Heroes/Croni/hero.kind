@@ -1,0 +1,8 @@
+App.Kl.Game.Heroes.Croni.hero: App.KL.Game.Hero
+  App.KL.Game.Hero.new(
+    "Croni",
+    (player) App.Kl.Game.Heroes.Croni.Assets.vbox_idle,
+    25,
+    10,
+    []
+  )

@@ -1,0 +1,8 @@
+App.Kl.Game.Heroes.Octoking.hero: App.Kl.Game.Hero
+  App.KL.Game.Hero.new(
+    "Octoking", 
+    (player) App.Kl.Game.Octoking.Assets.vbox_idle,
+    15,
+    10,
+    []
+  )
