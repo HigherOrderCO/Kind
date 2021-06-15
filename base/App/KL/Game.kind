@@ -1,3 +1,5 @@
+// TODO make alias for time -> U64 and base64 -> String
+
 // GAME
 // ====
 
@@ -55,8 +57,8 @@ App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
 type App.KL.Game.Creature {
   new(
     player: Maybe<String>
-    hero: App.Kaelin.Hero
-    team: App.Kaelin.Team
+    hero: App.KL.Game.Hero
+    team: App.KL.Game.Team
     hp: I32
     ap: I32
   )
@@ -64,15 +66,16 @@ type App.KL.Game.Creature {
 
 type App.KL.Game.Hero {
   new(
-    name: String 
-    draw: App.KL.Game.Player -> VoxBox
+    name: String
+    draw: App.KL.Game.Creature -> VoxBox
+    picture: Bool -> U64 -> String
     max_hp: I32
     max_ap: I32
     skills: List<App.KL.Game.Skill>
   )
 }
 
-type App.KL.Game.Hero.Assets {
+type App.KL.Game.Asset {
   new(
     vbox  : VoxBox
     base64: String
@@ -149,8 +152,8 @@ App.KL.Game.Board: Type
 // ----
 
 type App.KL.Game.Coord {
-  new(i: I32, j: I32) 
-}
+  new(i: I32, j: I32)
+} deriving (serializer, deserializer)
 
 
 type App.KL.Game.Coord.Cubic {
@@ -179,6 +182,23 @@ App.KL.Game.Coord.axial_to_nat(
   j = I32.to_u32(j)
   sum = i + j   //U32
   U32.to_nat(sum)
+
+
+// Converts a natural number to an axial coordinate, so it can be used as a key in a NatMap(App.Kaelin.Tile)
+// 10020997 is transformed to the coordinate {+2, -3}
+// TODO maybe add I32 to nat?
+App.KL.Game.Coord.nat_to_axial(
+  key: Nat
+): App.KL.Game.Coord
+
+  key_converted = Nat.to_u32(key)
+  coord_i = key_converted /  1000  //U32
+  coord_i = U32.to_i32(coord_i)
+  coord_i = coord_i - 100   // I32
+  coord_j = U32.mod(key_converted, 1000) // U32
+  coord_j = U32.to_i32(coord_j)
+  coord_j = coord_j - 100 // I32
+  App.KL.Game.Coord.new(coord_i, coord_j)
 
 
 // CastInfo
@@ -244,31 +264,25 @@ App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): D
       }
     }
     {
-      App.KL.Game.Draft(local, global)
+      App.KL.Game.Draft.draw(local, global)
     }
   </div>
 
 App.KL.Game.when(
   local: App.KL.Game.State.Local
+  global: App.KL.Global.State,
   event: App.Event
 ): IO<Maybe<App.State.local<App.KL.State>>>
-  case event {
-    mouse_click:
-      switch String.starts_with(event.id) {
-        "T" :
-          let player_count = String.drop(1, event.id)
-          if String.starts_with(player_count, "3") then
-            App.pass!
-          else
-            let team = String.drop(1, player_count)
-            let team = switch String.eql(team){
-              "blue": App.KL.Game.Team.blue
-              "red" : App.KL.Game.Team.red
-            } default App.KL.Game.Team.neutral
-
-            App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_team(team)))
-      } default App.pass!
-  } default App.pass!
+  open global
+  case global.game as game {
+    none: App.pass!
+    some: 
+      open game.value as game_info
+      case game_info.stage {
+        board: App.pass!
+        draft: App.KL.Game.Draft.when(game_info.players, local, game.value, event)
+      }
+  }
 
 App.KL.Game.start: App.KL.Game
   App.KL.Game.new(

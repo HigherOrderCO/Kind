@@ -32,8 +32,8 @@ App.KL.when: App.When<App.KL.State>
   (event, state)
   let {local, global} = state
   case local {
-    lobby: App.KL.Lobby.when(local.state, event)
-    game: App.KL.Game.when(local.state, event)
+    lobby: App.KL.Lobby.when(local.state, global, event)
+    game: App.KL.Game.when(local.state, global, event) // should we pass global stage here?
   }
 
 // A "KL, world!" + counter application

@@ -61,7 +61,8 @@ App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State):
 // ----------
 
 App.KL.Lobby.when(
-  local: App.KL.Lobby.State.Local
+  local: App.KL.Lobby.State.Local,
+  global: App.KL.Global.State,
   event: App.Event
 ): IO<Maybe<App.KL.State.Local>>
   case event {

@@ -23,7 +23,7 @@ Kind.Comp.Prim.ADT: Type
 Kind.Comp.Prim.inst(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
   case term {
     ins:
-      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let shape = lang@nati(term.prim) open shape
       let {vars,expr} = Kind.Comp.get_vars(term.expr)
       if List.length!(shape.inst) =? List.length!(vars) then
         let {expr,args} = Kind.Comp.get_args(expr)
@@ -63,7 +63,7 @@ Kind.Comp.Prim.inst.go(
 // applied to an inline argument, it generates a whole function.
 // - instantiator(`Nat`) == "(lambda (t) (t 0 (lambda (pred) (+ pred 1))))"
 Kind.Comp.Prim.instantiator(lang: Kind.Comp.Language, prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
-  let shape = Kind.Comp.Target.Scheme.natives(prim) open shape
+  let shape = lang@nati(prim) open shape
   let text = "x"
   for ctor in shape.inst with text:
     lang@gram@application(text, Kind.Comp.Prim.instantiator.go(lang, prim, depth, defs, ctor, 0))
@@ -85,7 +85,7 @@ Kind.Comp.Prim.instantiator.go(
 
 // Eliminators
 // ===========
-Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
+Kind.Comp.Prim.elim(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
   let {term,args} = Kind.Comp.get_args(term)
   case term {
     ref:
@@ -104,7 +104,7 @@ Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, d
             none
       }
     eli:
-      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let shape = lang@nati(term.prim) open shape
       let {ctag,cses} = shape.elim
       let args_len = List.length!(args)
       let cses_len = List.length!(cses)
@@ -138,8 +138,8 @@ Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, d
             )
           {name, text}
         let cse_body_list = List.map!!(build_cse, List.zip!!(cses, args))
+        some(lang@gram@select(Kind.Comp.replace(ctag,[self]), cse_body_list))
 
-        some(lang@gram@select(cse_body_list))
   } default none
 
 // TODO: use `lang` (probably requires converting some fors into folds or recursion)
@@ -148,7 +148,7 @@ Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, d
 // Inlines appications when possible.
 // - elim(`eli{Nat,5}`) == "(if (= 5 0) (lambda (z) (lambda (s) z)) (lambda (z) (lambda (s) (s 4))))`
 // - elim(`((eli{Nat,5} Z) S)` == "(if (= 5 0) Z (S 4))"
-Kind.Comp.Prim.elim(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
+Kind.Comp.Prim.elim.old(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs: Kind.Comp.Defs): Maybe(String)
   let {term,args} = Kind.Comp.get_args(term)
   case term {
     ref:
@@ -167,7 +167,7 @@ Kind.Comp.Prim.elim(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs:
             none
       }
     eli:
-      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let shape = lang@nati(term.prim) open shape
       let {ctag,cses} = shape.elim
       let args_len = List.length!(args)
       let cses_len = List.length!(cses)

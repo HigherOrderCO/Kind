@@ -2,7 +2,7 @@
 // -----
 
 // display room text, and ready/cancel button
-App.KL.Game.Draft.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+App.KL.Game.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   info = players{user}
   let {color, text} = 
     case info {
