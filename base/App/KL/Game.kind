@@ -33,7 +33,7 @@ type App.KL.Game.Stage {
 type App.KL.Game.Player {
   new(
     hero_id: Maybe<U8>
-    init_pos: App.KL.Game.Coord
+    init_pos: Maybe<App.KL.Game.Coord>
     team: App.KL.Game.Team
     ready: Bool
   )

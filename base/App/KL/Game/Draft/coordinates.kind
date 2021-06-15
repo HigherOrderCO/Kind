@@ -62,7 +62,11 @@ App.KL.Game.Draft.get_player_at(players: Map<App.KL.Game.Player>, coord: App.KL.
   let fun = 
     (x)
       open x
-      App.KL.Game.Coord.eql(x.snd@init_pos, coord)
+      let pos = x.snd@init_pos
+      case pos {
+        none: false
+        some: App.KL.Game.Coord.eql(pos.value, coord)
+      }
   List.find!(fun, Map.to_list!(players)) 
 
 // create all hexagons that will be draw
