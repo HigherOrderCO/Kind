@@ -261,10 +261,12 @@ App.KL.Game.when(
             App.pass!
           else
             let team = String.drop(1, player_count)
-            switch String.eql(team){
-              "blue": App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_team(App.KL.Game.Team.blue)))
-              "red" : App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_team(App.KL.Game.Team.red)))
-            } default App.pass!
+            let team = switch String.eql(team){
+              "blue": App.KL.Game.Team.blue
+              "red" : App.KL.Game.Team.red
+            } default App.KL.Game.Team.neutral
+
+            App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_team(team)))
       } default App.pass!
   } default App.pass!
 
