@@ -1,6 +1,95 @@
 //TODO?: create additional tabs for checking stats or skills of a hero
 
-App.KL.Game.Draft(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+App.KL.Game.Draft.when(
+  players: Map<App.KL.Game.Player>,
+  local  : App.KL.Game.State.Local
+  global : App.KL.Game
+  event  : App.Event,
+): IO<Maybe<App.State.local<App.KL.State>>>
+
+  case event {
+    mouse_click:
+      switch String.starts_with(event.id) {
+        "C" :
+          let coord_nat = String.drop(1, event.id)
+          let coord     = App.KL.Game.Coord.nat_to_axial(Nat.read(coord_nat))
+          App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_coord(coord)))
+        "H" :
+          let heroes_list = List.map!!(Pair.snd!!, Map.to_list!(players))
+          let team        = App.KL.Game.Draft.to_team(players, local@user) <> App.KL.Game.Team.neutral
+          let heroes_map  = App.Kaelin.Hero.info.map
+          let hero_name   = String.drop(1, event.id)
+          let hero_id     = heroes_map{hero_name}
+          let taken       = false
+          for player in heroes_list with taken:
+            open player
+            if App.KL.Game.Team.eql(team, player.team) then
+              if U8.eql(player.hero_id <> 99, hero_id <> 0) then
+                true
+              else
+                taken
+            else
+              taken
+          case hero_id {
+            none: App.pass!
+            some: 
+              if taken then
+                App.pass!
+              else 
+                App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_hero(hero_id.value)))
+          }
+        "R" :
+          let info    = players{local@user}
+          case info {
+            none: 
+              App.pass!
+            some:
+              let ready_u8 = 
+                if info.value@ready then
+                  0#8
+                else
+                  1#8
+              App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_ready(ready_u8)))
+          }        
+        "T" :
+          let player_count = String.drop(1, event.id)
+          if String.starts_with(player_count, "3") then
+            App.pass!
+          else
+            let team = String.drop(1, player_count)
+            let team = switch String.eql(team){
+              "blue": App.KL.Game.Team.blue
+              "red" : App.KL.Game.Team.red
+            } default App.KL.Game.Team.neutral
+            App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_team(team)))
+      } default App.pass!
+  
+  } default App.pass!
+
+// AUX FUNCTIONS
+// ==============================
+
+// get team string
+App.KL.Game.Draft.Team.show(team: App.KL.Game.Team): String
+  case team {
+    red: "red"
+    blue: "blue"
+    neutral: "neutral"
+  }
+
+// get team of a player
+App.KL.Game.Draft.to_team(players: Map<App.KL.Game.Player>, user: String): Maybe<App.KL.Game.Team>
+  player = players{user}
+  case player {
+    none: none
+    some: some(player.value@team)
+  }
+
+
+// DRAW
+// ===============================
+
+App.KL.Game.Draft.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
   //heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
   open global
   case global.game as game {
@@ -13,14 +102,14 @@ App.KL.Game.Draft(local: App.KL.Game.State.Local, global: App.KL.Global.State): 
         "justify-content": "center"
         "align-items": "center"
       }>
-        {App.KL.Game.Draft.main(game.value@players, local@room, local@user)}
+        {App.KL.Game.Draft.draw.main(game.value@players, local@room, local@user)}
       </div>
   }
 
-App.KL.Game.Draft.main(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+App.KL.Game.Draft.draw.main(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   let player = players{user}
-  let normal = [App.KL.Game.Draft.top(players, user),  App.KL.Game.draft.bottom(players, room, user)]
-  let select = [App.KL.Game.Draft.choose_team(players)]
+  let normal = [App.KL.Game.Draft.draw.top(players, user),  App.KL.Game.draft.draw.bottom(players, room, user)]
+  let select = [App.KL.Game.Draft.draw.choose_team(players)]
   let draw = 
     case player {
       none: [<div>"no player"</div>]
@@ -45,13 +134,56 @@ App.KL.Game.Draft.main(players: Map<App.KL.Game.Player>, room: String, user: Str
     for div in draw: div
   </div>
   
+// CHOOSE TEAM SCREEN
+// ----------
+App.KL.Game.Draft.draw.choose_team(players: Map<App.KL.Game.Player>): DOM
+  <div style={ 
+    "width": "60%"
+    "height": "30%"
+    "display": "flex"
+    "flex-direction": "row"
+    "justify-content": "space-between"
+  }>
+    {App.KL.Game.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
+    {App.KL.Game.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
+  </div>
+
+// draft.blue and draft.red are the same function
+// the only thing that change is linear-gradient and id
+// the parameter players isnt used in both
+App.KL.Game.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
+  let player_list   = Map.to_list!(players) // List<Pair<String, App.KL.Game.Player>>
+  let fun = 
+    (x)
+      let y = x@snd@team
+      App.KL.Game.Team.eql(y, team)
+  let player_count  = List.count!(fun, player_list) // Player count in respective team
+  let team_txt      = App.KL.Game.Draft.Team.show(team)
+  let gradient      = 
+    case team {
+      blue:     "linear-gradient(#38a5fa, #2081e0)" // blue
+      red:      "linear-gradient(#ff3537, #d60f10)" // red
+      neutral:  "linear-gradient(#f2f2f2, #e6e6e6)" // light gray - not used
+    }
+  
+  <button id = "T" | Nat.show(player_count) | team_txt style={ 
+    "width": "40%"
+    "height": "100%"
+    "background-image": gradient
+    "box-shadow": "2px -2px 2px black"
+    "font-size": "2rem"
+  }>
+    Nat.show(player_count) | "/3 Players"
+  </button>
+
+
 
 // TOP DRAFT LAYOUT
-// ------
+// ==============================
 
 // draw top layout of draft screen
 // it contains position and card info about the player and allies
-App.KL.Game.Draft.top(players: Map<App.KL.Game.Player>, user: String): DOM
+App.KL.Game.Draft.draw.top(players: Map<App.KL.Game.Player>, user: String): DOM
   // get team of user
   let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   // choose color to show based on team
@@ -78,8 +210,8 @@ App.KL.Game.Draft.top(players: Map<App.KL.Game.Player>, user: String): DOM
       "align-items": "center"
       "justify-content": "center"
     }>
-      {App.KL.Game.Draft.coordinates(players, user)} // draw coord positions
-      {App.KL.Game.Draft.cards(players, user)} // draw card info about user and allies
+      {App.KL.Game.Draft.draw.coordinates(players, user)} // draw coord positions
+      {App.KL.Game.Draft.draw.cards(players, user)} // draw card info about user and allies
     </div>
   </div>
 
@@ -88,7 +220,7 @@ App.KL.Game.Draft.top(players: Map<App.KL.Game.Player>, user: String): DOM
 
 // draw bottom of layout
 // it contains the heroes that can be choosen
-App.KL.Game.draft.bottom(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+App.KL.Game.draft.draw.bottom(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   <div style={ 
     "width": "100%"
     "height": "40%"
@@ -104,26 +236,357 @@ App.KL.Game.draft.bottom(players: Map<App.KL.Game.Player>, room: String, user: S
       "justify-content": "center"
       "align-items": "center"
     }>
-      // { App.KL.Game.draft.bottom_left(players)}
-      { App.KL.Game.Draft.ready_button(players, room, user)}
+      // { App.KL.Game.draft.draw.bottom_left(players)}
+      { App.KL.Game.Draft.draw.ready_button(players, room, user)}
     </div>
   </div>
 
-// AUX FUNCTIONS
-// ---------
+// CHOICE OF COORDINATES 
+// ============================
 
-// get team string
-App.KL.Game.Draft.Team.show(team: App.KL.Game.Team): String
+// draw coord positions on the left of top layout
+App.KL.Game.Draft.draw.coordinates(players: Map<App.KL.Game.Player>, user: String): DOM
+  <div style={ 
+    "width": "30%"
+    "height": "100%"
+    "display": "flex"
+    "align-items": "center"
+    "padding": "10% 0px 10% 2%"
+  }>
+    {App.KL.Game.Draft.draw.map_space(players, user)}
+  </div>
+
+// wrap hexagons in a div
+App.KL.Game.Draft.draw.map_space(players: Map<App.KL.Game.Player>, user: String): DOM
+  <div style={ 
+    "width": "100%"
+    "height": "0"
+    "border": "5px solid #d6dadc"
+    "border-radius": "15px"
+    "background-color": "#d6dadc"
+    "position": "relative"
+    "padding-top": "100%"
+  }>  
+    for div in App.KL.Game.Draft.draw.tiles(players, user): div
+  </div>
+
+// get all positions of the hexagons that will be draw
+// based on the user team
+App.KL.Game.Draft.draw.tiles.get_pos(team: App.KL.Game.Team): List<App.KL.Game.Coord>
+      
+  let a = App.KL.Game.Coord.new(1,-2)
+  let b = App.KL.Game.Coord.new(0,-1)
+  let c = App.KL.Game.Coord.new(1,-1)
+  let d = App.KL.Game.Coord.new(0, 0)
+  let e = App.KL.Game.Coord.new(-1,1)
+  let f = App.KL.Game.Coord.new(0, 1)
+  let g = App.KL.Game.Coord.new(-1,2)
+
+  let one = App.KL.Game.Coord.new(-1,0) // Team 1's edge
+  let two = App.KL.Game.Coord.new(1, 0) // Team 2's edge
+
   case team {
-    red: "red"
-    blue: "blue"
-    neutral: "neutral"
-  }
+    blue: List.map!!(App.KL.Game.Draft.draw.tiles.get_pos.offset(App.KL.Game.Team.blue), [a,b,c,d,e,f,g,one])
+    red : List.map!!(App.KL.Game.Draft.draw.tiles.get_pos.offset(App.KL.Game.Team.red ), [a,b,c,d,e,f,g,two])
+  } default []
 
-// get team of a player
-App.KL.Game.Draft.to_team(players: Map<App.KL.Game.Player>, user: String): Maybe<App.KL.Game.Team>
-  player = players{user}
-  case player {
+
+// offset coords to respective team's corners
+App.KL.Game.Draft.draw.tiles.get_pos.offset(team: App.KL.Game.Team, coord: App.KL.Game.Coord): App.KL.Game.Coord
+  open coord
+  map_size = U32.to_i32(4#32 - 1) //TODO  4 - > App.KL.Constants.map_size 
+  case team{
+    blue: App.KL.Game.Coord.new(coord.i - map_size, coord.j)
+    red : App.KL.Game.Coord.new(coord.i + map_size, coord.j)
+  } default coord
+
+// get player at `coord` coordinate
+App.KL.Game.Draft.draw.get_player_at(players: Map<App.KL.Game.Player>, coord: App.KL.Game.Coord): Maybe<Pair<String, App.KL.Game.Player>>
+  let fun = 
+    (x)
+      open x
+      let pos = x.snd@init_pos
+      case pos {
+        none: false
+        some: App.KL.Game.Coord.eql(pos.value, coord)
+      }
+  List.find!(fun, Map.to_list!(players)) 
+
+// create all hexagons that will be draw
+App.KL.Game.Draft.draw.tiles(players: Map<App.KL.Game.Player>, user: String): List<DOM> //tiles or tiles
+  team        = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  coords      = App.KL.Game.Draft.draw.tiles.get_pos(team)
+  player_list = [] 
+  tiles_list  = []
+
+  // Filtering players with coords
+  for coord in coords with player_list:
+    player = App.KL.Game.Draft.draw.get_player_at(players, coord)
+    case player {
+      none: {coord, none} & player_list
+      some: {coord, some(player.value@fst)} & player_list
+    }
+  
+  for pair in player_list with tiles_list:
+    open pair
+    let coord = App.KL.Game.Coord.axial_to_nat(pair.fst)
+    App.KL.Game.Draft.draw.tiles.go(team, pair.fst, pair.snd, user) & tiles_list
+  
+  tiles_list
+
+// create one hexagon the will be draw
+// TODO: -> switch 8#32 to -> App.KL.Game.Constants.draft_hexagon_radius
+App.KL.Game.Draft.draw.tiles.go(team: App.KL.Game.Team, coord: App.KL.Game.Coord, id: Maybe(String), user: String): DOM
+  let nat    =  App.KL.Game.Coord.axial_to_nat(coord)
+  let {x, y} =  App.KL.Game.Draft.draw.tiles.to_xy(coord, team) // calculate x,y position based on i,j coord
+  let top    =  Nat.show(U32.to_nat(y)) | "%"
+  let left   =  Nat.show(U32.to_nat(x)) | "%"
+  let size   =  Nat.show(U32.to_nat((8#32*2) -1)) | "%" 
+  let margin =  Nat.show(U32.to_nat((8#32)))
+  let color  =  
+    case id {
+      none: "#B97A57"
+      some: 
+        if String.eql(user, id.value) then "#0FB735"
+        else "#4B97E2"
+    }
+  
+  <div id="C" | Nat.show(nat) style={
+    "width": size
+    "height": size
+    "margin": "-" | margin | "% 0px 0px -" | margin | "%"
+    "position": "absolute"
+    "top":  top
+    "left": left
+    "clip-path": "polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%)"
+    "background": color
+  }></div>
+
+// calculate x,y position based on i,j coord
+// TODO: currently it all works with percentages (50%, 8%), should it be changed to px?
+// TODO: switch 4#32 to -> App.KL.Game.Constants.map_size
+App.KL.Game.Draft.draw.tiles.to_xy(
+  coord: App.KL.Game.Coord,
+  team: App.KL.Game.Team
+): Pair<U32,U32>
+
+  // offset in i to centralize the hexagon
+  i_offset = case team {
+    blue: U32.to_i32(4#32 - 1)
+    red:  I32.neg(U32.to_i32(4#32 -1 ))   
+  } default +0#32
+
+  open coord
+  i = coord.i + i_offset
+  j = coord.j
+  
+  i = I32.to_f64(i)
+  j = I32.to_f64(j)
+
+  int_rad = U32.to_f64(8#32) // TODO 8 -> App.KL.Game.Constants.draft_hexagon_radius
+  hlf     = F64.div(int_rad, 2.0#64)
+  int_screen_center_x = 50.0
+  int_screen_center_y = 50.0
+  
+  cx = int_screen_center_x + j * int_rad  // screen_center + j * rad
+  cx = cx + i * int_rad * 2 // screen_center + j * rad + i * 2rad
+  cy = int_screen_center_y + j * hlf * 3 // screen_center + j * (3rad/2)
+  // let cy = F64.add(cy, j)
+  cx = F64.to_u32(cx)
+  y  = cy + 0.5 // to round correctly
+  cy = F64.to_u32(cy)
+  {cx, cy}
+
+// CARD INFO FOR USER AND ALLIES
+// ===================================
+
+// draw card info for user and allies
+App.KL.Game.Draft.draw.cards(players: Map<App.KL.Game.Player>, user: String): DOM
+  let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  let player = players{user}
+  let allies = Map.delete!(user, players)
+  let hero   = case player{
     none: none
-    some: some(player.value@team)
+    some: player = player.value
+      player@hero_id 
   }
+  
+  <div style={
+    "width": "70%"
+    "height": "100%"
+    "display": "flex"
+  }>
+    { App.KL.Game.Draft.draw.cards.picks_left(hero)} // draw card info for user
+    { App.KL.Game.Draft.draw.cards.picks_right(allies, team)} // draw card info for allies
+  </div>
+
+
+// USER
+// -----
+
+// draw card info for user
+App.KL.Game.Draft.draw.cards.picks_left(hero: Maybe(U8)): DOM
+  <div style={
+    "width": "40%"
+    "height": "100%"
+    "display": "flex"
+    "padding": "5%"
+    "box-sizing": "border-box"
+  }>
+    { App.KL.Game.Draft.draw.cards.player(hero)}
+  </div>
+
+App.KL.Game.Draft.draw.cards.player(hero: Maybe(U8)): DOM
+  let {name, image} = Maybe {
+      get hero_id = hero
+      get hero = App.Kaelin.Hero.info(hero_id) // TODO bring this function
+      let assets = hero@assets
+      return {hero@name,assets@base64}
+    } <> {"Choosing", App.KL.Game.Draft.draw.cards.interrogation}
+  
+  App.KL.Game.Draft.draw.cards.card(name, image, "100%")
+
+// ALLIES
+// -----
+
+// draw card info for allies
+App.KL.Game.Draft.draw.cards.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
+  <div style={ 
+    "width": "60%"
+    "height": "100%"
+    "padding": "3%"
+    "display": "flex"
+    "flex-direction": "row"
+    "align-items": "center"
+    "box-sizing": "border-box"
+  }>
+    for div in App.KL.Game.Draft.draw.cards.allies(map, team): div
+  </div>
+
+App.KL.Game.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
+  lst       = Map.to_list!(map)
+  teammates = []
+  for info in lst with teammates:
+    open info
+    if App.KL.Game.Team.eql(team, info.snd@team) then
+      info & teammates
+    else
+      teammates
+  count = 2 - List.length!(teammates)
+  
+  dom   = []
+  for i from 0 to count with dom:
+    App.KL.Game.Draft.draw.cards.ally("none", none) & dom
+  for pair in teammates with dom:
+    App.KL.Game.Draft.draw.cards.ally(pair@fst, some(pair@snd)) & dom
+
+  dom
+
+App.KL.Game.Draft.draw.cards.ally(user: String, info: Maybe(App.KL.Game.Player)): DOM
+  {name, image} = case info {
+    none: {"Connecting", App.KL.Game.Draft.draw.cards.interrogation}
+    some:
+      Maybe {
+        get info = info.value@hero_id
+        get hero = App.Kaelin.Hero.info(info)  // TODO bring this function
+        let assets = hero@assets
+        return {hero@name, assets@base64}
+      } <> {"Choosing", App.KL.Game.Draft.draw.cards.interrogation}
+    }
+
+  App.KL.Game.Draft.draw.cards.card(name, image, "80%")
+
+App.KL.Game.Draft.draw.cards.card(name: String, image: String, height: String): DOM
+   <div style={ 
+    "width": "100%"
+    "height": height
+    "display": "flex"
+    "border": "5px solid #d6dadc"
+    "background-color": "#bac1c4"
+    "margin": "3%"
+    "border-radius": "5px"
+    "flex-direction": "column"
+    "justify-content": "space-between"
+    "align-items": "center"
+    "box-sizing": "border-box"
+  }>
+    <div style={ 
+      "height": "10%"
+      "margin-top": "5%"
+    }>
+      name
+    </div>
+    
+    <div style={ 
+      "width":"50%" 
+      "height":"auto"
+    }>
+      <img src=image style={ 
+        "width": "100%"
+        "height": "auto"
+        "image-rendering": "pixelated"
+      }></img>
+    </div>
+    
+    <div style={ 
+      "width": "100%"
+      "height": "40%"
+      "background-color": "#d6dadc"
+    }></div>
+
+  </div>
+
+
+App.KL.Game.Draft.draw.cards.interrogation: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
+
+// ROOM NUMBER AND READY BUTTON
+// ==========================
+
+// display room text, and ready/cancel button
+App.KL.Game.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+  info = players{user}
+  let {color, text} = 
+    case info {
+      none: {"#4CAF50", "Ready"}
+      some: 
+        let player = info.value
+        if player@ready then
+          {"gray",    "Cancel"}
+        else
+          {"#4CAF50", "Ready"}
+  }
+  <div style={ 
+    "width": "30%"
+    "height": "auto"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+    "flex-direction": "column"
+  }>
+    <div style={ 
+      "background-color": "#d6dadc"
+      "color": "black"
+      "padding": "8px"
+      "text-align": "center"
+      "border-radius": "5px"
+      "margin-bottom": "10px"
+      "font-size": "32px"
+    }>
+      room
+    </div>
+    <button id="Ready" style={ 
+      "background-color": color
+      "border": "none"
+      "color": "white"
+      "padding": "32px"
+      "text-align": "center"
+      "text-decoration": "none"
+      "display": "inline-block"
+      "font-size": "32px"
+      "margin": "4px 2px"
+      "cursor": "pointer"
+    }>
+      text
+    </button>
+  </div>

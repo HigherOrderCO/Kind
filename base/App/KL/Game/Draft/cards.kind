@@ -2,7 +2,7 @@
 // -------
 
 // draw card info for user and allies
-App.KL.Game.Draft.cards(players: Map<App.KL.Game.Player>, user: String): DOM
+App.KL.Game.Draft.draw.cards(players: Map<App.KL.Game.Player>, user: String): DOM
   let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   let player = players{user}
   let allies = Map.delete!(user, players)
@@ -17,8 +17,8 @@ App.KL.Game.Draft.cards(players: Map<App.KL.Game.Player>, user: String): DOM
     "height": "100%"
     "display": "flex"
   }>
-    { App.KL.Game.Draft.cards.picks_left(hero)} // draw card info for user
-    { App.KL.Game.Draft.cards.picks_right(allies, team)} // draw card info for allies
+    { App.KL.Game.Draft.draw.cards.picks_left(hero)} // draw card info for user
+    { App.KL.Game.Draft.draw.cards.picks_right(allies, team)} // draw card info for allies
   </div>
 
 
@@ -26,7 +26,7 @@ App.KL.Game.Draft.cards(players: Map<App.KL.Game.Player>, user: String): DOM
 // -----
 
 // draw card info for user
-App.KL.Game.Draft.cards.picks_left(hero: Maybe(U8)): DOM
+App.KL.Game.Draft.draw.cards.picks_left(hero: Maybe(U8)): DOM
   <div style={
     "width": "40%"
     "height": "100%"
@@ -34,24 +34,24 @@ App.KL.Game.Draft.cards.picks_left(hero: Maybe(U8)): DOM
     "padding": "5%"
     "box-sizing": "border-box"
   }>
-    { App.KL.Game.Draft.cards.player(hero)}
+    { App.KL.Game.Draft.draw.cards.player(hero)}
   </div>
 
-App.KL.Game.Draft.cards.player(hero: Maybe(U8)): DOM
+App.KL.Game.Draft.draw.cards.player(hero: Maybe(U8)): DOM
   let {name, image} = Maybe {
       get hero_id = hero
       get hero = App.Kaelin.Hero.info(hero_id) // TODO bring this function
       let assets = hero@assets
       return {hero@name,assets@base64}
-    } <> {"Choosing", App.KL.Game.Draft.cards.interrogation}
+    } <> {"Choosing", App.KL.Game.Draft.draw.cards.interrogation}
   
-  App.KL.Game.Draft.cards.card(name, image, "100%")
+  App.KL.Game.Draft.draw.cards.card(name, image, "100%")
 
 // ALLIES
 // -----
 
 // draw card info for allies
-App.KL.Game.Draft.cards.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
+App.KL.Game.Draft.draw.cards.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
   <div style={ 
     "width": "60%"
     "height": "100%"
@@ -61,10 +61,10 @@ App.KL.Game.Draft.cards.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.G
     "align-items": "center"
     "box-sizing": "border-box"
   }>
-    for div in App.KL.Game.Draft.cards.allies(map, team): div
+    for div in App.KL.Game.Draft.draw.cards.allies(map, team): div
   </div>
 
-App.KL.Game.Draft.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
+App.KL.Game.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
   lst       = Map.to_list!(map)
   teammates = []
   for info in lst with teammates:
@@ -77,27 +77,27 @@ App.KL.Game.Draft.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.T
   
   dom   = []
   for i from 0 to count with dom:
-    App.KL.Game.Draft.cards.ally("none", none) & dom
+    App.KL.Game.Draft.draw.cards.ally("none", none) & dom
   for pair in teammates with dom:
-    App.KL.Game.Draft.cards.ally(pair@fst, some(pair@snd)) & dom
+    App.KL.Game.Draft.draw.cards.ally(pair@fst, some(pair@snd)) & dom
 
   dom
 
-App.KL.Game.Draft.cards.ally(user: String, info: Maybe(App.KL.Game.Player)): DOM
+App.KL.Game.Draft.draw.cards.ally(user: String, info: Maybe(App.KL.Game.Player)): DOM
   {name, image} = case info {
-    none: {"Connecting", App.KL.Game.Draft.cards.interrogation}
+    none: {"Connecting", App.KL.Game.Draft.draw.cards.interrogation}
     some:
       Maybe {
         get info = info.value@hero_id
         get hero = App.Kaelin.Hero.info(info)  // TODO bring this function
         let assets = hero@assets
         return {hero@name, assets@base64}
-      } <> {"Choosing", App.KL.Game.Draft.cards.interrogation}
+      } <> {"Choosing", App.KL.Game.Draft.draw.cards.interrogation}
     }
 
-  App.KL.Game.Draft.cards.card(name, image, "80%")
+  App.KL.Game.Draft.draw.cards.card(name, image, "80%")
 
-App.KL.Game.Draft.cards.card(name: String, image: String, height: String): DOM
+App.KL.Game.Draft.draw.cards.card(name: String, image: String, height: String): DOM
    <div style={ 
     "width": "100%"
     "height": height
@@ -138,5 +138,5 @@ App.KL.Game.Draft.cards.card(name: String, image: String, height: String): DOM
   </div>
 
 
-App.KL.Game.Draft.cards.interrogation: String
+App.KL.Game.Draft.draw.cards.interrogation: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
