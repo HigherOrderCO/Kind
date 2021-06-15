@@ -1,5 +1,5 @@
 // Construct a map from a list
-// Example Map.from_list!!([{"ab", 2}, {"cd", 4}]), gives a map
+// Example Map.from_list!([{"ab", 2}, {"cd", 4}]), gives a map
 // associated with "ab" on 2 and "cd" on 4
 
 Map.from_list<A: Type>(xs: List<Pair<String,A>>): Map(A)
