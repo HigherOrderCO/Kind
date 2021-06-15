@@ -43,7 +43,7 @@ type App.KL.Game.Team {
   blue
   red
   neutral
-}
+} deriving (serializer, deserializer)
 
 App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
   case a b {
@@ -244,15 +244,29 @@ App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): D
       }
     }
     {
-      App.KL.Draft(local, global)
+      App.KL.Game.Draft(local, global)
     }
   </div>
 
 App.KL.Game.when(
   local: App.KL.Game.State.Local
   event: App.Event
-): IO<Maybe<App.KL.State.Local>>
-  App.pass<App.KL.State>
+): IO<Maybe<App.State.local<App.KL.State>>>
+  case event {
+    mouse_click:
+      switch String.starts_with(event.id) {
+        "T" :
+          let player_count = String.drop(1, event.id)
+          if String.starts_with(player_count, "3") then
+            App.pass!
+          else
+            let team = String.drop(1, player_count)
+            switch String.eql(team){
+              "blue": App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_team(App.KL.Game.Team.blue)))
+              "red" : App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_team(App.KL.Game.Team.red)))
+            } default App.pass!
+      } default App.pass!
+  } default App.pass!
 
 App.KL.Game.start: App.KL.Game
   App.KL.Game.new(

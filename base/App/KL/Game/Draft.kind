@@ -1,6 +1,6 @@
 //TODO?: create additional tabs for checking stats or skills of a hero
 
-App.KL.Draft(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+App.KL.Game.Draft(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
   //heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
   open global
   case global.game as game {
