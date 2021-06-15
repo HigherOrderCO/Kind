@@ -19,15 +19,17 @@ App.KL.Draft(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
 
 App.KL.Game.Draft.main(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   let player = players{user}
-  let normal = [App.KL.Game.Draft.top(players, user),  App.KL.Game.draft.bottom(players, room, user)]   //   QWE
+  let normal = [App.KL.Game.Draft.top(players, user),  App.KL.Game.draft.bottom(players, room, user)]
+  let select = [App.KL.Game.Draft.choose_team(players)]
   let draw = 
     case player {
       none: [<div>"no player"</div>]
       some:
-        switch String.eql(App.KL.Game.Draft.Team.show(player.value@team)) {
-          "blue": normal
-          "red":  normal
-        } default [App.KL.Game.Draft.choose_team(players)]
+        let team = player.value@team
+        case team{
+          blue:   normal
+          red:    normal
+        }default  select
 
     }
   
@@ -53,10 +55,10 @@ App.KL.Game.Draft.top(players: Map<App.KL.Game.Player>, user: String): DOM
   // get team of user
   let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   // choose color to show based on team
-  let color  = switch String.eql(App.KL.Game.Draft.Team.show(team)) {
-    "blue": "linear-gradient(#3fbcf2, #3791d4)"
-    "red" : "linear-gradient(#ff6666, #ff4d4d)"
-  } default  "linear-gradient(#94b8b8, #75a3a3)"
+  let color  = case team {
+    blue:   "linear-gradient(#3fbcf2, #3791d4)"
+    red:    "linear-gradient(#ff6666, #ff4d4d)"
+  }default  "linear-gradient(#94b8b8, #75a3a3)"
 
   // mount top layout
   <div style={ 

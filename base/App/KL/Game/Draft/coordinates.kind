@@ -73,8 +73,8 @@ App.KL.Game.Draft.get_player_at(players: Map<App.KL.Game.Player>, coord: App.KL.
 App.KL.Game.Draft.tiles(players: Map<App.KL.Game.Player>, user: String): List<DOM> //tiles or tiles
   team        = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   coords      = App.KL.Game.Draft.tiles.get_pos(team)
-  player_list = []
-  list        = []
+  player_list = [] 
+  tiles_list  = []
 
   // Filtering players with coords
   for coord in coords with player_list:
@@ -84,20 +84,21 @@ App.KL.Game.Draft.tiles(players: Map<App.KL.Game.Player>, user: String): List<DO
       some: {coord, some(player.value@fst)} & player_list
     }
   
-  for pair in player_list with list:
+  for pair in player_list with tiles_list:
     open pair
     let coord = App.KL.Game.Coord.axial_to_nat(pair.fst)
-    App.KL.Game.Draft.tiles.go(team, pair.fst, pair.snd, user) & list
+    App.KL.Game.Draft.tiles.go(team, pair.fst, pair.snd, user) & tiles_list
   
-  list
+  tiles_list
 
 // create one hexagon the will be draw
+// TODO: -> switch 8#32 to -> App.KL.Game.Constants.draft_hexagon_radius
 App.KL.Game.Draft.tiles.go(team: App.KL.Game.Team, coord: App.KL.Game.Coord, id: Maybe(String), user: String): DOM
   let nat    =  App.KL.Game.Coord.axial_to_nat(coord)
   let {x, y} =  App.KL.Game.Draft.tiles.to_xy(coord, team) // calculate x,y position based on i,j coord
   let top    =  Nat.show(U32.to_nat(y)) | "%"
   let left   =  Nat.show(U32.to_nat(x)) | "%"
-  let size   =  Nat.show(U32.to_nat((8#32*2) -1)) | "%" // TODO 8 -> App.KL.Game.Constants.draft_hexagon_radius
+  let size   =  Nat.show(U32.to_nat((8#32*2) -1)) | "%" 
   let margin =  Nat.show(U32.to_nat((8#32)))
   let color  =  
     case id {
@@ -119,18 +120,21 @@ App.KL.Game.Draft.tiles.go(team: App.KL.Game.Team, coord: App.KL.Game.Coord, id:
   }></div>
 
 // calculate x,y position based on i,j coord
+// TODO: currently it all works with percentages (50%, 8%), should it be changed to px?
+// TODO: switch 4#32 to -> App.KL.Game.Constants.map_size
 App.KL.Game.Draft.tiles.to_xy(
   coord: App.KL.Game.Coord,
   team: App.KL.Game.Team
 ): Pair<U32,U32>
 
-  let centralizer = switch String.eql(App.KL.Game.Draft.Team.show(team)) {
-    "blue": U32.to_i32(4#32 - 1) // TODO 4 - > App.KL.Game.Constants.map_size
-    "red" : I32.neg(U32.to_i32(4#32 -1 ))
+  // offset in i to centralize the hexagon
+  i_offset = case team {
+    blue: U32.to_i32(4#32 - 1)
+    red:  I32.neg(U32.to_i32(4#32 -1 ))   
   } default +0#32
 
   open coord
-  i = coord.i + centralizer
+  i = coord.i + i_offset
   j = coord.j
   
   i = I32.to_f64(i)
