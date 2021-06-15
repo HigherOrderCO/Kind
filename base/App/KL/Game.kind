@@ -27,22 +27,30 @@ type App.KL.Game.Stage {
   board
 }
 
-type App.KL.Game.Team {
-  blue
-  red
-  neutral
-}
-
 // Players
 // -------
 
 type App.KL.Game.Player {
   new(
     hero_id: Maybe<U8>
-    init_pos: App.KL.Game.Team
+    init_pos: App.KL.Game.Coord
+    team: App.KL.Game.Team
     ready: Bool
   )
 }
+
+type App.KL.Game.Team {
+  blue
+  red
+  neutral
+}
+
+App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
+  case a b {
+    red red: true
+    blue blue: true
+    neutral neutral: true
+  } default false
 
 type App.KL.Game.Creature {
   new(
@@ -149,6 +157,30 @@ type App.KL.Game.Coord.Cubic {
     new(x:I32, y:I32, z:I32)
 }
 
+App.KL.Game.Coord.eql(
+  a:App.KL.Game.Coord,
+  b:App.KL.Game.Coord
+): Bool
+
+  open a
+  open b
+  Bool.and(I32.eql(a.i,b.i), I32.eql(a.j, b.j))
+
+
+App.KL.Game.Coord.axial_to_nat(
+  coord: App.KL.Game.Coord
+): Nat
+
+  open coord
+  i = coord.i + 100 //  I32
+  i = i * 1000
+  i = I32.to_u32(i)
+  j = coord.j + 100
+  j = I32.to_u32(j)
+  sum = i + j   //U32
+  U32.to_nat(sum)
+
+
 // CastInfo
 // ----
 
@@ -201,6 +233,7 @@ type App.KL.Game.Action { // skill info to send on post
 
 
 App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+  
   <div>
     <div>"Sala: " | local@room</div>
     {
@@ -209,6 +242,9 @@ App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): D
         none: <div>"Not ingame."</div>
         some: <div>"Players: " | Nat.show(List.length!(Map.to_list!(game.value@players)))</div>
       }
+    }
+    {
+      App.KL.Draft(local, global)
     }
   </div>
 
