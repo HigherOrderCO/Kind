@@ -63,7 +63,7 @@ Kind.Comp.Prim.inst.go(
 // applied to an inline argument, it generates a whole function.
 // - instantiator(`Nat`) == "(lambda (t) (t 0 (lambda (pred) (+ pred 1))))"
 Kind.Comp.Prim.instantiator(lang: Kind.Comp.Language, prim: Kind.Comp.Prim, depth: Nat, defs: Kind.Comp.Defs): String
-  let shape = Kind.Comp.Target.Scheme.natives(prim) open shape
+  let shape = lang@nati(prim) open shape
   let text = "x"
   for ctor in shape.inst with text:
     lang@gram@application(text, Kind.Comp.Prim.instantiator.go(lang, prim, depth, defs, ctor, 0))
@@ -104,7 +104,7 @@ Kind.Comp.Prim.elim.new(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, d
             none
       }
     eli:
-      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let shape = lang@nati(term.prim) open shape
       let {ctag,cses} = shape.elim
       let args_len = List.length!(args)
       let cses_len = List.length!(cses)
@@ -167,7 +167,7 @@ Kind.Comp.Prim.elim(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs:
             none
       }
     eli:
-      let shape = Kind.Comp.Target.Scheme.natives(term.prim) open shape
+      let shape = lang@nati(term.prim) open shape
       let {ctag,cses} = shape.elim
       let args_len = List.length!(args)
       let cses_len = List.length!(cses)
