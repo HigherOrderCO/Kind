@@ -1,0 +1,131 @@
+//TODO?: create additional tabs for checking stats or skills of a hero
+
+App.KL.Draft(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+  //heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+  open global
+  case global.game as game {
+    none: <div>"no game"</div>
+    some:
+      <div style={ 
+        "width": "100vw"
+        "height": "100vh"
+        "display": "flex"
+        "justify-content": "center"
+        "align-items": "center"
+      }>
+        {App.KL.Game.Draft.main(game.value@players, local@room, local@user)}
+      </div>
+  }
+
+App.KL.Game.Draft.main(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+  let player = players{user}
+  let normal = [App.KL.Game.Draft.top(players, user),  App.KL.Game.draft.bottom(players, room, user)]   //   QWE
+  let draw = 
+    case player {
+      none: [<div>"no player"</div>]
+      some:
+        switch String.eql(App.KL.Game.Draft.Team.show(player.value@team)) {
+          "blue": normal
+          "red":  normal
+        } default [App.KL.Game.Draft.choose_team(players)]
+
+    }
+  
+  <div style={ 
+    "width": "100vw"
+    "height": "100vh"
+    "display": "flex"
+    "flex-direction": "column"
+    "justify-content": "center"
+    "align-items": "center"
+    "font-size": "2rem"
+  }>
+    for div in draw: div
+  </div>
+  
+
+// TOP DRAFT LAYOUT
+// ------
+
+// draw top layout of draft screen
+// it contains position and card info about the player and allies
+App.KL.Game.Draft.top(players: Map<App.KL.Game.Player>, user: String): DOM
+  // get team of user
+  let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  // choose color to show based on team
+  let color  = switch String.eql(App.KL.Game.Draft.Team.show(team)) {
+    "blue": "linear-gradient(#3fbcf2, #3791d4)"
+    "red" : "linear-gradient(#ff6666, #ff4d4d)"
+  } default  "linear-gradient(#94b8b8, #75a3a3)"
+
+  // mount top layout
+  <div style={ 
+    "width": "100%"
+    "height": "60%"
+    "display": "flex"
+    "background-image": color
+    "align-items": "center"
+    "justify-content": "center"
+  }>
+    <div style={  
+      "width": "100%"
+      "max-width": "1440px"
+      "height": "100%"
+      "display": "flex"
+      "background-image": color
+      "align-items": "center"
+      "justify-content": "center"
+    }>
+      {App.KL.Game.Draft.coordinates(players, user)} // draw coord positions
+      {App.KL.Game.Draft.cards(players, user)} // draw card info about user and allies
+    </div>
+  </div>
+
+// BOTTOM DRAFT LAYOUT
+// ------
+
+// draw bottom of layout
+// it contains the heroes that can be choosen
+App.KL.Game.draft.bottom(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+  <div style={ 
+    "width": "100%"
+    "height": "40%"
+    "display": "flex"
+    "background-image": "linear-gradient(#0e0c0e, #242324)"
+    "justify-content": "center"
+    "align-items": "center"
+  }>
+    <div style={ 
+      "width": "100%"
+      "max-width": "1440px" 
+      "display": "flex"
+      "justify-content": "center"
+      "align-items": "center"
+    }>
+      // { App.KL.Game.draft.bottom_left(players)}
+      { App.KL.Game.Draft.ready_button(players, room, user)}
+    </div>
+  </div>
+
+
+// App.KL.Game.draft.interrogation: String
+//"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
+
+// AUX FUNCTIONS
+// ---------
+
+// get team string
+App.KL.Game.Draft.Team.show(team: App.KL.Game.Team): String
+  case team {
+    red: "red"
+    blue: "blue"
+    neutral: "neutral"
+  }
+
+// get team of a player
+App.KL.Game.Draft.to_team(players: Map<App.KL.Game.Player>, user: String): Maybe<App.KL.Game.Team>
+  player = players{user}
+  case player {
+    none: none
+    some: some(player.value@team)
+  }

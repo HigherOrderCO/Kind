@@ -1,0 +1,48 @@
+// CARD INFO FOR USER AND ALLIES
+// -------
+
+// draw card info for user and allies
+App.KL.Game.Draft.cards(players: Map<App.KL.Game.Player>, user: String): DOM
+  let team   = App.KL.Game.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  let player = players{user}
+  let allies = Map.delete!(user, players)
+  let hero   = case player{
+    none: none
+    some: player = player.value
+      player@hero_id 
+  }
+  
+  <div style={
+    "width": "70%"
+    "height": "100%"
+    "display": "flex"
+  }>
+    { App.KL.Game.draft.picks_left(hero)} // draw card info for user
+    { App.KL.Game.draft.picks_right(allies, team)} // draw card info for allies
+  </div>
+
+// draw card info for user
+App.KL.Game.draft.picks_left(hero: Maybe(U8)): DOM
+  <div style={
+    "width": "40%"
+    "height": "100%"
+    "display": "flex"
+    "padding": "5%"
+    "box-sizing": "border-box"
+  }>
+    //{ App.KL.Game.draft.player(hero)}
+  </div>
+
+// draw card info for allies
+App.KL.Game.draft.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
+  <div style={ 
+    "width": "60%"
+    "height": "100%"
+    "padding": "3%"
+    "display": "flex"
+    "flex-direction": "row"
+    "align-items": "center"
+    "box-sizing": "border-box"
+  }>
+    //{ App.KL.Game.draft.allies(map, team)}
+  </div>
