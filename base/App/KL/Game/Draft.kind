@@ -1,5 +1,8 @@
 //TODO?: create additional tabs for checking stats or skills of a hero
 
+// DRAFT WHEN
+// ==================
+
 App.KL.Game.Draft.when(
   players: Map<App.KL.Game.Player>,
   local  : App.KL.Game.State.Local
@@ -13,7 +16,7 @@ App.KL.Game.Draft.when(
         "C" :
           let coord_nat = String.drop(1, event.id)
           let coord     = App.KL.Game.Coord.nat_to_axial(Nat.read(coord_nat))
-          App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_coord(coord)))
+          App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_init_pos(coord)))
         "H" :
           let heroes_list = List.map!!(Pair.snd!!, Map.to_list!(players))
           let team        = App.KL.Game.Draft.to_team(players, local@user) <> App.KL.Game.Team.neutral

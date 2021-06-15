@@ -7,10 +7,10 @@ type App.KL.Global.State {
 type App.KL.Global.Event {
   void
   join_room
-  set_team (team: App.KL.Game.Team)
-  set_hero (hero: U8)
-  set_coord(coord: App.KL.Game.Coord)
-  set_ready(ready: U8)
+  set_team    (team: App.KL.Game.Team)
+  set_hero    (hero: U8)
+  set_init_pos(coord: App.KL.Game.Coord)
+  set_ready   (ready: U8)
   // Will store draft info (player / hero / team)
   // [App.Kaelin.Drafted.new("0x01babFc", App.Kaelin.Hero.Zeralul, App.Kaelin.Team.Blue)]
   //start_game   ( players: List<App.Kaelin.Player> )
@@ -60,4 +60,34 @@ App.KL.Global.post: App.Post<App.KL.State>
           let glob.game = game.value@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false), game.value@players)
           glob@game <- some(glob.game)
       }
+    // set_init_pos:
+    //   log("- set_init_pos")
+    //   open glob
+    //   case glob.game as game {
+    //     none: glob
+    //     some: 
+    //       let key      = App.KL.Game.Coord.axial_to_nat(event.coord)
+    //       let team     = App.KL.Game.Draft.to_team(game.players, user) <> App.KL.Team.neutral
+    //       let map      = App.Kaelin.Coord.draft.to_map(team, glob.stage.coords) // TODO bring this function
+    //       let coord_id = NatMap.get!(key, map) 
+    //       case coord_id {
+    //         none: glob
+    //         some:
+    //           let coords   = NatMap.to_list!(map)
+    //           for pair in coords with map:
+    //             open pair
+    //             if String.eql(pair.snd, user) then
+    //               NatMap.set!(pair.fst, "empty", map)
+    //             else
+    //               map
+    //           let new_map = NatMap.set!(key, user, map)
+    //           let new_map = 
+    //             switch String.eql(App.Kaelin.Team.show(team)) {
+    //               "blue": Pair.new!!(new_map, Pair.snd!!(glob.stage.coords))
+    //               "red":  Pair.new!!(Pair.fst!!(glob.stage.coords,) new_map)
+    //             }default glob.stage.coords
+    //           let stage   = App.Kaelin.Stage.draft(glob.stage.players, new_map)
+    //           glob@stage <- stage
+    //       }
+    //   }
   } default glob
