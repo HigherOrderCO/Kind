@@ -1,14 +1,90 @@
-App.KL.Game.draft.bottom_left(players: Map<App.KL.Game.Player>): DOM
-  heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
-    DOM.node("div", {},
-    { "width": "70%",
-      "height": "100%"
-      "display": "flex"
-      "justify-content": "center"
-      "align-items": "center"}
-    [
-      // DOM.node("div", {},
-      // {"display": "flex", "flex-wrap": "wrap", "justify-content": "center", "width": "100%"},
-      // List.map!!(App.KL.Game.draft.selection, heroes))
-    ]
-  )
+//BOTTOM MENU FOR CHOOSING HEROES 
+App.KL.Game.draft.menu(
+  players: Map<App.KL.Game.Player>
+): DOM
+
+  //heroes = List.map!!(Pair.snd!!, Map.to_list!(App.KL.Game.Heroes.Resources))
+  heroes = Map.values!(App.KL.Game.Heroes.Resources)
+  main_style = 
+  {
+    "width": "70%",
+    "height": "100%"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+  }
+  
+  display_style = 
+  { 
+    "display": "flex",
+    "flex-wrap": "wrap",
+    "justify-content": "center", 
+    "width": "100%"
+  }
+  
+  hero_list = List.map!!(App.KL.Game.draft.selection, heroes) 
+
+  <div style=main_style>
+    <div style=display_style>
+    for div in hero_list: div
+    </div>
+  </div>
+  // função será chamada dentro das divs (ela retorna uma lista de div, só meter
+  // o for)
+  //?a
+
+     //Selection
+//----------------------------------------------
+App.KL.Game.draft.selection(
+  hero: App.KL.Game.Hero
+): DOM
+   
+   image = App.KL.Game.Heroes.Croni.Assets.base64_idle //placeholder
+  //assets = hero@assets
+  //image  = assets@base64
+
+  box_style = 
+  { 
+    "margin": "4px",
+    "border": "5px solid #d6dadc",
+    //"box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
+    "background-color": "#bac1c4"
+    "height": "auto",
+    "width": "15%",
+    "border-radius": "5px"
+  }
+
+  name_style =   
+  {
+    "display": "flex",
+    "justify-content": "center",
+    "font-size": "1.2vw"
+  }
+
+  img_box_style = 
+  {
+    "padding": "2px",
+    "height": "100%",
+    "width": "100%"
+  } 
+
+  corner_style = 
+  {
+    "width": "75%",
+    "margin-left": "12.5%",
+    "height": "auto",
+    "image-rendering": "pixelated"
+  }
+  square_style = 
+  {
+  "display": "flex", "justify-content": "center", "height": "100%", "width":"100%"
+  }
+  
+  <div style=box_style id="H" | hero@name>
+    <div style=name_style id="H"| hero@name>String.show(hero@name)
+    </div>
+    <div style=img_box_style>
+      <img style=corner_style src=image id="H" | hero@name>
+      </img>
+    </div>
+  </div>

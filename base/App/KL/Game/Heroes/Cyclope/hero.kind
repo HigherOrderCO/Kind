@@ -1,7 +1,7 @@
-App.Kl.Game.Heroes.Cyclope.hero: App.Kl.Game.Hero
+App.KL.Game.Heroes.Cyclope.hero: App.KL.Game.Hero
   App.KL.Game.Hero.new(
     "Cyclope", 
-    (player) App.Kl.Game.Cyclope.Assets.vbox_idle,
+    (player) App.KL.Game.Heroes.Cyclope.Assets.vbox_idle,
     15,
     10,
     []

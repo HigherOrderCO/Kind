@@ -104,7 +104,7 @@ App.KL.Game.draft.bottom(players: Map<App.KL.Game.Player>, room: String, user: S
       "justify-content": "center"
       "align-items": "center"
     }>
-      // { App.KL.Game.draft.bottom_left(players)}
+      { App.KL.Game.draft.menu(players)}
       { App.KL.Game.Draft.ready_button(players, room, user)}
     </div>
   </div>
