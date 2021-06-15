@@ -1,4 +1,4 @@
-App.KL.Game.draft.bottom_left(players: Map<App.KL.Game.Player>): DOM
+App.KL.Game.draft.menu(players: Map<App.KL.Game.Player>): DOM
   heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
     DOM.node("div", {},
     { "width": "70%",
