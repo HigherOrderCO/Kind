@@ -48,7 +48,9 @@ Kind.Parser.file.adt(file: String, code: String, defs: Kind.Defs): Parser(Kind.D
                 open derived.value
                 let name = derived.value.name
                 let term = derived.value.term
+                let term = Kind.Term.bind([], (x) Bits.i(x), term)
                 let type = derived.value.type
+                let type = Kind.Term.bind([], (x) Bits.o(x), type)
                 let arit = derived.value.arit
                 Either.right!!(Kind.Map.def(file, code, orig, name, term, type, false, arit, false, defs.value))
             }
