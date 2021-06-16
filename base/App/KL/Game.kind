@@ -186,10 +186,10 @@ type App.KL.Game.Coord.Cubic {
 App.KL.Game.Coord.Cmp(
   x: App.KL.Game.Coord,
   y: App.KL.Game.Coord
-): CMP
-  let c = I32.cmp(x@i, y@j)
+): Cmp
+  let c = I32.cmp(x@i, y@i)
   case c {
-    eq : I32.cmp(x@j, y@j)
+    eql : I32.cmp(x@j, y@j)
   } default c
 
 App.Kl.Game.tree <A : Type> : Type
@@ -301,8 +301,8 @@ App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): D
             {
               let stage = game.value@stage
               case stage {
-                board: App.KL.Game.Board.draw(local, global)
-                draft: App.KL.Game.Draft.draw(local, global)
+                board: App.KL.Game.Board.draw(local, game.value)
+                draft: App.KL.Game.Draft.draw(local, global) // TODO change to receive App.KL.Game instead global
               } 
             }
           </div>
