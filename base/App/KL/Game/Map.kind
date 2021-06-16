@@ -8,30 +8,33 @@ App.KL.Game.Coord.Map.Cmp(
   } default c
 
 
-App.Kl.Game.Map.insert<A : Type>(key : App.KL.Game.Coord, val : A, map : Avl<App.KL.Game.Coord, A>) :  Avl<App.KL.Game.Coord, A>
+App.KL.Game.Map.insert<A : Type>(key : App.KL.Game.Coord, val : A, map : App.KL.Game.Map<A>) :  App.KL.Game.Map<A>
     Avl.insert!!(App.KL.Game.Coord.Map.Cmp, key, val, map)
 
-App.Kl.Game.Map.find<A : Type>(key : App.KL.Game.Coord, map : Avl<App.KL.Game.Coord, A>) : Maybe<A>
+App.KL.Game.Map.find<A : Type>(key : App.KL.Game.Coord, map : App.KL.Game.Map<A>) : Maybe<A>
     Avl.lookup!!(App.KL.Game.Coord.Map.Cmp, key map)
 
-App.Kl.Game.Map.delete<A : Type>(key : App.KL.Game.Coord, map : Avl<App.KL.Game.Coord, A>) : Avl<App.KL.Game.Coord, A>
+App.KL.Game.Map.delete<A : Type>(key : App.KL.Game.Coord, map : App.KL.Game.Map<A>) : App.KL.Game.Map<A>
     Avl.delete!!(App.KL.Game.Coord.Map.Cmp, key, map)
 
-App.Kl.Game.Map.union<A : Type>(map : Avl<App.KL.Game.Coord, A>) : Avl<App.KL.Game.Coord, A> -> Avl<App.KL.Game.Coord, A>
+App.KL.Game.Map.union<A : Type>(map : App.KL.Game.Map<A>) : App.KL.Game.Map<A> -> App.KL.Game.Map<A>
     Avl.union!!(App.KL.Game.Coord.Map.Cmp, map)
 
-App.Kl.Game.Map.keys<A : Type>(map : Avl<App.KL.Game.Coord, A>) : List<App.KL.Game.Coord>
+App.KL.Game.Map.keys<A : Type>(map : App.KL.Game.Map<A>) : List<App.KL.Game.Coord>
     Avl.foldr_with_key!!!((key, value, list) key & list, [], map)
 
-App.Kl.Game.Map.values<A : Type>(map : Avl<App.KL.Game.Coord, A>) : List<A>
+App.KL.Game.Map.values<A : Type>(map : App.KL.Game.Map<A>) : List<A>
     Avl.foldr_with_key!!!((key, value, list) value & list, [], map)
 
-App.Kl.Game.Map.values<A : Type, B : Type>(f : A -> B, map : Avl<App.KL.Game.Coord, A>) : List<B>
+App.KL.Game.Map.values<A : Type, B : Type>(f : A -> B, map : App.KL.Game.Map<A>) : List<B>
     Avl.map!!(f, map)
 
-App.Kl.Game.Map.new<A : Type> : Avl<App.KL.Game.Coord, A>
+App.KL.Game.Map.to_list<A: Type>(map: App.KL.Game.Map<A>): List<Pair<App.KL.Game.Coord,A>>
+    Avl.to_list!!(map)
+
+App.KL.Game.Map.new<A : Type> : App.KL.Game.Map<A>
     Avl.tip!!
 
-App.Kl.Game.Map<A : Type> : Type
+App.KL.Game.Map<A : Type> : Type
    Avl<App.KL.Game.Coord, A>
 

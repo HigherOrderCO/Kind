@@ -178,7 +178,7 @@ type App.KL.Game.Entity { // TODO rename?
 // -----
 
 App.KL.Game.Board: Type
-  App.Kl.Game.Map<App.KL.Game.Tile>
+  App.KL.Game.Map<App.KL.Game.Tile>
 
 // Math
 // ----
@@ -200,9 +200,6 @@ App.KL.Game.Coord.Cmp(
   case c {
     eql : I32.cmp(x@j, y@j)
   } default c
-
-App.KL.Game.Tree <A : Type> : Type
-   Avl<App.KL.Game.Coord, A>
 
 App.KL.Game.Coord.eql(
   a:App.KL.Game.Coord,
@@ -339,7 +336,7 @@ App.KL.Game.start: App.KL.Game
   App.KL.Game.new(
     App.KL.Game.Stage.draft
     Map.new!
-    App.Kl.Game.Map.new!
+    App.KL.Game.Map.new!
     0
   )
 

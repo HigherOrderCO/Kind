@@ -67,12 +67,11 @@ App.KL.Game.Stage.Board.draw.board(
   img : VoxBox
 ): VoxBox
 
-  map = NatMap.to_list!(map)
+  map = App.KL.Game.Map.to_list!(map)
   mouse_coord =  App.KL.Game.Coord.new(0, 0) // TODO App.KL.Game.Coord.to_axial(env_info@mouse_pos)
 
   for pos in map with img:
     {coord, tile} = pos
-    coord = App.KL.Game.Coord.nat_to_axial(coord)
 
     img = App.KL.Game.Stage.Board.draw.tile.terrain(tile@terrain, coord, mouse_coord, img)
     img = App.KL.Game.Stage.Board.draw.tile.creature(tile@creature, coord, img)
@@ -117,8 +116,7 @@ App.KL.Game.Stage.Board.draw.tile.creature(
 ): VoxBox
   case creature {
     none: img
-    some: 
-      key = App.KL.Game.Coord.axial_to_nat(coord)
+    some:
       {cx, cy} = App.KL.Game.Coord.to_screen_xy(coord)
       
       // draw creature
@@ -170,7 +168,6 @@ App.KL.Game.Stage.Board.draw.support.get_indicator(
   //   none: 
   //     App.KL.Game.Indicator.background
   //   some:
-  coord_nat = App.KL.Game.Coord.axial_to_nat(coord)
   range = none //App.Kaelin.Draw.support.get_effect(coord_nat, cast_info)
   area  = none //App.Kaelin.Draw.support.area_of_effect(mouse_coord, coord_nat, cast_info)
   case area{ 

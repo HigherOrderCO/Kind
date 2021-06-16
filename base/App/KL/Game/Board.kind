@@ -2,7 +2,7 @@
 App.KL.Game.Board.arena: App.KL.Game.Board
   board_size = App.KL.Constants.board_size
   
-  board  = NatMap.new!
+  board  = App.KL.Game.Map.new<App.KL.Game.Tile>
   
   width  = (board_size * 2) + 1
   width  = I32.to_u32(width)
@@ -40,8 +40,7 @@ App.KL.Game.Board.get(
   coord: App.KL.Game.Coord,
   board: App.KL.Game.Board
 ): Maybe<App.KL.Game.Tile>
-  key = App.KL.Game.Coord.axial_to_nat(coord)
-  NatMap.get!(key, board)
+  App.KL.Game.Map.find!(coord, board)
 
 // set tile in some coord on board
 App.KL.Game.Board.set(
@@ -49,9 +48,7 @@ App.KL.Game.Board.set(
   tile: App.KL.Game.Tile,
   board:App.KL.Game.Board
 ): App.KL.Game.Board
-
-  key = App.KL.Game.Coord.axial_to_nat(coord)
-  NatMap.set!(key, tile, board)
+  App.KL.Game.Map.insert!(coord, tile, board)
 
 
 // push entity to board
