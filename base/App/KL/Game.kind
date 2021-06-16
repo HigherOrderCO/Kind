@@ -287,18 +287,26 @@ type App.KL.Game.Action { // skill info to send on post
 
 
 App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
-  
   <div>
     <div>"Sala: " | local@room</div>
     {
       let game = global@game
       case game {
         none: <div>"Not ingame."</div>
-        some: <div>"Players: " | Nat.show(List.length!(Map.to_list!(game.value@players)))</div>
+        some: 
+          <div>
+            <div>"Players: " | Nat.show(List.length!(Map.to_list!(game.value@players)))</div>
+
+            // choose what to draw based on game stage
+            {
+              let stage = game.value@stage
+              case stage {
+                board: App.KL.Game.Board.draw(local, global)
+                draft: App.KL.Game.Draft.draw(local, global)
+              } 
+            }
+          </div>
       }
-    }
-    {
-      App.KL.Game.Draft.draw(local, global)
     }
   </div>
 

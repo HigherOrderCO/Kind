@@ -1,0 +1,48 @@
+
+
+// BOARD DRAWING
+// ====================
+
+
+App.KL.Game.Board.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+  // let seconds = case global.stage { planning: some(global.stage.seconds) } default none  TODO timer and round
+  
+  <div style={ 
+    "width": "100vw", 
+    "height": "100vh", 
+    "display": "flex", 
+    "flex-direction": "column", 
+    "justify-content": "center", 
+    "align-items": "center",
+    "position": "relative"
+  }>
+    <div style={"margin-bottom": "10px"}> 
+      <div> "seconds here" </div>
+      // for div in App.Kaelin.Draw.game.round(seconds, global.round)): div TODO show seconds
+    </div>
+    <div>
+      <div>"vbox here"</div>
+      // { 
+      //   DOM.vbox(
+      //     {"width": "512"}, 
+      //     {"border": "none", "image-rendering": "pixelated"}, 
+      //     App.Kaelin.Draw.map(img, map_to_draw, state)
+      //   ) 
+      // }
+    </div>
+
+    // TODO show list of skills?
+    // <div style={
+    //   "position": "absolute", 
+    //   "bottom": "0px",
+    //   "right": "0px",
+    //   "margin": "15px"
+    //   "display": "flex",
+    //   "flex-direction": "column-reverse"
+    // }>
+    //   {
+    //     let skills_text = List.map!!(App.Kaelin.Draw.game.skill_list(local.user, local.team, global.map, is_planning), global.skills_list)
+    //     for skill in skills_text: skill
+    //   }
+    // </div>
+  </div>
