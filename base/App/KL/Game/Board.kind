@@ -1,199 +1,85 @@
-
-
-// BOARD DRAWING
-// ====================
-
-
-// draw all the screen (round, seconds, canvas, list of skills)
-App.KL.Game.Board.draw(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
-  // let seconds = case global.stage { planning: some(global.stage.seconds) } default none  TODO timer and round
+// The 'Arena' board
+App.KL.Game.Board.arena: App.KL.Game.Board
+  board_size = App.KL.Constants.board_size
   
-  <div style={ 
-    "width": "100vw", 
-    "height": "100vh", 
-    "display": "flex", 
-    "flex-direction": "column", 
-    "justify-content": "center", 
-    "align-items": "center",
-    "position": "relative"
-  }>
-    <div style={"margin-bottom": "10px"}> 
-      <div> "seconds here" </div>
-      // for div in App.Kaelin.Draw.game.round(seconds, global.round)): div TODO show seconds
-    </div>
-    <div>
-      <div>"vbox here"</div>
-      // { 
-      //   DOM.vbox(
-      //     {"width": "512"}, 
-      //     {"border": "none", "image-rendering": "pixelated"}, 
-      //     App.Kaelin.Draw.map(img, map_to_draw, state)
-      //   ) 
-      // }
-    </div>
+  board  = NatMap.new!
+  
+  width  = (board_size * 2) + 1
+  width  = I32.to_u32(width)
+  
+  height = (board_size * 2) + 1
+  height = I32.to_u32(height)
+  // TODO: Define this elsewhere?
+  // Defines all possible images inside a tile
+  // terrain_img = App.KL.Game.Resources.terrains
 
-    // TODO show list of skills?
-    // <div style={
-    //   "position": "absolute", 
-    //   "bottom": "0px",
-    //   "right": "0px",
-    //   "margin": "15px"
-    //   "display": "flex",
-    //   "flex-direction": "column-reverse"
-    // }>
-    //   {
-    //     let skills_text = List.map!!(App.Kaelin.Draw.game.skill_list(local.user, local.team, global.map, is_planning), global.skills_list)
-    //     for skill in skills_text: skill
-    //   }
-    // </div>
-  </div>
+  new_terrain = App.KL.Game.Terrain.new(0)
+  new_terrain = App.KL.Game.Entity.terrain(new_terrain)
 
-// CANVAS DRAWING
-// ================
-
-// draw canvas
-App.KL.Game.Board.draw.canvas(
-  img  : VoxBox,
-  local: App.KL.Game.State.Local,
-  game : App.KL.Game
-): VoxBox
-
-  let img = App.KL.Game.Board.draw.board(game@board, img) // TODO add cast and env infos
-  // let img = App.KL.Game.Board.draw.mouse_ui(local@env_info, img)
-  img
-
-// draw canvas board
-App.KL.Game.Board.draw.board(
-  map : App.KL.Game.Board,
-  // cast: Maybe<App.Kaelin.CastInfo.local>,
-  // env_info: App.EnvInfo,
-  img : VoxBox
-): VoxBox
-
-  map = NatMap.to_list!(map)
-  mouse_coord =  App.KL.Game.Coord.new(0, 0) // TODO App.KL.Game.Coord.to_axial(env_info@mouse_pos)
-
-  for pos in map with img:
-    {coord, tile} = pos
-    coord = App.KL.Game.Coord.nat_to_axial(coord)
-
-    img = App.KL.Game.Board.draw.tile.terrain(tile@terrain, coord, mouse_coord, img)
-    img = App.KL.Game.Board.draw.tile.creature(tile@creature, coord, img)
-    // img = App.KL.Game.Board.draw.tile.animation(tile@animation, coord, internal, img) TODO animation
-    img
-  img
-
-
-App.KL.Game.Board.draw.mouse_ui(
-  info: App.EnvInfo,
-  img: VoxBox
-): VoxBox
-
-  open info 
-  coord = App.KL.Game.Coord.to_axial(info.mouse_pos)
-  {x,y} = App.KL.Game.Board.draw.support.centralize(coord)
-  VoxBox.Draw.image(x, y, 0#32, App.Kaelin.Assets.tile.mouse_ui, img) // TODO create KL assets?
-
-
-App.KL.Game.Board.draw.tile.terrain(
-  terrain: App.KL.Game.Terrain, 
-  // cast_info: Maybe<App.KL.Game.CastInfo.local>,
-  coord: App.KL.Game.Coord,
-  mouse_coord: App.KL.Game.Coord,
-  img: VoxBox
-): VoxBox
-
-  // coord_nat = App.KL.Game.Coord.axial_to_nat(coord)
-  sprite  = App.KL.Game.Board.draw.support.get_indicator(coord, mouse_coord) // TODO add castinfo
-  {i, j}  = App.KL.Game.Board.draw.support.centralize(coord)
-
-  field   = App.KL.Game.Fields(terrain@field_id)
-  drawing = field@draw(terrain, sprite)
-
-  VoxBox.Draw.image(i, j, 0#32, drawing, img)
-
-
-App.KL.Game.Board.draw.tile.creature(
-  creature: Maybe<App.KL.Game.Creature>,
-  coord: App.KL.Game.Coord,
-  img: VoxBox
-): VoxBox
-  case creature {
-    none: img
-    some: 
-      key = App.KL.Game.Coord.axial_to_nat(coord)
-      {cx, cy} = App.KL.Game.Coord.to_screen_xy(coord)
+  //// loops through the half of the board_size
+  for j : U32 from 0 to height with board:
+    for i : U32 from 0 to width with board: 
+      // generate int axial coordinate
+      coord_i = I32.sub(U32.to_i32(i),  board_size) // i - board_size
+      coord_j = I32.sub(U32.to_i32(j),  board_size) // j - board_size
+      coord = App.KL.Game.Coord.new(coord_i, coord_j)
+      fit = App.KL.Game.Coord.fit(coord)
       
-      // draw creature
-      img = App.KL.Game.Board.draw.hero(cx, cy, 0u, creature.value, img)
-
-      // TODO draw creature hp and ap
-      // if I32.gtn(creature.value@hp, 0) then
-      //   IO {
-      //     hp = App.Kaelin.Draw.creature.hp(cx - 5, cy - 31, creature.value, img)
-      //     ap = App.Kaelin.Draw.creature.ap(cx - 5, cy - 25, creature.value, img)
-      //     ap
-      //   }
-      // else
-      //   img
-      
-      img
-  }
-
-// draw hero in some canvas coordinate (allows pass hexagons)
-// TODO confirm with Maia
-App.KL.Game.Board.draw.hero(
-  cx: U32,
-  cy: U32,
-  z : U32,
-  creature: App.KL.Game.Creature,
-  img: VoxBox
-): VoxBox
-
-  let hero    = creature@hero
-  let drawing = hero@draw(creature)
-
-  aux_y = App.KL.Constants.hexagon_radius * 2 //U32
-  cy    = cy - aux_y //U32
-  cx    = cx - App.KL.Constants.hexagon_radius //U32
-  
-  
-  VoxBox.Draw.image(cx, cy, 0u, drawing, img)
+      case fit {
+        true:
+          App.KL.Game.Board.push(coord, new_terrain, board)
+        false:
+          board
+      }
+    board
+  board
 
 
-// AUX FUNCTIONS
-// =================
-App.KL.Game.Board.draw.support.get_indicator(
+// get tile from board
+App.KL.Game.Board.get(
   coord: App.KL.Game.Coord,
-  mouse_coord: App.KL.Game.Coord,
-  // cast_info: Maybe(App.Kaelin.CastInfo.local)
-): App.KL.Game.Indicator
+  board: App.KL.Game.Board
+): Maybe<App.KL.Game.Tile>
+  key = App.KL.Game.Coord.axial_to_nat(coord)
+  NatMap.get!(key, board)
 
-  // case cast_info {
-  //   none: 
-  //     App.KL.Game.Indicator.background
-  //   some:
-  coord_nat = App.KL.Game.Coord.axial_to_nat(coord)
-  range = none //App.Kaelin.Draw.support.get_effect(coord_nat, cast_info)
-  area  = none //App.Kaelin.Draw.support.area_of_effect(mouse_coord, coord_nat, cast_info)
-  case area{ 
-    none: case range { 
-      none: 
-        App.KL.Game.Indicator.background
-      some:
-        range.value
-    }
+// set tile in some coord on board
+App.KL.Game.Board.set(
+  coord: App.KL.Game.Coord,
+  tile: App.KL.Game.Tile,
+  board:App.KL.Game.Board
+): App.KL.Game.Board
+
+  key = App.KL.Game.Coord.axial_to_nat(coord)
+  NatMap.set!(key, tile, board)
+
+
+// push entity to board
+App.KL.Game.Board.push(
+  coord : App.KL.Game.Coord,
+  entity: App.KL.Game.Entity
+  board : App.KL.Game.Board
+): App.KL.Game.Board
+
+  tile = App.KL.Game.Board.get(coord, board)
+  case tile { 
+    none: 
+      case entity {
+        terrain:
+          new_tile = App.KL.Game.Tile.new(entity.value, none)
+          App.KL.Game.Board.set(coord, new_tile, board)
+      } default board
     some:
-      area.value
-  }
-    // }
-
-// Centralizes an image in the hexagon 
-App.KL.Game.Board.draw.support.centralize(
-  coord: App.KL.Game.Coord
-): Pair(U32, U32)
-
-      {i,   j} = App.KL.Game.Coord.to_screen_xy(coord)
-      i = i - App.KL.Constants.hexagon_radius
-      j = j - App.KL.Constants.hexagon_radius
-      {i, j}
+      open tile.value as tile
+      case entity {
+        terrain:
+          background_tile = tile.value@background <- entity.value
+          App.KL.Game.Board.set(coord, background_tile, board)
+        creature:
+          creature_tile = tile.value@creature <- some(entity.value)
+          App.KL.Game.Board.set(coord, creature_tile, board)
+        animation :
+          animation_tile = tile.value@animation <- some(entity.value)
+          App.KL.Game.Board.set(coord, animation_tile, board)
+      }
+    }

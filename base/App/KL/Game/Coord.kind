@@ -17,6 +17,31 @@ App.KL.Game.Coord.axial_to_nat(coord: App.KL.Game.Coord): Nat
   sum = i + j   //U32
   U32.to_nat(sum)
 
+// Checks if a coord is inside map boundaries
+App.KL.Game.Coord.fit(coord: App.KL.Game.Coord): Bool
+  board_size = App.KL.Constants.board_size
+  coord      = App.KL.Game.Coord.axial_to_cubic(coord)
+  open coord
+
+  x = I32.abs(coord.x)
+  y = I32.abs(coord.y)
+  z = I32.abs(coord.z)
+  greater = I32.max(x, I32.max(y, z))
+  I32.lte(greater, board_size)
+
+// CONVERSIONS
+// ==============================
+
+// convert axial coordinates to cubic coordinates 
+App.KL.Game.Coord.axial_to_cubic(coord: App.KL.Game.Coord): App.KL.Game.Coord.Cubic
+    open coord
+    x = coord.i
+    z = coord.j
+    y = (I32.neg(x) - z)
+
+    App.KL.Game.Coord.Cubic.new(x, y, z)
+
+// convert axial coordinate to canvas coordinate
 App.KL.Game.Coord.to_screen_xy(coord: App.KL.Game.Coord): Pair<U32,U32> // TODO add alias
   open coord
   i   = coord.i

@@ -295,7 +295,7 @@ type App.KL.Game.Action { // skill info to send on post
 
 
 
-App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
   <div>
     <div>"Sala: " | local@room</div>
     {
@@ -310,8 +310,8 @@ App.KL.Game.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): D
             {
               let stage = game.value@stage
               case stage {
-                board: App.KL.Game.Board.draw(local, game.value)
-                draft: App.KL.Game.Draft.draw(local, global) // TODO change to receive App.KL.Game instead global
+                board: App.KL.Game.Stage.Board.draw(img, local, game.value)
+                draft: App.KL.Game.Stage.Draft.draw(local, global) // TODO change to receive App.KL.Game instead global
               } 
             }
           </div>
@@ -331,7 +331,7 @@ App.KL.Game.when(
       open game.value as game_info
       case game_info.stage {
         board: App.pass!
-        draft: App.KL.Game.Draft.when(game_info.players, local, game.value, event)
+        draft: App.KL.Game.Stage.Draft.when(game_info.players, local, game.value, event)
       }
   }
 

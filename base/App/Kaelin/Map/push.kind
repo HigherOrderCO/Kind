@@ -7,13 +7,11 @@ App.Kaelin.Map.push(
   tile = App.Kaelin.Map.get(coord, map)
   case tile { 
     none: 
-      case entity { 
-        animation: map
+      case entity {
         background:
           new_tile = App.Kaelin.Tile.new(entity.value, none, none)
           App.Kaelin.Map.set(coord, new_tile, map)
-        creature: map
-      }
+      } default map
     some:
       open tile.value as tile
       case entity {

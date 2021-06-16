@@ -6,7 +6,7 @@ App.KL.Game.Heroes.Resources: Map(App.KL.Game.Hero)
     App.KL.Game.Heroes.Lela.hero,
     App.KL.Game.Heroes.Octoking.hero,
   ]
-
+  
   List.fold!(heroes)!({}, (hero, map) 
     open hero
     map{hero.name} <- hero
