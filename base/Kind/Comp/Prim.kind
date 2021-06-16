@@ -138,7 +138,9 @@ Kind.Comp.Prim.elim(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs:
             )
           {name, text}
         let cse_body_list = List.map!!(build_cse, List.zip!!(cses, args))
-        some(lang@gram@select(Kind.Comp.replace(ctag,[self]), cse_body_list))
+        let ret = lang@gram@select(Kind.Comp.replace(ctag,[self]), cse_body_list)
+        let ret = lang@gram@local_definition(self, Kind.Comp.transpile.term(lang, term.expr,depth,defs), ret)
+        some(ret)
 
   } default none
 

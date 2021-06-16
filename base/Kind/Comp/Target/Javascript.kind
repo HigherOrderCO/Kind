@@ -25,8 +25,8 @@ Kind.Comp.Target.Javascript.application(func: String, argm: String): String
   func|"("|argm|")"
 
 Kind.Comp.Target.Javascript.local_definition(name: String, expr: String, body: String): String
-  "const "|Kind.Comp.Target.Javascript.name(name)|" = "|expr|";\n"
-  |body
+  "(() => {const "|Kind.Comp.Target.Javascript.name(name)|" = "|expr|";\n return "
+  |body|";})()"
 
 Kind.Comp.Target.Javascript.global_function(name: String, args: List<String>, body: String): String
   case args {
@@ -83,12 +83,15 @@ Kind.Comp.Target.Javascript.string_literal(str: String): String
       ) | Kind.Comp.Target.Javascript.string_literal(str.tail)
   }
 
+Kind.Comp.Target.Javascript.nat(nat: Nat): String
+  Nat.show(nat)|"n"
+
 Kind.Comp.Target.Javascript.select(term: String, cse_body_list: List<Pair<String,String>>): String
   let switch_body = ""
   let switch_body = for cse_body in cse_body_list:
     {cse, body} = cse_body
-    switch_body|"case "|cse|": "|body|"; break;\n"
-  "switch ("|term|") {\n"|switch_body|"}"
+    switch_body|"case "|cse|": return "|body|";\n"
+  "(() => { switch ("|term|") {\n"|switch_body|"} })()"
 
 Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(
@@ -103,6 +106,7 @@ Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
     Kind.Comp.Target.Javascript.global_application
     Kind.Comp.Target.Javascript.select
     Kind.Comp.Target.Javascript.string_literal
+    Kind.Comp.Target.Javascript.nat
     Kind.Comp.Target.Javascript.module
     Kind.Comp.Target.Javascript.program
   )
