@@ -75,6 +75,29 @@ type App.KL.Game.Hero {
   )
 }
 
+App.KL.Game.Hero.from_id(
+  id: U8
+): Maybe(App.KL.Game.Hero)
+
+  switch U8.eql(id) {
+    0: some(App.KL.Game.Heroes.Croni.hero)
+    1: some(App.KL.Game.Heroes.Cyclope.hero)
+    2: some(App.KL.Game.Heroes.Lela.hero)
+    3: some(App.KL.Game.Heroes.Octoking.hero)
+   } default none
+
+App.KL.Game.Hero.to_map: Map(U8)
+  App.KL.Game.Hero.to_map.go(0, Map.new<U8>)
+
+App.KL.Game.Hero.to_map.go(id: U8, map: Map(U8)): Map(U8)
+  hero = App.KL.Game.Hero.from_id(id)
+  case hero{
+    none: map 
+    some: 
+      App.KL.Game.Hero.to_map.go(id + 1, map{hero.value@name} <- id)
+  }
+  
+
 type App.KL.Game.Asset {
   new(
     vbox  : VoxBox
@@ -194,7 +217,6 @@ App.KL.Game.Coord.axial_to_nat(
   j = I32.to_u32(j)
   sum = i + j   //U32
   U32.to_nat(sum)
-
 
 // Converts a natural number to an axial coordinate, so it can be used as a key in a NatMap(App.Kaelin.Tile)
 // 10020997 is transformed to the coordinate {+2, -3}

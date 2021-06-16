@@ -39,18 +39,18 @@ App.Kaelin.App.when.draft(
                 App.new_post!(state.global@room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_hero(hero_id.value)))
           }
         "R" :
-        let info    = players{local.user}
-        case info {
-          none: 
-            App.pass!
-          some:
-            let ready_u8 = 
-              if info.value@ready then
-              0#8
-              else
-              1#8
-            App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_ready(ready_u8)))
-        }        
+          let info    = players{local.user}
+          case info {
+            none: 
+              App.pass!
+            some:
+              let ready_u8 = 
+                if info.value@ready then
+                0#8
+                else
+                1#8
+              App.new_post!(global.room, App.Kaelin.Event.serialize(App.Kaelin.Event.draft_ready(ready_u8)))
+          }        
         "T" :
           let player_count = String.drop(1, event.id)
           if String.starts_with(player_count, "3") then

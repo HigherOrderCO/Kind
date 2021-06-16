@@ -13,48 +13,31 @@ App.KL.Game.Draft.when(
   case event {
     mouse_click:
       switch String.starts_with(event.id) {
-        "C" :
+        "C" : // Set initial position 
           let coord_nat = String.drop(1, event.id)
           let coord     = App.KL.Game.Coord.nat_to_axial(Nat.read(coord_nat))
           App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_init_pos(coord)))
-        "H" :
-          let heroes_list = List.map!!(Pair.snd!!, Map.to_list!(players))
-          let team        = App.KL.Game.Draft.to_team(players, local@user) <> App.KL.Game.Team.neutral
-          let heroes_map  = App.Kaelin.Hero.info.map
+        "H" : // Set Player Hero
+          let heroes_map  = App.KL.Game.Hero.to_map
           let hero_name   = String.drop(1, event.id)
           let hero_id     = heroes_map{hero_name}
-          let taken       = false
-          for player in heroes_list with taken:
-            open player
-            if App.KL.Game.Team.eql(team, player.team) then
-              if U8.eql(player.hero_id <> 99, hero_id <> 0) then
-                true
-              else
-                taken
-            else
-              taken
           case hero_id {
             none: App.pass!
-            some: 
-              if taken then
-                App.pass!
-              else 
-                App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_hero(hero_id.value)))
+            some: App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_hero(hero_id.value)))
           }
-        "R" :
-          let info    = players{local@user}
-          case info {
-            none: 
-              App.pass!
+        "R" : // Toggle Ready
+          let player = players{local@user}
+          case player {
+            none: App.pass!
             some:
               let ready_u8 = 
-                if info.value@ready then
+                if player.value@ready then
                   0#8
                 else
                   1#8
               App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_ready(ready_u8)))
           }        
-        "T" :
+        "T" : // Set a team
           let player_count = String.drop(1, event.id)
           if String.starts_with(player_count, "3") then
             App.pass!
@@ -72,6 +55,21 @@ App.KL.Game.Draft.when(
 // AUX FUNCTIONS
 // ==============================
 
+// check if player has a coord
+App.KL.Game.Draft.has_hero(hero_id: U8, player: Pair<String, App.KL.Game.Player>): Bool
+  x = player@snd@hero_id
+  case x {
+    none: false
+    some: U8.eql(x.value, hero_id)
+  }
+
+App.KL.Game.Draft.has_coord(coord: App.KL.Game.Coord, player: Pair<String, App.KL.Game.Player>): Bool
+  x = player@snd@init_pos
+  case x {
+    none: false
+    some: App.KL.Game.Coord.eql(x.value, coord)
+  }
+  
 // get team string
 App.KL.Game.Draft.Team.show(team: App.KL.Game.Team): String
   case team {
@@ -443,9 +441,9 @@ App.KL.Game.Draft.draw.cards.picks_left(hero: Maybe(U8)): DOM
 App.KL.Game.Draft.draw.cards.player(hero: Maybe(U8)): DOM
   let {name, image} = Maybe {
       get hero_id = hero
-      get hero = App.Kaelin.Hero.info(hero_id) // TODO bring this function
-      let assets = hero@assets
-      return {hero@name,assets@base64}
+      get hero    = App.KL.Game.Hero.from_id(hero_id) 
+      let picture = hero@picture(false, 0) // TODO update with real bool and time
+      return {hero@name,picture}
     } <> {"Choosing", App.KL.Game.Draft.draw.cards.interrogation}
   
   App.KL.Game.Draft.draw.cards.card(name, image, "100%")
@@ -626,9 +624,6 @@ App.KL.Game.Draft.draw.menu(
       for div in hero_list: div
     </div>
   </div>
-  // função será chamada dentro das divs (ela retorna uma lista de div, só meter
-  // o for)
-  //?a
 
      //Selection
 //----------------------------------------------
@@ -684,3 +679,4 @@ App.KL.Game.Draft.draw.selection(
       </img>
     </div>
   </div>
+
