@@ -147,9 +147,18 @@ type App.KL.Game.Field {
   )
 }
 
+
+
+App.KL.Game.Fields(n: U32): App.KL.Game.Field
+  let default_field = 
+    (terrain, indicator)
+      App.Kaelin.Assets.tile.green_2
+
+  { default_field }
+
 type App.KL.Game.Terrain {
   new(
-    field_id: Maybe<U8>
+    field_id: U32
   )
 }
 
@@ -160,7 +169,7 @@ type App.KL.Game.Tile {
   )
 }
 
-type App.KL.Game.Entity { // rename?
+type App.KL.Game.Entity { // TODO rename?
   terrain (value: App.KL.Game.Terrain)
   creature(value: App.KL.Game.Creature)
 }
@@ -192,7 +201,7 @@ App.KL.Game.Coord.Cmp(
     eql : I32.cmp(x@j, y@j)
   } default c
 
-App.Kl.Game.tree <A : Type> : Type
+App.KL.Game.Tree <A : Type> : Type
    Avl<App.KL.Game.Coord, A>
 
 App.KL.Game.Coord.eql(
