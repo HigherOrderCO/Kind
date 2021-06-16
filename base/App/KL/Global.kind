@@ -68,7 +68,14 @@ App.KL.Global.post: App.Post<App.KL.State>
       log("- join_room")
       open glob
       let glob.game = glob.game <> App.KL.Game.start
-      let glob.game = glob.game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), glob.game@players)
+      let player    = Map.get!(addr, glob.game@players)
+      let glob.game = case player {
+        none:
+          glob.game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), glob.game@players) 
+        some:
+          glob.game@players <- Map.set!(addr, player.value, glob.game@players) 
+      }
+
       glob@game <- some(glob.game)
 
     set_team:
