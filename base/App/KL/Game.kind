@@ -178,7 +178,7 @@ type App.KL.Game.Entity { // TODO rename?
 // -----
 
 App.KL.Game.Board: Type
-  NatMap<App.KL.Game.Tile>
+  App.Kl.Game.Map<App.KL.Game.Tile>
 
 // Math
 // ----
@@ -339,7 +339,7 @@ App.KL.Game.start: App.KL.Game
   App.KL.Game.new(
     App.KL.Game.Stage.draft
     Map.new!
-    NatMap.new!
+    App.Kl.Game.Map.new!
     0
   )
 
