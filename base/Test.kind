@@ -1,5 +1,2 @@
 Test: _
-  let a = App.KL.Event.join_room
-  let h = App.KL.Event.serialize_hex(a)
-  let a = App.KL.Event.deserialize_hex(h)
-  h
+  F64.ltn(3.0001, 3.0)
