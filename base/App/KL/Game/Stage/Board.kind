@@ -50,12 +50,11 @@ App.KL.Game.Stage.Board.draw(img: VoxBox, local: App.KL.Game.State.Local, game: 
 
 // draw canvas
 App.KL.Game.Stage.Board.draw.canvas(
-  img  : VoxBox,
+  img : VoxBox,
   local: App.KL.Game.State.Local,
-  game : App.KL.Game
+  game: App.KL.Game
 ): VoxBox
-
-  let img = App.KL.Game.Stage.Board.draw.board(game@board, img) // TODO add cast and env infos
+  let img = App.KL.Game.Stage.Board.draw.board(game@board, local@casts, img) // TODO add cast and env infos
   // let img = App.KL.Game.Stage.Board.draw.mouse_ui(local@env_info, img)
   img
 
@@ -63,10 +62,9 @@ App.KL.Game.Stage.Board.draw.canvas(
 // TODO 
 // add cast_info
 App.KL.Game.Stage.Board.draw.board(
-  map : App.KL.Game.Board,
-  // cast: Maybe<App.Kaelin.CastInfo.local>,
-  // env_info: App.EnvInfo,
-  img : VoxBox
+  map: App.KL.Game.Board
+  casts: Maybe<App.KL.Game.Casts>
+  img: VoxBox
 ): VoxBox
 
   map = App.KL.Game.Map.to_list!(map)
@@ -74,7 +72,7 @@ App.KL.Game.Stage.Board.draw.board(
 
   for pos in map with img:
     {coord, tile} = pos
-    img = App.KL.Game.Stage.Board.draw.tile.terrain(tile@terrain, coord, mouse_coord, img)
+    img = App.KL.Game.Stage.Board.draw.tile.terrain(tile@terrain, casts, coord, mouse_coord, img)
     img = App.KL.Game.Stage.Board.draw.tile.creature(tile@creature, coord, img)
     // img = App.KL.Game.Stage.Board.draw.tile.animation(tile@animation, coord, internal, img) TODO animation
     img
@@ -95,19 +93,19 @@ App.KL.Game.Stage.Board.draw.mouse_ui(
 // add cast_info
 // draws tile terrain
 App.KL.Game.Stage.Board.draw.tile.terrain(
-  terrain: App.KL.Game.Terrain, 
-  // cast_info: Maybe<App.KL.Game.CastInfo.local>,
-  coord: App.KL.Game.Coord,
-  mouse_coord: App.KL.Game.Coord,
+  terrain: App.KL.Game.Terrain,
+  casts: Maybe<App.KL.Game.Casts>
+  coord: App.KL.Game.Coord
+  mouse_coord: App.KL.Game.Coord
   img: VoxBox
 ): VoxBox
 
   // coord_nat = App.KL.Game.Coord.axial_to_nat(coord)
-  sprite  = App.KL.Game.Stage.Board.draw.get_indicator(coord, mouse_coord) // TODO add castinfo
-  {i, j}  = App.KL.Game.Stage.Board.draw.centralize(coord)
+  indicator = App.KL.Game.Stage.Board.draw.get_indicator(coord, mouse_coord, casts) // TODO add castinfo
+  {i, j}    = App.KL.Game.Stage.Board.draw.centralize(coord)
 
-  field   = App.KL.Game.Fields(terrain@field_id)
-  drawing = field@draw(terrain, sprite)
+  field   = App.KL.Game.Field.get_by_id.default(terrain@field_id)
+  drawing = field@draw(terrain, indicator)
 
   VoxBox.Draw.image(i, j, 0#32, drawing, img)
 
@@ -161,32 +159,32 @@ App.KL.Game.Stage.Board.draw.hero(
 // AUX FUNCTIONS
 // =================
 
+
 // TODO 
 // add cast_info
 App.KL.Game.Stage.Board.draw.get_indicator(
-  coord: App.KL.Game.Coord,
-  mouse_coord: App.KL.Game.Coord,
-  // cast_info: Maybe(App.Kaelin.CastInfo.local)
+  tile_coord: App.KL.Game.Coord
+  mouse_coord: App.KL.Game.Coord
+  casts: Maybe<App.KL.Game.Casts>
 ): App.KL.Game.Indicator
-
-  // case cast_info {
-  //   none: 
-  //     App.KL.Game.Indicator.background
-  //   some:
-  range = none //App.Kaelin.Draw.support.get_effect(coord_nat, cast_info)
-  area  = none //App.Kaelin.Draw.support.area_of_effect(mouse_coord, coord_nat, cast_info)
-  case area{ 
-    none: case range { 
-      none: 
-        App.KL.Game.Indicator.background
-      some:
-        range.value
-    }
-    some:
-      area.value
+  let indicator = App.KL.Game.Indicator.background
+  //let indicator =
+    //if App.KL.Game.Coord.eql(tile_coord, mouse_coord)
+    //then App.KL.Game.Indicator.blue
+    //else App.KL.Game.Indicator.background
+  without casts: indicator
+  open casts
+  let indicator = case App.KL.Game.Map.find!(tile_coord, casts.areas) as got {
+    none: indicator
+    some: got.value
   }
-    // }
-
+  // TODO: move to Board.draw, to draw the letter
+  let indicator = case App.KL.Game.Map.find!(tile_coord, casts.picks) as got {
+    none: indicator
+    some: App.KL.Game.Indicator.red
+  }
+  indicator
+  
 // Centralizes an image in the hexagon 
 App.KL.Game.Stage.Board.draw.centralize(
   coord: App.KL.Game.Coord
@@ -195,3 +193,48 @@ App.KL.Game.Stage.Board.draw.centralize(
   i      = i - App.KL.Constants.hexagon_radius
   j      = j - App.KL.Constants.hexagon_radius
   {i, j}
+
+
+// When
+// ====
+
+App.KL.Game.Stage.Board.when(
+  local: App.KL.Game.State.Local
+  global: App.KL.Game
+  event: App.Event,
+): IO<Maybe<App.State.local<App.KL.State>>>
+  case event {
+    key_down:
+      log("Key down " | Char.to_string(event.code))
+      switch U16.eql(event.code) {
+        'X':
+          log("Setting casts.")
+          let coord = App.KL.Game.Coord.new(0,0) // TODO: use mouse pos instead
+          let casts = local@casts <> App.KL.Game.Casts.new(App.KL.Game.Map.new!, App.KL.Game.Map.new!)
+          let casts = casts@areas <- App.KL.Game.Map.from_list!([{coord, App.KL.Game.Indicator.blue}])
+          App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
+      } default App.pass!
+    key_up:
+      log("Key up " | Char.to_string(event.code))
+      let coord = App.KL.Game.Coord.new(0,0) // TODO: use mouse pos instead
+      let casts = local@casts <> App.KL.Game.Casts.new(App.KL.Game.Map.new!, App.KL.Game.Map.new!)
+      let casts = casts@picks <- App.KL.Game.Map.insert!(coord, Char.to_string(event.code), casts@picks)
+      App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
+  } default App.pass!
+
+
+//type App.KL.Game.CastInfo.Area {
+  //new(
+    //center: App.KL.Game.Coord
+    //range: Nat
+    //letter: String
+  //)
+//}
+
+//type App.KL.Game.CastInfo {
+  //new(
+    //areas: List<App.KL.Game.CastInfo.Area>
+    //casts: List<Pair<App.KL.Game.Coord, String>>
+  //)
+//}
+

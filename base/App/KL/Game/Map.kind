@@ -32,6 +32,9 @@ App.KL.Game.Map.values<A : Type, B : Type>(f : A -> B, map : App.KL.Game.Map<A>)
 App.KL.Game.Map.to_list<A: Type>(map: App.KL.Game.Map<A>): List<Pair<App.KL.Game.Coord,A>>
     Avl.to_list!!(map)
 
+App.KL.Game.Map.from_list<A: Type>(list: List<Pair<App.KL.Game.Coord,A>>): App.KL.Game.Map<A>
+  Avl.from_list!!(App.KL.Game.Coord.Cmp, list)
+
 App.KL.Game.Map.new<A : Type> : App.KL.Game.Map<A>
     Avl.tip!!
 

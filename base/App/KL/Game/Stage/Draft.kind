@@ -4,11 +4,12 @@
 // ==================
 
 App.KL.Game.Stage.Draft.when(
-  players: Map<App.KL.Game.Player>,
+  //players: Map<App.KL.Game.Player>,
   local  : App.KL.Game.State.Local
   global : App.KL.Game
   event  : App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
+  let players = global@players
 
   case event {
     mouse_click:
