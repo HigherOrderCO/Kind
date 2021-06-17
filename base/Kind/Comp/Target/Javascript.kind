@@ -79,7 +79,7 @@ Kind.Comp.Target.Javascript.string_literal(str: String): String
       else if U16.gte(str.head, ' ') && U16.lte(str.head, '~') then
         Char.to_string(str.head)
       else
-        "\\x" | U16.show_hex(str.head) | ";"
+        "\\x" | String.pad_left(2, '0', U16.show_hex(str.head))
       ) | Kind.Comp.Target.Javascript.string_literal(str.tail)
   }
 
@@ -90,7 +90,7 @@ Kind.Comp.Target.Javascript.select(term: String, cse_body_list: List<Pair<String
   let switch_body = ""
   let switch_body = for cse_body in cse_body_list:
     {cse, body} = cse_body
-    switch_body|"case '"|cse|"': return "|body|";\n"
+    switch_body|"case "|cse|": return "|body|";\n"
   "(() => { switch ("|term|") {\n"|switch_body|"} })()"
 
 Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
@@ -237,7 +237,7 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
           let field_list = [] :: List<String>
           for field in ctr_fields with field_list:
              ("$0['"|field|"']") & field_list
-          {ctr_name, field_list} & cses
+          {"'"|ctr_name|"'", field_list} & cses
         List.reverse!(cses)
       })
   }
