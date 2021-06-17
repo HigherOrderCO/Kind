@@ -88,7 +88,7 @@ App.KL.Game.Stage.Board.draw.mouse_ui(
 
   open info 
   coord = App.KL.Game.Coord.to_axial(info.mouse_pos)
-  {x,y} = App.KL.Game.Stage.Board.draw.support.centralize(coord)
+  {x,y} = App.KL.Game.Stage.Board.draw.centralize(coord)
   VoxBox.Draw.image(x, y, 0#32, App.Kaelin.Assets.tile.mouse_ui, img) // TODO create KL assets?
 
 // TODO 
@@ -103,8 +103,8 @@ App.KL.Game.Stage.Board.draw.tile.terrain(
 ): VoxBox
 
   // coord_nat = App.KL.Game.Coord.axial_to_nat(coord)
-  sprite  = App.KL.Game.Stage.Board.draw.support.get_indicator(coord, mouse_coord) // TODO add castinfo
-  {i, j}  = App.KL.Game.Stage.Board.draw.support.centralize(coord)
+  sprite  = App.KL.Game.Stage.Board.draw.get_indicator(coord, mouse_coord) // TODO add castinfo
+  {i, j}  = App.KL.Game.Stage.Board.draw.centralize(coord)
 
   field   = App.KL.Game.Fields(terrain@field_id)
   drawing = field@draw(terrain, sprite)
@@ -163,7 +163,7 @@ App.KL.Game.Stage.Board.draw.hero(
 
 // TODO 
 // add cast_info
-App.KL.Game.Stage.Board.draw.support.get_indicator(
+App.KL.Game.Stage.Board.draw.get_indicator(
   coord: App.KL.Game.Coord,
   mouse_coord: App.KL.Game.Coord,
   // cast_info: Maybe(App.Kaelin.CastInfo.local)
@@ -188,7 +188,7 @@ App.KL.Game.Stage.Board.draw.support.get_indicator(
     // }
 
 // Centralizes an image in the hexagon 
-App.KL.Game.Stage.Board.draw.support.centralize(
+App.KL.Game.Stage.Board.draw.centralize(
   coord: App.KL.Game.Coord
 ): Pair(U32, U32)
   {i, j} = App.KL.Game.Coord.to_screen_xy(coord)
