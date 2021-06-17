@@ -54,8 +54,8 @@ App.KL.Game.Stage.Board.draw.canvas(
   local: App.KL.Game.State.Local,
   game: App.KL.Game
 ): VoxBox
-  let img = App.KL.Game.Stage.Board.draw.board(game@board, local@casts, img) // TODO add cast and env infos
-  // let img = App.KL.Game.Stage.Board.draw.mouse_ui(local@env_info, img)
+  let img = App.KL.Game.Stage.Board.draw.board(game@board, local@casts, local@env_info, img) 
+  let img = App.KL.Game.Stage.Board.draw.mouse_ui(local@env_info, img)
   img
 
 // draw canvas board
@@ -64,11 +64,12 @@ App.KL.Game.Stage.Board.draw.canvas(
 App.KL.Game.Stage.Board.draw.board(
   map: App.KL.Game.Board
   casts: Maybe<App.KL.Game.Casts>
+  env_info: App.EnvInfo
   img: VoxBox
 ): VoxBox
 
   map = App.KL.Game.Map.to_list!(map)
-  mouse_coord =  App.KL.Game.Coord.new(0, 0) // TODO App.KL.Game.Coord.to_axial(env_info@mouse_pos)
+  mouse_coord = App.KL.Game.Coord.xy_to_axial(env_info@mouse_pos)
 
   for pos in map with img:
     {coord, tile} = pos
@@ -87,7 +88,7 @@ App.KL.Game.Stage.Board.draw.mouse_ui(
   open info 
   coord = App.KL.Game.Coord.to_axial(info.mouse_pos)
   {x,y} = App.KL.Game.Stage.Board.draw.centralize(coord)
-  VoxBox.Draw.image(x, y, 0#32, App.Kaelin.Assets.tile.mouse_ui, img) // TODO create KL assets?
+  VoxBox.Draw.image(x, y, 0#32, App.Kaelin.Assets.tile.mouse_ui, img) // TODO move to use KL assets?
 
 // TODO 
 // add cast_info
@@ -204,19 +205,21 @@ App.KL.Game.Stage.Board.when(
   event: App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
   case event {
+    frame:
+      App.set_local!(App.KL.State.Local.game(local@env_info <- event.info))
     key_down:
       log("Key down " | Char.to_string(event.code))
       switch U16.eql(event.code) {
         'X':
           log("Setting casts.")
-          let coord = App.KL.Game.Coord.new(0,0) // TODO: use mouse pos instead
+          let coord = App.KL.Game.Coord.xy_to_axial(local@env_info@mouse_pos)
           let casts = local@casts <> App.KL.Game.Casts.new(App.KL.Game.Map.new!, App.KL.Game.Map.new!)
           let casts = casts@areas <- App.KL.Game.Map.from_list!([{coord, App.KL.Game.Indicator.blue}])
           App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
       } default App.pass!
     key_up:
       log("Key up " | Char.to_string(event.code))
-      let coord = App.KL.Game.Coord.new(0,0) // TODO: use mouse pos instead
+      let coord = App.KL.Game.Coord.xy_to_axial(local@env_info@mouse_pos)
       let casts = local@casts <> App.KL.Game.Casts.new(App.KL.Game.Map.new!, App.KL.Game.Map.new!)
       let casts = casts@picks <- App.KL.Game.Map.insert!(coord, Char.to_string(event.code), casts@picks)
       App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
