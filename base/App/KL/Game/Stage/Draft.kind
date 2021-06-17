@@ -689,7 +689,7 @@ App.KL.Game.Stage.Draft.create_board(players: Map<App.KL.Game.Player>): App.KL.G
   players = Map.to_list!(players)
   for pair in players with map:    
     let user   = pair@fst
-    log(user)
+    
     let player = pair@snd
     let pos    = player@init_pos
     Maybe {
@@ -698,8 +698,7 @@ App.KL.Game.Stage.Draft.create_board(players: Map<App.KL.Game.Player>): App.KL.G
       let team      = player@team
       get creature  = App.KL.Game.Stage.Draft.Tile.create_creature(hero_id, some(user), team)
       let entity    = App.KL.Game.Entity.creature(creature)
-      log("chegou aqui")
-      return App.KL.Game.Board.push(coord, entity, map) // TODO file to guard board map functions 
+      return App.KL.Game.Board.push(coord, entity, map)
     } <> map
   map
 
@@ -714,7 +713,6 @@ App.KL.Game.Stage.Draft.Tile.create_creature(
     none: none
     some: some({ player_addr, hero.value, team, hero.value@max_hp, hero.value@max_ap })
   }
-
 
 App.KL.Game.Stage.Draft.Hero.info(
   id: U8
