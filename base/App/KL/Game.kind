@@ -6,10 +6,10 @@
 type App.KL.Game.State.Local {
   new(
     user: String
-    room: String 
+    room: String
     casts: Maybe<App.KL.Game.Casts>
     // cast_info
-    // env_info
+    env_info: App.EnvInfo
   )
 }
 
@@ -219,7 +219,7 @@ App.KL.Game.Coord.nat_to_axial(
 
 type App.KL.Game.Casts {
   new(
-    areas: App.KL.Game.Map<App.KL.Game.Indicator>
+    areas: Maybe<App.KL.Game.Map<App.KL.Game.Indicator>>
     picks: App.KL.Game.Map<String>
   )
 }
