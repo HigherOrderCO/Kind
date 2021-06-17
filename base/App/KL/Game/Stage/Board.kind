@@ -60,6 +60,8 @@ App.KL.Game.Stage.Board.draw.canvas(
   img
 
 // draw canvas board
+// TODO 
+// add cast_info
 App.KL.Game.Stage.Board.draw.board(
   map : App.KL.Game.Board,
   // cast: Maybe<App.Kaelin.CastInfo.local>,
@@ -72,14 +74,13 @@ App.KL.Game.Stage.Board.draw.board(
 
   for pos in map with img:
     {coord, tile} = pos
-
     img = App.KL.Game.Stage.Board.draw.tile.terrain(tile@terrain, coord, mouse_coord, img)
     img = App.KL.Game.Stage.Board.draw.tile.creature(tile@creature, coord, img)
     // img = App.KL.Game.Stage.Board.draw.tile.animation(tile@animation, coord, internal, img) TODO animation
     img
   img
 
-
+// draw mouse indicator
 App.KL.Game.Stage.Board.draw.mouse_ui(
   info: App.EnvInfo,
   img: VoxBox
@@ -90,7 +91,9 @@ App.KL.Game.Stage.Board.draw.mouse_ui(
   {x,y} = App.KL.Game.Stage.Board.draw.support.centralize(coord)
   VoxBox.Draw.image(x, y, 0#32, App.Kaelin.Assets.tile.mouse_ui, img) // TODO create KL assets?
 
-
+// TODO 
+// add cast_info
+// draws tile terrain
 App.KL.Game.Stage.Board.draw.tile.terrain(
   terrain: App.KL.Game.Terrain, 
   // cast_info: Maybe<App.KL.Game.CastInfo.local>,
@@ -108,7 +111,7 @@ App.KL.Game.Stage.Board.draw.tile.terrain(
 
   VoxBox.Draw.image(i, j, 0#32, drawing, img)
 
-
+// draws tile creature if any
 App.KL.Game.Stage.Board.draw.tile.creature(
   creature: Maybe<App.KL.Game.Creature>,
   coord: App.KL.Game.Coord,
@@ -135,8 +138,7 @@ App.KL.Game.Stage.Board.draw.tile.creature(
       img
   }
 
-// draw hero in some canvas coordinate (allows pass hexagons)
-// TODO confirm with Maia
+// draw hero img in some canvas coordinate (allows pass hexagons)
 App.KL.Game.Stage.Board.draw.hero(
   cx: U32,
   cy: U32,
@@ -158,6 +160,9 @@ App.KL.Game.Stage.Board.draw.hero(
 
 // AUX FUNCTIONS
 // =================
+
+// TODO 
+// add cast_info
 App.KL.Game.Stage.Board.draw.support.get_indicator(
   coord: App.KL.Game.Coord,
   mouse_coord: App.KL.Game.Coord,
@@ -186,8 +191,7 @@ App.KL.Game.Stage.Board.draw.support.get_indicator(
 App.KL.Game.Stage.Board.draw.support.centralize(
   coord: App.KL.Game.Coord
 ): Pair(U32, U32)
-
-      {i,   j} = App.KL.Game.Coord.to_screen_xy(coord)
-      i = i - App.KL.Constants.hexagon_radius
-      j = j - App.KL.Constants.hexagon_radius
-      {i, j}
+  {i, j} = App.KL.Game.Coord.to_screen_xy(coord)
+  i      = i - App.KL.Constants.hexagon_radius
+  j      = j - App.KL.Constants.hexagon_radius
+  {i, j}

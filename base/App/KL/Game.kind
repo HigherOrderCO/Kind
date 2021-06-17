@@ -147,14 +147,17 @@ type App.KL.Game.Field {
   )
 }
 
-
-
+// TODO
+// decide which folder will store the terrains assets
 App.KL.Game.Fields(n: U32): App.KL.Game.Field
   let default_field = 
     (terrain, indicator)
       App.Kaelin.Assets.tile.green_2
-
-  { default_field }
+  
+  switch U32.eql(n) {
+    0: 
+      { (terrain, indicator) App.Kaelin.Assets.tile.green_2 }
+  } default { default_field }
 
 type App.KL.Game.Terrain {
   new(
