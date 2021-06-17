@@ -7,6 +7,7 @@ type App.KL.Game.State.Local {
   new(
     user: String
     room: String 
+    casts: Maybe<App.KL.Game.Casts>
     // cast_info
     // env_info
   )
@@ -34,7 +35,7 @@ type App.KL.Game.Stage {
 
 type App.KL.Game.Player {
   new(
-    hero_id: Maybe<U8>
+    hero_id: Maybe<Nat>
     init_pos: Maybe<App.KL.Game.Coord>
     team: App.KL.Game.Team
     ready: Bool
@@ -75,29 +76,6 @@ type App.KL.Game.Hero {
   )
 }
 
-App.KL.Game.Hero.from_id(
-  id: U8
-): Maybe(App.KL.Game.Hero)
-
-  switch U8.eql(id) {
-    0: some(App.KL.Game.Heroes.Croni.hero)
-    1: some(App.KL.Game.Heroes.Cyclope.hero)
-    2: some(App.KL.Game.Heroes.Lela.hero)
-    3: some(App.KL.Game.Heroes.Octoking.hero)
-   } default none
-
-App.KL.Game.Hero.to_map: Map(U8)
-  App.KL.Game.Hero.to_map.go(0, Map.new<U8>)
-
-App.KL.Game.Hero.to_map.go(id: U8, map: Map(U8)): Map(U8)
-  hero = App.KL.Game.Hero.from_id(id)
-  case hero{
-    none: map 
-    some: 
-      App.KL.Game.Hero.to_map.go(id + 1, map{hero.value@name} <- id)
-  }
-  
-
 type App.KL.Game.Asset {
   new(
     vbox  : VoxBox
@@ -126,7 +104,7 @@ type App.KL.Game.Effect.Result <A: Type> {
     value: A
     board: App.KL.Game.Board
     //futures: List(App.KL.Board.Future)
-    indicators: NatMap<App.KL.Game.Indicator>
+    //indicators: NatMap<App.KL.Game.Indicator>
   )
 }
 
@@ -136,32 +114,24 @@ type App.KL.Game.Indicator {
   yellow
   blue
   background
-}
+} deriving (stringifier)
+
+App.KL.Game.Indicator.show(indicator: App.KL.Game.Indicator): String
+  Stringifier.run!(App.KL.Game.Indicator.stringifier, indicator)
 
 // Terrains
 // --------
 
 type App.KL.Game.Field {
   new(
+    name: String
     draw: App.KL.Game.Terrain -> App.KL.Game.Indicator -> VoxBox
   )
 }
 
-// TODO
-// decide which folder will store the terrains assets
-App.KL.Game.Fields(n: U32): App.KL.Game.Field
-  let default_field = 
-    (terrain, indicator)
-      App.Kaelin.Assets.tile.green_2
-  
-  switch U32.eql(n) {
-    0: 
-      { (terrain, indicator) App.Kaelin.Assets.tile.green_2 }
-  } default { default_field }
-
 type App.KL.Game.Terrain {
   new(
-    field_id: U32
+    field_id: Nat
   )
 }
 
@@ -188,7 +158,7 @@ App.KL.Game.Board: Type
 
 type App.KL.Game.Coord {
   new(i: I32, j: I32)
-} deriving (serializer, deserializer)
+} deriving (serializer, deserializer, stringifier)
 
 
 type App.KL.Game.Coord.Cubic {
@@ -247,12 +217,10 @@ App.KL.Game.Coord.nat_to_axial(
 // CastInfo
 // ----
 
-type App.KL.Game.CastInfo {
+type App.KL.Game.Casts {
   new(
-    hero_pos: App.KL.Game.Coord
-    skill: App.KL.Game.Skill
-    range: NatSet // remove?
-    area: NatMap<App.KL.Game.Indicator> // remove?
+    areas: App.KL.Game.Map<App.KL.Game.Indicator>
+    picks: App.KL.Game.Map<String>
   )
 }
 
@@ -330,8 +298,8 @@ App.KL.Game.when(
     some: 
       open game.value as game_info
       case game_info.stage {
-        board: App.pass!
-        draft: App.KL.Game.Stage.Draft.when(game_info.players, local, game.value, event)
+        board: App.KL.Game.Stage.Board.when(local, game.value, event)
+        draft: App.KL.Game.Stage.Draft.when(local, game.value, event)
       }
   }
 

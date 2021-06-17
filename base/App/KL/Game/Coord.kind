@@ -158,3 +158,30 @@ App.KL.Game.Coord.round.diff(x: F64,y: F64): F64 // TODO while F64.abs doesnt ex
     true: x - y
     false: y - x
   }
+
+App.KL.Game.Coord.show(coord: App.KL.Game.Coord): String
+  Stringifier.run!(App.KL.Game.Coord.stringifier, coord)
+
+
+// TODO: move from App.Kaelin
+// Returns the distance between 2 Coords
+App.KL.Game.Coord.distance(
+  fst_coord: App.KL.Game.Coord
+  snd_coord: App.KL.Game.Coord
+): I32
+  let convert_fst = App.KL.Game.Coord.axial_to_cubic(fst_coord)
+  let convert_snd = App.KL.Game.Coord.axial_to_cubic(snd_coord)
+  App.KL.Game.Coord.Cubic.distance(convert_fst, convert_snd)
+
+// Returns the distance between 2 Coords
+// TODO: create I32.to_nat ?
+App.KL.Game.Coord.Cubic.distance(
+  coord_a: App.KL.Game.Coord.Cubic
+  coord_b: App.KL.Game.Coord.Cubic
+): I32
+  open coord_a as axis_a
+  open coord_b as axis_b
+  subx = I32.sub(axis_a.x, axis_b.x)
+  suby = I32.sub(axis_a.y, axis_b.y)
+  subz = I32.sub(axis_a.z, axis_b.z)
+  I32.max(I32.max(I32.abs(subx), I32.abs(suby)), I32.abs(subz))

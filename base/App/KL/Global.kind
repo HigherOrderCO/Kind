@@ -37,8 +37,11 @@ App.KL.Global.Event.deserialize_post(hex: String): App.KL.Global.Event
 // Global ticker: not used
 App.KL.Global.tick: App.Tick<App.KL.State>
   (tick, glob)
-  //TODO move to another function?
-    Maybe {
+  let game = glob@game
+  without game: glob
+  let stage = game@stage
+  case stage {
+    draft: Maybe {
       get game        = glob@game
       let game        = game@tick <- U64.add(game@tick, 1)
       let players     = game@players
@@ -57,6 +60,7 @@ App.KL.Global.tick: App.Tick<App.KL.State>
       }
       return global
     } <> glob
+  } default glob
 
 
 // Global visitor: counts posts to room_zero
@@ -114,7 +118,7 @@ App.KL.Global.post: App.Post<App.KL.State>
         get player      = players{addr}
         let player_list = Map.to_list!(players)
         let is_picked   = List.fold!(List.map!!(App.KL.Game.Stage.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
-        let game        = game@players <- players{addr} <- player@hero_id <- some(event.hero) // New_Hero -> Player -> Players -> Game 
+        let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
         let global      =
           if is_picked then
             glob

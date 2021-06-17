@@ -1,0 +1,5 @@
+App.KL.Game.Hero.get_by_id(id: Nat): Maybe<App.KL.Game.Hero>
+  NatMap.get!(id, App.KL.Game.Hero.get_by_id.map)
+
+App.KL.Game.Hero.get_by_id.map: NatMap<App.KL.Game.Hero>
+  NatMap.from_list!(List.imap!!((i,x) {i, x}, App.KL.Game.Hero.list))
