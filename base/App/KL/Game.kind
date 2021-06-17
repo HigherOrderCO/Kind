@@ -6,10 +6,10 @@
 type App.KL.Game.State.Local {
   new(
     user: String
-    room: String 
+    room: String
     casts: Maybe<App.KL.Game.Casts>
     // cast_info
-    // env_info
+    env_info: App.EnvInfo
   )
 }
 

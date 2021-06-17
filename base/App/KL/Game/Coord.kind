@@ -185,3 +185,30 @@ App.KL.Game.Coord.Cubic.distance(
   suby = I32.sub(axis_a.y, axis_b.y)
   subz = I32.sub(axis_a.z, axis_b.z)
   I32.max(I32.max(I32.abs(subx), I32.abs(suby)), I32.abs(subz))
+
+// Converts position in canvas to Axial coordinate
+App.KL.Game.Coord.xy_to_axial(
+  coord: Pair(U32, U32)
+): App.KL.Game.Coord
+
+  {x, y} = coord
+
+  f = U32.to_f64
+  i = F64.to_i32
+  float_hex_rad = F64.div(f(App.KL.Constants.hexagon_radius), 2)
+  center_x = App.KL.Constants.center_x
+  center_y = App.KL.Constants.center_y
+
+  float_x = F64.div(F64.sub(f(x), f(center_x)), float_hex_rad)
+  float_y = F64.div(F64.sub(f(y), f(center_y)), float_hex_rad)
+  
+
+  fourth = 0.25
+  sixth = F64.div(1, 6)
+  third = F64.div(1, 3)
+  half = 0.5
+
+  axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
+  axial_y = F64.mul(float_y, third)
+  {i, j}  = App.KL.Game.Coord.round(axial_x, axial_y)
+  App.KL.Game.Coord.new(i, j)
