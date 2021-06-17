@@ -1,4 +1,4 @@
 //Type for Axial Coordinate
-type Axial { 
+type Hexagonal.Axial { 
   new(i: I32, j: I32)
 }
