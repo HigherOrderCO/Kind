@@ -1,3 +1,2 @@
-// TODO: should return the actual keys as texts, not their bits
-Map.keys<A: Type>(xs: BitsMap<A>): List<String>
-  List.mapped!(List.reverse!(BitsMap.keys.go!(xs, Bits.e, List.nil!)))!(Bits.show)
+Map.keys<A: Type>(xs: Map<A>): List<String>
+  Avl.foldr_with_key!!!((key, value, list) key & list, [], xs)

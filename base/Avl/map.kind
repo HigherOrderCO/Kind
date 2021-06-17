@@ -1,0 +1,9 @@
+Avl.map<K: Type, V: Type, Z: Type>(f: V -> Z, map: Avl<K,V>): Avl<K,Z>
+  case map {
+    tip: Avl.tip<K,Z>,
+    bin:  
+      let new_val   = f(map.val)
+      let new_left  = Avl.map<K,V,Z>(f, map.left)
+      let new_right = Avl.map<K,V,Z>(f, map.right)
+      Avl.node<K,Z>(map.key, new_val, new_left, new_right)
+  }

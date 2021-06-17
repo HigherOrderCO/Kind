@@ -1,0 +1,7 @@
+Kind.Parser.comment: Parser<Unit>
+    Parser {
+      Parser.text("//")
+      let end = Parser.choice!([Parser.text("\n"), Parser.eof])
+      Parser.until!(end, Parser.one)
+      return unit
+    }

@@ -40,7 +40,7 @@ Kind.Comp.transpile.term(
           data: go(comp.expr,depth,defs)
         }
         nat:
-          Nat.show(comp.natx) // TODO: lang@gram@nat?
+          lang@gram@nat(comp.natx) // TODO: lang@gram@nat?
         chr:
           Nat.show(U16.to_nat(comp.chrx)) // TODO: lang@gram@char?
         str:

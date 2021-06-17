@@ -1,0 +1,32 @@
+// i'm studying compilers using "modern compiler implementation in ML" by Andrew Appel
+// translating to Kind as I go. i'm not too worried about following the book too closely.
+// for example i'll likely use `Parser` to parse programs instead of Lex and Yacc
+
+// straight-line programs
+
+// statement
+type Stm {
+  CompoundStrm(fst: Stm, snd: Stm)
+  AssignStm(id: String, exp: Exp)
+  PrintStm(exp_list: List<Exp>)
+}
+
+// expression
+type Exp {
+  IdExp(is: String)
+  NumExp(num: Int) // #TODO include other numbers?
+  OpExp(op: Binop, fst: Exp, snd: Exp)
+  EseqExp(stm: Stm, exp: Exp)
+}
+
+type ExpList {
+  PairExpList(head: Exp, tail: ExpList)
+  LastExpList(head: Exp)
+}
+
+type Binop {
+  plus
+  minus
+  times
+  div
+}

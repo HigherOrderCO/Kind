@@ -1,9 +1,0 @@
-GMap.map<K: Type, V: Type, Z: Type>(f: V -> Z, map: GMap<K,V>): GMap<K,Z>
-  case map {
-    tip: GMap.tip<K,Z>,
-    bin:  
-      let new_val   = f(map.val)
-      let new_left  = GMap.map<K,V,Z>(f, map.left)
-      let new_right = GMap.map<K,V,Z>(f, map.right)
-      GMap.node<K,Z>(map.key, new_val, new_left, new_right)
-  }

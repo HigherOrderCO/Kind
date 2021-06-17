@@ -1,2 +1,0 @@
-GMap.not_member<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: GMap<K,V>): Bool
-  Bool.not(GMap.member<K,V>(cmp, key, map))

@@ -3,7 +3,7 @@ App.Kaelin.Map.creature.restore_all_ap(
 ): App.Kaelin.Map
 
   map = NatMap.to_list!(map)
-  new_map = {}
+  new_map = BitsMap.new! :: App.Kaelin.Map
   for pos in map with new_map:
     tile = pos@snd
     coord = pos@fst

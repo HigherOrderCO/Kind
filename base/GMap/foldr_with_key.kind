@@ -1,2 +1,0 @@
-GMap.foldr_with_key<K: Type, V: Type, Z: Type>(f: K -> V -> Z -> Z, z: Z, map: GMap<K,V>): Z 
-  GMap.foldr_with_key.go<K,V,Z>(f, z, map)

@@ -9,6 +9,8 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.parenthesis
       Kind.Parser.letforrange.u32((x) Kind.Parser.term)
       Kind.Parser.letforrange.u32.with((x) Kind.Parser.term)
+      Kind.Parser.letforrange.i32((x) Kind.Parser.term)
+      Kind.Parser.letforrange.i32.with((x) Kind.Parser.term)
       Kind.Parser.letforrange.nat((x) Kind.Parser.term)
       Kind.Parser.letforrange.nat.with((x) Kind.Parser.term)
       Kind.Parser.letforin((x) Kind.Parser.term)

@@ -1,0 +1,40 @@
+App.KL.Game.Coord.Map.Cmp(
+  x: App.KL.Game.Coord,
+  y: App.KL.Game.Coord
+): Cmp
+  let c = I32.cmp(x@i, y@i)
+  case c {
+    eql : I32.cmp(x@j, y@j)
+  } default c
+
+
+App.KL.Game.Map.insert<A : Type>(key : App.KL.Game.Coord, val : A, map : App.KL.Game.Map<A>) :  App.KL.Game.Map<A>
+    Avl.insert!!(App.KL.Game.Coord.Map.Cmp, key, val, map)
+
+App.KL.Game.Map.find<A : Type>(key : App.KL.Game.Coord, map : App.KL.Game.Map<A>) : Maybe<A>
+    Avl.lookup!!(App.KL.Game.Coord.Map.Cmp, key map)
+
+App.KL.Game.Map.delete<A : Type>(key : App.KL.Game.Coord, map : App.KL.Game.Map<A>) : App.KL.Game.Map<A>
+    Avl.delete!!(App.KL.Game.Coord.Map.Cmp, key, map)
+
+App.KL.Game.Map.union<A : Type>(map : App.KL.Game.Map<A>) : App.KL.Game.Map<A> -> App.KL.Game.Map<A>
+    Avl.union!!(App.KL.Game.Coord.Map.Cmp, map)
+
+App.KL.Game.Map.keys<A : Type>(map : App.KL.Game.Map<A>) : List<App.KL.Game.Coord>
+    Avl.foldr_with_key!!!((key, value, list) key & list, [], map)
+
+App.KL.Game.Map.values<A : Type>(map : App.KL.Game.Map<A>) : List<A>
+    Avl.foldr_with_key!!!((key, value, list) value & list, [], map)
+
+App.KL.Game.Map.values<A : Type, B : Type>(f : A -> B, map : App.KL.Game.Map<A>) : List<B>
+    Avl.map!!(f, map)
+
+App.KL.Game.Map.to_list<A: Type>(map: App.KL.Game.Map<A>): List<Pair<App.KL.Game.Coord,A>>
+    Avl.to_list!!(map)
+
+App.KL.Game.Map.new<A : Type> : App.KL.Game.Map<A>
+    Avl.tip!!
+
+App.KL.Game.Map<A : Type> : Type
+   Avl<App.KL.Game.Coord, A>
+

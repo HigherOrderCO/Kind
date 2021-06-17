@@ -19,6 +19,6 @@
 type Kind.Comp.Native {
   new(
     inst: List(Pair(Nat, String))
-    elim: Pair(String, List(Pair(String ,List(String))))
+    elim: Pair(String, List(Pair(String, List(String))))
   )
 }

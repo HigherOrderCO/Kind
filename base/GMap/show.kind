@@ -1,9 +1,0 @@
-GMap.show<K: Type, V: Type>(
-  show_key: K -> String,
-  show_val: V -> String,
-  map     : GMap<K,V>
-): String
-  let show_pair = Pair.show<K,V>(show_key, show_val)
-  let kvs       = GMap.to_list<K,V>(map)
-  let kvs       = List.map<Pair<K,V>, String>(show_pair, kvs)
-  List.show<String>(String.show, kvs)

@@ -1,3 +1,5 @@
+// TODO make alias for time -> U64 and base64 -> String
+
 // GAME
 // ====
 
@@ -5,16 +7,359 @@ type App.KL.Game.State.Local {
   new(
     user: String
     room: String 
+    // cast_info
+    // env_info
   )
 }
 
-App.KL.Game.draw(local: App.KL.Game.State.Local): DOM
+// Global State
+// ============
+
+type App.KL.Game {
+  new(
+    stage: App.KL.Game.Stage
+    players: Map<App.KL.Game.Player>
+    board: App.KL.Game.Board
+    tick: U64
+  )
+}
+
+type App.KL.Game.Stage {
+  draft
+  board
+}
+
+// Players
+// -------
+
+type App.KL.Game.Player {
+  new(
+    hero_id: Maybe<U8>
+    init_pos: Maybe<App.KL.Game.Coord>
+    team: App.KL.Game.Team
+    ready: Bool
+  )
+}
+
+type App.KL.Game.Team {
+  blue
+  red
+  neutral
+} deriving (serializer, deserializer)
+
+App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
+  case a b {
+    red red: true
+    blue blue: true
+    neutral neutral: true
+  } default false
+
+type App.KL.Game.Creature {
+  new(
+    player: Maybe<String>
+    hero: App.KL.Game.Hero
+    team: App.KL.Game.Team
+    hp: I32
+    ap: I32
+  )
+}
+
+type App.KL.Game.Hero {
+  new(
+    name: String
+    draw: App.KL.Game.Creature -> VoxBox
+    picture: Bool -> U64 -> String
+    max_hp: I32
+    max_ap: I32
+    skills: List<App.KL.Game.Skill>
+  )
+}
+
+App.KL.Game.Hero.from_id(
+  id: U8
+): Maybe(App.KL.Game.Hero)
+
+  switch U8.eql(id) {
+    0: some(App.KL.Game.Heroes.Croni.hero)
+    1: some(App.KL.Game.Heroes.Cyclope.hero)
+    2: some(App.KL.Game.Heroes.Lela.hero)
+    3: some(App.KL.Game.Heroes.Octoking.hero)
+   } default none
+
+App.KL.Game.Hero.to_map: Map(U8)
+  App.KL.Game.Hero.to_map.go(0, Map.new<U8>)
+
+App.KL.Game.Hero.to_map.go(id: U8, map: Map(U8)): Map(U8)
+  hero = App.KL.Game.Hero.from_id(id)
+  case hero{
+    none: map 
+    some: 
+      App.KL.Game.Hero.to_map.go(id + 1, map{hero.value@name} <- id)
+  }
+  
+
+type App.KL.Game.Asset {
+  new(
+    vbox  : VoxBox
+    base64: String
+  )
+}
+
+type App.KL.Game.Skill {
+	new(
+  	name: String
+		range: I32
+    ap_cost: I32
+		effect: App.KL.Game.Effect<Unit>
+		key: Char
+	)
+}
+
+App.KL.Game.Effect(A: Type): Type
+  ((center: App.KL.Game.Coord) ->
+   (target: App.KL.Game.Coord) ->
+   (board: App.KL.Game.Board) ->
+   App.KL.Game.Effect.Result(A))
+
+type App.KL.Game.Effect.Result <A: Type> {
+  new(
+    value: A
+    board: App.KL.Game.Board
+    //futures: List(App.KL.Board.Future)
+    indicators: NatMap<App.KL.Game.Indicator>
+  )
+}
+
+type App.KL.Game.Indicator {
+  green
+  red
+  yellow
+  blue
+  background
+}
+
+// Terrains
+// --------
+
+type App.KL.Game.Field {
+  new(
+    draw: App.KL.Game.Terrain -> App.KL.Game.Indicator -> VoxBox
+  )
+}
+
+// TODO
+// decide which folder will store the terrains assets
+App.KL.Game.Fields(n: U32): App.KL.Game.Field
+  let default_field = 
+    (terrain, indicator)
+      App.Kaelin.Assets.tile.green_2
+  
+  switch U32.eql(n) {
+    0: 
+      { (terrain, indicator) App.Kaelin.Assets.tile.green_2 }
+  } default { default_field }
+
+type App.KL.Game.Terrain {
+  new(
+    field_id: U32
+  )
+}
+
+type App.KL.Game.Tile {
+  new(
+    terrain: App.KL.Game.Terrain
+    creature: Maybe<App.KL.Game.Creature>
+  )
+}
+
+type App.KL.Game.Entity { // TODO rename?
+  terrain (value: App.KL.Game.Terrain)
+  creature(value: App.KL.Game.Creature)
+}
+
+// Board
+// -----
+
+App.KL.Game.Board: Type
+  App.KL.Game.Map<App.KL.Game.Tile>
+
+// Math
+// ----
+
+type App.KL.Game.Coord {
+  new(i: I32, j: I32)
+} deriving (serializer, deserializer)
+
+
+type App.KL.Game.Coord.Cubic {
+    new(x:I32, y:I32, z:I32)
+}
+
+App.KL.Game.Coord.Cmp(
+  x: App.KL.Game.Coord,
+  y: App.KL.Game.Coord
+): Cmp
+  let c = I32.cmp(x@i, y@i)
+  case c {
+    eql : I32.cmp(x@j, y@j)
+  } default c
+
+App.KL.Game.Coord.eql(
+  a:App.KL.Game.Coord,
+  b:App.KL.Game.Coord
+): Bool
+
+  open a
+  open b
+  Bool.and(I32.eql(a.i,b.i), I32.eql(a.j, b.j))
+
+
+App.KL.Game.Coord.axial_to_nat(
+  coord: App.KL.Game.Coord
+): Nat
+
+  open coord
+  i = coord.i + 100 //  I32
+  i = i * 1000
+  i = I32.to_u32(i)
+  j = coord.j + 100
+  j = I32.to_u32(j)
+  sum = i + j   //U32
+  U32.to_nat(sum)
+
+// Converts a natural number to an axial coordinate, so it can be used as a key in a NatMap(App.Kaelin.Tile)
+// 10020997 is transformed to the coordinate {+2, -3}
+// TODO maybe add I32 to nat?
+App.KL.Game.Coord.nat_to_axial(
+  key: Nat
+): App.KL.Game.Coord
+
+  key_converted = Nat.to_u32(key)
+  coord_i = key_converted /  1000  //U32
+  coord_i = U32.to_i32(coord_i)
+  coord_i = coord_i - 100   // I32
+  coord_j = U32.mod(key_converted, 1000) // U32
+  coord_j = U32.to_i32(coord_j)
+  coord_j = coord_j - 100 // I32
+  App.KL.Game.Coord.new(coord_i, coord_j)
+
+
+// CastInfo
+// ----
+
+type App.KL.Game.CastInfo {
+  new(
+    hero_pos: App.KL.Game.Coord
+    skill: App.KL.Game.Skill
+    range: NatSet // remove?
+    area: NatMap<App.KL.Game.Indicator> // remove?
+  )
+}
+
+type App.KL.Game.Action { // skill info to send on post
+  new(
+    player: String,
+    target_pos: App.KL.Game.Coord,
+    key: U16
+  )
+}
+
+//type App.Kaelin.State.global {
+  //new(
+    //round: I32
+    //tick: U64
+    //room: String
+    //map: App.Kaelin.Map
+    //stage: App.Kaelin.Stage
+    //skills_list: List<App.Kaelin.CastInfo.global>
+  //)
+//}
+
+//type App.Kaelin.State.local {
+  //new(
+    //input: String
+    //user: String
+    //team: App.Kaelin.Team
+    //local_map: App.Kaelin.Map
+    //control_map: I32
+    //cast_info: Maybe<App.Kaelin.CastInfo.local>
+    //env_info: App.EnvInfo,
+    //internal: App.Kaelin.Internal 
+  //)
+//}
+
+
+
+
+
+
+
+
+App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
   <div>
-    "TODO"
+    <div>"Sala: " | local@room</div>
+    {
+      let game = global@game
+      case game {
+        none: <div>"Not ingame."</div>
+        some: 
+          <div>
+            <div>"Players: " | Nat.show(List.length!(Map.to_list!(game.value@players)))</div>
+
+            // choose what to draw based on game stage
+            {
+              let stage = game.value@stage
+              case stage {
+                board: App.KL.Game.Stage.Board.draw(img, local, game.value)
+                draft: App.KL.Game.Stage.Draft.draw(local, global) // TODO change to receive App.KL.Game instead global
+              } 
+            }
+          </div>
+      }
+    }
   </div>
 
 App.KL.Game.when(
   local: App.KL.Game.State.Local
+  global: App.KL.Global.State,
   event: App.Event
-): IO<Maybe<App.KL.State.Local>>
-  App.pass<App.KL.State>
+): IO<Maybe<App.State.local<App.KL.State>>>
+  open global
+  case global.game as game {
+    none: App.pass!
+    some: 
+      open game.value as game_info
+      case game_info.stage {
+        board: App.pass!
+        draft: App.KL.Game.Stage.Draft.when(game_info.players, local, game.value, event)
+      }
+  }
+
+App.KL.Game.start: App.KL.Game
+  App.KL.Game.new(
+    App.KL.Game.Stage.draft
+    Map.new!
+    App.KL.Game.Map.new!
+    0
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
