@@ -219,7 +219,7 @@ App.KL.Game.Coord.nat_to_axial(
 
 type App.KL.Game.Casts {
   new(
-    areas: App.KL.Game.Map<App.KL.Game.Indicator>
+    areas: Maybe<App.KL.Game.Map<App.KL.Game.Indicator>>
     picks: App.KL.Game.Map<String>
   )
 }

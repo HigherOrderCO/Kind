@@ -95,19 +95,24 @@ App.KL.Game.Stage.Board.draw.mouse_ui(
 App.KL.Game.Stage.Board.draw.tile.terrain(
   terrain: App.KL.Game.Terrain,
   casts: Maybe<App.KL.Game.Casts>
-  coord: App.KL.Game.Coord
+  tile_coord: App.KL.Game.Coord
   mouse_coord: App.KL.Game.Coord
   img: VoxBox
 ): VoxBox
+  // get indicator to draw
+  indicator = App.KL.Game.Stage.Board.draw.get_indicator(tile_coord, mouse_coord, casts) // TODO add castinfo
+  // get centralized position to draw hexagon tile
+  {i, j}    = App.KL.Game.Stage.Board.draw.centralize(tile_coord)
 
-  // coord_nat = App.KL.Game.Coord.axial_to_nat(coord)
-  indicator = App.KL.Game.Stage.Board.draw.get_indicator(coord, mouse_coord, casts) // TODO add castinfo
-  {i, j}    = App.KL.Game.Stage.Board.draw.centralize(coord)
-
-  field   = App.KL.Game.Field.get_by_id.default(terrain@field_id)
-  drawing = field@draw(terrain, indicator)
-
-  VoxBox.Draw.image(i, j, 0#32, drawing, img)
+  // get fields voxbox based on indicator and draws it
+  field = App.KL.Game.Field.get_by_id.default(terrain@field_id)
+  field_drawing = field@draw(terrain, indicator)
+  tile_drawing  = VoxBox.Draw.image(i, j, 0#32, field_drawing, img)
+  
+  // draw picks' letters of cast
+  tile_drawing  = App.KL.Game.Stage.Board.draw.pick_letter(tile_coord, casts, tile_drawing)
+  // returns all together
+  tile_drawing
 
 // draws tile creature if any
 App.KL.Game.Stage.Board.draw.tile.creature(
@@ -159,6 +164,24 @@ App.KL.Game.Stage.Board.draw.hero(
 // AUX FUNCTIONS
 // =================
 
+App.KL.Game.Stage.Board.draw.pick_letter(
+  tile_coord: App.KL.Game.Coord
+  casts: Maybe<App.KL.Game.Casts>
+  img: VoxBox
+): VoxBox
+  without casts: img
+  open casts
+  
+  case App.KL.Game.Map.find!(tile_coord, casts.picks) as got {
+    none: img
+    some: 
+      screen_coord = App.KL.Game.Coord.to_screen_xy(tile_coord)
+      {cx, cy}     = App.KL.Game.Stage.Board.draw.centralize_letter(screen_coord)
+      VoxBox.Draw.text(got.value, PixelFont.black, Pos32.new(cx,cy,0u), img)
+  }
+
+App.KL.Game.Stage.Board.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
+  { screen_coord@fst - 2, screen_coord@snd - 6 }
 
 // TODO 
 // add cast_info
@@ -174,16 +197,12 @@ App.KL.Game.Stage.Board.draw.get_indicator(
     //else App.KL.Game.Indicator.background
   without casts: indicator
   open casts
-  let indicator = case App.KL.Game.Map.find!(tile_coord, casts.areas) as got {
+  without casts.areas: indicator
+  case App.KL.Game.Map.find!(tile_coord, casts.areas) as got {
     none: indicator
     some: got.value
   }
-  // TODO: move to Board.draw, to draw the letter
-  let indicator = case App.KL.Game.Map.find!(tile_coord, casts.picks) as got {
-    none: indicator
-    some: App.KL.Game.Indicator.red
-  }
-  indicator
+
   
 // Centralizes an image in the hexagon 
 App.KL.Game.Stage.Board.draw.centralize(
@@ -210,15 +229,16 @@ App.KL.Game.Stage.Board.when(
         'X':
           log("Setting casts.")
           let coord = App.KL.Game.Coord.new(0,0) // TODO: use mouse pos instead
-          let casts = local@casts <> App.KL.Game.Casts.new(App.KL.Game.Map.new!, App.KL.Game.Map.new!)
-          let casts = casts@areas <- App.KL.Game.Map.from_list!([{coord, App.KL.Game.Indicator.blue}])
+          let casts = local@casts <> App.KL.Game.Casts.new(some(App.KL.Game.Map.new!), App.KL.Game.Map.new!)
+          let casts = casts@areas <- some(App.KL.Game.Map.from_list!([{coord, App.KL.Game.Indicator.blue}]))
           App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
       } default App.pass!
     key_up:
       log("Key up " | Char.to_string(event.code))
       let coord = App.KL.Game.Coord.new(0,0) // TODO: use mouse pos instead
-      let casts = local@casts <> App.KL.Game.Casts.new(App.KL.Game.Map.new!, App.KL.Game.Map.new!)
+      let casts = local@casts <> App.KL.Game.Casts.new(some(App.KL.Game.Map.new!), App.KL.Game.Map.new!)
       let casts = casts@picks <- App.KL.Game.Map.insert!(coord, Char.to_string(event.code), casts@picks)
+      let casts = casts@areas <- none
       App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
   } default App.pass!
 
