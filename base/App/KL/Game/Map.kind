@@ -4,7 +4,7 @@ App.KL.Game.Coord.Map.Cmp(
 ): Cmp
   let c = I32.cmp(x@i, y@i)
   case c {
-    eql : I32.cmp(x@j, y@j)
+    eql: I32.cmp(x@j, y@j)
   } default c
 
 

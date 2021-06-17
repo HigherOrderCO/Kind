@@ -1,0 +1,5 @@
+App.KL.Game.Hero.get_by_name(name: String): Maybe<App.KL.Game.Hero>
+  Map.get!(name, App.KL.Game.Hero.get_by_name.map)
+
+App.KL.Game.Hero.get_by_name.map: Map<App.KL.Game.Hero>
+  Map.from_list!(List.map!!((x) {x@name, x}, App.KL.Game.Hero.list))

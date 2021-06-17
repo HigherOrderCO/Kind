@@ -18,9 +18,8 @@ App.KL.Game.Stage.Draft.when(
           let coord     = App.KL.Game.Coord.nat_to_axial(Nat.read(coord_nat))
           App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_init_pos(coord)))
         "H" : // Set Player Hero
-          let heroes_map  = App.KL.Game.Hero.to_map
-          let hero_name   = String.drop(1, event.id)
-          let hero_id     = heroes_map{hero_name}
+          let hero_name = String.drop(1, event.id)
+          let hero_id   = Maybe.map!!(Nat.to_u8, App.KL.Game.Hero.name_to_id(hero_name))
           case hero_id {
             none: App.pass!
             some: App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_hero(hero_id.value)))
@@ -60,7 +59,7 @@ App.KL.Game.Stage.Draft.has_hero(hero_id: U8, player: Pair<String, App.KL.Game.P
   x = player@snd@hero_id
   case x {
     none: false
-    some: U8.eql(x.value, hero_id)
+    some: U8.eql(Nat.to_u8(x.value), hero_id)
   }
 
 App.KL.Game.Stage.Draft.has_coord(coord: App.KL.Game.Coord, player: Pair<String, App.KL.Game.Player>): Bool
@@ -408,8 +407,9 @@ App.KL.Game.Stage.Draft.draw.cards(players: Map<App.KL.Game.Player>, user: Strin
   let allies = Map.delete!(user, players)
   let hero   = case player{
     none: none
-    some: player = player.value
-      player@hero_id 
+    some:
+      let player = player.value
+      Maybe.map!!(Nat.to_u8, player@hero_id)
   }
 
 
@@ -441,7 +441,7 @@ App.KL.Game.Stage.Draft.draw.cards.picks_left(hero: Maybe(U8)): DOM
 App.KL.Game.Stage.Draft.draw.cards.player(hero: Maybe(U8)): DOM
   let {name, image} = Maybe {
       get hero_id = hero
-      get hero    = App.KL.Game.Hero.from_id(hero_id) 
+      get hero    = App.KL.Game.Hero.get_by_id(U8.to_nat(hero_id)) 
       let picture = hero@picture(false, 0) // TODO update with real bool and time
       return {hero@name,picture}
     } <> {"Choosing", App.KL.Game.Stage.Draft.draw.cards.interrogation}
@@ -489,7 +489,7 @@ App.KL.Game.Stage.Draft.draw.cards.ally(user: String, info: Maybe(App.KL.Game.Pl
     none: {"Connecting", App.KL.Game.Stage.Draft.draw.cards.interrogation}
     some:
       Maybe {
-        get info = info.value@hero_id
+        get info = Maybe.map!!(Nat.to_u8, info.value@hero_id)
         get hero = App.Kaelin.Hero.info(info)  // TODO bring this function
         let assets = hero@assets
         return {hero@name, assets@base64}
@@ -599,7 +599,7 @@ App.KL.Game.Stage.Draft.draw.menu(
   players: Map<App.KL.Game.Player>
 ): DOM
 
-  heroes = Map.values!(App.KL.Game.Heroes.Resources)
+  heroes = App.KL.Game.Hero.list
   main_style = 
   {
     "width": "70%",
@@ -694,7 +694,7 @@ App.KL.Game.Stage.Draft.create_board(players: Map<App.KL.Game.Player>): App.KL.G
     let pos    = player@init_pos
     Maybe {
       get coord     = pos
-      get hero_id   = player@hero_id
+      get hero_id   = Maybe.map!!(Nat.to_u8, player@hero_id)
       let team      = player@team
       get creature  = App.KL.Game.Stage.Draft.Tile.create_creature(hero_id, some(user), team)
       let entity    = App.KL.Game.Entity.creature(creature)
@@ -716,13 +716,5 @@ App.KL.Game.Stage.Draft.Tile.create_creature(
   }
 
 
-App.KL.Game.Stage.Draft.Hero.info(
-  id: U8
-): Maybe(App.KL.Game.Hero)
-
-  switch U8.eql(id) {
-    0: some(App.KL.Game.Heroes.Croni.hero)
-    1: some(App.KL.Game.Heroes.Cyclope.hero)
-    2: some(App.KL.Game.Heroes.Lela.hero)
-    3: some(App.KL.Game.Heroes.Octoking.hero)
-   } default none
+App.KL.Game.Stage.Draft.Hero.info(id: U8): Maybe(App.KL.Game.Hero)
+  App.KL.Game.Hero.get_by_id(U8.to_nat(id))

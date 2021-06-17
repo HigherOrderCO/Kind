@@ -114,7 +114,7 @@ App.KL.Global.post: App.Post<App.KL.State>
         get player      = players{addr}
         let player_list = Map.to_list!(players)
         let is_picked   = List.fold!(List.map!!(App.KL.Game.Stage.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
-        let game        = game@players <- players{addr} <- player@hero_id <- some(event.hero) // New_Hero -> Player -> Players -> Game 
+        let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
         let global      =
           if is_picked then
             glob

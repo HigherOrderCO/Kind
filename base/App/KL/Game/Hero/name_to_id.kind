@@ -1,0 +1,5 @@
+App.KL.Game.Hero.name_to_id(name: String): Maybe<Nat>
+  App.KL.Game.Hero.name_to_id.map{name}
+
+App.KL.Game.Hero.name_to_id.map: Map<Nat>
+  Map.from_list!(List.imap!!((i,x) {x@name, i}, App.KL.Game.Hero.list))

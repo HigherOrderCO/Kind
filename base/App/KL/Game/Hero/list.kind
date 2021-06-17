@@ -1,0 +1,7 @@
+App.KL.Game.Hero.list: List<App.KL.Game.Hero>
+  [
+    App.KL.Game.Hero.Croni.hero
+    App.KL.Game.Hero.Cyclope.hero
+    App.KL.Game.Hero.Lela.hero
+    App.KL.Game.Hero.Octoking.hero
+  ]
