@@ -19,7 +19,7 @@ Kind.Comp.Target.Javascript.inst_name(name: String): String
   name|"_inst"
 
 Kind.Comp.Target.Javascript.lambda(name: String, body: String): String
-  "("|Kind.Comp.Target.Javascript.name(name)|") => { "|body|"}"
+  "(("|Kind.Comp.Target.Javascript.name(name)|") => { "|body|"})"
 
 Kind.Comp.Target.Javascript.application(func: String, argm: String): String
   func|"("|argm|")"
@@ -62,7 +62,7 @@ Kind.Comp.Target.Javascript.module(name: String, exports: List(String), defs: St
   let ret = "module.exports = (function (){ "|defs
   let export_list = String.join(", ",
     List.map!!(make_export, exports))
-  let ret = ret|"return { "|export_list|"}; })();"
+  let ret = ret|"return {"|export_list|"}; })();"
   ret
 
 Kind.Comp.Target.Javascript.program(main: String, defs: String): String
@@ -90,7 +90,7 @@ Kind.Comp.Target.Javascript.select(term: String, cse_body_list: List<Pair<String
   let switch_body = ""
   let switch_body = for cse_body in cse_body_list:
     {cse, body} = cse_body
-    switch_body|"case "|cse|": return "|body|";\n"
+    switch_body|"case '"|cse|"': return "|body|";\n"
   "(() => { switch ("|term|") {\n"|switch_body|"} })()"
 
 Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
@@ -222,15 +222,13 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
         {ctr_name, ctr_fields} = ctr
         let ctr_length = List.length!(ctr_fields)
         if Nat.gtn(ctr_length, 0) then
-          let range = List.range(ctr_length)
-          let range = List.map!!((n) "$"|Nat.show(n - 1), range)
-          let args = String.join(", ", range)
+          let fields = List.imap!!((idx, ctr_field) "'"|ctr_field|"': $"|Nat.show(idx), ctr_fields)
+          let fields = String.join(", ", fields)
           // TODO do it inline instead of calling the function?
-          (Kind.Comp.Target.Javascript.name(prim.name|"."|ctr_name)|"("|args|")") & insts
+          {ctr_length, ("({_:'"|prim.name|"."|ctr_name|"', "|fields|"})")} & insts
         else
-          Kind.Comp.Target.Javascript.name(prim.name|"."|ctr_name) & insts
-      let i_insts = List.imap!!((i, p) {i, p}, insts)
-      i_insts,
+          {0, "({_:'"|prim.name|"."|ctr_name|"'})"} & insts
+      List.reverse!(insts),
       // Elim
       {"$0._", 
         let cses = [] :: List<Pair<String, List<String>>>
@@ -240,7 +238,7 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
           for field in ctr_fields with field_list:
              ("$0['"|field|"']") & field_list
           {ctr_name, field_list} & cses
-        cses
+        List.reverse!(cses)
       })
   }
 
