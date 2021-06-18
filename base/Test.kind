@@ -1,2 +1,2 @@
 Test: _
-  Word.is_neg!((0.11 :: F64)@word)
+  U64.show(1000#64)

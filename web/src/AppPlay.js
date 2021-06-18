@@ -95,9 +95,14 @@ module.exports = class AppPlay extends Component {
 
    // Mouse movement event
     this.listeners.mousemove = (e) => {
-      this.mouse_pos = {_: "Pair.new", fst: e.offsetX, snd: e.offsetY}
+      this.mouse_pos = {_: "Pair.new", fst: e.pageX, snd: e.pageY};
+      this.register_event({
+        _: "App.Event.mouse_move",
+        time: BigInt(Date.now()),
+        id: e.target.id,
+        mouse_pos: {_: "Pair.new", fst: e.offsetX, snd: e.offsetY}
+      });
     }
-
     document.body.addEventListener("mousemove", this.listeners.mousemove);
 
     // Mouse down event
@@ -505,6 +510,7 @@ module.exports = class AppPlay extends Component {
     if (!this.canvas[id] || this.canvas[id].width !== width || this.canvas[id].height !== height) {
       console.log("creating canvas", id, width, height);
       this.canvas[id] = document.createElement("canvas");
+      this.canvas[id].id = id;
       this.canvas[id].style["image-rendering"] = "pixelated";
       this.canvas[id].width = width;
       this.canvas[id].height = height;

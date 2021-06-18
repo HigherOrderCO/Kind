@@ -4,9 +4,12 @@ App.KL.Game.Phase.Play.when(
   event: App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
   case event {
-    frame:
-      let {x,y} = event.info@mouse_pos
-      App.set_local!(App.KL.State.Local.game(local@mouse <- {x / 2, y / 2}))
+    mouse_move:
+      if String.eql("game_screen", event.id) then
+        let {x,y} = event.mouse_pos
+        App.set_local!(App.KL.State.Local.game(local@mouse <- {x / 2, y / 2}))
+      else
+        App.pass!
     key_down:
       log("Key down " | Char.to_string(event.code))
       log("Setting casts.")
