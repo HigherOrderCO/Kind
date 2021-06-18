@@ -2,7 +2,7 @@ type App.KL.Game.Hero {
   new(
     name: String
     draw: App.KL.Game.Creature -> VoxBox
-    picture: Bool -> U64 -> String
+    picture: Bool -> U64 -> String // rename to portrait?
     max_hp: I32
     max_ap: I32
     skills: List<App.KL.Game.Skill>
