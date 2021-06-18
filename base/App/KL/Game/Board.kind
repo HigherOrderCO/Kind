@@ -2,7 +2,7 @@
 App.KL.Game.Board.arena: App.KL.Game.Board
   board_size = App.KL.Constants.board_size
   
-  board  = App.KL.Game.Map.new<App.KL.Game.Tile>
+  board  = Hexagonal.Axial.BBL.new<App.KL.Game.Tile>
   
   width  = (board_size * 2) + 1
   width  = I32.to_u32(width)
@@ -40,7 +40,7 @@ App.KL.Game.Board.get(
   coord: Hexagonal.Axial,
   board: App.KL.Game.Board
 ): Maybe<App.KL.Game.Tile>
-  App.KL.Game.Map.find!(coord, board)
+  Hexagonal.Axial.BBL.get!(coord, board)
 
 // set tile in some coord on board
 App.KL.Game.Board.set(
@@ -48,7 +48,7 @@ App.KL.Game.Board.set(
   tile: App.KL.Game.Tile,
   board:App.KL.Game.Board
 ): App.KL.Game.Board
-  App.KL.Game.Map.insert!(coord, tile, board)
+  Hexagonal.Axial.BBL.insert!(coord, tile, board)
 
 
 // push entity to board
