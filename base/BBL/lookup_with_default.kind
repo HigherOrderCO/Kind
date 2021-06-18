@@ -1,0 +1,10 @@
+BBL.lookup_with_default<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  key : K, 
+  dft : V,
+  map : BBL<K,V>
+) : V
+  case BBL.lookup<K,V>(cmp, key, map) as maybe_val {
+    none: dft, 
+    some: maybe_val.value
+  }

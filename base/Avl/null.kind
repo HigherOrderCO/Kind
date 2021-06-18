@@ -1,5 +1,0 @@
-Avl.null<K: Type, V: Type>(map: Avl<K,V>): Bool
-  case map {
-    tip: Bool.true,
-    bin: Bool.false
-  }

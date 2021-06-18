@@ -1,2 +1,0 @@
-Avl.foldr_with_key<K: Type, V: Type, Z: Type>(f: K -> V -> Z -> Z, z: Z, map: Avl<K,V>): Z 
-  Avl.foldr_with_key.go<K,V,Z>(f, z, map)

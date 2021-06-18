@@ -4,4 +4,4 @@
 // Map.get!("doge", Map.from_list!!([{"ab", 2}, {"cd", 4}])) == none
 
 Map.get<A: Type>(key: String, map: Map(A)): Maybe<A>
-  Avl.lookup!!(String.cmp, key, map)
+  BBL.lookup!!(String.cmp, key, map)

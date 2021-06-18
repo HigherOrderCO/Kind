@@ -1,8 +1,0 @@
-Avl.min<K: Type, V: Type>(map: Avl<K,V>): Maybe<Pair<K,V>>
-  case map {
-    tip: Maybe.none<Pair<K,V>>,
-    bin: case map.left {
-      tip: Maybe.some<Pair<K,V>>(Pair.new<K,V>(map.key, map.val)),
-      bin: Avl.min<K,V>(map.left)
-    }
-  }

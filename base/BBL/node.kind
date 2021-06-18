@@ -1,0 +1,5 @@
+BBL.node<K: Type, V: Type>(key: K, val: V, left: BBL<K,V>, right: BBL<K,V>): BBL<K,V>
+  let size_left  = BBL.size!!(left)
+  let size_right = BBL.size!!(right)
+  let new_size   = U32.add(1u, U32.add(size_left, size_right))
+  BBL.bin!!(new_size, key, val, left, right)

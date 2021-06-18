@@ -1,0 +1,6 @@
+BBL.assign(A : Type, 
+           B : Type, 
+           cmp : A -> A -> Cmp
+           ) : BBL<A, B> -> BBL<A, B> -> BBL<A, B>
+  BBL.foldr_with_key(A, B, BBL<A, B>, (key, value, map) BBL.insert!!(cmp, key, value, map))
+  
