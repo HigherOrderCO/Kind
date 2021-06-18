@@ -151,15 +151,15 @@ type App.KL.Game.Entity { // TODO rename?
 // -----
 
 App.KL.Game.Board: Type
-  App.KL.Game.Map<App.KL.Game.Tile>
+  Hexagonal.Axial.BBL<App.KL.Game.Tile>
 
 // CastInfo
 // ----
 
 type App.KL.Game.Casts {
   new(
-    areas: Maybe<App.KL.Game.Map<App.KL.Game.Indicator>>
-    picks: App.KL.Game.Map<String>
+    areas: Maybe<Hexagonal.Axial.BBL<App.KL.Game.Indicator>>
+    picks: Hexagonal.Axial.BBL<String>
   )
 }
 
@@ -246,7 +246,7 @@ App.KL.Game.start: App.KL.Game
   App.KL.Game.new(
     App.KL.Game.Stage.draft
     Map.new!
-    App.KL.Game.Map.new!
+    Hexagonal.Axial.BBL.new!
     0
   )
 

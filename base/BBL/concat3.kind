@@ -1,0 +1,42 @@
+BBL.concat3<K: Type, V: Type>(
+  cmp  : K -> K -> Cmp, 
+  key  : K,
+  val  : V, 
+  left : BBL<K,V>,
+  right: BBL<K,V> 
+) : BBL<K,V>
+
+  case left {
+    tip: case right {
+      tip: BBL.singleton<K,V>(key, val), // trivial case, both trees are empty
+      bin: BBL.insert<K,V>(cmp, key, val, right) // if left is empty, we just insert (key,val) in the right tree
+    },
+    bin: case right {
+      tip: BBL.insert<K,V>(cmp, key, val, left), // if right is empety, we just insert (key,val) in the left tree
+      // if none of the trees are empty, we need to check if we can
+      // make a balanced tree by using (key,val) as a new node
+      // if not, we need to find the largest subtree on the side
+      // "facing" the smaller tree that is small enough to balance 
+      // with the smaller tree
+      bin:  
+      let right_is_heavier = U32.ltn(U32.mul(BBL.w, left.size), right.size)
+      let left_is_heavier  = U32.ltn(U32.mul(BBL.w, right.size), left.size)
+
+      if right_is_heavier then 
+        let new_key   = right.key 
+        let new_val   = right.val 
+        let new_left  = BBL.concat3<K,V>(cmp, key, val, left, right.left) 
+        let new_right = right.right
+        BBL.balance<K,V>(new_key, new_val, new_left, new_right)
+      
+      else if left_is_heavier then 
+        let new_key   = left.key 
+        let new_val   = left.val 
+        let new_left  = left.left 
+        let new_right = BBL.concat3<K,V>(cmp, key, val, left.right, right)
+        BBL.balance<K,V>(new_key, new_val, new_left, new_right)
+
+      else 
+        BBL.node<K,V>(key, val, left, right)
+    }
+  }

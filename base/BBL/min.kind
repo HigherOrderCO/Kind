@@ -1,0 +1,8 @@
+BBL.min<K: Type, V: Type>(map: BBL<K,V>): Maybe<Pair<K,V>>
+  case map {
+    tip: Maybe.none<Pair<K,V>>,
+    bin: case map.left {
+      tip: Maybe.some<Pair<K,V>>(Pair.new<K,V>(map.key, map.val)),
+      bin: BBL.min<K,V>(map.left)
+    }
+  }

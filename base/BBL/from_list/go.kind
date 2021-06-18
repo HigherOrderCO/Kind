@@ -1,0 +1,13 @@
+BBL.from_list.go<K: Type, V: Type>(
+  cmp : K -> K -> Cmp, 
+  acc : BBL<K,V>, 
+  xs  : List<Pair<K,V>>
+) : BBL<K,V> 
+  case xs {
+    nil : acc,
+    cons:  
+      let key = Pair.fst<K,V>(xs.head)
+      let val = Pair.snd<K,V>(xs.head)
+      let new_acc = BBL.insert<K,V>(cmp, key, val, acc)
+      BBL.from_list.go<K,V>(cmp, new_acc, xs.tail)     
+  }

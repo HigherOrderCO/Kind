@@ -68,7 +68,7 @@ App.KL.Game.Stage.Board.draw.board(
   img: VoxBox
 ): VoxBox
 
-  map = App.KL.Game.Map.to_list!(map)
+  map = Hexagonal.Axial.BBL.to_list!(map)
   mouse_coord = Hexagonal.Axial.from_screen_xy(env_info@mouse_pos, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
 
   for pos in map with img:
@@ -172,7 +172,7 @@ App.KL.Game.Stage.Board.draw.pick_letter(
   without casts: img
   open casts
   
-  case App.KL.Game.Map.find!(tile_coord, casts.picks) as got {
+  case Hexagonal.Axial.BBL.get!(tile_coord, casts.picks) as got {
     none: img
     some: 
       screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
@@ -198,7 +198,7 @@ App.KL.Game.Stage.Board.draw.get_indicator(
   without casts: indicator
   open casts
   without casts.areas: indicator
-  case App.KL.Game.Map.find!(tile_coord, casts.areas) as got {
+  case Hexagonal.Axial.BBL.get!(tile_coord, casts.areas) as got {
     none: indicator
     some: got.value
   }
@@ -232,15 +232,15 @@ App.KL.Game.Stage.Board.when(
         'X':
           log("Setting casts.")
           let coord = Hexagonal.Axial.from_screen_xy(local@env_info@mouse_pos, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-          let casts = local@casts <> App.KL.Game.Casts.new(some(App.KL.Game.Map.new!), App.KL.Game.Map.new!)
-          let casts = casts@areas <- some(App.KL.Game.Map.from_list!([{coord, App.KL.Game.Indicator.blue}]))
+          let casts = local@casts <> App.KL.Game.Casts.new(some(Hexagonal.Axial.BBL.new!), Hexagonal.Axial.BBL.new!)
+          let casts = casts@areas <- some(Hexagonal.Axial.BBL.from_list!([{coord, App.KL.Game.Indicator.blue}]))
           App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
       } default App.pass!
     key_up:
       log("Key up " | Char.to_string(event.code))
       let coord = Hexagonal.Axial.from_screen_xy(local@env_info@mouse_pos, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let casts = local@casts <> App.KL.Game.Casts.new(some(App.KL.Game.Map.new!), App.KL.Game.Map.new!)
-      let casts = casts@picks <- App.KL.Game.Map.insert!(coord, Char.to_string(event.code), casts@picks)
+      let casts = local@casts <> App.KL.Game.Casts.new(some(Hexagonal.Axial.BBL.new!), Hexagonal.Axial.BBL.new!)
+      let casts = casts@picks <- Hexagonal.Axial.BBL.insert!(coord, Char.to_string(event.code), casts@picks)
       let casts = casts@areas <- none
       App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
   } default App.pass!

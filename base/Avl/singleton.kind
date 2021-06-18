@@ -1,2 +1,0 @@
-Avl.singleton<K: Type, V: Type>(key: K, val: V): Avl<K,V>
-  Avl.bin<K,V>(1#32, key, val, Avl.tip!!, Avl.tip!!)
