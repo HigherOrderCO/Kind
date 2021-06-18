@@ -1,0 +1,5 @@
+BBL.size<K: Type, V: Type>(map: BBL<K,V>): U32 
+  case map {
+    tip: 0#32,
+    bin: map.size
+  }

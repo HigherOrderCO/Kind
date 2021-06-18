@@ -1,0 +1,2 @@
+BBL.foldr<K: Type, V: Type, Z: Type>(f: V -> Z -> Z, z: Z, map : BBL<K,V>): Z
+  BBL.foldr.go<K,V,Z>(f, z, map)

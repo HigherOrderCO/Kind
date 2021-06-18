@@ -1,0 +1,5 @@
+F64.abs(n: F64): F64
+  if (F64.ltn(n, 0)) then
+    F64.neg(n)
+  else
+    n

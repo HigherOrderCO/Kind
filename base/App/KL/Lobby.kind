@@ -86,7 +86,7 @@ App.KL.Lobby.when(
         "ready": IO {
           App.watch!(local@room_input)
           App.new_post!(local@room_input, App.KL.Global.Event.serialize_post(App.KL.Global.Event.join_room))
-          App.set_local!(App.KL.State.Local.game(App.KL.Game.State.Local.new(local@user, local@room_input)))
+          App.set_local!(App.KL.State.Local.game(App.KL.Game.State.Local.new(local@user, local@room_input, none, App.EnvInfo.new({256, 256}, {0, 0}))))
         }
       } default App.pass!
   } default App.pass!

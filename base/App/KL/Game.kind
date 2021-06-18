@@ -6,9 +6,10 @@
 type App.KL.Game.State.Local {
   new(
     user: String
-    room: String 
+    room: String
+    casts: Maybe<App.KL.Game.Casts>
     // cast_info
-    // env_info
+    env_info: App.EnvInfo
   )
 }
 
@@ -34,8 +35,8 @@ type App.KL.Game.Stage {
 
 type App.KL.Game.Player {
   new(
-    hero_id: Maybe<U8>
-    init_pos: Maybe<App.KL.Game.Coord>
+    hero_id: Maybe<Nat>
+    init_pos: Maybe<Hexagonal.Axial>
     team: App.KL.Game.Team
     ready: Bool
   )
@@ -75,29 +76,6 @@ type App.KL.Game.Hero {
   )
 }
 
-App.KL.Game.Hero.from_id(
-  id: U8
-): Maybe(App.KL.Game.Hero)
-
-  switch U8.eql(id) {
-    0: some(App.KL.Game.Heroes.Croni.hero)
-    1: some(App.KL.Game.Heroes.Cyclope.hero)
-    2: some(App.KL.Game.Heroes.Lela.hero)
-    3: some(App.KL.Game.Heroes.Octoking.hero)
-   } default none
-
-App.KL.Game.Hero.to_map: Map(U8)
-  App.KL.Game.Hero.to_map.go(0, Map.new<U8>)
-
-App.KL.Game.Hero.to_map.go(id: U8, map: Map(U8)): Map(U8)
-  hero = App.KL.Game.Hero.from_id(id)
-  case hero{
-    none: map 
-    some: 
-      App.KL.Game.Hero.to_map.go(id + 1, map{hero.value@name} <- id)
-  }
-  
-
 type App.KL.Game.Asset {
   new(
     vbox  : VoxBox
@@ -116,8 +94,8 @@ type App.KL.Game.Skill {
 }
 
 App.KL.Game.Effect(A: Type): Type
-  ((center: App.KL.Game.Coord) ->
-   (target: App.KL.Game.Coord) ->
+  ((center: Hexagonal.Axial) ->
+   (target: Hexagonal.Axial) ->
    (board: App.KL.Game.Board) ->
    App.KL.Game.Effect.Result(A))
 
@@ -126,7 +104,7 @@ type App.KL.Game.Effect.Result <A: Type> {
     value: A
     board: App.KL.Game.Board
     //futures: List(App.KL.Board.Future)
-    indicators: NatMap<App.KL.Game.Indicator>
+    //indicators: NatMap<App.KL.Game.Indicator>
   )
 }
 
@@ -136,32 +114,24 @@ type App.KL.Game.Indicator {
   yellow
   blue
   background
-}
+} deriving (stringifier)
+
+App.KL.Game.Indicator.show(indicator: App.KL.Game.Indicator): String
+  Stringifier.run!(App.KL.Game.Indicator.stringifier, indicator)
 
 // Terrains
 // --------
 
 type App.KL.Game.Field {
   new(
+    name: String
     draw: App.KL.Game.Terrain -> App.KL.Game.Indicator -> VoxBox
   )
 }
 
-// TODO
-// decide which folder will store the terrains assets
-App.KL.Game.Fields(n: U32): App.KL.Game.Field
-  let default_field = 
-    (terrain, indicator)
-      App.Kaelin.Assets.tile.green_2
-  
-  switch U32.eql(n) {
-    0: 
-      { (terrain, indicator) App.Kaelin.Assets.tile.green_2 }
-  } default { default_field }
-
 type App.KL.Game.Terrain {
   new(
-    field_id: U32
+    field_id: Nat
   )
 }
 
@@ -181,85 +151,22 @@ type App.KL.Game.Entity { // TODO rename?
 // -----
 
 App.KL.Game.Board: Type
-  App.KL.Game.Map<App.KL.Game.Tile>
-
-// Math
-// ----
-
-type App.KL.Game.Coord {
-  new(i: I32, j: I32)
-} deriving (serializer, deserializer)
-
-
-type App.KL.Game.Coord.Cubic {
-    new(x:I32, y:I32, z:I32)
-}
-
-App.KL.Game.Coord.Cmp(
-  x: App.KL.Game.Coord,
-  y: App.KL.Game.Coord
-): Cmp
-  let c = I32.cmp(x@i, y@i)
-  case c {
-    eql : I32.cmp(x@j, y@j)
-  } default c
-
-App.KL.Game.Coord.eql(
-  a:App.KL.Game.Coord,
-  b:App.KL.Game.Coord
-): Bool
-
-  open a
-  open b
-  Bool.and(I32.eql(a.i,b.i), I32.eql(a.j, b.j))
-
-
-App.KL.Game.Coord.axial_to_nat(
-  coord: App.KL.Game.Coord
-): Nat
-
-  open coord
-  i = coord.i + 100 //  I32
-  i = i * 1000
-  i = I32.to_u32(i)
-  j = coord.j + 100
-  j = I32.to_u32(j)
-  sum = i + j   //U32
-  U32.to_nat(sum)
-
-// Converts a natural number to an axial coordinate, so it can be used as a key in a NatMap(App.Kaelin.Tile)
-// 10020997 is transformed to the coordinate {+2, -3}
-// TODO maybe add I32 to nat?
-App.KL.Game.Coord.nat_to_axial(
-  key: Nat
-): App.KL.Game.Coord
-
-  key_converted = Nat.to_u32(key)
-  coord_i = key_converted /  1000  //U32
-  coord_i = U32.to_i32(coord_i)
-  coord_i = coord_i - 100   // I32
-  coord_j = U32.mod(key_converted, 1000) // U32
-  coord_j = U32.to_i32(coord_j)
-  coord_j = coord_j - 100 // I32
-  App.KL.Game.Coord.new(coord_i, coord_j)
-
+  Hexagonal.Axial.BBL<App.KL.Game.Tile>
 
 // CastInfo
 // ----
 
-type App.KL.Game.CastInfo {
+type App.KL.Game.Casts {
   new(
-    hero_pos: App.KL.Game.Coord
-    skill: App.KL.Game.Skill
-    range: NatSet // remove?
-    area: NatMap<App.KL.Game.Indicator> // remove?
+    areas: Maybe<Hexagonal.Axial.BBL<App.KL.Game.Indicator>>
+    picks: Hexagonal.Axial.BBL<String>
   )
 }
 
 type App.KL.Game.Action { // skill info to send on post
   new(
     player: String,
-    target_pos: App.KL.Game.Coord,
+    target_pos: Hexagonal.Axial,
     key: U16
   )
 }
@@ -330,8 +237,8 @@ App.KL.Game.when(
     some: 
       open game.value as game_info
       case game_info.stage {
-        board: App.pass!
-        draft: App.KL.Game.Stage.Draft.when(game_info.players, local, game.value, event)
+        board: App.KL.Game.Stage.Board.when(local, game.value, event)
+        draft: App.KL.Game.Stage.Draft.when(local, game.value, event)
       }
   }
 
@@ -339,7 +246,7 @@ App.KL.Game.start: App.KL.Game
   App.KL.Game.new(
     App.KL.Game.Stage.draft
     Map.new!
-    App.KL.Game.Map.new!
+    Hexagonal.Axial.BBL.new!
     0
   )
 

@@ -1,8 +1,0 @@
-type Kind.Prim {
-  bool,
-  nat,
-  u16,
-  string,
-  data(ctrs: List<Nat>),
-  //bits,
-}

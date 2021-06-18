@@ -1,0 +1,9 @@
+type Monoid<A: Type>{
+    new(
+        op: A -> A -> A,
+        e: A,
+        assoc: (a: A, b: A, c: A) Equal(A,op(op(a,b),c),op(a,op(b,c))),
+        neuter_left: (a: A) Equal(A,op(e, a), a),
+        neuter_right: (a: A) Equal(A, op(a, e), a),
+        )
+}

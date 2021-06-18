@@ -1,9 +1,0 @@
-App.KL.Game.Heroes.Cyclope.hero: App.KL.Game.Hero
-  App.KL.Game.Hero.new(
-    "Cyclope", 
-    (player) App.KL.Game.Heroes.Cyclope.Assets.vbox_idle,
-    (bool, time) App.KL.Game.Heroes.Cyclope.Assets.base64_idle,
-    15,
-    10,
-    []
-  )

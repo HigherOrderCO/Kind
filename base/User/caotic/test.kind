@@ -1,3 +1,4 @@
 User.Caotic.Test: _
-  let test = Map.from_list!([{"ab", 2}])
-  Map.values!(Avl.insert!!(String.cmp, "sd", 3, test))
+  let test = {2, 4}
+  {x, y} = test
+  y

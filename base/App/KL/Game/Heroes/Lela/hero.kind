@@ -1,9 +1,0 @@
-App.KL.Game.Heroes.Lela.hero: App.KL.Game.Hero
-  App.KL.Game.Hero.new(
-    "Lela", 
-    (player) App.KL.Game.Heroes.Lela.Assets.vbox_idle,
-    (bool, time) App.KL.Game.Heroes.Lela.Assets.base64_idle,
-    15,
-    10,
-    []
-  )

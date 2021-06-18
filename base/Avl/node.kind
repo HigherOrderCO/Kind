@@ -1,5 +1,0 @@
-Avl.node<K: Type, V: Type>(key: K, val: V, left: Avl<K,V>, right: Avl<K,V>): Avl<K,V>
-  let size_left  = Avl.size!!(left)
-  let size_right = Avl.size!!(right)
-  let new_size   = U32.add(1u, U32.add(size_left, size_right))
-  Avl.bin!!(new_size, key, val, left, right)

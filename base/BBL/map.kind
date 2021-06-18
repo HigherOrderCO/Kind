@@ -1,0 +1,9 @@
+BBL.map<K: Type, V: Type, Z: Type>(f: V -> Z, map: BBL<K,V>): BBL<K,Z>
+  case map {
+    tip: BBL.tip<K,Z>,
+    bin:  
+      let new_val   = f(map.val)
+      let new_left  = BBL.map<K,V,Z>(f, map.left)
+      let new_right = BBL.map<K,V,Z>(f, map.right)
+      BBL.node<K,Z>(map.key, new_val, new_left, new_right)
+  }

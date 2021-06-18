@@ -1,0 +1,4 @@
+type BBL <K: Type, V: Type> {
+  tip,
+  bin(size: U32, key: K, val: V, left: BBL<K,V>, right: BBL<K,V>)
+}

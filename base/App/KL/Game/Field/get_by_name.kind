@@ -1,0 +1,5 @@
+App.KL.Game.Field.get_by_name(name: String): Maybe<App.KL.Game.Field>
+  Map.get!(name, App.KL.Game.Field.get_by_name.map)
+
+App.KL.Game.Field.get_by_name.map: Map<App.KL.Game.Field>
+  Map.from_list!(List.map!!((x) {x@name, x}, App.KL.Game.Field.list))

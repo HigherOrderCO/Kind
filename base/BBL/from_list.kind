@@ -1,0 +1,5 @@
+BBL.from_list<K: Type, V: Type>(
+  cmp : K -> K -> Cmp, 
+  xs  : List<Pair<K,V>>
+) : BBL<K,V>
+  BBL.from_list.go<K,V>(cmp, BBL.tip<K,V>, xs)
