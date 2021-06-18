@@ -1,0 +1,3 @@
+Nat.mul.Monoid: Monoid(Nat)
+  let aux = (x, y, z) mirror(Nat.mul.assoc(x, y, z))
+  Monoid.new!(Nat.mul, 1, aux, Nat.mul.one_left, Nat.mul.one_right)
