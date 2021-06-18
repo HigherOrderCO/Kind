@@ -2,13 +2,13 @@ App.KL.Constants.hexagon_radius: I32
   15
 
 App.KL.Constants.board_size : I32
-  4
+  7
 
 App.KL.Constants.center_x : I32
-  256
+  228
 
 App.KL.Constants.center_y : I32
-  128
+  176
 
 App.KL.Constants.draft_hexagon_radius: U32
   8

@@ -8,8 +8,7 @@ type App.KL.Game.State.Local {
     user: String
     room: String
     casts: Maybe<App.KL.Game.Casts>
-    // cast_info
-    env_info: App.EnvInfo
+    mouse: Pair<U32, U32>
   )
 }
 
