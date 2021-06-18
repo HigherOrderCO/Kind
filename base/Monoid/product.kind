@@ -1,0 +1,98 @@
+Equal.apply.extended<
+  A: Type,
+  B: Type,
+  a: A,
+  b: A,
+  f: A -> B
+  g: A -> B
+>(e0: Equal<A -> B, f, g>,  e1: Equal<A,a,b>): Equal<B, f(a), g(b)>
+  case e0 {
+    refl: case e1 {
+      refl: Equal.refl<B>(f(a))
+    }!
+  }!
+
+Monoid.product.op<A: Type, B: Type>(MA: Monoid(A), MB: Monoid(B)): Pair(A,B) -> Pair(A, B) -> Pair(A, B)
+  (ab1, ab2)
+  def a1 = Pair.fst<A, B>(ab1)
+  def b1 = Pair.snd<A, B>(ab1)
+  def a2 = Pair.fst<A, B>(ab2)
+  def b2 = Pair.snd<A, B>(ab2)
+  case MA MB {
+    new new:
+      Pair.new<A, B>(MA.op(a1, a2), MB@op(b1, b2))
+  }!
+
+Monoid.product.neuter<A: Type, B: Type>(MA: Monoid(A), MB: Monoid(B)): Pair(A,B)
+  {MA@e, MB@e}
+
+Monoid.product.assoc<A: Type, B: Type>(MA: Monoid(A), MB: Monoid(B))
+  :  def op = Monoid.product.op<A, B>(MA, MB)
+     def T = Pair<A, B>
+   ((a: T, b: T, c: T) -> Equal(T, op(op(a,b),c),op(a,op(b,c))))
+
+  (ab1, ab2, ab3)
+  case ab1 ab2 ab3 MA MB {
+    new new new new new:
+      let lem0 = MA.assoc(ab1.fst, ab2.fst, ab3.fst)
+      let lem1 = MB.assoc(ab1.snd, ab2.snd, ab3.snd)
+      let lem3 = Equal.apply!!!!(Pair.new<A, B>, lem0)
+      let lem4 = Equal.apply.extended!!!!!!(lem3, lem1)
+      lem4
+  }!
+
+
+Monoid.product.neuter_left<A: Type, B: Type>(MA: Monoid(A), MB: Monoid(B))
+ :  def op = Monoid.product.op<A, B>(MA, MB)
+    def e  = Monoid.product.neuter<A,B>(MA, MB)
+    def T = Pair<A, B>
+  ((a: T) -> Equal(T, op(e, a), a))
+
+  (ab)
+  case ab MA MB{
+    new new new:
+      let lem0 = MA.neuter_left(ab.fst)
+      let lem1 = MB.neuter_left(ab.snd)
+      let lem3 = Equal.apply!!!!(Pair.new<A,B>, lem0)
+      let lem4 = Equal.apply.extended!!!!!!(lem3, lem1)
+      lem4
+  }!
+
+
+Monoid.product.neuter_right<A: Type, B: Type>(MA: Monoid(A), MB: Monoid(B))
+ :  def op = Monoid.product.op<A, B>(MA, MB)
+    def e  = Monoid.product.neuter<A,B>(MA, MB)
+    def T = Pair<A, B>
+  ((a: T) -> Equal(T, op(a, e), a))
+
+  (ab)
+  case ab MA MB{
+    new new new:
+      let lem0 = MA.neuter_right(ab.fst)
+      let lem1 = MB.neuter_right(ab.snd)
+      let lem3 = Equal.apply!!!!(Pair.new<A,B>, lem0)
+      let lem4 = Equal.apply.extended!!!!!!(lem3, lem1)
+      lem4
+  }!
+
+
+Monoid.product<A: Type, B: Type>(MA: Monoid(A), MB: Monoid(B)): Monoid(Pair(A,B))
+  Monoid.new(
+  // The product type
+  Pair(A,B),
+
+  // The binary operation
+  Monoid.product.op<A, B>(MA, MB),
+
+  // The neuter element
+  Monoid.product.neuter<A, B>(MA, MB),
+
+  // Associativity
+  Monoid.product.assoc<A, B>(MA, MB),
+
+  // e * a == a
+  Monoid.product.neuter_left<A,B>(MA, MB),
+
+  // a * e == a
+  Monoid.product.neuter_right<A,B>(MA, MB),
+  )
