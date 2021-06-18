@@ -1,0 +1,7 @@
+// Converts a List of Pair A, B which A is an Hexagonal Axial Coordinate and B a
+// value of B type
+Hexagonal.Axial.BBL.from_list<A: Type>(
+  list: List<Pair<Hexagonal.Axial,A>>
+): Hexagonal.Axial.BBL<A>
+
+  BBL.from_list!!(Hexagonal.Axial.cmp, list)

@@ -1,0 +1,26 @@
+// Converts screen coordinates to hexagon Axial coordinates
+Hexagonal.Axial.from_screen_xy(
+  coord: Pair<U32, U32> // TODO add alias
+  radius: I32,
+  center_x: I32,
+  center_y: I32
+): Hexagonal.Axial
+
+  {x, y} = coord
+
+  f = I32.to_f64
+  i = U32.to_f64
+  float_hex_rad = F64.div(f(radius), 2)
+
+  float_x = F64.div(F64.sub(i(x), f(center_x)), float_hex_rad)
+  float_y = F64.div(F64.sub(i(y), f(center_y)), float_hex_rad)
+  
+
+  fourth = 0.25
+  sixth = F64.div(1, 6)
+  third = F64.div(1, 3)
+  half = 0.5
+
+  axial_x = F64.sub( F64.mul(float_x, fourth), F64.mul(float_y, sixth) )
+  axial_y = F64.mul(float_y, third)
+  Hexagonal.Axial.round(axial_x, axial_y)

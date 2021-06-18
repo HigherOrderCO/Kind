@@ -1,0 +1,13 @@
+// Converts an Axial Coordinate to a Natural Number
+Hexagonal.Axial.to_nat(
+  coord: Hexagonal.Axial
+): Nat
+
+  open coord
+  i = coord.i + 100 //  I32
+  i = i * 1000
+  i = I32.to_u32(i)
+  j = coord.j + 100
+  j = I32.to_u32(j)
+  sum = i + j   //U32
+  U32.to_nat(sum)

@@ -1,0 +1,10 @@
+// Converts Axial coordinates to Cubic coordinates
+Hexagonal.Axial.to_cubic(
+  coord: Hexagonal.Axial
+): Hexagonal.Cubic
+
+    open coord
+    x = coord.i
+    z = coord.j
+    y = (I32.neg(x) - z)
+    Hexagonal.Cubic.new(x, y, z)

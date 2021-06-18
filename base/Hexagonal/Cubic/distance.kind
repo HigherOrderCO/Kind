@@ -1,0 +1,12 @@
+// Verifies the distance between two distinct Cubic coordinates
+Hexagonal.Cubic.distance(
+  coord_a: Hexagonal.Cubic
+  coord_b: Hexagonal.Cubic
+): I32
+
+  open coord_a as axis_a
+  open coord_b as axis_b
+  subx = I32.sub(axis_a.x, axis_b.x)
+  suby = I32.sub(axis_a.y, axis_b.y)
+  subz = I32.sub(axis_a.z, axis_b.z)
+  I32.max(I32.max(I32.abs(subx), I32.abs(suby)), I32.abs(subz))

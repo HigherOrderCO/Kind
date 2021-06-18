@@ -1,0 +1,7 @@
+// Gets a value in a BBL tree
+Hexagonal.Axial.BBL.get<A : Type>(
+  key : Hexagonal.Axial,
+  map : Hexagonal.Axial.BBL<A>
+): Maybe<A>
+
+  BBL.lookup!!(Hexagonal.Axial.cmp, key map)

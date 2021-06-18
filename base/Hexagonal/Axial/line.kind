@@ -1,0 +1,23 @@
+// Returns a list of coordinates in-line from a start to a goal
+Hexagonal.Axial.line(
+  start: Hexagonal.Axial,
+  goal: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  open start
+  open goal
+
+  {si, sj} = {I32.to_f64(start.i), I32.to_f64(start.j)}
+  {gi, gj} = {I32.to_f64(goal.i), I32.to_f64(goal.j)}
+  
+  coords = []
+  distance = I32.to_nat(Hexagonal.Axial.distance(start, goal))
+  for i from 0 to distance with coords:
+    i = F64.from_nat(i + 1)
+    distance = F64.from_nat(distance)
+    ratio = i/distance
+    inter_x = F64.lerp(si, gi, ratio)
+    inter_y = F64.lerp(sj, gj, ratio)
+    {new_i, new_j} = App.Kaelin.Coord.round(inter_x, inter_y)
+    Hexagonal.Axial.new(new_i, new_j) & coords
+  coords
