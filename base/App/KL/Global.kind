@@ -1,140 +1,37 @@
 type App.KL.Global.State {
-  new(
-    game: Maybe<App.KL.Game> // game state
-  )
+  new(game: Maybe<App.KL.Game>)
 }
 
 type App.KL.Global.Event {
   void
-
-  // Lobby events
-  join_room
-  
-  // Draft events
-  set_team    (team: App.KL.Game.Team)
-  set_hero    (hero: U8)
-  set_init_pos(coord: Hexagonal.Axial)
-  set_ready   (ready: U8)
-    
-  // Play events
-
-  //start_game  ( players: List<App.Kaelin.Player> )
-  // Will store draft info (player / hero / team)
-  // [App.Kaelin.Drafted.new("0x01babFc", App.Kaelin.Hero.Zeralul, App.Kaelin.Team.Blue)]
-  //create_user  ( player: App.Kaelin.Player )
-  //create_hero  ( hero_id: U8 )
-  //user_input   ( player: String, coord: App.Kaelin.Coord, action: App.Kaelin.Action )
-  //exe_skill    ( player: String, target_pos: App.Kaelin.Coord, key: Char )
-  //save_skill   ( player: String, target_pos: App.Kaelin.Coord, key: Char, team: App.Kaelin.Team )
-  //remove_skill ( player: String, target_pos: App.Kaelin.Coord, key: Char, team: App.Kaelin.Team )
-  //end_action
-  //draft_hero   ( hero: U8)
-  //draft_coord  ( coord: App.Kaelin.Coord)
-  //draft_team   ( team: U8)
-  //draft_ready  ( ready: U8)
-  //control_map  
+  game(event: App.KL.Game.Event)
 } deriving (serializer, deserializer)
 
 App.KL.Global.Event.serialize_post(ev: App.KL.Global.Event): String
   "0x" | String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.KL.Global.Event.serializer, ev)))
 
-App.KL.Global.Event.deserialize_post(hex: String): App.KL.Global.Event
-  Deserializer.run!(App.KL.Global.Event.deserializer, Bits.hex.decode(String.drop(2,hex))) <> App.KL.Global.Event.void
+App.KL.Global.Event.deserialize_post(hex: String): Maybe<App.KL.Global.Event>
+  Deserializer.run!(App.KL.Global.Event.deserializer, Bits.hex.decode(String.drop(2,hex)))
 
 // Global ticker
 App.KL.Global.tick: App.Tick<App.KL.State>
   (tick, glob)
   let game = glob@game
-  without game: glob
-  let phase = game@phase
-  case phase {
-    draft: Maybe {
-      get game        = glob@game
-      let game        = game@tick <- U64.add(game@tick, 1)
-      let players     = game@players
-      let player_list = Map.to_list!(players)
-      let ready       = List.fold!(player_list, _, true, (x) Bool.and(x@snd@ready))
-      let global = case player_list {
-        nil:
-          glob
-        cons: 
-          if ready then
-            log("- to_board")
-            game = game@phase <- App.KL.Game.Phase.play // Phase -> Game
-            game = game@board <- App.KL.Game.Phase.Draft.create_board(players)
-            glob@game <- some(game) 
-          else
-            glob
-      }
-      return global
-    } <> glob
-  } default glob
-
+  case game {
+    none: glob
+    some: glob@game <- some(App.KL.Game.tick(tick, game.value))
+  }
 
 // Global post
 App.KL.Global.post: App.Post<App.KL.State>
   (time, room, addr, data, glob)
-  log("Event: " | room | " " | data)
-  case App.KL.Global.Event.deserialize_post(data) as event {
-    void: glob
+  case App.KL.Global.Event.deserialize_post(data) as post {
+    none: glob
+    some: case post.value {
+      void: glob
+      game:
+        let game = glob@game <> App.KL.Game.start
+        glob@game <- some(App.KL.Game.post(time, room, addr, post.value.event, game))
+    }
+  }
 
-    join_room:
-      log("- join_room")
-      open glob
-      let glob.game = glob.game <> App.KL.Game.start
-      let player    = Map.get!(addr, glob.game@players)
-      let glob.game = case player {
-        none: glob.game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), glob.game@players) 
-        some: glob.game@players <- Map.set!(addr, player.value, glob.game@players) 
-      }
-      glob@game <- some(glob.game)
-
-    set_team:
-      log("- set_team")
-      open glob
-      case glob.game as game {
-        none: glob
-        some:
-          let glob.game = game.value@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false), game.value@players)
-          glob@game <- some(glob.game)
-      }
-
-    set_init_pos:
-      log("- set_init_pos")
-      Maybe {
-        get game        = glob@game
-        let players     = game@players
-        get player      = players{addr}
-        let player_list = Map.to_list!(players)
-        let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
-        let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
-        let global      = if is_occupied then glob else glob@game <- some(game)
-        return global
-      } <> glob
-
-    set_hero: // TODO: Only check in your team's list to see if the hero is already picked
-      log("- set_hero")
-      Maybe {
-        get game        = glob@game
-        let players     = game@players
-        get player      = players{addr}
-        let player_list = Map.to_list!(players)
-        let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
-        let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
-        let global      = if is_picked then glob else glob@game <- some(game)
-        return global
-      } <> glob 
-        
-    set_ready:
-      log("- set_ready")
-      Maybe {
-        get game    = glob@game
-        let players = game@players
-        get player  = players{addr}
-        let ready   = U8.eql(event.ready, 1)
-        let game    = game@players <- players{addr} <- player@ready <- ready // New_Ready -> Player -> Players -> Game
-        let global  = glob@game <- some(game)
-        return global
-      } <> glob
-              
-  } default glob

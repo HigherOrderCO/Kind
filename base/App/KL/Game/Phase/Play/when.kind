@@ -1,0 +1,25 @@
+App.KL.Game.Phase.Play.when(
+  local: App.KL.Game.State.Local
+  global: App.KL.Game
+  event: App.Event,
+): IO<Maybe<App.State.local<App.KL.State>>>
+  case event {
+    frame:
+      let {x,y} = event.info@mouse_pos
+      App.set_local!(App.KL.State.Local.game(local@mouse <- {x / 2, y / 2}))
+    key_down:
+      log("Key down " | Char.to_string(event.code))
+      log("Setting casts.")
+      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+      let casts = local@casts <> App.KL.Game.Casts.new(some(Hexagonal.Axial.BBL.new!), Hexagonal.Axial.BBL.new!)
+      let casts = casts@areas <- some(Hexagonal.Axial.BBL.from_list!([{coord, App.KL.Game.Indicator.blue}]))
+      App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
+    key_up:
+      log("Key up " | Char.to_string(event.code))
+      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+      let casts = local@casts <> App.KL.Game.Casts.new(some(Hexagonal.Axial.BBL.new!), Hexagonal.Axial.BBL.new!)
+      let casts = casts@picks <- Hexagonal.Axial.BBL.insert!(coord, Char.to_string(event.code), casts@picks)
+      let casts = casts@areas <- none
+      App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
+  } default App.pass!
+

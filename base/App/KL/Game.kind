@@ -29,6 +29,7 @@ type App.KL.Game.Phase {
   play
 }
 
+// Initial state
 App.KL.Game.start: App.KL.Game
   let phase = App.KL.Game.Phase.draft
   let players = Map.new!
@@ -54,8 +55,8 @@ App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Glo
     }
   }</div>
 
-// Event handler
-// =============
+// Local events
+// ============
 
 App.KL.Game.when(
   local: App.KL.Game.State.Local
@@ -72,3 +73,32 @@ App.KL.Game.when(
         draft: App.KL.Game.Phase.Draft.when(local, game.value, event)
       }
   }
+
+// Global Events
+// =============
+
+type App.KL.Game.Event {
+  draft(event: App.KL.Game.Phase.Draft.Event)
+  play(event: App.KL.Game.Phase.Play.Event)
+} deriving (serializer, deserializer)
+
+App.KL.Game.tick(tick: U64, game: App.KL.Game): App.KL.Game
+  open game
+  case game.phase {
+    draft: App.KL.Game.Phase.Draft.tick(tick, game)
+    play: App.KL.Game.Phase.Play.tick(tick, game)
+  }
+
+App.KL.Game.post(
+  time: U64
+  room: String
+  addr: String
+  event: App.KL.Game.Event
+  game: App.KL.Game
+): App.KL.Game
+  open game
+  case event game.phase {
+    draft draft : App.KL.Game.Phase.Draft.post(time, room, addr, event.event, game)
+    play  play  : App.KL.Game.Phase.Play.post(time, room, addr, event.event, game)
+  } default game
+
