@@ -1,0 +1,4 @@
+String.test.all: TestSuite
+  TestSuite.suite("String", [
+    String.test.to_hex
+  ])

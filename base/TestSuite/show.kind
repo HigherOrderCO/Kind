@@ -3,18 +3,43 @@ TestSuite.show(t: TestSuite, depth: Nat): String
   for n from 0 to depth with ind:
     ind|"  "
   case t {
-    test: 
-      ind|TestSuite.show.test(t.name, t.result)|"\n"
+    test:
+      ind|TestSuite.show.test(t.name, t.result)|"\n "
     suite:
-      let result = ind|t.name|"\n"
+      let result = ind|t.name|"\n "
       for x in t.list with result:
         result|TestSuite.show(x, 1 + depth)
       result
   }
 
-TestSuite.show.test(name: String, result: Bool): String
-  String.concat(String.concat(name, ": "), if result then "Pass" else "Fail")
+TestSuite.show.test(name: String, result: Maybe<String>): String
+  case result {
+    none: "" //String.concat(String.concat(name, ": pass")
+    some: String.concat(name, ": Fail")
+  }
 
-//TestSuit.check_fail(t: List<TestSuite>): String
-//  List
+// TODO: check it for multiple suites
+TestSuite.show.check_fail(s: TestSuite): String
+  let is_error = ((t) 
+    case t {
+      test: 
+        case t.result {
+          none: false
+          some: true
+        }
+      suite: false
+    }) :: TestSuite -> Bool
+
+  case s {
+    test : 
+      if is_error(s) then TestSuite.show(s, 0) else s.name|": all tests passed."
+    suite:  
+      let fails = List.filter!(is_error, s.list) 
+      let res = ""
+      for entry in fails with res:
+        res|TestSuite.show(entry, 0)
+      if String.eql(res, "") then s.name|": all tests passed." else res
+  }
   
+TestSuite.log(name: String, expected: String, got: String): String
+  name|": "|" expected "|expected|" got "|got

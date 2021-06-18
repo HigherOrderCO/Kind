@@ -1,4 +1,6 @@
 type TestSuite {
-  test(name: String, result: Bool)
+  test(name: String, result: Maybe<String>)
   suite(name: String, list: List<TestSuite>)
 }
+
+// unit - many
