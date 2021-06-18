@@ -1,0 +1,2 @@
+Monoid.mconcat<A: Type>(m: Monoid<A>, xs: List<A>): A
+  List.fold!(xs)!(m@e, m@op)
