@@ -1,0 +1,6 @@
+// Converts the BBL Map into a List of Hexagonal Axial coordinates
+Hexagonal.Axial.BBL.to_list<A: Type>(
+  map: Hexagonal.Axial.BBL<A>
+): List<Pair<Hexagonal.Axial,A>>
+
+  BBL.to_list!!(map)

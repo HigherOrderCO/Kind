@@ -1,0 +1,6 @@
+// Returns an Axial coordinate as a String
+Hexagonal.Axial.show(
+  coord: Hexagonal.Axial
+): String
+
+  Stringifier.run!(Hexagonal.Axial.stringifier, coord)

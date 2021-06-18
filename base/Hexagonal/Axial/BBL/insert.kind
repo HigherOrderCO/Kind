@@ -1,0 +1,8 @@
+// Inserts a value to a BBL tree
+Hexagonal.Axial.BBL.insert<A : Type>(
+  key : Hexagonal.Axial,
+  val : A,
+  map : Hexagonal.Axial.BBL<A>
+): Hexagonal.Axial.BBL<A>
+
+  BBL.insert!!(Hexagonal.Axial.cmp, key, val, map)

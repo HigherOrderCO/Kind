@@ -1,0 +1,58 @@
+// Round an Axial coordinate
+Hexagonal.Axial.round(
+  axial_x: F64,
+  axial_y: F64
+): Hexagonal.Axial
+
+  i = F64.to_i32
+  axial_z = (0.0 - axial_x) - axial_y
+
+  round_x = Hexagonal.Axial.aux.round_F64(axial_x)
+  round_y = Hexagonal.Axial.aux.round_F64(axial_y)
+  round_z = Hexagonal.Axial.aux.round_F64(axial_z)
+
+  diff_x  = Hexagonal.Axial.aux.abs_diff(axial_x, round_x)
+  diff_y  = Hexagonal.Axial.aux.abs_diff(axial_y, round_y)
+  diff_z  = Hexagonal.Axial.aux.abs_diff(axial_z, round_z)
+  
+  case F64.gtn(diff_x, diff_z) {
+    true:
+      case F64.gtn(diff_y, diff_x) {
+        true: 
+          new_y = (0.0 - round_x) - round_z
+          Hexagonal.Axial.new(i(round_x), i(new_y))
+        false:
+          new_x = (0.0 - round_y) - round_z
+          Hexagonal.Axial.new(i(new_x), i(round_y))
+      }
+    false:
+      case F64.gtn(diff_y, diff_z) {
+        true:
+          new_y = (0.0 - round_x) - round_z
+          Hexagonal.Axial.new(i(round_x), i(new_y))
+        false:
+          Hexagonal.Axial.new(i(round_x), i(round_y))
+      }
+  }
+
+
+// TODO: Rheidner
+// Rounds a F64 number to the nearest integer
+Hexagonal.Axial.aux.round_F64(n: F64): F64
+  half = 0.5
+  big_number = 1000.0 // TODO while F64.gtn, cmp and ltn is broken
+  n = n + big_number
+  result = Hexagonal.Axial.aux.floor(n + half)
+  result - big_number
+
+// TODO
+Hexagonal.Axial.aux.floor(n: F64): F64
+  I32.to_f64(F64.to_i32(n))
+
+// TODO: Rheidner
+// Rounds a F64 and get its absolute value
+Hexagonal.Axial.aux.abs_diff(x: F64, y: F64): F64 // TODO while F64.abs doesnt exist
+  case F64.gtn(x, y) {
+    true: x - y
+    false: y - x
+  }
