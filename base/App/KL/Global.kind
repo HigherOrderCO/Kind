@@ -6,11 +6,18 @@ type App.KL.Global.State {
 
 type App.KL.Global.Event {
   void
+
+  // Lobby events
   join_room
+  
+  // Draft events
   set_team    (team: App.KL.Game.Team)
   set_hero    (hero: U8)
   set_init_pos(coord: Hexagonal.Axial)
   set_ready   (ready: U8)
+    
+  // Play events
+
   //start_game  ( players: List<App.Kaelin.Player> )
   // Will store draft info (player / hero / team)
   // [App.Kaelin.Drafted.new("0x01babFc", App.Kaelin.Hero.Zeralul, App.Kaelin.Team.Blue)]
@@ -34,7 +41,7 @@ App.KL.Global.Event.serialize_post(ev: App.KL.Global.Event): String
 App.KL.Global.Event.deserialize_post(hex: String): App.KL.Global.Event
   Deserializer.run!(App.KL.Global.Event.deserializer, Bits.hex.decode(String.drop(2,hex))) <> App.KL.Global.Event.void
 
-// Global ticker: not used
+// Global ticker
 App.KL.Global.tick: App.Tick<App.KL.State>
   (tick, glob)
   let game = glob@game
@@ -48,7 +55,8 @@ App.KL.Global.tick: App.Tick<App.KL.State>
       let player_list = Map.to_list!(players)
       let ready       = List.fold!(player_list, _, true, (x) Bool.and(x@snd@ready))
       let global = case player_list {
-        nil : glob
+        nil:
+          glob
         cons: 
           if ready then
             log("- to_board")
@@ -63,24 +71,22 @@ App.KL.Global.tick: App.Tick<App.KL.State>
   } default glob
 
 
-// Global visitor: counts posts to room_zero
+// Global post
 App.KL.Global.post: App.Post<App.KL.State>
   (time, room, addr, data, glob)
   log("Event: " | room | " " | data)
   case App.KL.Global.Event.deserialize_post(data) as event {
     void: glob
+
     join_room:
       log("- join_room")
       open glob
       let glob.game = glob.game <> App.KL.Game.start
       let player    = Map.get!(addr, glob.game@players)
       let glob.game = case player {
-        none:
-          glob.game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), glob.game@players) 
-        some:
-          glob.game@players <- Map.set!(addr, player.value, glob.game@players) 
+        none: glob.game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), glob.game@players) 
+        some: glob.game@players <- Map.set!(addr, player.value, glob.game@players) 
       }
-
       glob@game <- some(glob.game)
 
     set_team:
@@ -96,19 +102,15 @@ App.KL.Global.post: App.Post<App.KL.State>
     set_init_pos:
       log("- set_init_pos")
       Maybe {
-          get game        = glob@game
-          let players     = game@players
-          get player      = players{addr}
-          let player_list = Map.to_list!(players)
-          let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
-          let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
-          let global      =
-            if is_occupied then
-              glob
-            else
-              glob@game <- some(game)
-          return global
-          } <> glob
+        get game        = glob@game
+        let players     = game@players
+        get player      = players{addr}
+        let player_list = Map.to_list!(players)
+        let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
+        let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
+        let global      = if is_occupied then glob else glob@game <- some(game)
+        return global
+      } <> glob
 
     set_hero: // TODO: Only check in your team's list to see if the hero is already picked
       log("- set_hero")
@@ -119,24 +121,20 @@ App.KL.Global.post: App.Post<App.KL.State>
         let player_list = Map.to_list!(players)
         let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
         let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
-        let global      =
-          if is_picked then
-            glob
-          else
-            glob@game <- some(game)
+        let global      = if is_picked then glob else glob@game <- some(game)
         return global
-        } <> glob 
+      } <> glob 
         
-      set_ready:
-        log("- set_ready")
-        Maybe {
-          get game        = glob@game
-          let players     = game@players
-          get player      = players{addr}
-          let ready       = U8.eql(event.ready, 1)
-          let game        = game@players <- players{addr} <- player@ready <- ready // New_Ready -> Player -> Players -> Game
-          let global      = glob@game <- some(game)
-          return global
-          } <> glob
+    set_ready:
+      log("- set_ready")
+      Maybe {
+        get game    = glob@game
+        let players = game@players
+        get player  = players{addr}
+        let ready   = U8.eql(event.ready, 1)
+        let game    = game@players <- players{addr} <- player@ready <- ready // New_Ready -> Player -> Players -> Game
+        let global  = glob@game <- some(game)
+        return global
+      } <> glob
               
-  }default glob
+  } default glob
