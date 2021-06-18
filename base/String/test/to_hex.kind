@@ -4,7 +4,7 @@
 
 // Tests using NodeJS as reference
 String.test.to_hex: TestSuite
-  TestSuite.suite("to_hex", [
+  TestSuite.many("to_hex", [
     String.test.to_hex.0, String.test.to_hex.1, String.test.to_hex.2,
     String.test.to_hex.3, String.test.to_hex.4, String.test.to_hex.5,
     String.test.to_hex.6, String.test.to_hex.7, String.test.to_hex.8,
@@ -16,7 +16,8 @@ String.test.log(name: String, expected: String, got: String): TestSuite
     if String.eql(expected, got) 
     then Maybe.none! 
     else Maybe.some!(TestSuite.log(name, expected, got))
-  TestSuite.test(name, res)
+  log("expcted: "|expected|" got "|got)
+  TestSuite.unit(name, res)
 
 String.test.to_hex.0: TestSuite
   let hex = String.to_hex("abcdef")
