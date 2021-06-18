@@ -3057,7 +3057,7 @@ module.exports = class AppPlay extends Component {
 
    // Mouse movement event
     this.listeners.mousemove = (e) => {
-      this.mouse_pos = {_ : "Pair.new", fst: e.offsetX, snd : e.offsetY}
+      this.mouse_pos = {_: "Pair.new", fst: e.offsetX, snd: e.offsetY}
     }
 
     document.body.addEventListener("mousemove", this.listeners.mousemove);

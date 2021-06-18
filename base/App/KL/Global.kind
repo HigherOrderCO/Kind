@@ -39,8 +39,8 @@ App.KL.Global.tick: App.Tick<App.KL.State>
   (tick, glob)
   let game = glob@game
   without game: glob
-  let stage = game@stage
-  case stage {
+  let phase = game@phase
+  case phase {
     draft: Maybe {
       get game        = glob@game
       let game        = game@tick <- U64.add(game@tick, 1)
@@ -52,8 +52,8 @@ App.KL.Global.tick: App.Tick<App.KL.State>
         cons: 
           if ready then
             log("- to_board")
-            game = game@stage <- App.KL.Game.Stage.board // Stage -> Game
-            game = game@board <- App.KL.Game.Stage.Draft.create_board(players)
+            game = game@phase <- App.KL.Game.Phase.play // Phase -> Game
+            game = game@board <- App.KL.Game.Phase.Draft.create_board(players)
             glob@game <- some(game) 
           else
             glob
@@ -100,7 +100,7 @@ App.KL.Global.post: App.Post<App.KL.State>
           let players     = game@players
           get player      = players{addr}
           let player_list = Map.to_list!(players)
-          let is_occupied = List.fold!(List.map!!(App.KL.Game.Stage.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
+          let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
           let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
           let global      =
             if is_occupied then
@@ -117,7 +117,7 @@ App.KL.Global.post: App.Post<App.KL.State>
         let players     = game@players
         get player      = players{addr}
         let player_list = Map.to_list!(players)
-        let is_picked   = List.fold!(List.map!!(App.KL.Game.Stage.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
+        let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
         let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
         let global      =
           if is_picked then

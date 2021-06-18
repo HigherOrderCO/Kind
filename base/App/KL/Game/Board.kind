@@ -1,3 +1,6 @@
+App.KL.Game.Board: Type
+  Hexagonal.Axial.BBL<App.KL.Game.Tile>
+
 // The 'Arena' board
 App.KL.Game.Board.arena: App.KL.Game.Board
   board_size = App.KL.Constants.board_size

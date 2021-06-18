@@ -1,0 +1,15 @@
+App.KL.Game.Effect(A: Type): Type
+  ((center: Hexagonal.Axial) ->
+   (target: Hexagonal.Axial) ->
+   (board: App.KL.Game.Board) ->
+   App.KL.Game.Effect.Result(A))
+
+type App.KL.Game.Effect.Result <A: Type> {
+  new(
+    value: A
+    board: App.KL.Game.Board
+    //futures: List(App.KL.Board.Future)
+    //indicators: NatMap<App.KL.Game.Indicator>
+  )
+}
+

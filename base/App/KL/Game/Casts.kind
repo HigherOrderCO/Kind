@@ -1,0 +1,7 @@
+type App.KL.Game.Casts {
+  new(
+    areas: Maybe<Hexagonal.Axial.BBL<App.KL.Game.Indicator>>
+    picks: Hexagonal.Axial.BBL<String>
+  )
+}
+

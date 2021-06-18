@@ -1,11 +1,8 @@
 // BOARD DRAWING
-// ====================
-
+// =============
 
 // draw all the screen (round, seconds, canvas, list of skills)
-App.KL.Game.Stage.Board.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
-  // let seconds = case global.stage { planning: some(global.stage.seconds) } default none  TODO timer and round
-  
+App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
@@ -15,48 +12,30 @@ App.KL.Game.Stage.Board.draw(img: VoxBox, local: App.KL.Game.State.Local, game: 
     "align-items": "center",
     "position": "relative"
   }>
-    //<div style={"margin-bottom": "10px"}> 
-      //// for div in App.Kaelin.Draw.game.round(seconds, global.round)): div TODO show seconds
-      //<div>"seconds here"</div>
-    //</div>
     <div>{ 
       let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
       let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
-      DOM.vbox({"width": width, "height": height, "scale": "2"}, {}, App.KL.Game.Stage.Board.draw.canvas(img, local, game)) 
+      DOM.vbox({"width": width, "height": height, "scale": "2"}, {}, App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
     }</div>
-    // TODO show list of skills?
-    // <div style={
-    //   "position": "absolute", 
-    //   "bottom": "0px",
-    //   "right": "0px",
-    //   "margin": "15px"
-    //   "display": "flex",
-    //   "flex-direction": "column-reverse"
-    // }>
-    //   {
-    //     let skills_text = List.map!!(App.Kaelin.Draw.game.skill_list(local.user, local.team, global.map, is_planning), global.skills_list)
-    //     for skill in skills_text: skill
-    //   }
-    // </div>
   </div>
 
 // CANVAS DRAWING
 // ================
 
 // draw canvas
-App.KL.Game.Stage.Board.draw.canvas(
+App.KL.Game.Phase.Play.draw.canvas(
   img : VoxBox,
   local: App.KL.Game.State.Local,
   game: App.KL.Game
 ): VoxBox
-  let img = App.KL.Game.Stage.Board.draw.board(game@board, local@casts, local@mouse, img) 
-  let img = App.KL.Game.Stage.Board.draw.mouse_ui(local@mouse, img)
+  let img = App.KL.Game.Phase.Play.draw.board(game@board, local@casts, local@mouse, img) 
+  let img = App.KL.Game.Phase.Play.draw.mouse_ui(local@mouse, img)
   img
 
 // draw canvas board
 // TODO 
 // add cast_info
-App.KL.Game.Stage.Board.draw.board(
+App.KL.Game.Phase.Play.draw.board(
   map: App.KL.Game.Board
   casts: Maybe<App.KL.Game.Casts>
   mouse: Pair<U32, U32>
@@ -68,25 +47,26 @@ App.KL.Game.Stage.Board.draw.board(
 
   for pos in map with img:
     {coord, tile} = pos
-    img = App.KL.Game.Stage.Board.draw.tile.terrain(tile@terrain, casts, coord, mouse_coord, img)
-    img = App.KL.Game.Stage.Board.draw.tile.creature(tile@creature, coord, img)
-    // img = App.KL.Game.Stage.Board.draw.tile.animation(tile@animation, coord, internal, img) TODO animation
+    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, casts, coord, mouse_coord, img)
+    img = App.KL.Game.Phase.Play.draw.tile.creature(tile@creature, coord, img)
+    // img = App.KL.Game.Phase.Play.draw.tile.animation(tile@animation, coord, internal, img) TODO animation
     img
   img
 
 // draw mouse indicator
-App.KL.Game.Stage.Board.draw.mouse_ui(
+App.KL.Game.Phase.Play.draw.mouse_ui(
   mouse: Pair<U32, U32>
   img: VoxBox
 ): VoxBox
   coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-  {x,y} = App.KL.Game.Stage.Board.draw.centralize(coord)
+  {x,y} = App.KL.Game.Phase.Play.draw.centralize(coord)
+  log(U32.show(x) | " - " | U32.show(x))
   VoxBox.Draw.image(x, y, 0#32, App.Kaelin.Assets.tile.mouse_ui, img) // TODO move to use KL assets?
 
 // TODO 
 // add cast_info
 // draws tile terrain
-App.KL.Game.Stage.Board.draw.tile.terrain(
+App.KL.Game.Phase.Play.draw.tile.terrain(
   terrain: App.KL.Game.Terrain,
   casts: Maybe<App.KL.Game.Casts>
   tile_coord: Hexagonal.Axial
@@ -94,9 +74,9 @@ App.KL.Game.Stage.Board.draw.tile.terrain(
   img: VoxBox
 ): VoxBox
   // get indicator to draw
-  indicator = App.KL.Game.Stage.Board.draw.get_indicator(tile_coord, mouse_coord, casts) // TODO add castinfo
+  indicator = App.KL.Game.Phase.Play.draw.get_indicator(tile_coord, mouse_coord, casts) // TODO add castinfo
   // get centralized position to draw hexagon tile
-  {i, j}    = App.KL.Game.Stage.Board.draw.centralize(tile_coord)
+  {i, j}    = App.KL.Game.Phase.Play.draw.centralize(tile_coord)
 
   // get fields voxbox based on indicator and draws it
   field = App.KL.Game.Field.get_by_id.default(terrain@field_id)
@@ -104,12 +84,12 @@ App.KL.Game.Stage.Board.draw.tile.terrain(
   tile_drawing  = VoxBox.Draw.image(i, j, 0#32, field_drawing, img)
   
   // draw picks' letters of cast
-  tile_drawing  = App.KL.Game.Stage.Board.draw.pick_letter(tile_coord, casts, tile_drawing)
+  tile_drawing  = App.KL.Game.Phase.Play.draw.pick_letter(tile_coord, casts, tile_drawing)
   // returns all together
   tile_drawing
 
 // draws tile creature if any
-App.KL.Game.Stage.Board.draw.tile.creature(
+App.KL.Game.Phase.Play.draw.tile.creature(
   creature: Maybe<App.KL.Game.Creature>,
   coord: Hexagonal.Axial,
   img: VoxBox
@@ -120,7 +100,7 @@ App.KL.Game.Stage.Board.draw.tile.creature(
       {cx, cy} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       
       // draw creature
-      img = App.KL.Game.Stage.Board.draw.hero(cx, cy, 0u, creature.value, img)
+      img = App.KL.Game.Phase.Play.draw.hero(cx, cy, 0u, creature.value, img)
 
       // TODO draw creature hp and ap
       // if I32.gtn(creature.value@hp, 0) then
@@ -136,7 +116,7 @@ App.KL.Game.Stage.Board.draw.tile.creature(
   }
 
 // draw hero img in some canvas coordinate (allows pass hexagons)
-App.KL.Game.Stage.Board.draw.hero(
+App.KL.Game.Phase.Play.draw.hero(
   cx: U32,
   cy: U32,
   z : U32,
@@ -157,7 +137,7 @@ App.KL.Game.Stage.Board.draw.hero(
 // AUX FUNCTIONS
 // =================
 
-App.KL.Game.Stage.Board.draw.pick_letter(
+App.KL.Game.Phase.Play.draw.pick_letter(
   tile_coord: Hexagonal.Axial
   casts: Maybe<App.KL.Game.Casts>
   img: VoxBox
@@ -169,16 +149,16 @@ App.KL.Game.Stage.Board.draw.pick_letter(
     none: img
     some: 
       screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      {cx, cy}     = App.KL.Game.Stage.Board.draw.centralize_letter(screen_coord)
+      {cx, cy}     = App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord)
       VoxBox.Draw.text(got.value, PixelFont.black, Pos32.new(cx,cy,0u), img)
   }
 
-App.KL.Game.Stage.Board.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
+App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
   { screen_coord@fst - 2, screen_coord@snd - 6 }
 
 // TODO 
 // add cast_info
-App.KL.Game.Stage.Board.draw.get_indicator(
+App.KL.Game.Phase.Play.draw.get_indicator(
   tile_coord: Hexagonal.Axial
   mouse_coord: Hexagonal.Axial
   casts: Maybe<App.KL.Game.Casts>
@@ -198,7 +178,7 @@ App.KL.Game.Stage.Board.draw.get_indicator(
 
   
 // Centralizes an image in the hexagon 
-App.KL.Game.Stage.Board.draw.centralize(
+App.KL.Game.Phase.Play.draw.centralize(
   coord: Hexagonal.Axial
 ): Pair(U32, U32)
   let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
@@ -207,48 +187,4 @@ App.KL.Game.Stage.Board.draw.centralize(
   let j   = j - aux
   {i, j}
 
-
-// When
-// ====
-
-App.KL.Game.Stage.Board.when(
-  local: App.KL.Game.State.Local
-  global: App.KL.Game
-  event: App.Event,
-): IO<Maybe<App.State.local<App.KL.State>>>
-  case event {
-    mouse_:
-      let {x,y} = event.info@mouse_pos
-      App.set_local!(App.KL.State.Local.game(local@mouse <- {x / 2, y / 2}))
-    key_down:
-      log("Key down " | Char.to_string(event.code))
-      log("Setting casts.")
-      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let casts = local@casts <> App.KL.Game.Casts.new(some(Hexagonal.Axial.BBL.new!), Hexagonal.Axial.BBL.new!)
-      let casts = casts@areas <- some(Hexagonal.Axial.BBL.from_list!([{coord, App.KL.Game.Indicator.blue}]))
-      App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
-    key_up:
-      log("Key up " | Char.to_string(event.code))
-      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let casts = local@casts <> App.KL.Game.Casts.new(some(Hexagonal.Axial.BBL.new!), Hexagonal.Axial.BBL.new!)
-      let casts = casts@picks <- Hexagonal.Axial.BBL.insert!(coord, Char.to_string(event.code), casts@picks)
-      let casts = casts@areas <- none
-      App.set_local!(App.KL.State.Local.game(local@casts <- some(casts)))
-  } default App.pass!
-
-
-//type App.KL.Game.CastInfo.Area {
-  //new(
-    //center: Hexagonal.Axial
-    //range: Nat
-    //letter: String
-  //)
-//}
-
-//type App.KL.Game.CastInfo {
-  //new(
-    //areas: List<App.KL.Game.CastInfo.Area>
-    //casts: List<Pair<Hexagonal.Axial, String>>
-  //)
-//}
 
