@@ -1,2 +1,2 @@
 Test: _
-  F64.eql(-1, -1)
+  Word.is_neg!((0.11 :: F64)@word)

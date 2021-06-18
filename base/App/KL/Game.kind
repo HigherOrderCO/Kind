@@ -36,7 +36,7 @@ type App.KL.Game.Stage {
 type App.KL.Game.Player {
   new(
     hero_id: Maybe<Nat>
-    init_pos: Maybe<App.KL.Game.Coord>
+    init_pos: Maybe<Hexagonal.Axial>
     team: App.KL.Game.Team
     ready: Bool
   )
@@ -94,8 +94,8 @@ type App.KL.Game.Skill {
 }
 
 App.KL.Game.Effect(A: Type): Type
-  ((center: App.KL.Game.Coord) ->
-   (target: App.KL.Game.Coord) ->
+  ((center: Hexagonal.Axial) ->
+   (target: Hexagonal.Axial) ->
    (board: App.KL.Game.Board) ->
    App.KL.Game.Effect.Result(A))
 
@@ -153,67 +153,6 @@ type App.KL.Game.Entity { // TODO rename?
 App.KL.Game.Board: Type
   App.KL.Game.Map<App.KL.Game.Tile>
 
-// Math
-// ----
-
-type App.KL.Game.Coord {
-  new(i: I32, j: I32)
-} deriving (serializer, deserializer, stringifier)
-
-
-type App.KL.Game.Coord.Cubic {
-    new(x:I32, y:I32, z:I32)
-}
-
-App.KL.Game.Coord.Cmp(
-  x: App.KL.Game.Coord,
-  y: App.KL.Game.Coord
-): Cmp
-  let c = I32.cmp(x@i, y@i)
-  case c {
-    eql : I32.cmp(x@j, y@j)
-  } default c
-
-App.KL.Game.Coord.eql(
-  a:App.KL.Game.Coord,
-  b:App.KL.Game.Coord
-): Bool
-
-  open a
-  open b
-  Bool.and(I32.eql(a.i,b.i), I32.eql(a.j, b.j))
-
-
-App.KL.Game.Coord.axial_to_nat(
-  coord: App.KL.Game.Coord
-): Nat
-
-  open coord
-  i = coord.i + 100 //  I32
-  i = i * 1000
-  i = I32.to_u32(i)
-  j = coord.j + 100
-  j = I32.to_u32(j)
-  sum = i + j   //U32
-  U32.to_nat(sum)
-
-// Converts a natural number to an axial coordinate, so it can be used as a key in a NatMap(App.Kaelin.Tile)
-// 10020997 is transformed to the coordinate {+2, -3}
-// TODO maybe add I32 to nat?
-App.KL.Game.Coord.nat_to_axial(
-  key: Nat
-): App.KL.Game.Coord
-
-  key_converted = Nat.to_u32(key)
-  coord_i = key_converted /  1000  //U32
-  coord_i = U32.to_i32(coord_i)
-  coord_i = coord_i - 100   // I32
-  coord_j = U32.mod(key_converted, 1000) // U32
-  coord_j = U32.to_i32(coord_j)
-  coord_j = coord_j - 100 // I32
-  App.KL.Game.Coord.new(coord_i, coord_j)
-
-
 // CastInfo
 // ----
 
@@ -227,7 +166,7 @@ type App.KL.Game.Casts {
 type App.KL.Game.Action { // skill info to send on post
   new(
     player: String,
-    target_pos: App.KL.Game.Coord,
+    target_pos: Hexagonal.Axial,
     key: U16
   )
 }

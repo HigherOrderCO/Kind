@@ -9,7 +9,7 @@ type App.KL.Global.Event {
   join_room
   set_team    (team: App.KL.Game.Team)
   set_hero    (hero: U8)
-  set_init_pos(coord: App.KL.Game.Coord)
+  set_init_pos(coord: Hexagonal.Axial)
   set_ready   (ready: U8)
   //start_game  ( players: List<App.Kaelin.Player> )
   // Will store draft info (player / hero / team)

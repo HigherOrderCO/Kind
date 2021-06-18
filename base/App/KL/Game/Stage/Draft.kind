@@ -16,7 +16,7 @@ App.KL.Game.Stage.Draft.when(
       switch String.starts_with(event.id) {
         "C" : // Set initial position 
           let coord_nat = String.drop(1, event.id)
-          let coord     = App.KL.Game.Coord.nat_to_axial(Nat.read(coord_nat))
+          let coord     = Hexagonal.Axial.from_nat(Nat.read(coord_nat))
           App.new_post!(local@room, App.KL.Global.Event.serialize_post(App.KL.Global.Event.set_init_pos(coord)))
         "H" : // Set Player Hero
           let hero_name = String.drop(1, event.id)
@@ -63,11 +63,11 @@ App.KL.Game.Stage.Draft.has_hero(hero_id: U8, player: Pair<String, App.KL.Game.P
     some: U8.eql(Nat.to_u8(x.value), hero_id)
   }
 
-App.KL.Game.Stage.Draft.has_coord(coord: App.KL.Game.Coord, player: Pair<String, App.KL.Game.Player>): Bool
+App.KL.Game.Stage.Draft.has_coord(coord: Hexagonal.Axial, player: Pair<String, App.KL.Game.Player>): Bool
   x = player@snd@init_pos
   case x {
     none: false
-    some: App.KL.Game.Coord.eql(x.value, coord)
+    some: Hexagonal.Axial.eql(x.value, coord)
   }
   
 // get team string
@@ -273,18 +273,18 @@ App.KL.Game.Stage.Draft.draw.map_space(players: Map<App.KL.Game.Player>, user: S
 
 // get all positions of the hexagons that will be draw
 // based on the user team
-App.KL.Game.Stage.Draft.draw.tiles.get_pos(team: App.KL.Game.Team): List<App.KL.Game.Coord>
+App.KL.Game.Stage.Draft.draw.tiles.get_pos(team: App.KL.Game.Team): List<Hexagonal.Axial>
       
-  let a = App.KL.Game.Coord.new(1,-2)
-  let b = App.KL.Game.Coord.new(0,-1)
-  let c = App.KL.Game.Coord.new(1,-1)
-  let d = App.KL.Game.Coord.new(0, 0)
-  let e = App.KL.Game.Coord.new(-1,1)
-  let f = App.KL.Game.Coord.new(0, 1)
-  let g = App.KL.Game.Coord.new(-1,2)
+  let a = Hexagonal.Axial.new(1,-2)
+  let b = Hexagonal.Axial.new(0,-1)
+  let c = Hexagonal.Axial.new(1,-1)
+  let d = Hexagonal.Axial.new(0, 0)
+  let e = Hexagonal.Axial.new(-1,1)
+  let f = Hexagonal.Axial.new(0, 1)
+  let g = Hexagonal.Axial.new(-1,2)
 
-  let one = App.KL.Game.Coord.new(-1,0) // Team 1's edge
-  let two = App.KL.Game.Coord.new(1, 0) // Team 2's edge
+  let one = Hexagonal.Axial.new(-1,0) // Team 1's edge
+  let two = Hexagonal.Axial.new(1, 0) // Team 2's edge
 
   case team {
     blue: List.map!!(App.KL.Game.Stage.Draft.draw.tiles.get_pos.offset(App.KL.Game.Team.blue), [a,b,c,d,e,f,g,one])
@@ -293,23 +293,23 @@ App.KL.Game.Stage.Draft.draw.tiles.get_pos(team: App.KL.Game.Team): List<App.KL.
 
 
 // offset coords to respective team's corners
-App.KL.Game.Stage.Draft.draw.tiles.get_pos.offset(team: App.KL.Game.Team, coord: App.KL.Game.Coord): App.KL.Game.Coord
+App.KL.Game.Stage.Draft.draw.tiles.get_pos.offset(team: App.KL.Game.Team, coord: Hexagonal.Axial): Hexagonal.Axial
   open coord
   map_size = U32.to_i32(4#32 - 1) //TODO  4 - > App.KL.Constants.map_size 
   case team{
-    blue: App.KL.Game.Coord.new(coord.i - map_size, coord.j)
-    red : App.KL.Game.Coord.new(coord.i + map_size, coord.j)
+    blue: Hexagonal.Axial.new(coord.i - map_size, coord.j)
+    red : Hexagonal.Axial.new(coord.i + map_size, coord.j)
   } default coord
 
 // get player at `coord` coordinate
-App.KL.Game.Stage.Draft.draw.get_player_at(players: Map<App.KL.Game.Player>, coord: App.KL.Game.Coord): Maybe<Pair<String, App.KL.Game.Player>>
+App.KL.Game.Stage.Draft.draw.get_player_at(players: Map<App.KL.Game.Player>, coord: Hexagonal.Axial): Maybe<Pair<String, App.KL.Game.Player>>
   let fun = 
     (x)
       open x
       let pos = x.snd@init_pos
       case pos {
         none: false
-        some: App.KL.Game.Coord.eql(pos.value, coord)
+        some: Hexagonal.Axial.eql(pos.value, coord)
       }
   List.find!(fun, Map.to_list!(players)) 
 
@@ -329,16 +329,14 @@ App.KL.Game.Stage.Draft.draw.tiles(players: Map<App.KL.Game.Player>, user: Strin
     }
   
   for pair in player_list with tiles_list:
-    open pair
-    let coord = App.KL.Game.Coord.axial_to_nat(pair.fst)
-    App.KL.Game.Stage.Draft.draw.tiles.go(team, pair.fst, pair.snd, user) & tiles_list
+    App.KL.Game.Stage.Draft.draw.tiles.go(team, pair@fst, pair@snd, user) & tiles_list
   
   tiles_list
 
 // create one hexagon the will be draw
 // TODO: -> switch 8#32 to -> App.KL.Game.Constants.draft_hexagon_radius
-App.KL.Game.Stage.Draft.draw.tiles.go(team: App.KL.Game.Team, coord: App.KL.Game.Coord, id: Maybe(String), user: String): DOM
-  let nat    =  App.KL.Game.Coord.axial_to_nat(coord)
+App.KL.Game.Stage.Draft.draw.tiles.go(team: App.KL.Game.Team, coord: Hexagonal.Axial, id: Maybe(String), user: String): DOM
+  let nat    =  Hexagonal.Axial.to_nat(coord)
   let {x, y} =  App.KL.Game.Stage.Draft.draw.tiles.to_xy(coord, team) // calculate x,y position based on i,j coord
   let top    =  Nat.show(U32.to_nat(y)) | "%"
   let left   =  Nat.show(U32.to_nat(x)) | "%"
@@ -367,7 +365,7 @@ App.KL.Game.Stage.Draft.draw.tiles.go(team: App.KL.Game.Team, coord: App.KL.Game
 // TODO: currently it all works with percentages (50%, 8%), should it be changed to px?
 // TODO: switch 4#32 to -> App.KL.Game.Constants.map_size
 App.KL.Game.Stage.Draft.draw.tiles.to_xy(
-  coord: App.KL.Game.Coord,
+  coord: Hexagonal.Axial,
   team: App.KL.Game.Team
 ): Pair<U32,U32>
 

@@ -22,10 +22,10 @@ App.KL.Game.Board.arena: App.KL.Game.Board
       // generate int axial coordinate
       coord_i = I32.sub(U32.to_i32(i),  board_size) // i - board_size
       coord_j = I32.sub(U32.to_i32(j),  board_size) // j - board_size
-      coord = App.KL.Game.Coord.new(coord_i, coord_j)
-      fit = App.KL.Game.Coord.fit(coord)
+      coord   = Hexagonal.Axial.new(coord_i, coord_j)
+      inside  = Hexagonal.Axial.inside(coord, App.KL.Constants.board_size)
       
-      case fit {
+      case inside {
         true:
           App.KL.Game.Board.push(coord, new_terrain, board)
         false:
@@ -37,14 +37,14 @@ App.KL.Game.Board.arena: App.KL.Game.Board
 
 // get tile from board
 App.KL.Game.Board.get(
-  coord: App.KL.Game.Coord,
+  coord: Hexagonal.Axial,
   board: App.KL.Game.Board
 ): Maybe<App.KL.Game.Tile>
   App.KL.Game.Map.find!(coord, board)
 
 // set tile in some coord on board
 App.KL.Game.Board.set(
-  coord: App.KL.Game.Coord,
+  coord: Hexagonal.Axial,
   tile: App.KL.Game.Tile,
   board:App.KL.Game.Board
 ): App.KL.Game.Board
@@ -53,7 +53,7 @@ App.KL.Game.Board.set(
 
 // push entity to board
 App.KL.Game.Board.push(
-  coord : App.KL.Game.Coord,
+  coord : Hexagonal.Axial,
   entity: App.KL.Game.Entity
   board : App.KL.Game.Board
 ): App.KL.Game.Board
