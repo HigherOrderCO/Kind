@@ -5,7 +5,7 @@ type App.KL.Game.Hero {
     picture: Bool -> U64 -> String // rename to portrait?
     max_hp: I32
     max_ap: I32
-    skills: List<App.KL.Game.Skill>
+    skills: Map<App.KL.Game.Skill> // letter -> skill
   )
 }
 

@@ -1,0 +1,4 @@
+App.KL.Game.Skill.list: List<App.KL.Game.Skill>
+  [
+    App.KL.Game.Skill.Move.skill
+  ]

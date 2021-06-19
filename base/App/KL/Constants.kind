@@ -20,7 +20,7 @@ App.KL.Constants.draft_center_y : U32
   50
 
 App.KL.Constants.round_time: U64
-  60
+  64
 
 // TODO: Randomize or change it every time you build
 App.KL.Constants.room : String

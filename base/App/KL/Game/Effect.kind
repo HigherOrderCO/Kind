@@ -5,11 +5,32 @@ App.KL.Game.Effect(A: Type): Type
    App.KL.Game.Effect.Result(A))
 
 type App.KL.Game.Effect.Result <A: Type> {
-  new(
-    value: A
-    board: App.KL.Game.Board
-    //futures: List(App.KL.Board.Future)
-    //indicators: NatMap<App.KL.Game.Indicator>
-  )
+  new(value: A, board: App.KL.Game.Board)
 }
 
+App.KL.Game.Effect.monad: Monad(App.KL.Game.Effect)
+  Monad.new<App.KL.Game.Effect>(App.KL.Game.Effect.bind, App.KL.Game.Effect.pure)
+
+App.KL.Game.Effect.bind<A: Type, B: Type>(effect: App.KL.Game.Effect<A> next: A -> App.KL.Game.Effect<B>): App.KL.Game.Effect<B>
+  (center, target, map)
+  case effect(center, target, map) as result_a {
+    new: case next(result_a.value)(center, target, result_a.board) as result_b {
+      new:
+        value = result_b.value
+        map = result_b.board
+        App.KL.Game.Effect.Result.new<B>(value, map)
+    }
+  }
+
+App.KL.Game.Effect.pure<A: Type>(value: A): App.KL.Game.Effect<A>
+  (center, target, map)
+  App.KL.Game.Effect.Result.new<A>(value, map)
+
+App.KL.Game.Effect.run<A: Type>(
+  effect: App.KL.Game.Effect<A>
+  center: Hexagonal.Axial
+  target: Hexagonal.Axial
+  game: App.KL.Game
+): App.KL.Game
+  open effect(center, target, game@board) as result
+  game@board <- result.board

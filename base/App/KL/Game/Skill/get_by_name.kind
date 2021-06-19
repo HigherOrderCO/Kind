@@ -1,0 +1,5 @@
+App.KL.Game.skill.get_by_name(name: String): Maybe<App.KL.Game.Skill>
+  Map.get!(name, App.KL.Game.Skill.get_by_name.map)
+
+App.KL.Game.Skill.get_by_name.map: Map<App.KL.Game.Skill>
+  Map.from_list!(List.map!!((x) {x@name, x}, App.KL.Game.Skill.list))

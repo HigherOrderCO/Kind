@@ -14,7 +14,12 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "align-items": "center",
     "position": "relative"
   }>
-    <div>"Time: " | U64.show(game@tick)</div>
+    <div>
+      String.join(" | ", [
+        "Time: " | Nat.show(U64.to_nat(App.KL.Constants.round_time - game@tick % App.KL.Constants.round_time))
+        "Turn: " | Nat.show(U64.to_nat(game@tick / App.KL.Constants.round_time))
+      ])
+    </div>
     <div>{ 
       let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
       let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))

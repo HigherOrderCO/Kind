@@ -1,10 +1,6 @@
 type App.KL.Game.Skill {
 	new(
   	name: String
-		range: I32
-    ap_cost: I32
 		effect: App.KL.Game.Effect<Unit>
-		key: Char
 	)
 }
-

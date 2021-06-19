@@ -6,7 +6,5 @@ App.KL.Game.Phase.Play.post(
   game: App.KL.Game
 ): App.KL.Game
   case event {
-    cast: 
-      //log("got cast " | addr | " " | Char.to_string(event.letter))
-      game@casts <- App.KL.Game.Cast.push(addr, event.target, event.letter, game@casts)
+    cast: game@casts <- App.KL.Game.Cast.push(addr, event.target, event.letter, game@casts)
   }

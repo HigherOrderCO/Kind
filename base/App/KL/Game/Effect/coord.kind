@@ -1,0 +1,7 @@
+App.KL.Game.Effect.coord.get_center: App.KL.Game.Effect<Hexagonal.Axial>
+  (center, target, map)
+  App.KL.Game.Effect.Result.new!(center, map)
+
+App.KL.Game.Effect.coord.get_target: App.KL.Game.Effect<Hexagonal.Axial>
+  (center, target, map)
+  App.KL.Game.Effect.Result.new!(target, map)
