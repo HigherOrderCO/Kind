@@ -1,4 +1,5 @@
 Test: _
   // let hex = Crypto.Keccak.hash("abcdef")
   // hex
-  TestSuite.show.check_fail(String.test.to_hex)
+  log(TestSuite.show.check_fail(String.test.to_hex))
+  ""
