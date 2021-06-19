@@ -16,7 +16,7 @@ App.KL.Game.Effect.move: App.KL.Game.Effect<Unit>
             else
               let board = App.KL.Game.Board.del_creature(center, board)
               let board = App.KL.Game.Board.set_creature(target, creature.value, board)
-              App.KL.Game.Effect.Board.set(board)
+              App.KL.Game.Effect.board.set(board)
         }
     }
   }
