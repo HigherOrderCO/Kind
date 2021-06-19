@@ -16,7 +16,6 @@ String.test.log(name: String, expected: String, got: String): TestSuite
     if String.eql(expected, got) 
     then Maybe.none! 
     else Maybe.some!(TestSuite.log(name, expected, got))
-  log("expcted: "|expected|" got "|got)
   TestSuite.unit(name, res)
 
 String.test.to_hex.0: TestSuite
