@@ -7,20 +7,26 @@ type App.KL.Game.State.Local {
   new(
     user: String
     room: String
-    casts: Maybe<App.KL.Game.Casts>
+    preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
   )
 }
+
+App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Local
+  let preview = App.KL.Game.Cast.Preview.new(Hexagonal.Axial.BBL.new!, Hexagonal.Axial.BBL.new!)
+  let mouse = {0,0}
+  App.KL.Game.State.Local.new(user, room, preview, mouse)
 
 // Global State
 // ============
 
 type App.KL.Game {
   new(
+    tick: U64
     phase: App.KL.Game.Phase
     players: Map<App.KL.Game.Player>
     board: App.KL.Game.Board
-    tick: U64
+    casts: List<App.KL.Game.Cast>
   )
 }
 
@@ -35,7 +41,8 @@ App.KL.Game.start: App.KL.Game
   let players = Map.new!
   let board = Hexagonal.Axial.BBL.new!
   let tick = 0#64
-  App.KL.Game.new(phase, players, board, tick)
+  let casts = []
+  App.KL.Game.new(tick, phase, players, board, casts)
 
 // Render function
 // ===============
@@ -101,4 +108,3 @@ App.KL.Game.post(
     draft draft : App.KL.Game.Phase.Draft.post(time, room, addr, event.event, game)
     play  play  : App.KL.Game.Phase.Play.post(time, room, addr, event.event, game)
   } default game
-

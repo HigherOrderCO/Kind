@@ -1,0 +1,43 @@
+type App.KL.Game.Cast {
+  new(player: String, target: Hexagonal.Axial, letter: Char)
+}
+
+type App.KL.Game.Cast.Preview {
+  new(
+    areas: Hexagonal.Axial.BBL<App.KL.Game.Indicator>
+    picks: Hexagonal.Axial.BBL<Char>
+  )
+}
+
+App.KL.Game.Cast.push(
+  player: String
+  target: Hexagonal.Axial
+  letter: Char
+  casts: List<App.KL.Game.Cast>
+): List<App.KL.Game.Cast>
+  App.KL.Game.Cast.new(player, target, letter) & casts
+  //let player_casts = casts{player} <> Hexagonal.Axial.BBL.new!
+  //let player_casts = Hexagonal.Axial.BBL.insert!(target, letter, player_casts)
+  //casts{player} <- player_casts
+
+App.KL.Game.Cast.picks_of(player: String, casts: List<App.KL.Game.Cast>): Hexagonal.Axial.BBL<Char>
+  let map = Hexagonal.Axial.BBL.new!
+  for cast in casts with map:
+    open cast
+    if player =? cast.player then 
+      Hexagonal.Axial.BBL.insert!(cast.target, cast.letter, map)
+    else
+      map
+  map
+  
+  
+
+//App.KL.Game.Cast.to_list(casts: App.KL.Game.Cast): List<App.KL.Game.Cast.Pick>
+  //let list = []
+  //for player_casts in Map.to_list!(casts) with list:
+    //let {player, casts} = player_casts
+    //for target_letter in Hexagonal.Axial.BBL.to_list!(casts) with list:
+      //let {target, letter} = target_letter
+      //App.KL.Game.Cast.Pick.new(player, target, letter) & list
+    //list
+  //list

@@ -27,18 +27,18 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
 
 // draw canvas
 App.KL.Game.Phase.Play.draw.canvas(
-  img: VoxBox,
-  local: App.KL.Game.State.Local,
+  img: VoxBox
+  local: App.KL.Game.State.Local
   game: App.KL.Game
 ): VoxBox
-  let img = App.KL.Game.Phase.Play.draw.board(game@board, local@casts, local@mouse, img) 
+  let img = App.KL.Game.Phase.Play.draw.board(game@board, local@preview, local@mouse, img) 
   let img = App.KL.Game.Phase.Play.draw.cursor(local@mouse, img)
   img
 
 // draw canvas board
 App.KL.Game.Phase.Play.draw.board(
   map: App.KL.Game.Board
-  casts: Maybe<App.KL.Game.Casts>
+  preview: App.KL.Game.Cast.Preview
   mouse: Pair<U32, U32>
   img: VoxBox
 ): VoxBox
@@ -46,7 +46,7 @@ App.KL.Game.Phase.Play.draw.board(
   mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   for pos in map with img:
     {coord, tile} = pos
-    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, casts, coord, mouse_coord, img)
+    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview, coord, mouse_coord, img)
     img = App.KL.Game.Phase.Play.draw.tile.creature(tile@creature, coord, img)
     img
   img
@@ -63,17 +63,17 @@ App.KL.Game.Phase.Play.draw.cursor(
 // draws tile terrain
 App.KL.Game.Phase.Play.draw.tile.terrain(
   terrain: App.KL.Game.Terrain,
-  casts: Maybe<App.KL.Game.Casts>
+  preview: App.KL.Game.Cast.Preview
   tile_coord: Hexagonal.Axial
   mouse_coord: Hexagonal.Axial
   img: VoxBox
 ): VoxBox
-  indicator = App.KL.Game.Phase.Play.draw.tile.terrain.indicator(tile_coord, mouse_coord, casts)
+  indicator = App.KL.Game.Phase.Play.draw.tile.terrain.indicator(tile_coord, mouse_coord, preview)
   {i, j} = App.KL.Game.Phase.Play.draw.centralize(tile_coord)
   field = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   field_drawing = field@draw(terrain, indicator)
   tile_drawing = VoxBox.Draw.image(i, j, 0#32, field_drawing, img)
-  tile_drawing = App.KL.Game.Phase.Play.draw.letter(tile_coord, casts, tile_drawing)
+  tile_drawing = App.KL.Game.Phase.Play.draw.letter(tile_coord, preview, tile_drawing)
   tile_drawing
 
 // draws tile creature if any
@@ -100,17 +100,16 @@ App.KL.Game.Phase.Play.draw.tile.creature(
 
 App.KL.Game.Phase.Play.draw.letter(
   tile_coord: Hexagonal.Axial
-  casts: Maybe<App.KL.Game.Casts>
+  preview: App.KL.Game.Cast.Preview
   img: VoxBox
 ): VoxBox
-  without casts: img
-  open casts
-  case Hexagonal.Axial.BBL.get!(tile_coord, casts.picks) as got {
+  open preview
+  case Hexagonal.Axial.BBL.get!(tile_coord, preview.picks) as got {
     none: img
     some: 
       screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       {cx, cy} = App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord)
-      VoxBox.Draw.text(got.value, PixelFont.black, Pos32.new(cx,cy,0u), img)
+      VoxBox.Draw.text(Char.to_string(got.value), PixelFont.black, Pos32.new(cx,cy,0u), img)
   }
 
 App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
@@ -119,13 +118,11 @@ App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pai
 App.KL.Game.Phase.Play.draw.tile.terrain.indicator(
   tile_coord: Hexagonal.Axial
   mouse_coord: Hexagonal.Axial
-  casts: Maybe<App.KL.Game.Casts>
+  preview: App.KL.Game.Cast.Preview
 ): App.KL.Game.Indicator
   let indicator = App.KL.Game.Indicator.background
-  without casts: indicator
-  open casts
-  without casts.areas: indicator
-  case Hexagonal.Axial.BBL.get!(tile_coord, casts.areas) as got {
+  open preview
+  case Hexagonal.Axial.BBL.get!(tile_coord, preview.areas) as got {
     none: indicator
     some: got.value
   }

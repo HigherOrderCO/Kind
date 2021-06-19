@@ -1,4 +1,5 @@
 type App.KL.Game.Phase.Play.Event {
+  cast(letter: Char, target: Hexagonal.Axial)
   // Play events
   //start_game  ( players: List<App.Kaelin.Player> )
   // Will store draft info (player / hero / team)
@@ -16,3 +17,6 @@ type App.KL.Game.Phase.Play.Event {
   //draft_ready  ( ready: U8)
   //control_map  
 } deriving (serializer, deserializer)
+
+App.KL.Game.Phase.Play.Event.cast.serial(letter: Char, target: Hexagonal.Axial): String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.play(App.KL.Game.Phase.Play.Event.cast(letter, target))))
