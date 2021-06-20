@@ -1,0 +1,81 @@
+Crypto.test.keccak: TestSuite
+  TestSuite.many("Crypto.keccak", [
+    Crypto.test.keccak.0, Crypto.test.keccak.1, Crypto.test.keccak.2,
+    Crypto.test.keccak.3, Crypto.test.keccak.4, Crypto.test.keccak.5,
+    Crypto.test.keccak.6, Crypto.test.keccak.7, Crypto.test.keccak.8
+  ])
+
+// Reference tests using NodeJS and 
+// https://emn178.github.io/online-tools/keccak_256.html
+
+//TODO: check the code
+Crypto.test.keccak.0: TestSuite
+  let test = "    "
+  let got = Crypto.Keccak.hash(test)
+  let exp = "e4619842b4a1b6bc9159b355799065d116c3ef9ad38b87792ac919ad9c76307e"
+  let name = "0"
+  TestSuite.log.string(name, test, exp, got)
+
+// Hash for "abcedf"
+Crypto.test.keccak.1: TestSuite
+  let test = "abcedf"
+  let got = Crypto.Keccak.hash(test)
+  let exp = "2b75518380cd2f8501390abe8dd833e719c0acc7bda96b3dfca9e22a40e72f7b"
+  let name = "1"
+  TestSuite.log.string(name, test, exp, got)
+
+// Empty string
+Crypto.test.keccak.2: TestSuite
+  let test = ""
+  let got = Crypto.Keccak.hash(test)
+  let exp = "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+  let name = "2"
+  TestSuite.log.string(name, test, exp, got)
+
+// Hash with acentuation
+Crypto.test.keccak.3: TestSuite
+  let test = "áõü"
+  let got = Crypto.Keccak.hash(test)
+  let exp = "7822f57468f6ac6599b7cf84b72788e3302523158e8bf791d000551d5bd3181e"
+  let name = "3"
+  TestSuite.log.string(name, test, exp, got)
+
+// Hash with special characters
+Crypto.test.keccak.4: TestSuite
+  let test = "$&#\;{+!"
+  let got = Crypto.Keccak.hash(test)
+  let exp = "215b0eda8940cb8d2448e3fb15f9c1f6e7872a68f86085a4d941df82492a33e7"
+  let name = "4"
+  TestSuite.log.string(name, test, exp, got)
+
+// Hash with 2 bytes characters
+Crypto.test.keccak.5: TestSuite
+  let test = "¢Ω"
+  let got = Crypto.Keccak.hash(test)
+  let exp = "a439cbd097de2c56bdd128ae5857b8692ef2f0df1a6a7decdc6a934007b456db"
+  let name = "5"
+  TestSuite.log.string(name, test, exp, got)
+
+// Hash with 3 bytes characters
+Crypto.test.keccak.6: TestSuite
+  let test = "ह€한"
+  let got = Crypto.Keccak.hash(test)
+  let exp = "76e0e32e2cc3045de2b9aad5f88f05f5e7806b58720681479cecdbd4fc96964e"
+  let name = "6"
+  TestSuite.log.string(name, test, exp, got)
+
+// Hash
+Crypto.test.keccak.7: TestSuite
+  let test = "😺𐍈"
+  let got = Crypto.Keccak.hash(test)
+  let exp = "76e0e32e2cc3045de2b9aad5f88f05f5e7806b58720681479cecdbd4fc96964e"
+  let name = "7"
+  TestSuite.log.string(name, test, exp, got)
+
+// Hash with special characters
+Crypto.test.keccak.8: TestSuite
+  let test = "øπ∫©∑≈ç"
+  let got = Crypto.Keccak.hash(test)
+  let exp = "114ff12f4f053addb8124f4e650418453b03b3401342b761adb323e828b37e7a"
+  let name = "8"
+  TestSuite.log.string(name, test, exp, got)

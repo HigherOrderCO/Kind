@@ -1,5 +1,4 @@
 Crypto.Keccak.hash(string: String): String
-  // FIXME: check if it works
   let buf8 = Buffer8.from_hex(String.to_hex(string))
   let hash = Crypto.Keccak.hash.bytes(buf8)
   Buffer8.to_hex(hash)
