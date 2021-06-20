@@ -1,0 +1,9 @@
+// Receives a string and return its hexadecimal form
+// Ex: String.to_hex("abcdef") == "616263646566"
+String.to_hex(str: String): String
+  case str {
+    nil : String.nil
+    cons:
+      let hex = U16.to_hex.show(str.head)
+      String.concat(hex, String.to_hex(str.tail))
+  }

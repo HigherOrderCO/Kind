@@ -1,0 +1,10 @@
+TestSuite.show(t: TestSuite): IO(Unit)
+  case t {
+    test: IO {
+      IO.print(TestSuite.show.test(t.name, t.result)|"\n")
+    }
+    suite: IO {
+      for x in t.list:
+        TestSuite.show(x)
+    }
+  }

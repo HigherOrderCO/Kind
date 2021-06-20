@@ -1,0 +1,85 @@
+// String.test.to_hex.0: _
+//   def hex = String.to_hex("abcdef")
+//   refl :: String.eql(hex, "616263646566") == true
+
+// Tests using NodeJS as reference
+String.test.to_hex: TestSuite
+  TestSuite.many("String.to_hex", [
+    String.test.to_hex.0, String.test.to_hex.1, String.test.to_hex.2,
+    String.test.to_hex.3, String.test.to_hex.4, String.test.to_hex.5,
+    String.test.to_hex.6, String.test.to_hex.7, String.test.to_hex.8,
+    String.test.to_hex.9
+  ])
+
+String.test.to_hex.0: TestSuite
+  let test = "abcdef"
+  let hex = String.to_hex(test)
+  let exp = "616263646566"
+  let name = "0"
+  TestSuite.log.string(name, test, exp, hex)
+
+String.test.to_hex.1: TestSuite
+  let test = ""
+  let hex = String.to_hex(test)
+  let exp = ""
+  let name = "1"
+  TestSuite.log.string(name, test, exp, hex)
+
+String.test.to_hex.2: TestSuite
+  let test = "á"
+  let hex = String.to_hex(test)
+  let exp = "c3a1"
+  let name = "2"
+  TestSuite.log.string(name, test, exp, hex)
+
+String.test.to_hex.3: TestSuite
+  let test = "ü"
+  let hex = String.to_hex(test)
+  let exp = "c3bc"
+  let name = "3"
+  TestSuite.log.string(name, test, exp, hex)
+
+String.test.to_hex.4: TestSuite
+  let test = "õ"
+  let hex = String.to_hex(test)
+  let exp = "c3b5"
+  let name = "4"
+  TestSuite.log.string(name, test, exp, hex)
+
+String.test.to_hex.5: TestSuite
+  let test = "1234567890"
+  let hex = String.to_hex(test)
+  let exp = "31323334353637383930"
+  let name = "5"
+  TestSuite.log.string(name, test, exp, hex)
+
+String.test.to_hex.6: TestSuite
+  let test = "{%$@"
+  let hex = String.to_hex(test)
+  let exp = "7b252440"
+  let name = "6"
+  TestSuite.log.string(name, test, exp, hex)
+
+// 2 bytes UTF-8
+String.test.to_hex.7: TestSuite
+  let test = "¢"
+  let hex = String.to_hex(test)
+  let exp = "c2a2"
+  let name = "7"
+  TestSuite.log.string(name, test, exp, hex)
+
+// 3 bytes UTF-8
+String.test.to_hex.8: TestSuite
+  let test = "ह€"
+  let hex = String.to_hex(test)
+  let exp = "e0a4b9e282ac"
+  let name = "8"
+  TestSuite.log.string(name, test, exp, hex)
+
+// 4 bytes UTF-8
+String.test.to_hex.9: TestSuite
+  let test = "𐍈"
+  let hex = String.to_hex(test)
+  let exp = "f0908d88"
+  let name = "9"
+  TestSuite.log.string(name, test, exp, hex)

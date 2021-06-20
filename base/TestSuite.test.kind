@@ -1,0 +1,11 @@
+TestSuite.test: _
+  let res = ""
+  let tests     = [
+    TestSuite.show.check_fail(Crypto.test.keccak),
+    TestSuite.show.check_fail(String.test.all)
+  ]
+  for test in tests with res:
+    log(test)
+    res|test
+  
+  res

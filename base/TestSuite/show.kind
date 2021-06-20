@@ -1,0 +1,43 @@
+TestSuite.show(t: TestSuite, depth: Nat): String
+  let ind = ""
+  for n from 0 to depth with ind:
+    ind|"  "
+  case t {
+    unit:
+      ind|TestSuite.show.test(t.name, t.result)|"\n "
+    many:
+      let result = ind|t.name|"\n "
+      for x in t.list with result:
+        result|TestSuite.show(x, 1 + depth)
+      result
+  }
+
+TestSuite.show.test(name: String, result: Maybe<String>): String
+  String.concat(name, case result {
+    none: ": pass"
+    some: ": fail"
+  })
+
+TestSuite.show.check_fail(s: TestSuite): String
+  case s {
+    unit: 
+      case s.result as res {
+        none: ""
+        some: res.value
+      }
+    many: 
+      let result = "\n--> "|s.name|" failed in: \n"
+      for test in s.list with result:
+        result|TestSuite.show.check_fail(test)
+      result
+  }
+  
+TestSuite.log(name: String, test: String, expected: String, got: String): String
+  "\n["|name|"] test: "|test|"\nexpected: "|expected|"\ngot: "|got
+
+TestSuite.log.string(name: String, test: String, expected: String, got: String): TestSuite
+  let res = 
+    if String.eql(expected, got) 
+    then Maybe.none! 
+    else Maybe.some!(TestSuite.log(name, test, expected, got))
+  TestSuite.unit(name, res)
