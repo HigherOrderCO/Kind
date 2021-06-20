@@ -1,0 +1,36 @@
+// The 'Arena' board
+App.KL.Game.Board.arena: App.KL.Game.Board
+  board_size = App.KL.Constants.board_size
+  
+  board  = Hexagonal.Axial.BBL.new<App.KL.Game.Tile>
+  
+  width  = (board_size * 2) + 1
+  width  = I32.to_u32(width)
+  
+  height = (board_size * 2) + 1
+  height = I32.to_u32(height)
+  // TODO: Define this elsewhere?
+  // Defines all possible images inside a tile
+  // terrain_img = App.KL.Game.Resources.terrains
+
+  new_terrain = App.KL.Game.Terrain.new(0)
+  new_terrain = App.KL.Game.Entity.terrain(new_terrain)
+
+  //// loops through the half of the board_size
+  for j : U32 from 0 to height with board:
+    for i : U32 from 0 to width with board: 
+      // generate int axial coordinate
+      coord_i = I32.sub(U32.to_i32(i),  board_size) // i - board_size
+      coord_j = I32.sub(U32.to_i32(j),  board_size) // j - board_size
+      coord   = Hexagonal.Axial.new(coord_i, coord_j)
+      inside  = Hexagonal.Axial.inside(coord, App.KL.Constants.board_size)
+      
+      case inside {
+        true:
+          App.KL.Game.Board.push(coord, new_terrain, board)
+        false:
+          board
+      }
+    board
+  board
+

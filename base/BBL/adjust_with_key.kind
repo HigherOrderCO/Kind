@@ -1,0 +1,27 @@
+BBL.adjust_with_key<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  f   : K -> V -> V, 
+  k   : K, 
+  map : BBL<K,V> 
+) : BBL<K,V>
+  case map {
+   tip: map,
+   bin:  
+    case cmp(k, map.key) {
+    // k < map.key, we check the left subtree
+     ltn:  
+      let new_left = BBL.adjust_with_key<K,V>(cmp, f, k, map.left)
+      BBL.node<K,V>(map.key, map.val, new_left, map.right),
+    
+    // we found the key we were looking for, so just
+    // apply the function
+     eql:  
+      let new_val = f(map.key, map.val)
+      BBL.node<K,V>(map.key, new_val, map.left, map.right),
+
+    // k > map.key, we check in the right subtree 
+     gtn:  
+      let new_right = BBL.adjust_with_key<K,V>(cmp, f, k, map.right)
+      BBL.node<K,V>(map.key, map.val, map.left, map.right)
+    }
+  }

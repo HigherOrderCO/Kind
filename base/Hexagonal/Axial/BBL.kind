@@ -1,0 +1,3 @@
+// Type for Balanced Binary Tree in an Hexagonal Axial environment
+Hexagonal.Axial.BBL<A : Type> : Type
+  BBL<Hexagonal.Axial, A>

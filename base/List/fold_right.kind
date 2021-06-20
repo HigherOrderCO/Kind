@@ -1,5 +1,0 @@
-List.fold_right(A : Type, B : Type, b : B, f : A -> B -> B, xs : List<A>) : B
-  case xs { 
-    nil : b
-    cons : List.fold_right(A, B, f(xs.head, b), f, xs.tail)
-  }

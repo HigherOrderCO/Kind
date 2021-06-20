@@ -1,0 +1,19 @@
+// Returns the minor path between 2 coords
+Hexagonal.Axial.minimum(
+  origin: Hexagonal.Axial,
+  goal: Hexagonal.Axial
+): Maybe(Hexagonal.Axial)
+
+  neighborhood = Hexagonal.Axial.moore(origin)
+sort = ((x, y) 
+  case y {
+    none: 
+      some(x)
+    some: 
+     shorter = Hexagonal.Axial.shorter(goal, x, y.value)
+      if shorter then
+        some(x)
+      else 
+        y
+    }) :: Hexagonal.Axial -> Maybe(Hexagonal.Axial) -> Maybe(Hexagonal.Axial)
+  List.foldr!!(none, sort, neighborhood)

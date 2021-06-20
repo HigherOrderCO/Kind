@@ -9,7 +9,9 @@ type Kind.Comp.Grammar {
     local_definition: (name: String, expr: String, body: String) -> String
     global_function: (name: String, args: List(String), body: String) -> String
     global_application: (name: String, args: List(String)) -> String
+    select: (term: String, cse_body_list: List<Pair<String, String>>) -> String // expression that works like a scheme case
     string_literal: (str: String) -> String
+    nat: (nat: Nat) -> String
     module: (name: String, exports: List(String), defs: String) -> String
     program: (main: String, defs: String) -> String
   )

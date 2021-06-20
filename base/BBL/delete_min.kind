@@ -1,0 +1,10 @@
+BBL.delete_min<K: Type, V: Type>(map: BBL<K,V>): BBL<K,V>
+  case map {
+    tip: map,
+    bin: case map.left {
+      tip: map.right,
+      bin:  
+        let new_left = BBL.delete_min<K,V>(map.left)
+        BBL.balance<K,V>(map.key, map.val, new_left, map.right)
+    }
+  }

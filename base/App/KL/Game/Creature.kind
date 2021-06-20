@@ -1,0 +1,10 @@
+type App.KL.Game.Creature {
+  new(
+    player: Maybe<String>
+    hero: App.KL.Game.Hero
+    team: App.KL.Game.Team
+    hp: I32
+    ap: I32
+  )
+}
+

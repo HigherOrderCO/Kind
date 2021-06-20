@@ -1,0 +1,2 @@
+App.KL.Game.Skill.Move.skill: App.KL.Game.Skill
+  App.KL.Game.Skill.new("move", App.KL.Game.Effect.move)

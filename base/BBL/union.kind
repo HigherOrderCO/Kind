@@ -1,0 +1,23 @@
+BBL.union<K: Type, V: Type>(
+  cmp  : K -> K -> Cmp,
+  map_a: BBL<K,V>, 
+  map_b: BBL<K,V>
+) : BBL<K,V>
+  
+  case map_a {
+    tip: case map_b {
+      tip: BBL.tip<K,V>,
+      bin: map_b
+    },
+    bin: case map_b {
+      tip: map_a,
+      bin:  
+        let key   = map_b.key 
+        let val   = map_b.val 
+        let ltn   = BBL.split_ltn<K,V>(cmp, map_b.key, map_a)
+        let gtn   = BBL.split_gtn<K,V>(cmp, map_b.key, map_a)
+        let left  = BBL.union<K,V>(cmp, ltn, map_b.left)
+        let right = BBL.union<K,V>(cmp, gtn, map_b.right)
+        BBL.concat3<K,V>(cmp, key, val, left, right)
+    }
+  }

@@ -1,0 +1,5 @@
+//TODO : Add ALIAS to Hexagonal.Axial.from_screen_xy and Hexagonal.Axial.from_screen_xy
+//Type for Axial coordinates in an Hexagon
+type Hexagonal.Axial { 
+  new(i: I32, j: I32)
+} deriving (serializer, deserializer, stringifier)

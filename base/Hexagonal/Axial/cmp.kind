@@ -1,0 +1,8 @@
+Hexagonal.Axial.cmp(
+  x: Hexagonal.Axial,
+  y: Hexagonal.Axial
+): Cmp
+  c = I32.cmp(x@i, y@i)
+  case c {
+    eql: I32.cmp(x@j, y@j)
+  } default c

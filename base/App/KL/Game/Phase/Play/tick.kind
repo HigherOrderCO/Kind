@@ -1,0 +1,9 @@
+App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
+  let game = game@tick <- game@tick + 1
+  if U64.eql(U64.mod(tick, App.KL.Constants.round_time), 0) then 
+    let casts = App.KL.Game.Cast.sort(game@casts)
+    for cast in casts with game:
+      App.KL.Game.Cast.apply(cast, game)
+    game@casts <- []
+  else
+    game

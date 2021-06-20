@@ -66,6 +66,9 @@ Kind.Comp.Target.Scheme.string_literal(str: String): String
       ) | Kind.Comp.Target.Scheme.string_literal(str.tail)
   }
 
+Kind.Comp.Target.Scheme.nat(nat: Nat): String
+  Nat.show(nat)
+
 Kind.Comp.Target.Scheme.module(name: String, exports: List(String), defs: String): String
   let code = "#!chezscheme\n(library ("|name|") (export"
   for export in Kind.Comp.Target.Scheme.exports with code:
@@ -81,6 +84,13 @@ Kind.Comp.Target.Scheme.program(main: String, defs: String): String
   let code = defs|"(run_kind "|main|")"
   code
 
+Kind.Comp.Target.Scheme.select(term: String, cse_body_list: List<Pair<String, String>>): String
+  let cses = ""
+  for cse_body in cse_body_list with cses:
+    {cse, body} = cse_body
+    "("|cse|" "|body|")"
+  "(case "|term|" "|cses|")"
+
 Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(
     Kind.Comp.Target.Scheme.null
@@ -92,7 +102,9 @@ Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
     Kind.Comp.Target.Scheme.local_definition
     Kind.Comp.Target.Scheme.global_function
     Kind.Comp.Target.Scheme.global_application
+    Kind.Comp.Target.Scheme.select
     Kind.Comp.Target.Scheme.string_literal
+    Kind.Comp.Target.Scheme.nat
     Kind.Comp.Target.Scheme.module
     Kind.Comp.Target.Scheme.program
   )

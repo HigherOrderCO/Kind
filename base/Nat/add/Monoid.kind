@@ -1,0 +1,2 @@
+Nat.add.Monoid: Monoid(Nat)
+  Monoid.new!(Nat.add, Nat.zero, Nat.add.assoc, Nat.add.zero_left, Nat.add.zero_right)

@@ -11,35 +11,32 @@ function list_to_array(list) {
   return arr;
 }
 
-function map_to_object(map, key = "", obj = {}) {
+function map_to_object(map, obj = {}) {
   switch (map._) {
-    case "BitsMap.tie":
-      switch (map.val._) {
-        case "Maybe.none": break;
-        case "Maybe.some": obj[bits_to_string(key)] = map.val.value; break;
-      }
-      map_to_object(map.lft, key + "0", obj);
-      map_to_object(map.rgt, key + "1", obj);
+    case "BBL.bin":
+      obj[map.key] = map.val;
+      map_to_object(map.left, obj);
+      map_to_object(map.right, obj);
       break;
-    case "BitsMap.new":
+    case "BBL.tip":
       break;
   }
   return obj;
 }
 
-function bits_to_string(bits) {
-  var str = "";
-  for (var i = 0; i < bits.length; i += 16) {
-    var binary = bits.slice(i, i + 16).split("").reverse().join("");
-    str += String.fromCharCode(parseInt(binary, 2));
-  }
-  return str;
-}
+// function bits_to_string(bits) {
+//   var str = "";
+//   for (var i = 0; i < bits.length; i += 16) {
+//     var binary = bits.slice(i, i + 16).split("").reverse().join("");
+//     str += String.fromCharCode(parseInt(binary, 2));
+//   }
+//   return str;
+// }
 
 
 module.exports = {
   is_valid_hex,
   list_to_array,
   map_to_object,
-  bits_to_string,
+  // bits_to_string,
 }

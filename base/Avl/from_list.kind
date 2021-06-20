@@ -1,5 +1,0 @@
-Avl.from_list<K: Type, V: Type>(
-  cmp : K -> K -> Cmp, 
-  xs  : List<Pair<K,V>>
-) : Avl<K,V>
-  Avl.from_list.go<K,V>(cmp, Avl.tip<K,V>, xs)

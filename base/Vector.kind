@@ -1,4 +1,4 @@
-// A vector definition that computes your size before which gives the possible constructors before pattern matching.
+// A vector definition that computes your size that gives the possible constructors before pattern matching.
 
 Vector(A: Type, len: Nat): Type
   case len {

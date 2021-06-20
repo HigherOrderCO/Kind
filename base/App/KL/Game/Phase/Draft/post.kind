@@ -1,0 +1,56 @@
+App.KL.Game.Phase.Draft.post(
+  time: U64
+  room: String
+  addr: String
+  event: App.KL.Game.Phase.Draft.Event
+  game: App.KL.Game
+): App.KL.Game
+  case event {
+    void: game
+
+    join_room:
+      log("- join_room")
+      let player = Map.get!(addr, game@players)
+      let game = case player {
+        none: game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), game@players) 
+        some: game@players <- Map.set!(addr, player.value, game@players) 
+      }
+      game
+
+    set_team:
+      log("- set_team")
+      game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false), game@players)
+
+    set_init_pos:
+      log("- set_init_pos")
+      Maybe {
+        let players     = game@players
+        get player      = players{addr}
+        let player_list = Map.to_list!(players)
+        let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
+        let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
+        if is_occupied then none else some(game)
+      } <> game
+
+    set_hero: // TODO: Only check in your team's list to see if the hero is already picked
+      log("- set_hero")
+      Maybe {
+        let players     = game@players
+        get player      = players{addr}
+        let player_list = Map.to_list!(players)
+        let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
+        let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
+        if is_picked then none else some(game)
+      } <> game 
+        
+    set_ready:
+      log("- set_ready")
+      Maybe {
+        let players = game@players
+        get player  = players{addr}
+        let ready   = U8.eql(event.ready, 1)
+        let game    = game@players <- players{addr} <- player@ready <- ready // New_Ready -> Player -> Players -> Game
+        some(game)
+      } <> game
+              
+  }

@@ -1,0 +1,7 @@
+// Deletes a value in a BBL tree
+Hexagonal.Axial.BBL.delete<A : Type>(
+  key : Hexagonal.Axial,
+  map : Hexagonal.Axial.BBL<A>
+): Hexagonal.Axial.BBL<A>
+
+  BBL.delete!!(Hexagonal.Axial.cmp, key, map)

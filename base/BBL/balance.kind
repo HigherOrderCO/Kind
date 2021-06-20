@@ -1,0 +1,74 @@
+BBL.balance<K: Type, V: Type>(k: K, v: V, l: BBL<K,V>, r: BBL<K,V>): BBL<K,V>
+  let size_l             = BBL.size!!(l)
+  let size_r             = BBL.size!!(r)
+  let size_l_plus_size_r = U32.add(size_l, size_r)
+  let w_x_size_l         = U32.mul(BBL.w, size_l)
+  let w_x_size_r         = U32.mul(BBL.w, size_r)
+  // size_l_plus_size_r < 2 means that one subtree is empty and the
+  // other contains only one element, hence the tree cannot be balanced 
+  if U32.ltn(size_l_plus_size_r, 2#32) then 
+    BBL.node!!(k, v, l, r)
+  // size_r > w * size_l means the right subtree is too heavy
+  else if U32.gtn(size_r, w_x_size_l) then
+    case r {
+    // this is an impossible case because we already know that
+    // the right subtree is too heavy
+    // question: how to deal with it?
+     tip: BBL.node!!(k, v, l, r),
+     bin:  
+      let size_rl = BBL.size<K,V>(r.left)
+      let size_rr = BBL.size<K,V>(r.right)
+      // size_rl < size_rr means we should perform a single left rotation
+      if U32.ltn(size_rl, size_rr) then 
+        let new_key   = r.key 
+        let new_val   = r.val 
+        let new_left  = BBL.node!!(k, v, l, r.left)
+        let new_right = r.right 
+        BBL.node!!(new_key, new_val, new_left, new_right)
+      // size_rl > size_rr means we should perform a double left rotation
+      else 
+       // we need to branch on the left subtree of r in order to extract its components 
+       case r.left {
+        tip: BBL.node!!(k, v, l, r), // impossible case
+        bin:  
+         let new_key   = r.left.key
+         let new_val   = r.left.val 
+         let new_left  = BBL.node!!(k, v, l, r.left.left) 
+         let new_right = BBL.node!!(r.key, r.val, r.left.right, r.right)
+         BBL.node!!(new_key, new_val, new_left, new_right)
+       }
+    }
+
+  // size_l > w * size_r means the left subtree is too heavy  
+  else if U32.gtn(size_l, w_x_size_r) then 
+    case l {
+    // this is an impossible case because we already know that
+    // the left subtree is too heavy
+    // question: how to deal with it?
+     tip: BBL.node!!(k, v, l, r),
+     bin:  
+      let size_ll = BBL.size<K,V>(l.left)
+      let size_lr = BBL.size<K,V>(l.right)
+      // size_lr < size_lln means we should perform a single right rotation
+      if U32.ltn(size_lr, size_ll) then 
+        let new_key   = l.key 
+        let new_val   = l.val 
+        let new_left  = l.left
+        let new_right = BBL.node!!(k, v, l.right, r)
+        BBL.node!!(new_key, new_val, new_left, new_right)
+      // size_lr > size_ll means we should perform a double right rotation
+      else 
+        // we need to branch on the right subtree of l in order to 
+        // extract its components and move them to the right
+        case l.right {
+         tip: BBL.node!!(k, v, l, r), // impossible case 
+         bin:  
+          let new_key   = l.right.key
+          let new_val   = l.right.val 
+          let new_left  = BBL.node!!(l.key, l.val, l.left, l.right.left)
+          let new_right = BBL.node!!(k, v, l.right.right, r)
+          BBL.node!!(new_key, new_val, new_left, new_right)
+        }
+    }
+  else // neither subtrees are too heavy, no balancing is needed 
+    BBL.node!!(k, v, l, r)

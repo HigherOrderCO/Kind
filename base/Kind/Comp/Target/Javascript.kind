@@ -22,11 +22,11 @@ Kind.Comp.Target.Javascript.lambda(name: String, body: String): String
   "(("|Kind.Comp.Target.Javascript.name(name)|") => { return "|body|";})"
 
 Kind.Comp.Target.Javascript.application(func: String, argm: String): String
-  func|"("|argm|")"
+  "("|func|"("|argm|")"|")"
 
 Kind.Comp.Target.Javascript.local_definition(name: String, expr: String, body: String): String
-  "const "|Kind.Comp.Target.Javascript.name(name)|" = "|expr|";\n"
-  |body
+  "(() => {const "|Kind.Comp.Target.Javascript.name(name)|" = "|expr|";\n return "
+  |body|";})()"
 
 Kind.Comp.Target.Javascript.global_function(name: String, args: List<String>, body: String): String
   case args {
@@ -35,18 +35,17 @@ Kind.Comp.Target.Javascript.global_function(name: String, args: List<String>, bo
       |" = "|body|";\n"
     cons:
       "function "|Kind.Comp.Target.Javascript.name(name)|"$("
-      |String.join(",", args)|"){"|body|"};\n"
-      |Kind.Comp.Target.Javascript.nest_lambdas(name, args)
+      |String.join(",", args)|") { return "|body|"; }\n"
+      |Kind.Comp.Target.Javascript.nest_lambdas(name, args)|"\n"
   }
 
 Kind.Comp.Target.Javascript.global_application(name: String, args: List<String>): String
   // #TODO
-  Kind.Comp.Target.Javascript.name(name)
-  |"$("|String.join(",", args)|");"
+  Kind.Comp.Target.Javascript.name(name)|"$("|String.join(",", args)|")"
 
 Kind.Comp.Target.Javascript.nest_lambdas(name: String, args: List<String>): String
   let body = Kind.Comp.Target.Javascript.nest_lambdas.aux(name, args, args)
-  "(define " | name | " " | body | ")\n"
+  "const " | Kind.Comp.Target.Javascript.name(name) | " = " | body | ";\n"
 
 Kind.Comp.Target.Javascript.nest_lambdas.aux(fun: String, args: List<String>, rem_args: List<String>): String
   def this = Kind.Comp.Target.Javascript.nest_lambdas.aux(fun, args)
@@ -60,10 +59,10 @@ Kind.Comp.Target.Javascript.nest_lambdas.aux(fun: String, args: List<String>, re
 Kind.Comp.Target.Javascript.module(name: String, exports: List(String), defs: String): String
   def make_export = (n)
     "'"|n|"': "|Kind.Comp.Target.Javascript.name(n)
-  let ret = "module.exports = (function (){\n"|defs
-  let export_list = String.join(",\n",
+  let ret = "module.exports = (function (){ "|defs
+  let export_list = String.join(", ",
     List.map!!(make_export, exports))
-  let ret = ret|"return {\n"|export_list|"};\n})();"
+  let ret = ret|"return {"|export_list|"}; })();"
   ret
 
 Kind.Comp.Target.Javascript.program(main: String, defs: String): String
@@ -80,9 +79,19 @@ Kind.Comp.Target.Javascript.string_literal(str: String): String
       else if U16.gte(str.head, ' ') && U16.lte(str.head, '~') then
         Char.to_string(str.head)
       else
-        "\\x" | U16.show_hex(str.head) | ";"
+        "\\x" | String.pad_left(2, '0', U16.show_hex(str.head))
       ) | Kind.Comp.Target.Javascript.string_literal(str.tail)
   }
+
+Kind.Comp.Target.Javascript.nat(nat: Nat): String
+  Nat.show(nat)|"n"
+
+Kind.Comp.Target.Javascript.select(term: String, cse_body_list: List<Pair<String,String>>): String
+  let switch_body = ""
+  let switch_body = for cse_body in cse_body_list:
+    {cse, body} = cse_body
+    switch_body|"case "|cse|": return "|body|";\n"
+  "(() => { switch ("|term|") {\n"|switch_body|"} })()"
 
 Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(
@@ -95,7 +104,9 @@ Kind.Comp.Target.Javascript.grammar: Kind.Comp.Grammar
     Kind.Comp.Target.Javascript.local_definition
     Kind.Comp.Target.Javascript.global_function
     Kind.Comp.Target.Javascript.global_application
+    Kind.Comp.Target.Javascript.select
     Kind.Comp.Target.Javascript.string_literal
+    Kind.Comp.Target.Javascript.nat
     Kind.Comp.Target.Javascript.module
     Kind.Comp.Target.Javascript.program
   )
@@ -143,7 +154,7 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
         // Nat.zero
         {0, "0n"}
         // Nat.succ
-        {1, "($0 - 1n)"}
+        {1, "($0 + 1n)"}
       ]
       // Elim
       {"($0 === 0n)", [
@@ -163,7 +174,7 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
     u16: Kind.Comp.Native.new(
       // Inst
       [
-        {1, "(word_to_u16($0)"}
+        {1, "word_to_u16($0)"}
       ]
       // Elim
       {"true", [
@@ -211,15 +222,13 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
         {ctr_name, ctr_fields} = ctr
         let ctr_length = List.length!(ctr_fields)
         if Nat.gtn(ctr_length, 0) then
-          let range = List.range(ctr_length)
-          let range = List.map!!((n) "$"|Nat.show(n - 1), range)
-          let args = String.join(", ", range)
+          let fields = List.imap!!((idx, ctr_field) "'"|ctr_field|"': $"|Nat.show(idx), ctr_fields)
+          let fields = String.join(", ", fields)
           // TODO do it inline instead of calling the function?
-          (Kind.Comp.Target.Javascript.name(prim.name|"."|ctr_name)|"("|args|")") & insts
+          {ctr_length, ("({_:'"|prim.name|"."|ctr_name|"', "|fields|"})")} & insts
         else
-          Kind.Comp.Target.Javascript.name(prim.name|"."|ctr_name) & insts
-      let i_insts = List.imap!!((i, p) {i, p}, insts)
-      i_insts,
+          {0, "({_:'"|prim.name|"."|ctr_name|"'})"} & insts
+      List.reverse!(insts),
       // Elim
       {"$0._", 
         let cses = [] :: List<Pair<String, List<String>>>
@@ -228,8 +237,8 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
           let field_list = [] :: List<String>
           for field in ctr_fields with field_list:
              ("$0['"|field|"']") & field_list
-          {ctr_name, field_list} & cses
-        cses
+          {"'"|prim.name|"."|ctr_name|"'", List.reverse!(field_list)} & cses
+        List.reverse!(cses)
       })
   }
 
@@ -942,3 +951,4 @@ Kind.Comp.Target.Javascript.Language: Kind.Comp.Language
     Kind.Comp.Target.Javascript.optimizeds
     Kind.Comp.Target.Javascript.basics
   )
+

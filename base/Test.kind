@@ -1,8 +1,2 @@
 Test: _
-  // log(TestSuite.show.check_fail(String.test.to_hex))
-  // let hex = Crypto.Keccak.hash("abcdef")
-  let kec = TestSuite.show.check_fail(Crypto.test.keccak)
-  let str_hex = TestSuite.show.check_fail(Crypto.test.keccak)
-  // let kec = TestSuite.show(Crypto.test.keccak.2, 1)
-  log(kec)
-  ""
+  U64.show(1000#64)

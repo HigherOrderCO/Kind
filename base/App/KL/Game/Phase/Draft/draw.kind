@@ -1,0 +1,587 @@
+App.KL.Game.Phase.Draft.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+  //heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
+  open global
+  case global.game as game {
+    none: <div>"no game"</div>
+    some:
+      <div style={ 
+        "width": "100vw"
+        "height": "100vh"
+        "display": "flex"
+        "justify-content": "center"
+        "align-items": "center"
+      }>
+        {App.KL.Game.Phase.Draft.draw.main(game.value@players, local@room, local@user)}
+      </div>
+  }
+
+App.KL.Game.Phase.Draft.draw.main(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+  let player = players{user}
+  let normal = [App.KL.Game.Phase.Draft.draw.top(players, user),  App.KL.Game.Phase.draft.draw.bottom(players, room, user)]
+  let select = [App.KL.Game.Phase.Draft.draw.choose_team(players)]
+  let draw = 
+    case player {
+      none: [<div>"no player"</div>]
+      some:
+        let team = player.value@team
+        case team{
+          blue:   normal
+          red:    normal
+        }default  select
+
+    }
+  
+  <div style={ 
+    "width": "100vw"
+    "height": "100vh"
+    "display": "flex"
+    "flex-direction": "column"
+    "justify-content": "center"
+    "align-items": "center"
+    "font-size": "2rem"
+  }>
+    for div in draw: div
+  </div>
+  
+// CHOOSE TEAM SCREEN
+// ----------
+App.KL.Game.Phase.Draft.draw.choose_team(players: Map<App.KL.Game.Player>): DOM
+  <div style={ 
+    "width": "60%"
+    "height": "30%"
+    "display": "flex"
+    "flex-direction": "row"
+    "justify-content": "space-between"
+  }>
+    {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
+    {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
+  </div>
+
+// draft.blue and draft.red are the same function
+// the only thing that change is linear-gradient and id
+// the parameter players isnt used in both
+App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
+  let player_list   = Map.to_list!(players) // List<Pair<String, App.KL.Game.Player>>
+  let fun = 
+    (x)
+      let y = x@snd@team
+      App.KL.Game.Team.eql(y, team)
+  let player_count  = List.count!(fun, player_list) // Player count in respective team
+  let team_txt      = App.KL.Game.Phase.Draft.Team.show(team)
+  let gradient      = 
+    case team {
+      blue:     "linear-gradient(#38a5fa, #2081e0)" // blue
+      red:      "linear-gradient(#ff3537, #d60f10)" // red
+      neutral:  "linear-gradient(#f2f2f2, #e6e6e6)" // light gray - not used
+    }
+  
+  <button id = "T" | Nat.show(player_count) | team_txt style={ 
+    "width": "40%"
+    "height": "100%"
+    "background-image": gradient
+    "box-shadow": "2px -2px 2px black"
+    "font-size": "2rem"
+  }>
+    Nat.show(player_count) | "/3 Players"
+  </button>
+
+
+
+// TOP DRAFT LAYOUT
+// ==============================
+
+// draw top layout of draft screen
+// it contains position and card info about the player and allies
+App.KL.Game.Phase.Draft.draw.top(players: Map<App.KL.Game.Player>, user: String): DOM
+  // get team of user
+  let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  // choose color to show based on team
+  let color  = case team {
+    blue:   "linear-gradient(#3fbcf2, #3791d4)"
+    red:    "linear-gradient(#ff6666, #ff4d4d)"
+  }default  "linear-gradient(#94b8b8, #75a3a3)"
+
+  // mount top layout
+  <div style={ 
+    "width": "100%"
+    "height": "60%"
+    "display": "flex"
+    "background-image": color
+    "align-items": "center"
+    "justify-content": "center"
+  }>
+    <div style={  
+      "width": "100%"
+      "max-width": "1440px"
+      "height": "100%"
+      "display": "flex"
+      "background-image": color
+      "align-items": "center"
+      "justify-content": "center"
+    }>
+      {App.KL.Game.Phase.Draft.draw.coordinates(players, user)} // draw coord positions
+      {App.KL.Game.Phase.Draft.draw.cards(players, user)} // draw card info about user and allies
+    </div>
+  </div>
+
+// BOTTOM DRAFT LAYOUT
+// ------
+
+// draw bottom of layout
+// it contains the heroes that can be choosen
+App.KL.Game.Phase.draft.draw.bottom(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+  <div style={ 
+    "width": "100%"
+    "height": "40%"
+    "display": "flex"
+    "background-image": "linear-gradient(#0e0c0e, #242324)"
+    "justify-content": "center"
+    "align-items": "center"
+  }>
+    <div style={ 
+      "width": "100%"
+      "max-width": "1440px" 
+      "display": "flex"
+      "justify-content": "center"
+      "align-items": "center"
+    }>
+      { App.KL.Game.Phase.Draft.draw.menu(players)}
+      { App.KL.Game.Phase.Draft.draw.ready_button(players, room, user)}
+    </div>
+  </div>
+
+// CHOICE OF COORDINATES 
+// ============================
+
+// draw coord positions on the left of top layout
+App.KL.Game.Phase.Draft.draw.coordinates(players: Map<App.KL.Game.Player>, user: String): DOM
+  <div style={ 
+    "width": "30%"
+    "height": "100%"
+    "display": "flex"
+    "align-items": "center"
+    "padding": "10% 0px 10% 2%"
+  }>
+    {App.KL.Game.Phase.Draft.draw.map_space(players, user)}
+  </div>
+
+// wrap hexagons in a div
+App.KL.Game.Phase.Draft.draw.map_space(players: Map<App.KL.Game.Player>, user: String): DOM
+  <div style={ 
+    "width": "100%"
+    "height": "0"
+    "border": "5px solid #d6dadc"
+    "border-radius": "15px"
+    "background-color": "#d6dadc"
+    "position": "relative"
+    "padding-top": "100%"
+  }>  
+    for div in App.KL.Game.Phase.Draft.draw.tiles(players, user): div
+  </div>
+
+// get all positions of the hexagons that will be draw
+// based on the user team
+App.KL.Game.Phase.Draft.draw.tiles.get_pos(team: App.KL.Game.Team): List<Hexagonal.Axial>
+      
+  let a = Hexagonal.Axial.new(1,-2)
+  let b = Hexagonal.Axial.new(0,-1)
+  let c = Hexagonal.Axial.new(1,-1)
+  let d = Hexagonal.Axial.new(0, 0)
+  let e = Hexagonal.Axial.new(-1,1)
+  let f = Hexagonal.Axial.new(0, 1)
+  let g = Hexagonal.Axial.new(-1,2)
+
+  let one = Hexagonal.Axial.new(-1,0) // Team 1's edge
+  let two = Hexagonal.Axial.new(1, 0) // Team 2's edge
+
+  case team {
+    blue: List.map!!(App.KL.Game.Phase.Draft.draw.tiles.get_pos.offset(App.KL.Game.Team.blue), [a,b,c,d,e,f,g,one])
+    red : List.map!!(App.KL.Game.Phase.Draft.draw.tiles.get_pos.offset(App.KL.Game.Team.red ), [a,b,c,d,e,f,g,two])
+  } default []
+
+
+// offset coords to respective team's corners
+App.KL.Game.Phase.Draft.draw.tiles.get_pos.offset(team: App.KL.Game.Team, coord: Hexagonal.Axial): Hexagonal.Axial
+  open coord
+  map_size = App.KL.Constants.board_size - 1
+  case team{
+    blue: Hexagonal.Axial.new(coord.i - map_size, coord.j)
+    red : Hexagonal.Axial.new(coord.i + map_size, coord.j)
+  } default coord
+
+// get player at `coord` coordinate
+App.KL.Game.Phase.Draft.draw.get_player_at(players: Map<App.KL.Game.Player>, coord: Hexagonal.Axial): Maybe<Pair<String, App.KL.Game.Player>>
+  let fun = 
+    (x)
+      open x
+      let pos = x.snd@init_pos
+      case pos {
+        none: false
+        some: Hexagonal.Axial.eql(pos.value, coord)
+      }
+  List.find!(fun, Map.to_list!(players)) 
+
+// create all hexagons that will be draw
+App.KL.Game.Phase.Draft.draw.tiles(players: Map<App.KL.Game.Player>, user: String): List<DOM> //tiles or tiles
+  team        = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  coords      = App.KL.Game.Phase.Draft.draw.tiles.get_pos(team)
+  player_list = [] 
+  tiles_list  = []
+
+  // Filtering players with coords
+  for coord in coords with player_list:
+    player = App.KL.Game.Phase.Draft.draw.get_player_at(players, coord)
+    case player {
+      none: {coord, none} & player_list
+      some: {coord, some(player.value@fst)} & player_list
+    }
+  
+  for pair in player_list with tiles_list:
+    App.KL.Game.Phase.Draft.draw.tiles.go(team, pair@fst, pair@snd, user) & tiles_list
+  
+  tiles_list
+
+// create one hexagon the will be draw
+App.KL.Game.Phase.Draft.draw.tiles.go(team: App.KL.Game.Team, coord: Hexagonal.Axial, id: Maybe(String), user: String): DOM
+  let nat    =  Hexagonal.Axial.to_nat(coord)
+  let {x, y} =  App.KL.Game.Phase.Draft.draw.tiles.to_xy(coord, team) // calculate x,y position based on i,j coord
+  let top    =  Nat.show(U32.to_nat(y)) | "%"
+  let left   =  Nat.show(U32.to_nat(x)) | "%"
+  let size   =  Nat.show(U32.to_nat((App.KL.Constants.draft_hexagon_radius*2) -1)) | "%" 
+  let margin =  Nat.show(U32.to_nat((App.KL.Constants.draft_hexagon_radius)))
+  let color  =  
+    case id {
+      none: "#B97A57"
+      some: 
+        if String.eql(user, id.value) then "#0FB735"
+        else "#4B97E2"
+    }
+  
+  <div id="C" | Nat.show(nat) style={
+    "width": size
+    "height": size
+    "margin": "-" | margin | "% 0px 0px -" | margin | "%"
+    "position": "absolute"
+    "top":  top
+    "left": left
+    "clip-path": "polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%)"
+    "background": color
+  }></div>
+
+// calculate x,y position based on i,j coord
+// TODO: currently it all works with percentages (50%, 8%), should it be changed to px?
+App.KL.Game.Phase.Draft.draw.tiles.to_xy(
+  coord: Hexagonal.Axial,
+  team: App.KL.Game.Team
+): Pair<U32,U32>
+
+  // offset in i to centralize the hexagon
+  i_offset = case team {
+    blue: App.KL.Constants.board_size - 1
+    red:  I32.neg(App.KL.Constants.board_size -1 )   
+  } default +0#32
+
+  open coord
+  i = coord.i + i_offset
+  j = coord.j
+  
+  i = I32.to_f64(i)
+  j = I32.to_f64(j)
+
+  int_rad = U32.to_f64(App.KL.Constants.draft_hexagon_radius)
+  hlf     = F64.div(int_rad, 2.0#64)
+  int_screen_center_x = 50.0
+  int_screen_center_y = 50.0
+  
+  cx = int_screen_center_x + j * int_rad  // screen_center + j * rad
+  cx = cx + i * int_rad * 2 // screen_center + j * rad + i * 2rad
+  cy = int_screen_center_y + j * hlf * 3 // screen_center + j * (3rad/2)
+  // let cy = F64.add(cy, j)
+  cx = F64.to_u32(cx)
+  y  = cy + 0.5 // to round correctly
+  cy = F64.to_u32(cy)
+  {cx, cy}
+
+// CARD INFO FOR USER AND ALLIES
+// ===================================
+
+// draw card info for user and allies
+App.KL.Game.Phase.Draft.draw.cards(players: Map<App.KL.Game.Player>, user: String): DOM
+  let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
+  let player = players{user}
+  let allies = Map.delete!(user, players)
+  let hero   = case player{
+    none: none
+    some:
+      let player = player.value
+      Maybe.map!!(Nat.to_u8, player@hero_id)
+  }
+
+
+  <div style={
+    "width": "70%"
+    "height": "100%"
+    "display": "flex"
+  }>
+    { App.KL.Game.Phase.Draft.draw.cards.picks_left(hero)} // draw card info for user
+    { App.KL.Game.Phase.Draft.draw.cards.picks_right(allies, team)} // draw card info for allies
+  </div>
+
+
+// USER
+// -----
+
+// draw card info for user
+App.KL.Game.Phase.Draft.draw.cards.picks_left(hero: Maybe(U8)): DOM
+  <div style={
+    "width": "40%"
+    "height": "100%"
+    "display": "flex"
+    "padding": "5%"
+    "box-sizing": "border-box"
+  }>
+    { App.KL.Game.Phase.Draft.draw.cards.player(hero)}
+  </div>
+
+App.KL.Game.Phase.Draft.draw.cards.player(hero: Maybe(U8)): DOM
+  let {name, image} = Maybe {
+      get hero_id = hero
+      get hero    = App.KL.Game.Hero.get_by_id(U8.to_nat(hero_id)) 
+      let picture = hero@picture(false, 0) // TODO update with real bool and time
+      return {hero@name,picture}
+    } <> {"Choosing", App.KL.Game.Phase.Draft.draw.cards.interrogation}
+  
+  App.KL.Game.Phase.Draft.draw.cards.card(name, image, "100%")
+
+// ALLIES
+// -----
+
+// draw card info for allies
+App.KL.Game.Phase.Draft.draw.cards.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
+  <div style={ 
+    "width": "60%"
+    "height": "100%"
+    "padding": "3%"
+    "display": "flex"
+    "flex-direction": "row"
+    "align-items": "center"
+    "box-sizing": "border-box"
+  }>
+    for div in App.KL.Game.Phase.Draft.draw.cards.allies(map, team): div
+  </div>
+
+App.KL.Game.Phase.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
+  lst       = Map.to_list!(map)
+  teammates = []
+  for info in lst with teammates:
+    open info
+    if App.KL.Game.Team.eql(team, info.snd@team) then
+      info & teammates
+    else
+      teammates
+  count = 2 - List.length!(teammates)
+  
+  dom   = []
+  for i from 0 to count with dom:
+    App.KL.Game.Phase.Draft.draw.cards.ally("none", none) & dom
+  for pair in teammates with dom:
+    App.KL.Game.Phase.Draft.draw.cards.ally(pair@fst, some(pair@snd)) & dom
+
+  dom
+
+App.KL.Game.Phase.Draft.draw.cards.ally(user: String, info: Maybe(App.KL.Game.Player)): DOM
+  {name, image} = case info {
+    none: {"Connecting", App.KL.Game.Phase.Draft.draw.cards.interrogation}
+    some:
+      Maybe {
+        get info = Maybe.map!!(Nat.to_u8, info.value@hero_id)
+        get hero = App.Kaelin.Hero.info(info)  // TODO bring this function
+        let assets = hero@assets
+        return {hero@name, assets@base64}
+      } <> {"Choosing", App.KL.Game.Phase.Draft.draw.cards.interrogation}
+    }
+
+  App.KL.Game.Phase.Draft.draw.cards.card(name, image, "80%")
+
+App.KL.Game.Phase.Draft.draw.cards.card(name: String, image: String, height: String): DOM
+   <div style={ 
+    "width": "100%"
+    "height": height
+    "display": "flex"
+    "border": "5px solid #d6dadc"
+    "background-color": "#bac1c4"
+    "margin": "3%"
+    "border-radius": "5px"
+    "flex-direction": "column"
+    "justify-content": "space-between"
+    "align-items": "center"
+    "box-sizing": "border-box"
+  }>
+    <div style={ 
+      "height": "10%"
+      "margin-top": "5%"
+    }>
+      name
+    </div>
+    
+    <div style={ 
+      "width":"50%" 
+      "height":"auto"
+    }>
+      <img src=image style={ 
+        "width": "100%"
+        "height": "auto"
+        "image-rendering": "pixelated"
+      }></img>
+    </div>
+    
+    <div style={ 
+      "width": "100%"
+      "height": "40%"
+      "background-color": "#d6dadc"
+    }></div>
+
+  </div>
+
+
+App.KL.Game.Phase.Draft.draw.cards.interrogation: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
+
+// ROOM NUMBER AND READY BUTTON
+// ==========================
+
+// display room text, and ready/cancel button
+App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+  info = players{user}
+  let {color, text} = 
+    case info {
+      none: {"#4CAF50", "Ready"}
+      some: 
+        let player = info.value
+        if player@ready then
+          {"gray",    "Cancel"}
+        else
+          {"#4CAF50", "Ready"}
+  }
+  <div style={ 
+    "width": "30%"
+    "height": "auto"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+    "flex-direction": "column"
+  }>
+    <div style={ 
+      "background-color": "#d6dadc"
+      "color": "black"
+      "padding": "8px"
+      "text-align": "center"
+      "border-radius": "5px"
+      "margin-bottom": "10px"
+      "font-size": "32px"
+    }>
+      room
+    </div>
+    <button id="Ready" style={ 
+      "background-color": color
+      "border": "none"
+      "color": "white"
+      "padding": "32px"
+      "text-align": "center"
+      "text-decoration": "none"
+      "display": "inline-block"
+      "font-size": "32px"
+      "margin": "4px 2px"
+      "cursor": "pointer"
+    }>
+      text
+    </button>
+  </div>
+
+// BOTTOM MENU FOR CHOOSING HEROES 
+// ======================
+App.KL.Game.Phase.Draft.draw.menu(
+  players: Map<App.KL.Game.Player>
+): DOM
+
+  heroes = App.KL.Game.Hero.list
+  main_style = 
+  {
+    "width": "70%",
+    "height": "100%"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+  }
+  
+  display_style = 
+  { 
+    "display": "flex",
+    "flex-wrap": "wrap",
+    "justify-content": "center", 
+    "width": "100%"
+  }
+  
+  hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, heroes) 
+
+  <div style=main_style>
+    <div style=display_style>
+      for div in hero_list: div
+    </div>
+  </div>
+
+     //Selection
+//----------------------------------------------
+App.KL.Game.Phase.Draft.draw.selection(
+  hero: App.KL.Game.Hero
+): DOM
+   
+  image = hero@picture(true, 0) //TODO placeholder
+  //assets = hero@assets
+  //image  = assets@base64
+
+  box_style = 
+  { 
+    "margin": "4px",
+    "border": "5px solid #d6dadc",
+    //"box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
+    "background-color": "#bac1c4"
+    "height": "auto",
+    "width": "15%",
+    "border-radius": "5px"
+  }
+
+  name_style =   
+  {
+    "display": "flex",
+    "justify-content": "center",
+    "font-size": "1.2vw"
+  }
+
+  img_box_style = 
+  {
+    "padding": "2px",
+    "height": "100%",
+    "width": "100%"
+  } 
+
+  corner_style = 
+  {
+    "width": "75%",
+    "margin-left": "12.5%",
+    "height": "auto",
+    "image-rendering": "pixelated"
+  }
+  square_style = 
+  {
+    "display": "flex", "justify-content": "center", "height": "100%", "width":"100%"
+  }
+  
+  <div style=box_style id="H" | hero@name>
+    <div style=name_style id="H"| hero@name>hero@name</div>
+    <div style=img_box_style>
+      <img style=corner_style src=image id="H" | hero@name>
+      </img>
+    </div>
+  </div>
+

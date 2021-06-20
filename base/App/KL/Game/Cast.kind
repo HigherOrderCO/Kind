@@ -1,0 +1,59 @@
+type App.KL.Game.Cast {
+  new(
+    player: String
+    target: Hexagonal.Axial
+    letter: Char
+  )
+}
+
+type App.KL.Game.Cast.Preview {
+  new(
+    areas: Hexagonal.Axial.BBL<App.KL.Game.Indicator>
+    picks: Hexagonal.Axial.BBL<Char>
+  )
+}
+
+App.KL.Game.Cast.push(
+  player: String
+  target: Hexagonal.Axial
+  letter: Char
+  casts: List<App.KL.Game.Cast>
+): List<App.KL.Game.Cast>
+  App.KL.Game.Cast.new(player, target, letter) & casts
+
+// Returns the current picks of a player as a map of Coord->Letter
+App.KL.Game.Cast.picks_of(player: String, casts: List<App.KL.Game.Cast>): Hexagonal.Axial.BBL<Char>
+  let map = Hexagonal.Axial.BBL.new!
+  for cast in casts with map:
+    open cast
+    if player =? cast.player then 
+      Hexagonal.Axial.BBL.insert!(cast.target, cast.letter, map)
+    else
+      map
+  map
+  
+// Removes duplicates and sort by skill priority (TODO)
+App.KL.Game.Cast.sort(casts: List<App.KL.Game.Cast>): List<App.KL.Game.Cast>
+  let map = {}
+  for cast in casts with map:
+    map{cast@player | "@" | Char.to_string(cast@letter)} <- cast
+  Map.values!(map)
+
+// Applies a cast, modifying the game state
+App.KL.Game.Cast.apply(
+  cast: App.KL.Game.Cast
+  game: App.KL.Game
+): App.KL.Game
+  open cast
+  open game
+  Maybe {
+    let players = App.KL.Game.Board.find_players(game.board) // TODO: optimize
+    var player_coord = players{cast@player}
+    var player_creature = App.KL.Game.Board.get_creature(player_coord, game.board)
+    let player_hero = player_creature@hero
+    let player_skills = player_hero@skills
+    var casted_skill = player_skills{Char.to_string(cast.letter)}
+    let casted_effect = casted_skill@effect
+    let game = App.KL.Game.Effect.run!(casted_effect, player_coord, cast.target, game)
+    return game
+  } <> game

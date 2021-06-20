@@ -1,0 +1,27 @@
+App.KL.Constants.hexagon_radius: I32
+  15
+
+App.KL.Constants.board_size : I32
+  7
+
+App.KL.Constants.center_x : I32
+  228
+
+App.KL.Constants.center_y : I32
+  176
+
+App.KL.Constants.draft_hexagon_radius: U32
+  8
+  
+App.KL.Constants.draft_center_x : U32
+  50
+
+App.KL.Constants.draft_center_y : U32
+  50
+
+App.KL.Constants.round_time: U64
+  64
+
+// TODO: Randomize or change it every time you build
+App.KL.Constants.room : String
+  "0x78414442332238"

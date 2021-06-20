@@ -1,0 +1,12 @@
+// Returns a list of coordinates within a given range inside an hexagonal region
+Hexagonal.Axial.range(
+  coord: Hexagonal.Axial
+  region: I32
+  distance: I32
+): List<Hexagonal.Axial>
+
+  center = Hexagonal.Axial.to_cubic(coord)
+  list_coords = List.map!!(Hexagonal.Cubic.to_axial, Hexagonal.Cubic.range(center, distance))
+  fit = (x)
+  Hexagonal.Axial.inside(x, region)
+  List.filter!(fit, list_coords)

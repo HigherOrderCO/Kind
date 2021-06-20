@@ -1,0 +1,12 @@
+BBL.foldr_with_key.go<K: Type, V: Type, Z: Type>(
+  f   : K -> V -> Z -> Z, 
+  z   : Z,
+  map : BBL<K,V> 
+) : Z 
+  case map {
+    tip: z,
+    bin:  
+      let right_folded = BBL.foldr_with_key.go<K,V,Z>(f, z, map.right) 
+      let new_z        = f(map.key, map.val, right_folded)
+      BBL.foldr_with_key.go<K,V,Z>(f, new_z, map.left)
+  }

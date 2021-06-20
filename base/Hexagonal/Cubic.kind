@@ -1,0 +1,4 @@
+// Type for Cubic coordinates in an Hexagon
+type Hexagonal.Cubic { 
+  new(x:I32, y:I32, z:I32)
+} deriving (serializer, deserializer, stringifier)

@@ -1,0 +1,3 @@
+F64.neg(n: F64): F64
+  open n
+  F64.new(Word.neg!(n.word))

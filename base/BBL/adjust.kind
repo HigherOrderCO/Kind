@@ -1,0 +1,12 @@
+BBL.adjust<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  f   : V -> V, 
+  key : K, 
+  map : BBL<K,V> 
+) : BBL<K,V>
+  BBL.adjust_with_key<K,V>(
+    cmp,
+    (k, v) f(v),
+    key,
+    map
+  )

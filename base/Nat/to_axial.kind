@@ -1,0 +1,14 @@
+// Converts a natural number to an axial coordinate, so it can be used as a key in a NatMap(App.Kaelin.Tile)
+// 10020997 is transformed to the coordinate {+2, -3}
+Nat.to_axial(
+  key: Nat
+): Hexagonal.Axial
+
+  key_converted = Nat.to_U32(key)
+  coord_i = key_converted /  1000  //U32
+  coord_i = U32.to_i32(coord_i)
+  coord_i = coord_i - 100   // I32
+  coord_j = U32.mod(key_converted, 1000) // U32
+  coord_j = U32.to_i32(coord_j)
+  coord_j = coord_j - 100 // I32
+  Hexagonal.Axial.new(coord_i, coord_j)

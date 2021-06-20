@@ -1,0 +1,19 @@
+BBL.is_balanced<K: Type, V: Type>(map: BBL<K,V>): Bool
+  case map {
+    tip: Bool.true,
+    bin:  
+      let size_l = BBL.size!!(map.left)
+      let size_r = BBL.size!!(map.right)
+      let max_size_l = U32.mul(BBL.w, size_r)
+      let max_size_r = U32.mul(BBL.w, size_l)
+      let size_l_plus_r = U32.add(size_l, size_r)
+      let sizes_dont_exceed = List.and([
+          U32.lte(size_l, max_size_r),
+          U32.lte(size_r, max_size_l)
+      ])
+      let subtrees_sizes_ok = Bool.or(sizes_dont_exceed, U32.lte(size_l_plus_r, 1#32))
+      let left_is_balanced  = BBL.is_balanced!!(map.left)
+      let right_is_balanced = BBL.is_balanced!!(map.right)
+  
+      List.and([subtrees_sizes_ok, left_is_balanced, right_is_balanced])
+  }

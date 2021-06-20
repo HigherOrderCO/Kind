@@ -1,0 +1,14 @@
+BBL.split_ltn<K: Type, V: Type>(cmp: K -> K-> Cmp, cut: K, map: BBL<K,V>): BBL<K,V>
+  case map {
+    tip: map,
+    bin: case cmp(cut, map.key) {
+      ltn: BBL.split_ltn<K,V>(cmp, cut, map.left),
+      eql: map.left,
+      gtn:  
+        let key   = map.key 
+        let val   = map.val 
+        let left  = map.left 
+        let right = BBL.split_ltn<K,V>(cmp, cut, map.right)
+        BBL.concat3<K,V>(cmp, key, val, left, right)
+    }
+  }

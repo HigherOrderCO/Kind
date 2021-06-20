@@ -1,0 +1,2 @@
+Char.serializer: Serializer<Char>
+  U16.serializer

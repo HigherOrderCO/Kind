@@ -1,0 +1,16 @@
+// Returns the list of coordinates available in a range
+Hexagonal.Axial.moore(
+  coord: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  open coord
+  U32_i = ((i) Int.to_i32(Int.sub(Int.from_nat(U32.to_nat(i)), +1))) :: U32 -> I32
+  result = []
+  for x : U32 from 0 to 3 with result:
+    for y : U32 from 0 to 3 with result:
+      if (U32.eql(x, y)) then 
+        result 
+      else 
+        Hexagonal.Axial.new(coord.i + U32_i(x), coord.j + U32_i(y)) & result // U32
+    result
+  result

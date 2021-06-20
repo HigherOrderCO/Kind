@@ -1,0 +1,22 @@
+App.KL.Game.Effect.move: App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    get board = App.KL.Game.Effect.board.get
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    let distance = I32.abs(Hexagonal.Axial.distance(center, target))
+    let creature = App.KL.Game.Board.get_creature(center, board)
+    case creature {
+      none: App.KL.Game.Effect { return unit }
+      some:
+        let tile = App.KL.Game.Board.get(center, board)
+        case tile {
+          none: App.KL.Game.Effect { return unit }
+          some: if App.KL.Game.Board.is_occupied(target, board)
+            then App.KL.Game.Effect { return unit }
+            else
+              let board = App.KL.Game.Board.del_creature(center, board)
+              let board = App.KL.Game.Board.set_creature(target, creature.value, board)
+              App.KL.Game.Effect.board.set(board)
+        }
+    }
+  }

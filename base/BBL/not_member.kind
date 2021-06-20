@@ -1,0 +1,2 @@
+BBL.not_member<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: BBL<K,V>): Bool
+  Bool.not(BBL.member<K,V>(cmp, key, map))

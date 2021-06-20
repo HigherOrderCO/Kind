@@ -1,0 +1,37 @@
+type App.KL.Global.State {
+  new(game: Maybe<App.KL.Game>)
+}
+
+type App.KL.Global.Event {
+  void
+  game(event: App.KL.Game.Event)
+} deriving (serializer, deserializer)
+
+App.KL.Global.Event.serialize_post(ev: App.KL.Global.Event): String
+  "0x" | String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.KL.Global.Event.serializer, ev)))
+
+App.KL.Global.Event.deserialize_post(hex: String): Maybe<App.KL.Global.Event>
+  Deserializer.run!(App.KL.Global.Event.deserializer, Bits.hex.decode(String.drop(2,hex)))
+
+// Global ticker
+App.KL.Global.tick: App.Tick<App.KL.State>
+  (tick, glob)
+  let game = glob@game
+  case game {
+    none: glob
+    some: glob@game <- some(App.KL.Game.tick(tick, game.value))
+  }
+
+// Global post
+App.KL.Global.post: App.Post<App.KL.State>
+  (time, room, addr, data, glob)
+  case App.KL.Global.Event.deserialize_post(data) as post {
+    none: glob
+    some: case post.value {
+      void: glob
+      game:
+        let game = glob@game <> App.KL.Game.start
+        glob@game <- some(App.KL.Game.post(time, room, addr, post.value.event, game))
+    }
+  }
+

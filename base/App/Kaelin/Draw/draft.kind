@@ -1,7 +1,3 @@
-//TODO: get images from respective heroes
-//TODO: get team from somewhere else instead of draft_hero
-
-
 //TODO?: create additional tabs for checking stats or skills of a hero
 
 App.Kaelin.Draw.draft(state: App.Store<App.Kaelin.State>): DOM
