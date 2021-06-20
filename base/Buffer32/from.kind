@@ -3,7 +3,7 @@ Buffer32.from(str: String): Buffer32
   // let buf = Buffer32.alloc(Nat.bitlen(size) + 1)
   // FIXME: this size is wrong. It much better than it need to be.
   let buf = Buffer32.alloc(size)
-  log("size: " | Nat.show(size))
+  // log("size: " | Nat.show(size))
   Buffer32.from.go(str, buf, 0)
 
 Buffer32.from.go(str: String, buf: Buffer32, idx: U32): Buffer32
