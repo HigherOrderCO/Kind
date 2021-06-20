@@ -26,7 +26,7 @@ TestSuite.show.check_fail(s: TestSuite): String
         some: res.value
       }
     many: 
-      let result = s.name|" failed in: \n"
+      let result = "\n--> "|s.name|" failed in: \n"
       for test in s.list with result:
         result|TestSuite.show.check_fail(test)
       result
