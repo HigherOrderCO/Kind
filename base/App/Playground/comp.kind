@@ -21,8 +21,6 @@ App.Playground.comp.header(
     "display": "flex"
     "flex-direction": "row"
     "justify-content": "space-between"
-    "align-content": "center"
-    "justify-content": "center"
   }
   let btn_area = DOM.node("div", {}, {
     "display": "flex"
