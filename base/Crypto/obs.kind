@@ -1,0 +1,3 @@
+// add Nat.parse_hex 
+// add Nat.egcd
+// add Nat.mul_Var
