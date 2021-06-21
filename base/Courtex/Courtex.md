@@ -14,7 +14,7 @@ Courtex is an extremely distilled take on the same concept. Its design is final
 and won't ever require updates, and the protocol is sufficiently simple for an
 independent developer to understand and implement it in a few days of work.
 These factors, together, remove the need for developer trust, and any remaining
-centralization. Cortex's execution language is a light calculus that is prone to
+centralization. Courtex's execution language is a light calculus that is prone to
 formal verification, greatly reducing the odds of software errors and making it
 as secure as technically possible. Its signature algorithm relies on hashes,
 making it resistant to quantum attacks. Proof of Work is used as the consensus
@@ -24,7 +24,7 @@ Since simplicity and security are prioritized over efficiency and scalability,
 Courtex, compared to alternatives, has lower throughput and higher transaction
 costs. As such, it isn't suitable for applications that demand a large number of
 transactions per second. On the other hands, for applications where safety is
-more important than throughput, such as contracts of high monetary value, Cortex
+more important than throughput, such as contracts of high monetary value, Courtex
 provides an ideal settlement environment that is stable, previsible and secure. 
 
 Design

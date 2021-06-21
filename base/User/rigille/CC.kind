@@ -1,0 +1,54 @@
+CC.Enum.ctor.const<P: Type>(p: P, n: Nat): Variadic(n, P, P)
+  case n {
+    zero: p
+    succ: (x) CC.Enum.ctor.const<P>(p, n.pred)
+  }!
+
+CC.Enum.ctor.aux<P: Type>(n: Nat, m: Nat): Variadic(Nat.succ(Nat.add(n, m)), P, P)
+  case n {
+    zero: (p) CC.Enum.ctor.const<P>(p, m)
+    succ: (p) CC.Enum.ctor.aux<P>(n.pred, m)
+  }!
+
+CC.Enum.ctor(n: Nat, m: Nat): CC.Enum(Nat.succ(Nat.add(n, m)))
+  (P) CC.Enum.ctor.aux<P>(n, m)
+
+CC.Enum(n: Nat): Type
+  CC.Enum.self<P: Type> -> Variadic(n, P, P)
+
+MyBool: Type
+  CC.Enum(2)
+
+MyBool.true: MyBool
+  CC.Enum.ctor(0, 1)
+
+MyBool.false: MyBool
+  CC.Enum.ctor(1, 0)
+
+Test: Bool
+  MyBool.false(Bool, true, false) // dá true
+
+Eriadic(
+  n: Nat,
+  m: Nat,
+  A: Nat -> Type,
+  f: (a: Nat) -> (b: Nat) -> A(Nat.add(a, b)),
+  P: A(Nat.add(n, m)) -> Type,
+  B: Type
+): Type
+  case m with P {
+    zero:
+      B
+    succ:
+      let C = ( (a) 
+        let lem = mirror(Nat.add.succ_right(n, m.pred))
+        P(Equal.rewrite!!!(lem, A, a)) ) :: A(Nat.add(Nat.succ(n), m.pred)) -> Type
+      P(f(n, Nat.succ(m.pred))) -> Eriadic(Nat.succ(n), m.pred, A, f, C, B)
+  }!
+
+Enum.cons(n: Nat, m: Nat): Enum(Nat.add(n, m))
+  (A) ?a
+  //Enum.ctor.aux<P>(n, m)
+
+Enum(n: Nat): Type
+  Enum.self<P: Enum(n) -> Type> -> Eriadic(0, n, Enum, Enum.cons, P, P(Enum.self))
