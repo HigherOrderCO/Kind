@@ -1,46 +1,12 @@
-// The 'Arena' board
-App.KL.Game.Board.arena: App.KL.Game.Board
-  board_size = App.KL.Constants.board_size
-  
-  board  = App.KL.Game.Map.new<App.KL.Game.Tile>
-  
-  width  = (board_size * 2) + 1
-  width  = I32.to_u32(width)
-  
-  height = (board_size * 2) + 1
-  height = I32.to_u32(height)
-  // TODO: Define this elsewhere?
-  // Defines all possible images inside a tile
-  // terrain_img = App.KL.Game.Resources.terrains
-
-  new_terrain = App.KL.Game.Terrain.new(0)
-  new_terrain = App.KL.Game.Entity.terrain(new_terrain)
-
-  //// loops through the half of the board_size
-  for j : U32 from 0 to height with board:
-    for i : U32 from 0 to width with board: 
-      // generate int axial coordinate
-      coord_i = I32.sub(U32.to_i32(i),  board_size) // i - board_size
-      coord_j = I32.sub(U32.to_i32(j),  board_size) // j - board_size
-      coord   = Hexagonal.Axial.new(coord_i, coord_j)
-      inside  = Hexagonal.Axial.inside(coord, App.KL.Constants.board_size)
-      
-      case inside {
-        true:
-          App.KL.Game.Board.push(coord, new_terrain, board)
-        false:
-          board
-      }
-    board
-  board
-
+App.KL.Game.Board: Type
+  Hexagonal.Axial.BBL<App.KL.Game.Tile>
 
 // get tile from board
 App.KL.Game.Board.get(
   coord: Hexagonal.Axial,
   board: App.KL.Game.Board
 ): Maybe<App.KL.Game.Tile>
-  App.KL.Game.Map.find!(coord, board)
+  Hexagonal.Axial.BBL.get!(coord, board)
 
 // set tile in some coord on board
 App.KL.Game.Board.set(
@@ -48,8 +14,7 @@ App.KL.Game.Board.set(
   tile: App.KL.Game.Tile,
   board:App.KL.Game.Board
 ): App.KL.Game.Board
-  App.KL.Game.Map.insert!(coord, tile, board)
-
+  Hexagonal.Axial.BBL.insert!(coord, tile, board)
 
 // push entity to board
 App.KL.Game.Board.push(
@@ -75,8 +40,69 @@ App.KL.Game.Board.push(
         creature:
           creature_tile = tile.value@creature <- some(entity.value)
           App.KL.Game.Board.set(coord, creature_tile, board)
-        animation :
+        animation:
           animation_tile = tile.value@animation <- some(entity.value)
           App.KL.Game.Board.set(coord, animation_tile, board)
       }
     }
+
+App.KL.Game.Board.get_creature(
+  coord: Hexagonal.Axial
+  board: App.KL.Game.Board
+): Maybe<App.KL.Game.Creature>
+  let tile = App.KL.Game.Board.get(coord, board)
+  case tile {
+    none: none
+    some: tile.value@creature
+  }
+
+App.KL.Game.Board.del_creature(
+  coord: Hexagonal.Axial
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+  let tile = App.KL.Game.Board.get(coord, board)
+  case tile { 
+    none: board
+    some: App.KL.Game.Board.set(coord, tile.value@creature <- none, board)
+  }
+
+App.KL.Game.Board.set_creature(
+  coord: Hexagonal.Axial
+  creature: App.KL.Game.Creature
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+  let tile = App.KL.Game.Board.get(coord, board)
+  case tile { 
+    none: board
+    some: App.KL.Game.Board.set(coord, tile.value@creature <- some(creature), board)
+  }
+  
+App.KL.Game.Board.is_occupied(coord: Hexagonal.Axial, board: App.KL.Game.Board): Bool
+  let tile = App.KL.Game.Board.get(coord, board)
+  case tile {
+    none: false
+    some:
+      open tile.value
+      case tile.value.creature { 
+        none: false
+        some: true
+      }
+  }
+
+// Returns a map with the player Address as the key to its respective coordinate 
+App.KL.Game.Board.find_players(board: App.KL.Game.Board): Map<Hexagonal.Axial>
+  let tile_list = Hexagonal.Axial.BBL.to_list!(board)
+  let players = []
+  for coord_tile in tile_list with players:
+    let {coord,tile} = coord_tile
+    let creature = tile@creature
+    case creature {
+      none: players
+      some: 
+        let player = creature.value@player
+        case player {
+          none: players
+          some: {player.value, coord} & players
+        }
+    }
+  Map.from_list!(players)

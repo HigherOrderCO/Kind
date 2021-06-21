@@ -1,0 +1,6 @@
+type App.KL.Game.Terrain {
+  new(
+    field_id: Nat
+  )
+}
+

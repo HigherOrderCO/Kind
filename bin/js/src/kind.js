@@ -5149,7 +5149,7 @@ module.exports = (function() {
         return $1204;
     };
     const Kind$Parser$comment = x0 => Kind$Parser$comment$(x0);
-    const Kind$Parser$spaces = Parser$many$(Parser$choice(List$cons$(Parser$text(" "), List$cons$(Parser$text("\u{9}"), List$cons$(Parser$text("\u{a}"), List$cons$(Kind$Parser$comment, List$nil))))));
+    const Kind$Parser$spaces = Parser$many$(Parser$choice(List$cons$(Parser$text(" "), List$cons$(Parser$text("\u{9}"), List$cons$(Parser$text("\u{d}"), List$cons$(Parser$text("\u{a}"), List$cons$(Kind$Parser$comment, List$nil)))))));
 
     function Parser$get_idx$(_pst$1) {
         var self = _pst$1;
@@ -33235,8 +33235,8 @@ module.exports = (function() {
     const String$pad_left = x0 => x1 => x2 => String$pad_left$(x0, x1, x2);
 
     function Kind$Code$color$(_col$1, _str$2) {
-        var $10512 = String$cons$(27, String$cons$(91, (_col$1 + String$cons$(109, (_str$2 + String$cons$(27, String$cons$(91, String$cons$(48, String$cons$(109, String$nil)))))))));
-        return $10512;
+        var $10234 = String$cons$(27, ("[" + (_col$1 + ("m" + (_str$2 + String$cons$(27, "[0m"))))));
+        return $10234;
     };
     const Kind$Code$color = x0 => x1 => Kind$Code$color$(x0, x1);
 
@@ -42598,49 +42598,49 @@ module.exports = (function() {
     };
     const Kind$Comp$Prim$eliminator = x0 => x1 => x2 => x3 => Kind$Comp$Prim$eliminator$(x0, x1, x2, x3);
 
-    function Avl$lookup$(_cmp$3, _key$4, _map$5) {
-        var Avl$lookup$ = (_cmp$3, _key$4, _map$5) => ({
+    function BBL$lookup$(_cmp$3, _key$4, _map$5) {
+        var BBL$lookup$ = (_cmp$3, _key$4, _map$5) => ({
             ctr: 'TCO',
             arg: [_cmp$3, _key$4, _map$5]
         });
-        var Avl$lookup = _cmp$3 => _key$4 => _map$5 => Avl$lookup$(_cmp$3, _key$4, _map$5);
+        var BBL$lookup = _cmp$3 => _key$4 => _map$5 => BBL$lookup$(_cmp$3, _key$4, _map$5);
         var arg = [_cmp$3, _key$4, _map$5];
         while (true) {
             let [_cmp$3, _key$4, _map$5] = arg;
             var R = (() => {
                 var self = _map$5;
                 switch (self._) {
-                    case 'Avl.bin':
-                        var $12812 = self.key;
-                        var $12813 = self.val;
-                        var $12814 = self.left;
-                        var $12815 = self.right;
-                        var self = _cmp$3(_key$4)($12812);
+                    case 'BBL.bin':
+                        var $12534 = self.key;
+                        var $12535 = self.val;
+                        var $12536 = self.left;
+                        var $12537 = self.right;
+                        var self = _cmp$3(_key$4)($12534);
                         switch (self._) {
                             case 'Cmp.ltn':
-                                var $12817 = Avl$lookup$(_cmp$3, _key$4, $12814);
-                                var $12816 = $12817;
+                                var $12539 = BBL$lookup$(_cmp$3, _key$4, $12536);
+                                var $12538 = $12539;
                                 break;
                             case 'Cmp.eql':
                                 var $12818 = Maybe$some$($12813);
                                 var $12816 = $12818;
                                 break;
                             case 'Cmp.gtn':
-                                var $12819 = Avl$lookup$(_cmp$3, _key$4, $12815);
-                                var $12816 = $12819;
+                                var $12541 = BBL$lookup$(_cmp$3, _key$4, $12537);
+                                var $12538 = $12541;
                                 break;
                         };
-                        return $12816;
-                    case 'Avl.tip':
-                        var $12820 = Maybe$none;
-                        return $12820;
+                        return $12538;
+                    case 'BBL.tip':
+                        var $12542 = Maybe$none;
+                        return $12542;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
             else return R;
         }
     };
-    const Avl$lookup = x0 => x1 => x2 => Avl$lookup$(x0, x1, x2);
+    const BBL$lookup = x0 => x1 => x2 => BBL$lookup$(x0, x1, x2);
 
     function U16$cmp$(_a$1, _b$2) {
         var self = (_a$1 < _b$2);
@@ -42722,16 +42722,16 @@ module.exports = (function() {
     const String$cmp = x0 => x1 => String$cmp$(x0, x1);
 
     function Map$get$(_key$2, _map$3) {
-        var $12841 = Avl$lookup$(String$cmp, _key$2, _map$3);
-        return $12841;
+        var $12563 = BBL$lookup$(String$cmp, _key$2, _map$3);
+        return $12563;
     };
     const Map$get = x0 => x1 => Map$get$(x0, x1);
 
-    function Avl$(_K$1, _V$2) {
-        var $12842 = null;
-        return $12842;
+    function BBL$(_K$1, _V$2) {
+        var $12564 = null;
+        return $12564;
     };
-    const Avl = x0 => x1 => Avl$(x0, x1);
+    const BBL = x0 => x1 => BBL$(x0, x1);
 
     function Map$(_V$1) {
         var $12843 = null;
@@ -43241,9 +43241,9 @@ module.exports = (function() {
     };
     const Kind$Comp$Target$Scheme$natives = x0 => Kind$Comp$Target$Scheme$natives$(x0);
 
-    function Avl$bin$(_size$3, _key$4, _val$5, _left$6, _right$7) {
-        var $12958 = ({
-            _: 'Avl.bin',
+    function BBL$bin$(_size$3, _key$4, _val$5, _left$6, _right$7) {
+        var $12680 = ({
+            _: 'BBL.bin',
             'size': _size$3,
             'key': _key$4,
             'val': _val$5,
@@ -43252,7 +43252,7 @@ module.exports = (function() {
         });
         return $12958;
     };
-    const Avl$bin = x0 => x1 => x2 => x3 => x4 => Avl$bin$(x0, x1, x2, x3, x4);
+    const BBL$bin = x0 => x1 => x2 => x3 => x4 => BBL$bin$(x0, x1, x2, x3, x4);
 
     function U32$new$(_value$1) {
         var $12959 = word_to_u32(_value$1);
@@ -43260,46 +43260,46 @@ module.exports = (function() {
     };
     const U32$new = x0 => U32$new$(x0);
     const Nat$to_u32 = a0 => (Number(a0) >>> 0);
-    const Avl$tip = ({
-        _: 'Avl.tip'
+    const BBL$tip = ({
+        _: 'BBL.tip'
     });
 
-    function Avl$singleton$(_key$3, _val$4) {
-        var $12960 = Avl$bin$(1, _key$3, _val$4, Avl$tip, Avl$tip);
-        return $12960;
+    function BBL$singleton$(_key$3, _val$4) {
+        var $12682 = BBL$bin$(1, _key$3, _val$4, BBL$tip, BBL$tip);
+        return $12682;
     };
-    const Avl$singleton = x0 => x1 => Avl$singleton$(x0, x1);
+    const BBL$singleton = x0 => x1 => BBL$singleton$(x0, x1);
 
-    function Avl$size$(_map$3) {
+    function BBL$size$(_map$3) {
         var self = _map$3;
         switch (self._) {
-            case 'Avl.bin':
-                var $12962 = self.size;
-                var $12963 = $12962;
-                var $12961 = $12963;
+            case 'BBL.bin':
+                var $12684 = self.size;
+                var $12685 = $12684;
+                var $12683 = $12685;
                 break;
-            case 'Avl.tip':
-                var $12964 = 0;
-                var $12961 = $12964;
+            case 'BBL.tip':
+                var $12686 = 0;
+                var $12683 = $12686;
                 break;
         };
         return $12961;
     };
-    const Avl$size = x0 => Avl$size$(x0);
+    const BBL$size = x0 => BBL$size$(x0);
     const U32$add = a0 => a1 => ((a0 + a1) >>> 0);
     const U32$mul = a0 => a1 => ((a0 * a1) >>> 0);
-    const Avl$w = 3;
+    const BBL$w = 3;
     const U32$ltn = a0 => a1 => (a0 < a1);
     const U32$from_nat = a0 => (Number(a0) >>> 0);
 
-    function Avl$node$(_key$3, _val$4, _left$5, _right$6) {
-        var _size_left$7 = Avl$size$(_left$5);
-        var _size_right$8 = Avl$size$(_right$6);
+    function BBL$node$(_key$3, _val$4, _left$5, _right$6) {
+        var _size_left$7 = BBL$size$(_left$5);
+        var _size_right$8 = BBL$size$(_right$6);
         var _new_size$9 = ((1 + ((_size_left$7 + _size_right$8) >>> 0)) >>> 0);
-        var $12965 = Avl$bin$(_new_size$9, _key$3, _val$4, _left$5, _right$6);
-        return $12965;
+        var $12687 = BBL$bin$(_new_size$9, _key$3, _val$4, _left$5, _right$6);
+        return $12687;
     };
-    const Avl$node = x0 => x1 => x2 => x3 => Avl$node$(x0, x1, x2, x3);
+    const BBL$node = x0 => x1 => x2 => x3 => BBL$node$(x0, x1, x2, x3);
 
     function Cmp$as_gtn$(_cmp$1) {
         var self = _cmp$1;
@@ -43325,63 +43325,63 @@ module.exports = (function() {
     const Word$gtn = x0 => x1 => Word$gtn$(x0, x1);
     const U32$gtn = a0 => a1 => (a0 > a1);
 
-    function Avl$balance$(_k$3, _v$4, _l$5, _r$6) {
-        var _size_l$7 = Avl$size$(_l$5);
-        var _size_r$8 = Avl$size$(_r$6);
+    function BBL$balance$(_k$3, _v$4, _l$5, _r$6) {
+        var _size_l$7 = BBL$size$(_l$5);
+        var _size_r$8 = BBL$size$(_r$6);
         var _size_l_plus_size_r$9 = ((_size_l$7 + _size_r$8) >>> 0);
-        var _w_x_size_l$10 = ((Avl$w * _size_l$7) >>> 0);
-        var _w_x_size_r$11 = ((Avl$w * _size_r$8) >>> 0);
+        var _w_x_size_l$10 = ((BBL$w * _size_l$7) >>> 0);
+        var _w_x_size_r$11 = ((BBL$w * _size_r$8) >>> 0);
         var self = (_size_l_plus_size_r$9 < 2);
         if (self) {
-            var $12971 = Avl$node$(_k$3, _v$4, _l$5, _r$6);
-            var $12970 = $12971;
+            var $12693 = BBL$node$(_k$3, _v$4, _l$5, _r$6);
+            var $12692 = $12693;
         } else {
             var self = (_size_r$8 > _w_x_size_l$10);
             if (self) {
                 var self = _r$6;
                 switch (self._) {
-                    case 'Avl.bin':
-                        var $12974 = self.key;
-                        var $12975 = self.val;
-                        var $12976 = self.left;
-                        var $12977 = self.right;
-                        var _size_rl$17 = Avl$size$($12976);
-                        var _size_rr$18 = Avl$size$($12977);
+                    case 'BBL.bin':
+                        var $12696 = self.key;
+                        var $12697 = self.val;
+                        var $12698 = self.left;
+                        var $12699 = self.right;
+                        var _size_rl$17 = BBL$size$($12698);
+                        var _size_rr$18 = BBL$size$($12699);
                         var self = (_size_rl$17 < _size_rr$18);
                         if (self) {
-                            var _new_key$19 = $12974;
-                            var _new_val$20 = $12975;
-                            var _new_left$21 = Avl$node$(_k$3, _v$4, _l$5, $12976);
-                            var _new_right$22 = $12977;
-                            var $12979 = Avl$node$(_new_key$19, _new_val$20, _new_left$21, _new_right$22);
-                            var $12978 = $12979;
+                            var _new_key$19 = $12696;
+                            var _new_val$20 = $12697;
+                            var _new_left$21 = BBL$node$(_k$3, _v$4, _l$5, $12698);
+                            var _new_right$22 = $12699;
+                            var $12701 = BBL$node$(_new_key$19, _new_val$20, _new_left$21, _new_right$22);
+                            var $12700 = $12701;
                         } else {
                             var self = $12976;
                             switch (self._) {
-                                case 'Avl.bin':
-                                    var $12981 = self.key;
-                                    var $12982 = self.val;
-                                    var $12983 = self.left;
-                                    var $12984 = self.right;
-                                    var _new_key$24 = $12981;
-                                    var _new_val$25 = $12982;
-                                    var _new_left$26 = Avl$node$(_k$3, _v$4, _l$5, $12983);
-                                    var _new_right$27 = Avl$node$($12974, $12975, $12984, $12977);
-                                    var $12985 = Avl$node$(_new_key$24, _new_val$25, _new_left$26, _new_right$27);
-                                    var $12980 = $12985;
+                                case 'BBL.bin':
+                                    var $12703 = self.key;
+                                    var $12704 = self.val;
+                                    var $12705 = self.left;
+                                    var $12706 = self.right;
+                                    var _new_key$24 = $12703;
+                                    var _new_val$25 = $12704;
+                                    var _new_left$26 = BBL$node$(_k$3, _v$4, _l$5, $12705);
+                                    var _new_right$27 = BBL$node$($12696, $12697, $12706, $12699);
+                                    var $12707 = BBL$node$(_new_key$24, _new_val$25, _new_left$26, _new_right$27);
+                                    var $12702 = $12707;
                                     break;
-                                case 'Avl.tip':
-                                    var $12986 = Avl$node$(_k$3, _v$4, _l$5, _r$6);
-                                    var $12980 = $12986;
+                                case 'BBL.tip':
+                                    var $12708 = BBL$node$(_k$3, _v$4, _l$5, _r$6);
+                                    var $12702 = $12708;
                                     break;
                             };
                             var $12978 = $12980;
                         };
                         var $12973 = $12978;
                         break;
-                    case 'Avl.tip':
-                        var $12987 = Avl$node$(_k$3, _v$4, _l$5, _r$6);
-                        var $12973 = $12987;
+                    case 'BBL.tip':
+                        var $12709 = BBL$node$(_k$3, _v$4, _l$5, _r$6);
+                        var $12695 = $12709;
                         break;
                 };
                 var $12972 = $12973;
@@ -43390,54 +43390,54 @@ module.exports = (function() {
                 if (self) {
                     var self = _l$5;
                     switch (self._) {
-                        case 'Avl.bin':
-                            var $12990 = self.key;
-                            var $12991 = self.val;
-                            var $12992 = self.left;
-                            var $12993 = self.right;
-                            var _size_ll$17 = Avl$size$($12992);
-                            var _size_lr$18 = Avl$size$($12993);
+                        case 'BBL.bin':
+                            var $12712 = self.key;
+                            var $12713 = self.val;
+                            var $12714 = self.left;
+                            var $12715 = self.right;
+                            var _size_ll$17 = BBL$size$($12714);
+                            var _size_lr$18 = BBL$size$($12715);
                             var self = (_size_lr$18 < _size_ll$17);
                             if (self) {
-                                var _new_key$19 = $12990;
-                                var _new_val$20 = $12991;
-                                var _new_left$21 = $12992;
-                                var _new_right$22 = Avl$node$(_k$3, _v$4, $12993, _r$6);
-                                var $12995 = Avl$node$(_new_key$19, _new_val$20, _new_left$21, _new_right$22);
-                                var $12994 = $12995;
+                                var _new_key$19 = $12712;
+                                var _new_val$20 = $12713;
+                                var _new_left$21 = $12714;
+                                var _new_right$22 = BBL$node$(_k$3, _v$4, $12715, _r$6);
+                                var $12717 = BBL$node$(_new_key$19, _new_val$20, _new_left$21, _new_right$22);
+                                var $12716 = $12717;
                             } else {
                                 var self = $12993;
                                 switch (self._) {
-                                    case 'Avl.bin':
-                                        var $12997 = self.key;
-                                        var $12998 = self.val;
-                                        var $12999 = self.left;
-                                        var $13000 = self.right;
-                                        var _new_key$24 = $12997;
-                                        var _new_val$25 = $12998;
-                                        var _new_left$26 = Avl$node$($12990, $12991, $12992, $12999);
-                                        var _new_right$27 = Avl$node$(_k$3, _v$4, $13000, _r$6);
-                                        var $13001 = Avl$node$(_new_key$24, _new_val$25, _new_left$26, _new_right$27);
-                                        var $12996 = $13001;
+                                    case 'BBL.bin':
+                                        var $12719 = self.key;
+                                        var $12720 = self.val;
+                                        var $12721 = self.left;
+                                        var $12722 = self.right;
+                                        var _new_key$24 = $12719;
+                                        var _new_val$25 = $12720;
+                                        var _new_left$26 = BBL$node$($12712, $12713, $12714, $12721);
+                                        var _new_right$27 = BBL$node$(_k$3, _v$4, $12722, _r$6);
+                                        var $12723 = BBL$node$(_new_key$24, _new_val$25, _new_left$26, _new_right$27);
+                                        var $12718 = $12723;
                                         break;
-                                    case 'Avl.tip':
-                                        var $13002 = Avl$node$(_k$3, _v$4, _l$5, _r$6);
-                                        var $12996 = $13002;
+                                    case 'BBL.tip':
+                                        var $12724 = BBL$node$(_k$3, _v$4, _l$5, _r$6);
+                                        var $12718 = $12724;
                                         break;
                                 };
                                 var $12994 = $12996;
                             };
                             var $12989 = $12994;
                             break;
-                        case 'Avl.tip':
-                            var $13003 = Avl$node$(_k$3, _v$4, _l$5, _r$6);
-                            var $12989 = $13003;
+                        case 'BBL.tip':
+                            var $12725 = BBL$node$(_k$3, _v$4, _l$5, _r$6);
+                            var $12711 = $12725;
                             break;
                     };
                     var $12988 = $12989;
                 } else {
-                    var $13004 = Avl$node$(_k$3, _v$4, _l$5, _r$6);
-                    var $12988 = $13004;
+                    var $12726 = BBL$node$(_k$3, _v$4, _l$5, _r$6);
+                    var $12710 = $12726;
                 };
                 var $12972 = $12988;
             };
@@ -43445,56 +43445,56 @@ module.exports = (function() {
         };
         return $12970;
     };
-    const Avl$balance = x0 => x1 => x2 => x3 => Avl$balance$(x0, x1, x2, x3);
+    const BBL$balance = x0 => x1 => x2 => x3 => BBL$balance$(x0, x1, x2, x3);
 
-    function Avl$insert$(_cmp$3, _key$4, _val$5, _map$6) {
+    function BBL$insert$(_cmp$3, _key$4, _val$5, _map$6) {
         var self = _map$6;
         switch (self._) {
-            case 'Avl.bin':
-                var $13006 = self.key;
-                var $13007 = self.val;
-                var $13008 = self.left;
-                var $13009 = self.right;
-                var self = _cmp$3(_key$4)($13006);
+            case 'BBL.bin':
+                var $12728 = self.key;
+                var $12729 = self.val;
+                var $12730 = self.left;
+                var $12731 = self.right;
+                var self = _cmp$3(_key$4)($12728);
                 switch (self._) {
                     case 'Cmp.ltn':
-                        var _new_key$12 = $13006;
-                        var _new_val$13 = $13007;
-                        var _new_left$14 = Avl$insert$(_cmp$3, _key$4, _val$5, $13008);
-                        var _new_right$15 = $13009;
-                        var $13011 = Avl$balance$(_new_key$12, _new_val$13, _new_left$14, _new_right$15);
-                        var $13010 = $13011;
+                        var _new_key$12 = $12728;
+                        var _new_val$13 = $12729;
+                        var _new_left$14 = BBL$insert$(_cmp$3, _key$4, _val$5, $12730);
+                        var _new_right$15 = $12731;
+                        var $12733 = BBL$balance$(_new_key$12, _new_val$13, _new_left$14, _new_right$15);
+                        var $12732 = $12733;
                         break;
                     case 'Cmp.eql':
-                        var $13012 = Avl$node$(_key$4, _val$5, $13008, $13009);
-                        var $13010 = $13012;
+                        var $12734 = BBL$node$(_key$4, _val$5, $12730, $12731);
+                        var $12732 = $12734;
                         break;
                     case 'Cmp.gtn':
-                        var _new_key$12 = $13006;
-                        var _new_val$13 = $13007;
-                        var _new_left$14 = $13008;
-                        var _new_right$15 = Avl$insert$(_cmp$3, _key$4, _val$5, $13009);
-                        var $13013 = Avl$balance$(_new_key$12, _new_val$13, _new_left$14, _new_right$15);
-                        var $13010 = $13013;
+                        var _new_key$12 = $12728;
+                        var _new_val$13 = $12729;
+                        var _new_left$14 = $12730;
+                        var _new_right$15 = BBL$insert$(_cmp$3, _key$4, _val$5, $12731);
+                        var $12735 = BBL$balance$(_new_key$12, _new_val$13, _new_left$14, _new_right$15);
+                        var $12732 = $12735;
                         break;
                 };
                 var $13005 = $13010;
                 break;
-            case 'Avl.tip':
-                var $13014 = Avl$singleton$(_key$4, _val$5);
-                var $13005 = $13014;
+            case 'BBL.tip':
+                var $12736 = BBL$singleton$(_key$4, _val$5);
+                var $12727 = $12736;
                 break;
         };
         return $13005;
     };
-    const Avl$insert = x0 => x1 => x2 => x3 => Avl$insert$(x0, x1, x2, x3);
+    const BBL$insert = x0 => x1 => x2 => x3 => BBL$insert$(x0, x1, x2, x3);
 
-    function Avl$from_list$go$(_cmp$3, _acc$4, _xs$5) {
-        var Avl$from_list$go$ = (_cmp$3, _acc$4, _xs$5) => ({
+    function BBL$from_list$go$(_cmp$3, _acc$4, _xs$5) {
+        var BBL$from_list$go$ = (_cmp$3, _acc$4, _xs$5) => ({
             ctr: 'TCO',
             arg: [_cmp$3, _acc$4, _xs$5]
         });
-        var Avl$from_list$go = _cmp$3 => _acc$4 => _xs$5 => Avl$from_list$go$(_cmp$3, _acc$4, _xs$5);
+        var BBL$from_list$go = _cmp$3 => _acc$4 => _xs$5 => BBL$from_list$go$(_cmp$3, _acc$4, _xs$5);
         var arg = [_cmp$3, _acc$4, _xs$5];
         while (true) {
             let [_cmp$3, _acc$4, _xs$5] = arg;
@@ -43502,13 +43502,13 @@ module.exports = (function() {
                 var self = _xs$5;
                 switch (self._) {
                     case 'List.cons':
-                        var $13015 = self.head;
-                        var $13016 = self.tail;
-                        var _key$8 = Pair$fst$($13015);
-                        var _val$9 = Pair$snd$($13015);
-                        var _new_acc$10 = Avl$insert$(_cmp$3, _key$8, _val$9, _acc$4);
-                        var $13017 = Avl$from_list$go$(_cmp$3, _new_acc$10, $13016);
-                        return $13017;
+                        var $12737 = self.head;
+                        var $12738 = self.tail;
+                        var _key$8 = Pair$fst$($12737);
+                        var _val$9 = Pair$snd$($12737);
+                        var _new_acc$10 = BBL$insert$(_cmp$3, _key$8, _val$9, _acc$4);
+                        var $12739 = BBL$from_list$go$(_cmp$3, _new_acc$10, $12738);
+                        return $12739;
                     case 'List.nil':
                         var $13018 = _acc$4;
                         return $13018;
@@ -43518,17 +43518,17 @@ module.exports = (function() {
             else return R;
         }
     };
-    const Avl$from_list$go = x0 => x1 => x2 => Avl$from_list$go$(x0, x1, x2);
+    const BBL$from_list$go = x0 => x1 => x2 => BBL$from_list$go$(x0, x1, x2);
 
-    function Avl$from_list$(_cmp$3, _xs$4) {
-        var $13019 = Avl$from_list$go$(_cmp$3, Avl$tip, _xs$4);
-        return $13019;
+    function BBL$from_list$(_cmp$3, _xs$4) {
+        var $12741 = BBL$from_list$go$(_cmp$3, BBL$tip, _xs$4);
+        return $12741;
     };
-    const Avl$from_list = x0 => x1 => Avl$from_list$(x0, x1);
+    const BBL$from_list = x0 => x1 => BBL$from_list$(x0, x1);
 
     function Map$from_list$(_xs$2) {
-        var $13020 = Avl$from_list$(String$cmp, _xs$2);
-        return $13020;
+        var $12742 = BBL$from_list$(String$cmp, _xs$2);
+        return $12742;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
     const Kind$Comp$Target$Scheme$optimizeds = Map$from_list$(List$cons$(Pair$new$("Bool.not", Pair$new$(1n, "(not $0)")), List$cons$(Pair$new$("Bool.and", Pair$new$(2n, "(and $0 $1)")), List$cons$(Pair$new$("Bool.if", Pair$new$(3n, "(if $0 $1 $2)")), List$cons$(Pair$new$("Bool.or", Pair$new$(2n, "(or $0 $1)")), List$cons$(Pair$new$("Nat.add", Pair$new$(2n, "(+ $0 $1)")), List$cons$(Pair$new$("Nat.sub", Pair$new$(2n, "(max (- $0 $1) 0)")), List$cons$(Pair$new$("Nat.mul", Pair$new$(2n, "(* $0 $1)")), List$cons$(Pair$new$("Nat.div", Pair$new$(2n, "(div $0 $1)")), List$cons$(Pair$new$("Nat.mod", Pair$new$(2n, "(mod $0 $1)")), List$cons$(Pair$new$("Nat.pow", Pair$new$(2n, "(expt $0 $1)")), List$cons$(Pair$new$("Nat.ltn", Pair$new$(2n, "(< $0 $1)")), List$cons$(Pair$new$("Nat.lte", Pair$new$(2n, "(<= $0 $1)")), List$cons$(Pair$new$("Nat.eql", Pair$new$(2n, "(= $0 $1)")), List$cons$(Pair$new$("Nat.gte", Pair$new$(2n, "(>= $0 $1)")), List$cons$(Pair$new$("Nat.gtn", Pair$new$(2n, "(> $0 $1)")), List$cons$(Pair$new$("Nat.to_u16", Pair$new$(1n, "$0")), List$cons$(Pair$new$("Nat.show", Pair$new$(1n, "(number->string $0)")), List$cons$(Pair$new$("U16.add", Pair$new$(2n, "(mod (+ $0 $1) 65536)")), List$cons$(Pair$new$("U16.sub", Pair$new$(2n, "(mod (- $0 $1) 65536)")), List$cons$(Pair$new$("U16.mul", Pair$new$(2n, "(mod (* $0 $1) 65536)")), List$cons$(Pair$new$("U16.div", Pair$new$(2n, "(div $0 $1)")), List$cons$(Pair$new$("U16.mod", Pair$new$(2n, "(mod $0 $1)")), List$cons$(Pair$new$("U16.pow", Pair$new$(2n, "(mod (expt $0 $1) 65536)")), List$cons$(Pair$new$("U16.ltn", Pair$new$(2n, "(< $0 $1)")), List$cons$(Pair$new$("U16.lte", Pair$new$(2n, "(<= $0 $1)")), List$cons$(Pair$new$("U16.eql", Pair$new$(2n, "(= $0 $1)")), List$cons$(Pair$new$("U16.gte", Pair$new$(2n, "(>= $0 $1)")), List$cons$(Pair$new$("U16.gtn", Pair$new$(2n, "(> $0 $1)")), List$cons$(Pair$new$("U16.inc", Pair$new$(2n, "(+ $0 1)")), List$cons$(Pair$new$("U16.to_nat", Pair$new$(1n, "$0")), List$cons$(Pair$new$("String.eql", Pair$new$(2n, "(string=? (kstring->string $0) (kstring->string $1))")), List$cons$(Pair$new$("String.concat", Pair$new$(2n, "(kstring-append $0 $1)")), List$nil)))))))))))))))))))))))))))))))));
@@ -46112,11 +46112,11 @@ module.exports = (function() {
         'Kind.Comp.apply': Kind$Comp$apply,
         'Kind.Comp.Prim.elim': Kind$Comp$Prim$elim,
         'Kind.Comp.Prim.eliminator': Kind$Comp$Prim$eliminator,
-        'Avl.lookup': Avl$lookup,
+        'BBL.lookup': BBL$lookup,
         'U16.cmp': U16$cmp,
         'String.cmp': String$cmp,
         'Map.get': Map$get,
-        'Avl': Avl,
+        'BBL': BBL,
         'Map': Map,
         'Kind.Comp.transpile.global_definitions': Kind$Comp$transpile$global_definitions,
         'Kind.Comp.transpile': Kind$Comp$transpile,
@@ -46143,25 +46143,25 @@ module.exports = (function() {
         'Kind.Comp.Target.Scheme.grammar': Kind$Comp$Target$Scheme$grammar,
         'Kind.Comp.Native.new': Kind$Comp$Native$new,
         'Kind.Comp.Target.Scheme.natives': Kind$Comp$Target$Scheme$natives,
-        'Avl.bin': Avl$bin,
+        'BBL.bin': BBL$bin,
         'U32.new': U32$new,
         'Nat.to_u32': Nat$to_u32,
-        'Avl.tip': Avl$tip,
-        'Avl.singleton': Avl$singleton,
-        'Avl.size': Avl$size,
+        'BBL.tip': BBL$tip,
+        'BBL.singleton': BBL$singleton,
+        'BBL.size': BBL$size,
         'U32.add': U32$add,
         'U32.mul': U32$mul,
-        'Avl.w': Avl$w,
+        'BBL.w': BBL$w,
         'U32.ltn': U32$ltn,
         'U32.from_nat': U32$from_nat,
-        'Avl.node': Avl$node,
+        'BBL.node': BBL$node,
         'Cmp.as_gtn': Cmp$as_gtn,
         'Word.gtn': Word$gtn,
         'U32.gtn': U32$gtn,
-        'Avl.balance': Avl$balance,
-        'Avl.insert': Avl$insert,
-        'Avl.from_list.go': Avl$from_list$go,
-        'Avl.from_list': Avl$from_list,
+        'BBL.balance': BBL$balance,
+        'BBL.insert': BBL$insert,
+        'BBL.from_list.go': BBL$from_list$go,
+        'BBL.from_list': BBL$from_list,
         'Map.from_list': Map$from_list,
         'Kind.Comp.Target.Scheme.optimizeds': Kind$Comp$Target$Scheme$optimizeds,
         'Kind.Comp.Target.Scheme.basics': Kind$Comp$Target$Scheme$basics,

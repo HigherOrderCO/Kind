@@ -1,0 +1,6 @@
+type App.KL.Game.Skill {
+	new(
+  	name: String
+		effect: App.KL.Game.Effect<Unit>
+	)
+}

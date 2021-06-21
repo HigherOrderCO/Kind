@@ -5,5 +5,5 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
     (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle,
     25,
     10,
-    []
+    {"X": App.KL.Game.Skill.Move.skill},
   )

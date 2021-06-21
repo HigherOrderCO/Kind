@@ -1,0 +1,22 @@
+type App.KL.Game.Phase.Play.Event {
+  cast(letter: Char, target: Hexagonal.Axial)
+  // Play events
+  //start_game  ( players: List<App.Kaelin.Player> )
+  // Will store draft info (player / hero / team)
+  // [App.Kaelin.Drafted.new("0x01babFc", App.Kaelin.Hero.Zeralul, App.Kaelin.Team.Blue)]
+  //create_user  ( player: App.Kaelin.Player )
+  //create_hero  ( hero_id: U8 )
+  //user_input   ( player: String, coord: App.Kaelin.Coord, action: App.Kaelin.Action )
+  //exe_skill    ( player: String, target_pos: App.Kaelin.Coord, key: Char )
+  //save_skill   ( player: String, target_pos: App.Kaelin.Coord, key: Char, team: App.Kaelin.Team )
+  //remove_skill ( player: String, target_pos: App.Kaelin.Coord, key: Char, team: App.Kaelin.Team )
+  //end_action
+  //draft_hero   ( hero: U8)
+  //draft_coord  ( coord: App.Kaelin.Coord)
+  //draft_team   ( team: U8)
+  //draft_ready  ( ready: U8)
+  //control_map  
+} deriving (serializer, deserializer)
+
+App.KL.Game.Phase.Play.Event.cast.serial(letter: Char, target: Hexagonal.Axial): String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.play(App.KL.Game.Phase.Play.Event.cast(letter, target))))

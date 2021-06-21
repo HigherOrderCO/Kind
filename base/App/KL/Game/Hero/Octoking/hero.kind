@@ -5,5 +5,5 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
     (bool, time) App.KL.Game.Hero.Octoking.Assets.base64_idle,
     15,
     10,
-    []
+    {"X": App.KL.Game.Skill.Move.skill},
   )

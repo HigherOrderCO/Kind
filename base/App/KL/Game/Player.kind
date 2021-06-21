@@ -1,0 +1,8 @@
+type App.KL.Game.Player {
+  new(
+    hero_id: Maybe<Nat>
+    init_pos: Maybe<Hexagonal.Axial>
+    team: App.KL.Game.Team
+    ready: Bool
+  )
+}

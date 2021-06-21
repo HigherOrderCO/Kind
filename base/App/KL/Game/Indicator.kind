@@ -1,0 +1,11 @@
+type App.KL.Game.Indicator {
+  green
+  red
+  yellow
+  blue
+  background
+} deriving (stringifier)
+
+App.KL.Game.Indicator.show(indicator: App.KL.Game.Indicator): String
+  Stringifier.run!(App.KL.Game.Indicator.stringifier, indicator)
+

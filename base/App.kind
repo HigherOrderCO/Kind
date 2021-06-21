@@ -93,6 +93,12 @@ type App.Event {
     time: U64
     code: U16
   )
+  // The event occurs when the mouse moves
+  mouse_move(
+    time: U64
+    id: String
+    mouse_pos: Pair<U32, U32>
+  )
   // The event occurs when the pointer is moved onto an element, or onto one of its children
   mouse_over(
     time: U64

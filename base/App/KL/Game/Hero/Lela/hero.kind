@@ -5,5 +5,5 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
     (bool, time) App.KL.Game.Hero.Lela.Assets.base64_idle,
     15,
     10,
-    []
+    {"X": App.KL.Game.Skill.Move.skill},
   )

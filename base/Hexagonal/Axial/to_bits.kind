@@ -1,0 +1,7 @@
+// Converts Axial coordinates to Bits
+Hexagonal.Axial.to_bits(
+  coord : Hexagonal.Axial
+): Bits
+
+  unique_nat = Hexagonal.Axial.to_nat(coord)
+  Nat.to_bits(unique_nat)

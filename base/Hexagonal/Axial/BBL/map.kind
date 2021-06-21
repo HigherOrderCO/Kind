@@ -1,0 +1,7 @@
+// Applies to all values in a A Type map the f Function
+Hexagonal.Axial.BBL.map<A : Type, B : Type>(
+  f : A -> B,
+  map : Hexagonal.Axial.BBL<A>
+) : Hexagonal.Axial.BBL<B>
+
+  BBL.map!!!(f, map)

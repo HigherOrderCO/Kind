@@ -1,0 +1,6 @@
+// Returns a Cubic coordinate as a String
+Hexagonal.Cubic.show(
+  coord: Hexagonal.Cubic
+): String
+
+  Stringifier.run!(Hexagonal.Cubic.stringifier, coord)

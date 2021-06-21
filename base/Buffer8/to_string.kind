@@ -1,0 +1,9 @@
+// Returns a string of spaced pairs of Char.
+// ex: 01 02 ff 01 7f
+Buffer8.to_string(buf: Buffer8): String
+  let str = ""
+  for i from 0 to buf@depth with str:
+    let bits = U8.to_bits(Buffer8.get(Nat.to_u32(i), buf)) // group of 4 bytes
+    let hex = String.reverse(Bits.hex.encode(bits))
+    str | " " | hex
+  str

@@ -1,0 +1,6 @@
+// Unites two results of Actions in a BBL tree
+Hexagonal.Axial.BBL.union<A : Type>(
+  map : Hexagonal.Axial.BBL<A>
+): Hexagonal.Axial.BBL<A> -> Hexagonal.Axial.BBL<A>
+
+  BBL.union!!(Hexagonal.Axial.cmp, map)

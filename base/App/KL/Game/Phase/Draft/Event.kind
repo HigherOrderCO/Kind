@@ -1,0 +1,23 @@
+type App.KL.Game.Phase.Draft.Event {
+  join_room
+  set_team(team: App.KL.Game.Team)
+  set_hero(hero: U8)
+  set_init_pos(coord: Hexagonal.Axial)
+  set_ready(ready: U8)
+} deriving (serializer, deserializer)
+
+App.KL.Game.Phase.Draft.Event.join_room.serial: String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.draft(App.KL.Game.Phase.Draft.Event.join_room)))
+
+App.KL.Game.Phase.Draft.Event.set_team.serial(team: App.KL.Game.Team): String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.draft(App.KL.Game.Phase.Draft.Event.set_team(team))))
+
+App.KL.Game.Phase.Draft.Event.set_hero.serial(hero: U8): String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.draft(App.KL.Game.Phase.Draft.Event.set_hero(hero))))
+
+App.KL.Game.Phase.Draft.Event.set_init_pos.serial(coord: Hexagonal.Axial): String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.draft(App.KL.Game.Phase.Draft.Event.set_init_pos(coord))))
+
+App.KL.Game.Phase.Draft.Event.set_ready.serial(ready: U8): String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.draft(App.KL.Game.Phase.Draft.Event.set_ready(ready))))
+

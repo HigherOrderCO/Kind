@@ -1,0 +1,6 @@
+// Gets all values in a map and returns as a List
+Hexagonal.Axial.BBL.values<A : Type>(
+  map : Hexagonal.Axial.BBL<A>
+): List<A>
+
+  BBL.foldr_with_key!!!((key, value, list) value & list, [], map)

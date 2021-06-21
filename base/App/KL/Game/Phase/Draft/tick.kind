@@ -1,0 +1,17 @@
+App.KL.Game.Phase.Draft.tick(tick: U64, game: App.KL.Game): App.KL.Game
+  //let game        = game@tick <- U64.add(game@tick, 1)
+  let players     = game@players
+  let player_list = Map.to_list!(players)
+  let ready       = List.fold!(player_list, _, true, (x) Bool.and(x@snd@ready))
+  case player_list {
+    nil:
+      game
+    cons: 
+      if ready then
+        log("- to_board")
+        game = game@phase <- App.KL.Game.Phase.play // Phase -> Game
+        game = game@board <- App.KL.Game.Phase.Draft.create_board(players)
+        game
+      else
+        game
+  }

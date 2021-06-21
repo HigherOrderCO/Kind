@@ -1,0 +1,12 @@
+type App.KL.Game.Team {
+  blue
+  red
+  neutral
+} deriving (serializer, deserializer)
+
+App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
+  case a b {
+    red     red     : true
+    blue    blue    : true
+    neutral neutral : true
+  } default false

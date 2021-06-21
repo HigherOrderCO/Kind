@@ -19,10 +19,10 @@ Kind.Comp.Target.Javascript.inst_name(name: String): String
   name|"_inst"
 
 Kind.Comp.Target.Javascript.lambda(name: String, body: String): String
-  "(("|Kind.Comp.Target.Javascript.name(name)|") => { "|body|"})"
+  "(("|Kind.Comp.Target.Javascript.name(name)|") => { return "|body|";})"
 
 Kind.Comp.Target.Javascript.application(func: String, argm: String): String
-  func|"("|argm|")"
+  "("|func|"("|argm|")"|")"
 
 Kind.Comp.Target.Javascript.local_definition(name: String, expr: String, body: String): String
   "(() => {const "|Kind.Comp.Target.Javascript.name(name)|" = "|expr|";\n return "
@@ -51,7 +51,7 @@ Kind.Comp.Target.Javascript.nest_lambdas.aux(fun: String, args: List<String>, re
   def this = Kind.Comp.Target.Javascript.nest_lambdas.aux(fun, args)
   case rem_args {
     nil:
-      "return "|Kind.Comp.Target.Javascript.global_application(fun, args)|";"
+      Kind.Comp.Target.Javascript.global_application(fun, args)
     cons:
       Kind.Comp.Target.Javascript.lambda(rem_args.head, this(rem_args.tail))
   }
@@ -237,7 +237,7 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
           let field_list = [] :: List<String>
           for field in ctr_fields with field_list:
              ("$0['"|field|"']") & field_list
-          {"'"|ctr_name|"'", field_list} & cses
+          {"'"|prim.name|"."|ctr_name|"'", List.reverse!(field_list)} & cses
         List.reverse!(cses)
       })
   }

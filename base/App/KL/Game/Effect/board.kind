@@ -1,0 +1,7 @@
+App.KL.Game.Effect.board.get: App.KL.Game.Effect<App.KL.Game.Board>
+  (center, target, board)
+  App.KL.Game.Effect.Result.new!(board, board)
+
+App.KL.Game.Effect.board.set(new_board: App.KL.Game.Board): App.KL.Game.Effect<Unit>
+  (center, target, board)
+  App.KL.Game.Effect.Result.new!(unit, new_board)

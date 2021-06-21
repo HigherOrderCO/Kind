@@ -1,230 +1,69 @@
 // TODO make alias for time -> U64 and base64 -> String
 
-// GAME
-// ====
+// Local State
+// ===========
 
 type App.KL.Game.State.Local {
   new(
     user: String
     room: String
-    casts: Maybe<App.KL.Game.Casts>
-    // cast_info
-    env_info: App.EnvInfo
+    preview: App.KL.Game.Cast.Preview
+    mouse: Pair<U32, U32>
   )
 }
+
+App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Local
+  let preview = App.KL.Game.Cast.Preview.new(Hexagonal.Axial.BBL.new!, Hexagonal.Axial.BBL.new!)
+  let mouse = {0,0}
+  App.KL.Game.State.Local.new(user, room, preview, mouse)
 
 // Global State
 // ============
 
 type App.KL.Game {
   new(
-    stage: App.KL.Game.Stage
+    tick: U64
+    phase: App.KL.Game.Phase
     players: Map<App.KL.Game.Player>
     board: App.KL.Game.Board
-    tick: U64
+    casts: List<App.KL.Game.Cast>
   )
 }
 
-type App.KL.Game.Stage {
+type App.KL.Game.Phase {
   draft
-  board
+  play
 }
 
-// Players
-// -------
+// Initial state
+App.KL.Game.start: App.KL.Game
+  let phase = App.KL.Game.Phase.draft
+  let players = Map.new!
+  let board = Hexagonal.Axial.BBL.new!
+  let tick = 0#64
+  let casts = []
+  App.KL.Game.new(tick, phase, players, board, casts)
 
-type App.KL.Game.Player {
-  new(
-    hero_id: Maybe<Nat>
-    init_pos: Maybe<Hexagonal.Axial>
-    team: App.KL.Game.Team
-    ready: Bool
-  )
-}
-
-type App.KL.Game.Team {
-  blue
-  red
-  neutral
-} deriving (serializer, deserializer)
-
-App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
-  case a b {
-    red red: true
-    blue blue: true
-    neutral neutral: true
-  } default false
-
-type App.KL.Game.Creature {
-  new(
-    player: Maybe<String>
-    hero: App.KL.Game.Hero
-    team: App.KL.Game.Team
-    hp: I32
-    ap: I32
-  )
-}
-
-type App.KL.Game.Hero {
-  new(
-    name: String
-    draw: App.KL.Game.Creature -> VoxBox
-    picture: Bool -> U64 -> String
-    max_hp: I32
-    max_ap: I32
-    skills: List<App.KL.Game.Skill>
-  )
-}
-
-type App.KL.Game.Asset {
-  new(
-    vbox  : VoxBox
-    base64: String
-  )
-}
-
-type App.KL.Game.Skill {
-	new(
-  	name: String
-		range: I32
-    ap_cost: I32
-		effect: App.KL.Game.Effect<Unit>
-		key: Char
-	)
-}
-
-App.KL.Game.Effect(A: Type): Type
-  ((center: Hexagonal.Axial) ->
-   (target: Hexagonal.Axial) ->
-   (board: App.KL.Game.Board) ->
-   App.KL.Game.Effect.Result(A))
-
-type App.KL.Game.Effect.Result <A: Type> {
-  new(
-    value: A
-    board: App.KL.Game.Board
-    //futures: List(App.KL.Board.Future)
-    //indicators: NatMap<App.KL.Game.Indicator>
-  )
-}
-
-type App.KL.Game.Indicator {
-  green
-  red
-  yellow
-  blue
-  background
-} deriving (stringifier)
-
-App.KL.Game.Indicator.show(indicator: App.KL.Game.Indicator): String
-  Stringifier.run!(App.KL.Game.Indicator.stringifier, indicator)
-
-// Terrains
-// --------
-
-type App.KL.Game.Field {
-  new(
-    name: String
-    draw: App.KL.Game.Terrain -> App.KL.Game.Indicator -> VoxBox
-  )
-}
-
-type App.KL.Game.Terrain {
-  new(
-    field_id: Nat
-  )
-}
-
-type App.KL.Game.Tile {
-  new(
-    terrain: App.KL.Game.Terrain
-    creature: Maybe<App.KL.Game.Creature>
-  )
-}
-
-type App.KL.Game.Entity { // TODO rename?
-  terrain (value: App.KL.Game.Terrain)
-  creature(value: App.KL.Game.Creature)
-}
-
-// Board
-// -----
-
-App.KL.Game.Board: Type
-  Hexagonal.Axial.BBL<App.KL.Game.Tile>
-
-// CastInfo
-// ----
-
-type App.KL.Game.Casts {
-  new(
-    areas: Maybe<Hexagonal.Axial.BBL<App.KL.Game.Indicator>>
-    picks: Hexagonal.Axial.BBL<String>
-  )
-}
-
-type App.KL.Game.Action { // skill info to send on post
-  new(
-    player: String,
-    target_pos: Hexagonal.Axial,
-    key: U16
-  )
-}
-
-//type App.Kaelin.State.global {
-  //new(
-    //round: I32
-    //tick: U64
-    //room: String
-    //map: App.Kaelin.Map
-    //stage: App.Kaelin.Stage
-    //skills_list: List<App.Kaelin.CastInfo.global>
-  //)
-//}
-
-//type App.Kaelin.State.local {
-  //new(
-    //input: String
-    //user: String
-    //team: App.Kaelin.Team
-    //local_map: App.Kaelin.Map
-    //control_map: I32
-    //cast_info: Maybe<App.Kaelin.CastInfo.local>
-    //env_info: App.EnvInfo,
-    //internal: App.Kaelin.Internal 
-  //)
-//}
-
-
-
-
-
-
-
+// Render function
+// ===============
 
 App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
-  <div>
-    <div>"Sala: " | local@room</div>
-    {
-      let game = global@game
-      case game {
-        none: <div>"Not ingame."</div>
-        some: 
-          <div>
-            <div>"Players: " | Nat.show(List.length!(Map.to_list!(game.value@players)))</div>
-
-            // choose what to draw based on game stage
-            {
-              let stage = game.value@stage
-              case stage {
-                board: App.KL.Game.Stage.Board.draw(img, local, game.value)
-                draft: App.KL.Game.Stage.Draft.draw(local, global) // TODO change to receive App.KL.Game instead global
-              } 
-            }
-          </div>
-      }
+  <div>{
+    let game = global@game
+    case game {
+      none: <div>"Not ingame."</div>
+      some: <div>{
+        let phase = game.value@phase
+        case phase {
+          play: App.KL.Game.Phase.Play.draw(img, local, game.value)
+          draft: App.KL.Game.Phase.Draft.draw(local, global) // TODO change to receive App.KL.Game instead global
+        } 
+      }</div>
     }
-  </div>
+  }</div>
+
+// Local events
+// ============
 
 App.KL.Game.when(
   local: App.KL.Game.State.Local
@@ -236,37 +75,36 @@ App.KL.Game.when(
     none: App.pass!
     some: 
       open game.value as game_info
-      case game_info.stage {
-        board: App.KL.Game.Stage.Board.when(local, game.value, event)
-        draft: App.KL.Game.Stage.Draft.when(local, game.value, event)
+      case game_info.phase {
+        play: App.KL.Game.Phase.Play.when(local, game.value, event)
+        draft: App.KL.Game.Phase.Draft.when(local, game.value, event)
       }
   }
 
-App.KL.Game.start: App.KL.Game
-  App.KL.Game.new(
-    App.KL.Game.Stage.draft
-    Map.new!
-    Hexagonal.Axial.BBL.new!
-    0
-  )
+// Global Events
+// =============
 
+type App.KL.Game.Event {
+  draft(event: App.KL.Game.Phase.Draft.Event)
+  play(event: App.KL.Game.Phase.Play.Event)
+} deriving (serializer, deserializer)
 
+App.KL.Game.tick(tick: U64, game: App.KL.Game): App.KL.Game
+  open game
+  case game.phase {
+    draft: App.KL.Game.Phase.Draft.tick(tick, game)
+    play: App.KL.Game.Phase.Play.tick(tick, game)
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+App.KL.Game.post(
+  time: U64
+  room: String
+  addr: String
+  event: App.KL.Game.Event
+  game: App.KL.Game
+): App.KL.Game
+  open game
+  case event game.phase {
+    draft draft : App.KL.Game.Phase.Draft.post(time, room, addr, event.event, game)
+    play  play  : App.KL.Game.Phase.Play.post(time, room, addr, event.event, game)
+  } default game

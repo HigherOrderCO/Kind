@@ -3057,9 +3057,14 @@ module.exports = class AppPlay extends Component {
 
    // Mouse movement event
     this.listeners.mousemove = (e) => {
-      this.mouse_pos = {_ : "Pair.new", fst: e.offsetX, snd : e.offsetY}
+      this.mouse_pos = {_: "Pair.new", fst: e.pageX, snd: e.pageY};
+      this.register_event({
+        _: "App.Event.mouse_move",
+        time: BigInt(Date.now()),
+        id: e.target.id,
+        mouse_pos: {_: "Pair.new", fst: e.offsetX, snd: e.offsetY}
+      });
     }
-
     document.body.addEventListener("mousemove", this.listeners.mousemove);
 
     // Mouse down event
@@ -3389,7 +3394,8 @@ module.exports = class AppPlay extends Component {
         var id       = canvas_props ? canvas_props.id || "" : "";
         var width    = Number(canvas_props.width) || 256;
         var height   = Number(canvas_props.height) || 256;
-        var canvas   = this.get_canvas(id, width, height);
+        var scale    = Number(canvas_props.scale) || 1;
+        var canvas   = this.get_canvas(id, width, height, scale);
         var length   = elem.value.length;
         var capacity = elem.value.capacity;
         var buffer   = elem.value.buffer;
@@ -3408,8 +3414,6 @@ module.exports = class AppPlay extends Component {
             canvas.clear.data[canvas.clear.length++] = idx;
           }
         }
-        // Add custom style to canvas
-        canvas.style = canvas_style;
         // Renders buffers to canvas
         canvas.image_data.data.set(canvas.image_u8);
         canvas.context.putImageData(canvas.image_data, 0, 0);
@@ -3464,17 +3468,18 @@ module.exports = class AppPlay extends Component {
   }
 
   // Gets a pixel-art canvas
-  get_canvas(id, width, height) {
+  get_canvas(id, width, height, scale=1) {
     if (!this.canvas[id] || this.canvas[id].width !== width || this.canvas[id].height !== height) {
       console.log("creating canvas", id, width, height);
       this.canvas[id] = document.createElement("canvas");
+      this.canvas[id].id = id;
       this.canvas[id].style["image-rendering"] = "pixelated";
       this.canvas[id].width = width;
       this.canvas[id].height = height;
-      this.canvas[id].style.width = width + "px";
-      this.canvas[id].style.height = height + "px";
+      this.canvas[id].style.width = (width*scale) + "px";
+      this.canvas[id].style.height = (height*scale) + "px";
       this.canvas[id].clear = { length: 0, data: new Uint32Array(width * height * 32) };
-      this.canvas[id].style.border = "1px solid black";
+      //this.canvas[id].style.border = "1px solid black";
       this.canvas[id].context = this.canvas[id].getContext("2d");
       this.canvas[id].image_data = this.canvas[id].context.getImageData(0, 0, this.canvas[id].width, this.canvas[id].height)
       this.canvas[id].image_buf = new ArrayBuffer(this.canvas[id].image_data.data.length);
@@ -3559,12 +3564,12 @@ function list_to_array(list) {
 
 function map_to_object(map, obj = {}) {
   switch (map._) {
-    case "Avl.bin":
+    case "BBL.bin":
       obj[map.key] = map.val;
       map_to_object(map.left, obj);
       map_to_object(map.right, obj);
       break;
-    case "Avl.tip":
+    case "BBL.tip":
       break;
   }
   return obj;

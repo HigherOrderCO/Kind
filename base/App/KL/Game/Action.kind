@@ -1,0 +1,8 @@
+type App.KL.Game.Action { // skill info to send on post
+  new(
+    player: String,
+    target_pos: Hexagonal.Axial,
+    key: U16
+  )
+}
+

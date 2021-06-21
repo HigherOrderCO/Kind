@@ -1,2 +1,2 @@
 I32.to_nat(a: I32): Nat
-  U32.to_nat(I32.to_U32(a))
+  U32.to_nat(I32.to_u32(a))

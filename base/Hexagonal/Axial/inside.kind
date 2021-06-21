@@ -1,0 +1,13 @@
+// Verifies if a coordinate is inside an hexagonal region
+Hexagonal.Axial.inside(
+  coord: Hexagonal.Axial,
+  region_size: I32
+): Bool
+  coord = Hexagonal.Axial.to_cubic(coord)
+  open coord
+
+  x = I32.abs(coord.x)
+  y = I32.abs(coord.y)
+  z = I32.abs(coord.z)
+  greater = I32.max(x, I32.max(y, z))
+  I32.lte(greater, region_size)
