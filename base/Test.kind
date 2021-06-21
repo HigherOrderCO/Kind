@@ -1,2 +1,6 @@
 Test: _
-  U64.show(1000#64)
+  let map = BBL.from_list!!(Nat.cmp, [{1, 1}, {2, 2}, {3, 3}])
+  BBL.for!!(map)!({"0", "0"}, 
+    (x,y,z) 
+      {z@fst | Nat.show(x), z@fst | Nat.show(y)}
+  )
