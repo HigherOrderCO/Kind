@@ -1,3 +1,3 @@
 Test: _
   let list = [0,1,2,3]
-  [i + 2 for i in list where Nat.ltn(i, 3), Nat.gtn(i, 0)]
+  [Nat.read(String.reverse(Nat.show(5 * (2 + i)))) for i in list where Nat.ltn(i, 3), Nat.gtn(i, 0)]

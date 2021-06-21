@@ -1,5 +1,5 @@
 Kind.Parser.comprehension: Parser<Kind.Term>
-  Parser.first_of!([
+  Parser.choice!([
     Kind.Parser.comprehension_with_where,
     Kind.Parser.comprehension_without_where      
   ])
