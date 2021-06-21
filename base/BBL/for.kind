@@ -1,16 +1,4 @@
+// TODO optmize?
 BBL.for<K: Type, V: Type>(map: BBL<K,V>)<A: Type>(a: A, f: K -> V -> A -> A): A
-  case map {
-    tip: a,
-    bin: 
-      let left_result  = case map.left {
-        tip: a,
-        bin: BBL.for!!(map.left)!(f(map.left.key, map.left.val, a), f)
-      }
-      let middle_result = f(map.key, map.val, left_result)
-      case map.right {
-        tip: left_result
-        bin: 
-          let right_result = BBL.for!!(map.right)!(f(map.right.key, map.right.val, middle_result), f)
-          right_result
-      }
-  }
+  let list = BBL.to_list!!(map)
+  List.for!(list)!(a, (x, y) f(x@fst, x@snd, y))
