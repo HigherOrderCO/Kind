@@ -68,10 +68,11 @@ Kind.Comp.transpile.global_definitions(
     let {name,term} = defn
     let {vars,body} = Kind.Comp.get_vars(term)
     // multiarg function
-    let code = code|lang@gram@global_function(name, vars, case lang@opts{name} as opt {
+    let inlined_body = case lang@opts{name} as opt {
       none: Kind.Comp.transpile.term(lang, body, 0, defs)
       some: Kind.Comp.replace(Pair.snd!!(opt.value), vars)
-    })
+    }
+    let code = code|lang@gram@global_function(name, vars, inlined_body)
     code
   code
 

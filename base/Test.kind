@@ -1,3 +1,24 @@
 Test: _
-  let map = Map.from_list!([{"orange", 2}, {"black", 3}, {"yellow", 4}, {"brown", 1}, {"white", 1}])
-  Map.for!(map)!({".", 0}, (x, y, z) { z@fst | x | ".", z@snd + y})
+  let nat = Kind.Comp.Target.Scheme.natives(Kind.Comp.Prim.data("Kind.Comp.Grammar", [{"new", ["null", "name", "inst_name", "elim_name", "lambda", "application", "local_definition", "global_function", "global_application", "select", "string_literal", "nat", "module", "program"]}])) open nat
+  //Kind.Comp.Prim.instantiator(Kind.Comp.Target.Scheme.Language, k, 0, BitsMap.new!)
+  let vars = [
+    "null$0",
+    "name$1",
+    "inst_name$2",
+    "elim_name$3",
+    "lambda$4",
+    "application$5",
+    "local_definition$6",
+    "global_function$7",
+    "global_application$8",
+    "select$9",
+    "string_literal$10",
+    "nat$11",
+    "module$12",
+    "program$13"
+  ]
+  case nat.inst {
+    cons:
+      //Pair.snd!!(nat.inst.head)
+      Kind.Comp.replace(Pair.snd!!(nat.inst.head), vars)
+  } default "error"
