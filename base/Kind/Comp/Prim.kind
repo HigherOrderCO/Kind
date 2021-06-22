@@ -5,9 +5,14 @@ type Kind.Comp.Prim {
   bits,
   unit,
   nat,
+  u8,
   u16,
   u32,
+  u64,
+  u256,
+  f64,
   string,
+  buffer32,
   data(name: String, ctrs: Kind.Comp.Prim.ADT),
 }
 
