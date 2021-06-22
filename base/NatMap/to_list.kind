@@ -1,0 +1,3 @@
+NatMap.to_list<A: Type>(xs: NatMap(A)): List<Pair<Nat,A>>
+  let kvs = List.reverse!(BitsMap.to_list.go!(xs, Bits.e, List.nil!))
+  List.mapped!(kvs)!((kv) let {k,v} = kv; {Bits.to_nat(k), v})
