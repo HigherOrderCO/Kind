@@ -395,18 +395,19 @@ App.KL.Game.Phase.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: Ap
   dom
 
 App.KL.Game.Phase.Draft.draw.cards.ally(user: String, info: Maybe(App.KL.Game.Player)): DOM
-  {name, image} = case info {
-    none: {"Connecting", App.KL.Game.Phase.Draft.draw.cards.interrogation}
-    some:
-      Maybe {
-        get info = Maybe.map!!(Nat.to_u8, info.value@hero_id)
-        get hero = App.Kaelin.Hero.info(info)  // TODO bring this function
-        let assets = hero@assets
-        return {hero@name, assets@base64}
-      } <> {"Choosing", App.KL.Game.Phase.Draft.draw.cards.interrogation}
-    }
+  <div>"TODO"</div>
+  //{name, image} = case info {
+    //none: {"Connecting", App.KL.Game.Phase.Draft.draw.cards.interrogation}
+    //some:
+      //Maybe {
+        //get info = Maybe.map!!(Nat.to_u8, info.value@hero_id)
+        //get hero = App.Kaelin.Hero.info(info)  // TODO bring this function
+        //let assets = hero@assets
+        //return {hero@name, assets@base64}
+      //} <> {"Choosing", App.KL.Game.Phase.Draft.draw.cards.interrogation}
+    //}
 
-  App.KL.Game.Phase.Draft.draw.cards.card(name, image, "80%")
+  //App.KL.Game.Phase.Draft.draw.cards.card(name, image, "80%")
 
 App.KL.Game.Phase.Draft.draw.cards.card(name: String, image: String, height: String): DOM
    <div style={ 
