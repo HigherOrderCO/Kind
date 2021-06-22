@@ -1,2 +1,0 @@
-NatMap.set<A: Type>(key: Nat, val: A, map: NatMap(A)): NatMap(A)
-  BitsMap.set<A>(Nat.to_bits(key), val, map)

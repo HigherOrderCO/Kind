@@ -1,0 +1,5 @@
+BBT.node<K: Type, V: Type>(key: K, val: V, left: BBT<K,V>, right: BBT<K,V>): BBT<K,V>
+  let size_left  = BBT.size!!(left)
+  let size_right = BBT.size!!(right)
+  let new_size   = U32.add(1u, U32.add(size_left, size_right))
+  BBT.bin!!(new_size, key, val, left, right)

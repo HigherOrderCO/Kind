@@ -1,0 +1,5 @@
+App.KL.Game.Effect.hp.heal(
+  heal: I32
+): App.KL.Game.Effect<I32>
+
+  App.KL.Game.Effect.hp.change(heal)

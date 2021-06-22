@@ -1,4 +1,31 @@
-User.Caotic.Test: _
-  let test = {2, 4}
-  {x, y} = test
-  y
+type Map <A : Type> <B : Type> (op : A -> A -> Cmp) {
+  new(tree : BBT<A, B>)
+}
+
+Map.set(A : Type, B : Type, op : A -> A -> CMP, k : A, v : B, map : Map<A, B, op>) : Map<A, B, op>
+  open map
+  let k = BBT.insert!!(op, k, v, map.tree)
+  Map.new(A, B, op, k)
+
+StringMap(B : Type) : Type
+  Map!<B, String.cmp>
+
+StringMap.new<B : Type> : StringMap<B>
+  Map.new!!!(BBT.tip<String, B>)
+
+test(x : StringMap<Nat>) : StringMap<Nat>
+  Map.set!!!("test", 34, x)
+
+User.caotic.test : _
+  test(StringMap.new!)
+
+User.Caotic.Test2: _
+  let test = [] :: BList<Nat>
+  let k = List.foldr!!(test, BList.insert!, [1, 2, 3, 4, 5, 6])
+  Maybe {
+    let a = List.tail!(k)
+    get b = List.head!(a)
+    return b
+  }
+  //BList.insert!(2, test)
+  

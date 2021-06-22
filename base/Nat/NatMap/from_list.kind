@@ -1,0 +1,2 @@
+Nat.NatMap.from_list<A: Type>(xs: List<Pair<Nat,A>>): Nat.NatMap(A)
+  BBT.from_list!!(Nat.cmp, xs)

@@ -1,2 +1,0 @@
-Map.union<A: Type>(a: Map(A), b: Map(A)): Map(A)
-  BBL.union!!(String.cmp, a, b)

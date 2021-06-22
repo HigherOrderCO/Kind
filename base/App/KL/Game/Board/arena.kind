@@ -4,7 +4,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
     board_size = App.KL.Constants.board_size
   n_board_size = I32.neg(board_size)
 
-  board  = Hexagonal.Axial.BBL.new<App.KL.Game.Tile>
+  board  = Hexagonal.Axial.BBT.new<App.KL.Game.Tile>
   
   // TODO: Define this elsewhere?
   // Defines all possible images inside a tile
@@ -14,6 +14,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
   new_terrain = App.KL.Game.Entity.terrain(new_terrain)
 
   
+    
   for j : I32 from n_board_size to (board_size + 1) with board:
     // https://www.redblobgames.com/grids/hexagons/#range-coordinate
     // iterates only in valid coordinates

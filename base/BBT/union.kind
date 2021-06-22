@@ -1,0 +1,23 @@
+BBT.union<K: Type, V: Type>(
+  cmp  : K -> K -> Cmp,
+  map_a: BBT<K,V>, 
+  map_b: BBT<K,V>
+) : BBT<K,V>
+  
+  case map_a {
+    tip: case map_b {
+      tip: BBT.tip<K,V>,
+      bin: map_b
+    },
+    bin: case map_b {
+      tip: map_a,
+      bin:  
+        let key   = map_b.key 
+        let val   = map_b.val 
+        let ltn   = BBT.split_ltn<K,V>(cmp, map_b.key, map_a)
+        let gtn   = BBT.split_gtn<K,V>(cmp, map_b.key, map_a)
+        let left  = BBT.union<K,V>(cmp, ltn, map_b.left)
+        let right = BBT.union<K,V>(cmp, gtn, map_b.right)
+        BBT.concat3<K,V>(cmp, key, val, left, right)
+    }
+  }

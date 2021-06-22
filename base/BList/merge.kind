@@ -1,0 +1,2 @@
+BList.merge(A : Type, x : BList.BTree<A>, y : BList.BTree<A>) : BList.BTree<A>
+  BList.BTree.Node!(BList.size!(x) + BList.size!(y), x, y)

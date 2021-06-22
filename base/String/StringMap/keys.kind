@@ -1,0 +1,2 @@
+String.StringMap.keys<A: Type>(xs: String.StringMap<A>): List<String>
+  BBT.foldr_with_key!!!((key, value, list) key & list, [], xs)
