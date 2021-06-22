@@ -1,0 +1,4 @@
+type TestSuite {
+  unit(name: String, result: Maybe<String>)
+  many(name: String, list: List<TestSuite>)
+}

@@ -1,0 +1,4 @@
+// TODO optmize?
+BBL.for<K: Type, V: Type>(map: BBL<K,V>)<A: Type>(a: A, f: K -> V -> A -> A): A
+  let list = BBL.to_list!!(map)
+  List.for!(list)!(a, (x, y) f(x@fst, x@snd, y))

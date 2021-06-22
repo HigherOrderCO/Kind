@@ -6,7 +6,7 @@
 
 // statement
 type Stm {
-  CompoundStrm(fst: Stm, snd: Stm)
+  CompoundStm(fst: Stm, snd: Stm)
   AssignStm(id: String, exp: Exp)
   PrintStm(exp_list: List<Exp>)
 }
@@ -30,3 +30,8 @@ type Binop {
   times
   div
 }
+
+maxargs(stm: Stm): Nat
+  case stm {
+    CompoundStm: Nat.max(maxargs(stm.fst), maxargs(stm.snd))
+  } default 0

@@ -1654,14 +1654,14 @@ module.exports = (function() {
         return $282;
     };
     const DOM$text = x0 => DOM$text$(x0);
-    const Map$new = BBL$tip;
 
     function App$KL$Lobby$draw$input$(_id$1, _value$2) {
-        var _style$3 = Map$from_list$(List$cons$(Pair$new$("font-size", "2rem"), List$cons$(Pair$new$("font-family", "monospace"), List$cons$(Pair$new$("outline", "transparent"), List$nil))));
+        var _style$3 = Map$from_list$(List$cons$(Pair$new$("font-size", "2rem"), List$cons$(Pair$new$("font-family", "monospace"), List$cons$(Pair$new$("outline", "transparent"), List$cons$(Pair$new$("margin-bottom", "15px"), List$nil)))));
         var $283 = DOM$node$("input", Map$from_list$(List$cons$(Pair$new$("value", _value$2), List$cons$(Pair$new$("id", _id$1), List$nil))), _style$3, List$nil);
         return $283;
     };
     const App$KL$Lobby$draw$input = x0 => x1 => App$KL$Lobby$draw$input$(x0, x1);
+    const Map$new = BBL$tip;
 
     function App$KL$Lobby$draw$button$(_id$1, _content$2) {
         var _style$3 = Map$from_list$(List$cons$(Pair$new$("font-size", "2rem"), List$cons$(Pair$new$("font-family", "monospace"), List$cons$(Pair$new$("margin-left", "10px"), List$cons$(Pair$new$("padding", "2px"), List$nil)))));
@@ -1675,8 +1675,8 @@ module.exports = (function() {
         switch (self._) {
             case 'App.KL.Lobby.State.Local.new':
                 var $286 = self.room_input;
-                var _style$5 = Map$from_list$(List$cons$(Pair$new$("width", "100vw"), List$cons$(Pair$new$("height", "100vh"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("font-size", "2rem"), List$nil))))))));
-                var $287 = DOM$node$("div", Map$from_list$(List$nil), _style$5, List$cons$(DOM$node$("h1", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$nil)), List$cons$(DOM$text$("Welcome to Kaelin"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$new, List$cons$(DOM$text$("Enter a room number: "), List$cons$(App$KL$Lobby$draw$input$("text", $286), List$cons$(App$KL$Lobby$draw$button$("ready", "Enter"), List$cons$(App$KL$Lobby$draw$button$("random", "Random"), List$nil))))), List$nil)));
+                var _style$5 = Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$cons$(Pair$new$("font-size", "2rem"), List$nil))))))));
+                var $287 = DOM$node$("div", Map$from_list$(List$nil), _style$5, List$cons$(DOM$node$("h1", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-bottom", "10px"), List$cons$(Pair$new$("text-align", "center"), List$nil))), List$cons$(DOM$text$("Welcome to Kaelin"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$cons$(Pair$new$("text-align", "center"), List$nil))))), List$cons$(DOM$text$("Enter a room number: "), List$cons$(App$KL$Lobby$draw$input$("text", $286), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$new, List$cons$(App$KL$Lobby$draw$button$("ready", "Enter"), List$cons$(App$KL$Lobby$draw$button$("random", "Random"), List$nil))), List$nil)))), List$nil)));
                 var $285 = $287;
                 break;
         };
@@ -13073,8 +13073,8 @@ module.exports = (function() {
         'List.nil': List$nil,
         'DOM.node': DOM$node,
         'DOM.text': DOM$text,
-        'Map.new': Map$new,
         'App.KL.Lobby.draw.input': App$KL$Lobby$draw$input,
+        'Map.new': Map$new,
         'App.KL.Lobby.draw.button': App$KL$Lobby$draw$button,
         'App.KL.Lobby.draw': App$KL$Lobby$draw,
         'Maybe': Maybe,

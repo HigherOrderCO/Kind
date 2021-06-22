@@ -29,7 +29,8 @@ App.KL.Lobby.draw.input(id: String, value: String): DOM
   let style = {
     "font-size": "2rem",
     "font-family": "monospace",
-    "outline": "transparent"
+    "outline": "transparent",
+    "margin-bottom": "15px"
   }
   <input id=id value=value style=style>
   </input>
@@ -37,8 +38,8 @@ App.KL.Lobby.draw.input(id: String, value: String): DOM
 App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State): DOM
   open local
   let style = {
-    "width": "100vw", 
-    "height": "100vh", 
+    "width": "100%", 
+    "height": "100%", 
     "display": "flex", 
     "flex-direction": "column", 
     "justify-content": "center", 
@@ -46,14 +47,21 @@ App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State):
     "font-size": "2rem"
   }
   <div style=style>
-    <h1 style={"margin-bottom": "10px"}>
+    <h1 style={"margin-bottom": "10px", "text-align": "center"}>
       "Welcome to Kaelin"
     </h1>
-    <div>
+    <div style={
+      "display": "flex",
+      "justify-content": "center", 
+      "flex-wrap": "wrap",
+      "text-align": "center"
+    }>
       "Enter a room number: "
       {App.KL.Lobby.draw.input("text", local.room_input)}
-      {App.KL.Lobby.draw.button("ready", "Enter")}
-      {App.KL.Lobby.draw.button("random", "Random")}
+      <div>
+        {App.KL.Lobby.draw.button("ready", "Enter")}
+        {App.KL.Lobby.draw.button("random", "Random")}
+      </div>
     </div>
   </div>
 
