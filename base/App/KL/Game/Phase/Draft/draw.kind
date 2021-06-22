@@ -79,7 +79,7 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
     "width": "40%"
     "height": "200px"
     "background-image": gradient
-    // "box-shadow": "2px -2px 2px black"
+    "box-shadow": "2px -2px 2px black"
     "font-size": "2rem"
     "border": "0"
     "border-radius": "5px"
