@@ -13,7 +13,7 @@ type Stm {
 
 // expression
 type Exp {
-  IdExp(is: String)
+  IdExp(id: String)
   NumExp(num: Int) // #TODO include other numbers?
   OpExp(op: Binop, fst: Exp, snd: Exp)
   EseqExp(stm: Stm, exp: Exp)
@@ -34,4 +34,58 @@ type Binop {
 maxargs(stm: Stm): Nat
   case stm {
     CompoundStm: Nat.max(maxargs(stm.fst), maxargs(stm.snd))
-  } default 0
+    AssignStm: 0
+    PrintStm: List.length!(stm.exp_list)
+  }
+
+interpStm(stm: Stm, table: List<Pair<String, Int>>): List<Pair<String, Int>>
+  case stm {
+    CompoundStm:
+      let new_table = interpStm(stm.fst, table)
+      interpStm(stm.snd, new_table)
+    AssignStm:
+      let {i, new_table} = interpExp(stm.exp, table)
+      {stm.id, i} & new_table
+    PrintStm:
+      for exp in stm.exp_list with table:
+        let {i, new_table} = interpExp(exp, table)
+        log(Int.show(i))
+        new_table
+      table
+  }
+
+lookup(id: String, table: List<Pair<String, Int>>): Int
+  case table {
+    nil:
+      0 :: Int
+    cons:
+      let {table_id, val} = table.head
+      if id =? table_id then
+        val
+      else
+        lookup(id, table.tail)
+  }
+
+interpExp(exp: Exp, table: List<Pair<String, Int>>): Pair<Int, List<Pair<String, Int>>>
+  case exp {
+    IdExp:
+      {lookup(exp.id, table), table}
+    NumExp:
+      {exp.num, table}
+    OpExp:
+      let {fst_val, table} = interpExp(exp.fst, table)
+      let {snd_val, table} = interpExp(exp.snd, table)
+      case exp.op {
+        plus:
+          {fst_val + snd_val, table}
+        minus:
+          {fst_val - snd_val, table}
+        times:
+          {fst_val * snd_val, table}
+        div:
+          {fst_val / snd_val, table}
+      }
+    EseqExp:
+      let table = interpStm(exp.stm, table)
+      interpExp(exp.exp, table)
+  }
