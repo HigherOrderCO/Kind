@@ -4,6 +4,9 @@ App.KL.Constants.hexagon_radius: I32
 App.KL.Constants.board_size : I32
   7
 
+App.KL.Constants.board_extra_width : I32
+  0
+
 App.KL.Constants.center_x : I32
   228
 

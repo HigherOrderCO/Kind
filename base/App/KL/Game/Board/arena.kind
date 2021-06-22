@@ -1,6 +1,7 @@
 // The 'Arena' board
 App.KL.Game.Board.arena: App.KL.Game.Board
-  board_size = App.KL.Constants.board_size
+  extra_width  = App.KL.Constants.board_extra_width
+    board_size = App.KL.Constants.board_size
   n_board_size = I32.neg(board_size)
 
   board  = Hexagonal.Axial.BBL.new<App.KL.Game.Tile>
@@ -19,7 +20,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
     let a = I32.max(n_board_size, I32.neg(j) - board_size)
     let b = I32.min(  board_size, I32.neg(j) + board_size)
 
-    for i : I32 from a to (b + 1) with board: 
+    for i : I32 from (a - extra_width) to (b + extra_width + 1) with board: 
       // generate int axial coordinate
       coord   = Hexagonal.Axial.new(i, j)
       App.KL.Game.Board.push(coord, new_terrain, board)

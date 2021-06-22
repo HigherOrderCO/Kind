@@ -11262,6 +11262,7 @@ module.exports = (function() {
     const App$KL$Game$Phase$play = ({
         _: 'App.KL.Game.Phase.play'
     });
+    const App$KL$Constants$board_extra_width = 1;
 
     function App$KL$Game$Terrain$new$(_field_id$1) {
         var $2527 = ({
@@ -11359,37 +11360,38 @@ module.exports = (function() {
     };
     const App$KL$Game$Board$push = x0 => x1 => x2 => App$KL$Game$Board$push$(x0, x1, x2);
     const App$KL$Game$Board$arena = (() => {
-        var _board_size$1 = App$KL$Constants$board_size;
-        var _n_board_size$2 = ((-_board_size$1));
-        var _board$3 = Hexagonal$Axial$BBL$new;
-        var _new_terrain$4 = App$KL$Game$Terrain$new$(0n);
-        var _new_terrain$5 = App$KL$Game$Entity$terrain$(_new_terrain$4);
-        var _board$6 = (() => {
-            var $2549 = _board$3;
-            var $2550 = _n_board_size$2;
-            var $2551 = ((_board_size$1 + 1) >> 0);
-            let _board$7 = $2549;
-            for (let _j$6 = $2550; _j$6 < $2551; ++_j$6) {
-                var _a$8 = I32$max$(_n_board_size$2, ((((-_j$6)) - _board_size$1) >> 0));
-                var _b$9 = I32$min$(_board_size$1, ((((-_j$6)) + _board_size$1) >> 0));
-                var _board$10 = (() => {
-                    var $2552 = _board$7;
-                    var $2553 = _a$8;
-                    var $2554 = ((_b$9 + 1) >> 0);
-                    let _board$11 = $2552;
-                    for (let _i$10 = $2553; _i$10 < $2554; ++_i$10) {
-                        var _coord$12 = Hexagonal$Axial$new$(_i$10, _j$6);
-                        var $2552 = App$KL$Game$Board$push$(_coord$12, _new_terrain$5, _board$11);
-                        _board$11 = $2552;
+        var _extra_width$1 = App$KL$Constants$board_extra_width;
+        var _board_size$2 = App$KL$Constants$board_size;
+        var _n_board_size$3 = ((-_board_size$2));
+        var _board$4 = Hexagonal$Axial$BBL$new;
+        var _new_terrain$5 = App$KL$Game$Terrain$new$(0n);
+        var _new_terrain$6 = App$KL$Game$Entity$terrain$(_new_terrain$5);
+        var _board$7 = (() => {
+            var $2549 = _board$4;
+            var $2550 = _n_board_size$3;
+            var $2551 = ((_board_size$2 + 1) >> 0);
+            let _board$8 = $2549;
+            for (let _j$7 = $2550; _j$7 < $2551; ++_j$7) {
+                var _a$9 = I32$max$(_n_board_size$3, ((((-_j$7)) - _board_size$2) >> 0));
+                var _b$10 = I32$min$(_board_size$2, ((((-_j$7)) + _board_size$2) >> 0));
+                var _board$11 = (() => {
+                    var $2552 = _board$8;
+                    var $2553 = ((_a$9 - _extra_width$1) >> 0);
+                    var $2554 = ((_b$10 + ((_extra_width$1 + 1) >> 0)) >> 0);
+                    let _board$12 = $2552;
+                    for (let _i$11 = $2553; _i$11 < $2554; ++_i$11) {
+                        var _coord$13 = Hexagonal$Axial$new$(_i$11, _j$7);
+                        var $2552 = App$KL$Game$Board$push$(_coord$13, _new_terrain$6, _board$12);
+                        _board$12 = $2552;
                     };
-                    return _board$11;
+                    return _board$12;
                 })();
-                var $2549 = _board$10;
-                _board$7 = $2549;
+                var $2549 = _board$11;
+                _board$8 = $2549;
             };
-            return _board$7;
+            return _board$8;
         })();
-        var $2548 = _board$6;
+        var $2548 = _board$7;
         return $2548;
     })();
 
@@ -13709,6 +13711,7 @@ module.exports = (function() {
         'Debug.log': Debug$log,
         'App.KL.Game.new': App$KL$Game$new,
         'App.KL.Game.Phase.play': App$KL$Game$Phase$play,
+        'App.KL.Constants.board_extra_width': App$KL$Constants$board_extra_width,
         'App.KL.Game.Terrain.new': App$KL$Game$Terrain$new,
         'App.KL.Game.Entity.terrain': App$KL$Game$Entity$terrain,
         'I32.inc': I32$inc,
