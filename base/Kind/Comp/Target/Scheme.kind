@@ -545,7 +545,7 @@ Kind.Comp.Target.Scheme.cli: String
 (let ([args (cdr (command-line))])
   (if (null? args)
     (print-lines
-    '("# Kind - Scheme Release"
+    '("# kind-scm `|Kind.version|`"
       ""
       "Usage:"
       ""
