@@ -6,6 +6,7 @@ type Kind.Comp.Prim {
   unit,
   nat,
   u16,
+  u32,
   string,
   data(name: String, ctrs: Kind.Comp.Prim.ADT),
 }

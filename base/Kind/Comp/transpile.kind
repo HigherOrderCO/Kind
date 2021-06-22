@@ -29,6 +29,7 @@ Kind.Comp.transpile.term(
           bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
           nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
           u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
+          u32: lang@gram@application(lang@gram@inst_name("U32"), go(comp.expr,depth,defs))
           string: lang@gram@application(lang@gram@inst_name("String"), go(comp.expr,depth,defs))
           data: go(comp.expr,depth,defs)
         }
@@ -38,6 +39,7 @@ Kind.Comp.transpile.term(
           bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
           nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
           u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
+          u32: lang@gram@application(lang@gram@inst_name("U32"), go(comp.expr,depth,defs))
           string: lang@gram@application(lang@gram@inst_name("String"), go(comp.expr,depth,defs))
           data: go(comp.expr,depth,defs)
         }

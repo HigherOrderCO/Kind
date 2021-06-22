@@ -2,9 +2,11 @@
 Kind.Comp.Prim.show(prim: Kind.Comp.Prim): String
   case prim {
     unit: "Unit"
+    bits: "Bits"
     bool: "Bool"
     nat: "Nat"
     u16: "U16"
+    u32: "U32"
     string: "String"
     data: Kind.Comp.Prim.show.ctrs(prim.ctrs)
   }

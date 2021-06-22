@@ -126,11 +126,6 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
       { "true", [
         {"true", []}
       ]})
-//  Unit: {
-//    inst: [[0, "null"]],
-//    elim: {ctag: x => '"unit"', ctor: [[]]},
-//    cnam: {mode: "switch", nams: ['unit']},
-//  },
     // #TODO test
     bits: Kind.Comp.Native.new(
       // Inst
@@ -160,11 +155,6 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
         {"true", []}
         {"false", []}
       ]})
-//  Bool: {
-//    inst: [[0, "true"], [0, "false"]],
-//    elim: {ctag: x => x, ctor: [[], []]},
-//    cnam: {mode: "if"},
-//  },
     nat: Kind.Comp.Native.new(
       // Inst
       [
@@ -180,14 +170,6 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
         // case succ
         {"false", ["($0 - 1n)"]}
       ]})
-//  Nat: {
-//    inst: [[0, "0n"], [1, p => "1n+"+p]],
-//    elim: {
-//      ctag: x => x+"===0n",
-//      ctor: [[], [x => "("+x+"-1n)"]],
-//    },
-//    cnam: {mode: "if"},
-//  },
     u16: Kind.Comp.Native.new(
       // Inst
       [
@@ -199,14 +181,17 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
           "u16_to_word($0)"
         ]}
       ]})
-//  U16: {
-//    inst: [[1, x => "word_to_u16("+x+")"]],
-//    elim: {
-//      ctag: x => "'u16'",
-//      ctor: [[x => "u16_to_word("+x+")"]],
-//    },
-//    cnam: {mode: "switch", nams: ['u16']},
-//  },
+    u32: Kind.Comp.Native.new(
+      // Inst
+      [
+        {1, "word_to_u32($0)"}
+      ]
+      // Elim
+      {"true", [
+        {"true", [
+          "u32_to_word($0)"
+        ]}
+      ]})
     string: Kind.Comp.Native.new(
       // Inst
       [
@@ -224,14 +209,6 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
           "($0).slice(1)",
           ]}
       ]})
-//  String: {
-//    inst: [[0,"''"], [2, h => t => "(String.fromCharCode("+h+")+"+t+")"]],
-//    elim: {
-//      ctag: x => x+".length===0",
-//      ctor: [[], [x => x+".charCodeAt(0)", x => x+".slice(1)"]],
-//    },
-//    cnam: {mode: "if"},
-//  },
     data: Kind.Comp.Native.new(
       // Inst
       let insts = []
