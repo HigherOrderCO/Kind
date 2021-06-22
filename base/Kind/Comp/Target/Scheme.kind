@@ -88,8 +88,8 @@ Kind.Comp.Target.Scheme.select(term: String, cse_body_list: List<Pair<String, St
   let cses = ""
   for cse_body in cse_body_list with cses:
     {cse, body} = cse_body
-    "("|cse|" "|body|")"
-  "(case "|term|" "|cses|")"
+    cses|" ("|cse|" "|body|")"
+  "(case "|term|cses|")"
 
 Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(
