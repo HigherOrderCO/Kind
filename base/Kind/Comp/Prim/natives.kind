@@ -4,14 +4,14 @@ Kind.Comp.Prim.natives: List(Pair(String, Kind.Comp.Prim))
     {"Bool", Kind.Comp.Prim.bool}
     {"Nat", Kind.Comp.Prim.nat}
     {"Bits", Kind.Comp.Prim.bits}
-    //"U8"
+    {"U8", Kind.Comp.Prim.u8}
     {"U16", Kind.Comp.Prim.u16}
     {"U32", Kind.Comp.Prim.u32}
-    //"U64"
-    //"U256"
-    //"F64"
+    {"U64", Kind.Comp.Prim.u64}
+    {"U256", Kind.Comp.Prim.u256}
+    {"F64", Kind.Comp.Prim.f64}
     {"String", Kind.Comp.Prim.string}
-    //"Buffer32"
+    {"Buffer32", Kind.Comp.Prim.buffer32}
   ]
 
 Kind.Comp.Prim.natives.names: List(String)
