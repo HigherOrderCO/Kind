@@ -1,6 +1,6 @@
-(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[130],{
+(self["webpackChunkkind_web"] = self["webpackChunkkind_web"] || []).push([[737],{
 
-/***/ 130:
+/***/ 737:
 /***/ ((module) => {
 
 module.exports = (function() {
@@ -236,18 +236,15 @@ module.exports = (function() {
         return $26;
     });
 
-    function App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6) {
+    function App$Store$new$(_local$2, _global$3) {
         var $27 = ({
-            _: 'App.new',
-            'init': _init$2,
-            'draw': _draw$3,
-            'when': _when$4,
-            'tick': _tick$5,
-            'post': _post$6
+            _: 'App.Store.new',
+            'local': _local$2,
+            'global': _global$3
         });
         return $27;
     };
-    const App$new = x0 => x1 => x2 => x3 => x4 => App$new$(x0, x1, x2, x3, x4);
+    const App$Store$new = x0 => x1 => App$Store$new$(x0, x1);
 
     function Pair$new$(_fst$3, _snd$4) {
         var $28 = ({
@@ -259,18 +256,29 @@ module.exports = (function() {
     };
     const Pair$new = x0 => x1 => Pair$new$(x0, x1);
     const App$State$new = Pair$new$(null, null);
-    const App$Hello$State = App$State$new;
+    const App$Playground$State = App$State$new;
 
-    function App$Store$new$(_local$2, _global$3) {
+    function App$Playground$State$local$new$(_device$1, _window$2, _mouse_over$3, _code$4, _output$5, _kind_version$6) {
         var $29 = ({
-            _: 'App.Store.new',
-            'local': _local$2,
-            'global': _global$3
+            _: 'App.Playground.State.local.new',
+            'device': _device$1,
+            'window': _window$2,
+            'mouse_over': _mouse_over$3,
+            'code': _code$4,
+            'output': _output$5,
+            'kind_version': _kind_version$6
         });
         return $29;
     };
-    const App$Store$new = x0 => x1 => App$Store$new$(x0, x1);
-    const App$Hello$init = App$Store$new$(0n, 0n);
+    const App$Playground$State$local$new = x0 => x1 => x2 => x3 => x4 => x5 => App$Playground$State$local$new$(x0, x1, x2, x3, x4, x5);
+    const Device$big_desktop = ({
+        _: 'Device.big_desktop'
+    });
+    const App$Playground$Window$input = ({
+        _: 'App.Playground.Window.input'
+    });
+    const App$Playground$State$local_empty = App$Playground$State$local$new$(Device$big_desktop, App$Playground$Window$input, "", "", "", "");
+    const Unit$new = null;
 
     function DOM$node$(_tag$1, _props$2, _style$3, _children$4) {
         var $30 = ({
@@ -1197,25 +1205,27 @@ module.exports = (function() {
         return $237;
     };
     const Map$from_list = x0 => Map$from_list$(x0);
-    const List$nil = ({
-        _: 'List.nil'
-    });
-
-    function Pair$(_A$1, _B$2) {
-        var $238 = null;
-        return $238;
-    };
-    const Pair = x0 => x1 => Pair$(x0, x1);
 
     function List$cons$(_head$2, _tail$3) {
-        var $239 = ({
+        var $238 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $239;
+        return $238;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
+
+    function Pair$(_A$1, _B$2) {
+        var $239 = null;
+        return $239;
+    };
+    const Pair = x0 => x1 => Pair$(x0, x1);
+    const List$nil = ({
+        _: 'List.nil'
+    });
+    const App$Playground$constant$light_gray_color = "#E0E0E0";
+    const App$Playground$constant$white_smoke = "#F5F5F5";
 
     function DOM$text$(_value$1) {
         var $240 = ({
@@ -1225,342 +1235,407 @@ module.exports = (function() {
         return $240;
     };
     const DOM$text = x0 => DOM$text$(x0);
+    const Bool$and = a0 => a1 => (a0 && a1);
+    const String$eql = a0 => a1 => (a0 === a1);
 
-    function String$cons$(_head$1, _tail$2) {
-        var $241 = (String.fromCharCode(_head$1) + _tail$2);
+    function Map$(_V$1) {
+        var $241 = null;
         return $241;
     };
-    const String$cons = x0 => x1 => String$cons$(x0, x1);
-    const String$concat = a0 => a1 => (a0 + a1);
+    const Map = x0 => Map$(x0);
 
-    function List$fold$(_list$2, _nil$4, _cons$5) {
-        var self = _list$2;
+    function BBL$concat3$(_cmp$3, _key$4, _val$5, _left$6, _right$7) {
+        var self = _left$6;
         switch (self._) {
-            case 'List.cons':
-                var $243 = self.head;
-                var $244 = self.tail;
-                var $245 = _cons$5($243)(List$fold$($244, _nil$4, _cons$5));
-                var $242 = $245;
+            case 'BBL.bin':
+                var $243 = self.size;
+                var $244 = self.key;
+                var $245 = self.val;
+                var $246 = self.left;
+                var $247 = self.right;
+                var self = _right$7;
+                switch (self._) {
+                    case 'BBL.bin':
+                        var $249 = self.size;
+                        var $250 = self.key;
+                        var $251 = self.val;
+                        var $252 = self.left;
+                        var $253 = self.right;
+                        var _right_is_heavier$18 = (((BBL$w * $243) >>> 0) < $249);
+                        var _left_is_heavier$19 = (((BBL$w * $249) >>> 0) < $243);
+                        var self = _right_is_heavier$18;
+                        if (self) {
+                            var _new_key$20 = $250;
+                            var _new_val$21 = $251;
+                            var _new_left$22 = BBL$concat3$(_cmp$3, _key$4, _val$5, _left$6, $252);
+                            var _new_right$23 = $253;
+                            var $255 = BBL$balance$(_new_key$20, _new_val$21, _new_left$22, _new_right$23);
+                            var $254 = $255;
+                        } else {
+                            var self = _left_is_heavier$19;
+                            if (self) {
+                                var _new_key$20 = $244;
+                                var _new_val$21 = $245;
+                                var _new_left$22 = $246;
+                                var _new_right$23 = BBL$concat3$(_cmp$3, _key$4, _val$5, $247, _right$7);
+                                var $257 = BBL$balance$(_new_key$20, _new_val$21, _new_left$22, _new_right$23);
+                                var $256 = $257;
+                            } else {
+                                var $258 = BBL$node$(_key$4, _val$5, _left$6, _right$7);
+                                var $256 = $258;
+                            };
+                            var $254 = $256;
+                        };
+                        var $248 = $254;
+                        break;
+                    case 'BBL.tip':
+                        var $259 = BBL$insert$(_cmp$3, _key$4, _val$5, _left$6);
+                        var $248 = $259;
+                        break;
+                };
+                var $242 = $248;
                 break;
-            case 'List.nil':
-                var $246 = _nil$4;
-                var $242 = $246;
+            case 'BBL.tip':
+                var self = _right$7;
+                switch (self._) {
+                    case 'BBL.tip':
+                        var $261 = BBL$singleton$(_key$4, _val$5);
+                        var $260 = $261;
+                        break;
+                    case 'BBL.bin':
+                        var $262 = BBL$insert$(_cmp$3, _key$4, _val$5, _right$7);
+                        var $260 = $262;
+                        break;
+                };
+                var $242 = $260;
                 break;
         };
         return $242;
     };
-    const List$fold = x0 => x1 => x2 => List$fold$(x0, x1, x2);
+    const BBL$concat3 = x0 => x1 => x2 => x3 => x4 => BBL$concat3$(x0, x1, x2, x3, x4);
 
-    function Either$(_A$1, _B$2) {
-        var $247 = null;
-        return $247;
-    };
-    const Either = x0 => x1 => Either$(x0, x1);
-
-    function Either$left$(_value$3) {
-        var $248 = ({
-            _: 'Either.left',
-            'value': _value$3
-        });
-        return $248;
-    };
-    const Either$left = x0 => Either$left$(x0);
-
-    function Either$right$(_value$3) {
-        var $249 = ({
-            _: 'Either.right',
-            'value': _value$3
-        });
-        return $249;
-    };
-    const Either$right = x0 => Either$right$(x0);
-
-    function Nat$sub_rem$(_n$1, _m$2) {
-        var Nat$sub_rem$ = (_n$1, _m$2) => ({
-            ctr: 'TCO',
-            arg: [_n$1, _m$2]
-        });
-        var Nat$sub_rem = _n$1 => _m$2 => Nat$sub_rem$(_n$1, _m$2);
-        var arg = [_n$1, _m$2];
-        while (true) {
-            let [_n$1, _m$2] = arg;
-            var R = (() => {
-                var self = _m$2;
-                if (self === 0n) {
-                    var $250 = Either$left$(_n$1);
-                    return $250;
-                } else {
-                    var $251 = (self - 1n);
-                    var self = _n$1;
-                    if (self === 0n) {
-                        var $253 = Either$right$(Nat$succ$($251));
-                        var $252 = $253;
-                    } else {
-                        var $254 = (self - 1n);
-                        var $255 = Nat$sub_rem$($254, $251);
-                        var $252 = $255;
-                    };
-                    return $252;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Nat$sub_rem = x0 => x1 => Nat$sub_rem$(x0, x1);
-
-    function Nat$div_mod$go$(_n$1, _m$2, _d$3) {
-        var Nat$div_mod$go$ = (_n$1, _m$2, _d$3) => ({
-            ctr: 'TCO',
-            arg: [_n$1, _m$2, _d$3]
-        });
-        var Nat$div_mod$go = _n$1 => _m$2 => _d$3 => Nat$div_mod$go$(_n$1, _m$2, _d$3);
-        var arg = [_n$1, _m$2, _d$3];
-        while (true) {
-            let [_n$1, _m$2, _d$3] = arg;
-            var R = (() => {
-                var self = Nat$sub_rem$(_n$1, _m$2);
+    function BBL$split_ltn$(_cmp$3, _cut$4, _map$5) {
+        var self = _map$5;
+        switch (self._) {
+            case 'BBL.bin':
+                var $264 = self.key;
+                var $265 = self.val;
+                var $266 = self.left;
+                var $267 = self.right;
+                var self = _cmp$3(_cut$4)($264);
                 switch (self._) {
-                    case 'Either.left':
-                        var $256 = self.value;
-                        var $257 = Nat$div_mod$go$($256, _m$2, Nat$succ$(_d$3));
-                        return $257;
-                    case 'Either.right':
-                        var $258 = Pair$new$(_d$3, _n$1);
-                        return $258;
+                    case 'Cmp.ltn':
+                        var $269 = BBL$split_ltn$(_cmp$3, _cut$4, $266);
+                        var $268 = $269;
+                        break;
+                    case 'Cmp.eql':
+                        var $270 = $266;
+                        var $268 = $270;
+                        break;
+                    case 'Cmp.gtn':
+                        var _key$11 = $264;
+                        var _val$12 = $265;
+                        var _left$13 = $266;
+                        var _right$14 = BBL$split_ltn$(_cmp$3, _cut$4, $267);
+                        var $271 = BBL$concat3$(_cmp$3, _key$11, _val$12, _left$13, _right$14);
+                        var $268 = $271;
+                        break;
                 };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
+                var $263 = $268;
+                break;
+            case 'BBL.tip':
+                var $272 = _map$5;
+                var $263 = $272;
+                break;
+        };
+        return $263;
     };
-    const Nat$div_mod$go = x0 => x1 => x2 => Nat$div_mod$go$(x0, x1, x2);
-    const Nat$div_mod = a0 => a1 => (({
-        _: 'Pair.new',
-        'fst': a0 / a1,
-        'snd': a0 % a1
-    }));
+    const BBL$split_ltn = x0 => x1 => x2 => BBL$split_ltn$(x0, x1, x2);
 
-    function List$(_A$1) {
-        var $259 = null;
-        return $259;
-    };
-    const List = x0 => List$(x0);
-
-    function Nat$to_base$go$(_base$1, _nat$2, _res$3) {
-        var Nat$to_base$go$ = (_base$1, _nat$2, _res$3) => ({
-            ctr: 'TCO',
-            arg: [_base$1, _nat$2, _res$3]
-        });
-        var Nat$to_base$go = _base$1 => _nat$2 => _res$3 => Nat$to_base$go$(_base$1, _nat$2, _res$3);
-        var arg = [_base$1, _nat$2, _res$3];
-        while (true) {
-            let [_base$1, _nat$2, _res$3] = arg;
-            var R = (() => {
-                var self = (({
-                    _: 'Pair.new',
-                    'fst': _nat$2 / _base$1,
-                    'snd': _nat$2 % _base$1
-                }));
+    function BBL$split_gtn$(_cmp$3, _cut$4, _map$5) {
+        var self = _map$5;
+        switch (self._) {
+            case 'BBL.bin':
+                var $274 = self.key;
+                var $275 = self.val;
+                var $276 = self.left;
+                var $277 = self.right;
+                var self = _cmp$3(_cut$4)($274);
                 switch (self._) {
-                    case 'Pair.new':
-                        var $260 = self.fst;
-                        var $261 = self.snd;
-                        var self = $260;
-                        if (self === 0n) {
-                            var $263 = List$cons$($261, _res$3);
-                            var $262 = $263;
-                        } else {
-                            var $264 = (self - 1n);
-                            var $265 = Nat$to_base$go$(_base$1, $260, List$cons$($261, _res$3));
-                            var $262 = $265;
-                        };
-                        return $262;
+                    case 'Cmp.ltn':
+                        var _key$11 = $274;
+                        var _val$12 = $275;
+                        var _left$13 = BBL$split_gtn$(_cmp$3, _cut$4, $276);
+                        var _right$14 = $277;
+                        var $279 = BBL$concat3$(_cmp$3, _key$11, _val$12, _left$13, _right$14);
+                        var $278 = $279;
+                        break;
+                    case 'Cmp.eql':
+                        var $280 = $277;
+                        var $278 = $280;
+                        break;
+                    case 'Cmp.gtn':
+                        var $281 = BBL$split_gtn$(_cmp$3, _cut$4, $277);
+                        var $278 = $281;
+                        break;
                 };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Nat$to_base$go = x0 => x1 => x2 => Nat$to_base$go$(x0, x1, x2);
-
-    function Nat$to_base$(_base$1, _nat$2) {
-        var $266 = Nat$to_base$go$(_base$1, _nat$2, List$nil);
-        return $266;
-    };
-    const Nat$to_base = x0 => x1 => Nat$to_base$(x0, x1);
-    const String$nil = '';
-
-    function Nat$mod$go$(_n$1, _m$2, _r$3) {
-        var Nat$mod$go$ = (_n$1, _m$2, _r$3) => ({
-            ctr: 'TCO',
-            arg: [_n$1, _m$2, _r$3]
-        });
-        var Nat$mod$go = _n$1 => _m$2 => _r$3 => Nat$mod$go$(_n$1, _m$2, _r$3);
-        var arg = [_n$1, _m$2, _r$3];
-        while (true) {
-            let [_n$1, _m$2, _r$3] = arg;
-            var R = (() => {
-                var self = _m$2;
-                if (self === 0n) {
-                    var $267 = Nat$mod$go$(_n$1, _r$3, _m$2);
-                    return $267;
-                } else {
-                    var $268 = (self - 1n);
-                    var self = _n$1;
-                    if (self === 0n) {
-                        var $270 = _r$3;
-                        var $269 = $270;
-                    } else {
-                        var $271 = (self - 1n);
-                        var $272 = Nat$mod$go$($271, $268, Nat$succ$(_r$3));
-                        var $269 = $272;
-                    };
-                    return $269;
-                };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const Nat$mod$go = x0 => x1 => x2 => Nat$mod$go$(x0, x1, x2);
-    const Nat$mod = a0 => a1 => (a0 % a1);
-    const Bool$and = a0 => a1 => (a0 && a1);
-    const Nat$gtn = a0 => a1 => (a0 > a1);
-    const Nat$lte = a0 => a1 => (a0 <= a1);
-
-    function Maybe$(_A$1) {
-        var $273 = null;
+                var $273 = $278;
+                break;
+            case 'BBL.tip':
+                var $282 = _map$5;
+                var $273 = $282;
+                break;
+        };
         return $273;
     };
-    const Maybe = x0 => Maybe$(x0);
-    const Maybe$none = ({
-        _: 'Maybe.none'
-    });
+    const BBL$split_gtn = x0 => x1 => x2 => BBL$split_gtn$(x0, x1, x2);
 
-    function Maybe$some$(_value$2) {
-        var $274 = ({
-            _: 'Maybe.some',
-            'value': _value$2
-        });
-        return $274;
-    };
-    const Maybe$some = x0 => Maybe$some$(x0);
-
-    function List$at$(_index$2, _list$3) {
-        var List$at$ = (_index$2, _list$3) => ({
-            ctr: 'TCO',
-            arg: [_index$2, _list$3]
-        });
-        var List$at = _index$2 => _list$3 => List$at$(_index$2, _list$3);
-        var arg = [_index$2, _list$3];
-        while (true) {
-            let [_index$2, _list$3] = arg;
-            var R = (() => {
-                var self = _list$3;
+    function BBL$union$(_cmp$3, _map_a$4, _map_b$5) {
+        var self = _map_a$4;
+        switch (self._) {
+            case 'BBL.tip':
+                var self = _map_b$5;
                 switch (self._) {
-                    case 'List.cons':
-                        var $275 = self.head;
-                        var $276 = self.tail;
-                        var self = _index$2;
-                        if (self === 0n) {
-                            var $278 = Maybe$some$($275);
-                            var $277 = $278;
-                        } else {
-                            var $279 = (self - 1n);
-                            var $280 = List$at$($279, $276);
-                            var $277 = $280;
-                        };
-                        return $277;
-                    case 'List.nil':
-                        var $281 = Maybe$none;
-                        return $281;
+                    case 'BBL.tip':
+                        var $285 = BBL$tip;
+                        var $284 = $285;
+                        break;
+                    case 'BBL.bin':
+                        var $286 = _map_b$5;
+                        var $284 = $286;
+                        break;
                 };
-            })();
-            if (R.ctr === 'TCO') arg = R.arg;
-            else return R;
-        }
-    };
-    const List$at = x0 => x1 => List$at$(x0, x1);
-
-    function Nat$show_digit$(_base$1, _n$2) {
-        var _m$3 = (_n$2 % _base$1);
-        var _base64$4 = List$cons$(48, List$cons$(49, List$cons$(50, List$cons$(51, List$cons$(52, List$cons$(53, List$cons$(54, List$cons$(55, List$cons$(56, List$cons$(57, List$cons$(97, List$cons$(98, List$cons$(99, List$cons$(100, List$cons$(101, List$cons$(102, List$cons$(103, List$cons$(104, List$cons$(105, List$cons$(106, List$cons$(107, List$cons$(108, List$cons$(109, List$cons$(110, List$cons$(111, List$cons$(112, List$cons$(113, List$cons$(114, List$cons$(115, List$cons$(116, List$cons$(117, List$cons$(118, List$cons$(119, List$cons$(120, List$cons$(121, List$cons$(122, List$cons$(65, List$cons$(66, List$cons$(67, List$cons$(68, List$cons$(69, List$cons$(70, List$cons$(71, List$cons$(72, List$cons$(73, List$cons$(74, List$cons$(75, List$cons$(76, List$cons$(77, List$cons$(78, List$cons$(79, List$cons$(80, List$cons$(81, List$cons$(82, List$cons$(83, List$cons$(84, List$cons$(85, List$cons$(86, List$cons$(87, List$cons$(88, List$cons$(89, List$cons$(90, List$cons$(43, List$cons$(47, List$nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
-        var self = ((_base$1 > 0n) && (_base$1 <= 64n));
-        if (self) {
-            var self = List$at$(_m$3, _base64$4);
-            switch (self._) {
-                case 'Maybe.some':
-                    var $284 = self.value;
-                    var $285 = $284;
-                    var $283 = $285;
-                    break;
-                case 'Maybe.none':
-                    var $286 = 35;
-                    var $283 = $286;
-                    break;
-            };
-            var $282 = $283;
-        } else {
-            var $287 = 35;
-            var $282 = $287;
+                var $283 = $284;
+                break;
+            case 'BBL.bin':
+                var self = _map_b$5;
+                switch (self._) {
+                    case 'BBL.bin':
+                        var $288 = self.key;
+                        var $289 = self.val;
+                        var $290 = self.left;
+                        var $291 = self.right;
+                        var _key$16 = $288;
+                        var _val$17 = $289;
+                        var _ltn$18 = BBL$split_ltn$(_cmp$3, $288, _map_a$4);
+                        var _gtn$19 = BBL$split_gtn$(_cmp$3, $288, _map_a$4);
+                        var _left$20 = BBL$union$(_cmp$3, _ltn$18, $290);
+                        var _right$21 = BBL$union$(_cmp$3, _gtn$19, $291);
+                        var $292 = BBL$concat3$(_cmp$3, _key$16, _val$17, _left$20, _right$21);
+                        var $287 = $292;
+                        break;
+                    case 'BBL.tip':
+                        var $293 = _map_a$4;
+                        var $287 = $293;
+                        break;
+                };
+                var $283 = $287;
+                break;
         };
-        return $282;
+        return $283;
     };
-    const Nat$show_digit = x0 => x1 => Nat$show_digit$(x0, x1);
+    const BBL$union = x0 => x1 => x2 => BBL$union$(x0, x1, x2);
 
-    function Nat$to_string_base$(_base$1, _nat$2) {
-        var $288 = List$fold$(Nat$to_base$(_base$1, _nat$2), String$nil, (_n$3 => _str$4 => {
-            var $289 = String$cons$(Nat$show_digit$(_base$1, _n$3), _str$4);
-            return $289;
-        }));
-        return $288;
+    function Map$union$(_a$2, _b$3) {
+        var $294 = BBL$union$(String$cmp, _a$2, _b$3);
+        return $294;
     };
-    const Nat$to_string_base = x0 => x1 => Nat$to_string_base$(x0, x1);
+    const Map$union = x0 => x1 => Map$union$(x0, x1);
+    const App$Kind$constant$secondary_color = "#3891A6";
 
-    function Nat$show$(_n$1) {
-        var $290 = Nat$to_string_base$(10n, _n$1);
-        return $290;
-    };
-    const Nat$show = x0 => Nat$show$(x0);
-
-    function App$Hello$draw$(_state$1) {
-        var $291 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("border", "1px solid black"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("font-weight", "bold"), List$nil)), List$cons$(DOM$text$("Hello, world!"), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(("Clicks: " + Nat$show$((() => {
-            var self = _state$1;
-            switch (self._) {
-                case 'App.Store.new':
-                    var $292 = self.local;
-                    var $293 = $292;
-                    return $293;
+    function App$Playground$comp$btn$(_mouse_over$1, _id$2, _text$3) {
+        var _is_hover$4 = (_id$2 === _mouse_over$1);
+        var _normal$5 = Map$from_list$(List$cons$(Pair$new$("width", "50px"), List$cons$(Pair$new$("height", "25px"), List$cons$(Pair$new$("margin", "5px 0px"), List$cons$(Pair$new$("color", "white"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("border", "none"), List$cons$(Pair$new$("border-radius", "4px"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("align-content", "center"), List$cons$(Pair$new$("align-items", "center"), List$nil))))))))))));
+        var $295 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", _id$2), List$nil)), (() => {
+            var self = _is_hover$4;
+            if (self) {
+                var $296 = Map$union$(_normal$5, Map$from_list$(List$cons$(Pair$new$("background-color", "#44B8D3"), List$nil)));
+                return $296;
+            } else {
+                var $297 = Map$union$(_normal$5, Map$from_list$(List$cons$(Pair$new$("background-color", App$Kind$constant$secondary_color), List$nil)));
+                return $297;
             };
-        })()))), List$nil)), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$(("Visits: " + Nat$show$((() => {
-            var self = _state$1;
-            switch (self._) {
-                case 'App.Store.new':
-                    var $294 = self.global;
-                    var $295 = $294;
-                    return $295;
-            };
-        })()))), List$nil)), List$nil))));
-        return $291;
+        })(), List$cons$(DOM$text$(_text$3), List$nil));
+        return $295;
     };
-    const App$Hello$draw = x0 => App$Hello$draw$(x0);
+    const App$Playground$comp$btn = x0 => x1 => x2 => App$Playground$comp$btn$(x0, x1, x2);
 
-    function IO$(_A$1) {
-        var $296 = null;
-        return $296;
+    function App$Playground$comp$header$(_device$1, _mouse_over$2, _window$3) {
+        var _playground$4 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "input_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
+            var self = _window$3;
+            switch (self._) {
+                case 'App.Playground.Window.input':
+                    var $299 = App$Playground$constant$light_gray_color;
+                    return $299;
+                case 'App.Playground.Window.terminal':
+                    var $300 = App$Playground$constant$white_smoke;
+                    return $300;
+            };
+        })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("playground.kind"), List$nil));
+        var _btn_check$5 = App$Playground$comp$btn$(_mouse_over$2, "btn_type_check", "check");
+        var _btn_run$6 = App$Playground$comp$btn$(_mouse_over$2, "btn_run_code", "run");
+        var _style_header$7 = Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$nil))));
+        var _btn_area$8 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("width", "120px"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$nil))))), List$cons$(_btn_check$5, List$cons$(_btn_run$6, List$nil)));
+        var self = _device$1;
+        switch (self._) {
+            case 'Device.phone':
+                var _terminal$9 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "terminal_view"), List$nil)), Map$from_list$(List$cons$(Pair$new$("font-size", "14px"), List$cons$(Pair$new$("height", "35px"), List$cons$(Pair$new$("padding", "8px 15px 0px 15px"), List$cons$(Pair$new$("background-color", (() => {
+                    var self = _window$3;
+                    switch (self._) {
+                        case 'App.Playground.Window.input':
+                            var $302 = App$Playground$constant$white_smoke;
+                            return $302;
+                        case 'App.Playground.Window.terminal':
+                            var $303 = App$Playground$constant$light_gray_color;
+                            return $303;
+                    };
+                })()), List$cons$(Pair$new$("display", "flex"), List$nil)))))), List$cons$(DOM$text$("output"), List$nil));
+                var $301 = DOM$node$("div", Map$from_list$(List$nil), _style_header$7, List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "flex-start"), List$cons$(Pair$new$("flex-direction", "row"), List$nil)))), List$cons$(_playground$4, List$cons$(_terminal$9, List$nil))), List$cons$(_btn_area$8, List$nil)));
+                var $298 = $301;
+                break;
+            case 'Device.tablet':
+            case 'Device.desktop':
+            case 'Device.big_desktop':
+                var $304 = DOM$node$("div", Map$from_list$(List$nil), _style_header$7, List$cons$(_playground$4, List$cons$(_btn_area$8, List$nil)));
+                var $298 = $304;
+                break;
+        };
+        return $298;
     };
-    const IO = x0 => IO$(x0);
+    const App$Playground$comp$header = x0 => x1 => x2 => App$Playground$comp$header$(x0, x1, x2);
+
+    function String$cons$(_head$1, _tail$2) {
+        var $305 = (String.fromCharCode(_head$1) + _tail$2);
+        return $305;
+    };
+    const String$cons = x0 => x1 => String$cons$(x0, x1);
+    const String$concat = a0 => a1 => (a0 + a1);
+
+    function App$Playground$comp$input$(_code$1) {
+        var $306 = DOM$node$("textarea", Map$from_list$(List$cons$(Pair$new$("id", "input_code"), List$cons$(Pair$new$("placeholder", "Write Kind code in this online editor and run it <3"), List$nil))), Map$from_list$(List$cons$(Pair$new$("cols", "100"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("border", ("solid 5px " + App$Playground$constant$light_gray_color)), List$cons$(Pair$new$("resize", "none"), List$cons$(Pair$new$("padding", "10px"), List$nil)))))), List$cons$(DOM$text$(_code$1), List$nil));
+        return $306;
+    };
+    const App$Playground$comp$input = x0 => App$Playground$comp$input$(x0);
+
+    function App$Playground$comp$output_area$(_output$1, _device$2) {
+        var _style$3 = Map$from_list$(List$cons$(Pair$new$("width", "400px"), List$cons$(Pair$new$("max-width", "500px"), List$cons$(Pair$new$("overflow", "auto"), List$cons$(Pair$new$("padding", "10px"), List$cons$(Pair$new$("background-color", App$Playground$constant$light_gray_color), List$nil))))));
+        var $307 = DOM$node$("div", Map$from_list$(List$nil), (() => {
+            var self = _device$2;
+            switch (self._) {
+                case 'Device.phone':
+                    var $308 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin-top", "0px"), List$nil))));
+                    return $308;
+                case 'Device.tablet':
+                case 'Device.desktop':
+                case 'Device.big_desktop':
+                    var $309 = Map$union$(_style$3, Map$from_list$(List$cons$(Pair$new$("height", "100% - 35px"), List$cons$(Pair$new$("margin-top", "35px"), List$nil))));
+                    return $309;
+            };
+        })(), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$nil), List$cons$(DOM$text$("kind-lang@1.0.51"), List$nil)), List$cons$(DOM$node$("pre", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("margin-top", "10px"), List$nil)), List$cons$(DOM$text$(_output$1), List$nil)), List$nil)));
+        return $307;
+    };
+    const App$Playground$comp$output_area = x0 => x1 => App$Playground$comp$output_area$(x0, x1);
+
+    function App$Playground$comp$main_area$(_stt$1) {
+        var self = _stt$1;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $311 = self.device;
+                var $312 = self.window;
+                var $313 = self.mouse_over;
+                var $314 = self.code;
+                var $315 = self.output;
+                var _header$8 = App$Playground$comp$header$($311, $313, $312);
+                var _input_view$9 = App$Playground$comp$input$($314);
+                var _output_view$10 = App$Playground$comp$output_area$($315, $311);
+                var self = $311;
+                switch (self._) {
+                    case 'Device.phone':
+                        var $317 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$nil))))), List$cons$(_header$8, List$cons$((() => {
+                            var self = $312;
+                            switch (self._) {
+                                case 'App.Playground.Window.input':
+                                    var $318 = _input_view$9;
+                                    return $318;
+                                case 'App.Playground.Window.terminal':
+                                    var $319 = _output_view$10;
+                                    return $319;
+                            };
+                        })(), List$nil)));
+                        var $316 = $317;
+                        break;
+                    case 'Device.tablet':
+                    case 'Device.desktop':
+                    case 'Device.big_desktop':
+                        var $320 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$nil))))), List$cons$(DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "column"), List$cons$(Pair$new$("width", "60%"), List$nil)))), List$cons$(_header$8, List$cons$(_input_view$9, List$nil))), List$cons$(_output_view$10, List$nil)));
+                        var $316 = $320;
+                        break;
+                };
+                var $310 = $316;
+                break;
+        };
+        return $310;
+    };
+    const App$Playground$comp$main_area = x0 => App$Playground$comp$main_area$(x0);
+
+    function App$Playground$draw$(_stt$1) {
+        var self = _stt$1;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $322 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "100%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("margin", "20px 0x"), List$cons$(Pair$new$("display", "flex"), List$nil))))), List$cons$(App$Playground$comp$main_area$(_stt$1), List$nil));
+                var $321 = $322;
+                break;
+        };
+        return $321;
+    };
+    const App$Playground$draw = x0 => App$Playground$draw$(x0);
+
+    function App$playground$body$(_stt$1) {
+        var self = _stt$1;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $324 = self.device;
+                var self = $324;
+                switch (self._) {
+                    case 'Device.phone':
+                        var $326 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "10px"), List$cons$(Pair$new$("height", "300px"), List$nil))), List$cons$(App$Playground$draw$(_stt$1), List$nil));
+                        var $325 = $326;
+                        break;
+                    case 'Device.tablet':
+                    case 'Device.desktop':
+                    case 'Device.big_desktop':
+                        var $327 = DOM$node$("div", Map$from_list$(List$cons$(Pair$new$("id", "page"), List$nil)), Map$from_list$(List$cons$(Pair$new$("margin", "100px"), List$cons$(Pair$new$("height", "500px"), List$nil))), List$cons$(App$Playground$draw$(_stt$1), List$nil));
+                        var $325 = $327;
+                        break;
+                };
+                var $323 = $325;
+                break;
+        };
+        return $323;
+    };
+    const App$playground$body = x0 => App$playground$body$(x0);
     const App$State$local = Pair$fst;
 
+    function IO$(_A$1) {
+        var $328 = null;
+        return $328;
+    };
+    const IO = x0 => IO$(x0);
+
+    function Maybe$(_A$1) {
+        var $329 = null;
+        return $329;
+    };
+    const Maybe = x0 => Maybe$(x0);
+
     function IO$ask$(_query$2, _param$3, _then$4) {
-        var $297 = ({
+        var $330 = ({
             _: 'IO.ask',
             'query': _query$2,
             'param': _param$3,
             'then': _then$4
         });
-        return $297;
+        return $330;
     };
     const IO$ask = x0 => x1 => x2 => IO$ask$(x0, x1, x2);
 
@@ -1568,157 +1643,442 @@ module.exports = (function() {
         var self = _a$3;
         switch (self._) {
             case 'IO.end':
-                var $299 = self.value;
-                var $300 = _f$4($299);
-                var $298 = $300;
+                var $332 = self.value;
+                var $333 = _f$4($332);
+                var $331 = $333;
                 break;
             case 'IO.ask':
-                var $301 = self.query;
-                var $302 = self.param;
-                var $303 = self.then;
-                var $304 = IO$ask$($301, $302, (_x$8 => {
-                    var $305 = IO$bind$($303(_x$8), _f$4);
-                    return $305;
+                var $334 = self.query;
+                var $335 = self.param;
+                var $336 = self.then;
+                var $337 = IO$ask$($334, $335, (_x$8 => {
+                    var $338 = IO$bind$($336(_x$8), _f$4);
+                    return $338;
                 }));
-                var $298 = $304;
+                var $331 = $337;
                 break;
         };
-        return $298;
+        return $331;
     };
     const IO$bind = x0 => x1 => IO$bind$(x0, x1);
 
     function IO$end$(_value$2) {
-        var $306 = ({
+        var $339 = ({
             _: 'IO.end',
             'value': _value$2
         });
-        return $306;
+        return $339;
     };
     const IO$end = x0 => IO$end$(x0);
 
     function IO$monad$(_new$2) {
-        var $307 = _new$2(IO$bind)(IO$end);
-        return $307;
+        var $340 = _new$2(IO$bind)(IO$end);
+        return $340;
     };
     const IO$monad = x0 => IO$monad$(x0);
-    const Unit$new = null;
-
-    function IO$do$(_call$1, _param$2) {
-        var $308 = IO$ask$(_call$1, _param$2, (_answer$3 => {
-            var $309 = IO$end$(Unit$new);
-            return $309;
-        }));
-        return $308;
-    };
-    const IO$do = x0 => x1 => IO$do$(x0, x1);
+    const Maybe$none = ({
+        _: 'Maybe.none'
+    });
     const App$pass = IO$monad$((_m$bind$2 => _m$pure$3 => {
-        var $310 = _m$pure$3;
-        return $310;
+        var $341 = _m$pure$3;
+        return $341;
     }))(Maybe$none);
 
-    function App$do$(_call$2, _param$3) {
-        var $311 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-            var $312 = _m$bind$4;
-            return $312;
-        }))(IO$do$(_call$2, _param$3))((_$4 => {
-            var $313 = App$pass;
-            return $313;
-        }));
-        return $311;
-    };
-    const App$do = x0 => x1 => App$do$(x0, x1);
-
-    function App$watch$(_room$2) {
-        var $314 = App$do$("watch", _room$2);
-        return $314;
-    };
-    const App$watch = x0 => App$watch$(x0);
-    const App$room_zero = "0x00000000000000";
-
-    function App$new_post$(_room$2, _data$3) {
-        var $315 = IO$monad$((_m$bind$4 => _m$pure$5 => {
-            var $316 = _m$bind$4;
-            return $316;
-        }))(App$do$("post", (_room$2 + (";" + _data$3))))((_$4 => {
-            var $317 = App$pass;
-            return $317;
-        }));
-        return $315;
-    };
-    const App$new_post = x0 => x1 => App$new_post$(x0, x1);
-    const App$empty_post = "0x0000000000000000000000000000000000000000000000000000000000000000";
-
-    function App$set_local$(_value$2) {
-        var $318 = IO$monad$((_m$bind$3 => _m$pure$4 => {
-            var $319 = _m$pure$4;
-            return $319;
-        }))(Maybe$some$(_value$2));
-        return $318;
-    };
-    const App$set_local = x0 => App$set_local$(x0);
-    const Nat$add = a0 => a1 => (a0 + a1);
-
-    function App$Hello$when$(_event$1, _state$2) {
-        var self = _event$1;
+    function Cmp$as_lte$(_cmp$1) {
+        var self = _cmp$1;
         switch (self._) {
-            case 'App.Event.init':
-                var $321 = IO$monad$((_m$bind$6 => _m$pure$7 => {
-                    var $322 = _m$bind$6;
-                    return $322;
-                }))(App$watch$(App$room_zero))((_$6 => {
-                    var $323 = App$new_post$(App$room_zero, App$empty_post);
-                    return $323;
-                }));
-                var $320 = $321;
+            case 'Cmp.ltn':
+            case 'Cmp.eql':
+                var $343 = Bool$true;
+                var $342 = $343;
                 break;
-            case 'App.Event.frame':
-            case 'App.Event.mouse_up':
-            case 'App.Event.key_down':
-            case 'App.Event.key_up':
-            case 'App.Event.mouse_move':
-            case 'App.Event.mouse_over':
-            case 'App.Event.mouse_click':
-            case 'App.Event.input':
-                var $324 = App$pass;
-                var $320 = $324;
-                break;
-            case 'App.Event.mouse_down':
-                var $325 = App$set_local$(((() => {
-                    var self = _state$2;
-                    switch (self._) {
-                        case 'App.Store.new':
-                            var $326 = self.local;
-                            var $327 = $326;
-                            return $327;
-                    };
-                })() + 1n));
-                var $320 = $325;
+            case 'Cmp.gtn':
+                var $344 = Bool$false;
+                var $342 = $344;
                 break;
         };
-        return $320;
+        return $342;
     };
-    const App$Hello$when = x0 => x1 => App$Hello$when$(x0, x1);
+    const Cmp$as_lte = x0 => Cmp$as_lte$(x0);
 
-    function App$no_tick$(_tick$2, _glob$3) {
-        var $328 = _glob$3;
-        return $328;
+    function Word$lte$(_a$2, _b$3) {
+        var $345 = Cmp$as_lte$(Word$cmp$(_a$2, _b$3));
+        return $345;
     };
-    const App$no_tick = x0 => x1 => App$no_tick$(x0, x1);
-    const App$Hello$tick = App$no_tick;
+    const Word$lte = x0 => x1 => Word$lte$(x0, x1);
+    const U32$lte = a0 => a1 => (a0 <= a1);
+    const Device$phone = ({
+        _: 'Device.phone'
+    });
+    const Device$tablet = ({
+        _: 'Device.tablet'
+    });
+    const Device$desktop = ({
+        _: 'Device.desktop'
+    });
 
-    function App$Hello$post$(_time$1, _room$2, _addr$3, _data$4, _global_state$5) {
-        var $329 = (_global_state$5 + 1n);
-        return $329;
+    function Device$classify$(_width$1) {
+        var self = (_width$1 <= 600);
+        if (self) {
+            var $347 = Device$phone;
+            var $346 = $347;
+        } else {
+            var self = (_width$1 <= 768);
+            if (self) {
+                var $349 = Device$tablet;
+                var $348 = $349;
+            } else {
+                var self = (_width$1 <= 992);
+                if (self) {
+                    var $351 = Device$desktop;
+                    var $350 = $351;
+                } else {
+                    var $352 = Device$big_desktop;
+                    var $350 = $352;
+                };
+                var $348 = $350;
+            };
+            var $346 = $348;
+        };
+        return $346;
     };
-    const App$Hello$post = x0 => x1 => x2 => x3 => x4 => App$Hello$post$(x0, x1, x2, x3, x4);
-    const App$Hello = App$new$(App$Hello$init, App$Hello$draw, App$Hello$when, App$Hello$tick, App$Hello$post);
+    const Device$classify = x0 => Device$classify$(x0);
+
+    function Maybe$some$(_value$2) {
+        var $353 = ({
+            _: 'Maybe.some',
+            'value': _value$2
+        });
+        return $353;
+    };
+    const Maybe$some = x0 => Maybe$some$(x0);
+
+    function App$set_local$(_value$2) {
+        var $354 = IO$monad$((_m$bind$3 => _m$pure$4 => {
+            var $355 = _m$pure$4;
+            return $355;
+        }))(Maybe$some$(_value$2));
+        return $354;
+    };
+    const App$set_local = x0 => App$set_local$(x0);
+
+    function App$Playground$set_mouse_over$(_id$1, _stt$2) {
+        var self = _stt$2;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $357 = self.device;
+                var $358 = self.window;
+                var $359 = self.code;
+                var $360 = self.output;
+                var $361 = self.kind_version;
+                var $362 = App$Playground$State$local$new$($357, $358, _id$1, $359, $360, $361);
+                var $356 = $362;
+                break;
+        };
+        return $356;
+    };
+    const App$Playground$set_mouse_over = x0 => x1 => App$Playground$set_mouse_over$(x0, x1);
+    const App$Playground$Window$terminal = ({
+        _: 'App.Playground.Window.terminal'
+    });
+
+    function String$is_empty$(_str$1) {
+        var self = _str$1;
+        if (self.length === 0) {
+            var $364 = Bool$true;
+            var $363 = $364;
+        } else {
+            var $365 = self.charCodeAt(0);
+            var $366 = self.slice(1);
+            var $367 = Bool$false;
+            var $363 = $367;
+        };
+        return $363;
+    };
+    const String$is_empty = x0 => String$is_empty$(x0);
+
+    function App$Playground$set_output$(_output$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $369 = self.device;
+                var $370 = self.window;
+                var $371 = self.mouse_over;
+                var $372 = self.code;
+                var $373 = self.kind_version;
+                var $374 = App$Playground$State$local$new$($369, $370, $371, $372, _output$1, $373);
+                var $368 = $374;
+                break;
+        };
+        return $368;
+    };
+    const App$Playground$set_output = x0 => x1 => App$Playground$set_output$(x0, x1);
+
+    function IO$request$(_url$1) {
+        var $375 = IO$ask$("request", _url$1, (_text$2 => {
+            var $376 = IO$end$(_text$2);
+            return $376;
+        }));
+        return $375;
+    };
+    const IO$request = x0 => IO$request$(x0);
+
+    function App$Playground$set_window$(_window$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $378 = self.device;
+                var $379 = self.mouse_over;
+                var $380 = self.code;
+                var $381 = self.output;
+                var $382 = self.kind_version;
+                var $383 = App$Playground$State$local$new$($378, _window$1, $379, $380, $381, $382);
+                var $377 = $383;
+                break;
+        };
+        return $377;
+    };
+    const App$Playground$set_window = x0 => x1 => App$Playground$set_window$(x0, x1);
+
+    function App$Playground$set_code$(_input$1, _state$2) {
+        var self = _state$2;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $385 = self.device;
+                var $386 = self.window;
+                var $387 = self.mouse_over;
+                var $388 = self.output;
+                var $389 = self.kind_version;
+                var $390 = App$Playground$State$local$new$($385, $386, $387, _input$1, $388, $389);
+                var $384 = $390;
+                break;
+        };
+        return $384;
+    };
+    const App$Playground$set_code = x0 => x1 => App$Playground$set_code$(x0, x1);
+
+    function App$Playground$when$(_event$1, _stt$2) {
+        var self = _stt$2;
+        switch (self._) {
+            case 'App.Store.new':
+                var $392 = self.local;
+                var $393 = $392;
+                var _state$3 = $393;
+                break;
+        };
+        var self = _state$3;
+        switch (self._) {
+            case 'App.Playground.State.local.new':
+                var $394 = self.device;
+                var $395 = self.code;
+                var self = _event$1;
+                switch (self._) {
+                    case 'App.Event.frame':
+                        var $397 = self.info;
+                        var self = $397;
+                        switch (self._) {
+                            case 'App.EnvInfo.new':
+                                var $399 = self.screen_size;
+                                var self = $399;
+                                switch (self._) {
+                                    case 'Pair.new':
+                                        var $401 = self.fst;
+                                        var _device$16 = Device$classify$($401);
+                                        var self = _state$3;
+                                        switch (self._) {
+                                            case 'App.Playground.State.local.new':
+                                                var $403 = self.window;
+                                                var $404 = self.mouse_over;
+                                                var $405 = self.code;
+                                                var $406 = self.output;
+                                                var $407 = self.kind_version;
+                                                var $408 = App$Playground$State$local$new$(_device$16, $403, $404, $405, $406, $407);
+                                                var _stt$17 = $408;
+                                                break;
+                                        };
+                                        var $402 = App$set_local$(_stt$17);
+                                        var $400 = $402;
+                                        break;
+                                };
+                                var $398 = $400;
+                                break;
+                        };
+                        var $396 = $398;
+                        break;
+                    case 'App.Event.mouse_over':
+                        var $409 = self.id;
+                        var $410 = App$set_local$(App$Playground$set_mouse_over$($409, _state$3));
+                        var $396 = $410;
+                        break;
+                    case 'App.Event.mouse_click':
+                        var $411 = self.id;
+                        var self = $394;
+                        switch (self._) {
+                            case 'Device.phone':
+                                var $413 = App$Playground$Window$terminal;
+                                var _window$13 = $413;
+                                break;
+                            case 'Device.tablet':
+                            case 'Device.desktop':
+                            case 'Device.big_desktop':
+                                var $414 = App$Playground$Window$input;
+                                var _window$13 = $414;
+                                break;
+                        };
+                        var self = ($411 === "btn_type_check");
+                        if (self) {
+                            var self = String$is_empty$($395);
+                            if (self) {
+                                var _stt$14 = App$Playground$set_output$("How can I type check an empty code? haha", _state$3);
+                                var $416 = App$set_local$(_stt$14);
+                                var $415 = $416;
+                            } else {
+                                var $417 = IO$monad$((_m$bind$14 => _m$pure$15 => {
+                                    var $418 = _m$bind$14;
+                                    return $418;
+                                }))(IO$request$(("http://18.222.191.174:3030/api/check_term?code=" + $395)))((_checked$14 => {
+                                    var _stt$15 = App$Playground$set_output$(_checked$14, _state$3);
+                                    var _stt$16 = App$Playground$set_window$(_window$13, _stt$15);
+                                    var $419 = App$set_local$(_stt$16);
+                                    return $419;
+                                }));
+                                var $415 = $417;
+                            };
+                            var $412 = $415;
+                        } else {
+                            var self = ($411 === "btn_run_code");
+                            if (self) {
+                                var self = String$is_empty$($395);
+                                if (self) {
+                                    var self = _state$3;
+                                    switch (self._) {
+                                        case 'App.Playground.State.local.new':
+                                            var $423 = self.device;
+                                            var $424 = self.window;
+                                            var $425 = self.mouse_over;
+                                            var $426 = self.code;
+                                            var $427 = self.kind_version;
+                                            var $428 = App$Playground$State$local$new$($423, $424, $425, $426, "How can I type check an empty code? haha", $427);
+                                            var _stt$14 = $428;
+                                            break;
+                                    };
+                                    var $422 = App$set_local$(_stt$14);
+                                    var $421 = $422;
+                                } else {
+                                    var $429 = IO$monad$((_m$bind$14 => _m$pure$15 => {
+                                        var $430 = _m$bind$14;
+                                        return $430;
+                                    }))(IO$request$(("http://18.222.191.174:3030/api/run_term?code=" + $395)))((_checked$14 => {
+                                        var _stt$15 = App$Playground$set_output$(_checked$14, _state$3);
+                                        var _stt$16 = App$Playground$set_window$(_window$13, _stt$15);
+                                        var $431 = App$set_local$(_stt$16);
+                                        return $431;
+                                    }));
+                                    var $421 = $429;
+                                };
+                                var $420 = $421;
+                            } else {
+                                var self = ($411 === "terminal_view");
+                                if (self) {
+                                    var _stt$14 = App$Playground$set_window$(App$Playground$Window$terminal, _state$3);
+                                    var $433 = App$set_local$(_stt$14);
+                                    var $432 = $433;
+                                } else {
+                                    var self = ($411 === "input_view");
+                                    if (self) {
+                                        var _stt$14 = App$Playground$set_window$(App$Playground$Window$input, _state$3);
+                                        var $435 = App$set_local$(_stt$14);
+                                        var $434 = $435;
+                                    } else {
+                                        var $436 = App$pass;
+                                        var $434 = $436;
+                                    };
+                                    var $432 = $434;
+                                };
+                                var $420 = $432;
+                            };
+                            var $412 = $420;
+                        };
+                        var $396 = $412;
+                        break;
+                    case 'App.Event.input':
+                        var $437 = self.id;
+                        var $438 = self.text;
+                        var self = ($437 === "input_code");
+                        if (self) {
+                            var $440 = App$set_local$(App$Playground$set_code$($438, _state$3));
+                            var $439 = $440;
+                        } else {
+                            var $441 = App$pass;
+                            var $439 = $441;
+                        };
+                        var $396 = $439;
+                        break;
+                    case 'App.Event.init':
+                    case 'App.Event.mouse_down':
+                    case 'App.Event.mouse_up':
+                    case 'App.Event.key_down':
+                    case 'App.Event.key_up':
+                    case 'App.Event.mouse_move':
+                        var $442 = App$pass;
+                        var $396 = $442;
+                        break;
+                };
+                var $391 = $396;
+                break;
+        };
+        return $391;
+    };
+    const App$Playground$when = x0 => x1 => App$Playground$when$(x0, x1);
+
+    function App$new$(_init$2, _draw$3, _when$4, _tick$5, _post$6) {
+        var $443 = ({
+            _: 'App.new',
+            'init': _init$2,
+            'draw': _draw$3,
+            'when': _when$4,
+            'tick': _tick$5,
+            'post': _post$6
+        });
+        return $443;
+    };
+    const App$new = x0 => x1 => x2 => x3 => x4 => App$new$(x0, x1, x2, x3, x4);
+    const App$Playground = (() => {
+        var _init$1 = App$Store$new$(App$Playground$State$local_empty, Unit$new);
+        var _draw$2 = (_state$2 => {
+            var $445 = App$playground$body$((() => {
+                var self = _state$2;
+                switch (self._) {
+                    case 'App.Store.new':
+                        var $446 = self.local;
+                        var $447 = $446;
+                        return $447;
+                };
+            })());
+            return $445;
+        });
+        var _when$3 = App$Playground$when;
+        var _tick$4 = (_tick$4 => _glob$5 => {
+            var $448 = _glob$5;
+            return $448;
+        });
+        var _post$5 = (_time$5 => _room$6 => _addr$7 => _data$8 => _glob$9 => {
+            var $449 = _glob$9;
+            return $449;
+        });
+        var $444 = App$new$(_init$1, _draw$2, _when$3, _tick$4, _post$5);
+        return $444;
+    })();
     return {
-        'App.new': App$new,
+        'App.Store.new': App$Store$new,
         'Pair.new': Pair$new,
         'App.State.new': App$State$new,
-        'App.Hello.State': App$Hello$State,
-        'App.Store.new': App$Store$new,
-        'App.Hello.init': App$Hello$init,
+        'App.Playground.State': App$Playground$State,
+        'App.Playground.State.local.new': App$Playground$State$local$new,
+        'Device.big_desktop': Device$big_desktop,
+        'App.Playground.Window.input': App$Playground$Window$input,
+        'App.Playground.State.local_empty': App$Playground$State$local_empty,
+        'Unit.new': Unit$new,
         'DOM.node': DOM$node,
         'BBL': BBL,
         'Pair.fst': Pair$fst,
@@ -1776,61 +2136,62 @@ module.exports = (function() {
         'U16.cmp': U16$cmp,
         'String.cmp': String$cmp,
         'Map.from_list': Map$from_list,
-        'List.nil': List$nil,
-        'Pair': Pair,
         'List.cons': List$cons,
+        'Pair': Pair,
+        'List.nil': List$nil,
+        'App.Playground.constant.light_gray_color': App$Playground$constant$light_gray_color,
+        'App.Playground.constant.white_smoke': App$Playground$constant$white_smoke,
         'DOM.text': DOM$text,
+        'Bool.and': Bool$and,
+        'String.eql': String$eql,
+        'Map': Map,
+        'BBL.concat3': BBL$concat3,
+        'BBL.split_ltn': BBL$split_ltn,
+        'BBL.split_gtn': BBL$split_gtn,
+        'BBL.union': BBL$union,
+        'Map.union': Map$union,
+        'App.Kind.constant.secondary_color': App$Kind$constant$secondary_color,
+        'App.Playground.comp.btn': App$Playground$comp$btn,
+        'App.Playground.comp.header': App$Playground$comp$header,
         'String.cons': String$cons,
         'String.concat': String$concat,
-        'List.fold': List$fold,
-        'Either': Either,
-        'Either.left': Either$left,
-        'Either.right': Either$right,
-        'Nat.sub_rem': Nat$sub_rem,
-        'Nat.div_mod.go': Nat$div_mod$go,
-        'Nat.div_mod': Nat$div_mod,
-        'List': List,
-        'Nat.to_base.go': Nat$to_base$go,
-        'Nat.to_base': Nat$to_base,
-        'String.nil': String$nil,
-        'Nat.mod.go': Nat$mod$go,
-        'Nat.mod': Nat$mod,
-        'Bool.and': Bool$and,
-        'Nat.gtn': Nat$gtn,
-        'Nat.lte': Nat$lte,
-        'Maybe': Maybe,
-        'Maybe.none': Maybe$none,
-        'Maybe.some': Maybe$some,
-        'List.at': List$at,
-        'Nat.show_digit': Nat$show_digit,
-        'Nat.to_string_base': Nat$to_string_base,
-        'Nat.show': Nat$show,
-        'App.Hello.draw': App$Hello$draw,
-        'IO': IO,
+        'App.Playground.comp.input': App$Playground$comp$input,
+        'App.Playground.comp.output_area': App$Playground$comp$output_area,
+        'App.Playground.comp.main_area': App$Playground$comp$main_area,
+        'App.Playground.draw': App$Playground$draw,
+        'App.playground.body': App$playground$body,
         'App.State.local': App$State$local,
+        'IO': IO,
+        'Maybe': Maybe,
         'IO.ask': IO$ask,
         'IO.bind': IO$bind,
         'IO.end': IO$end,
         'IO.monad': IO$monad,
-        'Unit.new': Unit$new,
-        'IO.do': IO$do,
+        'Maybe.none': Maybe$none,
         'App.pass': App$pass,
-        'App.do': App$do,
-        'App.watch': App$watch,
-        'App.room_zero': App$room_zero,
-        'App.new_post': App$new_post,
-        'App.empty_post': App$empty_post,
+        'Cmp.as_lte': Cmp$as_lte,
+        'Word.lte': Word$lte,
+        'U32.lte': U32$lte,
+        'Device.phone': Device$phone,
+        'Device.tablet': Device$tablet,
+        'Device.desktop': Device$desktop,
+        'Device.classify': Device$classify,
+        'Maybe.some': Maybe$some,
         'App.set_local': App$set_local,
-        'Nat.add': Nat$add,
-        'App.Hello.when': App$Hello$when,
-        'App.no_tick': App$no_tick,
-        'App.Hello.tick': App$Hello$tick,
-        'App.Hello.post': App$Hello$post,
-        'App.Hello': App$Hello,
+        'App.Playground.set_mouse_over': App$Playground$set_mouse_over,
+        'App.Playground.Window.terminal': App$Playground$Window$terminal,
+        'String.is_empty': String$is_empty,
+        'App.Playground.set_output': App$Playground$set_output,
+        'IO.request': IO$request,
+        'App.Playground.set_window': App$Playground$set_window,
+        'App.Playground.set_code': App$Playground$set_code,
+        'App.Playground.when': App$Playground$when,
+        'App.new': App$new,
+        'App.Playground': App$Playground,
     };
 })();
 
 /***/ })
 
 }]);
-//# sourceMappingURL=130.index.js.map
+//# sourceMappingURL=737.index.js.map
