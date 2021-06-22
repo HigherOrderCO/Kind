@@ -1,5 +1,5 @@
-type Map <A : Type> <B : Type> ~ (op : A -> A -> Cmp) {
-  new(compator : A -> A -> CMP, tree : BBT<A, B>) ~ (op = compator)
+type Map <A : Type> <B : Type> (op : A -> A -> Cmp) {
+  new(tree : BBT<A, B>)
 }
 
 Map.set(A : Type, B : Type, op : A -> A -> CMP, k : A, v : B, map : Map<A, B, op>) : Map<A, B, op>
@@ -11,14 +11,13 @@ StringMap(B : Type) : Type
   Map!<B, String.cmp>
 
 StringMap.new<B : Type> : StringMap<B>
-  Map.new!!(String.cmp, BBT.tip<String, B>)
+  Map.new!!!(BBT.tip<String, B>)
 
 test(x : StringMap<Nat>) : StringMap<Nat>
   Map.set!!!("test", 34, x)
 
-User.Caotic.Test : StringMap<Nat>
+User.caotic.test : _
   test(StringMap.new!)
-
 
 User.Caotic.Test2: _
   let test = [] :: BList<Nat>
