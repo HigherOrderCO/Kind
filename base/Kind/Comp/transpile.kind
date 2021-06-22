@@ -25,6 +25,7 @@ Kind.Comp.transpile.term(
           lang@gram@local_definition(lang@gram@name(comp.name), go(comp.expr,depth,defs), go(comp.body,Nat.succ(depth),defs))
         eli: case comp.prim {
           unit: lang@gram@application(lang@gram@inst_name("Unit"), go(comp.expr,depth,defs))
+          bits: lang@gram@application(lang@gram@inst_name("Bits"), go(comp.expr,depth,defs))
           bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
           nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
           u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
@@ -33,6 +34,7 @@ Kind.Comp.transpile.term(
         }
         ins: case comp.prim {
           unit: lang@gram@application(lang@gram@inst_name("Unit"), go(comp.expr,depth,defs))
+          bits: lang@gram@application(lang@gram@inst_name("Bits"), go(comp.expr,depth,defs))
           bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
           nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
           u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
