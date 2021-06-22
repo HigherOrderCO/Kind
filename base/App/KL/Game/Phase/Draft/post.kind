@@ -38,9 +38,12 @@ App.KL.Game.Phase.Draft.post(
         let players     = game@players
         get player      = players{addr}
         let player_list = Map.to_list!(players)
-        let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
+        //let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
         let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
-        if is_picked then none else some(game)
+        //if is_picked then
+        //  none 
+        //else 
+          some(game)
       } <> game 
         
     set_ready:
