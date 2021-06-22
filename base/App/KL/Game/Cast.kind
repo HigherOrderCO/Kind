@@ -48,11 +48,11 @@ App.KL.Game.Cast.apply(
   open game
   Maybe {
     let players = App.KL.Game.Board.find_players(game.board) // TODO: optimize
-    var player_coord = players{cast@player}
-    var player_creature = App.KL.Game.Board.get_creature(player_coord, game.board)
+    get player_coord = players{cast@player}
+    get player_creature = App.KL.Game.Board.get_creature(player_coord, game.board)
     let player_hero = player_creature@hero
     let player_skills = player_hero@skills
-    var casted_skill = player_skills{Char.to_string(cast.letter)}
+    get casted_skill = player_skills{Char.to_string(cast.letter)}
     let casted_effect = casted_skill@effect
     let game = App.KL.Game.Effect.run!(casted_effect, player_coord, cast.target, game)
     return game
