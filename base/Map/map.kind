@@ -1,2 +1,2 @@
 Map.map<A: Type, B: Type>(fn: A -> B, map: Map(A)): Map(B)
-  BBL.map!!!(fn, map)
+  BBT.map!!!(fn, map)
