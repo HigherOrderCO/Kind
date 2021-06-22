@@ -1,2 +1,0 @@
-String.StringMap.new<A: Type>: String.StringMap(A)
-  BBT.tip!!

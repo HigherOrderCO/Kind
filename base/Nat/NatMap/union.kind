@@ -1,2 +1,0 @@
-String.NatMap.union<A: Type>(a: Nat.NatMap(A), b: Nat.NatMap(A)): Nat.NatMap(A)
-  BBT.union!!(Nat.cmp, a, b)

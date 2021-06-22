@@ -1,4 +1,0 @@
-// Copies all key and vals from b to a
-
-Nat.NatMap.assign<A: Type>(a: Nat.NatMap(A), b: Nat.NatMap(A)): Nat.NatMap(A)
-  BBT.assign(Nat, A, Nat.cmp, b, a)

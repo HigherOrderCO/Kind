@@ -1,2 +1,0 @@
-Nat.NatMap.set<A: Type>(key: Nat, val: A, map: Nat.NatMap(A)): Nat.NatMap(A)
-  BBT.insert!!(Nat.cmp, key, val, map)

@@ -1,3 +1,0 @@
-String.StringMap(V: Type): Type
-  BBT<String, V>
-  

@@ -1,2 +1,0 @@
-Nat.NatMap.new<A: Type>: Nat.NatMap(A)
-  BBT.tip!!

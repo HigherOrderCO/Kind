@@ -1,2 +1,0 @@
-Nat.NatMap.delete<A: Type>(key: Nat, map: Nat.NatMap(A)): Nat.NatMap(A)
-  BBT.delete!!(Nat.cmp, key, map)

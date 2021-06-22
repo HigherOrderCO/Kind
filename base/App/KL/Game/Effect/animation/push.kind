@@ -7,5 +7,5 @@
     //(coord, map) 
       //App.KL.Game.Map.push(coord, App.KL.Game.Map.Entity.animation(App.KL.Game.Animation.new(some(45), App.KL.Game.Sprite.fire)),
      //map), coords)
-  //App.KL.Game.Effect.Result.new<Unit>(Unit.new, map, [], Nat.NatMap.new!)
+  //App.KL.Game.Effect.Result.new<Unit>(Unit.new, map, [], NatMap.new!)
 

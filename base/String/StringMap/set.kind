@@ -1,2 +1,0 @@
-String.StringMap.set<A: Type>(key: String, val: A, map: String.StringMap(A)): String.StringMap(A)
-  BBT.insert!!(String.cmp, key, val, map)

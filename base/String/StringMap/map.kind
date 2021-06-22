@@ -1,2 +1,0 @@
-String.StringMap.map<A: Type, B: Type>(fn: A -> B, map: String.StringMap(A)): String.StringMap(B)
-  BBT.map!!!(fn, map)

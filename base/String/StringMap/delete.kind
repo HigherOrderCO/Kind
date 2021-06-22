@@ -1,8 +1,0 @@
-// Deletes a element of a specified key 
-// #Example :
-// Map.delete!("orange", 
-//   Map.from_list([{"orange", 2}, {"black, 3"}]))  == 
-//         Map.from_list([{"black, 3"}]))
-// If there is not key corresponding, leaves the map unchanged 
-String.StringMap.delete<A: Type>(key: String, map: String.StringMap(A)): String.StringMap(A)
-  BBT.delete!!(String.cmp, key, map)

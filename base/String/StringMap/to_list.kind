@@ -1,2 +1,0 @@
-String.StringMap.to_list<A: Type>(xs: String.StringMap(A)): List<Pair<String,A>>
-  BBT.to_list!!(xs)

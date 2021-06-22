@@ -1,2 +1,0 @@
-Nat.NatMap.get<A: Type>(key: Nat, map: Nat.NatMap(A)): Maybe<A>
-  BBT.lookup!!(Nat.cmp, key, map)
