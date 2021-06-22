@@ -1,0 +1,2 @@
+Map.to_list<A: Type>(xs: Map(A)): List<Pair<String,A>>
+  BBL.to_list!!(xs)

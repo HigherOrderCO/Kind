@@ -1,0 +1,8 @@
+// Iterates over a map applyng a String -> A -> A -> B function
+// #Example :
+// let map = Map.from_list!([{"orange", 2}, {"black", 3}, {"yellow", 4}, {"brown", 1}, {"white", 1}])
+// Map.for!(map)!({".", 0}, (x, y, z) { z@fst | x | ".", z@snd + y})
+// == 
+// {".black.brown.orange.white.yellow.", 11}
+Map.for<A: Type>(map: Map(A))<B: Type>(b: B, f: String -> A -> B -> B): B
+  BBL.for!!(map)!(b, f)

@@ -1,18 +1,16 @@
 App.KL.Game.Effect.area<A: Type>(
-  eff: App.KL.Game.Effect<A>,
+  effect: Hexagonal.Axial -> App.KL.Game.Effect<A>,
   coords: List<Hexagonal.Axial>
 ): App.KL.Game.Effect<Hexagonal.Axial.BBT<A>>  
-
   (center, target, board)
-    let board_result = Hexagonal.Axial.BBT.new!
-    let eff_result = App.KL.Game.Effect.pure!(board_result)
-    let result = App.KL.Game.Effect.Result.new!(board_result, board, Hexagonal.Axial.BBT.new!)
-    for coord in coords with result:
-      let result_of_effect = eff(center, coord, result@board)
-      let new_form = App.KL.Game.Effect.Result.new!(
-        Hexagonal.Axial.BBT.set!(coord, result_of_effect@value, Hexagonal.Axial.BBT.new!)
-        result_of_effect@board
-        result_of_effect@indicators
-      )
-      App.KL.Game.Effect.result.union!(result, new_form, Hexagonal.Axial.BBT.union!)
-    result
+  let board_result = Hexagonal.Axial.BBT.new!
+  let effect_result = App.KL.Game.Effect.pure!(board_result)
+  let result = App.KL.Game.Effect.Result.new!(board_result, board, Hexagonal.Axial.BBT.new!)
+  for coord in coords with result:
+    let result_of_effect = effect(coord, center, target, result@board)
+    let new_form = App.KL.Game.Effect.Result.new!(
+      Hexagonal.Axial.BBT.set!(coord, result_of_effect@value, Hexagonal.Axial.BBT.new!)
+      result_of_effect@board
+      result_of_effect@indicators)
+    App.KL.Game.Effect.result.union!(result, new_form, Hexagonal.Axial.BBT.union!)
+  result
