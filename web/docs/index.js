@@ -3540,7 +3540,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = {
-  'App.KL': __webpack_require__.e(/* import() */ 967).then(__webpack_require__.t.bind(__webpack_require__, 967, 23)),
+  'App.Seta': __webpack_require__.e(/* import() */ 415).then(__webpack_require__.t.bind(__webpack_require__, 415, 23)),
 }
 
 
