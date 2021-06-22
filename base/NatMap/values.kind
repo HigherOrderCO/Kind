@@ -1,0 +1,2 @@
+NatMap.values<A: Type>(xs: NatMap(A)): List<A>
+  BitsMap.values!(xs)

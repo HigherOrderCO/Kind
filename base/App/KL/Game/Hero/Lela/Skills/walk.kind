@@ -1,0 +1,2 @@
+App.KL.Game.Hero.Lela.Skills.walk: App.KL.Game.Skill
+  App.KL.Game.Skill.new("walk", 500, 8, App.KL.Game.Effect.movement.move)

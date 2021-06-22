@@ -1,4 +1,4 @@
-all: kind-scm kind-scm.deb
+all: bin/kind-scm kind-scm.deb
 bootstrap:
 	cd ../../base && kind-scm Kind.Comp.Target.Scheme.bootstrap --run
 clean:
@@ -8,7 +8,7 @@ clean:
 bin/kind-scm:
 	cd src/ && scheme compile.scm
 	chmod +x bin/kind-scm
-kind-scm.deb: kind-scm
+kind-scm.deb: bin/kind-scm
 	mkdir -p kind-scm_1.0.1-0_amd64/usr/local/bin/
 	cp bin/kind-scm kind-scm_1.0.1-0_amd64/usr/local/bin/
 	dpkg-deb --root-owner-group  --build kind-scm_1.0.1-0_amd64/ bin/kind-scm_1.0.1-0_amd64.deb

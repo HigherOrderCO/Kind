@@ -1,5 +1,5 @@
 App.KL.Game.Effect.indicators.add(
-  indicators: Hexagonal.Axial.BBL(App.KL.Game.Indicator)
+  indicators: Hexagonal.Axial.BBT(App.KL.Game.Indicator)
 ): App.KL.Game.Effect<Unit>
 
   (center, target, board)

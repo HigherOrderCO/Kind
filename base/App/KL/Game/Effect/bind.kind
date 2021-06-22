@@ -8,7 +8,7 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
       new:
         value = result_b.value
         map   = result_b.board
-        indicators = Hexagonal.Axial.BBL.union!(result_a.indicators, result_b.indicators)
+        indicators = Hexagonal.Axial.BBT.union!(result_a.indicators, result_b.indicators)
         App.KL.Game.Effect.Result.new<B>(value, map, indicators)
     }
   }

@@ -1,0 +1,53 @@
+VoxBox.Draw.arrow(
+  x1: I32, 
+  y1: I32, 
+  x2: I32, 
+  y2: I32, 
+  z: I32, 
+  size: I32, 
+  col: Col32, 
+  img: VoxBox
+): VoxBox
+  let f_x1 = I32.to_f64(x1)
+  let f_y1 = I32.to_f64(y1)
+  let f_x2 = I32.to_f64(x2)
+  let f_y2 = I32.to_f64(y2)
+  let f_size = I32.to_f64(size)
+  
+  // set m when x2 == x1 because this gives 90 deg which has no tangent
+  let m = if F64.eql(f_x2 - f_x1, 0) then 89.99 :: F64 else F64.div((f_y2 - f_y1), f_x2 - f_x1)
+  let deg = F64.atan(m)
+  
+  let pi = 3.14159265359 :: F64
+  let to_left = if f_x2 >? f_x1 then 0 :: F64 else pi;
+  let to_left = if f_x2 =? f_x1 then (if f_y1 >? f_y2 then pi else 0 :: F64) else to_left
+  log("------------")
+  let degree1 = to_left + (deg + (5 * (pi / 6)));
+  let degree2 = to_left + (deg + (7 * (pi / 6)));
+
+  let px1 = f_x2 + F64.cos(degree1) * f_size;
+  let py1 = f_y2 + F64.sin(degree1) * f_size;
+
+  let px2 = f_x2 + F64.cos(degree2) * f_size;
+  let py2 = f_y2 + F64.sin(degree2) * f_size;
+  
+  // to draw only outside arrow
+  // find px3 and py3 where arrow starts
+  let all_dist = VoxBox.Draw.arrow.distance(f_x1, f_y1, f_x2, f_y2)
+  let L = VoxBox.Draw.arrow.distance(f_x2, f_y2, px2, py2)
+  let b = VoxBox.Draw.arrow.distance(px1, py1, px2, py2)
+  let h = F64.sqrt((L*L) - ((b*b)/4))
+
+  let px3 = f_x2 - (((h) * (f_x2 - f_x1)) / all_dist);
+  let py3 = f_y2 - (((h) * (f_y2 - f_y1)) / all_dist);
+
+  let img = VoxBox.Draw.line(x1, y1, F64.to_i32(px3), F64.to_i32(py3), z, col, img)
+  let img = VoxBox.Draw.line(x2, y2, F64.to_i32(px1), F64.to_i32(py1), z, col, img)
+  let img = VoxBox.Draw.line(x2, y2, F64.to_i32(px2), F64.to_i32(py2), z, col, img)
+  let img = VoxBox.Draw.line(F64.to_i32(px1), F64.to_i32(py1), F64.to_i32(px2), F64.to_i32(py2), z, col, img)
+  img
+
+
+// distance between two points
+VoxBox.Draw.arrow.distance(x1: F64, y1: F64, x2: F64, y2: F64): F64
+  F64.sqrt(((x2 - x1)*(x2 - x1)) + ((y2 - y1)*(y2 - y1)))

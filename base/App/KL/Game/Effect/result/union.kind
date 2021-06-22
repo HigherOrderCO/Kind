@@ -7,6 +7,6 @@ App.KL.Game.Effect.result.union<A: Type>(
   App.KL.Game.Effect.Result.new<A>(
     value_union(a@value, b@value)
     b@board
-    Hexagonal.Axial.BBL.union!(a@indicators, b@indicators)
+    Hexagonal.Axial.BBT.union!(a@indicators, b@indicators)
   )
   
