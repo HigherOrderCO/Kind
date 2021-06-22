@@ -1,0 +1,9 @@
+App.KL.Game.Effect.run<A: Type>(
+  effect: App.KL.Game.Effect<A>
+  center: Hexagonal.Axial
+  target: Hexagonal.Axial
+  game: App.KL.Game
+): App.KL.Game
+
+  open effect(center, target, game@board) as result
+  game@board <- result.board

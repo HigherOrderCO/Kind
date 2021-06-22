@@ -1,0 +1,10 @@
+App.KL.Game.Effect.animation.push
+  (coords : List<App.KL.Game.Coord>
+): App.KL.Game.Effect<Unit>
+
+  (center, target, map)
+  map = List.foldr!!(map, 
+    (coord, map) 
+      App.KL.Game.Map.push(coord, App.KL.Game.Map.Entity.animation(App.KL.Game.Animation.new(some(45), App.KL.Game.Sprite.fire)),
+     map), coords)
+  App.KL.Game.Effect.Result.new<Unit>(Unit.new, map, [], NatMap.new!)

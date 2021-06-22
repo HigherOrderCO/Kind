@@ -1,0 +1,7 @@
+// TODO LATER
+App.KL.Game.Effect.future.add(
+  futures: List(App.KL.Game.Future)
+): App.KL.Game.Effect<Unit>
+
+  (tick, center, target, map)
+  App.KL.Game.Effect.Result.new!(unit, map, futures, NatMap.new!)

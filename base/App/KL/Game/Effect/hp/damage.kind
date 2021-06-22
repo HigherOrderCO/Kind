@@ -1,0 +1,5 @@
+App.KL.Game.Effect.hp.damage(
+  dmg: I32
+): App.KL.Game.Effect<I32>
+
+  App.KL.Game.Effect.hp.change(I32.neg(dmg))

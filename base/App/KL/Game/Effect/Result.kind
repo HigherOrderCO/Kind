@@ -1,0 +1,7 @@
+type App.KL.Game.Effect.Result <A: Type> {
+  new(
+    value: A,
+    board: App.KL.Game.Board,
+    indicators: Hexagonal.Axial.BBL(App.KL.Game.Indicator)
+  )
+}
