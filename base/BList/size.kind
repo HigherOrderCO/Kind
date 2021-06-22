@@ -1,0 +1,5 @@
+BList.size(A : Type, tree : BList.BTree<A>) : U32
+  case tree {
+      Leaf : 1
+      Node : tree.size
+  }

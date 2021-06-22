@@ -1,12 +1,12 @@
 App.KL.Game.Board: Type
-  Hexagonal.Axial.BBL<App.KL.Game.Tile>
+  Hexagonal.Axial.BBT<App.KL.Game.Tile>
 
 // get tile from board
 App.KL.Game.Board.get(
   coord: Hexagonal.Axial,
   board: App.KL.Game.Board
 ): Maybe<App.KL.Game.Tile>
-  Hexagonal.Axial.BBL.get!(coord, board)
+  Hexagonal.Axial.BBT.get!(coord, board)
 
 // set tile in some coord on board
 App.KL.Game.Board.set(
@@ -14,7 +14,7 @@ App.KL.Game.Board.set(
   tile: App.KL.Game.Tile,
   board:App.KL.Game.Board
 ): App.KL.Game.Board
-  Hexagonal.Axial.BBL.insert!(coord, tile, board)
+  Hexagonal.Axial.BBT.set!(coord, tile, board)
 
 // push entity to board
 App.KL.Game.Board.push(
@@ -46,37 +46,6 @@ App.KL.Game.Board.push(
       }
     }
 
-App.KL.Game.Board.get_creature(
-  coord: Hexagonal.Axial
-  board: App.KL.Game.Board
-): Maybe<App.KL.Game.Creature>
-  let tile = App.KL.Game.Board.get(coord, board)
-  case tile {
-    none: none
-    some: tile.value@creature
-  }
-
-App.KL.Game.Board.del_creature(
-  coord: Hexagonal.Axial
-  board: App.KL.Game.Board
-): App.KL.Game.Board
-  let tile = App.KL.Game.Board.get(coord, board)
-  case tile { 
-    none: board
-    some: App.KL.Game.Board.set(coord, tile.value@creature <- none, board)
-  }
-
-App.KL.Game.Board.set_creature(
-  coord: Hexagonal.Axial
-  creature: App.KL.Game.Creature
-  board: App.KL.Game.Board
-): App.KL.Game.Board
-  let tile = App.KL.Game.Board.get(coord, board)
-  case tile { 
-    none: board
-    some: App.KL.Game.Board.set(coord, tile.value@creature <- some(creature), board)
-  }
-  
 App.KL.Game.Board.is_occupied(coord: Hexagonal.Axial, board: App.KL.Game.Board): Bool
   let tile = App.KL.Game.Board.get(coord, board)
   case tile {
@@ -92,7 +61,7 @@ App.KL.Game.Board.is_occupied(coord: Hexagonal.Axial, board: App.KL.Game.Board):
 // TODO: optimize
 // Returns a map with the player Address as the key to its respective coordinate 
 App.KL.Game.Board.find_players(board: App.KL.Game.Board): Map<Hexagonal.Axial>
-  let tile_list = Hexagonal.Axial.BBL.to_list!(board)
+  let tile_list = Hexagonal.Axial.BBT.to_list!(board)
   let players = []
   for coord_tile in tile_list with players:
     let {coord,tile} = coord_tile

@@ -47,11 +47,11 @@ App.KL.Game.Phase.Draft.draw.main(players: Map<App.KL.Game.Player>, room: String
 // ----------
 App.KL.Game.Phase.Draft.draw.choose_team(players: Map<App.KL.Game.Player>): DOM
   <div style={ 
-    "width": "60%"
-    "height": "30%"
+    // "width": "60%"
+    // "height": "30%"
     "display": "flex"
-    "flex-direction": "row"
-    "justify-content": "space-between"
+    "justify-content": "center"
+    "flex-wrap": "wrap"
   }>
     {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
     {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
@@ -77,10 +77,15 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
   
   <button id = "T" | Nat.show(player_count) | team_txt style={ 
     "width": "40%"
-    "height": "100%"
+    "height": "200px"
     "background-image": gradient
     "box-shadow": "2px -2px 2px black"
     "font-size": "2rem"
+    "border": "0"
+    "border-radius": "5px"
+    "cursor": "pointer"
+    "min-width": "270px"
+    "margin": "20px"
   }>
     Nat.show(player_count) | "/3 Players"
   </button>

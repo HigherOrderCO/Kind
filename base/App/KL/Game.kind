@@ -13,7 +13,7 @@ type App.KL.Game.State.Local {
 }
 
 App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Local
-  let preview = App.KL.Game.Cast.Preview.new(Hexagonal.Axial.BBL.new!, Hexagonal.Axial.BBL.new!)
+  let preview = App.KL.Game.Cast.Preview.new(Hexagonal.Axial.BBT.new!, Hexagonal.Axial.BBT.new!)
   let mouse = {0,0}
   App.KL.Game.State.Local.new(user, room, preview, mouse)
 
@@ -47,7 +47,8 @@ App.KL.Game.start: App.KL.Game
   let turn = 0#64
   let moment = App.KL.Game.Moment.preparation(64)
   let players = Map.new!
-  let board = Hexagonal.Axial.BBL.new!
+  let board = Hexagonal.Axial.BBT.new!
+  let tick = 0#64
   let casts = []
   App.KL.Game.new(phase, turn, moment, players, board, casts)
 

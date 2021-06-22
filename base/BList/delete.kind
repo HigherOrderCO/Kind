@@ -1,0 +1,5 @@
+BList.delete(A : Type, blist : BList<A>) : Pair<BList.BTree<A>, BList<A>>
+  case blist {
+      nil : ?a
+      cons : ?b
+  }

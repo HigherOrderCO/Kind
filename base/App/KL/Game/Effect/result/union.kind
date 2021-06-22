@@ -1,0 +1,12 @@
+App.KL.Game.Effect.result.union<A: Type>(
+  a: App.KL.Game.Effect.Result<A>, 
+  b: App.KL.Game.Effect.Result<A>, 
+  value_union: A -> A -> A
+): App.KL.Game.Effect.Result<A>
+
+  App.KL.Game.Effect.Result.new<A>(
+    value_union(a@value, b@value)
+    b@board
+    Hexagonal.Axial.BBT.union!(a@indicators, b@indicators)
+  )
+  

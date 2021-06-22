@@ -8413,14 +8413,24 @@ module.exports = (function() {
                 var _gradient$7 = $1901;
                 break;
         };
+<<<<<<< HEAD
         var $1893 = DOM$node$("button", Map$from_list$(List$cons$(Pair$new$("id", ("T" + (Nat$show$(_player_count$5) + _team_txt$6))), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "40%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("background-image", _gradient$7), List$cons$(Pair$new$("box-shadow", "2px -2px 2px black"), List$cons$(Pair$new$("font-size", "2rem"), List$nil)))))), List$cons$(DOM$text$((Nat$show$(_player_count$5) + "/3 Players")), List$nil));
         return $1893;
+=======
+        var $1889 = DOM$node$("button", Map$from_list$(List$cons$(Pair$new$("id", ("T" + (Nat$show$(_player_count$5) + _team_txt$6))), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "40%"), List$cons$(Pair$new$("height", "200px"), List$cons$(Pair$new$("background-image", _gradient$7), List$cons$(Pair$new$("box-shadow", "2px -2px 2px black"), List$cons$(Pair$new$("font-size", "2rem"), List$cons$(Pair$new$("border", "0"), List$cons$(Pair$new$("border-radius", "5px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("min-width", "270px"), List$cons$(Pair$new$("margin", "20px"), List$nil))))))))))), List$cons$(DOM$text$((Nat$show$(_player_count$5) + "/3 Players")), List$nil));
+        return $1889;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$draw$choose_team$button = x0 => x1 => App$KL$Game$Phase$Draft$draw$choose_team$button$(x0, x1);
 
     function App$KL$Game$Phase$Draft$draw$choose_team$(_players$1) {
+<<<<<<< HEAD
         var $1902 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "60%"), List$cons$(Pair$new$("height", "30%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$nil)))))), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$blue), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$red), List$nil)));
         return $1902;
+=======
+        var $1898 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil)))), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$blue), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$red), List$nil)));
+        return $1898;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$draw$choose_team = x0 => App$KL$Game$Phase$Draft$draw$choose_team$(x0);
 
@@ -11505,6 +11515,7 @@ module.exports = (function() {
     const App$KL$Game$Phase$play = ({
         _: 'App.KL.Game.Phase.play'
     });
+    const App$KL$Constants$board_extra_width = 1;
 
     function App$KL$Game$Terrain$new$(_field_id$1) {
         var $2592 = ({
@@ -11524,6 +11535,7 @@ module.exports = (function() {
     };
     const App$KL$Game$Entity$terrain = x0 => App$KL$Game$Entity$terrain$(x0);
 
+<<<<<<< HEAD
     function Hexagonal$Axial$inside$(_coord$1, _region_size$2) {
         var _coord$3 = Hexagonal$Axial$to_cubic$(_coord$1);
         var self = _coord$3;
@@ -11538,24 +11550,40 @@ module.exports = (function() {
                 var _greater$10 = I32$max$(_x$7, I32$max$(_y$8, _z$9));
                 var $2598 = (_greater$10 <= _region_size$2);
                 var $2594 = $2598;
+=======
+    function I32$inc$(_a$1) {
+        var self = _a$1;
+        switch ('i32') {
+            case 'i32':
+                var $2530 = i32_to_word(self);
+                var $2531 = I32$new$(Word$inc$($2530));
+                var $2529 = $2531;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
         };
         return $2594;
     };
-    const Hexagonal$Axial$inside = x0 => x1 => Hexagonal$Axial$inside$(x0, x1);
+    const I32$inc = x0 => I32$inc$(x0);
+    const I32$for = a0 => a1 => a2 => a3 => (i32_for(a0, a1, a2, a3));
 
     function App$KL$Game$Board$push$(_coord$1, _entity$2, _board$3) {
         var _tile$4 = App$KL$Game$Board$get$(_coord$1, _board$3);
         var self = _tile$4;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $2600 = self.value;
                 var self = $2600;
+=======
+                var $2533 = self.value;
+                var self = $2533;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 switch (self._) {
                     case 'App.KL.Game.Tile.new':
                         var self = _entity$2;
                         switch (self._) {
                             case 'App.KL.Game.Entity.creature':
+<<<<<<< HEAD
                                 var $2603 = self.value;
                                 var self = $2600;
                                 switch (self._) {
@@ -11586,11 +11614,44 @@ module.exports = (function() {
                         break;
                 };
                 var $2599 = $2601;
+=======
+                                var $2536 = self.value;
+                                var self = $2533;
+                                switch (self._) {
+                                    case 'App.KL.Game.Tile.new':
+                                        var $2538 = self.terrain;
+                                        var $2539 = App$KL$Game$Tile$new$($2538, Maybe$some$($2536));
+                                        var _creature_tile$9 = $2539;
+                                        break;
+                                };
+                                var $2537 = App$KL$Game$Board$set$(_coord$1, _creature_tile$9, _board$3);
+                                var $2535 = $2537;
+                                break;
+                            case 'App.KL.Game.Entity.terrain':
+                                var self = $2533;
+                                switch (self._) {
+                                    case 'App.KL.Game.Tile.new':
+                                        var $2541 = self.terrain;
+                                        var $2542 = self.creature;
+                                        var $2543 = App$KL$Game$Tile$new$($2541, $2542);
+                                        var _background_tile$9 = $2543;
+                                        break;
+                                };
+                                var $2540 = App$KL$Game$Board$set$(_coord$1, _background_tile$9, _board$3);
+                                var $2535 = $2540;
+                                break;
+                        };
+                        var $2534 = $2535;
+                        break;
+                };
+                var $2532 = $2534;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
             case 'Maybe.none':
                 var self = _entity$2;
                 switch (self._) {
                     case 'App.KL.Game.Entity.terrain':
+<<<<<<< HEAD
                         var $2612 = self.value;
                         var _new_tile$6 = App$KL$Game$Tile$new$($2612, Maybe$none);
                         var $2613 = App$KL$Game$Board$set$(_coord$1, _new_tile$6, _board$3);
@@ -11646,9 +11707,57 @@ module.exports = (function() {
                 })();
                 var $2616 = _board$11;
                 _board$10 = $2616;
+=======
+                        var $2545 = self.value;
+                        var _new_tile$6 = App$KL$Game$Tile$new$($2545, Maybe$none);
+                        var $2546 = App$KL$Game$Board$set$(_coord$1, _new_tile$6, _board$3);
+                        var $2544 = $2546;
+                        break;
+                    case 'App.KL.Game.Entity.creature':
+                        var $2547 = _board$3;
+                        var $2544 = $2547;
+                        break;
+                };
+                var $2532 = $2544;
+                break;
+        };
+        return $2532;
+    };
+    const App$KL$Game$Board$push = x0 => x1 => x2 => App$KL$Game$Board$push$(x0, x1, x2);
+    const App$KL$Game$Board$arena = (() => {
+        var _extra_width$1 = App$KL$Constants$board_extra_width;
+        var _board_size$2 = App$KL$Constants$board_size;
+        var _n_board_size$3 = ((-_board_size$2));
+        var _board$4 = Hexagonal$Axial$BBL$new;
+        var _new_terrain$5 = App$KL$Game$Terrain$new$(0n);
+        var _new_terrain$6 = App$KL$Game$Entity$terrain$(_new_terrain$5);
+        var _board$7 = (() => {
+            var $2549 = _board$4;
+            var $2550 = _n_board_size$3;
+            var $2551 = ((_board_size$2 + 1) >> 0);
+            let _board$8 = $2549;
+            for (let _j$7 = $2550; _j$7 < $2551; ++_j$7) {
+                var _a$9 = I32$max$(_n_board_size$3, ((((-_j$7)) - _board_size$2) >> 0));
+                var _b$10 = I32$min$(_board_size$2, ((((-_j$7)) + _board_size$2) >> 0));
+                var _board$11 = (() => {
+                    var $2552 = _board$8;
+                    var $2553 = ((_a$9 - _extra_width$1) >> 0);
+                    var $2554 = ((_b$10 + ((_extra_width$1 + 1) >> 0)) >> 0);
+                    let _board$12 = $2552;
+                    for (let _i$11 = $2553; _i$11 < $2554; ++_i$11) {
+                        var _coord$13 = Hexagonal$Axial$new$(_i$11, _j$7);
+                        var $2552 = App$KL$Game$Board$push$(_coord$13, _new_terrain$6, _board$12);
+                        _board$12 = $2552;
+                    };
+                    return _board$12;
+                })();
+                var $2549 = _board$11;
+                _board$8 = $2549;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
             };
-            return _board$10;
+            return _board$8;
         })();
+<<<<<<< HEAD
         var $2615 = _board$9;
         return $2615;
     })();
@@ -11656,11 +11765,24 @@ module.exports = (function() {
     function App$KL$Game$Phase$Draft$Hero$info$(_id$1) {
         var $2624 = App$KL$Game$Hero$get_by_id$((BigInt(_id$1)));
         return $2624;
+=======
+        var $2548 = _board$7;
+        return $2548;
+    })();
+
+    function App$KL$Game$Phase$Draft$Hero$info$(_id$1) {
+        var $2555 = App$KL$Game$Hero$get_by_id$((BigInt(_id$1)));
+        return $2555;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$Hero$info = x0 => App$KL$Game$Phase$Draft$Hero$info$(x0);
 
     function App$KL$Game$Creature$new$(_player$1, _hero$2, _team$3, _hp$4, _ap$5) {
+<<<<<<< HEAD
         var $2625 = ({
+=======
+        var $2556 = ({
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
             _: 'App.KL.Game.Creature.new',
             'player': _player$1,
             'hero': _hero$2,
@@ -11668,7 +11790,11 @@ module.exports = (function() {
             'hp': _hp$4,
             'ap': _ap$5
         });
+<<<<<<< HEAD
         return $2625;
+=======
+        return $2556;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Creature$new = x0 => x1 => x2 => x3 => x4 => App$KL$Game$Creature$new$(x0, x1, x2, x3, x4);
 
@@ -11677,6 +11803,7 @@ module.exports = (function() {
         var self = _hero$4;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $2627 = self.value;
                 var $2628 = Maybe$some$(App$KL$Game$Creature$new$(_player_addr$2, $2627, _team$3, (() => {
                     var self = $2627;
@@ -11703,19 +11830,56 @@ module.exports = (function() {
                 break;
         };
         return $2626;
+=======
+                var $2558 = self.value;
+                var $2559 = Maybe$some$(App$KL$Game$Creature$new$(_player_addr$2, $2558, _team$3, (() => {
+                    var self = $2558;
+                    switch (self._) {
+                        case 'App.KL.Game.Hero.new':
+                            var $2560 = self.max_hp;
+                            var $2561 = $2560;
+                            return $2561;
+                    };
+                })(), (() => {
+                    var self = $2558;
+                    switch (self._) {
+                        case 'App.KL.Game.Hero.new':
+                            var $2562 = self.max_ap;
+                            var $2563 = $2562;
+                            return $2563;
+                    };
+                })()));
+                var $2557 = $2559;
+                break;
+            case 'Maybe.none':
+                var $2564 = Maybe$none;
+                var $2557 = $2564;
+                break;
+        };
+        return $2557;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$Tile$create_creature = x0 => x1 => x2 => App$KL$Game$Phase$Draft$Tile$create_creature$(x0, x1, x2);
 
     function App$KL$Game$Entity$creature$(_value$1) {
+<<<<<<< HEAD
         var $2634 = ({
             _: 'App.KL.Game.Entity.creature',
             'value': _value$1
         });
         return $2634;
+=======
+        var $2565 = ({
+            _: 'App.KL.Game.Entity.creature',
+            'value': _value$1
+        });
+        return $2565;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Entity$creature = x0 => App$KL$Game$Entity$creature$(x0);
 
     function App$KL$Game$Phase$Draft$create_board$(_players$1) {
+<<<<<<< HEAD
         var $2635 = ((console.log(" - criando mapa"), (_$2 => {
             var _map$3 = App$KL$Game$Board$arena;
             var _players$4 = Map$to_list$(_players$1);
@@ -11732,19 +11896,44 @@ module.exports = (function() {
                             var $2640 = self.fst;
                             var $2641 = $2640;
                             var _user$7 = $2641;
+=======
+        var $2566 = ((console.log(" - criando mapa"), (_$2 => {
+            var _map$3 = App$KL$Game$Board$arena;
+            var _players$4 = Map$to_list$(_players$1);
+            var _map$5 = (() => {
+                var $2569 = _map$3;
+                var $2570 = _players$4;
+                let _map$6 = $2569;
+                let _pair$5;
+                while ($2570._ === 'List.cons') {
+                    _pair$5 = $2570.head;
+                    var self = _pair$5;
+                    switch (self._) {
+                        case 'Pair.new':
+                            var $2571 = self.fst;
+                            var $2572 = $2571;
+                            var _user$7 = $2572;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                             break;
                     };
                     var self = _pair$5;
                     switch (self._) {
                         case 'Pair.new':
+<<<<<<< HEAD
                             var $2642 = self.snd;
                             var $2643 = $2642;
                             var _player$8 = $2643;
+=======
+                            var $2573 = self.snd;
+                            var $2574 = $2573;
+                            var _player$8 = $2574;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                             break;
                     };
                     var self = _player$8;
                     switch (self._) {
                         case 'App.KL.Game.Player.new':
+<<<<<<< HEAD
                             var $2644 = self.init_pos;
                             var $2645 = $2644;
                             var _pos$9 = $2645;
@@ -11757,18 +11946,39 @@ module.exports = (function() {
                         var $2647 = Maybe$monad$((_m$bind$11 => _m$pure$12 => {
                             var $2648 = _m$bind$11;
                             return $2648;
+=======
+                            var $2575 = self.init_pos;
+                            var $2576 = $2575;
+                            var _pos$9 = $2576;
+                            break;
+                    };
+                    var $2569 = Maybe$default$(Maybe$monad$((_m$bind$10 => _m$pure$11 => {
+                        var $2577 = _m$bind$10;
+                        return $2577;
+                    }))(_pos$9)((_coord$10 => {
+                        var $2578 = Maybe$monad$((_m$bind$11 => _m$pure$12 => {
+                            var $2579 = _m$bind$11;
+                            return $2579;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                         }))(Maybe$map$(Nat$to_u8, (() => {
                             var self = _player$8;
                             switch (self._) {
                                 case 'App.KL.Game.Player.new':
+<<<<<<< HEAD
                                     var $2649 = self.hero_id;
                                     var $2650 = $2649;
                                     return $2650;
+=======
+                                    var $2580 = self.hero_id;
+                                    var $2581 = $2580;
+                                    return $2581;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                             };
                         })()))((_hero_id$11 => {
                             var self = _player$8;
                             switch (self._) {
                                 case 'App.KL.Game.Player.new':
+<<<<<<< HEAD
                                     var $2652 = self.team;
                                     var $2653 = $2652;
                                     var _team$12 = $2653;
@@ -11798,6 +12008,37 @@ module.exports = (function() {
             return $2636;
         })()));
         return $2635;
+=======
+                                    var $2583 = self.team;
+                                    var $2584 = $2583;
+                                    var _team$12 = $2584;
+                                    break;
+                            };
+                            var $2582 = Maybe$monad$((_m$bind$13 => _m$pure$14 => {
+                                var $2585 = _m$bind$13;
+                                return $2585;
+                            }))(App$KL$Game$Phase$Draft$Tile$create_creature$(_hero_id$11, Maybe$some$(_user$7), _team$12))((_creature$13 => {
+                                var _entity$14 = App$KL$Game$Entity$creature$(_creature$13);
+                                var $2586 = Maybe$monad$((_m$bind$15 => _m$pure$16 => {
+                                    var $2587 = _m$pure$16;
+                                    return $2587;
+                                }))(App$KL$Game$Board$push$(_coord$10, _entity$14, _map$6));
+                                return $2586;
+                            }));
+                            return $2582;
+                        }));
+                        return $2578;
+                    })), _map$6);
+                    _map$6 = $2569;
+                    $2570 = $2570.tail;
+                }
+                return _map$6;
+            })();
+            var $2567 = _map$5;
+            return $2567;
+        })()));
+        return $2566;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$create_board = x0 => App$KL$Game$Phase$Draft$create_board$(x0);
 
@@ -11805,13 +12046,20 @@ module.exports = (function() {
         var self = _game$2;
         switch (self._) {
             case 'App.KL.Game.new':
+<<<<<<< HEAD
                 var $2658 = self.players;
                 var $2659 = $2658;
                 var _players$3 = $2659;
+=======
+                var $2589 = self.players;
+                var $2590 = $2589;
+                var _players$3 = $2590;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
         };
         var _player_list$4 = Map$to_list$(_players$3);
         var _ready$5 = List$fold$(_player_list$4, Bool$true, (_x$5 => {
+<<<<<<< HEAD
             var $2660 = a1 => ((() => {
                 var self = _x$5;
                 switch (self._) {
@@ -11819,26 +12067,50 @@ module.exports = (function() {
                         var $2661 = self.snd;
                         var $2662 = $2661;
                         var self = $2662;
+=======
+            var $2591 = a1 => ((() => {
+                var self = _x$5;
+                switch (self._) {
+                    case 'Pair.new':
+                        var $2592 = self.snd;
+                        var $2593 = $2592;
+                        var self = $2593;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                         break;
                 };
                 switch (self._) {
                     case 'App.KL.Game.Player.new':
+<<<<<<< HEAD
                         var $2663 = self.ready;
                         var $2664 = $2663;
                         return $2664;
                 };
             })() && a1);
             return $2660;
+=======
+                        var $2594 = self.ready;
+                        var $2595 = $2594;
+                        return $2595;
+                };
+            })() && a1);
+            return $2591;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
         }));
         var self = _player_list$4;
         switch (self._) {
             case 'List.nil':
+<<<<<<< HEAD
                 var $2665 = _game$2;
                 var $2657 = $2665;
+=======
+                var $2596 = _game$2;
+                var $2588 = $2596;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
             case 'List.cons':
                 var self = _ready$5;
                 if (self) {
+<<<<<<< HEAD
                     var $2667 = ((console.log("- to_board"), (_$8 => {
                         var self = _game$2;
                         switch (self._) {
@@ -11850,11 +12122,24 @@ module.exports = (function() {
                                 var $2673 = self.casts;
                                 var $2674 = App$KL$Game$new$(App$KL$Game$Phase$play, $2669, $2670, $2671, $2672, $2673);
                                 var _game$9 = $2674;
+=======
+                    var $2598 = ((console.log("- to_board"), (_$8 => {
+                        var self = _game$2;
+                        switch (self._) {
+                            case 'App.KL.Game.new':
+                                var $2600 = self.tick;
+                                var $2601 = self.players;
+                                var $2602 = self.board;
+                                var $2603 = self.casts;
+                                var $2604 = App$KL$Game$new$($2600, App$KL$Game$Phase$play, $2601, $2602, $2603);
+                                var _game$9 = $2604;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                                 break;
                         };
                         var self = _game$9;
                         switch (self._) {
                             case 'App.KL.Game.new':
+<<<<<<< HEAD
                                 var $2675 = self.phase;
                                 var $2676 = self.turn;
                                 var $2677 = self.moment;
@@ -11876,10 +12161,33 @@ module.exports = (function() {
                 break;
         };
         return $2657;
+=======
+                                var $2605 = self.tick;
+                                var $2606 = self.phase;
+                                var $2607 = self.players;
+                                var $2608 = self.casts;
+                                var $2609 = App$KL$Game$new$($2605, $2606, $2607, App$KL$Game$Phase$Draft$create_board$(_players$3), $2608);
+                                var _game$10 = $2609;
+                                break;
+                        };
+                        var $2599 = _game$10;
+                        return $2599;
+                    })()));
+                    var $2597 = $2598;
+                } else {
+                    var $2610 = _game$2;
+                    var $2597 = $2610;
+                };
+                var $2588 = $2597;
+                break;
+        };
+        return $2588;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$tick = x0 => x1 => App$KL$Game$Phase$Draft$tick$(x0, x1);
     const U64$gtn = a0 => a1 => (a0 > a1);
 
+<<<<<<< HEAD
     function App$KL$Game$Moment$preparation$(_countdown$1) {
         var $2682 = ({
             _: 'App.KL.Game.Moment.preparation',
@@ -11918,12 +12226,40 @@ module.exports = (function() {
                             var $2689 = Bool$false;
                             var $2687 = $2689;
                             break;
+=======
+    function Map$values$(_xs$2) {
+        var $2611 = BBL$foldr_with_key$((_key$3 => _value$4 => _list$5 => {
+            var $2612 = List$cons$(_value$4, _list$5);
+            return $2612;
+        }), List$nil, _xs$2);
+        return $2611;
+    };
+    const Map$values = x0 => Map$values$(x0);
+
+    function App$KL$Game$Cast$sort$(_casts$1) {
+        var _map$2 = Map$from_list$(List$nil);
+        var _map$3 = (() => {
+            var $2615 = _map$2;
+            var $2616 = _casts$1;
+            let _map$4 = $2615;
+            let _cast$3;
+            while ($2616._ === 'List.cons') {
+                _cast$3 = $2616.head;
+                var $2615 = Map$set$(((() => {
+                    var self = _cast$3;
+                    switch (self._) {
+                        case 'App.KL.Game.Cast.new':
+                            var $2617 = self.player;
+                            var $2618 = $2617;
+                            return $2618;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                     };
                     return $2687;
                 }), _list$3);
                 var _eql$8 = List$filter$((_x$8 => {
                     var self = _cmp$2(_x$8)(_fst$6);
                     switch (self._) {
+<<<<<<< HEAD
                         case 'Cmp.ltn':
                         case 'Cmp.gtn':
                             var $2691 = Bool$false;
@@ -11960,11 +12296,27 @@ module.exports = (function() {
                 break;
         };
         return $2684;
+=======
+                        case 'App.KL.Game.Cast.new':
+                            var $2619 = self.letter;
+                            var $2620 = $2619;
+                            return $2620;
+                    };
+                })()))), _cast$3, _map$4);
+                _map$4 = $2615;
+                $2616 = $2616.tail;
+            }
+            return _map$4;
+        })();
+        var $2613 = Map$values$(_map$3);
+        return $2613;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const List$sort = x0 => x1 => List$sort$(x0, x1);
     const U64$ltn = a0 => a1 => (a0 < a1);
     const U64$eql = a0 => a1 => (a0 === a1);
 
+<<<<<<< HEAD
     function U64$cmp$(_a$1, _b$2) {
         var self = (_a$1 < _b$2);
         if (self) {
@@ -12059,6 +12411,72 @@ module.exports = (function() {
                 break;
         };
         return $2702;
+=======
+    function App$KL$Game$Board$find_players$(_board$1) {
+        var _tile_list$2 = Hexagonal$Axial$BBL$to_list$(_board$1);
+        var _players$3 = List$nil;
+        var _players$4 = (() => {
+            var $2623 = _players$3;
+            var $2624 = _tile_list$2;
+            let _players$5 = $2623;
+            let _coord_tile$4;
+            while ($2624._ === 'List.cons') {
+                _coord_tile$4 = $2624.head;
+                var self = _coord_tile$4;
+                switch (self._) {
+                    case 'Pair.new':
+                        var $2625 = self.fst;
+                        var $2626 = self.snd;
+                        var self = $2626;
+                        switch (self._) {
+                            case 'App.KL.Game.Tile.new':
+                                var $2628 = self.creature;
+                                var $2629 = $2628;
+                                var _creature$8 = $2629;
+                                break;
+                        };
+                        var self = _creature$8;
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $2630 = self.value;
+                                var self = $2630;
+                                switch (self._) {
+                                    case 'App.KL.Game.Creature.new':
+                                        var $2632 = self.player;
+                                        var $2633 = $2632;
+                                        var _player$10 = $2633;
+                                        break;
+                                };
+                                var self = _player$10;
+                                switch (self._) {
+                                    case 'Maybe.some':
+                                        var $2634 = self.value;
+                                        var $2635 = List$cons$(Pair$new$($2634, $2625), _players$5);
+                                        var $2631 = $2635;
+                                        break;
+                                    case 'Maybe.none':
+                                        var $2636 = _players$5;
+                                        var $2631 = $2636;
+                                        break;
+                                };
+                                var $2627 = $2631;
+                                break;
+                            case 'Maybe.none':
+                                var $2637 = _players$5;
+                                var $2627 = $2637;
+                                break;
+                        };
+                        var $2623 = $2627;
+                        break;
+                };
+                _players$5 = $2623;
+                $2624 = $2624.tail;
+            }
+            return _players$5;
+        })();
+        var $2621 = Map$from_list$(_players$4);
+        return $2621;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Cast$sort = x0 => App$KL$Game$Cast$sort$(x0);
     const App$KL$Constants$between_turn_delay = 16n;
@@ -12070,13 +12488,20 @@ module.exports = (function() {
             var self = _game$5;
             switch (self._) {
                 case 'App.KL.Game.new':
+<<<<<<< HEAD
                     var $2722 = self.board;
                     var $2723 = $2722;
                     return $2723;
+=======
+                    var $2639 = self.board;
+                    var $2640 = $2639;
+                    return $2640;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
             };
         })());
         switch (self._) {
             case 'App.KL.Game.Effect.Result.new':
+<<<<<<< HEAD
                 var $2724 = self.board;
                 var self = _game$5;
                 switch (self._) {
@@ -12094,12 +12519,31 @@ module.exports = (function() {
                 break;
         };
         return $2721;
+=======
+                var $2641 = self.board;
+                var self = _game$5;
+                switch (self._) {
+                    case 'App.KL.Game.new':
+                        var $2643 = self.tick;
+                        var $2644 = self.phase;
+                        var $2645 = self.players;
+                        var $2646 = self.casts;
+                        var $2647 = App$KL$Game$new$($2643, $2644, $2645, $2641, $2646);
+                        var $2642 = $2647;
+                        break;
+                };
+                var $2638 = $2642;
+                break;
+        };
+        return $2638;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Effect$run = x0 => x1 => x2 => x3 => App$KL$Game$Effect$run$(x0, x1, x2, x3);
 
     function App$KL$Game$Cast$apply$(_cast$1, _game$2) {
         var self = _game$2;
         switch (self._) {
+<<<<<<< HEAD
             case 'App.KL.Game.new':
                 var self = _cast$1;
                 switch (self._) {
@@ -12122,10 +12566,45 @@ module.exports = (function() {
                                             var $2740 = self.effect;
                                             var $2741 = $2740;
                                             return $2741;
+=======
+            case 'App.KL.Game.Cast.new':
+                var $2649 = self.target;
+                var $2650 = self.letter;
+                var self = _game$2;
+                switch (self._) {
+                    case 'App.KL.Game.new':
+                        var $2652 = self.board;
+                        var $2653 = Maybe$default$((() => {
+                            var _players$11 = App$KL$Game$Board$find_players$($2652);
+                            var $2654 = Maybe$monad$((_m$bind$12 => _m$pure$13 => {
+                                var $2655 = _m$bind$12;
+                                return $2655;
+                            }))(Map$get$((() => {
+                                var self = _cast$1;
+                                switch (self._) {
+                                    case 'App.KL.Game.Cast.new':
+                                        var $2656 = self.player;
+                                        var $2657 = $2656;
+                                        return $2657;
+                                };
+                            })(), _players$11))((_player_coord$12 => {
+                                var $2658 = Maybe$monad$((_m$bind$13 => _m$pure$14 => {
+                                    var $2659 = _m$bind$13;
+                                    return $2659;
+                                }))(App$KL$Game$Board$get_creature$(_player_coord$12, $2652))((_player_creature$13 => {
+                                    var self = _player_creature$13;
+                                    switch (self._) {
+                                        case 'App.KL.Game.Creature.new':
+                                            var $2661 = self.hero;
+                                            var $2662 = $2661;
+                                            var _player_hero$14 = $2662;
+                                            break;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                                     };
                                 })(), _coord$13, (() => {
                                     var self = _cast$1;
                                     switch (self._) {
+<<<<<<< HEAD
                                         case 'App.KL.Game.Cast.new':
                                             var $2742 = self.target;
                                             var $2743 = $2742;
@@ -12143,6 +12622,46 @@ module.exports = (function() {
                 break;
         };
         return $2732;
+=======
+                                        case 'App.KL.Game.Hero.new':
+                                            var $2663 = self.skills;
+                                            var $2664 = $2663;
+                                            var _player_skills$15 = $2664;
+                                            break;
+                                    };
+                                    var $2660 = Maybe$monad$((_m$bind$16 => _m$pure$17 => {
+                                        var $2665 = _m$bind$16;
+                                        return $2665;
+                                    }))(Map$get$(Char$to_string$($2650), _player_skills$15))((_casted_skill$16 => {
+                                        var self = _casted_skill$16;
+                                        switch (self._) {
+                                            case 'App.KL.Game.Skill.new':
+                                                var $2667 = self.effect;
+                                                var $2668 = $2667;
+                                                var _casted_effect$17 = $2668;
+                                                break;
+                                        };
+                                        var _game$18 = App$KL$Game$Effect$run$(_casted_effect$17, _player_coord$12, $2649, _game$2);
+                                        var $2666 = Maybe$monad$((_m$bind$19 => _m$pure$20 => {
+                                            var $2669 = _m$pure$20;
+                                            return $2669;
+                                        }))(_game$18);
+                                        return $2666;
+                                    }));
+                                    return $2660;
+                                }));
+                                return $2658;
+                            }));
+                            return $2654;
+                        })(), _game$2);
+                        var $2651 = $2653;
+                        break;
+                };
+                var $2648 = $2651;
+                break;
+        };
+        return $2648;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Cast$apply = x0 => x1 => App$KL$Game$Cast$apply$(x0, x1);
 
@@ -12150,6 +12669,7 @@ module.exports = (function() {
         var self = _game$2;
         switch (self._) {
             case 'App.KL.Game.new':
+<<<<<<< HEAD
                 var $2745 = self.moment;
                 var self = $2745;
                 switch (self._) {
@@ -12351,6 +12871,73 @@ module.exports = (function() {
                 break;
         };
         return $2744;
+=======
+                var $2671 = self.phase;
+                var $2672 = self.players;
+                var $2673 = self.board;
+                var $2674 = self.casts;
+                var $2675 = App$KL$Game$new$((((() => {
+                    var self = _game$2;
+                    switch (self._) {
+                        case 'App.KL.Game.new':
+                            var $2676 = self.tick;
+                            var $2677 = $2676;
+                            return $2677;
+                    };
+                })() + 1n) & 0xFFFFFFFFFFFFFFFFn), $2671, $2672, $2673, $2674);
+                var _game$3 = $2675;
+                break;
+        };
+        var self = (((() => {
+            var self = _game$3;
+            switch (self._) {
+                case 'App.KL.Game.new':
+                    var $2678 = self.tick;
+                    var $2679 = $2678;
+                    return $2679;
+            };
+        })() % App$KL$Constants$round_time) === 0n);
+        if (self) {
+            var _casts$4 = App$KL$Game$Cast$sort$((() => {
+                var self = _game$3;
+                switch (self._) {
+                    case 'App.KL.Game.new':
+                        var $2681 = self.casts;
+                        var $2682 = $2681;
+                        return $2682;
+                };
+            })());
+            var _game$5 = (() => {
+                var $2684 = _game$3;
+                var $2685 = _casts$4;
+                let _game$6 = $2684;
+                let _cast$5;
+                while ($2685._ === 'List.cons') {
+                    _cast$5 = $2685.head;
+                    var $2684 = App$KL$Game$Cast$apply$(_cast$5, _game$6);
+                    _game$6 = $2684;
+                    $2685 = $2685.tail;
+                }
+                return _game$6;
+            })();
+            var self = _game$5;
+            switch (self._) {
+                case 'App.KL.Game.new':
+                    var $2686 = self.tick;
+                    var $2687 = self.phase;
+                    var $2688 = self.players;
+                    var $2689 = self.board;
+                    var $2690 = App$KL$Game$new$($2686, $2687, $2688, $2689, List$nil);
+                    var $2680 = $2690;
+                    break;
+            };
+            var $2670 = $2680;
+        } else {
+            var $2691 = _game$3;
+            var $2670 = $2691;
+        };
+        return $2670;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Play$tick = x0 => x1 => App$KL$Game$Phase$Play$tick$(x0, x1);
 
@@ -12358,6 +12945,7 @@ module.exports = (function() {
         var self = _game$2;
         switch (self._) {
             case 'App.KL.Game.new':
+<<<<<<< HEAD
                 var $2828 = self.phase;
                 var self = $2828;
                 switch (self._) {
@@ -12374,6 +12962,24 @@ module.exports = (function() {
                 break;
         };
         return $2827;
+=======
+                var $2693 = self.phase;
+                var self = $2693;
+                switch (self._) {
+                    case 'App.KL.Game.Phase.draft':
+                        var $2695 = App$KL$Game$Phase$Draft$tick$(_tick$1, _game$2);
+                        var $2694 = $2695;
+                        break;
+                    case 'App.KL.Game.Phase.play':
+                        var $2696 = App$KL$Game$Phase$Play$tick$(_tick$1, _game$2);
+                        var $2694 = $2696;
+                        break;
+                };
+                var $2692 = $2694;
+                break;
+        };
+        return $2692;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$tick = x0 => x1 => App$KL$Game$tick$(x0, x1);
 
@@ -12381,14 +12987,21 @@ module.exports = (function() {
         var self = _glob$2;
         switch (self._) {
             case 'App.KL.Global.State.new':
+<<<<<<< HEAD
                 var $2833 = self.game;
                 var $2834 = $2833;
                 var _game$3 = $2834;
+=======
+                var $2698 = self.game;
+                var $2699 = $2698;
+                var _game$3 = $2699;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
         };
         var self = _game$3;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $2835 = self.value;
                 var self = _glob$2;
                 switch (self._) {
@@ -12405,6 +13018,24 @@ module.exports = (function() {
                 break;
         };
         return $2832;
+=======
+                var $2700 = self.value;
+                var self = _glob$2;
+                switch (self._) {
+                    case 'App.KL.Global.State.new':
+                        var $2702 = App$KL$Global$State$new$(Maybe$some$(App$KL$Game$tick$(_tick$1, $2700)));
+                        var $2701 = $2702;
+                        break;
+                };
+                var $2697 = $2701;
+                break;
+            case 'Maybe.none':
+                var $2703 = _glob$2;
+                var $2697 = $2703;
+                break;
+        };
+        return $2697;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Global$tick = x0 => x1 => App$KL$Global$tick$(x0, x1);
 
@@ -12412,6 +13043,7 @@ module.exports = (function() {
         var self = _deserializer$2(_bs$3);
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $2840 = self.value;
                 var $2841 = Maybe$some$((() => {
                     var self = $2840;
@@ -12430,12 +13062,37 @@ module.exports = (function() {
                 break;
         };
         return $2839;
+=======
+                var $2705 = self.value;
+                var $2706 = Maybe$some$((() => {
+                    var self = $2705;
+                    switch (self._) {
+                        case 'Pair.new':
+                            var $2707 = self.snd;
+                            var $2708 = $2707;
+                            return $2708;
+                    };
+                })());
+                var $2704 = $2706;
+                break;
+            case 'Maybe.none':
+                var $2709 = Maybe$none;
+                var $2704 = $2709;
+                break;
+        };
+        return $2704;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Deserializer$run = x0 => x1 => Deserializer$run$(x0, x1);
 
     function Deserializer$Reply$(_A$1) {
+<<<<<<< HEAD
         var $2845 = null;
         return $2845;
+=======
+        var $2710 = null;
+        return $2710;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Deserializer$Reply = x0 => Deserializer$Reply$(x0);
 
@@ -12452,6 +13109,7 @@ module.exports = (function() {
                 var self = _pars$2;
                 switch (self._) {
                     case 'List.cons':
+<<<<<<< HEAD
                         var $2846 = self.head;
                         var $2847 = self.tail;
                         var self = $2846(_bs$3);
@@ -12478,6 +13136,34 @@ module.exports = (function() {
                     case 'List.nil':
                         var $2855 = Maybe$none;
                         return $2855;
+=======
+                        var $2711 = self.head;
+                        var $2712 = self.tail;
+                        var self = $2711(_bs$3);
+                        switch (self._) {
+                            case 'Maybe.some':
+                                var $2714 = self.value;
+                                var self = $2714;
+                                switch (self._) {
+                                    case 'Pair.new':
+                                        var $2716 = self.fst;
+                                        var $2717 = self.snd;
+                                        var $2718 = Maybe$some$(Pair$new$($2716, $2717));
+                                        var $2715 = $2718;
+                                        break;
+                                };
+                                var $2713 = $2715;
+                                break;
+                            case 'Maybe.none':
+                                var $2719 = Deserializer$choice$go$($2712, _bs$3);
+                                var $2713 = $2719;
+                                break;
+                        };
+                        return $2713;
+                    case 'List.nil':
+                        var $2720 = Maybe$none;
+                        return $2720;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -12487,14 +13173,24 @@ module.exports = (function() {
     const Deserializer$choice$go = x0 => x1 => Deserializer$choice$go$(x0, x1);
 
     function Deserializer$choice$(_pars$2) {
+<<<<<<< HEAD
         var $2856 = Deserializer$choice$go(_pars$2);
         return $2856;
+=======
+        var $2721 = Deserializer$choice$go(_pars$2);
+        return $2721;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Deserializer$choice = x0 => Deserializer$choice$(x0);
 
     function Deserializer$(_A$1) {
+<<<<<<< HEAD
         var $2857 = null;
         return $2857;
+=======
+        var $2722 = null;
+        return $2722;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Deserializer = x0 => Deserializer$(x0);
 
@@ -12502,6 +13198,7 @@ module.exports = (function() {
         var self = _deserialize$3(_bs$5);
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $2859 = self.value;
                 var self = $2859;
                 switch (self._) {
@@ -12520,6 +13217,26 @@ module.exports = (function() {
                 break;
         };
         return $2858;
+=======
+                var $2724 = self.value;
+                var self = $2724;
+                switch (self._) {
+                    case 'Pair.new':
+                        var $2726 = self.fst;
+                        var $2727 = self.snd;
+                        var $2728 = _next$4($2727)($2726);
+                        var $2725 = $2728;
+                        break;
+                };
+                var $2723 = $2725;
+                break;
+            case 'Maybe.none':
+                var $2729 = Maybe$none;
+                var $2723 = $2729;
+                break;
+        };
+        return $2723;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Deserializer$bind = x0 => x1 => x2 => Deserializer$bind$(x0, x1, x2);
 
@@ -12536,6 +13253,7 @@ module.exports = (function() {
                 var self = _bits$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'o':
+<<<<<<< HEAD
                         var $2865 = self.slice(0, -1);
                         var self = _bs$2;
                         switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
@@ -12570,6 +13288,42 @@ module.exports = (function() {
                     case 'e':
                         var $2875 = Maybe$some$(Pair$new$(_bs$2, Unit$new));
                         return $2875;
+=======
+                        var $2730 = self.slice(0, -1);
+                        var self = _bs$2;
+                        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+                            case 'o':
+                                var $2732 = self.slice(0, -1);
+                                var $2733 = Deserializer$bits$($2730, $2732);
+                                var $2731 = $2733;
+                                break;
+                            case 'e':
+                            case 'i':
+                                var $2734 = Maybe$none;
+                                var $2731 = $2734;
+                                break;
+                        };
+                        return $2731;
+                    case 'i':
+                        var $2735 = self.slice(0, -1);
+                        var self = _bs$2;
+                        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+                            case 'i':
+                                var $2737 = self.slice(0, -1);
+                                var $2738 = Deserializer$bits$($2735, $2737);
+                                var $2736 = $2738;
+                                break;
+                            case 'e':
+                            case 'o':
+                                var $2739 = Maybe$none;
+                                var $2736 = $2739;
+                                break;
+                        };
+                        return $2736;
+                    case 'e':
+                        var $2740 = Maybe$some$(Pair$new$(_bs$2, Unit$new));
+                        return $2740;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -12579,14 +13333,20 @@ module.exports = (function() {
     const Deserializer$bits = x0 => x1 => Deserializer$bits$(x0, x1);
 
     function Deserializer$pure$(_value$2, _bs$3) {
+<<<<<<< HEAD
         var $2876 = Maybe$some$(Pair$new$(_bs$3, _value$2));
         return $2876;
+=======
+        var $2741 = Maybe$some$(Pair$new$(_bs$3, _value$2));
+        return $2741;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Deserializer$pure = x0 => x1 => Deserializer$pure$(x0, x1);
     const App$KL$Global$Event$void = ({
         _: 'App.KL.Global.Event.void'
     });
     const App$KL$Game$Team$deserializer = Deserializer$choice$(List$cons$(Deserializer$bind(Deserializer$bits(((Bits$e + '0') + '0')))((_$1 => {
+<<<<<<< HEAD
         var $2877 = Deserializer$pure(App$KL$Game$Team$blue);
         return $2877;
     })), List$cons$(Deserializer$bind(Deserializer$bits(((Bits$e + '0') + '1')))((_$1 => {
@@ -12600,12 +13360,28 @@ module.exports = (function() {
     function Deserializer$monad$(_new$2) {
         var $2880 = _new$2(Deserializer$bind)(Deserializer$pure);
         return $2880;
+=======
+        var $2742 = Deserializer$pure(App$KL$Game$Team$blue);
+        return $2742;
+    })), List$cons$(Deserializer$bind(Deserializer$bits(((Bits$e + '0') + '1')))((_$1 => {
+        var $2743 = Deserializer$pure(App$KL$Game$Team$red);
+        return $2743;
+    })), List$cons$(Deserializer$bind(Deserializer$bits(((Bits$e + '1') + '0')))((_$1 => {
+        var $2744 = Deserializer$pure(App$KL$Game$Team$neutral);
+        return $2744;
+    })), List$nil))));
+
+    function Deserializer$monad$(_new$2) {
+        var $2745 = _new$2(Deserializer$bind)(Deserializer$pure);
+        return $2745;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Deserializer$monad = x0 => Deserializer$monad$(x0);
 
     function Word$deserializer$(_size$1) {
         var self = _size$1;
         if (self === 0n) {
+<<<<<<< HEAD
             var $2882 = Deserializer$monad$((_m$bind$2 => _m$pure$3 => {
                 var $2883 = _m$pure$3;
                 return $2883;
@@ -12750,11 +13526,158 @@ module.exports = (function() {
             return $2926;
         }));
         return $2925;
+=======
+            var $2747 = Deserializer$monad$((_m$bind$2 => _m$pure$3 => {
+                var $2748 = _m$pure$3;
+                return $2748;
+            }))(Word$e);
+            var $2746 = $2747;
+        } else {
+            var $2749 = (self - 1n);
+            var $2750 = Deserializer$choice$(List$cons$(Deserializer$monad$((_m$bind$3 => _m$pure$4 => {
+                var $2751 = _m$bind$3;
+                return $2751;
+            }))(Deserializer$bits((Bits$e + '0')))((_$3 => {
+                var $2752 = Deserializer$monad$((_m$bind$4 => _m$pure$5 => {
+                    var $2753 = _m$bind$4;
+                    return $2753;
+                }))(Word$deserializer$($2749))((_pred$4 => {
+                    var $2754 = Deserializer$monad$((_m$bind$5 => _m$pure$6 => {
+                        var $2755 = _m$pure$6;
+                        return $2755;
+                    }))(Word$o$(_pred$4));
+                    return $2754;
+                }));
+                return $2752;
+            })), List$cons$(Deserializer$monad$((_m$bind$3 => _m$pure$4 => {
+                var $2756 = _m$bind$3;
+                return $2756;
+            }))(Deserializer$bits((Bits$e + '1')))((_$3 => {
+                var $2757 = Deserializer$monad$((_m$bind$4 => _m$pure$5 => {
+                    var $2758 = _m$bind$4;
+                    return $2758;
+                }))(Word$deserializer$($2749))((_pred$4 => {
+                    var $2759 = Deserializer$monad$((_m$bind$5 => _m$pure$6 => {
+                        var $2760 = _m$pure$6;
+                        return $2760;
+                    }))(Word$i$(_pred$4));
+                    return $2759;
+                }));
+                return $2757;
+            })), List$nil)));
+            var $2746 = $2750;
+        };
+        return $2746;
+    };
+    const Word$deserializer = x0 => Word$deserializer$(x0);
+    const U8$deserializer = Deserializer$monad$((_m$bind$1 => _m$pure$2 => {
+        var $2761 = _m$bind$1;
+        return $2761;
+    }))(Word$deserializer$(8n))((_word$1 => {
+        var $2762 = Deserializer$monad$((_m$bind$2 => _m$pure$3 => {
+            var $2763 = _m$pure$3;
+            return $2763;
+        }))(U8$new$(_word$1));
+        return $2762;
+    }));
+    const I32$deserializer = Deserializer$monad$((_m$bind$1 => _m$pure$2 => {
+        var $2764 = _m$bind$1;
+        return $2764;
+    }))(Word$deserializer$(32n))((_word$1 => {
+        var $2765 = Deserializer$monad$((_m$bind$2 => _m$pure$3 => {
+            var $2766 = _m$pure$3;
+            return $2766;
+        }))(I32$new$(_word$1));
+        return $2765;
+    }));
+    const Hexagonal$Axial$deserializer = Deserializer$choice$(List$cons$(Deserializer$bind(Deserializer$bits(Bits$e))((_$1 => {
+        var $2767 = Deserializer$bind(I32$deserializer)((_i$2 => {
+            var $2768 = Deserializer$bind(I32$deserializer)((_j$3 => {
+                var $2769 = Deserializer$pure(Hexagonal$Axial$new$(_i$2, _j$3));
+                return $2769;
+            }));
+            return $2768;
+        }));
+        return $2767;
+    })), List$nil));
+    const App$KL$Game$Phase$Draft$Event$deserializer = Deserializer$choice$(List$cons$(Deserializer$bind(Deserializer$bits((((Bits$e + '0') + '0') + '0')))((_$1 => {
+        var $2770 = Deserializer$pure(App$KL$Game$Phase$Draft$Event$join_room);
+        return $2770;
+    })), List$cons$(Deserializer$bind(Deserializer$bits((((Bits$e + '0') + '0') + '1')))((_$1 => {
+        var $2771 = Deserializer$bind(App$KL$Game$Team$deserializer)((_team$2 => {
+            var $2772 = Deserializer$pure(App$KL$Game$Phase$Draft$Event$set_team$(_team$2));
+            return $2772;
+        }));
+        return $2771;
+    })), List$cons$(Deserializer$bind(Deserializer$bits((((Bits$e + '0') + '1') + '0')))((_$1 => {
+        var $2773 = Deserializer$bind(U8$deserializer)((_hero$2 => {
+            var $2774 = Deserializer$pure(App$KL$Game$Phase$Draft$Event$set_hero$(_hero$2));
+            return $2774;
+        }));
+        return $2773;
+    })), List$cons$(Deserializer$bind(Deserializer$bits((((Bits$e + '0') + '1') + '1')))((_$1 => {
+        var $2775 = Deserializer$bind(Hexagonal$Axial$deserializer)((_coord$2 => {
+            var $2776 = Deserializer$pure(App$KL$Game$Phase$Draft$Event$set_init_pos$(_coord$2));
+            return $2776;
+        }));
+        return $2775;
+    })), List$cons$(Deserializer$bind(Deserializer$bits((((Bits$e + '1') + '0') + '0')))((_$1 => {
+        var $2777 = Deserializer$bind(U8$deserializer)((_ready$2 => {
+            var $2778 = Deserializer$pure(App$KL$Game$Phase$Draft$Event$set_ready$(_ready$2));
+            return $2778;
+        }));
+        return $2777;
+    })), List$nil))))));
+    const U16$deserializer = Deserializer$monad$((_m$bind$1 => _m$pure$2 => {
+        var $2779 = _m$bind$1;
+        return $2779;
+    }))(Word$deserializer$(16n))((_word$1 => {
+        var $2780 = Deserializer$monad$((_m$bind$2 => _m$pure$3 => {
+            var $2781 = _m$pure$3;
+            return $2781;
+        }))(U16$new$(_word$1));
+        return $2780;
+    }));
+    const Char$deserializer = U16$deserializer;
+    const App$KL$Game$Phase$Play$Event$deserializer = Deserializer$choice$(List$cons$(Deserializer$bind(Deserializer$bits(Bits$e))((_$1 => {
+        var $2782 = Deserializer$bind(Char$deserializer)((_letter$2 => {
+            var $2783 = Deserializer$bind(Hexagonal$Axial$deserializer)((_target$3 => {
+                var $2784 = Deserializer$pure(App$KL$Game$Phase$Play$Event$cast$(_letter$2, _target$3));
+                return $2784;
+            }));
+            return $2783;
+        }));
+        return $2782;
+    })), List$nil));
+    const App$KL$Game$Event$deserializer = Deserializer$choice$(List$cons$(Deserializer$bind(Deserializer$bits((Bits$e + '0')))((_$1 => {
+        var $2785 = Deserializer$bind(App$KL$Game$Phase$Draft$Event$deserializer)((_event$2 => {
+            var $2786 = Deserializer$pure(App$KL$Game$Event$draft$(_event$2));
+            return $2786;
+        }));
+        return $2785;
+    })), List$cons$(Deserializer$bind(Deserializer$bits((Bits$e + '1')))((_$1 => {
+        var $2787 = Deserializer$bind(App$KL$Game$Phase$Play$Event$deserializer)((_event$2 => {
+            var $2788 = Deserializer$pure(App$KL$Game$Event$play$(_event$2));
+            return $2788;
+        }));
+        return $2787;
+    })), List$nil)));
+    const App$KL$Global$Event$deserializer = Deserializer$choice$(List$cons$(Deserializer$bind(Deserializer$bits((Bits$e + '0')))((_$1 => {
+        var $2789 = Deserializer$pure(App$KL$Global$Event$void);
+        return $2789;
+    })), List$cons$(Deserializer$bind(Deserializer$bits((Bits$e + '1')))((_$1 => {
+        var $2790 = Deserializer$bind(App$KL$Game$Event$deserializer)((_event$2 => {
+            var $2791 = Deserializer$pure(App$KL$Global$Event$game$(_event$2));
+            return $2791;
+        }));
+        return $2790;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     })), List$nil)));
 
     function Bits$hex$decode$(_x$1) {
         var self = _x$1;
         if (self.length === 0) {
+<<<<<<< HEAD
             var $2928 = Bits$e;
             var $2927 = $2928;
         } else {
@@ -12918,12 +13841,182 @@ module.exports = (function() {
             var $2927 = $2931;
         };
         return $2927;
+=======
+            var $2793 = Bits$e;
+            var $2792 = $2793;
+        } else {
+            var $2794 = self.charCodeAt(0);
+            var $2795 = self.slice(1);
+            var self = ($2794 === 48);
+            if (self) {
+                var $2797 = ((((Bits$hex$decode$($2795) + '0') + '0') + '0') + '0');
+                var $2796 = $2797;
+            } else {
+                var self = ($2794 === 49);
+                if (self) {
+                    var $2799 = ((((Bits$hex$decode$($2795) + '0') + '0') + '0') + '1');
+                    var $2798 = $2799;
+                } else {
+                    var self = ($2794 === 50);
+                    if (self) {
+                        var $2801 = ((((Bits$hex$decode$($2795) + '0') + '0') + '1') + '0');
+                        var $2800 = $2801;
+                    } else {
+                        var self = ($2794 === 51);
+                        if (self) {
+                            var $2803 = ((((Bits$hex$decode$($2795) + '0') + '0') + '1') + '1');
+                            var $2802 = $2803;
+                        } else {
+                            var self = ($2794 === 52);
+                            if (self) {
+                                var $2805 = ((((Bits$hex$decode$($2795) + '0') + '1') + '0') + '0');
+                                var $2804 = $2805;
+                            } else {
+                                var self = ($2794 === 53);
+                                if (self) {
+                                    var $2807 = ((((Bits$hex$decode$($2795) + '0') + '1') + '0') + '1');
+                                    var $2806 = $2807;
+                                } else {
+                                    var self = ($2794 === 54);
+                                    if (self) {
+                                        var $2809 = ((((Bits$hex$decode$($2795) + '0') + '1') + '1') + '0');
+                                        var $2808 = $2809;
+                                    } else {
+                                        var self = ($2794 === 55);
+                                        if (self) {
+                                            var $2811 = ((((Bits$hex$decode$($2795) + '0') + '1') + '1') + '1');
+                                            var $2810 = $2811;
+                                        } else {
+                                            var self = ($2794 === 56);
+                                            if (self) {
+                                                var $2813 = ((((Bits$hex$decode$($2795) + '1') + '0') + '0') + '0');
+                                                var $2812 = $2813;
+                                            } else {
+                                                var self = ($2794 === 57);
+                                                if (self) {
+                                                    var $2815 = ((((Bits$hex$decode$($2795) + '1') + '0') + '0') + '1');
+                                                    var $2814 = $2815;
+                                                } else {
+                                                    var self = ($2794 === 97);
+                                                    if (self) {
+                                                        var $2817 = ((((Bits$hex$decode$($2795) + '1') + '0') + '1') + '0');
+                                                        var $2816 = $2817;
+                                                    } else {
+                                                        var self = ($2794 === 98);
+                                                        if (self) {
+                                                            var $2819 = ((((Bits$hex$decode$($2795) + '1') + '0') + '1') + '1');
+                                                            var $2818 = $2819;
+                                                        } else {
+                                                            var self = ($2794 === 99);
+                                                            if (self) {
+                                                                var $2821 = ((((Bits$hex$decode$($2795) + '1') + '1') + '0') + '0');
+                                                                var $2820 = $2821;
+                                                            } else {
+                                                                var self = ($2794 === 100);
+                                                                if (self) {
+                                                                    var $2823 = ((((Bits$hex$decode$($2795) + '1') + '1') + '0') + '1');
+                                                                    var $2822 = $2823;
+                                                                } else {
+                                                                    var self = ($2794 === 101);
+                                                                    if (self) {
+                                                                        var $2825 = ((((Bits$hex$decode$($2795) + '1') + '1') + '1') + '0');
+                                                                        var $2824 = $2825;
+                                                                    } else {
+                                                                        var self = ($2794 === 102);
+                                                                        if (self) {
+                                                                            var $2827 = ((((Bits$hex$decode$($2795) + '1') + '1') + '1') + '1');
+                                                                            var $2826 = $2827;
+                                                                        } else {
+                                                                            var self = ($2794 === 65);
+                                                                            if (self) {
+                                                                                var $2829 = ((((Bits$hex$decode$($2795) + '1') + '0') + '1') + '0');
+                                                                                var $2828 = $2829;
+                                                                            } else {
+                                                                                var self = ($2794 === 66);
+                                                                                if (self) {
+                                                                                    var $2831 = ((((Bits$hex$decode$($2795) + '1') + '0') + '1') + '1');
+                                                                                    var $2830 = $2831;
+                                                                                } else {
+                                                                                    var self = ($2794 === 67);
+                                                                                    if (self) {
+                                                                                        var $2833 = ((((Bits$hex$decode$($2795) + '1') + '1') + '0') + '0');
+                                                                                        var $2832 = $2833;
+                                                                                    } else {
+                                                                                        var self = ($2794 === 68);
+                                                                                        if (self) {
+                                                                                            var $2835 = ((((Bits$hex$decode$($2795) + '1') + '1') + '0') + '1');
+                                                                                            var $2834 = $2835;
+                                                                                        } else {
+                                                                                            var self = ($2794 === 69);
+                                                                                            if (self) {
+                                                                                                var $2837 = ((((Bits$hex$decode$($2795) + '1') + '1') + '1') + '0');
+                                                                                                var $2836 = $2837;
+                                                                                            } else {
+                                                                                                var self = ($2794 === 70);
+                                                                                                if (self) {
+                                                                                                    var $2839 = ((((Bits$hex$decode$($2795) + '1') + '1') + '1') + '1');
+                                                                                                    var $2838 = $2839;
+                                                                                                } else {
+                                                                                                    var $2840 = Bits$e;
+                                                                                                    var $2838 = $2840;
+                                                                                                };
+                                                                                                var $2836 = $2838;
+                                                                                            };
+                                                                                            var $2834 = $2836;
+                                                                                        };
+                                                                                        var $2832 = $2834;
+                                                                                    };
+                                                                                    var $2830 = $2832;
+                                                                                };
+                                                                                var $2828 = $2830;
+                                                                            };
+                                                                            var $2826 = $2828;
+                                                                        };
+                                                                        var $2824 = $2826;
+                                                                    };
+                                                                    var $2822 = $2824;
+                                                                };
+                                                                var $2820 = $2822;
+                                                            };
+                                                            var $2818 = $2820;
+                                                        };
+                                                        var $2816 = $2818;
+                                                    };
+                                                    var $2814 = $2816;
+                                                };
+                                                var $2812 = $2814;
+                                            };
+                                            var $2810 = $2812;
+                                        };
+                                        var $2808 = $2810;
+                                    };
+                                    var $2806 = $2808;
+                                };
+                                var $2804 = $2806;
+                            };
+                            var $2802 = $2804;
+                        };
+                        var $2800 = $2802;
+                    };
+                    var $2798 = $2800;
+                };
+                var $2796 = $2798;
+            };
+            var $2792 = $2796;
+        };
+        return $2792;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const Bits$hex$decode = x0 => Bits$hex$decode$(x0);
 
     function App$KL$Global$Event$deserialize_post$(_hex$1) {
+<<<<<<< HEAD
         var $2976 = Deserializer$run$(App$KL$Global$Event$deserializer, Bits$hex$decode$(String$drop$(2n, _hex$1)));
         return $2976;
+=======
+        var $2841 = Deserializer$run$(App$KL$Global$Event$deserializer, Bits$hex$decode$(String$drop$(2n, _hex$1)));
+        return $2841;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Global$Event$deserialize_post = x0 => App$KL$Global$Event$deserialize_post$(x0);
     const App$KL$Game$Phase$draft = ({
@@ -12932,6 +14025,7 @@ module.exports = (function() {
     const Nat$to_u64 = a0 => (a0 & 0xFFFFFFFFFFFFFFFFn);
     const App$KL$Game$start = (() => {
         var _phase$1 = App$KL$Game$Phase$draft;
+<<<<<<< HEAD
         var _turn$2 = 0n;
         var _moment$3 = App$KL$Game$Moment$preparation$(64n);
         var _players$4 = Map$new;
@@ -12943,13 +14037,29 @@ module.exports = (function() {
 
     function App$KL$Game$Player$new$(_hero_id$1, _init_pos$2, _team$3, _ready$4) {
         var $2978 = ({
+=======
+        var _players$2 = Map$new;
+        var _board$3 = Hexagonal$Axial$BBL$new;
+        var _tick$4 = 0n;
+        var _casts$5 = List$nil;
+        var $2842 = App$KL$Game$new$(_tick$4, _phase$1, _players$2, _board$3, _casts$5);
+        return $2842;
+    })();
+
+    function App$KL$Game$Player$new$(_hero_id$1, _init_pos$2, _team$3, _ready$4) {
+        var $2843 = ({
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
             _: 'App.KL.Game.Player.new',
             'hero_id': _hero_id$1,
             'init_pos': _init_pos$2,
             'team': _team$3,
             'ready': _ready$4
         });
+<<<<<<< HEAD
         return $2978;
+=======
+        return $2843;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Player$new = x0 => x1 => x2 => x3 => App$KL$Game$Player$new$(x0, x1, x2, x3);
 
@@ -12957,21 +14067,34 @@ module.exports = (function() {
         var self = _player$2;
         switch (self._) {
             case 'Pair.new':
+<<<<<<< HEAD
                 var $2980 = self.snd;
                 var $2981 = $2980;
                 var self = $2981;
+=======
+                var $2845 = self.snd;
+                var $2846 = $2845;
+                var self = $2846;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
         };
         switch (self._) {
             case 'App.KL.Game.Player.new':
+<<<<<<< HEAD
                 var $2982 = self.hero_id;
                 var $2983 = $2982;
                 var _x$3 = $2983;
+=======
+                var $2847 = self.hero_id;
+                var $2848 = $2847;
+                var _x$3 = $2848;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
         };
         var self = _x$3;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $2984 = self.value;
                 var $2985 = ((Number($2984) & 0xFF) === _hero_id$1);
                 var $2979 = $2985;
@@ -12982,6 +14105,18 @@ module.exports = (function() {
                 break;
         };
         return $2979;
+=======
+                var $2849 = self.value;
+                var $2850 = ((Number($2849) & 0xFF) === _hero_id$1);
+                var $2844 = $2850;
+                break;
+            case 'Maybe.none':
+                var $2851 = Bool$false;
+                var $2844 = $2851;
+                break;
+        };
+        return $2844;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$has_hero = x0 => x1 => App$KL$Game$Phase$Draft$has_hero$(x0, x1);
     const Bool$or = a0 => a1 => (a0 || a1);
@@ -12990,21 +14125,34 @@ module.exports = (function() {
         var self = _player$2;
         switch (self._) {
             case 'Pair.new':
+<<<<<<< HEAD
                 var $2988 = self.snd;
                 var $2989 = $2988;
                 var self = $2989;
+=======
+                var $2853 = self.snd;
+                var $2854 = $2853;
+                var self = $2854;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
         };
         switch (self._) {
             case 'App.KL.Game.Player.new':
+<<<<<<< HEAD
                 var $2990 = self.init_pos;
                 var $2991 = $2990;
                 var _x$3 = $2991;
+=======
+                var $2855 = self.init_pos;
+                var $2856 = $2855;
+                var _x$3 = $2856;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                 break;
         };
         var self = _x$3;
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $2992 = self.value;
                 var $2993 = Hexagonal$Axial$eql$($2992, _coord$1);
                 var $2987 = $2993;
@@ -13015,6 +14163,18 @@ module.exports = (function() {
                 break;
         };
         return $2987;
+=======
+                var $2857 = self.value;
+                var $2858 = Hexagonal$Axial$eql$($2857, _coord$1);
+                var $2852 = $2858;
+                break;
+            case 'Maybe.none':
+                var $2859 = Bool$false;
+                var $2852 = $2859;
+                break;
+        };
+        return $2852;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$has_coord = x0 => x1 => App$KL$Game$Phase$Draft$has_coord$(x0, x1);
 
@@ -13022,6 +14182,7 @@ module.exports = (function() {
         var self = _event$4;
         switch (self._) {
             case 'App.KL.Game.Phase.Draft.Event.set_team':
+<<<<<<< HEAD
                 var $2996 = self.team;
                 var $2997 = ((console.log("- set_team"), (_$7 => {
                     var self = _game$5;
@@ -13086,10 +14247,75 @@ module.exports = (function() {
                                         };
                                     })(), _players$8), $3018, $3019);
                                     var _game$12 = $3020;
+=======
+                var $2861 = self.team;
+                var $2862 = ((console.log("- set_team"), (_$7 => {
+                    var self = _game$5;
+                    switch (self._) {
+                        case 'App.KL.Game.new':
+                            var $2864 = self.tick;
+                            var $2865 = self.phase;
+                            var $2866 = self.board;
+                            var $2867 = self.casts;
+                            var $2868 = App$KL$Game$new$($2864, $2865, Map$set$(_addr$3, App$KL$Game$Player$new$(Maybe$none, Maybe$none, $2861, Bool$false), (() => {
+                                var self = _game$5;
+                                switch (self._) {
+                                    case 'App.KL.Game.new':
+                                        var $2869 = self.players;
+                                        var $2870 = $2869;
+                                        return $2870;
+                                };
+                            })()), $2866, $2867);
+                            var $2863 = $2868;
+                            break;
+                    };
+                    return $2863;
+                })()));
+                var $2860 = $2862;
+                break;
+            case 'App.KL.Game.Phase.Draft.Event.set_hero':
+                var $2871 = self.hero;
+                var $2872 = ((console.log("- set_hero"), (_$7 => {
+                    var $2873 = Maybe$default$((() => {
+                        var self = _game$5;
+                        switch (self._) {
+                            case 'App.KL.Game.new':
+                                var $2875 = self.players;
+                                var $2876 = $2875;
+                                var _players$8 = $2876;
+                                break;
+                        };
+                        var $2874 = Maybe$monad$((_m$bind$9 => _m$pure$10 => {
+                            var $2877 = _m$bind$9;
+                            return $2877;
+                        }))(Map$get$(_addr$3, _players$8))((_player$9 => {
+                            var _player_list$10 = Map$to_list$(_players$8);
+                            var _is_picked$11 = List$fold$(List$map$(App$KL$Game$Phase$Draft$has_hero($2871), _player_list$10), Bool$false, Bool$or);
+                            var self = _game$5;
+                            switch (self._) {
+                                case 'App.KL.Game.new':
+                                    var $2879 = self.tick;
+                                    var $2880 = self.phase;
+                                    var $2881 = self.board;
+                                    var $2882 = self.casts;
+                                    var $2883 = App$KL$Game$new$($2879, $2880, Map$set$(_addr$3, (() => {
+                                        var self = _player$9;
+                                        switch (self._) {
+                                            case 'App.KL.Game.Player.new':
+                                                var $2884 = self.init_pos;
+                                                var $2885 = self.team;
+                                                var $2886 = self.ready;
+                                                var $2887 = App$KL$Game$Player$new$(Maybe$some$((BigInt($2871))), $2884, $2885, $2886);
+                                                return $2887;
+                                        };
+                                    })(), _players$8), $2881, $2882);
+                                    var _game$12 = $2883;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                                     break;
                             };
                             var self = _is_picked$11;
                             if (self) {
+<<<<<<< HEAD
                                 var $3025 = Maybe$none;
                                 var $3014 = $3025;
                             } else {
@@ -13142,10 +14368,64 @@ module.exports = (function() {
                                         };
                                     })(), _players$8), $3038, $3039);
                                     var _game$12 = $3040;
+=======
+                                var $2888 = Maybe$none;
+                                var $2878 = $2888;
+                            } else {
+                                var $2889 = Maybe$some$(_game$12);
+                                var $2878 = $2889;
+                            };
+                            return $2878;
+                        }));
+                        return $2874;
+                    })(), _game$5);
+                    return $2873;
+                })()));
+                var $2860 = $2872;
+                break;
+            case 'App.KL.Game.Phase.Draft.Event.set_init_pos':
+                var $2890 = self.coord;
+                var $2891 = ((console.log("- set_init_pos"), (_$7 => {
+                    var $2892 = Maybe$default$((() => {
+                        var self = _game$5;
+                        switch (self._) {
+                            case 'App.KL.Game.new':
+                                var $2894 = self.players;
+                                var $2895 = $2894;
+                                var _players$8 = $2895;
+                                break;
+                        };
+                        var $2893 = Maybe$monad$((_m$bind$9 => _m$pure$10 => {
+                            var $2896 = _m$bind$9;
+                            return $2896;
+                        }))(Map$get$(_addr$3, _players$8))((_player$9 => {
+                            var _player_list$10 = Map$to_list$(_players$8);
+                            var _is_occupied$11 = List$fold$(List$map$(App$KL$Game$Phase$Draft$has_coord($2890), _player_list$10), Bool$false, Bool$or);
+                            var self = _game$5;
+                            switch (self._) {
+                                case 'App.KL.Game.new':
+                                    var $2898 = self.tick;
+                                    var $2899 = self.phase;
+                                    var $2900 = self.board;
+                                    var $2901 = self.casts;
+                                    var $2902 = App$KL$Game$new$($2898, $2899, Map$set$(_addr$3, (() => {
+                                        var self = _player$9;
+                                        switch (self._) {
+                                            case 'App.KL.Game.Player.new':
+                                                var $2903 = self.hero_id;
+                                                var $2904 = self.team;
+                                                var $2905 = self.ready;
+                                                var $2906 = App$KL$Game$Player$new$($2903, Maybe$some$($2890), $2904, $2905);
+                                                return $2906;
+                                        };
+                                    })(), _players$8), $2900, $2901);
+                                    var _game$12 = $2902;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                                     break;
                             };
                             var self = _is_occupied$11;
                             if (self) {
+<<<<<<< HEAD
                                 var $3045 = Maybe$none;
                                 var $3034 = $3045;
                             } else {
@@ -13210,18 +14490,90 @@ module.exports = (function() {
                 break;
             case 'App.KL.Game.Phase.Draft.Event.join_room':
                 var $3065 = ((console.log("- join_room"), (_$6 => {
+=======
+                                var $2907 = Maybe$none;
+                                var $2897 = $2907;
+                            } else {
+                                var $2908 = Maybe$some$(_game$12);
+                                var $2897 = $2908;
+                            };
+                            return $2897;
+                        }));
+                        return $2893;
+                    })(), _game$5);
+                    return $2892;
+                })()));
+                var $2860 = $2891;
+                break;
+            case 'App.KL.Game.Phase.Draft.Event.set_ready':
+                var $2909 = self.ready;
+                var $2910 = ((console.log("- set_ready"), (_$7 => {
+                    var $2911 = Maybe$default$((() => {
+                        var self = _game$5;
+                        switch (self._) {
+                            case 'App.KL.Game.new':
+                                var $2913 = self.players;
+                                var $2914 = $2913;
+                                var _players$8 = $2914;
+                                break;
+                        };
+                        var $2912 = Maybe$monad$((_m$bind$9 => _m$pure$10 => {
+                            var $2915 = _m$bind$9;
+                            return $2915;
+                        }))(Map$get$(_addr$3, _players$8))((_player$9 => {
+                            var _ready$10 = ($2909 === 1);
+                            var self = _game$5;
+                            switch (self._) {
+                                case 'App.KL.Game.new':
+                                    var $2917 = self.tick;
+                                    var $2918 = self.phase;
+                                    var $2919 = self.board;
+                                    var $2920 = self.casts;
+                                    var $2921 = App$KL$Game$new$($2917, $2918, Map$set$(_addr$3, (() => {
+                                        var self = _player$9;
+                                        switch (self._) {
+                                            case 'App.KL.Game.Player.new':
+                                                var $2922 = self.hero_id;
+                                                var $2923 = self.init_pos;
+                                                var $2924 = self.team;
+                                                var $2925 = App$KL$Game$Player$new$($2922, $2923, $2924, _ready$10);
+                                                return $2925;
+                                        };
+                                    })(), _players$8), $2919, $2920);
+                                    var _game$11 = $2921;
+                                    break;
+                            };
+                            var $2916 = Maybe$some$(_game$11);
+                            return $2916;
+                        }));
+                        return $2912;
+                    })(), _game$5);
+                    return $2911;
+                })()));
+                var $2860 = $2910;
+                break;
+            case 'App.KL.Game.Phase.Draft.Event.join_room':
+                var $2926 = ((console.log("- join_room"), (_$6 => {
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                     var _player$7 = Map$get$(_addr$3, (() => {
                         var self = _game$5;
                         switch (self._) {
                             case 'App.KL.Game.new':
+<<<<<<< HEAD
                                 var $3067 = self.players;
                                 var $3068 = $3067;
                                 return $3068;
+=======
+                                var $2928 = self.players;
+                                var $2929 = $2928;
+                                return $2929;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                         };
                     })());
                     var self = _player$7;
                     switch (self._) {
                         case 'Maybe.some':
+<<<<<<< HEAD
                             var $3069 = self.value;
                             var self = _game$5;
                             switch (self._) {
@@ -13244,11 +14596,35 @@ module.exports = (function() {
                                     break;
                             };
                             var _game$8 = $3070;
+=======
+                            var $2930 = self.value;
+                            var self = _game$5;
+                            switch (self._) {
+                                case 'App.KL.Game.new':
+                                    var $2932 = self.tick;
+                                    var $2933 = self.phase;
+                                    var $2934 = self.board;
+                                    var $2935 = self.casts;
+                                    var $2936 = App$KL$Game$new$($2932, $2933, Map$set$(_addr$3, $2930, (() => {
+                                        var self = _game$5;
+                                        switch (self._) {
+                                            case 'App.KL.Game.new':
+                                                var $2937 = self.players;
+                                                var $2938 = $2937;
+                                                return $2938;
+                                        };
+                                    })()), $2934, $2935);
+                                    var $2931 = $2936;
+                                    break;
+                            };
+                            var _game$8 = $2931;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                             break;
                         case 'Maybe.none':
                             var self = _game$5;
                             switch (self._) {
                                 case 'App.KL.Game.new':
+<<<<<<< HEAD
                                     var $3080 = self.phase;
                                     var $3081 = self.turn;
                                     var $3082 = self.moment;
@@ -13276,23 +14652,64 @@ module.exports = (function() {
                 break;
         };
         return $2995;
+=======
+                                    var $2940 = self.tick;
+                                    var $2941 = self.phase;
+                                    var $2942 = self.board;
+                                    var $2943 = self.casts;
+                                    var $2944 = App$KL$Game$new$($2940, $2941, Map$set$(_addr$3, App$KL$Game$Player$new$(Maybe$none, Maybe$none, App$KL$Game$Team$neutral, Bool$false), (() => {
+                                        var self = _game$5;
+                                        switch (self._) {
+                                            case 'App.KL.Game.new':
+                                                var $2945 = self.players;
+                                                var $2946 = $2945;
+                                                return $2946;
+                                        };
+                                    })()), $2942, $2943);
+                                    var $2939 = $2944;
+                                    break;
+                            };
+                            var _game$8 = $2939;
+                            break;
+                    };
+                    var $2927 = _game$8;
+                    return $2927;
+                })()));
+                var $2860 = $2926;
+                break;
+        };
+        return $2860;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Draft$post = x0 => x1 => x2 => x3 => x4 => App$KL$Game$Phase$Draft$post$(x0, x1, x2, x3, x4);
 
     function App$KL$Game$Cast$new$(_player$1, _target$2, _letter$3) {
+<<<<<<< HEAD
         var $3088 = ({
+=======
+        var $2947 = ({
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
             _: 'App.KL.Game.Cast.new',
             'player': _player$1,
             'target': _target$2,
             'letter': _letter$3
         });
+<<<<<<< HEAD
         return $3088;
+=======
+        return $2947;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Cast$new = x0 => x1 => x2 => App$KL$Game$Cast$new$(x0, x1, x2);
 
     function App$KL$Game$Cast$push$(_player$1, _target$2, _letter$3, _casts$4) {
+<<<<<<< HEAD
         var $3089 = List$cons$(App$KL$Game$Cast$new$(_player$1, _target$2, _letter$3), _casts$4);
         return $3089;
+=======
+        var $2948 = List$cons$(App$KL$Game$Cast$new$(_player$1, _target$2, _letter$3), _casts$4);
+        return $2948;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Cast$push = x0 => x1 => x2 => x3 => App$KL$Game$Cast$push$(x0, x1, x2, x3);
 
@@ -13300,6 +14717,7 @@ module.exports = (function() {
         var self = _event$4;
         switch (self._) {
             case 'App.KL.Game.Phase.Play.Event.cast':
+<<<<<<< HEAD
                 var $3091 = self.letter;
                 var $3092 = self.target;
                 var self = _game$5;
@@ -13326,6 +14744,33 @@ module.exports = (function() {
                 break;
         };
         return $3090;
+=======
+                var $2950 = self.letter;
+                var $2951 = self.target;
+                var self = _game$5;
+                switch (self._) {
+                    case 'App.KL.Game.new':
+                        var $2953 = self.tick;
+                        var $2954 = self.phase;
+                        var $2955 = self.players;
+                        var $2956 = self.board;
+                        var $2957 = App$KL$Game$new$($2953, $2954, $2955, $2956, App$KL$Game$Cast$push$(_addr$3, $2951, $2950, (() => {
+                            var self = _game$5;
+                            switch (self._) {
+                                case 'App.KL.Game.new':
+                                    var $2958 = self.casts;
+                                    var $2959 = $2958;
+                                    return $2959;
+                            };
+                        })()));
+                        var $2952 = $2957;
+                        break;
+                };
+                var $2949 = $2952;
+                break;
+        };
+        return $2949;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$Phase$Play$post = x0 => x1 => x2 => x3 => x4 => App$KL$Game$Phase$Play$post$(x0, x1, x2, x3, x4);
 
@@ -13333,6 +14778,7 @@ module.exports = (function() {
         var self = _game$5;
         switch (self._) {
             case 'App.KL.Game.new':
+<<<<<<< HEAD
                 var $3103 = self.phase;
                 var self = _event$4;
                 switch (self._) {
@@ -13371,6 +14817,46 @@ module.exports = (function() {
                 break;
         };
         return $3102;
+=======
+                var $2961 = self.phase;
+                var self = _event$4;
+                switch (self._) {
+                    case 'App.KL.Game.Event.draft':
+                        var $2963 = self.event;
+                        var self = $2961;
+                        switch (self._) {
+                            case 'App.KL.Game.Phase.draft':
+                                var $2965 = App$KL$Game$Phase$Draft$post$(_time$1, _room$2, _addr$3, $2963, _game$5);
+                                var $2964 = $2965;
+                                break;
+                            case 'App.KL.Game.Phase.play':
+                                var $2966 = _game$5;
+                                var $2964 = $2966;
+                                break;
+                        };
+                        var $2962 = $2964;
+                        break;
+                    case 'App.KL.Game.Event.play':
+                        var $2967 = self.event;
+                        var self = $2961;
+                        switch (self._) {
+                            case 'App.KL.Game.Phase.draft':
+                                var $2969 = _game$5;
+                                var $2968 = $2969;
+                                break;
+                            case 'App.KL.Game.Phase.play':
+                                var $2970 = App$KL$Game$Phase$Play$post$(_time$1, _room$2, _addr$3, $2967, _game$5);
+                                var $2968 = $2970;
+                                break;
+                        };
+                        var $2962 = $2968;
+                        break;
+                };
+                var $2960 = $2962;
+                break;
+        };
+        return $2960;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Game$post = x0 => x1 => x2 => x3 => x4 => App$KL$Game$post$(x0, x1, x2, x3, x4);
 
@@ -13378,23 +14864,38 @@ module.exports = (function() {
         var self = App$KL$Global$Event$deserialize_post$(_data$4);
         switch (self._) {
             case 'Maybe.some':
+<<<<<<< HEAD
                 var $3114 = self.value;
                 var self = $3114;
                 switch (self._) {
                     case 'App.KL.Global.Event.game':
                         var $3116 = self.event;
+=======
+                var $2972 = self.value;
+                var self = $2972;
+                switch (self._) {
+                    case 'App.KL.Global.Event.game':
+                        var $2974 = self.event;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                         var _game$8 = Maybe$default$((() => {
                             var self = _glob$5;
                             switch (self._) {
                                 case 'App.KL.Global.State.new':
+<<<<<<< HEAD
                                     var $3118 = self.game;
                                     var $3119 = $3118;
                                     return $3119;
+=======
+                                    var $2976 = self.game;
+                                    var $2977 = $2976;
+                                    return $2977;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
                             };
                         })(), App$KL$Game$start);
                         var self = _glob$5;
                         switch (self._) {
                             case 'App.KL.Global.State.new':
+<<<<<<< HEAD
                                 var $3120 = App$KL$Global$State$new$(Maybe$some$(App$KL$Game$post$(_time$1, _room$2, _addr$3, $3116, _game$8)));
                                 var $3117 = $3120;
                                 break;
@@ -13414,12 +14915,38 @@ module.exports = (function() {
                 break;
         };
         return $3113;
+=======
+                                var $2978 = App$KL$Global$State$new$(Maybe$some$(App$KL$Game$post$(_time$1, _room$2, _addr$3, $2974, _game$8)));
+                                var $2975 = $2978;
+                                break;
+                        };
+                        var $2973 = $2975;
+                        break;
+                    case 'App.KL.Global.Event.void':
+                        var $2979 = _glob$5;
+                        var $2973 = $2979;
+                        break;
+                };
+                var $2971 = $2973;
+                break;
+            case 'Maybe.none':
+                var $2980 = _glob$5;
+                var $2971 = $2980;
+                break;
+        };
+        return $2971;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     };
     const App$KL$Global$post = x0 => x1 => x2 => x3 => x4 => App$KL$Global$post$(x0, x1, x2, x3, x4);
     const App$KL = (() => {
         var _img$1 = VoxBox$alloc_capacity$(((65536 * 8) >>> 0));
+<<<<<<< HEAD
         var $3123 = App$new$(App$KL$init, App$KL$draw(_img$1), App$KL$when, App$KL$Global$tick, App$KL$Global$post);
         return $3123;
+=======
+        var $2981 = App$new$(App$KL$init, App$KL$draw(_img$1), App$KL$when, App$KL$Global$tick, App$KL$Global$post);
+        return $2981;
+>>>>>>> ac92ef1592ac3ca52c01a9193c39d4ef90a5dfe8
     })();
     return {
         'Buffer32.new': Buffer32$new,
@@ -14159,9 +15686,11 @@ module.exports = (function() {
         'Debug.log': Debug$log,
         'App.KL.Game.new': App$KL$Game$new,
         'App.KL.Game.Phase.play': App$KL$Game$Phase$play,
+        'App.KL.Constants.board_extra_width': App$KL$Constants$board_extra_width,
         'App.KL.Game.Terrain.new': App$KL$Game$Terrain$new,
         'App.KL.Game.Entity.terrain': App$KL$Game$Entity$terrain,
-        'Hexagonal.Axial.inside': Hexagonal$Axial$inside,
+        'I32.inc': I32$inc,
+        'I32.for': I32$for,
         'App.KL.Game.Board.push': App$KL$Game$Board$push,
         'App.KL.Game.Board.arena': App$KL$Game$Board$arena,
         'App.KL.Game.Phase.Draft.Hero.info': App$KL$Game$Phase$Draft$Hero$info,

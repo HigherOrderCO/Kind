@@ -1,0 +1,6 @@
+BBT.to_list<K: Type, V: Type>(map: BBT<K,V>): List<Pair<K,V>>
+  BBT.foldr_with_key<K,V,List<Pair<K,V>>>(
+    (k, v, kvs) List.cons<Pair<K,V>>(Pair.new<K,V>(k,v), kvs),
+    List.nil<Pair<K,V>>,
+    map
+  )

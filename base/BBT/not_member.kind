@@ -1,0 +1,2 @@
+BBT.not_member<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: BBT<K,V>): Bool
+  Bool.not(BBT.member<K,V>(cmp, key, map))

@@ -1,2 +1,0 @@
-Map.keys<A: Type>(xs: Map<A>): List<String>
-  BBL.foldr_with_key!!!((key, value, list) key & list, [], xs)

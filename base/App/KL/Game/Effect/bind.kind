@@ -1,0 +1,14 @@
+App.KL.Game.Effect.bind<A: Type, B: Type>(
+  effect: App.KL.Game.Effect<A> next: A -> App.KL.Game.Effect<B>
+): App.KL.Game.Effect<B>
+
+  (center, target, board)
+  case effect(center, target, board) as result_a {
+    new: case next(result_a.value)(center, target, result_a.board) as result_b {
+      new:
+        value = result_b.value
+        map   = result_b.board
+        indicators = Hexagonal.Axial.BBT.union!(result_a.indicators, result_b.indicators)
+        App.KL.Game.Effect.Result.new<B>(value, map, indicators)
+    }
+  }

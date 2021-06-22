@@ -1,0 +1,4 @@
+// Copies all key and vals from b to a
+
+String.StringMap.assign<A: Type>(a: String.StringMap(A), b: String.StringMap(A)): String.StringMap(A)
+  BBT.assign(String, A, String.cmp, b, a)

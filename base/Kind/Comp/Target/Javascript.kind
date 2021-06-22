@@ -131,6 +131,23 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
 //    elim: {ctag: x => '"unit"', ctor: [[]]},
 //    cnam: {mode: "switch", nams: ['unit']},
 //  },
+    // #TODO test
+    bits: Kind.Comp.Native.new(
+      // Inst
+      [
+        // Bits.e
+        {0, "''"}
+        // Bits.o
+        {1, "$0+'0'"}
+        // Bits.i
+        {1, "$0+'1'"}
+      ]
+      // Elim
+      {"$0.length===0?'e':$0[$0.length-1]==='0'?'o':'i'", [
+        {"'e'", []}
+        {"'o'", ["$0.slice(0, -1)"]}
+        {"'i'", ["$0.slice(0, -1)"]}
+      ]})
     bool: Kind.Comp.Native.new(
       // Inst
       [
@@ -275,7 +292,6 @@ Kind.Comp.Target.Javascript.optimizeds: Kind.Comp.Optimizeds
     "U16.gtn": {2,`$0>$1`},
     "U16.inc": {2,`($0+1)&0xFFFF`},
     "U16.to_nat": {1,`BigInt($0)`},
-    // TODO test if this is faster than non-optimized comparison
     "String.eql": {2,`$0===$1`},
     "String.concat": {2,`$0+$1`},
   }

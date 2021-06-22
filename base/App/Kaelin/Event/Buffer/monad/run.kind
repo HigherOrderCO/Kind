@@ -1,5 +1,0 @@
-App.Kaelin.Event.Buffer.monad.run(A : Type, buffer : App.Kaelin.Event.Buffer<A>, str : String) : Maybe<A>
-  Parser.run!(Parser {
-      get b = buffer([])
-      return Pair.snd!!(b)
-  }, str)

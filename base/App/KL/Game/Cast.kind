@@ -8,8 +8,8 @@ type App.KL.Game.Cast {
 
 type App.KL.Game.Cast.Preview {
   new(
-    areas: Hexagonal.Axial.BBL<App.KL.Game.Indicator>
-    picks: Hexagonal.Axial.BBL<Char>
+    areas: Hexagonal.Axial.BBT<App.KL.Game.Indicator>
+    picks: Hexagonal.Axial.BBT<Char>
   )
 }
 
@@ -26,12 +26,12 @@ App.KL.Game.Cast.push(
 App.KL.Game.Cast.picks_of(
   player: String
   casts: List<App.KL.Game.Cast>
-): Hexagonal.Axial.BBL<Char>
-  let map = Hexagonal.Axial.BBL.new!
+): Hexagonal.Axial.BBT<Char>
+  let map = Hexagonal.Axial.BBT.new!
   for cast in casts with map:
     open cast
     if player =? cast.player then 
-      Hexagonal.Axial.BBL.insert!(cast.target, cast.letter, map)
+      Hexagonal.Axial.BBT.set!(cast.target, cast.letter, map)
     else
       map
   map
@@ -65,7 +65,7 @@ App.KL.Game.Cast.get_creature(
 ): Maybe<App.KL.Game.Creature>
   Maybe {
     get coord = App.KL.Game.Cast.get_coord(cast, game)
-    get tile = Hexagonal.Axial.BBL.get!(coord, game@board)
+    get tile = Hexagonal.Axial.BBT.get!(coord, game@board)
     tile@creature
   }
 

@@ -3,7 +3,7 @@ Kind.Comp.Prim.natives: List(Pair(String, Kind.Comp.Prim))
   [
     {"Bool", Kind.Comp.Prim.bool}
     {"Nat", Kind.Comp.Prim.nat}
-    //"Bits"
+    {"Bits", Kind.Comp.Prim.bits}
     //"U8"
     {"U16", Kind.Comp.Prim.u16}
     //"U32"

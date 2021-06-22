@@ -70,7 +70,7 @@ App.KL.Game.Phase.Play.draw.board(
   mouse: Pair<U32, U32>
   img: VoxBox
 ): VoxBox
-  map = Hexagonal.Axial.BBL.to_list!(map)
+  map = Hexagonal.Axial.BBT.to_list!(map)
   mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   for pos in map with img:
     {coord, tile} = pos
@@ -120,6 +120,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       let cy = cy - (aux * 2) //U32
       let cx = cx - aux //U32
       let img = VoxBox.Draw.image(cx, cy, 0u, drawing, img)
+      let img = App.KL.Game.Board.Creature.show_hp(cx, cy, creature.value, img)
       img
   }
 
@@ -132,7 +133,7 @@ App.KL.Game.Phase.Play.draw.letter(
   img: VoxBox
 ): VoxBox
   open preview
-  case Hexagonal.Axial.BBL.get!(tile_coord, preview.picks) as got {
+  case Hexagonal.Axial.BBT.get!(tile_coord, preview.picks) as got {
     none: img
     some: 
       screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
@@ -150,7 +151,7 @@ App.KL.Game.Phase.Play.draw.tile.terrain.indicator(
 ): App.KL.Game.Indicator
   let indicator = App.KL.Game.Indicator.background
   open preview
-  case Hexagonal.Axial.BBL.get!(tile_coord, preview.areas) as got {
+  case Hexagonal.Axial.BBT.get!(tile_coord, preview.areas) as got {
     none: indicator
     some: got.value
   }
