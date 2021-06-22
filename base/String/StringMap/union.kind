@@ -1,0 +1,2 @@
+String.StringMap.union<A: Type>(a: String.StringMap(A), b: String.StringMap(A)): String.StringMap(A)
+  BBT.union!!(String.cmp, a, b)

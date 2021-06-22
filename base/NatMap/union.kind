@@ -1,2 +1,0 @@
-NatMap.union<A: Type>(a: NatMap<A>, b: NatMap<A>): NatMap<A>
-  BitsMap.union!(a, b)

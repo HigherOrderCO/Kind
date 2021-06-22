@@ -1,0 +1,8 @@
+// Inserts a value to a BBT tree
+Hexagonal.Axial.BBT.set<A : Type>(
+  key : Hexagonal.Axial,
+  val : A,
+  map : Hexagonal.Axial.BBT<A>
+): Hexagonal.Axial.BBT<A>
+
+  BBT.insert!!(Hexagonal.Axial.cmp, key, val, map)

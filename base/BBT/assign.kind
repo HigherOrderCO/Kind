@@ -1,0 +1,6 @@
+BBT.assign(A : Type, 
+           B : Type, 
+           cmp : A -> A -> Cmp
+           ) : BBT<A, B> -> BBT<A, B> -> BBT<A, B>
+  BBT.foldr_with_key(A, B, BBT<A, B>, (key, value, map) BBT.insert!!(cmp, key, value, map))
+  

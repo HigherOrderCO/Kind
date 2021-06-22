@@ -1,0 +1,2 @@
+Nat.Map.values<A: Type>(xs: Nat.NatMap(A)): List<A>
+  BBT.foldr_with_key!!!((key, value, list) value & list, [], xs)

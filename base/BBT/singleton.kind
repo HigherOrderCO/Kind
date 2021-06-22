@@ -1,0 +1,2 @@
+BBT.singleton<K: Type, V: Type>(key: K, val: V): BBT<K,V>
+  BBT.bin<K,V>(1#32, key, val, BBT.tip!!, BBT.tip!!)

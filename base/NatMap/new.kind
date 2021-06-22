@@ -1,2 +1,0 @@
-NatMap.new<A: Type>: NatMap<A>
-  BitsMap.new<A>

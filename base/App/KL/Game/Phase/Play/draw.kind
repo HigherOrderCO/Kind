@@ -47,7 +47,7 @@ App.KL.Game.Phase.Play.draw.board(
   mouse: Pair<U32, U32>
   img: VoxBox
 ): VoxBox
-  map = Hexagonal.Axial.BBL.to_list!(map)
+  map = Hexagonal.Axial.BBT.to_list!(map)
   mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   for pos in map with img:
     {coord, tile} = pos

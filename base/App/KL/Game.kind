@@ -39,7 +39,7 @@ type App.KL.Game.Phase {
 App.KL.Game.start: App.KL.Game
   let phase = App.KL.Game.Phase.draft
   let players = Map.new!
-  let board = Hexagonal.Axial.BBL.new!
+  let board = Hexagonal.Axial.BBT.new!
   let tick = 0#64
   let casts = []
   App.KL.Game.new(tick, phase, players, board, casts)

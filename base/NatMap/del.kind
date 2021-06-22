@@ -1,2 +1,0 @@
-NatMap.del<A: Type>(key: Nat, map: NatMap(A)): NatMap(A)
-  BitsMap.delete<A>(Nat.to_bits(key), map)

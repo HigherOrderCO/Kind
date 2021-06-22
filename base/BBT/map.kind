@@ -1,0 +1,9 @@
+BBT.map<K: Type, V: Type, Z: Type>(f: V -> Z, map: BBT<K,V>): BBT<K,Z>
+  case map {
+    tip: BBT.tip<K,Z>,
+    bin:  
+      let new_val   = f(map.val)
+      let new_left  = BBT.map<K,V,Z>(f, map.left)
+      let new_right = BBT.map<K,V,Z>(f, map.right)
+      BBT.node<K,Z>(map.key, new_val, new_left, new_right)
+  }
