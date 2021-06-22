@@ -89,6 +89,7 @@ App.KL.Game.Board.is_occupied(coord: Hexagonal.Axial, board: App.KL.Game.Board):
       }
   }
 
+// TODO: optimize
 // Returns a map with the player Address as the key to its respective coordinate 
 App.KL.Game.Board.find_players(board: App.KL.Game.Board): Map<Hexagonal.Axial>
   let tile_list = Hexagonal.Axial.BBL.to_list!(board)
@@ -106,3 +107,8 @@ App.KL.Game.Board.find_players(board: App.KL.Game.Board): Map<Hexagonal.Axial>
         }
     }
   Map.from_list!(players)
+
+// TODO: optimize
+// Returns the position of a player
+App.KL.Game.Board.find_player_coord(player: String, board: App.KL.Game.Board): Maybe<Hexagonal.Axial>
+  App.KL.Game.Board.find_players(board){player}

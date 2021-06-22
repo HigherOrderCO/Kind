@@ -1,6 +1,8 @@
 type App.KL.Game.Skill {
 	new(
-  	name: String
-		effect: App.KL.Game.Effect<Unit>
+  	name: String                     // the name of the skill
+    delay: U64                       // skills with larger delay are called later
+    frames: U64                      // how many ticks its animation takes
+		effect: App.KL.Game.Effect<Unit> // its in-game effect
 	)
 }
