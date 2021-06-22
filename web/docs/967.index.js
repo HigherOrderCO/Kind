@@ -8372,13 +8372,13 @@ module.exports = (function() {
                 var _gradient$7 = $1897;
                 break;
         };
-        var $1889 = DOM$node$("button", Map$from_list$(List$cons$(Pair$new$("id", ("T" + (Nat$show$(_player_count$5) + _team_txt$6))), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "40%"), List$cons$(Pair$new$("height", "100%"), List$cons$(Pair$new$("background-image", _gradient$7), List$cons$(Pair$new$("box-shadow", "2px -2px 2px black"), List$cons$(Pair$new$("font-size", "2rem"), List$nil)))))), List$cons$(DOM$text$((Nat$show$(_player_count$5) + "/3 Players")), List$nil));
+        var $1889 = DOM$node$("button", Map$from_list$(List$cons$(Pair$new$("id", ("T" + (Nat$show$(_player_count$5) + _team_txt$6))), List$nil)), Map$from_list$(List$cons$(Pair$new$("width", "40%"), List$cons$(Pair$new$("height", "200px"), List$cons$(Pair$new$("background-image", _gradient$7), List$cons$(Pair$new$("font-size", "2rem"), List$cons$(Pair$new$("border", "0"), List$cons$(Pair$new$("border-radius", "5px"), List$cons$(Pair$new$("cursor", "pointer"), List$cons$(Pair$new$("min-width", "270px"), List$cons$(Pair$new$("margin", "20px"), List$nil)))))))))), List$cons$(DOM$text$((Nat$show$(_player_count$5) + "/3 Players")), List$nil));
         return $1889;
     };
     const App$KL$Game$Phase$Draft$draw$choose_team$button = x0 => x1 => App$KL$Game$Phase$Draft$draw$choose_team$button$(x0, x1);
 
     function App$KL$Game$Phase$Draft$draw$choose_team$(_players$1) {
-        var $1898 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("width", "60%"), List$cons$(Pair$new$("height", "30%"), List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("flex-direction", "row"), List$cons$(Pair$new$("justify-content", "space-between"), List$nil)))))), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$blue), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$red), List$nil)));
+        var $1898 = DOM$node$("div", Map$from_list$(List$nil), Map$from_list$(List$cons$(Pair$new$("display", "flex"), List$cons$(Pair$new$("justify-content", "center"), List$cons$(Pair$new$("flex-wrap", "wrap"), List$nil)))), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$blue), List$cons$(App$KL$Game$Phase$Draft$draw$choose_team$button$(_players$1, App$KL$Game$Team$red), List$nil)));
         return $1898;
     };
     const App$KL$Game$Phase$Draft$draw$choose_team = x0 => App$KL$Game$Phase$Draft$draw$choose_team$(x0);
