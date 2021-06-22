@@ -1,0 +1,73 @@
+// App states (local = clicks, global = visitors)
+App.Seta.State: App.State
+  App.State.new(Nat, Nat)
+
+// Initial state
+App.Seta.init: App.Init<App.Seta.State>
+  App.Store.new<App.Seta.State>(0, 0)
+
+// Render function
+App.Seta.draw(img: VoxBox): App.Draw<App.Seta.State>
+  (state)
+    let img = transform(img)
+    DOM.vbox({"id": "game_screen", "width": "500px", "height": "500px", "scale": "2"}, {}, img) 
+
+transform(img: VoxBox): VoxBox
+  let x1 = 20 :: I32
+  let y1 = 70 :: I32
+  let x2 = 100 :: I32
+  let y2 = 100 :: I32
+  
+  let m = if I32.eql(x2 - x1, 0) then 0 :: I32 else I32.div((y2 - y1), x2 - x1)
+  let deg = F64.atan(I32.to_f64(m))
+  
+  let pi = 3.1415 :: F64
+  let to_left = if x2 >? x1 then 0 :: F64 else pi;
+  
+  let degree1 = to_left + (deg + (5 * (pi / 6)));
+  let degree2 = to_left + (deg + (7 * (pi / 6)));
+
+  let px1 = I32.to_f64(x2) + F64.cos(degree1) * 10;
+  let py1 = I32.to_f64(y2) + F64.sin(degree1) * 10;
+
+  let px2 = I32.to_f64(x2) + F64.cos(degree2) * 10;
+  let py2 = I32.to_f64(y2) + F64.sin(degree2) * 10;
+
+  let img = VoxBox.Draw.line(x1, y1, x2, y2, 0, Col32.new(0, 0, 0, 255), img)
+  let img = VoxBox.Draw.line(x2, y2, F64.to_i32(px1), F64.to_i32(py1), 0, Col32.new(0, 0, 0, 255), img)
+  let img = VoxBox.Draw.line(x2, y2, F64.to_i32(px2), F64.to_i32(py2), 0, Col32.new(0, 0, 0, 255), img)
+  let img = VoxBox.Draw.line(F64.to_i32(px1), F64.to_i32(py1), F64.to_i32(px2), F64.to_i32(py2), 0, Col32.new(0, 0, 0, 255), img)
+  img
+
+// Event handler
+App.Seta.when: App.When<App.Seta.State>
+  (event, state)
+  case event {
+    init: IO {
+      App.watch!(App.room_zero)
+      App.new_post!(App.room_zero, App.empty_post)
+    }
+    mouse_down: IO {
+      App.set_local!(state@local + 1)
+    }
+  } default App.pass!
+
+// Global ticker: not used
+App.Seta.tick: App.Tick<App.Seta.State>
+  App.no_tick<App.Seta.State>
+
+// Global visitor: counts posts to room_zero
+App.Seta.post: App.Post<App.Seta.State>
+  (time, room, addr, data, global_state)
+  global_state + 1
+
+// A "Seta, world!" + counter application
+App.Seta: App<App.Seta.State>
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  App.new<App.Seta.State>(
+    App.Seta.init
+    App.Seta.draw(img)
+    App.Seta.when
+    App.Seta.tick
+    App.Seta.post
+  )
