@@ -3,3 +3,42 @@
 // add Nat.mul_Var
 // add Int.parse_hex
 // add Nat.parse_decimal
+// add String.cons_Var
+
+// TODO:
+// Vector.concat
+// Vector.extract
+// Vector.reverse
+
+
+// T Array<A: Type>                                            ~ (depth: Nat)
+// | Array.tip(value: A)                                             ~ (Nat.zero);
+// | Array.tie<depth: Nat>(lft: Array(A,depth), rgt: Array(A,depth)) ~ (Nat.succ(depth));
+
+// T Vector <A: Type>                         ~ (size: Nat)
+// | Vector.nil                                      ~ (Nat.zero);
+// | Vector.ext<size: Nat>(head: A, tail: Vector(A,size)) ~ (Nat.succ(size));
+
+// --------------------------
+// type Array<A: Type> ~ (depth: Nat) {
+//   tip(value: A)                                             ~ (depth = Nat.zero),
+//   tie<depth: Nat>(lft: Array<A,depth>, rgt: Array<A,depth>) ~ (depth = Nat.succ(depth))
+// }
+
+// Vector(A: Type, len: Nat): Type
+//   case len {
+//     zero:
+//       self(P: (self: Vector(A,0)) Type) ->
+//       (nil: P(Vector.nil(A))) ->
+//       P(self)
+//     succ:
+//       self(P: (self: Vector(A,Nat.succ(len.pred))) Type) ->
+//       (cons: (head: A) -> (tail: Vector(A, len.pred)) -> P(Vector.cons(A,len.pred,head,tail))) ->
+//       P(self)
+//   }
+
+// Vector.nil(A: Type): Vector(A, 0)
+//   (self, nil) nil
+
+// Vector.cons(A: Type, len: Nat, head: A, tail: Vector(A, len)): Vector(A, Nat.succ(len))
+//   (self, cons) cons(head, tail)
