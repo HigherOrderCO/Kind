@@ -9,12 +9,12 @@ App.KL.Game.Effect.hp.change_at(
     let res = App.KL.Game.Board.Creature.change_hp(change, pos, board)
     let dhp = res@fst
     let map = res@snd
-    let indicators = Hexagonal.Axial.BBL.new!
+    let indicators = Hexagonal.Axial.BBT.new!
     App.KL.Game.Effect.board.set(board)
     if I32.gtn(dhp, +0#32) then
-      App.KL.Game.Effect.indicators.add(Hexagonal.Axial.BBL.insert!(target, App.KL.Game.Indicator.green, indicators))
+      App.KL.Game.Effect.indicators.add(Hexagonal.Axial.BBT.set!(target, App.KL.Game.Indicator.green, indicators))
     else if I32.ltn(dhp, +0#32) then
-      App.KL.Game.Effect.indicators.add(Hexagonal.Axial.BBL.insert!(target, App.KL.Game.Indicator.red, indicators))
+      App.KL.Game.Effect.indicators.add(Hexagonal.Axial.BBT.set!(target, App.KL.Game.Indicator.red, indicators))
     else
       App.KL.Game.Effect { return unit }
     return dhp

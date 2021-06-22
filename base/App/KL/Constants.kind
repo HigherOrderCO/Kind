@@ -25,6 +25,9 @@ App.KL.Constants.draft_center_y : U32
 App.KL.Constants.round_time: U64
   64
 
+App.KL.Constants.between_turn_delay: U64
+  16
+
 // TODO: Randomize or change it every time you build
 App.KL.Constants.room : String
   "0x78414442332238"
