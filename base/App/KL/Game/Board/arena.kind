@@ -14,6 +14,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
   new_terrain = App.KL.Game.Entity.terrain(new_terrain)
 
   
+    
   for j : I32 from n_board_size to (board_size + 1) with board:
     // https://www.redblobgames.com/grids/hexagons/#range-coordinate
     // iterates only in valid coordinates
