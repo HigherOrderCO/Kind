@@ -1,0 +1,7 @@
+// Gets a value from a key or return none if there is no key associated in the map
+// #Examples
+// Map.get!("ab", Map.from_list!!([{"ab", 2}, {"cd", 4}])) == some(2)
+// Map.get!("doge", Map.from_list!!([{"ab", 2}, {"cd", 4}])) == none
+
+Map.get<A: Type>(key: String, map: Map(A)): Maybe<A>
+  BBL.lookup!!(String.cmp, key, map)

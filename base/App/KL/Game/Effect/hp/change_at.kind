@@ -2,7 +2,6 @@ App.KL.Game.Effect.hp.change_at(
   change: I32
   pos: Hexagonal.Axial
 ): App.KL.Game.Effect<I32>
-
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
     get target = App.KL.Game.Effect.coord.get_target
@@ -18,4 +17,4 @@ App.KL.Game.Effect.hp.change_at(
     else
       App.KL.Game.Effect { return unit }
     return dhp
-      }
+  }
