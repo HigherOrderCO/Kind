@@ -9,35 +9,8 @@ App.Seta.init: App.Init<App.Seta.State>
 // Render function
 App.Seta.draw(img: VoxBox): App.Draw<App.Seta.State>
   (state)
-    let img = transform(img)
+    let img = VoxBox.draw.arrow(100, 20, 40, 100, 0, 20, Col32.new(0, 0, 0, 255), img)
     DOM.vbox({"id": "game_screen", "width": "500px", "height": "500px", "scale": "2"}, {}, img) 
-
-transform(img: VoxBox): VoxBox
-  let x1 = 20 :: I32
-  let y1 = 70 :: I32
-  let x2 = 100 :: I32
-  let y2 = 100 :: I32
-  
-  let m = if I32.eql(x2 - x1, 0) then 0 :: I32 else I32.div((y2 - y1), x2 - x1)
-  let deg = F64.atan(I32.to_f64(m))
-  
-  let pi = 3.1415 :: F64
-  let to_left = if x2 >? x1 then 0 :: F64 else pi;
-  
-  let degree1 = to_left + (deg + (5 * (pi / 6)));
-  let degree2 = to_left + (deg + (7 * (pi / 6)));
-
-  let px1 = I32.to_f64(x2) + F64.cos(degree1) * 10;
-  let py1 = I32.to_f64(y2) + F64.sin(degree1) * 10;
-
-  let px2 = I32.to_f64(x2) + F64.cos(degree2) * 10;
-  let py2 = I32.to_f64(y2) + F64.sin(degree2) * 10;
-
-  let img = VoxBox.Draw.line(x1, y1, x2, y2, 0, Col32.new(0, 0, 0, 255), img)
-  let img = VoxBox.Draw.line(x2, y2, F64.to_i32(px1), F64.to_i32(py1), 0, Col32.new(0, 0, 0, 255), img)
-  let img = VoxBox.Draw.line(x2, y2, F64.to_i32(px2), F64.to_i32(py2), 0, Col32.new(0, 0, 0, 255), img)
-  let img = VoxBox.Draw.line(F64.to_i32(px1), F64.to_i32(py1), F64.to_i32(px2), F64.to_i32(py2), 0, Col32.new(0, 0, 0, 255), img)
-  img
 
 // Event handler
 App.Seta.when: App.When<App.Seta.State>
