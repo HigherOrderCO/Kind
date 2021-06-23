@@ -1,0 +1,13 @@
+App.KL.Game.Effect.heroes.shadow_flux(
+  dmg: I32,
+  area: I32
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect {
+    get target = App.KL.Game.Effect.coord.get_target
+    get center = App.KL.Game.Effect.coord.get_center
+    let coords = Hexagonal.Axial.range(target, area)
+    //App.KL.Game.Effect.animation.push(coords)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.hp.damage_at(dmg), coords)
+    return unit
+  }

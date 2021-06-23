@@ -1,0 +1,12 @@
+App.KL.Game.Effect.heroes.walk(
+  distance: U64
+): App.KL.Game.Skill
+
+  App.KL.Game.Skill.new(
+  "walk"
+  500
+  8
+  distance
+  App.KL.Game.Effect.movement.move
+  )
+

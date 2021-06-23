@@ -3,6 +3,7 @@ type App.KL.Game.Skill {
   	name: String                     // the name of the skill
     delay: U64                       // skills with larger delay are called later
     frames: U64                      // how many ticks its animation takes
+    range: U64
 		effect: App.KL.Game.Effect<Unit> // its in-game effect
 	)
 }

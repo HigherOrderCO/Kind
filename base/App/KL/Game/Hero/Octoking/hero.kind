@@ -12,7 +12,11 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
   let max_ap = 10 :: I32
 
   let skills = {
-    "X": App.KL.Game.Hero.Octoking.Skills.walk
+    "X": App.KL.Game.Effect.heroes.walk(2)
+
+    "Q": App.KL.Game.Skill.new("Gust", 700, 8, 2, App.KL.Game.Effect.heroes.gust(3, 1))
+    "W": App.KL.Game.Skill.new("Wild Slash", 500, 8, 0, App.KL.Game.Effect.heroes.wild_slash(3))
+    "E": App.KL.Game.Skill.new("Lunge", 800, 8, 0, App.KL.Game.Effect.heroes.lunge(4))
   }
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)

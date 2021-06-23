@@ -1,0 +1,11 @@
+App.KL.Game.Effect.heroes.lunge(
+  dmg: I32
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect { 
+    get target = App.KL.Game.Effect.coord.get_target
+    get self = App.KL.Game.Effect.coord.get_center
+    let line = Hexagonal.Axial.line(self, target)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.hp.damage_at(dmg), line)
+    return unit
+  }

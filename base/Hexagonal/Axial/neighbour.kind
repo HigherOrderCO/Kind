@@ -1,0 +1,6 @@
+Hexagonal.Axial.neighbour(
+  coord: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  cubic = Hexagonal.Axial.to_cubic(coord)
+  List.map!!(Hexagonal.Cubic.to_axial, Hexagonal.Cubic.neighbors(cubic))
