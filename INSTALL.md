@@ -56,3 +56,11 @@ It may take some time. You can grab a cup of coffee while it finishes.
    Obs: we just can't typecheck a module with Scheme (`kind-scm Module/`), all other commands are working.
 
 If you have any problem, [let us know](https://github.com/uwu-tech/Kind/issues).
+
+## Update
+Go to the Kind directory and run:
+```bash
+cd bin/scm
+make
+sudo make install
+```
