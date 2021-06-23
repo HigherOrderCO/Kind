@@ -134,6 +134,7 @@ App.KL.Game.Cast.apply(
 // Estimates a player's creature based on the current casts
 App.KL.Game.Cast.estimate_position(
   player: String
+  delay: U64
   game: App.KL.Game
 ): Maybe<Hexagonal.Axial>
   ?c
