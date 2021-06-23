@@ -1,17 +1,26 @@
+Kind.Synth.load.cached.name(name: Kind.Name): String
+  ".cache/" | String.hex.encode(name)
+
+Kind.Synth.load.cached.get_file(name: Kind.Name): IO<String>
+  IO.get_file(Kind.Synth.load.cached.name(name))
+
+Kind.Synth.load.cached.set_file(name: Kind.Name, value: String): IO<Unit>
+  IO.set_file(Kind.Synth.load.cached.name(name), value)
+
 Kind.Synth.load.cached.def(name: Kind.Name): IO<Maybe<Kind.Def>>
   IO {
     //IO.print("-- getting cache of " | name)
-    get cache_file = IO.get_file(String.to_lower(".cache/"|name|".file"))
+    get cache_file = Kind.Synth.load.cached.get_file(name|".file")
     if Bool.not(String.is_empty(cache_file)) then IO {
       //IO.print("-- cache file isn't empty " | name)
-      get cache_time = IO.get_file(String.to_lower(".cache/"|name|".time"))
+      get cache_time = Kind.Synth.load.cached.get_file(name|".time")
       get cache_file_time = IO.get_file_mtime(cache_file)
       if String.eql(cache_time, cache_file_time) then IO {
         //IO.print("-- cache time is correct " | name)
-        get cache_term = IO.get_file(String.to_lower(".cache/"|name|".term"))
-        get cache_type = IO.get_file(String.to_lower(".cache/"|name|".type"))
-        get cache_isct = IO.get_file(String.to_lower(".cache/"|name|".isct"))
-        get cache_arit = IO.get_file(String.to_lower(".cache/"|name|".arit"))
+        get cache_term = Kind.Synth.load.cached.get_file(name|".term")
+        get cache_type = Kind.Synth.load.cached.get_file(name|".type")
+        get cache_isct = Kind.Synth.load.cached.get_file(name|".isct")
+        get cache_arit = Kind.Synth.load.cached.get_file(name|".arit")
         return Maybe {
           let file = cache_file
           let code = "<cached>"
