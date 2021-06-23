@@ -14,10 +14,24 @@ type App.KL.Game.Creature.Status {
     duration: I32
   )
   shield(
+    id: String
     duration: I32
     amount: I32
   )
 }
+
+App.KL.Game.Creature.Status.add_shield(
+  id: String
+  duration: I32
+  amount: I32
+  creature: App.KL.Game.Creature
+): App.KL.Game.Creature
+  ?a
+
+App.KL.Game.Creature.Status.total_shield(
+  creature: App.KL.Game.Creature
+): I32
+  ?b
 
 // Attempts to hit a list of shields
 // Returns the updated status list, and the total damage blocked
