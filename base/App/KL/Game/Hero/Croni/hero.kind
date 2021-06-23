@@ -13,9 +13,32 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
-    "Q": App.KL.Game.Skill.new("Haste", 300, 16, 3, App.KL.Game.Effect.heroes.haste(4))
-    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 3, App.KL.Game.Effect.heroes.shadow_flux(8, 1))
+    "Q": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 3, App.KL.Game.Effect.heroes.shadow_flux(8, 1))
+    "W": App.KL.Game.Skill.new("Trap", 300, 16, 5, App.KL.Game.Effect {
+      App.KL.Game.Effect.limit_range(5)
+      get target = App.KL.Game.Effect.coord.get_target
+      let trap = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Croni.hero.trap, App.KL.Game.Team.neutral, [], 0, 0)
+      App.KL.Game.Effect.board.summon(target, trap)
+    })
     "E": App.KL.Game.Skill.new("Lunge", 800, 16, 0, App.KL.Game.Effect.heroes.lunge(4))
   }
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)
+  let on_stepped = none
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
+
+App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
+  let name = "Croni_Trap"
+  let draw = (player) App.KL.Game.Hero.Croni.Assets.croni1_d_1
+  let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
+  let max_hp = 10 :: I32
+  let max_ap = 0 :: I32
+  let skills = {}
+  let on_stepped = some(App.KL.Game.Effect {
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    App.KL.Game.Effect.hp.damage_at(3, center)
+    App.KL.Game.Effect.board.creature.move(center, target)
+    return unit
+  })
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)

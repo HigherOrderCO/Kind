@@ -18,4 +18,6 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
     "E": App.KL.Game.Skill.new("Lunge", 800, 16, 0, App.KL.Game.Effect.heroes.lunge(4))
   }
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)
+  let on_stepped = none
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
