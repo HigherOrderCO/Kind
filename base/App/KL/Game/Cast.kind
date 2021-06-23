@@ -130,11 +130,3 @@ App.KL.Game.Cast.apply(
       new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators)
     }
   } <> App.KL.Game.Cast.Result.failure
-
-// Estimates a player's creature based on the current casts
-App.KL.Game.Cast.estimate_position(
-  player: String
-  delay: U64
-  game: App.KL.Game
-): Maybe<Hexagonal.Axial>
-  ?c

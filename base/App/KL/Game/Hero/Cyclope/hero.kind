@@ -19,4 +19,6 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
 
   }
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)
+  let on_stepped = none
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
