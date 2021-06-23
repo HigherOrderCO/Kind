@@ -3,9 +3,6 @@ Hexagonal.Axial.range(
   coord: Hexagonal.Axial
   distance: I32
 ): List<Hexagonal.Axial>
-  let center = Hexagonal.Axial.to_cubic(coord)
-  let list_coords = List.map!!(Hexagonal.Cubic.to_axial, Hexagonal.Cubic.range(center, distance))
-  list_coords
 
   center = Hexagonal.Axial.to_cubic(coord)
   List.map!!(Hexagonal.Cubic.to_axial, Hexagonal.Cubic.range(center, distance))
