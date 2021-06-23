@@ -17,3 +17,4 @@ web/events/data/*
 *.wpo
 .cache
 /.gtm/
+web/docs

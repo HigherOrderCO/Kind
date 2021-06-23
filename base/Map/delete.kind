@@ -5,4 +5,4 @@
 //         Map.from_list([{"black, 3"}]))
 // If there is not key corresponding, leaves the map unchanged 
 Map.delete<A: Type>(key: String, map: Map(A)): Map(A)
-  BBL.delete!!(String.cmp, key, map)
+  BBT.delete!!(String.cmp, key, map)

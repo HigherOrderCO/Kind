@@ -24,19 +24,33 @@ Kind.Comp.transpile.term(
         let:
           lang@gram@local_definition(lang@gram@name(comp.name), go(comp.expr,depth,defs), go(comp.body,Nat.succ(depth),defs))
         eli: case comp.prim {
-          unit: lang@gram@application(lang@gram@inst_name("Unit"), go(comp.expr,depth,defs))
-          bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
-          nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
-          u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
-          string: lang@gram@application(lang@gram@inst_name("String"), go(comp.expr,depth,defs))
+          unit: lang@gram@application(lang@gram@elim_name("Unit"), go(comp.expr,depth,defs))
+          bits: lang@gram@application(lang@gram@elim_name("Bits"), go(comp.expr,depth,defs))
+          bool: lang@gram@application(lang@gram@elim_name("Bool"), go(comp.expr,depth,defs))
+          nat: lang@gram@application(lang@gram@elim_name("Nat"), go(comp.expr,depth,defs))
+          //u8: lang@gram@application(lang@gram@elim_name("U8"), go(comp.expr,depth,defs))
+          u16: lang@gram@application(lang@gram@elim_name("U16"), go(comp.expr,depth,defs))
+          u32: lang@gram@application(lang@gram@elim_name("U32"), go(comp.expr,depth,defs))
+          //u64: lang@gram@application(lang@gram@elim_name("U64"), go(comp.expr,depth,defs))
+          //u256: lang@gram@application(lang@gram@elim_name("U256"), go(comp.expr,depth,defs))
+          //f64: lang@gram@application(lang@gram@elim_name("F64"), go(comp.expr,depth,defs))
+          string: lang@gram@application(lang@gram@elim_name("String"), go(comp.expr,depth,defs))
+          //buffer32: lang@gram@application(lang@gram@elim_name("F64"), go(comp.expr,depth,defs))
           data: go(comp.expr,depth,defs)
         }
         ins: case comp.prim {
           unit: lang@gram@application(lang@gram@inst_name("Unit"), go(comp.expr,depth,defs))
+          bits: lang@gram@application(lang@gram@inst_name("Bits"), go(comp.expr,depth,defs))
           bool: lang@gram@application(lang@gram@inst_name("Bool"), go(comp.expr,depth,defs))
           nat: lang@gram@application(lang@gram@inst_name("Nat"), go(comp.expr,depth,defs))
+          //u8: lang@gram@application(lang@gram@inst_name("U8"), go(comp.expr,depth,defs))
           u16: lang@gram@application(lang@gram@inst_name("U16"), go(comp.expr,depth,defs))
+          u32: lang@gram@application(lang@gram@inst_name("U32"), go(comp.expr,depth,defs))
+          //u64: lang@gram@application(lang@gram@inst_name("U64"), go(comp.expr,depth,defs))
+          //u256: lang@gram@application(lang@gram@inst_name("U256"), go(comp.expr,depth,defs))
+          //f64: lang@gram@application(lang@gram@inst_name("F64"), go(comp.expr,depth,defs))
           string: lang@gram@application(lang@gram@inst_name("String"), go(comp.expr,depth,defs))
+          //buffer32: lang@gram@application(lang@gram@inst_name("F64"), go(comp.expr,depth,defs))
           data: go(comp.expr,depth,defs)
         }
         nat:
@@ -68,10 +82,11 @@ Kind.Comp.transpile.global_definitions(
     let {name,term} = defn
     let {vars,body} = Kind.Comp.get_vars(term)
     // multiarg function
-    let code = code|lang@gram@global_function(name, vars, case lang@opts{name} as opt {
+    let inlined_body = case lang@opts{name} as opt {
       none: Kind.Comp.transpile.term(lang, body, 0, defs)
       some: Kind.Comp.replace(Pair.snd!!(opt.value), vars)
-    })
+    }
+    let code = code|lang@gram@global_function(name, vars, inlined_body)
     code
   code
 

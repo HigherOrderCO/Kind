@@ -1,0 +1,2 @@
+App.KL.Game.Indicators: Type
+  Hexagonal.Axial.BBT<App.KL.Game.Indicator>

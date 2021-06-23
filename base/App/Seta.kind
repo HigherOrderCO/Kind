@@ -1,0 +1,70 @@
+// App states (local = clicks, global = visitors)
+App.Seta.State: App.State
+  App.State.new(Pair<Pair<I32, I32>, Pair<I32, I32>>, Nat)
+
+// Initial state
+App.Seta.init: App.Init<App.Seta.State>
+  App.Store.new<App.Seta.State>({{100,20}, {40,100}}, 0)
+
+// Render function
+App.Seta.draw(img: VoxBox): App.Draw<App.Seta.State>
+  (state)
+    open state
+    
+    let img = VoxBox.Draw.arrow(
+      state.local@fst@fst, 
+      state.local@fst@snd, 
+      state.local@snd@fst, 
+      state.local@snd@snd, 
+      0, 20, Col32.new(0, 0, 0, 255), img)
+    
+    <div style={
+      "display": "flex"
+      "width": "100%"
+      "justify-content": "space-evenly"
+    }>
+      { DOM.vbox({"id": "game_screen", "width": "500px", "height": "500px", "scale": "2"}, {}, img) }
+      <div>
+        for i in [0,1,2,3]:
+          <div style={"margin": "5px"}><input min="0" type="number" id=Nat.show(i) style={"width": "200px"}></input></div>
+      </div>
+    </div>
+    
+
+// Event handler
+App.Seta.when: App.When<App.Seta.State>
+  (event, state)
+  open state
+  case event {
+    input:
+      switch String.eql(event.id) {
+        "0":
+          App.set_local!(state.local@fst <- state.local@fst@fst <- I32.read(event.text))
+        "1":
+          App.set_local!(state.local@fst <- state.local@fst@snd <- I32.read(event.text))
+        "2":
+          App.set_local!(state.local@snd <- state.local@snd@fst <- I32.read(event.text))
+        "3":
+          App.set_local!(state.local@snd <- state.local@snd@snd <- I32.read(event.text))
+      } default App.pass!
+  } default App.pass!
+
+// Global ticker: not used
+App.Seta.tick: App.Tick<App.Seta.State>
+  App.no_tick<App.Seta.State>
+
+// Global visitor: counts posts to room_zero
+App.Seta.post: App.Post<App.Seta.State>
+  (time, room, addr, data, global_state)
+  global_state + 1
+
+// A "Seta, world!" + counter application
+App.Seta: App<App.Seta.State>
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  App.new<App.Seta.State>(
+    App.Seta.init
+    App.Seta.draw(img)
+    App.Seta.when
+    App.Seta.tick
+    App.Seta.post
+  )

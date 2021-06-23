@@ -1,0 +1,6 @@
+BBT.show_tree<K: Type, V: Type>(
+  tree: BBT<K,V>, 
+  key_show: K -> String, 
+  val_show: V -> String
+) : String
+  BBT.show_tree.go!!(tree, key_show, val_show, 0)

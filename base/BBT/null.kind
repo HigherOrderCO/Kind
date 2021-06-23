@@ -1,0 +1,5 @@
+BBT.null<K: Type, V: Type>(map: BBT<K,V>): Bool
+  case map {
+    tip: Bool.true,
+    bin: Bool.false
+  }

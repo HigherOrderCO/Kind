@@ -1,0 +1,9 @@
+BBT.lookup<K: Type, V: Type>(cmp: K -> K -> Cmp, key: K, map: BBT<K,V>): Maybe<V>
+  case map {
+    tip: Maybe.none<V>,
+    bin: case cmp(key, map.key) {
+      ltn: BBT.lookup<K,V>(cmp, key, map.left),
+      eql: Maybe.some<V>(map.val),
+      gtn: BBT.lookup<K,V>(cmp, key, map.right)
+    }
+  }

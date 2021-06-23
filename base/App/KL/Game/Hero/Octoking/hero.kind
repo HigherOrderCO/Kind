@@ -1,9 +1,21 @@
 App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
-  App.KL.Game.Hero.new(
-    "Octoking", 
-    (player) App.KL.Game.Hero.Octoking.Assets.vbox_idle,
-    (bool, time) App.KL.Game.Hero.Octoking.Assets.base64_idle,
-    15,
-    10,
-    {"X": App.KL.Game.Skill.Move.skill},
-  )
+  let name = "Octoking"
+
+  let draw = (player)
+    App.KL.Game.Hero.Octoking.Assets.vbox_idle
+
+  let picture = (bool, time)
+    App.KL.Game.Hero.Octoking.Assets.base64_idle
+
+  let max_hp = 25 :: I32
+
+  let max_ap = 10 :: I32
+
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
+    "Q": App.KL.Game.Skill.new("Gust", 700, 16, 2, App.KL.Game.Effect.heroes.gust(3, 1))
+    "W": App.KL.Game.Skill.new("Wild Slash", 500, 16, 0, App.KL.Game.Effect.heroes.wild_slash(3))
+    "E": App.KL.Game.Skill.new("Lunge", 800, 16, 0, App.KL.Game.Effect.heroes.lunge(4))
+  }
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)

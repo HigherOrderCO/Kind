@@ -1,0 +1,2 @@
+App.KL.Game.Effect.monad: Monad(App.KL.Game.Effect)
+  Monad.new<App.KL.Game.Effect>(App.KL.Game.Effect.bind, App.KL.Game.Effect.pure)

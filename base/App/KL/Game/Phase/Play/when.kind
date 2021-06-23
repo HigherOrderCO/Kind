@@ -7,7 +7,7 @@ App.KL.Game.Phase.Play.when(
     frame:
       let picks = App.KL.Game.Cast.picks_of(local@user, game@casts)
       let preview = local@preview <- (local@preview@picks <- picks)
-      //log("ue " | Nat.show(List.length!(Hexagonal.Axial.BBL.to_list!(local@preview@picks))))
+      //log("ue " | Nat.show(List.length!(Hexagonal.Axial.BBT.to_list!(local@preview@picks))))
       App.set_local!(App.KL.State.Local.game(preview))
     mouse_move:
       if String.eql("game_screen", event.id) then
@@ -16,17 +16,21 @@ App.KL.Game.Phase.Play.when(
       else
         App.pass!
     key_down:
-      //log("Key down " | Char.to_string(event.code))
-      //log("Setting casts.")
-      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let preview = local@preview
-      let preview = preview@areas <- Hexagonal.Axial.BBL.from_list!([{coord, App.KL.Game.Indicator.blue}])
-      App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+      App.set_local!(App.KL.State.Local.game(Maybe {
+        let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+        get caster_coord = App.KL.Game.Board.find_player_coord(local@user, game@board)
+        get casted_skill = App.KL.Game.Skill.get(local@user, event.code, game)
+        let casted_range = Nat.to_i32(U64.to_nat(casted_skill@range))
+        let indicators = List.mapped!(Hexagonal.Axial.range(caster_coord, casted_range))!((coord) {coord, App.KL.Game.Indicator.blue})
+        let preview = local@preview
+        let preview = preview@areas <- Hexagonal.Axial.BBT.from_list!(indicators)
+        return local@preview <- preview
+      } <> local))
     key_up: IO {
       //log("Key up " | Char.to_string(event.code))
       let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       let preview = local@preview
-      let preview = preview@areas <- Hexagonal.Axial.BBL.from_list!([])
+      let preview = preview@areas <- Hexagonal.Axial.BBT.from_list!([])
       App.new_post!(local@room, App.KL.Game.Phase.Play.Event.cast.serial(event.code, coord))
       App.set_local!(App.KL.State.Local.game(local@preview <- preview))
     }

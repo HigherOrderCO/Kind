@@ -1,0 +1,2 @@
+App.KL.Game.Picks: Type
+  Hexagonal.Axial.BBT<Char>

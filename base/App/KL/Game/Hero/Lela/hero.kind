@@ -1,9 +1,21 @@
 App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
-  App.KL.Game.Hero.new(
-    "Lela", 
-    (player) App.KL.Game.Hero.Lela.Assets.vbox_idle,
-    (bool, time) App.KL.Game.Hero.Lela.Assets.base64_idle,
-    15,
-    10,
-    {"X": App.KL.Game.Skill.Move.skill},
-  )
+  let name = "Lela"
+
+  let draw = (player)
+    App.KL.Game.Hero.Lela.Assets.vbox_idle
+
+  let picture = (bool, time)
+    App.KL.Game.Hero.Lela.Assets.base64_idle
+
+  let max_hp = 25 :: I32
+
+  let max_ap = 10 :: I32
+
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
+    "Q": App.KL.Game.Skill.new("Restore",600, 16, 2, App.KL.Game.Effect.heroes.restore(2, 2))
+    "W": App.KL.Game.Skill.new("Escort", 600, 16, 4, App.KL.Game.Effect.heroes.escort(3))
+    "E": App.KL.Game.Skill.new("Detain", 800, 16, 4, App.KL.Game.Effect.heroes.detain(4))
+  }
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)

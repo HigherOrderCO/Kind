@@ -13,12 +13,12 @@ function list_to_array(list) {
 
 function map_to_object(map, obj = {}) {
   switch (map._) {
-    case "BBL.bin":
+    case "BBT.bin":
       obj[map.key] = map.val;
       map_to_object(map.left, obj);
       map_to_object(map.right, obj);
       break;
-    case "BBL.tip":
+    case "BBT.tip":
       break;
   }
   return obj;

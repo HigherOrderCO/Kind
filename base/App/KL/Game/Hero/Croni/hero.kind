@@ -1,9 +1,21 @@
 App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
-  App.KL.Game.Hero.new(
-    "Croni",
-    (player) App.KL.Game.Hero.Croni.Assets.vbox_idle,
-    (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle,
-    25,
-    10,
-    {"X": App.KL.Game.Skill.Move.skill},
-  )
+  let name = "Croni"
+
+  let draw = (player)
+    App.KL.Game.Hero.Croni.Assets.vbox_idle
+
+  let picture = (bool, time)
+    App.KL.Game.Hero.Croni.Assets.base64_idle
+
+  let max_hp = 25 :: I32
+
+  let max_ap = 10 :: I32
+
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
+    "Q": App.KL.Game.Skill.new("Haste", 300, 16, 3, App.KL.Game.Effect.heroes.haste(4))
+    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 3, App.KL.Game.Effect.heroes.shadow_flux(8, 1))
+    "E": App.KL.Game.Skill.new("Lunge", 800, 16, 0, App.KL.Game.Effect.heroes.lunge(4))
+  }
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)

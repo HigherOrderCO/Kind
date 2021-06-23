@@ -1,0 +1,30 @@
+// Returns a list of coordinates from 1/6 of a circle after rotating 60 degrees
+Hexagonal.Cubic.clock_rotation(
+  start: Hexagonal.Cubic
+): List<Hexagonal.Cubic>
+
+  //https://www.redblobgames.com/grids/hexagons/#rotation
+
+  x = start@x  
+  y = start@y
+  z = start@z
+
+  neg_x = x * -1
+  neg_y = y * -1
+  neg_z = z * -1
+
+  start_coord                = Hexagonal.Cubic.new(x    , y    , z    )
+  sixty_degrees              = Hexagonal.Cubic.new(neg_z, neg_x, neg_y)
+  one_hundred_twenty_degrees = Hexagonal.Cubic.new(y    , z    , x    )  
+  one_hundred_eighty_degrees = Hexagonal.Cubic.new(neg_x, neg_y, neg_z)
+  two_hundred_fourty_degrees = Hexagonal.Cubic.new(z    , x    , y    )  
+  three_hundred_degrees      = Hexagonal.Cubic.new(neg_y, neg_z, neg_x)
+  
+  fst    = start_coord
+  snd    = sixty_degrees
+  third  = one_hundred_twenty_degrees
+  fourth = one_hundred_eighty_degrees
+  fifth  = two_hundred_fourty_degrees 
+  sixth  = three_hundred_degrees
+  
+  [fst, snd, third, fourth, fifth, sixth]

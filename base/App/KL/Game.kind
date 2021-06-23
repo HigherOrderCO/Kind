@@ -13,7 +13,7 @@ type App.KL.Game.State.Local {
 }
 
 App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Local
-  let preview = App.KL.Game.Cast.Preview.new(Hexagonal.Axial.BBL.new!, Hexagonal.Axial.BBL.new!)
+  let preview = App.KL.Game.Cast.Preview.new(Hexagonal.Axial.BBT.new!, Hexagonal.Axial.BBT.new!)
   let mouse = {0,0}
   App.KL.Game.State.Local.new(user, room, preview, mouse)
 
@@ -22,11 +22,12 @@ App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Loca
 
 type App.KL.Game {
   new(
-    tick: U64
-    phase: App.KL.Game.Phase
-    players: Map<App.KL.Game.Player>
-    board: App.KL.Game.Board
-    casts: List<App.KL.Game.Cast>
+    phase: App.KL.Game.Phase         // current phase: draft or play?
+    turn: U64                        // current turn
+    moment: App.KL.Game.Moment       // current moment: preparation or animation?
+    players: Map<App.KL.Game.Player> // human players connected to board creatures
+    board: App.KL.Game.Board         // the game map, including tiles, creatures, objects
+    casts: List<App.KL.Game.Cast>    // all skills casted on the current turn
   )
 }
 
@@ -35,14 +36,26 @@ type App.KL.Game.Phase {
   play
 }
 
+type App.KL.Game.Moment {
+  preparation(countdown: U64) // when players are casting their skills
+  execution(
+    casts: List<App.KL.Game.Cast>
+    frame: U64
+    hits: App.KL.Game.Indicators
+    success: Bool
+  ) // when casts are being executed and animated
+}
+
 // Initial state
 App.KL.Game.start: App.KL.Game
   let phase = App.KL.Game.Phase.draft
+  let turn = 0#64
+  let moment = App.KL.Game.Moment.preparation(64)
   let players = Map.new!
-  let board = Hexagonal.Axial.BBL.new!
+  let board = Hexagonal.Axial.BBT.new!
   let tick = 0#64
   let casts = []
-  App.KL.Game.new(tick, phase, players, board, casts)
+  App.KL.Game.new(phase, turn, moment, players, board, casts)
 
 // Render function
 // ===============

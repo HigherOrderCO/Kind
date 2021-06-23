@@ -47,11 +47,11 @@ App.KL.Game.Phase.Draft.draw.main(players: Map<App.KL.Game.Player>, room: String
 // ----------
 App.KL.Game.Phase.Draft.draw.choose_team(players: Map<App.KL.Game.Player>): DOM
   <div style={ 
-    "width": "60%"
-    "height": "30%"
+    // "width": "60%"
+    // "height": "30%"
     "display": "flex"
-    "flex-direction": "row"
-    "justify-content": "space-between"
+    "justify-content": "center"
+    "flex-wrap": "wrap"
   }>
     {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
     {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
@@ -77,10 +77,15 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
   
   <button id = "T" | Nat.show(player_count) | team_txt style={ 
     "width": "40%"
-    "height": "100%"
+    "height": "200px"
     "background-image": gradient
     "box-shadow": "2px -2px 2px black"
     "font-size": "2rem"
+    "border": "0"
+    "border-radius": "5px"
+    "cursor": "pointer"
+    "min-width": "270px"
+    "margin": "20px"
   }>
     Nat.show(player_count) | "/3 Players"
   </button>
@@ -394,10 +399,10 @@ App.KL.Game.Phase.Draft.draw.cards.ally(user: String, info: Maybe(App.KL.Game.Pl
     none: {"Connecting", App.KL.Game.Phase.Draft.draw.cards.interrogation}
     some:
       Maybe {
-        get info = Maybe.map!!(Nat.to_u8, info.value@hero_id)
-        get hero = App.Kaelin.Hero.info(info)  // TODO bring this function
-        let assets = hero@assets
-        return {hero@name, assets@base64}
+        get hero_id = info.value@hero_id
+        get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+        let picture = hero@picture(true, 0) // TODO replace with real bool and time
+        return {hero@name, picture}
       } <> {"Choosing", App.KL.Game.Phase.Draft.draw.cards.interrogation}
     }
 

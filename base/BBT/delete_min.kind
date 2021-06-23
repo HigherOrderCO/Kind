@@ -1,0 +1,10 @@
+BBT.delete_min<K: Type, V: Type>(map: BBT<K,V>): BBT<K,V>
+  case map {
+    tip: map,
+    bin: case map.left {
+      tip: map.right,
+      bin:  
+        let new_left = BBT.delete_min<K,V>(map.left)
+        BBT.balance<K,V>(map.key, map.val, new_left, map.right)
+    }
+  }

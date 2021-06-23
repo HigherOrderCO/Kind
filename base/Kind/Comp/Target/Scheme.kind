@@ -88,8 +88,8 @@ Kind.Comp.Target.Scheme.select(term: String, cse_body_list: List<Pair<String, St
   let cses = ""
   for cse_body in cse_body_list with cses:
     {cse, body} = cse_body
-    "("|cse|" "|body|")"
-  "(case "|term|" "|cses|")"
+    cses|" ("|cse|" "|body|")"
+  "(case "|term|cses|")"
 
 Kind.Comp.Target.Scheme.grammar: Kind.Comp.Grammar
   Kind.Comp.Grammar.new(
@@ -124,6 +124,25 @@ Kind.Comp.Target.Scheme.natives: Kind.Comp.Natives
       {"#t", [
         // case new
         {"#t", []}
+      ]})
+    bits: Kind.Comp.Native.new(
+      // Inst
+      [
+        // Bits.e
+        {0, "#b1"}
+        // Bits.o
+        {1, "(bitwise-arithmetic-shift-left $0 #b1)"}
+        // Bits.i
+        {1, "(bitwise-ior (bitwise-arithmetic-shift-left $0 #b1) #b1)"}
+      ]
+      // Elim
+      {"(if (eq? $0 #b1) 2 (bitwise-and $0 #b1))", [
+        // case e
+        {"2", []}
+        // case o
+        {"0", ["(bitwise-arithmetic-shift-right $0 #b1)"]}
+        // case i
+        {"1", ["(bitwise-arithmetic-shift-right $0 #b1)"]}
       ]})
     bool: Kind.Comp.Native.new(
       // Inst
@@ -169,6 +188,19 @@ Kind.Comp.Target.Scheme.natives: Kind.Comp.Natives
         // case new
         {"#t", [
           "(u16-to-word $0)" // x.value
+        ]}
+      ]})
+    u32: Kind.Comp.Native.new(
+      // Inst
+      [
+        // U16.new
+        {1, "(word-to-u 32 $0)"}
+      ]
+      // Elim
+      {"#t", [
+        // case new
+        {"#t", [
+          "(u-to-word 32 $0)" // x.value
         ]}
       ]})
     string: Kind.Comp.Native.new(
@@ -365,6 +397,14 @@ Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
       ((symbol=? 'Word.i (get w 0)) (word-to-u16-go (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
   (word-to-u16-go 0 w 0))
 
+(define (word-to-u n w)
+  (define (word-to-u-go n i w x)
+    (cond ((= n i) x)
+      ((symbol=? 'Word.e (get w 0)) (word-to-u-go n (+ i 1) (vector 'Word.e) x))
+      ((symbol=? 'Word.o (get w 0)) (word-to-u-go n (+ i 1) (get w 1) x))
+      ((symbol=? 'Word.i (get w 0)) (word-to-u-go n (+ i 1) (get w 1) (fxior x (fxarithmetic-shift-left 1 i))))))
+  (word-to-u-go n 0 w 0))
+
 ; Converts a native integer to a Kind word
 (define (u16-to-word x)
   (define (u16-to-word-go i x w)
@@ -373,6 +413,14 @@ Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
         (vector 'Word.o w)
         (vector 'Word.i w)))))
   (u16-to-word-go 0 x (vector 'Word.e)))
+
+(define (u-to-word n x)
+  (define (u-to-word-go n i x w)
+    (if (= n i) w (u-to-word-go n (+ i 1) x
+      (if (= (fxand (fxarithmetic-shift-right x (- n (+ i 1))) 1) 0)
+        (vector 'Word.o w)
+        (vector 'Word.i w)))))
+  (u-to-word-go n 0 x (vector 'Word.e)))
 
 (define suffix?
   (lambda (str suff)
@@ -545,7 +593,7 @@ Kind.Comp.Target.Scheme.cli: String
 (let ([args (cdr (command-line))])
   (if (null? args)
     (print-lines
-    '("# Kind - Scheme Release"
+    '("# kind-scm `|Kind.version|`"
       ""
       "Usage:"
       ""
