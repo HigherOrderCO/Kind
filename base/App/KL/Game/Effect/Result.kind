@@ -1,4 +1,5 @@
 type App.KL.Game.Effect.Result <A: Type> {
+  err
   new(
     value: A,
     board: App.KL.Game.Board,

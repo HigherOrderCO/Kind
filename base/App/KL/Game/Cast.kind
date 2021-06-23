@@ -8,8 +8,16 @@ type App.KL.Game.Cast {
 
 type App.KL.Game.Cast.Preview {
   new(
-    areas: Hexagonal.Axial.BBT<App.KL.Game.Indicator>
-    picks: Hexagonal.Axial.BBT<Char>
+    areas: App.KL.Game.Indicators
+    picks: App.KL.Game.Picks
+  )
+}
+
+type App.KL.Game.Cast.Result {
+  failure
+  success(
+    game: App.KL.Game
+    hits: App.KL.Game.Indicators
   )
 }
 
@@ -26,7 +34,7 @@ App.KL.Game.Cast.push(
 App.KL.Game.Cast.picks_of(
   player: String
   casts: List<App.KL.Game.Cast>
-): Hexagonal.Axial.BBT<Char>
+): App.KL.Game.Picks
   let map = Hexagonal.Axial.BBT.new!
   for cast in casts with map:
     open cast
@@ -86,16 +94,23 @@ App.KL.Game.Cast.get_hero(
     return creature@hero
   }
 
-// Sorts a game's casts by delay, in ascending order
+// Sorts a game's casts by delay, in ascending order, removing duplicates
 App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
   open game
-  let casts = [] :: List<Pair<App.KL.Game.Cast,U64>>
-  for cast in game.casts with casts:
-    case App.KL.Game.Cast.get_skill(cast, game) as got_skill {
-      none: casts
-      some: {cast, got_skill.value@delay} & casts
+  let state = {{}, []} :: Pair<Map<Unit>, List<Pair<App.KL.Game.Cast,U64>>>
+  for cast in game.casts with state:
+    let {seen, casts} = state
+    let key = cast@player | "::" | Char.to_string(cast@letter)
+    case seen{key} as got {
+      none: 
+        let seen = seen{key} <- unit
+        case App.KL.Game.Cast.get_skill(cast, game) as got_skill {
+          none: {seen, casts}
+          some: {seen, {cast, got_skill.value@delay} & casts}
+        }
+      some: {seen, casts}
     }
-  let list = List.sort!((a,b) U64.cmp(a@snd, b@snd), casts)
+  let list = List.sort!((a,b) U64.cmp(a@snd, b@snd), state@snd)
   let list = List.map!!((a) a@fst, list)
   list
 
@@ -103,11 +118,15 @@ App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
 App.KL.Game.Cast.apply(
   cast: App.KL.Game.Cast
   game: App.KL.Game
-): App.KL.Game
+): App.KL.Game.Cast.Result
   open game
   open cast
   Maybe {
     get skill = App.KL.Game.Cast.get_skill(cast, game)
     get coord = App.KL.Game.Cast.get_coord(cast, game)
-    return App.KL.Game.Effect.run!(skill@effect, coord, cast@target, game)
-  } <> game
+    let result = skill@effect(coord, cast@target, game@board)
+    return case result {
+      err: App.KL.Game.Cast.Result.failure
+      new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators)
+    }
+  } <> App.KL.Game.Cast.Result.failure

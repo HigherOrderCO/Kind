@@ -38,7 +38,12 @@ type App.KL.Game.Phase {
 
 type App.KL.Game.Moment {
   preparation(countdown: U64) // when players are casting their skills
-  execution(casts: List<App.KL.Game.Cast>, frame: U64) // when casts are being executed and animated
+  execution(
+    casts: List<App.KL.Game.Cast>
+    frame: U64
+    hits: App.KL.Game.Indicators
+    success: Bool
+  ) // when casts are being executed and animated
 }
 
 // Initial state

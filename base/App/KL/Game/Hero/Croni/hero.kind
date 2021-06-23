@@ -12,13 +12,10 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let max_ap = 10 :: I32
 
   let skills = {
-    "X": App.KL.Game.Effect.heroes.walk(2)
-
-    // added 4 walks for debugging
-
-    "Q": App.KL.Game.Skill.new("Haste", 300, 8, 3, App.KL.Game.Effect.heroes.haste(4))
-    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 8, 3, App.KL.Game.Effect.heroes.shadow_flux(8, 1))
-    "E": App.KL.Game.Skill.new("Lunge", 800, 8, 0, App.KL.Game.Effect.heroes.lunge(4))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
+    "Q": App.KL.Game.Skill.new("Haste", 300, 16, 3, App.KL.Game.Effect.heroes.haste(4))
+    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 3, App.KL.Game.Effect.heroes.shadow_flux(8, 1))
+    "E": App.KL.Game.Skill.new("Lunge", 800, 16, 0, App.KL.Game.Effect.heroes.lunge(4))
   }
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills)

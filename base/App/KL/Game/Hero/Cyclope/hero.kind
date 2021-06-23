@@ -12,11 +12,10 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
   let max_ap = 10 :: I32
 
   let skills = {
-    "X": App.KL.Game.Effect.heroes.walk(2)
-
-    "Q": App.KL.Game.Skill.new("Empathy",600, 8, 1, App.KL.Game.Effect.heroes.empathy(4, 1))
-    "W": App.KL.Game.Skill.new("Revenge", 600, 8, 1, App.KL.Game.Effect.heroes.revenge)
-    "E": App.KL.Game.Skill.new("Ground Slam", 800, 8, 0, App.KL.Game.Effect.heroes.ground_slam(2, 2))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
+    "Q": App.KL.Game.Skill.new("Empathy",600, 16, 1, App.KL.Game.Effect.heroes.empathy(4, 1))
+    "W": App.KL.Game.Skill.new("Revenge", 600, 16, 1, App.KL.Game.Effect.heroes.revenge)
+    "E": App.KL.Game.Skill.new("Ground Slam", 800, 16, 0, App.KL.Game.Effect.heroes.ground_slam(2, 2))
 
   }
 
