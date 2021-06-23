@@ -151,22 +151,21 @@ App.KL.Game.Cast.estimate_position(
 
 App.KL.Game.Cast.estimate_position.go(
   casts: List<App.KL.Game.Cast>
-  delay: U64
+  max_delay: U64
   game: App.KL.Game
 ): App.KL.Game
   Maybe {
-    get cast        = List.head!(casts)
-    get skill       = App.KL.Game.Cast.get_skill(cast, game)
-    let cast_delay  = skill@delay
-    return 
-      if delay <? cast_delay then
-        game
-      else
-        let result = App.KL.Game.Cast.apply(cast, game)
-        let game =
-          case result {
-            failure: game
-            success: result.game
-          }
-        App.KL.Game.Cast.estimate_position.go(List.tail!(casts), delay, game)
+    get cast = List.head!(casts)
+    get skill = App.KL.Game.Cast.get_skill(cast, game)
+    let cast_delay = skill@delay
+    if cast_delay <? max_delay then Maybe {
+      let result = App.KL.Game.Cast.apply(cast, game)
+      let game = case result {
+        failure: game
+        success: result.game
+      }
+      return App.KL.Game.Cast.estimate_position.go(List.tail!(casts), max_delay, game)
+    } else Maybe {
+      return game
+    }
   } <> game
