@@ -7,11 +7,11 @@ Kind.Comp.Prim.natives: List(Pair(String, Kind.Comp.Prim))
     {"U8", Kind.Comp.Prim.u8}
     {"U16", Kind.Comp.Prim.u16}
     {"U32", Kind.Comp.Prim.u32}
-    {"U64", Kind.Comp.Prim.u64}
-    {"U256", Kind.Comp.Prim.u256}
-    {"F64", Kind.Comp.Prim.f64}
+    //{"U64", Kind.Comp.Prim.u64}
+    //{"U256", Kind.Comp.Prim.u256}
+    //{"F64", Kind.Comp.Prim.f64}
     {"String", Kind.Comp.Prim.string}
-    {"Buffer32", Kind.Comp.Prim.buffer32}
+    //{"Buffer32", Kind.Comp.Prim.buffer32}
   ]
 
 Kind.Comp.Prim.natives.names: List(String)

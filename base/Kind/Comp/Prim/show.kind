@@ -8,11 +8,11 @@ Kind.Comp.Prim.show(prim: Kind.Comp.Prim): String
     u8: "U8"
     u16: "U16"
     u32: "U32"
-    u64: "U64"
-    u256: "U256"
-    f64: "F64"
+    //u64: "U64"
+    //u256: "U256"
+    //f64: "F64"
     string: "String"
-    buffer32: "Buffer32"
+    //buffer32: "Buffer32"
     data: Kind.Comp.Prim.show.ctrs(prim.ctrs)
   }
 
