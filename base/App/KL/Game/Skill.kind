@@ -3,7 +3,22 @@ type App.KL.Game.Skill {
   	name: String                     // the name of the skill
     delay: U64                       // skills with larger delay are called later
     frames: U64                      // how many ticks its animation takes
-    range: U64
+    range: U64                       // cast range
 		effect: App.KL.Game.Effect<Unit> // its in-game effect
 	)
 }
+
+// Gets the skill associated with a player/letter pair
+App.KL.Game.Skill.get(
+  player: String
+  letter: Char
+  game: App.KL.Game
+): Maybe<App.KL.Game.Skill>
+  open game
+  Maybe {
+    get player = game.players{player}
+    get hero_id = player@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    get skill = hero@skills{Char.to_string(letter)}
+    return skill
+  }

@@ -1,2 +1,2 @@
 App.KL.Game.Hero.Octoking.Skills.walk: App.KL.Game.Skill
-  App.KL.Game.Skill.new("walk", 500, 8, App.KL.Game.Effect.movement.move)
+  App.KL.Game.Skill.new("walk", 500, 8, 2, App.KL.Game.Effect.movement.move)

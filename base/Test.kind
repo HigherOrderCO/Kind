@@ -1,2 +1,3 @@
-Test: _
-  List.show!(Nat.show, List.sort!(Nat.cmp, [1, 7, 9, 6, 7, 2, 5, 7, 9, 8, 10]))
+Test: Nat
+  1234
+  

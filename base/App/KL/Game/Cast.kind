@@ -41,6 +41,13 @@ App.KL.Game.Cast.get_skill(
   cast: App.KL.Game.Cast
   game: App.KL.Game
 ): Maybe<App.KL.Game.Skill>
+  App.KL.Game.Skill.get(cast@player, cast@letter, game)
+  
+// Gets the skill associated with a cast
+App.KL.Game.Cast.get_skill(
+  cast: App.KL.Game.Cast
+  game: App.KL.Game
+): Maybe<App.KL.Game.Skill>
   open game
   open cast
   Maybe {
