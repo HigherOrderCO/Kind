@@ -33,22 +33,24 @@ App.KL.Game.Cast.push(
 // Returns the current picks of a player as a map of Coord->Letter
 App.KL.Game.Cast.picks_of(
   player: String
-  casts: List<App.KL.Game.Cast>
+  game: App.KL.Game
 ): App.KL.Game.Picks
   let result = {{}, Hexagonal.Axial.BBT.new! } :: Pair<Map<Unit>, App.KL.Game.Picks>
+  let casts  = game@casts
+
   for cast in casts with result:
     open cast
     let {seen, map} = result
     if player =? cast.player then
+      let skill = App.KL.Game.Cast.get_skill(cast, game)
       let letter = Char.to_string(cast.letter)
-      case seen{letter} as got {
-        none:
-          {seen{letter} <- unit, Hexagonal.Axial.BBT.set!(cast.target, cast.letter, map)}
-        some:
-          {seen, map}
-      }
+      case skill seen{letter} {
+        some none: 
+          { seen{letter} <- unit, Hexagonal.Axial.BBT.set!(cast.target, cast.letter, map) }
+      } default {seen, map}
     else
       result
+  
   result@snd
   
 // Gets the skill associated with a cast
