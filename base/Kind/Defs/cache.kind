@@ -13,12 +13,12 @@ Kind.Defs.cache.go(kvs: List(Pair(String,Kind.Def))): IO(Unit)
       case defn.stat {
         done: IO {
           get time = IO.get_file_mtime(defn.file)
-          IO.set_file(String.to_lower(".cache/" | name | ".term"), Kind.Core.show(defn.term))
-          IO.set_file(String.to_lower(".cache/" | name | ".type"), Kind.Core.show(defn.type))
-          IO.set_file(String.to_lower(".cache/" | name | ".isct"), Bool.show(defn.isct))
-          IO.set_file(String.to_lower(".cache/" | name | ".arit"), Nat.show(defn.arit))
-          IO.set_file(String.to_lower(".cache/" | name | ".file"), defn.file)
-          IO.set_file(String.to_lower(".cache/" | name | ".time"), time)
+          Kind.Synth.load.cached.set_file(name|".term", Kind.Core.show(defn.term))
+          Kind.Synth.load.cached.set_file(name|".type", Kind.Core.show(defn.type))
+          Kind.Synth.load.cached.set_file(name|".isct", Bool.show(defn.isct))
+          Kind.Synth.load.cached.set_file(name|".arit", Nat.show(defn.arit))
+          Kind.Synth.load.cached.set_file(name|".file", defn.file)
+          Kind.Synth.load.cached.set_file(name|".time", time)
           Kind.Defs.cache.go(kvs.tail)
         }
       } default IO {
