@@ -146,4 +146,28 @@ App.KL.Game.Cast.estimate_position(
   delay: U64
   game: App.KL.Game
 ): Maybe<Hexagonal.Axial>
-  ?c
+  let casts = App.KL.Game.Cast.sort(game)
+  let casts = List.filter!((x) String.eql(x@player, player), casts)
+  let game  = App.KL.Game.Cast.estimate_position.go(casts, delay, game)
+  App.KL.Game.Board.find_player_coord(player, game@board)
+
+App.KL.Game.Cast.estimate_position.go(
+  casts: List<App.KL.Game.Cast>
+  max_delay: U64
+  game: App.KL.Game
+): App.KL.Game
+  Maybe {
+    get cast = List.head!(casts)
+    get skill = App.KL.Game.Cast.get_skill(cast, game)
+    let cast_delay = skill@delay
+    if cast_delay <? max_delay then Maybe {
+      let result = App.KL.Game.Cast.apply(cast, game)
+      let game = case result {
+        failure: game
+        success: result.game
+      }
+      return App.KL.Game.Cast.estimate_position.go(List.tail!(casts), max_delay, game)
+    } else Maybe {
+      return game
+    }
+  } <> game
