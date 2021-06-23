@@ -7,7 +7,7 @@ App.KL.Game.Effect.hp.change_at(
     get target = App.KL.Game.Effect.coord.get_target
     let res = App.KL.Game.Board.Creature.change_hp(change, pos, board)
     let dhp = res@fst
-    let map = res@snd
+    let board = res@snd
     let indicators = Hexagonal.Axial.BBT.new!
     App.KL.Game.Effect.board.set(board)
     if I32.gtn(dhp, +0#32) then

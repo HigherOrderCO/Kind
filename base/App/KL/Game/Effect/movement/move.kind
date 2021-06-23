@@ -11,9 +11,7 @@ App.KL.Game.Effect.movement.move: App.KL.Game.Effect<Unit>
     without target_tile:
       App.KL.Game.Effect { return unit }
     without target_creature:
-      let board = App.KL.Game.Board.Creature.del(center, board)
-      let board = App.KL.Game.Board.Creature.set(target, center_creature, board)
-      App.KL.Game.Effect.board.set(board)
+      App.KL.Game.Effect.board.creature.move(center, target)
     open target_creature
     open target_creature.hero
     without target_creature.hero.on_stepped:
