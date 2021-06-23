@@ -29,7 +29,7 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
 App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
   let name = "Croni_Trap"
-  let draw = (player) App.KL.Game.Hero.Croni.Assets.croni1_d_1
+  let draw = (player) App.KL.Game.Hero.Croni.Assets.vbox_idle
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
   let max_hp = 10 :: I32
   let max_ap = 0 :: I32
