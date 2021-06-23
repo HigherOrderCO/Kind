@@ -35,14 +35,21 @@ App.KL.Game.Cast.picks_of(
   player: String
   casts: List<App.KL.Game.Cast>
 ): App.KL.Game.Picks
-  let map = Hexagonal.Axial.BBT.new!
-  for cast in casts with map:
+  let result = {{}, Hexagonal.Axial.BBT.new! } :: Pair<Map<Unit>, App.KL.Game.Picks>
+  for cast in casts with result:
     open cast
-    if player =? cast.player then 
-      Hexagonal.Axial.BBT.set!(cast.target, cast.letter, map)
+    let {seen, map} = result
+    if player =? cast.player then
+      let letter = Char.to_string(cast.letter)
+      case seen{letter} as got {
+        none:
+          {seen{letter} <- unit, Hexagonal.Axial.BBT.set!(cast.target, cast.letter, map)}
+        some:
+          {seen, map}
+      }
     else
-      map
-  map
+      result
+  result@snd
   
 // Gets the skill associated with a cast
 App.KL.Game.Cast.get_skill(
