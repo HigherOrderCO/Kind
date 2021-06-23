@@ -1,91 +1,92 @@
 // i'm studying compilers using "modern compiler implementation in ML" by Andrew Appel
 // translating to Kind as I go. i'm not too worried about following the book too closely.
-// for example i'll likely use `Parser` to parse programs instead of Lex and Yacc
+// for example i'll likely use kind's `Parser` to parse programs instead of Lex and Yacc.
+// but i'm using ML's naming conventions. it looks ugly but makes lookups easier.
 
-// straight-line programs
+// position on source code, to produce error messages
+User.rigille.Tiger.pos: Type
+  Pair<Nat, Nat>
 
-// statement
-type Stm {
-  CompoundStm(fst: Stm, snd: Stm)
-  AssignStm(id: String, exp: Exp)
-  PrintStm(exp_list: List<Exp>)
+User.rigille.Tiger.symbol: Type
+  String
+
+type User.rigille.Tiger.var {
+  SimpleVar(name: User.rigille.Tiger.symbol, pos: User.rigille.Tiger.pos)
+  FieldVar(var: User.rigille.Tiger.var, name: User.rigille.Tiger.symbol, pos: User.rigille.Tiger.pos)
+  SubscriptVar(var: User.rigille.Tiger.var, exp: User.rigille.Tiger.exp, pos: User.rigille.Tiger.pos)
 }
 
-// expression
-type Exp {
-  IdExp(id: String)
-  NumExp(num: Int) // #TODO include other numbers?
-  OpExp(op: Binop, fst: Exp, snd: Exp)
-  EseqExp(stm: Stm, exp: Exp)
+type User.rigille.Tiger.record_fields {
+  new(
+    name: User.rigille.Tiger.symbol
+    args: List<User.rigille.Tiger.exp>
+    pos: User.rigille.Tiger.pos
+  )
+}
+type User.rigille.Tiger.exp {
+  NilExp
+  VarExp(var: User.rigille.Tiger.var)
+  IntExp(val: Int)
+  StringExp(val: String, pos: User.rigille.Tiger.pos)
+  CallExp(
+    func: User.rigille.Tiger.symbol
+    args: List<User.rigille.Tiger.exp>
+    pos: User.rigille.Tiger.pos
+  )
+  OpExp(
+    left: User.rigille.Tiger.exp
+    oper: User.rigille.Tiger.oper
+    right: User.rigille.Tiger.exp
+    pos: User.rigille.Tiger.pos
+  )
+  RecordExp(
+    fields: List<User.rigille.Tiger.record_fields>
+    typ: User.rigille.Tiger.symbol
+    pos: User.rigille.Tiger.pos
+  )
+  SeqExp(
+    val: List<User.rigille.Tiger.exp>
+  )
+  AssignExp(
+    var: User.rigille.Tiger.var
+    exp: User.rigille.Tiger.exp
+    pos: User.rigille.Tiger.pos
+  )
+  IfExp(
+    test: User.rigille.Tiger.exp
+    then: User.rigille.Tiger.exp
+    else: Maybe<User.rigille.Tiger.exp>
+  )
+  WhileExp(
+    test: User.rigille.Tiger.exp
+    body: User.rigille.Tiger.exp
+    pos: User.rigille.Tiger.pos
+  )
+  ForExp(
+    var: User.rigille.Tiger.symbol
+    escape: Bool
+    lo: User.rigille.Tiger.exp
+    hi: User.rigille.Tiger.exp
+    body: User.rigille.Tiger.exp
+    pos: User.rigille.Tiger.pos
+  )
+  BreakExp(
+    pos: User.rigille.Tiger.pos
+  )
+  LetExp(
+    decs: List<User.rigille.Tiger.dec>
+    body: User.rigille.Tiger.exp
+    pos: User.rigille.Tiger.pos
+  )
+  ArrayExp(
+    typ: User.rigille.Tiger.symbol
+    size: User.rigille.Tiger.exp
+    pos: User.rigille.Tiger.pos
+  )
 }
 
-type ExpList {
-  PairExpList(head: Exp, tail: ExpList)
-  LastExpList(head: Exp)
+type User.rigille.Tiger.oper {
 }
 
-type Binop {
-  plus
-  minus
-  times
-  div
+type User.rigille.Tiger.dec {
 }
-
-maxargs(stm: Stm): Nat
-  case stm {
-    CompoundStm: Nat.max(maxargs(stm.fst), maxargs(stm.snd))
-    AssignStm: 0
-    PrintStm: List.length!(stm.exp_list)
-  }
-
-interpStm(stm: Stm, table: List<Pair<String, Int>>): List<Pair<String, Int>>
-  case stm {
-    CompoundStm:
-      let new_table = interpStm(stm.fst, table)
-      interpStm(stm.snd, new_table)
-    AssignStm:
-      let {i, new_table} = interpExp(stm.exp, table)
-      {stm.id, i} & new_table
-    PrintStm:
-      for exp in stm.exp_list with table:
-        let {i, new_table} = interpExp(exp, table)
-        log(Int.show(i))
-        new_table
-      table
-  }
-
-lookup(id: String, table: List<Pair<String, Int>>): Int
-  case table {
-    nil:
-      0 :: Int
-    cons:
-      let {table_id, val} = table.head
-      if id =? table_id then
-        val
-      else
-        lookup(id, table.tail)
-  }
-
-interpExp(exp: Exp, table: List<Pair<String, Int>>): Pair<Int, List<Pair<String, Int>>>
-  case exp {
-    IdExp:
-      {lookup(exp.id, table), table}
-    NumExp:
-      {exp.num, table}
-    OpExp:
-      let {fst_val, table} = interpExp(exp.fst, table)
-      let {snd_val, table} = interpExp(exp.snd, table)
-      case exp.op {
-        plus:
-          {fst_val + snd_val, table}
-        minus:
-          {fst_val - snd_val, table}
-        times:
-          {fst_val * snd_val, table}
-        div:
-          {fst_val / snd_val, table}
-      }
-    EseqExp:
-      let table = interpStm(exp.stm, table)
-      interpExp(exp.exp, table)
-  }
