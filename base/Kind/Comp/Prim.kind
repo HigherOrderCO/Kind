@@ -5,7 +5,7 @@ type Kind.Comp.Prim {
   bits,
   unit,
   nat,
-  u8,
+  //u8,
   u16,
   u32,
   //u64,
