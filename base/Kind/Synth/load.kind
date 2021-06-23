@@ -1,5 +1,5 @@
 Kind.Synth.load.cached.name(name: Kind.Name): String
-  ".cache/" | String.hex.encode(name)
+  ".cache/" | Bits.hex.encode(Kind.Name.to_bits(name))
 
 Kind.Synth.load.cached.get_file(name: Kind.Name): IO<String>
   IO.get_file(Kind.Synth.load.cached.name(name))
