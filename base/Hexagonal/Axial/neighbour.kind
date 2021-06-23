@@ -2,5 +2,15 @@ Hexagonal.Axial.neighbour(
   coord: Hexagonal.Axial
 ): List<Hexagonal.Axial>
 
-  cubic = Hexagonal.Axial.to_cubic(coord)
-  List.map!!(Hexagonal.Cubic.to_axial, Hexagonal.Cubic.neighbors(cubic))
+  i = coord@i
+  j = coord@j
+
+  right       = Hexagonal.Axial.new(i + 1, j    )
+  top_right   = Hexagonal.Axial.new(i + 1, j - 1)
+  top_left    = Hexagonal.Axial.new(i    , j - 1)
+  left        = Hexagonal.Axial.new(i - 1, j    )
+  bottom_left = Hexagonal.Axial.new(i - 1, j + 1)
+  bottom_right= Hexagonal.Axial.new(i    , j + 1)
+
+
+[right, top_right, top_left, left, bottom_left, bottom_right]

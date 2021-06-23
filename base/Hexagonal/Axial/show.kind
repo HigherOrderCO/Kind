@@ -3,4 +3,4 @@ Hexagonal.Axial.show(
   coord: Hexagonal.Axial
 ): String
 
-  Stringifier.run!(Hexagonal.Axial.stringifier, coord)
+  " {i: "|I32.show(coord@i) | " : " | " j: " | I32.show(coord@j) | " } "

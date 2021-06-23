@@ -3,4 +3,4 @@ Hexagonal.Cubic.show(
   coord: Hexagonal.Cubic
 ): String
 
-  Stringifier.run!(Hexagonal.Cubic.stringifier, coord)
+  " {x: "|I32.show(coord@x) | " : " | " y: " | I32.show(coord@y)   | " : " | " z: " | I32.show(coord@z) |" } "
