@@ -1,20 +1,6 @@
 App.KL.Game.Effect.movement.move: App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
-    get board = App.KL.Game.Effect.board.get
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
-    let center_creature = App.KL.Game.Board.Creature.get(center, board)
-    let target_creature = App.KL.Game.Board.Creature.get(target, board)
-    let target_tile = App.KL.Game.Board.get(center, board)
-    without center_creature:
-      App.KL.Game.Effect { return unit }
-    without target_tile:
-      App.KL.Game.Effect { return unit }
-    without target_creature:
-      App.KL.Game.Effect.board.creature.move(center, target)
-    open target_creature
-    open target_creature.hero
-    without target_creature.hero.on_stepped:
-      App.KL.Game.Effect { return unit }
-    target_creature.hero.on_stepped
+    App.KL.Game.Effect.movement.move_to(center, target)
   }
