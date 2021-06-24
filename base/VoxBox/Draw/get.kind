@@ -1,0 +1,2 @@
+VoxBox.Draw.get<A : Type>(v : VoxBox.Draw<A>) : VoxBox.Draw(VoxBox)
+  (paint) {paint@img, paint}
