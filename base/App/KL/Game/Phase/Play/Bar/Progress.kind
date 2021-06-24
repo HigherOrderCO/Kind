@@ -1,0 +1,3 @@
+type App.KL.Game.Phase.Play.Bar.Progress {
+  new(max : U32, loss : U32, defense : U32, col_ful : Col32, col_defense : Col32, col_empty : Col32)
+}
