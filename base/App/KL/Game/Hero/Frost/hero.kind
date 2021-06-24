@@ -13,7 +13,7 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
-    "Q": App.KL.Game.Skill.new("Bite", 300, 16, 1, App.KL.Game.Effect.heroes.area_damage(1, 0, 3))
+    "Q": App.KL.Game.Skill.new("Ravenous Bite", 300, 16, 1, App.KL.Game.Effect.common.dmg.semi_circle(3))
     "W": App.KL.Game.Skill.new("Summon Wall", 300, 16, 5, App.KL.Game.Hero.Frost.Skills.summon_wall)
     "E": App.KL.Game.Skill.new("Taunt", 800, 16, 2, App.KL.Game.Hero.Frost.Skills.taunt(2))
   }

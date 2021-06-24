@@ -1,6 +1,9 @@
 App.KL.Game.Effect.heroes.empathy(
   dmg: I32
-  range: I32
+  id: String
+  duration: I32
+  amount: I32
+
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect { 
@@ -10,6 +13,6 @@ App.KL.Game.Effect.heroes.empathy(
     let board_size = App.KL.Constants.board_size
     let area = Hexagonal.Axial.neighbour(center)
     App.KL.Game.Effect.hp.damage_at(dmg, center)
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.hp.heal_at(dmg*2), area)
+    App.KL.Game.Effect.common.shield.ring(id, duration, amount)
     return unit
   }

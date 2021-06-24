@@ -1,0 +1,12 @@
+App.KL.Game.Effect.common.shield.single(
+  range: I32
+  id: String
+  duration: I32
+  amount: I32
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect { 
+    get mouse = App.KL.Game.Effect.coord.get_target
+    App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.Status.shield.add(id, duration, amount), mouse)
+    return unit
+  }

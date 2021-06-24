@@ -2,8 +2,8 @@ App.KL.Game.Effect.Status.shield.change_at(
   id: String
   duration: I32
   amount: I32
-  pos: Hexagonal.Axial
-): App.KL.Game.Effect<I32>
+): App.KL.Game.Effect.At<I32>
+  (pos)
 
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
@@ -12,7 +12,7 @@ App.KL.Game.Effect.Status.shield.change_at(
       none:
         App.KL.Game.Effect { return +0#32 }
       some:
-        let shielded = App.KL.Game.Board.Creature.add_shield(creature.value, id, duration, amount)
+        let shielded = App.KL.Game.Board.Creature.add_shield(creature.value, id, I32.add(I32.mul(duration, 16), 1), amount)
         let new_board = App.KL.Game.Board.Creature.set(pos, shielded, board)
         let total_shield = App.KL.Game.Board.Creature.total_shield(shielded)
         App.KL.Game.Effect { 

@@ -4,4 +4,9 @@ App.KL.Game.Effect.coord.clamp(
   target: Hexagonal.Axial
 ): Hexagonal.Axial
 
-  Hexagonal.Axial.lerp(I32.to_f64(range), center, target)
+  f = I32.to_f64
+  distance = Hexagonal.Axial.distance(center, target)
+  distance_64 = f(distance)
+  range_64 = f(range)
+
+  Hexagonal.Axial.lerp(range_64 / distance_64, center, target)
