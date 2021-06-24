@@ -132,6 +132,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       //let cx = cx - aux //U32
       let img = VoxBox.Draw.image(cx, cy, 0u, drawing, img)
       let img = App.KL.Game.Phase.Play.draw.hp(cx + 128 - 4, cy + 128 - 24, creature.value, img)
+      let img = App.KL.Game.Phase.Play.draw.shield(cx + 128 - 4, cy + 128 - 32, creature.value, img)
       img
   }
 
@@ -175,3 +176,15 @@ App.KL.Game.Phase.Play.draw.hp(
   let hp = I32.to_int(creature@hp)
   let hp = Nat.show(Int.to_nat(hp))
   VoxBox.Draw.text(hp, PixelFont.small_black, Pos32.new(cx,cy,0), img)
+
+
+App.KL.Game.Phase.Play.draw.shield(
+  cx: U32
+  cy: U32
+  creature: App.KL.Game.Creature
+  img: VoxBox
+): VoxBox
+  let shield = App.KL.Game.Board.Creature.total_shield(creature)
+  let shield = I32.to_int(shield)
+  let shield = Nat.show(Int.to_nat(shield))
+  VoxBox.Draw.text(shield, PixelFont.small_black, Pos32.new(cx, cy, 0), img)

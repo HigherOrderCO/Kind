@@ -3,4 +3,4 @@ App.KL.Game.Effect.hp.heal_at(
   pos: Hexagonal.Axial
 ): App.KL.Game.Effect<I32>
 
-  App.KL.Game.Effect.hp.change_at(I32.neg(heal), pos)
+  App.KL.Game.Effect.hp.change_at(heal, pos)
