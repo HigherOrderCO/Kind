@@ -13,8 +13,8 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
-    "Q": App.KL.Game.Skill.new("Haste", 700, 16, 2, App.KL.Game.Effect.heroes.gust(3, 1))
-    "W": App.KL.Game.Skill.new("Shield", 600, 16, 0, App.KL.Game.Effect {
+    "Q": App.KL.Game.Skill.new("Haste", 200, 16, 2, App.KL.Game.Effect.heroes.haste(2, 2))
+    "W": App.KL.Game.Skill.new("Shield", 520, 16, 0, App.KL.Game.Effect {
       get target = App.KL.Game.Effect.board.creature.target
       get caster = App.KL.Game.Effect.board.creature.caster
       get center = App.KL.Game.Effect.coord.get_center
@@ -27,7 +27,7 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
         return unit
       }
     })
-    "E": App.KL.Game.Skill.new("Slash", 800, 16, 0, App.KL.Game.Effect.common.dmg.single(1, 12))
+    "E": App.KL.Game.Skill.new("Slash", 800, 16, 0, App.KL.Game.Effect.common.dmg.single(1, 20))
   }
 
   let on_stepped = none
