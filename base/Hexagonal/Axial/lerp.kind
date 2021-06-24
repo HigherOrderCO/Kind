@@ -5,4 +5,5 @@ Hexagonal.Axial.lerp(x: F64, origin: Hexagonal.Axial, goal: Hexagonal.Axial): He
   let b_j = I32.to_f64(goal@j)
   let i   = F64.lerp(a_i, b_i, x)
   let j   = F64.lerp(a_j, b_j, x)
-  Hexagonal.Axial.new(F64.to_i32(i), F64.to_i32(j))
+  
+  Hexagonal.Axial.round(i, j)

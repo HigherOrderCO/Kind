@@ -9,4 +9,9 @@ App.KL.Game.Effect.indicators.get_indicators(
   open skill
   //Returning each effect's List of affected coords
   result = skill.effect(hero_pos, mouse_coord, map)
-  result@indicators
+  case result {
+    new: 
+      result.indicators
+    err: 
+      Hexagonal.Axial.BBT.new<App.KL.Game.Indicator>
+  }
