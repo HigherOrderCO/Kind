@@ -1,0 +1,4 @@
+Hexagonal.Axial.add(a: Hexagonal.Axial, b: Hexagonal.Axial): Hexagonal.Axial
+open a
+open b
+  Hexagonal.Axial.new(b.i + a.i, b.j + a.j)
