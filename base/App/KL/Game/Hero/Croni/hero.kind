@@ -26,8 +26,12 @@ App.KL.Game.Hero.Croni.Skills.trap: App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(5)
     get target = App.KL.Game.Effect.coord.get_target
-    let trap = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Croni.hero.trap, App.KL.Game.Team.neutral, [], 0, 0)
-    App.KL.Game.Effect.board.summon(target, trap)
+    get board = App.KL.Game.Effect.board.get
+    if App.KL.Game.Board.is_occupied(target, board) then
+      App.KL.Game.Effect.pass
+    else
+      let trap = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Croni.hero.trap, App.KL.Game.Team.neutral, [], 0, 0)
+      App.KL.Game.Effect.board.summon(target, trap)
   }
 
 App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
