@@ -158,8 +158,8 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       //let cy = cy - (aux * 2) //U32
       //let cx = cx - aux //U32
       let img = VoxBox.Draw.image(cx, cy, 0u, drawing, img)
-   //   let img = App.KL.Game.Phase.Play.draw.hp(cx + 128 - 4, cy + 128 - 24, creature.value, img)
-   //   let img = App.KL.Game.Board.Creature.show_hp(cx + 128 - 16, cy + 128 - 28, creature.value, img)
+  //    let img = App.KL.Game.Phase.Play.draw.hp(cx + 128 - 4, cy + 128 - 24, creature.value, img)
+      let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 128 - 16, cy + 128 - 28, creature.value, img)
     //  let img = App.KL.Game.Phase.Play.draw.shield(cx + 128 - 4, cy + 128 - 32, creature.value, img)
       img
   }
