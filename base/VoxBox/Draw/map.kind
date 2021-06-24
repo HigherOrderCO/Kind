@@ -1,0 +1,2 @@
+VoxBox.Draw.map(f : VoxBox -> VoxBox) : VoxBox.Draw<Unit>
+  (paint) {Unit.new, paint@img <- f(paint@img)}

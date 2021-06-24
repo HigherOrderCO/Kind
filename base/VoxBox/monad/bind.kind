@@ -1,0 +1,8 @@
+VoxBox.monad.bind<A : Type, 
+                  B : Type>
+                  (m : VoxBox.Draw<A>,
+                  f : A -> VoxBox.Draw<B>
+                  ) : VoxBox.Draw<B>
+  (paint) 
+    let {a, paint2} = m(paint)
+    f(a, paint2)
