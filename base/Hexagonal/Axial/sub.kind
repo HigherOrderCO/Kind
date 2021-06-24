@@ -1,0 +1,4 @@
+Hexagonal.Axial.sub(a: Hexagonal.Axial, b: Hexagonal.Axial): Hexagonal.Axial
+open a
+open b
+  Hexagonal.Axial.new(a.i - b.j, a.i - b.j)
