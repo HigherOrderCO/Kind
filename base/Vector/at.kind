@@ -1,0 +1,9 @@
+Vector.at<A: Type>(len: Nat, v: Vector<A>(len), idx: Fin(len)): A
+  case len with v idx {
+    zero:
+      case idx {}
+    succ: case v idx {
+        cons zero: v.head
+        cons succ: Vector.at<A>(len.pred, v.tail, idx.pred)
+      }
+  }!

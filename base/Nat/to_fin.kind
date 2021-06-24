@@ -1,9 +1,12 @@
-Nat.to_fin(n: Nat)<sobra: Nat>: Fin<Nat.succ(Nat.add(n, sobra))>
+Nat.to_fin(n: Nat)<slack: Nat>: Fin<Nat.succ(Nat.add(n, slack))>
   case n {
     zero:
-      Fin.zero<sobra>
+      Fin.zero<slack>
     succ: 
-      let a = Nat.to_fin(n.pred)<sobra>
+      let a = Nat.to_fin(n.pred)<slack>
       let b = Fin.succ!<a>
       b
   }!
+
+Nat.to_fin.tight(n: Nat): Fin<Nat.succ(n)>
+  Nat.to_fin(n, 0) :: rewrite X in Fin(Nat.succ(X)) with Nat.add.zero_right(n)

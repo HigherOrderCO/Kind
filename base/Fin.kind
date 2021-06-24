@@ -1,4 +1,17 @@
-type Fin ~ <lim: Nat> {
-  zero<n: Nat>               ~ (lim = Nat.succ(n))
-  succ<n: Nat>(pred: Fin<n>) ~ (lim = Nat.succ(n))
-}
+Fin(lim: Nat): Type
+  case lim {
+    zero:
+      Fin.self<P: (:Fin(Nat.zero)) Type>
+      P(Fin.self)
+    succ:
+      Fin.self<P: (:Fin(Nat.succ(lim.pred))) Type>
+      (zero: P(Fin.zero(lim.pred)))
+      (succ: (pred: Fin(lim.pred)) P(Fin.succ(lim.pred, pred)))
+      P(Fin.self)
+  }
+
+Fin.zero(lim: Nat): Fin(Nat.succ(lim))
+  (P, z, s) z
+
+Fin.succ(lim: Nat, pred: Fin(lim)): Fin(Nat.succ(lim))
+  (P, z, s) s(pred)
