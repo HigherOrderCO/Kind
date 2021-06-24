@@ -13,7 +13,7 @@ type App.KL.Game.State.Local {
 }
 
 App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Local
-  let preview = App.KL.Game.Cast.Preview.new(Hexagonal.Axial.BBT.new!, Hexagonal.Axial.BBT.new!)
+  let preview = App.KL.Game.Cast.Preview.new(none, Hexagonal.Axial.BBT.new!)
   let mouse = {0,0}
   App.KL.Game.State.Local.new(user, room, preview, mouse)
 

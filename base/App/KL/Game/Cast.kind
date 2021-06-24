@@ -8,7 +8,7 @@ type App.KL.Game.Cast {
 
 type App.KL.Game.Cast.Preview {
   new(
-    areas: App.KL.Game.Indicators
+    skill: Maybe<App.KL.Game.Skill>
     picks: App.KL.Game.Picks
   )
 }

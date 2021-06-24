@@ -25,9 +25,9 @@ App.KL.Game.Phase.Play.when(
             get casted_skill = App.KL.Game.Skill.get(local@user, event.code, game)
             get caster_coord = App.KL.Game.Cast.estimate_position(local@user, casted_skill@delay, game)
             let casted_range = Nat.to_i32(U64.to_nat(casted_skill@range))
-            let indicators = List.mapped!(Hexagonal.Axial.range(caster_coord, casted_range))!((coord) {coord, App.KL.Game.Indicator.blue})
+            //let indicators = List.mapped!(Hexagonal.Axial.range(caster_coord, casted_range))!((coord) {coord, App.KL.Game.Indicator.blue})
             let preview = local@preview
-            let preview = preview@areas <- Hexagonal.Axial.BBT.from_list!(indicators)
+            let preview = preview@skill  <- some(casted_skill)
             return local@preview <- preview
           } <> local))
         execution: App.pass!
@@ -40,7 +40,7 @@ App.KL.Game.Phase.Play.when(
             //log("Key up " | Char.to_string(event.code))
             let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
             let preview = local@preview
-            let preview = preview@areas <- Hexagonal.Axial.BBT.from_list!([])
+            let preview = preview@skill <- none
             App.new_post!(local@room, App.KL.Game.Phase.Play.Event.cast.serial(event.code, coord))
             App.set_local!(App.KL.State.Local.game(local@preview <- preview))
           }
