@@ -336,37 +336,37 @@ ECDSA.Jacobian.add(p: ECDSA.Jacobian, q: ECDSA.Jacobian): ECDSA.Jacobian
     }
   }
 
-// FIXME: update Int usage in this fuction 
 // Non-constant-time multiplication. Uses double-and-add algorithm.
 // It's faster, but should only be used when you don't care about
 // an exposed private key e.g. sig verification.
-// ECDSA.Jacobian.mul_unsafe(d: ECDSA.Jacobian, scalar: Nat): ECDSA.Jacobian
-//   let n = Nat.mod(scalar, ECDSA.CURVE.n)
-//   let {k1, k2} = ECDSA.split_scalar(n)
-//   get k1neg k1 = Int.to_nat(k1)
-//   get k2neg k2 = Int.to_nat(k2)
-//   get k1p k2p = ECDSA.Jacobian.mul_unsafe_aux(d, ECDSA.Jacobian.0, ECDSA.Jacobian.0, k1, k2)
-//   let k1p = Bool.if!(k1neg, ECDSA.Jacobian.negate(k1p), k1p)
-//   let k2p = Bool.if!(k2neg, ECDSA.Jacobian.negate(k2p), k2p)
-//   let k2p = get k2p.x k2p.y k2p.z = k2p
-//     ECDSA.Jacobian.new(ECDSA.mod(Nat.mul(k2p.x, ECDSA.CURVE.beta)), k2p.y, k2p.z)
-//   ECDSA.Jacobian.add(k1p, k2p)
+ECDSA.Jacobian.mul_unsafe(d: ECDSA.Jacobian, scalar: Nat): ECDSA.Jacobian
+  let n = Nat.mod(scalar, ECDSA.CURVE.n)
+  let {k1, k2} = ECDSA.split_scalar(n)
+  let {k1neg, k1} = Int.to_nat_signed(k1)
+  let {k2neg, k2} = Int.to_nat_signed(k2)
+  let {k1p, k2p} = ECDSA.Jacobian.mul_unsafe_aux(d, ECDSA.Jacobian.0, ECDSA.Jacobian.0, k1, k2)
+  let k1p = Bool.if!(k1neg, ECDSA.Jacobian.negate(k1p), k1p)
+  let k2p = Bool.if!(k2neg, ECDSA.Jacobian.negate(k2p), k2p)
+  let k2p = ECDSA.Jacobian.new(ECDSA.mod(Nat.mul(k2p@x, ECDSA.CURVE.beta)), k2p@y, k2p@z)
+  ECDSA.Jacobian.add(k1p, k2p)
 
-// ECDSA.Jacobian.mul_unsafe_aux(
-//   d: ECDSA.Jacobian,
-//   k1p: ECDSA.Jacobian,
-//   k2p: ECDSA.Jacobian,
-//   k1: Nat,
-//   k2: Nat)
-// : Pair(ECDSA.Jacobian, ECDSA.Jacobian)
-//   case Bool.or(Nat.gtn(k1, 0), Nat.gtn(k2, 0)):
-//   | let k1p = Bool.if<>(Nat.odd(k1), ECDSA.Jacobian.add(k1p, d), k1p)
-//     let k2p = Bool.if<>(Nat.odd(k2), ECDSA.Jacobian.add(k2p, d), k2p)
-//     let d = ECDSA.Jacobian.double(d)
-//     let k1 = Nat.div(k1, 2)
-//     let k2 = Nat.div(k2, 2)
-//     ECDSA.Jacobian.mul_unsafe_aux(d, k1p, k2p, k1, k2);
-//   | Pair.new<ECDSA.Jacobian, ECDSA.Jacobian>(k1p, k2p);
+ECDSA.Jacobian.mul_unsafe_aux(
+  d: ECDSA.Jacobian,
+  k1p: ECDSA.Jacobian,
+  k2p: ECDSA.Jacobian,
+  k1: Nat,
+  k2: Nat)
+: Pair(ECDSA.Jacobian, ECDSA.Jacobian)
+  case Bool.or(Nat.gtn(k1, 0), Nat.gtn(k2, 0)) {
+    true: 
+      let k1p = Bool.if!(Nat.odd(k1), ECDSA.Jacobian.add(k1p, d), k1p)
+      let k2p = Bool.if!(Nat.odd(k2), ECDSA.Jacobian.add(k2p, d), k2p)
+      let d = ECDSA.Jacobian.double(d)
+      let k1 = Nat.div(k1, 2)
+      let k2 = Nat.div(k2, 2)
+      ECDSA.Jacobian.mul_unsafe_aux(d, k1p, k2p, k1, k2)
+    false: Pair.new<ECDSA.Jacobian, ECDSA.Jacobian>(k1p, k2p)
+  }
 
 ECDSA.window(n: Nat): Nat
   case ECDSA.USE_ENDOMORPHISM {
@@ -435,22 +435,19 @@ ECDSA.Jacobian.precompute_window.aux(
 //   maxNumber: Nat)
 // : Pair(ECDSA.Jacobian, ECDSA.Jacobian)
 //   case Nat.ltn(window, windows) {
-//   true: let offset = Nat.mul(window, windowSize)
-
+//   true: 
+//     let offset = Nat.mul(window, windowSize)
 //     // Extract W bits.
 //     let wbits = Nat.bitwise_and(n, mask)
-
 //     // Shift number by W bits.
 //     let n = Nat.div(n, maxNumber)
-
 //     // If the bits are bigger than max size, we'll split those.
 //     // +224 => 256 - 32
 //     let {n, wbits} =
 //       case Nat.gtn(wbits, windowSize) {
 //         true : {Nat.succ(n), Int.new(wbits, maxNumber)}
-//         false: {n, Int.fromNat(wbits)}
+//         false: {n, Int.from_nat(wbits)}
 //       }
-
 //     // Check if we're onto Zero point.
 //     // Add random point inside current window to f.
 //     case Int.eql(wbits, Int.0) {
@@ -460,7 +457,7 @@ ECDSA.Jacobian.precompute_window.aux(
 //         let window = Nat.succ(window)
 //         ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, window, windows, windowSize, mask, maxNumber)
 //       false: // List.at should not return none. TODO: Use vector with known size instead of list for precomputes
-//         get neg wbits = Int.to_nat(wbits)
+//         let {neg, wbits} = Int.to_nat_signed(wbits)
 //         let cached = Maybe.extract!(List.at!(precomputes, Nat.pred(Nat.add(offset, wbits))), ECDSA.Jacobian.0)
 //         let cached = Bool.if!(neg, ECDSA.Jacobian.negate(cached), cached)
 //         let p = ECDSA.Jacobian.add(p, cached)
