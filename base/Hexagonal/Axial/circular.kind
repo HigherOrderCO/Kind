@@ -1,5 +1,5 @@
 // Returns a list of coordinates within a given range minus the central coord
-Hexagonal.Axial.range(
+Hexagonal.Axial.circular(
   coord: Hexagonal.Axial
   distance: I32
 ): List<Hexagonal.Axial>

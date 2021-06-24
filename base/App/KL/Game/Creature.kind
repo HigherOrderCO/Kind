@@ -85,7 +85,7 @@ App.KL.Game.Creature.Status.tick.aux(
       }
       let tail = App.KL.Game.Creature.Status.tick.aux(status.tail)
       case head {
-        stun: if I32.gtn(head.duration,0) then head & tail else tail
-        shield: if I32.gtn(head.duration,0) then head & tail else tail
+        stun: if I32.gtn(head.duration, 0) then head & tail else tail
+        shield: if I32.gtn(head.duration, 0) then head & tail else tail
       }
   }

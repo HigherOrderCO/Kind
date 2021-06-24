@@ -1,0 +1,6 @@
+App.KL.Game.Effect.area.semi_circle(
+  origin: Hexagonal.Axial
+  goal: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  Hexagonal.Axial.semi_circle(origin, goal)

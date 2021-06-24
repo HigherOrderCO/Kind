@@ -1,0 +1,6 @@
+App.KL.Game.Effect.area.line(
+  origin: Hexagonal.Axial
+  goal: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  Hexagonal.Axial.line(origin, goal)
