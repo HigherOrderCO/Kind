@@ -23,7 +23,8 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
 
-// Skills
+
+// SKILLS
 
 App.KL.Game.Hero.Cyclope.hero.Skills.empathy(dmg_on_self: I32, duration: I32, shield_value: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
@@ -32,8 +33,10 @@ App.KL.Game.Hero.Cyclope.hero.Skills.empathy(dmg_on_self: I32, duration: I32, sh
     get target = App.KL.Game.Effect.coord.get_target
     let board_size = App.KL.Constants.board_size
     let area = Hexagonal.Axial.neighbour(center)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.hp.damage_at(dmg_on_self, center)
-    App.KL.Game.Effect.common.shield.ring("Empathy", duration, shield_value)
+    App.KL.Game.Effect.common.shield.ring(1, "Empathy", duration, shield_value)
     return unit
   }
 
@@ -49,24 +52,19 @@ App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(radius: I32 dmg: I32): App.KL.G
 
 App.KL.Game.Hero.Cyclope.hero.Skills.revenge(range: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
-    App.KL.Game.Effect.limit_range(range)
-    get map = App.KL.Game.Effect.board.get
-    get center = App.KL.Game.Effect.coord.get_center
-    get target = App.KL.Game.Effect.coord.get_target
-    let creature = App.KL.Game.Board.Creature.get(center, map)
-    let true_dmg =
-    case creature { 
-      none:
-        +0#32
-      some:
-        open creature.value as creature
-        open creature.hero as hero
-        missing_hp = hero.max_hp - creature.hp
-        true_dmg = missing_hp / 4
-        true_dmg
-    }
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.hp.damage_at(true_dmg, target)
-    return unit
+      App.KL.Game.Effect.limit_range(range)
+      get map = App.KL.Game.Effect.board.get
+      get center = App.KL.Game.Effect.coord.get_center
+      get target = App.KL.Game.Effect.coord.get_target
+      let creature = App.KL.Game.Board.Creature.get(center, map)
+      without creature: App.KL.Game.Effect.pass
+        App.KL.Game.Effect { 
+          let hero = creature@hero
+          let missing_hp = hero@max_hp - creature@hp
+          let dmg = missing_hp / 4
+          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+          App.KL.Game.Effect.common.dmg.single(range, dmg)
+          return unit
+        }
   }

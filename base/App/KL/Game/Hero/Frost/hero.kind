@@ -22,6 +22,9 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
 
+
+// SKILLS
+
 App.KL.Game.Hero.Frost.Skills.summon_wall: App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(5)

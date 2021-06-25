@@ -15,14 +15,15 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
     "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
     "Q": App.KL.Game.Skill.new("Haste", 200, 16, 2, App.KL.Game.Hero.Octoking.hero.Skills.haste(2, 2))
     "W": App.KL.Game.Skill.new("Shield", 520, 16, 0, App.KL.Game.Hero.Octoking.hero.Skills.shield(3))
-    "E": App.KL.Game.Skill.new("Slash", 800, 16, 1, App.KL.Game.Effect.common.dmg.single(1, 20))
+    "E": App.KL.Game.Skill.new("Slash", 800, 16, 1, App.KL.Game.Hero.Octoking.hero.Skills.slash(1, 20))
   }
 
   let on_stepped = none
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
 
-//Skills
+
+// SKILLS
 
 App.KL.Game.Hero.Octoking.hero.Skills.haste(range: I32, dmg: I32): App.KL.Game.Effect<Unit>
 
@@ -58,4 +59,13 @@ App.KL.Game.Hero.Octoking.hero.Skills.shield(shield_value: I32): App.KL.Game.Eff
       App.KL.Game.Effect.Status.shield.add("Kenlua", 1, shield_value, center)
       return unit
     }
+  }
+
+App.KL.Game.Hero.Octoking.hero.Skills.slash(range: I32, dmg: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    get target  = App.KL.Game.Effect.coord.get_target
+    get center  = App.KL.Game.Effect.coord.get_center
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.common.dmg.single(range, dmg)
   }

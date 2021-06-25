@@ -3,11 +3,5 @@ App.KL.Game.Effect.common.dmg.single(
   dmg: I32
 ): App.KL.Game.Effect<Unit>
 
-  App.KL.Game.Effect { 
-    get center = App.KL.Game.Effect.coord.get_center
-    get target = App.KL.Game.Effect.coord.get_target
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.hp.damage_at(dmg, target)
-    return unit
-  } 
+  let eff = App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg))
+  App.KL.Game.Effect.common.single!(eff, range, dmg)

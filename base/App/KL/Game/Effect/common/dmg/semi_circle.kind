@@ -2,12 +2,5 @@ App.KL.Game.Effect.common.dmg.semi_circle(
   dmg: I32
 ): App.KL.Game.Effect<Unit>
 
-  App.KL.Game.Effect { 
-    get target = App.KL.Game.Effect.coord.get_target
-    get self = App.KL.Game.Effect.coord.get_center
-    let clamp = App.KL.Game.Effect.coord.clamp(1, self, target)
-    let semi_circle = App.KL.Game.Effect.area.semi_circle(self, clamp)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, semi_circle)
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.hp.damage_at(dmg), semi_circle)
-    return unit
-  }
+  let eff = App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg))
+  App.KL.Game.Effect.common.semi_circle!(eff, dmg)
