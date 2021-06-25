@@ -116,58 +116,25 @@ App.KL.Game.Phase.Play.draw.board(
 App.KL.Game.Phase.Play.Draw.get_indicators(
   skill: Maybe<App.KL.Game.Skill>, 
   target: Hexagonal.Axial,
-  user: String,
+  player: String,
   game: App.KL.Game
 ): App.KL.Game.Indicators
-  
+
   Maybe {
     get skill      = skill
-    get center     = App.KL.Game.Board.find_player_coord(user, game@board)
-    get est_pos    = App.KL.Game.Phase.Play.Draw.estimate_position(user, skill@delay, game)
+    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, player), game)
+    get center     = App.KL.Game.Board.find_player_coord(player, game@board)
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue
     let indicators = Hexagonal.Axial.BBT.new!
-    let haste = App.KL.Game.Creature.get_total_haste(creature)
-    //TODO: verify Player status in center to check how far the range should be shown.
-    let coords     = Hexagonal.Axial.range(est_pos, Nat.to_i32(U64.to_nat(skill@range)) + haste)
+    let haste      = App.KL.Game.Creature.get_total_haste(creature)
+    let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.BBT.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(est_pos, skill, target, game@board)
+    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, target, game@board)
     return Hexagonal.Axial.BBT.union!(indicators, areas)
   } <> Hexagonal.Axial.BBT.new<App.KL.Game.Indicator>
-
-  // Estimates a player's creature based on the current casts
-App.KL.Game.Phase.Play.Draw.estimate_position(
-  player: String
-  delay: U64
-  game: App.KL.Game
-): Maybe<Hexagonal.Axial>
-  let casts = App.KL.Game.Cast.sort(game)
-  let casts = List.filter!((x) String.eql(x@player, player), casts)
-  let game  = App.KL.Game.Phase.Play.Draw.estimate_position.go(casts, delay, game)
-  App.KL.Game.Board.find_player_coord(player, game@board)
-  
-App.KL.Game.Phase.Play.Draw.estimate_position.go(
-  casts: List<App.KL.Game.Cast>
-  max_delay: U64
-  game: App.KL.Game
-): App.KL.Game
-  Maybe {
-    get cast = List.head!(casts)
-    get skill = App.KL.Game.Cast.get_skill(cast, game)
-    let cast_delay = skill@delay
-    if cast_delay <? max_delay then Maybe {
-      let result = App.KL.Game.Cast.apply(cast, game)
-      let game = case result {
-        failure: game
-        success: result.game
-      }
-      return App.KL.Game.Phase.Play.Draw.estimate_position.go(List.tail!(casts), max_delay, game)
-    } else Maybe {
-      return game
-    }
-  } <> game
 
 // draw mouse indicator
 App.KL.Game.Phase.Play.draw.cursor(
