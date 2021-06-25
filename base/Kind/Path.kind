@@ -1,2 +1,108 @@
 Kind.Path: Type
+  Bits
+
+Kind.Path.Builder: Type
   Bits -> Bits
+
+Kind.Path.Maybe.Builder: Type
+  Maybe<Kind.Path.Builder>
+
+Kind.Path.patch_at.list<A: Type>(
+  path: Kind.Path
+  list: List<A>
+  cont: Kind.Path -> A -> A
+): List<A>
+  case path {
+    e: []
+    o: case list {
+      nil: []
+      cons: cont(path.pred, list.head) & list.tail
+    }
+    i: case list {
+      nil: []
+      cons: list.head & Kind.Path.patch_at.list!(path.pred, list.tail, cont)
+    }
+  }
+
+Kind.Path.patch_at.bitsmap<A: Type>(
+  path: Kind.Path
+  bmap: BitsMap<A>
+  cont: Kind.Path -> A -> A
+): BitsMap<A>
+  case path {
+    e: BitsMap.new!
+    o: case bmap {
+      new: BitsMap.new!
+      tie: case bmap.val {
+        none: BitsMap.tie!(none, bmap.lft, bmap.rgt)
+        some: BitsMap.tie!(some(cont(path.pred, bmap.val.value)), bmap.lft, bmap.rgt)
+      }
+    }
+    i: case path.pred {
+      e: BitsMap.new!
+      o: case bmap {
+        new: BitsMap.new!
+        tie: BitsMap.tie!(bmap.val, Kind.Path.patch_at.bitsmap<A>(path.pred.pred, bmap.lft, cont), bmap.rgt)
+      }
+      i: case bmap {
+        new: BitsMap.new!
+        tie: BitsMap.tie!(bmap.val, bmap.lft, Kind.Path.patch_at.bitsmap<A>(path.pred.pred, bmap.rgt, cont))
+      }
+    }
+  }
+
+Kind.Path.Builder.nat(n: Nat, b: Kind.Path.Builder): Kind.Path.Builder
+  case n {
+    zero: Kind.Path.Builder.o(b)
+    succ: Kind.Path.Builder.i(Kind.Path.Builder.nat(n.pred, b))
+  }
+
+Kind.Path.Builder.bits(bits: Bits, b: Kind.Path.Builder): Kind.Path.Builder
+  case bits {
+    e: Kind.Path.Builder.o(b)
+    o: Kind.Path.Builder.i(Kind.Path.Builder.o(Kind.Path.Builder.bits(bits.pred,b)))
+    i: Kind.Path.Builder.i(Kind.Path.Builder.i(Kind.Path.Builder.bits(bits.pred,b)))
+  }
+
+Kind.Path.Builder.name(name: Kind.Name, b: Kind.Path.Builder): Kind.Path.Builder
+  (x) Kind.Name.to_bits.go(name, b(x))
+
+Kind.Path.Builder.i(path: Kind.Path.Builder): Kind.Path.Builder
+  (x) path(Bits.i(x))
+
+Kind.Path.Builder.o(path: Kind.Path.Builder): Kind.Path.Builder
+  (x) path(Bits.o(x))
+
+Kind.Path.Builder.nil: Kind.Path.Builder
+  (x) x
+
+Kind.Path.Builder.to_bits(path: Kind.Path.Builder): Bits
+  path(Bits.e)
+
+Kind.Path.Maybe.Builder.bits(bits: Bits, b: Kind.Path.Maybe.Builder): Kind.Path.Maybe.Builder
+  case b {
+    none: none
+    some: some(Kind.Path.Builder.bits(bits, b.value))
+  }
+
+Kind.Path.Maybe.Builder.name(s: Kind.Name, b: Kind.Path.Maybe.Builder): Kind.Path.Maybe.Builder
+  case b {
+    none: none
+    some: some(Kind.Path.Builder.name(s, b.value))
+  }
+
+Kind.Path.Maybe.Builder.i(path: Kind.Path.Maybe.Builder): Kind.Path.Maybe.Builder
+  Maybe.mapped!(path)!(Kind.Path.Builder.i)
+
+Kind.Path.Maybe.Builder.o(path: Kind.Path.Maybe.Builder): Kind.Path.Maybe.Builder
+  Maybe.mapped!(path)!(Kind.Path.Builder.o)
+
+Kind.Path.Maybe.Builder.nil: Kind.Path.Maybe.Builder
+  Maybe.some!(Kind.Path.Builder.nil)
+
+Kind.Path.Maybe.Builder.to_bits(path: Kind.Path.Maybe.Builder): Bits
+  case path {
+    none: Bits.e,
+    some: path.value(Bits.e),
+  }
+

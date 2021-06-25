@@ -1,0 +1,3 @@
+Test: Nat
+  let x = {1,2} :: Pair<Nat,Nat>
+  x@fst

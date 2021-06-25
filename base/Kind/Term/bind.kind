@@ -1,4 +1,4 @@
-Kind.Term.bind(vars: Kind.Context, path: Kind.Path, term: Kind.Term): Kind.Term 
+Kind.Term.bind(vars: Kind.Context, path: Kind.Path.Builder, term: Kind.Term): Kind.Term 
   case term {
     ref: case Kind.Context.find(term.name, vars) as got {
       none: Kind.Term.ref(term.name),
@@ -11,12 +11,12 @@ Kind.Term.bind(vars: Kind.Context, path: Kind.Path, term: Kind.Term): Kind.Term
     typ: Kind.Term.typ,
     all: 
       let vlen = List.length!(vars);
-      def xtyp = Kind.Term.bind(vars, Kind.Path.o(path), term.xtyp);
+      def xtyp = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.xtyp);
       def body = (s,x) Kind.Term.bind(
         List.cons!({term.name,x},
           List.cons!({term.self,s},
           vars)),
-        Kind.Path.i(path),
+        Kind.Path.Builder.i(path),
         term.body(
           Kind.Term.var(term.self, vlen),
           Kind.Term.var(term.name, Nat.succ(vlen))));
@@ -25,37 +25,37 @@ Kind.Term.bind(vars: Kind.Context, path: Kind.Path, term: Kind.Term): Kind.Term
       let vlen = List.length!(vars);
       def body = (x) Kind.Term.bind(
         List.cons!({term.name,x},vars),
-        Kind.Path.o(path),
+        Kind.Path.Builder.o(path),
         term.body(Kind.Term.var(term.name, vlen)));
       Kind.Term.lam(term.name, body),
     app:
-      def func = Kind.Term.bind(vars, Kind.Path.o(path), term.func);
-      def argm = Kind.Term.bind(vars, Kind.Path.i(path), term.argm);
+      def func = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.func);
+      def argm = Kind.Term.bind(vars, Kind.Path.Builder.i(path), term.argm);
       Kind.Term.app(func, argm),
     let:
       let vlen = List.length!(vars);
-      def expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
+      def expr = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.expr);
       def body = (x) Kind.Term.bind(
         List.cons!({term.name,x}, vars),
-        Kind.Path.i(path),
+        Kind.Path.Builder.i(path),
         term.body(Kind.Term.var(term.name, vlen)));
       Kind.Term.let(term.name, expr, body),
     def:
       let vlen = List.length!(vars);
-      def expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
+      def expr = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.expr);
       def body = (x) Kind.Term.bind(
         List.cons!({term.name,x}, vars),
-        Kind.Path.i(path),
+        Kind.Path.Builder.i(path),
         term.body(Kind.Term.var(term.name, vlen)));
       Kind.Term.def(term.name, expr, body),
     ann:
-      def term = Kind.Term.bind(vars, Kind.Path.o(path), term.term);
-      def type = Kind.Term.bind(vars, Kind.Path.i(path), term.type);
+      def term = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.term);
+      def type = Kind.Term.bind(vars, Kind.Path.Builder.i(path), term.type);
       Kind.Term.ann(term.done, term, type),
     gol:
       Kind.Term.gol(term.name, term.dref, term.verb),
     hol:
-      Kind.Term.hol(Kind.Path.to_bits(path)),
+      Kind.Term.hol(Kind.Path.Builder.to_bits(path)),
     nat:
       Kind.Term.nat(term.natx),
     chr:
@@ -65,7 +65,7 @@ Kind.Term.bind(vars: Kind.Context, path: Kind.Path, term: Kind.Term): Kind.Term
     num:
       Kind.Term.num(term.sign, term.numb, term.frac),
     cse:
-      let expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
+      let expr = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.expr);
       let name = term.name; // TODO
       let wyth = List.mapped!(term.with)!((with_var)
         open with_var
@@ -77,23 +77,20 @@ Kind.Term.bind(vars: Kind.Context, path: Kind.Path, term: Kind.Term): Kind.Term
         Kind.Ann.new(with_var.name, with_var_term, with_var_type));
       let cses = term.cses; // TODO
       let moti = term.moti; // TODO
-      Kind.Term.cse(Kind.Path.to_bits(path), expr, name, wyth, cses, moti),
+      Kind.Term.cse(Kind.Path.Builder.to_bits(path), expr, name, wyth, cses, moti),
     new:
-      let args = List.fold!(term.args)!(
-        ((path) []) :: Kind.Path -> List(Kind.Term),
-        (arg,res,path) List.cons!(Kind.Term.bind(vars, path, arg), res(Kind.Path.o(path))),
-        path);
+      let args = List.imapped!(term.args)!((idx,arg) Kind.Term.bind(vars, Kind.Path.Builder.nat(idx, path), arg))
       Kind.Term.new(args)
     get:
-      let expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
+      let expr = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.expr);
       Kind.Term.get(expr, term.fkey)
     set:
-      let expr = Kind.Term.bind(vars, Kind.Path.o(path), term.expr);
-      let fval = Kind.Term.bind(vars, Kind.Path.i(path), term.fval);
+      let expr = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.expr);
+      let fval = Kind.Term.bind(vars, Kind.Path.Builder.i(path), term.fval);
       Kind.Term.set(expr, term.fkey, fval)
     ope:
-      let arg0 = Kind.Term.bind(vars, Kind.Path.o(path), term.arg0);
-      let arg1 = Kind.Term.bind(vars, Kind.Path.i(path), term.arg1);
+      let arg0 = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.arg0);
+      let arg1 = Kind.Term.bind(vars, Kind.Path.Builder.i(path), term.arg1);
       Kind.Term.ope(term.name, arg0, arg1)
     ori:
       Kind.Term.ori(term.orig, Kind.Term.bind(vars, path, term.expr)),
