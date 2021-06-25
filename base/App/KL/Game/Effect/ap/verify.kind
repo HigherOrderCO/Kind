@@ -7,5 +7,6 @@ App.KL.Game.Effect.ap.verify(
   without creature: App.KL.Game.Effect.Result.err<Unit>
   if I32.gtn(cost, creature@ap) then 
     App.KL.Game.Effect.Result.err<Unit>
-  else
+  else App.KL.Game.Effect {
     App.KL.Game.Effect.Result.new<Unit>(unit, board, Hexagonal.Axial.BBT.new!)
+  }
