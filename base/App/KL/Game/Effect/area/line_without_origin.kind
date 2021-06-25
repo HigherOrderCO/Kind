@@ -1,0 +1,7 @@
+App.KL.Game.Effect.area.line_without_origin(
+  origin: Hexagonal.Axial
+  goal: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  new_origin = App.KL.Game.Effect.coord.clamp(1, origin, goal)
+  Hexagonal.Axial.line(new_origin, goal)

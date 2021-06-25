@@ -1,0 +1,6 @@
+App.KL.Game.Effect.area.ring(
+  coord: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  Hexagonal.Axial.neighbour(coord)
+

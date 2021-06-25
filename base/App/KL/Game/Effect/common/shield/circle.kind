@@ -1,16 +1,18 @@
-App.KL.Game.Effect.heroes.circle_area(
+App.KL.Game.Effect.common.shield.circle(
   range: I32
   area: I32
-  dmg: I32
+  id: String
+  duration: I32
+  amount: I32
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(range)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    let coords = Hexagonal.Axial.range(target, area)
+    let coords = App.KL.Game.Effect.area.circle(target, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), coords)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.Status.shield.add(id, duration, amount)), coords)
     return unit
   }

@@ -1,0 +1,8 @@
+App.KL.Game.Effect.area.circle(
+  coord: Hexagonal.Axial
+  radius: I32
+): List<Hexagonal.Axial>
+
+  circle = Hexagonal.Axial.range(coord, radius)
+  circle
+
