@@ -1,10 +1,14 @@
 App.KL.Game.Effect.heroes.walk(
-  distance: U64
+  distance: I32
 ): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
+    get center = App.KL.Game.Effect.coord.get_center
+    get creature = App.KL.Game.Effect.board.creature.get(center)
+    let distance = Maybe.extract!(creature, _, +0#32, App.KL.Game.Creature.get_total_haste) + distance
+    
     get target = App.KL.Game.Effect.coord.get_target
-    App.KL.Game.Effect.limit_range(Nat.to_i32(U64.to_nat(distance)))
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
+    App.KL.Game.Effect.limit_range(distance)
+//    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
     App.KL.Game.Effect.movement.move
   }
 
