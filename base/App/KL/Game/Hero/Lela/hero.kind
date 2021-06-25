@@ -13,8 +13,8 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
-    "Q": App.KL.Game.Skill.new("Restore", 400, 16, 2, App.KL.Game.Effect.common.heal.single(4, 3))
-    "W": App.KL.Game.Skill.new("Escort", 400, 16, 4, App.KL.Game.Effect.common.shield.single(4, "Lela", 1, 3))
+    "Q": App.KL.Game.Skill.new("Restore", 400, 16, 2, App.KL.Game.Effect.common.heal.single(4, 2))
+    "W": App.KL.Game.Skill.new("Escort", 400, 16, 4, App.KL.Game.Effect.common.shield.single(4, "Lela", 1, 2))
     "E": App.KL.Game.Skill.new("Detain", 600, 16, 4, App.KL.Game.Effect.common.dmg.single(2, 2))
   }
 
