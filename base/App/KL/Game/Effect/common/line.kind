@@ -5,11 +5,11 @@ App.KL.Game.Effect.common.line<A: Type>(
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
+    App.KL.Game.Effect.limit_range(size)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
     let line = App.KL.Game.Effect.area.line(target, center)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, line)
     App.KL.Game.Effect.area!(eff_at, line)
     return unit
   }

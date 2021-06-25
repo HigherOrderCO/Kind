@@ -1,4 +1,4 @@
-// Creates a line starting at line_start that extends to the direction of origin to it
+// Creates a line starting at origin that extends to the direction of origin to it
 Hexagonal.Axial.line_by_direction(
   size: I32,
   line_start: Hexagonal.Axial,
@@ -9,7 +9,7 @@ Hexagonal.Axial.line_by_direction(
   let diff = Hexagonal.Axial.sub(origin, line_start)
   for i from 0 to I32.to_nat(size) with coords:
     case coords {
-      nil: [line_start]
+      nil: [origin]
       cons:
         coord = Hexagonal.Axial.add(coords.head, diff)
         coord & coords

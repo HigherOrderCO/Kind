@@ -12,7 +12,7 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let max_ap = 10 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
     "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 16, 1, App.KL.Game.Effect.common.dmg.semi_circle(3))
     "W": App.KL.Game.Skill.new("Summon Wall", 300, 16, 5, App.KL.Game.Hero.Frost.Skills.summon_wall)
     "E": App.KL.Game.Skill.new("Taunt", 700, 16, 2, App.KL.Game.Hero.Frost.Skills.taunt(2))
@@ -22,11 +22,15 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
 
+
+// SKILLS
+
 App.KL.Game.Hero.Frost.Skills.summon_wall: App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(5)
     get target = App.KL.Game.Effect.coord.get_target
     get board = App.KL.Game.Effect.board.get
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
     else
