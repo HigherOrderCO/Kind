@@ -20,7 +20,7 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
           game@moment <- App.KL.Game.Moment.execution(game.moment.casts.tail, 0, game.moment.hits, game.moment.success)
         some: // Casted valid skill
           // Executing a cast
-          if U64.ltn(game.moment.frame, skill.value@frames) then
+          if U64.ltn(game.moment.frame, skill.value@frames * 3) then
             // On frame 0, run the effect
             if U64.eql(game.moment.frame,0) then case App.KL.Game.Cast.apply(game.moment.casts.head, game) as cast_result {
               // If the effect is a failure, keep the old game state
@@ -42,8 +42,9 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
       // No more casts left
       nil:
         let frame = game.moment.frame
-        // Between-turn delay
+        //Between-turn delay
         if U64.ltn(frame, App.KL.Constants.between_turn_delay) then
+          let game = game@board <- App.KL.Game.Creature.Status.tick_map(game.board)
           game@moment <- App.KL.Game.Moment.execution(game.moment.casts, frame + 1, game.moment.hits, game.moment.success)
         // Go to next turn
         else

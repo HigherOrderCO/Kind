@@ -1,12 +1,47 @@
-# MacOS
-
-## Scheme
+# Scheme
 
 The Scheme backend handles recursion better than the default Javascript backend. That means it never stack overflows in deep recursions.
 
+## Linux
+
+If you're using a Debian-based distro, like Ubuntu or Mint, you could download the [latest debian binary package](https://github.com/uwu-tech/Kind/releases) and install it by double-clicking the file. In other cases building from source is the way to go.
+
+### Building from source 
+
+**1.** First [install chezscheme](https://command-not-found.com/scheme). To check if you succeeded run.
+
+```shell
+scheme --version
+```
+
+**2.** Go to the Kind directory, pull the latest version, and run:
+
+```shell
+cd bin/scm
+make
+```
+
+if you're fine installing the binary in `/usr/local/bin/`
+
+```shell
+sudo make install
+```
+
+**3.** To check if the install succeeded, navigate to the `Kind/base` folder and run
+
+```shell
+kind-scm
+```
+
+If you're greeted with a help message then `kind-scm` is installed. :slightly_smiling_face:
+
+   Obs: we just can't typecheck a module with Scheme (`kind-scm Module/`), all other commands are working.
+
+## MacOS
+
 Currently, the only way to install the Scheme backend on macOS is to build from the source.
 
-## Building from source
+### Building from source
 
 **1.** First you'll need to [build](https://github.com/racket/ChezScheme/blob/master/BUILDING) and install [Racket's fork](https://github.com/racket/ChezScheme) of ChezScheme:
 
@@ -56,3 +91,11 @@ It may take some time. You can grab a cup of coffee while it finishes.
    Obs: we just can't typecheck a module with Scheme (`kind-scm Module/`), all other commands are working.
 
 If you have any problem, [let us know](https://github.com/uwu-tech/Kind/issues).
+
+### Update
+Go to the Kind directory, pull the latest version, and run:
+```bash
+cd bin/scm
+make
+sudo make install
+```

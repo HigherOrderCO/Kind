@@ -2,10 +2,14 @@
 Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array<A,depth>): Array<A,depth>
   def P = (depth) Array<A,depth> -> Array<A,depth>
   def nil = (arr) Array.tip<A>(f(Array.extract_tip<A>(arr)))
-  def w0 = <idx.size> (rec) (arr)
+  
+  Word.foldl<P, depth>(
+    nil, 
+    <idx.size> (rec) (arr)
+      let {arr_l,arr_r} = Array.extract_tie<A, idx.size>(arr)
+      Array.tie<A, idx.size>(rec(arr_l), arr_r), 
+    <idx.size> (rec) (arr)
     let {arr_l,arr_r} = Array.extract_tie<A, idx.size>(arr)
-    Array.tie<A, idx.size>(rec(arr_l), arr_r)
-  def w1 = <idx.size> (rec) (arr)
-    let {arr_l,arr_r} = Array.extract_tie<A, idx.size>(arr)
-    Array.tie<A, idx.size>(arr_l, rec(arr_r))
-  Word.foldl<P, depth>(nil, w0, w1, idx, arr)
+    Array.tie<A, idx.size>(arr_l, rec(arr_r)), 
+    idx, 
+    arr)

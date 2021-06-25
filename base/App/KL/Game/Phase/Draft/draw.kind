@@ -1,5 +1,4 @@
 App.KL.Game.Phase.Draft.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
-  //heroes = List.map!!(Pair.snd!!, Map.to_list!(App.Kaelin.Resources.heroes))
   open global
   case global.game as game {
     none: <div>"no game"</div>

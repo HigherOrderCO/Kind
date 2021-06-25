@@ -1,0 +1,21 @@
+Fin.slack<n: Nat>(i: Fin(n)): Nat
+  case n with i {
+    zero: case i {}
+    succ:
+      case i {
+        zero:
+          n.pred
+        succ:
+          Fin.slack!(i.pred)
+      }
+  }!
+
+// cuts the fin some slack
+Fin.slack.inc(lim: Nat, i: Fin(lim), inc: Nat): Fin(Nat.add(lim, inc))
+  case lim with i {
+    zero: case i {}
+    succ: case i {
+      zero: Fin.zero!
+      succ: Fin.succ!(Fin.slack.inc(lim.pred, i.pred, inc))
+    }!
+  }!

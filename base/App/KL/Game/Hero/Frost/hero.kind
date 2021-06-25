@@ -1,0 +1,59 @@
+App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
+  let name = "Frost"
+
+  let draw = (player)
+    App.KL.Game.Hero.Frost.Assets.vbox_idle
+
+  let picture = (bool, time)
+    App.KL.Game.Hero.Frost.Assets.base64_idle
+
+  let max_hp = 35 :: I32
+
+  let max_ap = 10 :: I32
+
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
+    "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 16, 1, App.KL.Game.Effect.common.dmg.semi_circle(3))
+    "W": App.KL.Game.Skill.new("Summon Wall", 300, 16, 5, App.KL.Game.Hero.Frost.Skills.summon_wall)
+    "E": App.KL.Game.Skill.new("Taunt", 700, 16, 2, App.KL.Game.Hero.Frost.Skills.taunt(2))
+  }
+
+  let on_stepped = none
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
+
+
+// SKILLS
+
+App.KL.Game.Hero.Frost.Skills.summon_wall: App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    App.KL.Game.Effect.limit_range(5)
+    get target = App.KL.Game.Effect.coord.get_target
+    get board = App.KL.Game.Effect.board.get
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    if App.KL.Game.Board.is_occupied(target, board) then
+      App.KL.Game.Effect.pass
+    else
+      let wall = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Frost.hero.wall, App.KL.Game.Team.neutral, [], 0, 0)
+      App.KL.Game.Effect.board.summon(target, wall)
+  }
+
+App.KL.Game.Hero.Frost.Skills.taunt(area: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    get center = App.KL.Game.Effect.coord.get_center
+    let coords = Hexagonal.Axial.range(center, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.movement.pull_at), coords)
+    return unit
+  }
+
+App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
+  let name = "Frost_wall"
+  let draw = (player) App.KL.Game.Field.Elements.rock_11_0
+  let picture = (bool, time) App.KL.Game.Hero.Frost.Assets.base64_idle
+  let max_hp = 10 :: I32
+  let max_ap = 0 :: I32
+  let skills = {}
+  let on_stepped = some(App.KL.Game.Effect { return unit })
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)

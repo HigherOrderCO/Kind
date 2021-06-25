@@ -2,10 +2,10 @@ App.KL.Game.Field.Grass.field: App.KL.Game.Field
   let name = "Grass"
   let draw = (terrain, indicator)
     case indicator {
-      background: App.Kaelin.Assets.tile.green_2
-      green: App.Kaelin.Assets.tile.green_1
-      red: App.Kaelin.Assets.tile.effect.light_red2
-      yellow: App.Kaelin.Assets.tile.effect.light_red2
-      blue:App.Kaelin.Assets.tile.effect.dark_blue2
+      background  : App.KL.Game.Field.Grass.Assets.normal
+      green       : App.KL.Game.Field.Grass.Assets.light_blue
+      red         : App.KL.Game.Field.Grass.Assets.red
+      yellow      : App.KL.Game.Field.Grass.Assets.light_red
+      blue        : App.KL.Game.Field.Grass.Assets.blue
     }
   App.KL.Game.Field.new(name, draw)

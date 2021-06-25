@@ -7,8 +7,8 @@ Hexagonal.Axial.to_screen_xy(
 ): Pair<U32,U32> // TODO add alias
 
   open coord
-  i   = coord.i
-  j   = coord.j
+  i = coord.i
+  j = coord.j
   
   i = I32.to_f64(i)
   j = I32.to_f64(j)

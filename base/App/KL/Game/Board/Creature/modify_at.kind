@@ -1,4 +1,4 @@
-// TODO: applies a function to the Creature at a coord
+// applies a function to the Creature at a coord
 App.KL.Game.Board.Creature.modify_at(
   mod: App.KL.Game.Creature -> App.KL.Game.Creature
   pos: Hexagonal.Axial

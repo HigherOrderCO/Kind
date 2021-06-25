@@ -1,9 +1,0 @@
-App.KL.Game.Effect.heroes.detain(
-  dmg: I32
-): App.KL.Game.Effect<Unit>
-
-  App.KL.Game.Effect { 
-    get target = App.KL.Game.Effect.coord.get_target
-    App.KL.Game.Effect.hp.damage_at(dmg, target)
-    return unit
-  } 

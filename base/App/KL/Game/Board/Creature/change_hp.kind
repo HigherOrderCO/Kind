@@ -7,20 +7,24 @@ App.KL.Game.Board.Creature.change_hp(
   creature = App.KL.Game.Board.Creature.get(pos, board)
   case creature { 
     none:
-      board = App.KL.Game.Board.Creature.modify_at(App.KL.Game.Board.Creature.change_hp_aux(value), pos, board)
-      {value, board}
+      {0, board}
     some:
       open creature.value as creature
       open creature.hero as hero
-      if I32.eql(0, creature.value@hp) then
-        {+0#32, App.KL.Game.Board.Creature.del(pos, board)}
+      new_hp = I32.max((creature.value@hp + value) , 0)
+      new_hp = I32.min(new_hp, hero.max_hp)
+      hp_diff = new_hp - creature.value@hp 
+      aux = App.KL.Game.Board.Creature.change_hp_aux(hp_diff)
+      board = App.KL.Game.Board.Creature.modify_at(aux, pos, board)
+      new_creature = App.KL.Game.Board.Creature.change_hp_aux(hp_diff, creature.value)
+      if I32.lte(new_creature@hp, 0) then
+        dead = App.KL.Game.Board.Creature.del(pos, board)
+        {+0#32, dead}
       else
-        new_hp = I32.max((creature.value@hp + value) , 0)
-        new_hp = I32.min(new_hp, hero.max_hp)
-        hp_diff = new_hp - creature.value@hp 
-        board = App.KL.Game.Board.Creature.modify_at(App.KL.Game.Board.Creature.change_hp_aux(hp_diff), pos, board)
         {hp_diff, board}
   }
+
+
 
 
 App.KL.Game.Board.Creature.change_hp_aux(
@@ -30,10 +34,20 @@ App.KL.Game.Board.Creature.change_hp_aux(
 
   open creature
   open creature.hero as hero
-  case I32.lte(creature.hp, 0) { //I32
-    true: 
-      creature
-    false:
-      def new_hp = I32.min(I32.add(creature.hp, change), hero.max_hp)
-      creature@hp <- new_hp
-      }
+    verify = I32.cmp(change, 0)
+    case verify { 
+      ltn:
+        //dmg
+        {status, blocked} = App.KL.Game.Creature.Status.hit_shields(I32.neg(change), creature.status)
+        true_dmg = change + blocked 
+        new_creature = creature@status <- status
+        new_hp = I32.min((creature.hp + true_dmg), hero.max_hp)
+        new_creature@hp <- new_hp
+      eql:
+        //nothing
+        creature
+      gtn:
+        //heal
+        new_hp = I32.min((creature.hp + change), hero.max_hp)
+        creature@hp <- new_hp
+    }

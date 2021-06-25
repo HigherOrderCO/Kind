@@ -112,11 +112,10 @@ Kind.Term.check(
       def: Kind.Check {
         let ctx_size = List.length!(ctx);
         get expr_typ = Kind.Term.check(term.expr, Maybe.none!, defs, ctx, Kind.MPath.o(path), orig);
-        let body_val = term.body(Kind.Term.ann(Bool.true, term.expr, expr_typ));
+        let body_val = term.body(term.expr);
         let body_ctx = List.cons!({term.name, expr_typ}, ctx);
         get body_typ = Kind.Term.check(body_val, type, defs, body_ctx, Kind.MPath.i(path), orig);
         return body_typ;
-        //Kind.Term.check(term.body(term.expr), type, defs, ctx, path, orig);
       },
       nat: case type {
         none: Kind.Term.check.direct(Kind.Term.ref("Nat"), defs)

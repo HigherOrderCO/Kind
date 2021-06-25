@@ -1,0 +1,11 @@
+App.KL.Game.Effect.board.creature.move(from: Hexagonal.Axial, to: Hexagonal.Axial): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    get creature = App.KL.Game.Effect.board.creature.get(from)
+    case creature {
+      none: App.KL.Game.Effect.pass
+      some: App.KL.Game.Effect {
+        App.KL.Game.Effect.board.creature.del(from)
+        App.KL.Game.Effect.board.creature.set(to, creature.value)
+      }
+    }
+  }

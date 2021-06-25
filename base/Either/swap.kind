@@ -1,0 +1,5 @@
+Either.swap<A: Type, B: Type>(e: Either<A, B>): Either<B, A>
+    case e {
+        left: right(e.value)
+        right: left(e.value)
+    }

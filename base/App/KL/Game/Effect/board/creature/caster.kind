@@ -1,0 +1,5 @@
+App.KL.Game.Effect.board.creature.caster: App.KL.Game.Effect<Maybe<App.KL.Game.Creature>>
+  App.KL.Game.Effect {
+    get center = App.KL.Game.Effect.coord.get_center
+    App.KL.Game.Effect.board.creature.get(center)
+  }

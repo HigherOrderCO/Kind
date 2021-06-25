@@ -1,0 +1,2 @@
+VoxBox.Draw.monad : Monad<VoxBox.Draw>
+  Monad.new<VoxBox.Draw>(VoxBox.monad.bind, VoxBox.monad.pure)

@@ -1,0 +1,6 @@
+VoxBox.Draw.set_pos(x : U32, y : U32, z : U32) : VoxBox.Draw<Unit>
+  (paint) 
+    let paint = paint@x <- x
+    let paint = paint@y <- y
+    let paint = paint@z <- z
+  {Unit.new, paint}

@@ -7,6 +7,7 @@ Hexagonal.Axial.semi_circle(
   new = Hexagonal.Axial.new
   open origin as a
   open goal   as b
+  let coords =
   if I32.eql(a.i, b.i) then
     [
       new((a.j + b.i - b.j), b.j) 
@@ -23,3 +24,4 @@ Hexagonal.Axial.semi_circle(
       new(a.i, b.j)              
       new(b.i, a.j)               
     ]
+  goal & coords

@@ -1,0 +1,90 @@
+// TODO : Remove this?
+App.KL.Game.Phase.Play.Bar.draw_line(destin : Pair<U32, U32>, x : U32, y : U32, z : U32, col : Col32, img : VoxBox) : VoxBox
+  open destin
+  VoxBox.Draw.line(
+                   U32.to_i32(x),
+                   U32.to_i32(y), 
+                   U32.to_i32(destin.fst), 
+                   U32.to_i32(destin.snd),
+                   U32.to_i32(z),
+                   col, 
+                   img)
+
+App.KL.Game.Phase.Play.Bar.progress_line(
+  p : U32,
+  col: Col32, //U32 -> U32 -> Col32,
+  z : U32,
+  rect : App.KL.Game.Phase.Play.Bar.Rectangular,
+  img: VoxBox,
+): VoxBox // Draw a line using p as index in the progress bar
+  open rect
+  let x = rect.x + p
+  let y = rect.y
+  if Bool.or(U32.eql(p, 0), U32.gte(p, rect.width)) then 
+     img 
+  else
+    App.KL.Game.Phase.Play.Bar.draw_line({x, y+rect.height-rect.lines_size}, x, y+rect.lines_size, z, col, img) 
+
+App.KL.Game.Phase.Play.Bar.complete_square(
+  bar : App.KL.Game.Phase.Play.Bar.Progress,
+  rect : App.KL.Game.Phase.Play.Bar.Rectangular,
+  img: VoxBox) : VoxBox
+  let min = ((x, y) if U32.ltn(x, y) then x else y) :: U32 -> U32 -> U32
+  let max = ((x, y) if U32.ltn(x, y) then y else x) :: U32 -> U32 -> U32
+
+  open rect
+  open bar
+  let line = max((bar.max + bar.defense) / rect.width, 1)
+    // Here if the bar.max + bar.defense is less than rect.width the value will be 
+    // less than 0 (that is okay, however we do not use double), a possible solution is using division or comparate every value
+
+  let bar_max = rect.width
+  let bar_actual = bar.loss / line
+  let bar_defense = bar.defense / line
+  let progress = bar_max - bar_actual
+
+  // Draw the color depending on status by BarProgress
+  for i : U32 from 1 to (bar_max - bar_defense) - bar_actual with img:
+    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_ful, 2, rect, img)
+  for i : U32 from (bar_max - bar_defense) - bar_actual to bar_max - bar_actual with img :
+    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_defense, 2, rect, img)
+  for i : U32 from bar_max - bar_actual to bar_max with img:
+    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_empty, 2, rect, img)
+  
+  // Draw separator depending on max value
+  let separator = line 
+  for i : U32 from 1 to separator with img:   //U32
+    App.KL.Game.Phase.Play.Bar.progress_line((i * ((bar_max -1) / separator)) + 1, bar.col_empty, 3, rect, img)  
+  img
+  
+App.KL.Game.Phase.Play.Bar.draw_bar(
+  rect : App.KL.Game.Phase.Play.Bar.Rectangular,
+  bar : App.KL.Game.Phase.Play.Bar.Progress,
+): VoxBox.Draw<Unit>
+  open rect
+  VoxBox.Draw {
+     VoxBox.Draw.set_pos(rect.x, rect.y, 3)
+     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x, rect.y+rect.height})) // The first horizontal line of rectangle
+     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y})) // The second horizontal line of rectangle
+  
+     VoxBox.Draw.set_pos(rect.x+rect.width, rect.y, 3) 
+     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height})) // The second horizontal line of rectangle
+     VoxBox.Draw.set_pos(rect.x, rect.y+rect.height, 3) 
+     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height})) // The second vertical line of rectangle
+  
+     // Complete the rectangle by the BarProgress
+     VoxBox.Draw.map(App.KL.Game.Phase.Play.Bar.complete_square(bar, rect))
+  }
+
+App.KL.Game.Phase.Play.Bar.draw(x: U32,
+  y: U32,
+  z : U32,
+  height : U32,
+  width : U32,
+  bar : App.KL.Game.Phase.Play.Bar.Progress,
+  col: Col32, //U32 -> U32 -> Col32,
+  img: VoxBox,
+): VoxBox
+  let rect = App.KL.Game.Phase.Play.Bar.Rectangular.new(x, y, height, width, 1)
+  let result = App.KL.Game.Phase.Play.Bar.draw_bar(rect, bar, VoxBox.Draw.Paint.new(x, y, z, col, img))
+  result@snd@img

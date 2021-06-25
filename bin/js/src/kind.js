@@ -37569,7 +37569,7 @@ module.exports = (function() {
                         switch (self._) {
                             case 'Maybe.some':
                                 var $11431 = self.value;
-                                var _body_val$14 = $11426(Kind$Term$ann$(Bool$true, $11425, $11431));
+                                var _body_val$14 = $11426($11425);
                                 var _body_ctx$15 = List$cons$(Pair$new$($11424, $11431), _ctx$4);
                                 var self = Kind$Term$check$(_body_val$14, _type$2, _defs$3, _body_ctx$15, Kind$MPath$i$(_path$5), _orig$6);
                                 switch (self._) {

@@ -1,0 +1,16 @@
+App.KL.Game.Effect.common.shield.single(
+  range: I32
+  id: String
+  duration: I32
+  amount: I32
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect { 
+    App.KL.Game.Effect.limit_range(range)
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.Status.shield.add(id, duration, amount), target)
+    return unit
+  }

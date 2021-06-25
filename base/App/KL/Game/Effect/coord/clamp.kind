@@ -1,16 +1,12 @@
 App.KL.Game.Effect.coord.clamp(
+  range:  I32
   center: Hexagonal.Axial
   target: Hexagonal.Axial
 ): Hexagonal.Axial
 
-
-  {ci, cj} = {I32.to_f64(center@i), I32.to_f64(center@j)}
-  {ti, tj} = {I32.to_f64(target@i), I32.to_f64(target@j)}
-
+  f = I32.to_f64
   distance = Hexagonal.Axial.distance(center, target)
-  distance_f64 = I32.to_f64(distance)
-  lerp_i = F64.lerp(ci, ti, 1/distance_f64)
-  lerp_j = F64.lerp(cj, tj, 1/distance_f64)
- 
-  {new_i, new_j} = Hexagonal.Axial.round(lerp_i, lerp_j)
-  Hexagonal.Axial.new(new_i, new_j)
+  distance_64 = f(distance)
+  range_64 = f(range)
+
+  Hexagonal.Axial.lerp(range_64 / distance_64, center, target)

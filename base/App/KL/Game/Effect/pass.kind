@@ -1,0 +1,4 @@
+App.KL.Game.Effect.pass: App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    return unit
+  }

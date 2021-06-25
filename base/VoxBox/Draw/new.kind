@@ -1,0 +1,2 @@
+VoxBox.Draw.new(f : U32 -> U32 -> U32 -> Col32 -> VoxBox -> VoxBox) : VoxBox.Draw<Unit>
+  (paint) {Unit.new, paint@img <- f(paint@x, paint@y, paint@z, paint@col, paint@img)}

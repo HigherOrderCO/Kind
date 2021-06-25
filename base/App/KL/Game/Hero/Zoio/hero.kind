@@ -1,0 +1,33 @@
+App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
+  let name = "Zoio"
+
+  let draw = (player)
+    App.KL.Game.Hero.Zoio.Assets.vbox_idle
+
+  let picture = (bool, time)
+    App.KL.Game.Hero.Zoio.Assets.base64_idle
+
+  let max_hp = 25 :: I32
+
+  let max_ap = 10 :: I32
+
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
+    "Q": App.KL.Game.Skill.new("Damage Placeholder for Q", 700, 16, 3, App.KL.Game.Effect.common.dmg.single(3, 8))
+    "W": App.KL.Game.Skill.new("Eye Beam", 600, 16, 2, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(2,5))
+    "E": App.KL.Game.Skill.new("Area Damage Placeholder for E", 800, 16, 2, App.KL.Game.Effect.common.dmg.circle(2, 1, 4))
+  }
+
+  let on_stepped = none
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+
+App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    let straight_line = App.KL.Game.Effect.area.straight_line(size, center, target)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, straight_line)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.common.dmg.straight_line(size, dmg)
+  }

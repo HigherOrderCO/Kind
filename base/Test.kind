@@ -1,4 +1,0 @@
-Test:_
-  let coord = Hexagonal.Axial.new(+1, -1)
-  List.show!(Hexagonal.Axial.show, Hexagonal.Axial.clock_rotation(coord))
-  
