@@ -1,3 +1,7 @@
 Test: Nat
-  let x = {1,2} :: Pair<Nat,Nat>
-  x@fst
+  let pair = {1,2}
+  case pair@fst {
+    zero: 0
+    succ: 1
+  }
+
