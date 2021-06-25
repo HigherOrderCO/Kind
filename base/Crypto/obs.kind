@@ -13,6 +13,9 @@
 // Vector.reverse
 // Vector.split_at
 
+// FIXME:
+// Maybe.extract está diferente do que era no Formality, por quê?
+
 
 // T Array<A: Type>                                            ~ (depth: Nat)
 // | Array.tip(value: A)                                             ~ (Nat.zero);
