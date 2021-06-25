@@ -24,7 +24,7 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
 App.KL.Game.Hero.Croni.Skills.trap: App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
-    App.KL.Game.Effect.limit_range(5)
+    App.KL.Game.Effect.limit_range(6)
     get target = App.KL.Game.Effect.coord.get_target
     get board = App.KL.Game.Effect.board.get
     if App.KL.Game.Board.is_occupied(target, board) then
