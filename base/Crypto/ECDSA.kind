@@ -558,9 +558,9 @@ ECDSA.Point.to_bytes(p: ECDSA.Point, compressed: Bool): U8_Vector(Bool.if<Nat>(c
 //       }
 //   }
 
-// ECDSA.Point.to_hex(p: ECDSA.Point, compressed: Bool): String
-//   def size = Bool.if!(compressed, 33, 65)
-//   U8_Vector.to_hex<size>(ECDSA.Point.to_bytes(p, compressed))
+ECDSA.Point.to_hex(p: ECDSA.Point, compressed: Bool): String
+  def size = Bool.if!(compressed, 33, 65)
+  U8_Vector.to_hex<size>(ECDSA.Point.to_bytes(p, compressed))
 
 // TODO: change keyword "use"
 // ECDSA.Point.from.SignResult(msgHash: String, sign: ECDSA.SignResult, recovery: Nat): ECDSA.Error(ECDSA.Point)
@@ -584,13 +584,13 @@ ECDSA.Point.to_bytes(p: ECDSA.Point, compressed: Bool): U8_Vector(Bool.if<Nat>(c
 ECDSA.Point.from_PrivateKey(n: Nat): ECDSA.Point
   ECDSA.Point.base.mul(n)
 
-// ECDSA.Point.get_shared_secret(privateA: Nat, publicB: ECDSA.Point): ECDSA.Error(String)
-//   case ECDSA.Point.valid_point(publicB) {
-//     left : ECDSA.Error.err!(ECDSA.ErrorTypes.invalid_public_key)
-//     right: 
-//       let shared = ECDSA.Point.mul(publicB, privateA)
-//       ECDSA.Error.ok!(ECDSA.Point.to_hex(shared, Bool.false))
-//   }
+ECDSA.Point.get_shared_secret(privateA: Nat, publicB: ECDSA.Point): ECDSA.Error(String)
+  case ECDSA.Point.valid_point(publicB) {
+    left : ECDSA.Error.err!(ECDSA.ErrorTypes.invalid_public_key)
+    right: 
+      let shared = ECDSA.Point.mul(publicB, privateA)
+      ECDSA.Error.ok!(ECDSA.Point.to_hex(shared, Bool.false))
+  }
 
 ECDSA.PrivateKey.is_valid(n: Nat): Bool
   Bool.and(Nat.gtn(0, n), Nat.gtn(n, ECDSA.CURVE.n))
@@ -607,44 +607,45 @@ type ECDSA.SignResult {
   new(r: Nat, s: Nat)
 }
 
+// TODO:
+ECDSA.SignResult.from_hex(str: String): ECDSA.Error(ECDSA.SignResult)
+  ECDSA.SignResult.from_hex(str)
 // ECDSA.SignResult.from_hex(str: String): ECDSA.Error(ECDSA.SignResult)
-//   ECDSA.SignResult.from_hex(str)
-// // ECDSA.SignResult.from_hex(str: String): ECDSA.Error(ECDSA.SignResult)
-// //   def bind = ECDSA.Error.bind
-// //   def from_maybe = ECDSA.Error.from_maybe<Pair(String, String)>(ECDSA.ErrorTypes.invalid_signature_hex)
-// //   use pair = bind<,>(from_maybe(String.take_n(2, str)))
-// //   get str check1 = pair
+//   def bind = ECDSA.Error.bind
+//   def from_maybe = ECDSA.Error.from_maybe<Pair(String, String)>(ECDSA.ErrorTypes.invalid_signature_hex)
+//   use pair = bind<,>(from_maybe(String.take_n(2, str)))
+//   get str check1 = pair
 
-// //   use pair = bind<,>(from_maybe(String.take_n(2, str)))
-// //   get length str = pair
-// //   let length = ECDSA.parse_byte(length)
+//   use pair = bind<,>(from_maybe(String.take_n(2, str)))
+//   get length str = pair
+//   let length = ECDSA.parse_byte(length)
 
-// //   use pair = bind<,>(from_maybe(String.take_n(2, str)))
-// //   get check2 str = pair
-// //   case Bool.orVar(3)(
-// //     String.eql(check1, "30"),
-// //     Nat.eql(length, Nat.sub(String.length(str), 4)),
-// //     String.eql(check2, "02")):
-// //   | ECDSA.Error.err<ECDSA.SignResult>(ECDSA.ErrorTypes.invalid_signature_hex);
-// //   | // r
-// //     use pair = bind<,>(from_maybe(String.take_n(2, str)))
-// //     get rLen str = pair
-// //     let rLen = ECDSA.parse_byte(rLen)
-// //     use pair = bind<,>(from_maybe(String.take_n(rLen, str)))
-// //     get r str = pair
-// //     let r = Nat.parse_hex(r)
-// //     // s
-// //     use pair = bind<,>(from_maybe(String.take_n(2, str)))
-// //     get check3 str = pair
-// //     case String.eql(check3, "02"):
-// //     | ECDSA.Error.err<ECDSA.SignResult>(ECDSA.ErrorTypes.invalid_signature_hex);
-// //     | use pair = bind<,>(from_maybe(String.take_n(2, str)))
-// //       get sLen str = pair
-// //       let sLen = ECDSA.parse_byte(sLen)
-// //       use pair = bind<,>(from_maybe(String.take_n(sLen, str)))
-// //       get s str = pair
-// //       let s = Nat.parse_hex(s)
-// //       ECDSA.Error.ok<ECDSA.SignResult>(ECDSA.SignResult.new(r, s));;
+//   use pair = bind<,>(from_maybe(String.take_n(2, str)))
+//   get check2 str = pair
+//   case Bool.orVar(3)(
+//     String.eql(check1, "30"),
+//     Nat.eql(length, Nat.sub(String.length(str), 4)),
+//     String.eql(check2, "02")):
+//   | ECDSA.Error.err<ECDSA.SignResult>(ECDSA.ErrorTypes.invalid_signature_hex);
+//   | // r
+//     use pair = bind<,>(from_maybe(String.take_n(2, str)))
+//     get rLen str = pair
+//     let rLen = ECDSA.parse_byte(rLen)
+//     use pair = bind<,>(from_maybe(String.take_n(rLen, str)))
+//     get r str = pair
+//     let r = Nat.parse_hex(r)
+//     // s
+//     use pair = bind<,>(from_maybe(String.take_n(2, str)))
+//     get check3 str = pair
+//     case String.eql(check3, "02"):
+//     | ECDSA.Error.err<ECDSA.SignResult>(ECDSA.ErrorTypes.invalid_signature_hex);
+//     | use pair = bind<,>(from_maybe(String.take_n(2, str)))
+//       get sLen str = pair
+//       let sLen = ECDSA.parse_byte(sLen)
+//       use pair = bind<,>(from_maybe(String.take_n(sLen, str)))
+//       get s str = pair
+//       let s = Nat.parse_hex(s)
+//       ECDSA.Error.ok<ECDSA.SignResult>(ECDSA.SignResult.new(r, s));;
 
 ECDSA.SignResult.to_hex(sig: ECDSA.SignResult, compressed: Bool): String
   let s_hex = ECDSA.number_to_hex(sig@s)
@@ -666,12 +667,8 @@ U8_Vector: Nat -> Type
 U8_Vector.to_number<n: Nat>(bytes: U8_Vector(n)): Nat
   U8_Vector.to_number.aux<n>(bytes, 0)
 
-// TODO: check if this "case" is right
+// TODO: check if this "case" is right (usage of n.pred)
 U8_Vector.to_number.aux<n: Nat>(bytes: U8_Vector(n), res: Nat): Nat
-  // case bytes {
-  //   nil : res
-  //   cons: U8_Vector.to_number.aux<len>(bytes.tail, Nat.add(U8.to_nat(bytes.head), Nat.mul(res, 16)))
-  // }!
   case n with bytes {
     zero: res
     succ:
@@ -685,19 +682,33 @@ U8_Vector.to_number.aux<n: Nat>(bytes: U8_Vector(n), res: Nat): Nat
 U8_Vector.from_nat(pad: Nat, n: Nat): U8_Vector(pad)
   Vector.reverse<U8, pad>(U8_Vector.from_nat(pad, n))
 
-// U8_Vector.from_nat.aux(pad: Nat, n: Nat): U8_Vector(pad)
-//   case pad:
-//   | Vector.nil<U8>;
-//   | get div mod = Nat.div_mod(n, 256)
-//     Vector.ext<U8, pad.pred>(U8.from_nat(mod), U8_Vector.from_nat.aux(pad.pred, div));
-//   : U8_Vector(pad.self);
+U8_Vector.from_nat.aux(pad: Nat, n: Nat): U8_Vector(pad)
+  case pad {
+    zero: Vector.nil<U8>
+    succ: 
+      let {div, mod} = Nat.div_mod(n, 256)
+      Vector.cons<U8, pad.pred>(U8.from_nat(mod), U8_Vector.from_nat.aux(pad.pred, div))
+  }!
 
-// U8_Vector.to_hex<n: Nat>(bytes: U8_Vector(n)): String
-//   case bytes {
-//     nil : String.nil
-//     cons: String.concat(ECDSA.number_to_hex(U8.to_nat(bytes.head)), U8_Vector.to_hex<bytes.len>(bytes.tail))
-//   }
+U8_Vector.to_hex<n: Nat>(bytes: U8_Vector(n)): String
+  case n with bytes {
+    zero: String.nil
+    succ: 
+      open bytes
+      String.concat(ECDSA.number_to_hex(U8.to_nat(bytes.head)), U8_Vector.to_hex!(bytes.tail))
+  }!
 
+// U8_Vector.from_hex(hex: String): Sigma(Nat, U8_Vector)
+//   case hex:
+//   | Sigma.new<Nat,U8_Vector>(0, Vector.nil<U8>);
+//   | case hex.tail:
+//     | let b = ECDSA.parse_byte(String.consVar(1, hex.head))
+//       let vec = Vector.ext<U8,0>(U8.from_nat(b), Vector.nil<U8>)
+//       Sigma.new<Nat, U8_Vector>(1, vec);
+//     | let b = ECDSA.parse_byte(String.consVar(2, hex.head, hex.tail.head))
+//       get len vec = U8_Vector.from_hex(hex.tail.tail)
+//       let vec = Vector.ext<U8,len>(U8.from_nat(b), vec)
+//       Sigma.new<Nat, U8_Vector>(Nat.succ(len), vec);;
 
 // U8_Vector.from_hex(hex: String): Sigma(Nat, U8_Vector)
 //   case hex {
@@ -705,18 +716,19 @@ U8_Vector.from_nat(pad: Nat, n: Nat): U8_Vector(pad)
 //     cons: 
 //       case hex.tail {
 //         nil : 
-//           let b = ECDSA.parse_byte(String.cons_Var(1, hex.head))
+//           let b   = ECDSA.parse_byte(String.cons_Var(1, hex.head))
 //           let vec = Vector.cons<U8,0>(U8.from_nat(b), Vector.nil<U8>)
 //           Sigma.new<Nat, U8_Vector>(1, vec)
-//         cons: 
+//         cons:
 //           let b = ECDSA.parse_byte(String.cons_Var(2, hex.head, hex.tail.head))
 //           let sig = U8_Vector.from_hex(hex.tail.tail)
+//           // open sig
 //           let len = sig@fst
 //           let vec = sig@snd
 //           let vec = Vector.cons<U8,len>(U8.from_nat(b), vec)
 //           Sigma.new<Nat, U8_Vector>(Nat.succ(len), vec)
-//       }
-//   }
+//       }!
+//   }!
 
 U8_Vector.fill(n: Nat, s: U8): U8_Vector(n)
   Vector.fill<U8>(n, s)
@@ -762,70 +774,69 @@ ECDSA.sign_qrs(priv: Nat, qrs: ECDSA.QRS): String
 //   ECDSA.Error.ok!(ECDSA.sign_qrs(priv, qrs))
 
 // ECDSA.sign(msgHash: String, priv: Nat): ECDSA.Error(String)
-//   use qrs = ECDSA.Error.bind<,>(ECDSA.get_QRS_RFC6979(msgHash, priv))
+//   use qrs = ECDSA.Error.bind!!(ECDSA.get_QRS_RFC6979(msgHash, priv))
 //   ECDSA.Error.ok!(ECDSA.sign_qrs(priv, qrs))
 
-// ECDSA.verify(signature: ECDSA.SignResult, msgHash: String, pubkey: ECDSA.Point): Bool
-//   let h = ECDSA.truncate_hash(msgHash)
-//   let r = signature@r 
-//   let s = signature@s
-//   let pubkey = ECDSA.Jacobian.from_point(pubkey)
-//   let s1 = ECDSA.invert(s, ECDSA.CURVE.n)
-//   let Ghs1 = ECDSA.Jacobian.base.mul(Nat.mod(Nat.mul(h, s1), ECDSA.CURVE.n))
-//   let Prs1 = ECDSA.Jacobian.mul_unsafe(pubkey, Nat.mod(Nat.mul(r, s1), ECDSA.CURVE.n))
-//   let point = ECDSA.Jacobian.to_point(ECDSA.Jacobian.add(Ghs1, Prs1))
-//   Nat.eql(point@x, r)
+ECDSA.verify(signature: ECDSA.SignResult, msgHash: String, pubkey: ECDSA.Point): Bool
+  let h = ECDSA.truncate_hash(msgHash)
+  let r = signature@r 
+  let s = signature@s
+  let pubkey = ECDSA.Jacobian.from_point(pubkey)
+  let s1 = ECDSA.invert(s, ECDSA.CURVE.n)
+  let Ghs1 = ECDSA.Jacobian.base.mul(Nat.mod(Nat.mul(h, s1), ECDSA.CURVE.n))
+  let Prs1 = ECDSA.Jacobian.mul_unsafe(pubkey, Nat.mod(Nat.mul(r, s1), ECDSA.CURVE.n))
+  let point = ECDSA.Jacobian.to_point(ECDSA.Jacobian.add(Ghs1, Prs1))
+  Nat.eql(point@x, r)
 
+// TODO:
 ECDSA.hmacSha256<klen: Nat, mlen: Nat>(key: U8_Vector(klen), msg: U8_Vector(mlen)): U8_Vector(32)
-  // TODO:
   ECDSA.hmacSha256<klen, mlen>(key, msg)
 
 // Deterministic k generation as per RFC6979.
 // Generates k, and then calculates Q & Signature {r, s} based on it.
 // https://tools.ietf.org/html/rfc6979#section-3.1
-// ECDSA.get_QRS_RFC6979(msgHash: String, priv: Nat): ECDSA.Error(ECDSA.QRS)
-//   // Step A is ignored, since we already provide hash instead of msg
-//   let num = Nat.parse_hex(msgHash)
-//   let h1  = U8_Vector.from_nat(32, num)
-//   let x   = U8_Vector.from_nat(32, priv)
-//   let h1n = U8_Vector.to_number<32>(h1)
-//   // Step B
-//   let v  = U8_Vector.fill(32, U8.parse_hex("1"))
-//   // Step C
-//   let k  = U8_Vector.fill(32, U8.parse_hex("0"))
-//   let b0 = U8_Vector.fill(1, U8.parse_hex("0"))
-//   let b1 = U8_Vector.fill(1, U8.parse_hex("1"))
-//   // Step D
-//   let vec = U8_Vector.concat<32, 32>(x, h1)
-//   let vec = U8_Vector.concat<1, 64>(b0, vec)
-//   let vec = U8_Vector.concat<32, 65>(v, vec)
-//   let k   = ECDSA.hmacSha256<32, 97>(k, vec)
-//   // Step E
-//   let v = ECDSA.hmacSha256<32, 32>(k, v)
-//   // Step F
-//   let vec = U8_Vector.concat<32, 32>(x, h1)
-//   let vec = U8_Vector.concat<1, 64>(b1, vec)
-//   let vec = U8_Vector.concat<32, 65>(v, vec)
-//   let k   = ECDSA.hmacSha256<32, 97>(k, vec)
-//   // Step G
-//   let v = ECDSA.hmacSha256<32, 32>(k, v)
+ECDSA.get_QRS_RFC6979(msgHash: String, priv: Nat): ECDSA.Error(ECDSA.QRS)
+  // Step A is ignored, since we already provide hash instead of msg
+  let num = Nat.parse_hex(msgHash)
+  let h1  = U8_Vector.from_nat(32, num)
+  let x   = U8_Vector.from_nat(32, priv)
+  let h1n = U8_Vector.to_number<32>(h1)
+  // Step B
+  let v  = U8_Vector.fill(32, U8.parse_hex("1"))
+  // Step C
+  let k  = U8_Vector.fill(32, U8.parse_hex("0"))
+  let b0 = U8_Vector.fill(1, U8.parse_hex("0"))
+  let b1 = U8_Vector.fill(1, U8.parse_hex("1"))
+  // Step D
+  let vec = U8_Vector.concat<32, 32>(x, h1)
+  let vec = U8_Vector.concat<1, 64>(b0, vec)
+  let vec = U8_Vector.concat<32, 65>(v, vec)
+  let k   = ECDSA.hmacSha256<32, 97>(k, vec)
+  // Step E
+  let v = ECDSA.hmacSha256<32, 32>(k, v)
+  // Step F
+  let vec = U8_Vector.concat<32, 32>(x, h1)
+  let vec = U8_Vector.concat<1, 64>(b1, vec)
+  let vec = U8_Vector.concat<32, 65>(v, vec)
+  let k   = ECDSA.hmacSha256<32, 97>(k, vec)
+  // Step G
+  let v = ECDSA.hmacSha256<32, 32>(k, v)
+  ECDSA.get_QRS_RFC6979.aux(priv, k, v, h1n, 0)
 
-//   ECDSA.get_QRS_RFC6979.aux(priv, k, v, h1n, 0)
-
-// ECDSA.get_QRS_RFC6979.aux(priv: Nat, k: U8_Vector(32), v: U8_Vector(32), h1n: Nat, i: Nat): ECDSA.Error(ECDSA.QRS)
-//   // Step H3, repeat until 1 < T < n - 1
-//   case Nat.ltn(i, 1000) {
-//   true: 
-//     let v = ECDSA.hmacSha256<32, 32>(k, v)
-//     let T = U8_Vector.to_number<32>(v)
-//     case ECDSA.QRS.from_k(T, h1n, priv) as m {
-//       left: 
-//         let b0  = U8_Vector.fill(1, U8.parse_hex("0"))
-//         let vec = U8_Vector.concat<1, 32>(b0, v)
-//         let k   = ECDSA.hmacSha256<32, 33>(k, vec)
-//         let v   = ECDSA.hmacSha256<32, 32>(k, v)
-//         ECDSA.get_QRS_RFC6979.aux(priv, k, v, h1n, Nat.succ(i))
-//       right: ECDSA.Error.ok<ECDSA.QRS>(m.value)
-//     }
-//   false: ECDSA.Error.err<ECDSA.QRS>(ECDSA.ErrorTypes.could_not_find_k)
-//   }
+ECDSA.get_QRS_RFC6979.aux(priv: Nat, k: U8_Vector(32), v: U8_Vector(32), h1n: Nat, i: Nat): ECDSA.Error(ECDSA.QRS)
+  // Step H3, repeat until 1 < T < n - 1
+  case Nat.ltn(i, 1000) {
+  true: 
+    let v = ECDSA.hmacSha256<32, 32>(k, v)
+    let T = U8_Vector.to_number<32>(v)
+    case ECDSA.QRS.from_k(T, h1n, priv) as m {
+      left: 
+        let b0  = U8_Vector.fill(1, U8.parse_hex("0"))
+        let vec = U8_Vector.concat<1, 32>(b0, v)
+        let k   = ECDSA.hmacSha256<32, 33>(k, vec)
+        let v   = ECDSA.hmacSha256<32, 32>(k, v)
+        ECDSA.get_QRS_RFC6979.aux(priv, k, v, h1n, Nat.succ(i))
+      right: ECDSA.Error.ok<ECDSA.QRS>(m.value)
+    }
+  false: ECDSA.Error.err<ECDSA.QRS>(ECDSA.ErrorTypes.could_not_find_k)
+  }
