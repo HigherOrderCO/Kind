@@ -1,0 +1,2 @@
+BBT.filter<K: Type, V: Type>(fn: K -> V -> Bool, map: BBT<K,V>): BBT<K,V>
+  

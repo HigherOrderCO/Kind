@@ -44,3 +44,35 @@ Kind.Parser.comprehension.and_all(a: List<Kind.Term>): Kind.Term
       let and = Kind.Term.app(and, Kind.Parser.comprehension.and_all(a.tail))
       and
   }
+
+Kind.Parser.comprehension_map: Parser<Kind.Term>
+  Parser {
+    Kind.Parser.text("{")
+    get loop = Kind.Parser.term
+    Kind.Parser.text("for")
+    get val = Kind.Parser.name1
+    Kind.Parser.text("in")
+    get map = Kind.Parser.term
+    Kind.Parser.text("}")
+    
+    let term = Kind.Term.ref("BBT.map")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let lamb = Kind.Term.lam(val, (v) loop)
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.app(term, map)
+
+    return term
+  }
+
+// Kind.Parser.comprehension_range: Parser<Kind.Term>
+//   Parser {
+//     Kind.Parser.text("[")
+//     let ini = Kind.Parser.term
+//     Kind.Parser.text("..")
+//     let end = Kind.Parser.term
+//     Kind.Parser.text("]")
+    
+//     let term = Kind.Term.ref("List.range()")
+//   }
