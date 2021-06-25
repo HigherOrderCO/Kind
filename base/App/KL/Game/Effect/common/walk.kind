@@ -1,4 +1,4 @@
-App.KL.Game.Effect.heroes.walk(
+App.KL.Game.Effect.common.walk(
   distance: U64
 ): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {

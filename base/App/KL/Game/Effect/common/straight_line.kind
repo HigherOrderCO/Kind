@@ -1,0 +1,15 @@
+App.KL.Game.Effect.common.straight_line<A: Type>(
+  eff_at: App.KL.Game.Effect.At<A>
+  size: I32
+  value: I32
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect {
+    get target = App.KL.Game.Effect.coord.get_target
+    get center = App.KL.Game.Effect.coord.get_center
+    let line = App.KL.Game.Effect.area.straight_line(size, center, target)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, line)
+    App.KL.Game.Effect.area!(eff_at, line)
+    return unit
+  }

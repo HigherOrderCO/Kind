@@ -12,13 +12,61 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
   let max_ap = 10 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.heroes.walk(2))
-    "Q": App.KL.Game.Skill.new("Empathy",600, 16, 1, App.KL.Game.Effect.heroes.empathy(4, "Empathy", 1, 8))
-    "W": App.KL.Game.Skill.new("Revenge", 600, 16, 1, App.KL.Game.Effect.heroes.revenge)
-    "E": App.KL.Game.Skill.new("Ground Slam", 800, 16, 0, App.KL.Game.Effect.heroes.ground_slam(0, 2, 4))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
+    "Q": App.KL.Game.Skill.new("Empathy",280, 16, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(4, 1, 8))
+    "W": App.KL.Game.Skill.new("Revenge", 480, 16, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1))
+    "E": App.KL.Game.Skill.new("Ground Slam", 800, 16, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 4))
 
   }
 
   let on_stepped = none
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+
+// Skills
+
+App.KL.Game.Hero.Cyclope.hero.Skills.empathy(dmg_on_self: I32, duration: I32, shield_value: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    get board = App.KL.Game.Effect.board.get
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    let board_size = App.KL.Constants.board_size
+    let area = Hexagonal.Axial.neighbour(center)
+    App.KL.Game.Effect.hp.damage_at(dmg_on_self, center)
+    App.KL.Game.Effect.common.shield.ring("Empathy", duration, shield_value)
+    return unit
+  }
+
+App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(radius: I32 dmg: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    get center = App.KL.Game.Effect.coord.get_center  
+    let area = App.KL.Game.Effect.area.circle_without_center(center, radius)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.hp.damage_at(dmg), area)
+    return unit
+  }
+
+App.KL.Game.Hero.Cyclope.hero.Skills.revenge(range: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    App.KL.Game.Effect.limit_range(range)
+    get map = App.KL.Game.Effect.board.get
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    let creature = App.KL.Game.Board.Creature.get(center, map)
+    let true_dmg =
+    case creature { 
+      none:
+        +0#32
+      some:
+        open creature.value as creature
+        open creature.hero as hero
+        missing_hp = hero.max_hp - creature.hp
+        true_dmg = missing_hp / 4
+        true_dmg
+    }
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.hp.damage_at(true_dmg, target)
+    return unit
+  }

@@ -1,0 +1,8 @@
+App.KL.Game.Effect.area.straight_line(
+  size: I32
+  origin: Hexagonal.Axial
+  goal: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  direction = App.KL.Game.Effect.coord.clamp(1, origin, goal)
+  Hexagonal.Axial.line_by_direction(size, origin, direction)

@@ -1,9 +1,0 @@
-App.KL.Game.Effect.heroes.escort(
-  value: I32
-): App.KL.Game.Effect<Unit>
-
-  App.KL.Game.Effect { 
-    get target = App.KL.Game.Effect.coord.get_target
-    App.KL.Game.Effect.hp.heal_at(value, target)
-    return unit
-  }
