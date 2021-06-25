@@ -1,45 +1,15 @@
-Vector.reverse<A: Type, size: Nat>(xs: Vector(A, size)): Vector(A, size)
-  Vector.indl(A, Vector(A), size)(Vector.nil(A), Vector.cons(A), xs)
+Vector.reverse<A: Type, size: Nat>(vec: Vector(A, size)): Vector(A, size)
+ Vector.reverse.go!(size, 0, vec, Vector.nil!)
 
-// Vector.reverse<A: Type, size: Nat>(xs: Vector(A, size)): Vector(A, size)
-//   Vector.indl<A, Vector(A), size>(Vector.nil<A>, Vector.ext<A>, xs)
-
-// Vector.indl<A: Type, P: Nat -> Type, m: Nat>
-// (nil  : P(Nat.zero))
-// (ext   : <size: Nat> -> (a: A) -> (tail: P(size)) -> P(Nat.succ(size)))
-// (vector : Vector(A, m))
-// : P(m)
-//   case vector:
-//   | nil;
-//   | def P   = (n) P(Nat.succ(n))
-//     def nil = ext<Nat.zero>(vector.head, nil)
-//     def ext  = <x> ext<Nat.succ(x)>
-//     Vector.indl<A, P, vector.size>(nil, ext, vector.tail);
-//   : P(vector.size);
-
-Vector.indl<A: Type, P: Nat -> Type, m: Nat>(
-  nil    : P(Nat.zero)
-  cons   : (size: Nat) -> (head: A) -> (tail: P(size)) -> P(Nat.succ(size))
-  vector : Vector(A, m)
-  ) : P(m)
-  Vector.indl<A, P, m>(nil, cons, vector)
-  
-  // case vector {
-  //   nil : nil
-  //   cons: ?cons
-  //     // def P   = (n) P(Nat.succ(n))
-  //     // def nil = cons<Nat.zero>(vector.head, nil)
-  //     // def cons = (x) cons<Nat.succ(x)>
-  //     // Vector.indl<A, P, vector.size>(nil, cons, vector.tail)
-  // } : P(m)
-
-  // case m with vector {
-  //   zero: nil 
-  //   succ: case vector {
-  //       cons: 
-  //         def P   = (n) P(Nat.succ(n))
-  //         def nil = cons<Nat.zero>(vector.head, nil)
-  //         def cons = (x) cons<Nat.succ(x)>
-  //         Vector.indl<A, P, m.pred>(nil, cons, vector.tail)
-  //     }
-  // }
+Vector.reverse.go<A: Type>(
+  n: Nat, m: Nat, 
+  vec: Vector<A>(n), 
+  aux: Vector<A>(m)
+): Vector<A>(Nat.add(m, n))
+  case n with vec {
+    zero: aux :: rewrite X in Vector<A>(X) with mirror(Nat.add.zero_right(m))
+    succ: 
+      open vec
+      def a = Vector.reverse.go!(n.pred, Nat.succ(m), vec.tail, Vector.cons<A>(m, vec.head, aux))
+      a :: rewrite X in Vector<A>(X) with mirror(Nat.add.succ_right(m, n.pred))
+  }!
