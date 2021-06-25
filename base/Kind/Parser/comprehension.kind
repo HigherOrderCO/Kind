@@ -1,11 +1,4 @@
 Kind.Parser.comprehension: Parser<Kind.Term>
-  Parser.choice!([
-    Kind.Parser.comprehension_with_where,
-    Kind.Parser.comprehension_without_where      
-  ])
-  
-  
-Kind.Parser.comprehension_without_where: Parser<Kind.Term>
   Parser {
     Kind.Parser.text("[")
     get loop = Kind.Parser.term
@@ -13,29 +6,15 @@ Kind.Parser.comprehension_without_where: Parser<Kind.Term>
     get elem = Kind.Parser.name1
     Kind.Parser.text("in")
     get list = Kind.Parser.term
-    Kind.Parser.text("]")
+    Parser.maybe!(Kind.Parser.text("where"))
 
-    let term = Kind.Term.ref("List.map")
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
-    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
-    let lamb = Kind.Term.lam(elem, (i) loop)
-    let term = Kind.Term.app(term, lamb)
-    let term = Kind.Term.app(term, list)
-    
-    return term
-  }
+    get filters = Parser.until!(Kind.Parser.text("]"), Parser {
+      Kind.Parser.spaces
+      get term = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(","))
+      return term
+    })
 
-
-Kind.Parser.comprehension_with_where: Parser<Kind.Term>
-  Parser {
-    Kind.Parser.text("[")
-    get loop = Kind.Parser.term
-    Kind.Parser.text("for")
-    get elem = Kind.Parser.name1
-    Kind.Parser.text("in")
-    get list = Kind.Parser.term
-    get filters = Kind.Parser.items!("where", Kind.Parser.term ,"]")
-    
     let and = Kind.Parser.comprehension.and_all(filters)
 
     let filter_fun = Kind.Term.ref("List.filter")
