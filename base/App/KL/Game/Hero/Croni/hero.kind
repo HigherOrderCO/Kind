@@ -31,8 +31,7 @@ App.KL.Game.Hero.Croni.Skills.trap(ap_cost: I32): App.KL.Game.Effect<Unit>
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
     get board = App.KL.Game.Effect.board.get
-    App.KL.Game.Effect.ap.verify(ap_cost)
-    App.KL.Game.Effect.ap.cost(ap_cost, center)
+    App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
