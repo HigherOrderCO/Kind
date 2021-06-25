@@ -124,17 +124,6 @@ ECDSA.invertBatch(nums: List(Nat), modulo: Nat): List(Nat)
   let acc = ECDSA.invert(acc, modulo)
   ECDSA.invertBatch.aux2(rest, modulo, acc, scratch, List.nil<Nat>)
 
-// ECDSA.invertBatch.aux1(nums: List(Nat), modulo: Nat, acc: Nat, scratch: List(Nat), rest: List(Nat)): Pair(Nat, Pair(List(Nat), List(Nat)))
-//   case nums:
-//   | Pair.new<,>(acc, Pair.new<,>(scratch, rest));
-//   | case Nat.eql(nums.head, 0):
-//     | let scratch = List.cons<>(0, scratch)
-//       let rest = List.cons<>(nums.head, rest)
-//       ECDSA.invertBatch.aux1(nums.tail, modulo, acc, scratch, rest);
-//     | let scratch = List.cons<>(acc, scratch)
-//       let acc = Nat.mod(Nat.mul(acc, nums.head), modulo)
-//       let rest = List.cons<>(nums.head, rest)
-//       ECDSA.invertBatch.aux1(nums.tail, modulo, acc, scratch, rest);;
 ECDSA.invertBatch.aux1(
   nums: List(Nat), 
   modulo: Nat, 
@@ -341,10 +330,10 @@ ECDSA.Jacobian.add(p: ECDSA.Jacobian, q: ECDSA.Jacobian): ECDSA.Jacobian
 // an exposed private key e.g. sig verification.
 ECDSA.Jacobian.mul_unsafe(d: ECDSA.Jacobian, scalar: Nat): ECDSA.Jacobian
   let n = Nat.mod(scalar, ECDSA.CURVE.n)
-  let {k1, k2} = ECDSA.split_scalar(n)
+  let {k1, k2}    = ECDSA.split_scalar(n)
   let {k1neg, k1} = Int.to_nat_signed(k1)
   let {k2neg, k2} = Int.to_nat_signed(k2)
-  let {k1p, k2p} = ECDSA.Jacobian.mul_unsafe_aux(d, ECDSA.Jacobian.0, ECDSA.Jacobian.0, k1, k2)
+  let {k1p, k2p}  = ECDSA.Jacobian.mul_unsafe_aux(d, ECDSA.Jacobian.0, ECDSA.Jacobian.0, k1, k2)
   let k1p = Bool.if!(k1neg, ECDSA.Jacobian.negate(k1p), k1p)
   let k2p = Bool.if!(k2neg, ECDSA.Jacobian.negate(k2p), k2p)
   let k2p = ECDSA.Jacobian.new(ECDSA.mod(Nat.mul(k2p@x, ECDSA.CURVE.beta)), k2p@y, k2p@z)
@@ -358,14 +347,14 @@ ECDSA.Jacobian.mul_unsafe_aux(
   k2: Nat)
 : Pair(ECDSA.Jacobian, ECDSA.Jacobian)
   case Bool.or(Nat.gtn(k1, 0), Nat.gtn(k2, 0)) {
-    true: 
-      let k1p = Bool.if!(Nat.odd(k1), ECDSA.Jacobian.add(k1p, d), k1p)
-      let k2p = Bool.if!(Nat.odd(k2), ECDSA.Jacobian.add(k2p, d), k2p)
-      let d = ECDSA.Jacobian.double(d)
-      let k1 = Nat.div(k1, 2)
-      let k2 = Nat.div(k2, 2)
-      ECDSA.Jacobian.mul_unsafe_aux(d, k1p, k2p, k1, k2)
-    false: Pair.new<ECDSA.Jacobian, ECDSA.Jacobian>(k1p, k2p)
+  true: 
+    let k1p = Bool.if!(Nat.odd(k1), ECDSA.Jacobian.add(k1p, d), k1p)
+    let k2p = Bool.if!(Nat.odd(k2), ECDSA.Jacobian.add(k2p, d), k2p)
+    let d = ECDSA.Jacobian.double(d)
+    let k1 = Nat.div(k1, 2)
+    let k2 = Nat.div(k2, 2)
+    ECDSA.Jacobian.mul_unsafe_aux(d, k1p, k2p, k1, k2)
+  false: Pair.new<ECDSA.Jacobian, ECDSA.Jacobian>(k1p, k2p)
   }
 
 ECDSA.window(n: Nat): Nat
@@ -407,66 +396,65 @@ ECDSA.Jacobian.precompute_window.aux(
     false: points
   }
 
-// ECDSA.Jacobian.wNAF(W: Nat, precomputes: List(ECDSA.Jacobian), n: Nat): Pair(ECDSA.Jacobian, ECDSA.Jacobian)
-//   let windows = ECDSA.window(W)
-//   let windowSize = Nat.pow(2, Nat.pred(W))
-//   let maxNumber = Nat.pow(2, W)
+ECDSA.Jacobian.wNAF(W: Nat, precomputes: List(ECDSA.Jacobian), n: Nat): Pair(ECDSA.Jacobian, ECDSA.Jacobian)
+  let windows = ECDSA.window(W)
+  let windowSize = Nat.pow(2, Nat.pred(W))
+  let maxNumber = Nat.pow(2, W)
 
-//   // Create mask with W ones: 0b1111 for W=4 etc.
-//   let mask = Nat.pred(Nat.pow(2, W))
+  // Create mask with W ones: 0b1111 for W=4 etc.
+  let mask = Nat.pred(Nat.pow(2, W))
 
-//   // real and fake points
-//   let p = ECDSA.Jacobian.0
-//   let f = ECDSA.Jacobian.0
+  // real and fake points
+  let p = ECDSA.Jacobian.0
+  let f = ECDSA.Jacobian.0
 
-//   ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, 0, windows, windowSize, mask, maxNumber)
+  ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, 0, windows, windowSize, mask, maxNumber)
 
-// TODO: fix to use Int.to_nat
-// ECDSA.Jacobian.wNAF.aux(
-//   precomputes: List(ECDSA.Jacobian),
-//   p: ECDSA.Jacobian,
-//   f: ECDSA.Jacobian,
-//   n: Nat,
-//   W: Nat,
-//   window: Nat,
-//   windows: Nat,
-//   windowSize: Nat,
-//   mask: Nat,
-//   maxNumber: Nat)
-// : Pair(ECDSA.Jacobian, ECDSA.Jacobian)
-//   case Nat.ltn(window, windows) {
-//   true: 
-//     let offset = Nat.mul(window, windowSize)
-//     // Extract W bits.
-//     let wbits = Nat.bitwise_and(n, mask)
-//     // Shift number by W bits.
-//     let n = Nat.div(n, maxNumber)
-//     // If the bits are bigger than max size, we'll split those.
-//     // +224 => 256 - 32
-//     let {n, wbits} =
-//       case Nat.gtn(wbits, windowSize) {
-//         true : {Nat.succ(n), Int.new(wbits, maxNumber)}
-//         false: {n, Int.from_nat(wbits)}
-//       }
-//     // Check if we're onto Zero point.
-//     // Add random point inside current window to f.
-//     case Int.eql(wbits, Int.0) {
-//       true : // List.at should not return none. TODO: Use vector with known size instead of list for precomputes
-//         let q = Maybe.extract!(List.at!(precomputes, offset), ECDSA.Jacobian.0)
-//         let f = ECDSA.Jacobian.add(f, Bool.if!(Nat.odd(window), ECDSA.Jacobian.negate(q), q))
-//         let window = Nat.succ(window)
-//         ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, window, windows, windowSize, mask, maxNumber)
-//       false: // List.at should not return none. TODO: Use vector with known size instead of list for precomputes
-//         let {neg, wbits} = Int.to_nat_signed(wbits)
-//         let cached = Maybe.extract!(List.at!(precomputes, Nat.pred(Nat.add(offset, wbits))), ECDSA.Jacobian.0)
-//         let cached = Bool.if!(neg, ECDSA.Jacobian.negate(cached), cached)
-//         let p = ECDSA.Jacobian.add(p, cached)
-//         let window = Nat.succ(window)
-//         ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, window, windows, windowSize, mask, maxNumber)
-//     }
-//   false: Pair.new<ECDSA.Jacobian, ECDSA.Jacobian>(p, f)
-//   }
+ECDSA.Jacobian.wNAF.aux(
+  precomputes: List(ECDSA.Jacobian),
+  p: ECDSA.Jacobian,
+  f: ECDSA.Jacobian,
+  n: Nat,
+  W: Nat,
+  window: Nat,
+  windows: Nat,
+  windowSize: Nat,
+  mask: Nat,
+  maxNumber: Nat)
+: Pair(ECDSA.Jacobian, ECDSA.Jacobian)
+  case Nat.ltn(window, windows) {
+  true: let offset = Nat.mul(window, windowSize)
+    // Extract W bits.
+    let wbits = Nat.bitwise_and(n, mask)
+    // Shift number by W bits.
+    let n = Nat.div(n, maxNumber)
+    // If the bits are bigger than max size, we'll split those.
+    // +224 => 256 - 32
+    let {n, wbits} =
+      case Nat.gtn(wbits, windowSize) {
+        true : {Nat.succ(n), Int.new(wbits, maxNumber)}
+        false: {n, Int.from_nat(wbits)}
+      }
+    // Check if we're onto Zero point.
+    // Add random point inside current window to f.
+    case Int.eql(wbits, Int.0) {
+      true : // List.at should not return none. TODO: Use vector with known size instead of list for precomputes
+        let q = Maybe.extract!(List.at!(offset, precomputes), ECDSA.Jacobian.0)
+        let f = ECDSA.Jacobian.add(f, Bool.if!(Nat.odd(window), ECDSA.Jacobian.negate(q), q))
+        let window = Nat.succ(window)
+        ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, window, windows, windowSize, mask, maxNumber)
+      false: // List.at should not return none. TODO: Use vector with known size instead of list for precomputes
+        let {neg, wbits} = Int.to_nat_signed(wbits)
+        let cached = Maybe.extract!(List.at!(Nat.pred(Nat.add(offset, wbits)), precomputes), ECDSA.Jacobian.0)
+        let cached = Bool.if!(neg, ECDSA.Jacobian.negate(cached), cached)
+        let p = ECDSA.Jacobian.add(p, cached)
+        let window = Nat.succ(window)
+        ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, window, windows, windowSize, mask, maxNumber)
+    }
+  false: Pair.new<ECDSA.Jacobian, ECDSA.Jacobian>(p, f)
+  }
 
+// TODO: this function was commented in Formality code
 ECDSA.Jacobian.mul_pre(scalar: Nat, w: Nat, precomputes: List(ECDSA.Jacobian)): ECDSA.Jacobian
   ECDSA.Jacobian.mul_pre(scalar, w, precomputes)
 // ECDSA.Jacobian.mul_pre(scalar: Nat, w: Nat, precomputes: List(ECDSA.Jacobian)): ECDSA.Jacobian
@@ -503,8 +491,8 @@ ECDSA.Point.base.mul(n: Nat): ECDSA.Point
 ECDSA.Point.mul(p: ECDSA.Point, n: Nat): ECDSA.Point
   ECDSA.Jacobian.to_point(ECDSA.Jacobian.mul(ECDSA.Jacobian.from_point(p), n))
 
-// ECDSA.Point.mul_unsafe(p: ECDSA.Point, n: Nat): ECDSA.Point
-//   ECDSA.Jacobian.to_point(ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.from_point(p), n))
+ECDSA.Point.mul_unsafe(p: ECDSA.Point, n: Nat): ECDSA.Point
+  ECDSA.Jacobian.to_point(ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.from_point(p), n))
 
 ECDSA.Point.valid_point(p: ECDSA.Point): ECDSA.Error(ECDSA.Point)
   case Bool.or(Nat.eql(p@x, 0), Nat.eql(p@y, 0)) {
@@ -515,25 +503,29 @@ ECDSA.Point.valid_point(p: ECDSA.Point): ECDSA.Error(ECDSA.Point)
     }
   }
 
-// ECDSA.Point.from_compressed_bytes(bytes: U8_Vector(33)): ECDSA.Error(ECDSA.Point)
-//   let {head, tail} = Vector.extract<U8, 32>(bytes)
-//   let head = U8.to_nat(head)
-//   let x = U8_Vector.to_number<32>(tail)
-//   let sqrY = ECDSA.weierstrass(x)
-//   let y = ECDSA.sqrt(sqrY)
-//   let is_head_odd = Nat.odd(head)
-//   let is_y_odd = Nat.odd(y)
-//   let y = Bool.if!(Bool.eql(is_head_odd, is_y_odd), y, ECDSA.negate(y))
-//   let point = ECDSA.Point.new(x, y)
-//   ECDSA.Point.valid_point(point)
+ECDSA.Point.from_compressed_bytes(bytes: U8_Vector(33)): ECDSA.Error(ECDSA.Point)
+  open bytes
+  def head = bytes.head
+  def tail = bytes.tail
+  let head = U8.to_nat(head)
+  let x = U8_Vector.to_number<32>(tail)
+  let sqrY = ECDSA.weierstrass(x)
+  let y = ECDSA.sqrt(sqrY)
+  let is_head_odd = Nat.odd(head)
+  let is_y_odd = Nat.odd(y)
+  let y = Bool.if!(Bool.eql(is_head_odd, is_y_odd), y, ECDSA.negate(y))
+  let point = ECDSA.Point.new(x, y)
+  ECDSA.Point.valid_point(point)
 
-// ECDSA.Point.from_uncompressed_bytes(bytes: U8_Vector(65)): ECDSA.Error(ECDSA.Point)
-//   let {head, tail} = Vector.extract<U8, 64>(bytes)
-//   let {x, y} = Vector.split_at<U8, 64>(tail, 32)
-//   let x = U8_Vector.to_number<32>(x)
-//   let y = U8_Vector.to_number<32>(y)
-//   let point = ECDSA.Point.new(x, y)
-//   ECDSA.Point.valid_point(point)
+ECDSA.Point.from_uncompressed_bytes(bytes: U8_Vector(65)): ECDSA.Error(ECDSA.Point)
+  open bytes
+  def head = bytes.head
+  def tail = bytes.tail
+  let {x, y} = Vector.split_at<U8, 64>(tail, 32)
+  let x = U8_Vector.to_number<32>(x)
+  let y = U8_Vector.to_number<32>(y)
+  let point = ECDSA.Point.new(x, y)
+  ECDSA.Point.valid_point(point)
 
 ECDSA.Point.to_bytes(p: ECDSA.Point, compressed: Bool): U8_Vector(Bool.if<Nat>(compressed, 33, 65))
  let x = U8_Vector.from_nat(32, p@x)
@@ -671,14 +663,24 @@ ECDSA.SignResult.to_hex(sig: ECDSA.SignResult, compressed: Bool): String
 U8_Vector: Nat -> Type
   Vector(U8)
 
-// U8_Vector.to_number<n: Nat>(bytes: U8_Vector(n)): Nat
-//   U8_Vector.to_number.aux<n>(bytes, 0)
+U8_Vector.to_number<n: Nat>(bytes: U8_Vector(n)): Nat
+  U8_Vector.to_number.aux<n>(bytes, 0)
 
-// U8_Vector.to_number.aux<n: Nat>(bytes: U8_Vector(n), res: Nat): Nat
-//   case bytes {
-//     nil : res
-//     cons: U8_Vector.to_number.aux<bytes.len>(bytes.tail, Nat.add(U8.to_nat(bytes.head), Nat.mul(res, 16)))
-//   }!
+// TODO: check if this "case" is right
+U8_Vector.to_number.aux<n: Nat>(bytes: U8_Vector(n), res: Nat): Nat
+  // case bytes {
+  //   nil : res
+  //   cons: U8_Vector.to_number.aux<len>(bytes.tail, Nat.add(U8.to_nat(bytes.head), Nat.mul(res, 16)))
+  // }!
+  case n with bytes {
+    zero: res
+    succ:
+      case bytes {
+        cons :
+          U8_Vector.to_number.aux<n.pred>(bytes.tail, Nat.add(U8.to_nat(bytes.head), Nat.mul(res, 16)))
+       }
+  }!
+
 
 U8_Vector.from_nat(pad: Nat, n: Nat): U8_Vector(pad)
   Vector.reverse<U8, pad>(U8_Vector.from_nat(pad, n))
@@ -693,7 +695,7 @@ U8_Vector.from_nat(pad: Nat, n: Nat): U8_Vector(pad)
 // U8_Vector.to_hex<n: Nat>(bytes: U8_Vector(n)): String
 //   case bytes {
 //     nil : String.nil
-//     cons: String.concat(ECDSA.number_to_hex(U8.to_nat(bytes.head)), U8_Vector.to_hex<bytes.size>(bytes.tail))
+//     cons: String.concat(ECDSA.number_to_hex(U8.to_nat(bytes.head)), U8_Vector.to_hex<bytes.len>(bytes.tail))
 //   }
 
 
