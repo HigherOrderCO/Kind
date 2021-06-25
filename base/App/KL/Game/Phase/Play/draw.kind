@@ -3,53 +3,75 @@
 // BOARD DRAWING
 // =============
 
+type App.KL.Game.Phase.Play.draw.SkillInfo {
+  new(
+    hero: String
+    name: String
+    delay: U64
+  )
+}
+
 // draw all the screen (round, seconds, canvas, list of skills)
 App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   open game
+
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
     "display": "flex", 
-    "flex-direction": "column", 
-    "justify-content": "center", 
-    "align-items": "center",
+    "flex-direction": "row", 
+    "justify-content": "flex-start", 
+    //"align-items": "center",
     "position": "relative"
   }>
-    <div style={"font-size": "24px", "font-family": "monospace"}>
-      case game.moment {
-        preparation: 
-          "Turn "
-          | Nat.show(U64.to_nat(game.turn))
-          | ". Casting in "
-          | Nat.show(U64.to_nat(game.moment.countdown))
-          | " ticks..."
-        execution: case game.moment.casts {
-          nil:
-            "End of turn "
+    {App.KL.Game.Phase.Play.draw.skills_menu(game)}
+
+    <div style={ 
+      "width": "calc(100% - 200px)", 
+      "height": "100%", 
+      "display": "flex", 
+      "flex-direction": "column", 
+      "justify-content": "center", 
+      "align-items": "center",
+      "position": "relative"
+    }>
+    
+      <div style={"font-size": "24px", "font-family": "monospace"}>
+        case game.moment {
+          preparation: 
+            "Turn "
             | Nat.show(U64.to_nat(game.turn))
-            | "."
-          cons: Maybe {
-            let cast = game.moment.casts.head
-            get skill = App.KL.Game.Cast.get_skill(cast, game)
-            get hero = App.KL.Game.Cast.get_hero(cast, game)
-            let text = hero@name | " used " | skill@name | "!"
-            let text = text | if game.moment.success then "" else " But it failed."
-            return text
-          } <> "Invalid cast."
+            | ". Casting in "
+            | Nat.show(U64.to_nat(game.moment.countdown))
+            | " ticks..."
+          execution: case game.moment.casts {
+            nil:
+              "End of turn "
+              | Nat.show(U64.to_nat(game.turn))
+              | "."
+            cons: Maybe {
+              let cast = game.moment.casts.head
+              get skill = App.KL.Game.Cast.get_skill(cast, game)
+              get hero = App.KL.Game.Cast.get_hero(cast, game)
+              let text = hero@name | " used " | skill@name | "!"
+              let text = text | if game.moment.success then "" else " But it failed."
+              return text
+            } <> "Invalid cast."
+          }
         }
-      }
+      </div>
+      <div>{ 
+        let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
+        let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
+        DOM.vbox(
+          { "id": "game_screen",
+            "width": width,
+            "height": height,
+            "scale": "2"},
+          {},
+          App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
+      }</div>
     </div>
-    <div>{ 
-      let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
-      let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
-      DOM.vbox(
-        { "id": "game_screen",
-          "width": width,
-          "height": height,
-          "scale": "2"},
-        {},
-        App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
-    }</div>
   </div>
 
 // CANVAS DRAWING
@@ -166,6 +188,61 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       img
   }
 
+// Skill Menu
+// ==========
+
+App.KL.Game.Phase.Play.draw.get_game_heroes(game: App.KL.Game): List<App.KL.Game.Hero>
+  open game
+  let list = Map.values!(game.players)
+  let list = List.mapped!(list)!((player) App.KL.Game.Hero.get_by_id(player@hero_id <> 65536))
+  let list = List.somes!(list)
+  list
+
+App.KL.Game.Phase.Play.draw.get_game_skills(game: App.KL.Game): List<Pair<String,Pair<App.KL.Game.Hero, App.KL.Game.Skill>>>
+  open game
+  let game_heroes = App.KL.Game.Phase.Play.draw.get_game_heroes(game)
+  let game_skills = List.flatten!(List.mapped!(game_heroes)!((hero) List.mapped!(Map.to_list!(hero@skills))!((x) {Pair.fst!!(x), {hero,Pair.snd!!(x)}})))
+  let game_skills = List.sort!((a,b) let as = Pair.snd!!(Pair.snd!!(a)); bs = Pair.snd!!(Pair.snd!!(b)); U64.cmp(as@delay, bs@delay), game_skills)
+  game_skills
+
+App.KL.Game.Phase.Play.draw.get_casting_skill(game: App.KL.Game): Maybe<App.KL.Game.Skill>
+  open game
+  case game.moment {
+    execution: case game.moment.casts {
+      nil: none
+      cons: App.KL.Game.Cast.get_skill(game.moment.casts.head, game)
+    }
+  } default none
+
+App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
+  open game
+
+  let game_skills = App.KL.Game.Phase.Play.draw.get_game_skills(game)
+  let casting_skill = App.KL.Game.Phase.Play.draw.get_casting_skill(game)
+  let skill_infos = List.mapped!(game_skills)!((letter_hero_skill)
+    let {letter, hero_skill} = letter_hero_skill
+    let {hero, skill} = hero_skill
+    let background = case casting_skill {
+      none: "none"
+      some: if String.eql(casting_skill.value@name, skill@name)
+        then "rgb(220,220,220)"
+        else "none"
+    }
+    <div style={
+      "background": background
+      "display": "flex"
+      "align-items": "center"
+    }>
+      <img style={"margin": "4px"} src=hero@picture(false,0)></img>
+      <span style={"margin-left": "4px"}>"[" | letter | "] " | skill@name</span>
+    </div>)
+
+    <div style={"width": "200px", "height": "100%", "background": "rgb(245,245,245)"}>
+      for skill_info in skill_infos:
+        skill_info
+    </div>
+
+
 // AUX FUNCTIONS
 // =============
 
@@ -217,3 +294,4 @@ App.KL.Game.Phase.Play.draw.shield(
   let shield = I32.to_int(shield)
   let shield = Nat.show(Int.to_nat(shield))
   VoxBox.Draw.text(shield, PixelFont.small_black, Pos32.new(cx, cy, 0), img)
+
