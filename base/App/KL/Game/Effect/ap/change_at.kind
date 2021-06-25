@@ -1,0 +1,13 @@
+App.KL.Game.Effect.ap.change_at(
+  value: I32
+): App.KL.Game.Effect.At<I32>
+
+  (pos)
+  App.KL.Game.Effect { 
+    get board = App.KL.Game.Effect.board.get
+    let res = App.KL.Game.Board.Creature.change_ap(value, pos, board)
+    let ap_cost = res@fst
+    let board = res@snd
+    App.KL.Game.Effect.board.set(board)
+    return ap_cost
+  }

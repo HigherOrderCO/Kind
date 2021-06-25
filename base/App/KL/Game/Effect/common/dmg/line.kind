@@ -1,6 +1,7 @@
 App.KL.Game.Effect.common.dmg.line(
   size: I32
   dmg: I32
+  ap_cost: I32
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect { 

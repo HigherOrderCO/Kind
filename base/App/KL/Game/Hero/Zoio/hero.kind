@@ -9,13 +9,13 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
 
   let max_hp = 25 :: I32
 
-  let max_ap = 10 :: I32
+  let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
-    "Q": App.KL.Game.Skill.new("Damage Placeholder for Q", 700, 16, 3, App.KL.Game.Effect.common.dmg.single(3, 8))
-    "W": App.KL.Game.Skill.new("Eye Beam", 600, 16, 2, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(2,5))
-    "E": App.KL.Game.Skill.new("Area Damage Placeholder for E", 800, 16, 2, App.KL.Game.Effect.common.dmg.circle(2, 1, 4))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Damage Placeholder for Q", 700, 16, 3, App.KL.Game.Effect.common.dmg.single(3, 8, 1))
+    "W": App.KL.Game.Skill.new("Eye Beam", 600, 16, 2, App.KL.Game.Effect.common.dmg.straight_line(2,5, 1))
+    "E": App.KL.Game.Skill.new("Area Damage Placeholder for E", 800, 16, 2, App.KL.Game.Effect.common.dmg.circle(2, 1, 4, 1))
   }
 
   let on_stepped = none

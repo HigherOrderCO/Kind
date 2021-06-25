@@ -1,0 +1,32 @@
+// Updates the Creature with its new Status
+App.KL.Game.Creature.Status.update(
+  creature: App.KL.Game.Creature
+): App.KL.Game.Creature
+
+  open creature
+  status_update = App.KL.Game.Creature.Status.update.aux(creature.status)
+  creature@status <- status_update
+
+
+// Decreases the duration of all active status and remove expired ones
+App.KL.Game.Creature.Status.update.aux(
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+  case status {
+    nil:
+      []
+    cons: 
+      let head = case status.head {
+        stun: App.KL.Game.Creature.Status.stun(I32.sub(status.head.duration, 1))
+        shield: App.KL.Game.Creature.Status.shield(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
+        haste : App.KL.Game.Creature.Status.haste(I32.sub(status.head.duration, 1), status.head.amount)
+        weaken : App.KL.Game.Creature.Status.weaken(I32.sub(status.head.duration, 1), status.head.amount)
+      }
+      let tail = App.KL.Game.Creature.Status.update.aux(status.tail)
+      case head {
+        stun: if I32.gtn(head.duration,0) then head & tail else tail
+        haste : if I32.gtn(head.duration,0) then head & tail else tail
+        shield: if I32.gtn(head.duration,0) then head & tail else tail
+        weaken : if I32.gtn(head.duration,0) then head & tail else tail
+      }
+  }

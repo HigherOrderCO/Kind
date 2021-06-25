@@ -2,12 +2,15 @@ App.KL.Game.Effect.common.single<A: Type>(
   eff_at: App.KL.Game.Effect.At<A>
   range: I32
   value: I32
+  ap_cost: I32
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect { 
+    App.KL.Game.Effect.ap.verify(ap_cost)
     App.KL.Game.Effect.limit_range(range)
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
+    App.KL.Game.Effect.ap.cost(ap_cost,center)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     eff_at(target)
     return unit
