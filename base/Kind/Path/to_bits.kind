@@ -1,2 +1,0 @@
-Kind.Path.to_bits(path: Kind.Path): Bits
-  path(Bits.e)

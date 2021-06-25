@@ -1,2 +1,0 @@
-Kind.Path.i(path: Kind.Path): Kind.Path
-  (x) path(Bits.i(x))

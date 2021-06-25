@@ -2,8 +2,11 @@
 // This function is fully expanded to ensure good performance in any target,
 // independent of the performance of maps, chunking functions, or primitives.
 Kind.Name.to_bits(name: Kind.Name): Bits
+  Kind.Name.to_bits.go(name, Bits.e)
+
+Kind.Name.to_bits.go(name: Kind.Name, end: Bits): Bits
   case name {
-    nil: Bits.e
+    nil: end
     cons:
       let x = name.head
       let O = Bits.o
