@@ -1,0 +1,6 @@
+App.KL.Game.Effect.hp.heal_at(
+  heal: I32,
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect.hp.change_at(heal, pos)

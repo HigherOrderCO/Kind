@@ -1,0 +1,29 @@
+App.KL.Game.Effect.At<A: Type>: Type
+  Hexagonal.Axial -> App.KL.Game.Effect<A>
+
+// Modifies a "_at" function, adding a condition to it
+App.KL.Game.Effect.At.cond<A: Type>(
+  cond: App.KL.Game.Creature -> App.KL.Game.Creature -> Bool
+  eff: App.KL.Game.Effect.At<A>
+): Hexagonal.Axial -> App.KL.Game.Effect<Maybe<A>>
+  (pos)
+  App.KL.Game.Effect {
+    get caster = App.KL.Game.Effect.board.creature.caster
+    get target = App.KL.Game.Effect.board.creature.get(pos)
+    without caster: App.KL.Game.Effect { return none }
+    without target: App.KL.Game.Effect { return none }
+    if cond(caster, target) then App.KL.Game.Effect {
+      get result = eff(pos)
+      return some(result)
+    } else App.KL.Game.Effect {
+      return none
+    }
+  }
+
+// Modifies a "_at" function to only affect allies
+App.KL.Game.Effect.At.ally<A: Type>(eff: App.KL.Game.Effect.At<A>): App.KL.Game.Effect.At<Maybe<A>>
+  App.KL.Game.Effect.At.cond<A>((caster,target) App.KL.Game.Team.eql(caster@team, target@team), eff)
+
+// Modifies a "_at" function to only affect enemies
+App.KL.Game.Effect.At.enemy<A: Type>(eff: App.KL.Game.Effect.At<A>): App.KL.Game.Effect.At<Maybe<A>>
+  App.KL.Game.Effect.At.cond<A>((caster,target) Bool.not(App.KL.Game.Team.eql(caster@team, target@team)), eff)

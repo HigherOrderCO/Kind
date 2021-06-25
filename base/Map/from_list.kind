@@ -3,4 +3,4 @@
 // associated with "ab" on 2 and "cd" on 4
 
 Map.from_list<A: Type>(xs: List<Pair<String,A>>): Map(A)
-  BBL.from_list!!(String.cmp, xs)
+  BBT.from_list!!(String.cmp, xs)

@@ -9,8 +9,11 @@ Kind.Comp.replace(str: String, vars: List(String)): String
       if U16.eql(a, '$') then 
         def is_num = (b) U16.gte(b, '0') && U16.lte(b, '9')
         let n_str = String.take_while(is_num, str.tail)
-        let n_str.tail = String.drop_while(is_num, str.tail)
-        (vars[Nat.read(n_str)] <> "?") | Kind.Comp.replace(n_str.tail, vars)
+        if Nat.gtn(String.length(n_str), 0) then
+          let n_str.tail = String.drop_while(is_num, str.tail)
+          (vars[Nat.read(n_str)] <> "?") | Kind.Comp.replace(n_str.tail, vars)
+        else
+          String.cons(a, Kind.Comp.replace(str.tail, vars))
       else
         String.cons(a, Kind.Comp.replace(str.tail, vars))
   }

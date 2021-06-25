@@ -1,0 +1,27 @@
+// Returns a list of coordinates that makes a semi circular shape
+Hexagonal.Axial.semi_circle(
+  origin: Hexagonal.Axial,
+  goal: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  new = Hexagonal.Axial.new
+  open origin as a
+  open goal   as b
+  let coords =
+  if I32.eql(a.i, b.i) then
+    [
+      new((a.j + b.i - b.j), b.j) 
+      new((b.j + a.i - a.j), a.j) 
+    ]
+  else
+    if I32.eql(a.j, b.j) then
+    [
+      new(a.i, (a.j + b.i - a.i))
+      new(b.i, (b.j + a.i - b.i)) 
+    ]
+    else
+    [
+      new(a.i, b.j)              
+      new(b.i, a.j)               
+    ]
+  goal & coords

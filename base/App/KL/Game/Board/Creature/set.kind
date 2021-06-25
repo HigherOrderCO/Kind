@@ -1,0 +1,12 @@
+App.KL.Game.Board.Creature.set(
+  coord: Hexagonal.Axial
+  creature: App.KL.Game.Creature
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+
+  let tile = App.KL.Game.Board.get(coord, board)
+  case tile { 
+    none: board
+    some: App.KL.Game.Board.set(coord, tile.value@creature <- some(creature), board)
+  }
+  

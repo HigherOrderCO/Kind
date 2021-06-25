@@ -3,7 +3,7 @@ App.KL.Game.Field.Grass.field: App.KL.Game.Field
   let draw = (terrain, indicator)
     case indicator {
       background: App.Kaelin.Assets.tile.green_2
-      green: App.Kaelin.Assets.tile.green_1
+      green: App.Kaelin.Assets.tile.effect.light_blue2
       red: App.Kaelin.Assets.tile.effect.light_red2
       yellow: App.Kaelin.Assets.tile.effect.light_red2
       blue:App.Kaelin.Assets.tile.effect.dark_blue2

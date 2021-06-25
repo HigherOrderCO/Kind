@@ -1,0 +1,21 @@
+App.KL.Game.Effect.area<A: Type>(
+  effect: Hexagonal.Axial -> App.KL.Game.Effect<A>
+  coords: List<Hexagonal.Axial>
+): App.KL.Game.Effect<Hexagonal.Axial.BBT<A>>  
+  App.KL.Game.Effect.area.go<A>(effect, coords, Hexagonal.Axial.BBT.new!)
+
+App.KL.Game.Effect.area.go<A: Type>(
+  effect: Hexagonal.Axial -> App.KL.Game.Effect<A>,
+  coords: List<Hexagonal.Axial>
+  results: Hexagonal.Axial.BBT<A>
+): App.KL.Game.Effect<Hexagonal.Axial.BBT<A>>  
+  case coords {
+    nil: App.KL.Game.Effect {
+      return results
+    }
+    cons: App.KL.Game.Effect {
+      get result = effect(coords.head)
+      let results = Hexagonal.Axial.BBT.set!(coords.head, result, results)
+      App.KL.Game.Effect.area.go<A>(effect, coords.tail, results)
+    }
+  }

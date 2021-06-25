@@ -6,6 +6,6 @@ type App.KL.Game.Hero {
     max_hp: I32
     max_ap: I32
     skills: Map<App.KL.Game.Skill> // letter -> skill
+    on_stepped: Maybe<App.KL.Game.Effect<Unit>>
   )
 }
-

@@ -5,4 +5,4 @@
 // == 
 // {".black.brown.orange.white.yellow.", 11}
 Map.for<A: Type>(map: Map(A))<B: Type>(b: B, f: String -> A -> B -> B): B
-  BBL.for!!(map)!(b, f)
+  BBT.for!!(map)!(b, f)

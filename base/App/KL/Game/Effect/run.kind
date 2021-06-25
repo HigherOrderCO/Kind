@@ -1,0 +1,10 @@
+App.KL.Game.Effect.run<A: Type>(
+  effect: App.KL.Game.Effect<A>
+  center: Hexagonal.Axial
+  target: Hexagonal.Axial
+  game: App.KL.Game
+): App.KL.Game
+  case effect(center, target, game@board) as result {
+    err: game
+    new: game@board <- result.board
+  }

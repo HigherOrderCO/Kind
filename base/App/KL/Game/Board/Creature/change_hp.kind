@@ -1,0 +1,53 @@
+App.KL.Game.Board.Creature.change_hp(
+  value: I32
+  pos: Hexagonal.Axial
+  board: App.KL.Game.Board
+): Pair(I32, App.KL.Game.Board)
+
+  creature = App.KL.Game.Board.Creature.get(pos, board)
+  case creature { 
+    none:
+      {0, board}
+    some:
+      open creature.value as creature
+      open creature.hero as hero
+      new_hp = I32.max((creature.value@hp + value) , 0)
+      new_hp = I32.min(new_hp, hero.max_hp)
+      hp_diff = new_hp - creature.value@hp 
+      aux = App.KL.Game.Board.Creature.change_hp_aux(hp_diff)
+      board = App.KL.Game.Board.Creature.modify_at(aux, pos, board)
+      new_creature = App.KL.Game.Board.Creature.change_hp_aux(hp_diff, creature.value)
+      if I32.lte(new_creature@hp, 0) then
+        dead = App.KL.Game.Board.Creature.del(pos, board)
+        {+0#32, dead}
+      else
+        {hp_diff, board}
+  }
+
+
+
+
+App.KL.Game.Board.Creature.change_hp_aux(
+  change: I32,
+  creature: App.KL.Game.Creature
+): App.KL.Game.Creature
+
+  open creature
+  open creature.hero as hero
+    verify = I32.cmp(change, 0)
+    case verify { 
+      ltn:
+        //dmg
+        {status, blocked} = App.KL.Game.Creature.Status.hit_shields(I32.neg(change), creature.status)
+        true_dmg = change + blocked 
+        new_creature = creature@status <- status
+        new_hp = I32.min((creature.hp + true_dmg), hero.max_hp)
+        new_creature@hp <- new_hp
+      eql:
+        //nothing
+        creature
+      gtn:
+        //heal
+        new_hp = I32.min((creature.hp + change), hero.max_hp)
+        creature@hp <- new_hp
+    }

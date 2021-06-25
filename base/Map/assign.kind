@@ -1,4 +1,4 @@
 // Copies all key and vals from b to a
 
 Map.assign<A: Type>(a: Map(A), b: Map(A)): Map(A)
-  BBL.assign(String, A, String.cmp, b, a)
+  BBT.assign(String, A, String.cmp, b, a)

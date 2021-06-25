@@ -1,0 +1,8 @@
+// Returns a list of coordinates from 1/6 of a circle after rotating 60 degrees
+// counter_clockise
+Hexagonal.Axial.counter_clock_rotation(
+  start: Hexagonal.Axial
+): List<Hexagonal.Axial>
+
+  coord = Hexagonal.Axial.to_cubic(start)
+  List.map!!(Hexagonal.Cubic.to_axial, Hexagonal.Cubic.counter_clock_rotation(coord))
