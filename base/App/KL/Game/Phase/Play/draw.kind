@@ -123,17 +123,18 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
   
   Maybe {
     get skill      = skill
-    get center     = App.KL.Game.Phase.Play.Draw.estimate_position(user, skill@delay, game)
-    get creature   =  App.KL.Game.Board.Creature.get(center, game@board)
+    get center     = App.KL.Game.Board.find_player_coord(user, game@board)
+    get est_pos    = App.KL.Game.Phase.Play.Draw.estimate_position(user, skill@delay, game)
+    get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue
     let indicators = Hexagonal.Axial.BBT.new!
     let haste = App.KL.Game.Creature.get_total_haste(creature)
     //TODO: verify Player status in center to check how far the range should be shown.
-    let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
+    let coords     = Hexagonal.Axial.range(est_pos, Nat.to_i32(U64.to_nat(skill@range)) + haste)
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.BBT.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, target, game@board)
+    let areas = App.KL.Game.Effect.indicators.get_indicators(est_pos, skill, target, game@board)
     return Hexagonal.Axial.BBT.union!(indicators, areas)
   } <> Hexagonal.Axial.BBT.new<App.KL.Game.Indicator>
 
