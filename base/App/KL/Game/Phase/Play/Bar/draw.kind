@@ -18,21 +18,27 @@ App.KL.Game.Phase.Play.Bar.progress_line(
   img: VoxBox,
 ): VoxBox // Draw a line using p as index in the progress bar
   open rect
-  let size = rect.lines_size
-  let x = rect.x + (p * size)
+  let x = rect.x + p
   let y = rect.y
-  App.KL.Game.Phase.Play.Bar.draw_line({x, y+rect.height-rect.lines_size}, x, y+rect.lines_size, z, col, img) 
+  if Bool.or(U32.eql(p, 0), U32.gte(p, rect.width)) then 
+     img 
+  else
+    App.KL.Game.Phase.Play.Bar.draw_line({x, y+rect.height-rect.lines_size}, x, y+rect.lines_size, z, col, img) 
 
 App.KL.Game.Phase.Play.Bar.complete_square(
   bar : App.KL.Game.Phase.Play.Bar.Progress,
   rect : App.KL.Game.Phase.Play.Bar.Rectangular,
   img: VoxBox) : VoxBox
   let min = ((x, y) if U32.ltn(x, y) then x else y) :: U32 -> U32 -> U32
+  let max = ((x, y) if U32.ltn(x, y) then y else x) :: U32 -> U32 -> U32
+
   open rect
   open bar
-  let max = rect.width / rect.lines_size
-  let line = (bar.max + bar.defense) / max
-  let bar_max = min((bar.max + bar.defense) / line, max)
+  let line = max((bar.max + bar.defense) / rect.width, 1)
+    // Here if the bar.max + bar.defense is less than rect.width the value will be 
+    // less than 0 (that is okay, however we do not use double), a possible solution is using division or comparate every value
+
+  let bar_max = rect.width
   let bar_actual = bar.loss / line
   let bar_defense = bar.defense / line
   let progress = bar_max - bar_actual
@@ -46,9 +52,9 @@ App.KL.Game.Phase.Play.Bar.complete_square(
     App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_empty, 2, rect, img)
   
   // Draw separator depending on max value
-  let separator = 5#32
-  for i : U32 from 1 to 5 with img:   //U32
-    App.KL.Game.Phase.Play.Bar.progress_line(i*(bar_max / separator), bar.col_empty, 3, rect, img)  
+  let separator = line 
+  for i : U32 from 1 to separator with img:   //U32
+    App.KL.Game.Phase.Play.Bar.progress_line((i * ((bar_max -1) / separator)) + 1, bar.col_empty, 3, rect, img)  
   img
   
 App.KL.Game.Phase.Play.Bar.draw_bar(
