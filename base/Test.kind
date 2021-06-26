@@ -1,7 +1,5 @@
-Test: Nat
-  let pair = {1,2}
-  case pair@fst {
-    zero: 0
-    succ: 1
-  }
+porc(base : Nat, value : Nat, total : Nat) : Nat
+   (total * (value*100/base))/100
 
+Test: Nat
+  porc(25, 12, 38)

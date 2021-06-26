@@ -1,0 +1,10 @@
+type App.Example.State.global {
+   new
+}
+
+type App.Example.State.local {
+  new
+}
+
+App.Example.State: App.State
+  App.State.new(App.Example.State.local, App.Example.State.global)

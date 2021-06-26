@@ -10,6 +10,6 @@ App.KL.Game.Phase.Play.Bar.show_hp(
   open hero
   let shield = App.KL.Game.Board.Creature.total_shield(creature)
 
-  let bar = App.KL.Game.Phase.Play.Bar.Progress.new(I32.to_u32(hero.max_hp*10), I32.to_u32((hero.max_hp*10) - (creature.hp*10)), I32.to_u32(shield*10), Col32.new(31, 203, 1, 255), Col32.new(202, 202, 201, 255), Col32.new(0, 0, 0, 255))  
+  let bar = App.KL.Game.Phase.Play.Bar.Progress.new(I32.to_u32(hero.max_hp), I32.to_u32(hero.max_hp) - I32.to_u32(creature.hp), I32.to_u32(shield), Col32.new(31, 203, 1, 255), Col32.new(202, 202, 201, 255), Col32.new(0, 0, 0, 255))
   App.KL.Game.Phase.Play.Bar.draw(cx, cy, 2, 4, 38, bar, Col32.new(157, 159, 158, 255), img)
     

@@ -1,0 +1,3 @@
+App.Example.post: App.Post<App.Example.State>
+  (time, room, addr, data, glob)
+     glob

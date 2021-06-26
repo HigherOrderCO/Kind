@@ -1,0 +1,5 @@
+App.Example.init : App.Init<App.Example.State>
+    App.Store.new!(
+      App.Example.State.local.new
+      App.Example.State.global.new
+    )

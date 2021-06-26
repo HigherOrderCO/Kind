@@ -1,0 +1,3 @@
+App.Example.draw(img: VoxBox): App.Draw<App.Example.State>
+(state) 
+     DOM.vbox({}, {}, img)
