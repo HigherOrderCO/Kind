@@ -1,3 +1,0 @@
-App.Example.tick: App.Tick<App.Example.State>
-  (tick, glob)
-    glob

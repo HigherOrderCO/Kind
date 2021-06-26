@@ -1,3 +1,0 @@
-App.Example.when: App.When<App.Example.State>
-  (event, state)
-      App.pass!
