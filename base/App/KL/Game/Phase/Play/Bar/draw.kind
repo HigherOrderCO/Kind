@@ -25,6 +25,9 @@ App.KL.Game.Phase.Play.Bar.progress_line(
   else
     App.KL.Game.Phase.Play.Bar.draw_line({x, y+rect.height-rect.lines_size}, x, y+rect.lines_size, z, col, img) 
 
+porc(base : U32, value : U32, total : U32) : U32
+   (total * (value*100/base))/100
+
 App.KL.Game.Phase.Play.Bar.complete_square(
   bar : App.KL.Game.Phase.Play.Bar.Progress,
   rect : App.KL.Game.Phase.Play.Bar.Rectangular,
@@ -34,27 +37,22 @@ App.KL.Game.Phase.Play.Bar.complete_square(
 
   open rect
   open bar
-  let line = max((bar.max + bar.defense) / rect.width, 1)
-    // Here if the bar.max + bar.defense is less than rect.width the value will be 
-    // less than 0 (that is okay, however we do not use double), a possible solution is using division or comparate every value
-
-  let bar_max = rect.width
-  let bar_actual = bar.loss / line
-  let bar_defense = bar.defense / line
-  let progress = bar_max - bar_actual
+  let bar_actual = porc(bar.max, bar.loss, rect.width)
+  let progress = rect.width - bar_actual
+  let bar_defense = min(porc(bar.max, bar.defense, rect.width), bar_actual)
 
   // Draw the color depending on status by BarProgress
-  for i : U32 from 1 to (bar_max - bar_defense) - bar_actual with img:
+  for i : U32 from 1 to progress with img:
     App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_ful, 2, rect, img)
-  for i : U32 from (bar_max - bar_defense) - bar_actual to bar_max - bar_actual with img :
+  for i : U32 from progress to progress + bar_defense with img :
     App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_defense, 2, rect, img)
-  for i : U32 from bar_max - bar_actual to bar_max with img:
+  for i : U32 from (progress + bar_defense) to rect.width with img:
     App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_empty, 2, rect, img)
   
-  // Draw separator depending on max value
-  let separator = line 
+  let separator = min(bar.max/6, rect.width/2)
+  
   for i : U32 from 1 to separator with img:   //U32
-    App.KL.Game.Phase.Play.Bar.progress_line((i * ((bar_max -1) / separator)) + 1, bar.col_empty, 3, rect, img)  
+    App.KL.Game.Phase.Play.Bar.progress_line((i * ((rect.width -1) / separator)) + 1, bar.col_empty, 3, rect, img)  
   img
   
 App.KL.Game.Phase.Play.Bar.draw_bar(
