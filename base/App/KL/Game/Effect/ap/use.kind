@@ -2,7 +2,8 @@ App.KL.Game.Effect.ap.use(
   cost: I32
 ): App.KL.Game.Effect<Unit>
 
-  App.KL.Game.Effect { 
+  App.KL.Game.Effect {
+    App.KL.Game.Effect.ap.add(cost) 
     get caster = App.KL.Game.Effect.board.creature.caster
     get center = App.KL.Game.Effect.coord.get_center
     without caster: App.KL.Game.Effect.fail

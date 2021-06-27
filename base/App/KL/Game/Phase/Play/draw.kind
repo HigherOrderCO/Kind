@@ -104,11 +104,12 @@ App.KL.Game.Phase.Play.draw.board(
   map = game@board
   mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   indicators = App.KL.Game.Phase.Play.Draw.get_indicators(preview@skill, mouse_coord, user, game)
+  ap_used = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
   map = Hexagonal.Axial.BBT.to_list!(map)
   for pos in map with img:
     {coord, tile} = pos
     img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
-    img = App.KL.Game.Phase.Play.draw.tile.creature(tile@creature, coord, img)
+    img = App.KL.Game.Phase.Play.draw.tile.creature(tile@creature, coord, ap_used, img)
     img
   img
 
@@ -167,6 +168,7 @@ App.KL.Game.Phase.Play.draw.tile.terrain(
 App.KL.Game.Phase.Play.draw.tile.creature(
   creature: Maybe<App.KL.Game.Creature>,
   coord: Hexagonal.Axial,
+  ap_used: Maybe<Pair<String, I32>>
   img: VoxBox
 ): VoxBox
   case creature {
@@ -182,13 +184,10 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       //let cx = cx - aux //U32
       let img = VoxBox.Draw.image(cx, cy, 0u, drawing, img)
       let img = if I32.gtn(creature.value@hp, 0)
-        then App.KL.Game.Phase.Play.draw.hp(cx + 128 - 16, cy + 128 - 28, creature.value, img)
+        //then App.KL.Game.Phase.Play.Bar.show_hp(cx + 128 - 16, cy + 128 - 28, creature.value, img)
+        then App.KL.Game.Phase.Play.draw.hp(cx + 128 - 4, cy + 128 - 28, creature.value, img)
         else img
-      let img = if I32.gtn(creature.value@ap, 0) then
-                App.KL.Game.Phase.Play.draw.ap(cx + 128 - 16, cy + 128 - 40, creature.value, img)
-          else 
-            img
-      img
+      App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 32, creature.value, ap_used, img)
   }
 
 // Skill Menu
@@ -287,14 +286,43 @@ App.KL.Game.Phase.Play.draw.hp(
   VoxBox.Draw.text(hp, PixelFont.small_black, Pos32.new(cx,cy,0), img)
 
 App.KL.Game.Phase.Play.draw.ap(
-  cx: U32
-  cy: U32
+  x: U32
+  y: U32
   creature: App.KL.Game.Creature
+  ap_used: Maybe<Pair<String, I32>>
   img: VoxBox
 ): VoxBox
-  let ap = I32.to_int(creature@ap)
-  let ap = Nat.show(Int.to_nat(ap))
-  VoxBox.Draw.text(ap, PixelFont.small_black, Pos32.new(cx,cy,0), img)
+  no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, creature@ap, 0, 0, I32.to_u32(creature@hero@max_ap), img)
+  case ap_used {
+    none: 
+      no_cast
+    some:
+      // Verifies if the creature is the one casting current ability
+      if String.eql(ap_used.value@fst, creature@player <> "none") then 
+        App.KL.Game.Phase.Play.draw.ap.bars(x, y, creature@ap, ap_used.value@snd, 0, I32.to_u32(creature@hero@max_ap), img)
+      else
+        no_cast
+  }
+
+      
+App.KL.Game.Phase.Play.draw.ap.bars(x: U32 y: U32, blue: I32, red: I32, bar_idx: U32, bar_quantity: U32, img: VoxBox): VoxBox
+  if I32.eql(0, blue) then
+    if I32.eql(0, red) then 
+      if U32.gte(bar_idx, bar_quantity) then
+        img
+      else 
+        img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.gray, img)
+        App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red, bar_idx + 1, bar_quantity, img)
+    else
+      img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.red, img)
+      App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red - 1, bar_idx + 1, bar_quantity, img)
+  else 
+    img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.blue, img)
+    App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue - 1, red, bar_idx + 1, bar_quantity, img)
+
+
+  
+
 
 App.KL.Game.Phase.Play.draw.shield(
   cx: U32
