@@ -1,0 +1,9 @@
+Vector.set<A: Type>(size: Nat, v: Vector<A>(size), idx: Fin(size), a: A): Vector<A>(size)
+  case size with v idx {
+    zero: case idx {}
+    succ: open v
+      case idx {
+        zero: Vector.cons!!(a, v.tail)
+        succ: Vector.cons!!(v.head, Vector.set!!(v.tail, idx.pred, a))
+      }
+  }!
