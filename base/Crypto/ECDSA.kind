@@ -67,7 +67,6 @@ ECDSA.CURVE.beta: Nat
 ECDSA.mod(a: Nat): Nat
   Nat.mod(a, ECDSA.CURVE.P)
 
-// TODO: improve syntax to use "if"
 ECDSA.negate(a: Nat): Nat
   let a = ECDSA.mod(a)
   case Nat.eql(a, 0) {
@@ -81,7 +80,6 @@ ECDSA.sub(a: Nat, b: Nat): Nat
 ECDSA.pow_mod(a: Nat, b: Nat, modulo: Nat): Nat
   ECDSA.pow_mod.aux(a, b, modulo, 1)
 
-// TODO: improve syntax to use "if"
 ECDSA.pow_mod.aux(a: Nat, b: Nat, modulo: Nat, res: Nat): Nat
   case Nat.eql(b, 0) {
     true : res
@@ -219,8 +217,8 @@ ECDSA.Jacobian.base.precomputes: List(ECDSA.Jacobian)
 ECDSA.Jacobian.base.mul(n: Nat): ECDSA.Jacobian
   ECDSA.Jacobian.mul_pre(n, ECDSA.Jacobian.base.window_size, ECDSA.Jacobian.base.precomputes)
 
-// ECDSA.Jacobian.base.mul_unsafe(n: Nat): ECDSA.Jacobian
-//   ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.base, n)
+ECDSA.Jacobian.base.mul_unsafe(n: Nat): ECDSA.Jacobian
+  ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.base, n)
 
 ECDSA.Jacobian.equal(a: ECDSA.Jacobian, b: ECDSA.Jacobian): Bool
   open a
@@ -562,7 +560,6 @@ ECDSA.Point.to_hex(p: ECDSA.Point, compressed: Bool): String
   def size = Bool.if!(compressed, 33, 65)
   U8_Vector.to_hex<size>(ECDSA.Point.to_bytes(p, compressed))
 
-// TODO: change keyword "use"
 // ECDSA.Point.from.SignResult(msgHash: String, sign: ECDSA.SignResult, recovery: Nat): ECDSA.Error(ECDSA.Point)
 //   let r = sign@r
 //   let s = sign@s
@@ -572,14 +569,21 @@ ECDSA.Point.to_hex(p: ECDSA.Point, compressed: Bool): String
 //     let rinv = ECDSA.invert(r, ECDSA.CURVE.n)
 //     let h = Nat.parse_hex(msgHash)
 //     let header = U8.from_nat(Nat.add(2, Nat.bitwise_and(recovery, 1)))
-//     let bytes = Vector.ext<U8, 32>(header, U8_Vector.from_nat(32, r))
-//     use P_ = ECDSA.Error.bind!!(ECDSA.Point.from_compressed_bytes(bytes))
-//     let sP = ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.from_point(P_), s)
-//     let hG = ECDSA.Jacobian.negate(ECDSA.Jacobian.base.mul(h))
-//     let Q = ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.add(sP, hG), rinv)
-//     let point = ECDSA.Jacobian.to_point(Q)
-//     ECDSA.Point.valid_point(point)
+//     let bytes = Vector.cons<U8, 32>(header, U8_Vector.from_nat(32, r))
+//     // use point = ECDSA.Error.bind!!(ECDSA.Point.from_compressed_bytes(bytes))
+//     // let sP = ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.from_point(point), s)
+//     // FIXME: 
+//     // let func = ((point) ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.from_point(point), s)) :: ECDSA.Point -> ECDSA.Jacobian
+
+//     let sP = ECDSA.Error.bind<ECDSA.Point>!(ECDSA.Point.from_compressed_bytes(bytes))(func)
+//     // let hG = ECDSA.Jacobian.negate(ECDSA.Jacobian.base.mul(h))
+//     // let Q = ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.add(sP, hG), rinv)
+//     // let point = ECDSA.Jacobian.to_point(Q)
+//     // ECDSA.Point.valid_point(point)
+//     ?a
 //   }
+
+// ECDSA.Error.bind<A: Type, B: Type>(m: ECDSA.Error(A), f: A -> ECDSA.Error(B)): ECDSA.Error(B)
 
 ECDSA.Point.from_PrivateKey(n: Nat): ECDSA.Point
   ECDSA.Point.base.mul(n)
@@ -719,16 +723,17 @@ U8_Vector.to_hex<n: Nat>(bytes: U8_Vector(n)): String
 //           let b   = ECDSA.parse_byte(String.cons_Var(1, hex.head))
 //           let vec = Vector.cons<U8,0>(U8.from_nat(b), Vector.nil<U8>)
 //           Sigma.new<Nat, U8_Vector>(1, vec)
-//         cons:
+//         cons: 
 //           let b = ECDSA.parse_byte(String.cons_Var(2, hex.head, hex.tail.head))
 //           let sig = U8_Vector.from_hex(hex.tail.tail)
-//           // open sig
-//           let len = sig@fst
-//           let vec = sig@snd
-//           let vec = Vector.cons<U8,len>(U8.from_nat(b), vec)
+//           open sig
+//           let len = sig.fst
+//           let vec = sig.snd
+//           let vec = Vector.cons!!(U8.from_nat(b), vec)
+//           // ?cons
 //           Sigma.new<Nat, U8_Vector>(Nat.succ(len), vec)
 //       }!
-//   }!
+//   }
 
 U8_Vector.fill(n: Nat, s: U8): U8_Vector(n)
   Vector.fill<U8>(n, s)
@@ -767,15 +772,21 @@ ECDSA.sign_qrs(priv: Nat, qrs: ECDSA.QRS): String
   let sig = ECDSA.SignResult.new(qrs@r, adjustedS)
   ECDSA.SignResult.to_hex(sig, Bool.false)
 
-// FIXME: what was the "use" from previous syntax used for?
 // ECDSA.sign_with_k(msgHash: String, priv: Nat, k: Nat): ECDSA.Error(String)
 //   let msg = Nat.parse_hex(msgHash)
 //   use qrs = ECDSA.Error.bind!!(ECDSA.QRS.from_k(k, msg, priv))
 //   ECDSA.Error.ok!(ECDSA.sign_qrs(priv, qrs))
+ECDSA.sign_with_k(msgHash: String, priv: Nat, k: Nat): ECDSA.Error(String)
+  let msg = Nat.parse_hex(msgHash)
+  let func = (qrs) ECDSA.Error.ok!(ECDSA.sign_qrs(priv, qrs))
+  ECDSA.Error.bind!!(ECDSA.QRS.from_k(k, msg, priv))(func)
 
 // ECDSA.sign(msgHash: String, priv: Nat): ECDSA.Error(String)
-//   use qrs = ECDSA.Error.bind!!(ECDSA.get_QRS_RFC6979(msgHash, priv))
-//   ECDSA.Error.ok!(ECDSA.sign_qrs(priv, qrs))
+//   use qrs = ECDSA.Error.bind<,>(ECDSA.get_QRS_RFC6979(msgHash, priv))
+//   ECDSA.Error.ok<>(ECDSA.sign_qrs(priv, qrs))
+ECDSA.sign(msgHash: String, priv: Nat): ECDSA.Error(String)
+  let func = (qrs) ECDSA.Error.ok!(ECDSA.sign_qrs(priv, qrs))
+  ECDSA.Error.bind!!(ECDSA.get_QRS_RFC6979(msgHash, priv))(func)
 
 ECDSA.verify(signature: ECDSA.SignResult, msgHash: String, pubkey: ECDSA.Point): Bool
   let h = ECDSA.truncate_hash(msgHash)
