@@ -1,0 +1,7 @@
+Matrix.add<T: Type>(
+  add: T -> T -> T
+  n: Nat, m: Nat,
+  A: Matrix<T>(n, m)
+  B: Matrix<T>(n, m)
+): Matrix<T>(n, m)
+  Vector.add!(Vector.add!(add, m), n, A, B)

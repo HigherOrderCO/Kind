@@ -5,10 +5,9 @@ App.KL.Game.Effect.common.neighbour<A: Type>(
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
-    App.KL.Game.Effect.ap.verify(ap_cost)
+    App.KL.Game.Effect.ap.use(ap_cost)
     get center = App.KL.Game.Effect.coord.get_center
     let coords = App.KL.Game.Effect.area.ring(center)
-    App.KL.Game.Effect.ap.cost(ap_cost,center)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.area!(eff_at, coords)
     return unit

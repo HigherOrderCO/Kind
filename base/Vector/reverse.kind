@@ -1,0 +1,15 @@
+Vector.reverse<A: Type, size: Nat>(vec: Vector(A, size)): Vector(A, size)
+ Vector.reverse.go!(size, 0, vec, Vector.nil!)
+
+Vector.reverse.go<A: Type>(
+  n: Nat, m: Nat, 
+  vec: Vector<A>(n), 
+  aux: Vector<A>(m)
+): Vector<A>(Nat.add(m, n))
+  case n with vec {
+    zero: aux :: rewrite X in Vector<A>(X) with mirror(Nat.add.zero_right(m))
+    succ: 
+      open vec
+      def a = Vector.reverse.go!(n.pred, Nat.succ(m), vec.tail, Vector.cons<A>(m, vec.head, aux))
+      a :: rewrite X in Vector<A>(X) with mirror(Nat.add.succ_right(m, n.pred))
+  }!

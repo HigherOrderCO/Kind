@@ -4,5 +4,6 @@ type App.KL.Game.Effect.Result <A: Type> {
     value: A,
     board: App.KL.Game.Board,
     indicators: Hexagonal.Axial.BBT(App.KL.Game.Indicator)
+    ap_used: I32 
   )
 }

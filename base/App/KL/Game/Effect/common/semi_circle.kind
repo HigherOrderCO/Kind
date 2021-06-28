@@ -5,10 +5,9 @@ App.KL.Game.Effect.common.semi_circle<A: Type>(
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
-    App.KL.Game.Effect.ap.verify(ap_cost)
+    App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.ap.cost(ap_cost,center)
     let clamp = App.KL.Game.Effect.coord.clamp(1, center, target)
     let semi_circle = App.KL.Game.Effect.area.semi_circle(center, clamp)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])

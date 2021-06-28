@@ -18,6 +18,7 @@ type App.KL.Game.Cast.Result {
   success(
     game: App.KL.Game
     hits: App.KL.Game.Indicators
+    ap_used: I32
   )
 }
 
@@ -136,7 +137,7 @@ App.KL.Game.Cast.apply(
     let result = skill@effect(coord, cast@target, game@board)
     return case result {
       err: App.KL.Game.Cast.Result.failure
-      new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators)
+      new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators, result.ap_used)
     }
   } <> App.KL.Game.Cast.Result.failure
 
