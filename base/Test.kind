@@ -1,10 +1,9 @@
 Test: _
   let map = Map.from_list!([{"orange", 2}, {"black", 3}, {"yellow", 4}, {"brown", 1}, {"white", 1}])
-  let map = { Nat.add(2, v) for v in map }
   let result = ""
   for key: val in map with result:
     result | key | ": " | Nat.show(val) | "\n"
   
   IO.put_string(result)
   // let list = [0,1,2,3]
-  // [x for x in [Nat.read(String.reverse(Nat.show(5 * (2 + i)))) for i in list where Nat.ltn(i, 3), Nat.gtn(i, 0)] where Nat.gtn(x, 50)]
+  // [x for x in [i * 70 for i in list where Nat.ltn(i, 3), Nat.gtn(i, 0)] where Nat.gtn(x, 70)]

@@ -45,6 +45,7 @@ Kind.Parser.comprehension.and_all(a: List<Kind.Term>): Kind.Term
       and
   }
 
+// prototype
 Kind.Parser.comprehension_map: Parser<Kind.Term>
   Parser {
     Kind.Parser.text("{")
