@@ -1,5 +1,5 @@
-Courtex: the minimal secure decentralized computer
-==================================================
+Neutraleum: the minimal secure decentralized computer
+=====================================================
 
 In 2009, the first peer-to-peer electronic cash, Bitcoin, was proposed, but its
 limitations resulted in the launch of several alternative currencies, each
