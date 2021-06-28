@@ -1,12 +1,13 @@
 // TODO : Remove this?
 App.KL.Game.Phase.Play.Bar.draw_line(destin : Pair<U32, U32>, x : U32, y : U32, z : U32, col : Col32, img : VoxBox) : VoxBox
   open destin
+  
   VoxBox.Draw.line(
-                   U32.to_i32(x),
-                   U32.to_i32(y), 
-                   U32.to_i32(destin.fst), 
-                   U32.to_i32(destin.snd),
-                   U32.to_i32(z),
+                   U32.to_i32.signed(x),
+                   U32.to_i32.signed(y), 
+                   U32.to_i32.signed(destin.fst), 
+                   U32.to_i32.signed(destin.snd),
+                   U32.to_i32.signed(z),
                    col, 
                    img)
 
@@ -56,23 +57,24 @@ App.KL.Game.Phase.Play.Bar.complete_square(
   img
   
 App.KL.Game.Phase.Play.Bar.draw_bar(
-  rect : App.KL.Game.Phase.Play.Bar.Rectangular,
-  bar : App.KL.Game.Phase.Play.Bar.Progress,
-): VoxBox.Draw<Unit>
+  rect: App.KL.Game.Phase.Play.Bar.Rectangular,
+  bar: App.KL.Game.Phase.Play.Bar.Progress,
+  col: Col32
+  img: VoxBox
+): VoxBox
   open rect
-  VoxBox.Draw {
-     VoxBox.Draw.set_pos(rect.x, rect.y, 3)
-     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x, rect.y+rect.height})) // The first horizontal line of rectangle
-     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y})) // The second horizontal line of rectangle
+     
+     let img = App.KL.Game.Phase.Play.Bar.draw_line({rect.x, rect.y+rect.height}, rect.x, rect.y, 3, col, img) // The first horizontal line of rectangle
+     let img = App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y}, rect.x, rect.y, 3, col, img) // The second horizontal line of rectangle
   
-     VoxBox.Draw.set_pos(rect.x+rect.width, rect.y, 3) 
-     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height})) // The second horizontal line of rectangle
-     VoxBox.Draw.set_pos(rect.x, rect.y+rect.height, 3) 
-     VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height})) // The second vertical line of rectangle
+     
+     let img = App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height}, rect.x+rect.width, rect.y, 3, col, img) // The second horizontal line of rectangle
+     
+     let img = App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height}, rect.x, rect.y+rect.height, 3, col, img) // The second vertical line of rectangle
   
      // Complete the rectangle by the BarProgress
-     VoxBox.Draw.map(App.KL.Game.Phase.Play.Bar.complete_square(bar, rect))
-  }
+     App.KL.Game.Phase.Play.Bar.complete_square(bar, rect, img)
+  
 
 App.KL.Game.Phase.Play.Bar.draw(x: U32,
   y: U32,
@@ -84,5 +86,5 @@ App.KL.Game.Phase.Play.Bar.draw(x: U32,
   img: VoxBox,
 ): VoxBox
   let rect = App.KL.Game.Phase.Play.Bar.Rectangular.new(x, y, height, width, 1)
-  let result = App.KL.Game.Phase.Play.Bar.draw_bar(rect, bar, VoxBox.Draw.Paint.new(x, y, z, col, img))
-  result@snd@img
+  let result = App.KL.Game.Phase.Play.Bar.draw_bar(rect, bar, col, img)
+  result
