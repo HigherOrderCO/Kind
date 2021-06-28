@@ -3,4 +3,4 @@ App.KL.Game.Effect.indicators.add(
 ): App.KL.Game.Effect<Unit>
 
   (center, target, board)
-  App.KL.Game.Effect.Result.new!(unit, board, indicators)
+  App.KL.Game.Effect.Result.new!(unit, board, indicators, 0)

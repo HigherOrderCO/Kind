@@ -1,0 +1,7 @@
+App.KL.Game.Effect.common.dmg.neighbour(
+  dmg: I32
+  ap_cost: I32
+): App.KL.Game.Effect<Unit>
+
+    let eff = App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg))
+    App.KL.Game.Effect.common.neighbour!(eff, dmg, ap_cost)

@@ -575,7 +575,6 @@ module.exports = (function() {
         _: 'Maybe.none'
     });
     const BitsMap$get = a0 => a1 => (bitsmap_get(a0, a1));
-    const Bits$e = '';
     const Bits$o = a0 => (a0 + '0');
     const Bits$i = a0 => (a0 + '1');
     const Bool$true = true;
@@ -812,11 +811,471 @@ module.exports = (function() {
     };
     const Nat$to_word = x0 => x1 => Nat$to_word$(x0, x1);
     const Nat$to_u16 = a0 => (Number(a0) & 0xFFFF);
+
+    function Kind$Name$to_bits$go$(_name$1, _end$2) {
+        var self = _name$1;
+        if (self.length === 0) {
+            var $90 = _end$2;
+            var $89 = $90;
+        } else {
+            var $91 = self.charCodeAt(0);
+            var $92 = self.slice(1);
+            var _x$5 = $91;
+            var _O$6 = Bits$o;
+            var _I$7 = Bits$i;
+            var self = (_x$5 < 47);
+            if (self) {
+                var $94 = _I$7(_I$7(_I$7(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                var $93 = $94;
+            } else {
+                var self = (_x$5 < 58);
+                if (self) {
+                    var self = (_x$5 < 53);
+                    if (self) {
+                        var self = (_x$5 < 50);
+                        if (self) {
+                            var self = (_x$5 < 49);
+                            if (self) {
+                                var $99 = _I$7(_I$7(_O$6(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                var $98 = $99;
+                            } else {
+                                var $100 = _I$7(_I$7(_O$6(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                var $98 = $100;
+                            };
+                            var $97 = $98;
+                        } else {
+                            var self = (_x$5 < 51);
+                            if (self) {
+                                var $102 = _I$7(_I$7(_O$6(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                var $101 = $102;
+                            } else {
+                                var self = (_x$5 < 52);
+                                if (self) {
+                                    var $104 = _I$7(_I$7(_O$6(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                    var $103 = $104;
+                                } else {
+                                    var $105 = _I$7(_I$7(_I$7(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                    var $103 = $105;
+                                };
+                                var $101 = $103;
+                            };
+                            var $97 = $101;
+                        };
+                        var $96 = $97;
+                    } else {
+                        var self = (_x$5 < 55);
+                        if (self) {
+                            var self = (_x$5 < 54);
+                            if (self) {
+                                var $108 = _I$7(_I$7(_I$7(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                var $107 = $108;
+                            } else {
+                                var $109 = _I$7(_I$7(_I$7(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                var $107 = $109;
+                            };
+                            var $106 = $107;
+                        } else {
+                            var self = (_x$5 < 56);
+                            if (self) {
+                                var $111 = _I$7(_I$7(_I$7(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                var $110 = $111;
+                            } else {
+                                var self = (_x$5 < 57);
+                                if (self) {
+                                    var $113 = _I$7(_I$7(_I$7(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                    var $112 = $113;
+                                } else {
+                                    var $114 = _I$7(_I$7(_I$7(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                    var $112 = $114;
+                                };
+                                var $110 = $112;
+                            };
+                            var $106 = $110;
+                        };
+                        var $96 = $106;
+                    };
+                    var $95 = $96;
+                } else {
+                    var self = (_x$5 < 91);
+                    if (self) {
+                        var self = (_x$5 < 78);
+                        if (self) {
+                            var self = (_x$5 < 71);
+                            if (self) {
+                                var self = (_x$5 < 68);
+                                if (self) {
+                                    var self = (_x$5 < 66);
+                                    if (self) {
+                                        var $120 = _O$6(_O$6(_O$6(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                        var $119 = $120;
+                                    } else {
+                                        var self = (_x$5 < 67);
+                                        if (self) {
+                                            var $122 = _O$6(_O$6(_O$6(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $121 = $122;
+                                        } else {
+                                            var $123 = _O$6(_O$6(_O$6(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                            var $121 = $123;
+                                        };
+                                        var $119 = $121;
+                                    };
+                                    var $118 = $119;
+                                } else {
+                                    var self = (_x$5 < 69);
+                                    if (self) {
+                                        var $125 = _O$6(_O$6(_O$6(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                        var $124 = $125;
+                                    } else {
+                                        var self = (_x$5 < 70);
+                                        if (self) {
+                                            var $127 = _O$6(_O$6(_O$6(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                            var $126 = $127;
+                                        } else {
+                                            var $128 = _O$6(_O$6(_O$6(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $126 = $128;
+                                        };
+                                        var $124 = $126;
+                                    };
+                                    var $118 = $124;
+                                };
+                                var $117 = $118;
+                            } else {
+                                var self = (_x$5 < 74);
+                                if (self) {
+                                    var self = (_x$5 < 72);
+                                    if (self) {
+                                        var $131 = _O$6(_O$6(_O$6(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                        var $130 = $131;
+                                    } else {
+                                        var self = (_x$5 < 73);
+                                        if (self) {
+                                            var $133 = _O$6(_O$6(_O$6(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                            var $132 = $133;
+                                        } else {
+                                            var $134 = _O$6(_O$6(_I$7(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                            var $132 = $134;
+                                        };
+                                        var $130 = $132;
+                                    };
+                                    var $129 = $130;
+                                } else {
+                                    var self = (_x$5 < 76);
+                                    if (self) {
+                                        var self = (_x$5 < 75);
+                                        if (self) {
+                                            var $137 = _O$6(_O$6(_I$7(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $136 = $137;
+                                        } else {
+                                            var $138 = _O$6(_O$6(_I$7(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                            var $136 = $138;
+                                        };
+                                        var $135 = $136;
+                                    } else {
+                                        var self = (_x$5 < 77);
+                                        if (self) {
+                                            var $140 = _O$6(_O$6(_I$7(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                            var $139 = $140;
+                                        } else {
+                                            var $141 = _O$6(_O$6(_I$7(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                            var $139 = $141;
+                                        };
+                                        var $135 = $139;
+                                    };
+                                    var $129 = $135;
+                                };
+                                var $117 = $129;
+                            };
+                            var $116 = $117;
+                        } else {
+                            var self = (_x$5 < 84);
+                            if (self) {
+                                var self = (_x$5 < 81);
+                                if (self) {
+                                    var self = (_x$5 < 79);
+                                    if (self) {
+                                        var $145 = _O$6(_O$6(_I$7(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                        var $144 = $145;
+                                    } else {
+                                        var self = (_x$5 < 80);
+                                        if (self) {
+                                            var $147 = _O$6(_O$6(_I$7(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                            var $146 = $147;
+                                        } else {
+                                            var $148 = _O$6(_O$6(_I$7(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                            var $146 = $148;
+                                        };
+                                        var $144 = $146;
+                                    };
+                                    var $143 = $144;
+                                } else {
+                                    var self = (_x$5 < 82);
+                                    if (self) {
+                                        var $150 = _O$6(_I$7(_O$6(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                        var $149 = $150;
+                                    } else {
+                                        var self = (_x$5 < 83);
+                                        if (self) {
+                                            var $152 = _O$6(_I$7(_O$6(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $151 = $152;
+                                        } else {
+                                            var $153 = _O$6(_I$7(_O$6(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                            var $151 = $153;
+                                        };
+                                        var $149 = $151;
+                                    };
+                                    var $143 = $149;
+                                };
+                                var $142 = $143;
+                            } else {
+                                var self = (_x$5 < 87);
+                                if (self) {
+                                    var self = (_x$5 < 85);
+                                    if (self) {
+                                        var $156 = _O$6(_I$7(_O$6(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                        var $155 = $156;
+                                    } else {
+                                        var self = (_x$5 < 86);
+                                        if (self) {
+                                            var $158 = _O$6(_I$7(_O$6(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                            var $157 = $158;
+                                        } else {
+                                            var $159 = _O$6(_I$7(_O$6(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $157 = $159;
+                                        };
+                                        var $155 = $157;
+                                    };
+                                    var $154 = $155;
+                                } else {
+                                    var self = (_x$5 < 89);
+                                    if (self) {
+                                        var self = (_x$5 < 88);
+                                        if (self) {
+                                            var $162 = _O$6(_I$7(_O$6(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                            var $161 = $162;
+                                        } else {
+                                            var $163 = _O$6(_I$7(_O$6(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                            var $161 = $163;
+                                        };
+                                        var $160 = $161;
+                                    } else {
+                                        var self = (_x$5 < 90);
+                                        if (self) {
+                                            var $165 = _O$6(_I$7(_I$7(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                            var $164 = $165;
+                                        } else {
+                                            var $166 = _O$6(_I$7(_I$7(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $164 = $166;
+                                        };
+                                        var $160 = $164;
+                                    };
+                                    var $154 = $160;
+                                };
+                                var $142 = $154;
+                            };
+                            var $116 = $142;
+                        };
+                        var $115 = $116;
+                    } else {
+                        var self = (_x$5 < 96);
+                        if (self) {
+                            var $168 = _I$7(_I$7(_I$7(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                            var $167 = $168;
+                        } else {
+                            var self = (_x$5 < 110);
+                            if (self) {
+                                var self = (_x$5 < 103);
+                                if (self) {
+                                    var self = (_x$5 < 100);
+                                    if (self) {
+                                        var self = (_x$5 < 98);
+                                        if (self) {
+                                            var $173 = _O$6(_I$7(_I$7(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                            var $172 = $173;
+                                        } else {
+                                            var self = (_x$5 < 99);
+                                            if (self) {
+                                                var $175 = _O$6(_I$7(_I$7(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                                var $174 = $175;
+                                            } else {
+                                                var $176 = _O$6(_I$7(_I$7(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                                var $174 = $176;
+                                            };
+                                            var $172 = $174;
+                                        };
+                                        var $171 = $172;
+                                    } else {
+                                        var self = (_x$5 < 101);
+                                        if (self) {
+                                            var $178 = _O$6(_I$7(_I$7(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $177 = $178;
+                                        } else {
+                                            var self = (_x$5 < 102);
+                                            if (self) {
+                                                var $180 = _O$6(_I$7(_I$7(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                                var $179 = $180;
+                                            } else {
+                                                var $181 = _O$6(_I$7(_I$7(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                                var $179 = $181;
+                                            };
+                                            var $177 = $179;
+                                        };
+                                        var $171 = $177;
+                                    };
+                                    var $170 = $171;
+                                } else {
+                                    var self = (_x$5 < 106);
+                                    if (self) {
+                                        var self = (_x$5 < 104);
+                                        if (self) {
+                                            var $184 = _I$7(_O$6(_O$6(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                            var $183 = $184;
+                                        } else {
+                                            var self = (_x$5 < 105);
+                                            if (self) {
+                                                var $186 = _I$7(_O$6(_O$6(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                                var $185 = $186;
+                                            } else {
+                                                var $187 = _I$7(_O$6(_O$6(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                                var $185 = $187;
+                                            };
+                                            var $183 = $185;
+                                        };
+                                        var $182 = $183;
+                                    } else {
+                                        var self = (_x$5 < 108);
+                                        if (self) {
+                                            var self = (_x$5 < 107);
+                                            if (self) {
+                                                var $190 = _I$7(_O$6(_O$6(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                                var $189 = $190;
+                                            } else {
+                                                var $191 = _I$7(_O$6(_O$6(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                                var $189 = $191;
+                                            };
+                                            var $188 = $189;
+                                        } else {
+                                            var self = (_x$5 < 109);
+                                            if (self) {
+                                                var $193 = _I$7(_O$6(_O$6(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                                var $192 = $193;
+                                            } else {
+                                                var $194 = _I$7(_O$6(_O$6(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                                var $192 = $194;
+                                            };
+                                            var $188 = $192;
+                                        };
+                                        var $182 = $188;
+                                    };
+                                    var $170 = $182;
+                                };
+                                var $169 = $170;
+                            } else {
+                                var self = (_x$5 < 116);
+                                if (self) {
+                                    var self = (_x$5 < 113);
+                                    if (self) {
+                                        var self = (_x$5 < 111);
+                                        if (self) {
+                                            var $198 = _I$7(_O$6(_O$6(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                            var $197 = $198;
+                                        } else {
+                                            var self = (_x$5 < 112);
+                                            if (self) {
+                                                var $200 = _I$7(_O$6(_I$7(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                                var $199 = $200;
+                                            } else {
+                                                var $201 = _I$7(_O$6(_I$7(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                                var $199 = $201;
+                                            };
+                                            var $197 = $199;
+                                        };
+                                        var $196 = $197;
+                                    } else {
+                                        var self = (_x$5 < 114);
+                                        if (self) {
+                                            var $203 = _I$7(_O$6(_I$7(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                            var $202 = $203;
+                                        } else {
+                                            var self = (_x$5 < 115);
+                                            if (self) {
+                                                var $205 = _I$7(_O$6(_I$7(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                                var $204 = $205;
+                                            } else {
+                                                var $206 = _I$7(_O$6(_I$7(_I$7(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                                var $204 = $206;
+                                            };
+                                            var $202 = $204;
+                                        };
+                                        var $196 = $202;
+                                    };
+                                    var $195 = $196;
+                                } else {
+                                    var self = (_x$5 < 119);
+                                    if (self) {
+                                        var self = (_x$5 < 117);
+                                        if (self) {
+                                            var $209 = _I$7(_O$6(_I$7(_I$7(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                            var $208 = $209;
+                                        } else {
+                                            var self = (_x$5 < 118);
+                                            if (self) {
+                                                var $211 = _I$7(_O$6(_I$7(_I$7(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                                var $210 = $211;
+                                            } else {
+                                                var $212 = _I$7(_O$6(_I$7(_I$7(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                                var $210 = $212;
+                                            };
+                                            var $208 = $210;
+                                        };
+                                        var $207 = $208;
+                                    } else {
+                                        var self = (_x$5 < 121);
+                                        if (self) {
+                                            var self = (_x$5 < 120);
+                                            if (self) {
+                                                var $215 = _I$7(_I$7(_O$6(_O$6(_O$6(_O$6((kind_name_to_bits($92))))))));
+                                                var $214 = $215;
+                                            } else {
+                                                var $216 = _I$7(_I$7(_O$6(_O$6(_O$6(_I$7((kind_name_to_bits($92))))))));
+                                                var $214 = $216;
+                                            };
+                                            var $213 = $214;
+                                        } else {
+                                            var self = (_x$5 < 122);
+                                            if (self) {
+                                                var $218 = _I$7(_I$7(_O$6(_O$6(_I$7(_O$6((kind_name_to_bits($92))))))));
+                                                var $217 = $218;
+                                            } else {
+                                                var $219 = _I$7(_I$7(_O$6(_O$6(_I$7(_I$7((kind_name_to_bits($92))))))));
+                                                var $217 = $219;
+                                            };
+                                            var $213 = $217;
+                                        };
+                                        var $207 = $213;
+                                    };
+                                    var $195 = $207;
+                                };
+                                var $169 = $195;
+                            };
+                            var $167 = $169;
+                        };
+                        var $115 = $167;
+                    };
+                    var $95 = $115;
+                };
+                var $93 = $95;
+            };
+            var $89 = $93;
+        };
+        return $89;
+    };
+    const Kind$Name$to_bits$go = x0 => x1 => Kind$Name$to_bits$go$(x0, x1);
+    const Bits$e = '';
     const Kind$Name$to_bits = a0 => (kind_name_to_bits(a0));
 
     function Kind$Map$get$(_name$2, _map$3) {
-        var $89 = (bitsmap_get((kind_name_to_bits(_name$2)), _map$3));
-        return $89;
+        var $220 = (bitsmap_get((kind_name_to_bits(_name$2)), _map$3));
+        return $220;
     };
     const Kind$Map$get = x0 => x1 => Kind$Map$get$(x0, x1);
 
@@ -824,21 +1283,21 @@ module.exports = (function() {
         var self = _m$2;
         switch (self._) {
             case 'Maybe.some':
-                var $91 = self.value;
-                var $92 = $91;
-                var $90 = $92;
+                var $222 = self.value;
+                var $223 = $222;
+                var $221 = $223;
                 break;
             case 'Maybe.none':
-                var $93 = _a$3;
-                var $90 = $93;
+                var $224 = _a$3;
+                var $221 = $224;
                 break;
         };
-        return $90;
+        return $221;
     };
     const Maybe$default = x0 => x1 => Maybe$default$(x0, x1);
 
     function Parser$State$new$(_err$1, _nam$2, _ini$3, _idx$4, _str$5) {
-        var $94 = ({
+        var $225 = ({
             _: 'Parser.State.new',
             'err': _err$1,
             'nam': _nam$2,
@@ -846,16 +1305,16 @@ module.exports = (function() {
             'idx': _idx$4,
             'str': _str$5
         });
-        return $94;
+        return $225;
     };
     const Parser$State$new = x0 => x1 => x2 => x3 => x4 => Parser$State$new$(x0, x1, x2, x3, x4);
 
     function Maybe$some$(_value$2) {
-        var $95 = ({
+        var $226 = ({
             _: 'Maybe.some',
             'value': _value$2
         });
-        return $95;
+        return $226;
     };
     const Maybe$some = x0 => Maybe$some$(x0);
 
@@ -863,37 +1322,37 @@ module.exports = (function() {
         var self = _parser$2(Parser$State$new$(Maybe$none, "", 0n, 0n, _code$3));
         switch (self._) {
             case 'Parser.Reply.value':
-                var $97 = self.val;
-                var $98 = Maybe$some$($97);
-                var $96 = $98;
+                var $228 = self.val;
+                var $229 = Maybe$some$($228);
+                var $227 = $229;
                 break;
             case 'Parser.Reply.error':
-                var $99 = Maybe$none;
-                var $96 = $99;
+                var $230 = Maybe$none;
+                var $227 = $230;
                 break;
         };
-        return $96;
+        return $227;
     };
     const Parser$run = x0 => x1 => Parser$run$(x0, x1);
 
     function Parser$Reply$(_V$1) {
-        var $100 = null;
-        return $100;
+        var $231 = null;
+        return $231;
     };
     const Parser$Reply = x0 => Parser$Reply$(x0);
 
     function List$(_A$1) {
-        var $101 = null;
-        return $101;
+        var $232 = null;
+        return $232;
     };
     const List = x0 => List$(x0);
 
     function Parser$Reply$error$(_err$2) {
-        var $102 = ({
+        var $233 = ({
             _: 'Parser.Reply.error',
             'err': _err$2
         });
-        return $102;
+        return $233;
     };
     const Parser$Reply$error = x0 => Parser$Reply$error$(x0);
     const Nat$gtn = a0 => a1 => (a0 > a1);
@@ -902,26 +1361,26 @@ module.exports = (function() {
         var self = _a$1;
         switch (self._) {
             case 'Parser.Error.new':
-                var $104 = self.idx;
+                var $235 = self.idx;
                 var self = _b$2;
                 switch (self._) {
                     case 'Parser.Error.new':
-                        var $106 = self.idx;
-                        var self = ($104 > $106);
+                        var $237 = self.idx;
+                        var self = ($235 > $237);
                         if (self) {
-                            var $108 = _a$1;
-                            var $107 = $108;
+                            var $239 = _a$1;
+                            var $238 = $239;
                         } else {
-                            var $109 = _b$2;
-                            var $107 = $109;
+                            var $240 = _b$2;
+                            var $238 = $240;
                         };
-                        var $105 = $107;
+                        var $236 = $238;
                         break;
                 };
-                var $103 = $105;
+                var $234 = $236;
                 break;
         };
-        return $103;
+        return $234;
     };
     const Parser$Error$combine = x0 => x1 => Parser$Error$combine$(x0, x1);
 
@@ -929,47 +1388,47 @@ module.exports = (function() {
         var self = _a$1;
         switch (self._) {
             case 'Maybe.some':
-                var $111 = self.value;
+                var $242 = self.value;
                 var self = _b$2;
                 switch (self._) {
                     case 'Maybe.some':
-                        var $113 = self.value;
-                        var $114 = Maybe$some$(Parser$Error$combine$($111, $113));
-                        var $112 = $114;
+                        var $244 = self.value;
+                        var $245 = Maybe$some$(Parser$Error$combine$($242, $244));
+                        var $243 = $245;
                         break;
                     case 'Maybe.none':
-                        var $115 = _a$1;
-                        var $112 = $115;
+                        var $246 = _a$1;
+                        var $243 = $246;
                         break;
                 };
-                var $110 = $112;
+                var $241 = $243;
                 break;
             case 'Maybe.none':
                 var self = _b$2;
                 switch (self._) {
                     case 'Maybe.none':
-                        var $117 = Maybe$none;
-                        var $116 = $117;
+                        var $248 = Maybe$none;
+                        var $247 = $248;
                         break;
                     case 'Maybe.some':
-                        var $118 = _b$2;
-                        var $116 = $118;
+                        var $249 = _b$2;
+                        var $247 = $249;
                         break;
                 };
-                var $110 = $116;
+                var $241 = $247;
                 break;
         };
-        return $110;
+        return $241;
     };
     const Parser$Error$maybe_combine = x0 => x1 => Parser$Error$maybe_combine$(x0, x1);
 
     function Parser$Reply$value$(_pst$2, _val$3) {
-        var $119 = ({
+        var $250 = ({
             _: 'Parser.Reply.value',
             'pst': _pst$2,
             'val': _val$3
         });
-        return $119;
+        return $250;
     };
     const Parser$Reply$value = x0 => x1 => Parser$Reply$value$(x0, x1);
     const List$nil = ({
@@ -977,12 +1436,12 @@ module.exports = (function() {
     });
 
     function List$cons$(_head$2, _tail$3) {
-        var $120 = ({
+        var $251 = ({
             _: 'List.cons',
             'head': _head$2,
             'tail': _tail$3
         });
-        return $120;
+        return $251;
     };
     const List$cons = x0 => x1 => List$cons$(x0, x1);
 
@@ -1002,20 +1461,20 @@ module.exports = (function() {
                         var self = _parse$2(_pst$4);
                         switch (self._) {
                             case 'Parser.Reply.value':
-                                var $122 = self.pst;
-                                var $123 = self.val;
-                                var $124 = Parser$many$go$(_parse$2, (_xs$12 => {
-                                    var $125 = _values$3(List$cons$($123, _xs$12));
-                                    return $125;
-                                }), $122);
-                                var $121 = $124;
+                                var $253 = self.pst;
+                                var $254 = self.val;
+                                var $255 = Parser$many$go$(_parse$2, (_xs$12 => {
+                                    var $256 = _values$3(List$cons$($254, _xs$12));
+                                    return $256;
+                                }), $253);
+                                var $252 = $255;
                                 break;
                             case 'Parser.Reply.error':
-                                var $126 = Parser$Reply$value$(_pst$4, _values$3(List$nil));
-                                var $121 = $126;
+                                var $257 = Parser$Reply$value$(_pst$4, _values$3(List$nil));
+                                var $252 = $257;
                                 break;
                         };
-                        return $121;
+                        return $252;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1025,11 +1484,11 @@ module.exports = (function() {
     const Parser$many$go = x0 => x1 => x2 => Parser$many$go$(x0, x1, x2);
 
     function Parser$many$(_parser$2) {
-        var $127 = Parser$many$go(_parser$2)((_x$3 => {
-            var $128 = _x$3;
-            return $128;
+        var $258 = Parser$many$go(_parser$2)((_x$3 => {
+            var $259 = _x$3;
+            return $259;
         }));
-        return $127;
+        return $258;
     };
     const Parser$many = x0 => Parser$many$(x0);
 
@@ -1037,111 +1496,111 @@ module.exports = (function() {
         var self = _pst$3;
         switch (self._) {
             case 'Parser.State.new':
-                var $130 = self.err;
+                var $261 = self.err;
                 var _reply$9 = _parser$2(_pst$3);
                 var self = _reply$9;
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $132 = self.err;
-                        var self = $130;
+                        var $263 = self.err;
+                        var self = $261;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $134 = self.value;
-                                var $135 = Parser$Reply$error$(Parser$Error$combine$($134, $132));
-                                var $133 = $135;
+                                var $265 = self.value;
+                                var $266 = Parser$Reply$error$(Parser$Error$combine$($265, $263));
+                                var $264 = $266;
                                 break;
                             case 'Maybe.none':
-                                var $136 = Parser$Reply$error$($132);
-                                var $133 = $136;
+                                var $267 = Parser$Reply$error$($263);
+                                var $264 = $267;
                                 break;
                         };
-                        var $131 = $133;
+                        var $262 = $264;
                         break;
                     case 'Parser.Reply.value':
-                        var $137 = self.pst;
-                        var $138 = self.val;
-                        var self = $137;
+                        var $268 = self.pst;
+                        var $269 = self.val;
+                        var self = $268;
                         switch (self._) {
                             case 'Parser.State.new':
-                                var $140 = self.err;
-                                var $141 = self.nam;
-                                var $142 = self.ini;
-                                var $143 = self.idx;
-                                var $144 = self.str;
-                                var _reply$pst$17 = Parser$State$new$(Parser$Error$maybe_combine$($130, $140), $141, $142, $143, $144);
+                                var $271 = self.err;
+                                var $272 = self.nam;
+                                var $273 = self.ini;
+                                var $274 = self.idx;
+                                var $275 = self.str;
+                                var _reply$pst$17 = Parser$State$new$(Parser$Error$maybe_combine$($261, $271), $272, $273, $274, $275);
                                 var self = _reply$pst$17;
                                 switch (self._) {
                                     case 'Parser.State.new':
-                                        var $146 = self.err;
+                                        var $277 = self.err;
                                         var _reply$23 = Parser$many$(_parser$2)(_reply$pst$17);
                                         var self = _reply$23;
                                         switch (self._) {
                                             case 'Parser.Reply.error':
-                                                var $148 = self.err;
-                                                var self = $146;
+                                                var $279 = self.err;
+                                                var self = $277;
                                                 switch (self._) {
                                                     case 'Maybe.some':
-                                                        var $150 = self.value;
-                                                        var $151 = Parser$Reply$error$(Parser$Error$combine$($150, $148));
-                                                        var $149 = $151;
+                                                        var $281 = self.value;
+                                                        var $282 = Parser$Reply$error$(Parser$Error$combine$($281, $279));
+                                                        var $280 = $282;
                                                         break;
                                                     case 'Maybe.none':
-                                                        var $152 = Parser$Reply$error$($148);
-                                                        var $149 = $152;
+                                                        var $283 = Parser$Reply$error$($279);
+                                                        var $280 = $283;
                                                         break;
                                                 };
-                                                var $147 = $149;
+                                                var $278 = $280;
                                                 break;
                                             case 'Parser.Reply.value':
-                                                var $153 = self.pst;
-                                                var $154 = self.val;
-                                                var self = $153;
+                                                var $284 = self.pst;
+                                                var $285 = self.val;
+                                                var self = $284;
                                                 switch (self._) {
                                                     case 'Parser.State.new':
-                                                        var $156 = self.err;
-                                                        var $157 = self.nam;
-                                                        var $158 = self.ini;
-                                                        var $159 = self.idx;
-                                                        var $160 = self.str;
-                                                        var _reply$pst$31 = Parser$State$new$(Parser$Error$maybe_combine$($146, $156), $157, $158, $159, $160);
-                                                        var $161 = Parser$Reply$value$(_reply$pst$31, List$cons$($138, $154));
-                                                        var $155 = $161;
+                                                        var $287 = self.err;
+                                                        var $288 = self.nam;
+                                                        var $289 = self.ini;
+                                                        var $290 = self.idx;
+                                                        var $291 = self.str;
+                                                        var _reply$pst$31 = Parser$State$new$(Parser$Error$maybe_combine$($277, $287), $288, $289, $290, $291);
+                                                        var $292 = Parser$Reply$value$(_reply$pst$31, List$cons$($269, $285));
+                                                        var $286 = $292;
                                                         break;
                                                 };
-                                                var $147 = $155;
+                                                var $278 = $286;
                                                 break;
                                         };
-                                        var $145 = $147;
+                                        var $276 = $278;
                                         break;
                                 };
-                                var $139 = $145;
+                                var $270 = $276;
                                 break;
                         };
-                        var $131 = $139;
+                        var $262 = $270;
                         break;
                 };
-                var $129 = $131;
+                var $260 = $262;
                 break;
         };
-        return $129;
+        return $260;
     };
     const Parser$many1 = x0 => x1 => Parser$many1$(x0, x1);
 
     function Parser$Error$new$(_nam$1, _ini$2, _idx$3, _msg$4) {
-        var $162 = ({
+        var $293 = ({
             _: 'Parser.Error.new',
             'nam': _nam$1,
             'ini': _ini$2,
             'idx': _idx$3,
             'msg': _msg$4
         });
-        return $162;
+        return $293;
     };
     const Parser$Error$new = x0 => x1 => x2 => x3 => Parser$Error$new$(x0, x1, x2, x3);
 
     function Parser$Reply$fail$(_nam$2, _ini$3, _idx$4, _msg$5) {
-        var $163 = Parser$Reply$error$(Parser$Error$new$(_nam$2, _ini$3, _idx$4, _msg$5));
-        return $163;
+        var $294 = Parser$Reply$error$(Parser$Error$new$(_nam$2, _ini$3, _idx$4, _msg$5));
+        return $294;
     };
     const Parser$Reply$fail = x0 => x1 => x2 => x3 => Parser$Reply$fail$(x0, x1, x2, x3);
 
@@ -1150,21 +1609,21 @@ module.exports = (function() {
         switch (self._) {
             case 'Cmp.ltn':
             case 'Cmp.gtn':
-                var $165 = Bool$false;
-                var $164 = $165;
+                var $296 = Bool$false;
+                var $295 = $296;
                 break;
             case 'Cmp.eql':
-                var $166 = Bool$true;
-                var $164 = $166;
+                var $297 = Bool$true;
+                var $295 = $297;
                 break;
         };
-        return $164;
+        return $295;
     };
     const Cmp$as_eql = x0 => Cmp$as_eql$(x0);
 
     function Word$eql$(_a$2, _b$3) {
-        var $167 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
-        return $167;
+        var $298 = Cmp$as_eql$(Word$cmp$(_a$2, _b$3));
+        return $298;
     };
     const Word$eql = x0 => x1 => Word$eql$(x0, x1);
     const U16$eql = a0 => a1 => (a0 === a1);
@@ -1173,96 +1632,96 @@ module.exports = (function() {
         var self = _pst$1;
         switch (self._) {
             case 'Parser.State.new':
-                var $169 = self.err;
-                var $170 = self.nam;
-                var $171 = self.ini;
-                var $172 = self.idx;
-                var $173 = self.str;
-                var self = $173;
+                var $300 = self.err;
+                var $301 = self.nam;
+                var $302 = self.ini;
+                var $303 = self.idx;
+                var $304 = self.str;
+                var self = $304;
                 if (self.length === 0) {
-                    var $175 = Parser$Reply$fail$($170, $171, $172, "Not a digit.");
-                    var $174 = $175;
+                    var $306 = Parser$Reply$fail$($301, $302, $303, "Not a digit.");
+                    var $305 = $306;
                 } else {
-                    var $176 = self.charCodeAt(0);
-                    var $177 = self.slice(1);
-                    var _pst$9 = Parser$State$new$($169, $170, $171, Nat$succ$($172), $177);
-                    var self = ($176 === 48);
+                    var $307 = self.charCodeAt(0);
+                    var $308 = self.slice(1);
+                    var _pst$9 = Parser$State$new$($300, $301, $302, Nat$succ$($303), $308);
+                    var self = ($307 === 48);
                     if (self) {
-                        var $179 = Parser$Reply$value$(_pst$9, 0n);
-                        var $178 = $179;
+                        var $310 = Parser$Reply$value$(_pst$9, 0n);
+                        var $309 = $310;
                     } else {
-                        var self = ($176 === 49);
+                        var self = ($307 === 49);
                         if (self) {
-                            var $181 = Parser$Reply$value$(_pst$9, 1n);
-                            var $180 = $181;
+                            var $312 = Parser$Reply$value$(_pst$9, 1n);
+                            var $311 = $312;
                         } else {
-                            var self = ($176 === 50);
+                            var self = ($307 === 50);
                             if (self) {
-                                var $183 = Parser$Reply$value$(_pst$9, 2n);
-                                var $182 = $183;
+                                var $314 = Parser$Reply$value$(_pst$9, 2n);
+                                var $313 = $314;
                             } else {
-                                var self = ($176 === 51);
+                                var self = ($307 === 51);
                                 if (self) {
-                                    var $185 = Parser$Reply$value$(_pst$9, 3n);
-                                    var $184 = $185;
+                                    var $316 = Parser$Reply$value$(_pst$9, 3n);
+                                    var $315 = $316;
                                 } else {
-                                    var self = ($176 === 52);
+                                    var self = ($307 === 52);
                                     if (self) {
-                                        var $187 = Parser$Reply$value$(_pst$9, 4n);
-                                        var $186 = $187;
+                                        var $318 = Parser$Reply$value$(_pst$9, 4n);
+                                        var $317 = $318;
                                     } else {
-                                        var self = ($176 === 53);
+                                        var self = ($307 === 53);
                                         if (self) {
-                                            var $189 = Parser$Reply$value$(_pst$9, 5n);
-                                            var $188 = $189;
+                                            var $320 = Parser$Reply$value$(_pst$9, 5n);
+                                            var $319 = $320;
                                         } else {
-                                            var self = ($176 === 54);
+                                            var self = ($307 === 54);
                                             if (self) {
-                                                var $191 = Parser$Reply$value$(_pst$9, 6n);
-                                                var $190 = $191;
+                                                var $322 = Parser$Reply$value$(_pst$9, 6n);
+                                                var $321 = $322;
                                             } else {
-                                                var self = ($176 === 55);
+                                                var self = ($307 === 55);
                                                 if (self) {
-                                                    var $193 = Parser$Reply$value$(_pst$9, 7n);
-                                                    var $192 = $193;
+                                                    var $324 = Parser$Reply$value$(_pst$9, 7n);
+                                                    var $323 = $324;
                                                 } else {
-                                                    var self = ($176 === 56);
+                                                    var self = ($307 === 56);
                                                     if (self) {
-                                                        var $195 = Parser$Reply$value$(_pst$9, 8n);
-                                                        var $194 = $195;
+                                                        var $326 = Parser$Reply$value$(_pst$9, 8n);
+                                                        var $325 = $326;
                                                     } else {
-                                                        var self = ($176 === 57);
+                                                        var self = ($307 === 57);
                                                         if (self) {
-                                                            var $197 = Parser$Reply$value$(_pst$9, 9n);
-                                                            var $196 = $197;
+                                                            var $328 = Parser$Reply$value$(_pst$9, 9n);
+                                                            var $327 = $328;
                                                         } else {
-                                                            var $198 = Parser$Reply$fail$($170, $171, $172, "Not a digit.");
-                                                            var $196 = $198;
+                                                            var $329 = Parser$Reply$fail$($301, $302, $303, "Not a digit.");
+                                                            var $327 = $329;
                                                         };
-                                                        var $194 = $196;
+                                                        var $325 = $327;
                                                     };
-                                                    var $192 = $194;
+                                                    var $323 = $325;
                                                 };
-                                                var $190 = $192;
+                                                var $321 = $323;
                                             };
-                                            var $188 = $190;
+                                            var $319 = $321;
                                         };
-                                        var $186 = $188;
+                                        var $317 = $319;
                                     };
-                                    var $184 = $186;
+                                    var $315 = $317;
                                 };
-                                var $182 = $184;
+                                var $313 = $315;
                             };
-                            var $180 = $182;
+                            var $311 = $313;
                         };
-                        var $178 = $180;
+                        var $309 = $311;
                     };
-                    var $174 = $178;
+                    var $305 = $309;
                 };
-                var $168 = $174;
+                var $299 = $305;
                 break;
         };
-        return $168;
+        return $299;
     };
     const Parser$digit = x0 => Parser$digit$(x0);
     const Nat$add = a0 => a1 => (a0 + a1);
@@ -1281,13 +1740,13 @@ module.exports = (function() {
                 var self = _ds$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $199 = self.head;
-                        var $200 = self.tail;
-                        var $201 = Nat$from_base$go$(_b$1, $200, (_b$1 * _p$3), (($199 * _p$3) + _res$4));
-                        return $201;
+                        var $330 = self.head;
+                        var $331 = self.tail;
+                        var $332 = Nat$from_base$go$(_b$1, $331, (_b$1 * _p$3), (($330 * _p$3) + _res$4));
+                        return $332;
                     case 'List.nil':
-                        var $202 = _res$4;
-                        return $202;
+                        var $333 = _res$4;
+                        return $333;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1309,13 +1768,13 @@ module.exports = (function() {
                 var self = _xs$2;
                 switch (self._) {
                     case 'List.cons':
-                        var $203 = self.head;
-                        var $204 = self.tail;
-                        var $205 = List$reverse$go$($204, List$cons$($203, _res$3));
-                        return $205;
+                        var $334 = self.head;
+                        var $335 = self.tail;
+                        var $336 = List$reverse$go$($335, List$cons$($334, _res$3));
+                        return $336;
                     case 'List.nil':
-                        var $206 = _res$3;
-                        return $206;
+                        var $337 = _res$3;
+                        return $337;
                 };
             })();
             if (R.ctr === 'TCO') arg = R.arg;
@@ -1325,14 +1784,14 @@ module.exports = (function() {
     const List$reverse$go = x0 => x1 => List$reverse$go$(x0, x1);
 
     function List$reverse$(_xs$2) {
-        var $207 = List$reverse$go$(_xs$2, List$nil);
-        return $207;
+        var $338 = List$reverse$go$(_xs$2, List$nil);
+        return $338;
     };
     const List$reverse = x0 => List$reverse$(x0);
 
     function Nat$from_base$(_base$1, _ds$2) {
-        var $208 = Nat$from_base$go$(_base$1, List$reverse$(_ds$2), 1n, 0n);
-        return $208;
+        var $339 = Nat$from_base$go$(_base$1, List$reverse$(_ds$2), 1n, 0n);
+        return $339;
     };
     const Nat$from_base = x0 => x1 => Nat$from_base$(x0, x1);
 
@@ -1340,49 +1799,49 @@ module.exports = (function() {
         var self = _pst$1;
         switch (self._) {
             case 'Parser.State.new':
-                var $210 = self.err;
+                var $341 = self.err;
                 var _reply$7 = Parser$many1$(Parser$digit, _pst$1);
                 var self = _reply$7;
                 switch (self._) {
                     case 'Parser.Reply.error':
-                        var $212 = self.err;
-                        var self = $210;
+                        var $343 = self.err;
+                        var self = $341;
                         switch (self._) {
                             case 'Maybe.some':
-                                var $214 = self.value;
-                                var $215 = Parser$Reply$error$(Parser$Error$combine$($214, $212));
-                                var $213 = $215;
+                                var $345 = self.value;
+                                var $346 = Parser$Reply$error$(Parser$Error$combine$($345, $343));
+                                var $344 = $346;
                                 break;
                             case 'Maybe.none':
-                                var $216 = Parser$Reply$error$($212);
-                                var $213 = $216;
+                                var $347 = Parser$Reply$error$($343);
+                                var $344 = $347;
                                 break;
                         };
-                        var $211 = $213;
+                        var $342 = $344;
                         break;
                     case 'Parser.Reply.value':
-                        var $217 = self.pst;
-                        var $218 = self.val;
-                        var self = $217;
+                        var $348 = self.pst;
+                        var $349 = self.val;
+                        var self = $348;
                         switch (self._) {
                             case 'Parser.State.new':
-                                var $220 = self.err;
-                                var $221 = self.nam;
-                                var $222 = self.ini;
-                                var $223 = self.idx;
-                                var $224 = self.str;
-                                var _reply$pst$15 = Parser$State$new$(Parser$Error$maybe_combine$($210, $220), $221, $222, $223, $224);
-                                var $225 = Parser$Reply$value$(_reply$pst$15, Nat$from_base$(10n, $218));
-                                var $219 = $225;
+                                var $351 = self.err;
+                                var $352 = self.nam;
+                                var $353 = self.ini;
+                                var $354 = self.idx;
+                                var $355 = self.str;
+                                var _reply$pst$15 = Parser$State$new$(Parser$Error$maybe_combine$($341, $351), $352, $353, $354, $355);
+                                var $356 = Parser$Reply$value$(_reply$pst$15, Nat$from_base$(10n, $349));
+                                var $350 = $356;
                                 break;
                         };
-                        var $211 = $219;
+                        var $342 = $350;
                         break;
                 };
-                var $209 = $211;
+                var $340 = $342;
                 break;
         };
-        return $209;
+        return $340;
     };
     const Parser$nat = x0 => Parser$nat$(x0);
 
@@ -35690,7 +36149,7 @@ module.exports = (function() {
     };
     const Kind$Error$patch = x0 => x1 => Kind$Error$patch$(x0, x1);
 
-    function Kind$MPath$to_bits$(_path$1) {
+    function Kind$Path$Maybe$Builder$to_bits$(_path$1) {
         var self = _path$1;
         switch (self._) {
             case 'Maybe.some':
@@ -35705,7 +36164,7 @@ module.exports = (function() {
         };
         return $11252;
     };
-    const Kind$MPath$to_bits = x0 => Kind$MPath$to_bits$(x0);
+    const Kind$Path$Maybe$Builder$to_bits = x0 => Kind$Path$Maybe$Builder$to_bits$(x0);
 
     function Kind$Term$check$patch$(_term$1, _type$2, _path$3) {
         var $11256 = Kind$Check$result$(_type$2, List$cons$(Kind$Error$patch$(Kind$MPath$to_bits$(_path$3), _term$1), List$nil));
@@ -35742,11 +36201,11 @@ module.exports = (function() {
         var $11259 = _x$1;
         return $11259;
     };
-    const Kind$Path$nil = x0 => Kind$Path$nil$(x0);
-    const Kind$MPath$nil = Maybe$some$(Kind$Path$nil);
+    const Kind$Path$Builder$nil = x0 => Kind$Path$Builder$nil$(x0);
+    const Kind$Path$Maybe$Builder$nil = Maybe$some$(Kind$Path$Builder$nil);
 
     function Kind$Term$check$direct$(_term$1, _defs$2) {
-        var self = Kind$Term$check$(_term$1, Maybe$none, _defs$2, List$nil, Kind$MPath$nil, Maybe$none);
+        var self = Kind$Term$check$(_term$1, Maybe$none, _defs$2, List$nil, Kind$Path$Maybe$Builder$nil, Maybe$none);
         switch (self._) {
             case 'Kind.Check.result':
                 var $11261 = self.value;
@@ -40704,6 +41163,52 @@ module.exports = (function() {
     };
     const Kind$Term$check = x0 => x1 => x2 => x3 => x4 => x5 => Kind$Term$check$(x0, x1, x2, x3, x4, x5);
 
+    function Kind$Path$patch_at$list$(_path$2, _list$3, _cont$4) {
+        var self = _path$2;
+        switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
+            case 'o':
+                var $11738 = self.slice(0, -1);
+                var self = _list$3;
+                switch (self._) {
+                    case 'List.cons':
+                        var $11740 = self.head;
+                        var $11741 = self.tail;
+                        var $11742 = List$cons$(_cont$4($11738)($11740), $11741);
+                        var $11739 = $11742;
+                        break;
+                    case 'List.nil':
+                        var $11743 = List$nil;
+                        var $11739 = $11743;
+                        break;
+                };
+                var $11737 = $11739;
+                break;
+            case 'i':
+                var $11744 = self.slice(0, -1);
+                var self = _list$3;
+                switch (self._) {
+                    case 'List.cons':
+                        var $11746 = self.head;
+                        var $11747 = self.tail;
+                        var $11748 = List$cons$($11746, Kind$Path$patch_at$list$($11744, $11747, _cont$4));
+                        var $11745 = $11748;
+                        break;
+                    case 'List.nil':
+                        var $11749 = List$nil;
+                        var $11745 = $11749;
+                        break;
+                };
+                var $11737 = $11745;
+                break;
+            case 'e':
+                var $11750 = List$nil;
+                var $11737 = $11750;
+                break;
+        };
+        return $11737;
+    };
+    const Kind$Path$patch_at$list = x0 => x1 => x2 => Kind$Path$patch_at$list$(x0, x1, x2);
+
     function Kind$Term$patch_at$(_path$1, _term$2, _fn$3) {
         var self = _term$2;
         switch (self._) {
@@ -40946,7 +41451,6 @@ module.exports = (function() {
             case 'Kind.Term.nat':
             case 'Kind.Term.chr':
             case 'Kind.Term.str':
-            case 'Kind.Term.new':
                 var self = _path$1;
                 switch (self.length === 0 ? 'e' : self[self.length - 1] === '0' ? 'o' : 'i') {
                     case 'e':
@@ -41177,7 +41681,7 @@ module.exports = (function() {
                         switch (self._) {
                             case 'Kind.Status.init':
                                 var _defs$22 = Kind$Map$set$(_name$16, Kind$Def$new$(_file$13, _code$14, _orig$15, _name$16, _term$17, _type$18, _isct$19, _arit$20, Kind$Status$wait), _defs$2);
-                                var self = Kind$Term$check$(_type$18, Maybe$some$(Kind$Term$typ), _defs$22, List$nil, Kind$MPath$i$(Kind$MPath$nil), Maybe$none);
+                                var self = Kind$Term$check$(_type$18, Maybe$some$(Kind$Term$typ), _defs$22, List$nil, Kind$Path$Maybe$Builder$i$(Kind$Path$Maybe$Builder$nil), Maybe$none);
                                 switch (self._) {
                                     case 'Kind.Check.result':
                                         var $12596 = self.value;
@@ -41189,7 +41693,7 @@ module.exports = (function() {
                                                 var $12598 = $12599;
                                                 break;
                                             case 'Maybe.some':
-                                                var self = Kind$Term$check$(_term$17, Maybe$some$(_type$18), _defs$22, List$nil, Kind$MPath$o$(Kind$MPath$nil), Maybe$none);
+                                                var self = Kind$Term$check$(_term$17, Maybe$some$(_type$18), _defs$22, List$nil, Kind$Path$Maybe$Builder$o$(Kind$Path$Maybe$Builder$nil), Maybe$none);
                                                 switch (self._) {
                                                     case 'Kind.Check.result':
                                                         var $12601 = self.value;
@@ -47120,7 +47624,6 @@ module.exports = (function() {
         'BitsMap': BitsMap,
         'Maybe.none': Maybe$none,
         'BitsMap.get': BitsMap$get,
-        'Bits.e': Bits$e,
         'Bits.o': Bits$o,
         'Bits.i': Bits$i,
         'Bool.true': Bool$true,
@@ -47145,6 +47648,8 @@ module.exports = (function() {
         'Word.zero': Word$zero,
         'Nat.to_word': Nat$to_word,
         'Nat.to_u16': Nat$to_u16,
+        'Kind.Name.to_bits.go': Kind$Name$to_bits$go,
+        'Bits.e': Bits$e,
         'Kind.Name.to_bits': Kind$Name$to_bits,
         'Kind.Map.get': Kind$Map$get,
         'Maybe.default': Maybe$default,
@@ -47615,12 +48120,12 @@ module.exports = (function() {
         'Kind.Error.waiting': Kind$Error$waiting,
         'Kind.Error.indirect': Kind$Error$indirect,
         'Kind.Error.patch': Kind$Error$patch,
-        'Kind.MPath.to_bits': Kind$MPath$to_bits,
+        'Kind.Path.Maybe.Builder.to_bits': Kind$Path$Maybe$Builder$to_bits,
         'Kind.Term.check.patch': Kind$Term$check$patch,
         'Kind.Error.type_mismatch': Kind$Error$type_mismatch,
         'Kind.Error.show_goal': Kind$Error$show_goal,
-        'Kind.Path.nil': Kind$Path$nil,
-        'Kind.MPath.nil': Kind$MPath$nil,
+        'Kind.Path.Builder.nil': Kind$Path$Builder$nil,
+        'Kind.Path.Maybe.Builder.nil': Kind$Path$Maybe$Builder$nil,
         'Kind.Term.check.direct': Kind$Term$check$direct,
         'Kind.Term.check.get_name_of_self_type.slice': Kind$Term$check$get_name_of_self_type$slice,
         'Kind.Term.check.get_name_of_self_type': Kind$Term$check$get_name_of_self_type,
@@ -47680,6 +48185,7 @@ module.exports = (function() {
         'BitsSet.new': BitsSet$new,
         'BitsSet.mut.new': BitsSet$mut$new,
         'Kind.Term.check': Kind$Term$check,
+        'Kind.Path.patch_at.list': Kind$Path$patch_at$list,
         'Kind.Term.patch_at': Kind$Term$patch_at,
         'Kind.Synth.fix': Kind$Synth$fix,
         'Kind.Status.fail': Kind$Status$fail,

@@ -2,9 +2,11 @@ App.KL.Game.Effect.common.straight_line<A: Type>(
   eff_at: App.KL.Game.Effect.At<A>
   size: I32
   value: I32
+  ap_cost: I32
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
+    App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
     let line = App.KL.Game.Effect.area.straight_line(size, center, target)

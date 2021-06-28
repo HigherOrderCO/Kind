@@ -4,7 +4,6 @@ App.KL.Game.Effect.hp.change_at(
   (pos)
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
-    get target = App.KL.Game.Effect.coord.get_target
     let res = App.KL.Game.Board.Creature.change_hp(change, pos, board)
     let dhp = res@fst
     let board = res@snd

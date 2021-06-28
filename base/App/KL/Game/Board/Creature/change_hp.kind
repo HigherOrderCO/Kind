@@ -5,24 +5,20 @@ App.KL.Game.Board.Creature.change_hp(
 ): Pair(I32, App.KL.Game.Board)
 
   creature = App.KL.Game.Board.Creature.get(pos, board)
-  case creature { 
-    none:
-      {0, board}
-    some:
-      open creature.value as creature
-      open creature.hero as hero
-      new_hp = I32.max((creature.value@hp + value) , 0)
-      new_hp = I32.min(new_hp, hero.max_hp)
-      hp_diff = new_hp - creature.value@hp 
-      aux = App.KL.Game.Board.Creature.change_hp_aux(hp_diff)
-      board = App.KL.Game.Board.Creature.modify_at(aux, pos, board)
-      new_creature = App.KL.Game.Board.Creature.change_hp_aux(hp_diff, creature.value)
-      if I32.lte(new_creature@hp, 0) then
-        dead = App.KL.Game.Board.Creature.del(pos, board)
-        {+0#32, dead}
-      else
-        {hp_diff, board}
-  }
+  without creature: {0, board}
+    open creature
+    open creature.hero as hero
+    new_hp = I32.max((creature@hp + value) , 0)
+    new_hp = I32.min(new_hp, hero.max_hp)
+    hp_diff = new_hp - creature@hp 
+    aux = App.KL.Game.Board.Creature.change_hp_aux(hp_diff)
+    board = App.KL.Game.Board.Creature.modify_at(aux, pos, board)
+    new_creature = App.KL.Game.Board.Creature.change_hp_aux(hp_diff, creature)
+    if I32.lte(new_creature@hp, 0) then
+      dead = App.KL.Game.Board.Creature.del(pos, board)
+      {+0#32, dead}
+    else
+      {hp_diff, board}
 
 
 

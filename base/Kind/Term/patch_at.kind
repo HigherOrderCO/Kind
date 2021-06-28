@@ -4,55 +4,58 @@ Kind.Term.patch_at(path: Bits, term: Kind.Term, fn: Kind.Term -> Kind.Term): Kin
       e: fn(term)
       o: Kind.Term.all(term.eras, term.self, term.name, Kind.Term.patch_at(path.pred,term.xtyp,fn), term.body)
       i: Kind.Term.all(term.eras, term.self, term.name, term.xtyp, (s,x) Kind.Term.patch_at(path.pred,term.body(s,x),fn))
-    },
+    }
     lam: case path {
-      e: fn(term),
+      e: fn(term)
       o: Kind.Term.lam(term.name, (x) Kind.Term.patch_at(Bits.tail(path), term.body(x), fn))
       i: Kind.Term.lam(term.name, (x) Kind.Term.patch_at(Bits.tail(path), term.body(x), fn))
-    },
+    }
     app: case path {
       e: fn(term)
       o: Kind.Term.app(Kind.Term.patch_at(path.pred,term.func,fn), term.argm)
       i: Kind.Term.app(term.func, Kind.Term.patch_at(path.pred,term.argm,fn))
-    },
+    }
     let: case path {
       e: fn(term)
       o: Kind.Term.let(term.name, Kind.Term.patch_at(path.pred,term.expr,fn), term.body)
       i: Kind.Term.let(term.name, term.expr, (x) Kind.Term.patch_at(path.pred,term.body(x),fn))
-    },
+    }
     def: case path {
       e: fn(term)
       o: Kind.Term.def(term.name, Kind.Term.patch_at(path.pred,term.expr,fn), term.body)
       i: Kind.Term.def(term.name, term.expr, (x) Kind.Term.patch_at(path.pred,term.body(x),fn))
-    },
+    }
     ann: case path {
       e: fn(term)
       o: Kind.Term.ann(term.done, Kind.Term.patch_at(path.pred,term.term,fn), term.type)
       i: Kind.Term.ann(term.done, term.term, Kind.Term.patch_at(path.pred,term.type,fn))
-    },
+    }
+    cse: case path {
+      e: fn(term)
+      o: Kind.Term.cse(term.path, Kind.Term.patch_at(path.pred,term.expr,fn), term.name, term.with, term.cses, term.moti)
+      i: term
+    }
+    new: case path {
+      e: fn(term)
+    } default Kind.Term.new(Kind.Path.patch_at.list!(path, term.args, (arg_path, arg) Kind.Term.patch_at(arg_path, arg, fn)))
     get: case path {
       e: fn(term)
-      o: Kind.Term.get(Kind.Term.patch_at(path.pred,term.expr,fn), term.fkey)
-      i: Kind.Term.get(Kind.Term.patch_at(path.pred,term.expr,fn), term.fkey)
-    }
+    } default Kind.Term.get(Kind.Term.patch_at(path.pred,term.expr,fn), term.fkey)
     set: case path {
       e: fn(term)
       o: Kind.Term.set(Kind.Term.patch_at(path.pred,term.expr,fn), term.fkey, term.fval)
       i: Kind.Term.set(term.expr, term.fkey, Kind.Term.patch_at(path.pred,term.fval,fn))
     }
-    ope: 
-      // necessary because the checker may need to infer
-      // arg0, which may trigger a patch inside the ope
-      case path {
-        e: fn(term),
-        o: Kind.Term.ope(term.name, Kind.Term.patch_at(path.pred,term.arg0,fn), term.arg1),
-        i: Kind.Term.ope(term.name, term.arg0, Kind.Term.patch_at(path.pred,term.arg1,fn)),
-      }
+    ope: case path {
+      e: fn(term)
+      o: Kind.Term.ope(term.name, Kind.Term.patch_at(path.pred,term.arg0,fn), term.arg1)
+      i: Kind.Term.ope(term.name, term.arg0, Kind.Term.patch_at(path.pred,term.arg1,fn))
+    }
     ori: Kind.Term.ori(term.orig, Kind.Term.patch_at(path, term.expr, fn))
     _: case path {
-      e: fn(term),
-      o: term,
-      i: term,
-    },
+      e: fn(term)
+      o: term
+      i: term
+    }
   }
 

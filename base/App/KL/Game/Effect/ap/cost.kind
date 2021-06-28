@@ -1,0 +1,6 @@
+App.KL.Game.Effect.ap.cost(
+  cost: I32,
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect.ap.change_at(I32.neg(cost), pos)

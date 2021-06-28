@@ -4,9 +4,11 @@ App.KL.Game.Effect.common.shield.circle(
   id: String
   duration: I32
   amount: I32
+  ap_cost: I32
 ): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
+    App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.limit_range(range)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center

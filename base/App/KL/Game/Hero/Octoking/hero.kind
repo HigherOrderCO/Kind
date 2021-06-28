@@ -9,13 +9,13 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
 
   let max_hp = 25 :: I32
 
-  let max_ap = 10 :: I32
+  let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
-    "Q": App.KL.Game.Skill.new("Haste", 200, 16, 2, App.KL.Game.Hero.Octoking.hero.Skills.haste(2, 2))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Haste", 200, 16, 2, App.KL.Game.Hero.Octoking.hero.Skills.haste(2, 2, 1))
     "W": App.KL.Game.Skill.new("Shield", 520, 16, 0, App.KL.Game.Hero.Octoking.hero.Skills.shield(3))
-    "E": App.KL.Game.Skill.new("Slash", 800, 16, 1, App.KL.Game.Hero.Octoking.hero.Skills.slash(1, 20))
+    "E": App.KL.Game.Skill.new("Slash", 800, 16, 1, App.KL.Game.Hero.Octoking.hero.Skills.slash(1, 20, 1))
   }
 
   let on_stepped = none
@@ -25,7 +25,7 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
 
 // SKILLS
 
-App.KL.Game.Hero.Octoking.hero.Skills.haste(range: I32, dmg: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Octoking.hero.Skills.haste(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(range)
@@ -34,13 +34,13 @@ App.KL.Game.Hero.Octoking.hero.Skills.haste(range: I32, dmg: I32): App.KL.Game.E
     let coords  = Hexagonal.Axial.neighbour(target)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
-    if App.KL.Game.Board.is_occupied(target, board) then
-      App.KL.Game.Effect.pass // TODO make it return an error? - Currently it will draw the indicators and say the ability has been used, but it shouldn't be.
-    else
-      App.KL.Game.Effect {
-      App.KL.Game.Effect.area!(App.KL.Game.Effect.hp.damage_at(dmg), coords)
+    if App.KL.Game.Board.is_occupied(target, board) then App.KL.Game.Effect {
+      App.KL.Game.Effect.fail
+    } else App.KL.Game.Effect {
+      App.KL.Game.Effect.common.dmg.neighbour(dmg, ap_cost)
       App.KL.Game.Effect.movement.move
-      return unit }   
+      return unit
+    }
   }
 
 App.KL.Game.Hero.Octoking.hero.Skills.shield(shield_value: I32): App.KL.Game.Effect<Unit>
@@ -61,11 +61,11 @@ App.KL.Game.Hero.Octoking.hero.Skills.shield(shield_value: I32): App.KL.Game.Eff
     }
   }
 
-App.KL.Game.Hero.Octoking.hero.Skills.slash(range: I32, dmg: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Octoking.hero.Skills.slash(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     get target  = App.KL.Game.Effect.coord.get_target
     get center  = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.common.dmg.single(range, dmg)
+    App.KL.Game.Effect.common.dmg.single(range, dmg, ap_cost)
   }

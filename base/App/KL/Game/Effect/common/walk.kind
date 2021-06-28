@@ -1,14 +1,15 @@
 App.KL.Game.Effect.common.walk(
   distance: I32
+  ap_cost: I32
 ): App.KL.Game.Effect<Unit>
+
   App.KL.Game.Effect {
     get center = App.KL.Game.Effect.coord.get_center
     get creature = App.KL.Game.Effect.board.creature.get(center)
     let distance = Maybe.extract!(creature, _, +0#32, App.KL.Game.Creature.get_total_haste) + distance
-    
     get target = App.KL.Game.Effect.coord.get_target
+    App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.limit_range(distance)
-//    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
     App.KL.Game.Effect.movement.move
   }
 

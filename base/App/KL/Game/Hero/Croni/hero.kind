@@ -9,13 +9,13 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let max_hp = 25 :: I32
 
-  let max_ap = 10 :: I32
+  let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
-    "Q": App.KL.Game.Skill.new("Shadow Ball", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_ball(6, 1, 3))
-    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_flux(6, 8))
-    "E": App.KL.Game.Skill.new("Trap", 300, 16, 6, App.KL.Game.Hero.Croni.Skills.trap)
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Shadow Ball", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_ball(6, 1, 3, 1))
+    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_flux(6, 8, 1))
+    "E": App.KL.Game.Skill.new("Trap", 300, 16, 6, App.KL.Game.Hero.Croni.Skills.trap(1))
   }
 
   let on_stepped = none
@@ -25,11 +25,13 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
 // SKILLS
 
-App.KL.Game.Hero.Croni.Skills.trap: App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Croni.Skills.trap(ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(6)
     get target = App.KL.Game.Effect.coord.get_target
+    get center = App.KL.Game.Effect.coord.get_center
     get board = App.KL.Game.Effect.board.get
+    App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
@@ -38,24 +40,24 @@ App.KL.Game.Hero.Croni.Skills.trap: App.KL.Game.Effect<Unit>
       App.KL.Game.Effect.board.summon(target, trap)
   }
 
-App.KL.Game.Hero.croni.hero.Skills.shadow_ball(range: I32, area: I32, dmg: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.croni.hero.Skills.shadow_ball(range: I32, area: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
     let circle = App.KL.Game.Effect.area.circle(target, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, circle)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.common.dmg.circle(range, area, dmg)
+    App.KL.Game.Effect.common.dmg.circle(range, area, dmg, ap_cost)
   }
 
 
-App.KL.Game.Hero.croni.hero.Skills.shadow_flux(range: I32, dmg: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.croni.hero.Skills.shadow_flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     get target  = App.KL.Game.Effect.coord.get_target
     get center  = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.common.dmg.single(range, dmg)
+    App.KL.Game.Effect.common.dmg.single(range, dmg, ap_cost)
   }
 
 App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero

@@ -9,13 +9,13 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
 
   let max_hp = 25 :: I32
 
-  let max_ap = 10 :: I32
+  let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2))
-    "Q": App.KL.Game.Skill.new("Restore", 400, 16, 2, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 2))
-    "W": App.KL.Game.Skill.new("Escort", 400, 16, 4, App.KL.Game.Effect.common.shield.single(4, "Lela Escort", 1, 2))
-    "E": App.KL.Game.Skill.new("Detain", 600, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(2, 2))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Restore", 400, 16, 2, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 2, 1))
+    "W": App.KL.Game.Skill.new("Escort", 400, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 2, 1))
+    "E": App.KL.Game.Skill.new("Detain", 600, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(2, 2, 1))
   }
 
   let on_stepped = none
@@ -23,20 +23,28 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
 
 
-App.KL.Game.Hero.Lela.hero.Skills.restore(range: I32, heal: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Lela.hero.Skills.restore(range: I32, heal: I32, ap_cost:I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     get target  = App.KL.Game.Effect.coord.get_target
     get center  = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
-    App.KL.Game.Effect.common.heal.single(range, heal)
+    App.KL.Game.Effect.common.heal.single(range, heal, ap_cost)
   }
 
-App.KL.Game.Hero.Lela.hero.Skills.detain(range: I32, dmg: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Lela.hero.Skills.detain(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     get target  = App.KL.Game.Effect.coord.get_target
     get center  = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.common.dmg.single(range, dmg)
+    App.KL.Game.Effect.common.dmg.single(range, dmg, ap_cost)
+  }
+App.KL.Game.Hero.Lela.hero.Skills.escort(range: I32, id: String, duration: I32, amount: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    get target  = App.KL.Game.Effect.coord.get_target
+    get center  = App.KL.Game.Effect.coord.get_center
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.common.shield.single(range, id, duration, amount, ap_cost)
   }

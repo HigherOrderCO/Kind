@@ -1,0 +1,12 @@
+Matrix.transpose<T: Type>(
+  n: Nat, m: Nat
+  M: Matrix<T>(n, m)
+): Matrix<T>(m, n)
+  ?a
+
+Matrix.tranpose.lin<T: Type>(
+  n0: Nat, n1: Nat
+  m: Nat
+  M: Matrix<T>(Nat.add(n1, n0), m)
+): Matrix<T>(m, Nat.add(n1, n0))
+  ?b

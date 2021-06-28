@@ -4,5 +4,5 @@ App.KL.Game.Effect.indicators.remove<A: Type>
 
   (center, target, board)
   case eff(center, target, board) as result {
-    new: App.KL.Game.Effect.Result.new<A>(result.value, result.board, Hexagonal.Axial.BBT.new!)
+    new: App.KL.Game.Effect.Result.new<A>(result.value, result.board, Hexagonal.Axial.BBT.new!, 0)
   }

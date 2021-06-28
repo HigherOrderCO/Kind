@@ -3,5 +3,4 @@ App.KL.Game.Effect.limit_range(range: I32): App.KL.Game.Effect<Unit>
   if I32.gtn(Hexagonal.Axial.distance(center, target), range) then
     App.KL.Game.Effect.Result.err<Unit>
   else
-    App.KL.Game.Effect.Result.new<Unit>(unit, board, Hexagonal.Axial.BBT.new!)
-  
+    App.KL.Game.Effect.Result.new<Unit>(unit, board, Hexagonal.Axial.BBT.new!, 0)

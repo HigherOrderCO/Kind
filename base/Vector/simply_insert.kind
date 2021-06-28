@@ -1,12 +1,12 @@
-Vector.simply_insert(A : Type, size : Nat, n : Nat, v : A, vec : Vector<A, size>) : Vector<A, size>
+Vector.simply_insert(A: Type, size: Nat, n: Nat, v: A, vec: Vector<A, size>): Vector<A, size>
   case size with vec {
-      zero : Vector.nil!
-      succ : case n {
-          zero : case vec {
-              cons : Vector.cons(A, size.pred, v, vec.tail)
+      zero: Vector.nil!
+      succ: case n {
+          zero: case vec {
+              cons: Vector.cons(A, size.pred, v, vec.tail)
           }
-          succ : case vec {
-              cons : 
+          succ: case vec {
+              cons: 
                 Vector.cons(A, size.pred, vec.head,
                    Vector.simply_insert(A, size.pred, n.pred, v, vec.tail))
           }

@@ -1,0 +1,8 @@
+App.KL.Game.Effect.common.dmg.circle_without_center(
+  radius: I32
+  dmg: I32
+  ap_cost: I32
+): App.KL.Game.Effect<Unit>
+
+    let eff = App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg))
+    App.KL.Game.Effect.common.circle_without_center!(eff, radius, dmg, ap_cost)

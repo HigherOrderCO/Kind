@@ -6,10 +6,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
 
   board  = Hexagonal.Axial.BBT.new<App.KL.Game.Tile>
   
-  // TODO: Define this elsewhere?
-  // Defines all possible images inside a tile
-  // terrain_img = App.KL.Game.Resources.terrains
-
+  
   new_terrain = App.KL.Game.Terrain.new(0)
   new_terrain = App.KL.Game.Entity.terrain(new_terrain)
 

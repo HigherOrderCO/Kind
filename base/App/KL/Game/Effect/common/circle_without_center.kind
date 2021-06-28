@@ -1,0 +1,17 @@
+App.KL.Game.Effect.common.circle_without_center<A: Type>(
+  eff_at: App.KL.Game.Effect.At<A>
+  radius: I32
+  value: I32
+  ap_cost: I32
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect {
+    App.KL.Game.Effect.ap.use(ap_cost)
+    App.KL.Game.Effect.limit_range(radius)
+    get target = App.KL.Game.Effect.coord.get_target
+    get center = App.KL.Game.Effect.coord.get_center
+    let circle = App.KL.Game.Effect.area.circle_without_center(target, radius)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.area!(eff_at, circle)
+    return unit
+  }

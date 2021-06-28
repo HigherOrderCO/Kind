@@ -1,7 +1,8 @@
 App.KL.Game.Effect.common.dmg.single(
   range: I32
   dmg: I32
+  ap_cost: I32
 ): App.KL.Game.Effect<Unit>
 
   let eff = App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg))
-  App.KL.Game.Effect.common.single!(eff, range, dmg)
+  App.KL.Game.Effect.common.single!(eff, range, dmg, ap_cost)

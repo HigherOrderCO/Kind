@@ -3,7 +3,6 @@ App.KL.Game.Effect.area.circle_without_center(
   radius: I32
 ): List<Hexagonal.Axial>
 
- 
   circle = Hexagonal.Axial.range(coord, radius)
   List.filter!((x)not(Hexagonal.Axial.eql(coord, x)), circle)
 
