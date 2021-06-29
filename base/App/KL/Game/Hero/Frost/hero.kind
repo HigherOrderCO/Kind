@@ -12,7 +12,7 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 4, 2, App.KL.Game.Effect.common.walk(2, 1))
     "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 16, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1))
     "W": App.KL.Game.Skill.new("Summon Wall", 300, 16, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(1))
     "E": App.KL.Game.Skill.new("Taunt", 700, 16, 0, App.KL.Game.Hero.Frost.Skills.taunt(2, 1))

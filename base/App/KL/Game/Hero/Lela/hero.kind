@@ -7,15 +7,15 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Lela.Assets.base64_idle
 
-  let max_hp = 25 :: I32
+  let max_hp = 18 :: I32
 
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Restore", 400, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 2, 1))
-    "W": App.KL.Game.Skill.new("Escort", 400, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 2, 1))
-    "E": App.KL.Game.Skill.new("Detain", 600, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(4, 2, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 4, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Restore", 398, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 2, 1))
+    "W": App.KL.Game.Skill.new("Escort", 403, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 2, 1))
+    "E": App.KL.Game.Skill.new("Detain", 617, 16, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(4, 2, 1))
   }
 
   let on_stepped = none

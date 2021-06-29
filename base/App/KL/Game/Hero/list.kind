@@ -4,6 +4,6 @@ App.KL.Game.Hero.list: List<App.KL.Game.Hero>
     App.KL.Game.Hero.Cyclope.hero
     App.KL.Game.Hero.Frost.hero
     App.KL.Game.Hero.Lela.hero
-    App.KL.Game.Hero.Octoking.hero
+    App.KL.Game.Hero.Vargouli.hero
     App.KL.Game.Hero.Zoio.hero
   ]

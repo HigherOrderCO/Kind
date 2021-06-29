@@ -1,21 +1,21 @@
-App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
-  let name = "Octoking"
+App.KL.Game.Hero.Vargouli.hero: App.KL.Game.Hero
+  let name = "Vargouli"
 
   let draw = (player)
-    App.KL.Game.Hero.Octoking.Assets.vbox_idle
+    App.KL.Game.Hero.Vargouli.Assets.vbox_idle
 
   let picture = (bool, time)
-    App.KL.Game.Hero.Octoking.Assets.base64_idle
+    App.KL.Game.Hero.Vargouli.Assets.base64_idle
 
-  let max_hp = 25 :: I32
+  let max_hp = 20 :: I32
 
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Haste", 200, 16, 2, App.KL.Game.Hero.Octoking.hero.Skills.haste(2, 2, 1))
-    "W": App.KL.Game.Skill.new("Shield", 520, 16, 0, App.KL.Game.Hero.Octoking.hero.Skills.shield(3))
-    "E": App.KL.Game.Skill.new("Slash", 800, 16, 1, App.KL.Game.Hero.Octoking.hero.Skills.slash(1, 20, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 4, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Haste", 200, 16, 2, App.KL.Game.Hero.Vargouli.hero.Skills.haste(2, 2, 1))
+    "W": App.KL.Game.Skill.new("Shield", 520, 16, 0, App.KL.Game.Hero.Vargouli.hero.Skills.shield(10))
+    "E": App.KL.Game.Skill.new("Slash", 800, 16, 1, App.KL.Game.Hero.Vargouli.hero.Skills.slash(1, 20, 1))
   }
 
   let on_stepped = none
@@ -25,10 +25,11 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
 
 // SKILLS
 
-App.KL.Game.Hero.Octoking.hero.Skills.haste(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Vargouli.hero.Skills.haste(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
 
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(range)
+    get center  = App.KL.Game.Effect.coord.get_center
     get target  = App.KL.Game.Effect.coord.get_target
     get board   = App.KL.Game.Effect.board.get
     let coords  = Hexagonal.Axial.neighbour(target)
@@ -38,12 +39,13 @@ App.KL.Game.Hero.Octoking.hero.Skills.haste(range: I32, dmg: I32, ap_cost: I32):
       App.KL.Game.Effect.fail
     } else App.KL.Game.Effect {
       App.KL.Game.Effect.common.dmg.neighbour(dmg, ap_cost)
+      App.KL.Game.Effect.hp.damage_at(2, center)
       App.KL.Game.Effect.movement.move
       return unit
     }
   }
 
-App.KL.Game.Hero.Octoking.hero.Skills.shield(shield_value: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Vargouli.hero.Skills.shield(shield_value: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     get target_creature = App.KL.Game.Effect.board.creature.target
     get target = App.KL.Game.Effect.coord.get_target
@@ -61,7 +63,7 @@ App.KL.Game.Hero.Octoking.hero.Skills.shield(shield_value: I32): App.KL.Game.Eff
     }
   }
 
-App.KL.Game.Hero.Octoking.hero.Skills.slash(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Vargouli.hero.Skills.slash(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     get target  = App.KL.Game.Effect.coord.get_target
     get center  = App.KL.Game.Effect.coord.get_center

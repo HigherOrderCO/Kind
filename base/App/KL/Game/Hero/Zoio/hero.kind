@@ -12,9 +12,9 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 4, 1, App.KL.Game.Effect.common.walk(1, 1))
     "Q": App.KL.Game.Skill.new("Damage Placeholder for Q", 700, 16, 3, App.KL.Game.Effect.common.dmg.single(3, 8, 1))
-    "W": App.KL.Game.Skill.new("Eye Beam", 600, 16, 2, App.KL.Game.Effect.common.dmg.straight_line(2,5, 1))
+    "W": App.KL.Game.Skill.new("Eye Beam", 600, 16, 2, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(12, 4, 1))
     "E": App.KL.Game.Skill.new("Area Damage Placeholder for E", 800, 16, 2, App.KL.Game.Effect.common.dmg.circle(2, 1, 4, 1))
   }
 
@@ -22,12 +22,12 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
 
-App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
     let straight_line = App.KL.Game.Effect.area.straight_line(size, center, target)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, straight_line)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.common.dmg.straight_line(size, dmg)
+    App.KL.Game.Effect.common.dmg.straight_line(size, dmg, ap_cost)
   }
