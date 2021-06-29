@@ -1,4 +1,4 @@
-Fin.to_nat<n: Nat>(i: Fin(n)): Nat
+Fin.to_nat(n: Nat, i: Fin(n)): Nat
   case n with i {
     zero: case i {}
     succ:
