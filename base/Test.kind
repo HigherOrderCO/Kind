@@ -1,2 +1,2 @@
 Test: _
-  [i for i in [+2#32 * x for x in [0 to 100 : I32]] where I32.gte(i, 100)]
+  [i for i in [x * 2 for x in [0 to 100 : I32]] where I32.gte(i, 100)]
