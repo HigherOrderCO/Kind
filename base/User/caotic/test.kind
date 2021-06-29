@@ -1,31 +1,39 @@
-type Map <A : Type> <B : Type> (op : A -> A -> Cmp) {
-  new(tree : BBT<A, B>)
-}
-
-Map.set(A : Type, B : Type, op : A -> A -> CMP, k : A, v : B, map : Map<A, B, op>) : Map<A, B, op>
-  open map
-  let k = BBT.insert!!(op, k, v, map.tree)
-  Map.new(A, B, op, k)
-
-StringMap(B : Type) : Type
-  Map!<B, String.cmp>
-
-StringMap.new<B : Type> : StringMap<B>
-  Map.new!!!(BBT.tip<String, B>)
-
-test(x : StringMap<Nat>) : StringMap<Nat>
-  Map.set!!!("test", 34, x)
-
-User.caotic.test : _
-  test(StringMap.new!)
-
-User.Caotic.Test2: _
-  let test = [] :: BList<Nat>
-  let k = List.foldr!!(test, BList.insert!, [1, 2, 3, 4, 5, 6])
-  Maybe {
-    let a = List.tail!(k)
-    get b = List.head!(a)
-    return b
+Problems.filter<A : Type>(xs : List<A>, fn : A -> Bool) : List<A>
+  case xs {
+    nil : List.nil!
+    cons : 
+      def p = Problems.filter(A, xs.tail, fn)
+      if fn(xs.head) then p else List.cons!(xs.head, p)
   }
-  //BList.insert!(2, test)
+
+// Returns the same list without the smallest element
+Problems.p22(xs: List<Nat>): List<Nat>
+  Problems.filter(Nat, xs, (y) Problems.p13(Problems.p21(xs), y))
+
+Problems.aux_slow_sort(xs: List<Nat>): List<Nat>
+  case xs {
+    nil : []
+    cons : 
+      let v = Problems.p21(xs)
+      let rest = Problems.p22(xs.tail)
+      List.cons(Nat, v, rest) 
+  }
   
+// Tests if "output" is the sorted version of "input"
+sort.test(input: List<Nat>, output: List<Nat>): Bool
+  // Checks if output is in ascending order
+  let ok = true
+  for i from 1 to List.length!(output) with ok:
+    if Nat.lte(output[i-1] <> 0, output[i] <> 0) then
+      ok
+    else
+      false
+  ok
+
+// The sort algorithm 
+sort(list: List<Nat>): List<Nat>
+  ?sort
+
+// The proof that it works for *all* inputs
+proof(list: List<Nat>): sort.test(list, sort(list)) == true
+  ?proof-18

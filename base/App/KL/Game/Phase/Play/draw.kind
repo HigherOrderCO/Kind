@@ -182,8 +182,9 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       //let aux = I32.to_u32(App.KL.Constants.hexagon_radius) //U32
       //let cy = cy - (aux * 2) //U32
       //let cx = cx - aux //U32
+      //log(U32.show( cy + 100))
       let img = VoxBox.Draw.image(cx, cy, 0u, drawing, img)
-      let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 128 - 16, cy + 128 - 28, creature.value, img)
+      let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
       let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 32, creature.value, ap_used, img)
       img
   }

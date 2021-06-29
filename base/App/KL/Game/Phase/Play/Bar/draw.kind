@@ -1,13 +1,12 @@
 // TODO : Remove this?
 App.KL.Game.Phase.Play.Bar.draw_line(destin : Pair<U32, U32>, x : U32, y : U32, z : U32, col : Col32, img : VoxBox) : VoxBox
   open destin
-  
   VoxBox.Draw.line(
-                   U32.to_i32.signed(x),
-                   U32.to_i32.signed(y), 
-                   U32.to_i32.signed(destin.fst), 
-                   U32.to_i32.signed(destin.snd),
-                   U32.to_i32.signed(z),
+                   U32.to_i32(x),
+                   U32.to_i32(y), 
+                   U32.to_i32(destin.fst), 
+                   U32.to_i32(destin.snd),
+                   U32.to_i32(z),
                    col, 
                    img)
 
