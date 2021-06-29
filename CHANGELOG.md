@@ -1,4 +1,4 @@
-### Kind 1.0.73
+### Kind 1.0.75
 
 - New syntaxes
     
@@ -13,19 +13,21 @@
         open x
         rest
 
-    - May
+    - Let abort
         
-        may x = obj abort k
+        let x = maybe abort k
         rest
 
         // Equivalent to:
 
-        case obj as x {
+        case maybe as x {
           none: k
           some: 
             let x = x.value
             rest
         }
+
+        // Also works with 'use'
 
     - List comprehension
 

@@ -18,6 +18,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.letforinmap.with((x) Kind.Parser.term)
       Kind.Parser.letwhile((x) Kind.Parser.term)
       Kind.Parser.letwhile.with((x) Kind.Parser.term)
+      Kind.Parser.let.abort((x) Kind.Parser.term)
       Kind.Parser.let((x) Kind.Parser.term)
       Kind.Parser.let.omit((x) Kind.Parser.term)
       Kind.Parser.getwhile((x) Kind.Parser.term)
@@ -25,8 +26,8 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.get((x) Kind.Parser.term)
       Kind.Parser.get.omit((x) Kind.Parser.term)
       Kind.Parser.def((x) Kind.Parser.term)
+      Kind.Parser.use.abort((x) Kind.Parser.term)
       Kind.Parser.use((x) Kind.Parser.term)
-      Kind.Parser.may((x) Kind.Parser.term)
       Kind.Parser.goal_rewrite
       Kind.Parser.if
       Kind.Parser.char

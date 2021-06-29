@@ -1,3 +1,30 @@
-Test: Nat
-  (Nat.double . Nat.succ . Nat.succ)(7)
+Test: _
+  use x = some({70,80}) abort 0
+  x.fst
   
+
+//type Neutralis.PrivateKey {
+  //new(pairs: List<Pair<U256,U256>>)
+//}
+
+//type Neutralis.PublicKey {
+  //new(pairs: List<Pair<U256,U256>>)
+//}
+
+//Neutralis.Bytes: Type
+  //Pair<U32,Buffer8>
+
+//Neutralis.Bytes.get_bit(index: Nat, bytes: Neutralis.Bytes): Bool
+  //open bytes
+  //let k = Nat.to_u32(index)
+  //let i = U32.div(k,8)
+  //let j = U32.mod(k,8)
+  //U8.eql(U8.shr(Buffer8.get(k,bytes.snd),U32.to_u8(j)),1)
+  
+//Neutralis.Sign(pkey: Neutralis.PrivateKey, msg: Neutralis.Bytes): List<U256>
+  //open pkey
+  //let hash = Crypto.Keccak.hash.bytes(msg)
+  //let reveal = []
+  //let reveal = for i from 0 to 256:
+    //?a
+  //?b
