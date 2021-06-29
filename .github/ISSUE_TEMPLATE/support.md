@@ -1,6 +1,6 @@
 ---
 name: ❓ Support
-about: You need help using the language
+about: Get help using the language
 ---
 
 To help future users with similar problems please
