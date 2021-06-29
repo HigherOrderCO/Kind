@@ -26,23 +26,25 @@ App.KL.Game.Phase.Play.Bar.progress_line(
     App.KL.Game.Phase.Play.Bar.draw_line({x, y+rect.height-rect.lines_size}, x, y+rect.lines_size, z, col, img) 
 
 porc(base : U32, value : U32, total : U32) : U32
-   (total * (value*100/base))/100
-
+   let base = U32.to_f64(base)
+   let value = U32.to_f64(value)
+   let total = U32.to_f64(total)
+   let v = (total * (value*100/base))/100
+   F64.to_u32(v)
+  
 App.KL.Game.Phase.Play.Bar.complete_square(
-  bar: App.KL.Game.Phase.Play.Bar.Progress,
-  rect: App.KL.Game.Phase.Play.Bar.Rectangular,
-  img: VoxBox
-): VoxBox
-
+  bar : App.KL.Game.Phase.Play.Bar.Progress,
+  rect : App.KL.Game.Phase.Play.Bar.Rectangular,
+  img: VoxBox) : VoxBox
   let min = ((x, y) if U32.ltn(x, y) then x else y) :: U32 -> U32 -> U32
   let max = ((x, y) if U32.ltn(x, y) then y else x) :: U32 -> U32 -> U32
 
   open rect
   open bar
-  let bar_actual = porc(bar.max, bar.loss, rect.width)
+  let bar_actual = max(porc(bar.max, bar.loss, rect.width), 2)
   let bar_defense = min(porc(bar.max, bar.defense, rect.width), bar_actual)
-  let progress = rect.width + (bar_actual - bar_actual)
-
+  let progress = rect.width + (bar_actual - bar_defense)
+  
   // Draw the color depending on status by BarProgress
   for i : U32 from 1 to (bar_actual - bar_defense) with img:
     App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_ful, 2, rect, img)
@@ -50,13 +52,12 @@ App.KL.Game.Phase.Play.Bar.complete_square(
     App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_defense, 2, rect, img)
   for i : U32 from bar_actual to rect.width with img:
     App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_empty, 2, rect, img)
-
+  
   let separator = min(bar.max/6, rect.width/2)
-
+  
   for i : U32 from 1 to separator with img:   //U32
-    App.KL.Game.Phase.Play.Bar.progress_line((i * ((rect.width -1) / separator)) + 1, bar.col_empty, 3, rect, img)
+    App.KL.Game.Phase.Play.Bar.progress_line((i * ((rect.width -1) / separator)) + 1, bar.col_empty, 3, rect, img)  
   img
-
 
 App.KL.Game.Phase.Play.Bar.draw_bar(
   rect : App.KL.Game.Phase.Play.Bar.Rectangular,
