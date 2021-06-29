@@ -39,7 +39,7 @@
 
     - Map for-in:
 
-        for key,val in map with state:
+        for key:val in map with state:
           loop
         rest
 
