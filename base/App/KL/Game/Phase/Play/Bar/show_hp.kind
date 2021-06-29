@@ -10,11 +10,16 @@ App.KL.Game.Phase.Play.Bar.show_hp(
   let shield = App.KL.Game.Creature.Status.shield.total(creature)
   
   if I32.gtn(creature.hp, 0) then
+    let col = case creature.team {
+      red: Col32.new(200, 20, 20, 255)
+      blue: Col32.new(20, 20, 200, 255)
+      neutral: Col32.new(100, 20, 100, 255)
+    }
     let bar = App.KL.Game.Phase.Play.Bar.Progress.new(
       I32.to_u32(hero.max_hp),
       I32.to_u32(creature.hp),
       I32.to_u32(shield),
-      Col32.new(31, 203, 1, 255),
+      col,
       Col32.new(202, 202, 201, 255),
       Col32.new(0, 0, 0, 255))
     App.KL.Game.Phase.Play.Bar.draw(cx, cy, 2, 4, 33, bar, Col32.new(0, 0, 0, 200), img)

@@ -13,9 +13,9 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 4, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Shadow Flux", 860, 16, 6, App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(6, 12, 1))
-    "W": App.KL.Game.Skill.new("Shadow Trap", 300, 8, 6, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(1))
-    "E": App.KL.Game.Skill.new("Shadow Trap", 300, 8, 6, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(1))
+    "Q": App.KL.Game.Skill.new("Shadow Flux", 860, 16, 12, App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(12, 12, 1))
+    "W": App.KL.Game.Skill.new("Shadow Trap", 300, 8, 12, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1))
+    "E": App.KL.Game.Skill.new("Shadow Trap", 300, 8, 12, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1))
   }
 
   let on_stepped = none
@@ -25,9 +25,9 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
 // SKILLS
 
-App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
-    App.KL.Game.Effect.limit_range(6)
+    App.KL.Game.Effect.limit_range(range)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
     get board = App.KL.Game.Effect.board.get
