@@ -1,5 +1,0 @@
-App.Kaelin.Effect.indicators.remove<A: Type>(eff: App.Kaelin.Effect<A>): App.Kaelin.Effect<A>
-  (center, target, map)
-  case eff(center, target, map) as result {
-    new: App.Kaelin.Effect.Result.new<A>(result.value, result.map, result.futures, NatMap.new!)
-  }

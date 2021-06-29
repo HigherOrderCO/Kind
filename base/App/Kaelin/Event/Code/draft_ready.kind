@@ -1,6 +1,0 @@
-App.Kaelin.Event.Code.draft_ready : List<U8>
-  [
-    2#8, // 4 
-  ] //constraint 2 <= 64
-
-  

@@ -1,6 +1,0 @@
-App.Kaelin.Event.Code.Hex.set_min_length(
-  min: Nat, hex: String
-): String
-
-  dif = min - String.length(hex)
-  hex | String.repeat("0", dif)

@@ -1,5 +1,0 @@
-App.Kaelin.Coord.draft.to_map(team: App.Kaelin.Team, coords: Pair<NatMap<String>,NatMap<String>>): NatMap<String>
-switch String.eql(App.Kaelin.Team.show(team)) {
-  "blue" : coords@fst
-  "red"  : coords@snd
-}default NatMap.new<String>

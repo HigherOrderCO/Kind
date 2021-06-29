@@ -1,3 +1,0 @@
-App.Kaelin.Draw.timer(state: App.Store<App.Kaelin.State>, i: I32, a: U64, img: VoxBox): VoxBox
-  img = VoxBox.Draw.text(U64.show(a), PixelFont.small_black, Pos32.new(50,50,0u), img)
-  VoxBox.Draw.text(I32.show(i), PixelFont.small_black, Pos32.new(50,35,0u), img)

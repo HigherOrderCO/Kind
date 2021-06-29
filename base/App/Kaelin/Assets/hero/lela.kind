@@ -1,5 +1,0 @@
-App.Kaelin.Assets.hero.lela: App.Kaelin.HeroAssets
-  App.Kaelin.HeroAssets.new(
-    App.Kaelin.Assets.hero.lela.vbox_idle
-    App.Kaelin.Assets.hero.lela.base64_idle
-  )

@@ -21,7 +21,7 @@ App.Hello.when: App.When<App.Hello.State>
   case event {
     init: IO {
       App.watch!(App.room_zero)
-      App.new_post!(App.room_zero, App.empty_post)
+      App.new_post!(App.room_zero, "")
     }
     mouse_down: IO {
       App.set_local!(state@local + 1)

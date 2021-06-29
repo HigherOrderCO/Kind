@@ -1,8 +1,0 @@
-App.Kaelin.Map.get(
-  coord: App.Kaelin.Coord,
-  map: App.Kaelin.Map
-): Maybe<App.Kaelin.Tile>
-
-  key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
-  NatMap.get!(key, map)
-  

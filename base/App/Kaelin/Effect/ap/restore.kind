@@ -1,6 +1,0 @@
-App.Kaelin.Effect.ap.restore(
-  value: I32
-  pos: App.Kaelin.Coord
-): App.Kaelin.Effect<I32>
-
-  App.Kaelin.Effect.ap.change(I32.neg(value), pos)

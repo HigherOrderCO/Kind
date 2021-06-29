@@ -1,8 +1,0 @@
-App.Kaelin.Map.set(
-  coord: App.Kaelin.Coord,
-  tile: App.Kaelin.Tile,
-  map:App.Kaelin.Map
-):App.Kaelin.Map
-
-  key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
-  NatMap.set!(key, tile, map)

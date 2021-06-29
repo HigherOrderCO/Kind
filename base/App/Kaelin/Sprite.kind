@@ -1,3 +1,0 @@
-type App.Kaelin.Sprite {
-   new (frame_info : Nat, voxboxes : List<VoxBox>)
-}

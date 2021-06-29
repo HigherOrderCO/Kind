@@ -2,7 +2,7 @@ Example.udp.sender.new(port: Nat, to_ip: String, to_port: Nat, msge: String): IO
   IO {
     IO.print("sending")
     IO.init_udp(port)
-    let data = String.drop(2,String.hex.encode(msge))
+    let data = String.hex.encode(msge)
     IO.send_udp(port, to_ip, to_port, data)
     IO.sleep(500)
     Example.udp.sender.new(port, to_ip, to_port, msge)
@@ -18,7 +18,7 @@ Example.udp.receiver.new(port: Nat): IO<Unit>
       use msge = got[i] abort IO.pass
       IO.print("- message " | Nat.show(i) | ":")
       IO.print("-- from: " | msge.from@ip)
-      IO.print("-- msge: " | String.hex.decode("0x"|msge.data))
+      IO.print("-- msge: " | String.hex.decode(msge.data))
     }
     IO.sleep(500)
     Example.udp.receiver.new(port)

@@ -1,7 +1,0 @@
-type App.Kaelin.Tile {
-  new(
-    background: App.Kaelin.Terrain, 
-    creature: Maybe(App.Kaelin.Creature),
-    animation: Maybe(App.Kaelin.Animation)
-    )
-}

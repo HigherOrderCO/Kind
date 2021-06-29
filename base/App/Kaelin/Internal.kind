@@ -1,7 +1,0 @@
-// TODO
-// Now we only support timer by datatime tick
-// Add support to frame timer by App.Kaelin.Timer.Future 
-
-type App.Kaelin.Internal {
-    new(tick : Nat, frame : Nat, timer : List<App.Kaelin.Timer>)
-}

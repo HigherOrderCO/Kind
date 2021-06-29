@@ -1,3 +1,0 @@
-type App.Kaelin.Timer{
-  new(time : Nat, action : App.Store<App.Kaelin.State> -> App.Store<App.Kaelin.State>)
-} 

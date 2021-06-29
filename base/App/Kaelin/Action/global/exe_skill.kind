@@ -1,7 +1,0 @@
-App.Kaelin.Action.global.exe_skill(
-  player: String
-  mouse_pos: App.Kaelin.Coord
-  key: U16
-  global: App.Kaelin.State.global, 
-): App.Kaelin.State.global
-  global@map <- App.Kaelin.Map.exe_skill(player, mouse_pos, key, global@map)

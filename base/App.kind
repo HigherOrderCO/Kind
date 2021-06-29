@@ -52,14 +52,14 @@ App.Tick<S: App.State>: Type
   ((tick: U64, glob: App.State.global(S)) -> App.State.global(S))
 
 // The global post handler receives:
-// - time: 40 bits, representing time in 62.5s ticks. Equal to UTC_TIME / 62.5
-// - room: 56 bits, representing the room this post was posted to.
+// - time: 64 bits, representing time in 62.5s ticks. Equal to UTC_TIME / 62.5
+// - room: 64 bits, representing the room this post was posted to.
 // - addr: 160 bits, the user identifier, represented as its Ethereum address
 // - data: 256 bits, the contents of the post
 // - glob: the current global state of the app
 // It must return the updated global state.
 App.Post<S: App.State>: Type
-  ((time: U64, room: String, addr: String, data: String, glob: App.State.global(S)) -> App.State.global(S))
+  ((tick: U64, room: String, addr: String, data: String, glob: App.State.global(S)) -> App.State.global(S))
 
 type App.Event {
   // Occurs when the app is initialized
@@ -146,7 +146,7 @@ App.no_tick<S: App.State>: App.Tick<S>
 
 // Default post
 App.no_post<S: App.State>: App.Post<S>
-  (time, room, addr, data, glob) glob
+  (tick, room, addr, data, glob) glob
 
 App.do<S: App.State>(call: String, param: String): IO<Maybe<App.State.local<S>>>
   IO {
@@ -183,10 +183,4 @@ App.unwatch<S: App.State>(room: String): IO<Maybe<App.State.local<S>>>
   App.do<S>("unwatch", room)
 
 App.room_zero: String
-  "0x00000000000000"
-
-App.empty_post: String
-  "0x0000000000000000000000000000000000000000000000000000000000000000"
-
-//foo: Type
-  //App.Post<App.State.new(Unit,Unit)>
+  "0000000000000000"

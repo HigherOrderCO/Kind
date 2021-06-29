@@ -1,8 +1,0 @@
-//Function to find which hero skill
-App.Kaelin.Skill.get(
-  key:U16
-  creature: App.Kaelin.Creature
-): Maybe(App.Kaelin.Skill)
-
-  open creature
-  List.find!((x) U16.eql(x@key, key), creature.hero@skills)

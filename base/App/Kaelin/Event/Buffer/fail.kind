@@ -1,2 +1,0 @@
-App.Kaelin.Event.Buffer.fail<A : Type> : App.Kaelin.Event.Buffer<A>
-  (ls) Parser.fail!("Falhou")

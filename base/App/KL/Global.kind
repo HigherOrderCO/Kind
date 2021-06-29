@@ -8,10 +8,10 @@ type App.KL.Global.Event {
 } deriving (serializer, deserializer)
 
 App.KL.Global.Event.serialize_post(ev: App.KL.Global.Event): String
-  "0x" | String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.KL.Global.Event.serializer, ev)))
+  String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.KL.Global.Event.serializer, ev)))
 
 App.KL.Global.Event.deserialize_post(hex: String): Maybe<App.KL.Global.Event>
-  Deserializer.run!(App.KL.Global.Event.deserializer, Bits.hex.decode(String.drop(2,hex)))
+  Deserializer.run!(App.KL.Global.Event.deserializer, Bits.hex.decode(hex))
 
 // Global ticker
 App.KL.Global.tick: App.Tick<App.KL.State>

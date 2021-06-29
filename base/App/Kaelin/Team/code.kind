@@ -1,6 +1,0 @@
-App.Kaelin.Team.code(team: App.Kaelin.Team): U8
-  case team {
-    red: 1
-    blue: 2
-    neutral: 0
-  }

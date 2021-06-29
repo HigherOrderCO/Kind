@@ -1,5 +1,0 @@
-App.Kaelin.Effect.hp.heal(
-  heal: I32
-): App.Kaelin.Effect<I32>
-
-  App.Kaelin.Effect.hp.change(heal)

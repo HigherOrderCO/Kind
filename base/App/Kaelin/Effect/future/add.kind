@@ -1,7 +1,0 @@
-// TODO LATER
-App.Kaelin.Effect.future.add(
-  futures: List(App.Kaelin.Future)
-): App.Kaelin.Effect<Unit>
-
-  (tick, center, target, map)
-  App.Kaelin.Effect.Result.new!(unit, map, futures, NatMap.new!)

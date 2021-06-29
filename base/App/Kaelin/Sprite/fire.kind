@@ -1,9 +1,0 @@
-// You must notice that sprite wiil run in a frame of kaelin
-// For example if you sprite runs in 150 ms, so you must divide by the actual tick length of Kaelin
-App.Kaelin.Sprite.fire : App.Kaelin.Sprite
-  App.Kaelin.Sprite.new(9,  // have to be higher than the size of image sprite
-  [App.Kaelin.Assets.effects.fire_1
-   App.Kaelin.Assets.effects.fire_2,
-   App.Kaelin.Assets.effects.fire_3,
-   App.Kaelin.Assets.effects.fire_4,
-   App.Kaelin.Assets.effects.fire_5])

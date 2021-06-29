@@ -1,6 +1,0 @@
-App.Kaelin.Effect.ap.cost(
-  key: U16
-  target: App.Kaelin.Coord
-): App.Kaelin.Effect<I32>
-
-  App.Kaelin.Effect.ap.change_at(key, target)

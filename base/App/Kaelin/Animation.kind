@@ -1,3 +1,0 @@
-type App.Kaelin.Animation {
-  new(duration : Maybe<Nat>, sprite : App.Kaelin.Sprite)
-}

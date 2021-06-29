@@ -1,5 +1,0 @@
-App.Kaelin.Effect.indicators.add(
-  indicators: NatMap(App.Kaelin.Indicator)
-): App.Kaelin.Effect<Unit>
-  (center, target, map)
-  App.Kaelin.Effect.Result.new!(unit, map, [], indicators)

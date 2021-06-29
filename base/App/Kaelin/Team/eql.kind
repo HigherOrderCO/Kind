@@ -1,6 +1,0 @@
-App.Kaelin.Team.eql(a: App.Kaelin.Team, b: App.Kaelin.Team): Bool
-  case a b {
-    red red: true
-    blue blue: true
-    neutral neutral: true
-  } default false

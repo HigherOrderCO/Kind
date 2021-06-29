@@ -11,7 +11,7 @@ const KindEventsClient = require("./../events/client.js");
 function random_hex(bits_len) {
   var bytes = crypto.getRandomValues(new Uint8Array((bits_len/8)>>>0));
   var chars = Array.from(bytes).map(b => ("00" + b.toString(16)).slice(-2));
-  return "0x" + chars.join("");
+  return chars.join("");
 }
 
 function get_from_storage(key, init) {
@@ -24,9 +24,15 @@ function get_from_storage(key, init) {
 }
 
 window.KEY = get_from_storage("KEY", () => random_hex(256));
+// backwards compatibility
+if (window.KEY.slice(0,2) === "0x") {
+  window.KEY = window.KEY.slice(2);
+  localStorage.setItem("KEY", window.KEY);
+}
 window.KindEvents = KindEventsClient({url: "ws://uwu.tech:7171", key: window.KEY});
+//window.KindEvents = KindEventsClient({url: "ws://localhost:7171", key: window.KEY});
 console.log("KEY: ", window.KEY);
-console.log("ADDRESS: ", EthSign.addressFromKey(window.KEY));
+console.log("ADDRESS: ", EthSign.addressFromKey("0x"+window.KEY).slice(2));
 
 class Moonad extends Component {
   constructor(props) {

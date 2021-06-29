@@ -1,6 +1,0 @@
-type App.Kaelin.Map.Entity {
-  animation(value: App.Kaelin.Animation)
-  background(value: App.Kaelin.Terrain)
-  creature(value: App.Kaelin.Creature)
-}
-  

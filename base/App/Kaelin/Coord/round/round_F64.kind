@@ -1,9 +1,0 @@
-App.Kaelin.Coord.round.round_F64(
-  n: F64
-): F64
-
-  half = 0.5 //F64
-  big_number = 1000.0// while F64.gtn, cmp and ltn is broken
-  n = n + big_number //F64
-  result = App.Kaelin.Coord.round.floor(n + half) //F64
-  result - big_number //F64

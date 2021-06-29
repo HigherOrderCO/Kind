@@ -1,6 +1,0 @@
-App.Kaelin.Event.Code.user_input : List<U8>
-  [
-    40#8,
-    2#8, // 4
-    8#8 // 12
-  ] //constraint 2 <= 64

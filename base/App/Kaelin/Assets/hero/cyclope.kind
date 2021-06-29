@@ -1,5 +1,0 @@
-App.Kaelin.Assets.hero.cyclope: App.Kaelin.HeroAssets
-  App.Kaelin.HeroAssets.new(
-    App.Kaelin.Assets.hero.cyclope.vbox_idle
-    App.Kaelin.Assets.hero.cyclope.base64_idle
-  )

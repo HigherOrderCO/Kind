@@ -1,6 +1,0 @@
-App.Kaelin.Team.show(team: App.Kaelin.Team): String
-  case team {
-    red: "red"
-    blue: "blue"
-    neutral: "neutral"
-  }

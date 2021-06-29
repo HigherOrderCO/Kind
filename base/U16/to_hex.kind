@@ -1,3 +1,4 @@
+// TODO rename to U16.hex.encode.utf8
 U16.to_hex(a: U16): String
   String.cons(U16.to_hex.4(U16.shr(a,4)),
   String.cons(U16.to_hex.4(U16.and(a,0xf)),

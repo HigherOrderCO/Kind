@@ -1,6 +1,0 @@
-type App.Kaelin.Stage {
-  init
-  draft(players: Map<App.Kaelin.DraftInfo>, coords:Pair<NatMap<String>, NatMap<String>>)
-  planning(control_map: I32, local_tick: U64, seconds: U64)
-  action
-}

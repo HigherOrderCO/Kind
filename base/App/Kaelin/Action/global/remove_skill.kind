@@ -1,9 +1,0 @@
-App.Kaelin.Action.global.remove_skill(
-  user: String,
-  target_pos: App.Kaelin.Coord,
-  key: U16,
-  team: App.Kaelin.Team,
-  global: App.Kaelin.State.global
-): App.Kaelin.State.global
-  this_cast = App.Kaelin.CastInfo.global.new(user, target_pos, key, team)
-  global@skills_list <- List.delete_by!(App.Kaelin.CastInfo.global.eql, this_cast, global@skills_list)
