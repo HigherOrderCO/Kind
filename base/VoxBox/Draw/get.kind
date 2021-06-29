@@ -1,2 +1,8 @@
+// Get the instance of Voxbox of a VoxBox.Draw
+// VoxBox.Draw {
+// get my_voxbox = VoxBox.Draw.get
+// ...   
+//}
+
 VoxBox.Draw.get<A : Type>(v : VoxBox.Draw<A>) : VoxBox.Draw(VoxBox)
   (paint) {paint@img, paint}

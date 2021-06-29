@@ -1,3 +1,12 @@
+// Set the pos of the VoxBox.Draw
+// #Example
+// VoxBox.Draw {
+//  VoxBox.Draw.set_pos(34, 30, 2)
+//  ...
+//  VoxBox.Draw.set_pos(344, 33, 3)
+//  ...
+//}
+
 VoxBox.Draw.set_pos(x : U32, y : U32, z : U32) : VoxBox.Draw<Unit>
   (paint) 
     let paint = paint@x <- x
