@@ -15,7 +15,7 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
     "X": App.KL.Game.Skill.new("Walk", 500, 4, 1, App.KL.Game.Effect.common.walk(1, 1))
     "Q": App.KL.Game.Skill.new("Tentackle", 300, 16, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2))
     "W": App.KL.Game.Skill.new("Eye Beam", 650, 16, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(12, 4, 1))
-    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 16, 0, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(12, 16, 3))
+    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 16, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(12, 16, 3))
   }
 
   let on_stepped = none
@@ -50,11 +50,11 @@ App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(size: I32, dmg: I32, ap_cost: I32):
     let area = []
     let area = for direction_coord in ring:
       App.KL.Game.Effect.area.straight_line(size, target, direction_coord) ++ area
+    App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.movement.move_to(center, target)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
-    App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.hp.damage_at(256, center)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, target & area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
+    App.KL.Game.Effect.hp.damage_at(256, target)
     return unit
   }

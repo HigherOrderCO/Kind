@@ -99,10 +99,18 @@ App.KL.Game.Cast.get_hero(
   cast: App.KL.Game.Cast
   game: App.KL.Game
 ): Maybe<App.KL.Game.Hero>
+  open game
+  open cast
   Maybe {
-    get creature = App.KL.Game.Cast.get_creature(cast, game)
-    return creature@hero
+    get player = game.players{cast.player}
+    get hero_id = player@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
   }
+  //Maybe {
+    //get creature = App.KL.Game.Cast.get_creature(cast, game)
+    //return creature@hero
+  //}
 
 // Sorts a game's casts by delay, in ascending order, removing duplicates
 App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
