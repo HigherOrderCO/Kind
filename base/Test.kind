@@ -1,0 +1,3 @@
+Test: Nat
+  may x = some(7) abort 0
+  x

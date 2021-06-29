@@ -86,6 +86,8 @@ Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
     Kind.Parser.getwhile.with((x) Kind.Parser.do.statements(monad_name))
     Kind.Parser.get((x) Kind.Parser.do.statements(monad_name))
     Kind.Parser.def((x) Kind.Parser.do.statements(monad_name))
+    Kind.Parser.use((x) Kind.Parser.do.statements(monad_name))
+    Kind.Parser.may((x) Kind.Parser.do.statements(monad_name))
     Kind.Parser.log((x) Kind.Parser.do.statements(monad_name))
     Kind.Parser.open((x) Kind.Parser.do.statements(monad_name))
     // Non-binding call: @expr rest@

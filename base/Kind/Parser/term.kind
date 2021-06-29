@@ -14,6 +14,8 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.letforrange.nat.with((x) Kind.Parser.term)
       Kind.Parser.letforin((x) Kind.Parser.term)
       Kind.Parser.letforin.with((x) Kind.Parser.term)
+      Kind.Parser.letforinmap((x) Kind.Parser.term)
+      Kind.Parser.letforinmap.with((x) Kind.Parser.term)
       Kind.Parser.letwhile((x) Kind.Parser.term)
       Kind.Parser.letwhile.with((x) Kind.Parser.term)
       Kind.Parser.let((x) Kind.Parser.term)
@@ -23,6 +25,8 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.get((x) Kind.Parser.term)
       Kind.Parser.get.omit((x) Kind.Parser.term)
       Kind.Parser.def((x) Kind.Parser.term)
+      Kind.Parser.use((x) Kind.Parser.term)
+      Kind.Parser.may((x) Kind.Parser.term)
       Kind.Parser.goal_rewrite
       Kind.Parser.if
       Kind.Parser.char
@@ -37,6 +41,8 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.apply
       Kind.Parser.chain
       Kind.Parser.mirror
+      Kind.Parser.comprehension
+      Kind.Parser.comprehension_map
       Kind.Parser.list
       Kind.Parser.map
       Kind.Parser.log((x) Kind.Parser.term)
