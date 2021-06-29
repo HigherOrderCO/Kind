@@ -67,13 +67,37 @@ Kind.Parser.comprehension_map: Parser<Kind.Term>
     return term
   }
 
-// Kind.Parser.comprehension_range: Parser<Kind.Term>
-//   Parser {
-//     Kind.Parser.text("[")
-//     let ini = Kind.Parser.term
-//     Kind.Parser.text("..")
-//     let end = Kind.Parser.term
-//     Kind.Parser.text("]")
-    
-//     let term = Kind.Term.ref("List.range()")
-//   }
+Kind.Parser.comprehension_range: Parser<Kind.Term>
+  Parser.choice!([
+    Kind.Parser.comprehension_range.go(none)
+    Kind.Parser.comprehension_range.go(some("I32"))
+    Kind.Parser.comprehension_range.go(some("U32"))
+  ])
+
+Kind.Parser.comprehension_range.go(typename: Maybe<String>): Parser(Kind.Term)
+  Kind.Parser.block("comprehension_range", Parser {
+    Kind.Parser.text("[")
+    get idx0 = Kind.Parser.term
+    Kind.Parser.text("to")
+    get idx1 = Kind.Parser.term
+    let list = 
+      ((x) 
+        let term = Kind.Term.ref(x|".range")
+        let term = Kind.Term.app(term, idx0)
+        let term = Kind.Term.app(term, idx1)
+        term) :: String -> Kind.Term
+
+    case typename {
+      none: Parser {
+        Kind.Parser.text("]")
+        return list("Nat")
+      }
+      some: 
+        Parser {
+          Kind.Parser.text(":")
+          Kind.Parser.text(typename.value)
+          Kind.Parser.text("]")
+          return list(typename.value)
+        }
+    }
+  })
