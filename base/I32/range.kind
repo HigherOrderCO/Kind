@@ -1,0 +1,11 @@
+I32.range(ini: I32, end: I32): List<I32>
+  if ini >=? end then
+    []
+  else
+    I32.range.go(ini, end, [])
+
+I32.range.go(ini: I32, end: I32, result: List<I32>): List<I32>
+  if ini =? end then
+    List.reverse!(result)
+  else
+    I32.range.go(ini + 1, end, ini & result)
