@@ -1,2 +1,2 @@
 Test: _
-  [i for i in [x * 2 for x in [0 to 100 : I32]] where I32.gte(i, 100)]
+  [(Nat.read . String.reverse . Nat.show)(i) for i in [x * 2 for x in [0 to 100]] where Nat.gte(i, 100)]

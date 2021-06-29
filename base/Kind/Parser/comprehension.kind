@@ -89,6 +89,11 @@ Kind.Parser.comprehension_range.go(typename: Maybe<String>): Parser(Kind.Term)
 
     case typename {
       none: Parser {
+        // optional for nat
+        Parser.maybe!(Parser {
+          Kind.Parser.text(":")
+          Kind.Parser.text("Nat")
+        })
         Kind.Parser.text("]")
         return list("Nat")
       }
