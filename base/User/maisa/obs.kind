@@ -1,3 +1,4 @@
+// From ECDSA
 // add Nat.parse_hex 
 // add Nat.egcd
 // add Nat.mul_Var
@@ -9,7 +10,11 @@
 
 // TODO:
 // Vector.split_at
+// Victor: Create String.hex.decode.utf8
+// Victor: rename to U16.to_hex to U16.hex.encode.utf8 
+
 // U8.parse_hex
+
 
 // FIXME:
 // Maybe.extract está diferente do que era no Formality, por quê?
