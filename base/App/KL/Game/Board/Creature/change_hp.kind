@@ -2,7 +2,7 @@ App.KL.Game.Board.Creature.change_hp(
   value: I32
   pos: Hexagonal.Axial
   board: App.KL.Game.Board
-): Pair(I32, App.KL.Game.Board)
+): Pair<I32, App.KL.Game.Board>
 
   creature = App.KL.Game.Board.Creature.get(pos, board)
   without creature: {0, board}

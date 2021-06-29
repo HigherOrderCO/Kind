@@ -12,10 +12,10 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Empathy",280, 16, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(4, 1, 8, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(3, 1))
+    "Q": App.KL.Game.Skill.new("Empathy",280, 16, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(4, 1, 8, 0))
     "W": App.KL.Game.Skill.new("Revenge", 480, 16, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1))
-    "E": App.KL.Game.Skill.new("Ground Slam", 800, 16, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 4, 1))
+    "E": App.KL.Game.Skill.new("Ground Slam", 800, 16, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 8, 2))
 
   }
 
@@ -62,7 +62,7 @@ App.KL.Game.Hero.Cyclope.hero.Skills.revenge(range: I32, ap_cost: I32): App.KL.G
         App.KL.Game.Effect { 
           let hero = creature@hero
           let missing_hp = hero@max_hp - creature@hp
-          let dmg = missing_hp / 4
+          let dmg = missing_hp / 2
           App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
           App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
           App.KL.Game.Effect.common.dmg.single(range, dmg, ap_cost)

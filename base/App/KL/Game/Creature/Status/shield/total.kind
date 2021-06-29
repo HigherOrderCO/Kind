@@ -1,4 +1,4 @@
-App.KL.Game.Board.Creature.total_shield(
+App.KL.Game.Creature.Status.shield.total(
   creature: App.KL.Game.Creature
 ): I32
 

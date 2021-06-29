@@ -13,9 +13,9 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Shadow Ball", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_ball(6, 1, 3, 1))
-    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_flux(6, 8, 1))
-    "E": App.KL.Game.Skill.new("Trap", 300, 16, 6, App.KL.Game.Hero.Croni.Skills.trap(1))
+    "Q": App.KL.Game.Skill.new("Shadow Ball", 800, 16, 4, App.KL.Game.Hero.croni.hero.Skills.shadow_ball(4, 1, 5, 2))
+    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 4, App.KL.Game.Hero.croni.hero.Skills.shadow_flux(4, 8, 1))
+    "E": App.KL.Game.Skill.new("Trap", 300, 16, 4, App.KL.Game.Hero.Croni.Skills.trap(1))
   }
 
   let on_stepped = none
