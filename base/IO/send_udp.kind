@@ -1,0 +1,4 @@
+IO.send_udp(port: Nat, to_ip: String, to_port: Nat, data: String): IO<Unit>
+  let param = Nat.show(port) | ";" | to_ip | ";" | Nat.show(to_port) | ";" | data
+  IO.ask<Unit>("send_udp", param, ()
+  IO.end<Unit>(unit))

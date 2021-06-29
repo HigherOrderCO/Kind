@@ -1,0 +1,18 @@
+Buffer8.from_list(list: List<U8>): Pair<U32, Buffer8>
+  let len = List.length!(list)
+  let buf = Buffer8.alloc(Nat.bitlen(Nat.pred(len)))
+  let buf = for i from 0 to len:
+    Buffer8.set(Nat.to_u32(i), list[i] <> 0#8, buf)
+  {Nat.to_u32(len), buf}
+
+// Converts list of U256s to Buffer8, little-endian
+Buffer8.from_list.256(list: List<U256>): Pair<U32, Buffer8>
+  let len = List.length!(list)
+  let buf = Buffer8.alloc(Nat.bitlen(Nat.pred(len * 32)))
+  for i from 0 to len with buf:
+    for j from 0 to 32 with buf:
+      let w = list[i] <> 0#256
+      let b = U256.to_u8(U256.shr(w, Nat.to_u256(j * 8)))
+      Buffer8.set(Nat.to_u32((i * 32) + j), b, buf)
+    buf
+  {Nat.to_u32(len*32), buf}

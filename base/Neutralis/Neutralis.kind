@@ -1,0 +1,40 @@
+type Neutralis.Key {
+  new(
+    pvt: List<Pair<U256,U256>>
+    pub: List<Pair<U256,U256>>
+  )
+} deriving (stringifier)
+
+Neutralis.Bytes: Type
+  Pair<U32,Buffer8>
+
+Neutralis.Bytes.is_set(bit: Nat, bytes: Neutralis.Bytes): Bool
+  open bytes
+  let b = Nat.to_u32(bit)
+  let i = U32.div(b,8)
+  let j = U32.mod(b,8)
+  U8.eql(U8.shr(Buffer8.get(b,bytes.snd),U32.to_u8(j)),1)
+  
+Neutralis.sign(key: Neutralis.Key, msg: Neutralis.Bytes): List<U256>
+  open key
+  let hash = Crypto.Keccak.hash.bytes(msg)
+  let reveal = []
+  let reveal = for i from 0 to 256:
+    use pair = key.pvt[i] abort reveal
+    if Neutralis.Bytes.is_set(i,hash) then
+      pair.fst & reveal
+    else
+      pair.snd & reveal
+  reveal
+
+Neutralis.Key.gen(seed: U256, nth: U256): Neutralis.Key
+  let pvt = []
+  let pvt = for i from 0 to 256:
+    let val0 = Crypto.Keccak.hash.u256(seed + (nth * 512) + (Nat.to_u256(i) * 2) + 0)
+    let val1 = Crypto.Keccak.hash.u256(seed + (nth * 512) + (Nat.to_u256(i) * 2) + 1)
+    {val0, val1} & pvt
+  let pub = [Pair.map!!!(Crypto.Keccak.hash.u256,pair) for pair in pvt]
+  Neutralis.Key.new(pvt, pub)
+
+Neutralis.Key.show(pkey: Neutralis.Key): String
+  Stringifier.run!(Neutralis.Key.stringifier, pkey)

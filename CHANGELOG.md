@@ -1,3 +1,9 @@
+### Kind 1.0.79
+
+- Socket UDP primitives
+
+    Check Example.udp.sender and Example.udp.receiver
+
 ### Kind 1.0.75
 
 - New syntaxes

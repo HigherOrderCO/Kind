@@ -1,0 +1,31 @@
+type IO.recv_udp.Address {
+  new(
+    ip: String
+    port: Nat
+  )
+}
+
+type IO.recv_udp.Message {
+  new(
+    from: IO.recv_udp.Address
+    data: String // hex string
+  )
+}
+
+IO.recv_udp(port: Nat): IO<List<IO.recv_udp.Message>>
+  IO.ask<List<IO.recv_udp.Message>>("recv_udp", Nat.show(port), (msges_str)
+  let msges = String.split(msges_str, ";")
+  case msges {
+    cons:
+      if String.eql(msges.head,"") then
+        IO.end<List<IO.recv_udp.Message>>([])
+      else
+        let msges = List.mapped!(msges)!((args_str)
+          let args = String.split(args_str, ",")
+          let addr = IO.recv_udp.Address.new(args[0] <> "", Nat.read(args[1] <> ""))
+          let data = args[2] <> ""
+          IO.recv_udp.Message.new(addr, data))
+        IO.end<List<IO.recv_udp.Message>>(msges)
+    nil:
+      IO.end<List<IO.recv_udp.Message>>([])
+  })
