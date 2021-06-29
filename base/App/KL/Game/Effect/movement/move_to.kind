@@ -4,15 +4,21 @@ App.KL.Game.Effect.movement.move_to(from: Hexagonal.Axial, to: Hexagonal.Axial):
     let from_creature = App.KL.Game.Board.Creature.get(from, board)
     let to_creature = App.KL.Game.Board.Creature.get(to, board)
     let to_tile = App.KL.Game.Board.get(from, board)
-    without from_creature:
-      App.KL.Game.Effect { return unit }
-    without to_tile:
-      App.KL.Game.Effect { return unit }
-    without to_creature:
-      App.KL.Game.Effect.board.creature.move(from, to)
-    open to_creature
-    open to_creature.hero
-    without to_creature.hero.on_stepped:
-      App.KL.Game.Effect { return unit }
-    to_creature.hero.on_stepped
+    let board_size = App.KL.Constants.board_size
+    let inside_board = Hexagonal.Axial.inside(to, board_size)
+    if inside_board then
+      without from_creature:
+        App.KL.Game.Effect.fail
+      without to_tile:
+        App.KL.Game.Effect.fail
+      without to_creature:
+        App.KL.Game.Effect.board.creature.move(from, to)
+      open to_creature
+      open to_creature.hero
+      without to_creature.hero.on_stepped:
+        App.KL.Game.Effect.fail
+      to_creature.hero.on_stepped
+    else
+      App.KL.Game.Effect.fail
+
   }

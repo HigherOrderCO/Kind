@@ -4,7 +4,6 @@ App.KL.Game.Phase.Play.Bar.show_hp(
   creature: App.KL.Game.Creature,
   img: VoxBox
 ): VoxBox
-
   open creature
   let hero = creature.hero
   open hero
