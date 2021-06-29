@@ -1,0 +1,2 @@
+Test: _
+  [(Nat.read . String.reverse . Nat.show)(i) for i in [x * 2 for x in [0 to 100]] where Nat.gte(i, 100)]
