@@ -1,0 +1,54 @@
+// TODO move to correct place
+// #TODO verify the buffer has the correct length?
+Neutralis.Bytes.concat(left: Neutralis.Bytes, right: Neutralis.Bytes): Neutralis.Bytes
+  open left
+  open right
+  let ret.snd = left.snd
+  for idx : U32 from 0 to right.fst with ret.snd:
+    Buffer8.set(idx + left.fst, Buffer8.get(idx, right.snd), ret.snd)
+  {left.fst + right.fst, ret.snd}
+
+// TODO move to correct place
+// converts an U32 to Buffer8 using little endian byte order
+U32.to_buffer8(n: U32): Buffer8
+  let ret = Buffer8.alloc(2)
+  for i : U32 from 0 to 4 with ret:
+    let u = U32.to_u8(U32.and(U32.shr(i, n), 0x000000FF))
+    Buffer8.set(3 - i, u, ret)
+  ret
+
+// returns a nonce that mines the block
+Neutralis.consensus.mine(block: Neutralis.Bytes, target: U256): IO(Pair<Neutralis.Bytes, Neutralis.Bytes>)
+  IO {
+    // TODO get better random number generation
+    get nonce_nat = IO.random(Nat.pow(2, 32) - 1)
+    let nonce = {4 :: U32, U32.to_buffer8(Nat.to_u32(nonce_nat))}
+    if Neutralis.consensus.mine.test(block, nonce, target) then
+      IO {
+        return {block, nonce}
+      }
+    else
+      Neutralis.consensus.mine(block, target)
+  }
+
+Neutralis.consensus.mine.test(
+  block: Neutralis.Bytes
+  nonce: Neutralis.Bytes
+  target: U256
+): Bool
+  let block = Neutralis.Bytes.concat(block, nonce)
+  let {len, hash_buff} = Crypto.Keccak.hash.bytes(block)
+  let hash = Buffer8.to_u256(hash_buff)
+  log(U256.show(hash))
+  hash <? target
+
+// test script
+Neutralis.consensus: _
+  IO {
+    // should mine instantly
+    get k = Neutralis.consensus.mine(Buffer8.from_hex("afe32aa112231321aae"), 115792089237316195423570985008687907853269984665640564039457584007913129639935/16)
+    return unit
+  }
+
+Neutralis.Blockchain: Type
+  List<Neutralis.Bytes>

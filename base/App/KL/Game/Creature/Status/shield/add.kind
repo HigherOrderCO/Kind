@@ -1,17 +1,16 @@
-
-App.KL.Game.Board.Creature.add_shield(
+App.KL.Game.Creature.Status.shield.add(
   creature: App.KL.Game.Creature
   id: String
   duration: I32
   amount: I32
 ): App.KL.Game.Creature
   
-  shield_added = App.KL.Game.Board.Creature.add_shield.aux(id, duration, amount, creature@status)
+  shield_added = App.KL.Game.Creature.Status.shield.add.aux(id, duration, amount, creature@status)
   creature@status <- shield_added
 
 
 
-App.KL.Game.Board.Creature.add_shield.aux(
+App.KL.Game.Creature.Status.shield.add.aux(
   id: String
   duration: I32
   amount: I32
@@ -29,6 +28,6 @@ App.KL.Game.Board.Creature.add_shield.aux(
           if is_same then
             new_shield & status.tail
           else
-            status.head & App.KL.Game.Board.Creature.add_shield.aux(id, duration, amount, status.tail)
-      }default status.head & App.KL.Game.Board.Creature.add_shield.aux(id, duration, amount, status.tail)
+            status.head & App.KL.Game.Creature.Status.shield.add.aux(id, duration, amount, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.shield.add.aux(id, duration, amount, status.tail)
   }
