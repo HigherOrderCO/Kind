@@ -36,7 +36,13 @@ App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(range: I32, ap_cost: I32): App.KL
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
     else
-      let shadow_trap = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Croni.hero.shadow_trap, App.KL.Game.Team.neutral, [], 0, 0)
+      let shadow_trap = App.KL.Game.Creature.new(
+        none,
+        App.KL.Game.Hero.Croni.hero.shadow_trap,
+        App.KL.Game.Team.neutral,
+        [],
+        App.KL.Game.Hero.Croni.hero.shadow_trap@max_hp,
+        App.KL.Game.Hero.Croni.hero.shadow_trap@max_ap)
       App.KL.Game.Effect.board.summon(target, shadow_trap)
   }
 
@@ -53,7 +59,7 @@ App.KL.Game.Hero.Croni.hero.shadow_trap: App.KL.Game.Hero
   let name = "ShadowTrap"
   let draw = (player) App.KL.Game.Field.Elements.mushroom_0_0
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
-  let max_hp = 10 :: I32
+  let max_hp = 16 :: I32
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some(App.KL.Game.Effect {

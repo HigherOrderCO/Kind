@@ -2,6 +2,7 @@ type App.KL.Game.Effect.Result <A: Type> {
   err
   new(
     value: A,
+    center: Hexagonal.Axial,
     board: App.KL.Game.Board,
     indicators: Hexagonal.Axial.BBT(App.KL.Game.Indicator)
     ap_used: I32 

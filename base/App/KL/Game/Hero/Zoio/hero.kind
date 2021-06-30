@@ -14,8 +14,8 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 4, 1, App.KL.Game.Effect.common.walk(1, 1))
     "Q": App.KL.Game.Skill.new("Tentackle", 300, 16, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2))
-    "W": App.KL.Game.Skill.new("Eye Beam", 650, 16, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(12, 12, 1))
-    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 16, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(12, 16, 3))
+    "W": App.KL.Game.Skill.new("Eye Beam", 650, 16, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 12, 1))
+    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 16, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(16, 16, 3))
   }
 
   let on_stepped = none
