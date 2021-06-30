@@ -19,7 +19,9 @@ App.KL.Game.Effect.movement.move_to(from: Hexagonal.Axial, to: Hexagonal.Axial):
     without to_creature.hero.on_stepped: App.KL.Game.Effect {
       return false
     }
-    App.KL.Game.Effect {
+    if Hexagonal.Axial.eql(from, to) then App.KL.Game.Effect {
+      return true
+    } else App.KL.Game.Effect {
       to_creature.hero.on_stepped(from, to)
       return true
     }
