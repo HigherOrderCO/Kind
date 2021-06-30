@@ -20,7 +20,7 @@ App.KL.Game.Effect.movement.move_to(from: Hexagonal.Axial, to: Hexagonal.Axial):
       return false
     }
     App.KL.Game.Effect {
-      to_creature.hero.on_stepped
+      to_creature.hero.on_stepped(from, to)
       return true
     }
   }

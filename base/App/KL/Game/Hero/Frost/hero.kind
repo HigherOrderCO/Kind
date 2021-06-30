@@ -58,7 +58,7 @@ App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
   let max_hp = 10 :: I32
   let max_ap = 0 :: I32
   let skills = {}
-  let on_stepped = some(App.KL.Game.Effect { return unit })
+  let on_stepped = some((from,to) App.KL.Game.Effect { return unit })
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
 
 App.KL.Game.Hero.Frost.Skills.ravenous_bite(dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
