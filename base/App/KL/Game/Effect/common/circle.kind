@@ -16,3 +16,4 @@ App.KL.Game.Effect.common.circle<A: Type>(
     App.KL.Game.Effect.area!(eff_at, circle)
     return unit
   }
+

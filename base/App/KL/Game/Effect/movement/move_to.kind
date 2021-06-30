@@ -24,3 +24,10 @@ App.KL.Game.Effect.movement.move_to(from: Hexagonal.Axial, to: Hexagonal.Axial):
       return true
     }
   }
+
+App.KL.Game.Effect.movement.move_to.target: App.KL.Game.Effect<Bool>
+  App.KL.Game.Effect { 
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    App.KL.Game.Effect.movement.move_to(center, target)
+  }

@@ -15,6 +15,6 @@ App.KL.Game.Effect.common.shield.semi_circle(
     let semi_circle = App.KL.Game.Effect.area.semi_circle(center, clamp)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, semi_circle)
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.Status.shield.add(id, duration, amount)), semi_circle)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.status.shield.add(id, duration, amount)), semi_circle)
     return unit
   }

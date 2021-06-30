@@ -57,7 +57,7 @@ App.KL.Game.Hero.Vargouli.hero.Skills.shield(shield_value: I32): App.KL.Game.Eff
     if App.KL.Game.Team.eql(target_creature@team, caster@team) then
       App.KL.Game.Effect.pass
     else App.KL.Game.Effect {
-      App.KL.Game.Effect.Status.shield.add("Kenlua", 1, shield_value, center)
+      App.KL.Game.Effect.status.shield.add("Kenlua", 1, shield_value, center)
       return unit
     }
   }

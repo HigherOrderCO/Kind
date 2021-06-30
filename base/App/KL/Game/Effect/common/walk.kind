@@ -13,6 +13,7 @@ App.KL.Game.Effect.common.walk(
       App.KL.Game.Effect.fail
     else
       App.KL.Game.Effect.ap.use(ap_cost)
-      App.KL.Game.Effect.movement.move
+    App.KL.Game.Effect.movement.move_to.target
+    return unit
   }
 
