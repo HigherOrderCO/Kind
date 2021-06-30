@@ -29,20 +29,19 @@ App.KL.Game.Hero.Vargouli.hero.Skills.haste(range: I32, dmg: I32, ap_cost: I32):
 
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(range)
-    get center  = App.KL.Game.Effect.coord.get_center
-    get target  = App.KL.Game.Effect.coord.get_target
-    get board   = App.KL.Game.Effect.board.get
-    let coords  = Hexagonal.Axial.neighbour(target)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
-    if App.KL.Game.Board.is_occupied(target, board) then App.KL.Game.Effect {
-      App.KL.Game.Effect.fail
-    } else App.KL.Game.Effect {
-      App.KL.Game.Effect.common.dmg.neighbour(dmg, ap_cost)
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    get board  = App.KL.Game.Effect.board.get
+    let coords = App.KL.Game.Effect.area.ring(target)
+    App.KL.Game.Effect.ap.use(ap_cost)
+    get moved = App.KL.Game.Effect.movement.move_to(center, target)
+    if moved then App.KL.Game.Effect {
+      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
+      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
+      App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), coords)
       App.KL.Game.Effect.hp.damage_at(2, center)
-      App.KL.Game.Effect.movement.move
       return unit
-    }
+    } else App.KL.Game.Effect.fail
   }
 
 App.KL.Game.Hero.Vargouli.hero.Skills.shield(shield_value: I32): App.KL.Game.Effect<Unit>

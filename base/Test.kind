@@ -1,7 +1,6 @@
-
-porc(base : F64, value : F64, total : F64) : U32
-   let v = (total * (value*100/base))/100
-   F64.to_u32(v)
-
-Test : _
-  porc(32, 32, 34)
+Test: IO<Unit>
+  IO {
+    let x = some(7) abort IO.print("ata")
+    let y = some(7) abort IO.print("ola")
+    return unit
+  }
