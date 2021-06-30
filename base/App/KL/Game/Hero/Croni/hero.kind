@@ -63,8 +63,8 @@ App.KL.Game.Hero.Croni.hero.shadow_trap: App.KL.Game.Hero
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect {
-    App.KL.Game.Effect.hp.damage_at(6, from)
     App.KL.Game.Effect.board.creature.move(from, to)
+    App.KL.Game.Effect.hp.damage_at(6, to)
     return unit
   })
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
