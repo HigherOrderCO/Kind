@@ -36,22 +36,11 @@ type App.KL.Game.Phase {
   play
 }
 
-type App.KL.Game.Moment {
-  preparation(countdown: U64) // when players are casting their skills
-  execution(
-    casts: List<App.KL.Game.Cast>
-    frame: U64
-    hits: App.KL.Game.Indicators
-    ap_used: I32
-    success: Bool
-  ) // when casts are being executed and animated
-}
-
 // Initial state
 App.KL.Game.start: App.KL.Game
   let phase = App.KL.Game.Phase.draft
   let turn = 0#64
-  let moment = App.KL.Game.Moment.preparation(64)
+  let moment = App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
   let players = Map.new!
   let board = Hexagonal.Axial.BBT.new!
   let tick = 0#64
@@ -122,13 +111,3 @@ App.KL.Game.post(
     draft draft : App.KL.Game.Phase.Draft.post(time, room, addr, event.event, game)
     play  play  : App.KL.Game.Phase.Play.post(time, room, addr, event.event, game)
   } default game
-
-App.KL.Game.Moment.get_player_used_ap(game: App.KL.Game): Maybe<Pair<String, I32>>
-  case game@moment as moment {
-    preparation: none
-    execution: 
-      case moment.casts {
-        nil: none
-        cons: some({moment.casts.head@player, moment.ap_used})
-      }
-  }

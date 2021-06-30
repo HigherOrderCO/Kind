@@ -53,14 +53,7 @@ App.KL.Game.Cast.picks_of(
       result
   
   result@snd
-  
-// Gets the skill associated with a cast
-App.KL.Game.Cast.get_skill(
-  cast: App.KL.Game.Cast
-  game: App.KL.Game
-): Maybe<App.KL.Game.Skill>
-  App.KL.Game.Skill.get(cast@player, cast@letter, game)
-  
+
 // Gets the skill associated with a cast
 App.KL.Game.Cast.get_skill(
   cast: App.KL.Game.Cast
@@ -75,7 +68,7 @@ App.KL.Game.Cast.get_skill(
     get skill = hero@skills{Char.to_string(cast.letter)}
     return skill
   }
-
+  
 // Gets the coord associated with a cast
 App.KL.Game.Cast.get_coord(
   cast: App.KL.Game.Cast

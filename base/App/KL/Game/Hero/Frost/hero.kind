@@ -1,8 +1,8 @@
 App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let name = "Frost"
 
-  let draw = (player)
-    App.KL.Game.Hero.Frost.Assets.vbox_idle
+  let draw = (pose)
+    {none, App.KL.Game.Hero.Frost.Assets.vbox_idle}
 
   let picture = (bool, time)
     App.KL.Game.Hero.Frost.Assets.base64_idle
@@ -12,10 +12,10 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 16, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 2))
-    "W": App.KL.Game.Skill.new("Summon Wall", 300, 16, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(1))
-    "E": App.KL.Game.Skill.new("Taunt", 700, 16, 0, App.KL.Game.Hero.Frost.Skills.taunt(2, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 48, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 2))
+    "W": App.KL.Game.Skill.new("Summon Wall", 300, 48, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(1))
+    "E": App.KL.Game.Skill.new("Taunt", 700, 48, 0, App.KL.Game.Hero.Frost.Skills.taunt(2, 1))
   }
 
   let on_stepped = none
@@ -53,7 +53,7 @@ App.KL.Game.Hero.Frost.Skills.taunt(area: I32, ap_cost: I32): App.KL.Game.Effect
 
 App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
   let name = "Frost_wall"
-  let draw = (player) App.KL.Game.Field.Elements.rock_11_0
+  let draw = (pose) {none, App.KL.Game.Field.Elements.rock_11_0}
   let picture = (bool, time) App.KL.Game.Hero.Frost.Assets.base64_idle
   let max_hp = 10 :: I32
   let max_ap = 0 :: I32

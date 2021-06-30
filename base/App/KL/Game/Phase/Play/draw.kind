@@ -109,10 +109,9 @@ App.KL.Game.Phase.Play.draw.board(
   for pos in map with img:
     {coord, tile} = pos
     img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
-    img = App.KL.Game.Phase.Play.draw.tile.creature(tile@creature, coord, ap_used, img)
+    img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
     img
   img
-
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
   skill: Maybe<App.KL.Game.Skill>, 
@@ -164,8 +163,36 @@ App.KL.Game.Phase.Play.draw.tile.terrain(
   tile_drawing = App.KL.Game.Phase.Play.draw.letter(tile_coord, picks, tile_drawing)
   tile_drawing
 
+App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game: App.KL.Game, coord: Hexagonal.Axial): App.KL.Game.Hero.Draw.Pose
+  open game
+  case game.moment {
+    preparation:
+      App.KL.Game.Hero.Draw.Pose.idle
+    execution: case game.moment.casts {
+      nil:
+        App.KL.Game.Hero.Draw.Pose.idle
+      cons: Maybe { 
+        get success = if game.moment.success then some(unit) else none
+        get creature = App.KL.Game.Board.Creature.get(coord, game.board)
+        let cast = game.moment.casts.head
+        get player = creature@player
+        open cast
+        if String.eql(player, cast.player) then Maybe {
+          let frame = game.moment.frame
+          let center = game.moment.coord <> coord
+          let target = cast.target
+          let letter = cast.letter
+          get skill = App.KL.Game.Cast.get_skill(cast, game)
+          get creature = App.KL.Game.Cast.get_creature(cast, game)
+          return App.KL.Game.Hero.Draw.Pose.cast(frame, center, target, letter, skill, creature)
+        } else none
+      } <> App.KL.Game.Hero.Draw.Pose.idle
+    }
+  }
+
 // draws tile creature if any
 App.KL.Game.Phase.Play.draw.tile.creature(
+  game: App.KL.Game
   creature: Maybe<App.KL.Game.Creature>,
   coord: Hexagonal.Axial,
   ap_used: Maybe<Pair<String, I32>>
@@ -174,16 +201,18 @@ App.KL.Game.Phase.Play.draw.tile.creature(
   case creature {
     none: img
     some:
-      {cx, cy} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let cx = cx - (128::U32)
-      let cy = cy - (128::U32)
       let hero = creature.value@hero
-      let drawing = hero@draw(creature.value)
+      let draw_pose = App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game, coord)
+      let {draw_coord, draw_voxbox} = hero@draw(draw_pose)
+      let draw_coord = draw_coord <> coord
       //let aux = I32.to_u32(App.KL.Constants.hexagon_radius) //U32
       //let cy = cy - (aux * 2) //U32
       //let cx = cx - aux //U32
       //log(U32.show( cy + 100))
-      let img = VoxBox.Draw.image(cx, cy, 0u, drawing, img)
+      {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+      let cx = cx - (128::U32)
+      let cy = cy - (128::U32)
+      let img = VoxBox.Draw.image(cx, cy, 0u, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 
         none:
