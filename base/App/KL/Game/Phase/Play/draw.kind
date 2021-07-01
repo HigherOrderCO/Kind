@@ -288,13 +288,13 @@ App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, ga
     get skill_key = local.preview@skill
     get skill     = App.KL.Game.Skill.get(local@user, skill_key, game)
     return 
-      <div style={"width": "200px", "height": "40%", "display":"flex", "flex-direction":"column", "align-items": "center"}>
+      <div style={"width": "200px", "height": "40%", "display":"flex", "flex-direction":"column", "align-items": "center", "align-self":"center"}>
         <div style={"font-size": "3em", "padding-bottom": "5px"}>
           Char.to_string(skill_key) // TODO replace with Skill icon
         </div>
         <div style={"font-size": "2em", "padding-bottom": "5px"}>skill@name</div>
-        <div style={"padding-bottom": "5px"}>"Cast time: " | U64.show(skill@delay)</div>
-        <div style={"padding-bottom": "5px"}>skill@description</div>
+        <div style={"padding-bottom": "8px"}>"Cast time: " | Nat.show(U64.to_nat(skill@delay))</div>
+        <div style={"padding-bottom": "8px"}>skill@description</div>
       </div>
   } <> <div style={"width": "200px", "height": "40%", "display":"flex", "flex-direction":"column", "align-items": "center"}></div>
 
