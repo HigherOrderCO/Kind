@@ -17,29 +17,44 @@ App.KL.Game.Phase.Play.when(
       else
         App.pass!
     key_down:
-      // only allow preview in preparation mode
-      case game.moment {
-        preparation:
-          App.set_local!(App.KL.State.Local.game(Maybe {
-            get casted_skill = App.KL.Game.Skill.get(local@user, event.code, game)
-            let preview = local@preview 
-            let preview = preview@skill  <- some(casted_skill)
-            return local@preview <- preview
-          } <> local))
-        execution: App.pass!
-      }
-    key_up: 
+      App.set_local!(App.KL.State.Local.game(Maybe {
+        get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
+        let preview       = local@preview
+        let preview       =
+          case preview@skill as skill {
+            none: 
+              preview@skill <- some(event.code)
+            some:
+              if skill.value =? event.code then
+                preview@skill <- none
+              else 
+                preview@skill <- some(event.code)
+          }          
+        return local@preview <- preview
+      } <> local))
+    mouse_down: 
       // only allow cast skill in preparation mode
       case game.moment {
         preparation:
-          IO {
-            //log("Key up " | Char.to_string(event.code))
-            let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-            let preview = local@preview
-            let preview = preview@skill <- none
-            App.new_post!(local@room, App.KL.Game.Phase.Play.Event.cast.serial(event.code, coord))
-            App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+          let preview = local@preview
+          case preview@skill as skill {
+            none: App.pass!
+            some:
+              IO {
+                log("Key up " | Char.to_string(skill.value))
+                let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+                let preview = preview@skill <- none
+                App.new_post!(local@room, App.KL.Game.Phase.Play.Event.cast.serial(skill.value, coord))
+                App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+              }
           }
-        execution: App.pass!
+        execution:
+          let preview = local@preview
+          case preview@skill as skill {
+            none: App.pass!
+            some:
+              let preview = preview@skill <- none
+              App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+          }
       }
   } default App.pass!

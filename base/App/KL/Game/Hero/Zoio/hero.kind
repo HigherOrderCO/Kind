@@ -12,10 +12,10 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, 1, App.KL.Game.Effect.common.walk(1, 1))
-    "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2))
-    "W": App.KL.Game.Skill.new("Eye Beam", 650, 48, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 12, 1))
-    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 48, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(16, 16, 3))
+    "X": App.KL.Game.Skill.new("Walk", 500, 12, 1, App.KL.Game.Effect.common.walk(1, 1), "This is the description of an ability")
+    "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2), "This is the description of an ability")
+    "W": App.KL.Game.Skill.new("Eye Beam", 650, 48, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 12, 1), "This is the description of an ability")
+    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 48, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(16, 16, 3), "This is the description of an ability")
   }
 
   let on_stepped = none

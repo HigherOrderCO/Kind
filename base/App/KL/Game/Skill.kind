@@ -5,6 +5,7 @@ type App.KL.Game.Skill {
     frames: U64                      // how many ticks its animation takes
     range: U64                       // cast range
 		effect: App.KL.Game.Effect<Unit> // its in-game effect
+    description: String
 	)
 }
 

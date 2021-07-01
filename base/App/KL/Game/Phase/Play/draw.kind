@@ -71,6 +71,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
     </div>
+    {App.KL.Game.Phase.Play.draw.skill_description(local, game)}
   </div>
 
 // CANVAS DRAWING
@@ -114,16 +115,17 @@ App.KL.Game.Phase.Play.draw.board(
   img
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
-  skill: Maybe<App.KL.Game.Skill>, 
+  skill: Maybe<Char>, 
   target: Hexagonal.Axial,
-  player: String,
+  user: String,
   game: App.KL.Game
 ): App.KL.Game.Indicators
 
   Maybe {
-    get skill      = skill
-    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, player), game)
-    get center     = App.KL.Game.Board.find_player_coord(player, game@board)
+    get skill_key  = skill
+    get skill      = App.KL.Game.Skill.get(user, skill_key, game)
+    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, user), game)
+    get center     = App.KL.Game.Board.find_player_coord(user, game@board)
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue
     let indicators = Hexagonal.Axial.BBT.new!
@@ -279,6 +281,22 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
         skill_info
     </div>
 
+App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  open local 
+  open game
+  Maybe {
+    get skill_key = local.preview@skill
+    get skill     = App.KL.Game.Skill.get(local@user, skill_key, game)
+    return 
+      <div style={"width": "200px", "height": "40%", "display":"flex", "flex-direction":"column", "align-items": "center"}>
+        <div style={"font-size": "3em", "padding-bottom": "5px"}>
+          Char.to_string(skill_key) // TODO replace with Skill icon
+        </div>
+        <div style={"font-size": "2em", "padding-bottom": "5px"}>skill@name</div>
+        <div style={"padding-bottom": "5px"}>"Cast time: " | U64.show(skill@delay)</div>
+        <div style={"padding-bottom": "5px"}>skill@description</div>
+      </div>
+  } <> <div style={"width": "200px", "height": "40%", "display":"flex", "flex-direction":"column", "align-items": "center"}></div>
 
 // AUX FUNCTIONS
 // =============

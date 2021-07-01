@@ -12,10 +12,10 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 8, 1))
-    "W": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 6, 2))
-    "E": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1), "This is the description of an ability")
+    "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 8, 1), "This is the description of an ability")
+    "W": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 6, 2), "This is the description of an ability")
+    "E": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1), "This is the description of an ability")
   }
 
   let on_stepped = none
