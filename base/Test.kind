@@ -1,6 +1,6 @@
 Test: IO<Unit>
   IO {
-    let x = some(7) abort IO.print("ata")
-    let y = some(7) abort IO.print("ola")
-    return unit
+    for i from 0 to 256 * 2:
+      IO.print(U256.show(Crypto.Keccak.hash.u256(Nat.to_u256(i))))
   }
+
