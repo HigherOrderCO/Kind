@@ -18,17 +18,17 @@ U32.to_buffer8(n: U32): Buffer8
   ret
 
 // returns a nonce that mines the block
-Neutralis.consensus.mine(block: Neutralis.Bytes, target: U256): IO(Neutralis.Bytes)
+Neutralis.consensus.mine(block: Neutralis.Bytes, target: U256, seed: Nat): IO(Neutralis.Bytes)
   IO {
     // TODO get better random number generation
-    get nonce_nat = IO.random(Nat.pow(2, 32) - 1)
+    get nonce_nat = Neutralis.random(Nat.pow(2, 32) - 1, seed)
     let nonce = {4 :: U32, U32.to_buffer8(Nat.to_u32(nonce_nat))}
     if Neutralis.consensus.mine.test(block, nonce, target) then
       IO {
         return nonce
       }
     else
-      Neutralis.consensus.mine(block, target)
+      Neutralis.consensus.mine(block, target, nonce_nat)
   }
 
 Neutralis.consensus.mine.test(
@@ -97,12 +97,20 @@ Neutralis.Blockchain.cons(
       cons: IO {
         let hash = Crypto.Keccak.hash.bytes(chain.head)
         let block = Neutralis.Bytes.concat(hash, block)
-        get nonce = Neutralis.consensus.mine(block, target)
+        get nonce = Neutralis.consensus.mine(block, target, 0)
         let block = Neutralis.Bytes.concat(block, nonce)
         return List.cons!(block, chain)
       }
     }
   }
+
+Neutralis.random(a: Nat, prev: Nat): IO(Nat)
+ IO {
+    get seed = IO.get_time
+    let seed = Nat.random(seed)
+    let seed = Nat.random(seed + prev)
+    return Nat.mod(seed, a)
+ }
 
 Neutralis.consensus.fake_block: Neutralis.Bytes
   Buffer8.from_hex("afe32aa112231321aae")
