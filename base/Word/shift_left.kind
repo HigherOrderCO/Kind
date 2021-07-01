@@ -1,5 +1,5 @@
-Word.shift_left<size: Nat>(n: Nat, value: Word(size)): Word(size)
+Word.shift_left<size: Nat>(value: Word(size), n: Nat): Word(size)
   case n {
     zero: value,
-    succ: Word.shift_left<size>(n.pred, Word.shift_left.one<size>(value))
+    succ: Word.shift_left<size>(Word.shift_left.one<size>(value), n.pred)
   }: Word(size)
