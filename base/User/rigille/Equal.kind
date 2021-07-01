@@ -1,0 +1,57 @@
+// More equality theorems for a bottom-up approach
+// for dealing with big expressions
+Equal.if<A: Type>(
+  cond: Bool,
+  v0: A, v1: A, v2: A,
+  h0: (cond == true) -> (v0 == v1)
+  h1: (cond == false) -> (v0 == v2)
+): v0 == if cond then v1 else v2
+  case cond with h0 h1 {
+    true:
+      h0(refl)
+    false:
+      h1(refl)
+  }!
+
+Equal.if.true<A: Type>(
+  cond: Bool,
+  v0: A, v1: A, v2: A,
+  h0: cond == true,
+  h1: v0 == v1
+): v0 == if cond then v1 else v2
+  case cond with h0 {
+    true:
+      h1
+    false:
+      contra = Bool.false_neq_true(h0)
+      Empty.absurd!(contra)
+  }!
+
+Equal.if.false<A: Type>(
+  cond: Bool,
+  v0: A, v1: A, v2: A,
+  h0: cond == false,
+  h1: v0 == v2
+): v0 == if cond then v1 else v2
+  case cond with h0 {
+    true:
+      contra = Bool.true_neq_false(h0)
+      Empty.absurd!(contra)
+    false:
+      h1
+  }!
+
+// this is harder than i thought
+Nat.Interval(n0: Nat, n1: Nat): Type
+  Subset(Nat, (n) And(Nat.lte(n0, n) == true, Nat.ltn(n, n1) == true))
+
+//Equal.for<A: Type>(
+//  v0: A
+//  n0: Nat
+//  n1: Nat
+//  f0: Nat.Interval(n0, n1) -> A -> A,
+//  f1: Nat.Interval(n0, n1) -> A,
+//  h0: f(n0)
+//  h1: Nat.Interval(n0, n1) -> f(Nat.succ(i), g(i, v0)) == g(Nat.succ(i), v0)
+//): v0 == let v = v0; for n from n0 to n1 with v: f(n, v)
+//  ?x
