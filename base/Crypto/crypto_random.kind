@@ -7,8 +7,7 @@
  //   IO.print(Nat.show(get_interval(a, 1, 10))) // prints a natural random number between 1 and 10
 //}
 
-
-IO.crypto_random: IO<F64>
+Crypto.random: IO<F64>
   IO.ask<F64>("get_random", "", (value)
   IO.end<F64>(F64.read(value)))
 

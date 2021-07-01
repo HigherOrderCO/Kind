@@ -4,6 +4,6 @@ get_interval(random : F64, min : Nat, max : Nat) : Nat
 
 User.caotic.test : IO<_>
   IO {
-    get a = IO.crypto_random
+    get a = Crypto.random
     IO.print(Nat.show(get_interval(a, 1, 10)))
   }
