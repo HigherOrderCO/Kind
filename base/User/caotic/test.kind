@@ -1,73 +1,9 @@
-insert_sort<A : Type>(f : A -> A -> Bool, v : A,  xs : List<A>) : List<A>
-  let {ls, ys} = List.split(A, xs, Nat.half(List.length(A, xs)))
-  case ls {
-    nil :  case ys {
-      nil : List.cons!(v, List.nil!)
-      cons : if f(v, ys.head) then [ys.head, v] else [v, ys.head] 
-    }
-    cons : case ys {
-      nil : insert_sort(A, f, v, ls)
-      cons : 
-        if f(v, ys.head) then
-          (ls ++ insert_sort(A, f, v, ys))
-        else
-          (insert_sort(A, f, v, ls) ++ ys)
-    }
+get_interval(random : F64, min : Nat, max : Nat) : Nat
+  F64.to_nat(random * (Nat.to_f64(max) - Nat.to_f64(min)) + Nat.to_f64(min))
+
+
+User.caotic.test : IO<_>
+  IO {
+    get a = IO.crypto_random
+    IO.print(Nat.show(get_interval(a, 1, 10)))
   }
-
-// Tests if "output" is the sorted version of "input"
-sort.test(input: List<Nat>, output: List<Nat>): Bool
-  // Checks if both lists have the same length
-  let ok = Nat.eql(List.length!(input), List.length!(output))
-
-  // Checks if output is in ascending order
-  for i from 1 to List.length!(output) with ok:
-    if Nat.lte(output[i-1] <> 0, output[i] <> 0) then
-      ok
-    else
-      false
-
-  // Checks if all input elements appear in the output list
-  for a in input with ok:
-    if List.found!(Nat.eql(a), output) then
-      ok
-    else
-      false
-
-  // Returns if 'sort' worked
-  ok
-
-sorted(xs : List<Nat>) : Type
-  case xs {
-    nil : Unit
-    cons : case xs.tail as xss {
-      nil : Unit
-      cons : 
-        Pair<Equal(_, Nat.gte(xs.head, xss.head), true), sorted(xss.tail)>
-    }
-  }
-
-// The sort algorithm 
-sort(list: List<Nat>): List<Nat>
-  List.foldr!!([], insert_sort!(Nat.gte), list)
-
-
-sort_proof (xs : List<Nat>) : sorted(sort(xs))
-  case xs {
-    nil : Unit.new
-    cons : 
-      case xs.tail as xss {
-        nil : Unit.new
-        cons : 
-          let pred = sort_proof(xss.tail)
-          ?a-5-65-131-263
-      }!
-  }!
-
-// The proof that it works for *all* inputs
-proof(list: List<Nat>): sort.test(list, sort(list)) == true
-  ?proof
-
-
-User.caotic.test : _
-  sort([2922, 2, 100, 4])
