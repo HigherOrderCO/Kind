@@ -110,8 +110,43 @@ App.KL.Game.Phase.Play.draw.board(
     {coord, tile} = pos
     img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
     img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
+    img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
     img
   img
+
+App.KL.Game.Phase.Play.draw.tile.token(
+  game: App.KL.Game
+  token: Maybe<App.KL.Game.Token>,
+  token_coord: Hexagonal.Axial,
+  img: VoxBox
+): VoxBox
+  without token: img
+  log("debug")
+  let col = case App.KL.Game.Token.get_dominance(token) as team {
+    none: Col32.new(100,100,100,255)
+    some:
+      case team.value {    
+        blue: Col32.new(0, 0, 255, 255)
+        red:  Col32.new(255, 0, 0, 255)
+      } default Col32.new(100,100,100,255)
+  }
+  let coords = Hexagonal.Axial.range(token_coord, token@range)
+  for coord in coords with img:
+    let {cx, cy} = 
+      Hexagonal.Axial.to_screen_xy(
+        coord,
+        App.KL.Constants.hexagon_radius,
+        App.KL.Constants.center_x,
+        App.KL.Constants.center_y
+      )
+    
+    if Hexagonal.Axial.eql(coord, token_coord) then
+      VoxBox.Draw.square(cx,cy,2,10,10,col,img)
+    else
+      VoxBox.Draw.square(cx,cy,2,5,5,col,img)
+  img
+
+  
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
   skill: Maybe<App.KL.Game.Skill>, 

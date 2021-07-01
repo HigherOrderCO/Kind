@@ -10,7 +10,7 @@ App.KL.Game.Board.Creature.modify_at(
     get tile = App.KL.Game.Board.get(pos, board)
     get creature = tile@creature
     let new_creature = mod(creature)
-    let new_tile = App.KL.Game.Tile.new(tile@terrain, some(new_creature))
+    let new_tile = App.KL.Game.Tile.new(tile@terrain, some(new_creature), tile@token)
     let new_map = App.KL.Game.Board.set(pos, new_tile, board)
     return new_map
   }

@@ -1,6 +1,14 @@
-Test: IO<Unit>
-  IO {
-    let x = some(7) abort IO.print("ata")
-    let y = some(7) abort IO.print("ola")
-    return unit
+Test(test: A): String
+  case test {
+    asd:
+      Nat.show(test.i)
+    qwe:
+      I32.show(test.j)
+    zxc:
+      I32.show(x2as     2828278278272872   agdggdx)
   }
+
+type A {
+  asd(i: Nat),
+  qwe(j: I32)
+}
