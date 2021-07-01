@@ -20,14 +20,6 @@ App.KL.Game.Phase.Draft.has_coord(coord: Hexagonal.Axial, player: Pair<String, A
     none: false
     some: Hexagonal.Axial.eql(x.value, coord)
   }
-  
-// get team string
-App.KL.Game.Phase.Draft.Team.show(team: App.KL.Game.Team): String
-  case team {
-    red: "red"
-    blue: "blue"
-    neutral: "neutral"
-  }
 
 // get team of a player
 App.KL.Game.Phase.Draft.to_team(players: Map<App.KL.Game.Player>, user: String): Maybe<App.KL.Game.Team>
