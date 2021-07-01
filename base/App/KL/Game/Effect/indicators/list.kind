@@ -3,5 +3,5 @@ App.KL.Game.Effect.indicators.list(
   coords: List<Hexagonal.Axial>
 ): App.KL.Game.Effect<Unit>
   let list = List.mapped!(coords)!((coord) {coord, indicator})
-  let bbt = Hexagonal.Axial.BBT.from_list!(list)
-  App.KL.Game.Effect.indicators.add(bbt)
+  let Map = Hexagonal.Axial.Map.from_list!(list)
+  App.KL.Game.Effect.indicators.add(Map)

@@ -1,6 +1,6 @@
 // Gets all values in a map and returns as a List
-Hexagonal.Axial.BBT.values<A : Type>(
-  map : Hexagonal.Axial.BBT<A>
+Hexagonal.Axial.Map.values<A : Type>(
+  map : Hexagonal.Axial.Map<A>
 ): List<A>
 
   BBT.foldr_with_key!!!((key, value, list) value & list, [], map)

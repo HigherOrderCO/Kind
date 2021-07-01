@@ -4,7 +4,7 @@ App.KL.Game.Effect.indicators.get_indicators(
   skill: App.KL.Game.Skill
   mouse_coord: Hexagonal.Axial
   map: App.KL.Game.Board
-): Hexagonal.Axial.BBT<App.KL.Game.Indicator>
+): Hexagonal.Axial.Map<App.KL.Game.Indicator>
 
   open skill
   //Returning each effect's List of affected coords
@@ -13,5 +13,5 @@ App.KL.Game.Effect.indicators.get_indicators(
     new: 
       result.indicators
     err: 
-      Hexagonal.Axial.BBT.new<App.KL.Game.Indicator>
+      Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
   }

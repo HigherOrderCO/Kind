@@ -1,0 +1,6 @@
+// Unites two results of Actions in a Map tree
+Hexagonal.Axial.Map.union<A : Type>(
+  map : Hexagonal.Axial.Map<A>
+): Hexagonal.Axial.Map<A> -> Hexagonal.Axial.Map<A>
+
+  BBT.union!!(Hexagonal.Axial.cmp, map)

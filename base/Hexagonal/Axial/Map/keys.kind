@@ -1,0 +1,6 @@
+// Generates a list of Hexagonal Axial coordinates from Map Keys
+Hexagonal.Axial.Map.keys<A : Type>(
+  map : Hexagonal.Axial.Map<A>
+): List<Hexagonal.Axial>
+
+  BBT.foldr_with_key!!!((key, value, list) key & list, [], map)
