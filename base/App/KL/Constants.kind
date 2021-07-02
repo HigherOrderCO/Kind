@@ -28,5 +28,8 @@ App.KL.Constants.round_time: U64
 App.KL.Constants.between_turn_delay: U64
   16
 
+App.KL.Constants.turns_dead: I32
+  2
+
 App.KL.Constants.room : String
   "4b4c494e01010101"

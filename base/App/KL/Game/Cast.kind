@@ -138,7 +138,10 @@ App.KL.Game.Cast.apply(
     let result = skill@effect(coord, cast@target, game@board)
     return case result {
       err: App.KL.Game.Cast.Result.failure
-      new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators, result.ap_used)
+      new: 
+        let game = game@board <- result.board
+        let game = game@cemetery <- game@cemetery ++ result.cemetery
+        App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
     }
   } <> App.KL.Game.Cast.Result.failure
 

@@ -121,7 +121,6 @@ App.KL.Game.Phase.Play.draw.tile.token(
   img: VoxBox
 ): VoxBox
   without token: img
-  log("debug")
   let col = case App.KL.Game.Token.get_dominance(token) as team {
     none: Col32.new(100,100,100,255)
     some:

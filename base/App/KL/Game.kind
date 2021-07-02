@@ -29,6 +29,7 @@ type App.KL.Game {
     board: App.KL.Game.Board         // the game map, including tiles, creatures, objects
     casts: List<App.KL.Game.Cast>    // all skills casted on the current turn
     score: App.KL.Game.Score
+    cemetery: App.KL.Game.Cemetery
   )
 }
 
@@ -48,7 +49,8 @@ App.KL.Game.start: App.KL.Game
   let tick = 0#64
   let casts = []
   let score = App.KL.Game.Score.new({0,0}, 10)
-  App.KL.Game.new(phase, turn, moment, players, board, casts, score)
+  let cemetery = []
+  App.KL.Game.new(phase, turn, moment, players, board, casts, score, cemetery)
 
 // Render function
 // ===============
