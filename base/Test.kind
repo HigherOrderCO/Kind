@@ -1,6 +1,6 @@
 Test: IO<Unit>
   IO {
-    for i from 0 to 100:
-      IO.print(Nat.show(Nat.double(i)))
+    for i from 0 to 256 * 2:
+      IO.print(U256.show(Crypto.Keccak.hash.u256(Nat.to_u256(i))))
   }
-  //Neutralis.main(42000)
+
