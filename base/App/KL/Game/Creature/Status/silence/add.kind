@@ -24,6 +24,6 @@ App.KL.Game.Creature.Status.silence.add.aux(
           case next_silence {
             gtn: 
               new_silence & status.tail
-          }default status
-      }default status
+          }default status.head & App.KL.Game.Creature.Status.silence.add.aux(duration, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.silence.add.aux(duration, status.tail)
   }

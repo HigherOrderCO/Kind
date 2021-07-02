@@ -17,6 +17,7 @@ type App.KL.Game.Creature.Status {
   )
   haste(
     duration : I32
+    amount: I32
   )
   poison(
     id: String
@@ -39,5 +40,6 @@ type App.KL.Game.Creature.Status {
   )
   weaken(
     duration : I32
+    amount: I32
   )
 }

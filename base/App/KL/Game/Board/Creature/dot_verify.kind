@@ -31,7 +31,6 @@ App.KL.Game.Board.Creature.dot_verify(
 
 
 
-
 App.KL.Game.Board.Creature.dot_verify.aux(
   board: App.KL.Game.Board
 ): List<Pair<Hexagonal.Axial, App.KL.Game.Creature>>
@@ -41,7 +40,7 @@ App.KL.Game.Board.Creature.dot_verify.aux(
   for coords in list with creatures:
     coords = coords@fst
     creature = App.KL.Game.Board.Creature.get(coords, board)
-    case creature { 
+    case creature {
       none:
         creatures
       some:
@@ -50,9 +49,3 @@ App.KL.Game.Board.Creature.dot_verify.aux(
     }
   creatures
   
-
-
-
-  //let f = App.KL.Game.Creature.Status.update
-  //let update_creature = App.KL.Game.Tile.update_creature(f)
-  //Hexagonal.Axial.Map.map!!(update_creature, board)

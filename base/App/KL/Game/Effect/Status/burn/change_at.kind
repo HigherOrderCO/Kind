@@ -13,8 +13,10 @@ App.KL.Game.Effect.status.burn.change_at(
     let new_board = App.KL.Game.Board.Creature.set(pos, burn, board)
     let total_burn = App.KL.Game.Creature.Status.burn.total(burn)
     let result = App.KL.Game.Board.Creature.change_hp(total_burn, pos, new_board)
+    let board = result@snd
+    let dmg  = result@fst
     App.KL.Game.Effect { 
-      App.KL.Game.Effect.board.set(result@snd)
-      return result@fst
+      App.KL.Game.Effect.board.set(board)
+      return dmg
     }
   }

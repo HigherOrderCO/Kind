@@ -6,6 +6,7 @@ type App.KL.Game.Hero {
     max_hp: I32
     max_ap: I32
     skills: Map<App.KL.Game.Skill> // letter -> skill
+    //on_turn_end: App.KL.Game.Creature -> App.KL.Game.Creature //TODO: ADD
     on_stepped: Maybe<App.KL.Game.Effect.FromTo<Unit>>
   )
 }
@@ -22,5 +23,8 @@ type App.KL.Game.Hero.Draw.Pose {
   )
 }
 
+
 App.KL.Game.Hero.Draw.Result: Type
   Pair<Maybe<Hexagonal.Axial>, VoxBox>
+
+

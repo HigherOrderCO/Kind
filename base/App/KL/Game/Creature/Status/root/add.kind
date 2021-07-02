@@ -23,6 +23,7 @@ App.KL.Game.Creature.Status.root.add.aux(
           case next_root {
             gtn: 
               new_root & status.tail
-          }default status
-      }default status
+
+          }default status.head & App.KL.Game.Creature.Status.root.add.aux(duration, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.root.add.aux(duration, status.tail)
   }
