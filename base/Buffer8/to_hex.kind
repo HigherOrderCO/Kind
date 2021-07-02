@@ -2,5 +2,7 @@ Buffer8.to_hex(lenbuf: Pair<U32, Buffer8>): String
   let {len,buf} = lenbuf
   let str = ""
   for i: U32 from 0 to len with str:
-    str | U8.to_hex(Buffer8.get(i,buf))
+    let no_pad = U8.to_hex(Buffer8.get(i,buf))
+    let padded = String.pad_left(2, '0', no_pad)
+    str | padded
   str

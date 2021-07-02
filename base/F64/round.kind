@@ -1,0 +1,2 @@
+F64.round(x : F64) : F64
+  F64.round(x)

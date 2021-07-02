@@ -1,14 +1,6 @@
-Test(test: A): String
-  case test {
-    asd:
-      Nat.show(test.i)
-    qwe:
-      I32.show(test.j)
-    zxc:
-      I32.show(x2as     2828278278272872   agdggdx)
+Test: IO<Unit>
+  IO {
+    for i from 0 to 256 * 2:
+      IO.print(U256.show(Crypto.Keccak.hash.u256(Nat.to_u256(i))))
   }
 
-type A {
-  asd(i: Nat),
-  qwe(j: I32)
-}

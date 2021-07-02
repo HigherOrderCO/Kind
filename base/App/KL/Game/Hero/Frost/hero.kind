@@ -14,7 +14,7 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1))
     "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 48, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 2))
-    "W": App.KL.Game.Skill.new("Summon Wall", 300, 48, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(1))
+    "W": App.KL.Game.Skill.new("Summon Wall", 300, 48, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(5, 1))
     "E": App.KL.Game.Skill.new("Taunt", 700, 48, 0, App.KL.Game.Hero.Frost.Skills.taunt(2, 1))
   }
 
@@ -25,9 +25,9 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
 // SKILLS
 
-App.KL.Game.Hero.Frost.Skills.summon_wall(ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Frost.Skills.summon_wall(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
-    App.KL.Game.Effect.limit_range(5)
+    App.KL.Game.Effect.limit_range(range)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
     get board = App.KL.Game.Effect.board.get
@@ -42,12 +42,15 @@ App.KL.Game.Hero.Frost.Skills.summon_wall(ap_cost: I32): App.KL.Game.Effect<Unit
 
 App.KL.Game.Hero.Frost.Skills.taunt(area: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
-    get center = App.KL.Game.Effect.coord.get_center
-    let coords = Hexagonal.Axial.range(center, area)
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
+    get center = App.KL.Game.Effect.coord.get_center
+    let area = App.KL.Game.Areas.ring(center, area)
+    App.KL.Game.Effect.ap.use(ap_cost)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.movement.pull_at), coords)
+    let enemy = App.KL.Game.Effect.At.enemy!
+    let pull = App.KL.Game.Effect.movement.pull_at(false)
+    App.KL.Game.Effect.area!(enemy(pull), area)
     return unit
   }
 
@@ -63,11 +66,15 @@ App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
 
 App.KL.Game.Hero.Frost.Skills.ravenous_bite(dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
+    App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    let clamp = App.KL.Game.Effect.coord.clamp(1, center, target)
-    let coords = Hexagonal.Axial.semi_circle(center, clamp)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
+    let clamp = Hexagonal.Axial.clamp(1, center, target)
+    let area = App.KL.Game.Areas.semi_circle(center, clamp)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.common.dmg.semi_circle(dmg, ap_cost)
+    let enemy = App.KL.Game.Effect.At.enemy!
+    let eff = App.KL.Game.Effect.hp.damage_at(dmg)
+    App.KL.Game.Effect.area!(enemy(eff), area)
+    return unit
   }

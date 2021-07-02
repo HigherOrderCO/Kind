@@ -2,11 +2,13 @@ App.KL.Game.Effect.hp.change_at(
   change: I32
 ): App.KL.Game.Effect.At<I32>
   (pos)
+
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
     let res = App.KL.Game.Board.Creature.change_hp(change, pos, board)
     let dhp = res@fst
-    let board = res@snd@fst
+    let board = res@snd
+    let board = board@fst
     App.KL.Game.Effect.board.set(board)
     case res@snd@snd as dead {
       none: App.KL.Game.Effect.pass

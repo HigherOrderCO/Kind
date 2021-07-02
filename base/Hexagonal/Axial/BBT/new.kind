@@ -1,3 +1,0 @@
-// A new Hexagonal Axial BBT tree
-Hexagonal.Axial.BBT.new<A : Type> : Hexagonal.Axial.BBT<A>
-    BBT.tip!!

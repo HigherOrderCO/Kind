@@ -4,7 +4,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
     board_size = App.KL.Constants.board_size
   n_board_size = I32.neg(board_size)
 
-  board  = Hexagonal.Axial.BBT.new<App.KL.Game.Tile>
+  board  = Hexagonal.Axial.Map.new<App.KL.Game.Tile>
   
   
   new_terrain = App.KL.Game.Terrain.new(0)

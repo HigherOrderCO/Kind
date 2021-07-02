@@ -1,3 +1,7 @@
+### Kind 1.0.81
+
+- Add Scheme compilation options to CLI
+
 ### Kind 1.0.79
 
 - Socket UDP primitives

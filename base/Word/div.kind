@@ -7,5 +7,5 @@ Word.div<size: Nat>(a: Word(size), b: Word(size)): Word(size)
     zero
   else
     let shift = Nat.sub(a_bits, b_bits)
-    let shift_copy = Word.shift_left<size>(shift, b)
+    let shift_copy = Word.shift_left<size>(b, shift)
     Word.div.go<size>(shift, a, shift_copy, zero)

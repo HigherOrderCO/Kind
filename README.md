@@ -16,7 +16,9 @@ Usage
 -----
 ![npm](https://img.shields.io/npm/v/kind-lang)  [![telegram](https://img.shields.io/badge/chat-on%20telegram-blue)](https://t.me/formality_lang)
 
-1. Install Kind using `npm` (alternative releases soon):
+0. Choose a release. We'll use JavaScript here but ChezScheme is also [available](/INSTALL.md).
+
+1. Install Kind using `npm`:
 
 ```bash
 npm i -g kind-lang
