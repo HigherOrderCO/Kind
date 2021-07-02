@@ -211,7 +211,7 @@ function display_error(name, error){
       //console.log(fmc_to_hs.compile(fmcc, name, {module}));
     //} catch (e) {
       //display_error(name, e);
-    }
+    //}
 
   // Type-Checking
   } else {
