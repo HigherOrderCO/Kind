@@ -1,0 +1,12 @@
+App.KL.Game.Creature.Status.haste.total(
+  creature: App.KL.Game.Creature
+): I32
+
+  total_haste = +0#32
+  for haste in creature@status with total_haste:
+    case haste { 
+      haste:
+        haste.amount + total_haste
+    }default +0#32
+  total_haste
+

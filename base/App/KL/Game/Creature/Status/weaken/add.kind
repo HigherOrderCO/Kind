@@ -1,17 +1,19 @@
 App.KL.Game.Creature.Status.weaken.add(
   creature: App.KL.Game.Creature
   duration: I32
+  amount: I32
 ): App.KL.Game.Creature
   
-  let weaken_added = App.KL.Game.Creature.Status.weaken.add.aux(duration, creature@status)
+  let weaken_added = App.KL.Game.Creature.Status.weaken.add.aux(duration, amount, creature@status)
   creature@status <- weaken_added
 
 App.KL.Game.Creature.Status.weaken.add.aux(
   duration: I32
+  amount: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  let new_weaken = App.KL.Game.Creature.Status.weaken(duration)
+  let new_weaken = App.KL.Game.Creature.Status.weaken(duration, amount)
   case status { 
     nil:
       new_weaken & status
@@ -23,6 +25,6 @@ App.KL.Game.Creature.Status.weaken.add.aux(
           case next_weaken {
             gtn: 
               new_weaken & status.tail
-          }default status
-      }default status
+          }default status.head & App.KL.Game.Creature.Status.weaken.add.aux(duration, amount, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.weaken.add.aux(duration, amount, status.tail)
   }

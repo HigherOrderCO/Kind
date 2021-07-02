@@ -27,5 +27,5 @@ App.KL.Game.Creature.Status.poison.add.aux(
             new_poison & status.tail
           else
             status.head & App.KL.Game.Creature.Status.poison.add.aux(id, duration, dmg, status.tail)
-      }default status
+      }default status.head & App.KL.Game.Creature.Status.poison.add.aux(id, duration, dmg, status.tail)
   }
