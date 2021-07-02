@@ -20,7 +20,9 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
+  let description = "Croni is a fragile mage with slow skills that deal high damage from afar."
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS
@@ -67,4 +69,5 @@ App.KL.Game.Hero.Croni.hero.shadow_trap: App.KL.Game.Hero
     App.KL.Game.Effect.hp.damage_at(6, to)
     return unit
   })
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "A Shadow Trap created by Croni that deals 6 damage to whoever steps on it"
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)

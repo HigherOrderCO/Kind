@@ -20,7 +20,9 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
+  let description = "Frost is a resistant warrior with several different crowd control skills"
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS
@@ -59,7 +61,8 @@ App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect { return unit })
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "A wall created by Frost that blocks a tile"
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 App.KL.Game.Hero.Frost.Skills.ravenous_bite(dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 

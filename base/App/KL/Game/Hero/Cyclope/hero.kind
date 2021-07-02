@@ -7,7 +7,7 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Cyclope.Assets.base64_idle
 
-  let max_hp = 25 :: I32
+  let max_hp = 40 :: I32
 
   let max_ap = 3 :: I32
 
@@ -20,7 +20,9 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "Cyclope is a resistant warrior. He can either protect his allies with his own life or damage enemies around him"
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS

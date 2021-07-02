@@ -180,7 +180,9 @@ App.KL.Game.Hero.Vargouli.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "Kenlua is a fragile, but nimble assassin with great mobility and high damage"
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS

@@ -13,7 +13,25 @@ type App.KL.Game.Phase.Play.draw.SkillInfo {
 // draw all the screen (round, seconds, canvas, list of skills)
 App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   open game
-
+  let text_lines = case game.moment {
+    preparation: 
+      [
+        "Turn " | Nat.show(U64.to_nat(game.turn)) | "'s Preparation phase.",
+        "Executing in " | Nat.show(U64.to_nat(game.moment.countdown / 16)) | " seconds!"
+      ]
+    execution: case game.moment.casts {
+      nil:
+        ["End of turn " | Nat.show(U64.to_nat(game.turn)) | "."]
+      cons: 
+        [Maybe {
+          let cast = game.moment.casts.head
+          get skill = App.KL.Game.Cast.get_skill(cast, game)
+          get hero = App.KL.Game.Cast.get_hero(cast, game)
+          let text = hero@name | " used " | skill@name | "!"
+          let text = text | if game.moment.success then "" else " But it failed."
+          return text
+        } <> "Invalid cast."]}
+    }
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
@@ -24,7 +42,6 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "position": "relative"
   }>
     {App.KL.Game.Phase.Play.draw.skills_menu(game)}
-
     <div style={ 
       "width": "calc(100% - 200px)", 
       "height": "100%", 
@@ -34,31 +51,9 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
       "align-items": "center",
       "position": "relative"
     }>
-    
-      <div style={"font-size": "24px", "font-family": "monospace"}>
-        case game.moment {
-          preparation: 
-            "Turn "
-            | Nat.show(U64.to_nat(game.turn))
-            | ". Casting in "
-            | Nat.show(U64.to_nat(game.moment.countdown))
-            | " ticks..."
-          execution: case game.moment.casts {
-            nil:
-              "End of turn "
-              | Nat.show(U64.to_nat(game.turn))
-              | "."
-            cons: Maybe {
-              let cast = game.moment.casts.head
-              get skill = App.KL.Game.Cast.get_skill(cast, game)
-              get hero = App.KL.Game.Cast.get_hero(cast, game)
-              let text = hero@name | " used " | skill@name | "!"
-              let text = text | if game.moment.success then "" else " But it failed."
-              return text
-            } <> "Invalid cast."
-          }
-        }
-      </div>
+      for text in text_lines: 
+      <div style={"font-size": "24px", "font-family": "monospace"}>text</div>
+      
       <div>{ 
         let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
         let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
@@ -69,8 +64,9 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
             "scale": "2"},
           {},
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
-      }</div>
+      }</div>      
     </div>
+    {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
     {App.KL.Game.Phase.Play.draw.skill_description(local, game)}
   </div>
 
@@ -114,6 +110,35 @@ App.KL.Game.Phase.Play.draw.board(
     img
   img
 
+App.KL.Game.Phase.Play.Draw.gray_overlay(game: App.KL.Game): DOM
+  open game
+    case game.moment {
+      preparation: <div></div>
+      execution: case game.moment.casts {
+        nil: 
+          let frame_part = U64.to_f64(game.moment.frame) / U64.to_f64(App.KL.Constants.between_turn_delay)
+          let opacity =
+            if frame_part <? 0.5 then
+              "0.5"
+            else
+              F64.show(1 - frame_part)
+          <div style=
+          { "width": "100%",
+            "height": "100%",
+            "position": "absolute",
+            "background-color":"gray",
+            "opacity": opacity,
+            "display": "flex"
+          }>
+            <div style={"font-size": "4em", "margin": "auto", "opacity": "1", "text-align": "center", "color": "white"}>
+              <div>"Turn " | Nat.show(U64.to_nat(game.turn)) | " ended."</div>
+              <div>"Starting Turn " | Nat.show(U64.to_nat(game.turn + 1)) | "!"</div>
+            </div>
+          </div>
+        cons: <div></div>
+      }
+    }
+  
 App.KL.Game.Phase.Play.Draw.get_indicators(
   skill: Maybe<Char>, 
   target: Hexagonal.Axial,

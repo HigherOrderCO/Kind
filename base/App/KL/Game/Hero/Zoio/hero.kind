@@ -20,7 +20,9 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "Zoio is a fragile mage that has no range limitations in his Eye Beam. However, his movement is extremely slow"
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 

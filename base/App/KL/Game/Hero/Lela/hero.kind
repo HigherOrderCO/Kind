@@ -20,7 +20,9 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "Lela is a fragile support for her team, she can heal and protect her team from a long distance"
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 App.KL.Game.Hero.Lela.hero.Skills.restore(range: I32, heal: I32, ap_cost:I32): App.KL.Game.Effect<Unit>
