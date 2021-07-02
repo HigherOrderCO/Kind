@@ -1,0 +1,20 @@
+App.KL.Game.Effect.status.burn.change_at(
+  id: String
+  duration: I32
+  amount: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect { 
+    get board = App.KL.Game.Effect.board.get
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    without creature: App.KL.Game.Effect { return +0#32 }
+    let burn = App.KL.Game.Creature.Status.burn.add(creature, id, duration, amount)
+    let new_board = App.KL.Game.Board.Creature.set(pos, burn, board)
+    let total_burn = App.KL.Game.Creature.Status.burn.total(burn)
+    let result = App.KL.Game.Board.Creature.change_hp(total_burn, pos, new_board)
+    App.KL.Game.Effect { 
+      App.KL.Game.Effect.board.set(result@snd)
+      return result@fst
+    }
+  }

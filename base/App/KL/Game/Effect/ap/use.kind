@@ -15,7 +15,7 @@ App.KL.Game.Effect.ap.use(
       App.KL.Game.Effect.fail
     else
       App.KL.Game.Effect { 
-        App.KL.Game.Effect.ap.cost(cost, center)
+        App.KL.Game.Effect.ap.remove(cost, center)
         return unit
       }
   }

@@ -127,8 +127,9 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue
     let indicators = Hexagonal.Axial.Map.new!
-    let haste      = App.KL.Game.Creature.get_total_haste(creature)
-    let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
+    //let haste      = App.KL.Game.Creature.get_total_haste(creature)
+    //let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
+    let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)))
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
@@ -220,6 +221,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
         some:
           let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
           let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 32, creature.value, ap_used, img)
+          let img = App.KL.Game.Phase.Play.draw.hp(cx +111, cy + 90, creature.value, img)
           img
       }
 

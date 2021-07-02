@@ -1,0 +1,8 @@
+App.KL.Game.Creature.Status.cast_impedment(
+  creature: App.KL.Game.Creature
+): Bool
+
+  let stun = App.KL.Game.Creature.Status.stun.check(creature)
+  let silence = App.KL.Game.Creature.Status.silence.check(creature)
+
+  stun || silence

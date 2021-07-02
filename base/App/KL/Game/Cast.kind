@@ -125,22 +125,6 @@ App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
   let list = List.map!!((a) a@fst, list)
   list
 
-// Applies a cast, modifying the game state
-App.KL.Game.Cast.apply(
-  cast: App.KL.Game.Cast
-  game: App.KL.Game
-): App.KL.Game.Cast.Result
-  open game
-  open cast
-  Maybe {
-    get skill = App.KL.Game.Cast.get_skill(cast, game)
-    get coord = App.KL.Game.Cast.get_coord(cast, game)
-    let result = skill@effect(coord, cast@target, game@board)
-    return case result {
-      err: App.KL.Game.Cast.Result.failure
-      new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators, result.ap_used)
-    }
-  } <> App.KL.Game.Cast.Result.failure
 
 
 // TODO: modularize
