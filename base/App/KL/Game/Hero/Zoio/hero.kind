@@ -14,7 +14,7 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 12, 1, App.KL.Game.Effect.common.walk(1, 1))
     "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2))
-    "W": App.KL.Game.Skill.new("Eye Beam", 650, 48, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 10, 1))
+    "W": App.KL.Game.Skill.new("Eye Beam", 650, 48, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 0, 1))
     "E": App.KL.Game.Skill.new("Blinkaboom", 800, 48, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(16, 16, 3))
   }
 
@@ -33,7 +33,7 @@ App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): A
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
     let effect = App.KL.Game.Effect.hp.damage_at(dmg)
-    App.KL.Game.Effect.area!(enemy(App.KL.Game.Effect.status.burn.add("Zoio", 3, 3)), area)
+    App.KL.Game.Effect.area!(enemy(App.KL.Game.Effect.status.burn.add("Zoio", 3, 20)), area)
     App.KL.Game.Effect.area!(enemy(effect), area)
     return unit
   }

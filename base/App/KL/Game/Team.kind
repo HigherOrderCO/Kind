@@ -10,3 +10,11 @@ App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
     blue    blue    : true
     neutral neutral : true
   } default false
+
+// get team string
+App.KL.Game.Team.show(team: App.KL.Game.Team): String
+  case team {
+    red: "red"
+    blue: "blue"
+    neutral: "neutral"
+  }

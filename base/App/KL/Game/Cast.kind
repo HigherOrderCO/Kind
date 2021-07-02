@@ -125,8 +125,6 @@ App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
   let list = List.map!!((a) a@fst, list)
   list
 
-
-
 // TODO: modularize
 // Runs all casts up to a given delay with a filter
 App.KL.Game.Cast.simulate(

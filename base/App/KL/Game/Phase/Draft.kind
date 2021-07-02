@@ -20,14 +20,6 @@ App.KL.Game.Phase.Draft.has_coord(coord: Hexagonal.Axial, player: Pair<String, A
     none: false
     some: Hexagonal.Axial.eql(x.value, coord)
   }
-  
-// get team string
-App.KL.Game.Phase.Draft.Team.show(team: App.KL.Game.Team): String
-  case team {
-    red: "red"
-    blue: "blue"
-    neutral: "neutral"
-  }
 
 // get team of a player
 App.KL.Game.Phase.Draft.to_team(players: Map<App.KL.Game.Player>, user: String): Maybe<App.KL.Game.Team>
@@ -46,34 +38,7 @@ App.KL.Game.Phase.Draft.to_team(players: Map<App.KL.Game.Player>, user: String):
 
 App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>): App.KL.Game.Board
   log(" - criando mapa")
-  map = App.KL.Game.Board.arena
-  players = Map.to_list!(players)
-  for pair in players with map:    
-    let user   = pair@fst
-    
-    let player = pair@snd
-    let pos    = player@init_pos
-    Maybe {
-      get coord     = pos
-      get hero_id   = Maybe.map!!(Nat.to_u8, player@hero_id)
-      let team      = player@team
-      get creature  = App.KL.Game.Phase.Draft.Tile.create_creature(hero_id, some(user), team)
-      let entity    = App.KL.Game.Entity.creature(creature)
-      return App.KL.Game.Board.push(coord, entity, map)
-    } <> map
-  map
-
-// TODO change this to another file (maybe Tile.kind)
-App.KL.Game.Phase.Draft.Tile.create_creature(
-  hero_id: U8,
-  player_addr: Maybe<String>,
-  team: App.KL.Game.Team
-): Maybe<App.KL.Game.Creature>
-  let hero = App.KL.Game.Phase.Draft.Hero.info(hero_id)
-  case hero {
-    none: none
-    some: some(App.KL.Game.Creature.new(player_addr, hero.value, team, [], hero.value@max_hp, hero.value@max_ap - 1))
-  }
-
-App.KL.Game.Phase.Draft.Hero.info(id: U8): Maybe(App.KL.Game.Hero)
-  App.KL.Game.Hero.get_by_id(U8.to_nat(id))
+  board = App.KL.Game.Board.arena
+  for user:player in players with board:    
+    App.KL.Game.Board.PLayer.set(user, player, board)
+  board

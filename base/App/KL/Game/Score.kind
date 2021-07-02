@@ -1,0 +1,34 @@
+// -- score
+// -- esquema
+// adiciona campo tipo Score em game com 
+//     pontuacao atual {score_blue, score_red} de cada time 
+//     pontuacao maxima do jogo score_max (objetivo do jogo)
+// adiciona campo score em cada token
+
+// -- no jogo
+// ao final de cada turno
+//    pra cada token
+//        verifica qual time domina o token (se algum dominar)
+//        aumenta token@score no score do time correspondente
+//    se algum dos times chegou na pontuacao maxima
+//       jogo termina - vitoria do time
+//    se ambos chegaram a pontuacao maxima
+//       jogo termina - empate (poderia colocar uma prorrogacao, aumentando o score_max)
+//    senao
+//       jogo continua
+
+type App.KL.Game.Score {
+  new(
+    points: Pair<I32, I32>
+    max: I32
+  )
+}
+
+App.KL.Game.Score.get_winner(score: App.KL.Game.Score): Maybe<App.KL.Game.Team>
+  let {blue_points, red_points} = score@points
+  case I32.eql(blue_points, score@max) I32.eql(red_points, score@max) {
+    true true  : some(App.KL.Game.Team.neutral) // draw
+    true false : some(App.KL.Game.Team.blue)
+    false true : some(App.KL.Game.Team.red)
+    false false: none
+  }

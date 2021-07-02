@@ -6,8 +6,11 @@ App.KL.Game.Effect.common.walk(
   App.KL.Game.Effect {
     get center = App.KL.Game.Effect.coord.get_center
     get creature = App.KL.Game.Effect.board.creature.get(center)
-    //let distance = Maybe.extract!(creature, _, +0#32, App.KL.Game.Creature.get_total_haste) + distance
     get target = App.KL.Game.Effect.coord.get_target
+    without creature: App.KL.Game.Effect { return unit }
+    let haste_value = App.KL.Game.Creature.Status.haste.total(creature)
+    let distance = haste_value + distance
+    let area = App.KL.Game.Areas.circle(center, distance)
     App.KL.Game.Effect.limit_range(distance)
     if Hexagonal.Axial.eql(center, target) then
       App.KL.Game.Effect.fail

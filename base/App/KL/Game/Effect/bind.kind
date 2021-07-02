@@ -14,6 +14,7 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
         map        = result_b.board
         indicators = Hexagonal.Axial.Map.union!(result_a.indicators, result_b.indicators)
         ap_used    = result_a.ap_used + result_b.ap_used
-        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used)
+        cemetery   = result_a.cemetery ++ result_b.cemetery
+        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used, cemetery)
     }
   }

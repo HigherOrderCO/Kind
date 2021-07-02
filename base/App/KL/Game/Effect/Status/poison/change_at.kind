@@ -12,8 +12,8 @@ App.KL.Game.Effect.status.poison.change_at(
     let poison = App.KL.Game.Creature.Status.poison.add(creature, id, duration, amount)
     let new_board = App.KL.Game.Board.Creature.set(pos, poison, board)
     let total_poison = App.KL.Game.Creature.Status.poison.total(poison)
-    App.KL.Game.Effect { 
+    App.KL.Game.Effect {
       App.KL.Game.Effect.board.set(new_board)
-      return total_poison
+      App.KL.Game.Effect.hp.damage_at(total_poison, pos)
     }
   }

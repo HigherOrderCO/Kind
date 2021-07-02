@@ -48,12 +48,32 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
           game@moment <- App.KL.Game.Moment.execution(game.moment.casts, frame + 1, none, game.moment.hits, game.moment.ap_used, game.moment.success)
         // Go to next turn
         else
-          let game = game@moment <- App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
-          let game = game@board <- App.KL.Game.Board.Creature.dot_verify(game.board)
-          let game = game@board <- App.KL.Game.Board.status_update(game@board)
-          let game = game@board <- App.KL.Game.Board.ap_update(game@board)
-          let game = game@turn <- game@turn + 1
-          game
+          // apply status TODO redo
+          let game = App.KL.Game.Board.Creature.dot_verify(game)
+          // token update
+          let game   = game@board <- App.KL.Game.Token.board.capture(game@board)
+          // score update
+          let game   = game@score <- App.KL.Game.Token.score.capture(game@board, game@score)
+          // Verify if game ended  
+          let winner = App.KL.Game.Score.get_winner(game@score)
+          case winner {
+            none: // There isnt a winner - game continues
+              let game = game@board <- App.KL.Game.Board.status_update(game@board)
+              // ap restore
+              let game = game@board <- App.KL.Game.Board.ap_update(game@board)
+              // cemetery update
+              let game   = game@board    <- App.KL.Game.Cemetery.revive(game@cemetery, game@players, game@board)
+              let game   = game@cemetery <- App.KL.Game.Cemetery.update(game@cemetery)
+              // phase change
+              let game = game@moment <- App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
+              let game = game@turn <- game@turn + 1
+              game
+            some: // There is a winner (or a drawn) - game ends
+              // TODO add delay
+              let game = game@phase <- App.KL.Game.Phase.end
+              game
+          }
+          
     }
   }
   //let game = game@tick <- game@tick + 1

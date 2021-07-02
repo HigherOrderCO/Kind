@@ -28,7 +28,7 @@ App.KL.Game.Board.push(
     none: 
       case entity {
         terrain:
-          new_tile = App.KL.Game.Tile.new(entity.value, none)
+          new_tile = App.KL.Game.Tile.new(entity.value, none, none)
           App.KL.Game.Board.set(coord, new_tile, board)
       } default board
     some:
@@ -43,6 +43,12 @@ App.KL.Game.Board.push(
         animation:
           animation_tile = tile.value@animation <- some(entity.value)
           App.KL.Game.Board.set(coord, animation_tile, board)
+        token:
+          token_tile = tile.value@token <- some(entity.value)
+          App.KL.Game.Board.set(coord, token_tile, board)
+        asdsadadddd:
+          token_tile = tile.value@asdsadadddd <- some(entity.value)
+          App.KL.Game.Board.set(coord, token_tile, board)
       }
     }
 

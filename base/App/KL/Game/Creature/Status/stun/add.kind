@@ -23,6 +23,6 @@ App.KL.Game.Creature.Status.stun.add.aux(
           case next_stun {
             gtn: 
               new_stun & status.tail
-          }default status
-      }default status
+          }default status.head & App.KL.Game.Creature.Status.stun.add.aux(duration, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.stun.add.aux(duration, status.tail)
   }

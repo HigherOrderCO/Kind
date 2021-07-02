@@ -1,0 +1,27 @@
+App.KL.Game.Phase.End.draw(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let winner = App.KL.Game.Score.get_winner(game@score)
+
+  case winner {
+    none: <div>"Not ingame"</div>
+    some: 
+      <div style={
+        "height": "100vh"
+        "width": "100vw"
+        "font-size": "2rem"
+        "display": "flex"
+        "flex-direction": "column"
+        "justify-content": "center"
+        "align-items": "center"
+      }>
+        {
+          // check if draw
+          if App.KL.Game.Team.eql(winner.value, App.KL.Game.Team.neutral) then
+            <p>"OH NO! It's a DRAW :("</p>
+          else 
+            let team = App.KL.Game.Team.show(winner.value)
+            <p>"Team " | team | " wins! (ez)"</p>
+        }
+        // TODO make it work
+        <button id="return" style={"font-size": "1rem", "padding": "2px"}>"Return to lobby"</button>
+      </div>
+  }

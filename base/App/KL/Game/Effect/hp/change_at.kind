@@ -8,6 +8,11 @@ App.KL.Game.Effect.hp.change_at(
     let res = App.KL.Game.Board.Creature.change_hp(change, pos, board)
     let dhp = res@fst
     let board = res@snd
+    let board = board@fst
     App.KL.Game.Effect.board.set(board)
+    case res@snd@snd as dead {
+      none: App.KL.Game.Effect.pass
+      some: App.KL.Game.Effect.cemetery.add(dead.value)
+    }
     return dhp
   }

@@ -29,5 +29,5 @@ App.KL.Game.Creature.Status.shield.add.aux(
             new_shield & status.tail
           else
             status.head & App.KL.Game.Creature.Status.shield.add.aux(id, duration, amount, status.tail)
-      }default status
+      }default status.head & App.KL.Game.Creature.Status.shield.add.aux(id, duration, amount, status.tail)
   }

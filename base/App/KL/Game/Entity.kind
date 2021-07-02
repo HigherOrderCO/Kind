@@ -1,5 +1,6 @@
 type App.KL.Game.Entity { // TODO rename?
   terrain (value: App.KL.Game.Terrain)
   creature(value: App.KL.Game.Creature)
+  token   (value: App.KL.Game.Token)
 }
 

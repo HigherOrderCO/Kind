@@ -34,7 +34,12 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
       "align-items": "center",
       "position": "relative"
     }>
-    
+      <div>
+        "Blue: " | String.show_clean(I32.show(game.score@points@fst)) 
+                 | "/" | String.show_clean(I32.show(App.KL.Constants.max_score)) | " | " |
+        "Red: " | String.show_clean(I32.show(game.score@points@snd)) 
+                 | "/" | String.show_clean(I32.show(App.KL.Constants.max_score))
+      </div>
       <div style={"font-size": "24px", "font-family": "monospace"}>
         case game.moment {
           preparation: 
@@ -110,8 +115,42 @@ App.KL.Game.Phase.Play.draw.board(
     {coord, tile} = pos
     img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
     img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
+    img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
     img
   img
+
+App.KL.Game.Phase.Play.draw.tile.token(
+  game: App.KL.Game
+  token: Maybe<App.KL.Game.Token>,
+  token_coord: Hexagonal.Axial,
+  img: VoxBox
+): VoxBox
+  without token: img
+  let col = case App.KL.Game.Token.get_dominance(token) as team {
+    none: Col32.new(100,100,100,255)
+    some:
+      case team.value {    
+        blue: Col32.new(0, 0, 255, 255)
+        red:  Col32.new(255, 0, 0, 255)
+      } default Col32.new(100,100,100,255)
+  }
+  let coords = Hexagonal.Axial.range(token_coord, token@range)
+  for coord in coords with img:
+    let {cx, cy} = 
+      Hexagonal.Axial.to_screen_xy(
+        coord,
+        App.KL.Constants.hexagon_radius,
+        App.KL.Constants.center_x,
+        App.KL.Constants.center_y
+      )
+    
+    if Hexagonal.Axial.eql(coord, token_coord) then
+      VoxBox.Draw.square(cx,cy,2,10,10,col,img)
+    else
+      VoxBox.Draw.square(cx,cy,2,5,5,col,img)
+  img
+
+  
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
   skill: Maybe<App.KL.Game.Skill>, 
@@ -221,7 +260,6 @@ App.KL.Game.Phase.Play.draw.tile.creature(
         some:
           let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
           let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 32, creature.value, ap_used, img)
-          let img = App.KL.Game.Phase.Play.draw.hp(cx +111, cy + 90, creature.value, img)
           img
       }
 
