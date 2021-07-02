@@ -37,9 +37,9 @@ Neutralis.consensus.mine(block: Neutralis.Bytes, target: U256, seed: Nat): IO(Ne
     let nonce_u32 = Nat.to_u32(nonce_nat)
     let nonce_buffer = U32.to_buffer8(nonce_u32)
     let nonce = {4 :: U32, nonce_buffer}
-    log("nonce_nat:    "|String.pad_left(8, '0', Nat.to_string_base(16, nonce_nat)))
-    log("nonce_u32:    "|String.pad_left(8, '0', U32.to_hex(nonce_u32)))
-    log("nonce_buffer: "|Buffer8.to_hex(nonce))
+//    log("nonce_nat:    "|String.pad_left(8, '0', Nat.to_string_base(16, nonce_nat)))
+//    log("nonce_u32:    "|String.pad_left(8, '0', U32.to_hex(nonce_u32)))
+//    log("nonce_buffer: "|Buffer8.to_hex(nonce))
     if Neutralis.consensus.mine.test(block, nonce, target) then
       IO {
         log("finish")
@@ -55,7 +55,11 @@ Neutralis.consensus.mine.test(
   target: U256
 ): Bool
   let block = Neutralis.Bytes.concat(block, nonce)
-  let {len, hash_buff} = Crypto.Keccak.hash.bytes(block)
+  let hash_bytes = Crypto.Keccak.hash.bytes(block)
+//  log("nonce: "|Buffer8.to_hex(nonce))
+//  log("block: "|Buffer8.to_hex(block))
+//  log("hash: "|Buffer8.to_hex(hash_bytes))
+  let {len, hash_buff} = hash_bytes
   let hash = Buffer8.to_u256(hash_buff)
   hash <? target
 
@@ -85,8 +89,7 @@ Neutralis.Blockchain.check(
         nil:
           true
         cons:
-          let hash = Crypto.Keccak.hash.bytes(chain.tail.head)
-          open hash
+          use hash = Crypto.Keccak.hash.bytes(chain.tail.head)
           let mined = (Buffer8.to_u256(hash.snd) <? target)
           let chained = Neutralis.consensus.check_header(hash, chain.head)
           if mined && chained then
@@ -127,10 +130,15 @@ Neutralis.random(a: Nat, prev: Nat): IO(Nat)
   }
 
 Neutralis.consensus.fake_block: Neutralis.Bytes
-  Buffer8.from_hex("afe32aa112231321aae")
+  // crashes the program
+  //let {size, bytes} = Buffer8.from_hex("aefa726718366ae712eeee3737381817373282827139291aefaffefa00000000")
+  {0, Buffer8.alloc(4)}
+  // make up space for nonce
+  //{size - 4, bytes}
+  
 
 Neutralis.consensus.fake_target: U256
-  Nat.to_u256(115792089237316195423570985008687907853269984665640564039457584007913129639935/2)
+  Nat.to_u256(0x1000000000000000000000000000000000000000000000000000000000000000)
 
 // test script
 Neutralis.consensus: _
