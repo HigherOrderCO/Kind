@@ -10,7 +10,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
   new_terrain = App.KL.Game.Terrain.new(0)
   new_terrain = App.KL.Game.Entity.terrain(new_terrain)
   
-  neutral_token = App.KL.Game.Token.new(0, 1, 1)
+  neutral_token = App.KL.Game.Token.new(0, 1, 1, 2)
   neutral_token = App.KL.Game.Entity.token(neutral_token)
   token_coords  = [{0, 0} :: Hexagonal.Axial, 
                    {0,-5} :: Hexagonal.Axial, 

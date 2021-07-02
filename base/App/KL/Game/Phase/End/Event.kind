@@ -1,0 +1,6 @@
+type App.KL.Game.Phase.End.Event {
+  go_lobby
+} deriving (serializer, deserializer)
+
+App.KL.Game.Phase.End.Event.go_lobby.serial: String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.end(App.KL.Game.Phase.End.Event.go_lobby)))

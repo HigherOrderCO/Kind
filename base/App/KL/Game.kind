@@ -28,12 +28,14 @@ type App.KL.Game {
     players: Map<App.KL.Game.Player> // human players connected to board creatures
     board: App.KL.Game.Board         // the game map, including tiles, creatures, objects
     casts: List<App.KL.Game.Cast>    // all skills casted on the current turn
+    score: App.KL.Game.Score
   )
 }
 
 type App.KL.Game.Phase {
   draft
   play
+  end
 }
 
 // Initial state
@@ -45,7 +47,8 @@ App.KL.Game.start: App.KL.Game
   let board = Hexagonal.Axial.BBT.new!
   let tick = 0#64
   let casts = []
-  App.KL.Game.new(phase, turn, moment, players, board, casts)
+  let score = App.KL.Game.Score.new({0,0}, 10)
+  App.KL.Game.new(phase, turn, moment, players, board, casts, score)
 
 // Render function
 // ===============
@@ -58,8 +61,9 @@ App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Glo
       some: <div>{
         let phase = game.value@phase
         case phase {
-          play: App.KL.Game.Phase.Play.draw(img, local, game.value)
-          draft: App.KL.Game.Phase.Draft.draw(local, global) // TODO change to receive App.KL.Game instead global
+          play : App.KL.Game.Phase.Play.draw(img, local, game.value)
+          draft: App.KL.Game.Phase.Draft.draw(local, global)
+          end  : App.KL.Game.Phase.End.draw(local, game.value)
         } 
       }</div>
     }
@@ -81,6 +85,7 @@ App.KL.Game.when(
       case game_info.phase {
         play: App.KL.Game.Phase.Play.when(local, game.value, event)
         draft: App.KL.Game.Phase.Draft.when(local, game.value, event)
+        end: App.KL.Game.Phase.Draft.when(local, game.value, event)
       }
   }
 
@@ -90,13 +95,15 @@ App.KL.Game.when(
 type App.KL.Game.Event {
   draft(event: App.KL.Game.Phase.Draft.Event)
   play(event: App.KL.Game.Phase.Play.Event)
+  end(event: App.KL.Game.Phase.End.Event)
 } deriving (serializer, deserializer)
 
 App.KL.Game.tick(tick: U64, game: App.KL.Game): App.KL.Game
   open game
   case game.phase {
     draft: App.KL.Game.Phase.Draft.tick(tick, game)
-    play: App.KL.Game.Phase.Play.tick(tick, game)
+    play : App.KL.Game.Phase.Play.tick(tick, game)
+    end  : App.KL.Game.Phase.End.tick(tick, game)
   }
 
 App.KL.Game.post(
@@ -110,4 +117,5 @@ App.KL.Game.post(
   case event game.phase {
     draft draft : App.KL.Game.Phase.Draft.post(time, room, addr, event.event, game)
     play  play  : App.KL.Game.Phase.Play.post(time, room, addr, event.event, game)
+    end   end   : App.KL.Game.Phase.End.post(time, room, addr, event.event, game)
   } default game

@@ -1,0 +1,2 @@
+App.KL.Game.Phase.End.tick(tick: U64, game: App.KL.Game): App.KL.Game
+  game
