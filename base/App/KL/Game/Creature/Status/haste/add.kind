@@ -1,0 +1,28 @@
+App.KL.Game.Creature.Status.haste.add(
+  creature: App.KL.Game.Creature
+  duration: I32
+): App.KL.Game.Creature
+  
+  let haste_added = App.KL.Game.Creature.Status.haste.add.aux(duration, creature@status)
+  creature@status <- haste_added
+
+App.KL.Game.Creature.Status.haste.add.aux(
+  duration: I32
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+
+  let new_haste = App.KL.Game.Creature.Status.haste(duration)
+  case status { 
+    nil:
+      new_haste & status
+    cons:
+      case status.head { 
+        root: 
+          let old_duration = status.head.duration
+          let next_haste = I32.cmp(old_duration, duration)
+          case next_haste {
+            gtn: 
+              new_haste & status.tail
+          }default status
+      }default status
+  }

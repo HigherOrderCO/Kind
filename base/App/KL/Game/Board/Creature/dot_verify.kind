@@ -1,0 +1,58 @@
+App.KL.Game.Board.Creature.dot_verify(
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+
+  let new_map = board
+  let aux = App.KL.Game.Board.Creature.dot_verify.aux(new_map)
+  for creature in aux with new_map:
+    let coord = creature@fst
+    let creature = creature@snd
+    open creature
+    for dots in creature.status with new_map:
+      case dots { 
+        burn:
+          if I32.gtn(dots.duration, 0) then
+            let change =  App.KL.Game.Board.Creature.change_hp(dots.amount,coord, new_map)
+            let burnt = change@snd
+            burnt
+          else
+            new_map
+        poison:
+          if I32.gtn(dots.duration, 0) then
+            let change =  App.KL.Game.Board.Creature.change_hp(dots.amount,coord, new_map)
+            let poise = change@snd
+            poise
+          else
+            new_map
+      }default new_map
+      new_map
+    new_map
+
+
+
+
+
+App.KL.Game.Board.Creature.dot_verify.aux(
+  board: App.KL.Game.Board
+): List<Pair<Hexagonal.Axial, App.KL.Game.Creature>>
+
+  let list = Hexagonal.Axial.Map.to_list!(board)
+  let creatures = []
+  for coords in list with creatures:
+    coords = coords@fst
+    creature = App.KL.Game.Board.Creature.get(coords, board)
+    case creature { 
+      none:
+        creatures
+      some:
+      open creature.value
+      {coords, creature.value} & creatures
+    }
+  creatures
+  
+
+
+
+  //let f = App.KL.Game.Creature.Status.update
+  //let update_creature = App.KL.Game.Tile.update_creature(f)
+  //Hexagonal.Axial.Map.map!!(update_creature, board)

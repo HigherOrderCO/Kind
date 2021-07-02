@@ -2,6 +2,7 @@ App.KL.Game.Effect.hp.change_at(
   change: I32
 ): App.KL.Game.Effect.At<I32>
   (pos)
+
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
     let res = App.KL.Game.Board.Creature.change_hp(change, pos, board)

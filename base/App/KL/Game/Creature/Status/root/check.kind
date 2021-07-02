@@ -1,0 +1,14 @@
+App.KL.Game.Creature.Status.root.check(
+  creature: App.KL.Game.Creature
+): Bool
+
+  let status = creature@status
+  case status {
+    nil:
+      false
+    cons:
+      case status.head { 
+        root: if I32.gtn(status.head.duration, 0) then true   
+              else false
+      }default false
+  }

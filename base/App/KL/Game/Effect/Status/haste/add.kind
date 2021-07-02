@@ -1,0 +1,6 @@
+App.KL.Game.Effect.status.haste.add(
+  duration: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect.status.haste.change_at(duration, pos)

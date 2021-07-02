@@ -1,0 +1,7 @@
+// Deletes a value in a Map tree
+Hexagonal.Axial.Map.delete<A : Type>(
+  key : Hexagonal.Axial,
+  map : Hexagonal.Axial.Map<A>
+): Hexagonal.Axial.Map<A>
+
+  BBT.delete!!(Hexagonal.Axial.cmp, key, map)

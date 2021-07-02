@@ -1,0 +1,25 @@
+// Applies a cast, modifying the game state
+App.KL.Game.Cast.apply(
+  cast: App.KL.Game.Cast
+  game: App.KL.Game
+): App.KL.Game.Cast.Result
+  open game
+  open cast
+  Maybe {
+    get skill = App.KL.Game.Cast.get_skill(cast, game)
+    get coord = App.KL.Game.Cast.get_coord(cast, game)
+    get creature = App.KL.Game.Board.Creature.get(coord, game.board)
+    let result = skill@effect(coord, cast@target, game@board)
+    let allow_cast = App.KL.Game.Creature.Status.cast_impedment(creature)
+    if not(allow_cast) then
+      Maybe { 
+        return case result {
+          err: App.KL.Game.Cast.Result.failure
+          new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators, result.ap_used)
+      }
+    }
+    else
+      Maybe { 
+        return App.KL.Game.Cast.Result.failure
+      }
+  } <> App.KL.Game.Cast.Result.failure

@@ -1,39 +1,9 @@
-Problems.filter<A : Type>(xs : List<A>, fn : A -> Bool) : List<A>
-  case xs {
-    nil : List.nil!
-    cons : 
-      def p = Problems.filter(A, xs.tail, fn)
-      if fn(xs.head) then p else List.cons!(xs.head, p)
+get_interval(random : F64, min : Nat, max : Nat) : Nat
+  F64.to_nat(random * (Nat.to_f64(max) - Nat.to_f64(min)) + Nat.to_f64(min))
+
+
+User.caotic.test : IO<_>
+  IO {
+    get a = Crypto.random
+    IO.print(Nat.show(get_interval(a, 1, 10)))
   }
-
-// Returns the same list without the smallest element
-Problems.p22(xs: List<Nat>): List<Nat>
-  Problems.filter(Nat, xs, (y) Problems.p13(Problems.p21(xs), y))
-
-Problems.aux_slow_sort(xs: List<Nat>): List<Nat>
-  case xs {
-    nil : []
-    cons : 
-      let v = Problems.p21(xs)
-      let rest = Problems.p22(xs.tail)
-      List.cons(Nat, v, rest) 
-  }
-  
-// Tests if "output" is the sorted version of "input"
-sort.test(input: List<Nat>, output: List<Nat>): Bool
-  // Checks if output is in ascending order
-  let ok = true
-  for i from 1 to List.length!(output) with ok:
-    if Nat.lte(output[i-1] <> 0, output[i] <> 0) then
-      ok
-    else
-      false
-  ok
-
-// The sort algorithm 
-sort(list: List<Nat>): List<Nat>
-  ?sort
-
-// The proof that it works for *all* inputs
-proof(list: List<Nat>): sort.test(list, sort(list)) == true
-  ?proof-18

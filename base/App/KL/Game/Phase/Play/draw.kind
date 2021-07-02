@@ -105,7 +105,7 @@ App.KL.Game.Phase.Play.draw.board(
   mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   indicators = App.KL.Game.Phase.Play.Draw.get_indicators(preview@skill, mouse_coord, user, game)
   ap_used = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
-  map = Hexagonal.Axial.BBT.to_list!(map)
+  map = Hexagonal.Axial.Map.to_list!(map)
   for pos in map with img:
     {coord, tile} = pos
     img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
@@ -126,15 +126,16 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     get center     = App.KL.Game.Board.find_player_coord(player, game@board)
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue
-    let indicators = Hexagonal.Axial.BBT.new!
-    let haste      = App.KL.Game.Creature.get_total_haste(creature)
-    let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
+    let indicators = Hexagonal.Axial.Map.new!
+    //let haste      = App.KL.Game.Creature.get_total_haste(creature)
+    //let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
+    let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)))
     // set range indicator
     for coord in coords with indicators:
-      Hexagonal.Axial.BBT.set!(coord, indicator, indicators)
+      Hexagonal.Axial.Map.set!(coord, indicator, indicators)
     let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, target, game@board)
-    return Hexagonal.Axial.BBT.union!(indicators, areas)
-  } <> Hexagonal.Axial.BBT.new<App.KL.Game.Indicator>
+    return Hexagonal.Axial.Map.union!(indicators, areas)
+  } <> Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
 
 // draw mouse indicator
 App.KL.Game.Phase.Play.draw.cursor(
@@ -155,7 +156,7 @@ App.KL.Game.Phase.Play.draw.tile.terrain(
   mouse_coord: Hexagonal.Axial
   img: VoxBox
 ): VoxBox
-  indicator = Hexagonal.Axial.BBT.get!(tile_coord, hits <> areas) <> App.KL.Game.Indicator.background
+  indicator = Hexagonal.Axial.Map.get!(tile_coord, hits <> areas) <> App.KL.Game.Indicator.background
   {i, j} = App.KL.Game.Phase.Play.draw.centralize(tile_coord)
   field = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   field_drawing = field@draw(terrain, indicator)
@@ -220,6 +221,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
         some:
           let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
           let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 32, creature.value, ap_used, img)
+          let img = App.KL.Game.Phase.Play.draw.hp(cx +111, cy + 90, creature.value, img)
           img
       }
 
@@ -288,7 +290,7 @@ App.KL.Game.Phase.Play.draw.letter(
   picks: App.KL.Game.Picks
   img: VoxBox
 ): VoxBox
-  case Hexagonal.Axial.BBT.get!(tile_coord, picks) as got {
+  case Hexagonal.Axial.Map.get!(tile_coord, picks) as got {
     none: img
     some: 
       screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)

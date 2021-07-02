@@ -1,0 +1,6 @@
+// Converts the Map Map into a List of Hexagonal Axial coordinates
+Hexagonal.Axial.Map.to_list<A: Type>(
+  map: Hexagonal.Axial.Map<A>
+): List<Pair<Hexagonal.Axial,A>>
+
+  BBT.to_list!!(map)
