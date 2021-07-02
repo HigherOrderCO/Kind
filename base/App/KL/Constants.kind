@@ -31,5 +31,8 @@ App.KL.Constants.between_turn_delay: U64
 App.KL.Constants.turns_dead: I32
   2
 
+App.KL.Constants.max_score: I32
+  64
+
 App.KL.Constants.room : String
   "4b4c494e01010101"

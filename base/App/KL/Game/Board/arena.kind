@@ -9,12 +9,12 @@ App.KL.Game.Board.arena: App.KL.Game.Board
   
   new_terrain = App.KL.Game.Terrain.new(0)
   new_terrain = App.KL.Game.Entity.terrain(new_terrain)
-  
-  neutral_token = App.KL.Game.Token.new(0, 1, 1, 2)
-  neutral_token = App.KL.Game.Entity.token(neutral_token)
-  token_coords  = [{0, 0} :: Hexagonal.Axial, 
-                   {0,-5} :: Hexagonal.Axial, 
-                   {0, 5} :: Hexagonal.Axial]
+
+  tokens = [
+    { {0, 0} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 2, 2, 4) }
+    { {0,-5} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2) }
+    { {0, 5} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2) }
+  ]
     
   for j : I32 from n_board_size to (board_size + 1) with board:
     // https://www.redblobgames.com/grids/hexagons/#range-coordinate
@@ -25,13 +25,15 @@ App.KL.Game.Board.arena: App.KL.Game.Board
     for i : I32 from (a - extra_width) to (b + extra_width + 1) with board: 
       // generate int axial coordinate
       coord   = Hexagonal.Axial.new(i, j)
-      let board = App.KL.Game.Board.push(coord, new_terrain, board)
+      App.KL.Game.Board.push(coord, new_terrain, board)
       
-      case List.find!(Hexagonal.Axial.eql(coord), token_coords) as token_coord {
-        none: board
-        some: App.KL.Game.Board.push(coord, neutral_token, board)
-      }
-
     board
+
+  for token in tokens with board:
+    let token_coord = token@fst
+    let token = token@snd
+    let entity = App.KL.Game.Entity.token(token)
+    App.KL.Game.Board.push(token_coord, entity, board)
+
   board
 

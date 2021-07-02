@@ -48,7 +48,7 @@ App.KL.Game.start: App.KL.Game
   let board = Hexagonal.Axial.Map.new!
   let tick = 0#64
   let casts = []
-  let score = App.KL.Game.Score.new({0,0}, 10)
+  let score = App.KL.Game.Score.new({0,0}, App.KL.Constants.max_score)
   let cemetery = []
   App.KL.Game.new(phase, turn, moment, players, board, casts, score, cemetery)
 
