@@ -14,12 +14,15 @@ type App.KL.Game.Phase.Play.draw.SkillInfo {
 App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   open game
 
+  let preparing = case game.moment { preparation: true, execution: false }
+
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
     "display": "flex", 
     "flex-direction": "row", 
     "justify-content": "flex-start", 
+    "background": if preparing then "rgb(255,255,255)" else "rgb(240,240,240)",
     //"align-items": "center",
     "position": "relative"
   }>
@@ -302,7 +305,7 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
     let background = case casting_skill {
       none: "none"
       some: if String.eql(casting_skill.value@name, skill@name)
-        then "rgb(220,220,220)"
+        then "rgba(0,0,0,0.05)"
         else "none"
     }
     <div style={
@@ -314,7 +317,7 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
       <span style={"margin-left": "4px"}>"[" | letter | "] " | skill@name</span>
     </div>)
 
-    <div style={"width": "200px", "height": "100%", "background": "rgb(245,245,245)"}>
+    <div style={"width": "200px", "height": "100%", "background": "rgb(0,0,0,0.05)"}>
       for skill_info in skill_infos:
         skill_info
     </div>
