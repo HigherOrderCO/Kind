@@ -42,10 +42,11 @@ App.KL.Game.Hero.Zoio.hero.Skills.tentackle(range: I32, dmg: I32, ap_cost: I32):
   App.KL.Game.Effect { 
     App.KL.Game.Effect.limit_range(range)
     App.KL.Game.Effect.ap.use(ap_cost)
-    get target  = App.KL.Game.Effect.coord.get_target
-    get center  = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    get center = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.movement.push_at(false)), [target])
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
     return unit
   }
