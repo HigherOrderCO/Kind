@@ -1,3 +1,6 @@
+// This should NOT exist
+// I32.show, U64.show etc. should not output "#"
+
 String.show_clean(num_str: String): String
   String.reverse(String.show_clean.go(num_str, ""))
 

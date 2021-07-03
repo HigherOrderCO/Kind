@@ -14,7 +14,13 @@ type App.KL.Game.Phase.Play.draw.SkillInfo {
 App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   open game
 
-  let preparing = case game.moment { preparation: true, execution: false }
+  let countdown = case game.moment {
+    preparation: U64.to_nat(game.moment.countdown)
+    execution: 0
+  }
+
+  let blue_hp = I32.sub(App.KL.Constants.max_score, game.score@points@snd)
+  let red_hp = I32.sub(App.KL.Constants.max_score, game.score@points@fst)
 
   <div style={ 
     "width": "100vw", 
@@ -22,9 +28,15 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "display": "flex", 
     "flex-direction": "row", 
     "justify-content": "flex-start", 
-    "background": if preparing then "rgb(255,255,255)" else "rgb(240,240,240)",
-    //"align-items": "center",
     "position": "relative"
+    "background":
+      if countdown =? 0 then
+        "rgb(220,220,220)"
+      else if (countdown <? 64) && ((countdown % 12) <? 4) then
+        "rgb(232,232,232)"
+      else
+        "rgb(255,255,255)"
+    //"align-items": "center",
   }>
     {App.KL.Game.Phase.Play.draw.skills_menu(game)}
 
@@ -35,22 +47,19 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
       "flex-direction": "column", 
       "justify-content": "center", 
       "align-items": "center",
-      "position": "relative"
+      "position": "relative",
+      "background-size": "2px 2px",
     }>
-      <div>
-        "Blue: " | String.show_clean(I32.show(game.score@points@fst)) 
-                 | "/" | String.show_clean(I32.show(App.KL.Constants.max_score)) | " | " |
-        "Red: " | String.show_clean(I32.show(game.score@points@snd)) 
-                 | "/" | String.show_clean(I32.show(App.KL.Constants.max_score))
+      <div style={"font-size": "32px", "font-family": "monospace"}>
+        <span style={"color": "rgb(0,0,160)"}>Nat.show(I32.to_nat(blue_hp))</span>
+        <span>" X "</span>
+        <span style={"color": "rgb(160,0,0)"}>Nat.show(I32.to_nat(red_hp))</span>
+        //<span>" of " | String.show_clean(I32.show(App.KL.Constants.max_score))</span>
       </div>
-      <div style={"font-size": "24px", "font-family": "monospace"}>
+      <div style={"font-size": "32px", "font-family": "monospace"}>
         case game.moment {
           preparation: 
-            "Turn "
-            | Nat.show(U64.to_nat(game.turn))
-            | ". Casting in "
-            | Nat.show(U64.to_nat(game.moment.countdown))
-            | " ticks..."
+            Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))
           execution: case game.moment.casts {
             nil:
               "End of turn "
@@ -79,6 +88,19 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
     </div>
+
+    <div style={
+      "width": "200px"
+      "height": "100%"
+      "background": "rgb(220,220,220)"
+      "border-left": "1px solid black"
+      "padding": "4px"
+      "font-family": "monospace"
+      "font-size": "16px"
+    }>
+      "TODO :)"
+    </div>
+
   </div>
 
 // CANVAS DRAWING
@@ -317,7 +339,14 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
       <span style={"margin-left": "4px"}>"[" | letter | "] " | skill@name</span>
     </div>)
 
-    <div style={"width": "200px", "height": "100%", "background": "rgb(0,0,0,0.05)"}>
+    <div style={
+      "width": "200px"
+      "height": "100%"
+      "background": "rgb(220,220,220)"
+      "border-right": "1px solid black"
+      "font-family": "monospace"
+      "font-size": "16px"
+    }>
       for skill_info in skill_infos:
         skill_info
     </div>
