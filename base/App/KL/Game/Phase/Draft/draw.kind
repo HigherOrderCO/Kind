@@ -10,13 +10,13 @@ App.KL.Game.Phase.Draft.draw(local: App.KL.Game.State.Local, global: App.KL.Glob
         "justify-content": "center"
         "align-items": "center"
       }>
-        {App.KL.Game.Phase.Draft.draw.main(game.value@players, local@room, local@user)}
+        {App.KL.Game.Phase.Draft.draw.main(local@tab, game.value@players, local@room, local@user)}
       </div>
   }
 
-App.KL.Game.Phase.Draft.draw.main(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+App.KL.Game.Phase.Draft.draw.main(tab: String, players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   let player = players{user}
-  let normal = [App.KL.Game.Phase.Draft.draw.top(players, user),  App.KL.Game.Phase.draft.draw.bottom(players, room, user)]
+  let normal = [App.KL.Game.Phase.Draft.draw.top(tab, players, user),  App.KL.Game.Phase.draft.draw.bottom(players, room, user)]
   let select = [App.KL.Game.Phase.Draft.draw.choose_team(players)]
   let draw = 
     case player {
@@ -96,7 +96,7 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
 
 // draw top layout of draft screen
 // it contains position and card info about the player and allies
-App.KL.Game.Phase.Draft.draw.top(players: Map<App.KL.Game.Player>, user: String): DOM
+App.KL.Game.Phase.Draft.draw.top(tab: String, players: Map<App.KL.Game.Player>, user: String): DOM
   // get team of user
   let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   // choose color to show based on team
@@ -124,7 +124,7 @@ App.KL.Game.Phase.Draft.draw.top(players: Map<App.KL.Game.Player>, user: String)
       "justify-content": "center"
     }>
       {App.KL.Game.Phase.Draft.draw.coordinates(players, user)} // draw coord positions
-      {App.KL.Game.Phase.Draft.draw.cards(players, user)} // draw card info about user and allies
+      {App.KL.Game.Phase.Draft.draw.cards(tab, players, user)} // draw card info about user and allies
     </div>
   </div>
 
@@ -310,7 +310,7 @@ App.KL.Game.Phase.Draft.draw.tiles.to_xy(
 // ===================================
 
 // draw card info for user and allies
-App.KL.Game.Phase.Draft.draw.cards(players: Map<App.KL.Game.Player>, user: String): DOM
+App.KL.Game.Phase.Draft.draw.cards(tab: String, players: Map<App.KL.Game.Player>, user: String): DOM
   let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   let player = players{user}
   let allies = Map.delete!(user, players)
@@ -328,7 +328,7 @@ App.KL.Game.Phase.Draft.draw.cards(players: Map<App.KL.Game.Player>, user: Strin
     "height": "80%"
     "display": "flex"
   }>
-    { App.KL.Game.Phase.Draft.draw.cards.card(player, hero)} // draw card info for user
+    { App.KL.Game.Phase.Draft.draw.cards.card(some(tab), player, hero)} // draw card info for user
     for div in App.KL.Game.Phase.Draft.draw.cards.allies(allies, team): div // draw card info for allies
   </div>
 
@@ -366,22 +366,32 @@ App.KL.Game.Phase.Draft.draw.cards.ally(user: String, player: Maybe(App.KL.Game.
           return {some(player.value), some(hero)}
         } <> {some(player.value), none}
     }
-  App.KL.Game.Phase.Draft.draw.cards.card(player, hero)
+  App.KL.Game.Phase.Draft.draw.cards.card(none, player, hero)
 
-App.KL.Game.Phase.Draft.draw.cards.skills(player: Maybe<App.KL.Game.Player>, skill_key: String): DOM
-  <div style={
-    "width": "22%"
-    "height": "100%"
-    "margin": "0 1.5%"
-    "border-radius": "15px 15px 0 0"
-    "background-color": "#d6dadc"
-    "font-size": "1em"
-    "text-align": "center"
-  }>skill_key
-  </div>
+App.KL.Game.Phase.Draft.draw.cards.skills(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, skill_key: String): DOM
+  case tab {
+    none: <div></div>
+    some:
+      let background =
+        if tab.value =? skill_key then
+          "#d6dadc"
+        else
+          "#Bfc6c9"
+      <div id="D" | skill_key style={
+        "width": "22%"
+        "height": "100%"
+        "margin": "0 1.5%"
+        "border-radius": "15px 15px 0 0"
+        "background-color": background
+        "font-size": "1em"
+        "text-align": "center"
+      }>skill_key
+      </div>
 
+  }
+  
 
-App.KL.Game.Phase.Draft.draw.cards.card(player: Maybe<App.KL.Game.Player>, hero: Maybe<App.KL.Game.Hero>): DOM
+App.KL.Game.Phase.Draft.draw.cards.card(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, hero: Maybe<App.KL.Game.Hero>): DOM
   let name = 
     case player {
       none: "Connecting"
@@ -416,11 +426,11 @@ App.KL.Game.Phase.Draft.draw.cards.card(player: Maybe<App.KL.Game.Player>, hero:
     "height": "90%"
     "display": "flex"
     "border": "5px solid #d6dadc"
-    "background-color": "#bac1c4"
+    "background-color": "#Aeb4b7"
     "margin": "3%"
     "border-radius": "5px"
     "flex-direction": "column"
-    "justify-content": "flex-start"
+    "justify-content": "space-between"
     "align-items": "center"
     "box-sizing": "border-box"
   }>
@@ -444,22 +454,39 @@ App.KL.Game.Phase.Draft.draw.cards.card(player: Maybe<App.KL.Game.Player>, hero:
         "image-rendering": "pixelated"
       }></img>
     </div>
-    <div style={
+    <div id="D" style={
       "width": "100%"
-      "height": "10%"
+      "height": "7.5%"
       "display": "flex"
       "flex-direction": "row"
       "justify-content": "space-between"
       "align-items": "flex-end"
     }>
-    for char in skills: App.KL.Game.Phase.Draft.draw.cards.skills(player, char)
+    for char in skills: App.KL.Game.Phase.Draft.draw.cards.skills(tab, player, char)
     </div>
       
-    <div style={ 
+    <div id="D" style={ 
       "width": "100%"
-      "height": "35%"
+      "height": "40%"
+      "padding": "10%"
       "background-color": "#d6dadc"
-    }></div>
+      "font-size": "0.6em"
+    }>
+      case tab hero {
+        none none: "Waiting for Player to connect or pick a Hero"
+        none some: hero.value@description
+        some none: "Pick a hero!"
+        some some:
+          open hero.value as hero
+          case hero.skills{tab.value} as skill {
+            none: hero.value@description
+            some: 
+              skill.value@description
+          }
+      }
+          
+    
+    </div>
 
   </div>
 
@@ -565,7 +592,7 @@ App.KL.Game.Phase.Draft.draw.selection(
     "margin": "4px",
     "border": "5px solid #d6dadc",
     //"box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
-    "background-color": "#bac1c4"
+    "background-color": "#Aeb4b7"
     "height": "auto",
     "width": "15%",
     "border-radius": "5px"
