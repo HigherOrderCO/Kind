@@ -14,7 +14,7 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1))
     "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 48, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 2))
-    "W": App.KL.Game.Skill.new("Summon Wall", 300, 48, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(5, 1))
+    "W": App.KL.Game.Skill.new("Summon Wall", 100, 48, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(5, 1))
     "E": App.KL.Game.Skill.new("Taunt", 700, 48, 0, App.KL.Game.Hero.Frost.Skills.taunt(2, 1))
   }
 
@@ -58,7 +58,7 @@ App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
   let name = "Frost_wall"
   let draw = (pose) {none, App.KL.Game.Field.Elements.rock_11_0}
   let picture = (bool, time) App.KL.Game.Hero.Frost.Assets.base64_idle
-  let max_hp = 10 :: I32
+  let max_hp = 12 :: I32
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect { return unit })
