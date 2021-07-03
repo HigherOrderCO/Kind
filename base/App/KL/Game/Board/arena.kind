@@ -11,7 +11,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
   new_terrain = App.KL.Game.Entity.terrain(new_terrain)
 
   tokens = [
-    { {0, 0} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 2, 2, 4) }
+    { {0, 0} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2) }
     { {0,-5} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2) }
     { {0, 5} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2) }
   ]
