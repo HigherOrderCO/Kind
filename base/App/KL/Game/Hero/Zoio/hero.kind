@@ -28,7 +28,7 @@ App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): A
     App.KL.Game.Effect.ap.use(ap_cost)
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
-    let area = App.KL.Game.Effect.area.straight_line(size, center, target)
+    let area = App.KL.Game.Areas.straight_line(size, center, target)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
@@ -54,10 +54,10 @@ App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(size: I32, dmg: I32, ap_cost: I32):
   App.KL.Game.Effect { 
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    let ring = App.KL.Game.Effect.area.ring(target)
+    let ring = App.KL.Game.Areas.ring(target, 1)
     let area = []
     let area = for direction_coord in ring:
-      App.KL.Game.Effect.area.straight_line(size, target, direction_coord) ++ area
+      App.KL.Game.Areas.straight_line(size, target, direction_coord) ++ area
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.movement.move_to(center, target, false)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
