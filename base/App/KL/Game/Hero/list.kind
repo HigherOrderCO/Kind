@@ -6,4 +6,5 @@ App.KL.Game.Hero.list: List<App.KL.Game.Hero>
     App.KL.Game.Hero.Lela.hero
     App.KL.Game.Hero.Kenlua.hero
     App.KL.Game.Hero.Zoio.hero
+    App.KL.Game.Hero.Erkos.hero
   ]

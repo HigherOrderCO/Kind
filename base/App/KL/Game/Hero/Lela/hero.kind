@@ -13,9 +13,9 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Restore", 396, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 3, 1))
-    "W": App.KL.Game.Skill.new("Escort", 397, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 2, 1))
-    "E": App.KL.Game.Skill.new("Detain", 398, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(4, 1, 1))
+    "Q": App.KL.Game.Skill.new("Restore", 396, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 4, 1))
+    "W": App.KL.Game.Skill.new("Escort", 397, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 4, 1))
+    "E": App.KL.Game.Skill.new("Detain", 398, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(2, 1, 1))
   }
 
   let on_stepped = none
