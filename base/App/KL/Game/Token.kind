@@ -20,12 +20,12 @@ App.KL.Game.Token.score.capture(board: App.KL.Game.Board, score: App.KL.Game.Sco
   score
   
 // get all tokens in board
-App.KL.Game.Token.get_tokens(board: App.KL.Game.Board): Hexagonal.Axial.BBT<App.KL.Game.Token>
-  let result = Hexagonal.Axial.BBT.new!
+App.KL.Game.Token.get_tokens(board: App.KL.Game.Board): Hexagonal.Axial.Map<App.KL.Game.Token>
+  let result = Hexagonal.Axial.Map.new!
   for coord:tile in board with result:
     case tile@token as token{
       none: result
-      some: Hexagonal.Axial.BBT.set!(coord, token.value, result)
+      some: Hexagonal.Axial.Map.set!(coord, token.value, result)
     }
   result
 
