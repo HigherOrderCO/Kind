@@ -1,21 +1,21 @@
 App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let name = "Croni"
 
-  let draw = (player)
-    App.KL.Game.Hero.Croni.Assets.vbox_idle
+  let draw = (pose)
+    {none, App.KL.Game.Hero.Croni.Assets.vbox_idle}
 
   let picture = (bool, time)
     App.KL.Game.Hero.Croni.Assets.base64_idle
 
-  let max_hp = 25 :: I32
+  let max_hp = 16 :: I32
 
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 16, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Shadow Ball", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_ball(6, 1, 3, 1))
-    "W": App.KL.Game.Skill.new("Shadow Flux", 800, 16, 6, App.KL.Game.Hero.croni.hero.Skills.shadow_flux(6, 8, 1))
-    "E": App.KL.Game.Skill.new("Trap", 300, 16, 6, App.KL.Game.Hero.Croni.Skills.trap(1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1))
+    "Q": App.KL.Game.Skill.new("Shadow Flux", 860, 48, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(12, 10, 1))
+    "W": App.KL.Game.Skill.new("Shadow Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1))
+    "E": App.KL.Game.Skill.new("Shadow Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1))
   }
 
   let on_stepped = none
@@ -25,9 +25,9 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
 // SKILLS
 
-App.KL.Game.Hero.Croni.Skills.trap(ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
-    App.KL.Game.Effect.limit_range(6)
+    App.KL.Game.Effect.limit_range(range)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
     get board = App.KL.Game.Effect.board.get
@@ -36,42 +36,38 @@ App.KL.Game.Hero.Croni.Skills.trap(ap_cost: I32): App.KL.Game.Effect<Unit>
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
     else
-      let trap = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Croni.hero.trap, App.KL.Game.Team.neutral, [], 0, 0)
-      App.KL.Game.Effect.board.summon(target, trap)
+      let shadow_trap = App.KL.Game.Creature.new(
+        none,
+        App.KL.Game.Hero.Croni.hero.shadow_trap,
+        App.KL.Game.Team.neutral,
+        [],
+        App.KL.Game.Hero.Croni.hero.shadow_trap@max_hp,
+        App.KL.Game.Hero.Croni.hero.shadow_trap@max_ap)
+      App.KL.Game.Effect.board.summon(target, shadow_trap)
   }
 
-App.KL.Game.Hero.croni.hero.Skills.shadow_ball(range: I32, area: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
-  App.KL.Game.Effect { 
-    get center = App.KL.Game.Effect.coord.get_center
-    get target = App.KL.Game.Effect.coord.get_target
-    let circle = App.KL.Game.Effect.area.circle(target, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, circle)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.common.dmg.circle(range, area, dmg, ap_cost)
-  }
-
-
-App.KL.Game.Hero.croni.hero.Skills.shadow_flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
-  App.KL.Game.Effect { 
+App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
     get target  = App.KL.Game.Effect.coord.get_target
     get center  = App.KL.Game.Effect.coord.get_center
+    App.KL.Game.Effect.limit_range(range)
+    App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.common.dmg.single(range, dmg, ap_cost)
+    App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
+    return unit
   }
 
-App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
-  let name = "Croni_Trap"
-  let draw = (player) App.KL.Game.Field.Elements.mushroom_0_0
+App.KL.Game.Hero.Croni.hero.shadow_trap: App.KL.Game.Hero
+  let name = "ShadowTrap"
+  let draw = (pose) {none, App.KL.Game.Field.Elements.mushroom_0_0}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
-  let max_hp = 10 :: I32
+  let max_hp = 8 :: I32
   let max_ap = 0 :: I32
   let skills = {}
-  let on_stepped = some(App.KL.Game.Effect {
-    get center = App.KL.Game.Effect.coord.get_center
-    get target = App.KL.Game.Effect.coord.get_target
-    App.KL.Game.Effect.hp.damage_at(3, center)
-    App.KL.Game.Effect.board.creature.move(center, target)
+  let on_stepped = some((from,to) App.KL.Game.Effect {
+    App.KL.Game.Effect.board.creature.move(from, to)
+    App.KL.Game.Effect.status.stun.add(2, to)
     return unit
   })
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)

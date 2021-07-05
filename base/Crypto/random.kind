@@ -1,0 +1,13 @@
+// Generates a random number using the native function
+// #Example
+// get_interval(random : F64, min : Nat, max : Nat) : Nat
+//   F64.to_nat(random * (Nat.to_f64(max) - Nat.to_f64(min)) + Nat.to_f64(min))
+// IO {
+ //   get a = IO.crypto_random
+ //   IO.print(Nat.show(get_interval(a, 1, 10))) // prints a natural random number between 1 and 10
+//}
+
+Crypto.random: IO<F64>
+  IO.ask<F64>("get_random", "", (value)
+  IO.end<F64>(F64.read(value)))
+

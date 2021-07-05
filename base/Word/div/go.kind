@@ -1,7 +1,7 @@
 Word.div.go<size: Nat>(shift: Nat, sub_copy: Word(size), shift_copy: Word(size), value: Word(size)): Word(size)
   def one = Word.inc<size>(Word.to_zero<size>(sub_copy))
   let {bit_on, new_value} = if Word.gte<size>(sub_copy, shift_copy) then
-    let mask = Word.shift_left<size>(shift, one)
+    let mask = Word.shift_left<size>(one, shift)
     {true, Word.or<size>(value, mask)}
   else
     {false, value}
@@ -10,7 +10,7 @@ Word.div.go<size: Nat>(shift: Nat, sub_copy: Word(size), shift_copy: Word(size),
     zero:
       new_value,
     succ:
-      let new_shift_copy = Word.shift_right<size>(1, shift_copy)
+      let new_shift_copy = Word.shift_right<size>(shift_copy, 1)
       if bit_on then
         Word.div.go<size>(shift.pred, Word.sub<size>(sub_copy, shift_copy), new_shift_copy, new_value)
       else

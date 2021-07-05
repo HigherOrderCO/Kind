@@ -1,0 +1,23 @@
+App.KL.Game.Effect.movement.movable(
+  creature: Maybe<App.KL.Game.Creature>
+  ignore: Bool
+): App.KL.Game.Effect<Maybe<Unit>>
+
+  App.KL.Game.Effect { 
+    case creature { 
+      none:
+        App.KL.Game.Effect {
+          return none
+        }
+      some: 
+        let movable = App.KL.Game.Creature.Status.movement_impairment_check(creature.value)
+        if movable && not(ignore) then
+          App.KL.Game.Effect { 
+            return none
+          }
+        else
+          App.KL.Game.Effect { 
+            return some(unit)
+          }
+    }
+  }

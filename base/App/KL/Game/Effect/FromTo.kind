@@ -1,0 +1,2 @@
+App.KL.Game.Effect.FromTo<A: Type>: Type
+  Hexagonal.Axial -> Hexagonal.Axial -> App.KL.Game.Effect<A>

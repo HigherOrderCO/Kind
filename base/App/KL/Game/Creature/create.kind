@@ -1,0 +1,10 @@
+App.KL.Game.Creature.create(
+  hero_id: U8,
+  player_addr: Maybe<String>,
+  team: App.KL.Game.Team
+): Maybe<App.KL.Game.Creature>
+  let hero = App.KL.Game.Hero.get_by_id(U8.to_nat(hero_id))
+  case hero {
+    none: none
+    some: some(App.KL.Game.Creature.new(player_addr, hero.value, team, [], hero.value@max_hp, hero.value@max_ap - 1))
+  }

@@ -1,0 +1,92 @@
+type App.KL.Game.Token {
+  new(
+    dominance: I32 // blue and red TODO
+    range: I32
+    max: I32
+    score: I32
+  )
+}
+
+App.KL.Game.Token.score.capture(board: App.KL.Game.Board, score: App.KL.Game.Score): App.KL.Game.Score
+  let tokens = App.KL.Game.Token.get_tokens(board)
+  for coord:token in tokens with score:
+    let team = App.KL.Game.Token.get_dominance(token)
+    without team: score // no team dominating
+      {blue_score, red_score} = score@points
+      case team {
+        blue: score@points <- {I32.min(blue_score + token@score, score@max), red_score}
+        red : score@points <- {blue_score, I32.min(red_score + token@score, score@max)}
+      } default score // no team dominating
+  score
+  
+// get all tokens in board
+App.KL.Game.Token.get_tokens(board: App.KL.Game.Board): Hexagonal.Axial.Map<App.KL.Game.Token>
+  let result = Hexagonal.Axial.Map.new!
+  for coord:tile in board with result:
+    case tile@token as token{
+      none: result
+      some: Hexagonal.Axial.Map.set!(coord, token.value, result)
+    }
+  result
+
+App.KL.Game.Token.board.capture(board: App.KL.Game.Board): App.KL.Game.Board
+  let tokens = App.KL.Game.Token.get_tokens(board)
+  for coord:token in tokens with board:
+    let new_token = App.KL.Game.Token.capture(coord, board, token)
+    log(I32.show(new_token@dominance))
+    let token_entity = App.KL.Game.Entity.token(new_token)
+    App.KL.Game.Board.push(coord, token_entity, board)
+  board
+
+// get creatures around token
+App.KL.Game.Token.get_creatures(coord: Hexagonal.Axial, board: App.KL.Game.Board, token: App.KL.Game.Token): List<App.KL.Game.Creature>
+  let coords    = Hexagonal.Axial.range(coord, token@range)
+  let creatures = []
+  for coord in coords with creatures:
+    let tile = App.KL.Game.Board.get(coord, board)
+    without tile: creatures
+      let creature = tile@creature
+    without creature: creatures
+      creature & creatures
+  
+  creatures
+
+// get team dominating the token, if any
+App.KL.Game.Token.get_dominance(token: App.KL.Game.Token): Maybe<App.KL.Game.Team>
+  let dominance = token@dominance
+  switch I32.eql(token@max) {
+    dominance: some(App.KL.Game.Team.blue)
+    I32.neg(dominance): some(App.KL.Game.Team.red)
+  } default none
+
+// capture the token
+// get creatures around token_coord
+// get team around the token exclusively, if any
+// apply points, if any team around
+App.KL.Game.Token.capture(coord: Hexagonal.Axial, board: App.KL.Game.Board, token: App.KL.Game.Token): App.KL.Game.Token
+  let creatures = App.KL.Game.Token.get_creatures(coord, board, token)
+  let dom_team  = App.KL.Game.Token.get_team(creatures, token)
+  App.KL.Game.Token.apply_dominance(dom_team, token)
+
+// get team around the token exclusively, if any
+App.KL.Game.Token.get_team(creatures: List<App.KL.Game.Creature>, token: App.KL.Game.Token): Maybe<App.KL.Game.Team>
+  let result = {0, 0} :: Pair<I32, I32> // blue and red quantity of players
+  for creature in creatures with result:
+    case creature@team {
+      red:  result@fst <- result@fst + 1
+      blue: result@snd <- result@snd + 1
+    } default result
+  
+  case I32.eql(0, result@fst) I32.eql(0, result@snd) {
+    true false: some(App.KL.Game.Team.blue)
+    false true: some(App.KL.Game.Team.red)
+  } default none
+
+
+// apply dominance points according with dominant team
+App.KL.Game.Token.apply_dominance(team: Maybe<App.KL.Game.Team>, token: App.KL.Game.Token): App.KL.Game.Token
+  without team: token
+  case team {
+    blue: token@dominance <- I32.min(token@max, token@dominance + 1)
+    red:  token@dominance <- I32.max(I32.neg(token@max), token@dominance - 1)
+  } default token

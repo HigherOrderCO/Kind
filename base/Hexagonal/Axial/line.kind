@@ -18,6 +18,6 @@ Hexagonal.Axial.line(
     ratio = i/distance
     inter_x = F64.lerp(si, gi, ratio)
     inter_y = F64.lerp(sj, gj, ratio)
-    {new_i, new_j} = App.Kaelin.Coord.round(inter_x, inter_y)
+    {new_i, new_j} = Hexagonal.Axial.round(inter_x, inter_y)
     Hexagonal.Axial.new(new_i, new_j) & coords
   coords

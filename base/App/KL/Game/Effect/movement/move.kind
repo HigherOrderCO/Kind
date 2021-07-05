@@ -1,6 +1,0 @@
-App.KL.Game.Effect.movement.move: App.KL.Game.Effect<Unit>
-  App.KL.Game.Effect { 
-    get center = App.KL.Game.Effect.coord.get_center
-    get target = App.KL.Game.Effect.coord.get_target
-    App.KL.Game.Effect.movement.move_to(center, target)
-  }

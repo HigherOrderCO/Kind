@@ -1,0 +1,8 @@
+App.KL.Game.Phase.End.post(
+  time: U64
+  room: String
+  addr: String
+  event: App.KL.Game.Phase.End.Event
+  game: App.KL.Game
+): App.KL.Game
+  game

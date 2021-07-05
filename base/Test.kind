@@ -1,0 +1,2 @@
+Test: IO<Unit>
+  Neutralis.main(42000)
