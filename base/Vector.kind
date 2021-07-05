@@ -1,5 +1,16 @@
-// A vector definition that computes your size that gives the possible constructors before pattern matching.
-
+// Vector is a type whose shape depends upon its length.
+// Vector<A, 0> has only 1 constructor: nil.
+// Vector<A, Nat.succ(n)> has only 1 constructor: cons 
+//
+// A Vector<A, n> doesn't have a defined shape, so first you need to pattern
+// match on "n" before using it. 
+// Vec.example<A: Type>(n: Nat, vec: Vector<A>(n)): Maybe(A)
+//   case n with vec {
+//     zero: Maybe.none!
+//     succ: 
+//       open vec
+//       Maybe.some!(vec.head)
+//   }!
 Vector(A: Type, len: Nat): Type
   case len {
     zero:

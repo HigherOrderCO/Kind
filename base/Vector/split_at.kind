@@ -1,0 +1,81 @@
+// Vector.split_at<A: Type, n: Nat>(xs: Vector(A, n)): (m: Nat) -> Pair(Vector(A, Nat.min(n, m)), Vector(A, Nat.sub(n, m)))
+//   case xs:
+//   | (m) Pair.new<Vector(A, 0), Vector(A, 0)>(Vector.nil<A>, Vector.nil<A>);
+//   | (m)
+//     case m:
+//     | Pair.new<,>(Vector.nil<A>, Vector.ext<A, xs.size>(xs.head, xs.tail));
+//     | get x y = Vector.split_at<A, xs.size>(xs.tail, m.pred)
+//       let x = Vector.ext<A, Nat.min(xs.size, m.pred)>(xs.head, x)
+//       Pair.new<_,_>(x, y);
+//     : Pair(Vector(A, Nat.min(Nat.succ(xs.size), m.self)), Vector(A, Nat.sub(Nat.succ(xs.size), m.self)));;
+//   : (m: Nat) -> Pair(Vector(A, Nat.min(xs.size, m)), Vector(A, Nat.sub(xs.size, m)));
+
+Vector.split_at<A: Type, n: Nat>(xs: Vector(A, n)): (m: Nat) -> Pair(Vector(A, Nat.min(n, m)), Vector(A, Nat.sub(n, m)))
+  Vector.split_at(A, n, xs)
+
+// Vector.split_at<A: Type, n: Nat>(xs: Vector(A, n)): (m: Nat) -> Pair(Vector(A, Nat.min(n, m)), Vector(A, Nat.sub(n, m)))
+//   case n with xs {
+//   zero: (m) Pair.new<Vector(A, 0), Vector(A, 0)>(Vector.nil<A>, Vector.nil<A>)
+//   succ: (m)
+//     case m {
+//     zero: Pair.new!!(Vector.nil<A>, xs)
+//     succ: 
+//       open xs
+//       let {x, y} = Vector.split_at<A, n>(xs.tail, m.pred)
+//       let x = Vector.cons<A, Nat.min(n, m.pred)>(xs.head, x)
+//       {x,y}
+//     }!
+//   }!
+
+// Vector.split_at<A: Type>(
+//   n: Nat, 
+//   xs: Vector(A, n),
+//   m: Nat
+// ): Pair( Vector(A, Nat.min(m, n)), Vector(A, Nat.sub(n, m)) )
+//   case m {
+//     zero: {Vector.nil!, xs}
+//     succ: 
+//       case n with xs {
+//         zero: {Vector.nil!, Vector.nil!} // vector len 0
+//         succ: 
+//           open xs
+//           let {x, y} = Vector.split_at<A>(n, xs.tail, m.pred)
+//           let x = Vector.cons<A, Nat.min(m, n.pred)>(xs.head, x)
+//           // {x, y}
+//           ?cons
+//       }!
+//   }!
+
+// Vector.split_at<A: Type>(
+//   n: Nat, 
+//   fst: Vector(A, n),
+//   m: Nat
+// ):
+
+// Vector.split_at.go<A: Type>(
+//   n: Nat, 
+//   m: Nat,
+//   fst: Vector(A, Nat.add(n, m)),
+//   count: Nat,
+//   snd: Vector(A, count)
+// ): Pair( Vector(A, m), Vector(A, n) )
+//   case m {
+//     zero: 
+//       open fst
+//       {Vector.nil!, Vector.cons<A>(Nad.add(n, 0), fst.head, fst.tail)}
+//     succ: 
+//       case n with fst {
+//         zero: {Vector.nil!, Vector.nil!}
+//         succ: 
+//           open fst
+//           let new = Vector.cons<A>(count, fst.head, snd)
+//           if Nat.eql(m, count) then
+//             Vector.split_at<A>(n.pred, m, fst.tail, Natc.succ(count), new)
+//           else
+//             {fst, snd}
+//       }
+//   }!
+
+
+  //Pair(Vector(A,Nat.min(Nat.succ(m.pred),Nat.succ(n.pred))),
+  //     Vector(A,Nat.sub(Nat.succ(n.pred),Nat.succ(m.pred))))

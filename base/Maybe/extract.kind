@@ -3,3 +3,9 @@ Maybe.extract<A: Type>(m: Maybe<A>)<B: Type>(a: B, f: A -> B): B
     none: a,
     some: f(m.value),
   }
+
+Maybe.extract.value<A: Type>(m: Maybe(A), a: A): A
+  case m {
+    none: a
+    some: m.value
+  }
