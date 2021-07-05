@@ -1,4 +1,3 @@
-
 App.KL.Game.Creature.Status.silence.add(
   creature: App.KL.Game.Creature
   duration: I32

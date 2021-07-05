@@ -1,0 +1,2 @@
+Fin.absurd<A: Type>(a: Fin(0)): A
+  case a {}

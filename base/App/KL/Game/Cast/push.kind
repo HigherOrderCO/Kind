@@ -1,0 +1,8 @@
+// Pushes a cast to a cast list
+App.KL.Game.Cast.push(
+  player: String
+  target: Hexagonal.Axial
+  letter: Char
+  casts: List<App.KL.Game.Cast>
+): List<App.KL.Game.Cast>
+  App.KL.Game.Cast.new(player, target, letter) & casts

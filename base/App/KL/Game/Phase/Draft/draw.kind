@@ -632,9 +632,7 @@ App.KL.Game.Phase.Draft.draw.selection(
   
   <div style=box_style id="H" | hero@name>
     <div style=name_style id="H"| hero@name>hero@name</div>
-    <div style=img_box_style>
       <img style=corner_style src=image id="H" | hero@name>
       </img>
-    </div>
   </div>
 

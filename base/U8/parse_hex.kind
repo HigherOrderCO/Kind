@@ -1,0 +1,3 @@
+U8.parse_hex(str: String): U8
+  U8.parse_hex(str)
+  // U8.new(Word.from_bits(8, Bits.parse_hex(str)))

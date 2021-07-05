@@ -1,10 +1,8 @@
-Vector.fold(A : Type, B : Type, size : Nat, b : B, f : A -> B -> B, vec : Vector<A, size>) : B
-   case size with vec
-   {
-       zero : b
-       succ : case vec {
-           cons : 
-             let pred = Vector.fold(A, B, size.pred, b, f, vec.tail)
-             f(vec.head, pred)
-       }
-   }!
+Vector.fold(A: Type, B: Type, size: Nat, b: B, f: A -> B -> B, vec: Vector<A, size>) : B
+  case size with vec {
+    zero : b
+    succ : 
+      open vec
+      let pred = Vector.fold(A, B, size.pred, b, f, vec.tail)
+      f(vec.head, pred)
+    }!

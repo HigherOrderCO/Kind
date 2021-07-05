@@ -64,7 +64,7 @@ App.KL.Game.Hero.Lela.hero.Skills.detain(range: I32, dmg: I32, ap_cost: I32): Ap
     get center = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
-    App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.silence.add(2), target)
+    App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.silence.add(1), target)
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
     return unit
   }

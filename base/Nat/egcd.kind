@@ -1,0 +1,15 @@
+// Extended Euclidian algorithm. Given natural numbers a, b, computes GCD(a,b) and
+// Bezout's coefficients; that is, integers x, y such that a*x + b*y = GCD(a,b)
+Nat.egcd(a: Nat, b: Nat): Pair(Nat, Pair(Int, Int))
+  Nat.egcd.aux(a, b, +0, +1, +1, +0)
+
+Nat.egcd.aux(a: Nat, b: Nat, x: Int, y: Int, u: Int, v: Int): Pair(Nat, Pair(Int, Int))
+  case a {
+    zero: {b, {x, y}}
+    succ:
+      let q = Nat.div(b, a)
+      let r = Nat.mod(b, a)
+      let m = Int.sub(x, Int.mul(u, Int.from_nat(q)))
+      let n = Int.sub(y, Int.mul(v, Int.from_nat(q)))
+      Nat.egcd.aux(r, a, u, v, m, n)
+  }

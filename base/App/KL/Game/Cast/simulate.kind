@@ -1,0 +1,35 @@
+// TODO: modularize
+// Runs all casts up to a given delay with a filter
+App.KL.Game.Cast.simulate(
+  max_delay: U64
+  filter: App.KL.Game.Cast -> Bool
+  game: App.KL.Game
+): App.KL.Game
+  let casts = App.KL.Game.Cast.sort(game)
+  let casts = List.filter!(filter, casts)
+  App.KL.Game.Cast.simulate.go(casts, max_delay, game)
+
+
+
+
+App.KL.Game.Cast.simulate.go(
+  casts: List<App.KL.Game.Cast>
+  max_delay: U64
+  game: App.KL.Game
+): App.KL.Game
+  open game
+  Maybe {
+    get cast = List.head!(casts)
+    get skill = App.KL.Game.Cast.get_skill(cast, game)
+    let cast_delay = skill@delay
+    if cast_delay <? max_delay then Maybe {
+      let result = App.KL.Game.Cast.apply(cast, game)
+      let game = case result {
+        failure: game
+        success: result.game
+      }
+      return App.KL.Game.Cast.simulate.go(List.tail!(casts), max_delay, game)
+    } else Maybe {
+      return game
+    }
+  } <> game

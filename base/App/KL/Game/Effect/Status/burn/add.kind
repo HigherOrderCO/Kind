@@ -1,8 +1,0 @@
-App.KL.Game.Effect.status.burn.add(
-  id: String
-  duration: I32
-  amount: I32
-): App.KL.Game.Effect.At<I32>
-  (pos)
-
-  App.KL.Game.Effect.status.burn.change_at(id, duration, amount, pos)

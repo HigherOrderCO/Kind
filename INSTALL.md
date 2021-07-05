@@ -35,8 +35,6 @@ kind-scm
 
 If you're greeted with a help message then `kind-scm` is installed. :slightly_smiling_face:
 
-   Obs: we just can't typecheck a module with Scheme (`kind-scm Module/`), all other commands are working.
-
 ## MacOS
 
 Currently, the only way to install the Scheme backend on macOS is to build from the source.
@@ -87,8 +85,6 @@ sudo make install
 It may take some time. You can grab a cup of coffee while it finishes.
 
 **5.** Now `kind-scm` is installed, great! Run `kind-scm` inside the `Kind` repository and see if you're greeted with help text.
-
-   Obs: we just can't typecheck a module with Scheme (`kind-scm Module/`), all other commands are working.
 
 If you have any problem, [let us know](https://github.com/uwu-tech/Kind/issues).
 
