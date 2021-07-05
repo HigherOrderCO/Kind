@@ -1,0 +1,7 @@
+Vector.concat<A: Type, n: Nat, m: Nat>(as: Vector(A, n), bs: Vector(A, m)): Vector(A, Nat.add(n, m))
+  case n with as {
+    zero: bs
+    succ:
+      open as
+      Vector.cons!!(as.head, Vector.concat!!!(as.tail, bs))
+  }!
