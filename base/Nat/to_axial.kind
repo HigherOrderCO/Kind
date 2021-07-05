@@ -3,8 +3,7 @@
 Nat.to_axial(
   key: Nat
 ): Hexagonal.Axial
-
-  key_converted = Nat.to_U32(key)
+  key_converted = Nat.to_u32(key)
   coord_i = key_converted /  1000  //U32
   coord_i = U32.to_i32(coord_i)
   coord_i = coord_i - 100   // I32

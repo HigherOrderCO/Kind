@@ -1,0 +1,13 @@
+Int.parse_hex(str: String): Int
+  case str {
+    nil : +0
+    cons:
+      case U16.eql(str.head, Char.parse("-")) {
+        true : 
+          let b = Nat.parse_hex(str.tail)
+          Int.new(0, b)
+        false:
+          let a = Nat.parse_hex(String.cons(str.head, str.tail))
+          Int.new(a, 0)
+      }
+  }

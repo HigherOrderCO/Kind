@@ -1,0 +1,2 @@
+Nat.mul_Var: (n: Nat) -> Variadic(n, Nat, Nat)
+  Variadic.foldr!!(Nat.mul, 1)

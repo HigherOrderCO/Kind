@@ -300,7 +300,8 @@ Kind.Comp.Target.Scheme.optimizeds: Kind.Comp.Optimizeds
 //` | Kind.Comp.Target.Scheme.kstring | ")" 
 
 Kind.Comp.Target.Scheme.exports: Kind.Comp.Exports
-  ["suffix?"
+  ["find-all-kind-files"
+  "suffix?"
   "prefix?"
   "run-all"
   "run_io"
@@ -441,6 +442,29 @@ Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
           (substring str 0 pref_length)
           pref)
         #f))))
+
+(define (list->klist list)
+  (if (null? list)
+    (vector 'List.nil)
+    (vector 'List.cons (car list) (list->klist (cdr list)))))
+
+(define (find-all-kind-files-aux path)
+    (let ((file_list (directory-list path)))
+      (define (aux file_list)
+          (if (null? file_list)
+            '()
+            (let ((file (string-append path (car file_list))))
+              (let ((found-files
+                      (if (file-directory? file)
+                          (find-all-kind-files-aux (string-append file "/"))
+                          (if (and (file-regular? file) (suffix? file ".kind"))
+                              (list file)
+                              '()))))
+                   (append found-files (aux (cdr file_list)))))))
+      (aux file_list)))
+
+(define (find-all-kind-files path)
+  (list->klist (find-all-kind-files-aux path)))
 
 ; Returns the last index that chr occurs in str, -1 otherwise
 (define (last_index_of chr kstr idx)
@@ -597,7 +621,7 @@ Kind.Comp.Target.Scheme.cli: String
       ""
       "Usage:"
       ""
-      "  kind-scm Module/               # type-checks a module (TODO)"
+      "  kind-scm Module/               # type-checks a module"
       "  kind-scm Module/file.kind      # type-checks a file"
       "  kind-scm full_term_name --run  # runs a term"
       "  kind-scm full_term_name --show # prints a term"
@@ -633,7 +657,9 @@ Kind.Comp.Target.Scheme.cli: String
       (if (null? tail_args)
         (if (suffix? fst_arg ".kind")
           (run_io (Kind.api.io.check_file fst_arg))
-          (run_io (Kind.api.io.check_term fst_arg)))
+          (if (suffix? fst_arg "/")
+            (run_io (Kind.api.check_files (find-all-kind-files fst_arg)))
+            (run_io (Kind.api.io.check_term fst_arg))))
         (let ((snd_arg (car tail_args)))
           (case snd_arg
             ("--scm"

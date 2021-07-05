@@ -1,0 +1,14 @@
+// Gets the skill associated with a cast
+App.KL.Game.Cast.get_skill(
+  cast: App.KL.Game.Cast
+  game: App.KL.Game
+): Maybe<App.KL.Game.Skill>
+  open game
+  open cast
+  Maybe {
+    get player = game.players{cast@player}
+    get hero_id = player@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    get skill = hero@skills{Char.to_string(cast.letter)}
+    return skill
+  }

@@ -44,7 +44,9 @@
       (if (null? tail_args)
         (if (suffix? fst_arg ".kind")
           (run_io (Kind.api.io.check_file fst_arg))
-          (run_io (Kind.api.io.check_term fst_arg)))
+          (if (suffix? fst_arg "/")
+            (run_io (Kind.api.io.check_files (find-all-kind-files fst_arg)))
+            (run_io (Kind.api.io.check_term fst_arg))))
         (let ((snd_arg (car tail_args)))
           (case snd_arg
             ("--scm"
