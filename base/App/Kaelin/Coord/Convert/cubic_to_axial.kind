@@ -1,8 +1,0 @@
-App.Kaelin.Coord.Convert.cubic_to_axial(
-  coord: App.Kaelin.Coord.Cubic
-): App.Kaelin.Coord
-
-    open coord
-    i = coord.x
-    j = coord.z
-    App.Kaelin.Coord.new(i, j)

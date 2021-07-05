@@ -1,5 +1,0 @@
-App.Kaelin.Assets.hero.octoking: App.Kaelin.HeroAssets
-  App.Kaelin.HeroAssets.new(
-    App.Kaelin.Assets.hero.octoking.vbox_idle
-    App.Kaelin.Assets.hero.octoking.base64_idle
-  )

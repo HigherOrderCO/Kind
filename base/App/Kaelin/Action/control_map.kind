@@ -1,6 +1,0 @@
-App.Kaelin.Action.control_map(glob: App.Kaelin.State.global): App.Kaelin.State.global
-  let stage = glob@stage
-  case stage {
-    planning: 
-      glob@stage <- App.Kaelin.Stage.planning(stage.control_map + 1, stage.local_tick, stage.seconds)
-  } default glob

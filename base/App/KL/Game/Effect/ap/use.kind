@@ -1,0 +1,21 @@
+App.KL.Game.Effect.ap.use(
+  cost: I32
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect {
+    App.KL.Game.Effect.ap.add(cost) 
+    get board = App.KL.Game.Effect.board.get
+    get caster = App.KL.Game.Effect.board.creature.caster
+    get center = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    let tile = App.KL.Game.Board.get(target, board)
+    without tile: App.KL.Game.Effect.fail
+    without caster: App.KL.Game.Effect.fail
+    if I32.gtn(cost, caster@ap) then 
+      App.KL.Game.Effect.fail
+    else
+      App.KL.Game.Effect { 
+        App.KL.Game.Effect.ap.remove(cost, center)
+        return unit
+      }
+  }

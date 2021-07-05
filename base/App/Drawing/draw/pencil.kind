@@ -1,11 +1,11 @@
 App.Drawing.draw.pencil(local: App.Drawing.State.local): App.Drawing.State.local
-log("push")
-style     = local@style
-size      = style@size
-wb        = local@whiteboard
-info      = local@env_info@mouse_pos
-color     = style@color
-new_board = VoxBox.Draw.square(info@fst, info@snd, 0, size, size, color, wb@live)
-new_wb    = wb@live <- new_board
-local@whiteboard <- new_wb
+  log("push")
+  style     = local@style
+  size      = style@size
+  wb        = local@whiteboard
+  info      = local@env_info@mouse_pos
+  color     = style@color
+  new_board = VoxBox.Draw.square(info@fst, info@snd, 0, size, size, color, wb@live)
+  new_wb    = wb@live <- new_board
+  local@whiteboard <- new_wb
 

@@ -1,7 +1,0 @@
-App.Kaelin.Event.Buffer.push(
-  list : List<U8>
-): App.Kaelin.Event.Buffer<Unit>
-
-  (ls) Parser {
-    return {ls ++ list, Unit.new}
-  }

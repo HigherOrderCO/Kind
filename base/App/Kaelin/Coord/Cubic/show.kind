@@ -1,7 +1,0 @@
-// TODO fix I32.show
-App.Kaelin.Coord.Cubic.show(
-  coord: App.Kaelin.Coord.Cubic
-): String
-
-  open coord
-  Int.show(I32.to_int(coord.x)) | " " | Int.show(I32.to_int(coord.y)) | " " | Int.show(I32.to_int(coord.z))

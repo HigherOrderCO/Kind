@@ -1,0 +1,36 @@
+Kind.Parser.use(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
+  Kind.Parser.block("use", Parser {
+    Kind.Parser.text("use ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text("=")
+    get expr = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = body(unit)
+    let wyth = []
+    let cses = Kind.Map.set!("_", body, Kind.Map.new!)
+    let moti = Maybe.some!(Kind.Term.hol(Bits.e))
+    let term = Kind.Term.let(name, expr, () Kind.Term.cse(Bits.e, Kind.Term.ref(name), name, wyth, cses, moti))
+    return term
+  })
+
+Kind.Parser.use.abort(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
+  Kind.Parser.block("use", Parser {
+    Kind.Parser.text("use ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text("=")
+    get expr = Kind.Parser.term
+    Kind.Parser.text("abort ")
+    get abor = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = body(unit)
+    let term = expr
+    let term = Kind.Term.app(term, Kind.Term.lam("", () Kind.Term.hol(Bits.e)))
+    let term = Kind.Term.app(term, abor)
+    let term = Kind.Term.app(term, Kind.Term.lam(name, ()
+      let wyth = []
+      let cses = Kind.Map.set!("_", body, Kind.Map.new!)
+      let moti = Maybe.some!(Kind.Term.hol(Bits.e))
+      let term = Kind.Term.let(name, Kind.Term.ref(name), () Kind.Term.cse(Bits.e, Kind.Term.ref(name), name, wyth, cses, moti))
+      term))
+    return term
+  })

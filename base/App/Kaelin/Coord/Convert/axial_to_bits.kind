@@ -1,6 +1,0 @@
-App.Kaelin.Coord.Convert.axial_to_bits(
-  x : App.Kaelin.Coord
-): Bits
-
-  unique_nat = App.Kaelin.Coord.Convert.axial_to_nat(x)
-  Nat.to_bits(unique_nat)

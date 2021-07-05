@@ -1,0 +1,153 @@
+Neutralis.Bytes: Type
+  Pair<U32, Buffer8>
+
+Neutralis.Blockchain: Type
+  List<Neutralis.Bytes>
+
+U32.to_hex(u: U32): String
+  Nat.to_string_base(16, U32.to_nat(u))
+
+U8.to_hex(u: U8): String
+  Nat.to_string_base(16, U8.to_nat(u))
+
+// TODO move to correct place
+// #TODO verify this is correct mutability sucks
+Neutralis.Bytes.concat(left: Neutralis.Bytes, right: Neutralis.Bytes): Neutralis.Bytes
+  open left
+  open right
+  let ret_depth = U32.to_nat(U32.bitlen(left.fst + right.fst))
+  let ret = Buffer8.alloc(ret_depth)
+  for idx : U32 from 0 to left.fst with ret:
+    Buffer8.set(idx, Buffer8.get(idx, left.snd), ret)
+  for idx : U32 from 0 to right.fst with ret:
+    Buffer8.set(idx + left.fst, Buffer8.get(idx, right.snd), ret)
+  {left.fst + right.fst, ret}
+
+Neutralis.Bytes.copy(b: Neutralis.Bytes): Neutralis.Bytes
+  open b
+  {b.fst, Buffer8.copy(b.snd)}
+
+// TODO move to correct place
+// converts an U32 to Buffer8 using little endian byte order
+U32.to_buffer8(n: U32): Buffer8
+  let ret = Buffer8.alloc(2)
+  for i : U32 from 0 to 4 with ret:
+    let u = U32.to_u8(U32.and(U32.shr(n, 8*i), 0x000000FF))
+    Buffer8.set(3 - i, u, ret)
+  ret
+
+// returns a nonce that mines the block
+Neutralis.consensus.mine(block: Neutralis.Bytes, target: U256, seed: Nat): IO(Neutralis.Bytes)
+  IO {
+    // TODO get better random number generation
+    get nonce_nat = Neutralis.random(Nat.pow(2, 32) - 1, seed)
+    let nonce_u32 = Nat.to_u32(nonce_nat)
+    let nonce_buffer = U32.to_buffer8(nonce_u32)
+    let nonce = {4 :: U32, nonce_buffer}
+//    log("nonce_nat:    "|String.pad_left(8, '0', Nat.to_string_base(16, nonce_nat)))
+//    log("nonce_u32:    "|String.pad_left(8, '0', U32.to_hex(nonce_u32)))
+//    log("nonce_buffer: "|Buffer8.to_hex(nonce))
+    if Neutralis.consensus.mine.test(block, nonce, target) then
+      IO {
+        return nonce
+      }
+    else
+      Neutralis.consensus.mine(block, target, nonce_nat)
+  }
+
+Neutralis.consensus.mine.test(
+  block: Neutralis.Bytes
+  nonce: Neutralis.Bytes
+  target: U256
+): Bool
+  open block
+  use block = Neutralis.Bytes.concat(block, nonce)
+  let hash_bytes = Crypto.Keccak.hash.bytes(block)
+  let {len, hash_buff} = hash_bytes
+  let hash = Buffer8.to_u256(hash_buff)
+  log("hash: "|String.pad_left(64, '0', Nat.to_string_base(16, U256.to_nat(hash))))
+  hash <? target
+
+Neutralis.consensus.check_header(
+  prev_hash: Neutralis.Bytes
+  block: Neutralis.Bytes
+): Bool
+  open prev_hash
+  open block
+  let ret = true
+  for i : U32 from 0 to prev_hash.fst with ret:
+    if Buffer8.get(i, prev_hash.snd) =? Buffer8.get(i, block.snd) then
+      ret
+    else
+      false
+  ret
+
+Neutralis.Blockchain.check(
+  chain: Neutralis.Blockchain
+  target: U256 // TODO non constant target
+): Bool
+  case chain {
+    nil:
+      true
+    cons:
+      case chain.tail {
+        nil:
+          true
+        cons:
+          use hash = Crypto.Keccak.hash.bytes(chain.tail.head)
+          let mined = (Buffer8.to_u256(hash.snd) <? target)
+          let chained = Neutralis.consensus.check_header(hash, chain.head)
+          if mined && chained then
+            Neutralis.Blockchain.check(chain.tail, target)
+          else
+            false
+      }
+  }
+
+Neutralis.Blockchain.cons(
+  pre_block: Neutralis.Bytes
+  chain: Neutralis.Blockchain
+  target: U256
+): IO(Neutralis.Blockchain)
+  IO {
+    log("target: "|String.pad_left(64, '0', Nat.to_string_base(16, U256.to_nat(target))))
+    let block = Neutralis.Bytes.copy(pre_block)
+    let hash = 
+      case chain {
+        nil:
+          {32 :: U32, Buffer8.alloc(5)}
+        cons:
+          Crypto.Keccak.hash.bytes(chain.head)
+      }
+    let block = Neutralis.Bytes.concat(hash, block)
+    get nonce = Neutralis.consensus.mine(block, target, 0)
+    let block = Neutralis.Bytes.concat(block, nonce)
+    return List.cons!(block, chain)
+  }
+
+Neutralis.random(a: Nat, prev: Nat): IO(Nat)
+  IO {
+    get seed = IO.get_time
+    let seed = Nat.random(seed)
+    let seed = Nat.random(seed + prev)
+    return Nat.mod(seed, a)
+  }
+
+Neutralis.consensus.fake_block: Neutralis.Bytes
+  //                0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+  Buffer8.from_hex("0123456789abcdef0123456789abcdef0123456789abcdef0123456789ab")
+  
+
+Neutralis.consensus.fake_target: U256
+  Nat.to_u256(Nat.pow(2, 244))
+
+// test script
+Neutralis.consensus: _
+  IO {
+    def chain = List.nil!
+    get chain = Neutralis.Blockchain.cons(Neutralis.consensus.fake_block, chain, Neutralis.consensus.fake_target)
+    get chain = Neutralis.Blockchain.cons(Neutralis.consensus.fake_block, chain, Neutralis.consensus.fake_target)
+    get chain = Neutralis.Blockchain.cons(Neutralis.consensus.fake_block, chain, Neutralis.consensus.fake_target)
+    get chain = Neutralis.Blockchain.cons(Neutralis.consensus.fake_block, chain, Neutralis.consensus.fake_target)
+    IO.print("valid blockchain: "|Bool.show(Neutralis.Blockchain.check(chain, Neutralis.consensus.fake_target)))
+  }

@@ -1,8 +1,0 @@
-App.Kaelin.Heroes.Croni.hero: App.Kaelin.Hero
-  App.Kaelin.Hero.new(
-    "Croni",
-    App.Kaelin.Assets.hero.croni,
-    25,
-    10,
-    App.Kaelin.Heroes.Croni.skills
-  )

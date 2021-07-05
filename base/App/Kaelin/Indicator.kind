@@ -1,7 +1,0 @@
-type App.Kaelin.Indicator {
-  green
-  red
-  yellow
-  blue
-  background
-}

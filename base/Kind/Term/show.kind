@@ -12,7 +12,7 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
             name,
             //String.flatten(["$", name]),
           some: 
-            let path_val = Bits.concat(Kind.Path.to_bits(path.value), Bits.i(Bits.e));
+            let path_val = Bits.concat(Kind.Path.Builder.to_bits(path.value), Bits.i(Bits.e));
             let path_str = Nat.show(Bits.to_nat(path_val));
             String.flatten([name, Kind.Code.color("2", String.concat("-", path_str))]),
         },
@@ -25,39 +25,39 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
         let eras = term.eras;
         let self = Kind.Name.show(term.self);
         let name = Kind.Name.show(term.name);
-        let type = Kind.Term.show.go(term.xtyp, Kind.MPath.o(path));
+        let type = Kind.Term.show.go(term.xtyp, Kind.Path.Maybe.Builder.o(path));
         let open = if eras then "<" else "(";
         let clos = if eras then ">" else ")";
         let body = Kind.Term.show.go(
           term.body(
             Kind.Term.var(term.self, 0),
             Kind.Term.var(term.name, 0)),
-          Kind.MPath.i(path));
+          Kind.Path.Maybe.Builder.i(path));
         String.flatten([self,open,name,":",type,clos," ",body]),
       lam:
         let name = Kind.Name.show(term.name);
         let body = Kind.Term.show.go(
           term.body(Kind.Term.var(term.name, 0)),
-          Kind.MPath.o(path));
+          Kind.Path.Maybe.Builder.o(path));
         String.flatten(["(",name,") ",body]),
       app: Kind.Term.show.app(term, path, List.nil!),
       let:
         let name = Kind.Name.show(term.name);
-        let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
+        let expr = Kind.Term.show.go(term.expr, Kind.Path.Maybe.Builder.o(path));
         let body = Kind.Term.show.go(
           term.body(Kind.Term.var(term.name, 0)),
-          Kind.MPath.i(path));
+          Kind.Path.Maybe.Builder.i(path));
         String.flatten(["let ", name, " = ", expr, "; ", body]),
       def:
         let name = Kind.Name.show(term.name);
-        let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
+        let expr = Kind.Term.show.go(term.expr, Kind.Path.Maybe.Builder.o(path));
         let body = Kind.Term.show.go(
           term.body(Kind.Term.var(term.name, 0)),
-          Kind.MPath.i(path));
+          Kind.Path.Maybe.Builder.i(path));
         String.flatten(["def ", name, " = ", expr, "; ", body]),
       ann:
-        let term = Kind.Term.show.go(term.term, Kind.MPath.o(path));
-        let type = Kind.Term.show.go(term.type, Kind.MPath.i(path));
+        let term = Kind.Term.show.go(term.term, Kind.Path.Maybe.Builder.o(path));
+        let type = Kind.Term.show.go(term.type, Kind.Path.Maybe.Builder.i(path));
         String.flatten([term,"::",type]),
       gol:
         let name = Kind.Name.show(term.name);
@@ -80,7 +80,7 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
           }
         ])
       cse:
-        let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
+        let expr = Kind.Term.show.go(term.expr, Kind.Path.Maybe.Builder.o(path));
         let name = Kind.Name.show(term.name);
         let wyth = String.join("; ", List.mapped!(term.with)!((with_var)
           open with_var
@@ -100,20 +100,20 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
         String.flatten(["case ",expr," as ",name,wyth," { ",cses,"}",moti]),
       new:
         let args = List.fold!(term.args)!(
-          ((path) []) :: Kind.MPath -> List(String),
-          (arg,res,path) List.cons!(Kind.Term.show.go(arg, path), res(Kind.MPath.o(path))),
+          ((path) []) :: Kind.Path.Maybe.Builder -> List(String),
+          (arg,res,path) List.cons!(Kind.Term.show.go(arg, path), res(Kind.Path.Maybe.Builder.o(path))),
           path);
         String.flatten(["{", String.join(",",args), "}"])
       get:
-        let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
+        let expr = Kind.Term.show.go(term.expr, Kind.Path.Maybe.Builder.o(path));
         String.flatten([expr,"@",term.fkey])
       set:
-        let expr = Kind.Term.show.go(term.expr, Kind.MPath.o(path));
-        let fval = Kind.Term.show.go(term.fval, Kind.MPath.i(path));
+        let expr = Kind.Term.show.go(term.expr, Kind.Path.Maybe.Builder.o(path));
+        let fval = Kind.Term.show.go(term.fval, Kind.Path.Maybe.Builder.i(path));
         String.flatten([expr,"@",term.fkey," <- ",fval])
       ope:
-        let arg0 = Kind.Term.show.go(term.arg0, Kind.MPath.o(path));
-        let arg1 = Kind.Term.show.go(term.arg1, Kind.MPath.i(path));
+        let arg0 = Kind.Term.show.go(term.arg0, Kind.Path.Maybe.Builder.o(path));
+        let arg1 = Kind.Term.show.go(term.arg1, Kind.Path.Maybe.Builder.i(path));
         String.flatten(["(",arg0," ",term.name," ",arg1,")"])
       ori:
         Kind.Term.show.go(term.expr, path),
@@ -133,7 +133,7 @@ Kind.Term.show.as_nat(term: Kind.Term): Maybe<String>
 
 Kind.Term.show.app(term: Kind.Term, path: Maybe<Bits -> Bits>, args: List<String>): String
   case term {
-    app: Kind.Term.show.app(term.func, Kind.MPath.o(path), Kind.Term.show.go(term.argm, Kind.MPath.i(path)) & args),
+    app: Kind.Term.show.app(term.func, Kind.Path.Maybe.Builder.o(path), Kind.Term.show.go(term.argm, Kind.Path.Maybe.Builder.i(path)) & args),
     ori: Kind.Term.show.app(term.expr, path, args),
     _  : Kind.Term.show.app.done(term, path, args)
   }

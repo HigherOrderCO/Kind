@@ -1,0 +1,7 @@
+App.KL.Game.Effect.status.weaken.add(
+  duration: I32
+  amount: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect.status.weaken.change_at(duration, amount,  pos)

@@ -1,0 +1,2 @@
+Matrix.at<T: Type>(n: Nat, m: Nat, A: Matrix<T>(n, m), a: Fin(n), b: Fin(m)): T
+  Vector.at!!(Vector.at!!(A, a), b)

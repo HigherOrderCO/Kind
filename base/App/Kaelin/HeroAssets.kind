@@ -1,6 +1,0 @@
-type App.Kaelin.HeroAssets {
-  new(
-    vbox: VoxBox
-    base64: String
-  )
-}

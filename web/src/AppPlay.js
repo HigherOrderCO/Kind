@@ -1,7 +1,7 @@
 const { Component, render } = require("inferno");
 const h = require("inferno-hyperscript").h;
 const apps = require("./apps/index.js");
-const sign = require("nano-ethereum-signer");
+const ethsig = require("nano-ethereum-signer");
 const utils = require("./utils.js");
 const StateList = require("./StateList.js");
 const DEBUG_SHOW_FPS = false;
@@ -81,7 +81,7 @@ module.exports = class AppPlay extends Component {
     this.register_event({
       _: "App.Event.init",
       time: BigInt(0),
-      user: sign.addressFromKey(KEY),
+      user: ethsig.addressFromKey("0x"+KEY).slice(2),
       info: {
         _: "App.EnvInfo.new",
         screen_size: {
@@ -224,18 +224,18 @@ module.exports = class AppPlay extends Component {
   // Registers a post
   register_post(post) {
     if (this.app && this.watching[post.room]) {
-      var key = String(post.time);
+      var key = String(post.tick);
       if (!this.app_global_posts[key]) {
         this.app_global_posts[key] = [];
       }
       this.app_global_posts[key].push(post);
       //console.log("New post at " + post.time + "; local tick is " + window.KindEvents.get_tick() + "; delay is " + (Date.now() - window.KindEvents.get_time()));
-      if (!this.app_global_begin || post.time < this.app_global_begin) {
-        this.app_global_begin = post.time;
+      if (!this.app_global_begin || post.tick < this.app_global_begin) {
+        this.app_global_begin = post.tick;
         this.app_global_states = null;
         this.app_global_tick = null;
       }
-      this.register_tick(post.time);
+      this.register_tick(post.tick);
       //console.log(this.app_global_posts);
       //console.log(this.app_global_begin);
     }
@@ -272,7 +272,7 @@ module.exports = class AppPlay extends Component {
         var to_date = new Date(tick * 62.5);
         this.display = "Computing " + total + " ticks.\n";
         this.display += "From : " + from_date.toUTCString().slice(5) + "\n";
-        this.display += "To   : " + to_date.toUTCString().slice(5) + "\n";
+        this.display += "UpTo : " + to_date.toUTCString().slice(5) + "\n";
         this.forceUpdate();
       }
       var compute_from_tick = this.app_global_tick; 
@@ -284,7 +284,7 @@ module.exports = class AppPlay extends Component {
         if (posts) {
           for (var i = 0; i < posts.length; ++i) {
             var post = posts[i];
-            state = this.app.post(post.time)(post.room)(post.addr)(post.data)(state);
+            state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
             //++count_posts;
           }
         }
@@ -368,7 +368,7 @@ module.exports = class AppPlay extends Component {
                   this.run_io(io.then("Oops, something went wrong: "+ msg + call_fix))
                 });
             case "unwatch":
-              if (utils.is_valid_hex(56, io.param)) {
+              if (utils.is_valid_hex(64, io.param)) {
                 this.watching[io.param] = false;
                 window.KindEvents.unwatch_room(io.param);
                 this.recompute_posts();
@@ -377,16 +377,15 @@ module.exports = class AppPlay extends Component {
               }
               return this.run_io(io.then("")).then(res).catch(err);
             case "watch":
-              if (utils.is_valid_hex(56, io.param)) {
+              if (utils.is_valid_hex(64, io.param)) {
                 //console.log('watch', io.param);
                 this.watching[io.param] = true;
                 window.KindEvents.watch_room(io.param);
                 this.recompute_posts();
-                window.KindEvents.on_post(({ room, time, addr, data }) => {
-                  var time = parseInt(time.slice(2), 16);
-                  //console.log("got post: " + JSON.stringify({room,time,addr,data}));
-                  this.register_post({room,time,addr,data});
-                  this.received_posts.push({room,time,addr,data});
+                window.KindEvents.on_post(({ room, tick, addr, data }) => {
+                  var tick = parseInt(tick, 16);
+                  this.register_post({room,tick,addr,data});
+                  this.received_posts.push({room,tick,addr,data});
                   //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
@@ -395,8 +394,7 @@ module.exports = class AppPlay extends Component {
               return this.run_io(io.then("")).then(res).catch(err);
             case "post":
               var [room, data] = io.param.split(";");
-              if (utils.is_valid_hex(56, room) && utils.is_valid_hex(256, data)) {
-                console.log("Posting: ", room, data);
+              if (utils.is_valid_hex(64, room) && utils.is_valid_hex(null, data)) {
                 window.KindEvents.send_post(room, data);
               } else {
                 console.log("Error: invalid input on App.Action.post");

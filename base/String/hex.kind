@@ -14,7 +14,7 @@ String.hex.decode.go(hexs: String): String
   }
 
 String.hex.decode(hexs: String): String
-  String.hex.decode.go(String.drop(2, hexs))
+  String.hex.decode.go(hexs)
 
 String.hex.decode.ascii.go(hexs: String): String
   case hexs {
@@ -32,7 +32,7 @@ String.hex.decode.ascii.go(hexs: String): String
   }
 
 String.hex.decode.ascii(hexs: String): String
-  String.hex.decode.ascii.go(String.drop(2, hexs))
+  String.hex.decode.ascii.go(hexs)
 
 String.hex.encode.char_to_hex16(chr: Char): String
   String.pad_left(4, '0', U16.show_hex(chr))
@@ -44,7 +44,7 @@ String.hex.encode.go(str: String, result: String): String
   }
 
 String.hex.encode(str: String): String
-  "0x" | String.hex.encode.go(str, "")
+  String.hex.encode.go(str, "")
 
 String.hex.encode.ascii.char_to_hex8(chr: Char): String
   String.pad_left(2, '0', U16.show_hex(chr))
@@ -56,4 +56,14 @@ String.hex.encode.ascii.go(str: String, result: String): String
   }
 
 String.hex.encode.ascii(str: String): String
-  "0x" | String.hex.encode.ascii.go(str, "")
+  String.hex.encode.ascii.go(str, "")
+
+String.hex.encode.utf8(str: String): String
+  case str {
+    nil: String.nil
+    cons:
+      let hex = U16.to_hex.show(str.head)
+      String.concat(hex, String.to_hex(str.tail))
+  }
+
+// TODO: create String.hex.decode.utf8

@@ -1,7 +1,0 @@
-App.Kaelin.Skill.has_key(
-  key: U16,
-  skill: App.Kaelin.Skill
-): Bool
-
-  open skill
-  U16.eql(key, skill.key)

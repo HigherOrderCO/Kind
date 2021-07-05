@@ -1,0 +1,2 @@
+List.comp_and<A: Type>(xs: List<A -> Bool>, item: A): Bool
+  List.fold!(xs)!(true, (x, y) Bool.and(x(item),y))

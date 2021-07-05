@@ -1,0 +1,18 @@
+// This should NOT exist
+// I32.show, U64.show etc. should not output "#"
+
+String.show_clean(num_str: String): String
+  String.reverse(String.show_clean.go(num_str, ""))
+
+String.show_clean.go(num_str: String, result: String): String
+  case num_str {
+    nil: result
+    cons:
+      if Char.eql(num_str.head, '+') then
+        String.show_clean.go(num_str.tail, String.cons(' ', result))
+      else 
+        if Char.eql(num_str.head, '#') then
+          result
+        else
+          String.show_clean.go(num_str.tail, String.cons(num_str.head, result))
+  }

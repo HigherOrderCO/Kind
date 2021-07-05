@@ -1,8 +1,8 @@
 var lib = require("./lib.js");
-var sig = require("nano-ethereum-signer");
+var ethsig = require("nano-ethereum-signer");
 var WebSocket = require("isomorphic-ws");
 
-module.exports = function client({url = "ws://localhost:7171", key = "0x0000000000000000000000000000000000000000000000000000000000000001"} = {}) {
+module.exports = function client({url = "ws://localhost:7171", key = "0000000000000000000000000000000000000000000000000000000000000001"} = {}) {
   var ws = new WebSocket(url);
   var Posts = {};
   var watching = {};
@@ -40,10 +40,10 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   // Sends a signed post to a room on the server
   function send_post(post_room, post_data, priv_key = key) {
     var priv_key = lib.check_hex(256, priv_key);
-    var post_room = lib.check_hex(56, post_room);
-    var post_data = lib.check_hex(256, post_data);
-    var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
-    var post_sign = sig.signMessage(post_hash, priv_key);
+    var post_room = lib.check_hex(64, post_room);
+    var post_data = lib.check_hex(null, post_data);
+    var post_hash = ethsig.keccak("0x"+lib.hexs_to_bytes([post_room, post_data])).slice(2);
+    var post_sign = ethsig.signMessage("0x"+post_hash, "0x"+priv_key).slice(2);
 
     var msge_buff = lib.hexs_to_bytes([
       lib.u8_to_hex(lib.POST),
@@ -51,6 +51,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
       post_data,
       post_sign,
     ]);
+
     ws_send(msge_buff);
   };
 
@@ -59,7 +60,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     var room_name = room_name.toLowerCase();
     if (!watching[room_name]) {
       watching[room_name] = true;
-      var room_name = lib.check_hex(56, room_name);
+      var room_name = lib.check_hex(64, room_name);
       var msge_buff = lib.hexs_to_bytes([
         lib.u8_to_hex(lib.WATCH),
         room_name,
@@ -74,7 +75,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     var room_name = room_name.toLowerCase();
     if (watching[room_name]) {
       watching[room_name] = false;
-      var room_name = lib.check_hex(56, room_name);
+      var room_name = lib.check_hex(64, room_name);
       var msge_buff = lib.hexs_to_bytes([
         lib.u8_to_hex(lib.UNWATCH),
         room_name,
@@ -99,7 +100,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     last_ask_numb = ++last_ask_numb;
     ws_send(lib.hexs_to_bytes([
       lib.u8_to_hex(lib.TIME),
-      lib.u48_to_hex(last_ask_numb),
+      lib.u64_to_hex(last_ask_numb),
     ]));
   };
 
@@ -118,23 +119,27 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
 
   ws.onmessage = (msge) => {
     var msge = new Uint8Array(msge.data);
+    //console.log("receiving", msge);
     if (msge[0] === lib.SHOW) {
-      var room = lib.bytes_to_hex(msge.slice(1, 8));
-      var time = lib.bytes_to_hex(msge.slice(8, 13));
-      var addr = lib.bytes_to_hex(msge.slice(13, 33));
-      var data = lib.bytes_to_hex(msge.slice(33, 65));
-      Posts[room].push({time, addr, data});
+      var room = lib.bytes_to_hex(msge.slice(1, 9));
+      var tick = lib.bytes_to_hex(msge.slice(9, 17));
+      var addr = lib.bytes_to_hex(msge.slice(17, 37));
+      var data = lib.bytes_to_hex(msge.slice(37, msge.length));
+      //console.log("- room", room)
+      //console.log("- addr", addr)
+      //console.log("- data", data)
+      Posts[room].push({tick, addr, data});
       if (on_post_callback) {
-        on_post_callback({room, time, addr, data}, Posts);
+        on_post_callback({room, tick, addr, data}, Posts);
       }
     };
     if (msge[0] === lib.TIME) {
-      var reported_server_time = lib.bytes_to_hex(msge.slice(1, 7));
-      var reply_numb = lib.hex_to_u48(lib.bytes_to_hex(msge.slice(7, 13)));
+      var reported_server_time = lib.hex_to_u64(lib.bytes_to_hex(msge.slice(1, 9)));
+      var reply_numb = lib.hex_to_u64(lib.bytes_to_hex(msge.slice(9, 17)));
       if (last_ask_time !== null && last_ask_numb === reply_numb) {
         ping = (Date.now() - last_ask_time) / 2;
         var local_time = Date.now();
-        var estimated_server_time = Number(reported_server_time) + ping;
+        var estimated_server_time = reported_server_time + ping;
         if (ping < best_ask_ping) {
           delta_time = estimated_server_time - local_time;
           best_ask_ping = ping;

@@ -8,5 +8,20 @@ Nat.to_fin(n: Nat)<slack: Nat>: Fin<Nat.succ(Nat.add(n, slack))>
       b
   }!
 
+Nat.to_fin.cap(n: Nat, cap: Nat): Fin<Nat.succ(cap)>
+  case n {
+    zero: Fin.zero<cap>
+    succ: case cap {
+      zero: Fin.zero<Nat.zero>
+      succ: Fin.succ(Nat.succ(cap.pred), Nat.to_fin.cap(n.pred, cap.pred))
+    }!
+  }!
+
+Nat.to_fin.lim(n: Nat, lim: Nat): lim(() Type, Unit, (p) Fin<Nat.succ(p)>)
+  case lim {
+    zero: unit
+    succ: Nat.to_fin.cap(n,lim.pred)
+  }!
+
 Nat.to_fin.tight(n: Nat): Fin<Nat.succ(n)>
   Nat.to_fin(n, 0) :: rewrite X in Fin(Nat.succ(X)) with Nat.add.zero_right(n)

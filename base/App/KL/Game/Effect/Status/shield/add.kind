@@ -1,8 +1,8 @@
-App.KL.Game.Effect.Status.shield.add(
+App.KL.Game.Effect.status.shield.add(
   id: String
   duration: I32
   amount: I32
 ): App.KL.Game.Effect.At<I32>
   (pos)
 
-  App.KL.Game.Effect.Status.shield.change_at(id, duration, amount, pos)
+  App.KL.Game.Effect.status.shield.change_at(id, duration, amount, pos)

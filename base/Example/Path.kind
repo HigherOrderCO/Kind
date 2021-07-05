@@ -9,7 +9,7 @@
 //data I : Set where
  //i0 : I
  //i1 : I
- //ie : Path A i0 i1
+ //eq : Path A i0 i1
 
 //data Path (A: I -> Set) : (A i0) -> (A i1) -> Set where
   //abs : (t : (i: I) -> A i) -> Path A (t i0) (t i1)
@@ -24,7 +24,7 @@ I: Type
   i(P: I -> Type) ->
   (i0: P(i0)) ->
   (i1: P(i1)) ->
-  (ie: Path(P, i0, i1)) ->
+  (eq: Path(P, i0, i1)) ->
   P(i)
 
 // The i0 interval:
@@ -33,7 +33,7 @@ I: Type
 // Γ ⊢ i0 : I
 
 i0: I
-  (P, i0, i1, ie) i0
+  (P, i0, i1, eq) i0
 
 // The i1 interval:
 // Γ ⊢
@@ -41,14 +41,14 @@ i0: I
 // Γ ⊢ i1 : I
 
 i1: I
-  (P, i0, i1, ie) i1
+  (P, i0, i1, eq) i1
 
 // Interval equality:
 // Γ ⊢
 // -----------------
-// Γ ⊢ ie : i0 == i1
+// Γ ⊢ eq : i0 == i1
 
-ie: Path((i) I, i0, i1)
+eq: Path((i) I, i0, i1)
   (P, abs) abs((i) i)
   
 // The Path type:
@@ -164,3 +164,200 @@ funext(
   h: (x: A) -> Path((i) B(x), f(x), g(x)),
 ) : Path((i) (x: A) -> B(x), (x) f(x), (x) g(x))
   Path.abs((i) (x:A) -> B(x))((i) (x) app((i) B(x), f(x), g(x), h(x), i))
+
+
+
+
+
+
+
+
+
+
+
+
+//Goal ?a:
+//With type: Path((k) A,p.t(i1),x)
+//With context:
+//- A: Type
+//- x: A
+//- y: A
+//- p: Path((k) A,x,y)
+//- p.t: (i:I) A
+
+
+//Equal.mirror<A: Type, a: A, b: A>(e: Equal<A, a, b>): Equal<A, b, a>
+  //case e {
+    //refl: Equal.refl<A, a>
+  //} : Equal<A, e.b, a>
+//Path(A: I -> Type, a: A(i0), b: A(i1)) : Type
+  //path(P: (a: A(i0)) -> (b: A(i1)) -> Path(A, a, b) -> Type) ->
+  //(abs: (t: (i:I) -> A(i)) -> P(t(i0), t(i1), Path.abs(A, t))) ->
+  //P(a, b, path)
+// sym : ∀ {ℓ} {A : Set ℓ} {x y : A} → x ≡ y → y ≡ x
+
+qi(i: I, j: I): Path(() I, i, j)
+  Path.abs(() I, (n) n(() I, i, j, qi(i,j)))
+
+
+inot(i: I): I
+  i(() I, i1, i0, qi(i1, i0))
+
+ior(i: I, j: I): I
+  i(() I, j, i1, qi(j,i1))
+
+iand(i: I, j: I): I
+  i(() I, i0, j, qi(i0,j))
+
+//foo(f: I -> I, P: I -> Type, p: P(f(i0))): P(f(i1))
+  //case eq {
+    //abs: ?a
+  //}!
+
+//sym(i: I, j: I, p: Path(() I, i, j)): Path(() I, j, i)
+  //let k = p((a,b,p) Path(() I, b, a), (t) ?a)
+  //?a
+
+
+//type IsOne ~ (i: I) {
+  //it_is ~ (i = i1)
+//}
+
+//Partial(i: I, A: Type): Type
+  //((is1: IsOne(i)) -> A)
+
+//foo(i: I): IsOne(ior(i, inot(i)))
+  //i((i) IsOne(ior(i, inot(i)))
+    //IsOne.it_is
+    //IsOne.it_is
+    //Path.abs((i) IsOne(ior(i, inot(i))), (i) foo(i))
+  //)
+
+  
+
+//partial_bool(i: I): IsOne(i) -> Bool
+  //i((i) IsOne(i) -> Bool,
+    //(is1) false,
+    //(is1) true,
+    //?a,
+  //)
+
+  //case is1 {
+    //it_is:
+      //// i == i1
+      //case i {
+        //i0: false
+        //i1: true
+        //eq: // false == true
+      //}
+  //}
+
+
+//foo(
+  //i: I
+  //e: i == i1
+//): Bool
+  //let a = i(() Bool, 
+    // (i=i0)
+    //true,
+    // (i=i1)
+    //false,
+    // ?????
+    // Path(() Bool, true, false)
+    
+  //)
+  //let b = Equal.rewrite<I,i,i1>(e)
+  //?a
+//e: i == i1
+//a: case i { i0: a, i1: b }
+
+//deny(
+  //i: I
+  //is1: IsOne(i)
+  //A: Type
+  //P: A -> Type
+  //p: P(case is1
+
+  //(case is1 { it_is: is1.i(() A, a, b, _) }: 
+//P(case is1 { it_is: is1.i(() A, a, b, _) }) -> P(a)
+
+//bar(bad: IsOne(i0)): Empty
+  //case bad {
+    //it_is: unit
+  //}: case bad.i {
+    //i0: Empty
+    //i1: Unit
+    //eq: ?a
+  //}
+
+//foo: Path((i) (:IsOne(i)) Bool,(is1) Bool.false,(is1) Bool.true)
+  //Path.abs((i) (:IsOne(i)) Bool, (i)
+    //i((i) (:IsOne(i)) Bool,
+      //(is1) ?k,
+      //(is1) true,
+      //?a)
+  //)
+
+  //i((i) Partial(ior(i, inot(i)), Bool),
+    //(is1) false,
+    //(is1) true,
+    //Path.abs((i) Partial(ior(i,inot(i)),Bool), (i,is1) 
+      //i(() Bool, false, true, ?a)
+    //)
+  //)
+  //i(() Bool, false, true, ?a)
+  //case is1 {
+    //it_is: 
+      //let k = i(() Bool, false, true, ?a)
+      //?a
+  //}:
+    //case is1.i {
+      //i0: 
+    //}
+
+
+//comp(
+  //A: I -> Type
+  //B: I -> Type
+  //f: A(i0) -> B(i0)
+//): A(i1) -> B(i1)
+  //(x)
+  //?a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //case p {
+    //abs: 
+      //Path.abs((k) A, (i) case i {
+        //i0: y
+        //i1: x
+        //eq: ?c
+      //})
+      ////let g = pL(A, x, y, (X) Path((k) A, X, x), p, e)
+  //}: Path((k) A, p.b, x)
+
+// Path left:
+// Γ ⊢ a : A
+// Γ ⊢ b : B
+// Γ ⊢ e : Path A a b
+// --------------------------
+// Γ ⊢ p0(a,b,e) : e(i0) == a
+
+pL(A: Type, a: A, b: A, P: A -> Type, e: Path((i) A,a,b), p: P(a)): P(app((i) A,a,b,e,i0))
+  e((x, y, e) P(app((i) A,x,y,e,i0)) -> P(x), (t) (p) p, p)
+
+pR(A: Type, a: A, b: A, P: A -> Type, e: Path((i) A,a,b), p: P(b)): P(app((i) A,a,b,e,i1))
+  e((x, y, e) P(app((i) A,x,y,e,i1)) -> P(y), (t) (k) k, p)
+

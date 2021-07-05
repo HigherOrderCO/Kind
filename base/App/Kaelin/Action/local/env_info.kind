@@ -1,8 +1,0 @@
-// Returns state with updated cast_info
-App.Kaelin.Action.local.env_info(
-  time: U64,
-  env_info: App.EnvInfo,
-  local: App.Kaelin.State.local
-): App.Kaelin.State.local
-   local = App.Kaelin.Action.local.set_internal(time, local)
-   local@env_info <- env_info

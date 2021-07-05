@@ -1,0 +1,6 @@
+App.KL.Game.Effect.status.stun.add(
+  duration: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect.status.stun.change_at(duration, pos)

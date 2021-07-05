@@ -10,6 +10,26 @@ type App.KL.Game.Creature {
 }
 
 type App.KL.Game.Creature.Status {
+  burn(
+    id: String
+    duration: I32
+    amount: I32
+  )
+  haste(
+    duration : I32
+    amount: I32
+  )
+  poison(
+    id: String
+    duration: I32
+    amount: I32
+  )
+  root(
+    duration: I32
+  )
+  silence(
+    duration: I32
+  )
   stun(
     duration: I32
   )
@@ -18,86 +38,8 @@ type App.KL.Game.Creature.Status {
     duration: I32
     amount: I32
   )
-  haste(
-    duration : I32
-    amount : I32
-  )
   weaken(
     duration : I32
-    amount : I32
+    amount: I32
   )
 }
-
-// Attempts to hit a list of shields
-// Returns the updated status list, and the total damage blocked
-App.KL.Game.Creature.Status.hit_shields(
-  damage: I32
-  status: List<App.KL.Game.Creature.Status>
-): Pair<List<App.KL.Game.Creature.Status>, I32>
-  case status {
-    nil:
-      {[], 0::I32}
-    cons: case status.head {
-      shield:
-        let blocked = I32.min(status.head.amount, damage)
-        let remaining_damage = I32.sub(damage, blocked)
-        let remaining_shield = I32.sub(status.head.amount, blocked)
-        let status_head = App.KL.Game.Creature.Status.shield(status.head.id, status.head.duration, remaining_shield)
-        let {status_tail, total_blocked} = App.KL.Game.Creature.Status.hit_shields(remaining_damage, status.tail)
-        let status = if I32.gtn(remaining_shield, 0) then status_head & status_tail else status_tail
-        let total_blocked = I32.add(blocked, total_blocked)
-        {status, total_blocked}
-    } default 
-      let {status_tail, total_blocked} = App.KL.Game.Creature.Status.hit_shields(damage, status.tail)
-      let status = status.head & status_tail
-      {status, total_blocked}
-  }
-
-App.KL.Game.Creature.Status.tick_map(
-  board: App.KL.Game.Board
-): App.KL.Game.Board
-
-  func = ((tile)
-    open tile
-    case tile.creature { 
-      none:
-        tile
-      some:
-        new_creature = App.KL.Game.Creature.Status.tick(tile.creature.value)
-        tile@creature <- some(new_creature)
-    }
-  ):: App.KL.Game.Tile -> App.KL.Game.Tile
-  Hexagonal.Axial.BBT.map!!(func, board)
-
-
-App.KL.Game.Creature.Status.tick(
-  creature: App.KL.Game.Creature
-): App.KL.Game.Creature
-
-  open creature
-  att_shield = App.KL.Game.Creature.Status.tick.aux(creature.status)
-  creature@status <- att_shield
-  
-
-// Decreases the duration of all active status and remove expired ones
-App.KL.Game.Creature.Status.tick.aux(
-  status: List<App.KL.Game.Creature.Status>
-): List<App.KL.Game.Creature.Status>
-  case status {
-    nil:
-      []
-    cons: 
-      let head = case status.head {
-        stun: App.KL.Game.Creature.Status.stun(I32.sub(status.head.duration, 1))
-        shield: App.KL.Game.Creature.Status.shield(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
-        haste : App.KL.Game.Creature.Status.haste(I32.sub(status.head.duration, 1), status.head.amount)
-        weaken : App.KL.Game.Creature.Status.weaken(I32.sub(status.head.duration, 1), status.head.amount)
-      }
-      let tail = App.KL.Game.Creature.Status.tick.aux(status.tail)
-      case head {
-        stun: if I32.gtn(head.duration,0) then head & tail else tail
-        haste : if I32.gtn(head.duration,0) then head & tail else tail
-        shield: if I32.gtn(head.duration,0) then head & tail else tail
-        weaken : if I32.gtn(head.duration,0) then head & tail else tail
-      }
-  }

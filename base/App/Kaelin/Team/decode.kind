@@ -1,5 +1,0 @@
-App.Kaelin.Team.decode(n: U8): App.Kaelin.Team
-  switch U8.eql(n) {
-    1: App.Kaelin.Team.red
-    2: App.Kaelin.Team.blue
-  } default App.Kaelin.Team.neutral

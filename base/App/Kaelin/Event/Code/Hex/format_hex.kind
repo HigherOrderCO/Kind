@@ -1,7 +1,0 @@
-App.Kaelin.Event.Code.Hex.format_hex(
-  min: Nat,
-  hex: String
-): String
-
-  dif = min - String.length(hex)
-  if (Nat.ltn(String.length(hex), min)) then String.repeat("0", dif) | hex else hex

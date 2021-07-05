@@ -18,6 +18,7 @@ type App.KL.Game.Cast.Result {
   success(
     game: App.KL.Game
     hits: App.KL.Game.Indicators
+    ap_used: I32
   )
 }
 
@@ -35,7 +36,7 @@ App.KL.Game.Cast.picks_of(
   player: String
   game: App.KL.Game
 ): App.KL.Game.Picks
-  let result = {{}, Hexagonal.Axial.BBT.new! } :: Pair<Map<Unit>, App.KL.Game.Picks>
+  let result = {{}, Hexagonal.Axial.Map.new! } :: Pair<Map<Unit>, App.KL.Game.Picks>
   let casts  = game@casts
 
   for cast in casts with result:
@@ -46,20 +47,13 @@ App.KL.Game.Cast.picks_of(
       let letter = Char.to_string(cast.letter)
       case skill seen{letter} {
         some none: 
-          { seen{letter} <- unit, Hexagonal.Axial.BBT.set!(cast.target, cast.letter, map) }
+          { seen{letter} <- unit, Hexagonal.Axial.Map.set!(cast.target, cast.letter, map) }
       } default {seen, map}
     else
       result
   
   result@snd
-  
-// Gets the skill associated with a cast
-App.KL.Game.Cast.get_skill(
-  cast: App.KL.Game.Cast
-  game: App.KL.Game
-): Maybe<App.KL.Game.Skill>
-  App.KL.Game.Skill.get(cast@player, cast@letter, game)
-  
+
 // Gets the skill associated with a cast
 App.KL.Game.Cast.get_skill(
   cast: App.KL.Game.Cast
@@ -74,7 +68,7 @@ App.KL.Game.Cast.get_skill(
     get skill = hero@skills{Char.to_string(cast.letter)}
     return skill
   }
-
+  
 // Gets the coord associated with a cast
 App.KL.Game.Cast.get_coord(
   cast: App.KL.Game.Cast
@@ -89,7 +83,7 @@ App.KL.Game.Cast.get_creature(
 ): Maybe<App.KL.Game.Creature>
   Maybe {
     get coord = App.KL.Game.Cast.get_coord(cast, game)
-    get tile = Hexagonal.Axial.BBT.get!(coord, game@board)
+    get tile = Hexagonal.Axial.Map.get!(coord, game@board)
     tile@creature
   }
 
@@ -98,10 +92,18 @@ App.KL.Game.Cast.get_hero(
   cast: App.KL.Game.Cast
   game: App.KL.Game
 ): Maybe<App.KL.Game.Hero>
+  open game
+  open cast
   Maybe {
-    get creature = App.KL.Game.Cast.get_creature(cast, game)
-    return creature@hero
+    get player = game.players{cast.player}
+    get hero_id = player@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
   }
+  //Maybe {
+    //get creature = App.KL.Game.Cast.get_creature(cast, game)
+    //return creature@hero
+  //}
 
 // Sorts a game's casts by delay, in ascending order, removing duplicates
 App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
@@ -123,21 +125,35 @@ App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
   let list = List.map!!((a) a@fst, list)
   list
 
-// Applies a cast, modifying the game state
-App.KL.Game.Cast.apply(
-  cast: App.KL.Game.Cast
+// TODO: modularize
+// Runs all casts up to a given delay with a filter
+App.KL.Game.Cast.simulate(
+  max_delay: U64
+  filter: App.KL.Game.Cast -> Bool
   game: App.KL.Game
-): App.KL.Game.Cast.Result
+): App.KL.Game
+  let casts = App.KL.Game.Cast.sort(game)
+  let casts = List.filter!(filter, casts)
+  App.KL.Game.Cast.simulate.go(casts, max_delay, game)
+
+App.KL.Game.Cast.simulate.go(
+  casts: List<App.KL.Game.Cast>
+  max_delay: U64
+  game: App.KL.Game
+): App.KL.Game
   open game
-  open cast
   Maybe {
+    get cast = List.head!(casts)
     get skill = App.KL.Game.Cast.get_skill(cast, game)
-    get coord = App.KL.Game.Cast.get_coord(cast, game)
-    let result = skill@effect(coord, cast@target, game@board)
-    return case result {
-      err: App.KL.Game.Cast.Result.failure
-      new: App.KL.Game.Cast.Result.success(game@board <- result.board, result.indicators)
+    let cast_delay = skill@delay
+    if cast_delay <? max_delay then Maybe {
+      let result = App.KL.Game.Cast.apply(cast, game)
+      let game = case result {
+        failure: game
+        success: result.game
+      }
+      return App.KL.Game.Cast.simulate.go(List.tail!(casts), max_delay, game)
+    } else Maybe {
+      return game
     }
-  } <> App.KL.Game.Cast.Result.failure
-
-
+  } <> game

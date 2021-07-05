@@ -1,5 +1,9 @@
 function is_valid_hex(bits, hex) {
-  return new RegExp("^0x[0-9A-Fa-f]{"+Math.floor(bits/4)+"}$").test(hex)
+  if (bits) {
+    return new RegExp("^[0-9A-Fa-f]{"+Math.floor(bits/4)+"}$").test(hex)
+  } else {
+    return new RegExp("^[0-9A-Fa-f]*$").test(hex)
+  }
 }
 
 function list_to_array(list) {

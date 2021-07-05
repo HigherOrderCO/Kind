@@ -4,6 +4,7 @@ var kind = require("./kind.js");
 var fs = require("fs");
 var fsp = require("fs").promises;
 var path = require("path");
+var exec = require("child_process").execSync;
 var {fmc_to_js, fmc_to_hs} = require("formcore-js");
 //var {fmc_to_js, fmc_to_hs} = require("./../../../../FormCoreJS");
 
@@ -76,14 +77,15 @@ if (!process.argv[2] || process.argv[2] === "--help" || process.argv[2] === "-h"
   console.log("");
   console.log("Usage:");
   console.log("");
-  console.log("  kind Module/               # type-checks a module");
-  console.log("  kind Module/file.kind      # type-checks a file");
-  console.log("  kind full_term_name --run  # runs a term");
-  console.log("  kind full_term_name --show # prints a term");
-  console.log("  kind full_term_name --norm # prints a term's λ-normal form");
-  console.log("  kind full_term_name --js   # compiles a term to JavaScript");
-  console.log("  kind full_term_name --hs   # compiles a term to Haskell");
-  console.log("  kind full_term_name --fmc  # compiles a term to FormCore");
+  console.log("  kind Module/                  # type-checks a module");
+  console.log("  kind Module/file.kind         # type-checks a file");
+  console.log("  kind full_term_name --run     # runs a term using JavaScript");
+  console.log("  kind full_term_name --run-scm # runs a term using Chez Scheme");
+  console.log("  kind full_term_name --show    # prints a term");
+  console.log("  kind full_term_name --norm    # prints a term's λ-normal form");
+  console.log("  kind full_term_name --js      # compiles a term to JavaScript");
+  console.log("  kind full_term_name --scm     # compiles a term to Chez Scheme");
+  console.log("  kind full_term_name --fmc     # compiles a term to FormCore");
   console.log("");
   console.log("Examples:");
   console.log("");
@@ -144,6 +146,16 @@ function display_error(name, error){
       display_error(name, e);
     }
 
+  // JavaScript compilation
+  } else if (process.argv[3] === "--scm") {
+    var module = process.argv[4] === "--module";
+    try {
+      var scm = await kind.run(kind["Kind.api.io.term_to_scheme"](name));
+      console.log(scm);
+    } catch (e) {
+      display_error(name, e);
+    }
+
   // JavaScript execution
   } else if (process.argv[3] === "--run") {
     try {
@@ -158,6 +170,19 @@ function display_error(name, error){
       fs.writeFileSync(js_path, asjs);
       require(path.join(process.cwd(),js_path));
       fs.unlinkSync(js_path);
+    } catch (e) {
+      display_error(name, e);
+    }
+
+  // Scheme execution
+  } else if (process.argv[3] === "--run-scm") {
+    try {
+      var scm = await kind.run(kind["Kind.api.io.term_to_scheme"](name));
+      var scm_path = ".kind.tmp.scm";
+      try { fs.unlinkSync(scm_path); } catch (e) {};
+      fs.writeFileSync(scm_path, scm);
+      console.log(exec("scheme --script "+scm_path).toString().slice(0,-1));
+      fs.unlinkSync(scm_path);
     } catch (e) {
       display_error(name, e);
     }
@@ -179,14 +204,14 @@ function display_error(name, error){
     }
 
   // Haskell compilation
-  } else if (process.argv[3] === "--hs") {
-    var module = process.argv[4] === "--module" ? process.argv[5]||"Main" : null;
-    try {
-      var fmcc = await kind.run(kind["Kind.api.io.term_to_core"](name));
-      console.log(fmc_to_hs.compile(fmcc, name, {module}));
-    } catch (e) {
-      display_error(name, e);
-    }
+  //} else if (process.argv[3] === "--hs") {
+    //var module = process.argv[4] === "--module" ? process.argv[5]||"Main" : null;
+    //try {
+      //var fmcc = await kind.run(kind["Kind.api.io.term_to_core"](name));
+      //console.log(fmc_to_hs.compile(fmcc, name, {module}));
+    //} catch (e) {
+      //display_error(name, e);
+    //}
 
   // Type-Checking
   } else {

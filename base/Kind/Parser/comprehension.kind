@@ -1,0 +1,108 @@
+Kind.Parser.comprehension: Parser<Kind.Term>
+  Parser {
+    Kind.Parser.text("[")
+    get loop = Kind.Parser.term
+    Kind.Parser.text("for")
+    get elem = Kind.Parser.name1
+    Kind.Parser.text("in")
+    get list = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text("where"))
+
+    get filters = Parser.until!(Kind.Parser.text("]"), Parser {
+      Kind.Parser.spaces
+      get term = Kind.Parser.term
+      Parser.maybe!(Kind.Parser.text(","))
+      return term
+    })
+
+    let and = Kind.Parser.comprehension.and_all(filters)
+
+    let filter_fun = Kind.Term.ref("List.filter")
+    let filter_fun = Kind.Term.app(filter_fun, Kind.Term.hol(Bits.e))
+    let lamb_filter = Kind.Term.lam(elem, (i) and)
+    let filter_fun = Kind.Term.app(filter_fun, lamb_filter)
+    let filter_fun = Kind.Term.app(filter_fun, list)
+    
+    let term = Kind.Term.ref("List.map")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let lamb = Kind.Term.lam(elem, (i) loop)
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.app(term, filter_fun)
+    
+    return term
+  }
+
+// transform list of Kind.Term in a Kind.Term representing a list
+Kind.Parser.comprehension.and_all(a: List<Kind.Term>): Kind.Term
+  case a {
+    nil: 
+      Kind.Term.ref("Bool.true")
+    cons:
+      let and  = Kind.Term.ref("Bool.and")
+      let and = Kind.Term.app(and, a.head)
+      let and = Kind.Term.app(and, Kind.Parser.comprehension.and_all(a.tail))
+      and
+  }
+
+// prototype
+Kind.Parser.comprehension_map: Parser<Kind.Term>
+  Parser {
+    Kind.Parser.text("{")
+    get loop = Kind.Parser.term
+    Kind.Parser.text("for")
+    get val = Kind.Parser.name1
+    Kind.Parser.text("in")
+    get map = Kind.Parser.term
+    Kind.Parser.text("}")
+    
+    let term = Kind.Term.ref("BBT.map")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let lamb = Kind.Term.lam(val, (v) loop)
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.app(term, map)
+
+    return term
+  }
+
+Kind.Parser.comprehension_range: Parser<Kind.Term>
+  Parser.choice!([
+    Kind.Parser.comprehension_range.go(none)
+    Kind.Parser.comprehension_range.go(some("I32"))
+    Kind.Parser.comprehension_range.go(some("U32"))
+  ])
+
+Kind.Parser.comprehension_range.go(typename: Maybe<String>): Parser(Kind.Term)
+  Kind.Parser.block("comprehension_range", Parser {
+    Kind.Parser.text("[")
+    get idx0 = Kind.Parser.term
+    Kind.Parser.text("to")
+    get idx1 = Kind.Parser.term
+    let list = 
+      ((x) 
+        let term = Kind.Term.ref(x|".range")
+        let term = Kind.Term.app(term, idx0)
+        let term = Kind.Term.app(term, idx1)
+        term) :: String -> Kind.Term
+
+    case typename {
+      none: Parser {
+        // optional for nat
+        Parser.maybe!(Parser {
+          Kind.Parser.text(":")
+          Kind.Parser.text("Nat")
+        })
+        Kind.Parser.text("]")
+        return list("Nat")
+      }
+      some: 
+        Parser {
+          Kind.Parser.text(":")
+          Kind.Parser.text(typename.value)
+          Kind.Parser.text("]")
+          return list(typename.value)
+        }
+    }
+  })

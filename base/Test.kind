@@ -1,2 +1,2 @@
-Test: _
-  Nat.min(5, 0)
+Test: IO<Unit>
+  Neutralis.main(42000)

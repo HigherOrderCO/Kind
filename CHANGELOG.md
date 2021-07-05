@@ -1,3 +1,70 @@
+### Kind 1.0.81
+
+- Add Scheme compilation options to CLI
+
+### Kind 1.0.79
+
+- Socket UDP primitives
+
+    Check Example.udp.sender and Example.udp.receiver
+
+### Kind 1.0.75
+
+- New syntaxes
+    
+    - Use
+
+        use x = obj
+        rest
+
+        // Equivalent to:
+
+        let x = obj
+        open x
+        rest
+
+    - Let abort
+        
+        let x = maybe abort k
+        rest
+
+        // Equivalent to:
+
+        case maybe as x {
+          none: k
+          some: 
+            let x = x.value
+            rest
+        }
+
+        // Also works with 'use'
+
+    - List comprehension
+
+        [x * 10 for x in [1, 2, 3]]
+
+        // Returns:
+
+        [10, 20, 30]
+
+    - Map for-in:
+
+        for key:val in map with state:
+          loop
+        rest
+
+        let state = for key:val in map:
+          loop
+        rest
+
+    - Function composition:
+
+        f . g
+
+        // Equivalent to:
+
+        Function.comp!!!(f, g)
+
 ### Kind 1.0.64
 
 - Monadic block improvements

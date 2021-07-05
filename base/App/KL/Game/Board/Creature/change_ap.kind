@@ -1,0 +1,26 @@
+App.KL.Game.Board.Creature.change_ap(
+  value: I32
+  pos: Hexagonal.Axial
+  board: App.KL.Game.Board
+): Pair<I32, App.KL.Game.Board>
+
+  let creature = App.KL.Game.Board.Creature.get(pos, board)
+  without creature: {+0#32, board}
+  let hero = creature@hero
+  let new_ap = I32.max((creature@ap + value), 0)
+  let new_ap = I32.min(new_ap, hero@max_ap)
+  let aux = App.KL.Game.Board.Creature.change_ap.aux(value)
+  let new_board = App.KL.Game.Board.Creature.modify_at(aux, pos, board)
+  {new_ap, new_board}
+
+
+  
+
+App.KL.Game.Board.Creature.change_ap.aux(
+  value: I32
+  creature: App.KL.Game.Creature
+): App.KL.Game.Creature
+
+  let hero = creature@hero
+  let new_ap = I32.min((creature@ap + value), hero@max_ap)
+  creature@ap <- new_ap

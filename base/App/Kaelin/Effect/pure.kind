@@ -1,6 +1,0 @@
-App.Kaelin.Effect.pure<A: Type>(
-  value: A
-): App.Kaelin.Effect<A>
-
-  (center, target, map)
-  App.Kaelin.Effect.Result.new<A>(value, map, [], NatMap.new!)

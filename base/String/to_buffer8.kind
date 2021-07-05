@@ -1,0 +1,2 @@
+String.to_buffer8(str: String): Pair<U32,Buffer8>
+  Buffer8.from_hex(String.hex.encode(str))

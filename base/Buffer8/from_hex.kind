@@ -1,6 +1,6 @@
 Buffer8.from_hex(hex: String): Pair<U32, Buffer8>
   let len = String.length(hex) // TODO: optimize by using U32?
-  let buf = Buffer8.alloc(Nat.bitlen(len))
+  let buf = Buffer8.alloc(Nat.bitlen(Nat.pred(Nat.div(len,2))))
   Buffer8.from_hex.go(hex, 0, buf)
 
 Buffer8.from_hex.go(hex: String, idx: U32, buf: Buffer8): Pair<U32,Buffer8>

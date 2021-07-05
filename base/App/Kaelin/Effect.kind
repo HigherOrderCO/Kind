@@ -1,5 +1,0 @@
-App.Kaelin.Effect(A: Type): Type
-  ((center: App.Kaelin.Coord) ->
-   (target: App.Kaelin.Coord) ->
-   (map: App.Kaelin.Map) ->
-   App.Kaelin.Effect.Result(A))

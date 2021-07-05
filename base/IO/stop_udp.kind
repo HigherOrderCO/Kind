@@ -1,0 +1,3 @@
+IO.stop_udp(port: Nat): IO<Unit>
+  IO.ask<Unit>("stop_udp", Nat.show(port), ()
+  IO.end<Unit>(unit))

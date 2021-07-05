@@ -1,2 +1,8 @@
 U32.to_i32(n: U32): I32
   F64.to_i32(U32.to_f64(n))
+
+U32.to_i32.signed(x: U32): I32
+  if x <? 2147483648 then
+    U32.to_i32(x)
+  else
+    I32.mul(U32.to_i32(U32.sub(0, x)), -1)

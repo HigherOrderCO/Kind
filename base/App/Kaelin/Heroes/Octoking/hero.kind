@@ -1,8 +1,0 @@
-App.Kaelin.Heroes.Octoking.hero: App.Kaelin.Hero
-  App.Kaelin.Hero.new(
-    "Octoking", 
-    App.Kaelin.Assets.hero.octoking,
-    40,
-    10,
-    App.Kaelin.Heroes.Octoking.skills
-  )

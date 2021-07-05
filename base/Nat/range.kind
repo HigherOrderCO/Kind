@@ -1,0 +1,11 @@
+Nat.range(ini: Nat, end: Nat): List<Nat>
+if ini >=? end then
+  []
+else
+  Nat.range.go(ini, end, [])
+
+Nat.range.go(ini: Nat, end: Nat, result: List<Nat>): List<Nat>
+  if ini =? end then
+    List.reverse!(result)
+  else
+    Nat.range.go(ini + 1, end, ini & result)

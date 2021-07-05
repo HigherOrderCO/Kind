@@ -1,7 +1,0 @@
-App.Kaelin.Event.Code.save_skill : List<U8>
-  [
-    40#8
-    8#8
-    4#8
-    2#8
-  ] //constraint 4 <= 64

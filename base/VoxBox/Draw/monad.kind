@@ -1,2 +1,10 @@
+// A monad instance of a VoxDraw that encapsulate the drawing functions
+// #Example :
+// push_circle :: (x : U32) -> (y : U32) -> (z : U32) -> (col : Col32) -> VoxBox -> VoxBox
+// VoxBox.VoxDraw {
+    // VoxBox.Draw.set_pos(10, 20, 3)
+    // VoxBox.Draw.new(push_circle) // draw a circle in the position (x = 10, 20, z = 3)
+//}
+
 VoxBox.Draw.monad : Monad<VoxBox.Draw>
   Monad.new<VoxBox.Draw>(VoxBox.monad.bind, VoxBox.monad.pure)

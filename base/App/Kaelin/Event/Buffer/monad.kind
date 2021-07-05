@@ -1,4 +1,0 @@
-App.Kaelin.Event.Buffer.monad : Monad<App.Kaelin.Event.Buffer>
-  Monad.new<App.Kaelin.Event.Buffer>(
-    App.Kaelin.Event.Buffer.monad.bind, 
-    App.Kaelin.Event.Buffer.monad.pure)

@@ -1,0 +1,31 @@
+App.KL.Game.Cemetery: Type
+  List<App.KL.Game.Cemetery.Dead>
+
+App.KL.Game.Cemetery.Dead: Type
+  Pair<String, I32> // (player_id, turns left to revive)
+
+
+
+App.KL.Game.Cemetery.revive(
+  cemetery: App.KL.Game.Cemetery, 
+  players: Map<App.KL.Game.Player>, 
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+  let players_to_revive = List.filter<App.KL.Game.Cemetery.Dead>((dead) dead@snd =? 0, cemetery)
+  for dead in players_to_revive with board:
+    let id = dead@fst
+    let player = players{id}
+    without player: board
+    App.KL.Game.Board.PLayer.set(id, player, board)
+  board
+
+App.KL.Game.Cemetery.update(
+  cemetery: App.KL.Game.Cemetery
+): App.KL.Game.Cemetery
+  let new_cemetery = []
+  for dead in cemetery with new_cemetery:
+    if dead@snd =? 0 then
+      new_cemetery
+    else
+      {dead@fst, dead@snd - 1} & new_cemetery
+  new_cemetery

@@ -1,8 +1,0 @@
-type App.Kaelin.Effect.Result <A: Type> {
-  new(
-    value: A
-    map: App.Kaelin.Map
-    futures: List(App.Kaelin.Future)
-    indicators: NatMap(App.Kaelin.Indicator)
-  )
-}

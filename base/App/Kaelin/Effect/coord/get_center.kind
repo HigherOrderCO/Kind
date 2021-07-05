@@ -1,3 +1,0 @@
-App.Kaelin.Effect.coord.get_center: App.Kaelin.Effect<App.Kaelin.Coord>
-  (center, target, map)
-  App.Kaelin.Effect.Result.new!(center, map, [], NatMap.new!)

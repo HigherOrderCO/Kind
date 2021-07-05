@@ -19,15 +19,15 @@ const TIME = 4;
 
 function hex_to_bytes(hex) {
   var arr = [];
-  for (var i = 0; i < (hex.length-2)/2; ++i) {
-    arr.push((parseInt(hex[2+i*2+0],16)<<4)|parseInt(hex[2+i*2+1],16));
+  for (var i = 0; i < hex.length/2; ++i) {
+    arr.push((parseInt(hex[i*2+0],16)<<4)|parseInt(hex[i*2+1],16));
   };
   return new Uint8Array(arr);
 };
 
 const hex_char = "0123456789abcdef".split("");
 function bytes_to_hex(buf) {
-  var hex = "0x";
+  var hex = "";
   for (var i = 0; i < buf.length; ++i) {
     hex += hex_char[buf[i]>>>4] + hex_char[buf[i]&0xF];
   };
@@ -35,9 +35,9 @@ function bytes_to_hex(buf) {
 };
 
 function hex_join(arr) {
-  var res = "0x";
+  let res = "";
   for (var i = 0; i < arr.length; ++i) {
-    res += arr[i].slice(2);
+    res += arr[i];
   }
   return res;
 };
@@ -47,56 +47,56 @@ function hexs_to_bytes(arr) {
 };
 
 function u8_to_hex(num) {
-  return "0x" + ("00" + num.toString(16)).slice(-2);
+  return ("00" + num.toString(16)).slice(-2);
 };
 
 function hex_to_u8(hex) {
-  return parseInt(hex.slice(2), 16);
+  return parseInt(hex, 16);
 };
 
-function hex_to_u40(hex) {
-  return parseInt(hex.slice(-40), 16);
+function hex_to_u32(hex) {
+  return parseInt(hex.slice(-32), 16);
 };
 
-function hex_to_u48(hex) {
-  return parseInt(hex.slice(-48), 16);
-};
-
-function hex_to_u56(hex) {
-  return parseInt(hex.slice(-56), 16);
+function hex_to_u64(hex) {
+  return parseInt(hex.slice(-64), 16);
 };
 
 function uN_to_hex(N, num) {
-  var hex = "0x";
+  var hex = "";
   for (var i = 0; i < N/4; ++i) {
     hex += hex_char[(num / (2**((N/4-i-1)*4))) & 0xF];
   };
   return hex;
 };
 
-function u40_to_hex(num) {
-  return uN_to_hex(40, num);
+function u32_to_hex(num) {
+  return uN_to_hex(32, num);
 };
 
-function u48_to_hex(num) {
-  return uN_to_hex(48, num);
-};
-
-function u56_to_hex(num) {
-  return uN_to_hex(56, num);
+function u64_to_hex(num) {
+  return uN_to_hex(64, num);
 };
 
 function check_hex(bits, hex) {
-  if (typeof hex !== "string" || !/^0x[a-fA-F0-9]*$/.test(hex)) {
+  if (typeof hex !== "string") {
     return null;
-  };
-  while ((hex.length - 2) * 4 < bits) {
-    hex = "0x0" + hex.slice(2);
-  };
-  if ((hex.length - 2) * 4 > bits) {
-    hex = hex.slice(0, Math.floor(bits / 4) + 2);
   }
-  return hex.toLowerCase();
+  if (!/^[a-fA-F0-9]*$/.test(hex)) {
+    return null;
+  }
+  if (bits) {
+    while (hex.length * 4 < bits) {
+      hex = "0" + hex;
+    }
+    if (hex.length * 4 > bits) {
+      hex = hex.slice(0, Math.floor(bits / 4));
+    }
+    return hex.toLowerCase();
+  } else {
+    hex = hex.length % 2 === 1 ? "0" + hex : hex;
+    return hex.toLowerCase();
+  }
 };
 
 var utf8_encoder = new TextEncoder("utf-8");
@@ -129,12 +129,10 @@ module.exports = {
   hex_join,
   u8_to_hex,
   hex_to_u8,
-  u40_to_hex,
-  hex_to_u40,
-  u48_to_hex,
-  hex_to_u48,
-  u56_to_hex,
-  hex_to_u56,
+  u32_to_hex,
+  hex_to_u32,
+  u64_to_hex,
+  hex_to_u64,
   string_to_hex,
   hex_to_string,
   check_hex,

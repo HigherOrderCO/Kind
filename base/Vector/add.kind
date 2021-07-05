@@ -1,0 +1,30 @@
+Vector.add<T: Type>(
+  add: T -> T -> T
+  n: Nat
+  v: Vector<T>(n)
+  u: Vector<T>(n)
+): Vector<T>(n)
+  Vector.add.go<T>(add, n, 0, v, u, Vector.nil<T>)
+
+Vector.add.go<T: Type>(
+  add: T -> T -> T
+  n: Nat, m: Nat
+  v: Vector<T>(Nat.add(m, n))
+  u: Vector<T>(Nat.add(m, n))
+  aux: Vector<T>(m)
+): Vector<T>(Nat.add(m, n))
+  case n with v u {
+    zero:
+      aux :: rewrite X in Vector<T>(X) with mirror(Nat.add.zero_right(m))
+    succ:
+      // since the function is tail recursive, we need
+      // to start from the bigger indexes, fortunately
+      // the commutativity of addition is here for us
+      def idx = Nat.to_fin(n.pred, m) :: rewrite X in Fin<X> with Nat.add.comm(Nat.succ(n.pred), m)
+      def aux.head = add(Vector.at!!(v, idx), Vector.at!!(u, idx))
+      def aux = Vector.cons!!(aux.head, aux)
+      def lem = Nat.add.succ_right(m, n.pred)
+      def v = v :: rewrite X in Vector<T>(X) with lem
+      def u = u :: rewrite X in Vector<T>(X) with lem
+      Vector.add.go<T>(add, n.pred, Nat.succ(m), v, u, aux) :: rewrite X in Vector<T>(X) with mirror(lem)
+  }!

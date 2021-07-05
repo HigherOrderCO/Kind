@@ -1,0 +1,14 @@
+App.KL.Game.Board.PLayer.set(
+  user: String, 
+  player: App.KL.Game.Player, 
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+  let pos    = player@init_pos
+  Maybe {
+    get coord     = pos
+    get hero_id   = Maybe.map!!(Nat.to_u8, player@hero_id)
+    let team      = player@team
+    get creature  = App.KL.Game.Creature.create(hero_id, some(user), team)
+    let entity    = App.KL.Game.Entity.creature(creature)
+    return App.KL.Game.Board.push(coord, entity, board)
+  } <> board

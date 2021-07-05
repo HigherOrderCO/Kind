@@ -1,7 +1,7 @@
 Kind.Parser.lambda: Parser(Kind.Term)
   Kind.Parser.block("lambda", Parser {
     get nams = Kind.Parser.items!("(", Kind.Parser.name1, ")")
-    get body = Kind.Parser.term
+    get body = Parser.avoiding!(Kind.Parser.text_now("("), Kind.Parser.term)
     return Kind.Parser.lambda.make.start(nams, body)
   })
 

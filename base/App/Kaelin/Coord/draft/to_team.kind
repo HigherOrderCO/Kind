@@ -1,6 +1,0 @@
-App.Kaelin.Coord.draft.to_team(user: String, players: Map<App.Kaelin.DraftInfo>): Maybe<App.Kaelin.Team>
-player = players{user}
-  case player {
-    none: none
-    some: some(player.value@team)
-  }

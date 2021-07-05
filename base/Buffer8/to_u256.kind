@@ -1,0 +1,8 @@
+Buffer8.to_u256(buf: Buffer8): U256
+  open buf
+  let num = 0#256
+  for i from 0 to 32 with num:
+    let val = Buffer8.get(Nat.to_u32(i), buf)
+    //log(Nat.show(i) | " " | U8.show(val))
+    U256.or(num, U256.shl(U8.to_u256(val), Nat.to_u256(i) * 8))
+  num

@@ -1,0 +1,2 @@
+List.found<A: Type>(cond: A -> Bool, xs: List<A>): Bool
+  Maybe.is_some<A>(List.find<A>(cond, xs))

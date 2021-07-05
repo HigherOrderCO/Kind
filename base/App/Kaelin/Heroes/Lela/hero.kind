@@ -1,8 +1,0 @@
-App.Kaelin.Heroes.Lela.hero: App.Kaelin.Hero
-  App.Kaelin.Hero.new(
-    "Lela", 
-    App.Kaelin.Assets.hero.lela,
-    20,
-    10,
-    App.Kaelin.Heroes.Lela.skills
-  )

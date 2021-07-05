@@ -9,7 +9,7 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
         game
       // Countdown zero: go to execution phase
       else
-        let game = game@moment <- App.KL.Game.Moment.execution(App.KL.Game.Cast.sort(game), 0, Hexagonal.Axial.BBT.new!, true)
+        let game = game@moment <- App.KL.Game.Moment.execution(App.KL.Game.Cast.sort(game), 0, none, Hexagonal.Axial.Map.new!, 0, true)
         let game = game@casts <- []
         game
     // Execution phase
@@ -17,40 +17,63 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
       // Get the first cast of the list
       cons: case App.KL.Game.Cast.get_skill(game.moment.casts.head, game) as skill {
         none: // Casted invalid skill
-          game@moment <- App.KL.Game.Moment.execution(game.moment.casts.tail, 0, game.moment.hits, game.moment.success)
+          game@moment <- App.KL.Game.Moment.execution(game.moment.casts.tail, 0, none, game.moment.hits, 0, game.moment.success)
         some: // Casted valid skill
           // Executing a cast
-          if U64.ltn(game.moment.frame, skill.value@frames * 3) then
+          if U64.ltn(game.moment.frame, skill.value@frames) then
             // On frame 0, run the effect
             if U64.eql(game.moment.frame,0) then case App.KL.Game.Cast.apply(game.moment.casts.head, game) as cast_result {
               // If the effect is a failure, keep the old game state
               failure:
-                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, game.moment.hits, false)
+                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, none, game.moment.hits, 0, false)
                 game
               // If the effect is a success, update the game state
               success: 
+                let coord = App.KL.Game.Cast.get_coord(game.moment.casts.head, game)
                 let game = cast_result.game
-                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, cast_result.hits, true)
+                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, coord, cast_result.hits, cast_result.ap_used, true)
                 game
             // On the other frames, just update the counter
             } else
-              game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, game.moment.hits, game.moment.success)
+              game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, game.moment.coord, game.moment.hits, game.moment.ap_used, game.moment.success)
           // Ending a cast: go to next
           else
-            game@moment <- App.KL.Game.Moment.execution(game.moment.casts.tail, 0, game.moment.hits, game.moment.success)
+            game@moment <- App.KL.Game.Moment.execution(game.moment.casts.tail, 0, none, game.moment.hits, 0, game.moment.success)
       }
       // No more casts left
       nil:
         let frame = game.moment.frame
         //Between-turn delay
         if U64.ltn(frame, App.KL.Constants.between_turn_delay) then
-          let game = game@board <- App.KL.Game.Creature.Status.tick_map(game.board)
-          game@moment <- App.KL.Game.Moment.execution(game.moment.casts, frame + 1, game.moment.hits, game.moment.success)
+          game@moment <- App.KL.Game.Moment.execution(game.moment.casts, frame + 1, none, game.moment.hits, game.moment.ap_used, game.moment.success)
         // Go to next turn
         else
-          let game = game@moment <- App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
-          let game = game@turn <- game@turn + 1
-          game
+          // apply status TODO redo
+          let game = App.KL.Game.Board.Creature.dot_verify(game)
+          // token update
+          let game   = game@board <- App.KL.Game.Token.board.capture(game@board)
+          // score update
+          let game   = game@score <- App.KL.Game.Token.score.capture(game@board, game@score)
+          // Verify if game ended  
+          let winner = App.KL.Game.Score.get_winner(game@score)
+          case winner {
+            none: // There isnt a winner - game continues
+              let game = game@board <- App.KL.Game.Board.status_update(game@board)
+              // ap restore
+              let game = game@board <- App.KL.Game.Board.ap_update(game@board)
+              // cemetery update
+              let game   = game@board    <- App.KL.Game.Cemetery.revive(game@cemetery, game@players, game@board)
+              let game   = game@cemetery <- App.KL.Game.Cemetery.update(game@cemetery)
+              // phase change
+              let game = game@moment <- App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
+              let game = game@turn <- game@turn + 1
+              game
+            some: // There is a winner (or a drawn) - game ends
+              // TODO add delay
+              let game = game@phase <- App.KL.Game.Phase.end
+              game
+          }
+          
     }
   }
   //let game = game@tick <- game@tick + 1

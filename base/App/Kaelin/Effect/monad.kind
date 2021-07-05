@@ -1,2 +1,0 @@
-App.Kaelin.Effect.monad: Monad(App.Kaelin.Effect)
-  Monad.new<App.Kaelin.Effect>(App.Kaelin.Effect.bind, App.Kaelin.Effect.pure)

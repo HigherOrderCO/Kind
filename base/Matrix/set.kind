@@ -1,0 +1,9 @@
+Matrix.set<T: Type>(
+  n: Nat, m: Nat,
+  M: Matrix<T>(n, m),
+  idx0: Fin(n), idx1: Fin(m)
+  t: T
+): Matrix<T>(n, m)
+  def line = Vector.at!!(M, idx0)
+  def line = Vector.set!!(line, idx1, t)
+  Vector.set!!(M, idx0, line)

@@ -1,0 +1,2 @@
+String.from_buffer8(lenbuf: Pair<U32,Buffer8>): String
+  String.hex.decode(Buffer8.to_hex(lenbuf))

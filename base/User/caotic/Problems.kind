@@ -503,4 +503,4 @@ Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
   }!
 
 User.caotic.Problems : Nat
-  Bits.to_nat(Problems.sqrt(U32.to_bits(100000000#32)))
+  2

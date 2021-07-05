@@ -1,7 +1,0 @@
-App.Kaelin.Map.del(
-  coord: App.Kaelin.Coord,
-  map: App.Kaelin.Map
-): App.Kaelin.Map
-
-  key = App.Kaelin.Coord.Convert.axial_to_nat(coord)
-  NatMap.del!(key, map)

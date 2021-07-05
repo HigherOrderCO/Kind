@@ -1,3 +1,0 @@
-type App.Kaelin.Coord.Cubic {
-    new(x:I32, y:I32, z:I32)
-}

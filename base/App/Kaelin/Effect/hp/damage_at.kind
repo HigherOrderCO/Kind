@@ -1,6 +1,0 @@
-App.Kaelin.Effect.hp.damage_at(
-  dmg: I32,
-  pos: App.Kaelin.Coord
-): App.Kaelin.Effect<I32>
-
-  App.Kaelin.Effect.hp.change_at(I32.neg(dmg), pos)

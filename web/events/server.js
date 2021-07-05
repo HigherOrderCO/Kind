@@ -3,7 +3,7 @@ var ws = require('ws');
 var fs = require("fs-extra");
 var path = require("path");
 var lib = require("./lib.js");
-var sig = require("nano-ethereum-signer");
+var ethsig = require("nano-ethereum-signer");
 
 // Globals
 // =======
@@ -27,18 +27,24 @@ for (var file of files) {
     var room_name = file.slice(0, -5);
     var file_data = fs.readFileSync(path.join("data",file));
     var room_posts = [];
-    for (var i = 0; i < file_data.length; i += 64) {
+    for (var i = 0; i < file_data.length; i += 4 + size) {
+      var size = lib.hex_to_u32(file_data.slice(i, i + 4).toString("hex"));
       var head = Buffer.from([lib.SHOW]);
-      var body = file_data.slice(i, i + 64);
+      var body = file_data.slice(i + 4, i + 4 + size);
       room_posts.push(new Uint8Array(Buffer.concat([head, body])));
     }
-    console.log("Loaded "+room_posts.length+" posts from room "+room_name+".");
+    console.log("Loaded "+room_posts.length+" posts on room "+room_name+".");
     RoomPosts[room_name] = room_posts;
   }
 }
 
 // Methods
 // =======
+
+// Returns current time
+function get_time() {
+  return Date.now();
+}
 
 // Returns current tick
 function get_tick() {
@@ -91,17 +97,13 @@ function unwatch_room(room_name, ws) {
 
 // Saves a post (room id, user address, data)
 function save_post(post_room, post_user, post_data) {
-  var post_room = lib.check_hex(56, post_room);
-  var post_time = lib.u40_to_hex(get_tick());
+  var post_room = lib.check_hex(64, post_room);
+  var post_tick = lib.u64_to_hex(get_tick());
   var post_user = lib.check_hex(160, post_user);
-  var post_data = lib.check_hex(256, post_data);
-  var post_buff = lib.hexs_to_bytes([
-    lib.u8_to_hex(lib.SHOW),
-    post_room,
-    post_time,
-    post_user,
-    post_data,
-  ]);
+  var post_data = lib.check_hex(null, post_data);
+  var post_list = [post_room, post_tick, post_user, post_data];
+  var post_buff = lib.hexs_to_bytes([lib.u8_to_hex(lib.SHOW)].concat(post_list));
+  var post_seri = lib.hexs_to_bytes([lib.u32_to_hex(post_buff.length-1)].concat(post_list));
   var post_file = path.join("data", post_room+".room");
 
   var log_msg = "";
@@ -134,7 +136,7 @@ function save_post(post_room, post_user, post_data) {
   }
 
   // Adds post to file
-  fs.appendFileSync(post_file, Buffer.from(post_buff.slice(1)));
+  fs.appendFileSync(post_file, Buffer.from(post_seri));
 
   // Log messages
   console.log(log_msg);
@@ -154,13 +156,13 @@ wss.on("connection", function connection(ws) {
     switch (msge[0]) {
       // User wants to watch a room
       case lib.WATCH:
-        var room = lib.bytes_to_hex(msge.slice(1, 8));
+        var room = lib.bytes_to_hex(msge.slice(1, 9));
         watch_room(room, ws);
         break;
 
       // User wants to unwatch a room
       case lib.UNWATCH:
-        var room = lib.bytes_to_hex(msge.slice(1, 8));
+        var room = lib.bytes_to_hex(msge.slice(1, 9));
         unwatch_room(room, ws);
         break;
 
@@ -168,21 +170,21 @@ wss.on("connection", function connection(ws) {
       case lib.TIME:
         var msge_buff = lib.hexs_to_bytes([
           lib.u8_to_hex(lib.TIME),
-          lib.u48_to_hex(Date.now()),
-          lib.bytes_to_hex(msge.slice(1, 7)),
+          lib.u64_to_hex(Date.now()),
+          lib.bytes_to_hex(msge.slice(1, 9)),
         ]);
         ws.send(msge_buff);
         break;
 
       // User wants to post a message
       case lib.POST:
-        //console.log("got post msge...", msge);
-        var post_room = lib.bytes_to_hex(msge.slice(1, 8));
-        var post_data = lib.bytes_to_hex(msge.slice(8, 40));
-        var post_sign = lib.bytes_to_hex(msge.slice(40, 105));
-        var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
-        var post_user = sig.signerAddress(post_hash, post_sign);
+        var post_room = lib.bytes_to_hex(msge.slice(1, 9));
+        var post_data = lib.bytes_to_hex(msge.slice(9, msge.length - 65));
+        var post_sign = lib.bytes_to_hex(msge.slice(msge.length - 65, msge.length));
+        var post_hash = ethsig.keccak("0x"+lib.hexs_to_bytes([post_room, post_data])).slice(2);
+        var post_user = ethsig.signerAddress("0x"+post_hash, "0x"+post_sign).slice(2);
         save_post(post_room, post_user, post_data);
+        break;
     };
   });
 

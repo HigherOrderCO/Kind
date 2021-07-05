@@ -43,8 +43,8 @@ Kind.Synth.one(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
             //IO.print("- CHEK " | name)
             let defs = Kind.Map.set!(name, Kind.Def.new(file, code, orig, name, term, type, isct, arit, Kind.Status.wait), defs);
             let checked = do Kind.Check {
-              get chk_type = Kind.Term.check(type, Maybe.some!(Kind.Term.typ), defs, [], Kind.MPath.i(Kind.MPath.nil), Maybe.none!);
-              get chk_term = Kind.Term.check(term, Maybe.some!(type), defs, [], Kind.MPath.o(Kind.MPath.nil), Maybe.none!);
+              get chk_type = Kind.Term.check(type, Maybe.some!(Kind.Term.typ), defs, [], Kind.Path.Maybe.Builder.i(Kind.Path.Maybe.Builder.nil), Maybe.none!);
+              get chk_term = Kind.Term.check(term, Maybe.some!(type), defs, [], Kind.Path.Maybe.Builder.o(Kind.Path.Maybe.Builder.nil), Maybe.none!);
               return Unit.new;
             };
             case checked {

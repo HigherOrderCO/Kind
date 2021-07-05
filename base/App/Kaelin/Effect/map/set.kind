@@ -1,3 +1,0 @@
-App.Kaelin.Effect.map.set(new_map: App.Kaelin.Map): App.Kaelin.Effect<Unit>
-  (center, target, map)
-  App.Kaelin.Effect.Result.new!(unit, new_map, [], NatMap.new!)

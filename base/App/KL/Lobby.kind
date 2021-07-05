@@ -87,7 +87,7 @@ App.KL.Lobby.when(
         "random": IO {
           get rnd = IO.random(10000000000)
           let str = Nat.show(rnd)
-          let room = "0x72214422" | String.drop(String.length(str) - 6, str)
+          let room = "4b4c494e" | String.take(8, str)
           let new_local = local@room_input <- room
           App.set_local!(App.KL.State.Local.lobby(new_local))
         }

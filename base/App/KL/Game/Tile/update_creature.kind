@@ -1,0 +1,9 @@
+App.KL.Game.Tile.update_creature(
+  f: App.KL.Game.Creature -> App.KL.Game.Creature
+  tile: App.KL.Game.Tile
+): App.KL.Game.Tile
+  
+  open tile
+  without tile.creature: tile
+  tile@creature <- some(f(tile.creature))
+

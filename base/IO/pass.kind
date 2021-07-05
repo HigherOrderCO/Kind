@@ -1,0 +1,4 @@
+IO.pass: IO<Unit>
+  IO {
+    return unit
+  }

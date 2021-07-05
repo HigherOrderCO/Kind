@@ -1,9 +1,0 @@
-App.Kaelin.Skill.ap_recover(
-  restoration: I32
-): App.Kaelin.Effect<Unit>
-  
-  App.Kaelin.Effect {
-  get self = App.Kaelin.Effect.coord.get_center
-  App.Kaelin.Effect.ap.restore(I32.neg(restoration), self)
-  return unit
-  }

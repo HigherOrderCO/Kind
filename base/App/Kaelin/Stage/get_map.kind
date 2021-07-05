@@ -1,5 +1,0 @@
-App.Kaelin.Stage.get_map(state: App.Store<App.Kaelin.State>): App.Kaelin.Map
-  let stage = state@global@stage
-  case stage {
-    planning: state@local@local_map
-  } default state@global@map

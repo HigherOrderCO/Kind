@@ -1,27 +1,27 @@
 Matrix<T: Type>(rows: Nat, columns: Nat): Type
   Vector<Vector<T, columns>, rows>
 
-Matrix.at<T: Type>(n: Nat, m: Nat, A: Matrix<T>(n, m), a: Fin(n), b: Fin(m)): T
-  Vector.at!!(Vector.at!!(A, a), b)
-
 // TODO deal with case that n == 0
 Matrix.mul<T: Type>(
   // TODO use field
+  zero: T
   mul: T -> T -> T, add: T -> T -> T,
   m: Nat, n: Nat, p: Nat,
   A: Matrix<T>(m, n)
   B: Matrix<T>(n, p)
 ): Matrix<T>(m, p)
-  case m {
-    zero:
-      Vector.nil!
-    succ:
-      def lem = mirror(Nat.add.zero_right(m))
-      def A = A :: rewrite X in Matrix<T>(X, Nat.succ(n)) with lem
-      Matrix.mul.col<T>(mul, add, m, 0, n, p, A, B)
-  }!
+  ?a
+//  case m {
+//    zero:
+//      Vector.nil!
+//    succ:
+//      def lem = mirror(Nat.add.zero_right(m))
+//      def A = A :: rewrite X in Matrix<T>(X, Nat.succ(n)) with lem
+//      Matrix.mul.col<T>(mul, add, m, 0, n, p, A, B)
+//  }!
 
 Matrix.mul.col<T: Type>(
+  zero: T
   mul: T -> T -> T, add: T -> T -> T
   m0: Nat, m1: Nat
   n: Nat
@@ -29,20 +29,22 @@ Matrix.mul.col<T: Type>(
   A: Matrix<T>(Nat.add(m0, m1), Nat.succ(n))
   B: Matrix<T>(Nat.succ(n), Nat.succ(p))
 ): Matrix<T>(m0, p)
-  case m0 with A {
-    zero:
-      Vector.nil!
-    succ:
-      def lem = mirror(Nat.add.zero_right(p))
-      def NB = B :: rewrite X in Matrix<T>(Nat.succ(n), Nat.succ(X)) with lem
-      def hd = Matrix.mul.row<T>(mul, add, Nat.succ(m0.pred), m1, n, p, 0, A, NB)
-      def lem = mirror(Nat.add.succ_right(m0.pred, m1))
-      def A = A :: rewrite X in Matrix<T>(X, Nat.succ(n)) with lem
-      def tail = Matrix.mul.col<T>(mul, add, m0.pred, Nat.succ(m1), n, p, A, B)
-      Vector.cons(Vector<T, p>, m0.pred, hd, tail)
-  }!
+  ?b
+//  case m0 with A {
+//    zero:
+//      Vector.nil!
+//    succ:
+//      def lem = mirror(Nat.add.zero_right(p))
+//      def NB = B :: rewrite X in Matrix<T>(Nat.succ(n), Nat.succ(X)) with lem
+//      def hd = Matrix.mul.row<T>(mul, add, Nat.succ(m0.pred), m1, n, p, 0, A, NB)
+//      def lem = mirror(Nat.add.succ_right(m0.pred, m1))
+//      def A = A :: rewrite X in Matrix<T>(X, Nat.succ(n)) with lem
+//      def tail = Matrix.mul.col<T>(mul, add, m0.pred, Nat.succ(m1), n, p, A, B)
+//      Vector.cons(Vector<T, p>, m0.pred, hd, tail)
+//  }!
   
 Matrix.mul.row<T: Type>(
+  zero: T
   mul: T -> T -> T, add: T -> T -> T
   m0: Nat, m1: Nat
   n: Nat
@@ -50,16 +52,17 @@ Matrix.mul.row<T: Type>(
   A: Matrix<T>(Nat.succ(Nat.add(m0, m1)), Nat.succ(n))
   B: Matrix<T>(Nat.succ(n), Nat.succ(Nat.add(p0, p1)))
 ): Vector<T>(p0)
-  case p0 with B {
-    zero:
-      Vector.nil!
-    succ:
-      def lem = mirror(Nat.add.succ_right(p0.pred, p1))
-      def hd = Matrix.mul.dot<T>(mul, add, m0, m1, n, Nat.succ(p0.pred), p1, A, B)
-      def B = B :: rewrite X in Matrix<T>(Nat.succ(n), Nat.succ(X)) with lem
-      def tail = Matrix.mul.row<T>(mul, add, m0, m1, n, p0.pred, Nat.succ(p1), A, B)
-      Vector.cons<T>(p0.pred, hd, tail)
-  }!
+  ?c
+//  case p0 with B {
+//    zero:
+//      Vector.nil!
+//    succ:
+//      def lem = mirror(Nat.add.succ_right(p0.pred, p1))
+//      def hd = Matrix.mul.dot<T>(mul, add, m0, m1, n, Nat.succ(p0.pred), p1, A, B)
+//      def B = B :: rewrite X in Matrix<T>(Nat.succ(n), Nat.succ(X)) with lem
+//      def tail = Matrix.mul.row<T>(mul, add, m0, m1, n, p0.pred, Nat.succ(p1), A, B)
+//      Vector.cons<T>(p0.pred, hd, tail)
+//  }!
 
 Matrix.mul.dot<T: Type>(
   mul: T -> T -> T, add: T -> T -> T
@@ -69,17 +72,18 @@ Matrix.mul.dot<T: Type>(
   A: Matrix<T>(Nat.succ(Nat.add(m0, m1)), Nat.succ(n))
   B: Matrix<T>(Nat.succ(n), Nat.succ(Nat.add(p0, p1)))
 ): T
-  let idx0 = Nat.to_fin.tight(Nat.add(m0, m1))
-  let idx1 = Nat.to_fin.tight(n)
-  let idx2 = Nat.to_fin.tight(Nat.add(p0, p1))
-  def a = Matrix.at(T, Nat.succ(Nat.add(m0, m1)), Nat.succ(n), A, idx0, idx1)
-  def b = Matrix.at(T, Nat.succ(n), Nat.succ(Nat.add(p0, p1)), B, idx1, idx2)
-  def ret = mul(a, b)
-  def lem = apply(Nat.succ, mirror(Nat.add.zero_right(n)))
-  def lem = Equal.chain!!!!(lem, mirror(Nat.add.succ_right(n, 0)))
-  def A = A :: rewrite X in Matrix(T, Nat.succ(Nat.add(m0, m1)), X) with lem
-  def B = B :: rewrite X in Matrix(T, X, Nat.succ(Nat.add(p0, p1))) with lem
-  Matrix.mul.dot.go<T>(mul, add, m0, m1, n, 1, p0, p1, A, B, ret)
+  ?d
+//  let idx0 = Nat.to_fin.tight(Nat.add(m0, m1))
+//  let idx1 = Nat.to_fin.tight(n)
+//  let idx2 = Nat.to_fin.tight(Nat.add(p0, p1))
+//  def a = Matrix.at(T, Nat.succ(Nat.add(m0, m1)), Nat.succ(n), A, idx0, idx1)
+//  def b = Matrix.at(T, Nat.succ(n), Nat.succ(Nat.add(p0, p1)), B, idx1, idx2)
+//  def ret = mul(a, b)
+//  def lem = apply(Nat.succ, mirror(Nat.add.zero_right(n)))
+//  def lem = Equal.chain!!!!(lem, mirror(Nat.add.succ_right(n, 0)))
+//  def A = A :: rewrite X in Matrix(T, Nat.succ(Nat.add(m0, m1)), X) with lem
+//  def B = B :: rewrite X in Matrix(T, X, Nat.succ(Nat.add(p0, p1))) with lem
+//  Matrix.mul.dot.go<T>(mul, add, m0, m1, n, 1, p0, p1, A, B, ret)
 
 Matrix.mul.dot.go<T: Type>(
   // use field
@@ -91,19 +95,20 @@ Matrix.mul.dot.go<T: Type>(
   B: Matrix<T>(Nat.add(n0, n1), Nat.succ(Nat.add(p0, p1)))
   ret: T
 ): T
-  case n0 with A B {
-    zero:
-      ret
-    succ:
-      let idx0 = Nat.to_fin(m0, m1)
-      let idx1 = Nat.to_fin(n0.pred, n1)
-      let idx2 = Nat.to_fin(p0, p1)
-      def a = Matrix.at(T, Nat.succ(Nat.add(m0, m1)), Nat.add(Nat.succ(n0.pred), n1), A, idx0, idx1)
-      def b = Matrix.at(T, Nat.add(Nat.succ(n0.pred), n1), Nat.succ(Nat.add(p0, p1)), B, idx1, idx2)
-      def res = mul(a, b)
-      def ret = add(ret, res)
-      def lem = mirror(Nat.add.succ_right(n0.pred, n1))
-      def A = A :: rewrite X in Matrix(T, Nat.succ(Nat.add(m0, m1)), X) with lem
-      def B = B :: rewrite X in Matrix(T, X, Nat.succ(Nat.add(p0, p1))) with lem
-      Matrix.mul.dot.go<T>(mul, add, m0, m1, n0.pred, Nat.succ(n1), p0, p1, A, B, ret)
-  }!
+  ?e
+//  case n0 with A B {
+//    zero:
+//      ret
+//    succ:
+//      let idx0 = Nat.to_fin(m0, m1)
+//      let idx1 = Nat.to_fin(n0.pred, n1)
+//      let idx2 = Nat.to_fin(p0, p1)
+//      def a = Matrix.at(T, Nat.succ(Nat.add(m0, m1)), Nat.add(Nat.succ(n0.pred), n1), A, idx0, idx1)
+//      def b = Matrix.at(T, Nat.add(Nat.succ(n0.pred), n1), Nat.succ(Nat.add(p0, p1)), B, idx1, idx2)
+//      def res = mul(a, b)
+//      def ret = add(ret, res)
+//      def lem = mirror(Nat.add.succ_right(n0.pred, n1))
+//      def A = A :: rewrite X in Matrix(T, Nat.succ(Nat.add(m0, m1)), X) with lem
+//      def B = B :: rewrite X in Matrix(T, X, Nat.succ(Nat.add(p0, p1))) with lem
+//      Matrix.mul.dot.go<T>(mul, add, m0, m1, n0.pred, Nat.succ(n1), p0, p1, A, B, ret)
+//  }!

@@ -1,0 +1,31 @@
+Example.udp.sender.new(port: Nat, to_ip: String, to_port: Nat, msge: String): IO<Unit>
+  IO {
+    IO.print("sending")
+    IO.init_udp(port)
+    let data = String.hex.encode(msge)
+    IO.send_udp(port, to_ip, to_port, data)
+    IO.sleep(500)
+    Example.udp.sender.new(port, to_ip, to_port, msge)
+  }
+
+Example.udp.receiver.new(port: Nat): IO<Unit>
+  IO {
+    IO.init_udp(port)
+    get got = IO.recv_udp(port) 
+    let len = List.length!(got)
+    IO.print("received " | Nat.show(len))
+    for i from 0 to len: IO {
+      use msge = got[i] abort IO.pass
+      IO.print("- message " | Nat.show(i) | ":")
+      IO.print("-- from: " | msge.from@ip)
+      IO.print("-- msge: " | String.hex.decode(msge.data))
+    }
+    IO.sleep(500)
+    Example.udp.receiver.new(port)
+  }
+
+Example.udp.sender: IO<Unit>
+  Example.udp.sender.new(42000, "127.0.0.1", 42001, "oi tudo bem?")
+
+Example.udp.receiver: IO<Unit>
+  Example.udp.receiver.new(42001)

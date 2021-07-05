@@ -1,9 +1,0 @@
-App.Kaelin.Event.Buffer.next : App.Kaelin.Event.Buffer<Nat>
-  App.Kaelin.Event.Buffer.hex!(App.Kaelin.Event.Code.Hex.to_nat)
-  
-  
- // open buffer
-//  case buffer.snd as xs {
-  //    nil : buffer
-   //   cons : {String.drop(U8.to_nat(xs.head), buffer.fst), xs.tail}
- // }

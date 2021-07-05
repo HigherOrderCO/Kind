@@ -1,8 +1,0 @@
-App.Kaelin.Action.local.set_internal(
-  time : U64,
-  local: App.Kaelin.State.local
-): App.Kaelin.State.local
-
-  open local
-  open local.internal as internal
-  local@internal <- App.Kaelin.Internal.new(U64.to_nat(time), internal.frame +1, internal.timer)

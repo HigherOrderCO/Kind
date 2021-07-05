@@ -1,31 +1,9 @@
-type Map <A : Type> <B : Type> (op : A -> A -> Cmp) {
-  new(tree : BBT<A, B>)
-}
+get_interval(random : F64, min : Nat, max : Nat) : Nat
+  F64.to_nat(random * (Nat.to_f64(max) - Nat.to_f64(min)) + Nat.to_f64(min))
 
-Map.set(A : Type, B : Type, op : A -> A -> CMP, k : A, v : B, map : Map<A, B, op>) : Map<A, B, op>
-  open map
-  let k = BBT.insert!!(op, k, v, map.tree)
-  Map.new(A, B, op, k)
 
-StringMap(B : Type) : Type
-  Map!<B, String.cmp>
-
-StringMap.new<B : Type> : StringMap<B>
-  Map.new!!!(BBT.tip<String, B>)
-
-test(x : StringMap<Nat>) : StringMap<Nat>
-  Map.set!!!("test", 34, x)
-
-User.caotic.test : _
-  test(StringMap.new!)
-
-User.Caotic.Test2: _
-  let test = [] :: BList<Nat>
-  let k = List.foldr!!(test, BList.insert!, [1, 2, 3, 4, 5, 6])
-  Maybe {
-    let a = List.tail!(k)
-    get b = List.head!(a)
-    return b
+User.caotic.test : IO<_>
+  IO {
+    get a = Crypto.random
+    IO.print(Nat.show(get_interval(a, 1, 10)))
   }
-  //BList.insert!(2, test)
-  

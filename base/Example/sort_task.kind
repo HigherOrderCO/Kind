@@ -1,0 +1,63 @@
+// Tests if "output" is the sorted version of "input"
+sort.test(input: List<Nat>, output: List<Nat>): Bool
+  // Checks if both lists have the same length
+  let ok = Nat.eql(List.length!(input), List.length!(output))
+
+  // Checks if output is in ascending order
+  for i from 0 to List.length!(output) - 1 with ok:
+    if Nat.lte(output[i] <> 0, output[1+i] <> 0) then
+      ok
+    else
+      false
+
+  // Checks if all input elements appear in the output list
+  // TODO: should instead check element count
+  for a in input with ok:
+    if List.found!(Nat.eql(a), output) then
+      ok
+    else
+      false
+
+  // Returns if 'sort' worked
+  ok
+
+// The sort algorithm 
+sort(list: List<Nat>): List<Nat>
+  sort.build(list, [])
+
+// Creates a sorted list
+sort.build(list: List<Nat>, sorted: List<Nat>): List<Nat>
+  case list {
+    nil: sorted
+    cons: sort.build(list.tail, sort.insert(list.head, sorted))
+  }
+    
+// Inserts an element in a sorted list
+sort.insert(elem: Nat, list: List<Nat>): List<Nat>
+  case list {
+    nil: List.cons!(elem, [])
+    cons: if Nat.lte(elem, list.head)
+      then List.cons!(elem, List.cons!(list.head, list.tail))
+      else List.cons!(list.head, sort.insert(elem, list.tail))
+  }
+
+// Sorting preserves length
+sort.insert.length(elem: Nat, list: List<Nat>): List.length!(sort.insert(elem,list)) == Nat.succ(List.length!(list))
+  case list {
+    nil: refl
+    cons: case Nat.lte(elem, list.head) as lte {
+      true: refl
+      false: apply(Nat.succ, sort.insert.length(elem, list.tail))
+    }: List.length(Nat, lte(_,_,_)) == _
+  }!
+
+// Sorting returns a list in ascending order
+sort.insert.keep(list: List<Nat>, n: Nat): Equal(Bool, Nat.lte(Maybe.default<Nat>(List.at<Nat>(n,sort(list)),0), Maybe.default<Nat>(List.at<Nat>(Nat.add(n,1),sort(list)),0)), true)
+  case sort(list) as sorted {
+    nil: refl
+    cons:
+      ?b
+  }!
+
+Test: _
+  List.show!(Nat.show, sort([7, 2, 6, 5, 5, 3, 1]))

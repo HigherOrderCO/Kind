@@ -1,7 +1,0 @@
-App.Kaelin.Hero.skill.from_key(
-  key: U16,
-  hero: App.Kaelin.Hero
-): Maybe<App.Kaelin.Skill>
-
-  open hero
-  List.find!(App.Kaelin.Skill.has_key(key),hero.skills)
