@@ -1,0 +1,7 @@
+// Gets a value in a Map tree
+Hexagonal.Axial.Map.get<A : Type>(
+  key : Hexagonal.Axial,
+  map : Hexagonal.Axial.Map<A>
+): Maybe<A>
+
+  BBT.lookup!!(Hexagonal.Axial.cmp, key map)

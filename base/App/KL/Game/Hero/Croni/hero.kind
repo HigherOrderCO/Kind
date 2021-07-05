@@ -49,12 +49,15 @@ App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(range: I32, ap_cost: I32): App.KL
   }
 
 App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
-  App.KL.Game.Effect { 
+  App.KL.Game.Effect {
     get target  = App.KL.Game.Effect.coord.get_target
     get center  = App.KL.Game.Effect.coord.get_center
+    App.KL.Game.Effect.limit_range(range)
+    App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.common.dmg.single(range, dmg, ap_cost)
+    App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
+    return unit
   }
 
 App.KL.Game.Hero.Croni.hero.shadow_trap: App.KL.Game.Hero
@@ -66,7 +69,7 @@ App.KL.Game.Hero.Croni.hero.shadow_trap: App.KL.Game.Hero
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect {
     App.KL.Game.Effect.board.creature.move(from, to)
-    App.KL.Game.Effect.hp.damage_at(6, to)
+    App.KL.Game.Effect.status.stun.add(2, to)
     return unit
   })
   let description = "A Shadow Trap created by Croni that deals 6 damage to whoever steps on it"

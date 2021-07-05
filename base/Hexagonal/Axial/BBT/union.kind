@@ -1,6 +1,0 @@
-// Unites two results of Actions in a BBT tree
-Hexagonal.Axial.BBT.union<A : Type>(
-  map : Hexagonal.Axial.BBT<A>
-): Hexagonal.Axial.BBT<A> -> Hexagonal.Axial.BBT<A>
-
-  BBT.union!!(Hexagonal.Axial.cmp, map)

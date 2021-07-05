@@ -1,0 +1,8 @@
+App.KL.Game.Creature.Status.movement_impairment_check(
+  creature: App.KL.Game.Creature
+): Bool
+
+  let stun = App.KL.Game.Creature.Status.stun.check(creature)
+  let root = App.KL.Game.Creature.Status.root.check(creature)
+  
+  stun || root

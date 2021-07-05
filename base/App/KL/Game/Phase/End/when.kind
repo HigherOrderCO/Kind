@@ -1,0 +1,16 @@
+App.KL.Game.Phase.End.when(
+  local  : App.KL.Game.State.Local
+  global : App.KL.Game
+  event  : App.Event,
+): IO<Maybe<App.State.local<App.KL.State>>>
+  let players = global@players
+
+  case event {
+    mouse_click:
+      switch String.eql(event.id) {
+        "return" : // Set initial position
+          App.new_post!(local@room, App.KL.Game.Phase.End.Event.go_lobby.serial)
+      } default App.pass!
+  
+  } default App.pass!
+

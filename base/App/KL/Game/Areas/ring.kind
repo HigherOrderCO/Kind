@@ -1,0 +1,6 @@
+App.KL.Game.Areas.ring(
+  coord: Hexagonal.Axial
+  radius: I32
+): List<Hexagonal.Axial>
+
+  Hexagonal.Axial.circular(coord, radius)

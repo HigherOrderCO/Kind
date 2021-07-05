@@ -1,6 +1,2 @@
 Test: IO<Unit>
-  IO {
-    let x = some(7) abort IO.print("ata")
-    let y = some(7) abort IO.print("ola")
-    return unit
-  }
+  Neutralis.main(42000)

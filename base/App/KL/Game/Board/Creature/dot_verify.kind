@@ -1,0 +1,57 @@
+App.KL.Game.Board.Creature.dot_verify(
+  game: App.KL.Game
+): App.KL.Game
+
+  let result = {game@board, game@cemetery}
+  let aux = App.KL.Game.Board.Creature.dot_verify.aux(game@board)
+  for creature in aux with result:
+    let coord = creature@fst
+    let creature = creature@snd
+    open creature
+    for dots in creature.status with result:
+      case dots { 
+        burn:
+          if I32.gtn(dots.duration, 0) then
+            let change =  App.KL.Game.Board.Creature.change_hp(dots.amount,coord, result@fst)
+            case change@snd@snd as dead {
+              none: {change@snd@fst, result@snd}
+              some: {change@snd@fst, {dead.value, App.KL.Constants.turns_dead} & result@snd}
+            }
+          else
+            result
+        poison:
+          if I32.gtn(dots.duration, 0) then
+            let change =  App.KL.Game.Board.Creature.change_hp(dots.amount,coord, result@fst)
+            case change@snd@snd as dead {
+              none: {change@snd@fst, result@snd}
+              some: {change@snd@fst, {dead.value, App.KL.Constants.turns_dead} & result@snd}
+            }
+          else
+            result
+      } default result
+    result
+  let game = game@board <- result@fst
+  let game = game@cemetery <- result@snd
+  game
+
+
+
+
+App.KL.Game.Board.Creature.dot_verify.aux(
+  board: App.KL.Game.Board
+): List<Pair<Hexagonal.Axial, App.KL.Game.Creature>>
+
+  let list = Hexagonal.Axial.Map.to_list!(board)
+  let creatures = []
+  for coords in list with creatures:
+    coords = coords@fst
+    creature = App.KL.Game.Board.Creature.get(coords, board)
+    case creature {
+      none:
+        creatures
+      some:
+      open creature.value
+      {coords, creature.value} & creatures
+    }
+  creatures
+  

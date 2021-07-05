@@ -4,7 +4,7 @@ App.KL.Game.Creature.Status.update(
 ): App.KL.Game.Creature
 
   open creature
-  status_update = App.KL.Game.Creature.Status.update.aux(creature.status)
+  let status_update = App.KL.Game.Creature.Status.update.aux(creature.status)
   creature@status <- status_update
 
 
@@ -17,9 +17,11 @@ App.KL.Game.Creature.Status.update.aux(
       []
     cons: 
       let head = case status.head {
-        burn : App.KL.Game.Creature.Status.burn(I32.sub(status.head.duration, 1), status.head.amount)
+        burn : App.KL.Game.Creature.Status.burn(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
         haste : App.KL.Game.Creature.Status.haste(I32.sub(status.head.duration, 1), status.head.amount)
-        poison : App.KL.Game.Creature.Status.poison(I32.sub(status.head.duration, 1), status.head.amount)
+        poison : App.KL.Game.Creature.Status.poison(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
+        root: App.KL.Game.Creature.Status.root(I32.sub(status.head.duration, 1))
+        silence: App.KL.Game.Creature.Status.silence(I32.sub(status.head.duration, 1))
         stun: App.KL.Game.Creature.Status.stun(I32.sub(status.head.duration, 1))
         shield: App.KL.Game.Creature.Status.shield(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
         weaken : App.KL.Game.Creature.Status.weaken(I32.sub(status.head.duration, 1), status.head.amount)
@@ -29,6 +31,8 @@ App.KL.Game.Creature.Status.update.aux(
         burn : if I32.gtn(head.duration,0) then head & tail else tail
         haste : if I32.gtn(head.duration,0) then head & tail else tail
         poison : if I32.gtn(head.duration,0) then head & tail else tail
+        root : if I32.gtn(head.duration,0) then head & tail else tail
+        silence: if I32.gtn(head.duration,0) then head & tail else tail
         stun: if I32.gtn(head.duration,0) then head & tail else tail
         shield: if I32.gtn(head.duration,0) then head & tail else tail
         weaken : if I32.gtn(head.duration,0) then head & tail else tail

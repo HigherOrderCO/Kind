@@ -1,0 +1,77 @@
+// Assumes timestamps are syncronized
+// Assumes keccak inversion is unfeasible
+
+type Neutralis.Peer {
+  new(
+    addr: String
+    port: Nat
+  )
+}
+
+type Neutralis.Node {
+  new(
+    port: Nat
+    peers: List<Neutralis.Peer>
+  )
+}
+
+type Neutralis.Message {
+  im_alone
+  meet_them
+  are_you_there
+  yes_im_here
+  did_you_know
+  tell_me_more
+} deriving (serializer, deserializer)
+
+Neutralis.broadcast(node: Neutralis.Node, data: String): IO<Unit>
+  open node
+  Neutralis.broadcast.go(node.port, node.peers, data)
+
+Neutralis.broadcast.go(port: Nat, peers: List<Neutralis.Peer>, data: String): IO<Unit>
+  case peers {
+    nil: IO.pass
+    cons:
+      open peers.head
+      IO {
+        IO.print("send to " | Nat.show(peers.head.port))
+        IO.send_udp(port, peers.head.addr, peers.head.port, data)
+        Neutralis.broadcast.go(port, peers.tail, data)
+      }
+  }
+
+Neutralis.main(port: Nat, msge: String): IO<Unit>
+  let peers = [
+    Neutralis.Peer.new("127.0.0.1", 42000)
+    Neutralis.Peer.new("127.0.0.1", 42001)
+  ]
+  let node = Neutralis.Node.new(port, peers)
+  Neutralis.main.loop(node, msge)
+
+Neutralis.main.print_inbox(inbox: List<IO.recv_udp.Message>): IO<Unit>
+  case inbox {
+    nil: IO.pass
+    cons: IO {
+      use msge = inbox.head
+      use from = msge.from
+      IO.print("<" | from.ip | ":" | Nat.show(from.port) | "> " | msge.data)
+      Neutralis.main.print_inbox(inbox.tail)
+    }
+  }
+
+Neutralis.main.tmp(io: IO<Unit>): IO<Unit> 
+  io
+
+Neutralis.main.loop(node: Neutralis.Node, msge: String): IO<Unit>
+  open node
+  IO {
+    IO.print("Broadcasting...")
+    Neutralis.broadcast(node, msge)
+    
+    get inbox = IO.recv_udp(node.port)
+    Neutralis.main.print_inbox(inbox)
+
+    IO.sleep(1000)
+    Neutralis.main.tmp(Neutralis.main.loop(node, msge))
+    return unit
+  }

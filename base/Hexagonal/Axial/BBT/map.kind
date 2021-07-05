@@ -1,7 +1,0 @@
-// Applies to all values in a A Type map the f Function
-Hexagonal.Axial.BBT.map<A : Type, B : Type>(
-  f : A -> B,
-  map : Hexagonal.Axial.BBT<A>
-) : Hexagonal.Axial.BBT<B>
-
-  BBT.map!!!(f, map)

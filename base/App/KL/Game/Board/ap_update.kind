@@ -4,4 +4,4 @@ App.KL.Game.Board.ap_update(
 
   let f = App.KL.Game.Board.Creature.change_ap.aux(2)
   let update_creature = App.KL.Game.Tile.update_creature(f)
-  Hexagonal.Axial.BBT.map!!(update_creature, board)
+  Hexagonal.Axial.Map.map!!(update_creature, board)

@@ -1,0 +1,14 @@
+App.KL.Game.Creature.Status.stun.check(
+  creature: App.KL.Game.Creature
+): Bool
+
+  let status = creature@status
+  case status {
+    nil:
+      false
+    cons:
+      case status.head { 
+        stun: if I32.gtn(status.head.duration, 0) then true   
+              else false
+      }default false
+  }
