@@ -411,10 +411,8 @@ App.KL.Game.Phase.Draft.draw.cards.card(tab: Maybe<String> player: Maybe<App.KL.
   let skills =
     case hero {
       none: 
-        log("none")
         []
       some:
-        log("some")
         let skills = hero.value@skills
         for key:value in skills with skill_list:
           key & skill_list

@@ -12,15 +12,17 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Fire Ball", 810, 16, 4, App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(4, 4, 1))
-    "W": App.KL.Game.Skill.new("Fire Wave", 820, 16, 1, App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(5, 6, 1))
-    "E": App.KL.Game.Skill.new("Fire Ring", 100, 24, 0, App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 20, 3))
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1), "This is the description of an ability")
+    "Q": App.KL.Game.Skill.new("Fire Ball", 810, 16, 4, App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(4, 4, 1), "This is the description of an ability")
+    "W": App.KL.Game.Skill.new("Fire Wave", 820, 16, 1, App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(5, 6, 1), "This is the description of an ability")
+    "E": App.KL.Game.Skill.new("Fire Ring", 100, 24, 0, App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 20, 3), "This is the description of an ability")
   }
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
+  let description = "Erkos is a fragile fire mage with high damage in large areas"
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none, description)
 
 
 // SKILLS

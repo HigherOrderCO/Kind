@@ -22,6 +22,12 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   let blue_hp = I32.sub(App.KL.Constants.max_score, game.score@points@snd)
   let red_hp = I32.sub(App.KL.Constants.max_score, game.score@points@fst)
 
+  let bar_red = String.show_clean(F64.show(255.0 - Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_grn = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_col = "rgb("|bar_red|","|bar_grn|", 0)"
+
+
+
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
@@ -29,14 +35,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "flex-direction": "row", 
     "justify-content": "flex-start", 
     "position": "relative"
-    "background":
-      if countdown =? 0 then
-        "rgb(220,220,220)"
-      // else if (countdown <? 64) && ((countdown % 12) <? 4) then
-      //   "rgb(232,232,232)"
-      else
-        "rgb(255,255,255)"
-    //"align-items": "center",
+    "background": "rgb(255,255,255)"
   }>
     {App.KL.Game.Phase.Play.draw.skills_menu(game)}
     <div style={ 
@@ -86,27 +85,32 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
           {},
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
-      <div style=
-        {
-        "display":"flex"
-        "flex-directoin": "row"
-        "justify-position": "flex-start"
-        "width": "75%"
-        "border": "1px solid black"
-        "height": "20px"
-        "background": "rgb(220,220,220)"
-        
-        }>
-        <div style =
+      {
+      if countdown =? 0 then
+        <div style= {"height": "40px"}></div>
+      else
+        <div style=
           {
-            "width": String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 100.0)) | "%"
-            "height": "100%"
-            "background-color": "red"
-          }> 
+          "display":"flex"
+          "width": "75%"
+          "border-radius": "2px"
+          "border": "2px solid SlateGrey"
+          "height": "25px"
+          "margin-top": "15px"
+          "background-color": "rgb(220,220,220)"
+          
+          }>
+          <div style =
+            {
+              "width": String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 100.0)) | "%"
+              "height": "100%"
+              "background-color": bar_col
+            }> 
+          </div>
         </div>
-      </div>
+      }
     </div>
-    //{App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
+    {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
     {App.KL.Game.Phase.Play.draw.skill_description(local, game)}
   </div>
 
@@ -364,12 +368,12 @@ App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, ga
     {
     "width": "200px"
     "height": "100%"
+    "padding": "0 20px"
     "background": "rgb(220,220,220)"
     "border-left": "1px solid black"
     "display":"flex"
     "flex-direction":"column"
     "align-items": "center"
-    "align-self":"center"
     }
   
   open local 
@@ -478,3 +482,32 @@ App.KL.Game.Phase.Play.draw.shield(
   let shield = Nat.show(Int.to_nat(shield))
   VoxBox.Draw.text(shield, PixelFont.small_black, Pos32.new(cx, cy, 0), img)
 
+App.KL.Game.Phase.Play.Draw.gray_overlay(game: App.KL.Game): DOM
+  open game
+    case game.moment {
+      preparation: <div></div>
+      execution: case game.moment.casts {
+        nil: 
+          let frame_part = U64.to_f64(game.moment.frame) / U64.to_f64(App.KL.Constants.between_turn_delay)
+           let opacity = F64.show((1 - frame_part)/2.5)
+          <div style=
+          { "width": "100%",
+            "height": "100%",
+            "position": "absolute",
+            "background-color":"rgba(165,165,165,"|opacity|")",
+            "display": "flex"
+          }>
+            <div style=
+              { "font-size": "4em"
+                "margin": "auto"            
+                "text-align": "center"
+                "color": "white"
+              }>
+              <div>"Turn " | Nat.show(U64.to_nat(game.turn)) | " ended."</div>
+              <div>"Starting Turn " | Nat.show(U64.to_nat(game.turn + 1)) | "!"</div>
+            </div>
+          </div>
+        cons: <div></div>
+      }
+    }
+  
