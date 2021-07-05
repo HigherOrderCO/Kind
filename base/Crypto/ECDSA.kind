@@ -3,6 +3,9 @@
 // Commented code loops the hole filling algorithm, but kept them as looped definitions.
 // Investigation as to why it loops is needed.
 
+
+// Note: this code was parsed from: 
+// https://github.com/Soonad/Moonad/tree/gb/ECDSA
 type ECDSA.ErrorTypes {
   point_not_in_curve,
   invalid_private_key,
@@ -611,7 +614,7 @@ type ECDSA.SignResult {
   new(r: Nat, s: Nat)
 }
 
-// TODO:
+// TODO: this code was commented in Formality code
 ECDSA.SignResult.from_hex(str: String): ECDSA.Error(ECDSA.SignResult)
   ECDSA.SignResult.from_hex(str)
 // ECDSA.SignResult.from_hex(str: String): ECDSA.Error(ECDSA.SignResult)
@@ -725,15 +728,16 @@ U8_Vector.to_hex<n: Nat>(bytes: U8_Vector(n)): String
 //           Sigma.new<Nat, U8_Vector>(1, vec)
 //         cons: 
 //           let b = ECDSA.parse_byte(String.cons_Var(2, hex.head, hex.tail.head))
-//           let sig = U8_Vector.from_hex(hex.tail.tail)
+//           let sig = U8_Vector.from_hex(hex.tail.tail) 
 //           open sig
-//           let len = sig.fst
-//           let vec = sig.snd
-//           let vec = Vector.cons!!(U8.from_nat(b), vec)
+//           let len = sig.fst // Nat
+//           let vec = sig.snd // U8_Vector(sig.fst)
+//           // FIXME: why does the code don't accept "vec" or similar?
+//           let vec = Vector.cons(U8, len, U8.from_nat(b), U8_Vector(len))
 //           // ?cons
 //           Sigma.new<Nat, U8_Vector>(Nat.succ(len), vec)
 //       }!
-//   }
+//   }!
 
 U8_Vector.fill(n: Nat, s: U8): U8_Vector(n)
   Vector.fill<U8>(n, s)
