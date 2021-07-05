@@ -16,13 +16,13 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
     "Walk to another tile within 2 range from " | name |".")
 
     "Q": App.KL.Game.Skill.new("Shadow Flux", 860, 48, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(12, 10, 1), 
-    "Creates a shadow discharge to a position dealing 10 damage to enemies.")
+    "Croni creates a shadow discharge to a position, dealing 10 damage to enemies hit.")
 
     "W": App.KL.Game.Skill.new("Shadow Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1), 
-    "A Shadow Trap created by Croni that deals 6 damage to whoever steps on it")
+    "Croni summons a Shadow Trap that deals 6 damage to whoever steps on it.")
 
     "E": App.KL.Game.Skill.new("Shadow Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1),
-    "A Shadow Trap created by Croni that deals 6 damage to whoever steps on it")
+    "Croni summons a Shadow Trap that deals 6 damage to whoever steps on it.")
 
   }
 

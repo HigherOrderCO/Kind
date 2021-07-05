@@ -12,15 +12,22 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1), "This is the description of an ability")
-    "Q": App.KL.Game.Skill.new("Restore", 396, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 4, 1), "This is the description of an ability")
-    "W": App.KL.Game.Skill.new("Escort", 397, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 4, 1), "This is the description of an ability")
-    "E": App.KL.Game.Skill.new("Detain", 398, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(2, 1, 1), "This is the description of an ability")
+    "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1),
+    "Walk to another tile within 2 range from " | name | ".")
+    
+    "Q": App.KL.Game.Skill.new("Restore", 396, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 4, 1),
+    "Lela restores 4 Health Points of an ally.")
+
+    "W": App.KL.Game.Skill.new("Escort", 397, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 4, 1),
+    "Lela provides 4 Shield Points to an ally.")
+
+    "E": App.KL.Game.Skill.new("Detain", 398, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(2, 1, 2),
+    "Lela deals 1 damage to an enemy, silencing them.")
   }
 
   let on_stepped = none
 
-  let description = "Lela is a fragile support for her team, she can heal and protect her team from a long distance"
+  let description = "Lela is a fragile support for her team, she can heal and protect her team from a long distance."
 
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 

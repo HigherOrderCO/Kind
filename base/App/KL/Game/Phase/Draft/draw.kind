@@ -484,13 +484,13 @@ App.KL.Game.Phase.Draft.draw.cards.text(tab: Maybe<String>, hero: Maybe<App.KL.G
     none none: 
       [ <div>"Waiting for Player to connect or pick a Hero"</div>]
     none some:
-      [ <div>hero.value@description</div>]
+      [ <div style={"margin": "auto"}>hero.value@description</div>]
     some none:
       [ <div>"A Hero needs to be picked"</div>]
     some some:
       case hero.value@skills{tab.value} as skill {
         none:
-          [ <div>hero.value@description</div>]
+          [ <div style={"margin": "auto"}>hero.value@description</div>]
         some: 
           [ <div id="D" style={"font-size": "1.5em"}>skill.value@name</div>
             <div id="D" style={"padding-top": "3px"}>skill.value@description</div>]
