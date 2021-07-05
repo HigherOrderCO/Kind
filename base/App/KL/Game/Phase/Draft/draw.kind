@@ -378,9 +378,9 @@ App.KL.Game.Phase.Draft.draw.cards.skills(tab: Maybe<String> player: Maybe<App.K
         else
           "#Bfc6c9"
       <div id="D" | skill_key style={
-        "width": "22%"
+        "width": "24%"
         "height": "100%"
-        "margin": "0 1.5%"
+        //"margin": "0 0.5%"
         "border-radius": "15px 15px 0 0"
         "background-color": background
         "font-size": "1em"
@@ -468,28 +468,36 @@ App.KL.Game.Phase.Draft.draw.cards.card(tab: Maybe<String> player: Maybe<App.KL.
     <div id="D" style={ 
       "width": "100%"
       "height": "40%"
-      "padding": "10%"
+      "padding": "6%"
+      "display": "flex"
+      "flex-direction": "column"
       "background-color": "#d6dadc"
       "font-size": "0.6em"
+      "text-align": "center"
     }>
-      case tab hero {
-        none none: "Waiting for Player to connect or pick a Hero"
-        none some: hero.value@description
-        some none: "Pick a hero!"
-        some some:
-          open hero.value as hero
-          case hero.skills{tab.value} as skill {
-            none: hero.value@description
-            some: 
-              skill.value@description
-          }
-      }
+      for div in App.KL.Game.Phase.Draft.draw.cards.text(tab, hero): div
           
     
     </div>
 
   </div>
-
+App.KL.Game.Phase.Draft.draw.cards.text(tab: Maybe<String>, hero: Maybe<App.KL.Game.Hero>): List<DOM>
+  case tab hero {
+    none none: 
+      [ <div>"Waiting for Player to connect or pick a Hero"</div>]
+    none some:
+      [ <div>hero.value@description</div>]
+    some none:
+      [ <div>"A Hero needs to be picked"</div>]
+    some some:
+      case hero.value@skills{tab.value} as skill {
+        none:
+          [ <div>hero.value@description</div>]
+        some: 
+          [ <div id="D" style={"font-size": "1.5em"}>skill.value@name</div>
+            <div id="D" style={"padding-top": "3px"}>skill.value@description</div>]
+      }
+  }
 
 App.KL.Game.Phase.Draft.draw.cards.interrogation: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
