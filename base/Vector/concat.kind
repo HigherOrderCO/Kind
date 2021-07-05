@@ -1,9 +1,3 @@
-// Vector.concat<A: Type, n: Nat, m: Nat>(as: Vector(A, n), bs: Vector(A, m)): Vector(A, Nat.add(n, m))
-//   case as:
-//   | bs;
-//   | Vector.ext<A, Nat.add(as.size, m)>(as.head, Vector.concat<A, as.size, m>(as.tail, bs));
-//   : Vector(A, Nat.add(as.size, m));
-
 Vector.concat<A: Type, n: Nat, m: Nat>(as: Vector(A, n), bs: Vector(A, m)): Vector(A, Nat.add(n, m))
   case n with as {
     zero: bs

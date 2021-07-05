@@ -440,13 +440,13 @@ ECDSA.Jacobian.wNAF.aux(
     // Add random point inside current window to f.
     case Int.eql(wbits, Int.0) {
       true : // List.at should not return none. TODO: Use vector with known size instead of list for precomputes
-        let q = Maybe.extract!(List.at!(offset, precomputes), ECDSA.Jacobian.0)
+        let q = Maybe.extract.value!(List.at!(offset, precomputes), ECDSA.Jacobian.0)
         let f = ECDSA.Jacobian.add(f, Bool.if!(Nat.odd(window), ECDSA.Jacobian.negate(q), q))
         let window = Nat.succ(window)
         ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, window, windows, windowSize, mask, maxNumber)
       false: // List.at should not return none. TODO: Use vector with known size instead of list for precomputes
         let {neg, wbits} = Int.to_nat_signed(wbits)
-        let cached = Maybe.extract!(List.at!(Nat.pred(Nat.add(offset, wbits)), precomputes), ECDSA.Jacobian.0)
+        let cached = Maybe.extract.value!(List.at!(Nat.pred(Nat.add(offset, wbits)), precomputes), ECDSA.Jacobian.0)
         let cached = Bool.if!(neg, ECDSA.Jacobian.negate(cached), cached)
         let p = ECDSA.Jacobian.add(p, cached)
         let window = Nat.succ(window)
