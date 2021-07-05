@@ -8,5 +8,5 @@ App.KL.Game.Effect.hp.damage_at(
     get creature = App.KL.Game.Effect.board.creature.get(center)
     without creature: App.KL.Game.Effect { return +0#32 }
     let debuffer = App.KL.Game.Creature.Status.weaken.total(creature)
-    App.KL.Game.Effect.hp.change_at(I32.neg(dmg)-debuffer, pos)
+    App.KL.Game.Effect.hp.change_at(I32.neg(dmg - debuffer), pos)
   }

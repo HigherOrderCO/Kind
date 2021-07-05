@@ -9,26 +9,12 @@ App.KL.Game.Board.Creature.dot_verify(
     let creature = creature@snd
     open creature
     for dots in creature.status with result:
-      case dots { 
-        burn:
-          if I32.gtn(dots.duration, 0) then
-            let change =  App.KL.Game.Board.Creature.change_hp(dots.amount,coord, result@fst)
-            case change@snd@snd as dead {
-              none: {change@snd@fst, result@snd}
-              some: {change@snd@fst, {dead.value, App.KL.Constants.turns_dead} & result@snd}
-            }
-          else
-            result
-        poison:
-          if I32.gtn(dots.duration, 0) then
-            let change =  App.KL.Game.Board.Creature.change_hp(dots.amount,coord, result@fst)
-            case change@snd@snd as dead {
-              none: {change@snd@fst, result@snd}
-              some: {change@snd@fst, {dead.value, App.KL.Constants.turns_dead} & result@snd}
-            }
-          else
-            result
-      } default result
+      let effect = App.KL.Game.Creature.Status.get_effect(dots)
+      let effect_result = effect(coord, coord, coord, game@board)
+      case effect_result { 
+        err: result
+        new: {effect_result.board, effect_result.cemetery}
+      }
     result
   let game = game@board <- result@fst
   let game = game@cemetery <- result@snd
