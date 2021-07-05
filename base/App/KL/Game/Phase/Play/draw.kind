@@ -217,7 +217,6 @@ App.KL.Game.Phase.Play.draw.tile.terrain(
   areas: App.KL.Game.Indicators
   hits: Maybe<App.KL.Game.Indicators>
   tile_coord: Hexagonal.Axial
-  mouse_coord: Hexagonal.Axial
   img: VoxBox
 ): VoxBox
   indicator = Hexagonal.Axial.Map.get!(tile_coord, hits <> areas) <> App.KL.Game.Indicator.background
