@@ -1,0 +1,22 @@
+// Returns the current picks of a player as a map of Coord->Letter
+App.KL.Game.Cast.picks_of(
+  player: String
+  game: App.KL.Game
+): App.KL.Game.Picks
+  let result = {{}, Hexagonal.Axial.Map.new! } :: Pair<Map<Unit>, App.KL.Game.Picks>
+  let casts  = game@casts
+
+  for cast in casts with result:
+    open cast
+    let {seen, map} = result
+    if player =? cast.player then
+      let skill = App.KL.Game.Cast.get_skill(cast, game)
+      let letter = Char.to_string(cast.letter)
+      case skill seen{letter} {
+        some none: 
+          { seen{letter} <- unit, Hexagonal.Axial.Map.set!(cast.target, cast.letter, map) }
+      } default {seen, map}
+    else
+      result
+  
+  result@snd
