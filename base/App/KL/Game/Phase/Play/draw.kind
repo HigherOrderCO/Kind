@@ -138,7 +138,7 @@ App.KL.Game.Phase.Play.draw.board(
   map = Hexagonal.Axial.Map.to_list!(map)
   for pos in map with img:
     {coord, tile} = pos
-    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
+    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, img)
     img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
     img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
     img
