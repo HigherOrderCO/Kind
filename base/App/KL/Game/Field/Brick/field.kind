@@ -1,7 +1,7 @@
 App.KL.Game.Field.Brick.field: App.KL.Game.Field
   let name = "Brick"
   let draw = (terrain, indicator)
-    App.KL.Game.Field.Tiles.brick_0
+    App.KL.Game.Field.Tiles.test
     // case indicator {
     //   background  : App.KL.Game.Field.Grass.Assets.normal
     //   green       : App.KL.Game.Field.Grass.Assets.light_blue

@@ -19,7 +19,8 @@ Hexagonal.Axial.to_screen_xy(
   
   cx = int_screen_center_x + j * int_rad  // screen_center + j * rad
   cx = cx + i * int_rad * 2 // screen_center + j * rad + i * 2rad
-  cy = int_screen_center_y + j * hlf * 3 // screen_center + j * (3rad/2)
+  cy = I32.to_f64(F64.to_i32(hlf * 3)) // fix rounding of odd radius
+  cy = int_screen_center_y + j * cy // screen_center + j * (3rad/2)
   
   cx = F64.to_u32(cx)
   y = cy + 0.5 // to round correctly

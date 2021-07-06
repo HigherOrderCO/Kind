@@ -208,7 +208,7 @@ App.KL.Game.Phase.Play.draw.cursor(
 ): VoxBox
   coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   {x,y} = App.KL.Game.Phase.Play.draw.centralize(coord)
-  VoxBox.Draw.image(x, y, 0#32, App.KL.Game.Field.Grass.Assets.mouse_ui, img)
+  VoxBox.Draw.image(x, y, 50#32, App.KL.Game.Field.Grass.Assets.mouse_ui, img)
 
 // draws tile terrain
 App.KL.Game.Phase.Play.draw.tile.terrain(
@@ -376,6 +376,8 @@ App.KL.Game.Phase.Play.draw.centralize(
   coord: Hexagonal.Axial
 ): Pair(U32, U32)
   let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  // log(U32.show(i))
+  // log(U32.show(j))
   let aux = I32.to_u32(App.KL.Constants.hexagon_radius)
   let i = i - aux
   let j = j - aux

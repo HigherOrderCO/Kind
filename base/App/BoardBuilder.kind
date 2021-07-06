@@ -29,7 +29,9 @@ App.BoardBuilder.draw.board(
   img: VoxBox
 ): VoxBox
   let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, canvas_size@fst / 2, canvas_size@snd / 2)
-  let img = App.BoardBuilder.draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
+  let img = App.KL.Game.Phase.Play.draw.cursor(mouse, img)
+  // let img = App.BoardBuilder.draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
+  log("-----------------------")
   for coord:terrain in board with img:
     App.BoardBuilder.draw.terrain(terrain, coord, canvas_size, img)
   img
@@ -42,7 +44,9 @@ App.BoardBuilder.draw.terrain(
 ): VoxBox
   let {i, j} = App.KL.Game.Phase.Play.draw.centralize(coord)
   let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
-  let j = j - 128
+  let j = (j - 128) + I32.to_u32(App.KL.Constants.hexagon_radius) + 5
+  log(U32.show(i))
+  log(U32.show(j))
   // let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, canvas_size@fst, canvas_size@snd)
   let field  = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   let field_drawing = field@draw(terrain, App.KL.Game.Indicator.background)
@@ -95,8 +99,6 @@ App.BoardBuilder.when: App.When<App.BoardBuilder.State>
       mouse_move:
         if String.eql("game_screen", event.id) then
           let {x,y} = event.mouse_pos
-          log(U32.show(x))
-          log(U32.show(y))
           let command = state.local@command <> ' '
           if Char.eql(command, 'X') then
             let coord = Hexagonal.Axial.from_screen_xy(state.local@mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
