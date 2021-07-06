@@ -16,7 +16,7 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
     "Walk to another tile within 2 range from " | name |".")
 
     "Q": App.KL.Game.Skill.new("Flux", 860, 48, 8, App.KL.Game.Hero.Croni.hero.Skills.flux(12, 12, 1), 
-    "Croni targets a dark flux to a position, dealing 16 damage to enemies hit.")
+    "Croni casts a targeted dark flux, dealing 12 damage in a single area.")
 
     "W": App.KL.Game.Skill.new("Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.trap(12, 1), 
     "Croni summons a Trap that roots when stepped on.")
