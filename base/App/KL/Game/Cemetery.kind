@@ -19,10 +19,13 @@ App.KL.Game.Cemetery.revive(
     App.KL.Game.Board.PLayer.set(id, player, board)
   board
 
+// TODO use comprehension
 App.KL.Game.Cemetery.update(
   cemetery: App.KL.Game.Cemetery
 ): App.KL.Game.Cemetery
   let new_cemetery = []
+  // log("Update: " | List.show!((x) x@fst | "-" | I32.show(x@snd), cemetery))
+  // [ ?a for dead in cemetery where dead@snd !=? 0]
   for dead in cemetery with new_cemetery:
     if dead@snd =? 0 then
       new_cemetery
