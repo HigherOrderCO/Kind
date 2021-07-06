@@ -136,7 +136,7 @@ App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
   let name = "Croni.Trap"
   let draw = (pose) {none, App.KL.Game.Field.Elements.mushroom_0_0}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
-  let max_hp = 8 :: I32
+  let max_hp = 6 :: I32
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect {
@@ -151,7 +151,7 @@ App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
   let name = "Croni.Void"
   let draw = (pose) {none, App.KL.Game.Field.Elements.baner_1}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
-  let max_hp = 8 :: I32
+  let max_hp = 6 :: I32
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect {
