@@ -33,7 +33,7 @@ App.KL.Game.Token.board.capture(board: App.KL.Game.Board): App.KL.Game.Board
   let tokens = App.KL.Game.Token.get_tokens(board)
   for coord:token in tokens with board:
     let new_token = App.KL.Game.Token.capture(coord, board, token)
-    log(I32.show(new_token@dominance))
+    // log(I32.show(new_token@dominance))
     let token_entity = App.KL.Game.Entity.token(new_token)
     App.KL.Game.Board.push(coord, token_entity, board)
   board

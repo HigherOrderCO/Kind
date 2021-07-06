@@ -17,7 +17,7 @@ App.KL.Game.Board.Creature.dot_verify(
       }
     result
   let game = game@board <- result@fst
-  let game = game@cemetery <- result@snd
+  let game = game@cemetery <- game@cemetery ++ result@snd
   game
 
 
