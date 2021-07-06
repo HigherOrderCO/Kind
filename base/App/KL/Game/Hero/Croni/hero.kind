@@ -111,14 +111,14 @@ App.KL.Game.Hero.Croni.hero.Skills.void.area.go(
       then
         let area = Hexagonal.Axial.Map.set!(pos, unit, area)
         let ring = App.KL.Game.Areas.ring(pos,1)
-        let area = for new_pos in ring:
-          Hexagonal.Axial.Map.set!(new_pos, unit, area)
         let ring = ring ++ App.KL.Game.Areas.ring(pos,2)
         let area = for new_pos in ring:
           case Hexagonal.Axial.Map.get!(new_pos, area) as got {
             none: App.KL.Game.Hero.Croni.hero.Skills.void.area.go(new_pos, board, area)
             some: area
           }
+        let area = for new_pos in ring:
+          Hexagonal.Axial.Map.set!(new_pos, unit, area)
         area
       else
         area
