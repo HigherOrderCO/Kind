@@ -296,7 +296,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
           img
         some:
           let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
-          let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 32, creature.value, ap_used, img)
+          let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 31, creature.value, ap_used, img)
           img
       }
 
