@@ -16,7 +16,7 @@ App.KL.Game.Board.Creature.change_hp(
     let new_creature = App.KL.Game.Board.Creature.change_hp_aux(hp_diff, creature)
     if I32.lte(new_creature@hp, 0) then
       let dead = App.KL.Game.Board.Creature.del(pos, board)
-      {+0#32, {dead, creature.player}}
+      {hp_diff, {dead, creature.player}}
     else
       {hp_diff, {board, none}}
 
