@@ -6,9 +6,10 @@ type App.BoardBuilder.State.local {
   new(
     canvas_size: Pair<I32, I32>
     board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
-    mouse: Pair<U32, U32>
+    mouse: Maybe<Pair<U32, U32>>
     actual_terrain: App.KL.Game.Terrain
     command: Maybe<Char>
+    string: String
   )
 }
 
@@ -17,19 +18,24 @@ App.BoardBuilder.init: App.Init<App.BoardBuilder.State>
   let canvas_size = {App.KL.Constants.center_x * 2, App.KL.Constants.center_y * 2}
   let board = Hexagonal.Axial.Map.new!
   let board = Hexagonal.Axial.Map.set!({0,0} :: Hexagonal.Axial, {1}, board)
-  let mouse = {0,0}
+  let mouse = none
   let actual_terrain = App.KL.Game.Terrain.new(1)
-  App.Store.new<App.BoardBuilder.State>(App.BoardBuilder.State.local.new(canvas_size, board, mouse, actual_terrain, none), unit)
+  let string = ""
+  App.Store.new<App.BoardBuilder.State>(App.BoardBuilder.State.local.new(canvas_size, board, mouse, actual_terrain, none, ""), unit)
 
 App.BoardBuilder.draw.board(
   canvas_size: Pair<I32, I32>
   board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
   actual_terrain: App.KL.Game.Terrain
-  mouse: Pair<U32, U32>
+  mouse: Maybe<Pair<U32, U32>>
   img: VoxBox
 ): VoxBox
-  let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, canvas_size@fst / 2, canvas_size@snd / 2)
-  let img = App.KL.Game.Phase.Play.draw.cursor(mouse, img)
+  // let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, canvas_size@fst / 2, canvas_size@snd / 2)
+  let img = 
+    case mouse {
+      none: img
+      some: App.KL.Game.Phase.Play.draw.cursor(mouse.value, img)
+    }
   // let img = App.BoardBuilder.draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
   log("-----------------------")
   for coord:terrain in board with img:
@@ -53,33 +59,48 @@ App.BoardBuilder.draw.terrain(
   let tile_drawing = VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 20, field_drawing, img)
   tile_drawing
 
+App.BoardBuilder.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>): String
+  let string = ""
+  for coord:terrain in board with string:
+    let coord_string   = "Hexagonal.Axial.new(" | String.show_clean(I32.show(coord@i)) | ", " | String.show_clean(I32.show(coord@j)) | ")"
+    let terrain_string = "App.KL.Game.Terrain.new(" | Nat.show(terrain@field_id) | ")"
+    "{" | coord_string | "," | terrain_string | "}" | ",\n" | string
+  
+  "[\n" | string | "]"
+
 // Render function
 App.BoardBuilder.draw(img: VoxBox): App.Draw<App.BoardBuilder.State>
   (state)
     open state
-    <div style={"display": "flex", "padding": "20px"}>
-      <div style={"margin-right": "5px"}>
-        {
-          let width = Nat.show(I32.to_nat(state.local@canvas_size@fst))
-          let height = Nat.show(I32.to_nat(state.local@canvas_size@snd))
-          DOM.vbox(
-            { "id": "game_screen",
-              "width": width,
-              "height": height,
-              "scale": "2"},
-            {},
-            App.BoardBuilder.draw.board(state.local@canvas_size, state.local@board, state.local@actual_terrain, state.local@mouse, img)
-          )
-        }
+    <div style={"margin-bottom": "10px"}>
+      <div style={"display": "flex", "padding": "20px"}>
+        <div style={"margin-right": "5px"}>
+          {
+            let width = Nat.show(I32.to_nat(state.local@canvas_size@fst))
+            let height = Nat.show(I32.to_nat(state.local@canvas_size@snd))
+            DOM.vbox(
+              { "id": "game_screen",
+                "width": width,
+                "height": height,
+                "scale": "2"},
+              {},
+              App.BoardBuilder.draw.board(state.local@canvas_size, state.local@board, state.local@actual_terrain, state.local@mouse, img)
+            )
+          }
+        </div>
+        <div>
+          for i in [0 to List.length!(App.KL.Game.Field.list)]:
+            <button id=Nat.show(i) style={"padding": "5px", "font-size": "1rem"}>"Select Field " | Nat.show(i)</button>
+        </div>
+        // <div>
+        //   for info in ["width", "height"]:
+        //     <input id=info type="number" style={"font-size": "1rem"}></input>
+        // </div>
       </div>
-      <div>
-        for i in [0 to List.length!(App.KL.Game.Field.list)]:
-          <button id=Nat.show(i) style={"padding": "5px", "font-size": "1rem"}>"Select Field " | Nat.show(i)</button>
+      <div style={"display": "flex", "width": "100vw", "justify-content": "center", "flex-direction": "column", "align-items":"center"}>
+        <button id="generate_array" style={"font-size": "2rem", "padding": "2px"}>"Generate array"</button>
+        <textarea readonly="readonly" value=state.local@string style={"width": "900px", "height": "900px", "font-size": "1rem"}></textarea>
       </div>
-      // <div>
-      //   for info in ["width", "height"]:
-      //     <input id=info type="number" style={"font-size": "1rem"}></input>
-      // </div>
     </div>
 
 // Event handler
@@ -100,31 +121,39 @@ App.BoardBuilder.when: App.When<App.BoardBuilder.State>
         if String.eql("game_screen", event.id) then
           let {x,y} = event.mouse_pos
           let command = state.local@command <> ' '
+          let mouse = {x / 2, y / 2}
           if Char.eql(command, 'X') then
-            let coord = Hexagonal.Axial.from_screen_xy(state.local@mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
+            let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
             let board = Hexagonal.Axial.Map.set!(coord, state.local@actual_terrain, state.local@board)
-            let local = state.local@mouse <- {x / 2, y / 2}
+            let local = state.local@mouse <- some(mouse)
             let local = local@board <- board
             App.set_local!(local)
           else
-            let local = state.local@mouse <- {x / 2, y / 2}
+            let local = state.local@mouse <- some(mouse)
             App.set_local!(local)
         else
-          App.pass!
+          let local = state.local@mouse <- none
+          App.set_local!(local)
       mouse_click:
-        let terrain = App.KL.Game.Terrain.new(Nat.read(event.id))
-        let local = state.local@actual_terrain <- terrain
-        App.set_local!(local)
+        if (event.id =? "generate_array") then
+          let local = state.local@string <- App.BoardBuilder.generate_array(state.local@board)
+          App.set_local!(local)
+        else 
+          let terrain = App.KL.Game.Terrain.new(Nat.read(event.id))
+          let local = state.local@actual_terrain <- terrain
+          App.set_local!(local)
       mouse_up:
-        let command = state.local@command <> ' '
-        let coord = Hexagonal.Axial.from_screen_xy(state.local@mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
-        let board = 
-          if Char.eql(command, 'Z') then
-            Hexagonal.Axial.Map.delete!(coord, state.local@board)
-          else  
-            Hexagonal.Axial.Map.set!(coord, state.local@actual_terrain, state.local@board)
-        let local = state.local@board <- board
-        App.set_local!(local)
+        let mouse = state.local@mouse
+        without mouse: App.pass!
+          let command = state.local@command <> ' '
+          let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
+          let board = 
+            if Char.eql(command, 'Z') then
+              Hexagonal.Axial.Map.delete!(coord, state.local@board)
+            else  
+              Hexagonal.Axial.Map.set!(coord, state.local@actual_terrain, state.local@board)
+          let local = state.local@board <- board
+          App.set_local!(local)
       key_up:
         let local = state.local@command <- none
         App.set_local!(local)
