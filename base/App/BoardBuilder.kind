@@ -16,9 +16,9 @@ type App.BoardBuilder.State.local {
 App.BoardBuilder.init: App.Init<App.BoardBuilder.State>
   let canvas_size = {App.KL.Constants.center_x * 2, App.KL.Constants.center_y * 2}
   let board = Hexagonal.Axial.Map.new!
-  let board = Hexagonal.Axial.Map.set!({0,0} :: Hexagonal.Axial, {0}, board)
+  let board = Hexagonal.Axial.Map.set!({0,0} :: Hexagonal.Axial, {1}, board)
   let mouse = {0,0}
-  let actual_terrain = App.KL.Game.Terrain.new(0)
+  let actual_terrain = App.KL.Game.Terrain.new(1)
   App.Store.new<App.BoardBuilder.State>(App.BoardBuilder.State.local.new(canvas_size, board, mouse, actual_terrain, none), unit)
 
 App.BoardBuilder.draw.board(
@@ -29,20 +29,24 @@ App.BoardBuilder.draw.board(
   img: VoxBox
 ): VoxBox
   let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, canvas_size@fst / 2, canvas_size@snd / 2)
-  let img = App.BoardBuilder.draw.terrain(actual_terrain, mouse_coord, img)
+  let img = App.BoardBuilder.draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
   for coord:terrain in board with img:
-    App.BoardBuilder.draw.terrain(terrain, coord, img)
+    App.BoardBuilder.draw.terrain(terrain, coord, canvas_size, img)
   img
 
 App.BoardBuilder.draw.terrain(
   terrain: App.KL.Game.Terrain, 
   coord: Hexagonal.Axial,
+  canvas_size: Pair<I32, I32>
   img: VoxBox
 ): VoxBox
   let {i, j} = App.KL.Game.Phase.Play.draw.centralize(coord)
+  let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
+  let j = j - 128
+  // let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, canvas_size@fst, canvas_size@snd)
   let field  = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   let field_drawing = field@draw(terrain, App.KL.Game.Indicator.background)
-  let tile_drawing = VoxBox.Draw.image(i, j, 0#32, field_drawing, img)
+  let tile_drawing = VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 20, field_drawing, img)
   tile_drawing
 
 // Render function
@@ -91,6 +95,8 @@ App.BoardBuilder.when: App.When<App.BoardBuilder.State>
       mouse_move:
         if String.eql("game_screen", event.id) then
           let {x,y} = event.mouse_pos
+          log(U32.show(x))
+          log(U32.show(y))
           let command = state.local@command <> ' '
           if Char.eql(command, 'X') then
             let coord = Hexagonal.Axial.from_screen_xy(state.local@mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
@@ -104,25 +110,23 @@ App.BoardBuilder.when: App.When<App.BoardBuilder.State>
         else
           App.pass!
       mouse_click:
-        let terrain = App.KL.Game.Terrain.new(0)
+        let terrain = App.KL.Game.Terrain.new(Nat.read(event.id))
         let local = state.local@actual_terrain <- terrain
         App.set_local!(local)
       mouse_up:
         let command = state.local@command <> ' '
         let coord = Hexagonal.Axial.from_screen_xy(state.local@mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
-        log(Char.to_string(command))
         let board = 
           if Char.eql(command, 'Z') then
             Hexagonal.Axial.Map.delete!(coord, state.local@board)
           else  
-            Hexagonal.Axial.Map.set!(coord, {0}, state.local@board)
+            Hexagonal.Axial.Map.set!(coord, state.local@actual_terrain, state.local@board)
         let local = state.local@board <- board
         App.set_local!(local)
       key_up:
         let local = state.local@command <- none
         App.set_local!(local)
       key_down:
-        log(Char.to_string(event.code))
         let local = state.local@command <- some(event.code)
         App.set_local!(local)
     } default App.pass!

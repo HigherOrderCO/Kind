@@ -1,4 +1,5 @@
 App.KL.Game.Field.list: List<App.KL.Game.Field>
   [
     App.KL.Game.Field.Grass.field
+    App.KL.Game.Field.Brick.field
   ]
