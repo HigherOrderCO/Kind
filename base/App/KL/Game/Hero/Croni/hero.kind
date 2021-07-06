@@ -110,14 +110,14 @@ App.KL.Game.Hero.Croni.hero.Skills.void.area.go(
     some: if String.eql(target.value@hero@name, "Croni.Void")
       then
         let area = Hexagonal.Axial.Map.set!(pos, unit, area)
-        let ring = App.KL.Game.Areas.ring(pos,1)
-        let ring = ring ++ App.KL.Game.Areas.ring(pos,2)
-        let area = for new_pos in ring:
+        let inner_ring = App.KL.Game.Areas.ring(pos,1)
+        let outer_ring = App.KL.Game.Areas.ring(pos,2)
+        let area = for new_pos in inner_ring ++ outer_ring:
           case Hexagonal.Axial.Map.get!(new_pos, area) as got {
             none: App.KL.Game.Hero.Croni.hero.Skills.void.area.go(new_pos, board, area)
             some: area
           }
-        let area = for new_pos in ring:
+        let area = for new_pos in inner_ring:
           Hexagonal.Axial.Map.set!(new_pos, unit, area)
         area
       else
