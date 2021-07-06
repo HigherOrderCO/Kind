@@ -1,0 +1,11 @@
+Nat.parse_hex(str: String): Nat
+  Nat.parse_hex.go(str, 0)
+
+Nat.parse_hex.go(str: String, res: Nat): Nat
+  case str {
+  nil : res
+  cons: 
+    let dig = U32.to_nat(Char.hex_value32(str.head))
+    let res = Nat.add(dig, Nat.mul(16, res))
+    Nat.parse_hex.go(str.tail, res)
+  }

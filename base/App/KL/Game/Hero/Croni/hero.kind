@@ -7,67 +7,157 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Croni.Assets.base64_idle
 
-  let max_hp = 16 :: I32
+  let max_hp = 12 :: I32
 
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1))
-    "Q": App.KL.Game.Skill.new("Shadow Flux", 860, 48, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(12, 10, 1))
-    "W": App.KL.Game.Skill.new("Shadow Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1))
-    "E": App.KL.Game.Skill.new("Shadow Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(12, 1))
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1),
+    "Walk to another tile within 2 range from " | name |".")
+
+    "Q": App.KL.Game.Skill.new("Flux", 860, 48, 8, App.KL.Game.Hero.Croni.hero.Skills.flux(12, 12, 1), 
+    "Croni casts a targeted dark flux, dealing 12 damage in a single area.")
+
+    "W": App.KL.Game.Skill.new("Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.trap(12, 1), 
+    "Croni summons a Trap that roots when stepped on.")
+
+    "E": App.KL.Game.Skill.new("Void", 880, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.void(12, 1),
+    "Croni summons a Void that blocks movement. Can be reactivated to root around it.")
+
   }
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none)
+  let description = "Croni is a fragile mage with slow skills that deal high damage from afar."
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS
 
-App.KL.Game.Hero.Croni.hero.Skills.shadow_trap(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Croni.hero.Skills.trap(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(range)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
+    get caster = App.KL.Game.Effect.board.creature.caster
     get board = App.KL.Game.Effect.board.get
+    let team = case caster { none: App.KL.Game.Team.neutral, some: caster.value@team }
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
     else
-      let shadow_trap = App.KL.Game.Creature.new(
+      let trap = App.KL.Game.Creature.new(
         none,
-        App.KL.Game.Hero.Croni.hero.shadow_trap,
-        App.KL.Game.Team.neutral,
+        App.KL.Game.Hero.Croni.hero.trap,
+        team,
         [],
-        App.KL.Game.Hero.Croni.hero.shadow_trap@max_hp,
-        App.KL.Game.Hero.Croni.hero.shadow_trap@max_ap)
-      App.KL.Game.Effect.board.summon(target, shadow_trap)
+        App.KL.Game.Hero.Croni.hero.trap@max_hp,
+        App.KL.Game.Hero.Croni.hero.trap@max_ap)
+      App.KL.Game.Effect.board.summon(target, trap)
   }
 
-App.KL.Game.Hero.Croni.hero.Skills.shadow_flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Croni.hero.Skills.flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
-    get target  = App.KL.Game.Effect.coord.get_target
-    get center  = App.KL.Game.Effect.coord.get_center
+    get target = App.KL.Game.Effect.coord.get_target
+    get center = App.KL.Game.Effect.coord.get_center
+    let area = [target]
     App.KL.Game.Effect.limit_range(range)
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
     return unit
   }
 
-App.KL.Game.Hero.Croni.hero.shadow_trap: App.KL.Game.Hero
-  let name = "ShadowTrap"
+App.KL.Game.Hero.Croni.hero.Skills.void(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    App.KL.Game.Effect.limit_range(range)
+    get target = App.KL.Game.Effect.coord.get_target
+    get center = App.KL.Game.Effect.coord.get_center
+    get board = App.KL.Game.Effect.board.get
+    get caster = App.KL.Game.Effect.board.creature.caster
+    get targeted = App.KL.Game.Effect.board.creature.target
+    App.KL.Game.Effect.ap.use(ap_cost)
+    case targeted {
+      none: App.KL.Game.Effect {
+        let team = case caster { none: App.KL.Game.Team.neutral, some: caster.value@team }
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+        let hero = App.KL.Game.Hero.Croni.hero.void
+        let mhp = App.KL.Game.Hero.Croni.hero.void@max_hp
+        let map = App.KL.Game.Hero.Croni.hero.void@max_ap
+        let trap = App.KL.Game.Creature.new(none, hero, team, [], mhp, map)
+        App.KL.Game.Effect.board.summon(target, trap)
+      }
+      some: if String.eql(targeted.value@hero@name, "Croni.Void") then App.KL.Game.Effect {
+        let area = App.KL.Game.Hero.Croni.hero.Skills.void.area(target, board)
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
+        App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.root.add(2)), area)
+        return unit
+      } else App.KL.Game.Effect.pass
+    }
+  }
+
+App.KL.Game.Hero.Croni.hero.Skills.void.area.go(
+  pos: Hexagonal.Axial
+  board: App.KL.Game.Board
+  area: Hexagonal.Axial.Map<Unit>
+): Hexagonal.Axial.Map<Unit>
+  let target = App.KL.Game.Board.Creature.get(pos, board)
+  case target {
+    none: area
+    some: if String.eql(target.value@hero@name, "Croni.Void")
+      then
+        let area = Hexagonal.Axial.Map.set!(pos, unit, area)
+        let inner_ring = App.KL.Game.Areas.ring(pos,1)
+        let outer_ring = App.KL.Game.Areas.ring(pos,2)
+        let area = for new_pos in inner_ring ++ outer_ring:
+          case Hexagonal.Axial.Map.get!(new_pos, area) as got {
+            none: App.KL.Game.Hero.Croni.hero.Skills.void.area.go(new_pos, board, area)
+            some: area
+          }
+        let area = for new_pos in inner_ring:
+          Hexagonal.Axial.Map.set!(new_pos, unit, area)
+        area
+      else
+        area
+  }
+
+App.KL.Game.Hero.Croni.hero.Skills.void.area(
+  pos: Hexagonal.Axial
+  board: App.KL.Game.Board
+): List<Hexagonal.Axial>
+  Hexagonal.Axial.Map.keys!(App.KL.Game.Hero.Croni.hero.Skills.void.area.go(pos, board, Hexagonal.Axial.Map.new!))
+
+// ~~~~~~~~~~
+
+App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
+  let name = "Croni.Trap"
   let draw = (pose) {none, App.KL.Game.Field.Elements.mushroom_0_0}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
-  let max_hp = 8 :: I32
+  let max_hp = 6 :: I32
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect {
     App.KL.Game.Effect.board.creature.move(from, to)
-    App.KL.Game.Effect.status.stun.add(2, to)
+    App.KL.Game.Effect.status.root.add(2, to)
     return unit
   })
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "A Trap created by Croni that deals 6 damage to whoever steps on it"
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+
+App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
+  let name = "Croni.Void"
+  let draw = (pose) {none, App.KL.Game.Field.Elements.baner_1}
+  let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
+  let max_hp = 6 :: I32
+  let max_ap = 0 :: I32
+  let skills = {}
+  let on_stepped = some((from,to) App.KL.Game.Effect {
+    //App.KL.Game.Effect.board.creature.move(from, to)
+    //App.KL.Game.Effect.status.stun.add(2, to)
+    return unit
+  })
+  let description = "A Void created by Croni"
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)

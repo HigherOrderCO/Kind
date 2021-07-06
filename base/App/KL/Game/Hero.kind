@@ -8,6 +8,7 @@ type App.KL.Game.Hero {
     skills: Map<App.KL.Game.Skill> // letter -> skill
     //on_turn_end: App.KL.Game.Creature -> App.KL.Game.Creature //TODO: ADD
     on_stepped: Maybe<App.KL.Game.Effect.FromTo<Unit>>
+    description: String
   )
 }
 

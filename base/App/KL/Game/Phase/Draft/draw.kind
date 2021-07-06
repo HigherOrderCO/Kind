@@ -10,13 +10,13 @@ App.KL.Game.Phase.Draft.draw(local: App.KL.Game.State.Local, global: App.KL.Glob
         "justify-content": "center"
         "align-items": "center"
       }>
-        {App.KL.Game.Phase.Draft.draw.main(game.value@players, local@room, local@user)}
+        {App.KL.Game.Phase.Draft.draw.main(local@tab, game.value@players, local@room, local@user)}
       </div>
   }
 
-App.KL.Game.Phase.Draft.draw.main(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+App.KL.Game.Phase.Draft.draw.main(tab: String, players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   let player = players{user}
-  let normal = [App.KL.Game.Phase.Draft.draw.top(players, user),  App.KL.Game.Phase.draft.draw.bottom(players, room, user)]
+  let normal = [App.KL.Game.Phase.Draft.draw.top(tab, players, user),  App.KL.Game.Phase.draft.draw.bottom(players, room, user)]
   let select = [App.KL.Game.Phase.Draft.draw.choose_team(players)]
   let draw = 
     case player {
@@ -96,7 +96,7 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
 
 // draw top layout of draft screen
 // it contains position and card info about the player and allies
-App.KL.Game.Phase.Draft.draw.top(players: Map<App.KL.Game.Player>, user: String): DOM
+App.KL.Game.Phase.Draft.draw.top(tab: String, players: Map<App.KL.Game.Player>, user: String): DOM
   // get team of user
   let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   // choose color to show based on team
@@ -124,7 +124,7 @@ App.KL.Game.Phase.Draft.draw.top(players: Map<App.KL.Game.Player>, user: String)
       "justify-content": "center"
     }>
       {App.KL.Game.Phase.Draft.draw.coordinates(players, user)} // draw coord positions
-      {App.KL.Game.Phase.Draft.draw.cards(players, user)} // draw card info about user and allies
+      {App.KL.Game.Phase.Draft.draw.cards(tab, players, user)} // draw card info about user and allies
     </div>
   </div>
 
@@ -310,69 +310,31 @@ App.KL.Game.Phase.Draft.draw.tiles.to_xy(
 // ===================================
 
 // draw card info for user and allies
-App.KL.Game.Phase.Draft.draw.cards(players: Map<App.KL.Game.Player>, user: String): DOM
+App.KL.Game.Phase.Draft.draw.cards(tab: String, players: Map<App.KL.Game.Player>, user: String): DOM
   let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
   let player = players{user}
   let allies = Map.delete!(user, players)
-  let hero   = case player{
-    none: none
-    some:
-      let player = player.value
-      Maybe.map!!(Nat.to_u8, player@hero_id)
-  }
+  let hero   = 
+    Maybe {
+      get player  = player
+      get hero_id = player@hero_id
+      get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+      return hero
+    }
 
 
   <div style={
     "width": "70%"
-    "height": "100%"
+    "height": "80%"
     "display": "flex"
   }>
-    { App.KL.Game.Phase.Draft.draw.cards.picks_left(hero)} // draw card info for user
-    { App.KL.Game.Phase.Draft.draw.cards.picks_right(allies, team)} // draw card info for allies
+    { App.KL.Game.Phase.Draft.draw.cards.card(some(tab), player, hero)} // draw card info for user
+    for div in App.KL.Game.Phase.Draft.draw.cards.allies(allies, team): div // draw card info for allies
   </div>
 
-
-// USER
-// -----
-
-// draw card info for user
-App.KL.Game.Phase.Draft.draw.cards.picks_left(hero: Maybe(U8)): DOM
-  <div style={
-    "width": "40%"
-    "height": "100%"
-    "display": "flex"
-    "padding": "5%"
-    "box-sizing": "border-box"
-  }>
-    { App.KL.Game.Phase.Draft.draw.cards.player(hero)}
-  </div>
-
-App.KL.Game.Phase.Draft.draw.cards.player(hero: Maybe(U8)): DOM
-  let {name, image} = Maybe {
-      get hero_id = hero
-      get hero    = App.KL.Game.Hero.get_by_id(U8.to_nat(hero_id)) 
-      let picture = hero@picture(false, 0) // TODO update with real bool and time
-      return {hero@name,picture}
-    } <> {"Choosing", App.KL.Game.Phase.Draft.draw.cards.interrogation}
-  
-  App.KL.Game.Phase.Draft.draw.cards.card(name, image, "100%")
 
 // ALLIES
 // -----
-
-// draw card info for allies
-App.KL.Game.Phase.Draft.draw.cards.picks_right(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
-  <div style={ 
-    "width": "60%"
-    "height": "100%"
-    "padding": "3%"
-    "display": "flex"
-    "flex-direction": "row"
-    "align-items": "center"
-    "box-sizing": "border-box"
-  }>
-    for div in App.KL.Game.Phase.Draft.draw.cards.allies(map, team): div
-  </div>
 
 App.KL.Game.Phase.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
   lst       = Map.to_list!(map)
@@ -393,27 +355,76 @@ App.KL.Game.Phase.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: Ap
 
   dom
 
-App.KL.Game.Phase.Draft.draw.cards.ally(user: String, info: Maybe(App.KL.Game.Player)): DOM
-  {name, image} = case info {
-    none: {"Connecting", App.KL.Game.Phase.Draft.draw.cards.interrogation}
+App.KL.Game.Phase.Draft.draw.cards.ally(user: String, player: Maybe(App.KL.Game.Player)): DOM
+  let {player, hero} = 
+    case player {
+      none: {none, none}
+      some: 
+        Maybe {
+          get hero_id = player.value@hero_id
+          get hero = App.KL.Game.Hero.get_by_id(hero_id)
+          return {some(player.value), some(hero)}
+        } <> {some(player.value), none}
+    }
+  App.KL.Game.Phase.Draft.draw.cards.card(none, player, hero)
+
+App.KL.Game.Phase.Draft.draw.cards.skills(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, skill_key: String): DOM
+  case tab {
+    none: <div></div>
     some:
-      Maybe {
-        get hero_id = info.value@hero_id
-        get hero    = App.KL.Game.Hero.get_by_id(hero_id)
-        let picture = hero@picture(true, 0) // TODO replace with real bool and time
-        return {hero@name, picture}
-      } <> {"Choosing", App.KL.Game.Phase.Draft.draw.cards.interrogation}
+      let background =
+        if tab.value =? skill_key then
+          "#d6dadc"
+        else
+          "#Bfc6c9"
+      <div id="D" | skill_key style={
+        "width": "24%"
+        "height": "100%"
+        //"margin": "0 0.5%"
+        "border-radius": "15px 15px 0 0"
+        "background-color": background
+        "font-size": "1em"
+        "text-align": "center"
+      }>skill_key
+      </div>
+
+  }
+  
+
+App.KL.Game.Phase.Draft.draw.cards.card(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, hero: Maybe<App.KL.Game.Hero>): DOM
+  let name = 
+    case player {
+      none: "Connecting"
+      some: 
+        case hero {
+          none: "Choosing"
+          some: hero.value@name
+        }
+    }
+  let image =
+    case hero {
+      none: App.KL.Game.Phase.Draft.draw.cards.interrogation
+      some: hero.value@picture(true, 0)
+    }
+  
+  let skill_list = []
+  let skills =
+    case hero {
+      none: 
+        []
+      some:
+        let skills = hero.value@skills
+        for key:value in skills with skill_list:
+          key & skill_list
+        skill_list
     }
 
-  App.KL.Game.Phase.Draft.draw.cards.card(name, image, "80%")
-
-App.KL.Game.Phase.Draft.draw.cards.card(name: String, image: String, height: String): DOM
    <div style={ 
     "width": "100%"
-    "height": height
+    "height": "90%"
     "display": "flex"
     "border": "5px solid #d6dadc"
-    "background-color": "#bac1c4"
+    "background-color": "#Aeb4b7"
     "margin": "3%"
     "border-radius": "5px"
     "flex-direction": "column"
@@ -428,25 +439,63 @@ App.KL.Game.Phase.Draft.draw.cards.card(name: String, image: String, height: Str
       name
     </div>
     
-    <div style={ 
-      "width":"50%" 
-      "height":"auto"
+    <div style={
+      "width":"100%" 
+      "height":"40%"
+      "display": "flex"
+      "justify-content": "center"
+      "align-items": "center"
     }>
-      <img src=image style={ 
-        "width": "100%"
+      <img src=image style={
+        "width": "50%"
         "height": "auto"
         "image-rendering": "pixelated"
       }></img>
     </div>
-    
-    <div style={ 
+    <div id="D" style={
+      "width": "100%"
+      "height": "7.5%"
+      "display": "flex"
+      "flex-direction": "row"
+      "justify-content": "space-between"
+      "align-items": "flex-end"
+    }>
+    for char in skills: App.KL.Game.Phase.Draft.draw.cards.skills(tab, player, char)
+    </div>
+      
+    <div id="D" style={ 
       "width": "100%"
       "height": "40%"
+      "padding": "6%"
+      "display": "flex"
+      "flex-direction": "column"
       "background-color": "#d6dadc"
-    }></div>
+      "font-size": "0.6em"
+      "text-align": "center"
+    }>
+      for div in App.KL.Game.Phase.Draft.draw.cards.text(tab, hero): div
+          
+    
+    </div>
 
   </div>
-
+App.KL.Game.Phase.Draft.draw.cards.text(tab: Maybe<String>, hero: Maybe<App.KL.Game.Hero>): List<DOM>
+  case tab hero {
+    none none: 
+      [ <div>"Waiting for Player to connect or pick a Hero"</div>]
+    none some:
+      [ <div style={"margin": "auto"}>hero.value@description</div>]
+    some none:
+      [ <div>"A Hero needs to be picked"</div>]
+    some some:
+      case hero.value@skills{tab.value} as skill {
+        none:
+          [ <div style={"margin": "auto"}>hero.value@description</div>]
+        some: 
+          [ <div id="D" style={"font-size": "1.5em"}>skill.value@name</div>
+            <div id="D" style={"padding-top": "3px"}>skill.value@description</div>]
+      }
+  }
 
 App.KL.Game.Phase.Draft.draw.cards.interrogation: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
@@ -526,7 +575,7 @@ App.KL.Game.Phase.Draft.draw.menu(
     "width": "100%"
   }
   
-  hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, heroes) 
+  hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, App.KL.Game.Hero.list) 
 
   <div style=main_style>
     <div style=display_style>
@@ -549,7 +598,7 @@ App.KL.Game.Phase.Draft.draw.selection(
     "margin": "4px",
     "border": "5px solid #d6dadc",
     //"box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
-    "background-color": "#bac1c4"
+    "background-color": "#Aeb4b7"
     "height": "auto",
     "width": "15%",
     "border-radius": "5px"
@@ -583,9 +632,7 @@ App.KL.Game.Phase.Draft.draw.selection(
   
   <div style=box_style id="H" | hero@name>
     <div style=name_style id="H"| hero@name>hero@name</div>
-    <div style=img_box_style>
       <img style=corner_style src=image id="H" | hero@name>
       </img>
-    </div>
   </div>
 

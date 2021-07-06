@@ -1,0 +1,19 @@
+// Sorts a game's casts by delay, in ascending order, removing duplicates
+App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
+  open game
+  let state = {{}, []} :: Pair<Map<Unit>, List<Pair<App.KL.Game.Cast,U64>>>
+  for cast in game.casts with state:
+    let {seen, casts} = state
+    let key = cast@player | "::" | Char.to_string(cast@letter)
+    case seen{key} as got {
+      none: 
+        let seen = seen{key} <- unit
+        case App.KL.Game.Cast.get_skill(cast, game) as got_skill {
+          none: {seen, casts}
+          some: {seen, {cast, got_skill.value@delay} & casts}
+        }
+      some: {seen, casts}
+    }
+  let list = List.sort!((a,b) U64.cmp(a@snd, b@snd), state@snd)
+  let list = List.map!!((a) a@fst, list)
+  list

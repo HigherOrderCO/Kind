@@ -72,9 +72,9 @@ App.KL.Game.Token.capture(coord: Hexagonal.Axial, board: App.KL.Game.Board, toke
 App.KL.Game.Token.get_team(creatures: List<App.KL.Game.Creature>, token: App.KL.Game.Token): Maybe<App.KL.Game.Team>
   let result = {0, 0} :: Pair<I32, I32> // blue and red quantity of players
   for creature in creatures with result:
-    case creature@team {
-      red:  result@fst <- result@fst + 1
-      blue: result@snd <- result@snd + 1
+    case creature@team creature@player {
+      red  some: result@fst <- result@fst + 1
+      blue some: result@snd <- result@snd + 1
     } default result
   
   case I32.eql(0, result@fst) I32.eql(0, result@snd) {

@@ -1,9 +1,0 @@
-App.KL.Game.Effect.status.poison.add(
-  id: String
-  duration: I32
-  amount: I32
-): App.KL.Game.Effect.At<I32>
-  (pos)
-
-  App.KL.Game.Effect.status.poison.change_at(id, duration, amount, pos)
-

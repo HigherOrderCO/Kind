@@ -7,14 +7,175 @@
 type App.KL.Lobby.State.Local {
   new(
     user: String
-    room_input: String
+    page: App.KL.Lobby.State.Local.Page
   )
 }
+
+type App.KL.Lobby.State.Local.Page {
+  front(room_input: String)
+  heroes(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String)
+} 
 
 // Lobby.Draw
 // ----------
 
-App.KL.Lobby.draw.button(id: String, content: String): DOM
+App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State): DOM
+  open local
+  case local.page as page{
+    front: App.KL.Lobby.draw.front(local@user, page.room_input, global)
+    heroes: App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
+  }
+
+App.KL.Lobby.draw.heroes(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
+  let style = {
+    "width": "100%", 
+    "height": "100%", 
+    "background-image": "linear-gradient(#0e0c0e, #242324)",
+    "display": "flex", 
+    "flex-direction": "column", 
+    "justify-content": "center", 
+    "align-items": "center",
+    "font-size": "2rem"
+  }
+
+  main_style = 
+  {
+    "width": "70%",
+    "height": "40%"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+  }
+  
+  display_style = 
+  { 
+    "display": "flex",
+    "flex-wrap": "wrap",
+    "justify-content": "center", 
+    "width": "100%"
+  }
+
+  hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, App.KL.Game.Hero.list)
+
+  <div style=style>
+    <div style=main_style>
+      <div style=display_style>
+        for div in hero_list: div
+      </div>
+    </div>
+    {App.KL.Lobby.draw.heroes.hero_menu(hero, skill, tab)}
+  </div>
+
+App.KL.Lobby.draw.heroes.hero_menu(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
+  descriptions_style = 
+  { 
+    "width": "85%",
+    "height": "50%"
+    "margin": "4px",
+    "margin-top": "20px"
+    "display": "flex"
+    "flex-direction": "row"
+    "justify-content": "space-around"
+    "align-items": "center"
+    "border": "5px solid #d6dadc",
+    "background-color": "#Aeb4b7"
+    "border-radius": "5px"
+  }
+
+  skill_show_style = 
+  {
+    "width": "30%"
+    "height": "90%"
+    "border": "5px solid #d6dadc"
+    "background-color": "#d6dadc"
+    "border-radius": "5px"
+  }
+
+  case hero {
+    none:
+      <div></div>
+    some:
+      <div style=descriptions_style>
+        {App.KL.Lobby.draw.heroes.skill(hero.value)}
+        {App.KL.Lobby.draw.heroes.skill_description(skill)}
+        <div style=skill_show_style>
+        </div>
+      </div>
+  }
+
+App.KL.Lobby.draw.heroes.skill(hero: App.KL.Game.Hero): DOM
+  
+  skills_style = 
+  {
+    "width": "30%"
+    "height": "90%"
+    "display": "flex"
+    "flex-direction": "column"
+    "justify-position": "flex-start"
+    "align-items": "center"
+  }
+  
+  skill_buttons_style = 
+    {
+      "width": "100%"
+      "height": "90%"
+      "padding-top": "5%"
+      "display": "grid"
+      "grid-template-columns": "45% 45%"
+      "grid-gap": "10%"
+      
+    }
+
+  list = []
+  for key:skill in hero@skills with list:
+    key & list
+  <div style=skills_style>
+    <div style={"font-size": "1em"}> "Skills"</div>
+      <div style=skill_buttons_style>
+        for key in list: App.KL.Lobby.draw.heroes.skill_button(key)
+      </div>
+  </div>
+  
+
+App.KL.Lobby.draw.heroes.skill_button(char: String): DOM
+  
+  id = "S" | char
+  skill_button_style = 
+  {
+    "width": "100%"
+    "height": "90%"
+    "border": "5px solid #d6dadc"
+    "border-radius": "5px"
+    "background-color": "#d6dadc"
+    "font-size": "2em"
+    "display":"flex"
+    "justify-content": "center"
+    "align-items": "center"
+  }
+  <div id=id style=skill_button_style>
+    <div id=id>char</div>
+  </div>
+
+App.KL.Lobby.draw.heroes.skill_description(skill: Maybe<App.KL.Game.Skill>): DOM
+  skill_description_style = 
+  {
+    "width": "30%"
+    "height": "90%"
+    "display": "flex"
+    "flex-direction": "column"
+    "justify-content": "flex-start"
+  }
+  case skill {
+    none: <div style=skill_description_style>"no skill selected"</div>
+    some:
+      <div style=skill_description_style>
+        <div style={"font-size": "1em"}>skill.value@name</div>
+        <div style={"font-size": "0.6em", "padding-top": "5%"}>skill.value@description</div>
+      </div>
+  }
+
+
+App.KL.Lobby.draw.front.button(id: String, content: String): DOM
   let style = {
     "font-size": "2rem",
     "font-family": "monospace",
@@ -25,7 +186,7 @@ App.KL.Lobby.draw.button(id: String, content: String): DOM
     content
   </button>
 
-App.KL.Lobby.draw.input(id: String, value: String): DOM
+App.KL.Lobby.draw.front.input(id: String, value: String): DOM
   let style = {
     "font-size": "2rem",
     "font-family": "monospace",
@@ -35,8 +196,7 @@ App.KL.Lobby.draw.input(id: String, value: String): DOM
   <input id=id value=value style=style>
   </input>
 
-App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State): DOM
-  open local
+App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.State): DOM
   let style = {
     "width": "100%", 
     "height": "100%", 
@@ -57,10 +217,11 @@ App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State):
       "text-align": "center"
     }>
       "Enter a room number: "
-      {App.KL.Lobby.draw.input("text", local.room_input)}
+      {App.KL.Lobby.draw.front.input("text", room_input)}
       <div>
-        {App.KL.Lobby.draw.button("ready", "Enter")}
-        {App.KL.Lobby.draw.button("random", "Random")}
+        {App.KL.Lobby.draw.front.button("ready", "Enter")}
+        {App.KL.Lobby.draw.front.button("random", "Random")}
+        {App.KL.Lobby.draw.front.button("heroes", "Heroes")}
       </div>
     </div>
   </div>
@@ -73,29 +234,72 @@ App.KL.Lobby.when(
   global: App.KL.Global.State,
   event: App.Event
 ): IO<Maybe<App.KL.State.Local>>
+  let page = local@page
   case event {
     init:
       let new_local = local@user <- String.to_lower(event.user)
       App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
-
     input:
-      let new_local = local@room_input <- event.text
-      App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+      case page {
+        front:
+          let new_page = App.KL.Lobby.State.Local.Page.front(event.text)
+          let new_local = local@page <- new_page
+          App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+        heroes:
+          App.pass<App.KL.State>
+      }
 
     mouse_click:
-      switch String.eql(event.id) {
-        "random": IO {
-          get rnd = IO.random(10000000000)
-          let str = Nat.show(rnd)
-          let room = "4b4c494e" | String.take(8, str)
-          let new_local = local@room_input <- room
-          App.set_local!(App.KL.State.Local.lobby(new_local))
-        }
-        "ready": IO {
-          App.watch!(local@room_input)
-          App.new_post!(local@room_input, App.KL.Game.Phase.Draft.Event.join_room.serial)
-          App.set_local!(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, local@room_input)))
-          //App.set_local!(App.KL.State.Local.game(App.KL.Game.State.Local.new(local@user, local@room_input, none, {0,0})))
-        }
-      } default App.pass!
-  } default App.pass!
+      case page {
+        front:
+          switch String.eql(event.id) {
+            "random": IO {
+              get rnd = IO.random(10000000000)
+              let str = Nat.show(rnd)
+              let room = "4b4c494e" | String.take(8, str)
+              let new_page = App.KL.Lobby.State.Local.Page.front(room)
+              let new_local = local@page <- new_page
+              App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+            }
+            "ready": 
+              case page.room_input {
+                nil: IO {App.pass!}
+                cons:
+                  IO {
+                    App.watch<App.KL.State>(page.room_input)
+                    App.new_post<App.KL.State>(page.room_input, App.KL.Game.Phase.Draft.Event.join_room.serial)
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input)))
+                  }
+              
+              }
+            "heroes": IO {
+              let new_page = App.KL.Lobby.State.Local.Page.heroes(none, none, "string")
+              let new_local = local@page <- new_page
+              App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+            }
+          }default App.pass!
+        heroes:
+          switch String.starts_with(event.id) {
+            "H": 
+              let hero_id = String.drop(1, event.id)
+              case App.KL.Game.Hero.get_by_name(hero_id) as hero {
+                none: App.pass!
+                some: 
+                  let new_page = App.KL.Lobby.State.Local.Page.heroes(some(hero.value), none, page.tab)
+                  let new_local = local@page <- new_page
+                  App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+              }
+            "S":
+              let skill_key = String.drop(1, event.id)
+              let skill     = Maybe {
+                get hero = page.hero
+                get skill = hero@skills{skill_key}
+                return skill
+              }
+              let new_page = App.KL.Lobby.State.Local.Page.heroes(page.hero, skill, page.tab)
+              let new_local = local@page <- new_page
+              App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+          }default App.pass<App.KL.State>
+      }
+  } default App.pass<App.KL.State>
+  

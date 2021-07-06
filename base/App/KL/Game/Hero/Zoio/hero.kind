@@ -12,15 +12,24 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, 1, App.KL.Game.Effect.common.walk(1, 1))
-    "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2))
-    "W": App.KL.Game.Skill.new("Eye Beam", 480, 48, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 8, 2))
-    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 48, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(16, 16, 3))
+    "X": App.KL.Game.Skill.new("Walk", 500, 12, 1, App.KL.Game.Effect.common.walk(1, 1),
+    "Walk to another tile within 1 range from " | name | ".")
+
+    "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2),
+    "Zoio quickly hits an enemy with his Tentacle, dealing 8 damage.")
+
+    "W": App.KL.Game.Skill.new("Eye Beam", 480, 48, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 8, 2),
+    "Zoio fires a powerful beam across the whole battlefield, dealing 8 damage and burning all enemies hit.")
+
+    "E": App.KL.Game.Skill.new("Blinkaboom", 800, 48, 32, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(16, 16, 3),
+    "After a brief delay, Zoio blinks to a tile, sacrificing himself to deal high damage across the battlefield.")
   }
 
   let on_stepped = none
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped)
+  let description = "Zoio is a fragile mage that has no range limitations in his Eye Beam. However, his movement is extremely slow."
+
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 

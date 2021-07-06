@@ -5,24 +5,45 @@ App.KL.Game.Cast.apply(
 ): App.KL.Game.Cast.Result
   open game
   open cast
+
   Maybe {
     get skill = App.KL.Game.Cast.get_skill(cast, game)
     get coord = App.KL.Game.Cast.get_coord(cast, game)
     get creature = App.KL.Game.Board.Creature.get(coord, game.board)
     let result = skill@effect(coord, cast@target, game@board)
-    let allow_cast = App.KL.Game.Creature.Status.cast_impedment(creature)
-    if not(allow_cast) then
+    let is_stunned = App.KL.Game.Creature.Status.stun.check(creature) // Verifies if the creature is stunned
+    let is_silenced = App.KL.Game.Creature.Status.silence.check(creature) // Verifies if the creature is silenced
+    let is_walk = String.eql(skill@name, "Walk") // Verifies if its walk
+
+    if is_stunned then
       Maybe { 
-        return case result {
+      return App.KL.Game.Cast.Result.failure
+      }
+    else 
+      if is_silenced then
+        if is_walk then // A silenced creature should be able to Walk
+          Maybe { 
+            return case result {
+            err: App.KL.Game.Cast.Result.failure
+            new: 
+              let game = game@board <- result.board
+              let game = game@cemetery <- game@cemetery ++ result.cemetery
+              App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+            }
+          }
+        else
+          Maybe { 
+            return App.KL.Game.Cast.Result.failure
+          }
+      else
+        Maybe { 
+          return case result {
           err: App.KL.Game.Cast.Result.failure
           new: 
             let game = game@board <- result.board
             let game = game@cemetery <- game@cemetery ++ result.cemetery
-            App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+          App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+          }
       }
-    }
-    else
-      Maybe { 
-        return App.KL.Game.Cast.Result.failure
-      }
-  } <> App.KL.Game.Cast.Result.failure
+
+} <> App.KL.Game.Cast.Result.failure

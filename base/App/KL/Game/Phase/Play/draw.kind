@@ -22,6 +22,12 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   let blue_hp = I32.sub(App.KL.Constants.max_score, game.score@points@snd)
   let red_hp = I32.sub(App.KL.Constants.max_score, game.score@points@fst)
 
+  let bar_red = String.show_clean(F64.show(255.0 - Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_grn = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_col = "rgb("|bar_red|","|bar_grn|", 0)"
+
+
+
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
@@ -29,17 +35,9 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "flex-direction": "row", 
     "justify-content": "flex-start", 
     "position": "relative"
-    "background":
-      if countdown =? 0 then
-        "rgb(220,220,220)"
-      else if (countdown <? 64) && ((countdown % 12) <? 4) then
-        "rgb(232,232,232)"
-      else
-        "rgb(255,255,255)"
-    //"align-items": "center",
+    "background": "rgb(255,255,255)"
   }>
     {App.KL.Game.Phase.Play.draw.skills_menu(game)}
-
     <div style={ 
       "width": "calc(100% - 200px)", 
       "height": "100%", 
@@ -87,20 +85,33 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
           {},
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
+      {
+      if countdown =? 0 then
+        <div style= {"height": "40px"}></div>
+      else
+        <div style=
+          {
+          "display":"flex"
+          "width": "75%"
+          "border-radius": "2px"
+          "border": "2px solid SlateGrey"
+          "height": "25px"
+          "margin-top": "15px"
+          "background-color": "rgb(220,220,220)"
+          
+          }>
+          <div style =
+            {
+              "width": String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 100.0)) | "%"
+              "height": "100%"
+              "background-color": bar_col
+            }> 
+          </div>
+        </div>
+      }
     </div>
-
-    <div style={
-      "width": "200px"
-      "height": "100%"
-      "background": "rgb(220,220,220)"
-      "border-left": "1px solid black"
-      "padding": "4px"
-      "font-family": "monospace"
-      "font-size": "16px"
-    }>
-      "TODO :)"
-    </div>
-
+    {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
+    {App.KL.Game.Phase.Play.draw.skill_description(local, game)}
   </div>
 
 // CANVAS DRAWING
@@ -143,7 +154,7 @@ App.KL.Game.Phase.Play.draw.board(
     img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
     img
   img
-
+  
 App.KL.Game.Phase.Play.draw.tile.token(
   game: App.KL.Game
   token: Maybe<App.KL.Game.Token>,
@@ -178,16 +189,17 @@ App.KL.Game.Phase.Play.draw.tile.token(
   
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
-  skill: Maybe<App.KL.Game.Skill>, 
+  skill: Maybe<Char>, 
   target: Hexagonal.Axial,
-  player: String,
+  user: String,
   game: App.KL.Game
 ): App.KL.Game.Indicators
 
   Maybe {
-    get skill      = skill
-    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, player), game)
-    get center     = App.KL.Game.Board.find_player_coord(player, game@board)
+    get skill_key  = skill
+    get skill      = App.KL.Game.Skill.get(user, skill_key, game)
+    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, user), game)
+    get center     = App.KL.Game.Board.find_player_coord(user, game@board)
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue
     let indicators = Hexagonal.Axial.Map.new!
@@ -350,6 +362,34 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
         skill_info
     </div>
 
+App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  main_style = 
+    {
+    "width": "200px"
+    "height": "100%"
+    "padding": "0 20px"
+    "background": "rgb(220,220,220)"
+    "border-left": "1px solid black"
+    "display":"flex"
+    "flex-direction":"column"
+    "align-items": "center"
+    }
+  
+  open local 
+  open game
+  Maybe {
+    get skill_key = local.preview@skill
+    get skill     = App.KL.Game.Skill.get(local@user, skill_key, game)
+    return 
+      <div style=main_style>
+        <div style={"font-size": "3em", "padding-bottom": "5px"}>
+          Char.to_string(skill_key) // TODO replace with Skill icon
+        </div>
+        <div style={"font-size": "2em", "padding-bottom": "5px"}>skill@name</div>
+        <div style={"padding-bottom": "8px"}>"Cast time: " | Nat.show(U64.to_nat(skill@delay))</div>
+        <div style={"padding-bottom": "8px"}>skill@description</div>
+      </div>
+  } <> <div style=main_style></div>
 
 // AUX FUNCTIONS
 // =============
@@ -443,3 +483,32 @@ App.KL.Game.Phase.Play.draw.shield(
   let shield = Nat.show(Int.to_nat(shield))
   VoxBox.Draw.text(shield, PixelFont.small_black, Pos32.new(cx, cy, 0), img)
 
+App.KL.Game.Phase.Play.Draw.gray_overlay(game: App.KL.Game): DOM
+  open game
+    case game.moment {
+      preparation: <div></div>
+      execution: case game.moment.casts {
+        nil: 
+          let frame_part = U64.to_f64(game.moment.frame) / U64.to_f64(App.KL.Constants.between_turn_delay)
+           let opacity = F64.show((1 - frame_part)/2.5)
+          <div style=
+          { "width": "100%",
+            "height": "100%",
+            "position": "absolute",
+            "background-color":"rgba(165,165,165,"|opacity|")",
+            "display": "flex"
+          }>
+            <div style=
+              { "font-size": "4em"
+                "margin": "auto"            
+                "text-align": "center"
+                "color": "white"
+              }>
+              <div>"Turn " | Nat.show(U64.to_nat(game.turn)) | " ended."</div>
+              <div>"Starting Turn " | Nat.show(U64.to_nat(game.turn + 1)) | "!"</div>
+            </div>
+          </div>
+        cons: <div></div>
+      }
+    }
+  

@@ -44,6 +44,15 @@ App.KL.Game.Phase.Draft.when(
             } default App.KL.Game.Team.neutral
             App.new_post!(local@room, App.KL.Game.Phase.Draft.Event.set_team.serial(team))
       } default App.pass!
-  
+  mouse_over:
+    switch String.starts_with(event.id) {
+      "D": // Set which tab to show
+        let tab   = String.drop(1, event.id)
+        let local = case tab {
+          nil: local 
+          cons: local@tab <- tab
+        }
+        App.set_local!(App.KL.State.Local.game(local))
+    }default App.set_local!(App.KL.State.Local.game(local@tab <- "D"))
   } default App.pass!
 

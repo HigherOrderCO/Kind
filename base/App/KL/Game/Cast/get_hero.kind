@@ -1,0 +1,17 @@
+// Gets the hero associated with a cast
+App.KL.Game.Cast.get_hero(
+  cast: App.KL.Game.Cast
+  game: App.KL.Game
+): Maybe<App.KL.Game.Hero>
+  open game
+  open cast
+  Maybe {
+    get player = game.players{cast.player}
+    get hero_id = player@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
+  }
+  //Maybe {
+    //get creature = App.KL.Game.Cast.get_creature(cast, game)
+    //return creature@hero
+  //}

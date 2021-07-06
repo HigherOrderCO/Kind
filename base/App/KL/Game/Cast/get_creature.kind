@@ -1,0 +1,10 @@
+// Gets the creature associated with a cast
+App.KL.Game.Cast.get_creature(
+  cast: App.KL.Game.Cast
+  game: App.KL.Game
+): Maybe<App.KL.Game.Creature>
+  Maybe {
+    get coord = App.KL.Game.Cast.get_coord(cast, game)
+    get tile = Hexagonal.Axial.Map.get!(coord, game@board)
+    tile@creature
+  }

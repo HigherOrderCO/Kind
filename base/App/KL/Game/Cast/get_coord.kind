@@ -1,0 +1,6 @@
+// Gets the coord associated with a cast
+App.KL.Game.Cast.get_coord(
+  cast: App.KL.Game.Cast
+  game: App.KL.Game
+): Maybe<Hexagonal.Axial>
+  App.KL.Game.Board.find_player_coord(cast@player, game@board)
