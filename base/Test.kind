@@ -1,2 +1,7 @@
-Test: IO<Unit>
-  Neutralis.main(42000)
+Test: _
+  let map = BBT.from_list!!(String.cmp, [{"orange", 2}, {"black", 3}, {"yellow", 4}, {"brown", 1}, {"white", 1}])
+  // BBT.foldl_with_key!!(map)!({".", 0}, (x, y, z) {z@fst | x | ".", z@snd + y})
+  result = {".", 0}
+  for str:n in map with result:
+    {result@fst | str | ".", result@snd + n}
+  result

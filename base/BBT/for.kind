@@ -1,4 +1,2 @@
-// TODO optmize?
 BBT.for<K: Type, V: Type>(map: BBT<K,V>)<A: Type>(a: A, f: K -> V -> A -> A): A
-  let list = BBT.to_list!!(map)
-  List.for!(list)!(a, (x, y) f(x@fst, x@snd, y))
+  BBT.foldl_with_key!!(map)!(a, f)
