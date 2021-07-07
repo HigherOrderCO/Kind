@@ -1,11 +1,11 @@
 // App states (local = clicks, global = visitors)
 App.BoardBuilder.State: App.State
-  App.State.new(App.BoardBuilder.State.local, Unit)
+  App.State.new(App.BoardBuilder.State.local, App.BoardBuilder.State.global)
 
 type App.BoardBuilder.State.local {
   new(
+    room: String
     canvas_size: Pair<I32, I32>
-    board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
     mouse: Maybe<Pair<U32, U32>>
     actual_terrain: App.KL.Game.Terrain
     command: Maybe<Char>
@@ -13,15 +13,25 @@ type App.BoardBuilder.State.local {
   )
 }
 
+type App.BoardBuilder.State.global {
+  new(
+    board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
+  )
+}
+
 // Initial state
 App.BoardBuilder.init: App.Init<App.BoardBuilder.State>
+  let room = ""
   let canvas_size = {App.KL.Constants.center_x * 2, App.KL.Constants.center_y * 2}
   let board = Hexagonal.Axial.Map.new!
   let board = Hexagonal.Axial.Map.set!({0,0} :: Hexagonal.Axial, {1}, board)
   let mouse = none
   let actual_terrain = App.KL.Game.Terrain.new(1)
   let string = ""
-  App.Store.new<App.BoardBuilder.State>(App.BoardBuilder.State.local.new(canvas_size, board, mouse, actual_terrain, none, ""), unit)
+  App.Store.new<App.BoardBuilder.State>(
+    App.BoardBuilder.State.local.new(room, canvas_size, mouse, actual_terrain, none, ""), 
+    App.BoardBuilder.State.global.new(board)
+  )
 
 App.BoardBuilder.draw.board(
   canvas_size: Pair<I32, I32>
@@ -82,7 +92,7 @@ App.BoardBuilder.draw(img: VoxBox): App.Draw<App.BoardBuilder.State>
                 "height": height,
                 "scale": "2"},
               {},
-              App.BoardBuilder.draw.board(state.local@canvas_size, state.local@board, state.local@actual_terrain, state.local@mouse, img)
+              App.BoardBuilder.draw.board(state.local@canvas_size, state.global@board, state.local@actual_terrain, state.local@mouse, img)
             )
           }
         </div>
@@ -168,7 +178,8 @@ App.BoardBuilder.tick: App.Tick<App.BoardBuilder.State>
 
 // Global visitor: counts posts to room_zero
 App.BoardBuilder.post: App.Post<App.BoardBuilder.State>
-  App.no_post<App.BoardBuilder.State>
+  (tick, room, addr, data, glob) 
+    glob
 
 // A "BoardBuilder, world!" + counter application
 App.BoardBuilder: App<App.BoardBuilder.State>
