@@ -129,6 +129,16 @@ sugars: Nat
   val0 + val1 + val2                  // Nat.add(val0, Nat.add(val1, val2))
 ```
 
+```c
+// List monadic block: returns [{1,4},{1,5},{1,6},{2,4},...,{3,6}]
+my_list: List<Pair<Nat,Nat>>
+  List {
+    get x = [1, 2, 3]
+    get y = [4, 5, 6]
+    return {x, y}
+  }
+```
+
 Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/master/base/List)!
 
 ### Some types
