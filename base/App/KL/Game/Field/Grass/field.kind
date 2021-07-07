@@ -8,4 +8,4 @@ App.KL.Game.Field.Grass.field: App.KL.Game.Field
       yellow      : App.KL.Game.Field.Grass.Assets.light_red
       blue        : App.KL.Game.Field.Grass.Assets.blue
     }
-  App.KL.Game.Field.new(name, draw)
+  App.KL.Game.Field.new(name, draw, "")

@@ -3,13 +3,22 @@ App.BoardBuilder.State: App.State
   App.State.new(App.BoardBuilder.State.local, App.BoardBuilder.State.global)
 
 type App.BoardBuilder.State.local {
+  lobby(value: App.BoardBuilder.Lobby.State.local)
+  builder(value: App.BoardBuilder.Builder.State.local)
+}
+
+type App.BoardBuilder.Lobby.State.local {
+  new(room_input: String)
+}
+
+type App.BoardBuilder.Builder.State.local {
   new(
-    room: String
-    canvas_size: Pair<I32, I32>
-    mouse: Maybe<Pair<U32, U32>>
-    actual_terrain: App.KL.Game.Terrain
-    command: Maybe<Char>
-    string: String
+    room: String,
+    canvas_size: Pair<I32, I32>,
+    mouse: Maybe<Pair<U32, U32>>,
+    actual_terrain: Nat,
+    command: Maybe<Char>,
+    array: String,
   )
 }
 
@@ -22,30 +31,21 @@ type App.BoardBuilder.State.global {
 // Initial state
 App.BoardBuilder.init: App.Init<App.BoardBuilder.State>
   let room = ""
-  let canvas_size = {App.KL.Constants.center_x * 2, App.KL.Constants.center_y * 2}
   let board = Hexagonal.Axial.Map.new!
-  let board = Hexagonal.Axial.Map.set!({0,0} :: Hexagonal.Axial, {1}, board)
-  let mouse = none
-  let actual_terrain = App.KL.Game.Terrain.new(1)
-  let string = ""
+  // let board = Hexagonal.Axial.Map.set!({0,0} :: Hexagonal.Axial, {1}, board)
   App.Store.new<App.BoardBuilder.State>(
-    App.BoardBuilder.State.local.new(room, canvas_size, mouse, actual_terrain, none, ""), 
+    App.BoardBuilder.State.local.lobby(App.BoardBuilder.Lobby.State.local.new(room))//, canvas_size, mouse, actual_terrain, none, ""), 
     App.BoardBuilder.State.global.new(board)
   )
 
 App.BoardBuilder.draw.board(
   canvas_size: Pair<I32, I32>
   board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
-  actual_terrain: App.KL.Game.Terrain
-  mouse: Maybe<Pair<U32, U32>>
+  actual_terrain: Nat
   img: VoxBox
 ): VoxBox
+  let actual_terrain = App.KL.Game.Terrain.new(actual_terrain)
   // let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, canvas_size@fst / 2, canvas_size@snd / 2)
-  let img = 
-    case mouse {
-      none: img
-      some: App.KL.Game.Phase.Play.draw.cursor(mouse.value, img)
-    }
   // let img = App.BoardBuilder.draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
   for coord:terrain in board with img:
     App.BoardBuilder.draw.terrain(terrain, coord, canvas_size, img)
@@ -75,111 +75,251 @@ App.BoardBuilder.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>)
   
   "[\n" | string | "]"
 
+App.BoardBuilder.draw.img(local: App.BoardBuilder.Builder.State.local, global: App.BoardBuilder.State.global, img: VoxBox): VoxBox
+  let img = App.BoardBuilder.draw.mouse(local@mouse, img)
+  let img = App.BoardBuilder.draw.board(local@canvas_size, global@board, local@actual_terrain, img)
+  img
+
+App.BoardBuilder.draw.mouse(mouse: Maybe<Pair<U32, U32>>, img: VoxBox): VoxBox
+  case mouse {
+    none: img
+    some: App.KL.Game.Phase.Play.draw.cursor(mouse.value, img)
+  }
+
+App.BoardBuilder.draw.builder(local: App.BoardBuilder.Builder.State.local, global: App.BoardBuilder.State.global, img: VoxBox): DOM 
+  let width = Nat.show(I32.to_nat(local@canvas_size@fst))
+  let height = Nat.show(I32.to_nat(local@canvas_size@snd))
+  let max_height = Nat.show(I32.to_nat(local@canvas_size@snd * 2))
+  <div style={"margin-bottom": "10px"}>
+    <div style={"display": "flex", "padding": "20px"}>
+      <div style={"margin-right": "5px"}>
+        {
+          DOM.vbox(
+            { "id": "game_screen",
+              "width": width,
+              "height": height,
+              "scale": "2"},
+            {},
+            App.BoardBuilder.draw.img(local, global, img)
+          )
+        }
+      </div>
+      <div style={"max-height": max_height|"px", "overflow": "auto", "display" : "flex", "flex-wrap": "wrap", "align-content": "flex-start"}>
+        for value in List.indices!(App.KL.Game.Field.list):
+          let selected = value@fst =? local@actual_terrain
+          let border = if selected then "2px solid green" else "none"
+          <div id=Nat.show(value@fst) style={"width" : "75px", "height": "fit-content", "padding": "5px", "font-size": "1rem", "cursor": "pointer", "display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column", "border" : border, "box-sizing": "border-box"}>
+            <img id=Nat.show(value@fst) src=value@snd@picture></img>
+            <span id=Nat.show(value@fst)>value@snd@name</span>
+          </div>
+      </div>
+    </div>
+    <div style={"display": "flex", "width": "100vw", "justify-content": "center", "flex-direction": "column", "align-items":"center"}>
+      <button id="generate_array" style={"font-size": "2rem", "padding": "2px"}>"Generate array"</button>
+      <textarea readonly="readonly" value=local@array style={"width": "900px", "height": "900px", "font-size": "1rem"}></textarea>
+    </div>
+  </div>
+
+App.BoardBuilder.draw.lobby(local: App.BoardBuilder.Lobby.State.local): DOM
+  let style = {
+    "width": "100%", 
+    "height": "100%", 
+    "display": "flex", 
+    "flex-direction": "column", 
+    "justify-content": "center", 
+    "align-items": "center",
+    "font-size": "2rem"
+  }
+  <div style=style>
+    <h1 style={"margin-bottom": "10px", "text-align": "center"}>
+      "Board Builder" <small>"v1.0"</small>
+    </h1>
+    <div style={
+      "display": "flex",
+      "justify-content": "center", 
+      "flex-wrap": "wrap",
+      "text-align": "center"
+    }>
+      "Enter a room number: "
+      <input id="room_input" value=local@room_input style={
+        "font-size": "2rem",
+        "font-family": "monospace",
+        "outline": "transparent",
+        "margin-bottom": "15px"
+      }>
+      </input>
+      <div>
+        {App.BoardBuilder.Lobby.draw.button("ready", "Enter")}
+        {App.BoardBuilder.Lobby.draw.button("random", "Random")}
+      </div>
+    </div>
+  </div>
+
+App.BoardBuilder.Lobby.draw.button(id: String, text: String): DOM
+  let style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "margin-left": "10px",
+    "padding": "2px"
+  }
+  <button id=id>text</button>
+
 // Render function
 App.BoardBuilder.draw(img: VoxBox): App.Draw<App.BoardBuilder.State>
   (state)
     open state
-    let width = Nat.show(I32.to_nat(state.local@canvas_size@fst))
-    let height = Nat.show(I32.to_nat(state.local@canvas_size@snd))
-    let max_height = Nat.show(I32.to_nat(state.local@canvas_size@snd * 2))
-    <div style={"margin-bottom": "10px"}>
-      <div style={"display": "flex", "padding": "20px"}>
-        <div style={"margin-right": "5px"}>
-          {
-            DOM.vbox(
-              { "id": "game_screen",
-                "width": width,
-                "height": height,
-                "scale": "2"},
-              {},
-              App.BoardBuilder.draw.board(state.local@canvas_size, state.global@board, state.local@actual_terrain, state.local@mouse, img)
-            )
+    let global = state.global
+    case state.local as local {
+      lobby: App.BoardBuilder.draw.lobby(local.value)
+      builder: App.BoardBuilder.draw.builder(local.value, global, img)
+    }
+
+
+App.BoardBuilder.Builder.when(
+  event: App.Event, 
+  local: App.BoardBuilder.Builder.State.local, 
+  global: App.BoardBuilder.State.global
+): IO<Maybe<App.State.local<App.BoardBuilder.State>>>
+  open local
+  case event {
+    input: 
+      switch String.eql(event.id) {
+        "width":
+          let local = local@canvas_size <- {I32.read(event.text), local.canvas_size@snd}
+          App.set_local!(App.BoardBuilder.State.local.builder(local))
+        "height":
+          let local = local@canvas_size <- {local.canvas_size@fst, I32.read(event.text)}
+          App.set_local!(App.BoardBuilder.State.local.builder(local))
+      } default App.pass!
+    mouse_move:
+      if String.eql("game_screen", event.id) then
+        let {x,y} = event.mouse_pos
+        let command = local.command <> ' '
+        let mouse = {x / 2, y / 2}
+        let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2, local.canvas_size@snd / 2)
+        let local = local@mouse <- some(mouse)
+        switch Char.eql(command) {
+          'X':
+            IO {
+              App.set_local<App.BoardBuilder.State>(App.BoardBuilder.State.local.builder(local))
+              App.new_post!(local.room, App.BoardBuilder.Event.serialize_post(App.BoardBuilder.Event.add(coord, local.actual_terrain)))
+            }
+          'Z':
+            IO {
+              App.set_local<App.BoardBuilder.State>(App.BoardBuilder.State.local.builder(local))
+              App.new_post!(local.room, App.BoardBuilder.Event.serialize_post(App.BoardBuilder.Event.del(coord)))
+            }
+        } default App.set_local!(App.BoardBuilder.State.local.builder(local))
+      else
+        let local = local@mouse <- none
+        App.set_local!(App.BoardBuilder.State.local.builder(local))
+    mouse_click:
+      if (event.id =? "generate_array") then
+        let local = local@array <- App.BoardBuilder.generate_array(global@board)
+        App.set_local!(App.BoardBuilder.State.local.builder(local))
+      else
+        let terrain = Nat.read(event.id)
+        let local = local@actual_terrain <- terrain
+        App.set_local!(App.BoardBuilder.State.local.builder(local))
+    mouse_up:
+      let mouse = local.mouse
+      without mouse: App.pass!
+        let command = local.command <> ' '
+        let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2, local.canvas_size@snd / 2)
+        let event = 
+          if Char.eql(command, 'Z') then
+            App.BoardBuilder.Event.del(coord)
+          else 
+            App.BoardBuilder.Event.add(coord, local.actual_terrain)
+        App.new_post!(local.room, App.BoardBuilder.Event.serialize_post(event))
+    key_up:
+      let local = local@command <- none
+      App.set_local!(App.BoardBuilder.State.local.builder(local))
+    key_down:
+      let local = local@command <- some(event.code)
+      App.set_local!(App.BoardBuilder.State.local.builder(local))
+  } default App.pass!
+
+App.BoardBuilder.Lobby.when(
+  event: App.Event, 
+  local: App.BoardBuilder.Lobby.State.local, 
+  global: App.BoardBuilder.State.global
+): IO<Maybe<App.State.local<App.BoardBuilder.State>>>
+  case event {
+    // init:
+      // let new_local = local@user <- String.to_lower(event.user)
+      // App.set_local!(App.BoardBuilder.State.local.lobby(new_local))
+    input:
+      let local = local@room_input <- event.text
+      App.set_local!(App.BoardBuilder.State.local.lobby(local))
+    mouse_click:
+  
+      switch String.eql(event.id) {
+        "random": IO {
+          get rnd = IO.random(10000000000)
+          let str = Nat.show(rnd)
+          let room = "5c4c494e" | String.take(8, str)
+          let new_local = local@room_input <- room
+          App.set_local!(App.BoardBuilder.State.local.lobby(new_local))
+        }
+        "ready": 
+          case local@room_input {
+            nil: App.pass!
+            cons:
+              IO {
+                App.watch!(local@room_input)
+                // App.new_post!(local@room_input, App.KL.Game.Phase.Draft.Event.join_room.serial)
+                App.set_local!(App.BoardBuilder.State.local.builder(App.BoardBuilder.Builder.State.Local.init(local@room_input)))
+              }
           }
-        </div>
-        <div style={"max-height": max_height|"px", "overflow": "auto", "display" : "flex", "flex-wrap": "wrap", "align-content": "flex-start"}>
-          for value in List.indices!(App.KL.Game.Field.list):
-            let selected = value@fst =? state.local@actual_terrain@field_id
-            let border = if selected then "2px solid green" else "none"
-            <div id=Nat.show(value@fst) style={"width" : "75px", "height": "fit-content", "padding": "5px", "font-size": "1rem", "cursor": "pointer", "display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column", "border" : border, "box-sizing": "border-box"}>
-              <img id=Nat.show(value@fst) src=value@snd@picture></img>
-              <span id=Nat.show(value@fst)>value@snd@name</span>
-            </div>
-        </div>
-      </div>
-      <div style={"display": "flex", "width": "100vw", "justify-content": "center", "flex-direction": "column", "align-items":"center"}>
-        <button id="generate_array" style={"font-size": "2rem", "padding": "2px"}>"Generate array"</button>
-        <textarea readonly="readonly" value=state.local@string style={"width": "900px", "height": "900px", "font-size": "1rem"}></textarea>
-      </div>
-    </div>
+      } default App.pass!
+  } default App.pass!
+
+App.BoardBuilder.Builder.State.Local.init(room: String): App.BoardBuilder.Builder.State.local
+  let canvas_size = {App.KL.Constants.center_x * 2, App.KL.Constants.center_y * 2}
+  let mouse = none
+  let actual_terrain = 1
+  let command = none
+  let array = ""
+  
+  {room, canvas_size, mouse, actual_terrain, command, array}
 
 // Event handler
 App.BoardBuilder.when: App.When<App.BoardBuilder.State>
   (event, state)
     open state
-    case event {
-      input: 
-        switch String.eql(event.id) {
-          "width":
-            let local = state.local@canvas_size <- {I32.read(event.text), state.local@canvas_size@snd}
-            App.set_local!(local)
-          "height":
-            let local = state.local@canvas_size <- {state.local@canvas_size@fst, I32.read(event.text)}
-            App.set_local!(local)
-        } default App.pass!
-      mouse_move:
-        if String.eql("game_screen", event.id) then
-          let {x,y} = event.mouse_pos
-          let command = state.local@command <> ' '
-          let mouse = {x / 2, y / 2}
-          if Char.eql(command, 'X') then
-            let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
-            let board = Hexagonal.Axial.Map.set!(coord, state.local@actual_terrain, state.local@board)
-            let local = state.local@mouse <- some(mouse)
-            let local = local@board <- board
-            App.set_local!(local)
-          else
-            let local = state.local@mouse <- some(mouse)
-            App.set_local!(local)
-        else
-          let local = state.local@mouse <- none
-          App.set_local!(local)
-      mouse_click:
-        if (event.id =? "generate_array") then
-          let local = state.local@string <- App.BoardBuilder.generate_array(state.local@board)
-          App.set_local!(local)
-        else 
-          log(Nat.show(Nat.read(event.id)))
-          let terrain = App.KL.Game.Terrain.new(Nat.read(event.id))
-          let local = state.local@actual_terrain <- terrain
-          App.set_local!(local)
-      mouse_up:
-        let mouse = state.local@mouse
-        without mouse: App.pass!
-          let command = state.local@command <> ' '
-          let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, state.local@canvas_size@fst / 2, state.local@canvas_size@snd / 2)
-          let board = 
-            if Char.eql(command, 'Z') then
-              Hexagonal.Axial.Map.delete!(coord, state.local@board)
-            else  
-              Hexagonal.Axial.Map.set!(coord, state.local@actual_terrain, state.local@board)
-          let local = state.local@board <- board
-          App.set_local!(local)
-      key_up:
-        let local = state.local@command <- none
-        App.set_local!(local)
-      key_down:
-        let local = state.local@command <- some(event.code)
-        App.set_local!(local)
-    } default App.pass!
+    case state.local as local {
+      lobby: App.BoardBuilder.Lobby.when(event, local.value, state.global)
+      builder: App.BoardBuilder.Builder.when(event, local.value, state.global)
+    }
+    
 
 // Global ticker: not used
 App.BoardBuilder.tick: App.Tick<App.BoardBuilder.State>
   App.no_tick<App.BoardBuilder.State>
 
+type App.BoardBuilder.Event {
+  add(coord: Hexagonal.Axial, field_id: Nat)
+  del(coord: Hexagonal.Axial)
+} deriving (serializer, deserializer)
+
+App.BoardBuilder.Event.serialize_post(ev: App.BoardBuilder.Event): String
+  String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.BoardBuilder.Event.serializer, ev)))
+
+App.BoardBuilder.Event.deserialize_post(hex: String): Maybe<App.BoardBuilder.Event>
+  Deserializer.run!(App.BoardBuilder.Event.deserializer, Bits.hex.decode(hex))
+
 // Global visitor: counts posts to room_zero
 App.BoardBuilder.post: App.Post<App.BoardBuilder.State>
   (tick, room, addr, data, glob) 
-    glob
+    case App.BoardBuilder.Event.deserialize_post(data) as eventglob {
+      none: glob
+      some:
+        case eventglob.value as event {
+          add: glob@board <- Hexagonal.Axial.Map.set!(event.coord, {event.field_id}, glob@board)
+          del: glob@board <- Hexagonal.Axial.Map.delete!(event.coord, glob@board)
+        }   
+    }
 
 // A "BoardBuilder, world!" + counter application
 App.BoardBuilder: App<App.BoardBuilder.State>
