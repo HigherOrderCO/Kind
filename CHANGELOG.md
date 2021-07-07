@@ -1,3 +1,7 @@
+### Kind 1.0.85
+
+- Optimize BBT.for
+
 ### Kind 1.0.81
 
 - Add Scheme compilation options to CLI
