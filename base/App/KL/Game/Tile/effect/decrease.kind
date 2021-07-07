@@ -1,0 +1,14 @@
+App.KL.Game.Tile.effect.decrease(
+  tile: App.KL.Game.Tile
+): App.KL.Game.Tile
+
+  open tile
+  without tile.effect: tile
+  open tile.effect
+  let new_duration = tile.effect.duration - 1
+  if I32.gtn(new_duration, 0) then 
+    let new_effect = tile.effect@duration <- new_duration
+    tile@effect <- some(new_effect)
+  else
+    tile@effect <- none
+

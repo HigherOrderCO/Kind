@@ -4,13 +4,7 @@ App.KL.Game.Board.apply_status(
 
   let result = {game@board, game@cemetery}
   for coord:tile in game@board with result:
-    open tile
-    let effect_tile = case tile.effect {
-      none:
-        App.KL.Game.Effect.pass
-      some:
-        tile.effect.value
-      }
+    let effect_tile = App.KL.Game.Tile.effect.get(tile)
     let effect_tile_result = effect_tile(coord, coord, result@fst)
     let result = case effect_tile_result { 
       err: result
@@ -28,6 +22,8 @@ App.KL.Game.Board.apply_status(
       }
     result
     
-  let game = game@board <- result@fst
+//Update Tile Effects
+  let new_board = App.KL.Game.Board.tile_update(result@fst)
+  let game = game@board <- new_board
   let game = game@cemetery <- game@cemetery ++ result@snd
   game

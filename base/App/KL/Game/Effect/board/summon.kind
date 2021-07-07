@@ -3,5 +3,6 @@ App.KL.Game.Effect.board.summon(
   creature: App.KL.Game.Creature
 ): App.KL.Game.Effect<Unit>
   (center, target, board)
+
   let board = App.KL.Game.Board.push(coord, App.KL.Game.Entity.creature(creature), board)
   App.KL.Game.Effect.Result.new!(unit, center, board, Hexagonal.Axial.Map.new!, 0, [])
