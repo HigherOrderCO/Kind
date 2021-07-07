@@ -4,7 +4,7 @@ App.KL.Game.Effect.movement.move_to(from: Hexagonal.Axial, to: Hexagonal.Axial, 
     get board = App.KL.Game.Effect.board.get
     let from_creature = App.KL.Game.Board.Creature.get(from, board)
     let to_creature = App.KL.Game.Board.Creature.get(to, board)
-    let to_tile = App.KL.Game.Board.get(to, board)
+    let to_tile = App.KL.Game.Tile.get(to, board)
     get movement_impairment = App.KL.Game.Effect.movement.movable(from_creature, ignore)
     without to_tile: App.KL.Game.Effect {
       return false

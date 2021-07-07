@@ -1,0 +1,7 @@
+// set tile in some coord on board
+App.KL.Game.Board.set(
+  coord: Hexagonal.Axial,
+  tile: App.KL.Game.Tile,
+  board:App.KL.Game.Board
+): App.KL.Game.Board
+  Hexagonal.Axial.Map.set!(coord, tile, board)
