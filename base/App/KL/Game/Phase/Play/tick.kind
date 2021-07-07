@@ -49,7 +49,7 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
         // Go to next turn
         else
           // apply status TODO redo
-          let game = App.KL.Game.Board.Creature.dot_verify(game)
+          let game = App.KL.Game.Board.apply_status(game)
           // token update
           let game   = game@board <- App.KL.Game.Token.board.capture(game@board)
           // score update

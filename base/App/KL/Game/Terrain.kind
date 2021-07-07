@@ -1,6 +1,7 @@
 type App.KL.Game.Terrain {
   new(
     field_id: Nat
+    effect: Maybe<App.KL.Game.Effect<Unit>>
   )
 }
 

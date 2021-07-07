@@ -144,7 +144,7 @@ App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
     App.KL.Game.Effect.status.root.add(2, to)
     return unit
   })
-  let description = "A Trap created by Croni that deals 6 damage to whoever steps on it"
+  let description = "A Trap created by Croni that stuns whoever steps on it"
   App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero

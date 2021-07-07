@@ -6,8 +6,7 @@ App.KL.Game.Board.arena: App.KL.Game.Board
 
   board  = Hexagonal.Axial.Map.new<App.KL.Game.Tile>
   
-  
-  new_terrain = App.KL.Game.Terrain.new(0)
+  new_terrain = App.KL.Game.Terrain.new(0,none)
   new_terrain = App.KL.Game.Entity.terrain(new_terrain)
 
   tokens = [
