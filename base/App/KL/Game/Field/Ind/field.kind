@@ -1,0 +1,27 @@
+App.KL.Game.Field.Ind.field.1: App.KL.Game.Field
+  let name = "ind_01"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.ind_01
+  let picture = App.KL.Game.Field.NewTiles.ind_01_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Ind.field.2: App.KL.Game.Field
+  let name = "ind_02"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.ind_02
+  let picture = App.KL.Game.Field.NewTiles.ind_02_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Ind.field.3: App.KL.Game.Field
+  let name = "ind_03"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.ind_03
+  let picture = App.KL.Game.Field.NewTiles.ind_03_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Ind.field.4: App.KL.Game.Field
+  let name = "ind_04"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.ind_04
+  let picture = App.KL.Game.Field.NewTiles.ind_04_base64
+  App.KL.Game.Field.new(name, draw, picture)

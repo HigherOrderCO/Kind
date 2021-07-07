@@ -1,0 +1,182 @@
+App.KL.Game.Field.Lava.field.0: App.KL.Game.Field
+  let name = "Lava_00"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_00
+  let picture = App.KL.Game.Field.NewTiles.lava_00_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.1: App.KL.Game.Field
+  let name = "Lava_01"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_01
+  let picture = App.KL.Game.Field.NewTiles.lava_01_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.2: App.KL.Game.Field
+  let name = "Lava_02"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_02
+  let picture = App.KL.Game.Field.NewTiles.lava_02_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.3: App.KL.Game.Field
+  let name = "Lava_03"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_03
+  let picture = App.KL.Game.Field.NewTiles.lava_03_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.4: App.KL.Game.Field
+  let name = "Lava_04"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_04
+  let picture = App.KL.Game.Field.NewTiles.lava_04_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.5: App.KL.Game.Field
+  let name = "Lava_05"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_05
+  let picture = App.KL.Game.Field.NewTiles.lava_05_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.6: App.KL.Game.Field
+  let name = "Lava_06"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_06
+  let picture = App.KL.Game.Field.NewTiles.lava_06_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.7: App.KL.Game.Field
+  let name = "Lava_07"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_07
+  let picture = App.KL.Game.Field.NewTiles.lava_07_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.8: App.KL.Game.Field
+  let name = "Lava_08"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_08
+  let picture = App.KL.Game.Field.NewTiles.lava_08_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.9: App.KL.Game.Field
+  let name = "Lava_09"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_09
+  let picture = App.KL.Game.Field.NewTiles.lava_09_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.10: App.KL.Game.Field
+  let name = "Lava_10"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_10
+  let picture = App.KL.Game.Field.NewTiles.lava_10_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.10: App.KL.Game.Field
+  let name = "Lava_10"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_10
+  let picture = App.KL.Game.Field.NewTiles.lava_10_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.11: App.KL.Game.Field
+  let name = "Lava_11"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_11
+  let picture = App.KL.Game.Field.NewTiles.lava_11_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.12: App.KL.Game.Field
+  let name = "Lava_12"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_12
+  let picture = App.KL.Game.Field.NewTiles.lava_12_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.13: App.KL.Game.Field
+  let name = "Lava_13"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_13
+  let picture = App.KL.Game.Field.NewTiles.lava_13_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.14: App.KL.Game.Field
+  let name = "Lava_14"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_14
+  let picture = App.KL.Game.Field.NewTiles.lava_14_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.15: App.KL.Game.Field
+  let name = "Lava_15"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_15
+  let picture = App.KL.Game.Field.NewTiles.lava_15_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.16: App.KL.Game.Field
+  let name = "Lava_16"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_16
+  let picture = App.KL.Game.Field.NewTiles.lava_16_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.17: App.KL.Game.Field
+  let name = "Lava_17"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_17
+  let picture = App.KL.Game.Field.NewTiles.lava_17_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.18: App.KL.Game.Field
+  let name = "Lava_18"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_18
+  let picture = App.KL.Game.Field.NewTiles.lava_18_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.19: App.KL.Game.Field
+  let name = "Lava_19"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_19
+  let picture = App.KL.Game.Field.NewTiles.lava_19_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.20: App.KL.Game.Field
+  let name = "Lava_20"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_20
+  let picture = App.KL.Game.Field.NewTiles.lava_20_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.21: App.KL.Game.Field
+  let name = "Lava_21"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_21
+  let picture = App.KL.Game.Field.NewTiles.lava_21_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.22: App.KL.Game.Field
+  let name = "Lava_22"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_22
+  let picture = App.KL.Game.Field.NewTiles.lava_22_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.23: App.KL.Game.Field
+  let name = "Lava_23"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_23
+  let picture = App.KL.Game.Field.NewTiles.lava_23_base64
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.24: App.KL.Game.Field
+  let name = "Lava_24"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.NewTiles.lava_24
+  let picture = App.KL.Game.Field.NewTiles.lava_24_base64
+  App.KL.Game.Field.new(name, draw, picture)
+

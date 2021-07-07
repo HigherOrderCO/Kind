@@ -37,7 +37,6 @@ App.BoardBuilder.draw.board(
       some: App.KL.Game.Phase.Play.draw.cursor(mouse.value, img)
     }
   // let img = App.BoardBuilder.draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
-  log("-----------------------")
   for coord:terrain in board with img:
     App.BoardBuilder.draw.terrain(terrain, coord, canvas_size, img)
   img
@@ -51,8 +50,6 @@ App.BoardBuilder.draw.terrain(
   let {i, j} = App.KL.Game.Phase.Play.draw.centralize(coord)
   let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
   let j = (j - 128) + I32.to_u32(App.KL.Constants.hexagon_radius) + 5
-  log(U32.show(i))
-  log(U32.show(j))
   // let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, canvas_size@fst, canvas_size@snd)
   let field  = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   let field_drawing = field@draw(terrain, App.KL.Game.Indicator.background)
@@ -62,8 +59,8 @@ App.BoardBuilder.draw.terrain(
 App.BoardBuilder.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>): String
   let string = ""
   for coord:terrain in board with string:
-    let coord_string   = "Hexagonal.Axial.new(" | String.show_clean(I32.show(coord@i)) | ", " | String.show_clean(I32.show(coord@j)) | ")"
-    let terrain_string = "App.KL.Game.Terrain.new(" | Nat.show(terrain@field_id) | ")"
+    let coord_string   = "{" | String.show_clean(I32.show(coord@i)) | ", " | String.show_clean(I32.show(coord@j)) | "}"
+    let terrain_string = Nat.show(terrain@field_id)
     "{" | coord_string | "," | terrain_string | "}" | ",\n" | string
   
   "[\n" | string | "]"
@@ -72,12 +69,13 @@ App.BoardBuilder.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>)
 App.BoardBuilder.draw(img: VoxBox): App.Draw<App.BoardBuilder.State>
   (state)
     open state
+    let width = Nat.show(I32.to_nat(state.local@canvas_size@fst))
+    let height = Nat.show(I32.to_nat(state.local@canvas_size@snd))
+    let max_height = Nat.show(I32.to_nat(state.local@canvas_size@snd * 2))
     <div style={"margin-bottom": "10px"}>
       <div style={"display": "flex", "padding": "20px"}>
         <div style={"margin-right": "5px"}>
           {
-            let width = Nat.show(I32.to_nat(state.local@canvas_size@fst))
-            let height = Nat.show(I32.to_nat(state.local@canvas_size@snd))
             DOM.vbox(
               { "id": "game_screen",
                 "width": width,
@@ -88,14 +86,15 @@ App.BoardBuilder.draw(img: VoxBox): App.Draw<App.BoardBuilder.State>
             )
           }
         </div>
-        <div>
-          for i in [0 to List.length!(App.KL.Game.Field.list)]:
-            <button id=Nat.show(i) style={"padding": "5px", "font-size": "1rem"}>"Select Field " | Nat.show(i)</button>
+        <div style={"max-height": max_height|"px", "overflow": "auto", "display" : "flex", "flex-wrap": "wrap", "align-content": "flex-start"}>
+          for value in List.indices!(App.KL.Game.Field.list):
+            let selected = value@fst =? state.local@actual_terrain@field_id
+            let border = if selected then "2px solid green" else "none"
+            <div id=Nat.show(value@fst) style={"width" : "75px", "height": "fit-content", "padding": "5px", "font-size": "1rem", "cursor": "pointer", "display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column", "border" : border, "box-sizing": "border-box"}>
+              <img id=Nat.show(value@fst) src=value@snd@picture></img>
+              <span id=Nat.show(value@fst)>value@snd@name</span>
+            </div>
         </div>
-        // <div>
-        //   for info in ["width", "height"]:
-        //     <input id=info type="number" style={"font-size": "1rem"}></input>
-        // </div>
       </div>
       <div style={"display": "flex", "width": "100vw", "justify-content": "center", "flex-direction": "column", "align-items":"center"}>
         <button id="generate_array" style={"font-size": "2rem", "padding": "2px"}>"Generate array"</button>
@@ -139,6 +138,7 @@ App.BoardBuilder.when: App.When<App.BoardBuilder.State>
           let local = state.local@string <- App.BoardBuilder.generate_array(state.local@board)
           App.set_local!(local)
         else 
+          log(Nat.show(Nat.read(event.id)))
           let terrain = App.KL.Game.Terrain.new(Nat.read(event.id))
           let local = state.local@actual_terrain <- terrain
           App.set_local!(local)

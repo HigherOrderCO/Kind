@@ -2,6 +2,7 @@ type App.KL.Game.Field {
   new(
     name: String
     draw: App.KL.Game.Terrain -> App.KL.Game.Indicator -> VoxBox
+    picture: String
   )
 }
 
