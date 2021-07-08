@@ -1,0 +1,8 @@
+Nat.lte.zero_right(n: Nat, Hyp: Nat.lte(n, 0) == true): n == 0
+  case n with Hyp {
+    zero:
+      refl
+    succ:
+      contra = Bool.false_neq_true(Hyp)
+      Empty.absurd!(contra)
+  }!
