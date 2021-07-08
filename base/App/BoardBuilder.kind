@@ -132,7 +132,7 @@ App.BoardBuilder.draw.lobby(local: App.BoardBuilder.Lobby.State.local): DOM
   }
   <div style=style>
     <h1 style={"margin-bottom": "10px", "text-align": "center"}>
-      "Board Builder" <small>"v1.0"</small>
+      "Board Builder  " <small>"v1.0"</small>
     </h1>
     <div style={
       "display": "flex",
@@ -162,7 +162,7 @@ App.BoardBuilder.Lobby.draw.button(id: String, text: String): DOM
     "margin-left": "10px",
     "padding": "2px"
   }
-  <button id=id>text</button>
+  <button id=id style=style>text</button>
 
 // Render function
 App.BoardBuilder.draw(img: VoxBox): App.Draw<App.BoardBuilder.State>
