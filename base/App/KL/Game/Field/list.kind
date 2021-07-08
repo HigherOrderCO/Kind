@@ -1,11 +1,11 @@
 App.KL.Game.Field.list: List<App.KL.Game.Field>
   [
     // App.KL.Game.Field.Grass.field
-    App.KL.Game.Field.Grass2.field.1
-    App.KL.Game.Field.Grass2.field.2
-    App.KL.Game.Field.Grass2.field.3
-    App.KL.Game.Field.Grass2.field.4
-    App.KL.Game.Field.Grass2.field.5
+    App.KL.Game.Field.Grass.field.1
+    App.KL.Game.Field.Grass.field.2
+    App.KL.Game.Field.Grass.field.3
+    App.KL.Game.Field.Grass.field.4
+    App.KL.Game.Field.Grass.field.5
     App.KL.Game.Field.Ind.field.1
     App.KL.Game.Field.Ind.field.2
     App.KL.Game.Field.Ind.field.3

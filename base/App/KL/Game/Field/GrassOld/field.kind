@@ -1,0 +1,11 @@
+App.KL.Game.Field.GrassOld.field: App.KL.Game.Field
+  let name = "GrassOld"
+  let draw = (terrain, indicator)
+    case indicator {
+      background  : App.KL.Game.Field.GrassOld.Assets.normal
+      green       : App.KL.Game.Field.GrassOld.Assets.light_blue
+      red         : App.KL.Game.Field.GrassOld.Assets.red
+      yellow      : App.KL.Game.Field.GrassOld.Assets.light_red
+      blue        : App.KL.Game.Field.GrassOld.Assets.blue
+    }
+  App.KL.Game.Field.new(name, draw, "")
