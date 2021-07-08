@@ -4,4 +4,10 @@ App.KL.Game.Effect.status.weaken.add(
 ): App.KL.Game.Effect.At<I32>
   (pos)
 
-  App.KL.Game.Effect.status.weaken.change_at(duration, amount,  pos)
+  App.KL.Game.Effect { 
+    let duration_show = String.show_clean(I32.show(duration))
+    let amount_show = String.show_clean(I32.show(amount))
+    let turn = if I32.gtn(duration, 1) then " turns" else " turn"
+    App.KL.Game.Effect.description.add("Weaken a creature for"|duration_show| turn | " reducing the damage it deals by"|amount_show)
+    App.KL.Game.Effect.status.weaken.change_at(duration, amount, pos)
+  }

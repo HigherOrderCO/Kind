@@ -1,4 +1,7 @@
-App.KL.Game.Effect.board.creature.get(pos: Hexagonal.Axial): App.KL.Game.Effect<Maybe<App.KL.Game.Creature>>
+App.KL.Game.Effect.board.creature.get(
+  pos: Hexagonal.Axial
+): App.KL.Game.Effect<Maybe<App.KL.Game.Creature>>
+
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
     let creature = App.KL.Game.Board.Creature.get(pos, board)

@@ -1,4 +1,7 @@
-App.KL.Game.Effect.board.creature.del(pos: Hexagonal.Axial): App.KL.Game.Effect<Unit>
+App.KL.Game.Effect.board.creature.del(
+  pos: Hexagonal.Axial
+): App.KL.Game.Effect<Unit>
+
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
     let board = App.KL.Game.Board.Creature.del(pos, board)

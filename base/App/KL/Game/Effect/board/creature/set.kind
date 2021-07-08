@@ -1,4 +1,8 @@
-App.KL.Game.Effect.board.creature.set(pos: Hexagonal.Axial, creature: App.KL.Game.Creature): App.KL.Game.Effect<Unit>
+App.KL.Game.Effect.board.creature.set(
+  pos: Hexagonal.Axial,
+  creature: App.KL.Game.Creature
+): App.KL.Game.Effect<Unit>
+
   App.KL.Game.Effect {
     get board = App.KL.Game.Effect.board.get
     let board = App.KL.Game.Board.Creature.set(pos, creature, board)

@@ -5,4 +5,10 @@ App.KL.Game.Effect.status.shield.add(
 ): App.KL.Game.Effect.At<I32>
   (pos)
 
-  App.KL.Game.Effect.status.shield.change_at(id, duration, amount, pos)
+  App.KL.Game.Effect { 
+    let duration_show = String.show_clean(I32.show(duration))
+    let amount_show = String.show_clean(I32.show(amount))
+    let turn = if I32.gtn(duration, 1) then " turns" else " turn"
+    App.KL.Game.Effect.description.add("Give Shield to a creature for"|duration_show|turn| " protecting it from taking "|amount_show|" damage")
+    App.KL.Game.Effect.status.shield.change_at(id, duration, amount, pos)
+  }
