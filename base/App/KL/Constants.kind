@@ -54,10 +54,10 @@ App.KL.Constants.z_index.cursor: U32
   103
 
 App.KL.Constants.z_index.trap: U32
-  104
+  128
 
 App.KL.Constants.z_index.hero: U32
-  104
+  128
 
 App.KL.Constants.z_index.life_bar: U32
   154
