@@ -2,4 +2,5 @@ App.KL.Game.Effect.cemetery.add(
   player_id: String
 ): App.KL.Game.Effect<Unit>
   (center, target, board)
-    App.KL.Game.Effect.Result.new!(unit, center, board, Hexagonal.Axial.Map.new!, 0, [{player_id, App.KL.Constants.turns_dead }])
+
+  App.KL.Game.Effect.Result.new!(unit, center, board, Hexagonal.Axial.Map.new!, 0, [{player_id, App.KL.Constants.turns_dead }], "")

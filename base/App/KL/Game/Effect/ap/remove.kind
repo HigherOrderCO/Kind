@@ -3,4 +3,9 @@ App.KL.Game.Effect.ap.remove(
 ): App.KL.Game.Effect.At<I32>
   (pos)
 
-  App.KL.Game.Effect.ap.change_at(I32.neg(cost), pos)
+  App.KL.Game.Effect { 
+    let remove = String.show_clean(I32.show(I32.neg(cost)))
+    let ap = if I32.gtn(cost, 1) then " Action Points" else " Action Point"
+    App.KL.Game.Effect.description.add("Restore "|remove| ap)
+    App.KL.Game.Effect.ap.change_at(I32.neg(cost), pos)
+  }

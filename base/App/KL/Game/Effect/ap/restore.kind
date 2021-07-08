@@ -3,4 +3,9 @@ App.KL.Game.Effect.ap.restore(
 ): App.KL.Game.Effect.At<I32>
   (pos)
 
-  App.KL.Game.Effect.ap.change_at(restore, pos)
+  App.KL.Game.Effect { 
+    let restores = String.show_clean(I32.show(restore))
+    let ap = if I32.gtn(restore, 1) then " Action Points" else " Action Point"
+    App.KL.Game.Effect.description.add("Restore " | restores | ap)
+    App.KL.Game.Effect.ap.change_at(restore, pos)
+  }

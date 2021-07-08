@@ -4,11 +4,11 @@ App.KL.Game.Creature.Status.show(
 
   case status { 
     burn: "burn: "| status.id | ", duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
-    haste: "haste: duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
+    haste: "haste duration: " | I32.show(status.duration) | ", amount: " | I32.show(status.amount)
     poison: "poison: "| status.id | ", duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
-    root: "root:  duration: " | I32.show(status.duration) 
-    silence: "silence:  duration: " | I32.show(status.duration)
-    stun: "stun:  duration: " | I32.show(status.duration)
-    shield: "shield: "| status.id | ", duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
-    weaken: "weaken: duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
+    root: "root  duration: " | I32.show(status.duration) 
+    silence: "silence  duration: " | I32.show(status.duration)
+    stun: "stun  duration: " | I32.show(status.duration)
+    shield: "shield: "| status.id | ", duration: " | I32.show(status.duration) | ", shield ammount " | I32.show(status.amount)
+    weaken: "weaken duration: " | I32.show(status.duration) | ", dmg reduction: " | I32.show(status.amount)
   }

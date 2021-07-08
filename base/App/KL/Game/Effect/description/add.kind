@@ -1,0 +1,6 @@
+App.KL.Game.Effect.description.add(
+  description: String
+): App.KL.Game.Effect<Unit>
+
+  (center, target, board)
+  App.KL.Game.Effect.Result.new!(unit, center, board, Hexagonal.Axial.Map.new!, 0, [], description)

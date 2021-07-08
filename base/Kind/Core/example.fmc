@@ -1,0 +1,31 @@
+Bool : * =
+  %self(P: @(self: Bool) *)
+  @(true: (P true))
+  @(false: (P false))
+  (P self);
+
+true : Bool =
+  #P #t #f t;
+
+false : Bool =
+  #P #t #f f;
+
+not : @(x: Bool) Bool =
+  #x (((x #self Bool) false) true);
+
+Equal : @(A: *) @(a: A) @(b: A) * =
+  #A #a #b
+  %self(P: @(b: A) @(self: (((Equal A) a) b)) *)
+  @(refl: ((P a) ((refl A) a)))
+  ((P b) self);
+
+refl : %(A: *) %(a: A) (((Equal A) a) a) =
+  #A #x #P #refl refl;
+
+double_negation_theorem : @(b: Bool) (((Equal Bool) (not (not b))) b) =
+  #b (((b #self (((Equal Bool) (not (not self))) self))
+    ((refl Bool) true))
+    ((refl Bool) false));
+
+main : Bool =
+  false

@@ -1,0 +1,32 @@
+//Placeholder for Status drawing
+App.KL.Game.Creature.Status.draw(
+  cx: U32
+  cy: U32
+  creature: App.KL.Game.Creature
+  img: VoxBox
+): VoxBox
+  
+  let list = App.KL.Game.Creature.Status.draw.aux(creature)
+  let list = List.show!(Function.id!, list)
+  VoxBox.Draw.text(list, PixelFont.small_black, Pos32.new(cx, cy, 0), img)
+
+
+
+App.KL.Game.Creature.Status.draw.aux(
+  creature: App.KL.Game.Creature
+): List<String>
+  
+  let statuses = []
+  open creature
+  for status in creature.status with statuses:
+    case status { 
+      burn: "B" & statuses
+      haste: "H" & statuses
+      poison: "P" & statuses
+      root: "R" & statuses
+      silence: "SI" & statuses
+      stun: "S" & statuses
+      shield: statuses
+      weaken: "W" & statuses
+    }
+  statuses

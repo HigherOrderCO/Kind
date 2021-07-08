@@ -1,0 +1,71 @@
+// avoid the float ceil function
+Nat.divup(n: Nat, d: Nat): Nat
+  if (n % d) =? 0 then
+    n/d
+  else
+    n/d + 1
+
+// number of bytes of digest
+n: Nat
+  128/8 // 16
+
+// Winternitz parameter
+// a bigger parameter makes signatures shorter and
+// verification slower
+w: Nat
+  16
+
+//size of private key
+// TODO calculate as a function of n and w
+len_1: Nat
+  Nat.divup(8*n, Nat.log2(w))
+
+len_2: Nat
+  Nat.log2(len_1 * (w - 1)) / Nat.log2(w)
+
+len: Nat
+  len_1 + len_2
+
+// keyed cryptographic hash function
+F(key: Vector<U8, n>): (input: Vector<U8, n>) -> Vector<U8, n>
+  ?F_body
+
+// pseudo-random function
+PRF(key: Vector<U8, n>, idx: U256): Vector<U8, n>
+  ?PRF_body
+
+// i have no idea what this should do
+setHashAddress(ADRS: U256, idx: U256): U256
+  ?setHashAddress_body
+
+setKeyAndMask(ADRS: U256, idx: U256): U256
+  ?setKeyAndMask_body
+
+// chaining function (Algorithm 2)
+chain(X: Vector<U8, n>, i: U256, s: U256, SEED: Vector<U8, n>, ADRS: U256): Vector<U8, n>
+  if s =? 0 then
+    X
+  else if (i + s) >? Nat.to_u256(w - 1) then
+    Vector.fill<U8>(n, 0) // shouldn't happen?
+  else
+    let tmp = chain(X, i, s - 1, SEED, ADRS)
+    let ADRS = setHashAddress(ADRS, i + s - 1) // ???
+    let ADRS = setKeyAndMask(ADRS, 0) // ???
+    let KEY = PRF(SEED, ADRS)
+    let ADRS = setKeyAndMask(ADRS, 1) // ???
+    let BM = PRF(SEED, ADRS)
+    F(KEY, Vector.add!(U8.xor, n, tmp, BM))
+ 
+privateKey: IO(Matrix<U8, len, n>)
+  IO {
+    return Vector.fill<Vector<U8, n>>(len, Vector.fill<U8>(n, 0)); // TODO make it random
+  }
+
+publicKey(privateKey: Matrix<U8, len, n>): Matrix<U8, len, n>
+  ?publicKey_body
+
+signature(message: Matrix<U8, len, n>): Matrix<U8, len, n>
+  ?signature_body
+
+Test: Nat
+  (len*n) + n + (256/8)

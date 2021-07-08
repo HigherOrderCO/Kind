@@ -1,6 +1,10 @@
-App.KL.Game.Effect.movement.move_to(from: Hexagonal.Axial, to: Hexagonal.Axial, ignore: Bool): App.KL.Game.Effect<Bool>
-  App.KL.Game.Effect { 
+App.KL.Game.Effect.movement.move_to(
+  from: Hexagonal.Axial,
+  to: Hexagonal.Axial,
+  ignore: Bool
+): App.KL.Game.Effect<Bool>
 
+  App.KL.Game.Effect { 
     get board = App.KL.Game.Effect.board.get
     let from_creature = App.KL.Game.Board.Creature.get(from, board)
     let to_creature = App.KL.Game.Board.Creature.get(to, board)
@@ -34,7 +38,10 @@ App.KL.Game.Effect.movement.move_to(from: Hexagonal.Axial, to: Hexagonal.Axial, 
     }
   }
 
-App.KL.Game.Effect.movement.move_to.target(ignore: Bool): App.KL.Game.Effect<Bool>
+App.KL.Game.Effect.movement.move_to.target(
+  ignore: Bool
+): App.KL.Game.Effect<Bool>
+
   App.KL.Game.Effect { 
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target

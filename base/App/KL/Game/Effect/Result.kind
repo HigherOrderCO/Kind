@@ -1,5 +1,5 @@
 type App.KL.Game.Effect.Result <A: Type> {
-  err
+  err //TODO: Add description
   new(
     value: A,
     center: Hexagonal.Axial,
@@ -7,5 +7,6 @@ type App.KL.Game.Effect.Result <A: Type> {
     indicators: Hexagonal.Axial.Map(App.KL.Game.Indicator)
     ap_used: I32 
     cemetery: App.KL.Game.Cemetery
+    description: String
   )
 }

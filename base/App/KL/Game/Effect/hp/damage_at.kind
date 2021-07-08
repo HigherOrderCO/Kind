@@ -6,7 +6,16 @@ App.KL.Game.Effect.hp.damage_at(
   App.KL.Game.Effect {
     get center = App.KL.Game.Effect.coord.get_center
     get creature = App.KL.Game.Effect.board.creature.get(center)
-    without creature: App.KL.Game.Effect { return +0#32 }
-    let debuffer = App.KL.Game.Creature.Status.weaken.total(creature)
-    App.KL.Game.Effect.hp.change_at(I32.neg(dmg - debuffer), pos)
+    case creature { 
+      none: 
+        App.KL.Game.Effect { return +0#32 } 
+      some: 
+        App.KL.Game.Effect { 
+        let debuffer = App.KL.Game.Creature.Status.weaken.total(creature.value)
+        get real_dmg = App.KL.Game.Effect.hp.change_at(I32.neg(dmg - debuffer), pos)
+        let damage = String.show_clean(I32.show(I32.neg(real_dmg)))
+        App.KL.Game.Effect.description.add("Deal "| damage | " damage")
+        return real_dmg
+      }
+    }
   }

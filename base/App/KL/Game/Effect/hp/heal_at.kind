@@ -3,4 +3,8 @@ App.KL.Game.Effect.hp.heal_at(
 ): App.KL.Game.Effect.At<I32>
   (pos)
 
-  App.KL.Game.Effect.hp.change_at(heal, pos)
+  App.KL.Game.Effect { 
+    let heals = String.show_clean(I32.show(heal))
+    App.KL.Game.Effect.description.add("Heal for"| heals)
+    App.KL.Game.Effect.hp.change_at(heal, pos)
+  }

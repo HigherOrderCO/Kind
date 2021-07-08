@@ -1,3 +1,3 @@
 App.KL.Game.Effect.pure<A: Type>(value: A): App.KL.Game.Effect<A>
   (center, target, board)
-  App.KL.Game.Effect.Result.new<A>(value, center, board, Hexagonal.Axial.Map.new!, 0, [])
+  App.KL.Game.Effect.Result.new<A>(value, center, board, Hexagonal.Axial.Map.new!, 0, [], "")

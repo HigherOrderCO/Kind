@@ -8,7 +8,6 @@ App.KL.Game.Phase.Play.when(
     frame:
       let picks = App.KL.Game.Cast.picks_of(local@user, game)
       let preview = local@preview <- (local@preview@picks <- picks)
-      //log("ue " | Nat.show(List.length!(Hexagonal.Axial.Map.to_list!(local@preview@picks))))
       App.set_local!(App.KL.State.Local.game(preview))
     mouse_move:
       if String.eql("game_screen", event.id) then
