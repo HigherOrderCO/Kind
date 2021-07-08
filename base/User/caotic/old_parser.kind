@@ -1,0 +1,85 @@
+Kind.FormCore.read.is_name(chr: Char): Bool
+  Bool.or(Bool.and(U16.gte(chr,46#16), U16.lte(chr,47#16)),  // ./
+  Bool.or(Bool.and(U16.gte(chr,48#16), U16.ltn(chr,58#16)),  // 0-9
+  Bool.or(Bool.and(U16.gte(chr,65#16), U16.ltn(chr,91#16)),  // A-Z
+  Bool.or(Bool.and(U16.gte(chr,95#16), U16.ltn(chr,96#16)),  // _
+  Bool.or(Bool.and(U16.gte(chr,97#16), U16.ltn(chr,123#16)), // a-z
+  Bool.false)))))
+
+Kind.FormCore.Parser.char(A : Type, x : Reader<A>) : Reader<Char>
+  let code = Pair.fst!!(x)
+  case code {
+    nil : Kind.FormCore.Parser.Error("Parser error : EOF, but expect a valid char", A, x, Char)
+    cons : if Kind.FormCore.read.is_name(code.head) then
+        {code.tail, Either.right!!(code.head)}
+      else
+         Kind.FormCore.Parser.Error("Parser error expect a valid char instead of '" | Char.to_string(code.head) | "'", _, x, _)
+  }
+
+Kind.FormCore.Parser.space(A : Type, x : Reader<A>) : Reader<A>
+  let code = Pair.fst!!(x)
+  case code {
+    nil :  Kind.FormCore.Parser.Error("Parser error : EOF, but expect a space", _, x, _)
+    cons : if Char.eql(code.head, ' ') || Char.eql(code.head, '\n')  then
+        {code.tail, Pair.snd!!(x)}
+      else
+         Kind.FormCore.Parser.Error("Parser error expect a space instead of " | Char.to_string(code.head), _, x, _)
+  }
+
+Kind.FormCore.Parser.many(A : Type, func : Reader<List<A>> -> Reader<List<A>>, parser : Reader<List<A>>) : Reader<List<A>>
+  let result = Pair.snd!!(parser)
+  case result {
+    left : parser
+    right : 
+      let {code, result2} = Kind.FormCore.Parser.many(A, func, func(parser))
+      case result2 {
+        left : {code, result}
+        right : 
+          {code, Either.right!!(result.value ++ result2.value)}
+      }
+  }
+
+Kind.FormCore.Parser.continue(A : Type, B : Type, func : A -> Reader<A> -> Reader<B>) : Reader<A> -> Reader<B>
+  (parser) 
+  case Pair.snd!!(parser) as result {
+    left : {Pair.fst!!(parser), Either.left!!(result.value)}
+    right : func(result.value, parser)
+  }
+
+Kind.FormCore.Parser.return(A : Type, B : Type, parser : Reader<A>, v : B) : Reader<B>
+  case Pair.snd!!(parser) as result {
+    left : {Pair.fst!!(parser), Either.left!!(result.value)}
+    right : {Pair.fst!!(parser), Either.right!!(v)}
+  }
+
+Kind.FormCore.Parser.many1(A : Type, B : Type, func : (B : Type) -> Reader<B> -> Reader<A>, parser : Reader<B>) : Reader<List<A>>
+  let foldable = Kind.FormCore.Parser.continue(A, List<A>, 
+    (v, parser) 
+      case Pair.snd!!(parser) as result {
+        left : {Pair.fst!!(parser), Either.left!!(result.value)}
+        right : {Pair.fst!!(parser), Either.right!!([result.value])}
+  }) :: Reader<A> -> Reader<List<A>>
+  Kind.FormCore.Parser.many(A, (x) foldable(func(_, x)), foldable(func(_, parser)))
+
+Kind.FormCore.chars_to_string(xs : List<Char>) : String
+  case xs {
+    nil : String.nil
+    cons : String.cons(xs.head, Kind.FormCore.chars_to_string(xs.tail))
+  }
+
+Kind.FormCore.Parser.name(A : Type, parser : Reader<A>) : Reader<String>
+  let parser = Kind.FormCore.Parser.many1!!(Kind.FormCore.Parser.char, parser)
+  Kind.FormCore.Parser.continue!!((chars, parser) 
+      Kind.FormCore.Parser.return!!(parser, Kind.FormCore.chars_to_string(chars)), parser)
+
+Kind.FormCore.Term.read (parser : Reader<Unit>) : Reader<String> 
+  def next = Kind.FormCore.Parser.continue
+  def return = Kind.FormCore.Parser.return
+  next!!((name, parser) 
+    next!!((i, parser) 
+      next!!((i, parser)
+         return!!(parser, Kind.FormCore.chars_to_string(name)),
+      Kind.FormCore.Parser.consume('g', _, parser)), 
+    Kind.FormCore.Parser.space!(parser)),
+  Kind.FormCore.Parser.many1!!(Kind.FormCore.Parser.char, parser))
+  

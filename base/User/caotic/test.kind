@@ -1,9 +1,27 @@
-get_interval(random : F64, min : Nat, max : Nat) : Nat
-  F64.to_nat(random * (Nat.to_f64(max) - Nat.to_f64(min)) + Nat.to_f64(min))
+Effectful (A : Type) : Type
+  (self(P : Effectful(A) -> Type) -> 
+    (pure : (x : A) -> P(Effectful.new(A, x))) ->
+    (return : Type) ->
+    (bind : Equal(Type, P(self), Effectful<return>)) ->
+    P(self))
 
+Effectful.new : (A : Type) -> (x : A) -> Effectful(A)
+  (a, x, P, new, return, bind) new(x)
 
-User.caotic.test : IO<_>
-  IO {
-    get a = Crypto.random
-    IO.print(Nat.show(get_interval(a, 1, 10)))
+User.caotic.test : Effectful<String>
+  let k = Effectful.new!(2)
+  case k {
+    pure : Effectful.new!("aa") // Aqui vc só pode retornar um IO
+    return : Nat
+    bind : k.refl
+  }
+
+Effectful.monad.pure(A : Type, x : A) : Effectful<A>
+  Effectful.new!(x)
+
+Effectful.monad.bind(A : Type, B : Type, value : Effectful<A>, f : A -> Effectful<B>) : Effectful<B>
+  case value {
+    pure : f(value.x)
+    bind : value.refl
+    return : _
   }
