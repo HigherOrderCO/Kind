@@ -69,7 +69,7 @@ App.BoardBuilder.Builder.When(
 App.BoardBuilder.When.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>): String
   let string = ""
   for coord:terrain in board with string:
-    let coord_string   = "{" | String.show_clean(I32.show(coord@i)) | ", " | String.show_clean(I32.show(coord@j)) | "}"
+    let coord_string   = "{" | I32.show(coord@i) | ", " | I32.show(coord@j) | "}"
     let terrain_string = Nat.show(terrain@field_id)
     "{" | coord_string | "," | terrain_string | "}" | ",\n" | string
   
