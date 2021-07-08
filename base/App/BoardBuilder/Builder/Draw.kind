@@ -1,0 +1,88 @@
+App.BoardBuilder.Builder.Draw(local: App.BoardBuilder.Builder.State.local, global: App.BoardBuilder.State.global, img: VoxBox): DOM 
+  let width = Nat.show(I32.to_nat(local@canvas_size@fst))
+  let height = Nat.show(I32.to_nat(local@canvas_size@snd))
+  let max_height = Nat.show(I32.to_nat(local@canvas_size@snd * 2))
+  <div style={"margin-bottom": "10px"}>
+    <div style={"display": "flex", "padding": "20px"}>
+      <div style={"margin-right": "5px"}>
+        {
+          DOM.vbox(
+            { "id": "game_screen",
+              "width": width,
+              "height": height,
+              "scale": "2"},
+            {},
+            App.BoardBuilder.Builder.Draw.img(local, global, img)
+          )
+        }
+      </div>
+      <div style={"max-height": max_height|"px", "overflow": "auto", "display" : "flex", "flex-wrap": "wrap", "align-content": "flex-start"}>
+        for value in List.indices!(App.KL.Game.Field.list):
+          let selected = value@fst =? local@actual_terrain
+          let border = if selected then "2px solid green" else "none"
+          <div id=Nat.show(value@fst) style={"width" : "75px", "height": "fit-content", "padding": "5px", "font-size": "1rem", "cursor": "pointer", "display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column", "border" : border, "box-sizing": "border-box"}>
+            <img id=Nat.show(value@fst) src=value@snd@picture></img>
+            <span id=Nat.show(value@fst)>value@snd@name</span>
+          </div>
+      </div>
+    </div>
+    <div style={"display": "flex", "width": "100vw", "justify-content": "center", "flex-direction": "column", "align-items":"center"}>
+      <button id="generate_array" style={"font-size": "2rem", "padding": "2px"}>"Generate array"</button>
+      <textarea readonly="readonly" value=local@array style={"width": "900px", "height": "900px", "font-size": "1rem"}></textarea>
+    </div>
+  </div>
+
+App.BoardBuilder.Builder.Draw.board(
+  canvas_size: Pair<I32, I32>
+  board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
+  actual_terrain: Nat
+  img: VoxBox
+): VoxBox
+  let actual_terrain = App.KL.Game.Terrain.new(actual_terrain)
+  // let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, canvas_size@fst / 2, canvas_size@snd / 2)
+  // let img = App.BoardBuilder.Builder.Draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
+  for coord:terrain in board with img:
+    App.BoardBuilder.Builder.Draw.terrain(terrain, coord, canvas_size, img)
+  img
+
+App.BoardBuilder.Builder.Draw.terrain(
+  terrain: App.KL.Game.Terrain, 
+  coord: Hexagonal.Axial,
+  canvas_size: Pair<I32, I32>
+  img: VoxBox
+): VoxBox
+  let {i, j} = App.KL.Game.Phase.Play.draw.centralize(coord)
+  let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
+  let j = (j - 128) + I32.to_u32(App.KL.Constants.hexagon_radius) + 5
+  // let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, canvas_size@fst, canvas_size@snd)
+  let field  = App.KL.Game.Field.get_by_id.default(terrain@field_id)
+  let field_drawing = field@draw(terrain, App.KL.Game.Indicator.background)
+  let tile_drawing = VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 20, field_drawing, img)
+  tile_drawing
+
+App.BoardBuilder.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>): String
+  let string = ""
+  for coord:terrain in board with string:
+    let coord_string   = "{" | String.show_clean(I32.show(coord@i)) | ", " | String.show_clean(I32.show(coord@j)) | "}"
+    let terrain_string = Nat.show(terrain@field_id)
+    "{" | coord_string | "," | terrain_string | "}" | ",\n" | string
+  
+  "[\n" | string | "]"
+
+App.BoardBuilder.Builder.Draw.img(
+  local: App.BoardBuilder.Builder.State.local, 
+  global: App.BoardBuilder.State.global, 
+  img: VoxBox
+): VoxBox
+  let img = App.BoardBuilder.Builder.Draw.mouse(local@mouse, img)
+  let img = App.BoardBuilder.Builder.Draw.board(local@canvas_size, global@board, local@actual_terrain, img)
+  img
+
+App.BoardBuilder.Builder.Draw.mouse(
+  mouse: Maybe<Pair<U32, U32>>, 
+  img: VoxBox
+): VoxBox
+  case mouse {
+    none: img
+    some: App.KL.Game.Phase.Play.draw.cursor(mouse.value, img)
+  }

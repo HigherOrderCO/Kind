@@ -1,0 +1,11 @@
+type App.BoardBuilder.Builder.State.local {
+  new(
+    room: String,
+    canvas_size: Pair<I32, I32>,
+    mouse: Maybe<Pair<U32, U32>>,
+    actual_terrain: Nat,
+    command: Maybe<Char>,
+    array: String,
+  )
+}
+

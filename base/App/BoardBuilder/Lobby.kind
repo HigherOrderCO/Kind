@@ -1,0 +1,4 @@
+type App.BoardBuilder.Lobby.State.local {
+  new(room_input: String)
+}
+

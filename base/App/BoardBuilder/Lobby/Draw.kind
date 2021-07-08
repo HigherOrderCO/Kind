@@ -1,0 +1,43 @@
+App.BoardBuilder.Lobby.Draw(local: App.BoardBuilder.Lobby.State.local): DOM
+  let style = {
+    "width": "100%", 
+    "height": "100%", 
+    "display": "flex", 
+    "flex-direction": "column", 
+    "justify-content": "center", 
+    "align-items": "center",
+    "font-size": "2rem"
+  }
+  <div style=style>
+    <h1 style={"margin-bottom": "10px", "text-align": "center"}>
+      "Board Builder  " <small>"v1.0"</small>
+    </h1>
+    <div style={
+      "display": "flex",
+      "justify-content": "center", 
+      "flex-wrap": "wrap",
+      "text-align": "center"
+    }>
+      "Enter a room number: "
+      <input id="room_input" value=local@room_input style={
+        "font-size": "2rem",
+        "font-family": "monospace",
+        "outline": "transparent",
+        "margin-bottom": "15px"
+      }>
+      </input>
+      <div>
+        {App.BoardBuilder.Lobby.Draw.button("ready", "Enter")}
+        {App.BoardBuilder.Lobby.Draw.button("random", "Random")}
+      </div>
+    </div>
+  </div>
+
+App.BoardBuilder.Lobby.Draw.button(id: String, text: String): DOM
+  let style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "margin-left": "10px",
+    "padding": "2px"
+  }
+  <button id=id style=style>text</button>
