@@ -5,4 +5,4 @@ App.KL.Game.Field.get_by_id.map: NatMap<App.KL.Game.Field>
   NatMap.from_list!(List.imap!!((i,x) {i, x}, App.KL.Game.Field.list))
 
 App.KL.Game.Field.get_by_id.default(id: Nat): App.KL.Game.Field
-  App.KL.Game.Field.get_by_id(id) <> App.KL.Game.Field.Grass.field
+  App.KL.Game.Field.get_by_id(id) <> App.KL.Game.Field.Grass.field.2
