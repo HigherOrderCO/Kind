@@ -1,0 +1,63 @@
+IdemFn(A: Type, f: A -> A): Type
+  ((a: A) -> Equal<A>(f(f(a)), f(a)))
+
+Quotient(A: Type, f: A -> A, id: IdemFn(A, f)): Type
+  Subset(A, (a) f(a) == a)
+
+qcanon(A: Type, f: A -> A, id: IdemFn(A, f)): (a: A) -> Quotient(A, f, id)
+  (a) Subset.new!!(f(a), id(a))
+
+type PreInt {
+  pzero
+  psucc(pred: PreInt)
+  ppred(succ: PreInt)
+}
+
+PreInt.succ(i: PreInt): PreInt
+  case i {
+    pzero: PreInt.psucc(PreInt.pzero)
+    psucc: PreInt.psucc(PreInt.psucc(i.pred))
+    ppred: i.succ
+  }
+PreInt.pred(i: PreInt): PreInt
+  case i {
+    pzero: PreInt.ppred(PreInt.pzero)
+    psucc: i.pred
+    ppred: PreInt.ppred(PreInt.ppred(i.succ))
+  }
+
+PreInt.integer(i: PreInt): PreInt
+  case i {
+    pzero: PreInt.pzero
+    psucc: PreInt.succ(i.pred)
+    ppred: PreInt.pred(i.succ)
+  }
+
+PreInt.integer.idem(i: PreInt): PreInt.integer(PreInt.integer(i)) == PreInt.integer(i)
+  case i {
+    pzero: refl
+    psucc: ?a-22-5-
+    ppred: ?b
+  }!
+
+IInt: Type
+  Quotient(PreInt, PreInt.integer, PreInt.integer.idem)
+
+IInt.succ(i: IInt): IInt
+  ?iint.succ
+
+IInt.pred(i: IInt): IInt
+  ?iint.pred
+
+IInt.zero: IInt
+  ?iint.zero
+
+IInt.induct(
+  i: IInt
+): (P: IInt -> Type) 
+   (zero: P(IInt.zero))
+   (succ: (p: IInt) P(IInt.succ(p)))
+   (pred: (s: IInt) P(IInt.pred(s)))
+   P(i)
+ (P, z, s, p)
+     ?a
