@@ -1,0 +1,2 @@
+BBT.foldl_with_key<K: Type, V: Type>(map: BBT<K,V>)<Z: Type>(z: Z, f: K -> V -> Z -> Z): Z 
+  BBT.foldl_with_key.go<K,V,Z>(f, z, map)

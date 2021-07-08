@@ -1,0 +1,12 @@
+BBT.foldl_with_key.go<K: Type, V: Type, Z: Type>(
+  f   : K -> V -> Z -> Z, 
+  z   : Z,
+  map : BBT<K,V> 
+) : Z 
+  case map {
+    tip: z,
+    bin:  
+      let left_folded = BBT.foldl_with_key.go<K,V,Z>(f, z, map.left) 
+      let new_z        = f(map.key, map.val, left_folded)
+      BBT.foldl_with_key.go<K,V,Z>(f, new_z, map.right)
+  }

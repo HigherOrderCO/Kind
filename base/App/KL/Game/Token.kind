@@ -43,7 +43,7 @@ App.KL.Game.Token.get_creatures(coord: Hexagonal.Axial, board: App.KL.Game.Board
   let coords    = Hexagonal.Axial.range(coord, token@range)
   let creatures = []
   for coord in coords with creatures:
-    let tile = App.KL.Game.Board.get(coord, board)
+    let tile = App.KL.Game.Tile.get(coord, board)
     without tile: creatures
       let creature = tile@creature
     without creature: creatures

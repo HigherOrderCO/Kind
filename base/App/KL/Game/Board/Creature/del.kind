@@ -2,7 +2,7 @@ App.KL.Game.Board.Creature.del(
   coord: Hexagonal.Axial
   board: App.KL.Game.Board
 ): App.KL.Game.Board
-  let tile = App.KL.Game.Board.get(coord, board)
+  let tile = App.KL.Game.Tile.get(coord, board)
   case tile { 
     none: board
     some: App.KL.Game.Board.set(coord, tile.value@creature <- none, board)

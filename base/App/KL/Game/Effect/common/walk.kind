@@ -12,15 +12,11 @@ App.KL.Game.Effect.common.walk(
     let distance = haste_value + distance
     let area = App.KL.Game.Areas.circle(center, distance)
     App.KL.Game.Effect.limit_range(distance)
-    if Hexagonal.Axial.eql(center, target) then
-      App.KL.Game.Effect.pass
-    else
-      App.KL.Game.Effect { 
+    if Hexagonal.Axial.eql(center, target) then App.KL.Game.Effect.pass
+    else App.KL.Game.Effect { 
         get movement = App.KL.Game.Effect.movement.move_to.target(false)
-        if movement then
-          App.KL.Game.Effect.ap.use(ap_cost)
-        else
-          App.KL.Game.Effect.pass
+        if movement then App.KL.Game.Effect.ap.use(ap_cost)
+        else App.KL.Game.Effect.pass
       }
     return unit
   }

@@ -1,0 +1,29 @@
+App.KL.Game.Board.apply_status(
+  game: App.KL.Game
+): App.KL.Game
+
+  let result = {game@board, game@cemetery}
+  for coord:tile in game@board with result:
+    let effect_tile = App.KL.Game.Tile.effect.get(tile)
+    let effect_tile_result = effect_tile(coord, coord, result@fst)
+    let result = case effect_tile_result { 
+      err: result
+      new: {effect_tile_result.board, result@snd ++ effect_tile_result.cemetery}
+    }
+    let new_creature = App.KL.Game.Board.Creature.get(coord, result@fst)
+    without new_creature: result
+    let status = new_creature@status
+    for dots in status with result:
+      let effect = App.KL.Game.Creature.Status.get_effect(dots)
+      let effect_result = effect(coord, coord, coord, result@fst)
+      case effect_result { 
+        err: result
+        new: {effect_result.board, result@snd ++ effect_result.cemetery}
+      }
+    result
+    
+//Update Tile Effects
+  let new_board = App.KL.Game.Board.tile_update(result@fst)
+  let game = game@board <- new_board
+  let game = game@cemetery <- game@cemetery ++ result@snd
+  game

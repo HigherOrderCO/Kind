@@ -1,0 +1,6 @@
+// get tile from board
+App.KL.Game.Tile.get(
+  coord: Hexagonal.Axial,
+  board: App.KL.Game.Board
+): Maybe<App.KL.Game.Tile>
+  Hexagonal.Axial.Map.get!(coord, board)

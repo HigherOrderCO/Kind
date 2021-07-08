@@ -1,5 +1,0 @@
-App.KL.Game.Creature.get_debuffer(hero : App.KL.Game.Creature) : I32
-  open hero
-  List.foldr!!(+0#32, (x, y) case x {
-        weaken : x.amount + y
-  } default 0, hero.status)

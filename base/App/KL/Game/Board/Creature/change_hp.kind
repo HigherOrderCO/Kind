@@ -11,9 +11,9 @@ App.KL.Game.Board.Creature.change_hp(
     let new_hp = I32.max((creature@hp + value) , 0)
     let new_hp = I32.min(new_hp, hero.max_hp)
     let hp_diff = new_hp - creature@hp 
-    let aux = App.KL.Game.Board.Creature.change_hp_aux(hp_diff)
+    let aux = App.KL.Game.Board.Creature.change_hp.aux(hp_diff)
     let board = App.KL.Game.Board.Creature.modify_at(aux, pos, board)
-    let new_creature = App.KL.Game.Board.Creature.change_hp_aux(hp_diff, creature)
+    let new_creature = App.KL.Game.Board.Creature.change_hp.aux(hp_diff, creature)
     if I32.lte(new_creature@hp, 0) then
       let board = App.KL.Game.Board.Creature.del(pos, board)
       {hp_diff, {board, new_creature@player}}
@@ -23,7 +23,7 @@ App.KL.Game.Board.Creature.change_hp(
 
 
 
-App.KL.Game.Board.Creature.change_hp_aux(
+App.KL.Game.Board.Creature.change_hp.aux(
   change: I32,
   creature: App.KL.Game.Creature
 ): App.KL.Game.Creature
