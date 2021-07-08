@@ -5,7 +5,7 @@ App.KL.Game.Phase.Play.Bar.draw_line(destin : Pair<U32, U32>, x : U32, y : U32, 
     U32.to_i32.signed(y), 
     U32.to_i32.signed(destin.fst), 
     U32.to_i32.signed(destin.snd),
-    U32.to_i32.signed(z),
+    U32.to_i32.signed(App.KL.Constants.z_index.life_bar),
     col, 
     img)
 
@@ -48,17 +48,17 @@ App.KL.Game.Phase.Play.Bar.complete_square(
   
   // Draw the color depending on status by BarProgress
   for i : U32 from 1 to bar_actual with img:
-    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_ful, 2, rect, img)
+    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_ful, App.KL.Constants.z_index.life_bar, rect, img)
   for i : U32 from bar_actual to bar_actual + bar_defense with img :
-    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_defense, 2, rect, img)
+    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_defense, App.KL.Constants.z_index.life_bar, rect, img)
   for i : U32 from bar_actual + bar_defense to rect.width with img:
     // Notice rect.witdth should be rect.width - (bar_actual + bar_defense), however
     // because a possible bad rounding of bar.loss and bar.defense we make sure the progress is always completed
-    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_empty, 2, rect, img)
+    App.KL.Game.Phase.Play.Bar.progress_line(i, bar.col_empty, App.KL.Constants.z_index.life_bar, rect, img)
 
   let separator = min(bar.max/6, rect.width/2)
   for i : U32 from 1 to separator with img:   //U32
-    App.KL.Game.Phase.Play.Bar.progress_line((i * ((rect.width -1) / separator)) + 1, bar.col_empty, 3, rect, img)  
+    App.KL.Game.Phase.Play.Bar.progress_line((i * ((rect.width -1) / separator)) + 1, bar.col_empty, App.KL.Constants.z_index.life_bar, rect, img)  
   img
 
 App.KL.Game.Phase.Play.Bar.draw_bar(
@@ -68,13 +68,13 @@ App.KL.Game.Phase.Play.Bar.draw_bar(
   open rect
   // A monadic version of VoxBox
   VoxBox.Draw {
-     VoxBox.Draw.set_pos(rect.x, rect.y, 6)
+     VoxBox.Draw.set_pos(rect.x, rect.y, App.KL.Constants.z_index.life_bar)
      VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x, rect.y+rect.height})) // The first horizontal line of rectangle
      VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y})) // The second horizontal line of rectangle
   
-     VoxBox.Draw.set_pos(rect.x+rect.width, rect.y, 6) 
+     VoxBox.Draw.set_pos(rect.x+rect.width, rect.y, App.KL.Constants.z_index.life_bar) 
      VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height})) // The second horizontal line of rectangle
-     VoxBox.Draw.set_pos(rect.x, rect.y+rect.height, 6) 
+     VoxBox.Draw.set_pos(rect.x, rect.y+rect.height, App.KL.Constants.z_index.life_bar) 
      VoxBox.Draw.new(App.KL.Game.Phase.Play.Bar.draw_line({rect.x+rect.width, rect.y+rect.height})) // The second vertical line of rectangle
   
      // Complete the rectangle by the BarProgress
@@ -91,5 +91,5 @@ App.KL.Game.Phase.Play.Bar.draw(x: U32,
   img: VoxBox,
 ): VoxBox
   let rect = App.KL.Game.Phase.Play.Bar.Rectangular.new(x, y, height, width, 1)
-  let result = App.KL.Game.Phase.Play.Bar.draw_bar(rect, bar, VoxBox.Draw.Paint.new(x, y, z, col, img))
+  let result = App.KL.Game.Phase.Play.Bar.draw_bar(rect, bar, VoxBox.Draw.Paint.new(x, y, App.KL.Constants.z_index.life_bar, col, img))
   result@snd@img
