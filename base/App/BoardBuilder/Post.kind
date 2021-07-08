@@ -5,7 +5,7 @@ App.BoardBuilder.Post: App.Post<App.BoardBuilder.State>
       none: glob
       some:
         case eventglob.value as event {
-          add: glob@board <- Hexagonal.Axial.Map.set!(event.coord, {event.field_id}, glob@board)
+          add: glob@board <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@board)
           del: glob@board <- Hexagonal.Axial.Map.delete!(event.coord, glob@board)
         }   
     }
