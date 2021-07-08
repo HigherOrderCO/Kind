@@ -181,9 +181,9 @@ App.KL.Game.Phase.Play.draw.tile.token(
       )
     
     if Hexagonal.Axial.eql(coord, token_coord) then
-      VoxBox.Draw.square(cx,cy,2,10,10,col,img)
+      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
     else
-      VoxBox.Draw.square(cx,cy,2,5,5,col,img)
+      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,5,5,col,img)
   img
 
   
