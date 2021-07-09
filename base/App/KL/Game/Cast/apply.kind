@@ -16,34 +16,27 @@ App.KL.Game.Cast.apply(
     let is_walk = String.eql(skill@name, "Walk") // Verifies if its walk
 
     if is_stunned then
-      Maybe { 
-      return App.KL.Game.Cast.Result.failure
-      }
+      none
     else 
       if is_silenced then
         if is_walk then // A silenced creature should be able to Walk
-          Maybe { 
-            return case result {
-            err: App.KL.Game.Cast.Result.failure
-            new: 
+          case result {
+            err: none
+            new: Maybe {
               let game = game@board <- result.board
               let game = game@cemetery <- game@cemetery ++ result.cemetery
-              App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+              return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
             }
           }
         else
-          Maybe { 
-            return App.KL.Game.Cast.Result.failure
-          }
+          none
       else
-        Maybe { 
-          return case result {
-          err: App.KL.Game.Cast.Result.failure
-          new: 
+        case result {
+          err: none
+          new: Maybe {
             let game = game@board <- result.board
             let game = game@cemetery <- game@cemetery ++ result.cemetery
-          App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+            return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
           }
-      }
-
-} <> App.KL.Game.Cast.Result.failure
+        }
+  } <> App.KL.Game.Cast.Result.failure
