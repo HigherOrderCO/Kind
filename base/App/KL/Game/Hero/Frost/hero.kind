@@ -73,10 +73,10 @@ App.KL.Game.Hero.Frost.Skills.ice_fall(area: I32, ap_cost: I32): App.KL.Game.Eff
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
 
-    let ring = App.KL.Game.Areas.ring(target, 1)
-    let area = [target]
+    let ring = App.KL.Game.Areas.ring(center, 1)
+    let area = []
     let area = for direction_coord in ring:
-      App.KL.Game.Areas.straight_line(2, target, direction_coord) ++ area
+      App.KL.Game.Areas.straight_line(2, center, direction_coord) ++ area
 
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
