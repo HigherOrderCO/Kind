@@ -1,8 +1,12 @@
+// receives an indicator and the terrain img 
+// and return the terrain img according the indicator
+// used for give default indicators to fields
 App.KL.Game.Field.set_indicators(indicator: App.KL.Game.Indicator, img: VoxBox): VoxBox
-  case indicator {
-    background  : img
-    green       : App.KL.Game.Field.Ind.Assets.ind_02
-    red         : App.KL.Game.Field.Ind.Assets.ind_03
-    yellow      : App.KL.Game.Field.Ind.Assets.ind_04
-    blue        : App.KL.Game.Field.Ind.Assets.ind_01
-  }
+  img
+  // case indicator {
+  //   background  : img
+  //   green       : App.KL.Game.Field.Ind.Assets.ind_02
+  //   red         : App.KL.Game.Field.Ind.Assets.ind_03
+  //   yellow      : App.KL.Game.Field.Ind.Assets.ind_04
+  //   blue        : App.KL.Game.Field.Ind.Assets.ind_01
+  // }
