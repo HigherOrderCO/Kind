@@ -3,12 +3,9 @@ App.KL.Game.Creature.Status.root.check(
 ): Bool
 
   let status = creature@status
-  case status {
-    nil:
-      false
-    cons:
-      case status.head { 
-        root: if I32.gtn(status.head.duration, 0) then true   
-              else false
-      }default false
-  }
+  let result = false
+  for root in status with result:
+    case root { 
+      root: true
+    }default result
+  result

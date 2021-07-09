@@ -3,12 +3,9 @@ App.KL.Game.Creature.Status.haste.check(
 ): Bool
 
   let status = creature@status
-  case status {
-    nil:
-      false
-    cons:
-      case status.head { 
-        haste: if I32.gtn(status.head.duration, 0) then true   
-              else false
-      }default false
-  }
+  let result = false
+  for haste in status with result:
+    case haste { 
+      haste: true
+    }default result
+  result

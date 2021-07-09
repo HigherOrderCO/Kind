@@ -6,7 +6,7 @@ type App.KL.Game.Moment {
     coord: Maybe<Hexagonal.Axial>
     hits: App.KL.Game.Indicators
     ap_used: I32
-    success: Bool
+    success: Either<String, Unit>
   ) // when casts are being executed and animated
 }
 

@@ -9,7 +9,7 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
         game
       // Countdown zero: go to execution phase
       else
-        let game = game@moment <- App.KL.Game.Moment.execution(App.KL.Game.Cast.sort(game), 0, none, Hexagonal.Axial.Map.new!, 0, true)
+        let game = game@moment <- App.KL.Game.Moment.execution(App.KL.Game.Cast.sort(game), 0, none, Hexagonal.Axial.Map.new!, 0, Either.right!!(unit))
         let game = game@casts <- []
         game
     // Execution phase
@@ -25,13 +25,13 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
             if U64.eql(game.moment.frame,0) then case App.KL.Game.Cast.apply(game.moment.casts.head, game) as cast_result {
               // If the effect is a failure, keep the old game state
               failure:
-                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, none, game.moment.hits, 0, false)
+                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, none, game.moment.hits, 0, Either.left!!(cast_result.reason))
                 game
               // If the effect is a success, update the game state
               success: 
                 let coord = App.KL.Game.Cast.get_coord(game.moment.casts.head, game)
                 let game = cast_result.game
-                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, coord, cast_result.hits, cast_result.ap_used, true)
+                let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.frame + 1, coord, cast_result.hits, cast_result.ap_used, Either.right!!(unit))
                 game
             // On the other frames, just update the counter
             } else
