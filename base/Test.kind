@@ -1,2 +1,2 @@
-Test: _
-  "Hello"
+Test: IO<Unit>
+  Crypto.WOTS.example

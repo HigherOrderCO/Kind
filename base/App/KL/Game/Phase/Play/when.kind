@@ -3,6 +3,7 @@ App.KL.Game.Phase.Play.when(
   game: App.KL.Game
   event: App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
+
   open game
   case event {
     frame:

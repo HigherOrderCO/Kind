@@ -506,13 +506,16 @@ App.KL.Game.Phase.Draft.draw.cards.interrogation: String
 // display room text, and ready/cancel button
 App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
   info = players{user}
+  let ready_count = App.KL.Game.Player.ready_count(players, room, user) // Pair(Total players, ready check)
+  let total = Nat.show(ready_count@fst)
+  let count = Nat.show(ready_count@snd)
   let {color, text} = 
     case info {
       none: {"#4CAF50", "Ready"}
       some: 
         let player = info.value
         if player@ready then
-          {"gray",    "Cancel"}
+          {"gray",    count|"/"|total|"\n\n Cancel"}
         else
           {"#4CAF50", "Ready"}
   }

@@ -1,6 +1,6 @@
 {
   "name": "kind-lang",
-  "version": "1.0.85",
+  "version": "1.0.86",
   "description": "Kind-Lang in JavaScript",
   "main": "src/kind.js",
   "scripts": {

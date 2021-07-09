@@ -1,9 +1,9 @@
-Vector.to_list(A : Type, size : Nat, v : Vector<A, size>) : List<A>
+Vector.to_list<A: Type>(size: Nat, v: Vector<A, size>): List<A>
   case size with v {
-    zero : List.nil!
-    succ : case v {
-      cons : 
-        let pred = Vector.to_list(A, size.pred, v.tail)
+    zero: List.nil!
+    succ: case v {
+      cons: 
+        let pred = Vector.to_list<A>(size.pred, v.tail)
         List.cons!(v.head, pred)
     }
   }!

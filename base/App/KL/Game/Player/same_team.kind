@@ -1,0 +1,11 @@
+App.KL.Game.Player.same_team(
+  player: App.KL.Game.Player
+  players: Map<App.KL.Game.Player>
+): Bool
+
+  let team = player@team
+  let result = false
+  for id:teammates in players with result:
+    let mate = teammates@team
+    App.KL.Game.Team.eql(team, mate)
+  result

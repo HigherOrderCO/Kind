@@ -1,0 +1,19 @@
+Vector.parser<A: Type>(len: Nat, elem: Parser<A>): Parser<Vector<A,len>>
+  case len {
+    zero: Parser {
+      Parser.spaces;
+      Parser.text("]")
+      return Vector.nil!
+    }
+    succ: Parser {
+      Parser.spaces;
+      Parser.maybe!(Parser.choice!([
+        Parser.text(","),
+        Parser.text("["),
+      ]))
+      Parser.spaces;
+      get head = elem
+      get tail = Vector.parser<A>(len.pred, elem)
+      return Vector.cons!!(head, tail)
+    }
+  }!
