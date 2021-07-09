@@ -2,6 +2,7 @@ App.KL.Game.Effect.indicators.list(
   indicator: App.KL.Game.Indicator
   coords: List<Hexagonal.Axial>
 ): App.KL.Game.Effect<Unit>
+
   let list = List.mapped!(coords)!((coord) {coord, indicator})
   let Map = Hexagonal.Axial.Map.from_list!(list)
   App.KL.Game.Effect.indicators.add(Map)

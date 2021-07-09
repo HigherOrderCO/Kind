@@ -9,12 +9,28 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
     new: case next(result_a.value)(result_a.center, target, result_a.board) as result_b {
       err: App.KL.Game.Effect.Result.err<B>
       new:
-        center     = result_b.center
-        value      = result_b.value
-        map        = result_b.board
-        indicators = Hexagonal.Axial.Map.union!(result_a.indicators, result_b.indicators)
-        ap_used    = result_a.ap_used + result_b.ap_used
-        cemetery   = result_a.cemetery ++ result_b.cemetery
-        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used, cemetery)
+        center      = result_b.center
+        value       = result_b.value
+        map         = result_b.board
+        indicators  = Hexagonal.Axial.Map.union!(result_a.indicators, result_b.indicators)
+        ap_used     = result_a.ap_used + result_b.ap_used
+        cemetery    = result_a.cemetery ++ result_b.cemetery
+        description = App.KL.Game.Effect.bind.description_aux(result_a.description, result_b.description)
+        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used, cemetery, description)
     }
   }
+
+
+App.KL.Game.Effect.bind.description_aux(
+  a: String
+  b: String
+): String
+  
+  case a b { 
+    nil nil: ""
+    nil cons: b
+    cons nil: a 
+    cons cons: a | "\n" | b
+  }
+
+    

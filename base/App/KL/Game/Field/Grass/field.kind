@@ -1,11 +1,34 @@
-App.KL.Game.Field.Grass.field: App.KL.Game.Field
-  let name = "Grass"
+App.KL.Game.Field.Grass.field.1: App.KL.Game.Field
+  let name = "grass_01"
   let draw = (terrain, indicator)
-    case indicator {
-      background  : App.KL.Game.Field.Grass.Assets.normal
-      green       : App.KL.Game.Field.Grass.Assets.light_blue
-      red         : App.KL.Game.Field.Grass.Assets.red
-      yellow      : App.KL.Game.Field.Grass.Assets.light_red
-      blue        : App.KL.Game.Field.Grass.Assets.blue
-    }
-  App.KL.Game.Field.new(name, draw)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Grass.Assets.grass_01)
+  let picture = App.KL.Game.Field.Grass.Assets.base64.grass_01
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Grass.field.2: App.KL.Game.Field
+  let name = "grass_02"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Grass.Assets.grass_02)
+  let picture = App.KL.Game.Field.Grass.Assets.base64.grass_02
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Grass.field.3: App.KL.Game.Field
+  let name = "grass_03"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Grass.Assets.grass_03)
+  let picture = App.KL.Game.Field.Grass.Assets.base64.grass_03
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Grass.field.4: App.KL.Game.Field
+  let name = "grass_04"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Grass.Assets.grass_04)
+  let picture = App.KL.Game.Field.Grass.Assets.base64.grass_04
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Grass.field.5: App.KL.Game.Field
+  let name = "grass_05"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Grass.Assets.grass_05)
+  let picture = App.KL.Game.Field.Grass.Assets.base64.grass_05
+  App.KL.Game.Field.new(name, draw, picture)

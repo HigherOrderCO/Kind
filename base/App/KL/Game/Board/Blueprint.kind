@@ -1,0 +1,46 @@
+type App.KL.Game.Board.Blueprint {
+  new(
+    terrains: List<Pair<Hexagonal.Axial, App.KL.Game.Terrain>>
+    tokens: List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
+  )
+}
+
+App.KL.Game.Board.Blueprint.build.terrains(
+  terrains: List<Pair<Pair<I32, I32>, Nat>> // {coord, field_id}
+): List<Pair<Hexagonal.Axial, App.KL.Game.Terrain>>
+  let transform = 
+    ((x) 
+      open x
+      {Hexagonal.Axial.new(x.fst@fst, x.fst@snd), App.KL.Game.Terrain.new(x@snd, none)}) :: Pair<Pair<I32,I32>, Nat> -> Pair<Hexagonal.Axial, App.KL.Game.Terrain>
+  
+  [transform(x) for x in terrains]
+
+App.KL.Game.Board.Blueprint.build.tokens(
+  tokens: List<Pair<Pair<I32, I32>, App.KL.Game.Token>> // {coord, token}
+): List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
+  let transform = 
+    ((x) 
+      open x
+      {Hexagonal.Axial.new(x.fst@fst, x.fst@snd), x@snd}) :: Pair<Pair<I32,I32>, App.KL.Game.Token> -> Pair<Hexagonal.Axial, App.KL.Game.Token>
+  
+  [transform(x) for x in tokens]
+  
+
+App.KL.Game.Board.Blueprint.build.board(
+  blueprint: App.KL.Game.Board.Blueprint
+): App.KL.Game.Board
+  let board  = Hexagonal.Axial.Map.new<App.KL.Game.Tile>
+  open blueprint
+  for terrain in blueprint.terrains with board:
+    let coord   = terrain@fst
+    let terrain = terrain@snd
+    let entity  = App.KL.Game.Entity.terrain(terrain)
+    App.KL.Game.Board.push(coord, entity, board)
+  
+  for token in blueprint.tokens with board:
+    let coord   = token@fst
+    let token   = token@snd
+    let entity  = App.KL.Game.Entity.token(token)
+    App.KL.Game.Board.push(coord, entity, board)
+  
+  board

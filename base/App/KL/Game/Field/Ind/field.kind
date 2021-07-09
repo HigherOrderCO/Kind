@@ -1,0 +1,27 @@
+App.KL.Game.Field.Ind.field.1: App.KL.Game.Field
+  let name = "ind_01"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Ind.Assets.ind_01)
+  let picture = App.KL.Game.Field.Ind.Assets.base64.ind_01
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Ind.field.2: App.KL.Game.Field
+  let name = "ind_02"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Ind.Assets.ind_02)
+  let picture = App.KL.Game.Field.Ind.Assets.base64.ind_02
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Ind.field.3: App.KL.Game.Field
+  let name = "ind_03"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Ind.Assets.ind_03)
+  let picture = App.KL.Game.Field.Ind.Assets.base64.ind_03
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Ind.field.4: App.KL.Game.Field
+  let name = "ind_04"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Ind.Assets.ind_04)
+  let picture = App.KL.Game.Field.Ind.Assets.base64.ind_04
+  App.KL.Game.Field.new(name, draw, picture)

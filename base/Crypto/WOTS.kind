@@ -1,5 +1,3 @@
-// https://pdfs.semanticscholar.org/29f3/6c12d7bb1d4bcf237a7c040131a6509a332d.pdf
-
 Crypto.WOTS.PrivateKey: Type
   Vector<U256, 32>
 

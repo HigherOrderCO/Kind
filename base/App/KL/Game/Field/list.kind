@@ -1,4 +1,38 @@
 App.KL.Game.Field.list: List<App.KL.Game.Field>
   [
-    App.KL.Game.Field.Grass.field
+    // App.KL.Game.Field.Grass.field
+    App.KL.Game.Field.Grass.field.1
+    App.KL.Game.Field.Grass.field.2
+    App.KL.Game.Field.Grass.field.3
+    App.KL.Game.Field.Grass.field.4
+    App.KL.Game.Field.Grass.field.5
+    App.KL.Game.Field.Ind.field.1
+    App.KL.Game.Field.Ind.field.2
+    App.KL.Game.Field.Ind.field.3
+    App.KL.Game.Field.Ind.field.4
+    App.KL.Game.Field.Lava.field.0
+    App.KL.Game.Field.Lava.field.1
+    App.KL.Game.Field.Lava.field.2
+    App.KL.Game.Field.Lava.field.3
+    App.KL.Game.Field.Lava.field.4
+    App.KL.Game.Field.Lava.field.5
+    App.KL.Game.Field.Lava.field.6
+    App.KL.Game.Field.Lava.field.7
+    App.KL.Game.Field.Lava.field.8
+    App.KL.Game.Field.Lava.field.9
+    App.KL.Game.Field.Lava.field.10
+    App.KL.Game.Field.Lava.field.11
+    App.KL.Game.Field.Lava.field.12
+    App.KL.Game.Field.Lava.field.13
+    App.KL.Game.Field.Lava.field.14
+    App.KL.Game.Field.Lava.field.15
+    App.KL.Game.Field.Lava.field.16
+    App.KL.Game.Field.Lava.field.17
+    App.KL.Game.Field.Lava.field.18
+    App.KL.Game.Field.Lava.field.19
+    App.KL.Game.Field.Lava.field.20
+    App.KL.Game.Field.Lava.field.21
+    App.KL.Game.Field.Lava.field.22
+    App.KL.Game.Field.Lava.field.23
+    App.KL.Game.Field.Lava.field.24
   ]

@@ -1,0 +1,16 @@
+//Don't recommend using before having Animations
+App.KL.Game.Effect.tile.add_effect(
+  effect: App.KL.Game.Effect.At<I32>
+  duration: I32
+): App.KL.Game.Effect.At<Unit>
+  (pos)
+
+  App.KL.Game.Effect { 
+    get board = App.KL.Game.Effect.board.get
+    let tile = App.KL.Game.Tile.get(pos, board)
+    without tile: App.KL.Game.Effect.pass
+    let effect = App.KL.Game.Effect { effect(pos) return unit }
+    let new_tile = App.KL.Game.Tile.effect.add(tile, effect, duration)
+    let new_board = App.KL.Game.Board.set(pos, new_tile, board)
+    App.KL.Game.Effect.board.set(new_board)
+  }

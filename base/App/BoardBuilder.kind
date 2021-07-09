@@ -1,0 +1,57 @@
+// App states (local = clicks, global = visitors)
+App.BoardBuilder.State: App.State
+  App.State.new(App.BoardBuilder.State.local, App.BoardBuilder.State.global)
+
+type App.BoardBuilder.State.local {
+  lobby(value: App.BoardBuilder.Lobby.State.local)
+  builder(value: App.BoardBuilder.Builder.State.local)
+}
+
+type App.BoardBuilder.State.global {
+  new(
+    board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
+  )
+}
+
+// Initial state
+App.BoardBuilder.init: App.Init<App.BoardBuilder.State>
+  let room = ""
+  let board = Hexagonal.Axial.Map.new!
+  App.Store.new<App.BoardBuilder.State>(
+    App.BoardBuilder.State.local.lobby(App.BoardBuilder.Lobby.State.local.new(room))//, canvas_size, mouse, actual_terrain, none, ""), 
+    App.BoardBuilder.State.global.new(board)
+  )
+
+// Render function
+App.BoardBuilder.draw(img: VoxBox): App.Draw<App.BoardBuilder.State>
+  (state)
+    open state
+    let global = state.global
+    case state.local as local {
+      lobby: App.BoardBuilder.Lobby.Draw(local.value)
+      builder: App.BoardBuilder.Builder.Draw(local.value, global, img)
+    }
+
+// Event handler
+App.BoardBuilder.when: App.When<App.BoardBuilder.State>
+  (event, state)
+    open state
+    case state.local as local {
+      lobby: App.BoardBuilder.Lobby.When(event, local.value, state.global)
+      builder: App.BoardBuilder.Builder.When(event, local.value, state.global)
+    }
+
+// Global ticker: not used
+App.BoardBuilder.tick: App.Tick<App.BoardBuilder.State>
+  App.no_tick<App.BoardBuilder.State>
+
+// A "BoardBuilder, world!" + counter application
+App.BoardBuilder: App<App.BoardBuilder.State>
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  App.new<App.BoardBuilder.State>(
+    App.BoardBuilder.init
+    App.BoardBuilder.draw(img)
+    App.BoardBuilder.when
+    App.BoardBuilder.tick
+    App.BoardBuilder.Post
+  )

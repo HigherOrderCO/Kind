@@ -1,0 +1,22 @@
+// Global visitor: counts posts to room_zero
+App.BoardBuilder.Post: App.Post<App.BoardBuilder.State>
+  (tick, room, addr, data, glob) 
+    case App.BoardBuilder.Post.Event.deserialize_post(data) as eventglob {
+      none: glob
+      some:
+        case eventglob.value as event {
+          add: glob@board <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@board)
+          del: glob@board <- Hexagonal.Axial.Map.delete!(event.coord, glob@board)
+        }   
+    }
+
+type App.BoardBuilder.Post.Event {
+  add(coord: Hexagonal.Axial, field_id: Nat)
+  del(coord: Hexagonal.Axial)
+} deriving (serializer, deserializer)
+
+App.BoardBuilder.Post.Event.serialize_post(ev: App.BoardBuilder.Post.Event): String
+  String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.BoardBuilder.Post.Event.serializer, ev)))
+
+App.BoardBuilder.Post.Event.deserialize_post(hex: String): Maybe<App.BoardBuilder.Post.Event>
+  Deserializer.run!(App.BoardBuilder.Post.Event.deserializer, Bits.hex.decode(hex))

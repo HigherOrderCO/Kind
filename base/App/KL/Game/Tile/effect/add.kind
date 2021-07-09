@@ -1,0 +1,8 @@
+App.KL.Game.Tile.effect.add(
+  tile: App.KL.Game.Tile
+  effect: App.KL.Game.Effect<Unit>
+  duration: I32
+): App.KL.Game.Tile
+
+  let new_effect = App.KL.Game.Tile.Effect.new(effect, duration)
+  tile@effect <- some(new_effect)

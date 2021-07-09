@@ -10,7 +10,7 @@ App.KL.Game.Board.push(
     none: 
       case entity {
         terrain:
-          new_tile = App.KL.Game.Tile.new(entity.value, none, none, entity.value@effect)
+          new_tile = App.KL.Game.Tile.new(entity.value, none, none, none)
           App.KL.Game.Board.set(coord, new_tile, board)
       } default board
     some:

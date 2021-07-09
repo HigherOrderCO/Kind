@@ -8,7 +8,7 @@ App.KL.Game.Effect.indicators.get_indicators(
 
   open skill
   //Returning each effect's List of affected coords
-  result = skill.effect(hero_pos, mouse_coord, map)
+  let result = skill.effect(hero_pos, mouse_coord, map)
   case result {
     new: 
       result.indicators

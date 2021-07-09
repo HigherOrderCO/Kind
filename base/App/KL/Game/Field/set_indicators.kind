@@ -1,0 +1,8 @@
+App.KL.Game.Field.set_indicators(indicator: App.KL.Game.Indicator, img: VoxBox): VoxBox
+  case indicator {
+    background  : img
+    green       : App.KL.Game.Field.Ind.Assets.ind_02
+    red         : App.KL.Game.Field.Ind.Assets.ind_03
+    yellow      : App.KL.Game.Field.Ind.Assets.ind_04
+    blue        : App.KL.Game.Field.Ind.Assets.ind_01
+  }

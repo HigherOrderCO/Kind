@@ -1,6 +1,9 @@
 App.KL.Constants.hexagon_radius: I32
   15
 
+App.KL.Constants.hexagon.extra_height: I32
+  10
+
 App.KL.Constants.board_size : I32
   7
 
@@ -36,3 +39,28 @@ App.KL.Constants.max_score: I32
 
 App.KL.Constants.room : String
   "4b4c494e01010101"
+
+
+App.KL.Constants.z_index.token: U32
+  100
+
+App.KL.Constants.z_index.indicator: U32
+  101
+
+App.KL.Constants.z_index.letter: U32
+  102
+
+App.KL.Constants.z_index.cursor: U32
+  103
+
+App.KL.Constants.z_index.trap: U32
+  128
+
+App.KL.Constants.z_index.hero: U32
+  128
+
+App.KL.Constants.z_index.life_bar: U32
+  154
+
+App.KL.Constants.z_index.ap_bar: U32
+  154

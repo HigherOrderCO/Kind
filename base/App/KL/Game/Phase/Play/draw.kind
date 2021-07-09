@@ -149,7 +149,7 @@ App.KL.Game.Phase.Play.draw.board(
   map = Hexagonal.Axial.Map.to_list!(map)
   for pos in map with img:
     {coord, tile} = pos
-    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
+    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, img)
     img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
     img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
     img
@@ -181,9 +181,9 @@ App.KL.Game.Phase.Play.draw.tile.token(
       )
     
     if Hexagonal.Axial.eql(coord, token_coord) then
-      VoxBox.Draw.square(cx,cy,2,10,10,col,img)
+      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
     else
-      VoxBox.Draw.square(cx,cy,2,5,5,col,img)
+      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,5,5,col,img)
   img
 
   
@@ -220,7 +220,7 @@ App.KL.Game.Phase.Play.draw.cursor(
 ): VoxBox
   coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   {x,y} = App.KL.Game.Phase.Play.draw.centralize(coord)
-  VoxBox.Draw.image(x, y, 0#32, App.KL.Game.Field.Grass.Assets.mouse_ui, img)
+  VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.Grass.Assets.mouse_ui, img)
 
 // draws tile terrain
 App.KL.Game.Phase.Play.draw.tile.terrain(
@@ -229,14 +229,13 @@ App.KL.Game.Phase.Play.draw.tile.terrain(
   areas: App.KL.Game.Indicators
   hits: Maybe<App.KL.Game.Indicators>
   tile_coord: Hexagonal.Axial
-  mouse_coord: Hexagonal.Axial
   img: VoxBox
 ): VoxBox
   indicator = Hexagonal.Axial.Map.get!(tile_coord, hits <> areas) <> App.KL.Game.Indicator.background
-  {i, j} = App.KL.Game.Phase.Play.draw.centralize(tile_coord)
+  {i, j} = App.KL.Game.Phase.Play.draw.centralize.terrain(tile_coord)
   field = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   field_drawing = field@draw(terrain, indicator)
-  tile_drawing = VoxBox.Draw.image(i, j, 0#32, field_drawing, img)
+  tile_drawing = VoxBox.Draw.image(i, j, I32.to_u32(tile_coord@j + 20), field_drawing, img)
   tile_drawing = App.KL.Game.Phase.Play.draw.letter(tile_coord, picks, tile_drawing)
   tile_drawing
 
@@ -289,13 +288,14 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       let cx = cx - (128::U32)
       let cy = cy - (128::U32)
-      let img = VoxBox.Draw.image(cx, cy, 0u, draw_voxbox, img)
+      let img = VoxBox.Draw.image(cx, cy, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 
         none:
           img
         some:
           let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
+          let img = App.KL.Game.Creature.Status.draw(cx + 116, cy + 88, creature.value, img) // Placeholder for Showing status
           let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 31, creature.value, ap_used, img)
           img
       }
@@ -405,18 +405,28 @@ App.KL.Game.Phase.Play.draw.letter(
     some: 
       screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       {cx, cy} = App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord)
-      VoxBox.Draw.text(Char.to_string(got.value), PixelFont.black, Pos32.new(cx,cy,0u), img)
+      VoxBox.Draw.text(Char.to_string(got.value), PixelFont.black, Pos32.new(cx,cy,App.KL.Constants.z_index.letter), img)
   }
 
 App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
   { screen_coord@fst - 2, screen_coord@snd - 6 }
   
+App.KL.Game.Phase.Play.draw.centralize.terrain(
+  coord: Hexagonal.Axial
+): Pair(U32, U32)
+  let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  let i = i - 128
+  let j = j - 128 - I32.to_u32(App.KL.Constants.hexagon.extra_height / 2)
+  {i, j}
+
 // Centralizes an image in the hexagon 
 // TODO: won't be used after we start using assets from KL only
 App.KL.Game.Phase.Play.draw.centralize(
   coord: Hexagonal.Axial
 ): Pair(U32, U32)
   let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  // log(U32.show(i))
+  // log(U32.show(j))
   let aux = I32.to_u32(App.KL.Constants.hexagon_radius)
   let i = i - aux
   let j = j - aux
@@ -458,13 +468,13 @@ App.KL.Game.Phase.Play.draw.ap.bars(x: U32 y: U32, blue: I32, red: I32, bar_idx:
       if U32.gte(bar_idx, bar_quantity) then
         img
       else 
-        img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.gray, img)
+        img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.gray, img)
         App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red, bar_idx + 1, bar_quantity, img)
     else
-      img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.red, img)
+      img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.red, img)
       App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red - 1, bar_idx + 1, bar_quantity, img)
   else 
-    img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.blue, img)
+    img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.blue, img)
     App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue - 1, red, bar_idx + 1, bar_quantity, img)
 
 
