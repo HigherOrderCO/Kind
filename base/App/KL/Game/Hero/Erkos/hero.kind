@@ -67,6 +67,7 @@ App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(size: I32, dmg: I32, ap_cost: I32):
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
+    //App.KL.Game.Effect.area!(App.KL.Game.Effect.tile.add_effect(App.KL.Game.Effect.status.burn.add("erkos_wave", 3, 4), 3), area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.burn.add("erkos_wave", 2, 2)), area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
     return unit
