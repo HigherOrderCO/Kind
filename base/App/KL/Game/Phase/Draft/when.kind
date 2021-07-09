@@ -31,7 +31,8 @@ App.KL.Game.Phase.Draft.when(
                   0#8 
                 else if can_ready then 
                   1#8 
-                else 0#8
+                else 
+                  0#8
               App.new_post!(local@room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_u8))
           }        
         "T" : // Set a team

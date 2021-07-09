@@ -4,27 +4,12 @@ App.KL.Game.Player.ready_count(
   user: String
 ): Pair<Nat, Nat> // Total_player / Ready_Count
   
-  let ready_count = 0
-  let total_player = Map.to_list!(players)
-  let total_player = App.KL.Game.Player.ready_count.aux!(total_player)
-  info = players{user}
-  case info {
-    none: 
-      {ready_count, total_player}
-    some: 
-      let player = info.value
-        if player@ready then
-          {total_player, ready_count + 1}
-        else
-          {total_player, ready_count - 1}
-  }
+  let total_ready = {0, 0}
 
-//Se essa função já existia, me perdoe, são 6 am e eu estou com sono
-App.KL.Game.Player.ready_count.aux<A:Type>(
-  xs: List<A>
-): Nat
+  for id:player in players with total_ready:
+    let has_team = App.KL.Game.Player.has_team(player)
+    let new_total_player = if has_team then total_ready@fst + 1 else total_ready@fst
+    let new_ready_count = if player@ready then total_ready@snd + 1 else total_ready@snd
+    {new_total_player, new_ready_count}
 
-  let result = 0
-  for size in xs with result:
-    result + 1
-  result
+  total_ready
