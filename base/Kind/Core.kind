@@ -480,7 +480,7 @@ Kind.Core.Check(defs : Kind.Core.Defs, list_defs : List<Pair<String, Kind.Core.D
 
 Kind.Core : IO<Unit>
   IO {
-    get fmc = IO.get_file("/Users/caotic/Desktop/Kind/base/Kind/Core/example.fmc")    
+    get fmc = IO.get_file("./Kind/Core/example.fmc")    
     let defs = Kind.Core.parse_defs(fmc)
     Kind.Core.Check(defs, Map.to_list!(defs))
     return unit
