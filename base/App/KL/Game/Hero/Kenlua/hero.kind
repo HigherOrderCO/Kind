@@ -210,7 +210,7 @@ App.KL.Game.Hero.Kenlua.hero.Skills.dash(range: I32, dmg: I32, ap_cost: I32): Ap
       App.KL.Game.Effect.hp.damage_at(dmg, target)
       App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), coords)
       return unit
-    } else App.KL.Game.Effect.fail("but is rooted or stunned")
+    } else App.KL.Game.Effect.fail("but was rooted or stunned")
   }
 
 App.KL.Game.Hero.Kenlua.hero.Skills.stare(shield_value: I32): App.KL.Game.Effect<Unit>
