@@ -1,0 +1,13 @@
+//Verifies if the player has selected an initial pos
+App.KL.Game.Player.has_pos(
+  player: App.KL.Game.Player
+): Bool
+
+  open player
+  let pos = player.init_pos
+  case pos { 
+    none:
+      false
+    some: 
+      true
+  }

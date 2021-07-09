@@ -1,0 +1,13 @@
+//Verifies if the player has a hero
+App.KL.Game.Player.has_hero(
+  player: App.KL.Game.Player
+): Bool
+
+  open player
+  let hero = player.hero_id
+  case hero {
+    none:
+      false
+    some:
+      true
+  }

@@ -1,0 +1,9 @@
+//Verifies if the player has selected a hero and a starting position
+App.KL.Game.Player.has_hero_and_pos(
+  player: App.KL.Game.Player
+): Bool
+
+  let has_hero = App.KL.Game.Player.has_hero(player)
+  let has_pos = App.KL.Game.Player.has_pos(player)
+
+  has_hero && has_pos
