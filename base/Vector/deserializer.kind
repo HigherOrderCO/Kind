@@ -1,0 +1,11 @@
+Vector.deserializer<A: Type>(len: Nat, elem: Deserializer<A>): Deserializer<Vector<A,len>>
+  case len {
+    zero: Deserializer {
+      return Vector.nil<A>
+    }
+    succ: Deserializer {
+      get head = elem
+      get tail = Vector.deserializer<A>(len.pred, elem)
+      return Vector.cons<A,len.pred>(head, tail)
+    }
+  }!

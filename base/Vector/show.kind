@@ -1,0 +1,2 @@
+Vector.show<A: Type>(len: Nat, elem: A -> String, xs: Vector<A,len>): String
+  Stringifier.run!(Vector.stringifier<A>(len, (e) String.concat(elem(e))), xs)

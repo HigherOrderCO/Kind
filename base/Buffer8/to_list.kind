@@ -1,0 +1,9 @@
+Buffer8.to_list(lenbuf: Pair<U32,Buffer8>): List<U8>
+  let {len,buf} = lenbuf
+  Buffer8.to_list.go(0, len, buf)
+
+Buffer8.to_list.go(idx: U32, len: U32, buf: Buffer8): List<U8>
+  if U32.eql(idx,len) then
+    []
+  else
+    List.cons!(Buffer8.get(idx,buf), Buffer8.to_list.go(U32.add(1,idx), len, buf))

@@ -1,2 +1,2 @@
 Test: IO<Unit>
-  Neutralis.main(42000)
+  Crypto.WOTS.example

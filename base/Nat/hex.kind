@@ -1,0 +1,5 @@
+Nat.hex.encode(n: Nat): String
+  Bits.hex.encode(Nat.to_bits(n))
+  
+Nat.hex.decode(s: String): Nat
+  Bits.to_nat(Bits.hex.decode(s))

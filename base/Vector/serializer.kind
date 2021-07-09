@@ -1,0 +1,7 @@
+Vector.serializer<A: Type>(len: Nat, elem: Serializer<A>): Serializer<Vector<A, len>>
+  (xs, bs) case len with xs {
+    zero: bs
+    succ: case xs {
+      cons: elem(xs.head, Vector.serializer<A>(len.pred, elem, xs.tail, bs))
+    }
+  }!

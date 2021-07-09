@@ -1,0 +1,11 @@
+Vector.stringifier<A: Type>(len: Nat, elem: Stringifier<A>): Stringifier<Vector<A,len>>
+  (xs, str)
+  Vector.stringifier.go<A>(len, elem, xs, true, str)
+  
+Vector.stringifier.go<A: Type>(len: Nat, elem: Stringifier<A>, xs: Vector<A,len>, fst: Bool, str: String): String
+  case len with xs {
+    zero: Stringifier.text("]", str)
+    succ: case xs {
+      cons: Stringifier.text(if fst then "[" else ",", elem(xs.head, Vector.stringifier.go<A,len.pred>(elem, xs.tail, false, str)))
+    }
+  }!
