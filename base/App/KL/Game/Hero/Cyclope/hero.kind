@@ -40,8 +40,8 @@ App.KL.Game.Hero.Cyclope.hero.Skills.empathy(dmg_on_self: I32, duration: I32, sh
     get target = App.KL.Game.Effect.coord.get_target
     let area = App.KL.Game.Areas.ring(center, 1)
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
     App.KL.Game.Effect.hp.damage_at(dmg_on_self, center)
     let ally = App.KL.Game.Effect.At.ally!
     let shield = App.KL.Game.Effect.status.shield.add("Empathy", duration, shield_value)
@@ -54,8 +54,8 @@ App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(radius: I32 duration: I32, ap_c
     get center = App.KL.Game.Effect.coord.get_center  
     App.KL.Game.Effect.ap.use(ap_cost)
     let area = App.KL.Game.Areas.ring(center, radius)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
     App.KL.Game.Effect.area!(App.KL.Game.Effect.status.root.add(duration), area)
     return unit
   }
@@ -73,8 +73,8 @@ App.KL.Game.Hero.Cyclope.hero.Skills.revenge(range: I32, ap_cost: I32): App.KL.G
           let hero = creature@hero
           let missing_hp = hero@max_hp - creature@hp
           let dmg = missing_hp / 2
-          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
+          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
           App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.hp.damage_at(dmg), target)
           return unit
         }

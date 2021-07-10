@@ -38,8 +38,8 @@ App.KL.Game.Hero.Lela.hero.Skills.restore(range: I32, heal: I32, ap_cost:I32): A
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
     App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.hp.heal_at(heal), target)
     return unit
   }
@@ -50,8 +50,8 @@ App.KL.Game.Hero.Lela.hero.Skills.escort(range: I32, id: String, duration: I32, 
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
     App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.status.shield.add(id, duration, amount), target)
     return unit
   }
@@ -62,8 +62,8 @@ App.KL.Game.Hero.Lela.hero.Skills.detain(range: I32, dmg: I32, ap_cost: I32): Ap
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.silence.add(1), target)
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
     return unit

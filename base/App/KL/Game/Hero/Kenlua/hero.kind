@@ -205,8 +205,8 @@ App.KL.Game.Hero.Kenlua.hero.Skills.dash(range: I32, dmg: I32, ap_cost: I32): Ap
     App.KL.Game.Effect.ap.use(ap_cost)
     get moved = App.KL.Game.Effect.movement.move_to(center, target, false)
     if moved then App.KL.Game.Effect {
-      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
-      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
+      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, coords)
+      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [target])
       App.KL.Game.Effect.hp.damage_at(dmg, target)
       App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), coords)
       return unit
@@ -219,8 +219,8 @@ App.KL.Game.Hero.Kenlua.hero.Skills.stare(shield_value: I32): App.KL.Game.Effect
     get target = App.KL.Game.Effect.coord.get_target
     get caster = App.KL.Game.Effect.board.creature.caster
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
     without caster: App.KL.Game.Effect.pass
     without target_creature: App.KL.Game.Effect.pass
     if App.KL.Game.Team.eql(target_creature@team, caster@team) then
@@ -237,8 +237,8 @@ App.KL.Game.Hero.Kenlua.hero.Skills.slash(range: I32, dmg: I32, ap_cost: I32): A
     get center  = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.limit_range(range)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
     return unit
   }
