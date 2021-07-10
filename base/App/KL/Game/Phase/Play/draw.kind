@@ -67,8 +67,13 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
               let cast = game.moment.casts.head
               get skill = App.KL.Game.Cast.get_skill(cast, game)
               get hero = App.KL.Game.Cast.get_hero(cast, game)
-              let text = hero@name | " used " | skill@name | "!"
-              let text = text | if game.moment.success then "" else " But it failed."
+              let success = game.moment.success
+              let text = case success { 
+                left:
+                  hero@name | " tried to use " | skill@name | " but was " |success.value|"."
+                right:
+                  hero@name | " used " | skill@name | "!"
+              }
               return text
             } <> "Invalid cast."
           }
@@ -258,7 +263,11 @@ App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game: App.KL.Game, coord
       nil:
         App.KL.Game.Hero.Draw.Pose.idle
       cons: Maybe { 
-        get success = if game.moment.success then some(unit) else none
+        //get success = if game.moment.success then some(unit) else none
+        get success = case game.moment.success { 
+          left: none
+          right: some(unit)
+          }
         get creature = App.KL.Game.Board.Creature.get(coord, game.board)
         let cast = game.moment.casts.head
         get player = creature@player

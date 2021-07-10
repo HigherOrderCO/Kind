@@ -13,30 +13,44 @@ App.KL.Game.Cast.apply(
     let result = skill@effect(coord, cast@target, game@board)
     let is_stunned = App.KL.Game.Creature.Status.stun.check(creature) // Verifies if the creature is stunned
     let is_silenced = App.KL.Game.Creature.Status.silence.check(creature) // Verifies if the creature is silenced
+    let is_rooted = App.KL.Game.Creature.Status.root.check(creature) // Verifies if the creature is rooted
     let is_walk = String.eql(skill@name, "Walk") // Verifies if its walk
 
     if is_stunned then
-      none
+      some(App.KL.Game.Cast.Result.failure("stun"))
     else 
-      if is_silenced then
+      if is_rooted then
         if is_walk then // A silenced creature should be able to Walk
+          some(App.KL.Game.Cast.Result.failure("rooted"))
+        else
           case result {
-            err: none
+            err: some(App.KL.Game.Cast.Result.failure(result.message))
             new: Maybe {
               let game = game@board <- result.board
               let game = game@cemetery <- game@cemetery ++ result.cemetery
               return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
             }
           }
-        else
-          none
       else
-        case result {
-          err: none
-          new: Maybe {
-            let game = game@board <- result.board
-            let game = game@cemetery <- game@cemetery ++ result.cemetery
-            return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+        if is_silenced then
+          if is_walk then
+          case result {
+            err: some(App.KL.Game.Cast.Result.failure(result.message))
+            new: Maybe {
+              let game = game@board <- result.board
+              let game = game@cemetery <- game@cemetery ++ result.cemetery
+              return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+            }
           }
-        }
-  } <> App.KL.Game.Cast.Result.failure
+          else
+            some(App.KL.Game.Cast.Result.failure("silenced"))
+        else
+          case result {
+            err: some(App.KL.Game.Cast.Result.failure(result.message))
+            new: Maybe {
+              let game = game@board <- result.board
+              let game = game@cemetery <- game@cemetery ++ result.cemetery
+              return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
+            }
+          }
+  } <> App.KL.Game.Cast.Result.failure("invalid cast")

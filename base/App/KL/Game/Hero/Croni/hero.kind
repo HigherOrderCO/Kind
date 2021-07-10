@@ -11,17 +11,22 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
+  let walk_range = {2,2} ::Pair<U64, I32>
+  let flux_range = {10,10}::Pair<U64, I32>
+  let trap_range = {10,10} ::Pair<U64, I32>
+  let void_range = {8,8} ::Pair<U64, I32>
+
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1),
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name |".")
 
-    "Q": App.KL.Game.Skill.new("Flux", 860, 48, 8, App.KL.Game.Hero.Croni.hero.Skills.flux(12, 12, 1), 
-    "Croni casts a targeted dark flux, dealing 12 damage in a single area.")
-
-    "W": App.KL.Game.Skill.new("Trap", 150, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.trap(12, 1), 
+    "Q": App.KL.Game.Skill.new("Trap", 150, 24, trap_range@fst, App.KL.Game.Hero.Croni.hero.Skills.trap(trap_range@snd, 1), 
     "Croni summons a Trap that roots when stepped on.")
 
-    "E": App.KL.Game.Skill.new("Void", 880, 24, 8, App.KL.Game.Hero.Croni.hero.Skills.void(12, 1),
+    "W": App.KL.Game.Skill.new("Flux", 860, 48, flux_range@fst, App.KL.Game.Hero.Croni.hero.Skills.flux(flux_range@snd, 12, 1), 
+    "Croni casts a targeted dark flux, dealing 12 damage in a single area.")
+
+    "E": App.KL.Game.Skill.new("Void", 880, 24, void_range@fst, App.KL.Game.Hero.Croni.hero.Skills.void(void_range@snd, 1),
     "Croni summons a Void that blocks movement. Can be reactivated to root around it.")
 
   }
