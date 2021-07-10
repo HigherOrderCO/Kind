@@ -1,0 +1,9 @@
+Dyadic.add(a: Dyadic, b: Dyadic): Dyadic
+  open a
+  open b
+  if a.exp >? b.exp then
+    let fac = Nat.to_int(Nat.pow(2, a.exp - b.exp))
+    Dyadic.new(a.num + (b.num*fac), a.exp)
+  else
+    let fac = Nat.to_int(Nat.pow(2, b.exp - a.exp))
+    Dyadic.new((a.num*fac) + b.num, b.exp)
