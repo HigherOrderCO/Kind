@@ -1,0 +1,26 @@
+App.Pong.State: App.State
+  App.State.new(Unit, Unit)
+
+App.Pong.init: App.Init<App.Pong.State>
+  App.Store.new!(unit, unit)
+
+App.Pong.draw(img: VoxBox): App.Draw<App.Pong.State>
+  App.no_draw<App.Pong.State>
+
+App.Pong.when: App.When<App.Pong.State>
+  App.no_when<App.Pong.State>
+
+App.Pong.tick: App.Tick<App.Pong.State>
+  App.no_tick<App.Pong.State>
+
+App.Pong.post: App.Post<App.Pong.State>
+  App.no_post<App.Pong.State>
+
+App.Pong: App<App.Pong.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  let init = App.Pong.init 
+  let draw = App.Pong.draw(img)
+  let when = App.Pong.when
+  let tick = App.Pong.tick
+  let post = App.Pong.post
+  App.new!(init, draw, when, tick, post)
