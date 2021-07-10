@@ -1,8 +1,36 @@
 App.Pong.State: App.State
-  App.State.new(Unit, Unit)
+  App.State.new(App.Pong.State.local, Unit)
+
+type App.Pong.Player {
+  new(
+    h: Dyadic // position
+    v: Dyadic // speed
+  )
+}
+
+type App.Pong.Ball {
+  new(
+    p: Pair<Dyadic, Dyadic> // position
+    v: Pair<Dyadic, Dyadic> // speed
+  )
+}
+
+type App.Pong.State.local {
+  new(
+    left: App.Pong.Player
+    right: App.Pong.Player
+    ball: App.Pong.Ball
+  )
+}
+
+App.Pong.Ball.init_speed: Pair<Dyadic, Dyadic>
+  {1, 1}
 
 App.Pong.init: App.Init<App.Pong.State>
-  App.Store.new!(unit, unit)
+  let initial_player = App.Pong.Player.new(0, 0)
+  let initial_ball = App.Pong.Ball.new({0, 0}, App.Pong.Ball.init_speed)
+  let initial_state = App.Pong.State.local.new(initial_player, initial_player, initial_ball)
+  App.Store.new!(initial_state, unit)
 
 App.Pong.draw(img: VoxBox): App.Draw<App.Pong.State>
   App.no_draw<App.Pong.State>
