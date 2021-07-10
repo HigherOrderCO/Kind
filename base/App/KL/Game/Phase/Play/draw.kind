@@ -153,13 +153,30 @@ App.KL.Game.Phase.Play.draw.board(
 
   for coord:tile in map with img:
     let indicator = Hexagonal.Axial.Map.get!(coord, hits <> indicators)
+    let img = App.KL.Game.Phase.Play.draw.grid(coord, game@moment, img)
     let img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicator, coord, img)
     let img = App.KL.Game.Phase.Play.draw.tile.indicator(indicator, coord, img)
     let img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
     let img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
     img
   img
-  
+
+// TODO optimize?
+App.KL.Game.Phase.Play.draw.grid(
+  coord:  Hexagonal.Axial
+  moment: App.KL.Game.Moment
+  img:    VoxBox
+): VoxBox
+  case moment {
+    preparation:
+      let indicator     = App.KL.Game.Indicator.gray_line
+      let indicator_img = App.KL.Game.Indicator.get_img(indicator)
+      
+      let {x, y} = App.KL.Game.Phase.Play.draw.centralize.terrain(coord)
+      VoxBox.Draw.image(x, y, App.KL.Constants.z_index.grid, indicator_img, img)
+    execution: img
+  }
+
 App.KL.Game.Phase.Play.draw.tile.token(
   game: App.KL.Game
   token: Maybe<App.KL.Game.Token>,
