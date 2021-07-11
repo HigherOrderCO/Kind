@@ -67,8 +67,8 @@ App.Pong.draw(img: VoxBox): App.Draw<App.Pong.State>
     let img = VoxBox.Draw.moving_rect(
       Dyadic.to_i32(st@ball@p@fst)
       Dyadic.to_i32(st@ball@p@snd)
-      (2*Dyadic.to_i32(st@ball@v@fst))
-      (2*Dyadic.to_i32(st@ball@v@snd))
+      (Dyadic.to_i32(st@ball@v@fst)*3)/2
+      (Dyadic.to_i32(st@ball@v@snd)*3)/2
       U32.to_i32(App.Pong.ball_diameter)
       U32.to_i32(App.Pong.ball_diameter)
       0
@@ -106,6 +106,12 @@ App.Pong.when: App.When<App.Pong.State>
       frame: IO {
         let st = st@ball <- App.Pong.when.ball(st@ball)
         log("frame")
+        return some(st)
+      }
+      mouse_move: IO { // TODO modify speed to
+        let pos = U32.to_dyadic(event.mouse_pos@snd) - (st@left@h/2)
+        let left = st@left@p <- pos
+        let st = st@left <- left
         return some(st)
       }
     } default IO { return some(st) }
