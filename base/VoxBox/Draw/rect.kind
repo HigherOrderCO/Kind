@@ -1,0 +1,18 @@
+// draws a rectangle with top-left corner
+// at point (x, y)
+VoxBox.Draw.rect(
+  x: U32,
+  y: U32,
+  z: U32,
+  w: U32,
+  h: U32,
+  col: Col32,
+  img: VoxBox,
+): VoxBox
+  for i : U32 from x to x + w with img:
+    for j : U32 from y to y + h with img:
+      let pos = Pos32.new(i, j, z) // pixel pos (forms a square)
+      VoxBox.push(pos, col, img)
+      img
+    img
+

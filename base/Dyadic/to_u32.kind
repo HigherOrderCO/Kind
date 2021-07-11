@@ -1,0 +1,4 @@
+Dyadic.to_u32(a: Dyadic): U32
+  open a
+  let n = Int.to_nat(a.num)/Nat.pow(2, a.exp)
+  Nat.to_u32(n)
