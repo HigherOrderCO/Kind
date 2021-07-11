@@ -9,11 +9,16 @@ App.Hello.init: App.Init<App.Hello.State>
 // Render function
 App.Hello.draw: App.Draw<App.Hello.State>
   (state)
-  DOM.node("div", {}, {"border": "1px solid black"}, [
-    DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Hello, world!")])
-    DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
-    DOM.node("div", {}, {}, [DOM.text("Visits: " | Nat.show(state@global))])
-  ])
+  <div style={"border": "1px solid black"}>
+    <div style={"font-weight": "bold"}>"Hello, world!"</div>
+    <div>"Clicks: " | Nat.show(state@local)</div>
+    <div>"Visits: " | Nat.show(state@global)</div>
+  </div>
+  //DOM.node("div", {}, {"border": "1px solid black"}, [
+    //DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Hello, world!")])
+    //DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
+    //DOM.node("div", {}, {}, [DOM.text("Visits: " | Nat.show(state@global))])
+  //])
 
 // Event handler
 App.Hello.when: App.When<App.Hello.State>
