@@ -4,12 +4,13 @@ App.KL.Game.Phase.End.when(
   event  : App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
   let players = global@players
+  let room = String.take(16, Crypto.Keccak.hash(local@room))
 
   case event {
     mouse_click:
       switch String.eql(event.id) {
         "return" : // Set initial position
-          App.new_post!(local@room, App.KL.Game.Phase.End.Event.go_lobby.serial)
+          App.new_post!(room, App.KL.Game.Phase.End.Event.go_lobby.serial)
       } default App.pass!
   
   } default App.pass!

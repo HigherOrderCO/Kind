@@ -5,6 +5,7 @@ App.KL.Game.Phase.Draft.when(
   event  : App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
   let players = global@players
+  let room = String.take(16, Crypto.Keccak.hash(local@room))
 
   case event {
     mouse_click:
@@ -12,13 +13,13 @@ App.KL.Game.Phase.Draft.when(
         "C" : // Set initial position 
           let coord_nat = String.drop(1, event.id)
           let coord     = Hexagonal.Axial.from_nat(Nat.read(coord_nat))
-          App.new_post!(local@room, App.KL.Game.Phase.Draft.Event.set_init_pos.serial(coord))
+          App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_init_pos.serial(coord))
         "H" : // Set Player Hero
           let hero_name = String.drop(1, event.id)
           let hero_id   = Maybe.map!!(Nat.to_u8, App.KL.Game.Hero.name_to_id(hero_name))
           case hero_id {
             none: App.pass!
-            some: App.new_post!(local@room, App.KL.Game.Phase.Draft.Event.set_hero.serial(hero_id.value))
+            some: App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_hero.serial(hero_id.value))
           }
         "R" : // Toggle Ready
           let player = players{local@user}
@@ -33,7 +34,7 @@ App.KL.Game.Phase.Draft.when(
                   1#8 
                 else 
                   0#8
-              App.new_post!(local@room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_u8))
+              App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_u8))
           }        
         "T" : // Set a team
           let player_count = String.drop(1, event.id)
@@ -45,7 +46,7 @@ App.KL.Game.Phase.Draft.when(
               "blue": App.KL.Game.Team.blue
               "red" : App.KL.Game.Team.red
             } default App.KL.Game.Team.neutral
-            App.new_post!(local@room, App.KL.Game.Phase.Draft.Event.set_team.serial(team))
+            App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_team.serial(team))
       } default App.pass!
   mouse_over:
     switch String.starts_with(event.id) {

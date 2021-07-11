@@ -220,7 +220,7 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
       {App.KL.Lobby.draw.front.input("text", room_input)}
       <div>
         {App.KL.Lobby.draw.front.button("ready", "Enter")}
-        {App.KL.Lobby.draw.front.button("random", "Random")}
+        //{App.KL.Lobby.draw.front.button("random", "Random")}
         {App.KL.Lobby.draw.front.button("heroes", "Heroes")}
       </div>
     </div>
@@ -253,24 +253,24 @@ App.KL.Lobby.when(
       case page {
         front:
           switch String.eql(event.id) {
-            "random": IO {
-              get rnd = IO.random(10000000000)
-              let str = Nat.show(rnd)
-              let room = "4b4c494e" | String.take(8, str)
-              let new_page = App.KL.Lobby.State.Local.Page.front(room)
-              let new_local = local@page <- new_page
-              App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
-            }
+            //"random": IO {
+              //get rnd = IO.random(10000000000)
+              //let str = Nat.show(rnd)
+              //let room = "4b4c494e" | String.take(8, str)
+              //let new_page = App.KL.Lobby.State.Local.Page.front(room)
+              //let new_local = local@page <- new_page
+              //App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+            //}
             "ready": 
               case page.room_input {
                 nil: IO {App.pass!}
                 cons:
+                  let room = String.take(16, Crypto.Keccak.hash(page.room_input))
                   IO {
-                    App.watch<App.KL.State>(page.room_input)
-                    App.new_post<App.KL.State>(page.room_input, App.KL.Game.Phase.Draft.Event.join_room.serial)
+                    App.watch<App.KL.State>(room)
+                    App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
                     App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input)))
                   }
-              
               }
             "heroes": IO {
               let new_page = App.KL.Lobby.State.Local.Page.heroes(none, none, "string")
