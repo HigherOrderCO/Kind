@@ -1,9 +1,25 @@
 App.Pong.State: App.State
   App.State.new(App.Pong.State.local, Unit)
 
+App.Pong.width: U32
+  256
+
+App.Pong.height: U32
+  256
+
+App.Pong.paddle_width: U32
+  10
+
+App.Pong.ball_diameter: U32
+  8
+
+App.Pong.Ball.init_speed: Pair<Dyadic, Dyadic>
+  {15, 10}
+
 type App.Pong.Player {
   new(
-    h: Dyadic // position
+    h: Dyadic // height
+    p: Dyadic // vertical position of the top of the paddle
     v: Dyadic // speed
   )
 }
@@ -23,20 +39,77 @@ type App.Pong.State.local {
   )
 }
 
-App.Pong.Ball.init_speed: Pair<Dyadic, Dyadic>
-  {1, 1}
-
 App.Pong.init: App.Init<App.Pong.State>
-  let initial_player = App.Pong.Player.new(0, 0)
-  let initial_ball = App.Pong.Ball.new({0, 0}, App.Pong.Ball.init_speed)
+  let initial_player = App.Pong.Player.new(50, 0, 0)
+  let initial_ball = App.Pong.Ball.new({128, 128}, App.Pong.Ball.init_speed)
   let initial_state = App.Pong.State.local.new(initial_player, initial_player, initial_ball)
   App.Store.new!(initial_state, unit)
 
 App.Pong.draw(img: VoxBox): App.Draw<App.Pong.State>
-  App.no_draw<App.Pong.State>
+  (state)
+    let st = state@local
+    let img = VoxBox.Draw.rect(
+      1
+      Dyadic.to_u32(st@left@p)
+      0
+      App.Pong.paddle_width
+      Dyadic.to_u32(st@left@h)
+      Col32.new(0, 0, 0, 255)
+      img)
+    let img = VoxBox.Draw.rect(
+      App.Pong.width - App.Pong.paddle_width - 1
+      Dyadic.to_u32(st@right@p)
+      0
+      App.Pong.paddle_width
+      Dyadic.to_u32(st@right@h)
+      Col32.new(0, 0, 0, 255)
+      img)
+    let img = VoxBox.Draw.moving_rect(
+      Dyadic.to_i32(st@ball@p@fst)
+      Dyadic.to_i32(st@ball@p@snd)
+      (2*Dyadic.to_i32(st@ball@v@fst))
+      (2*Dyadic.to_i32(st@ball@v@snd))
+      U32.to_i32(App.Pong.ball_diameter)
+      U32.to_i32(App.Pong.ball_diameter)
+      0
+      Col32.new(0, 0, 0, 255)
+      img)
+    <div style={
+      "display": "flex"
+      "width": "100%"
+      "justify-content": "space-evenly"
+    }>{
+      DOM.vbox({"id": "game_screen", "width": "500px", "height": "500px", "scale": "1"}, {}, img)
+    }</div>
+
+App.Pong.when.ball(b: App.Pong.Ball): App.Pong.Ball
+  let w = U32.to_dyadic(App.Pong.width)
+  let h = U32.to_dyadic(App.Pong.height)
+  let d = U32.to_dyadic(App.Pong.ball_diameter)
+  // collisions
+  let v_x =
+    if ((b@p@fst <? 0) && (b@v@fst <? 0)) || (((b@p@fst + d) >? w) && (b@v@fst >? 0)) then
+      Dyadic.neg(b@v@fst)
+    else
+      b@v@fst
+  let v_y =
+    if ((b@p@snd <? 0) && (b@v@snd <? 0)) || (((b@p@snd + d) >? h) && (b@v@snd >? 0)) then
+      Dyadic.neg(b@v@snd)
+    else
+      b@v@snd
+  App.Pong.Ball.new({b@p@fst + v_x, b@p@snd + v_y}, {v_x, v_y})
 
 App.Pong.when: App.When<App.Pong.State>
-  App.no_when<App.Pong.State>
+  (event, state)
+    let st = state@local
+    case event {
+      frame: IO {
+        let st = st@ball <- App.Pong.when.ball(st@ball)
+        log("frame")
+        return some(st)
+      }
+    } default IO { return some(st) }
+
 
 App.Pong.tick: App.Tick<App.Pong.State>
   App.no_tick<App.Pong.State>
