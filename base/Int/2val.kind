@@ -1,0 +1,15 @@
+// calculates the 2-adic valuation of a Int, aka the number
+// of 0s at the end of `a` as a binary number. theoretically
+// it should return `+infinity` if a == 0, but we'll return
+// 0 instead for the sake of performance.
+Int.2val(a: Int): Nat
+  if a =? 0 then
+    0
+  else
+    Int.2val.go(a, 0)
+
+Int.2val.go(a: Int, ret: Nat): Nat
+  if Int.mod_nat(a, 2) =? 0 then
+    Int.2val.go(a/2, ret + 1)
+  else
+    ret

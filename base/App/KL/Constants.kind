@@ -41,26 +41,29 @@ App.KL.Constants.room : String
   "4b4c494e01010101"
 
 
-App.KL.Constants.z_index.token: U32
+App.KL.Constants.z_index.grid: U32
   100
 
-App.KL.Constants.z_index.indicator: U32
+App.KL.Constants.z_index.token: U32
   101
 
-App.KL.Constants.z_index.letter: U32
+App.KL.Constants.z_index.indicator: U32
   102
 
-App.KL.Constants.z_index.cursor: U32
+App.KL.Constants.z_index.letter: U32
   103
 
+App.KL.Constants.z_index.cursor: U32
+  104
+
 App.KL.Constants.z_index.trap: U32
-  128
+  129
 
 App.KL.Constants.z_index.hero: U32
-  128
+  129
 
 App.KL.Constants.z_index.life_bar: U32
-  154
+  155
 
 App.KL.Constants.z_index.ap_bar: U32
-  154
+  155

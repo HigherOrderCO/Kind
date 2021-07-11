@@ -9,10 +9,10 @@ App.KL.Game.Effect.ap.use(
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
     let tile = App.KL.Game.Tile.get(target, board)
-    without tile: App.KL.Game.Effect.fail
-    without caster: App.KL.Game.Effect.fail
+    without tile: App.KL.Game.Effect.fail("out of Action Points")
+    without caster: App.KL.Game.Effect.fail("out of Action Points")
     if I32.gtn(cost, caster@ap) then 
-      App.KL.Game.Effect.fail
+      App.KL.Game.Effect.fail("out of Action Points")
     else
       App.KL.Game.Effect { 
         App.KL.Game.Effect.ap.remove(cost, center)

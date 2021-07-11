@@ -1,0 +1,54 @@
+App.Pong.State: App.State
+  App.State.new(App.Pong.State.local, Unit)
+
+type App.Pong.Player {
+  new(
+    h: Dyadic // position
+    v: Dyadic // speed
+  )
+}
+
+type App.Pong.Ball {
+  new(
+    p: Pair<Dyadic, Dyadic> // position
+    v: Pair<Dyadic, Dyadic> // speed
+  )
+}
+
+type App.Pong.State.local {
+  new(
+    left: App.Pong.Player
+    right: App.Pong.Player
+    ball: App.Pong.Ball
+  )
+}
+
+App.Pong.Ball.init_speed: Pair<Dyadic, Dyadic>
+  {1, 1}
+
+App.Pong.init: App.Init<App.Pong.State>
+  let initial_player = App.Pong.Player.new(0, 0)
+  let initial_ball = App.Pong.Ball.new({0, 0}, App.Pong.Ball.init_speed)
+  let initial_state = App.Pong.State.local.new(initial_player, initial_player, initial_ball)
+  App.Store.new!(initial_state, unit)
+
+App.Pong.draw(img: VoxBox): App.Draw<App.Pong.State>
+  App.no_draw<App.Pong.State>
+
+App.Pong.when: App.When<App.Pong.State>
+  App.no_when<App.Pong.State>
+
+App.Pong.tick: App.Tick<App.Pong.State>
+  App.no_tick<App.Pong.State>
+
+App.Pong.post: App.Post<App.Pong.State>
+  App.no_post<App.Pong.State>
+
+App.Pong: App<App.Pong.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  let init = App.Pong.init 
+  let draw = App.Pong.draw(img)
+  let when = App.Pong.when
+  let tick = App.Pong.tick
+  let post = App.Pong.post
+  App.new!(init, draw, when, tick, post)

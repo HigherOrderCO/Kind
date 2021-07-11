@@ -11,17 +11,23 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
+  let walk_range = {2,2} ::Pair<U64, I32>
+  let restore_range = {4, 4} ::Pair<U64, I32>
+  let escort_range = {4, 4} ::Pair<U64, I32>
+  let detain_range = {3, 3} ::Pair<U64, I32>
+
+
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1),
-    "Walk to another tile within 2 range from " | name | ".")
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "Walk to another tile within 2 range from " | name |".")
     
-    "Q": App.KL.Game.Skill.new("Restore", 396, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.restore(4, 4, 1),
+    "Q": App.KL.Game.Skill.new("Restore", 396, 48, restore_range@fst, App.KL.Game.Hero.Lela.hero.Skills.restore(restore_range@snd, 4, 1),
     "Lela restores 4 Health Points of an ally.")
 
-    "W": App.KL.Game.Skill.new("Escort", 397, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.escort(4, "Lela Escort", 1, 4, 1),
+    "W": App.KL.Game.Skill.new("Escort", 397, 48, escort_range@fst, App.KL.Game.Hero.Lela.hero.Skills.escort(escort_range@snd, "Lela Escort", 1, 4, 1),
     "Lela provides 4 Shield Points to an ally.")
 
-    "E": App.KL.Game.Skill.new("Detain", 398, 48, 4, App.KL.Game.Hero.Lela.hero.Skills.detain(2, 1, 2),
+    "E": App.KL.Game.Skill.new("Detain", 398, 48, detain_range@fst, App.KL.Game.Hero.Lela.hero.Skills.detain(detain_range@snd, 1, 2),
     "Lela deals 1 damage to an enemy, silencing them.")
   }
 
@@ -38,8 +44,8 @@ App.KL.Game.Hero.Lela.hero.Skills.restore(range: I32, heal: I32, ap_cost:I32): A
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
     App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.hp.heal_at(heal), target)
     return unit
   }
@@ -50,8 +56,8 @@ App.KL.Game.Hero.Lela.hero.Skills.escort(range: I32, id: String, duration: I32, 
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
     App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.status.shield.add(id, duration, amount), target)
     return unit
   }
@@ -62,8 +68,8 @@ App.KL.Game.Hero.Lela.hero.Skills.detain(range: I32, dmg: I32, ap_cost: I32): Ap
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.silence.add(1), target)
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
     return unit

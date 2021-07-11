@@ -1,0 +1,12 @@
+// type for multiprecision fast(ish) fractional arithmetic
+// without F64s.  it represents the fraction num/(2^exp).
+// could be useful to formalize reals.
+//
+// TODO add smart constructor so that the fraction is always
+// irreducible without losing performance.
+type Dyadic {
+  new(
+    num: Int
+    exp: Nat
+  )
+}

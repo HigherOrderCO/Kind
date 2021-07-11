@@ -171,11 +171,14 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1),
-    "Walk to another tile within 2 range from " | name | ".")
+  let walk_range = {2,2} ::Pair<U64, I32>
+  let dash_range = {2, 2} ::Pair<U64, I32>
 
-    "Q": App.KL.Game.Skill.new("Dash", 200, 47, 2, App.KL.Game.Hero.Kenlua.hero.Skills.dash(2, 2, 1),
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "Walk to another tile within 2 range from " | name |".")
+
+    "Q": App.KL.Game.Skill.new("Dash", 200, 47, dash_range@fst, App.KL.Game.Hero.Kenlua.hero.Skills.dash(dash_range@snd, 2, 1),
     "Kenlua takes 2 damage to dash towards a tile within 2 range. Deal 2 damage to enemies nearby destination.")
 
     "W": App.KL.Game.Skill.new("Stare", 520, 48, 0, App.KL.Game.Hero.Kenlua.hero.Skills.stare(10),
@@ -205,12 +208,12 @@ App.KL.Game.Hero.Kenlua.hero.Skills.dash(range: I32, dmg: I32, ap_cost: I32): Ap
     App.KL.Game.Effect.ap.use(ap_cost)
     get moved = App.KL.Game.Effect.movement.move_to(center, target, false)
     if moved then App.KL.Game.Effect {
-      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, coords)
-      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [target])
+      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, coords)
+      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [target])
       App.KL.Game.Effect.hp.damage_at(dmg, target)
       App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), coords)
       return unit
-    } else App.KL.Game.Effect.fail
+    } else App.KL.Game.Effect.fail("but was rooted or stunned")
   }
 
 App.KL.Game.Hero.Kenlua.hero.Skills.stare(shield_value: I32): App.KL.Game.Effect<Unit>
@@ -219,8 +222,8 @@ App.KL.Game.Hero.Kenlua.hero.Skills.stare(shield_value: I32): App.KL.Game.Effect
     get target = App.KL.Game.Effect.coord.get_target
     get caster = App.KL.Game.Effect.board.creature.caster
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
     without caster: App.KL.Game.Effect.pass
     without target_creature: App.KL.Game.Effect.pass
     if App.KL.Game.Team.eql(target_creature@team, caster@team) then
@@ -237,8 +240,8 @@ App.KL.Game.Hero.Kenlua.hero.Skills.slash(range: I32, dmg: I32, ap_cost: I32): A
     get center  = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.limit_range(range)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
     return unit
   }

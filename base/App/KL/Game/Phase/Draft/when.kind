@@ -25,11 +25,14 @@ App.KL.Game.Phase.Draft.when(
           case player {
             none: App.pass!
             some:
+              let can_ready = App.KL.Game.Player.has_hero_and_pos(player.value)
               let ready_u8 = 
-                if player.value@ready then
+                if player.value@ready then 
+                  0#8 
+                else if can_ready then 
+                  1#8 
+                else 
                   0#8
-                else
-                  1#8
               App.new_post!(local@room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_u8))
           }        
         "T" : // Set a team

@@ -14,7 +14,9 @@ type App.KL.Game.Cast.Preview {
 }
 
 type App.KL.Game.Cast.Result {
-  failure
+  failure(
+    reason: String
+    )
   success(
     game: App.KL.Game
     hits: App.KL.Game.Indicators

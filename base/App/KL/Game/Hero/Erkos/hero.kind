@@ -11,18 +11,21 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1),
-    "Walk to another tile within 2 range from " | name | ".")
+  let walk_range = {2,2} ::Pair<U64, I32>
+  let fire_ball_range = {4,4} ::Pair<U64, I32>
 
-    "Q": App.KL.Game.Skill.new("Fire Ball", 810, 16, 4, App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(4, 4, 1),
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "Walk to another tile within 2 range from " | name |".")
+
+    "Q": App.KL.Game.Skill.new("Fire Ball", 554, 16, fire_ball_range@fst, App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(fire_ball_range@snd, 4, 1),
     "After charging, Erkos throws a Fire Ball in a position, dealing 4 damage to all enemies hit.")
 
     "W": App.KL.Game.Skill.new("Fire Wave", 820, 16, 1, App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(5, 6, 1),
-    "After charging, Erkos sends a Wave of a fire in 3 directions, dealing 6 damage to all enemies hit.")
+    "After charging, Erkos sends a Wave of a fire in 3 directions, dealing 6 damage and burning all enemies.")
 
-    "E": App.KL.Game.Skill.new("Fire Ring", 100, 24, 0, App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 20, 3),
-    "Erkos quickly expands his flames around him, dealing massive damage to all enemies nearby.")
+    "E": App.KL.Game.Skill.new("Fire Ring", 903, 24, 0, App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 10, 3),
+    "Erkos expands his flames around him, dealing massive damage to all enemies nearby.")
   }
 
   let on_stepped = none
@@ -49,8 +52,8 @@ App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(range: I32, dmg: I32, ap_cost: I32)
       App.KL.Game.Areas.straight_line(2, target, direction_coord) ++ area
 
     //let area = App.KL.Game.Areas.circle(target, 2)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
     return unit
   }
@@ -65,8 +68,9 @@ App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(size: I32, dmg: I32, ap_cost: I32):
     let area = for direction_coord in ring:
       App.KL.Game.Areas.straight_line(size, center, direction_coord) ++ area
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+    //App.KL.Game.Effect.area!(App.KL.Game.Effect.tile.add_effect(App.KL.Game.Effect.status.burn.add("erkos_wave", 3, 4), 3), area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.burn.add("erkos_wave", 2, 2)), area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
     return unit
@@ -78,8 +82,8 @@ App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(size: I32, dmg: I32, ap_cost: I32):
     get center = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.ap.use(ap_cost)
     let area = App.KL.Game.Areas.ring(center, size)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
     return unit
   }

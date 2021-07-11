@@ -1,0 +1,12 @@
+App.KL.Game.Indicator.get_img(indicator: App.KL.Game.Indicator): VoxBox
+  case indicator {
+    background: App.KL.Game.Indicator.Assets.gray_line
+    red_fill:   App.KL.Game.Indicator.Assets.red_fill
+    red_line:   App.KL.Game.Indicator.Assets.red_line
+    green_fill: App.KL.Game.Indicator.Assets.green_fill
+    green_line: App.KL.Game.Indicator.Assets.green_line
+    gray_fill:  App.KL.Game.Indicator.Assets.gray_fill
+    gray_line:  App.KL.Game.Indicator.Assets.gray_line
+    blue_fill:  App.KL.Game.Indicator.Assets.blue_fill
+    blue_line:  App.KL.Game.Indicator.Assets.blue_line
+  }

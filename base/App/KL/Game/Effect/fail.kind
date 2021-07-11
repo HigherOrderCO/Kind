@@ -1,3 +1,5 @@
-App.KL.Game.Effect.fail: App.KL.Game.Effect<Unit>
+App.KL.Game.Effect.fail(text: String): App.KL.Game.Effect<Unit>
   (caster, target, board)
-  App.KL.Game.Effect.Result.err<Unit>
+  
+    App.KL.Game.Effect.Result.err<Unit>(text)
+

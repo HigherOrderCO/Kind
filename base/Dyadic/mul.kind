@@ -1,0 +1,4 @@
+Dyadic.mul(a: Dyadic, b: Dyadic): Dyadic
+  open a
+  open b
+  Dyadic.new(a.num*b.num, a.exp + b.exp)
