@@ -1,13 +1,32 @@
 App.Pong.State: App.State
   App.State.new(App.Pong.State.local, Unit)
 
+// global constants
+App.Pong.width: Dyadic
+  256
+
+App.Pong.height: Dyadic
+  256
+
+App.Pong.paddle_width: Dyadic
+  10
+
+App.Pong.ball_diameter: Dyadic
+  8
+
+App.Pong.Ball.init_speed: App.Pong.Vec
+  {7, 3}
+
 type App.Pong.Entity {
   new(
     body: App.Pong.Rect
-    v: Pair<Dyadic, Dyadic> // speed
+    v: App.Pong.Vec // speed
     // rot: Dyadic // TODO rotation and magnus effect
   )
 }
+
+App.Pong.Vec: Type
+  Pair<Dyadic, Dyadic>
 
 type App.Pong.State.local {
   new(
@@ -27,23 +46,34 @@ type App.Pong.Rect {
   )
 }
 
-App.Pong.Rect.translate(a: App.Pong.Rect, v: Pair<Dyadic, Dyadic>): App.Pong.Rect
+App.Pong.Vec.add(a: App.Pong.Vec, b: App.Pong.Vec): App.Pong.Vec
+  {a@fst + b@fst, a@snd + b@snd}
+
+App.Pong.Vec.sub(a: App.Pong.Vec, b: App.Pong.Vec): App.Pong.Vec
+  {a@fst - b@fst, a@snd - b@snd}
+
+App.Pong.Vec.mul(c: Dyadic, v: App.Pong.Vec): App.Pong.Vec
+  {c*v@fst, c*v@snd}
+
+App.Pong.Vec.div(c: Dyadic, v: App.Pong.Vec): App.Pong.Vec
+  {v@fst/c, v@snd/c}
+
+App.Pong.Vec.dot(a: App.Pong.Vec, b: App.Pong.Vec): Dyadic
+  (a@fst*b@fst) + (a@snd*b@snd)
+
+App.Pong.Vec.simplify(a: App.Pong.Vec): App.Pong.Vec
+  {Dyadic.simplify(a@fst), Dyadic.simplify(a@snd)}
+
+App.Pong.Rect.translate(a: App.Pong.Rect, v: App.Pong.Vec): App.Pong.Rect
   {a@x + v@fst, a@y + v@snd, a@w, a@h}
 
-App.Pong.width: Dyadic
-  256
-
-App.Pong.height: Dyadic
-  256
-
-App.Pong.paddle_width: Dyadic
-  10
-
-App.Pong.ball_diameter: Dyadic
-  8
-
-App.Pong.Ball.init_speed: Pair<Dyadic, Dyadic>
-  {5, 3}
+App.Pong.Rect.vclamp(a: App.Pong.Rect, lims: App.Pong.Vec): App.Pong.Rect
+  if a@y <? lims@fst then
+    {a@x, lims@fst, a@w, a@h}
+  else if (a@y + a@h) >? lims@snd then
+    {a@x, lims@snd - a@h, a@w, a@h}
+  else
+    a
 
 App.Pong.init.ball: App.Pong.Entity
   App.Pong.Entity.new(App.Pong.Rect.new(
@@ -141,19 +171,38 @@ App.Pong.Physics.pong(
   left: Bool // true = left, false = right
   ball: App.Pong.Entity
 ): App.Pong.Entity
-  log("pong")
-  if left then
-    if ball@v@fst <? 0 then
-      let ball = ball@v <- {Dyadic.neg(ball@v@fst), ball@v@snd}
-      ball
-    else
-      ball
+  if left && ball@v@fst >? 0 then
+    ball
+  else if Bool.not(left) && ball@v@fst <? 0 then
+    ball
   else
-    if ball@v@fst >? 0 then
-      let ball = ball@v <- {Dyadic.neg(ball@v@fst), ball@v@snd}
-      ball
-    else
-      ball
+    // calculate normal
+    // it's more inclined the more you get close to the vertices
+    let n_x =
+      if left then
+        1 :: Dyadic
+      else
+        Dyadic.neg(1)
+    let paddle_radius =
+      Dyadic.div2(paddle@body@h)
+    let middle_paddle =
+      paddle@body@y + paddle_radius
+    let middle_ball =
+      ball@body@y + Dyadic.div2(ball@body@h)
+    let n_y =
+      ((middle_ball - middle_paddle)*128)/(3*paddle_radius)
+    let n =
+      {n_x*128, n_y}
+    // essentially reflects the ball according to the normal
+    // and adds the projection of the paddle speed in the normal
+    let nn =
+      App.Pong.Vec.dot(n, n)
+    let ball_velocity =
+      App.Pong.Vec.div(nn, App.Pong.Vec.mul(nn, ball@v) + App.Pong.Vec.mul(App.Pong.Vec.dot(paddle@v - App.Pong.Vec.mul(2, ball@v), n), n))
+    let vx = if left then Dyadic.max(ball_velocity@fst, 1) else Dyadic.min(ball_velocity@fst, Dyadic.neg(1))
+    let ball_velocity = {vx, ball_velocity@snd}
+    let ball = ball@v <- ball_velocity
+    ball
 
   
 App.Pong.when.ball_step(st: App.Pong.State.local): App.Pong.Entity
@@ -196,14 +245,18 @@ App.Pong.when: App.When<App.Pong.State>
     case event {
       frame: IO {
         let st = st@ball <- App.Pong.when.ball_step(st)
-        let st = st@right <- {{st@right@body@x, st@ball@body@y, st@right@body@w, st@right@body@h}, st@right@v}
+        let right_middle = st@right@body@y + (st@right@body@h/2)
+        let right_delta = (st@ball@body@y - right_middle)/5
+        let right_rect = App.Pong.Rect.vclamp(App.Pong.Rect.translate(st@right@body, {0, right_delta}), {0, App.Pong.height})
+        let st = st@right <- {right_rect, {0, right_delta}}
         let st = st@ball <- App.Pong.when.ball_collision(st)
         let st = st@ball <- App.Pong.when.ball_point(st)
         return some(st)
       }
-      mouse_move: IO { // TODO modify speed to
-        let pos = U32.to_dyadic(event.mouse_pos@snd) - (st@left@body@h/2)
-        let st = st@left <- {{st@left@body@x, pos, st@left@body@w, st@left@body@h}, st@left@v}
+      mouse_move: IO {
+        let pos = Dyadic.min(U32.to_dyadic(event.mouse_pos@snd) - (st@left@body@h/2), App.Pong.height - st@left@body@h)
+        let left_rect = App.Pong.Rect.vclamp({st@left@body@x, pos, st@left@body@w, st@left@body@h}, {0, App.Pong.height})
+        let st = st@left <- {left_rect, {0, pos - st@left@body@y}}
         return some(st)
       }
     } default IO { return some(st) }
