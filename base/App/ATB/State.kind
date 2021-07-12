@@ -1,0 +1,10 @@
+type App.ATB.State.local {
+    new
+}
+
+type App.ATB.State.global {
+    new
+}
+
+App.ATB.State : App.State
+    App.State.new(App.ATB.State.local, App.ATB.State.global)

@@ -1,0 +1,2 @@
+App.ATB.post : App.Post<App.ATB.State>
+    App.no_post(App.ATB.State)
