@@ -11,18 +11,21 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
+  let walk_range = {2,2} ::Pair<U64, I32>
+  let summon_wall_range = {5, 5} ::Pair<U64, I32>
+
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Effect.common.walk(2, 1),
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name |".")
 
-    "Q": App.KL.Game.Skill.new("Ravenous Bite", 400, 48, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1),
-    "Frost quickly bites all enemies in front of him, dealing 3 damage.")
-
-    "W": App.KL.Game.Skill.new("Summon Wall", 100, 48, 5, App.KL.Game.Hero.Frost.Skills.summon_wall(5, 1),
+    "Q": App.KL.Game.Skill.new("Summon Wall", 93, 48, summon_wall_range@fst, App.KL.Game.Hero.Frost.Skills.summon_wall(summon_wall_range@snd, 1),
     "Frost summons a Frozen Wall in a position, preventing heroes to walk on it.")
 
-    "E": App.KL.Game.Skill.new("Ice Fall", 700, 48, 0, App.KL.Game.Hero.Frost.Skills.ice_fall(2, 1),
+    "W": App.KL.Game.Skill.new("Ice Fall", 701, 48, 0, App.KL.Game.Hero.Frost.Skills.ice_fall(2, 1),
     "Frost creates a slipping surface around him, pulling enemies nearby.")
+
+    "E": App.KL.Game.Skill.new("Ravenous Bite", 702, 48, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1),
+    "Frost quickly bites all enemies in front of him, dealing 3 damage.")
   }
 
   let on_stepped = none
@@ -41,8 +44,8 @@ App.KL.Game.Hero.Frost.Skills.ravenous_bite(dmg: I32, ap_cost: I32): App.KL.Game
     get center = App.KL.Game.Effect.coord.get_center
     let clamp = Hexagonal.Axial.clamp(1, center, target)
     let area = App.KL.Game.Areas.semi_circle(center, clamp)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
     let eff = App.KL.Game.Effect.hp.damage_at(dmg)
     App.KL.Game.Effect.area!(enemy(eff), area)
@@ -56,7 +59,7 @@ App.KL.Game.Hero.Frost.Skills.summon_wall(range: I32, ap_cost: I32): App.KL.Game
     get center = App.KL.Game.Effect.coord.get_center
     get board = App.KL.Game.Effect.board.get
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
     else
@@ -70,14 +73,14 @@ App.KL.Game.Hero.Frost.Skills.ice_fall(area: I32, ap_cost: I32): App.KL.Game.Eff
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
 
-    let ring = App.KL.Game.Areas.ring(target, 1)
-    let area = [target]
+    let ring = App.KL.Game.Areas.ring(center, 1)
+    let area = []
     let area = for direction_coord in ring:
-      App.KL.Game.Areas.straight_line(2, target, direction_coord) ++ area
+      App.KL.Game.Areas.straight_line(2, center, direction_coord) ++ area
 
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
     let pull = App.KL.Game.Effect.movement.pull_at(false)
     App.KL.Game.Effect.area!(enemy(pull), area)

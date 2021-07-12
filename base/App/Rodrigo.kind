@@ -1,0 +1,93 @@
+type App.Rodrigo.User {
+  new(
+    name: String
+    cpf: String
+    age: U32
+  )
+}
+
+type App.Rodrigo.State.Global {
+  new(
+    users: Map<App.Rodrigo.User>
+  )
+}
+
+App.Rodrigo.add_user(
+  user: App.Rodrigo.User
+  state: App.Rodrigo.State.Global
+): App.Rodrigo.State.Global
+  open state
+  state@users <- state.users{user@name} <- user
+
+// App states
+App.Rodrigo.State: App.State
+  App.State.new(String, App.Rodrigo.State.Global)
+
+// Initial state
+App.Rodrigo.init: App.Init<App.Rodrigo.State>
+  App.Store.new<App.Rodrigo.State>("red", App.Rodrigo.State.Global.new({}))
+
+// Render function
+App.Rodrigo.draw: App.Draw<App.Rodrigo.State>
+  (state)
+  open state
+  //let x = Nat.show(state@global)
+  <div style={"color": state.local, "border": "1px solid black"}>
+    <div>"Eu sou o Rodrigo!"</div>
+    //<div style={"position": "absolute", "left": x | "px"}>"O"</div>
+  </div>
+
+// Event handler
+App.Rodrigo.when: App.When<App.Rodrigo.State>
+  (event, state)
+  case event {
+    init: IO {
+      App.watch!(App.Rodrigo.room)
+    }
+    key_down: 
+      let color = state@local
+      let color = switch String.eql(color) {
+        "red": "blue"
+        "blue": "green"
+        "green": "red"
+      } default "black"
+      IO {
+        App.set_local<App.Rodrigo.State>(color)
+        switch U16.eql(event.code) {
+          'D': App.new_post!(App.Rodrigo.room, App.Rodrigo.move_right)
+          'A': App.new_post!(App.Rodrigo.room, App.Rodrigo.move_left)
+        } default App.pass!
+      }
+  } default App.pass!
+
+// Global ticker: not used
+App.Rodrigo.tick: App.Tick<App.Rodrigo.State>
+  App.no_tick<App.Rodrigo.State>
+
+// Global visitor: counts posts to room_zero
+App.Rodrigo.post: App.Post<App.Rodrigo.State>
+  (time, room, addr, data, glob)
+  glob
+  //switch String.eql(data) {
+    //App.Rodrigo.move_right: glob + 2
+    //App.Rodrigo.move_left: glob - 2 
+  //} default glob
+
+// A "Rodrigo, world!" + counter application
+App.Rodrigo: App<App.Rodrigo.State>
+  App.new<App.Rodrigo.State>(
+    App.Rodrigo.init
+    App.Rodrigo.draw
+    App.Rodrigo.when
+    App.Rodrigo.tick
+    App.Rodrigo.post
+  )
+
+App.Rodrigo.room: String
+  "319370b096f5a8ab"
+
+App.Rodrigo.move_right: String
+  "00"
+
+App.Rodrigo.move_left: String
+  "01"

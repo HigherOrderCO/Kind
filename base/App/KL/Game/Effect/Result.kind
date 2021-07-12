@@ -1,5 +1,7 @@
 type App.KL.Game.Effect.Result <A: Type> {
-  err //TODO: Add description
+  err(
+    message: String
+    )
   new(
     value: A,
     center: Hexagonal.Axial,

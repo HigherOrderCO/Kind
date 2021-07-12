@@ -1,0 +1,13 @@
+// makes `a.num` have `e` binary digits truncating if
+// necessary
+Dyadic.set_precision(a: Dyadic, e: Nat): Dyadic
+  open a
+  let p = Dyadic.get_precision(a)
+  if p <=? e then
+    let diff = e - p
+    let fac = Nat.to_int(Nat.pow(2, diff))
+    Dyadic.new(a.num*fac, a.exp + diff)
+  else
+    let diff = p - e
+    let fac = Nat.to_int(Nat.pow(2, diff))
+    Dyadic.new(a.num/fac, a.exp - diff)

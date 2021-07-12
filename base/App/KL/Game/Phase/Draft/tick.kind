@@ -7,7 +7,7 @@ App.KL.Game.Phase.Draft.tick(tick: U64, game: App.KL.Game): App.KL.Game
   let pair = {ready, has_team}
   for id:player in players with pair:
     let has_team = App.KL.Game.Player.has_team(player)
-    {has_team && player@ready, true}
+    {pair@fst && player@ready, has_team || pair@snd}
 
   if pair@fst && pair@snd then
   log("- to_board")

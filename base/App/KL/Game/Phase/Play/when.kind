@@ -3,7 +3,7 @@ App.KL.Game.Phase.Play.when(
   game: App.KL.Game
   event: App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
-
+  let room = String.take(16, Crypto.Keccak.hash(local@room))
   open game
   case event {
     frame:
@@ -44,7 +44,7 @@ App.KL.Game.Phase.Play.when(
                 // log("Key up " | Char.to_string(skill.value))
                 let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
                 let preview = preview@skill <- none
-                App.new_post!(local@room, App.KL.Game.Phase.Play.Event.cast.serial(skill.value, coord))
+                App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.serial(skill.value, coord))
                 App.set_local!(App.KL.State.Local.game(local@preview <- preview))
               }
           }

@@ -1,0 +1,11 @@
+// Be careful, the result of the division depends on the
+// the precision of the numerator. More precise numerators
+// will result in more precise outputs.
+Dyadic.div(n: Dyadic, d: Dyadic): Dyadic
+  open n
+  open d
+  if n.exp >=? d.exp then
+    Dyadic.new(n.num/d.num, n.exp - d.exp)
+  else
+    let fac = d.exp - n.exp
+    Dyadic.new(((n.num*Nat.to_int(fac))/d.num), n.exp - d.exp)

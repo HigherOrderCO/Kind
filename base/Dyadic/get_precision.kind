@@ -1,0 +1,4 @@
+// outputs the number of binary digits in `a.num`
+Dyadic.get_precision(a: Dyadic): Nat
+  open a
+  Nat.log2(Int.abs(a.num))

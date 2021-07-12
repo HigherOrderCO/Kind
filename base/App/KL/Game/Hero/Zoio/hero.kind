@@ -15,8 +15,8 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
     "X": App.KL.Game.Skill.new("Walk", 500, 12, 1, App.KL.Game.Effect.common.walk(1, 1),
     "Walk to another tile within 1 range from " | name | ".")
 
-    "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 8, 2),
-    "Zoio quickly hits an enemy with his Tentacle, dealing 8 damage.")
+    "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 4, 1),
+    "Zoio quickly hits an enemy with his Tentacle, dealing 4 damage and poisoning the enemy.")
 
     "W": App.KL.Game.Skill.new("Eye Beam", 480, 48, 1, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 8, 2),
     "Zoio fires a powerful beam across the whole battlefield, dealing 8 damage and burning all enemies hit.")
@@ -38,8 +38,8 @@ App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): A
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
     let area = App.KL.Game.Areas.straight_line(size, center, target)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
     let effect = App.KL.Game.Effect.hp.damage_at(dmg)
     App.KL.Game.Effect.area!(enemy(App.KL.Game.Effect.status.burn.add("Zoio", 3, 3)), area)
@@ -53,9 +53,10 @@ App.KL.Game.Hero.Zoio.hero.Skills.tentackle(range: I32, dmg: I32, ap_cost: I32):
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.movement.push_at(false)), [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
+    //App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.movement.push_at(false)), [target])
+    App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.poison.add("tentackle", 2, 2), target)
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
     return unit
   }
@@ -70,8 +71,8 @@ App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(size: I32, dmg: I32, ap_cost: I32):
       App.KL.Game.Areas.straight_line(size, target, direction_coord) ++ area
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.movement.move_to(center, target, false)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, target & area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, target & area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
     App.KL.Game.Effect.hp.damage_at(256, target)
     return unit

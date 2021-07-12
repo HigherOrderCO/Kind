@@ -11,18 +11,22 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
+  let walk_range = {2,2} ::Pair<U64, I32>
+
+
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, 2, App.KL.Game.Effect.common.walk(2, 1),
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name |".")
 
     "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 10, 1),
     "Cyclope sacrifices 4 Health to provide 10 Shield Points to nearby allies.")
 
-    "W": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
+    "W": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
+    "Cyclope deals damage to an enemy equal to half of his missing Health Points.")
+
+    "E": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
     "Cyclope stomps the ground, rooting all enemies within 2 tiles.")
 
-    "E": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
-    "Cyclope deals damage to an enemy equal to half of his missing Health Points.")
   }
 
   let on_stepped = none
@@ -40,8 +44,8 @@ App.KL.Game.Hero.Cyclope.hero.Skills.empathy(dmg_on_self: I32, duration: I32, sh
     get target = App.KL.Game.Effect.coord.get_target
     let area = App.KL.Game.Areas.ring(center, 1)
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
     App.KL.Game.Effect.hp.damage_at(dmg_on_self, center)
     let ally = App.KL.Game.Effect.At.ally!
     let shield = App.KL.Game.Effect.status.shield.add("Empathy", duration, shield_value)
@@ -54,8 +58,8 @@ App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(radius: I32 duration: I32, ap_c
     get center = App.KL.Game.Effect.coord.get_center  
     App.KL.Game.Effect.ap.use(ap_cost)
     let area = App.KL.Game.Areas.ring(center, radius)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
     App.KL.Game.Effect.area!(App.KL.Game.Effect.status.root.add(duration), area)
     return unit
   }
@@ -73,8 +77,8 @@ App.KL.Game.Hero.Cyclope.hero.Skills.revenge(range: I32, ap_cost: I32): App.KL.G
           let hero = creature@hero
           let missing_hp = hero@max_hp - creature@hp
           let dmg = missing_hp / 2
-          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red, [target])
-          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue, [center])
+          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
+          App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
           App.KL.Game.Effect.At.ally!(App.KL.Game.Effect.hp.damage_at(dmg), target)
           return unit
         }

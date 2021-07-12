@@ -9,6 +9,12 @@ Crypto.Keccak.hash.u256(u256: U256): U256
   let u256 = Buffer8.to_u256(hash.snd)
   u256
 
+Crypto.Keccak.hash.u256.many(list: List<U256>): U256
+  let buf8 = Buffer8.from_list.256(list)
+  use hash = Crypto.Keccak.hash.bytes(buf8)
+  let u256 = Buffer8.to_u256(hash.snd)
+  u256
+
 Crypto.Keccak.hash.bytes.test(unit: Unit): String
   let buf8 = Buffer8.from_hex("0102ff017fcafe8879124567")
   let hash = Crypto.Keccak.hash.bytes(buf8)

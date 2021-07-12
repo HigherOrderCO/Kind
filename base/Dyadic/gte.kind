@@ -1,0 +1,9 @@
+Dyadic.gte(a: Dyadic, b: Dyadic): Bool
+  open a
+  open b
+  if a.exp >=? b.exp then
+    let fac = Nat.to_int(Nat.pow(2, a.exp - b.exp))
+    a.num >=? (b.num*fac)
+  else
+    let fac = Nat.to_int(Nat.pow(2, b.exp - a.exp))
+    (a.num*fac) >=? b.num

@@ -1,0 +1,2 @@
+U32.to_dyadic(u: U32): Dyadic
+  Dyadic.new(Nat.to_int(U32.to_nat(u)), 0)
