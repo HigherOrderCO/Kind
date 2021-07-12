@@ -3,10 +3,10 @@ App.Pong.State: App.State
 
 // global constants
 App.Pong.width: Dyadic
-  256
+  1024
 
 App.Pong.height: Dyadic
-  256
+  512
 
 App.Pong.paddle_width: Dyadic
   10
@@ -117,8 +117,8 @@ App.Pong.Entity.draw_blur(
   VoxBox.Draw.moving_rect(
     Dyadic.to_i32(e@body@x)
     Dyadic.to_i32(e@body@y)
-    Dyadic.to_i32(e@v@fst)
-    Dyadic.to_i32(e@v@snd)
+    (Dyadic.to_i32(e@v@fst)*2)
+    (Dyadic.to_i32(e@v@snd)*2)
     Dyadic.to_i32(e@body@w)
     Dyadic.to_i32(e@body@h)
     z
@@ -152,7 +152,7 @@ App.Pong.draw(img: VoxBox): App.Draw<App.Pong.State>
       "width": "100%"
       "justify-content": "space-evenly"
     }>{
-      DOM.vbox({"id": "game_screen", "width": "500px", "height": "500px", "scale": "1"}, {}, img)
+      DOM.vbox({"id": "game_screen", "width": Nat.show(Dyadic.to_nat(App.Pong.width)), "height": Nat.show(Dyadic.to_nat(App.Pong.height)), "scale": "1"}, {}, img)
     }</div>
 
 App.Pong.Physics.rect_collision(
@@ -198,8 +198,8 @@ App.Pong.Physics.pong(
     let nn =
       App.Pong.Vec.dot(n, n)
     let ball_velocity =
-      App.Pong.Vec.div(nn, App.Pong.Vec.mul(nn, ball@v) + App.Pong.Vec.mul(App.Pong.Vec.dot(paddle@v - App.Pong.Vec.mul(2, ball@v), n), n))
-    let vx = if left then Dyadic.max(ball_velocity@fst, 1) else Dyadic.min(ball_velocity@fst, Dyadic.neg(1))
+      App.Pong.Vec.div(nn, App.Pong.Vec.mul(nn, ball@v) + App.Pong.Vec.mul(App.Pong.Vec.dot(App.Pong.Vec.mul(2, paddle@v) - App.Pong.Vec.mul(2, ball@v), n), n))
+    let vx = if left then Dyadic.max(ball_velocity@fst, 5) else Dyadic.min(ball_velocity@fst, Dyadic.neg(5))
     let ball_velocity = {vx, ball_velocity@snd}
     let ball = ball@v <- ball_velocity
     ball
