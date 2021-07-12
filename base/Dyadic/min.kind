@@ -1,0 +1,5 @@
+Dyadic.min(a: Dyadic, b: Dyadic): Dyadic
+  if a <=? b then
+    a
+  else
+    b
