@@ -1,0 +1,8 @@
+Vector.create.go<A: Type>(len: Nat, create_value: Nat -> A): Vector<A,len>
+  case len {
+    zero: Vector.nil<A>
+    succ: Vector.cons<A>(len.pred, create_value(0), Vector.create.go<A>(len.pred, (x) create_value(Nat.succ(x))))
+  }!
+
+Vector.create<A: Type>(len: Nat, create_value: Nat -> A): Vector<A,len>
+  Vector.create.go<A>(len, create_value)

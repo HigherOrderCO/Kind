@@ -2,10 +2,10 @@ App.KL.Game.Creature.Status.poison.add(
   creature: App.KL.Game.Creature
   id: String
   duration: I32
-  dmg: I32
+  amount: I32
 ): App.KL.Game.Creature
   
-  let poison_added = App.KL.Game.Creature.Status.poison.add.aux(id, duration, I32.neg(dmg), creature@status)
+  let poison_added = App.KL.Game.Creature.Status.poison.add.aux(id, duration, amount, creature@status)
   creature@status <- poison_added
 
 App.KL.Game.Creature.Status.poison.add.aux(

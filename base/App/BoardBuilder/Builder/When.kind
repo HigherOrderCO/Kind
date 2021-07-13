@@ -1,0 +1,76 @@
+App.BoardBuilder.Builder.When(
+  event: App.Event, 
+  local: App.BoardBuilder.Builder.State.local, 
+  global: App.BoardBuilder.State.global
+): IO<Maybe<App.State.local<App.BoardBuilder.State>>>
+  open local
+  case event {
+    input: 
+      switch String.eql(event.id) {
+        "width":
+          let new_local = local@canvas_size <- {I32.read(event.text), local.canvas_size@snd}
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        "height":
+          let new_local = local@canvas_size <- {local.canvas_size@fst, I32.read(event.text)}
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+      } default App.pass!
+    mouse_move:
+      if String.eql("game_screen", event.id) then
+        let {x,y} = event.mouse_pos
+        let command = local.command <> ' '
+        let mouse = {x / 2, y / 2}
+        let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2, local.canvas_size@snd / 2)
+        let new_local = local@mouse <- some(mouse)
+        switch Char.eql(command) {
+          'X':
+            IO {
+              App.set_local<App.BoardBuilder.State>(App.BoardBuilder.State.local.builder(new_local))
+              App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(App.BoardBuilder.Post.Event.add(coord, local.actual_terrain)))
+            }
+          'Z':
+            IO {
+              App.set_local<App.BoardBuilder.State>(App.BoardBuilder.State.local.builder(new_local))
+              App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(App.BoardBuilder.Post.Event.del(coord)))
+            }
+        } default App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+      else
+        let new_local = local@mouse <- none
+        App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+    mouse_click:
+      if (event.id =? "generate_array") then
+        let new_local = local@array <- App.BoardBuilder.When.generate_array(global@board)
+        App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+      else
+        if String.starts_with(event.id, "T") then
+          let terrain = Nat.read(String.drop(1, event.id))
+          let new_local = local@actual_terrain <- terrain
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        else 
+          App.pass!
+    mouse_up:
+      let mouse = local.mouse
+      without mouse: App.pass!
+        let command = local.command <> ' '
+        let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2, local.canvas_size@snd / 2)
+        let event = 
+          if Char.eql(command, 'Z') then
+            App.BoardBuilder.Post.Event.del(coord)
+          else 
+            App.BoardBuilder.Post.Event.add(coord, local.actual_terrain)
+        App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(event))
+    key_up:
+      let new_local = local@command <- none
+      App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+    key_down:
+      let new_local = local@command <- some(event.code)
+      App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+  } default App.pass!
+
+App.BoardBuilder.When.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>): String
+  let string = ""
+  for coord:terrain in board with string:
+    let coord_string   = "{" | I32.show(coord@i) | ", " | I32.show(coord@j) | "}"
+    let terrain_string = Nat.show(terrain@field_id)
+    "{" | coord_string | "," | terrain_string | "}" | ",\n" | string
+  
+  "[\n" | string | "]"

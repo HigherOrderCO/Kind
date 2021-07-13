@@ -1,6 +1,15 @@
 type App.KL.Game.Phase.Play.Event {
   cast(letter: Char, target: Hexagonal.Axial)
+  cancel_casts
+  cancel_skill(letter: Char)
 } deriving (serializer, deserializer)
 
 App.KL.Game.Phase.Play.Event.cast.serial(letter: Char, target: Hexagonal.Axial): String
   App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.play(App.KL.Game.Phase.Play.Event.cast(letter, target))))
+
+
+App.KL.Game.Phase.Play.Event.cast.cancel_casts: String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.play(App.KL.Game.Phase.Play.Event.cancel_casts)))
+
+App.KL.Game.Phase.Play.Event.cast.cancel_skill(letter: Char): String
+  App.KL.Global.Event.serialize_post(App.KL.Global.Event.game(App.KL.Game.Event.play(App.KL.Game.Phase.Play.Event.cancel_skill(letter))))

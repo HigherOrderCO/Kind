@@ -1,0 +1,6 @@
+App.KL.Game.Board.tile_update(
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+
+  let f = App.KL.Game.Tile.effect.decrease
+  Hexagonal.Axial.Map.map!!(f, board)

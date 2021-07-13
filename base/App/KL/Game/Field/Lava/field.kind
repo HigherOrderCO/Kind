@@ -1,0 +1,182 @@
+App.KL.Game.Field.Lava.field.0: App.KL.Game.Field
+  let name = "Lava_00"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_00)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_00
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.1: App.KL.Game.Field
+  let name = "Lava_01"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_01)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_01
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.2: App.KL.Game.Field
+  let name = "Lava_02"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_02)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_02
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.3: App.KL.Game.Field
+  let name = "Lava_03"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_03)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_03
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.4: App.KL.Game.Field
+  let name = "Lava_04"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_04)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_04
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.5: App.KL.Game.Field
+  let name = "Lava_05"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_05)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_05
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.6: App.KL.Game.Field
+  let name = "Lava_06"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_06)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_06
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.7: App.KL.Game.Field
+  let name = "Lava_07"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_07)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_07
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.8: App.KL.Game.Field
+  let name = "Lava_08"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_08)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_08
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.9: App.KL.Game.Field
+  let name = "Lava_09"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_09)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_09
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.10: App.KL.Game.Field
+  let name = "Lava_10"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_10)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_10
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.10: App.KL.Game.Field
+  let name = "Lava_10"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_10)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_10
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.11: App.KL.Game.Field
+  let name = "Lava_11"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_11)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_11
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.12: App.KL.Game.Field
+  let name = "Lava_12"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_12)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_12
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.13: App.KL.Game.Field
+  let name = "Lava_13"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_13)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_13
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.14: App.KL.Game.Field
+  let name = "Lava_14"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_14)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_14
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.15: App.KL.Game.Field
+  let name = "Lava_15"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_15)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_15
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.16: App.KL.Game.Field
+  let name = "Lava_16"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_16)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_16
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.17: App.KL.Game.Field
+  let name = "Lava_17"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_17)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_17
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.18: App.KL.Game.Field
+  let name = "Lava_18"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_18)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_18
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.19: App.KL.Game.Field
+  let name = "Lava_19"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_19)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_19
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.20: App.KL.Game.Field
+  let name = "Lava_20"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_20)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_20
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.21: App.KL.Game.Field
+  let name = "Lava_21"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_21)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_21
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.22: App.KL.Game.Field
+  let name = "Lava_22"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_22)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_22
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.23: App.KL.Game.Field
+  let name = "Lava_23"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_23)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_23
+  App.KL.Game.Field.new(name, draw, picture)
+
+App.KL.Game.Field.Lava.field.24: App.KL.Game.Field
+  let name = "Lava_24"
+  let draw = (terrain, indicator)
+    App.KL.Game.Field.set_indicators(indicator, App.KL.Game.Field.Lava.Assets.lava_24)
+  let picture = App.KL.Game.Field.Lava.Assets.base64.lava_24
+  App.KL.Game.Field.new(name, draw, picture)
+

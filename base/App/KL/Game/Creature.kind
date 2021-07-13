@@ -9,7 +9,13 @@ type App.KL.Game.Creature {
   )
 }
 
+
 type App.KL.Game.Creature.Status {
+  block(
+    id: String
+    duration: I32
+    caster: String
+  )
   burn(
     id: String
     duration: I32
@@ -18,6 +24,17 @@ type App.KL.Game.Creature.Status {
   haste(
     duration : I32
     amount: I32
+  )
+  //Heal Over Time
+  hot(
+    id: String
+    duration: I32
+    stack: I32
+    amount: I32
+  )
+  invulnerable(
+    id: String
+    duration: I32
   )
   poison(
     id: String
@@ -44,25 +61,13 @@ type App.KL.Game.Creature.Status {
   )
 }
 
+
 App.KL.Game.Creature.Status.get_effect(
   status: App.KL.Game.Creature.Status
 ): App.KL.Game.Effect.At<I32>
   
   case status { 
     burn: App.KL.Game.Effect.status.burn.apply(status.id, status.duration, status.amount)
-    //haste:
+    hot:log(String.show_clean(I32.show(status.amount))) App.KL.Game.Effect.status.hot.apply(status.id, status.duration, status.amount)
     poison: App.KL.Game.Effect.status.poison.apply(status.id, status.duration, status.amount)
-
-    //root:
-    //silence:
-    //stun:
-    //shield:
-    //weaken:
   } default (pos)App.KL.Game.Effect { return +0#32 }
-    
-
-
-
-//1 função que 
-//1 -> Verifica se tem DoT, se tiver, aplica na criatura
-//2 -> Ela também diminui a duração

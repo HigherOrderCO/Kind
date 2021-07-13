@@ -1,0 +1,117 @@
+// draws a rectangle with top-left corner at point (x, y).
+// but with motion blur tail to make animation smoother
+VoxBox.Draw.moving_rect(
+  x: I32,
+  y: I32,
+  dx: I32, // how long to make the tail
+  dy: I32,
+  w: I32,
+  h: I32,
+  z: I32,
+  col: Col32,
+  img: VoxBox
+): VoxBox
+  // draws trail
+  let img =
+    if (dx =? 0) && (dy =? 0) then
+      img
+    else
+      if dx <? 0 then
+        if dy <? 0 then
+          // moving to top-left
+          let coords = VoxBox.Draw.line.coords(x + w, y + h, x + w - dx, y + h - dy)
+          let len = List.length!(coords)
+          for i from 0 to len with img:
+            let coord = coords[i] <> {0 :: I32 , 0 :: I32}
+            let ulen = Nat.to_u32(len)
+            let ui = Nat.to_u32(i)
+            let r = Col32.r(col)
+            let g = Col32.g(col)
+            let b = Col32.b(col)
+            let a = Col32.a(col)
+            let na = (ui*255)/ulen
+            let col = Col32.new(r, g, b, na)
+            for i : I32 from (coord@snd - h) + 1 to coord@snd + 1 with img:
+              let pos = Pos32.new(I32.to_u32(coord@fst), I32.to_u32(i), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            for i : I32 from coord@fst - w to coord@fst with img:
+              let pos = Pos32.new(I32.to_u32(i), I32.to_u32(coord@snd), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            img
+          img
+        else
+          // moving to bottom-left
+          let coords = VoxBox.Draw.line.coords(x + w, y, x + w - dx, y - dy)
+          let len = List.length!(coords)
+          for i from 0 to len with img:
+            let coord = coords[i] <> {0 :: I32 , 0 :: I32}
+            let ulen = Nat.to_u32(len)
+            let ui = Nat.to_u32(i)
+            let r = Col32.r(col)
+            let g = Col32.g(col)
+            let b = Col32.b(col)
+            let a = Col32.a(col)
+            let na = (ui*255)/ulen
+            let col = Col32.new(r, g, b, na)
+            for i : I32 from coord@snd to coord@snd + h with img:
+              let pos = Pos32.new(I32.to_u32(coord@fst), I32.to_u32(i), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            for i : I32 from coord@fst - w to coord@fst with img:
+              let pos = Pos32.new(I32.to_u32(i), I32.to_u32(coord@snd), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            img
+          img
+      else
+        if dy <? 0 then
+          // moving to top-right
+          let coords = VoxBox.Draw.line.coords(x, y + h, x - dx, y + h - dy)
+          let len = List.length!(coords)
+          for i from 0 to len with img:
+            let coord = coords[i] <> {0 :: I32 , 0 :: I32}
+            let ulen = Nat.to_u32(len)
+            let ui = Nat.to_u32(i)
+            let r = Col32.r(col)
+            let g = Col32.g(col)
+            let b = Col32.b(col)
+            let a = Col32.a(col)
+            // VoxBox.Draw.line.coords is kinda irregular regarding pixel order
+            let na = (ui*255)/ulen
+            let col = Col32.new(r, g, b, na)
+            for i : I32 from (coord@snd - h) + 1 to coord@snd + 1 with img:
+              let pos = Pos32.new(I32.to_u32(coord@fst), I32.to_u32(i), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            for i : I32 from coord@fst to coord@fst + w with img:
+              let pos = Pos32.new(I32.to_u32(i), I32.to_u32(coord@snd), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            img
+          img
+        else
+          // moving to bottom-right
+          let coords = VoxBox.Draw.line.coords(x, y, x - dx, y - dy)
+          let len = List.length!(coords)
+          for i from 0 to len with img:
+            let coord = coords[i] <> {0 :: I32 , 0 :: I32}
+            let ulen = Nat.to_u32(len)
+            let ui = Nat.to_u32(i)
+            let r = Col32.r(col)
+            let g = Col32.g(col)
+            let b = Col32.b(col)
+            let a = Col32.a(col)
+            // VoxBox.Draw.line.coords is kinda irregular regarding pixel order
+            let na = (ui*255)/ulen
+            let col = Col32.new(r, g, b, na)
+            for i : I32 from coord@snd to coord@snd + h with img:
+              let pos = Pos32.new(I32.to_u32(coord@fst), I32.to_u32(i), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            for i : I32 from coord@fst to coord@fst + w with img:
+              let pos = Pos32.new(I32.to_u32(i), I32.to_u32(coord@snd), I32.to_u32(z))
+              VoxBox.push(pos, col, img)
+            img
+          img
+  // draws square
+  for i : I32 from x to x + w with img:
+    for j : I32 from y to y + h with img:
+      let pos = Pos32.new(I32.to_u32(i), I32.to_u32(j), I32.to_u32(z)) // pixel pos (forms a square)
+      VoxBox.push(pos, col, img)
+      img
+    img

@@ -1,0 +1,2 @@
+Col32.g(col: Col32): U32
+  U32.and(U32.shr(col, 8), 0xFF)

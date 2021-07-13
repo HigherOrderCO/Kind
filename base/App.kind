@@ -184,3 +184,6 @@ App.unwatch<S: App.State>(room: String): IO<Maybe<App.State.local<S>>>
 
 App.room_zero: String
   "0000000000000000"
+
+App.room(name: String): String
+  String.take(16, Crypto.Keccak.hash(name))

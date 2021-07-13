@@ -1,5 +1,0 @@
-App.KL.Game.Creature.get_total_haste(hero : App.KL.Game.Creature) : I32
-  open hero
-  List.foldr!!(+0#32, (x, y) case x {
-        haste : x.amount + y
-  } default 0, hero.status)

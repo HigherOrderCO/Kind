@@ -1,7 +1,7 @@
 // Term
 // ====
 
-type Kind.Core {
+type Kind.Core.Term {
   var(
     name: String
     indx: Nat
@@ -14,95 +14,86 @@ type Kind.Core {
     eras: Bool
     self: String
     name: String
-    xtyp: Kind.Core
-    body: Kind.Core -> Kind.Core -> Kind.Core
+    xtyp: Kind.Core.Term
+    body: Kind.Core.Term -> Kind.Core.Term -> Kind.Core.Term
   )
   lam(
     name: String
-    body: Kind.Core -> Kind.Core
+    body: Kind.Core.Term -> Kind.Core.Term
   )
   app(
-    func: Kind.Core
-    argm: Kind.Core
+    func: Kind.Core.Term
+    argm: Kind.Core.Term
   )
   let(
     name: String
-    expr: Kind.Core
-    body: Kind.Core -> Kind.Core
+    expr: Kind.Core.Term 
+    body: Kind.Core.Term -> Kind.Core.Term
   )
   ann(
     done: Bool
-    expr: Kind.Core
-    type: Kind.Core
+    expr: Kind.Core.Term
+    type: Kind.Core.Term
   )
 }
-
 
 type Kind.Core.Def {
   new(
     name: String
-    type: Kind.Core
-    term: Kind.Core
+    type: Kind.Core.Term
+    term: Kind.Core.Term
   )
 }
 
+Kind.Core.Ctx : Type
+  List<Pair<String,Kind.Core.Term>>
+
 Kind.Core.Defs: Type
-  Kind.Map<Kind.Core.Def>
+  Map<Kind.Core.Def>
 
-// Stringifier
-// ===========
-
-Kind.Core.show(term: Kind.Core): String
-  Kind.Core.show.go(term, 0, [])
-
-Kind.Core.show.go(term: Kind.Core, indx: Nat, vars: List<Kind.Name>): String
-  case term {
-    ref:
-      Kind.Name.show(term.name)
-    var:
-      Kind.Core.var_name(Nat.pred(Nat.sub(indx,term.indx)), term.name, 0, vars)
-    typ:
-      "*"
-    all:
-      let eras = term.eras
-      let init = if eras then "%" else "@"
-      let self = Kind.Name.show(term.self)
-      let name = Kind.Name.show(term.name)
-      let xtyp = Kind.Core.show.go(term.xtyp, indx, vars)
-      let body = Kind.Core.show.go(
-        term.body(
-          Kind.Core.var(term.self,indx),
-          Kind.Core.var(term.name,Nat.succ(indx))),
-        Nat.succ(Nat.succ(indx)),
-        List.cons!(term.name, List.cons!(term.self, vars)))
-      String.flatten([init,self,"(",name,":",xtyp,") ",body])
-    lam:
-      let name = Kind.Name.show(term.name)
-      let body = Kind.Core.show.go(
-        term.body(Kind.Core.var(term.name,indx)),
-        Nat.succ(indx),
-        List.cons!(term.name, vars))
-      String.flatten(["#",name," ",body])
-    app:
-      let func = Kind.Core.show.go(term.func, indx, vars)
-      let argm = Kind.Core.show.go(term.argm, indx, vars)
-      String.flatten(["(",func," ",argm,")"])
-    let: 
-      let name = Kind.Name.show(term.name)
-      let expr = Kind.Core.show.go(term.expr, indx, vars)
-      let body = Kind.Core.show.go(
-        term.body(Kind.Core.var(term.name,indx)),
-        Nat.succ(indx),
-        List.cons!(term.name, vars))
-      String.flatten(["!", name, " = ", expr, "; ", body])
-    ann:
-      let term = Kind.Core.show.go(term.expr, indx, vars)
-      let type = Kind.Core.show.go(term.type, indx, vars)
-      String.flatten(["{",term,":",type,"}"])
+Kind.Core.Term.return(term : Kind.Core.Term) : IO<Kind.Core.Term>
+  IO {
+    return term
   }
 
-// Parser
-// ======
+Kind.Core.error(str : String, def_name : String, term : Kind.Core.Term, type : Maybe<Kind.Core.Term>, ctx : Kind.Core.Ctx) : IO<Kind.Core.Term>
+  let msg = "Error on " | def_name | "\n"
+  let msg = msg | str
+  let msg = msg | "\nExpression :" | Kind.Core.Term.show(term) 
+  IO {
+    IO.print(msg)
+    IO.exit
+    return term
+  }
+
+Kind.Core.Term.show(term : Kind.Core.Term) : String
+  case term {
+    var : term.name
+    ref : term.name
+    typ : "*"
+    all : 
+      let bind = if term.eras then "%" else "@"
+      let self = term.self
+      let name = term.name
+      let xtyp = Kind.Core.Term.show(term.xtyp)
+      let body = term.body(Kind.Core.Term.var(self, 0), Kind.Core.Term.var(name, 0))
+      bind | self | "(" | name | ":" | xtyp | ") " | Kind.Core.Term.show(body)
+    lam :
+      let name = term.name
+      let body = term.body(Kind.Core.Term.var(name, 0))
+      "#" | name | " " | Kind.Core.Term.show(body)
+    app :
+      let func = Kind.Core.Term.show(term.func)
+      let arg = Kind.Core.Term.show(term.argm)
+      "(" | func | " " | arg | ")"
+    let :
+      let name = term.name
+      let expr = Kind.Core.Term.show(term.expr)
+      let body = term.body(Kind.Core.Term.var(name, 0))
+      "!" | name | "=" | expr | ";" | Kind.Core.Term.show(body)
+    ann : 
+      Kind.Core.Term.show(term.expr)
+  }
 
 Kind.Core.read.is_name(chr: Char): Bool
   Bool.or(Bool.and(U16.gte(chr,46#16), U16.lte(chr,47#16)),  // ./
@@ -111,6 +102,18 @@ Kind.Core.read.is_name(chr: Char): Bool
   Bool.or(Bool.and(U16.gte(chr,95#16), U16.ltn(chr,96#16)),  // _
   Bool.or(Bool.and(U16.gte(chr,97#16), U16.ltn(chr,123#16)), // a-z
   Bool.false)))))
+
+Kind.Core.read.name(code: String): Pair<String, String>
+  case code {
+    nil:
+      {code, ""}
+    cons:
+      if Kind.Core.read.is_name(code.head) then
+        let {code, name} = Kind.Core.read.name(code.tail)
+        {code, String.cons(code.head, name)}
+      else
+        {code, ""}
+  }
 
 Kind.Core.read.char(code: String, chr: Char): Pair<String, Unit>
   let {code, skip} = Kind.Core.read.spaces(code)
@@ -124,18 +127,31 @@ Kind.Core.read.char(code: String, chr: Char): Pair<String, Unit>
         {"", unit}
   }
 
-Kind.Core.read.name(code: String): Pair<String, String>
+Kind.Core.read.spaces(code: String): Pair<String, Unit>
   case code {
     nil:
-      {code, ""}
+      {code, Unit.new}
     cons:
-      if Kind.Core.read.is_name(code.head) then
-        let {code, name} = Kind.Core.read.name(code.tail)
-        {code, String.cons(code.head, name)}
+      if Char.eql(code.head, ' ') || Char.eql(code.head, '\n') then
+        let {code, name} = Kind.Core.read.spaces(code.tail)
+        {code, Unit.new}
       else
-        {code, ""}
+        {code, Unit.new}
   }
-  
+
+Kind.Core.read.nat(code: String): Pair<String, String>
+  case code {
+    nil:
+      {code, "0"}
+    cons:
+      let chr = code.head
+      if Bool.and(U16.gte(chr,48#16), U16.ltn(chr,58#16)) then
+        let {code, name} = Kind.Core.read.nat(code.tail)
+        {code.tail, String.cons(chr, name)}
+      else
+        {code, "0"}
+  }
+
 Kind.Core.read.find<A: Type>(list: List<A>, cond: A -> Nat -> Bool, indx: Nat, skip: Nat): Maybe<Pair<A,Nat>>
   case list {
     nil:
@@ -150,16 +166,17 @@ Kind.Core.read.find<A: Type>(list: List<A>, cond: A -> Nat -> Bool, indx: Nat, s
         Kind.Core.read.find!(list.tail, cond, Nat.succ(indx), skip)
   }
 
-Kind.Core.read.term(code: String): Pair<String, List<Pair<String,Kind.Core>> -> Kind.Core>
+
+Kind.Core.read.term(code: String): Pair<String, Kind.Core.Ctx -> Kind.Core.Term>
   let {code, skip} = Kind.Core.read.spaces(code)
   case code {
     nil:
-      {"", (ctx) Kind.Core.ref("error")}
+      {"", (ctx) Kind.Core.Term.ref("error")}
     cons:
       let head = code.head
       let code = code.tail
       if Char.eql(head, '*') then
-        {code, (ctx) Kind.Core.typ}
+        {code, (ctx) Kind.Core.Term.typ}
       else if U16.eql(head, '@') then
         let {code, self} = Kind.Core.read.name(code)
         let {code, skip} = Kind.Core.read.char(code, '(')
@@ -168,7 +185,7 @@ Kind.Core.read.term(code: String): Pair<String, List<Pair<String,Kind.Core>> -> 
         let {code, bind} = Kind.Core.read.term(code)
         let {code, skip} = Kind.Core.read.char(code, ')')
         let {code, body} = Kind.Core.read.term(code)
-        {code, (ctx) Kind.Core.all(false, self, name, bind(ctx), (s,x) body({name,x}&{self,s}&ctx))}
+        {code, (ctx) Kind.Core.Term.all(false, self, name, bind(ctx), (s,x) body({name,x}&{self,s}&ctx))}
       else if U16.eql(head, '%') then
         let {code, self} = Kind.Core.read.name(code)
         let {code, skip} = Kind.Core.read.char(code, '(')
@@ -177,162 +194,294 @@ Kind.Core.read.term(code: String): Pair<String, List<Pair<String,Kind.Core>> -> 
         let {code, bind} = Kind.Core.read.term(code)
         let {code, skip} = Kind.Core.read.char(code, ')')
         let {code, body} = Kind.Core.read.term(code)
-        {code, (ctx) Kind.Core.all(true, self, name, bind(ctx), (s,x) body({name,x}&{self,s}&ctx))}
+        {code, (ctx) Kind.Core.Term.all(true, self, name, bind(ctx), (s,x) body({name,x}&{self,s}&ctx))}
       else if U16.eql(head, '#') then
         let {code, name} = Kind.Core.read.name(code)
         let {code, body} = Kind.Core.read.term(code)
-        {code, (ctx) Kind.Core.lam(name, (x) body({name,x} & ctx))}
+        {code, (ctx) Kind.Core.Term.lam(name, (x) body({name,x} & ctx))}
       else if U16.eql(head, '(') then
         let {code, func} = Kind.Core.read.term(code)
         let {code, argm} = Kind.Core.read.term(code)
         let {code, skip} = Kind.Core.read.char(code, ')')
-        {code, (ctx) Kind.Core.app(func(ctx), argm(ctx))}
+        {code, (ctx) Kind.Core.Term.app(func(ctx), argm(ctx))}
       else if U16.eql(head, '!') then
         let {code, name} = Kind.Core.read.name(code)
         let {code, skip} = Kind.Core.read.char(code, '=')
         let {code, expr} = Kind.Core.read.term(code)
         let {code, skip} = Kind.Core.read.char(code, ';')
         let {code, body} = Kind.Core.read.term(code)
-        {code, (ctx) Kind.Core.let(name, expr(ctx), (x) body({name,x} & ctx))}
+        {code, (ctx) Kind.Core.Term.let(name, expr(ctx), (x) body({name,x} & ctx))}
       else if U16.eql(head, '{') then
         let {code, expr} = Kind.Core.read.term(code)
         let {code, skip} = Kind.Core.read.char(code, ':')
         let {code, type} = Kind.Core.read.term(code)
         let {code, skip} = Kind.Core.read.char(code, '}')
-        {code, (ctx) Kind.Core.ann(false, expr(ctx), type(ctx))}
+        {code, (ctx) Kind.Core.Term.ann(false, expr(ctx), type(ctx))}
       else
         if Kind.Core.read.is_name(head) then
           let {code, name} = Kind.Core.read.name(code)
           let name = String.cons(head, name)
           let {code, brui} = case code {
-            nil: {"", 0}
+            nil: {"", "0"}
             cons: if U16.eql(code.head,'^')
-              then Kind.Core.read.natx(code.tail, 0)
-              else {code, 0}
+              then Kind.Core.read.nat(code.tail)
+              else {code, "0"}
           }
           {code, (ctx)
             def fun = (x,i) String.eql(Pair.fst!!(x), name)
-            let got = Kind.Core.read.find!(ctx, fun, 0, brui)
+            let got = Kind.Core.read.find!(ctx, fun, 0, Nat.read(brui))
             case got {
               some: Pair.snd!!(Pair.fst!!(got.value))
-              none: Kind.Core.ref(name)
+              none: Kind.Core.Term.ref(name)
             }}
         else
-          {"", (ctx) Kind.Core.ref("error")}
+          {"", (ctx) Kind.Core.Term.ref("error")}
   }
 
-Kind.Core.read(code: String): Maybe<Kind.Core>
-  let {code, term} = Kind.Core.read.term(code | ";")
-  case code {
-    nil: none
-    cons: some(term([]))
+
+Kind.Core.serialize(term : Kind.Core.Term, dep : Nat, ini : Nat) : String
+  case term {
+    var : 
+      let lvl = term.indx
+      if (lvl >=? ini) then "^-" | Nat.show((dep - lvl) - 1) else "^+" | Nat.show(lvl)
+    ref : "$" | term.name
+    typ : "*"
+    all : 
+      let init = if term.eras then "%" else "@"
+      let self = term.self
+      let bind = Kind.Core.serialize(term.xtyp, dep, ini)
+      let body =  Kind.Core.serialize(term.body(Kind.Core.Term.var("", dep), Kind.Core.Term.var("", dep+1)), dep+2, ini)
+      init | self | bind | body
+    lam : "#" | Kind.Core.serialize(term.body(Kind.Core.Term.var("", dep)), dep+1, ini)
+    app :
+      let func = Kind.Core.serialize(term.func, dep, ini)
+      let argm = Kind.Core.serialize(term.argm, dep, ini)
+      "(" | func | " " | argm | ")"
+    let : 
+      let expr = Kind.Core.serialize(term.expr, dep, ini)
+      let body = Kind.Core.serialize(term.body(Kind.Core.Term.var("", dep)), dep+1, ini);
+     "!" | expr | body
+    ann : 
+       Kind.Core.serialize(term.expr, dep, ini)
   }
 
-Kind.Core.read_defs.go(code: String, defs: Kind.Core.Defs): Kind.Core.Defs
-  let {code, skip} = Kind.Core.read.spaces(code)
-  let {code, name} = Kind.Core.read.name(code)
-  if Nat.gtn(String.length(name), 0) then
-    let {code, skip} = Kind.Core.read.char(code, ':')
-    let {code, type} = Kind.Core.read.term(code)
-    let {code, skip} = Kind.Core.read.char(code, '=')
-    let {code, term} = Kind.Core.read.term(code)
-    let {code, skip} = Kind.Core.read.char(code, ';')
-    let defs = Kind.Map.set!(name, Kind.Core.Def.new(name, type([]), term([])), defs)
-    Kind.Core.read_defs.go(code, defs)
-  else
-    defs
+Kind.Core.equal(a : Kind.Core.Term, 
+                    b : Kind.Core.Term, 
+                    defs : Kind.Core.Defs,
+                    dep : Nat,
+                    seen : Set
+                    ) : Bool
+  let a1 = Kind.Core.reduce(a, defs)
+  let b1 = Kind.Core.reduce(b, defs)
+  let a_serialized = Kind.Core.serialize(a1, dep, dep)
+  let b_serialized = Kind.Core.serialize(b1, dep, dep)
 
-Kind.Core.read_defs(code: String): Kind.Core.Defs
-  Kind.Core.read_defs.go(code, Kind.Map.new!)
+  let codification = a_serialized | "==" | b_serialized
+  if (String.eql(a_serialized, b_serialized) || Set.has(codification, seen)) then
+    true
+  else 
+    let seen = Set.set(codification, seen)
+    case a1 b1 {
+      all all : 
+        let a1_body = a1.body(Kind.Core.Term.var(a1.self, dep), Kind.Core.Term.var(a1.name, dep+1))
+        let b1_body = b1.body(Kind.Core.Term.var(a1.self, dep), Kind.Core.Term.var(a1.name, dep+1));
+        Bool.eql(a1.eras, b1.eras) && String.eql(a1.self, b1.self) && 
+          Kind.Core.equal(a1.xtyp, b1.xtyp, defs, dep+0, seen) &&
+            Kind.Core.equal(a1_body, b1_body, defs, dep+2, seen)
+       lam lam : 
+        let a1_body = a1.body(Kind.Core.Term.var(a1.name, dep))
+        let b1_body = b1.body(Kind.Core.Term.var(a1.name, dep))
+        Kind.Core.equal(a1_body, b1_body, defs, dep+1, seen)
+        app app : 
+          Kind.Core.equal(a1.func, b1.func, defs, dep, seen)
+            && Kind.Core.equal(a1.argm, b1.argm, defs, dep, seen)
+        let let : 
+           let a1_body = a1.body(Kind.Core.Term.var(a1.name, dep))
+           let b1_body = b1.body(Kind.Core.Term.var(a1.name, dep))
+           Kind.Core.equal(a1.expr, b1.expr, defs, dep+0, seen) && Kind.Core.equal(a1_body, b1_body, defs, dep+1, seen)
+        ann ann : 
+           Kind.Core.equal(a1.expr, b1.expr, defs, dep, seen)
+    } default false
 
-// Evaluator
-// =========
-
-Kind.Core.reduce(term: Kind.Core, defs: Kind.Core.Defs): Kind.Core
+Kind.Core.reduce(term: Kind.Core.Term, defs: Kind.Core.Defs): Kind.Core.Term
   case term {
     ref: // deref
-      let got = Kind.Map.get!(term.name, defs)
+      let got = Map.get!(term.name, defs)
       case got {
-        none: Kind.Core.ref(term.name)
+        none: Kind.Core.Term.ref(term.name)
         some: got.value@term
       }
     app: // beta-reduction
       let func = Kind.Core.reduce(term.func, defs)
       case func {
         lam: Kind.Core.reduce(func.body(term.argm), defs)
-      } default Kind.Core.app(func, term.argm)
+      } default Kind.Core.Term.app(func, term.argm)
+    ann : 
+      Kind.Core.reduce(term.expr, defs)
+    let : 
+      Kind.Core.reduce(term.body(term.expr), defs)
   } default term
 
-Kind.Core.normalize(term: Kind.Core, defs: Kind.Core.Defs): Kind.Core
-  let norm = Kind.Core.reduce(term, defs)
-  case norm {
-    var: Kind.Core.var(norm.name, norm.indx)
-    ref: Kind.Core.ref(norm.name)
-    typ: Kind.Core.typ
-    all: Kind.Core.all(norm.eras, norm.self, norm.name, Kind.Core.normalize(norm.xtyp,defs), (s,x) Kind.Core.normalize(norm.body(s,x), defs))
-    lam: Kind.Core.lam(norm.name, (x) Kind.Core.normalize(norm.body(x), defs))
-    app: Kind.Core.app(Kind.Core.normalize(norm.func, defs), Kind.Core.normalize(norm.argm, defs))
-    let: Kind.Core.let(norm.name, Kind.Core.normalize(norm.expr, defs), (x) Kind.Core.normalize(norm.body(x), defs))
-    ann: Kind.Core.ann(norm.done, Kind.Core.normalize(norm.expr, defs), Kind.Core.normalize(norm.type, defs))
+Kind.Core.normalize(term : Kind.Core.Term, defs : Kind.Core.Defs) : Kind.Core.Term
+  let norm_weak = Kind.Core.reduce(term, defs)
+  case norm_weak {
+    var : Kind.Core.Term.var(norm_weak.name, norm_weak.indx)
+    ref : Kind.Core.Term.ref(norm_weak.name)
+    typ : Kind.Core.Term.typ
+    all : 
+      let eras = norm_weak.eras
+      let self = norm_weak.self
+      let name = norm_weak.name
+      let xtyp = Kind.Core.normalize(norm_weak.xtyp, defs)
+      let body = ((s, x) Kind.Core.normalize(norm_weak.body(s, x), defs)) :: Kind.Core.Term -> Kind.Core.Term -> Kind.Core.Term 
+      Kind.Core.Term.all(eras, self, name, xtyp, body)
+    lam :
+      let name = norm_weak.name
+      let body = (x) Kind.Core.normalize(norm_weak.body(x), defs)
+      Kind.Core.Term.lam(name, body)
+    app :
+      let func = Kind.Core.normalize(norm_weak.func, defs)
+      let argm = Kind.Core.normalize(norm_weak.argm, defs)
+      Kind.Core.Term.app(func, argm)
+    let :
+      Kind.Core.normalize(norm_weak.body(norm_weak.expr), defs)
+    ann :
+      Kind.Core.normalize(norm_weak.expr, defs)
   }
 
-// Equality
-// ========
 
-//#x #y x(y) // ##(1 0)
-//#a #b a(FOOOO) // ##(1 FOOOO)
-//#x #y x(FOOOO) // ##(1 FOOOO)
+Kind.Core.type_check(term : Kind.Core.Term, type : Kind.Core.Term, def_name : String, defs: Kind.Core.Defs, ctx : Kind.Core.Ctx) : IO<Kind.Core.Term>
+  def return = Kind.Core.Term.return
+  def throw = Kind.Core.error
+  let typev = Kind.Core.reduce(type, defs)
+  case term { // / Γ |- λX.T : ΠX : κ.κ0 --> Γ, X : κ |- T : κ0 Γ |- κ : *, or even when k = *, by * : * 
+    lam : case typev {
+      all :
+        let self_var = Kind.Core.Term.ann(true, term, type)
+        let name_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx) + 1), typev.xtyp)
+        let body_typ = typev.body(self_var, name_var)
+        let body_ctx = {term.name, typev.xtyp} & ctx
+        Kind.Core.type_check(term.body(name_var), body_typ, def_name, defs, body_ctx)
+    } default throw("Lambda has a non-function type", def_name, term, some(typev), ctx)
+      let : 
+        IO {
+          get expr_typ = Kind.Core.type_infer(term.expr, def_name, defs, ctx)
+          let expr_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx)), expr_typ)
+          let body_ctx = {term.name, expr_typ} & ctx
+          Kind.Core.type_check(term.body(expr_var), type, def_name, defs, body_ctx)
+        }
+  } default 
+    IO {
+      get infr = Kind.Core.type_infer(term, def_name, defs, ctx)
+      let eq = Kind.Core.equal(type, infr, defs, List.length!(ctx), Set.new)
+      if eq then
+        return(term)
+      else 
+        let type0_str = Kind.Core.Term.show(Kind.Core.normalize(type, Map.new!))
+        let infr0_str = Kind.Core.Term.show(Kind.Core.normalize(infr, Map.new!))
+        throw("Found type: " | infr0_str |
+          "\nInstead of: " | type0_str, def_name, term, some(typev), ctx)
+    }
 
-Kind.Core.serialize(term: Kind.Core, dep: Nat, ini: Nat): String
+Kind.Core.type_infer(term : Kind.Core.Term, def_name : String, defs: Kind.Core.Defs, ctx : Kind.Core.Ctx) : IO<Kind.Core.Term>
+  def return = Kind.Core.Term.return
+  def throw = Kind.Core.error
   case term {
-    var:
-      let lvl = term.indx
-      if Nat.gte(lvl, ini) then
-        "^-" | Nat.show(Nat.pred(Nat.sub(dep, lvl)))
-      else
-        "^+" | Nat.show(lvl)
-    ref:
-      "$" | term.name
-    typ:
-      "*"
-    all:
-      let init = if term.eras then "%" else "@"
-      let self = term.self
-      let bind = Kind.Core.serialize(term.xtyp, dep, ini)
-      let body = Kind.Core.serialize(term.body(Kind.Core.var("",dep), Kind.Core.var("", Nat.succ(dep))), Nat.succ(Nat.succ(dep)), ini)
-      init | self | bind | body
-    lam: 
-      let body = Kind.Core.serialize(term.body(Kind.Core.var("", dep)), Nat.succ(dep), ini)
-      "#" | body
-    app:
-      let func = Kind.Core.serialize(term.func, dep, ini)
-      let argm = Kind.Core.serialize(term.argm, dep, ini)
-      "(" | func | " " | argm | ")"
-    let:
-      let expr = Kind.Core.serialize(term.expr, dep, ini)
-      let body = Kind.Core.serialize(term.body(Kind.Core.var("", dep)), Nat.succ(dep), ini)
-      "!" | expr | body
-    ann:
-      let expr = Kind.Core.serialize(term.expr, dep, ini)
-      "$" | expr
+    var : return(Kind.Core.Term.var(term.name, term.indx))
+    ref : case Map.get!(term.name, defs) as reference {
+      none : throw("Unbound reference", def_name, term, none, ctx)
+      some : 
+        open reference.value as reference
+        return(reference.type)
+    }
+    typ : return(Kind.Core.Term.typ)
+    app : 
+      IO {
+        get func_infer  = Kind.Core.type_infer(term.func, def_name, defs, ctx)
+        let func_typ = Kind.Core.reduce(func_infer, defs)
+        case func_typ {
+          all : 
+             IO {
+               let self_var = Kind.Core.Term.ann(true, term.func, func_typ)
+               let name_var = Kind.Core.Term.ann(true, term.argm, func_typ.xtyp)
+               Kind.Core.type_check(term.argm, func_typ.xtyp, def_name, defs, ctx)
+               let term_typ = func_typ.body(self_var, name_var)
+               return(term_typ)
+             }
+          } default throw("Non-function application.", def_name, term, none, ctx)
+      }
+    let : 
+        IO {
+          get expr_typ = Kind.Core.type_infer(term.expr, def_name, defs, ctx)
+          let expr_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx)+1), expr_typ)
+          let body_ctx = {term.name, expr_typ} & ctx  
+          Kind.Core.type_infer(term.body(expr_var), def_name, defs, body_ctx)
+        }
+    all : 
+         IO {
+           let self_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.self, List.length!(ctx)), term)
+           let name_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx)), term.xtyp)
+           let body_ctx = {term.self, term} & {term.name, term.xtyp} & ctx
+           Kind.Core.type_check(term.xtyp, Kind.Core.Term.typ, def_name, defs, ctx)
+           Kind.Core.type_check(term.body(self_var, name_var), Kind.Core.Term.typ, def_name, defs, body_ctx)
+           return (Kind.Core.Term.typ)
+         }
+    ann : 
+        if not(term.done) then
+          Kind.Core.type_check(term.expr, term.type, def_name defs, ctx)
+        else
+          return(term.type)
+    
+  } default throw("Can't infer", def_name, term, none, ctx)
+
+
+Kind.Core.parse_defs(code : String) : Kind.Core.Defs
+  case code {
+    cons : 
+      let {code, skip} = Kind.Core.read.spaces(code)
+      let {code, name} = Kind.Core.read.name(code)
+      let {code, skip} = Kind.Core.read.spaces(code)
+      let {code, skip} = Kind.Core.read.char(code, ':')
+      let {code, skip} = Kind.Core.read.spaces(code)
+      let {code, type} = Kind.Core.read.term(code)
+      let {code, skip} = Kind.Core.read.spaces(code)
+      let {code, skip} = Kind.Core.read.char(code, '=')
+      let {code, skip} = Kind.Core.read.spaces(code)
+      let {code, body} = Kind.Core.read.term(code)
+      let {code, skip} = Kind.Core.read.char(code, ';')
+      let map = Kind.Core.parse_defs(code)
+      Map.set!(name, Kind.Core.Def.new(name, type([]), body([])), map)
+     // {name : Kind.Core.Def.new(name, type([]), body([]))}
+
+    nil : {}
   }
 
-Kind.Core.equal(a: Kind.Core, b: Kind.Core, defs: Kind.Core.Defs, dep: Nat, seen: Kind.Map<Unit>): Bool
-  let a1 = Kind.Core.reduce(a, defs)
-  let b1 = Kind.Core.reduce(b, defs)
-  let ah = Kind.Core.serialize(a1, dep, dep)
-  let bh = Kind.Core.serialize(b1, dep, dep)
-  let id = ah | "==" | bh
-  if String.eql(ah, bh) || Maybe.is_some!(Kind.Map.get!(id, seen)) then
-    true
-  else case a1 b1 {
-    all all:
-      let a1_body = a1.body(Kind.Core.var(a1.self, dep), Kind.Core.var(a1.name, Nat.succ(dep)))
-      let b1_body = b1.body(Kind.Core.var(b1.self, dep), Kind.Core.var(b1.name, Nat.succ(dep)))
-      Bool.eql(a1.eras, b1.eras)
-      && String.eql(a1.self, b1.self) 
-      && Kind.Core.equal(a1.xtyp, b1.xtyp, defs, dep, seen)
-      && Kind.Core.equal(a1_body, b1_body, defs, Nat.succ(Nat.succ(dep)), seen)
-  } default false
+Kind.Core.read(code: String): Maybe<Kind.Core.Term>
+  let {code, term} = Kind.Core.read.term(code | ";")
+  case code {
+    nil: none
+    cons: some(term([]))
+  }
 
-// ...........
+Kind.Core.Check(defs : Kind.Core.Defs, list_defs : List<Pair<String, Kind.Core.Def>>) : IO<Unit>
+  case list_defs {
+    nil : IO.pass
+    cons : IO {
+      let name = Pair.fst!!(list_defs.head)
+      let definition = Pair.snd!!(list_defs.head)
+      open definition
+      IO.print(name | " = " |  Kind.Core.Term.show(definition.term) | " : " | Kind.Core.Term.show(definition.type) | "\n")
+      Kind.Core.type_check(definition.type, Kind.Core.Term.typ, name defs, [])
+      Kind.Core.type_check(definition.term, definition.type, name, defs, [])
+      Kind.Core.Check(defs, list_defs.tail)
+      return unit
+    }
+  }
+
+Kind.Core : IO<Unit>
+  IO {
+    get fmc = IO.get_file("./Kind/Core/example.fmc")    
+    let defs = Kind.Core.parse_defs(fmc)
+    Kind.Core.Check(defs, Map.to_list!(defs))
+    return unit
+  }

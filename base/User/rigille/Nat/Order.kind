@@ -16,9 +16,9 @@ User.rigille.Nat.Order.refl(a: Nat): User.rigille.Nat.after(a, a)
 
 User.rigille.Nat.Order.conn(a: Nat, b: Nat): Or<User.rigille.Nat.after(a, b), User.rigille.Nat.after(b, a)>
   case a b {
-    zero zero: Or.left!!(refl)
-    zero succ: Or.left!!(refl)
-    succ zero: Or.right!!(refl)
+    zero zero: left(refl)
+    zero succ: left(refl)
+    succ zero: right(refl)
     succ succ: ind = User.rigille.Nat.Order.conn(a.pred, b.pred)
                ind
   }!

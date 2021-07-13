@@ -22,6 +22,12 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   let blue_hp = I32.sub(App.KL.Constants.max_score, game.score@points@snd)
   let red_hp = I32.sub(App.KL.Constants.max_score, game.score@points@fst)
 
+  let bar_red = String.show_clean(F64.show(255.0 - Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_grn = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_col = "rgb("|bar_red|","|bar_grn|", 0)"
+
+
+
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
@@ -29,17 +35,9 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "flex-direction": "row", 
     "justify-content": "flex-start", 
     "position": "relative"
-    "background":
-      if countdown =? 0 then
-        "rgb(220,220,220)"
-      else if (countdown <? 64) && ((countdown % 12) <? 4) then
-        "rgb(232,232,232)"
-      else
-        "rgb(255,255,255)"
-    //"align-items": "center",
+    "background": "rgb(255,255,255)"
   }>
     {App.KL.Game.Phase.Play.draw.skills_menu(game)}
-
     <div style={ 
       "width": "calc(100% - 200px)", 
       "height": "100%", 
@@ -69,14 +67,19 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
               let cast = game.moment.casts.head
               get skill = App.KL.Game.Cast.get_skill(cast, game)
               get hero = App.KL.Game.Cast.get_hero(cast, game)
-              let text = hero@name | " used " | skill@name | "!"
-              let text = text | if game.moment.success then "" else " But it failed."
+              let success = game.moment.success
+              let text = case success { 
+                left:
+                  hero@name | " tried to use " | skill@name | " but was " |success.value|"."
+                right:
+                  hero@name | " used " | skill@name | "!"
+              }
               return text
             } <> "Invalid cast."
           }
         }
       </div>
-      <div>{ 
+      <div >{//style={"background": "url(\"https://i.imgur.com/SguOlY0.png\")"}>{ 
         let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
         let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
         DOM.vbox(
@@ -84,23 +87,36 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
             "width": width,
             "height": height,
             "scale": "2"},
-          {},
+          {"background": "transparent"},
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
+      {
+      if countdown =? 0 then
+        <div style= {"height": "40px"}></div>
+      else
+        <div style=
+          {
+          "display":"flex"
+          "width": "75%"
+          "border-radius": "2px"
+          "border": "2px solid SlateGrey"
+          "height": "25px"
+          "margin-top": "15px"
+          "background-color": "rgb(220,220,220)"
+          
+          }>
+          <div style =
+            {
+              "width": String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 100.0)) | "%"
+              "height": "100%"
+              "background-color": bar_col
+            }> 
+          </div>
+        </div>
+      }
     </div>
-
-    <div style={
-      "width": "200px"
-      "height": "100%"
-      "background": "rgb(220,220,220)"
-      "border-left": "1px solid black"
-      "padding": "4px"
-      "font-family": "monospace"
-      "font-size": "16px"
-    }>
-      "TODO :)"
-    </div>
-
+    {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
+    {App.KL.Game.Phase.Play.draw.skill_description(local, game)}
   </div>
 
 // CANVAS DRAWING
@@ -123,26 +139,43 @@ App.KL.Game.Phase.Play.draw.canvas(
 
 // draw canvas board
 App.KL.Game.Phase.Play.draw.board(
-  game: App.KL.Game
+  game:    App.KL.Game
   preview: App.KL.Game.Cast.Preview
-  hits: Maybe<App.KL.Game.Indicators>
-  user: String
-  mouse: Pair<U32, U32>
-  img: VoxBox
+  hits:    Maybe<App.KL.Game.Indicators>
+  user:    String
+  mouse:   Pair<U32, U32>
+  img:     VoxBox
 ): VoxBox
+  let map         = game@board
+  let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  let indicators  = App.KL.Game.Phase.Play.Draw.get_indicators(preview, mouse_coord, user, game)
+  let ap_used     = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
 
-  map = game@board
-  mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-  indicators = App.KL.Game.Phase.Play.Draw.get_indicators(preview@skill, mouse_coord, user, game)
-  ap_used = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
-  map = Hexagonal.Axial.Map.to_list!(map)
-  for pos in map with img:
-    {coord, tile} = pos
-    img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicators, hits, coord, mouse_coord, img)
-    img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
-    img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
+  for coord:tile in map with img:
+    let indicator = Hexagonal.Axial.Map.get!(coord, hits <> indicators)
+    let img = App.KL.Game.Phase.Play.draw.grid(coord, game@moment, img)
+    let img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicator, coord, img)
+    let img = App.KL.Game.Phase.Play.draw.tile.indicator(indicator, coord, img)
+    let img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, img)
+    let img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, img)
     img
   img
+
+// TODO optimize?
+App.KL.Game.Phase.Play.draw.grid(
+  coord:  Hexagonal.Axial
+  moment: App.KL.Game.Moment
+  img:    VoxBox
+): VoxBox
+  case moment {
+    preparation:
+      let indicator     = App.KL.Game.Indicator.gray_line
+      let indicator_img = App.KL.Game.Indicator.get_img(indicator)
+      
+      let {x, y} = App.KL.Game.Phase.Play.draw.centralize.terrain(coord)
+      VoxBox.Draw.image(x, y, App.KL.Constants.z_index.grid, indicator_img, img)
+    execution: img
+  }
 
 App.KL.Game.Phase.Play.draw.tile.token(
   game: App.KL.Game
@@ -170,26 +203,30 @@ App.KL.Game.Phase.Play.draw.tile.token(
       )
     
     if Hexagonal.Axial.eql(coord, token_coord) then
-      VoxBox.Draw.square(cx,cy,2,10,10,col,img)
+      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
     else
-      VoxBox.Draw.square(cx,cy,2,5,5,col,img)
+      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,5,5,col,img)
   img
 
   
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
-  skill: Maybe<App.KL.Game.Skill>, 
+  preview: App.KL.Game.Cast.Preview 
   target: Hexagonal.Axial,
-  player: String,
-  game: App.KL.Game
+  user:   String,
+  game:   App.KL.Game
 ): App.KL.Game.Indicators
 
   Maybe {
-    get skill      = skill
-    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, player), game)
-    get center     = App.KL.Game.Board.find_player_coord(player, game@board)
+    get pair       = preview@skill
+    let skill_key  = pair@fst
+    get skill      = App.KL.Game.Skill.get(user, skill_key, game)
+    let targets    = App.KL.Game.Picks.get_skill_coords(skill_key, preview@picks)
+    let targets    = target & targets
+    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, user), game)
+    get center     = App.KL.Game.Board.find_player_coord(user, game@board)
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
-    let indicator  = App.KL.Game.Indicator.blue
+    let indicator  = App.KL.Game.Indicator.blue_line
     let indicators = Hexagonal.Axial.Map.new!
     //let haste      = App.KL.Game.Creature.get_total_haste(creature)
     //let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
@@ -197,7 +234,7 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, target, game@board)
+    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, targets, game@board)
     return Hexagonal.Axial.Map.union!(indicators, areas)
   } <> Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
 
@@ -208,25 +245,34 @@ App.KL.Game.Phase.Play.draw.cursor(
 ): VoxBox
   coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   {x,y} = App.KL.Game.Phase.Play.draw.centralize(coord)
-  VoxBox.Draw.image(x, y, 0#32, App.KL.Game.Field.Grass.Assets.mouse_ui, img)
+  VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.GrassOld.Assets.mouse_ui, img)
 
 // draws tile terrain
 App.KL.Game.Phase.Play.draw.tile.terrain(
-  terrain: App.KL.Game.Terrain
-  picks: App.KL.Game.Picks
-  areas: App.KL.Game.Indicators
-  hits: Maybe<App.KL.Game.Indicators>
+  terrain:    App.KL.Game.Terrain
+  picks:      App.KL.Game.Picks
+  indicator:  Maybe<App.KL.Game.Indicator>
   tile_coord: Hexagonal.Axial
-  mouse_coord: Hexagonal.Axial
-  img: VoxBox
+  img:        VoxBox
 ): VoxBox
-  indicator = Hexagonal.Axial.Map.get!(tile_coord, hits <> areas) <> App.KL.Game.Indicator.background
-  {i, j} = App.KL.Game.Phase.Play.draw.centralize(tile_coord)
-  field = App.KL.Game.Field.get_by_id.default(terrain@field_id)
-  field_drawing = field@draw(terrain, indicator)
-  tile_drawing = VoxBox.Draw.image(i, j, 0#32, field_drawing, img)
-  tile_drawing = App.KL.Game.Phase.Play.draw.letter(tile_coord, picks, tile_drawing)
+  let indicator = indicator <> App.KL.Game.Indicator.background
+  let {i, j}    = App.KL.Game.Phase.Play.draw.centralize.terrain(tile_coord)
+  let field     = App.KL.Game.Field.get_by_id.default(terrain@field_id)
+  let field_drawing = field@draw(terrain, indicator)
+  let tile_drawing  = VoxBox.Draw.image(i, j, I32.to_u32(tile_coord@j + 20), field_drawing, img) // TODO remove +20
+  let tile_drawing  = App.KL.Game.Phase.Play.draw.letter(tile_coord, picks, tile_drawing)
   tile_drawing
+
+App.KL.Game.Phase.Play.draw.tile.indicator(
+  indicator:  Maybe<App.KL.Game.Indicator>
+  tile_coord: Hexagonal.Axial
+  img:        VoxBox
+): VoxBox
+  without indicator: img
+    let {i, j} = App.KL.Game.Phase.Play.draw.centralize.terrain(tile_coord)
+    let ind_img = App.KL.Game.Indicator.get_img(indicator)
+    let img = VoxBox.Draw.image(i, j, App.KL.Constants.z_index.indicator, ind_img, img)
+    img
 
 App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game: App.KL.Game, coord: Hexagonal.Axial): App.KL.Game.Hero.Draw.Pose
   open game
@@ -237,7 +283,11 @@ App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game: App.KL.Game, coord
       nil:
         App.KL.Game.Hero.Draw.Pose.idle
       cons: Maybe { 
-        get success = if game.moment.success then some(unit) else none
+        //get success = if game.moment.success then some(unit) else none
+        get success = case game.moment.success { 
+          left: none
+          right: some(unit)
+          }
         get creature = App.KL.Game.Board.Creature.get(coord, game.board)
         let cast = game.moment.casts.head
         get player = creature@player
@@ -277,14 +327,15 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       let cx = cx - (128::U32)
       let cy = cy - (128::U32)
-      let img = VoxBox.Draw.image(cx, cy, 0u, draw_voxbox, img)
+      let img = VoxBox.Draw.image(cx, cy, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 
         none:
           img
         some:
           let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
-          let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 32, creature.value, ap_used, img)
+          let img = App.KL.Game.Creature.Status.draw(cx + 116, cy + 88, creature.value, img) // Placeholder for Showing status
+          let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 31, creature.value, ap_used, img)
           img
       }
 
@@ -351,6 +402,35 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
         skill_info
     </div>
 
+App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  main_style = 
+    {
+    "width": "200px"
+    "height": "100%"
+    "padding": "0 20px"
+    "background": "rgb(220,220,220)"
+    "border-left": "1px solid black"
+    "display":"flex"
+    "flex-direction":"column"
+    "align-items": "center"
+    }
+  
+  open local 
+  open game
+  Maybe {
+    get pair      = local.preview@skill
+    let skill_key = pair@fst
+    get skill     = App.KL.Game.Skill.get(local@user, skill_key, game)
+    return 
+      <div style=main_style>
+        <div style={"font-size": "3em", "padding-bottom": "5px"}>
+          Char.to_string(skill_key) // TODO replace with Skill icon
+        </div>
+        <div style={"font-size": "2em", "padding-bottom": "5px"}>skill@name</div>
+        <div style={"padding-bottom": "8px"}>"Cast time: " | Nat.show(U64.to_nat(skill@delay))</div>
+        <div style={"padding-bottom": "8px"}>skill@description</div>
+      </div>
+  } <> <div style=main_style></div>
 
 // AUX FUNCTIONS
 // =============
@@ -365,18 +445,28 @@ App.KL.Game.Phase.Play.draw.letter(
     some: 
       screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       {cx, cy} = App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord)
-      VoxBox.Draw.text(Char.to_string(got.value), PixelFont.black, Pos32.new(cx,cy,0u), img)
+      VoxBox.Draw.text(Char.to_string(got.value), PixelFont.black, Pos32.new(cx,cy,App.KL.Constants.z_index.letter), img)
   }
 
 App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
   { screen_coord@fst - 2, screen_coord@snd - 6 }
   
+App.KL.Game.Phase.Play.draw.centralize.terrain(
+  coord: Hexagonal.Axial
+): Pair(U32, U32)
+  let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  let i = i - 128
+  let j = j - 128 - I32.to_u32(App.KL.Constants.hexagon.extra_height / 2)
+  {i, j}
+
 // Centralizes an image in the hexagon 
 // TODO: won't be used after we start using assets from KL only
 App.KL.Game.Phase.Play.draw.centralize(
   coord: Hexagonal.Axial
 ): Pair(U32, U32)
   let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  // log(U32.show(i))
+  // log(U32.show(j))
   let aux = I32.to_u32(App.KL.Constants.hexagon_radius)
   let i = i - aux
   let j = j - aux
@@ -418,13 +508,13 @@ App.KL.Game.Phase.Play.draw.ap.bars(x: U32 y: U32, blue: I32, red: I32, bar_idx:
       if U32.gte(bar_idx, bar_quantity) then
         img
       else 
-        img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.gray, img)
+        img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.gray, img)
         App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red, bar_idx + 1, bar_quantity, img)
     else
-      img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.red, img)
+      img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.red, img)
       App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red - 1, bar_idx + 1, bar_quantity, img)
   else 
-    img = VoxBox.Draw.image(x + (12 * bar_idx), y, 10, App.KL.Game.Phase.Play.Ap.Assets.blue, img)
+    img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.blue, img)
     App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue - 1, red, bar_idx + 1, bar_quantity, img)
 
 
@@ -442,3 +532,32 @@ App.KL.Game.Phase.Play.draw.shield(
   let shield = Nat.show(Int.to_nat(shield))
   VoxBox.Draw.text(shield, PixelFont.small_black, Pos32.new(cx, cy, 0), img)
 
+App.KL.Game.Phase.Play.Draw.gray_overlay(game: App.KL.Game): DOM
+  open game
+    case game.moment {
+      preparation: <div></div>
+      execution: case game.moment.casts {
+        nil: 
+          let frame_part = U64.to_f64(game.moment.frame) / U64.to_f64(App.KL.Constants.between_turn_delay)
+           let opacity = F64.show((1 - frame_part)/2.5)
+          <div style=
+          { "width": "100%",
+            "height": "100%",
+            "position": "absolute",
+            "background-color":"rgba(165,165,165,"|opacity|")",
+            "display": "flex"
+          }>
+            <div style=
+              { "font-size": "4em"
+                "margin": "auto"            
+                "text-align": "center"
+                "color": "white"
+              }>
+              <div>"Turn " | Nat.show(U64.to_nat(game.turn)) | " ended."</div>
+              <div>"Starting Turn " | Nat.show(U64.to_nat(game.turn + 1)) | "!"</div>
+            </div>
+          </div>
+        cons: <div></div>
+      }
+    }
+  

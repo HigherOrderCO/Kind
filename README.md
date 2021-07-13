@@ -129,6 +129,16 @@ sugars: Nat
   val0 + val1 + val2                  // Nat.add(val0, Nat.add(val1, val2))
 ```
 
+```c
+// List monadic block: returns [{1,4},{1,5},{1,6},{2,4},...,{3,6}]
+my_list: List<Pair<Nat,Nat>>
+  List {
+    get x = [1, 2, 3]
+    get y = [4, 5, 6]
+    return {x, y}
+  }
+```
+
 Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/master/base/List)!
 
 ### Some types
@@ -265,11 +275,11 @@ Check some Nat proofs on [base/Nat/add](https://github.com/uwu-tech/Kind/tree/ma
 // Render function
 App.Hello.draw: App.Draw<App.Hello.State>
   (state)
-  DOM.node("div", {}, {"border": "1px solid black"}, [
-    DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Hello, world!")])
-    DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
-    DOM.node("div", {}, {}, [DOM.text("Visits: " | Nat.show(state@global))])
-  ])
+  <div style={"border": "1px solid black"}>
+    <div style={"font-weight": "bold"}>"Hello, world!"</div>
+    <div>"Clicks: " | Nat.show(state@local)</div>
+    <div>"Visits: " | Nat.show(state@global)</div>
+  </div>
 
 // Event handler
 App.Hello.when: App.When<App.Hello.State>

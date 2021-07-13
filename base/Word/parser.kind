@@ -1,18 +1,6 @@
 Word.parser(size: Nat): Parser<Word<size>>
-  case size {
-    zero: Parser {
-      return Word.e
-    }
-    succ: Parser.choice!([
-      Parser {
-        Parser.text("0")
-        get pred = Word.parser(size.pred)
-        return Word.o<size.pred>(pred)
-      }
-      Parser {
-        Parser.text("1")
-        get pred = Word.parser(size.pred)
-        return Word.i<size.pred>(pred)
-      }
-    ])
-  }!
+  Parser {
+    get nat = Nat.parser
+    let wrd = Nat.to_word(size, nat)
+    return wrd
+  }

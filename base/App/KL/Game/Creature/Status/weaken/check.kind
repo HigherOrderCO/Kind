@@ -3,12 +3,9 @@ App.KL.Game.Creature.Status.weaken.check(
 ): Bool
 
   let status = creature@status
-  case status {
-    nil:
-      false
-    cons:
-      case status.head { 
-        weaken: if I32.gtn(status.head.duration, 0) then true   
-              else false
-      }default false
-  }
+  let result = false
+  for weaken in status with result:
+    case weaken { 
+      weaken: true
+    }default result
+  result

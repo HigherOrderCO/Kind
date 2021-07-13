@@ -1,0 +1,2 @@
+App.ATB.draw (canvas: VoxBox) : App.Draw<App.ATB.State>
+    (state) DOM.vbox({}, {}, canvas)

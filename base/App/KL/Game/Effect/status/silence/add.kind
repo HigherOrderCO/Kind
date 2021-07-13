@@ -1,0 +1,17 @@
+App.KL.Game.Effect.status.silence.add(
+  duration: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect { 
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    let duration_show = String.show_clean(I32.show(duration))
+    let turn = if I32.gtn(duration, 1) then " turns" else " turn"
+    App.KL.Game.Effect.description.add("Silence a creature for"|duration_show|turn)
+    without creature: App.KL.Game.Effect { return +0#32 }
+    let invul = App.KL.Game.Creature.Status.invulnerable.check(creature)
+    if invul then
+      App.KL.Game.Effect { return +0#32 } 
+    else
+      App.KL.Game.Effect.status.silence.change_at(duration, pos)
+  }

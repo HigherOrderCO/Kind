@@ -1,7 +1,17 @@
-Vector.from_list(A : Type, ls : List<A>) : Vector<A, List.length!(ls)>
-  case ls {
-      nil : Vector.nil!
-      cons : 
-        let pred = Vector.from_list(A, ls.tail)
-        Vector.cons(A, _, ls.head, pred)
+Vector.from_list<A: Type>(list: List<A>): Vector<A, List.length!(list)>
+  case list {
+      nil:
+        Vector.nil!
+      cons: 
+        let tail = Vector.from_list<A>(list.tail)
+        Vector.cons!!(list.head, tail)
+  }!
+
+Vector.from_list.length<A: Type>(len: Nat, default: A, list: List<A>): Vector<A, len>
+  case len {
+    zero: Vector.nil<A>
+    succ: case list {
+      nil: Vector.cons<A,len.pred>(default, Vector.from_list.length<A>(len.pred, default, []))
+      cons: Vector.cons<A,len.pred>(list.head, Vector.from_list.length<A>(len.pred, default, list.tail))
+    }
   }!

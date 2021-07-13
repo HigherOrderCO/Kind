@@ -1,8 +1,12 @@
 type App.KL.Game.Indicator {
-  green
-  red
-  yellow
-  blue
+  red_line
+  red_fill
+  green_line
+  green_fill
+  gray_line
+  gray_fill
+  blue_line
+  blue_fill
   background
 } deriving (stringifier)
 

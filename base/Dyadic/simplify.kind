@@ -1,0 +1,6 @@
+Dyadic.simplify(a: Dyadic): Dyadic
+  open a
+  let trailing_zeroes = Int.2val(a.num)
+  Dyadic.new(
+    a.num/Nat.to_int(Nat.pow(2, trailing_zeroes)),
+    a.exp - trailing_zeroes)

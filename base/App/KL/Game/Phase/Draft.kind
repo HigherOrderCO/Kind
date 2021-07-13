@@ -38,7 +38,7 @@ App.KL.Game.Phase.Draft.to_team(players: Map<App.KL.Game.Player>, user: String):
 
 App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>): App.KL.Game.Board
   log(" - criando mapa")
-  board = App.KL.Game.Board.arena
+  board = App.KL.Game.Board.Blueprint.build.board(App.KL.Game.Board.Boards.arena)
   for user:player in players with board:    
     App.KL.Game.Board.PLayer.set(user, player, board)
   board

@@ -1,0 +1,278 @@
+App.Pong.State: App.State
+  App.State.new(App.Pong.State.local, Unit)
+
+// global constants
+App.Pong.width: Dyadic
+  1024
+
+App.Pong.height: Dyadic
+  512
+
+App.Pong.paddle_width: Dyadic
+  10
+
+App.Pong.ball_diameter: Dyadic
+  8
+
+App.Pong.Ball.init_speed: App.Pong.Vec
+  {7, 3}
+
+type App.Pong.Entity {
+  new(
+    body: App.Pong.Rect
+    v: App.Pong.Vec // speed
+    // rot: Dyadic // TODO rotation and magnus effect
+  )
+}
+
+App.Pong.Vec: Type
+  Pair<Dyadic, Dyadic>
+
+type App.Pong.State.local {
+  new(
+    score: Pair<Nat, Nat>
+    left: App.Pong.Entity
+    right: App.Pong.Entity
+    ball: App.Pong.Entity
+  )
+}
+
+type App.Pong.Rect {
+  new(
+    x: Dyadic
+    y: Dyadic
+    w: Dyadic
+    h: Dyadic
+  )
+}
+
+App.Pong.Vec.add(a: App.Pong.Vec, b: App.Pong.Vec): App.Pong.Vec
+  {a@fst + b@fst, a@snd + b@snd}
+
+App.Pong.Vec.sub(a: App.Pong.Vec, b: App.Pong.Vec): App.Pong.Vec
+  {a@fst - b@fst, a@snd - b@snd}
+
+App.Pong.Vec.mul(c: Dyadic, v: App.Pong.Vec): App.Pong.Vec
+  {c*v@fst, c*v@snd}
+
+App.Pong.Vec.div(c: Dyadic, v: App.Pong.Vec): App.Pong.Vec
+  {v@fst/c, v@snd/c}
+
+App.Pong.Vec.dot(a: App.Pong.Vec, b: App.Pong.Vec): Dyadic
+  (a@fst*b@fst) + (a@snd*b@snd)
+
+App.Pong.Vec.simplify(a: App.Pong.Vec): App.Pong.Vec
+  {Dyadic.simplify(a@fst), Dyadic.simplify(a@snd)}
+
+App.Pong.Rect.translate(a: App.Pong.Rect, v: App.Pong.Vec): App.Pong.Rect
+  {a@x + v@fst, a@y + v@snd, a@w, a@h}
+
+App.Pong.Rect.vclamp(a: App.Pong.Rect, lims: App.Pong.Vec): App.Pong.Rect
+  if a@y <? lims@fst then
+    {a@x, lims@fst, a@w, a@h}
+  else if (a@y + a@h) >? lims@snd then
+    {a@x, lims@snd - a@h, a@w, a@h}
+  else
+    a
+
+App.Pong.init.ball: App.Pong.Entity
+  App.Pong.Entity.new(App.Pong.Rect.new(
+    128 - App.Pong.ball_diameter/2,
+    128 - App.Pong.ball_diameter/2,
+    App.Pong.ball_diameter,
+    App.Pong.ball_diameter), App.Pong.Ball.init_speed)
+  
+App.Pong.init: App.Init<App.Pong.State>
+  let initial_player_left =
+    App.Pong.Entity.new(App.Pong.Rect.new(
+      1, 50, App.Pong.paddle_width, 70), {0, 0})
+  let initial_player_right =
+    App.Pong.Entity.new(App.Pong.Rect.new(
+      App.Pong.width - (App.Pong.paddle_width + 1), 50, App.Pong.paddle_width, 70), {0, 0})
+  let initial_state = App.Pong.State.local.new({0, 0}, initial_player_left, initial_player_right, App.Pong.init.ball)
+  App.Store.new!(initial_state, unit)
+
+App.Pong.Entity.draw(
+  img: VoxBox
+  e: App.Pong.Entity
+  z: U32
+  col: Col32
+): VoxBox
+  VoxBox.Draw.rect(
+    Dyadic.to_u32(e@body@x)
+    Dyadic.to_u32(e@body@y)
+    z
+    Dyadic.to_u32(e@body@w)
+    Dyadic.to_u32(e@body@h)
+    col
+    img
+  )
+
+App.Pong.Entity.draw_blur(
+  img: VoxBox
+  e: App.Pong.Entity
+  z: I32
+  col: Col32
+): VoxBox
+  VoxBox.Draw.moving_rect(
+    Dyadic.to_i32(e@body@x)
+    Dyadic.to_i32(e@body@y)
+    (Dyadic.to_i32(e@v@fst)*2)
+    (Dyadic.to_i32(e@v@snd)*2)
+    Dyadic.to_i32(e@body@w)
+    Dyadic.to_i32(e@body@h)
+    z
+    col
+    img
+  )
+
+App.Pong.draw(img: VoxBox): App.Draw<App.Pong.State>
+  (state)
+    let st = state@local
+    let img = App.Pong.Entity.draw_blur(
+      img,
+      st@ball,
+      0,
+      Col32.new(0, 0, 0, 255)
+    )
+    let img = App.Pong.Entity.draw(
+      img,
+      st@left,
+      0,
+      Col32.new(0, 0, 0, 255)
+    )
+    let img = App.Pong.Entity.draw(
+      img,
+      st@right,
+      0,
+      Col32.new(0, 0, 0, 255)
+    )
+    <div style={
+      "display": "flex"
+      "width": "100%"
+      "justify-content": "space-evenly"
+    }>{
+      DOM.vbox({"id": "game_screen", "width": Nat.show(Dyadic.to_nat(App.Pong.width)), "height": Nat.show(Dyadic.to_nat(App.Pong.height)), "scale": "1"}, {}, img)
+    }</div>
+
+App.Pong.Physics.rect_collision(
+  a: App.Pong.Rect
+  b: App.Pong.Rect
+): Bool
+  (a@x <=? b@x + b@w)
+  && (a@y <=? b@y + b@h)
+  && ((a@x + a@w) >=? b@x)
+  && ((a@y + a@h) >=? b@y)
+
+// takes a ball and a paddle and returns a collided
+// ball
+App.Pong.Physics.pong(
+  paddle: App.Pong.Entity
+  left: Bool // true = left, false = right
+  ball: App.Pong.Entity
+): App.Pong.Entity
+  if left && ball@v@fst >? 0 then
+    ball
+  else if Bool.not(left) && ball@v@fst <? 0 then
+    ball
+  else
+    // calculate normal
+    // it's more inclined the more you get close to the vertices
+    let n_x =
+      if left then
+        1 :: Dyadic
+      else
+        Dyadic.neg(1)
+    let paddle_radius =
+      Dyadic.div2(paddle@body@h)
+    let middle_paddle =
+      paddle@body@y + paddle_radius
+    let middle_ball =
+      ball@body@y + Dyadic.div2(ball@body@h)
+    let n_y =
+      ((middle_ball - middle_paddle)*128)/(3*paddle_radius)
+    let n =
+      {n_x*128, n_y}
+    // essentially reflects the ball according to the normal
+    // and adds the projection of the paddle speed in the normal
+    let nn =
+      App.Pong.Vec.dot(n, n)
+    let ball_velocity =
+      App.Pong.Vec.div(nn, App.Pong.Vec.mul(nn, ball@v) + App.Pong.Vec.mul(App.Pong.Vec.dot(App.Pong.Vec.mul(2, paddle@v) - App.Pong.Vec.mul(2, ball@v), n), n))
+    let vx = if left then Dyadic.max(ball_velocity@fst, 5) else Dyadic.min(ball_velocity@fst, Dyadic.neg(5))
+    let ball_velocity = {vx, ball_velocity@snd}
+    let ball = ball@v <- ball_velocity
+    ball
+
+  
+App.Pong.when.ball_step(st: App.Pong.State.local): App.Pong.Entity
+  let b = st@ball
+  let b = b@body <- App.Pong.Rect.translate(b@body, b@v)
+  b
+
+App.Pong.when.ball_collision(st: App.Pong.State.local): App.Pong.Entity
+  let b = st@ball
+  let l = st@left
+  let r = st@right
+  // paddles
+  let b =
+    if App.Pong.Physics.rect_collision(b@body, l@body) then
+      App.Pong.Physics.pong(l, true, b)
+    else if App.Pong.Physics.rect_collision(b@body, r@body) then
+      App.Pong.Physics.pong(r, false, b)
+    else 
+      b
+  // top walls
+  let b =
+    if (b@body@y <=? 0) || ((b@body@y + b@body@h) >=? App.Pong.height) then
+      let b = b@v <- {b@v@fst, Dyadic.neg(b@v@snd)}
+      b
+    else
+      b
+  b
+
+// resets ball if a point has been made
+App.Pong.when.ball_point(st: App.Pong.State.local): App.Pong.Entity
+  let b = st@ball
+  if (((b@body@x + b@body@w) <? 0) && (b@v@fst <? 0)) || ((b@body@x >? App.Pong.width) && (b@v@fst >? 0)) then
+    App.Pong.init.ball
+  else
+    b
+
+App.Pong.when: App.When<App.Pong.State>
+  (event, state)
+    let st = state@local
+    case event {
+      frame: IO {
+        let st = st@ball <- App.Pong.when.ball_step(st)
+        let right_middle = st@right@body@y + (st@right@body@h/2)
+        let right_delta = (st@ball@body@y - right_middle)/5
+        let right_rect = App.Pong.Rect.vclamp(App.Pong.Rect.translate(st@right@body, {0, right_delta}), {0, App.Pong.height})
+        let st = st@right <- {right_rect, {0, right_delta}}
+        let st = st@ball <- App.Pong.when.ball_collision(st)
+        let st = st@ball <- App.Pong.when.ball_point(st)
+        return some(st)
+      }
+      mouse_move: IO {
+        let pos = Dyadic.min(U32.to_dyadic(event.mouse_pos@snd) - (st@left@body@h/2), App.Pong.height - st@left@body@h)
+        let left_rect = App.Pong.Rect.vclamp({st@left@body@x, pos, st@left@body@w, st@left@body@h}, {0, App.Pong.height})
+        let st = st@left <- {left_rect, {0, pos - st@left@body@y}}
+        return some(st)
+      }
+    } default IO { return some(st) }
+
+
+App.Pong.tick: App.Tick<App.Pong.State>
+  App.no_tick<App.Pong.State>
+
+App.Pong.post: App.Post<App.Pong.State>
+  App.no_post<App.Pong.State>
+
+App.Pong: App<App.Pong.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  let init = App.Pong.init 
+  let draw = App.Pong.draw(img)
+  let when = App.Pong.when
+  let tick = App.Pong.tick
+  let post = App.Pong.post
+  App.new!(init, draw, when, tick, post)

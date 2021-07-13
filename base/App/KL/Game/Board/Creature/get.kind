@@ -2,7 +2,7 @@ App.KL.Game.Board.Creature.get(
   coord: Hexagonal.Axial
   board: App.KL.Game.Board
 ): Maybe<App.KL.Game.Creature>
-  let tile = App.KL.Game.Board.get(coord, board)
+  let tile = App.KL.Game.Tile.get(coord, board)
   case tile {
     none: none
     some: tile.value@creature

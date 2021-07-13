@@ -1,0 +1,8 @@
+App.ATB: App<App.ATB.State>
+  let canvas = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  let init = App.ATB.init 
+  let draw = App.ATB.draw(canvas)
+  let when = App.ATB.when
+  let tick = App.ATB.tick
+  let post = App.ATB.post
+  App.new!(init, draw, when, tick, post)

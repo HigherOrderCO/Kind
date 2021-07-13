@@ -1,0 +1,8 @@
+// TODO: optimize
+// Returns the position of a player
+App.KL.Game.Board.find_player_coord(
+  player: String,
+  board: App.KL.Game.Board
+): Maybe<Hexagonal.Axial>
+
+  App.KL.Game.Board.find_players(board){player}

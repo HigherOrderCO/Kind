@@ -1,0 +1,15 @@
+App.KL.Game.Tile.effect.show(
+  coord: Hexagonal.Axial,
+  board: App.KL.Game.Board
+): String
+
+  let tile = App.KL.Game.Tile.get(coord, board)
+  without tile: ""
+  let effect = App.KL.Game.Tile.effect.get(tile)
+  let result = effect(coord, coord, board)
+  case result { 
+    err:
+      ""
+    new:
+      result.description
+  }

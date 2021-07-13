@@ -31,12 +31,12 @@ VoxBox.Draw.line.coords(
   let low = I32.ltn(dist_y, dist_x)
   if low then
     if I32.gtn(x0, x1) then
-      VoxBox.Draw.line.coords.low(x1, y1, x0, y0)
+      List.reverse!(VoxBox.Draw.line.coords.low(x1, y1, x0, y0))
     else
       VoxBox.Draw.line.coords.low(x0, y0, x1, y1)
   else
     if I32.gtn(y0, y1) then
-      VoxBox.Draw.line.coords.high(x1, y1, x0, y0)
+      List.reverse!(VoxBox.Draw.line.coords.high(x1, y1, x0, y0))
     else
       VoxBox.Draw.line.coords.high(x0, y0, x1, y1)
 

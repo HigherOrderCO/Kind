@@ -32,17 +32,18 @@ App.KL.Game.Phase.Draft.post(
         if is_occupied then none else some(game)
       } <> game
 
-    set_hero: // TODO: Only check in your team's list to see if the hero is already picked
+    set_hero:
       log("- set_hero")
       Maybe {
         let players     = game@players
         get player      = players{addr}
         let player_list = Map.to_list!(players)
-        //let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
+        let same_team = App.KL.Game.Player.same_team(player, players) // Verifies if a player is on the same team with another player
+        let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
         let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
-        //if is_picked then
-        //  none 
-        //else 
+        if is_picked && same_team then 
+         none 
+        else 
           some(game)
       } <> game 
         

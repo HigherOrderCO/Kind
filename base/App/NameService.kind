@@ -1,0 +1,81 @@
+type App.NameService.State.local {
+  new(
+    addr: String
+    input: String
+  )
+}
+
+// App states (local = clicks, global = visitors)
+App.NameService.State: App.State
+  App.State.new(App.NameService.State.local, String)
+
+// Initial state
+App.NameService.init: App.Init<App.NameService.State>
+  App.Store.new<App.NameService.State>(App.NameService.State.local.new("",""), "")
+
+// Render function
+App.NameService.draw: App.Draw<App.NameService.State>
+  (state)
+  <div>
+    <div>
+      <span>"Your name: " | state@global</span>
+    </div>
+    <div>
+      <span>"New name: "</span>
+      <input></input>
+      <div id="set_name" style={"border": "1px solid black", "width": "120px", "cursor": "pointer"}>"set"</div>
+    </div>
+  </div>
+
+// Event handler
+App.NameService.when: App.When<App.NameService.State>
+  (event, state)
+  case event {
+    init: IO {
+      open state
+      let local = state@local
+      let local = local@addr <- event.user 
+      App.watch!(App.NameService.room_of(event.user))
+      App.set_local!(local)
+    }
+    input: IO {
+      let local = state@local
+      App.set_local!(local@input <- event.text)
+    }
+    mouse_click: 
+      log("clicked " | event.id)
+      if String.eql(event.id, "set_name") then IO {
+        let local = state@local
+        App.new_post!(App.NameService.room_of(local@addr), String.hex.encode(local@input))
+        App.pass!
+      } else App.pass!
+    //init: IO {
+      //App.watch!(App.room_zero)
+      //App.new_post!(App.room_zero, "")
+    //}
+    //mouse_down: IO {
+      //App.set_local!(state@local + 1)
+    //}
+  } default App.pass!
+
+// Global ticker: not used
+App.NameService.tick: App.Tick<App.NameService.State>
+  App.no_tick<App.NameService.State>
+
+// Global visitor: counts posts to room_zero
+App.NameService.post: App.Post<App.NameService.State>
+  (time, room, addr, data, global_state)
+  String.hex.decode(data)
+
+// A "NameService, world!" + counter application
+App.NameService: App<App.NameService.State>
+  App.new<App.NameService.State>(
+    App.NameService.init
+    App.NameService.draw
+    App.NameService.when
+    App.NameService.tick
+    App.NameService.post
+  )
+
+App.NameService.room_of(addr: String): String
+  App.room("App.NameService.room_of." | addr)

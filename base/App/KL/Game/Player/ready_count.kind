@@ -1,0 +1,15 @@
+App.KL.Game.Player.ready_count(
+  players: Map<App.KL.Game.Player>
+  room: String,
+  user: String
+): Pair<Nat, Nat> // Total_player / Ready_Count
+  
+  let total_ready = {0, 0}
+
+  for id:player in players with total_ready:
+    let has_team = App.KL.Game.Player.has_team(player)
+    let new_total_player = if has_team then total_ready@fst + 1 else total_ready@fst
+    let new_ready_count = if player@ready then total_ready@snd + 1 else total_ready@snd
+    {new_total_player, new_ready_count}
+
+  total_ready

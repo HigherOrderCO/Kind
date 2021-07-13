@@ -33,7 +33,7 @@ App.KL.Game.Token.board.capture(board: App.KL.Game.Board): App.KL.Game.Board
   let tokens = App.KL.Game.Token.get_tokens(board)
   for coord:token in tokens with board:
     let new_token = App.KL.Game.Token.capture(coord, board, token)
-    log(I32.show(new_token@dominance))
+    // log(I32.show(new_token@dominance))
     let token_entity = App.KL.Game.Entity.token(new_token)
     App.KL.Game.Board.push(coord, token_entity, board)
   board
@@ -43,7 +43,7 @@ App.KL.Game.Token.get_creatures(coord: Hexagonal.Axial, board: App.KL.Game.Board
   let coords    = Hexagonal.Axial.range(coord, token@range)
   let creatures = []
   for coord in coords with creatures:
-    let tile = App.KL.Game.Board.get(coord, board)
+    let tile = App.KL.Game.Tile.get(coord, board)
     without tile: creatures
       let creature = tile@creature
     without creature: creatures
@@ -72,9 +72,9 @@ App.KL.Game.Token.capture(coord: Hexagonal.Axial, board: App.KL.Game.Board, toke
 App.KL.Game.Token.get_team(creatures: List<App.KL.Game.Creature>, token: App.KL.Game.Token): Maybe<App.KL.Game.Team>
   let result = {0, 0} :: Pair<I32, I32> // blue and red quantity of players
   for creature in creatures with result:
-    case creature@team {
-      red:  result@fst <- result@fst + 1
-      blue: result@snd <- result@snd + 1
+    case creature@team creature@player {
+      red  some: result@fst <- result@fst + 1
+      blue some: result@snd <- result@snd + 1
     } default result
   
   case I32.eql(0, result@fst) I32.eql(0, result@snd) {

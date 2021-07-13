@@ -1,0 +1,130 @@
+Crypto.WOTS.PrivateKey: Type
+  Vector<U256, 32>
+
+Crypto.WOTS.PublicKey: Type
+  Vector<U256, 32>
+
+Crypto.WOTS.Address: Type
+  U256
+
+Crypto.WOTS.Message: Type
+  Vector<U8, 32>
+
+Crypto.WOTS.Signature: Type
+  Vector<U256, 32>
+
+Crypto.WOTS.message.bytes(bytes: Pair<U32,Buffer8>): Crypto.WOTS.Message
+  let msge = Crypto.Keccak.hash.bytes(bytes)
+  let vals = Buffer8.to_list(bytes)
+  let csum = 7650 :: U32
+  let csum = for i from 2 to List.length!(vals):
+    csum - U8.to_u32(vals[i] <> 0)
+  let vals = vals[0] <- U32.to_u8(U32.div(csum, 256))
+  let vals = vals[1] <- U32.to_u8(U32.mod(csum, 256))
+  let vals = Vector.from_list.length!(32, 0, vals)
+  vals
+
+Crypto.WOTS.message.hex(hex: String): Crypto.WOTS.Message
+  Crypto.WOTS.message.bytes(Buffer8.from_hex(hex))
+
+Crypto.WOTS.message(str: String): Crypto.WOTS.Message
+  Crypto.WOTS.message.bytes(Buffer8.from_hex(String.to_hex(str)))
+
+Crypto.WOTS.private(seed: U256): Crypto.WOTS.PrivateKey
+  Crypto.WOTS.private.go(32, seed)
+
+Crypto.WOTS.private.go(len: Nat, seed: U256): Vector<U256,len>
+  case len {
+    zero:
+      Vector.nil!
+    succ:
+      let head = Crypto.Keccak.hash.u256(U256.add(seed, Nat.to_u256(len)))
+      let tail = Crypto.WOTS.private.go(len.pred, seed)
+      Vector.cons<U256,len.pred>(head, tail)
+  }!
+
+Crypto.WOTS.public(pvt: Crypto.WOTS.PrivateKey): Crypto.WOTS.PublicKey
+  Crypto.WOTS.public.go(32, pvt)
+
+Crypto.WOTS.public.go(len: Nat, pvt: Vector<U256,len>): Vector<U256,len>
+  case len with pvt {
+    zero: Vector.nil!
+    succ: case pvt {
+      cons:
+        let hash = pvt.head
+        let hash = for i from 0 to 256:
+          Crypto.Keccak.hash.u256(hash)
+        Vector.cons<U256,len.pred>(hash, Crypto.WOTS.public.go(len.pred, pvt.tail))
+    }
+  }!
+
+Crypto.WOTS.address(pub: Crypto.WOTS.PublicKey): Crypto.WOTS.Address
+  let vals = Buffer8.from_list.256(Vector.to_list!(32, pub))
+  let addr = Buffer8.to_u256(Crypto.Keccak.hash.bytes(vals)@snd)
+  addr
+  
+Crypto.WOTS.sign(msg: Crypto.WOTS.Message, pvt: Crypto.WOTS.PrivateKey): Crypto.WOTS.Signature
+  Crypto.WOTS.sign.go(32, msg, pvt)
+
+Crypto.WOTS.sign.go(len: Nat, msg: Vector<U8,len>, pvt: Vector<U256,len>): Vector<U256,len>
+  case len with msg pvt {
+    zero: case msg pvt {
+      nil nil: Vector.nil!
+    }
+    succ: case msg pvt {
+      cons cons:
+        let hash = pvt.head
+        let hash = for i from 0 to 256 - U8.to_nat(msg.head):
+          Crypto.Keccak.hash.u256(hash)
+        Vector.cons<U256,len.pred>(hash, Crypto.WOTS.sign.go(len.pred, msg.tail, pvt.tail))
+    }
+  }!
+
+Crypto.WOTS.verify(msg: Crypto.WOTS.Message, addr: Crypto.WOTS.Address, sig: Crypto.WOTS.Signature): Bool
+  let checksums = Crypto.WOTS.checksum(msg)
+  let sign_addr = Crypto.WOTS.recover(msg, sig)
+  checksums && U256.eql(addr, sign_addr)
+
+Crypto.WOTS.checksum(msg: Crypto.WOTS.Message): Bool
+  Crypto.WOTS.checksum.go(32, msg)
+
+Crypto.WOTS.checksum.go(len: Nat, msg: Vector<U8,len>): Bool
+  let vals = Vector.to_list<U8>(len, msg)
+  let csum = 7650 :: U32
+  let csum = for i from 2 to List.length!(vals):
+    csum - U8.to_u32(vals[i] <> 0)
+  let cs_0 = U8.to_u32(vals[0] <> 0)
+  let cs_1 = U8.to_u32(vals[1] <> 0)
+  //log("!!! csum is " | U32.show(csum))
+  //log("!!! cs_0 is " | U32.show(cs_0))
+  //log("!!! cs_1 is " | U32.show(cs_1))
+  U32.eql(csum, U32.add(U32.mul(cs_0, 256), cs_1))
+
+Crypto.WOTS.recover(msg: Crypto.WOTS.Message, sig: Crypto.WOTS.Signature): Crypto.WOTS.Address
+  Crypto.WOTS.address(Crypto.WOTS.recover.go(32, msg, sig))
+
+Crypto.WOTS.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,len>): Vector<U256,len>
+  case len with msg sig {
+    zero: Vector.nil!
+    succ: case msg sig {
+      cons cons cons:
+        let hash = sig.head
+        let hash = for i from 0 to U8.to_nat(msg.head): Crypto.Keccak.hash.u256(hash)
+        Vector.cons<U256,len.pred>(hash, Crypto.WOTS.recover.go(len.pred, msg.tail, sig.tail))
+    }
+  }!
+
+Crypto.WOTS.example.signature: IO<Unit>
+  IO {
+    let seed = 1234 :: U256
+
+    let pvt = Crypto.WOTS.private(seed)
+    let pub = Crypto.WOTS.public(pvt)
+    let adr = Crypto.WOTS.address(pub)
+
+    let msg = Crypto.WOTS.message("cats cats cats yay")
+    let sig = Crypto.WOTS.sign(msg, pvt)
+
+    let chk = Crypto.WOTS.verify(msg, adr, sig)
+    IO.print(Bool.show(chk))
+  }

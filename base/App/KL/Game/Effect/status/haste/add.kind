@@ -1,0 +1,14 @@
+App.KL.Game.Effect.status.haste.add(
+  duration: I32
+  amount: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect { 
+    let duration_show = String.show_clean(I32.show(duration))
+    let amount_show = String.show_clean(I32.show(amount))
+    let turn = if I32.gtn(duration, 1) then " turns " else " turn "
+    let distance = if I32.gtn(amount, 1) then " tiles " else " tile " 
+    App.KL.Game.Effect.description.add("Set Haste in a creature for"|duration_show| turn | "increasing movement distance by"|amount_show|distance)
+    App.KL.Game.Effect.status.haste.change_at(duration, amount, pos)
+  }

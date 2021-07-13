@@ -1,0 +1,11 @@
+//Verifies if the player is in a team
+App.KL.Game.Player.has_team(
+  player: App.KL.Game.Player
+): Bool
+
+  open player
+  let team = player.team
+  case team { 
+    neutral: false
+  }default true
+

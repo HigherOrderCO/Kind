@@ -1,0 +1,7 @@
+App.KL.Game.Tile.effect.duration(
+  tile: App.KL.Game.Tile
+): I32
+
+  open tile
+  without tile.effect: 0 ::I32
+  tile.effect@duration

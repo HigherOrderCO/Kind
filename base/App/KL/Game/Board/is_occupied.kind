@@ -1,0 +1,16 @@
+//Verifies if a tile is occupied
+App.KL.Game.Board.is_occupied(
+  coord: Hexagonal.Axial,
+  board: App.KL.Game.Board
+): Bool
+
+  let tile = App.KL.Game.Tile.get(coord, board)
+  case tile {
+    none: false
+    some:
+      open tile.value
+      case tile.value.creature { 
+        none: false
+        some: true
+      }
+  }

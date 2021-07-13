@@ -1,7 +1,5 @@
 Word.stringifier<size: Nat>: Stringifier<Word<size>>
   (w, str)
-  case w {
-    e: str
-    o: Stringifier.text("0", Word.stringifier<w.size>(w.pred, str))
-    i: Stringifier.text("1", Word.stringifier<w.size>(w.pred, str))
-  }
+  let nat = Word.to_nat!(w)
+  let str = Nat.stringifier(nat, str)
+  str

@@ -1,0 +1,43 @@
+App.BoardBuilder.Lobby.When(
+  event: App.Event, 
+  local: App.BoardBuilder.Lobby.State.local, 
+  global: App.BoardBuilder.State.global
+): IO<Maybe<App.State.local<App.BoardBuilder.State>>>
+  case event {
+    // init:
+      // let new_local = local@user <- String.to_lower(event.user)
+      // App.set_local!(App.BoardBuilder.State.local.lobby(new_local))
+    input:
+      let local = local@room_input <- event.text
+      App.set_local!(App.BoardBuilder.State.local.lobby(local))
+    mouse_click:
+  
+      switch String.eql(event.id) {
+        "random": IO {
+          get rnd = IO.random(10000000000)
+          let str = Nat.show(rnd)
+          let room = "5c4c494e" | String.take(8, str)
+          let new_local = local@room_input <- room
+          App.set_local!(App.BoardBuilder.State.local.lobby(new_local))
+        }
+        "ready": 
+          case local@room_input {
+            nil: App.pass!
+            cons:
+              IO {
+                App.watch!(local@room_input)
+                // App.new_post!(local@room_input, App.KL.Game.Phase.Draft.Event.join_room.serial)
+                App.set_local!(App.BoardBuilder.State.local.builder(App.BoardBuilder.Lobby.When.init_builder(local@room_input)))
+              }
+          }
+      } default App.pass!
+  } default App.pass!
+
+App.BoardBuilder.Lobby.When.init_builder(room: String): App.BoardBuilder.Builder.State.local
+  let canvas_size = {App.KL.Constants.center_x * 2, App.KL.Constants.center_y * 2}
+  let mouse = none
+  let actual_terrain = 1
+  let command = none
+  let array = ""
+  
+  {room, canvas_size, mouse, actual_terrain, command, array}

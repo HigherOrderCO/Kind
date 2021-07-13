@@ -1,0 +1,11 @@
+App.KL.Game.Creature.Status.invulnerable.check(
+  creature: App.KL.Game.Creature
+): Bool
+
+  let status = creature@status
+  let result = false
+  for invul in status with result:
+    case invul { 
+      invulnerable: true
+    }default result
+  result
