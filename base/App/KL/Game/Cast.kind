@@ -1,14 +1,14 @@
 type App.KL.Game.Cast {
   new(
     player: String
-    target: Hexagonal.Axial
+    target: List<Hexagonal.Axial>
     letter: Char
   )
 }
 
 type App.KL.Game.Cast.Preview {
   new(
-    skill: Maybe<Char>
+    skill: Maybe<Pair<Char, Nat>>
     picks: App.KL.Game.Picks
   )
 }

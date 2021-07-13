@@ -17,16 +17,16 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let void_range = {8,8} ::Pair<U64, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name |".")
 
-    "Q": App.KL.Game.Skill.new("Trap", 150, 24, trap_range@fst, App.KL.Game.Hero.Croni.hero.Skills.trap(trap_range@snd, 1), 
-    "Croni summons a Trap that roots when stepped on.")
-
-    "W": App.KL.Game.Skill.new("Flux", 860, 48, flux_range@fst, App.KL.Game.Hero.Croni.hero.Skills.flux(flux_range@snd, 12, 1), 
+    "Q": App.KL.Game.Skill.new("Flux", 860, 48, trap_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Croni.hero.Skills.flux(trap_range@snd, 12, 1), 
     "Croni casts a targeted dark flux, dealing 12 damage in a single area.")
 
-    "E": App.KL.Game.Skill.new("Void", 880, 24, void_range@fst, App.KL.Game.Hero.Croni.hero.Skills.void(void_range@snd, 1),
+    "W": App.KL.Game.Skill.new("Trap", 150, 24, flux_range@fst, App.KL.Game.Skill.Pattern.multiple_no_repeat(2), App.KL.Game.Hero.Croni.hero.Skills.trap(flux_range@snd, 1), 
+    "Croni summons a Trap that roots when stepped on.")
+
+    "E": App.KL.Game.Skill.new("Void", 880, 24, void_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Croni.hero.Skills.void(void_range@snd, 1),
     "Croni summons a Void that blocks movement. Can be reactivated to root around it.")
 
   }
@@ -43,24 +43,16 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 App.KL.Game.Hero.Croni.hero.Skills.trap(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(range)
-    get target = App.KL.Game.Effect.coord.get_target
-    get center = App.KL.Game.Effect.coord.get_center
-    get caster = App.KL.Game.Effect.board.creature.caster
-    get board = App.KL.Game.Effect.board.get
-    let team = case caster { none: App.KL.Game.Team.neutral, some: caster.value@team }
+    get targets = App.KL.Game.Effect.coord.get_targets
+    get center  = App.KL.Game.Effect.coord.get_center
+    get caster  = App.KL.Game.Effect.board.creature.caster
+    get board   = App.KL.Game.Effect.board.get
+    let team    = case caster { none: App.KL.Game.Team.neutral, some: caster.value@team }
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
-    if App.KL.Game.Board.is_occupied(target, board) then
-      App.KL.Game.Effect.pass
-    else
-      let trap = App.KL.Game.Creature.new(
-        none,
-        App.KL.Game.Hero.Croni.hero.trap,
-        team,
-        [],
-        App.KL.Game.Hero.Croni.hero.trap@max_hp,
-        App.KL.Game.Hero.Croni.hero.trap@max_ap)
-      App.KL.Game.Effect.board.summon(target, trap)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, targets)
+    let trap = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Croni.hero.trap, team, [], App.KL.Game.Hero.Croni.hero.trap@max_hp, App.KL.Game.Hero.Croni.hero.trap@max_ap)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.board.summon(trap), targets)
+    return unit
   }
 
 App.KL.Game.Hero.Croni.hero.Skills.flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
@@ -93,7 +85,7 @@ App.KL.Game.Hero.Croni.hero.Skills.void(range: I32, ap_cost: I32): App.KL.Game.E
         let mhp = App.KL.Game.Hero.Croni.hero.void@max_hp
         let map = App.KL.Game.Hero.Croni.hero.void@max_ap
         let trap = App.KL.Game.Creature.new(none, hero, team, [], mhp, map)
-        App.KL.Game.Effect.board.summon(target, trap)
+        App.KL.Game.Effect.board.summon(trap, target)
       }
       some: if String.eql(targeted.value@hero@name, "Croni.Void") then App.KL.Game.Effect {
         let area = App.KL.Game.Hero.Croni.hero.Skills.void.area(target, board)

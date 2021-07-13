@@ -4,7 +4,7 @@ App.KL.Game.Effect.run<A: Type>(
   target: Hexagonal.Axial
   game: App.KL.Game
 ): App.KL.Game
-  case effect(center, target, game@board) as result {
+  case effect(center, targets, game@board) as result {
     err: game
     new: game@board <- result.board
   }

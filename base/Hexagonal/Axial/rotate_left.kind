@@ -1,0 +1,8 @@
+Hexagonal.Axial.rotate_left(
+  start: Hexagonal.Axial
+  axis: Hexagonal.Axial
+): Hexagonal.Axial
+
+  a = Hexagonal.Axial.to_cubic(start)
+  b = Hexagonal.Axial.to_cubic(axis)
+  Hexagonal.Cubic.to_axial(Hexagonal.Cubic.rotate_left(a,b))

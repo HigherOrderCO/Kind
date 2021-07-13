@@ -15,7 +15,6 @@ App.KL.State: App.State
 // Initial state
 App.KL.init: App.Init<App.KL.State>
   let local = App.KL.State.Local.lobby(App.KL.Lobby.State.Local.new("", App.KL.Lobby.State.Local.Page.front("")))
-  //let local = App.KL.State.Local.lobby(App.KL.Lobby.State.Local.new("", App.KL.Lobby.State.Local.Page.heroes))
   let global = App.KL.Global.State.new(none)
   App.Store.new<App.KL.State>(local, global)
 

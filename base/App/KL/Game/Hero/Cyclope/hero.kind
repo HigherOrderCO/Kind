@@ -15,18 +15,17 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
 
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single,App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name |".")
 
-    "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 10, 1),
+    "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 10, 1),
     "Cyclope sacrifices 4 Health to provide 10 Shield Points to nearby allies.")
 
-    "W": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
+    "W": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
     "Cyclope deals damage to an enemy equal to half of his missing Health Points.")
 
-    "E": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
+    "E": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
     "Cyclope stomps the ground, rooting all enemies within 2 tiles.")
-
   }
 
   let on_stepped = none

@@ -1,6 +1,6 @@
 App.KL.Game.Board.Boards.arena: App.KL.Game.Board.Blueprint
   App.KL.Game.Board.Blueprint.new(
-    App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.arena.terrains)
+    App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.lava.terrains)
     App.KL.Game.Board.Blueprint.build.tokens(App.KL.Game.Board.Boards.arena.tokens)
   )
 

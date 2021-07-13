@@ -148,7 +148,7 @@ App.KL.Game.Phase.Play.draw.board(
 ): VoxBox
   let map         = game@board
   let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-  let indicators  = App.KL.Game.Phase.Play.Draw.get_indicators(preview@skill, mouse_coord, user, game)
+  let indicators  = App.KL.Game.Phase.Play.Draw.get_indicators(preview, mouse_coord, user, game)
   let ap_used     = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
 
   for coord:tile in map with img:
@@ -211,15 +211,18 @@ App.KL.Game.Phase.Play.draw.tile.token(
   
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
-  skill:  Maybe<Char>, 
+  preview: App.KL.Game.Cast.Preview 
   target: Hexagonal.Axial,
   user:   String,
   game:   App.KL.Game
 ): App.KL.Game.Indicators
 
   Maybe {
-    get skill_key  = skill
+    get pair       = preview@skill
+    let skill_key  = pair@fst
     get skill      = App.KL.Game.Skill.get(user, skill_key, game)
+    let targets    = App.KL.Game.Picks.get_skill_coords(skill_key, preview@picks)
+    let targets    = target & targets
     let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, user), game)
     get center     = App.KL.Game.Board.find_player_coord(user, game@board)
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
@@ -231,7 +234,7 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, target, game@board)
+    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, targets, game@board)
     return Hexagonal.Axial.Map.union!(indicators, areas)
   } <> Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
 
@@ -415,7 +418,8 @@ App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, ga
   open local 
   open game
   Maybe {
-    get skill_key = local.preview@skill
+    get pair      = local.preview@skill
+    let skill_key = pair@fst
     get skill     = App.KL.Game.Skill.get(local@user, skill_key, game)
     return 
       <div style=main_style>
