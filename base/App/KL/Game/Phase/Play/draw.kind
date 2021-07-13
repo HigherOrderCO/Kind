@@ -23,8 +23,8 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   let red_hp = I32.sub(App.KL.Constants.max_score, game.score@points@fst)
 
   let bar_red = String.show_clean(F64.show(255.0 - Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
-  let bar_grn = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
-  let bar_col = "rgb("|bar_red|","|bar_grn|", 0)"
+  let bar_blu = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_col = "rgb("|bar_red|", 0, " |bar_blu| ")"
 
 
 
