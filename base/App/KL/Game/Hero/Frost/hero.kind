@@ -15,16 +15,16 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let summon_wall_range = {5, 5} ::Pair<U64, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name |".")
 
-    "Q": App.KL.Game.Skill.new("Summon Wall", 93, 48, summon_wall_range@fst, App.KL.Game.Hero.Frost.Skills.summon_wall(summon_wall_range@snd, 1),
+    "Q": App.KL.Game.Skill.new("Summon Wall", 93, 48, summon_wall_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.summon_wall(summon_wall_range@snd, 1),
     "Frost summons a Frozen Wall in a position, preventing heroes to walk on it.")
 
-    "W": App.KL.Game.Skill.new("Ice Fall", 701, 48, 0, App.KL.Game.Hero.Frost.Skills.ice_fall(2, 1),
+    "W": App.KL.Game.Skill.new("Ice Fall", 701, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.ice_fall(2, 1),
     "Frost creates a slipping surface around him, pulling enemies nearby.")
 
-    "E": App.KL.Game.Skill.new("Ravenous Bite", 702, 48, 1, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1),
+    "E": App.KL.Game.Skill.new("Ravenous Bite", 702, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1),
     "Frost quickly bites all enemies in front of him, dealing 3 damage.")
   }
 
@@ -64,7 +64,7 @@ App.KL.Game.Hero.Frost.Skills.summon_wall(range: I32, ap_cost: I32): App.KL.Game
       App.KL.Game.Effect.pass
     else
       let wall = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Frost.hero.wall, App.KL.Game.Team.neutral, [], 0, 0)
-      App.KL.Game.Effect.board.summon(target, wall)
+      App.KL.Game.Effect.board.summon(wall, target)
   }
 
 App.KL.Game.Hero.Frost.Skills.ice_fall(area: I32, ap_cost: I32): App.KL.Game.Effect<Unit>

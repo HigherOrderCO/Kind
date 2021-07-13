@@ -7,16 +7,35 @@ App.KL.Game.Cast.picks_of(
   let casts  = game@casts
 
   for cast in casts with result:
-    open cast
+    open cast 
     let {seen, map} = result
     if player =? cast.player then
       let skill = App.KL.Game.Cast.get_skill(cast, game)
-      let letter = Char.to_string(cast.letter)
-      case skill seen{letter} {
-        some none: 
-          { seen{letter} <- unit, Hexagonal.Axial.Map.set!(cast.target, cast.letter, map) }
-      } default {seen, map}
+      case skill {
+        some:
+          let coords_max = App.KL.Game.Skill.get_pattern(skill.value)
+          let letter = Char.to_string(cast.letter)
+          for i from 0 to coords_max with result:
+            let target = App.KL.Game.Cast.picks_of.aux(cast.target, i, skill.value@pattern)
+            case target {
+              some: { seen{letter} <- unit, Hexagonal.Axial.Map.set!(target.value, cast.letter, result@snd)}
+              none: result
+            }
+          result
+        none: result
+      }
+      
     else
       result
   
   result@snd
+
+App.KL.Game.Cast.picks_of.aux(targets: List<Hexagonal.Axial>, idx: Nat, pattern: App.KL.Game.Skill.Pattern): Maybe<Hexagonal.Axial>
+  case pattern {
+    vector:
+      target = targets[1]
+      case target {
+        none: targets[0]
+        some: target
+      }
+  }default targets[idx]

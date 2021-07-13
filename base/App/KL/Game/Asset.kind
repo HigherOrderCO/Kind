@@ -1,7 +1,0 @@
-type App.KL.Game.Asset {
-  new(
-    vbox  : VoxBox
-    base64: String
-  )
-}
-

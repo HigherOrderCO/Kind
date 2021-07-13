@@ -18,16 +18,16 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
 
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name |".")
     
-    "Q": App.KL.Game.Skill.new("Restore", 396, 48, restore_range@fst, App.KL.Game.Hero.Lela.hero.Skills.restore(restore_range@snd, 4, 1),
+    "Q": App.KL.Game.Skill.new("Restore", 396, 48, restore_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Lela.hero.Skills.restore(restore_range@snd, 4, 1),
     "Lela restores 4 Health Points of an ally.")
 
-    "W": App.KL.Game.Skill.new("Escort", 397, 48, escort_range@fst, App.KL.Game.Hero.Lela.hero.Skills.escort(escort_range@snd, "Lela Escort", 1, 4, 1),
+    "W": App.KL.Game.Skill.new("Escort", 397, 48, escort_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Lela.hero.Skills.escort(escort_range@snd, "Lela Escort", 1, 4, 1),
     "Lela provides 4 Shield Points to an ally.")
 
-    "E": App.KL.Game.Skill.new("Detain", 398, 48, detain_range@fst, App.KL.Game.Hero.Lela.hero.Skills.detain(detain_range@snd, 1, 2),
+    "E": App.KL.Game.Skill.new("Detain", 398, 48, detain_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Lela.hero.Skills.detain(detain_range@snd, 1, 2),
     "Lela deals 1 damage to an enemy, silencing them.")
   }
 

@@ -6,7 +6,7 @@ App.KL.Game.Indicator.get_img(indicator: App.KL.Game.Indicator): VoxBox
     green_fill: App.KL.Game.Indicator.Assets.green_fill
     green_line: App.KL.Game.Indicator.Assets.green_line
     gray_fill:  App.KL.Game.Indicator.Assets.gray_fill
-    gray_line:  App.KL.Game.Indicator.Assets.gray_line
+    gray_line:  App.KL.Game.Indicator.Assets.to_rename
     blue_fill:  App.KL.Game.Indicator.Assets.blue_fill
     blue_line:  App.KL.Game.Indicator.Assets.blue_line
   }
