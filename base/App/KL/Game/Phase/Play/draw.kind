@@ -261,7 +261,7 @@ App.KL.Game.Phase.Play.draw.tile.terrain(
   let {i, j}    = App.KL.Game.Phase.Play.draw.centralize.new(tile_coord)
   let field     = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   let field_drawing = field@draw(terrain, indicator)
-  let tile_drawing  = VoxBox.Draw.image(i, j, I32.to_u32(tile_coord@j + 20), field_drawing, img) // TODO remove +20
+  let tile_drawing  = VoxBox.Draw.image(i, j, I32.to_u32(tile_coord@j + App.KL.Constants.z_index.terrain), field_drawing, img)
   let tile_drawing  = App.KL.Game.Phase.Play.draw.letter(tile_coord, picks, tile_drawing)
   tile_drawing
 

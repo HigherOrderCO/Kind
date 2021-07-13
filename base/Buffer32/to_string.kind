@@ -1,0 +1,8 @@
+Buffer32.to_string(buf: Buffer32, space: Bool): String
+  let str = ""
+  for i: U32 from 0 to Nat.to_u32(buf@depth) with str:
+    let crunk = Buffer32.get(i, buf) // group of 4 bytes
+    let bits = U32.to_bits(crunk)
+    let hex = Bits.to_buf_string(bits)
+    str | if space then " " else "" | hex
+  str

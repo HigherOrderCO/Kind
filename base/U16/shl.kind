@@ -1,4 +1,4 @@
-// Shift 'n' a bits to the left
+// Shift 'a' bits in 'n' to the left
 U16.shl(n: U16, a: U16): U16
   open n
   open a

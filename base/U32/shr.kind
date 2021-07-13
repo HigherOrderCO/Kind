@@ -1,4 +1,4 @@
-// Shift 'n' a bits to the right
+// Shift 'a' bits in 'n' to the right
 U32.shr(n: U32, a: U32): U32
   open n
   open a
