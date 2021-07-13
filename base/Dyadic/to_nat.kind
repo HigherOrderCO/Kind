@@ -1,0 +1,2 @@
+Dyadic.to_nat(a: Dyadic): Nat
+  Int.to_nat(Dyadic.to_int(a))
