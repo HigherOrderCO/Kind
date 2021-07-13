@@ -15,6 +15,10 @@ App.KL.Game.Effect.status.burn.add(
     without creature: App.KL.Game.Effect { return +0#32 }
     let burn = App.KL.Game.Creature.Status.burn.add(creature, id, duration, amount)
     let new_board = App.KL.Game.Board.Creature.set(pos, burn, board)
+    let invul = App.KL.Game.Creature.Status.invulnerable.check(creature)
+    if invul then
+      App.KL.Game.Effect { return +0#32 }
+    else
       App.KL.Game.Effect { 
       App.KL.Game.Effect.board.set(new_board)
       return amount

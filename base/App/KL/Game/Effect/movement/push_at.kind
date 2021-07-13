@@ -5,10 +5,17 @@ App.KL.Game.Effect.movement.push_at(
 
   App.KL.Game.Effect {
     get center   = App.KL.Game.Effect.coord.get_center
+    get creature = App.KL.Game.Effect.board.creature.get(target)
+    without creature: App.KL.Game.Effect.pass
     let distance = Hexagonal.Axial.distance(center, target)
     let x        = 1.0 / I32.to_f64(distance)
     let goal     = Hexagonal.Axial.lerp(x, target, center)
-    App.KL.Game.Effect.movement.move_to(target, goal, ignore)
-    return unit
+    let invul = App.KL.Game.Creature.Status.invulnerable.check(creature)
+    if invul && not(ignore) then 
+      App.KL.Game.Effect.pass
+    else
+      App.KL.Game.Effect { 
+        App.KL.Game.Effect.movement.move_to(target, goal, ignore)
+        return unit
+      }
   }
-    

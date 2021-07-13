@@ -17,8 +17,11 @@ App.KL.Game.Creature.Status.update.aux(
       []
     cons: 
       let head = case status.head {
+        block : App.KL.Game.Creature.Status.block(status.head.id, I32.sub(status.head.duration, 1), status.head.caster)
         burn : App.KL.Game.Creature.Status.burn(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
         haste : App.KL.Game.Creature.Status.haste(I32.sub(status.head.duration, 1), status.head.amount)
+        hot : App.KL.Game.Creature.Status.hot(status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
+        invulnerable: App.KL.Game.Creature.Status.invulnerable(status.head.id, I32.sub(status.head.duration ,1))
         poison : App.KL.Game.Creature.Status.poison(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
         root: App.KL.Game.Creature.Status.root(I32.sub(status.head.duration, 1))
         silence: App.KL.Game.Creature.Status.silence(I32.sub(status.head.duration, 1))
@@ -28,8 +31,11 @@ App.KL.Game.Creature.Status.update.aux(
       }
       let tail = App.KL.Game.Creature.Status.update.aux(status.tail)
       case head {
+        block : if I32.gtn(head.duration,0) then head & tail else tail
         burn : if I32.gtn(head.duration,0) then head & tail else tail
         haste : if I32.gtn(head.duration,0) then head & tail else tail
+        hot : if I32.gtn(head.duration,0) then head & tail else tail
+        invulnerable : if I32.gtn(head.duration,0) then head & tail else tail
         poison : if I32.gtn(head.duration,0) then head & tail else tail
         root : if I32.gtn(head.duration,0) then head & tail else tail
         silence: if I32.gtn(head.duration,0) then head & tail else tail

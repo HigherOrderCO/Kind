@@ -11,6 +11,11 @@ type App.KL.Game.Creature {
 
 
 type App.KL.Game.Creature.Status {
+  block(
+    id: String
+    duration: I32
+    caster: String
+  )
   burn(
     id: String
     duration: I32
@@ -19,6 +24,17 @@ type App.KL.Game.Creature.Status {
   haste(
     duration : I32
     amount: I32
+  )
+  //Heal Over Time
+  hot(
+    id: String
+    duration: I32
+    stack: I32
+    amount: I32
+  )
+  invulnerable(
+    id: String
+    duration: I32
   )
   poison(
     id: String
@@ -52,5 +68,6 @@ App.KL.Game.Creature.Status.get_effect(
   
   case status { 
     burn: App.KL.Game.Effect.status.burn.apply(status.id, status.duration, status.amount)
+    hot:log(String.show_clean(I32.show(status.amount))) App.KL.Game.Effect.status.hot.apply(status.id, status.duration, status.amount)
     poison: App.KL.Game.Effect.status.poison.apply(status.id, status.duration, status.amount)
   } default (pos)App.KL.Game.Effect { return +0#32 }

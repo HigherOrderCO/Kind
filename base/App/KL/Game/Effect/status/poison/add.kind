@@ -15,8 +15,12 @@ App.KL.Game.Effect.status.poison.add(
     without creature: App.KL.Game.Effect { return +0#32 }
     let poison = App.KL.Game.Creature.Status.poison.add(creature, id, duration, amount)
     let new_board = App.KL.Game.Board.Creature.set(pos, poison, board)
-    App.KL.Game.Effect {
-      App.KL.Game.Effect.board.set(new_board)
-      return amount
-    }
+    let invul = App.KL.Game.Creature.Status.invulnerable.check(creature)
+    if invul then
+      App.KL.Game.Effect { return +0#32 } 
+    else
+      App.KL.Game.Effect {
+        App.KL.Game.Effect.board.set(new_board)
+        return amount
+      }
   }
