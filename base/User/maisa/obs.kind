@@ -2,6 +2,8 @@
 // TODO:
 // Vector.split_at
 // Victor: Create String.hex.decode.utf8
+
+// DONE:
 // Victor: rename to U16.to_hex to U16.hex.encode.utf8 
 
 // U8.parse_hex
