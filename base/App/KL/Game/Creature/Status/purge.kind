@@ -1,0 +1,15 @@
+//removes positive effects from a creature
+App.KL.Game.Creature.Status.purge(
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+
+  case status { 
+    nil:
+      status
+    cons:
+      case status.head { 
+        haste: App.KL.Game.Creature.Status.purge(status.tail)
+        hot: App.KL.Game.Creature.Status.purge(status.tail)
+        shield: App.KL.Game.Creature.Status.purge(status.tail)
+      }default status.head & App.KL.Game.Creature.Status.purge(status.tail)
+  }

@@ -1,0 +1,14 @@
+App.KL.Game.Effect.status.hot.add(
+  id: String
+  duration: I32
+  amount: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect { 
+    let duration_show = String.show_clean(I32.show(duration))
+    let amount_show = String.show_clean(I32.show(amount))
+    let turn = if I32.gtn(duration, 1) then " turns" else " turn"
+    App.KL.Game.Effect.description.add("Add a heal over time status for"|duration_show|turn| " healing for"|amount_show)
+    App.KL.Game.Effect.status.hot.change_at(id, duration, amount, pos)
+  }

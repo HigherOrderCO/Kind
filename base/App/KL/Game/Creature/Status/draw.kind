@@ -20,8 +20,11 @@ App.KL.Game.Creature.Status.draw.aux(
   open creature
   for status in creature.status with statuses:
     case status { 
+      block: "D" & statuses
       burn: "B" & statuses
       haste: "H" & statuses
+      hot: String.concat("HOT", Nat.show(I32.to_nat(status.stack))) & statuses
+      invulnerable: "I" & statuses
       poison: "P" & statuses
       root: "R" & statuses
       silence: "SI" & statuses
