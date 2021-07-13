@@ -82,7 +82,7 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
     "font-size": "2rem"
     "border": "0"
     "border-radius": "5px"
-    "cursor": "pointer"
+    "cursor": "inherit"
     "min-width": "270px"
     "margin": "20px"
   }>
@@ -557,7 +557,7 @@ App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room
       "display": "inline-block"
       "font-size": "32px"
       "margin": "4px 2px"
-      "cursor": "pointer"
+      "cursor": "inherit"
     }>
       text
     </button>

@@ -79,7 +79,9 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
           }
         }
       </div>
-      <div >{//style={"background": "url(\"https://i.imgur.com/SguOlY0.png\")"}>{ 
+      <div style={
+        "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
+      }>{
         let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
         let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
         DOM.vbox(
@@ -87,7 +89,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
             "width": width,
             "height": height,
             "scale": "2"},
-          {"background": "transparent"},
+          {},
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
       {
@@ -434,6 +436,20 @@ App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, ga
 
 // AUX FUNCTIONS
 // =============
+
+App.KL.Game.Phase.Play.draw.get_cursor(
+  local: App.KL.Game.State.Local
+  game : App.KL.Game
+): String
+  let cursor =
+    Maybe {
+      get skill_key = local@preview@skill
+      let skill_key = skill_key@fst
+      get skill  = App.KL.Game.Skill.get(local@user, skill_key, game)
+      return skill@cursor
+    } <> App.KL.Game.Cursor.default
+  
+  App.KL.Game.Cursor.get_img(cursor)
 
 App.KL.Game.Phase.Play.draw.letter(
   tile_coord: Hexagonal.Axial

@@ -16,16 +16,16 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".")
+    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
 
     "Q": App.KL.Game.Skill.new("Summon Wall", 93, 48, summon_wall_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.summon_wall(summon_wall_range@snd, 1),
-    "Frost summons a Frozen Wall in a position, preventing heroes to walk on it.")
+    "Frost summons a Frozen Wall in a position, preventing heroes to walk on it.", App.KL.Game.Cursor.attack)
 
     "W": App.KL.Game.Skill.new("Ice Fall", 701, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.ice_fall(2, 1),
-    "Frost creates a slipping surface around him, pulling enemies nearby.")
+    "Frost creates a slipping surface around him, pulling enemies nearby.", App.KL.Game.Cursor.attack)
 
     "E": App.KL.Game.Skill.new("Ravenous Bite", 702, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1),
-    "Frost quickly bites all enemies in front of him, dealing 3 damage.")
+    "Frost quickly bites all enemies in front of him, dealing 3 damage.", App.KL.Game.Cursor.attack)
   }
 
   let on_stepped = none
