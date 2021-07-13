@@ -1,0 +1,27 @@
+U16.hex.encode.utf8(a: U16): String
+  String.cons(U16.hex.encode.utf8.aux(U16.shr(a,4)),
+  String.cons(U16.hex.encode.utf8.aux(U16.and(a,0xf)),
+  String.nil))
+
+U16.hex.encode.utf8.aux(a: U16): U16
+  switch U16.eql(a) {
+     0#16: '0'
+     1#16: '1'
+     2#16: '2'
+     3#16: '3'
+     4#16: '4'
+     5#16: '5'
+     6#16: '6'
+     7#16: '7'
+     8#16: '8'
+     9#16: '9'
+    10#16: 'a'
+    11#16: 'b'
+    12#16: 'c'
+    13#16: 'd'
+    14#16: 'e'
+    15#16: 'f'
+  } default '0'
+
+
+
