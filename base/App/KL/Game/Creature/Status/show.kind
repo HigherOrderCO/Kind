@@ -3,8 +3,11 @@ App.KL.Game.Creature.Status.show(
 ): String
 
   case status { 
+    block: "Deny id: "| status.id | ", duration: "| I32.show(status.duration)| ", caster: "| status.caster
     burn: "burn: "| status.id | ", duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
     haste: "haste duration: " | I32.show(status.duration) | ", amount: " | I32.show(status.amount)
+    hot: "Heal over time: "| status.id | ", duration: " | I32.show(status.duration) | ", heal: " | I32.show(status.amount) | ", stacks:" | I32.show(status.stack)
+    invulnerable: "invulnerability duration: " | I32.show(status.duration) | ", id: " | status.id
     poison: "poison: "| status.id | ", duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
     root: "root  duration: " | I32.show(status.duration) 
     silence: "silence  duration: " | I32.show(status.duration)

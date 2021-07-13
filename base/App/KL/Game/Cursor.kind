@@ -1,0 +1,8 @@
+type App.KL.Game.Cursor {
+  default
+  attack
+  heal
+  move
+  // pointer
+}
+

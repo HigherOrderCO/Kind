@@ -15,16 +15,16 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 12, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(1, 1),
-    "Walk to another tile within 1 range from " | name | ".")
+    "Walk to another tile within 1 range from " | name | ".", App.KL.Game.Cursor.move)
 
     "Q": App.KL.Game.Skill.new("Tentackle", 300, 48, 2, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Zoio.hero.Skills.tentackle(2, 4, 1),
-    "Zoio quickly hits an enemy with his Tentacle, dealing 4 damage and poisoning the enemy.")
+    "Zoio quickly hits an enemy with his Tentacle, dealing 4 damage and poisoning the enemy.", App.KL.Game.Cursor.attack)
 
     "W": App.KL.Game.Skill.new("Eye Beam", 480, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(16, 8, 2),
-    "Zoio fires a powerful beam across the whole battlefield, dealing 8 damage and burning all enemies hit.")
+    "Zoio fires a powerful beam across the whole battlefield, dealing 8 damage and burning all enemies hit.", App.KL.Game.Cursor.attack)
 
     "E": App.KL.Game.Skill.new("Blinkaboom", 800, 48, 32, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(16, 16, 3),
-    "After a brief delay, Zoio blinks to a tile, sacrificing himself to deal high damage across the battlefield.")
+    "After a brief delay, Zoio blinks to a tile, sacrificing himself to deal high damage across the battlefield.", App.KL.Game.Cursor.attack)
   }
 
   let on_stepped = none

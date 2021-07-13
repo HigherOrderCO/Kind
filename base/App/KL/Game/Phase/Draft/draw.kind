@@ -82,7 +82,7 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
     "font-size": "2rem"
     "border": "0"
     "border-radius": "5px"
-    "cursor": "pointer"
+    "cursor": "inherit"
     "min-width": "270px"
     "margin": "20px"
   }>
@@ -337,12 +337,10 @@ App.KL.Game.Phase.Draft.draw.cards(tab: String, players: Map<App.KL.Game.Player>
 // -----
 
 App.KL.Game.Phase.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
-  lst       = Map.to_list!(map)
   teammates = []
-  for info in lst with teammates:
-    open info
-    if App.KL.Game.Team.eql(team, info.snd@team) then
-      info & teammates
+  for id:player in map with teammates:
+    if App.KL.Game.Team.eql(team, player@team) then
+      {id, player} & teammates
     else
       teammates
   count = 2 - List.length!(teammates)
@@ -559,7 +557,7 @@ App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room
       "display": "inline-block"
       "font-size": "32px"
       "margin": "4px 2px"
-      "cursor": "pointer"
+      "cursor": "inherit"
     }>
       text
     </button>

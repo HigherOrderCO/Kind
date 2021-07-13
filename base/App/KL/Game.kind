@@ -58,7 +58,11 @@ App.KL.Game.start: App.KL.Game
 // ===============
 
 App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
-  <div>{
+  let style = {
+    "cursor": "url("|App.KL.Game.Cursor.get_img(App.KL.Game.Cursor.default)|"), auto"
+  }
+
+  <div style=style>{
     let game = global@game
     case game {
       none: <div>"Not ingame."</div>

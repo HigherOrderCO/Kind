@@ -20,16 +20,16 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".")
+    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
 
     "Q": App.KL.Game.Skill.new("Flux", 860, 48, trap_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Croni.hero.Skills.flux(trap_range@snd, 12, 1), 
-    "Croni casts a targeted dark flux, dealing 12 damage in a single area.")
+    "Croni casts a targeted dark flux, dealing 12 damage in a single area.", App.KL.Game.Cursor.attack)
 
     "W": App.KL.Game.Skill.new("Trap", 150, 24, flux_range@fst, App.KL.Game.Skill.Pattern.multiple_no_repeat(2), App.KL.Game.Hero.Croni.hero.Skills.trap(flux_range@snd, 1), 
-    "Croni summons a Trap that roots when stepped on.")
+    "Croni summons a Trap that roots when stepped on.", App.KL.Game.Cursor.attack)
 
     "E": App.KL.Game.Skill.new("Void", 880, 24, void_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Croni.hero.Skills.void(void_range@snd, 1),
-    "Croni summons a Void that blocks movement. Can be reactivated to root around it.")
+    "Croni summons a Void that blocks movement. Can be reactivated to root around it.", App.KL.Game.Cursor.attack)
 
   }
 
