@@ -13,19 +13,19 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
 
   let skills = {
     "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(2, 1),
-    "Walk to another tile within 2 range from " | name |".")
+    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
 
     "Q": App.KL.Game.Skill.new("Haste", 320, 48, 32, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Flina.Skill.Haste(32, 1, 2, 1),
-    "Flina grants haste to an ally, increasing their movement.")
+    "Flina grants haste to an ally, increasing their movement.", App.KL.Game.Cursor.heal)
 
     "W": App.KL.Game.Skill.new("Heal", 330, 48, 32, App.KL.Game.Skill.Pattern.vector, App.KL.Game.Hero.Flina.Skill.Heal(32, 2, 1),
-    "Flina restores Health Points for all allies in the area.")
+    "Flina restores Health Points for all allies in the area.", App.KL.Game.Cursor.heal)
 
     "E": App.KL.Game.Skill.new("Dampen", 350, 48, 32, App.KL.Game.Skill.Pattern.vector, App.KL.Game.Hero.Flina.Skill.Dampen(32, 3, 2, 2),
-    "Flina weakens all enemies in an area, reducing all damage dealt by them for 2 turns.")
+    "Flina weakens all enemies in an area, reducing all damage dealt by them for 2 turns.", App.KL.Game.Cursor.heal)
 
     "R": App.KL.Game.Skill.new("Flight", 950, 48, 32, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(32, 3),
-    "After a long delay, Flina flies to any place in the battlefield.")
+    "After a long delay, Flina flies to any place in the battlefield.", App.KL.Game.Cursor.heal)
   }
 
   let on_stepped = none
