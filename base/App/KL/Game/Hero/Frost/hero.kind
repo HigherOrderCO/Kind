@@ -7,6 +7,8 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Frost.Assets.base64_idle
 
+  let height = 18 :: I32 // Distance from center of image to the top of it
+
   let max_hp = 35 :: I32
 
   let max_ap = 3 :: I32
@@ -32,7 +34,7 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   let description = "Frost is a resistant warrior with several different crowd control skills."
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS
@@ -92,10 +94,11 @@ App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
   let name = "Frozen_wall"
   let draw = (pose) {none, App.KL.Game.Field.Elements.rock_11_0}
   let picture = (bool, time) App.KL.Game.Hero.Frost.Assets.base64_idle
+  let height = 20 :: I32
   let max_hp = 12 :: I32
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect { return unit })
   let description = "A wall created by Frost that blocks a tile"
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
 

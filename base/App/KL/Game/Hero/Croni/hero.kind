@@ -7,6 +7,8 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Croni.Assets.base64_idle
 
+  let height = 18 :: I32 // Distance from center of image to the top of it
+
   let max_hp = 12 :: I32
 
   let max_ap = 3 :: I32
@@ -35,7 +37,7 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let description = "Croni is a fragile mage with slow skills that deal high damage from afar."
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS
@@ -133,6 +135,7 @@ App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
   let name = "Croni.Trap"
   let draw = (pose) {none, App.KL.Game.Field.Elements.mushroom_0_0}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
+  let height = 20 :: I32
   let max_hp = 6 :: I32
   let max_ap = 0 :: I32
   let skills = {}
@@ -142,12 +145,13 @@ App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
     return unit
   })
   let description = "A Trap created by Croni that stuns whoever steps on it"
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
 
 App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
   let name = "Croni.Void"
   let draw = (pose) {none, App.KL.Game.Field.Elements.baner_1}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
+  let height = 20 :: I32
   let max_hp = 6 :: I32
   let max_ap = 0 :: I32
   let skills = {}
@@ -157,4 +161,4 @@ App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
     return unit
   })
   let description = "A Void created by Croni"
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)

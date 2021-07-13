@@ -7,6 +7,8 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Flina.Assets.base64_idle
 
+  let height = 40 :: I32
+
   let max_hp = 10 :: I32
 
   let max_ap = 3 :: I32
@@ -32,7 +34,7 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
 
   let description = "Flina is a resistant warrior with several different crowd control skills."
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS

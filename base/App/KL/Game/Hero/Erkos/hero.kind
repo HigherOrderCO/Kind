@@ -7,6 +7,8 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Erkos.Assets.base64_idle
 
+  let height = 20 :: I32 // Distance from center of image to the top of it
+
   let max_hp = 16 :: I32
 
   let max_ap = 3 :: I32
@@ -32,7 +34,7 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
 
   let description = "Erkos is a fragile fire mage with high damage in large areas."
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, none, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS

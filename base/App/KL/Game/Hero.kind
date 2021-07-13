@@ -3,6 +3,7 @@ type App.KL.Game.Hero {
     name: String
     draw: App.KL.Game.Hero.Draw.Pose -> App.KL.Game.Hero.Draw.Result
     picture: Bool -> U64 -> String // rename to portrait?
+    height: I32
     max_hp: I32
     max_ap: I32
     skills: Map<App.KL.Game.Skill> // letter -> skill

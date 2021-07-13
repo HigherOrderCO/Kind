@@ -169,6 +169,8 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Kenlua.Assets.base64_idle
 
+  let height = 20 :: I32 // Distance from center of image to the top of it
+
   let max_hp = 16 :: I32
 
   let max_ap = 3 :: I32
@@ -194,7 +196,7 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
 
   let description = "Kenlua is a fragile, but nimble assassin with great mobility and high damage."
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS

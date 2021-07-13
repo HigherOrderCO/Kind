@@ -325,17 +325,18 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       //let cx = cx - aux //U32
       //log(U32.show( cy + 100))
       {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let cx = cx - (128::U32)
-      let cy = cy - (128::U32)
-      let img = VoxBox.Draw.image(cx, cy, App.KL.Constants.z_index.hero, draw_voxbox, img)
+      let img_x = cx - (128::U32)
+      let img_y = cy - (128::U32)
+      let height = I32.to_u32(hero@height)
+      let img = VoxBox.Draw.image(img_x, img_y, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 
         none:
           img
         some:
-          let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
-          let img = App.KL.Game.Creature.Status.draw(cx + 116, cy + 88, creature.value, img) // Placeholder for Showing status
-          let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 31, creature.value, ap_used, img)
+          let img = App.KL.Game.Phase.Play.Bar.show_hp(cx - 17, (cy - height), creature.value, img)
+          let img = App.KL.Game.Creature.Status.draw(cx - 12, (cy - height) - 12, creature.value, img) // Placeholder for Showing status
+          let img = App.KL.Game.Phase.Play.draw.ap(img_x - 12, (img_y - height) - 3, creature.value, ap_used, img)
           img
       }
 
