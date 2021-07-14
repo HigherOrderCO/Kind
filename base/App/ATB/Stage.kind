@@ -1,0 +1,17 @@
+type App.ATB.Stage.status_room {
+    new(room_id : String)
+}
+
+type App.ATB.Stage.status_draft {
+    new(
+        room_id : String
+        char_id : Maybe<String>
+    )
+}
+
+type App.ATB.Stage
+{
+    room(status : App.ATB.Stage.status_room)
+    draft(status : App.ATB.Stage.status_draft)
+    play
+}

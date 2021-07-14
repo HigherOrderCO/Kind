@@ -1,5 +1,5 @@
 App.ATB.init : App.Init(App.ATB.State)
     App.Store.new!(
-        App.ATB.State.local.new 
+        App.ATB.State.local.new(App.ATB.Stage.room(App.ATB.Stage.status_room.new("")))
         App.ATB.State.global.new
     )
