@@ -1,4 +1,4 @@
-App.KL.Game.Effect.status.dot.apply(
+App.KL.Game.Effect.status.poison.apply(
   id: String
   duration: I32
   amount: I32
