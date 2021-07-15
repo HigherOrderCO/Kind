@@ -1,0 +1,162 @@
+// App states (local = clicks, global = visitors)
+App.CardPlayer.State: App.State
+  App.State.new(Nat, Nat)
+
+// Initial state
+App.CardPlayer.init: App.Init<App.CardPlayer.State>
+  App.Store.new<App.CardPlayer.State>(0, 0)
+
+// Render function
+App.CardPlayer.draw: App.Draw<App.CardPlayer.State>
+  (state)
+    <div style={"margin": "5px", "display": "flex"}>
+      { App.CardPlayer.card.user("FLINA", "HEALER", "https://i.imgur.com/T49eUdC.png") }
+      { App.CardPlayer.card.others("CRONI", "MAGE", "https://i.imgur.com/T49eUdC.png") }
+      { App.CardPlayer.card.others("ZOIO", "SENTINEL", "https://i.imgur.com/T49eUdC.png") }
+    </div>
+
+App.CardPlayer.card.user(name: String, type: String, img: String): DOM
+  let fator = 2
+  let bt    = 2
+  let inner = 
+    <div style={"display": "contents"}>
+      <div style={"height": "40%", "width": "17%", "max-height": "40%", "overflow": "auto", "border-radius": "5px 0px 0px 5px"}>
+        for i in [0 to 50]:
+          <div style={
+            "background": "#638627"
+            "height": "20%"
+            "width": "100%"
+            "text-align": "center"
+            // "font-size": "1.5rem"
+            "border-radius": "5px"
+          }>
+            Nat.show(i)
+          </div>
+      </div>
+      <div style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
+        {App.CardPlayer.card.hero(name, type, img)}
+      </div>
+    </div>
+  
+  App.CardPlayer.card.wrapper(99, 208, bt, fator, "https://i.imgur.com/HTnAVKj.png", inner)
+
+App.CardPlayer.card.others(name: String, type: String, img: String): DOM
+  let fator = 2
+  let bt    = 2
+  let inner = 
+    <div style={"width": "100%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
+      {App.CardPlayer.card.hero(name, type, img)}
+    </div>
+  
+  App.CardPlayer.card.wrapper(82, 208, bt, fator, "https://i.imgur.com/CI2xJrU.png", inner)
+
+// https://i.imgur.com/HTnAVKj.png
+App.CardPlayer.card.wrapper(width: Nat, height: Nat, bt: Nat, fator: Nat, background: String, inner: DOM): DOM
+  <div style={
+    "height": Nat.show(fator * height) | "px", 
+    "width": Nat.show(fator * width) | "px", 
+    "display": "flex", 
+    "background-image": "url("|background|")", 
+    "background-size": "100% 100%", 
+    "padding-top": Nat.show(fator * bt) | "px"
+    "margin": "0 10px"
+  }>
+    {inner}
+  </div>
+
+App.CardPlayer.card.hero(name: String, type: String, img: String): DOM
+  <div style={"height": "100%"}>
+    <div style={
+      "height": "52%"
+    }>
+      {App.CardPlayer.card.img(name, type, img)}
+    </div>
+    <div style={"height": "48%", "width": "100%"}>
+      {App.CardPlayer.card.stats}
+    </div>
+  </div>
+
+// https://i.imgur.com/T49eUdC.png
+App.CardPlayer.card.img(name: String, type: String, img: String): DOM
+  <div style={"position": "relative", "height": "100%"}> 
+    <div style={
+      "position": "absolute", 
+      "margin-left": "auto"
+      "margin-right": "auto"
+      "left": "0"
+      "right": "0"
+      "text-align": "center"
+      "top": "-10%"
+      "width": "55%",
+      "height": "55%",
+      "background-image": "url("|img|")",
+      "background-size": "cover",
+      "background-position": "center",
+      "background-repeat": "no-repeat"
+    }></div>
+    <div style={
+      "position": "absolute"
+      "top": "70%"
+      "left": "0"
+      "right": "0"
+      "margin": "auto"
+      "height": "25%"
+      "display": "flex"
+      "flex-direction": "column"
+      "justify-content": "space-between"
+      "align-items": "center"
+    }>
+      <span style={"color": "white"}>name</span>
+      <hr></hr>
+      <span style={"color": "white"}>type</span>
+    </div>
+  </div>
+
+App.CardPlayer.card.stats: DOM
+  <div style={"display": "contents"}> 
+    for i in [0 to 5]:
+      <div style={"height": "17%", "display": "flex", "align-items": "center", "padding": "2% 5%", "border": "1% solid black"}>
+        // <span>Nat.show(i)</span>
+        <div style={
+          "height": "100%"
+          "flex": "1"
+          "background-image": "url(https://img.icons8.com/metro/452/sword.png)"
+          "background-position": "center"
+          "background-size": "contain"
+          "background-repeat": "no-repeat"
+        }></div>
+        <div style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
+          for j in [1 to 6]:
+            let color = case Nat.cmp(j, i) {
+              ltn: "#382137"
+              eql: "#095838"
+              gtn: "#683782"
+            }
+            <div style={"margin": "0 1px", "height": "20%", "flex": "1", "background-color": color}></div>
+        </div>
+      </div>
+  </div>
+
+// Event handler
+App.CardPlayer.when: App.When<App.CardPlayer.State>
+  (event, state)
+  App.pass!
+
+// Global ticker: not used
+App.CardPlayer.tick: App.Tick<App.CardPlayer.State>
+  App.no_tick<App.CardPlayer.State>
+
+// Global visitor: counts posts to room_zero
+App.CardPlayer.post: App.Post<App.CardPlayer.State>
+  (time, room, addr, data, global_state)
+  global_state + 1
+
+// A "CardPlayer, world!" + counter application
+App.CardPlayer: App<App.CardPlayer.State>
+  App.new<App.CardPlayer.State>(
+    App.CardPlayer.init
+    App.CardPlayer.draw
+    App.CardPlayer.when
+    App.CardPlayer.tick
+    App.CardPlayer.post
+  )
