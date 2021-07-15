@@ -63,7 +63,9 @@ App.BoardBuilder.Builder.Draw.terrain(
   canvas_size: Pair<I32, I32>
   img: VoxBox
 ): VoxBox
-  let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
+  let {i, j} = App.KL.Game.Phase.Play.draw.centralize(coord)
+  let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
+  let j = (j - 128) + I32.to_u32(App.KL.Constants.hexagon_radius) + 5
   // let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, canvas_size@fst, canvas_size@snd)
   let field  = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   let field_drawing = field@draw(terrain, App.KL.Game.Indicator.background)

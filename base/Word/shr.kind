@@ -1,4 +1,3 @@
-// Shift 'value' bits in 'n' to the right
 Word.shr<size: Nat>(n: Word(size), value: Word(size)): Word(size)
   n_nat = Word.to_nat!(n)
   Word.shift_right!(value, n_nat)

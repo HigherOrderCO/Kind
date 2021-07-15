@@ -1,0 +1,18 @@
+App.KL.Game.Effect.status.add(
+  creature: App.KL.Game.Creature
+  status: App.KL.Game.Creature.Status
+): App.KL.Game.Effect.At<Unit>
+  (pos)
+
+  App.KL.Game.Effect { 
+    get board = App.KL.Game.Effect.board.get
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    without creature: App.KL.Game.Effect { return unit }
+    let status_add = App.KL.Game.Creature.Status.add(creature, status)
+    let new_board = App.KL.Game.Board.Creature.set(pos, status_add, board)
+    App.KL.Game.Effect { 
+    //Adds the description for the effect
+      App.KL.Game.Effect.status.description(status)
+      App.KL.Game.Effect.board.set(new_board)
+    }
+  }

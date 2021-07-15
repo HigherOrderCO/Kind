@@ -1,0 +1,37 @@
+App.KL.Game.Creature.Status.dot.add(
+  creature: App.KL.Game.Creature
+  id: String
+  duration: I32
+  amount: I32
+): App.KL.Game.Creature
+  
+  let dot_added = App.KL.Game.Creature.Status.dot.add.aux(id, duration, amount, creature@status)
+  creature@status <- dot_added
+
+App.KL.Game.Creature.Status.dot.add.aux(
+  id: String
+  duration: I32
+  amount: I32
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+
+  new_dot = App.KL.Game.Creature.Status.dot(id, duration, 1, amount)
+  case status { 
+    nil:
+      new_dot & status
+    cons:
+      case status.head { 
+        dot: 
+          is_same = String.eql(id, status.head.id)
+          if is_same then
+            let dot_duration = status.head.duration + 1
+            let dot_stacks = status.head.stack + 1
+            let dot_damage = status.head.amount * 2
+            if I32.gtn(dot_stacks, 3) then
+              App.KL.Game.Creature.Status.dot("final_apply", 1, 0, status.head.amount + 2) & status.tail
+            else 
+              App.KL.Game.Creature.Status.dot(status.head.id, dot_duration, dot_stacks, dot_damage) & status.tail
+          else
+            status.head & App.KL.Game.Creature.Status.dot.add.aux(id, duration, amount,  status.tail)
+      }default status.head & App.KL.Game.Creature.Status.dot.add.aux(id, duration, amount,  status.tail)
+  }

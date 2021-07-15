@@ -1,9 +1,16 @@
+// From ECDSA
+// add Nat.parse_hex 
+// add Nat.egcd
+// add Nat.mul_Var
+// add Int.parse_hex
+// add Nat.parse_decimal
+// add String.cons_Var
+// add Nat.add_Var
+// add String.concat_Var
 
 // TODO:
 // Vector.split_at
 // Victor: Create String.hex.decode.utf8
-
-// DONE:
 // Victor: rename to U16.to_hex to U16.hex.encode.utf8 
 
 // U8.parse_hex
@@ -11,6 +18,7 @@
 
 // FIXME:
 // Maybe.extract está diferente do que era no Formality, por quê?
+
 
 
 // use x = qualquer(coisa, mesmo)
@@ -27,28 +35,3 @@
 ECDSA.sign(msgHash: String, priv: Nat): ECDSA.Error(String)
   let func = (qrs) ECDSA.Error.ok!(ECDSA.sign_qrs(priv, qrs))
   ECDSA.Error.bind!!(ECDSA.get_QRS_RFC6979(msgHash, priv))(func)
-
-
-utf8decode=
-  ([m,n,o,p])=>
-    if m<0x80 then
-    ( m&0x7f)<<0 
-    else if 0xc1<m&&m<0xe0&&n===(n&0xbf) then
-    ( m&0x1f)<<6|( n&0x3f)<<0
-    else if ( m===0xe0&&0x9f<n&&n<0xc0
-    ||0xe0<m&&m<0xed&&0x7f<n&&n<0xc0
-    ||m===0xed&&0x7f<n&&n<0xa0
-    ||0xed<m&&m<0xf0&&0x7f<n&&n<0xc0)
-  &&o===o&0xbf 
-    then ( m&0x0f)<<12|( n&0x3f)<<6|( o&0x3f)<<0
-    else if ( m===0xf0&&0x8f<n&&n<0xc0
-    ||m===0xf4&&0x7f<n&&n<0x90
-    ||0xf0<m&&m<0xf4&&0x7f<n&&n<0xc0)
-  &&o===o&0xbf&&p===p&0xbf
-    then ( m&0x07)<<18|( n&0x3f)<<12|( o&0x3f)<<6|( p&0x3f)<<0
-    else (()=>{throw'Invalid UTF-8 encoding!'})()
-
-
-// ABOUT UFT-8
-// Certain code points are off limits: surrogate halves. 
-// These are code points U+D800 through U+DFFF

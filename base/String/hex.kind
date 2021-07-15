@@ -13,7 +13,6 @@ String.hex.decode.go(hexs: String): String
         Char.to_string(char) | String.hex.decode.go(rest)
   }
 
-// U16
 String.hex.decode(hexs: String): String
   String.hex.decode.go(hexs)
 
@@ -63,31 +62,8 @@ String.hex.encode.utf8(str: String): String
   case str {
     nil: String.nil
     cons:
-      let hex = U16.hex_show(str.head)
+      let hex = U16.to_hex.show(str.head)
       String.concat(hex, String.to_hex(str.tail))
   }
 
-// WIP!
 // TODO: create String.hex.decode.utf8
-// 1 char can have 1, 2, 3 or 4 bytes lenght
-// Note: check for surrogate half?
-// https://rosettacode.org/wiki/UTF-8_encode_and_decode#JavaScript
-String.hex.from_utf8(m: U16, n: U16, o: U16, p: U16): String
-  // let m = U8.to_u16(m)
-  // let n = U8.to_u16(n)
-  log("0m: "|U16.show(m))
-  log("0n: "|U16.show(n))
-  if U16.ltn(m, 0x80) then // ok
-    String.hex.decode(U16.show(m))
-  else if U16.eql(U16.and(m, 0xe0), 0xc0) then
-    log("2 bytes")
-    let c0 = U16.shl(U16.and(m, 0x1f), 6)
-    let c1 = U16.shl(U16.and(n, 0x3f), 0)
-    String.hex.decode(U16.show(U16.or(c0, c1)))
-  else if U16.eql(U16.and(m, 0xf0), 0xe0) then // s[0] & 0xf0) == 0xe0
-    "3 bytes" 
-  else if Bool.and( // (s[0] & 0xf8) == 0xf0 && (s[0] <= 0xf4)
-    U16.eql(U16.and(m, 0xf8), 0xf0),
-    U16.lte(m, 0xf4)) then "4 bytes"
-  else
-    "invalid"

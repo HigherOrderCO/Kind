@@ -5,8 +5,11 @@ App.KL.Game.Effect.status.invulnerable.add(
   (pos)
 
   App.KL.Game.Effect { 
-    let duration_show = String.show_clean(I32.show(duration))
-    let turn = if I32.gtn(duration, 1) then " turns" else " turn"
-    App.KL.Game.Effect.description.add("Makes a creature invulnerable for"|duration_show|turn| " protecting it from any negative effects")
-    App.KL.Game.Effect.status.invulnerable.change_at(id, duration, pos)
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    without creature: App.KL.Game.Effect { return +0#32 }
+    let invul = App.KL.Game.Creature.Status.invulnerable(id, duration)
+    App.KL.Game.Effect { 
+      App.KL.Game.Effect.status.add(creature, invul, pos)
+      return duration
+    }
   }
