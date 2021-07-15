@@ -1,7 +1,10 @@
+// TODO: optimize
 // Returns a map with the player Address as the key to its respective coordinate 
 App.KL.Game.Board.find_players(board: App.KL.Game.Board): Map<Hexagonal.Axial>
+  let tile_list = Hexagonal.Axial.Map.to_list!(board)
   let players = []
-  for coord:tile in board with players:
+  for coord_tile in tile_list with players:
+    let {coord,tile} = coord_tile
     let creature = tile@creature
     case creature {
       none: players

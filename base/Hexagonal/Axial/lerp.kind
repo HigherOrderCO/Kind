@@ -4,8 +4,8 @@ Hexagonal.Axial.lerp(
   goal: Hexagonal.Axial
 ): Hexagonal.Axial
 
-  let a_i = I32.to_f64(origin@i) + 0.000001
-  let a_j = I32.to_f64(origin@j) + 0.000002
+  let a_i = I32.to_f64(origin@i)
+  let a_j = I32.to_f64(origin@j)
   let b_i = I32.to_f64(goal@i)
   let b_j = I32.to_f64(goal@j)
   let i   = F64.lerp(a_i, b_i, x)

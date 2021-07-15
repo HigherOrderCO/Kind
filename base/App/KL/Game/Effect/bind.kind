@@ -4,10 +4,10 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
 ): App.KL.Game.Effect<B>
 
   //TODO: Verify problem with error result A and B
-  (center, targets, board)
-  case effect(center, targets, board) as result_a {
+  (center, target, board)
+  case effect(center, target, board) as result_a {
     err: App.KL.Game.Effect.Result.err<B>(result_a.message)
-    new: case next(result_a.value)(result_a.center, targets, result_a.board) as result_b {
+    new: case next(result_a.value)(result_a.center, target, result_a.board) as result_b {
       err: App.KL.Game.Effect.Result.err<B>(result_b.message)
       new:
         center      = result_b.center

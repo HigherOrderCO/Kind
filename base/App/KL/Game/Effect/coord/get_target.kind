@@ -1,5 +1,3 @@
 App.KL.Game.Effect.coord.get_target: App.KL.Game.Effect<Hexagonal.Axial>
-  (center, targets, map)
-  let target = List.head!(targets) <> center
-
+  (center, target, map)
   App.KL.Game.Effect.Result.new!(target, center, map, Hexagonal.Axial.Map.new!, 0, [], "")

@@ -7,8 +7,6 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Cyclope.Assets.base64_idle
 
-  let height = 28 :: I32 // Distance from center of image to the top of it
-
   let max_hp = 40 :: I32
 
   let max_ap = 3 :: I32
@@ -17,24 +15,25 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
 
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single,App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "Walk to another tile within 2 range from " | name |".")
 
-    "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 10, 1),
-    "Cyclope sacrifices 4 Health to provide 10 Shield Points to nearby allies.", App.KL.Game.Cursor.heal)
+    "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 10, 1),
+    "Cyclope sacrifices 4 Health to provide 10 Shield Points to nearby allies.")
 
-    "W": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
-    "Cyclope deals damage to an enemy equal to half of his missing Health Points.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
+    "Cyclope deals damage to an enemy equal to half of his missing Health Points.")
 
-    "E": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
-    "Cyclope stomps the ground, rooting all enemies within 2 tiles.", App.KL.Game.Cursor.attack)
+    "E": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
+    "Cyclope stomps the ground, rooting all enemies within 2 tiles.")
+
   }
 
   let on_stepped = none
 
   let description = "Cyclope is a resistant warrior. He can either protect his allies with his own life or damage enemies around him."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS

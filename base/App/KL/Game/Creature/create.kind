@@ -6,7 +6,5 @@ App.KL.Game.Creature.create(
   let hero = App.KL.Game.Hero.get_by_id(U8.to_nat(hero_id))
   case hero {
     none: none
-    some: 
-      let new_creature = App.KL.Game.Creature.new(player_addr, hero.value, team, [], hero.value@max_hp, hero.value@max_ap - 1)
-      some(App.KL.Game.Creature.Status.invulnerable.add(new_creature, "begin_game", 1))
+    some: some(App.KL.Game.Creature.new(player_addr, hero.value, team, [], hero.value@max_hp, hero.value@max_ap - 1))
   }

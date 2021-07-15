@@ -1,3 +1,3 @@
 App.KL.Game.Effect.cancel<A: Type>: App.KL.Game.Effect<A>
-  (center, targets, board)
+  (center, target, board)
   App.KL.Game.Effect.Result.err<A>

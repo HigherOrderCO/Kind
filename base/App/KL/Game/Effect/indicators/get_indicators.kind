@@ -2,7 +2,7 @@
 App.KL.Game.Effect.indicators.get_indicators(
   hero_pos: Hexagonal.Axial
   skill: App.KL.Game.Skill
-  mouse_coord: List<Hexagonal.Axial>
+  mouse_coord: Hexagonal.Axial
   map: App.KL.Game.Board
 ): Hexagonal.Axial.Map<App.KL.Game.Indicator>
 

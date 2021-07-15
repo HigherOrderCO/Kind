@@ -2,5 +2,5 @@ App.KL.Game.Effect.indicators.add(
   indicators: Hexagonal.Axial.Map(App.KL.Game.Indicator)
 ): App.KL.Game.Effect<Unit>
 
-  (center, targets, board)
+  (center, target, board)
   App.KL.Game.Effect.Result.new!(unit, center, board, indicators, 0, [], "")

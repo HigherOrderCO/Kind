@@ -82,7 +82,7 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
     "font-size": "2rem"
     "border": "0"
     "border-radius": "5px"
-    "cursor": "inherit"
+    "cursor": "pointer"
     "min-width": "270px"
     "margin": "20px"
   }>
@@ -337,10 +337,12 @@ App.KL.Game.Phase.Draft.draw.cards(tab: String, players: Map<App.KL.Game.Player>
 // -----
 
 App.KL.Game.Phase.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
+  lst       = Map.to_list!(map)
   teammates = []
-  for id:player in map with teammates:
-    if App.KL.Game.Team.eql(team, player@team) then
-      {id, player} & teammates
+  for info in lst with teammates:
+    open info
+    if App.KL.Game.Team.eql(team, info.snd@team) then
+      info & teammates
     else
       teammates
   count = 2 - List.length!(teammates)
@@ -366,7 +368,7 @@ App.KL.Game.Phase.Draft.draw.cards.ally(user: String, player: Maybe(App.KL.Game.
     }
   App.KL.Game.Phase.Draft.draw.cards.card(none, player, hero)
 
-App.KL.Game.Phase.Draft.draw.cards.skills(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, skill_key: String, width: String): DOM
+App.KL.Game.Phase.Draft.draw.cards.skills(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, skill_key: String): DOM
   case tab {
     none: <div></div>
     some:
@@ -376,7 +378,7 @@ App.KL.Game.Phase.Draft.draw.cards.skills(tab: Maybe<String> player: Maybe<App.K
         else
           "#Bfc6c9"
       <div id="D" | skill_key style={
-        "width": width
+        "width": "24%"
         "height": "100%"
         //"margin": "0 0.5%"
         "border-radius": "15px 15px 0 0"
@@ -415,17 +417,6 @@ App.KL.Game.Phase.Draft.draw.cards.card(tab: Maybe<String> player: Maybe<App.KL.
         for key:value in skills with skill_list:
           key & skill_list
         skill_list
-    }
-  
-  
-  let skill_tab_width = 
-    case hero {
-      none: 
-        "0"
-      some:
-        len = List.length!(Map.to_list!(hero.value@skills))
-        width = (100 - len)/len 
-        Nat.show(width) | "%"
     }
 
    <div style={ 
@@ -469,7 +460,7 @@ App.KL.Game.Phase.Draft.draw.cards.card(tab: Maybe<String> player: Maybe<App.KL.
       "justify-content": "space-between"
       "align-items": "flex-end"
     }>
-    for char in skills: App.KL.Game.Phase.Draft.draw.cards.skills(tab, player, char, skill_tab_width)
+    for char in skills: App.KL.Game.Phase.Draft.draw.cards.skills(tab, player, char)
     </div>
       
     <div id="D" style={ 
@@ -557,7 +548,7 @@ App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room
       "display": "inline-block"
       "font-size": "32px"
       "margin": "4px 2px"
-      "cursor": "inherit"
+      "cursor": "pointer"
     }>
       text
     </button>

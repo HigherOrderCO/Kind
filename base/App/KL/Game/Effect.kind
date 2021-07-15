@@ -1,5 +1,5 @@
 App.KL.Game.Effect(A: Type): Type
   ((center: Hexagonal.Axial) ->
-   (targets: List<Hexagonal.Axial>) ->
+   (target: Hexagonal.Axial) ->
    (board: App.KL.Game.Board) ->
    App.KL.Game.Effect.Result(A))

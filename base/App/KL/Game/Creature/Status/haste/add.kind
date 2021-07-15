@@ -19,7 +19,7 @@ App.KL.Game.Creature.Status.haste.add.aux(
       new_haste & status
     cons:
       case status.head { 
-        haste: 
+        root: 
           let old_duration = status.head.duration
           let next_haste = I32.cmp(old_duration, duration)
           case next_haste {

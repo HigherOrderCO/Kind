@@ -1,4 +1,3 @@
-// Removes n characters from the begining of the string
 String.drop(n: Nat, xs: String):  String
   case n{
   zero: xs

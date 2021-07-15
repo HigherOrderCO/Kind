@@ -141,26 +141,24 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
       idle:
         {none, idle_spr}
       cast:
-        let target = List.head!(pose.target) <> pose.center
-        let center = pose.center
         switch String.eql(pose.skill@name) {
           "Walk": 
             let coord = switch U64.lte(pose.frame) {
-              3: center // 3
-            } default target
+              3: pose.center // 3
+            } default pose.target
             {some(coord), walk_ani[U64.to_nat(pose.frame)] <> idle_spr}
           "Dash": 
             let coord = switch U64.lte(pose.frame) {
-              10: center
-            } default target
+              10: pose.center
+            } default pose.target
             {some(coord), dash_ani[U64.to_nat(pose.frame)] <> idle_spr}
           "Stare":
             {none, stare_spri}
           "Slash":
             let coord = switch U64.lte(pose.frame) {
-              22: center
-              59: target
-            } default center
+              22: pose.center
+              59: pose.target
+            } default pose.center
             {some(coord), slash_ani[U64.to_nat(pose.frame)] <> idle_spr}
         } default {none, idle_spr}
     }
@@ -168,8 +166,6 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
 
   let picture = (bool, time)
     App.KL.Game.Hero.Kenlua.Assets.base64_idle
-
-  let height = 20 :: I32 // Distance from center of image to the top of it
 
   let max_hp = 16 :: I32
 
@@ -179,24 +175,24 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
   let dash_range = {2, 2} ::Pair<U64, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name | ".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "Walk to another tile within 2 range from " | name |".")
 
-    "Q": App.KL.Game.Skill.new("Dash", 200, 47, dash_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.dash(dash_range@snd, 2, 1),
-    "Kenlua takes 2 damage to dash towards a tile within 2 range. Deal 2 damage to enemies nearby destination.", App.KL.Game.Cursor.move)
+    "Q": App.KL.Game.Skill.new("Dash", 200, 47, dash_range@fst, App.KL.Game.Hero.Kenlua.hero.Skills.dash(dash_range@snd, 2, 1),
+    "Kenlua takes 2 damage to dash towards a tile within 2 range. Deal 2 damage to enemies nearby destination.")
 
-    "W": App.KL.Game.Skill.new("Stare", 520, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.stare(10),
-    "Kenlua Stares at a tile. If there is an enemy on it, Kenlua receives 10 Shield Points for this turn.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new("Stare", 520, 48, 0, App.KL.Game.Hero.Kenlua.hero.Skills.stare(10),
+    "Kenlua Stares at a tile. If there is an enemy on it, Kenlua receives 10 Shield Points for this turn.")
 
-    "E": App.KL.Game.Skill.new("Slash", 800, 68, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.slash(1, 20, 1),
-    "Kenlua deals a lethal blow dealing 20 damage to an enemy close to Kenlua.", App.KL.Game.Cursor.attack)
+    "E": App.KL.Game.Skill.new("Slash", 800, 68, 1, App.KL.Game.Hero.Kenlua.hero.Skills.slash(1, 20, 1),
+    "Kenlua deals a lethal blow dealing 20 damage to an enemy close to Kenlua.")
   }
 
   let on_stepped = none
 
   let description = "Kenlua is a fragile, but nimble assassin with great mobility and high damage."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
 
 
 // SKILLS

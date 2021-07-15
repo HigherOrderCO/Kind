@@ -12,8 +12,8 @@ Hexagonal.Axial.shorter(
     a_dis1 = a.j - goal.j // I32
     b_dis0 = b.i - goal.i // I32
     b_dis1 = b.j - goal.j // I32
-    ab_dis0_comp = I32.ltn(I32.abs(a_dis0), I32.abs(b_dis0)) // ai < bi
-    ab_dis0_min  = I32.eql(I32.abs(a_dis0), I32.abs(b_dis0)) // ai = bi
-    ab_dis1_comp = I32.ltn(I32.abs(a_dis1), I32.abs(b_dis1)) // aj < bj
+    ab_dis0_comp = I32.ltn(I32.abs(a_dis0), I32.abs(b_dis0))
+    ab_dis0_min = I32.eql(I32.abs(a_dis0), I32.abs(b_dis0))
+    ab_dis1_comp = I32.ltn(I32.abs(a_dis1), I32.abs(b_dis1))
     diff = ab_dis0_min && ab_dis1_comp
     Bool.or(ab_dis0_comp, diff)

@@ -1,0 +1,6 @@
+Char.newline: Char
+  Char.new(
+    Bit.o, Bit.o, Bit.o, Bit.o,
+    Bit.o, Bit.o, Bit.o, Bit.o,
+    Bit.o, Bit.o, Bit.o, Bit.o,
+    Bit.i, Bit.o, Bit.i, Bit.o)

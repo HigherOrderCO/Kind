@@ -19,7 +19,7 @@ App.KL.Game.Creature.Status.weaken.add.aux(
       new_weaken & status
     cons:
       case status.head { 
-        weaken: 
+        root: 
           let old_duration = status.head.duration
           let next_weaken = I32.cmp(old_duration, duration)
           case next_weaken {

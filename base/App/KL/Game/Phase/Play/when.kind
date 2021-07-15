@@ -17,42 +17,34 @@ App.KL.Game.Phase.Play.when(
       else
         App.pass!
     key_down:
-      let preview = local@preview
-      switch U16.eql(event.code) {
-        27#16:
-          let preview = preview@skill <- none
-          IO {
-            App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_casts)
-            App.set_local!(App.KL.State.Local.game(local@preview <- preview))
-          }
-      }default
-      local = 
-        Maybe {
-          get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
-          let skill       =
-            case preview@skill as skill {
-              none: 
-                some({event.code, 1})
-              some:
-                if skill.value@fst =? event.code then
-                  none
-                else 
-                  some({event.code, 1})
-            }          
-          return local@preview <- preview@skill <- skill
-        } <> local
-      IO {
-        App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_skill(event.code))
-        App.set_local!(App.KL.State.Local.game(local))
-      }
+      App.set_local!(App.KL.State.Local.game(Maybe {
+        get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
+        let preview       = local@preview
+        let preview       =
+          case preview@skill as skill {
+            none: 
+              preview@skill <- some(event.code)
+            some:
+              if skill.value =? event.code then
+                preview@skill <- none
+              else 
+                preview@skill <- some(event.code)
+          }          
+        return local@preview <- preview
+      } <> local))
     mouse_down: 
+      // only allow cast skill in preparation mode
       case game.moment {
         preparation:
               App.KL.Game.Phase.Play.when.preparation.mouse_down(room, local, game)
         execution:
           let preview = local@preview
-          let preview = preview@skill <- none
-          App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+          case preview@skill as skill {
+            none: App.pass!
+            some:
+              let preview = preview@skill <- none
+              App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+          }
       }
   } default App.pass!
 

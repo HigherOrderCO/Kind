@@ -17,7 +17,7 @@ App.KL.Game.Creature.Status.silence.add.aux(
       new_silence & status
     cons:
       case status.head { 
-        silence: 
+        root: 
           let old_duration = status.head.duration
           let next_silence = I32.cmp(old_duration, duration)
           case next_silence {

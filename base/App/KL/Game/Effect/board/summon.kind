@@ -1,18 +1,8 @@
-//Changed, not sure if i could, but i did hehe
 App.KL.Game.Effect.board.summon(
+  coord: Hexagonal.Axial
   creature: App.KL.Game.Creature
-): App.KL.Game.Effect.At<Unit>
-  //(center, targets, board)
-  (pos)
+): App.KL.Game.Effect<Unit>
+  (center, target, board)
 
-
-  App.KL.Game.Effect { 
-    get board = App.KL.Game.Effect.board.get
-    get center = App.KL.Game.Effect.coord.get_center
-    let summoned_board = App.KL.Game.Board.push(pos, App.KL.Game.Entity.creature(creature), board)
-    if App.KL.Game.Board.is_occupied(pos, board) then
-      App.KL.Game.Effect.pass
-    else
-      App.KL.Game.Effect.board.set(summoned_board)
-    //App.KL.Game.Effect.Result.new!(unit, center, board, Hexagonal.Axial.Map.new!, 0, [])
-  }
+  let board = App.KL.Game.Board.push(coord, App.KL.Game.Entity.creature(creature), board)
+  App.KL.Game.Effect.Result.new!(unit, center, board, Hexagonal.Axial.Map.new!, 0, [], "Summon a creature on the map")
