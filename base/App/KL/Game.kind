@@ -8,6 +8,7 @@ type App.KL.Game.State.Local {
     user: String
     room: String
     tab:  String
+    info: Hexagonal.Axial
     preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
   )
@@ -17,7 +18,8 @@ App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Loca
   let preview = App.KL.Game.Cast.Preview.new(none, Hexagonal.Axial.Map.new!)
   let mouse   = {0,0}
   let tab     = "D"
-  App.KL.Game.State.Local.new(user, room, tab, preview, mouse)
+  let info = Hexagonal.Axial.new(0,0)
+  App.KL.Game.State.Local.new(user, room, tab, info, preview, mouse)
 
 // Global State
 // ============
@@ -58,7 +60,11 @@ App.KL.Game.start: App.KL.Game
 // ===============
 
 App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
-  <div>{
+  let style = {
+    "cursor": "url("|App.KL.Game.Cursor.get_img(App.KL.Game.Cursor.default)|"), auto"
+  }
+
+  <div style=style>{
     let game = global@game
     case game {
       none: <div>"Not ingame."</div>

@@ -1,0 +1,6 @@
+App.KL.Game.Cursor.get_img(cursor: App.KL.Game.Cursor): String // Base64 img
+  case cursor {
+    attack: App.KL.Game.Cursor.Assets.attack
+    heal  : App.KL.Game.Cursor.Assets.heal
+    move  : App.KL.Game.Cursor.Assets.move
+  } default App.KL.Game.Cursor.Assets.default // while we have only one

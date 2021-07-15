@@ -1,0 +1,19 @@
+App.KL.Game.Effect.status.block.add(
+  id: String
+  duration: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect { 
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    get caster = App.KL.Game.Effect.board.creature.caster
+    without caster: App.KL.Game.Effect { return +0#32 }
+    without creature: App.KL.Game.Effect { return +0#32 }
+    let hero_name = caster@hero
+    let hero_name = hero_name@name
+    let block = App.KL.Game.Creature.Status.block(id, duration, hero_name)
+    App.KL.Game.Effect { 
+      App.KL.Game.Effect.status.add(creature, block, pos)
+      return duration
+    }
+  }

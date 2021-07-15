@@ -17,44 +17,90 @@ App.KL.Game.Phase.Play.when(
       else
         App.pass!
     key_down:
-      App.set_local!(App.KL.State.Local.game(Maybe {
-        get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
-        let preview       = local@preview
-        let preview       =
-          case preview@skill as skill {
-            none: 
-              preview@skill <- some(event.code)
-            some:
-              if skill.value =? event.code then
-                preview@skill <- none
-              else 
-                preview@skill <- some(event.code)
-          }          
-        return local@preview <- preview
-      } <> local))
+      let preview = local@preview
+      switch U16.eql(event.code) {
+        27#16:
+          let preview = preview@skill <- none
+          IO {
+            App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_casts)
+            App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+          }
+      }default
+      local = 
+        Maybe {
+          get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
+          let skill       =
+            case preview@skill as skill {
+              none: 
+                some({event.code, 1})
+              some:
+                if skill.value@fst =? event.code then
+                  none
+                else 
+                  some({event.code, 1})
+            }          
+          return local@preview <- preview@skill <- skill
+        } <> local
+      IO {
+        App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_skill(event.code))
+        App.set_local!(App.KL.State.Local.game(local))
+      }
     mouse_down: 
-      // only allow cast skill in preparation mode
       case game.moment {
         preparation:
-          let preview = local@preview
-          case preview@skill as skill {
-            none: App.pass!
-            some:
-              IO {
-                // log("Key up " | Char.to_string(skill.value))
-                let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-                let preview = preview@skill <- none
-                App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.serial(skill.value, coord))
-                App.set_local!(App.KL.State.Local.game(local@preview <- preview))
-              }
-          }
+              App.KL.Game.Phase.Play.when.preparation.mouse_down(room, local, game)
         execution:
           let preview = local@preview
-          case preview@skill as skill {
-            none: App.pass!
-            some:
-              let preview = preview@skill <- none
-              App.set_local!(App.KL.State.Local.game(local@preview <- preview))
-          }
+          let preview = preview@skill <- none
+          App.set_local!(App.KL.State.Local.game(local@preview <- preview))
       }
   } default App.pass!
+
+
+App.KL.Game.Phase.Play.when.preparation.mouse_down(room: String, local: App.KL.Game.State.Local, game: App.KL.Game): IO<Maybe<App.State.local<App.KL.State>>>
+  let preview = local@preview
+  case preview@skill as skill{
+    none:
+      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+      let new_local = local@info <- coord
+      App.set_local!(App.KL.State.Local.game(new_local))
+    some:
+      let {char, count} = skill.value // Skill key and count for how many coords have been chosen after selecting skill
+      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+      let skill = App.KL.Game.Skill.get(local@user, char, game)
+      case skill {
+        none: App.pass!
+        some:
+          let pattern     = App.KL.Game.Skill.get_pattern(skill.value)
+
+          // Checks if skill can or if it will be cast at a repeating tile
+          let can_cast =
+            if App.KL.Game.Skill.can_repeat(skill.value) then
+              true
+            else
+              let picks = preview@picks
+              let can_cast = true 
+
+              // Checks if there is already a pick for that tile and skill
+              for new_coord:new_char in picks with can_cast: 
+                can_cast && not((new_coord =? coord) && (new_char =? char))
+              can_cast
+
+          // Updates skill field in preview until all the required picks have been done
+          let new_skill = 
+            if count <? pattern then
+              some({char, count + 1})
+            else
+              none
+          let preview = preview@skill <- new_skill
+
+          // Updates data
+          if can_cast then
+            IO {
+              App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.serial(char, coord))
+              App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+            }
+          else
+            App.pass!
+      }
+    }

@@ -1,0 +1,11 @@
+App.KL.Game.Creature.Status.slow.check(
+  creature: App.KL.Game.Creature
+): Bool
+
+  let status = creature@status
+  let result = false
+  for slow in status with result:
+    case slow { 
+      slow: true
+    }default result
+  result

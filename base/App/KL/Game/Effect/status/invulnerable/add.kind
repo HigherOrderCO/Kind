@@ -1,0 +1,15 @@
+App.KL.Game.Effect.status.invulnerable.add(
+  id: String
+  duration: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect { 
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    without creature: App.KL.Game.Effect { return +0#32 }
+    let invul = App.KL.Game.Creature.Status.invulnerable(id, duration)
+    App.KL.Game.Effect { 
+      App.KL.Game.Effect.status.add(creature, invul, pos)
+      return duration
+    }
+  }

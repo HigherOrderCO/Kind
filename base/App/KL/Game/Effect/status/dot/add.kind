@@ -1,0 +1,16 @@
+App.KL.Game.Effect.status.dot.add(
+  id: String
+  duration: I32
+  amount: I32
+): App.KL.Game.Effect.At<I32>
+  (pos)
+
+  App.KL.Game.Effect { 
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    without creature: App.KL.Game.Effect { return +0#32 }
+    let dot = App.KL.Game.Creature.Status.dot(id, duration, 0, amount)
+    App.KL.Game.Effect { 
+      App.KL.Game.Effect.status.add(creature, dot, pos)
+      return amount
+    }
+  }

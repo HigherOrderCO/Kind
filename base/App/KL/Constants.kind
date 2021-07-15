@@ -41,6 +41,9 @@ App.KL.Constants.room : String
   "4b4c494e01010101"
 
 
+App.KL.Constants.z_index.terrain: I32 // I32 because of the sum with coord@j
+  50 // allows j coordinate of terrains to go from -50 to 50 
+
 App.KL.Constants.z_index.grid: U32
   100
 

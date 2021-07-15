@@ -1,0 +1,29 @@
+App.KL.Game.Creature.Status.invulnerable.add(
+  creature: App.KL.Game.Creature
+  id: String
+  duration: I32
+): App.KL.Game.Creature
+  
+  let invulnerability_added = App.KL.Game.Creature.Status.invulnerable.add.aux(id, duration, creature@status)
+  creature@status <- invulnerability_added
+
+App.KL.Game.Creature.Status.invulnerable.add.aux(
+  id: String
+  duration: I32
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+
+  new_invulnerable = App.KL.Game.Creature.Status.invulnerable(id, duration)
+  case status { 
+    nil:
+      new_invulnerable & status
+    cons:
+      case status.head { 
+        invulnerable: 
+          is_same = String.eql(id, status.head.id)
+          if is_same then
+            new_invulnerable & status.tail
+          else
+            status.head & App.KL.Game.Creature.Status.invulnerable.add.aux(id, duration, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.invulnerable.add.aux(id, duration, status.tail)
+  }

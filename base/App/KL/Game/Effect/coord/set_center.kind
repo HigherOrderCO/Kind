@@ -2,5 +2,5 @@ App.KL.Game.Effect.coord.set_center(
   new_center: Hexagonal.Axial
 ): App.KL.Game.Effect<Unit>
 
-  (center, target, map)
+  (center, targets, map)
   App.KL.Game.Effect.Result.new!(unit, new_center, map, Hexagonal.Axial.Map.new!, 0, [], "")

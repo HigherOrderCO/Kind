@@ -2,13 +2,18 @@ App.KL.Game.Creature.Status.show(
   status: App.KL.Game.Creature.Status
 ): String
 
+  let turn = case status{}default if I32.gtn(status.duration, 1) then " turns"  else " turn"
   case status { 
-    burn: "burn: "| status.id | ", duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
-    haste: "haste duration: " | I32.show(status.duration) | ", amount: " | I32.show(status.amount)
-    poison: "poison: "| status.id | ", duration: " | I32.show(status.duration) | ", dmg: " | I32.show(status.amount)
-    root: "root  duration: " | I32.show(status.duration) 
-    silence: "silence  duration: " | I32.show(status.duration)
-    stun: "stun  duration: " | I32.show(status.duration)
-    shield: "shield: "| status.id | ", duration: " | I32.show(status.duration) | ", shield ammount " | I32.show(status.amount)
-    weaken: "weaken duration: " | I32.show(status.duration) | ", dmg reduction: " | I32.show(status.amount)
+    block: "Denied for:"| String.show_clean(I32.show(status.duration))|turn| ", caster: "| status.caster
+    dampen: ""
+    dot: "Hurting for" | String.show_clean(I32.show(status.duration)) |turn| ", Damage: " | String.show_clean(I32.show(status.amount))|"."
+    haste: "Hasted for "| I32.show(status.duration) |turn| ", extra distance:" | String.show_clean(I32.show(status.amount))|"."
+    hot: "Healing for: "|String.show_clean(I32.show(status.duration)) |turn| ", heal amount:" | String.show_clean(I32.show(status.amount)) | ", stacks:" | String.show_clean(I32.show(status.stack))|"."
+    invulnerable: "Invulnerable for:" | String.show_clean(I32.show(status.duration)) |turn|"."
+    root: "Rooted for: " | String.show_clean(I32.show(status.duration))|turn| "."
+    silence: "Silenced for: " | String.show_clean(I32.show(status.duration))|turn|"."
+    stun: "Stunned  for: " | String.show_clean(I32.show(status.duration))|turn|"."
+    slow: "Slowed for: " | String.show_clean(I32.show(status.duration))|turn | ", Slow amount: " | String.show_clean(I32.show(status.amount))
+    shield: "Shielded for:"| String.show_clean(I32.show(status.duration))|turn | ", Shield ammount " | String.show_clean(I32.show(status.amount))
+    weaken: "Weakened for:" | String.show_clean(I32.show(status.duration))|turn|  ", Damage reducted by: " | String.show_clean(I32.show(status.amount))
   }

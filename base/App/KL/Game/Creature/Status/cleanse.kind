@@ -1,0 +1,16 @@
+//removes negative effects from a creature
+App.KL.Game.Creature.Status.cleanse(
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+
+  case status { 
+    nil:
+      status
+    cons:
+      case status.head { 
+        haste: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
+        hot: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
+        invulnerable: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
+        shield: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
+      }default App.KL.Game.Creature.Status.cleanse(status.tail)
+  }

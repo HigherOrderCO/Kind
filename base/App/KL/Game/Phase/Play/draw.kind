@@ -23,8 +23,8 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   let red_hp = I32.sub(App.KL.Constants.max_score, game.score@points@fst)
 
   let bar_red = String.show_clean(F64.show(255.0 - Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
-  let bar_grn = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
-  let bar_col = "rgb("|bar_red|","|bar_grn|", 0)"
+  let bar_blu = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
+  let bar_col = "rgb("|bar_red|", 0, " |bar_blu| ")"
 
 
 
@@ -79,7 +79,9 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
           }
         }
       </div>
-      <div >{//style={"background": "url(\"https://i.imgur.com/SguOlY0.png\")"}>{ 
+      <div style={
+        "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
+      }>{
         let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
         let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
         DOM.vbox(
@@ -87,7 +89,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
             "width": width,
             "height": height,
             "scale": "2"},
-          {"background": "transparent"},
+          {},
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
       {
@@ -116,7 +118,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
       }
     </div>
     {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
-    {App.KL.Game.Phase.Play.draw.skill_description(local, game)}
+    {App.KL.Game.Phase.Play.draw.description(local, game)}
   </div>
 
 // CANVAS DRAWING
@@ -148,7 +150,7 @@ App.KL.Game.Phase.Play.draw.board(
 ): VoxBox
   let map         = game@board
   let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-  let indicators  = App.KL.Game.Phase.Play.Draw.get_indicators(preview@skill, mouse_coord, user, game)
+  let indicators  = App.KL.Game.Phase.Play.Draw.get_indicators(preview, mouse_coord, user, game)
   let ap_used     = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
 
   for coord:tile in map with img:
@@ -172,7 +174,7 @@ App.KL.Game.Phase.Play.draw.grid(
       let indicator     = App.KL.Game.Indicator.gray_line
       let indicator_img = App.KL.Game.Indicator.get_img(indicator)
       
-      let {x, y} = App.KL.Game.Phase.Play.draw.centralize.terrain(coord)
+      let {x, y} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
       VoxBox.Draw.image(x, y, App.KL.Constants.z_index.grid, indicator_img, img)
     execution: img
   }
@@ -211,15 +213,18 @@ App.KL.Game.Phase.Play.draw.tile.token(
   
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
-  skill:  Maybe<Char>, 
+  preview: App.KL.Game.Cast.Preview 
   target: Hexagonal.Axial,
   user:   String,
   game:   App.KL.Game
 ): App.KL.Game.Indicators
 
   Maybe {
-    get skill_key  = skill
+    get pair       = preview@skill
+    let skill_key  = pair@fst
     get skill      = App.KL.Game.Skill.get(user, skill_key, game)
+    let targets    = App.KL.Game.Picks.get_skill_coords(skill_key, preview@picks)
+    let targets    = target & targets
     let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, user), game)
     get center     = App.KL.Game.Board.find_player_coord(user, game@board)
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
@@ -231,7 +236,7 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, target, game@board)
+    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, targets, game@board)
     return Hexagonal.Axial.Map.union!(indicators, areas)
   } <> Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
 
@@ -241,7 +246,7 @@ App.KL.Game.Phase.Play.draw.cursor(
   img: VoxBox
 ): VoxBox
   coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-  {x,y} = App.KL.Game.Phase.Play.draw.centralize(coord)
+  {x,y} = App.KL.Game.Phase.Play.draw.centralize.old(coord)
   VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.GrassOld.Assets.mouse_ui, img)
 
 // draws tile terrain
@@ -253,10 +258,10 @@ App.KL.Game.Phase.Play.draw.tile.terrain(
   img:        VoxBox
 ): VoxBox
   let indicator = indicator <> App.KL.Game.Indicator.background
-  let {i, j}    = App.KL.Game.Phase.Play.draw.centralize.terrain(tile_coord)
+  let {i, j}    = App.KL.Game.Phase.Play.draw.centralize.new(tile_coord)
   let field     = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   let field_drawing = field@draw(terrain, indicator)
-  let tile_drawing  = VoxBox.Draw.image(i, j, I32.to_u32(tile_coord@j + 20), field_drawing, img) // TODO remove +20
+  let tile_drawing  = VoxBox.Draw.image(i, j, I32.to_u32(tile_coord@j + App.KL.Constants.z_index.terrain), field_drawing, img)
   let tile_drawing  = App.KL.Game.Phase.Play.draw.letter(tile_coord, picks, tile_drawing)
   tile_drawing
 
@@ -266,7 +271,7 @@ App.KL.Game.Phase.Play.draw.tile.indicator(
   img:        VoxBox
 ): VoxBox
   without indicator: img
-    let {i, j} = App.KL.Game.Phase.Play.draw.centralize.terrain(tile_coord)
+    let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(tile_coord)
     let ind_img = App.KL.Game.Indicator.get_img(indicator)
     let img = VoxBox.Draw.image(i, j, App.KL.Constants.z_index.indicator, ind_img, img)
     img
@@ -322,17 +327,17 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       //let cx = cx - aux //U32
       //log(U32.show( cy + 100))
       {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let cx = cx - (128::U32)
-      let cy = cy - (128::U32)
-      let img = VoxBox.Draw.image(cx, cy, App.KL.Constants.z_index.hero, draw_voxbox, img)
+      let img_x = cx - (128::U32)
+      let img_y = cy - (128::U32)
+      let height = I32.to_u32(hero@height)
+      let img = VoxBox.Draw.image(img_x, img_y, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 
         none:
           img
         some:
-          let img = App.KL.Game.Phase.Play.Bar.show_hp(cx + 111, cy + 100, creature.value, img)
-          let img = App.KL.Game.Creature.Status.draw(cx + 116, cy + 88, creature.value, img) // Placeholder for Showing status
-          let img = App.KL.Game.Phase.Play.draw.ap(cx - 12, cy - 31, creature.value, ap_used, img)
+          let img = App.KL.Game.Phase.Play.Bar.show_hp(cx - 17, (cy - height), creature.value, img)
+          let img = App.KL.Game.Phase.Play.draw.ap(img_x - 12, (img_y - height) - 3, creature.value, ap_used, img)
           img
       }
 
@@ -399,14 +404,22 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
         skill_info
     </div>
 
-App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+App.KL.Game.Phase.Play.draw.description(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   main_style = 
     {
     "width": "200px"
     "height": "100%"
-    "padding": "0 20px"
     "background": "rgb(220,220,220)"
     "border-left": "1px solid black"
+    "display":"flex"
+    "flex-direction":"column"
+    "align-items": "center"
+    }
+  upper_bottom_style = 
+    {
+    "width": "100%"
+    "height": "50%"
+    "padding": "0 20px"
     "display":"flex"
     "flex-direction":"column"
     "align-items": "center"
@@ -414,11 +427,87 @@ App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, ga
   
   open local 
   open game
-  Maybe {
-    get skill_key = local.preview@skill
+
+  let tile = App.KL.Game.Tile.get(local@info, game.board)
+
+  let creature_hp =  Maybe { 
+    get creature = App.KL.Game.Board.Creature.get(local@info, game.board)
+    return String.show_clean(I32.show(creature@hp))
+  } <> ""
+
+  let creature_ap =  Maybe { 
+    get creature = App.KL.Game.Board.Creature.get(local@info, game.board)
+    return String.show_clean(I32.show(creature@ap))
+  } <> ""
+
+  let hero_name =  Maybe { 
+    get creature = App.KL.Game.Board.Creature.get(local@info, game.board)
+    return creature@hero@name
+  } <> ""
+
+  let status_list =  Maybe { 
+    get creature = App.KL.Game.Board.Creature.get(local@info, game.board)
+    return List.show!(App.KL.Game.Creature.Status.show, creature@status)
+  } <> ""
+
+  let player_team =  Maybe { 
+    get creature = App.KL.Game.Board.Creature.get(local@info, game.board)
+    let team = creature@team
+    return App.KL.Game.Team.show(team)
+  } <> ""
+
+  let tile_effect = App.KL.Game.Tile.effect.show(local@info, game.board)
+
+  let show_info = 
+          <div style=main_style>
+            <div style=upper_bottom_style></div>
+              <div style=upper_bottom_style>
+                <div style={"text-align": "left"}>
+                  <div style={"font-size": "2em", "padding-bottom": "5px"}>"Player Information" </div>
+                    <div style={"padding-bottom": "8px"}>"Hero: "|hero_name</div>
+                    <div style={"padding-bottom": "8px"}>"Team: "|player_team</div>
+                    <div style={"padding-bottom": "8px"}>"Health:"|creature_hp</div>
+                    <div style={"padding-bottom": "8px"}>"Action Points:"|creature_ap</div>
+                    <div style={"padding-bottom": "8px"}>"Status List: "|status_list</div>
+                </div>
+              </div>
+            </div>
+
+  let default_info = case tile { 
+    none:
+      <div style=main_style></div>
+    some:
+      let creature = tile.value@creature
+      let effect = tile.value@effect
+      case creature { 
+        none:
+          case effect { 
+            none:
+              <div style=main_style></div>
+            some:
+              <div style=main_style>
+                <div style=upper_bottom_style></div>
+                <div style=upper_bottom_style>
+                  <div style={"text-align": "left"}>
+                    <div style={"font-size": "2em"}>"Tile Information" </div>
+                    <div style={"padding-bottom": "8px"}>"Tile Effect: "|tile_effect</div>
+                  </div>
+                </div>
+              </div>
+          }
+        some:
+          show_info
+      }
+  }
+
+
+  let cast_info = Maybe {
+    get pair      = local.preview@skill
+    let skill_key = pair@fst
     get skill     = App.KL.Game.Skill.get(local@user, skill_key, game)
     return 
-      <div style=main_style>
+    <div style=main_style>
+      <div style=upper_bottom_style>
         <div style={"font-size": "3em", "padding-bottom": "5px"}>
           Char.to_string(skill_key) // TODO replace with Skill icon
         </div>
@@ -426,10 +515,47 @@ App.KL.Game.Phase.Play.draw.skill_description(local: App.KL.Game.State.Local, ga
         <div style={"padding-bottom": "8px"}>"Cast time: " | Nat.show(U64.to_nat(skill@delay))</div>
         <div style={"padding-bottom": "8px"}>skill@description</div>
       </div>
-  } <> <div style=main_style></div>
+      <div style=upper_bottom_style>
+        for div in 
+          (case tile { 
+            none:
+              []
+            some:
+              let creature = tile.value@creature
+              let effect = tile.value@effect
+            [
+            <div style={"text-align": "left"}>
+              <div style={"font-size": "2em", "padding-bottom": "5px"}>"Player Information"</div>
+                <div style={"padding-bottom": "8px"}>"Hero: "|hero_name</div>
+                <div style={"padding-bottom": "8px"}>"Team: "|player_team</div>
+                <div style={"padding-bottom": "8px"}>"Health:"|creature_hp</div>
+                <div style={"padding-bottom": "8px"}>"Action Points:"|creature_ap</div>
+                <div style={"padding-bottom": "8px"}>"Status List: "|status_list</div>
+            </div>
+            ]
+      }):div
+      </div>
+    </div>
+  } 
+
+  cast_info <> default_info
 
 // AUX FUNCTIONS
 // =============
+
+App.KL.Game.Phase.Play.draw.get_cursor(
+  local: App.KL.Game.State.Local
+  game : App.KL.Game
+): String
+  let cursor =
+    Maybe {
+      get skill_key = local@preview@skill
+      let skill_key = skill_key@fst
+      get skill  = App.KL.Game.Skill.get(local@user, skill_key, game)
+      return skill@cursor
+    } <> App.KL.Game.Cursor.default
+  
+  App.KL.Game.Cursor.get_img(cursor)
 
 App.KL.Game.Phase.Play.draw.letter(
   tile_coord: Hexagonal.Axial
@@ -447,7 +573,7 @@ App.KL.Game.Phase.Play.draw.letter(
 App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
   { screen_coord@fst - 2, screen_coord@snd - 6 }
   
-App.KL.Game.Phase.Play.draw.centralize.terrain(
+App.KL.Game.Phase.Play.draw.centralize.new(
   coord: Hexagonal.Axial
 ): Pair(U32, U32)
   let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
@@ -457,7 +583,7 @@ App.KL.Game.Phase.Play.draw.centralize.terrain(
 
 // Centralizes an image in the hexagon 
 // TODO: won't be used after we start using assets from KL only
-App.KL.Game.Phase.Play.draw.centralize(
+App.KL.Game.Phase.Play.draw.centralize.old(
   coord: Hexagonal.Axial
 ): Pair(U32, U32)
   let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)

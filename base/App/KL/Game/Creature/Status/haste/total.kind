@@ -9,4 +9,3 @@ App.KL.Game.Creature.Status.haste.total(
         haste.amount + total_haste
     }default +0#32
   total_haste
-

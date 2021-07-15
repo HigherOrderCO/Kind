@@ -10,7 +10,10 @@ App.KL.Game.Cast.sort(game: App.KL.Game): List<App.KL.Game.Cast>
         let seen = seen{key} <- unit
         case App.KL.Game.Cast.get_skill(cast, game) as got_skill {
           none: {seen, casts}
-          some: {seen, {cast, got_skill.value@delay} & casts}
+          some:
+            pattern = App.KL.Game.Skill.get_pattern(got_skill.value)
+            cast    = cast@target <- List.take!(pattern, cast@target)
+            {seen, {cast, got_skill.value@delay} & casts}
         }
       some: {seen, casts}
     }

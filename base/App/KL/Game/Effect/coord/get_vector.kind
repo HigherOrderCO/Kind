@@ -1,0 +1,10 @@
+App.KL.Game.Effect.coord.get_vector: App.KL.Game.Effect<Pair<Hexagonal.Axial, Maybe<Hexagonal.Axial>>>
+  (center, targets, map)
+  let vector = 
+    case targets[1] as direction {
+      none: {targets[0] <> center, none}
+      some: {direction.value, targets[0]}
+    }
+
+
+  App.KL.Game.Effect.Result.new!(vector, center, map, Hexagonal.Axial.Map.new!, 0, [], "")

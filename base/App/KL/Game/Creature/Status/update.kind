@@ -17,24 +17,34 @@ App.KL.Game.Creature.Status.update.aux(
       []
     cons: 
       let head = case status.head {
-        burn : App.KL.Game.Creature.Status.burn(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
+        block : App.KL.Game.Creature.Status.block(status.head.id, I32.sub(status.head.duration, 1), status.head.caster)
+        dampen : App.KL.Game.Creature.Status.dampen(I32.sub(status.head.duration, 1), status.head.tick)
+        dot : App.KL.Game.Creature.Status.dot(status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
         haste : App.KL.Game.Creature.Status.haste(I32.sub(status.head.duration, 1), status.head.amount)
-        poison : App.KL.Game.Creature.Status.poison(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
+        //heal over time(hot)
+        hot : App.KL.Game.Creature.Status.hot(status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
+        invulnerable: App.KL.Game.Creature.Status.invulnerable(status.head.id, I32.sub(status.head.duration ,1))
         root: App.KL.Game.Creature.Status.root(I32.sub(status.head.duration, 1))
-        silence: App.KL.Game.Creature.Status.silence(I32.sub(status.head.duration, 1))
-        stun: App.KL.Game.Creature.Status.stun(I32.sub(status.head.duration, 1))
         shield: App.KL.Game.Creature.Status.shield(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
+        silence: App.KL.Game.Creature.Status.silence(I32.sub(status.head.duration, 1))
+        slow : App.KL.Game.Creature.Status.slow(I32.sub(status.head.duration, 1), status.head.amount)
+        stun: App.KL.Game.Creature.Status.stun(I32.sub(status.head.duration, 1))
         weaken : App.KL.Game.Creature.Status.weaken(I32.sub(status.head.duration, 1), status.head.amount)
       }
       let tail = App.KL.Game.Creature.Status.update.aux(status.tail)
       case head {
-        burn : if I32.gtn(head.duration,0) then head & tail else tail
+        block : if I32.gtn(head.duration,0) then head & tail else tail
+        dampen : if I32.gtn(head.duration,0) then head & tail else tail
+        dot : if I32.gtn(head.duration,0) then head & tail else tail
         haste : if I32.gtn(head.duration,0) then head & tail else tail
-        poison : if I32.gtn(head.duration,0) then head & tail else tail
+        //heal over time(hot)
+        hot : if I32.gtn(head.duration,0) then head & tail else tail
+        invulnerable : if I32.gtn(head.duration,0) then head & tail else tail
         root : if I32.gtn(head.duration,0) then head & tail else tail
-        silence: if I32.gtn(head.duration,0) then head & tail else tail
-        stun: if I32.gtn(head.duration,0) then head & tail else tail
         shield: if I32.gtn(head.duration,0) then head & tail else tail
+        silence: if I32.gtn(head.duration,0) then head & tail else tail
+        slow: if I32.gtn(head.duration,0) then head & tail else tail
+        stun: if I32.gtn(head.duration,0) then head & tail else tail
         weaken : if I32.gtn(head.duration,0) then head & tail else tail
       }
   }

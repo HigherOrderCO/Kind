@@ -11,38 +11,20 @@ type App.KL.Game.Creature {
 
 
 type App.KL.Game.Creature.Status {
-  burn(
-    id: String
-    duration: I32
-    amount: I32
-  )
-  haste(
-    duration : I32
-    amount: I32
-  )
-  poison(
-    id: String
-    duration: I32
-    amount: I32
-  )
-  root(
-    duration: I32
-  )
-  silence(
-    duration: I32
-  )
-  stun(
-    duration: I32
-  )
-  shield(
-    id: String
-    duration: I32
-    amount: I32
-  )
-  weaken(
-    duration : I32
-    amount: I32
-  )
+  block(id: String, duration: I32, caster: String)
+  //Damage Over Time
+  dot(id: String, duration: I32, stack: I32, amount: I32)
+  dampen(duration: I32, tick: I32)
+  haste(duration : I32, amount: I32)
+  //Heal Over Time
+  hot(id: String, duration: I32, stack: I32, amount: I32)
+  invulnerable(id: String, duration: I32)
+  root(duration: I32)
+  shield(id: String, duration: I32, amount: I32)
+  silence(duration: I32)
+  slow(duration: I32, amount: I32)
+  stun(duration: I32)
+  weaken(duration : I32, amount: I32)
 }
 
 
@@ -51,6 +33,6 @@ App.KL.Game.Creature.Status.get_effect(
 ): App.KL.Game.Effect.At<I32>
   
   case status { 
-    burn: App.KL.Game.Effect.status.burn.apply(status.id, status.duration, status.amount)
-    poison: App.KL.Game.Effect.status.poison.apply(status.id, status.duration, status.amount)
+    dot: App.KL.Game.Effect.status.dot.apply(status.id, status.duration, status.amount)
+    hot: App.KL.Game.Effect.status.hot.apply(status.id, status.duration, status.amount)
   } default (pos)App.KL.Game.Effect { return +0#32 }

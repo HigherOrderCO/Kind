@@ -2,5 +2,5 @@ App.KL.Game.Effect.board.set(
   new_board: App.KL.Game.Board
 ): App.KL.Game.Effect<Unit>
 
-  (center, target, board)
+  (center, targets, board)
   App.KL.Game.Effect.Result.new!(unit, center, new_board, Hexagonal.Axial.Map.new!, 0, [], "")

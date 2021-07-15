@@ -1,2 +1,11 @@
 App.KL.Game.Picks: Type
   Hexagonal.Axial.Map<Char>
+
+App.KL.Game.Picks.get_skill_coords(skill_key: Char, picks: App.KL.Game.Picks): List<Hexagonal.Axial>
+  let coords = []
+  for coord:char in picks with coords:
+    if Char.eql(skill_key, char) then
+      coord & coords
+    else
+      coords
+  coords
