@@ -1,0 +1,14 @@
+App.KL.Game.Effect.scoreboard.add.kill(
+  player_id: String
+): App.KL.Game.Effect<Unit>    
+  (center, targets, board)
+    App.KL.Game.Effect.Result.new!(
+      unit, 
+      center, 
+      board, 
+      Hexagonal.Axial.Map.new!, 
+      0, 
+      [], 
+      "", 
+      {player_id: App.KL.Game.Scoreboard.new(0, 0, 1, 0)}
+    )

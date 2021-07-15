@@ -1,0 +1,26 @@
+// READ THIS 
+// this function considers that the killer is always the caster
+// dont use this if is not the case
+App.KL.Game.Effect.scoreboard.kill(
+  victim: String
+): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    get caster = App.KL.Game.Effect.board.creature.caster
+    let killer = Maybe {
+      get caster = caster // verify if caster exist
+      get killer = caster@player // verify if caster is a player
+      return killer
+    }
+    
+    // add kill to killer if killer exists
+    case killer {
+      none: App.KL.Game.Effect.pass
+      some: App.KL.Game.Effect {
+        App.KL.Game.Effect.scoreboard.add.kill(killer.value)
+      }
+    }
+
+    // add death to victim
+    App.KL.Game.Effect.scoreboard.add.death(victim)
+    return unit
+  }

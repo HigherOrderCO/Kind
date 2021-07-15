@@ -16,13 +16,14 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
         indicators  = Hexagonal.Axial.Map.union!(result_a.indicators, result_b.indicators)
         ap_used     = result_a.ap_used + result_b.ap_used
         cemetery    = result_a.cemetery ++ result_b.cemetery
-        description = App.KL.Game.Effect.bind.description_aux(result_a.description, result_b.description)
-        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used, cemetery, description)
+        description = App.KL.Game.Effect.bind.description(result_a.description, result_b.description)
+        scoreboard  = App.KL.Game.Scoreboard.map.union(result_a.scoreboard, result_b.scoreboard)
+        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used, cemetery, description, scoreboard)
     }
   }
 
 //Auxiliary effect so descriptions look cleaner
-App.KL.Game.Effect.bind.description_aux(
+App.KL.Game.Effect.bind.description(
   a: String
   b: String
 ): String
@@ -33,5 +34,3 @@ App.KL.Game.Effect.bind.description_aux(
     cons nil: a 
     cons cons: a | "\n" | b
   }
-
-    

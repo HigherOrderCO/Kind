@@ -4,7 +4,17 @@ App.KL.Game.Effect.hp.heal_at(
   (pos)
 
   App.KL.Game.Effect { 
-    let heals = String.show_clean(I32.show(heal))
+    get real_heal = App.KL.Game.Effect.hp.change_at(heal, pos)
+    let heals = String.show_clean(I32.show(real_heal))
     App.KL.Game.Effect.description.add("Heal for"| heals)
-    App.KL.Game.Effect.hp.change_at(heal, pos)
+    get caster = App.KL.Game.Effect.board.creature.caster
+    case caster {
+      none:
+        App.KL.Game.Effect { return real_heal }
+      some:
+        App.KL.Game.Effect {
+          App.KL.Game.Effect.scoreboard.caster.add.heal(real_heal)
+          return real_heal
+        }
+    }
   }

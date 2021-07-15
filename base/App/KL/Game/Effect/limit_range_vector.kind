@@ -5,4 +5,4 @@ App.KL.Game.Effect.limit_range_vector(range: I32): App.KL.Game.Effect<Unit>
   if I32.gtn(Hexagonal.Axial.distance(center, start), range) then
     App.KL.Game.Effect.Result.err<Unit>("out of range.")
   else
-    App.KL.Game.Effect.Result.new<Unit>(unit, center, board, Hexagonal.Axial.Map.new!, 0, [], "")
+    App.KL.Game.Effect.Result.new<Unit>(unit, center, board, Hexagonal.Axial.Map.new!, 0, [], "", {})

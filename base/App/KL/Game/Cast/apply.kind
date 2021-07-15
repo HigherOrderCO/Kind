@@ -28,6 +28,7 @@ App.KL.Game.Cast.apply(
             new: Maybe {
               let game = game@board <- result.board
               let game = game@cemetery <- game@cemetery ++ result.cemetery
+              let game = game@players <- App.KL.Game.Player.scoreboard.map.update(game@players, result.scoreboard)
               return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
             }
           }
@@ -39,6 +40,7 @@ App.KL.Game.Cast.apply(
             new: Maybe {
               let game = game@board <- result.board
               let game = game@cemetery <- game@cemetery ++ result.cemetery
+              let game = game@players <- App.KL.Game.Player.scoreboard.map.update(game@players, result.scoreboard)
               return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
             }
           }
@@ -50,6 +52,7 @@ App.KL.Game.Cast.apply(
             new: Maybe {
               let game = game@board <- result.board
               let game = game@cemetery <- game@cemetery ++ result.cemetery
+              let game = game@players <- App.KL.Game.Player.scoreboard.map.update(game@players, result.scoreboard)
               return App.KL.Game.Cast.Result.success(game, result.indicators, result.ap_used)
             }
           }

@@ -1,0 +1,37 @@
+type App.KL.Game.Scoreboard {
+  new(
+    damage: I32,
+    heal: I32,
+    kills: I32,
+    deaths: I32
+  )
+}
+
+App.KL.Game.Scoreboard.pure: App.KL.Game.Scoreboard
+  {0,0,0,0}
+
+App.KL.Game.Scoreboard.show(
+  scoreboard: App.KL.Game.Scoreboard
+): String
+  "kills: "  | I32.show(scoreboard@kills)  | "\n" | 
+  "deaths: " | I32.show(scoreboard@deaths) | "\n" | 
+  "heal: "   | I32.show(scoreboard@heal)   | "\n" | 
+  "damage: " | I32.show(scoreboard@damage) | "\n" 
+
+App.KL.Game.Scoreboard.map.union(
+  a: Map<App.KL.Game.Scoreboard>
+  b: Map<App.KL.Game.Scoreboard>
+): Map<App.KL.Game.Scoreboard>
+  for player_id:scoreboard in b with a:
+    let scoreboard_a = a{player_id}
+    case scoreboard_a {
+      none: a{player_id} <- scoreboard
+      some: a{player_id} <- App.KL.Game.Scoreboard.union(scoreboard_a.value, scoreboard)
+    }
+  a
+
+App.KL.Game.Scoreboard.union(
+  a: App.KL.Game.Scoreboard, 
+  b: App.KL.Game.Scoreboard
+): App.KL.Game.Scoreboard
+  {a@damage + b@damage, a@heal + b@heal, a@kills + b@kills, a@deaths + b@deaths}

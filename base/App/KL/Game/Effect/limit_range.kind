@@ -5,6 +5,6 @@ App.KL.Game.Effect.limit_range(range: I32): App.KL.Game.Effect<Unit>
     in_range && I32.lte(Hexagonal.Axial.distance(center, target), range)
 
   if in_range then
-    App.KL.Game.Effect.Result.new<Unit>(unit, center, board, Hexagonal.Axial.Map.new!, 0, [] "")
+    App.KL.Game.Effect.Result.new<Unit>(unit, center, board, Hexagonal.Axial.Map.new!, 0, [] "", {})
   else
     App.KL.Game.Effect.Result.err<Unit>("out of range.")

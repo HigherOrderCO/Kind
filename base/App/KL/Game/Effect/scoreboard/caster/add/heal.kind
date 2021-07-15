@@ -1,0 +1,18 @@
+// store heal in caster player scoreboad
+App.KL.Game.Effect.scoreboard.caster.add.heal(heal: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    get caster = App.KL.Game.Effect.board.creature.caster
+    let player_id = Maybe {
+      get caster = caster // verify if caster exist
+      get player_id = caster@player // verify if caster is a player
+      return player_id
+    }
+    case player_id {
+      none: App.KL.Game.Effect.pass // if not a player does nothing
+      some: 
+        App.KL.Game.Effect {
+          App.KL.Game.Effect.scoreboard.add.heal(player_id.value, heal)
+          return unit
+        }
+    }
+  }

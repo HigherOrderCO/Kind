@@ -10,5 +10,6 @@ type App.KL.Game.Effect.Result <A: Type> {
     ap_used: I32 
     cemetery: App.KL.Game.Cemetery
     description: String
+    scoreboard: Map<App.KL.Game.Scoreboard>
   )
 }
