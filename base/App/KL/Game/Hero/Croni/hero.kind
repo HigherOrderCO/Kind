@@ -35,9 +35,19 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
+  let attributes =
+    some(App.KL.Game.Hero.Attributes.set(
+      0 // Damage
+      1 // Resistance
+      5 // Mobility
+      5 // Range
+      5 // Utility
+      3 // Difficulty
+  ))
+
   let description = "Croni is a fragile mage with slow skills that deal high damage from afar."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
 
 
 // SKILLS
@@ -144,8 +154,9 @@ App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
     App.KL.Game.Effect.status.root.add(2, to)
     return unit
   })
+  let attributes = none
   let description = "A Trap created by Croni that stuns whoever steps on it"
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
 
 App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
   let name = "Croni.Void"
@@ -160,5 +171,6 @@ App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
     //App.KL.Game.Effect.status.stun.add(2, to)
     return unit
   })
+  let attributes = none
   let description = "A Void created by Croni"
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)

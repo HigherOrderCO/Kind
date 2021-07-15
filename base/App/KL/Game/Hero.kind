@@ -9,6 +9,7 @@ type App.KL.Game.Hero {
     skills: Map<App.KL.Game.Skill> // letter -> skill
     //on_turn_end: App.KL.Game.Creature -> App.KL.Game.Creature //TODO: ADD
     on_stepped: Maybe<App.KL.Game.Effect.FromTo<Unit>>
+    attributes: Maybe<App.KL.Game.Hero.Attributes>
     description: String
   )
 }
@@ -25,8 +26,27 @@ type App.KL.Game.Hero.Draw.Pose {
   )
 }
 
-
 App.KL.Game.Hero.Draw.Result: Type
   Pair<Maybe<Hexagonal.Axial>, VoxBox>
 
+type App.KL.Game.Hero.Attributes {
+  new(
+    damage: Nat
+    resistance: Nat
+    mobility: Nat
+    range: Nat
+    utility: Nat
+    difficulty: Nat
+  )
+}
 
+App.KL.Game.Hero.Attributes.set(damage: Nat, resistance: Nat, mobility: Nat, range: Nat, utility: Nat, difficulty: Nat): App.KL.Game.Hero.Attributes
+  max = Nat.min(5)
+  App.KL.Game.Hero.Attributes.new(
+    max(damage)
+    max(resistance)
+    max(mobility)
+    max(range)
+    max(utility)
+    max(difficulty)
+  )

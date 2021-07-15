@@ -32,9 +32,19 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
-  let description = "Flina is a resistant warrior with several different crowd control skills."
+  let attributes =
+    some(App.KL.Game.Hero.Attributes.set(
+      0 // Damage
+      1 // Resistance
+      5 // Mobility
+      5 // Range
+      5 // Utility
+      3 // Difficulty
+  ))
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
+  let description = "Flina is a fragile high ranged support with several different skills to help her allies, or to disrupt her enemies."
+
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
 
 
 // SKILLS

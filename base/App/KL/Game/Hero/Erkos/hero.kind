@@ -32,9 +32,19 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
 
   let on_stepped = none
 
+  let attributes =
+    some(App.KL.Game.Hero.Attributes.set(
+      5 // Damage
+      1 // Resistance
+      2 // Mobility
+      5 // Range
+      0 // Utility
+      1 // Difficulty
+  ))
+
   let description = "Erkos is a fragile fire mage with high damage in large areas."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
 
 
 // SKILLS
