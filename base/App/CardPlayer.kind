@@ -11,7 +11,7 @@ App.CardPlayer.draw: App.Draw<App.CardPlayer.State>
   (state)
     <div style={"margin": "5px", "display": "flex"}>
       { App.CardPlayer.card.user("FLINA", "HEALER", "https://i.imgur.com/T49eUdC.png") }
-      { App.CardPlayer.card.others("CRONI", "MAGE", "https://i.imgur.com/T49eUdC.png") }
+      { App.CardPlayer.card.others("CRONI", "MAGE", "https://i.imgur.com/1FZbfvI.png") }
       { App.CardPlayer.card.others("ZOIO", "SENTINEL", "https://i.imgur.com/T49eUdC.png") }
     </div>
 
@@ -86,14 +86,16 @@ App.CardPlayer.card.img(name: String, type: String, img: String): DOM
       "left": "0"
       "right": "0"
       "text-align": "center"
-      "top": "-10%"
+      "top": "-7%"
       "width": "55%",
       "height": "55%",
       "background-image": "url("|img|")",
-      "background-size": "cover",
+      "background-size": "contain",
       "background-position": "center",
       "background-repeat": "no-repeat"
-    }></div>
+    }>
+      // <img src=img style={"object-size": "contain"}></img>
+    </div>
     <div style={
       "position": "absolute"
       "top": "70%"
@@ -128,7 +130,7 @@ App.CardPlayer.card.stats: DOM
         <div style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
           for j in [1 to 6]:
             let color = case Nat.cmp(j, i) {
-              ltn: "#382137"
+              ltn: "#883862"
               eql: "#095838"
               gtn: "#683782"
             }
