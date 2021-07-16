@@ -109,7 +109,7 @@ App.CardPlayer.card.img(name: String, type: String, img: String): DOM
       "align-items": "center"
     }>
       <span style={"color": "white"}>name</span>
-      <hr></hr>
+      <img src=App.CardPlayer.card.name_divisor></img>
       <span style={"color": "white"}>type</span>
     </div>
   </div>
@@ -118,30 +118,42 @@ App.CardPlayer.card.stats: DOM
   <div style={"display": "contents"}> 
     for icon in App.CardPlayer.card.attr_icons:
       let {i, img} = icon
-      <div style={"height": "17%", "display": "flex", "align-items": "center", "padding": "2% 8%", "border": "1% solid black"}>
-        // <span>Nat.show(i)</span>
+      <div style={"display": "contents"}>
         <div style={
-          // "height": "100%"
-          "flex": "1"
-          "margin-right": "10%"
-          "height": "100%"
-          // "background-image": "url("|img|")"
-          // "background-position": "center"
-          // "background-size": "contain"
-          // "background-repeat": "no-repeat"
+          "height": "15%",
+          "display": "flex", 
+          "align-items": "center", 
+          "padding": "4% 10%",
+          "margin-top": if i =? 2 then "4%" else ""
         }>
-          <img style={"width": "100%", "height": "100%", "object-fit": "contain"} src=img></img>
+          <div style={
+            "flex": "1"
+            "margin-right": "10%"
+            "height": "100%"
+          }>
+            <img style={"width": "100%", "height": "100%", "object-fit": "contain"} src=img></img>
+          </div>
+          <div style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
+            for j in [1 to 6]:
+              let bar = App.CardPlayer.card.attr_bar(i, j)
+              <div style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%"} src=bar></img> </div>
+          </div>
         </div>
-        <div style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
-          for j in [1 to 6]:
-            let bar = App.CardPlayer.card.attr_bar(i, j)
-            <div style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%"} src=bar></img> </div>
-        </div>
+        {
+          if i =? 4 then <span></span>
+          else 
+            <div style={"display": "flex", "justify-content": "center"}>
+              <img style={"width": "80%", "margin": "auto"} src=App.CardPlayer.card.divisor></img>
+            </div>
+        }
       </div>
   </div>
 
 App.CardPlayer.card.divisor: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAAACCAYAAADsDAqEAAAAGUlEQVR42mNgl3D8P4od/zM4qOX/H8X5/wFLCtMnRwvN3AAAAABJRU5ErkJggg=="
+
+App.CardPlayer.card.name_divisor: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAYAAAChQ5zUAAAAKklEQVR42mPQlgz7z82j9R9Eg7CZSxcGjYzbZT/AaWpgZDORMTa3ILsVAD4KYiEWiGpBAAAAAElFTkSuQmCC"
 
 App.CardPlayer.card.attr_bar(i: Nat, j: Nat): String
   case Nat.cmp(j, i) {
