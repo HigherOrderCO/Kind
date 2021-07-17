@@ -9,11 +9,24 @@ App.CardPlayer.init: App.Init<App.CardPlayer.State>
 // Render function
 App.CardPlayer.draw: App.Draw<App.CardPlayer.State>
   (state)
-    <div style={"margin": "5px", "display": "flex"}>
-      { App.CardPlayer.card.user("FLINA", "HEALER", "https://i.imgur.com/T49eUdC.png") }
-      { App.CardPlayer.card.others("CRONI", "MAGE", "https://i.imgur.com/1FZbfvI.png") }
-      { App.CardPlayer.card.others("ZOIO", "SENTINEL", "https://i.imgur.com/T49eUdC.png") }
+    <div style={"margin": "0", "height": "100%", "width": "100%", "background-image": "url(https://i.imgur.com/H5BB1V3.png)"}>
+      <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center"}>
+        <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px"}></header>
+        <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "flex": "1"}>
+          { App.CardPlayer.card.user("FLINA", "HEALER", "https://i.imgur.com/T49eUdC.png") }
+          { App.CardPlayer.card.others("CRONI", "MAGE", "https://i.imgur.com/1FZbfvI.png") }
+          { App.CardPlayer.card.others("ZOIO", "SENTINEL", "https://i.imgur.com/T49eUdC.png") }
+        </div>
+        <footer style={"display": "flex", "padding": "5px"}>
+          <div style={"flex": "1"}></div>
+          <div><img src=App.CardPlayer.footer.ready_button></img></div>
+          <div style={"flex": "1"}></div>
+        </footer>
+      </div>
     </div>
+
+App.CardPlayer.footer.ready_button: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAAAqCAYAAABr9d/aAAAC70lEQVR42u2aMWsVQRDH0/kBbNKksElhSBU0giJIAgkBFYsINgmKjdilUWzsEhQUIailYqG1FsHGxlQ2+gkEG3sLwULkZA7mmN03uzf79m7fu+S/8Oe9nZ27t29+N7N7793MDBoaWndt+eW3ClEAdbRBMgPII5psAIvKiDZGe/q7qsochDY5oJymSNfhlEiHGXdCmUfjsQ8C+PKgmVVjj0Eg51RIgJoek9QkcWwMCevf9JVPLfscVtxhWUoqwp+3EbHGVrIJspIGOSA/RCujltLK6+dxhK59dz9JJJQQOPb3bQ1YzQgNRzXAs6uPoQHKAchEz338UUuWABaP4crvRymxVwEC3nAgOgAXF3abtKT3pLn5nVrcX156BRVUiIPk1AA8eWo7Cg8QJwMvBpGYqQBD8ABxMvA0iFkAu4a4sfW+uvX8S1A0nuJ35c5Blt/1B5+qiytvax96pb60+7YS8DoH2KXaNkY0fn7thclv/fa7Vr/t/c+tfuSzcuN1de3eB8dOfd9WKk5TDTDWaJzmZvWj75Pj9+fvvwYiif1CNgAUYOSVHQOoZc2jw+8jYGLns/gBYCJADVbMFvp1wnJsG1QABECUUN6ctJXQzYcHKkBrCbUAlOeTfQCMbE5kpsX8KNAaQOsmJmSjHSfvVv3GFxcAdpCBIYB+xqQCPHPhmQqR50VjAOitTwTDsgbyesT3bKE10C+DKQB5jnzfKMfIVipGJoAnZi/VA0dxE5MLUJtnSXgSIM2TWDkASWQklc7CcQDKv12kcmCRvv78NZUAJQ/m5DxbM0mI4wDM3ZxYNzvTALAVnv/AjQaxT/mBWbr8pNUWCvjq3TcjsCw2bXdJ62psniViY4YXg7g+t9OrKFBcwui9xaaJxjfm748ca7H52ry6b5pnCZnhhSDSSW6e3nNUavLHTVqck+ClQIT61djwYuUUKqcseCGIfK/IT0nh2cxuJOMpY50Fz4dIN44sQOwHnoxxJ/B8iFDhx+YN7T9DLCkhPaM0KwAAAABJRU5ErkJggg=="
 
 App.CardPlayer.card.user(name: String, type: String, img: String): DOM
   let fator = 2
