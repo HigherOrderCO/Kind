@@ -10,15 +10,18 @@ BBT.member.In<K: Type, V: Type>(
       let contra = Bool.false_neq_true(H0)
       Empty.absurd!(contra)
     bin:
-      open H1 open H1.snd
+      open H1; open H1.snd;
+      // reduce the type so that `with` works
+      let H0 = H0 :: cmp(key,map.key,_,_,_,_) == _
       case cmp(key, map.key) with H0 {
         ltn:
           let ind = BBT.member.In<K, V>(cmp, key, map.left, H0, H1.snd.fst)
-          ?ltn
+          BBT.In.left!!!!!!!!(ind)
         eql:
           BBT.In.here<K, V>(map.size, key, map.val, map.left, map.right)
         gtn:
-          ?gtn
+          let ind = BBT.member.In<K, V>(cmp, key, map.right, H0, H1.snd.snd)
+          BBT.In.right!!!!!!!!(ind)
       }!
   }!
 
