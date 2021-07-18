@@ -1,0 +1,24 @@
+BBT.member.In<K: Type, V: Type>(
+  cmp: K -> K -> Cmp
+  key: K
+  map: BBT<K,V>
+)<H0: BBT.member<K, V>(cmp, key, map) == true
+  H1: BBT.Balanced<K, V>(cmp, map)
+>: BBT.In<K, V>(map, key)
+  case map with H0 H1 {
+    tip:
+      let contra = Bool.false_neq_true(H0)
+      Empty.absurd!(contra)
+    bin:
+      open H1 open H1.snd
+      case cmp(key, map.key) with H0 {
+        ltn:
+          let ind = BBT.member.In<K, V>(cmp, key, map.left, H0, H1.snd.fst)
+          ?ltn
+        eql:
+          BBT.In.here<K, V>(map.size, key, map.val, map.left, map.right)
+        gtn:
+          ?gtn
+      }!
+  }!
+
