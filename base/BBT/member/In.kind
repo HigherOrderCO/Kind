@@ -4,6 +4,7 @@ BBT.member.In<K: Type, V: Type>(
   map: BBT<K,V>
 )<H0: BBT.member<K, V>(cmp, key, map) == true
   H1: BBT.Balanced<K, V>(cmp, map)
+  H2: Cmp.Order<K>(cmp)
 >: BBT.In<K, V>(map, key)
   case map with H0 H1 {
     tip:
@@ -11,16 +12,16 @@ BBT.member.In<K: Type, V: Type>(
       Empty.absurd!(contra)
     bin:
       open H1; open H1.snd;
-      // reduce the type so that `with` works
+      // force typechecker to reduce the type so that `with` works
       let H0 = H0 :: cmp(key,map.key,_,_,_,_) == _
       case cmp(key, map.key) with H0 {
         ltn:
-          let ind = BBT.member.In<K, V>(cmp, key, map.left, H0, H1.snd.fst)
+          let ind = BBT.member.In<K, V>(cmp, key, map.left, H0, H1.snd.fst, H2)
           BBT.In.left!!!!!!!!(ind)
         eql:
           BBT.In.here<K, V>(map.size, key, map.val, map.left, map.right)
         gtn:
-          let ind = BBT.member.In<K, V>(cmp, key, map.right, H0, H1.snd.snd)
+          let ind = BBT.member.In<K, V>(cmp, key, map.right, H0, H1.snd.snd, H2)
           BBT.In.right!!!!!!!!(ind)
       }!
   }!
