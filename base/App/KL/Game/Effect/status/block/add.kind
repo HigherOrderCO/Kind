@@ -5,24 +5,15 @@ App.KL.Game.Effect.status.block.add(
   (pos)
 
   App.KL.Game.Effect { 
-    let turn = if I32.gtn(duration, 1) then " turns " else " turn "
-    let duration_show = String.show_clean(I32.show(duration))
-    App.KL.Game.Effect.description.add("Denies a creature from dealing damage for"|duration_show|turn)
-    get caster = App.KL.Game.Effect.board.creature.caster
     get creature = App.KL.Game.Effect.board.creature.get(pos)
-    get board = App.KL.Game.Effect.board.get
+    get caster = App.KL.Game.Effect.board.creature.caster
     without caster: App.KL.Game.Effect { return +0#32 }
     without creature: App.KL.Game.Effect { return +0#32 }
     let hero_name = caster@hero
     let hero_name = hero_name@name
-    let block = App.KL.Game.Creature.Status.block.add(creature, id, duration, hero_name)
-    let new_board = App.KL.Game.Board.Creature.set(pos, block, board)
-    let invul = App.KL.Game.Creature.Status.invulnerable.check(creature)
-    if invul then
-      App.KL.Game.Effect { return +0#32 }
-    else
-      App.KL.Game.Effect { 
-      App.KL.Game.Effect.board.set(new_board)
+    let block = App.KL.Game.Creature.Status.block(id, duration, hero_name)
+    App.KL.Game.Effect { 
+      App.KL.Game.Effect.status.add(creature, block, pos)
       return duration
     }
   }

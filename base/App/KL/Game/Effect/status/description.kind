@@ -1,0 +1,33 @@
+App.KL.Game.Effect.status.description(
+  status: App.KL.Game.Creature.Status
+): App.KL.Game.Effect<Unit>
+  
+  let duration_show = case status{block: String.show_clean(I32.show(status.duration))}default String.show_clean(I32.show(status.duration))
+  let turn = case status {block: if I32.gtn(status.duration, 1) then " turns " else " turn "
+}default if I32.gtn(status.duration, 1) then " turns " else " turn "
+  let amount_show = case status {
+    block: ""
+    dampen:""
+    invulnerable:""
+    root: ""
+    silence:""
+    stun:""
+    }default String.show_clean(I32.show(status.amount))
+
+  let distance = case status { haste: if I32.gtn(status.amount, 1) then " tiles " else " tile " }default ""
+ 
+
+    case status { 
+      block: App.KL.Game.Effect.description.add("Denies a creature from dealing damage for"|duration_show|turn)
+      dampen: App.KL.Game.Effect { return unit } //TODO
+      dot: App.KL.Game.Effect.description.add("Adds a damage over time effect for"|duration_show|turn| "dealing"|amount_show|" damage")
+      haste: App.KL.Game.Effect.description.add("Set Haste in a creature for"|duration_show| turn | "increasing movement distance by"|amount_show|distance)
+      hot: App.KL.Game.Effect.description.add("Add a heal over time status for"|duration_show|turn| " healing for"|amount_show)
+      invulnerable: App.KL.Game.Effect.description.add("Makes a creature invulnerable for"|duration_show|turn| " protecting it from any negative effects")
+      root: App.KL.Game.Effect.description.add("Root a creature for"|duration_show|turn)
+      shield: App.KL.Game.Effect.description.add("Give Shield to a creature for"|duration_show|turn| " protecting it from taking "|amount_show|" damage")
+      silence: App.KL.Game.Effect.description.add("Silence a creature for"|duration_show|turn)
+      slow: App.KL.Game.Effect { return unit } // TODO
+      stun: App.KL.Game.Effect.description.add("Stun a creature for"|duration_show|turn)
+      weaken: App.KL.Game.Effect.description.add("Weaken a creature for"|duration_show| turn | " reducing the damage it deals by"|amount_show)
+    }

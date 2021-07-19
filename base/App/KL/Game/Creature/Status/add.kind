@@ -1,0 +1,33 @@
+App.KL.Game.Creature.Status.add(
+  creature: App.KL.Game.Creature
+  status: App.KL.Game.Creature.Status
+): App.KL.Game.Creature
+
+  let invulnerable = App.KL.Game.Creature.Status.invulnerable.check(creature)
+  let positive_effect = App.KL.Game.Creature.Status.positive(status)
+
+  if invulnerable then
+    if positive_effect then
+      case status { 
+        haste: App.KL.Game.Creature.Status.haste.add(creature, status.duration, status.amount)
+        hot: App.KL.Game.Creature.Status.hot.add(creature, status.id, status.duration, status.amount)
+        invulnerable: App.KL.Game.Creature.Status.invulnerable.add(creature, status.id, status.duration)
+        shield: App.KL.Game.Creature.Status.shield.add(creature, status.id, status.duration, status.amount)
+      }default creature
+    else
+      creature
+  else
+    case status { 
+      block: App.KL.Game.Creature.Status.block.add(creature, status.id, status.duration, status.caster)
+      dampen: creature
+      dot: App.KL.Game.Creature.Status.dot.add(creature, status.id, status.duration, status.amount)
+      haste: App.KL.Game.Creature.Status.haste.add(creature, status.duration, status.amount)
+      hot: App.KL.Game.Creature.Status.hot.add(creature, status.id, status.duration, status.amount)
+      invulnerable: App.KL.Game.Creature.Status.invulnerable.add(creature, status.id, status.duration)
+      root: App.KL.Game.Creature.Status.root.add(creature, status.duration)
+      shield: App.KL.Game.Creature.Status.shield.add(creature, status.id, status.duration, status.amount)
+      silence: App.KL.Game.Creature.Status.silence.add(creature, status.duration)
+      slow: App.KL.Game.Creature.Status.slow.add(creature, status.duration, status.amount)
+      stun: App.KL.Game.Creature.Status.stun.add(creature, status.duration)
+      weaken: App.KL.Game.Creature.Status.weaken.add(creature, status.duration, status.amount)
+    }

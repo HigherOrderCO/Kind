@@ -1,5 +1,5 @@
 type App.ATB.State.local {
-    new
+    new(phase: App.ATB.Stage)
 }
 
 type App.ATB.State.global {

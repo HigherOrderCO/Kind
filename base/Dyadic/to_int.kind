@@ -1,4 +1,0 @@
-Dyadic.to_int(a: Dyadic): Int
-  open a
-  let n = a.num/Nat.to_int(Nat.pow(2, a.exp))
-  n

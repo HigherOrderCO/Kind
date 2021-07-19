@@ -1,2 +1,14 @@
 App.ATB.when : App.When<App.ATB.State>
-    App.no_when(App.ATB.State)
+   (event, state) 
+   open state 
+   open state.local
+   case state.local.phase {
+       room : App.ATB.when.room(state.local.phase.status, event, state)
+       draft : App.ATB.when.draft(state.local.phase.status, event, state)
+       play :  App.pass!
+   }
+ //  case event {
+   //    input : switch (String.eql(event.id)) {
+     //      "room_id" : App.set_local!(App.ATB.State.local.new(App.ATB.Stage.room(event.text)))
+     //  } default App.pass!
+  // } default App.pass!

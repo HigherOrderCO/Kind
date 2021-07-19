@@ -6,7 +6,7 @@ type App.KL.Game.Skill {
     range: U64                          // cast range
     pattern: App.KL.Game.Skill.Pattern  // pattern in which skill is cast
 		effect: App.KL.Game.Effect<Unit>    // its in-game effect
-    description: String
+    description: String                 // description of the skill
     cursor: App.KL.Game.Cursor          // cursor that game will show when skill is casted
 	)
 }
