@@ -44,13 +44,32 @@ App.CardPlayer.draw: App.Draw<App.CardPlayer.State>
             </div>
           </div>
         </div>
-        <footer style={"display": "flex", "padding": "5px"}>
-          <div style={"flex": "1"}></div>
-          <div><img style={"image-rendering": "pixelated"} src=App.CardPlayer.footer.ready_button></img></div>
-          <div style={"flex": "1"}></div>
+        <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
+          <div style={"display": "flex", "height": "50%", "flex": "1"}>
+            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.CardPlayer.footer.stencil.main |")"}></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.CardPlayer.footer.stencil.diagonal_left></img></div>
+            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img style={"image-rendering": "pixelated"} src=App.CardPlayer.footer.ready_button></img></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.CardPlayer.footer.stencil.diagonal_right></img></div>
+            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.CardPlayer.footer.stencil.main |")"}></div>
+          </div>
         </footer>
       </div>
     </div>
+
+App.CardPlayer.footer.stencil.main: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAL0lEQVR42u3OIQEAAAgDMCyOGPQvCDFuJuZX03tJJSAgICAgICAgICAgICAgkA48lJQATI4CDw0AAAAASUVORK5CYII="
+
+App.CardPlayer.footer.stencil.left: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA60lEQVRIDcWWwQ2DMBRDufbWKxt0A2bpIp2HoToCO3AEfSRXVsGQT/KTSihgOf5+FNR2z8driTj64b3gGMbvdm7r/7lddyU+ERCWCYiUtQhMFEhqLkCzYVIHRvoA85nm+49ZZEFPdjaMZ1i0Nwsmupw3/zaMd1CuH0Xt5VZZ8LjeGRUWpaOkrUVhogpf5QLI7rrysufyN1OF1NC5qJrHnlMYFVBL56JqJnskjNpcU+eiai57DmHUxto6F1Wz2bODUZta6FxUzYdn999MbWilc1HVgT2/b0aZW+pcVPVgzwajjK11FD3rAY89Ziu/MPx2bdASCAAAAABJRU5ErkJggg=="
+
+App.CardPlayer.footer.stencil.diagonal_left: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA60lEQVRIDcWWwQ2DMBRDufbWKxt0A2bpIp2HoToCO3AEfSRXVsGQT/KTSihgOf5+FNR2z8driTj64b3gGMbvdm7r/7lddyU+ERCWCYiUtQhMFEhqLkCzYVIHRvoA85nm+49ZZEFPdjaMZ1i0Nwsmupw3/zaMd1CuH0Xt5VZZ8LjeGRUWpaOkrUVhogpf5QLI7rrysufyN1OF1NC5qJrHnlMYFVBL56JqJnskjNpcU+eiai57DmHUxto6F1Wz2bODUZta6FxUzYdn999MbWilc1HVgT2/b0aZW+pcVPVgzwajjK11FD3rAY89Ziu/MPx2bdASCAAAAABJRU5ErkJggg=="
+
+App.CardPlayer.footer.stencil.diagonal_right: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA1ElEQVRIDc2XwQ2DMBAE/c0vXzpIB9SSRlIPRVECPeRJdJGMQNjOGN8qRrJAx2pvx2BLDsHhGqd5jWMYn6dnq8Vxvz1WxWjGMIAYktwVEObZBLKHUAWkvpdBXst7+xK0mVJ3CaQ3CJugapAeIapBeoWoAiEQ/1z86NeqhbBtWLmwU94/QQgE0aSae9aKICQg0XgGznllQUhAosk19q4nQUhAovEOW/I7gZCARFNqqnh3ACHbZ48QNjEbCIEgGsVsE88vCAlINKShShNowHjWUAVp9f0ACML8do5nEEsAAAAASUVORK5CYII="
+
+App.CardPlayer.footer.stencil.right: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA1ElEQVRIDc2XwQ2DMBAE/c0vXzpIB9SSRlIPRVECPeRJdJGMQNjOGN8qRrJAx2pvx2BLDsHhGqd5jWMYn6dnq8Vxvz1WxWjGMIAYktwVEObZBLKHUAWkvpdBXst7+xK0mVJ3CaQ3CJugapAeIapBeoWoAiEQ/1z86NeqhbBtWLmwU94/QQgE0aSae9aKICQg0XgGznllQUhAosk19q4nQUhAovEOW/I7gZCARFNqqnh3ACHbZ48QNjEbCIEgGsVsE88vCAlINKShShNowHjWUAVp9f0ACML8do5nEEsAAAAASUVORK5CYII="
 
 App.CardPlayer.header.button.invite: String  
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABYklEQVR42u3aPQrCQBAF4FzAI4iIYBqtbGJlaWGXxs7Gyk4vIFhY23gYj+M9LCIDmTAsu5ss5GdH38LDJIrwMcns4pqMZ3lByTanYro6qkoSMgAFFFBv5usLKgoooIACmmhFBkGBBBJIIFUgu1ifAtknMhYcKglki8js9S7koHMVSAlzHduAEjqa7PQ0HvPVBDKIw9fp+PG5V4n2diXYYvu03rI8JFBCo0MSQlaMQ8D0cKugHFcVzaiupK+KEubKIEiqlnmNcPJZ5HPZbFQhQ7qrrYuqRPrmSXPaUP9MNlkA2KoZZXcNjZwPzWrSdfVIRrieTYmUiR4p50bfMq7uM4MjeYoIWYybDagrYK/d9WeRtpWOC+IbKpB1iCbvR49sYwAJZI+Nx7dOrYua7voXyCF/nsSGD5BAAgkk9idRSSCB/I8/EAIIIIBBsW0PooIAlsA8PfeS/fLayvdEC2wrAJbjC8t/0cpcsmwIAAAAAElFTkSuQmCC"
