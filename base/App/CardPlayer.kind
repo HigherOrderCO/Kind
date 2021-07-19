@@ -32,9 +32,10 @@ App.CardPlayer.draw: App.Draw<App.CardPlayer.State>
               "height": "416px" 
               "overflow": "auto"
               "display": "grid"
-              "grid-template-columns": "repeat(4, minmax(0, 1fr))"
-              "gap": "5px"
+              "grid-template-columns": "repeat(5, minmax(0, 1fr))"
+              "gap": "10px"
               "margin": "0 10px"
+              "padding-top": "4px" // because of negative margin
             }>
               for card in [App.CardPlayer.portrait.hero(hero) for hero in App.KL.Game.Hero.list]:
                 card
