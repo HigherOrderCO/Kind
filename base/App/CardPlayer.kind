@@ -167,12 +167,12 @@ App.CardPlayer.card.img(name: String, type: String, img: String): DOM
       "height": "25%"
       "display": "flex"
       "flex-direction": "column"
-      "justify-content": "space-between"
+      "justify-content": "space-around"
       "align-items": "center"
     }>
       <span style={"color": "white"}>name</span>
-      <img src=App.CardPlayer.card.name_divisor></img>
-      <span style={"color": "white"}>type</span>
+      <img src=App.CardPlayer.card.name_divisor style={"width": "50%"}></img>
+      <span style={"color": "#871df0", "font-size": "small"}>type</span>
     </div>
   </div>
 
