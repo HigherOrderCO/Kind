@@ -50,3 +50,13 @@ App.KL.Game.Hero.Attributes.set(damage: Nat, resistance: Nat, mobility: Nat, ran
     max(utility)
     max(difficulty)
   )
+
+App.KL.Game.Hero.Attributes.to_map(attrs: App.KL.Game.Hero.Attributes): Map<Nat>
+  {
+    "damage":     attrs@damage
+    "resistance": attrs@resistance
+    "mobility":   attrs@mobility
+    "range":      attrs@range
+    "utility":    attrs@utility
+    "difficulty": attrs@difficulty
+  }
