@@ -1,25 +1,33 @@
-name: Check files
+name: Authorize a new App to be automatically deployed
 
-on: 
-  push:
-    branches:
-      - deploy
+on:
   pull_request:
+    types: [ opened, synchronize, labeled ]
     branches:
-      - deploy
+      - main
+      - master
         
 jobs:
-  test:
+  check_deploy_label:
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'deploy_app') }}
+    steps:
+      - run: echo "Contains label deploy_app"
+  
+  deploy:
+    needs: [check_deploy_label]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.1.0
+      - uses: actions/checkout@v2
+        with: 
+          ref: ${{ github.event.pull_request.head.sha }}
         id: auth
       - uses: jitterbit/get-changed-files@v1
         id: files
         with:
           format: space-delimited
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Printing
+      - name: Analyze files that changed
         run: |
           echo "All:"
           echo "${{ steps.files.outputs.all }}"
@@ -27,7 +35,7 @@ jobs:
           for changed_file in ${{ steps.files.outputs.all }}; do
             app_dir=${changed_file:9}
             key=${{ github.actor }}
-            echo "Changed: $app_dir."
+            echo "Changed: $app_dir"
             
             if [[ "$app_dir" =~ ^$key.* ]]; then
               is_kind=${app_dir: -5}
@@ -44,3 +52,4 @@ jobs:
             
           done
 
+  
