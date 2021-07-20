@@ -18,12 +18,13 @@ App.KL.Game.Creature.Status.update.aux(
     cons: 
       let head = case status.head {
         block : App.KL.Game.Creature.Status.block(status.head.id, I32.sub(status.head.duration, 1), status.head.caster)
-        dampen : App.KL.Game.Creature.Status.dampen(I32.sub(status.head.duration, 1), status.head.tick)
+        //damage over time(dot)
         dot : App.KL.Game.Creature.Status.dot(status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
         haste : App.KL.Game.Creature.Status.haste(I32.sub(status.head.duration, 1), status.head.amount)
         //heal over time(hot)
         hot : App.KL.Game.Creature.Status.hot(status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
         invulnerable: App.KL.Game.Creature.Status.invulnerable(status.head.id, I32.sub(status.head.duration ,1))
+        protect: App.KL.Game.Creature.Status.protect(I32.sub(status.head.duration, 1), status.head.amount)
         root: App.KL.Game.Creature.Status.root(I32.sub(status.head.duration, 1))
         shield: App.KL.Game.Creature.Status.shield(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
         silence: App.KL.Game.Creature.Status.silence(I32.sub(status.head.duration, 1))
@@ -34,12 +35,13 @@ App.KL.Game.Creature.Status.update.aux(
       let tail = App.KL.Game.Creature.Status.update.aux(status.tail)
       case head {
         block : if I32.gtn(head.duration,0) then head & tail else tail
-        dampen : if I32.gtn(head.duration,0) then head & tail else tail
+        // damage over time (dot)
         dot : if I32.gtn(head.duration,0) then head & tail else tail
         haste : if I32.gtn(head.duration,0) then head & tail else tail
         //heal over time(hot)
         hot : if I32.gtn(head.duration,0) then head & tail else tail
         invulnerable : if I32.gtn(head.duration,0) then head & tail else tail
+        protect : if I32.gtn(head.duration,0) then head & tail else tail
         root : if I32.gtn(head.duration,0) then head & tail else tail
         shield: if I32.gtn(head.duration,0) then head & tail else tail
         silence: if I32.gtn(head.duration,0) then head & tail else tail

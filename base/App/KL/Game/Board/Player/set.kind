@@ -1,4 +1,4 @@
-App.KL.Game.Board.PLayer.set(
+App.KL.Game.Board.Player.set(
   user: String, 
   player: App.KL.Game.Player, 
   board: App.KL.Game.Board

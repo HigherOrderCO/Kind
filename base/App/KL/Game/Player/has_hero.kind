@@ -6,8 +6,6 @@ App.KL.Game.Player.has_hero(
   open player
   let hero = player.hero_id
   case hero {
-    none:
-      false
-    some:
-      true
+    none: false
+    some: true
   }

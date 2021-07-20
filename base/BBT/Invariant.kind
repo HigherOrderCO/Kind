@@ -1,0 +1,5 @@
+type BBT.Invariant<K: Type, V: Type>(cmp: K -> K -> Cmp, map: BBT<K, V>) {
+  new(
+    bal: BBT.Balanced<K, V>(cmp, map)
+  )
+}

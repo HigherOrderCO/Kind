@@ -1,0 +1,16 @@
+App.KL.Game.Effect.status.protect.apply(
+  creature: App.KL.Game.Creature
+): App.KL.Game.Effect.At<Bool>
+  (pos)
+
+  App.KL.Game.Effect { 
+    let affected = App.KL.Game.Creature.Status.protect.check(creature)
+    if affected then App.KL.Game.Effect { 
+      get board = App.KL.Game.Effect.board.get
+      let updated_protect = App.KL.Game.Creature.Status.protect.update(creature)
+      let new_board = App.KL.Game.Board.Creature.set(pos, updated_protect, board)
+      App.KL.Game.Effect.board.set(new_board)
+      return true
+    }
+    else App.KL.Game.Effect { return false }
+  }

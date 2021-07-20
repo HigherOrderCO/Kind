@@ -4,7 +4,6 @@ App.KL.Game.Phase.Draft.tick(
 ): App.KL.Game
 
   let players     = game@players
-  //let can_start = App.KL.Game.Phase.Draft.tick.aux(players)
 
   let ready = true
   let team = false
