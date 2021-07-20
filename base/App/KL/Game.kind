@@ -8,6 +8,7 @@ type App.KL.Game.State.Local {
     user: String
     room: String
     tab:  String
+    page: String // page in draft -> heroes or users for now
     info: Hexagonal.Axial
     preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
@@ -19,7 +20,8 @@ App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Loca
   let mouse   = {0,0}
   let tab     = "D"
   let info = Hexagonal.Axial.new(0,0)
-  App.KL.Game.State.Local.new(user, room, tab, info, preview, mouse)
+  let page = "heroes"
+  App.KL.Game.State.Local.new(user, room, tab, page, info, preview, mouse)
 
 // Global State
 // ============
@@ -60,24 +62,28 @@ App.KL.Game.start: App.KL.Game
 // ===============
 
 App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+  // set global cursor
   let style = {
     "cursor": "url("|App.KL.Game.Cursor.get_img(App.KL.Game.Cursor.default)|"), auto"
+    "height": "100%"
+    "width": "100%"
   }
 
-  <div style=style>{
-    let game = global@game
-    case game {
-      none: <div>"Not ingame."</div>
-      some: <div>{
-        let phase = game.value@phase
-        case phase {
-          play : App.KL.Game.Phase.Play.draw(img, local, game.value)
-          draft: App.KL.Game.Phase.Draft.draw(local, global)
-          end  : App.KL.Game.Phase.End.draw(local, game.value)
-        } 
-      }</div>
+  <div style=style> 
+    {
+      let game = global@game
+      case game {
+        none: <div>"Not ingame."</div>
+        some:
+          let phase = game.value@phase
+          case phase {
+            play : App.KL.Game.Phase.Play.draw(img, local, game.value)
+            draft: App.KL.Game.Phase.Draft.draw(local, global)
+            end  : App.KL.Game.Phase.End.draw(local, game.value)
+          } 
+      }
     }
-  }</div>
+  </div>
 
 // Local events
 // ============

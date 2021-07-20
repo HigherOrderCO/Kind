@@ -9,6 +9,7 @@ App.KL.Game.Phase.Draft.when(
 
   case event {
     mouse_click:
+      log(event.id)
       switch String.starts_with(event.id) {
         "C" : // Set initial position 
           let coord_nat = String.drop(1, event.id)
@@ -47,6 +48,10 @@ App.KL.Game.Phase.Draft.when(
               "red" : App.KL.Game.Team.red
             } default App.KL.Game.Team.neutral
             App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_team.serial(team))
+        "user-card":
+          let new_page = if String.eql(local@page, "heroes") then "users" else "heroes"
+          let local    = local@page <- new_page
+          App.set_local!(App.KL.State.Local.game(local))
       } default App.pass!
   mouse_over:
     switch String.starts_with(event.id) {
