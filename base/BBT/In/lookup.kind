@@ -1,0 +1,30 @@
+// efficiently lookup the value of a key you know it's there
+BBT.In.lookup<K: Type, V: Type>(
+  cmp: K -> K -> Cmp
+  key: K
+  map: BBT<K,V>
+)<H0: BBT.In<K, V>(map, key)
+  H1: BBT.Balanced<K, V>(cmp, map)
+>: V
+  case map with H0 H1 {
+    tip:
+      case H0 {}
+    bin:
+      open H1
+      open H1.snd
+      def its_there = H1.fst(key, H0) // where should I look?
+      case cmp(key, map.key) with its_there {
+        ltn:
+          // now ind is BBT.In<K, V>(map.left, key)
+          // so we can call the function recursively
+          open its_there
+          BBT.In.lookup<K, V>(cmp, key, map.left)<its_there.fst, H1.snd.fst>
+        eql:
+          map.val
+        gtn:
+          // now ind is BBT.In<K, V>(map.right, key)
+          // so we can call the function recursively
+          open its_there
+          BBT.In.lookup<K, V>(cmp, key, map.right)<its_there.snd, H1.snd.snd>
+      }!
+  }!
