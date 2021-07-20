@@ -1,0 +1,307 @@
+// Litereum: a minimal decentralized computer
+// event that updates the blockchain
+type Litereum.Post {
+  new(
+    // enough for function calls
+    data: Vector<U256,8>     //  8 words =  256 bytes
+    // only data is signed
+    sign: Litereum.Signature // 32 words = 1024 bytes
+    // half nonce half miner?
+    info: U256               //  1 word  =   32 bytes
+    // hash of previous post
+    prev: U256               //  1 word  =   32 bytes
+  )                          // 42 words = 1344 bytes
+}
+
+type Litereum.Chain {
+  new(
+    // OK o hash é igual a chave
+    post: Map<Litereum.Post> // PostHash ~> post
+
+    // OK para todo membro da lista, o anterior é igual a chave
+    nexts: Map<List<U256>>   // PostHash ~> [next_post_hash]
+
+    // OK é a soma do score do post atual com o score anterior
+    score: Map<U256>         // PostHash ~> accumulated_score
+
+    // o score é maior que todo mundo
+    // o score bate
+    tip: Pair<U256,U256>     // top-most post
+  )
+}
+  
+// Verifies all the invariants of the data structure are satisfied
+Litereum.CheckIntegrity.go(
+  c: Litereum.Chain,
+  max_score: Pair<U256, U256>
+  stack: List<List<U256>>,
+): Maybe<String>
+  open c
+  case stack {
+    nil:
+      none
+    cons:
+      case stack.head {
+        nil:
+          // should never happen
+          none
+        cons:
+          let current = stack.head.head
+          let curr_string = U256.show(current)
+          let curr_nexts = c.nexts{curr_string} abort some("hash \""|curr_string|"\" not in chain.nexts")
+          case curr_nexts {
+            nil:
+              // we reached a leaf, time to backtrack
+              let next_unseen = Litereum.CheckIntegrity.remove_seen(stack)
+              Litereum.CheckIntegrity.go(c, max_score, next_unseen)
+            cons:
+              let ret = none :: Maybe<String>
+              let curr_score = c.score{curr_string} abort some("\""|curr_string|"\" not found in chain.score (should never happen)")
+              for next in curr_nexts with ret:
+                case ret {
+                  none:
+                    let next_string = U256.show(next)
+                    let next_post = c.post{next_string} abort some("post not in chain.posts: "|curr_string)
+                    let next_hash = Litereum.post_hash(next_post)
+                    if next_hash =? next then
+                      open next_post
+                      if next_post.prev =? current then
+                        let post_score = Litereum.score(next_hash)
+                        let next_score = c.score{next_string} abort some("\""|next_string|"\" not found in chain.score")
+                        if next_score =? post_score + curr_score then
+                          use tip = c.tip
+                          if tip.snd =? next then
+                            if tip.fst =? next_score then
+                              none
+                            else
+                              some("tip "|next_string|" is said to have score "|U256.show(tip.fst)
+                                |", but actually has score "|U256.show(next_score))
+                          else
+                            if tip.snd >=? next_score then
+                              none
+                            else
+                              some("post \""|next_string|"\" has score "|U256.show(next_score)
+                                |", which is bigger than the tip")
+                        else
+                          some("\""|next_string|"\" score cache is "|U256.show(next_score)
+                            |" but should've been "|U256.show(post_score)|" + "|U256.show(curr_score))
+                      else
+                        let next_prev_string = U256.show(next_post.prev)
+                        some("chan.next{\""|curr_string|"\"} includes \""|next_string|"\" but it has prev \""|next_prev_string|"\"")
+                    else
+                      some("post has key \""|next_string|"\" in chain.posts but hash \""|U256.show(next_hash)|"\"")
+                  some:
+                    ret
+                }
+              case ret {
+                none:
+                  Litereum.CheckIntegrity.go(c, max_score, curr_nexts & stack)
+                some:
+                  ret
+              }
+          }
+      }
+  }
+
+// [ ] genesis está no mapa
+// [ ] o hash bate
+// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[genesis]])
+// [x] genesis está no nexts
+// [x] BlockB está no mapa
+// [x] o hash bate
+// [x] o prev do BlockB é o genesis
+// [x] BlockA está no mapa
+// [x] o hash bate
+// [x] o prev do BlockA é o genesis
+// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockB, BlockA], [genesis]])
+// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockC, BlockD], [BlockB, BlockA], [genesis]])
+// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockD], [BlockB, BlockA], [genesis]])
+// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockA], [genesis]])
+// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [])
+
+Litereum.CheckIntegrity.remove_seen(
+  stack: List<List<U256>>
+): List<List<U256>>
+  case stack {
+    nil: []
+    cons:
+      case stack.head {
+        nil:
+          [] // should never happen
+        cons:
+          case stack.head.tail {
+            nil:
+              Litereum.CheckIntegrity.remove_seen(stack.tail)
+            cons:
+              stack.head.tail & stack.tail
+          }
+      }
+  }
+
+
+Litereum.CheckIntegrity(
+  c: Litereum.Chain,
+  genesis: U256,
+): Maybe<String>
+  // TODO verify genesis is in map and that it's hash matches the key
+  Litereum.CheckIntegrity.go(c, {0, 0}, [[genesis]])
+
+Litereum.Private: Type
+  Vector<U256, 32>
+
+Litereum.Public: Type
+  Vector<U256, 32>
+
+Litereum.Address: Type
+  U256
+
+Litereum.Signable: Type
+  Vector<U8, 32>
+
+Litereum.Signature: Type
+  Vector<U256, 32>
+
+// Takes the Keccak hash of a list of words
+Litereum.hash(words: List<U256>): U256
+  Crypto.Keccak.hash.words(words)
+
+// Hashes a buffer into a 1024-byte signable string
+Litereum.Signable.bytes(len_bytes: Pair<U32,Buffer8>): Litereum.Signable
+  let vals = Buffer8.to_list(Crypto.Keccak.hash.bytes(len_bytes))
+  let csum = 7650 :: U32
+  let csum = for i from 2 to List.length!(vals): csum - U8.to_u32(vals[i] <> 0)
+  let vals = vals[0] <- U32.to_u8(U32.div(csum, 256))
+  let vals = vals[1] <- U32.to_u8(U32.mod(csum, 256))
+  let vals = Vector.from_list.length!(32, 0, vals)
+  vals
+
+// Converts a list of words to a signable
+Litereum.Signable.words(words: List<U256>): Litereum.Signable
+  Litereum.Signable.bytes(Buffer8.from_list.256(words))
+
+// Converts a UTF-8 string to a signable
+Litereum.Signable.utf8(str: String): Litereum.Signable
+  Litereum.Signable.bytes(Buffer8.from_hex(String.to_hex(str)))
+
+// Converts a seed to a private key
+Litereum.private_from_seed(seed: U256): Litereum.Private
+  Litereum.private_from_seed.go(32, seed)
+
+Litereum.private_from_seed.go(len: Nat, seed: U256): Vector<U256,len>
+  case len {
+    zero:
+      Vector.nil!
+    succ:
+      let head = Litereum.hash([U256.add(seed, Nat.to_u256(len))])
+      let tail = Litereum.private_from_seed.go(len.pred, seed)
+      Vector.cons<U256,len.pred>(head, tail)
+  }!
+
+// Coverts a private key to an address
+Litereum.public_from_private(pvt: Litereum.Private): Litereum.Private
+  Litereum.public_from_private.go(32, pvt)
+
+Litereum.public_from_private.go(len: Nat, pvt: Vector<U256,len>): Vector<U256,len>
+  case len with pvt {
+    zero: Vector.nil!
+    succ: case pvt {
+      cons:
+        let hash = pvt.head
+        let hash = for i from 0 to 256:
+          Litereum.hash([hash])
+        Vector.cons<U256,len.pred>(hash, Litereum.public_from_private.go(len.pred, pvt.tail))
+    }
+  }!
+
+// Converts a public key to an address
+Litereum.address_from_public(pub: Litereum.Public): Litereum.Address
+  let vals = Buffer8.from_list.256(Vector.to_list!(32, pub))
+  let addr = Buffer8.to_u256(Crypto.Keccak.hash.bytes(vals)@snd)
+  addr
+
+// Signs a post
+Litereum.sign_post(post: Litereum.Post, pvt: Litereum.Private): Litereum.Signature
+  Litereum.sign(Litereum.Signable.words(Vector.to_list!(8,post@data)), pvt)
+  
+// Signs a signable
+Litereum.sign(msg: Litereum.Signable, pvt: Litereum.Private): Litereum.Signature
+  Litereum.sign.go(32, msg, pvt)
+
+Litereum.sign.go(len: Nat, msg: Vector<U8,len>, pvt: Vector<U256,len>): Vector<U256,len>
+  case len with msg pvt {
+    zero: case msg pvt {
+      nil nil: Vector.nil!
+    }
+    succ: case msg pvt {
+      cons cons:
+        let hash = pvt.head
+        let hash = for i from 0 to 256 - U8.to_nat(msg.head):
+          Litereum.hash([hash])
+        Vector.cons<U256,len.pred>(hash, Litereum.sign.go(len.pred, msg.tail, pvt.tail))
+    }
+  }!
+
+// Verifies if a signature is correct
+Litereum.verify(msg: Litereum.Signable, addr: Litereum.Address, sig: Litereum.Signature): Bool
+  let checksums = Litereum.checksum(msg)
+  let sign_addr = Litereum.recover(msg, sig)
+  checksums && U256.eql(addr, sign_addr)
+
+// Checks if the signable checksum is correct
+Litereum.checksum(msg: Litereum.Signable): Bool
+  Litereum.checksum.go(32, msg)
+
+Litereum.checksum.go(len: Nat, msg: Vector<U8,len>): Bool
+  let vals = Vector.to_list<U8>(len, msg)
+  let csum = 7650 :: U32
+  let csum = for i from 2 to List.length!(vals):
+    csum - U8.to_u32(vals[i] <> 0)
+  let cs_0 = U8.to_u32(vals[0] <> 0)
+  let cs_1 = U8.to_u32(vals[1] <> 0)
+  //log("!!! csum is " | U32.show(csum))
+  //log("!!! cs_0 is " | U32.show(cs_0))
+  //log("!!! cs_1 is " | U32.show(cs_1))
+  U32.eql(csum, U32.add(U32.mul(cs_0, 256), cs_1))
+
+// Returns the public key that signed a message
+Litereum.recover(msg: Litereum.Signable, sig: Litereum.Signature): Litereum.Address
+  Litereum.address_from_public(Litereum.recover.go(32, msg, sig))
+
+Litereum.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,len>): Vector<U256,len>
+  case len with msg sig {
+    zero: Vector.nil!
+    succ: case msg sig {
+      cons cons cons:
+        let hash = sig.head
+        let hash = for i from 0 to U8.to_nat(msg.head): Litereum.hash([hash])
+        Vector.cons<U256,len.pred>(hash, Litereum.recover.go(len.pred, msg.tail, sig.tail))
+    }
+  }!
+
+// Returns the PostHash
+Litereum.post_hash(post: Litereum.Post): U256
+  use post = post
+  let words = []
+  let words = words ++ Vector.to_list!(8, post.data)
+  let words = words ++ Vector.to_list!(32, post.sign)
+  let words = words ++ [post.info, post.prev]
+  Litereum.hash(words)
+
+// Estimates how many attempts were needed to make this hash
+Litereum.score(hash: U256): U256
+  let lim = Nat.pow(2, 256)
+  Nat.to_u256(lim / (lim - U256.to_nat(hash)))
+
+Litereum.add_post(post: Litereum.Post, chain: Litereum.Chain): Litereum.Chain
+  open post; open chain; open chain.tip
+  let prev_hash   = post.prev
+  let post_hash   = Litereum.post_hash(post)
+  let prev        = chain.post{U256.show(prev_hash)} abort chain
+  let prev_score  = chain.score{U256.show(prev_hash)} abort chain
+  let post_score  = prev_score + Litereum.score(post_hash)
+  let prev_nexts  = chain.nexts{U256.show(prev_hash)} <> []
+  let chain.post  = chain.post{U256.show(post_hash)} <- post
+  let chain.score = chain.score{U256.show(post_hash)} <- post_score
+  let chain.nexts = chain.nexts{U256.show(prev_hash)} <- post_hash & prev_nexts
+  let chain.tip   = if post_score >? chain.tip.fst then {post_score,post_hash} else chain.tip
+  Litereum.Chain.new(chain.post, chain.nexts, chain.score, chain.tip)
