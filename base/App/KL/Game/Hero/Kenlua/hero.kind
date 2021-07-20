@@ -185,8 +185,8 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
     "Q": App.KL.Game.Skill.new("Dash", 200, 47, dash_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.dash(dash_range@snd, 2, 1),
     "Kenlua takes 2 damage to dash towards a tile within 2 range. Deal 2 damage to enemies nearby destination.", App.KL.Game.Cursor.move)
 
-    "W": App.KL.Game.Skill.new("Stare", 520, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.stare(10),
-    "Kenlua Stares at a tile. If there is an enemy on it, Kenlua receives 10 Shield Points for this turn.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new("Stare", 520, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.stare(1),
+    "Kenlua Stares at a tile. If there is an enemy on it, Kenlua blocks all the incoming damage from its source.", App.KL.Game.Cursor.attack)
 
     "E": App.KL.Game.Skill.new("Slash", 800, 68, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.slash(1, 20, 1),
     "Kenlua deals a lethal blow dealing 20 damage to an enemy close to Kenlua.", App.KL.Game.Cursor.attack)
@@ -227,10 +227,10 @@ App.KL.Game.Hero.Kenlua.hero.Skills.dash(range: I32, dmg: I32, ap_cost: I32): Ap
       App.KL.Game.Effect.hp.damage_at(dmg, target)
       App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), coords)
       return unit
-    } else App.KL.Game.Effect.fail("but was rooted or stunned")
+    } else App.KL.Game.Effect.fail("but couldn't move")
   }
 
-App.KL.Game.Hero.Kenlua.hero.Skills.stare(shield_value: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Kenlua.hero.Skills.stare(block_duration: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     get target_creature = App.KL.Game.Effect.board.creature.target
     get target = App.KL.Game.Effect.coord.get_target
@@ -243,7 +243,7 @@ App.KL.Game.Hero.Kenlua.hero.Skills.stare(shield_value: I32): App.KL.Game.Effect
     if App.KL.Game.Team.eql(target_creature@team, caster@team) then
       App.KL.Game.Effect.pass
     else App.KL.Game.Effect {
-      App.KL.Game.Effect.status.shield.add("Kenlua", 0, shield_value, center)
+      App.KL.Game.Effect.status.block.add("Kenlua Stare", block_duration, target)
       return unit
     }
   }

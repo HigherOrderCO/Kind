@@ -18,11 +18,6 @@ App.KL.Game.Creature.Status.silence.add.aux(
     cons:
       case status.head { 
         silence: 
-          let old_duration = status.head.duration
-          let next_silence = I32.cmp(old_duration, duration)
-          case next_silence {
-            gtn: 
-              new_silence & status.tail
-          }default status.head & App.KL.Game.Creature.Status.silence.add.aux(duration, status.tail)
+          status
       }default status.head & App.KL.Game.Creature.Status.silence.add.aux(duration, status.tail)
   }

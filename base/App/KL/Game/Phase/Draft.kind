@@ -40,5 +40,5 @@ App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>): App.KL.G
   log(" - criando mapa")
   board = App.KL.Game.Board.Blueprint.build.board(App.KL.Game.Board.Boards.arena)
   for user:player in players with board:    
-    App.KL.Game.Board.PLayer.set(user, player, board)
+    App.KL.Game.Board.Player.set(user, player, board)
   board

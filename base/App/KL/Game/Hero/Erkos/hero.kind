@@ -20,13 +20,13 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
     "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
     "Walk to another tile within 2 range from " | name | ".", App.KL.Game.Cursor.move)
 
-    "Q": App.KL.Game.Skill.new("Fire Ball", 554, 16, fire_ball_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(fire_ball_range@snd, 4, 1),
+    "Q": App.KL.Game.Skill.new("Fire Ball", 554, 24, fire_ball_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(fire_ball_range@snd, 4, 1),
     "After charging, Erkos throws a Fire Ball in a position, dealing 4 damage to all enemies hit.", App.KL.Game.Cursor.attack)
 
-    "W": App.KL.Game.Skill.new("Fire Wave", 820, 16, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(5, 6, 1),
+    "W": App.KL.Game.Skill.new("Fire Wave", 820, 24, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(5, 6, 1),
     "After charging, Erkos sends a Wave of a fire in 3 directions, dealing  6 damage and doting all enemies hit.", App.KL.Game.Cursor.attack)
 
-    "E": App.KL.Game.Skill.new("Fire Ring", 903, 24, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 10, 3),
+    "E": App.KL.Game.Skill.new("Fire Ring", 903, 24, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 12, 3),
     "Erkos slowly expands his flames around him, dealing massive damage to all enemies nearby.", App.KL.Game.Cursor.attack)
   }
 
@@ -55,8 +55,6 @@ App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(range: I32, dmg: I32, ap_cost: I32)
     get center = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.limit_range(range)
     App.KL.Game.Effect.ap.use(ap_cost)
-
-
 
     let ring = App.KL.Game.Areas.ring(target, 1)
     let area = [target]

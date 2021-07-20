@@ -5,43 +5,38 @@ App.KL.Game.Effect.hp.damage_at(
 
   App.KL.Game.Effect {
     get creature = App.KL.Game.Effect.board.creature.get(pos)
-  //Verifies if a creature is set to be denied
+    get caster = App.KL.Game.Effect.board.creature.caster
+
+  //Verifies if a creature is gonna block skills
     get block =  App.KL.Game.Effect { 
-      get caster = App.KL.Game.Effect.board.creature.caster
       case creature { 
-        none:
-          App.KL.Game.Effect { return false } 
+        none: App.KL.Game.Effect { return false } 
         some:
-          let hero_name = creature.value@hero
-          let hero_name = hero_name@name
           case caster { 
-            none:
-              App.KL.Game.Effect { return false } 
-            some:
-              App.KL.Game.Effect { return  App.KL.Game.Creature.Status.block.verifier(caster.value, hero_name) }
+            none: App.KL.Game.Effect { return false } 
+            some: App.KL.Game.Effect { return  App.KL.Game.Creature.Status.block.verifier(caster.value, creature.value) } // Affected -> Caster
           }
       }
     }
 
+    //Verifies if a creature is protected
+    get protected = App.KL.Game.Effect { case creature { none:  App.KL.Game.Effect { return false } some: App.KL.Game.Effect.status.protect.apply(creature.value, pos) }}
+
     case creature { 
-      none: 
-        App.KL.Game.Effect { return +0#32 } 
+      none: App.KL.Game.Effect { return +0#32 } 
       some: 
+        // Verifies if the target is invulnerable, if can block
         let invul = App.KL.Game.Creature.Status.invulnerable.check(creature.value)
-        if invul then
-          App.KL.Game.Effect { return +0#32 } 
-        else
-          App.KL.Game.Effect { 
-            if block then
-              App.KL.Game.Effect { return +0#32 }
-            else
-              App.KL.Game.Effect { 
-                let debuffer = App.KL.Game.Creature.Status.weaken.total(creature.value)
-                get real_dmg = App.KL.Game.Effect.hp.change_at(I32.neg(dmg - debuffer), pos)
-                let damage = String.show_clean(I32.show(I32.neg(real_dmg)))
-                App.KL.Game.Effect.description.add("Deal "| damage | " damage")
-                return real_dmg 
-              }
+        if invul || block || protected then App.KL.Game.Effect { return +0#32 } 
+        else case caster { 
+          none: App.KL.Game.Effect { return +0#32 } 
+          some: App.KL.Game.Effect { 
+            let debuffer = App.KL.Game.Creature.Status.weaken.total(caster.value)
+            get real_dmg = App.KL.Game.Effect.hp.change_at(I32.neg(dmg - debuffer), pos)
+            let damage = String.show_clean(I32.show(I32.neg(real_dmg)))
+            App.KL.Game.Effect.description.add("Deal "| damage | " damage")
+            return real_dmg 
           }
+        }
     }
   }

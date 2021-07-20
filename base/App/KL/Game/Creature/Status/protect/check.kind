@@ -1,0 +1,11 @@
+App.KL.Game.Creature.Status.protect.check(
+  creature: App.KL.Game.Creature
+): Bool //Has_effect / Skills to be blocked
+
+  let list_status = creature@status
+  let result = false
+  for status in list_status with result:
+    case status { 
+      protect: true
+    }default result
+  result

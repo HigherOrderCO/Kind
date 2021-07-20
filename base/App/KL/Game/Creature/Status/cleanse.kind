@@ -11,6 +11,7 @@ App.KL.Game.Creature.Status.cleanse(
         haste: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
         hot: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
         invulnerable: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
+        protect: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
         shield: status.head & App.KL.Game.Creature.Status.cleanse(status.tail)
       }default App.KL.Game.Creature.Status.cleanse(status.tail)
   }

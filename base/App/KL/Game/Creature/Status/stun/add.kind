@@ -18,11 +18,6 @@ App.KL.Game.Creature.Status.stun.add.aux(
     cons:
       case status.head { 
         stun: 
-          let old_duration = status.head.duration
-          let next_stun = I32.cmp(old_duration, duration)
-          case next_stun {
-            gtn: 
-              new_stun & status.tail
-          }default status.head & App.KL.Game.Creature.Status.stun.add.aux(duration, status.tail)
+          status
       }default status.head & App.KL.Game.Creature.Status.stun.add.aux(duration, status.tail)
   }

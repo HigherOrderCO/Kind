@@ -23,7 +23,7 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
     "W": App.KL.Game.Skill.new("Heal", 330, 48, 32, App.KL.Game.Skill.Pattern.vector, App.KL.Game.Hero.Flina.Skill.Heal(32, 2, 1),
     "Flina restores Health Points for all allies in the area.", App.KL.Game.Cursor.heal)
 
-    "E": App.KL.Game.Skill.new("Dampen", 350, 48, 32, App.KL.Game.Skill.Pattern.vector, App.KL.Game.Hero.Flina.Skill.Dampen(32, 3, 2, 2),
+    "E": App.KL.Game.Skill.new("Protect", 350, 48, 32, App.KL.Game.Skill.Pattern.vector, App.KL.Game.Hero.Flina.Skill.Dampen(32, 2, 2, 1),
     "Flina weakens all enemies in an area, reducing all damage dealt by them for 2 turns.", App.KL.Game.Cursor.heal)
 
     "R": App.KL.Game.Skill.new("Flight", 950, 48, 32, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(32, 3),
@@ -82,7 +82,7 @@ App.KL.Game.Hero.Flina.Skill.Heal(range: I32, power: I32, ap_cost: I32): App.KL.
     }
   }
 
-App.KL.Game.Hero.Flina.Skill.Dampen(range: I32, power: I32, duration: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Flina.Skill.Dampen(range: I32, duration: I32, amount: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range_vector(range)
     App.KL.Game.Effect.ap.use(ap_cost)
@@ -94,9 +94,10 @@ App.KL.Game.Hero.Flina.Skill.Dampen(range: I32, power: I32, duration: I32, ap_co
       let area   = App.KL.Game.Areas.triangle(start, direction)
       App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
       App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
-      let enemy = App.KL.Game.Effect.At.enemy!
-      let eff = App.KL.Game.Effect.status.weaken.add(duration, power)
-      App.KL.Game.Effect.area!(enemy(eff), area)
+      let ally = App.KL.Game.Effect.At.ally!
+      ////original effect
+      let eff = App.KL.Game.Effect.status.protect.add(duration, amount)
+      App.KL.Game.Effect.area!(ally(eff), area)
       return unit
     }
   }
