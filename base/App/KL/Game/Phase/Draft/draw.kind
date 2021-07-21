@@ -107,8 +107,10 @@ App.KL.Game.Phase.Draft.draw.main(
   tab: String,
   user: String
 ): DOM
-  <div style={"margin": "0", "height": "max(100%, 766px)", "width": "100%", "background-image": "url(https://i.imgur.com/H5BB1V3.png)", "image-rendering": "pixelated"}>
-      <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center"}>
+  <div style={"margin": "0", "height": "max(100%, 766px)", "width": "100%", "background-image": "url(https://i.imgur.com/H5BB1V3.png)", "image-rendering": "pixelated", "position": "relative"}>
+      {App.KL.Game.Phase.Draft.draw.background}
+
+      <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
         <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px", "image-rendering": "pixelated", "display": "flex", "justify-content": "space-between", "padding": "0 5px"}>
           <div style={"display": "flex"}>
           
@@ -120,9 +122,16 @@ App.KL.Game.Phase.Draft.draw.main(
             <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "image-rendering": "pixelated"}></img>
           </div>
         </header>
-        <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)"}>
+        <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
           <div style={"display": "flex", "padding": "4px"}>
             { App.KL.Game.Phase.Draft.draw.main.middle(allies, page, tab, user) }
+          </div>
+
+          // -16 because footer height is 64px
+          // and margin top of ready button is -32px
+          <div style={"position": "absolute", "bottom": "-16px", "right": "50px", "display": "flex", "transform": "scale(1.5)"}>
+            <img style={"margin": "0 5px"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.list_button></img>
+            <img style={"margin": "0 5px"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom></img>
           </div>
         </div>
         <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
@@ -136,6 +145,31 @@ App.KL.Game.Phase.Draft.draw.main(
         </footer>
       </div>
     </div>
+
+App.KL.Game.Phase.Draft.draw.background: DOM
+  let s = Maybe.some!
+  <div style={"display": "contents"}>
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(none,s(10),s(64),none, App.KL.Game.Phase.Draft.draw.assets.background.hexagons.1)}
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(none,none,s(64),s(10), App.KL.Game.Phase.Draft.draw.assets.background.hexagons.2)}
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(s(64),s(10),none,none, App.KL.Game.Phase.Draft.draw.assets.background.hexagons.3)}
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(s(64),none,none,s(10), App.KL.Game.Phase.Draft.draw.assets.background.hexagons.4)}
+  </div>
+
+App.KL.Game.Phase.Draft.draw.background.hexagons(
+  top: Maybe<Nat>
+  right: Maybe<Nat>
+  bottom: Maybe<Nat>
+  left: Maybe<Nat>
+  img: String
+): DOM
+  let decapsule = ((x) case x {
+    none: ""
+    some: Nat.show(x.value) | "px"
+  }) :: Maybe<Nat> -> String
+
+  <div style={"position": "absolute", "top": decapsule(top), "right": decapsule(right), "bottom": decapsule(bottom), "left": decapsule(left), "transform": "scale(2)", "z-index": "0"} >
+    <img src=img></img>
+  </div>
 
 App.KL.Game.Phase.Draft.draw.main.middle(
   allies: Map<App.KL.Game.Player>
@@ -658,3 +692,25 @@ App.KL.Game.Phase.Draft.draw.assets.header.button.list: String
 
 App.KL.Game.Phase.Draft.draw.assets.header.button.logout: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABdUlEQVR42u3bOwrCQBAG4LmARxARwTR2NlpZWth5ABsrOz2Cd/AwHsebREZYCMGYmWyy7vyZgSGCMeRzNrt5bGi6OJacm92lnK/PkEkcMdDl9hb1fTJkLNREJdGhVA9EKH0LNCg1BRKUfgUKlNoCAUqSsA4laQyBTHWi4Mihkd5cBVmc7qLteSVzRWpbQHJkdQebPkNUMoDqSxNIzc7yuqv9I8kw0nslJXcKApB7R162Vdpsx2O6km1jGWeoHuwZT6oeNZtxcvN8lZrg9ZMjYyoRgBroX5AxWQXycjI7iNIsUgqEQEqbubbZdkbG9ox1pOZY1kKzqKTmd/yHaKEmkVpolsgqQJqjQP46rrNESoaSOhAOqQEmQTYNNV07Hi3QZO+qBZoeQjQnEOaQpq9CIJGjuJ4MQ0H2dwb6gGrT5LOQ7JE5TCnzh7COdKQjHelIRzrSJxD6VNBRTOqFn54NP9Ee/pUJ+JdfqsBjcYVKeOAHiQ7kfAPswOCUA++R1QAAAABJRU5ErkJggg=="
+
+// background
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.1: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGYAAAB2CAYAAAA6Ceb5AAABkklEQVR42u3cQQ7CIBAFUK7iGTyS9z+DxqXGhUULf+BN0qVN4VEYZNLWCsXlers/ryayQN4vPRMGAigcBFA4CKBwEEDhIIDCQQCBAQMGDBgwYAQYMGDAgAEDRoABAwYMGDBgAAECBAgQIECABCBAgMCAAQNGgAEDBgwYMGDAgAEDBgwYMGDAgHnpJDChICMeHsgPb8gZjQHyxynrH40DcmIH9/weyMBF/Zv7AZmYZX26P5CgtHcWRsn9iI0iGDBgwIABAwYMGDBgwIABAwYMGDBgwIDp66TVUWZV9MQDzTwoGzkITxsUKx0tjxyEw97aysUYIwfhtGl1h8ZWGETdD196egiedrsfvvSCGpyolEmzpfY2wzbDYMCAAQMGDBgwYMCAAQMGDBgwYMCAAaOipyCK79ccGABADrwhjpbDp6ytizEqrCFblS9VXNR3qOgpnWXtUNGzRNq7chtLbxSbAAMGDBgwYMAIMGDAgAEDBgwYMGDAgCkOs/rf/oCA1AECEgYEJAwISBgQkDAgIJun2TPjAUCEMu6iz3bYAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.2: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAAB3CAYAAABPA20BAAABk0lEQVR42u3c4W2DMBAGUFbJDB2p+8/QqpEiVVXaQrB9/syzxM/47AeGyMexbVq/dnt7//g6Vo/ZZKAjBl4Rs8tZ7DHwiphDLvEWA6+IWbL+X/l9RcwpAu3pryLmlGfhWf8VMSMeq494FTFPdVBxv4uKCQkSJEiQIEGCBAkSJEiQIC2DZKtkEqzvOD+P6XF6d/wXTi+smL3uIzitsGKyJmdwXsWKyb+1xNmLFZPJ7YnzG1bcOwEVx5bSAEGCBAkSJEiQIEGCBAkSJEiQIMGBAwcOHDhw/N+BBAkSJEiQIEGCBAkSJEiQIEGaC6l5bclKrxl3O0ErvLA+7GpOLH0oW/oJRTTT3CdnLMea9qEyQ2FfzBO4siw15u9KVbExJEiQIEGCBAkSJEiQIEGCBKkCyVbJThybbgeunEtv347OekQlAkZPNiqlNHrZRCUnR9+Ao9LcsR/GHBnzKp91jRswJEiQIEGCBAkSJEiQIEGCFL91EVmAM2rw0Ti9J7MUTuvJLY1zdrKXwjk6+Uvj/IcBx7K6t0/BHTiwPEdP2QAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.3: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADsAAAA0CAYAAAA0c0BmAAAAzklEQVR42u3Zyw2EMAxFUbcyNVAS/dcwIxZsEEjBY798fC1liZ3DP46ZMz7b/j2GCUNe81pQMYGzxnV0O6sZE3hCpqHfJoyYQCsyDP1vAs/xXqQbHX1rtOSLQjajsx/6u/xZyEe0+nWuAt6i1d/KnmCwYMGCBQsWLFiwYMFWxZZZ4qkX712RqrbMUMishtvQyKhW6lRIb5N8amTr9sdSyBJXcrgfgx4BFixYsGDBggULFixYsGtj1WgbKUogs9A2U5RAetG2UpRAZm+vvIkfiSZdjv2Z6aMAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.4: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAAB2CAYAAABMM1RyAAAB4ElEQVR42u3cQW7CMBAF0Fylqx6gN+kVeoHefwNiQVWloBCSPxPqZylLPPYjUYxn8DS9UPt8/z5drknLwM4vMiFY0EWwoItgQRfBgi6CHR66CnZYaMCAAQMGDBgwYMCAAQMGDBgwYMCAAQNubm8fX6fLZcM9DFt1Rw8Pm4IGG4IGG4IGG4IGG4IeZj1bidsZEzBgwIABAwYMGDBgwIABAwYMGDDgbe26dVg54ert0ZaY9za/k4O4TvJ3rPSk5zHiMR9N3+w5iDnsrVh7T3qpz91jPpuA3DKIJdgE9No+NsfcK4X+zKC3xFo76a1Qqz+fKgJ55LHbM9bSpPd+1Bf7qypjuvXiSMaaTzr9svrTf1chXhL2HnTLkrILuOMLbflRBBgwYMCAAQMGDBgwYMCAAQMGDBjwS21XHiID3vG/4fSGe2cGvDyzkczFHQG6LTeXzCYfAbotu5yshzgCdFt9RLKi5wjQbRU+FW/kTui2GrXKdeVIa+iW5qwfwIABAwYMGDBgwIABAwYMGDBgwIABNzcnZxfBVt3Rw8OmoMGGoMGGoMGGoMGGoIdZzzpMCTBgwIABAwYMGDBgwIABAwYMGDDgNZP97ydnDwE9LGwaAmwIBmwICmwIGmwIGqxVwU87A1dxGgh2jQzNAAAAAElFTkSuQmCC"
+
+// bottom buttons
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.bottom.list_button: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAATCAYAAAAeVmTJAAABHklEQVR42u2Uuw3CMBRF3TEATZoUNBQgKhChRaJgC5QVGAIkClpK1mALVmAI+sCLuObG8bMcCIgCS0eRHfv6yD9j7mW62BXZ4VzMTheL1AHa9teiEaEstMvcBhJtC8SKWInRcFMxk3raX5dk42MrIE+yeeWlXkp0eysrgM4YILwrgBzOhojMbSU0AZ9IzPa4AppITYI7uYMhwtvmA+fAN97Nf0lCkEmwlC444NrY1iU0virxXwk8MB9biU4yt/BVAqGryXK+sYDn8Eq4naS+TJ8E34XHCyhfHgN82ep2TJLcgoB8sC3hN98HBNAfIIez1e3QRNzQJoQEahL8AzKfwJ2jIgF439xDxLcgBPfT8nhOg8KNGjEi/D8m0/xKuQG23r4JXV13wgAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAATCAYAAADxlA/3AAABEklEQVR42u2VMQrCQBBFt/MANmlS2FgoVoraChbeQnIFD6FgYWvpNbyFV/AQ9tFZ+MvPuLMmEkHEwA/s7sz/j0yibrrcl7PjpZyfr0GyhrB3uJWNlPLCvmQ7ubUdXhfCA4yG2wqRrPP+xms2PrUi+Ik3P3FZu25vHcJRiGLRu6HohQ97A0KyPYAVHoV4NKYeuZzrfguiAsAFsWYO5znGZEHoUTQCENUJh/4Avwmgf0hafQk72SKIPxetVxBybvVyxhOALpD1Kk+LQ1N1Me/oCCZZEYTmYrDzsgB0OOp1H3tHR2BBaEOWhKfOU+EVAN4EyCekMwIAxHPSLwz+TtkkJq6z/DjTycUblupA8HkdT/cN1x3Wm8bj6iLFvgAAAABJRU5ErkJggg=="
