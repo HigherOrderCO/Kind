@@ -114,10 +114,10 @@ App.KL.Game.Phase.Draft.draw.main(
           
           </div>
           <div style={"display": "flex", "justify-content": "flex-end"}>
-            <img src=App.CardPlayer.header.button.invite style={"height": "100%", "image-rendering": "pixelated"}></img>
-            <img src=App.CardPlayer.header.button.help   style={"height": "100%", "image-rendering": "pixelated"}></img>
-            <img src=App.CardPlayer.header.button.list   style={"height": "100%", "image-rendering": "pixelated"}></img>
-            <img src=App.CardPlayer.header.button.logout style={"height": "100%", "image-rendering": "pixelated"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "image-rendering": "pixelated"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "image-rendering": "pixelated"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "image-rendering": "pixelated"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "image-rendering": "pixelated"}></img>
           </div>
         </header>
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)"}>
@@ -127,11 +127,11 @@ App.KL.Game.Phase.Draft.draw.main(
         </div>
         <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
           <div style={"display": "flex", "height": "50%", "flex": "1"}>
-            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.CardPlayer.footer.stencil.main |")"}></div>
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.CardPlayer.footer.stencil.diagonal_left></img></div>
-            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img style={"image-rendering": "pixelated"} src=App.CardPlayer.footer.ready_button></img></div>
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.CardPlayer.footer.stencil.diagonal_right></img></div>
-            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.CardPlayer.footer.stencil.main |")"}></div>
+            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left></img></div>
+            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img style={"image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right></img></div>
+            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
           </div>
         </footer>
       </div>
@@ -220,7 +220,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
 
   let slot   = ((el)
     <div style={
-      "background-image": "url("|App.CardPlayer.card.button|")"
+      "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.card.button|")"
       "background-size": "100% 100%"
       "height": "20%"
       "width": "100%"
@@ -290,8 +290,8 @@ App.KL.Game.Phase.Draft.draw.card.hero(
     }>
       {
         case hero {
-          none: App.CardPlayer.card.img("", "", "", id) // TODO change to none
-          some: App.CardPlayer.card.img(hero.value@name, "HEALER", img, id) // TODO change type
+          none: App.KL.Game.Phase.Draft.draw.card.hero.img("", "", "", id) // TODO change to none
+          some: App.KL.Game.Phase.Draft.draw.card.hero.img(hero.value@name, "HEALER", img, id) // TODO change type
         }
       }
     </div>
@@ -299,16 +299,96 @@ App.KL.Game.Phase.Draft.draw.card.hero(
     <div id=id style={"height": "48%", "width": "100%"}>
       {
         case hero {
-          none: App.CardPlayer.card.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id) // when no hero is selected
+          none: App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id) // when no hero is selected
           some:
             case hero.value@attributes as attrs {
-              none: App.CardPlayer.card.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id) // when hero has no attribute
-              some: App.CardPlayer.card.attrs(attrs.value, id) // show attributes
+              none: App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id) // when hero has no attribute
+              some: App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs.value, id) // show attributes
             }
         }
       }
     </div>
   </div>
+
+// draw card's top
+App.KL.Game.Phase.Draft.draw.card.hero.img(name: String, type: String, img: String, id: String): DOM
+  <div id=id style={"position": "relative", "height": "100%"}> 
+    <div id=id style={
+      "position": "absolute", 
+      "margin-left": "auto"
+      "margin-right": "auto"
+      "left": "0"
+      "right": "0"
+      "text-align": "center"
+      "top": "-7%"
+      "width": "55%",
+      "height": "55%",
+      "background-image": "url("|img|")",
+      "background-size": "contain",
+      "background-position": "center",
+      "background-repeat": "no-repeat"
+    }>
+      // <img src=img style={"object-size": "contain"}></img>
+    </div>
+    <div id=id style={
+      "position": "absolute"
+      "top": "70%"
+      "left": "0"
+      "right": "0"
+      "margin": "auto"
+      "height": "25%"
+      "display": "flex"
+      "flex-direction": "column"
+      "justify-content": "space-around"
+      "align-items": "center"
+    }>
+      <span id=id style={"color": "white", "text-transform": "uppercase"}>name</span>
+      <img id=id src=App.KL.Game.Phase.Draft.draw.assets.card.name_divisor style={"width": "50%"}></img>
+      <span id=id style={"color": "#871df0", "font-size": "small", "text-transform": "uppercase"}>type</span>
+    </div>
+  </div>
+
+// draw attributes icons and bars
+App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes, id: String): DOM
+  let order     = ["damage", "resistance", "mobility", "range", "utility"]
+  let attrs_map = App.KL.Game.Hero.Attributes.to_map(attrs) 
+  <div id=id style={"display": "contents"}> 
+    for attr in order:
+      let img = App.KL.Game.Phase.Draft.draw.assets.card.attr_icons{attr}
+      without img: <span id=id style={"display": "none"}></span> // TODO
+      <div id=id style={"display": "contents"}>
+        <div id=id style={
+          "height": "15%",
+          "display": "flex", 
+          "align-items": "center", 
+          "padding": "4% 10%",
+          "margin-top": if attr =? "damage" then "4%" else ""
+        }>
+          <div id=id style={
+            "flex": "1"
+            "margin-right": "10%"
+            "height": "100%"
+          }>
+            <img id=id style={"width": "100%", "height": "100%", "object-fit": "contain", "image-rendering": "pixelated"} src=img></img>
+          </div>
+          <div id=id style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
+            for j in [1 to 6]:
+              let attr_value = attrs_map{attr}
+              without attr_value: <span style={"display": "none"}></span>
+              let bar = App.KL.Game.Phase.Draft.draw.assets.card.attr_bar(attr_value, j)
+              <div id=id style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%", "image-rendering": "pixelated"} src=bar></img> </div>
+          </div>
+        </div>
+        {
+          if attr =? "utility" then <span></span>
+          else 
+            <div id=id style={"display": "flex", "justify-content": "center"}>
+              <img id=id style={"width": "80%", "margin": "auto", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.card.divisor></img>
+            </div>
+        }
+      </div>
+  </div>
+
 
 App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: Nat, background: String, inner: DOM): DOM
   <div id=id style={
@@ -336,7 +416,7 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(hero: App.KL.Game.Hero): DOM
       <p id=id style={"text-transform": "uppercase", "color": "white"}>hero@name</p>
     </div>
   
-  App.KL.Game.Phase.Draft.draw.card.wrapper(44, 74, bt, id, fator, App.CardPlayer.portrait.hero.background, inner)
+  App.KL.Game.Phase.Draft.draw.card.wrapper(44, 74, bt, id, fator, App.KL.Game.Phase.Draft.draw.assets.portrait.hero.background, inner)
 
 // ROOM NUMBER AND READY BUTTON
 // ==========================
@@ -477,3 +557,73 @@ App.KL.Game.Phase.Draft.draw.selection(
       </img>
   </div>
 
+
+// ASSETS
+
+// user and allies card
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.card.button: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAsUlEQVR42mNgAAIzl67/5tPP/7fY8QCM+778x4ph8iC1ID0MpGjGaYiudhuKAIhvbjwfKwbJIVsorBj/nwFEwDTLqhXh1AzDIDUwQ+AGwDSDMMgWfBimDqQHxQCYJDEGwLwySA0gZAhOA9glHOEYZhA6RlaDYQCyAg/ZIqwY2QKsXjCRSARjXAbA5DG8ABOAGZKo1Y4VI2sG0XADkA2BSWLDyPIwfeAMBeMgBxI+jKwZAA9Tzqish/WQAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.card.divisor: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAAACCAYAAADsDAqEAAAAGUlEQVR42mNgl3D8P4od/zM4qOX/H8X5/wFLCtMnRwvN3AAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.card.name_divisor: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAYAAAChQ5zUAAAAKklEQVR42mPQlgz7z82j9R9Eg7CZSxcGjYzbZT/AaWpgZDORMTa3ILsVAD4KYiEWiGpBAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.card.attr_bar(i: Nat, j: Nat): String
+  case Nat.cmp(j, i) {
+    ltn: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mN4nf3/PyHMQJSiyRmv/hPCACSbVe0aeuODAAAAAElFTkSuQmCC"
+    eql: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mPo+/L/PyHMQJSiyRmv/hPCAAScWQUsjAs3AAAAAElFTkSuQmCC"
+    gtn: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mPg5tH6TwgzEKXIzKXrPyEMAKotKJyhzZc5AAAAAElFTkSuQmCC"
+  }
+
+App.KL.Game.Phase.Draft.draw.assets.card.attr_icons: Map<String>
+  {
+    "damage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAATUlEQVR42mNgAIK+L///W+x48J8BCwCJg+QxBNA14BKHS8BMgbFx2ciArhDFelwaCCpEVoRuA0ETcdqA7DlsiuGexBk82IIPb/CgaQAAVVyucYmp1skAAAAASUVORK5CYII=" // offensive
+    "resistance": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAALCAYAAACtWacbAAAAQ0lEQVR42mNgQAIWOx787/vy/z+IZkAHMEl0DFeMLoFVjChFMKsYsACcVmLjYzgcWRGGL7H5jmAwYA0rgoGJrhBdDABa1bsEjscb1AAAAABJRU5ErkJggg==" // defensive
+    "mobility": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAKCAYAAABv7tTEAAAAQklEQVR42mOw2PHgf9+X/ygYmxgDOgApgmF0xTg1wTTisgWnJnTN6M7Fq4lkDVSxBT00sRqASxNBm/EFO9khCRIHABDzAc+vGvQQAAAAAElFTkSuQmCC" // mobility
+    "range": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42mNggAKLHQ/+9335j4JBYgzIAKsgkmY4B6YI3UQUeZgAuqnIpoFpFA6Sqehi5CnEazXRniE6eIgNcADtwMQtWOgT0gAAAABJRU5ErkJggg==" // range
+    "utility": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAMCAYAAACwXJejAAAAU0lEQVR42mNgQAIWOx787/vy/z+IZsAGQJLoGEMRzBSYBrymIdM4rYOZiKEQm/HI1qNysJgO1ozuI2QT4dZicwtGUCAHIDpGMRmXKRhhhc0kmBwAbSTOuAXc0NYAAAAASUVORK5CYII="// utility
+  }
+
+// hero portraits
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.portrait.hero.background: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAABKCAYAAADAKbZGAAAAcUlEQVR42u3bwQkAIQwEQNu4GuTasSPrVvwdeE+FBGZhyXcK2JSSNfVp4609ZJftF7tuxG7oyNgvGhgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgY+Dg43QY+3ZeBXMwEjZrO46oJAlgAAAAASUVORK5CYII="
+
+// ready button
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.ready_button: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAAAqCAYAAABr9d/aAAAC70lEQVR42u2aMWsVQRDH0/kBbNKksElhSBU0giJIAgkBFYsINgmKjdilUWzsEhQUIailYqG1FsHGxlQ2+gkEG3sLwULkZA7mmN03uzf79m7fu+S/8Oe9nZ27t29+N7N7793MDBoaWndt+eW3ClEAdbRBMgPII5psAIvKiDZGe/q7qsochDY5oJymSNfhlEiHGXdCmUfjsQ8C+PKgmVVjj0Eg51RIgJoek9QkcWwMCevf9JVPLfscVtxhWUoqwp+3EbHGVrIJspIGOSA/RCujltLK6+dxhK59dz9JJJQQOPb3bQ1YzQgNRzXAs6uPoQHKAchEz338UUuWABaP4crvRymxVwEC3nAgOgAXF3abtKT3pLn5nVrcX156BRVUiIPk1AA8eWo7Cg8QJwMvBpGYqQBD8ABxMvA0iFkAu4a4sfW+uvX8S1A0nuJ35c5Blt/1B5+qiytvax96pb60+7YS8DoH2KXaNkY0fn7thclv/fa7Vr/t/c+tfuSzcuN1de3eB8dOfd9WKk5TDTDWaJzmZvWj75Pj9+fvvwYiif1CNgAUYOSVHQOoZc2jw+8jYGLns/gBYCJADVbMFvp1wnJsG1QABECUUN6ctJXQzYcHKkBrCbUAlOeTfQCMbE5kpsX8KNAaQOsmJmSjHSfvVv3GFxcAdpCBIYB+xqQCPHPhmQqR50VjAOitTwTDsgbyesT3bKE10C+DKQB5jnzfKMfIVipGJoAnZi/VA0dxE5MLUJtnSXgSIM2TWDkASWQklc7CcQDKv12kcmCRvv78NZUAJQ/m5DxbM0mI4wDM3ZxYNzvTALAVnv/AjQaxT/mBWbr8pNUWCvjq3TcjsCw2bXdJ62psniViY4YXg7g+t9OrKFBcwui9xaaJxjfm748ca7H52ry6b5pnCZnhhSDSSW6e3nNUavLHTVqck+ClQIT61djwYuUUKqcseCGIfK/IT0nh2cxuJOMpY50Fz4dIN44sQOwHnoxxJ/B8iFDhx+YN7T9DLCkhPaM0KwAAAABJRU5ErkJggg=="
+
+// footer
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAL0lEQVR42u3OIQEAAAgDMCyOGPQvCDFuJuZX03tJJSAgICAgICAgICAgICAgkA48lJQATI4CDw0AAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.left: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA60lEQVRIDcWWwQ2DMBRDufbWKxt0A2bpIp2HoToCO3AEfSRXVsGQT/KTSihgOf5+FNR2z8driTj64b3gGMbvdm7r/7lddyU+ERCWCYiUtQhMFEhqLkCzYVIHRvoA85nm+49ZZEFPdjaMZ1i0Nwsmupw3/zaMd1CuH0Xt5VZZ8LjeGRUWpaOkrUVhogpf5QLI7rrysufyN1OF1NC5qJrHnlMYFVBL56JqJnskjNpcU+eiai57DmHUxto6F1Wz2bODUZta6FxUzYdn999MbWilc1HVgT2/b0aZW+pcVPVgzwajjK11FD3rAY89Ziu/MPx2bdASCAAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA60lEQVRIDcWWwQ2DMBRDufbWKxt0A2bpIp2HoToCO3AEfSRXVsGQT/KTSihgOf5+FNR2z8driTj64b3gGMbvdm7r/7lddyU+ERCWCYiUtQhMFEhqLkCzYVIHRvoA85nm+49ZZEFPdjaMZ1i0Nwsmupw3/zaMd1CuH0Xt5VZZ8LjeGRUWpaOkrUVhogpf5QLI7rrysufyN1OF1NC5qJrHnlMYFVBL56JqJnskjNpcU+eiai57DmHUxto6F1Wz2bODUZta6FxUzYdn999MbWilc1HVgT2/b0aZW+pcVPVgzwajjK11FD3rAY89Ziu/MPx2bdASCAAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA1ElEQVRIDc2XwQ2DMBAE/c0vXzpIB9SSRlIPRVECPeRJdJGMQNjOGN8qRrJAx2pvx2BLDsHhGqd5jWMYn6dnq8Vxvz1WxWjGMIAYktwVEObZBLKHUAWkvpdBXst7+xK0mVJ3CaQ3CJugapAeIapBeoWoAiEQ/1z86NeqhbBtWLmwU94/QQgE0aSae9aKICQg0XgGznllQUhAosk19q4nQUhAovEOW/I7gZCARFNqqnh3ACHbZ48QNjEbCIEgGsVsE88vCAlINKShShNowHjWUAVp9f0ACML8do5nEEsAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.right: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA1ElEQVRIDc2XwQ2DMBAE/c0vXzpIB9SSRlIPRVECPeRJdJGMQNjOGN8qRrJAx2pvx2BLDsHhGqd5jWMYn6dnq8Vxvz1WxWjGMIAYktwVEObZBLKHUAWkvpdBXst7+xK0mVJ3CaQ3CJugapAeIapBeoWoAiEQ/1z86NeqhbBtWLmwU94/QQgE0aSae9aKICQg0XgGznllQUhAosk19q4nQUhAovEOW/I7gZCARFNqqnh3ACHbZ48QNjEbCIEgGsVsE88vCAlINKShShNowHjWUAVp9f0ACML8do5nEEsAAAAASUVORK5CYII="
+
+// header
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.header.button.invite: String  
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABYklEQVR42u3aPQrCQBAF4FzAI4iIYBqtbGJlaWGXxs7Gyk4vIFhY23gYj+M9LCIDmTAsu5ss5GdH38LDJIrwMcns4pqMZ3lByTanYro6qkoSMgAFFFBv5usLKgoooIACmmhFBkGBBBJIIFUgu1ifAtknMhYcKglki8js9S7koHMVSAlzHduAEjqa7PQ0HvPVBDKIw9fp+PG5V4n2diXYYvu03rI8JFBCo0MSQlaMQ8D0cKugHFcVzaiupK+KEubKIEiqlnmNcPJZ5HPZbFQhQ7qrrYuqRPrmSXPaUP9MNlkA2KoZZXcNjZwPzWrSdfVIRrieTYmUiR4p50bfMq7uM4MjeYoIWYybDagrYK/d9WeRtpWOC+IbKpB1iCbvR49sYwAJZI+Nx7dOrYua7voXyCF/nsSGD5BAAgkk9idRSSCB/I8/EAIIIIBBsW0PooIAlsA8PfeS/fLayvdEC2wrAJbjC8t/0cpcsmwIAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.header.button.help: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABD0lEQVR42u3asQ3CMBCF4SzACAghJKioaELFAHRpGICKDhZgLsZhk0CQLKILsRK44Pj8W7rG3ZcXX+TY2XRRlFXlu1M53xyjqqzPAAoUKFCgQN+13F5I1DS0nnBvaIxp9oKCBAkSJEiQIEGCBJk6Mr/dSzmqOTPIT0BNqNtyBUP6gNqJBkNKzGS2f5XEm0DWga7MISXQFLKOkvPmkL6GFH3j6dqMTCFlV21LOmrkUCmOFqkJDIqU5xgmkV0/KVEi206itJFfnYf8q7tqb7NG23jMIpNIMok1aaq78rfOCtJ3YyO5JDUfBkmyJkGCBAlySKT5m5IAAQIECFALWKzOURXAX4GH9bUx516f0QCf4wFemMVkf3n/hwAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.header.button.list: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAAA7klEQVR42u3aQQqCQBTGcS/QESIiqFWrNrbqAO3cdIBW7uwCnavjdJOpWQiTDORDnfqc/4MHMiD4442fIhbLTeV8l6farQ9XqS4sBdTY2+ONiQIFChQo0KHQXzxOBkMVp2mCqr4oJEdmMUmQc0B+ux+nvF+TIGOAlCHEdgUJEmS+SPlHyOwnWT6eri1/HFvvW+H5f4XsVrjuL9rS4fkg2a4TIBer80e3Sdpd79syyNi6NJJ0JV1JV4IHJNuV4CFdSVfSVQXJh6zckWN+vWOSIEGCBAkSJEj+lAQIECBAgKMBq10j1QCtwMv+rgd81wu9A5PjjdGiEwAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.header.button.logout: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABdUlEQVR42u3bOwrCQBAG4LmARxARwTR2NlpZWth5ABsrOz2Cd/AwHsebREZYCMGYmWyy7vyZgSGCMeRzNrt5bGi6OJacm92lnK/PkEkcMdDl9hb1fTJkLNREJdGhVA9EKH0LNCg1BRKUfgUKlNoCAUqSsA4laQyBTHWi4Mihkd5cBVmc7qLteSVzRWpbQHJkdQebPkNUMoDqSxNIzc7yuqv9I8kw0nslJXcKApB7R162Vdpsx2O6km1jGWeoHuwZT6oeNZtxcvN8lZrg9ZMjYyoRgBroX5AxWQXycjI7iNIsUgqEQEqbubbZdkbG9ox1pOZY1kKzqKTmd/yHaKEmkVpolsgqQJqjQP46rrNESoaSOhAOqQEmQTYNNV07Hi3QZO+qBZoeQjQnEOaQpq9CIJGjuJ4MQ0H2dwb6gGrT5LOQ7JE5TCnzh7COdKQjHelIRzrSJxD6VNBRTOqFn54NP9Ee/pUJ+JdfqsBjcYVKeOAHiQ7kfAPswOCUA++R1QAAAABJRU5ErkJggg=="
