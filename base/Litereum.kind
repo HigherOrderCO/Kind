@@ -1,5 +1,4 @@
 // Litereum: a minimal decentralized computer
-// event that updates the blockchain
 type Litereum.Post {
   new(
     // enough for function calls
@@ -15,13 +14,13 @@ type Litereum.Post {
 
 type Litereum.Chain {
   new(
-    // OK o hash é igual a chave
+    // o hash é igual a chave
     post: Map<Litereum.Post> // PostHash ~> post
 
-    // OK para todo membro da lista, o anterior é igual a chave
+    // para todo membro da lista, o anterior é igual a chave
     nexts: Map<List<U256>>   // PostHash ~> [next_post_hash]
 
-    // OK é a soma do score do post atual com o score anterior
+    // é a soma do score do post atual com o score anterior
     score: Map<U256>         // PostHash ~> accumulated_score
 
     // o score é maior que todo mundo
@@ -141,9 +140,6 @@ Litereum.checksum.go(len: Nat, msg: Vector<U8,len>): Bool
     csum - U8.to_u32(vals[i] <> 0)
   let cs_0 = U8.to_u32(vals[0] <> 0)
   let cs_1 = U8.to_u32(vals[1] <> 0)
-  //log("!!! csum is " | U32.show(csum))
-  //log("!!! cs_0 is " | U32.show(cs_0))
-  //log("!!! cs_1 is " | U32.show(cs_1))
   U32.eql(csum, U32.add(U32.mul(cs_0, 256), cs_1))
 
 // Returns the public key that signed a message
@@ -175,12 +171,19 @@ Litereum.score(hash: U256): U256
   let lim = Nat.pow(2, 256)
   Nat.to_u256(lim / (lim - U256.to_nat(hash)))
 
-Litereum.make_post(seed: U256, msg: String, data: Vector<8, U256>): Litereum.Chain
-  let pvt = Litereum.private_from_seed(seed)
-  let pub = Litereum.public_from_private(pvt)
-  let adr = Litereum.address_from_public(pub)
-  let sig = Litereum.sign(msg, pvt)
-  Litereum.Post.new(data, sig, 42, 0)
+Litereum.Post.summary(p: Litereum.Post): String
+  let hash = Litereum.post_hash(p)
+  open p
+  let trimmed_hash = String.take(5, U256.show(hash))
+  let trimmed_prev = String.take(5, U256.show(p.prev))
+  "h: "|trimmed_hash|" p: "|trimmed_prev
+
+//Litereum.make_post(pvt: Litereum.Private, msg: String, data: Vector<8, U256>): Litereum.Chain
+//  let pvt = Litereum.private_from_seed(seed)
+//  let pub = Litereum.public_from_private(pvt)
+//  let adr = Litereum.address_from_public(pub)
+//  let sig = Litereum.sign(msg, pvt)
+//  Litereum.Post.new(data, sig, 42, 0)
 
 Litereum.add_post(post: Litereum.Post, chain: Litereum.Chain): Litereum.Chain
   open post; open chain; open chain.tip
@@ -193,7 +196,8 @@ Litereum.add_post(post: Litereum.Post, chain: Litereum.Chain): Litereum.Chain
   let chain.post  = chain.post{U256.show(post_hash)} <- post
   let chain.score = chain.score{U256.show(post_hash)} <- post_score
   let chain.nexts = chain.nexts{U256.show(prev_hash)} <- post_hash & prev_nexts
-  let chain.tip   = if post_score >? chain.tip.fst then {post_score,post_hash} else chain.tip
+  let chain.nexts = chain.nexts{U256.show(post_hash)} <- []
+  let chain.tip   = if post_score >? chain.tip.fst then {post_score, post_hash} else chain.tip
   Litereum.Chain.new(chain.post, chain.nexts, chain.score, chain.tip)
   
 // Verifies all the invariants of the data structure are satisfied
@@ -218,7 +222,7 @@ Litereum.CheckIntegrity.go(
           case curr_nexts {
             nil:
               // we reached a leaf, time to backtrack
-              let next_unseen = Litereum.CheckIntegrity.remove_seen(stack)
+              let next_unseen = Litereum.Chain.remove_seen(stack)
               Litereum.CheckIntegrity.go(c, max_score, next_unseen)
             cons:
               let ret = none :: Maybe<String>
@@ -269,7 +273,8 @@ Litereum.CheckIntegrity.go(
       }
   }
 
-Litereum.CheckIntegrity.remove_seen(
+// For depth first functions
+Litereum.Chain.remove_seen(
   stack: List<List<U256>>
 ): List<List<U256>>
   case stack {
@@ -281,7 +286,7 @@ Litereum.CheckIntegrity.remove_seen(
         cons:
           case stack.head.tail {
             nil:
-              Litereum.CheckIntegrity.remove_seen(stack.tail)
+              Litereum.Chain.remove_seen(stack.tail)
             cons:
               stack.head.tail & stack.tail
           }
@@ -309,18 +314,53 @@ Litereum.CheckIntegrity(
 Litereum.Chain.empty: Litereum.Chain
   Litereum.Chain.new(Map.new!, Map.new!, Map.new!, {0, 0})
 
-//type Litereum.Post {
-//  new(
-//    // enough for function calls
-//    data: Vector<U256,8>     //  8 words =  256 bytes
-//    // only data is signed
-//    sign: Litereum.Signature // 32 words = 1024 bytes
-//    // half nonce half miner?
-//    info: U256               //  1 word  =   32 bytes
-//    // hash of previous post
-//    prev: U256               //  1 word  =   32 bytes
-//  )                          // 42 words = 1344 bytes
-//}
+Litereum.Chain.depth_first_fold.go<A: Type>(
+  c: Litereum.Chain
+  depth: Nat
+  ret: A
+  f: Nat -> Litereum.Post -> A -> A
+  stack: List<List<U256>>
+): Maybe<A>
+  open c
+  case stack {
+    nil:
+      some(ret)
+    cons:
+      case stack.head {
+        nil:
+          none // should never happen
+        cons:
+          let current = stack.head.head
+          let curr_string = U256.show(current)
+          let curr_post = c.post{curr_string} abort none
+          let curr_nexts = c.nexts{curr_string} abort some(f(depth, curr_post, ret))
+          case curr_nexts {
+            nil:
+              // we reached a leaf, time to backtrack
+              let next_unseen = Litereum.Chain.remove_seen(stack)
+              Litereum.Chain.depth_first_fold.go!(c, List.length!(next_unseen), f(depth, curr_post, ret), f, next_unseen)
+            cons:
+              Litereum.Chain.depth_first_fold.go!(c, 1 + depth, f(depth, curr_post, ret), f, curr_nexts & stack)
+          }
+      }
+  }
+
+Litereum.Chain.depth_first_fold<A: Type>(
+  chain: Litereum.Chain
+  genesis: U256
+  nil: A
+  f: Nat -> Litereum.Post -> A -> A
+): Maybe<A>
+  Litereum.Chain.depth_first_fold.go<A>(chain, 0, nil, f, [[genesis]])
+
+Litereum.Chain.show.aux(depth: Nat, post: Litereum.Post, str: String): String
+  let ind = "" // indentation level
+  for i from 0 to depth with ind:
+    ind|"  "
+  str|ind|Litereum.Post.summary(post)|"\n"
+
+Litereum.Chain.show(c: Litereum.Chain, g: U256): String
+  Litereum.Chain.depth_first_fold!(c, g, "", Litereum.Chain.show.aux) <> ""
 
 Litereum.Test: Litereum.Post
   let seed = 1234 :: U256

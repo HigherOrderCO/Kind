@@ -8,91 +8,17 @@ Litereum.test: IO<Unit>
 
 Litereum.test.chain: TestSuite
   TestSuite.many("chain", [
-    Litereum.test.chain.genesis])
+    Litereum.test.chain.genesis
+    Litereum.test.chain.add_post])
 
-Litereum.test.chain.genesis: TestSuite
-  TestSuite.many("genesis", [
-    Litereum.test.chain.genesis.0
-    Litereum.test.chain.genesis.1
-    Litereum.test.chain.genesis.2
-    Litereum.test.chain.genesis.3
-    Litereum.test.chain.genesis.4
-    Litereum.test.chain.genesis.5
-  ])
+Litereum.test.chain.add_post: TestSuite
+  TestSuite.many("add_post", [
+    Litereum.test.chain.add_post.0])
 
-Litereum.test.genesis.post: Litereum.Post
-  let seed = 1234 :: U256
-  let pvt = Litereum.private_from_seed(seed)
-  let pub = Litereum.public_from_private(pvt)
-  let adr = Litereum.address_from_public(pub)
-  let msg = Litereum.Signable.utf8("cats cats cats yay")
-  let sig = Litereum.sign(msg, pvt)
-  let chk = Litereum.verify(msg, adr, sig)
-  Litereum.Post.new(Vector.from_list!([0#256, 1#256, 2#256, 3#256, 4#256, 5#256, 6#256, 7#256]), sig, 42, 0)
-
-Litereum.test.chain.genesis.0: TestSuite
+// linear chain
+Litereum.test.chain.add_post.0: TestSuite
   TestSuite.unit("0",
-    case Litereum.CheckIntegrity(Litereum.Chain.empty, 0) {
-      some: none
-      none: some("")
-    })
-
-Litereum.test.chain.genesis.1: TestSuite
-  TestSuite.unit("1",
-    let e = Litereum.Chain.empty
-    open e
-    let e.post = e.post{"1256#256"} <- Litereum.test.genesis.post
-    let e = e@post <- e.post
-    case Litereum.CheckIntegrity(e, 1256) {
-      some: none
-      none: some("")
-    })
-
-Litereum.test.chain.genesis.2: TestSuite
-  TestSuite.unit("2",
-    let e = Litereum.Chain.empty
-    open e
-    let hash = Litereum.post_hash(Litereum.test.genesis.post)
-    let hash_str = U256.show(hash)
-    let e.post = e.post{hash_str} <- Litereum.test.genesis.post
-    let e.score = e.score{hash_str} <- Litereum.score(hash)
-    let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
-    case Litereum.CheckIntegrity(e, hash) {
-      some: none
-      none: some("")
-    })
-
-Litereum.test.chain.genesis.3: TestSuite
-  TestSuite.unit("3",
-    let e = Litereum.Chain.empty
-    open e
-    let hash = Litereum.post_hash(Litereum.test.genesis.post)
-    let hash_str = U256.show(hash)
-    let e.post = e.post{hash_str} <- Litereum.test.genesis.post
-    let e.nexts = e.nexts{hash_str} <- []
-    let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
-    case Litereum.CheckIntegrity(e, hash) {
-      some: none
-      none: some("")
-    })
-
-Litereum.test.chain.genesis.4: TestSuite
-  TestSuite.unit("4",
-    let e = Litereum.Chain.empty
-    open e
-    let hash = Litereum.post_hash(Litereum.test.genesis.post)
-    let hash_str = U256.show(hash)
-    let e.post = e.post{hash_str} <- Litereum.test.genesis.post
-    let e.nexts = e.nexts{hash_str} <- []
-    let e.score = e.score{hash_str} <- 100000000 // wrong
-    let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
-    case Litereum.CheckIntegrity(e, hash) {
-      some: none
-      none: some("")
-    })
-
-Litereum.test.chain.genesis.5: TestSuite
-  TestSuite.unit("5",
+    // TODO use a real function for this
     let e = Litereum.Chain.empty
     open e
     let hash = Litereum.post_hash(Litereum.test.genesis.post)
@@ -101,16 +27,12 @@ Litereum.test.chain.genesis.5: TestSuite
     let e.nexts = e.nexts{hash_str} <- []
     let e.score = e.score{hash_str} <- Litereum.score(hash)
     let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
-    Litereum.CheckIntegrity(e, hash))
-  
-// [x] some("genesis not in chain.posts: "|gen_string)
-// [x] some("genesis has key \""|gen_string|"\" in chain.posts but actual hash \""|U256.show(gen_hash)|"\"")
-// [x] some("hash \""|curr_string|"\" not in chain.nexts")
-// [x] some("\""|curr_string|"\" not found in chain.score")
-// [ ] some("post not in chain.posts: "|curr_string)
-// [ ] some("\""|next_string|"\" not found in chain.score")
-// [ ] some("tip "|next_string|" is said to have score "|U256.show(tip.fst)
-// [ ] some("post \""|next_string|"\" has score "|U256.show(next_score)
-// [ ] some("\""|next_string|"\" score cache is "|U256.show(next_score)
-// [ ] some("chan.next{\""|curr_string|"\"} includes \""|next_string|"\" but it has prev \""|next_prev_string|"\"")
-// [ ] some("post has key \""|next_string|"\" in chain.posts but hash \""|U256.show(next_hash)|"\"")
+    let c = {e, Litereum.test.genesis.post}
+    for i from 0 to 10 with c:
+      open c; open c.snd
+      let new_post = c.snd@prev <- Litereum.post_hash(c.snd)
+      let new_chain = Litereum.add_post(new_post, c.fst)
+      {new_chain, new_post}
+    open c
+    //log(Litereum.Chain.show(c.fst, hash))
+    Litereum.CheckIntegrity(c.fst, hash))
