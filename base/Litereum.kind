@@ -216,7 +216,7 @@ Litereum.CheckIntegrity.go(
               Litereum.CheckIntegrity.go(c, max_score, next_unseen)
             cons:
               let ret = none :: Maybe<String>
-              let curr_score = c.score{curr_string} abort some("\""|curr_string|"\" not found in chain.score (should never happen)")
+              let curr_score = c.score{curr_string} abort some("\""|curr_string|"\" not found in chain.score")
               for next in curr_nexts with ret:
                 case ret {
                   none:
@@ -291,7 +291,12 @@ Litereum.CheckIntegrity(
   let gen_post = c.post{gen_string} abort some("genesis not in chain.posts: "|gen_string)
   let gen_hash = Litereum.post_hash(gen_post)
   if gen_hash =? genesis then
-    Litereum.CheckIntegrity.go(c, {0, 0}, [[genesis]])
+    let curr_score = c.score{gen_string} abort some("genesis \""|gen_string|"\" not found in chain.score")
+    let gen_score = Litereum.score(genesis)
+    if curr_score =? gen_score then
+      Litereum.CheckIntegrity.go(c, {genesis, curr_score}, [[genesis]])
+    else
+      some("genesis score is "|U256.show(gen_score)|" but mapped score is "|U256.show(curr_score))
   else
     some("genesis has key \""|gen_string|"\" in chain.posts but actual hash \""|U256.show(gen_hash)|"\"")
 
@@ -310,6 +315,7 @@ Litereum.Chain.empty: Litereum.Chain
 //    prev: U256               //  1 word  =   32 bytes
 //  )                          // 42 words = 1344 bytes
 //}
+
 Litereum.Test: Litereum.Post
   let seed = 1234 :: U256
   let pvt = Litereum.private_from_seed(seed)
@@ -318,4 +324,4 @@ Litereum.Test: Litereum.Post
   let msg = Litereum.Signable.utf8("cats cats cats yay")
   let sig = Litereum.sign(msg, pvt)
   let chk = Litereum.verify(msg, adr, sig)
-  Litereum.Post.new(Vector.from_list!([0#256, 1#256, 2#256, 3#256, 4#256, 5#256, 6#256, 7#256]), ?b, ?c, ?d)
+  Litereum.Post.new(Vector.from_list!([0#256, 1#256, 2#256, 3#256, 4#256, 5#256, 6#256, 7#256]), sig, 42, 0)
