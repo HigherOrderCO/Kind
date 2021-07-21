@@ -20,11 +20,12 @@ App.KL.Game.Creature.Status.haste.add.aux(
     cons:
       case status.head { 
         haste: 
-          let old_duration = status.head.duration
-          let next_haste = I32.cmp(old_duration, duration)
-          case next_haste {
-            gtn: 
-              new_haste & status.tail
-          }default status.head & App.KL.Game.Creature.Status.haste.add.aux(duration, amount, status.tail)
+          let new_amount = status.head.amount + amount
+          if I32.gtn(new_amount, 2) then 
+            let limit_haste = App.KL.Game.Creature.Status.haste(status.head.duration, 2)
+            limit_haste & status.tail
+          else
+            let add_haste = App.KL.Game.Creature.Status.haste(duration, new_amount)
+            add_haste & status.tail
       }default status.head & App.KL.Game.Creature.Status.haste.add.aux(duration, amount, status.tail)
   }

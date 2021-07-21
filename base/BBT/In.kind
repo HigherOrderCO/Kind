@@ -1,0 +1,45 @@
+// path to get to a value in a BBT
+BBT.In<K: Type, V: Type>(map: BBT<K, V>, key: K): Type
+  case map {
+    tip: 
+      self<P: BBT.In<K, V>(BBT.tip<K, V>, key) -> Type>
+      P(self)
+    bin:
+      def mmap = BBT.bin<K, V>(map.size, map.key, map.val, map.left, map.right)
+      self<P: BBT.In<K, V>(mmap, key) -> Type>
+      (left: (H: BBT.In<K, V>(map.left, key)) P(BBT.In.left<K, V>(map.size, map.key, map.val, map.left, map.right, key, H)))
+      (right: (H: BBT.In<K, V>(map.right, key)) P(BBT.In.right<K, V>(map.size, map.key, map.val, map.left, map.right, key, H)))
+      (here: P(BBT.In.here<K, V>(map.size, key, map.val, map.left, map.right)))
+      P(self)
+  }!
+
+BBT.In.left<K: Type, V: Type>(
+  size: U32
+  key0: K
+  val: V
+  lft: BBT<K, V>
+  rht: BBT<K, V>
+  key1: K
+  H: BBT.In<K, V>(lft, key1)
+): BBT.In<K, V>(BBT.bin<K, V>(size, key0, val, lft, rht), key1)
+  (self, lft, rht, here) lft(H)
+
+BBT.In.right<K: Type, V: Type>(
+  size: U32
+  key0: K
+  val: V
+  lft: BBT<K, V>
+  rht: BBT<K, V>
+  key1: K
+  H: BBT.In<K, V>(rht, key1)
+): BBT.In<K, V>(BBT.bin<K, V>(size, key0, val, lft, rht), key1)
+  (self, lft, rht, here) rht(H)
+
+BBT.In.here<K: Type, V: Type>(
+  size: U32
+  key: K
+  val: V
+  lft: BBT<K, V>
+  rht: BBT<K, V>
+): BBT.In<K, V>(BBT.bin<K, V>(size, key, val, lft, rht), key)
+  (self, rht, rht, here) here

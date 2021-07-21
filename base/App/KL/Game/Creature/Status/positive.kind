@@ -7,5 +7,6 @@ App.KL.Game.Creature.Status.positive(
     haste: true
     hot: true
     invulnerable: true
+    protect: true
     shield: true
   }default false

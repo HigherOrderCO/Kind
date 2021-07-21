@@ -14,11 +14,11 @@ type App.KL.Game.Creature.Status {
   block(id: String, duration: I32, caster: String)
   //Damage Over Time
   dot(id: String, duration: I32, stack: I32, amount: I32)
-  dampen(duration: I32, tick: I32)
   haste(duration : I32, amount: I32)
   //Heal Over Time
   hot(id: String, duration: I32, stack: I32, amount: I32)
   invulnerable(id: String, duration: I32)
+  protect(duration: I32, amount: I32)
   root(duration: I32)
   shield(id: String, duration: I32, amount: I32)
   silence(duration: I32)

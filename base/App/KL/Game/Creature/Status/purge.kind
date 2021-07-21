@@ -10,6 +10,7 @@ App.KL.Game.Creature.Status.purge(
       case status.head { 
         haste: App.KL.Game.Creature.Status.purge(status.tail)
         hot: App.KL.Game.Creature.Status.purge(status.tail)
+        protect: App.KL.Game.Creature.Status.purge(status.tail)
         shield: App.KL.Game.Creature.Status.purge(status.tail)
       }default status.head & App.KL.Game.Creature.Status.purge(status.tail)
   }
