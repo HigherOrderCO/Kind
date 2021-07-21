@@ -107,7 +107,7 @@ App.KL.Game.Phase.Draft.draw.main(
   tab: String,
   user: String
 ): DOM
-  <div style={"margin": "0", "height": "max(100%, 766px)", "width": "100%", "background-image": "url(https://i.imgur.com/H5BB1V3.png)", "image-rendering": "pixelated", "position": "relative"}>
+  <div style={"margin": "0", "height": "max(100%, 766px)", "width": "100%", "background-image": "url(https://i.imgur.com/H5BB1V3.png)", "image-rendering": "pixelated", "position": "relative", "animation": "fade-in 700ms"}>
       {App.KL.Game.Phase.Draft.draw.background}
 
       <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
@@ -221,6 +221,7 @@ App.KL.Game.Phase.Draft.draw.main.middle(
       "height": "416px" 
       "overflow": "auto"
       "display": if String.eql(page, "heroes") then "grid" else "none" // page
+      "animation": "fade-in 500ms"
       "grid-template-columns": "repeat(5, minmax(0, 1fr))"
       "grid-auto-rows": "max-content"
       "gap": "10px"
@@ -308,7 +309,7 @@ App.KL.Game.Phase.Draft.draw.card.allies(
       {App.KL.Game.Phase.Draft.draw.card.hero(hero, "")}
     </div>
   
-  <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none"}>
+  <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none", "animation": "fade-in 500ms"}>
     { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, bt, "", fator, "https://i.imgur.com/CI2xJrU.png", inner) }
   </div>
 
