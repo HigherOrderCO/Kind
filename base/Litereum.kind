@@ -88,13 +88,12 @@ Litereum.public_from_private(pvt: Litereum.Private): Litereum.Private
 Litereum.public_from_private.go(len: Nat, pvt: Vector<U256,len>): Vector<U256,len>
   case len with pvt {
     zero: Vector.nil!
-    succ: case pvt {
-      cons:
-        let hash = pvt.head
-        let hash = for i from 0 to 256:
-          Litereum.hash([hash])
-        Vector.cons<U256,len.pred>(hash, Litereum.public_from_private.go(len.pred, pvt.tail))
-    }
+    succ:
+      open pvt
+      let hash = pvt.head
+      let hash = for i from 0 to 256:
+        Litereum.hash([hash])
+      Vector.cons<U256,len.pred>(hash, Litereum.public_from_private.go(len.pred, pvt.tail))
   }!
 
 // Converts a public key to an address
@@ -164,7 +163,7 @@ Litereum.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,len>): Vecto
 
 // Returns the PostHash
 Litereum.post_hash(post: Litereum.Post): U256
-  use post = post
+  open post
   let words = []
   let words = words ++ Vector.to_list!(8, post.data)
   let words = words ++ Vector.to_list!(32, post.sign)
@@ -175,6 +174,13 @@ Litereum.post_hash(post: Litereum.Post): U256
 Litereum.score(hash: U256): U256
   let lim = Nat.pow(2, 256)
   Nat.to_u256(lim / (lim - U256.to_nat(hash)))
+
+Litereum.make_post(seed: U256, msg: String, data: Vector<8, U256>): Litereum.Chain
+  let pvt = Litereum.private_from_seed(seed)
+  let pub = Litereum.public_from_private(pvt)
+  let adr = Litereum.address_from_public(pub)
+  let sig = Litereum.sign(msg, pvt)
+  Litereum.Post.new(data, sig, 42, 0)
 
 Litereum.add_post(post: Litereum.Post, chain: Litereum.Chain): Litereum.Chain
   open post; open chain; open chain.tip

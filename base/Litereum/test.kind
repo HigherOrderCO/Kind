@@ -32,7 +32,10 @@ Litereum.test.genesis.post: Litereum.Post
 
 Litereum.test.chain.genesis.0: TestSuite
   TestSuite.unit("0",
-    Litereum.CheckIntegrity(Litereum.Chain.empty, 0))
+    case Litereum.CheckIntegrity(Litereum.Chain.empty, 0) {
+      some: none
+      none: some("")
+    })
 
 Litereum.test.chain.genesis.1: TestSuite
   TestSuite.unit("1",
@@ -40,7 +43,10 @@ Litereum.test.chain.genesis.1: TestSuite
     open e
     let e.post = e.post{"1256#256"} <- Litereum.test.genesis.post
     let e = e@post <- e.post
-    Litereum.CheckIntegrity(e, 1256))
+    case Litereum.CheckIntegrity(e, 1256) {
+      some: none
+      none: some("")
+    })
 
 Litereum.test.chain.genesis.2: TestSuite
   TestSuite.unit("2",
@@ -51,7 +57,10 @@ Litereum.test.chain.genesis.2: TestSuite
     let e.post = e.post{hash_str} <- Litereum.test.genesis.post
     let e.score = e.score{hash_str} <- Litereum.score(hash)
     let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
-    Litereum.CheckIntegrity(e, hash))
+    case Litereum.CheckIntegrity(e, hash) {
+      some: none
+      none: some("")
+    })
 
 Litereum.test.chain.genesis.3: TestSuite
   TestSuite.unit("3",
@@ -62,7 +71,10 @@ Litereum.test.chain.genesis.3: TestSuite
     let e.post = e.post{hash_str} <- Litereum.test.genesis.post
     let e.nexts = e.nexts{hash_str} <- []
     let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
-    Litereum.CheckIntegrity(e, hash))
+    case Litereum.CheckIntegrity(e, hash) {
+      some: none
+      none: some("")
+    })
 
 Litereum.test.chain.genesis.4: TestSuite
   TestSuite.unit("4",
@@ -74,7 +86,10 @@ Litereum.test.chain.genesis.4: TestSuite
     let e.nexts = e.nexts{hash_str} <- []
     let e.score = e.score{hash_str} <- 100000000 // wrong
     let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
-    Litereum.CheckIntegrity(e, hash))
+    case Litereum.CheckIntegrity(e, hash) {
+      some: none
+      none: some("")
+    })
 
 Litereum.test.chain.genesis.5: TestSuite
   TestSuite.unit("5",
