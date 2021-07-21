@@ -144,7 +144,13 @@ App.KL.Game.Phase.Draft.draw.main.middle(
   user: String
 ): DOM
   let max = 3 // max players TODO store in game?
-  
+  let selected_hero = Maybe {
+    get user = allies{user}
+    get hero_id = user@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
+  }
+
   <div style={"display": "contents"}>
     
     // USER CARD
@@ -152,7 +158,7 @@ App.KL.Game.Phase.Draft.draw.main.middle(
       let player = allies{user}
       case player {
         none: <span></span> // Impossible
-        some: App.KL.Game.Phase.Draft.draw.card.user(player.value, max / 2)
+        some: App.KL.Game.Phase.Draft.draw.card.user(player.value)
       }
     }
 
@@ -165,21 +171,18 @@ App.KL.Game.Phase.Draft.draw.main.middle(
       <div style={"display": "contents"}>
         for index in [0 to n_allies]:
           let info = List.get!(index, allies)
-          // distribute allies to right and left
-          let order = if index <? (n_allies / 2) then 0 else max
           case info {
             // if there is some allie not connected
-            none: App.KL.Game.Phase.Draft.draw.card.allies(none, order, page)
+            none: App.KL.Game.Phase.Draft.draw.card.allies(none, page)
             some:
               let {id, player} = info.value
-              App.KL.Game.Phase.Draft.draw.card.allies(some(player), order, page)
+              App.KL.Game.Phase.Draft.draw.card.allies(some(player), page)
           }
       </div>
     }
     
     // MENU SELECTION
     <div style={
-      "order": Nat.show(max + 1)
       "max-height": "416px"
       "height": "416px" 
       "overflow": "auto"
@@ -190,7 +193,7 @@ App.KL.Game.Phase.Draft.draw.main.middle(
       "margin": "0 10px"
       "padding-top": "4px" // because of negative margin
     }>
-      for card in [App.KL.Game.Phase.Draft.draw.portrait.hero(hero) for hero in App.KL.Game.Hero.list]:
+      for card in [App.KL.Game.Phase.Draft.draw.portrait.hero(hero, selected_hero) for hero in App.KL.Game.Hero.list]:
         card
     </div>
   </div>
@@ -200,7 +203,6 @@ App.KL.Game.Phase.Draft.draw.main.middle(
 // this order sets the user card to stay in middle
 App.KL.Game.Phase.Draft.draw.card.user(
   player: App.KL.Game.Player
-  order:  Nat 
 ): DOM
   let fator  = 2
   let bt     = 2
@@ -248,18 +250,17 @@ App.KL.Game.Phase.Draft.draw.card.user(
       </div>
     </div>
   
-  <div id=id style={"margin": "0 10px", "order": Nat.show(order)}>
+  <div id=id style={"margin": "0 10px"}>
     { App.KL.Game.Phase.Draft.draw.card.wrapper(99, 208, bt, id, fator, "https://i.imgur.com/HTnAVKj.png", inner) }
   </div>
 
 App.KL.Game.Phase.Draft.draw.card.allies(
   player: Maybe<App.KL.Game.Player>,
-  order: Nat
   page: String
 ): DOM
   let fator = 2
   let bt    = 2
-  let type = "HEALER"
+  let type = "CLASS"
 
   let hero = Maybe {
     get player  = player
@@ -273,7 +274,7 @@ App.KL.Game.Phase.Draft.draw.card.allies(
       {App.KL.Game.Phase.Draft.draw.card.hero(hero, "")}
     </div>
   
-  <div style={"margin": "0 10px", "order": Nat.show(order), "display": if String.eql(page, "users") then "block" else "none"}>
+  <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none"}>
     { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, bt, "", fator, "https://i.imgur.com/CI2xJrU.png", inner) }
   </div>
 
@@ -291,7 +292,7 @@ App.KL.Game.Phase.Draft.draw.card.hero(
       {
         case hero {
           none: App.KL.Game.Phase.Draft.draw.card.hero.img("", "", "", id) // TODO change to none
-          some: App.KL.Game.Phase.Draft.draw.card.hero.img(hero.value@name, "HEALER", img, id) // TODO change type
+          some: App.KL.Game.Phase.Draft.draw.card.hero.img(hero.value@name, "TYPE", img, id) // TODO change type
         }
       }
     </div>
@@ -404,11 +405,19 @@ App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: 
     {inner}
   </div>
 
-App.KL.Game.Phase.Draft.draw.portrait.hero(hero: App.KL.Game.Hero): DOM
+App.KL.Game.Phase.Draft.draw.portrait.hero(hero: App.KL.Game.Hero, selected_hero: Maybe<App.KL.Game.Hero>): DOM
   let fator = 2
   let bt = 2
-  let id = "H" | hero@name
+  let width = 44
+  let height = 74
 
+  // verify if hero is the hero selected
+  let is_selected = case selected_hero {
+    none: false
+    some: String.eql(hero@name, selected_hero.value@name)
+  }
+  
+  let id = "H" | hero@name
   let portrait = hero@picture(true, 0)
   let inner =
     <div id=id style={"width": "100%", "padding": "0 " | Nat.show(bt * fator) | "px", "display": "flex", "flex-direction": "column", "align-items": "center"}>
@@ -416,7 +425,26 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(hero: App.KL.Game.Hero): DOM
       <p id=id style={"text-transform": "uppercase", "color": "white"}>hero@name</p>
     </div>
   
-  App.KL.Game.Phase.Draft.draw.card.wrapper(44, 74, bt, id, fator, App.KL.Game.Phase.Draft.draw.assets.portrait.hero.background, inner)
+
+  <div id=id style={
+    "height": Nat.show(fator * height) | "px", 
+    "width": Nat.show(fator * width) | "px", 
+    "display": "flex", 
+    "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.portrait.hero.background|")", 
+    "background-size": "100% 100%", 
+    "background-repeat": "no-repeat"
+    "padding-top": Nat.show(fator * bt) | "px"
+    "image-rendering": "pixelated"
+    "border-style": "solid"
+    "border-image-slice": "4"
+    "border-image-width": "10px"
+    "border-image-repeat": "stretch stretch"
+    "border-color": "transparent"
+    // if selected then draw border
+    "border-image-source": if is_selected then "url("|App.KL.Game.Phase.Draft.draw.assets.portrait.hero.border|")" else ""
+  }>
+    {inner}
+  </div>
 
 // ROOM NUMBER AND READY BUTTON
 // ==========================
@@ -591,6 +619,9 @@ App.KL.Game.Phase.Draft.draw.assets.card.attr_icons: Map<String>
 // =====================
 App.KL.Game.Phase.Draft.draw.assets.portrait.hero.background: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAABKCAYAAADAKbZGAAAAcUlEQVR42u3bwQkAIQwEQNu4GuTasSPrVvwdeE+FBGZhyXcK2JSSNfVp4609ZJftF7tuxG7oyNgvGhgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgY+Dg43QY+3ZeBXMwEjZrO46oJAlgAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.portrait.hero.border: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAABPCAYAAACUEffIAAAAnklEQVR42u3asQ3CMBBA0RuLnZiFeRiHASjpCSKCyOAUoFiWD96TrrT87cKVIx52x9N0uFyHnntjlDJEV/FldHWigVSdGaLX4iNL9Hv8HB7JCBf+F+GZXpTyZRHePRwAAAAAAAAAAPhl/mT1Dvdhsnf4eT+lC5+bhQsXLrxZ9BKeJf7Z+hI+evxq55b4cu2n0yR6S0DvaXp7395gqz1uy7Mq9gTE4rAAAAAASUVORK5CYII="
 
 // ready button
 // =====================
