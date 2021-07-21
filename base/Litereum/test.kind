@@ -1,18 +1,38 @@
 Litereum.test: IO<Unit>
   IO {
     let litereum_suite = TestSuite.many("Litereum", [
-      Litereum.test.signature])
+      Litereum.test.signature
+      Litereum.test.chain])
     TestSuite.print(litereum_suite)
   }
 
-Litereum.test.signature: TestSuite
-  TestSuite.unit(
-    "Signature",
-    let seed = 1234 :: U256
-    let pvt = Litereum.private_from_seed(seed)
-    let pub = Litereum.public_from_private(pvt)
-    let adr = Litereum.address_from_public(pub)
-    let msg = Litereum.Signable.utf8("cats cats cats yay")
-    let sig = Litereum.sign(msg, pvt)
-    let chk = Litereum.verify(msg, adr, sig)
-    if chk then none else some("error"))
+Litereum.test.chain: TestSuite
+  TestSuite.many("chain", [
+    Litereum.test.chain.genesis])
+
+Litereum.test.chain.genesis: TestSuite
+  TestSuite.many("genesis", [
+    Litereum.test.chain.genesis.0])
+
+Litereum.test.chain.genesis.0: TestSuite
+  TestSuite.unit("0",
+    Litereum.CheckIntegrity(Litereum.Chain.empty, 0))
+
+Litereum.test.chain.genesis.1: TestSuite
+  TestSuite.unit("1",
+    let e = Litereum.Chain.empty
+    open e
+    e.chain{"0#256"}
+    Litereum.CheckIntegrity(Litereum.Chain.empty, 0))
+  
+// [X] some("genesis not in chain.posts: "|gen_string)
+// [ ] some("genesis has key \""|gen_string|"\" in chain.posts but actual hash \""|U256.show(gen_hash)|"\"")
+// [ ] some("hash \""|curr_string|"\" not in chain.nexts")
+// [ ] some("\""|curr_string|"\" not found in chain.score (should never happen)")
+// [ ] some("post not in chain.posts: "|curr_string)
+// [ ] some("\""|next_string|"\" not found in chain.score")
+// [ ] some("tip "|next_string|" is said to have score "|U256.show(tip.fst)
+// [ ] some("post \""|next_string|"\" has score "|U256.show(next_score)
+// [ ] some("\""|next_string|"\" score cache is "|U256.show(next_score)
+// [ ] some("chan.next{\""|curr_string|"\"} includes \""|next_string|"\" but it has prev \""|next_prev_string|"\"")
+// [ ] some("post has key \""|next_string|"\" in chain.posts but hash \""|U256.show(next_hash)|"\"")

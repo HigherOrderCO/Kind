@@ -29,122 +29,6 @@ type Litereum.Chain {
     tip: Pair<U256,U256>     // top-most post
   )
 }
-  
-// Verifies all the invariants of the data structure are satisfied
-Litereum.CheckIntegrity.go(
-  c: Litereum.Chain,
-  max_score: Pair<U256, U256>
-  stack: List<List<U256>>,
-): Maybe<String>
-  open c
-  case stack {
-    nil:
-      none
-    cons:
-      case stack.head {
-        nil:
-          // should never happen
-          none
-        cons:
-          let current = stack.head.head
-          let curr_string = U256.show(current)
-          let curr_nexts = c.nexts{curr_string} abort some("hash \""|curr_string|"\" not in chain.nexts")
-          case curr_nexts {
-            nil:
-              // we reached a leaf, time to backtrack
-              let next_unseen = Litereum.CheckIntegrity.remove_seen(stack)
-              Litereum.CheckIntegrity.go(c, max_score, next_unseen)
-            cons:
-              let ret = none :: Maybe<String>
-              let curr_score = c.score{curr_string} abort some("\""|curr_string|"\" not found in chain.score (should never happen)")
-              for next in curr_nexts with ret:
-                case ret {
-                  none:
-                    let next_string = U256.show(next)
-                    let next_post = c.post{next_string} abort some("post not in chain.posts: "|curr_string)
-                    let next_hash = Litereum.post_hash(next_post)
-                    if next_hash =? next then
-                      open next_post
-                      if next_post.prev =? current then
-                        let post_score = Litereum.score(next_hash)
-                        let next_score = c.score{next_string} abort some("\""|next_string|"\" not found in chain.score")
-                        if next_score =? post_score + curr_score then
-                          use tip = c.tip
-                          if tip.snd =? next then
-                            if tip.fst =? next_score then
-                              none
-                            else
-                              some("tip "|next_string|" is said to have score "|U256.show(tip.fst)
-                                |", but actually has score "|U256.show(next_score))
-                          else
-                            if tip.snd >=? next_score then
-                              none
-                            else
-                              some("post \""|next_string|"\" has score "|U256.show(next_score)
-                                |", which is bigger than the tip")
-                        else
-                          some("\""|next_string|"\" score cache is "|U256.show(next_score)
-                            |" but should've been "|U256.show(post_score)|" + "|U256.show(curr_score))
-                      else
-                        let next_prev_string = U256.show(next_post.prev)
-                        some("chan.next{\""|curr_string|"\"} includes \""|next_string|"\" but it has prev \""|next_prev_string|"\"")
-                    else
-                      some("post has key \""|next_string|"\" in chain.posts but hash \""|U256.show(next_hash)|"\"")
-                  some:
-                    ret
-                }
-              case ret {
-                none:
-                  Litereum.CheckIntegrity.go(c, max_score, curr_nexts & stack)
-                some:
-                  ret
-              }
-          }
-      }
-  }
-
-// [ ] genesis está no mapa
-// [ ] o hash bate
-// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[genesis]])
-// [x] genesis está no nexts
-// [x] BlockB está no mapa
-// [x] o hash bate
-// [x] o prev do BlockB é o genesis
-// [x] BlockA está no mapa
-// [x] o hash bate
-// [x] o prev do BlockA é o genesis
-// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockB, BlockA], [genesis]])
-// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockC, BlockD], [BlockB, BlockA], [genesis]])
-// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockD], [BlockB, BlockA], [genesis]])
-// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [[BlockA], [genesis]])
-// Litereum.CheckIntegrity.go(c, 0, {0, 0}, [])
-
-Litereum.CheckIntegrity.remove_seen(
-  stack: List<List<U256>>
-): List<List<U256>>
-  case stack {
-    nil: []
-    cons:
-      case stack.head {
-        nil:
-          [] // should never happen
-        cons:
-          case stack.head.tail {
-            nil:
-              Litereum.CheckIntegrity.remove_seen(stack.tail)
-            cons:
-              stack.head.tail & stack.tail
-          }
-      }
-  }
-
-
-Litereum.CheckIntegrity(
-  c: Litereum.Chain,
-  genesis: U256,
-): Maybe<String>
-  // TODO verify genesis is in map and that it's hash matches the key
-  Litereum.CheckIntegrity.go(c, {0, 0}, [[genesis]])
 
 Litereum.Private: Type
   Vector<U256, 32>
@@ -305,3 +189,133 @@ Litereum.add_post(post: Litereum.Post, chain: Litereum.Chain): Litereum.Chain
   let chain.nexts = chain.nexts{U256.show(prev_hash)} <- post_hash & prev_nexts
   let chain.tip   = if post_score >? chain.tip.fst then {post_score,post_hash} else chain.tip
   Litereum.Chain.new(chain.post, chain.nexts, chain.score, chain.tip)
+  
+// Verifies all the invariants of the data structure are satisfied
+Litereum.CheckIntegrity.go(
+  c: Litereum.Chain,
+  max_score: Pair<U256, U256>
+  stack: List<List<U256>>,
+): Maybe<String>
+  open c
+  case stack {
+    nil:
+      none
+    cons:
+      case stack.head {
+        nil:
+          // should never happen
+          none
+        cons:
+          let current = stack.head.head
+          let curr_string = U256.show(current)
+          let curr_nexts = c.nexts{curr_string} abort some("hash \""|curr_string|"\" not in chain.nexts")
+          case curr_nexts {
+            nil:
+              // we reached a leaf, time to backtrack
+              let next_unseen = Litereum.CheckIntegrity.remove_seen(stack)
+              Litereum.CheckIntegrity.go(c, max_score, next_unseen)
+            cons:
+              let ret = none :: Maybe<String>
+              let curr_score = c.score{curr_string} abort some("\""|curr_string|"\" not found in chain.score (should never happen)")
+              for next in curr_nexts with ret:
+                case ret {
+                  none:
+                    let next_string = U256.show(next)
+                    let next_post = c.post{next_string} abort some("post not in chain.posts: "|curr_string)
+                    let next_hash = Litereum.post_hash(next_post)
+                    if next_hash =? next then
+                      open next_post
+                      if next_post.prev =? current then
+                        let post_score = Litereum.score(next_hash)
+                        let next_score = c.score{next_string} abort some("\""|next_string|"\" not found in chain.score")
+                        if next_score =? post_score + curr_score then
+                          use tip = c.tip
+                          if tip.snd =? next then
+                            if tip.fst =? next_score then
+                              none
+                            else
+                              some("tip "|next_string|" is said to have score "|U256.show(tip.fst)
+                                |", but actually has score "|U256.show(next_score))
+                          else
+                            if tip.snd >=? next_score then
+                              none
+                            else
+                              some("post \""|next_string|"\" has score "|U256.show(next_score)
+                                |", which is bigger than the tip")
+                        else
+                          some("\""|next_string|"\" score cache is "|U256.show(next_score)
+                            |" but should've been "|U256.show(post_score)|" + "|U256.show(curr_score))
+                      else
+                        let next_prev_string = U256.show(next_post.prev)
+                        some("chan.next{\""|curr_string|"\"} includes \""|next_string|"\" but it has prev \""|next_prev_string|"\"")
+                    else
+                      some("post has key \""|next_string|"\" in chain.posts but hash \""|U256.show(next_hash)|"\"")
+                  some:
+                    ret
+                }
+              case ret {
+                none:
+                  Litereum.CheckIntegrity.go(c, max_score, curr_nexts & stack)
+                some:
+                  ret
+              }
+          }
+      }
+  }
+
+Litereum.CheckIntegrity.remove_seen(
+  stack: List<List<U256>>
+): List<List<U256>>
+  case stack {
+    nil: []
+    cons:
+      case stack.head {
+        nil:
+          [] // should never happen
+        cons:
+          case stack.head.tail {
+            nil:
+              Litereum.CheckIntegrity.remove_seen(stack.tail)
+            cons:
+              stack.head.tail & stack.tail
+          }
+      }
+  }
+
+Litereum.CheckIntegrity(
+  c: Litereum.Chain,
+  genesis: U256,
+): Maybe<String>
+  open c
+  let gen_string = U256.show(genesis)
+  let gen_post = c.post{gen_string} abort some("genesis not in chain.posts: "|gen_string)
+  let gen_hash = Litereum.post_hash(gen_post)
+  if gen_hash =? genesis then
+    Litereum.CheckIntegrity.go(c, {0, 0}, [[genesis]])
+  else
+    some("genesis has key \""|gen_string|"\" in chain.posts but actual hash \""|U256.show(gen_hash)|"\"")
+
+Litereum.Chain.empty: Litereum.Chain
+  Litereum.Chain.new(Map.new!, Map.new!, Map.new!, {0, 0})
+
+//type Litereum.Post {
+//  new(
+//    // enough for function calls
+//    data: Vector<U256,8>     //  8 words =  256 bytes
+//    // only data is signed
+//    sign: Litereum.Signature // 32 words = 1024 bytes
+//    // half nonce half miner?
+//    info: U256               //  1 word  =   32 bytes
+//    // hash of previous post
+//    prev: U256               //  1 word  =   32 bytes
+//  )                          // 42 words = 1344 bytes
+//}
+Litereum.Test: Litereum.Post
+  let seed = 1234 :: U256
+  let pvt = Litereum.private_from_seed(seed)
+  let pub = Litereum.public_from_private(pvt)
+  let adr = Litereum.address_from_public(pub)
+  let msg = Litereum.Signable.utf8("cats cats cats yay")
+  let sig = Litereum.sign(msg, pvt)
+  let chk = Litereum.verify(msg, adr, sig)
+  Litereum.Post.new(Vector.from_list!([0#256, 1#256, 2#256, 3#256, 4#256, 5#256, 6#256, 7#256]), ?b, ?c, ?d)
