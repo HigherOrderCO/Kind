@@ -20,11 +20,21 @@ type App.KL.Lobby.State.Local.Page {
 // ----------
 
 App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State): DOM
-  open local
-  case local.page as page{
-    front: App.KL.Lobby.draw.front(local@user, page.room_input, global)
-    heroes: App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
+  let style = {
+    "cursor": "url("|App.KL.Game.Cursor.get_img(App.KL.Game.Cursor.default)|"), auto"
+    "width" : "100%"
+    "height": "100%"
   }
+  
+  <div style=style>
+    {
+      open local
+      case local.page as page{
+        front: App.KL.Lobby.draw.front(local@user, page.room_input, global)
+        heroes: App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
+      }
+    }
+  </div>
 
 App.KL.Lobby.draw.heroes(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
   let style = {
@@ -180,7 +190,8 @@ App.KL.Lobby.draw.front.button(id: String, content: String): DOM
     "font-size": "2rem",
     "font-family": "monospace",
     "margin-left": "10px",
-    "padding": "2px"
+    "padding": "2px",
+    "cursor": "inherit"
   }
   <button id=id style=style>
     content
@@ -253,15 +264,7 @@ App.KL.Lobby.when(
       case page {
         front:
           switch String.eql(event.id) {
-            //"random": IO {
-              //get rnd = IO.random(10000000000)
-              //let str = Nat.show(rnd)
-              //let room = "4b4c494e" | String.take(8, str)
-              //let new_page = App.KL.Lobby.State.Local.Page.front(room)
-              //let new_local = local@page <- new_page
-              //App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
-            //}
-            "ready": 
+            "ready":
               case page.room_input {
                 nil: IO {App.pass!}
                 cons:
@@ -300,6 +303,24 @@ App.KL.Lobby.when(
               let new_local = local@page <- new_page
               App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
           }default App.pass<App.KL.State>
+      }
+    key_down:
+      case page {
+        front:
+          switch U16.eql(event.code) {
+            13#16:
+              case page.room_input {
+                nil: IO {App.pass<App.KL.State>}
+                cons:
+                  let room = String.take(16, Crypto.Keccak.hash(page.room_input))
+                  IO {
+                    App.watch<App.KL.State>(room)
+                    App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input)))
+                  }
+              }
+          }default App.pass<App.KL.State>
+        heroes: App.pass<App.KL.State>
       }
   } default App.pass<App.KL.State>
   

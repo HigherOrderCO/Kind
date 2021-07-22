@@ -1,0 +1,28 @@
+GetType<A: Type>(x: A): Type
+  A
+
+BBT.In.member<K: Type, V: Type>(
+  cmp: K -> K -> Cmp
+  key: K
+  map: BBT<K,V>
+)<H0: BBT.In<K, V>(map, key)
+  H1: BBT.Balanced<K, V>(cmp, map)
+  H2: Cmp.Order<K>(cmp)
+>: BBT.member<K, V>(cmp, key, map) == true
+  case map with H0 H1 {
+    tip:
+      case H0 {}
+    bin:
+      //let H0 = ?a-4-16- :: GetType!(H0)
+      open H1 open H1.snd
+      let ref = H1.fst(key, H0)
+      let ret =
+        case cmp(key, map.key) with ref {
+          ltn: open ref
+            BBT.In.member<K, V>(cmp, key, map.left, ref.fst, H1.snd.fst, H2)
+          eql: refl
+          gtn: open ref
+            BBT.In.member<K, V>(cmp, key, map.right, ref.snd, H1.snd.snd, H2)
+        }! :: cmp(key, map.key, _, _, _, _) == _
+      ret
+  }!

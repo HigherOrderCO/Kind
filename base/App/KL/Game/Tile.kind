@@ -2,7 +2,7 @@ type App.KL.Game.Tile {
   new(
     terrain: App.KL.Game.Terrain
     creature: Maybe<App.KL.Game.Creature>
-    token: Maybe<App.KL.Game.Token> // TODO
+    token: Maybe<App.KL.Game.Token>
     effect: Maybe<App.KL.Game.Tile.Effect>
   )
 }

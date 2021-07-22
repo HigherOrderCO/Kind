@@ -8,4 +8,6 @@ App.KL.Game.Phase.Play.post(
 
   case event {
     cast: game@casts <- App.KL.Game.Cast.push(addr, event.target, event.letter, game@casts)
+    cancel_casts: game@casts <- App.KL.Game.Cast.cancel_casts(addr, game@casts)
+    cancel_skill: game@casts <- App.KL.Game.Cast.cancel_skill(addr, event.letter, game@casts)
   }

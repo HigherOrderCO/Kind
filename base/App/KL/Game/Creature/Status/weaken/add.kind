@@ -19,12 +19,12 @@ App.KL.Game.Creature.Status.weaken.add.aux(
       new_weaken & status
     cons:
       case status.head { 
-        root: 
+        weaken: 
           let old_duration = status.head.duration
-          let next_weaken = I32.cmp(old_duration, duration)
+          let next_weaken = I32.cmp(duration, old_duration)
           case next_weaken {
             gtn: 
               new_weaken & status.tail
-          }default status.head & App.KL.Game.Creature.Status.weaken.add.aux(duration, amount, status.tail)
+          }default App.KL.Game.Creature.Status.weaken.add.aux(duration, amount, status.tail)
       }default status.head & App.KL.Game.Creature.Status.weaken.add.aux(duration, amount, status.tail)
   }

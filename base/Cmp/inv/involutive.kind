@@ -1,0 +1,6 @@
+Cmp.inv.involution(c: Cmp): c == Cmp.inv(Cmp.inv(c))
+  case c {
+    ltn: refl
+    eql: refl
+    gtn: refl
+  }!

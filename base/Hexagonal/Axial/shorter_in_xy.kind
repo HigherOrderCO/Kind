@@ -1,0 +1,15 @@
+Hexagonal.Axial.shorter_in_xy(goal: Hexagonal.Axial a: Hexagonal.Axial, b: Hexagonal.Axial, hex_rad: I32, map_center_x: I32, map_center_y: I32): Bool
+  {g_i, g_j} = Hexagonal.Axial.to_screen_xy(goal, hex_rad, map_center_x, map_center_y)
+  {a_i, a_j} = Hexagonal.Axial.to_screen_xy(a,    hex_rad, map_center_x, map_center_y)
+  {b_i, b_j} = Hexagonal.Axial.to_screen_xy(b,    hex_rad, map_center_x, map_center_y)
+  
+  // sqrt not necessary, since it is only a comparison
+  let dis_a = 
+      F64.pow(U32.to_f64(a_i) - U32.to_f64(g_i), 2) +
+      F64.pow(U32.to_f64(a_j) - U32.to_f64(g_j), 2)
+    
+  let dis_b = 
+      F64.pow(U32.to_f64(b_i) - U32.to_f64(g_i), 2) +
+      F64.pow(U32.to_f64(b_j) - U32.to_f64(g_j), 2)
+    
+  F64.ltn(dis_a, dis_b)

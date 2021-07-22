@@ -2,6 +2,7 @@ type App.KL.Game.Moment {
   preparation(countdown: U64) // when players are casting their skills
   execution(
     casts: List<App.KL.Game.Cast>
+    previous_casts: List<App.KL.Game.Cast>
     frame: U64
     coord: Maybe<Hexagonal.Axial>
     hits: App.KL.Game.Indicators

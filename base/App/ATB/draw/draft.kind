@@ -1,0 +1,53 @@
+App.ATB.draw.draft.button_fst(id: String, content: String): DOM
+  let style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "margin-left": "10px",
+    "padding": "2px"
+  }
+  <button id=id style=style>
+    content
+  </button>
+
+App.ATB.draw.draft.button_snd(id: String, content: String): DOM
+  let style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "margin-left": "10px",
+    "padding": "2px"
+  }
+  <button id=id style=style>
+    content
+  </button>
+
+App.ATB.draw.draft(char : Maybe<String>) : DOM
+case char {
+  none:
+    let style = {
+      "width": "100%", 
+      "height": "100%",
+      "display": "flex",
+      "flex-direction": "column", 
+      "justify-content": "center", 
+      "align-items": "center",
+      "font-size": "2rem"
+    }
+    <div style=style>
+      <h1 style={"margin-bottom": "10px", "text-align": "center"}>
+        "Welcome to Active Time Battle System:"
+      </h1>
+      <div style={
+        "display": "flex",
+        "justify-content": "center", 
+        "flex-wrap": "wrap",
+        "text-align": "center"
+      }>
+        "Choose a character: "
+        <div>
+          {App.ATB.draw.draft.button_fst("char_fst", "character 1")}
+          {App.ATB.draw.draft.button_snd("char_snd", "character 2")}
+        </div>
+      </div>
+    </div>
+  some : ?a
+}

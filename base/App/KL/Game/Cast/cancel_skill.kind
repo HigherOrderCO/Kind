@@ -1,0 +1,8 @@
+App.KL.Game.Cast.cancel_skill(user: String, skill_key: Char, casts: List<App.KL.Game.Cast>): List<App.KL.Game.Cast>
+  let list = []
+  for cast in casts with list:
+    if (user =? cast@player) && (cast@letter =? skill_key) then
+      list 
+    else
+      cast & list
+  list

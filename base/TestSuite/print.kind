@@ -1,10 +1,19 @@
-TestSuite.show(t: TestSuite): IO(Unit)
+TestSuite.print(t: TestSuite): IO(Unit)
+  TestSuite.print.aux(t, 0)
+
+TestSuite.print.aux(t: TestSuite, depth: Nat): IO(Unit)
+  let ind = ""
+  for n from 0 to depth with ind:
+    ind|"  "
   case t {
-    test: IO {
-      IO.print(TestSuite.show.test(t.name, t.result)|"\n")
+    unit: IO {
+      IO.print(ind|TestSuite.show.test(t.name, t.result))
     }
-    suite: IO {
+    many: IO {
       for x in t.list:
-        TestSuite.show(x)
+        IO {
+          IO.print(ind|t.name)
+          TestSuite.print.aux(x, 1 + depth)
+        }
     }
   }

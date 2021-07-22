@@ -1,4 +1,4 @@
 App.KL.Game.Effect.board.get: App.KL.Game.Effect<App.KL.Game.Board>
-  (center, target, board)
+  (center, targets, board)
 
   App.KL.Game.Effect.Result.new!(board, center, board, Hexagonal.Axial.Map.new!, 0, [], "")

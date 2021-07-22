@@ -1,11 +1,13 @@
 type App.KL.Game.Skill {
 	new(
-  	name: String                     // the name of the skill
-    delay: U64                       // skills with larger delay are called later
-    frames: U64                      // how many ticks its animation takes
-    range: U64                       // cast range
-		effect: App.KL.Game.Effect<Unit> // its in-game effect
-    description: String
+  	name: String                        // the name of the skill
+    delay: U64                          // skills with larger delay are called later
+    frames: U64                         // how many ticks its animation takes
+    range: U64                          // cast range
+    pattern: App.KL.Game.Skill.Pattern  // pattern in which skill is cast
+		effect: App.KL.Game.Effect<Unit>    // its in-game effect
+    description: String                 // description of the skill
+    cursor: App.KL.Game.Cursor          // cursor that game will show when skill is casted
 	)
 }
 
@@ -23,3 +25,25 @@ App.KL.Game.Skill.get(
     get skill = hero@skills{Char.to_string(letter)}
     return skill
   }
+
+type App.KL.Game.Skill.Pattern {
+  single
+  vector
+  multiple(areas: Nat)
+  multiple_no_repeat(areas: Nat)
+}
+
+App.KL.Game.Skill.get_pattern(skill: App.KL.Game.Skill): Nat
+  let pattern = skill@pattern
+  case pattern {
+    single  : 1
+    vector  : 2
+    multiple: pattern.areas
+    multiple_no_repeat: pattern.areas
+  }
+
+App.KL.Game.Skill.can_repeat(skill: App.KL.Game.Skill): Bool
+  let pattern = skill@pattern
+  case pattern {
+    multiple: true
+  }default false

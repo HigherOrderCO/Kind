@@ -1,0 +1,11 @@
+App.KL.Game.Creature.Status.block.check(
+  creature: App.KL.Game.Creature
+): List<Pair<Bool, String>> //Has_effect / Caster_ID
+
+  let status = creature@status
+  let result = [{false, ""}]
+  for block in status with result:
+    case block { 
+      block: [{true, block.caster}]
+    }default result
+  result

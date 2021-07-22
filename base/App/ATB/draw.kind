@@ -1,0 +1,11 @@
+App.ATB.draw (canvas: VoxBox) : App.Draw<App.ATB.State>
+    (state) 
+    
+    open state
+    open state.local
+    case state.local.phase{
+        room: App.ATB.draw.room(state.local.phase.status@room_id)
+        draft: App.ATB.draw.draft
+        play: DOM.vbox({}, {}, canvas)
+    }
+    //DOM.vbox({}, {}, canvas)

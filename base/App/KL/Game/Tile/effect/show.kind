@@ -6,10 +6,10 @@ App.KL.Game.Tile.effect.show(
   let tile = App.KL.Game.Tile.get(coord, board)
   without tile: ""
   let effect = App.KL.Game.Tile.effect.get(tile)
-  let result = effect(coord, coord, board)
+  let result = effect(coord, [coord], board)
   case result { 
     err:
-      ""
+      "Normal"
     new:
       result.description
   }

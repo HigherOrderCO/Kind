@@ -8,4 +8,4 @@ Dyadic.div(n: Dyadic, d: Dyadic): Dyadic
     Dyadic.new(n.num/d.num, n.exp - d.exp)
   else
     let fac = d.exp - n.exp
-    Dyadic.new((n.num/d.num)*Nat.to_int(fac), n.exp - d.exp)
+    Dyadic.new(((n.num*Nat.to_int(fac))/d.num), n.exp - d.exp)

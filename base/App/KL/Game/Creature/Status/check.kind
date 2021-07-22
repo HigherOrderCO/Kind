@@ -1,0 +1,23 @@
+App.KL.Game.Creature.Status.check(
+  creature: App.KL.Game.Creature
+  status: App.KL.Game.Creature.Status
+): Bool
+
+  let creature_status = creature@status
+  let result = false
+  for verify in creature_status with result:
+    case verify status { 
+      block block : true
+      dot dot: true
+      dampen dampen: true
+      haste haste: true
+      hot hot: true
+      invulnerable invulnerable: true
+      root root: true
+      shield shield: true
+      silence silence: true
+      slow slow: true
+      stun stun: true
+      weaken weaken: true
+    }default result
+  result

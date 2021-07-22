@@ -6,9 +6,12 @@ App.KL.Game.Effect.status.shield.add(
   (pos)
 
   App.KL.Game.Effect { 
-    let duration_show = String.show_clean(I32.show(duration))
-    let amount_show = String.show_clean(I32.show(amount))
-    let turn = if I32.gtn(duration, 1) then " turns" else " turn"
-    App.KL.Game.Effect.description.add("Give Shield to a creature for"|duration_show|turn| " protecting it from taking "|amount_show|" damage")
-    App.KL.Game.Effect.status.shield.change_at(id, duration, amount, pos)
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    without creature: App.KL.Game.Effect { return +0#32 }
+    let shield = App.KL.Game.Creature.Status.shield(id, duration, amount)
+    let total_shield = App.KL.Game.Creature.Status.shield.total(creature)
+    App.KL.Game.Effect { 
+      App.KL.Game.Effect.status.add(creature, shield, pos)
+      return total_shield
+    }
   }

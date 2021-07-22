@@ -7,6 +7,8 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let picture = (bool, time)
     App.KL.Game.Hero.Croni.Assets.base64_idle
 
+  let height = 18 :: I32 // Distance from center of image to the top of it
+
   let max_hp = 12 :: I32
 
   let max_ap = 3 :: I32
@@ -17,25 +19,35 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let void_range = {8,8} ::Pair<U64, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".")
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
 
-    "Q": App.KL.Game.Skill.new("Trap", 150, 24, trap_range@fst, App.KL.Game.Hero.Croni.hero.Skills.trap(trap_range@snd, 1), 
-    "Croni summons a Trap that roots when stepped on.")
+    "Q": App.KL.Game.Skill.new("Flux", 860, 48, trap_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Croni.hero.Skills.flux(trap_range@snd, 12, 1), 
+    "Croni casts a targeted dark flux, dealing 12 damage in a single area.", App.KL.Game.Cursor.attack)
 
-    "W": App.KL.Game.Skill.new("Flux", 860, 48, flux_range@fst, App.KL.Game.Hero.Croni.hero.Skills.flux(flux_range@snd, 12, 1), 
-    "Croni casts a targeted dark flux, dealing 12 damage in a single area.")
+    "W": App.KL.Game.Skill.new("Trap", 150, 24, flux_range@fst, App.KL.Game.Skill.Pattern.multiple_no_repeat(2), App.KL.Game.Hero.Croni.hero.Skills.trap(flux_range@snd, 1), 
+    "Croni summons a Trap that roots when stepped on.", App.KL.Game.Cursor.attack)
 
-    "E": App.KL.Game.Skill.new("Void", 880, 24, void_range@fst, App.KL.Game.Hero.Croni.hero.Skills.void(void_range@snd, 1),
-    "Croni summons a Void that blocks movement. Can be reactivated to root around it.")
+    "E": App.KL.Game.Skill.new("Void", 880, 24, void_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Croni.hero.Skills.void(void_range@snd, 1),
+    "Croni summons a Void that blocks movement. Can be reactivated to root around it.", App.KL.Game.Cursor.attack)
 
   }
 
   let on_stepped = none
 
+  let attributes =
+    some(App.KL.Game.Hero.Attributes.set(
+      0 // Damage
+      1 // Resistance
+      5 // Mobility
+      5 // Range
+      5 // Utility
+      3 // Difficulty
+  ))
+
   let description = "Croni is a fragile mage with slow skills that deal high damage from afar."
 
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
 
 
 // SKILLS
@@ -43,24 +55,16 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 App.KL.Game.Hero.Croni.hero.Skills.trap(range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.limit_range(range)
-    get target = App.KL.Game.Effect.coord.get_target
-    get center = App.KL.Game.Effect.coord.get_center
-    get caster = App.KL.Game.Effect.board.creature.caster
-    get board = App.KL.Game.Effect.board.get
-    let team = case caster { none: App.KL.Game.Team.neutral, some: caster.value@team }
+    get targets = App.KL.Game.Effect.coord.get_targets
+    get center  = App.KL.Game.Effect.coord.get_center
+    get caster  = App.KL.Game.Effect.board.creature.caster
+    get board   = App.KL.Game.Effect.board.get
+    let team    = case caster { none: App.KL.Game.Team.neutral, some: caster.value@team }
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
-    if App.KL.Game.Board.is_occupied(target, board) then
-      App.KL.Game.Effect.pass
-    else
-      let trap = App.KL.Game.Creature.new(
-        none,
-        App.KL.Game.Hero.Croni.hero.trap,
-        team,
-        [],
-        App.KL.Game.Hero.Croni.hero.trap@max_hp,
-        App.KL.Game.Hero.Croni.hero.trap@max_ap)
-      App.KL.Game.Effect.board.summon(target, trap)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, targets)
+    let trap = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Croni.hero.trap, team, [], App.KL.Game.Hero.Croni.hero.trap@max_hp, App.KL.Game.Hero.Croni.hero.trap@max_ap)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.board.summon(trap), targets)
+    return unit
   }
 
 App.KL.Game.Hero.Croni.hero.Skills.flux(range: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
@@ -93,7 +97,7 @@ App.KL.Game.Hero.Croni.hero.Skills.void(range: I32, ap_cost: I32): App.KL.Game.E
         let mhp = App.KL.Game.Hero.Croni.hero.void@max_hp
         let map = App.KL.Game.Hero.Croni.hero.void@max_ap
         let trap = App.KL.Game.Creature.new(none, hero, team, [], mhp, map)
-        App.KL.Game.Effect.board.summon(target, trap)
+        App.KL.Game.Effect.board.summon(trap, target)
       }
       some: if String.eql(targeted.value@hero@name, "Croni.Void") then App.KL.Game.Effect {
         let area = App.KL.Game.Hero.Croni.hero.Skills.void.area(target, board)
@@ -141,6 +145,7 @@ App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
   let name = "Croni.Trap"
   let draw = (pose) {none, App.KL.Game.Field.Elements.mushroom_0_0}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
+  let height = 20 :: I32
   let max_hp = 6 :: I32
   let max_ap = 0 :: I32
   let skills = {}
@@ -149,13 +154,15 @@ App.KL.Game.Hero.Croni.hero.trap: App.KL.Game.Hero
     App.KL.Game.Effect.status.root.add(2, to)
     return unit
   })
+  let attributes = none
   let description = "A Trap created by Croni that stuns whoever steps on it"
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
 
 App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
   let name = "Croni.Void"
   let draw = (pose) {none, App.KL.Game.Field.Elements.baner_1}
   let picture = (bool, time) App.KL.Game.Hero.Croni.Assets.base64_idle
+  let height = 20 :: I32
   let max_hp = 6 :: I32
   let max_ap = 0 :: I32
   let skills = {}
@@ -164,5 +171,6 @@ App.KL.Game.Hero.Croni.hero.void: App.KL.Game.Hero
     //App.KL.Game.Effect.status.stun.add(2, to)
     return unit
   })
+  let attributes = none
   let description = "A Void created by Croni"
-  App.KL.Game.Hero.new(name, draw, picture, max_hp, max_ap, skills, on_stepped, description)
+  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)

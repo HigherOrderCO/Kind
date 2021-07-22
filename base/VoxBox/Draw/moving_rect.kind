@@ -75,7 +75,7 @@ VoxBox.Draw.moving_rect(
             let b = Col32.b(col)
             let a = Col32.a(col)
             // VoxBox.Draw.line.coords is kinda irregular regarding pixel order
-            let na = ((ulen - ui)*255)/ulen
+            let na = (ui*255)/ulen
             let col = Col32.new(r, g, b, na)
             for i : I32 from (coord@snd - h) + 1 to coord@snd + 1 with img:
               let pos = Pos32.new(I32.to_u32(coord@fst), I32.to_u32(i), I32.to_u32(z))
@@ -98,7 +98,7 @@ VoxBox.Draw.moving_rect(
             let b = Col32.b(col)
             let a = Col32.a(col)
             // VoxBox.Draw.line.coords is kinda irregular regarding pixel order
-            let na = ((ulen - ui)*255)/ulen
+            let na = (ui*255)/ulen
             let col = Col32.new(r, g, b, na)
             for i : I32 from coord@snd to coord@snd + h with img:
               let pos = Pos32.new(I32.to_u32(coord@fst), I32.to_u32(i), I32.to_u32(z))

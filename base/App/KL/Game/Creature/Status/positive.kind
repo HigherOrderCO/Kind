@@ -1,0 +1,12 @@
+//Verifies if a status is positive or negative
+App.KL.Game.Creature.Status.positive(
+  status: App.KL.Game.Creature.Status
+): Bool
+
+  case status { 
+    haste: true
+    hot: true
+    invulnerable: true
+    protect: true
+    shield: true
+  }default false
