@@ -15,21 +15,23 @@ App.KL.Game.Phase.Draft.Filter.default: App.KL.Game.Phase.Draft.Filter
     }
   )
 
-
-
 App.KL.Game.Phase.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: App.KL.Game.Phase.Draft.Filter): List<App.KL.Game.Hero>
+  // TODO do all this in a beautiful way :(
   let filters_active = [
     {
       Bool.not(String.eql("", filter@hero_name)),
-      ((hero) String.starts_with(hero@name, filter@hero_name)) :: App.KL.Game.Hero -> Bool
+      ((hero) 
+        String.starts_with(String.to_lower(hero@name), String.to_lower(filter@hero_name))
+      ) :: App.KL.Game.Hero -> Bool
     }, // text
     {
-      BBT.for!!(filter@options)!(true, (k, v, z) Bool.not(v) && z),
+      BBT.for!!(filter@options)!(false, (k, v, z) v || z),
       ((hero) 
-        case filter@options{"healer"} as filter {
-          none: false
-          some: filter.value
-        }
+          true
+        // case filter@options{"healer"} as filter {
+        //   none: false
+        //   some: filter.value
+        // }
       ) :: App.KL.Game.Hero -> Bool
     } // class
   ]
@@ -45,6 +47,6 @@ App.KL.Game.Phase.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: App
         else 
           should_enter
       if should_enter then hero & filtered else filtered
-    filtered
+    List.reverse!(filtered)
   else 
     heroes
