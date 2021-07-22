@@ -214,7 +214,15 @@ App.KL.Game.Phase.Draft.draw.main.middle(
           }
       </div>
     }
-    
+
+    // FILTER
+    <div style={
+      "display": if String.eql(page, "heroes") then "block" else "none" // page
+      "animation": "fade-in 500ms"
+    }>
+      {App.KL.Game.Phase.Draft.draw.card.filter("Alo")}
+    </div>
+
     // MENU SELECTION
     <div style={
       "max-height": "416px"
@@ -425,6 +433,64 @@ App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes,
       </div>
   </div>
 
+App.KL.Game.Phase.Draft.draw.card.filter(
+  filter: String
+): DOM
+  let inner = 
+    <div style={"max-height": "100%", "width": "100%", "overflow": "auto", "padding": "15px 10%"}>
+      <div style={"display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column"}>
+        <img src=App.KL.Game.Phase.Draft.draw.assets.filter.icon style={"width": "20%"}></img>
+        <span style={"color": "white", "margin": "10px 0"}>"FILTER"</span>
+        <div style={
+          "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.filter.input|")"
+          "background-size": "100% 100%"
+          "width": "100%"
+          "height": "32px"
+        }>
+          <input id="hero-filter" value=filter style={
+            "background": "transparent"
+            "border": "none"
+            "color": "white"
+            "height": "100%"
+            "padding": "0 16px"
+            "width": "100%"
+            "outline": "none"
+            "font-family": "monospace"
+          }></input>
+        </div>
+      </div>
+
+      <div style={"margin": "5px 0", "width": "100%"}>
+        <img src=App.KL.Game.Phase.Draft.draw.assets.card.divisor style={"width": "100%"}></img>
+      </div>
+
+      <div>
+        <ul style={"list-style": "none"}>
+          { App.KL.Game.Phase.Draft.draw.card.filter.option(true, "lorem") }
+          { App.KL.Game.Phase.Draft.draw.card.filter.option(false, "ipsum") }
+        </ul>
+      </div>
+    </div>
+  
+  <div style={"margin": "0 10px"}>
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, 2, "", 2, App.KL.Game.Phase.Draft.draw.assets.filter.background, inner) }
+  </div>
+
+App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DOM
+  let img = 
+    if checked then
+      App.KL.Game.Phase.Draft.draw.assets.filter.check_true
+    else
+      App.KL.Game.Phase.Draft.draw.assets.filter.check_false
+  
+  <li style={"margin-bottom": "3px"}>
+    <img src=img style={
+      "zoom": "2"
+      "margin-right": "5px"
+      "vertical-align": "middle"
+    }></img>
+    <span style={"vertical-align": "middle", "color": "white", "text-transform": "uppercase"}>text</span>
+  </li>
 
 App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: Nat, background: String, inner: DOM): DOM
   <div id=id style={
@@ -715,3 +781,20 @@ App.KL.Game.Phase.Draft.draw.assets.bottom.list_button: String
 
 App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAATCAYAAADxlA/3AAABEklEQVR42u2VMQrCQBBFt/MANmlS2FgoVoraChbeQnIFD6FgYWvpNbyFV/AQ9tFZ+MvPuLMmEkHEwA/s7sz/j0yibrrcl7PjpZyfr0GyhrB3uJWNlPLCvmQ7ubUdXhfCA4yG2wqRrPP+xms2PrUi+Ik3P3FZu25vHcJRiGLRu6HohQ97A0KyPYAVHoV4NKYeuZzrfguiAsAFsWYO5znGZEHoUTQCENUJh/4Avwmgf0hafQk72SKIPxetVxBybvVyxhOALpD1Kk+LQ1N1Me/oCCZZEYTmYrDzsgB0OOp1H3tHR2BBaEOWhKfOU+EVAN4EyCekMwIAxHPSLwz+TtkkJq6z/DjTycUblupA8HkdT/cN1x3Wm8bj6iLFvgAAAABJRU5ErkJggg=="
+
+// filter
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.filter.background: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFIAAADQCAYAAACUVDZIAAACE0lEQVR42u3dO04CQRzA4em8ghaegNgKrYln8EaaUNhyFW7BFTiChb2rf5Ihwz6QfUST5dvkFybLK/OxL6pNqVgen9fVcrOrVtv9oRjXy89F759fs6qc27m5xzisUtty7YiTYMaK8gPe7j+qxd2LWgqb0uqIWUeEdVkNTIjTYCa78zS7ecoHTjDDyiegFANb47itMgxTPo1DGVa+bAQ5FWRsmiDHQYYhSJAgQQokSJAgBRIkSJAgQYIEKZAgQYIUSJAgBRIkSJACCRIkSJAgQYIUSJAgQQokSJAgQYIECVIgQYIEKZAgQQokSJAgBRIkSJBQQIIEKZAgQYIUSJAgQYIECRKkQIIECVIgQYIECRIkSJACCRIkSIEECVIgQYIEKZAgQYKEAhIkSIEECRKkQP4H5HKzAzkSMgxBggQ5T8jVdg9yJGQYggQJEqRAggQJUiBBggQJEiRIkAIJEiRIgQQJUiBBggQpkCBBggQJEiRIgQQJEqRAggQJEiRIkCAFEiRIkAIJEqRAggQJUiBBggQJBSRIkAIJEiRIgQQJEiRIkCBBCuQfQT4sXsH0LMxOIPNKOP0h4/EEEuYwxFZImP0ROyHzC9Vd3atziyy7uX3ST+cwW4+REPtjNs7aEIdhNi7IHf/6HyuP15Fx468Ss+uXyG+KmyleQ5d6hN3h5mmxxKDeJV+U/xHNoTyf3+bdZhWG38iSLQn5ZPm+AAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.filter.icon: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAbElEQVR42mNgQAIWOx787/vyHwWDxBiIAcga2mU/gDGygQQ147IJZBBeQ2C24LMAZghWS4j1J06LQIIgGwbWAIq8AJMg5Aq8FsGiCZchMEvwuhQ5ISFjklImLg3o4kQnb3yGDx5DGMgByGkCABtMGgikVxUvAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.filter.input: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAAAPCAYAAABQkhlaAAAAUElEQVR42mNgAAJd7bb/IxkzIAcCu4TjiMTwwBjJgYAcGKMBMRoQowExGhCjATEaEKMBMRoQowExGhBUDAgzl64RGwggv6N0vEACIxWDwgAAd8ufnGfNeIEAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.filter.check_false: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAKklEQVR42mNgAAIzl67/7bIf4BjEZ0CWYJdwhGO4AnQJZAUUSOK1E59rAea0VhRBV4/wAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.filter.check_true: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAJklEQVR42mNgAAIzl67/7bIf4BjEZ8AmgaIAmwQMUyCJ1058rgUA9IdvWCCrT8sAAAAASUVORK5CYII="
