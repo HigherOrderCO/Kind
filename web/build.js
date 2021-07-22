@@ -6,23 +6,30 @@ var {exec, execSync} = require("child_process");
 var code_dir = __dirname+"/src";
 var kind_dir = __dirname+"/../base";
 
+process.chdir(code_dir);
+var all_js_apps   = fs.readdirSync("apps").filter(x => x.startsWith("App."));
 process.chdir(kind_dir);
-var files = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
+var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
+// var app = ["TicTacToe.kind"];
+var app = "";
+var compiled_apps = [];
 
+// Only build 1 App
 if (process.argv[2]) {
-  files = files.filter(name => {
+  app = all_kind_apps.filter(name => {
     return name.toLowerCase().indexOf(process.argv[2].toLowerCase()) !== -1
   });
-} else {
+  compiled_apps = compile_app(app);
+} else { // Build all Apps
   console.log("Tip: to build only 1 app, use \x1b[2mnode build.js app_name\x1b[0m.")
+  for (var file of all_kind_apps) {
+    compiled_apps.push(compile_app(file));
+  }
 }
 
-var apps = [];
-
-console.log("Compiling apps:");
-for (var file of files) {
+function compile_app(name) {
   process.chdir(kind_dir);
-  var name = "App."+file.slice(0,-5);
+  var name = "App."+name.slice(0,-5);
   console.log("- " + name);
   
   try {
@@ -30,20 +37,20 @@ for (var file of files) {
   } catch (e) {
     console.log("Couldn't compile " + file + ". Error:");
     console.log(e.toString());
-    continue;
   }
-  
-  // console.log(code);
+
+  // Write compiled App
   process.chdir(code_dir);
   fs.writeFileSync("apps/"+name+".js", code);
-  apps.push(name);
+  return name;
 }
 
+// Export Apps in index.js
 process.chdir(code_dir);
-
 var index = "module.exports = {\n";
-for (var app of apps) {
-  index += "  '" + app + "': import('./"+app+".js'),\n";
+const build_all = app === "";
+for (var app of build_all ? all_js_apps : all_js_apps.concat(app)) {
+  index += "  '" + app + "': import('./"+app+"'),\n";
 }
 index += "}\n";
 fs.writeFileSync("apps/index.js", index);
