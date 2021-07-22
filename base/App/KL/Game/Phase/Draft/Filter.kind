@@ -1,0 +1,16 @@
+type App.KL.Game.Phase.Draft.Filter {
+  new(
+    hero_name: String
+    options: Map<Bool>
+  )
+}
+
+App.KL.Game.Phase.Draft.Filter.default: App.KL.Game.Phase.Draft.Filter
+  App.KL.Game.Phase.Draft.Filter.new(
+    "",
+    {
+      "healer": false,
+      "mage": false,
+      "thief": false
+    }
+  )

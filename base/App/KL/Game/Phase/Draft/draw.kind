@@ -5,7 +5,7 @@ App.KL.Game.Phase.Draft.draw(
   open global
   without global.game: <div>"No game"</div> // impossible
   
-  App.KL.Game.Phase.Draft.draw.choose_page(global.game@players, local@page, local@tab, local@room, local@user)
+  App.KL.Game.Phase.Draft.draw.choose_page(global.game@players, local@page, local@tab, local@room, local@user, local@filter)
 
 // choose what page draw based on team
 App.KL.Game.Phase.Draft.draw.choose_page(
@@ -13,7 +13,8 @@ App.KL.Game.Phase.Draft.draw.choose_page(
   page: String,
   tab:  String,
   room: String,
-  user: String
+  user: String,
+  filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
   let player = players{user}
   without player: <div>"No player"</div> // impossible
@@ -24,8 +25,8 @@ App.KL.Game.Phase.Draft.draw.choose_page(
   case team {
     // if any team is selected go to main draft selection
     // pass only allies
-    blue:   App.KL.Game.Phase.Draft.draw.main(App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user)
-    red:    App.KL.Game.Phase.Draft.draw.main(App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user)
+    blue:   App.KL.Game.Phase.Draft.draw.main(App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user, filter)
+    red:    App.KL.Game.Phase.Draft.draw.main(App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user, filter)
   } default team_page // if no team is selected go to team selection
 
 // aux function to filter players according with 
@@ -105,7 +106,8 @@ App.KL.Game.Phase.Draft.draw.main(
   allies: Map<App.KL.Game.Player>, 
   page: String
   tab: String,
-  user: String
+  user: String,
+  filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
   <div style={"margin": "0", "height": "max(100%, 766px)", "width": "100%", "background-image": "url(https://i.imgur.com/H5BB1V3.png)", "image-rendering": "pixelated", "position": "relative", "animation": "fade-in 700ms"}>
       {App.KL.Game.Phase.Draft.draw.background}
@@ -124,7 +126,7 @@ App.KL.Game.Phase.Draft.draw.main(
         </header>
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
           <div style={"display": "flex", "padding": "4px"}>
-            { App.KL.Game.Phase.Draft.draw.main.middle(allies, page, tab, user) }
+            { App.KL.Game.Phase.Draft.draw.main.middle(allies, page, tab, user, filter) }
           </div>
 
           // -16 because footer height is 64px
@@ -176,6 +178,7 @@ App.KL.Game.Phase.Draft.draw.main.middle(
   page: String
   tab:  String
   user: String
+  filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
   let max = 3 // max players TODO store in game?
   let selected_hero = Maybe {
@@ -220,7 +223,7 @@ App.KL.Game.Phase.Draft.draw.main.middle(
       "display": if String.eql(page, "heroes") then "block" else "none" // page
       "animation": "fade-in 500ms"
     }>
-      {App.KL.Game.Phase.Draft.draw.card.filter("Alo")}
+      {App.KL.Game.Phase.Draft.draw.card.filter(filter)}
     </div>
 
     // MENU SELECTION
@@ -434,8 +437,10 @@ App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes,
   </div>
 
 App.KL.Game.Phase.Draft.draw.card.filter(
-  filter: String
+  filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
+  let options = Map.to_list!(filter@options) // TODO formap in DOM
+
   let inner = 
     <div style={"max-height": "100%", "width": "100%", "overflow": "auto", "padding": "15px 10%"}>
       <div style={"display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column"}>
@@ -447,7 +452,7 @@ App.KL.Game.Phase.Draft.draw.card.filter(
           "width": "100%"
           "height": "32px"
         }>
-          <input id="hero-filter" value=filter style={
+          <input id="hero-filter" value=filter@hero_name style={
             "background": "transparent"
             "border": "none"
             "color": "white"
@@ -466,8 +471,9 @@ App.KL.Game.Phase.Draft.draw.card.filter(
 
       <div>
         <ul style={"list-style": "none"}>
-          { App.KL.Game.Phase.Draft.draw.card.filter.option(true, "lorem") }
-          { App.KL.Game.Phase.Draft.draw.card.filter.option(false, "ipsum") }
+          for option in options:
+            let {text, checked} = option
+            App.KL.Game.Phase.Draft.draw.card.filter.option(checked, text)
         </ul>
       </div>
     </div>
@@ -483,7 +489,7 @@ App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DO
     else
       App.KL.Game.Phase.Draft.draw.assets.filter.check_false
   
-  <li style={"margin-bottom": "3px"}>
+  <li style={"margin-bottom": "5px"}>
     <img src=img style={
       "zoom": "2"
       "margin-right": "5px"
