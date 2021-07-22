@@ -14,8 +14,8 @@ TestSuite.show(t: TestSuite, depth: Nat): String
 
 TestSuite.show.test(name: String, result: Maybe<String>): String
   String.concat(name, case result {
-    none: ": pass"
-    some: ": fail \""|result.value|"\""
+    none: ": "|Kind.Code.color("32", "pass ✓")
+    some: ": "|Kind.Code.color("31", "fail ✗")|" \""|result.value|"\""
   })
 
 TestSuite.show.check_fail(s: TestSuite): String
