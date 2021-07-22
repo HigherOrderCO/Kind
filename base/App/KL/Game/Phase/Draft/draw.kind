@@ -187,6 +187,8 @@ App.KL.Game.Phase.Draft.draw.main.middle(
     get hero = App.KL.Game.Hero.get_by_id(hero_id)
     return hero
   }
+  
+  let hero_list = App.KL.Game.Phase.Draft.Filter.apply(App.KL.Game.Hero.list, filter)
 
   <div style={"display": "contents"}>
     
@@ -239,7 +241,7 @@ App.KL.Game.Phase.Draft.draw.main.middle(
       "margin": "0 10px"
       "padding-top": "4px" // because of negative margin
     }>
-      for card in [App.KL.Game.Phase.Draft.draw.portrait.hero(hero, selected_hero) for hero in App.KL.Game.Hero.list]:
+      for card in [App.KL.Game.Phase.Draft.draw.portrait.hero(hero, selected_hero, filter) for hero in hero_list]:
         card
     </div>
   </div>
@@ -452,7 +454,7 @@ App.KL.Game.Phase.Draft.draw.card.filter(
           "width": "100%"
           "height": "32px"
         }>
-          <input id="hero-filter" value=filter@hero_name style={
+          <input id="HF" value=filter@hero_name style={
             "background": "transparent"
             "border": "none"
             "color": "white"
@@ -488,14 +490,14 @@ App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DO
       App.KL.Game.Phase.Draft.draw.assets.filter.check_true
     else
       App.KL.Game.Phase.Draft.draw.assets.filter.check_false
-  
-  <li style={"margin-bottom": "5px"}>
-    <img src=img style={
+  let id = "FC" | text
+  <li id=id style={"margin-bottom": "5px"}>
+    <img id=id src=img style={
       "zoom": "2"
       "margin-right": "5px"
       "vertical-align": "middle"
     }></img>
-    <span style={"color": "white", "text-transform": "uppercase"}>text</span>
+    <span id=id style={"color": "white", "text-transform": "uppercase"}>text</span>
   </li>
 
 App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: Nat, background: String, inner: DOM): DOM
@@ -512,7 +514,11 @@ App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: 
     {inner}
   </div>
 
-App.KL.Game.Phase.Draft.draw.portrait.hero(hero: App.KL.Game.Hero, selected_hero: Maybe<App.KL.Game.Hero>): DOM
+App.KL.Game.Phase.Draft.draw.portrait.hero(
+  hero: App.KL.Game.Hero, 
+  selected_hero: Maybe<App.KL.Game.Hero>, 
+  filter: App.KL.Game.Phase.Draft.Filter
+): DOM
   let fator = 2
   let bt = 2
   let width = 44

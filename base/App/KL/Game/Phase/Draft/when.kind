@@ -8,8 +8,13 @@ App.KL.Game.Phase.Draft.when(
   let room = String.take(16, Crypto.Keccak.hash(local@room))
 
   case event {
+    input: 
+      switch String.starts_with(event.id) {
+        "HF": // HF = hero-filter = name of hero to filter
+          let local = local@filter <- filter@hero_name <- event.text
+          App.set_local!(App.KL.State.Local.game(local))
+      } default App.pass!
     mouse_click:
-      log(event.id)
       switch String.starts_with(event.id) {
         "C" : // Set initial position 
           let coord_nat = String.drop(1, event.id)
@@ -45,6 +50,17 @@ App.KL.Game.Phase.Draft.when(
               "red" : App.KL.Game.Team.red
             } default App.KL.Game.Team.neutral
             App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_team.serial(team))
+        "FC": // FC = filter-class = hero class to filter
+          let class = String.drop(2, event.id)
+          let options = local@filter@options
+          let option = options{class}
+          case option {
+            none: App.pass!
+            some:
+              let new_options = options{class} <- Bool.not(option.value)
+              let local = local@filter <- local@filter@options <- new_options
+              App.set_local!(App.KL.State.Local.game(local))
+          }
         "user-card":
           let new_page = if String.eql(local@page, "heroes") then "users" else "heroes"
           let local    = local@page <- new_page
