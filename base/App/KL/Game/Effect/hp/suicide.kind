@@ -1,0 +1,28 @@
+App.KL.Game.Effect.hp.suicide : App.KL.Game.Effect<I32>
+
+  App.KL.Game.Effect { 
+    get caster = App.KL.Game.Effect.board.creature.caster
+    case caster { 
+      none:
+        App.KL.Game.Effect { return +0#32 }
+      some:
+        App.KL.Game.Effect { 
+          get board = App.KL.Game.Effect.board.get
+          get center = App.KL.Game.Effect.coord.get_center
+          let complete_purge = []
+          let purged = caster.value@status <- complete_purge
+          let new_board = App.KL.Game.Board.Creature.set(center, purged, board)
+          let hero_hp = purged@hp
+          let res = App.KL.Game.Board.Creature.change_hp(I32.neg(hero_hp), center, new_board)
+          let dhp = res@fst
+          let newer_board = res@snd
+          let newer_board = newer_board@fst
+          App.KL.Game.Effect.board.set(newer_board)
+          case res@snd@snd as dead {
+            none: App.KL.Game.Effect.pass
+            some: App.KL.Game.Effect.cemetery.add(dead.value)
+          }
+          return dhp
+        }
+    }
+  }
