@@ -26,13 +26,13 @@ App.ATB.draw.draft.button_okay(id: String, content: String): DOM
     content
   </button>
 
-function (element: App.ATB.Hero.hero) : DOM
+function234 (element: App.ATB.Hero.hero_type) : DOM
   App.ATB.draw.draft.button_char(element@name, "lightgrey", element@char_id)
 
 App.ATB.draw.draft.base(color_1: String, color_c2: String, skills: String) : DOM
-let list_heroes = App.ATB.Hero.list_hero :: List<App.ATB.Hero.hero>
+let list_heroes = App.ATB.Hero.list_hero :: List<App.ATB.Hero.hero_type>
 //let list_heroes_dom = List.map!!((element) App.ATB.draw.draft.button_char(element@name, "lightgrey", element@char_id), list_heroes)
-let list_heroes_dom = List.map!!(function, list_heroes)
+let list_heroes_dom = List.map!!(function234, list_heroes)
 let style = {
       "width": "100%", 
       "height": "100%",

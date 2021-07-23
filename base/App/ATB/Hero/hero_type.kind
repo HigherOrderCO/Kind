@@ -1,4 +1,4 @@
-type App.ATB.Hero.hero {
+type App.ATB.Hero.hero_type {
     new(
         char_id: String
         name: String
