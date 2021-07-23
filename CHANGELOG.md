@@ -1,3 +1,8 @@
+### Kind 1.0.87
+
+- Add DOM formap
+- Now you can pass props in DOM in camelCase. It will then transform it to kebab-case. Util for properties like stroke-width in svg tag.
+
 ### Kind 1.0.85
 
 - Optimize BBT.for
