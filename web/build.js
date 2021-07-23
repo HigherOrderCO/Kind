@@ -6,6 +6,8 @@ var {exec, execSync} = require("child_process");
 var code_dir = __dirname+"/src";
 var kind_dir = __dirname+"/../base";
 
+// TODO: remove from "src/apps" the ones that are no longer in "base/Apps"
+
 process.chdir(code_dir);
 var all_js_apps   = fs.readdirSync("apps").filter(x => x.startsWith("App."));
 process.chdir(kind_dir);
