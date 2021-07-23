@@ -140,7 +140,7 @@ App.KL.Game.Phase.Draft.draw.main(
           <div style={"display": "flex", "height": "50%", "flex": "1"}>
             <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
             <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left></img></div>
-            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img style={"image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
+            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img id="Ready" style={"image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
             <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right></img></div>
             <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
           </div>
@@ -331,7 +331,6 @@ App.KL.Game.Phase.Draft.draw.card.hero(
   hero: Maybe<App.KL.Game.Hero>
   id: String
 ): DOM
-  let img   = "https://i.imgur.com/T49eUdC.png"
   <div id=id style={"height": "100%"}>
     // draw top of card
     <div id=id style={
@@ -339,8 +338,8 @@ App.KL.Game.Phase.Draft.draw.card.hero(
     }>
       {
         case hero {
-          none: App.KL.Game.Phase.Draft.draw.card.hero.img("", "", "", id) // TODO change to none
-          some: App.KL.Game.Phase.Draft.draw.card.hero.img(hero.value@name, "TYPE", img, id) // TODO change type
+          none: App.KL.Game.Phase.Draft.draw.card.hero.img("", none, "", id) // TODO change to none
+          some: App.KL.Game.Phase.Draft.draw.card.hero.img(hero.value@name, hero.value@role, hero.value@draw@b64_img(true, 0), id) // TODO change type
         }
       }
     </div>
@@ -360,7 +359,11 @@ App.KL.Game.Phase.Draft.draw.card.hero(
   </div>
 
 // draw card's top
-App.KL.Game.Phase.Draft.draw.card.hero.img(name: String, type: String, img: String, id: String): DOM
+App.KL.Game.Phase.Draft.draw.card.hero.img(name: String, role: Maybe<App.KL.Game.Hero.Role>, img: String, id: String): DOM
+  let role = case role {
+    none: "" // TODO what put here?
+    some: App.KL.Game.Hero.Role.to_string(role.value)
+  }
   <div id=id style={"position": "relative", "height": "100%"}> 
     <div id=id style={
       "position": "absolute", 
@@ -393,7 +396,7 @@ App.KL.Game.Phase.Draft.draw.card.hero.img(name: String, type: String, img: Stri
     }>
       <span id=id style={"color": "white", "text-transform": "uppercase"}>name</span>
       <img id=id src=App.KL.Game.Phase.Draft.draw.assets.card.name_divisor style={"width": "50%"}></img>
-      <span id=id style={"color": "#871df0", "font-size": "small", "text-transform": "uppercase"}>type</span>
+      <span id=id style={"color": "#871df0", "font-size": "small", "text-transform": "uppercase"}>role</span>
     </div>
   </div>
 
@@ -562,56 +565,56 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
 // ROOM NUMBER AND READY BUTTON
 // ==========================
 
-// display room text, and ready/cancel button
-App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
-  info = players{user}
-  let ready_count = App.KL.Game.Player.ready_count(players, room, user) // Pair(Total players, ready check)
-  let total = Nat.show(ready_count@fst)
-  let count = Nat.show(ready_count@snd)
-  let {color, text} = 
-    case info {
-      none: {"#4CAF50", "Ready"}
-      some: 
-        let player = info.value
-        if player@ready then
-          {"gray",    count|"/"|total|"\n\n Cancel"}
-        else
-          {"#4CAF50", "Ready"}
-  }
-  <div style={ 
-    "width": "30%"
-    "height": "auto"
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-    "flex-direction": "column"
-  }>
-    <div style={ 
-      "background-color": "#d6dadc"
-      "color": "black"
-      "padding": "8px"
-      "text-align": "center"
-      "border-radius": "5px"
-      "margin-bottom": "10px"
-      "font-size": "32px"
-    }>
-      room
-    </div>
-    <button id="Ready" style={ 
-      "background-color": color
-      "border": "none"
-      "color": "white"
-      "padding": "32px"
-      "text-align": "center"
-      "text-decoration": "none"
-      "display": "inline-block"
-      "font-size": "32px"
-      "margin": "4px 2px"
-      "cursor": "inherit"
-    }>
-      text
-    </button>
-  </div>
+// // display room text, and ready/cancel button
+// App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+//   info = players{user}
+//   let ready_count = App.KL.Game.Player.ready_count(players, room, user) // Pair(Total players, ready check)
+//   let total = Nat.show(ready_count@fst)
+//   let count = Nat.show(ready_count@snd)
+//   let {color, text} = 
+//     case info {
+//       none: {"#4CAF50", "Ready"}
+//       some: 
+//         let player = info.value
+//         if player@ready then
+//           {"gray",    count|"/"|total|"\n\n Cancel"}
+//         else
+//           {"#4CAF50", "Ready"}
+//   }
+//   <div style={ 
+//     "width": "30%"
+//     "height": "auto"
+//     "display": "flex"
+//     "justify-content": "center"
+//     "align-items": "center"
+//     "flex-direction": "column"
+//   }>
+//     <div style={ 
+//       "background-color": "#d6dadc"
+//       "color": "black"
+//       "padding": "8px"
+//       "text-align": "center"
+//       "border-radius": "5px"
+//       "margin-bottom": "10px"
+//       "font-size": "32px"
+//     }>
+//       room
+//     </div>
+//     <button id="Ready" style={ 
+//       "background-color": color
+//       "border": "none"
+//       "color": "white"
+//       "padding": "32px"
+//       "text-align": "center"
+//       "text-decoration": "none"
+//       "display": "inline-block"
+//       "font-size": "32px"
+//       "margin": "4px 2px"
+//       "cursor": "inherit"
+//     }>
+//       text
+//     </button>
+//   </div>
 
 // BOTTOM MENU FOR CHOOSING HEROES 
 // ======================
