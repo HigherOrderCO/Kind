@@ -1,7 +1,7 @@
 App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
   let name = "Kenlua"
 
-  let draw = (pose)
+  let vbox_img = (pose)
     let idle_spr = VoxBox.assets.fe7.assassin_sword.1
     let walk_ani = [
       VoxBox.assets.fe7.assassin_sword.1
@@ -166,10 +166,16 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
     }
     //App.KL.Game.Hero.Kenlua.Assets.vbox_idle
 
-  let picture = (bool, time)
-    App.KL.Game.Hero.Kenlua.Assets.base64_idle
+  let b64_portrait = (bool, time)
+    App.KL.Game.Hero.Kenlua.Assets.b64_portrait
+
+  let b64_img = (bool, time)
+    App.KL.Game.Hero.Kenlua.Assets.b64_portrait
+
 
   let height = 20 :: I32 // Distance from center of image to the top of it
+
+  let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
 
   let max_hp = 16 :: I32
 
@@ -204,9 +210,11 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
       5 // Difficulty
   ))
 
+  let role = some(App.KL.Game.Hero.Role.melee)
+
   let description = "Kenlua is a fragile, but nimble assassin with great mobility and high damage."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
 
 
 // SKILLS

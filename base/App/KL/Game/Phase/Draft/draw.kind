@@ -531,7 +531,7 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
   }
   
   let id = "H" | hero@name
-  let portrait = hero@picture(true, 0)
+  let portrait = hero@draw@b64_portrait(true, 0)
   let inner =
     <div id=id style={"width": "100%", "padding": "0 " | Nat.show(bt * fator) | "px", "display": "flex", "flex-direction": "column", "align-items": "center"}>
       <img id=id style={"width": "100%", "image-rendering": "pixelated", "transform": "translateY(-"|Nat.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
@@ -651,7 +651,7 @@ App.KL.Game.Phase.Draft.draw.selection(
   hero: App.KL.Game.Hero
 ): DOM
    
-  image = hero@picture(true, 0) //TODO placeholder
+  image = hero@draw@b64_portrait(true, 0) //TODO placeholder
   //assets = hero@assets
   //image  = assets@base64
 

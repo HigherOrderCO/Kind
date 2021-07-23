@@ -1,13 +1,18 @@
 App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let name = "Zoio"
 
-  let draw = (pose)
+  let vbox_img = (pose)
     {none, App.KL.Game.Hero.Zoio.Assets.vbox_idle}
 
-  let picture = (bool, time)
-    App.KL.Game.Hero.Zoio.Assets.base64_idle
+  let b64_portrait = (bool, time)
+    App.KL.Game.Hero.Zoio.Assets.b64_portrait
+  
+  let b64_img = (bool, time)
+    App.KL.Game.Hero.Zoio.Assets.b64_img
 
   let height = 20 :: I32 // Distance from center of image to the top of it
+
+  let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
 
   let max_hp = 18 :: I32
 
@@ -39,9 +44,11 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
       3 // Difficulty
   ))
 
+  let role = some(App.KL.Game.Hero.Role.ranged)
+
   let description = "Zoio is a fragile mage that has no range limitations in his Eye Beam. However, his movement is extremely slow."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
 
 App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 

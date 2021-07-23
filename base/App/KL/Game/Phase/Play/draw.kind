@@ -172,7 +172,7 @@ App.KL.Game.Phase.Play.draw.cast(main_skill: Bool, cast: Maybe<App.KL.Game.Cast>
     let dom = 
     <div style=main_style>
       <div>
-        <img src= hero@picture(false,0) style=
+        <img src= hero@draw@b64_portrait(false,0) style=
         {
           "transform": "scale("| if main_skill then "2" else "1"|")",
           "image-rendering": "pixelated"
@@ -389,7 +389,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
     some:
       let hero = creature.value@hero
       let draw_pose = App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game, coord)
-      let {draw_coord, draw_voxbox} = hero@draw(draw_pose)
+      let {draw_coord, draw_voxbox} = hero@draw@vbox_img(draw_pose)
       let draw_coord = draw_coord <> coord
       //let aux = I32.to_u32(App.KL.Constants.hexagon_radius) //U32
       //let cy = cy - (aux * 2) //U32
@@ -398,7 +398,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       let img_x = cx - (128::U32)
       let img_y = cy - (128::U32)
-      let height = I32.to_u32(hero@height)
+      let height = I32.to_u32(hero@draw@height)
       let img = VoxBox.Draw.image(img_x, img_y, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 
@@ -457,7 +457,7 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
       "display": "flex"
       "align-items": "center"
     }>
-      <img style={"margin": "4px"} src=hero@picture(false,0)></img>
+      <img style={"margin": "4px"} src=hero@draw@b64_portrait(false,0)></img>
       <span style={"margin-left": "4px"}>"[" | letter | "] " | skill@name</span>
     </div>)
 
