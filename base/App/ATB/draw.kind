@@ -5,7 +5,7 @@ App.ATB.draw (canvas: VoxBox) : App.Draw<App.ATB.State>
     open state.local
     case state.local.phase{
         room: App.ATB.draw.room(state.local.phase.status@room_id)
-        draft: App.ATB.draw.draft
+        draft: App.ATB.draw.draft(state.local.phase.status@char_id)
         play: DOM.vbox({}, {}, canvas)
     }
     //DOM.vbox({}, {}, canvas)
