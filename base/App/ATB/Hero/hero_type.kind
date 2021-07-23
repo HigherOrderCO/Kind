@@ -1,0 +1,8 @@
+type App.ATB.Hero.hero_type {
+    new(
+        char_id: String
+        name: String
+        hp_max: Nat
+        hp_atual: Nat
+    )
+}
