@@ -7,8 +7,3 @@ App.ATB.when : App.When<App.ATB.State>
        draft : App.ATB.when.draft(state.local.phase.status, event, state)
        play :  App.pass!
    }
- //  case event {
-   //    input : switch (String.eql(event.id)) {
-     //      "room_id" : App.set_local!(App.ATB.State.local.new(App.ATB.Stage.room(event.text)))
-     //  } default App.pass!
-  // } default App.pass!

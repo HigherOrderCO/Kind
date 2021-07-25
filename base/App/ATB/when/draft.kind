@@ -1,14 +1,12 @@
-App.ATB.when.draft(status : App.ATB.Stage.draft) : App.When<App.ATB.State>
+App.ATB.when.draft(status : App.ATB.Stage.status_draft) : App.When<App.ATB.State>
    (event, state) 
    case event {
-       input : switch (String.eql(event.id)) {
-           "room_id": 
-           let status = App.ATB.Stage.room(status@room_id <- event.text)
-           App.set_local!(App.ATB.State.local.new(status))
-       } default App.pass!
        mouse_click : switch (String.eql(event.id)) {
-           "ready" : 
-           let status = App.ATB.Stage.draft(App.ATB.Stage.status_draft.new(event.id))
+           "char_fst" : 
+           let status = App.ATB.Stage.draft(App.ATB.Stage.status_draft.new(event.id,Maybe.some!("char_fst")))
+           App.set_local!(App.ATB.State.local.new(status))
+           "char_snd" : 
+           let status = App.ATB.Stage.draft(App.ATB.Stage.status_draft.new(event.id,Maybe.some!("char_snd")))
            App.set_local!(App.ATB.State.local.new(status))
        } default App.pass!
    } default App.pass!
