@@ -6,13 +6,15 @@ type App.KL.Game.Phase.Draft.Filter {
 }
 
 App.KL.Game.Phase.Draft.Filter.default: App.KL.Game.Phase.Draft.Filter
+  let roles = {}
+
+  for role in App.KL.Game.Hero.Role.all with roles:
+    let str = App.KL.Game.Hero.Role.show(role)
+    roles{str} <- false
+  
   App.KL.Game.Phase.Draft.Filter.new(
     "",
-    {
-      "healer": false,
-      "mage": false,
-      "thief": false
-    }
+    roles
   )
 
 App.KL.Game.Phase.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: App.KL.Game.Phase.Draft.Filter): List<App.KL.Game.Hero>
@@ -26,12 +28,13 @@ App.KL.Game.Phase.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: App
     }, // text
     {
       BBT.for!!(filter@options)!(false, (k, v, z) v || z),
-      ((hero) 
-          true
-        // case filter@options{"healer"} as filter {
-        //   none: false
-        //   some: filter.value
-        // }
+      ((hero)
+        Maybe {
+          get role = hero@role
+          let role = App.KL.Game.Hero.Role.show(role)
+          get filter = filter@options{role}
+          return filter
+        } <> false
       ) :: App.KL.Game.Hero -> Bool
     } // class
   ]

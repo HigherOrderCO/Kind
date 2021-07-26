@@ -362,7 +362,7 @@ App.KL.Game.Phase.Draft.draw.card.hero(
 App.KL.Game.Phase.Draft.draw.card.hero.img(name: String, role: Maybe<App.KL.Game.Hero.Role>, img: String, id: String): DOM
   let role = case role {
     none: "" // TODO what put here?
-    some: App.KL.Game.Hero.Role.to_string(role.value)
+    some: App.KL.Game.Hero.Role.show(role.value)
   }
   <div id=id style={"position": "relative", "height": "100%"}> 
     <div id=id style={

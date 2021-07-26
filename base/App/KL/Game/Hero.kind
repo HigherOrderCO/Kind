@@ -68,7 +68,10 @@ type App.KL.Game.Hero.Role {
   tank
 }
 
-App.KL.Game.Hero.Role.to_string(role: App.KL.Game.Hero.Role): String
+App.KL.Game.Hero.Role.all: List<App.KL.Game.Hero.Role>
+  [App.KL.Game.Hero.Role.melee, App.KL.Game.Hero.Role.ranged, App.KL.Game.Hero.Role.specialist, App.KL.Game.Hero.Role.support, App.KL.Game.Hero.Role.tank]
+
+App.KL.Game.Hero.Role.show(role: App.KL.Game.Hero.Role): String
   case role {
     melee: "Melee DPS"
     ranged: "Ranged DPS"
