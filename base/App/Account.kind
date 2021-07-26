@@ -81,8 +81,8 @@ App.Account.draw: App.Draw<App.Account.State>
       open state; open state.global
       let userlist = Map.to_list!(state.global.usermap)
       let keylist = Map.to_list!(state.global.keymap)
-      Stringifier.run!(List.stringifier!!, userlist)
-      |"\n"|Stringifier.run!(List.stringifier!!, keylist)
+      List.show!(Pair.show!!((x) x, (x) x), userlist)
+      |"\n"|List.show!(Pair.show!!((x) x, List.show!(Pair.show!!((x) x, (x) x))), keylist)
     </p>
   </div>
 
