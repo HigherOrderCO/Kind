@@ -224,10 +224,10 @@ App.KL.Game.Hero.Kenlua.hero.Skills.dash(range: I32, dmg: I32, ap_cost: I32): Ap
     if moved then App.KL.Game.Effect {
       App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, coords)
       App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [target])
-      App.KL.Game.Effect.hp.damage_at(dmg, target)
+      App.KL.Game.Effect.hp.sacrifice(dmg)
       App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), coords)
       return unit
-    } else App.KL.Game.Effect.fail("but couldn't move")
+    } else App.KL.Game.Effect.fail("unable to move")
   }
 
 App.KL.Game.Hero.Kenlua.hero.Skills.stare(block_duration: I32): App.KL.Game.Effect<Unit>

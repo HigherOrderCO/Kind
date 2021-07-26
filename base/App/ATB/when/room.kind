@@ -8,7 +8,7 @@ App.ATB.when.room(status : App.ATB.Stage.status_room) : App.When<App.ATB.State>
        } default App.pass!
        mouse_click : switch (String.eql(event.id)) {
            "ready" : 
-           let status = App.ATB.Stage.draft(App.ATB.Stage.status_draft.new(event.id))
+           let status = App.ATB.Stage.draft(App.ATB.Stage.status_draft.new(event.id,Maybe.none!))
            App.set_local!(App.ATB.State.local.new(status))
        } default App.pass!
    } default App.pass!

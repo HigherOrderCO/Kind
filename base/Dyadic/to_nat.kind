@@ -1,0 +1,3 @@
+Dyadic.to_nat(d: Dyadic): Nat
+  open d
+  Int.to_nat(d.num) / Nat.pow(2, d.exp)

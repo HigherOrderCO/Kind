@@ -1,2 +1,2 @@
-Test: IO<Unit>
-  Crypto.WOTS.example
+Test: _
+  Litereum.main(42001)

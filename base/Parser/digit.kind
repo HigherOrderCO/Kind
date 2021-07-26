@@ -25,3 +25,4 @@ Parser.digit: Parser(Nat)
         '9': Parser.Reply.value!(pst, 9)
       } default Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Not a digit.")
   }
+
