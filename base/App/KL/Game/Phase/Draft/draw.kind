@@ -109,7 +109,7 @@ App.KL.Game.Phase.Draft.draw.main(
   user: String,
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
-  <div style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/H5BB1V3.png)", "image-rendering": "pixelated", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
+  <div style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "image-rendering": "pixelated", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
       {App.KL.Game.Phase.Draft.draw.background}
 
       <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>

@@ -11,10 +11,10 @@ App.KL.Constants.board_extra_width : I32
   0
 
 App.KL.Constants.center_x : I32
-  228
+  300
 
 App.KL.Constants.center_y : I32
-  176
+  200
 
 App.KL.Constants.draft_hexagon_radius: U32
   8

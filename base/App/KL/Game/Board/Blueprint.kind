@@ -2,6 +2,8 @@ type App.KL.Game.Board.Blueprint {
   new(
     terrains: List<Pair<Hexagonal.Axial, App.KL.Game.Terrain>>
     tokens: List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
+    base: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+    initial: BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
   )
 }
 
@@ -24,7 +26,7 @@ App.KL.Game.Board.Blueprint.build.tokens(
       {Hexagonal.Axial.new(x.fst@fst, x.fst@snd), x@snd}) :: Pair<Pair<I32,I32>, App.KL.Game.Token> -> Pair<Hexagonal.Axial, App.KL.Game.Token>
   
   [transform(x) for x in tokens]
-  
+
 
 App.KL.Game.Board.Blueprint.build.board(
   blueprint: App.KL.Game.Board.Blueprint
@@ -44,3 +46,11 @@ App.KL.Game.Board.Blueprint.build.board(
     App.KL.Game.Board.push(coord, entity, board)
   
   board
+
+App.KL.Game.Board.Blueprint.build.initial(
+  coords: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+): BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
+  let result = BBT.tip!!
+  for coord in coords with result:
+    BBT.insert!!(App.KL.Game.Team.cmp, coord@fst, coord@snd, result)
+  result

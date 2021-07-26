@@ -37,7 +37,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   }>
     // {App.KL.Game.Phase.Play.draw.skills_menu(game)}
     <div style={ 
-      "width": "calc(100% - 200px)", 
+      "width": "100%", 
       "height": "100%", 
       "display": "flex", 
       "flex-direction": "column", 

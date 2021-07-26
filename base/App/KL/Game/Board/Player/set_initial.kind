@@ -1,0 +1,17 @@
+App.KL.Game.Board.Player.set_initial(
+  user: String, 
+  player: App.KL.Game.Player,
+  coord: Hexagonal.Axial,
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+  Maybe {
+    get hero_id   = Maybe.map!!(Nat.to_u8, player@hero_id)
+    let team      = player@team
+    let terrain   = App.KL.Game.Team.terrain(team)
+    let entity    = App.KL.Game.Entity.terrain(terrain)
+    let board     = App.KL.Game.Board.push(coord, entity, board)
+    get creature  = App.KL.Game.Creature.create(hero_id, some(user), team)
+    log("HERE")
+    let entity    = App.KL.Game.Entity.creature(creature)
+    return App.KL.Game.Board.push(coord, entity, board)
+  } <> board

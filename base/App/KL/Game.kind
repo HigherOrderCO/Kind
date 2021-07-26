@@ -36,6 +36,7 @@ type App.KL.Game {
     moment: App.KL.Game.Moment       // current moment: preparation or animation?
     players: Map<App.KL.Game.Player> // human players connected to board creatures
     board: App.KL.Game.Board         // the game map, including tiles, creatures, objects
+    blueprint: App.KL.Game.Board.Blueprint // initial blueprint
     casts: List<App.KL.Game.Cast>    // all skills casted on the current turn
     score: App.KL.Game.Score
     cemetery: App.KL.Game.Cemetery
@@ -59,7 +60,8 @@ App.KL.Game.start: App.KL.Game
   let casts = []
   let score = App.KL.Game.Score.new({0,0}, App.KL.Constants.max_score)
   let cemetery = []
-  App.KL.Game.new(phase, turn, moment, players, board, casts, score, cemetery)
+  let blueprint = App.KL.Game.Board.Boards.arena
+  App.KL.Game.new(phase, turn, moment, players, board, blueprint, casts, score, cemetery)
 
 // Render function
 // ===============

@@ -4,6 +4,13 @@ type App.KL.Game.Team {
   neutral
 } deriving (serializer, deserializer)
 
+App.KL.Game.Team.terrain(team: App.KL.Game.Team): App.KL.Game.Terrain
+  case team {
+    red:     App.KL.Game.Terrain.new(7, none) // App.KL.Game.Field.Ind.field.4
+    blue:    App.KL.Game.Terrain.new(5, none) // App.KL.Game.Field.Ind.field.2
+    neutral: App.KL.Game.Terrain.new(8, none) // App.KL.Game.Field.Ind.field.1
+  }
+
 App.KL.Game.Team.eql(a: App.KL.Game.Team, b: App.KL.Game.Team): Bool
   case a b {
     red     red     : true
@@ -18,3 +25,7 @@ App.KL.Game.Team.show(team: App.KL.Game.Team): String
     blue: "blue"
     neutral: "neutral"
   }
+
+App.KL.Game.Team.cmp(x: App.KL.Game.Team, y: App.KL.Game.Team): Cmp
+  String.cmp(App.KL.Game.Team.show(x), App.KL.Game.Team.show(y))
+
