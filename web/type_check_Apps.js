@@ -7,12 +7,18 @@ process.chdir(kind_dir);
 var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
 
 // node type_check_Apps all
-if (process.argv[2].trim() === "all") {
-  let res = type_check_apps();
-  exit(res["fail"]);
-} else { // node type_check_Apps App.[name]
-  let res = type_check_app(process.argv[2]);
-  exit(res["fail"]);
+if (process.argv[2]){
+  if (process.argv[2].trim() === "all") {
+    let res = type_check_apps();
+    exit(res["fail"]);
+  } else { // node type_check_Apps App.[name]
+    let res = type_check_app(process.argv[2]);
+    exit(res["fail"]);
+  }
+} else {
+  console.log("A parameter must be specified.");
+  console.log("- node type_check_Apps App.[name]");
+  console.log("- node type_check_Apps all");
 }
 
 // error: Array(String)

@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "test-apps": "node type_check_Apps.js"
+    "build": "webpack"
   },
   "author": "",
   "license": "MIT",
