@@ -13,7 +13,6 @@
     "inferno": "^7.4.6",
     "inferno-hyperscript": "^7.4.6",
     "isomorphic-ws": "^4.0.1",
-    "js-beautify": "^1.14.0",
     "kind-lang": "^1.0.52",
     "nano-ethereum-signer": "^0.1.2"
   },
