@@ -41,7 +41,7 @@ function compile_app(name) {
   var name = "App."+name.slice(0,-5);
   console.log("- " + name);
   try {
-    var code = String(execSync("kind "+name+" --js --module | js-beautify-temp-fix", { maxBuffer: 1024 * 1024 * 1024}));
+    var code = String(execSync("kind "+name+" --js --module | js-beautify", {maxBuffer: 1024 * 1024 * 1024}));
   } catch (e) {
     console.log("Couldn't compile " + file + ". Error:");
     console.log(e.toString());

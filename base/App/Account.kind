@@ -1,0 +1,244 @@
+// modificar o estado para incluir quais informações são públicas e quais são dos usuários
+// usar tipos diferentes para tipos de informação diferentes
+// enunciar todas as propriedades que a gente gostaria que o sistema tivesse
+
+// qualquer outro usuário, usando apenas informações públicas e suas informações privadas, não consegue modificar a conta de um usuário
+// qualquer outro usuário, usando apenas informações públicas, consegue identificar qualquer usuário
+// o usuário mantem acesso a conta dele contanto que tenha pelo menos um dispositivo
+
+App.Account.State: App.State
+  App.State.new(App.Account.State.local, App.Account.State.global)
+
+type App.Account.State.global {
+  new(
+    usermap: Map<App.Account.Username>
+    keymap: Map<List<Pair<App.Account.Device.Name, App.Account.Device.Key>>>
+  )
+}
+
+type App.Account.State.local { 
+  new( 
+    test: String
+  )
+  //new(
+}
+
+App.Account.Username: Type
+  String
+
+App.Account.Device.Key: Type
+  String
+
+App.Account.Device.Name: Type
+  String
+
+type App.Account.Global.Event {
+  register(name: String)
+} deriving (serializer, deserializer)
+
+App.Account.Global.Event.serialize_post(ev: App.Account.Global.Event): String
+  Bits.hex.encode(Serializer.run!(App.Account.Global.Event.serializer, ev))
+
+App.Account.Global.Event.deserialize_post(hex: String): Maybe<App.Account.Global.Event>
+  Deserializer.run!(App.Account.Global.Event.deserializer, Bits.hex.decode(hex))
+
+App.Account.Global.Event.register.serial(name: String): String
+  App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(name))
+
+
+App.Account.room: String
+  "alskdkapdçadçsçdkakslfjallsdkaçdkslslflqlqllekekdksllsfjslakk"
+
+App.Account: App<App.Account.State>
+  App.new<App.Account.State>(
+    App.Account.init
+    App.Account.draw
+    App.Account.when
+    App.Account.tick
+    App.Account.post
+  )
+
+App.Account.init: App.Init<App.Account.State>
+  App.Store.new<App.Account.State>(App.Account.State.local.new("teste"), App.Account.State.global.new(Map.new!, Map.new!))
+
+App.Account.draw: App.Draw<App.Account.State>
+  (state)
+  open state; open state.global;
+  <div>
+    <div>"Create an Account"</div>
+  </div>
+
+App.Account.when: App.When<App.Account.State>
+  (event, state)
+  case event { 
+    init: IO { 
+      App.watch!(App.Account.room)
+    }
+//    mouse_click:
+//      open state
+//      IO {
+//        App.new_post!(App.Account.room, App.Account.Global.Event.inc.serial)
+//      }
+  } default App.pass!
+
+//Tick not used
+App.Account.tick: App.Tick<App.Account.State>
+  App.no_tick(App.Account.State)
+
+//Post
+App.Account.post: App.Post<App.Account.State>
+ (time, room, addr, data, glob)
+ case App.Account.Global.Event.deserialize_post(data) as post {
+   none: glob
+   some: case post.value {
+     register:
+       glob
+//       let count = glob@count
+//       let new_count = 1 + count
+//       let new_global = glob@count <- new_count
+//       new_global
+   }
+ }
+
+// Global post
+//App.KL.Global.post: App.Post<App.KL.State>
+//  (time, room, addr, data, glob)
+//  case App.KL.Global.Event.deserialize_post(data) as post {
+//    none: glob
+//    some: case post.value {
+//      void: glob
+//      game:
+//        let game = glob@game <> App.KL.Game.start
+//        glob@game <- some(App.KL.Game.post(time, room, addr, post.value.event, game))
+//    }
+//  }
+  
+// Design/Especificação
+// - definir estado - OK
+// - definir transições de estado - OK
+// - definir invariantes
+
+// global
+// criar conta (username, nome pro dispositivo) OK
+// autorizar dispositivo (outros dispositivo, nome pro dispositivo)
+// revogar dispositivo (outro dispositivo, nome do dispositivo revogado)
+
+// local
+// sign out (senha, na primeira vez)
+// sign in (username, senha (PIN))
+// trocar o pin
+
+
+//App.Account.Device: Type
+//  Pair<Nat, Nat>
+//
+//App.Account.Device.eql: App.Account.Device -> App.Account.Device -> Bool
+//  Nat.eql
+//
+//App.Account.Devices: Type
+//  List<App.Account.Device>
+//
+//App.Account.Username: Type
+//  Nat
+//
+//App.Account.Username.eql: App.Account.Username -> App.Account.Username -> Bool
+//  Nat.eql
+//
+//App.Account.State.model: Type
+//  List<Pair<App.Account.Username, App.Account.Devices>>
+//
+////[{3, [0, 1, 2, 4]}, {3, [0, 1, 2]}]
+//
+//App.Account.created(
+//  state: App.Account.State.model
+//  username: App.Account.Username
+//): Bool
+//  let check_user = (p)
+//    let u = Pair.fst!!(p)
+//    App.Account.Username.eql(username, u)
+//  List.found!(check_user, state)
+//
+//App.Account.deleted(
+//  state: App.Account.State.model
+//  username: App.Account.Username
+//): Bool
+//  let check_user = (p)
+//    let u = Pair.fst!!(p)
+//    App.Account.Username.eql(username, u)
+//  let account = List.find!(check_user, state)
+//  case account {
+//    none: false
+//    some:
+//      open account.value
+//      Nat.eql(List.length!(account.value.snd), 0)
+//  }
+//
+//App.Account.get_devices(
+//  state: App.Account.State.model
+//  username: App.Account.Username
+//): App.Account.Devices
+//  case state {
+//    nil:
+//      []
+//    cons:
+//      open state.head
+//      if App.Account.Username.eql(username, state.head.fst) then
+//        state.head.snd
+//      else
+//        App.Account.get_devices(state.tail, username)
+//  }
+//
+//App.Account.create_account(
+//  state: App.Account.State.model
+//  username: App.Account.Username
+//  device: App.Account.Device
+//): App.Account.State.model
+//  let owned = List.found!((p) Nat.eql(Pair.fst!!(p), username), state)
+//  case owned {
+//    false: {username, [device]} & state
+//    true: state
+//  }
+//
+//App.Account.is_device(
+//  state: App.Account.State.model
+//  username: App.Account.Username
+//  device: App.Account.Device
+//): Bool
+//  let devices = App.Account.get_devices(state, username)
+//  List.found!(App.Account.Device.eql(device), devices)
+//
+//App.Account.authorize(
+//  state: App.Account.State.model
+//  username: App.Account.Username
+//  authorizer: App.Account.Device
+//  authorized: App.Account.Device
+//): App.Account.State.model
+//  let device_ok = App.Account.is_device(state, username, authorizer)
+//  if device_ok then
+//    let devs = App.Account.get_devices(state, username)
+//    {username, authorized & devs} & state
+//  else
+//    state
+//
+//App.Account.revoke(
+//  state: App.Account.State.model
+//  username: App.Account.Username
+//  revoker: App.Account.Device
+//  revoked: App.Account.Device
+//): App.Account.State.model
+//  let device_ok = App.Account.is_device(state, username, revoker)
+//  if device_ok then
+//    let devs = App.Account.get_devices(state, username)
+//    let devs = List.filter!((x) Bool.not(App.Account.Device.eql(revoked, x)), devs)
+//    {username, devs} & state
+//  else
+//    state
+//
+//// o usuário pode perder dispositivos sem perder a conta
+//// o usuário não pode ser hackeado
+//// sem acesso aos dispositivos, nada na sua conta muda
+//
+//// App.Account.authorize([{2, [1, 2, 3]}, {1, [5, 7]}], 1, 5, 9)
+//// [{1, [1, 5, 7]}, {2, [1, 2, 3]}, {1, [5, 7]}]
+//// TODO definir quais informações cada usuário tem acesso
+//// provar que nenhum usuário consegue modificar a conta do outro
