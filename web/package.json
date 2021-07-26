@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "test-apps": "cd web; node type_check_Apps.js"
+    "test-apps": "node type_check_Apps.js"
   },
   "author": "",
   "license": "MIT",
@@ -14,6 +14,7 @@
     "inferno": "^7.4.6",
     "inferno-hyperscript": "^7.4.6",
     "isomorphic-ws": "^4.0.1",
+    "js-beautify": "^1.14.0",
     "kind-lang": "^1.0.52",
     "nano-ethereum-signer": "^0.1.2"
   },

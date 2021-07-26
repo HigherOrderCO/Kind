@@ -71,7 +71,7 @@ fs.writeFileSync("apps/index.js", index);
 console.log("Building index.js...");
 exec("npm run build", function (err, stdout, stdin) {
   if (err) {
-    console.error(err);
+    console.error(err.stack);
   } else {
     console.log("Done.");
   }
