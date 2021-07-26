@@ -16,7 +16,7 @@ App.KL.Game.Cemetery.revive(
     let id = dead@fst
     let player = players{id}
     without player: board
-    App.KL.Game.Board.PLayer.set(id, player, board)
+    App.KL.Game.Board.Player.set(id, player, board)
   board
 
 App.KL.Game.Cemetery.update(

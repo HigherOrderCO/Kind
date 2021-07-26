@@ -12,7 +12,7 @@ type App.KL.Game.Hero {
     attributes: Maybe<App.KL.Game.Hero.Attributes>
     description: String
   )
-}
+  }
 
 type App.KL.Game.Hero.Draw.Pose {
   idle
