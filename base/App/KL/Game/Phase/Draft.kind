@@ -52,7 +52,7 @@ App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>, blueprint
       log(Nat.show(index))
       get coord = List.get!(index, coord_list)
       log(Hexagonal.Axial.show(coord))
-      let board = App.KL.Game.Board.Player.set_initial(user, player, coord, board)
+      let board = App.KL.Game.Board.Player.set_initial(user, player, coord, result@fst)
       return {board, count}
     } <> {board, count}
   let board = result@fst
