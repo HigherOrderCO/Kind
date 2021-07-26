@@ -17,10 +17,9 @@ type App.Account.State.global {
 }
 
 type App.Account.State.local { 
-  new( 
-    test: String
+  new(
+    input: String
   )
-  //new(
 }
 
 App.Account.Username: Type
@@ -33,7 +32,7 @@ App.Account.Device.Name: Type
   String
 
 type App.Account.Global.Event {
-  register(name: String)
+  register(username: String, devicename: String)
 } deriving (serializer, deserializer)
 
 App.Account.Global.Event.serialize_post(ev: App.Account.Global.Event): String
@@ -42,12 +41,12 @@ App.Account.Global.Event.serialize_post(ev: App.Account.Global.Event): String
 App.Account.Global.Event.deserialize_post(hex: String): Maybe<App.Account.Global.Event>
   Deserializer.run!(App.Account.Global.Event.deserializer, Bits.hex.decode(hex))
 
-App.Account.Global.Event.register.serial(name: String): String
-  App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(name))
+App.Account.Global.Event.register.serial(username: String, devicename: String): String
+  App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename))
 
 
 App.Account.room: String
-  "alskdkapdçadçsçdkakslfjallsdkaçdkslslflqlqllekekdksllsfjslakk"
+  App.room("alakdalfhçadladkskflhçalsdkfhaçsdlk")
 
 App.Account: App<App.Account.State>
   App.new<App.Account.State>(
@@ -59,13 +58,32 @@ App.Account: App<App.Account.State>
   )
 
 App.Account.init: App.Init<App.Account.State>
-  App.Store.new<App.Account.State>(App.Account.State.local.new("teste"), App.Account.State.global.new(Map.new!, Map.new!))
+  App.Store.new<App.Account.State>(App.Account.State.local.new(""), App.Account.State.global.new(Map.new!, Map.new!))
 
 App.Account.draw: App.Draw<App.Account.State>
   (state)
   open state; open state.global;
+  let style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "outline": "transparent",
+    "margin-bottom": "15px"
+  }
   <div>
     <div>"Create an Account"</div>
+    <input id="id" style=style>
+    </input>
+    <button id="button_id" style=style>
+      "não aperte"
+    </button>
+    <p>"global state:"</p>
+    <p>
+      open state; open state.global
+      let userlist = Map.to_list!(state.global.usermap)
+      let keylist = Map.to_list!(state.global.keymap)
+      Stringifier.run!(List.stringifier!!, userlist)
+      |"\n"|Stringifier.run!(List.stringifier!!, keylist)
+    </p>
   </div>
 
 App.Account.when: App.When<App.Account.State>
@@ -74,11 +92,19 @@ App.Account.when: App.When<App.Account.State>
     init: IO { 
       App.watch!(App.Account.room)
     }
-//    mouse_click:
-//      open state
-//      IO {
-//        App.new_post!(App.Account.room, App.Account.Global.Event.inc.serial)
-//      }
+    mouse_click: IO {
+      case event.id =? "button_id" {
+        true:
+          App.new_post!(App.Account.room, App.Account.Global.Event.register.serial(state@local@input, "device"))
+        false:
+          App.pass!
+      }
+    }
+    input: IO {
+      open state; open state.local
+      let new_local = state.local@input <- event.text
+      App.set_local!(new_local)
+    }
   } default App.pass!
 
 //Tick not used
@@ -92,11 +118,20 @@ App.Account.post: App.Post<App.Account.State>
    none: glob
    some: case post.value {
      register:
-       glob
-//       let count = glob@count
-//       let new_count = 1 + count
-//       let new_global = glob@count <- new_count
-//       new_global
+       open glob
+       let curr_user = glob.usermap{addr}
+       case curr_user {
+         none:
+           let new_usermap = glob.usermap{addr} <- post.value.username
+           let glob = glob@usermap <- new_usermap
+
+           // TODO pick a device name
+           let new_keymap = glob.keymap{post.value.username} <- [{post.value.devicename, addr}]
+           let glob = glob@keymap <- new_keymap
+           glob
+         some:
+           glob
+       }
    }
  }
 
