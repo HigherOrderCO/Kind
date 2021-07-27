@@ -18,7 +18,10 @@ type App.Account.State.global {
 
 type App.Account.State.local { 
   new(
-    input: String
+    register_username: String
+    register_devicename: String
+    authorize_devicekey: String
+    authorize_devicename: String
   )
 }
 
@@ -54,9 +57,11 @@ App.Account.Global.Event.deserialize_post(hex: String): Maybe<App.Account.Global
 App.Account.Global.Event.register.serial(username: String, devicename: String): String
   String.pad_right_exact(64, '0', App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename)))
 
+App.Account.Global.Event.authorize.serial(devicekey: String, devicename: String): String
+  String.pad_right_exact(64, '0', App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(devicekey, devicename)))
 
 App.Account.room: String
-  App.room("a19sjc834nv9ejd3834jhf8vjf84jdoxc90")
+  App.room("a19sjc8343v9ejd3834jhf8vj3846dox390")
 
 App.Account: App<App.Account.State>
   App.new<App.Account.State>(
@@ -68,24 +73,46 @@ App.Account: App<App.Account.State>
   )
 
 App.Account.init: App.Init<App.Account.State>
-  App.Store.new<App.Account.State>(App.Account.State.local.new(""), App.Account.State.global.new(Map.new!, Map.new!))
+  App.Store.new<App.Account.State>(App.Account.State.local.new("", "","",""), App.Account.State.global.new(Map.new!, Map.new!))
 
 App.Account.draw: App.Draw<App.Account.State>
   (state)
   open state; open state.global;
-  let style = {
+  let main_style = {
+    "width": "200px"
+    "height": "100%"
+    "display":"flex"
+    "flex-direction":"column"
+    "align-items": "center"
+  }
+  
+  let upper_bottom_style = { 
+    "display":"flex"
+    "flex-direction":"row"
+    "align-items": "center"
+  }
+
+  let box_style = {
     "font-size": "2rem",
     "font-family": "monospace",
     "outline": "transparent",
     "margin-bottom": "15px"
   }
-  <div>
-    <div>"Create an Account"</div>
-    <input id="id" style=style>
-    </input>
-    <button id="button_id" style=style>
-      "não aperte"
-    </button>
+  let text_style = { 
+    "font-size": "2em",
+    "padding-bottom": "5px"
+  }
+  <div style=main_style>
+    <div style=text_style>"Create an Account"</div>
+    <div style=upper_bottom_style>
+      <input id="register_username" style=box_style>
+      </input>
+      <input id="register_devicename" style=box_style>
+      </input>
+      <button id="register_button" style=box_style>
+        "Register"
+      </button>
+    </div>
     <p>"global state:"</p>
     <p>
       open state; open state.global
@@ -103,21 +130,27 @@ App.Account.when: App.When<App.Account.State>
       App.watch!(App.Account.room)
     }
     mouse_click: IO {
-      case event.id =? "button_id" {
+      case event.id =? "register_button" {
         true:
-          log("input: "|state@local@input) // DEBUG
-          let serial = App.Account.Global.Event.register.serial(state@local@input, "device")
+          log("input: "|state@local@register_username) // DEBUG
+          let serial = App.Account.Global.Event.register.serial(state@local@register_username, state@local@register_devicename)
           App.new_post!(App.Account.room, serial)
         false:
           App.pass!
       }
     }
-    input: IO {
+    input:
       open state; open state.local
-      log("event.text: "|event.text) // DEBUG
-      let new_local = state.local@input <- event.text
-      App.set_local!(new_local)
-    }
+      switch String.eql(event.id) {
+        "register_username": IO { 
+          let new_local = state.local@register_username <- event.text
+          App.set_local<App.Account.State>(new_local)
+        }
+        "register_devicename": IO { 
+          let new_local = state.local@register_devicename <- event.text
+          App.set_local<App.Account.State>(new_local)
+        }
+      }default App.pass!
   } default App.pass!
 
 //Tick not used
