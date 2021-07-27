@@ -52,7 +52,7 @@ App.Account.Global.Event.deserialize_post(hex: String): Maybe<App.Account.Global
   Deserializer.run!(App.Account.Global.Event.deserializer, Bits.hex.decode(hex))
 
 App.Account.Global.Event.register.serial(username: String, devicename: String): String
-  App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename))
+  String.pad_right_exact(64, '0', App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename)))
 
 
 App.Account.room: String
@@ -106,13 +106,27 @@ App.Account.when: App.When<App.Account.State>
       case event.id =? "button_id" {
         true:
           log("input: "|state@local@input)
-          App.new_post!(App.Account.room, App.Account.Global.Event.register.serial(state@local@input, "device"))
+          let serial = App.Account.Global.Event.register.serial(state@local@input, "device")
+          let u =
+            case App.Account.Global.Event.deserialize_post(serial) as post {
+              none:
+                log("none")
+                unit
+              some:
+                case post.value {
+                  register:
+                    log("post.value.username: "|post.value.username)
+                    unit
+                } default log("mouse_click some default") unit
+            }
+          App.new_post!(App.Account.room, serial)
         false:
           App.pass!
       }
     }
     input: IO {
       open state; open state.local
+      log("event.text: "|event.text)
       let new_local = state.local@input <- event.text
       App.set_local!(new_local)
     }
