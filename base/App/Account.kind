@@ -105,20 +105,8 @@ App.Account.when: App.When<App.Account.State>
     mouse_click: IO {
       case event.id =? "button_id" {
         true:
-          log("input: "|state@local@input)
+          log("input: "|state@local@input) // DEBUG
           let serial = App.Account.Global.Event.register.serial(state@local@input, "device")
-          let u =
-            case App.Account.Global.Event.deserialize_post(serial) as post {
-              none:
-                log("none")
-                unit
-              some:
-                case post.value {
-                  register:
-                    log("post.value.username: "|post.value.username)
-                    unit
-                } default log("mouse_click some default") unit
-            }
           App.new_post!(App.Account.room, serial)
         false:
           App.pass!
@@ -126,7 +114,7 @@ App.Account.when: App.When<App.Account.State>
     }
     input: IO {
       open state; open state.local
-      log("event.text: "|event.text)
+      log("event.text: "|event.text) // DEBUG
       let new_local = state.local@input <- event.text
       App.set_local!(new_local)
     }
@@ -145,7 +133,7 @@ App.Account.post: App.Post<App.Account.State>
      register:
        open glob
        // TODO verify post.value.username not empty
-       log("post.value.username: "|post.value.username)
+       log("post.value.username: "|post.value.username) // DEBUG
        case glob.usermap{addr} glob.keymap{post.value.username} {
          none none:
            let new_usermap = glob.usermap{addr} <- post.value.username
@@ -155,17 +143,19 @@ App.Account.post: App.Post<App.Account.State>
            let new_keymap = glob.keymap{post.value.username} <- [{post.value.devicename, addr}]
            let glob = glob@keymap <- new_keymap
            glob
-       } default log("register abort default") glob
+       } default
+         log("register abort default") // DEBUG
+         glob
      authorize:
        open glob
        let curr_user = glob.usermap{addr} abort
-         log("authorize abort due to addr not found in usermap")
+         log("authorize abort due to addr not found in usermap") // DEBUG
          glob
        let curr_devices = glob.keymap{curr_user} abort
-         log("authorize abort due to curr_user not found in keymap")
+         log("authorize abort due to curr_user not found in keymap") // DEBUG
          glob
        let found = List.find!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices) abort
-         log("authorize abort due to device already authorized")
+         log("authorize abort due to device already authorized") // DEBUG
          glob
        let new_devices = {post.value.devicename, post.value.devicekey} & curr_devices
        let new_keymap = glob.keymap{curr_user} <- new_devices
@@ -176,10 +166,10 @@ App.Account.post: App.Post<App.Account.State>
      revoke:
        open glob
        let curr_user = glob.usermap{addr} abort
-         log("revoke abort due to addr not found in usermap")
+         log("revoke abort due to addr not found in usermap") // DEBUG
          glob
        let curr_devices = glob.keymap{curr_user} abort
-         log("revoke abort due to curr_user not found in keymap")
+         log("revoke abort due to curr_user not found in keymap") // DEBUG
          glob
        let new_devices = List.filter!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices)
        let new_keymap = if List.length!(new_devices) =? 0 then
@@ -190,7 +180,9 @@ App.Account.post: App.Post<App.Account.State>
        let glob = glob@usermap <- new_usermap
        let glob = glob@keymap <- new_keymap
        glob
-   } default log("default") glob
+   } default
+     log("deserialize_post default") // DEBUG
+     glob
  }
 
 // Global post
