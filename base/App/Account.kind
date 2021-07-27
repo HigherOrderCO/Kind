@@ -79,11 +79,11 @@ App.Account.draw: App.Draw<App.Account.State>
   (state)
   open state; open state.global;
   let main_style = {
-    "width": "200px"
-    "height": "100%"
+    "width": "100vw"
+    "height": "100vw"
     "display":"flex"
     "flex-direction":"column"
-    "align-items": "center"
+    "align-items": "start"
   }
   
   let upper_bottom_style = { 
@@ -97,8 +97,10 @@ App.Account.draw: App.Draw<App.Account.State>
     "font-family": "monospace",
     "outline": "transparent",
     "margin-bottom": "15px"
+    "margin-left": "4px"
   }
   let text_style = { 
+    "align-items": "center"
     "font-size": "2em",
     "padding-bottom": "5px"
   }
@@ -111,6 +113,24 @@ App.Account.draw: App.Draw<App.Account.State>
       </input>
       <button id="register_button" style=box_style>
         "Register"
+      </button>
+    </div>
+    <div style=text_style>"Authorize new Device"</div>
+    <div style=upper_bottom_style>
+      <input id="authorize_username" style=box_style>
+      </input>
+      <input id="authorize_devicekey" style=box_style>
+      </input>
+      <button id="authorize_button" style=box_style>
+        "Authorize"
+      </button>
+    </div>
+    <div style=text_style>"Revoke Device access"</div>
+    <div style=upper_bottom_style>
+      <input id="revoke_devicekey" style=box_style>
+      </input>
+      <button id="revoke_button" style=box_style>
+        "Revoke"
       </button>
     </div>
     <p>"global state:"</p>
