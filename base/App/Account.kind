@@ -1,10 +1,15 @@
-// modificar o estado para incluir quais informações são públicas e quais são dos usuários
-// usar tipos diferentes para tipos de informação diferentes
-// enunciar todas as propriedades que a gente gostaria que o sistema tivesse
+// 1 - Welcome Screen:: Create an Account + Log in
+//  caso escolha criar a conta
+// 1.1 - Pick a Username + Continue
+// 1.2 - Name this Computer + Continue
+// 3 - Home (pode revogar dispositivos)
 
-// qualquer outro usuário, usando apenas informações públicas e suas informações privadas, não consegue modificar a conta de um usuário
-// qualquer outro usuário, usando apenas informações públicas, consegue identificar qualquer usuário
-// o usuário mantem acesso a conta dele contanto que tenha pelo menos um dispositivo
+//  caso clique Log in
+// 2.1 - insert Username
+//  caso username presente
+// 3 - lista de dispositivos
+// requisitar autorização para dispositivo selecionado
+// aceitar do outro dispositivo
 
 App.Account.State: App.State
   App.State.new(App.Account.State.local, App.Account.State.global)
