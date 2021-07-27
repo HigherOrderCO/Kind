@@ -22,6 +22,7 @@ type App.Account.State.local {
     register_devicename: String
     authorize_devicekey: String
     authorize_devicename: String
+    revoke_devicekey: String
   )
 }
 
@@ -54,14 +55,28 @@ App.Account.Global.Event.serialize_post(ev: App.Account.Global.Event): String
 App.Account.Global.Event.deserialize_post(hex: String): Maybe<App.Account.Global.Event>
   Deserializer.run!(App.Account.Global.Event.deserializer, Bits.hex.decode(hex))
 
+App.Account.pad_even(c: Char, str: String): String
+  case (String.length(str) % 2) =? 0 {
+    true:
+      str
+    false:
+      str|Char.to_string(c)
+  }
+
 App.Account.Global.Event.register.serial(username: String, devicename: String): String
-  String.pad_right_exact(64, '0', App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename)))
+  App.Account.pad_even('0',
+    App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename)))
 
 App.Account.Global.Event.authorize.serial(devicekey: String, devicename: String): String
-  String.pad_right_exact(64, '0', App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(devicekey, devicename)))
+  App.Account.pad_even('0',
+    App.Account.Global.Event.serialize_post(App.Account.Global.Event.authorize(devicekey, devicename)))
+
+App.Account.Global.Event.revoke.serial(devicekey: String): String
+  App.Account.pad_even('0',
+    App.Account.Global.Event.serialize_post(App.Account.Global.Event.revoke(devicekey)))
 
 App.Account.room: String
-  App.room("a19sjc8343v9ejd3834jhf8vj3846dox390")
+  App.room("a110283a89s9d9cja929hf9sjdvbd899sw0")
 
 App.Account: App<App.Account.State>
   App.new<App.Account.State>(
@@ -73,7 +88,7 @@ App.Account: App<App.Account.State>
   )
 
 App.Account.init: App.Init<App.Account.State>
-  App.Store.new<App.Account.State>(App.Account.State.local.new("", "","",""), App.Account.State.global.new(Map.new!, Map.new!))
+  App.Store.new<App.Account.State>(App.Account.State.local.new("", "", "","",""), App.Account.State.global.new(Map.new!, Map.new!))
 
 App.Account.draw: App.Draw<App.Account.State>
   (state)
@@ -117,9 +132,9 @@ App.Account.draw: App.Draw<App.Account.State>
     </div>
     <div style=text_style>"Authorize new Device"</div>
     <div style=upper_bottom_style>
-      <input id="authorize_username" style=box_style>
-      </input>
       <input id="authorize_devicekey" style=box_style>
+      </input>
+      <input id="authorize_devicename" style=box_style>
       </input>
       <button id="authorize_button" style=box_style>
         "Authorize"
@@ -150,14 +165,21 @@ App.Account.when: App.When<App.Account.State>
       App.watch!(App.Account.room)
     }
     mouse_click: IO {
-      case event.id =? "register_button" {
-        true:
+      switch String.eql(event.id) {
+        "register_button":
           log("input: "|state@local@register_username) // DEBUG
           let serial = App.Account.Global.Event.register.serial(state@local@register_username, state@local@register_devicename)
+          log("serial register: "|serial)
           App.new_post!(App.Account.room, serial)
-        false:
-          App.pass!
-      }
+        "authorize_button":
+          let serial = App.Account.Global.Event.authorize.serial(state@local@authorize_devicekey, state@local@authorize_devicename)
+          log("serial authorize: "|serial)
+          App.new_post!(App.Account.room, serial)
+        "revoke_button":
+          let serial = App.Account.Global.Event.revoke.serial(state@local@revoke_devicekey)
+          log("serial revoke: "|serial)
+          App.new_post!(App.Account.room, serial)
+      } default App.pass!
     }
     input:
       open state; open state.local
@@ -170,7 +192,19 @@ App.Account.when: App.When<App.Account.State>
           let new_local = state.local@register_devicename <- event.text
           App.set_local<App.Account.State>(new_local)
         }
-      }default App.pass!
+        "authorize_devicekey": IO { 
+          let new_local = state.local@authorize_devicekey <- event.text
+          App.set_local<App.Account.State>(new_local)
+        }
+        "authorize_devicename": IO { 
+          let new_local = state.local@authorize_devicename <- event.text
+          App.set_local<App.Account.State>(new_local)
+        }
+        "revoke_devicekey": IO { 
+          let new_local = state.local@revoke_devicekey <- event.text
+          App.set_local<App.Account.State>(new_local)
+        }
+      } default App.pass!
   } default App.pass!
 
 //Tick not used
@@ -180,8 +214,9 @@ App.Account.tick: App.Tick<App.Account.State>
 //Post
 App.Account.post: App.Post<App.Account.State>
  (time, room, addr, data, glob)
+ log("olha o post: "|data)
  case App.Account.Global.Event.deserialize_post(data) as post {
-   none: glob
+   none: log("none") glob
    some: case post.value {
      register:
        open glob
@@ -207,15 +242,19 @@ App.Account.post: App.Post<App.Account.State>
        let curr_devices = glob.keymap{curr_user} abort
          log("authorize abort due to curr_user not found in keymap") // DEBUG
          glob
-       let found = List.find!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices) abort
-         log("authorize abort due to device already authorized") // DEBUG
-         glob
-       let new_devices = {post.value.devicename, post.value.devicekey} & curr_devices
-       let new_keymap = glob.keymap{curr_user} <- new_devices
-       let new_usermap = glob.usermap{post.value.devicekey} <- curr_user
-       let glob = glob@usermap <- new_usermap
-       let glob = glob@keymap <- new_keymap
-       glob
+       let found = List.found!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices)
+       case found {
+         false:
+           let new_devices = {post.value.devicename, post.value.devicekey} & curr_devices
+           let new_keymap = glob.keymap{curr_user} <- new_devices
+           let new_usermap = glob.usermap{post.value.devicekey} <- curr_user
+           let glob = glob@usermap <- new_usermap
+           let glob = glob@keymap <- new_keymap
+           glob
+         true:
+           log("authorize abort due to device already authorized") // DEBUG
+           glob
+       }
      revoke:
        open glob
        let curr_user = glob.usermap{addr} abort
@@ -224,7 +263,9 @@ App.Account.post: App.Post<App.Account.State>
        let curr_devices = glob.keymap{curr_user} abort
          log("revoke abort due to curr_user not found in keymap") // DEBUG
          glob
-       let new_devices = List.filter!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices)
+       let new_devices = List.filter!(
+         (p) Bool.not(String.eql(post.value.devicekey, Pair.snd!!(p))),
+         curr_devices)
        let new_keymap = if List.length!(new_devices) =? 0 then
          Map.delete!(curr_user, glob.keymap)
        else
