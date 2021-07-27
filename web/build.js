@@ -55,7 +55,7 @@ function compile_app(name) {
 // Write "src/app/index.js" to export the Apps
 process.chdir(code_dir);
 var index = "module.exports = {\n";
-const add_line = (app) => "  '" + app + "': import('./"+app+"'),\n";
+const add_line = (app) => "  '" + app.slice(0, -3) + "': import('./"+app+"'),\n";
 if (app !== "" && app !== undefined) { // Check if need to add App to the export list
   const app_export_format = "App."+app.slice(0,-5)+".js";
   if (all_js_apps.includes(app_export_format)) all_js_apps.concat(app_export_format);
