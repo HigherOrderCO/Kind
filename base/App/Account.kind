@@ -22,6 +22,20 @@ type App.Account.State.local {
   )
 }
 
+type App.Account.Global.Event {
+  register(
+    username: String
+    devicename: String
+  )
+  authorize(
+    devicekey: String
+    devicename: String
+  )
+  revoke(
+    devicekey: String
+  )
+} deriving (serializer, deserializer)
+
 App.Account.Username: Type
   String
 
@@ -30,10 +44,6 @@ App.Account.Device.Key: Type
 
 App.Account.Device.Name: Type
   String
-
-type App.Account.Global.Event {
-  register(username: String, devicename: String)
-} deriving (serializer, deserializer)
 
 App.Account.Global.Event.serialize_post(ev: App.Account.Global.Event): String
   Bits.hex.encode(Serializer.run!(App.Account.Global.Event.serializer, ev))
@@ -46,7 +56,7 @@ App.Account.Global.Event.register.serial(username: String, devicename: String): 
 
 
 App.Account.room: String
-  App.room("alakdalfhçadladkskflhçalsdkfhaçsdlk")
+  App.room("a19sjc834nv9ejd3834jhf8vjf84jdoxc90")
 
 App.Account: App<App.Account.State>
   App.new<App.Account.State>(
@@ -95,6 +105,7 @@ App.Account.when: App.When<App.Account.State>
     mouse_click: IO {
       case event.id =? "button_id" {
         true:
+          log("input: "|state@local@input)
           App.new_post!(App.Account.room, App.Account.Global.Event.register.serial(state@local@input, "device"))
         false:
           App.pass!
@@ -119,9 +130,10 @@ App.Account.post: App.Post<App.Account.State>
    some: case post.value {
      register:
        open glob
-       let curr_user = glob.usermap{addr}
-       case curr_user {
-         none:
+       // TODO verify post.value.username not empty
+       log("post.value.username: "|post.value.username)
+       case glob.usermap{addr} glob.keymap{post.value.username} {
+         none none:
            let new_usermap = glob.usermap{addr} <- post.value.username
            let glob = glob@usermap <- new_usermap
 
@@ -129,10 +141,42 @@ App.Account.post: App.Post<App.Account.State>
            let new_keymap = glob.keymap{post.value.username} <- [{post.value.devicename, addr}]
            let glob = glob@keymap <- new_keymap
            glob
-         some:
-           glob
-       }
-   }
+       } default log("register abort default") glob
+     authorize:
+       open glob
+       let curr_user = glob.usermap{addr} abort
+         log("authorize abort due to addr not found in usermap")
+         glob
+       let curr_devices = glob.keymap{curr_user} abort
+         log("authorize abort due to curr_user not found in keymap")
+         glob
+       let found = List.find!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices) abort
+         log("authorize abort due to device already authorized")
+         glob
+       let new_devices = {post.value.devicename, post.value.devicekey} & curr_devices
+       let new_keymap = glob.keymap{curr_user} <- new_devices
+       let new_usermap = glob.usermap{post.value.devicekey} <- curr_user
+       let glob = glob@usermap <- new_usermap
+       let glob = glob@keymap <- new_keymap
+       glob
+     revoke:
+       open glob
+       let curr_user = glob.usermap{addr} abort
+         log("revoke abort due to addr not found in usermap")
+         glob
+       let curr_devices = glob.keymap{curr_user} abort
+         log("revoke abort due to curr_user not found in keymap")
+         glob
+       let new_devices = List.filter!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices)
+       let new_keymap = if List.length!(new_devices) =? 0 then
+         Map.delete!(curr_user, glob.keymap)
+       else
+         glob.keymap{curr_user} <- new_devices
+       let new_usermap = Map.delete!(post.value.devicekey, glob.usermap)
+       let glob = glob@usermap <- new_usermap
+       let glob = glob@keymap <- new_keymap
+       glob
+   } default log("default") glob
  }
 
 // Global post
