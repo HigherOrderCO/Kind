@@ -1,4 +1,5 @@
 type App.KL.Game.Moment {
+  initial(countdown: U64) // when stage is initiated, players can choose coordinate
   preparation(countdown: U64) // when players are casting their skills
   execution(
     casts: List<App.KL.Game.Cast>
@@ -13,10 +14,54 @@ type App.KL.Game.Moment {
 
 App.KL.Game.Moment.get_player_used_ap(game: App.KL.Game): Maybe<Pair<String, I32>>
   case game@moment as moment {
+    initial: none
     preparation: none
     execution: 
       case moment.casts {
         nil: none
         cons: some({moment.casts.head@player, moment.ap_used})
       }
+  }
+
+
+// TODO move this to another place?
+App.KL.Game.Moment.preparation.create_board(players: Map<App.KL.Game.Player>, blueprint: App.KL.Game.Board.Blueprint, board: App.KL.Game.Board): App.KL.Game.Board
+  log("ENTROU NA FUNCAO")
+  for user:player in players with board:
+    App.KL.Game.Board.Player.set(user, player, board)
+  
+  for user:player in players with board:
+    case player@init_pos {
+      none: App.KL.Game.Moment.create_board.choose_coord(user, player, blueprint, board)
+      some: board
+    }
+
+  for team:coords in blueprint@initial with board:
+    for coord in coords with board:
+      log(Hexagonal.Axial.show(coord))
+      Hexagonal.Axial.Map.delete!(coord, board)
+    board
+  board
+
+App.KL.Game.Moment.create_board.choose_coord(user: String, player: App.KL.Game.Player, blueprint: App.KL.Game.Board.Blueprint, board: App.KL.Game.Board): App.KL.Game.Board
+  let bases  = blueprint@base
+  let base_coords = BBT.lookup!!(App.KL.Game.Team.cmp, player@team, bases)
+  case base_coords {
+    none: board
+    some: App.KL.Game.Moment.create_board.choose_coord.find(base_coords.value, user, player, board)
+  }
+
+App.KL.Game.Moment.create_board.choose_coord.find(
+  coords: List<Hexagonal.Axial>, 
+  user: String, 
+  player: App.KL.Game.Player,
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+  case coords {
+    nil:  board
+    cons: 
+      if App.KL.Game.Board.is_occupied(coords.head, board) then
+        App.KL.Game.Moment.create_board.choose_coord.find(coords.tail, user, player, board)
+      else
+        App.KL.Game.Board.Player.set_initial(user, player, coords.head, board)
   }

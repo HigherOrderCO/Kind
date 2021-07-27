@@ -21,17 +21,6 @@ App.KL.Game.Phase.Draft.post(
       log("- set_team")
       game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false), game@players)
 
-    set_init_pos:
-      log("- set_init_pos")
-      Maybe {
-        let players     = game@players
-        get player      = players{addr}
-        let player_list = Map.to_list!(players)
-        let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
-        let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
-        if is_occupied then none else some(game)
-      } <> game
-
     set_hero:
       log("- set_hero")
       Maybe {

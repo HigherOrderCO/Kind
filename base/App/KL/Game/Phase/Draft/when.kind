@@ -16,10 +16,6 @@ App.KL.Game.Phase.Draft.when(
       } default App.pass!
     mouse_click:
       switch String.starts_with(event.id) {
-        "C" : // Set initial position 
-          let coord_nat = String.drop(1, event.id)
-          let coord     = Hexagonal.Axial.from_nat(Nat.read(coord_nat))
-          App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_init_pos.serial(coord))
         "H" : // Set Player Hero
           let hero_name = String.drop(1, event.id)
           let hero_id   = Maybe.map!!(Nat.to_u8, App.KL.Game.Hero.name_to_id(hero_name))

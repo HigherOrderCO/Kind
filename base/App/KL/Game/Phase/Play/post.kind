@@ -7,6 +7,17 @@ App.KL.Game.Phase.Play.post(
 ): App.KL.Game
 
   case event {
+    set_init_pos:
+      log("- set_init_pos")
+      Maybe {
+        let players     = game@players
+        get player      = players{addr}
+        let player_list = Map.to_list!(players)
+        let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
+        let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
+        if is_occupied then none else some(game)
+      } <> game
+    
     cast: game@casts <- App.KL.Game.Cast.push(addr, event.target, event.letter, game@casts)
     cancel_casts: game@casts <- App.KL.Game.Cast.cancel_casts(addr, game@casts)
     cancel_skill: game@casts <- App.KL.Game.Cast.cancel_skill(addr, event.letter, game@casts)

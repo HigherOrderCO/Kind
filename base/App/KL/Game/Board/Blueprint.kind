@@ -1,8 +1,8 @@
 type App.KL.Game.Board.Blueprint {
   new(
     terrains: List<Pair<Hexagonal.Axial, App.KL.Game.Terrain>>
-    tokens: List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
-    base: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+    tokens:   List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
+    base:    BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
     initial: BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
   )
 }
@@ -54,3 +54,24 @@ App.KL.Game.Board.Blueprint.build.initial(
   for coord in coords with result:
     BBT.insert!!(App.KL.Game.Team.cmp, coord@fst, coord@snd, result)
   result
+
+// refactor
+App.KL.Game.Board.Blueprint.build.bases(
+  coords: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+): BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
+  let result = BBT.tip!!
+  for coord in coords with result:
+    BBT.insert!!(App.KL.Game.Team.cmp, coord@fst, coord@snd, result)
+  result
+
+App.KL.Game.Board.Blueprint.base.valid(
+  coord: Hexagonal.Axial
+  team: App.KL.Game.Team
+  blueprint: App.KL.Game.Board.Blueprint
+): Bool
+  let base = blueprint@base
+  Maybe {
+    get base_team = BBT.lookup!!(App.KL.Game.Team.cmp, team, blueprint@base)
+    get coord     = List.find!((x) Hexagonal.Axial.eql(x, coord), base_team)
+    return true
+  } <> false

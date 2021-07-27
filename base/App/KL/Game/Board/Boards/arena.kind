@@ -2,7 +2,7 @@ App.KL.Game.Board.Boards.arena: App.KL.Game.Board.Blueprint
   App.KL.Game.Board.Blueprint.new(
     App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.arena.terrains)
     App.KL.Game.Board.Blueprint.build.tokens(App.KL.Game.Board.Boards.arena.tokens)
-    App.KL.Game.Board.Boards.arena.bases
+    App.KL.Game.Board.Blueprint.build.bases(App.KL.Game.Board.Boards.arena.bases)
     App.KL.Game.Board.Blueprint.build.initial(App.KL.Game.Board.Boards.arena.initial)
   )
 
@@ -37,8 +37,8 @@ App.KL.Game.Board.Boards.arena.initial: List<Pair<App.KL.Game.Team, List<Hexagon
     ]},
     {App.KL.Game.Team.red, [
        Hexagonal.Axial.new(size + 2,  0 ::I32),
-       Hexagonal.Axial.new(size    , -2 ::I32),
-       Hexagonal.Axial.new(size + 2,  1 ::I32),
+       Hexagonal.Axial.new(size + 2, -2 ::I32),
+       Hexagonal.Axial.new(size + 1, -1 ::I32),
     ]},
   ]
 

@@ -15,6 +15,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   open game
 
   let countdown = case game.moment {
+    initial: U64.to_nat(game.moment.countdown)
     preparation: U64.to_nat(game.moment.countdown)
     execution: 0
   }
@@ -54,6 +55,8 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
       </div>
       <div style={"font-size": "32px", "font-family": "monospace"}>
         case game.moment {
+          initial: 
+            Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))
           preparation: 
             Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))
           execution: case game.moment.casts {
@@ -92,6 +95,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
       }</div>
       {
         case game.moment as moment {
+          initial: <div></div>
           preparation: 
             <div style=
               {
@@ -201,6 +205,7 @@ App.KL.Game.Phase.Play.draw.canvas(
 ): VoxBox
   open game
   let hits = case game.moment {
+    initial: none
     preparation: none
     execution: some(game.moment.hits)
   }
@@ -239,6 +244,7 @@ App.KL.Game.Phase.Play.draw.grid(
   img:    VoxBox
 ): VoxBox
   case moment {
+    initial: img
     preparation:
       let indicator     = App.KL.Game.Indicator.gray_line
       let indicator_img = App.KL.Game.Indicator.get_img(indicator)
@@ -348,6 +354,7 @@ App.KL.Game.Phase.Play.draw.tile.indicator(
 App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game: App.KL.Game, coord: Hexagonal.Axial): App.KL.Game.Hero.Draw.Pose
   open game
   case game.moment {
+    initial: App.KL.Game.Hero.Draw.Pose.idle
     preparation:
       App.KL.Game.Hero.Draw.Pose.idle
     execution: case game.moment.casts {
@@ -726,6 +733,7 @@ App.KL.Game.Phase.Play.draw.shield(
 App.KL.Game.Phase.Play.Draw.gray_overlay(game: App.KL.Game): DOM
   open game
     case game.moment {
+      initial: <div></div>
       preparation: <div></div>
       execution: case game.moment.casts {
         nil: 

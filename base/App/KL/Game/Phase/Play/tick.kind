@@ -1,6 +1,18 @@
 App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
   open game
   case game.moment {
+    // Inital phase
+    initial:
+      // Countdown positive: decrease countdown
+      if U64.gtn(game.moment.countdown, 0) then
+        let game = game@moment <- App.KL.Game.Moment.initial(game.moment.countdown - 1)
+        game
+      // Countdown zero: go to preparation phase
+      else
+        let game = game@board <- App.KL.Game.Moment.preparation.create_board(game@players, game@blueprint, game@board)
+        let game = game@moment <- App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
+        let game = game@casts <- []
+        game
     // Preparation phase
     preparation:
       // Countdown positive: decrease countdown

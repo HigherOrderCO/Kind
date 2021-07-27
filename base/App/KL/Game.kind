@@ -53,7 +53,7 @@ type App.KL.Game.Phase {
 App.KL.Game.start: App.KL.Game
   let phase = App.KL.Game.Phase.draft
   let turn = 0#64
-  let moment = App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
+  let moment = App.KL.Game.Moment.initial(App.KL.Constants.initial_time)
   let players = Map.new!
   let board = Hexagonal.Axial.Map.new!
   let tick = 0#64
