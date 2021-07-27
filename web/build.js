@@ -15,7 +15,7 @@ var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
 var app = "";
 var compiled_apps = [];
 
-console.log("Compiling apps:")
+console.log("[1/2] Compiling apps:")
 if (process.argv[2]) { // Only build 1 App
   app = all_kind_apps.filter(name => {
     const match = process.argv[2].toLowerCase().slice(4) // remove "App."
@@ -68,10 +68,10 @@ for (var app of all_js_apps ) {
 index += "}\n";
 fs.writeFileSync("apps/index.js", index);
 
-console.log("Building index.js...");
+console.log("\n[2/2] Building index.js...");
 exec("npm run build", function (err, stdout, stdin) {
   if (err) {
-    console.error(err.stack);
+    console.log(err);
   } else {
     console.log("Done.");
   }
