@@ -1,0 +1,18 @@
+Module: Type
+  Map<Dynamic>
+
+Module.type_of(module: Module, name: String): Type
+  case Map.get<Dynamic>(name, module) as got {
+    none: Unit
+    some: Dynamic.type_of(got.value)
+  }
+
+Module.value_of(module: Module, name: String): Module.type_of(module, name)
+  def got = Map.get<Dynamic>(name, module)
+  case got {
+    none: unit
+    some: Dynamic.value_of(got.value)
+  } : case got {
+    none: Unit
+    some: Dynamic.type_of(got.value)
+  }

@@ -1,2 +1,14 @@
-Test: _
-  Litereum.main(42001)
+IntLib.add(a: Int, b: Int): Int
+  a + b
+
+IntLib.neg(a: Int): Int
+  0 - a
+
+IntLib: Module
+  {
+    "a": Dynamic.new<Int -> Int -> Int>(IntLib.add)
+    "n": Dynamic.new<Int -> Int>(IntLib.neg)
+  }
+
+five: Nat
+  Module.value_of(IntLib, "a")(+2, +3)
