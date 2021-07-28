@@ -1,0 +1,107 @@
+
+
+App.Account.Screen.draw.welcome: DOM
+  let main_style = {
+    "width": "100vw"
+    "height": "100vw"
+    "display":"flex"
+    "flex-direction":"column"
+    "align-items": "start"
+  }
+  
+  let upper_bottom_style = { 
+    "display":"flex"
+    "flex-direction":"row"
+    "align-items": "center"
+  }
+
+  let box_style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "outline": "transparent",
+    "margin-bottom": "15px"
+    "margin-left": "4px"
+  }
+  let text_style = { 
+    "align-items": "center"
+    "font-size": "2em",
+    "padding-bottom": "5px"
+  }
+
+  <div style=main_style>
+    <div style=text_style>"Welcome to UwU.Tech Accounts :3"</div>
+    <button id="register_button" style=box_style>
+      "Register"
+    </button>
+    <button id="login_button" style=box_style>
+      "Login"
+    </button>
+  </div>
+
+App.Account.Screen.draw.debug(state: App.Account.State.global): DOM
+  let main_style = {
+    "width": "100vw"
+    "height": "100vw"
+    "display":"flex"
+    "flex-direction":"column"
+    "align-items": "start"
+  }
+  
+  let upper_bottom_style = { 
+    "display":"flex"
+    "flex-direction":"row"
+    "align-items": "center"
+  }
+
+  let box_style = {
+    "font-size": "2rem",
+    "font-family": "monospace",
+    "outline": "transparent",
+    "margin-bottom": "15px"
+    "margin-left": "4px"
+  }
+  let text_style = { 
+    "align-items": "center"
+    "font-size": "2em",
+    "padding-bottom": "5px"
+  }
+  <div style=main_style>
+    <div style=text_style>"Create an Account"</div>
+    <div style=upper_bottom_style>
+      <input id="register_username" style=box_style>
+      </input>
+      <input id="register_devicename" style=box_style>
+      </input>
+      <button id="register_button" style=box_style>
+        "Register"
+      </button>
+    </div>
+    <div style=text_style>"Authorize new Device"</div>
+    <div style=upper_bottom_style>
+      <input id="authorize_devicekey" style=box_style>
+      </input>
+      <input id="authorize_devicename" style=box_style>
+      </input>
+      <button id="authorize_button" style=box_style>
+        "Authorize"
+      </button>
+    </div>
+    <div style=text_style>"Revoke Device access"</div>
+    <div style=upper_bottom_style>
+      <input id="revoke_devicekey" style=box_style>
+      </input>
+      <button id="revoke_button" style=box_style>
+        "Revoke"
+      </button>
+    </div>
+    <p>"global state:"</p>
+    <p>
+      let userlist = Map.to_list!(state@usermap)
+      let keylist = Map.to_list!(state@keymap)
+      List.show!(Pair.show!!((x) x, (x) x), userlist)
+      |"\n"|List.show!(Pair.show!!((x) x, List.show!(Pair.show!!((x) x, (x) x))), keylist)
+    </p>
+    <button id="welcome_button" style=box_style>
+      "Home"
+    </button>
+  </div>
