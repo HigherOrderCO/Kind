@@ -68,16 +68,10 @@ App.KL.Game.Phase.Play.when(
 App.KL.Game.Phase.Play.when.initial.mouse_down(room: String, local: App.KL.Game.State.Local, game: App.KL.Game): IO<Maybe<App.State.local<App.KL.State>>>
   let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   
-  let player = game@players{local@user}
-  case player {
-    none: App.pass!
-    some:
-      if App.KL.Game.Board.Blueprint.base.valid(coord, player.value@team, game@blueprint) then
-        log("VALIDO")
-        App.new_post!(room, App.KL.Game.Phase.Play.Event.set_init_pos.serial(coord))
-      else
-        App.pass!
-  }
+  if App.KL.Game.Board.Blueprint.base.valid(coord, local@user, game@players, game@blueprint) then
+    App.new_post!(room, App.KL.Game.Phase.Play.Event.set_init_pos.serial(coord))
+  else
+    App.pass!
 
   
 
