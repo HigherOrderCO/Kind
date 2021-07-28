@@ -85,8 +85,8 @@ App.KL.Game.Board.Blueprint.base.valid(
     for player in App.KL.Game.Player.get_allies_list(player, players) with result:
       case player@init_pos as init_pos {
         none: result
-        some: 
-          Hexagonal.Axial.eql(coord, init_pos.value) && result
+        some:
+          Bool.not(Hexagonal.Axial.eql(coord, init_pos.value)) && result
       }
 
     return result
