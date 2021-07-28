@@ -1,0 +1,49 @@
+Bits0 : Bits
+   Bits.o(Bits.e)
+
+Bits1 : Bits
+   Bits.i(Bits.e)
+
+Bits16 : Bits
+   Nat.to_bits(16)
+
+type User.caotic.Encode.ABI.Coder {
+    uint_256(value : String)
+    bytes32(value : String)
+    andress(value : String)
+}
+
+type User.caotic.Encode.ABI.Data {
+    new(value : Bits, dynamic : Bool)
+}
+
+Bits.pad.go(pad : Nat, x : Bits) : Bits
+  if pad >? 0 then Bits.pad.go(pad-1, Bits.o(x)) else x
+
+Bits.pad(pad : Nat, x : Bits) : Bits
+  Bits.concat(x, Bits.pad.go(pad-Bits.length(x), Bits.e))
+
+Bytes.padRight(pad : Nat, x : Bits) : Bits // x*pad
+  if pad >? 0 then Bits.mul(Bytes.padRight(pad - 1, x), Bits16) else x
+
+//Bits.pad.correcly_semantics(n : Nat, x : Bits) :
+//   Bits.to_nat(Bits.pad(n, x)) == Bits.to_nat(x)
+//  ?a // padding a Bit do not change the semantic in Nat
+
+User.caotic.ABI.encode_(coder : User.caotic.Encode.ABI.Coder) : Pair<String, Bool> 
+  case coder {
+    bytes32 :
+      let length = String.length(coder.value) - 1 // change after to bits.length
+      let nextMul32 = (((length - 1) / 64) + 1) * 64
+      let lengthEncoded = User.caotic.ABI.encode_(User.caotic.Encode.ABI.Coder.uint_256(Nat.hex.encode(length)))
+      open lengthEncoded
+      let bytesEncoded = String.pad_right(nextMul32 - 1, '0', "0" | coder.value)
+      {lengthEncoded.fst | bytesEncoded, true}
+  } default 
+      {String.pad_left(64, '0', coder.value), false}
+
+User.caotic.ABI.encode : _
+  let value = Bits.to_hex_string(Nat.to_bits(1002))
+  let r = User.caotic.ABI.encode_(User.caotic.Encode.ABI.Coder.bytes32(value))
+  open r
+  r.fst
