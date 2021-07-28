@@ -147,6 +147,18 @@ App.Account.when: App.When<App.Account.State>
             "register_button": App.set_local!(App.Account.State.local.register("",""))
             "login_button": App.set_local!(App.Account.State.local.login)
           } default App.pass!
+        register:
+          switch String.eql(event.id) { 
+            "register_button":
+              // TODO check inputs
+              log("input: "|state.local.username) // DEBUG
+              let serial = App.Account.Global.Event.register.serial(state.local.username, state.local.devicename)
+              log("serial register: "|serial)
+              IO {
+                App.new_post!(App.Account.room, serial)
+                App.set_local!(App.Account.State.local.home)
+              }
+          }default App.pass!
       } default App.pass!
     }
     input:
@@ -192,6 +204,19 @@ App.Account.when: App.When<App.Account.State>
                 state.local.register_devicename,
                 state.local.authorize_devicekey,
                 state.local.authorize_devicename,
+                event.text))
+            }
+          } default App.pass!
+        register: 
+          switch String.eql(event.id) {
+            "register_username": IO {
+              App.set_local<App.Account.State>(App.Account.State.local.register(
+                event.text,
+                state.local.devicename))
+              }
+            "register_devicename": IO {
+              App.set_local<App.Account.State>(App.Account.State.local.register(
+                state.local.username,
                 event.text))
             }
           } default App.pass!
