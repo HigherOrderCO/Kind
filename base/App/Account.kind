@@ -198,31 +198,54 @@ App.Account.when: App.When<App.Account.State>
           } default App.pass!
       } default App.pass!
     }
-//    input:
-//      open state; open state.local
-//      switch String.eql(event.id) {
-//        "register_username": IO { 
-//          let new_local = state.local@register_username <- event.text
-//          App.set_local<App.Account.State>(new_local)
-//        }
-//        "register_devicename": IO { 
-//          let new_local = state.local@register_devicename <- event.text
-//          App.set_local<App.Account.State>(new_local)
-//        }
-//        "authorize_devicekey": IO { 
-//          let new_local = state.local@authorize_devicekey <- event.text
-//          App.set_local<App.Account.State>(new_local)
-//        }
-//        "authorize_devicename": IO { 
-//          let new_local = state.local@authorize_devicename <- event.text
-//          App.set_local<App.Account.State>(new_local)
-//        }
-//        "revoke_devicekey": IO { 
-//          let new_local = state.local@revoke_devicekey <- event.text
-//          App.set_local<App.Account.State>(new_local)
-//        }
-//      } default App.pass!
-  } default App.pass!
+    input:
+      open state;
+      case state.local { 
+        debug: 
+          switch String.eql(event.id) {
+            "register_username": IO {
+              App.set_local<App.Account.State>(App.Account.State.local.debug(
+                event.text,
+                state.local.register_devicename,
+                state.local.authorize_devicekey,
+                state.local.authorize_devicename,
+                state.local.revoke_devicekey))
+            }
+            "register_devicename": IO {
+              App.set_local<App.Account.State>(App.Account.State.local.debug(
+                state.local.register_username,
+                event.text,
+                state.local.authorize_devicekey,
+                state.local.authorize_devicename,
+                state.local.revoke_devicekey))
+            }
+            "authorize_devicekey": IO {
+              App.set_local<App.Account.State>(App.Account.State.local.debug(
+                state.local.register_username
+                state.local.register_devicename,
+                event.text,
+                state.local.authorize_devicename,
+                state.local.revoke_devicekey))
+            }
+            "authorize_devicename": IO {
+              App.set_local<App.Account.State>(App.Account.State.local.debug(
+                state.local.register_username
+                state.local.register_devicename,
+                state.local.authorize_devicekey,
+                event.text,
+                state.local.revoke_devicekey))
+            }
+            "revoke_devicekey": IO {
+              App.set_local<App.Account.State>(App.Account.State.local.debug(
+                state.local.register_username
+                state.local.register_devicename,
+                state.local.authorize_devicekey,
+                state.local.authorize_devicename,
+                event.text))
+            }
+          } default App.pass!
+        } default App.pass!
+      } default App.pass!
 
 //Tick not used
 App.Account.tick: App.Tick<App.Account.State>
