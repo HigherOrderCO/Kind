@@ -1,30 +1,26 @@
-Bits0 : Bits
-   Bits.o(Bits.e)
-
-Bits1 : Bits
-   Bits.i(Bits.e)
-
-Bits16 : Bits
-   Nat.to_bits(16)
-
 type User.caotic.Encode.ABI.Coder {
     uint_256(value : String)
     bytes32(value : String)
     andress(value : String)
 }
 
-type User.caotic.Encode.ABI.Data {
-    new(value : Bits, dynamic : Bool)
-}
 
-Bits.pad.go(pad : Nat, x : Bits) : Bits
-  if pad >? 0 then Bits.pad.go(pad-1, Bits.o(x)) else x
+User.caotic.Encode.ABI.Coder.stringfy(coder : User.caotic.Encode.ABI.Coder) : String
+  case coder {
+    uint_256 : "uint_256"
+    bytes32 : "bytes32"
+    andress : "andress"
+  }
 
-Bits.pad(pad : Nat, x : Bits) : Bits
-  Bits.concat(x, Bits.pad.go(pad-Bits.length(x), Bits.e))
-
-Bytes.padRight(pad : Nat, x : Bits) : Bits // x*pad
-  if pad >? 0 then Bits.mul(Bytes.padRight(pad - 1, x), Bits16) else x
+ type User.caotic.Encode.ABI.Method {
+   new(
+     name : String,
+     inputs : List<User.caotic.Encode.ABI.Coder>
+     output : List<User.caotic.Encode.ABI.Coder>
+     constant : List<Bool>,
+     payable : List<Bool>
+   )
+ }
 
 //Bits.pad.correcly_semantics(n : Nat, x : Bits) :
 //   Bits.to_nat(Bits.pad(n, x)) == Bits.to_nat(x)
@@ -42,6 +38,28 @@ User.caotic.ABI.encode_(coder : User.caotic.Encode.ABI.Coder) : Pair<String, Boo
   } default 
       {String.pad_left(64, '0', coder.value), false}
 
+User.caotic.ABI.methodData(method : User.caotic.Encode.ABI.Method) : _
+  open method
+  let joinMethods = List.map!!((x) User.caotic.Encode.ABI.Coder.stringfy(x), method.inputs)
+  let methodSig = method.name | "(" | String.join(",", joinMethods) | ")"
+  let methodHash = Crypto.Keccak.hash(methodSig)
+  let encodeInputs = List.map!!((x) User.caotic.ABI.encode_(x), method.inputs)
+  let encodeSize = List.length!(encodeInputs)
+
+  let str = ""
+  for coder in encodeInputs with str :
+    open coder
+    if coder.snd then
+      let dataLoc = (encodeSize*32) + String.length(str)
+      str = str | String.pad_left(64, '0', Nat.hex.encode(dataLoc))
+      str = str | coder.fst
+      str
+    else
+      str = str | coder.fst
+      str
+  
+  ?b
+  
 User.caotic.ABI.encode : _
   let value = Bits.to_hex_string(Nat.to_bits(1002))
   let r = User.caotic.ABI.encode_(User.caotic.Encode.ABI.Coder.bytes32(value))
