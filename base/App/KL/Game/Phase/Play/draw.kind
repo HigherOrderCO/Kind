@@ -297,12 +297,25 @@ App.KL.Game.Phase.Play.draw.bases(
       let player = game@players{user}
       without player: img
 
-      let allies = App.KL.Game.Player.get_allies_list(player, game@players)
+      let allies = App.KL.Game.Player.get_allies(player, game@players)
       let bases  = game@blueprint@base
       for team:coords in bases with img:
+        let indicator = App.KL.Game.Team.get_indicator(team)
         for coord in coords with img:
-          let indicator = App.KL.Game.Team.get_indicator(team)
-          App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
+          for l_user:player in allies with img:
+            let init_pos = player@init_pos
+            without init_pos: App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
+            
+            let indicator = 
+              if Hexagonal.Axial.eql(init_pos, coord) then
+                if String.eql(user, l_user) then 
+                  App.KL.Game.Indicator.green_line
+                else
+                  App.KL.Game.Indicator.gray_line
+              else
+                indicator
+            App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
+          img
         img
       img
     preparation: img
