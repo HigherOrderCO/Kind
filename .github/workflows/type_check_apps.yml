@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  type_check_apps:
     runs-on: ubuntu-latest
 
     steps:
