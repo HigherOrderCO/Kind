@@ -210,6 +210,7 @@ App.KL.Game.Phase.Play.draw.canvas(
     execution: some(game.moment.hits)
   }
   let img = App.KL.Game.Phase.Play.draw.board(game, local@preview, hits, local@user, local@mouse, img) 
+  let img = App.KL.Game.Phase.Play.draw.bases(game, local@user, img)
   let img = App.KL.Game.Phase.Play.draw.cursor(local@mouse, img)
   img
 
@@ -286,6 +287,27 @@ App.KL.Game.Phase.Play.draw.tile.token(
   img
 
   
+App.KL.Game.Phase.Play.draw.bases(
+  game: App.KL.Game
+  user: String
+  img: VoxBox
+): VoxBox
+  case game@moment {
+    initial:
+      let player = game@players{user}
+      without player: img
+
+      let allies = App.KL.Game.Player.get_allies_list(player, game@players)
+      let bases  = game@blueprint@base
+      for team:coords in bases with img:
+        for coord in coords with img:
+          let indicator = App.KL.Game.Team.get_indicator(team)
+          App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
+        img
+      img
+    preparation: img
+    execution: img
+  }
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
   preview: App.KL.Game.Cast.Preview 

@@ -29,3 +29,10 @@ App.KL.Game.Team.show(team: App.KL.Game.Team): String
 App.KL.Game.Team.cmp(x: App.KL.Game.Team, y: App.KL.Game.Team): Cmp
   String.cmp(App.KL.Game.Team.show(x), App.KL.Game.Team.show(y))
 
+  
+App.KL.Game.Team.get_indicator(team: App.KL.Game.Team): App.KL.Game.Indicator
+  case team {
+    red: App.KL.Game.Indicator.red_line
+    blue: App.KL.Game.Indicator.blue_line
+    neutral: App.KL.Game.Indicator.background
+  }

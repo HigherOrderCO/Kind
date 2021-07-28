@@ -15,7 +15,7 @@ App.KL.Game.Board.Boards.arena.bases: List<Pair<App.KL.Game.Team, List<Hexagonal
        Hexagonal.Axial.new(I32.neg(size)    ,  1 ::I32),
        Hexagonal.Axial.new(I32.neg(size) + 2, -2 ::I32),
        Hexagonal.Axial.new(I32.neg(size),      2 ::I32),
-       Hexagonal.Axial.new(I32.neg(size) + 1,  1 ::I32),
+       Hexagonal.Axial.new(I32.neg(size) + 1, -1 ::I32),
     ]},
     {App.KL.Game.Team.red, [
        Hexagonal.Axial.new(size    ,  0 ::I32),
@@ -23,7 +23,7 @@ App.KL.Game.Board.Boards.arena.bases: List<Pair<App.KL.Game.Team, List<Hexagonal
        Hexagonal.Axial.new(size    , -1 ::I32),
        Hexagonal.Axial.new(size - 2,  2 ::I32),
        Hexagonal.Axial.new(size,     -2 ::I32),
-       Hexagonal.Axial.new(size - 1, -1 ::I32),
+       Hexagonal.Axial.new(size - 1,  1 ::I32),
     ]},
   ]
 
