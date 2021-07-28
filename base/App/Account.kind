@@ -161,6 +161,9 @@ App.Account.Screen.debug(state: App.Account.State.global): DOM
       List.show!(Pair.show!!((x) x, (x) x), userlist)
       |"\n"|List.show!(Pair.show!!((x) x, List.show!(Pair.show!!((x) x, (x) x))), keylist)
     </p>
+    <button id="welcome_button" style=box_style>
+      "Home"
+    </button>
   </div>
 
 App.Account.draw: App.Draw<App.Account.State>
@@ -195,6 +198,8 @@ App.Account.when: App.When<App.Account.State>
               let serial = App.Account.Global.Event.revoke.serial(state.local.revoke_devicekey)
               log("serial revoke: "|serial)
               App.new_post!(App.Account.room, serial)
+            "welcome_button":
+              App.set_local!(App.Account.State.local.welcome)
           } default App.pass!
       } default App.pass!
     }
