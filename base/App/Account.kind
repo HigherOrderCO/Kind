@@ -20,7 +20,6 @@ type App.Account.State.global {
     keymap: Map<List<Pair<App.Account.Device.Name, App.Account.Device.Key>>>
   )
 }
-
 type App.Account.State.local { 
   debug(
     register_username: String
@@ -30,7 +29,12 @@ type App.Account.State.local {
     revoke_devicekey: String
   )
   welcome
-  new
+  register(
+    username: String
+    devicename: String
+  )
+  login
+  home
 }
 
 
@@ -107,7 +111,9 @@ App.Account.draw: App.Draw<App.Account.State>
       App.Account.Screen.draw.debug(state.global)
     welcome:
       App.Account.Screen.draw.welcome
-  } default <p>"oi"</p>
+    register:
+      App.Account.Screen.draw.register
+  } default <p>"you're in the void, this screen doesn't exist"</p>
 
 App.Account.when: App.When<App.Account.State>
   (event, state)
@@ -135,6 +141,11 @@ App.Account.when: App.When<App.Account.State>
               App.new_post!(App.Account.room, serial)
             "welcome_button":
               App.set_local!(App.Account.State.local.welcome)
+          } default App.pass!
+        welcome: 
+          switch String.eql(event.id) { 
+            "register_button": App.set_local!(App.Account.State.local.register("",""))
+            "login_button": App.set_local!(App.Account.State.local.login)
           } default App.pass!
       } default App.pass!
     }

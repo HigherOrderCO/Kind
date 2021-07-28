@@ -1,70 +1,66 @@
-
-
-App.Account.Screen.draw.welcome: DOM
-  let main_style = {
-    "width": "100vw"
+App.Account.Screen.draw.main_style: Map<String>
+  { "width": "100vw"
     "height": "100vw"
     "display":"flex"
     "flex-direction":"column"
-    "align-items": "start"
-  }
-  
-  let upper_bottom_style = { 
-    "display":"flex"
-    "flex-direction":"row"
-    "align-items": "center"
-  }
+    "align-items": "start" }
 
-  let box_style = {
-    "font-size": "2rem",
-    "font-family": "monospace",
-    "outline": "transparent",
-    "margin-bottom": "15px"
-    "margin-left": "4px"
-  }
-  let text_style = { 
-    "align-items": "center"
-    "font-size": "2em",
-    "padding-bottom": "5px"
-  }
+App.Account.Screen.draw.upper_bottom_style: Map<String>
+{ "display":"flex"
+  "flex-direction":"row"
+  "align-items": "center" }
 
-  <div style=main_style>
-    <div style=text_style>"Welcome to UwU.Tech Accounts :3"</div>
-    <button id="register_button" style=box_style>
+App.Account.Screen.draw.box_style: Map<String>
+{ "font-size": "2rem",
+  "font-family": "monospace",
+  "outline": "transparent",
+  "margin-bottom": "15px"
+  "margin-left": "4px" }
+
+App.Account.Screen.draw.box_style: Map<String>
+{ "align-items": "center"
+  "font-size": "2em",
+  "padding-bottom": "5px" }
+
+App.Account.Screen.draw.text_style: Map<String>
+{ "align-items": "center"
+  "font-size": "2em",
+  "padding-bottom": "5px" }
+
+
+App.Account.Screen.draw.welcome: DOM
+  <div style=App.Account.Screen.draw.main_style>
+    <div style=App.Account.Screen.draw.text_style>"Welcome to UwU.Tech Accounts :3"</div>
+    <button id="register_button" style=App.Account.Screen.draw.box_style>
       "Register"
     </button>
-    <button id="login_button" style=box_style>
+    <button id="login_button" style=App.Account.Screen.draw.box_style>
       "Login"
     </button>
   </div>
 
-App.Account.Screen.draw.debug(state: App.Account.State.global): DOM
-  let main_style = {
-    "width": "100vw"
-    "height": "100vw"
-    "display":"flex"
-    "flex-direction":"column"
-    "align-items": "start"
-  }
-  
-  let upper_bottom_style = { 
-    "display":"flex"
-    "flex-direction":"row"
-    "align-items": "center"
-  }
 
-  let box_style = {
-    "font-size": "2rem",
-    "font-family": "monospace",
-    "outline": "transparent",
-    "margin-bottom": "15px"
-    "margin-left": "4px"
-  }
-  let text_style = { 
-    "align-items": "center"
-    "font-size": "2em",
-    "padding-bottom": "5px"
-  }
+App.Account.Screen.draw.register: DOM
+  let main_style = App.Account.Screen.draw.main_style
+  let text_style = App.Account.Screen.draw.text_style
+  let box_style =  App.Account.Screen.draw.box_style
+  <div style=main_style>
+    <div style=text_style>"Create an Account"</div>
+      <input id="register_username" style=box_style>
+      </input>
+      <input id="register_devicename" style=box_style>
+      </input>
+      <button id="register_button" style=box_style>
+        "Register"
+      </button>
+  </div>
+
+App.Account.Screen.draw.debug(state: App.Account.State.global): DOM
+  let main_style = App.Account.Screen.draw.main_style
+  let text_style = App.Account.Screen.draw.text_style
+  let box_style =  App.Account.Screen.draw.box_style
+  let upper_bottom_style =App.Account.Screen.draw.upper_bottom_style
+
   <div style=main_style>
     <div style=text_style>"Create an Account"</div>
     <div style=upper_bottom_style>
