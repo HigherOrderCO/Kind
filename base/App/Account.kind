@@ -18,6 +18,7 @@ type App.Account.State.global {
   new(
     usermap: Map<App.Account.Username>
     keymap: Map<List<Pair<App.Account.Device.Name, App.Account.Device.Key>>>
+    tick: U64
   )
 }
 type App.Account.State.local {
@@ -42,6 +43,9 @@ type App.Account.State.Screen {
   )
   login
   home
+  loading(
+    init_time: U64
+  )
 }
 
 
@@ -108,7 +112,9 @@ App.Account: App<App.Account.State>
 
 App.Account.init: App.Init<App.Account.State>
   let screen = App.Account.State.Screen.debug("", "", "", "", "")
-  App.Store.new<App.Account.State>(App.Account.State.local.new("", screen), App.Account.State.global.new(Map.new!, Map.new!))
+  App.Store.new<App.Account.State>(
+    App.Account.State.local.new("", screen)
+    App.Account.State.global.new(Map.new!, Map.new!, 0))
 
 
 App.Account.draw: App.Draw<App.Account.State>
@@ -124,6 +130,8 @@ App.Account.draw: App.Draw<App.Account.State>
       App.Account.Screen.draw.register
     home:
       App.Account.Screen.draw.home(state.global, state.local@address)
+    loading:
+      App.Account.Screen.draw.loading
   } default <p>"you're in the void, this screen doesn't exist"</p>
 
 App.Account.when: App.When<App.Account.State>
@@ -131,10 +139,33 @@ App.Account.when: App.When<App.Account.State>
   case event { 
     init: IO { 
       open state
-      App.watch!(App.Account.room)
-      let local = state.local@address <- event.user
+      let time = ((event.time*2) /125)
+      let screen = App.Account.State.Screen.loading(time)
+      let local = App.Account.State.local.new(event.user, screen)
       log(" -User address: "|local@address)
+      App.watch!(App.Account.room)
       App.set_local!(local)
+    }
+    frame: IO {
+      open state
+      let screen = state.local@screen
+      case screen { 
+        loading:
+          let target = screen.init_time
+          let curr_tick = state.global@tick
+          if U64.gte(curr_tick, target) then
+            let has_user = App.Account.verify(state.global, state.local@address)
+            if has_user then
+              let screen = App.Account.State.Screen.home
+              let local = state.local@screen <- screen
+              App.set_local!(local)
+            else
+              let screen = App.Account.State.Screen.welcome
+              let local = state.local@screen <- screen
+              App.set_local!(local)
+          else
+            App.pass!
+      }default App.pass!
     }
     mouse_click: IO {
       open state
@@ -262,7 +293,9 @@ App.Account.when: App.When<App.Account.State>
 
 //Tick not used
 App.Account.tick: App.Tick<App.Account.State>
-  App.no_tick(App.Account.State)
+  (tick, glob)
+  glob@tick <- tick
+
 
 //Post
 App.Account.post: App.Post<App.Account.State>
