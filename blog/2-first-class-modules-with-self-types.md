@@ -158,9 +158,9 @@ dyn: Nat
 ```
 
 With this, we're able to represent first-class modules in Kind. The `Dynamic`
-and `Module` modules are already on base, and the first snippet in this post
-already works as written!
+and `Module` modules are already on Kind/base. Thus, users can already use
+first-class modules in their codes, and the first snippet in this post works!
 
-As a last thought, I wonder if, in a fugutre, we should desugar the `type` 
+As a last thought, I wonder if, in a future, we should desugar the `type` 
 syntax in a way that does this automatically. I see no reason not to, but
 it would increase the complexity of the desugarer considerably.
