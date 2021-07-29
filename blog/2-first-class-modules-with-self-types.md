@@ -144,6 +144,20 @@ Dynamic.new<T: Type>(value: T): Dynamic
   (P, new) new(T,value)
 ```
 
+This should work in any language with self types. Since not every reader is
+familiar with Kind's syntax, here is the same code in an Agda-like syntax:
+
+```
+Dynamic : Set
+Dynamic =
+  ∀ self (P : Dynamic -> Set) ->
+  ∀ (new : (T : Type) -> (value : typeOf self) -> P (new (typeOf self) value)) ->
+  P self
+
+new : (T : Set) -> (value : T) -> Dynamic
+new T value = \ P new -> new T value
+```
+
 With this small change, we're now able to extract values of static dynamics just
 like in Agda. In other words, the following program type-checks just fine:
 
@@ -158,8 +172,8 @@ dyn: Nat
 ```
 
 With this, we're able to represent first-class modules in Kind. The `Dynamic`
-and `Module` modules are already on Kind/base. Thus, users can already use
-first-class modules in their codes, and the first snippet in this post works!
+and `Module` modules are already on base. Kind users can already use first-class
+modules in their codes, and the first snippet in this post works as is!
 
 As a last thought, I wonder if, in a future, we should desugar the `type` 
 syntax in a way that does this automatically. I see no reason not to, but
