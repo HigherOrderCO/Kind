@@ -53,17 +53,25 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
         <span style={"color": "rgb(160,0,0)"}>Nat.show(I32.to_nat(red_hp))</span>
         //<span>" of " | String.show_clean(I32.show(App.KL.Constants.max_score))</span>
       </div>
-      <div style={"font-size": "32px", "font-family": "monospace"}>
+      <div style={"font-size": "32px", "font-family": "monospace"}>{
         case game.moment {
           initial: 
-            Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))
+            if U64.gtn(game.moment.countdown, App.KL.Constants.initital_delay) then
+              <div>
+                <p>"Choose an initial coordinate"</p>
+                <p style={"text-align":"center"}>Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))</p>
+              </div>
+            else
+              <span>"The game will start..."</span>
           preparation: 
-            Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))
+            <span>Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))</span>
           execution: case game.moment.casts {
             nil:
-              "End of turn "
-              | Nat.show(U64.to_nat(game.turn))
-              | "."
+              <span>
+                "End of turn "
+                | Nat.show(U64.to_nat(game.turn))
+                | "."
+              </span>
             cons: Maybe {
               let cast = game.moment.casts.head
               get skill = App.KL.Game.Cast.get_skill(cast, game)
@@ -75,11 +83,11 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
                 right:
                   hero@name | " used " | skill@name | "!"
               }
-              return text
-            } <> "Invalid cast."
+              return <span>text</span>
+            } <> <span>"Invalid cast."</span>
           }
         }
-      </div>
+      }</div>
       <div style={
         "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
       }>{
