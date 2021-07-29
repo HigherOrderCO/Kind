@@ -18,7 +18,6 @@ type App.Account.State.global {
   new(
     usermap: Map<App.Account.Username>
     keymap: Map<List<Pair<App.Account.Device.Name, App.Account.Device.Key>>>
-    tick: U64
   )
 }
 type App.Account.State.local {
@@ -42,10 +41,11 @@ type App.Account.State.Screen {
     devicename: String
   )
   login
-  home
-  loading(
-    init_time: U64
+  home(
+    user: String
+    devices: List<Pair<String, String>>
   )
+  loading
 }
 
 
@@ -111,10 +111,10 @@ App.Account: App<App.Account.State>
   )
 
 App.Account.init: App.Init<App.Account.State>
-  let screen = App.Account.State.Screen.debug("", "", "", "", "")
+  let screen = App.Account.State.Screen.welcome
   App.Store.new<App.Account.State>(
     App.Account.State.local.new("", screen)
-    App.Account.State.global.new(Map.new!, Map.new!, 0))
+    App.Account.State.global.new(Map.new!, Map.new!))
 
 
 App.Account.draw: App.Draw<App.Account.State>
@@ -129,7 +129,12 @@ App.Account.draw: App.Draw<App.Account.State>
     register:
       App.Account.Screen.draw.register
     home:
-      App.Account.Screen.draw.home(state.global, state.local@address)
+      App.Account.Screen.draw.home(
+        state.global
+        state.local.address
+        state.local.screen.user
+        state.local.screen.devices
+      )
     loading:
       App.Account.Screen.draw.loading
   } default <p>"you're in the void, this screen doesn't exist"</p>
@@ -138,34 +143,37 @@ App.Account.when: App.When<App.Account.State>
   (event, state)
   case event { 
     init: IO { 
-      open state
-      let time = ((event.time*2) /125)
-      let screen = App.Account.State.Screen.loading(time)
-      let local = App.Account.State.local.new(event.user, screen)
+//      open state
+//      let time = ((event.time*2) /125)
+      let screen = App.Account.State.Screen.welcome
+      let local = App.Account.State.local.new(String.to_lower(event.user), screen)
       log(" -User address: "|local@address)
       App.watch!(App.Account.room)
       App.set_local!(local)
     }
     frame: IO {
       open state
-      let screen = state.local@screen
-      case screen { 
-        loading:
-          let target = screen.init_time
-          let curr_tick = state.global@tick
-          if U64.gte(curr_tick, target) then
-            let has_user = App.Account.verify(state.global, state.local@address)
-            if has_user then
-              let screen = App.Account.State.Screen.home
+      open state.local
+      // TODO do this elsewhere
+      case state.local.screen {
+        welcome:
+          open state.global
+          case state.global.usermap{state.local.address} as username {
+            some:
+              //let screen = App.Account.State.Screen.debug("", "", "", "", "")
+              let devices = state.global.keymap{username.value} abort
+                log("invariant violation, user not found")
+                App.pass!
+              let screen = App.Account.State.Screen.home(username.value, devices)
               let local = state.local@screen <- screen
               App.set_local!(local)
-            else
-              let screen = App.Account.State.Screen.welcome
-              let local = state.local@screen <- screen
-              App.set_local!(local)
-          else
-            App.pass!
-      }default App.pass!
+            none:
+              App.pass!
+//              let screen = App.Account.State.Screen.welcome
+//              let local = state.local@screen <- screen
+//              App.set_local!(local)
+          }
+      } default App.pass!
     }
     mouse_click: IO {
       open state
@@ -210,12 +218,12 @@ App.Account.when: App.When<App.Account.State>
               let serial = App.Account.Global.Event.register.serial(state.local.screen.username, state.local.screen.devicename)
               log("serial register: "|serial)
               IO {
-                let new_room = App.Account.State.Screen.home
+                let new_room = App.Account.State.Screen.home(state.local.screen.username, [{state.local.screen.devicename, state.local.address}])
                 let addr = state.local.address
                 App.new_post!(App.Account.room, serial)
                 App.set_local!(App.Account.State.local.new(addr, new_room))
               }
-          }default App.pass!
+          } default App.pass!
       } default App.pass!
     }
     input:
@@ -293,8 +301,7 @@ App.Account.when: App.When<App.Account.State>
 
 //Tick not used
 App.Account.tick: App.Tick<App.Account.State>
-  (tick, glob)
-  glob@tick <- tick
+  App.no_tick<App.Account.State>
 
 
 //Post
