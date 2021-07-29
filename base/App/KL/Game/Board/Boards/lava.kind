@@ -1,8 +1,44 @@
 App.KL.Game.Board.Boards.lava: App.KL.Game.Board.Blueprint
   App.KL.Game.Board.Blueprint.new(
     App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.lava.terrains)
-    [{{+0#32,+0#32} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2)}]
+    [{{+0#32,+0#32} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2)}],
+    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards.lava.bases),
+    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards.lava.initial)
   )
+
+App.KL.Game.Board.Boards.lava.initial: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+  [
+    {App.KL.Game.Team.red, [
+      {+7#32, -2#32 } :: Hexagonal.Axial
+      {+7#32, -1#32 } :: Hexagonal.Axial
+      {+6#32, +0#32 } :: Hexagonal.Axial
+    ]},
+    {App.KL.Game.Team.blue, [
+      {-8#32, +0#32 } :: Hexagonal.Axial
+      {-9#32, +1#32 } :: Hexagonal.Axial
+      {-9#32, +2#32 } :: Hexagonal.Axial
+    ]}
+  ]
+
+App.KL.Game.Board.Boards.lava.bases: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+  [
+    {App.KL.Game.Team.red, [
+      {+5#32, -2#32 } :: Hexagonal.Axial
+      {+4#32, -1#32 } :: Hexagonal.Axial
+      {+4#32, +0#32 } :: Hexagonal.Axial
+      {+4#32, +1#32 } :: Hexagonal.Axial
+      {+3#32, +1#32 } :: Hexagonal.Axial
+      {+4#32, -2#32 } :: Hexagonal.Axial
+    ]},
+    {App.KL.Game.Team.blue, [
+      {-7#32, +1#32 } :: Hexagonal.Axial
+      {-7#32, +2#32 } :: Hexagonal.Axial
+      {-6#32, +1#32 } :: Hexagonal.Axial
+      {-6#32, +0#32 } :: Hexagonal.Axial
+      {-6#32, -1#32 } :: Hexagonal.Axial
+      {-5#32, -1#32 } :: Hexagonal.Axial
+    ]}
+  ]
 
 App.KL.Game.Board.Boards.lava.terrains: List<Pair<Pair<I32, I32>, Nat>>
   [
