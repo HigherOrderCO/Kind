@@ -38,7 +38,7 @@ data Dynamic : Set where
   new : (T : Set) -> (value : T) -> Dynamic
 ```
 
-This type kind of carries the type of a value together with the value itself.
+This datatype just carries the type of a value together with the value itself.
 This, in turn, allows us to create collections of types that vary. For example,
 we may store ints and strings in the same `List Dynamic`:
 
