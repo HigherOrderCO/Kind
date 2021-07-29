@@ -1,17 +1,19 @@
 App.KL.Game.Creature.Status.root.add(
   creature: App.KL.Game.Creature
+  caster_id: String
   duration: I32
 ): App.KL.Game.Creature
   
-  root_added = App.KL.Game.Creature.Status.root.add.aux(duration, creature@status)
+  root_added = App.KL.Game.Creature.Status.root.add.aux(caster_id, duration, creature@status)
   creature@status <- root_added
 
 App.KL.Game.Creature.Status.root.add.aux(
+  caster_id: String
   duration: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  let new_root = App.KL.Game.Creature.Status.root(duration)
+  let new_root = App.KL.Game.Creature.Status.root(caster_id, duration)
   case status { 
     nil:
       new_root & status
@@ -24,6 +26,6 @@ App.KL.Game.Creature.Status.root.add.aux(
             gtn: 
               new_root & status.tail
 
-          }default status.head & App.KL.Game.Creature.Status.root.add.aux(duration, status.tail)
-      }default status.head & App.KL.Game.Creature.Status.root.add.aux(duration, status.tail)
+          }default status.head & App.KL.Game.Creature.Status.root.add.aux(caster_id, duration, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.root.add.aux(caster_id, duration, status.tail)
   }

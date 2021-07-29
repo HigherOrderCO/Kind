@@ -1,17 +1,19 @@
 App.KL.Game.Creature.Status.stun.add(
   creature: App.KL.Game.Creature
+  caster_id: String
   duration: I32
 ): App.KL.Game.Creature
   
-  let stun_added = App.KL.Game.Creature.Status.stun.add.aux(duration, creature@status)
+  let stun_added = App.KL.Game.Creature.Status.stun.add.aux(caster_id, duration, creature@status)
   creature@status <- stun_added
 
 App.KL.Game.Creature.Status.stun.add.aux(
+  caster_id: String
   duration: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  let new_stun = App.KL.Game.Creature.Status.stun(duration)
+  let new_stun = App.KL.Game.Creature.Status.stun(caster_id, duration)
   case status { 
     nil:
       new_stun & status
@@ -23,6 +25,6 @@ App.KL.Game.Creature.Status.stun.add.aux(
           case next_stun {
             gtn: 
               new_stun & status.tail
-          }default status.head & App.KL.Game.Creature.Status.stun.add.aux(duration, status.tail)
-      }default status.head & App.KL.Game.Creature.Status.stun.add.aux(duration, status.tail)
+          }default status.head & App.KL.Game.Creature.Status.stun.add.aux(caster_id, duration, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.stun.add.aux(caster_id, duration, status.tail)
   }

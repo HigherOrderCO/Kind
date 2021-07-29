@@ -2,28 +2,37 @@ App.KL.Game.Board.apply_status(
   game: App.KL.Game
 ): App.KL.Game
 
-  let result = {game@board, game@cemetery}
+  let result = {game@board, {game@cemetery, Map.new<App.KL.Game.Scoreboard>}}
   for coord:tile in game@board with result:
     let effect_tile = App.KL.Game.Tile.effect.get(tile)
-    let effect_tile_result = effect_tile(coord, [coord], result@fst)
+    let effect_tile_result = effect_tile(coord, [coord], none, result@fst)
     let result = case effect_tile_result { 
       err: result
-      new: {effect_tile_result.board, result@snd ++ effect_tile_result.cemetery}
+      new: {effect_tile_result.board, {result@snd@fst ++ effect_tile_result.cemetery, Map.union!(effect_tile_result.scoreboard, result@snd@snd)}}
     }
     let new_creature = App.KL.Game.Board.Creature.get(coord, result@fst)
     without new_creature: result
     let status = new_creature@status
     for dots in status with result:
       let effect = App.KL.Game.Creature.Status.get_effect(dots)
-      let effect_result = effect(coord, coord, [coord], result@fst)
+      open dots
+      let effect_result = effect(coord, coord, [coord], some(dots.caster_id), result@fst)
       case effect_result { 
         err: result
-        new: {effect_result.board, result@snd ++ effect_result.cemetery}
+        new: {effect_result.board, {result@snd@fst ++ effect_result.cemetery, Map.union!(effect_result.scoreboard, result@snd@snd)}}
       }
     result
     
 //Update Tile Effects
   let new_board = App.KL.Game.Board.tile_update(result@fst)
   let game = game@board <- new_board
-  let game = game@cemetery <- game@cemetery ++ result@snd
+  let game = game@cemetery <- game@cemetery ++ result@snd@fst
+  let log  = ""
+  let log  =
+    for player:score in result@snd@snd with log:
+      open score
+      log | player | "   Damage:   " | I32.to_string(score.damage) | "     "
+    log
+  log(log)
+  let game = game@players <- App.KL.Game.Player.scoreboard.map.update(game@players, result@snd@snd)
   game

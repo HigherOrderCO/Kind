@@ -5,6 +5,7 @@ type App.KL.Game.Effect.Result <A: Type> {
   new(
     value: A,
     center: Hexagonal.Axial,
+    caster_id: Maybe<String>
     board: App.KL.Game.Board,
     indicators: Hexagonal.Axial.Map(App.KL.Game.Indicator)
     ap_used: I32 

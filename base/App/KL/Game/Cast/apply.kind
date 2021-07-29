@@ -10,7 +10,7 @@ App.KL.Game.Cast.apply(
     get skill = App.KL.Game.Cast.get_skill(cast, game)
     get coord = App.KL.Game.Cast.get_coord(cast, game)
     get creature = App.KL.Game.Board.Creature.get(coord, game.board)
-    let result = skill@effect(coord, cast@target, game@board)
+    let result = skill@effect(coord, cast@target, none, game@board)
     let is_stunned = App.KL.Game.Creature.Status.stun.check(creature) // Verifies if the creature is stunned
     let is_silenced = App.KL.Game.Creature.Status.silence.check(creature) // Verifies if the creature is silenced
     let is_rooted = App.KL.Game.Creature.Status.root.check(creature) // Verifies if the creature is rooted

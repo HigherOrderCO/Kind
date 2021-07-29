@@ -1,0 +1,6 @@
+App.KL.Game.Effect.caster_id.add(
+  id: String
+): App.KL.Game.Effect<Unit>
+  (center, targets, caster_id, board)
+
+  App.KL.Game.Effect.Result.new!(unit, center, some(id), board, Hexagonal.Axial.Map.new!, 0, [], "", {})

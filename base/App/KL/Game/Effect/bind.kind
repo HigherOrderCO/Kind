@@ -4,10 +4,10 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
 ): App.KL.Game.Effect<B>
 
   //TODO: Verify problem with error result A and B
-  (center, targets, board)
-  case effect(center, targets, board) as result_a {
+  (center, targets, caster_id, board)
+  case effect(center, targets, caster_id, board) as result_a {
     err: App.KL.Game.Effect.Result.err<B>(result_a.message)
-    new: case next(result_a.value)(result_a.center, targets, result_a.board) as result_b {
+    new: case next(result_a.value)(result_a.center, targets, result_a.caster_id, result_a.board) as result_b {
       err: App.KL.Game.Effect.Result.err<B>(result_b.message)
       new:
         center      = result_b.center
@@ -18,7 +18,8 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
         cemetery    = result_a.cemetery ++ result_b.cemetery
         description = App.KL.Game.Effect.bind.description(result_a.description, result_b.description)
         scoreboard  = App.KL.Game.Scoreboard.map.union(result_a.scoreboard, result_b.scoreboard)
-        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used, cemetery, description, scoreboard)
+        caster_id   = case result_b.caster_id {none: result_a.caster_id some: result_b.caster_id}
+        App.KL.Game.Effect.Result.new<B>(value, center, caster_id, map, indicators, ap_used, cemetery, description, scoreboard)
     }
   }
 

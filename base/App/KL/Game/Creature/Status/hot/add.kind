@@ -1,22 +1,24 @@
 App.KL.Game.Creature.Status.hot.add(
   creature: App.KL.Game.Creature
+  caster_id: String
   id: String
   duration: I32
   amount: I32
 ): App.KL.Game.Creature
   
   //HOT = Heal Over Time
-  let hot_added = App.KL.Game.Creature.Status.hot.add.aux(id, duration, amount, creature@status)
+  let hot_added = App.KL.Game.Creature.Status.hot.add.aux(caster_id, id, duration, amount, creature@status)
   creature@status <- hot_added
 
 App.KL.Game.Creature.Status.hot.add.aux(
+  caster_id: String
   id: String
   duration: I32
   amount: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  new_hot = App.KL.Game.Creature.Status.hot(id, duration, 1, amount)
+  new_hot = App.KL.Game.Creature.Status.hot(caster_id, id, duration, 1, amount)
   case status { 
     nil:
       new_hot & status
@@ -29,10 +31,10 @@ App.KL.Game.Creature.Status.hot.add.aux(
             let hot_stacks = status.head.stack + 1
             let hot_heal = status.head.amount * 2
             if I32.gtn(hot_stacks, 3) then
-              App.KL.Game.Creature.Status.hot("final_apply", 1, 0, status.head.amount + 2) & status.tail
+              App.KL.Game.Creature.Status.hot(status.head.caster_id, "final_apply", 1, 0, status.head.amount + 2) & status.tail
             else 
-              App.KL.Game.Creature.Status.hot(status.head.id, hot_duration, hot_stacks, hot_heal) & status.tail
+              App.KL.Game.Creature.Status.hot(status.head.caster_id, status.head.id, hot_duration, hot_stacks, hot_heal) & status.tail
           else
-            status.head & App.KL.Game.Creature.Status.hot.add.aux(id, duration, amount,  status.tail)
-      }default status.head & App.KL.Game.Creature.Status.hot.add.aux(id, duration, amount,  status.tail)
+            status.head & App.KL.Game.Creature.Status.hot.add.aux(caster_id, id, duration, amount,  status.tail)
+      }default status.head & App.KL.Game.Creature.Status.hot.add.aux(caster_id, id, duration, amount,  status.tail)
   }

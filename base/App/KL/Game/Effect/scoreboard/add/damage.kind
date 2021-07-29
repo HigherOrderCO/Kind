@@ -2,10 +2,11 @@ App.KL.Game.Effect.scoreboard.add.damage(
   player_id: String
   damage: I32
 ): App.KL.Game.Effect<Unit>
-  (center, targets, board)
+  (center, targets, caster_id, board)
     App.KL.Game.Effect.Result.new!(
       unit, 
       center, 
+      none, 
       board, 
       Hexagonal.Axial.Map.new!, 
       0, 

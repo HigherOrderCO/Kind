@@ -2,14 +2,15 @@ App.KL.Game.Effect.scoreboard.add.heal(
   player_id: String
   heal: I32
 ): App.KL.Game.Effect<Unit>
-  (center, targets, board)
+  (center, targets, caster_id, board)
     App.KL.Game.Effect.Result.new!(
       unit, 
-      center, 
+      center,
+      none,
       board, 
       Hexagonal.Axial.Map.new!, 
       0, 
       [], 
       "", 
-      {player_id: App.KL.Game.Scoreboard.new(0, heal, 0, 0)}
+      {player_id: App.KL.Game.Scoreboard.new(0, heal, 0, 0)},
     )

@@ -1,17 +1,19 @@
 App.KL.Game.Creature.Status.silence.add(
   creature: App.KL.Game.Creature
+  caster_id: String
   duration: I32
 ): App.KL.Game.Creature
   
-  let silence_added = App.KL.Game.Creature.Status.silence.add.aux(duration, creature@status)
+  let silence_added = App.KL.Game.Creature.Status.silence.add.aux(caster_id, duration, creature@status)
   creature@status <- silence_added
 
 App.KL.Game.Creature.Status.silence.add.aux(
+  caster_id: String
   duration: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  let new_silence = App.KL.Game.Creature.Status.silence(duration)
+  let new_silence = App.KL.Game.Creature.Status.silence(caster_id, duration)
   case status { 
     nil:
       new_silence & status
@@ -23,6 +25,6 @@ App.KL.Game.Creature.Status.silence.add.aux(
           case next_silence {
             gtn: 
               new_silence & status.tail
-          }default status.head & App.KL.Game.Creature.Status.silence.add.aux(duration, status.tail)
-      }default status.head & App.KL.Game.Creature.Status.silence.add.aux(duration, status.tail)
+          }default status.head & App.KL.Game.Creature.Status.silence.add.aux(caster_id, duration, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.silence.add.aux(caster_id, duration, status.tail)
   }

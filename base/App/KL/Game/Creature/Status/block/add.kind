@@ -1,21 +1,23 @@
 App.KL.Game.Creature.Status.block.add(
   creature: App.KL.Game.Creature
+  caster_id: String
   id: String
   duration: I32
   caster: String
 ): App.KL.Game.Creature
   
-  let block_added = App.KL.Game.Creature.Status.block.add.aux(id, duration, caster, creature@status)
+  let block_added = App.KL.Game.Creature.Status.block.add.aux(caster_id, id, duration, caster, creature@status)
   creature@status <- block_added
 
 App.KL.Game.Creature.Status.block.add.aux(
+  caster_id: String
   id: String
   duration: I32
   caster: String
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  new_block = App.KL.Game.Creature.Status.block(id, duration, caster)
+  new_block = App.KL.Game.Creature.Status.block(caster_id, id, duration, caster)
   case status { 
     nil:
       new_block & status
@@ -26,6 +28,6 @@ App.KL.Game.Creature.Status.block.add.aux(
           if is_same then
             new_block & status.tail
           else
-            status.head & App.KL.Game.Creature.Status.block.add.aux(id, duration, caster, status.tail)
-      }default status.head & App.KL.Game.Creature.Status.block.add.aux(id, duration, caster, status.tail)
+            status.head & App.KL.Game.Creature.Status.block.add.aux(caster_id, id, duration, caster, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.block.add.aux(caster_id, id, duration, caster, status.tail)
   }

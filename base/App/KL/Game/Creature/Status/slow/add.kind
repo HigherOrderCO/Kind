@@ -1,19 +1,21 @@
 App.KL.Game.Creature.Status.slow.add(
   creature: App.KL.Game.Creature
+  caster_id: String
   duration: I32
   amount: I32
 ): App.KL.Game.Creature
   
-  let slow_added = App.KL.Game.Creature.Status.slow.add.aux(duration, amount, creature@status)
+  let slow_added = App.KL.Game.Creature.Status.slow.add.aux(caster_id, duration, amount, creature@status)
   creature@status <- slow_added
 
 App.KL.Game.Creature.Status.slow.add.aux(
+  caster_id: String
   duration: I32
   amount: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  let new_slow = App.KL.Game.Creature.Status.slow(duration, amount)
+  let new_slow = App.KL.Game.Creature.Status.slow(caster_id, duration, amount)
   case status { 
     nil:
       new_slow & status
@@ -25,6 +27,6 @@ App.KL.Game.Creature.Status.slow.add.aux(
           case next_slow {
             gtn: 
               new_slow & status.tail
-          }default status.head & App.KL.Game.Creature.Status.slow.add.aux(duration, amount, status.tail)
-      }default status.head & App.KL.Game.Creature.Status.slow.add.aux(duration, amount, status.tail)
+          }default status.head & App.KL.Game.Creature.Status.slow.add.aux(caster_id, duration, amount, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.slow.add.aux(caster_id, duration, amount, status.tail)
   }
