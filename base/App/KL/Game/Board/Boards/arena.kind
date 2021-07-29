@@ -31,14 +31,14 @@ App.KL.Game.Board.Boards.arena.initial: List<Pair<App.KL.Game.Team, List<Hexagon
   let size = App.KL.Constants.board_size + App.KL.Constants.board_extra_width
   [
     {App.KL.Game.Team.blue, [
+       Hexagonal.Axial.new(I32.neg(size + 1), -1 ::I32),
+       Hexagonal.Axial.new(I32.neg(size + 2),  1 ::I32),
        Hexagonal.Axial.new(I32.neg(size + 2),  0 ::I32),
-       Hexagonal.Axial.new(I32.neg(size + 1), -2 ::I32),
-       Hexagonal.Axial.new(I32.neg(size + 3),  1 ::I32),
     ]},
     {App.KL.Game.Team.red, [
+       Hexagonal.Axial.new(size + 2, -1 ::I32),
+       Hexagonal.Axial.new(size + 1,  1 ::I32),
        Hexagonal.Axial.new(size + 2,  0 ::I32),
-       Hexagonal.Axial.new(size + 2, -2 ::I32),
-       Hexagonal.Axial.new(size + 1, -1 ::I32),
     ]},
   ]
 
