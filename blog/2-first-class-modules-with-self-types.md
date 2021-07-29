@@ -18,7 +18,7 @@ IntLib: Module
     "neg": Dynamic.new!(IntLib.neg) // Int -> Int
   }
 
-five: Nat
+five: Int
   Module.value_of(IntLib, "a")(+2, +3)
 ```
 

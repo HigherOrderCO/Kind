@@ -6,9 +6,9 @@ IntLib.neg(a: Int): Int
 
 IntLib: Module
   {
-    "a": Dynamic.new<Int -> Int -> Int>(IntLib.add)
-    "n": Dynamic.new<Int -> Int>(IntLib.neg)
+    "add": Dynamic.new!(IntLib.add) // Int -> Int -> Int
+    "neg": Dynamic.new!(IntLib.neg) // Int -> Int
   }
 
-five: Nat
-  Module.value_of(IntLib, "a")(+2, +3)
+five: Int
+  Module.value_of(IntLib, "add")(+2, +3)

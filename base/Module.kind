@@ -12,7 +12,7 @@ Module.value_of(module: Module, name: String): Module.type_of(module, name)
   case got {
     none: unit
     some: Dynamic.value_of(got.value)
-  } : case got {
+  }: case got {
     none: Unit
     some: Dynamic.type_of(got.value)
   }
