@@ -5,8 +5,6 @@ var kind_dir = __dirname+"/../base";
 
 process.chdir(kind_dir);
 var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
-// var github_apps = ["base/App/Account.kind", "base/App/Account/Screen/draw.kind"]
-
 const args = process.argv[2];
 
 if (args){
@@ -14,7 +12,7 @@ if (args){
     exit_all(type_check_apps());
   } else { // node type_check_Apps App/[name]
     is_folder(args) 
-    ? exit(type_check_folder_js(get_app_folder(args))) 
+    ? exit(type_check_folder(get_app_folder(args))) 
     : exit(type_check_app(args));
   }
 } else {
@@ -49,7 +47,7 @@ function exit_all(res) {
     console.log("\x1b[32msuccess\x1b[39m\n")
     process.exit();
   } else {
-    console.log("Error in folders: ", res["fail"]);
+    console.log("Found error in folders: ", res["fail"]);
     console.error("\x1b[31mfail\x1b[39m\n");
     process.exit(1);
   }
@@ -67,48 +65,50 @@ function type_check_app(name) {
       }
       console.log('type check STDOUT: '+stdout);
     });
-    const res = String(type_check);
-    // console.log(res);
-    let match = res.slice(-17, -1); // mensage in the end of the type check process
+    let match = String(type_check).slice(-17, -1); // mensage in the end of the type check process
     return match.endsWith("All terms check.");
 }
 
 // Type check an App's folder in base/App
+// all_apps: when false, uses JavaScript compilation target. If true, Scheme.
 // ex: node type_check_Apps App/Playground/
-function type_check_folder_js(name) {
+function type_check_folder(name, all_apps = false) {
   if (fs.existsSync(kind_dir+"/App/"+name)) {
     try {
       console.log("Type checking folder App/"+name+"/* ...");
-      const type_check = execSync('kind App/'+ name +"/", function (error, stdout, stderr) {
+      var target = all_apps ? "kind-scm" : "kind";
+      const type_check = execSync(target+' App/'+ name +"/", function (error, stdout, stderr) {
         if (error) {
           console.log(error.stack);
           return false;
         }
         console.log('type check STDOUT: '+stdout);
       });
-      const res = String(type_check);
-      // console.log(res);
-      let match = res.slice(-17, -1); // mensage in the end of the type check process
+      let match = String(type_check).slice(-17, -1); // mensage in the end of the type check process
       return match.endsWith("All terms check.");
     } catch (e) {
       console.log(e);
       return false;
     }
   } else {
-    console.log("Couldn't find folder App/"+name);
-    return false;
+    if (all_kind_apps.includes(name+".kind")) {
+      return true; // it's an App without folder
+    } else { 
+      console.log("Couldn't find folder App/"+name);
+      return false;
+    }
   }
 }
 
-// console.log("Apps to check: ", all_kind_apps);
 // Type check all apps
+// IMPORTANT: it will not work if the compilation target isn't Scheme.
 function type_check_apps() {
   const success = [];
   const fail = [];
   for (var file of all_kind_apps) {
     var app = file.slice(0, -5);
-    // type_check_app("App."+format) ? success.push(file) : fail.push(file);
-    type_check_folder(app) ? success.push(app) : fail.push(app);
+    type_check_app("App."+app) ? success.push(file) : fail.push(file);
+    type_check_folder(app, true) ? success.push(app) : fail.push(app);
   }
   return {success, fail}
 }
