@@ -19,7 +19,7 @@ IntLib: Module
   }
 
 five: Int
-  Module.value_of(IntLib, "a")(+2, +3)
+  Module.value_of(IntLib, "add")(+2, +3)
 ```
 
 So how can we represent the `Module` type? Neither `Map<Int -> Int -> Int>` nor
