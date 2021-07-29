@@ -69,7 +69,7 @@ num = valueOf dyn
 
 Of course, we can only turn a `Dynamic` into a well-typed value if it has a
 statically known type. Otherwise, it becomes useless, since we won't be able to
-do anything with it (after all, Int functions work on Int arguments, not Dynamic
+do anything with it (after all, `Int` functions work on `Int` arguments, not `Dynamic`
 arguments, for example). But for first-class modules, `Dynamic` is very handy,
 since we're always able to cast module functions to their actual types.
 
