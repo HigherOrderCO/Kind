@@ -2,7 +2,7 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let name = "Frost"
 
   let vbox_img = (pose)
-    {none, App.KL.Game.Hero.Frost.Assets.vbox_idle}
+    {none, App.KL.Game.Hero.Frost.Assets.vbox_img}
 
   let b64_portrait = (bool, time)
     App.KL.Game.Hero.Frost.Assets.b64_portrait

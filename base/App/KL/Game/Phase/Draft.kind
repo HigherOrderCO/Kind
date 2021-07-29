@@ -43,7 +43,7 @@ App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>, blueprint
   for user:player in players with result:
     open player
     Maybe {
-      get coord_list = BBT.lookup!!(App.KL.Game.Team.cmp, player.team, blueprint@initial)
+      let coord_list = List.filter!((x) player.team =? x@snd, blueprint@initial)
       let count = case BBT.lookup!!(App.KL.Game.Team.cmp, player.team, result@snd) as c_team {
         none: BBT.insert!!(App.KL.Game.Team.cmp, player.team, 0, result@snd)
         some: BBT.insert!!(App.KL.Game.Team.cmp, player.team, c_team.value + 1, result@snd)
@@ -51,6 +51,7 @@ App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>, blueprint
       get index = BBT.lookup!!(App.KL.Game.Team.cmp, player.team, count)
       log(Nat.show(index))
       get coord = List.get!(index, coord_list)
+      let coord = coord@fst
       log(Hexagonal.Axial.show(coord))
       let board = App.KL.Game.Board.Player.set_initial(user, player, coord, result@fst)
       return {board, count}

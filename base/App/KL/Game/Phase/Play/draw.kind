@@ -306,12 +306,11 @@ App.KL.Game.Phase.Play.draw.bases(
       without player: img
 
       let allies = App.KL.Game.Player.get_allies(player, game@players)
-      let bases  = game@blueprint@base
-      for team:coords in bases with img:
+      let bases  = game@blueprint@bases
+      for info in bases with img:
+        let {coord, team} = info
         let indicator = App.KL.Game.Team.get_indicator(team)
-        for coord in coords with img:
-          App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
-        img
+        App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
 
       for l_user:player in allies with img:
         let init_pos = player@init_pos

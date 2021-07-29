@@ -2,8 +2,8 @@ type App.KL.Game.Board.Blueprint {
   new(
     terrains: List<Pair<Hexagonal.Axial, App.KL.Game.Terrain>>
     tokens:   List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
-    base:    BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
-    initial: BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
+    bases:    List<Pair<Hexagonal.Axial, App.KL.Game.Team>>
+    initial:  List<Pair<Hexagonal.Axial, App.KL.Game.Team>>
   )
 }
 
@@ -47,21 +47,15 @@ App.KL.Game.Board.Blueprint.build.board(
   
   board
 
-App.KL.Game.Board.Blueprint.build.initial(
-  coords: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
-): BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
-  let result = BBT.tip!!
-  for coord in coords with result:
-    BBT.insert!!(App.KL.Game.Team.cmp, coord@fst, coord@snd, result)
-  result
-
-// refactor
-App.KL.Game.Board.Blueprint.build.bases(
-  coords: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
-): BBT<App.KL.Game.Team, List<Hexagonal.Axial>>
-  let result = BBT.tip!!
-  for coord in coords with result:
-    BBT.insert!!(App.KL.Game.Team.cmp, coord@fst, coord@snd, result)
+App.KL.Game.Board.Blueprint.build.team_coords(
+  blueprint: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+): List<Pair<Hexagonal.Axial, App.KL.Game.Team>>
+  let result = []
+  for info in blueprint with result:
+    let {team, coords} = info
+    for coord in coords with result:
+      {coord, team} & result
+    result
   result
 
 // verify if a coord is a valid base coordinate
@@ -71,14 +65,15 @@ App.KL.Game.Board.Blueprint.base.valid(
   players: Map<App.KL.Game.Player>
   blueprint: App.KL.Game.Board.Blueprint
 ): Bool
-  let base = blueprint@base
+  let base = blueprint@bases
   Maybe {
     // get player
-    get player      = players{user}
+    get player    = players{user}
     // get all the base coords
-    get base_team = BBT.lookup!!(App.KL.Game.Team.cmp, player@team, blueprint@base)
+    let base_team = List.filter!((x) App.KL.Game.Team.eql(x@snd, player@team), blueprint@bases)
     // check if coord clicked exist in base
-    get coord     = List.find!((x) Hexagonal.Axial.eql(x, coord), base_team)
+    get coord     = List.find!((x) Hexagonal.Axial.eql(x@fst, coord), base_team)
+    let coord     = coord@fst
     
     // check if coord is not selected by allies
     let result = true

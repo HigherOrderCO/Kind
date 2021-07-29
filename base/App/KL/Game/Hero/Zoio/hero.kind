@@ -2,7 +2,7 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let name = "Zoio"
 
   let vbox_img = (pose)
-    {none, App.KL.Game.Hero.Zoio.Assets.vbox_idle}
+    {none, App.KL.Game.Hero.Zoio.Assets.pic_zoio}
 
   let b64_portrait = (bool, time)
     App.KL.Game.Hero.Zoio.Assets.b64_portrait

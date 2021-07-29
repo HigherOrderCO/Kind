@@ -25,34 +25,26 @@ App.KL.Game.Moment.get_player_used_ap(game: App.KL.Game): Maybe<Pair<String, I32
 
 
 // TODO move this to another place?
+// create board for preparation phase
+// is only called once
+// all it does is move players for its init_pos and remove initial coords
 App.KL.Game.Moment.preparation.create_board(players: Map<App.KL.Game.Player>, blueprint: App.KL.Game.Board.Blueprint, board: App.KL.Game.Board): App.KL.Game.Board
-  log("ENTROU NA FUNCAO")
   for user:player in players with board:
     App.KL.Game.Board.Player.set(user, player, board)
   
   for user:player in players with board:
     case player@init_pos {
-      none: App.KL.Game.Moment.create_board.choose_coord(user, player, blueprint, board)
+      none: App.KL.Game.Moment.create_board.choose_coord(blueprint@bases, user, player, board)
       some: board
     }
 
-  for team:coords in blueprint@initial with board:
-    for coord in coords with board:
-      log(Hexagonal.Axial.show(coord))
-      Hexagonal.Axial.Map.delete!(coord, board)
-    board
+  for info in blueprint@initial with board:
+    Hexagonal.Axial.Map.delete!(info@fst, board) // delete initial coordinates
   board
 
-App.KL.Game.Moment.create_board.choose_coord(user: String, player: App.KL.Game.Player, blueprint: App.KL.Game.Board.Blueprint, board: App.KL.Game.Board): App.KL.Game.Board
-  let bases  = blueprint@base
-  let base_coords = BBT.lookup!!(App.KL.Game.Team.cmp, player@team, bases)
-  case base_coords {
-    none: board
-    some: App.KL.Game.Moment.create_board.choose_coord.find(base_coords.value, user, player, board)
-  }
-
-App.KL.Game.Moment.create_board.choose_coord.find(
-  coords: List<Hexagonal.Axial>, 
+// choose a coordinate for players that didn't choose
+App.KL.Game.Moment.create_board.choose_coord(
+  coords: List<Pair<Hexagonal.Axial, App.KL.Game.Team>>, 
   user: String, 
   player: App.KL.Game.Player,
   board: App.KL.Game.Board
@@ -60,8 +52,9 @@ App.KL.Game.Moment.create_board.choose_coord.find(
   case coords {
     nil:  board
     cons: 
-      if App.KL.Game.Board.is_occupied(coords.head, board) then
-        App.KL.Game.Moment.create_board.choose_coord.find(coords.tail, user, player, board)
+      let {coord, team} = coords.head
+      if App.KL.Game.Board.is_occupied(coord, board) && player@team =? team then
+        App.KL.Game.Moment.create_board.choose_coord(coords.tail, user, player, board)
       else
-        App.KL.Game.Board.Player.set_initial(user, player, coords.head, board)
+        App.KL.Game.Board.Player.set_initial(user, player, coord, board)
   }
