@@ -11,7 +11,7 @@ App.KL.Game.Phase.Draft.draw(
 App.KL.Game.Phase.Draft.draw.choose_page(
   players: Map<App.KL.Game.Player>,
   page: String,
-  tab:  String,
+  tab:  Maybe<String>,
   room: String,
   user: String,
   filter: App.KL.Game.Phase.Draft.Filter
@@ -105,7 +105,7 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
 App.KL.Game.Phase.Draft.draw.main(
   allies: Map<App.KL.Game.Player>, 
   page: String
-  tab: String,
+  tab:  Maybe<String>,
   user: String,
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
@@ -176,7 +176,7 @@ App.KL.Game.Phase.Draft.draw.background.hexagons(
 App.KL.Game.Phase.Draft.draw.main.middle(
   allies: Map<App.KL.Game.Player>
   page: String
-  tab:  String
+  tab:  Maybe<String>
   user: String
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
@@ -197,7 +197,7 @@ App.KL.Game.Phase.Draft.draw.main.middle(
       let player = allies{user}
       case player {
         none: <span></span> // Impossible
-        some: App.KL.Game.Phase.Draft.draw.card.user(player.value)
+        some: App.KL.Game.Phase.Draft.draw.card.user(player.value, tab)
       }
     }
 
@@ -250,7 +250,8 @@ App.KL.Game.Phase.Draft.draw.main.middle(
 // draw user card in specific order
 // this order sets the user card to stay in middle
 App.KL.Game.Phase.Draft.draw.card.user(
-  player: App.KL.Game.Player
+  player: App.KL.Game.Player,
+  tab:  Maybe<String>
 ): DOM
   let fator  = 2
   let bt     = 2
@@ -268,39 +269,43 @@ App.KL.Game.Phase.Draft.draw.card.user(
     some: Map.to_list!(hero.value@skills)
   }
 
-  let slot   = ((el)
-    <div style={
-      "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.card.button|")"
-      "background-size": "100% 100%"
-      "height": "20%"
-      "width": "100%"
-      // "font-size": "1.5rem"
-      "border-radius": "5px"
-      "display": "flex"
-      "align-items": "center"
-      "justify-content": "center"
-      "color": "white"
-    }>
-      { el }
-    </div>
-  ) :: DOM -> DOM
-
   let inner  = 
     <div style={"display": "contents"}>
       <div style={"height": "40%", "width": "17%", "max-height": "40%", "overflow": "auto", "border-radius": "5px 0px 0px 5px"}>
-        { slot(<span>"I"</span>) } // TODO LIST ICON
+        { App.KL.Game.Phase.Draft.Draw.card.slot("DNone", <span id="DNone">"I"</span>) } // TODO LIST ICON
         for info in skills:
           let {key, skill} = info
-          slot(<span>key</span>)
+          let id = "D"|key
+          App.KL.Game.Phase.Draft.Draw.card.slot(id, <span id=id >key</span>)
       </div>
       <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
-        {App.KL.Game.Phase.Draft.draw.card.hero(hero, id)}
+        {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab)}
       </div>
     </div>
   
   <div id=id style={"margin": "0 10px"}>
     { App.KL.Game.Phase.Draft.draw.card.wrapper(99, 208, bt, id, fator, "https://i.imgur.com/HTnAVKj.png", inner) }
   </div>
+
+App.KL.Game.Phase.Draft.Draw.card.slot(
+  id: String
+  el: DOM
+): DOM
+  <div id=id style={
+    "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.card.button|")"
+    "background-size": "100% 100%"
+    "height": "20%"
+    "width": "100%"
+    // "font-size": "1.5rem"
+    "border-radius": "5px"
+    "display": "flex"
+    "align-items": "center"
+    "justify-content": "center"
+    "color": "white"
+  }>
+    { el }
+  </div>
+
 
 App.KL.Game.Phase.Draft.draw.card.allies(
   player: Maybe<App.KL.Game.Player>,
@@ -319,7 +324,7 @@ App.KL.Game.Phase.Draft.draw.card.allies(
 
   let inner = 
     <div style={"width": "100%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
-      {App.KL.Game.Phase.Draft.draw.card.hero(hero, "")}
+      {App.KL.Game.Phase.Draft.draw.card.hero(hero, "", none)}
     </div>
   
   <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none", "animation": "fade-in 500ms"}>
@@ -330,6 +335,7 @@ App.KL.Game.Phase.Draft.draw.card.allies(
 App.KL.Game.Phase.Draft.draw.card.hero(
   hero: Maybe<App.KL.Game.Hero>
   id: String
+  tab:  Maybe<String>
 ): DOM
   <div id=id style={"height": "100%"}>
     // draw top of card
@@ -346,17 +352,33 @@ App.KL.Game.Phase.Draft.draw.card.hero(
     // draw bottom of card
     <div id=id style={"height": "48%", "width": "100%"}>
       {
-        case hero {
-          none: App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id) // when no hero is selected
-          some:
-            case hero.value@attributes as attrs {
-              none: App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id) // when hero has no attribute
-              some: App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs.value, id) // show attributes
-            }
-        }
+        Maybe {
+          get hero = hero
+          get attr = hero@attributes
+          case tab {
+            none: some(App.KL.Game.Phase.Draft.draw.card.hero.attrs(attr, id))
+            some: some(App.KL.Game.Phase.Draft.draw.card.hero.skill_info(hero, tab.value))
+          }
+        } <> App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id)
       }
     </div>
   </div>
+
+App.KL.Game.Phase.Draft.draw.card.hero.skill_info(
+  hero: App.KL.Game.Hero, 
+  key:  String
+): DOM
+  let skill = hero@skills{key}
+  case skill {
+    none: <span></span>
+    some:
+      let description = skill.value@description
+
+      <div style={"padding": "10px", "width": "100%"}>
+        <p style={"text-align": "center", "color": "white"}>description</p>
+      </div>
+    
+  }
 
 // draw card's top
 App.KL.Game.Phase.Draft.draw.card.hero.img(name: String, role: Maybe<App.KL.Game.Hero.Role>, img: String, id: String): DOM

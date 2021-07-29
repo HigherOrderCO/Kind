@@ -21,7 +21,12 @@ App.KL.Game.Phase.Draft.when(
           let hero_id   = Maybe.map!!(Nat.to_u8, App.KL.Game.Hero.name_to_id(hero_name))
           case hero_id {
             none: App.pass!
-            some: App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_hero.serial(hero_id.value))
+            some: 
+              let local = local@tab <- none
+              IO {
+                App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_hero.serial(hero_id.value))
+                App.set_local!(App.KL.State.Local.game(local))
+              }
           }
         "R" : // Toggle Ready
           let player = players{local@user}
@@ -57,20 +62,18 @@ App.KL.Game.Phase.Draft.when(
               let local = local@filter <- local@filter@options <- new_options
               App.set_local!(App.KL.State.Local.game(local))
           }
+        "D": // Set which tab to show
+          let tab   = String.drop(1, event.id)
+          let local = 
+            if "None" =? tab then
+             local@tab <- none
+            else
+             local@tab <- some(tab)
+          App.set_local!(App.KL.State.Local.game(local))
         "user-card":
           let new_page = if String.eql(local@page, "heroes") then "users" else "heroes"
           let local    = local@page <- new_page
           App.set_local!(App.KL.State.Local.game(local))
       } default App.pass!
-  mouse_over:
-    switch String.starts_with(event.id) {
-      "D": // Set which tab to show
-        let tab   = String.drop(1, event.id)
-        let local = case tab {
-          nil: local 
-          cons: local@tab <- tab
-        }
-        App.set_local!(App.KL.State.Local.game(local))
-    }default App.set_local!(App.KL.State.Local.game(local@tab <- "D"))
   } default App.pass!
 

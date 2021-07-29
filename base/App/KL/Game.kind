@@ -7,7 +7,7 @@ type App.KL.Game.State.Local {
   new(
     user: String
     room: String
-    tab:  String
+    tab:  Maybe<String>
     page: String // page in draft -> heroes or users for now
     score: Maybe<String>
     info: Hexagonal.Axial
@@ -20,7 +20,7 @@ type App.KL.Game.State.Local {
 App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Local
   let preview = App.KL.Game.Cast.Preview.new(none, Hexagonal.Axial.Map.new!)
   let mouse   = {0#32,0#32}
-  let tab     = "D"
+  let tab     = none
   let info = Hexagonal.Axial.new(0,0)
   let page = "heroes"
   let filter = App.KL.Game.Phase.Draft.Filter.default
