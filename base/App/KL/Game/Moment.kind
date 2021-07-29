@@ -53,7 +53,7 @@ App.KL.Game.Moment.create_board.choose_coord(
     nil:  board
     cons: 
       let {coord, team} = coords.head
-      if App.KL.Game.Board.is_occupied(coord, board) && player@team =? team then
+      if App.KL.Game.Board.is_occupied(coord, board) || Bool.not(player@team =? team)  then
         App.KL.Game.Moment.create_board.choose_coord(coords.tail, user, player, board)
       else
         App.KL.Game.Board.Player.set_initial(user, player, coord, board)
