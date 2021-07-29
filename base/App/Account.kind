@@ -95,7 +95,7 @@ App.Account.Global.Event.revoke.serial(devicekey: String): String
     App.Account.Global.Event.serialize_post(App.Account.Global.Event.revoke(devicekey)))
 
 App.Account.room: String
-  App.room("a110283a89s9d9cja929hf9sjdvbd899sw0")
+  App.room("13f11281239412392983713j9rfh1iu41jd0920j9d923i429342")
 
 App.Account: App<App.Account.State>
   App.new<App.Account.State>(
@@ -122,15 +122,28 @@ App.Account.draw: App.Draw<App.Account.State>
       App.Account.Screen.draw.welcome
     register:
       App.Account.Screen.draw.register
-    //home:  //TODO Add
-      //App.Account.Screen.draw.home(state)
+    home:
+      App.Account.Screen.draw.home(state.global, state.local@address)
   } default <p>"you're in the void, this screen doesn't exist"</p>
 
 App.Account.when: App.When<App.Account.State>
   (event, state)
   case event { 
     init: IO { 
+      open state
       App.watch!(App.Account.room)
+      let local = state.local@address <- event.user
+      log(" -User address: "|local@address)
+      let is_logged = App.Account.verify(state.global, event.user)
+      if is_logged then IO { 
+        log("i am logged")
+        let home = App.Account.State.Screen.home
+        App.set_local!(App.Account.State.local.new(event.user, home))
+      }
+      else IO {
+        log("i am not logged")
+        App.set_local!(local)
+      }
     }
     mouse_click: IO {
       open state
@@ -144,7 +157,7 @@ App.Account.when: App.When<App.Account.State>
               log("serial register: "|serial)
               App.new_post!(App.Account.room, serial)
             "authorize_button":
-              let serial = App.Account.Global.Event.authorize.serial(state.local.screen.authorize_devicekey, state.local.screen.authorize_devicename)
+              let serial = App.Account.Global.Event.authorize.serial(state.local@address, state.local.screen.authorize_devicename)
               log("serial authorize: "|serial)
               App.new_post!(App.Account.room, serial)
             "revoke_button":
@@ -263,7 +276,7 @@ App.Account.tick: App.Tick<App.Account.State>
 //Post
 App.Account.post: App.Post<App.Account.State>
  (time, room, addr, data, glob)
- log("olha o post: "|data)
+ //log("olha o post: "|data)
  case App.Account.Global.Event.deserialize_post(data) as post {
    none: log("none") glob
    some: case post.value {
@@ -327,3 +340,18 @@ App.Account.post: App.Post<App.Account.State>
      log("deserialize_post default") // DEBUG
      glob
  }
+
+App.Account.verify(state: App.Account.State.global, address: String): Bool
+  open state
+  let ans = false
+  for devicename:list in state.keymap with ans: 
+    for test in list with ans:
+      if String.eql(address, test@snd) then
+      log("opa, caiu true")
+        true
+      else
+        ans
+    ans
+  ans
+      
+
