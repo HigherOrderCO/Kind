@@ -160,3 +160,7 @@ dyn: Nat
 With this, we're able to represent first-class modules in Kind. The `Dynamic`
 and `Module` modules are already on base, and the first snippet in this post
 already works as written!
+
+As a last thought, I wonder if, in a fugutre, we should desugar the `type` 
+syntax in a way that does this automatically. I see no reason not to, but
+it would increase the complexity of the desugarer considerably.
