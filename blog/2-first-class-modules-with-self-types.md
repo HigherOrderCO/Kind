@@ -19,7 +19,7 @@ IntLib: Module
   }
 
 five: Int
-  Module.value_of(IntLib, "a")(+2, +3)
+  Module.value_of(IntLib, "add")(+2, +3)
 ```
 
 So how can we represent the `Module` type? Neither `Map<Int -> Int -> Int>` nor
@@ -38,9 +38,10 @@ data Dynamic : Set where
   new : (T : Set) -> (value : T) -> Dynamic
 ```
 
-This type kind of carries the type of a value together with the value itself.
-This, in turn, allows us to create collections of types that vary. For example,
-we may store ints and strings in the same `List Dynamic`:
+This datatype is like a box that "hides" a value and its type internally, but is
+itself viewed as a single type, called `Dynamic`. This, in turn, allows us to 
+create collections of types that vary. For example, we may store ints and
+strings in the same `List Dynamic`:
 
 ```
 elems : List Dynamic
@@ -67,10 +68,11 @@ num : Int
 num = valueOf dyn
 ```
 
-Of course, we can only turn `Dynamic` into well-typed values if they are
-compile-time constants. Otherwise, we aren't able to turn a `Dynamic` into a
-`Int`, and it becomes essentially useless, since we won't be able to do anything
-with it. But for first-class modules, `Dynamic` is very handy.
+Of course, we can only turn a `Dynamic` into a well-typed value if it has a
+statically known type. Otherwise, it becomes useless, since we won't be able to
+do anything with it (after all, `Int` functions work on `Int` arguments, not `Dynamic`
+arguments, for example). But for first-class modules, `Dynamic` is very handy,
+since we're always able to cast module functions to their actual types.
 
 ## The Dynamic type in Kind, with Self types
 
@@ -144,6 +146,20 @@ Dynamic.new<T: Type>(value: T): Dynamic
   (P, new) new(T,value)
 ```
 
+This should work in any language with self types. Since not every reader is
+familiar with Kind's syntax, here is the same code in an Agda-like syntax:
+
+```
+Dynamic : Set
+Dynamic =
+  ∀ self (P : Dynamic -> Set) ->
+  ∀ (new : (T : Type) -> (value : typeOf self) -> P (new (typeOf self) value)) ->
+  P self
+
+new : (T : Set) -> (value : T) -> Dynamic
+new T value = \ P new -> new T value
+```
+
 With this small change, we're now able to extract values of static dynamics just
 like in Agda. In other words, the following program type-checks just fine:
 
@@ -158,8 +174,8 @@ dyn: Nat
 ```
 
 With this, we're able to represent first-class modules in Kind. The `Dynamic`
-and `Module` modules are already on Kind/base. Thus, users can already use
-first-class modules in their codes, and the first snippet in this post works!
+and `Module` modules are already on base. Kind users can already use first-class
+modules in their codes, and the first snippet in this post works as is!
 
 As a last thought, I wonder if, in a future, we should desugar the `type` 
 syntax in a way that does this automatically. I see no reason not to, but
