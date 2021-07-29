@@ -18,6 +18,7 @@ type App.Account.State.global {
   new(
     usermap: Map<App.Account.Username>
     keymap: Map<List<Pair<App.Account.Device.Name, App.Account.Device.Key>>>
+    tick: U64
   )
 }
 type App.Account.State.local {
@@ -42,6 +43,9 @@ type App.Account.State.Screen {
   )
   login
   home
+  loading(
+    init_time: U64
+  )
 }
 
 
@@ -108,7 +112,9 @@ App.Account: App<App.Account.State>
 
 App.Account.init: App.Init<App.Account.State>
   let screen = App.Account.State.Screen.debug("", "", "", "", "")
-  App.Store.new<App.Account.State>(App.Account.State.local.new("", screen), App.Account.State.global.new(Map.new!, Map.new!))
+  App.Store.new<App.Account.State>(
+    App.Account.State.local.new("", screen)
+    App.Account.State.global.new(Map.new!, Map.new!, 0))
 
 
 App.Account.draw: App.Draw<App.Account.State>
@@ -135,6 +141,10 @@ App.Account.when: App.When<App.Account.State>
       let local = state.local@address <- event.user
       log(" -User address: "|local@address)
       App.set_local!(local)
+    }
+    frame: IO {
+      log("event.time: "|U64.show(event.time))
+      App.pass!
     }
     mouse_click: IO {
       open state
@@ -262,7 +272,9 @@ App.Account.when: App.When<App.Account.State>
 
 //Tick not used
 App.Account.tick: App.Tick<App.Account.State>
-  App.no_tick(App.Account.State)
+  (tick, glob)
+    log("glob tick: "|U64.show(tick))
+    glob
 
 //Post
 App.Account.post: App.Post<App.Account.State>
