@@ -24,11 +24,11 @@ Crypto.WOTS.message.bytes(bytes: Pair<U32,Buffer8>): Crypto.WOTS.Message
   let vals = Vector.from_list.length!(32, 0, vals)
   vals
 
-Crypto.WOTS.message.hex(hex: String): Crypto.WOTS.Message
-  Crypto.WOTS.message.bytes(Buffer8.from_hex(hex))
-
 Crypto.WOTS.message(str: String): Crypto.WOTS.Message
   Crypto.WOTS.message.bytes(Buffer8.from_hex(String.to_hex(str)))
+
+Crypto.WOTS.message.words(list: List<U256>): Crypto.WOTS.Message
+  Crypto.WOTS.message.bytes(Buffer8.from_list.256(list))
 
 Crypto.WOTS.private(seed: U256): Crypto.WOTS.PrivateKey
   Crypto.WOTS.private.go(32, seed)
@@ -38,7 +38,7 @@ Crypto.WOTS.private.go(len: Nat, seed: U256): Vector<U256,len>
     zero:
       Vector.nil!
     succ:
-      let head = Crypto.Keccak.hash.u256(U256.add(seed, Nat.to_u256(len)))
+      let head = Crypto.Keccak.word(U256.add(seed, Nat.to_u256(len)))
       let tail = Crypto.WOTS.private.go(len.pred, seed)
       Vector.cons<U256,len.pred>(head, tail)
   }!
@@ -53,7 +53,7 @@ Crypto.WOTS.public.go(len: Nat, pvt: Vector<U256,len>): Vector<U256,len>
       cons:
         let hash = pvt.head
         let hash = for i from 0 to 256:
-          Crypto.Keccak.hash.u256(hash)
+          Crypto.Keccak.word(hash)
         Vector.cons<U256,len.pred>(hash, Crypto.WOTS.public.go(len.pred, pvt.tail))
     }
   }!
@@ -75,7 +75,7 @@ Crypto.WOTS.sign.go(len: Nat, msg: Vector<U8,len>, pvt: Vector<U256,len>): Vecto
       cons cons:
         let hash = pvt.head
         let hash = for i from 0 to 256 - U8.to_nat(msg.head):
-          Crypto.Keccak.hash.u256(hash)
+          Crypto.Keccak.word(hash)
         Vector.cons<U256,len.pred>(hash, Crypto.WOTS.sign.go(len.pred, msg.tail, pvt.tail))
     }
   }!
@@ -109,7 +109,7 @@ Crypto.WOTS.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,len>): Ve
     succ: case msg sig {
       cons cons cons:
         let hash = sig.head
-        let hash = for i from 0 to U8.to_nat(msg.head): Crypto.Keccak.hash.u256(hash)
+        let hash = for i from 0 to U8.to_nat(msg.head): Crypto.Keccak.word(hash)
         Vector.cons<U256,len.pred>(hash, Crypto.WOTS.recover.go(len.pred, msg.tail, sig.tail))
     }
   }!

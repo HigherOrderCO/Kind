@@ -1,0 +1,42 @@
+name: Type check apps
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  type_check_apps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: jitterbit/get-changed-files@v1
+        id: files
+        with:
+          format: space-delimited
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.3.0
+        with: 
+          node-version: 15.x
+      
+      - name: Install Kind-lang
+        run: npm i -g kind-lang
+  
+      - name: Type check modified apps
+        run: |
+          for changed_file in ${{ steps.files.outputs.all }}; do
+            app_dir=${changed_file:5} # remove base/ prefix
+            folder=${app_dir:0:4}
+            ext=${app_dir: -5}
+            if [ "$ext" == ".kind" ] && [ "$folder" == "App/" ]; then
+              app_name=${app_dir%.k*} # remove .kind sufix
+              app_name_format=${app_name////.} # replaces "/" for "."
+              eval node web/type_check_Apps ${app_name_format}
+            fi
+          done
+

@@ -88,11 +88,15 @@ App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(size: I32, dmg: I32, ap_cost: I32):
     let area = []
     let area = for direction_coord in ring:
       App.KL.Game.Areas.straight_line(size, target, direction_coord) ++ area
-    App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.movement.move_to(center, target, false)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, target & area)
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
-    App.KL.Game.Effect.hp.damage_at(256, target)
-    return unit
+    get moved = App.KL.Game.Effect.movement.move_to(center, target, false)
+    if moved then
+      App.KL.Game.Effect { 
+        App.KL.Game.Effect.ap.use(ap_cost)
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, target & area)
+        App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
+        App.KL.Game.Effect.hp.suicide
+        return unit
+      }
+    else App.KL.Game.Effect.fail("unable to move") 
   }

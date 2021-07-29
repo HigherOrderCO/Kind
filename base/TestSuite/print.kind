@@ -10,9 +10,9 @@ TestSuite.print.aux(t: TestSuite, depth: Nat): IO(Unit)
       IO.print(ind|TestSuite.show.test(t.name, t.result))
     }
     many: IO {
+      IO.print(ind|t.name)
       for x in t.list:
         IO {
-          IO.print(ind|t.name)
           TestSuite.print.aux(x, 1 + depth)
         }
     }

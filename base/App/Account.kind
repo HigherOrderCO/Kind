@@ -1,0 +1,356 @@
+// 1 - Welcome Screen:: Create an Account + Log in
+//  caso escolha criar a conta
+// 1.1 - Pick a Username + Continue
+// 1.2 - Name this Computer + Continue
+// 3 - Home (pode revogar dispositivos)
+
+//  caso clique Log in
+// 2.1 - insert Username
+//  caso username presente
+// 3 - lista de dispositivos
+// requisitar autorização para dispositivo selecionado
+// aceitar do outro dispositivo
+
+App.Account.State: App.State
+  App.State.new(App.Account.State.local, App.Account.State.global)
+
+type App.Account.State.global {
+  new(
+    usermap: Map<App.Account.Username>
+    keymap: Map<List<Pair<App.Account.Device.Name, App.Account.Device.Key>>>
+    tick: U64
+  )
+}
+type App.Account.State.local {
+  new(
+    address: String
+    screen: App.Account.State.Screen
+  )
+}
+
+type App.Account.State.Screen { 
+  debug(
+    register_username: String
+    register_devicename: String
+    authorize_devicekey: String
+    authorize_devicename: String
+    revoke_devicekey: String
+  )
+  welcome
+  register(
+    username: String
+    devicename: String
+  )
+  login
+  home
+  loading(
+    init_time: U64
+  )
+}
+
+
+type App.Account.Global.Event {
+  register(
+    username: String
+    devicename: String
+  )
+  authorize(
+    devicekey: String
+    devicename: String
+  )
+  revoke(
+    devicekey: String
+  )
+} deriving (serializer, deserializer)
+
+App.Account.Username: Type
+  String
+
+App.Account.Device.Key: Type
+  String
+
+App.Account.Device.Name: Type
+  String
+
+App.Account.Global.Event.serialize_post(ev: App.Account.Global.Event): String
+  Bits.hex.encode(Serializer.run!(App.Account.Global.Event.serializer, ev))
+
+App.Account.Global.Event.deserialize_post(hex: String): Maybe<App.Account.Global.Event>
+  Deserializer.run!(App.Account.Global.Event.deserializer, Bits.hex.decode(hex))
+
+App.Account.pad_even(c: Char, str: String): String
+  case (String.length(str) % 2) =? 0 {
+    true:
+      str
+    false:
+      str|Char.to_string(c)
+  }
+
+App.Account.Global.Event.register.serial(username: String, devicename: String): String
+  App.Account.pad_even('0',
+    App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename)))
+
+App.Account.Global.Event.authorize.serial(devicekey: String, devicename: String): String
+  App.Account.pad_even('0',
+    App.Account.Global.Event.serialize_post(App.Account.Global.Event.authorize(devicekey, devicename)))
+
+App.Account.Global.Event.revoke.serial(devicekey: String): String
+  App.Account.pad_even('0',
+    App.Account.Global.Event.serialize_post(App.Account.Global.Event.revoke(devicekey)))
+
+App.Account.room: String
+  App.room("13f11281239412392983713j9rfh1iu41jd0920j9d923i429342")
+
+App.Account: App<App.Account.State>
+  App.new<App.Account.State>(
+    App.Account.init
+    App.Account.draw
+    App.Account.when
+    App.Account.tick
+    App.Account.post
+  )
+
+App.Account.init: App.Init<App.Account.State>
+  let screen = App.Account.State.Screen.debug("", "", "", "", "")
+  App.Store.new<App.Account.State>(
+    App.Account.State.local.new("", screen)
+    App.Account.State.global.new(Map.new!, Map.new!, 0))
+
+
+App.Account.draw: App.Draw<App.Account.State>
+  (state)
+  open state; open state.global;
+  open state.local
+  case state.local.screen {
+    debug:
+      App.Account.Screen.draw.debug(state.global)
+    welcome:
+      App.Account.Screen.draw.welcome
+    register:
+      App.Account.Screen.draw.register
+    home:
+      App.Account.Screen.draw.home(state.global, state.local@address)
+    loading:
+      App.Account.Screen.draw.loading
+  } default <p>"you're in the void, this screen doesn't exist"</p>
+
+App.Account.when: App.When<App.Account.State>
+  (event, state)
+  case event { 
+    init: IO { 
+      open state
+      let time = ((event.time*2) /125)
+      let screen = App.Account.State.Screen.loading(time)
+      let local = App.Account.State.local.new(event.user, screen)
+      log(" -User address: "|local@address)
+      App.watch!(App.Account.room)
+      App.set_local!(local)
+    }
+    frame: IO {
+      //((event.time*2) /125)
+      App.pass!
+    }
+    mouse_click: IO {
+      open state
+      open state.local
+      case state.local.screen {
+        debug:
+          switch String.eql(event.id) {
+            "register_button":
+              //log("input: "|state.local.register_username) // DEBUG
+              let serial = App.Account.Global.Event.register.serial(state.local.screen.register_username, state.local.screen.register_devicename)
+              log("serial register: "|serial)
+              App.new_post!(App.Account.room, serial)
+            "authorize_button":
+              let serial = App.Account.Global.Event.authorize.serial(state.local@address, state.local.screen.authorize_devicename)
+              log("serial authorize: "|serial)
+              App.new_post!(App.Account.room, serial)
+            "revoke_button":
+              let serial = App.Account.Global.Event.revoke.serial(state.local.screen.revoke_devicekey)
+              log("serial revoke: "|serial)
+              App.new_post!(App.Account.room, serial)
+            "welcome_button":
+              let addr = state.local.address
+              let new_screen = App.Account.State.Screen.welcome
+              App.set_local!(App.Account.State.local.new(addr, new_screen))
+          } default App.pass!
+        welcome: 
+          switch String.eql(event.id) { 
+            "register_button": 
+              let addr = state.local.address
+              let new_screen = App.Account.State.Screen.register("","")
+              App.set_local!(App.Account.State.local.new(addr, new_screen))
+            "login_button":
+              let addr = state.local.address
+              let new_screen = App.Account.State.Screen.login
+              App.set_local!(App.Account.State.local.new(addr, new_screen))
+          } default App.pass!
+        register:
+          switch String.eql(event.id) { 
+            "register_button":
+              // TODO check inputs
+              //log("input: "|state.local.username) // DEBUG
+              let serial = App.Account.Global.Event.register.serial(state.local.screen.username, state.local.screen.devicename)
+              log("serial register: "|serial)
+              IO {
+                let new_room = App.Account.State.Screen.home
+                let addr = state.local.address
+                App.new_post!(App.Account.room, serial)
+                App.set_local!(App.Account.State.local.new(addr, new_room))
+              }
+          }default App.pass!
+      } default App.pass!
+    }
+    input:
+      open state;
+      open state.local
+      case state.local.screen { 
+        debug: 
+          switch String.eql(event.id) {
+            "register_username": IO {
+              let addr = state.local.address
+              let screen = App.Account.State.Screen.debug(
+                event.text,
+                state.local.screen.register_devicename,
+                state.local.screen.authorize_devicekey,
+                state.local.screen.authorize_devicename,
+                state.local.screen.revoke_devicekey)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+            }
+            "register_devicename": IO {
+              let addr = state.local.address
+              let screen = App.Account.State.Screen.debug(
+                state.local.screen.register_username,
+                event.text,
+                state.local.screen.authorize_devicekey,
+                state.local.screen.authorize_devicename,
+                state.local.screen.revoke_devicekey)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+            }
+            "authorize_devicekey": IO {
+              let addr = state.local.address
+              let screen = App.Account.State.Screen.debug(
+                state.local.screen.register_username,
+                state.local.screen.register_devicename,
+                event.text,
+                state.local.screen.authorize_devicename,
+                state.local.screen.revoke_devicekey)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+            }
+            "authorize_devicename": IO {
+              let addr = state.local.address
+              let screen = App.Account.State.Screen.debug(
+                state.local.screen.register_username,
+                state.local.screen.register_devicename,
+                state.local.screen.authorize_devicekey,
+                event.text,
+                state.local.screen.revoke_devicekey)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+            }
+            "revoke_devicekey": IO {
+              let addr = state.local.address
+              let screen = App.Account.State.Screen.debug(
+                state.local.screen.register_username,
+                state.local.screen.register_devicename,
+                state.local.screen.authorize_devicekey,
+                state.local.screen.authorize_devicename,
+                event.text)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+            }
+        } default App.pass!
+        register: 
+          switch String.eql(event.id) {
+            "register_username": IO {
+              let addr = state.local.address
+              let new_screen = App.Account.State.Screen.register(event.text, state.local.screen.devicename)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, new_screen))
+              }
+            "register_devicename": IO {
+              let addr = state.local.address
+              let new_screen = App.Account.State.Screen.register(state.local.screen.username, event.text)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, new_screen))
+            }
+          } default App.pass!
+        } default App.pass!
+      } default App.pass!
+
+//Tick not used
+App.Account.tick: App.Tick<App.Account.State>
+  (tick, glob)
+  glob@tick <- tick
+
+
+//Post
+App.Account.post: App.Post<App.Account.State>
+ (time, room, addr, data, glob)
+ //log("olha o post: "|data)
+ case App.Account.Global.Event.deserialize_post(data) as post {
+   none: log("none") glob
+   some: case post.value {
+     register:
+       open glob
+       // TODO verify post.value.username not empty
+       log("post.value.username: "|post.value.username) // DEBUG
+       case glob.usermap{addr} glob.keymap{post.value.username} {
+         none none:
+           let new_usermap = glob.usermap{addr} <- post.value.username
+           let glob = glob@usermap <- new_usermap
+
+           // TODO pick a device name
+           let new_keymap = glob.keymap{post.value.username} <- [{post.value.devicename, addr}]
+           let glob = glob@keymap <- new_keymap
+           glob
+       } default
+         log("register abort default") // DEBUG
+         glob
+     authorize:
+       open glob
+       let curr_user = glob.usermap{addr} abort
+         log("authorize abort due to addr not found in usermap") // DEBUG
+         glob
+       let curr_devices = glob.keymap{curr_user} abort
+         log("authorize abort due to curr_user not found in keymap") // DEBUG
+         glob
+       let found = List.found!((p) String.eql(post.value.devicekey, Pair.snd!!(p)), curr_devices)
+       case found {
+         false:
+           let new_devices = {post.value.devicename, post.value.devicekey} & curr_devices
+           let new_keymap = glob.keymap{curr_user} <- new_devices
+           let new_usermap = glob.usermap{post.value.devicekey} <- curr_user
+           let glob = glob@usermap <- new_usermap
+           let glob = glob@keymap <- new_keymap
+           glob
+         true:
+           log("authorize abort due to device already authorized") // DEBUG
+           glob
+       }
+     revoke:
+       open glob
+       let curr_user = glob.usermap{addr} abort
+         log("revoke abort due to addr not found in usermap") // DEBUG
+         glob
+       let curr_devices = glob.keymap{curr_user} abort
+         log("revoke abort due to curr_user not found in keymap") // DEBUG
+         glob
+       let new_devices = List.filter!(
+         (p) Bool.not(String.eql(post.value.devicekey, Pair.snd!!(p))),
+         curr_devices)
+       let new_keymap = if List.length!(new_devices) =? 0 then
+         Map.delete!(curr_user, glob.keymap)
+       else
+         glob.keymap{curr_user} <- new_devices
+       let new_usermap = Map.delete!(post.value.devicekey, glob.usermap)
+       let glob = glob@usermap <- new_usermap
+       let glob = glob@keymap <- new_keymap
+       glob
+   } default
+     log("deserialize_post default") // DEBUG
+     glob
+ }
+
+App.Account.verify(state: App.Account.State.global, address: String): Bool
+  open state
+  let user = state.usermap{address}
+  Maybe.is_some!(user)
+      
+

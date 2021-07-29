@@ -1,0 +1,8 @@
+App.KL.Game.Effect.hp.sacrifice(
+  dmg: I32
+): App.KL.Game.Effect<I32>
+
+  App.KL.Game.Effect { 
+    get center = App.KL.Game.Effect.coord.get_center
+    App.KL.Game.Effect.hp.change_at(I32.neg(dmg), center)
+  }

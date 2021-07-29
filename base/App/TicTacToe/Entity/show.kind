@@ -1,5 +1,0 @@
-App.TicTacToe.entity.show(e : App.TicTacToe.Entity) : String
-  case e {
-      circle : "○"
-      x : "x"
-  }

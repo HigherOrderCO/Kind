@@ -35,7 +35,7 @@ App.KL.Game.Board.Creature.change_hp.aux(
       ltn:
         //dmg
         {status, blocked} = App.KL.Game.Creature.Status.shield.hit(I32.neg(change), creature.status)
-        true_dmg = change + blocked 
+        true_dmg = change - blocked 
         new_creature = creature@status <- status
         new_hp = I32.min((creature.hp + true_dmg), hero.max_hp)
         new_creature@hp <- new_hp
