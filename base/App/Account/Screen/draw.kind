@@ -83,7 +83,7 @@ App.Account.Screen.draw.home(state: App.Account.State.global, addr: String): DOM
       let box_style =  App.Account.Screen.draw.box_style
       let upper_bottom_style = App.Account.Screen.draw.upper_bottom_style
       <div style=main_style>
-        <div style=text_style>"Hello "|curr_user|"Welcome!"</div>
+        <div style=text_style>"Hello "|curr_user|" Welcome!"</div>
         <div style=text_style>"Here are your devices!"</div>
       </div>
     false:

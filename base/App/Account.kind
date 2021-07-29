@@ -134,16 +134,7 @@ App.Account.when: App.When<App.Account.State>
       App.watch!(App.Account.room)
       let local = state.local@address <- event.user
       log(" -User address: "|local@address)
-      let is_logged = App.Account.verify(state.global, event.user)
-      if is_logged then IO { 
-        log("i am logged")
-        let home = App.Account.State.Screen.home
-        App.set_local!(App.Account.State.local.new(event.user, home))
-      }
-      else IO {
-        log("i am not logged")
-        App.set_local!(local)
-      }
+      App.set_local!(local)
     }
     mouse_click: IO {
       open state
@@ -343,15 +334,7 @@ App.Account.post: App.Post<App.Account.State>
 
 App.Account.verify(state: App.Account.State.global, address: String): Bool
   open state
-  let ans = false
-  for devicename:list in state.keymap with ans: 
-    for test in list with ans:
-      if String.eql(address, test@snd) then
-      log("opa, caiu true")
-        true
-      else
-        ans
-    ans
-  ans
+  let user = state.usermap{address}
+  Maybe.is_some!(user)
       
 
