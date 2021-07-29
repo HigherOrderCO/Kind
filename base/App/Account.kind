@@ -130,6 +130,8 @@ App.Account.draw: App.Draw<App.Account.State>
       App.Account.Screen.draw.register
     home:
       App.Account.Screen.draw.home(state.global, state.local@address)
+    loading:
+      App.Account.Screen.draw.loading
   } default <p>"you're in the void, this screen doesn't exist"</p>
 
 App.Account.when: App.When<App.Account.State>
@@ -137,13 +139,15 @@ App.Account.when: App.When<App.Account.State>
   case event { 
     init: IO { 
       open state
-      App.watch!(App.Account.room)
-      let local = state.local@address <- event.user
+      let time = ((event.time*2) /125)
+      let screen = App.Account.State.Screen.loading(time)
+      let local = App.Account.State.local.new(event.user, screen)
       log(" -User address: "|local@address)
+      App.watch!(App.Account.room)
       App.set_local!(local)
     }
     frame: IO {
-      log("event.time: "|U64.show(event.time))
+      //((event.time*2) /125)
       App.pass!
     }
     mouse_click: IO {
@@ -273,8 +277,8 @@ App.Account.when: App.When<App.Account.State>
 //Tick not used
 App.Account.tick: App.Tick<App.Account.State>
   (tick, glob)
-    log("glob tick: "|U64.show(tick))
-    glob
+  glob@tick <- tick
+
 
 //Post
 App.Account.post: App.Post<App.Account.State>

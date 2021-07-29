@@ -35,6 +35,14 @@ App.Account.Screen.draw.text_style_small: Map<String>
   "margin-left": "4px" 
   "padding-bottom": "5px" }
 
+App.Account.Screen.draw.loading: DOM
+  let main_style = App.Account.Screen.draw.main_style
+  let text_style = App.Account.Screen.draw.text_style
+  let box_style =  App.Account.Screen.draw.box_style
+  <div style=App.Account.Screen.draw.main_style>
+    <div style=text_style>"Loading..."</div>
+  </div>
+
 App.Account.Screen.draw.welcome: DOM
   <div style=App.Account.Screen.draw.main_style>
     <div style=App.Account.Screen.draw.text_style>"Welcome to UwU.Tech Accounts :3"</div>
