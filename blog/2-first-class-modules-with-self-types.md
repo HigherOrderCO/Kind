@@ -44,7 +44,7 @@ we may store ints and strings in the same `List Dynamic`:
 
 ```
 elems : List Dynamic
-elems = [Dynamic Int 3, Dynamic String "foo"]
+elems = [new Int 3, new String "foo"]
 ```
 
 We can also make functions to extract the type and the value of a `Dynamic`:
