@@ -6,15 +6,16 @@ var kind_dir = __dirname+"/../base";
 process.chdir(kind_dir);
 var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
 
+const args = process.argv[2];
 // node type_check_Apps all
-if (process.argv[2]){
+if (args){
+  let res = false;
   if (process.argv[2].trim() === "all") {
-    let res = type_check_apps();
-    exit(res["fail"]);
+    res = type_check_apps();
   } else { // node type_check_Apps App.[name]
-    let res = type_check_app(process.argv[2]);
-    exit(res["fail"]);
+    res = type_check_app(args);
   }
+  exit(res);
 } else {
   console.log("A parameter must be specified.");
   console.log("- node type_check_Apps App.[name]");
@@ -22,13 +23,12 @@ if (process.argv[2]){
 }
 
 // error: Array(String)
-function exit(error) {
-  if (error.length === 0) {
-    console.log("\nAll terms checked.")
+function exit(success) {
+  if (success) {
+    console.log("\x1b[32msuccess\x1b[39m\n")
     process.exit();
   } else {
-    console.error("\nType check fail.");
-    console.log(error);
+    console.error("\x1b[31mfail\x1b[39m\n");
     process.exit(1);
   }
 }
@@ -58,6 +58,7 @@ function type_check_app(name) {
 }
 
 // console.log("Apps to check: ", all_kind_apps);
+// Type check all apps
 function type_check_apps() {
   const success = [];
   const fail = [];
