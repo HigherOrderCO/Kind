@@ -1,6 +1,1 @@
-function(hero : App.Atb.Hero.hero) : Dom
-  ...
-
-
-(hero) ....
-
+User.caotic.test : String
