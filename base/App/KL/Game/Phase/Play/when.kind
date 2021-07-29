@@ -17,41 +17,44 @@ App.KL.Game.Phase.Play.when(
       else
         App.pass!
     key_down:
-      let preview = local@preview
-      switch U16.eql(event.code) {
-        9#16:
-          let score = case local@score {
-            none: some("score")
-            some: none
-          }
-          let local = local@score <- score
-          App.set_local!(App.KL.State.Local.game(local))
-        27#16:
-          let preview = preview@skill <- none
+      case game@moment {
+        preparation:
+          let preview = local@preview
+          switch U16.eql(event.code) {
+            9#16:
+              let score = case local@score {
+                none: some("score")
+                some: none
+              }
+              let local = local@score <- score
+              App.set_local!(App.KL.State.Local.game(local))
+            27#16:
+              let preview = preview@skill <- none
+              IO {
+                App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_casts)
+                App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+              }
+          }default
+          local = 
+            Maybe {
+              get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
+              let skill       =
+                case preview@skill as skill {
+                  none: 
+                    some({event.code, 1})
+                  some:
+                    if skill.value@fst =? event.code then
+                      none
+                    else 
+                      some({event.code, 1})
+                }          
+              return local@preview <- preview@skill <- skill
+            } <> local
           IO {
-            App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_casts)
-            App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+            App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_skill(event.code))
+            App.set_local!(App.KL.State.Local.game(local))
           }
-      }default
-      local = 
-        Maybe {
-          get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
-          let skill       =
-            case preview@skill as skill {
-              none: 
-                some({event.code, 1})
-              some:
-                if skill.value@fst =? event.code then
-                  none
-                else 
-                  some({event.code, 1})
-            }          
-          return local@preview <- preview@skill <- skill
-        } <> local
-      IO {
-        App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_skill(event.code))
-        App.set_local!(App.KL.State.Local.game(local))
-      }
+      } default App.pass!
     mouse_down: 
       case game.moment {
         initial:
