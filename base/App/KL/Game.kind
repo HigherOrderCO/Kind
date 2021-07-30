@@ -8,7 +8,6 @@ type App.KL.Game.State.Local {
     user: String
     room: String
     tab:  String
-    score: Maybe<String>
     info: Hexagonal.Axial
     preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
@@ -20,7 +19,7 @@ App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Loca
   let mouse   = {0,0}
   let tab     = "D"
   let info = Hexagonal.Axial.new(0,0)
-  App.KL.Game.State.Local.new(user, room, tab, none, info, preview, mouse)
+  App.KL.Game.State.Local.new(user, room, tab, info, preview, mouse)
 
 // Global State
 // ============
