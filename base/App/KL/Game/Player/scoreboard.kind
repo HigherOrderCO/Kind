@@ -7,7 +7,7 @@ App.KL.Game.Player.scoreboard.update(
 App.KL.Game.Player.scoreboard.map.update(
   players: Map<App.KL.Game.Player>
   scoreboards: Map<App.KL.Game.Scoreboard>
-): Map<App.KL.Game.Player>
+): Map<App.KL.Game.Player>  
   for id:scoreboard in scoreboards with players:
     let player = players{id}
     case player {

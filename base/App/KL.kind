@@ -30,7 +30,7 @@ App.KL.draw(img: VoxBox): App.Draw<App.KL.State>
 
 // Event handler
 App.KL.when: App.When<App.KL.State>
-  (event, state)
+  (event, state)  
   let {local, global} = state
   case local {
     lobby: App.KL.Lobby.when(local.state, global, event)

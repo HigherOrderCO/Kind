@@ -27,12 +27,12 @@ App.KL.Game.Board.apply_status(
   let new_board = App.KL.Game.Board.tile_update(result@fst)
   let game = game@board <- new_board
   let game = game@cemetery <- game@cemetery ++ result@snd@fst
-  let log  = ""
-  let log  =
-    for player:score in result@snd@snd with log:
-      open score
-      log | player | "   Damage:   " | I32.to_string(score.damage) | "     "
-    log
-  log(log)
+  // let log  = ""
+  // let log  =
+  //   for player:score in result@snd@snd with log:
+  //     open score
+  //     log | player | "   Damage:   " | I32.to_string(score.damage) | "     "
+  //   log
+  // log(log)
   let game = game@players <- App.KL.Game.Player.scoreboard.map.update(game@players, result@snd@snd)
   game
