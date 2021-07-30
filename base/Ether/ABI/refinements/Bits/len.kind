@@ -1,4 +1,4 @@
-Ether.Abi.refinement.Bits.len(x : Maybe<Nat>) : Type
+Ether.Abi.refinements.Bits.len(x : Maybe<Nat>) : Type
   case x {
     some : (x.value >? 0) == true
     none : Unit

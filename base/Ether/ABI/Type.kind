@@ -4,5 +4,5 @@ type Ether.ABI.Method.Type {
   int(value : Bits)
   bool(value : Bits)
   array(value : List<Ether.ABI.Method.Type>) 
-   // All values in the array constructor must have the constructor to be well-typed.
+   // refinement : All values in the array constructor must have the saame constructor to be well-typed.
 }
