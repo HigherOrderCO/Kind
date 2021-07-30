@@ -1,0 +1,8 @@
+type Ether.ABI.Method.Type {
+  bytes(len : Maybe<Nat>, value : Bits) // refinement : Ether.Abi.refinement.Bits.len
+  uint(len : Nat, value : Bits) // refinement : Ether.Abi.refinement.uint.len
+  int(value : Bits)
+  bool(value : Bits)
+  array(value : List<Ether.ABI.Method.Type>) 
+   // All values in the array constructor must have the constructor to be well-typed.
+}
