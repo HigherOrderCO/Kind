@@ -297,12 +297,18 @@ App.Account.when: App.When<App.Account.State>
             }
           } default App.pass!
         } default App.pass!
+        key_down:
+          switch U16.eql(event.code) {
+            17:
+              open state; open state.local;
+              let screen = App.Account.State.Screen.debug("", "", "", "", "")
+              App.set_local!(App.Account.State.local.new(state.local.address, screen))
+          } default App.pass!
       } default App.pass!
 
 //Tick not used
 App.Account.tick: App.Tick<App.Account.State>
   App.no_tick<App.Account.State>
-
 
 //Post
 App.Account.post: App.Post<App.Account.State>
@@ -376,5 +382,3 @@ App.Account.verify(state: App.Account.State.global, address: String): Bool
   open state
   let user = state.usermap{address}
   Maybe.is_some!(user)
-      
-
