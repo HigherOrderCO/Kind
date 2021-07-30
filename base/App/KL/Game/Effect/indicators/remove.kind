@@ -4,6 +4,6 @@ App.KL.Game.Effect.indicators.remove<A: Type>
 
   (center, targets, caster_id, board)
   case eff(center, targets, caster_id, board) as result {
-    new: App.KL.Game.Effect.Result.new<A>(result.value, result.center, result.board, Hexagonal.Axial.Map.new!, 0, [], "", {})
+    new: App.KL.Game.Effect.Result.new<A>(result.value, result.center, result.caster_id, result.board, Hexagonal.Axial.Map.new!, 0, [], "", {})
     err: App.KL.Game.Effect.Result.err<A>(result.message)
   }

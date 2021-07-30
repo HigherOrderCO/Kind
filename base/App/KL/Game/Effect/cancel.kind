@@ -1,3 +1,0 @@
-App.KL.Game.Effect.cancel<A: Type>: App.KL.Game.Effect<A>
-  (center, targets, caster_id, board)
-  App.KL.Game.Effect.Result.err<A>
