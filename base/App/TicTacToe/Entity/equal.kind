@@ -1,5 +1,0 @@
-App.TicTacToe.entity.equal(x : App.TicTacToe.Entity, y : App.TicTacToe.Entity) : Bool
-  case x y {
-      circle circle : true
-      x x : true
-  } default false

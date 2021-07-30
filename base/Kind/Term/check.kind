@@ -132,8 +132,16 @@ Kind.Term.check(
           }
         }
       },
-      chr: Kind.Term.check.direct(Kind.Term.ref("Char"), defs),
-      str: Kind.Term.check.direct(Kind.Term.ref("String"), defs),
+      chr: Kind.Check {
+        Kind.Term.check.direct(Kind.Term.ref("Word.from_bits"), defs)
+        Kind.Term.check.direct(Kind.Term.ref("U16.new"), defs)
+        Kind.Term.check.direct(Kind.Term.ref("Char"), defs)
+      }
+      str: Kind.Check {
+        Kind.Term.check.direct(Kind.Term.ref("Word.from_bits"), defs)
+        Kind.Term.check.direct(Kind.Term.ref("U16.new"), defs)
+        Kind.Term.check.direct(Kind.Term.ref("String"), defs)
+      }
       num: Kind.Check {
         let dsug = Kind.Term.check.expand.num(term.sign, term.numb, term.frac, type, defs)
         Kind.Term.check.patch(dsug, type, path)

@@ -1,7 +1,0 @@
-App.TicTacToe.board.pairs.choose_free(vec : Vector<Maybe<App.TicTacToe.Entity>, 9>, xs : List<Pair<U32, U32>>) : Maybe<Pair<U32, U32>>
-  List.foldr!!(none, (x,y) 
-    let n = App.TicTacToe.pos.mini_pair_to_vector(x)
-    case Maybe.join!(Vector.get_maybe(Maybe<App.TicTacToe.Entity>, 9, U32.to_nat(n), vec)) as k {
-      some : y
-      none : some(x)
-    }, xs)
