@@ -1,3 +1,17 @@
-type Dynamic {
-  new<A: Type>(value: A)
-}
+Dynamic: Type
+  self<P: Dynamic -> Type>
+  (new: <T: Type> (value: Dynamic.type_of(self)) P(Dynamic.new(Dynamic.type_of(self), value)))
+  P(self)
+
+Dynamic.new<T: Type>(value: T): Dynamic
+  (P, new) new(T,value)
+
+Dynamic.type_of(dyn: Dynamic): Type
+  case dyn {
+    new: dyn.T
+  }
+
+Dynamic.value_of(dyn: Dynamic): Dynamic.type_of(dyn)
+  case dyn {
+    new: dyn.value
+  }
