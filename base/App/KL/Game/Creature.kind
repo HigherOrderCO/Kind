@@ -13,12 +13,12 @@ type App.KL.Game.Creature {
 type App.KL.Game.Creature.Status {
   block(caster_id: String, id: String, duration: I32, caster: String)
   //Damage Over Time
-  dot(caster_id: String id: String, duration: I32, stack: I32, amount: I32)
-  dampen(caster_id: String, duration: I32, tick: I32)
+  dot(caster_id: String, id: String, duration: I32, stack: I32, amount: I32)
   haste(caster_id: String, duration : I32, amount: I32)
   //Heal Over Time
   hot(caster_id: String, id: String, duration: I32, stack: I32, amount: I32)
   invulnerable(caster_id: String, id: String, duration: I32)
+  protect(caster_id: String, duration: I32, amount: I32)
   root(caster_id: String, duration: I32)
   shield(caster_id: String, id: String, duration: I32, amount: I32)
   silence(caster_id: String, duration: I32)
@@ -36,3 +36,4 @@ App.KL.Game.Creature.Status.get_effect(
     dot: App.KL.Game.Effect.status.dot.apply(status.caster_id, status.id, status.duration, status.amount)
     hot: App.KL.Game.Effect.status.hot.apply(status.caster_id, status.id, status.duration, status.amount)
   } default (pos)App.KL.Game.Effect { return +0#32 }
+ 

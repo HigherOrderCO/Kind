@@ -7,6 +7,6 @@ App.KL.Game.Creature.Status.shield.total(
     case shield { 
       shield:
         shield.amount + total_shield
-    }default +0#32
+    }default total_shield
   total_shield
 

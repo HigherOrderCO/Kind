@@ -22,10 +22,6 @@ App.KL.Game.Creature.Status.invulnerable.add.aux(
     cons:
       case status.head { 
         invulnerable: 
-          is_same = String.eql(id, status.head.id)
-          if is_same then
-            new_invulnerable & status.tail
-          else
-            status.head & App.KL.Game.Creature.Status.invulnerable.add.aux(caster_id, id, duration, status.tail)
+          status
       }default status.head & App.KL.Game.Creature.Status.invulnerable.add.aux(caster_id, id, duration, status.tail)
   }

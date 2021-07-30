@@ -1,0 +1,38 @@
+Litereum.test: IO<Unit>
+  IO {
+    let litereum_suite = TestSuite.many("Litereum", [
+      Litereum.test.signature
+      Litereum.test.chain])
+    TestSuite.print(litereum_suite)
+  }
+
+Litereum.test.chain: TestSuite
+  TestSuite.many("chain", [
+    Litereum.test.chain.genesis
+    Litereum.test.chain.add_post])
+
+Litereum.test.chain.add_post: TestSuite
+  TestSuite.many("add_post", [
+    Litereum.test.chain.add_post.0])
+
+// linear chain
+Litereum.test.chain.add_post.0: TestSuite
+  TestSuite.unit("0",
+    // TODO use a real function for this
+    let e = Litereum.Chain.empty
+    open e
+    let hash = Litereum.post_hash(Litereum.test.genesis.post)
+    let hash_str = U256.show(hash)
+    let e.post = e.post{hash_str} <- Litereum.test.genesis.post
+    let e.nexts = e.nexts{hash_str} <- []
+    let e.score = e.score{hash_str} <- Litereum.score(hash)
+    let e = {e.post, e.nexts, e.score, e.tip} :: Litereum.Chain
+    let c = {e, Litereum.test.genesis.post}
+    for i from 0 to 10 with c:
+      open c; open c.snd
+      let new_post = c.snd@prev <- Litereum.post_hash(c.snd)
+      let new_chain = Litereum.add_post(new_post, c.fst)
+      {new_chain, new_post}
+    open c
+    //log(Litereum.Chain.show(c.fst, hash))
+    Litereum.CheckIntegrity(c.fst, hash))

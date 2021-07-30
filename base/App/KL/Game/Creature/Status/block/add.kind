@@ -17,16 +17,16 @@ App.KL.Game.Creature.Status.block.add.aux(
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  new_block = App.KL.Game.Creature.Status.block(caster_id, id, duration, caster)
+  let new_block = App.KL.Game.Creature.Status.block(caster_id, id, duration, caster)
   case status { 
     nil:
       new_block & status
     cons:
       case status.head { 
-        block: 
+        block:
           is_same = String.eql(id, status.head.id)
           if is_same then
-            new_block & status.tail
+            status
           else
             status.head & App.KL.Game.Creature.Status.block.add.aux(caster_id, id, duration, caster, status.tail)
       }default status.head & App.KL.Game.Creature.Status.block.add.aux(caster_id, id, duration, caster, status.tail)

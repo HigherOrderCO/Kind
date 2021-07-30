@@ -26,8 +26,6 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   let bar_blu = String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 255.0))
   let bar_col = "rgb("|bar_red|", 0, " |bar_blu| ")"
 
-
-
   <div style={ 
     "width": "100vw", 
     "height": "100vh", 
@@ -93,33 +91,104 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
           App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
       }</div>
       {
-      if countdown =? 0 then
-        <div style= {"height": "40px"}></div>
-      else
-        <div style=
-          {
-          "display":"flex"
-          "width": "75%"
-          "border-radius": "2px"
-          "border": "2px solid SlateGrey"
-          "height": "25px"
-          "margin-top": "15px"
-          "background-color": "rgb(220,220,220)"
-          
-          }>
-          <div style =
-            {
-              "width": String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 100.0)) | "%"
-              "height": "100%"
-              "background-color": bar_col
-            }> 
-          </div>
-        </div>
+        case game.moment as moment {
+          preparation: 
+            <div style=
+              {
+              "display":"flex"
+              "width": "75%"
+              "border-radius": "2px"
+              "border": "2px solid SlateGrey"
+              "height": "30px"
+              "margin": "35px 0"
+              "background-color": "rgb(220,220,220)"
+              }>
+              <div style =
+                {
+                  "width": String.show_clean(F64.show(Nat.to_f64(countdown) / U64.to_f64(App.KL.Constants.round_time) / 100.0)) | "%"
+                  "height": "100%"
+                  "background-color": bar_col
+                }> 
+              </div>
+            </div>
+          execution: 
+            casts = moment.casts
+            p_cst = moment.previous_casts
+            <div style = 
+              {
+                "display":"flex"
+                "width": "40%"
+                "height": "100px"
+                "flex-direction": "row"
+                "justify-content": "space-around"
+                "align-items": "center"
+              }>
+            {App.KL.Game.Phase.Play.draw.cast(false, p_cst[1], game.players)}
+            {App.KL.Game.Phase.Play.draw.cast(false, p_cst[0], game.players)}
+            {App.KL.Game.Phase.Play.draw.cast(true,  casts[0], game.players)}
+            {App.KL.Game.Phase.Play.draw.cast(false, casts[1], game.players)}
+            {App.KL.Game.Phase.Play.draw.cast(false, casts[2], game.players)}
+            </div>
+        }
       }
     </div>
     {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
     {App.KL.Game.Phase.Play.draw.description(local, game)}
   </div>
+
+App.KL.Game.Phase.Play.draw.cast(main_skill: Bool, cast: Maybe<App.KL.Game.Cast>, players: Map<App.KL.Game.Player>): DOM
+  let small_style = 
+    {
+      "width": "15%"
+      "height": "50%"
+      "display": "flex"
+      "flex-direction": "row"
+      "justify-content": "space-around"
+      "align-items": "center"
+    }
+  
+  let large_style = 
+    {
+      "width": "30%"
+      "height": "100%"
+      "display": "flex"
+      "flex-direction": "row"
+      "justify-content": "space-around"
+      "align-items": "center"
+    }
+
+  let main_style =
+    if main_skill then
+      large_style
+    else
+      small_style
+
+  Maybe {
+    get cast = cast
+    get player = players{cast@player}
+    get hero_id = player@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    open hero
+    let dom = 
+    <div style=main_style>
+      <div>
+        <img src= hero@picture(false,0) style=
+        {
+          "transform": "scale("| if main_skill then "2" else "1"|")",
+          "image-rendering": "pixelated"
+        }>
+        </img>
+      </div>
+      <div>
+        "--->"
+      </div>
+      <div style={"font-size": if main_skill then "4em" else "2em"}>
+        Char.to_string(cast@letter)
+      </div>
+    </div>
+    return dom
+  } <> <div style = main_style></div> 
+
 
 // CANVAS DRAWING
 // ================

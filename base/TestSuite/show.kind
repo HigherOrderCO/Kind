@@ -4,9 +4,9 @@ TestSuite.show(t: TestSuite, depth: Nat): String
     ind|"  "
   case t {
     unit:
-      ind|TestSuite.show.test(t.name, t.result)|"\n "
+      ind|TestSuite.show.test(t.name, t.result)|"\n"
     many:
-      let result = ind|t.name|"\n "
+      let result = ind|t.name|"\n"
       for x in t.list with result:
         result|TestSuite.show(x, 1 + depth)
       result
@@ -14,8 +14,8 @@ TestSuite.show(t: TestSuite, depth: Nat): String
 
 TestSuite.show.test(name: String, result: Maybe<String>): String
   String.concat(name, case result {
-    none: ": pass"
-    some: ": fail"
+    none: ": "|Kind.Code.color("32", "pass ✓")
+    some: ": "|Kind.Code.color("31", "fail ✗")|" \""|result.value|"\""
   })
 
 TestSuite.show.check_fail(s: TestSuite): String

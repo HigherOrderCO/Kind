@@ -6,8 +6,6 @@ App.KL.Game.Player.has_pos(
   open player
   let pos = player.init_pos
   case pos { 
-    none:
-      false
-    some: 
-      true
+    none: false
+    some: true
   }

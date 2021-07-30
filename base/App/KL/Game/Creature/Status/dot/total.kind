@@ -7,6 +7,6 @@ App.KL.Game.Creature.Status.dot.total(
     case status { 
       dot:
         status.amount + total_dot
-    }default +0#32
+    }default total_dot
   total_dot
 

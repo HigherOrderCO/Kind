@@ -1,0 +1,25 @@
+App.KL.Game.Creature.Status.protect.update(
+  creature: App.KL.Game.Creature
+): App.KL.Game.Creature
+  
+  protect_updated = App.KL.Game.Creature.Status.protect.update.aux(creature@status)
+  creature@status <- protect_updated
+
+App.KL.Game.Creature.Status.protect.update.aux(
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+
+  case status { 
+    nil:
+      status
+    cons:
+      case status.head { 
+        protect: 
+          let new_amount = status.head.amount - 1
+          let update_protect = App.KL.Game.Creature.Status.protect(status.head.duration, new_amount)
+          if I32.eql(new_amount, 0) then
+            status.tail
+          else
+            update_protect & status.tail
+          }default status.head & App.KL.Game.Creature.Status.protect.update.aux(status.tail)
+      }default status.head & App.KL.Game.Creature.Status.protect.update.aux(status.tail)

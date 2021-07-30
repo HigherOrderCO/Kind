@@ -1,0 +1,11 @@
+Litereum.test.signature: TestSuite
+  TestSuite.unit(
+    "signature",
+    let seed = 1234 :: U256
+    let pvt = Litereum.private_from_seed(seed)
+    let pub = Litereum.public_from_private(pvt)
+    let adr = Litereum.address_from_public(pub)
+    let msg = Litereum.Signable.utf8("cats cats cats yay")
+    let sig = Litereum.sign(msg, pvt)
+    let chk = Litereum.verify(msg, adr, sig)
+    if chk then none else some("error"))

@@ -20,12 +20,6 @@ App.KL.Game.Creature.Status.root.add.aux(
     cons:
       case status.head { 
         root: 
-          let old_duration = status.head.duration
-          let next_root = I32.cmp(old_duration, duration)
-          case next_root {
-            gtn: 
-              new_root & status.tail
-
-          }default status.head & App.KL.Game.Creature.Status.root.add.aux(caster_id, duration, status.tail)
+          status
       }default status.head & App.KL.Game.Creature.Status.root.add.aux(caster_id, duration, status.tail)
   }

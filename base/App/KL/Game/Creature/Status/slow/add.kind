@@ -1,3 +1,4 @@
+//Slow has a limit of 2 
 App.KL.Game.Creature.Status.slow.add(
   creature: App.KL.Game.Creature
   caster_id: String
@@ -22,11 +23,12 @@ App.KL.Game.Creature.Status.slow.add.aux(
     cons:
       case status.head { 
         slow: 
-          let old_duration = status.head.duration
-          let next_slow = I32.cmp(old_duration, duration)
-          case next_slow {
-            gtn: 
-              new_slow & status.tail
-          }default status.head & App.KL.Game.Creature.Status.slow.add.aux(caster_id, duration, amount, status.tail)
+          let new_amount = status.head.amount + amount
+          if I32.gtn(new_amount, 2) then 
+            let limit_slow = App.KL.Game.Creature.Status.slow(status.head.caster_id, status.head.duration, 2)
+            limit_slow & status.tail
+          else
+            let add_slow = App.KL.Game.Creature.Status.slow(caster_id, duration, new_amount)
+            add_slow & status.tail
       }default status.head & App.KL.Game.Creature.Status.slow.add.aux(caster_id, duration, amount, status.tail)
   }
