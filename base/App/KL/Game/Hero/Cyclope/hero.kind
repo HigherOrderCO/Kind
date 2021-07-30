@@ -57,7 +57,7 @@ App.KL.Game.Hero.Cyclope.hero.Skills.empathy(dmg_on_self: I32, duration: I32, sh
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
-    App.KL.Game.Effect.hp.damage_at(dmg_on_self, center)
+    App.KL.Game.Effect.hp.sacrifice(dmg_on_self)
     let ally = App.KL.Game.Effect.At.ally!
     let shield = App.KL.Game.Effect.status.shield.add("Empathy", duration, shield_value)
     App.KL.Game.Effect.area!(ally(shield), area)
