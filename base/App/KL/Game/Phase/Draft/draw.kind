@@ -118,10 +118,10 @@ App.KL.Game.Phase.Draft.draw.main(
           
           </div>
           <div style={"display": "flex", "justify-content": "flex-end"}>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "image-rendering": "pixelated"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "image-rendering": "pixelated"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "image-rendering": "pixelated"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "image-rendering": "pixelated"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
           </div>
         </header>
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
@@ -132,8 +132,8 @@ App.KL.Game.Phase.Draft.draw.main(
           // -16 because footer height is 64px
           // and margin top of ready button is -32px
           <div style={"position": "absolute", "bottom": "-16px", "right": "50px", "display": "flex", "transform": "scale(1.5)"}>
-            <img style={"margin": "0 5px"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.list_button></img>
-            <img style={"margin": "0 5px"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom></img>
+            <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.list_button></img>
+            <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom></img>
           </div>
         </div>
         <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
