@@ -1,0 +1,172 @@
+type User.caotic.Encode.ABI.Coder {
+    uint_256(value : String)
+    bytes(value : String)
+    bytes32(value : String)
+    andress(value : String)
+}
+
+
+User.caotic.Encode.ABI.Coder.stringfy(coder : User.caotic.Encode.ABI.Coder) : String
+  case coder {
+    uint_256 : "uint_256"
+    bytes32 : "bytes32"
+    andress : "andress"
+    bytes : "bytes"
+  }
+
+ type User.caotic.Encode.ABI.Method {
+   new(
+     name : String,
+     inputs : List<User.caotic.Encode.ABI.Coder>
+   //  output : List<User.caotic.Encode.ABI.Coder>
+   //  constant : List<Bool>,
+   //  payable : List<Bool>
+   )
+ }
+
+//Bits.pad.correcly_semantics(n : Nat, x : Bits) :
+//   Bits.to_nat(Bits.pad(n, x)) == Bits.to_nat(x)
+//  ?a // padding a Bit do not change the semantic in Nat
+
+User.caotic.ABI.encode_(coder : User.caotic.Encode.ABI.Coder) : Pair<String, Bool> 
+  case coder {
+    bytes :
+      let length = String.length(coder.value) - 1 // change after to bits.length
+      let nextMul32 = (((length - 1) / 64) + 1) * 64
+      let lengthEncoded = User.caotic.ABI.encode_(User.caotic.Encode.ABI.Coder.uint_256(Nat.hex.encode(length)))
+      open lengthEncoded
+      let bytesEncoded = String.pad_right(nextMul32 - 1, '0', "0" | coder.value)
+      {lengthEncoded.fst | bytesEncoded, true}
+  } default 
+      {String.pad_left(64, '0', coder.value), false}
+
+User.caotic.ABI.methodData(method : User.caotic.Encode.ABI.Method) : _
+  open method
+  let joinMethods = List.map!!((x) User.caotic.Encode.ABI.Coder.stringfy(x), method.inputs)
+  let methodSig = method.name | "(" | String.join(",", joinMethods) | ")"
+  let methodHash = Crypto.Keccak.hash(methodSig)
+  let encodeInputs = List.map!!((x) User.caotic.ABI.encode_(x), method.inputs)
+  let encodeSize = List.length!(encodeInputs)
+  let hexs = Pair.new!!("", "")
+
+  for coder in encodeInputs with hexs :
+    let {dataBlock, headBlock} = hexs
+    open coder
+    if coder.snd then
+      let dataLoc = (encodeSize*32) + String.length(dataBlock)
+      headBlock = headBlock | String.pad_left(64, '0', Nat.hex.encode(dataLoc))
+      dataBlock = dataBlock | coder.fst
+      {dataBlock, headBlock}
+    else
+      dataBlock = dataBlock | coder.fst
+      {dataBlock, headBlock}
+  methodHash | Pair.snd!!(hexs) | Pair.fst!!(hexs)
+
+
+uint_len_refinment(x : Nat) : Type
+   Pair<(x <=? 256) == true, Nat.divides(8, x)>
+
+bytes_len_refinments(x : Maybe<Nat>) : Type
+  case x {
+    some : (x.value >? 0) == true
+    none : Unit
+  }
+
+type Method.Type {
+  bytes(len : Maybe<Nat>, value : Bits),
+  uint(len : Nat, value : Bits)
+  int(value : Bits)
+  bool(value : Bits)
+  array(value : List<Method.Type>)
+}
+
+Bits.to_hex(value : Bits, left : Bool) : String
+  let func = if left then String.pad_left else String.pad_right
+  func(64, '0', String.reverse(Bits.hex.encode(value)))
+
+Bool.to_bytes(b : Bool) : Bits
+  if b then Bits.i(Bits.e) else Bits.o(Bits.e)
+
+String.to_bits2(str: String): Bits
+  case str{
+    nil : Bits.e
+    cons: Bits.concat(Bits.o(U16.to_bits(str.head)), String.to_bits(str.tail))
+  }
+
+User.caotic.encodeType(coder : Method.Type) : List<String>
+  case coder {
+    bytes : 
+      case coder.len {
+        some : 
+          [Bits.to_hex(coder.value, true)]
+        none : 
+          let bytes_size = Nat.to_bits((Bits.size(coder.value) + 1) / 8)
+          [Bits.to_hex(bytes_size, true), Bits.to_hex(coder.value, false)]
+      } 
+    array : 
+      let list_length = Nat.to_bits(List.length!(coder.value))
+      let content = List.map!!(User.caotic.encodeType, coder.value)
+      Bits.to_hex(list_length, true) & List.flatten!(content)
+  } default
+     [Bits.to_hex(coder.value, true)]
+
+User.caotic.encode(length : Nat, coder : List<Method.Type>) : Pair<List<String>, List<String>>
+  case coder {
+    cons : case coder.head as bytes {
+      bytes : case bytes.len {
+        some : 
+           let {static, dynamic} = User.caotic.encode(length, coder.tail)
+           {static ++ User.caotic.encodeType(coder.head), dynamic}
+        none : 
+          let {static, dynamic} = User.caotic.encode(length, coder.tail)
+          let dynamic_location = Nat.to_bits((length + List.length!(dynamic)) * 32) // + size of queue dynamic
+          {static ++ [Bits.to_hex(dynamic_location, true)], dynamic ++ User.caotic.encodeType(coder.head)}
+       }
+      array :
+          let {static, dynamic} = User.caotic.encode(length, coder.tail)
+          let dynamic_location = Nat.to_bits((length + List.length!(dynamic)) * 32) // + size of queue dynamic
+          {static ++ [Bits.to_hex(dynamic_location, true)], dynamic ++ User.caotic.encodeType(coder.head)}
+    } default 
+        let {static, dynamic} = User.caotic.encode(length, coder.tail)
+        {static ++ User.caotic.encodeType(coder.head), dynamic}
+  } default {[], []}
+
+
+
+User.caotic.encode.read(enconding : Pair<List<String>, List<String>>) : String
+  let {static, dynamic} = enconding
+  static = List.map!!((x) "0x" | x, static)
+  dynamic = List.map!!((x) "0x" | x, dynamic)
+  String.join("", static) | String.join("", dynamic)
+
+User.caotic.ABI.encode : _
+  let dave_bits = Bits.read("10100110011011101000011000100110")
+//  let paramsTest = [
+  //    Method.Type.uint(32, U32.to_bits(69), {refl, Sigma.new!!(4, refl)})
+  //    Method.Type.bool(Bool.to_bytes(true))
+   // ]
+
+ // let array = Method.Type.array([
+   //   Method.Type.uint(256, Nat.to_bits(1)),
+    //  Method.Type.uint(256, Nat.to_bits(2)),
+    //  Method.Type.uint(256, Nat.to_bits(3))
+   // ])
+
+  //let paramsTest = [
+  //  Method.Type.bytes(none, dave_bits),
+   // Method.Type.bool(Bool.to_bytes(true)),
+   // array
+ // ]
+
+  let paramsTest = [
+     Method.Type.uint(256, Nat.to_bits(291)),
+     Method.Type.array([
+       Method.Type.uint(32, Nat.to_bits(1110)),
+       Method.Type.uint(32, Nat.to_bits(1929)),
+     ]),
+     Method.Type.bytes(some(10), Bits.read("00110001001100100011001100110100001101010011011000110111001110000011100100110000")),
+     Method.Type.bytes(none, Bits.read("01001000011001010110110001101100011011110010110000100000011101110110111101110010011011000110010000100001")),
+  ]
+
+  let test = User.caotic.encode(List.length!(paramsTest), List.reverse!(paramsTest))
+  User.caotic.encode.read(test)

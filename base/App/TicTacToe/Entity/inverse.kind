@@ -1,5 +1,0 @@
-App.TicTacToe.entity.inverse(x : App.TicTacToe.Entity) : App.TicTacToe.Entity
-  case x {
-      circle : App.TicTacToe.Entity.x
-      x : App.TicTacToe.Entity.circle
-  }

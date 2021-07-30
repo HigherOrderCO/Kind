@@ -1,5 +1,0 @@
-App.TicTacToe.entity.to_assets(e : App.TicTacToe.Entity) : VoxBox
-  case e {
-      circle : App.TicTacToe.Assets.circle
-      x : App.TicTacToe.Assets.x
-  }
