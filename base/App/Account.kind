@@ -1,36 +1,5 @@
-// 1 - Welcome Screen:: Create an Account + Log in
-//  caso escolha criar a conta
-// 1.1 - Pick a Username + Continue
-// 1.2 - Name this Computer + Continue
-// 3 - Home (pode revogar dispositivos)
+//Não permitir usuários de cadastrarem strings vazias
 
-//  caso clique Log in
-// 2.1 - insert Username
-//  caso username presente
-// 3 - lista de dispositivos
-// requisitar autorização para dispositivo selecionado
-// aceitar do outro dispositivo
-
-//case endereco_temconta {
-//  false:
-//    case usuario_tem_conta {
-//      false:
-//        cria conta  OK
-//      true:
-//        o dispositivo vai fazer uma requisição para outro dispositivo
-//        se aceitar ele dá um post de register
-//        se não ele ignora
-//        //|devicename| Authorization Key
-//        // exibe um qr code
-//        // uma url com uma query string -> estado local do app
-//    }
-//  true:
-//    mostra os dados, permite operações
-//    // devices
-//    // carrinho hot wheels
-//    // aspirador de pó
-//    // * autorizar novo dispositivo
-//}
 
 App.Account.State: App.State
   App.State.new(App.Account.State.local, App.Account.State.global)
@@ -120,7 +89,7 @@ App.Account.Global.Event.revoke.serial(devicekey: String): String
     App.Account.Global.Event.serialize_post(App.Account.Global.Event.revoke(devicekey)))
 
 App.Account.room: String
-  App.room("13f11281239412392983713j9rfh1iu41jd0920j9d923i429342")
+  App.room("Account_Beta_Test")
 
 App.Account: App<App.Account.State>
   App.new<App.Account.State>(
@@ -165,8 +134,6 @@ App.Account.when: App.When<App.Account.State>
   (event, state)
   case event { 
     init: IO { 
-//      open state
-//      let time = ((event.time*2) /125)
       let screen = App.Account.State.Screen.welcome
       // TODO verify why event.user has random capital letters
       let local = App.Account.State.local.new(String.to_lower(event.user), screen)
@@ -237,28 +204,38 @@ App.Account.when: App.When<App.Account.State>
           switch String.eql(event.id) { 
             "register_button":
               // TODO check inputs
-              //log("input: "|state.local.username) // DEBUG
-              let serial = App.Account.Global.Event.register.serial(state.local.screen.username, state.local.screen.devicename)
-              log("serial register: "|serial)
-              IO {
-                let new_room = App.Account.State.Screen.home(false, "","")
-                let addr = state.local.address
-                App.new_post!(App.Account.room, serial)
-                App.set_local!(App.Account.State.local.new(addr, new_room))
-              }
+              let empty_username = String.is_empty(state.local.screen.username)
+              let empty_devicename = String.is_empty(state.local.screen.devicename)
+              if empty_username || empty_devicename then
+                App.pass!
+              else
+                IO {
+                  let serial = App.Account.Global.Event.register.serial(state.local.screen.username, state.local.screen.devicename)
+                  log("serial register: "|serial)
+                  let new_room = App.Account.State.Screen.home(false, "","")
+                  let addr = state.local.address
+                  App.new_post!(App.Account.room, serial)
+                  App.set_local!(App.Account.State.local.new(addr, new_room))
+                }
           } default App.pass!
         home:
           case String.eql(event.id, App.Account.Screen.draw.home.authorize_id) {
             true:
               case state.local.screen.authorizing {
-                true: IO { 
-                  let addr = state.local.address
-                  let screen = App.Account.State.Screen.home(false, "", "")
-                  let serial = App.Account.Global.Event.authorize.serial(
-                    state.local.screen.authorize_devicename,
-                    state.local.screen.authorize_devicekey)
-                  App.new_post!(App.Account.room, serial)
-                  App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+                true:
+                  let empty_username = String.is_empty(state.local.screen.authorize_devicename)
+                  let empty_devicename = String.is_empty(state.local.screen.authorize_devicekey)
+                  if empty_username || empty_devicename then
+                    App.pass!
+                  else
+                    IO { 
+                    let addr = state.local.address
+                    let screen = App.Account.State.Screen.home(false, "", "")
+                    let serial = App.Account.Global.Event.authorize.serial(
+                      state.local.screen.authorize_devicename,
+                      state.local.screen.authorize_devicekey)
+                    App.new_post!(App.Account.room, serial)
+                    App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
                 }
                 false:
                   let addr = state.local.address
@@ -373,7 +350,6 @@ App.Account.when: App.When<App.Account.State>
           } default App.pass!
       } default App.pass!
       key_down:
-        log(U16.show(event.code))
         switch U16.eql(event.code) {
           219:
             open state; open state.local;
