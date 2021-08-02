@@ -8,6 +8,7 @@ App.Account.Screen.draw.main_style: Map<String>
 App.Account.Screen.draw.upper_bottom_style: Map<String>
 { "display":"flex"
   "flex-direction":"row"
+  "justify-content":"flex-start"
   "align-items": "center" }
 
 App.Account.Screen.draw.box_style: Map<String>
@@ -25,18 +26,32 @@ App.Account.Screen.draw.box_style: Map<String>
 App.Account.Screen.draw.text_style: Map<String>
 { "align-items": "center"
   "font-size": "2em",
+  "margin-left": "4px" 
   "padding-bottom": "5px" }
 
+App.Account.Screen.draw.text_style_small: Map<String>
+{ "align-items": "center"
+  "font-size": "1.5em",
+  "margin-left": "4px" 
+  "padding-bottom": "5px" }
+
+App.Account.Screen.draw.loading: DOM
+  let main_style = App.Account.Screen.draw.main_style
+  let text_style = App.Account.Screen.draw.text_style
+  let box_style =  App.Account.Screen.draw.box_style
+  <div style=App.Account.Screen.draw.main_style>
+    <div style=text_style>"Loading..."</div>
+  </div>
 
 App.Account.Screen.draw.welcome: DOM
   <div style=App.Account.Screen.draw.main_style>
     <div style=App.Account.Screen.draw.text_style>"Welcome to UwU.Tech Accounts :3"</div>
-    <button id="register_button" style=App.Account.Screen.draw.box_style>
-      "Register"
-    </button>
-    <button id="login_button" style=App.Account.Screen.draw.box_style>
-      "Login"
-    </button>
+      <button id="register_button" style=App.Account.Screen.draw.box_style>
+        "Register"
+      </button>
+      <button id="login_button" style=App.Account.Screen.draw.box_style>
+        "Login"
+      </button>
   </div>
 
 
@@ -46,14 +61,64 @@ App.Account.Screen.draw.register: DOM
   let box_style =  App.Account.Screen.draw.box_style
   <div style=main_style>
     <div style=text_style>"Create an Account"</div>
-      <input id="register_username" style=box_style>
-      </input>
-      <input id="register_devicename" style=box_style>
-      </input>
-      <button id="register_button" style=box_style>
-        "Register"
-      </button>
+    <div style= App.Account.Screen.draw.upper_bottom_style>
+      <div style={"flex-direction":"column"}>
+        <div style=App.Account.Screen.draw.text_style_small>"Create your Username"</div>
+        <input id="register_username" style=box_style>
+        </input>
+      </div>
+      <div style={"flex-direction":"column"}>
+        <div style=App.Account.Screen.draw.text_style_small>"Name your device"</div>
+        <input id="register_devicename" style=box_style>
+        </input>
+      </div>
+      <div style={"flex-direction":"column"}>
+        <div style=App.Account.Screen.draw.text_style_small>"‎"</div>
+        <button id="register_button" style=box_style>
+          "Register"
+        </button>
+      </div>
+    </div>
   </div>
+
+App.Account.Screen.draw.home.revoke_prefix: String
+  "revoke_button_"
+App.Account.Screen.draw.home(
+  state: App.Account.State.global
+  addr: String
+): DOM
+  open state
+  let user = state.usermap{addr} <> ""
+  let devicelist = state.keymap{user} <> []
+  let main_style = App.Account.Screen.draw.main_style
+  let text_style = App.Account.Screen.draw.text_style
+  let box_style =  App.Account.Screen.draw.box_style
+  let upper_bottom_style = App.Account.Screen.draw.upper_bottom_style
+  let device_row = ((n, p)
+    open p
+    <tr>
+      <td>p.fst</td>
+      <td>p.snd</td>
+      <td>
+        <button
+          id=App.Account.Screen.draw.home.revoke_prefix|Nat.show(n) style=box_style> "Revoke" </button>
+      </td>
+    </tr>) :: Nat -> Pair(String, String) -> DOM
+  let table_rows = List.imap!!(device_row, devicelist)
+
+  <div style=main_style>
+    <div style=text_style>"Hello "|user|" Welcome!"</div>
+    <div style=text_style>"Here are your devices:"</div>
+    <table>
+      <tr><th>"Device Name"</th><th>"Device Key"</th></tr>
+      for row in table_rows:
+        row
+    </table>
+  </div>
+
+
+
+
 
 App.Account.Screen.draw.debug(state: App.Account.State.global): DOM
   let main_style = App.Account.Screen.draw.main_style
@@ -98,6 +163,9 @@ App.Account.Screen.draw.debug(state: App.Account.State.global): DOM
       |"\n"|List.show!(Pair.show!!((x) x, List.show!(Pair.show!!((x) x, (x) x))), keylist)
     </p>
     <button id="welcome_button" style=box_style>
-      "Home"
+      "Welcome Screen"
     </button>
   </div>
+
+
+

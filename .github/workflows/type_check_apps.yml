@@ -31,11 +31,10 @@ jobs:
         run: |
           for changed_file in ${{ steps.files.outputs.all }}; do
             app_dir=${changed_file:5} # remove base/ prefix
-            is_kind=${app_dir: -5}
-            if [ "$is_kind" == ".kind" ]; then
-              app_name=${app_dir%.k*} # remove .kind sufix
-              app_name_format=${app_name////.} # replaces "/" for "."
-              eval node web/type_check_Apps ${app_name_format}
+            folder=${app_dir:0:4}
+            ext=${app_dir: -5}
+            if [ "$ext" == ".kind" ] && [ "$folder" == "App/" ]; then
+              eval node web/type_check_Apps ${app_dir}
             fi
           done
 

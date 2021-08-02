@@ -64,7 +64,7 @@ User.caotic.ABI.methodData(method : User.caotic.Encode.ABI.Method) : _
 
 
 uint_len_refinment(x : Nat) : Type
-  Pair<(x <=? 256) == true, Nat.divides(8, x)>
+   Pair<(x <=? 256) == true, Nat.divides(8, x)>
 
 bytes_len_refinments(x : Maybe<Nat>) : Type
   case x {
@@ -73,15 +73,16 @@ bytes_len_refinments(x : Maybe<Nat>) : Type
   }
 
 type Method.Type {
-  bytes(len : Maybe<Nat>, value : Bits, refinment : bytes_len_refinments(len)),
-  uint(len : Nat, value : Bits, refinment : uint_len_refinment(len))
+  bytes(len : Maybe<Nat>, value : Bits),
+  uint(len : Nat, value : Bits)
   int(value : Bits)
   bool(value : Bits)
   array(value : List<Method.Type>)
 }
 
-Bits.to_hex(value : Bits) : String
-  String.pad_left(64, '0', String.reverse(Bits.hex.encode(value)))
+Bits.to_hex(value : Bits, left : Bool) : String
+  let func = if left then String.pad_left else String.pad_right
+  func(64, '0', String.reverse(Bits.hex.encode(value)))
 
 Bool.to_bytes(b : Bool) : Bits
   if b then Bits.i(Bits.e) else Bits.o(Bits.e)
@@ -92,35 +93,79 @@ String.to_bits2(str: String): Bits
     cons: Bits.concat(Bits.o(U16.to_bits(str.head)), String.to_bits(str.tail))
   }
 
-User.caotic.encode(coder : List<Method.Type>) : Pair<List<String>, List<String>>
+User.caotic.encodeType(coder : Method.Type) : List<String>
+  case coder {
+    bytes : 
+      case coder.len {
+        some : 
+          [Bits.to_hex(coder.value, true)]
+        none : 
+          let bytes_size = Nat.to_bits((Bits.size(coder.value) + 1) / 8)
+          [Bits.to_hex(bytes_size, true), Bits.to_hex(coder.value, false)]
+      } 
+    array : 
+      let list_length = Nat.to_bits(List.length!(coder.value))
+      let content = List.map!!(User.caotic.encodeType, coder.value)
+      Bits.to_hex(list_length, true) & List.flatten!(content)
+  } default
+     [Bits.to_hex(coder.value, true)]
+
+User.caotic.encode(length : Nat, coder : List<Method.Type>) : Pair<List<String>, List<String>>
   case coder {
     cons : case coder.head as bytes {
       bytes : case bytes.len {
-        some : {[], []}
+        some : 
+           let {static, dynamic} = User.caotic.encode(length, coder.tail)
+           {static ++ User.caotic.encodeType(coder.head), dynamic}
         none : 
-          let {static, dynamic} = User.caotic.encode(coder.tail)
-          let dynamic_location = Nat.to_bits((List.length!(static) + 2) * 32) // + size of queue dynamic
-          let bytes_size = Nat.to_bits(Bits.size(bytes.value))
-          {Bits.to_hex(dynamic_location) & static, Bits.to_hex(bytes_size) & Bits.to_hex(bytes.value) & dynamic}
-      }
-      array : {[], []}
+          let {static, dynamic} = User.caotic.encode(length, coder.tail)
+          let dynamic_location = Nat.to_bits((length + List.length!(dynamic)) * 32) // + size of queue dynamic
+          {static ++ [Bits.to_hex(dynamic_location, true)], dynamic ++ User.caotic.encodeType(coder.head)}
+       }
+      array :
+          let {static, dynamic} = User.caotic.encode(length, coder.tail)
+          let dynamic_location = Nat.to_bits((length + List.length!(dynamic)) * 32) // + size of queue dynamic
+          {static ++ [Bits.to_hex(dynamic_location, true)], dynamic ++ User.caotic.encodeType(coder.head)}
     } default 
-        let {static, dynamic} = User.caotic.encode(coder.tail)
-        {Bits.to_hex(bytes.value) & static, dynamic}
+        let {static, dynamic} = User.caotic.encode(length, coder.tail)
+        {static ++ User.caotic.encodeType(coder.head), dynamic}
   } default {[], []}
 
-User.caotic.ABI.encode : _
 
-  log(Bits.show(String.to_bits2("ab")))
+User.caotic.encode.read(enconding : Pair<List<String>, List<String>>) : String
+  let {static, dynamic} = enconding
+  static = List.map!!((x) "0x" | x, static)
+  dynamic = List.map!!((x) "0x" | x, dynamic)
+  String.join("", static) | String.join("", dynamic)
+
+User.caotic.ABI.encode : _
+  let dave_bits = Bits.read("10100110011011101000011000100110")
 //  let paramsTest = [
   //    Method.Type.uint(32, U32.to_bits(69), {refl, Sigma.new!!(4, refl)})
   //    Method.Type.bool(Bool.to_bytes(true))
    // ]
 
+ // let array = Method.Type.array([
+   //   Method.Type.uint(256, Nat.to_bits(1)),
+    //  Method.Type.uint(256, Nat.to_bits(2)),
+    //  Method.Type.uint(256, Nat.to_bits(3))
+   // ])
+
+  //let paramsTest = [
+  //  Method.Type.bytes(none, dave_bits),
+   // Method.Type.bool(Bool.to_bytes(true)),
+   // array
+ // ]
+
   let paramsTest = [
-    Method.Type.bytes(none, String.to_bits("dave"), Unit.new),
-    Method.Type.bool(Bool.to_bytes(true))
+     Method.Type.uint(256, Nat.to_bits(291)),
+     Method.Type.array([
+       Method.Type.uint(32, Nat.to_bits(1110)),
+       Method.Type.uint(32, Nat.to_bits(1929)),
+     ]),
+     Method.Type.bytes(some(10), Bits.read("00110001001100100011001100110100001101010011011000110111001110000011100100110000")),
+     Method.Type.bytes(none, Bits.read("01001000011001010110110001101100011011110010110000100000011101110110111101110010011011000110010000100001")),
   ]
 
-  let test = User.caotic.encode(paramsTest)
-  Pair.show!!(List.show!(Function.id!), List.show!(Function.id!), test)
+  let test = User.caotic.encode(List.length!(paramsTest), List.reverse!(paramsTest))
+  User.caotic.encode.read(test)

@@ -1,0 +1,3 @@
+Ether.Hex.to_abi_hex(value : Bits, left : Bool) : String
+  let func = if left then String.pad_left else String.pad_right
+  func(64, '0', String.reverse(Bits.hex.encode(value)))
