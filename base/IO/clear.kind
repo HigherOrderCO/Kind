@@ -1,0 +1,2 @@
+IO.clear: IO<Unit>
+  IO.print(String.cons(Nat.to_u16(27), String.cons(Nat.to_u16(99), String.nil)))
