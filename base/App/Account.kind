@@ -149,6 +149,8 @@ App.Account.draw: App.Draw<App.Account.State>
       App.Account.Screen.draw.welcome
     register:
       App.Account.Screen.draw.register
+    login: 
+      App.Account.Screen.draw.login(state.local.address)
     home:
       App.Account.Screen.draw.home(
         state.global
@@ -157,9 +159,7 @@ App.Account.draw: App.Draw<App.Account.State>
         state.local.screen.authorize_devicekey
         state.local.screen.authorize_devicename
       )
-    loading:
-      App.Account.Screen.draw.loading
-  } default <p>"you're in the void, this screen doesn't exist"</p>
+  }
 
 App.Account.when: App.When<App.Account.State>
   (event, state)
