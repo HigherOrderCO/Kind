@@ -36,7 +36,7 @@ App.Account.Screen.draw.text_style_small: Map<String>
   "padding-bottom": "5px" }
 
 App.Account.Screen.draw.login_key_style: Map<String>
-{ "width": "41ch",
+{ "width": "45ch",
   "padding": "5px",
   "font-size": "1.5rem",
   "font-family": "monospace",
@@ -128,13 +128,22 @@ App.Account.Screen.draw.home(
   let auth_stuff =
     if authorizing then
       <div style=upper_bottom_style>
-        <input id=App.Account.Screen.draw.home.authorize_devicekey_id style=box_style>
-        </input>
-        <input id=App.Account.Screen.draw.home.authorize_devicename_id style=box_style>
-        </input>
-        <button id=App.Account.Screen.draw.home.authorize_id style=box_style>
-          "Authorize"
-        </button>
+        <div style={"flex-direction":"column"}>
+          <div style=App.Account.Screen.draw.text_style_small>"Enter the device name"</div>
+          <input id=App.Account.Screen.draw.home.authorize_devicename_id style=box_style>
+          </input>
+        </div>
+        <div style={"flex-direction":"column"}>
+          <div style=App.Account.Screen.draw.text_style_small>"Enter the Device key"</div>
+          <input id=App.Account.Screen.draw.home.authorize_devicekey_id style=box_style>
+          </input>
+        </div>
+        <div style={"flex-direction":"column"}>
+          <div style=App.Account.Screen.draw.text_style_small>"‎"</div>
+          <button id=App.Account.Screen.draw.home.authorize_id style=box_style>
+            "Authorize"
+          </button>
+        </div>
       </div>
     else
       <button id=App.Account.Screen.draw.home.authorize_id style=box_style>

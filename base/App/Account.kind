@@ -64,8 +64,8 @@ type App.Account.State.Screen {
   login
   home(
     authorizing: Bool
-    authorize_devicekey: String
     authorize_devicename: String
+    authorize_devicekey: String
   )
 }
 
@@ -76,8 +76,8 @@ type App.Account.Global.Event {
     devicename: String
   )
   authorize(
-    devicekey: String
     devicename: String
+    devicekey: String
   )
   revoke(
     devicekey: String
@@ -111,9 +111,9 @@ App.Account.Global.Event.register.serial(username: String, devicename: String): 
   App.Account.pad_even('0',
     App.Account.Global.Event.serialize_post(App.Account.Global.Event.register(username, devicename)))
 
-App.Account.Global.Event.authorize.serial(devicekey: String, devicename: String): String
+App.Account.Global.Event.authorize.serial(devicename: String, devicekey: String): String
   App.Account.pad_even('0',
-    App.Account.Global.Event.serialize_post(App.Account.Global.Event.authorize(devicekey, devicename)))
+    App.Account.Global.Event.serialize_post(App.Account.Global.Event.authorize(devicename, devicekey)))
 
 App.Account.Global.Event.revoke.serial(devicekey: String): String
   App.Account.pad_even('0',
@@ -156,8 +156,8 @@ App.Account.draw: App.Draw<App.Account.State>
         state.global
         state.local.address
         state.local.screen.authorizing
-        state.local.screen.authorize_devicekey
         state.local.screen.authorize_devicename
+        state.local.screen.authorize_devicekey
       )
   }
 
@@ -210,7 +210,7 @@ App.Account.when: App.When<App.Account.State>
               log("serial register: "|serial)
               App.new_post!(App.Account.room, serial)
             "authorize_button":
-              let serial = App.Account.Global.Event.authorize.serial(state.local@address, state.local.screen.authorize_devicename)
+              let serial = App.Account.Global.Event.authorize.serial(state.local.screen.authorize_devicename, state.local@address)
               log("serial authorize: "|serial)
               App.new_post!(App.Account.room, serial)
             "revoke_button":
@@ -255,8 +255,8 @@ App.Account.when: App.When<App.Account.State>
                   let addr = state.local.address
                   let screen = App.Account.State.Screen.home(false, "", "")
                   let serial = App.Account.Global.Event.authorize.serial(
-                    state.local.screen.authorize_devicekey
-                    state.local.screen.authorize_devicename)
+                    state.local.screen.authorize_devicename,
+                    state.local.screen.authorize_devicekey)
                   App.new_post!(App.Account.room, serial)
                   App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
                 }
@@ -293,8 +293,8 @@ App.Account.when: App.When<App.Account.State>
               let screen = App.Account.State.Screen.debug(
                 event.text,
                 state.local.screen.register_devicename,
-                state.local.screen.authorize_devicekey,
                 state.local.screen.authorize_devicename,
+                state.local.screen.authorize_devicekey,
                 state.local.screen.revoke_devicekey)
               App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
             }
@@ -303,18 +303,8 @@ App.Account.when: App.When<App.Account.State>
               let screen = App.Account.State.Screen.debug(
                 state.local.screen.register_username,
                 event.text,
+                state.local.screen.authorize_devicename,
                 state.local.screen.authorize_devicekey,
-                state.local.screen.authorize_devicename,
-                state.local.screen.revoke_devicekey)
-              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
-            }
-            "authorize_devicekey": IO {
-              let addr = state.local.address
-              let screen = App.Account.State.Screen.debug(
-                state.local.screen.register_username,
-                state.local.screen.register_devicename,
-                event.text,
-                state.local.screen.authorize_devicename,
                 state.local.screen.revoke_devicekey)
               App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
             }
@@ -323,7 +313,17 @@ App.Account.when: App.When<App.Account.State>
               let screen = App.Account.State.Screen.debug(
                 state.local.screen.register_username,
                 state.local.screen.register_devicename,
+                event.text,
                 state.local.screen.authorize_devicekey,
+                state.local.screen.revoke_devicekey)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+            }
+            "authorize_devicekey": IO {
+              let addr = state.local.address
+              let screen = App.Account.State.Screen.debug(
+                state.local.screen.register_username,
+                state.local.screen.register_devicename,
+                state.local.screen.authorize_devicename,
                 event.text,
                 state.local.screen.revoke_devicekey)
               App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
@@ -354,27 +354,28 @@ App.Account.when: App.When<App.Account.State>
           } default App.pass!
         home:
           switch String.eql(event.id) { 
-            App.Account.Screen.draw.home.authorize_devicekey_id: IO { 
-              let addr = state.local.address
-              let screen = App.Account.State.Screen.home(
-                state.local.screen.authorizing
-                event.text,
-                state.local.screen.authorize_devicename)
-              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
-            }
             App.Account.Screen.draw.home.authorize_devicename_id: IO { 
               let addr = state.local.address
               let screen = App.Account.State.Screen.home(
                 state.local.screen.authorizing
-                state.local.screen.authorize_devicekey,
+                event.text,
+                state.local.screen.authorize_devicekey)
+              App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
+            }
+            App.Account.Screen.draw.home.authorize_devicekey_id: IO { 
+              let addr = state.local.address
+              let screen = App.Account.State.Screen.home(
+                state.local.screen.authorizing
+                state.local.screen.authorize_devicename,
                 event.text)
               App.set_local<App.Account.State>(App.Account.State.local.new(addr, screen))
             }
           } default App.pass!
       } default App.pass!
       key_down:
+        log(U16.show(event.code))
         switch U16.eql(event.code) {
-          17:
+          219:
             open state; open state.local;
             let screen = App.Account.State.Screen.debug("", "", "", "", "")
             App.set_local!(App.Account.State.local.new(state.local.address, screen))
