@@ -79,7 +79,6 @@ function type_check_app(name) {
 // all_apps: when false, uses JavaScript compilation target. If true, Scheme.
 // ex: node type_check_Apps App/Playground/
 function type_check_folder(name, all_apps = false) {
-  console.log("Type check folder: ", name)
   if (fs.existsSync(kind_dir+"/App/"+name)) {
     try {
       console.log("Type checking folder App/"+name+"/* ...");

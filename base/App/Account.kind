@@ -11,6 +11,27 @@
 // requisitar autorização para dispositivo selecionado
 // aceitar do outro dispositivo
 
+//case endereco_temconta {
+//  false:
+//    case usuario_tem_conta {
+//      false:
+//        cria conta  OK
+//      true:
+//        o dispositivo vai fazer uma requisição para outro dispositivo
+//        se aceitar ele dá um post de register
+//        se não ele ignora
+//        //|devicename| Authorization Key
+//        // exibe um qr code
+//        // uma url com uma query string -> estado local do app
+//    }
+//  true:
+//    mostra os dados, permite operações
+//    // devices
+//    // carrinho hot wheels
+//    // aspirador de pó
+//    // * autorizar novo dispositivo
+//}
+
 App.Account.State: App.State
   App.State.new(App.Account.State.local, App.Account.State.global)
 
@@ -41,11 +62,7 @@ type App.Account.State.Screen {
     devicename: String
   )
   login
-  home(
-    user: String
-    devices: List<Pair<String, String>>
-  )
-  loading
+  home
 }
 
 
@@ -132,8 +149,6 @@ App.Account.draw: App.Draw<App.Account.State>
       App.Account.Screen.draw.home(
         state.global
         state.local.address
-        state.local.screen.user
-        state.local.screen.devices
       )
     loading:
       App.Account.Screen.draw.loading
@@ -146,6 +161,7 @@ App.Account.when: App.When<App.Account.State>
 //      open state
 //      let time = ((event.time*2) /125)
       let screen = App.Account.State.Screen.welcome
+      // TODO verify why event.user has random capital letters
       let local = App.Account.State.local.new(String.to_lower(event.user), screen)
       log(" -User address: "|local@address)
       App.watch!(App.Account.room)
@@ -158,26 +174,16 @@ App.Account.when: App.When<App.Account.State>
       case state.local.screen {
         welcome:
           open state.global
-          case state.global.usermap{state.local.address} as username {
-            some:
-              //let screen = App.Account.State.Screen.debug("", "", "", "", "")
-              let devices = state.global.keymap{username.value} abort
-                log("invariant violation, user not found")
-                App.pass!
-              let screen = App.Account.State.Screen.home(username.value, devices)
-              let local = state.local@screen <- screen
-              App.set_local!(local)
-            none:
-              App.pass!
-//              let screen = App.Account.State.Screen.welcome
-//              let local = state.local@screen <- screen
-//              App.set_local!(local)
-          }
+          let username = state.global.usermap{state.local.address} abort App.pass!
+          let screen = App.Account.State.Screen.home
+          let local = state.local@screen <- screen
+          App.set_local!(local)
       } default App.pass!
     }
     mouse_click: IO {
       open state
       open state.local
+      open state.global
       case state.local.screen {
         debug:
           switch String.eql(event.id) {
@@ -218,11 +224,25 @@ App.Account.when: App.When<App.Account.State>
               let serial = App.Account.Global.Event.register.serial(state.local.screen.username, state.local.screen.devicename)
               log("serial register: "|serial)
               IO {
-                let new_room = App.Account.State.Screen.home(state.local.screen.username, [{state.local.screen.devicename, state.local.address}])
+                let new_room = App.Account.State.Screen.home
                 let addr = state.local.address
                 App.new_post!(App.Account.room, serial)
                 App.set_local!(App.Account.State.local.new(addr, new_room))
               }
+          } default App.pass!
+        home:
+          case String.starts_with(event.id, App.Account.Screen.draw.home.revoke_prefix) {
+            true:
+              let prefix_size = String.length(App.Account.Screen.draw.home.revoke_prefix)
+              let n = Nat.read(String.drop(prefix_size, event.id))
+              let user = state.global.usermap{state.local.address} abort
+                App.pass!
+              let devices = state.global.keymap{user} abort App.pass!
+              let device_pair = devices[n] abort App.pass!
+              let {devicename, devicekey} = device_pair
+              let serial = App.Account.Global.Event.revoke.serial(devicekey)
+              log("serial revoke: "|serial)
+              App.new_post!(App.Account.room, serial)
           } default App.pass!
       } default App.pass!
     }

@@ -132,7 +132,6 @@ User.caotic.encode(length : Nat, coder : List<Method.Type>) : Pair<List<String>,
   } default {[], []}
 
 
-
 User.caotic.encode.read(enconding : Pair<List<String>, List<String>>) : String
   let {static, dynamic} = enconding
   static = List.map!!((x) "0x" | x, static)
