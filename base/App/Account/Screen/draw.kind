@@ -81,11 +81,24 @@ App.Account.Screen.draw.register: DOM
     </div>
   </div>
 
+App.Account.Screen.draw.home.authorize_id: String
+  "authorize_button"
+
+App.Account.Screen.draw.home.authorize_devicekey_id: String
+  "authorize_devicekey"
+
+App.Account.Screen.draw.home.authorize_devicename_id: String
+  "authorize_devicename"
+
 App.Account.Screen.draw.home.revoke_prefix: String
   "revoke_button_"
+
 App.Account.Screen.draw.home(
   state: App.Account.State.global
   addr: String
+  authorizing: Bool
+  authorize_devicekey: String
+  authorize_devicename: String
 ): DOM
   open state
   let user = state.usermap{addr} <> ""
@@ -94,6 +107,22 @@ App.Account.Screen.draw.home(
   let text_style = App.Account.Screen.draw.text_style
   let box_style =  App.Account.Screen.draw.box_style
   let upper_bottom_style = App.Account.Screen.draw.upper_bottom_style
+  let auth_stuff =
+    if authorizing then
+      <div style=upper_bottom_style>
+        <input id=App.Account.Screen.draw.home.authorize_devicekey_id style=box_style>
+        </input>
+        <input id=App.Account.Screen.draw.home.authorize_devicename_id style=box_style>
+        </input>
+        <button id=App.Account.Screen.draw.home.authorize_id style=box_style>
+          "Authorize"
+        </button>
+      </div>
+    else
+      <button id=App.Account.Screen.draw.home.authorize_id style=box_style>
+        "Authorize new device"
+      </button>
+
   let device_row = ((n, p)
     open p
     <tr>
@@ -114,11 +143,8 @@ App.Account.Screen.draw.home(
       for row in table_rows:
         row
     </table>
+    {auth_stuff}
   </div>
-
-
-
-
 
 App.Account.Screen.draw.debug(state: App.Account.State.global): DOM
   let main_style = App.Account.Screen.draw.main_style
