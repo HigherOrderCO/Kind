@@ -81,22 +81,44 @@ App.Account.Screen.draw.register: DOM
     </div>
   </div>
 
-App.Account.Screen.draw.home(state: App.Account.State.global, addr: String): DOM
+App.Account.Screen.draw.home.revoke_prefix: String
+  "revoke_button_"
+App.Account.Screen.draw.home(
+  state: App.Account.State.global
+  addr: String
+): DOM
   open state
-  case App.Account.verify(state, addr) { 
-    true:
-      let curr_user = state.usermap{addr} <> "Guest"
-      let main_style = App.Account.Screen.draw.main_style
-      let text_style = App.Account.Screen.draw.text_style
-      let box_style =  App.Account.Screen.draw.box_style
-      let upper_bottom_style = App.Account.Screen.draw.upper_bottom_style
-      <div style=main_style>
-        <div style=text_style>"Hello "|curr_user|" Welcome!"</div>
-        <div style=text_style>"Here are your devices!"</div>
-      </div>
-    false:
-      App.Account.Screen.draw.debug(state)
-  }
+  let user = state.usermap{addr} <> ""
+  let devicelist = state.keymap{user} <> []
+  let main_style = App.Account.Screen.draw.main_style
+  let text_style = App.Account.Screen.draw.text_style
+  let box_style =  App.Account.Screen.draw.box_style
+  let upper_bottom_style = App.Account.Screen.draw.upper_bottom_style
+  let device_row = ((n, p)
+    open p
+    <tr>
+      <td>p.fst</td>
+      <td>p.snd</td>
+      <td>
+        <button
+          id=App.Account.Screen.draw.home.revoke_prefix|Nat.show(n) style=box_style> "Revoke" </button>
+      </td>
+    </tr>) :: Nat -> Pair(String, String) -> DOM
+  let table_rows = List.imap!!(device_row, devicelist)
+
+  <div style=main_style>
+    <div style=text_style>"Hello "|user|" Welcome!"</div>
+    <div style=text_style>"Here are your devices:"</div>
+    <table>
+      <tr><th>"Device Name"</th><th>"Device Key"</th></tr>
+      for row in table_rows:
+        row
+    </table>
+  </div>
+
+
+
+
 
 App.Account.Screen.draw.debug(state: App.Account.State.global): DOM
   let main_style = App.Account.Screen.draw.main_style

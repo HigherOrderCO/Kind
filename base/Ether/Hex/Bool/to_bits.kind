@@ -1,0 +1,2 @@
+Ether.Hex.Bool.to_bits(b : Bool) : Bits
+  if b then Bits.i(Bits.e) else Bits.o(Bits.e)
