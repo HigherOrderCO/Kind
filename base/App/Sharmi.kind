@@ -1,58 +1,62 @@
-// App states (local = clicks, global = visitors)
 type App.Sharmi.State.global {
   new
 }
 
-App.Sharmi.Vec: Type
-  Pair<I32, I32>
-
-type App.Sharmi.State.local {
+type App.Sharmi.Game.State.local {
   new(
     players: List<App.Sharmi.Player>
     bodies: List<App.Sharmi.Body>
     goals: List<App.Sharmi.Goal>
-    camera: Pair<App.Sharmi.Vec, App.Sharmi.Vec>
+    camera: Pair<V2, V2>
   )
 }
+type App.Sharmi.State.local {
+  home
+  game(
+    state: App.Sharmi.Game.State.local
+  )
+}
+
+App.Sharmi.room: String
+  App.room("alsllsslsldlallsldkakdlslfls")
 
 type App.Sharmi.Goal {
   new(
-    pos: App.Sharmi.Verlet
-  )
-}
-
-type App.Sharmi.Verlet {
-  new(
-    pos: App.Sharmi.Vec
-    prev: App.Sharmi.Vec
-    acc: App.Sharmi.Vec
+    pos: Physics.Verlet
   )
 }
 
 type App.Sharmi.Body {
   new(
-    radius: I32
-    mass: I32
-    pos: App.Sharmi.Verlet
+    radius: F64
+    mass: F64
+    pos: Physics.Verlet
   )
 }
 
 type App.Sharmi.Player {
   new(
     name: String
-    dir: App.Sharmi.Vec
-    pos: App.Sharmi.Verlet
+    dir: V2
+    pos: Physics.Verlet
   )
 }
 
-type App.Sharmi.State.Screen {
-  home
-  game
-}
+App.Sharmi.Field: Type
+  (V2 -> V2)
 
-// creates an object that's standing still
-App.Sharmi.Verlet.still(pos: App.Sharmi.Vec): App.Sharmi.Verlet
-  App.Sharmi.Verlet.new(pos, pos, {0, 0})
+App.Sharmi.Body.Gravity(body: App.Sharmi.Body): App.Sharmi.Field
+  (p)
+    open body; open body.pos;
+    Physics.Gravity(body.pos.pos, body.mass, p)
+
+App.Sharmi.Gravity(local: App.Sharmi.Game.State.local): App.Sharmi.Field
+  (p)
+  open local
+  let acc = {0, 0} :: V2
+  for body in local.bodies with acc:
+    acc + App.Sharmi.Body.Gravity(body, p)
+  acc
 
 App.Sharmi.State: App.State
   App.State.new(App.Sharmi.State.local, App.Sharmi.State.global)
@@ -60,11 +64,13 @@ App.Sharmi.State: App.State
 // Initial state
 App.Sharmi.init: App.Init<App.Sharmi.State>
   let local = 
-    App.Sharmi.State.local.new(
-      [] // List<App.Sharmi.Player>
-      [] // List<App.Sharmi.Body>
-      [] // List<App.Sharmi.Goal>
-      {{0, 0}, {0, 0}} // Pair<App.Sharmi.Vec, App.Sharmi.Vec>
+    App.Sharmi.State.local.game(
+      App.Sharmi.Game.State.local.new(
+        [] // List<App.Sharmi.Player>
+        [] // List<App.Sharmi.Body>
+        [] // List<App.Sharmi.Goal>
+        {{0.0, 0.0} :: V2, {0.0, 0.0} :: V2} // Pair<V2, V2>
+      )
     )
   App.Store.new<App.Sharmi.State>(local, App.Sharmi.State.global.new)
 
@@ -85,17 +91,36 @@ App.Sharmi.draw: App.Draw<App.Sharmi.State>
 
 // Event handler
 App.Sharmi.when: App.When<App.Sharmi.State>
-  App.no_when<App.Sharmi.State>
-//  (event, state)
-//  case event {
-//    init: IO {
-//      App.watch!(App.room_zero)
-//      App.new_post!(App.room_zero, "")
-//    }
-//    mouse_down: IO {
-//      App.set_local!(state@local + 1)
-//    }
-//  } default App.pass!
+  (event, state)
+  open state;
+  case state.local {
+    game:
+      case event {
+    //    init: IO {
+    //      //App.watch!(App.Sharmi.room)
+    //      //App.new_post!(App.room_zero, "")
+    //    }
+        frame: IO {
+          open state.local.state;
+          let new_bodies = []
+          // apply gravity
+          for body in state.local.state.bodies with new_bodies:
+            open body; open body.pos
+            let new_acc = App.Sharmi.Gravity(state.local.state, body.pos.pos)
+            let new_pos = body.pos@acc <- new_acc
+            let new_body = body@pos <- new_pos
+            new_body & new_bodies
+          let new_players = []
+          for player in state.local.state.players with new_players:
+            open player; open player.pos
+            let new_acc = App.Sharmi.Gravity(state.local.state, player.pos.pos)
+            let new_pos = player.pos@acc <- new_acc
+            let new_player = player@pos <- new_pos
+            new_player & new_players
+          App.pass!
+        }
+      } default App.pass!
+  } default App.pass!
 
 // Global ticker: not used
 App.Sharmi.tick: App.Tick<App.Sharmi.State>
@@ -118,15 +143,17 @@ App.Sharmi: App<App.Sharmi.State>
   )
 
 App.Sharmi.test_state: App.Sharmi.State.local
-  let player0 = App.Sharmi.Player.new("Stanci", {0,1}, App.Sharmi.Verlet.still({0, 20})) // x:0 y:20
-  let player1 = App.Sharmi.Player.new("Rigi", {0,1}, App.Sharmi.Verlet.still({10, -30#32})) // x:10 y:-30
-  let ring0 = App.Sharmi.Goal.new(App.Sharmi.Verlet.still({10, 30})) // x:10 y:30
-  let ring1 = App.Sharmi.Goal.new(App.Sharmi.Verlet.still({40, 0})) // x:40 y:0
-  let body = App.Sharmi.Body.new(5,50, App.Sharmi.Verlet.still({0,0}))
-  let camera = {{-40#32, -40#32}, {40, 40}}
-  App.Sharmi.State.local.new(
-    [player0, player1] // List<App.Sharmi.Player>
-    [body] // List<App.Sharmi.Body>
-    [ring0, ring1] // List<App.Sharmi.Goal>
-    camera // Pair<App.Sharmi.Vec, App.Sharmi.Vec>
+  let player0 = App.Sharmi.Player.new("Stanci", {0, 1}, Physics.Verlet.still({0, 20})) // x:0 y:20
+  let player1 = App.Sharmi.Player.new("Rigi", {0, 1}, Physics.Verlet.still({10, -30.0})) // x:10 y:-30
+  let ring0 = App.Sharmi.Goal.new(Physics.Verlet.still({10, 30})) // x:10 y:30
+  let ring1 = App.Sharmi.Goal.new(Physics.Verlet.still({40, 0})) // x:40 y:0
+  let body = App.Sharmi.Body.new(5, 50, Physics.Verlet.still({0, 0}))
+  let camera = {{-40.0, -40.0} :: V2, {40, 40} :: V2}
+  App.Sharmi.State.local.game(
+    App.Sharmi.Game.State.local.new(
+      [player0, player1] // List<App.Sharmi.Player>
+      [body] // List<App.Sharmi.Body>
+      [ring0, ring1] // List<App.Sharmi.Goal>
+      camera // Pair<V2, V2>
+    )
   )

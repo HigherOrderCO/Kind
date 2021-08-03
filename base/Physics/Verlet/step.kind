@@ -1,0 +1,7 @@
+// Performs a single step of Verlet integration
+Physics.Verlet.step(pos: Physics.Verlet, dt: F64): Physics.Verlet
+  open pos;
+  let new_pos =
+    V2.scale(2, pos.pos) - pos.prev + V2.scale(dt*dt, pos.acc)
+  {pos.pos, new_pos, pos.acc}
+
