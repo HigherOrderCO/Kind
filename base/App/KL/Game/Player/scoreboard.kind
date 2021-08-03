@@ -4,18 +4,7 @@ App.KL.Game.Player.scoreboard.update(
 ): App.KL.Game.Player
   player@scoreboard <- App.KL.Game.Scoreboard.union(player@scoreboard, new)
 
-App.KL.Game.Player.scoreboard.map.update(
-  players: Map<App.KL.Game.Player>
-  scoreboards: Map<App.KL.Game.Scoreboard>
-): Map<App.KL.Game.Player>  
-  for id:scoreboard in scoreboards with players:
-    let player = players{id}
-    case player {
-      none: players
-      some: players{id} <- App.KL.Game.Player.scoreboard.update(scoreboard, player.value)
-    }
-  players
-  
+ 
 App.KL.Game.Player.scoreboard.map.show(
   map: Map<App.KL.Game.Player>
 ): String

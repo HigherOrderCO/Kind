@@ -12,7 +12,7 @@ App.KL.Game.Creature.Status.shield.hit(
         let blocked = I32.min(status.head.amount, damage)
         let remaining_damage = I32.sub(damage, blocked)
         let remaining_shield = I32.sub(status.head.amount, blocked)
-        let status_head = App.KL.Game.Creature.Status.shield(status.head.caster_id, status.head.id, status.head.duration, remaining_shield)
+        let status_head = App.KL.Game.Creature.Status.shield(status.head.cast_data, status.head.id, status.head.duration, remaining_shield)
         let {status_tail, total_blocked} = App.KL.Game.Creature.Status.shield.hit(remaining_damage, status.tail)
         let status = if I32.gtn(remaining_shield, 0) then status_head & status_tail else status_tail
         let total_blocked = I32.add(blocked, total_blocked)

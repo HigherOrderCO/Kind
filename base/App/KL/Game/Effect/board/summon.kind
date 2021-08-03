@@ -2,7 +2,7 @@
 App.KL.Game.Effect.board.summon(
   creature: App.KL.Game.Creature
 ): App.KL.Game.Effect.At<Unit>
-  //(center, targets, caster_id, board)
+  //(center, targets, cast_data, board)
   (pos)
 
 

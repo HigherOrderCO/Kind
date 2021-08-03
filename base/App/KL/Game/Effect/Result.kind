@@ -5,12 +5,12 @@ type App.KL.Game.Effect.Result <A: Type> {
   new(
     value: A,
     center: Hexagonal.Axial,
-    caster_id: Maybe<String>
+    cast_data: Pair<Char,String>
     board: App.KL.Game.Board,
     indicators: Hexagonal.Axial.Map(App.KL.Game.Indicator)
     ap_used: I32 
     cemetery: App.KL.Game.Cemetery
     description: String
-    scoreboard: Map<App.KL.Game.Scoreboard>
+    player_data: App.KL.Game.PlayerData
   )
 }

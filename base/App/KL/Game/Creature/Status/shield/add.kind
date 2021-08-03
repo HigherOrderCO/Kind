@@ -1,25 +1,25 @@
 App.KL.Game.Creature.Status.shield.add(
   creature: App.KL.Game.Creature
-  caster_id: String
+  cast_data: Pair<Char, String>
   id: String
   duration: I32
   amount: I32
 ): App.KL.Game.Creature
   
-  shield_added = App.KL.Game.Creature.Status.shield.add.aux(caster_id, id, duration, amount, creature@status)
+  shield_added = App.KL.Game.Creature.Status.shield.add.aux(cast_data, id, duration, amount, creature@status)
   creature@status <- shield_added
 
 
 
 App.KL.Game.Creature.Status.shield.add.aux(
-  caster_id: String
+  cast_data: Pair<Char, String>
   id: String
   duration: I32
   amount: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  new_shield = App.KL.Game.Creature.Status.shield(caster_id, id, duration, amount)
+  new_shield = App.KL.Game.Creature.Status.shield(cast_data, id, duration, amount)
   case status { 
     nil:
       new_shield & status
@@ -30,6 +30,6 @@ App.KL.Game.Creature.Status.shield.add.aux(
           if is_same then
             new_shield & status.tail
           else
-            status.head & App.KL.Game.Creature.Status.shield.add.aux(caster_id, id, duration, amount, status.tail)
-      }default status.head & App.KL.Game.Creature.Status.shield.add.aux(caster_id, id, duration, amount, status.tail)
+            status.head & App.KL.Game.Creature.Status.shield.add.aux(cast_data, id, duration, amount, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.shield.add.aux(cast_data, id, duration, amount, status.tail)
   }

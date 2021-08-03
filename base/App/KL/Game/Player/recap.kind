@@ -1,0 +1,15 @@
+App.KL.Game.Player.recap.update(
+  new: App.KL.Game.Recap
+  player: App.KL.Game.Player
+): App.KL.Game.Player
+  player@recap <- new ++ player@recap
+
+App.KL.Game.Player.recap.map.show(
+  map: Map<App.KL.Game.Player>
+): String
+  let result = ""
+  for id:player in map with result:
+    "id: " | id | "\n" |
+    App.KL.Game.Recap.show(player@recap) |
+    result
+  result

@@ -305,7 +305,7 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, targets, game@board)
+    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, {skill_key, user} targets, game@board)
     return Hexagonal.Axial.Map.union!(indicators, areas)
   } <> Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
 

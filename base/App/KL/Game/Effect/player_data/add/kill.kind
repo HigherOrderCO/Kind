@@ -1,15 +1,15 @@
-App.KL.Game.Effect.scoreboard.add.kill(
+App.KL.Game.Effect.player_data.add.kill(
   player_id: String
 ): App.KL.Game.Effect<Unit>    
-  (center, targets, caster_id, board)
+  (center, targets, cast_data, board)
     App.KL.Game.Effect.Result.new!(
       unit, 
       center, 
-      none,
+      cast_data,
       board, 
       Hexagonal.Axial.Map.new!, 
       0, 
       [], 
       "", 
-      {player_id: App.KL.Game.Scoreboard.new(0, 0, 1, 0)}
+      {player_id: {App.KL.Game.Scoreboard.new(0, 0, 1, 0), none}}
     )

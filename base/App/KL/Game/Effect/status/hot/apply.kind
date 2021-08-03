@@ -1,5 +1,5 @@
 App.KL.Game.Effect.status.hot.apply(
-  caster_id: String
+  cast_data: Pair<Char, String>
   id: String
   duration: I32
   amount: I32
@@ -7,7 +7,7 @@ App.KL.Game.Effect.status.hot.apply(
   (pos)
 
   App.KL.Game.Effect {
-    App.KL.Game.Effect.caster_id.add(caster_id)
+    App.KL.Game.Effect.cast_data.add(cast_data)
     if duration >? 0 then
       App.KL.Game.Effect.hp.heal_at(amount, pos)
     else

@@ -16,7 +16,7 @@ App.KL.Game.Effect.hp.change_at(
        // if someone died
         App.KL.Game.Effect {
           App.KL.Game.Effect.cemetery.add(dead.value) // add to cemetery
-          App.KL.Game.Effect.scoreboard.kill(dead.value) // add kill and death to scoreboard
+          App.KL.Game.Effect.player_data.kill(dead.value) // add kill and death to scoreboard
         }
     }
     return dhp

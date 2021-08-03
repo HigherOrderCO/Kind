@@ -1,6 +1,6 @@
 App.KL.Game.Effect.ap.add(
   ap_used: I32
 ): App.KL.Game.Effect<Unit>
-  (center, targets, caster_id, board)
+  (center, targets, cast_data, board)
 
-  App.KL.Game.Effect.Result.new!(unit, center, caster_id, board, Hexagonal.Axial.Map.new!, ap_used, [], "", {})
+  App.KL.Game.Effect.Result.new!(unit, center, cast_data, board, Hexagonal.Axial.Map.new!, ap_used, [], "", {})

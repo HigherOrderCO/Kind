@@ -1,4 +1,0 @@
-App.KL.Game.Effect.caster_id.get: App.KL.Game.Effect<Maybe<String>>
-  (center, targets, caster_id, board)
-
-  App.KL.Game.Effect.Result.new!(caster_id, center, caster_id, board, Hexagonal.Axial.Map.new!, 0, [], "", {})

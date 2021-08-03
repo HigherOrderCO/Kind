@@ -1,0 +1,10 @@
+App.KL.Game.Effect.player_data.add(
+  value: I32
+  effect: String -> I32 -> App.KL.Game.Effect<Unit>
+): App.KL.Game.Effect<Unit>
+
+  App.KL.Game.Effect {
+      get cast_data = App.KL.Game.Effect.cast_data.get
+      let player_id = cast_data@snd
+      effect(player_id, value)
+    }

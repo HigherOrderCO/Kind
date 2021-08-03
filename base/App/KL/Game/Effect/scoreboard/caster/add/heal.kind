@@ -1,3 +1,0 @@
-// store heal in caster player scoreboad
-App.KL.Game.Effect.scoreboard.caster.add.heal(heal: I32): App.KL.Game.Effect<Unit>
-  App.KL.Game.Effect.scoreboard.add(heal, App.KL.Game.Effect.scoreboard.add.heal)

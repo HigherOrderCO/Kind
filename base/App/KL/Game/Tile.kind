@@ -10,6 +10,7 @@ type App.KL.Game.Tile {
 
 type App.KL.Game.Tile.Effect { 
   new(
+    cast_data: Pair<Char, String>
     effect: App.KL.Game.Effect<Unit>
     duration: I32
   )

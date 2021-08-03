@@ -32,6 +32,7 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
                 let coord = App.KL.Game.Cast.get_coord(game.moment.casts.head, game)
                 let game = cast_result.game
                 log(App.KL.Game.Player.scoreboard.map.show(game@players))
+                log(App.KL.Game.Player.recap.map.show(game@players))
                 let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.previous_casts, game.moment.frame + 1, coord, cast_result.hits, cast_result.ap_used, Either.right!!(unit))
                 game
             // On the other frames, just update the counter

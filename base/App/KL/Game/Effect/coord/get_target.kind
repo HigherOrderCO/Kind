@@ -1,5 +1,5 @@
 App.KL.Game.Effect.coord.get_target: App.KL.Game.Effect<Hexagonal.Axial>
-  (center, targets, caster_id, map)
+  (center, targets, cast_data, map)
   let target = List.head!(targets) <> center
 
-  App.KL.Game.Effect.Result.new!(target, center, caster_id, map, Hexagonal.Axial.Map.new!, 0, [], "", {})
+  App.KL.Game.Effect.Result.new!(target, center, cast_data, map, Hexagonal.Axial.Map.new!, 0, [], "", {})

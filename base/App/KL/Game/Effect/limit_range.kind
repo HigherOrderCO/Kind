@@ -1,10 +1,10 @@
 App.KL.Game.Effect.limit_range(range: I32): App.KL.Game.Effect<Unit>
-  (center, targets, caster_id, board)
+  (center, targets, cast_data, board)
   in_range = true
   for target in targets with in_range:
     in_range && I32.lte(Hexagonal.Axial.distance(center, target), range)
 
   if in_range then
-    App.KL.Game.Effect.Result.new<Unit>(unit, center, none, board, Hexagonal.Axial.Map.new!, 0, [], "", {})
+    App.KL.Game.Effect.Result.new<Unit>(unit, center, cast_data, board, Hexagonal.Axial.Map.new!, 0, [], "", {})
   else
     App.KL.Game.Effect.Result.err<Unit>("out of range.")

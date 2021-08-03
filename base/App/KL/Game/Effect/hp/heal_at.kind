@@ -13,7 +13,7 @@ App.KL.Game.Effect.hp.heal_at(
         App.KL.Game.Effect { return real_heal }
       some:
         App.KL.Game.Effect {
-          App.KL.Game.Effect.scoreboard.caster.add.heal(real_heal)
+          App.KL.Game.Effect.player_data.caster.add.heal(real_heal)
           return real_heal
         }
     }

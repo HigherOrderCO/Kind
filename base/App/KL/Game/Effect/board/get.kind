@@ -1,4 +1,4 @@
 App.KL.Game.Effect.board.get: App.KL.Game.Effect<App.KL.Game.Board>
-  (center, targets, caster_id, board)
+  (center, targets, cast_data, board)
 
-  App.KL.Game.Effect.Result.new!(board, center, caster_id, board, Hexagonal.Axial.Map.new!, 0, [], "", {})
+  App.KL.Game.Effect.Result.new!(board, center, cast_data, board, Hexagonal.Axial.Map.new!, 0, [], "", {})

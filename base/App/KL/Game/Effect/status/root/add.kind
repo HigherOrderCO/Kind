@@ -4,10 +4,10 @@ App.KL.Game.Effect.status.root.add(
   (pos)
 
   App.KL.Game.Effect {
-    get caster_id = App.KL.Game.Effect.caster_id.get_from_center
+    get cast_data = App.KL.Game.Effect.cast_data.get
     get creature = App.KL.Game.Effect.board.creature.get(pos)
     without creature: App.KL.Game.Effect { return +0#32 }
-    let root = App.KL.Game.Creature.Status.root(caster_id, duration)
+    let root = App.KL.Game.Creature.Status.root(cast_data, duration)
     App.KL.Game.Effect { 
       App.KL.Game.Effect.status.add(creature, root, pos)
       return duration
