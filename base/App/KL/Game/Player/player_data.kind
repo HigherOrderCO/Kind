@@ -7,10 +7,10 @@ App.KL.Game.Player.player_data.map.update(
     case player {
       none: players
       some: 
-        players = players{id} <- App.KL.Game.Player.scoreboard.update(data@fst, player.value)
+        new_player  = App.KL.Game.Player.scoreboard.update(data@fst, player.value)        
         case data@snd as recap {
-          none: players
-          some: players{id} <- App.KL.Game.Player.recap.update(recap.value, player.value)
+          none: players{id} <- new_player
+          some: players{id} <- App.KL.Game.Player.recap.update(recap.value, new_player)
         }
     }
   players

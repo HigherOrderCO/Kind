@@ -18,17 +18,6 @@ App.KL.Game.Scoreboard.show(
   "heal: "   | I32.show(scoreboard@heal)   | "\n" | 
   "damage: " | I32.show(scoreboard@damage) | "\n" 
 
-App.KL.Game.Scoreboard.map.union(
-  a: Map<App.KL.Game.Scoreboard>
-  b: Map<App.KL.Game.Scoreboard>
-): Map<App.KL.Game.Scoreboard>
-  for player_id:scoreboard in b with a:
-    let scoreboard_a = a{player_id}
-    case scoreboard_a {
-      none: a{player_id} <- scoreboard
-      some: a{player_id} <- App.KL.Game.Scoreboard.union(scoreboard_a.value, scoreboard)
-    }
-  a
 
 App.KL.Game.Scoreboard.union(
   a: App.KL.Game.Scoreboard, 
