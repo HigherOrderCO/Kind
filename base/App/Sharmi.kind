@@ -1,0 +1,132 @@
+// App states (local = clicks, global = visitors)
+type App.Sharmi.State.global {
+  new
+}
+
+App.Sharmi.Vec: Type
+  Pair<I32, I32>
+
+type App.Sharmi.State.local {
+  new(
+    players: List<App.Sharmi.Player>
+    bodies: List<App.Sharmi.Body>
+    goals: List<App.Sharmi.Goal>
+    camera: Pair<App.Sharmi.Vec, App.Sharmi.Vec>
+  )
+}
+
+type App.Sharmi.Goal {
+  new(
+    pos: App.Sharmi.Verlet
+  )
+}
+
+type App.Sharmi.Verlet {
+  new(
+    pos: App.Sharmi.Vec
+    prev: App.Sharmi.Vec
+    acc: App.Sharmi.Vec
+  )
+}
+
+type App.Sharmi.Body {
+  new(
+    radius: I32
+    mass: I32
+    pos: App.Sharmi.Verlet
+  )
+}
+
+type App.Sharmi.Player {
+  new(
+    name: String
+    dir: App.Sharmi.Vec
+    pos: App.Sharmi.Verlet
+  )
+}
+
+type App.Sharmi.State.Screen {
+  home
+  game
+}
+
+// creates an object that's standing still
+App.Sharmi.Verlet.still(pos: App.Sharmi.Vec): App.Sharmi.Verlet
+  App.Sharmi.Verlet.new(pos, pos, {0, 0})
+
+App.Sharmi.State: App.State
+  App.State.new(App.Sharmi.State.local, App.Sharmi.State.global)
+
+// Initial state
+App.Sharmi.init: App.Init<App.Sharmi.State>
+  let local = 
+    App.Sharmi.State.local.new(
+      [] // List<App.Sharmi.Player>
+      [] // List<App.Sharmi.Body>
+      [] // List<App.Sharmi.Goal>
+      {{0, 0}, {0, 0}} // Pair<App.Sharmi.Vec, App.Sharmi.Vec>
+    )
+  App.Store.new<App.Sharmi.State>(local, App.Sharmi.State.global.new)
+
+// Render function
+App.Sharmi.draw: App.Draw<App.Sharmi.State>
+   App.no_draw!
+//  (state)
+//  <div style={"border": "1px solid black"}>
+//    <div style={"font-weight": "bold"}>"Sharmi, world!"</div>
+//    <div>"Clicks: " | Nat.show(state@local)</div>
+//    <div>"Visits: " | Nat.show(state@global)</div>
+//  </div>
+  //DOM.node("div", {}, {"border": "1px solid black"}, [
+    //DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Sharmi, world!")])
+    //DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
+    //DOM.node("div", {}, {}, [DOM.text("Visits: " | Nat.show(state@global))])
+  //])
+
+// Event handler
+App.Sharmi.when: App.When<App.Sharmi.State>
+  App.no_when<App.Sharmi.State>
+//  (event, state)
+//  case event {
+//    init: IO {
+//      App.watch!(App.room_zero)
+//      App.new_post!(App.room_zero, "")
+//    }
+//    mouse_down: IO {
+//      App.set_local!(state@local + 1)
+//    }
+//  } default App.pass!
+
+// Global ticker: not used
+App.Sharmi.tick: App.Tick<App.Sharmi.State>
+  App.no_tick<App.Sharmi.State>
+
+// Global visitor: counts posts to room_zero
+App.Sharmi.post: App.Post<App.Sharmi.State>
+  App.no_post<App.Sharmi.State>
+//  (time, room, addr, data, global_state)
+//  global_state + 1
+
+// A "Sharmi, world!" + counter application
+App.Sharmi: App<App.Sharmi.State>
+  App.new<App.Sharmi.State>(
+    App.Sharmi.init
+    App.Sharmi.draw
+    App.Sharmi.when
+    App.Sharmi.tick
+    App.Sharmi.post
+  )
+
+App.Sharmi.test_state: App.Sharmi.State.local
+  let player0 = App.Sharmi.Player.new("Stanci", {0,1}, App.Sharmi.Verlet.still({0, 20})) // x:0 y:20
+  let player1 = App.Sharmi.Player.new("Rigi", {0,1}, App.Sharmi.Verlet.still({10, -30#32})) // x:10 y:-30
+  let ring0 = App.Sharmi.Goal.new(App.Sharmi.Verlet.still({10, 30})) // x:10 y:30
+  let ring1 = App.Sharmi.Goal.new(App.Sharmi.Verlet.still({40, 0})) // x:40 y:0
+  let body = App.Sharmi.Body.new(5,50, App.Sharmi.Verlet.still({0,0}))
+  let camera = {{-40#32, -40#32}, {40, 40}}
+  App.Sharmi.State.local.new(
+    [player0, player1] // List<App.Sharmi.Player>
+    [body] // List<App.Sharmi.Body>
+    [ring0, ring1] // List<App.Sharmi.Goal>
+    camera // Pair<App.Sharmi.Vec, App.Sharmi.Vec>
+  )
