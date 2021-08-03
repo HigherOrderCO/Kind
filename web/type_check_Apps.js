@@ -7,7 +7,7 @@ process.chdir(kind_dir);
 var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
 const args = process.argv[2];
 
-if (args){
+if (args) {
   let app = args.slice(5); // remove "base/"
   if (process.argv[2].trim() === "all") { // node type_check_Apps all
     exit_all(type_check_apps());
@@ -29,7 +29,8 @@ if (args){
 
 function is_folder(path) {
   let folders = path.split("/");
-  return folders.length > 2;
+  console.log(folders)
+  return (folders.length > 1) && (!folders[1].endsWith(".kind"));
 }
 
 function get_app_folder(path) {
@@ -119,3 +120,5 @@ function type_check_apps() {
   }
   return {success, fail}
 }
+
+module.exports = { type_check_folder, is_folder };
