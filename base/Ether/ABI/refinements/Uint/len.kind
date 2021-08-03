@@ -1,0 +1,2 @@
+Ether.Abi.refinements.Uint.len(x : Nat) : Type
+   Pair<(x <=? 256) == true, Nat.divides(8, x)>
