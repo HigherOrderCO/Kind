@@ -138,18 +138,21 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   </div>
 
 App.KL.Game.Phase.Play.draw.interface(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let players_info = App.KL.Game.Phase.Play.draw.interface.top.get_players(game@players, game@board)
+
   <div>
-    {App.KL.Game.Phase.Play.draw.interface.top(local, game)}
+    {App.KL.Game.Phase.Play.draw.interface.top(players_info, local, game)}
     {App.KL.Game.Phase.Play.draw.interface.bottom(local, game)}
+    {App.KL.Game.Phase.Play.draw.interface.user(local@user, players_info)}
   </div>
 
-App.KL.Game.Phase.Play.draw.interface.top(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+App.KL.Game.Phase.Play.draw.interface.top(players_info: PlayersInfo, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   let inner =
     <div>
       {App.KL.Game.Phase.Play.draw.interface.top.timer(game@moment)}
       {App.KL.Game.Phase.Play.draw.interface.top.round(game@turn)}
       {App.KL.Game.Phase.Play.draw.interface.top.scores(game@score)}
-      {App.KL.Game.Phase.Play.draw.interface.top.players(local@user, game@players, game@cemetery, game@board)}
+      {App.KL.Game.Phase.Play.draw.interface.top.players(local@user, players_info, game@cemetery, game@board)}
     </div>
   
   <header style={
@@ -186,7 +189,7 @@ App.KL.Game.Phase.Play.draw.interface.top.timer(moment: App.KL.Game.Moment): DOM
     "right":" 0"
     "text-align":" center"
     "height": "8.5%"
-    "background-color": "eb6bff"
+    "background-color": "#eb6bff"
     "border-radius": "2px"
     "width": String.show_clean(F64.show(bar * 44.5)) | "%"
   }>
@@ -226,10 +229,13 @@ App.KL.Game.Phase.Play.draw.interface.top.scores(scores: App.KL.Game.Score): DOM
     <span>Nat.show(I32.to_nat(red_hp))</span>
   </div>
 
+PlayersInfo: Type
+  Map<Pair<App.KL.Game.Team, Maybe<App.KL.Game.Creature>>>
+
 App.KL.Game.Phase.Play.draw.interface.top.get_players(
   players: Map<App.KL.Game.Player>, 
   board: App.KL.Game.Board
-): Map<Pair<App.KL.Game.Team, Maybe<App.KL.Game.Creature>>>
+): PlayersInfo
   let result = {}
   for id:player in players with result:
     result{id} <- {player@team, none}
@@ -242,8 +248,7 @@ App.KL.Game.Phase.Play.draw.interface.top.get_players(
     } <> result
   result
 
-App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players: Map<App.KL.Game.Player> cemetery: App.KL.Game.Cemetery, board: App.KL.Game.Board): DOM
-  let players_info = App.KL.Game.Phase.Play.draw.interface.top.get_players(players, board)
+App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: PlayersInfo, cemetery: App.KL.Game.Cemetery, board: App.KL.Game.Board): DOM
   // get team to show in left and team to show in right
   let {user_team, enemy_team} = 
     Maybe {
@@ -293,20 +298,21 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players: Map<App
     </div>
   </div>
 
+App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature: Maybe<App.KL.Game.Creature>): F64
+  case creature {
+    none: 0
+    some: F64.mul(100.0, I32.to_f64(creature.value@hp) / I32.to_f64(creature.value@hero@max_hp))
+  }
+
+App.KL.Game.Phase.Play.draw.interface.get_ap(creature: Maybe<App.KL.Game.Creature>): I32
+  case creature {
+    none: 0
+    some: creature.value@ap
+  }
+
 App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.Creature>, dead: Maybe<App.KL.Game.Cemetery.Dead>, is_enemy: Bool, is_user: Bool): DOM
-  let life_percentage = 
-    case creature {
-      none: "0"
-      some: 
-        log(I32.show(creature.value@hero@max_hp))
-        String.show_clean(F64.show(100 * I32.to_f64(creature.value@hp) / I32.to_f64(creature.value@hero@max_hp)))
-    }
-  log(life_percentage)
-  let ap = 
-    case creature {
-      none: 0
-      some: creature.value@ap
-    }
+  let life_percentage = String.show_clean(F64.show(App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature)))
+  let ap = App.KL.Game.Phase.Play.draw.interface.get_ap(creature)
 
   <div style={"position": "relative", "margin-right": "7%", "order": if is_user then "1" else "2"}>
     // portrait
@@ -372,6 +378,61 @@ App.KL.Game.Phase.Play.draw.interface.bottom(local: App.KL.Game.State.Local, gam
     {App.KL.Game.Phase.Play.draw.wrapper(280, 65, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.bottom, <div></div>)}
   </footer>
 
+App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: PlayersInfo): DOM
+  let user = players_info{user}
+  without user: <span style={"display": "none"}></span>
+
+  let creature = user@snd
+  let life_percentage = App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature)
+  let ap = App.KL.Game.Phase.Play.draw.interface.get_ap(creature)
+
+  let content = 
+    <div style={
+      "position": "relative"
+      "width": "100%"
+      "height": "100%"
+    }>
+      <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={
+        "position": "absolute"
+        "transform": "scale("|F64.show(1.5 * 2)|")"
+        "transform-origin": "top left"
+        "top": "4%"
+        "left": "4%"
+      }></img>
+      <img src= App.KL.Game.Phase.Play.draw.assets.interface.user.life style={
+        "position": "absolute"
+        "transform": "scale(1.5)"
+        "transform-origin": "top left"
+        "top": "61%"
+        "left": "34%"
+        "clip-path": "polygon(0 0%, "|String.show_clean(F64.show(life_percentage + 8))|"% 0%, "|String.show_clean(F64.show(life_percentage))|"% 100%, 0% 100%)"
+      }></img>
+      <div style={
+        "position": "absolute"
+        "top": "74%"
+        "left": "31%"
+        "display": "flex"
+        "transform": "scale(1.5)"
+        "transform-origin": "top left"
+      }>
+        for i in [0 to ap : I32]:
+          <img src=App.KL.Game.Phase.Play.draw.assets.interface.user.ap style={
+            "margin-right": "-3px"
+          }></img>
+      </div>
+    </div>
+     
+  <footer style={
+    "position": "absolute",
+    "bottom": "0"
+    "left": "0"
+    "width": "min-content"
+  }>
+    {App.KL.Game.Phase.Play.draw.wrapper(249, 112, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.user, content)}
+  </footer>
+
+
+
 App.KL.Game.Phase.Play.draw.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: F64, background: String, inner: DOM): DOM
   <div id=id style={
     "height": Nat.show(F64.to_nat(fator * Nat.to_f64(height))) | "px", 
@@ -409,6 +470,15 @@ App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder: String
 
 App.KL.Game.Phase.Play.draw.assets.interface.bottom: String
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARgAAABBCAYAAAAKeLsHAAAEyElEQVR42u2dTY7UMBBGe8cFWMCCE4xYw5ZLzBW4ySzZzlU4BBJX4AZs2DcyklE6cuKyXVX+yYtUQrQ0mX75XM/udJK53RbcPr3+vGsUPPBckYctE/bLh99qBQ88V+JhE4b95t2Xpvr49NI9dHjgYVtQLiOEDg88bAvLpWfo8MCDZC4glx6hwwMPkrmQXDxDhwceJHNBuXiEDg88SObCcrEMHR54kAxyMQkdHniQDHIxCR0eeJAMcjEJHR54kAxyMQkdHniQDHIxCR0eeJAMcjEJHR54kAxyMQkdHniQTKUILJ59EQOfJexYuQEMDzwePF59WrR9+3O/5+rI+qWVe/MMYHjg0RGMZp+WOqLoB7c70HjQzplkZg/86f3zQ8EDTw/BaPZpqSOq5BJK8yleKwsmvrZKQ8Izn2C0+jQcn1JPVAnG6xGBDGB44BlHMDWSKRaMtlwQDDzwzCOYUskUCcZCLggGHnjmEkyJZMSCsZILgoEHnvkEI5WMSDCWckEw8MAzp2AkkskKxlouocLViKliAMMDj5znqI+s+/dMMqeC8ZBL6nqEla6zoCHh6XVdTyyPHj6SzKFgvOSyD5oBDA887TxbLq8+TkkmebGdp1wQDDzwrCGYvWSKLiv+/P3Xg5nC//evx9cQDA0JzzUFc3r7T27lEmWyl82+EAwNCc91BZOUjPRjkUQyCIaGhOfagnmQTOk5l5xkNAUT9he+apst7KMBDA88HjwjCOa/ZGpP6qYEU3MeJieYWULfMkUGeODpwbOEYDTkIhXM6KHvw84NYHjgseSZXjBaq5cSwYwa+lHYuQEMDzxWPNML5ugE7/b8jIVgRgtdGjY88HjLZUnB1KxoSgUzSuilMwk88HjKZcmTvDXfKNUE3jv0mpkEHng85TK9YLTOydQKplfotTMJPPB4ymUpwVjdiyT5KOYZestMAg88nnJBMEqC8Qq9dSaBBx5PuSAYRcFYh64xk8ADj6dcEIyyYKxC15pJ4IHHUy4IxkAw2qFrziTwwOMpFwRjJBit0LVnEnjg8ZTLMILR+vu1Lc/jTR2Y8G9t4DV3dR+V1kwCDzxePPt99JLLw3Nheq1czi5+6h26dtjwwOPFs2Ua6sl2Yfv69se/ZZ8GpMSwuQPUs7TChgeeHjwePRxcEZwh+XtnSclYlvQgjVCaocMDzwo8US63mi1KZrbHCI4+s8ADzwo8TXJBMgxieOAxlQuSYRDDA4+pXJAMgxgeeEzlgmQYxPDAYyoXJMMghue6PC5yCVv4RSsJJvKUFIP4Ojzbn28dKzPnE3lcBLPKYIsXBQUzSyse6JGul6CeXa73iLO4tCzuLeopf3PBpOQy20DJyaVmlqKoIwEdSWa2fjGXzNHKxWKW2L6m2fQtKxeKqq29ZDRllusfi6uJ1SWzbc59w64gl7ObtljVUGcNnhs7s0sm1fOqkok7jTDxNuwUSOvB6iUXyTkXipJ8JDobW96S0ejD+Frs++23yM2SiTtKmfpIMho1mlykq53SallyS96/135b34/k51uPl0VmI0tG81NF6nlR4fc1SUayBAylLRlLuWzDrpELRdWMk/24m0EycZ8S4RZLRrLj0c9RpOSisXqgKM1VlLZkPM8x7RcaKZf8BUdERs5iqgziAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Play.draw.assets.interface.user: String
+  "data:image/png;base64,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"
+
+App.KL.Game.Phase.Play.draw.assets.interface.user.life: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJcAAAANCAYAAACkYvxcAAAAd0lEQVRYCe3WsQ3AMAgFUdbKkpks46Qn8gafIqJ5SHTIBRyHq4Zxv91SDxIGZmg9V5fUg4SBEVnJg2qAdxgYBWhAkzIALOf9l+8NsIAFrFTD6vZPNmMxFmMx0b6J0hkwFmMxVrot6vbNxliMxVhMtG+idAYjY1V9cEEJch85MJkAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Play.draw.assets.interface.user.ap: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAGCAYAAACB1M0KAAAAJklEQVR42mNgwAL6vvz/P9Qwhicsdjz4P9TwqCdGPTHqCQKeAAIAliYVnQmzbRMAAAAASUVORK5CYII="
 
 App.KL.Game.Phase.Play.draw.board_canvas(local: App.KL.Game.State.Local, game: App.KL.Game, img: VoxBox): DOM
   <div style={
