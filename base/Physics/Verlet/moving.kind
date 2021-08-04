@@ -1,0 +1,2 @@
+Physics.Verlet.moving(pos: V2, speed: V2): Physics.Verlet
+  Physics.Verlet.new(pos - speed, pos, {0, 0})

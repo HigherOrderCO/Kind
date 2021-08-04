@@ -2,6 +2,10 @@ type App.Sharmi.State.global {
   new
 }
 
+type App.Sharmi.Game.State.global {
+  new
+}
+
 type App.Sharmi.Game.State.local {
   new(
     players: List<App.Sharmi.Player>
@@ -42,15 +46,12 @@ type App.Sharmi.Player {
   )
 }
 
-App.Sharmi.Field: Type
-  (V2 -> V2)
-
-App.Sharmi.Body.Gravity(body: App.Sharmi.Body): App.Sharmi.Field
+App.Sharmi.Body.Gravity(body: App.Sharmi.Body): Physics.Field
   (p)
     open body; open body.pos;
     Physics.Gravity(body.pos.pos, body.mass, p)
 
-App.Sharmi.Gravity(local: App.Sharmi.Game.State.local): App.Sharmi.Field
+App.Sharmi.Gravity(local: App.Sharmi.Game.State.local): Physics.Field
   (p)
   open local
   let acc = {0, 0} :: V2
@@ -63,31 +64,82 @@ App.Sharmi.State: App.State
 
 // Initial state
 App.Sharmi.init: App.Init<App.Sharmi.State>
-  let local = 
-    App.Sharmi.State.local.game(
-      App.Sharmi.Game.State.local.new(
-        [] // List<App.Sharmi.Player>
-        [] // List<App.Sharmi.Body>
-        [] // List<App.Sharmi.Goal>
-        {{0.0, 0.0} :: V2, {0.0, 0.0} :: V2} // Pair<V2, V2>
-      )
+  App.Store.new<App.Sharmi.State>(App.Sharmi.test_state, App.Sharmi.State.global.new)
+
+App.Sharmi.Body.draw(
+  img: VoxBox
+  e: App.Sharmi.Body
+  z: I32
+  col: Col32
+): VoxBox
+  let x = e@pos@pos@x
+  let y = e@pos@pos@y
+  VoxBox.Draw.rect(
+    F64.to_u32(x)
+    F64.to_u32(y)
+    I32.to_u32(z)
+    10
+    10
+    col
+    img
+  )
+
+App.Sharmi.Player.draw(
+  img: VoxBox
+  e: App.Sharmi.Player
+  z: I32
+  col: Col32
+): VoxBox
+  let x = e@pos@pos@x
+  let y = e@pos@pos@y
+  VoxBox.Draw.rect(
+    F64.to_u32(x)
+    F64.to_u32(y)
+    I32.to_u32(z)
+    10
+    10
+    col
+    img
+  )
+App.Sharmi.Game.draw(
+  img: VoxBox
+  local: App.Sharmi.Game.State.local
+  global: App.Sharmi.Game.State.global
+): DOM
+  open local;
+  for body in local.bodies with img:
+    App.Sharmi.Body.draw(
+      img
+      body
+      0
+      Col32.new(255, 0, 0, 255)
     )
-  App.Store.new<App.Sharmi.State>(local, App.Sharmi.State.global.new)
+  for player in local.players with img:
+    App.Sharmi.Player.draw(
+      img
+      player
+      0
+      Col32.new(0, 0, 255, 255)
+    )
+  <div style={
+    "display": "flex"
+    "width": "100%"
+    "justify-content": "space-evenly"
+  }>{
+    DOM.vbox({"id": "game_screen", "width": Nat.show(1024), "height": Nat.show(1024), "scale": "1"}, {}, img)
+  }</div>
 
 // Render function
-App.Sharmi.draw: App.Draw<App.Sharmi.State>
-   App.no_draw!
-//  (state)
-//  <div style={"border": "1px solid black"}>
-//    <div style={"font-weight": "bold"}>"Sharmi, world!"</div>
-//    <div>"Clicks: " | Nat.show(state@local)</div>
-//    <div>"Visits: " | Nat.show(state@global)</div>
-//  </div>
-  //DOM.node("div", {}, {"border": "1px solid black"}, [
-    //DOM.node("div", {}, {"font-weight": "bold"}, [DOM.text("Sharmi, world!")])
-    //DOM.node("div", {}, {}, [DOM.text("Clicks: " | Nat.show(state@local))])
-    //DOM.node("div", {}, {}, [DOM.text("Visits: " | Nat.show(state@global))])
-  //])
+App.Sharmi.draw(img: VoxBox): App.Draw<App.Sharmi.State>
+  (state)
+    open state
+    case state.local {
+      home:
+        // TODO define App.Sharmi.Home.draw
+        <p>"welcome home"</p>
+      game:
+        App.Sharmi.Game.draw(img, state.local.state, App.Sharmi.Game.State.global.new)
+    }
 
 // Event handler
 App.Sharmi.when: App.When<App.Sharmi.State>
@@ -101,23 +153,38 @@ App.Sharmi.when: App.When<App.Sharmi.State>
     //      //App.new_post!(App.room_zero, "")
     //    }
         frame: IO {
+          log("frame")
           open state.local.state;
           let new_bodies = []
-          // apply gravity
+          // do physics
           for body in state.local.state.bodies with new_bodies:
-            open body; open body.pos
-            let new_acc = App.Sharmi.Gravity(state.local.state, body.pos.pos)
-            let new_pos = body.pos@acc <- new_acc
+            open body; open body.pos;
+            //let new_acc = App.Sharmi.Gravity(state.local.state, body.pos.pos)
+            //let new_pos = body.pos@acc <- new_acc
+            let new_pos = Physics.Verlet.step(body.pos, 1.0/60.0)
+            let new_pos = body.pos
             let new_body = body@pos <- new_pos
             new_body & new_bodies
           let new_players = []
           for player in state.local.state.players with new_players:
             open player; open player.pos
             let new_acc = App.Sharmi.Gravity(state.local.state, player.pos.pos)
+            open new_acc;
+            //log(player.name|" new_acc: {"|F64.show(new_acc.x)|", "|F64.show(new_acc.y)|"}")
             let new_pos = player.pos@acc <- new_acc
+            let new_pos = Physics.Verlet.step(new_pos, 1.0/60.0)
             let new_player = player@pos <- new_pos
             new_player & new_players
-          App.pass!
+          let new_state =
+            App.Sharmi.State.local.game(
+              App.Sharmi.Game.State.local.new(
+                new_players
+                new_bodies
+                state.local.state.goals
+                state.local.state.camera
+              )
+            )
+          App.set_local!(new_state)
         }
       } default App.pass!
   } default App.pass!
@@ -126,32 +193,32 @@ App.Sharmi.when: App.When<App.Sharmi.State>
 App.Sharmi.tick: App.Tick<App.Sharmi.State>
   App.no_tick<App.Sharmi.State>
 
-// Global visitor: counts posts to room_zero
 App.Sharmi.post: App.Post<App.Sharmi.State>
   App.no_post<App.Sharmi.State>
 //  (time, room, addr, data, global_state)
 //  global_state + 1
 
-// A "Sharmi, world!" + counter application
 App.Sharmi: App<App.Sharmi.State>
+  let img = VoxBox.alloc_capacity(65536*8)
   App.new<App.Sharmi.State>(
     App.Sharmi.init
-    App.Sharmi.draw
+    App.Sharmi.draw(img)
     App.Sharmi.when
     App.Sharmi.tick
     App.Sharmi.post
   )
 
 App.Sharmi.test_state: App.Sharmi.State.local
-  let player0 = App.Sharmi.Player.new("Stanci", {0, 1}, Physics.Verlet.still({0, 20})) // x:0 y:20
-  let player1 = App.Sharmi.Player.new("Rigi", {0, 1}, Physics.Verlet.still({10, -30.0})) // x:10 y:-30
+  let player0 = App.Sharmi.Player.new("Stanci", {0, 1}, Physics.Verlet.moving({300, 500}, {0, -0.5})) // x:0 y:20
+  let player1 = App.Sharmi.Player.new("Rigi", {0, 1}, Physics.Verlet.moving({450, 500}, {0, 2})) // x:10 y:-30
   let ring0 = App.Sharmi.Goal.new(Physics.Verlet.still({10, 30})) // x:10 y:30
-  let ring1 = App.Sharmi.Goal.new(Physics.Verlet.still({40, 0})) // x:40 y:0
-  let body = App.Sharmi.Body.new(5, 50, Physics.Verlet.still({0, 0}))
+  let ring1 = App.Sharmi.Goal.new(Physics.Verlet.still({40, 150})) // x:40 y:0
+  let body = App.Sharmi.Body.new(5, 1000000, Physics.Verlet.still({500, 500}))
   let camera = {{-40.0, -40.0} :: V2, {40, 40} :: V2}
   App.Sharmi.State.local.game(
     App.Sharmi.Game.State.local.new(
-      [player0, player1] // List<App.Sharmi.Player>
+      [player0] // List<App.Sharmi.Player>
+      //[player0, player1] // List<App.Sharmi.Player>
       [body] // List<App.Sharmi.Body>
       [ring0, ring1] // List<App.Sharmi.Goal>
       camera // Pair<V2, V2>
