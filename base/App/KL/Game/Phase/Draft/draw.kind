@@ -109,19 +109,19 @@ App.KL.Game.Phase.Draft.draw.main(
   user: String,
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
-  <div style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "image-rendering": "pixelated", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
+  <div class="pixel-art" style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
       {App.KL.Game.Phase.Draft.draw.background}
 
       <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
-        <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px", "image-rendering": "pixelated", "display": "flex", "justify-content": "space-between", "padding": "0 5px"}>
+        <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px", "display": "flex", "justify-content": "space-between", "padding": "0 5px"}>
           <div style={"display": "flex"}>
           
           </div>
           <div style={"display": "flex", "justify-content": "flex-end"}>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "cursor": "not-allowed"}></img>
           </div>
         </header>
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
@@ -139,9 +139,9 @@ App.KL.Game.Phase.Draft.draw.main(
         <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
           <div style={"display": "flex", "height": "50%", "flex": "1"}>
             <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left></img></div>
-            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img id="Ready" style={"image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right></img></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left></img></div>
+            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img id="Ready" style={} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right></img></div>
             <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
           </div>
         </footer>
@@ -443,21 +443,21 @@ App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes,
             "margin-right": "10%"
             "height": "100%"
           }>
-            <img id=id style={"width": "100%", "height": "100%", "object-fit": "contain", "image-rendering": "pixelated"} src=img></img>
+            <img id=id style={"width": "100%", "height": "100%", "object-fit": "contain", } src=img></img>
           </div>
           <div id=id style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
             for j in [1 to 6]:
               let attr_value = attrs_map{attr}
               without attr_value: <span style={"display": "none"}></span>
               let bar = App.KL.Game.Phase.Draft.draw.assets.card.attr_bar(attr_value, j)
-              <div id=id style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%", "image-rendering": "pixelated"} src=bar></img> </div>
+              <div id=id style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%", } src=bar></img> </div>
           </div>
         </div>
         {
           if attr =? "utility" then <span></span>
           else 
             <div id=id style={"display": "flex", "justify-content": "center"}>
-              <img id=id style={"width": "80%", "margin": "auto", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.card.divisor></img>
+              <img id=id style={"width": "80%", "margin": "auto", } src=App.KL.Game.Phase.Draft.draw.assets.card.divisor></img>
             </div>
         }
       </div>
@@ -526,7 +526,7 @@ App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DO
   </li>
 
 App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: Nat, background: String, inner: DOM): DOM
-  <div id=id style={
+  <div class="pixel-art" id=id style={
     "height": Nat.show(fator * height) | "px", 
     "width": Nat.show(fator * width) | "px", 
     "display": "flex", 
@@ -534,7 +534,7 @@ App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: 
     "background-size": "100% 100%", 
     "padding-top": Nat.show(fator * bt) | "px"
     // "margin": "0 10px"
-    "image-rendering": "pixelated"
+    
   }>
     {inner}
   </div>
@@ -559,7 +559,7 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
   let portrait = hero@draw@b64_portrait(true, 0)
   let inner =
     <div id=id style={"width": "100%", "padding": "0 " | Nat.show(bt * fator) | "px", "display": "flex", "flex-direction": "column", "align-items": "center"}>
-      <img id=id style={"width": "100%", "image-rendering": "pixelated", "transform": "translateY(-"|Nat.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
+      <img id=id style={"width": "100%", "transform": "translateY(-"|Nat.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
       <p id=id style={"text-transform": "uppercase", "color": "white"}>hero@name</p>
     </div>
   
@@ -572,7 +572,7 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
     "background-size": "100% 100%", 
     "background-repeat": "no-repeat"
     "padding-top": Nat.show(fator * bt) | "px"
-    "image-rendering": "pixelated"
+    
     "border-style": "solid"
     "border-image-slice": "4"
     "border-image-width": "10px"
@@ -710,7 +710,7 @@ App.KL.Game.Phase.Draft.draw.selection(
     "width": "75%",
     "margin-left": "12.5%",
     "height": "auto",
-    "image-rendering": "pixelated"
+    
   }
   square_style = 
   {

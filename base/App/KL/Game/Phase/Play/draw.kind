@@ -206,6 +206,8 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
       "top": "18%"
       "left": "3.5%"
       "display": "flex"
+      "transform": "scale(1.5)"
+      "transform-origin": "top left"
     }>
       for info in players_info:
         let {id, snd_info} = info
@@ -221,8 +223,10 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
     <div style={
       "position": "absolute"
       "top": "18%"
-      "left": "57.3%"
+      "left": "57.5%"
       "display": "flex"
+      "transform": "scale(1.5)"
+      "transform-origin": "top left"
     }>
       for info in players_info:
         let {id, snd_info} = info
@@ -255,14 +259,14 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
 
   <div style={"position": "relative", "margin-right": "7%", "order": if is_user then "1" else "2"}>
     // portrait
-    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={"zoom": "1.5", "left": "0", "top": "0"}></img>
+    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={"left": "0", "top": "0"}></img>
     // death portrait
     {
       case dead {
         none: <span style={"display":"none"}></span>
         some: 
           <div style={"display": "contents"}>
-            <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.dead style={"zoom": "1.5", "position": "absolute", "left": "0", "top": "0"}></img>
+            <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.dead style={"position": "absolute", "left": "0", "top": "0"}></img>
             <span style={
               "position": "absolute"
               "top": "38%"
@@ -278,14 +282,14 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
       } 
     }
     // life placeholder
-    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder style={"zoom": "1.5", "position": "absolute", "left": "60%", "bottom": "-15%"}></img>
+    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder style={"position": "absolute", "left": "56%", "bottom": "-15%"}></img>
     // life bar
     <img 
       src= if is_enemy then App.KL.Game.Phase.Play.draw.assets.interface.top.life_red else App.KL.Game.Phase.Play.draw.assets.interface.top.life_green 
-      style={"zoom": "1.5" "position": "absolute", "left": "64%", "bottom": "6%", "clip-path": "polygon(0 0%, "|life_percentage|"% 0%, "|life_percentage|"% 100%, 0% 100%)" }>
+      style={"position": "absolute", "left": "61%", "bottom": "4%", "clip-path": "polygon(0 0%, "|life_percentage|"% 0%, "|life_percentage|"% 100%, 0% 100%)" }>
     </img>
     // ap bar
-    for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{65.0,-12.0}, {79.0,1.0}, {92.0,14.0}]):
+    for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{61.0,-12.0}, {76.0,1.0}, {89.0,12.0}]):
       img
   </div>
 
@@ -297,7 +301,6 @@ App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<P
       cons:
         <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.ap style={
           "position": "absolute"
-          "zoom": "1.5"
           "left": String.show_clean(F64.show(positions.head@fst)) | "%"
           "bottom": String.show_clean(F64.show(positions.head@snd)) | "%"
         }></img> & App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap - 1, positions.tail)
@@ -455,7 +458,7 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
 
 
 App.KL.Game.Phase.Play.draw.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: F64, background: String, inner: DOM): DOM
-  <div id=id style={
+  <div class="pixel-art" id=id style={
     "height": Nat.show(F64.to_nat(fator * Nat.to_f64(height))) | "px", 
     "width": Nat.show(F64.to_nat(fator * Nat.to_f64(width))) | "px", 
     "display": "flex", 
@@ -463,7 +466,6 @@ App.KL.Game.Phase.Play.draw.wrapper(width: Nat, height: Nat, bt: Nat, id: String
     "background-size": "100% 100%", 
     "padding-top": Nat.show(F64.to_nat(fator * Nat.to_f64(bt))) | "px"
     // "margin": "0 10px"
-    "image-rendering": "pixelated"
   }>
     {inner}
   </div>
@@ -513,7 +515,8 @@ App.KL.Game.Phase.Play.draw.board_canvas(local: App.KL.Game.State.Local, game: A
   }>{
     let width = Nat.show(I32.to_nat(App.KL.Constants.center_x * 2))
     let height = Nat.show(I32.to_nat(App.KL.Constants.center_y * 2))
-    DOM.vbox({ 
+    DOM.vbox({
+        "class": "pixel-art" 
         "id": "game_screen",
         "width": width,
         "height": height,
