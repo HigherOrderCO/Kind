@@ -1,0 +1,18 @@
+Bytes.test.all_tests: _
+  [ Bytes.test.from_nat
+    Bytes.test.length
+    Bytes.test.slice
+  ]
+
+Bytes.test.all: _
+  TestSuite.many("Bytes", Bytes.test.all_tests)
+
+// Print all tests
+Bytes.test.show: _
+  let a = ""
+  for test in Bytes.test.all_tests with a:
+    log(TestSuite.show(test, 0))
+    ""
+  a
+  
+
