@@ -142,11 +142,11 @@ App.KL.Game.Phase.Play.draw.interface(local: App.KL.Game.State.Local, game: App.
 
   <div>
     {App.KL.Game.Phase.Play.draw.interface.top(players_info, local, game)}
-    {App.KL.Game.Phase.Play.draw.interface.bottom(local, game)}
+    {App.KL.Game.Phase.Play.draw.interface.bottom(local@user, players_info, local@hud@skill)}
     {App.KL.Game.Phase.Play.draw.interface.user(local@user, players_info)}
   </div>
 
-App.KL.Game.Phase.Play.draw.interface.top(players_info: PlayersInfo, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+App.KL.Game.Phase.Play.draw.interface.top(players_info: Map<PlayersInfo>, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   let inner =
     <div>
       {App.KL.Game.Phase.Play.draw.interface.top.timer(game@moment)}
@@ -229,31 +229,36 @@ App.KL.Game.Phase.Play.draw.interface.top.scores(scores: App.KL.Game.Score): DOM
     <span>Nat.show(I32.to_nat(red_hp))</span>
   </div>
 
-PlayersInfo: Type
-  Map<Pair<App.KL.Game.Team, Maybe<App.KL.Game.Creature>>>
+type PlayersInfo {
+  new(
+    team: App.KL.Game.Team
+    creature: Maybe<App.KL.Game.Creature>
+    hero_id: Maybe<Nat>
+  )
+}
 
 App.KL.Game.Phase.Play.draw.interface.top.get_players(
   players: Map<App.KL.Game.Player>, 
   board: App.KL.Game.Board
-): PlayersInfo
+): Map<PlayersInfo>
   let result = {}
   for id:player in players with result:
-    result{id} <- {player@team, none}
+    result{id} <- PlayersInfo.new(player@team, none, player@hero_id)
   for coord:tile in board with result:
     Maybe {
       get creature = tile@creature
       get id = creature@player
       get info = result{id}
-      return result{id} <- info@snd <- some(creature)
+      return result{id} <- info@creature <- some(creature)
     } <> result
   result
 
-App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: PlayersInfo, cemetery: App.KL.Game.Cemetery, board: App.KL.Game.Board): DOM
+App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Map<PlayersInfo>, cemetery: App.KL.Game.Cemetery, board: App.KL.Game.Board): DOM
   // get team to show in left and team to show in right
   let {user_team, enemy_team} = 
     Maybe {
       get info = players_info{user}
-      let team = info@fst
+      let team = info@team
       case team {
         blue: some({App.KL.Game.Team.blue, App.KL.Game.Team.red})
         red:  some({App.KL.Game.Team.red, App.KL.Game.Team.blue})
@@ -271,8 +276,9 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Pl
       "display": "flex"
     }>
       for info in players_info:
-        let {id, snd_info}   = info
-        let {team, creature} = snd_info
+        let {id, snd_info} = info
+        let team     = snd_info@team
+        let creature = snd_info@creature
         let dead = List.find!((x) id =? x@fst, cemetery)
 
         if team =? user_team then
@@ -287,8 +293,9 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Pl
       "display": "flex"
     }>
       for info in players_info:
-        let {id, snd_info}   = info
-        let {team, creature} = snd_info
+        let {id, snd_info} = info
+        let team     = snd_info@team
+        let creature = snd_info@creature
         let dead = List.find!((x) id =? x@fst, cemetery)
 
         if team =? enemy_team then
@@ -364,7 +371,89 @@ App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<P
         }></img> & App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap - 1, positions.tail)
     }
 
-App.KL.Game.Phase.Play.draw.interface.bottom(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+App.KL.game.Phase.Play.Draw.interface.bottom.get_skills(skills: Map<App.KL.Game.Skill>, max: Nat): List<Pair<String, App.KL.Game.Skill>>
+  result = {[] :: List<Pair<String, App.KL.Game.Skill>>, max}
+  for key: skill in skills with result:
+    if (max <=? 0) || (skill@name =? "Walk") then 
+      result
+    else
+      let result = result@fst <- {key, skill} & result@fst
+      result@snd <- result@snd - 1
+  result@fst
+
+App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills: Map<App.KL.Game.Skill>): String
+  case skills {
+    tip: ""
+    bin: 
+      if skills.val@name =? "Walk" then
+        skills.key
+      else
+        App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills.left) | App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills.right)
+  }
+
+App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<PlayersInfo>, skill_hovered: Maybe<App.KL.Game.Skill>): DOM
+  // get user in players map
+  // if user isnt a player this interface isnt shown
+  let user = players_info{user}
+  without user: <span style={"display": "none"}></span>
+  // get hero of user, if none this interface isnt shown
+  let hero = 
+    Maybe {
+      get hero_id = user@hero_id
+      get hero = App.KL.Game.Hero.get_by_id(hero_id)
+      return hero
+    }
+  without hero: <span style={"display": "none"}></span>
+
+  // draw content TODO change when formap implemented
+  let skills      = hero@skills
+  let skills_list = App.KL.game.Phase.Play.Draw.interface.bottom.get_skills(skills, 4)
+  let content = 
+    <div style={
+      "position": "relative"
+      "width": "100%"
+      "height": "100%"
+    }>
+      {
+        let walk_key = App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills)
+        <span style={"position": "absolute", "left": "1.25%", "top": "25%"}>walk_key</span>
+      }
+      <div style={
+        "position": "absolute"
+        "display": "grid"
+        "grid-template-columns": "repeat(4, 1fr)"
+        "grid-template-rows": "1fr"
+        "gap": "2%"
+        "width": "73%"
+        "height": "73%"
+        "left": "13.5%"
+      }>
+        for info in skills_list:
+          let {key, skill} = info
+          let id = "SK"|key
+          let show = Maybe.if!((x) String.eql(skill@name, x@name), skill_hovered)
+          <div style={
+            "position": "relative"
+          }>
+            <div id=id style={
+              "background-color": "#190d1f"
+              "border-radius": "5px"
+              "padding": "5px"
+              "animation": "fade-in 0.1s"
+              "position": "absolute"
+              "transform-origin": "bottom center"
+              "transform": "translate(-15%, -101%)"
+              "width": "150%"
+              "color": "white"
+              "display": if show then "block" else "none
+              "
+            }>skill@description</div>
+            <span id=id style={"position": "absolute", "bottom": "1%", "left": "7%"}>key</span>
+            <span id=id style={"position": "absolute", "width": "100%", "height": "100%", "display": "flex", "justify-content": "center", "align-items": "center", "color": "white"}>skill@name</span>
+          </div>
+      </div>
+    </div>
+
   <footer style={
     "position": "absolute",
     "bottom": "0"
@@ -375,14 +464,14 @@ App.KL.Game.Phase.Play.draw.interface.bottom(local: App.KL.Game.State.Local, gam
     "text-align": "center"
     "width": "min-content"
   }>
-    {App.KL.Game.Phase.Play.draw.wrapper(280, 65, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.bottom, <div></div>)}
+    {App.KL.Game.Phase.Play.draw.wrapper(280, 65, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.bottom, content)}
   </footer>
 
-App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: PlayersInfo): DOM
+App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<PlayersInfo>): DOM
   let user = players_info{user}
   without user: <span style={"display": "none"}></span>
 
-  let creature = user@snd
+  let creature = user@creature
   let life_percentage = App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature)
   let ap = App.KL.Game.Phase.Play.draw.interface.get_ap(creature)
 
