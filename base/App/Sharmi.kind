@@ -47,7 +47,7 @@ App.Sharmi.Mouse.deserialize(hex: String): Maybe<App.Sharmi.Mouse>
   Deserializer.run!(App.Sharmi.Mouse.deserializer, Bits.hex.decode(hex))
 
 App.Sharmi.room: String
-  App.room("aalalaldkdkkkkkshskakdlslfls")
+  App.room("asodovciveneiejenfufjfj3n2os")
 
 type App.Sharmi.Goal {
   new(
@@ -65,7 +65,7 @@ type App.Sharmi.Body {
 
 type App.Sharmi.Player {
   new(
-    name: String
+    address: String
     throttle: I32
     dir: V2
     pos: Physics.Verlet
@@ -134,6 +134,10 @@ App.Sharmi.Player.draw(
       col
       img
     )
+  let col = if e@throttle =? 0 then
+    Col32.new(255, 0, 0, 255)
+  else
+    Col32.new(0, 0, 0, 255)
   let img =
     VoxBox.Draw.line(
       F64.to_i32(e@pos@pos@x)
@@ -224,16 +228,22 @@ App.Sharmi.when: App.When<App.Sharmi.State>
             open new_acc;
             //log(player.name|" new_acc: {"|F64.show(new_acc.x)|", "|F64.show(new_acc.y)|"}")
             let new_pos = player.pos@acc <- new_acc
+            let player =
+              case state.global.state@mouses{player@address} as mouse {
+                some:
+                  let new_dir = App.Sharmi.Mouse.pos_to_v2(mouse.value@pos) - player@pos@pos
+                  let player = player@dir <- new_dir
+                  if mouse.value@pressed then
+                    player@throttle <- 200
+                  else
+                    player@throttle <- 0
+                none:
+                  player
+              }
+            let player = player@acc <- player@acc + V2.scale(player@throttle/V2.len(new.player@dir), player@dir)
             let new_pos = Physics.Verlet.step(new_pos, 1.0/60.0)
-            let new_player = player@pos <- new_pos
-            case state.global.state@mouses{state.local.state.address} as mouse {
-              some:
-                let new_dir = App.Sharmi.Mouse.pos_to_v2(mouse.value@pos) - new_player@pos@pos
-                let new_player = new_player@dir <- new_dir
-                new_player & new_players
-              none:
-                new_player & new_players
-            }
+            let player = player@pos <- new_pos
+            player & new_players
           let new_players = List.reverse!(new_players)
 
           // update state
@@ -261,8 +271,28 @@ App.Sharmi.when: App.When<App.Sharmi.State>
           let post = App.Sharmi.Mouse.serialize(mouse)
           App.new_post!(App.Sharmi.room, post)
         mouse_down:
-          log(U16.show(event.button))
-          App.pass!
+          let mouse = state.global.state@mouses{state.local.state@address}
+          let mouse =
+            case mouse {
+              some:
+                mouse.value@pressed <- true
+              none:
+                App.Sharmi.Mouse.new({0, 0}, true)
+            }
+          let post = App.Sharmi.Mouse.serialize(mouse)
+          App.new_post!(App.Sharmi.room, post)
+        mouse_up:
+          // TODO avoid code duplication
+          let mouse = state.global.state@mouses{state.local.state@address}
+          let mouse =
+            case mouse {
+              some:
+                mouse.value@pressed <- false
+              none:
+                App.Sharmi.Mouse.new({0, 0}, false)
+            }
+          let post = App.Sharmi.Mouse.serialize(mouse)
+          App.new_post!(App.Sharmi.room, post)
       } default App.pass!
   } default App.pass!
 
@@ -296,8 +326,8 @@ App.Sharmi: App<App.Sharmi.State>
   )
 
 App.Sharmi.test_state: App.Sharmi.State.local
-  let player0 = App.Sharmi.Player.new("Stanci", 0, {0, 1}, Physics.Verlet.moving({300, 500}, {0, -0.5})) // x:0 y:20
-  let player1 = App.Sharmi.Player.new("Rigi", 0, {0, 1}, Physics.Verlet.moving({450, 500}, {0, 2})) // x:10 y:-30
+  let player0 = App.Sharmi.Player.new("4b5e3dac0b466492c2f7d8668530f0564e77ec7d", 0, {0, 1}, Physics.Verlet.moving({300, 500}, {0, -0.5})) // x:0 y:20
+  let player1 = App.Sharmi.Player.new("199887b2edd2d582551f67747b31041c8ba2fb26", 0, {0, 1}, Physics.Verlet.moving({450, 500}, {0, 2})) // x:10 y:-30
   let ring0 = App.Sharmi.Goal.new(Physics.Verlet.still({10, 30})) // x:10 y:30
   let ring1 = App.Sharmi.Goal.new(Physics.Verlet.still({40, 150})) // x:40 y:0
   let body = App.Sharmi.Body.new(5, 1000000, Physics.Verlet.still({500, 500}))
@@ -305,8 +335,7 @@ App.Sharmi.test_state: App.Sharmi.State.local
   App.Sharmi.State.local.game(
     App.Sharmi.Game.State.local.new(
       ""
-      [player0] // List<App.Sharmi.Player>
-      //[player0, player1] // List<App.Sharmi.Player>
+      [player0, player1] // List<App.Sharmi.Player>
       [body] // List<App.Sharmi.Body>
       [ring0, ring1] // List<App.Sharmi.Goal>
       camera // Pair<V2, V2>
