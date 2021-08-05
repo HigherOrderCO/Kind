@@ -1,0 +1,3 @@
+Bytes.length(b: Bytes): U32
+  let {len,_} = b
+  len

@@ -1,0 +1,9 @@
+// A Bytes 
+// valid byte range (i.e. between 0 and 255 inclusive)
+Bytes: Type
+  Pair<U32, Buffer8>
+
+// type Bytes {
+//   new(depth: Nat, array: Array<U8, depth>) // TODO: calculate depth based on len
+// }
+
