@@ -144,7 +144,52 @@ App.KL.Game.Phase.Play.draw.interface(local: App.KL.Game.State.Local, game: App.
     {App.KL.Game.Phase.Play.draw.interface.top(players_info, local, game)}
     {App.KL.Game.Phase.Play.draw.interface.bottom(local@user, players_info, local@hud@skill)}
     {App.KL.Game.Phase.Play.draw.interface.user(local@user, players_info)}
+    {App.KL.Game.Phase.Play.draw.interface.casts(local@user, game@moment, game@players)}
   </div>
+
+App.KL.Game.Phase.Play.draw.interface.casts(user: String, moment: App.KL.Game.Moment, players: Map<App.KL.Game.Player>): DOM
+  case moment {
+    execution:
+      casts = moment.casts
+      p_cst = moment.previous_casts
+      
+      <div style={
+        "position": "absolute"
+        "bottom": "0"
+        "right": "0"
+        "width": "300px"
+        "margin-right": "5px"
+      }>
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, p_cst[1], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, p_cst[0], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(true,  casts[0], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, casts[1], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, casts[2], players)}
+      </div>
+  } default <span style={"display": "none"}></span>
+
+App.KL.Game.Phase.Play.draw.interface.casts.item(main: Bool, cast: Maybe<App.KL.Game.Cast>, players: Map<App.KL.Game.Player>): DOM
+  let name = Maybe {
+    get cast    = cast
+    get player  = players{cast@player}
+    get hero_id = player@hero_id
+    get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+    get skill   = hero@skills{Char.to_string(cast@letter)}
+    return hero@name | " - " | skill@name
+  } <> ""
+  log("aqui")
+  <div style={
+    "color": "white"
+    "background-color": if main && Bool.not(name =? "") then "#2a1956" else "transparent"
+    "width": if main then "100%" else "98%"
+    "padding": "0 20px"
+    "margin-left": if main then "0" else "2%"
+    "height": if main then "48px" else "36px"
+    "flex": if main then "2" else "1"
+    "display": "flex"
+    "border-radius": "5px"
+    "align-items": "center"
+  }>name</div>
 
 App.KL.Game.Phase.Play.draw.interface.top(players_info: Map<PlayersInfo>, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   let inner =
