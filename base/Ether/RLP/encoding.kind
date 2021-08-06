@@ -1,1 +1,27 @@
-Ether.RLP.encoding_(tree : Ether.RLP.tree) 
+Ether.RLP.encoding_(tree : Ether.RLP.Tree) : List<Bits>
+  case tree {
+      tip : 
+        let bytes_size = Bits.length(tree.value) / 16
+        let u16_char = Bits.trim(4, tree.value)
+        if (bytes_size =? 1) && Bits.ltn(u16_char, Ether.RLP.Constants.bits_128) then
+          [tree.value]
+        else
+          log(Nat.show(bytes_size))
+          Ether.RPL.encode_length(bytes_size, 128) ++ [tree.value]
+      list : []
+  }
+
+Ether.RPL.encode_length(value : Nat, offSet : Nat) : List<Bits>
+  switch (Nat.ltn(value)) {
+    56 : 
+      [Nat.to_bits(value + offSet)]
+    18446744073709551616 : 
+      let value = Nat.to_bits(value)
+      let len = Bits.length(value) / 16
+      [Nat.to_bits(len + offSet + 55), value]
+  } default [] // This case has to be treated within a proof
+
+
+Ether.RLP.encoding : _
+  let xs = Ether.RLP.encoding_(Ether.RLP.Tree.tip(String.to_bits("abc")))
+  List.map!!(Bits.to_hex_string, xs)
