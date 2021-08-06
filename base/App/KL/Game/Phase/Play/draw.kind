@@ -64,7 +64,6 @@ App.KL.Game.Phase.Play.draw.interface.casts.item(main: Bool, cast: Maybe<App.KL.
     get skill   = hero@skills{Char.to_string(cast@letter)}
     return hero@name | " - " | skill@name
   } <> ""
-  log("aqui")
   <div style={
     "color": "white"
     "background-color": if main && Bool.not(name =? "") then "#2a1956" else "transparent"
@@ -204,10 +203,13 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
     <div style={
       "position": "absolute"
       "top": "18%"
-      "left": "3.5%"
-      "display": "flex"
-      "transform": "scale(1.5)"
-      "transform-origin": "top left"
+      "left": "3.2%"
+      "width": "39.7%"
+      "height": "51%"
+      "display": "grid"
+      "grid-template-columns": "repeat(5, 1fr)"
+      "grid-template-rows": "1fr"
+      "grid-column-gap": "3px"
     }>
       for info in players_info:
         let {id, snd_info} = info
@@ -223,10 +225,13 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
     <div style={
       "position": "absolute"
       "top": "18%"
-      "left": "57.5%"
-      "display": "flex"
-      "transform": "scale(1.5)"
-      "transform-origin": "top left"
+      "left": "57%"
+      "width": "39.7%"
+      "height": "51%"
+      "display": "grid"
+      "grid-template-columns": "repeat(5, 1fr)"
+      "grid-template-rows": "1fr"
+      "grid-column-gap": "3px"
     }>
       for info in players_info:
         let {id, snd_info} = info
@@ -257,16 +262,30 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
   let life_percentage = String.show_clean(F64.show(App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature)))
   let ap = App.KL.Game.Phase.Play.draw.interface.get_ap(creature)
 
-  <div style={"position": "relative", "margin-right": "7%", "order": if is_user then "1" else "2"}>
+  <div style={"position": "relative", "width": "100%", "height": "100%", "order": if is_user then "1" else "2"}>
     // portrait
-    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={"left": "0", "top": "0"}></img>
+    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={
+      "top": "2%"
+      "left": "4.5%"
+      "transform-origin": "top left"
+      "transform": "scale(1.5)"
+      "position": "absolute"
+    }></img>
+    <div style={"position": "absolute", "top": "46%", "left": "63%"}>
+      { App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage, ap, is_enemy) }
+    </div>
     // death portrait
     {
       case dead {
         none: <span style={"display":"none"}></span>
         some: 
           <div style={"display": "contents"}>
-            <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.dead style={"position": "absolute", "left": "0", "top": "0"}></img>
+            <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.dead style={
+              "left": "0"
+              "transform-origin": "top left"
+              "transform": "scale(1.5)"
+              "position": "absolute"
+            }></img>
             <span style={
               "position": "absolute"
               "top": "38%"
@@ -277,21 +296,33 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
               "right":" 0"
               "text-align":" center"
               "color": "white"
-            }>String.show_clean(I32.show(dead.value@snd)) | " TURNS"</span>
+            }> "0 TURNS"</span> // String.show_clean(I32.show(dead.value@snd)) |
           </div>
       } 
     }
-    // life placeholder
-    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder style={"position": "absolute", "left": "56%", "bottom": "-15%"}></img>
-    // life bar
-    <img 
-      src= if is_enemy then App.KL.Game.Phase.Play.draw.assets.interface.top.life_red else App.KL.Game.Phase.Play.draw.assets.interface.top.life_green 
-      style={"position": "absolute", "left": "61%", "bottom": "4%", "clip-path": "polygon(0 0%, "|life_percentage|"% 0%, "|life_percentage|"% 100%, 0% 100%)" }>
-    </img>
-    // ap bar
-    for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{61.0,-12.0}, {76.0,1.0}, {89.0,12.0}]):
-      img
   </div>
+
+App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage: String, ap: I32, is_enemy: Bool): DOM
+  let content =
+    <div style={"position": "relative", "width": "100%", "height": "100%"}>
+      // life bar
+      <img 
+        src= if is_enemy then App.KL.Game.Phase.Play.draw.assets.interface.top.life_red else App.KL.Game.Phase.Play.draw.assets.interface.top.life_green 
+        style={
+          "left": "3px"
+          "top": "2px"
+          "position": "absolute"
+          "transform": "scale(1.5)"
+          "transform-origin": "top left"
+          "clip-path": "polygon(0 0%, "|life_percentage|"% 0%, "|life_percentage|"% 100%, 0% 100%)" 
+        }>
+      </img>
+      // ap bar
+      for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{3.0,32.0}, {12.0,23.0}, {21.0,14.0}]):
+        img
+    </div>
+
+  App.KL.Game.Phase.Play.draw.wrapper(20, 33, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder, content)
 
 App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<Pair<F64, F64>>): List<DOM>
   if ap <=? 0 then []
@@ -301,8 +332,10 @@ App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<P
       cons:
         <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.ap style={
           "position": "absolute"
-          "left": String.show_clean(F64.show(positions.head@fst)) | "%"
-          "bottom": String.show_clean(F64.show(positions.head@snd)) | "%"
+          "left": String.show_clean(F64.show(positions.head@fst)) | "px"
+          "top": String.show_clean(F64.show(positions.head@snd)) | "px"
+          "transform": "scale(1.5)"
+          "transform-origin": "top left"
         }></img> & App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap - 1, positions.tail)
     }
 
