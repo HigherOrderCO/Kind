@@ -1,0 +1,42 @@
+Bits_128 : Bits
+  Nat.to_bits(128) 
+
+Ether.RPL.to_bits(value : Bits) : String
+  String.reverse(Bits.hex.encode(value))
+
+Ether.RLP.encoding_(tree : Ether.RLP.Tree) : Maybe<String>
+  case tree {
+      tip : 
+        let bytes_size = (Bits.size(tree.value) + 1) / 8
+        if (bytes_size >? 1) && Bits.ltn(tree.value, Bits_128) then
+          some(Ether.RPL.to_bits(tree.value))
+        else
+          Maybe {
+            get b = Ether.RPL.encode_length(bytes_size, 128)
+            some(b | Ether.RPL.to_bits(tree.value))
+          }
+      list : 
+        let str = some("")
+        for item in tree.value with str :
+          Maybe {
+            get result = str
+            get value = Ether.RLP.encoding_(item) 
+            some(result | value)
+          }
+        Maybe {
+          get str = str
+          let size = Bits.size(tree.value) + 1) / 8
+          Ether.RPL.encode_length
+        }
+  }
+        
+
+Ether.RPL.encode_length(value : Nat, offSet : Nat) : Maybe<String>
+  switch (Nat.ltn(value)) {
+    56 : 
+      some(Ether.RPL.to_bits(Nat.to_bits(value + offSet)))
+    18446744073709551616 : 
+      let value = Nat.to_bits(value)
+      let len = Bits.size(value) + 1
+      some(Ether.RPL.to_bits(Nat.to_bits(len + offSet + 55)) | Ether.RPL.to_bits(value))
+  } default none

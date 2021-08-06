@@ -3,17 +3,17 @@ Ether.encode.type(coder : Ether.ABI.Method.Type) : List<String>
     bytes : 
       case coder.len {
         some : 
-          [Ether.Hex.to_abi_hex(coder.value, true)]
+          [Ether.Hex.to_hex(coder.value, true)]
         none : 
           let bytes_size = Nat.to_bits((Bits.size(coder.value) + 1) / 8)
-          [Ether.Hex.to_abi_hex(bytes_size, true), Ether.Hex.to_abi_hex(coder.value, false)]
+          [Ether.Hex.to_hex(bytes_size, true), Ether.Hex.to_hex(coder.value, false)]
       } 
     array : 
       let list_length = Nat.to_bits(List.length!(coder.value))
       let content = List.map!!(Ether.encode.type, coder.value)
-      Ether.Hex.to_abi_hex(list_length, true) & List.flatten!(content)
+      Ether.Hex.to_hex(list_length, true) & List.flatten!(content)
   } default
-     [Ether.Hex.to_abi_hex(coder.value, true)]
+     [Ether.Hex.to_hex(coder.value, true)]
 
 Ether.encode(length : Nat, coder : List<Ether.ABI.Method.Type>) : Pair<List<String>, List<String>>
   case coder {
@@ -25,12 +25,12 @@ Ether.encode(length : Nat, coder : List<Ether.ABI.Method.Type>) : Pair<List<Stri
         none : 
           let {static, dynamic} = Ether.encode(length, coder.tail)
           let dynamic_location = Nat.to_bits((length + List.length!(dynamic)) * 32) // + size of queue dynamic
-          {static ++ [Ether.Hex.to_abi_hex(dynamic_location, true)], dynamic ++ Ether.encode.type(coder.head)}
+          {static ++ [Ether.Hex.to_hex(dynamic_location, true)], dynamic ++ Ether.encode.type(coder.head)}
        }
       array :
           let {static, dynamic} = Ether.encode(length, coder.tail)
           let dynamic_location = Nat.to_bits((length + List.length!(dynamic)) * 32) // + size of queue dynamic
-          {static ++ [Ether.Hex.to_abi_hex(dynamic_location, true)], dynamic ++ Ether.encode.type(coder.head)}
+          {static ++ [Ether.Hex.to_hex(dynamic_location, true)], dynamic ++ Ether.encode.type(coder.head)}
     } default 
         let {static, dynamic} = Ether.encode(length, coder.tail)
         {static ++ Ether.encode.type(coder.head), dynamic}
