@@ -1,3 +1,8 @@
+App.KL.Game.Phase.Play.draw.fator.number: F64
+  1.5
+
+App.KL.Game.Phase.Play.draw.fator.string: String
+  F64.show(App.KL.Game.Phase.Play.draw.fator.number)
 
 // BOARD DRAWING
 // =============
@@ -96,7 +101,7 @@ App.KL.Game.Phase.Play.draw.interface.top(players_info: Map<PlayersInfo>, local:
     "text-align": "center"
     "width": "min-content"
   }>
-    {App.KL.Game.Phase.Play.draw.wrapper(624, 91, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.top, inner)}
+    {App.KL.Game.Phase.Play.draw.wrapper(624, 91, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.draw.assets.interface.top, inner)}
   </header>
 
 App.KL.Game.Phase.Play.draw.interface.top.timer(moment: App.KL.Game.Moment): DOM
@@ -268,10 +273,10 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
       "top": "2%"
       "left": "4.5%"
       "transform-origin": "top left"
-      "transform": "scale(1.5)"
+      "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
       "position": "absolute"
     }></img>
-    <div style={"position": "absolute", "top": "46%", "left": "63%"}>
+    <div style={"position": "absolute", "top": "46%", "left": "63%", "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")", "transform-origin": "top left"}>
       { App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage, ap, is_enemy) }
     </div>
     // death portrait
@@ -283,7 +288,7 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
             <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.dead style={
               "left": "0"
               "transform-origin": "top left"
-              "transform": "scale(1.5)"
+              "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
               "position": "absolute"
             }></img>
             <span style={
@@ -303,26 +308,22 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
   </div>
 
 App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage: String, ap: I32, is_enemy: Bool): DOM
-  let content =
-    <div style={"position": "relative", "width": "100%", "height": "100%"}>
+    <div style={"position": "relative"}>
       // life bar
+      <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder></img>
       <img 
         src= if is_enemy then App.KL.Game.Phase.Play.draw.assets.interface.top.life_red else App.KL.Game.Phase.Play.draw.assets.interface.top.life_green 
         style={
-          "left": "3px"
-          "top": "2px"
+          "left": "2px"
+          "top": "1px"
           "position": "absolute"
-          "transform": "scale(1.5)"
-          "transform-origin": "top left"
           "clip-path": "polygon(0 0%, "|life_percentage|"% 0%, "|life_percentage|"% 100%, 0% 100%)" 
         }>
       </img>
       // ap bar
-      for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{3.0,32.0}, {12.0,23.0}, {21.0,14.0}]):
+      for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{2.0,21.0}, {8.0,15.0}, {14.0,9.0}]):
         img
     </div>
-
-  App.KL.Game.Phase.Play.draw.wrapper(20, 33, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder, content)
 
 App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<Pair<F64, F64>>): List<DOM>
   if ap <=? 0 then []
@@ -334,8 +335,6 @@ App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<P
           "position": "absolute"
           "left": String.show_clean(F64.show(positions.head@fst)) | "px"
           "top": String.show_clean(F64.show(positions.head@snd)) | "px"
-          "transform": "scale(1.5)"
-          "transform-origin": "top left"
         }></img> & App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap - 1, positions.tail)
     }
 
@@ -432,7 +431,7 @@ App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<Pla
     "text-align": "center"
     "width": "min-content"
   }>
-    {App.KL.Game.Phase.Play.draw.wrapper(280, 65, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.bottom, content)}
+    {App.KL.Game.Phase.Play.draw.wrapper(280, 65, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.draw.assets.interface.bottom, content)}
   </footer>
 
 App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<PlayersInfo>): DOM
@@ -451,14 +450,14 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
     }>
       <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={
         "position": "absolute"
-        "transform": "scale("|F64.show(1.5 * 2)|")"
+        "transform": "scale("|F64.show(App.KL.Game.Phase.Play.draw.fator.number * 2)|")"
         "transform-origin": "top left"
         "top": "4%"
         "left": "4%"
       }></img>
       <img src= App.KL.Game.Phase.Play.draw.assets.interface.user.life style={
         "position": "absolute"
-        "transform": "scale(1.5)"
+        "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
         "transform-origin": "top left"
         "top": "61%"
         "left": "34%"
@@ -469,7 +468,7 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
         "top": "74%"
         "left": "31%"
         "display": "flex"
-        "transform": "scale(1.5)"
+        "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
         "transform-origin": "top left"
       }>
         for i in [0 to ap : I32]:
@@ -485,7 +484,7 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
     "left": "0"
     "width": "min-content"
   }>
-    {App.KL.Game.Phase.Play.draw.wrapper(249, 112, 0, "", 1.5, App.KL.Game.Phase.Play.draw.assets.interface.user, content)}
+    {App.KL.Game.Phase.Play.draw.wrapper(249, 112, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.draw.assets.interface.user, content)}
   </footer>
 
 
