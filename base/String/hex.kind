@@ -67,3 +67,9 @@ String.hex.encode.utf8(str: String): String
   }
 
 // TODO: create String.hex.decode.utf8
+// String.hex.decode.utf8(hex: String): String
+//   case str {
+//     nil: String.nil
+//     cons:
+//       let aux =  
+//   }

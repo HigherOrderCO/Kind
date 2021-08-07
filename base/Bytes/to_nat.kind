@@ -1,0 +1,4 @@
+Bytes.to_nat(b: Bytes): Nat
+  let bits = String.to_bits(b)
+  Bits.to_nat(bits)
+  

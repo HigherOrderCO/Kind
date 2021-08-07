@@ -1,0 +1,55 @@
+Bytes.test.to_string.0: TestSuite
+  let test = Bytes.to_string("0x736f6d655f72616e646f6d5f737472696e67");
+  let got = test
+  let exp = "some_random_string"
+  let name = "0"
+  TestSuite.show.log_string(name, test, exp, got)
+
+Bytes.test.to_string.1: TestSuite
+  let test = Bytes.to_string("0x");
+  let got = test
+  let exp = ""
+  let name = "1"
+  TestSuite.show.log_string(name, test, exp, got)
+
+Bytes.test.to_string.2: TestSuite
+  let test = Bytes.to_string("0x30313233343536373839");
+  let got = test
+  let exp = "0123456789"
+  let name = "2"
+  TestSuite.show.log_string(name, test, exp, got)
+
+// char with 2 bytes
+Bytes.test.to_string.3: TestSuite
+  let test = Bytes.to_string("0xc2a2");
+  let got = test
+  let exp = "¢"
+  let name = "2"
+  TestSuite.show.log_string(name, test, exp, got)
+
+// char with 3 bytes
+Bytes.test.to_string.4: TestSuite
+  let test = Bytes.to_string("0xe0a4b9e282ac");
+  let got = test
+  let exp = "ह€"
+  let name = "2"
+  TestSuite.show.log_string(name, test, exp, got)
+
+// char with 4 bytes
+Bytes.test.to_string.5: TestSuite
+  let test = Bytes.to_string("0xf0908d88");
+  let got = test
+  let exp = "𐍈"
+  let name = "5"
+  TestSuite.show.log_string(name, test, exp, got)
+
+Bytes.test.to_string: TestSuite
+  TestSuite.many("to_string", [
+    Bytes.test.to_string.0
+    Bytes.test.to_string.1
+    Bytes.test.to_string.2
+    Bytes.test.to_string.3
+    Bytes.test.to_string.4
+  ])
+
+

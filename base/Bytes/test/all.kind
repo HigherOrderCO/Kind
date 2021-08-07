@@ -2,6 +2,9 @@ Bytes.test.all_tests: _
   [ Bytes.test.from_nat
     Bytes.test.length
     Bytes.test.slice
+    // Bytes.test.to_nat
+    Bytes.test.from_string
+    Bytes.test.to_string
   ]
 
 Bytes.test.all: _

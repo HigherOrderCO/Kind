@@ -1,0 +1,2 @@
+Bytes.to_string(b: Bytes): String
+  String.hex.decode(b)
