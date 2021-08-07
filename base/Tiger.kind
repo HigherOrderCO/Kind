@@ -1,0 +1,92 @@
+// i'm studying compilers using "modern compiler implementation in ML" by Andrew Appel
+// translating to Kind as I go. i'm not too worried about following the book too closely.
+// for example i'll likely use kind's `Parser` to parse programs instead of Lex and Yacc.
+// but i'm using ML's naming conventions. it looks ugly but makes lookups easier.
+
+// position on source code, to produce error messages
+Tiger.pos: Type
+  Pair<Nat, Nat>
+
+Tiger.symbol: Type
+  String
+
+type Tiger.var {
+  SimpleVar(name: Tiger.symbol, pos: Tiger.pos)
+  FieldVar(var: Tiger.var, name: Tiger.symbol, pos: Tiger.pos)
+  SubscriptVar(var: Tiger.var, exp: Tiger.exp, pos: Tiger.pos)
+}
+
+type Tiger.record_fields {
+  new(
+    name: Tiger.symbol
+    args: List<Tiger.exp>
+    pos: Tiger.pos
+  )
+}
+type Tiger.exp {
+  NilExp
+  VarExp(var: Tiger.var)
+  IntExp(val: Int)
+  StringExp(val: String, pos: Tiger.pos)
+  CallExp(
+    func: Tiger.symbol
+    args: List<Tiger.exp>
+    pos: Tiger.pos
+  )
+  OpExp(
+    left: Tiger.exp
+    oper: Tiger.oper
+    right: Tiger.exp
+    pos: Tiger.pos
+  )
+  RecordExp(
+    fields: List<Tiger.record_fields>
+    typ: Tiger.symbol
+    pos: Tiger.pos
+  )
+  SeqExp(
+    val: List<Tiger.exp>
+  )
+  AssignExp(
+    var: Tiger.var
+    exp: Tiger.exp
+    pos: Tiger.pos
+  )
+  IfExp(
+    test: Tiger.exp
+    then: Tiger.exp
+    else: Maybe<Tiger.exp>
+  )
+  WhileExp(
+    test: Tiger.exp
+    body: Tiger.exp
+    pos: Tiger.pos
+  )
+  ForExp(
+    var: Tiger.symbol
+    escape: Bool
+    lo: Tiger.exp
+    hi: Tiger.exp
+    body: Tiger.exp
+    pos: Tiger.pos
+  )
+  BreakExp(
+    pos: Tiger.pos
+  )
+  LetExp(
+    decs: List<Tiger.dec>
+    body: Tiger.exp
+    pos: Tiger.pos
+  )
+  ArrayExp(
+    typ: Tiger.symbol
+    size: Tiger.exp
+    pos: Tiger.pos
+  )
+}
+
+type Tiger.oper {
+}
+
+type Tiger.dec {
+}
