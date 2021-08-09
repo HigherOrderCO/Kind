@@ -1,0 +1,4 @@
+V2.dot(u: V2, v: V2): F64
+  open u; open v
+  (u.x*v.x) + (u.y*v.y)
+

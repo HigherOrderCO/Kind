@@ -1,0 +1,7 @@
+type Date {
+  new(
+    year: Nat
+    mon: Date.Month
+    day: Date.Day(year, mon)
+  )
+}

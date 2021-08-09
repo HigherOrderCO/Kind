@@ -1,0 +1,4 @@
+V2.add(a: V2, b: V2): V2
+  open a; open b;
+  {a.x + b.x, a.y + b.y} :: V2
+
