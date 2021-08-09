@@ -1,0 +1,28 @@
+// ASSETS
+
+// user and allies card
+// =====================
+App.KL.Game.Phase.Draft.Assets.card.button: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAsUlEQVR42mNgAAIzl67/5tPP/7fY8QCM+778x4ph8iC1ID0MpGjGaYiudhuKAIhvbjwfKwbJIVsorBj/nwFEwDTLqhXh1AzDIDUwQ+AGwDSDMMgWfBimDqQHxQCYJDEGwLwySA0gZAhOA9glHOEYZhA6RlaDYQCyAg/ZIqwY2QKsXjCRSARjXAbA5DG8ABOAGZKo1Y4VI2sG0XADkA2BSWLDyPIwfeAMBeMgBxI+jKwZAA9Tzqish/WQAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.Assets.card.divisor: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAAACCAYAAADsDAqEAAAAGUlEQVR42mNgl3D8P4od/zM4qOX/H8X5/wFLCtMnRwvN3AAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.Assets.card.name_divisor: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAYAAAChQ5zUAAAAKklEQVR42mPQlgz7z82j9R9Eg7CZSxcGjYzbZT/AaWpgZDORMTa3ILsVAD4KYiEWiGpBAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.Assets.card.attr_bar(i: Nat, j: Nat): String
+  case Nat.cmp(j, i) {
+    ltn: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mN4nf3/PyHMQJSiyRmv/hPCACSbVe0aeuODAAAAAElFTkSuQmCC"
+    eql: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mPo+/L/PyHMQJSiyRmv/hPCAAScWQUsjAs3AAAAAElFTkSuQmCC"
+    gtn: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mPg5tH6TwgzEKXIzKXrPyEMAKotKJyhzZc5AAAAAElFTkSuQmCC"
+  }
+
+App.KL.Game.Phase.Draft.Assets.card.attr_icons: Map<String>
+  {
+    "damage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAATUlEQVR42mNgAIK+L///W+x48J8BCwCJg+QxBNA14BKHS8BMgbFx2ciArhDFelwaCCpEVoRuA0ETcdqA7DlsiuGexBk82IIPb/CgaQAAVVyucYmp1skAAAAASUVORK5CYII=" // offensive
+    "resistance": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAALCAYAAACtWacbAAAAQ0lEQVR42mNgQAIWOx787/vy/z+IZkAHMEl0DFeMLoFVjChFMKsYsACcVmLjYzgcWRGGL7H5jmAwYA0rgoGJrhBdDABa1bsEjscb1AAAAABJRU5ErkJggg==" // defensive
+    "mobility": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAKCAYAAABv7tTEAAAAQklEQVR42mOw2PHgf9+X/ygYmxgDOgApgmF0xTg1wTTisgWnJnTN6M7Fq4lkDVSxBT00sRqASxNBm/EFO9khCRIHABDzAc+vGvQQAAAAAElFTkSuQmCC" // mobility
+    "range": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42mNggAKLHQ/+9335j4JBYgzIAKsgkmY4B6YI3UQUeZgAuqnIpoFpFA6Sqehi5CnEazXRniE6eIgNcADtwMQtWOgT0gAAAABJRU5ErkJggg==" // range
+    "utility": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAMCAYAAACwXJejAAAAU0lEQVR42mNgQAIWOx787/vy/z+IZsAGQJLoGEMRzBSYBrymIdM4rYOZiKEQm/HI1qNysJgO1ozuI2QT4dZicwtGUCAHIDpGMRmXKRhhhc0kmBwAbSTOuAXc0NYAAAAASUVORK5CYII="// utility
+  }

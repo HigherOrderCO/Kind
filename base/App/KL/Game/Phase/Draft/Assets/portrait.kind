@@ -1,0 +1,7 @@
+// hero portraits
+// =====================
+App.KL.Game.Phase.Draft.Assets.portrait.hero.background: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAABKCAYAAADAKbZGAAAAcUlEQVR42u3bwQkAIQwEQNu4GuTasSPrVvwdeE+FBGZhyXcK2JSSNfVp4609ZJftF7tuxG7oyNgvGhgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgY+Dg43QY+3ZeBXMwEjZrO46oJAlgAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.Assets.portrait.hero.border: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAABPCAYAAACUEffIAAAAnklEQVR42u3asQ3CMBBA0RuLnZiFeRiHASjpCSKCyOAUoFiWD96TrrT87cKVIx52x9N0uFyHnntjlDJEV/FldHWigVSdGaLX4iNL9Hv8HB7JCBf+F+GZXpTyZRHePRwAAAAAAAAAAPhl/mT1Dvdhsnf4eT+lC5+bhQsXLrxZ9BKeJf7Z+hI+evxq55b4cu2n0yR6S0DvaXp7395gqz1uy7Mq9gTE4rAAAAAASUVORK5CYII="

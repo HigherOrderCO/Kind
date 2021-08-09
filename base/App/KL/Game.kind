@@ -15,6 +15,7 @@ type App.KL.Game.State.Local {
     mouse: Pair<U32, U32>
     filter: App.KL.Game.Phase.Draft.Filter
     hud: App.KL.Game.State.Local.hud // HUD controls
+    draft: App.KL.Game.State.Local.Draft // Draft page controls
   )
 }
 
@@ -25,8 +26,13 @@ App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Loca
   let info = Hexagonal.Axial.new(0,0)
   let page = "heroes"
   let filter = App.KL.Game.Phase.Draft.Filter.default
-  let hud = App.KL.Game.State.Local.hud.new(none)
-  App.KL.Game.State.Local.new(user, room, tab, page, none, info, preview, mouse, filter, hud)
+  let hud    = App.KL.Game.State.Local.hud.new(none)
+  // draft screen controls TODO move to function
+  let draft  = App.KL.Game.State.Local.Draft.new(
+    App.KL.Game.Assets.ButtonAnimation.Button.new(App.KL.Game.Phase.Draft.Assets.main_button.ready, 0),
+    false
+  )
+  App.KL.Game.State.Local.new(user, room, tab, page, none, info, preview, mouse, filter, hud, draft)
 
 // Global State
 // ============
@@ -148,5 +154,13 @@ App.KL.Game.post(
 type App.KL.Game.State.Local.hud {
   new(
     skill: Maybe<App.KL.Game.Skill>
+  )
+}
+
+// Draft controls
+type App.KL.Game.State.Local.Draft {
+  new(
+    main_button: App.KL.Game.Assets.ButtonAnimation.Button
+    main_button_hovered: Bool
   )
 }
