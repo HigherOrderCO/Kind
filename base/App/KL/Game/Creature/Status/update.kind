@@ -17,20 +17,20 @@ App.KL.Game.Creature.Status.update.aux(
       []
     cons: 
       let head = case status.head {
-        block : App.KL.Game.Creature.Status.block(status.head.id, I32.sub(status.head.duration, 1), status.head.caster)
+        block : App.KL.Game.Creature.Status.block(status.head.cast_data, status.head.id, I32.sub(status.head.duration, 1), status.head.caster)
         //damage over time(dot)
-        dot : App.KL.Game.Creature.Status.dot(status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
-        haste : App.KL.Game.Creature.Status.haste(I32.sub(status.head.duration, 1), status.head.amount)
+        dot : App.KL.Game.Creature.Status.dot(status.head.cast_data, status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
+        haste : App.KL.Game.Creature.Status.haste(status.head.cast_data, I32.sub(status.head.duration, 1), status.head.amount)
         //heal over time(hot)
-        hot : App.KL.Game.Creature.Status.hot(status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
-        invulnerable: App.KL.Game.Creature.Status.invulnerable(status.head.id, I32.sub(status.head.duration ,1))
-        protect: App.KL.Game.Creature.Status.protect(I32.sub(status.head.duration, 1), status.head.amount)
-        root: App.KL.Game.Creature.Status.root(I32.sub(status.head.duration, 1))
-        shield: App.KL.Game.Creature.Status.shield(status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
-        silence: App.KL.Game.Creature.Status.silence(I32.sub(status.head.duration, 1))
-        slow : App.KL.Game.Creature.Status.slow(I32.sub(status.head.duration, 1), status.head.amount)
-        stun: App.KL.Game.Creature.Status.stun(I32.sub(status.head.duration, 1))
-        weaken : App.KL.Game.Creature.Status.weaken(I32.sub(status.head.duration, 1), status.head.amount)
+        hot : App.KL.Game.Creature.Status.hot(status.head.cast_data, status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
+        invulnerable: App.KL.Game.Creature.Status.invulnerable(status.head.cast_data, status.head.id, I32.sub(status.head.duration ,1))
+        protect: App.KL.Game.Creature.Status.protect(status.head.cast_data, I32.sub(status.head.duration, 1), status.head.amount)
+        root: App.KL.Game.Creature.Status.root(status.head.cast_data, I32.sub(status.head.duration, 1))
+        shield: App.KL.Game.Creature.Status.shield(status.head.cast_data, status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
+        silence: App.KL.Game.Creature.Status.silence(status.head.cast_data, I32.sub(status.head.duration, 1))
+        slow : App.KL.Game.Creature.Status.slow(status.head.cast_data, I32.sub(status.head.duration, 1), status.head.amount)
+        stun: App.KL.Game.Creature.Status.stun(status.head.cast_data, I32.sub(status.head.duration, 1))
+        weaken : App.KL.Game.Creature.Status.weaken(status.head.cast_data, I32.sub(status.head.duration, 1), status.head.amount)
       }
       let tail = App.KL.Game.Creature.Status.update.aux(status.tail)
       case head {

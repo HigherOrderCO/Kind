@@ -12,8 +12,8 @@ App.KL.State: App.State
 // APP
 // ===
 
-// Initial state
-App.KL.init: App.Init<App.KL.State>
+// Initial state 
+App.KL.init: App.Init<App.KL.State> 
   let local = App.KL.State.Local.lobby(App.KL.Lobby.State.Local.new("", App.KL.Lobby.State.Local.Page.front("")))
   //let local = App.KL.State.Local.lobby(App.KL.Lobby.State.Local.new("", App.KL.Lobby.State.Local.Page.heroes))
   let global = App.KL.Global.State.new(none)
@@ -30,12 +30,13 @@ App.KL.draw(img: VoxBox): App.Draw<App.KL.State>
 
 // Event handler
 App.KL.when: App.When<App.KL.State>
-  (event, state)
+  (event, state)  
   let {local, global} = state
   case local {
     lobby: App.KL.Lobby.when(local.state, global, event)
     game: App.KL.Game.when(local.state, global, event) // should we pass global stage here?
   }
+  
 
 // A "KL, world!" + counter application
 App.KL: App<App.KL.State>

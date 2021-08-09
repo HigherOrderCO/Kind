@@ -1,21 +1,23 @@
 App.KL.Game.Creature.Status.dot.add(
   creature: App.KL.Game.Creature
+  cast_data: Pair<Char, String>
   id: String
   duration: I32
   amount: I32
 ): App.KL.Game.Creature
   
-  let dot_added = App.KL.Game.Creature.Status.dot.add.aux(id, duration, amount, creature@status)
+  let dot_added = App.KL.Game.Creature.Status.dot.add.aux(cast_data, id, duration, amount, creature@status)
   creature@status <- dot_added
 
 App.KL.Game.Creature.Status.dot.add.aux(
+  cast_data: Pair<Char, String>
   id: String
   duration: I32
   amount: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  new_dot = App.KL.Game.Creature.Status.dot(id, duration, 1, amount)
+  new_dot = App.KL.Game.Creature.Status.dot(cast_data, id, duration, 1, amount)
   case status { 
     nil:
       new_dot & status
@@ -28,10 +30,10 @@ App.KL.Game.Creature.Status.dot.add.aux(
             let dot_stacks = status.head.stack + 1
             let dot_damage = status.head.amount * 2
             if I32.gtn(dot_stacks, 3) then
-              App.KL.Game.Creature.Status.dot("final_apply", 1, 0, status.head.amount + 2) & status.tail
+              App.KL.Game.Creature.Status.dot(status.head.cast_data, "final_apply", 1, 0, status.head.amount + 2) & status.tail
             else 
-              App.KL.Game.Creature.Status.dot(status.head.id, dot_duration, dot_stacks, dot_damage) & status.tail
+              App.KL.Game.Creature.Status.dot(status.head.cast_data, status.head.id, dot_duration, dot_stacks, dot_damage) & status.tail
           else
-            status.head & App.KL.Game.Creature.Status.dot.add.aux(id, duration, amount,  status.tail)
-      }default status.head & App.KL.Game.Creature.Status.dot.add.aux(id, duration, amount,  status.tail)
+            status.head & App.KL.Game.Creature.Status.dot.add.aux(cast_data, id, duration, amount,  status.tail)
+      }default status.head & App.KL.Game.Creature.Status.dot.add.aux(cast_data, id, duration, amount,  status.tail)
   }

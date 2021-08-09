@@ -1,0 +1,19 @@
+App.KL.Game.Recap: Type
+  List<App.KL.Game.Recap.Episode>
+
+type App.KL.Game.Recap.Episode {
+  new(
+    skill_key: Char
+    address:   String
+    hp_diff:   I32   
+  )
+}
+
+App.KL.Game.Recap.show(recap: App.KL.Game.Recap): String
+  text = ""
+  for episode in recap with text:
+    text | "\n" |
+    "key: "    | Char.to_string(episode@skill_key)  | "\n" | 
+    "caster: " | episode@address | "\n" | 
+    "damage: " | I32.show(episode@hp_diff) | "\n" 
+  text

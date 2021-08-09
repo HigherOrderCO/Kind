@@ -1,7 +1,8 @@
+// TODO: Update to properly apply protect effect
 App.KL.Game.Creature.Status.protect.apply(
   creature: App.KL.Game.Creature
   board: App.KL.Game.Board
 ): App.KL.Game.Board
 
   let verify = App.KL.Game.Creature.Status.protect.check(creature)
-  ?a
+  board
