@@ -1,0 +1,5 @@
+Maybe.if<A: Type>(cond: A -> Bool, x: Maybe<A>): Bool
+  case x {
+    none: false
+    some: cond(x.value)
+  }

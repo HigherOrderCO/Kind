@@ -109,19 +109,19 @@ App.KL.Game.Phase.Draft.draw.main(
   user: String,
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
-  <div style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "image-rendering": "pixelated", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
+  <div class="pixel-art" style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
       {App.KL.Game.Phase.Draft.draw.background}
 
       <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
-        <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px", "image-rendering": "pixelated", "display": "flex", "justify-content": "space-between", "padding": "0 5px"}>
+        <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px", "display": "flex", "justify-content": "space-between", "padding": "0 5px"}>
           <div style={"display": "flex"}>
           
           </div>
           <div style={"display": "flex", "justify-content": "flex-end"}>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "image-rendering": "pixelated", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "cursor": "not-allowed"}></img>
           </div>
         </header>
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
@@ -130,7 +130,7 @@ App.KL.Game.Phase.Draft.draw.main(
           </div>
 
           // -16 because footer height is 64px
-          // and margin top of ready button is -32px
+          // and margin top of ready button is -40px
           <div style={"position": "absolute", "bottom": "-16px", "right": "50px", "display": "flex", "transform": "scale(1.5)"}>
             <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.list_button></img>
             <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom></img>
@@ -139,9 +139,9 @@ App.KL.Game.Phase.Draft.draw.main(
         <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
           <div style={"display": "flex", "height": "50%", "flex": "1"}>
             <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left></img></div>
-            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-32px"}><img id="Ready" style={"image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right></img></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left></img></div>
+            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-40px"}><img id="Ready" style={} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right></img></div>
             <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
           </div>
         </footer>
@@ -443,21 +443,21 @@ App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes,
             "margin-right": "10%"
             "height": "100%"
           }>
-            <img id=id style={"width": "100%", "height": "100%", "object-fit": "contain", "image-rendering": "pixelated"} src=img></img>
+            <img id=id style={"width": "100%", "height": "100%", "object-fit": "contain", } src=img></img>
           </div>
           <div id=id style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
             for j in [1 to 6]:
               let attr_value = attrs_map{attr}
               without attr_value: <span style={"display": "none"}></span>
               let bar = App.KL.Game.Phase.Draft.draw.assets.card.attr_bar(attr_value, j)
-              <div id=id style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%", "image-rendering": "pixelated"} src=bar></img> </div>
+              <div id=id style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%", } src=bar></img> </div>
           </div>
         </div>
         {
           if attr =? "utility" then <span></span>
           else 
             <div id=id style={"display": "flex", "justify-content": "center"}>
-              <img id=id style={"width": "80%", "margin": "auto", "image-rendering": "pixelated"} src=App.KL.Game.Phase.Draft.draw.assets.card.divisor></img>
+              <img id=id style={"width": "80%", "margin": "auto", } src=App.KL.Game.Phase.Draft.draw.assets.card.divisor></img>
             </div>
         }
       </div>
@@ -526,7 +526,7 @@ App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DO
   </li>
 
 App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: Nat, background: String, inner: DOM): DOM
-  <div id=id style={
+  <div class="pixel-art" id=id style={
     "height": Nat.show(fator * height) | "px", 
     "width": Nat.show(fator * width) | "px", 
     "display": "flex", 
@@ -534,7 +534,7 @@ App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: 
     "background-size": "100% 100%", 
     "padding-top": Nat.show(fator * bt) | "px"
     // "margin": "0 10px"
-    "image-rendering": "pixelated"
+    
   }>
     {inner}
   </div>
@@ -559,7 +559,7 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
   let portrait = hero@draw@b64_portrait(true, 0)
   let inner =
     <div id=id style={"width": "100%", "padding": "0 " | Nat.show(bt * fator) | "px", "display": "flex", "flex-direction": "column", "align-items": "center"}>
-      <img id=id style={"width": "100%", "image-rendering": "pixelated", "transform": "translateY(-"|Nat.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
+      <img id=id style={"width": "100%", "transform": "translateY(-"|Nat.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
       <p id=id style={"text-transform": "uppercase", "color": "white"}>hero@name</p>
     </div>
   
@@ -572,7 +572,7 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
     "background-size": "100% 100%", 
     "background-repeat": "no-repeat"
     "padding-top": Nat.show(fator * bt) | "px"
-    "image-rendering": "pixelated"
+    
     "border-style": "solid"
     "border-image-slice": "4"
     "border-image-width": "10px"
@@ -710,7 +710,7 @@ App.KL.Game.Phase.Draft.draw.selection(
     "width": "75%",
     "margin-left": "12.5%",
     "height": "auto",
-    "image-rendering": "pixelated"
+    
   }
   square_style = 
   {
@@ -764,7 +764,7 @@ App.KL.Game.Phase.Draft.draw.assets.portrait.hero.border: String
 // ready button
 // =====================
 App.KL.Game.Phase.Draft.draw.assets.ready_button: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAAAqCAYAAABr9d/aAAAC70lEQVR42u2aMWsVQRDH0/kBbNKksElhSBU0giJIAgkBFYsINgmKjdilUWzsEhQUIailYqG1FsHGxlQ2+gkEG3sLwULkZA7mmN03uzf79m7fu+S/8Oe9nZ27t29+N7N7793MDBoaWndt+eW3ClEAdbRBMgPII5psAIvKiDZGe/q7qsochDY5oJymSNfhlEiHGXdCmUfjsQ8C+PKgmVVjj0Eg51RIgJoek9QkcWwMCevf9JVPLfscVtxhWUoqwp+3EbHGVrIJspIGOSA/RCujltLK6+dxhK59dz9JJJQQOPb3bQ1YzQgNRzXAs6uPoQHKAchEz338UUuWABaP4crvRymxVwEC3nAgOgAXF3abtKT3pLn5nVrcX156BRVUiIPk1AA8eWo7Cg8QJwMvBpGYqQBD8ABxMvA0iFkAu4a4sfW+uvX8S1A0nuJ35c5Blt/1B5+qiytvax96pb60+7YS8DoH2KXaNkY0fn7thclv/fa7Vr/t/c+tfuSzcuN1de3eB8dOfd9WKk5TDTDWaJzmZvWj75Pj9+fvvwYiif1CNgAUYOSVHQOoZc2jw+8jYGLns/gBYCJADVbMFvp1wnJsG1QABECUUN6ctJXQzYcHKkBrCbUAlOeTfQCMbE5kpsX8KNAaQOsmJmSjHSfvVv3GFxcAdpCBIYB+xqQCPHPhmQqR50VjAOitTwTDsgbyesT3bKE10C+DKQB5jnzfKMfIVipGJoAnZi/VA0dxE5MLUJtnSXgSIM2TWDkASWQklc7CcQDKv12kcmCRvv78NZUAJQ/m5DxbM0mI4wDM3ZxYNzvTALAVnv/AjQaxT/mBWbr8pNUWCvjq3TcjsCw2bXdJ62psniViY4YXg7g+t9OrKFBcwui9xaaJxjfm748ca7H52ry6b5pnCZnhhSDSSW6e3nNUavLHTVqck+ClQIT61djwYuUUKqcseCGIfK/IT0nh2cxuJOMpY50Fz4dIN44sQOwHnoxxJ/B8iFDhx+YN7T9DLCkhPaM0KwAAAABJRU5ErkJggg=="
+  "data:image/gif;base64,R0lGODlhcAAwAPcAAMD/7j2e0jeXz470/zxRkjZEij694ji44DQ6jyU2fD1Cpjczny0rhh0mchwxahMhX09ptmWczWKVyUpesU5ptlZ6vT5DpjtHlkhkp1+TwkNZoFF3sv////f7/YnD3VV/tjU8kBEpTwcYQc7l8DNNjURrok0tfEgdckomeFVPk2Q5j2EqhwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAAACwAAAAAcAAwAAAI/gABCBxIsKDBgwgTKlzIsKHDgQEKCnhIsaLFixgzatzIsaPHjyBDihxJsqTJkyhTqlzJsqVLkhNfypxJs6bNmzhz6tzJc2HMnkAZChgw4CfCoUYzEhWZNORQolCbCnxalOPSoAehaq1qcCtXjAEiKhyQk6rXrQImnv1KMQBUsTDPSgUQlaDZtV7vbo3o9i3Cvnud4q078G7atIMTK17MuLHjx5DPEphMubLly5gzZy7AubPnz6BDix5NujRRAkQNGAjLWnXk17Bjaz1w4HBa2kQLnB6gmnVY17KDC29M27YA3LoHIJiMAEGCBM0VSJ9Ovbr169QXaN/Ovbv37+DD/ovvzoBBgwblOTMg6oBA8+fNo2OfT1/6+Pv484svX/58+gfsuQdffPLVZ+B0+iWo4H388edfAQAO0J5z0BFY4IHTQRDBhhxKMMECE0gg4ogeLkABiSN+eCKJFViwgAUVSNAijDIuuECDDqIHYYAUWujjj0AacNYBFxwwJAZGepUBkkpqsAFUGzxJFI5UVmnlgxFOOCCQXP5oAAdghsnBAQUcIGaYZA5wJphpntnBABlkoCaccnIwgJV44oklj1t26WdzX9pJFJtlgrmVB7oZOuiYiQqq5ph10jlnnpTiuKeEAlb455+Bkmkmo5+S+dmjnhJKaqMHRBrnpJW2eqmW/ppu2mWnhYJK6KiEhooqqqpG2qqrOmaZqaycKjpnqY4O8AFnj0Jl6rOQNtvsr5W+OiyxXX4qpqjahpkBs2syeiqpGxgp5gAHUEuptT1iCyQDnzqLbq1afdvoouJCewAI5TZ7wAbq5slun+7GV16oGeiKcJwagButvqiWhySbGAQscLDshUAAwQXzp3Cut3o2LsSkesymxRcXIEKEA4QQQrsFI9Dgx7baSdvNu4485gEjnHywzyhT6Z8IIixFlMswY4sjzcie2Wa+UDtt8pjmBd3g0EWTJdDRLz/n9ddgg33e2A2ESoLZ3aJZAqlrs9n2uQdoMHaoZNdt9911M0D0nlUDcY2ACYAHLvjggJ9g+OEnaCCiBokv3jiKEmiAguKRT7645SimgDjljCPu+eegH6531lm1HIIJKqSuAuGDh+7667DHLnvsK9S+wgl7a126y6ir7vvvtgcv/PDEF2/88cgnHzzupI9l+p9WRy/9r7k3xLXGYV1W2vbcd+99aWmpXL1D7DnQXvaUfa/++uyDFv4D8PNN/nD0169YQgEBACH5BAkKAAAALAAAAABwADAAh8D/7o70/z2e0jeXzzZEijxRkji44D694i0rhh0mcjcznz1CpjQ6jyU2fBMhXxwxak9ptmWczWKVyUpesU5ptlN0u1qDwURRrDtHlkhkp2Kbxk1vrUllp1WBt/////f7/YnD3VV/tl+TwjxKmENZoAcYQREpT87m8TNNjUl2qEgdck82gllcm00tfGEqh2Q5jwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAj+AAEIHEiwoMGDCBMqXMiwocOHECNKnEixosWLGDNq3Mixo8ePIEOKHEmypMQAJlOqXMmypckAKF3KpAhzps2IAgTc3Mmz50UBAXQOHLCxps+KQGEKBRCAaMYBTl/G9Aiz6kCjJaNmxLoxadWgAqtq1XqUINSuX9OiVDu14ACYZGW+hZvRK9umd5uaTRsXwNy+HOemtWg3r+HDX4kKVgt44mK2QgurXSoZseXLmDNr3ryZgOfPoEOLHk26tGnTBVKrXs26tevXsGESgGnAANTbtTnr3s3764EDOYP/hllAdoDat6Hm7s28OebfwXMOLx4AgWcECBIkwK6gu/fv4MP+ix9PfvyC8+jTq1/Pvj16BgwaNICfmgFMBwSwa8fOvbz//wB+596ABLoHH3zy0ffAffntx19/AUYoYXcFVmjhgQcmWMCCAeCX3XYPQljeehBEYGIEEqQ4gQITpOiiigpQ8KKLECxQwYkmWnDBAhdYEIGOPf5ooXoYZjjfhgx+GOKSTDZpAFsGYPCkWgZkMGVaGmxwgFoacNBBVR18CVORZJZppoYceuhgk2wyaYAHcMbpgQEEvCknnHQGcCecBxR35wcBaKCBnoEO6kEAZiaaKJpJrtnmo9jZWRWedcKZFgizWQoTn34euqkHBxhaKKGKllokox02CCKkkNpJp6v+lc4pmp5zFnAAp7T2mauogpJq6q+oqrkqq23CaiyloeVqK67MgsqrqL8Ce2SaqhLbqqaEvoptACF4RuukoHaqK5+GempptKYGW621xe5JZ6xyiuDtnuEqm2sHW8oZwAHolqqukuyyKemmx8X6lbyZmtvsuKCOgO+3B3TQr6L/OhpwiK6KcOycInRMAgHilsvwyPBpyecGE1M87X0lEGDxxfxtrK2sn6Vm78LiHngrqCmrXIAJHAZQQgkAw/ygzAbXZsBv4jad6wEn8Kmz1D2XmaAJJtQE09BFG40A0nbeObLT9PIL3878zle1kQxgjdXWRGsn99x01023qyjgHbbBnAekkKvffAKu7wEcyNcA2oYnrvjijF+ddVtMCU20CpRXbvnlmFdOQookqLC5BJ1/LgGOHKzAgYmlnx5B6jiayEILsLegOgex12777bi30PbjB8GtggvAu5D58MQPn/vxyCevfO0vNP9CC25DTpDvwVdv/fXYZ++C89x37/334IcvvvfQ864Q3F5Duvb6/UbfENwtQ3Xa/KDBZv/9+Oef08/uO3SfA/iRH/1Ok78CGlB/AtjQAzgUEec48IGWSUhAAAAh+QQJCgAAACwAAAAAcAAwAIfA/+43l8+O9P89ntI8UZI2RIo4uOA+veI0Oo8tK4YdJnI3M589QqYlNnwcMWpKXrFilcllnM1PabZTdLtOabZWer0+Q6Y7R5ZIZKdfk8JDWaBRd7L////3+/0TIV+Jw91Vf7Y1PJBVgbdNb60HGEERKU/O5fAzTY1Ea6JJZadIHXJKJnhZXJtNLXxhKodkOY8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI/gABCBxIsKDBgwgTKlzIsKHDhxAjSpxIsaLFixgzatzIsaPHjwACgBxJsqTJkyhNChCQsuXHlS5BBhBJEiZBmxgHpJxZcoDOmyxjCs35c6jRo0hRCqCZtKnCATgFBnWK1KfUlUypDrUqECrLACujanXp1WdYlmexjiWbtq3bpQrBwq2ptqNXAWbf6nXLk6Dcs0z/ZpU4s+1gv3+XZi28t7Hjx5AjS55MWS+BApgza97MubPnz6BDi/ZMoLTp06hTl15JYKUBAzNjv65Mu7btswcO+Nydm7Xv17Fnzr5NvHjk3Lt99m4tAAHmBAkUKIC+oLr169iza9/Ovbt37gzC/osfTz48AgQNGpwvjWClgwLQpUOn/r2+/fv4q5ffP/78+fTrOeAefPLNR19+CCZ4H38M+ucfgAQIKMB70U1n4IH4PQABBBF02KEEDEjg4YggThDBhihC8MACFKQIQQUWLGBBBS9aMOOL+jG4n4MPqhfhgBVeKOSQRBrglgEXGNmWARgomVYGTbaVgQYbhLVBlSslwOOWXHIJoYQUFkjkmEMawMGZaHJgQAFmpnnmmgK4+WYBcabZgQAZZBAnnnpy0FyXgHb55UoeEGghmYjO12ZYcy561gd0nsmompH6udKbffK5Z6Cc8jioAIUGmeioba5ZKptzblanqXOuWqkB/pnmuWmntH4aqpijknnqrqlq5uqprq4aa6a01uqjhLcemuuYju7JqqUrgYBZnZPC2Sqm1FJbbKe2Grosom2muSaqbmYwrZyUBvvmBkamKcAB23LarajfFinppQI8e5a5lV56bbpvhsAutQeIEG+g8+Ja74WlZsCrmnlOeS7E6gKsJnQjHHDmASMcjPCxhJJQgMILK9royZSq+q+1FhugJQIacwCvx4CmR0AJEgpAAgn0lmwypQ/n+9prrxa9qgEmvOlfzDPTvCWAJZQA00o79+zzw8+6yfLWlbrZNNPoOe0g1FJPRTXP0qWt9tpsr13qCW+HKy4Kq9L9pt3uHpBCsHoNMM3334AHLjjZYp2dgAqIJ6744ownrsGGGqjwOASRT+6iBitMjrnmmbsYAQsthN5CCh2mIPrpqKeuegsIRC3WVTur4MLsLjRu++2453776rz3jvoLwL/QgutTGXS27LQnr/zyzDfv/PO0By/99NRXb33ww5e9kOE+dz+q2PES39DZIs802vnod6ba+uyz79PN4jtEqAeFmp/+/aO1r//+7zvg/+vbM44AB+iYhAQEACH5BAkKAAAALAAAAABwADAAh8D/7jeXz470/zZEiji44C0rhh0mcjcznxMhX0pesWKVyU5ptlZ6vT5DphwxajtHlkhkp1+TwkNZoFF3sjxRkv////f7/TQ6j4nD3SU2fFV/tjU8kAcYQREpT87l8DNNjURrokgdckomeFVPk00tfGEqh2Q5jz2e0gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAj+AAEIHEiwoMGDCBMqXMiwocOHECNKnEixosWLGDMaDBBAo8ePIDkWFAmypMmJAgScXMlyYcqWJzvCLChA5sybOHPq3Mmzp8+fQIMKJWhzqNGjSJMqXQpTpcUANZkahZqyI0miRX86LZmya1GOXb1WJTpWqsWwaMGiXctR7dqoB6lmjfu0rMS2b/Pq3cu3r9+/gAMLFjCgsOHDiBMrXsy4sePHkCMjTjkgJQECbTleHsy5s+e8lzMH2EyYsoDQmUl/Xs1aMOq2mysLKFC4QAEDBmwf2M27t+/fwIMLH068uPEDtnHbrp0SwYDkuW0XOE69uvXrw6Xfjj4AQfPnyrX+T8dOvrx53+K30/YuwLn69NgTKJhPX0GCA/Lrz7+/QP/+A/3Vx0ADBzTAgAIDGoggdumpN4AD373X4IQUEvAWAQ9YuBYBEGiIVgQdrhWBBBN0NUGJKVGoYoPKUQBhe+BFt+KMBRBQwY04VkDAADbmeOOOAvj4Y2U+WiBABBEEeWSSFcxG44y4XeBihOE9qWKPXQ2JZVgYENlkSkMG+aWYBDC5pJJWrmhABlK+6F6VaTbY445z8jjkZFqGqaeOZiKJZpwTZsDmlDBKCKh4dSZ652Fk2qmjl0D+2KeZh6Z3gaBtUiljpdJtqSSdN4alQWFiZvloo2Qy+WWonEp3waX+g7oZY6va9Zjjjo7mGAGpQp66JwETWJjjabS+CmumhcLZqqdNgjrmkbyu+iukGwRbKrCtGnssoW9uuqykivKJpATRlonqr7Z1+CME2WqLKbccDKAsp+E6iyuj056rY6c/tutuBhR08KIAHHBgKL15PorlZQxD6jCZBHjQr21zcqrtq5h20MFLKRV88KH15nrrw3v6SAC/+3pL48XHavySQB0bjNvMNNdsc81zfpCzrbeCQKbPPwI9LAESzDznzUjTLOjSS1/g8lYwE2xwCFRXbfXVWFctwXwShLC1Al1/rZ8EInxNttll+zeC1WZn7XbVJMQtd9xObwz1QDGHUMJj3iW87fffgAcueOBzm2C4CSQ8nVDefDfu+OOQRy755JRXLvnhmCOuuEIx0+r55yuybOzmLkkdL0eSpa766o5R4LrrJ5wQMOkMNYeAc6izrvvukb0Ou+wOBP/yQ60Vb3xgCQUEADs="
 
 // footer
 // =====================
