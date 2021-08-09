@@ -301,7 +301,7 @@ App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.C
               "right":" 0"
               "text-align":" center"
               "color": "white"
-            }> "0 TURNS"</span> // String.show_clean(I32.show(dead.value@snd)) |
+            }> String.show_clean(I32.show(dead.value@snd)) | " TURNS"</span>
           </div>
       } 
     }
