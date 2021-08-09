@@ -1,41 +1,41 @@
 Bytes.test.from_string.0: TestSuite
-  let test = Bytes.from_string("some_random_string");
-  let got = test
+  let test = "some_random_string"
+  let got = Bytes.from_string(test)
   let exp = "0x736f6d655f72616e646f6d5f737472696e67"
   let name = "0"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string.1: TestSuite
-  let test = Bytes.from_string("");
-  let got = test
+  let test = ""
+  let got = Bytes.from_string(test)
   let exp = "0x"
   let name = "1"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string.2: TestSuite
-  let test = Bytes.from_string("¢");
-  let got = test
+  let test = "¢"
+  let got = Bytes.from_string(test)
   let exp = "0xc2a2"
   let name = "2"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string.3: TestSuite
-  let test = Bytes.from_string("ह€");
-  let got = test
+  let test = "ह€"
+  let got = Bytes.from_string(test)
   let exp = "0xe0a4b9e282ac"
   let name = "2"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string.4: TestSuite
-  let test = Bytes.from_string("𐍈");
-  let got = test
+  let test = "𐍈"
+  let got = Bytes.from_string(test)
   let exp = "0xf0908d88"
   let name = "2"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string.5: TestSuite
-  let test = Bytes.from_string("0123456789");
-  let got = test
+  let test = "0123456789"
+  let got = Bytes.from_string(test)
   let exp = "0x30313233343536373839"
   let name = "2"
   TestSuite.show.log_string(name, test, exp, got)

@@ -1,6 +1,6 @@
 Bytes.test.to_nat.0: TestSuite
-  let test = Nat.to_string(Bytes.to_nat("0xeb5c68c79ee5de81"));
-  let got = test
+  let test = "0xeb5c68c79ee5de81"
+  let got = Nat.to_string(Bytes.to_nat(test))
   let exp = "16959545503344091000"
   let name = "0"
   TestSuite.show.log_string(name, test, exp, got)
