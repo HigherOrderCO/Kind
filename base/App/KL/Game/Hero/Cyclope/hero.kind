@@ -1,13 +1,18 @@
 App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
   let name = "Cyclope"
 
-  let draw = (pose)
-    {none, App.KL.Game.Hero.Cyclope.Assets.vbox_idle}
+  let vbox_img = (pose)
+    {none, App.KL.Game.Hero.Cyclope.Assets.vbox_img}
 
-  let picture = (bool, time)
-    App.KL.Game.Hero.Cyclope.Assets.base64_idle
+  let b64_portrait = (bool, time)
+    App.KL.Game.Hero.Cyclope.Assets.b64_portrait
 
+  let b64_img = (bool, time)
+    App.KL.Game.Hero.Cyclope.Assets.b64_img
+  
   let height = 28 :: I32 // Distance from center of image to the top of it
+
+  let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
 
   let max_hp = 40 :: I32
 
@@ -42,9 +47,11 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
       3 // Difficulty
   ))
 
+  let role = some(App.KL.Game.Hero.Role.tank)
+
   let description = "Cyclope is a resistant warrior. He can either protect his allies with his own life or damage enemies around him."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
 
 
 // SKILLS
@@ -57,7 +64,7 @@ App.KL.Game.Hero.Cyclope.hero.Skills.empathy(dmg_on_self: I32, duration: I32, sh
     App.KL.Game.Effect.ap.use(ap_cost)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
-    App.KL.Game.Effect.hp.damage_at(dmg_on_self, center)
+    App.KL.Game.Effect.hp.sacrifice(dmg_on_self)
     let ally = App.KL.Game.Effect.At.ally!
     let shield = App.KL.Game.Effect.status.shield.add("Empathy", duration, shield_value)
     App.KL.Game.Effect.area!(ally(shield), area)

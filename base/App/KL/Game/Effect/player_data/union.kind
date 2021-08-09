@@ -1,0 +1,25 @@
+App.KL.Game.Effect.player_data.union(
+  a: App.KL.Game.PlayerData
+  b: App.KL.Game.PlayerData
+): App.KL.Game.PlayerData
+  for id:data in b with a:
+    let data_a = a{id}
+    case data_a {
+      none: 
+        let a = a{id} <- data
+        a
+      some: 
+        let scoreboard = App.KL.Game.Scoreboard.union(data_a.value@fst, data@fst)
+        let a_recap = data_a.value@snd
+        let b_recap = data@snd
+        let recap = 
+          case a_recap b_recap {
+            none none: none
+            none some: some(b_recap.value)
+            some none: some(a_recap.value)
+            some some: some(a_recap.value ++ b_recap.value)
+          }
+        new_data = Pair.new!!(scoreboard, recap)
+        a{id} <- new_data 
+    }
+  a

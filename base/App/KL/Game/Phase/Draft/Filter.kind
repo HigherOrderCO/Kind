@@ -1,0 +1,55 @@
+type App.KL.Game.Phase.Draft.Filter {
+  new(
+    hero_name: String
+    options: Map<Bool>
+  )
+}
+
+App.KL.Game.Phase.Draft.Filter.default: App.KL.Game.Phase.Draft.Filter
+  let roles = {}
+
+  for role in App.KL.Game.Hero.Role.all with roles:
+    let str = App.KL.Game.Hero.Role.show(role)
+    roles{str} <- false
+  
+  App.KL.Game.Phase.Draft.Filter.new(
+    "",
+    roles
+  )
+
+App.KL.Game.Phase.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: App.KL.Game.Phase.Draft.Filter): List<App.KL.Game.Hero>
+  // TODO do all this in a beautiful way :(
+  let filters_active = [
+    {
+      Bool.not(String.eql("", filter@hero_name)),
+      ((hero) 
+        String.starts_with(String.to_lower(hero@name), String.to_lower(filter@hero_name))
+      ) :: App.KL.Game.Hero -> Bool
+    }, // text
+    {
+      BBT.for!!(filter@options)!(false, (k, v, z) v || z),
+      ((hero)
+        Maybe {
+          get role = hero@role
+          let role = App.KL.Game.Hero.Role.show(role)
+          get filter = filter@options{role}
+          return filter
+        } <> false
+      ) :: App.KL.Game.Hero -> Bool
+    } // class
+  ]
+
+  if List.or(List.map!!((x) x@fst, filters_active)) then
+    let filtered = []
+    for hero in heroes with filtered:
+      let should_enter = true
+      for filter in filters_active with should_enter:
+        let {active, effect} = filter
+        if should_enter && active then
+          effect(hero)
+        else 
+          should_enter
+      if should_enter then hero & filtered else filtered
+    List.reverse!(filtered)
+  else 
+    heroes

@@ -4,3 +4,11 @@ type App.KL.Game.Entity { // TODO rename?
   token   (value: App.KL.Game.Token)
 }
 
+type App.KL.Game.Entity.Draw {
+  new(
+    vbox_img: App.KL.Game.Hero.Draw.Pose -> App.KL.Game.Hero.Draw.Result
+    b64_portrait: Bool -> U64 -> String 
+    b64_img: Bool -> U64 -> String
+    height: I32
+  )
+}

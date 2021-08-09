@@ -1,4 +1,5 @@
 type App.KL.Game.Moment {
+  initial(countdown: U64) // when stage is initiated, players can choose coordinate
   preparation(countdown: U64) // when players are casting their skills
   execution(
     casts: List<App.KL.Game.Cast>
@@ -13,10 +14,47 @@ type App.KL.Game.Moment {
 
 App.KL.Game.Moment.get_player_used_ap(game: App.KL.Game): Maybe<Pair<String, I32>>
   case game@moment as moment {
+    initial: none
     preparation: none
     execution: 
       case moment.casts {
         nil: none
         cons: some({moment.casts.head@player, moment.ap_used})
       }
+  }
+
+
+// TODO move this to another place?
+// create board for preparation phase
+// is only called once
+// all it does is move players for its init_pos and remove initial coords
+App.KL.Game.Moment.preparation.create_board(players: Map<App.KL.Game.Player>, blueprint: App.KL.Game.Board.Blueprint, board: App.KL.Game.Board): App.KL.Game.Board
+  for user:player in players with board:
+    App.KL.Game.Board.Player.set(user, player, board)
+  
+  for user:player in players with board:
+    case player@init_pos {
+      none: App.KL.Game.Moment.create_board.choose_coord(blueprint@bases, user, player, board)
+      some: board
+    }
+
+  for info in blueprint@initial with board:
+    Hexagonal.Axial.Map.delete!(info@fst, board) // delete initial coordinates
+  board
+
+// choose a coordinate for players that didn't choose
+App.KL.Game.Moment.create_board.choose_coord(
+  coords: List<Pair<Hexagonal.Axial, App.KL.Game.Team>>, 
+  user: String, 
+  player: App.KL.Game.Player,
+  board: App.KL.Game.Board
+): App.KL.Game.Board
+  case coords {
+    nil:  board
+    cons: 
+      let {coord, team} = coords.head
+      if App.KL.Game.Board.is_occupied(coord, board) || Bool.not(player@team =? team)  then
+        App.KL.Game.Moment.create_board.choose_coord(coords.tail, user, player, board)
+      else
+        App.KL.Game.Board.Player.set_initial(user, player, coord, board)
   }

@@ -5,11 +5,14 @@ App.KL.Game.Tile.effect.show(
 
   let tile = App.KL.Game.Tile.get(coord, board)
   without tile: ""
-  let effect = App.KL.Game.Tile.effect.get(tile)
-  let result = effect(coord, [coord], board)
-  case result { 
-    err:
-      "Normal"
-    new:
-      result.description
-  }
+  Maybe {
+    get effect = tile@effect
+    let result = effect@effect(coord, [coord], effect@cast_data, board)
+    let description = case result { 
+      err:
+        "Normal"
+      new:
+        result.description
+    }
+    return description
+  } <> "Normal"

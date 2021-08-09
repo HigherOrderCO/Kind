@@ -1,13 +1,18 @@
 App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
   let name = "Frost"
 
-  let draw = (pose)
-    {none, App.KL.Game.Hero.Frost.Assets.vbox_idle}
+  let vbox_img = (pose)
+    {none, App.KL.Game.Hero.Frost.Assets.vbox_img}
 
-  let picture = (bool, time)
-    App.KL.Game.Hero.Frost.Assets.base64_idle
+  let b64_portrait = (bool, time)
+    App.KL.Game.Hero.Frost.Assets.b64_portrait
 
+  let b64_img = (time, time)
+    App.KL.Game.Hero.Frost.Assets.b64_img
+  
   let height = 18 :: I32 // Distance from center of image to the top of it
+
+  let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
 
   let max_hp = 35 :: I32
 
@@ -42,9 +47,11 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
       4 // Difficulty
   ))
 
+  let role = some(App.KL.Game.Hero.Role.tank)
+
   let description = "Frost is a resistant warrior with several different crowd control skills."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
 
 
 // SKILLS
@@ -102,14 +109,17 @@ App.KL.Game.Hero.Frost.Skills.ice_fall(area: I32, ap_cost: I32): App.KL.Game.Eff
 
 App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
   let name = "Frozen_wall"
-  let draw = (pose) {none, App.KL.Game.Field.Elements.rock_11_0}
-  let picture = (bool, time) App.KL.Game.Hero.Frost.Assets.base64_idle
+  let vbox_img = (pose) {none, App.KL.Game.Field.Elements.rock_11_0}
+  let b64_portrait = (bool, time) App.KL.Game.Hero.Frost.Assets.b64_portrait
+  let b64_img = (bool, time) App.KL.Game.Hero.Frost.Assets.b64_portrait
   let height = 20 :: I32
+  let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
   let max_hp = 12 :: I32
   let max_ap = 0 :: I32
   let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect { return unit })
   let attributes = none
+  let role = none
   let description = "A wall created by Frost that blocks a tile"
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
 

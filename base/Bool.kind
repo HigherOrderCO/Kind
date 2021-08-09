@@ -1,4 +1,4 @@
 type Bool {
   true,
   false,
-}
+} deriving (serializer, deserializer)

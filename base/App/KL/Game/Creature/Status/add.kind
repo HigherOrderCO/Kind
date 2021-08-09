@@ -9,29 +9,29 @@ App.KL.Game.Creature.Status.add(
   if invulnerable then
     if positive_effect then
       case status { 
-        haste: App.KL.Game.Creature.Status.haste.add(creature, status.duration, status.amount)
+        haste: App.KL.Game.Creature.Status.haste.add(creature, status.cast_data, status.duration, status.amount)
         //heal over time(hot)
-        hot: App.KL.Game.Creature.Status.hot.add(creature, status.id, status.duration, status.amount)
-        invulnerable: App.KL.Game.Creature.Status.invulnerable.add(creature, status.id, status.duration)
-        protect: App.KL.Game.Creature.Status.protect.add(creature, status.duration, status.amount)
-        shield: App.KL.Game.Creature.Status.shield.add(creature, status.id, status.duration, status.amount)
+        hot: App.KL.Game.Creature.Status.hot.add(creature, status.cast_data, status.id, status.duration, status.amount)
+        invulnerable: App.KL.Game.Creature.Status.invulnerable.add(creature, status.cast_data, status.id, status.duration)
+        protect: App.KL.Game.Creature.Status.protect.add(creature, status.cast_data, status.duration, status.amount)
+        shield: App.KL.Game.Creature.Status.shield.add(creature, status.cast_data, status.id, status.duration, status.amount)
       }default creature
     else
       creature
   else
     case status { 
-      block: App.KL.Game.Creature.Status.block.add(creature, status.id, status.duration, status.caster)
+      block: App.KL.Game.Creature.Status.block.add(creature, status.cast_data, status.id, status.duration, status.caster)
       //damage over time(dot)
-      dot: App.KL.Game.Creature.Status.dot.add(creature, status.id, status.duration, status.amount)
-      haste: App.KL.Game.Creature.Status.haste.add(creature, status.duration, status.amount)
+      dot: App.KL.Game.Creature.Status.dot.add(creature, status.cast_data, status.id, status.duration, status.amount)
+      haste: App.KL.Game.Creature.Status.haste.add(creature, status.cast_data, status.duration, status.amount)
       //heal over time(hot)
-      hot: App.KL.Game.Creature.Status.hot.add(creature, status.id, status.duration, status.amount)
-      invulnerable: App.KL.Game.Creature.Status.invulnerable.add(creature, status.id, status.duration)
-      protect: App.KL.Game.Creature.Status.protect.add(creature, status.duration, status.amount)
-      root: App.KL.Game.Creature.Status.root.add(creature, status.duration)
-      shield: App.KL.Game.Creature.Status.shield.add(creature, status.id, status.duration, status.amount)
-      silence: App.KL.Game.Creature.Status.silence.add(creature, status.duration)
-      slow: App.KL.Game.Creature.Status.slow.add(creature, status.duration, status.amount)
-      stun: App.KL.Game.Creature.Status.stun.add(creature, status.duration)
-      weaken: App.KL.Game.Creature.Status.weaken.add(creature, status.duration, status.amount)
+      hot: App.KL.Game.Creature.Status.hot.add(creature, status.cast_data, status.id, status.duration, status.amount)
+      invulnerable: App.KL.Game.Creature.Status.invulnerable.add(creature, status.cast_data, status.id, status.duration)
+      protect: App.KL.Game.Creature.Status.protect.add(creature, status.cast_data, status.duration, status.amount)
+      root: App.KL.Game.Creature.Status.root.add(creature, status.cast_data, status.duration)
+      shield: App.KL.Game.Creature.Status.shield.add(creature, status.cast_data, status.id, status.duration, status.amount)
+      silence: App.KL.Game.Creature.Status.silence.add(creature, status.cast_data, status.duration)
+      slow: App.KL.Game.Creature.Status.slow.add(creature, status.cast_data, status.duration, status.amount)
+      stun: App.KL.Game.Creature.Status.stun.add(creature, status.cast_data, status.duration)
+      weaken: App.KL.Game.Creature.Status.weaken.add(creature, status.cast_data, status.duration, status.amount)
     }

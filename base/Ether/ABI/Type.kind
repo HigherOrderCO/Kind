@@ -1,8 +1,8 @@
-type Ether.ABI.Method.Type {
+type Ether.ABI.Type {
   bytes(len : Maybe<Nat>, value : Bits) // refinement : Ether.Abi.refinement.Bits.len
   uint(len : Nat, value : Bits) // refinement : Ether.Abi.refinement.uint.len
   int(value : Bits)
   bool(value : Bits)
-  array(value : List<Ether.ABI.Method.Type>) 
+  array(value : List<Ether.ABI.Type>) 
    // refinement : All values in the array constructor must have the saame constructor to be well-typed.
 }

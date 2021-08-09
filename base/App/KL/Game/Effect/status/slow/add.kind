@@ -1,4 +1,5 @@
 App.KL.Game.Effect.status.slow.add(
+  cast_data: Pair<Char, String>
   duration: I32
   amount: I32
 ): App.KL.Game.Effect.At<I32>
@@ -7,7 +8,7 @@ App.KL.Game.Effect.status.slow.add(
   App.KL.Game.Effect { 
     get creature = App.KL.Game.Effect.board.creature.get(pos)
     without creature: App.KL.Game.Effect { return +0#32 }
-    let slow = App.KL.Game.Creature.Status.slow(duration, amount)
+    let slow = App.KL.Game.Creature.Status.slow(cast_data, duration, amount)
     let total_slow = App.KL.Game.Creature.Status.slow.total(creature)
     App.KL.Game.Effect { 
       App.KL.Game.Effect.status.add(creature, slow, pos)

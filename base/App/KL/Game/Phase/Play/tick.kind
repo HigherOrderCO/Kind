@@ -1,6 +1,28 @@
 App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
   open game
   case game.moment {
+    // Inital phase
+    initial:
+      // Countdown positive: decrease countdown
+      if U64.gtn(game.moment.countdown, App.KL.Constants.initital_delay) then
+        let game = game@moment <- App.KL.Game.Moment.initial(game.moment.countdown - 1)
+        game
+      // Countdown zero: go to preparation phase
+      else
+        // Delay time
+        if U64.gtn(game.moment.countdown, 0) then 
+          // Create board only one time
+          if U64.eql(game.moment.countdown, App.KL.Constants.initital_delay) then
+            let game = game@board <- App.KL.Game.Moment.preparation.create_board(game@players, game@blueprint, game@board)
+            let game = game@moment <- App.KL.Game.Moment.initial(game.moment.countdown - 1)
+            game
+          else
+            let game = game@moment <- App.KL.Game.Moment.initial(game.moment.countdown - 1)
+            game
+        else
+          let game = game@moment <- App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
+          let game = game@casts <- []
+          game
     // Preparation phase
     preparation:
       // Countdown positive: decrease countdown
@@ -31,6 +53,8 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
               success: 
                 let coord = App.KL.Game.Cast.get_coord(game.moment.casts.head, game)
                 let game = cast_result.game
+                log("Scoreboard: \n " | App.KL.Game.Player.scoreboard.map.show(game@players))
+                log("Recap: \n " | App.KL.Game.Player.recap.map.show(game@players))
                 let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.previous_casts, game.moment.frame + 1, coord, cast_result.hits, cast_result.ap_used, Either.right!!(unit))
                 game
             // On the other frames, just update the counter
