@@ -1,0 +1,5 @@
+App.KL.Game.Creature.Status.movement_range(range: I32 creature: App.KL.Game.Creature): I32
+  let haste_value = App.KL.Game.Creature.Status.haste.total(creature)
+  let slow_value = App.KL.Game.Creature.Status.slow.total(creature)
+  let distance = slow_value + haste_value + range
+  distance

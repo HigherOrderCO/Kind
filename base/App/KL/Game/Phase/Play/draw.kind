@@ -223,6 +223,13 @@ App.KL.Game.Phase.Play.draw.canvas(
   img
 
 // draw canvas board
+App.KL.Game.Phase.Play.draw.landscape(blueprint: App.KL.Game.Board.Blueprint, img: VoxBox): VoxBox
+  let landscape = blueprint@landscape
+  for coord:tile in landscape with img:
+    App.KL.Game.Phase.Play.draw.tile.terrain(tile, Hexagonal.Axial.Map.new!, none, coord, img)
+  img
+
+
 App.KL.Game.Phase.Play.draw.board(
   game:    App.KL.Game
   preview: App.KL.Game.Cast.Preview
@@ -231,10 +238,12 @@ App.KL.Game.Phase.Play.draw.board(
   mouse:   Pair<U32, U32>
   img:     VoxBox
 ): VoxBox
+  open game
   let map         = game@board
   let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   let indicators  = App.KL.Game.Phase.Play.Draw.get_indicators(preview, mouse_coord, user, game)
   let ap_used     = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
+  let img         = App.KL.Game.Phase.Play.draw.landscape(game@blueprint, img)
 
   for coord:tile in map with img:
     let indicator = Hexagonal.Axial.Map.get!(coord, hits <> indicators)
@@ -307,8 +316,7 @@ App.KL.Game.Phase.Play.draw.bases(
 
       let allies = App.KL.Game.Player.get_allies(player, game@players)
       let bases  = game@blueprint@bases
-      for info in bases with img:
-        let {coord, team} = info
+      for coord:team in bases with img:
         let indicator = App.KL.Game.Team.get_indicator(team)
         App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
 
@@ -344,9 +352,8 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue_line
     let indicators = Hexagonal.Axial.Map.new!
-    //let haste      = App.KL.Game.Creature.get_total_haste(creature)
-    //let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)) + haste)
-    let coords     = Hexagonal.Axial.range(center, Nat.to_i32(U64.to_nat(skill@range)))
+    let distance   = App.KL.Game.Creature.Status.movement_range(Nat.to_i32(U64.to_nat(skill@range)), creature)
+    let coords     = Hexagonal.Axial.range(center, distance)
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
