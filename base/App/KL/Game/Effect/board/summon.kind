@@ -2,7 +2,7 @@
 App.KL.Game.Effect.board.summon(
   creature: App.KL.Game.Creature
 ): App.KL.Game.Effect.At<Unit>
-  //(center, targets, board)
+  //(center, targets, cast_data, board)
   (pos)
 
 
@@ -14,5 +14,4 @@ App.KL.Game.Effect.board.summon(
       App.KL.Game.Effect.pass
     else
       App.KL.Game.Effect.board.set(summoned_board)
-    //App.KL.Game.Effect.Result.new!(unit, center, board, Hexagonal.Axial.Map.new!, 0, [])
   }

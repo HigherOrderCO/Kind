@@ -12,14 +12,14 @@ App.KL.Game.Phase.Draft.post(
       log("- join_room")
       let player = Map.get!(addr, game@players)
       let game = case player {
-        none: game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), game@players) 
+        none: game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false, App.KL.Game.Scoreboard.pure, []), game@players) 
         some: game@players <- Map.set!(addr, player.value, game@players) 
       }
       game
 
     set_team:
       log("- set_team")
-      game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false), game@players)
+      game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false, App.KL.Game.Scoreboard.pure, []), game@players)
 
     set_hero:
       log("- set_hero")

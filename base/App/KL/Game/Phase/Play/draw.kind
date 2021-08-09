@@ -350,7 +350,7 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, targets, game@board)
+    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, {skill_key, user} targets, game@board)
     return Hexagonal.Axial.Map.union!(indicators, areas)
   } <> Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
 
@@ -361,7 +361,7 @@ App.KL.Game.Phase.Play.draw.cursor(
 ): VoxBox
   coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   {x,y} = App.KL.Game.Phase.Play.draw.centralize.old(coord)
-  VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.GrassOld.Assets.mouse_ui, img)
+  VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.Mouse.mouse_ui, img)
 
 // draws tile terrain
 App.KL.Game.Phase.Play.draw.tile.terrain(

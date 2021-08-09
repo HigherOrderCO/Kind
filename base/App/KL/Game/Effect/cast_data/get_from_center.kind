@@ -1,0 +1,10 @@
+App.KL.Game.Effect.cast_data.get_from_center: App.KL.Game.Effect<String>
+  App.KL.Game.Effect {
+    get caster = App.KL.Game.Effect.board.creature.caster
+    let cast_data = Maybe {
+      get caster = caster
+      get player = caster@player
+      return player
+    } <> "no address"
+    return cast_data  
+  }

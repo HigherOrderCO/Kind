@@ -1,0 +1,9 @@
+// state needed for verlet integration
+// https://youtu.be/g55QvpAev0I
+type Physics.Verlet {
+  new(
+    prev: V2
+    pos: V2
+    acc: V2
+  )
+}

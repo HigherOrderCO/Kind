@@ -1,0 +1,16 @@
+App.KL.Game.Player.player_data.map.update(
+  players: Map<App.KL.Game.Player>
+  player_data: Map(Pair(App.KL.Game.Scoreboard,Maybe(App.KL.Game.Recap)))
+): Map<App.KL.Game.Player>  
+  for id:data in player_data with players:
+    let player = players{id}
+    case player {
+      none: players
+      some: 
+        new_player  = App.KL.Game.Player.scoreboard.update(data@fst, player.value)        
+        case data@snd as recap {
+          none: players{id} <- new_player
+          some: players{id} <- App.KL.Game.Player.recap.update(recap.value, new_player)
+        }
+    }
+  players

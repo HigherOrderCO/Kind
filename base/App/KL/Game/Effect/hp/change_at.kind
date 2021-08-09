@@ -12,7 +12,12 @@ App.KL.Game.Effect.hp.change_at(
     App.KL.Game.Effect.board.set(board)
     case res@snd@snd as dead {
       none: App.KL.Game.Effect.pass
-      some: App.KL.Game.Effect.cemetery.add(dead.value)
+      some:
+       // if someone died
+        App.KL.Game.Effect {
+          App.KL.Game.Effect.cemetery.add(dead.value) // add to cemetery
+          App.KL.Game.Effect.player_data.kill(dead.value) // add kill and death to scoreboard
+        }
     }
     return dhp
   }

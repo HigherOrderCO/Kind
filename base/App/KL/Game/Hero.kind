@@ -11,7 +11,7 @@ type App.KL.Game.Hero {
     role: Maybe<App.KL.Game.Hero.Role>
     description: String
   )
-}
+  }
 
 type App.KL.Game.Hero.Draw.Pose {
   idle

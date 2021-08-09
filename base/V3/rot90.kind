@@ -1,3 +1,3 @@
 V3.rot90(a: V3): V3
   open a
-  {a.y, F64.sub(0, a.y), 0}
+  {F64.sub(0, a.y), a.x, 0}

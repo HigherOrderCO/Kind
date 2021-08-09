@@ -4,5 +4,6 @@ App.KL.Game.Effect.hp.sacrifice(
 
   App.KL.Game.Effect { 
     get center = App.KL.Game.Effect.coord.get_center
+    App.KL.Game.Effect.player_data.add(dmg, App.KL.Game.Effect.player_data.add.recap.damage)
     App.KL.Game.Effect.hp.change_at(I32.neg(dmg), center)
   }
