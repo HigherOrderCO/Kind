@@ -11,10 +11,10 @@ App.KL.Constants.board_extra_width : I32
   0
 
 App.KL.Constants.center_x : I32
-  228
+  300
 
 App.KL.Constants.center_y : I32
-  176
+  200
 
 App.KL.Constants.draft_hexagon_radius: U32
   8
@@ -27,6 +27,12 @@ App.KL.Constants.draft_center_y : U32
 
 App.KL.Constants.round_time: U64
   160
+
+App.KL.Constants.initial_time: U64
+  320
+
+App.KL.Constants.initital_delay: U64
+  64
 
 App.KL.Constants.between_turn_delay: U64
   48

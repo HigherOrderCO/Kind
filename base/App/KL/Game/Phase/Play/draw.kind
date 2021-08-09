@@ -15,6 +15,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   open game
 
   let countdown = case game.moment {
+    initial: U64.to_nat(game.moment.countdown)
     preparation: U64.to_nat(game.moment.countdown)
     execution: 0
   }
@@ -27,17 +28,17 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   let bar_col = "rgb("|bar_red|", 0, " |bar_blu| ")"
 
   <div style={ 
-    "width": "100vw", 
-    "height": "100vh", 
+    // "width": "100vw", 
+    // "height": "100vh", 
     "display": "flex", 
     "flex-direction": "row", 
-    "justify-content": "flex-start", 
+    "justify-content": "center", 
     "position": "relative"
     "background": "rgb(255,255,255)"
   }>
-    {App.KL.Game.Phase.Play.draw.skills_menu(game)}
+    // {App.KL.Game.Phase.Play.draw.skills_menu(game)}
     <div style={ 
-      "width": "calc(100% - 200px)", 
+      "width": "100%", 
       "height": "100%", 
       "display": "flex", 
       "flex-direction": "column", 
@@ -52,15 +53,25 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
         <span style={"color": "rgb(160,0,0)"}>Nat.show(I32.to_nat(red_hp))</span>
         //<span>" of " | String.show_clean(I32.show(App.KL.Constants.max_score))</span>
       </div>
-      <div style={"font-size": "32px", "font-family": "monospace"}>
+      <div style={"font-size": "32px", "font-family": "monospace"}>{
         case game.moment {
+          initial: 
+            if U64.gtn(game.moment.countdown, App.KL.Constants.initital_delay) then
+              <div>
+                <p>"Choose an initial coordinate"</p>
+                <p style={"text-align":"center"}>Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))</p>
+              </div>
+            else
+              <span>"The game will start..."</span>
           preparation: 
-            Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))
+            <span>Nat.show(Nat.div(U64.to_nat(game.moment.countdown), 16))</span>
           execution: case game.moment.casts {
             nil:
-              "End of turn "
-              | Nat.show(U64.to_nat(game.turn))
-              | "."
+              <span>
+                "End of turn "
+                | Nat.show(U64.to_nat(game.turn))
+                | "."
+              </span>
             cons: Maybe {
               let cast = game.moment.casts.head
               get skill = App.KL.Game.Cast.get_skill(cast, game)
@@ -72,11 +83,11 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
                 right:
                   hero@name | " used " | skill@name | "!"
               }
-              return text
-            } <> "Invalid cast."
+              return <span>text</span>
+            } <> <span>"Invalid cast."</span>
           }
         }
-      </div>
+      }</div>
       <div style={
         "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
       }>{
@@ -92,6 +103,7 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
       }</div>
       {
         case game.moment as moment {
+          initial: <div></div>
           preparation: 
             <div style=
               {
@@ -132,8 +144,8 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
         }
       }
     </div>
-    {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
-    {App.KL.Game.Phase.Play.draw.description(local, game)}
+    // {App.KL.Game.Phase.Play.Draw.gray_overlay(game)}
+    // {App.KL.Game.Phase.Play.draw.description(local, game)}
   </div>
 
 App.KL.Game.Phase.Play.draw.cast(main_skill: Bool, cast: Maybe<App.KL.Game.Cast>, players: Map<App.KL.Game.Player>): DOM
@@ -172,7 +184,7 @@ App.KL.Game.Phase.Play.draw.cast(main_skill: Bool, cast: Maybe<App.KL.Game.Cast>
     let dom = 
     <div style=main_style>
       <div>
-        <img src= hero@picture(false,0) style=
+        <img src= hero@draw@b64_portrait(false,0) style=
         {
           "transform": "scale("| if main_skill then "2" else "1"|")",
           "image-rendering": "pixelated"
@@ -201,10 +213,12 @@ App.KL.Game.Phase.Play.draw.canvas(
 ): VoxBox
   open game
   let hits = case game.moment {
+    initial: none
     preparation: none
     execution: some(game.moment.hits)
   }
   let img = App.KL.Game.Phase.Play.draw.board(game, local@preview, hits, local@user, local@mouse, img) 
+  let img = App.KL.Game.Phase.Play.draw.bases(game, local@user, img)
   let img = App.KL.Game.Phase.Play.draw.cursor(local@mouse, img)
   img
 
@@ -239,6 +253,7 @@ App.KL.Game.Phase.Play.draw.grid(
   img:    VoxBox
 ): VoxBox
   case moment {
+    initial: img
     preparation:
       let indicator     = App.KL.Game.Indicator.gray_line
       let indicator_img = App.KL.Game.Indicator.get_img(indicator)
@@ -280,6 +295,36 @@ App.KL.Game.Phase.Play.draw.tile.token(
   img
 
   
+App.KL.Game.Phase.Play.draw.bases(
+  game: App.KL.Game
+  user: String
+  img: VoxBox
+): VoxBox
+  case game@moment {
+    initial:
+      let player = game@players{user}
+      without player: img
+
+      let allies = App.KL.Game.Player.get_allies(player, game@players)
+      let bases  = game@blueprint@bases
+      for info in bases with img:
+        let {coord, team} = info
+        let indicator = App.KL.Game.Team.get_indicator(team)
+        App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, img)
+
+      for l_user:player in allies with img:
+        let init_pos = player@init_pos
+        without init_pos: img
+        let indicator =
+          if String.eql(user, l_user) then 
+            App.KL.Game.Indicator.green_line
+          else
+            App.KL.Game.Indicator.gray_line
+        App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), init_pos, img)
+      img
+    preparation: img
+    execution: img
+  }
 
 App.KL.Game.Phase.Play.Draw.get_indicators(
   preview: App.KL.Game.Cast.Preview 
@@ -348,6 +393,7 @@ App.KL.Game.Phase.Play.draw.tile.indicator(
 App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game: App.KL.Game, coord: Hexagonal.Axial): App.KL.Game.Hero.Draw.Pose
   open game
   case game.moment {
+    initial: App.KL.Game.Hero.Draw.Pose.idle
     preparation:
       App.KL.Game.Hero.Draw.Pose.idle
     execution: case game.moment.casts {
@@ -389,7 +435,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
     some:
       let hero = creature.value@hero
       let draw_pose = App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game, coord)
-      let {draw_coord, draw_voxbox} = hero@draw(draw_pose)
+      let {draw_coord, draw_voxbox} = hero@draw@vbox_img(draw_pose)
       let draw_coord = draw_coord <> coord
       //let aux = I32.to_u32(App.KL.Constants.hexagon_radius) //U32
       //let cy = cy - (aux * 2) //U32
@@ -398,7 +444,7 @@ App.KL.Game.Phase.Play.draw.tile.creature(
       {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
       let img_x = cx - (128::U32)
       let img_y = cy - (128::U32)
-      let height = I32.to_u32(hero@height)
+      let height = I32.to_u32(hero@draw@height)
       let img = VoxBox.Draw.image(img_x, img_y, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 
@@ -457,7 +503,7 @@ App.KL.Game.Phase.Play.draw.skills_menu(game: App.KL.Game): DOM
       "display": "flex"
       "align-items": "center"
     }>
-      <img style={"margin": "4px"} src=hero@picture(false,0)></img>
+      <img style={"margin": "4px"} src=hero@draw@b64_portrait(false,0)></img>
       <span style={"margin-left": "4px"}>"[" | letter | "] " | skill@name</span>
     </div>)
 
@@ -726,6 +772,7 @@ App.KL.Game.Phase.Play.draw.shield(
 App.KL.Game.Phase.Play.Draw.gray_overlay(game: App.KL.Game): DOM
   open game
     case game.moment {
+      initial: <div></div>
       preparation: <div></div>
       execution: case game.moment.casts {
         nil: 
