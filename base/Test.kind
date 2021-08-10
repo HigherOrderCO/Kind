@@ -1,2 +1,3 @@
 Test: _
-  Litereum.Node.init(42001)
+  U256.read(U256.show(1234567#256))
+  //StringChain.Node.init(42000)
