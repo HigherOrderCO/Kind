@@ -284,7 +284,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
           App.KL.Game.Phase.Draft.Draw.card.slot(id, <span id=id >key</span>)
       </div>
       <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
-        {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab)}
+        {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab, player@ready)}
       </div>
     </div>
   
@@ -326,10 +326,10 @@ App.KL.Game.Phase.Draft.draw.card.allies(
     get hero    = App.KL.Game.Hero.get_by_id(hero_id)
     return hero
   }
-
+  let ready = Maybe.if!((p) p@ready, player)
   let inner = 
     <div style={"width": "100%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
-      {App.KL.Game.Phase.Draft.draw.card.hero(hero, "", none)}
+      {App.KL.Game.Phase.Draft.draw.card.hero(hero, "", none, ready)}
     </div>
   
   <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none", "animation": "fade-in 500ms"}>
@@ -341,8 +341,9 @@ App.KL.Game.Phase.Draft.draw.card.hero(
   hero: Maybe<App.KL.Game.Hero>
   id: String
   tab:  Maybe<String>
+  ready: Bool
 ): DOM
-  <div id=id style={"height": "100%"}>
+  <div id=id style={"height": "100%", "position": "relative"}>
     // draw top of card
     <div id=id style={
       "height": "52%"
@@ -367,6 +368,22 @@ App.KL.Game.Phase.Draft.draw.card.hero(
         } <> App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id)
       }
     </div>
+    // draw light if player is ready
+    {
+      if ready then
+        <div style={
+          "transform": "scale(2)", 
+          "transform-origin": "top left",
+          "position": "absolute", 
+          "top": "92%", 
+          "left": "37%"
+          "animation": "fade-in 200ms"
+        }>
+          <img src=App.KL.Game.Phase.Draft.Assets.card.active></img>
+        </div>
+      else
+        <span style={"display": "none"}></span>
+    }
   </div>
 
 App.KL.Game.Phase.Draft.draw.card.hero.skill_info(

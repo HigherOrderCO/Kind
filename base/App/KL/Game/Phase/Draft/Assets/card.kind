@@ -26,3 +26,6 @@ App.KL.Game.Phase.Draft.Assets.card.attr_icons: Map<String>
     "range": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42mNggAKLHQ/+9335j4JBYgzIAKsgkmY4B6YI3UQUeZgAuqnIpoFpFA6Sqehi5CnEazXRniE6eIgNcADtwMQtWOgT0gAAAABJRU5ErkJggg==" // range
     "utility": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAMCAYAAACwXJejAAAAU0lEQVR42mNgQAIWOx787/vy/z+IZsAGQJLoGEMRzBSYBrymIdM4rYOZiKEQm/HI1qNysJgO1ozuI2QT4dZicwtGUCAHIDpGMRmXKRhhhc0kmBwAbSTOuAXc0NYAAAAASUVORK5CYII="// utility
   }
+
+App.KL.Game.Phase.Draft.Assets.card.active: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAGCAYAAADHYm6gAAAANklEQVR42mNgwALMp5//TwpmIAaAFLJLOJKECRoOM7Tvy3+SMF7DyTUUr+GUGorVcGoZim44AHENJuRrYpF/AAAAAElFTkSuQmCC"
