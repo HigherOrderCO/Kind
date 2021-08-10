@@ -68,11 +68,10 @@ App.KL.Game.Phase.Play.draw.interface.casts.item(main: Bool, cast: Maybe<App.KL.
     get hero    = App.KL.Game.Hero.get_by_id(hero_id)
     get skill   = hero@skills{Char.to_string(cast@letter)}
     return hero@name | " - " | skill@name
-  } <> ""
+  }
   <div style={
     "color": "white"
     "background-color": if main && Bool.not(name =? "") then "#2a1956" else "transparent"
-    "width": if main then "100%" else "98%"
     "padding": "0 20px"
     "margin-left": if main then "0" else "2%"
     "height": if main then "48px" else "36px"
