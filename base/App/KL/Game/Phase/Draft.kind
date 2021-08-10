@@ -37,13 +37,14 @@ App.KL.Game.Phase.Draft.to_team(players: Map<App.KL.Game.Player>, user: String):
 // ====================
 
 App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>, blueprint: App.KL.Game.Board.Blueprint): App.KL.Game.Board
-  let count  = BBT.tip!!
-  let board  = App.KL.Game.Board.Blueprint.build.board(blueprint)
-  let result = {board, count}
+  let count   = BBT.tip!!
+  let board   = App.KL.Game.Board.Blueprint.build.board(blueprint)
+  let result  = {board, count}
+  let initial = Hexagonal.Axial.Map.to_list!(blueprint@initial)
   for user:player in players with result:
     open player
     Maybe {
-      let coord_list = List.filter!((x) player.team =? x@snd, blueprint@initial)
+      let coord_list = List.filter!((x) player.team =? x@snd, initial)
       let count = case BBT.lookup!!(App.KL.Game.Team.cmp, player.team, result@snd) as c_team {
         none: BBT.insert!!(App.KL.Game.Team.cmp, player.team, 0, result@snd)
         some: BBT.insert!!(App.KL.Game.Team.cmp, player.team, c_team.value + 1, result@snd)
@@ -58,6 +59,8 @@ App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>, blueprint
     } <> {board, count}
   let board = result@fst
   board
+
+// 
 
 // App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>): Pair<App.KL.Game.Board, App.KL.Game.Board.Blueprint>
 //   log(" - criando mapa")
