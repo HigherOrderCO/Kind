@@ -1,77 +1,34 @@
 // Litereum: a minimal decentralized computer
 
+// A private key is a set of 32 words
 Litereum.Private: Type
   Vector<U256, 32>
 
+// A public key is the hash^32 of the private key
 Litereum.Public: Type
   Vector<U256, 32>
 
+// An address is the hash of a public key
 Litereum.Address: Type
   U256
 
+// A hash is a 256-bit word
 Litereum.Hash: Type
   U256
 
+// A signature is a set of 32 words
+// - 30 words sign the first 30 bytes of the message hash
+// -  2 words sign the checksum
 Litereum.Signature: Type
   Vector<U256, 32>
 
+// The 32 bytes to be signed by a signature
 Litereum.Summary: Type
   Vector<U8, 32>
 
+// The body of a Litereum Post can hold up to 8 words
 Litereum.Body: Type
   Vector<U256,8>
-
-type Litereum.Post {
-  new(
-    body: Litereum.Body      //  8 words =  256 bytes
-    sign: Litereum.Signature // 32 words = 1024 bytes
-    info: U256               //  1 word  =   32 bytes
-    prev: U256               //  1 word  =   32 bytes
-  )                          // 42 words = 1344 bytes
-} deriving (serializer, deserializer)
-
-type Litereum.Chain {
-  new(
-    post: Map<Litereum.Post>           // maps PostHash to Post object
-    children: Map<List<Litereum.Hash>> // maps PostHash to list of PostHash that link to it
-    pending: Map<List<Litereum.Post>>  // maps PostHash to list of posts waiting it for inclusion
-    score: Map<Litereum.Hash>          // maps PostHash to cached score
-    tip: Litereum.Hash                 // current tip PostHash
-  )
-}
-
-type Litereum.NetAddress {
-  ipv4(ip0: U8, ip1: U8, ip2: U8, ip3: U8, port: U16)
-} deriving (serializer, deserializer)
-
-type Litereum.Peer {
-  new(
-    address: Litereum.NetAddress
-  )
-}
-
-type Litereum.Message {
-  ping
-  pong
-  get_tip
-  get_post_by_hash(hash: Litereum.Hash)
-  share_post(post: Litereum.Post)
-} deriving (serializer, deserializer)
-
-type Litereum.Received {
-  new(
-    sender: Litereum.Peer
-    message: Litereum.Message
-  )
-}
-
-type Litereum.Node {
-  new(
-    port: Nat
-    peers: List<Litereum.Peer>
-    chain: Litereum.Chain
-  )
-}
 
 Litereum.Body.deserializer: Deserializer<Litereum.Body>
   Vector.deserializer!(8,U256.deserializer)
@@ -90,22 +47,6 @@ Litereum.Hash.serializer: Serializer<Litereum.Hash>
 
 Litereum.Hash.deserializer: Deserializer<Litereum.Hash>
   U256.deserializer
-
-Litereum.Message.serialize(message: Litereum.Message): String
-  let hex = Bits.hex.encode(Serializer.run!(Litereum.Message.serializer, message))
-  let hex = if Nat.mod(String.length(hex),2) =? 0 then hex else hex | "0"
-  hex
-
-Litereum.Message.deserialize(string: String): Maybe<Litereum.Message>
-  Deserializer.run!(Litereum.Message.deserializer, Bits.hex.decode(string))
-
-Litereum.Message.show(message: Litereum.Message): String
-  case message {
-    void: "void"
-    ping: "ping"
-    pong: "pong"
-    get_post_by_hash: "get_post_by_hash(" | U256.show(message.hash) | ")"
-  } default "?"
 
 Litereum.Peer.show(peer: Litereum.Peer): String
   open peer
@@ -233,210 +174,3 @@ Litereum.Signature.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,le
         Vector.cons<U256,len.pred>(hash, Litereum.Signature.recover.go(len.pred, msg.tail, sig.tail))
     }
   }!
-
-// Estimates how many attempts were needed to make this hash
-Litereum.Hash.score(hash: U256): U256
-  Nat.to_u256(Nat.pow(2,256) / U256.to_nat(hash))
-
-// Increases the Post nonce until it is above target_score
-Litereum.Post.mine(post: Litereum.Post, target_score: U256, attempts: U256): Litereum.Post
-  let post_score = Litereum.Hash.score(Litereum.Hash.from_post(post))
-  if U256.eql(attempts,0) || U256.gte(post_score, target_score) then
-    post
-  else
-    Litereum.Post.mine(post@info <- post@info + 1, target_score, attempts - 1)
-
-Litereum.Chain.add_post(post: Litereum.Post, chain: Litereum.Chain): Litereum.Chain
-  open post
-  open chain
-  open chain.tip
-  let post_hash = Litereum.Hash.from_post(post)
-  case chain.post{U256.show(post_hash)} as got_post {
-    some: chain
-    none:
-      let prev_hash = post.prev
-      case chain.post{U256.show(prev_hash)} as got_prev {
-        none: 
-          let prev_pending   = chain.pending{U256.show(prev_hash)} <> []
-          let prev_pending   = post & prev_pending
-          let chain.pending  = chain.pending{U256.show(prev_hash)} <- prev_pending
-          Litereum.Chain.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
-        some: 
-          let prev           = got_prev.value
-          let prev_score     = chain.score{U256.show(prev_hash)} abort chain
-          let post_score     = U256.add(prev_score, Litereum.Hash.score(post_hash))
-          let prev_children  = chain.children{U256.show(prev_hash)} <> []
-          let pending        = chain.pending{U256.show(post_hash)} <> []
-          let chain.post     = chain.post{U256.show(post_hash)} <- post
-          let chain.score    = chain.score{U256.show(post_hash)} <- post_score
-          let chain.children = chain.children{U256.show(prev_hash)} <- post_hash & prev_children
-          let chain.tip      = if post_score >? chain.tip then post_hash else chain.tip
-          let chain.pending  = Map.delete!(U256.show(post_hash), chain.pending)
-          let chain          = Litereum.Chain.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
-          let chain          = for pending_post in pending: Litereum.Chain.add_post(pending_post, chain)
-          chain
-      }
-  }
-
-Litereum.Chain.genesis: Litereum.Chain
-  let chain.post = {U256.show(0): Litereum.Post.new(Vector.create!(8,()0),Vector.create!(32,()0),0,0)}
-  let chain.score = {U256.show(0): 0#256}
-  let chain.pending = {}
-  let chain.children = {U256.show(0): []}
-  let chain.tip = 0#256
-  Litereum.Chain.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
-
-Litereum.Chain.main_fork(chain: Litereum.Chain): List<Litereum.Post>
-  open chain
-  open chain.tip
-  case chain.post{U256.show(chain.tip)} as tip_post {
-    none: []
-    some: Litereum.Chain.main_fork.go(tip_post.value, chain.post, [])
-  }
-
-Litereum.Chain.main_fork.go(
-  post: Litereum.Post
-  posts: Map<Litereum.Post>
-  result: List<Litereum.Post>
-): List<Litereum.Post>
-  open post
-  let result = List.cons!(post, result)
-  if U256.eql(post.prev, 0) then
-    result
-  else case posts{U256.show(post.prev)} as prev {
-    none: result
-    some: Litereum.Chain.main_fork.go(prev.value, posts, result)
-  }
-
-Litereum.NetAddress.show.ip(addr: Litereum.NetAddress): String
-  open addr
-  let ip0 = Nat.show(U8.to_nat(addr.ip0))
-  let ip1 = Nat.show(U8.to_nat(addr.ip1))
-  let ip2 = Nat.show(U8.to_nat(addr.ip2))
-  let ip3 = Nat.show(U8.to_nat(addr.ip3))
-  ip0 | "." | ip1 | "." | ip2 | "." | ip3
-
-Litereum.NetAddress.show.port(addr: Litereum.NetAddress): String
-  open addr
-  Nat.show(U16.to_nat(addr.port))
-
-Litereum.NetAddress.show(addr: Litereum.NetAddress): String
-  Litereum.NetAddress.show.ip(addr) | ":" | Litereum.NetAddress.show.port(addr)
-  
-Litereum.example.signature: IO<Unit>
-  IO {
-    let pvt = Litereum.Private.from_seed(1234)
-    let pub = Litereum.Public.from_private(pvt)
-    let adr = Litereum.Address.from_public(pub)
-    let msg = Litereum.Summary.from_utf8("cats cats cats yay")
-    let sig = Litereum.Signature.sign(msg, pvt)
-    let chk = Litereum.Signature.verify(msg, adr, sig)
-    IO.print(Bool.show(chk))
-  }
-
-Litereum.example.mining: IO<Unit>
-  IO {
-    let pvt  = Litereum.Private.from_seed(1234)
-    let pub  = Litereum.Public.from_private(pvt)
-    let addr = Litereum.Address.from_public(pub)
-    let body = Vector.create!(8, (x) Nat.to_u256(x))
-    let sign = Litereum.Signature.sign(Litereum.Summary.from_words(Vector.to_list!(8,body)), pvt)
-    let post = Litereum.Post.new(body, sign, 0, 0)
-    let post = Litereum.Post.mine(post, 2000, 1000000)
-    let hash = Litereum.Hash.from_post(post)
-    IO.print(U256.show(Litereum.Hash.score(hash)))
-  }
-
-Litereum.Node.init(port: Nat): IO<Unit>
-  let peers = [
-    Litereum.Peer.new(Litereum.NetAddress.ipv4(127,0,0,1,42000))
-    Litereum.Peer.new(Litereum.NetAddress.ipv4(127,0,0,1,42001))
-    Litereum.Peer.new(Litereum.NetAddress.ipv4(127,0,0,1,42002))
-    Litereum.Peer.new(Litereum.NetAddress.ipv4(127,0,0,1,42003))
-  ]
-  let node = Litereum.Node.new(port, peers, Litereum.Chain.genesis)
-  Litereum.Node.loop(node)
-
-Litereum.Node.loop(node: Litereum.Node): IO<Unit>
-  open node
-  IO {
-    
-    // Broadcast gossips
-    Litereum.Node.broadcast(node, Litereum.Message.ping)
-
-    // Get inbox
-    get inbox = IO.recv_udp(node.port)
-    Litereum.Node.receive(inbox)
-
-    // Loop
-    IO.sleep(1000)
-    Litereum.Node.loop(node)
-    return unit
-  }
-
-Litereum.Received.from_udp_message(recv: IO.recv_udp.Message): Maybe<Litereum.Received>
-  Maybe {
-    open recv
-    open recv.from
-    let ip = List.mapped!(String.split(recv.from.ip, "."))!((x) Nat.to_u8(Nat.read(x)))
-    let port = Nat.to_u16(recv.from.port)
-    get ip0 = ip[0]
-    get ip1 = ip[1]
-    get ip2 = ip[2]
-    get ip3 = ip[3]
-    let peer = Litereum.Peer.new(Litereum.NetAddress.ipv4(ip0, ip1, ip2, ip3, port))
-    get msge = Litereum.Message.deserialize(recv.data)
-    return Litereum.Received.new(peer, msge)
-  }
-
-Litereum.Node.receive(inbox: List<IO.recv_udp.Message>): IO<Unit>
-  case inbox {
-    nil: IO.pass
-    cons: IO {
-      open inbox.head
-      def continue = Litereum.Node.receive(inbox.tail)
-      use received = Litereum.Received.from_udp_message(inbox.head) abort continue
-      IO.print(Litereum.Peer.show(received.sender) | " " | Litereum.Message.show(received.message))
-      continue
-    }
-  }
-  
-Litereum.Node.respond(node: Litereum.Node, received: Litereum.Received): IO<Unit>
-  open received
-  case received.message {
-    ping: Litereum.Node.send(node, received.sender, Litereum.Message.pong)
-  } default IO.pass
-
-Litereum.Node.send(node: Litereum.Node, peer: Litereum.Peer, message: Litereum.Message): IO<Unit>
-  open node
-  open peer
-  open peer.address
-  let from_port = node.port
-  let to_ip     = Litereum.NetAddress.show.ip(peer.address)
-  let to_port   = U16.to_nat(peer.address.port)
-  //log("SENDING: " | Litereum.Message.serialize(message))
-  IO.send_udp(from_port, to_ip, to_port, Litereum.Message.serialize(message))
-
-Litereum.Node.broadcast(node: Litereum.Node, message: Litereum.Message): IO<Unit>
-  Litereum.Node.broadcast.go(node, message, node@peers)
-
-Litereum.Node.broadcast.go(node: Litereum.Node, message: Litereum.Message, peers: List<Litereum.Peer>): IO<Unit>
-  case peers {
-    nil: IO.pass
-    cons: IO {
-      Litereum.Node.send(node, peers.head, message)
-      Litereum.Node.broadcast.go(node, message, peers.tail)
-    }
-  }
-
-Litereum.Node.main.print_inbox(inbox: List<IO.recv_udp.Message>): IO<Unit>
-  case inbox {
-    nil: IO.pass
-    cons: IO {
-      open inbox.head
-      open inbox.head.from
-      let msge = Litereum.Message.deserialize(inbox.head.data) <> Litereum.Message.ping
-      IO.print("<" | inbox.head.from.ip | ":" | Nat.show(inbox.head.from.port) | "> " | Litereum.Message.show(msge))
-      Litereum.Node.main.print_inbox(inbox.tail)
-    }
-  }
