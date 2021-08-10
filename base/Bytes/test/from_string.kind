@@ -23,21 +23,21 @@ Bytes.test.from_string.3: TestSuite
   let test = "ह€"
   let got = Bytes.from_string(test)
   let exp = "0xe0a4b9e282ac"
-  let name = "2"
+  let name = "3"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string.4: TestSuite
   let test = "𐍈"
   let got = Bytes.from_string(test)
   let exp = "0xf0908d88"
-  let name = "2"
+  let name = "4"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string.5: TestSuite
   let test = "0123456789"
   let got = Bytes.from_string(test)
   let exp = "0x30313233343536373839"
-  let name = "2"
+  let name = "5"
   TestSuite.show.log_string(name, test, exp, got)
 
 Bytes.test.from_string: TestSuite

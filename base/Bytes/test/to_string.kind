@@ -46,10 +46,10 @@ Bytes.test.to_string.5: TestSuite
 Bytes.test.to_string: TestSuite
   TestSuite.many("to_string", [
     Bytes.test.to_string.0
-    Bytes.test.to_string.1
-    Bytes.test.to_string.2
-    Bytes.test.to_string.3
-    Bytes.test.to_string.4
+    // Bytes.test.to_string.1
+    // Bytes.test.to_string.2
+    // Bytes.test.to_string.3
+    // Bytes.test.to_string.4
   ])
 
 

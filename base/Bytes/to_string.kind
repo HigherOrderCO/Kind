@@ -1,3 +1,3 @@
 Bytes.to_string(b: Bytes): String
-  let rmv_notation = String.drop(2, b) // removes 0x from the beginning
-  String.hex.decode.utf8(rmv_notation)
+  // let rmv_notation = String.drop(2, b) // removes 0x from the beginning
+  String.hex.decode.utf8(b)

@@ -1,8 +1,11 @@
 // Reference: https://gist.github.com/pascaldekloe/62546103a1576803dade9269ccf76330
+
+// Decode a UTF8 data into a String
 U16.to_string.utf8(s: String): String
   case s {
     nil : ""
     cons:
+      log("char to string: " | Char.to_string(s.head))
       case s.tail {
         nil : U16.to_string.utf8.aux(s.head, 0#16)
         cons: U16.to_string.utf8.aux(s.head, s.tail.head) | U16.to_string.utf8(s.tail)
@@ -14,6 +17,7 @@ U16.to_string.utf8.aux(c: U16, next: U16): String
   let two_bytes   = Bool.and(U16.gtn(c, 191#16), U16.ltn(c, 224#16)) // (c > 191 && c < 224)
   let three_bytes = Bool.and(U16.gtn(c, 223), U16.ltn(c, 240)) // (c > 223 && c < 240)
   let four_bytes  = Bool.and(U16.gtn(c, 239), U16.ltn(c, 248)) // (c > 239 && c < 248)
+  log("c: " | U16.show(c))
   let s =
   if U16.gtn(c, 127#16) then
     if two_bytes then 
