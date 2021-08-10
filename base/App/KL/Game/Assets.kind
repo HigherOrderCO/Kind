@@ -1,3 +1,5 @@
+// BUTTON ANIMATION
+// ==========================
 type App.KL.Game.Assets.ButtonAnimation {
   new(frames: List<String>, init_loop: Nat, seconds_per_frame: Nat)
 }
@@ -22,3 +24,33 @@ App.KL.Game.Assets.ButtonAnimation.get_limit(
   animation: App.KL.Game.Assets.ButtonAnimation
 ): Nat
   (List.length!(animation@frames) * animation@seconds_per_frame) - 1
+
+// BUTTON CLICK
+// ==========================
+type App.KL.Game.Assets.ButtonClick.Image {
+  new(
+    normal: String,
+    hover: String,
+    click: String
+  )
+}
+
+type App.KL.Game.Assets.ButtonClick {
+  new(image: App.KL.Game.Assets.ButtonClick.Image, hovered: Bool, clicked: Bool)
+}
+
+App.KL.Game.Assets.ButtonClick.generate(
+  image: App.KL.Game.Assets.ButtonClick.Image
+): App.KL.Game.Assets.ButtonClick
+  App.KL.Game.Assets.ButtonClick.new(image, false, false)
+
+App.KL.Game.Assets.ButtonClick.get_img(
+  button: App.KL.Game.Assets.ButtonClick
+): String
+  if button@clicked then
+    button@image@click
+  else
+    if button@hovered then
+      button@image@hover
+    else
+      button@image@normal

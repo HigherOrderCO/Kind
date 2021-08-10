@@ -7,7 +7,7 @@ App.KL.Game.Phase.Draft.when(
   let players = global@players
   let room  = String.take(16, Crypto.Keccak.hash(local@room))
   let ready = Maybe.if!((x) x@ready, players{local@user}) // verify if local user is ready
-  let controls = local@draft
+  let controls = local@draft // buttons controls (hover, click, active, etc)
 
   case event {
     frame:
@@ -31,13 +31,7 @@ App.KL.Game.Phase.Draft.when(
           App.set_local!(App.KL.State.Local.game(local))
       } default App.pass!
     mouse_move:
-      let default_controls = 
-        if ready then 
-          controls@main_button <- controls@main_button@animation <- App.KL.Game.Phase.Draft.Assets.main_button.waiting
-        else
-          controls@main_button <- controls@main_button@animation <- App.KL.Game.Phase.Draft.Assets.main_button.ready
-      let default_controls = default_controls@main_button_hovered <- false
-
+      let default_controls = App.KL.Game.Controls.Draft.default(ready, controls)
       let controls = switch String.starts_with(event.id) {
         "R": // ready
           if ready then
@@ -50,9 +44,10 @@ App.KL.Game.Phase.Draft.when(
               controls
           else 
             controls
+        "btn-header-": // hover in header buttons
+          let event_id = String.drop(11, event.id)
+          App.KL.Game.Controls.Draft.header.update(event_id, default_controls)
       } default default_controls
-        
-      
       let local = local@draft <- controls
       App.set_local!(App.KL.State.Local.game(local))
     mouse_click:

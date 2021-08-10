@@ -9,7 +9,7 @@ App.KL.Game.Phase.Draft.draw(
 
 // choose what page draw based on team
 App.KL.Game.Phase.Draft.draw.choose_page(
-  controls: App.KL.Game.State.Local.Draft
+  controls: App.KL.Game.Controls.Draft
   players: Map<App.KL.Game.Player>,
   page: String,
   tab:  Maybe<String>,
@@ -104,26 +104,25 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
 // DRAFT LAYOUT
 // ==============================
 App.KL.Game.Phase.Draft.draw.main(
-  controls: App.KL.Game.State.Local.Draft
+  controls: App.KL.Game.Controls.Draft
   allies: Map<App.KL.Game.Player>, 
   page: String
   tab:  Maybe<String>,
   user: String,
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
+  let header_order = ["friend", "collection", "store", "help", "config", "exit"]
+
   <div class="pixel-art" style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
       {App.KL.Game.Phase.Draft.draw.background}
 
       <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
-        <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px", "display": "flex", "justify-content": "space-between", "padding": "0 5px"}>
+        <header style={"background-image": "url("| App.KL.Game.Phase.Draft.Assets.header |")", "width": "100%", "height": "64px", "display": "flex", "justify-content": "space-between"}>
           <div style={"display": "flex"}>
           
           </div>
           <div style={"display": "flex", "justify-content": "flex-end"}>
-            <img src=App.KL.Game.Phase.Draft.Assets.header.button.invite style={"height": "100%", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.Assets.header.button.help   style={"height": "100%", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.Assets.header.button.list   style={"height": "100%", "cursor": "not-allowed"}></img>
-            <img src=App.KL.Game.Phase.Draft.Assets.header.button.logout style={"height": "100%", "cursor": "not-allowed"}></img>
+            for button in App.KL.Game.Phase.Draft.draw.header(header_order, controls@header): button
           </div>
         </header>
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
@@ -152,6 +151,25 @@ App.KL.Game.Phase.Draft.draw.main(
         </footer>
       </div>
     </div>
+
+App.KL.Game.Phase.Draft.draw.header(
+  order: List<String>, 
+  buttons: Map<App.KL.Game.Assets.ButtonClick>
+): List<DOM>
+  let length = List.length!(order)
+  let to_dom = (order, id)
+    let button_image = buttons{id}
+    without button_image: <span style={"display": "none"}></span>
+    let z_index = Nat.show(length - order)
+    let order   = Nat.show(order)
+
+    <img 
+      id="btn-header-"|id
+      src=App.KL.Game.Assets.ButtonClick.get_img(button_image) 
+      style={"height": "100%", "cursor": "not-allowed", "margin-left": "-11px", "order": order, "z-index": z_index}
+    ></img>
+  
+  List.imap!!(to_dom, order)
 
 App.KL.Game.Phase.Draft.draw.background: DOM
   let s = Maybe.some!
@@ -289,7 +307,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
     </div>
   
   <div id=id style={"margin": "0 10px"}>
-    { App.KL.Game.Phase.Draft.draw.card.wrapper(99, 208, bt, id, fator, "https://i.imgur.com/HTnAVKj.png", inner) }
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(99, 208, bt, id, fator, App.KL.Game.Phase.Draft.Assets.card.main, inner) }
   </div>
 
 App.KL.Game.Phase.Draft.Draw.card.slot(
@@ -333,7 +351,7 @@ App.KL.Game.Phase.Draft.draw.card.allies(
     </div>
   
   <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none", "animation": "fade-in 500ms"}>
-    { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, bt, "", fator, "https://i.imgur.com/CI2xJrU.png", inner) }
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, bt, "", fator, App.KL.Game.Phase.Draft.Assets.card.allies, inner) }
   </div>
 
 // draw hero parts of cards
