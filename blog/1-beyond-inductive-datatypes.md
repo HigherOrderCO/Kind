@@ -269,6 +269,11 @@ Cedille](https://homepage.cs.uiowa.edu/~cwjnkins/assets/MJS19_Quotients-Idempote
 Possibility #1: conditional constructors
 ----------------------------------------
 
+*Edit: after thinking about it, this isn't different from just functions that
+return types, which conventional proof languages can do just fine. But I'll
+leave it here because it is still useful information. Go ahead to the next
+section if you just want to explore self types.*
+
 In [this paper](https://arxiv.org/pdf/2103.15408.pdf), Tesla Zhang (again!)
 proposes a different encoding of indexed datatypes. He starts by presenting the
 usual definition of `Vector` in Agda:
@@ -421,7 +426,13 @@ update Kind to incorporate Tesla's syntax for this kind of datatype, but the
 fact you can already do that by manually tweaking the Self-encodings is
 beautiful.
 
-Possibility #2: higher inductive types
+Possibility #2: first-class modules
+-----------------------------------
+
+Check [this post](https://github.com/uwu-tech/Kind/blob/master/blog/2-first-class-modules-with-self-types.md) 
+for a simple encoding of first-class modules with self types.
+
+Possibility #3: higher inductive types
 --------------------------------------
 
 From ncatlab, *"Higher inductive types (HITs) are a generalization of inductive
