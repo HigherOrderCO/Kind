@@ -891,7 +891,7 @@ With type: Nat.succ(Nat.half(Nat.double(n.pred))) == Nat.succ(n.pred)
 With context:
 - n: Nat
 - n.pred: Nat
-- rec: Nat.half(Nat.double(n.pred)) == n.pred
+- ind: Nat.half(Nat.double(n.pred)) == n.pred
 ```
 
 Our goal didn't change, but now we have a new variable, `ind` in our context. We
@@ -1717,7 +1717,7 @@ notation:
 not_a_neq_a(b: Bool): Bool.not(b) != b
   (e)
   case b
-  with e : (Bool.not(b) == b) = e {
+  with e : (Bool.not(b) == b) {
     true: Bool.false_neq_true(e)
     false: Bool.true_neq_false(e)
   }!
