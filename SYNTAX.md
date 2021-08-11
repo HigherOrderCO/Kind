@@ -36,6 +36,10 @@ Creates a top-level function called `get_first`, which receives two arguments,
 `fst` and `snd` of type `String`, and returns a `String`, which is the first
 argument.
 
+The name of the top level definition also specifies the file where the
+definition is. For example `Physics.Verlet.step` must be either in
+`base/Physics.kind` or `base/Physics/Verlet.kind` or `base/Physics/Verlet/step.kind`.
+
 Top-level definitions and datatype declarations (described below) are the only
 syntaxes that aren't expressions, which mean they can't appear anywhere in the
 program and, instead, must appear at the "global scope" of a file.
