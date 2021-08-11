@@ -88,7 +88,7 @@ quicksort(list: List<Nat>): List<Nat>
     cons:
       fst = list.head
       min = filter!((x) x <? list.head, list.tail)
-      max = filter!((x) x >? list.head, list.tail)
+      max = filter!((x) x >=? list.head, list.tail)
       quicksort(min) ++ [fst] ++ quicksort(max)
   }
 ```
