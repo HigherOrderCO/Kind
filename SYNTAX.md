@@ -3,7 +3,7 @@ All syntaxes
 
 This document lists all the high-level syntaxes available on the Kind
 language. Every syntax listed below is expanded (desugared) to either a
-primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of the functions available on the [base library](https://github.com/uwu-tech/Kind/tree/master/base).
+primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of the functions available on the [base library](https://github.com/uwu-tech/Kind/tree/master/base). Also, check [this](https://news.ycombinator.com/edit?id=28145337) answer on Hacker News for some thoughts and reasonings about our syntax choices.
 
 Top-level definition
 --------------------
