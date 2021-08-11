@@ -20,12 +20,51 @@ As an example, all the proofs on
 [Nat/Add](https://github.com/uwu-tech/Kind/tree/master/base/Nat/add) were added
 by Eloi (thanks!). That kind of contribution is always welcome!
 
-## Create apps:
+## Improve the Numeric libraries
 
-Sounds silly, but just creating apps using the `App` type would be amazing. Any
-app added to `base/App` will show up on [http://uwu.tech/](http://uwu.tech).
-Sadly, we don't have a tutorial on how apps work, but it should be learnable
-from looking the examples.
+There are many missing numeric types on `Kind/base`, such as `I128`. The
+existing types, such as `U32`, may also have missing functions here and there.
+Additions are welcome!
+
+## Implement missing Word algorithms
+
+While Kind optimizes operations such as `I32.add` to native operations in its
+back-ends, these operations still need to be implemented in pure Kind, for
+theorem proving purposes. Since implementing these operations for every numeric
+type would be repetitive, most of these are implemented on the `Word` type,
+which represent N-bit values (for example, `I32` is a thin wrapper around
+`Word<32>`, so `I32.add` just calls `Word.add<32>`). While many operations are
+implemented, many are still missing. For example, all these operations are
+TODOs:
+
+```
+Word.int.add
+Word.int.mul
+Word.int.sub
+Word.int.mod
+Word.int.div
+Word.int.pow
+Word.int.eql
+Word.int.ltn
+Word.int.lte
+Word.int.eql
+Word.int.gte
+Word.int.gtn
+Word.float.add
+Word.float.mul
+Word.float.sub
+Word.float.mod
+Word.float.div
+Word.float.pow
+Word.float.eql
+Word.float.ltn
+Word.float.lte
+Word.float.eql
+Word.float.gte
+Word.float.gtn
+```
+
+Adding these would be great.
 
 ## Add another back-end:
 
@@ -36,6 +75,27 @@ every language? Currently, Kind targets Scheme and JavaScript. We'd like more
 backends, as many as possible. Adding a new back-end is somewhat simple: just
 add its syntax on
 [base/Kind/Comp/Target](https://github.com/uwu-tech/Kind/tree/master/base/Kind/Comp/Target)!
+
+## Add a rich geometry library:
+
+We have some very primtive 3D vector operations, but not much else. For game
+development purposes, it would be amazing to have a rich library of geometric
+primitives, including matrices, quaternions, collisions, space partitioning
+structures and so on. Adding these is always welcome!
+
+## Add a WebGL renderer
+
+Right now, the [DOM](https://github.com/uwu-tech/Kind/blob/master/base/DOM.kind)
+type allows rendering text, HTML nodes and pixelated canvas. It would be amazing
+to have a render mode that integrated with WebGL. If you'd like to work on that,
+contact us for more instructions!
+
+## Create apps:
+
+Sounds silly, but just creating apps using the `App` type would be amazing. Any
+app added to `base/App` will show up on [http://uwu.tech/](http://uwu.tech).
+Sadly, we don't have a tutorial on how apps work, but it should be learnable
+from looking the examples.
 
 ## Get rid of FormCoreJS:
 
@@ -102,6 +162,19 @@ This would be equivalent to:
 let list = list[2] <- 100
 ```
 
+## Improve the usability of map keys
+
+Right now, when using maps, you need to explicitly convert your keys to strings.
+For example:
+
+```
+map{U256.show(1234)} <- "entry"
+```
+
+It would be nice if we either improved maps to have polymorphic keys, or
+improved the parser to automatically add these conversions, in the same way that
+operators (like `+`) are polymoprhic.
+
 ## Remove the need for parenthesis on forall's syntax
 
 The "forall" syntax requires a parenthesis sometimes. For example:
@@ -112,6 +185,25 @@ foo: Type
 ```
 
 This shouldn't be the case and needs investigation.
+
+## Add more generics
+
+Right now, we can derive `serializer, deserializer, stringifier, parser` for types.
+For example:
+
+```
+type MyType {
+  foo
+  bar
+} deriving (stringifier, parser)
+```
+
+Derives `MyType.stringifier`, `MyType.parser`. It would be nice to also allow
+deriving other functions such as `show, read, equal, larget_than, greater_than,
+serialize, deserialize`. Most of these are trivial. For example, `show` is just
+a wrapper that could use `stringifier`, and `serialize` is just a wrapped that
+could use `serializer`. Regardless, these are TODOs. Adding these would be
+great.
 
 ## Re-add optimal evaluators:
 
@@ -160,3 +252,14 @@ subset of the language. That would bring several benefits.
 Adding linearity checker to the compiler isn't a PhD-level task, but it requires
 some experience with functional programming, a lot of patience and knowledge
 about our type checker. Contact us if you are interested!
+
+## Research how to add HoTT features:
+
+While we have some interesting insights on the matter (check [this blog
+post](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md)),
+Kind isn't capable of expressing the most important HoTT features. We could add
+these inspired on Cubical Type Theory, but this would increase the size of
+Kind's core by a few multipliers, which we don't want to. In special, the
+`transp` function seems to account for most of that complexity. Investigating
+how to add HoTT features without blowing up the core size is an interesting line
+of research.
