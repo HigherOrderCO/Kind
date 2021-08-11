@@ -209,6 +209,15 @@ a wrapper that could use `stringifier`, and `serialize` is just a wrapped that
 could use `serializer`. Regardless, these are TODOs. Adding these would be
 great.
 
+## Add implicits
+
+One of the main sources of verbosity in Kind is the lack of implicit arguments.
+That is partly improved by holes and `!`. For example, `Pair.new` can be written
+as `Pair.new<Nat,Nat>(1,2)`, or `Pair.new<_,_>(1,2)`, or `Pair.new!!(1,2)`. It
+would be better to write just `Pair.new(1,2)`. It is not clear how to add implicit
+arguments to Kind without making some undesirable compromises, but it would be
+a great improvement.
+
 ## Re-add optimal evaluators:
 
 Past versions of Kind/Formality had an option to compile programs to optimal
