@@ -11,7 +11,20 @@ var kind_dir = __dirname+"/../base";
 process.chdir(code_dir);
 var all_js_apps   = fs.readdirSync("apps").filter(x => x.startsWith("App."));
 process.chdir(kind_dir);
-var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
+// TODO: 
+// var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
+// console.log(all_kind_apps)
+var all_kind_apps = [
+  'Browser.kind',   
+  'Hello.kind',
+  'Kind.kind',
+  'KL.kind',
+  'Playground.kind',
+  'Pong.kind',
+  'Seta.kind',
+  'TicTacToe.kind'
+]
+
 var app = "";
 var compiled_apps = [];
 
