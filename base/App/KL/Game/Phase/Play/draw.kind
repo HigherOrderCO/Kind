@@ -154,7 +154,7 @@ App.KL.Game.Phase.Play.draw.tab.controls(
   </div>
 
 App.KL.Game.Phase.Play.draw.tab.controls.button(
-  img: String, 
+  button: App.KL.Game.Phase.Play.Assets.tab.button, 
   button_tab: App.KL.Game.Controls.Hud.Tab
   active_tab: App.KL.Game.Controls.Hud.Tab
 ): DOM
@@ -162,7 +162,7 @@ App.KL.Game.Phase.Play.draw.tab.controls.button(
   let is_active = App.KL.Game.Controls.Hud.Tab.eql(button_tab, active_tab)
 
   <div id=tab_text style={"position": "relative", "display": "inline-flex", "margin-right": "1px"}>
-    <img id=tab_text src=img></img>
+    <img id=tab_text src=button(is_active)></img>
     <div id=tab_text style={
       "position": "absolute"
       "top": "0"
