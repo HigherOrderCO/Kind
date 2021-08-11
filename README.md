@@ -64,7 +64,7 @@ No, theorems are not scary things mathematicians do. For programmers, they're mo
 
 ### Deploy Smart-Contracts.
 
-(TODO) *Ethereum: we're coming for you.*
+(Soon.)
 
 Examples
 --------
@@ -298,3 +298,8 @@ App.Hello.when: App.When<App.Hello.State>
 Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
 
 Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
+
+Future work
+-----------
+
+There are so many things we want to do and improve. Would like to contribute? Check [CONTRIBUTE.md](https://github.com/uwu-tech/Kind/blob/master/CONTRIBUTE.md). Also reach us on [Telegram](https://t.me/formality_lang). We're friendly!
