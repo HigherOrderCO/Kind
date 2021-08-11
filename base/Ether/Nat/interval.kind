@@ -1,3 +1,0 @@
-Ether.Nat.interval(n : Nat, pair : Pair<Nat, Nat>) : Bool
-  open pair
-  (n >=? pair.fst) && (n <=? pair.snd)

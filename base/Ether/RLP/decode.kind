@@ -1,0 +1,27 @@
+String.at(len : Nat, str : String) : Pair<String, String>
+  {String.take(len, str), String.drop(len, str)}
+
+Ether.RLP.decode.read(encode : String) : Pair<Ether.RLP.Tree, String>
+  let {prefix, rest} = String.at(2, encode)
+  let byte_prefix = Bits.hex.decode(String.reverse(prefix))
+  def bytes_size = String.length(encode)
+  switch (Bits.ltn(byte_prefix)) {
+    Ether.RLP.Constants.bits_128 : {Ether.RLP.Tree.tip(byte_prefix), rest} // between (0, 127)
+    Ether.RLP.Constants.bits_184 : 
+      let content_length = (Bits.to_nat(byte_prefix) - 128) * 2
+      if (bytes_size >? content_length) then
+        let {prefix, rest} = String.at(content_length, rest)
+        log(prefix)
+        {Ether.RLP.Tree.tip(Bits.hex.decode(String.reverse(prefix))), rest}
+      else 
+        {Ether.RLP.Tree.list([]), "error"}
+  } default {Ether.RLP.Tree.list([]), "error"}
+
+Ether.RLP.decode : _
+  let hello = Bits.read("0110100001100101011011000110110001101111")
+
+  let xs = Ether.RLP.encode.bytes(Ether.RLP.Tree.tip(hello))
+  
+  let str = String.drop(2, Ether.RLP.encode.read(xs))
+  
+  Ether.RLP.decode.read(str)
