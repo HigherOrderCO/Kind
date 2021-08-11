@@ -4,6 +4,9 @@ App.KL.Game.Phase.Play.draw.fator.number: F64
 App.KL.Game.Phase.Play.draw.fator.string: String
   F64.show(App.KL.Game.Phase.Play.draw.fator.number)
 
+App.KL.Game.Phase.Play.draw.theme.secondary: String
+  "#eb6bff"
+
 // BOARD DRAWING
 // =============
 
@@ -26,7 +29,153 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
   }>
     // interface
     { App.KL.Game.Phase.Play.draw.interface(local, game) }
+    // canvas
     { App.KL.Game.Phase.Play.draw.board_canvas(local, game, img) }
+    // tab
+    { App.KL.Game.Phase.Play.draw.tab(local, game) }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab(
+  local: App.KL.Game.State.Local, 
+  game: App.KL.Game
+): DOM
+  let tab_active = local@hud@tab_active
+  let tab_which  = local@hud@tab_which
+
+  // if tab_active then 
+    <div class="pixel-art" style={
+      "position": "fixed"
+      "top": "50%"
+      "left": "50%"
+      "transform": "scale("| App.KL.Game.Phase.Play.draw.fator.string |") translate(-50%, -50%)"
+      "transform-origin": "top left"
+    }>
+      <div style={
+        "position": "relative"
+      }>
+        <img src=App.KL.Game.Phase.Play.Assets.tab.background></img>
+        { App.KL.Game.Phase.Play.draw.tab.close }
+        { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
+        { App.KL.Game.Phase.Play.draw.tab.timer }
+        { App.KL.Game.Phase.Play.draw.tab.content(tab_which) }
+        { App.KL.Game.Phase.Play.draw.tab.controls(tab_which) }
+      </div>
+    </div>
+  // else
+  //   <span style={"display": "none"}></span>
+
+App.KL.Game.Phase.Play.draw.tab.score(score: App.KL.Game.Score): DOM
+  let blue_hp = I32.sub(App.KL.Constants.max_score, score@points@snd)
+  let red_hp  = I32.sub(App.KL.Constants.max_score, score@points@fst)
+  <div style={
+    "position": "absolute"
+    "width": "87%"
+    "top": "5%"
+    "display": "flex"
+    "justify-content": "space-between"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+    "color": "white"
+  }>
+    <span> String.show_clean(I32.show(blue_hp)) </span>
+    <span> String.show_clean(I32.show(red_hp))  </span>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.close: DOM
+  <div style={
+    "position": "absolute"
+    "right": "-12px"
+    "top": "-8px"
+  }>
+    <img src=App.KL.Game.Phase.Play.Assets.tab.button.close></img>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.timer: DOM
+  <div style={
+    "position": "absolute"
+    "top": "8.3%"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+    "color": App.KL.Game.Phase.Play.draw.theme.secondary
+  }>
+    <span>"13:58"</span>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content(tab_which: App.KL.Game.Controls.Hud.Tab): DOM
+  <div style={
+    "left": "1%"
+    "top": "15%"
+    "position": "absolute"
+    "height": "72%"
+    "width": "98%"
+  }>
+    App.KL.Game.Controls.Hud.Tab.show(tab_which)
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.controls(
+  active_tab: App.KL.Game.Controls.Hud.Tab
+): DOM
+  <div style={
+    "position": "absolute"
+    "top": "89%"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+  }>
+    { 
+      App.KL.Game.Phase.Play.draw.tab.controls.button(
+        App.KL.Game.Phase.Play.Assets.tab.button.left,
+        App.KL.Game.Controls.Hud.Tab.stats,
+        active_tab
+      ) 
+    }
+    { 
+      App.KL.Game.Phase.Play.draw.tab.controls.button(
+        App.KL.Game.Phase.Play.Assets.tab.button.middle,
+        App.KL.Game.Controls.Hud.Tab.skills,
+        active_tab
+      ) 
+    }
+    { 
+      App.KL.Game.Phase.Play.draw.tab.controls.button(
+        App.KL.Game.Phase.Play.Assets.tab.button.right,
+        App.KL.Game.Controls.Hud.Tab.recap,
+        active_tab
+      ) 
+    }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.controls.button(
+  img: String, 
+  button_tab: App.KL.Game.Controls.Hud.Tab
+  active_tab: App.KL.Game.Controls.Hud.Tab
+): DOM
+  let tab_text  = String.to_lower(App.KL.Game.Controls.Hud.Tab.show(button_tab))
+  let is_active = App.KL.Game.Controls.Hud.Tab.eql(button_tab, active_tab)
+
+  <div id=tab_text style={"position": "relative", "display": "inline-flex", "margin-right": "1px"}>
+    <img id=tab_text src=img></img>
+    <div id=tab_text style={
+      "position": "absolute"
+      "top": "0"
+      "width": "100%" 
+      "height": "100%" 
+      "display": "flex" 
+      "justify-content": "center"
+      "align-items": "center"
+      "color": "white"
+      "text-transform": "capitalize"
+    }>
+      tab_text
+    </div>
   </div>
 
 App.KL.Game.Phase.Play.draw.interface(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
@@ -68,7 +217,7 @@ App.KL.Game.Phase.Play.draw.interface.casts.item(main: Bool, cast: Maybe<App.KL.
     get hero    = App.KL.Game.Hero.get_by_id(hero_id)
     get skill   = hero@skills{Char.to_string(cast@letter)}
     return hero@name | " - " | skill@name
-  }
+  } <> ""
   <div style={
     "color": "white"
     "background-color": if main && Bool.not(name =? "") then "#2a1956" else "transparent"
@@ -124,7 +273,7 @@ App.KL.Game.Phase.Play.draw.interface.top.timer(moment: App.KL.Game.Moment): DOM
     "right":" 0"
     "text-align":" center"
     "height": "8.5%"
-    "background-color": "#eb6bff"
+    "background-color": App.KL.Game.Phase.Play.draw.theme.secondary
     "border-radius": "2px"
     "width": String.show_clean(F64.show(bar * 44.5)) | "%"
   }>

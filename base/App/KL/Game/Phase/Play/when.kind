@@ -4,6 +4,8 @@ App.KL.Game.Phase.Play.when(
   event: App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
   let room = String.take(16, Crypto.Keccak.hash(local@room))
+  let controls = local@hud
+
   open game
   case event {
     frame:
@@ -11,63 +13,76 @@ App.KL.Game.Phase.Play.when(
       let preview = local@preview <- (local@preview@picks <- picks)
       App.set_local!(App.KL.State.Local.game(preview))
     mouse_move:
+      // mouse move on canvas
       if String.eql("game_screen", event.id) then
         let {x,y} = event.mouse_pos
-        let local = local@hud <- App.KL.Game.State.Local.hud.new(none)
+        let local = local@hud <- local@hud@skill <- none
         let local = local@mouse <- {x / 2, y / 2}
         App.set_local!(App.KL.State.Local.game(local))
+      // mouse move on interface
       else
-        switch String.starts_with(event.id) {
-          "SK":
-            let key = String.drop(2, event.id)
-            Maybe {
-              get user    = game@players{local@user}
-              get hero_id = user@hero_id
-              get hero    = App.KL.Game.Hero.get_by_id(hero_id)
-              get skill   = hero@skills{key}
-              let local   = local@hud <- local@hud@skill <- some(skill)
-              return App.set_local!(App.KL.State.Local.game(local))
-            } <> App.set_local!(App.KL.State.Local.game(local@hud <- local@hud@skill <- none))
-        } default App.set_local!(App.KL.State.Local.game(local@hud <- App.KL.Game.State.Local.hud.new(none)))
+        let default_controls = App.KL.Game.Controls.Hud.initial
+        let controls = 
+          switch String.starts_with(event.id) {
+            // hover on skills
+            "SK":
+              let key = String.drop(2, event.id)
+              Maybe {
+                get user     = game@players{local@user}
+                get hero_id  = user@hero_id
+                get hero     = App.KL.Game.Hero.get_by_id(hero_id)
+                get skill    = hero@skills{key}
+                let controls = local@hud@skill <- some(skill)
+                return controls
+              } <> controls
+          } default controls
+        let local = local@hud <- controls
+        App.set_local!(App.KL.State.Local.game(local))
     key_down:
-      case game@moment {
-        preparation:
-          let preview = local@preview
-          switch U16.eql(event.code) {
-            9#16:
-              let score = case local@score {
-                none: some("score")
-                some: none
-              }
-              let local = local@score <- score
-              App.set_local!(App.KL.State.Local.game(local))
-            27#16:
-              let preview = preview@skill <- none
-              IO {
-                App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_casts)
-                App.set_local!(App.KL.State.Local.game(local@preview <- preview))
-              }
-          }default
-          local = 
-            Maybe {
-              get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
-              let skill       =
-                case preview@skill as skill {
-                  none: 
-                    some({event.code, 1})
-                  some:
-                    if skill.value@fst =? event.code then
-                      none
-                    else 
+      // if tab pressed 
+      if event.code =? 9#16 then
+        let local = App.KL.Game.Phase.Play.when.invert_tab(true, controls, local)
+        App.set_local!(App.KL.State.Local.game(local))
+      else 
+        case game@moment {
+          preparation:
+            let preview = local@preview
+            switch U16.eql(event.code) {
+              
+              27#16:
+                let preview = preview@skill <- none
+                IO {
+                  App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_casts)
+                  App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+                }
+            }default
+            local = 
+              Maybe {
+                get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
+                let skill       =
+                  case preview@skill as skill {
+                    none: 
                       some({event.code, 1})
-                }          
-              return local@preview <- preview@skill <- skill
-            } <> local
-          IO {
-            App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_skill(event.code))
-            App.set_local!(App.KL.State.Local.game(local))
-          }
-      } default App.pass!
+                    some:
+                      if skill.value@fst =? event.code then
+                        none
+                      else 
+                        some({event.code, 1})
+                  }          
+                return local@preview <- preview@skill <- skill
+              } <> local
+            IO {
+              App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_skill(event.code))
+              App.set_local!(App.KL.State.Local.game(local))
+            }
+        } default App.pass!
+    key_up:
+      // if tab released
+      if event.code =? 9#16 then
+        let local = App.KL.Game.Phase.Play.when.invert_tab(false, controls, local)
+        App.set_local!(App.KL.State.Local.game(local))
+      else
+        App.pass!
     mouse_down: 
       case game.moment {
         initial:
@@ -79,7 +94,41 @@ App.KL.Game.Phase.Play.when(
           let preview = preview@skill <- none
           App.set_local!(App.KL.State.Local.game(local@preview <- preview))
       }
+    mouse_click:
+      // switch tab
+      let local = App.KL.Game.Phase.Play.when.switch_tab(event.id, local)
+      App.set_local!(App.KL.State.Local.game(local))
   } default App.pass!
+
+App.KL.Game.Phase.Play.when.switch_tab(
+  event_id: String
+  local: App.KL.Game.State.Local
+): App.KL.Game.State.Local
+  let controls = local@hud
+  let actual_tab = controls@tab_which
+  let to_string  = App.KL.Game.Controls.Hud.Tab.show
+  let stats  = App.KL.Game.Controls.Hud.Tab.stats
+  let skills = App.KL.Game.Controls.Hud.Tab.skills
+  let recap  = App.KL.Game.Controls.Hud.Tab.recap
+  let tab = switch String.eql(event_id) {
+    to_string(stats): stats
+    to_string(recap): recap
+    to_string(skills): skills
+  } default actual_tab
+
+  let controls = controls@tab_which <- tab
+  let local = local@hud <- controls
+  local
+
+App.KL.Game.Phase.Play.when.invert_tab(
+  active: Bool
+  controls: App.KL.Game.Controls.Hud
+  local: App.KL.Game.State.Local
+): App.KL.Game.State.Local
+  let tab        = controls@tab_active <- active
+  let controls   = controls@tab <- tab
+  let local      = local@hud <- controls
+  local
 
 App.KL.Game.Phase.Play.when.initial.mouse_down(room: String, local: App.KL.Game.State.Local, game: App.KL.Game): IO<Maybe<App.State.local<App.KL.State>>>
   let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
