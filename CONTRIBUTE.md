@@ -248,9 +248,40 @@ subset of the language. That would bring several benefits.
    in the past, but isn't currently available. Adding linear types would allow
    us to compile it soundly to optimal evaluators in a sound manner.
 
+3. **Consistency/Termination checkers.** Adding linear types will make the job
+   of making a consistency checker easier. Check the section below.
+
 Adding linearity checker to the compiler isn't a PhD-level task, but it requires
 some experience with functional programming, a lot of patience and knowledge
 about our type checker. Contact us if you are interested!
+
+## Add a consistency checker
+
+Compared to other proof languages, kind takes an inverted approach. Instead of
+consistency being default and expressivity being opt-in, here, expressivity is
+default and consistency is a planned opt-in. That means you're allowed to write
+programs with no restrictions, just like most traditional languages like Haskell
+or JavaScript, as long as they're total and well-typed. But that means programs
+that do not halt, and logical paradoxes, are also expressive.
+
+Regardless, there are several terminating, consistent subsets of Kind, each
+admiting different kinds of programs. For example, with structural recursion,
+we're allowed to have Agda-like proofs, but no `Type:Type`. Under elementary
+affine logic, we're allowed to have `Type:Type`, but not certain forms of nested
+loops. Adding checkers for different consistent subsets would be a nice feature.
+
+For the end user, this could be presented as an icon when type-checking. For
+example:
+
+```
+$ kind Nat.add
+
+Nat.add: (n:Nat) (m:Nat) Nat ✓ ⊤
+
+All terms check.
+```
+
+With `✓` standing for "well-typed" and `⊤` standing for "terminating".
 
 ## Research how to add HoTT features:
 
