@@ -1,10 +1,9 @@
 # Contributing
 
 Want to contribute? Here are some things we need, but aren't currently doing. If
-you want to work in any of these, contact us for instructions!
-
-I'm currently adding items as I remember, so this list isn't complete right now.
-Help me think in more things to add!
+you want to work in any of these, [contact us](http://t.me/formality_lang) for
+instructions! I'm currently adding items as I remember, so this list isn't
+complete right now. Help me think in more things to add!
 
 ## Improve base:
 
