@@ -1,4 +1,4 @@
-Ether.RLP.encoding_(tree : Ether.RLP.Tree) : List<Bits>
+Ether.RLP.encode.bytes(tree : Ether.RLP.Tree) : List<Bits>
   case tree {
       tip : 
         let bytes_size = Nat.max(Bits.length(tree.value) / 8, 1)
@@ -10,7 +10,7 @@ Ether.RLP.encoding_(tree : Ether.RLP.Tree) : List<Bits>
       list : 
         let bytes = []
         for item in tree.value with bytes :
-          bytes ++ Ether.RLP.encoding_(item)
+          bytes ++ Ether.RLP.encode.bytes(item)
         let bytes_size = List.foldr!!(0, (x, y) Nat.max((Bits.length(x) / 8), 1) + y, bytes)
         Ether.RPL.encode_length(bytes_size, 192) ++ bytes
   }
@@ -31,14 +31,14 @@ Ether.RPL.encode_binary(value : Nat) : List<Bits>
   else
     Ether.RPL.encode_binary(value / 256) ++ [Nat.to_bits(value % 256)]
 
-Ether.RLP.encoding.read(bits : List<Bits>) : String
+Ether.RLP.encode.read(bits : List<Bits>) : String
   let hexfify = List.map!!((x) String.pad_left(2, '0', String.reverse(Bits.hex.encode(x))), bits)
   "0x" | String.join("", hexfify)
 
-Ether.RLP.encoding : _
+Ether.RLP.encode : _
  //log(Nat.show(Bits.length(Nat.to_bits(10))))
   let hello = Bits.read("0111010001001110101001100000111010110110101001101100111000000100100001101001011001110110100101101100011010000110001101100000010010110110100001101010111010001110000001001010111010100110000001001010011010101110100011101010011001110110000001001010011010010110001011101100111010100110001101101111011010110110000001001010011011001110110011101001011000100110011101101010011000001110110011101010111011001010000001000111010010000110001101101010111011100110100101100011011000000100101011101010011000000100011101101001011000100110101011100010111010010110110001101001011000110110001101101111011011001110000001000011010000100110100101100000010011001110100101100010111010000110011101101010011001110110101001100110111000000100100001100000010010000110001001101001011001101110100001100100111011100110000001000011010010110110101001101100111000000100101101101000011010101110100011100000010010100110101011101000111011001110100101101010111010001010")
-  let xs = Ether.RLP.encoding_(
+  let xs = Ether.RLP.encode.bytes(
     Ether.RLP.Tree.list([
       Ether.RLP.Tree.list([
         Ether.RLP.Tree.tip(hello),
@@ -46,6 +46,6 @@ Ether.RLP.encoding : _
         Ether.RLP.Tree.tip(hello)
       ])]
     ))
- // let xs = Ether.RLP.encoding_(Ether.RLP.Tree.tip(hello))
+ // let xs = Ether.RLP.encode.bytes(Ether.RLP.Tree.tip(hello))
     
-  Ether.RLP.encoding.read(xs)
+  Ether.RLP.encode.read(xs)
