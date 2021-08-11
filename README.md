@@ -52,7 +52,7 @@ Things you can do with Kind:
 
 ### Compile programs and modules to several targets.
 
-Kind has an universal compiler that targets several back-ends. Just find what you need on Kind, and compile it with `kind Main --lang`. For example, to generate a QuickSort function in JavaScript, just type `kind List.quicksort --js`. You may never write code in any other language! Available targets: `--js`, `--scm`. Several more will be available this month.
+Kind has an universal compiler that targets several back-ends. Just find what you need on Kind, and compile it with `kind Main --lang`. For example, to generate a QuickSort function in JavaScript, just type `kind List.quicksort --js`. You may never write code in any other language! Available targets: `--js`, `--scm`. Several more will be available eventually.
 
 ### Create live applications.
 
