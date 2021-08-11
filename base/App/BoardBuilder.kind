@@ -9,17 +9,26 @@ type App.BoardBuilder.State.local {
 
 type App.BoardBuilder.State.global {
   new(
-    board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
+    terrains:  Hexagonal.Axial.Map<App.KL.Game.Terrain>
+    tokens:    Hexagonal.Axial.Map<App.KL.Game.Token>
+    bases:     Hexagonal.Axial.Map<App.KL.Game.Team>
+    initial:   Hexagonal.Axial.Map<App.KL.Game.Team>
+    landscape: Hexagonal.Axial.Map<App.KL.Game.Terrain>
   )
 }
 
 // Initial state
 App.BoardBuilder.init: App.Init<App.BoardBuilder.State>
   let room = ""
-  let board = Hexagonal.Axial.Map.new!
+  let terrains  = Hexagonal.Axial.Map.new<App.KL.Game.Terrain>
+  let tokens    = Hexagonal.Axial.Map.new<App.KL.Game.Token>
+  let bases     = Hexagonal.Axial.Map.new<App.KL.Game.Team>
+  let initial   = Hexagonal.Axial.Map.new<App.KL.Game.Team>
+  let landscape = Hexagonal.Axial.Map.new<App.KL.Game.Terrain>
+
   App.Store.new<App.BoardBuilder.State>(
     App.BoardBuilder.State.local.lobby(App.BoardBuilder.Lobby.State.local.new(room))//, canvas_size, mouse, actual_terrain, none, ""), 
-    App.BoardBuilder.State.global.new(board)
+    App.BoardBuilder.State.global.new(terrains, tokens, bases, initial, landscape)
   )
 
 // Render function

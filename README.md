@@ -2,7 +2,7 @@
 
 A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. That means it can handle mathematical theorems just like Coq, Idris, Lean and Agda. On the surface, it aims to be more practical and looks more like TypeScript. Compared to other proof assistants, Kind has:
 
-1. The smallest core. Check this [700-LOC](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) reference implementation. It has the whole type system!
+1. The smallest core. Check [FormCore.js](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) or [Core.kind](https://github.com/uwu-tech/Kind/blob/master/base/Kind/Core.kind). Both are `< 1000-LOC` complete implementations!
 
 2. Novel type-level features. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
 
@@ -60,7 +60,7 @@ Kind has an interconnected back-end that allows you to create rich, interactive 
 
 ### Prove theorems.
 
-No, theorems are not scary things mathematicians do. For programmers, they're more like unit tests, except they can involve symbols, allowing you to cover infinitely many test cases. If you like unit tests, you'll love theorems. To learn more, check [THEOREMS.md](THEOREMS.md).
+No, theorems are not scary things mathematicians do. For programmers, they're more like unit tests, except they can involve symbols, allowing you to cover infinitely many test cases. If you like unit tests, you'll love theorems. To learn more, check [THEOREMS.md](THEOREMS.md). You can also compile Kind programs and proofs to a minuscle core language with the `--fmc` flag (example: `kind Nat.add.assoc --fmc`). Try it!
 
 ### Deploy Smart-Contracts.
 

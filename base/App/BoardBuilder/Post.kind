@@ -5,14 +5,64 @@ App.BoardBuilder.Post: App.Post<App.BoardBuilder.State>
       none: glob
       some:
         case eventglob.value as event {
-          add: glob@board <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@board)
-          del: glob@board <- Hexagonal.Axial.Map.delete!(event.coord, glob@board)
+          terrain_add: 
+            glob = glob@terrains  <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@terrains)
+            glob = glob@landscape <- Hexagonal.Axial.Map.delete!(event.coord, glob@landscape)
+            glob
+          terrain_del: 
+            glob = glob@terrains <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
+            glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
+            glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
+            glob
+          landscape_add:
+            glob = glob@landscape <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@landscape)
+            glob = glob@terrains  <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
+            glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
+            glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
+            glob
+          landscape_del: 
+            glob = glob@landscape <- Hexagonal.Axial.Map.delete!(event.coord, glob@landscape)
+            glob
+          bases_add:
+            case Hexagonal.Axial.Map.get!(event.coord, glob@terrains) {
+              none: 
+                glob 
+              some:
+                glob@bases <- Hexagonal.Axial.Map.set!(event.coord, event.team, glob@bases)
+            }
+          bases_del:
+            glob@bases <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
+          initial_add:
+            glob = glob@initial   <- Hexagonal.Axial.Map.set!(event.coord, event.team, glob@initial)
+            glob = glob@terrains  <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
+            glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
+            glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
+            glob
+          initial_del:
+            glob@initial <- Hexagonal.Axial.Map.delete!(event.coord, glob@initial)
+          token_add:
+            case Hexagonal.Axial.Map.get!(event.coord, glob@terrains) {
+              none: 
+                glob 
+              some:
+                glob@tokens <- Hexagonal.Axial.Map.set!(event.coord, event.token, glob@tokens)
+            }
+          token_del:
+            glob@tokens <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
         }   
     }
 
 type App.BoardBuilder.Post.Event {
-  add(coord: Hexagonal.Axial, field_id: Nat)
-  del(coord: Hexagonal.Axial)
+  terrain_add(coord: Hexagonal.Axial, field_id: Nat)
+  terrain_del(coord: Hexagonal.Axial)
+  landscape_add(coord: Hexagonal.Axial, field_id: Nat)
+  landscape_del(coord: Hexagonal.Axial)
+  bases_add(coord: Hexagonal.Axial, team: App.KL.Game.Team)
+  bases_del(coord: Hexagonal.Axial)
+  initial_add(coord: Hexagonal.Axial, team: App.KL.Game.Team)
+  initial_del(coord: Hexagonal.Axial)
+  token_add(coord: Hexagonal.Axial, token: App.KL.Game.Token)
+  token_del(coord: Hexagonal.Axial)
 } deriving (serializer, deserializer)
 
 App.BoardBuilder.Post.Event.serialize_post(ev: App.BoardBuilder.Post.Event): String
