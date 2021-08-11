@@ -60,7 +60,7 @@ Kind has an interconnected back-end that allows you to create rich, interactive 
 
 ### Prove theorems.
 
-No, theorems are not scary things mathematicians do. For programmers, they're more like unit tests, except they can involve symbols, allowing you to cover infinitely many test cases. If you like unit tests, you'll love theorems. To learn more, check [THEOREMS.md](THEOREMS.md).
+No, theorems are not scary things mathematicians do. For programmers, they're more like unit tests, except they can involve symbols, allowing you to cover infinitely many test cases. If you like unit tests, you'll love theorems. To learn more, check [THEOREMS.md](THEOREMS.md). You can also compile Kind programs and proofs to a minuscle core language with the `--fmc` flag (example: `kind Nat.add.assoc --fmc`). Try it!
 
 ### Deploy Smart-Contracts.
 
