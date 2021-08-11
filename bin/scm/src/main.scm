@@ -4,11 +4,11 @@
 (let ([args (cdr (command-line))])
   (if (null? args)
     (print-lines
-    '("# kind-scm 1.0.83"
+    '("# kind-scm 1.0.85"
       ""
       "Usage:"
       ""
-      "  kind-scm Module/               # type-checks a module (TODO)"
+      "  kind-scm Module/               # type-checks a module"
       "  kind-scm Module/file.kind      # type-checks a file"
       "  kind-scm full_term_name --run  # runs a term"
       "  kind-scm full_term_name --show # prints a term"
