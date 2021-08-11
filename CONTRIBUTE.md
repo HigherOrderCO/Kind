@@ -4,13 +4,13 @@ Want to contribute? Here are some things we need. If
 you want to work in any of these, [contact us](http://t.me/formality_lang) for
 instructions!
 
-## Funding:
+## Funding
 
 We're self-funded. More funds = more devs = more cool features. 
 
 If you'd like to help with donations, grants or funding, obviously let us know (:
 
-## Improve base:
+## Improve base
 
 The best way to start contributing (and to get familiar with the codebase) is to
 just add files to `base`. Kind's
@@ -70,7 +70,7 @@ Word.float.gtn
 
 Adding these would be great.
 
-## Add another back-end:
+## Add another back-end
 
 Are you a full-time JavaScript developer that doesn't like JavScript?  You can
 just use Kind as your main language, compile it to JS with `kind Your.Term --js`
@@ -80,7 +80,7 @@ backends, as many as possible. Adding a new back-end is somewhat simple: just
 add its syntax on
 [base/Kind/Comp/Target](https://github.com/uwu-tech/Kind/tree/master/base/Kind/Comp/Target)!
 
-## Add a rich geometry library:
+## Add a rich geometry library
 
 We have some very primtive 3D vector operations, but not much else. For game
 development purposes, it would be amazing to have a rich library of geometric
@@ -94,14 +94,14 @@ type allows rendering text, HTML nodes and pixelated canvas. It would be amazing
 to have a render mode that integrated with WebGL. If you'd like to work on that,
 contact us for more instructions!
 
-## Create apps:
+## Create apps
 
 Sounds silly, but just creating apps using the `App` type would be amazing. Any
 app added to `base/App` will show up on [http://uwu.tech/](http://uwu.tech).
 Sadly, we don't have a tutorial on how apps work, but it should be learnable
 from looking the examples.
 
-## Get rid of FormCoreJS:
+## Get rid of FormCoreJS
 
 Right now, the JavaScript compiler on
 [JavaScript.kind](https://github.com/uwu-tech/Kind/tree/master/base/Kind/Comp/Target)
@@ -113,7 +113,7 @@ back-end will produce much worse JS code than the Node.js back-end, among other
 issues. It would be nice to improve `JavaScript.kind` to make it as efficient as
 `FmcToJs.js`, allowing us to get rid of the JavaScript dependency.
 
-## Improve the pair syntax:
+## Improve the pair syntax
 
 There are many missing syntaxes. For example, we don't have a syntax for
 quadruples, triples, only pairs. We also can't destruct triples, quadruples. We
@@ -209,7 +209,16 @@ a wrapper that could use `stringifier`, and `serialize` is just a wrapped that
 could use `serializer`. Regardless, these are TODOs. Adding these would be
 great.
 
-## Re-add optimal evaluators:
+## Add implicits
+
+One of the main sources of verbosity in Kind is the lack of implicit arguments.
+That is partly improved by holes and `!`. For example, `Pair.new` can be written
+as `Pair.new<Nat,Nat>(1,2)`, or `Pair.new<_,_>(1,2)`, or `Pair.new!!(1,2)`. It
+would be better to write just `Pair.new(1,2)`. It is not clear how to add implicit
+arguments to Kind without making some undesirable compromises, but it would be
+a great improvement.
+
+## Re-add optimal evaluators
 
 Past versions of Kind/Formality had an option to compile programs to optimal
 λ-calculus evaluators, which allowed us to explore these, using the language
@@ -217,14 +226,14 @@ syntax. Sadly, this isn't available anymore. Re-adding would be amazing. In
 order to do that, the shortest path would be to port the code in [this
 repository](https://github.com/MaiaVictor/abstract-algorithm) to Kind.
 
-## Implement an EVM compiler:
+## Implement an EVM compiler
 
 Implement a compiler from the low-order, linear λ-calculus to the EVM. Doing so
 is completely viable and will result in efficient smart-contracts. Once we have
 this, plus linear types, Kind will be able to be used as a smart-contract
 language. Contact us for more instructions.
 
-## Add linear types:
+## Add linear types
 
 Adding linear types would allow us to separate the linear from the non-linear
 subset of the language. That would bring several benefits.
@@ -288,7 +297,7 @@ All terms check.
 
 With `✓` standing for "well-typed" and `⊤` standing for "terminating".
 
-## Research how to add HoTT features:
+## Research how to add HoTT features
 
 While we have some interesting insights on the matter (check [this blog
 post](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md)),
