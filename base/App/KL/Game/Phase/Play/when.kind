@@ -11,8 +11,6 @@ App.KL.Game.Phase.Play.when(
       let preview = local@preview <- (local@preview@picks <- picks)
       open local 
       let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      open coord
-      log(String.show_clean(I32.show(coord.i)) | " - " | String.show_clean(I32.show(coord.j)))
       App.set_local!(App.KL.State.Local.game(preview))
     mouse_move:
       if String.eql("game_screen", event.id) then
