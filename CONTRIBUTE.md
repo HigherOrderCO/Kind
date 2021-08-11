@@ -7,8 +7,9 @@ complete right now. Help me think in more things to add!
 
 ## Funding:
 
-We're self-funded. More funds = more devs = more cool features. If you'd like to 
-help with donations, grants or funding, obviously let us know (:
+We're self-funded. More funds = more devs = more cool features. 
+
+If you'd like to help with donations, grants or funding, obviously let us know (:
 
 ## Improve base:
 
