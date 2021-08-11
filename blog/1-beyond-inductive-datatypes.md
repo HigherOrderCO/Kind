@@ -14,6 +14,14 @@ impossible in conventional proof assistants.
 A quick recap of Self-Types in Kind
 -----------------------------------
 
+
+> Self-types can be described briefly. The dependent function type, `∀ (x : A) -> B(x)`
+> allows the type returned by a function call, `f(x)`, to depend on the value of the 
+> argument, `x`. The self-dependent function type, `∀ f(x : A) -> B(f,x)` allows the
+> type returned by a function call, `f(x)`, to also depend on the value of the function,
+> `f`. That is sufficient to encode all the inductive datatypes and proofs present in 
+> traditional proof languages, as well as many other things.
+
 To get started, let's recap how Self-Types work in Kind. Let's start by defining
 the `Nat` type, a simple recursive function, and an inductive proof:
 
