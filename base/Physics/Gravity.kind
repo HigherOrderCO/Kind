@@ -1,7 +1,7 @@
 // calculates te gravitational field of a mass in space
 Physics.Gravity(pos: V2, mass: F64): Physics.Field
   (p)
-    let diff = p - pos
+    let diff = pos - p
     let diff_norm = F64.sqrt(V2.dot(diff, diff))
     let denominator = F64.pow(diff_norm, 3)
     V2.scale(mass/denominator, diff)

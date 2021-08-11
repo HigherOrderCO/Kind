@@ -1,35 +1,53 @@
-App.KL.Game.Phase.Draft.draw(local: App.KL.Game.State.Local, global: App.KL.Global.State): DOM
+App.KL.Game.Phase.Draft.draw(
+  local: App.KL.Game.State.Local, 
+  global: App.KL.Global.State
+): DOM
   open global
-  case global.game as game {
-    none: <div>"no game"</div>
-    some:
-      <div style={ 
-        "width": "100vw"
-        "height": "100vh"
-        "display": "flex"
-        "justify-content": "center"
-        "align-items": "center"
-      }>
-        {App.KL.Game.Phase.Draft.draw.main(local@tab, game.value@players, local@room, local@user)}
-      </div>
-  }
-
-App.KL.Game.Phase.Draft.draw.main(tab: String, players: Map<App.KL.Game.Player>, room: String, user: String): DOM
-  let player = players{user}
-  let normal = [App.KL.Game.Phase.Draft.draw.top(tab, players, user),  App.KL.Game.Phase.draft.draw.bottom(players, room, user)]
-  let select = [App.KL.Game.Phase.Draft.draw.choose_team(players)]
-  let draw = 
-    case player {
-      none: [<div>"no player"</div>]
-      some:
-        let team = player.value@team
-        case team{
-          blue:   normal
-          red:    normal
-        }default  select
-
-    }
+  without global.game: <div>"No game"</div> // impossible
   
+  App.KL.Game.Phase.Draft.draw.choose_page(global.game@players, local@page, local@tab, local@room, local@user, local@filter)
+
+// choose what page draw based on team
+App.KL.Game.Phase.Draft.draw.choose_page(
+  players: Map<App.KL.Game.Player>,
+  page: String,
+  tab:  Maybe<String>,
+  room: String,
+  user: String,
+  filter: App.KL.Game.Phase.Draft.Filter
+): DOM
+  let player = players{user}
+  without player: <div>"No player"</div> // impossible
+
+  let team_page = App.KL.Game.Phase.Draft.draw.choose_team(players)
+    
+  let team = player@team
+  case team {
+    // if any team is selected go to main draft selection
+    // pass only allies
+    blue:   App.KL.Game.Phase.Draft.draw.main(App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user, filter)
+    red:    App.KL.Game.Phase.Draft.draw.main(App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user, filter)
+  } default team_page // if no team is selected go to team selection
+
+// aux function to filter players according with 
+// its respective team
+App.KL.Game.Phase.Draft.draw.choose_page.filter_team(
+  players: Map<App.KL.Game.Player>
+  team: App.KL.Game.Team
+): Map<App.KL.Game.Player>
+  let result = {}
+  for id:player in players with result:
+    if App.KL.Game.Team.eql(player@team, team) then
+      result{id} <- player
+    else
+      result
+  result
+
+// CHOOSE TEAM SCREEN
+// ----------
+App.KL.Game.Phase.Draft.draw.choose_team(
+  players: Map<App.KL.Game.Player>
+): DOM
   <div style={ 
     "width": "100vw"
     "height": "100vh"
@@ -39,28 +57,20 @@ App.KL.Game.Phase.Draft.draw.main(tab: String, players: Map<App.KL.Game.Player>,
     "align-items": "center"
     "font-size": "2rem"
   }>
-    for div in draw: div
-  </div>
-  
-// CHOOSE TEAM SCREEN
-// ----------
-App.KL.Game.Phase.Draft.draw.choose_team(players: Map<App.KL.Game.Player>): DOM
-  <div style={ 
-    // "width": "60%"
-    // "height": "30%"
-    "display": "flex"
-    "justify-content": "center"
-    "flex-wrap": "wrap"
-  }>
-    {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
-    {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
+    <div style={ 
+      // "width": "60%"
+      // "height": "30%"
+      "display": "flex"
+      "justify-content": "center"
+      "flex-wrap": "wrap"
+    }>
+      {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
+      {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
+    </div>
   </div>
 
-// draft.blue and draft.red are the same function
-// the only thing that change is linear-gradient and id
-// the parameter players isnt used in both
 App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
-  let player_list   = Map.to_list!(players) // List<Pair<String, App.KL.Game.Player>>
+  let player_list   = Map.to_list!(players) // TODO BBT.count
   let fun = 
     (x)
       let y = x@snd@team
@@ -90,478 +100,543 @@ App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>
   </button>
 
 
-
-// TOP DRAFT LAYOUT
+// DRAFT LAYOUT
 // ==============================
+App.KL.Game.Phase.Draft.draw.main(
+  allies: Map<App.KL.Game.Player>, 
+  page: String
+  tab:  Maybe<String>,
+  user: String,
+  filter: App.KL.Game.Phase.Draft.Filter
+): DOM
+  <div class="pixel-art" style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
+      {App.KL.Game.Phase.Draft.draw.background}
 
-// draw top layout of draft screen
-// it contains position and card info about the player and allies
-App.KL.Game.Phase.Draft.draw.top(tab: String, players: Map<App.KL.Game.Player>, user: String): DOM
-  // get team of user
-  let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
-  // choose color to show based on team
-  let color  = case team {
-    blue:   "linear-gradient(#3fbcf2, #3791d4)"
-    red:    "linear-gradient(#ff6666, #ff4d4d)"
-  }default  "linear-gradient(#94b8b8, #75a3a3)"
+      <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
+        <header style={"background-image": "url(https://i.imgur.com/duRFrIR.png)", "width": "100%", "height": "64px", "display": "flex", "justify-content": "space-between", "padding": "0 5px"}>
+          <div style={"display": "flex"}>
+          
+          </div>
+          <div style={"display": "flex", "justify-content": "flex-end"}>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.invite style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.help   style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.list   style={"height": "100%", "cursor": "not-allowed"}></img>
+            <img src=App.KL.Game.Phase.Draft.draw.assets.header.button.logout style={"height": "100%", "cursor": "not-allowed"}></img>
+          </div>
+        </header>
+        <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
+          <div style={"display": "flex", "padding": "4px"}>
+            { App.KL.Game.Phase.Draft.draw.main.middle(allies, page, tab, user, filter) }
+          </div>
 
-  // mount top layout
-  <div style={ 
-    "width": "100%"
-    "height": "60%"
-    "display": "flex"
-    "background-image": color
-    "align-items": "center"
-    "justify-content": "center"
-  }>
-    <div style={  
-      "width": "100%"
-      "max-width": "1440px"
-      "height": "100%"
-      "display": "flex"
-      "background-image": color
-      "align-items": "center"
-      "justify-content": "center"
-    }>
-      {App.KL.Game.Phase.Draft.draw.coordinates(players, user)} // draw coord positions
-      {App.KL.Game.Phase.Draft.draw.cards(tab, players, user)} // draw card info about user and allies
-    </div>
-  </div>
-
-// BOTTOM DRAFT LAYOUT
-// ------
-
-// draw bottom of layout
-// it contains the heroes that can be choosen
-App.KL.Game.Phase.draft.draw.bottom(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
-  <div style={ 
-    "width": "100%"
-    "height": "40%"
-    "display": "flex"
-    "background-image": "linear-gradient(#0e0c0e, #242324)"
-    "justify-content": "center"
-    "align-items": "center"
-  }>
-    <div style={ 
-      "width": "100%"
-      "max-width": "1440px" 
-      "display": "flex"
-      "justify-content": "center"
-      "align-items": "center"
-    }>
-      { App.KL.Game.Phase.Draft.draw.menu(players)}
-      { App.KL.Game.Phase.Draft.draw.ready_button(players, room, user)}
-    </div>
-  </div>
-
-// CHOICE OF COORDINATES 
-// ============================
-
-// draw coord positions on the left of top layout
-App.KL.Game.Phase.Draft.draw.coordinates(players: Map<App.KL.Game.Player>, user: String): DOM
-  <div style={ 
-    "width": "30%"
-    "height": "100%"
-    "display": "flex"
-    "align-items": "center"
-    "padding": "10% 0px 10% 2%"
-  }>
-    {App.KL.Game.Phase.Draft.draw.map_space(players, user)}
-  </div>
-
-// wrap hexagons in a div
-App.KL.Game.Phase.Draft.draw.map_space(players: Map<App.KL.Game.Player>, user: String): DOM
-  <div style={ 
-    "width": "100%"
-    "height": "0"
-    "border": "5px solid #d6dadc"
-    "border-radius": "15px"
-    "background-color": "#d6dadc"
-    "position": "relative"
-    "padding-top": "100%"
-  }>  
-    for div in App.KL.Game.Phase.Draft.draw.tiles(players, user): div
-  </div>
-
-// get all positions of the hexagons that will be draw
-// based on the user team
-App.KL.Game.Phase.Draft.draw.tiles.get_pos(team: App.KL.Game.Team): List<Hexagonal.Axial>
-      
-  let a = Hexagonal.Axial.new(1,-2)
-  let b = Hexagonal.Axial.new(0,-1)
-  let c = Hexagonal.Axial.new(1,-1)
-  let d = Hexagonal.Axial.new(0, 0)
-  let e = Hexagonal.Axial.new(-1,1)
-  let f = Hexagonal.Axial.new(0, 1)
-  let g = Hexagonal.Axial.new(-1,2)
-
-  let one = Hexagonal.Axial.new(-1,0) // Team 1's edge
-  let two = Hexagonal.Axial.new(1, 0) // Team 2's edge
-
-  case team {
-    blue: List.map!!(App.KL.Game.Phase.Draft.draw.tiles.get_pos.offset(App.KL.Game.Team.blue), [a,b,c,d,e,f,g,one])
-    red : List.map!!(App.KL.Game.Phase.Draft.draw.tiles.get_pos.offset(App.KL.Game.Team.red ), [a,b,c,d,e,f,g,two])
-  } default []
-
-
-// offset coords to respective team's corners
-App.KL.Game.Phase.Draft.draw.tiles.get_pos.offset(team: App.KL.Game.Team, coord: Hexagonal.Axial): Hexagonal.Axial
-  open coord
-  map_size = App.KL.Constants.board_size - 1
-  case team{
-    blue: Hexagonal.Axial.new(coord.i - map_size, coord.j)
-    red : Hexagonal.Axial.new(coord.i + map_size, coord.j)
-  } default coord
-
-// get player at `coord` coordinate
-App.KL.Game.Phase.Draft.draw.get_player_at(players: Map<App.KL.Game.Player>, coord: Hexagonal.Axial): Maybe<Pair<String, App.KL.Game.Player>>
-  let fun = 
-    (x)
-      open x
-      let pos = x.snd@init_pos
-      case pos {
-        none: false
-        some: Hexagonal.Axial.eql(pos.value, coord)
-      }
-  List.find!(fun, Map.to_list!(players)) 
-
-// create all hexagons that will be draw
-App.KL.Game.Phase.Draft.draw.tiles(players: Map<App.KL.Game.Player>, user: String): List<DOM> //tiles or tiles
-  team        = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
-  coords      = App.KL.Game.Phase.Draft.draw.tiles.get_pos(team)
-  player_list = [] 
-  tiles_list  = []
-
-  // Filtering players with coords
-  for coord in coords with player_list:
-    player = App.KL.Game.Phase.Draft.draw.get_player_at(players, coord)
-    case player {
-      none: {coord, none} & player_list
-      some: {coord, some(player.value@fst)} & player_list
-    }
-  
-  for pair in player_list with tiles_list:
-    App.KL.Game.Phase.Draft.draw.tiles.go(team, pair@fst, pair@snd, user) & tiles_list
-  
-  tiles_list
-
-// create one hexagon the will be draw
-App.KL.Game.Phase.Draft.draw.tiles.go(team: App.KL.Game.Team, coord: Hexagonal.Axial, id: Maybe(String), user: String): DOM
-  let nat    =  Hexagonal.Axial.to_nat(coord)
-  let {x, y} =  App.KL.Game.Phase.Draft.draw.tiles.to_xy(coord, team) // calculate x,y position based on i,j coord
-  let top    =  Nat.show(U32.to_nat(y)) | "%"
-  let left   =  Nat.show(U32.to_nat(x)) | "%"
-  let size   =  Nat.show(U32.to_nat((App.KL.Constants.draft_hexagon_radius*2) -1)) | "%" 
-  let margin =  Nat.show(U32.to_nat((App.KL.Constants.draft_hexagon_radius)))
-  let color  =  
-    case id {
-      none: "#B97A57"
-      some: 
-        if String.eql(user, id.value) then "#0FB735"
-        else "#4B97E2"
-    }
-  
-  <div id="C" | Nat.show(nat) style={
-    "width": size
-    "height": size
-    "margin": "-" | margin | "% 0px 0px -" | margin | "%"
-    "position": "absolute"
-    "top":  top
-    "left": left
-    "clip-path": "polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%)"
-    "background": color
-  }></div>
-
-// calculate x,y position based on i,j coord
-// TODO: currently it all works with percentages (50%, 8%), should it be changed to px?
-App.KL.Game.Phase.Draft.draw.tiles.to_xy(
-  coord: Hexagonal.Axial,
-  team: App.KL.Game.Team
-): Pair<U32,U32>
-
-  // offset in i to centralize the hexagon
-  i_offset = case team {
-    blue: App.KL.Constants.board_size - 1
-    red:  I32.neg(App.KL.Constants.board_size -1 )   
-  } default +0#32
-
-  open coord
-  i = coord.i + i_offset
-  j = coord.j
-  
-  i = I32.to_f64(i)
-  j = I32.to_f64(j)
-
-  int_rad = U32.to_f64(App.KL.Constants.draft_hexagon_radius)
-  hlf     = F64.div(int_rad, 2.0#64)
-  int_screen_center_x = 50.0
-  int_screen_center_y = 50.0
-  
-  cx = int_screen_center_x + j * int_rad  // screen_center + j * rad
-  cx = cx + i * int_rad * 2 // screen_center + j * rad + i * 2rad
-  cy = int_screen_center_y + j * hlf * 3 // screen_center + j * (3rad/2)
-  // let cy = F64.add(cy, j)
-  cx = F64.to_u32(cx)
-  y  = cy + 0.5 // to round correctly
-  cy = F64.to_u32(cy)
-  {cx, cy}
-
-// CARD INFO FOR USER AND ALLIES
-// ===================================
-
-// draw card info for user and allies
-App.KL.Game.Phase.Draft.draw.cards(tab: String, players: Map<App.KL.Game.Player>, user: String): DOM
-  let team   = App.KL.Game.Phase.Draft.to_team(players, user) <> App.KL.Game.Team.neutral
-  let player = players{user}
-  let allies = Map.delete!(user, players)
-  let hero   = 
-    Maybe {
-      get player  = player
-      get hero_id = player@hero_id
-      get hero    = App.KL.Game.Hero.get_by_id(hero_id)
-      return hero
-    }
-
-
-  <div style={
-    "width": "70%"
-    "height": "80%"
-    "display": "flex"
-  }>
-    { App.KL.Game.Phase.Draft.draw.cards.card(some(tab), player, hero)} // draw card info for user
-    for div in App.KL.Game.Phase.Draft.draw.cards.allies(allies, team): div // draw card info for allies
-  </div>
-
-
-// ALLIES
-// -----
-
-App.KL.Game.Phase.Draft.draw.cards.allies(map: Map<App.KL.Game.Player>, team: App.KL.Game.Team): List<DOM>
-  teammates = []
-  for id:player in map with teammates:
-    if App.KL.Game.Team.eql(team, player@team) then
-      {id, player} & teammates
-    else
-      teammates
-  count = 2 - List.length!(teammates)
-  
-  dom   = []
-  for i from 0 to count with dom:
-    App.KL.Game.Phase.Draft.draw.cards.ally("none", none) & dom
-  for pair in teammates with dom:
-    App.KL.Game.Phase.Draft.draw.cards.ally(pair@fst, some(pair@snd)) & dom
-
-  dom
-
-App.KL.Game.Phase.Draft.draw.cards.ally(user: String, player: Maybe(App.KL.Game.Player)): DOM
-  let {player, hero} = 
-    case player {
-      none: {none, none}
-      some: 
-        Maybe {
-          get hero_id = player.value@hero_id
-          get hero = App.KL.Game.Hero.get_by_id(hero_id)
-          return {some(player.value), some(hero)}
-        } <> {some(player.value), none}
-    }
-  App.KL.Game.Phase.Draft.draw.cards.card(none, player, hero)
-
-App.KL.Game.Phase.Draft.draw.cards.skills(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, skill_key: String, width: String): DOM
-  case tab {
-    none: <div></div>
-    some:
-      let background =
-        if tab.value =? skill_key then
-          "#d6dadc"
-        else
-          "#Bfc6c9"
-      <div id="D" | skill_key style={
-        "width": width
-        "height": "100%"
-        //"margin": "0 0.5%"
-        "border-radius": "15px 15px 0 0"
-        "background-color": background
-        "font-size": "1em"
-        "text-align": "center"
-      }>skill_key
+          // -16 because footer height is 64px
+          // and margin top of ready button is -40px
+          <div style={"position": "absolute", "bottom": "-16px", "right": "50px", "display": "flex", "transform": "scale(1.5)"}>
+            <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.list_button></img>
+            <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom></img>
+          </div>
+        </div>
+        <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
+          <div style={"display": "flex", "height": "50%", "flex": "1"}>
+            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left></img></div>
+            <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-40px"}><img id="Ready" style={} src=App.KL.Game.Phase.Draft.draw.assets.ready_button></img></div>
+            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right></img></div>
+            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main |")"}></div>
+          </div>
+        </footer>
       </div>
+    </div>
 
+App.KL.Game.Phase.Draft.draw.background: DOM
+  let s = Maybe.some!
+  <div style={"display": "contents"}>
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(none,s(10),s(64),none, App.KL.Game.Phase.Draft.draw.assets.background.hexagons.1)}
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(none,none,s(64),s(10), App.KL.Game.Phase.Draft.draw.assets.background.hexagons.2)}
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(s(64),s(10),none,none, App.KL.Game.Phase.Draft.draw.assets.background.hexagons.3)}
+    {App.KL.Game.Phase.Draft.draw.background.hexagons(s(64),none,none,s(10), App.KL.Game.Phase.Draft.draw.assets.background.hexagons.4)}
+  </div>
+
+App.KL.Game.Phase.Draft.draw.background.hexagons(
+  top: Maybe<Nat>
+  right: Maybe<Nat>
+  bottom: Maybe<Nat>
+  left: Maybe<Nat>
+  img: String
+): DOM
+  let decapsule = ((x) case x {
+    none: ""
+    some: Nat.show(x.value) | "px"
+  }) :: Maybe<Nat> -> String
+
+  <div style={"position": "absolute", "top": decapsule(top), "right": decapsule(right), "bottom": decapsule(bottom), "left": decapsule(left), "transform": "scale(2)", "z-index": "0"} >
+    <img src=img></img>
+  </div>
+
+App.KL.Game.Phase.Draft.draw.main.middle(
+  allies: Map<App.KL.Game.Player>
+  page: String
+  tab:  Maybe<String>
+  user: String
+  filter: App.KL.Game.Phase.Draft.Filter
+): DOM
+  let max = 3 // max players TODO store in game?
+  let selected_hero = Maybe {
+    get user = allies{user}
+    get hero_id = user@hero_id
+    get hero = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
   }
   
+  let hero_list = App.KL.Game.Phase.Draft.Filter.apply(App.KL.Game.Hero.list, filter)
 
-App.KL.Game.Phase.Draft.draw.cards.card(tab: Maybe<String> player: Maybe<App.KL.Game.Player>, hero: Maybe<App.KL.Game.Hero>): DOM
-  let name = 
-    case player {
-      none: "Connecting"
-      some: 
-        case hero {
-          none: "Choosing"
-          some: hero.value@name
-        }
-    }
-  let image =
-    case hero {
-      none: App.KL.Game.Phase.Draft.draw.cards.interrogation
-      some: hero.value@picture(true, 0)
-    }
-  
-  let skill_list = []
-  let skills =
-    case hero {
-      none: 
-        []
-      some:
-        let skills = hero.value@skills
-        for key:value in skills with skill_list:
-          key & skill_list
-        skill_list
-    }
-  
-  
-  let skill_tab_width = 
-    case hero {
-      none: 
-        "0"
-      some:
-        len = List.length!(Map.to_list!(hero.value@skills))
-        width = (100 - len)/len 
-        Nat.show(width) | "%"
-    }
-
-   <div style={ 
-    "width": "100%"
-    "height": "90%"
-    "display": "flex"
-    "border": "5px solid #d6dadc"
-    "background-color": "#Aeb4b7"
-    "margin": "3%"
-    "border-radius": "5px"
-    "flex-direction": "column"
-    "justify-content": "space-between"
-    "align-items": "center"
-    "box-sizing": "border-box"
-  }>
-    <div style={ 
-      "height": "10%"
-      "margin-top": "5%"
-    }>
-      name
-    </div>
+  <div style={"display": "contents"}>
     
+    // USER CARD
+    {
+      let player = allies{user}
+      case player {
+        none: <span></span> // Impossible
+        some: App.KL.Game.Phase.Draft.draw.card.user(player.value, tab)
+      }
+    }
+
+    // ALLIES CARDS
+    {
+      let allies   = Map.delete!(user, allies)
+      let allies   = Map.to_list!(allies) // TODO formap in DOM
+      let n_allies = max - 1
+      // let allies = List.indices!(allies)
+      <div style={"display": "contents"}>
+        for index in [0 to n_allies]:
+          let info = List.get!(index, allies)
+          case info {
+            // if there is some allie not connected
+            none: App.KL.Game.Phase.Draft.draw.card.allies(none, page)
+            some:
+              let {id, player} = info.value
+              App.KL.Game.Phase.Draft.draw.card.allies(some(player), page)
+          }
+      </div>
+    }
+
+    // FILTER
     <div style={
-      "width":"100%" 
-      "height":"40%"
-      "display": "flex"
-      "justify-content": "center"
-      "align-items": "center"
+      "display": if String.eql(page, "heroes") then "block" else "none" // page
+      "animation": "fade-in 500ms"
     }>
-      <img src=image style={
-        "width": "50%"
-        "height": "auto"
-        "image-rendering": "pixelated"
-      }></img>
+      {App.KL.Game.Phase.Draft.draw.card.filter(filter)}
     </div>
-    <div id="D" style={
-      "width": "100%"
-      "height": "7.5%"
-      "display": "flex"
-      "flex-direction": "row"
-      "justify-content": "space-between"
-      "align-items": "flex-end"
+
+    // MENU SELECTION
+    <div style={
+      "max-height": "416px"
+      "height": "416px" 
+      "overflow": "auto"
+      "display": if String.eql(page, "heroes") then "grid" else "none" // page
+      "animation": "fade-in 500ms"
+      "grid-template-columns": "repeat(5, minmax(0, 1fr))"
+      "grid-auto-rows": "max-content"
+      "gap": "10px"
+      "margin": "0 10px"
+      "padding-top": "4px" // because of negative margin
     }>
-    for char in skills: App.KL.Game.Phase.Draft.draw.cards.skills(tab, player, char, skill_tab_width)
+      for card in [App.KL.Game.Phase.Draft.draw.portrait.hero(hero, selected_hero, filter) for hero in hero_list]:
+        card
     </div>
-      
-    <div id="D" style={ 
-      "width": "100%"
-      "height": "40%"
-      "padding": "6%"
+  </div>
+
+
+// draw user card in specific order
+// this order sets the user card to stay in middle
+App.KL.Game.Phase.Draft.draw.card.user(
+  player: App.KL.Game.Player,
+  tab:  Maybe<String>
+): DOM
+  let fator  = 2
+  let bt     = 2
+  let id     = "user-card"
+
+  let hero = Maybe {
+    get hero_id = player@hero_id
+    get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
+  }
+
+  // TODO resolve this
+  let skills = case hero {
+    none: []
+    some: Map.to_list!(hero.value@skills)
+  }
+
+  let inner  = 
+    <div style={"display": "contents"}>
+      <div style={"height": "40%", "width": "17%", "max-height": "40%", "overflow": "auto", "border-radius": "5px 0px 0px 5px"}>
+        { App.KL.Game.Phase.Draft.Draw.card.slot("DNone", <span id="DNone">"I"</span>) } // TODO LIST ICON
+        for info in skills:
+          let {key, skill} = info
+          let id = "D"|key
+          App.KL.Game.Phase.Draft.Draw.card.slot(id, <span id=id >key</span>)
+      </div>
+      <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
+        {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab)}
+      </div>
+    </div>
+  
+  <div id=id style={"margin": "0 10px"}>
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(99, 208, bt, id, fator, "https://i.imgur.com/HTnAVKj.png", inner) }
+  </div>
+
+App.KL.Game.Phase.Draft.Draw.card.slot(
+  id: String
+  el: DOM
+): DOM
+  <div id=id style={
+    "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.card.button|")"
+    "background-size": "100% 100%"
+    "height": "20%"
+    "width": "100%"
+    // "font-size": "1.5rem"
+    "border-radius": "5px"
+    "display": "flex"
+    "align-items": "center"
+    "justify-content": "center"
+    "color": "white"
+  }>
+    { el }
+  </div>
+
+
+App.KL.Game.Phase.Draft.draw.card.allies(
+  player: Maybe<App.KL.Game.Player>,
+  page: String
+): DOM
+  let fator = 2
+  let bt    = 2
+  let type = "CLASS"
+
+  let hero = Maybe {
+    get player  = player
+    get hero_id = player@hero_id
+    get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
+  }
+
+  let inner = 
+    <div style={"width": "100%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
+      {App.KL.Game.Phase.Draft.draw.card.hero(hero, "", none)}
+    </div>
+  
+  <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none", "animation": "fade-in 500ms"}>
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, bt, "", fator, "https://i.imgur.com/CI2xJrU.png", inner) }
+  </div>
+
+// draw hero parts of cards
+App.KL.Game.Phase.Draft.draw.card.hero(
+  hero: Maybe<App.KL.Game.Hero>
+  id: String
+  tab:  Maybe<String>
+): DOM
+  <div id=id style={"height": "100%"}>
+    // draw top of card
+    <div id=id style={
+      "height": "52%"
+    }>
+      {
+        case hero {
+          none: App.KL.Game.Phase.Draft.draw.card.hero.img("", none, "", id) // TODO change to none
+          some: App.KL.Game.Phase.Draft.draw.card.hero.img(hero.value@name, hero.value@role, hero.value@draw@b64_img(true, 0), id) // TODO change type
+        }
+      }
+    </div>
+    // draw bottom of card
+    <div id=id style={"height": "48%", "width": "100%"}>
+      {
+        Maybe {
+          get hero = hero
+          get attr = hero@attributes
+          case tab {
+            none: some(App.KL.Game.Phase.Draft.draw.card.hero.attrs(attr, id))
+            some: some(App.KL.Game.Phase.Draft.draw.card.hero.skill_info(hero, tab.value))
+          }
+        } <> App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id)
+      }
+    </div>
+  </div>
+
+App.KL.Game.Phase.Draft.draw.card.hero.skill_info(
+  hero: App.KL.Game.Hero, 
+  key:  String
+): DOM
+  let skill = hero@skills{key}
+  case skill {
+    none: <span></span>
+    some:
+      let description = skill.value@description
+
+      <div style={"padding": "10px", "width": "100%"}>
+        <p style={"text-align": "center", "color": "white"}>description</p>
+      </div>
+    
+  }
+
+// draw card's top
+App.KL.Game.Phase.Draft.draw.card.hero.img(name: String, role: Maybe<App.KL.Game.Hero.Role>, img: String, id: String): DOM
+  let role = case role {
+    none: "" // TODO what put here?
+    some: App.KL.Game.Hero.Role.show(role.value)
+  }
+  <div id=id style={"position": "relative", "height": "100%"}> 
+    <div id=id style={
+      "position": "absolute", 
+      "margin-left": "auto"
+      "margin-right": "auto"
+      "left": "0"
+      "right": "0"
+      "text-align": "center"
+      "top": "-7%"
+      "width": "55%",
+      "height": "55%",
+      "background-image": "url("|img|")",
+      "background-size": "contain",
+      "background-position": "center",
+      "background-repeat": "no-repeat"
+    }>
+      // <img src=img style={"object-size": "contain"}></img>
+    </div>
+    <div id=id style={
+      "position": "absolute"
+      "top": "70%"
+      "left": "0"
+      "right": "0"
+      "margin": "auto"
+      "height": "25%"
       "display": "flex"
       "flex-direction": "column"
-      "background-color": "#d6dadc"
-      "font-size": "0.6em"
-      "text-align": "center"
+      "justify-content": "space-around"
+      "align-items": "center"
     }>
-      for div in App.KL.Game.Phase.Draft.draw.cards.text(tab, hero): div
-          
-    
+      <span id=id style={"color": "white", "text-transform": "uppercase"}>name</span>
+      <img id=id src=App.KL.Game.Phase.Draft.draw.assets.card.name_divisor style={"width": "50%"}></img>
+      <span id=id style={"color": "#871df0", "font-size": "small", "text-transform": "uppercase"}>role</span>
     </div>
-
   </div>
-App.KL.Game.Phase.Draft.draw.cards.text(tab: Maybe<String>, hero: Maybe<App.KL.Game.Hero>): List<DOM>
-  case tab hero {
-    none none: 
-      [ <div>"Waiting for Player to connect or pick a Hero"</div>]
-    none some:
-      [ <div style={"margin": "auto"}>hero.value@description</div>]
-    some none:
-      [ <div>"A Hero needs to be picked"</div>]
-    some some:
-      case hero.value@skills{tab.value} as skill {
-        none:
-          [ <div style={"margin": "auto"}>hero.value@description</div>]
-        some: 
-          [ <div id="D" style={"font-size": "1.5em"}>skill.value@name</div>
-            <div id="D" style={"padding-top": "3px"}>skill.value@description</div>]
-      }
-  }
 
-App.KL.Game.Phase.Draft.draw.cards.interrogation: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAn0lEQVQ4T8WUURKAIAhE44x1zO5og2mDKwiONflZ8tx1EdpeXuTwkvHfrBsBM+wsxD3dbKKnRK21gA1MqmTwCGoCq7IDPPN3Ae3qo8C6L30CZNFFeVwhOOXC5l5ngdgtXUgrQAuWuwhP9hqb9+cg6hKpT/WhPPgBejBVsvLUEDh0FbKsJG6OgAhwah5FgDhx1i17z01aCCmEQbGu8NdQLmHYLhXjuqBcAAAAAElFTkSuQmCC"
+// draw attributes icons and bars
+App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes, id: String): DOM
+  let order     = ["damage", "resistance", "mobility", "range", "utility"]
+  let attrs_map = App.KL.Game.Hero.Attributes.to_map(attrs) 
+  <div id=id style={"display": "contents"}> 
+    for attr in order:
+      let img = App.KL.Game.Phase.Draft.draw.assets.card.attr_icons{attr}
+      without img: <span id=id style={"display": "none"}></span> // TODO
+      <div id=id style={"display": "contents"}>
+        <div id=id style={
+          "height": "15%",
+          "display": "flex", 
+          "align-items": "center", 
+          "padding": "4% 10%",
+          "margin-top": if attr =? "damage" then "4%" else ""
+        }>
+          <div id=id style={
+            "flex": "1"
+            "margin-right": "10%"
+            "height": "100%"
+          }>
+            <img id=id style={"width": "100%", "height": "100%", "object-fit": "contain", } src=img></img>
+          </div>
+          <div id=id style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
+            for j in [1 to 6]:
+              let attr_value = attrs_map{attr}
+              without attr_value: <span style={"display": "none"}></span>
+              let bar = App.KL.Game.Phase.Draft.draw.assets.card.attr_bar(attr_value, j)
+              <div id=id style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%", } src=bar></img> </div>
+          </div>
+        </div>
+        {
+          if attr =? "utility" then <span></span>
+          else 
+            <div id=id style={"display": "flex", "justify-content": "center"}>
+              <img id=id style={"width": "80%", "margin": "auto", } src=App.KL.Game.Phase.Draft.draw.assets.card.divisor></img>
+            </div>
+        }
+      </div>
+  </div>
+
+App.KL.Game.Phase.Draft.draw.card.filter(
+  filter: App.KL.Game.Phase.Draft.Filter
+): DOM
+  let options = Map.to_list!(filter@options) // TODO formap in DOM
+
+  let inner = 
+    <div style={"max-height": "100%", "width": "100%", "overflow": "auto", "padding": "15px 10%"}>
+      <div style={"display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column"}>
+        <img src=App.KL.Game.Phase.Draft.draw.assets.filter.icon style={"width": "20%"}></img>
+        <span style={"color": "white", "margin": "10px 0"}>"FILTER"</span>
+        <div style={
+          "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.filter.input|")"
+          "background-size": "100% 100%"
+          "width": "100%"
+          "height": "32px"
+        }>
+          <input id="HF" value=filter@hero_name style={
+            "background": "transparent"
+            "border": "none"
+            "color": "white"
+            "height": "100%"
+            "padding": "0 16px"
+            "width": "100%"
+            "outline": "none"
+            "font-family": "monospace"
+          }></input>
+        </div>
+      </div>
+
+      <div style={"margin": "5px 0", "width": "100%"}>
+        <img src=App.KL.Game.Phase.Draft.draw.assets.card.divisor style={"width": "100%"}></img>
+      </div>
+
+      <div>
+        <ul style={"list-style": "none"}>
+          for option in options:
+            let {text, checked} = option
+            App.KL.Game.Phase.Draft.draw.card.filter.option(checked, text)
+        </ul>
+      </div>
+    </div>
+  
+  <div style={"margin": "0 10px"}>
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, 2, "", 2, App.KL.Game.Phase.Draft.draw.assets.filter.background, inner) }
+  </div>
+
+App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DOM
+  let img = 
+    if checked then
+      App.KL.Game.Phase.Draft.draw.assets.filter.check_true
+    else
+      App.KL.Game.Phase.Draft.draw.assets.filter.check_false
+  let id = "FC" | text
+  <li id=id style={"margin-bottom": "5px"}>
+    <img id=id src=img style={
+      "zoom": "2"
+      "margin-right": "5px"
+      "vertical-align": "middle"
+    }></img>
+    <span id=id style={"color": "white", "text-transform": "uppercase"}>text</span>
+  </li>
+
+App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: Nat, background: String, inner: DOM): DOM
+  <div class="pixel-art" id=id style={
+    "height": Nat.show(fator * height) | "px", 
+    "width": Nat.show(fator * width) | "px", 
+    "display": "flex", 
+    "background-image": "url("|background|")", 
+    "background-size": "100% 100%", 
+    "padding-top": Nat.show(fator * bt) | "px"
+    // "margin": "0 10px"
+    
+  }>
+    {inner}
+  </div>
+
+App.KL.Game.Phase.Draft.draw.portrait.hero(
+  hero: App.KL.Game.Hero, 
+  selected_hero: Maybe<App.KL.Game.Hero>, 
+  filter: App.KL.Game.Phase.Draft.Filter
+): DOM
+  let fator = 2
+  let bt = 2
+  let width = 44
+  let height = 74
+
+  // verify if hero is the hero selected
+  let is_selected = case selected_hero {
+    none: false
+    some: String.eql(hero@name, selected_hero.value@name)
+  }
+  
+  let id = "H" | hero@name
+  let portrait = hero@draw@b64_portrait(true, 0)
+  let inner =
+    <div id=id style={"width": "100%", "padding": "0 " | Nat.show(bt * fator) | "px", "display": "flex", "flex-direction": "column", "align-items": "center"}>
+      <img id=id style={"width": "100%", "transform": "translateY(-"|Nat.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
+      <p id=id style={"text-transform": "uppercase", "color": "white"}>hero@name</p>
+    </div>
+  
+
+  <div id=id style={
+    "height": Nat.show(fator * height) | "px", 
+    "width": Nat.show(fator * width) | "px", 
+    "display": "flex", 
+    "background-image": "url("|App.KL.Game.Phase.Draft.draw.assets.portrait.hero.background|")", 
+    "background-size": "100% 100%", 
+    "background-repeat": "no-repeat"
+    "padding-top": Nat.show(fator * bt) | "px"
+    
+    "border-style": "solid"
+    "border-image-slice": "4"
+    "border-image-width": "10px"
+    "border-image-repeat": "stretch stretch"
+    "border-color": "transparent"
+    // if selected then draw border
+    "border-image-source": if is_selected then "url("|App.KL.Game.Phase.Draft.draw.assets.portrait.hero.border|")" else ""
+  }>
+    {inner}
+  </div>
 
 // ROOM NUMBER AND READY BUTTON
 // ==========================
 
-// display room text, and ready/cancel button
-App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
-  info = players{user}
-  let ready_count = App.KL.Game.Player.ready_count(players, room, user) // Pair(Total players, ready check)
-  let total = Nat.show(ready_count@fst)
-  let count = Nat.show(ready_count@snd)
-  let {color, text} = 
-    case info {
-      none: {"#4CAF50", "Ready"}
-      some: 
-        let player = info.value
-        if player@ready then
-          {"gray",    count|"/"|total|"\n\n Cancel"}
-        else
-          {"#4CAF50", "Ready"}
-  }
-  <div style={ 
-    "width": "30%"
-    "height": "auto"
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-    "flex-direction": "column"
-  }>
-    <div style={ 
-      "background-color": "#d6dadc"
-      "color": "black"
-      "padding": "8px"
-      "text-align": "center"
-      "border-radius": "5px"
-      "margin-bottom": "10px"
-      "font-size": "32px"
-    }>
-      room
-    </div>
-    <button id="Ready" style={ 
-      "background-color": color
-      "border": "none"
-      "color": "white"
-      "padding": "32px"
-      "text-align": "center"
-      "text-decoration": "none"
-      "display": "inline-block"
-      "font-size": "32px"
-      "margin": "4px 2px"
-      "cursor": "inherit"
-    }>
-      text
-    </button>
-  </div>
+// // display room text, and ready/cancel button
+// App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
+//   info = players{user}
+//   let ready_count = App.KL.Game.Player.ready_count(players, room, user) // Pair(Total players, ready check)
+//   let total = Nat.show(ready_count@fst)
+//   let count = Nat.show(ready_count@snd)
+//   let {color, text} = 
+//     case info {
+//       none: {"#4CAF50", "Ready"}
+//       some: 
+//         let player = info.value
+//         if player@ready then
+//           {"gray",    count|"/"|total|"\n\n Cancel"}
+//         else
+//           {"#4CAF50", "Ready"}
+//   }
+//   <div style={ 
+//     "width": "30%"
+//     "height": "auto"
+//     "display": "flex"
+//     "justify-content": "center"
+//     "align-items": "center"
+//     "flex-direction": "column"
+//   }>
+//     <div style={ 
+//       "background-color": "#d6dadc"
+//       "color": "black"
+//       "padding": "8px"
+//       "text-align": "center"
+//       "border-radius": "5px"
+//       "margin-bottom": "10px"
+//       "font-size": "32px"
+//     }>
+//       room
+//     </div>
+//     <button id="Ready" style={ 
+//       "background-color": color
+//       "border": "none"
+//       "color": "white"
+//       "padding": "32px"
+//       "text-align": "center"
+//       "text-decoration": "none"
+//       "display": "inline-block"
+//       "font-size": "32px"
+//       "margin": "4px 2px"
+//       "cursor": "inherit"
+//     }>
+//       text
+//     </button>
+//   </div>
 
 // BOTTOM MENU FOR CHOOSING HEROES 
 // ======================
@@ -601,7 +676,7 @@ App.KL.Game.Phase.Draft.draw.selection(
   hero: App.KL.Game.Hero
 ): DOM
    
-  image = hero@picture(true, 0) //TODO placeholder
+  image = hero@draw@b64_portrait(true, 0) //TODO placeholder
   //assets = hero@assets
   //image  = assets@base64
 
@@ -635,7 +710,7 @@ App.KL.Game.Phase.Draft.draw.selection(
     "width": "75%",
     "margin-left": "12.5%",
     "height": "auto",
-    "image-rendering": "pixelated"
+    
   }
   square_style = 
   {
@@ -648,3 +723,115 @@ App.KL.Game.Phase.Draft.draw.selection(
       </img>
   </div>
 
+
+// ASSETS
+
+// user and allies card
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.card.button: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAsUlEQVR42mNgAAIzl67/5tPP/7fY8QCM+778x4ph8iC1ID0MpGjGaYiudhuKAIhvbjwfKwbJIVsorBj/nwFEwDTLqhXh1AzDIDUwQ+AGwDSDMMgWfBimDqQHxQCYJDEGwLwySA0gZAhOA9glHOEYZhA6RlaDYQCyAg/ZIqwY2QKsXjCRSARjXAbA5DG8ABOAGZKo1Y4VI2sG0XADkA2BSWLDyPIwfeAMBeMgBxI+jKwZAA9Tzqish/WQAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.card.divisor: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAAACCAYAAADsDAqEAAAAGUlEQVR42mNgl3D8P4od/zM4qOX/H8X5/wFLCtMnRwvN3AAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.card.name_divisor: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAYAAAChQ5zUAAAAKklEQVR42mPQlgz7z82j9R9Eg7CZSxcGjYzbZT/AaWpgZDORMTa3ILsVAD4KYiEWiGpBAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.card.attr_bar(i: Nat, j: Nat): String
+  case Nat.cmp(j, i) {
+    ltn: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mN4nf3/PyHMQJSiyRmv/hPCACSbVe0aeuODAAAAAElFTkSuQmCC"
+    eql: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mPo+/L/PyHMQJSiyRmv/hPCAAScWQUsjAs3AAAAAElFTkSuQmCC"
+    gtn: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAADCAYAAABBCiV2AAAAGElEQVR42mPg5tH6TwgzEKXIzKXrPyEMAKotKJyhzZc5AAAAAElFTkSuQmCC"
+  }
+
+App.KL.Game.Phase.Draft.draw.assets.card.attr_icons: Map<String>
+  {
+    "damage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAATUlEQVR42mNgAIK+L///W+x48J8BCwCJg+QxBNA14BKHS8BMgbFx2ciArhDFelwaCCpEVoRuA0ETcdqA7DlsiuGexBk82IIPb/CgaQAAVVyucYmp1skAAAAASUVORK5CYII=" // offensive
+    "resistance": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAALCAYAAACtWacbAAAAQ0lEQVR42mNgQAIWOx787/vy/z+IZkAHMEl0DFeMLoFVjChFMKsYsACcVmLjYzgcWRGGL7H5jmAwYA0rgoGJrhBdDABa1bsEjscb1AAAAABJRU5ErkJggg==" // defensive
+    "mobility": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAKCAYAAABv7tTEAAAAQklEQVR42mOw2PHgf9+X/ygYmxgDOgApgmF0xTg1wTTisgWnJnTN6M7Fq4lkDVSxBT00sRqASxNBm/EFO9khCRIHABDzAc+vGvQQAAAAAElFTkSuQmCC" // mobility
+    "range": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42mNggAKLHQ/+9335j4JBYgzIAKsgkmY4B6YI3UQUeZgAuqnIpoFpFA6Sqehi5CnEazXRniE6eIgNcADtwMQtWOgT0gAAAABJRU5ErkJggg==" // range
+    "utility": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAMCAYAAACwXJejAAAAU0lEQVR42mNgQAIWOx787/vy/z+IZsAGQJLoGEMRzBSYBrymIdM4rYOZiKEQm/HI1qNysJgO1ozuI2QT4dZicwtGUCAHIDpGMRmXKRhhhc0kmBwAbSTOuAXc0NYAAAAASUVORK5CYII="// utility
+  }
+
+// hero portraits
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.portrait.hero.background: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAABKCAYAAADAKbZGAAAAcUlEQVR42u3bwQkAIQwEQNu4GuTasSPrVvwdeE+FBGZhyXcK2JSSNfVp4609ZJftF7tuxG7oyNgvGhgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgY+Dg43QY+3ZeBXMwEjZrO46oJAlgAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.portrait.hero.border: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAABPCAYAAACUEffIAAAAnklEQVR42u3asQ3CMBBA0RuLnZiFeRiHASjpCSKCyOAUoFiWD96TrrT87cKVIx52x9N0uFyHnntjlDJEV/FldHWigVSdGaLX4iNL9Hv8HB7JCBf+F+GZXpTyZRHePRwAAAAAAAAAAPhl/mT1Dvdhsnf4eT+lC5+bhQsXLrxZ9BKeJf7Z+hI+evxq55b4cu2n0yR6S0DvaXp7395gqz1uy7Mq9gTE4rAAAAAASUVORK5CYII="
+
+// ready button
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.ready_button: String
+  "data:image/gif;base64,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"
+
+// footer
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.main: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAL0lEQVR42u3OIQEAAAgDMCyOGPQvCDFuJuZX03tJJSAgICAgICAgICAgICAgkA48lJQATI4CDw0AAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.left: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA60lEQVRIDcWWwQ2DMBRDufbWKxt0A2bpIp2HoToCO3AEfSRXVsGQT/KTSihgOf5+FNR2z8driTj64b3gGMbvdm7r/7lddyU+ERCWCYiUtQhMFEhqLkCzYVIHRvoA85nm+49ZZEFPdjaMZ1i0Nwsmupw3/zaMd1CuH0Xt5VZZ8LjeGRUWpaOkrUVhogpf5QLI7rrysufyN1OF1NC5qJrHnlMYFVBL56JqJnskjNpcU+eiai57DmHUxto6F1Wz2bODUZta6FxUzYdn999MbWilc1HVgT2/b0aZW+pcVPVgzwajjK11FD3rAY89Ziu/MPx2bdASCAAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_left: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA60lEQVRIDcWWwQ2DMBRDufbWKxt0A2bpIp2HoToCO3AEfSRXVsGQT/KTSihgOf5+FNR2z8driTj64b3gGMbvdm7r/7lddyU+ERCWCYiUtQhMFEhqLkCzYVIHRvoA85nm+49ZZEFPdjaMZ1i0Nwsmupw3/zaMd1CuH0Xt5VZZ8LjeGRUWpaOkrUVhogpf5QLI7rrysufyN1OF1NC5qJrHnlMYFVBL56JqJnskjNpcU+eiai57DmHUxto6F1Wz2bODUZta6FxUzYdn999MbWilc1HVgT2/b0aZW+pcVPVgzwajjK11FD3rAY89Ziu/MPx2bdASCAAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.diagonal_right: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA1ElEQVRIDc2XwQ2DMBAE/c0vXzpIB9SSRlIPRVECPeRJdJGMQNjOGN8qRrJAx2pvx2BLDsHhGqd5jWMYn6dnq8Vxvz1WxWjGMIAYktwVEObZBLKHUAWkvpdBXst7+xK0mVJ3CaQ3CJugapAeIapBeoWoAiEQ/1z86NeqhbBtWLmwU94/QQgE0aSae9aKICQg0XgGznllQUhAosk19q4nQUhAovEOW/I7gZCARFNqqnh3ACHbZ48QNjEbCIEgGsVsE88vCAlINKShShNowHjWUAVp9f0ACML8do5nEEsAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.footer.stencil.right: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAASCAYAAAAZk42HAAAA1ElEQVRIDc2XwQ2DMBAE/c0vXzpIB9SSRlIPRVECPeRJdJGMQNjOGN8qRrJAx2pvx2BLDsHhGqd5jWMYn6dnq8Vxvz1WxWjGMIAYktwVEObZBLKHUAWkvpdBXst7+xK0mVJ3CaQ3CJugapAeIapBeoWoAiEQ/1z86NeqhbBtWLmwU94/QQgE0aSae9aKICQg0XgGznllQUhAosk19q4nQUhAovEOW/I7gZCARFNqqnh3ACHbZ48QNjEbCIEgGsVsE88vCAlINKShShNowHjWUAVp9f0ACML8do5nEEsAAAAASUVORK5CYII="
+
+// header
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.header.button.invite: String  
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABYklEQVR42u3aPQrCQBAF4FzAI4iIYBqtbGJlaWGXxs7Gyk4vIFhY23gYj+M9LCIDmTAsu5ss5GdH38LDJIrwMcns4pqMZ3lByTanYro6qkoSMgAFFFBv5usLKgoooIACmmhFBkGBBBJIIFUgu1ifAtknMhYcKglki8js9S7koHMVSAlzHduAEjqa7PQ0HvPVBDKIw9fp+PG5V4n2diXYYvu03rI8JFBCo0MSQlaMQ8D0cKugHFcVzaiupK+KEubKIEiqlnmNcPJZ5HPZbFQhQ7qrrYuqRPrmSXPaUP9MNlkA2KoZZXcNjZwPzWrSdfVIRrieTYmUiR4p50bfMq7uM4MjeYoIWYybDagrYK/d9WeRtpWOC+IbKpB1iCbvR49sYwAJZI+Nx7dOrYua7voXyCF/nsSGD5BAAgkk9idRSSCB/I8/EAIIIIBBsW0PooIAlsA8PfeS/fLayvdEC2wrAJbjC8t/0cpcsmwIAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.header.button.help: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABD0lEQVR42u3asQ3CMBCF4SzACAghJKioaELFAHRpGICKDhZgLsZhk0CQLKILsRK44Pj8W7rG3ZcXX+TY2XRRlFXlu1M53xyjqqzPAAoUKFCgQN+13F5I1DS0nnBvaIxp9oKCBAkSJEiQIEGCBJk6Mr/dSzmqOTPIT0BNqNtyBUP6gNqJBkNKzGS2f5XEm0DWga7MISXQFLKOkvPmkL6GFH3j6dqMTCFlV21LOmrkUCmOFqkJDIqU5xgmkV0/KVEi206itJFfnYf8q7tqb7NG23jMIpNIMok1aaq78rfOCtJ3YyO5JDUfBkmyJkGCBAlySKT5m5IAAQIECFALWKzOURXAX4GH9bUx516f0QCf4wFemMVkf3n/hwAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.header.button.list: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAAA7klEQVR42u3aQQqCQBTGcS/QESIiqFWrNrbqAO3cdIBW7uwCnavjdJOpWQiTDORDnfqc/4MHMiD4442fIhbLTeV8l6farQ9XqS4sBdTY2+ONiQIFChQo0KHQXzxOBkMVp2mCqr4oJEdmMUmQc0B+ux+nvF+TIGOAlCHEdgUJEmS+SPlHyOwnWT6eri1/HFvvW+H5f4XsVrjuL9rS4fkg2a4TIBer80e3Sdpd79syyNi6NJJ0JV1JV4IHJNuV4CFdSVfSVQXJh6zckWN+vWOSIEGCBAkSJEj+lAQIECBAgKMBq10j1QCtwMv+rgd81wu9A5PjjdGiEwAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.header.button.logout: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABdUlEQVR42u3bOwrCQBAG4LmARxARwTR2NlpZWth5ABsrOz2Cd/AwHsebREZYCMGYmWyy7vyZgSGCMeRzNrt5bGi6OJacm92lnK/PkEkcMdDl9hb1fTJkLNREJdGhVA9EKH0LNCg1BRKUfgUKlNoCAUqSsA4laQyBTHWi4Mihkd5cBVmc7qLteSVzRWpbQHJkdQebPkNUMoDqSxNIzc7yuqv9I8kw0nslJXcKApB7R162Vdpsx2O6km1jGWeoHuwZT6oeNZtxcvN8lZrg9ZMjYyoRgBroX5AxWQXycjI7iNIsUgqEQEqbubbZdkbG9ox1pOZY1kKzqKTmd/yHaKEmkVpolsgqQJqjQP46rrNESoaSOhAOqQEmQTYNNV07Hi3QZO+qBZoeQjQnEOaQpq9CIJGjuJ4MQ0H2dwb6gGrT5LOQ7JE5TCnzh7COdKQjHelIRzrSJxD6VNBRTOqFn54NP9Ee/pUJ+JdfqsBjcYVKeOAHiQ7kfAPswOCUA++R1QAAAABJRU5ErkJggg=="
+
+// background
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.1: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGYAAAB2CAYAAAA6Ceb5AAABkklEQVR42u3cQQ7CIBAFUK7iGTyS9z+DxqXGhUULf+BN0qVN4VEYZNLWCsXlers/ryayQN4vPRMGAigcBFA4CKBwEEDhIIDCQQCBAQMGDBgwYAQYMGDAgAEDRoABAwYMGDBgAAECBAgQIECABCBAgMCAAQNGgAEDBgwYMGDAgAEDBgwYMGDAgHnpJDChICMeHsgPb8gZjQHyxynrH40DcmIH9/weyMBF/Zv7AZmYZX26P5CgtHcWRsn9iI0iGDBgwIABAwYMGDBgwIABAwYMGDBgwIDp66TVUWZV9MQDzTwoGzkITxsUKx0tjxyEw97aysUYIwfhtGl1h8ZWGETdD196egiedrsfvvSCGpyolEmzpfY2wzbDYMCAAQMGDBgwYMCAAQMGDBgwYMCAAaOipyCK79ccGABADrwhjpbDp6ytizEqrCFblS9VXNR3qOgpnWXtUNGzRNq7chtLbxSbAAMGDBgwYMAIMGDAgAEDBgwYMGDAgCkOs/rf/oCA1AECEgYEJAwISBgQkDAgIJun2TPjAUCEMu6iz3bYAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.2: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAAB3CAYAAABPA20BAAABk0lEQVR42u3c4W2DMBAGUFbJDB2p+8/QqpEiVVXaQrB9/syzxM/47AeGyMexbVq/dnt7//g6Vo/ZZKAjBl4Rs8tZ7DHwiphDLvEWA6+IWbL+X/l9RcwpAu3pryLmlGfhWf8VMSMeq494FTFPdVBxv4uKCQkSJEiQIEGCBAkSJEiQIC2DZKtkEqzvOD+P6XF6d/wXTi+smL3uIzitsGKyJmdwXsWKyb+1xNmLFZPJ7YnzG1bcOwEVx5bSAEGCBAkSJEiQIEGCBAkSJEiQIMGBAwcOHDhw/N+BBAkSJEiQIEGCBAkSJEiQIEGaC6l5bclKrxl3O0ErvLA+7GpOLH0oW/oJRTTT3CdnLMea9qEyQ2FfzBO4siw15u9KVbExJEiQIEGCBAkSJEiQIEGCBKkCyVbJThybbgeunEtv347OekQlAkZPNiqlNHrZRCUnR9+Ao9LcsR/GHBnzKp91jRswJEiQIEGCBAkSJEiQIEGCFL91EVmAM2rw0Ti9J7MUTuvJLY1zdrKXwjk6+Uvj/IcBx7K6t0/BHTiwPEdP2QAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.3: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADsAAAA0CAYAAAA0c0BmAAAAzklEQVR42u3Zyw2EMAxFUbcyNVAS/dcwIxZsEEjBY798fC1liZ3DP46ZMz7b/j2GCUNe81pQMYGzxnV0O6sZE3hCpqHfJoyYQCsyDP1vAs/xXqQbHX1rtOSLQjajsx/6u/xZyEe0+nWuAt6i1d/KnmCwYMGCBQsWLFiwYMFWxZZZ4qkX712RqrbMUMishtvQyKhW6lRIb5N8amTr9sdSyBJXcrgfgx4BFixYsGDBggULFixYsGtj1WgbKUogs9A2U5RAetG2UpRAZm+vvIkfiSZdjv2Z6aMAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.background.hexagons.4: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAAB2CAYAAABMM1RyAAAB4ElEQVR42u3cQW7CMBAF0Fylqx6gN+kVeoHefwNiQVWloBCSPxPqZylLPPYjUYxn8DS9UPt8/z5drknLwM4vMiFY0EWwoItgQRfBgi6CHR66CnZYaMCAAQMGDBgwYMCAAQMGDBgwYMCAAQNubm8fX6fLZcM9DFt1Rw8Pm4IGG4IGG4IGG4IGG4IeZj1bidsZEzBgwIABAwYMGDBgwIABAwYMGDDgbe26dVg54ert0ZaY9za/k4O4TvJ3rPSk5zHiMR9N3+w5iDnsrVh7T3qpz91jPpuA3DKIJdgE9No+NsfcK4X+zKC3xFo76a1Qqz+fKgJ55LHbM9bSpPd+1Bf7qypjuvXiSMaaTzr9svrTf1chXhL2HnTLkrILuOMLbflRBBgwYMCAAQMGDBgwYMCAAQMGDBjwS21XHiID3vG/4fSGe2cGvDyzkczFHQG6LTeXzCYfAbotu5yshzgCdFt9RLKi5wjQbRU+FW/kTui2GrXKdeVIa+iW5qwfwIABAwYMGDBgwIABAwYMGDBgwIABNzcnZxfBVt3Rw8OmoMGGoMGGoMGGoMGGoIdZzzpMCTBgwIABAwYMGDBgwIABAwYMGDDgNZP97ydnDwE9LGwaAmwIBmwICmwIGmwIGqxVwU87A1dxGgh2jQzNAAAAAElFTkSuQmCC"
+
+// bottom buttons
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.bottom.list_button: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAATCAYAAAAeVmTJAAABHklEQVR42u2Uuw3CMBRF3TEATZoUNBQgKhChRaJgC5QVGAIkClpK1mALVmAI+sCLuObG8bMcCIgCS0eRHfv6yD9j7mW62BXZ4VzMTheL1AHa9teiEaEstMvcBhJtC8SKWInRcFMxk3raX5dk42MrIE+yeeWlXkp0eysrgM4YILwrgBzOhojMbSU0AZ9IzPa4AppITYI7uYMhwtvmA+fAN97Nf0lCkEmwlC444NrY1iU0virxXwk8MB9biU4yt/BVAqGryXK+sYDn8Eq4naS+TJ8E34XHCyhfHgN82ep2TJLcgoB8sC3hN98HBNAfIIez1e3QRNzQJoQEahL8AzKfwJ2jIgF439xDxLcgBPfT8nhOg8KNGjEi/D8m0/xKuQG23r4JXV13wgAAAABJRU5ErkJggg=="
+
+App.KL.Game.Phase.Draft.draw.assets.bottom.chat_buttom: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAATCAYAAADxlA/3AAABEklEQVR42u2VMQrCQBBFt/MANmlS2FgoVoraChbeQnIFD6FgYWvpNbyFV/AQ9tFZ+MvPuLMmEkHEwA/s7sz/j0yibrrcl7PjpZyfr0GyhrB3uJWNlPLCvmQ7ubUdXhfCA4yG2wqRrPP+xms2PrUi+Ik3P3FZu25vHcJRiGLRu6HohQ97A0KyPYAVHoV4NKYeuZzrfguiAsAFsWYO5znGZEHoUTQCENUJh/4Avwmgf0hafQk72SKIPxetVxBybvVyxhOALpD1Kk+LQ1N1Me/oCCZZEYTmYrDzsgB0OOp1H3tHR2BBaEOWhKfOU+EVAN4EyCekMwIAxHPSLwz+TtkkJq6z/DjTycUblupA8HkdT/cN1x3Wm8bj6iLFvgAAAABJRU5ErkJggg=="
+
+// filter
+// =====================
+App.KL.Game.Phase.Draft.draw.assets.filter.background: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFIAAADQCAYAAACUVDZIAAACE0lEQVR42u3dO04CQRzA4em8ghaegNgKrYln8EaaUNhyFW7BFTiChb2rf5Ihwz6QfUST5dvkFybLK/OxL6pNqVgen9fVcrOrVtv9oRjXy89F759fs6qc27m5xzisUtty7YiTYMaK8gPe7j+qxd2LWgqb0uqIWUeEdVkNTIjTYCa78zS7ecoHTjDDyiegFANb47itMgxTPo1DGVa+bAQ5FWRsmiDHQYYhSJAgQQokSJAgBRIkSJAgQYIEKZAgQYIUSJAgBRIkSJACCRIkSJAgQYIUSJAgQQokSJAgQYIECVIgQYIEKZAgQQokSJAgBRIkSJBQQIIEKZAgQYIUSJAgQYIECRKkQIIECVIgQYIECRIkSJACCRIkSIEECVIgQYIEKZAgQYKEAhIkSIEECRKkQP4H5HKzAzkSMgxBggQ5T8jVdg9yJGQYggQJEqRAggQJUiBBggQJEiRIkAIJEiRIgQQJUiBBggQpkCBBggQJEiRIgQQJEqRAggQJEiRIkCAFEiRIkAIJEqRAggQJUiBBggQJBSRIkAIJEiRIgQQJEiRIkCBBCuQfQT4sXsH0LMxOIPNKOP0h4/EEEuYwxFZImP0ROyHzC9Vd3atziyy7uX3ST+cwW4+REPtjNs7aEIdhNi7IHf/6HyuP15Fx468Ss+uXyG+KmyleQ5d6hN3h5mmxxKDeJV+U/xHNoTyf3+bdZhWG38iSLQn5ZPm+AAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.filter.icon: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAbElEQVR42mNgQAIWOx787/vyHwWDxBiIAcga2mU/gDGygQQ147IJZBBeQ2C24LMAZghWS4j1J06LQIIgGwbWAIq8AJMg5Aq8FsGiCZchMEvwuhQ5ISFjklImLg3o4kQnb3yGDx5DGMgByGkCABtMGgikVxUvAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.filter.input: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAAAPCAYAAABQkhlaAAAAUElEQVR42mNgAAJd7bb/IxkzIAcCu4TjiMTwwBjJgYAcGKMBMRoQowExGhCjATEaEKMBMRoQowExGhBUDAgzl64RGwggv6N0vEACIxWDwgAAd8ufnGfNeIEAAAAASUVORK5CYII="
+
+App.KL.Game.Phase.Draft.draw.assets.filter.check_false: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAKklEQVR42mNgAAIzl67/7bIf4BjEZ0CWYJdwhGO4AnQJZAUUSOK1E59rAea0VhRBV4/wAAAAAElFTkSuQmCC"
+
+App.KL.Game.Phase.Draft.draw.assets.filter.check_true: String
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAJklEQVR42mNgAAIzl67/7bIf4BjEZ8AmgaIAmwQMUyCJ1058rgUA9IdvWCCrT8sAAAAASUVORK5CYII="

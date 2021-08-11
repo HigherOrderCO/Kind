@@ -1,10 +1,48 @@
 App.KL.Game.Board.Boards.lava: App.KL.Game.Board.Blueprint
   App.KL.Game.Board.Blueprint.new(
     App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.lava.terrains)
-    [{{+0#32,+0#32} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2)}]
+    Hexagonal.Axial.Map.from_list!([{{+0#32,+0#32} :: Hexagonal.Axial, App.KL.Game.Token.new(0, 1, 1, 2)}]),
+    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards.lava.bases),
+    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards.lava.initial)
+    App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.lava.landscape)
   )
 
+App.KL.Game.Board.Boards.lava.initial: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+  [
+    {App.KL.Game.Team.red, [
+      {+7#32, -2#32 } :: Hexagonal.Axial
+      {+7#32, -1#32 } :: Hexagonal.Axial
+      {+6#32, +0#32 } :: Hexagonal.Axial
+    ]},
+    {App.KL.Game.Team.blue, [
+      {-8#32, +0#32 } :: Hexagonal.Axial
+      {-9#32, +1#32 } :: Hexagonal.Axial
+      {-9#32, +2#32 } :: Hexagonal.Axial
+    ]}
+  ]
+
+App.KL.Game.Board.Boards.lava.bases: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+  [
+    {App.KL.Game.Team.red, [
+      {+5#32, -2#32 } :: Hexagonal.Axial
+      {+4#32, -1#32 } :: Hexagonal.Axial
+      {+4#32, +0#32 } :: Hexagonal.Axial
+      {+4#32, +1#32 } :: Hexagonal.Axial
+      {+3#32, +1#32 } :: Hexagonal.Axial
+      {+4#32, -2#32 } :: Hexagonal.Axial
+    ]},
+    {App.KL.Game.Team.blue, [
+      {-7#32, +1#32 } :: Hexagonal.Axial
+      {-7#32, +2#32 } :: Hexagonal.Axial
+      {-6#32, +1#32 } :: Hexagonal.Axial
+      {-6#32, +0#32 } :: Hexagonal.Axial
+      {-6#32, -1#32 } :: Hexagonal.Axial
+      {-5#32, -1#32 } :: Hexagonal.Axial
+    ]}
+  ]
+
 App.KL.Game.Board.Boards.lava.terrains: List<Pair<Pair<I32, I32>, Nat>>
+  
   [
     {{+7#32, -6#32}, 20},
     {{+7#32, -7#32}, 20},
@@ -90,9 +128,6 @@ App.KL.Game.Board.Boards.lava.terrains: List<Pair<Pair<I32, I32>, Nat>>
     {{-1#32, +0#32}, 24},
     {{-1#32, -1#32}, 24},
     {{-1#32, -2#32}, 24},
-    {{-1#32, -3#32}, 12},
-    {{-1#32, -4#32}, 16},
-    {{-1#32, -5#32}, 10},
     {{-1#32, -6#32}, 24},
     {{-2#32, +7#32}, 8},
     {{-2#32, +6#32}, 20},
@@ -104,9 +139,6 @@ App.KL.Game.Board.Boards.lava.terrains: List<Pair<Pair<I32, I32>, Nat>>
     {{-2#32, +0#32}, 23},
     {{-2#32, -1#32}, 23},
     {{-2#32, -2#32}, 24},
-    {{-2#32, -3#32}, 17},
-    {{-2#32, -4#32}, 9},
-    {{-2#32, -5#32}, 13},
     {{-2#32, -6#32}, 24},
     {{-3#32, +7#32}, 8},
     {{-3#32, +6#32}, 20},
@@ -118,8 +150,6 @@ App.KL.Game.Board.Boards.lava.terrains: List<Pair<Pair<I32, I32>, Nat>>
     {{-3#32, +0#32}, 23},
     {{-3#32, -1#32}, 20},
     {{-3#32, -2#32}, 24},
-    {{-3#32, -3#32}, 9},
-    {{-3#32, -4#32}, 11},
     {{-3#32, -5#32}, 24},
     {{-4#32, +7#32}, 8},
     {{-4#32, +6#32}, 20},
@@ -130,8 +160,6 @@ App.KL.Game.Board.Boards.lava.terrains: List<Pair<Pair<I32, I32>, Nat>>
     {{-4#32, +1#32}, 20},
     {{-4#32, +0#32}, 20},
     {{-4#32, -1#32}, 24},
-    {{-4#32, -2#32}, 9},
-    {{-4#32, -3#32}, 15},
     {{-4#32, -4#32}, 24},
     {{-5#32, +8#32}, 8},
     {{-5#32, +7#32}, 20},
@@ -154,4 +182,18 @@ App.KL.Game.Board.Boards.lava.terrains: List<Pair<Pair<I32, I32>, Nat>>
     {{-6#32, -1#32}, 24},
     {{-7#32, +2#32}, 20},
     {{-7#32, +1#32}, 20},
+  ]
+
+App.KL.Game.Board.Boards.lava.landscape: List<Pair<Pair<I32, I32>, Nat>>
+  [
+    {{-2#32, -4#32}, 9},
+    {{-3#32, -3#32}, 9},
+    {{-4#32, -2#32}, 9},
+    {{-1#32, -5#32}, 10},
+    {{-3#32, -4#32}, 11},
+    {{-1#32, -3#32}, 12},
+    {{-2#32, -5#32}, 13},
+    {{-4#32, -3#32}, 15},
+    {{-1#32, -4#32}, 16},
+    {{-2#32, -3#32}, 17},
   ]

@@ -1,13 +1,18 @@
 App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
   let name = "Flina"
 
-  let draw = (pose)
-    {none, App.KL.Game.Hero.Flina.Assets.vbox_idle}
+  let vbox_img = (pose)
+    {none, App.KL.Game.Hero.Flina.Assets.vbox_img}
 
-  let picture = (bool, time)
-    App.KL.Game.Hero.Flina.Assets.base64_idle
+  let b64_portrait = (bool, time)
+    App.KL.Game.Hero.Flina.Assets.b64_portrait
+
+  let b64_img = (bool, time)
+    App.KL.Game.Hero.Flina.Assets.b64_img
 
   let height = 40 :: I32
+
+  let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
 
   let max_hp = 10 :: I32
 
@@ -42,9 +47,11 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
       3 // Difficulty
   ))
 
+  let role = some(App.KL.Game.Hero.Role.support)
+
   let description = "Flina is a fragile high ranged support with several different skills to help her allies, or to disrupt her enemies."
 
-  App.KL.Game.Hero.new(name, draw, picture, height, max_hp, max_ap, skills, on_stepped, attributes, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
 
 
 // SKILLS

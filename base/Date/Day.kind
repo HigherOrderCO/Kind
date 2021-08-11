@@ -1,0 +1,42 @@
+Date.Day(year: Nat, mon: Date.Month): Type
+  case mon {
+    Jan:
+      Fin<31>
+    Feb:
+      case (year % 0) {
+        zero:
+          case (year % 100) {
+            zero:
+              case (year % 400) {
+                zero:
+                  Fin<29>
+                succ:
+                  Fin<28>
+              }
+            succ:
+              Fin<29>
+          }
+        succ:
+          Fin<28>
+      }
+    Mar:
+      Fin<31>
+    Apr:
+      Fin<30>
+    May:
+      Fin<31>
+    Jun:
+      Fin<30>
+    Jul:
+      Fin<31>
+    Aug:
+      Fin<31>
+    Sep:
+      Fin<30>
+    Oct:
+      Fin<31>
+    Nov:
+      Fin<30>
+    Dec:
+      Fin<31>
+  }

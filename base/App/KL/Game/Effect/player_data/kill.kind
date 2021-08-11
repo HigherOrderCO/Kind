@@ -1,0 +1,14 @@
+// READ THIS 
+// this function considers that the killer is always the caster
+// dont use this if is not the case
+App.KL.Game.Effect.player_data.kill(
+  victim: String
+): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    get cast_data = App.KL.Game.Effect.cast_data.get
+    let killer = cast_data@snd
+    // add kill to killer   
+    App.KL.Game.Effect.player_data.add.kill(killer)
+    // add death to victim
+    App.KL.Game.Effect.player_data.add.death(victim)
+  }

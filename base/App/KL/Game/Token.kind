@@ -4,8 +4,8 @@ type App.KL.Game.Token {
     range: I32
     max: I32
     score: I32
-  )
-}
+  ) 
+} deriving (serializer, deserializer)
 
 App.KL.Game.Token.score.capture(board: App.KL.Game.Board, score: App.KL.Game.Score): App.KL.Game.Score
   let tokens = App.KL.Game.Token.get_tokens(board)

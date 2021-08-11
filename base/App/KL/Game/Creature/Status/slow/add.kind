@@ -1,20 +1,22 @@
 //Slow has a limit of 2 
 App.KL.Game.Creature.Status.slow.add(
   creature: App.KL.Game.Creature
+  cast_data: Pair<Char, String>
   duration: I32
   amount: I32
 ): App.KL.Game.Creature
   
-  let slow_added = App.KL.Game.Creature.Status.slow.add.aux(duration, amount, creature@status)
+  let slow_added = App.KL.Game.Creature.Status.slow.add.aux(cast_data, duration, amount, creature@status)
   creature@status <- slow_added
 
 App.KL.Game.Creature.Status.slow.add.aux(
+  cast_data: Pair<Char, String>
   duration: I32
   amount: I32
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  let new_slow = App.KL.Game.Creature.Status.slow(duration, amount)
+  let new_slow = App.KL.Game.Creature.Status.slow(cast_data, duration, amount)
   case status { 
     nil:
       new_slow & status
@@ -23,10 +25,10 @@ App.KL.Game.Creature.Status.slow.add.aux(
         slow: 
           let new_amount = status.head.amount + amount
           if I32.gtn(new_amount, 2) then 
-            let limit_slow = App.KL.Game.Creature.Status.slow(status.head.duration, 2)
+            let limit_slow = App.KL.Game.Creature.Status.slow(status.head.cast_data, status.head.duration, 2)
             limit_slow & status.tail
           else
-            let add_slow = App.KL.Game.Creature.Status.slow(duration, new_amount)
+            let add_slow = App.KL.Game.Creature.Status.slow(cast_data, duration, new_amount)
             add_slow & status.tail
-      }default status.head & App.KL.Game.Creature.Status.slow.add.aux(duration, amount, status.tail)
+      }default status.head & App.KL.Game.Creature.Status.slow.add.aux(cast_data, duration, amount, status.tail)
   }

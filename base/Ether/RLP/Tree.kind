@@ -1,0 +1,4 @@
+type Ether.RLP.Tree {
+    tip(value : Bits)
+    list(value : List<Ether.RLP.Tree>)
+}

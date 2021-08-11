@@ -2,7 +2,46 @@ App.KL.Game.Board.Boards.arena: App.KL.Game.Board.Blueprint
   App.KL.Game.Board.Blueprint.new(
     App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.arena.terrains)
     App.KL.Game.Board.Blueprint.build.tokens(App.KL.Game.Board.Boards.arena.tokens)
+    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards.arena.bases)
+    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards.arena.initial)
+    App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards.arena.landscape)
   )
+
+App.KL.Game.Board.Boards.arena.bases: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+  let size = App.KL.Constants.board_size + App.KL.Constants.board_extra_width
+  [
+    {App.KL.Game.Team.blue, [
+       Hexagonal.Axial.new(I32.neg(size)    ,  0 ::I32),
+       Hexagonal.Axial.new(I32.neg(size) + 1,  0 ::I32),
+       Hexagonal.Axial.new(I32.neg(size)    ,  1 ::I32),
+       Hexagonal.Axial.new(I32.neg(size) + 2, -2 ::I32),
+       Hexagonal.Axial.new(I32.neg(size),      2 ::I32),
+       Hexagonal.Axial.new(I32.neg(size) + 1, -1 ::I32),
+    ]},
+    {App.KL.Game.Team.red, [
+       Hexagonal.Axial.new(size    ,  0 ::I32),
+       Hexagonal.Axial.new(size - 1,  0 ::I32),
+       Hexagonal.Axial.new(size    , -1 ::I32),
+       Hexagonal.Axial.new(size - 2,  2 ::I32),
+       Hexagonal.Axial.new(size,     -2 ::I32),
+       Hexagonal.Axial.new(size - 1,  1 ::I32),
+    ]},
+  ]
+
+App.KL.Game.Board.Boards.arena.initial: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+  let size = App.KL.Constants.board_size + App.KL.Constants.board_extra_width
+  [
+    {App.KL.Game.Team.blue, [
+       Hexagonal.Axial.new(I32.neg(size + 1), -1 ::I32),
+       Hexagonal.Axial.new(I32.neg(size + 2),  1 ::I32),
+       Hexagonal.Axial.new(I32.neg(size + 2),  0 ::I32),
+    ]},
+    {App.KL.Game.Team.red, [
+       Hexagonal.Axial.new(size + 2, -1 ::I32),
+       Hexagonal.Axial.new(size + 1,  1 ::I32),
+       Hexagonal.Axial.new(size + 2,  0 ::I32),
+    ]},
+  ]
 
 App.KL.Game.Board.Boards.arena.tokens: List<Pair<Pair<I32, I32>, App.KL.Game.Token>>
   [
@@ -19,7 +58,7 @@ App.KL.Game.Board.Boards.arena.terrains: List<Pair<Pair<I32, I32>, Nat>>
   
   let field_id = 1
   let result = []
-  
+
 
   for j : I32 from n_board_size to (board_size + 1) with result:
       // https://www.redblobgames.com/grids/hexagons/#range-coordinate
@@ -35,3 +74,6 @@ App.KL.Game.Board.Boards.arena.terrains: List<Pair<Pair<I32, I32>, Nat>>
         
       result
   result
+
+App.KL.Game.Board.Boards.arena.landscape: List<Pair<Pair<I32, I32>, Nat>>
+  []
