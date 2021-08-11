@@ -5,6 +5,11 @@ you want to work in any of these, [contact us](http://t.me/formality_lang) for
 instructions! I'm currently adding items as I remember, so this list isn't
 complete right now. Help me think in more things to add!
 
+## Funding:
+
+We're self-funded. If you'd like to help with donations, grants or funding,
+obviously let us know (:
+
 ## Improve base:
 
 The best way to start contributing (and to get familiar with the codebase) is to
