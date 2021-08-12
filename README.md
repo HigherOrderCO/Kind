@@ -26,7 +26,7 @@ npm i -g kind-lang
 
 2. Save the file below as `Main.kind`:
 
-```
+```javascript
 Main: IO(Unit)
   IO {
     IO.print("Hello, world!")
@@ -35,13 +35,13 @@ Main: IO(Unit)
 
 3. Type-check it:
 
-```
+```bash
 kind Main
 ```
 
 4. Run it:
 
-```
+```bash
 kind Main --run
 ```
 
