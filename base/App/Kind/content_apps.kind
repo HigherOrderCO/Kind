@@ -15,5 +15,6 @@ App.Kind.content_apps_text: DOM
     App.Kind.comp.link_black("Hello!", "App.Hello"),
     App.Kind.comp.link_black("Kind playground - try Kind online!", "App.Playground"),
     App.Kind.comp.link_black("Browser", "App.Browser"),
-    App.Kind.comp.link_black("MiniMMO", "App.MiniMMO"),
+    App.Kind.comp.link_black("Seta - modify an arrow drawing", "App.Seta"),
+    App.Kind.comp.link_black("Pong - a two-dimensional sports game that simulates table tennis", "App.Pong"),
   ])

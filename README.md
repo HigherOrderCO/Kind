@@ -26,7 +26,7 @@ npm i -g kind-lang
 
 2. Save the file below as `Main.kind`:
 
-```
+```javascript
 Main: IO(Unit)
   IO {
     IO.print("Hello, world!")
@@ -35,13 +35,13 @@ Main: IO(Unit)
 
 3. Type-check it:
 
-```
+```bash
 kind Main
 ```
 
 4. Run it:
 
-```
+```bash
 kind Main --run
 ```
 
@@ -52,7 +52,7 @@ Things you can do with Kind:
 
 ### Compile programs and modules to several targets.
 
-Kind has an universal compiler that targets several back-ends. Just find what you need on Kind, and compile it with `kind Main --lang`. For example, to generate a QuickSort function in JavaScript, just type `kind List.quicksort --js`. You may never write code in any other language! Available targets: `--js`, `--scm`. Several more will be available this month.
+Kind has an universal compiler that targets several back-ends. Just find what you need on Kind, and compile it with `kind Main --lang`. For example, to generate a QuickSort function in JavaScript, just type `kind List.quicksort --js`. You may never write code in any other language! Available targets: `--js`, `--scm`. Several more will be available eventually.
 
 ### Create live applications.
 
@@ -64,7 +64,7 @@ No, theorems are not scary things mathematicians do. For programmers, they're mo
 
 ### Deploy Smart-Contracts.
 
-(TODO) *Ethereum: we're coming for you.*
+(Soon.)
 
 Examples
 --------
@@ -88,7 +88,7 @@ quicksort(list: List<Nat>): List<Nat>
     cons:
       fst = list.head
       min = filter!((x) x <? list.head, list.tail)
-      max = filter!((x) x >? list.head, list.tail)
+      max = filter!((x) x >=? list.head, list.tail)
       quicksort(min) ++ [fst] ++ quicksort(max)
   }
 ```
@@ -298,3 +298,17 @@ App.Hello.when: App.When<App.Hello.State>
 Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
 
 Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
+
+In order to run this or any other app you should follow this steps:
+  - The app should be in `base/App` folder
+  - Install necessary packages in web folder with `npm i --prefix web/`
+  - Install `js-beautify` using `sudo npm i -g js-beautify`
+  - Run our local server with `node web/server`
+  - Build the app you want with `node web/build App.[name of app]` (in this example would be `node web/build App.Hello`)
+  - Open `localhost` in your favorite browser and see your app working
+
+
+Future work
+-----------
+
+There are so many things we want to do and improve. Would like to contribute? Check [CONTRIBUTE.md](https://github.com/uwu-tech/Kind/blob/master/CONTRIBUTE.md). Also reach us on [Telegram](https://t.me/formality_lang). We're friendly!
