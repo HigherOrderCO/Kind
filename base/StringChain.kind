@@ -71,7 +71,7 @@ type StringChain.Store {
     children: Map<List<StringChain.Hash>> // maps PostHash to list of PostHash that link to it
     pending: Map<List<StringChain.Post>>  // maps PostHash to list of posts waiting it for inclusion
     score: Map<StringChain.Hash>          // maps PostHash to cached score
-    tip: StringChain.Hash                 // current tip PostHash
+    tip: Pair<U256,StringChain.Hash>      // current tip PostHash
   )
 }
 
@@ -115,11 +115,17 @@ StringChain.Message.show(message: StringChain.Message): String
 StringChain.Hash.from_words(words: List<U256>): StringChain.Hash
   Crypto.Keccak.hash.words(words)
 
+StringChain.Hash.show(hash: StringChain.Hash): String
+  String.pad_left(32, '0', Nat.hex.encode(U256.to_nat(hash)))
+
 // Returns the PostHash
 StringChain.Hash.from_post(post: StringChain.Post): StringChain.Hash
   use post = post
-  let list = Vector.to_list!(32, post.body) ++ [post.work, post.prev]
-  StringChain.Hash.from_words(list)
+  if U256.eql(post.prev, 0) && U256.eql(post.work, 0) then
+    0#256
+  else
+    let words = Vector.to_list!(32, post.body) ++ [post.work, post.prev]
+    StringChain.Hash.from_words(words)
 
 StringChain.Message.serialize(message: StringChain.Message): String
   let hex = Bits.hex.encode(Serializer.run!(StringChain.Message.serializer, message))
@@ -131,17 +137,21 @@ StringChain.Message.deserialize(string: String): Maybe<StringChain.Message>
 
 // Estimates how many attempts were needed to make this hash
 StringChain.Hash.score(hash: U256): U256
-  Nat.to_u256(Nat.pow(2,256) / U256.to_nat(hash))
+  if U256.eql(hash,0) then
+    0
+  else
+    Nat.to_u256(Nat.pow(2,256) / U256.to_nat(hash))
 
 // Increases the Post nonce until it is above target_score
 StringChain.Post.mine(post: StringChain.Post, target_score: U256, attempts: U256): Maybe<StringChain.Post>
   let post_score = StringChain.Hash.score(StringChain.Hash.from_post(post))
+  //log("Mining. Score: " | U256.show(StringChain.Hash.from_post(post)) | " " | U256.show(post_score))
   if U256.eql(attempts,0) then
     none
   else if U256.gte(post_score, target_score) then
     some(post)
   else
-    StringChain.Post.mine(post@info <- post@info + 1, target_score, attempts - 1)
+    StringChain.Post.mine(post@work <- post@work + 1, target_score, attempts - 1)
 
 // Adds a post to the chain, updating the score, children and tip
 // If the prev is null, it is added to a pending map and re-added later
@@ -151,15 +161,17 @@ StringChain.Store.add_post(post: StringChain.Post, chain: StringChain.Store): St
   open chain.tip
   let post_hash = StringChain.Hash.from_post(post)
   case chain.post{U256.show(post_hash)} as got_post {
-    some: chain
+    some: log("- post already added") chain
     none:
       let prev_hash = post.prev
       case chain.post{U256.show(prev_hash)} as got_prev {
         none: 
+          log("- prev not available")
           let pending_list  = post & (chain.pending{U256.show(prev_hash)} <> []) // TODO: avoid adding duplicates
           let chain.pending = chain.pending{U256.show(prev_hash)} <- pending_list
           StringChain.Store.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
         some: 
+          log("- post added! prev: " | U256.show(prev_hash))
           let prev           = got_prev.value
           let prev_score     = chain.score{U256.show(prev_hash)} abort chain
           let post_score     = U256.add(prev_score, StringChain.Hash.score(post_hash))
@@ -168,7 +180,7 @@ StringChain.Store.add_post(post: StringChain.Post, chain: StringChain.Store): St
           let chain.post     = chain.post{U256.show(post_hash)} <- post
           let chain.score    = chain.score{U256.show(post_hash)} <- post_score
           let chain.children = chain.children{U256.show(prev_hash)} <- post_hash & prev_children
-          let chain.tip      = if post_score >? chain.tip then post_hash else chain.tip
+          let chain.tip      = if post_score >? Pair.fst!!(chain.tip) then {post_score,post_hash} else chain.tip
           let chain.pending  = Map.delete!(U256.show(post_hash), chain.pending)
           let chain          = StringChain.Store.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
           let chain          = for pending in pendings: StringChain.Store.add_post(pending, chain)
@@ -182,14 +194,14 @@ StringChain.Store.genesis: StringChain.Store
   let chain.score = {U256.show(0): 0#256}
   let chain.pending = {}
   let chain.children = {U256.show(0): []}
-  let chain.tip = 0#256
+  let chain.tip = {0#256, 0#256}
   StringChain.Store.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
 
 // Returns the longest chain, i.e., the one with most accumulated work
 StringChain.Store.longest_chain(chain: StringChain.Store): List<StringChain.Post>
   open chain
   open chain.tip
-  case chain.post{U256.show(chain.tip)} as tip_post {
+  case chain.post{U256.show(Pair.snd!!(chain.tip))} as tip_post {
     none: []
     some: StringChain.Store.longest_chain.go(tip_post.value, chain.post, [])
   }
@@ -229,6 +241,9 @@ StringChain.Address.show(addr: StringChain.Address): String
 StringChain.Peer.show(peer: StringChain.Peer): String
   open peer
   "<" | StringChain.Address.show(peer.address) | ">"
+
+StringChain.Peer.map_from_list(peers: List<StringChain.Peer>): Map<StringChain.Peer>
+  Map.from_list!(List.mapped!(peers)!((peer) { StringChain.Address.show(peer@address), peer }))
 
 StringChain.Received.from_udp_message(time: Nat, recv: IO.recv_udp.Message): Maybe<StringChain.Received>
   Maybe {
@@ -288,38 +303,44 @@ StringChain.Node.broadcast.go(node: StringChain.Node, message: StringChain.Messa
 StringChain.Node.init(port: Nat): IO<Unit>
   IO {
     get time = IO.get_time
-    let peers = Map.from_list!(List.mapped!([
+    let peers = StringChain.Peer.map_from_list([
       StringChain.Peer.new(time, StringChain.Address.ipv4(127,0,0,1,42000))
       StringChain.Peer.new(time, StringChain.Address.ipv4(127,0,0,1,42001))
       StringChain.Peer.new(time, StringChain.Address.ipv4(127,0,0,1,42002))
       StringChain.Peer.new(time, StringChain.Address.ipv4(127,0,0,1,42003))
-    ])!((peer) { StringChain.Address.show(peer@address), peer }))
+    ])
     let node = StringChain.Node.new(port, peers, StringChain.Store.genesis)
     StringChain.Node.loop(node)
   }
   
 StringChain.Node.loop(node: StringChain.Node): IO<Unit>
-  open node
-
   IO {
+    // Displays UI
+    StringChain.Node.display(node)
+    IO.print("")
+
     // Handle incoming messages
-    get inbox = IO.recv_udp(node.port)
+    get inbox = IO.recv_udp(node@port)
     get node = StringChain.Node.handle_inbox(node, inbox)
 
     // Attempts to mine a post and adds it if successful
-    //let node = StringChain.Node.mine(node)
+    get time = IO.get_time
+    let time = Nat.to_u256(time)
+    let body = Vector.create!(32, () time)
+    let post = StringChain.Post.new(body, 0, node@store@tip@snd)
+    let node = StringChain.Node.mine(node, post) <> node
 
     // Pings random neighbors, sending random peers to them
-    //StringChain.Node.ping(node)
+    StringChain.Node.ping(node)
 
     // Shares our best block with random neighbors
-    //StringChain.Node.share_tip(node)
+    StringChain.Node.share_tip(node)
 
     // Requests contents of pending posts
-    //StringChain.Node.request_pendings(node)
+    StringChain.Node.request_pendings(node)
 
-    // Displays UI
-    StringChain.Node.display(node)
+    // Forgets peers that look inactive
+    get node = StringChain.Node.forget_inactive_peers(node)
 
     // Loop
     IO.sleep(1000)
@@ -330,14 +351,20 @@ StringChain.Node.loop(node: StringChain.Node): IO<Unit>
 StringChain.Node.display(node: StringChain.Node): IO<Unit>
   open node
   open node.store
-  let longest = StringChain.Store.longest_chain(node.store)
+  let posts = StringChain.Store.longest_chain(node.store)
+  //let posts = Map.values!(node.store.post)
   IO {
-    //IO.clear
+    IO.clear
     IO.print(":: StringChain ::")
-    //for post in longest:
-      //let hash = StringChain.Hash.from_post(post)
-      //let score = StringChain.Hash.score(hash)
-      //IO.print(Nat.hex.encode(U256.to_nat(hash)) | " | " | U256.show(score))
+    IO.print("Peers: " | Nat.show(List.length!(Map.to_list!(node.peers))))
+    IO.print("Tip: " | Nat.hex.encode(U256.to_nat(node.store.tip@snd)))
+    IO.print("Posts:")
+    for post in posts: IO {
+      open post
+      let post_hash = StringChain.Hash.from_post(post)
+      let score = node.store.score{U256.show(post_hash)} <> 0
+      IO.print("- " | StringChain.Hash.show(post_hash) | " -- score: " | U256.show(score))
+    }
   }
 
 StringChain.Node.on_message(node: StringChain.Node, received: StringChain.Received): IO<StringChain.Node>
@@ -346,19 +373,23 @@ StringChain.Node.on_message(node: StringChain.Node, received: StringChain.Receiv
   open received
   case received.message {
     ping: IO {
+      log("~ received ping")
       //StringChain.Node.send(node, received.sender, StringChain.Message.pong)
       return node
     }
-    request_post: case node.store.post{U256.show(received.message.hash)} as got {
-      none: IO {
-        return node
-      }
-      some: IO {
+    request_post: 
+      log("~ received request")
+      case node.store.post{U256.show(received.message.hash)} as got {
+        none: IO {
+          return node
+        }
+        some: IO {
         StringChain.Node.send(node, received.sender, StringChain.Message.share_post(got.value))
-        return node
+          return node
+        }
       }
-    }
     share_post: IO {
+      log("~ received post")
       return StringChain.Node.add_post(node, received.message.post)
     }
   } default IO {
@@ -370,6 +401,7 @@ StringChain.Node.add_post(node: StringChain.Node, post: StringChain.Post): Strin
   node@store <- StringChain.Store.add_post(post, node.store)
 
 StringChain.Node.handle_inbox(node: StringChain.Node, inbox: List<IO.recv_udp.Message>): IO<StringChain.Node>
+  log("Handling inbox...")
   case inbox {
     nil: IO {
       return node
@@ -391,24 +423,36 @@ StringChain.Node.handle_inbox(node: StringChain.Node, inbox: List<IO.recv_udp.Me
     }
   }
 
+StringChain.Node.forget_inactive_peers(node: StringChain.Node): IO<StringChain.Node>
+  open node
+  IO {
+    get time = IO.get_time
+    let peers = Map.values!(node.peers)
+    let peers = List.filter<StringChain.Peer>((peer) (peer@last_seen + 10000) >? time, peers) 
+    return node@peers <- StringChain.Peer.map_from_list(peers)
+  }
+
 StringChain.Node.ping(node: StringChain.Node): IO<Unit>
   IO {
+    log("Pinging random peers...")
     get peers = StringChain.Node.get_random_peers(node, 8)
     let message = StringChain.Message.ping(List.mapped!(peers)!((peer) peer@address))
     StringChain.Node.send_to_random_peers(node, 3, message)
   }
 
 StringChain.Node.share_tip(node: StringChain.Node): IO<Unit>
+  open node
+  open node.store
   IO {
-    open node
-    open node.store
-    let tip_post = node.store.post{U256.show(node.store.tip)} abort IO.pass
+    log("Sharing tip with random peers...")
+    let tip_post = node.store.post{U256.show(Pair.snd!!(node.store.tip))} abort IO.pass
     let message = StringChain.Message.share_post(tip_post)
     StringChain.Node.send_to_random_peers(node, 3, message)
   }
 
 StringChain.Node.request_pendings(node: StringChain.Node): IO<Unit>
   IO {
+    log("Requesting pendings...")
     open node
     open node.store
     let pendings = List.map!!(U256.read, Map.keys!(node.store.pending))
@@ -417,15 +461,14 @@ StringChain.Node.request_pendings(node: StringChain.Node): IO<Unit>
       StringChain.Node.send_to_random_peers(node, 3, message)
   }
 
-StringChain.Node.mine(node: StringChain.Node): StringChain.Node
+StringChain.Node.mine(node: StringChain.Node, post: StringChain.Post): Maybe<StringChain.Node>
   IO {
+    log("Mining post...")
     open node
     open node.store
-    let body = Vector.create!(32, () 0)
-    let post = StringChain.Post.new(body, 0, node.store.tip)
-    let post = StringChain.Post.mine(post, 1024, 256)
-    case post {
-      none: node
-      some: StringChain.Node.add_post(node, post.value)
+    let mined_post = StringChain.Post.mine(post, 32, 64)
+    case mined_post {
+      none: log("- failure") none
+      some: log("- success") some(StringChain.Node.add_post(node, mined_post.value))
     }
   }

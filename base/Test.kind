@@ -1,6 +1,2 @@
 Test: _
-  U256.show(7070)
-  //StringChain.Node.init(42000)
-  //let list = [366, 9681, 7980, 992, 6516, 213, 59023, 4208, 6554, 1344]
-  //use vals = List.get_randoms!(16, 3, list)
-  //List.show!(Nat.show, vals.result)
+  StringChain.Node.init(42001)
