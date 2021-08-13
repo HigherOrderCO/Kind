@@ -1,3 +1,5 @@
+chezdir := ChezScheme
+
 all: bin/kind-scm
 
 deb: kind-scm.deb
@@ -26,10 +28,9 @@ install: bin/kind-scm
 	chmod +x bin/kind-scm
 	cp bin/kind-scm /usr/local/bin/
 
-chez: scheme/bin/scheme
-  cd ChezScheme
-	./configure --pb
-	make -j auto.bootquick
-	./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$PWD/../scheme
-	make -j
-	make install
+chez:
+	cd $(chezdir) && git submodule init && git submodule update
+	cd $(chezdir) && ./configure --pb
+	cd $(chezdir) && make -j auto.bootquick
+	cd $(chezdir) && ./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$(PWD)/scheme
+	cd $(chezdir) && make -j && make install
