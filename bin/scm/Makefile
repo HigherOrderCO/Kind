@@ -25,3 +25,11 @@ kind-scm.deb: bin/kind-scm
 install: bin/kind-scm
 	chmod +x bin/kind-scm
 	cp bin/kind-scm /usr/local/bin/
+
+chez: scheme/bin/scheme
+  cd ChezScheme
+	./configure --pb
+	make -j auto.bootquick
+	./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$PWD/../scheme
+	make -j
+	make install
