@@ -1,4 +1,5 @@
 chezdir := ChezScheme
+chezexedir := chez-exe
 
 all: bin/kind-scm
 
@@ -15,8 +16,9 @@ clean:
 	rm src/*.generated.c
 	rm bin/*
 
-bin/kind-scm:
-	cd src/ && scheme compile.scm
+bin/kind-scm: scheme/bin/compile-chez-program scheme/bin/scheme
+	./$(chezexedir)/compile-chez-program --full-chez --libdirs src src/main.scm
+	mv src/main bin/kind-scm
 	chmod +x bin/kind-scm
 
 kind-scm.deb: bin/kind-scm
@@ -28,9 +30,13 @@ install: bin/kind-scm
 	chmod +x bin/kind-scm
 	cp bin/kind-scm /usr/local/bin/
 
-chez:
+scheme/bin/scheme:
 	cd $(chezdir) && git submodule init && git submodule update
 	cd $(chezdir) && ./configure --pb
 	cd $(chezdir) && make -j auto.bootquick
 	cd $(chezdir) && ./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$(PWD)/scheme
 	cd $(chezdir) && make -j && make install
+
+scheme/bin/compile-chez-program: scheme/bin/scheme
+	cd $(chezexedir) && ./../scheme/bin/scheme --script gen-config.ss --scheme ./../scheme/bin/scheme --bootpath $(dirname $(find ../scheme -name kernel.o)) --prefix $(pwd)/../scheme
+	cd $(chezexedir) && make install
