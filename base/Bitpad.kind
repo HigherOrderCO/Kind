@@ -1,0 +1,491 @@
+// This file is just an early draft. Difficulty is fixed at 1000.
+// Nodes will discover peers, generate random posts, publish them
+// and reach a consensus regarding the chain tip. There are many
+// things missing right now.
+
+// TODO:
+// Discovery:
+//   Nodes must find peers, and keep a random pool of peers.
+// Propagation:
+//   Nodes must propagate and gossip valuable information, such as its best
+//   blocks, and some amount of previous best blocks.
+// Entry:
+//   When a node joins the network, it must request all the missing history. One
+//   way to do it would be to request all blocks from some random peer. If that
+//   peer accepts sending them, it will stream blocks one by one. Since UDP
+//   packets can be lost, receipts must be given, so a node can re-send missed
+//   blocks.
+// Difficulty:
+//   Difficulty should be adjusted, as in Bitcoin.
+// Timestamp:
+//   Nodes must be able to estimate a reasonable network time.
+
+// The body of a Bitpad Post can hold up to 8 words
+Bitpad.Body: Type
+  Vector<U256,32>
+
+// A Bitpad hash is a 256-bit word
+Bitpad.Hash: Type
+  U256
+
+// An IP networking address
+type Bitpad.Address {
+  ipv4(ip0: U8, ip1: U8, ip2: U8, ip3: U8, port: U16)
+} deriving (serializer, deserializer)
+
+// A networking peer
+type Bitpad.Peer {
+  new(
+    last_seen: Nat
+    address: Bitpad.Address
+  )
+}
+
+type Bitpad.Message {
+  ping(addresses: List<Bitpad.Address>)
+  request_post(hash: Bitpad.Hash)
+  share_post(post: Bitpad.Post)
+} deriving (serializer, deserializer)
+
+// A network message received from a sender
+type Bitpad.Received {
+  new(
+    sender: Bitpad.Peer
+    message: Bitpad.Message
+  )
+}
+
+// A Bitpad post
+type Bitpad.Post {
+  new(
+    body: Bitpad.Body // post contents (1024 bytes)
+    work: U256        // extra info and nonce (32 bytes)
+    prev: U256        // previous post (32 bytes)
+  )
+} deriving (serializer, deserializer)
+
+// Holds all the posts and aux structures
+type Bitpad.Store {
+  new(
+    post: Map<Bitpad.Post>           // maps PostHash to Post object
+    children: Map<List<Bitpad.Hash>> // maps PostHash to list of PostHash that link to it
+    pending: Map<List<Bitpad.Post>>  // maps PostHash to list of posts waiting it for inclusion
+    score: Map<Bitpad.Hash>          // maps PostHash to cached score
+    tip: Pair<U256,Bitpad.Hash>      // current tip PostHash
+  )
+}
+
+// The state of a Bitpad node
+type Bitpad.Node {
+  new(
+    port: Nat
+    peers: Map<Bitpad.Peer>
+    store: Bitpad.Store
+  )
+}
+
+Bitpad.Hash.serializer: Serializer<Bitpad.Hash>
+  U256.serializer
+
+Bitpad.Hash.deserializer: Deserializer<Bitpad.Hash>
+  U256.deserializer
+
+Bitpad.Body.deserializer: Deserializer<Bitpad.Body>
+  Vector.deserializer!(32,U256.deserializer)
+
+Bitpad.Body.serializer: Serializer<Bitpad.Body>
+  Vector.serializer!(32,U256.serializer)
+
+Bitpad.Message.serialize(message: Bitpad.Message): String
+  let hex = Bits.hex.encode(Serializer.run!(Bitpad.Message.serializer, message))
+  let hex = if Nat.mod(String.length(hex),2) =? 0 then hex else hex | "0"
+  hex
+
+Bitpad.Message.deserialize(string: String): Maybe<Bitpad.Message>
+  Deserializer.run!(Bitpad.Message.deserializer, Bits.hex.decode(string))
+
+Bitpad.Message.show(message: Bitpad.Message): String
+  case message {
+    ping: "ping"
+    share_post: "share_post(" | Bitpad.Hash.show(Bitpad.Hash.from_post(message.post)) | ")"
+    request_post: "request_post(" | Bitpad.Hash.show(message.hash) | ")"
+  }
+
+// Takes the Keccak hash of a list of words
+Bitpad.Hash.from_words(words: List<U256>): Bitpad.Hash
+  Crypto.Keccak.hash.words(words)
+
+Bitpad.Hash.show(hash: Bitpad.Hash): String
+  String.pad_left(32, '0', Nat.hex.encode(U256.to_nat(hash)))
+
+// Returns the PostHash
+Bitpad.Hash.from_post(post: Bitpad.Post): Bitpad.Hash
+  use post = post
+  if U256.eql(post.prev, 0) && U256.eql(post.work, 0) then
+    0#256
+  else
+    let words = Vector.to_list!(32, post.body) ++ [post.work, post.prev]
+    Bitpad.Hash.from_words(words)
+
+Bitpad.Message.serialize(message: Bitpad.Message): String
+  let hex = Bits.hex.encode(Serializer.run!(Bitpad.Message.serializer, message))
+  let hex = if Nat.mod(String.length(hex),2) =? 0 then hex else hex | "0"
+  hex
+
+Bitpad.Message.deserialize(string: String): Maybe<Bitpad.Message>
+  Deserializer.run!(Bitpad.Message.deserializer, Bits.hex.decode(string))
+
+// Estimates how many attempts were needed to make this hash
+Bitpad.Hash.score(hash: U256): U256
+  if U256.eql(hash,0) then
+    0
+  else
+    Nat.to_u256(Nat.pow(2,256) / U256.to_nat(hash))
+
+// Increases the Post nonce until it is above target_score
+Bitpad.Post.mine(post: Bitpad.Post, target_score: U256, attempts: U256): Maybe<Bitpad.Post>
+  let post_score = Bitpad.Hash.score(Bitpad.Hash.from_post(post))
+  //log("Mining. Score: " | U256.show(Bitpad.Hash.from_post(post)) | " " | U256.show(post_score))
+  if U256.eql(attempts,0) then
+    none
+  else if U256.gte(post_score, target_score) then
+    some(post)
+  else
+    Bitpad.Post.mine(post@work <- post@work + 1, target_score, attempts - 1)
+
+// Adds a post to the chain, updating the score, children and tip
+// If the prev is null, it is added to a pending map and re-added later
+Bitpad.Store.add_post(post: Bitpad.Post, chain: Bitpad.Store): Bitpad.Store
+  open post
+  open chain
+  open chain.tip
+  let post_hash = Bitpad.Hash.from_post(post)
+  case chain.post{U256.show(post_hash)} as got_post {
+    some:
+      //log("- post already added")
+      chain
+    none:
+      let prev_hash = post.prev
+      case chain.post{U256.show(prev_hash)} as got_prev {
+        none: 
+          //log("- prev not available")
+          let pending_list  = post & (chain.pending{U256.show(prev_hash)} <> []) // TODO: avoid adding duplicates
+          let chain.pending = chain.pending{U256.show(prev_hash)} <- pending_list
+          Bitpad.Store.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
+        some: 
+          //log("- post added! prev: " | U256.show(prev_hash))
+          let prev           = got_prev.value
+          let prev_score     = chain.score{U256.show(prev_hash)} abort chain
+          let post_score     = U256.add(prev_score, Bitpad.Hash.score(post_hash))
+          let prev_children  = chain.children{U256.show(prev_hash)} <> []
+          let pendings       = chain.pending{U256.show(post_hash)} <> []
+          let chain.post     = chain.post{U256.show(post_hash)} <- post
+          let chain.score    = chain.score{U256.show(post_hash)} <- post_score
+          let chain.children = chain.children{U256.show(prev_hash)} <- post_hash & prev_children
+          let chain.tip      = if post_score >? Pair.fst!!(chain.tip) then {post_score,post_hash} else chain.tip
+          let chain.pending  = Map.delete!(U256.show(post_hash), chain.pending)
+          let chain          = Bitpad.Store.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
+          let chain          = for pending in pendings: Bitpad.Store.add_post(pending, chain)
+          chain
+      }
+  }
+
+// The initial chain state
+Bitpad.Store.genesis: Bitpad.Store
+  let chain.post = {U256.show(0): Bitpad.Post.new(Vector.create!(32,()0),0,0)}
+  let chain.score = {U256.show(0): 0#256}
+  let chain.pending = {}
+  let chain.children = {U256.show(0): []}
+  let chain.tip = {0#256, 0#256}
+  Bitpad.Store.new(chain.post, chain.children, chain.pending, chain.score, chain.tip)
+
+// Returns the longest chain, i.e., the one with most accumulated work
+Bitpad.Store.longest_chain(chain: Bitpad.Store): List<Bitpad.Post>
+  open chain
+  open chain.tip
+  case chain.post{U256.show(Pair.snd!!(chain.tip))} as tip_post {
+    none: []
+    some: Bitpad.Store.longest_chain.go(tip_post.value, chain.post, [])
+  }
+
+Bitpad.Store.longest_chain.go(
+  post: Bitpad.Post
+  posts: Map<Bitpad.Post>
+  result: List<Bitpad.Post>
+): List<Bitpad.Post>
+  open post
+  let result = List.cons!(post, result)
+  if U256.eql(post.prev, 0) then
+    result
+  else case posts{U256.show(post.prev)} as prev {
+    none: result
+    some: Bitpad.Store.longest_chain.go(prev.value, posts, result)
+  }
+
+// Converts the IP of an address to a string
+Bitpad.Address.show.ip(addr: Bitpad.Address): String
+  open addr
+  let ip0 = Nat.show(U8.to_nat(addr.ip0))
+  let ip1 = Nat.show(U8.to_nat(addr.ip1))
+  let ip2 = Nat.show(U8.to_nat(addr.ip2))
+  let ip3 = Nat.show(U8.to_nat(addr.ip3))
+  ip0 | "." | ip1 | "." | ip2 | "." | ip3
+
+// Converts the port of an address to a string
+Bitpad.Address.show.port(addr: Bitpad.Address): String
+  open addr
+  Nat.show(U16.to_nat(addr.port))
+
+// Converts an address to a string
+Bitpad.Address.show(addr: Bitpad.Address): String
+  Bitpad.Address.show.ip(addr) | ":" | Bitpad.Address.show.port(addr)
+
+Bitpad.Peer.show(peer: Bitpad.Peer): String
+  open peer
+  "<" | Bitpad.Address.show(peer.address) | ">"
+
+Bitpad.Peer.map_from_list(peers: List<Bitpad.Peer>): Map<Bitpad.Peer>
+  Map.from_list!(List.mapped!(peers)!((peer) { Bitpad.Address.show(peer@address), peer }))
+
+Bitpad.Received.from_udp_message(time: Nat, recv: IO.recv_udp.Message): Maybe<Bitpad.Received>
+  Maybe {
+    open recv
+    open recv.from
+    let ip = List.mapped!(String.split(recv.from.ip, "."))!((x) Nat.to_u8(Nat.read(x)))
+    let port = Nat.to_u16(recv.from.port)
+    get ip0 = ip[0]
+    get ip1 = ip[1]
+    get ip2 = ip[2]
+    get ip3 = ip[3]
+    let peer = Bitpad.Peer.new(time, Bitpad.Address.ipv4(ip0, ip1, ip2, ip3, port))
+    get msge = Bitpad.Message.deserialize(recv.data)
+    return Bitpad.Received.new(peer, msge)
+  }
+
+Bitpad.Node.send(node: Bitpad.Node, peer: Bitpad.Peer, message: Bitpad.Message): IO<Unit>
+  open node
+  open peer
+  open peer.address
+  let from_port = node.port
+  let to_ip     = Bitpad.Address.show.ip(peer.address)
+  let to_port   = U16.to_nat(peer.address.port)
+  //log("SENDING: " | Bitpad.Message.serialize(message))
+  IO.send_udp(from_port, to_ip, to_port, Bitpad.Message.serialize(message))
+
+Bitpad.Node.get_random_peers(node: Bitpad.Node, count: Nat): IO<List<Bitpad.Peer>>
+  open node
+  IO {
+    get time = IO.get_time
+    use rand = List.get_randoms!(time, count, Map.values!(node.peers))
+    return rand.result
+  }
+
+Bitpad.Node.send_to_random_peers(node: Bitpad.Node, count: Nat, message: Bitpad.Message): IO<Unit>
+  IO {
+    get peers = Bitpad.Node.get_random_peers(node, count)
+    Bitpad.Node.broadcast.go(node, message, peers)
+  }
+
+Bitpad.Node.broadcast(node: Bitpad.Node, message: Bitpad.Message): IO<Unit>
+  Bitpad.Node.broadcast.go(node, message, Map.values!(node@peers))
+
+Bitpad.Node.broadcast.go(node: Bitpad.Node, message: Bitpad.Message, peers: List<Bitpad.Peer>): IO<Unit>
+  case peers {
+    nil: IO.pass
+    cons: IO {
+      Bitpad.Node.send(node, peers.head, message)
+      Bitpad.Node.broadcast.go(node, message, peers.tail)
+    }
+  }
+
+// Bitpad Node
+// ================
+
+// Starts a Bitpad node at given port
+Bitpad.Node.init(port: Nat): IO<Unit>
+  IO {
+    get time = IO.get_time
+    let peers = Bitpad.Peer.map_from_list([
+      Bitpad.Peer.new(time, Bitpad.Address.ipv4(127,0,0,1,42000))
+      Bitpad.Peer.new(time, Bitpad.Address.ipv4(127,0,0,1,42001))
+      Bitpad.Peer.new(time, Bitpad.Address.ipv4(127,0,0,1,42002))
+      Bitpad.Peer.new(time, Bitpad.Address.ipv4(127,0,0,1,42003))
+    ])
+    let node = Bitpad.Node.new(port, peers, Bitpad.Store.genesis)
+    Bitpad.Node.loop(node)
+  }
+  
+Bitpad.Node.loop(node: Bitpad.Node): IO<Unit>
+  IO {
+    // Displays UI
+    Bitpad.Node.display(node)
+    IO.print("")
+
+    // Handle incoming messages
+    get inbox = IO.recv_udp(node@port)
+    get node = Bitpad.Node.handle_inbox(node, inbox)
+
+    // Attempts to mine a post and adds it if successful
+    get time = IO.get_time
+    let time = Nat.to_u256(time)
+    let body = Vector.create!(32, () time)
+    let post = Bitpad.Post.new(body, 0, node@store@tip@snd)
+    let node = Bitpad.Node.mine(node, post) <> node
+
+    // Pings random neighbors, sending random peers to them
+    Bitpad.Node.ping(node)
+
+    // Shares our best block with random neighbors
+    Bitpad.Node.share_tip(node)
+
+    // Requests contents of pending posts
+    Bitpad.Node.request_pendings(node)
+
+    // Forgets peers that look inactive
+    get node = Bitpad.Node.forget_inactive_peers(node)
+
+    // Loop
+    IO.sleep(2000)
+    Bitpad.Node.loop(node)
+
+    return unit
+  }
+
+Bitpad.Node.display(node: Bitpad.Node): IO<Unit>
+  open node
+  open node.store
+  let posts = Bitpad.Store.longest_chain(node.store)
+  //let posts = Map.values!(node.store.post)
+  IO {
+    IO.clear
+    get time = IO.get_time
+    IO.print("~~ String:Chain ~~")
+    IO.print("Time     : " | Nat.show(time))
+    IO.print("Peers    : " | Nat.show(List.length!(Map.to_list!(node.peers))))
+    IO.print("Tip      : " | Nat.hex.encode(U256.to_nat(node.store.tip@snd)))
+    IO.print("Pendings : " | Nat.show(List.length!(Map.to_list!(node.store.pending))))
+    for post in posts: IO {
+      open post
+      let post_hash = Bitpad.Hash.from_post(post)
+      let score = node.store.score{U256.show(post_hash)} <> 0
+      IO.print("- " | Bitpad.Hash.show(post_hash) | " -- score: " | U256.show(score))
+    }
+  }
+
+Bitpad.Node.on_message(node: Bitpad.Node, received: Bitpad.Received): IO<Bitpad.Node>
+  open received
+  IO {
+    get node = Bitpad.Node.refresh_peer(node, received.sender)
+    open node
+    open node.store
+    case received.message {
+      ping: IO {
+        //log("~ received ping")
+        //Bitpad.Node.send(node, received.sender, Bitpad.Message.pong)
+        return node
+      }
+      request_post: 
+        //log("~ received request")
+        case node.store.post{U256.show(received.message.hash)} as got {
+          none: IO {
+            return node
+          }
+          some: IO {
+            Bitpad.Node.send(node, received.sender, Bitpad.Message.share_post(got.value))
+            return node
+          }
+        }
+      share_post: IO {
+        //log("~ received post")
+        return Bitpad.Node.add_post(node, received.message.post)
+      }
+    } default IO {
+      return node
+    }
+  }
+
+Bitpad.Node.refresh_peer(node: Bitpad.Node, peer: Bitpad.Peer): IO<Bitpad.Node>
+  open node
+  open peer
+  IO {
+    get time = IO.get_time
+    let peer = peer@last_seen <- time
+    let node = node@peers <- (node.peers{Bitpad.Peer.show(peer)} <- peer)
+    return node
+  }
+
+Bitpad.Node.add_post(node: Bitpad.Node, post: Bitpad.Post): Bitpad.Node
+  open node
+  node@store <- Bitpad.Store.add_post(post, node.store)
+
+Bitpad.Node.handle_inbox(node: Bitpad.Node, inbox: List<IO.recv_udp.Message>): IO<Bitpad.Node>
+  case inbox {
+    nil: IO {
+      return node
+    }
+    cons: IO {
+      open inbox.head
+      get time = IO.get_time
+      use received = Bitpad.Received.from_udp_message(time, inbox.head)
+      case received {
+        none: Bitpad.Node.handle_inbox(node, inbox.tail)
+        some: IO {
+          use received = received.value
+          get node = Bitpad.Node.on_message(node, received)
+          get node = Bitpad.Node.handle_inbox(node, inbox.tail)
+          IO.print(Bitpad.Peer.show(received.sender) | " " | Bitpad.Message.show(received.message))
+          return node
+        }
+      }
+    }
+  }
+
+Bitpad.Node.forget_inactive_peers(node: Bitpad.Node): IO<Bitpad.Node>
+  open node
+  IO {
+    get time = IO.get_time
+    let peers = Map.values!(node.peers)
+    let peers = List.filter<Bitpad.Peer>((peer) (peer@last_seen + 10000) >? time, peers) 
+    return node@peers <- Bitpad.Peer.map_from_list(peers)
+  }
+
+Bitpad.Node.ping(node: Bitpad.Node): IO<Unit>
+  IO {
+    log("Pinging peers...")
+    get peers = Bitpad.Node.get_random_peers(node, 8)
+    let message = Bitpad.Message.ping(List.mapped!(peers)!((peer) peer@address))
+    Bitpad.Node.broadcast(node, message)
+  }
+
+Bitpad.Node.share_tip(node: Bitpad.Node): IO<Unit>
+  open node
+  open node.store
+  IO {
+    log("Sharing tip with peers...")
+    let tip_post = node.store.post{U256.show(Pair.snd!!(node.store.tip))} abort IO.pass
+    let message = Bitpad.Message.share_post(tip_post)
+    Bitpad.Node.broadcast(node, message)
+  }
+
+Bitpad.Node.request_pendings(node: Bitpad.Node): IO<Unit>
+  IO {
+    log("Requesting pendings...")
+    open node
+    open node.store
+    let pendings = List.map!!(U256.read, Map.keys!(node.store.pending))
+    for pending in pendings:
+      let message = Bitpad.Message.request_post(pending)
+      Bitpad.Node.broadcast(node, message)
+  }
+
+Bitpad.Node.mine(node: Bitpad.Node, post: Bitpad.Post): Maybe<Bitpad.Node>
+  IO {
+    log("Mining post...")
+    open node
+    open node.store
+    let mined_post = Bitpad.Post.mine(post, 32, 64)
+    case mined_post {
+      none: log("- failure") none
+      some: log("- success") some(Bitpad.Node.add_post(node, mined_post.value))
+    }
+  }
