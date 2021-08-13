@@ -1,2 +1,4 @@
-Test: _
-  StringChain.Node.init(42001)
+Test: I32
+  let x = 2
+  let y = 4
+  I32.max((x + y), 0)

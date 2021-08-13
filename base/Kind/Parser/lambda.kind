@@ -1,4 +1,12 @@
 Kind.Parser.lambda: Parser(Kind.Term)
+  Kind.Parser.block("term", Parser {
+    Parser.choice!([
+      Kind.Parser.lambda.1,
+      Kind.Parser.lambda.2
+    ])
+  })
+
+Kind.Parser.lambda.1: Parser(Kind.Term)
   Kind.Parser.block("lambda", Parser {
     get nams = Kind.Parser.items!("(", Kind.Parser.name1, ")")
     get body = Parser.avoiding!(Kind.Parser.text_now("("), Kind.Parser.term)
@@ -35,3 +43,37 @@ Kind.Parser.lambda.make(names: List<Kind.Name>, body: Kind.Term): Kind.Term
     cons: Kind.Term.lam(names.head, (x) Kind.Parser.lambda.make(names.tail, body))
   }
 
+Kind.Parser.lambda.name_term: Parser(Pair<Kind.Name, Maybe<Kind.Term>>)
+  Parser {
+    get name = Kind.Parser.name
+  
+    get term = Parser.maybe!(Parser {
+      Kind.Parser.text(":")
+      get type = Kind.Parser.term
+      return type
+    })
+    return {name, term}
+  }
+
+
+Kind.Parser.lambda.2: Parser<Kind.Term>
+  Kind.Parser.block("lambda", Parser {
+    get nams = Kind.Parser.items!("(", Kind.Parser.lambda.name_term, ")")
+    get body = Parser.avoiding!(Kind.Parser.text_now("("), Kind.Parser.term)
+    let {nams, types} = List.unzip!!(nams)
+    let lamb = Kind.Parser.lambda.make.start(nams, body)
+    let type = Kind.Parser.lambda.get_type(types)
+    let term = Kind.Term.ann(false, lamb, type)
+    return term
+  })
+
+Kind.Parser.lambda.get_type(types: List<Maybe<Kind.Term>>): Kind.Term
+  case types {
+    nil: Kind.Term.hol(Bits.e)
+    cons:
+      let type = case types.head {
+        none: Kind.Term.hol(Bits.e)
+        some: types.head.value
+      }
+      Kind.Term.all(false, "", "", type, (s,x) Kind.Parser.lambda.get_type(types.tail))
+  }
