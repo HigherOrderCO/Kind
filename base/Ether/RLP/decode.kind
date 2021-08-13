@@ -1,6 +1,21 @@
 String.at(len : Nat, str : String) : Pair<String, String>
   {String.take(len, str), String.drop(len, str)}
 
+
+Ether.RLP.merge_tree(x : List<Ether.RLP.Tree>, y : Ether.RLP.Tree) : Ether.RLP.Tree
+  case y {
+    tip : Ether.RLP.Tree.list(y & x)
+    list : Ether.RLP.Tree.list(y.value ++ x)
+  }
+
+Ether.RLP.listing(encode : String) : Pair<List<Ether.RLP.Tree>, String>
+  if (String.length(encode) =? 0) || String.eql(encode, "error") then
+    {[], encode}
+  else
+    let {tree, rest} = Ether.RLP.decode.read(encode)
+    let {trees, rest} = Ether.RLP.listing(rest)
+    {tree & trees, rest}
+
 Ether.RLP.decode.read(encode : String) : Pair<Ether.RLP.Tree, String>
   let {prefix, rest} = String.at(2, encode)
   let byte_prefix = Bits.hex.decode(String.reverse(prefix))
@@ -11,17 +26,62 @@ Ether.RLP.decode.read(encode : String) : Pair<Ether.RLP.Tree, String>
       let content_length = (Bits.to_nat(byte_prefix) - 128) * 2
       if (bytes_size >? content_length) then
         let {prefix, rest} = String.at(content_length, rest)
-        log(prefix)
         {Ether.RLP.Tree.tip(Bits.hex.decode(String.reverse(prefix))), rest}
       else 
-        {Ether.RLP.Tree.list([]), "error"}
-  } default {Ether.RLP.Tree.list([]), "error"}
+        {Ether.RLP.Tree.list([]), "error"} // treat this case after
+  Ether.RLP.Constants.bits_192 :
+     let content_length = (Bits.to_nat(byte_prefix) - 183) * 2     
+     let {head, rest} = String.at(content_length, rest)
+     let length = Ether.RLP.decode_binary(head)
+     let verifier = (Bits.to_nat(byte_prefix) - (183 + length)) * 2
+     if (bytes_size >? content_length) && (bytes_size >? verifier) then
+       let {prefix, rest} = String.at(length *2, rest)
+       {Ether.RLP.Tree.tip(Bits.hex.decode(String.reverse(prefix))), rest}
+     else
+       {Ether.RLP.Tree.list([]), "error"} // treat this case after
+    Ether.RLP.Constants.bits_248 : 
+      let content_length = (Bits.to_nat(byte_prefix) - 192) * 2
+      if (bytes_size >? content_length) then
+        if String.length(rest) =? 0 then
+            {Ether.RLP.Tree.list([]), rest}
+        else
+          let {xs, rest} = Ether.RLP.listing(rest)
+          {Ether.RLP.Tree.list(xs), rest}
+      else
+        {Ether.RLP.Tree.list([]), "error"} // treat this case after
+    Ether.RLP.Constants.bits_255 : 
+      let content_length = (Bits.to_nat(byte_prefix) - 247) * 2     
+      let {head, rest} = String.at(content_length, rest)
+      let length = Ether.RLP.decode_binary(head)
+      let verifier = (Bits.to_nat(byte_prefix) - (247 + length)) * 2
+      if (bytes_size >? content_length) && (bytes_size >? verifier) then
+        if String.length(rest) =? 0 then
+            {Ether.RLP.Tree.list([]), rest}
+        else
+           let {xs, rest} = Ether.RLP.listing(rest)
+           {Ether.RLP.Tree.list(xs), rest}
+      else
+         {Ether.RLP.Tree.list([]), "error"} 
+  } default {Ether.RLP.Tree.list([]), "error"} // treat this case after
+
+Ether.RLP.decode_binary(value : String) : Nat
+  let {head, rest} = String.at(2, value)
+  let decode = Bits.to_nat(Bits.hex.decode(String.reverse(head)))
+  if (String.length(rest) =? 0) then
+    decode
+  else
+    Ether.RLP.decode_binary(rest) + (decode * 256)
 
 Ether.RLP.decode : _
-  let hello = Bits.read("0110100001100101011011000110110001101111")
+  // let x = Nat.pow(2, 16) - 1
+  // let v = Ether.RLP.encode.read(Ether.RPL.encode.binary(x))
+   
+ //  {Ether.RPL.encode.binary(x), 
+   //  Ether.RLP.decode_binary(String.drop(2, v))}
 
-  let xs = Ether.RLP.encode.bytes(Ether.RLP.Tree.tip(hello))
-  
+  let hello = Bits.read(String.reverse("011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001"))
+  let xs = Ether.RLP.encode.bytes(Ether.RLP.Tree.list([Ether.RLP.Tree.list([Ether.RLP.Tree.tip(hello)]), Ether.RLP.Tree.tip(hello)]))
+
   let str = String.drop(2, Ether.RLP.encode.read(xs))
   
   Ether.RLP.decode.read(str)
