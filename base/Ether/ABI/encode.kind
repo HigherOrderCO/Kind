@@ -5,7 +5,7 @@ Ether.encode.type(coder : Ether.ABI.Type) : List<String>
         some : 
           [Ether.Hex.to_hex(coder.value, true)]
         none : 
-          let bytes_size = Nat.to_bits(Bits.length(coder.value) / 8)
+          let bytes_size = Nat.to_bits(Ether.Bits.get_bytes_size(coder.value))
           [Ether.Hex.to_hex(bytes_size, true), Ether.Hex.to_hex(coder.value, false)]
       } 
     array : 
