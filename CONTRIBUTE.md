@@ -272,11 +272,12 @@ about our type checker. Contact us if you are interested!
 ## Add a consistency checker
 
 Compared to other proof languages, kind takes an inverted approach. Instead of
-consistency being default and expressivity being opt-in, here, expressivity is
-default and consistency is a planned opt-in. That means you're allowed to write
-programs with no restrictions, just like most traditional languages like Haskell
-or JavaScript, as long as they're total and well-typed. But that means programs
-that do not halt, and logical paradoxes, are also expressive.
+consistency being default and expressivity being opt-in (like Agda's
+`type-in-type` pragma), here, expressivity is default and consistency is a
+planned opt-in. That means you're allowed to write programs with no
+restrictions, just like most traditional languages like Haskell or JavaScript,
+as long as they're total and well-typed. But that also means programs that do
+not halt, and logical paradoxes, aren't prohibited.
 
 Regardless, there are several terminating, consistent subsets of Kind, each
 admiting different kinds of programs. For example, with structural recursion,

@@ -360,7 +360,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }
 ```
 
-To prove this theorem, Formality demands you to provide a proof of
+To prove this theorem, Kind demands you to provide a proof of
 `not(not(b))==b` on both cases. This isn't possible. But if you write a motive:
 
 ```
@@ -371,7 +371,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }: Bool.not(Bool.not(b)) == b
 ```
 
-Then Formality demands a proof of `not(not(true))==true` on the `?a` branch, and
+Then Kind demands a proof of `not(not(true))==true` on the `?a` branch, and
 a proof of `not(not(false))==false` on the `?b` branch. Since these equalities
 reduce to `true==true` and `false==false`, you can complete the proof with just
 `refl`.

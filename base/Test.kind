@@ -1,3 +1,5 @@
-Test: _
-  U256.read(U256.show(1234567#256))
-  //StringChain.Node.init(42000)
+is_even_double_n(n: Nat): Nat.is_even(Nat.double(n)) == true
+  case n {
+    zero: refl
+    succ: apply(Bool.not, apply(Bool.not, is_even_double_n(n.pred)))
+  }!
