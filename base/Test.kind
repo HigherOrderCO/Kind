@@ -1,4 +1,2 @@
-Test: I32
-  let x = 2
-  let y = 4
-  I32.max((x + y), 0)
+Test: _
+  (x: Nat, y) x + y

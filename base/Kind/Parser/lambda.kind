@@ -45,8 +45,7 @@ Kind.Parser.lambda.make(names: List<Kind.Name>, body: Kind.Term): Kind.Term
 
 Kind.Parser.lambda.name_term: Parser(Pair<Kind.Name, Maybe<Kind.Term>>)
   Parser {
-    get name = Kind.Parser.name
-  
+    get name = Kind.Parser.name1
     get term = Parser.maybe!(Parser {
       Kind.Parser.text(":")
       get type = Kind.Parser.term
