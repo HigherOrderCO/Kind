@@ -1,13 +1,16 @@
 chezdir := ChezScheme
 chezexedir := chez-exe
+# choose wether to use kind or kind-scm for bootstrapping
+kind := kind-scm
 
 all: bin/kind-scm
 
 deb: kind-scm.deb
 
-# compiles kind files to scheme you could replace kind-scm with kind
+# compiles kind files to scheme
+# do this after modifying the compiler source-code
 bootstrap:
-	cd ../../base && kind-scm Kind.Comp.Target.Scheme.bootstrap --run
+	cd ../../base && $(kind) Kind.Comp.Target.Scheme.bootstrap --run
 
 clean:
 	rm src/*.wpo
