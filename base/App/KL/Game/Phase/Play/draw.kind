@@ -57,7 +57,7 @@ App.KL.Game.Phase.Play.draw.tab(
         { App.KL.Game.Phase.Play.draw.tab.close }
         { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
         { App.KL.Game.Phase.Play.draw.tab.timer }
-        { App.KL.Game.Phase.Play.draw.tab.content(tab_which) }
+        { App.KL.Game.Phase.Play.draw.tab.content(tab_which, game@players) }
         { App.KL.Game.Phase.Play.draw.tab.controls(tab_which) }
       </div>
     </div>
@@ -107,7 +107,10 @@ App.KL.Game.Phase.Play.draw.tab.timer: DOM
     <span>"13:58"</span>
   </div>
 
-App.KL.Game.Phase.Play.draw.tab.content(tab_which: App.KL.Game.Controls.Hud.Tab): DOM
+App.KL.Game.Phase.Play.draw.tab.content(
+  tab_which: App.KL.Game.Controls.Hud.Tab
+  players: Map<App.KL.Game.Player>
+): DOM
   <div style={
     "left": "1%"
     "top": "15%"
@@ -115,8 +118,206 @@ App.KL.Game.Phase.Play.draw.tab.content(tab_which: App.KL.Game.Controls.Hud.Tab)
     "height": "72%"
     "width": "98%"
   }>
-    App.KL.Game.Controls.Hud.Tab.show(tab_which)
+    {
+      case tab_which {
+        stats:  App.KL.Game.Phase.Play.draw.tab.content.stats
+        recap:  App.KL.Game.Phase.Play.draw.tab.content.recap
+        skills: App.KL.Game.Phase.Play.draw.tab.content.skills(players)
+      }
+    }
   </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.skills(players: Map<App.KL.Game.Player>): DOM
+  let rows_quantity = 7
+  let skills = App.KL.Game.Phase.Play.draw.get_skills_to_tab(players)
+  let blocks = List.chunks_of!(rows_quantity, skills) // 7 is the number of rows
+  let blocks = List.indices!(blocks)
+  let last  = List.length!(blocks) - 1 
+  <div style={
+    "height": "100%"
+    "display": "flex"
+    "margin": "0 5%"
+    "overflow-x": "auto"
+  }>
+    for block in blocks:
+      let { block_number, skills_info } = block
+      <div style={"display": "contents"}>
+        <div style={"height": "100%"}>
+          <div style={
+            "height": "8%"
+            "display": "flex"
+            "align-items": "center"
+            "margin-bottom": "5px"
+          }>
+            {
+              if block_number =? 0 then
+                <div style={"display": "contents"}>
+                  <img 
+                    style={"margin-right": "5px"} 
+                    src=App.KL.Game.Phase.Play.Assets.tab.arrow.1
+                  ></img>
+                  <span style={"color": "#861cef"}>"Beginning"</span>
+                </div>
+              else
+                <img src=App.KL.Game.Phase.Play.Assets.tab.arrow.2></img>  
+            }
+          </div>
+          for skill_info in skills_info:
+            <div style={
+              "height": "10.5%"
+              "display": "flex"
+              "align-items": "center"
+              "text-transform": "uppercase"
+              "color": "white"
+              "margin-bottom": "5px"
+            }>
+              {
+                case skill_info {
+                  left:
+                    <img 
+                      style={"width": "100%"}
+                      src=App.KL.Game.Phase.Play.Assets.tab.divisor.walk
+                    > </img>
+                  right:
+                    let {key, info} = skill_info.value
+                    let {hero, skill} = info
+                    <div style={"display": "contents"}>
+                      <img 
+                        style={"margin-right": "5px", "height": "100%"} 
+                        src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                      ></img>
+                      <img 
+                        style={"margin-right": "5px", "height": "100%"} 
+                        src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                      ></img>
+                      <span style={"font-size": ".6rem"}>skill@name</span>
+                    </div> 
+                }
+              }
+            </div>
+            
+        </div>
+        <div style={"margin": "0 10px", "display": "flex", "align-items": "flex-end"}>
+          {
+            if block_number =? last then
+              <span style={"display": "none"}></span>
+            else
+              <img 
+                src=App.KL.Game.Phase.Play.Assets.tab.divisor.vertical 
+                style={"height": "91.5%"}
+              ></img>
+          }
+        </div>
+      </div>
+  </div>
+
+App.KL.Game.Phase.Play.draw.get_players_heroes(players: Map<App.KL.Game.Player>): List<App.KL.Game.Hero>
+  let list = Map.values!(players)
+  let list = List.mapped!(list)!((player) App.KL.Game.Hero.get_by_id(player@hero_id <> 65536))
+  let list = List.somes!(list)
+  list
+
+SkillInfo: Type
+  Pair<String,Pair<App.KL.Game.Hero, App.KL.Game.Skill>>
+
+App.KL.Game.Phase.Play.draw.get_players_skills(players: Map<App.KL.Game.Player>): List<SkillInfo>
+  let game_heroes = App.KL.Game.Phase.Play.draw.get_players_heroes(players)
+  let game_skills = List.flatten!(List.mapped!(game_heroes)!((hero) List.mapped!(Map.to_list!(hero@skills))!((x) {Pair.fst!!(x), {hero,Pair.snd!!(x)}})))
+  let game_skills = List.sort!((a,b) let as = Pair.snd!!(Pair.snd!!(a)); bs = Pair.snd!!(Pair.snd!!(b)); U64.cmp(as@delay, bs@delay), game_skills)
+  game_skills
+
+// return a list with skill info of all players
+// the either serves to tell where the walk skills are
+App.KL.Game.Phase.Play.draw.get_skills_to_tab(
+  players: Map<App.KL.Game.Player>
+): List<Either<Unit, SkillInfo>>
+  let skills = App.KL.Game.Phase.Play.draw.get_players_skills(players)
+  App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills, false)
+  
+App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(
+  skills: List<SkillInfo>
+  found_walk: Bool
+): List<Either<Unit, SkillInfo>>
+  case skills {
+    nil: []
+    cons:
+      let skill = skills.head@snd@snd
+      if (skill@name =? "Walk") || (skill@delay =? 500) then
+        if found_walk then
+          App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills.tail, found_walk)
+        else
+          Either.left!!(unit) & App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills.tail, true)
+      else
+        Either.right!!(skills.head) & App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills.tail, found_walk)
+  }
+
+App.KL.Game.Phase.Play.draw.apply_condition(
+  condition: App.KL.Game.Skill -> Bool
+  skill_info: SkillInfo
+): Bool
+  let skill = skill_info@snd@snd
+  condition(skill)
+
+App.KL.Game.Phase.Play.draw.tab.content.stats: DOM
+  <div>
+    <div style={
+      "display": "table"
+    }>
+      <div style={
+        "display": "table-header-group"
+      }>
+        <div style={
+          "display": "table-row"
+        }>
+          <div style={
+            "display": "table-cell"
+          }></div>
+          <div style={
+            "display": "table-cell"
+          }>"Hp"</div>
+          <div style={
+            "display": "table-cell"
+          }>"Kills"</div>
+          <div style={
+            "display": "table-cell"
+          }>"Deaths"</div>
+          <div style={
+            "display": "table-cell"
+          }>"Assists"</div>
+        </div>
+      </div>
+      <div style={
+        "display": "table-row-group"
+      }>
+        <div style={
+          "display": "table-row"
+        }>
+          <div style={
+            "display": "table-cell"
+          }></div>
+          <div style={
+            "display": "table-cell"
+          }>"Hpppppppppppp"</div>
+          <div style={
+            "display": "table-cell"
+          }>"Kills"</div>
+          <div style={
+            "display": "table-cell"
+          }>"Deathssss"</div>
+          <div style={
+            "display": "table-cell"
+          }>"Assistsfjnerfnjrnfrfnr"</div>
+        </div>
+      </div>
+    </div>
+
+    // <div style={"display": "table"}>
+    
+    // </div>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.recap: DOM
+  <span>"RECAP"</span>
 
 App.KL.Game.Phase.Play.draw.tab.controls(
   active_tab: App.KL.Game.Controls.Hud.Tab
