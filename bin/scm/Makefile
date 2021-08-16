@@ -1,10 +1,16 @@
+chezdir := ChezScheme
+chezexedir := chez-exe
+# choose wether to use kind or kind-scm for bootstrapping
+kind := kind-scm
+
 all: bin/kind-scm
 
 deb: kind-scm.deb
 
-# compiles kind files to scheme you could replace kind-scm with kind
+# compiles kind files to scheme
+# do this after modifying the compiler source-code
 bootstrap:
-	cd ../../base && kind-scm Kind.Comp.Target.Scheme.bootstrap --run
+	cd ../../base && $(kind) Kind.Comp.Target.Scheme.bootstrap --run
 
 clean:
 	rm src/*.wpo
@@ -13,8 +19,9 @@ clean:
 	rm src/*.generated.c
 	rm bin/*
 
-bin/kind-scm:
-	cd src/ && scheme compile.scm
+bin/kind-scm: scheme/bin/compile-chez-program scheme/bin/scheme
+	./$(chezexedir)/compile-chez-program --full-chez --libdirs src src/main.scm
+	mv src/main bin/kind-scm
 	chmod +x bin/kind-scm
 
 kind-scm.deb: bin/kind-scm
@@ -25,3 +32,14 @@ kind-scm.deb: bin/kind-scm
 install: bin/kind-scm
 	chmod +x bin/kind-scm
 	cp bin/kind-scm /usr/local/bin/
+
+scheme/bin/scheme:
+	cd $(chezdir) && git submodule init && git submodule update
+	cd $(chezdir) && ./configure --pb
+	cd $(chezdir) && make -j auto.bootquick
+	cd $(chezdir) && ./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$(PWD)/scheme
+	cd $(chezdir) && make -j && make install
+
+scheme/bin/compile-chez-program: scheme/bin/scheme
+	cd $(chezexedir) && ./../scheme/bin/scheme --script gen-config.ss --scheme $(PWD)/scheme/bin/scheme --bootpath $$(dirname $$(find ../scheme -name kernel.o)) --prefix $(PWD)/scheme
+	cd $(chezexedir) && make install
