@@ -1,5 +1,5 @@
 Package: kind-scm
-Version: 1.0.59
+Version: 1.0.90
 Architecture: amd64
 Maintainer: Rígille S. B. Menezes <rigillesbmenezes@protonmail.com>
 Description: ChezScheme release of the kind programming language.
