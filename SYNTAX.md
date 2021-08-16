@@ -298,7 +298,7 @@ branch as `name.field`. For example, when matching a `List`, we gain access to
 its head and tail as `list.head` and `list.tail`:
 
 ```
-sum(list: List<Nat>): List<Nat>
+sum(list: List<Nat>): Nat
   case list {
     nil: 0
     cons: list.head + sum(list.tail)
