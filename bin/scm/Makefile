@@ -35,8 +35,8 @@ install: bin/kind-scm
 
 scheme/bin/scheme:
 	cd $(chezdir) && git submodule init && git submodule update
-	cd $(chezdir) && ./configure --pb
-	cd $(chezdir) && make -j auto.bootquick
+	cd $(chezdir) && ./configure --pb --kernelobj --disable-curses --disable-iconv --disable-x11
+	cd $(chezdir) && make auto.bootquick
 	cd $(chezdir) && ./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$(PWD)/scheme
 	cd $(chezdir) && make -j && make install
 
