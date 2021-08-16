@@ -13,12 +13,13 @@ type App.KL.Game.State.Local {
     info: Hexagonal.Axial
     preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
+    screen_size: Pair<U32, U32>
     filter: App.KL.Game.Phase.Draft.Filter
     hud: App.KL.Game.State.Local.hud // HUD controls
   )
 }
 
-App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Local
+App.KL.Game.State.Local.init(user: String, room: String, screen_size: Pair<U32, U32>): App.KL.Game.State.Local
   let preview = App.KL.Game.Cast.Preview.new(none, Hexagonal.Axial.Map.new!)
   let mouse   = {0#32,0#32}
   let tab     = none
@@ -26,7 +27,7 @@ App.KL.Game.State.Local.init(user: String, room: String): App.KL.Game.State.Loca
   let page = "heroes"
   let filter = App.KL.Game.Phase.Draft.Filter.default
   let hud = App.KL.Game.State.Local.hud.new(none)
-  App.KL.Game.State.Local.new(user, room, tab, page, none, info, preview, mouse, filter, hud)
+  App.KL.Game.State.Local.new(user, room, tab, page, none, info, preview, mouse, screen_size, filter, hud)
 
 // Global State
 // ============
@@ -62,7 +63,7 @@ App.KL.Game.start: App.KL.Game
   let casts = []
   let score = App.KL.Game.Score.new({0,0}, App.KL.Constants.max_score)
   let cemetery = []
-  let blueprint = App.KL.Game.Board.Boards.lava
+  let blueprint = App.KL.Game.Board.Boards.laba
   App.KL.Game.new(phase, turn, moment, players, board, blueprint, casts, score, cemetery)
 
 // Render function
