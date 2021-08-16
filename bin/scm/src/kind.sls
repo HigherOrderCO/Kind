@@ -62,8 +62,9 @@
     ""
     (kstring-append
       (if fst "" sep)
-      (car strs)
-      (kstring_join sep (cdr strs) #f))))
+      (kstring-append
+        (car strs)
+        (kstring_join sep (cdr strs) #f)))))
 
 ; Short alias to vector-ref
 (define get vector-ref)
