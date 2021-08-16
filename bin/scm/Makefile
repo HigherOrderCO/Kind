@@ -38,5 +38,5 @@ scheme/bin/scheme:
 	cd $(chezdir) && make -j && make install
 
 scheme/bin/compile-chez-program: scheme/bin/scheme
-	cd $(chezexedir) && ./../scheme/bin/scheme --script gen-config.ss --scheme ./../scheme/bin/scheme --bootpath $(dirname $(find ../scheme -name kernel.o)) --prefix $(pwd)/../scheme
+	cd $(chezexedir) && ./../scheme/bin/scheme --script gen-config.ss --scheme $(PWD)/scheme/bin/scheme --bootpath $$(dirname $$(find ../scheme -name kernel.o)) --prefix $(PWD)/scheme
 	cd $(chezexedir) && make install
