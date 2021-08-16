@@ -10,8 +10,7 @@ App.KL.Game.Phase.Play.when(
       log("Screen size: " | U32.show(local@screen_size@fst) | ", " | U32.show(local@screen_size@snd))
       let picks = App.KL.Game.Cast.picks_of(local@user, game)
       let preview = local@preview <- (local@preview@picks <- picks)
-      open local 
-      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, U32.to_i32(local@screen_size@fst) / 2, U32.to_i32(local@screen_size@snd) / 2)
+      let preview = preview@screen_size <- event.info@screen_size
       App.set_local!(App.KL.State.Local.game(preview))
     mouse_move:
       if String.eql("game_screen", event.id) then
