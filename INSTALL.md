@@ -12,6 +12,7 @@ Kind is distributed as a single binary executable. You can download it [here](ht
 
 ```shell
 cd bin/scm
+git submodule update --init --recursive
 make
 ```
 
