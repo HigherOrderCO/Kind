@@ -575,8 +575,9 @@ App.KL.Game.Phase.Play.draw.canvas(
   }
   let img = App.KL.Game.Phase.Play.draw.board(game, local@preview, hits, local@user, local@mouse, img) 
   let img = App.KL.Game.Phase.Play.draw.bases(game, local@user, img)
-  let img = App.KL.Game.Phase.Play.draw.cursor(local@mouse, img)
+  let img = App.KL.Game.Phase.Play.draw.cursor(local@mouse,game.board, img)
   img
+
 
 // draw canvas board
 App.KL.Game.Phase.Play.draw.landscape(blueprint: App.KL.Game.Board.Blueprint, img: VoxBox): VoxBox
@@ -720,11 +721,18 @@ App.KL.Game.Phase.Play.Draw.get_indicators(
 // draw mouse indicator
 App.KL.Game.Phase.Play.draw.cursor(
   mouse: Pair<U32, U32>
+  board: App.KL.Game.Board
   img: VoxBox
 ): VoxBox
   coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
   {x,y} = App.KL.Game.Phase.Play.draw.centralize.old(coord)
-  VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.Mouse.mouse_ui, img)
+  let has_tile = App.KL.Game.Tile.get(coord, board)
+  case has_tile { 
+    none:
+      img
+    some:
+      VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.Mouse.mouse_ui, img)
+  }
 
 // draws tile terrain
 App.KL.Game.Phase.Play.draw.tile.terrain(
