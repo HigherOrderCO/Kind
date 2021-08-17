@@ -20,7 +20,7 @@ clean:
 	rm bin/*
 
 bin/kind-scm: scheme/bin/compile-chez-program scheme/bin/scheme
-	./$(chezexedir)/compile-chez-program --full-chez --libdirs src src/main.scm
+	./$(chezexedir)/compile-chez-program --full-chez --libdirs src --optimize-level 2 src/main.scm
 	mv src/main bin/kind-scm
 	chmod +x bin/kind-scm
 
