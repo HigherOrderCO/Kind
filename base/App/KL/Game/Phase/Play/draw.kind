@@ -650,12 +650,7 @@ App.KL.Game.Phase.Play.draw.tile.token(
   let coords = Hexagonal.Axial.range(token_coord, token@range)
   for coord in coords with img:
     let {cx, cy} = 
-      Hexagonal.Axial.to_screen_xy(
-        coord,
-        App.KL.Constants.hexagon_radius,
-        U32.to_i32(screen@fst),
-        U32.to_i32(screen@snd)
-      )
+      Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
     
     if Hexagonal.Axial.eql(coord, token_coord) then
       VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
