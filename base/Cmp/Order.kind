@@ -1,13 +1,13 @@
 type Cmp.Order<A: Type>(cmp: A -> A -> Cmp) {
   new(
     refl: 
-      (a: A, b: A, H: Equal<Cmp>(cmp(a, b), Cmp.eql))
+      (a: A, b: A, H: Equal<Cmp>(cmp(a, b), Cmp.eql)) ->
       (Equal<A>(a, b))
     antisym:
-      (a: A, b: A)
+      (a: A, b: A) ->
       (Equal<Cmp>(cmp(a, b), Cmp.inv(cmp(b, a)))),
     trans:
-      (a: A, b: A, c: A, H0: Equal<Cmp>(cmp(a, b), cmp(b, c)))
+      (a: A, b: A, c: A, H0: Equal<Cmp>(cmp(a, b), cmp(b, c))) ->
       (Equal<Cmp>(cmp(b, c), cmp(a, c)))
   )
 }
