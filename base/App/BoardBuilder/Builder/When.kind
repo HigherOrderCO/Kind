@@ -42,7 +42,7 @@ App.BoardBuilder.Builder.When(
         case mouse {
           none: App.pass!
           some:
-            let coord = Hexagonal.Axial.from_screen_xy(mouse.value, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2, local.canvas_size@snd / 2)
+            let coord = Hexagonal.Axial.from_screen_xy(mouse.value, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2 , local.canvas_size@snd / 2 )
             switch Char.eql(command) {
               'X':
                 let post =

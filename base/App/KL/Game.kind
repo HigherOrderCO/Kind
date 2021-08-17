@@ -63,7 +63,7 @@ App.KL.Game.start: App.KL.Game
   let casts = []
   let score = App.KL.Game.Score.new({0,0}, App.KL.Constants.max_score)
   let cemetery = []
-  let blueprint = App.KL.Game.Board.Boards.laba
+  let blueprint = App.KL.Game.Board.Boards.new_lava
   App.KL.Game.new(phase, turn, moment, players, board, blueprint, casts, score, cemetery)
 
 // Render function
