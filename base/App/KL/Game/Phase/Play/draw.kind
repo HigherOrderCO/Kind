@@ -57,7 +57,7 @@ App.KL.Game.Phase.Play.draw.tab(
         { App.KL.Game.Phase.Play.draw.tab.close }
         { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
         { App.KL.Game.Phase.Play.draw.tab.timer }
-        { App.KL.Game.Phase.Play.draw.tab.content(tab_which, game@players) }
+        { App.KL.Game.Phase.Play.draw.tab.content(tab_which, local@user, game@players) }
         { App.KL.Game.Phase.Play.draw.tab.controls(tab_which) }
       </div>
     </div>
@@ -109,6 +109,7 @@ App.KL.Game.Phase.Play.draw.tab.timer: DOM
 
 App.KL.Game.Phase.Play.draw.tab.content(
   tab_which: App.KL.Game.Controls.Hud.Tab
+  user: String
   players: Map<App.KL.Game.Player>
 ): DOM
   <div style={
@@ -120,7 +121,7 @@ App.KL.Game.Phase.Play.draw.tab.content(
   }>
     {
       case tab_which {
-        stats:  App.KL.Game.Phase.Play.draw.tab.content.stats
+        stats:  App.KL.Game.Phase.Play.draw.tab.content.stats(user, players)
         recap:  App.KL.Game.Phase.Play.draw.tab.content.recap
         skills: App.KL.Game.Phase.Play.draw.tab.content.skills(players)
       }
@@ -258,63 +259,137 @@ App.KL.Game.Phase.Play.draw.apply_condition(
   let skill = skill_info@snd@snd
   condition(skill)
 
-App.KL.Game.Phase.Play.draw.tab.content.stats: DOM
-  <div>
-    <div style={
-      "display": "table"
-    }>
+App.KL.Game.Phase.Play.draw.get_allies_enemies(
+  user: String
+  players: Map<App.KL.Game.Player>
+): Pair<Map<App.KL.Game.Player>, Map<App.KL.Game.Player>>
+  let player = players{user}
+  case player {
+    none:
+      let allies  = App.KL.Game.Player.get_from_team(App.KL.Game.Team.blue, players)
+      let enemies = App.KL.Game.Player.get_from_team(App.KL.Game.Team.red,  players)
+      {allies, enemies}
+    some:
+      let allies  = App.KL.Game.Player.get_allies(player.value, players)
+      let enemies = App.KL.Game.Player.get_enemies(player.value, players)
+      {allies, enemies}
+  }
+
+App.KL.Game.Phase.Play.draw.tab.content.stats(
+  user: String, 
+  players: Map<App.KL.Game.Player>
+): DOM
+  let {allies, enemies} = App.KL.Game.Phase.Play.draw.get_allies_enemies(user, players)
+  let allies  = Map.values!(allies)
+  let enemies = Map.values!(enemies)
+
+  <div style={"display": "flex", "justify-content": "space-between", "width": "100%", "height": "100%"}>
+    { App.KL.Game.Phase.Play.draw.tab.content.stats.table(allies, false) }
+    
+    <img
+      style={"height": "100%"}
+      src=App.KL.Game.Phase.Play.Assets.tab.divisor.vertical
+    ></img>
+    
+    { App.KL.Game.Phase.Play.draw.tab.content.stats.table(enemies, true) }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.stats.table(
+  players: List<App.KL.Game.Player>
+  reversed: Bool
+): DOM
+  let flex_direction = 
+    if reversed then "row-reverse" else "row"
+  let margin = // apply margin left if in right and vice-versa
+    if reversed then "0 0 0 5px" else "0 5px 0 0"
+  let text_align =
+    if reversed then "right" else "left"
+  let portrait =
+    if reversed then
+      App.KL.Game.Phase.Play.Assets.tab.portrait.enemy
+    else
+      App.KL.Game.Phase.Play.Assets.tab.portrait.ally
+
+  <div style={
+    "width": "45%"
+    "height": "100%"
+    "text-align": "center"
+    "color": "white"
+  }>
+    <div>
       <div style={
-        "display": "table-header-group"
+        "display": "flex"
+        "align-items": "center"
+        "color": App.KL.Game.Phase.Play.draw.theme.secondary
+        "font-size": "0.7rem"
+        "flex-direction": flex_direction
       }>
         <div style={
-          "display": "table-row"
-        }>
-          <div style={
-            "display": "table-cell"
-          }></div>
-          <div style={
-            "display": "table-cell"
-          }>"Hp"</div>
-          <div style={
-            "display": "table-cell"
-          }>"Kills"</div>
-          <div style={
-            "display": "table-cell"
-          }>"Deaths"</div>
-          <div style={
-            "display": "table-cell"
-          }>"Assists"</div>
-        </div>
-      </div>
-      <div style={
-        "display": "table-row-group"
-      }>
+          "flex": "2"
+        }></div>
         <div style={
-          "display": "table-row"
-        }>
-          <div style={
-            "display": "table-cell"
-          }></div>
-          <div style={
-            "display": "table-cell"
-          }>"Hpppppppppppp"</div>
-          <div style={
-            "display": "table-cell"
-          }>"Kills"</div>
-          <div style={
-            "display": "table-cell"
-          }>"Deathssss"</div>
-          <div style={
-            "display": "table-cell"
-          }>"Assistsfjnerfnjrnfrfnr"</div>
-        </div>
+          "flex": "1"
+        }>"Hp"</div>
+        <div style={
+          "flex": "1"
+        }>"Kills"</div>
+        <div style={
+          "flex": "1"
+        }>"Deaths"</div>
+        <div style={
+          "flex": "1"
+        }>"Assists"</div>
       </div>
     </div>
-
-    // <div style={"display": "table"}>
-    
-    // </div>
+    for player in players:
+      <div style={"height": "17%", "font-size": "0.8rem"}>
+        <div style={
+          "display": "flex"
+          "align-items": "center"
+          "flex-direction": flex_direction
+          "height": "calc(100% - 11px)" // 10px from 3px of bottom image + 8px of margin
+        }>
+          <div style={
+            "flex": "2"
+            "height": "100%"
+          }>
+            <div style={
+              "display": "flex"
+              "align-items": "center"
+              "justify-content": "center"
+              "flex-direction": flex_direction
+              "height": "100%"
+            }>
+              <img 
+                style={"margin": margin, "height": "100%"}
+                src=portrait
+              ></img>
+              <div style={"text-transform": "uppercase", "text-align": text_align}>
+                <p style={"font-size": "0.8rem"}>"Flina"</p>
+                <p style={"font-size": "0.7rem", "color": App.KL.Game.Phase.Play.draw.theme.secondary}>"User"</p>
+              </div>
+            </div>
+          </div>
+          <div style={
+            "flex": "1"
+          }><p>"60"</p></div>
+          <div style={
+            "flex": "1"
+          }><p>I32.show(player@scoreboard@kills)</p></div>
+          <div style={
+            "flex": "1"
+          }><p>I32.show(player@scoreboard@deaths)</p></div>
+          <div style={
+            "flex": "1"
+          }><p>"100"</p></div>
+        </div>
+        <img
+          style={"display": "flex", "margin": "4px 0", "width": "100%"}
+          src=App.KL.Game.Phase.Play.Assets.tab.divisor.horizontal
+        ></img>
+      </div>
   </div>
+
 
 App.KL.Game.Phase.Play.draw.tab.content.recap: DOM
   <span>"RECAP"</span>
