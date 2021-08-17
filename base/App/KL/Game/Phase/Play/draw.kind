@@ -7,19 +7,15 @@ App.KL.Game.Phase.Play.draw.fator.string: String
 App.KL.Game.Phase.Play.draw.theme.secondary: String
   "#eb6bff"
 
-type PlayersInfo {
-  new(
-    team: App.KL.Game.Team
-    creature: Maybe<App.KL.Game.Creature>
-    hero_id: Maybe<Nat>
-  )
-}
+PlayersInfo: Type
+  Pair<Maybe<App.KL.Game.Creature>, App.KL.Game.Player>
 
 SkillInfo: Type
   Pair<String,Pair<App.KL.Game.Hero, App.KL.Game.Skill>>
 
 // draw all the screen (round, seconds, canvas, list of skills)
 App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let players_info = App.KL.Game.Phase.Play.draw.get_players_info(game@players, game@board)
   <div style={ 
     "width": "max(100vw, 900px)",
     "height": "max(100vh, 650px)",
@@ -28,16 +24,23 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "background-color":" #071840"
   }>
     // interface
-    { App.KL.Game.Phase.Play.draw.interface(local, game) }
+    { App.KL.Game.Phase.Play.draw.interface(local, game, players_info) }
     // canvas
     { App.KL.Game.Phase.Play.draw.canvas.elem(local, game, img) }
     // tab
-    { App.KL.Game.Phase.Play.draw.tab(local, game) }
+    { App.KL.Game.Phase.Play.draw.tab(local, game, players_info) }
   </div>
 
 
 // AUX FUNCTIONS
 // =================================
+
+App.KL.Game.Phase.Play.draw.get_player_hero(player: App.KL.Game.Player): Maybe<App.KL.Game.Hero>
+  Maybe {
+    get hero_id = player@hero_id
+    get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
+  }
 
 App.KL.Game.Phase.Play.draw.get_players_heroes(players: Map<App.KL.Game.Player>): List<App.KL.Game.Hero>
   let list = Map.values!(players)
@@ -85,33 +88,50 @@ App.KL.Game.Phase.Play.draw.apply_condition(
 
 App.KL.Game.Phase.Play.draw.get_allies_enemies(
   user: String
-  players: Map<App.KL.Game.Player>
-): Pair<Map<App.KL.Game.Player>, Map<App.KL.Game.Player>>
-  let player = players{user}
-  case player {
-    none:
-      let allies  = App.KL.Game.Player.get_from_team(App.KL.Game.Team.blue, players)
-      let enemies = App.KL.Game.Player.get_from_team(App.KL.Game.Team.red,  players)
-      {allies, enemies}
+  players_info: Map<PlayersInfo>
+): Pair<Map<PlayersInfo>, Map<PlayersInfo>>
+  let {blues, reds} = App.KL.Game.Phase.Play.draw.sep_blue_red(players_info)
+  let player_info   = players_info{user}
+  case player_info {
+    none: {blues, reds}  // when local user isnt a player, blues come first
     some:
-      let allies  = App.KL.Game.Player.get_allies(player.value, players)
-      let enemies = App.KL.Game.Player.get_enemies(player.value, players)
-      {allies, enemies}
+      let player = player_info.value@snd
+      let player_team = player@team // if local user is a player, then his team come first
+      if App.KL.Game.Team.blue =? player_team then
+        {blues, reds}
+      else
+        {reds, blues}
   }
 
-App.KL.Game.Phase.Play.draw.interface.top.get_players(
+// separate blue and red teams
+App.KL.Game.Phase.Play.draw.sep_blue_red(
+  players: Map<PlayersInfo>
+): Pair<Map<PlayersInfo>, Map<PlayersInfo>>
+  let result = {{} :: Map<PlayersInfo>, {} :: Map<PlayersInfo>}
+  for id:player_info in players with result:
+    let {allies, enemies} = result
+    let player = player_info@snd
+    if App.KL.Game.Team.eql(player@team, App.KL.Game.Team.blue) then
+      let allies = allies{id}<-player_info
+      {allies, enemies}
+    else
+      let enemies = enemies{id}<-player_info
+      {allies, enemies}
+  result
+
+App.KL.Game.Phase.Play.draw.get_players_info(
   players: Map<App.KL.Game.Player>, 
   board: App.KL.Game.Board
 ): Map<PlayersInfo>
   let result = {}
   for id:player in players with result:
-    result{id} <- PlayersInfo.new(player@team, none, player@hero_id)
+    result{id} <- {none, player}
   for coord:tile in board with result:
     Maybe {
       get creature = tile@creature
       get id = creature@player
       get info = result{id}
-      return result{id} <- info@creature <- some(creature)
+      return result{id} <- info@fst <- some(creature)
     } <> result
   result
 

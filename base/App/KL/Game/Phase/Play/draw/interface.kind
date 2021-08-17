@@ -1,6 +1,8 @@
-App.KL.Game.Phase.Play.draw.interface(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
-  let players_info = App.KL.Game.Phase.Play.draw.interface.top.get_players(game@players, game@board)
-
+App.KL.Game.Phase.Play.draw.interface(
+  local: App.KL.Game.State.Local, 
+  game: App.KL.Game
+  players_info: Map<PlayersInfo>
+): DOM
   <div>
     {App.KL.Game.Phase.Play.draw.interface.top(players_info, local, game)}
     {App.KL.Game.Phase.Play.draw.interface.bottom(local@user, players_info, local@hud@skill)}
@@ -137,8 +139,9 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
   // get team to show in left and team to show in right
   let {user_team, enemy_team} = 
     Maybe {
-      get info = players_info{user}
-      let team = info@team
+      get info   = players_info{user}
+      let player = info@snd
+      let team   = player@team
       case team {
         blue: some({App.KL.Game.Team.blue, App.KL.Game.Team.red})
         red:  some({App.KL.Game.Team.red, App.KL.Game.Team.blue})
@@ -161,9 +164,9 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
       "grid-column-gap": "3px"
     }>
       for info in players_info:
-        let {id, snd_info} = info
-        let team     = snd_info@team
-        let creature = snd_info@creature
+        let {id, player_info}  = info
+        let {creature, player} = player_info
+        let team = player@team
         let dead = List.find!((x) id =? x@fst, cemetery)
 
         if team =? user_team then
@@ -183,9 +186,9 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
       "grid-column-gap": "3px"
     }>
       for info in players_info:
-        let {id, snd_info} = info
-        let team     = snd_info@team
-        let creature = snd_info@creature
+        let {id, player_info}  = info
+        let {creature, player} = player_info
+        let team = player@team
         let dead = List.find!((x) id =? x@fst, cemetery)
 
         if team =? enemy_team then
@@ -273,12 +276,13 @@ App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<P
 App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<PlayersInfo>, skill_hovered: Maybe<App.KL.Game.Skill>): DOM
   // get user in players map
   // if user isnt a player this interface isnt shown
-  let user = players_info{user}
-  without user: <span style={"display": "none"}></span>
+  let info = players_info{user}
+  without info: <span style={"display": "none"}></span>
   // get hero of user, if none this interface isnt shown
   let hero = 
     Maybe {
-      get hero_id = user@hero_id
+      let player  = info@snd
+      get hero_id = player@hero_id
       get hero = App.KL.Game.Hero.get_by_id(hero_id)
       return hero
     }
@@ -347,10 +351,10 @@ App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<Pla
   </footer>
 
 App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<PlayersInfo>): DOM
-  let user = players_info{user}
-  without user: <span style={"display": "none"}></span>
+  let info = players_info{user}
+  without info: <span style={"display": "none"}></span>
 
-  let creature = user@creature
+  let creature = info@fst
   let life_percentage = App.KL.Game.Phase.Play.draw.get_life_percentage(creature)
   let ap = App.KL.Game.Phase.Play.draw.get_ap(creature)
 
