@@ -1,0 +1,425 @@
+App.KL.Game.Phase.Play.draw.interface(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let players_info = App.KL.Game.Phase.Play.draw.interface.top.get_players(game@players, game@board)
+
+  <div>
+    {App.KL.Game.Phase.Play.draw.interface.top(players_info, local, game)}
+    {App.KL.Game.Phase.Play.draw.interface.bottom(local@user, players_info, local@hud@skill)}
+    {App.KL.Game.Phase.Play.draw.interface.user(local@user, players_info)}
+    {App.KL.Game.Phase.Play.draw.interface.casts(local@user, game@moment, game@players)}
+  </div>
+
+App.KL.Game.Phase.Play.draw.interface.casts(user: String, moment: App.KL.Game.Moment, players: Map<App.KL.Game.Player>): DOM
+  case moment {
+    execution:
+      casts = moment.casts
+      p_cst = moment.previous_casts
+      
+      <div style={
+        "position": "absolute"
+        "bottom": "0"
+        "right": "0"
+        "width": "300px"
+        "margin-right": "5px"
+      }>
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, p_cst[1], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, p_cst[0], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(true,  casts[0], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, casts[1], players)}
+        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, casts[2], players)}
+      </div>
+  } default <span style={"display": "none"}></span>
+
+App.KL.Game.Phase.Play.draw.interface.casts.item(main: Bool, cast: Maybe<App.KL.Game.Cast>, players: Map<App.KL.Game.Player>): DOM
+  let name = Maybe {
+    get cast    = cast
+    get player  = players{cast@player}
+    get hero_id = player@hero_id
+    get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+    get skill   = hero@skills{Char.to_string(cast@letter)}
+    return hero@name | " - " | skill@name
+  } <> ""
+  <div style={
+    "color": "white"
+    "background-color": if main && Bool.not(name =? "") then "#2a1956" else "transparent"
+    "padding": "0 20px"
+    "margin-left": if main then "0" else "2%"
+    "height": if main then "48px" else "36px"
+    "flex": if main then "2" else "1"
+    "display": "flex"
+    "border-radius": "5px"
+    "align-items": "center"
+  }>name</div>
+
+App.KL.Game.Phase.Play.draw.interface.top(players_info: Map<PlayersInfo>, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let inner =
+    <div>
+      {App.KL.Game.Phase.Play.draw.interface.top.timer(game@moment)}
+      {App.KL.Game.Phase.Play.draw.interface.top.round(game@turn)}
+      {App.KL.Game.Phase.Play.draw.interface.top.scores(game@score)}
+      {App.KL.Game.Phase.Play.draw.interface.top.players(local@user, players_info, game@cemetery, game@board)}
+    </div>
+  
+  <header style={
+    "position": "absolute",
+    "top": "0"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+    "width": "min-content"
+  }>
+    {App.KL.Game.Phase.Play.draw.wrapper(624, 91, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.Assets.interface.top, inner)}
+  </header>
+
+App.KL.Game.Phase.Play.draw.interface.top.timer(moment: App.KL.Game.Moment): DOM
+  let bar = case moment {
+    initial:
+      if moment.countdown >? App.KL.Constants.initital_delay then 
+        U64.to_f64(moment.countdown - App.KL.Constants.initital_delay) / U64.to_f64(App.KL.Constants.initial_time)
+      else
+        0.0
+    preparation:
+      U64.to_f64(moment.countdown) / U64.to_f64(App.KL.Constants.round_time)
+    execution: 0.0
+  }
+
+  <div style={
+    "position": "absolute"
+    "top": "4%"
+    "margin-left":" auto"
+    "margin-right":" auto"
+    "left":" 0"
+    "right":" 0"
+    "text-align":" center"
+    "height": "8.5%"
+    "background-color": App.KL.Game.Phase.Play.draw.theme.secondary
+    "border-radius": "2px"
+    "width": String.show_clean(F64.show(bar * 44.5)) | "%"
+  }>
+  </div>
+
+App.KL.Game.Phase.Play.draw.interface.top.round(round: U64): DOM
+  <div style={
+    "position": "absolute"
+    "bottom": "8%"
+    "font-size": "1.2rem"    
+    "margin-left":" auto"
+    "margin-right":" auto"
+    "left":" 0"
+    "right":" 0"
+    "text-align":" center"
+    "color": "white"
+  }>
+    <span>Nat.show(U64.to_nat(round))</span>
+  </div>
+
+App.KL.Game.Phase.Play.draw.interface.top.scores(scores: App.KL.Game.Score): DOM
+  let blue_hp = I32.sub(App.KL.Constants.max_score, scores@points@snd)
+  let red_hp = I32.sub(App.KL.Constants.max_score, scores@points@fst)
+
+  <div style={
+    "position": "absolute"
+    "top": "35%"
+    "font-size": "1.5rem"    
+    "margin-left":" auto"
+    "margin-right":" auto"
+    "left":" 0"
+    "right":" 0"
+    "text-align":" center"
+    "color": "white"
+  }>
+    <span style={"margin-right": "2.2%"}>Nat.show(I32.to_nat(blue_hp))</span>
+    <span>Nat.show(I32.to_nat(red_hp))</span>
+  </div>
+
+App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Map<PlayersInfo>, cemetery: App.KL.Game.Cemetery, board: App.KL.Game.Board): DOM
+  // get team to show in left and team to show in right
+  let {user_team, enemy_team} = 
+    Maybe {
+      get info = players_info{user}
+      let team = info@team
+      case team {
+        blue: some({App.KL.Game.Team.blue, App.KL.Game.Team.red})
+        red:  some({App.KL.Game.Team.red, App.KL.Game.Team.blue})
+        neutral: none
+      }
+    } <> {App.KL.Game.Team.blue, App.KL.Game.Team.red}  // set as default team
+
+  // TODO change when formap for DOM published
+  let players_info = Map.to_list!(players_info)
+  <div style={"display": "contents"}>
+    <div style={
+      "position": "absolute"
+      "top": "18%"
+      "left": "3.2%"
+      "width": "39.7%"
+      "height": "51%"
+      "display": "grid"
+      "grid-template-columns": "repeat(5, 1fr)"
+      "grid-template-rows": "1fr"
+      "grid-column-gap": "3px"
+    }>
+      for info in players_info:
+        let {id, snd_info} = info
+        let team     = snd_info@team
+        let creature = snd_info@creature
+        let dead = List.find!((x) id =? x@fst, cemetery)
+
+        if team =? user_team then
+          App.KL.Game.Phase.Play.draw.interface.top.creature(creature, dead, false, id =? user)
+        else
+          <span style={"display": "none"}></span>
+    </div>
+    <div style={
+      "position": "absolute"
+      "top": "18%"
+      "left": "57%"
+      "width": "39.7%"
+      "height": "51%"
+      "display": "grid"
+      "grid-template-columns": "repeat(5, 1fr)"
+      "grid-template-rows": "1fr"
+      "grid-column-gap": "3px"
+    }>
+      for info in players_info:
+        let {id, snd_info} = info
+        let team     = snd_info@team
+        let creature = snd_info@creature
+        let dead = List.find!((x) id =? x@fst, cemetery)
+
+        if team =? enemy_team then
+          App.KL.Game.Phase.Play.draw.interface.top.creature(creature, dead, true, false)
+        else
+          <span style={"display": "none"}></span>
+    </div>
+  </div>
+
+App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.Creature>, dead: Maybe<App.KL.Game.Cemetery.Dead>, is_enemy: Bool, is_user: Bool): DOM
+  let life_percentage = String.show_clean(F64.show(App.KL.Game.Phase.Play.draw.get_life_percentage(creature)))
+  let ap = App.KL.Game.Phase.Play.draw.get_ap(creature)
+
+  <div style={"position": "relative", "width": "100%", "height": "100%", "order": if is_user then "1" else "2"}>
+    // portrait
+    <img src=App.KL.Game.Phase.Play.Assets.interface.top.portrait_placeholder style={
+      "top": "2%"
+      "left": "4.5%"
+      "transform-origin": "top left"
+      "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
+      "position": "absolute"
+    }></img>
+    <div style={"position": "absolute", "top": "46%", "left": "63%", "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")", "transform-origin": "top left"}>
+      { App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage, ap, is_enemy) }
+    </div>
+    // death portrait
+    {
+      case dead {
+        none: <span style={"display":"none"}></span>
+        some: 
+          <div style={"display": "contents"}>
+            <img src=App.KL.Game.Phase.Play.Assets.interface.top.dead style={
+              "left": "0"
+              "transform-origin": "top left"
+              "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
+              "position": "absolute"
+            }></img>
+            <span style={
+              "position": "absolute"
+              "top": "38%"
+              "font-size": ".9rem"    
+              "margin-left":" auto"
+              "margin-right":" auto"
+              "left":" 0"
+              "right":" 0"
+              "text-align":" center"
+              "color": "white"
+            }> String.show_clean(I32.show(dead.value@snd)) | " TURNS"</span>
+          </div>
+      } 
+    }
+  </div>
+
+App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage: String, ap: I32, is_enemy: Bool): DOM
+    <div style={"position": "relative"}>
+      // life bar
+      <img src=App.KL.Game.Phase.Play.Assets.interface.top.life_placeholder></img>
+      <img 
+        src= if is_enemy then App.KL.Game.Phase.Play.Assets.interface.top.life_red else App.KL.Game.Phase.Play.Assets.interface.top.life_green 
+        style={
+          "left": "2px"
+          "top": "1px"
+          "position": "absolute"
+          "clip-path": "polygon(0 0%, "|life_percentage|"% 0%, "|life_percentage|"% 100%, 0% 100%)" 
+        }>
+      </img>
+      // ap bar
+      for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{2.0,21.0}, {8.0,15.0}, {14.0,9.0}]):
+        img
+    </div>
+
+App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<Pair<F64, F64>>): List<DOM>
+  if ap <=? 0 then []
+  else
+    case positions {
+      nil: []
+      cons:
+        <img src=App.KL.Game.Phase.Play.Assets.interface.top.ap style={
+          "position": "absolute"
+          "left": String.show_clean(F64.show(positions.head@fst)) | "px"
+          "top": String.show_clean(F64.show(positions.head@snd)) | "px"
+        }></img> & App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap - 1, positions.tail)
+    }
+
+App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<PlayersInfo>, skill_hovered: Maybe<App.KL.Game.Skill>): DOM
+  // get user in players map
+  // if user isnt a player this interface isnt shown
+  let user = players_info{user}
+  without user: <span style={"display": "none"}></span>
+  // get hero of user, if none this interface isnt shown
+  let hero = 
+    Maybe {
+      get hero_id = user@hero_id
+      get hero = App.KL.Game.Hero.get_by_id(hero_id)
+      return hero
+    }
+  without hero: <span style={"display": "none"}></span>
+
+  // draw content TODO change when formap implemented
+  let skills      = hero@skills
+  let skills_list = App.KL.Game.Phase.Play.draw.interface.bottom.get_skills(skills, 4)
+  let content = 
+    <div style={
+      "position": "relative"
+      "width": "100%"
+      "height": "100%"
+    }>
+      {
+        let walk_key = App.KL.Game.Phase.Play.draw.interface.bottom.get_walk_key(skills)
+        <span style={"position": "absolute", "left": "1.25%", "top": "25%"}>walk_key</span>
+      }
+      <div style={
+        "position": "absolute"
+        "display": "grid"
+        "grid-template-columns": "repeat(4, 1fr)"
+        "grid-template-rows": "1fr"
+        "gap": "2%"
+        "width": "73%"
+        "height": "73%"
+        "left": "13.5%"
+      }>
+        for info in skills_list:
+          let {key, skill} = info
+          let id = "SK"|key
+          let show = Maybe.if!((x) String.eql(skill@name, x@name), skill_hovered)
+          <div style={
+            "position": "relative"
+          }>
+            <div id=id style={
+              "background-color": "#190d1f"
+              "border-radius": "5px"
+              "padding": "5px"
+              "animation": "fade-in 0.1s"
+              "position": "absolute"
+              "transform-origin": "bottom center"
+              "transform": "translate(-15%, -101%)"
+              "width": "150%"
+              "color": "white"
+              "display": if show then "block" else "none
+              "
+            }>skill@description</div>
+            <span id=id style={"position": "absolute", "bottom": "1%", "left": "7%"}>key</span>
+            <span id=id style={"position": "absolute", "width": "100%", "height": "100%", "display": "flex", "justify-content": "center", "align-items": "center", "color": "white"}>skill@name</span>
+          </div>
+      </div>
+    </div>
+
+  <footer style={
+    "position": "absolute",
+    "bottom": "0"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+    "width": "min-content"
+  }>
+    {App.KL.Game.Phase.Play.draw.wrapper(280, 65, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.Assets.interface.bottom, content)}
+  </footer>
+
+App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<PlayersInfo>): DOM
+  let user = players_info{user}
+  without user: <span style={"display": "none"}></span>
+
+  let creature = user@creature
+  let life_percentage = App.KL.Game.Phase.Play.draw.get_life_percentage(creature)
+  let ap = App.KL.Game.Phase.Play.draw.get_ap(creature)
+
+  let content = 
+    <div style={
+      "position": "relative"
+      "width": "100%"
+      "height": "100%"
+    }>
+      <img src=App.KL.Game.Phase.Play.Assets.interface.top.portrait_placeholder style={
+        "position": "absolute"
+        "transform": "scale("|F64.show(App.KL.Game.Phase.Play.draw.fator.number * 2)|")"
+        "transform-origin": "top left"
+        "top": "4%"
+        "left": "4%"
+      }></img>
+      <img src= App.KL.Game.Phase.Play.Assets.interface.user.life style={
+        "position": "absolute"
+        "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
+        "transform-origin": "top left"
+        "top": "61%"
+        "left": "34%"
+        "clip-path": "polygon(0 0%, "|String.show_clean(F64.show(life_percentage + 8))|"% 0%, "|String.show_clean(F64.show(life_percentage))|"% 100%, 0% 100%)"
+      }></img>
+      <div style={
+        "position": "absolute"
+        "top": "74%"
+        "left": "31%"
+        "display": "flex"
+        "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
+        "transform-origin": "top left"
+      }>
+        for i in [0 to ap : I32]:
+          <img src=App.KL.Game.Phase.Play.Assets.interface.user.ap style={
+            "margin-right": "-3px"
+          }></img>
+      </div>
+    </div>
+     
+  <footer style={
+    "position": "absolute",
+    "bottom": "0"
+    "left": "0"
+    "width": "min-content"
+  }>
+    {App.KL.Game.Phase.Play.draw.wrapper(249, 112, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.Assets.interface.user, content)}
+  </footer>
+
+// AUX FUNCTION
+// =========================================
+App.KL.Game.Phase.Play.draw.interface.bottom.get_skills(
+  skills: Map<App.KL.Game.Skill>, 
+  max: Nat
+): List<Pair<String, App.KL.Game.Skill>>
+  result = {[] :: List<Pair<String, App.KL.Game.Skill>>, max}
+  for key: skill in skills with result:
+    if (max <=? 0) || (skill@name =? "Walk") then 
+      result
+    else
+      let result = result@fst <- {key, skill} & result@fst
+      result@snd <- result@snd - 1
+  result@fst
+
+App.KL.Game.Phase.Play.draw.interface.bottom.get_walk_key(skills: Map<App.KL.Game.Skill>): String
+  case skills {
+    tip: ""
+    bin: 
+      if skills.val@name =? "Walk" then
+        skills.key
+      else
+        App.KL.Game.Phase.Play.draw.interface.bottom.get_walk_key(skills.left) | App.KL.Game.Phase.Play.draw.interface.bottom.get_walk_key(skills.right)
+  }
