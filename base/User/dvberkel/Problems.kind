@@ -237,56 +237,112 @@ Problems.p23(xs: List<Nat>): List<Nat>
 
 // Note: these problems use functions from the base libs, NOT the ones above
 
-//Problems.t0: true == true
-//  ?a
+Problems.t0: true == true
+  refl
 
-//Problems.t1(a: Bool): Bool.and(false, a) == false
-//  ?a
+Problems.t1(a: Bool): Bool.and(false, a) == false
+  refl
 
-//Problems.t2(a: Bool): Bool.and(a, false) == false
-//  ?a
+Problems.t2(a: Bool): Bool.and(a, false) == false
+  case a {
+      true: refl
+      false: refl
+  }!
 
-//Problems.t3(a: Bool): Bool.or(true, a) == true
-//  ?a
+Problems.t3(a: Bool): Bool.or(true, a) == true
+  refl
 
-//Problems.t4(a: Bool): Bool.or(a, true) == true
-//  ?a
+Problems.t4(a: Bool): Bool.or(a, true) == true
+  case a {
+      true: refl
+      false: refl
+  }!
 
-//Problems.t5(a: Bool): Bool.eql(a, a) == true
-//  ?a
+Problems.t5(a: Bool): Bool.eql(a, a) == true
+  case a {
+      true: refl
+      false: refl
+  }!
 
-//Problems.t6(a: Bool): Bool.not(Bool.not(a)) == a
-//  ?a
+Problems.t6(a: Bool): Bool.not(Bool.not(a)) == a
+  case a {
+      true: refl
+      false: refl
+  }!
 
-//Problems.t7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
-//  ?a
+Problems.t7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+  case a b {
+      true  true: refl
+      false true: refl
+      true  false: refl
+      false false: refl
+  }!
 
-//Problems.t8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
-//  ?a
+Problems.t8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+  case a b {
+      true  true: refl
+      false true: refl
+      true  false: refl
+      false false: refl
+  }!
 
-//Problems.t9(a: Pair<Nat,Nat>): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
-//  ?a
+Problems.t9(a: Pair<Nat,Nat>): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
+  case a {
+      new: refl
+  }!
 
-//Problems.t10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
-//  ?a
+Problems.t10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
+  case a {
+      new: refl
+  }! 
 
-//Problems.t11(n: Nat): Nat.same(n) == n
-//  ?a
+Problems.t11(n: Nat): Nat.same(n) == n
+ case n {
+     zero: refl
+     succ:
+       ind = Problems.t11(n.pred)
+       qed = apply(Nat.succ, ind)
+       qed
+ }!
 
-//Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
-//  ?a
+Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
+  case n {
+      zero: refl
+      succ:
+        ind = Problems.t12(n.pred)
+        qed = apply(Nat.succ, ind)
+        qed
+  }!
 
-//Problems.t13(n: Nat): Nat.add(0,n) == n
-//  ?a
+Problems.t13(n: Nat): Nat.add(0,n) == n
+  refl
 
-//Problems.t14(n: Nat): Nat.add(n,0) == n
-//  ?a
+Problems.t14(n: Nat): Nat.add(n,0) == n
+  case n {
+      zero: refl
+      succ:
+        ind = Problems.t14(n.pred)
+        qed = apply(Nat.succ, ind)
+        qed
+  }!
 
-//Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
-//  ?a
+Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+ case n {
+     zero: refl
+     succ:
+        ind = Problems.t15(n.pred, m)
+        qed = apply(Nat.succ, ind)
+        qed
+ }!
   
-//Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
-//  ?a
+Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+  case n {
+      zero: refl
+      succ:
+        ind = Problems.t16(n.pred, m)
+        qed = apply(Nat.succ, ind)
+        qed
+  }!
 
 //Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
 //  ?a
