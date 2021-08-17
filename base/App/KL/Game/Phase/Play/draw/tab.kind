@@ -226,21 +226,11 @@ App.KL.Game.Phase.Play.draw.tab.content.stats.table(
         "font-size": "0.7rem"
         "flex-direction": flex_direction
       }>
-        <div style={
-          "flex": "2"
-        }></div>
-        <div style={
-          "flex": "1"
-        }>"Hp"</div>
-        <div style={
-          "flex": "1"
-        }>"Kills"</div>
-        <div style={
-          "flex": "1"
-        }>"Deaths"</div>
-        <div style={
-          "flex": "1"
-        }>"Assists"</div>
+        <div style={"flex": "2"}></div>
+        <div style={"flex": "1"}>"Hp"</div>
+        <div style={"flex": "1"}>"Kills"</div>
+        <div style={"flex": "1"}>"Deaths"</div>
+        <div style={"flex": "1"}>"Assists"</div>
       </div>
     </div>
     for info in players:
@@ -273,18 +263,10 @@ App.KL.Game.Phase.Play.draw.tab.content.stats.table(
               </div>
             </div>
           </div>
-          <div style={
-            "flex": "1"
-          }><p>"60"</p></div>
-          <div style={
-            "flex": "1"
-          }><p>I32.show(player@scoreboard@kills)</p></div>
-          <div style={
-            "flex": "1"
-          }><p>I32.show(player@scoreboard@deaths)</p></div>
-          <div style={
-            "flex": "1"
-          }><p>"100"</p></div>
+          <div style={"flex": "1"}><p>"60"</p></div>
+          <div style={"flex": "1"}><p>I32.show(player@scoreboard@kills)</p></div>
+          <div style={"flex": "1"}><p>I32.show(player@scoreboard@deaths)</p></div>
+          <div style={"flex": "1"}><p>"100"</p></div>
         </div>
         {
           if indice =? last then
