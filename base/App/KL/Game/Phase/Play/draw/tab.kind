@@ -6,27 +6,38 @@ App.KL.Game.Phase.Play.draw.tab(
   let tab_active = local@hud@tab_active
   let tab_which  = local@hud@tab_which
 
-  // if tab_active then 
-    <div class="pixel-art" style={
+  if tab_active then 
+    <div style={
       "position": "fixed"
-      "top": "50%"
-      "left": "50%"
-      "transform": "scale("| App.KL.Game.Phase.Play.draw.fator.string |") translate(-50%, -50%)"
-      "transform-origin": "top left"
+      "top": "0"
+      "left": "0"
+      "width": "100vw"
+      "height": "100vh"
+      "background-color": "rgba(0,0,0,0.35)"
+      "animation": "fade-in 100ms" 
     }>
-      <div style={
-        "position": "relative"
+      <div class="pixel-art" style={
+        "position": "fixed"
+        "top": "50%"
+        "left": "50%"
+        "transform": "scale("| App.KL.Game.Phase.Play.draw.fator.string |") translate(-50%, -50%)"
+        "transform-origin": "top left"
+        "box-shadow": "100% 100% 30px black"
       }>
-        <img src=App.KL.Game.Phase.Play.Assets.tab.background></img>
-        { App.KL.Game.Phase.Play.draw.tab.close }
-        { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
-        { App.KL.Game.Phase.Play.draw.tab.timer }
-        { App.KL.Game.Phase.Play.draw.tab.content(tab_which, local@user, players_info) }
-        { App.KL.Game.Phase.Play.draw.tab.controls(tab_which) }
+        <div style={
+          "position": "relative"
+        }>
+          <img src=App.KL.Game.Phase.Play.Assets.tab.background></img>
+          { App.KL.Game.Phase.Play.draw.tab.close }
+          { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
+          { App.KL.Game.Phase.Play.draw.tab.timer }
+          { App.KL.Game.Phase.Play.draw.tab.content(tab_which, local@user, players_info) }
+          { App.KL.Game.Phase.Play.draw.tab.controls(tab_which) }
+        </div>
       </div>
     </div>
-  // else
-  //   <span style={"display": "none"}></span>
+  else
+    <span style={"display": "none"}></span>
 
 App.KL.Game.Phase.Play.draw.tab.score(score: App.KL.Game.Score): DOM
   let blue_hp = I32.sub(App.KL.Constants.max_score, score@points@snd)
@@ -105,6 +116,7 @@ App.KL.Game.Phase.Play.draw.tab.content.skills(players: Map<App.KL.Game.Player>)
     "display": "flex"
     "margin": "0 5%"
     "overflow-x": "auto"
+    "animation": "fade-in 100ms"
   }>
     for block in blocks:
       let { block_number, skills_info } = block
@@ -186,7 +198,7 @@ App.KL.Game.Phase.Play.draw.tab.content.stats(
   let allies  = List.indices!(Map.values!(allies))
   let enemies = List.indices!(Map.values!(enemies))
 
-  <div style={"display": "flex", "justify-content": "space-between", "width": "100%", "height": "100%"}>
+  <div style={"display": "flex", "justify-content": "space-between", "width": "100%", "height": "100%", "animation": "fade-in 100ms"}>
     { App.KL.Game.Phase.Play.draw.tab.content.stats.table(allies, false) }
     
     <img
@@ -304,7 +316,7 @@ App.KL.Game.Phase.Play.draw.tab.stats.table.row(
   </div>
 
 App.KL.Game.Phase.Play.draw.tab.content.recap: DOM
-  <span>"RECAP"</span>
+  <span style={"animation": "fade-in 100ms"}>"RECAP"</span>
 
 App.KL.Game.Phase.Play.draw.tab.controls(
   active_tab: App.KL.Game.Controls.Hud.Tab

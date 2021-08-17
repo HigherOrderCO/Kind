@@ -41,8 +41,9 @@ App.KL.Game.Phase.Play.when(
         let local = local@hud <- controls
         App.set_local!(App.KL.State.Local.game(local))
     key_down:
-      // if tab pressed 
-      if event.code =? 9#16 then
+      // if tab (esc) pressed 
+      if event.code =? 32#16 then
+        log("ENTROU")
         let local = App.KL.Game.Phase.Play.when.invert_tab(true, controls, local)
         App.set_local!(App.KL.State.Local.game(local))
       else 
@@ -79,8 +80,9 @@ App.KL.Game.Phase.Play.when(
             }
         } default App.pass!
     key_up:
-      // if tab released
-      if event.code =? 9#16 then
+      // if tab (esc) released
+      if event.code =? 32#16 then
+        log("SAIU")
         let local = App.KL.Game.Phase.Play.when.invert_tab(false, controls, local)
         App.set_local!(App.KL.State.Local.game(local))
       else
@@ -127,9 +129,8 @@ App.KL.Game.Phase.Play.when.invert_tab(
   controls: App.KL.Game.Controls.Hud
   local: App.KL.Game.State.Local
 ): App.KL.Game.State.Local
-  let tab        = controls@tab_active <- active
-  let controls   = controls@tab <- tab
-  let local      = local@hud <- controls
+  let controls = controls@tab_active <- active
+  let local = local@hud <- controls
   local
 
 App.KL.Game.Phase.Play.when.initial.mouse_down(room: String, local: App.KL.Game.State.Local, game: App.KL.Game): IO<Maybe<App.State.local<App.KL.State>>>
