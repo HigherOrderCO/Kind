@@ -95,7 +95,7 @@ App.KL.Game.Phase.Play.draw.tab.content(
   </div>
 
 App.KL.Game.Phase.Play.draw.tab.content.skills(players: Map<App.KL.Game.Player>): DOM
-  let rows_quantity = 7
+  let rows_quantity = 10 // 7 is the number of rows
   let skills = App.KL.Game.Phase.Play.draw.get_skills_to_tab(players)
   let blocks = List.chunks_of!(rows_quantity, skills) // 7 is the number of rows
   let blocks = List.indices!(blocks)
@@ -131,7 +131,7 @@ App.KL.Game.Phase.Play.draw.tab.content.skills(players: Map<App.KL.Game.Player>)
           </div>
           for skill_info in skills_info:
             <div style={
-              "height": "10.5%"
+              "height": "7%"
               "display": "flex"
               "align-items": "center"
               "text-transform": "uppercase"
@@ -148,7 +148,6 @@ App.KL.Game.Phase.Play.draw.tab.content.skills(players: Map<App.KL.Game.Player>)
                   right:
                     let {key, info} = skill_info.value
                     let {hero, skill} = info
-                    log(hero@name)
                     <div style={"display": "contents"}>
                       <img 
                         style={"margin-right": "5px", "height": "100%"} 
@@ -158,7 +157,7 @@ App.KL.Game.Phase.Play.draw.tab.content.skills(players: Map<App.KL.Game.Player>)
                         style={"margin-right": "5px", "height": "100%"} 
                         src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
                       ></img>
-                      <span style={"font-size": ".6rem"}>skill@name</span>
+                      <span style={"font-size": ".55rem"}>skill@name</span>
                     </div> 
                 }
               }
