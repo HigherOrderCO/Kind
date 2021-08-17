@@ -1,0 +1,6 @@
+PriorityQueue.Tree.rank<A: Type>(tree: PriorityQueue.Tree<A>): Nat
+  case tree {
+      empty: 0
+      node: tree.rank
+  }
+  

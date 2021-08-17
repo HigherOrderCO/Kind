@@ -1,0 +1,9 @@
+PriorityQueue.tail<A: Type>(queue: PriorityQueue<A>): PriorityQueue<A>
+  open queue
+  case queue.tree {
+      empty: queue
+      node:
+        let priority = queue.priority
+        let merged = PriorityQueue.Tree.merge!(priority, queue.tree.left, queue.tree.right)
+        PriorityQueue.new!(queue.priority, merged)
+  }

@@ -1,0 +1,3 @@
+PriorityQueue.is_empty<A: Type>(queue: PriorityQueue<A>): Bool
+  open queue
+  PriorityQueue.Tree.is_empty!(queue.tree)
