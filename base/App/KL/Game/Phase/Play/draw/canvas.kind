@@ -127,8 +127,7 @@ App.KL.Game.Phase.Play.draw.canvas.bases(
 
       let allies = App.KL.Game.Player.get_allies(player, game@players)
       let bases  = game@blueprint@bases
-      for info in bases with img:
-        let {coord, team} = info
+      for coord:team in bases with img:
         let indicator = App.KL.Game.Team.get_indicator(team)
         App.KL.Game.Phase.Play.draw.canvas.tile.indicator(some(indicator), coord, img)
 

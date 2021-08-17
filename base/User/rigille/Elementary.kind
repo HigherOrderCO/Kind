@@ -16,6 +16,11 @@ type User.rigille.Elementary.Expression {
   )
 }
 
+User.rigille.Elementary.Expression.from_nat(n: Nat): User.rigille.Elementary.Expression
+  let i = Int.from_nat(n)
+  User.rigille.Elementary.constexp(i)
+  
+
 type User.rigille.Elementary.Op {
   add
   mult

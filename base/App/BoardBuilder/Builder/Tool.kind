@@ -1,0 +1,7 @@
+type App.BoardBuilder.Builder.Tool {
+  terrains
+  tokens
+  bases
+  initial
+  landscape
+}

@@ -3,7 +3,7 @@ All syntaxes
 
 This document lists all the high-level syntaxes available on the Kind
 language. Every syntax listed below is expanded (desugared) to either a
-primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of the functions available on the [base library](https://github.com/uwu-tech/Kind/tree/master/base).
+primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of the functions available on the [base library](https://github.com/uwu-tech/Kind/tree/master/base). Also, check [this](https://news.ycombinator.com/edit?id=28145337) answer on Hacker News for some thoughts and reasonings about our syntax choices.
 
 Top-level definition
 --------------------
@@ -35,6 +35,10 @@ get_first(fst: String, snd: String): String
 Creates a top-level function called `get_first`, which receives two arguments,
 `fst` and `snd` of type `String`, and returns a `String`, which is the first
 argument.
+
+The name of the top level definition also specifies the file where the
+definition is. For example `Physics.Verlet.step` must be either in
+`base/Physics.kind` or `base/Physics/Verlet.kind` or `base/Physics/Verlet/step.kind`.
 
 Top-level definitions and datatype declarations (described below) are the only
 syntaxes that aren't expressions, which mean they can't appear anywhere in the
@@ -294,7 +298,7 @@ branch as `name.field`. For example, when matching a `List`, we gain access to
 its head and tail as `list.head` and `list.tail`:
 
 ```
-sum(list: List<Nat>): List<Nat>
+sum(list: List<Nat>): Nat
   case list {
     nil: 0
     cons: list.head + sum(list.tail)
@@ -356,7 +360,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }
 ```
 
-To prove this theorem, Formality demands you to provide a proof of
+To prove this theorem, Kind demands you to provide a proof of
 `not(not(b))==b` on both cases. This isn't possible. But if you write a motive:
 
 ```
@@ -367,7 +371,7 @@ double_negation(b: Bool): Bool.not(Bool.not(b)) == b
   }: Bool.not(Bool.not(b)) == b
 ```
 
-Then Formality demands a proof of `not(not(true))==true` on the `?a` branch, and
+Then Kind demands a proof of `not(not(true))==true` on the `?a` branch, and
 a proof of `not(not(false))==false` on the `?b` branch. Since these equalities
 reduce to `true==true` and `false==false`, you can complete the proof with just
 `refl`.

@@ -2,7 +2,7 @@ Kind.Parser.forall: Parser(Kind.Term)
   Kind.Parser.block("forall", Parser {
     get self = Kind.Parser.name
     get bind = Kind.Parser.binder(":")
-    Parser.maybe!(Kind.Parser.text("->"))
+    Kind.Parser.text("->")
     get body = Kind.Parser.term
     let term = List.fold!(bind)!(body, (x,t) case x {
       new: Kind.Term.all(x.eras, "", x.name, x.term, (s,x) t)
