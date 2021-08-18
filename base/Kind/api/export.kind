@@ -1,6 +1,9 @@
 Kind.api.export: IO<Unit>
   IO {
     let e = Kind.api.io.term_to_core
+    // TODO: make Kind.Core.read.strx tail-recursive to uncomment this,
+    // because Kind.api.export fails to type-check when cached, due to
+    // FormCore stack overflowing on large string literals
     //let e = Kind.api.io.term_to_scheme
     //let e = Kind.api.io.terms_to_scheme_lib
     let e = Kind.api.io.check_file
