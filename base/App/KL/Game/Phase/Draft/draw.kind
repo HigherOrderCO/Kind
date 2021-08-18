@@ -292,14 +292,27 @@ App.KL.Game.Phase.Draft.draw.card.user(
     some: Map.to_list!(hero.value@skills)
   }
 
+  let order = ["I","Q","W","E","R","X"] // order which skills are shown 
   let inner  = 
     <div style={"display": "contents"}>
-      <div style={"height": "40%", "width": "17%", "max-height": "40%", "overflow": "auto", "border-radius": "5px 0px 0px 5px"}>
-        { App.KL.Game.Phase.Draft.Draw.card.slot("DNone", <span id="DNone">"I"</span>) } // TODO LIST ICON
-        for info in skills:
-          let {key, skill} = info
-          let id = "D"|key
-          App.KL.Game.Phase.Draft.Draw.card.slot(id, <span id=id >key</span>)
+      <div style={
+        "height": "40%", 
+        "width": "17%", 
+        "max-height": "40%", 
+        "overflow": "auto", 
+        "border-radius": "5px 0px 0px 5px", 
+      }>
+        <div style={
+          "display": "flex", 
+          "flex-direction": "column"
+        }>
+          { App.KL.Game.Phase.Draft.Draw.card.slot(some(0), "DNone", <span id="DNone">"I"</span>) } // TODO LIST ICON
+          for info in skills:
+            let {key, skill} = info
+            let order = List.find_index!(order, String.eql(key))
+            let id = "D"|key
+            App.KL.Game.Phase.Draft.Draw.card.slot(order, id, <span id=id >key</span>)
+        </div>
       </div>
       <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
         {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab, player@ready)}
@@ -311,22 +324,33 @@ App.KL.Game.Phase.Draft.draw.card.user(
   </div>
 
 App.KL.Game.Phase.Draft.Draw.card.slot(
+  order: Maybe<Nat>
   id: String
   el: DOM
 ): DOM
+  let order = order <> 0
+  let order = Nat.show(order)
   <div id=id style={
-    "background-image": "url("|App.KL.Game.Phase.Draft.Assets.card.button|")"
-    "background-size": "100% 100%"
-    "height": "20%"
+    "position": "relative"
     "width": "100%"
-    // "font-size": "1.5rem"
     "border-radius": "5px"
-    "display": "flex"
-    "align-items": "center"
-    "justify-content": "center"
     "color": "white"
+    "order": order
   }>
-    { el }
+    <img 
+      src=App.KL.Game.Phase.Draft.Assets.card.button
+      style={"width": "100%", "display": "flex"}
+    ></img>
+    <div style={
+      "position": "absolute"
+      "top": "0", "left": "0"
+      "width": "100%", "height": "100%"
+      "display": "flex"
+      "align-items": "center"
+      "justify-content": "center"
+    }>
+      <span>{ el }</span>
+    </div>
   </div>
 
 
@@ -412,10 +436,12 @@ App.KL.Game.Phase.Draft.draw.card.hero.skill_info(
   case skill {
     none: <span></span>
     some:
+      let name = skill.value@name
       let description = skill.value@description
 
-      <div style={"padding": "10px", "width": "100%"}>
-        <p style={"text-align": "center", "color": "white"}>description</p>
+      <div style={"padding": "10px", "width": "100%", "text-align": "center", "color": "white"}>
+        <p style={"margin-bottom": "3px"}>name</p>
+        <p>description</p>
       </div>
     
   }

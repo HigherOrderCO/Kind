@@ -1,14 +1,14 @@
-List.find_index<A: Type>(xs: List<A>, f: A -> Bool): Maybe<Pair<A,Nat>>
+List.find_index<A: Type>(xs: List<A>, f: A -> Bool): Maybe<Nat>
   List.find_index.go<A>(xs,f,Nat.zero)
 
 
 
 
-List.find_index.go<A: Type>(xs: List<A>, f: A -> Bool, i: Nat): Maybe<Pair<A,Nat>>
+List.find_index.go<A: Type>(xs: List<A>, f: A -> Bool, i: Nat): Maybe<Nat>
   case xs {
     nil : Maybe.none!,
     cons: case f(xs.head) {
-      true : Maybe.some!(Pair.new!!(xs.head)(i)),
+      true : Maybe.some!(i),
       false: List.find_index.go!(xs.tail,f,Nat.succ(i))
     }
   }
