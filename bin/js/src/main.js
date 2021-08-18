@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node --stack-size=100000
+#!/usr/bin/env node
 
 var kind = require("./kind.js");
 var fs = require("fs");

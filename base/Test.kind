@@ -1,9 +1,2 @@
-UPair<A: Type, B: Type>: Type
-  self<P: UPair<A,B> -> Type>
-  (new: (fst: A, snd: B) -> P(UPair.new<A,B>(fst,snd)))
-  P(self)
-
-UPair.new<A: Type, B: Type>(fst: A, snd: B): UPair<A,B>
-  <P> (new) new(fst, snd)
-
-
+Test: _
+  (x: Nat) x + x

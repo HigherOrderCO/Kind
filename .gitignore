@@ -5,6 +5,8 @@ scripts/
 src/_*
 src/tmp*
 bin/hs/cabal.project.local*
+bin/scm/scheme/
+bin/scm/bin/
 tmp.js
 .vscode
 *.orig
