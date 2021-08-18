@@ -358,8 +358,13 @@ App.KL.Game.Phase.Play.draw.tab.content.recap(
             for recap in recaps:
               let hp   = recap@new_hp
               let diff = recap@hp_diff
-              let diff_percentage = F64.show(App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(diff, creature))
-              let life_percentage = F64.show(App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(hp,   creature))
+              let diff_percentage = App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(diff, creature)
+              let life_percentage = App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(hp,   creature)
+              let life_percentage =
+                if diff >? 0 then life_percentage - diff_percentage
+                else life_percentage
+              let life_percentage = F64.show(life_percentage)
+              let diff_percentage = F64.show(diff_percentage)
               <div style={
                 "width": "8%", 
                 "height": "100%", 
