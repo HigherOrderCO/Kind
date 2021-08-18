@@ -1,6 +1,8 @@
 App.KL.Game.Effect.player_data.add.damage(
-  player_id: String
+  caster_id: String
+  target_id: String
   damage: I32
+  new_hp: I32
 ): App.KL.Game.Effect<Unit>
   (center, targets, cast_data, board)
     App.KL.Game.Effect.Result.new!(
@@ -12,5 +14,7 @@ App.KL.Game.Effect.player_data.add.damage(
       0, 
       [], 
       "", 
-      {player_id: {App.KL.Game.Scoreboard.new(damage, 0, 0, 0), some([App.KL.Game.Recap.Episode.new(cast_data@fst, cast_data@snd, damage)])}}
+      {
+        caster_id: {App.KL.Game.Scoreboard.new(damage, 0, 0, 0), none},
+        target_id: {App.KL.Game.Scoreboard.new(0, 0, 0, 0,), some([App.KL.Game.Recap.Episode.new(cast_data@fst, cast_data@snd, damage, new_hp)])}}
     )

@@ -9,9 +9,9 @@ App.KL.Game.Phase.Play.when(
     frame:
       log("Screen size: " | U32.show(local@screen_size@fst) | ", " | U32.show(local@screen_size@snd))
       let picks = App.KL.Game.Cast.picks_of(local@user, game)
-      let preview = local@preview <- (local@preview@picks <- picks)
-      let preview = preview@screen_size <- event.info@screen_size
-      App.set_local!(App.KL.State.Local.game(preview))
+      let new_local = local@preview <- (local@preview@picks <- picks)
+      let new_local = new_local@screen_size <- event.info@screen_size
+      App.set_local!(App.KL.State.Local.game(new_local))
     mouse_move:
       if String.eql("game_screen", event.id) then
         let {x,y} = event.mouse_pos
