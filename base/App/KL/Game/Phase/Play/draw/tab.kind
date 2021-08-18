@@ -6,7 +6,7 @@ App.KL.Game.Phase.Play.draw.tab(
   let tab_active = local@hud@tab_active
   let tab_which  = local@hud@tab_which
 
-  // if tab_active then 
+  if tab_active then 
     <div style={
       "position": "fixed"
       "top": "0"
@@ -36,8 +36,8 @@ App.KL.Game.Phase.Play.draw.tab(
         </div>
       </div>
     </div>
-  // else
-  //   <span style={"display": "none"}></span>
+  else
+    <span style={"display": "none"}></span>
 
 App.KL.Game.Phase.Play.draw.tab.score(score: App.KL.Game.Score): DOM
   let blue_hp = I32.sub(App.KL.Constants.max_score, score@points@snd)
@@ -324,7 +324,6 @@ App.KL.Game.Phase.Play.draw.tab.content.recap(
 
   let creature = player_info@fst
   let player   = player_info@snd
-  let life_percentage = F64.show(App.KL.Game.Phase.Play.draw.get_life_percentage(creature))
   let recaps    = List.take!(10, player@recap)
   let recap_len = List.length!(recaps)
   if recap_len =? 0 then
@@ -356,8 +355,11 @@ App.KL.Game.Phase.Play.draw.tab.content.recap(
             "padding": "1px 0" // border of image
           }>
             for recap in recaps:
+              let hp   = recap@new_hp
               let diff = recap@hp_diff
               let diff_percentage = F64.show(App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(diff, creature))
+              log("DIFF " |diff_percentage)
+              let life_percentage = F64.show(App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(hp,   creature))
               <div style={
                 "width": "8%", 
                 "height": "100%", 
@@ -369,8 +371,8 @@ App.KL.Game.Phase.Play.draw.tab.content.recap(
               }>
                 {
                   case diff >? 0 {
-                    true: <div style={"width": "100%", "height": diff_percentage|"%", "background": "#ed1c24"}></div>
-                    false:<div style={"width": "100%", "height": diff_percentage|"%", "background": "#b5e61c"}></div>
+                    true: <div style={"width": "100%", "height": diff_percentage|"%", "background": "#b5e61c"}></div>
+                    false:<div style={"width": "100%", "height": diff_percentage|"%", "background": "#ed1c24"}></div>
                   }
                 }
                 <div style={"width": "100%", "height": life_percentage|"%", "background": "#eb6aff"}></div>
@@ -441,7 +443,9 @@ App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(
 ): F64
   case creature {
     none: 0
-    some:  F64.mul(100.0, I32.to_f64(number) / I32.to_f64(creature.value@hero@max_hp))
+    some:  
+      let number = I32.abs(number)
+      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(creature.value@hero@max_hp))
   }
 
 App.KL.Game.Phase.Play.draw.tab.controls(
