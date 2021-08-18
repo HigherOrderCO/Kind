@@ -1,2 +1,2 @@
 Test: _
-  (x: Nat, y) x + y
+  (x: Nat) x + x

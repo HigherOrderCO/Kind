@@ -48,22 +48,9 @@ Litereum.Hash.serializer: Serializer<Litereum.Hash>
 Litereum.Hash.deserializer: Deserializer<Litereum.Hash>
   U256.deserializer
 
-Litereum.Peer.show(peer: Litereum.Peer): String
-  open peer
-  "<" | Litereum.NetAddress.show(peer.address) | ">"
-
 // Takes the Keccak hash of a list of words
 Litereum.Hash.from_words(words: List<U256>): Litereum.Hash
   Crypto.Keccak.hash.words(words)
-
-// Returns the PostHash
-Litereum.Hash.from_post(post: Litereum.Post): Litereum.Hash
-  use post = post
-  let words = []
-  let words = words ++ Vector.to_list!(8, post.body)
-  let words = words ++ Vector.to_list!(32, post.sign)
-  let words = words ++ [post.info, post.prev]
-  Litereum.Hash.from_words(words)
 
 // Hashes a buffer into a 1024-byte signable string
 Litereum.Summary.from_bytes(len_bytes: Pair<U32,Buffer8>): Litereum.Summary
@@ -119,10 +106,6 @@ Litereum.Address.from_public(pub: Litereum.Public): Litereum.Address
   let addr = Buffer8.to_u256(Crypto.Keccak.hash.bytes(vals)@snd)
   addr
 
-// Signs a post
-Litereum.Signature.sign_post(post: Litereum.Post, pvt: Litereum.Private): Litereum.Signature
-  Litereum.Signature.sign(Litereum.Summary.from_words(Vector.to_list!(8,post@body)), pvt)
-  
 // Signs a signable
 Litereum.Signature.sign(msg: Litereum.Summary, pvt: Litereum.Private): Litereum.Signature
   Litereum.Signature.sign.go(32, msg, pvt)
@@ -174,3 +157,6 @@ Litereum.Signature.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,le
         Vector.cons<U256,len.pred>(hash, Litereum.Signature.recover.go(len.pred, msg.tail, sig.tail))
     }
   }!
+
+
+

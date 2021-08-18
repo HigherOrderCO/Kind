@@ -1,0 +1,4 @@
+// Returns true if `min <= value < max`
+Nat.between(min: Nat, value: Nat, max: Nat): Bool
+  Bool.and(Nat.lte(min, value), Nat.ltn(value, max))
+  
