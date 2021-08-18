@@ -1,0 +1,3 @@
+PriorityQueue.safe_head<A: Type>(queue: PriorityQueue<A>)<Hyp: PriorityQueue.is_empty!(queue) == false>: A
+  let hypothesis = Hyp :: rewrite x in (x == false) with PriorityQueue.is_empty_queue_implies_is_empty_tree!(queue)
+  PriorityQueue.Tree.peek!(PriorityQueue.tree_of!(queue), hypothesis)
