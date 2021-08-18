@@ -350,6 +350,7 @@ App.KL.Game.Phase.Play.draw.tab.content.recap(
             "width": "100%"
             "height": "100%"
             "display": "flex"
+            "flex-direction": "row-reverse"
             "align-items": "flex-end"
             "justify-content": "space-around"
             "padding": "1px 0" // border of image
@@ -358,7 +359,6 @@ App.KL.Game.Phase.Play.draw.tab.content.recap(
               let hp   = recap@new_hp
               let diff = recap@hp_diff
               let diff_percentage = F64.show(App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(diff, creature))
-              log("DIFF " |diff_percentage)
               let life_percentage = F64.show(App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(hp,   creature))
               <div style={
                 "width": "8%", 
@@ -379,34 +379,40 @@ App.KL.Game.Phase.Play.draw.tab.content.recap(
               </div>
           </div>
         </div>
-        <div style={"width": "100%", "display": "flex", "justify-content": "space-around", "margin-top": "15px"}>
+        <div style={"width": "100%", "display": "flex", "justify-content": "space-around", "flex-direction": "row-reverse", "margin-top": "15px"}>
           for recap in recaps:
             let skill = App.KL.Game.Phase.Play.draw.tab.content.recap.get_skill(recap, players_info)
-            <div style={"width": "8%", "position": "relative"}>
-              <img
-                src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
-                style={"width": "100%"}
-              ></img>
-              <img
-                src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
-                style={"width": "50%", "margin": "-12px auto 0 auto", "display": "block"}
-              ></img>
+            <div style={"width": "8%"}>
               <div style={
-                "display": "flex", 
-                "justify-content": "center", 
-                "align-items": "center", 
-                "width": "100%", 
-                "height": "100%"
+                "position": "relative"
+                "width": "100%"
               }>
-                {
-                  case skill {
-                    none: <span></span>
-                    some: 
-                      log("AQUI")
-                      <span>skill.value@name</span>
+                <img
+                  src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                  style={"width": "100%"}
+                ></img>
+                <div style={
+                  "display": "flex", 
+                  "justify-content": "center", 
+                  "align-items": "center", 
+                  "position": "absolute"
+                  "width": "100%", "height": "100%"
+                  "top": "0", "left": "0"
+                  "color": "white"
+                  "font-size": "0.55rem"
+                }>
+                  {
+                    case skill {
+                      none: <span></span>
+                      some: <span>skill.value@name</span>
+                    }
                   }
-                }
+                </div>
               </div>
+              <img
+                src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                style={"width": "50%", "margin": "-12px auto 0 auto", "display": "block", "position": "relative"}
+              ></img>
             </div>
         </div>
       </div>
