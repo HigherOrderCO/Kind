@@ -10,6 +10,6 @@ App.KL.Game.Player.recap.map.show(
   let result = ""
   for id:player in map with result:
     "id: " | id | "\n" |
-    App.KL.Game.Recap.show(player@recap) |
+    App.KL.Game.Recap.show(player@recap) | "\n\n" |
     result
   result

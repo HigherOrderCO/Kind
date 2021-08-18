@@ -1,0 +1,10 @@
+//How to reproduce :
+//Delete your .cache and do not type-check this, try running this directly, it might run without error
+//Now, type-check this file, once you made it, try run this file again
+//Result: this file is not found after cached.
+
+Example.Bugs.bug2 : U16
+  case "a" as v {
+      cons : v.head
+      nil : 0#16
+  }
