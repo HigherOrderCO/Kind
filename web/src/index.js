@@ -49,7 +49,7 @@ class Moonad extends Component {
       return h("div", {style: {"padding": "10px"}}, [
           h(AppList),
           h("div", {style: {"margin": "10px 20px"}}, [
-            h("p", {}, "To the newcomers: select App.KL, enter a random number (and copy it to the clipboard), invite your friends to enter the game using this room number and enjoy our little Kind game :) ~ WIP")
+            h("p", {}, "To the newcomers: want to play a MOBA-like game with turns? Select App.KL and follow the instructions UwU")
           ])
         ])  
       ;

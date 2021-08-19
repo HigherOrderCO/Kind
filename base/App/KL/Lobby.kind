@@ -228,7 +228,7 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
       "flex-wrap": "wrap",
       "text-align": "center"
     }>
-      "Enter a room number: "
+      "Room number: "
       {App.KL.Lobby.draw.front.input("text", room_input)}
       <div>
         {App.KL.Lobby.draw.front.button("ready", "Enter")}
@@ -236,6 +236,16 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
         {App.KL.Lobby.draw.front.button("heroes", "Heroes")}
       </div>
     </div>
+    <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
+"Hello! To start with Kaelin it's easy.
+1. Enter a random room number and copy it
+2. Invite your friends to access: http://uwu.tech/App.KL
+3. Share the room number with them
+
+Enjoy our little Kind game! (WIP)
+We will love to hear about your experience <3
+Join us: http://discord.gg/SNhNx9gUgh "
+    </pre>
   </div>
 
 // Lobby.When
