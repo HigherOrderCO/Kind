@@ -4,19 +4,18 @@ App.KL.Game.Phase.Play.draw.fator.number: F64
 App.KL.Game.Phase.Play.draw.fator.string: String
   F64.show(App.KL.Game.Phase.Play.draw.fator.number)
 
-// BOARD DRAWING
-// =============
+App.KL.Game.Phase.Play.draw.theme.secondary: String
+  "#eb6bff"
 
-type App.KL.Game.Phase.Play.draw.SkillInfo {
-  new(
-    hero: String
-    name: String
-    delay: U64
-  )
-}
+PlayersInfo: Type
+  Pair<Maybe<App.KL.Game.Creature>, App.KL.Game.Player>
+
+SkillInfo: Type
+  Pair<String,Pair<App.KL.Game.Hero, App.KL.Game.Skill>>
 
 // draw all the screen (round, seconds, canvas, list of skills)
 App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let players_info = App.KL.Game.Phase.Play.draw.get_players_info(game@players, game@board)
   <div style={ 
     "width": "max(100vw, 900px)",
     "height": "max(100vh, 650px)",
@@ -25,469 +24,134 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "background-color":" #071840"
   }>
     // interface
-    { App.KL.Game.Phase.Play.draw.interface(local, game) }
-    { App.KL.Game.Phase.Play.draw.board_canvas(local, game, img) }
+    { App.KL.Game.Phase.Play.draw.interface(local, game, players_info) }
+    // canvas
+    { App.KL.Game.Phase.Play.draw.canvas.elem(local, game, img) }
+    // tab
+    { App.KL.Game.Phase.Play.draw.tab(local, game, players_info) }
   </div>
 
-App.KL.Game.Phase.Play.draw.interface(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
-  let players_info = App.KL.Game.Phase.Play.draw.interface.top.get_players(game@players, game@board)
 
-  <div>
-    {App.KL.Game.Phase.Play.draw.interface.top(players_info, local, game)}
-    {App.KL.Game.Phase.Play.draw.interface.bottom(local@user, players_info, local@hud@skill)}
-    {App.KL.Game.Phase.Play.draw.interface.user(local@user, players_info)}
-    {App.KL.Game.Phase.Play.draw.interface.casts(local@user, game@moment, game@players)}
-  </div>
+// AUX FUNCTIONS
+// =================================
 
-App.KL.Game.Phase.Play.draw.interface.casts(user: String, moment: App.KL.Game.Moment, players: Map<App.KL.Game.Player>): DOM
-  case moment {
-    execution:
-      casts = moment.casts
-      p_cst = moment.previous_casts
-      
-      <div style={
-        "position": "absolute"
-        "bottom": "0"
-        "right": "0"
-        "width": "300px"
-        "margin-right": "5px"
-      }>
-        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, p_cst[1], players)}
-        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, p_cst[0], players)}
-        {App.KL.Game.Phase.Play.draw.interface.casts.item(true,  casts[0], players)}
-        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, casts[1], players)}
-        {App.KL.Game.Phase.Play.draw.interface.casts.item(false, casts[2], players)}
-      </div>
-  } default <span style={"display": "none"}></span>
-
-App.KL.Game.Phase.Play.draw.interface.casts.item(main: Bool, cast: Maybe<App.KL.Game.Cast>, players: Map<App.KL.Game.Player>): DOM
-  let name = Maybe {
-    get cast    = cast
-    get player  = players{cast@player}
+App.KL.Game.Phase.Play.draw.get_player_hero(player: App.KL.Game.Player): Maybe<App.KL.Game.Hero>
+  Maybe {
     get hero_id = player@hero_id
     get hero    = App.KL.Game.Hero.get_by_id(hero_id)
-    get skill   = hero@skills{Char.to_string(cast@letter)}
-    return hero@name | " - " | skill@name
-  } <> ""
-  <div style={
-    "color": "white"
-    "background-color": if main && Bool.not(name =? "") then "#2a1956" else "transparent"
-    "width": if main then "100%" else "98%"
-    "padding": "0 20px"
-    "margin-left": if main then "0" else "2%"
-    "height": if main then "48px" else "36px"
-    "flex": if main then "2" else "1"
-    "display": "flex"
-    "border-radius": "5px"
-    "align-items": "center"
-  }>name</div>
-
-App.KL.Game.Phase.Play.draw.interface.top(players_info: Map<PlayersInfo>, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
-  let inner =
-    <div>
-      {App.KL.Game.Phase.Play.draw.interface.top.timer(game@moment)}
-      {App.KL.Game.Phase.Play.draw.interface.top.round(game@turn)}
-      {App.KL.Game.Phase.Play.draw.interface.top.scores(game@score)}
-      {App.KL.Game.Phase.Play.draw.interface.top.players(local@user, players_info, game@cemetery, game@board)}
-    </div>
-  
-  <header style={
-    "position": "absolute",
-    "top": "0"
-    "margin-left": "auto"
-    "margin-right": "auto"
-    "left": "0"
-    "right": "0"
-    "text-align": "center"
-    "width": "min-content"
-  }>
-    {App.KL.Game.Phase.Play.draw.wrapper(624, 91, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.draw.assets.interface.top, inner)}
-  </header>
-
-App.KL.Game.Phase.Play.draw.interface.top.timer(moment: App.KL.Game.Moment): DOM
-  let bar = case moment {
-    initial:
-      if moment.countdown >? App.KL.Constants.initital_delay then 
-        U64.to_f64(moment.countdown - App.KL.Constants.initital_delay) / U64.to_f64(App.KL.Constants.initial_time)
-      else
-        0.0
-    preparation:
-      U64.to_f64(moment.countdown) / U64.to_f64(App.KL.Constants.round_time)
-    execution: 0.0
+    return hero
   }
 
-  <div style={
-    "position": "absolute"
-    "top": "4%"
-    "margin-left":" auto"
-    "margin-right":" auto"
-    "left":" 0"
-    "right":" 0"
-    "text-align":" center"
-    "height": "8.5%"
-    "background-color": "#eb6bff"
-    "border-radius": "2px"
-    "width": String.show_clean(F64.show(bar * 44.5)) | "%"
-  }>
-  </div>
+App.KL.Game.Phase.Play.draw.get_players_heroes(players: Map<App.KL.Game.Player>): List<App.KL.Game.Hero>
+  let list = Map.values!(players)
+  let list = List.mapped!(list)!((player) App.KL.Game.Hero.get_by_id(player@hero_id <> 65536))
+  let list = List.somes!(list)
+  list
 
-App.KL.Game.Phase.Play.draw.interface.top.round(round: U64): DOM
-  <div style={
-    "position": "absolute"
-    "bottom": "8%"
-    "font-size": "1.2rem"    
-    "margin-left":" auto"
-    "margin-right":" auto"
-    "left":" 0"
-    "right":" 0"
-    "text-align":" center"
-    "color": "white"
-  }>
-    <span>Nat.show(U64.to_nat(round))</span>
-  </div>
+App.KL.Game.Phase.Play.draw.get_players_skills(players: Map<App.KL.Game.Player>): List<SkillInfo>
+  let game_heroes = App.KL.Game.Phase.Play.draw.get_players_heroes(players)
+  let game_skills = List.flatten!(List.mapped!(game_heroes)!((hero) List.mapped!(Map.to_list!(hero@skills))!((x) {Pair.fst!!(x), {hero,Pair.snd!!(x)}})))
+  let game_skills = List.sort!((a,b) let as = Pair.snd!!(Pair.snd!!(a)); bs = Pair.snd!!(Pair.snd!!(b)); U64.cmp(as@delay, bs@delay), game_skills)
+  game_skills
 
-App.KL.Game.Phase.Play.draw.interface.top.scores(scores: App.KL.Game.Score): DOM
-  let blue_hp = I32.sub(App.KL.Constants.max_score, scores@points@snd)
-  let red_hp = I32.sub(App.KL.Constants.max_score, scores@points@fst)
+// return a list with skill info of all players
+// the either serves to tell where the walk skills are
+App.KL.Game.Phase.Play.draw.get_skills_to_tab(
+  players: Map<App.KL.Game.Player>
+): List<Either<Unit, SkillInfo>>
+  let skills = App.KL.Game.Phase.Play.draw.get_players_skills(players)
+  App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills, false)
+  
+App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(
+  skills: List<SkillInfo>
+  found_walk: Bool
+): List<Either<Unit, SkillInfo>>
+  case skills {
+    nil: []
+    cons:
+      let skill = skills.head@snd@snd
+      if (skill@name =? "Walk") || (skill@delay =? 500) then
+        if found_walk then
+          App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills.tail, found_walk)
+        else
+          Either.left!!(unit) & App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills.tail, true)
+      else
+        Either.right!!(skills.head) & App.KL.Game.Phase.Play.draw.get_skills_to_tab.go(skills.tail, found_walk)
+  }
 
-  <div style={
-    "position": "absolute"
-    "top": "35%"
-    "font-size": "1.5rem"    
-    "margin-left":" auto"
-    "margin-right":" auto"
-    "left":" 0"
-    "right":" 0"
-    "text-align":" center"
-    "color": "white"
-  }>
-    <span style={"margin-right": "2.2%"}>Nat.show(I32.to_nat(blue_hp))</span>
-    <span>Nat.show(I32.to_nat(red_hp))</span>
-  </div>
+App.KL.Game.Phase.Play.draw.apply_condition(
+  condition: App.KL.Game.Skill -> Bool
+  skill_info: SkillInfo
+): Bool
+  let skill = skill_info@snd@snd
+  condition(skill)
 
-type PlayersInfo {
-  new(
-    team: App.KL.Game.Team
-    creature: Maybe<App.KL.Game.Creature>
-    hero_id: Maybe<Nat>
-  )
-}
+App.KL.Game.Phase.Play.draw.get_allies_enemies(
+  user: String
+  players_info: Map<PlayersInfo>
+): Pair<Map<PlayersInfo>, Map<PlayersInfo>>
+  let {blues, reds} = App.KL.Game.Phase.Play.draw.sep_blue_red(players_info)
+  let player_info   = players_info{user}
+  case player_info {
+    none: {blues, reds}  // when local user isnt a player, blues come first
+    some:
+      let player = player_info.value@snd
+      let player_team = player@team // if local user is a player, then his team come first
+      if App.KL.Game.Team.blue =? player_team then
+        {blues, reds}
+      else
+        {reds, blues}
+  }
 
-App.KL.Game.Phase.Play.draw.interface.top.get_players(
+// separate blue and red teams
+App.KL.Game.Phase.Play.draw.sep_blue_red(
+  players: Map<PlayersInfo>
+): Pair<Map<PlayersInfo>, Map<PlayersInfo>>
+  let result = {{} :: Map<PlayersInfo>, {} :: Map<PlayersInfo>}
+  for id:player_info in players with result:
+    let {allies, enemies} = result
+    let player = player_info@snd
+    if App.KL.Game.Team.eql(player@team, App.KL.Game.Team.blue) then
+      let allies = allies{id}<-player_info
+      {allies, enemies}
+    else
+      let enemies = enemies{id}<-player_info
+      {allies, enemies}
+  result
+
+App.KL.Game.Phase.Play.draw.get_players_info(
   players: Map<App.KL.Game.Player>, 
   board: App.KL.Game.Board
 ): Map<PlayersInfo>
   let result = {}
   for id:player in players with result:
-    result{id} <- PlayersInfo.new(player@team, none, player@hero_id)
+    result{id} <- {none, player}
   for coord:tile in board with result:
     Maybe {
       get creature = tile@creature
       get id = creature@player
       get info = result{id}
-      return result{id} <- info@creature <- some(creature)
+      return result{id} <- info@fst <- some(creature)
     } <> result
   result
 
-App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Map<PlayersInfo>, cemetery: App.KL.Game.Cemetery, board: App.KL.Game.Board): DOM
-  // get team to show in left and team to show in right
-  let {user_team, enemy_team} = 
-    Maybe {
-      get info = players_info{user}
-      let team = info@team
-      case team {
-        blue: some({App.KL.Game.Team.blue, App.KL.Game.Team.red})
-        red:  some({App.KL.Game.Team.red, App.KL.Game.Team.blue})
-        neutral: none
-      }
-    } <> {App.KL.Game.Team.blue, App.KL.Game.Team.red}  // set as default team
+App.KL.Game.Phase.Play.draw.get_life(creature: Maybe<App.KL.Game.Creature>): I32
+  case creature {
+    none: 0
+    some: creature.value@hp
+  }
 
-  // TODO change when formap for DOM published
-  let players_info = Map.to_list!(players_info)
-  <div style={"display": "contents"}>
-    <div style={
-      "position": "absolute"
-      "top": "18%"
-      "left": "3.2%"
-      "width": "39.7%"
-      "height": "51%"
-      "display": "grid"
-      "grid-template-columns": "repeat(5, 1fr)"
-      "grid-template-rows": "1fr"
-      "grid-column-gap": "3px"
-    }>
-      for info in players_info:
-        let {id, snd_info} = info
-        let team     = snd_info@team
-        let creature = snd_info@creature
-        let dead = List.find!((x) id =? x@fst, cemetery)
-
-        if team =? user_team then
-          App.KL.Game.Phase.Play.draw.interface.top.creature(creature, dead, false, id =? user)
-        else
-          <span style={"display": "none"}></span>
-    </div>
-    <div style={
-      "position": "absolute"
-      "top": "18%"
-      "left": "57%"
-      "width": "39.7%"
-      "height": "51%"
-      "display": "grid"
-      "grid-template-columns": "repeat(5, 1fr)"
-      "grid-template-rows": "1fr"
-      "grid-column-gap": "3px"
-    }>
-      for info in players_info:
-        let {id, snd_info} = info
-        let team     = snd_info@team
-        let creature = snd_info@creature
-        let dead = List.find!((x) id =? x@fst, cemetery)
-
-        if team =? enemy_team then
-          App.KL.Game.Phase.Play.draw.interface.top.creature(creature, dead, true, false)
-        else
-          <span style={"display": "none"}></span>
-    </div>
-  </div>
-
-App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature: Maybe<App.KL.Game.Creature>): F64
+App.KL.Game.Phase.Play.draw.get_life_percentage(creature: Maybe<App.KL.Game.Creature>): F64
   case creature {
     none: 0
     some: F64.mul(100.0, I32.to_f64(creature.value@hp) / I32.to_f64(creature.value@hero@max_hp))
   }
 
-App.KL.Game.Phase.Play.draw.interface.get_ap(creature: Maybe<App.KL.Game.Creature>): I32
+App.KL.Game.Phase.Play.draw.get_ap(creature: Maybe<App.KL.Game.Creature>): I32
   case creature {
     none: 0
     some: creature.value@ap
   }
-
-App.KL.Game.Phase.Play.draw.interface.top.creature(creature: Maybe<App.KL.Game.Creature>, dead: Maybe<App.KL.Game.Cemetery.Dead>, is_enemy: Bool, is_user: Bool): DOM
-  let life_percentage = String.show_clean(F64.show(App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature)))
-  let ap = App.KL.Game.Phase.Play.draw.interface.get_ap(creature)
-
-  <div style={"position": "relative", "width": "100%", "height": "100%", "order": if is_user then "1" else "2"}>
-    // portrait
-    <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={
-      "top": "2%"
-      "left": "4.5%"
-      "transform-origin": "top left"
-      "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
-      "position": "absolute"
-    }></img>
-    <div style={"position": "absolute", "top": "46%", "left": "63%", "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")", "transform-origin": "top left"}>
-      { App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage, ap, is_enemy) }
-    </div>
-    // death portrait
-    {
-      case dead {
-        none: <span style={"display":"none"}></span>
-        some: 
-          <div style={"display": "contents"}>
-            <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.dead style={
-              "left": "0"
-              "transform-origin": "top left"
-              "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
-              "position": "absolute"
-            }></img>
-            <span style={
-              "position": "absolute"
-              "top": "38%"
-              "font-size": ".9rem"    
-              "margin-left":" auto"
-              "margin-right":" auto"
-              "left":" 0"
-              "right":" 0"
-              "text-align":" center"
-              "color": "white"
-            }> String.show_clean(I32.show(dead.value@snd)) | " TURNS"</span>
-          </div>
-      } 
-    }
-  </div>
-
-App.KL.Game.Phase.Play.draw.interface.top.creature.life_ap(life_percentage: String, ap: I32, is_enemy: Bool): DOM
-    <div style={"position": "relative"}>
-      // life bar
-      <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder></img>
-      <img 
-        src= if is_enemy then App.KL.Game.Phase.Play.draw.assets.interface.top.life_red else App.KL.Game.Phase.Play.draw.assets.interface.top.life_green 
-        style={
-          "left": "2px"
-          "top": "1px"
-          "position": "absolute"
-          "clip-path": "polygon(0 0%, "|life_percentage|"% 0%, "|life_percentage|"% 100%, 0% 100%)" 
-        }>
-      </img>
-      // ap bar
-      for img in App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap, [{2.0,21.0}, {8.0,15.0}, {14.0,9.0}]):
-        img
-    </div>
-
-App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap: I32, positions: List<Pair<F64, F64>>): List<DOM>
-  if ap <=? 0 then []
-  else
-    case positions {
-      nil: []
-      cons:
-        <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.ap style={
-          "position": "absolute"
-          "left": String.show_clean(F64.show(positions.head@fst)) | "px"
-          "top": String.show_clean(F64.show(positions.head@snd)) | "px"
-        }></img> & App.KL.Game.Phase.Play.draw.interface.top.creature.ap(ap - 1, positions.tail)
-    }
-
-App.KL.game.Phase.Play.Draw.interface.bottom.get_skills(skills: Map<App.KL.Game.Skill>, max: Nat): List<Pair<String, App.KL.Game.Skill>>
-  result = {[] :: List<Pair<String, App.KL.Game.Skill>>, max}
-  for key: skill in skills with result:
-    if (max <=? 0) || (skill@name =? "Walk") then 
-      result
-    else
-      let result = result@fst <- {key, skill} & result@fst
-      result@snd <- result@snd - 1
-  result@fst
-
-App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills: Map<App.KL.Game.Skill>): String
-  case skills {
-    tip: ""
-    bin: 
-      if skills.val@name =? "Walk" then
-        skills.key
-      else
-        App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills.left) | App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills.right)
-  }
-
-App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<PlayersInfo>, skill_hovered: Maybe<App.KL.Game.Skill>): DOM
-  // get user in players map
-  // if user isnt a player this interface isnt shown
-  let user = players_info{user}
-  without user: <span style={"display": "none"}></span>
-  // get hero of user, if none this interface isnt shown
-  let hero = 
-    Maybe {
-      get hero_id = user@hero_id
-      get hero = App.KL.Game.Hero.get_by_id(hero_id)
-      return hero
-    }
-  without hero: <span style={"display": "none"}></span>
-
-  // draw content TODO change when formap implemented
-  let skills      = hero@skills
-  let skills_list = App.KL.game.Phase.Play.Draw.interface.bottom.get_skills(skills, 4)
-  let content = 
-    <div style={
-      "position": "relative"
-      "width": "100%"
-      "height": "100%"
-    }>
-      {
-        let walk_key = App.KL.Game.Phase.Play.Draw.interface.bottom.get_walk_key(skills)
-        <span style={"position": "absolute", "left": "1.25%", "top": "25%"}>walk_key</span>
-      }
-      <div style={
-        "position": "absolute"
-        "display": "grid"
-        "grid-template-columns": "repeat(4, 1fr)"
-        "grid-template-rows": "1fr"
-        "gap": "2%"
-        "width": "73%"
-        "height": "73%"
-        "left": "13.5%"
-      }>
-        for info in skills_list:
-          let {key, skill} = info
-          let id = "SK"|key
-          let show = Maybe.if!((x) String.eql(skill@name, x@name), skill_hovered)
-          <div style={
-            "position": "relative"
-          }>
-            <div id=id style={
-              "background-color": "#190d1f"
-              "border-radius": "5px"
-              "padding": "5px"
-              "animation": "fade-in 0.1s"
-              "position": "absolute"
-              "transform-origin": "bottom center"
-              "transform": "translate(-15%, -101%)"
-              "width": "150%"
-              "color": "white"
-              "display": if show then "block" else "none
-              "
-            }>skill@description</div>
-            <span id=id style={"position": "absolute", "bottom": "1%", "left": "7%"}>key</span>
-            <span id=id style={"position": "absolute", "width": "100%", "height": "100%", "display": "flex", "justify-content": "center", "align-items": "center", "color": "white"}>skill@name</span>
-          </div>
-      </div>
-    </div>
-
-  <footer style={
-    "position": "absolute",
-    "bottom": "0"
-    "margin-left": "auto"
-    "margin-right": "auto"
-    "left": "0"
-    "right": "0"
-    "text-align": "center"
-    "width": "min-content"
-  }>
-    {App.KL.Game.Phase.Play.draw.wrapper(280, 65, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.draw.assets.interface.bottom, content)}
-  </footer>
-
-App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<PlayersInfo>): DOM
-  let user = players_info{user}
-  without user: <span style={"display": "none"}></span>
-
-  let creature = user@creature
-  let life_percentage = App.KL.Game.Phase.Play.draw.interface.get_life_percentage(creature)
-  let ap = App.KL.Game.Phase.Play.draw.interface.get_ap(creature)
-
-  let content = 
-    <div style={
-      "position": "relative"
-      "width": "100%"
-      "height": "100%"
-    }>
-      <img src=App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder style={
-        "position": "absolute"
-        "transform": "scale("|F64.show(App.KL.Game.Phase.Play.draw.fator.number * 2)|")"
-        "transform-origin": "top left"
-        "top": "4%"
-        "left": "4%"
-      }></img>
-      <img src= App.KL.Game.Phase.Play.draw.assets.interface.user.life style={
-        "position": "absolute"
-        "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
-        "transform-origin": "top left"
-        "top": "61%"
-        "left": "34%"
-        "clip-path": "polygon(0 0%, "|String.show_clean(F64.show(life_percentage + 8))|"% 0%, "|String.show_clean(F64.show(life_percentage))|"% 100%, 0% 100%)"
-      }></img>
-      <div style={
-        "position": "absolute"
-        "top": "74%"
-        "left": "31%"
-        "display": "flex"
-        "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
-        "transform-origin": "top left"
-      }>
-        for i in [0 to ap : I32]:
-          <img src=App.KL.Game.Phase.Play.draw.assets.interface.user.ap style={
-            "margin-right": "-3px"
-          }></img>
-      </div>
-    </div>
-     
-  <footer style={
-    "position": "absolute",
-    "bottom": "0"
-    "left": "0"
-    "width": "min-content"
-  }>
-    {App.KL.Game.Phase.Play.draw.wrapper(249, 112, 0, "", App.KL.Game.Phase.Play.draw.fator.number, App.KL.Game.Phase.Play.draw.assets.interface.user, content)}
-  </footer>
-
-
 
 App.KL.Game.Phase.Play.draw.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: F64, background: String, inner: DOM): DOM
   <div class="pixel-art" id=id style={
@@ -501,339 +165,6 @@ App.KL.Game.Phase.Play.draw.wrapper(width: Nat, height: Nat, bt: Nat, id: String
   }>
     {inner}
   </div>
-
-App.KL.Game.Phase.Play.draw.assets.interface.top: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnAAAABbCAYAAADz57h/AAAK1ElEQVR42u3dPY48RxnH8cm4ABIQEBBbxMRcgiNAhoTEGRwQkBITcwJyQktESNzCgZEIjcpSmaLonn6Zeu/PT3r0X++ud+Zb+3TNd6unq19f/vTrb3/zw68u1c+/+FKp4nW1D9UaFeagWCPPL1vPVT2vzNVqhNe/MAe9QtLJKJ2g9mr2g2GVA3q1ialXD6pxJG4WgfM7W/ePiKM5Z7U/dHGMwXClB7+Xt5itvzBbvXiusMqzymrVaKscW/WLP/39u3rXn/nHXqSUepaQbc0Dd+aTkf648Pq1rkucda/w2K+tnH0BtYyseklcnGjD9/3gx79USqmPKswl6dziNU+NuHDxVt6uSFx80C9+8qsi1ergKPV8cdTlOOpB8qaUqiFx7144381XLV7ga8/7OPpwxJ/5sbzFhIbeegENf6HUkoja0lC7aXCU5YiSlvcheVNKtZC4MPfEz/eUhhbSg6MvR/zZW6vAsQ9fVxIbN/zP8T0CtV/Ma0lDi19sC/lZkeOMxKUrcgROKVVT4OK8d1beas7JuSy0mPdxnOOoxRB9K+3D153EBk4rfK6GJdeShpa2X1N+nsqRTqRpDyqlVGmBS+eYu/NVbemZbQVrRY4ar817vvX6JGlzx49rDXBpaWi1XFtbfp7OkfYegVNK1RK49OOe0tBTenC0l7cocHkfvkqkpsApdXUlzouNUqqWwLUWDKW2BO5VMun5WIOtelS6148XHKVUSXmL84u5VvUSuNiHrxo5upxaKRKnWr7gvrv0/m9//ve3IeHfo8vzjaleIm+q91mmavJG4tRoEnd292q1Zp0RuFh3f4Zav4fIm3qEvMXE7RwMvCJxa76gba1KpftkbV3YMtLmq3H1LWZP4no9771d2PfGXa+TN7WuvP3fvU17SFzYu+SP//p2mNIc6ze+Kl9XxKnnLYb2Nhz/y++/+V7awsdR5vLvTTdq7X37nLPjrubdHF2pIeRtS+JGkzcSp9R2Hd1K784KWI8blu+twkWBi4n/vXdXj143W7+6Anh0Kx29rRR5uyVxn4rWuxsJ36leEleao1dz4Vib4+iYvnsqs8WKXH6aNxezvRW4/HnmpydHW3G7Im/6HAeOeTiGkLd0wi8lbyXfF9Na4mpx9Gx2HOtylJS41iKX3+4oPzWavwcuiNyWQKU/a0Rxuypv+hwHjrE5hpK3mBHkrafE1eaYsdlxjM9RWuK27inZQuK23t+WPn769Xz1rYW83b1YoqW8OV5x4KjLMaS83RW4GoPbQ+JacczY7DjG51hF4t5dldpz5W0meXO84sBRh2NYebsjcDUHt6XEteaYsdlxjM9RU+JaXz27dWVqXHVreTXnrPLmeMWBoyxH+N7wnF6jZjR5ayFxvThmbHYc43OUvrAhXYEaYRuU1s/j7p0eRpA3xysOHGU4hpe3KwLXcnBrSlxvjhmbHcf4HCUkbuuN+1vvRSu5IesnFxbUeh53btc1krw5XnHg+IxjCnk7K3A9BreGxI3CMWOz4xif4xOJixPWltSEj8PXSl/Sf1Xiashb5Nq7cCJ87UjiRpQ3xysOHPc4ppG3MwLXc3BLStxoHDM2O47xOe5KXC5nqTjl8lbyuZ+VuChVpR87lbitVbj49Xc/Y1R5c7ziwHGNI84Fr1kyuryVkLhROWZsdhzjc9yRuL3Vtyhw6enE0u99OZK4KG+lHzc9bZwLXL4KN6u8OV5x4Cg3f04jcCMN7icSNzrHjM2OY3yOI7HYE7gtkUqvyqx19VmvneDfXXUbJW5vvGaRN8crDhyLStws8nZH4mbhmLHZcYzPcUXitgQufhw5a+//1Os2PnE1Ld9jbk/gZpQ3xysOHAtK3EzydkXiZuOYsdlxjM9xVuKOBK7VDuy97sF4VuBmljfHKw4ci0ncbPJ2RuJm5Zix2XGsIXHvBC782/IeiD3uvZiy7gncCvLmeMWBYyGJm1He3knc7BwzNjuO+SVuJIGL90MdSeBWkjfHKw4ci0hcLj6zDG6+FcAqHHnD48BRguNoHiBw7wXu7Pjpcxw4njd/EjgC58DFQeAInD7HgYPAEbiZGwUHjpYTUDh2osCl9USBSyvOLasLHA4cOAgcgdPwOCYWuK3bXD1N4PJxIHA4cOAgcATOgYtjaIFLTx8+eQUu3cSYwOHAgYPAETgHLo5hBS7ebYHAffU/Y0HgcODAQeAqC5yGx4HjvsDl8vb098BFiSNwOHDgIHAa5TEchHo+gYs3rSdw/60wJgQOBw4cBE6j4MAx7AQU54FU5J4qcHEczsibPseBw/xJ4DQKDhxdJ6B8Je7JAndW3vQ5DhzmTwKnUXDg6D4BEbivTm3eS+Bw4DB/EjiNggMHgSNw+hwHDgJH4HDgwEHgCJzjFQcOAqdRcOAgcASOwOHAYf4kcBoFBw4CR+D0OQ4cBI7AaXgcOAgcgXO84sDxPIGLu4/PNLhbjYIDB46vCVxjgdPnOHA8e/7sInDxZtazDPK7wcWBA8f9yYfAXRc4fY4Dh/mTxBUaXBw4cNybfAjcPYHT5zhwmD9JXKHBxYEDx1wCFx4rPv/Wj1tC4PQ5DhzPnj9JXMHBxYEDx2cCF35ea3lrLXHxd1lC4PQ5DhzPnT9JXOHBxYEDx/gCF4UtrZaPXVLg9DkOHM+cP0lchcHFgQPHsbjFq8V6nELtKXD5KdTwuHE8Zpc4fY4Dx0PkbTSJKzm4OHDg2Je3eKxHmUmrhcT1Erg93vDYcYslfY4DBw4S13lwceDAsX2s78lbK4nrIXBHvFHi9DkOHDhI3ACDiwMHjusCV1viWgvcGdZSAqfPceB4BsfjJa7F4OLAgeO6wEWxme2WOHmd5SwpcPocB45ncDxW4loOLg4cOK4LXHpPw6PvHa3ScewhcPocB45ncDxO4noMLg4cOM4L3MzydlXiagmcPseB4xkcj5G4noOLA8fTOc4I3ArydkXiagqcPseB4xkcU0hcqerFhAPHkzmOthBZSd62JO5oKxF9jgMHDhI38ODiwPFUjrjfWdzIN68r8pZuAhwrnS9C/fYP/9j9XPg3/fjo//3dX/95+PhnJC6vOB41BU6f48DxDI6hJe6TMpIi/Y/lICvvTlfclbcocFtiVupzZ5/HO4nb4m0hcCIi00qcURTpfxzvyUwuRlflLV+BCytmtQXujMTlX9tjN0eJiIjIsAK3t8qWb6x7V+CCuIVqsQJ3RuDyjYP3VucInIiIiAwrcOF0YX4nhFDp5+Np1lKnUEu8Ly5/D9zZU6g51x47gRMREZHhJW6r0jf233kfXJCsn/3o199V/DiuyMV697kocFvfFz5/5/1vOddWkTcRERGZQuK26orAbVWUt1p15zmlAuf9uSIiIrKc1KWrVKvsA5euLpI1ERERWU7g0tOKqwmcU6UiIiJC4AiciIiICIEjcCIiIiIEjsCJiIjIMwQuXtAwu7zFCxcInIiIiDxC4GaXuHTbEAInIiIiSwvc1t5wM8tbKnEETkRERJYTuC3hmU3i8pU3m/aKiIjIYwRuRok7kjcCJyIiIiSOvImIiIiQOPImIiIisrjEkTcRERGRiSSOvImIiIhMJHHkTURERGQiiSNvIiIiIh9KXK8ibyIiIiIXJS6/VVWrevdc/KZEREREDiSutby9kzi/IREREZEDieslb1sS5zcjIiIiciBxveUtlTi/EREREZGTEjdC+U2IyIj5D23q2xixaoTZAAAAAElFTkSuQmCC"
-
-App.KL.Game.Phase.Play.draw.assets.interface.top.dead: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAvCAYAAAClgknJAAAA0UlEQVR42u2ayw2AIBAFqcAC7NOjXdiuwXjEaFTY3xBIOO8MMXzemlLl2KclS85kOaThTSU0CppJaBZSl7BYJbUalt+peC2PnUKspts2J1HbE76ZIQJ8NUsk+N9MEeE/s0WGf2UkwD+ykuBvJWjwV4l+BKiTL7DNaybPITAEWuDPgYanChQHAhqeJmCaspmldmj44lJEen1FFkA/4tExCjrIQkeJ6DAXHaejGxr4llI3Tb1E3Snce8NIAUkJ11NfQsL97tUqEeLyiPvBQ0NCguEALTFIyZF1RbwAAAAASUVORK5CYII="
-
-App.KL.Game.Phase.Play.draw.assets.interface.top.life_placeholder: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAhCAYAAADZPosTAAAAqUlEQVR42q3WwQ2AMAwDwA7AAjwQAyDW7LqMAAKJDyRO7aRSv6dSk6StJVdfjvPe87Q+uwzbt54Dv1gKtDAZ9DAJRBgNRhgFjmDDIIOFIIOFJ2QxCCqYC6qYCWawH8imCUElTRdU04SnU9KEdxfVJ/XvRd2DrgzU2xAIq8K7I6nvWXOBqgYEUmlGIJ3m6CfTfc5aUpoqKA3ukhmLwPSjp+R9YoEl2AtWYReM1Yo9Nul7hAAAAABJRU5ErkJggg=="
-
-App.KL.Game.Phase.Play.draw.assets.interface.top.life_green: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAXCAYAAADtNKTnAAAASUlEQVR42u3MuwkAIAxAwazlkk7mOPYRBAt/YPIai9wAJwLlqsqDkpQH3mQKPMkWWJNjYEmuwWsSQQR/BB0ObokZDtbEDQcjgRrIJQkoZdOOigAAAABJRU5ErkJggg=="
-
-App.KL.Game.Phase.Play.draw.assets.interface.top.life_red: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAXCAYAAADtNKTnAAAAT0lEQVR42mNgoBD8W7fkP8UG/OUr/U+xAWQbgmwAWYagG0CyIdgMIMkQXAYQbcioAaMGDA4DQIBiA3AZQnLWptgAdEPILuYoNgBmCKUlPgDWlzbp+XS3GgAAAABJRU5ErkJggg=="
-
-App.KL.Game.Phase.Play.draw.assets.interface.top.ap: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAALCAYAAAC3ZUeVAAAAMklEQVR42mNgQAN9X/7/xxAwXPTpP4YAXBBZACyILgAWRBcgXhBsCYYAsiCKgzEEgAAAEsBkeRIf5ncAAAAASUVORK5CYII="
-
-App.KL.Game.Phase.Play.draw.assets.interface.top.portrait_placeholder: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAAFRUlEQVRYCb2Yv6pUVxSHb2sXUhhuZTqVi4GAfwoJGFsRUgVSpBEjWNj4AEICClNYBJF0Vr6CoLcR8gJh7jPkMSLKt+d8x9/Zs/eZmTveXNis/Xetb/32Omdm7sHBKf+uHD37uE+bC3tyvPj44cN/Y5vbu9Uazi6c/2GrZuCjw5/X9veCAVza8jN4b+/GeQBwdvnwzhpAK4m3fzwclWqt9wJyjnayD7RXhb34za3SFvd+LY5xvnz1tDSDsUZT5d7NtKD1kUq39nXnqFeBCfzTdz8WUCB1ihqTdrwoCaRKgOyqdMbtAuYCsAQhmGrhZISNmpsAk4D7hqtlvQXMXMYkFuNR6eF87mn2hb317fVyvZntRmASWa4SY6/J9oCFBpI4jOu4TUgnhfXgmG28dmahQ/kEpq7noIGlAStwSWK5mNyCnMUmLM4JIpwKqJjzBpqUxRA8gTnfA9a3vv68877Edn4C6aCG5QETuMAtF6tXzpzSQzkkvAnOAZf9xyv/7AeYxhmajKOtYVEigc0Ux/YFwarMaIc3h3s811O4Bv799m99YGEPv746ubIWMEqbNVYg7PL5i3HNfSaDZX8dgwSYK/sGMVAWYG6XM9iJsukk+wILKEQpj+H6UJRgArkXSwL/vn9bGusETv+qLbA+gKXpawRGWTbrRGvWAptpDfzml0fFMc4TTkgta+zVr6BpTRxLPIHpF+CETeh0msBCkzVOgVcJYGgtaFTDDy0Bs098/LKXhv9UtwALOWfngIHNs4yB/vvxkxGc4My/e3itlEVC1n1iCZ0PIPuIc2AwJxynVRmvRZVVl71cO/uAYgygpUA/oWvIenzl6Onn7yRDaeAbvxPgHjTzHKiBUQIYGmUALPuAwzlzNOGx+KgB6zHA7LMk6HeBW9AJDCQOrC2uX2hrGGVNIqGt7xowxyQKnP4TtqlwHravE0G1OBVSaK2glgVjlGes355NYJWFYSdgIBM0YX3AhKyt0ACz1gMFiDWBKYlTAXOoht0GmEQsA6C3AebTrQYmiZ0UVl0fAuvLcugprLJagPE1p/DewKrLOzE/4QhMvQLdAhZSq7qbgImnMNi6LMbXmvWT2eO8vLwrWJwIPAftDQANMHvx14OGQWBhOcfcWkk4oU1YSwCF/fRhnXnfCqjcUtq3A/sKzAbgCfRy9dA1a1hQbIEdvoALWzKOH5XMkwCQLWhLAcseYE2SpPMmsy+wcVNd1iYlIXRRMr54jLBRGipqDQuNdU3LHACbgMf4wzvbuue8a2vAqmuAsQwCljVhBNbW72ATcV7liZPK5rWz17rHMm4C+wvVh0p4rhBwr8mHCSuIc44NZHBBUY3GmGQSHCiEyL36Ye3GX/+sfnEwAJZ6AQwnBdaajV8MOhMsLcEc5z772ho6ldYHe00MnyOsv5FS3fI0+/O8AWtg4VrWPT0rNCoLTF9gfHK2CSu0JcDVo7SH6qBmrsMErvduGgP51blLpTzyOfDcmrLCaoHeBVjHu1gTJlEggfZ5QGFfgRthhQZYBzVIBqvXth1bDgDXZSDw1rBCC9wqC0ugBWhCrbWcY58KZ93S3xlWaMF6NgGyLzTncj77NTCge8H2oHHKNd6//Xr2oQSIvT1o5vXFbdJOraywWhU2wM1rzwsw3117QAK3EuMMZ2kkT/tisEIDiwo4B5gH06A9aGDdU1vO8wl6JrBCCwswrz/e1TVIjoGqoQvo8E2QtS+urLBaYL+/9KCA+PGdEHwPYSys/fEb3/Dvrf8FVmiAhSYwH+u9dvfqy5Ic+7KdubLCagm4T9PPrvYTWNZKhYRd7gsAAAAASUVORK5CYII="
-
-App.KL.Game.Phase.Play.draw.assets.interface.bottom: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARgAAABBCAYAAAAKeLsHAAAEyElEQVR42u2dTY7UMBBGe8cFWMCCE4xYw5ZLzBW4ySzZzlU4BBJX4AZs2DcyklE6cuKyXVX+yYtUQrQ0mX75XM/udJK53RbcPr3+vGsUPPBckYctE/bLh99qBQ88V+JhE4b95t2Xpvr49NI9dHjgYVtQLiOEDg88bAvLpWfo8MCDZC4glx6hwwMPkrmQXDxDhwceJHNBuXiEDg88SObCcrEMHR54kAxyMQkdHniQDHIxCR0eeJAMcjEJHR54kAxyMQkdHniQDHIxCR0eeJAMcjEJHR54kAxyMQkdHniQTKUILJ59EQOfJexYuQEMDzwePF59WrR9+3O/5+rI+qWVe/MMYHjg0RGMZp+WOqLoB7c70HjQzplkZg/86f3zQ8EDTw/BaPZpqSOq5BJK8yleKwsmvrZKQ8Izn2C0+jQcn1JPVAnG6xGBDGB44BlHMDWSKRaMtlwQDDzwzCOYUskUCcZCLggGHnjmEkyJZMSCsZILgoEHnvkEI5WMSDCWckEw8MAzp2AkkskKxlouocLViKliAMMDj5znqI+s+/dMMqeC8ZBL6nqEla6zoCHh6XVdTyyPHj6SzKFgvOSyD5oBDA887TxbLq8+TkkmebGdp1wQDDzwrCGYvWSKLiv+/P3Xg5nC//evx9cQDA0JzzUFc3r7T27lEmWyl82+EAwNCc91BZOUjPRjkUQyCIaGhOfagnmQTOk5l5xkNAUT9he+apst7KMBDA88HjwjCOa/ZGpP6qYEU3MeJieYWULfMkUGeODpwbOEYDTkIhXM6KHvw84NYHjgseSZXjBaq5cSwYwa+lHYuQEMDzxWPNML5ugE7/b8jIVgRgtdGjY88HjLZUnB1KxoSgUzSuilMwk88HjKZcmTvDXfKNUE3jv0mpkEHng85TK9YLTOydQKplfotTMJPPB4ymUpwVjdiyT5KOYZestMAg88nnJBMEqC8Qq9dSaBBx5PuSAYRcFYh64xk8ADj6dcEIyyYKxC15pJ4IHHUy4IxkAw2qFrziTwwOMpFwRjJBit0LVnEnjg8ZTLMILR+vu1Lc/jTR2Y8G9t4DV3dR+V1kwCDzxePPt99JLLw3Nheq1czi5+6h26dtjwwOPFs2Ua6sl2Yfv69se/ZZ8GpMSwuQPUs7TChgeeHjwePRxcEZwh+XtnSclYlvQgjVCaocMDzwo8US63mi1KZrbHCI4+s8ADzwo8TXJBMgxieOAxlQuSYRDDA4+pXJAMgxgeeEzlgmQYxPDAYyoXJMMghue6PC5yCVv4RSsJJvKUFIP4Ojzbn28dKzPnE3lcBLPKYIsXBQUzSyse6JGul6CeXa73iLO4tCzuLeopf3PBpOQy20DJyaVmlqKoIwEdSWa2fjGXzNHKxWKW2L6m2fQtKxeKqq29ZDRllusfi6uJ1SWzbc59w64gl7ObtljVUGcNnhs7s0sm1fOqkok7jTDxNuwUSOvB6iUXyTkXipJ8JDobW96S0ejD+Frs++23yM2SiTtKmfpIMho1mlykq53SallyS96/135b34/k51uPl0VmI0tG81NF6nlR4fc1SUayBAylLRlLuWzDrpELRdWMk/24m0EycZ8S4RZLRrLj0c9RpOSisXqgKM1VlLZkPM8x7RcaKZf8BUdERs5iqgziAAAAAElFTkSuQmCC"
-
-App.KL.Game.Phase.Play.draw.assets.interface.user: String
-  "data:image/png;base64,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"
-
-App.KL.Game.Phase.Play.draw.assets.interface.user.life: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJcAAAANCAYAAACkYvxcAAAAd0lEQVRYCe3WsQ3AMAgFUdbKkpks46Qn8gafIqJ5SHTIBRyHq4Zxv91SDxIGZmg9V5fUg4SBEVnJg2qAdxgYBWhAkzIALOf9l+8NsIAFrFTD6vZPNmMxFmMx0b6J0hkwFmMxVrot6vbNxliMxVhMtG+idAYjY1V9cEEJch85MJkAAAAASUVORK5CYII="
-
-App.KL.Game.Phase.Play.draw.assets.interface.user.ap: String
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAGCAYAAACB1M0KAAAAJklEQVR42mNgwAL6vvz/P9Qwhicsdjz4P9TwqCdGPTHqCQKeAAIAliYVnQmzbRMAAAAASUVORK5CYII="
-
-App.KL.Game.Phase.Play.draw.board_canvas(local: App.KL.Game.State.Local, game: App.KL.Game, img: VoxBox): DOM
-  <div style={
-    "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
-    "max-width": "max(100vw, 900px)",
-    "max-height": "max(100vh, 650px)",
-    "overflow": "scroll",
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-  }>{
-    let width = Nat.show(U32.to_nat(local@screen_size@fst / 2))
-    let height = Nat.show(U32.to_nat(local@screen_size@snd / 2))
-    DOM.vbox({
-        "class": "pixel-art" 
-        "id": "game_screen",
-        "width": width,
-        "height": height,
-        "scale": "2"
-      },
-      {},
-      App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
-  }</div>
-
-// CANVAS DRAWING
-// ================
-
-// draw canvas
-App.KL.Game.Phase.Play.draw.canvas(
-  img: VoxBox
-  local: App.KL.Game.State.Local
-  game: App.KL.Game
-): VoxBox
-  open game
-  let hits = case game.moment {
-    initial: none
-    preparation: none
-    execution: some(game.moment.hits)
-  }
-  let img = App.KL.Game.Phase.Play.draw.board(game, local@preview, hits, local@user, local@mouse, local@screen_size, img) 
-  let img = App.KL.Game.Phase.Play.draw.bases(game, local@user, local@screen_size, img)
-  let img = App.KL.Game.Phase.Play.draw.cursor(local@mouse, game.board, local@screen_size, img)
-  img
-
-
-// draw canvas board
-App.KL.Game.Phase.Play.draw.landscape(blueprint: App.KL.Game.Board.Blueprint, screen: Pair<U32, U32> img: VoxBox): VoxBox
-  let landscape = blueprint@landscape
-  for coord:tile in landscape with img:
-    App.KL.Game.Phase.Play.draw.tile.terrain(tile, Hexagonal.Axial.Map.new!, none, coord, screen, img)
-  img
-
-
-App.KL.Game.Phase.Play.draw.board(
-  game:    App.KL.Game
-  preview: App.KL.Game.Cast.Preview
-  hits:    Maybe<App.KL.Game.Indicators>
-  user:    String
-  mouse:   Pair<U32, U32>
-  screen:  Pair<U32, U32>
-  img:     VoxBox
-): VoxBox
-  open game
-  let map         = game@board
-  let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
-  let indicators  = App.KL.Game.Phase.Play.Draw.get_indicators(preview, mouse_coord, user, game)
-  let ap_used     = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
-  let img         = App.KL.Game.Phase.Play.draw.landscape(game@blueprint, screen, img)
-
-  for coord:tile in map with img:
-    let indicator = Hexagonal.Axial.Map.get!(coord, hits <> indicators)
-    let img = App.KL.Game.Phase.Play.draw.grid(coord, game@moment, screen, img)
-    let img = App.KL.Game.Phase.Play.draw.tile.terrain(tile@terrain, preview@picks, indicator, coord, screen, img)
-    let img = App.KL.Game.Phase.Play.draw.tile.indicator(indicator, coord, screen, img)
-    let img = App.KL.Game.Phase.Play.draw.tile.creature(game, tile@creature, coord, ap_used, screen, img)
-    let img = App.KL.Game.Phase.Play.draw.tile.token(game, tile@token, coord, screen, img)
-    img
-  img
-
-// TODO optimize?
-App.KL.Game.Phase.Play.draw.grid(
-  coord:  Hexagonal.Axial
-  moment: App.KL.Game.Moment
-  screen: Pair<U32, U32>
-  img:    VoxBox
-): VoxBox
-  case moment {
-    initial: img
-    preparation:
-      let indicator     = App.KL.Game.Indicator.gray_line
-      let indicator_img = App.KL.Game.Indicator.get_img(indicator)
-      
-      let {x, y} = App.KL.Game.Phase.Play.draw.centralize.new(coord, screen)
-      VoxBox.Draw.image(x, y, App.KL.Constants.z_index.grid, indicator_img, img)
-    execution: img
-  }
-
-App.KL.Game.Phase.Play.draw.tile.token(
-  game: App.KL.Game
-  token: Maybe<App.KL.Game.Token>,
-  token_coord: Hexagonal.Axial,
-  screen: Pair<U32, U32>
-  img: VoxBox
-): VoxBox
-  without token: img
-  let col = case App.KL.Game.Token.get_dominance(token) as team {
-    none: Col32.new(100,100,100,255)
-    some:
-      case team.value {    
-        blue: Col32.new(0, 0, 255, 255)
-        red:  Col32.new(255, 0, 0, 255)
-      } default Col32.new(100,100,100,255)
-  }
-  let coords = Hexagonal.Axial.range(token_coord, token@range)
-  for coord in coords with img:
-    let {cx, cy} = 
-      Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
-    
-    if Hexagonal.Axial.eql(coord, token_coord) then
-      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
-    else
-      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,5,5,col,img)
-  img
-
-  
-App.KL.Game.Phase.Play.draw.bases(
-  game: App.KL.Game
-  user: String
-  screen: Pair<U32, U32>
-  img: VoxBox
-): VoxBox
-  case game@moment {
-    initial:
-      let player = game@players{user}
-      without player: img
-
-      let allies = App.KL.Game.Player.get_allies(player, game@players)
-      let bases  = game@blueprint@bases
-      for coord:team in bases with img:
-        let indicator = App.KL.Game.Team.get_indicator(team)
-        App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), coord, screen, img)
-
-      for l_user:player in allies with img:
-        let init_pos = player@init_pos
-        without init_pos: img
-        let indicator =
-          if String.eql(user, l_user) then 
-            App.KL.Game.Indicator.green_line
-          else
-            App.KL.Game.Indicator.gray_line
-        App.KL.Game.Phase.Play.draw.tile.indicator(some(indicator), init_pos, screen, img)
-      img
-    preparation: img
-    execution: img
-  }
-
-App.KL.Game.Phase.Play.Draw.get_indicators(
-  preview: App.KL.Game.Cast.Preview 
-  target: Hexagonal.Axial,
-  user:   String,
-  game:   App.KL.Game
-): App.KL.Game.Indicators
-
-  Maybe {
-    get pair       = preview@skill
-    let skill_key  = pair@fst
-    get skill      = App.KL.Game.Skill.get(user, skill_key, game)
-    let targets    = App.KL.Game.Picks.get_skill_coords(skill_key, preview@picks)
-    let targets    = target & targets
-    let game       = App.KL.Game.Cast.simulate(skill@delay, (x) String.eql(x@player, user), game)
-    get center     = App.KL.Game.Board.find_player_coord(user, game@board)
-    get creature   = App.KL.Game.Board.Creature.get(center, game@board)
-    let indicator  = App.KL.Game.Indicator.blue_line
-    let indicators = Hexagonal.Axial.Map.new!
-    let distance   = App.KL.Game.Creature.Status.movement_range(Nat.to_i32(U64.to_nat(skill@range)), creature)
-    let coords     = Hexagonal.Axial.range(center, distance)
-    // set range indicator
-    for coord in coords with indicators:
-      Hexagonal.Axial.Map.set!(coord, indicator, indicators)
-    let areas = App.KL.Game.Effect.indicators.get_indicators(center, skill, {skill_key, user} targets, game@board)
-    return Hexagonal.Axial.Map.union!(indicators, areas)
-  } <> Hexagonal.Axial.Map.new<App.KL.Game.Indicator>
-
-// draw mouse indicator
-App.KL.Game.Phase.Play.draw.cursor(
-  mouse: Pair<U32, U32>
-  board: App.KL.Game.Board
-  screen: Pair<U32, U32>  
-  img: VoxBox
-): VoxBox
-  coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
-  {x,y} = App.KL.Game.Phase.Play.draw.centralize.old(coord, screen)
-  let has_tile = App.KL.Game.Tile.get(coord, board)
-  case has_tile { 
-    none:
-      img
-    some:
-      VoxBox.Draw.image(x, y, App.KL.Constants.z_index.cursor, App.KL.Game.Field.Mouse.mouse_ui, img)
-  }
-
-// draws tile terrain
-App.KL.Game.Phase.Play.draw.tile.terrain(
-  terrain:    App.KL.Game.Terrain
-  picks:      App.KL.Game.Picks
-  indicator:  Maybe<App.KL.Game.Indicator>
-  tile_coord: Hexagonal.Axial
-  screen:     Pair<U32, U32>
-  img:        VoxBox
-): VoxBox
-  let indicator = indicator <> App.KL.Game.Indicator.background
-  let {i, j}    = App.KL.Game.Phase.Play.draw.centralize.new(tile_coord, screen)
-  let field     = App.KL.Game.Field.get_by_id.default(terrain@field_id)
-  let field_drawing = field@draw(terrain, indicator)
-  let tile_drawing  = VoxBox.Draw.image(i, j, I32.to_u32(tile_coord@j + App.KL.Constants.z_index.terrain), field_drawing, img)
-  let tile_drawing  = App.KL.Game.Phase.Play.draw.letter(tile_coord, picks, screen, tile_drawing)
-  tile_drawing
-
-App.KL.Game.Phase.Play.draw.tile.indicator(
-  indicator:  Maybe<App.KL.Game.Indicator>
-  tile_coord: Hexagonal.Axial
-  screen:     Pair<U32,U32>
-  img:        VoxBox
-): VoxBox
-  without indicator: img
-    let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(tile_coord, screen)
-    let ind_img = App.KL.Game.Indicator.get_img(indicator)
-    let img = VoxBox.Draw.image(i, j, App.KL.Constants.z_index.indicator, ind_img, img)
-    img
-
-App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game: App.KL.Game, coord: Hexagonal.Axial): App.KL.Game.Hero.Draw.Pose
-  open game
-  case game.moment {
-    initial: App.KL.Game.Hero.Draw.Pose.idle
-    preparation:
-      App.KL.Game.Hero.Draw.Pose.idle
-    execution: case game.moment.casts {
-      nil:
-        App.KL.Game.Hero.Draw.Pose.idle
-      cons: Maybe { 
-        //get success = if game.moment.success then some(unit) else none
-        get success = case game.moment.success { 
-          left: none
-          right: some(unit)
-          }
-        get creature = App.KL.Game.Board.Creature.get(coord, game.board)
-        let cast = game.moment.casts.head
-        get player = creature@player
-        open cast
-        if String.eql(player, cast.player) then Maybe {
-          let frame = game.moment.frame
-          let center = game.moment.coord <> coord
-          let target = cast.target
-          let letter = cast.letter
-          get skill = App.KL.Game.Cast.get_skill(cast, game)
-          get creature = App.KL.Game.Cast.get_creature(cast, game)
-          return App.KL.Game.Hero.Draw.Pose.cast(frame, center, target, letter, skill, creature)
-        } else none
-      } <> App.KL.Game.Hero.Draw.Pose.idle
-    }
-  }
-
-// draws tile creature if any
-App.KL.Game.Phase.Play.draw.tile.creature(
-  game: App.KL.Game
-  creature: Maybe<App.KL.Game.Creature>,
-  coord: Hexagonal.Axial,
-  ap_used: Maybe<Pair<String, I32>>
-  screen: Pair<U32,U32>
-  img: VoxBox
-): VoxBox
-  case creature {
-    none: img
-    some:
-      let hero = creature.value@hero
-      let draw_pose = App.KL.Game.Phase.Play.draw.tile.creature.get_draw_pose(game, coord)
-      let {draw_coord, draw_voxbox} = hero@draw@vbox_img(draw_pose)
-      let draw_coord = draw_coord <> coord
-      //let aux = I32.to_u32(App.KL.Constants.hexagon_radius) //U32
-      //let cy = cy - (aux * 2) //U32
-      //let cx = cx - aux //U32
-      //log(U32.show( cy + 100))
-      {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
-      let img_x = cx - (128::U32)
-      let img_y = cy - (128::U32)
-      let height = I32.to_u32(hero@draw@height)
-      let img = VoxBox.Draw.image(img_x, img_y, App.KL.Constants.z_index.hero, draw_voxbox, img)
-      open creature.value as creature
-      case creature.player { 
-        none:
-          img
-        some:
-          let img = App.KL.Game.Phase.Play.Bar.show_hp(cx - 17, (cy - height), creature.value, img)
-          let img = App.KL.Game.Phase.Play.draw.ap(img_x - 12, (img_y - height) - 3, creature.value, ap_used, img)
-          img
-      }
-
-  }
-
-// AUX FUNCTIONS
-// =============
 
 App.KL.Game.Phase.Play.draw.get_cursor(
   local: App.KL.Game.State.Local
@@ -949,7 +280,7 @@ App.KL.Game.Phase.Play.draw.shield(
   let shield = Nat.show(Int.to_nat(shield))
   VoxBox.Draw.text(shield, PixelFont.small_black, Pos32.new(cx, cy, 0), img)
 
-App.KL.Game.Phase.Play.Draw.gray_overlay(game: App.KL.Game): DOM
+App.KL.Game.Phase.Play.draw.gray_overlay(game: App.KL.Game): DOM
   open game
     case game.moment {
       initial: <div></div>

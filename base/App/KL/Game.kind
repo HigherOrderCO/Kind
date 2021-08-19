@@ -9,13 +9,13 @@ type App.KL.Game.State.Local {
     room: String
     tab:  Maybe<String>
     page: String // page in draft -> heroes or users for now
-    score: Maybe<String>
     info: Hexagonal.Axial
     preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
     screen_size: Pair<U32, U32>
     filter: App.KL.Game.Phase.Draft.Filter
-    hud: App.KL.Game.State.Local.hud // HUD controls
+    hud: App.KL.Game.Controls.Hud // HUD controls
+    draft: App.KL.Game.Controls.Draft // draft page controls
   )
 }
 
@@ -26,8 +26,9 @@ App.KL.Game.State.Local.init(user: String, room: String, screen_size: Pair<U32, 
   let info = Hexagonal.Axial.new(0,0)
   let page = "heroes"
   let filter = App.KL.Game.Phase.Draft.Filter.default
-  let hud = App.KL.Game.State.Local.hud.new(none)
-  App.KL.Game.State.Local.new(user, room, tab, page, none, info, preview, mouse, screen_size, filter, hud)
+  let hud    = App.KL.Game.Controls.Hud.initial
+  let draft  = App.KL.Game.Controls.Draft.initial
+  App.KL.Game.State.Local.new(user, room, tab, page, info, preview, mouse, screen_size, filter, hud, draft)
 
 // Global State
 // ============
