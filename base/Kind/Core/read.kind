@@ -92,6 +92,13 @@ Kind.Core.read.chrx(code: String): Pair<String, Char>
     cons: {code.tail, code.head}
   }
         
+Kind.Core.read.strx.go(code: String, aux: String): Pair<String, String>
+  if String.starts_with(code, "\"") then
+    {code, String.reverse(aux)}
+  else
+    let {code, chrx} = Kind.Core.read.chrx(code)
+    Kind.Core.read.strx.go(code, String.cons(chrx, aux))
+  
 Kind.Core.read.strx(code: String): Pair<String, String>
   if String.starts_with(code, "\"") then
     {code, ""}
@@ -176,7 +183,7 @@ Kind.Core.read.term(code: String): Pair<String, List<Pair<String,Kind.Term>> -> 
         let {code, skip} = Kind.Core.read.char(code, '\'')
         {code, (ctx) Kind.Term.chr(chrx)}
       else if U16.eql(head, '"') then
-        let {code, strx} = Kind.Core.read.strx(code)
+        let {code, strx} = Kind.Core.read.strx.go(code, "")
         let {code, skip} = Kind.Core.read.char(code, '"')
         {code, (ctx) Kind.Term.str(strx)}
       else if U16.eql(head, '+') then

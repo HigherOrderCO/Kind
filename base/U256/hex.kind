@@ -1,0 +1,2 @@
+U256.hex.encode(a: U256): String
+  String.pad_left(64, '0', Nat.hex.encode(U256.to_nat(a)))

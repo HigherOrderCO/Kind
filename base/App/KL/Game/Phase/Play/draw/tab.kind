@@ -1,0 +1,520 @@
+App.KL.Game.Phase.Play.draw.tab(
+  local: App.KL.Game.State.Local, 
+  game: App.KL.Game,
+  players_info: Map<PlayersInfo>
+): DOM
+  let tab_active = local@hud@tab_active
+  let tab_which  = local@hud@tab_which
+
+  if tab_active then 
+    <div style={
+      "position": "fixed"
+      "top": "0"
+      "left": "0"
+      "width": "100vw"
+      "height": "100vh"
+      "background-color": "rgba(0,0,0,0.35)"
+      "animation": "fade-in 100ms" 
+    }>
+      <div class="pixel-art" style={
+        "position": "fixed"
+        "top": "50%"
+        "left": "50%"
+        "transform": "scale("| App.KL.Game.Phase.Play.draw.fator.string |") translate(-50%, -50%)"
+        "transform-origin": "top left"
+        "box-shadow": "100% 100% 30px black"
+      }>
+        <div style={
+          "position": "relative"
+        }>
+          <img src=App.KL.Game.Phase.Play.Assets.tab.background></img>
+          { App.KL.Game.Phase.Play.draw.tab.close }
+          { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
+          { App.KL.Game.Phase.Play.draw.tab.timer }
+          { App.KL.Game.Phase.Play.draw.tab.content(tab_which, local@user, players_info) }
+          { App.KL.Game.Phase.Play.draw.tab.controls(tab_which) }
+        </div>
+      </div>
+    </div>
+  else
+    <span style={"display": "none"}></span>
+
+App.KL.Game.Phase.Play.draw.tab.score(score: App.KL.Game.Score): DOM
+  let blue_hp = I32.sub(App.KL.Constants.max_score, score@points@snd)
+  let red_hp  = I32.sub(App.KL.Constants.max_score, score@points@fst)
+  <div style={
+    "position": "absolute"
+    "width": "87%"
+    "top": "5%"
+    "display": "flex"
+    "justify-content": "space-between"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+    "color": "white"
+  }>
+    <span> String.show_clean(I32.show(blue_hp)) </span>
+    <span> String.show_clean(I32.show(red_hp))  </span>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.close: DOM
+  <div style={
+    "position": "absolute"
+    "right": "-12px"
+    "top": "-8px"
+  }>
+    <img src=App.KL.Game.Phase.Play.Assets.tab.button.close></img>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.timer: DOM
+  <div style={
+    "position": "absolute"
+    "top": "8.3%"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+    "color": App.KL.Game.Phase.Play.draw.theme.secondary
+  }>
+    <span>"13:58"</span>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content(
+  tab_which: App.KL.Game.Controls.Hud.Tab
+  user: String
+  players: Map<PlayersInfo>
+): DOM
+  <div style={
+    "left": "1%"
+    "top": "15%"
+    "position": "absolute"
+    "height": "72%"
+    "width": "98%"
+  }>
+    {
+      case tab_which {
+        stats:  App.KL.Game.Phase.Play.draw.tab.content.stats(user, players)
+        recap:  App.KL.Game.Phase.Play.draw.tab.content.recap(user, players)
+        skills: 
+          let players = BBT.map!!!((x) x@snd, players)
+          App.KL.Game.Phase.Play.draw.tab.content.skills(players)
+      }
+    }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.skills(players: Map<App.KL.Game.Player>): DOM
+  let rows_quantity = 10 // 7 is the number of rows
+  let skills = App.KL.Game.Phase.Play.draw.get_skills_to_tab(players)
+  let blocks = List.chunks_of!(rows_quantity, skills) // 7 is the number of rows
+  let blocks = List.indices!(blocks)
+  let last  = List.length!(blocks) - 1 
+  <div style={
+    "height": "100%"
+    "display": "flex"
+    "margin": "0 5%"
+    "overflow-x": "auto"
+    "animation": "fade-in 100ms"
+  }>
+    for block in blocks:
+      let { block_number, skills_info } = block
+      <div style={"display": "contents"}>
+        <div style={"height": "100%"}>
+          <div style={
+            "height": "8%"
+            "display": "flex"
+            "align-items": "center"
+            "margin-bottom": "5px"
+          }>
+            {
+              if block_number =? 0 then
+                <div style={"display": "contents"}>
+                  <img 
+                    style={"margin-right": "5px"} 
+                    src=App.KL.Game.Phase.Play.Assets.tab.arrow.1
+                  ></img>
+                  <span style={"color": "#861cef"}>"Beginning"</span>
+                </div>
+              else
+                <img src=App.KL.Game.Phase.Play.Assets.tab.arrow.2></img>  
+            }
+          </div>
+          for skill_info in skills_info:
+            <div style={
+              "height": "7%"
+              "display": "flex"
+              "align-items": "center"
+              "text-transform": "uppercase"
+              "color": "white"
+              "margin-bottom": "5px"
+            }>
+              {
+                case skill_info {
+                  left:
+                    <img 
+                      style={"width": "100%"}
+                      src=App.KL.Game.Phase.Play.Assets.tab.divisor.walk
+                    > </img>
+                  right:
+                    let {key, info} = skill_info.value
+                    let {hero, skill} = info
+                    <div style={"display": "contents"}>
+                      <img 
+                        style={"margin-right": "5px", "height": "100%"} 
+                        src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                      ></img>
+                      <img 
+                        style={"margin-right": "5px", "height": "100%"} 
+                        src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                      ></img>
+                      <span style={"font-size": ".55rem"}>skill@name</span>
+                    </div> 
+                }
+              }
+            </div>
+            
+        </div>
+        <div style={"margin": "0 10px", "display": "flex", "align-items": "flex-end"}>
+          {
+            if block_number =? last then
+              <span style={"display": "none"}></span>
+            else
+              <img 
+                src=App.KL.Game.Phase.Play.Assets.tab.divisor.vertical 
+                style={"height": "91.5%"}
+              ></img>
+          }
+        </div>
+      </div>
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.stats(
+  user: String, 
+  players: Map<PlayersInfo>
+): DOM
+  let {allies, enemies} = App.KL.Game.Phase.Play.draw.get_allies_enemies(user, players)
+  let allies  = List.indices!(Map.values!(allies))
+  let enemies = List.indices!(Map.values!(enemies))
+
+  <div style={"display": "flex", "justify-content": "space-between", "width": "100%", "height": "100%", "animation": "fade-in 100ms"}>
+    { App.KL.Game.Phase.Play.draw.tab.content.stats.table(allies, false) }
+    
+    <img
+      style={"height": "100%"}
+      src=App.KL.Game.Phase.Play.Assets.tab.divisor.vertical
+    ></img>
+    
+    { App.KL.Game.Phase.Play.draw.tab.content.stats.table(enemies, true) }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.stats.table(
+  players: List<Pair<Nat, PlayersInfo>>
+  reversed: Bool
+): DOM
+  let last = List.length!(players) - 1
+  let flex_direction = 
+    if reversed then "row-reverse" else "row"
+  
+  <div style={
+    "width": "45%"
+    "height": "100%"
+    "text-align": "center"
+    "color": "white"
+  }>
+    <div> // header
+      <div style={
+        "display": "flex"
+        "align-items": "center"
+        "color": App.KL.Game.Phase.Play.draw.theme.secondary
+        "font-size": "0.7rem"
+        "flex-direction": flex_direction
+      }>
+        <div style={"flex": "2"}></div>
+        <div style={"flex": "1"}>"Hp"</div>
+        <div style={"flex": "1"}>"Kills"</div>
+        <div style={"flex": "1"}>"Deaths"</div>
+        <div style={"flex": "1"}>"Assists"</div>
+      </div>
+    </div>
+    for info in players: // body
+      let {indice, player_info} = info
+      let creature = player_info@fst
+      let player = player_info@snd
+      let hero   = App.KL.Game.Phase.Play.draw.get_player_hero(player)
+      let last   = indice =? last
+      case hero {
+        none: <span style={"display": "none"}></span>
+        some: App.KL.Game.Phase.Play.draw.tab.stats.table.row(reversed, last, hero.value, player, creature)
+      }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.stats.table.row(
+  reversed: Bool
+  last:     Bool
+  hero:   App.KL.Game.Hero
+  player: App.KL.Game.Player
+  creature: Maybe<App.KL.Game.Creature>
+): DOM
+  let inside_margin = // apply margin left if in right and vice-versa
+    if reversed then "0 0 0 5px" else "0 5px 0 0"
+  let outside_margin = 
+    if reversed then "0 12px 0 0" else "0 0 0 12px"
+  let text_align =
+    if reversed then "right" else "left"
+  let flex_direction = 
+    if reversed then "row-reverse" else "row"
+  let portrait =
+    if reversed then
+      App.KL.Game.Phase.Play.Assets.tab.portrait.enemy
+    else
+      App.KL.Game.Phase.Play.Assets.tab.portrait.ally
+
+  <div style={"height": "17%", "font-size": "0.8rem"}>
+    <div style={
+      "display": "flex"
+      "align-items": "center"
+      "flex-direction": flex_direction
+      "height": "calc(100% - 11px)" // 10px from 3px of bottom image + 8px of margin
+    }>
+      <div style={
+        "flex": "2"
+        "height": "100%"
+      }>
+        <div style={
+          "display": "flex"
+          "align-items": "center"
+          "flex-direction": flex_direction
+          "height": "100%"
+          "margin": outside_margin
+        }>
+          <img 
+            style={"margin": inside_margin, "height": "100%"}
+            src=portrait
+          ></img>
+          <div style={"text-transform": "uppercase", "text-align": text_align}>
+            <p style={"font-size": "0.8rem"}>hero@name</p>
+            <p style={"font-size": "0.7rem", "color": App.KL.Game.Phase.Play.draw.theme.secondary}>"User"</p>
+          </div>
+        </div>
+      </div>
+      <div style={"flex": "1"}><p>I32.show(App.KL.Game.Phase.Play.draw.get_life(creature))</p></div>
+      <div style={"flex": "1"}><p>I32.show(player@scoreboard@kills)</p></div>
+      <div style={"flex": "1"}><p>I32.show(player@scoreboard@deaths)</p></div>
+      <div style={"flex": "1"}><p>"100"</p></div>
+    </div>
+    {
+      if last then
+        <span style={"display": "none"}></span>
+      else
+        <img
+          style={"display": "flex", "margin": "4px 0", "width": "100%"}
+          src=App.KL.Game.Phase.Play.Assets.tab.divisor.horizontal
+        ></img>   
+    }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.recap(
+  user: String
+  players_info: Map<PlayersInfo>
+): DOM
+  let player_info = players_info{user}
+  without player_info: App.KL.Game.Phase.Play.draw.tab.content.recap.placeholder // case user not in players map (espectator?)
+
+  let creature = player_info@fst
+  let player   = player_info@snd
+  let recaps    = List.take!(10, player@recap)
+  let recap_len = List.length!(recaps)
+  if recap_len =? 0 then
+    App.KL.Game.Phase.Play.draw.tab.content.recap.placeholder
+  else 
+    <div style={
+      "width": "80%"
+      "height": "100%"
+      "animation": "fade-in 100ms"
+      "display": "flex"
+      "align-items": "flex-end"
+      "margin": "0 auto"
+    }>
+      <div style={"width": "100%"}>
+        <div style={"position": "relative", "display": "flex"}>
+          <img 
+            src=App.KL.Game.Phase.Play.Assets.tab.recap.graph
+            style={"width": "100%"}
+          ></img>
+          <div style={
+            "position": "absolute", 
+            "top": "0", 
+            "left": "0"
+            "width": "100%"
+            "height": "100%"
+            "display": "flex"
+            "flex-direction": "row-reverse"
+            "align-items": "flex-end"
+            "justify-content": "space-around"
+            "padding": "1px 0" // border of image
+          }>
+            for recap in recaps:
+              let hp   = recap@new_hp
+              let diff = recap@hp_diff
+              let diff_percentage = App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(diff, creature)
+              let life_percentage = App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(hp,   creature)
+              let life_percentage =
+                if diff >? 0 then life_percentage - diff_percentage
+                else life_percentage
+              let life_percentage = F64.show(life_percentage)
+              let diff_percentage = F64.show(diff_percentage)
+              <div style={
+                "width": "8%", 
+                "height": "100%", 
+                "background-color": "#2d2b86", 
+                "border": "2px solid #6b1fcc"
+                "display": "flex",
+                "flex-direction": "column"
+                "justify-content": "flex-end"
+              }>
+                {
+                  case diff >? 0 {
+                    true: <div style={"width": "100%", "height": diff_percentage|"%", "background": "#b5e61c"}></div>
+                    false:<div style={"width": "100%", "height": diff_percentage|"%", "background": "#ed1c24"}></div>
+                  }
+                }
+                <div style={"width": "100%", "height": life_percentage|"%", "background": "#eb6aff"}></div>
+              </div>
+          </div>
+        </div>
+        <div style={"width": "100%", "display": "flex", "justify-content": "space-around", "flex-direction": "row-reverse", "margin-top": "15px"}>
+          for recap in recaps:
+            let skill = App.KL.Game.Phase.Play.draw.tab.content.recap.get_skill(recap, players_info)
+            <div style={"width": "8%"}>
+              <div style={
+                "position": "relative"
+                "width": "100%"
+              }>
+                <img
+                  src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                  style={"width": "100%"}
+                ></img>
+                <div style={
+                  "display": "flex", 
+                  "justify-content": "center", 
+                  "align-items": "center", 
+                  "position": "absolute"
+                  "width": "100%", "height": "100%"
+                  "top": "0", "left": "0"
+                  "color": "white"
+                  "font-size": "0.55rem"
+                }>
+                  {
+                    case skill {
+                      none: <span></span>
+                      some: <span>skill.value@name</span>
+                    }
+                  }
+                </div>
+              </div>
+              <img
+                src=App.KL.Game.Phase.Play.Assets.tab.portrait.neutral
+                style={"width": "50%", "margin": "-12px auto 0 auto", "display": "block", "position": "relative"}
+              ></img>
+            </div>
+        </div>
+      </div>
+    </div>
+
+App.KL.Game.Phase.Play.draw.tab.content.recap.get_skill(
+  recap: App.KL.Game.Recap.Episode
+  players_info: Map<PlayersInfo>
+): Maybe<App.KL.Game.Skill>
+  Maybe {
+    let address     = recap@address
+    get player_info = players_info{address}
+    let player      = player_info@snd
+    get hero_id     = player@hero_id
+    get hero        = App.KL.Game.Hero.get_by_id(hero_id)
+    let skill_key   = Char.to_string(recap@skill_key)
+    get skill       = hero@skills{skill_key}
+    return skill
+  }
+
+App.KL.Game.Phase.Play.draw.tab.content.recap.placeholder: DOM
+  <div style={
+    "width": "100%", 
+    "height": "100%", 
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+    "color": "white"
+  }><span>"No recap to show... :("</span></div>
+
+App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(
+  number: I32, 
+  creature: Maybe<App.KL.Game.Creature>
+): F64
+  case creature {
+    none: 0
+    some:  
+      let number = I32.abs(number)
+      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(creature.value@hero@max_hp))
+  }
+
+App.KL.Game.Phase.Play.draw.tab.controls(
+  active_tab: App.KL.Game.Controls.Hud.Tab
+): DOM
+  <div style={
+    "position": "absolute"
+    "top": "89%"
+    "margin-left": "auto"
+    "margin-right": "auto"
+    "left": "0"
+    "right": "0"
+    "text-align": "center"
+  }>
+    { 
+      App.KL.Game.Phase.Play.draw.tab.controls.button(
+        App.KL.Game.Phase.Play.Assets.tab.button.left,
+        App.KL.Game.Controls.Hud.Tab.stats,
+        active_tab
+      ) 
+    }
+    { 
+      App.KL.Game.Phase.Play.draw.tab.controls.button(
+        App.KL.Game.Phase.Play.Assets.tab.button.middle,
+        App.KL.Game.Controls.Hud.Tab.skills,
+        active_tab
+      ) 
+    }
+    { 
+      App.KL.Game.Phase.Play.draw.tab.controls.button(
+        App.KL.Game.Phase.Play.Assets.tab.button.right,
+        App.KL.Game.Controls.Hud.Tab.recap,
+        active_tab
+      ) 
+    }
+  </div>
+
+App.KL.Game.Phase.Play.draw.tab.controls.button(
+  button: App.KL.Game.Phase.Play.Assets.tab.button, 
+  button_tab: App.KL.Game.Controls.Hud.Tab
+  active_tab: App.KL.Game.Controls.Hud.Tab
+): DOM
+  let tab_text  = String.to_lower(App.KL.Game.Controls.Hud.Tab.show(button_tab))
+  let is_active = App.KL.Game.Controls.Hud.Tab.eql(button_tab, active_tab)
+
+  <div id=tab_text style={"position": "relative", "display": "inline-flex", "margin-right": "1px"}>
+    <img id=tab_text src=button(is_active)></img>
+    <div id=tab_text style={
+      "position": "absolute"
+      "top": "0"
+      "width": "100%" 
+      "height": "100%" 
+      "display": "flex" 
+      "justify-content": "center"
+      "align-items": "center"
+      "color": "white"
+      "text-transform": "capitalize"
+    }>
+      tab_text
+    </div>
+  </div>

@@ -20,7 +20,7 @@ clean:
 	rm bin/*
 
 bin/kind-scm: scheme/bin/compile-chez-program scheme/bin/scheme
-	./$(chezexedir)/compile-chez-program --full-chez --libdirs src src/main.scm
+	./$(chezexedir)/compile-chez-program --full-chez --libdirs src --optimize-level 2 src/main.scm
 	mv src/main bin/kind-scm
 	chmod +x bin/kind-scm
 
@@ -35,8 +35,8 @@ install: bin/kind-scm
 
 scheme/bin/scheme:
 	cd $(chezdir) && git submodule init && git submodule update
-	cd $(chezdir) && ./configure --pb
-	cd $(chezdir) && make -j auto.bootquick
+	cd $(chezdir) && ./configure --pb --kernelobj --disable-curses --disable-iconv --disable-x11
+	cd $(chezdir) && make auto.bootquick
 	cd $(chezdir) && ./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$(PWD)/scheme
 	cd $(chezdir) && make -j && make install
 

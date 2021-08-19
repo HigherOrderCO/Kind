@@ -5,15 +5,51 @@ App.KL.Game.Phase.Draft.when(
   event  : App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
   let players = global@players
-  let room = String.take(16, Crypto.Keccak.hash(local@room))
+  let room  = String.take(16, Crypto.Keccak.hash(local@room))
+  let ready = Maybe.if!((x) x@ready, players{local@user}) // verify if local user is ready
+  let controls = local@draft // buttons controls (hover, click, active, etc)
 
   case event {
+    frame:
+      let main_button = controls@main_button
+      let init   = main_button@animation@init_loop
+      let end    = App.KL.Game.Assets.ButtonAnimation.get_limit(main_button@animation)
+      let actual = main_button@frame
+      let main_button  = 
+        if actual >=? end then
+          main_button@frame <- init
+        else
+          main_button@frame <- main_button@frame + 1
+      
+      let controls = controls@main_button <- main_button
+      let local = local@draft <- controls
+      App.set_local!(App.KL.State.Local.game(local))
     input: 
       switch String.starts_with(event.id) {
         "HF": // HF = hero-filter = name of hero to filter
           let local = local@filter <- filter@hero_name <- event.text
           App.set_local!(App.KL.State.Local.game(local))
       } default App.pass!
+    mouse_move:
+      let default_controls = App.KL.Game.Controls.Draft.default(ready, controls)
+      let controls = switch String.starts_with(event.id) {
+        "R": // ready
+          if ready then
+            if controls@main_button_hovered then
+              controls
+            else
+              let new_button = App.KL.Game.Assets.ButtonAnimation.Button.new(App.KL.Game.Phase.Draft.Assets.main_button.cancel, 0)
+              let controls = controls@main_button <- new_button
+              let controls = controls@main_button_hovered <- true
+              controls
+          else 
+            controls
+        "btn-header-": // hover in header buttons
+          let event_id = String.drop(11, event.id)
+          App.KL.Game.Controls.Draft.header.update(event_id, default_controls)
+      } default default_controls
+      let local = local@draft <- controls
+      App.set_local!(App.KL.State.Local.game(local))
     mouse_click:
       switch String.starts_with(event.id) {
         "H" : // Set Player Hero
@@ -33,12 +69,17 @@ App.KL.Game.Phase.Draft.when(
           case player {
             none: App.pass!
             some:
-              let can_ready = App.KL.Game.Player.has_hero(player.value)
-              let ready_u8 = 
-                if player.value@ready then 0#8 
-                else if can_ready then 1#8 
-                else 0#8
-              App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_u8))
+              let can_ready  = App.KL.Game.Player.has_hero(player.value)
+              let ready_info = 
+                if player.value@ready then {0#8, App.KL.Game.Phase.Draft.Assets.main_button.ready}
+                else 
+                  if can_ready then { 1#8, App.KL.Game.Phase.Draft.Assets.main_button.waiting}
+                  else {0#8, App.KL.Game.Phase.Draft.Assets.main_button.ready}
+              let local = local@draft <- controls@main_button <- controls@main_button@animation <- ready_info@snd
+              IO {
+                App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_info@fst))
+                App.set_local!(App.KL.State.Local.game(local))
+              }
           }        
         "T" : // Set a team
           let player_count = String.drop(1, event.id)
