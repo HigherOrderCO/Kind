@@ -6,7 +6,7 @@ BBT.Balanced<K: Type, V: Type>(cmp: K -> K -> Cmp, map: BBT<K, V>): Type
       And<
         // if the tree is balanced we can strenghten a proof of membership
         // with the result of a comparison
-        (key: K) (H: BBT.In<K, V>(map, key))
+        (key: K) -> (H: BBT.In<K, V>(map, key)) ->
         case cmp(key, map.key) {
           ltn: And<
             BBT.In<K, V>(map.left, key),
