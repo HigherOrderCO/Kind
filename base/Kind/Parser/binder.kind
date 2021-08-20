@@ -1,17 +1,22 @@
-Kind.Parser.binder(sep: String): Parser(List<Kind.Binder>)
+Kind.Parser.binder(sep: String, mandatory_spaces: Bool): Parser(List<Kind.Binder>)
   Parser {
     get lists = Parser.many1!(Parser.choice!([
-      Kind.Parser.binder.homo(sep, true)
-      Kind.Parser.binder.homo(sep, false)
+      Kind.Parser.binder.homo(sep, true, mandatory_spaces)
+      Kind.Parser.binder.homo(sep, false, mandatory_spaces)
     ]))
     return List.flatten!(lists)
   }
 
-Kind.Parser.binder.homo(sep: String, eras: Bool): Parser(List<Kind.Binder>)
+Kind.Parser.binder.homo(sep: String, eras: Bool, mandatory_spaces: Bool): Parser(List<Kind.Binder>)
   Parser {
     let open = if eras then "<" else "("
     let clos = if eras then ">" else ")"
-    get bind = Kind.Parser.items1!(open, Kind.Parser.name_term(sep), clos)
+    let items_parser = 
+      if mandatory_spaces then 
+        Kind.Parser.items_now
+      else 
+        Kind.Parser.items
+    get bind = items_parser!(open, Kind.Parser.name_term(sep), clos)
     return List.mapped!(bind)!((pair) case pair {
       new: Kind.Binder.new(eras, pair.fst, pair.snd)
     })
