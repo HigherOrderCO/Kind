@@ -102,7 +102,6 @@ destroy_theorem(a: Nat): destroy(a) == Nat.zero
 // - "self(x: A) -> B" is a self-forall (self-dependent function type)
 // - "(f, x) f(f(x))" is a lambda (as in, "λf. λx. (f (f x))")
 // - "." is just a name-valid character (so "foo.bar" is just a name)
-// - You can omit these arrows, but I'm trying to make the syntax look conventional
 ```
 
 In other words, after parsing, the first program is exactly equivalent to this

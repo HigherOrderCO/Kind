@@ -1,0 +1,50 @@
+// HUD controls
+type App.KL.Game.Controls.Hud {
+  new(
+    skill: Maybe<App.KL.Game.Skill>
+    // tab
+    tab_active:  Bool
+    tab_which:   App.KL.Game.Controls.Hud.Tab
+  )
+}
+
+type App.KL.Game.Controls.Hud.Tab.Label {
+  new(image: String, content: DOM)
+}
+
+App.KL.Game.Controls.Hud.initial: App.KL.Game.Controls.Hud
+  let skill = none
+  let tab_active  = false
+  let tab_which   = App.KL.Game.Controls.Hud.Tab.stats
+
+  App.KL.Game.Controls.Hud.new(
+    skill,
+    tab_active,
+    tab_which,
+  )
+
+
+type App.KL.Game.Controls.Hud.Tab {
+  stats
+  skills
+  recap
+}
+
+App.KL.Game.Controls.Hud.Tab.show(
+  tab: App.KL.Game.Controls.Hud.Tab
+): String
+  case tab {
+    stats:  "stats"
+    skills: "skills"
+    recap:  "recap"
+  }
+
+App.KL.Game.Controls.Hud.Tab.eql(
+  a: App.KL.Game.Controls.Hud.Tab
+  b: App.KL.Game.Controls.Hud.Tab
+): Bool
+  case a b {
+    stats stats: true
+    recap recap: true
+    skills skills: true
+  } default false
