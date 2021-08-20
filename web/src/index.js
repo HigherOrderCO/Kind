@@ -46,7 +46,13 @@ class Moonad extends Component {
   render() {
     var path = window.location.pathname.slice(1);
     if (path === "") {
-      return h(AppList);
+      return h("div", {style: {"padding": "10px"}}, [
+          h(AppList),
+          h("div", {style: {"margin": "10px 20px"}}, [
+            h("p", {}, "To the newcomers: want to play a MOBA-like game with turns? Select App.KL and follow the instructions UwU")
+          ])
+        ])  
+      ;
     } else {
       return h(AppPlay, {
         name: path, 
