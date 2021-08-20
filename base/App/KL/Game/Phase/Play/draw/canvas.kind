@@ -63,6 +63,7 @@ App.KL.Game.Phase.Play.draw.canvas.board(
   img:     VoxBox
 ): VoxBox
   open game
+  let team        = App.KL.Game.Phase.Draft.to_team(game@players, user) <> App.KL.Game.Team.neutral
   let map         = game@board
   let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
   let indicators  = App.KL.Game.Phase.Play.Draw.canvas.get_indicators(preview, mouse_coord, user, game)
@@ -74,8 +75,8 @@ App.KL.Game.Phase.Play.draw.canvas.board(
     let img = App.KL.Game.Phase.Play.draw.canvas.grid(coord, game@moment, screen, img)
     let img = App.KL.Game.Phase.Play.draw.canvas.tile.terrain(tile@terrain, preview@picks, indicator, coord, screen, img)
     let img = App.KL.Game.Phase.Play.draw.canvas.tile.indicator(indicator, coord, screen, img)
-    let img = App.KL.Game.Phase.Play.draw.canvas.tile.creature(game, tile@creature, coord, ap_used, screen, img)
-    let img = App.KL.Game.Phase.Play.draw.canvas.tile.token(game, tile@token, coord, screen, img)
+    let img = App.KL.Game.Phase.Play.draw.canvas.tile.creature(game, tile@creature, coord, ap_used, screen, user, img)
+    let img = App.KL.Game.Phase.Play.draw.canvas.tile.token(game, tile@token, coord, screen, team, img)
     img
   img
 
@@ -102,26 +103,40 @@ App.KL.Game.Phase.Play.draw.canvas.tile.token(
   token: Maybe<App.KL.Game.Token>,
   token_coord: Hexagonal.Axial,
   screen: Pair<U32, U32>
+  team: App.KL.Game.Team
   img: VoxBox
 ): VoxBox
   without token: img
-  let col = case App.KL.Game.Token.get_dominance(token) as team {
-    none: Col32.new(100,100,100,255)
-    some:
-      case team.value {    
-        blue: Col32.new(0, 0, 255, 255)
-        red:  Col32.new(255, 0, 0, 255)
-      } default Col32.new(100,100,100,255)
-  }
+  let col = 
+    case App.KL.Game.Token.get_dominance(token) as team {
+      none: Col32.new(100,100,100,255)
+      some:
+        if App.KL.Game.Team.eql(team, team.value) then
+          Col32.new(0, 0, 255, 255)
+        else
+          if App.KL.Game.Team.eql(App.KL.Game.Team.neutral, team.value) then
+            Col32.new(100,100,100,255)
+          else
+            Col32.new(255, 0, 0, 255)
+    }
+
   let coords = Hexagonal.Axial.range(token_coord, token@range)
+  let board = game@board
   for coord in coords with img:
-    let {cx, cy} = 
-      Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+    let tile = Hexagonal.Axial.Map.get!(coord, board)
+    case tile {
+      none:
+        img
+      some:
+        let {cx, cy} = 
+          Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+        
+        if Hexagonal.Axial.eql(coord, token_coord) then
+          VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
+        else
+          VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,5,5,col,img)
+    }
     
-    if Hexagonal.Axial.eql(coord, token_coord) then
-      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
-    else
-      VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,5,5,col,img)
   img
 
   
@@ -268,11 +283,13 @@ App.KL.Game.Phase.Play.draw.canvas.tile.creature(
   coord: Hexagonal.Axial,
   ap_used: Maybe<Pair<String, I32>>
   screen: Pair<U32,U32>
+  user_id: String
   img: VoxBox
 ): VoxBox
   case creature {
     none: img
     some:
+      let team = App.KL.Game.Phase.Draft.to_team(game@players, user_id)
       let hero = creature.value@hero
       let draw_pose = App.KL.Game.Phase.Play.draw.canvas.tile.creature.get_draw_pose(game, coord)
       let {draw_coord, draw_voxbox} = hero@draw@vbox_img(draw_pose)
@@ -291,7 +308,7 @@ App.KL.Game.Phase.Play.draw.canvas.tile.creature(
         none:
           img
         some:
-          let img = App.KL.Game.Phase.Play.Bar.show_hp(cx - 17, (cy - height), creature.value, img)
+          let img = App.KL.Game.Phase.Play.Bar.show_hp(cx - 17, (cy - height), user_id, team <> App.KL.Game.Team.neutral, creature.value, img)
           let img = App.KL.Game.Phase.Play.draw.ap(img_x - 12, (img_y - height) - 3, creature.value, ap_used, img)
           img
       }
