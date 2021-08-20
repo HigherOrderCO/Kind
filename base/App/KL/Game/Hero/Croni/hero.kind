@@ -42,12 +42,12 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
 
   let attributes =
     some(App.KL.Game.Hero.Attributes.set(
-      0 // Damage
+      5 // Damage
       1 // Resistance
-      5 // Mobility
+      2 // Mobility
       5 // Range
-      5 // Utility
-      3 // Difficulty
+      2 // Utility
+      4 // Difficulty
   ))
 
   let role = some(App.KL.Game.Hero.Role.ranged)

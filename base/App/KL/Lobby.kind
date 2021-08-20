@@ -233,7 +233,7 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
       <div>
         {App.KL.Lobby.draw.front.button("ready", "Enter")}
         //{App.KL.Lobby.draw.front.button("random", "Random")}
-        {App.KL.Lobby.draw.front.button("heroes", "Heroes")}
+        //{App.KL.Lobby.draw.front.button("heroes", "Heroes")}
       </div>
     </div>
     <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
@@ -287,12 +287,12 @@ App.KL.Lobby.when(
                     App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen_size)))
                   }
               }
-            "heroes": IO {
-              let new_page = App.KL.Lobby.State.Local.Page.heroes(none, none, "string")
-              let new_local = local@page <- new_page
-              App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
-            }
-          }default App.pass!
+            // "heroes": IO {
+            //   let new_page = App.KL.Lobby.State.Local.Page.heroes(none, none, "string")
+            //   let new_local = local@page <- new_page
+            //   App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+            // }
+          }default App.pass<App.KL.State>
         heroes:
           switch String.starts_with(event.id) {
             "H": 
