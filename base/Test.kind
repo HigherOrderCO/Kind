@@ -1,2 +1,11 @@
-Associative<A: Type>(op: A -> A -> A): Type
-  (a: A, b: A, c: A) -> Equal<A>(op(op(a, b), c), op(a, op(b, c)))
+Test: _
+  let a = {
+    "blue": "alo"
+    "red": "hello"
+    "green": "heehee"
+  }
+
+  <div>
+    for color:text in a:
+      <button style={"color": color}>text</button>
+  </div>
