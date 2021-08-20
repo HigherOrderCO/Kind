@@ -7,10 +7,11 @@ App.KL.Game.Effect.tile.add_effect(
 
   App.KL.Game.Effect { 
     get board = App.KL.Game.Effect.board.get
+    get cast_data = App.KL.Game.Effect.cast_data.get
     let tile = App.KL.Game.Tile.get(pos, board)
     without tile: App.KL.Game.Effect.pass
     let effect = App.KL.Game.Effect { effect(pos) return unit }
-    let new_tile = App.KL.Game.Tile.effect.add(tile, effect, duration)
+    let new_tile = App.KL.Game.Tile.effect.add(tile, cast_data, effect, duration)
     let new_board = App.KL.Game.Board.set(pos, new_tile, board)
     App.KL.Game.Effect.board.set(new_board)
   }

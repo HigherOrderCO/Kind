@@ -14,11 +14,11 @@
 Vector(A: Type, len: Nat): Type
   case len {
     zero:
-      self(P: (self: Vector(A,0)) Type) ->
+      self(P: (self: Vector(A,0)) -> Type) ->
       (nil: P(Vector.nil(A))) ->
       P(self)
     succ:
-      self(P: (self: Vector(A,Nat.succ(len.pred))) Type) ->
+      self(P: (self: Vector(A,Nat.succ(len.pred))) -> Type) ->
       (cons: (head: A) -> (tail: Vector(A, len.pred)) -> P(Vector.cons(A,len.pred,head,tail))) ->
       P(self)
   }

@@ -4,5 +4,7 @@ type App.KL.Game.Player {
     init_pos: Maybe<Hexagonal.Axial>
     team: App.KL.Game.Team
     ready: Bool
+    scoreboard: App.KL.Game.Scoreboard
+    recap: App.KL.Game.Recap
   )
 }

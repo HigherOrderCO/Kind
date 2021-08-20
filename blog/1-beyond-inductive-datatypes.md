@@ -14,6 +14,14 @@ impossible in conventional proof assistants.
 A quick recap of Self-Types in Kind
 -----------------------------------
 
+
+> Self-types can be described briefly. The dependent function type, `∀ (x : A) -> B(x)`
+> allows the type returned by a function call, `f(x)`, to depend on the value of the 
+> argument, `x`. The self-dependent function type, `∀ f(x : A) -> B(f,x)` allows the
+> type returned by a function call, `f(x)`, to also depend on the value of the function,
+> `f`. That is sufficient to encode all the inductive datatypes and proofs present in 
+> traditional proof languages, as well as many other things.
+
 To get started, let's recap how Self-Types work in Kind. Let's start by defining
 the `Nat` type, a simple recursive function, and an inductive proof:
 
@@ -94,7 +102,6 @@ destroy_theorem(a: Nat): destroy(a) == Nat.zero
 // - "self(x: A) -> B" is a self-forall (self-dependent function type)
 // - "(f, x) f(f(x))" is a lambda (as in, "λf. λx. (f (f x))")
 // - "." is just a name-valid character (so "foo.bar" is just a name)
-// - You can omit these arrows, but I'm trying to make the syntax look conventional
 ```
 
 In other words, after parsing, the first program is exactly equivalent to this
@@ -269,6 +276,11 @@ Cedille](https://homepage.cs.uiowa.edu/~cwjnkins/assets/MJS19_Quotients-Idempote
 Possibility #1: conditional constructors
 ----------------------------------------
 
+*Edit: after thinking about it, this isn't different from just functions that
+return types, which conventional proof languages can do just fine. But I'll
+leave it here because it is still useful information. Go ahead to the next
+section if you just want to explore self types.*
+
 In [this paper](https://arxiv.org/pdf/2103.15408.pdf), Tesla Zhang (again!)
 proposes a different encoding of indexed datatypes. He starts by presenting the
 usual definition of `Vector` in Agda:
@@ -421,7 +433,13 @@ update Kind to incorporate Tesla's syntax for this kind of datatype, but the
 fact you can already do that by manually tweaking the Self-encodings is
 beautiful.
 
-Possibility #2: higher inductive types
+Possibility #2: first-class modules
+-----------------------------------
+
+Check [this post](https://github.com/uwu-tech/Kind/blob/master/blog/2-first-class-modules-with-self-types.md) 
+for a simple encoding of first-class modules with self types.
+
+Possibility #3: higher inductive types
 --------------------------------------
 
 From ncatlab, *"Higher inductive types (HITs) are a generalization of inductive

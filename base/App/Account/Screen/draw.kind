@@ -35,13 +35,26 @@ App.Account.Screen.draw.text_style_small: Map<String>
   "margin-left": "4px" 
   "padding-bottom": "5px" }
 
-App.Account.Screen.draw.loading: DOM
-  let main_style = App.Account.Screen.draw.main_style
-  let text_style = App.Account.Screen.draw.text_style
-  let box_style =  App.Account.Screen.draw.box_style
-  <div style=App.Account.Screen.draw.main_style>
-    <div style=text_style>"Loading..."</div>
-  </div>
+App.Account.Screen.draw.login_key_style: Map<String>
+{ "width": "45ch",
+  "padding": "5px",
+  "font-size": "1.5rem",
+  "font-family": "monospace",
+  "outline": "transparent",
+  "margin-left": "4px" }
+
+App.Account.Screen.draw.home.authorize_id: String
+  "authorize_button"
+
+App.Account.Screen.draw.home.authorize_devicekey_id: String
+  "authorize_devicekey"
+
+App.Account.Screen.draw.home.authorize_devicename_id: String
+  "authorize_devicename"
+
+App.Account.Screen.draw.home.revoke_prefix: String
+  "revoke_button_"
+
 
 App.Account.Screen.draw.welcome: DOM
   <div style=App.Account.Screen.draw.main_style>
@@ -81,24 +94,83 @@ App.Account.Screen.draw.register: DOM
     </div>
   </div>
 
-App.Account.Screen.draw.home(
-  state: App.Account.State.global
-  addr: String
-  user: String
-  devices: List<Pair<String, String>>
+
+App.Account.Screen.draw.login(
+  address: String
 ): DOM
-  let device_str = ""
-  for device in devices with device_str:
-    open device
-    device.fst|" "|device.snd|", "
   let main_style = App.Account.Screen.draw.main_style
   let text_style = App.Account.Screen.draw.text_style
   let box_style =  App.Account.Screen.draw.box_style
   let upper_bottom_style = App.Account.Screen.draw.upper_bottom_style
+  let small_text_style = App.Account.Screen.draw.text_style_small
+  <div style=main_style>
+    <div style=text_style>"Login device to an Account"</div>
+    <div style=small_text_style>"Device Key:"</div>
+    <input style=App.Account.Screen.draw.login_key_style value=address></input>
+    <div style={"padding-top": "10px","align-items":"center","font-size":"1.2em"}>"To login go to an authorized device and click in \"Authorize new device\". then authorize this device."</div>
+  </div>
+
+
+App.Account.Screen.draw.home(
+  state: App.Account.State.global
+  addr: String
+  authorizing: Bool
+  authorize_devicekey: String
+  authorize_devicename: String
+): DOM
+  open state
+  let user = state.usermap{addr} <> ""
+  let devicelist = state.keymap{user} <> []
+  let main_style = App.Account.Screen.draw.main_style
+  let text_style = App.Account.Screen.draw.text_style
+  let box_style =  App.Account.Screen.draw.box_style
+  let upper_bottom_style = App.Account.Screen.draw.upper_bottom_style
+  let auth_stuff =
+    if authorizing then
+      <div style=upper_bottom_style>
+        <div style={"flex-direction":"column"}>
+          <div style=App.Account.Screen.draw.text_style_small>"Enter the device name"</div>
+          <input id=App.Account.Screen.draw.home.authorize_devicename_id style=box_style>
+          </input>
+        </div>
+        <div style={"flex-direction":"column"}>
+          <div style=App.Account.Screen.draw.text_style_small>"Enter the Device key"</div>
+          <input id=App.Account.Screen.draw.home.authorize_devicekey_id style=box_style>
+          </input>
+        </div>
+        <div style={"flex-direction":"column"}>
+          <div style=App.Account.Screen.draw.text_style_small>"‎"</div>
+          <button id=App.Account.Screen.draw.home.authorize_id style=box_style>
+            "Authorize"
+          </button>
+        </div>
+      </div>
+    else
+      <button id=App.Account.Screen.draw.home.authorize_id style=box_style>
+        "Authorize new device"
+      </button>
+
+  let device_row = ((n, p)
+    open p
+    <tr>
+      <td>p.fst</td>
+      <td>p.snd</td>
+      <td>
+        <button
+          id=App.Account.Screen.draw.home.revoke_prefix|Nat.show(n) style=box_style> "Revoke" </button>
+      </td>
+    </tr>) :: Nat -> Pair(String, String) -> DOM
+  let table_rows = List.imap!!(device_row, devicelist)
+
   <div style=main_style>
     <div style=text_style>"Hello "|user|" Welcome!"</div>
     <div style=text_style>"Here are your devices:"</div>
-    <p>device_str</p>
+    <table>
+      <tr><th>"Device Name"</th><th>"Device Key"</th></tr>
+      for row in table_rows:
+        row
+    </table>
+    {auth_stuff}
   </div>
 
 App.Account.Screen.draw.debug(state: App.Account.State.global): DOM

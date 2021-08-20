@@ -1,0 +1,20 @@
+App.KL.Game.Effect.player_data.add.heal(
+  caster_id: String
+  target_id: String
+  heal: I32
+  new_hp: I32
+): App.KL.Game.Effect<Unit>
+  (center, targets, cast_data, board)
+    App.KL.Game.Effect.Result.new!(
+      unit, 
+      center,
+      cast_data,
+      board, 
+      Hexagonal.Axial.Map.new!, 
+      0, 
+      [], 
+      "", 
+      {
+        caster_id: {App.KL.Game.Scoreboard.new(0, heal, 0, 0), none},
+        target_id: {App.KL.Game.Scoreboard.new(0, 0, 0, 0), some([App.KL.Game.Recap.Episode.new(cast_data@fst, cast_data@snd, heal, new_hp)])}},
+    )

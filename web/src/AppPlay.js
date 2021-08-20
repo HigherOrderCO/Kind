@@ -509,7 +509,7 @@ module.exports = class AppPlay extends Component {
       console.log("creating canvas", id, width, height);
       this.canvas[id] = document.createElement("canvas");
       this.canvas[id].id = id;
-      this.canvas[id].style["image-rendering"] = "pixelated";
+      this.canvas[id].classList.add("pixel-art");
       this.canvas[id].width = width;
       this.canvas[id].height = height;
       this.canvas[id].style.width = (width*scale) + "px";

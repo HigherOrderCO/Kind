@@ -8,6 +8,7 @@ type App.KL.Lobby.State.Local {
   new(
     user: String
     page: App.KL.Lobby.State.Local.Page
+    screen_size: Pair<U32, U32>
   )
 }
 
@@ -227,14 +228,24 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
       "flex-wrap": "wrap",
       "text-align": "center"
     }>
-      "Enter a room number: "
+      "Room number: "
       {App.KL.Lobby.draw.front.input("text", room_input)}
       <div>
         {App.KL.Lobby.draw.front.button("ready", "Enter")}
         //{App.KL.Lobby.draw.front.button("random", "Random")}
-        {App.KL.Lobby.draw.front.button("heroes", "Heroes")}
+        //{App.KL.Lobby.draw.front.button("heroes", "Heroes")}
       </div>
     </div>
+    <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
+"Hello! To start with Kaelin it's easy.
+1. Enter a random room number and copy it
+2. Invite your friends to access: http://uwu.tech/App.KL
+3. Share the room number with them
+
+Enjoy our little Kind game! (WIP)
+We will love to hear about your experience <3
+Join us: http://discord.gg/SNhNx9gUgh "
+    </pre>
   </div>
 
 // Lobby.When
@@ -249,6 +260,7 @@ App.KL.Lobby.when(
   case event {
     init:
       let new_local = local@user <- String.to_lower(event.user)
+      let new_local = new_local@screen_size <- event.info@screen_size
       App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
     input:
       case page {
@@ -272,15 +284,15 @@ App.KL.Lobby.when(
                   IO {
                     App.watch<App.KL.State>(room)
                     App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
-                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input)))
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen_size)))
                   }
               }
-            "heroes": IO {
-              let new_page = App.KL.Lobby.State.Local.Page.heroes(none, none, "string")
-              let new_local = local@page <- new_page
-              App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
-            }
-          }default App.pass!
+            // "heroes": IO {
+            //   let new_page = App.KL.Lobby.State.Local.Page.heroes(none, none, "string")
+            //   let new_local = local@page <- new_page
+            //   App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
+            // }
+          }default App.pass<App.KL.State>
         heroes:
           switch String.starts_with(event.id) {
             "H": 
@@ -316,7 +328,7 @@ App.KL.Lobby.when(
                   IO {
                     App.watch<App.KL.State>(room)
                     App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
-                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input)))
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen_size)))
                   }
               }
           }default App.pass<App.KL.State>

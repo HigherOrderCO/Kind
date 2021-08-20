@@ -34,7 +34,7 @@ jobs:
             folder=${app_dir:0:4}
             ext=${app_dir: -5}
             if [ "$ext" == ".kind" ] && [ "$folder" == "App/" ]; then
-              eval node web/type_check_Apps ${app_dir}
+              eval node web/type_check_Apps ${changed_file}
             fi
           done
 

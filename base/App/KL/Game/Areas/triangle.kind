@@ -7,7 +7,7 @@ App.KL.Game.Areas.triangle(start: Hexagonal.Axial, direction: Hexagonal.Axial): 
   if Hexagonal.Axial.eql(p2, direction) then
     left
   else
-    if Hexagonal.Axial.shorter_in_xy(direction, left, right, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y) then 
+    if Hexagonal.Axial.shorter_in_xy(direction, left, right, App.KL.Constants.hexagon_radius, 100, 100) then 
       left
     else
       right

@@ -1,0 +1,23 @@
+type List.get_randoms.Result <A: Type> {
+  new(
+    seed: Nat
+    list: List<A>
+    result: List<A>
+  )
+}
+
+List.get_randoms<A: Type>(seed: Nat, count: Nat, list: List<A>): List.get_randoms.Result<A>
+  List.get_randoms.go<A>(count, List.get_randoms.Result.new<A>(seed, list, []))
+
+List.get_randoms.go<A: Type>(count: Nat, state: List.get_randoms.Result<A>): List.get_randoms.Result<A>
+  open state
+  let length = List.length!(state.list)
+  case count length {
+    succ succ:
+      let seed   = Nat.random(state.seed)
+      let index  = seed % length
+      let got    = state.list[index]
+      let result = case got { none: state.result, some: got.value & state.result }
+      let list   = List.delete_at<A>(index, state.list) 
+      List.get_randoms.go<A>(count.pred, List.get_randoms.Result.new<A>(seed, list, result))
+  } default state

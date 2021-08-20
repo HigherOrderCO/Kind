@@ -1,0 +1,3 @@
+// store damage in caster player scoreboad
+App.KL.Game.Effect.player_data.caster.add.damage(target_id: String, damage: I32, new_hp: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect.player_data.add(target_id, damage, new_hp, App.KL.Game.Effect.player_data.add.damage)

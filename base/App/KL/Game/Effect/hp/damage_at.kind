@@ -33,6 +33,7 @@ App.KL.Game.Effect.hp.damage_at(
           some: App.KL.Game.Effect { 
             let debuffer = App.KL.Game.Creature.Status.weaken.total(caster.value)
             get real_dmg = App.KL.Game.Effect.hp.change_at(I32.neg(dmg - debuffer), pos)
+            App.KL.Game.Effect.player_data.caster.add.damage(creature.value@player <> "", real_dmg, creature.value@hp + real_dmg)
             let damage = String.show_clean(I32.show(I32.neg(real_dmg)))
             App.KL.Game.Effect.description.add("Deal "| damage | " damage")
             return real_dmg 

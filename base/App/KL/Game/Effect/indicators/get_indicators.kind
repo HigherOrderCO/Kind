@@ -2,13 +2,14 @@
 App.KL.Game.Effect.indicators.get_indicators(
   hero_pos: Hexagonal.Axial
   skill: App.KL.Game.Skill
+  cast_data: Pair<Char,String>
   mouse_coord: List<Hexagonal.Axial>
   map: App.KL.Game.Board
 ): Hexagonal.Axial.Map<App.KL.Game.Indicator>
 
   open skill
   //Returning each effect's List of affected coords
-  let result = skill.effect(hero_pos, mouse_coord, map)
+  let result = skill.effect(hero_pos, mouse_coord, cast_data, map)
   case result {
     new: 
       result.indicators

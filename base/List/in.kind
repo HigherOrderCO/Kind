@@ -1,0 +1,5 @@
+List.in<A: Type>(cond: A -> Bool, list: List<A>): Bool
+  case List.find!(cond, list) {
+    none: false
+    some: true
+  }

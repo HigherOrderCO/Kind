@@ -29,10 +29,10 @@ Kind.Parser.ADT.adt: Parser(Kind.Parser.ADT.Datatype)
   Parser {
     Kind.Parser.text("type ")
     get name = Kind.Parser.name1
-    get pars = Parser.maybe!(Kind.Parser.binder(":"))
+    get pars = Parser.maybe!(Kind.Parser.binder(":", false))
     get inds = Parser.maybe!(Parser {
       Kind.Parser.text("~")
-      Kind.Parser.binder(":")
+      Kind.Parser.binder(":", false)
     })
     let pars = Maybe.default!(pars, [])
     let inds = Maybe.default!(inds, [])
@@ -51,10 +51,10 @@ Kind.Parser.ADT.adt: Parser(Kind.Parser.ADT.Datatype)
 Kind.Parser.ADT.ctor(namespace: Kind.Name): Parser(Kind.Parser.ADT.Constructor)
   Parser {
     get name = Kind.Parser.name1
-    get args = Parser.maybe!(Kind.Parser.binder(":"))
+    get args = Parser.maybe!(Kind.Parser.binder(":", false))
     get inds = Parser.maybe!(Parser {
       Kind.Parser.text("~")
-      Kind.Parser.binder("=")
+      Kind.Parser.binder("=", false)
     })
     let args = Maybe.default!(args, [])
     let inds = Maybe.default!(inds, [])

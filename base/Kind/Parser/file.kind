@@ -68,7 +68,7 @@ Kind.Parser.file.def(file: String, code: String, defs: Kind.Defs): Parser(Kind.D
     Kind.Parser.spaces
     get from = Parser.get_idx
     get name = Kind.Parser.name1
-    get args = Parser.many!(Kind.Parser.binder(":"))
+    get args = Parser.many!(Kind.Parser.binder(":", false))
     let args = List.flatten!(args)
     Kind.Parser.text(":")
     get type = Kind.Parser.term

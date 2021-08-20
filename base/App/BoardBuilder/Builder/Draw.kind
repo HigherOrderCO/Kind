@@ -5,7 +5,7 @@ App.BoardBuilder.Builder.Draw(local: App.BoardBuilder.Builder.State.local, globa
   <div style={"margin-bottom": "10px"}>
     <div style={"display": "flex", "padding": "20px", "flex-direction": "row", "align-content": "flex-start"}>
       <div style={"display": "flex", "align-items": "center"}> 
-        <div style={"margin": "5px", "max-height": "700px", "max-width":"70vw", "overflow": "scroll", "border": "5px solid black", "border-radius": "20px"}>
+        <div style={"margin": "5px", "max-height": "700px", "max-width":"70vw", "overflow": "scroll", "outline": "5px solid black", "border-radius": "20px"}>
           {
             DOM.vbox(
               { "id": "game_screen",
@@ -22,20 +22,12 @@ App.BoardBuilder.Builder.Draw(local: App.BoardBuilder.Builder.State.local, globa
         //   {App.BoardBuilder.Builder.Draw.input("Height", "height", local@canvas_size@snd)}
         // </div>
       </div>
-      <div style={"max-height": "700px", "overflow": "auto", "display" : "flex", "flex-wrap": "wrap", "align-content": "flex-start", "overflow": "auto"}>
-        for value in List.indices!(App.KL.Game.Field.list):
-          let selected = value@fst =? local@actual_terrain
-          let border = if selected then "2px solid green" else "none"
-          <div id="T"|Nat.show(value@fst) style={"width" : "75px", "height": "fit-content", "padding": "5px", "font-size": "1rem", "cursor": "pointer", "display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column", "border" : border, "box-sizing": "border-box"}>
-            <img id="T"|Nat.show(value@fst) src=value@snd@picture></img>
-            <span id="T"|Nat.show(value@fst)>value@snd@name</span>
-          </div>
-      </div>
+      {App.BoardBuilder.Builder.Draw.tool_menu(local)}
     </div>
     <div style={"display": "flex", "width": "100vw", "justify-content": "center", "align-items":"center"}>
       <div style={"display": "flex", "flex-direction": "column", "align-items": "center", "margin-right": "5px"}>
-        <button id="generate_array" style={"font-size": "2rem", "padding": "2px"}>"Generate array"</button>
-        <textarea readonly="readonly" value=local@array style={"width": "500px", "height": "500px", "font-size": "1rem"}></textarea>
+        {App.BoardBuilder.Builder.Draw.bottom(local, global)}
+        <textarea readonly="readonly" value=local@array style={"padding":"10px", "width": "80vw", "height": "800px", "font-size": "1rem", "margin":"20px"}></textarea>
       </div>
       // <div style={"display": "flex", "flex-direction": "column", "align-items": "center"}>
       //   <button id="generate_array" style={"font-size": "2rem", "padding": "2px"}>"Import array"</button>
@@ -44,28 +36,149 @@ App.BoardBuilder.Builder.Draw(local: App.BoardBuilder.Builder.State.local, globa
     </div>
   </div>
 
+App.BoardBuilder.Builder.Draw.bottom(local: App.BoardBuilder.Builder.State.local, global: App.BoardBuilder.State.global): DOM
+  let tok_count = 0 :: Nat
+  for coord:token in global@tokens with tok_count:
+    tok_count + 1
+  let tok_color = if tok_count =? 0 then "red" else "green"
+
+  let blue_bases = 0 :: Nat
+  let red_bases = 0 :: Nat
+  let bases = {blue_bases, red_bases}
+  for coord:team in global@bases with bases:
+    case team {
+      blue: {bases@fst +1, bases@snd}
+      red:  {bases@fst, bases@snd +1}
+      neutral: bases
+    }
+  let blue_base_color  = if bases@fst <? 5 then "red" else "green"
+  let red_base_color   = if bases@snd <? 5 then "red" else "green"
+  
+  let blue_initial = 0 :: Nat
+  let red_initial = 0 :: Nat
+  let initial = {blue_initial, red_initial}
+  for coord:team in global@initial with initial:
+    case team {
+      blue: {initial@fst +1, initial@snd}
+      red:  {initial@fst, initial@snd +1}
+      neutral: initial
+    }
+  let blue_initial_color  = if initial@fst <? 5 then "red" else "green"
+  let red_initial_color   = if initial@snd <? 5 then "red" else "green"
+
+  let file_div = 
+    <button id="GEN-file" style={"height": "50px", "font-size": "2rem", "padding": "2px"}>"Generate file"</button>
+  let map_div = 
+    <input  id="map_name" style={"height": "50px", "font-size": "2rem", "padding": "2px"} value=local@map_name></input>
+
+  <div style={"width": "80%", "display": "flex", "flex-direction": "row", "justify-content": "space-between", "align-items": "center"}>
+    {map_div}
+    {App.BoardBuilder.Builder.Draw.bottom.buttons(tok_color, "Tokens: "|Nat.show(tok_count))}
+    {App.BoardBuilder.Builder.Draw.bottom.buttons(blue_base_color, "Blue B: "|Nat.show(bases@fst))}
+    {App.BoardBuilder.Builder.Draw.bottom.buttons(red_base_color,  "Red B: " |Nat.show(bases@snd))}
+    {App.BoardBuilder.Builder.Draw.bottom.buttons(blue_initial_color, "Blue I: "|Nat.show(initial@fst))}
+    {App.BoardBuilder.Builder.Draw.bottom.buttons(red_initial_color,  "Red I: " |Nat.show(initial@snd))}
+    {file_div}
+  </div>
+
+App.BoardBuilder.Builder.Draw.bottom.buttons(color: String, text: String): DOM
+  <div style={"font-size": "1.2rem", "line-height": "45px", "outline": "3px solid dark"|color, "height": "45px", "width": "120px", "background-color": color}>text</div>
+
 App.BoardBuilder.Builder.Draw.board(
   canvas_size: Pair<I32, I32>
-  board: Hexagonal.Axial.Map<App.KL.Game.Terrain>
-  actual_terrain: Nat
+  glob: App.BoardBuilder.State.global, 
+  shift: Bool
   img: VoxBox
 ): VoxBox
-  let actual_terrain = App.KL.Game.Terrain.new(actual_terrain)
+  let terrains = glob@terrains
+  let landscape = glob@landscape
+  let bases = glob@bases
+  let initial = glob@initial
+  let tokens = glob@tokens
+  // let terrain = App.KL.Game.Terrain.new(terrain)
   // let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, canvas_size@fst / 2, canvas_size@snd / 2)
-  // let img = App.BoardBuilder.Builder.Draw.terrain(actual_terrain, mouse_coord, canvas_size,img)
-  for coord:terrain in board with img:
-    App.BoardBuilder.Builder.Draw.terrain(terrain, coord, canvas_size, img)
+  // let img = App.BoardBuilder.Builder.Draw.terrain(terrain, mouse_coord, canvas_size,img)
+  for coord:terrain in terrains with img:
+    App.BoardBuilder.Builder.Draw.terrain(terrain, coord, img)
+  for coord:terrain in landscape with img:
+    App.BoardBuilder.Builder.Draw.terrain(terrain, coord, img)
+  if shift then
+  for coord:terrain in landscape with img:
+    App.BoardBuilder.Builder.Draw.landscape(coord, img)
+  for coord:team in bases with img:
+    App.BoardBuilder.Builder.Draw.bases(team, coord, img)
+  for coord:team in initial with img:
+    App.BoardBuilder.Builder.Draw.initial(team, coord, img)
+  for coord:token in tokens with img:
+    App.BoardBuilder.Builder.Draw.tokens(token, terrains, coord, img)
+  img
+    else
   img
 
+  
+
+App.BoardBuilder.Builder.Draw.tokens(
+  token: App.KL.Game.Token,
+  terrains: Hexagonal.Axial.Map<App.KL.Game.Terrain>
+  center: Hexagonal.Axial,
+  img: VoxBox
+): VoxBox
+  let distance = token@range
+  let coords = Hexagonal.Axial.range(center, distance)
+  let tile = App.KL.Game.Indicator.Assets.to_rename
+  for coord in coords with img:
+    let terrain = Hexagonal.Axial.Map.get!(coord, terrains)
+    case terrain {
+      none:
+        img
+      some:
+        let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
+        VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 25, tile, img)
+    }
+  img
+
+App.BoardBuilder.Builder.Draw.landscape(
+  coord: Hexagonal.Axial,
+  img: VoxBox
+): VoxBox
+  let tile = App.KL.Game.Indicator.Assets.gray_fill
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
+  VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 25, tile, img)
+
+App.BoardBuilder.Builder.Draw.initial(
+  team: App.KL.Game.Team, 
+  coord: Hexagonal.Axial,
+  img: VoxBox
+): VoxBox
+  let tile = 
+    if App.KL.Game.Team.eql(App.KL.Game.Team.blue, team) then
+      App.KL.Game.Indicator.Assets.blue_line
+    else
+      App.KL.Game.Indicator.Assets.red_line
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
+  VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 21, tile, img)
+
+App.BoardBuilder.Builder.Draw.bases(
+  team: App.KL.Game.Team, 
+  coord: Hexagonal.Axial,
+  img: VoxBox
+): VoxBox
+  let tile = 
+    if App.KL.Game.Team.eql(App.KL.Game.Team.blue, team) then
+      App.KL.Game.Indicator.Assets.blue_fill
+    else
+      App.KL.Game.Indicator.Assets.red_fill
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
+  VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 21, tile, img)
+  
 App.BoardBuilder.Builder.Draw.terrain(
   terrain: App.KL.Game.Terrain, 
   coord: Hexagonal.Axial,
-  canvas_size: Pair<I32, I32>
   img: VoxBox
 ): VoxBox
-  let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
-  let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
-  let j = (j - 128) + I32.to_u32(App.KL.Constants.hexagon_radius) + 5
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
+  // let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
+  // let j = (j - 128) + I32.to_u32(App.KL.Constants.hexagon_radius) + 5
   // let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, canvas_size@fst, canvas_size@snd)
   let field  = App.KL.Game.Field.get_by_id.default(terrain@field_id)
   let field_drawing = field@draw(terrain, App.KL.Game.Indicator.background)
@@ -78,7 +191,7 @@ App.BoardBuilder.Builder.Draw.img(
   img: VoxBox
 ): VoxBox
   let img = App.BoardBuilder.Builder.Draw.mouse(local@mouse, img)
-  let img = App.BoardBuilder.Builder.Draw.board(local@canvas_size, global@board, local@actual_terrain, img)
+  let img = App.BoardBuilder.Builder.Draw.board(local@canvas_size, global, local@show_grid, img)
   img
 
 App.BoardBuilder.Builder.Draw.mouse(
@@ -87,8 +200,99 @@ App.BoardBuilder.Builder.Draw.mouse(
 ): VoxBox
   case mouse {
     none: img
-    some: App.KL.Game.Phase.Play.draw.cursor(mouse.value, img)
+    some: 
+      let coord = Hexagonal.Axial.from_screen_xy(mouse.value, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+      let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
+      VoxBox.Draw.image(i, j - 5, App.KL.Constants.z_index.cursor, App.BoardBuilder.Builder.mouse_blue, img)
   }
+  
+App.BoardBuilder.Builder.Draw.tool_menu(local: App.BoardBuilder.Builder.State.local): DOM
+  let tool = local@tool
+  <div style={"max-height": "700px", "width": "100%" "display": "flex", "flex-direction": "column", "align-items": "center"}>
+    <div style ={"height": "40px", "width": "90%", "display": "flex", "flex-direction": "row", "justify-content": "space-between", "margin": "20px 0"}>
+      {App.BoardBuilder.Builder.Draw.tool_button("TAB-terrains",  "Terrains",   tool)}
+      {App.BoardBuilder.Builder.Draw.tool_button("TAB-landscape", "Landscape",  tool)}
+      {App.BoardBuilder.Builder.Draw.tool_button("TAB-tokens",    "Tokens",     tool)}
+      {App.BoardBuilder.Builder.Draw.tool_button("TAB-bases",     "Bases",      tool)}
+      {App.BoardBuilder.Builder.Draw.tool_button("TAB-initial",   "Initial",    tool)}
+    </div>
+    {
+      case tool {
+        terrains  : App.BoardBuilder.Builder.Draw.UI.terrains(local@terrain)
+        tokens    : App.BoardBuilder.Builder.Draw.UI.tokens(local@token)
+        bases     : App.BoardBuilder.Builder.Draw.UI.teams(local@team)
+        initial   : App.BoardBuilder.Builder.Draw.UI.teams(local@team)
+        landscape : App.BoardBuilder.Builder.Draw.UI.terrains(local@terrain) 
+      }
+    }
+  </div>
+
+
+App.BoardBuilder.Builder.Draw.tool_button(id: String, text: String, tool: App.BoardBuilder.Builder.Tool): DOM
+  let tab = String.drop(4, id)
+  let selected = 
+    case tool {
+      terrains  : String.eql(tab, "terrains")
+      tokens    : String.eql(tab, "tokens")
+      bases     : String.eql(tab, "bases")
+      initial   : String.eql(tab, "initial")
+      landscape : String.eql(tab, "landscape") 
+    }
+  let border = if selected then "3px solid purple" else "none"
+
+  <button id=id style={"width": "15%", "height": "80%", "font-size": "1rem", "padding": "2px", "outline": border}>text</button>
+
+App.BoardBuilder.Builder.Draw.UI.terrains(terrain: Nat): DOM
+  <div style={"max-height": "700px", "justify-content": "center", "padding": "10px", "overflow": "auto", "display" : "flex", "flex-wrap": "wrap", "align-content": "flex-start"}>
+    for value in List.indices!(App.KL.Game.Field.list):
+      let selected = value@fst =? terrain
+      let border = if selected then "3px solid purple" else "none"
+      <div id="TER-"|Nat.show(value@fst) style={"width" : "75px", "height": "fit-content", "padding": "5px", "font-size": "1rem", "cursor": "pointer", "display": "flex", "justify-content": "center", "align-items": "center", "flex-direction": "column", "outline" : border, "box-sizing": "border-box"}>
+        <img id="TER-"|Nat.show(value@fst) src=value@snd@picture></img>
+        <span id="TER-"|Nat.show(value@fst)>value@snd@name</span>
+      </div>
+  </div>
+
+App.BoardBuilder.Builder.Draw.UI.tokens(token: App.KL.Game.Token): DOM
+  let damage = String.show_clean(I32.show(token@score))
+  let damage = if String.starts_with(damage, "-") then damage else String.drop(1, damage)
+  let maximum = String.show_clean(I32.show(token@max))
+  let maximum = if String.starts_with(maximum, "-") then maximum else String.drop(1, maximum)
+  let range = String.show_clean(I32.show(token@range))
+  let range = if String.starts_with(range, "-") then range else String.drop(1, range)
+  
+  let section_style = {"height": "50px", "width": "80%", "display": "flex", "flex-direction": "row", "align-items": "center"}
+  <div style={"max-height": "700px", "width": "100%", "display" : "flex", "flex-direction": "column", "align-items": "center"}>
+    <div style=section_style>
+      <div style={"height": "25px", "width": "30%"}>"Influence range: "</div>
+      <input id="TOK-range" value=range style={"height": "25px", "width": "30%"} type="number"></input>
+    </div>
+    <div style=section_style>
+      <div style={"height": "25px", "width": "30%"} >"Turns to capture: "</div>
+      <input id="TOK-maximum" value=maximum style={"height": "25px", "width": "30%"}  type="number"></input>
+    </div>
+    <div style=section_style>
+      <div style={"height": "25px", "width": "30%"} >"Damage per turn: "</div>
+      <input id="TOK-damage" value=damage style={"height": "25px", "width": "30%"}  type="number"></input>
+    </div>
+  </div>
+
+App.BoardBuilder.Builder.Draw.UI.teams(team: App.KL.Game.Team): DOM
+  let blue_border = if App.KL.Game.Team.eql(App.KL.Game.Team.blue, team) then "3px solid purple" else "none"
+  let red_border  = if App.KL.Game.Team.eql(App.KL.Game.Team.red,  team) then "3px solid purple" else "none"
+  <div style={"max-height": "700px", "width": "100%", "display" : "flex", "flex-direction": "row", "justify-content":"center", "align-self": "center"}>
+    <button id="TEA-blue" style={"margin":"20px 20px","width": "40%", "background-color":"CornflowerBlue", "height": "60px", "font-size": "2rem", "padding": "2px", "outline": blue_border}>"Blue"</button>
+    <button id="TEA-red" style={"margin":"20px 20px","width": "40%", "background-color":"LightCoral", "height": "60px", "font-size": "2rem", "padding": "2px", "outline": red_border }>"Red"</button>
+  </div>
+
+
+App.BoardBuilder.Builder.Draw.centralize(
+  coord: Hexagonal.Axial
+): Pair(U32, U32)
+  let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  let i = i - 128
+  let j = j - 128 - I32.to_u32(App.KL.Constants.hexagon.extra_height / 2)
+  {i, j}
 
 // App.BoardBuilder.Builder.Draw.input(
 //   label: String

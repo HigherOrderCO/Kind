@@ -13,7 +13,7 @@ App.TicTacToe.when: App.When<App.TicTacToe.State>
               let v = winner.value
               open v
               IO {
-                App.print!("O jogador " | App.TicTacToe.entity.show(v.fst) | " ganhou")
+                App.print!("The player " | App.TicTacToe.entity.show(v.fst) | " win")
                 App.set_local!(turn.fst)
               }
           } 

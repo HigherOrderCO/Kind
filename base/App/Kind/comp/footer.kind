@@ -48,7 +48,7 @@ App.Kind.comp.footer(device: Device, container_layout: Map(String)): DOM
       "align-items": "center"
     }), [
       DOM.node("p", {}, {"font-size": footer_font_size_s}, [DOM.text("This website was created using Kind!")])
-      App.Kind.comp.link_white("*u* show me the code!", footer_font_size_s, "https://github.com/uwu-tech/Kind/blob/master/base/Web/Kind.kind")
+      App.Kind.comp.link_white("*u* show me the code!", footer_font_size_s, "https://github.com/uwu-tech/Kind/blob/master/base/App/Kind.kind")
     ])
 
   let msg_footer_wrapper = DOM.node("div", {}{

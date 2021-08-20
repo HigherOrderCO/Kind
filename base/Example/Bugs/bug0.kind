@@ -1,6 +1,8 @@
 // How to reproduce 
 // Just call the type checker for this file
 
+//Actually this is not a "bug", see here https://github.com/uwu-tech/Kind/issues/194
+
 Example.bugs.bug0(x : List<Bool>) : List<Bool>
   case x {
       true : x.head
