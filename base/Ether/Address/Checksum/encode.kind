@@ -10,10 +10,7 @@ List.agroup(A : Type, list : List<A>) : List<Pair<A, A>>
 Ether.Address.Checksum.bits(value : String): List<Bits> // refinement for all char in value, value is lower
   let value = Crypto.Keccak.hash(value)
   let value = String.fold(value, _, [], (c, xs) String.cons(c, String.nil) & xs) 
-  List.map!!((x)
-    log(String.join("", x))
-    (Bits.hex.decode . (String.reverse . String.join("")))(x)
-  , List.chunks_of!(2, value))
+  List.map!!(Bits.hex.decode . (String.reverse . String.join("")), List.chunks_of!(2, value))
 
 Ether.Address.Checksum.generate(encoding : List<Pair<Bits, Pair<String, String>>>) : String
   case encoding {
@@ -21,8 +18,6 @@ Ether.Address.Checksum.generate(encoding : List<Pair<Bits, Pair<String, String>>
        let {hash, chars} = encoding.head
        let {char, char1} = chars
        let str = Ether.Address.Checksum.generate(encoding.tail)
-
-       log(Nat.show(Bits.to_nat(hash)) | " " | Bool.show(Bits.lte(Nat.to_bits(8), Bits.shift_right(4, hash))) | " " | Bool.show(Bits.lte(Nat.to_bits(8), Bits.and(Nat.to_bits(15), hash))))
 
        str = if Bits.lte(Nat.to_bits(8), Bits.and(Nat.to_bits(15), hash)) then
                String.to_upper(char1) | str
