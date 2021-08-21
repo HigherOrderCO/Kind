@@ -344,62 +344,152 @@ Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
         qed
   }!
 
-//Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
-//  ?a
+Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+ case m {
+   zero: Problems.t14(n)
+   succ:
+     let ind = Problems.t17(n, m.pred)
+     let lemma = apply(Nat.succ, ind)
+     let left = Problems.t16(n, m.pred)
+     let qed = Equal.chain!!!!(left, lemma)
+     qed
+ }!
 
-//Problems.t18(n: Nat): Nat.add(n,n) == Nat.double(n)
-//  ?a
+Problems.t18(n: Nat): Nat.add(n,n) == Nat.double(n)
+ case n {
+   zero: refl
+   succ:
+     let ind = Problems.t18(n.pred)
+     let lemma_0 = apply(Nat.succ, ind)
+     let left = Problems.t16(n.pred, n.pred)
+     let lemma_1 = Equal.chain!!!!(left, lemma_0)
+     let qed = apply(Nat.succ, lemma_1)
+     qed
+ }!
 
-//Problems.t19(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
-//  ?a
+Problems.t19(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
+ case n {
+   zero: refl
+   succ:
+     let qed = Problems.t19(n.pred)
+     qed
+ }!
 
-//Problems.t20(n: Nat): Nat.gtn(Nat.succ(n), n) == true
-//  ?a
+Problems.t20(n: Nat): Nat.gtn(Nat.succ(n), n) == true
+ case n {
+   zero: refl
+   succ:
+     let qed = Problems.t20(n.pred)
+     qed
+ }!
 
-//Problems.t21(n: Nat): Nat.sub(n,n) == 0
-//  ?a
+Problems.t21(n: Nat): Nat.sub(n,n) == 0
+ case n {
+   zero: refl
+   succ:
+     let qed = Problems.t21(n.pred)
+     qed
+ }!
 
-//Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
-//  ?a
+Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
+  apply(Nat.succ, e)
 
-//Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
-//  ?a
+Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+ case n m with e {
+   zero zero: refl
+   zero succ:
+     let impossible = Bool.false_neq_true(e)
+     Empty.absurd!(impossible)
+   succ zero:
+     let impossible = Bool.false_neq_true(e)
+     Empty.absurd!(impossible)
+   succ succ:
+     let trivial = refl :: Nat.eql(n.pred, m.pred) == Nat.eql(Nat.succ(n.pred), Nat.succ(m.pred))
+     let lemma = Equal.chain!!!!(trivial, e)
+     let ind = Problems.t23(n.pred, m.pred, lemma)
+     apply(Nat.succ, ind)
+ }!
 
-//Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
-//  ?a
+Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
+ refl
 
-//Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
-//  ?a
+Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+ case xs {
+   nil: refl
+   cons:
+     let ind = Problems.t25(xs.tail)
+     apply(List.cons!(xs.head), ind)
+ }!
 
-//Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
-//  ?a
+Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
+ case xs {
+   nil: refl
+   cons:
+     let ind = Problems.t26(xs.tail, ys)
+     apply(Nat.succ, ind)
+ }!
 
-//Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
-//  ?a
+// Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
+  // ?a
 
-//Problems.t28: true != false
-//  ?a
+Problems.t28: true != false
+ (e)
+   let impossible = Bool.true_neq_false(e)
+   Empty.absurd!(impossible)
 
-//Problems.t29: 3 != 2
-//  ?a
+Problems.t29.0: 1 != 0
+  (e)
+    let impossible = Nat.one_neq_zero(e)
+    Empty.absurd!(impossible)
 
-//Problems.t30(a: Bool): Bool.or(true, a) != false
-//  ?a
+Problems.t29: 3 != 2
+ (e)
+   let double_pred = apply(Nat.pred, apply(Nat.pred, e))
+   let qed = Problems.t29.0(double_pred)
+   qed
 
-//Problems.t31(a: Bool): Bool.or(a, true) != false
-//  ?a
+Problems.t30(a: Bool): Bool.or(true, a) != false
+  (e)
+    let impossible = Bool.true_neq_false(e)
+    Empty.absurd!(impossible)
 
-//Problems.t32(a: Bool): Bool.and(false, a) != true
-//  ?a
+Problems.t31(a: Bool): Bool.or(a, true) != false
+ (e)
+   case a with e {
+     true:
+       let impossible = Bool.true_neq_false(e)
+       Empty.absurd!(impossible)
+     false:
+       let impossible = Bool.true_neq_false(e)
+       Empty.absurd!(impossible)
+   }!
 
-//Problems.t33(a: Bool): Bool.and(a, false) != true
-//  ?a
+Problems.t32(a: Bool): Bool.and(false, a) != true
+ (e)
+   let impossible = Bool.false_neq_true(e)
+   Empty.absurd!(impossible)
 
-//Problems.t34(a: Nat, b: Nat, e: a == b): b == a
-//  ?a
+Problems.t33(a: Bool): Bool.and(a, false) != true
+ (e)
+   case a with e {
+     true:
+       let impossible = Bool.false_neq_true(e)
+       Empty.absurd!(impossible)
+     false:
+       let impossible = Bool.false_neq_true(e)
+       Empty.absurd!(impossible)
+   }!
 
-//Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
-//  ?a
+Problems.t34(a: Nat, b: Nat, e: a == b): b == a
+  case e {
+    refl: refl
+  }!
 
-//Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
-//  ?a
+Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+  Equal.chain!!!!(e0, e1)
+
+Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+  let ammel = Problems.t11(a)
+  let lemma = mirror(ammel)
+  let qed = p :: rewrite x in P(x) with lemma
+  qed
