@@ -1,34 +1,6 @@
 PriorityQueue.Tree.In<A: Type>(tree: PriorityQueue.Tree<A>, a: A): Type
-case tree {
+  case tree {
     empty: Empty
     node:
-      ?a
-    //   PriorityQueue.Tree.Location!(tree, a)<hypothesis>
-}
-
-PriorityQueue.Tree.left_of<A: Type>(tree: PriorityQueue.Tree<A>)<Hyp: PriorityQueue.Tree.is_empty!(tree) == false>: PriorityQueue.Tree<A>
-  case tree with Hyp {
-      empty:
-        let hypothesis = Hyp :: rewrite x in (x == false) with PriorityQueue.Tree.empty_tree_is_empty<A>
-        let impossible = Bool.true_neq_false(hypothesis)
-        Empty.absurd!(impossible)
-      node:
-        tree.left
-  }!
-
-PriorityQueue.Tree.right_of<A: Type>(tree: PriorityQueue.Tree<A>)<Hyp: PriorityQueue.Tree.is_empty!(tree) == false>: PriorityQueue.Tree<A>
-  case tree with Hyp {
-      empty:
-        let hypothesis = Hyp :: rewrite x in (x == false) with PriorityQueue.Tree.empty_tree_is_empty<A>
-        let impossible = Bool.true_neq_false(hypothesis)
-        Empty.absurd!(impossible)
-      node:
-        tree.right
-  }!
-
-type PriorityQueue.Tree.Location<A: Type>(tree: PriorityQueue.Tree<A>, a: A)<Hyp: PriorityQueue.Tree.is_empty!(tree) == false> {
-  here(prf: PriorityQueue.Tree.peek!(tree)<Hyp> == a)
-  left(prf: PriorityQueue.Tree.Location!(PriorityQueue.Tree.left_of!(tree)<Hyp>, a))
-  right(prf: PriorityQueue.Tree.Location!(PriorityQueue.Tree.right_of!(tree)<Hyp>, a))
-}
-
+      PriorityQueue.Tree.Either<PriorityQueue.Tree.In!(tree.left, a), tree.element == a, PriorityQueue.Tree.In!(tree.right, a)>
+  }
