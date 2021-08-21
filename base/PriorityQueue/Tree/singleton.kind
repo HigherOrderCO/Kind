@@ -1,0 +1,2 @@
+PriorityQueue.Tree.singleton<A: Type>(a: A): PriorityQueue.Tree<A>
+  PriorityQueue.Tree.node!(1, a, PriorityQueue.Tree.empty!, PriorityQueue.Tree.empty!)
