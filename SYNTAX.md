@@ -180,7 +180,7 @@ Forall (self-dependent function type)
 -------------------------------------
 
 ```
-self(name: type) body
+self(name: type) -> body
 ```
 
 Forall, or Pi, or self-dependent function, is the type of a function. 
@@ -200,7 +200,7 @@ Kind functions are self-dependently typed, you can optionally give a name
 to the input variable, and to the value of the function itself. For example,
 
 ```
-(n: Nat) Vector(Bool, n)
+(n: Nat) -> Vector(Bool, n)
 ```
 
 Is the type of a function that receives a `n: Nat` and returns a `Vector` of `n`
@@ -298,7 +298,7 @@ branch as `name.field`. For example, when matching a `List`, we gain access to
 its head and tail as `list.head` and `list.tail`:
 
 ```
-sum(list: List<Nat>): List<Nat>
+sum(list: List<Nat>): Nat
   case list {
     nil: 0
     cons: list.head + sum(list.tail)

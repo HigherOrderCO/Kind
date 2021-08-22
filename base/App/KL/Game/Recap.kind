@@ -5,7 +5,8 @@ type App.KL.Game.Recap.Episode {
   new(
     skill_key: Char
     address:   String
-    hp_diff:   I32   
+    hp_diff:   I32 
+    new_hp:    I32  
   )
 }
 
@@ -15,5 +16,6 @@ App.KL.Game.Recap.show(recap: App.KL.Game.Recap): String
     text | "\n" |
     "key: "    | Char.to_string(episode@skill_key)  | "\n" | 
     "caster: " | episode@address | "\n" | 
-    "damage: " | I32.show(episode@hp_diff) | "\n" 
+    "hp_change: " | I32.show(episode@hp_diff) | "\n" |
+    "new_hp:" | I32.show(episode@new_hp) | "\n"
   text

@@ -1,0 +1,3 @@
+PriorityQueue.tree_of<A: Type>(queue: PriorityQueue<A>): PriorityQueue.Tree<A>
+  open queue
+  queue.tree

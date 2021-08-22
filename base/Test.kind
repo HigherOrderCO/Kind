@@ -1,5 +1,11 @@
-is_even_double_n(n: Nat): Nat.is_even(Nat.double(n)) == true
-  case n {
-    zero: refl
-    succ: apply(Bool.not, apply(Bool.not, is_even_double_n(n.pred)))
-  }!
+Test: _
+  let a = {
+    "blue": "alo"
+    "red": "hello"
+    "green": "heehee"
+  }
+
+  <div>
+    for color:text in a:
+      <button style={"color": color}>text</button>
+  </div>

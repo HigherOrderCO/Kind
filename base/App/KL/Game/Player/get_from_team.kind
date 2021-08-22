@@ -1,0 +1,13 @@
+App.KL.Game.Player.get_from_team(
+  team:  App.KL.Game.Team
+  players: Map<App.KL.Game.Player>
+): Map<App.KL.Game.Player>
+  let result = {}
+
+  for user:player in players with result:
+    if App.KL.Game.Team.eql(player@team, team) then
+      result{user} <- player
+    else
+      result
+  
+  result

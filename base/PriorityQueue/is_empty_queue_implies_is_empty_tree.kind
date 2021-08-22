@@ -1,0 +1,4 @@
+PriorityQueue.is_empty_queue_implies_is_empty_tree<A: Type>(queue: PriorityQueue<A>): PriorityQueue.is_empty!(queue) == PriorityQueue.Tree.is_empty!(PriorityQueue.tree_of!(queue))
+  case queue {
+      new: refl
+  }!

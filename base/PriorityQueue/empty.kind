@@ -1,0 +1,2 @@
+PriorityQueue.empty<A: Type>(priority: A -> Nat): PriorityQueue<A>
+  PriorityQueue.new!(priority, PriorityQueue.Tree.empty!)

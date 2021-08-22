@@ -1,0 +1,6 @@
+PriorityQueue.Tree.In<A: Type>(tree: PriorityQueue.Tree<A>, a: A): Type
+  case tree {
+    empty: Empty
+    node:
+      PriorityQueue.Tree.Either<PriorityQueue.Tree.In!(tree.left, a), tree.element == a, PriorityQueue.Tree.In!(tree.right, a)>
+  }

@@ -132,7 +132,7 @@ App.BoardBuilder.Builder.Draw.tokens(
       none:
         img
       some:
-        let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
+        let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
         VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 25, tile, img)
     }
   img
@@ -142,7 +142,7 @@ App.BoardBuilder.Builder.Draw.landscape(
   img: VoxBox
 ): VoxBox
   let tile = App.KL.Game.Indicator.Assets.gray_fill
-  let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
   VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 25, tile, img)
 
 App.BoardBuilder.Builder.Draw.initial(
@@ -155,7 +155,7 @@ App.BoardBuilder.Builder.Draw.initial(
       App.KL.Game.Indicator.Assets.blue_line
     else
       App.KL.Game.Indicator.Assets.red_line
-  let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
   VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 21, tile, img)
 
 App.BoardBuilder.Builder.Draw.bases(
@@ -168,7 +168,7 @@ App.BoardBuilder.Builder.Draw.bases(
       App.KL.Game.Indicator.Assets.blue_fill
     else
       App.KL.Game.Indicator.Assets.red_fill
-  let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
   VoxBox.Draw.image(i, j, I32.to_u32(coord@j) + 21, tile, img)
   
 App.BoardBuilder.Builder.Draw.terrain(
@@ -176,7 +176,7 @@ App.BoardBuilder.Builder.Draw.terrain(
   coord: Hexagonal.Axial,
   img: VoxBox
 ): VoxBox
-  let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
+  let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
   // let i = (i - 128) + I32.to_u32(App.KL.Constants.hexagon_radius)
   // let j = (j - 128) + I32.to_u32(App.KL.Constants.hexagon_radius) + 5
   // let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, canvas_size@fst, canvas_size@snd)
@@ -202,7 +202,7 @@ App.BoardBuilder.Builder.Draw.mouse(
     none: img
     some: 
       let coord = Hexagonal.Axial.from_screen_xy(mouse.value, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
-      let {i, j} = App.KL.Game.Phase.Play.draw.centralize.new(coord)
+      let {i, j} = App.BoardBuilder.Builder.Draw.centralize(coord)
       VoxBox.Draw.image(i, j - 5, App.KL.Constants.z_index.cursor, App.BoardBuilder.Builder.mouse_blue, img)
   }
   
@@ -284,6 +284,15 @@ App.BoardBuilder.Builder.Draw.UI.teams(team: App.KL.Game.Team): DOM
     <button id="TEA-blue" style={"margin":"20px 20px","width": "40%", "background-color":"CornflowerBlue", "height": "60px", "font-size": "2rem", "padding": "2px", "outline": blue_border}>"Blue"</button>
     <button id="TEA-red" style={"margin":"20px 20px","width": "40%", "background-color":"LightCoral", "height": "60px", "font-size": "2rem", "padding": "2px", "outline": red_border }>"Red"</button>
   </div>
+
+
+App.BoardBuilder.Builder.Draw.centralize(
+  coord: Hexagonal.Axial
+): Pair(U32, U32)
+  let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, App.KL.Constants.center_x, App.KL.Constants.center_y)
+  let i = i - 128
+  let j = j - 128 - I32.to_u32(App.KL.Constants.hexagon.extra_height / 2)
+  {i, j}
 
 // App.BoardBuilder.Builder.Draw.input(
 //   label: String

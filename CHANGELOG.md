@@ -1,3 +1,12 @@
+### Kind 1.0.91
+
+- Forall now demands `->`
+- Now you can assign types in lambda parameters as in
+```
+Test: _
+  (x: Nat, y) x + y
+```
+
 ### Kind 1.0.85
 
 - Optimize BBT.for

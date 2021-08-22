@@ -1,0 +1,6 @@
+PriorityQueue.head<A: Type>(queue: PriorityQueue<A>): Maybe<A>
+  open queue
+  case queue.tree {
+      empty: Maybe.none!
+      node: Maybe.some!(queue.tree.element) 
+  }

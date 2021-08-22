@@ -47,7 +47,7 @@ App.Sharmi.Mouse.deserialize(hex: String): Maybe<App.Sharmi.Mouse>
   Deserializer.run!(App.Sharmi.Mouse.deserializer, Bits.hex.decode(hex))
 
 App.Sharmi.room: String
-  App.room("asodovciveneiejenfufjfj3n2os")
+  App.room("110202039383883737370sj1i202")
 
 type App.Sharmi.Goal {
   new(
@@ -66,7 +66,7 @@ type App.Sharmi.Body {
 type App.Sharmi.Player {
   new(
     address: String
-    throttle: I32
+    throttle: F64
     dir: V2
     pos: Physics.Verlet
   )
@@ -135,9 +135,9 @@ App.Sharmi.Player.draw(
       img
     )
   let col = if e@throttle =? 0 then
-    Col32.new(255, 0, 0, 255)
-  else
     Col32.new(0, 0, 0, 255)
+  else
+    Col32.new(255, 0, 0, 255)
   let img =
     VoxBox.Draw.line(
       F64.to_i32(e@pos@pos@x)
@@ -224,25 +224,23 @@ App.Sharmi.when: App.When<App.Sharmi.State>
           let new_players = []
           for player in state.local.state.players with new_players:
             open player; open player.pos
-            let new_acc = App.Sharmi.Gravity(state.local.state, player.pos.pos)
-            open new_acc;
-            //log(player.name|" new_acc: {"|F64.show(new_acc.x)|", "|F64.show(new_acc.y)|"}")
-            let new_pos = player.pos@acc <- new_acc
             let player =
               case state.global.state@mouses{player@address} as mouse {
                 some:
                   let new_dir = App.Sharmi.Mouse.pos_to_v2(mouse.value@pos) - player@pos@pos
                   let player = player@dir <- new_dir
                   if mouse.value@pressed then
-                    player@throttle <- 200
+                    player@throttle <- 20
                   else
                     player@throttle <- 0
                 none:
                   player
               }
-            let player = player@acc <- player@acc + V2.scale(player@throttle/V2.len(new.player@dir), player@dir)
-            let new_pos = Physics.Verlet.step(new_pos, 1.0/60.0)
-            let player = player@pos <- new_pos
+            open player; open player.pos;
+            let new_acc = App.Sharmi.Gravity(state.local.state, player.pos.pos) + V2.scale(player.throttle/V2.len(player.dir), player.dir)
+            let pos = player.pos@acc <- new_acc
+            let pos = Physics.Verlet.step(pos, 1.0/60.0)
+            let player = player@pos <- pos
             player & new_players
           let new_players = List.reverse!(new_players)
 
