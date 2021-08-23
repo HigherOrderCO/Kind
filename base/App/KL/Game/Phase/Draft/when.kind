@@ -106,7 +106,7 @@ App.KL.Game.Phase.Draft.when(
         "D": // Set which tab to show
           let tab   = String.drop(1, event.id)
           let local = 
-            if "None" =? tab then
+            if tab =? "I" then
              local@tab <- none
             else
              local@tab <- some(tab)

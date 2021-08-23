@@ -117,66 +117,34 @@ App.KL.Game.Phase.Draft.draw.main(
   user: String,
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
-  let header_order = ["friend", "collection", "store", "help", "config", "exit"]
+  
 
   <div class="pixel-art" style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
       {App.KL.Game.Phase.Draft.draw.background}
-
       <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
-        <header style={"background-image": "url("| App.KL.Game.Phase.Draft.Assets.header |")", "width": "100%", "height": "64px", "display": "flex", "justify-content": "space-between"}>
-          <div style={"display": "flex"}>
-          
-          </div>
-          <div style={"display": "flex", "justify-content": "flex-end"}>
-            for button in App.KL.Game.Phase.Draft.draw.header(header_order, controls@header): button
-          </div>
-        </header>
+        {App.KL.Game.Phase.Draft.draw.header(controls)}
+        // middle content
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
+          // main content
           <div style={"display": "flex", "padding": "4px"}>
-            { App.KL.Game.Phase.Draft.draw.main.middle(allies, page, tab, user, filter) }
+            { App.KL.Game.Phase.Draft.draw.middle.content(allies, page, tab, user, filter) }
           </div>
-
-          // -16 because footer height is 64px
-          // and margin top of ready button is -40px
-          <div style={"position": "absolute", "bottom": "-16px", "right": "50px", "display": "flex", "transform": "scale(1.5)"}>
-            <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.Assets.bottom.list_button></img>
-            <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.Assets.bottom.chat_buttom></img>
-          </div>
+          // bottom buttons
+            { App.KL.Game.Phase.Draft.draw.middle.bottom_buttons }
         </div>
-        <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
-          <div style={"display": "flex", "height": "50%", "flex": "1"}>
-            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.Assets.footer.stencil.main |")"}></div>
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.Assets.footer.stencil.diagonal_left></img></div>
-            {
-              let src = App.KL.Game.Assets.ButtonAnimation.Button.get_img(controls@main_button) <> ""
-              <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-40px"}><img id="Ready" src=src></img></div>
-            }
-            <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.Assets.footer.stencil.diagonal_right></img></div>
-            <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.Assets.footer.stencil.main |")"}></div>
-          </div>
-        </footer>
+        {App.KL.Game.Phase.Draft.draw.footer(controls)}
       </div>
     </div>
 
-App.KL.Game.Phase.Draft.draw.header(
-  order: List<String>, 
-  buttons: Map<App.KL.Game.Assets.ButtonClick>
-): List<DOM>
-  let length = List.length!(order)
-  let to_dom = (order, id)
-    let button_image = buttons{id}
-    without button_image: <span style={"display": "none"}></span>
-    let z_index = Nat.show(length - order)
-    let order   = Nat.show(order)
+App.KL.Game.Phase.Draft.draw.middle.bottom_buttons: DOM
+  // -16 because footer height is 64px
+  // and margin top of ready button is -40px
+  <div style={"position": "absolute", "bottom": "-16px", "right": "50px", "display": "flex", "transform": "scale(1.5)"}>
+    <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.Assets.bottom.list_button></img>
+    <img style={"margin": "0 5px", "cursor": "not-allowed"} src=App.KL.Game.Phase.Draft.Assets.bottom.chat_buttom></img>
+  </div>
 
-    <img 
-      id="btn-header-"|id
-      src=App.KL.Game.Assets.ButtonClick.get_img(button_image) 
-      style={"height": "100%", "cursor": "not-allowed", "margin-left": "-11px", "order": order, "z-index": z_index}
-    ></img>
-  
-  List.imap!!(to_dom, order)
-
+// draw all background hexagons
 App.KL.Game.Phase.Draft.draw.background: DOM
   let s = Maybe.some!
   <div style={"display": "contents"}>
@@ -186,6 +154,7 @@ App.KL.Game.Phase.Draft.draw.background: DOM
     {App.KL.Game.Phase.Draft.draw.background.hexagons(s(64),none,none,s(10), App.KL.Game.Phase.Draft.Assets.background.hexagons.4)}
   </div>
 
+// draw a specific background hexagon
 App.KL.Game.Phase.Draft.draw.background.hexagons(
   top: Maybe<Nat>
   right: Maybe<Nat>
@@ -202,105 +171,91 @@ App.KL.Game.Phase.Draft.draw.background.hexagons(
     <img src=img></img>
   </div>
 
-App.KL.Game.Phase.Draft.draw.main.middle(
+// complete a list with none's
+pad_right<A: Type>(xs: List<A>, number: Nat): List<Maybe<A>>
+  case xs number{
+    nil zero:  List.nil!
+    nil succ:  List.repeat!(Nat.succ(number.pred), none)
+    cons zero: List.map!!((x) some(x), xs)
+    cons succ: some(xs.head) & pad_right!(xs.tail, number.pred)
+  }
+
+App.KL.Game.Phase.Draft.draw.middle.content(
   allies: Map<App.KL.Game.Player>
   page: String
   tab:  Maybe<String>
   user: String
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
-  let max = 3 // max players TODO store in game?
-  let selected_hero = Maybe {
-    get user = allies{user}
+  let players_qtt   = 3 // max players TODO store in game?
+  let local_player  = allies{user}
+  let selected_hero = Maybe { // TODO transform in function
+    get user = local_player
     get hero_id = user@hero_id
     get hero = App.KL.Game.Hero.get_by_id(hero_id)
     return hero
   }
-  
-  let hero_list = App.KL.Game.Phase.Draft.Filter.apply(App.KL.Game.Hero.list, filter)
-
+  let allies = Map.delete!(user, allies)
   <div style={"display": "contents"}>
-    
     // USER CARD
-    {
-      let player = allies{user}
-      case player {
-        none: <span></span> // Impossible
-        some: App.KL.Game.Phase.Draft.draw.card.user(player.value, tab)
-      }
-    }
-
+    { App.KL.Game.Phase.Draft.draw.card.user(local_player, selected_hero, tab) }
     // ALLIES CARDS
-    {
-      let allies   = Map.delete!(user, allies)
-      let allies   = Map.to_list!(allies) // TODO formap in DOM
-      let n_allies = max - 1
-      // let allies = List.indices!(allies)
-      <div style={"display": "contents"}>
-        for index in [0 to n_allies]:
-          let info = List.get!(index, allies)
-          case info {
-            // if there is some allie not connected
-            none: App.KL.Game.Phase.Draft.draw.card.allies(none, page)
-            some:
-              let {id, player} = info.value
-              App.KL.Game.Phase.Draft.draw.card.allies(some(player), page)
-          }
-      </div>
-    }
-
+    { App.KL.Game.Phase.Draft.draw.card.allies(allies, page, players_qtt) }
     // FILTER
     <div style={
       "display": if String.eql(page, "heroes") then "block" else "none" // page
       "animation": "fade-in 500ms"
     }>
-      {App.KL.Game.Phase.Draft.draw.card.filter(filter)}
+      { App.KL.Game.Phase.Draft.draw.card.filter(filter) }
     </div>
-
     // MENU SELECTION
-    <div style={
-      "max-height": "416px"
-      "height": "416px" 
-      "overflow": "auto"
-      "display": if String.eql(page, "heroes") then "grid" else "none" // page
-      "animation": "fade-in 500ms"
-      "grid-template-columns": "repeat(5, minmax(0, 1fr))"
-      "grid-auto-rows": "max-content"
-      "gap": "10px"
-      "margin": "0 10px"
-      "padding-top": "4px" // because of negative margin
-    }>
-      for card in [App.KL.Game.Phase.Draft.draw.portrait.hero(hero, selected_hero, filter) for hero in hero_list]:
-        card
-    </div>
+    { App.KL.Game.Phase.Draft.draw.menu(selected_hero, page, filter) }
   </div>
 
+App.KL.Game.Phase.Draft.draw.menu(
+  selected_hero: Maybe<App.KL.Game.Hero> // hero selected by local user
+  page:   String // page selected in draft
+  filter: App.KL.Game.Phase.Draft.Filter // filter
+): DOM
+  let hero_list = App.KL.Game.Phase.Draft.Filter.apply(App.KL.Game.Hero.list, filter)
+  let portrait  = App.KL.Game.Phase.Draft.draw.portrait.hero
+  let portraits = [ portrait(hero, selected_hero, filter) for hero in hero_list ]
+  <div style={
+    "display": if String.eql(page, "heroes") then "grid" else "none" // page
+    "max-height": "416px"
+    "height": "416px" 
+    "overflow": "auto"
+    "animation": "fade-in 500ms"
+    "grid-template-columns": "repeat(5, minmax(0, 1fr))"
+    "grid-auto-rows": "max-content"
+    "gap": "10px"
+    "margin": "0 10px"
+    "padding-top": "4px" // because of negative margin
+  }>
+    for portrait in portraits: portrait
+  </div>
 
 // draw user card in specific order
 // this order sets the user card to stay in middle
 App.KL.Game.Phase.Draft.draw.card.user(
-  player: App.KL.Game.Player,
-  tab:  Maybe<String>
+  player: Maybe<App.KL.Game.Player> // player (used to know if player is ready or not)
+  hero:   Maybe<App.KL.Game.Hero>, // selected hero
+  tab:    Maybe<String> // which skill tab is selected
 ): DOM
+  without player: <span style={"display": "none"}></span> // if user is not a player
+
   let fator  = App.KL.Game.Phase.Draft.draw.fator.number
   let bt     = 2.0
   let id     = "user-card"
-
-  let hero = Maybe {
-    get hero_id = player@hero_id
-    get hero    = App.KL.Game.Hero.get_by_id(hero_id)
-    return hero
-  }
-
-  // TODO resolve this
+  let order  = ["I","Q","W","E","R","X"] // order which skills are shown 
   let skills = case hero {
     none: []
-    some: Map.to_list!(hero.value@skills)
+    some: Map.to_list!(hero.value@skills) // TODO change with formap
   }
-
-  let order = ["I","Q","W","E","R","X"] // order which skills are shown 
+  
   let inner  = 
     <div style={"display": "contents"}>
+      // skills tabs
       <div style={
         "height": "40%", 
         "width": "17%", 
@@ -312,14 +267,13 @@ App.KL.Game.Phase.Draft.draw.card.user(
           "display": "flex", 
           "flex-direction": "column"
         }>
-          { App.KL.Game.Phase.Draft.Draw.card.slot(some(0), "DNone", <span id="DNone">"I"</span>) } // TODO LIST ICON
+          { App.KL.Game.Phase.Draft.Draw.card.slot("I") }
           for info in skills:
             let {key, skill} = info
-            let order = List.find_index!(order, String.eql(key))
-            let id = "D"|key
-            App.KL.Game.Phase.Draft.Draw.card.slot(order, id, <span id=id >key</span>)
+            App.KL.Game.Phase.Draft.Draw.card.slot(key)
         </div>
       </div>
+      // card with hero attrs
       <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": F64.show(fator * bt) | "px"}>
         {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab, player@ready)}
       </div>
@@ -330,24 +284,22 @@ App.KL.Game.Phase.Draft.draw.card.user(
   </div>
 
 App.KL.Game.Phase.Draft.Draw.card.slot(
-  order: Maybe<Nat>
-  id: String
-  el: DOM
+  key: String
 ): DOM
-  let order = order <> 0
-  let order = Nat.show(order)
+  let order = App.KL.Game.Phase.draw.get_skill_order_by_key(key)
+  let id    = "D" | key
   <div id=id style={
     "position": "relative"
     "width": "100%"
     "border-radius": "5px"
     "color": "white"
-    "order": order
+    "order": Nat.show(order)
   }>
-    <img 
+    <img id=id
       src=App.KL.Game.Phase.Draft.Assets.card.button
       style={"width": "100%", "display": "flex"}
     ></img>
-    <div style={
+    <div id=id style={
       "position": "absolute"
       "top": "0", "left": "0"
       "width": "100%", "height": "100%"
@@ -355,19 +307,36 @@ App.KL.Game.Phase.Draft.Draw.card.slot(
       "align-items": "center"
       "justify-content": "center"
     }>
-      <span>{ el }</span>
+      <span id=id>key</span>
     </div>
   </div>
 
-
 App.KL.Game.Phase.Draft.draw.card.allies(
+  allies: Map<App.KL.Game.Player>
+  page: String // which page is shown
+  players_qtt: Nat // players quantity
+): DOM
+  let allies_qtt = players_qtt - 1
+  let allies     = Map.to_list!(allies)
+  let allies     = pad_right!(allies, allies_qtt) // complete 
+  <div style={"display": "contents"}>
+    for ally in allies:
+      case ally {
+        // if there is some ally not connected
+        none: App.KL.Game.Phase.Draft.draw.card.ally(none, page)
+        some:
+          let {id, player} = ally.value
+          App.KL.Game.Phase.Draft.draw.card.ally(some(player), page)
+      }
+  </div>
+
+App.KL.Game.Phase.Draft.draw.card.ally(
   player: Maybe<App.KL.Game.Player>,
   page: String
 ): DOM
   let fator = App.KL.Game.Phase.Draft.draw.fator.number
   let bt    = 2.0
   let type = "CLASS"
-
   let hero = Maybe {
     get player  = player
     get hero_id = player@hero_id
@@ -654,143 +623,4 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
     "border-image-source": if is_selected then "url("|App.KL.Game.Phase.Draft.Assets.portrait.hero.border|")" else ""
   }>
     {inner}
-  </div>
-
-// ROOM NUMBER AND READY BUTTON
-// ==========================
-
-// // display room text, and ready/cancel button
-// App.KL.Game.Phase.Draft.draw.ready_button(players: Map<App.KL.Game.Player>, room: String, user: String): DOM
-//   info = players{user}
-//   let ready_count = App.KL.Game.Player.ready_count(players, room, user) // Pair(Total players, ready check)
-//   let total = Nat.show(ready_count@fst)
-//   let count = Nat.show(ready_count@snd)
-//   let {color, text} = 
-//     case info {
-//       none: {"#4CAF50", "Ready"}
-//       some: 
-//         let player = info.value
-//         if player@ready then
-//           {"gray",    count|"/"|total|"\n\n Cancel"}
-//         else
-//           {"#4CAF50", "Ready"}
-//   }
-//   <div style={ 
-//     "width": "30%"
-//     "height": "auto"
-//     "display": "flex"
-//     "justify-content": "center"
-//     "align-items": "center"
-//     "flex-direction": "column"
-//   }>
-//     <div style={ 
-//       "background-color": "#d6dadc"
-//       "color": "black"
-//       "padding": "8px"
-//       "text-align": "center"
-//       "border-radius": "5px"
-//       "margin-bottom": "10px"
-//       "font-size": "32px"
-//     }>
-//       room
-//     </div>
-//     <button id="Ready" style={ 
-//       "background-color": color
-//       "border": "none"
-//       "color": "white"
-//       "padding": "32px"
-//       "text-align": "center"
-//       "text-decoration": "none"
-//       "display": "inline-block"
-//       "font-size": "32px"
-//       "margin": "4px 2px"
-//       "cursor": "inherit"
-//     }>
-//       text
-//     </button>
-//   </div>
-
-// BOTTOM MENU FOR CHOOSING HEROES 
-// ======================
-App.KL.Game.Phase.Draft.draw.menu(
-  players: Map<App.KL.Game.Player>
-): DOM
-
-  heroes = App.KL.Game.Hero.list
-  main_style = 
-  {
-    "width": "70%",
-    "height": "100%"
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-  }
-  
-  display_style = 
-  { 
-    "display": "flex",
-    "flex-wrap": "wrap",
-    "justify-content": "center", 
-    "width": "100%"
-  }
-  
-  hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, App.KL.Game.Hero.list) 
-
-  <div style=main_style>
-    <div style=display_style>
-      for div in hero_list: div
-    </div>
-  </div>
-
-     //Selection
-//----------------------------------------------
-App.KL.Game.Phase.Draft.draw.selection(
-  hero: App.KL.Game.Hero
-): DOM
-   
-  image = hero@draw@b64_portrait(true, 0) //TODO placeholder
-  //assets = hero@assets
-  //image  = assets@base64
-
-  box_style = 
-  { 
-    "margin": "4px",
-    "border": "5px solid #d6dadc",
-    //"box-shadow":"0 2px 3px rgba(0, 0, 0, 0.1)",
-    "background-color": "#Aeb4b7"
-    "height": "auto",
-    "width": "15%",
-    "border-radius": "5px"
-  }
-
-  name_style =   
-  {
-    "display": "flex",
-    "justify-content": "center",
-    "font-size": "1.2vw"
-  }
-
-  img_box_style = 
-  {
-    "padding": "2px",
-    "height": "100%",
-    "width": "100%"
-  } 
-
-  corner_style = 
-  {
-    "width": "75%",
-    "margin-left": "12.5%",
-    "height": "auto",
-    
-  }
-  square_style = 
-  {
-    "display": "flex", "justify-content": "center", "height": "100%", "width":"100%"
-  }
-  
-  <div style=box_style id="H" | hero@name>
-    <div style=name_style id="H"| hero@name>hero@name</div>
-      <img style=corner_style src=image id="H" | hero@name>
-      </img>
   </div>

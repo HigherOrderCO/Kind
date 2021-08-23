@@ -1,0 +1,14 @@
+// file to write common things among phases
+
+// order which skills are shown
+App.KL.Game.Phase.draw.skill_order: List<String>
+  ["I","Q","W","E","R","X"]
+
+App.KL.Game.Phase.draw.get_skill_order_by_key(
+  key: String
+): Nat
+  List.find_index!(App.KL.Game.Phase.draw.skill_order, String.eql(key)) <> 90
+
+App.KL.Game.Phase.draw.none: DOM
+  <span style={"display": "none"}></span>
+  

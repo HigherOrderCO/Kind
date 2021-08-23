@@ -1,11 +1,2 @@
 Test: _
-  let a = {
-    "blue": "alo"
-    "red": "hello"
-    "green": "heehee"
-  }
-
-  <div>
-    for color:text in a:
-      <button style={"color": color}>text</button>
-  </div>
+  List.pad_right!([1,2,3,4,5], 0)

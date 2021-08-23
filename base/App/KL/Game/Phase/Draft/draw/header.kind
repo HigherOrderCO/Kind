@@ -1,0 +1,33 @@
+App.KL.Game.Phase.Draft.draw.header(
+  controls: App.KL.Game.Controls.Draft
+): DOM
+  let header_order = ["friend", "collection", "store", "help", "config", "exit"]
+
+  <header style={"background-image": "url("| App.KL.Game.Phase.Draft.Assets.header |")", "width": "100%", "height": "64px", "display": "flex", "justify-content": "space-between"}>
+    // first items - user dependency
+    <div style={"display": "flex"}></div>
+    // last items
+    <div style={"display": "flex", "justify-content": "flex-end"}>
+      for button in App.KL.Game.Phase.Draft.draw.header.end_buttons(header_order, controls@header): button
+    </div>
+  </header>
+
+// draw header end buttons
+App.KL.Game.Phase.Draft.draw.header.end_buttons(
+  order: List<String>, 
+  buttons: Map<App.KL.Game.Assets.ButtonClick>
+): List<DOM>
+  let length = List.length!(order)
+  let to_dom = (order, id)
+    let button_image = buttons{id}
+    without button_image: <span style={"display": "none"}></span>
+    let z_index = Nat.show(length - order)
+    let order   = Nat.show(order)
+
+    <img 
+      id="btn-header-"|id
+      src=App.KL.Game.Assets.ButtonClick.get_img(button_image) 
+      style={"height": "100%", "cursor": "not-allowed", "margin-left": "-11px", "order": order, "z-index": z_index}
+    ></img>
+  
+  List.imap!!(to_dom, order)

@@ -32,50 +32,51 @@ App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State):
       open local
       case local.page as page{
         front: App.KL.Lobby.draw.front(local@user, page.room_input, global)
-        heroes: App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
+        heroes: App.KL.Game.Phase.draw.none //App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
       }
     }
   </div>
 
-App.KL.Lobby.draw.heroes(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
-  let style = {
-    "width": "100%", 
-    "height": "100%", 
-    "background-image": "linear-gradient(#0e0c0e, #242324)",
-    "display": "flex", 
-    "flex-direction": "column", 
-    "justify-content": "center", 
-    "align-items": "center",
-    "font-size": "2rem"
-  }
+// TODO proper design
+// App.KL.Lobby.draw.heroes(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
+//   let style = {
+//     "width": "100%", 
+//     "height": "100%", 
+//     "background-image": "linear-gradient(#0e0c0e, #242324)",
+//     "display": "flex", 
+//     "flex-direction": "column", 
+//     "justify-content": "center", 
+//     "align-items": "center",
+//     "font-size": "2rem"
+//   }
 
-  main_style = 
-  {
-    "width": "70%",
-    "height": "40%"
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-  }
+//   main_style = 
+//   {
+//     "width": "70%",
+//     "height": "40%"
+//     "display": "flex"
+//     "justify-content": "center"
+//     "align-items": "center"
+//   }
   
-  display_style = 
-  { 
-    "display": "flex",
-    "flex-wrap": "wrap",
-    "justify-content": "center", 
-    "width": "100%"
-  }
+//   display_style = 
+//   { 
+//     "display": "flex",
+//     "flex-wrap": "wrap",
+//     "justify-content": "center", 
+//     "width": "100%"
+//   }
 
-  hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, App.KL.Game.Hero.list)
+//   hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, App.KL.Game.Hero.list)
 
-  <div style=style>
-    <div style=main_style>
-      <div style=display_style>
-        for div in hero_list: div
-      </div>
-    </div>
-    {App.KL.Lobby.draw.heroes.hero_menu(hero, skill, tab)}
-  </div>
+//   <div style=style>
+//     <div style=main_style>
+//       <div style=display_style>
+//         for div in hero_list: div
+//       </div>
+//     </div>
+//     {App.KL.Lobby.draw.heroes.hero_menu(hero, skill, tab)}
+//   </div>
 
 App.KL.Lobby.draw.heroes.hero_menu(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
   descriptions_style = 
