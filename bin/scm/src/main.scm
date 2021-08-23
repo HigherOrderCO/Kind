@@ -19,7 +19,7 @@
       ""
       "Examples:"
       ""
-      "  # Run the 'Main' term (outputs 'Hello, world'):"
+      "  # Run the 'Main' term (outputs 'oi'):"
       "  kind-scm Main --run"
       ""
       "  # Type-check all files inside the 'Nat' module:"
