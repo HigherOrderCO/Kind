@@ -1,3 +1,9 @@
+App.KL.Game.Phase.Draft.draw.fator.number: F64
+  2
+
+App.KL.Game.Phase.Draft.draw.fator.string: String
+  F64.show(App.KL.Game.Phase.Draft.draw.fator.number)
+
 App.KL.Game.Phase.Draft.draw(
   local: App.KL.Game.State.Local, 
   global: App.KL.Global.State
@@ -192,7 +198,7 @@ App.KL.Game.Phase.Draft.draw.background.hexagons(
     some: Nat.show(x.value) | "px"
   }) :: Maybe<Nat> -> String
 
-  <div style={"position": "absolute", "top": decapsule(top), "right": decapsule(right), "bottom": decapsule(bottom), "left": decapsule(left), "transform": "scale(2)", "z-index": "0"} >
+  <div style={"position": "absolute", "top": decapsule(top), "right": decapsule(right), "bottom": decapsule(bottom), "left": decapsule(left), "transform": "scale("|App.KL.Game.Phase.Draft.draw.fator.string|")", "z-index": "0"} >
     <img src=img></img>
   </div>
 
@@ -276,8 +282,8 @@ App.KL.Game.Phase.Draft.draw.card.user(
   player: App.KL.Game.Player,
   tab:  Maybe<String>
 ): DOM
-  let fator  = 2
-  let bt     = 2
+  let fator  = App.KL.Game.Phase.Draft.draw.fator.number
+  let bt     = 2.0
   let id     = "user-card"
 
   let hero = Maybe {
@@ -314,13 +320,13 @@ App.KL.Game.Phase.Draft.draw.card.user(
             App.KL.Game.Phase.Draft.Draw.card.slot(order, id, <span id=id >key</span>)
         </div>
       </div>
-      <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
+      <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": F64.show(fator * bt) | "px"}>
         {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab, player@ready)}
       </div>
     </div>
   
   <div id=id style={"margin": "0 10px"}>
-    { App.KL.Game.Phase.Draft.draw.card.wrapper(99, 208, bt, id, fator, App.KL.Game.Phase.Draft.Assets.card.main, inner) }
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(99.0, 208.0, bt, id, fator, App.KL.Game.Phase.Draft.Assets.card.main, inner) }
   </div>
 
 App.KL.Game.Phase.Draft.Draw.card.slot(
@@ -358,8 +364,8 @@ App.KL.Game.Phase.Draft.draw.card.allies(
   player: Maybe<App.KL.Game.Player>,
   page: String
 ): DOM
-  let fator = 2
-  let bt    = 2
+  let fator = App.KL.Game.Phase.Draft.draw.fator.number
+  let bt    = 2.0
   let type = "CLASS"
 
   let hero = Maybe {
@@ -370,12 +376,12 @@ App.KL.Game.Phase.Draft.draw.card.allies(
   }
   let ready = Maybe.if!((p) p@ready, player)
   let inner = 
-    <div style={"width": "100%", "border-radius": "0 5px 5px 0", "padding": Nat.show(fator * bt) | "px"}>
+    <div style={"width": "100%", "border-radius": "0 5px 5px 0", "padding": F64.show(fator * bt) | "px"}>
       {App.KL.Game.Phase.Draft.draw.card.hero(hero, "", none, ready)}
     </div>
   
   <div style={"margin": "0 10px", "display": if String.eql(page, "users") then "block" else "none", "animation": "fade-in 500ms"}>
-    { App.KL.Game.Phase.Draft.draw.card.wrapper(82, 208, bt, "", fator, App.KL.Game.Phase.Draft.Assets.card.allies, inner) }
+    { App.KL.Game.Phase.Draft.draw.card.wrapper(82.0, 208.0, bt, "", fator, App.KL.Game.Phase.Draft.Assets.card.allies, inner) }
   </div>
 
 // draw hero parts of cards
@@ -414,7 +420,7 @@ App.KL.Game.Phase.Draft.draw.card.hero(
     {
       if ready then
         <div style={
-          "transform": "scale(2)", 
+          "transform": "scale("|App.KL.Game.Phase.Draft.draw.fator.string|")", 
           "transform-origin": "top left",
           "position": "absolute", 
           "top": "92%", 
@@ -584,21 +590,21 @@ App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DO
   let id = "FC" | text
   <li id=id style={"margin-bottom": "5px"}>
     <img id=id src=img style={
-      "zoom": "2"
+      "zoom": App.KL.Game.Phase.Draft.draw.fator.string
       "margin-right": "5px"
       "vertical-align": "middle"
     }></img>
     <span id=id style={"color": "white", "text-transform": "uppercase"}>text</span>
   </li>
 
-App.KL.Game.Phase.Draft.draw.card.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: Nat, background: String, inner: DOM): DOM
+App.KL.Game.Phase.Draft.draw.card.wrapper(width: F64, height: F64, bt: F64, id: String, fator: F64, background: String, inner: DOM): DOM
   <div class="pixel-art" id=id style={
-    "height": Nat.show(fator * height) | "px", 
-    "width": Nat.show(fator * width) | "px", 
+    "height": F64.show(fator * height) | "px", 
+    "width": F64.show(fator * width) | "px", 
     "display": "flex", 
     "background-image": "url("|background|")", 
     "background-size": "100% 100%", 
-    "padding-top": Nat.show(fator * bt) | "px"
+    "padding-top": F64.show(fator * bt) | "px"
     // "margin": "0 10px"
     
   }>
@@ -610,10 +616,10 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
   selected_hero: Maybe<App.KL.Game.Hero>, 
   filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
-  let fator = 2
-  let bt = 2
-  let width = 44
-  let height = 74
+  let fator = App.KL.Game.Phase.Draft.draw.fator.number
+  let bt = 2.0
+  let width = 44.0
+  let height = 74.0
 
   // verify if hero is the hero selected
   let is_selected = case selected_hero {
@@ -624,20 +630,20 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
   let id = "H" | hero@name
   let portrait = hero@draw@b64_portrait(true, 0)
   let inner =
-    <div id=id style={"width": "100%", "padding": "0 " | Nat.show(bt * fator) | "px", "display": "flex", "flex-direction": "column", "align-items": "center"}>
-      <img id=id style={"width": "100%", "transform": "translateY(-"|Nat.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
+    <div id=id style={"width": "100%", "padding": "0 " | F64.show(bt * fator) | "px", "display": "flex", "flex-direction": "column", "align-items": "center"}>
+      <img id=id style={"width": "100%", "transform": "translateY(-"|F64.show((2 + bt)*fator)|"px)", "margin-bottom": "4px"} src=portrait></img>
       <p id=id style={"text-transform": "uppercase", "color": "white"}>hero@name</p>
     </div>
   
 
   <div id=id style={
-    "height": Nat.show(fator * height) | "px", 
-    "width": Nat.show(fator * width) | "px", 
+    "height": F64.show(fator * height) | "px", 
+    "width": F64.show(fator * width) | "px", 
     "display": "flex", 
     "background-image": "url("|App.KL.Game.Phase.Draft.Assets.portrait.hero.background|")", 
     "background-size": "100% 100%", 
     "background-repeat": "no-repeat"
-    "padding-top": Nat.show(fator * bt) | "px"
+    "padding-top": F64.show(fator * bt) | "px"
     
     "border-style": "solid"
     "border-image-slice": "4"
