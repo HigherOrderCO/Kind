@@ -1,0 +1,8 @@
+PriorityQueue.In.in_queue_equals_in_tree<A: Type>(
+  queue: PriorityQueue<A>,
+  a: A
+): PriorityQueue.In!(queue, a) == PriorityQueue.Tree.In!(PriorityQueue.tree_of!(queue), a)
+  case queue {
+    new: refl
+  }!
+ 
