@@ -77,12 +77,8 @@ App.KL.Game.Phase.Draft.draw.choose_team(
   </div>
 
 App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
-  let player_list   = Map.to_list!(players) // TODO BBT.count
-  let fun = 
-    (x)
-      let y = x@snd@team
-      App.KL.Game.Team.eql(y, team)
-  let player_count  = List.count!(fun, player_list) // Player count in respective team
+  let fun = (k,v) App.KL.Game.Team.eql(v@team, team)
+  let player_count  = BBT.count!!(fun, players) // Player count in respective team
   let team_txt      = App.KL.Game.Team.show(team)
   let gradient      = 
     case team {
@@ -184,12 +180,8 @@ App.KL.Game.Phase.Draft.draw.middle.content(
 ): DOM
   let players_qtt   = 3 // max players TODO store in game?
   let local_player  = allies{user}
-  let selected_hero = Maybe { // TODO transform in function
-    get user = local_player
-    get hero_id = user@hero_id
-    get hero = App.KL.Game.Hero.get_by_id(hero_id)
-    return hero
-  }
+  let selected_hero = App.KL.Game.Phase.Draft.draw.get_selected_hero(local_player)
+
   let allies = Map.delete!(user, allies)
   <div style={"display": "contents"}>
     // USER CARD
@@ -214,7 +206,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
   hero:   Maybe<App.KL.Game.Hero>, // selected hero
   tab:    Maybe<String> // which skill tab is selected
 ): DOM
-  without player: <span style={"display": "none"}></span> // if user is not a player
+  without player: App.KL.Game.Phase.draw.none // if user is not a player
 
   let fator  = App.KL.Game.Phase.Draft.draw.fator.number
   let bt     = 2.0
@@ -222,7 +214,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
   let order  = ["I","Q","W","E","R","X"] // order which skills are shown 
   let skills = case hero {
     none: []
-    some: Map.to_list!(hero.value@skills) // TODO change with formap
+    some: Map.to_list!(hero.value@skills)
   }
   
   let inner  = 
@@ -292,7 +284,7 @@ App.KL.Game.Phase.Draft.draw.card.allies(
 ): DOM
   let allies_qtt = players_qtt - 1
   let allies     = Map.to_list!(allies)
-  let allies     = App.KL.Game.Phase.Draft.pad_right!(allies, allies_qtt) // complete 
+  let allies     = App.KL.Game.Phase.Draft.draw.pad_right!(allies, allies_qtt) // complete 
   <div style={"display": "contents"}>
     for ally in allies:
       case ally {
@@ -358,7 +350,7 @@ App.KL.Game.Phase.Draft.draw.card.hero(
           <img src=App.KL.Game.Phase.Draft.Assets.card.active></img>
         </div>
       else
-        <span style={"display": "none"}></span>
+        App.KL.Game.Phase.draw.none
     }
   </div>
 
@@ -436,7 +428,7 @@ App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes,
   <div id=id style={"display": "contents"}> 
     for attr in order:
       let img = App.KL.Game.Phase.Draft.Assets.card.attr_icons{attr}
-      without img: <span id=id style={"display": "none"}></span> // TODO
+      without img: App.KL.Game.Phase.draw.none
       <div id=id style={"display": "contents"}>
         <div id=id style={
           "height": "15%",
@@ -455,7 +447,7 @@ App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes,
           <div id=id style={"display": "flex", "height": "100%", "flex": "4", "align-items": "center"}>
             for j in [1 to 6]:
               let attr_value = attrs_map{attr}
-              without attr_value: <span style={"display": "none"}></span>
+              without attr_value: App.KL.Game.Phase.draw.none
               let bar = App.KL.Game.Phase.Draft.Assets.card.attr_bar(attr_value, j)
               <div id=id style={"margin": "0 3px", "display": "flex", "align-items": "center", "flex": "1"}><img style={"width": "100%", } src=bar></img> </div>
           </div>
@@ -629,10 +621,20 @@ App.KL.Game.Phase.Draft.draw.portrait.hero(
 // AUX FUNCTIONS
 // ============================================
 // complete a list with none's
-App.KL.Game.Phase.Draft.pad_right<A: Type>(xs: List<A>, number: Nat): List<Maybe<A>>
+App.KL.Game.Phase.Draft.draw.pad_right<A: Type>(xs: List<A>, number: Nat): List<Maybe<A>>
   case xs number{
     nil zero:  List.nil!
     nil succ:  List.repeat!(Nat.succ(number.pred), none)
     cons zero: List.map!!((x) some(x), xs)
-    cons succ: some(xs.head) & App.KL.Game.Phase.Draft.pad_right!(xs.tail, number.pred)
+    cons succ: some(xs.head) & App.KL.Game.Phase.Draft.draw.pad_right!(xs.tail, number.pred)
+  }
+
+App.KL.Game.Phase.Draft.draw.get_selected_hero(
+  player: Maybe<App.KL.Game.Player>
+): Maybe<App.KL.Game.Hero>
+  Maybe {
+    get user    = player
+    get hero_id = user@hero_id
+    get hero    = App.KL.Game.Hero.get_by_id(hero_id)
+    return hero
   }
