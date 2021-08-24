@@ -8,7 +8,7 @@ type App.KL.Lobby.State.Local {
   new(
     user: String
     page: App.KL.Lobby.State.Local.Page
-    screen_size: Pair<U32, U32>
+    screen: App.KL.Game.Screen
   )
 }
 
@@ -261,7 +261,9 @@ App.KL.Lobby.when(
   case event {
     init:
       let new_local = local@user <- String.to_lower(event.user)
-      let new_local = new_local@screen_size <- event.info@screen_size
+      open new_local
+      let screen = new_local.screen@size <- event.info@screen_size
+      let new_local = new_local@screen <- screen
       App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
     input:
       case page {
@@ -285,7 +287,7 @@ App.KL.Lobby.when(
                   IO {
                     App.watch<App.KL.State>(room)
                     App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
-                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen_size)))
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen)))
                   }
               }
             // "heroes": IO {
@@ -329,7 +331,7 @@ App.KL.Lobby.when(
                   IO {
                     App.watch<App.KL.State>(room)
                     App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
-                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen_size)))
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen)))
                   }
               }
           }default App.pass<App.KL.State>
