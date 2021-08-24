@@ -6,6 +6,12 @@ type App.KL.Game.Controls.Draft {
     main_button_hovered: Bool
     // header button controls
     header: Map<App.KL.Game.Assets.ButtonClick> // id -> (img, state, action)
+    // skills tab
+    skills_tab:  Maybe<String> // which skill is selected
+    // page
+    page: String // page in draft -> heroes or users for now TODO transform in type
+    // filter
+    filter: App.KL.Game.Controls.Draft.Filter
   )
 }
 
@@ -16,6 +22,12 @@ App.KL.Game.Controls.Draft.initial: App.KL.Game.Controls.Draft
     false
     // header buttons
     App.KL.Game.Controls.Draft.header.buttons
+    // skills tab
+    none
+    // page
+    "heroes"
+    // filter
+    App.KL.Game.Controls.Draft.Filter.default
   )
 
 // default when mouse_move/mouse_down is not active
@@ -31,7 +43,10 @@ App.KL.Game.Controls.Draft.default(
   let main_button_hovered = false
   let header.buttons = App.KL.Game.Controls.Draft.header.buttons
 
-  App.KL.Game.Controls.Draft.new(main_button, main_button_hovered, header.buttons)
+  let controls = controls@main_button <- main_button
+  let controls = controls@main_button_hovered <- main_button_hovered
+  let controls = controls@header <- header.buttons
+  controls
 
 // HEADER BUTTONS
 App.KL.Game.Controls.Draft.header.buttons: Map<App.KL.Game.Assets.ButtonClick>
