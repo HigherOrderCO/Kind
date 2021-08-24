@@ -6,14 +6,18 @@
 // AUX FUNCTIONS
 // ==============================
 
-// check if player has a coord
-App.KL.Game.Phase.Draft.has_hero(hero_id: U8, player: Pair<String, App.KL.Game.Player>): Bool
-  x = player@snd@hero_id
-  case x {
-    none: false
-    some: U8.eql(Nat.to_u8(x.value), hero_id)
-  }
 
+App.KL.Game.Phase.Draft.has_hero(hero_id: U8, team: App.KL.Game.Team, player: Pair<String, App.KL.Game.Player>): Bool
+  x = player@snd@hero_id
+  if App.KL.Game.Team.eql(team, player@snd@team) then
+    case x {
+      none: false
+      some: U8.eql(Nat.to_u8(x.value), hero_id)
+    }
+  else
+    false
+
+// check if player has a coord
 App.KL.Game.Phase.Draft.has_coord(coord: Hexagonal.Axial, player: Pair<String, App.KL.Game.Player>): Bool
   x = player@snd@init_pos
   case x {
