@@ -1,0 +1,15 @@
+App.KL.Game.Phase.Draft.draw.footer(
+  controls: App.KL.Game.Controls.Draft
+): DOM
+  <footer style={"height": "64px", "display": "flex", "align-items": "flex-end", "width": "100%"}>
+    <div style={"display": "flex", "height": "50%", "flex": "1"}>
+      <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.Assets.footer.stencil.main |")"}></div>
+      <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.Assets.footer.stencil.diagonal_left></img></div>
+      {
+        let src = App.KL.Game.Assets.ButtonAnimation.Button.get_img(controls@main_button) <> ""
+        <div style={"align-self": "flex-start", "zoom": "150%", "margin-top": "-40px"}><img id="Ready" src=src></img></div>
+      }
+      <div style={"align-self": "flex-end", "height": "100%"}><img style={"height": "100%", } src=App.KL.Game.Phase.Draft.Assets.footer.stencil.diagonal_right></img></div>
+      <div style={"flex": "1", "height": "100%", "align-self": "flex-end", "background-image": "url("| App.KL.Game.Phase.Draft.Assets.footer.stencil.main |")"}></div>
+    </div>
+  </footer>

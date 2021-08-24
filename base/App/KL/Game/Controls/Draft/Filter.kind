@@ -1,23 +1,23 @@
-type App.KL.Game.Phase.Draft.Filter {
+type App.KL.Game.Controls.Draft.Filter {
   new(
     hero_name: String
     options: Map<Bool>
   )
 }
 
-App.KL.Game.Phase.Draft.Filter.default: App.KL.Game.Phase.Draft.Filter
+App.KL.Game.Controls.Draft.Filter.default: App.KL.Game.Controls.Draft.Filter
   let roles = {}
 
   for role in App.KL.Game.Hero.Role.all with roles:
     let str = App.KL.Game.Hero.Role.show(role)
     roles{str} <- false
   
-  App.KL.Game.Phase.Draft.Filter.new(
+  App.KL.Game.Controls.Draft.Filter.new(
     "",
     roles
   )
 
-App.KL.Game.Phase.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: App.KL.Game.Phase.Draft.Filter): List<App.KL.Game.Hero>
+App.KL.Game.Controls.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: App.KL.Game.Controls.Draft.Filter): List<App.KL.Game.Hero>
   // TODO do all this in a beautiful way :(
   let filters_active = [
     {

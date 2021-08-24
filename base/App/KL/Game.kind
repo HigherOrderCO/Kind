@@ -7,8 +7,8 @@ type App.KL.Game.State.Local {
   new(
     user: String
     room: String
-    tab:  Maybe<String>
-    page: String // page in draft -> heroes or users for now
+    tab: Maybe<String>
+    page: String //page in draft -> heroes or users for now
     info: Hexagonal.Axial
     preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
