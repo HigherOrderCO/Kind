@@ -7,5 +7,4 @@ Ether.Contract.getAddress(trans : Ether.Contract.Transaction) : String
    ]))
   let buffer = Buffer8.from_hex(String.drop(2, rlp_encoding))
   let hash = Crypto.Keccak.hash.bytes(buffer)
-  log(Buffer8.to_hex(hash))
   String.drop((12 * 2),Buffer8.to_hex(hash))
