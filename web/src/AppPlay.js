@@ -174,6 +174,7 @@ module.exports = class AppPlay extends Component {
     // Frame event (60 fps)
     this.intervals.frame = () => {
       setInterval(() => {
+        console.log( screen.width);
         this.register_event({
           _: "App.Event.frame",
           time: BigInt(Date.now()),
@@ -181,8 +182,8 @@ module.exports = class AppPlay extends Component {
             _: "App.EnvInfo.new",
             screen_size: {
               _: "Pair.new",
-              fst: this.container ? this.container.width  : 0,
-              snd: this.container ? this.container.height : 0,
+              fst: screen.width,
+              snd: screen.height,
             },
             mouse_pos: this.mouse_pos,
           }
@@ -503,10 +504,22 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  // remove canvas element
+  // used to avoid creation of infinite canvas
+  remove_canvas(id) {
+    let element = 
+      id ? 
+        document.getElementById(id) :
+        document.querySelector("canvas")
+    
+    if (element) element.remove();
+  }
+
   // Gets a pixel-art canvas
   get_canvas(id, width, height, scale=1) {
     if (!this.canvas[id] || this.canvas[id].width !== width || this.canvas[id].height !== height) {
       console.log("creating canvas", id, width, height);
+      this.remove_canvas(id);
       this.canvas[id] = document.createElement("canvas");
       this.canvas[id].id = id;
       this.canvas[id].classList.add("pixel-art");
