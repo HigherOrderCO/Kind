@@ -1,0 +1,3 @@
+PriorityQueue.In<A: Type>(queue: PriorityQueue<A>, a: A): Type
+  open queue
+  PriorityQueue.Tree.In!(queue.tree, a)

@@ -1,0 +1,7 @@
+PriorityQueue.Tree.make<A: Type>(element: A, a: PriorityQueue.Tree<A>, b: PriorityQueue.Tree<A>): PriorityQueue.Tree<A>
+  let rank_a = PriorityQueue.Tree.rank!(a)
+  let rank_b = PriorityQueue.Tree.rank!(b)
+  if Nat.gte(rank_a, rank_b) then
+    PriorityQueue.Tree.node!(Nat.succ(rank_b), element, a b)    
+  else
+    PriorityQueue.Tree.node!(Nat.succ(rank_a), element, b a)

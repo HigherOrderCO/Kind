@@ -1,0 +1,2 @@
+PriorityQueue.Tree.empty_tree_is_empty<A: Type>: PriorityQueue.Tree.is_empty(A, PriorityQueue.Tree.empty(A)) == true
+  refl

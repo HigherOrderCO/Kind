@@ -1,0 +1,2 @@
+Ether.Hex.size(len : Nat, x : String) : Type
+  String.length(x) == len

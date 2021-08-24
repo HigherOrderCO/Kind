@@ -1,17 +1,19 @@
 App.KL.Game.Phase.End.when(
   local  : App.KL.Game.State.Local
-  global : App.KL.Game
+  game : App.KL.Game
   event  : App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
-  let players = global@players
-  let room = String.take(16, Crypto.Keccak.hash(local@room))
 
+  let room = String.take(16, Crypto.Keccak.hash(local@room))
+  let screen = App.KL.Game.Screen.new({0,0}, 2, {0,0})
+  let new_local = App.KL.State.Local.lobby(App.KL.Lobby.State.Local.new(App.KL.Constants.room, App.KL.Lobby.State.Local.Page.front(""), screen))
   case event {
     mouse_click:
       switch String.eql(event.id) {
-        "return" : // Set initial position
-          App.new_post!(room, App.KL.Game.Phase.End.Event.go_lobby.serial)
-      } default App.pass!
-  
-  } default App.pass!
-
+        "go_to_lobby": IO { 
+          App.unwatch!(room)
+          App.watch!(App.KL.Constants.room)
+          App.set_local<App.KL.State>(new_local)
+        }
+      }default App.pass!
+  }default App.pass!

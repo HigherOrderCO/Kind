@@ -1,0 +1,6 @@
+Ether.tests : _
+  let bits = Bits.hex.decode(String.reverse("0x29D7d1dd5B6f9C864d9db560D72a247c178aE86B"))
+  Ether.Contract.getAddress(Ether.Contract.Transaction.new(bits, 10))
+  //let buffer = Buffer8.from_hex("d69429d7d1dd5b6f9c864d9db560d72a247c178ae86b0a")
+  //let hash = Crypto.Keccak.hash.bytes(buffer)
+  //Buffer8.to_hex(hash)

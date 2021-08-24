@@ -1,0 +1,27 @@
+// file to write common things among phases
+
+// order which skills are shown
+App.KL.Game.Phase.draw.skill_order: List<String>
+  ["I","Q","W","E","R","X"]
+
+App.KL.Game.Phase.draw.get_skill_order_by_key(
+  key: String
+): Nat
+  List.find_index!(App.KL.Game.Phase.draw.skill_order, String.eql(key)) <> 90
+
+App.KL.Game.Phase.draw.none: DOM
+  <span style={"display": "none"}></span>
+  
+App.KL.Game.Phase.draw.card.wrapper(width: F64, height: F64, bt: F64, id: String, fator: F64, background: String, inner: DOM): DOM
+  <div class="pixel-art" id=id style={
+    "height": F64.show(fator * height) | "px", 
+    "width": F64.show(fator * width) | "px", 
+    "display": "flex", 
+    "background-image": "url("|background|")", 
+    "background-size": "100% 100%", 
+    "padding-top": F64.show(fator * bt) | "px"
+    // "margin": "0 10px"
+    
+  }>
+    {inner}
+  </div>

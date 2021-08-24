@@ -1,0 +1,50 @@
+Kind.Meta.IsCore(term: Kind.Term): Type
+  def rf = Kind.Term.ref
+  case term {
+    ref:
+      Unit
+    var:
+      Unit
+    typ:
+      Unit
+    all:
+      And<
+        Kind.Meta.IsCore(term.xtyp),
+        (t0: Kind.Term, Hyp0: Kind.Meta.IsCore(t0)) ->
+        (t1: Kind.Term, Hyp1: Kind.Meta.IsCore(t1)) ->
+        Kind.Meta.IsCore(term.body(t0, t1))
+      >
+    lam:
+      (t0: Kind.Term, Hyp0: Kind.Meta.IsCore(t0)) ->
+      Kind.Meta.IsCore(term.body(t0))
+    app:
+      And<
+        Kind.Meta.IsCore(term.func)
+        Kind.Meta.IsCore(term.argm)
+      >
+    let: 
+      And<
+        Kind.Meta.IsCore(term.expr),
+        (t0: Kind.Term, Hyp0: Kind.Meta.IsCore(t0)) ->
+        Kind.Meta.IsCore(term.body(t0))
+      >
+    def:
+      And<
+        Kind.Meta.IsCore(term.expr),
+        (t0: Kind.Term, Hyp0: Kind.Meta.IsCore(t0)) ->
+        Kind.Meta.IsCore(term.body(t0))
+      >
+    ann:
+      And<
+        Kind.Meta.IsCore(term.term)
+        Kind.Meta.IsCore(term.type)
+      >
+    nat:
+      Unit
+    chr:
+      Unit
+    str:
+      Unit
+    ori:
+      Kind.Meta.IsCore(term.expr)
+  } default Empty

@@ -1,0 +1,3 @@
+type PriorityQueue<A: Type> {
+  new(priority: A -> Nat, tree: PriorityQueue.Tree<A>)
+}

@@ -1,0 +1,3 @@
+Ether.Bits.read_bytes(bytes : List<Bits>) : String
+  let hexfify = List.map!!((x) String.pad_left(2, '0', String.reverse(Bits.hex.encode(x))), bytes)
+  "0x" | String.join("", hexfify)

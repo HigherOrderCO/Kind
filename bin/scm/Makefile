@@ -38,7 +38,7 @@ scheme/bin/scheme:
 	cd $(chezdir) && ./configure --pb --kernelobj --disable-curses --disable-iconv --disable-x11
 	cd $(chezdir) && make auto.bootquick
 	cd $(chezdir) && ./configure --kernelobj --disable-curses --disable-iconv --disable-x11  --installprefix=$(PWD)/scheme
-	cd $(chezdir) && make -j && make install
+	cd $(chezdir) && make && make install
 
 scheme/bin/compile-chez-program: scheme/bin/scheme
 	cd $(chezexedir) && ./../scheme/bin/scheme --script gen-config.ss --scheme $(PWD)/scheme/bin/scheme --bootpath $$(dirname $$(find ../scheme -name kernel.o)) --prefix $(PWD)/scheme

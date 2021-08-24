@@ -1,0 +1,25 @@
+App.KL.Game.Effect.movement.swap(
+  from: Hexagonal.Axial,
+  to: Hexagonal.Axial,
+  ignore: Bool
+): App.KL.Game.Effect<Unit>
+  
+  App.KL.Game.Effect { 
+    if Hexagonal.Axial.eql(from, to) then
+      App.KL.Game.Effect.fail(" you cannot swap to the same place") 
+    else
+      App.KL.Game.Effect { 
+        get board = App.KL.Game.Effect.board.get
+        let from_creature = App.KL.Game.Board.Creature.get(from, board)
+        let to_creature = App.KL.Game.Board.Creature.get(to, board)
+        without from_creature: App.KL.Game.Effect.pass
+        without to_creature: App.KL.Game.Effect.pass
+          App.KL.Game.Effect { 
+            App.KL.Game.Effect.board.creature.del(from)
+            App.KL.Game.Effect.board.creature.del(to)
+            App.KL.Game.Effect.board.creature.set(from, to_creature)
+            App.KL.Game.Effect.board.creature.set(to, from_creature)
+          }
+      }
+  }
+

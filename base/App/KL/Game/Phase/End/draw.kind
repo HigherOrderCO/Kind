@@ -22,6 +22,6 @@ App.KL.Game.Phase.End.draw(local: App.KL.Game.State.Local, game: App.KL.Game): D
             <p>"Team " | team | " wins! (ez)"</p>
         }
         // TODO make it work
-        <button id="return" style={"font-size": "1rem", "padding": "2px"}>"Return to lobby"</button>
+        <button id="go_to_lobby" style={"font-size": "1rem", "padding": "2px"}>"Return to lobby"</button>
       </div>
   }

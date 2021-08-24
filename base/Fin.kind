@@ -1,11 +1,11 @@
 Fin(lim: Nat): Type
   case lim {
     zero:
-      Fin.self<P: (:Fin(Nat.zero)) -> Type> ->
+      Fin.self<P:(:Fin(Nat.zero)) -> Type> ->
       P(Fin.self)
     succ:
-      Fin.self<P: (:Fin(Nat.succ(lim.pred))) -> Type>
-      (zero: P(Fin.zero(lim.pred)))
+      Fin.self<P:(:Fin(Nat.succ(lim.pred))) -> Type> ->
+      (zero: P(Fin.zero(lim.pred))) ->
       (succ: (pred: Fin(lim.pred)) -> P(Fin.succ(lim.pred, pred))) ->
       P(Fin.self)
   }

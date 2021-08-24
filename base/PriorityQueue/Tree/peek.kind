@@ -1,0 +1,9 @@
+PriorityQueue.Tree.peek<A: Type>(tree: PriorityQueue.Tree<A>)<Hyp: PriorityQueue.Tree.is_empty!(tree) == false>: A
+  case tree with Hyp {
+      empty:
+        let hypothesis = Hyp :: rewrite x in (x == false) with PriorityQueue.Tree.empty_tree_is_empty<A>
+        let impossible = Bool.true_neq_false(hypothesis)
+        Empty.absurd!(impossible)
+      node: tree.element
+  }!
+

@@ -4,7 +4,7 @@
 (let ([args (cdr (command-line))])
   (if (null? args)
     (print-lines
-    '("# kind-scm 1.0.86"
+    '("# kind-scm 1.0.94"
       ""
       "Usage:"
       ""
@@ -19,7 +19,7 @@
       ""
       "Examples:"
       ""
-      "  # Run the 'Main' term (outputs 'Hello, world'):"
+      "  # Run the 'Main' term (outputs 'oi'):"
       "  kind-scm Main --run"
       ""
       "  # Type-check all files inside the 'Nat' module:"
