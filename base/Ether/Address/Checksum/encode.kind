@@ -7,10 +7,10 @@ List.agroup(A : Type, list : List<A>) : List<Pair<A, A>>
     nil : []
   }
 
-Ether.Address.Checksum.bits(value : String): List<Bits> // refinement for all char in value, value is lower
-  let value = Crypto.Keccak.hash(value)
-  let value = String.fold(value, _, [], (c, xs) String.cons(c, String.nil) & xs) 
-  List.map!!(Bits.hex.decode . (String.reverse . String.join("")), List.chunks_of!(2, value))
+//Ether.Address.Checksum.bits(value : String): List<Bits> // refinement for all char in value, value is lower
+  //let value = Crypto.Keccak.hash(value)
+  //let value = String.fold(value, _, [], (c, xs) String.cons(c, String.nil) & xs) 
+  //List.map!!(Bits.hex.decode . (String.reverse . String.join("")), List.chunks_of!(2, value))
 
 Ether.Address.Checksum.generate(encoding : List<Pair<Bits, Pair<String, String>>>) : String
   case encoding {
@@ -33,7 +33,7 @@ Ether.Address.Checksum.generate(encoding : List<Pair<Bits, Pair<String, String>>
   }
 
 Ether.Address.Checksum.encode(address : String) : String
-  let xs = Ether.Address.Checksum.bits(address)
+  let xs = Ether.Bits.to_bytes(Crypto.Keccak.hash(address)) // Ether.Address.Checksum.bits(address)
   let address = String.fold(address, _, [], (c, xs) String.cons(c, String.nil) & xs)
   let encoder = List.zip!!(List.take!(40, xs), List.agroup!(address))
   Ether.Address.Checksum.generate(encoder)
