@@ -11,29 +11,29 @@ App.KL.Game.Phase.Draft.draw(
   open global
   without global.game: <div>"No game"</div> // impossible
   
-  App.KL.Game.Phase.Draft.draw.choose_page(local@draft, global.game@players, local@page, local@tab, local@room, local@user, local@filter)
+  App.KL.Game.Phase.Draft.draw.choose_page(local@draft, global.game@players, local@room, local@user)
 
 // choose what page draw based on team
 App.KL.Game.Phase.Draft.draw.choose_page(
   controls: App.KL.Game.Controls.Draft
   players: Map<App.KL.Game.Player>,
-  page: String,
-  tab:  Maybe<String>,
   room: String,
   user: String,
-  filter: App.KL.Game.Phase.Draft.Filter
 ): DOM
   let player = players{user}
   without player: <div>"No player"</div> // impossible
 
   let team_page = App.KL.Game.Phase.Draft.draw.choose_team(players)
-    
+  let skills_tab       = controls@skills_tab
+  let filter    = controls@filter
+  let page      = controls@page
+
   let team = player@team
   case team {
     // if any team is selected go to main draft selection
     // pass only allies
-    blue:   App.KL.Game.Phase.Draft.draw.main(controls, App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user, filter)
-    red:    App.KL.Game.Phase.Draft.draw.main(controls, App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, tab, user, filter)
+    blue:   App.KL.Game.Phase.Draft.draw.main(controls, App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, skills_tab, user, filter)
+    red:    App.KL.Game.Phase.Draft.draw.main(controls, App.KL.Game.Phase.Draft.draw.choose_page.filter_team(players, team), page, skills_tab, user, filter)
   } default team_page // if no team is selected go to team selection
 
 // aux function to filter players according with 
@@ -109,9 +109,9 @@ App.KL.Game.Phase.Draft.draw.main(
   controls: App.KL.Game.Controls.Draft
   allies: Map<App.KL.Game.Player>, 
   page: String
-  tab:  Maybe<String>,
+  skills_tab:  Maybe<String>,
   user: String,
-  filter: App.KL.Game.Phase.Draft.Filter
+  filter: App.KL.Game.Controls.Draft.Filter
 ): DOM
   <div class="pixel-art" style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
       {App.KL.Game.Phase.Draft.draw.background}
@@ -121,7 +121,7 @@ App.KL.Game.Phase.Draft.draw.main(
         <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
           // main content
           <div style={"display": "flex", "padding": "4px"}>
-            { App.KL.Game.Phase.Draft.draw.middle.content(allies, page, tab, user, filter) }
+            { App.KL.Game.Phase.Draft.draw.middle.content(allies, page, skills_tab, user, filter) }
           </div>
           // bottom buttons
             { App.KL.Game.Phase.Draft.draw.middle.bottom_buttons }
@@ -174,9 +174,9 @@ App.KL.Game.Phase.Draft.draw.middle.bottom_buttons: DOM
 App.KL.Game.Phase.Draft.draw.middle.content(
   allies: Map<App.KL.Game.Player>
   page: String
-  tab:  Maybe<String>
+  skills_tab:  Maybe<String>
   user: String
-  filter: App.KL.Game.Phase.Draft.Filter
+  filter: App.KL.Game.Controls.Draft.Filter
 ): DOM
   let players_qtt   = 3 // max players TODO store in game?
   let local_player  = allies{user}
@@ -185,7 +185,7 @@ App.KL.Game.Phase.Draft.draw.middle.content(
   let allies = Map.delete!(user, allies)
   <div style={"display": "contents"}>
     // USER CARD
-    { App.KL.Game.Phase.Draft.draw.card.user(local_player, selected_hero, tab) }
+    { App.KL.Game.Phase.Draft.draw.card.user(local_player, selected_hero, skills_tab) }
     // ALLIES CARDS
     { App.KL.Game.Phase.Draft.draw.card.allies(allies, page, players_qtt) }
     // FILTER
@@ -204,7 +204,7 @@ App.KL.Game.Phase.Draft.draw.middle.content(
 App.KL.Game.Phase.Draft.draw.card.user(
   player: Maybe<App.KL.Game.Player> // player (used to know if player is ready or not)
   hero:   Maybe<App.KL.Game.Hero>, // selected hero
-  tab:    Maybe<String> // which skill tab is selected
+  skills_tab:    Maybe<String> // which skill skills_tab is selected
 ): DOM
   without player: App.KL.Game.Phase.draw.none // if user is not a player
 
@@ -219,7 +219,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
   
   let inner  = 
     <div style={"display": "contents"}>
-      // skills tabs
+      // skills skills_tabs
       <div style={
         "height": "40%", 
         "width": "17%", 
@@ -239,7 +239,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
       </div>
       // card with hero attrs
       <div id=id style={"width": "82%", "border-radius": "0 5px 5px 0", "padding": F64.show(fator * bt) | "px"}>
-        {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, tab, player@ready)}
+        {App.KL.Game.Phase.Draft.draw.card.hero(hero, id, skills_tab, player@ready)}
       </div>
     </div>
   
@@ -247,7 +247,7 @@ App.KL.Game.Phase.Draft.draw.card.user(
     { App.KL.Game.Phase.draw.card.wrapper(99.0, 208.0, bt, id, fator, App.KL.Game.Phase.Draft.Assets.card.main, inner) }
   </div>
 
-// draw skills tabs in local user card
+// draw skills skills_tabs in local user card
 App.KL.Game.Phase.Draft.draw.card.slot(
   key: String
 ): DOM
@@ -324,7 +324,7 @@ App.KL.Game.Phase.Draft.draw.card.ally(
 App.KL.Game.Phase.Draft.draw.card.hero(
   hero:  Maybe<App.KL.Game.Hero>
   id:    String
-  tab:   Maybe<String>
+  skills_tab:   Maybe<String>
   ready: Bool
 ): DOM
   <div id=id style={"height": "100%", "position": "relative"}>
@@ -334,7 +334,7 @@ App.KL.Game.Phase.Draft.draw.card.hero(
     </div>
     // draw bottom of card
     <div id=id style={"height": "48%", "width": "100%"}>
-      { App.KL.Game.Phase.Draft.draw.card.hero.bottom(hero, tab, id) }
+      { App.KL.Game.Phase.Draft.draw.card.hero.bottom(hero, skills_tab, id) }
     </div>
     // draw light if player is ready
     {
@@ -407,17 +407,17 @@ App.KL.Game.Phase.Draft.draw.card.hero.img(
 // choose what draw in bottom of cards
 App.KL.Game.Phase.Draft.draw.card.hero.bottom(
   hero: Maybe<App.KL.Game.Hero>
-  tab:  Maybe<String>
+  skills_tab:  Maybe<String>
   id:   String
 ): DOM
   Maybe {
     get hero = hero
-    case tab {
+    case skills_tab {
       none: Maybe {
         get attr = hero@attributes
         return App.KL.Game.Phase.Draft.draw.card.hero.attrs(attr, id)
       }
-      some: some(App.KL.Game.Phase.Draft.draw.card.hero.skill_info(hero, tab.value))
+      some: some(App.KL.Game.Phase.Draft.draw.card.hero.skill_info(hero, skills_tab.value))
     }
   } <> App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id)
 
@@ -484,7 +484,7 @@ App.KL.Game.Phase.Draft.draw.card.hero.skill_info(
 // ==============================
 // draw filter card
 App.KL.Game.Phase.Draft.draw.card.filter(
-  filter: App.KL.Game.Phase.Draft.Filter
+  filter: App.KL.Game.Controls.Draft.Filter
 ): DOM
   let options = Map.to_list!(filter@options) // TODO formap in DOM
 
@@ -552,9 +552,9 @@ App.KL.Game.Phase.Draft.draw.card.filter.option(checked: Bool, text: String): DO
 App.KL.Game.Phase.Draft.draw.menu(
   selected_hero: Maybe<App.KL.Game.Hero> // hero selected by local user
   page:   String // page selected in draft
-  filter: App.KL.Game.Phase.Draft.Filter // filter
+  filter: App.KL.Game.Controls.Draft.Filter // filter
 ): DOM
-  let hero_list = App.KL.Game.Phase.Draft.Filter.apply(App.KL.Game.Hero.list, filter)
+  let hero_list = App.KL.Game.Controls.Draft.Filter.apply(App.KL.Game.Hero.list, filter)
   let portrait  = App.KL.Game.Phase.Draft.draw.portrait.hero
   let portraits = [ portrait(hero, selected_hero, filter) for hero in hero_list ]
   <div style={
@@ -576,7 +576,7 @@ App.KL.Game.Phase.Draft.draw.menu(
 App.KL.Game.Phase.Draft.draw.portrait.hero(
   hero: App.KL.Game.Hero, 
   selected_hero: Maybe<App.KL.Game.Hero>, 
-  filter: App.KL.Game.Phase.Draft.Filter
+  filter: App.KL.Game.Controls.Draft.Filter
 ): DOM
   let fator = App.KL.Game.Phase.Draft.draw.fator.number
   let bt = 2.0
