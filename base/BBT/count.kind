@@ -1,0 +1,8 @@
+BBT.count<K: Type, V: Type>(cond: K -> V -> Bool, map: BBT<K,V>): Nat
+  let result = 0
+  for key:value in map with result:
+    if cond(key, value) then
+      result + 1
+    else
+      result
+  result
