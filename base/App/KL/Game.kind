@@ -12,14 +12,14 @@ type App.KL.Game.State.Local {
     info: Hexagonal.Axial
     preview: App.KL.Game.Cast.Preview
     mouse: Pair<U32, U32>
-    screen_size: Pair<U32, U32>
+    screen: App.KL.Game.Screen
     filter: App.KL.Game.Phase.Draft.Filter
     hud: App.KL.Game.Controls.Hud // HUD controls
     draft: App.KL.Game.Controls.Draft // draft page controls
   )
 }
 
-App.KL.Game.State.Local.init(user: String, room: String, screen_size: Pair<U32, U32>): App.KL.Game.State.Local
+App.KL.Game.State.Local.init(user: String, room: String, screen: App.KL.Game.Screen): App.KL.Game.State.Local
   let preview = App.KL.Game.Cast.Preview.new(none, Hexagonal.Axial.Map.new!)
   let mouse   = {0#32,0#32}
   let tab     = none
@@ -28,7 +28,7 @@ App.KL.Game.State.Local.init(user: String, room: String, screen_size: Pair<U32, 
   let filter = App.KL.Game.Phase.Draft.Filter.default
   let hud    = App.KL.Game.Controls.Hud.initial
   let draft  = App.KL.Game.Controls.Draft.initial
-  App.KL.Game.State.Local.new(user, room, tab, page, info, preview, mouse, screen_size, filter, hud, draft)
+  App.KL.Game.State.Local.new(user, room, tab, page, info, preview, mouse, screen, filter, hud, draft)
 
 // Global State
 // ============
@@ -110,7 +110,7 @@ App.KL.Game.when(
       case game_info.phase {
         play: App.KL.Game.Phase.Play.when(local, game.value, event)
         draft: App.KL.Game.Phase.Draft.when(local, game.value, event)
-        end: App.KL.Game.Phase.Draft.when(local, game.value, event)
+        end: App.KL.Game.Phase.End.when(local, game.value, event)
       }
   }
 
