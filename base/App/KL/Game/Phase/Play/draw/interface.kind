@@ -314,9 +314,12 @@ App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<Pla
         for info in skills_list:
           let {key, skill} = info
           let id = "SK"|key
-          let show = Maybe.if!((x) String.eql(skill@name, x@name), skill_hovered)
+          let show  = Maybe.if!((x) String.eql(skill@name, x@name), skill_hovered)
+          let order = App.KL.Game.Phase.draw.get_skill_order_by_key(key)
+          let order = Nat.show(order)
           <div style={
             "position": "relative"
+            "order": order
           }>
             <div id=id style={
               "background-color": "#190d1f"
@@ -328,8 +331,7 @@ App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<Pla
               "transform": "translate(-15%, -101%)"
               "width": "150%"
               "color": "white"
-              "display": if show then "block" else "none
-              "
+              "display": if show then "block" else "none"
             }>skill@description</div>
             <span id=id style={"position": "absolute", "bottom": "1%", "left": "7%"}>key</span>
             <span id=id style={"position": "absolute", "width": "100%", "height": "100%", "display": "flex", "justify-content": "center", "align-items": "center", "color": "white"}>skill@name</span>
