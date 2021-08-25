@@ -232,7 +232,7 @@ App.KL.Game.Phase.Play.draw.tab.content.stats.table(
         "flex-direction": flex_direction
       }>
         <div style={"flex": "2"}></div>
-        <div style={"flex": "1"}>"Hp"</div>
+        <div style={"flex": "1"}>"TP"</div>
         <div style={"flex": "1"}>"Kills"</div>
         <div style={"flex": "1"}>"Deaths"</div>
         <div style={"flex": "1"}>"Assists"</div>
@@ -299,7 +299,7 @@ App.KL.Game.Phase.Play.draw.tab.stats.table.row(
           </div>
         </div>
       </div>
-      <div style={"flex": "1"}><p>I32.show(App.KL.Game.Phase.Play.draw.get_life(creature))</p></div>
+      <div style={"flex": "1"}><p>I32.show(player@scoreboard@xp)</p></div>
       <div style={"flex": "1"}><p>I32.show(player@scoreboard@kills)</p></div>
       <div style={"flex": "1"}><p>I32.show(player@scoreboard@deaths)</p></div>
       <div style={"flex": "1"}><p>"100"</p></div>
