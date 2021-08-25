@@ -1,0 +1,3 @@
+Monoid.get_e<A: Type>(M: Monoid(A)): A
+    open M
+    M.e

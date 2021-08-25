@@ -1,0 +1,7 @@
+type Submonoid<A: Type>(M: Monoid(A)){
+    new(
+        Q: A -> Type,
+        he: Q(Monoid.get_e(A,M)),
+        closed: (a: A) (ha: Q(a)) (b: A) (hb: Q(b)) -> Q(Monoid.get_op(A,M)(a, b)),
+    )
+}
