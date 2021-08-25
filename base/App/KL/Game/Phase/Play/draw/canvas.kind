@@ -2,27 +2,29 @@ App.KL.Game.Phase.Play.draw.canvas.elem(
   local: App.KL.Game.State.Local, 
   game: App.KL.Game, img: VoxBox
 ): DOM
-  <div style={
-    "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
-    "max-width": "max(100vw, 900px)",
-    "max-height": "max(100vh, 650px)",
-    "overflow": "scroll",
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-  }>{
-    let width  = F64.show(F64.round(I32.to_f64(U32.to_i32(local@screen@size@fst)) / local@screen@scale))
-    let height = F64.show(F64.round(I32.to_f64(U32.to_i32(local@screen@size@snd)) / local@screen@scale))
-    DOM.vbox({
-        "class": "pixel-art" 
-        "id": "game_screen",
-        "width": width,
-        "height": height,
-        "scale": String.show_clean(F64.show(local@screen@scale))
-      },
-      {},
-      App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
-  }</div>
+  <div style={"display": "flex", "justify-content": "center", "align-items": "center", "width": "max(100vw, 900px)", "height": "max(100vh, 650px)"}>
+    <div style={
+      "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
+      "max-height": "100%",
+      "max-width": "100%",
+      "overflow": "scroll",
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "center"
+    }>{
+      let width  = F64.show(F64.round(I32.to_f64(U32.to_i32(local@screen@size@fst)) / local@screen@scale))
+      let height = F64.show(F64.round(I32.to_f64(U32.to_i32(local@screen@size@snd)) / local@screen@scale))
+      DOM.vbox({
+          "class": "pixel-art" 
+          "id": "game_screen",
+          "width": width,
+          "height": height,
+          "scale": String.show_clean(F64.show(local@screen@scale))
+        },
+        {},
+        App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
+    }</div>
+  </div>
 
 // Auxiliar Function
 App.KL.Game.Phase.Play.draw.canvas.to_xy( 
