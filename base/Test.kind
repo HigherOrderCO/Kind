@@ -1,11 +1,548 @@
-Test: _
-  let a = {
-    "blue": "alo"
-    "red": "hello"
-    "green": "heehee"
+Stream.to_list<A: Type>(length: Nat, stream: Stream<A>): List<A>
+  open stream
+  case length {
+    zero: []
+    succ: List.cons<A>(stream.head, Stream.to_list<A>(length.pred, stream.tail(unit)))
   }
 
-  <div>
-    for color:text in a:
-      <button style={"color": color}>text</button>
-  </div>
+Stream.map<A: Type, B: Type>(f: A -> B, stream: Stream<A>): Stream<B>
+  open stream
+  Stream.cons<B>(f(stream.head), () Stream.map<A,B>(f, stream.tail(unit)))
+
+nats(n: Nat): Stream<Nat>
+  Stream.cons!(n, () nats(Nat.succ(n)))
+
+Stream.filter<A: Type>(cond: A -> Bool, stream: Stream<A>): Stream<A>
+  open stream
+  if cond(stream.head) then
+    Stream.cons!(stream.head, () Stream.filter!(cond, stream.tail(unit)))
+  else
+    Stream.filter!(cond, stream.tail(unit))
+
+
+//1 2 3 4 5 6 7 8 9 10 11 12 13 14...
+//1 x 3 x 5 x 7 x 9 x  11 x  13  x...
+
+primes: Stream<Nat>
+  primes.go(nats(2))
+
+primes.go(sieve: Stream<Nat>): Stream<Nat>
+  open sieve
+  Stream.cons!(sieve.head, () primes.go(Stream.filter!((x) Bool.not(Nat.is_zero(Nat.mod(x,sieve.head))), sieve.tail(unit))))
+
+//0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|0 1|
+//0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|0 0 1|
+//0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|0 0 0 0 1|
+  
+primes2: Stream<Nat>
+  primes2.seek(Stream.map!!(Maybe.some!, nats(2)))
+
+primes2.cut<A: Type>(a: Nat, b: Nat, sieve: Stream<Maybe<Nat>>): Stream<Maybe<Nat>>
+  open sieve
+  case a {
+    zero: Stream.cons!(none,       () primes2.cut<A>(b,      0,           sieve.tail(unit)))
+    succ: Stream.cons!(sieve.head, () primes2.cut<A>(a.pred, Nat.succ(b), sieve.tail(unit)))
+  }
+
+primes2.seek(sieve: Stream<Maybe<Nat>>): Stream<Nat>
+  open sieve
+  case sieve.head {
+    none: primes2.seek(sieve.tail(unit))
+    some: Stream.cons!(sieve.head.value, () primes2.seek(primes2.cut!(Nat.pred(sieve.head.value), 0, sieve.tail(unit))))
+  }
+
+Test: _
+  let list = Stream.to_list!(2000, primes2)
+  List.show!(Nat.show, list)
+
+  //let ns = nats(0)
+  //Stream.head!(Stream.tail!(Stream.tail!(ns)))
+
+
+//primes2.next(num: Nat, sieve: Stream<Maybe<Nat>>): Stream<Maybe<Nat>>
+  //open sieve
+  //primes2.seek(primes2.cut!(0, Nat.pred(num), sieve))
+
+
+
+
+//1 2 3 4 5 6 7 8 9
+  //2   4   6   8
+
+//1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+    //3   5   7   9    11    13    15    17    19
+
+
+  
+  
+//Test: _
+  //let pq = PriorityQueue.empty<Nat>((x) x)
+  //let pq = PriorityQueue.insert<Nat>(7, pq)
+  //let pq = PriorityQueue.insert<Nat>(2, pq)
+  //let pq = PriorityQueue.insert<Nat>(9, pq)
+  //let pq = PriorityQueue.insert<Nat>(5, pq)
+  //{
+    //PriorityQueue.head!(pq)
+    //PriorityQueue.head!(PriorityQueue.tail!(pq))
+  //}
+//////gcd(a: Nat, b: Nat): Nat
+  //////case Nat.cmp(a, b) {
+    //////ltn: gcd(a, b - a)
+    //////eql: a
+    //////gtn: gcd(a - b, b)
+  //////}
+
+  //////4,10 ~> 0,6 ... gcd(4,6)
+  //////10,4 ~> 6,0 ... gcd(6,4)
+  //////5,5  ~> 0,0 ... 5
+
+
+//////gcd(n: Nat, d: Nat, a: Nat, b: Nat, c: Nat): Nat
+  //////log("gcd(" | Nat.show(a) | "," | Nat.show(b) | "," | Nat.show(c) | ")")
+  //////case a {
+    //////zero: case b {
+      //////zero: c
+      //////succ: log("a>b") gcd(n, d, c, Nat.succ(b.pred), 0)
+    //////}
+    //////succ: case b {
+      //////zero: log("a<b") gcd(n, d, Nat.succ(a.pred), c, 0)
+      //////succ: gcd(n, d, a.pred, b.pred, Nat.succ(c))
+    //////}
+  //////}
+
+////Rat: Type
+  ////int<P: Rat -> Type> ->
+  ////(new:
+    ////(num: Nat) ->
+    ////(den: Nat) ->
+    ////(a: Nat) ->
+    ////(b: Nat) ->
+    ////(c: Nat) ->
+    ////P(Rat.new(num, den, a, b, c))) ->
+  ////P(int)
+
+////// The Rat.new constructor takes 5 arguments.
+////// - num   : the fraction numerator
+////// - den   : the fraction denumerator
+////// - a,b,c : arguments of a built-in gcd computation
+////Rat.new(num: Nat, den: Nat, a: Nat, b: Nat, c: Nat): Rat
+  ////(P, new)
+  ////log(Nat.show(num) | " " | Nat.show(den) | " " | Nat.show(a) | " " | Nat.show(b) | " " | Nat.show(c))
+  ////den((den) P(Rat.new(num, den, a, b, c))
+    ////// den = zero
+    ////new(num, 1, 0, 0, 0)
+    ////// den = succ(den.pred)
+    ////(den.pred) a((a) P(Rat.new(num, Nat.succ(den.pred), a, b, c))
+      ////// a = zero
+      ////b((b) P(Rat.new(num, Nat.succ(den.pred), 0, b, c))
+        ////// b = zero
+        ////c((c) P(Rat.new(num, Nat.succ(den.pred), 0, 0, c))
+          ////// c = zero
+          ////new(num, Nat.succ(den.pred), 0, 0, 0)
+          ////// c = succ(c.pred)
+          ////(c.pred) Rat.new(Nat.div(num,Nat.succ(c.pred)), Nat.div(Nat.succ(den.pred),Nat.succ(c.pred)), 0, 0, 0)(P,new)
+        ////)
+        ////// b = succ(b.pred)
+        ////(b.pred) Rat.new(num, Nat.succ(den.pred), c, Nat.succ(b.pred), 0)(P,new)
+      ////)
+      ////// a = succ(a.pred)
+      ////(a.pred) b((b) P(Rat.new(num, Nat.succ(den.pred), Nat.succ(a.pred), b, c))
+        ////// b = zero
+        ////Rat.new(num, Nat.succ(den.pred), Nat.succ(a.pred), c, 0)(P,new)
+        ////// b = succ(b.pred)
+        ////(b.pred) Rat.new(num, Nat.succ(den.pred), a.pred, b.pred, Nat.succ(c))(P,new)
+      ////)
+    ////)
+  ////)
+  
+////Rat.values(rat: Rat): Pair<Nat,Nat>
+  ////case rat {
+    ////new: {rat.num, rat.den}
+  ////}
+
+////Rat.make(a: Nat, b: Nat): Rat
+  ////Rat.new(a, b, a, b, 0)
+
+////Test: _
+  ////Rat.values(Rat.new(40, 10, 0, 0, 0))
+
+//////foo(
+  //////P: Nat -> Type
+  //////z: (n: Nat, e: Nat.eql(n,0) == true) -> P(n)
+  //////s: (n: Nat, e: Nat.eql(n,0) == false) -> P(n)
+  //////n: Nat
+//////): P(n)
+  //////case n {
+    //////zero: 
+      //////let a = f(n)
+      //////?a
+    //////succ: ?b
+  //////}!
+
+
+
+
+//////Foo.new(Nat.pred(.........(Nat.pred(Nat.succ(Nat.pred(a))))))))))))))
+//////Foo.new(Nat.pred(.........(Nat.pred(a))))))))))))
+//////eq?
+
+//////(new) Nat.is_zero(Nat.pred(...(Nat.pred(Nat.succ(Nat.pred(a))))))))))))),
+  //////(b) P(Foo.new(Nat.pred(... (Nat.pred(Nat.succ(Nat.pred(a))))))))))))))),
+  //////(e) e((e.b) (e) P(Foo.new(e.b)),new(0)),
+  //////(e) e((e.b) (e) P(Foo.new(e.b)),
+  //////Foo.new(Nat.pred(... (Nat.pred(Nat.succ(Nat.pred(a)))))))))))))),P,new)))
+
+//////(new) Nat.is_zero(Nat.pred(...(Nat.pred(a))))))))))),                    
+  //////(b) P(Foo.new(Nat.pred(... (Nat.pred(a))))))))))))),
+  //////(e) e((e.b) (e) P(Foo.new(e.b)),new(0)),
+  //////(e) e((e.b) (e) P(Foo.new(e.b)),
+  //////Foo.new(Nat.pred(... (Nat.pred(a)))))))))))),P,new)))
+
+
+
+//////Nat.is_zero(n: Nat): Either<0 == n, Nat.succ(Nat.pred(n)) == n>
+  //////case n {
+    //////zero: Either.left!!(refl)
+    //////succ: Either.right!!(refl)
+  //////}!
+
+//////Foo: Type
+  //////foo<P: Foo -> Type> ->
+  //////(new: (a: Nat) -> P(Foo.new(a))) ->
+  //////P(foo)
+
+//////Foo.new(a: Nat): Foo
+  //////(P, new)
+  //////Nat.is_zero(a)(
+    //////(b) P(Foo.new(a))
+    //////(e) 
+      //////case e {
+        //////refl: new(0)
+      //////}: P(Foo.new(e.b))
+    //////(e)
+      //////case e {
+        //////refl: Foo.new(Nat.pred(a))(P,new)
+      //////}: P(Foo.new(e.b))
+      ////////case e with k: P(Foo.new(Nat.pred(a))) {
+        ////////refl: ?a
+      ////////}!
+      ////////let k = k :: rewrite X in P(Foo.new(X)) with mirror(e)
+      ////////rewrite X in P(Foo.new(X)) with e
+  //////)
+  ////////a(
+    ////////(a) P(Foo.new(a))
+    ////////new(0)
+    ////////(pred)
+      ////////let k = Foo.new(pred)(P,new)
+      ////////?a
+  ////////)
+
+  ////////Nat.is_zero(a)(
+    ////////// motive
+      ////////(e) P(Foo.new(a))
+    ////////// true:
+      ////////new(0)
+    ////////// false:
+      ////////Foo.
+  ////////)
+
+
+//////// ou n == 0
+//////// ou n >= 0
+
+
+
+
+
+////////Int: Type
+  ////////int<P: Int -> Type> ->
+  ////////(new: (pos: Nat) -> (neg: Nat) -> P(Int.new(pos, neg))) ->
+  ////////P(int)
+
+////////Int.new(pos: Nat, neg: Nat): Int
+  ////////(P, new)
+  ////////case pos {
+    ////////zero: new(Nat.zero, neg)                     
+    ////////succ: case neg {
+      ////////zero: new(Nat.succ(pos.pred), Nat.zero)
+      ////////succ: Int.new(pos.pred, neg.pred)(P, new)
+    ////////}!
+  ////////}: P(Int.new(pos, neg))
+
+
+
+//////////Asc: Type
+  //////////asc<P: Asc -> Type> ->
+  //////////(new: (a: Nat) -> (b: Nat) -> P(Asc.new(a, b))) ->
+  //////////P(asc)
+
+//////////Asc.new(a: Nat, b: Nat): Asc
+  //////////(P, new)
+  //////////case Nat.gtn(a, b) as gtn {
+    //////////true: new(a, b)
+    //////////false: new(b, a)
+  //////////}: case gtn {
+    //////////true: P(Asc.new(a,b))
+    //////////false: P(Asc.new(b,a))
+  //////////}
+
+
+//////////- Expected: P((P) (new) bar(a,(e) bar(a,(self) Type,P(Foo.new(a)),P(Foo.new(a))),new(a),new(a)))
+//////////- Detected:                       bar(a,(self) Type,P(Foo.new(a)),P(Foo.new(a)))
+
+
+//////////Foo.a(foo: Foo): Nat
+  //////////foo(() Nat, (a) 
+    //////////let a = booly<Nat>(a, Nat.eql(Foo.a(foo),0))
+    //////////?a)
+
+//////////b(x, x)
+//////////lol(a: Nat)<P: Nat -> Type>(p: P(a)): P(Nat.succ(Nat.pred(a)))
+  //////////case a with p {
+    //////////zero: ?r
+    //////////succ: ?s
+  //////////}!
+  //////////lol(a, P, p)
+
+//////////ok(a: Nat)<P: Foo -> Type>(p: P(Foo.new(Nat.pred(a)))): P(Foo.new(a))
+  //////////case a with p {
+    //////////zero: p
+    //////////succ: 
+      //////////let k = ok(a.pred, P, p)
+      //////////?a
+      ////////////ok(Nat.succ(a.pred))<P>(p)
+  //////////}!
+
+//////////Test: _
+  //////////case Foo.new(7) as foo {
+    //////////new: foo.a
+  //////////}
+
+//////////- Expected: P(Foo.new(a))
+//////////- Detected: P(Foo.new((P) (new) bar(a, (e) Nat, a, a)))
+
+////////// - Expected: P(Foo.new(a))
+////////// - Detected: bar(a,(e) Type,P(Foo.new(a)),P(Foo.new(a)))
+
+
+////////// n, m
+////////// caso gcd(n,m) == 1
+////////// caso gcd(n,m) != 1
+
+//////////foo(
+  //////////n: Nat
+  //////////P: Nat -> Type
+
+//////////foo:
+  //////////(n: Nat) ->
+  //////////case double(n) {
+    
+    
+  //////////a: P(4)
+
+
+  //////////case Nat.gtn(a, b) as gtn {
+    //////////true: new(a, b)
+    //////////false: new(b, a)
+  //////////}: case gtn {
+    //////////true: P(Asc.new(a,b))
+    //////////false: P(Asc.new(b,a))
+  //////////}
+
+
+//////////- Expected: P((P) (new) Nat.gtn(a,b,(gtn) gtn((gtn) Type,P(Asc.new(a,b)),P(Asc.new(b,a))),new(a,b),new(b,a)))
+//////////- Detected: Nat.gtn(a,b,(gtn) Type,P(Asc.new(a,b)),P(Asc.new(b,a)))
+
+//////////- Expected: P((P) (new) Nat.gtn(a,b,(gtn) gtn((gtn) Type,P(Asc.new(a,b)),P(Asc.new(b,a))),new(a,b),?a))
+//////////- Detected: Nat.gtn(a,b,(gtn) Type,P(Asc.new(a,b)),P(Asc.new(b,a)))
+
+//////////gcd(a: Nat, b: Nat): Nat
+  //////////case Nat.cmp(a, b) {
+    //////////ltn: gcd(a, b - a)
+    //////////eql: a
+    //////////gtn: gcd(a - b, b)
+  //////////}
+
+//////////mul(a: Nat, b: Nat): Nat
+  //////////switch Nat.eql(b) {
+    //////////0: a
+    //////////1: a
+  //////////} default Nat.mul(a, b)
+
+//////////div(a: Nat, b: Nat): Nat
+  //////////switch Nat.eql(b) {
+    //////////0: a
+    //////////1: a
+  //////////} default Nat.div(a, b)
+
+////////////Rat: Type
+  ////////////rat<P: Rat -> Type> ->
+  ////////////(new:
+    ////////////(num: Nat) ->
+    ////////////(den: Nat) ->
+    ////////////P(Rat.new(num, Nat.succ(Nat.succ(den))))
+    ////////////) ->
+  ////////////P(rat)
+
+////////////Rat.new(num: Nat, den: Nat): Rat
+  ////////////(P, new)
+  ////////////new(num, Nat.pred(Nat.pred(den)))
+
+
+//////////Foo.raise(pair: Pair<Nat,Nat>): Pair<Nat,Nat>
+  //////////case pair {
+    //////////new:
+      //////////case pair.fst {
+        //////////zero: {0, pair.snd}
+        //////////succ: case pair.snd {
+          //////////zero: {Nat.succ(pair.fst.pred), 0}
+          //////////succ: Foo.raise({pair.fst.pred, pair.snd.pred})
+        //////////}
+      //////////}
+  //////////}
+
+//////////Foo.reduce(pair: Pair<Nat,Nat>): Pair<Nat,Nat>
+  //////////case pair {
+    //////////new:
+      //////////case pair.fst {
+        //////////zero: {0, pair.snd}
+        //////////succ: case pair.snd {
+          //////////zero: {Nat.succ(pair.fst.pred), 0}
+          //////////succ: Foo.reduce({pair.fst.pred, pair.snd.pred})
+        //////////}
+      //////////}
+  //////////}
+
+//////////Ok(a: Nat, b: Nat): Foo.reduce(Foo.raise({a,b})) == {a,b}
+  //////////refl
+
+
+  ////////////case num {
+    ////////////zero: new(0, den)
+    ////////////succ: new(Nat.succ(num.pred), den)
+  ////////////}: case num {
+    ////////////zero: P(Rat.new(0, den))
+    ////////////succ: P(Rat.new(Nat.succ(num.pred), den))
+  ////////////}
+
+  ////////////case 0 as k {
+    ////////////zero: new(num, den)
+    ////////////succ: new(num, den)
+  ////////////}: P(Rat.new(Nat.pred(num),Nat.pred(den)))
+
+  ////////////new(div(num,1), div(den,1))
+  ////////////case gcd(num,den) as got {
+    ////////////zero: Rat.new(num,den)<P,new>
+    ////////////succ: Rat.new(num,den)<P,new>
+  ////////////}: P(Rat.new(mul(num,gcd(num,den)),mul(den,gcd(num,den))))
+
+  ////////////case gcd(num, den) as k {
+    ////////////zero: Rat.new(num, den)(P, new)
+    ////////////succ: Rat.new(num, den)(P, new)
+  ////////////}: P(Rat.new(div(num,k), div(den,k)))
+
+////////////Test: _
+  ////////////mul(3, 4)
+
+////////////is_even(a: Nat): Bool
+  ////////////case a {
+    ////////////zero: true
+    ////////////succ: case is_even(a.pred) as got {
+      ////////////true: false
+      ////////////false: true
+    ////////////}
+  ////////////}
+
+////////////half(a: Nat): Nat
+  ////////////case a {
+    ////////////zero: Nat.zero
+    ////////////succ: case a.pred {
+      ////////////zero: Nat.zero
+      ////////////succ: Nat.succ(half(a.pred.pred))
+    ////////////}
+  ////////////}
+
+
+////////////bin_ind(
+  ////////////P: Nat -> Type
+  ////////////z: P(Nat.zero)
+  ////////////o: (n: Nat) -> (p: P(n)) -> P(Nat.double(n))
+  ////////////i: (n: Nat) -> (p: P(n)) -> P(Nat.succ(Nat.double(n)))
+  ////////////n: Nat
+////////////): P(n)
+  ////////////case Nat.half(n) as half {
+    ////////////zero: ?a
+    ////////////succ: 
+  ////////////}
+
+////////////Test: Equal(Box, Box.new(3), Box.new(2))
+  ////////////Equal.refl<Box, Box.new(3)>
+
+////////////Test: _
+  ////////////case Box.new(3) as got {
+    ////////////new: got.n
+  ////////////}
+
+////////////Foo.new(Nat.succ(n)) == Foo.new(n)
+
+  ////////////case n {
+    ////////////zero: new(Nat.zero)
+    ////////////succ: Foo.new(n.pred)(P, new)
+  ////////////}: P(Foo.new(n))
+
+
+
+
+
+
+
+
+////////////Rat.new(7, 5) == 
+
+////////////Rat.new(a, b) = 
+
+
+////////////- Expected: P((P) (new) new(Nat.succ(num),den))
+////////////- Detected: P(Rat.new(Nat.succ(num),den))
+
+//////////// Rat.new(num, den) 
+
+////////////Rat.new(a, b) == case Rat.new(a, b) { new: Ra
+
+  ////////////if num >? den then
+    ////////////new(num, den)
+  ////////////else
+    ////////////new(num, den)
+
+  ////////////case is_even(num) as num_even {
+    ////////////false: new(num, den)
+    ////////////true: Rat.new(?a, den)(P, new)
+  ////////////}: P(Rat.new(num, den))
+
+////////////Rat.get(rat: Rat): Pair<Nat,Nat>
+  ////////////case rat {
+    ////////////new: {rat.num, rat.den}
+  ////////////}
+
+////////////Test: _
+  ////////////Rat.get(Rat.new(4, 4))
+
+  ////////////case num {
+    ////////////zero: Nat.zero
+  ////////////}
+  ////////////case Nat.half(den) as half {
+    ////////////zero: new(num, Nat.zero)
+    ////////////succ: Rat.new(num, Nat.succ(half.pred))(P, new)
+  ////////////}: P(Rat.new(num, half))
+
+  ////////////case Nat.double(num) as got {
+    ////////////zero: new(Nat.zero, den)
+    ////////////succ: Rat.new(got.pred, den)(P, new)
+  ////////////}: P(Rat.new(got, den))
+
+
+
+
+
+
+
