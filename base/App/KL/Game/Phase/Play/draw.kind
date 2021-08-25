@@ -147,6 +147,15 @@ App.KL.Game.Phase.Play.draw.get_life_percentage(creature: Maybe<App.KL.Game.Crea
     some: F64.mul(100.0, I32.to_f64(creature.value@hp) / I32.to_f64(creature.value@hero@max_hp))
   }
 
+App.KL.Game.Phase.Play.draw.get_life_info(info: PlayersInfo): Pair<I32, I32>
+  let {creature, player} = info
+  let hero     = App.KL.Game.Phase.Play.draw.get_player_hero(player)
+  let max_life = Maybe.map!!((x) x@max_hp, hero) <> (0 :: I32)
+  case creature {
+    none: {0, max_life}
+    some: {creature.value@hp, max_life}
+  }
+
 App.KL.Game.Phase.Play.draw.get_ap(creature: Maybe<App.KL.Game.Creature>): I32
   case creature {
     none: 0

@@ -357,8 +357,12 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
   without info: <span style={"display": "none"}></span>
 
   let creature = info@fst
-  let life_percentage = App.KL.Game.Phase.Play.draw.get_life_percentage(creature)
+  let life_percentage     = App.KL.Game.Phase.Play.draw.get_life_percentage(creature)
+  let {actual_hp, max_hp} = App.KL.Game.Phase.Play.draw.get_life_info(info)
   let ap = App.KL.Game.Phase.Play.draw.get_ap(creature)
+
+  let actual_hp = I32.show(actual_hp)
+  let max_hp    = I32.show(max_hp)
 
   let content = 
     <div style={
@@ -373,14 +377,34 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
         "top": "4%"
         "left": "4%"
       }></img>
-      <img src= App.KL.Game.Phase.Play.Assets.interface.user.life style={
+      <div style={
         "position": "absolute"
         "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
         "transform-origin": "top left"
         "top": "61%"
         "left": "34%"
-        "clip-path": "polygon(0 0%, "|String.show_clean(F64.show(life_percentage + 8))|"% 0%, "|String.show_clean(F64.show(life_percentage))|"% 100%, 0% 100%)"
-      }></img>
+      }>
+        <div style={"position": "relative"}>
+          <img src= App.KL.Game.Phase.Play.Assets.interface.user.life style={
+            "clip-path": "polygon(0 0%, "|String.show_clean(F64.show(life_percentage + 8))|"% 0%, "|String.show_clean(F64.show(life_percentage))|"% 100%, 0% 100%)"
+            "display": "flex"
+          }></img>
+          <div style={
+            "position": "absolute"
+            "top": "0" 
+            "left": "0"
+            "width": "100%"
+            "height": "100%"
+            "display": "flex"
+            "align-items": "center"
+            "justify-content": "center"
+            "color": "white"
+            "font-size": "0.75rem"
+          }>
+            <span>actual_hp | "/" | max_hp</span>
+          </div>
+        </div>
+      </div>
       <div style={
         "position": "absolute"
         "top": "74%"
