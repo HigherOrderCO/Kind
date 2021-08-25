@@ -211,7 +211,6 @@ App.KL.Game.Phase.Draft.draw.card.user(
   let fator  = App.KL.Game.Phase.Draft.draw.fator.number
   let bt     = 2.0
   let id     = "user-card"
-  let order  = ["I","Q","W","E","R","X"] // order which skills are shown 
   let skills = case hero {
     none: []
     some: Map.to_list!(hero.value@skills)
@@ -453,7 +452,7 @@ App.KL.Game.Phase.Draft.draw.card.hero.attrs(attrs: App.KL.Game.Hero.Attributes,
           </div>
         </div>
         {
-          if attr =? "utility" then <span></span>
+          if attr =? "utility" then App.KL.Game.Phase.draw.none
           else 
             <div id=id style={"display": "flex", "justify-content": "center"}>
               <img id=id style={"width": "80%", "margin": "auto", } src=App.KL.Game.Phase.Draft.Assets.card.divisor></img>
@@ -469,13 +468,13 @@ App.KL.Game.Phase.Draft.draw.card.hero.skill_info(
 ): DOM
   let skill = hero@skills{key}
   case skill {
-    none: <span></span>
+    none: App.KL.Game.Phase.draw.none
     some:
       let name = skill.value@name
       let description = skill.value@description
 
       <div style={"padding": "10px", "width": "100%", "text-align": "center", "color": "white"}>
-        <p style={"margin-bottom": "3px"}>name</p>
+        <p style={"margin-bottom": "3px", "font-weight": "700", "font-size": "1.2rem"}>name</p>
         <p>description</p>
       </div>    
   }
