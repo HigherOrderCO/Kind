@@ -31,10 +31,10 @@ App.KL.Game.Phase.Play.draw.canvas.to_xy(
 ): Pair<U32, U32>
     
     // Calculus to find the center of the canvas
-    let x = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@fst)) / screen@scale) / 2)
-    let y = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@snd)) / screen@scale) / 2)
-    Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, x, y)
-
+    let x = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@fst)) / screen@scale) / 2) 
+    let y = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@snd)) / screen@scale) / 2) 
+    let {x, y} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, x, y)
+    {x - screen@position@fst, y - screen@position@snd }
 
 
 App.KL.Game.Phase.Play.draw.canvas.from_xy( 
@@ -42,7 +42,7 @@ App.KL.Game.Phase.Play.draw.canvas.from_xy(
   screen: App.KL.Game.Screen
 ): Hexagonal.Axial
 
-
+  let position = {screen@position@fst + ((2#32 * position@fst) / F64.to_u32(screen@scale)), screen@position@snd + ((2#32 * position@snd) / F64.to_u32(screen@scale))}
   let x = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@fst)) / screen@scale) / 2)
   let y = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@snd)) / screen@scale) / 2)
   Hexagonal.Axial.from_screen_xy(position, App.KL.Constants.hexagon_radius, x, y)

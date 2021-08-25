@@ -57,8 +57,8 @@ App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): A
     get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
     let area = App.KL.Game.Areas.straight_line(size, center, target)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
     let effect = App.KL.Game.Effect.hp.damage_at(dmg)
     App.KL.Game.Effect.area!(enemy(App.KL.Game.Effect.status.dot.add("Zoio", 3, 1)), area)
@@ -73,7 +73,7 @@ App.KL.Game.Hero.Zoio.hero.Skills.tentackle(range: I32, dmg: I32, ap_cost: I32):
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, [target])
     //App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.movement.push_at(false)), [target])
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.dot.add("tentackle", 2, 2), target)
     App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg), target)
@@ -92,8 +92,8 @@ App.KL.Game.Hero.Zoio.hero.Skills.blinkaboom(size: I32, dmg: I32, ap_cost: I32):
     if moved then
       App.KL.Game.Effect { 
         App.KL.Game.Effect.ap.use(ap_cost)
-        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
-        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, target & area)
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, target & area)
         App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
         App.KL.Game.Effect.hp.suicide
         return unit
