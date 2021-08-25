@@ -1,0 +1,6 @@
+PriorityQueue.In.in_implies_not_empty<A: Type>(queue: PriorityQueue<A>, a: A, Hyp: PriorityQueue.In<A>(queue, a)): PriorityQueue.is_empty!(queue) == false
+  let hypothesis = PriorityQueue.In.in_queue_implies_in_tree!(queue, a, Hyp)
+  let lemma = PriorityQueue.Tree.In.in_implies_not_empty!(PriorityQueue.tree_of!(queue), a, hypothesis)
+  let qed = lemma :: rewrite x in (x == false) with PriorityQueue.is_empty_tree_implies_is_empty_queue!(queue)
+  qed
+ 

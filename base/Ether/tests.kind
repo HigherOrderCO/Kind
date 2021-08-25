@@ -1,6 +1,10 @@
 Ether.tests : _
-  let bits = Bits.hex.decode(String.reverse("0x29D7d1dd5B6f9C864d9db560D72a247c178aE86B"))
-  Ether.Contract.getAddress(Ether.Contract.Transaction.new(bits, 10))
+  def hash = Bits.hex.decode(String.reverse("0x29D7d1dd5B6f9C864d9db560D72a247c178aE86B"))
+  def salt = Bits.hex.decode(String.reverse("0x29D7d1dd5B6f9C86D72a2c178aE86B29D7d1dd5B6f9C86D72a2c178aE86B2345"))
+  def initCodeHash = Bits.hex.decode(String.reverse("0x29D7d1dd5B6f9C86D72a2c178aE86B29D7d1dd5B6f9C86D72a2c178aE86B2345"))
+ // log(Nat.show(Ether.Bits.get_bytes_size(salt)))
+  Ether.Address.get2dAddress(hash, salt, initCodeHash)
+
   //let buffer = Buffer8.from_hex("d69429d7d1dd5b6f9c864d9db560d72a247c178ae86b0a")
   //let hash = Crypto.Keccak.hash.bytes(buffer)
   //Buffer8.to_hex(hash)

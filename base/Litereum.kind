@@ -158,5 +158,143 @@ Litereum.Signature.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,le
     }
   }!
 
+// A term of the Litereum scripting language
+type Litereum.Term {
+  lam(
+    name: String,
+    body: Litereum.Term -> Litereum.Term,
+  )
+  app(
+    func: Litereum.Term,
+    argm: Litereum.Term,
+  )
+  var(
+    name: String,
+  )
 
+  nil
+  cons0(
+    pred: Litereum.Term,
+  )
+  cons1(
+    pred: Litereum.Term,
+  )
+  elim(
+    bits: Litereum.Term,
+    case_nil: Litereum.Term,
+    case_cons0: Litereum.Term -> Litereum.Term,
+    case_cons1: Litereum.Term -> Litereum.Term,
+  )
 
+  end(
+    done: Litereum.Term,
+  )
+  get(
+    key: Litereum.Term,
+    cont: Litereum.Term -> Litereum.Term,
+  )
+  set(
+    key: Litereum.Term,
+    val: Litereum.Term,
+    cont: Litereum.Term -> Litereum.Term,
+  )
+  call(
+    message: Litereum.Term,
+    recipient: Litereum.Term,
+    cont: Litereum.Term -> Litereum.Term,
+  )
+  install(
+    name: Litereum.Term,
+    term: Litereum.Term,
+    cont: Litereum.Term -> Litereum.Term,
+  )
+}
+
+type Litereum.Bond {
+  new(
+    entry: Litereum.Term
+    state: Map<Bits>
+  )
+}
+
+type Litereum.World {
+  new(
+    bonds: Map<Litereum.Bond>
+    terms: Map<Litereum.Term>
+  )
+}
+
+Litereum.Term.to_bits(
+  term: Litereum.Term
+): Bits
+  case Litereum.Term.reduce(term) as term {
+    end: Bits.e
+    cons0: Bits.o(Litereum.Term.to_bits(term.pred))
+    cons1: Bits.i(Litereum.Term.to_bits(term.pred))
+  } default Bits.e
+
+Litereum.Term.from_bits(
+  bits: Bits
+): Litereum.Term
+  case bits {
+    e: Litereum.Term.nil
+    o: Litereum.Term.cons0(Litereum.Term.from_bits(bits.pred))
+    i: Litereum.Term.cons1(Litereum.Term.from_bits(bits.pred))
+  }
+
+Litereum.Term.reduce(
+  term: Litereum.Term
+): Litereum.Term
+  case term {
+    app: case Litereum.Term.reduce(term.func) as func {
+      lam: Litereum.Term.reduce(func.body(term.argm))
+    } default term
+    elim: case Litereum.Term.reduce(term.bits) as bits {
+      nil: Litereum.Term.reduce(term.case_nil)
+      cons0: Litereum.Term.reduce(term.case_cons0(bits.pred))
+      cons1: Litereum.Term.reduce(term.case_cons1(bits.pred))
+    } default term
+  } default term
+  
+Litereum.Term.execute(
+  cost: Nat
+  user: Litereum.Address
+  term: Litereum.Term
+  world: Litereum.World
+): Pair<Litereum.Term, Litereum.World>
+  open world
+  let bond = world.bonds{U256.show(user)}
+  case Litereum.Term.reduce(term) as term {
+    end:
+      {term.done, world}
+    get: 
+      let key = Litereum.Term.to_bits(term.key)
+      let cost = cost + 1
+      case bond {
+        none:
+          Litereum.Term.execute(cost, user, term.cont(Litereum.Term.nil), world)
+        some:
+          use bond = bond.value
+          let val = Litereum.Term.from_bits(bond.state{Bits.show(key)} <> Bits.e)
+          Litereum.Term.execute(cost, user, term.cont(val), world)
+      }
+    set:
+      let key = Litereum.Term.to_bits(term.key)
+      let val = Litereum.Term.to_bits(term.val)
+      let cost = cost + 1
+      let world = case bond {
+        none:
+          world
+        some: 
+          use bond = bond.value
+          let state = bond.state{Bits.show(key)} <- val
+          let bond = bond@state <- state
+          let world.bonds = world.bonds{U256.show(user)} <- bond
+          world@bonds <- world.bonds
+      }
+      Litereum.Term.execute(cost, user, term.cont(Litereum.Term.nil), world)
+      call:
+        Litereum.Term.execute(cost, user, term.cont(Litereum.Term.nil), world)
+      install:
+        Litereum.Term.execute(cost, user, term.cont(Litereum.Term.nil), world)
+  } default {Litereum.Term.nil, world}

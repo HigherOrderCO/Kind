@@ -1,2 +1,6 @@
 Test: _
+<<<<<<< HEAD
+  IO.print("hi")
+=======
   List.pad_right!([1,2,3,4,5], 0)
+>>>>>>> 4b5c5a6eb8a3d1aaf28fed4057892bfc1bb053cf
