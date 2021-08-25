@@ -1,2 +1,11 @@
-User.caotic.test : String
+UPair(A: Type): Type
+ ((pair : Pair<A, A>) ->  
+  (self(P: UPair(A) -> Type) ->
+ // (trans : (a: A) (b: A) (H : P(UPair.make(A, a,b))) -> P(UPair.make(A, b, a))) ->
+ // (swap: (a: A) -> (b: A) -> Equal(_, make(a, b), trans(b, a, make(b,a)))) ->
+  P(self)))
+
+
+
+Test(x : Nat, y : Nat): Nat
   ?a
