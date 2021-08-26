@@ -1,2 +1,2 @@
-List.ifind<A: Type>(xs: List<A>, f: A -> Nat -> Bool): Maybe<Pair<A,Nat>>
+List.ifind<A: Type>(f: Nat -> A -> Bool, xs: List<A>): Maybe<Pair<Nat,A>>
   List.ifind.go<A>(xs,f,Nat.zero)
