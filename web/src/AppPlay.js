@@ -174,7 +174,6 @@ module.exports = class AppPlay extends Component {
     // Frame event (60 fps)
     this.intervals.frame = () => {
       setInterval(() => {
-        console.log( screen.width);
         this.register_event({
           _: "App.Event.frame",
           time: BigInt(Date.now()),
