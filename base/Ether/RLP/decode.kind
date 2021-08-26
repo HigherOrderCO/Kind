@@ -51,16 +51,5 @@ Ether.RLP.decode.read(encode : String) : Pair<Ether.RLP.Tree, String>
       {Ether.RLP.Tree.list(xs), rest}
   } default {Ether.RLP.Tree.list([]), "error"} // treat this case after
 
-Ether.RLP.decode : _
-  // let x = Nat.pow(2, 16) - 1
-  // let v = Ether.RLP.encode.read(Ether.RPL.encode.binary(x))
-   
- //  {Ether.RPL.encode.binary(x), 
-   //  Ether.RLP.decode.binary(String.drop(2, v))}
-
-  let hello = Bits.read(String.reverse("011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001011000010110000101100001"))
-  let xs = Ether.RLP.encode.bytes(Ether.RLP.Tree.list([Ether.RLP.Tree.list([Ether.RLP.Tree.tip(hello)]), Ether.RLP.Tree.tip(hello)]))
-
-  let str = String.drop(2, Ether.RLP.encode.read(xs))
-  
-  Ether.RLP.decode.read(str)
+Ether.RLP.decode(xs : String) : Ether.RLP.Tree  
+  Pair.fst!!(Ether.RLP.decode.read(String.drop(2, xs)))

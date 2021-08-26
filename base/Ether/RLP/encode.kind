@@ -2,8 +2,8 @@ Ether.RLP.encode.bytes(tree : Ether.RLP.Tree) : List<Bits>
   case tree {
       tip : 
         let bytes_size = Ether.Bits.get_bytes_size(tree.value)
-        let u16_char = Bits.trim(4, tree.value)
-        if (bytes_size =? 1) && Bits.ltn(u16_char, Ether.RLP.Constants.bits_128) then
+       // let u16_char = Bits.trim(4, tree.value)
+        if (bytes_size =? 1) && Bits.ltn(tree.value, Ether.RLP.Constants.bits_128) then
           [tree.value]
         else
           Ether.RPL.encode_length(bytes_size, 128) ++ [tree.value]
