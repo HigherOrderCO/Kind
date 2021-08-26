@@ -282,7 +282,6 @@ App.KL.Game.Board.Boards.new_lava.initial: List<Pair<App.KL.Game.Team, List<Hexa
 
 App.KL.Game.Board.Boards.new_lava.landscape: List<Pair<Pair<I32, I32>, Nat>> 
   [ 
-    {{+14#32, +22#32},1},
     {{+6#32, -4#32},16},
     {{+6#32, -5#32},14},
     {{+5#32, +1#32},16},

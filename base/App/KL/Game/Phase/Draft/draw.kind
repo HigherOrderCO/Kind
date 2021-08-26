@@ -557,13 +557,19 @@ App.KL.Game.Phase.Draft.draw.menu(
   let hero_list = App.KL.Game.Controls.Draft.Filter.apply(App.KL.Game.Hero.list, filter)
   let portrait  = App.KL.Game.Phase.Draft.draw.portrait.hero
   let portraits = [ portrait(hero, selected_hero, filter) for hero in hero_list ]
+  // portrait's background image width
+  // used to fill grid with empty space
+  // when filter has no result
+  let width_portrait = 44.0
+  let width_portrait = width_portrait * App.KL.Game.Phase.Draft.draw.fator.number
+  let width_portrait = F64.show(width_portrait)
   <div style={
     "display": if String.eql(page, "heroes") then "grid" else "none" // page
     "max-height": "416px"
     "height": "416px" 
     "overflow": "auto"
     "animation": "fade-in 500ms"
-    "grid-template-columns": "repeat(5, minmax(0, 1fr))"
+    "grid-template-columns": "repeat(5, minmax("|width_portrait|"px, 1fr))"
     "grid-auto-rows": "max-content"
     "gap": "10px"
     "margin": "0 10px"

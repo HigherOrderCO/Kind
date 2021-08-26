@@ -314,9 +314,12 @@ App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<Pla
         for info in skills_list:
           let {key, skill} = info
           let id = "SK"|key
-          let show = Maybe.if!((x) String.eql(skill@name, x@name), skill_hovered)
+          let show  = Maybe.if!((x) String.eql(skill@name, x@name), skill_hovered)
+          let order = App.KL.Game.Phase.draw.get_skill_order_by_key(key)
+          let order = Nat.show(order)
           <div style={
             "position": "relative"
+            "order": order
           }>
             <div id=id style={
               "background-color": "#190d1f"
@@ -328,8 +331,7 @@ App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<Pla
               "transform": "translate(-15%, -101%)"
               "width": "150%"
               "color": "white"
-              "display": if show then "block" else "none
-              "
+              "display": if show then "block" else "none"
             }>skill@description</div>
             <span id=id style={"position": "absolute", "bottom": "1%", "left": "7%"}>key</span>
             <span id=id style={"position": "absolute", "width": "100%", "height": "100%", "display": "flex", "justify-content": "center", "align-items": "center", "color": "white"}>skill@name</span>
@@ -355,8 +357,12 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
   without info: <span style={"display": "none"}></span>
 
   let creature = info@fst
-  let life_percentage = App.KL.Game.Phase.Play.draw.get_life_percentage(creature)
+  let life_percentage     = App.KL.Game.Phase.Play.draw.get_life_percentage(creature)
+  let {actual_hp, max_hp} = App.KL.Game.Phase.Play.draw.get_life_info(info)
   let ap = App.KL.Game.Phase.Play.draw.get_ap(creature)
+
+  let actual_hp = I32.show(actual_hp)
+  let max_hp    = I32.show(max_hp)
 
   let content = 
     <div style={
@@ -371,14 +377,34 @@ App.KL.Game.Phase.Play.draw.interface.user(user: String, players_info: Map<Playe
         "top": "4%"
         "left": "4%"
       }></img>
-      <img src= App.KL.Game.Phase.Play.Assets.interface.user.life style={
+      <div style={
         "position": "absolute"
         "transform": "scale("|App.KL.Game.Phase.Play.draw.fator.string|")"
         "transform-origin": "top left"
         "top": "61%"
         "left": "34%"
-        "clip-path": "polygon(0 0%, "|String.show_clean(F64.show(life_percentage + 8))|"% 0%, "|String.show_clean(F64.show(life_percentage))|"% 100%, 0% 100%)"
-      }></img>
+      }>
+        <div style={"position": "relative"}>
+          <img src= App.KL.Game.Phase.Play.Assets.interface.user.life style={
+            "clip-path": "polygon(0 0%, "|String.show_clean(F64.show(life_percentage + 8))|"% 0%, "|String.show_clean(F64.show(life_percentage))|"% 100%, 0% 100%)"
+            "display": "flex"
+          }></img>
+          <div style={
+            "position": "absolute"
+            "top": "0" 
+            "left": "0"
+            "width": "100%"
+            "height": "100%"
+            "display": "flex"
+            "align-items": "center"
+            "justify-content": "center"
+            "color": "white"
+            "font-size": "0.75rem"
+          }>
+            <span>actual_hp | "/" | max_hp</span>
+          </div>
+        </div>
+      </div>
       <div style={
         "position": "absolute"
         "top": "74%"

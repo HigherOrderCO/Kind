@@ -62,7 +62,7 @@ App.KL.Game.Hero.Flina.Skill.Haste(range: I32, power: I32, duration: I32, ap_cos
     App.KL.Game.Effect.ap.use(ap_cost)
     get target = App.KL.Game.Effect.coord.get_target
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
     let ally = App.KL.Game.Effect.At.ally!
     let eff = App.KL.Game.Effect.status.haste.add(duration, power)
@@ -80,7 +80,7 @@ App.KL.Game.Hero.Flina.Skill.Heal(range: I32, power: I32, ap_cost: I32): App.KL.
     without direction: App.KL.Game.Effect.fail("Direction not selected")
     App.KL.Game.Effect {
       let area   = App.KL.Game.Areas.triangle(start, direction)
-      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
+      App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, area)
       App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
       let ally = App.KL.Game.Effect.At.ally!
       let eff = App.KL.Game.Effect.hp.heal_at(power)

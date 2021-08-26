@@ -75,9 +75,11 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
           // apply status TODO redo
           let game = App.KL.Game.Board.apply_status(game)
           // token update
-          let game   = game@board <- App.KL.Game.Token.board.capture(game@board)
+          let game = game@board <- App.KL.Game.Token.board.capture(game@board)
           // score update
-          let game   = game@score <- App.KL.Game.Token.score.capture(game@board, game@score)
+          let {score, players} = App.KL.Game.Token.score.update(game@players, game@board, game@score)
+          let game = game@score <- score
+          let game = game@players <- players
           // Verify if game ended  
           let winner = App.KL.Game.Score.get_winner(game@score)
           case winner {

@@ -81,8 +81,8 @@ App.KL.Game.Hero.Croni.hero.Skills.flux(range: I32, dmg: I32, ap_cost: I32): App
     let area = [target]
     App.KL.Game.Effect.limit_range(range)
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
     App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.hp.damage_at(dmg)), area)
     return unit
   }
@@ -99,7 +99,7 @@ App.KL.Game.Hero.Croni.hero.Skills.void(range: I32, ap_cost: I32): App.KL.Game.E
     case targeted {
       none: App.KL.Game.Effect {
         let team = case caster { none: App.KL.Game.Team.neutral, some: caster.value@team }
-        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, [target])
         let hero = App.KL.Game.Hero.Croni.hero.void
         let mhp = App.KL.Game.Hero.Croni.hero.void@max_hp
         let map = App.KL.Game.Hero.Croni.hero.void@max_ap
@@ -108,7 +108,7 @@ App.KL.Game.Hero.Croni.hero.Skills.void(range: I32, ap_cost: I32): App.KL.Game.E
       }
       some: if String.eql(targeted.value@hero@name, "Croni.Void") then App.KL.Game.Effect {
         let area = App.KL.Game.Hero.Croni.hero.Skills.void.area(target, board)
-        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
+        App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
         App.KL.Game.Effect.area!(App.KL.Game.Effect.At.enemy!(App.KL.Game.Effect.status.root.add(2)), area)
         return unit
       } else App.KL.Game.Effect.pass
