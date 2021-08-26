@@ -11,5 +11,5 @@ App.KL.Game.Effect.player_data.add.kill(
       0, 
       [], 
       "", 
-      {player_id: {App.KL.Game.Scoreboard.new(0, 0, 1, 0), none}}
+      {player_id: {App.KL.Game.Scoreboard.new(0, 0, 1, 0, 0), none}}
     )
