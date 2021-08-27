@@ -27,21 +27,31 @@ type Litereum.Term {
     cses: List<Litereum.Term>
   )
   call(
-    addr: Nat
+    func: Nat
     argm: Litereum.Term
     cont: Litereum.Term
   )
-  store(
-    stat: Litereum.Term 
-    cont: Litereum.Term
-  )
+  //store(
+    //stat: Litereum.Term 
+    //cont: Litereum.Term
+  //)
 }
 
 // Litereum types are algebraic datatypes (ADTs)
 type Litereum.Type {
-  new(
+  adt(
     name: String
     forms: List<Litereum.Form>
+  )
+}
+
+// Litereum function
+type Litereum.Func {
+  new(
+    term: Litereum.Term
+    //stty: Litereum.Type
+    inty: Nat
+    outy: Nat
   )
 }
 
@@ -66,7 +76,7 @@ type Litereum.World {
   new(
     names: List<String>        // registered names
     types: List<Litereum.Type> // registered types
-    terms: List<Litereum.Term> // registered terms
+    funcs: List<Litereum.Func> // registered funcs
     state: Map<Litereum.Term>  // contract states
   )
 }
@@ -104,16 +114,29 @@ Litereum.Body: Type
 // Actions
 // -------
 
-Litereum.World.register_name(name: String, world: Litereum.World): Litereum.World
-  world@names <- name & world@names
+Litereum.World.register_name(
+  name: String
+  world: Litereum.World
+): Litereum.World
+  world@names <- world@names ++ [name]
 
-Litereum.World.register_type(type: Litereum.Type, world: Litereum.World): Litereum.World
-  world@types <- type & world@types
+Litereum.World.register_type(
+  type: Litereum.Type
+  world: Litereum.World
+): Litereum.World
+  world@types <- world@types ++ [type]
 
-Litereum.World.register_term(term: Litereum.Term, world: Litereum.World): Litereum.World
-  world@terms <- term & world@terms
+Litereum.World.register_func(
+  func: Litereum.Func
+  world: Litereum.World
+): Litereum.World
+  world@funcs <- world@funcs ++ [func]
 
-Litereum.World.set_state(term: Nat, value: Litereum.Term, world: Litereum.World): Litereum.World
+Litereum.World.set_state(
+  term: Nat
+  value: Litereum.Term
+  world: Litereum.World
+): Litereum.World
   world@state <- (world@state{Nat.show(term)} <- value)
 
 // Utils
@@ -125,14 +148,110 @@ Litereum.World.find_type(name: String, world: Litereum.World): Maybe<Pair<Nat,Li
 Litereum.Type.find_form(name: String, type: Litereum.Type): Maybe<Pair<Nat,Litereum.Form>>
   List.ifind!((i,t) String.eql(t@name,name), type@forms)
 
+// Type-Checking
+// -------------
+
+Litereum.World.check.fields(
+  terms: List<Litereum.Term>
+  fields: List<Litereum.Field>
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Bool
+  open world
+  case terms fields {
+    cons cons:
+      let type = world.types[fields.head@type] abort false
+      let head = Litereum.World.check(terms.head, type, ctx, world)
+      let tail = Litereum.World.check.fields(terms.tail, fields.tail, ctx, world)
+      head && tail
+    nil nil:
+      true
+  } default false
+
+Litereum.World.check.cases(
+  cases: List<Litereum.Term>
+  type: Litereum.Type
+  forms: List<Litereum.Form>
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Bool
+  case cases forms {
+    cons cons:
+      let ext_ctx = Litereum.World.check.cases.extend(forms.head@fields, ctx, world) abort false
+      let case_ok = Litereum.World.check(cases.head, type, ext_ctx, world)
+      let rest_ok = Litereum.World.check.cases(cases.tail, type, forms.tail, ctx, world)
+      case_ok && rest_ok
+    nil nil:
+      true
+  } default false
+
+Litereum.World.check.cases.extend(
+  fields: List<Litereum.Field>
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Maybe<List<Litereum.Type>>
+  open world
+  case fields {
+    nil: Maybe {
+      return ctx
+    }
+    cons: Maybe {
+      get type = world.types[fields.head@type]
+      get tail = Litereum.World.check.cases.extend(fields.tail, ctx, world)
+      return type & tail
+    }
+  }
+
+Litereum.World.check(
+  term: Litereum.Term
+  type: Litereum.Type
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Bool
+  log("- check " | Literity.show(term,world,[],0) | " : " | Litereum.Type.show(type))
+  open world
+  case term {
+    var:
+      let var_type = ctx[term.index] abort false
+      //log("-- var " | Litereum.Type.show(var_type) | " " | Litereum.Type.show(type))
+      Litereum.Type.equal(var_type, type)
+    alloc: case type {
+      adt:
+        use term_type = world.types[term.type] abort false
+        if Litereum.Type.equal(term_type, type) then
+          use form = type.forms[term.form] abort false
+          Litereum.World.check.fields(term.vals, form.fields, ctx, world)
+        else
+          false
+    }
+    match:
+      use expr_type = world.types[term.type] abort false
+      let expr = Litereum.World.check(term.expr, expr_type, ctx, world)
+      expr && Litereum.World.check.cases(term.cses, type, expr_type.forms, ctx, world)
+  } default false
+
+Litereum.World.check.func(
+  func: Nat
+  world: Litereum.World
+): Bool
+  open world
+  use func = world.funcs[func] abort false
+  let inty = world.types[func.inty] abort false
+  let outy = world.types[func.outy] abort false
+  let ctx = [inty]
+  Litereum.World.check(func.term, outy, ctx, world)
+
 // Execution
 // ---------
 
 Litereum.World.run(term: Litereum.Term, world: Litereum.World, vars: List<Litereum.Term>): Maybe<Pair<Litereum.Term, Litereum.World>>
+  log("- eval " | Literity.show(term, world, [], 0))
+  open world
   case term {
     var: Maybe {
       get value = vars[term.index]
-      return {value,world}
+      Litereum.World.run(value, world, vars)
+      //return {value,world}
     }
     match: Maybe {
       get expr_run = Litereum.World.run(term.expr, world, vars)
@@ -150,6 +269,10 @@ Litereum.World.run(term: Litereum.Term, world: Litereum.World, vars: List<Litere
       let {vals, world} = run_vals
       return {Litereum.Term.alloc(term.type, term.form, vals), world}
     }
+    call: Maybe {
+      get func = world.funcs[term.func]
+      Litereum.World.run(func@term, world, vars)
+    }
   } default some({term,world})
 
 Litereum.World.run.many(terms: List<Litereum.Term>, world: Litereum.World, vars: List<Litereum.Term>): Maybe<Pair<List<Litereum.Term>, Litereum.World>>
@@ -164,151 +287,26 @@ Litereum.World.run.many(terms: List<Litereum.Term>, world: Litereum.World, vars:
     }
   }
 
+Litereum.World.run.func(func: Nat, input: Litereum.Term, world: Litereum.World): Maybe<Pair<Litereum.Term, Litereum.World>>
+  open world
+  Maybe {
+    get func = world.funcs[func]
+    let vars = [input]
+    Litereum.World.run(func@term, world, vars)
+  }
+
 // Printing
 // --------
 
-Litereum.Term.show(term: Litereum.Term, world: Litereum.World, vars: List<String>, depth: Nat): String
-  open world
-  case term {
-    var: case vars[term.index] as got {
-      none: "?"
-      some: got.value
-    }
-    alloc: Maybe {
-      get type = world.types[term.type]
-      get form = type@forms[term.form]
-      let text = ""
-      let vals = List.zip_with!!!(
-        (field,value)
-          field@name
-          | ":"
-          | Litereum.Term.show(value, world, vars, depth),
-        form@fields,
-        term.vals)
-      let vals = if List.is_empty!(vals) then "" else "{" | String.join(",",vals) | "}"
-      return type@name | "#" | form@name | vals
-    } <> "?"
-    match: Maybe {
-      get type = world.types[term.type]
-      let expr = Litereum.Term.show(term.expr, world, vars, depth)
-      let name = term.name
-      let vals = List.zip_with!!!(
-        (form,cse)
-          let fields = List.map!!((x) name | "." | x@name, List.reverse!(form@fields))
-          let vars = fields ++ vars
-          let depth = Nat.succ(depth)
-          form@name
-          | ": "
-          | Litereum.Term.show(cse, world, vars, depth),
-        type@forms,
-        term.cses)
-      return type@name | "#case " | expr | " as " | name | " { " | String.join(", ",vals) | " }" 
-    } <> "?"
-  } default "?"
-
-// Parsing
-// -------
-
-Litereum.Term.parser(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
-  open world
-  Parser.choice!([
-    Litereum.Term.parser.alloc(world, vars)
-    Litereum.Term.parser.match(world, vars)
-    Litereum.Term.parser.var(world, vars)
-  ])
-
-Litereum.Term.parser.alloc(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
-  Parser {
-    get type_name = Kind.Parser.name
-    case Litereum.World.find_type(type_name, world) as found {
-      none: Parser.fail!("Type not found.")
-      some: Parser {
-        Kind.Parser.text("#")
-        get form_name = Kind.Parser.name
-        let {type_num, type} = found.value
-        case Litereum.Type.find_form(form_name, type) as found {
-          none: Parser.fail!("Form not found.")
-          some: Parser {
-            let {form_num, form} = found.value
-            let fields = form@fields
-            if List.is_empty!(fields) then Parser {
-              return Litereum.Term.alloc(type_num, form_num, [])
-            } else Parser {
-              let fields = List.map!!((x) x@name, fields)
-              Kind.Parser.text("{")
-              get vals = Litereum.Term.parser.alloc.vals(fields, world, vars)
-              Kind.Parser.text("}")
-              return Litereum.Term.alloc(type_num, form_num, vals)
-            }
-          }
-        }
-      }
-    }
+Litereum.Type.show(type: Litereum.Type): String
+  case type {
+    adt: type.name
   }
 
-Litereum.Term.parser.alloc.vals(fields: List<String>, world: Litereum.World, vars: List<String>): Parser<List<Litereum.Term>>
-  case fields {
-    nil: Parser {
-      return []
-    }
-    cons: Parser {
-      Kind.Parser.text(fields.head)
-      Kind.Parser.text(":")
-      get head = Litereum.Term.parser(world, vars)
-      Parser.maybe!(Kind.Parser.text(","))
-      get tail = Litereum.Term.parser.alloc.vals(fields.tail, world, vars)
-      return head & tail
-    }
-  }
-
-Litereum.Term.parser.match(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
-  Parser {
-    get type_name = Kind.Parser.name
-    case Litereum.World.find_type(type_name, world) as found {
-      none: Parser.fail!("Type not found.")
-      some: Parser {
-        let {type_num, type} = found.value
-        //let cses = List.map!!((x) x@name, type@forms)
-        Kind.Parser.text("#")
-        Kind.Parser.text("case ")
-        get expr = Litereum.Term.parser(world, vars)
-        Kind.Parser.text("as")
-        get name = Kind.Parser.name
-        Kind.Parser.text("{")
-        get cses = Litereum.Term.parser.match.cses(type@forms, name, vars, world)
-        Kind.Parser.text("}")
-        return Litereum.Term.match(type_num, name, expr, cses)
-      }
-    }
-  }
-
-Litereum.Term.parser.match.cses(cses: List<Litereum.Form>, name: String, vars: List<String>, world: Litereum.World): Parser<List<Litereum.Term>>
-  case cses {
-    nil: Parser {
-      return []
-    }
-    cons: Parser {
-      use form = cses.head
-      Kind.Parser.text(form.name)
-      Kind.Parser.text(":")
-      let fields = List.map!!((x) name | "." | x@name, List.reverse!(form.fields))
-      get head = Litereum.Term.parser(world, fields ++ vars)
-      Parser.maybe!(Kind.Parser.text(","))
-      get tail = Litereum.Term.parser.match.cses(cses.tail, name, vars, world)
-      return head & tail
-    }
-  }
-
-Litereum.Term.parser.var(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
-  Parser {
-    get name = Kind.Parser.name
-    case List.find_index!(vars, String.eql(name)) as found {
-      none: Parser.fail!("Unbound variable '" | name | "'.")
-      some: Parser {
-        return Litereum.Term.var(found.value)
-      }
-    }
-  }
+Litereum.Type.equal(a: Litereum.Type, b: Litereum.Type): Bool
+  case a b {
+    adt adt: String.eql(a.name, b.name)
+  } default false
 
 // Serialization
 // -------------
@@ -444,293 +442,28 @@ Litereum.Signature.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,le
     }
   }!
 
-// Dead code
-// ---------
-
-////Litereum.Term.eval(
-  ////term: Litereum.Term
-  ////world: Litereum.World
-////): Litereum.Term
-  ////case term {
-    ////app: case Litereum.Term.reduce(term.func) as func {
-      ////lam: Litereum.Term.reduce(func.body(term.argm))
-    ////} default term
-    ////elim: case Litereum.Term.reduce(term.bits) as bits {
-      ////nil: Litereum.Term.reduce(term.case_nil)
-      ////cons0: Litereum.Term.reduce(term.case_cons0(bits.pred))
-      ////cons1: Litereum.Term.reduce(term.case_cons1(bits.pred))
-    ////} default term
-  ////} default term
-  
-////type Litereum.Result {
-  ////new(
-    ////cost: Nat
-    ////value: Litereum.Term
-    ////world: Litereum.World
-  ////)
-////}
-
-////Litereum.Term.execute(
-  ////cost: Nat
-  ////addr: Litereum.Address
-  ////term: Litereum.Term
-  ////world: Litereum.World
-////): Litereum.Result
-  ////open world
-  ////let bond = world.bonds{U256.show(addr)}
-  ////case Litereum.Term.reduce(term) as term {
-    ////return:
-      ////Litereum.Result.new(cost, term.result, world)
-    ////get: 
-      ////let cost = cost + 1
-      ////let key = Litereum.Term.to_bits(term.key)
-      ////case bond {
-        ////none:
-          ////Litereum.Term.execute(cost, addr, term.cont(Litereum.Term.nil), world)
-        ////some:
-          ////use bond = bond.value
-          ////let val = Litereum.Term.from_bits(bond.state{Bits.show(key)} <> Bits.e)
-          ////Litereum.Term.execute(cost, addr, term.cont(val), world)
-      ////}
-    ////set:
-      ////let cost = cost + 1
-      ////let key = Litereum.Term.to_bits(term.key)
-      ////let val = Litereum.Term.to_bits(term.val)
-      ////let world = case bond {
-        ////none:
-          ////world
-        ////some: 
-          ////use bond = bond.value
-          ////let state = bond.state{Bits.show(key)} <- val
-          ////let bond = bond@state <- state
-          ////let bonds = world.bonds{U256.show(addr)} <- bond
-          ////world@bonds <- bonds
-      ////}
-      ////Litereum.Term.execute(cost, addr, term.cont, world)
-    ////call:
-      ////let cost = cost + 1
-      ////let targ_addr = Litereum.Term.to_address(term.addr)
-      ////let targ_bond = world.bonds{U256.show(targ_addr)}
-      ////case targ_bond {
-        ////none:
-          ////Litereum.Term.execute(cost, addr, term.cont(Litereum.Term.nil), world)
-        ////some:
-          ////use targ_bond = targ_bond.value
-          ////let targ_term = targ_bond.main
-          ////let targ_term = Litereum.Term.app(targ_term, Litereum.Term.from_address(targ_addr))
-          ////let targ_term = Litereum.Term.app(targ_term, Litereum.Term.to_bits(term.args))
-          ////use result = Litereum.Term.execute(cost, targ_addr, targ_term, world)
-          ////Litereum.Term.execute(result.cost, addr, term.cont(result.value), result.world)
-      ////}
-    ////spawn:
-      ////let cost = cost + 1
-      ////let bond_addr = Litereum.Term.to_address(term.addr)
-      ////let world.bonds = world.bonds{U256.show(bond_addr)} <- Litereum.Bond.new(term.main, {})
-      ////let world = world@bonds <- world.bonds
-      ////Litereum.Term.execute(cost, addr, term.cont, world)
-  ////} default Litereum.Result.new(cost, Litereum.Term.nil, world)
-
-////Litereum.Term.parser: Parser<Litereum.Term>
-  ////Parser.choice!([
-    ////Parser {
-      ////Kind.Parser.text("@")
-      ////get bind = Kind.Parser.name
-      ////Kind.Parser.text("=>")
-      ////get body = Litereum.Term.parser
-      ////return Litereum.Term.lam(bind, () body)
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("(")
-      ////get func = Litereum.Term.parser
-      ////get argm = Litereum.Term.parser
-      ////Kind.Parser.text(")")
-      ////return Litereum.Term.app(func, argm)
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("*")
-      ////return Litereum.Term.nil
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("0")
-      ////get pred = Litereum.Term.parser
-      ////return Litereum.Term.cons0(pred)
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("1")
-      ////get pred = Litereum.Term.parser
-      ////return Litereum.Term.cons1(pred)
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("case ")
-      ////get bits = Litereum.Term.parser
-      ////Kind.Parser.text("as")
-      ////get name = Kind.Parser.name
-      ////Kind.Parser.text("{")
-      ////Kind.Parser.text("$:")
-      ////get case_nil = Litereum.Term.parser
-      ////Kind.Parser.text("0:")
-      ////get case_cons0 = Litereum.Term.parser
-      ////Kind.Parser.text("1:")
-      ////get case_cons1 = Litereum.Term.parser
-      ////Kind.Parser.text("}")
-      ////return Litereum.Term.elim(bits, name, case_nil, () case_cons0, () case_cons1)
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("{")
-      ////get statements = Litereum.Block.parser
-      ////Kind.Parser.text("}")
-      ////return Litereum.Term.block(statements)
-    ////}
-  ////])
-
-////Litereum.Term.show(term: Litereum.Term): String
-  ////case term {
-    ////lam:
-      ////"@"
-      ////| term.name
-      ////| " => "
-      ////| Litereum.Term.show(term.body(Litereum.Term.var(term.name)))
-    ////app:
-      ////"("
-      ////| Litereum.Term.show(term.func)
-      ////| " "
-      ////| Litereum.Term.show(term.argm)
-      ////| ")"
-    ////var:
-      ////term.name
-    ////nil:
-      ////"*"
-    ////cons0:
-      ////"0" | Litereum.Term.show(term.pred)
-    ////cons1:
-      ////"1" | Litereum.Term.show(term.pred)
-    ////elim:
-      ////"case "
-      ////| Litereum.Term.show(term.bits)
-      ////| " as "
-      ////| term.name
-      ////| " {"
-      ////| " $: " | Litereum.Term.show(term.case_nil)
-      ////| " 0: " | Litereum.Term.show(term.case_cons0(Litereum.Term.var(term.name | ".pred")))
-      ////| " 1: " | Litereum.Term.show(term.case_cons0(Litereum.Term.var(term.name | ".pred")))
-      ////| "}"
-    ////block:
-      ////"{"
-      ////| Litereum.Block.show(term.statements)
-      ////| "}"
-  ////}
-
-////Litereum.Block.parser: Parser<Litereum.Block>
-  ////Parser.choice!([
-    ////Parser {
-      ////Kind.Parser.text("return ")
-      ////get result = Litereum.Term.parser
-      ////return Litereum.Block.return(result)
-    ////}
-    ////Parser {
-      ////get bind = Kind.Parser.name
-      ////Kind.Parser.text("=")
-      ////Kind.Parser.text("(get ")
-      ////get key = Litereum.Term.parser
-      ////Kind.Parser.text(")")
-      ////Kind.Parser.text(";")
-      ////get cont = Litereum.Block.parser
-      ////return Litereum.Block.get(key, bind, () cont)
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("(set ")
-      ////get key = Litereum.Term.parser
-      ////get val = Litereum.Term.parser
-      ////Kind.Parser.text(")")
-      ////Kind.Parser.text(";")
-      ////get cont = Litereum.Block.parser
-      ////return Litereum.Block.set(key, val, cont)
-    ////}
-    ////Parser {
-      ////get bind = Kind.Parser.name
-      ////Kind.Parser.text("=")
-      ////Kind.Parser.text("(call")
-      ////get addr = Litereum.Term.parser
-      ////get args = Litereum.Term.parser
-      ////Kind.Parser.text(")")
-      ////Kind.Parser.text(";")
-      ////get cont = Litereum.Block.parser
-      ////return Litereum.Block.call(addr, args, bind, () cont)
-    ////}
-    ////Parser {
-      ////Kind.Parser.text("(spawn ")
-      ////get addr = Litereum.Term.parser
-      ////get main = Litereum.Term.parser
-      ////Kind.Parser.text(")")
-      ////Kind.Parser.text(";")
-      ////get cont = Litereum.Block.parser
-      ////return Litereum.Block.spawn(addr, main, cont)
-    ////}
-  ////])
-
-////Litereum.Block.show(block: Litereum.Block): String
-  ////case block {
-    ////return:
-      ////"return "
-      ////| Litereum.Term.show(block.result)
-      ////| ";"
-    ////get:
-      ////block.bind
-      ////| " = (get " | Litereum.Term.show(block.key) | "); "
-      ////| Litereum.Block.show(block.cont(Litereum.Term.var(block.bind)))
-    ////set:
-      ////"(set "
-      ////| Litereum.Term.show(block.key)
-      ////| " "
-      ////| Litereum.Term.show(block.val)
-      ////| "); "
-      ////| Litereum.Block.show(block.cont)
-    ////call:
-      ////block.bind
-      ////| " = "
-      ////| "(call "
-      ////| Litereum.Term.show(block.addr)
-      ////| " "
-      ////| Litereum.Term.show(block.args)
-      ////| "); "
-      ////| Litereum.Block.show(block.cont(Litereum.Term.var(block.bind)))
-    ////spawn:
-      ////"(spawn "
-      ////| Litereum.Term.show(block.addr)
-      ////| " "
-      ////| Litereum.Term.show(block.main)
-      ////| "); "
-      ////| Litereum.Block.show(block.cont)
-  ////}
-
 // Tests
 // -----
 
+Litereum.read(code: String, world: Litereum.World): Litereum.Term
+  Parser.run!(Literity.parser.func(world),code) <> Litereum.Term.var(0)
+
 Litereum: _
+
   let world = Litereum.World.new([], [], [], {})
-  let world = Litereum.World.register_type(Litereum.Type.new("Bool", [
-    Litereum.Form.new("true", [])
-    Litereum.Form.new("false", [])
-  ]), world)
-  let world = Litereum.World.register_type(Litereum.Type.new("Nat", [
-    Litereum.Form.new("zero", [])
-    Litereum.Form.new("succ", [
-      Litereum.Field.new("pred", 1)
-    ])
-  ]), world)
-  let world = Litereum.World.register_type(Litereum.Type.new("Foo", [
-    Litereum.Form.new("new", [
-      Litereum.Field.new("bool", 0)
-      Litereum.Field.new("nat", 1)
-    ])
-  ]), world)
-  let code = "
-    Foo#case Foo#new{bool:Bool#true,nat:Nat#zero} as val {
-      new: Nat#succ{pred:val.nat}
-    }"
-  let term = Parser.run!(Litereum.Term.parser(world,[]), code) <> Litereum.Term.var(0)
-  let result = Litereum.World.run(term, world, [])
+  let world = Litereum.World.register_type(Litereum.Type.adt("Bool", [Litereum.Form.new("true", []), Litereum.Form.new("false", [])]), world)
+  let world = Litereum.World.register_type(Litereum.Type.adt("Nat", [Litereum.Form.new("zero", []), Litereum.Form.new("succ", [ Litereum.Field.new("pred", 1) ]) ]), world)
+  let world = Litereum.World.register_type(Litereum.Type.adt("NatPair", [Litereum.Form.new("new", [Litereum.Field.new("fst", 1), Litereum.Field.new("snd", 1) ]) ]), world)
+
+  let func  = Litereum.read("NatPair#case input as val { new: Nat#succ{pred: val.fst} }", world)
+  let argm  = Litereum.read("NatPair#new{ fst: Nat#zero, snd: Nat#zero }", world)
+  let world = Litereum.World.register_func(Litereum.Func.new(func, 2, 1), world)
+
   IO {
-    IO.print(Litereum.Term.show(term, world, [], 0))
-    IO.print(case result { none: "", some: Litereum.Term.show(result.value@fst, result.value@snd, [], 0) })
+    IO.print("term: " | Literity.show(func, world, [], 0))
+    IO.print("chck: " | Bool.show(Litereum.World.check.func(0, world)))
+    IO.print("norm: " | case Litereum.World.run.func(0, argm, world) as norm {
+      none: "error"
+      some: Literity.show(norm.value@fst, norm.value@snd, [], 0)
+    })
   }
