@@ -7,10 +7,92 @@ App.KL.Game.Player.player_data.map.update(
     case player {
       none: players
       some: 
-        new_player  = App.KL.Game.Player.scoreboard.update(data@fst, player.value)        
-        case data@snd as recap {
-          none: players{id} <- new_player
-          some: players{id} <- App.KL.Game.Player.recap.update(recap.value, new_player)
-        }
+        let new_player  = App.KL.Game.Player.scoreboard.update(data@fst, player.value)        
+        let players = 
+          case data@snd as recap {
+            none: players{id} <- new_player
+            some: 
+            players{id} <- App.KL.Game.Player.recap.update(recap.value, new_player)
+          }
+        App.KL.Game.Player.player_data.add_assists(players, id, data@fst)
     }
   players
+
+App.KL.Game.Player.player_data.add_assists.go(
+  players: Map<App.KL.Game.Player>, 
+  target: App.KL.Game.Player,
+  recap: App.KL.Game.Recap,
+  scoreboards: Map<App.KL.Game.Scoreboard>,
+  killer: String
+): Map(App.KL.Game.Scoreboard)
+  let go = App.KL.Game.Player.player_data.add_assists.go
+  case recap {
+    nil:
+      scoreboards
+    cons:
+      log(I32.show(recap.head@new_hp))
+      let ep = recap.head
+      if (ep@new_hp =? 0) then
+        scoreboards
+      else         
+        if ep@hp_diff <? 0 then
+          case players{ep@address} as assister {
+            none: go(players, target, recap.tail, scoreboards, killer)
+            some: 
+              if App.KL.Game.Team.eql(target@team, assister.value@team) || String.eql(killer, ep@address) then
+                go(players, target, recap.tail, scoreboards, killer)
+              else
+                let new_scoreboard = {0,0,0,0,1,0} :: App.KL.Game.Scoreboard
+                let scoreboards = scoreboards{ep@address} <- new_scoreboard
+                go(players, target, recap.tail, scoreboards, killer)
+          }
+        else
+          go(players, target, recap.tail, scoreboards, killer)
+  }  
+
+
+
+App.KL.Game.Player.player_data.add_assists(
+  players: Map<App.KL.Game.Player>, 
+  target_id: String
+  scoreboard: App.KL.Game.Scoreboard
+): Map<App.KL.Game.Player>
+  // Checks if Target died this turn
+  case players{target_id} as target {
+    none: players
+    some:
+      if scoreboard@deaths =? 0 then 
+        players
+      else
+        case target.value@recap as recap {
+          nil: players
+          cons: 
+            let killer = recap.head@address
+            let scoreboards = App.KL.Game.Player.player_data.add_assists.go(players, target.value, recap.tail, Map.new!, killer)
+            let scoreboards = App.KL.Game.Player.player_data.add_kill(players, scoreboards, killer, target_id)
+            for id:scoreboard in scoreboards with players:
+              case players{id} as player {
+                none: players
+                some: 
+                  let new_player = App.KL.Game.Player.scoreboard.update(scoreboard, player.value)
+                  players{id} <- new_player
+              }
+            players
+        }
+  }
+
+App.KL.Game.Player.player_data.add_kill(
+  players: Map<App.KL.Game.Player>, 
+  scoreboards: Map<App.KL.Game.Scoreboard>,
+  killer_id: String,
+  victim_id: String
+): Map<App.KL.Game.Scoreboard>
+  let killer = players{killer_id}
+  let victim = players{victim_id}
+  case killer victim {
+    some some:
+      if App.KL.Game.Team.eql(killer.value@team, victim.value@team) then
+        scoreboards
+      else
+        scoreboards{killer_id} <- {0,0,1,0,0,0} :: App.KL.Game.Scoreboard
+  }default scoreboards

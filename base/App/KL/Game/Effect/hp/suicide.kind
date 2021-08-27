@@ -6,13 +6,11 @@ App.KL.Game.Effect.hp.suicide : App.KL.Game.Effect<I32>
       none:
         App.KL.Game.Effect { return +0#32 }
       some:
-        App.KL.Game.Effect { 
-          get board = App.KL.Game.Effect.board.get
-          get center = App.KL.Game.Effect.coord.get_center
+        App.KL.Game.Effect {
           let hero_hp = caster.value@hp
           let total_shield = App.KL.Game.Creature.Status.shield.total(caster.value)
-          let lethal_damage = I32.neg(I32.add(hero_hp, total_shield))
-          App.KL.Game.Effect.hp.change_at(lethal_damage, center)
+          let lethal_damage = I32.add(hero_hp, total_shield)
+          App.KL.Game.Effect.hp.sacrifice(lethal_damage)
         }
     }
   }
