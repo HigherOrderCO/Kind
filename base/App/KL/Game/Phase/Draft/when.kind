@@ -11,18 +11,10 @@ App.KL.Game.Phase.Draft.when(
 
   case event {
     frame:
-      let main_button = controls@main_button
-      let init   = main_button@animation@init_loop
-      let end    = App.KL.Game.Assets.ButtonAnimation.get_limit(main_button@animation)
-      let actual = main_button@frame
-      let main_button  = 
-        if actual >=? end then
-          main_button@frame <- init
-        else
-          main_button@frame <- main_button@frame + 1
-      
-      let controls = controls@main_button <- main_button
-      let local = local@draft <- controls
+      let animations = controls@animations
+      let animations = App.KL.Game.Assets.Animation.update_map(animations)
+      let controls   = controls@animations <- animations
+      let local      = local@draft <- controls
       App.set_local!(App.KL.State.Local.game(local))
     input: 
       switch String.starts_with(event.id) {
@@ -39,9 +31,11 @@ App.KL.Game.Phase.Draft.when(
             if controls@main_button_hovered then
               controls
             else
-              let new_button = App.KL.Game.Assets.ButtonAnimation.Button.new(App.KL.Game.Phase.Draft.Assets.main_button.cancel, 0)
-              let controls = controls@main_button <- new_button
-              let controls = controls@main_button_hovered <- true
+              let new_button = App.KL.Game.Phase.Draft.Assets.main_button.cancel
+              let animations = controls@animations
+              let animations = animations{"main-button"} <- new_button
+              let controls   = controls@animations <- animations
+              let controls   = controls@main_button_hovered <- true
               controls
           else 
             controls
@@ -78,7 +72,11 @@ App.KL.Game.Phase.Draft.when(
                 else 
                   if can_ready then { 1#8, App.KL.Game.Phase.Draft.Assets.main_button.waiting}
                   else {0#8, App.KL.Game.Phase.Draft.Assets.main_button.ready}
-              let local = local@draft <- controls@main_button <- controls@main_button@animation <- ready_info@snd
+              
+              let animations = controls@animations
+              let animations = animations{"main-button"} <- ready_info@snd
+              let controls   = controls@animations <-animations
+              let local = local@draft <- controls
               IO {
                 App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_info@fst))
                 App.set_local!(App.KL.State.Local.game(local))

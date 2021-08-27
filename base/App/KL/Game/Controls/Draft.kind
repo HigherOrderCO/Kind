@@ -1,8 +1,9 @@
 // Draft controls
 type App.KL.Game.Controls.Draft {
   new(
+    // animations
+    animations: Map<App.KL.Game.Assets.Animation>
     // ready button controls
-    main_button: App.KL.Game.Assets.ButtonAnimation.Button
     main_button_hovered: Bool
     // header button controls
     header: Map<App.KL.Game.Assets.ButtonClick> // id -> (img, state, action)
@@ -15,10 +16,17 @@ type App.KL.Game.Controls.Draft {
   )
 }
 
+App.KL.Game.Controls.Draft.animations: Map<App.KL.Game.Assets.Animation>
+  {
+    "main-button": App.KL.Game.Phase.Draft.Assets.main_button.ready
+    "test": App.KL.Game.Phase.Play.Assets.end.defeat
+  }
+
 App.KL.Game.Controls.Draft.initial: App.KL.Game.Controls.Draft
   App.KL.Game.Controls.Draft.new(
-    // ready button
-    App.KL.Game.Assets.ButtonAnimation.Button.new(App.KL.Game.Phase.Draft.Assets.main_button.ready, 0)
+    // animations
+    App.KL.Game.Controls.Draft.animations
+    // ready button hover
     false
     // header buttons
     App.KL.Game.Controls.Draft.header.buttons
@@ -35,17 +43,24 @@ App.KL.Game.Controls.Draft.default(
   ready: Bool, 
   controls: App.KL.Game.Controls.Draft
 ): App.KL.Game.Controls.Draft
-  let main_button =
+  // animations update when no hover
+  let animations = controls@animations
+  let animations =
     if ready then 
-      controls@main_button@animation <- App.KL.Game.Phase.Draft.Assets.main_button.waiting
+      let button_animation = animations{"main-button"}
+      let actual_frame = case button_animation {
+        none: 0
+        some: button_animation.value@actual_frame
+      }
+      let new_button = App.KL.Game.Phase.Draft.Assets.main_button.waiting
+      let new_button = new_button@actual_frame <- actual_frame
+      animations{"main-button"} <- new_button
     else
-      controls@main_button@animation <- App.KL.Game.Phase.Draft.Assets.main_button.ready
-  let main_button_hovered = false
-  let header.buttons = App.KL.Game.Controls.Draft.header.buttons
-
-  let controls = controls@main_button <- main_button
-  let controls = controls@main_button_hovered <- main_button_hovered
-  let controls = controls@header <- header.buttons
+      animations
+  
+  let controls = controls@animations <- animations
+  let controls = controls@main_button_hovered <- false
+  let controls = controls@header <- App.KL.Game.Controls.Draft.header.buttons
   controls
 
 // HEADER BUTTONS

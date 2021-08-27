@@ -302,7 +302,7 @@ App.KL.Game.Phase.Play.draw.tab.stats.table.row(
       <div style={"flex": "1"}><p>I32.show(player@scoreboard@xp)</p></div>
       <div style={"flex": "1"}><p>I32.show(player@scoreboard@kills)</p></div>
       <div style={"flex": "1"}><p>I32.show(player@scoreboard@deaths)</p></div>
-      <div style={"flex": "1"}><p>"100"</p></div>
+      <div style={"flex": "1"}><p>I32.show(player@scoreboard@assists)</p></div>
     </div>
     {
       if last then

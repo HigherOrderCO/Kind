@@ -1,6 +1,53 @@
-App.KL.Game.Phase.End.draw(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
-  let winner = App.KL.Game.Score.get_winner(game@score)
+App.KL.Game.Phase.End.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let controls = local@end
+  let page = controls@page
 
+  case page {
+    transition: App.KL.Game.Phase.End.draw.transition(img, local, game)
+    stats: App.KL.Game.Phase.End.draw.stats(local, game)
+  }
+
+App.KL.Game.Phase.End.draw.transition(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let controls = local@end
+  <div>
+    { App.KL.Game.Phase.Play.draw(img, local, game) }
+    <div class="pixel-art" style={
+      "animation": "fade-in 200ms"
+      "position": "fixed", 
+      "z-index": "1"
+      "height": "100%"
+      "width": "100%"
+      "top": "0"
+      "left": "0"
+      "background-color": "rgba(0,0,0,0.6)"
+      "display": "flex"
+      "flex-direction": "column"
+      "justify-content": "center"
+      "align-items": "center"   
+    }>
+      {
+        case controls@animations{"panel-result"} as teste {
+          none: App.KL.Game.Phase.draw.none
+          some: 
+            let src = App.KL.Game.Assets.Animation.get_actual_img(teste.value) <> ""
+            <div style={
+              "display": "flex"
+              "flex-direction": "column"
+              "justify-content": "center"
+              "align-items": "center"
+              "width": "min-content"
+              "transform": "scale(2) translateY(-10%)"
+            }>
+              <img src=src ></img>
+              <button id="to-end">"Continue"</button>
+            </div>
+        }
+      }
+    </div>
+  </div>
+
+App.KL.Game.Phase.End.draw.stats(local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+  let winner = App.KL.Game.Score.get_winner(game@score)
   case winner {
     none: <div>"Not ingame"</div>
     some: 

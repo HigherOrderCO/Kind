@@ -149,8 +149,6 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
       }
     } <> {App.KL.Game.Team.blue, App.KL.Game.Team.red}  // set as default team
 
-  // TODO change when formap for DOM published
-  let players_info = Map.to_list!(players_info)
   <div style={"display": "contents"}>
     <div style={
       "position": "absolute"
@@ -163,8 +161,7 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
       "grid-template-rows": "1fr"
       "grid-column-gap": "3px"
     }>
-      for info in players_info:
-        let {id, player_info}  = info
+      for id:player_info in players_info:
         let {creature, player} = player_info
         let team = player@team
         let dead = List.find!((x) id =? x@fst, cemetery)
@@ -185,8 +182,7 @@ App.KL.Game.Phase.Play.draw.interface.top.players(user: String, players_info: Ma
       "grid-template-rows": "1fr"
       "grid-column-gap": "3px"
     }>
-      for info in players_info:
-        let {id, player_info}  = info
+      for id:player_info in players_info:
         let {creature, player} = player_info
         let team = player@team
         let dead = List.find!((x) id =? x@fst, cemetery)
@@ -288,7 +284,6 @@ App.KL.Game.Phase.Play.draw.interface.bottom(user: String, players_info: Map<Pla
     }
   without hero: <span style={"display": "none"}></span>
 
-  // draw content TODO change when formap implemented
   let skills      = hero@skills
   let skills_list = App.KL.Game.Phase.Play.draw.interface.bottom.get_skills(skills, 4)
   let content = 
