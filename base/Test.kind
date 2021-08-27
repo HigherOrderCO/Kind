@@ -1,6 +1,14 @@
-Test: _
-<<<<<<< HEAD
-  IO.print("hi")
-=======
-  List.pad_right!([1,2,3,4,5], 0)
->>>>>>> 4b5c5a6eb8a3d1aaf28fed4057892bfc1bb053cf
+//type Submonoid<A: Type>(M: Monoid(A)){
+    //new(
+        //Q: A -> Type,
+        //he: Q(M.e),
+        //closed: (a: A) (ha: Q(a)) (b: A) (hb: Q(b)) -> Q(M.op(a, b)),
+    //)
+//}
+type Submonoid<A: Type>(M: Monoid(A)){
+    new(
+        Q: A -> Type,
+        //he: Q(M.e),
+        //closed: (a: A) (ha: P(a)) (b: A) (hb: P(b)) -> P(M.op(a, b)),
+    )
+}

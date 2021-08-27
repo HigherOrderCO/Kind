@@ -1,0 +1,5 @@
+Bits.repeat(len: Nat, bit: Bool): Bits
+  case len {
+    zero: Bits.e
+    succ: (if bit then Bits.i else Bits.o)(Bits.repeat(len.pred, bit))
+  }

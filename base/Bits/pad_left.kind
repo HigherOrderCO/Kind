@@ -1,0 +1,2 @@
+Bits.pad_left(size: Nat, bit: Bool, bits: Bits): Bits
+  Bits.concat(Bits.repeat(Nat.sub(size, Bits.length(bits)), bit), bits)

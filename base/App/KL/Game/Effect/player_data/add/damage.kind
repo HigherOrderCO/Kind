@@ -15,6 +15,6 @@ App.KL.Game.Effect.player_data.add.damage(
       [], 
       "", 
       {
-        caster_id: {App.KL.Game.Scoreboard.new(damage, 0, 0, 0, 0), none},
-        target_id: {App.KL.Game.Scoreboard.new(0, 0, 0, 0, 0), some([App.KL.Game.Recap.Episode.new(cast_data@fst, cast_data@snd, damage, new_hp)])}}
+        caster_id: {App.KL.Game.Scoreboard.new(damage, 0, 0, 0, 0, 0), none},
+        target_id: {App.KL.Game.Scoreboard.new(0, 0, 0, 0, 0, 0), some([App.KL.Game.Recap.Episode.new(cast_data@fst, cast_data@snd, damage, new_hp)])}}
     )
