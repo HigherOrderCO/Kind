@@ -27,7 +27,7 @@ type Litereum.Term {
     cses: List<Litereum.Term>
   )
   call(
-    addr: Nat
+    func: Nat
     argm: Litereum.Term
     cont: Litereum.Term
   )
@@ -39,7 +39,7 @@ type Litereum.Term {
 
 // Litereum types are algebraic datatypes (ADTs)
 type Litereum.Type {
-  new(
+  adt(
     name: String
     forms: List<Litereum.Form>
   )
@@ -105,13 +105,13 @@ Litereum.Body: Type
 // -------
 
 Litereum.World.register_name(name: String, world: Litereum.World): Litereum.World
-  world@names <- name & world@names
+  world@names <- world@names ++ [name]
 
 Litereum.World.register_type(type: Litereum.Type, world: Litereum.World): Litereum.World
-  world@types <- type & world@types
+  world@types <- world@types ++ [type]
 
 Litereum.World.register_term(term: Litereum.Term, world: Litereum.World): Litereum.World
-  world@terms <- term & world@terms
+  world@terms <- world@terms ++ [term]
 
 Litereum.World.set_state(term: Nat, value: Litereum.Term, world: Litereum.World): Litereum.World
   world@state <- (world@state{Nat.show(term)} <- value)
@@ -124,6 +124,88 @@ Litereum.World.find_type(name: String, world: Litereum.World): Maybe<Pair<Nat,Li
 
 Litereum.Type.find_form(name: String, type: Litereum.Type): Maybe<Pair<Nat,Litereum.Form>>
   List.ifind!((i,t) String.eql(t@name,name), type@forms)
+
+// Type-Checking
+// -------------
+
+Litereum.World.check.fields(
+  terms: List<Litereum.Term>
+  fields: List<Litereum.Field>
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Bool
+  open world
+  case terms fields {
+    cons cons:
+      let type = world.types[fields.head@type] abort false
+      let head = Litereum.World.check(terms.head, type, ctx, world)
+      let tail = Litereum.World.check.fields(terms.tail, fields.tail, ctx, world)
+      head && tail
+    nil nil:
+      true
+  } default false
+
+Litereum.World.check.cases(
+  cases: List<Litereum.Term>
+  type: Litereum.Type
+  forms: List<Litereum.Form>
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Bool
+  case cases forms {
+    cons cons:
+      let ext_ctx = Litereum.World.check.cases.extend(forms.head@fields, ctx, world) abort false
+      let case_ok = Litereum.World.check(cases.head, type, ext_ctx, world)
+      let rest_ok = Litereum.World.check.cases(cases.tail, type, forms.tail, ctx, world)
+      case_ok && rest_ok
+    nil nil:
+      true
+  } default false
+
+Litereum.World.check.cases.extend(
+  fields: List<Litereum.Field>
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Maybe<List<Litereum.Type>>
+  open world
+  case fields {
+    nil: Maybe {
+      return ctx
+    }
+    cons: Maybe {
+      get type = world.types[fields.head@type]
+      get tail = Litereum.World.check.cases.extend(fields.tail, ctx, world)
+      return type & tail
+    }
+  }
+
+Litereum.World.check(
+  term: Litereum.Term
+  type: Litereum.Type
+  ctx: List<Litereum.Type>
+  world: Litereum.World
+): Bool
+  log("- check " | Litereum.Term.show(term,world,[],0) | " : " | Litereum.Type.show(type))
+  open world
+  case term {
+    var:
+      let var_type = ctx[term.index] abort false
+      log("-- var " | Litereum.Type.show(var_type) | " " | Litereum.Type.show(type))
+      Litereum.Type.equal(var_type, type)
+    alloc: case type {
+      adt:
+        use term_type = world.types[term.type] abort false
+        if Litereum.Type.equal(term_type, type) then
+          use form = type.forms[term.form] abort false
+          Litereum.World.check.fields(term.vals, form.fields, ctx, world)
+        else
+          false
+    }
+    match:
+      use expr_type = world.types[term.type] abort false
+      let expr = Litereum.World.check(term.expr, expr_type, ctx, world)
+      expr && Litereum.World.check.cases(term.cses, type, expr_type.forms, ctx, world)
+  } default false
 
 // Execution
 // ---------
@@ -171,7 +253,7 @@ Litereum.Term.show(term: Litereum.Term, world: Litereum.World, vars: List<String
   open world
   case term {
     var: case vars[term.index] as got {
-      none: "?"
+      none: "^" | Nat.show(term.index)
       some: got.value
     }
     alloc: Maybe {
@@ -205,6 +287,16 @@ Litereum.Term.show(term: Litereum.Term, world: Litereum.World, vars: List<String
       return type@name | "#case " | expr | " as " | name | " { " | String.join(", ",vals) | " }" 
     } <> "?"
   } default "?"
+
+Litereum.Type.show(type: Litereum.Type): String
+  case type {
+    adt: type.name
+  }
+
+Litereum.Type.equal(a: Litereum.Type, b: Litereum.Type): Bool
+  case a b {
+    adt adt: String.eql(a.name, b.name)
+  } default false
 
 // Parsing
 // -------
@@ -708,29 +800,44 @@ Litereum.Signature.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,le
 
 Litereum: _
   let world = Litereum.World.new([], [], [], {})
-  let world = Litereum.World.register_type(Litereum.Type.new("Bool", [
+  let world = Litereum.World.register_type(Litereum.Type.adt("Bool", [
     Litereum.Form.new("true", [])
     Litereum.Form.new("false", [])
   ]), world)
-  let world = Litereum.World.register_type(Litereum.Type.new("Nat", [
+  let world = Litereum.World.register_type(Litereum.Type.adt("Nat", [
     Litereum.Form.new("zero", [])
     Litereum.Form.new("succ", [
       Litereum.Field.new("pred", 1)
     ])
   ]), world)
-  let world = Litereum.World.register_type(Litereum.Type.new("Foo", [
+  let world = Litereum.World.register_type(Litereum.Type.adt("NatPair", [
     Litereum.Form.new("new", [
-      Litereum.Field.new("bool", 0)
-      Litereum.Field.new("nat", 1)
+      Litereum.Field.new("fst", 1)
+      Litereum.Field.new("snd", 1)
     ])
   ]), world)
   let code = "
-    Foo#case Foo#new{bool:Bool#true,nat:Nat#zero} as val {
-      new: Nat#succ{pred:val.nat}
+    NatPair#case NatPair#new{fst:Nat#zero,snd:Nat#succ{pred:Nat#zero}} as val {
+      new: Nat#succ{pred:val.fst}
     }"
   let term = Parser.run!(Litereum.Term.parser(world,[]), code) <> Litereum.Term.var(0)
-  let result = Litereum.World.run(term, world, [])
+  let type = world@types[1] <> Litereum.Type.adt("Empty", [])
   IO {
-    IO.print(Litereum.Term.show(term, world, [], 0))
-    IO.print(case result { none: "", some: Litereum.Term.show(result.value@fst, result.value@snd, [], 0) })
+    IO.print("term: " | Litereum.Term.show(term, world, [], 0))
+    IO.print("type: " | Litereum.Type.show(type))
+    IO.print("chck: " | Bool.show(Litereum.World.check(term, type, [], world)))
+    IO.print("norm: " | case Litereum.World.run(term, world, []) as norm {
+      none: "error"
+      some: Litereum.Term.show(norm.value@fst, norm.value@snd, [], 0)
+    })
   }
+  //let term = Litereum.Term.alloc(1, 1, [Litereum.Term.alloc(1, 0, [])])
+  
+  //Litereum.Term.show(term, world, [], 0)
+
+  //let term = Parser.run!(Litereum.Term.parser(world,[]), code) <> Litereum.Term.var(0)
+  //let result = Litereum.World.run(term, world, [])
+  //IO {
+    //IO.print(Litereum.Term.show(term, world, [], 0))
+    //IO.print(case result { none: "", some: Litereum.Term.show(result.value@fst, result.value@snd, [], 0) })
+  //}
