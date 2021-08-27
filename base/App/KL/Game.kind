@@ -14,6 +14,7 @@ type App.KL.Game.State.Local {
     screen: App.KL.Game.Screen
     hud: App.KL.Game.Controls.Hud // HUD controls
     draft: App.KL.Game.Controls.Draft // draft page controls
+    end: App.KL.Game.Controls.End
   )
 }
 
@@ -24,7 +25,8 @@ App.KL.Game.State.Local.init(user: String, room: String, screen: App.KL.Game.Scr
   let info = Hexagonal.Axial.new(0,0)
   let hud    = App.KL.Game.Controls.Hud.initial
   let draft  = App.KL.Game.Controls.Draft.initial
-  App.KL.Game.State.Local.new(user, room, info, preview, scroll, mouse, screen, hud, draft)
+  let end    = App.KL.Game.Controls.End.initial
+  App.KL.Game.State.Local.new(user, room, info, preview, scroll, mouse, screen, hud, draft, end)
 
 // Global State
 // ============
@@ -84,7 +86,7 @@ App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Glo
           case phase {
             play : App.KL.Game.Phase.Play.draw(img, local, game.value)
             draft: App.KL.Game.Phase.Draft.draw(local, global)
-            end  : App.KL.Game.Phase.End.draw(local, game.value)
+            end  : App.KL.Game.Phase.End.draw(img, local, game.value)
           } 
       }
     }

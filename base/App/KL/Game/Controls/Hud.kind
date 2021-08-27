@@ -1,10 +1,13 @@
 // HUD controls
 type App.KL.Game.Controls.Hud {
   new(
+    // skill hovered
     skill: Maybe<App.KL.Game.Skill>
-    // tab
+    // tab window
     tab_active:  Bool
     tab_which:   App.KL.Game.Controls.Hud.Tab
+    // show victory or defeat?
+    show_end: Bool
   )
 }
 
@@ -14,13 +17,15 @@ type App.KL.Game.Controls.Hud.Tab.Label {
 
 App.KL.Game.Controls.Hud.initial: App.KL.Game.Controls.Hud
   let skill = none
-  let tab_active  = false
-  let tab_which   = App.KL.Game.Controls.Hud.Tab.stats
+  let tab_active = false
+  let tab_which  = App.KL.Game.Controls.Hud.Tab.stats
+  let show_end   = false
 
   App.KL.Game.Controls.Hud.new(
     skill,
     tab_active,
     tab_which,
+    show_end
   )
 
 
