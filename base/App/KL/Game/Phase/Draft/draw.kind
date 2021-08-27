@@ -485,7 +485,7 @@ App.KL.Game.Phase.Draft.draw.card.hero.skill_info(
 App.KL.Game.Phase.Draft.draw.card.filter(
   filter: App.KL.Game.Controls.Draft.Filter
 ): DOM
-  let options = Map.to_list!(filter@options) // TODO formap in DOM
+  let options = filter@options
 
   let inner = 
     <div style={"max-height": "100%", "width": "100%", "overflow": "auto", "padding": "15px 10%"}>
@@ -517,8 +517,7 @@ App.KL.Game.Phase.Draft.draw.card.filter(
 
       <div>
         <ul style={"list-style": "none"}>
-          for option in options:
-            let {text, checked} = option
+          for text:checked in options:
             App.KL.Game.Phase.Draft.draw.card.filter.option(checked, text)
         </ul>
       </div>
