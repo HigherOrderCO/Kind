@@ -1,0 +1,148 @@
+// A simple syntax for Litereum terms
+
+Literity.show(term: Litereum.Term, world: Litereum.World, vars: List<String>, depth: Nat): String
+  open world
+  case term {
+    var: case vars[term.index] as got {
+      none: "^" | Nat.show(term.index)
+      some: got.value
+    }
+    alloc: Maybe {
+      get type = world.types[term.type]
+      get form = type@forms[term.form]
+      let text = ""
+      let vals = List.zip_with!!!(
+        (field,value)
+          field@name
+          | ":"
+          | Literity.show(value, world, vars, depth),
+        form@fields,
+        term.vals)
+      let vals = if List.is_empty!(vals) then "" else "{" | String.join(",",vals) | "}"
+      return type@name | "#" | form@name | vals
+    } <> "?"
+    match: Maybe {
+      get type = world.types[term.type]
+      let expr = Literity.show(term.expr, world, vars, depth)
+      let name = term.name
+      let vals = List.zip_with!!!(
+        (form,cse)
+          let fields = List.map!!((x) name | "." | x@name, List.reverse!(form@fields))
+          let vars = fields ++ vars
+          let depth = Nat.succ(depth)
+          form@name
+          | ": "
+          | Literity.show(cse, world, vars, depth),
+        type@forms,
+        term.cses)
+      return type@name | "#case " | expr | " as " | name | " { " | String.join(", ",vals) | " }" 
+    } <> "?"
+  } default "?"
+
+Literity.parser.func(world: Litereum.World): Parser<Litereum.Term>
+  Parser {
+    get term = Literity.parser(world, ["input"])
+    return term
+  }
+
+Literity.parser(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
+  open world
+  Parser.choice!([
+    Literity.parser.alloc(world, vars)
+    Literity.parser.match(world, vars)
+    Literity.parser.var(world, vars)
+  ])
+
+Literity.parser.alloc(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
+  Parser {
+    get type_name = Kind.Parser.name
+    case Litereum.World.find_type(type_name, world) as found {
+      none: Parser.fail!("Type not found.")
+      some: Parser {
+        Kind.Parser.text("#")
+        get form_name = Kind.Parser.name
+        let {type_num, type} = found.value
+        case Litereum.Type.find_form(form_name, type) as found {
+          none: Parser.fail!("Form not found.")
+          some: Parser {
+            let {form_num, form} = found.value
+            let fields = form@fields
+            if List.is_empty!(fields) then Parser {
+              return Litereum.Term.alloc(type_num, form_num, [])
+            } else Parser {
+              let fields = List.map!!((x) x@name, fields)
+              Kind.Parser.text("{")
+              get vals = Literity.parser.alloc.vals(fields, world, vars)
+              Kind.Parser.text("}")
+              return Litereum.Term.alloc(type_num, form_num, vals)
+            }
+          }
+        }
+      }
+    }
+  }
+
+Literity.parser.alloc.vals(fields: List<String>, world: Litereum.World, vars: List<String>): Parser<List<Litereum.Term>>
+  case fields {
+    nil: Parser {
+      return []
+    }
+    cons: Parser {
+      Kind.Parser.text(fields.head)
+      Kind.Parser.text(":")
+      get head = Literity.parser(world, vars)
+      Parser.maybe!(Kind.Parser.text(","))
+      get tail = Literity.parser.alloc.vals(fields.tail, world, vars)
+      return head & tail
+    }
+  }
+
+Literity.parser.match(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
+  Parser {
+    get type_name = Kind.Parser.name
+    case Litereum.World.find_type(type_name, world) as found {
+      none: Parser.fail!("Type not found.")
+      some: Parser {
+        let {type_num, type} = found.value
+        //let cses = List.map!!((x) x@name, type@forms)
+        Kind.Parser.text("#")
+        Kind.Parser.text("case ")
+        get expr = Literity.parser(world, vars)
+        Kind.Parser.text("as")
+        get name = Kind.Parser.name
+        Kind.Parser.text("{")
+        get cses = Literity.parser.match.cses(type@forms, name, vars, world)
+        Kind.Parser.text("}")
+        return Litereum.Term.match(type_num, name, expr, cses)
+      }
+    }
+  }
+
+Literity.parser.match.cses(cses: List<Litereum.Form>, name: String, vars: List<String>, world: Litereum.World): Parser<List<Litereum.Term>>
+  case cses {
+    nil: Parser {
+      return []
+    }
+    cons: Parser {
+      use form = cses.head
+      Kind.Parser.text(form.name)
+      Kind.Parser.text(":")
+      let fields = List.map!!((x) name | "." | x@name, List.reverse!(form.fields))
+      get head = Literity.parser(world, fields ++ vars)
+      Parser.maybe!(Kind.Parser.text(","))
+      get tail = Literity.parser.match.cses(cses.tail, name, vars, world)
+      return head & tail
+    }
+  }
+
+Literity.parser.var(world: Litereum.World, vars: List<String>): Parser<Litereum.Term>
+  Parser {
+    get name = Kind.Parser.name
+    case List.find_index!(vars, String.eql(name)) as found {
+      none: Parser.fail!("Unbound variable '" | name | "'.")
+      some: Parser {
+        log("parsed var " | name | " " | Nat.show(found.value) | " " | String.join(",",vars))
+        return Litereum.Term.var(found.value)
+      }
+    }
+  }

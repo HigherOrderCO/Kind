@@ -197,8 +197,7 @@ Litereum.World.check.cases.extend(
     }
     cons: Maybe {
       get type = world.types[fields.head@type]
-      get tail = Litereum.World.check.cases.extend(fields.tail, ctx, world)
-      return type & tail
+      Litereum.World.check.cases.extend(fields.tail, type & ctx, world)
     }
   }
 
@@ -209,6 +208,7 @@ Litereum.World.check(
   world: Litereum.World
 ): Bool
   log("- check " | Literity.show(term,world,[],0) | " : " | Litereum.Type.show(type))
+  //log("- ctx " | String.join(",", List.map!!((x) x@name, ctx)))
   open world
   case term {
     var:
@@ -245,7 +245,7 @@ Litereum.World.check.func(
 // ---------
 
 Litereum.World.run(term: Litereum.Term, world: Litereum.World, vars: List<Litereum.Term>): Maybe<Pair<Litereum.Term, Litereum.World>>
-  log("- eval " | Literity.show(term, world, [], 0))
+  //log("- eval " | Literity.show(term, world, [], 0))
   open world
   case term {
     var: Maybe {
@@ -456,7 +456,7 @@ Litereum: _
   let world = Litereum.World.register_type(Litereum.Type.adt("NatPair", [Litereum.Form.new("new", [Litereum.Field.new("fst", 1), Litereum.Field.new("snd", 1) ]) ]), world)
 
   let func  = Litereum.read("NatPair#case input as val { new: Nat#succ{pred: val.fst} }", world)
-  let argm  = Litereum.read("NatPair#new{ fst: Nat#zero, snd: Nat#zero }", world)
+  let argm  = Litereum.read("NatPair#new{ fst: Nat#succ{pred:Nat#zero}, snd: Nat#zero }", world)
   let world = Litereum.World.register_func(Litereum.Func.new(func, 2, 1), world)
 
   IO {
