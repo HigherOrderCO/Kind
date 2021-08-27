@@ -33,15 +33,16 @@ App.KL.Game.State.Local.init(user: String, room: String, screen: App.KL.Game.Scr
 
 type App.KL.Game {
   new(
+    tick:  Nat
     phase: App.KL.Game.Phase         // current phase: draft or play?
-    turn: U64                        // current turn
-    moment: App.KL.Game.Moment       // current moment: preparation or animation?
+    turn:  U64                        // current turn
+    moment:  App.KL.Game.Moment       // current moment: preparation or animation?
     players: Map<App.KL.Game.Player> // human players connected to board creatures
-    board: App.KL.Game.Board         // the game map, including tiles, creatures, objects
+    board:   App.KL.Game.Board         // the game map, including tiles, creatures, objects
     blueprint: App.KL.Game.Board.Blueprint // initial blueprint
     casts: List<App.KL.Game.Cast>    // all skills casted on the current turn
     score: App.KL.Game.Score
-    cemetery: App.KL.Game.Cemetery
+    cemetery:  App.KL.Game.Cemetery
   )
 }
 
@@ -53,17 +54,17 @@ type App.KL.Game.Phase {
 
 // Initial state
 App.KL.Game.start: App.KL.Game
+  let tick  = 0
   let phase = App.KL.Game.Phase.draft
-  let turn = 0#64
-  let moment = App.KL.Game.Moment.initial(App.KL.Constants.initial_time + App.KL.Constants.initital_delay)
+  let turn  = 0#64
+  let moment  = App.KL.Game.Moment.initial(App.KL.Constants.initial_time + App.KL.Constants.initital_delay)
   let players = Map.new!
   let board = Hexagonal.Axial.Map.new!
-  let tick = 0#64
   let casts = []
   let score = App.KL.Game.Score.new({0,0}, App.KL.Constants.max_score)
   let cemetery = []
   let blueprint = App.KL.Game.Board.Boards.new_lava
-  App.KL.Game.new(phase, turn, moment, players, board, blueprint, casts, score, cemetery)
+  App.KL.Game.new(tick, phase, turn, moment, players, board, blueprint, casts, score, cemetery)
 
 // Render function
 // ===============

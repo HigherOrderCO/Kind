@@ -1,5 +1,8 @@
 App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
   open game
+  // update tick
+  let game = game@tick <- game@tick + 1
+  
   case game.moment {
     // Inital phase
     initial:
