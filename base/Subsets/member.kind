@@ -1,2 +1,0 @@
-Subsets.member<T: Type>(x: T, A: Subsets<T>): Type
-    A(x)

@@ -1,2 +1,0 @@
-Subsets<A: Type>: Type
-    (a: A) -> Type

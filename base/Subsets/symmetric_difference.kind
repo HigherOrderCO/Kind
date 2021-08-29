@@ -1,2 +1,0 @@
-Subsets.symmetric_difference<T: Type>(A: Subsets<T>, B: Subsets<T>): Subsets<T>
-    Subsets.union<T>(Subsets.difference<T>(A, B), Subsets.difference<T>(B, A))

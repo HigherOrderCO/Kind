@@ -1,0 +1,2 @@
+Refinement.union<T: Type>(A: Refinement<T>, B: Refinement<T>): Refinement<T>
+    (a: T) Or(A(a), B(a))

@@ -1,2 +1,0 @@
-Subsets.intersection<T: Type>(A: Subsets<T>, B: Subsets<T>): Subsets<T>
-    (a: T) And(A(a), B(a))

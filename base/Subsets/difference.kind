@@ -1,2 +1,0 @@
-Subsets.difference<T: Type>(A: Subsets<T>, B: Subsets<T>): Subsets<T>
-    Subsets.intersection<T>(A, Subsets.complement<T>(B))

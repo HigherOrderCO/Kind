@@ -1,2 +1,0 @@
-Subsets.empty<A: Type>: Subsets<A>
-    (a: A) Empty

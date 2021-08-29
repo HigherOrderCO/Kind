@@ -1,2 +1,0 @@
-Subsets.complement<T: Type>(A: Subsets<T>): Subsets<T>
-    (a: T) Not(A(a))

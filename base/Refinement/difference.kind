@@ -1,0 +1,2 @@
+Refinement.difference<T: Type>(A: Refinement<T>, B: Refinement<T>): Refinement<T>
+    Refinement.intersection<T>(A, Refinement.complement<T>(B))
