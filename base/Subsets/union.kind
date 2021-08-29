@@ -1,0 +1,2 @@
+Subsets.union<T: Type>(A: Subsets<T>, B: Subsets<T>): Subsets<T>
+    (a: T) Or(A(a), B(a))

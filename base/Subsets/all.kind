@@ -1,0 +1,2 @@
+Subsets.all<A: Type>: Subsets<A>
+    (a: A) Unit
