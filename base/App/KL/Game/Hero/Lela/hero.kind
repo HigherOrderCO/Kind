@@ -38,23 +38,21 @@ App.KL.Game.Hero.Lela.hero: App.KL.Game.Hero
     "Lela deals 1 damage to an enemy, silencing them.", App.KL.Game.Cursor.attack)
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       1 // Damage
       1 // Resistance
       2 // Mobility
       3 // Range
       5 // Utility
       1 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.support)
+  let role = App.KL.Game.Hero.Role.support
 
   let description = "Lela is a fragile support for her team, she can heal and protect her team from a long distance."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 App.KL.Game.Hero.Lela.hero.Skills.restore(range: I32, heal: I32, ap_cost:I32): App.KL.Game.Effect<Unit>

@@ -32,23 +32,21 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
     "After a brief delay, Zoio blinks to a tile, sacrificing himself to deal high damage across the battlefield.", App.KL.Game.Cursor.attack)
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       5 // Damage
       2 // Resistance
       1 // Mobility
       5 // Range
       0 // Utility
       3 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.ranged)
+  let role = App.KL.Game.Hero.Role.ranged
 
   let description = "Zoio is a fragile mage that has no range limitations in his Eye Beam. However, his movement is extremely slow."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 App.KL.Game.Hero.Zoio.hero.Skills.eye_beam(size: I32, dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 

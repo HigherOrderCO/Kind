@@ -10,7 +10,7 @@ App.KL.Game.Board.Player.set_initial(
     let terrain   = App.KL.Game.Team.terrain(team)
     let entity    = App.KL.Game.Entity.terrain(terrain)
     let board     = App.KL.Game.Board.push(coord, entity, board)
-    get creature  = App.KL.Game.Creature.create(hero_id, some(user), team)
+    get creature  = App.KL.Game.Creature.create_hero(hero_id, some(user), team)
     log("HERE")
     let entity    = App.KL.Game.Entity.creature(creature)
     return App.KL.Game.Board.push(coord, entity, board)

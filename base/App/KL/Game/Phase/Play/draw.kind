@@ -143,8 +143,10 @@ App.KL.Game.Phase.Play.draw.get_life(creature: Maybe<App.KL.Game.Creature>): I32
 
 App.KL.Game.Phase.Play.draw.get_life_percentage(creature: Maybe<App.KL.Game.Creature>): F64
   case creature {
-    none: 0
-    some: F64.mul(100.0, I32.to_f64(creature.value@hp) / I32.to_f64(creature.value@hero@max_hp))
+    none: 0 :: F64
+    some: 
+      let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature.value)
+      F64.mul(100.0, I32.to_f64(creature.value@hp) / I32.to_f64(max_hp))
   }
 
 App.KL.Game.Phase.Play.draw.get_life_info(info: PlayersInfo): Pair<I32, I32>
@@ -158,8 +160,12 @@ App.KL.Game.Phase.Play.draw.get_life_info(info: PlayersInfo): Pair<I32, I32>
 
 App.KL.Game.Phase.Play.draw.get_ap(creature: Maybe<App.KL.Game.Creature>): I32
   case creature {
-    none: 0
-    some: creature.value@ap
+    none: 0 :: I32
+    some: 
+      case creature.value@category as category {
+        hero: category.ap
+        summon: 0 :: I32
+      }
   }
 
 App.KL.Game.Phase.Play.draw.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: F64, background: String, inner: DOM): DOM
@@ -249,14 +255,16 @@ App.KL.Game.Phase.Play.draw.ap(
   ap_used: Maybe<Pair<String, I32>>
   img: VoxBox
 ): VoxBox
-  no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, creature@ap, 0, 0, I32.to_u32(creature@hero@max_ap), img)
+  let ap = App.KL.Game.Board.Creature.get.ap(creature)
+  let max_ap = App.KL.Game.Board.Creature.get.max_ap(creature)
+  no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, 0, 0, I32.to_u32(max_ap), img)
   case ap_used {
     none: 
       no_cast
     some:
       // Verifies if the creature is the one casting current ability
       if String.eql(ap_used.value@fst, creature@player <> "none") then 
-        App.KL.Game.Phase.Play.draw.ap.bars(x, y, creature@ap, ap_used.value@snd, 0, I32.to_u32(creature@hero@max_ap), img)
+        App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, ap_used.value@snd, 0, I32.to_u32(max_ap), img)
       else
         no_cast
   }

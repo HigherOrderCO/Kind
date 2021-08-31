@@ -198,23 +198,21 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
     "Kenlua deals a lethal blow dealing 20 damage to an enemy close to Kenlua.", App.KL.Game.Cursor.attack)
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       5 // Damage
       2 // Resistance
       5 // Mobility
       1 // Range
       0 // Utility
       5 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.melee)
+  let role = App.KL.Game.Hero.Role.melee
 
   let description = "Kenlua is a fragile, but nimble assassin with great mobility and high damage."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS

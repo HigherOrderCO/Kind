@@ -464,7 +464,8 @@ App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(
     none: 0
     some:  
       let number = I32.abs(number)
-      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(creature.value@hero@max_hp))
+      let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature.value)
+      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(max_hp))
   }
 
 App.KL.Game.Phase.Play.draw.tab.controls(

@@ -35,23 +35,21 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
     "After a long delay, Flina flies to any place in the battlefield.", App.KL.Game.Cursor.heal)
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       0 // Damage
       1 // Resistance
       5 // Mobility
       5 // Range
       5 // Utility
       3 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.support)
+  let role = App.KL.Game.Hero.Role.support
 
   let description = "Flina is a fragile high ranged support with several different skills to help her allies, or to disrupt her enemies."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS

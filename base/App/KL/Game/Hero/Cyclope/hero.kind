@@ -35,23 +35,21 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
     "Cyclope stomps the ground, rooting all enemies within 2 tiles.", App.KL.Game.Cursor.attack)
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       2 // Damage
       5 // Resistance
       2 // Mobility
       1 // Range
       5 // Utility
       3 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.tank)
+  let role = App.KL.Game.Hero.Role.tank
 
   let description = "Cyclope is a resistant warrior. He can either protect his allies with his own life or damage enemies around him."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS
@@ -92,8 +90,8 @@ App.KL.Game.Hero.Cyclope.hero.Skills.revenge(range: I32, ap_cost: I32): App.KL.G
       let creature = App.KL.Game.Board.Creature.get(center, map)
       without creature: App.KL.Game.Effect.pass
         App.KL.Game.Effect { 
-          let hero = creature@hero
-          let missing_hp = hero@max_hp - creature@hp
+          let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature)
+          let missing_hp = max_hp - creature@hp
           let dmg = missing_hp / 2
           App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, [target])
           App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])

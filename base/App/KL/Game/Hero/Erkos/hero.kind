@@ -35,23 +35,21 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
     "Erkos slowly expands his flames around him, dealing massive damage to all enemies nearby.", App.KL.Game.Cursor.attack)
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       5 // Damage
       1 // Resistance
       2 // Mobility
       5 // Range
       0 // Utility
       1 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.ranged)
+  let role = App.KL.Game.Hero.Role.ranged
 
   let description = "Erkos is a fragile fire mage with high damage in large areas."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS

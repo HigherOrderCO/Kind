@@ -317,9 +317,9 @@ App.KL.Game.Phase.Play.draw.canvas.tile.creature(
     none: img
     some:
       let team = App.KL.Game.Phase.Draft.to_team(game@players, user_id)
-      let hero = creature.value@hero
+      let draw = App.KL.Game.Board.Creature.get.draw(creature.value)
       let draw_pose = App.KL.Game.Phase.Play.draw.canvas.tile.creature.get_draw_pose(game, coord)
-      let {draw_coord, draw_voxbox} = hero@draw@vbox_img(draw_pose)
+      let {draw_coord, draw_voxbox} = draw@vbox_img(draw_pose)
       let draw_coord = draw_coord <> coord
       //let aux = I32.to_u32(App.KL.Constants.hexagon_radius) //U32
       //let cy = cy - (aux * 2) //U32
@@ -328,7 +328,7 @@ App.KL.Game.Phase.Play.draw.canvas.tile.creature(
       let {cx, cy} = App.KL.Game.Phase.Play.draw.canvas.to_xy(draw_coord, screen)
       let img_x = cx - (128::U32)
       let img_y = cy - (128::U32)
-      let height = I32.to_u32(hero@draw@height)
+      let height = I32.to_u32(draw@height)
       let img = VoxBox.Draw.image(img_x, img_y, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 

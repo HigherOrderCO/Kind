@@ -4,11 +4,9 @@ type App.KL.Game.Hero {
     draw: App.KL.Game.Entity.Draw
     max_hp: I32
     max_ap: I32
-    skills: Map<App.KL.Game.Skill> // letter -> skill
-    //on_turn_end: App.KL.Game.Creature -> App.KL.Game.Creature //TODO: ADD
-    on_stepped: Maybe<App.KL.Game.Effect.FromTo<Unit>>
-    attributes: Maybe<App.KL.Game.Hero.Attributes>
-    role: Maybe<App.KL.Game.Hero.Role>
+    skills: Map<App.KL.Game.Skill>
+    attributes: App.KL.Game.Hero.Attributes
+    role: App.KL.Game.Hero.Role
     description: String
   )
 }

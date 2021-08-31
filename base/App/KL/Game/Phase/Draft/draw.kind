@@ -362,8 +362,7 @@ App.KL.Game.Phase.Draft.draw.card.hero.img(
   let role = 
     Maybe {
       get hero = hero
-      get role = hero@role
-      return App.KL.Game.Hero.Role.show(role)
+      return App.KL.Game.Hero.Role.show(hero@role)
     } <> "" // role of hero or nothing
   let img  = Maybe.map<App.KL.Game.Hero>!((x) x@draw@b64_img(true, 0), hero) <> "" // img of hero or nothing
 
@@ -411,12 +410,10 @@ App.KL.Game.Phase.Draft.draw.card.hero.bottom(
 ): DOM
   Maybe {
     get hero = hero
+    return 
     case skills_tab {
-      none: Maybe {
-        get attr = hero@attributes
-        return App.KL.Game.Phase.Draft.draw.card.hero.attrs(attr, id)
-      }
-      some: some(App.KL.Game.Phase.Draft.draw.card.hero.skill_info(hero, skills_tab.value))
+      none: App.KL.Game.Phase.Draft.draw.card.hero.attrs(hero@attributes, id)
+      some: App.KL.Game.Phase.Draft.draw.card.hero.skill_info(hero, skills_tab.value)
     }
   } <> App.KL.Game.Phase.Draft.draw.card.hero.attrs(App.KL.Game.Hero.Attributes.set(0,0,0,0,0,0), id)
 
