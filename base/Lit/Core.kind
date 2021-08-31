@@ -1,0 +1,310 @@
+// Litereum: a minimal decentralized computer
+// ==========================================
+
+// Types
+// -----
+
+// A Litereum program can:
+// - Create algebraic datatypes
+// - Perform pattern-matching
+// - Call other programs
+// - Store a local state
+// It is a minimal calculus, with state, comms, and no lambdas.
+// Pattern-matching is linear, to preserve the cost model.
+type Lit.Core.Term {
+  var(
+    index: Nat
+  )
+  alloc(
+    type: Nat
+    form: Nat
+    vals: List<Lit.Core.Term>
+  )
+  match(
+    type: Nat
+    name: String
+    expr: Lit.Core.Term
+    cses: List<Lit.Core.Term>
+  )
+  call(
+    addr: Nat
+    argm: Lit.Core.Term
+    cont: Lit.Core.Term
+  )
+  //spawn(
+    //addr: Nat
+    //term: Lit.Core.Term
+    //cont: Lit.Core.Term
+  //)
+  //store(
+    //stat: Lit.Core.Term 
+    //cont: Lit.Core.Term
+  //)
+}
+
+// Lit.Core types are algebraic datatypes (ADTs)
+type Lit.Core.Type {
+  adt(
+    name: String
+    forms: List<Lit.Core.Form>
+  )
+}
+
+// Lit.Core function
+type Lit.Core.Func {
+  new(
+    term: Lit.Core.Term
+    //stty: Lit.Core.Type
+    inty: Nat
+    outy: Nat
+  )
+}
+
+// A constructor of an ADT
+type Lit.Core.Form {
+  new(
+    name: String
+    fields: List<Lit.Core.Field>
+  )
+}
+
+// A field of an ADT's constructor
+type Lit.Core.Field {
+  new(
+    name: String
+    type: Nat
+  )
+}
+
+// Lit.Core's global state
+type Lit.Core.World {
+  new(
+    names: List<String>        // registered names
+    types: List<Lit.Core.Type> // registered types
+    funcs: List<Lit.Core.Func> // registered funcs
+    state: Map<Lit.Core.Term>  // contract states
+  )
+}
+
+// Actions
+// -------
+
+Lit.Core.World.register_name(
+  name: String
+  world: Lit.Core.World
+): Lit.Core.World
+  world@names <- world@names ++ [name]
+
+Lit.Core.World.register_type(
+  type: Lit.Core.Type
+  world: Lit.Core.World
+): Lit.Core.World
+  world@types <- world@types ++ [type]
+
+Lit.Core.World.register_func(
+  func: Lit.Core.Func
+  world: Lit.Core.World
+): Lit.Core.World
+  world@funcs <- world@funcs ++ [func]
+
+Lit.Core.World.set_state(
+  term: Nat
+  value: Lit.Core.Term
+  world: Lit.Core.World
+): Lit.Core.World
+  world@state <- (world@state{Nat.show(term)} <- value)
+
+// Utils
+// -----
+
+Lit.Core.World.find_type(name: String, world: Lit.Core.World): Maybe<Pair<Nat,Lit.Core.Type>>
+  List.ifind!((i,t) String.eql(t@name,name), world@types)
+
+Lit.Core.Type.find_form(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Form>>
+  List.ifind!((i,t) String.eql(t@name,name), type@forms)
+
+// Type-Checking
+// -------------
+
+Lit.Core.World.check.fields(
+  terms: List<Lit.Core.Term>
+  fields: List<Lit.Core.Field>
+  ctx: List<Lit.Core.Type>
+  world: Lit.Core.World
+): Bool
+  open world
+  case terms fields {
+    cons cons:
+      let type = world.types[fields.head@type] abort false
+      let head = Lit.Core.World.check(terms.head, type, ctx, world)
+      let tail = Lit.Core.World.check.fields(terms.tail, fields.tail, ctx, world)
+      head && tail
+    nil nil:
+      true
+  } default false
+
+Lit.Core.World.check.cases(
+  cases: List<Lit.Core.Term>
+  type: Lit.Core.Type
+  forms: List<Lit.Core.Form>
+  ctx: List<Lit.Core.Type>
+  world: Lit.Core.World
+): Bool
+  case cases forms {
+    cons cons:
+      let ext_ctx = Lit.Core.World.check.cases.extend(forms.head@fields, ctx, world) abort false
+      let case_ok = Lit.Core.World.check(cases.head, type, ext_ctx, world)
+      let rest_ok = Lit.Core.World.check.cases(cases.tail, type, forms.tail, ctx, world)
+      case_ok && rest_ok
+    nil nil:
+      true
+  } default false
+
+Lit.Core.World.check.cases.extend(
+  fields: List<Lit.Core.Field>
+  ctx: List<Lit.Core.Type>
+  world: Lit.Core.World
+): Maybe<List<Lit.Core.Type>>
+  open world
+  case fields {
+    nil: Maybe {
+      return ctx
+    }
+    cons: Maybe {
+      get type = world.types[fields.head@type]
+      Lit.Core.World.check.cases.extend(fields.tail, type & ctx, world)
+    }
+  }
+
+Lit.Core.World.check(
+  term: Lit.Core.Term
+  type: Lit.Core.Type
+  ctx: List<Lit.Core.Type>
+  world: Lit.Core.World
+): Bool
+  log("- check " | Lit.Lang.show(term,world,[],0) | " : " | Lit.Core.Type.show(type))
+  //log("- ctx " | String.join(",", List.map!!((x) x@name, ctx)))
+  open world
+  case term {
+    var:
+      let var_type = ctx[term.index] abort false
+      //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
+      Lit.Core.Type.equal(var_type, type)
+    alloc: case type {
+      adt:
+        use term_type = world.types[term.type] abort false
+        if Lit.Core.Type.equal(term_type, type) then
+          use form = type.forms[term.form] abort false
+          Lit.Core.World.check.fields(term.vals, form.fields, ctx, world)
+        else
+          false
+    }
+    match:
+      use expr_type = world.types[term.type] abort false
+      let expr = Lit.Core.World.check(term.expr, expr_type, ctx, world)
+      expr && Lit.Core.World.check.cases(term.cses, type, expr_type.forms, ctx, world)
+  } default false
+
+Lit.Core.World.check.func(
+  func: Nat
+  world: Lit.Core.World
+): Bool
+  open world
+  use func = world.funcs[func] abort false
+  let inty = world.types[func.inty] abort false
+  let outy = world.types[func.outy] abort false
+  let ctx = [inty]
+  Lit.Core.World.check(func.term, outy, ctx, world)
+
+// Execution
+// ---------
+
+Lit.Core.World.run(term: Lit.Core.Term, world: Lit.Core.World, vars: List<Lit.Core.Term>): Maybe<Pair<Lit.Core.Term, Lit.Core.World>>
+  //log("- eval " | Lit.Lang.show(term, world, [], 0))
+  open world
+  case term {
+    var: Maybe {
+      get value = vars[term.index]
+      Lit.Core.World.run(value, world, vars)
+      //return {value,world}
+    }
+    match: Maybe {
+      get expr_run = Lit.Core.World.run(term.expr, world, vars)
+      let {expr, world} = expr_run
+      case expr {
+        alloc: Maybe {
+          get body = term.cses[expr.form]
+          let vars = List.reverse!(expr.vals) ++ vars
+          Lit.Core.World.run(body, world, vars)
+        }
+      } default some({term,world})
+    }
+    alloc: Maybe {
+      get run_vals = Lit.Core.World.run.many(term.vals, world, vars)
+      let {vals, world} = run_vals
+      return {Lit.Core.Term.alloc(term.type, term.form, vals), world}
+    }
+    call: Maybe {
+      get func = world.funcs[term.addr]
+      Lit.Core.World.run(func@term, world, vars)
+    }
+  } default some({term,world})
+
+Lit.Core.World.run.many(terms: List<Lit.Core.Term>, world: Lit.Core.World, vars: List<Lit.Core.Term>): Maybe<Pair<List<Lit.Core.Term>, Lit.Core.World>>
+  case terms {
+    nil: some({[], world})
+    cons: Maybe {
+      get run_head = Lit.Core.World.run(terms.head, world, vars)
+      let {head, world} = run_head
+      get run_tail = Lit.Core.World.run.many(terms.tail, world, vars)
+      let {tail, world} = run_tail
+      return {head & tail, world}
+    }
+  }
+
+Lit.Core.World.run.func(func: Nat, input: Lit.Core.Term, world: Lit.Core.World): Maybe<Pair<Lit.Core.Term, Lit.Core.World>>
+  open world
+  Maybe {
+    get func = world.funcs[func]
+    let vars = [input]
+    Lit.Core.World.run(func@term, world, vars)
+  }
+
+// Printing
+// --------
+
+Lit.Core.Type.show(type: Lit.Core.Type): String
+  case type {
+    adt: type.name
+  }
+
+Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
+  case a b {
+    adt adt: String.eql(a.name, b.name)
+  } default false
+
+// Tests
+// -----
+
+Lit.Core.read(code: String, world: Lit.Core.World): Lit.Core.Term
+  Parser.run!(Lit.Lang.parser.func(world),code) <> Lit.Core.Term.var(0)
+
+Lit.Core: _
+
+  let world = Lit.Core.World.new([], [], [], {})
+  let world = Lit.Core.World.register_type(Lit.Core.Type.adt("Bool", [Lit.Core.Form.new("true", []), Lit.Core.Form.new("false", [])]), world)
+  let world = Lit.Core.World.register_type(Lit.Core.Type.adt("Nat", [Lit.Core.Form.new("zero", []), Lit.Core.Form.new("succ", [ Lit.Core.Field.new("pred", 1) ]) ]), world)
+  let world = Lit.Core.World.register_type(Lit.Core.Type.adt("NatPair", [Lit.Core.Form.new("new", [Lit.Core.Field.new("fst", 1), Lit.Core.Field.new("snd", 1) ]) ]), world)
+
+  let func  = Lit.Core.read("NatPair#case input as val { new: Nat#succ{pred: val.fst} }", world)
+  let argm  = Lit.Core.read("NatPair#new{ fst: Nat#succ{pred:Nat#zero}, snd: Nat#zero }", world)
+  let world = Lit.Core.World.register_func(Lit.Core.Func.new(func, 2, 1), world)
+
+  IO {
+    IO.print("term: " | Lit.Lang.show(func, world, [], 0))
+    IO.print("chck: " | Bool.show(Lit.Core.World.check.func(0, world)))
+    IO.print("norm: " | case Lit.Core.World.run.func(0, argm, world) as norm {
+      none: "error"
+      some: Lit.Lang.show(norm.value@fst, norm.value@snd, [], 0)
+    })
+  }
