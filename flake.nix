@@ -33,7 +33,7 @@
               doCheck = false;
             };
 
-          packages.kind-js =
+          /*packages.kind-js =
             pkgs.stdenv.mkDerivation {
               pname = "kind-js";
               version = version;
@@ -51,7 +51,7 @@
               doCheck = false;
             };
 
-          /*devShell.mkShell {
+          devShell.mkShell {
             buildInputs = [
               pkgs.chez-racket
               pkgs.chez-exe
