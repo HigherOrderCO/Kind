@@ -41,7 +41,7 @@ App.KL.Constants.turns_dead: I32
   2
 
 App.KL.Constants.max_score: I32
-  2
+  64
 
 App.KL.Constants.room : String
   "4b4c494e01010101"
