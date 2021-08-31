@@ -1,0 +1,8 @@
+Ether.Units.parse : Parser<Pair<List<Nat>, List<Nat>>>
+  Parser {
+    get integer = Parser.many1<Nat>(Parser.digit)
+    Parser.maybe!(Parser.text("."))
+    get fraction = Parser.many<Nat>(Parser.digit)
+    return {integer, fraction}
+  }
+  

@@ -1,0 +1,8 @@
+Nat.log(b : Nat, n: Nat): Nat
+  Nat.log.aux(n, b, 0)
+
+Nat.log.aux(n: Nat, b : Nat, r: Nat): Nat
+  case n {
+    zero: Nat.pred(r)
+    succ: Nat.log.aux(n/b, b, r+1)
+  }
