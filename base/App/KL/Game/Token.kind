@@ -60,7 +60,6 @@ App.KL.Game.Token.score.update.player(
   let player_scoreboard = player@scoreboard
   let player_scoreboard = player_scoreboard@xp <- player_scoreboard@xp + token@score
   let player = player@scoreboard <- player_scoreboard
-  log(I32.show(player@scoreboard@xp))
   player
 
 // get all tokens in board

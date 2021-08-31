@@ -5,7 +5,7 @@ App.KL.Game.Phase.Play.Assets.end.defeat: App.KL.Game.Assets.Animation
     0,
     7,
     22,
-    4,
+    {4,4,4}
     some(App.KL.Game.Phase.Play.Assets.end.defeat.when_end),
     false
   )
