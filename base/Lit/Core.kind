@@ -8,7 +8,7 @@
 type Lit.Core.Term {
   // A variable
   var(
-    bind: Nat
+    bvar: Nat
   )
   // Creates a value
   create(
@@ -37,13 +37,13 @@ type Lit.Core.Term {
   )
   // Calls an external program
   call(
-    bind: String
+    bvar: String
     func: String
     argm: Lit.Core.Term
     cont: Lit.Core.Term
   )
-  // Stores an new program
-  store(
+  // Binds an new program
+  bind(
     name: String
     main: Lit.Core.Term
     cont: Lit.Core.Term
@@ -52,7 +52,8 @@ type Lit.Core.Term {
 
 // Lit.Core types are algebraic datatypes (ADTs)
 type Lit.Core.Type {
-  new(
+  lab
+  adt(
     name: String
     forms: List<Lit.Core.Type.Form>
   )
@@ -78,7 +79,7 @@ type Lit.Core.Type.Field {
 type Lit.Core.User {
   new(
     name: String
-    pubk: String
+    pkey: String
   )
 }
 
@@ -94,10 +95,10 @@ type Lit.Core.Bond {
 }
 
 // An external call
-type Lit.Core.Eval {
+type Lit.Core.Exec {
   new(
     user: String
-    pubk: String
+    sign: String
     expr: Lit.Core.Term
   )
 }
@@ -107,7 +108,7 @@ type Lit.Core.Line {
   new_type(value: Lit.Core.Type)
   new_bond(value: Lit.Core.Bond)
   new_user(value: Lit.Core.User)
-  ext_eval(value: Lit.Core.Eval)
+  ext_exec(value: Lit.Core.Exec)
 }
 
 // A page of the Litereum book
@@ -150,14 +151,18 @@ Lit.Core.World.get_user(name: String, world: Lit.Core.World): Maybe<Lit.Core.Use
   } default none
 
 Lit.Core.Type.find_form(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Form>>
-  List.ifind!((i,t) String.eql(t@name,name), type@forms)
+  case type {
+    lab: none
+    adt: List.ifind!((i,f) String.eql(f@name,name), type.forms)
+  }
 
 // Type-Checking
 // -------------
 
 Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
   case a b {
-    new new: String.eql(a.name, b.name)
+    lab lab: true
+    adt adt: String.eql(a.name, b.name)
   } default false
 
 Lit.Core.World.check.term(
@@ -166,16 +171,19 @@ Lit.Core.World.check.term(
   ctx: List<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
-  //log("- check " | Lit.Lang.show(term,world,[],0) | " : " | Lit.Core.Type.show(type))
-  //log("- ctx " | String.join(",", List.map!!((x) x@name, ctx)))
+  //log("- chk " | Lit.Lang.show.term(term,world,[],0) | " : " | Lit.Lang.show.type.short(type))
+  //log("- ctx " | String.join(",", List.map!!(Lit.Lang.show.type.short, ctx)))
+  //log("")
   open world
   case term {
     var:
-      let var_type = ctx[term.bind] abort false
+      let var_type = ctx[term.bvar] abort false
       //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
       Lit.Core.Type.equal(var_type, type)
     create: case type {
-      new:
+      lab:
+        false
+      adt:
         use term_type = Lit.Core.World.get_type(term.type,world) abort false
         if Lit.Core.Type.equal(term_type, type) then
           use form = type.forms[term.form] abort false
@@ -184,10 +192,15 @@ Lit.Core.World.check.term(
           false
     }
     match:
-      use expr_type = Lit.Core.World.get_type(term.type,world) abort false
-      let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
-      let cses = Lit.Core.World.check.cases(term.cses, type, expr_type.forms, ctx, world)
-      expr && cses
+      let expr_type = Lit.Core.World.get_type(term.type,world) abort false
+      case expr_type {
+        lab:
+          false
+        adt:
+          let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
+          let cses = Lit.Core.World.check.cases(term.cses, type, expr_type.forms, ctx, world)
+          expr && cses
+      }
     call:
       use bond = Lit.Core.World.get_bond(term.func,world) abort false
       use inty = Lit.Core.World.get_type(bond.inty,world) abort false
@@ -195,11 +208,13 @@ Lit.Core.World.check.term(
       let argm = Lit.Core.World.check.term(term.argm, inty, ctx, world)
       let cont = Lit.Core.World.check.term(term.cont, inty, outy & ctx, world)
       argm && cont
-    store:
+    bind:
       // TODO: check access
       use bond = Lit.Core.World.get_bond(term.name,world) abort false
+      use inty = Lit.Core.World.get_type(bond.inty,world) abort false
       use outy = Lit.Core.World.get_type(bond.outy,world) abort false
-      let main = Lit.Core.World.check.term(term.main, outy, ctx, world)
+      let ctx2 = [inty, Lit.Core.Type.lab] ++ ctx
+      let main = Lit.Core.World.check.term(term.main, outy, ctx2, world)
       main
   } default false
 
@@ -274,11 +289,16 @@ Lit.Core.World.run.line(
   case line {
     new_type:
       // TODO: check something?
-      use type = line.value
-      log("- new_type: " | type.name)
-      case world{type.name} as got_type {
-        none: some(world{type.name} <- Lit.Core.Entry.type(type))
-      } default log("error: type redefinition: " | type.name) none
+      let type = line.value
+      case type {
+        lab:
+          none
+        adt: 
+          log("- new_type: " | type.name)
+          case world{type.name} as got_type {
+            none: some(world{type.name} <- Lit.Core.Entry.type(type))
+          } default log("error: type redefinition: " | type.name) none
+      }
     new_bond:
       use bond = line.value
       log("- new_bond: " | bond.name)
@@ -287,7 +307,7 @@ Lit.Core.World.run.line(
           let new_world = world{bond.name} <- Lit.Core.Entry.bond(bond)
           let inty = Lit.Core.World.get_type(bond.inty, world) abort log("error: bond inty not found: " | bond.name) none
           let outy = Lit.Core.World.get_type(bond.outy, world) abort log("error: bond outy not found: " | bond.name) none
-          let pass = Lit.Core.World.check.term(bond.main, outy, [inty], new_world)
+          let pass = Lit.Core.World.check.term(bond.main, outy, [inty, Lit.Core.Type.lab], new_world)
           if pass then
             some(new_world)
           else
@@ -299,18 +319,19 @@ Lit.Core.World.run.line(
       case world{user.name} as got {
         none: some(world{user.name} <- Lit.Core.Entry.user(user))
       } default log("error: user redefinition: " | user.name) none
-    ext_eval:
-      use eval = line.value
-      case world{eval.user} as got_entry {
+    ext_exec:
+      use exec = line.value
+      case world{exec.user} as got_entry {
         some: case got_entry.value as entry {
           user: 
             use user = entry.value
-            let {result, world} = Lit.Core.World.run.term(eval.expr, eval.user, world, [])
-            let world = world{eval.user} <- Lit.Core.Entry.user(user@pubk <- eval.pubk)
-            log("- ext_eval: " | Lit.Lang.show.term(result, world, [], 0))
+            let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, [])
+            // TODO: swap new public_key
+            //let world = world{exec.user} <- Lit.Core.Entry.user(user@pkey <- exec.pkey)
+            log("- ext_exec: " | Lit.Lang.show.term(result, world, [], 0))
             some(world)
-        } default log("error: eval user not a user") none
-      } default log("error: eval user undefined") none
+        } default log("error: exec user not a user") none
+      } default log("error: exec user undefined") none
   }
 
 Lit.Core.World.run.term(
@@ -319,11 +340,12 @@ Lit.Core.World.run.term(
   world: Lit.Core.World
   vars: List<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
-  //log("- eval " | Lit.Lang.show.term(term, world, [], 0) | " " | Nat.show(stack))
-  //log("- vars " | String.join(",", List.mapped!(vars)!((x) Lit.Lang.show.term(x, world, [], 0))))
+  //log("- run " | Lit.Lang.show.term(term,world,[],0))
+  //log("- var " | String.join(",", List.map!!((x) Lit.Lang.show.term(x,world,[],0), vars)))
+  //log("")
   case term {
     var: 
-      case vars[term.bind] as got {
+      case vars[term.bvar] as got {
         none: {term, world}
         some: Lit.Core.World.run.term(got.value, self, world, vars)
       }
@@ -350,17 +372,27 @@ Lit.Core.World.run.term(
           Lit.Core.World.run.term(term.cont, self, world, done & vars)
       } default {term,world}
     }
-    store: case world{term.name} as got {
+    bind: case world{term.name} as got {
       none:
         {term, world}
       some: case got.value as entry {
         bond:
           use bond = entry.value
-          let {main, world} = Lit.Core.World.run.term(term.main, self, world, vars)
+          let main_vars = Lit.Core.Term.var(0) & Lit.Core.Term.var(1) & vars
+          let {main, world} = Lit.Core.World.run.term(term.main, self, world, main_vars)
           let world = world{term.name} <- Lit.Core.Entry.bond(bond@main <- main)
           Lit.Core.World.run.term(term.cont, self, world, vars)
       } default {term, world}
     }
+    compare: case term.val0 term.val1 {
+      label label: 
+        let result = case String.cmp(term.val0.name, term.val1.name) {
+          ltn: term.iflt
+          eql: term.ifeq
+          gtn: term.ifgt
+        }
+        Lit.Core.World.run.term(result, self, world, vars)
+    } default {term, world}
   } default {term,world}
 
 Lit.Core.World.run.terms(
@@ -383,7 +415,8 @@ Lit.Core.World.run.terms(
 
 Lit.Core.Type.show(type: Lit.Core.Type): String
   case type {
-    new: type.name
+    lab: "Label"
+    adt: type.name
   }
 
 // Tests
@@ -429,32 +462,38 @@ Lit.Core: _
         zero:
           Nat/zero
         succ:
-          get rest = double(input.pred)
+          call rest = double(input.pred)
           Nat/succ{pred: Nat/succ{pred: rest}}
       }
     } : Nat -> Nat
 
-    eval {
-      user: MrDog
-      pubk: 012345789abcdef
-    } get n = double(Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}})
-      get b = not(Bool/true)
+    with MrDog {
+      call n = double(Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}})
+      call b = not(Bool/true)
       NatBool/new{x: n, y: b}
+    } signed {}
 
-    bond COUNT of Count {
+    bond Count.get of Count {
       Nat/zero
     } : Unit -> Nat
 
-    bond Count {
-      get count = COUNT(Unit/new)
-      set COUNT = Nat/succ{pred: count}
+    bond Count.inc {
+      call count.got = Count.get(Unit/new)
+      bind Count.get { Nat/succ{pred: count.got} }
       Unit/new
-    } : Unit -> Unit
+    } : Unit -> Nat
 
-    eval { user: MrDog, pubk: 0123456789abcdef } get x = Count(Unit/new); x
-    eval { user: MrDog, pubk: 0123456789abcdef } get x = Count(Unit/new); x
-    eval { user: MrDog, pubk: 0123456789abcdef } get x = Count(Unit/new); x
-    eval { user: MrDog, pubk: 0123456789abcdef } get x = COUNT(Unit/new); x
+    with MrDog {
+      call x = Count.inc(Unit/new)
+      call x = Count.inc(Unit/new)
+      call x = Count.inc(Unit/new)
+      x
+    } signed {}
+
+    with MrDog {
+      call x = Count.get(Unit/new)
+      x
+    } signed {}
   `
 
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
