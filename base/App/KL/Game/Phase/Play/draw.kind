@@ -14,7 +14,12 @@ SkillInfo: Type
   Pair<String,Pair<App.KL.Game.Hero, App.KL.Game.Skill>>
 
 // draw all the screen (round, seconds, canvas, list of skills)
-App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+App.KL.Game.Phase.Play.draw(
+  img: VoxBox, 
+  local: App.KL.Game.State.Local, 
+  game: App.KL.Game,
+  draw_interface: Bool
+): DOM
   let players_info = App.KL.Game.Phase.Play.draw.get_players_info(game@players, game@board)
   <div style={ 
     "width": "max(100vw, 900px)",
@@ -24,11 +29,21 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "background-color":" #071840"
   }>
     // interface
-    { App.KL.Game.Phase.Play.draw.interface(local, game, players_info) }
+    { 
+      if draw_interface then 
+        App.KL.Game.Phase.Play.draw.interface(local, game, players_info) 
+      else
+        App.KL.Game.Phase.draw.none
+    }
     // canvas
     { App.KL.Game.Phase.Play.draw.canvas.elem(local, game, img) }
     // tab
-    { App.KL.Game.Phase.Play.draw.tab(local, game, players_info) }
+    { 
+      if draw_interface then 
+        App.KL.Game.Phase.Play.draw.tab(local, game, players_info)
+      else
+        App.KL.Game.Phase.draw.none
+    }
   </div>
 
 

@@ -33,7 +33,7 @@ App.KL.Game.Controls.Draft.initial: App.KL.Game.Controls.Draft
     // skills tab
     none
     // page
-    "heroes"
+    "users"
     // filter
     App.KL.Game.Controls.Draft.Filter.default
   )
