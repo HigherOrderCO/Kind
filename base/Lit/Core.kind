@@ -4,11 +4,23 @@
 // Types
 // -----
 
+//names
+//λx. λy. ((λa. λb. λc. λt. t(a,b,c))(x))
+//λx. λy. (λb. λc. λt. t(x,b,c))
+
+//index
+//λx. λy. ((λa. λb. λc. λt. 0(3,2,1))(1))
+//λx. λy. (λb. λc. λt. 1(3,2,1))
+
+//level
+//λx. λy. ((λa. λb. λc. λt. 5(2,3,4))(0))
+//λx. λy. ((λa. λb. λc. λt. 5(2,3,4))(0))
+
 // A Litereum term
 type Lit.Core.Term {
   // A variable
   var(
-    bvar: Nat
+    name: String
   )
   // Creates a value
   create(
@@ -168,16 +180,16 @@ Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
 Lit.Core.World.check.term(
   term: Lit.Core.Term
   type: Lit.Core.Type
-  ctx: List<Lit.Core.Type>
+  ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
-  //log("- chk " | Lit.Lang.show.term(term,world,[],0) | " : " | Lit.Lang.show.type.short(type))
-  //log("- ctx " | String.join(",", List.map!!(Lit.Lang.show.type.short, ctx)))
+  //log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
+  //log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
   //log("")
   open world
   case term {
     var:
-      let var_type = ctx[term.bvar] abort false
+      let var_type = ctx{term.name} abort false
       //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
       Lit.Core.Type.equal(var_type, type)
     create: case type {
@@ -198,22 +210,24 @@ Lit.Core.World.check.term(
           false
         adt:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
-          let cses = Lit.Core.World.check.cases(term.cses, type, expr_type.forms, ctx, world)
+          let cses = Lit.Core.World.check.cases(term.cses, type, expr_type.forms, term.name, ctx, world)
           expr && cses
       }
     call:
       use bond = Lit.Core.World.get_bond(term.func,world) abort false
       use inty = Lit.Core.World.get_type(bond.inty,world) abort false
       use outy = Lit.Core.World.get_type(bond.outy,world) abort false
+      let ctx2 = ctx{term.bvar} <- outy
       let argm = Lit.Core.World.check.term(term.argm, inty, ctx, world)
-      let cont = Lit.Core.World.check.term(term.cont, inty, outy & ctx, world)
+      let cont = Lit.Core.World.check.term(term.cont, inty, ctx2, world)
       argm && cont
     bind:
       // TODO: check access
       use bond = Lit.Core.World.get_bond(term.name,world) abort false
       use inty = Lit.Core.World.get_type(bond.inty,world) abort false
       use outy = Lit.Core.World.get_type(bond.outy,world) abort false
-      let ctx2 = [inty, Lit.Core.Type.lab] ++ ctx
+      let ctx2 = ctx{"input"} <- inty
+      let ctx2 = ctx{"caller"} <- Lit.Core.Type.lab
       let main = Lit.Core.World.check.term(term.main, outy, ctx2, world)
       main
   } default false
@@ -221,7 +235,7 @@ Lit.Core.World.check.term(
 Lit.Core.World.check.fields(
   terms: List<Lit.Core.Term>
   fields: List<Lit.Core.Type.Field>
-  ctx: List<Lit.Core.Type>
+  ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
   open world
@@ -239,14 +253,15 @@ Lit.Core.World.check.cases(
   cases: List<Lit.Core.Term>
   type: Lit.Core.Type
   forms: List<Lit.Core.Type.Form>
-  ctx: List<Lit.Core.Type>
+  name: String
+  ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
   case cases forms {
     cons cons:
-      let ext_ctx = Lit.Core.World.check.cases.extend(forms.head@fields, ctx, world) abort false
+      let ext_ctx = Lit.Core.World.check.cases.extend(forms.head@fields, name, ctx, world) abort false
       let case_ok = Lit.Core.World.check.term(cases.head, type, ext_ctx, world)
-      let rest_ok = Lit.Core.World.check.cases(cases.tail, type, forms.tail, ctx, world)
+      let rest_ok = Lit.Core.World.check.cases(cases.tail, type, forms.tail, name, ctx, world)
       case_ok && rest_ok
     nil nil:
       true
@@ -254,16 +269,18 @@ Lit.Core.World.check.cases(
 
 Lit.Core.World.check.cases.extend(
   fields: List<Lit.Core.Type.Field>
-  ctx: List<Lit.Core.Type>
+  name: String
+  ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
-): Maybe<List<Lit.Core.Type>>
+): Maybe<Map<Lit.Core.Type>>
   case fields {
     nil: Maybe {
       return ctx
     }
     cons: Maybe {
       get type = Lit.Core.World.get_type(fields.head@type, world)
-      Lit.Core.World.check.cases.extend(fields.tail, type & ctx, world)
+      let ctx2 = ctx{name|"."|fields.head@name} <- type
+      Lit.Core.World.check.cases.extend(fields.tail, name, ctx2, world)
     }
   }
 
@@ -307,7 +324,8 @@ Lit.Core.World.run.line(
           let new_world = world{bond.name} <- Lit.Core.Entry.bond(bond)
           let inty = Lit.Core.World.get_type(bond.inty, world) abort log("error: bond inty not found: " | bond.name) none
           let outy = Lit.Core.World.get_type(bond.outy, world) abort log("error: bond outy not found: " | bond.name) none
-          let pass = Lit.Core.World.check.term(bond.main, outy, [inty, Lit.Core.Type.lab], new_world)
+          let ctx = {"input": inty, "caller": Lit.Core.Type.lab}
+          let pass = Lit.Core.World.check.term(bond.main, outy, ctx, new_world)
           if pass then
             some(new_world)
           else
@@ -325,10 +343,10 @@ Lit.Core.World.run.line(
         some: case got_entry.value as entry {
           user: 
             use user = entry.value
-            let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, [])
+            let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
             // TODO: swap new public_key
             //let world = world{exec.user} <- Lit.Core.Entry.user(user@pkey <- exec.pkey)
-            log("- ext_exec: " | Lit.Lang.show.term(result, world, [], 0))
+            log("- ext_exec: " | Lit.Lang.show.term(result, world))
             some(world)
         } default log("error: exec user not a user") none
       } default log("error: exec user undefined") none
@@ -338,14 +356,14 @@ Lit.Core.World.run.term(
   term: Lit.Core.Term
   self: String
   world: Lit.Core.World
-  vars: List<Lit.Core.Term>
+  vars: Map<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
-  //log("- run " | Lit.Lang.show.term(term,world,[],0))
-  //log("- var " | String.join(",", List.map!!((x) Lit.Lang.show.term(x,world,[],0), vars)))
+  //log("- run " | Lit.Lang.show.term(term,world))
+  //log("- var " | String.join(",", List.map!!((x) Lit.Lang.show.term(x,world), vars)))
   //log("")
   case term {
     var: 
-      case vars[term.bvar] as got {
+      case vars{term.name} as got {
         none: {term, world}
         some: Lit.Core.World.run.term(got.value, self, world, vars)
       }
@@ -354,8 +372,20 @@ Lit.Core.World.run.term(
       case expr {
         create:
           let body = term.cses[expr.form] abort {term,world}
-          let vars = List.reverse!(expr.vals) ++ vars
-          Lit.Core.World.run.term(body, self, world, vars)
+          let entry = world{term.type} abort {term, world}
+          case entry {
+            type:
+              let type = entry.value
+              case type {
+                adt:
+                  use form = type.forms[expr.form] abort {term, world}
+                  let kvs = List.zip_with!!!((f,t) {term.name|"."|f@name,t}, form.fields, expr.vals)
+                  for kv in kvs with vars:
+                    let {k,v} = kv
+                    vars{k} <- v
+                  Lit.Core.World.run.term(body, self, world, vars)
+              } default {term, world}
+          } default {term, world} 
       } default {term,world}
     }
     create:
@@ -367,9 +397,14 @@ Lit.Core.World.run.term(
       some: case got.value as entry {
         bond:
           use bond = entry.value
-          let {argm, world} = Lit.Core.World.run.term(term.argm, self, world, vars)
-          let {done, world} = Lit.Core.World.run.term(bond.main, term.func, world, argm & Lit.Core.Term.label(self) & vars)
-          Lit.Core.World.run.term(term.cont, self, world, done & vars)
+          let {argm,world} = Lit.Core.World.run.term(term.argm, self, world, vars)
+          let main_vars = vars
+          let main_vars = main_vars{"input"} <- argm
+          let main_vars = main_vars{"caller"} <- Lit.Core.Term.label(self)
+          let {done,world} = Lit.Core.World.run.term(bond.main, term.func, world, main_vars)
+          let cont_vars = vars
+          let cont_vars = cont_vars{term.bvar} <- done
+          Lit.Core.World.run.term(term.cont, self, world, cont_vars)
       } default {term,world}
     }
     bind: case world{term.name} as got {
@@ -378,7 +413,9 @@ Lit.Core.World.run.term(
       some: case got.value as entry {
         bond:
           use bond = entry.value
-          let main_vars = Lit.Core.Term.var(0) & Lit.Core.Term.var(1) & vars
+          let main_vars = vars
+          let main_vars = vars{"input"} <- Lit.Core.Term.var("input")
+          let main_vars = vars{"caller"} <- Lit.Core.Term.var("caller")
           let {main, world} = Lit.Core.World.run.term(term.main, self, world, main_vars)
           let world = world{term.name} <- Lit.Core.Entry.bond(bond@main <- main)
           Lit.Core.World.run.term(term.cont, self, world, vars)
@@ -399,7 +436,7 @@ Lit.Core.World.run.terms(
   terms: List<Lit.Core.Term>
   self: String
   world: Lit.Core.World
-  vars: List<Lit.Core.Term>
+  vars: Map<Lit.Core.Term>
 ): Pair<List<Lit.Core.Term>, Lit.Core.World>
   case terms {
     nil:
@@ -410,18 +447,8 @@ Lit.Core.World.run.terms(
       {head & tail, world}
   }
 
-// Printing
-// --------
-
-Lit.Core.Type.show(type: Lit.Core.Type): String
-  case type {
-    lab: "Label"
-    adt: type.name
-  }
-
 // Tests
 // -----
-
 
 Lit.Core: _
 
