@@ -1,0 +1,5 @@
+App.KL.Game.Board.Creature.get.max_ap(creature: App.KL.Game.Creature): I32
+  case creature@category as category {
+    hero: category.data@max_ap
+    summon: 0
+  }

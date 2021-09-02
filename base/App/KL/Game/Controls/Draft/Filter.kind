@@ -30,8 +30,7 @@ App.KL.Game.Controls.Draft.Filter.apply(heroes: List<App.KL.Game.Hero>, filter: 
       BBT.for!!(filter@options)!(false, (k, v, z) v || z),
       ((hero)
         Maybe {
-          get role = hero@role
-          let role = App.KL.Game.Hero.Role.show(role)
+          let role = App.KL.Game.Hero.Role.show(hero@role)
           get filter = filter@options{role}
           return filter
         } <> false

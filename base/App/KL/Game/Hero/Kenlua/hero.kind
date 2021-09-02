@@ -181,40 +181,62 @@ App.KL.Game.Hero.Kenlua.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let walk_range = {2,2} ::Pair<U64, I32>
-  let dash_range = {2, 2} ::Pair<U64, I32>
+  let walk_range = {2,2} ::Pair<I32, I32>
+  let dash_range = {2, 2} ::Pair<I32, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name | ".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new(
+      "Walk", 500, 12,
+      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+      "Walk to another tile within 2 range from " | name | ".",
+      App.KL.Game.Cursor.move
+    )
 
-    "Q": App.KL.Game.Skill.new("Dash", 200, 47, dash_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.dash(dash_range@snd, 2, 1),
-    "Kenlua takes 2 damage to dash towards a tile within 2 range. Deal 2 damage to enemies nearby destination.", App.KL.Game.Cursor.move)
+    "Q": App.KL.Game.Skill.new(
+      "Dash", 200, 47,
+      (board, center, targets) Hexagonal.Axial.range(center, dash_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Kenlua.hero.Skills.dash(dash_range@snd, 2, 1),
+      "Kenlua takes 2 damage to dash towards a tile within 2 range. Deal 2 damage to enemies nearby destination.",
+      App.KL.Game.Cursor.move
+    )
 
-    "W": App.KL.Game.Skill.new("Stare", 520, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.stare(1),
-    "Kenlua Stares at a tile. If there is an enemy on it, Kenlua blocks all the incoming damage from its source.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new(
+      "Stare", 520, 48,
+      (board, center, targets) [],
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Kenlua.hero.Skills.stare(1),
+      "Kenlua Stares at a tile. If there is an enemy on it, Kenlua blocks all the incoming damage from its source.",
+      App.KL.Game.Cursor.attack
+    )
 
-    "E": App.KL.Game.Skill.new("Slash", 800, 68, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Kenlua.hero.Skills.slash(1, 20, 1),
-    "Kenlua deals a lethal blow dealing 20 damage to an enemy close to Kenlua.", App.KL.Game.Cursor.attack)
+    "E": App.KL.Game.Skill.new(
+      "Slash", 800, 68,
+      (board, center, targets) Hexagonal.Axial.range(center, 1),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Kenlua.hero.Skills.slash(1, 20, 1),
+      "Kenlua deals a lethal blow dealing 20 damage to an enemy close to Kenlua.",
+      App.KL.Game.Cursor.attack
+    )
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       5 // Damage
       2 // Resistance
       5 // Mobility
       1 // Range
       0 // Utility
       5 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.melee)
+  let role = App.KL.Game.Hero.Role.melee
 
   let description = "Kenlua is a fragile, but nimble assassin with great mobility and high damage."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS

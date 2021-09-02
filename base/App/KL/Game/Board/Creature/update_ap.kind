@@ -1,0 +1,10 @@
+App.KL.Game.Board.Creature.change_ap.aux(
+  value: I32,
+  creature: App.KL.Game.Creature
+): App.KL.Game.Creature
+  case creature@category as category {
+    hero: 
+      let new_ap = I32.min((category.ap + value), category.data@max_ap)
+      creature@category <- App.KL.Game.Creature.Category.hero(category.data, new_ap, category.id)
+    summon: creature
+  }

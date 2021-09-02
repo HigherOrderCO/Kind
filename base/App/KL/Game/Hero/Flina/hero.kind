@@ -19,39 +19,67 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 12, 2, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(2, 1),
-    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new(
+      "Walk", 500, 12,
+      (board, center, targets) Hexagonal.Axial.range(center, 2),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Effect.common.walk(2, 1),
+      "Walk to another tile within 2 range from " | name |".",
+      App.KL.Game.Cursor.move
+    )
 
-    "Q": App.KL.Game.Skill.new("Haste", 320, 48, 32, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Flina.Skill.Haste(32, 1, 2, 1),
-    "Flina grants haste to an ally, increasing their movement.", App.KL.Game.Cursor.heal)
+    "Q": App.KL.Game.Skill.new(
+      "Haste", 320, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, 32),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Flina.Skill.Haste(32, 1, 2, 1),
+      "Flina grants haste to an ally, increasing their movement.",
+      App.KL.Game.Cursor.heal
+    )
 
-    "W": App.KL.Game.Skill.new("Heal", 330, 48, 32, App.KL.Game.Skill.Pattern.vector, App.KL.Game.Hero.Flina.Skill.Heal(32, 2, 1),
-    "Flina restores Health Points for all allies in the area.", App.KL.Game.Cursor.heal)
+    "W": App.KL.Game.Skill.new(
+      "Heal", 330, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, 32),
+      App.KL.Game.Skill.Pattern.vector,
+      App.KL.Game.Hero.Flina.Skill.Heal(32, 2, 1),
+      "Flina restores Health Points for all allies in the area.",
+      App.KL.Game.Cursor.heal
+    )
 
-    "E": App.KL.Game.Skill.new("Protect", 350, 48, 32, App.KL.Game.Skill.Pattern.vector, App.KL.Game.Hero.Flina.Skill.Dampen(32, 2, 2, 1),
-    "Flina weakens all enemies in an area, reducing all damage dealt by them for 2 turns.", App.KL.Game.Cursor.heal)
+    "E": App.KL.Game.Skill.new(
+      "Protect", 350, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, 32),
+      App.KL.Game.Skill.Pattern.vector,
+      App.KL.Game.Hero.Flina.Skill.Dampen(32, 2, 2, 1),
+      "Flina weakens all enemies in an area, reducing all damage dealt by them for 2 turns.",
+      App.KL.Game.Cursor.heal
+    )
 
-    "R": App.KL.Game.Skill.new("Flight", 950, 48, 32, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(32, 3),
-    "After a long delay, Flina flies to any place in the battlefield.", App.KL.Game.Cursor.heal)
+    "R": App.KL.Game.Skill.new(
+      "Flight", 950, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, 32),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Effect.common.walk(32, 3),
+      "After a long delay, Flina flies to any place in the battlefield.",
+      App.KL.Game.Cursor.heal
+    )
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       0 // Damage
       1 // Resistance
       5 // Mobility
       5 // Range
       5 // Utility
       3 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.support)
+  let role = App.KL.Game.Hero.Role.support
 
   let description = "Flina is a fragile high ranged support with several different skills to help her allies, or to disrupt her enemies."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS

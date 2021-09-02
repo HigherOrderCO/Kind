@@ -1,14 +1,23 @@
 type App.KL.Game.Creature {
   new(
     player: Maybe<String>
-    hero: App.KL.Game.Hero
+    category: App.KL.Game.Creature.Category
     team: App.KL.Game.Team
     status: List<App.KL.Game.Creature.Status>
     hp: I32
-    ap: I32
   )
 }
 
+type App.KL.Game.Creature.Category {
+  hero(
+    data: App.KL.Game.Hero
+    ap: I32
+    id: Nat
+  )
+  summon(
+    data: App.KL.Game.Summon
+  )
+}
 
 type App.KL.Game.Creature.Status {
   block(cast_data: Pair<Char, String>, id: String, duration: I32, caster: String)
@@ -18,6 +27,7 @@ type App.KL.Game.Creature.Status {
   //Heal Over Time
   hot(cast_data: Pair<Char, String>, id: String, duration: I32, stack: I32, amount: I32)
   invulnerable(cast_data: Pair<Char, String>, id: String, duration: I32)
+  opposite(cast_data: Pair<Char, String>, duration: I32)
   protect(cast_data: Pair<Char, String>, duration: I32, amount: I32)
   root(cast_data: Pair<Char, String>, duration: I32)
   shield(cast_data: Pair<Char, String>, id: String, duration: I32, amount: I32)
