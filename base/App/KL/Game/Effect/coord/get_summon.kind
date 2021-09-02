@@ -1,0 +1,18 @@
+App.KL.Game.Effect.coord.get_summon: App.KL.Game.Effect<Maybe<Hexagonal.Axial>>
+  (center, targets, cast_data, map)
+  App.KL.Game.Effect {
+    get caster = App.KL.Game.Effect.board.creature.caster
+    get board = App.KL.Game.Effect.board.get
+    without caster: App.KL.Game.Effect {
+      return none
+    }
+    let player = caster@player
+    without player: App.KL.Game.Effect {
+      return none
+    }
+    let coord = App.KL.Game.Board.find_summon_coord(player, board)
+    App.KL.Game.Effect {
+      return coord
+    }
+  }
+  //let summon_coord = App.KL.Game.Board.find_summon_coord()

@@ -1,0 +1,2 @@
+App.KL.Game.Board.find_summon_coord(board: App.KL.Game.Board): Maybe<Hexagonal.Axial>
+  none
