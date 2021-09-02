@@ -1,0 +1,11 @@
+App.KL.Game.Creature.Status.opposite.check(
+  creature: App.KL.Game.Creature
+): Bool
+
+  let status = creature@status
+  let result = false
+  for reversed in status with result:
+    case reversed { 
+      opposite: true
+    }default result
+  result

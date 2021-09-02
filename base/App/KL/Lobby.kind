@@ -31,7 +31,7 @@ App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State):
     {
       open local
       case local.page as page{
-        front: App.KL.Lobby.draw.front(local@user, page.room_input, global)
+        front:  App.KL.Lobby.draw.front(local@user, page.room_input, global)
         heroes: App.KL.Game.Phase.draw.none //App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
       }
     }
@@ -218,36 +218,39 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
     "justify-content": "center", 
     "align-items": "center",
     "font-size": "2rem"
+    "color": "white"
   }
-  <div style=style>
-    <h1 style={"margin-bottom": "10px", "text-align": "center"}>
-      "Welcome to Kaelin"
-    </h1>
-    <div style={
-      "display": "flex",
-      "justify-content": "center", 
-      "flex-wrap": "wrap",
-      "text-align": "center"
-    }>
-      "Room number: "
-      {App.KL.Lobby.draw.front.input("text", room_input)}
-      <div>
-        {App.KL.Lobby.draw.front.button("ready", "Enter")}
-        //{App.KL.Lobby.draw.front.button("random", "Random")}
-        //{App.KL.Lobby.draw.front.button("heroes", "Heroes")}
+  let content = 
+    <div style=style>
+      <h1 style={"margin-bottom": "10px", "text-align": "center"}>
+        "Welcome to Kaelin"
+      </h1>
+      <div style={
+        "display": "flex",
+        "justify-content": "center", 
+        "flex-wrap": "wrap",
+        "text-align": "center"
+      }>
+        "Room number: "
+        {App.KL.Lobby.draw.front.input("text", room_input)}
+        <div>
+          {App.KL.Lobby.draw.front.button("ready", "Enter")}
+          //{App.KL.Lobby.draw.front.button("random", "Random")}
+          //{App.KL.Lobby.draw.front.button("heroes", "Heroes")}
+        </div>
       </div>
-    </div>
-    <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
-"Hello! To start with Kaelin it's easy.
-1. Enter a random room number and copy it
-2. Invite your friends to access: http://uwu.tech/App.KL
-3. Share the room number with them
+      <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
+        "Hello! To start with Kaelin it's easy.
+        1. Enter a random room number and copy it
+        2. Invite your friends to access: http://uwu.tech/App.KL
+        3. Share the room number with them
 
-Enjoy our little Kind game! (WIP)
-We will love to hear about your experience <3
-Join us: http://discord.gg/SNhNx9gUgh "
-    </pre>
-  </div>
+        Enjoy our little Kind game! (WIP)
+        We will love to hear about your experience <3
+        Join us: http://discord.gg/SNhNx9gUgh "
+      </pre>
+    </div>
+  App.KL.Game.Draw.background(content)
 
 // Lobby.When
 // ----------

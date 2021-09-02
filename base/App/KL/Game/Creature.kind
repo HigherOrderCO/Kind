@@ -27,6 +27,7 @@ type App.KL.Game.Creature.Status {
   //Heal Over Time
   hot(cast_data: Pair<Char, String>, id: String, duration: I32, stack: I32, amount: I32)
   invulnerable(cast_data: Pair<Char, String>, id: String, duration: I32)
+  opposite(cast_data: Pair<Char, String>, duration: I32)
   protect(cast_data: Pair<Char, String>, duration: I32, amount: I32)
   root(cast_data: Pair<Char, String>, duration: I32)
   shield(cast_data: Pair<Char, String>, id: String, duration: I32, amount: I32)

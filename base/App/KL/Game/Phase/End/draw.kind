@@ -10,7 +10,7 @@ App.KL.Game.Phase.End.draw(img: VoxBox, local: App.KL.Game.State.Local, game: Ap
 App.KL.Game.Phase.End.draw.transition(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
   let controls = local@end
   <div>
-    { App.KL.Game.Phase.Play.draw(img, local, game) }
+    { App.KL.Game.Phase.Play.draw(img, local, game, false) }
     <div class="pixel-art" style={
       "animation": "fade-in 200ms"
       "position": "fixed", 
