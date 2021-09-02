@@ -8,6 +8,7 @@ App.KL.Game.Effect.status.description(
     block: ""
     dampen:""
     invulnerable:""
+    opposite: ""
     root: ""
     silence:""
     stun:""
@@ -22,6 +23,7 @@ App.KL.Game.Effect.status.description(
       haste: App.KL.Game.Effect.description.add("Set Haste in a creature for"|duration_show| turn | "increasing movement distance by"|amount_show|distance)
       hot: App.KL.Game.Effect.description.add("Add a heal over time status for"|duration_show|turn| " healing for"|amount_show)
       invulnerable: App.KL.Game.Effect.description.add("Makes a creature invulnerable for"|duration_show|turn| " protecting it from any negative effects")
+      opposite: App.KL.Game.Effect.description.add("Reverts Healing / Damaging effects on the creature")
       protect: App.KL.Game.Effect { return unit } //TODO
       root: App.KL.Game.Effect.description.add("Root a creature for"|duration_show|turn)
       shield: App.KL.Game.Effect.description.add("Give Shield to a creature for"|duration_show|turn| " protecting it from taking "|amount_show|" damage")
