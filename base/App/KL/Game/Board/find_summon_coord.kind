@@ -1,5 +1,4 @@
-// TODO: optimize
-// Returns the position of a player
+// Returns the position of a summon
 App.KL.Game.Board.find_summon_coord(
   summon: String,
   board: App.KL.Game.Board

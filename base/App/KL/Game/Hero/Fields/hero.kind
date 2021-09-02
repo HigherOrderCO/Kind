@@ -18,21 +18,46 @@ App.KL.Game.Hero.Fields.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let walk_range = {1,1} ::Pair<U64, I32>
+  let walk_range = {1,1} ::Pair<I32, I32>
   let summon_move_terry = {2, 3} ::Pair<I32, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new(
+      "Walk", 500, 8,
+      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+      "Walk to another tile within 2 range from " | name |".",
+      App.KL.Game.Cursor.move
+    )
 
-    "Q": App.KL.Game.Skill.new("Summon/Move Terry", 93, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Fields.Skills.summon_move_terry(summon_move_terry@fst, summon_move_terry@snd, 1),
-    "Fields summons or moves Terry.", App.KL.Game.Cursor.move)
+    "Q": App.KL.Game.Skill.new(
+      "Summon/Move Terry", 450, 8,
+      (board, center, targets) App.KL.Game.Hero.Fields.Skills.summon_move_terry.aux(board, center, summon_move_terry@fst, summon_move_terry@snd),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Fields.Skills.summon_move_terry(summon_move_terry@fst, summon_move_terry@snd, 1),
+      "Fields summons or moves Terry.",
+      App.KL.Game.Cursor.move
+    )
 
-    "W": App.KL.Game.Skill.new("Rawr", 701, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Fields.Skills.rawr(2, 1),
-    "Fields creates a slipping surface around him, pulling enemies nearby.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new(
+      "Rawr", 440, 48,
+      (board, center, targets) [],
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Fields.Skills.rawr(6, 2, 1),
+      "Terry Slashes an enemy nearby.",
+      App.KL.Game.Cursor.attack
+    )
 
-    "E": App.KL.Game.Skill.new("Ravenous Bite", 702, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Fields.Skills.ravenous_bite(3, 1),
-    "Fields quickly bites all enemies in front of him, dealing 3 damage.", App.KL.Game.Cursor.attack)
+    "E": App.KL.Game.Skill.new(
+      "Ravenous Bite",
+      702, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, 1),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Fields.Skills.ravenous_bite(3, 1),
+      "Fields quickly bites all enemies in front of him, dealing 3 damage.",
+      App.KL.Game.Cursor.attack
+    )
   }
 
    let attributes =
@@ -54,6 +79,29 @@ App.KL.Game.Hero.Fields.hero: App.KL.Game.Hero
 
 // SKILLS
 
+App.KL.Game.Hero.Fields.Skills.summon_move_terry.aux(board: App.KL.Game.Board, center: Hexagonal.Axial, summon_range: I32, move_range: I32): List<Hexagonal.Axial>
+  Maybe {
+    let tile = Hexagonal.Axial.Map.get!(center, board)
+    get tile = tile
+    get creature = tile@creature
+    get player = creature@player
+    let coords = case App.KL.Game.Board.find_summon_coord(player, board) as summon {
+      none: Hexagonal.Axial.range(center, summon_range)
+      some: Hexagonal.Axial.range(summon.value, move_range)
+    }
+    return coords
+  } <> []
+
+App.KL.Game.Hero.Fields.Skills.rawr.aux(board: App.KL.Game.Board, center: Hexagonal.Axial, range: I32): List<Hexagonal.Axial>
+  Maybe {
+    let tile = Hexagonal.Axial.Map.get!(center, board)
+    get tile = tile
+    get creature = tile@creature
+    get player = creature@player
+    get summon = App.KL.Game.Board.find_summon_coord(player, board)
+    return Hexagonal.Axial.range(summon, range)    
+  } <> []
+
 App.KL.Game.Hero.Fields.Skills.ravenous_bite(dmg: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     App.KL.Game.Effect.ap.use(ap_cost)
@@ -72,13 +120,12 @@ App.KL.Game.Hero.Fields.Skills.ravenous_bite(dmg: I32, ap_cost: I32): App.KL.Gam
 App.KL.Game.Hero.Fields.Skills.summon_move_terry(summon_range: I32, movement_range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     get target = App.KL.Game.Effect.coord.get_target
-    get center = App.KL.Game.Effect.coord.get_center
     get caster = App.KL.Game.Effect.board.creature.caster
+    get board = App.KL.Game.Effect.board.get
     let player = case caster {none: none, some: caster.value@player}
     case player {
       none: App.KL.Game.Effect.fail("no Player"),
       some: App.KL.Game.Effect {
-        get board = App.KL.Game.Effect.board.get
         let summon = App.KL.Game.Board.find_summon_coord(player.value, board)
         case summon {
           none: App.KL.Game.Effect { 
@@ -102,23 +149,29 @@ App.KL.Game.Hero.Fields.Skills.summon_move_terry(summon_range: I32, movement_ran
     }
   }
 
-App.KL.Game.Hero.Fields.Skills.ice_fall(area: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Fields.Skills.rawr(dmg: I32, range: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect {
     App.KL.Game.Effect.ap.use(ap_cost)
-    get center = App.KL.Game.Effect.coord.get_center
     get target = App.KL.Game.Effect.coord.get_target
-
-    let ring = App.KL.Game.Areas.ring(center, 1)
-    let area = []
-    let area = for direction_coord in ring:
-      App.KL.Game.Areas.straight_line(2, center, direction_coord) ++ area
-
-    App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
-    let enemy = App.KL.Game.Effect.At.enemy!
-    let pull = App.KL.Game.Effect.movement.pull_at(false)
-    App.KL.Game.Effect.area!(enemy(pull), area)
+    get caster = App.KL.Game.Effect.board.creature.caster
+    get board  = App.KL.Game.Effect.board.get
+    let player = case caster {none: none, some: caster.value@player}
+    case player {
+      none: App.KL.Game.Effect.fail("No player"),
+      some: App.KL.Game.Effect {
+        let summon = App.KL.Game.Board.find_summon_coord(player.value, board)
+        case summon {
+          none: App.KL.Game.Effect.fail("Terry is not alive"),
+          some: App.KL.Game.Effect {
+            App.KL.Game.Effect.limit_range_at(range, summon.value)
+            App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [summon.value])
+            App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.green_fill, [target])
+            App.KL.Game.Effect.hp.damage_at(dmg, summon.value)
+            return unit
+          }
+        }
+      }
+    }
     return unit
   }
 

@@ -18,21 +18,45 @@ App.KL.Game.Hero.Cyclope.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let walk_range = {2,2} ::Pair<U64, I32>
+  let walk_range = {2,2} ::Pair<I32, I32>
 
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single,App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new(
+      "Walk", 500, 8,
+      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+      "Walk to another tile within 2 range from " | name |".",
+      App.KL.Game.Cursor.move
+    )
 
-    "Q": App.KL.Game.Skill.new("Empathy",280, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 10, 1),
-    "Cyclope sacrifices 4 Health to provide 10 Shield Points to nearby allies.", App.KL.Game.Cursor.heal)
+    "Q": App.KL.Game.Skill.new(
+      "Empathy",280, 48,
+      (board, center, targets) [],
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Cyclope.hero.Skills.empathy(2, 1, 10, 1),
+      "Cyclope sacrifices 4 Health to provide 10 Shield Points to nearby allies.",
+      App.KL.Game.Cursor.heal
+    )
 
-    "W": App.KL.Game.Skill.new("Revenge", 480, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
-    "Cyclope deals damage to an enemy equal to half of his missing Health Points.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new(
+      "Revenge", 480, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, 1),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Cyclope.hero.Skills.revenge(1, 1),
+      "Cyclope deals damage to an enemy equal to half of his missing Health Points.",
+      App.KL.Game.Cursor.attack
+  )
 
-    "E": App.KL.Game.Skill.new("Ground Slam", 800, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
-    "Cyclope stomps the ground, rooting all enemies within 2 tiles.", App.KL.Game.Cursor.attack)
+    "E": App.KL.Game.Skill.new(
+      "Ground Slam", 800, 48,
+      (board, center, targets) [],
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Cyclope.hero.Skills.ground_slam(2, 2, 2),
+      "Cyclope stomps the ground, rooting all enemies within 2 tiles.",
+      App.KL.Game.Cursor.attack
+    )
   }
 
    let attributes =
