@@ -1,14 +1,6 @@
-//type Submonoid<A: Type>(M: Monoid(A)){
-    //new(
-        //Q: A -> Type,
-        //he: Q(M.e),
-        //closed: (a: A) (ha: Q(a)) (b: A) (hb: Q(b)) -> Q(M.op(a, b)),
-    //)
-//}
-type Submonoid<A: Type>(M: Monoid(A)){
-    new(
-        Q: A -> Type,
-        //he: Q(M.e),
-        //closed: (a: A) (ha: P(a)) (b: A) (hb: P(b)) -> P(M.op(a, b)),
-    )
-}
+Foo: Type
+  Either<Foo, Unit>
+
+Test: Foo
+  Either.left!!(Either.left!!(Either.left!!(Either.right!!(unit))))
+  

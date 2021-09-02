@@ -4,18 +4,6 @@
 // Types
 // -----
 
-//names
-//λx. λy. ((λa. λb. λc. λt. t(a,b,c))(x))
-//λx. λy. (λb. λc. λt. t(x,b,c))
-
-//index
-//λx. λy. ((λa. λb. λc. λt. 0(3,2,1))(1))
-//λx. λy. (λb. λc. λt. 1(3,2,1))
-
-//level
-//λx. λy. ((λa. λb. λc. λt. 5(2,3,4))(0))
-//λx. λy. ((λa. λb. λc. λt. 5(2,3,4))(0))
-
 // A Litereum term
 type Lit.Core.Term {
   // A variable
@@ -199,7 +187,7 @@ Lit.Core.World.check.term(
         use term_type = Lit.Core.World.get_type(term.type,world) abort false
         if Lit.Core.Type.equal(term_type, type) then
           use form = type.forms[term.form] abort false
-          Lit.Core.World.check.fields(term.vals, form.fields, ctx, world)
+          Lit.Core.World.check.create.fields(term.vals, form.fields, ctx, world)
         else
           false
     }
@@ -210,7 +198,7 @@ Lit.Core.World.check.term(
           false
         adt:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
-          let cses = Lit.Core.World.check.cases(term.cses, type, expr_type.forms, term.name, ctx, world)
+          let cses = Lit.Core.World.check.match.cases(term.cses, type, expr_type.forms, term.name, ctx, world)
           expr && cses
       }
     call:
@@ -232,7 +220,7 @@ Lit.Core.World.check.term(
       main
   } default false
 
-Lit.Core.World.check.fields(
+Lit.Core.World.check.create.fields(
   terms: List<Lit.Core.Term>
   fields: List<Lit.Core.Type.Field>
   ctx: Map<Lit.Core.Type>
@@ -243,13 +231,13 @@ Lit.Core.World.check.fields(
     cons cons:
       let type = Lit.Core.World.get_type(fields.head@type,world) abort false
       let head = Lit.Core.World.check.term(terms.head, type, ctx, world)
-      let tail = Lit.Core.World.check.fields(terms.tail, fields.tail, ctx, world)
+      let tail = Lit.Core.World.check.create.fields(terms.tail, fields.tail, ctx, world)
       head && tail
     nil nil:
       true
   } default false
 
-Lit.Core.World.check.cases(
+Lit.Core.World.check.match.cases(
   cases: List<Lit.Core.Term>
   type: Lit.Core.Type
   forms: List<Lit.Core.Type.Form>
@@ -259,30 +247,16 @@ Lit.Core.World.check.cases(
 ): Bool
   case cases forms {
     cons cons:
-      let ext_ctx = Lit.Core.World.check.cases.extend(forms.head@fields, name, ctx, world) abort false
+      let ext_ctx = ctx
+      for field in forms.head@fields with ext_ctx:
+        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.lab
+        ext_ctx{name | "." | field@name} <- type
       let case_ok = Lit.Core.World.check.term(cases.head, type, ext_ctx, world)
-      let rest_ok = Lit.Core.World.check.cases(cases.tail, type, forms.tail, name, ctx, world)
+      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, forms.tail, name, ctx, world)
       case_ok && rest_ok
     nil nil:
       true
   } default false
-
-Lit.Core.World.check.cases.extend(
-  fields: List<Lit.Core.Type.Field>
-  name: String
-  ctx: Map<Lit.Core.Type>
-  world: Lit.Core.World
-): Maybe<Map<Lit.Core.Type>>
-  case fields {
-    nil: Maybe {
-      return ctx
-    }
-    cons: Maybe {
-      get type = Lit.Core.World.get_type(fields.head@type, world)
-      let ctx2 = ctx{name|"."|fields.head@name} <- type
-      Lit.Core.World.check.cases.extend(fields.tail, name, ctx2, world)
-    }
-  }
 
 // Execution
 // ---------
