@@ -55,26 +55,29 @@ App.KL.Game.Phase.Draft.draw.choose_page.filter_team(
 App.KL.Game.Phase.Draft.draw.choose_team(
   players: Map<App.KL.Game.Player>
 ): DOM
-  <div style={ 
-    "width": "100vw"
-    "height": "100vh"
-    "display": "flex"
-    "flex-direction": "column"
-    "justify-content": "center"
-    "align-items": "center"
-    "font-size": "2rem"
-  }>
+  let content = 
     <div style={ 
-      // "width": "60%"
-      // "height": "30%"
+      "width": "100vw"
+      "height": "100vh"
       "display": "flex"
+      "flex-direction": "column"
       "justify-content": "center"
-      "flex-wrap": "wrap"
+      "align-items": "center"
+      "font-size": "2rem"
     }>
-      {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
-      {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
+      <div style={ 
+        // "width": "60%"
+        // "height": "30%"
+        "display": "flex"
+        "justify-content": "center"
+        "flex-wrap": "wrap"
+      }>
+        {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.blue)}
+        {App.KL.Game.Phase.Draft.draw.choose_team.button(players, App.KL.Game.Team.red)}
+      </div>
     </div>
-  </div>
+  
+  App.KL.Game.Draw.background(content)
 
 App.KL.Game.Phase.Draft.draw.choose_team.button(players: Map<App.KL.Game.Player>, team: App.KL.Game.Team): DOM
   let fun = (k,v) App.KL.Game.Team.eql(v@team, team)
@@ -113,51 +116,22 @@ App.KL.Game.Phase.Draft.draw.main(
   user: String,
   filter: App.KL.Game.Controls.Draft.Filter
 ): DOM
-  <div class="pixel-art" style={"margin": "0", "height": "max(100%, 650px)", "width": "100%", "background-image": "url(https://i.imgur.com/NrKCJHi.png)", "position": "relative", "animation": "fade-in 700ms", "overflow": "hidden"}>
-      {App.KL.Game.Phase.Draft.draw.background}
-      <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
-        {App.KL.Game.Phase.Draft.draw.header(controls)}
-        // middle content
-        <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
-          // main content
-          <div style={"display": "flex", "padding": "4px"}>
-            { App.KL.Game.Phase.Draft.draw.middle.content(allies, page, skills_tab, user, filter) }
-          </div>
-          // bottom buttons
-            { App.KL.Game.Phase.Draft.draw.middle.bottom_buttons }
+  let content =
+    <div style={"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "position": "relative", "z-index": "1"}>
+      {App.KL.Game.Phase.Draft.draw.header(controls)}
+      // middle content
+      <div style={"display": "flex", "width": "100%", "justify-content": "center", "align-items": "center", "height": "max(calc(100% - 128px), 500px)", "position": "relative"}>
+        // main content
+        <div style={"display": "flex", "padding": "4px"}>
+          { App.KL.Game.Phase.Draft.draw.middle.content(allies, page, skills_tab, user, filter) }
         </div>
-        {App.KL.Game.Phase.Draft.draw.footer(controls)}
+        // bottom buttons
+          { App.KL.Game.Phase.Draft.draw.middle.bottom_buttons }
       </div>
+      {App.KL.Game.Phase.Draft.draw.footer(controls)}
     </div>
 
-// BACKGROUND
-// ==================================
-// draw all background hexagons
-App.KL.Game.Phase.Draft.draw.background: DOM
-  let s = Maybe.some!
-  <div style={"display": "contents"}>
-    {App.KL.Game.Phase.Draft.draw.background.hexagons(none,s(10),s(64),none, App.KL.Game.Phase.Draft.Assets.background.hexagons.1)}
-    {App.KL.Game.Phase.Draft.draw.background.hexagons(none,none,s(64),s(10), App.KL.Game.Phase.Draft.Assets.background.hexagons.2)}
-    {App.KL.Game.Phase.Draft.draw.background.hexagons(s(64),s(10),none,none, App.KL.Game.Phase.Draft.Assets.background.hexagons.3)}
-    {App.KL.Game.Phase.Draft.draw.background.hexagons(s(64),none,none,s(10), App.KL.Game.Phase.Draft.Assets.background.hexagons.4)}
-  </div>
-
-// draw a specific background hexagon
-App.KL.Game.Phase.Draft.draw.background.hexagons(
-  top: Maybe<Nat>
-  right: Maybe<Nat>
-  bottom: Maybe<Nat>
-  left: Maybe<Nat>
-  img: String
-): DOM
-  let decapsule = ((x) case x {
-    none: ""
-    some: Nat.show(x.value) | "px"
-  }) :: Maybe<Nat> -> String
-
-  <div style={"position": "absolute", "top": decapsule(top), "right": decapsule(right), "bottom": decapsule(bottom), "left": decapsule(left), "transform": "scale("|App.KL.Game.Phase.Draft.draw.fator.string|")", "z-index": "0"} >
-    <img src=img></img>
-  </div>
+  App.KL.Game.Draw.background(content)
 
 // MIDDLE PART
 // ==========================================

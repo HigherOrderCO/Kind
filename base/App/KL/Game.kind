@@ -85,7 +85,7 @@ App.KL.Game.draw(img: VoxBox, local: App.KL.Game.State.Local, global: App.KL.Glo
         some:
           let phase = game.value@phase
           case phase {
-            play : App.KL.Game.Phase.Play.draw(img, local, game.value)
+            play : App.KL.Game.Phase.Play.draw(img, local, game.value, true)
             draft: App.KL.Game.Phase.Draft.draw(local, global)
             end  : App.KL.Game.Phase.End.draw(img, local, game.value)
           } 

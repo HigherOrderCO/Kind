@@ -1,0 +1,111 @@
+App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
+  let name = "Octoking"
+
+  let vbox_img = (pose)
+    {none, App.KL.Game.Hero.Octoking.Assets.vbox_idle}
+
+  let b64_portrait = (bool, time)
+    App.KL.Game.Hero.Octoking.Assets.base64_idle
+
+  let b64_img = (bool, time)
+    App.KL.Game.Hero.Octoking.Assets.base64_idle
+
+  let height = 20 :: I32 // Distance from center of image to the top of it
+
+  let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
+
+  let max_hp = 25 :: I32
+
+  let max_ap = 3 :: I32
+
+  let walk_range = {2,2} ::Pair<U64, I32>
+  let swap_range = {4, 4} ::Pair<U64, I32>
+  let pbreak_range = {4, 4} ::Pair<U64, I32>
+  let detain_range = {3, 3} ::Pair<U64, I32>
+  
+  //Skills = 
+     //X = Move 
+     //Q = Swap -> Pronto so falta ajustar o visual
+     //W = Paradigm Break
+     //E = Ap Sacrifice
+     //R = Death Manipulation 
+
+  let skills = {
+    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
+    
+    "Q": App.KL.Game.Skill.new("Swap", 499, 48, swap_range@fst, App.KL.Game.Skill.Pattern.multiple_no_repeat(2), App.KL.Game.Hero.Octoking.hero.Skills.swap(swap_range@snd, 1),
+    "HeroName swaps two player's positions.", App.KL.Game.Cursor.move)
+
+    "W": App.KL.Game.Skill.new("Paradigm Break", 512, 48, pbreak_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Octoking.hero.Skills.p_break(pbreak_range@snd, 1, 2, 2),
+    "Lela provides 4 Shield Points to an ally.", App.KL.Game.Cursor.heal)
+
+  }
+
+  let on_stepped = none
+
+  let attributes =
+    some(App.KL.Game.Hero.Attributes.set(
+      0 // Damage
+      0 // Resistance
+      0 // Mobility
+      0 // Range
+      0 // Utility
+      0 // Difficulty
+  ))
+
+  let role = some(App.KL.Game.Hero.Role.support)
+
+  let description = "HeroName description"
+
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+
+
+App.KL.Game.Hero.Octoking.hero.Skills.swap(range: I32, ap_cost:I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    App.KL.Game.Effect.ap.use(ap_cost)
+    get targets = App.KL.Game.Effect.coord.get_targets
+    get center = App.KL.Game.Effect.coord.get_center
+    case targets { 
+      nil:
+        App.KL.Game.Effect { 
+          App.KL.Game.Effect.limit_range(range)
+          App.KL.Game.Effect.fail("No primary target was selected")
+        }
+      cons:
+        in_range = true
+        for target in targets with in_range:
+          in_range && I32.lte(Hexagonal.Axial.distance(targets.head, target), 7)
+
+        if in_range then 
+          App.KL.Game.Effect { 
+            case targets.tail { 
+              nil:
+                App.KL.Game.Effect.fail("No secondary target was selected")
+              cons:
+                App.KL.Game.Effect.movement.swap(targets.head, targets.tail.head, false)
+            }
+          }
+        else
+          App.KL.Game.Effect { 
+            App.KL.Game.Effect.fail("out of range") 
+          }
+          
+    }
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, targets)
+    return unit
+  }
+
+
+App.KL.Game.Hero.Octoking.hero.Skills.p_break(range: I32, radius: I32, duration: I32, ap_cost: I32): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect { 
+    get center = App.KL.Game.Effect.coord.get_center  
+    get target = App.KL.Game.Effect.coord.get_target
+    App.KL.Game.Effect.ap.use(ap_cost)
+    let area = App.KL.Game.Areas.circle(target, radius)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.tile.add_effect(App.KL.Game.Effect.status.opposite.add(1), duration), area)
+    return unit
+  }

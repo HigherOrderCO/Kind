@@ -1,0 +1,492 @@
+// A simple syntax for Lit.Core terms. This is NOT part of the protocol.
+
+// Stringifier
+// -----------
+
+Lit.Lang.show.page(page: Lit.Core.Page, world: Lit.Core.World): String
+  String.join("\n", List.mapped!(page)!((s) Lit.Lang.show.line(s,world)))
+
+Lit.Lang.show.line(line: Lit.Core.Line, world: Lit.Core.World): String
+  case line {
+    new_type: Lit.Lang.show.type(line.value, world)
+    new_bond: Lit.Lang.show.bond(line.value, world)
+    new_user: Lit.Lang.show.user(line.value, world)
+    ext_exec: Lit.Lang.show.exec(line.value, world)
+  }
+
+Lit.Lang.show.type.short(type: Lit.Core.Type): String
+  case type {
+    lab: "Label"
+    adt: type.name
+  }
+
+Lit.Lang.show.type(type: Lit.Core.Type, world: Lit.Core.World): String
+  case type {
+    lab: "Label"
+    adt:
+      "type " | type.name
+      | " { "
+      | String.join(", ", List.mapped!(type.forms)!((form)
+          open form
+          if List.is_empty!(form.fields) then
+            form.name
+          else
+            form.name
+            | "{"
+            | String.join(", ", List.mapped!(form.fields)!((field)
+                open field
+                field.name | ": " | field.type
+              ))
+            | "}"
+        ))
+      | " }"
+  }
+
+Lit.Lang.show.bond(bond: Lit.Core.Bond, world: Lit.Core.World): String
+  open bond
+  "bond "
+  | bond.name
+  | case bond.ownr {
+    none: ""
+    some: " of " | bond.ownr.value
+  }
+  | " { "
+  | Lit.Lang.show.term(bond.main, world)
+  | " } : "
+  | bond.inty
+  | " -> "
+  | bond.outy
+
+Lit.Lang.show.user(user: Lit.Core.User, world: Lit.Core.World): String
+  open user
+  "user "
+  | user.name
+  | " { "
+  | user.pkey
+  | " }"
+
+Lit.Lang.show.exec(exec: Lit.Core.Exec, world: Lit.Core.World): String
+  open exec
+  "with "
+  | exec.user
+  | "{ "
+  | Lit.Lang.show.term(exec.expr, world)
+  | " } signed { "
+  | exec.sign
+  | " } "
+
+Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
+  case term {
+    var: term.name
+    create: Maybe {
+      get type = Lit.Core.World.get_type(term.type, world)
+      case type {
+        lab: none
+        adt: Maybe {
+          get form = type.forms[term.form]
+          use form = form
+          let text = ""
+          let vals = List.zip_with!!!(
+            (field,value)
+              field@name
+              | ":"
+              | Lit.Lang.show.term(value, world),
+            form.fields,
+            term.vals)
+          let vals = if List.is_empty!(vals) then "" else "{" | String.join(",",vals) | "}"
+          return type.name | "/" | form.name | vals
+        }
+      }
+    } <> "?"
+    match: Maybe {
+      get type = Lit.Core.World.get_type(term.type, world)
+      case type {
+        lab: none
+        adt: Maybe {
+          let expr = Lit.Lang.show.term(term.expr, world)
+          let name = term.name
+          let vals = List.zip_with!!!(
+            (form,cse)
+              let fields = List.map!!((x) name | "." | x@name, List.reverse!(form@fields))
+              form@name
+              | ": "
+              | Lit.Lang.show.term(cse, world),
+            type.forms,
+            term.cses)
+          return "case " | name | " : " | type.name | " = " | expr | " { " | String.join(", ",vals) | " }" 
+        }
+      }
+    } <> "?"
+    call: Maybe {
+      let bvar = term.bvar
+      let func = term.func
+      let argm = Lit.Lang.show.term(term.argm, world)
+      let cont = Lit.Lang.show.term(term.cont, world)
+      return "call " | bvar | " = " | func | "(" | argm | "); " | cont
+    } <> "?"
+    bind: Maybe {
+      let name = term.name
+      let main = Lit.Lang.show.term(term.main, world)
+      let cont = Lit.Lang.show.term(term.cont, world)
+      return "bind " | name | " { " | main | " }; " | cont
+    } <> "?"
+    label: Maybe {
+      let name = term.name
+      return "#" | name
+    } <> "?"
+    compare: Maybe {
+      let val0 = Lit.Lang.show.term(term.val0, world)
+      let val1 = Lit.Lang.show.term(term.val1, world)
+      let iflt = Lit.Lang.show.term(term.iflt, world)
+      let ifeq = Lit.Lang.show.term(term.ifeq, world)
+      let ifgt = Lit.Lang.show.term(term.ifgt, world)
+      return "compare " | val0 | " " | val1 | " { a<b: " | iflt | ", a=b: " | ifeq | ", a>b: " | ifgt | " }"
+    } <> "?"
+  } default "?"
+
+// Parser
+// ------
+
+Lit.Lang.parser.page(world: Lit.Core.World): Parser<Lit.Core.Page>
+  Parser.choice!([
+    Parser {
+      get head = Lit.Lang.parser.line(world)
+      let world = case head {
+        new_type: case head.value {
+          adt: world{head.value.name} <- Lit.Core.Entry.type(head.value)
+        } default world
+      } default world 
+      get tail = Lit.Lang.parser.page(world)
+      return head & tail
+    }
+    Parser {
+      return []
+    }
+  ])
+
+Lit.Lang.parser.line(world: Lit.Core.World): Parser<Lit.Core.Line> 
+  Parser.choice!([
+    Parser {
+      get bond = Lit.Lang.parser.bond(world)
+      return Lit.Core.Line.new_bond(bond)
+    }
+    Parser {
+      get type = Lit.Lang.parser.type(world)
+      return Lit.Core.Line.new_type(type)
+    }
+    Parser {
+      get user = Lit.Lang.parser.user(world)
+      return Lit.Core.Line.new_user(user)
+    }
+    Parser {
+      get exec = Lit.Lang.parser.exec(world)
+      return Lit.Core.Line.ext_exec(exec)
+    }
+  ])
+
+Lit.Lang.parser.exec(world: Lit.Core.World): Parser<Lit.Core.Exec>
+  Parser {
+    Lit.Lang.parser.text("with")
+    get user = Lit.Lang.parser.name
+    Lit.Lang.parser.text("{")
+    get expr = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("}")
+    Lit.Lang.parser.text("signed")
+    Lit.Lang.parser.text("{")
+    get sign = Lit.Lang.parser.name
+    Lit.Lang.parser.text("}")
+    return Lit.Core.Exec.new(user, sign, expr)
+  }
+
+Lit.Lang.parser.user(world: Lit.Core.World): Parser<Lit.Core.User>
+  Parser {
+    Lit.Lang.parser.text("user")
+    get name = Lit.Lang.parser.name
+    Lit.Lang.parser.text("{")
+    get pkey = Lit.Lang.parser.name
+    Lit.Lang.parser.text("}")
+    return Lit.Core.User.new(name, pkey)
+  }
+
+Lit.Lang.parser.bond(world: Lit.Core.World): Parser<Lit.Core.Bond>
+  Parser {
+    Lit.Lang.parser.text("bond")
+    get name = Lit.Lang.parser.name
+    get ownr = Parser.maybe!(Parser {
+      Lit.Lang.parser.text("of")
+      Lit.Lang.parser.name
+    })
+    Lit.Lang.parser.text("{")
+    get main = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("}")
+    Lit.Lang.parser.text(":")
+    get typs = Parser.choice!([
+      Parser {
+        get inty = Lit.Lang.parser.name
+        Lit.Lang.parser.text("->")
+        get outy = Lit.Lang.parser.name
+        return {inty, outy}
+      }
+      Parser {
+        let inty = "_"
+        get outy = Lit.Lang.parser.name
+        return {inty, outy}
+      }
+    ])
+    let {inty, outy} = typs
+    return Lit.Core.Bond.new(name, ownr, main, inty, outy)
+  }
+
+Lit.Lang.parser.type(world: Lit.Core.World): Parser<Lit.Core.Type>
+  Parser {
+    Lit.Lang.parser.text("type")
+    get name = Lit.Lang.parser.name
+    get forms = Parser.wrap!(
+      Lit.Lang.parser.text("{")
+      Parser {
+        Parser.maybe!(Lit.Lang.parser.text(","))
+        Lit.Lang.parser.type.form(world)
+      }
+      Lit.Lang.parser.text("}")
+    )
+    return Lit.Core.Type.adt(name, forms)
+  }
+
+Lit.Lang.parser.type.form(world: Lit.Core.World): Parser<Lit.Core.Type.Form>
+  Parser {
+    get name = Lit.Lang.parser.name
+    get fields = Parser.choice!([
+      Parser.wrap!(
+        Lit.Lang.parser.text("{")
+        Parser {
+          Parser.maybe!(Lit.Lang.parser.text(","))
+          get name = Lit.Lang.parser.name
+          Lit.Lang.parser.text(":")
+          get type = Lit.Lang.parser.name
+          return Lit.Core.Type.Field.new(name, type)
+        }
+        Lit.Lang.parser.text("}")
+      )
+      Parser {
+        return []
+      }
+    ])
+    return Lit.Core.Type.Form.new(name, fields)
+  }
+
+Lit.Lang.parser.term(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser.choice!([
+    Lit.Lang.parser.term.create(world)
+    Lit.Lang.parser.term.match(world)
+    Lit.Lang.parser.term.call(world)
+    Lit.Lang.parser.term.bind(world)
+    Lit.Lang.parser.term.var(world)
+  ])
+
+Lit.Lang.parser.term.label(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    Lit.Lang.parser.text("#")
+    get name = Lit.Lang.parser.name
+    return Lit.Core.Term.label(name)
+  }
+
+Lit.Lang.parser.term.compare(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    Lit.Lang.parser.text("compare")
+    get val0 = Lit.Lang.parser.term(world)
+    get val1 = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("{")
+    Lit.Lang.parser.text("a<b:")
+    get iflt = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("a=b:")
+    get ifeq = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("a>b:")
+    get ifgt = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("}")
+    return Lit.Core.Term.compare(val0, val1, iflt, ifeq, ifgt)
+  }
+
+Lit.Lang.parser.term.create(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    get type_name = Lit.Lang.parser.name
+    case Lit.Core.World.get_type(type_name, world) as found {
+      none: Parser.fail!("Type not found.")
+      some: Parser {
+        Lit.Lang.parser.text("/")
+        get form_name = Lit.Lang.parser.name
+        use type = found.value
+        case Lit.Core.Type.find_form(form_name, type) as found {
+          none: Parser.fail!("Form not found.")
+          some: Parser {
+            let {form_num, form} = found.value
+            let fields = form@fields
+            if List.is_empty!(fields) then Parser {
+              return Lit.Core.Term.create(type_name, form_num, [])
+            } else Parser {
+              let fields = List.map!!((x) x@name, fields)
+              Lit.Lang.parser.text("{")
+              get vals = Lit.Lang.parser.term.create.vals(fields, world)
+              Lit.Lang.parser.text("}")
+              return Lit.Core.Term.create(type_name, form_num, vals)
+            }
+          }
+        }
+      }
+    }
+  }
+
+Lit.Lang.parser.term.create.vals(fields: List<String>, world: Lit.Core.World): Parser<List<Lit.Core.Term>>
+  case fields {
+    nil: Parser {
+      return []
+    }
+    cons: Parser {
+      Lit.Lang.parser.text(fields.head)
+      Lit.Lang.parser.text(":")
+      get head = Lit.Lang.parser.term(world)
+      Parser.maybe!(Lit.Lang.parser.text(","))
+      get tail = Lit.Lang.parser.term.create.vals(fields.tail, world)
+      return head & tail
+    }
+  }
+
+Lit.Lang.parser.term.match(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    Lit.Lang.parser.text("case ")
+    get name = Lit.Lang.parser.name
+    Lit.Lang.parser.text(":")
+    get type_name = Lit.Lang.parser.name
+    case Lit.Core.World.get_type(type_name, world) as found {
+      none: Parser.fail!("Type not found.")
+      some: Parser {
+        let type = found.value
+        case type {
+          lab:
+            Parser.fail!("Match type not an ADT.")
+          adt: Parser {
+            get expr = Parser.choice!([
+              Parser {
+                Lit.Lang.parser.text("=")
+                Lit.Lang.parser.term(world)
+              }
+              Parser {
+                return Lit.Core.Term.var(name)
+              }
+            ])
+            Lit.Lang.parser.text("{")
+            get cses = Lit.Lang.parser.term.match.cses(type.forms, name, world)
+            Lit.Lang.parser.text("}")
+            return Lit.Core.Term.match(type_name, name, expr, cses)
+          }
+        }
+      }
+    }
+  }
+
+Lit.Lang.parser.term.match.cses(cses: List<Lit.Core.Type.Form>, name: String, world: Lit.Core.World): Parser<List<Lit.Core.Term>>
+  case cses {
+    nil: Parser {
+      return []
+    }
+    cons: Parser {
+      use form = cses.head
+      Lit.Lang.parser.text(form.name)
+      Lit.Lang.parser.text(":")
+      let fields = List.map!!((x) name | "." | x@name, List.reverse!(form.fields))
+      get head = Lit.Lang.parser.term(world)
+      Parser.maybe!(Lit.Lang.parser.text(","))
+      get tail = Lit.Lang.parser.term.match.cses(cses.tail, name, world)
+      return head & tail
+    }
+  }
+
+//Lit.Lang.parser.term.var.find(name: String, world: Lit.Core.World): Parser<Lit.Core.Term>
+  //case List.find_index!(vars, String.eql(name)) as found {
+    //none: Parser.fail!("Unbound variable '" | name | "'.")
+    //some: Parser {
+      ////log("parsed var " | name | " " | Nat.show(found.value) | " " | String.join(",",vars))
+      //return Lit.Core.Term.var(found.value)
+    //}
+  //}
+
+Lit.Lang.parser.term.var(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    get name = Lit.Lang.parser.name
+    return Lit.Core.Term.var(name)
+  }
+
+Lit.Lang.parser.term.call(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    Lit.Lang.parser.text("call ")
+    get bvar = Lit.Lang.parser.name
+    Lit.Lang.parser.text("=")
+    get name = Lit.Lang.parser.name
+    Lit.Lang.parser.text("(")
+    get argm = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text(")")
+    Parser.maybe!(Lit.Lang.parser.text(";"))
+    get cont = Lit.Lang.parser.term(world)
+    return Lit.Core.Term.call(bvar, name, argm, cont)
+  }
+
+Lit.Lang.parser.term.bind(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    Lit.Lang.parser.text("bind ")
+    get name = Lit.Lang.parser.name
+    Lit.Lang.parser.text("{")
+    get main = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("}")
+    Parser.maybe!(Lit.Lang.parser.text(";"))
+    get cont = Lit.Lang.parser.term(world)
+    return Lit.Core.Term.bind(name, main, cont)
+  }
+
+Lit.Lang.parser.text(text: String): Parser(Unit)
+  Parser {
+    Lit.Lang.parser.ignore
+    Parser.text(text)
+  }
+
+Lit.Lang.parser.ignore: Parser(List<Unit>)
+  Parser.many!(Parser.choice!([
+    Parser.text(" ")
+    Parser.text("\t")
+    Parser.text("\r")
+    Parser.text("\n")
+    Parser {
+      Parser.text("//")
+      let end = Parser.choice!([Parser.text("\n"), Parser.eof])
+      Parser.until!(end, Parser.one)
+      return unit
+    }
+  ]))
+
+Lit.Lang.parser.name: Parser<String>
+  Parser {
+    Lit.Lang.parser.ignore
+    get chrs = Parser.many<Kind.Letter>(Lit.Lang.parser.letter)
+    return List.fold!(chrs)!(String.nil, String.cons)
+  }
+
+Lit.Lang.parser.letter: Parser(Kind.Letter)
+  (pst)
+  open pst
+  case pst.str {
+    nil:
+      Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Unexpected eof."),
+    cons:
+      if Lit.Lang.parser.is_letter(pst.str.head) then
+        let pst = Parser.State.new(pst.err, pst.nam, pst.ini, Nat.succ(pst.idx), pst.str.tail)
+        Parser.Reply.value!(pst, pst.str.head)
+      else
+        Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Expected name."),
+  }
+
+Lit.Lang.parser.is_letter(chr: Char): Bool
+  if      U16.btw('A', chr, 'Z') then Bool.true
+  else if U16.btw('a', chr, 'z') then Bool.true
+  else if U16.btw('0', chr, '9') then Bool.true
+  else if U16.eql('.', chr)      then Bool.true
+  else if U16.eql('_', chr)      then Bool.true
+  else if U16.eql('^', chr)      then Bool.true
+  else                                Bool.false

@@ -107,7 +107,7 @@ Kind.Synth.load(name: Kind.Name, defs: Kind.Defs): IO<Maybe<Kind.Defs>>
 Kind.Synth.get_kind_code(file: String): IO(String)
   IO {
     get code = IO.get_file(file)
-    if String.eql(code,"") then IO {
+    if String.is_upper(String.take(1,file)) && String.eql(code,"") then IO {
       get code = IO.request("http://uwu.tech:7172/" | file)
       return code;
     } else IO {
