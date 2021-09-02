@@ -10,7 +10,7 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
   let b64_img = (bool, time)
     App.KL.Game.Hero.Octoking.Assets.base64_idle
 
-  let height = 20 :: I32 // Distance from center of image to the top of it
+  let height = 28 :: I32 // Distance from center of image to the top of it
 
   let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
 
@@ -18,10 +18,11 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let walk_range = {2,2} ::Pair<U64, I32>
-  let swap_range = {4, 4} ::Pair<U64, I32>
-  let pbreak_range = {4, 4} ::Pair<U64, I32>
-  let detain_range = {3, 3} ::Pair<U64, I32>
+  let walk_range = {2,2} ::Pair<I32, I32>
+  let swap_range = {4, 4} ::Pair<I32, I32>
+  let swap_range_2 = {6, 6} ::Pair<I32, I32>
+  let pbreak_range = {4, 4} ::Pair<I32, I32>
+  let detain_range = {3, 3} ::Pair<I32, I32>
   
   //Skills = 
      //X = Move 
@@ -31,37 +32,70 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
      //R = Death Manipulation 
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new(
+      "Walk", 500, 8,
+      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+      "Walk to another tile within 2 range from " | name |".",
+      App.KL.Game.Cursor.move
+    )
     
-    "Q": App.KL.Game.Skill.new("Swap", 499, 48, swap_range@fst, App.KL.Game.Skill.Pattern.multiple_no_repeat(2), App.KL.Game.Hero.Octoking.hero.Skills.swap(swap_range@snd, 1),
-    "HeroName swaps two player's positions.", App.KL.Game.Cursor.move)
+    "Q": App.KL.Game.Skill.new(
+      "Swap",499, 48,
+      (board, center, targets) App.KL.Game.Hero.Octoking.hero.Skills.swap.range(board, center, targets, swap_range@fst, swap_range_2@fst)
+      App.KL.Game.Skill.Pattern.multiple_no_repeat(2),
+      App.KL.Game.Hero.Octoking.hero.Skills.swap(swap_range@snd, swap_range_2@snd, 1),
+      "HeroName swaps two player's positions.",
+      App.KL.Game.Cursor.move
+    )
 
-    "W": App.KL.Game.Skill.new("Paradigm Break", 512, 48, pbreak_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Octoking.hero.Skills.p_break(pbreak_range@snd, 1, 2, 2),
-    "Lela provides 4 Shield Points to an ally.", App.KL.Game.Cursor.heal)
+    "W": App.KL.Game.Skill.new(
+      "Paradigm Break", 512, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, pbreak_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Octoking.hero.Skills.p_break(pbreak_range@snd, 1, 2, 2),
+      "Lela provides 4 Shield Points to an ally.",
+      App.KL.Game.Cursor.heal
+    )
 
   }
 
   let on_stepped = none
 
   let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+    App.KL.Game.Hero.Attributes.set(
       0 // Damage
       0 // Resistance
       0 // Mobility
       0 // Range
       0 // Utility
       0 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.support)
+  let role = App.KL.Game.Hero.Role.support
 
   let description = "HeroName description"
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
+App.KL.Game.Hero.Octoking.hero.Skills.swap.range(
+  board: App.KL.Game.Board,
+  center: Hexagonal.Axial,
+  targets: List<Hexagonal.Axial>,
+  range_fst: I32,
+  range_snd: I32
+): List<Hexagonal.Axial>
+  case targets {
+    nil: Hexagonal.Axial.range(center, range_fst)
+    cons: 
+      case targets.tail as next_targets {
+        nil: Hexagonal.Axial.range(center, range_fst)
+        cons:Hexagonal.Axial.range(next_targets.head, range_snd)
+      }
+  }
 
-App.KL.Game.Hero.Octoking.hero.Skills.swap(range: I32, ap_cost:I32): App.KL.Game.Effect<Unit>
+App.KL.Game.Hero.Octoking.hero.Skills.swap(range_fst: I32, range_snd: I32, ap_cost:I32): App.KL.Game.Effect<Unit>
   App.KL.Game.Effect { 
     App.KL.Game.Effect.ap.use(ap_cost)
     get targets = App.KL.Game.Effect.coord.get_targets
@@ -69,13 +103,13 @@ App.KL.Game.Hero.Octoking.hero.Skills.swap(range: I32, ap_cost:I32): App.KL.Game
     case targets { 
       nil:
         App.KL.Game.Effect { 
-          App.KL.Game.Effect.limit_range(range)
+          App.KL.Game.Effect.limit_range(range_fst)
           App.KL.Game.Effect.fail("No primary target was selected")
         }
       cons:
         in_range = true
         for target in targets with in_range:
-          in_range && I32.lte(Hexagonal.Axial.distance(targets.head, target), 7)
+          in_range && I32.lte(Hexagonal.Axial.distance(targets.head, target), range_snd)
 
         if in_range then 
           App.KL.Game.Effect { 

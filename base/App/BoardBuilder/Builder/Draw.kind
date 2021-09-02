@@ -125,7 +125,7 @@ App.BoardBuilder.Builder.Draw.tokens(
 ): VoxBox
   let distance = token@range
   let coords = Hexagonal.Axial.range(center, distance)
-  let tile = App.KL.Game.Indicator.Assets.to_rename
+  let tile = App.KL.Game.Indicator.Assets.gray_line
   for coord in coords with img:
     let terrain = Hexagonal.Axial.Map.get!(coord, terrains)
     case terrain {

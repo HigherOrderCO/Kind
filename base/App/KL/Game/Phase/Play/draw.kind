@@ -145,6 +145,7 @@ App.KL.Game.Phase.Play.draw.get_players_info(
     Maybe {
       get creature = tile@creature
       get id = creature@player
+      get data = case creature@category as category {hero: some(category.data), summon: none}
       get info = result{id}
       return result{id} <- info@fst <- some(creature)
     } <> result
@@ -273,15 +274,19 @@ App.KL.Game.Phase.Play.draw.ap(
   let ap = App.KL.Game.Board.Creature.get.ap(creature)
   let max_ap = App.KL.Game.Board.Creature.get.max_ap(creature)
   no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, 0, 0, I32.to_u32(max_ap), img)
-  case ap_used {
-    none: 
-      no_cast
-    some:
-      // Verifies if the creature is the one casting current ability
-      if String.eql(ap_used.value@fst, creature@player <> "none") then 
-        App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, ap_used.value@snd, 0, I32.to_u32(max_ap), img)
-      else
-        no_cast
+  case creature@category {
+    summon: img
+    hero:
+      case ap_used {
+        none: 
+          no_cast
+        some:
+          // Verifies if the creature is the one casting current ability
+          if String.eql(ap_used.value@fst, creature@player <> "none") then 
+            App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, ap_used.value@snd, 0, I32.to_u32(max_ap), img)
+          else
+            no_cast
+      }
   }
 
       
