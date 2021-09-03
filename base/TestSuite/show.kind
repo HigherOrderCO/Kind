@@ -35,7 +35,7 @@ TestSuite.show.check_fail(s: TestSuite): String
 TestSuite.show.log(name: String, test: String, expected: String, got: String): String
   "\n["|name|"] test: "|test|"\nexpected: "|expected|"\ngot: "|got
 
-TestSuite.show.string(name: String, test: String, expected: String, got: String): TestSuite
+TestSuite.show.log_string(name: String, test: String, expected: String, got: String): TestSuite
   let res = 
     if String.eql(expected, got) 
     then Maybe.none! 

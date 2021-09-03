@@ -7,11 +7,14 @@ Bytes.to_string(b: Bytes): String
 
 Bytes.to_string.aux(b: Bytes): String
   log("b: "| b)
-  let c = Bytes.take(2, b) //Bytes.at(b)
-  c
+  let c = Bytes.take(2, b)
+  Nat.show(Bytes.to_nat(c))
   // case c {
   //   none: ""
   //   some: 
   //     c.value
   // }
 
+// TODO: get all bytes and convert them to int
+// 2. get all the values and use them with the code in U16.from_hex.parse
+// Remove the code from U16 and put it in Bytes
