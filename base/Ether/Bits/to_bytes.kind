@@ -1,0 +1,3 @@
+Ether.Bits.to_bytes(value : String): List<Bits> // refinement for all char in value, value is lower
+  let value = String.fold(value, _, [], (c, xs) String.cons(c, String.nil) & xs) 
+  List.map!!(Bits.hex.decode . (String.reverse . String.join("")), List.chunks_of!(2, value))

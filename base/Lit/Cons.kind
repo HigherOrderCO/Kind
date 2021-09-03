@@ -1,0 +1,650 @@
+// The body of a Lit.Cons Post can hold up to 8 words
+Lit.Cons.Body: Type
+  Vector<U256,40>
+
+// A Lit.Cons hash is a 256-bit word
+Lit.Cons.Hash: Type
+  U256
+
+// An IP networking address
+type Lit.Cons.Address {
+  ipv4(ip0: U8, ip1: U8, ip2: U8, ip3: U8, port: U16)
+} deriving (serializer, deserializer)
+
+// A networking peer
+type Lit.Cons.Peer {
+  new(
+    last_seen: Nat
+    address: Lit.Cons.Address
+  )
+}
+
+type Lit.Cons.Message {
+  ping(addresses: List<Lit.Cons.Address>)
+  request_post(hash: Lit.Cons.Hash)
+  share_post(post: Lit.Cons.Post)
+} deriving (serializer, deserializer)
+
+// A network message received from a sender
+type Lit.Cons.Received {
+  new(
+    sender: Lit.Cons.Peer
+    message: Lit.Cons.Message
+  )
+}
+
+// A Lit.Cons post
+type Lit.Cons.Post {
+  new(
+    body: Lit.Cons.Body // post contents (1280 bytes)
+    work: U256         // extra info and nonce (32 bytes)
+    prev: U256         // previous post (32 bytes)
+  )
+} deriving (serializer, deserializer)
+
+// Holds all the posts and aux structures
+type Lit.Cons.Store {
+  new(
+    post: Map<Lit.Cons.Post>           // maps PostHash to Post object
+    seen: Map<Unit>                    // set of PostHash that I have downloaded
+    children: Map<List<Lit.Cons.Hash>> // maps PostHash to list of PostHash that link to it
+    pending: Map<List<Lit.Cons.Post>>  // maps PostHash to list of posts waiting it for inclusion
+    score: Map<Lit.Cons.Hash>          // maps PostHash to cached score
+    tip: Pair<U256,Lit.Cons.Hash>      // current tip PostHash
+  )
+}
+
+// The state of a Lit.Cons node
+type Lit.Cons.Node {
+  new(
+    port: Nat
+    peers: Map<Lit.Cons.Peer>
+    store: Lit.Cons.Store
+  )
+}
+
+Lit.Cons.serialize.uint(size: Nat, value: Nat): Bits
+  case size {
+    zero: Bits.e
+    succ: if (value % 2) =? 0
+      then Bits.o(Lit.Cons.serialize.uint(size.pred, value / 2))
+      else Bits.i(Lit.Cons.serialize.uint(size.pred, value / 2))
+  }
+
+Lit.Cons.deserialize.uint.go(size: Nat, bits: Bits): Pair<Bits,Nat>
+  case size {
+    zero: {bits, 0}
+    succ: case bits {
+      e: {Bits.e, 0}
+      o:
+        let {bits, value} = Lit.Cons.deserialize.uint.go(size.pred, bits.pred)
+        {bits, 2 * value}
+      i:
+        let {bits, value} = Lit.Cons.deserialize.uint.go(size.pred, bits.pred)
+        {bits, 1 + 2 * value}
+    }
+  }
+
+Lit.Cons.deserialize.uint(size: Nat, bits: Bits): Nat
+  Pair.snd!!(Lit.Cons.deserialize.uint.go(size, bits))
+  
+Lit.Cons.serialize.hash(hash: Lit.Cons.Hash): Bits
+  Lit.Cons.serialize.uint(256, U256.to_nat(hash))
+
+Lit.Cons.deserialize.hash.go(bits: Bits): Pair<Bits,Lit.Cons.Hash>
+  let {bits, value} = Lit.Cons.deserialize.uint.go(256, bits)
+  {bits, Nat.to_u256(value)}
+
+Lit.Cons.deserialize.hash(bits: Bits): Lit.Cons.Hash
+  Pair.snd!!(Lit.Cons.deserialize.hash.go(bits))
+
+Lit.Cons.serialize.words(length: Nat, words: Vector<U256,length>): Bits
+  case length with words {
+    zero: Bits.e
+    succ: case words {
+      cons: Bits.concat(Lit.Cons.serialize.uint(256, U256.to_nat(words.head)), Lit.Cons.serialize.words(length.pred, words.tail))
+    }
+  }!
+
+Lit.Cons.deserialize.words.go(length: Nat, bits: Bits): Pair<Bits,Vector<U256,length>>
+  case length {
+    zero: {bits, Vector.nil!}
+    succ: 
+      let {bits, head} = Lit.Cons.deserialize.uint.go(256, bits)
+      let {bits, tail} = Lit.Cons.deserialize.words.go(length.pred, bits)
+      {bits, Vector.cons!<length.pred>(Nat.to_u256(head), tail)}
+  }!
+
+Lit.Cons.deserialize.words(length: Nat, bits: Bits): Vector<U256,length>
+  Pair.snd!!(Lit.Cons.deserialize.words.go(length, bits))
+
+Lit.Cons.serialize.address(address: Lit.Cons.Address): Bits
+  open address
+  Bits.flatten([
+    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip0)),
+    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip1)),
+    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip2)),
+    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip3)),
+    Lit.Cons.serialize.uint(16, U16.to_nat(address.port)),
+  ])
+
+Lit.Cons.deserialize.address.go(bits: Bits): Pair<Bits,Lit.Cons.Address>
+  let {bits, ip0} = Lit.Cons.deserialize.uint.go(8, bits)
+  let {bits, ip1} = Lit.Cons.deserialize.uint.go(8, bits)
+  let {bits, ip2} = Lit.Cons.deserialize.uint.go(8, bits)
+  let {bits, ip3} = Lit.Cons.deserialize.uint.go(8, bits)
+  let {bits, port} = Lit.Cons.deserialize.uint.go(16, bits)
+  {bits, Lit.Cons.Address.ipv4(Nat.to_u8(ip0), Nat.to_u8(ip1), Nat.to_u8(ip2), Nat.to_u8(ip3), Nat.to_u16(port))}
+
+Lit.Cons.deserialize.address(bits: Bits): Lit.Cons.Address
+  Pair.snd!!(Lit.Cons.deserialize.address.go(bits))
+
+Lit.Cons.serialize.many<A: Type>(item: A -> Bits, list: List<A>): Bits
+  case list {
+    nil: Bits.o(Bits.e)
+    cons: Bits.i(Bits.concat(item(list.head), Lit.Cons.serialize.many<A>(item, list.tail)))
+  }
+
+Lit.Cons.deserialize.many.go<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits,List<A>>
+  case bits {
+    e:
+      {Bits.e, []}
+    o:
+      {bits.pred, []}
+    i:
+      let bits = bits.pred
+      let {bits, head} = item(bits)
+      let {bits, tail} = Lit.Cons.deserialize.many.go<A>(item, bits)
+      {bits, head & tail}
+  }
+
+Lit.Cons.deserialize.many<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): List<A>
+  Pair.snd!!(Lit.Cons.deserialize.many.go<A>(item, bits))
+
+Lit.Cons.serialize.post(post: Lit.Cons.Post): Bits
+  open post
+  Bits.flatten([
+    Lit.Cons.serialize.words(40, post.body),
+    Lit.Cons.serialize.uint(256, U256.to_nat(post.work)),
+    Lit.Cons.serialize.uint(256, U256.to_nat(post.prev)),
+  ])
+
+Lit.Cons.deserialize.post.go(bits: Bits): Pair<Bits,Lit.Cons.Post>
+  let {bits,body} = Lit.Cons.deserialize.words.go(40, bits)
+  let {bits,work} = Lit.Cons.deserialize.uint.go(256, bits)
+  let {bits,prev} = Lit.Cons.deserialize.uint.go(256, bits)
+  {bits, Lit.Cons.Post.new(body, Nat.to_u256(work), Nat.to_u256(prev))}
+
+Lit.Cons.deserialize.post(bits: Bits): Lit.Cons.Post
+  Pair.snd!!(Lit.Cons.deserialize.post.go(bits))
+
+Lit.Cons.serialize.message(message: Lit.Cons.Message): Bits
+  case message {
+    ping: 
+      Bits.concat(Lit.Cons.serialize.uint(8,0), Lit.Cons.serialize.many!(Lit.Cons.serialize.address, message.addresses))
+    request_post:
+      Bits.concat(Lit.Cons.serialize.uint(8,1), Lit.Cons.serialize.uint(256, U256.to_nat(message.hash)))
+    share_post:
+      Bits.concat(Lit.Cons.serialize.uint(8,2), Lit.Cons.serialize.post(message.post))
+  }
+
+Lit.Cons.deserialize.message.go(bits: Bits): Pair<Bits,Lit.Cons.Message>
+  let {bits, variant} = Lit.Cons.deserialize.uint.go(4,bits)
+  switch Nat.eql(variant) {
+    0:
+      let {bits, addresses} = Lit.Cons.deserialize.many.go!(Lit.Cons.deserialize.address.go, bits)
+      {bits, Lit.Cons.Message.ping(addresses)}
+    1: 
+      let {bits, hash} = Lit.Cons.deserialize.uint.go(256, bits)
+      {bits, Lit.Cons.Message.request_post(Nat.to_u256(hash))}
+    2:
+      let {bits, post} = Lit.Cons.deserialize.post.go(bits)
+      {bits, Lit.Cons.Message.share_post(post)}
+  } default {bits, Lit.Cons.Message.ping([])}
+
+Lit.Cons.deserialize.message(bits: Bits): Lit.Cons.Message
+  Pair.snd!!(Lit.Cons.deserialize.message.go(bits))
+  
+Lit.Cons.Hash.serializer: Serializer<Lit.Cons.Hash>
+  U256.serializer
+
+Lit.Cons.Hash.deserializer: Deserializer<Lit.Cons.Hash>
+  U256.deserializer
+
+Lit.Cons.Body.deserializer: Deserializer<Lit.Cons.Body>
+  Vector.deserializer!(40,U256.deserializer)
+
+Lit.Cons.Body.serializer: Serializer<Lit.Cons.Body>
+  Vector.serializer!(40,U256.serializer)
+
+Lit.Cons.Message.serialize(message: Lit.Cons.Message): String
+  let hex = Bits.hex.encode(Serializer.run!(Lit.Cons.Message.serializer, message))
+  let hex = if Nat.mod(String.length(hex),2) =? 0 then hex else hex | "0"
+  hex
+
+Lit.Cons.Message.deserialize(string: String): Maybe<Lit.Cons.Message>
+  Deserializer.run!(Lit.Cons.Message.deserializer, Bits.hex.decode(string))
+
+Lit.Cons.Message.show(message: Lit.Cons.Message): String
+  case message {
+    ping: "ping"
+    share_post: "share_post(" | Lit.Cons.Hash.show(Lit.Cons.Hash.from_post(message.post)) | ")"
+    request_post: "request_post(" | Lit.Cons.Hash.show(message.hash) | ")"
+  }
+
+// Takes the Keccak hash of a list of words
+Lit.Cons.Hash.from_words(words: List<U256>): Lit.Cons.Hash
+  Crypto.Keccak.hash.words(words)
+
+Lit.Cons.Hash.show(hash: Lit.Cons.Hash): String
+  String.pad_left(64, '0', Nat.hex.encode(U256.to_nat(hash)))
+
+// Returns the PostHash
+Lit.Cons.Hash.from_post(post: Lit.Cons.Post): Lit.Cons.Hash
+  use post = post
+  if U256.eql(post.prev, 0) && U256.eql(post.work, 0) then
+    0#256
+  else
+    let words = Vector.to_list!(40, post.body) ++ [post.work, post.prev]
+    Lit.Cons.Hash.from_words(words)
+
+Lit.Cons.Message.serialize(message: Lit.Cons.Message): String
+  let hex = Bits.hex.encode(Serializer.run!(Lit.Cons.Message.serializer, message))
+  let hex = if Nat.mod(String.length(hex),2) =? 0 then hex else hex | "0"
+  hex
+
+Lit.Cons.Message.deserialize(string: String): Maybe<Lit.Cons.Message>
+  Deserializer.run!(Lit.Cons.Message.deserializer, Bits.hex.decode(string))
+
+// Estimates how many attempts were needed to make this hash
+Lit.Cons.Hash.score(hash: U256): U256
+  if U256.eql(hash,0) then
+    0
+  else
+    Nat.to_u256(Nat.pow(2,256) / U256.to_nat(hash))
+
+// Increases the Post nonce until it is above target_score
+Lit.Cons.Post.mine(post: Lit.Cons.Post, target_score: U256, attempts: U256): Maybe<Lit.Cons.Post>
+  let post_score = Lit.Cons.Hash.score(Lit.Cons.Hash.from_post(post))
+  //log("Mining. Score: " | U256.hex.encode(Lit.Cons.Hash.from_post(post)) | " " | U256.show(post_score))
+  if U256.eql(attempts,0) then
+    none
+  else if U256.gte(post_score, target_score) then
+    some(post)
+  else
+    Lit.Cons.Post.mine(post@work <- post@work + 1, target_score, attempts - 1)
+
+// Adds a post to the chain, updating the score, children and tip
+// If the prev is null, it is added to a pending map and re-added later
+Lit.Cons.Store.add_post(post: Lit.Cons.Post, chain: Lit.Cons.Store): Lit.Cons.Store
+  open post
+  open chain
+  open chain.tip
+  let post_hash = Lit.Cons.Hash.from_post(post)
+  case chain.post{U256.show(post_hash)} as got_post {
+    some: // Post already included: do nothing
+      chain
+    none: // Post not included
+      let prev_hash = post.prev
+      case chain.post{U256.show(prev_hash)} as got_prev {
+        some: // Parent included: add post and compute infos
+          let prev_score     = chain.score{U256.show(prev_hash)} abort chain
+          let post_score     = U256.add(prev_score, Lit.Cons.Hash.score(post_hash))
+          let prev_children  = chain.children{U256.show(prev_hash)} <> []
+          let pendings       = chain.pending{U256.show(post_hash)} <> []
+          let chain.post     = chain.post{U256.show(post_hash)} <- post
+          let chain.seen     = chain.seen{U256.show(post_hash)} <- unit
+          let chain.score    = chain.score{U256.show(post_hash)} <- post_score
+          let chain.children = chain.children{U256.show(prev_hash)} <- post_hash & prev_children
+          let chain.tip      = if post_score >? Pair.fst!!(chain.tip) then {post_score,post_hash} else chain.tip
+          let chain.pending  = Map.delete!(U256.show(post_hash), chain.pending)
+          let chain          = Lit.Cons.Store.new(chain.post, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
+          let chain          = for pending in pendings: Lit.Cons.Store.add_post(pending, chain)
+          chain
+        none: // Parent not included
+          case chain.seen{U256.show(post_hash)} as seen_post {
+            some:
+              // Post seen before: do nothing
+              chain
+            none:
+              // Brand new post: add to pending list
+              let pending_list  = post & (chain.pending{U256.show(prev_hash)} <> []) // TODO: avoid adding duplicates
+              let chain.seen    = chain.seen{U256.show(post_hash)} <- unit
+              let chain.pending = chain.pending{U256.show(prev_hash)} <- pending_list
+              Lit.Cons.Store.new(chain.post, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
+          }
+      }
+  }
+
+// The initial chain state
+Lit.Cons.Store.genesis: Lit.Cons.Store
+  let chain.post = {U256.show(0): Lit.Cons.Post.new(Vector.create!(40,()0),0,0)}
+  let chain.seen = {}
+  let chain.score = {U256.show(0): 0#256}
+  let chain.pending = {}
+  let chain.children = {U256.show(0): []}
+  let chain.tip = {0#256, 0#256}
+  Lit.Cons.Store.new(chain.post, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
+
+// Returns the longest chain, i.e., the one with most accumulated work
+Lit.Cons.Store.longest_chain(chain: Lit.Cons.Store): List<Lit.Cons.Post>
+  open chain
+  open chain.tip
+  case chain.post{U256.show(Pair.snd!!(chain.tip))} as tip_post {
+    none: []
+    some: Lit.Cons.Store.longest_chain.go(tip_post.value, chain.post, [])
+  }
+
+Lit.Cons.Store.longest_chain.go(
+  post: Lit.Cons.Post
+  posts: Map<Lit.Cons.Post>
+  result: List<Lit.Cons.Post>
+): List<Lit.Cons.Post>
+  open post
+  let result = List.cons!(post, result)
+  if U256.eql(post.prev, 0) then
+    result
+  else case posts{U256.show(post.prev)} as prev {
+    none: result
+    some: Lit.Cons.Store.longest_chain.go(prev.value, posts, result)
+  }
+
+// Converts the IP of an address to a string
+Lit.Cons.Address.show.ip(addr: Lit.Cons.Address): String
+  open addr
+  let ip0 = Nat.show(U8.to_nat(addr.ip0))
+  let ip1 = Nat.show(U8.to_nat(addr.ip1))
+  let ip2 = Nat.show(U8.to_nat(addr.ip2))
+  let ip3 = Nat.show(U8.to_nat(addr.ip3))
+  ip0 | "." | ip1 | "." | ip2 | "." | ip3
+
+// Converts the port of an address to a string
+Lit.Cons.Address.show.port(addr: Lit.Cons.Address): String
+  open addr
+  Nat.show(U16.to_nat(addr.port))
+
+// Converts an address to a string
+Lit.Cons.Address.show(addr: Lit.Cons.Address): String
+  Lit.Cons.Address.show.ip(addr) | ":" | Lit.Cons.Address.show.port(addr)
+
+Lit.Cons.Peer.show(peer: Lit.Cons.Peer): String
+  open peer
+  "<" | Lit.Cons.Address.show(peer.address) | ">"
+
+Lit.Cons.Peer.map_from_list(peers: List<Lit.Cons.Peer>): Map<Lit.Cons.Peer>
+  Map.from_list!(List.mapped!(peers)!((peer) { Lit.Cons.Address.show(peer@address), peer }))
+
+Lit.Cons.Received.from_udp_message(time: Nat, recv: IO.recv_udp.Message): Maybe<Lit.Cons.Received>
+  Maybe {
+    open recv
+    open recv.from
+    let ip = List.mapped!(String.split(recv.from.ip, "."))!((x) Nat.to_u8(Nat.read(x)))
+    let port = Nat.to_u16(recv.from.port)
+    get ip0 = ip[0]
+    get ip1 = ip[1]
+    get ip2 = ip[2]
+    get ip3 = ip[3]
+    let peer = Lit.Cons.Peer.new(time, Lit.Cons.Address.ipv4(ip0, ip1, ip2, ip3, port))
+    get msge = Lit.Cons.Message.deserialize(recv.data)
+    return Lit.Cons.Received.new(peer, msge)
+  }
+
+Lit.Cons.Node.send(node: Lit.Cons.Node, peer: Lit.Cons.Peer, message: Lit.Cons.Message): IO<Unit>
+  open node
+  open peer
+  open peer.address
+  let from_port = node.port
+  let to_ip     = Lit.Cons.Address.show.ip(peer.address)
+  let to_port   = U16.to_nat(peer.address.port)
+  //log("SENDING: " | Lit.Cons.Message.serialize(message))
+  IO.send_udp(from_port, to_ip, to_port, Lit.Cons.Message.serialize(message))
+
+Lit.Cons.Node.get_random_peers(node: Lit.Cons.Node, count: Nat): IO<List<Lit.Cons.Peer>>
+  open node
+  IO {
+    get time = IO.get_time
+    use rand = List.get_randoms!(time, count, Map.values!(node.peers))
+    return rand.result
+  }
+
+Lit.Cons.Node.send_to_random_peers(node: Lit.Cons.Node, count: Nat, message: Lit.Cons.Message): IO<Unit>
+  IO {
+    get peers = Lit.Cons.Node.get_random_peers(node, count)
+    Lit.Cons.Node.broadcast.go(node, message, peers)
+  }
+
+Lit.Cons.Node.broadcast(node: Lit.Cons.Node, message: Lit.Cons.Message): IO<Unit>
+  Lit.Cons.Node.broadcast.go(node, message, Map.values!(node@peers))
+
+Lit.Cons.Node.broadcast.go(node: Lit.Cons.Node, message: Lit.Cons.Message, peers: List<Lit.Cons.Peer>): IO<Unit>
+  case peers {
+    nil: IO.pass
+    cons: IO {
+      Lit.Cons.Node.send(node, peers.head, message)
+      Lit.Cons.Node.broadcast.go(node, message, peers.tail)
+    }
+  }
+
+// Lit.Cons Node
+// ================
+
+// Starts a Lit.Cons node at given port
+Lit.Cons.Node.init(port: Nat): IO<Unit>
+  IO {
+    get time = IO.get_time
+    let peers = Lit.Cons.Peer.map_from_list([
+      Lit.Cons.Peer.new(time, Lit.Cons.Address.ipv4(127,0,0,1,42000))
+      Lit.Cons.Peer.new(time, Lit.Cons.Address.ipv4(127,0,0,1,42001))
+      Lit.Cons.Peer.new(time, Lit.Cons.Address.ipv4(127,0,0,1,42002))
+      Lit.Cons.Peer.new(time, Lit.Cons.Address.ipv4(127,0,0,1,42003))
+    ])
+    let node = Lit.Cons.Node.new(port, peers, Lit.Cons.Store.genesis)
+    Lit.Cons.Node.loop(node)
+  }
+  
+Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
+  IO {
+    // Displays UI
+    Lit.Cons.Node.display(node)
+    IO.print("")
+
+    // Handle incoming messages
+    get inbox = IO.recv_udp(node@port)
+    get node = Lit.Cons.Node.handle_inbox(node, inbox)
+
+    // Attempts to mine a post and adds it if successful
+    get time = IO.get_time
+    let time = Nat.to_u256(time)
+    let body = Vector.create!(40, (i) if i =? 39 then time else 0#256)
+    let post = Lit.Cons.Post.new(body, 0, node@store@tip@snd)
+    let node = Lit.Cons.Node.mine(node, post) <> node
+
+    // Pings random neighbors, sending random peers to them
+    Lit.Cons.Node.ping(node)
+
+    // Shares our best block with random neighbors
+    Lit.Cons.Node.share_tip(node)
+
+    // Requests contents of pending posts
+    Lit.Cons.Node.request_pendings(node)
+
+    // Forgets peers that look inactive
+    get node = Lit.Cons.Node.forget_inactive_peers(node)
+
+    // Loop
+    IO.sleep(2000)
+    Lit.Cons.Node.loop(node)
+
+    return unit
+  }
+
+Lit.Cons.Node.display(node: Lit.Cons.Node): IO<Unit>
+  open node
+  open node.store
+  let posts = Lit.Cons.Store.longest_chain(node.store)
+  //let posts = Map.values!(node.store.post)
+  IO {
+    IO.clear
+    get time = IO.get_time
+    IO.print("~~ String:Chain ~~")
+    IO.print("Time     : " | Nat.show(time))
+    IO.print("Peers    : " | Nat.show(List.length!(Map.to_list!(node.peers))))
+    IO.print("Pendings : " | Nat.show(List.length!(Map.to_list!(node.store.pending))))
+    let posts_length = List.length!(posts)
+    let posts_indexed = List.index!(posts)
+    IO.print("index  | body[0]                                                         | hash                                                             | score") 
+    for index_post in posts_indexed: IO {
+      let {index, post} = index_post
+      let half_count = 6
+      if Nat.between(half_count, index, posts_length - half_count) then
+        if index =? 4
+        then IO.print("(...)")
+        else IO.pass
+      else IO {
+        open post
+        let post_hash = Lit.Cons.Hash.from_post(post)
+        let score = node.store.score{U256.show(post_hash)} <> 0#256
+        let show_index = Nat.show(index)
+        let show_body = String.hex.decode(Nat.hex.encode(U256.to_nat(Vector.head!!(post.body))))
+        //let show_body = List.show!(U256.show,Vector.to_list!(32,post.body))
+        let show_hash = Lit.Cons.Hash.show(post_hash)
+        //let show_hash = Lit.Cons.Hash.show(post.prev)
+        let show_score = U256.show(score)
+        IO.print(""
+          | String.pad_left_exact(6, '0', show_index) | " | "
+          | String.pad_left_exact(64, '0', show_body) | " | "
+          | String.pad_left_exact(64, '0', show_hash) | " | "
+          | String.pad_left_exact(8, '0', show_score))
+        //IO.print("[" | Nat.show(index) | "] " | Lit.Cons.Hash.show(post_hash) | " -- score: " | U256.show(score))
+      }
+    }
+  }
+
+Lit.Cons.Node.on_message(node: Lit.Cons.Node, received: Lit.Cons.Received): IO<Lit.Cons.Node>
+  open received
+  IO {
+    get node = Lit.Cons.Node.refresh_peer(node, received.sender)
+    open node
+    open node.store
+    case received.message {
+      ping: IO {
+        //log("~ received ping")
+        //Lit.Cons.Node.send(node, received.sender, Lit.Cons.Message.pong)
+        return node
+      }
+      request_post: 
+        //log("~ received request")
+        case node.store.post{U256.show(received.message.hash)} as got {
+          none: IO {
+            return node
+          }
+          some: IO {
+            Lit.Cons.Node.send(node, received.sender, Lit.Cons.Message.share_post(got.value))
+            return node
+          }
+        }
+      share_post: IO {
+        //log("~ received post")
+        return Lit.Cons.Node.add_post(node, received.message.post)
+      }
+    } default IO {
+      return node
+    }
+  }
+
+Lit.Cons.Node.refresh_peer(node: Lit.Cons.Node, peer: Lit.Cons.Peer): IO<Lit.Cons.Node>
+  open node
+  open peer
+  IO {
+    get time = IO.get_time
+    let peer = peer@last_seen <- time
+    let node = node@peers <- (node.peers{Lit.Cons.Peer.show(peer)} <- peer)
+    return node
+  }
+
+Lit.Cons.Node.add_post(node: Lit.Cons.Node, post: Lit.Cons.Post): Lit.Cons.Node
+  open node
+  node@store <- Lit.Cons.Store.add_post(post, node.store)
+
+Lit.Cons.Node.handle_inbox(node: Lit.Cons.Node, inbox: List<IO.recv_udp.Message>): IO<Lit.Cons.Node>
+  IO {
+    IO.print("Handling incoming UDP messages...")
+    Lit.Cons.Node.handle_inbox.go(node, inbox)
+  }
+
+Lit.Cons.Node.handle_inbox.go(node: Lit.Cons.Node, inbox: List<IO.recv_udp.Message>): IO<Lit.Cons.Node>
+  case inbox {
+    nil: IO {
+      return node
+    }
+    cons: IO {
+      open inbox.head
+      get time = IO.get_time
+      use received = Lit.Cons.Received.from_udp_message(time, inbox.head)
+      case received {
+        none: Lit.Cons.Node.handle_inbox.go(node, inbox.tail)
+        some: IO {
+          use received = received.value
+          get node = Lit.Cons.Node.on_message(node, received)
+          get node = Lit.Cons.Node.handle_inbox.go(node, inbox.tail)
+          IO.print("- " | Lit.Cons.Peer.show(received.sender) | " " | Lit.Cons.Message.show(received.message))
+          return node
+        }
+      }
+    }
+  }
+
+Lit.Cons.Node.forget_inactive_peers(node: Lit.Cons.Node): IO<Lit.Cons.Node>
+  open node
+  IO {
+    get time = IO.get_time
+    let peers = Map.values!(node.peers)
+    let peers = List.filter<Lit.Cons.Peer>((peer) (peer@last_seen + 10000) >? time, peers) 
+    return node@peers <- Lit.Cons.Peer.map_from_list(peers)
+  }
+
+Lit.Cons.Node.ping(node: Lit.Cons.Node): IO<Unit>
+  IO {
+    log("Pinging peers...")
+    get peers = Lit.Cons.Node.get_random_peers(node, 8)
+    let message = Lit.Cons.Message.ping(List.mapped!(peers)!((peer) peer@address))
+    Lit.Cons.Node.broadcast(node, message)
+  }
+
+Lit.Cons.Node.share_tip(node: Lit.Cons.Node): IO<Unit>
+  open node
+  open node.store
+  IO {
+    log("Sharing tip with peers...")
+    let tip_post = node.store.post{U256.show(Pair.snd!!(node.store.tip))} abort IO.pass
+    let message = Lit.Cons.Message.share_post(tip_post)
+    Lit.Cons.Node.broadcast(node, message)
+  }
+
+Lit.Cons.Node.request_pendings(node: Lit.Cons.Node): IO<Unit>
+  IO {
+    log("Requesting pendings...")
+    open node
+    open node.store
+    let pendings = List.map!!(U256.read, Map.keys!(node.store.pending))
+    for pending in pendings:
+      case node.store.seen{U256.show(pending)} as seen {
+        none: 
+          let message = Lit.Cons.Message.request_post(pending)
+          Lit.Cons.Node.broadcast(node, message)
+        some:
+          IO.pass
+      }
+  }
+
+Lit.Cons.Node.mine(node: Lit.Cons.Node, post: Lit.Cons.Post): Maybe<Lit.Cons.Node>
+  IO {
+    log("Mining post...")
+    open node
+    open node.store
+    let mined_post = Lit.Cons.Post.mine(post, 32, 64)
+    case mined_post {
+      none: log("- Failure.") none
+      some: log("- Success!") some(Lit.Cons.Node.add_post(node, mined_post.value))
+    }
+  }

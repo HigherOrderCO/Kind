@@ -1,0 +1,4 @@
+// Returns the monoid operation for the given monoid.
+Monoid.get_op<A: Type>(M: Monoid<A>): A -> A -> A
+  open M
+  M.op

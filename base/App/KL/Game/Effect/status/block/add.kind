@@ -10,8 +10,7 @@ App.KL.Game.Effect.status.block.add(
     get caster = App.KL.Game.Effect.board.creature.caster
     without caster: App.KL.Game.Effect { return +0#32 }
     without creature: App.KL.Game.Effect { return +0#32 }
-    let hero_name = caster@hero
-    let hero_name = hero_name@name
+    let hero_name = App.KL.Game.Board.Creature.get.name(caster)
     let block = App.KL.Game.Creature.Status.block(cast_data, id, duration, hero_name)
     App.KL.Game.Effect { 
       App.KL.Game.Effect.status.add(creature, block, pos)

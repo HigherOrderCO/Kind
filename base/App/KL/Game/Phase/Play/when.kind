@@ -10,10 +10,29 @@ App.KL.Game.Phase.Play.when(
   case event {
     frame:
       open event.info
-      log("Screen size: " | U32.show(local@screen_size@fst) | ", " | U32.show(local@screen_size@snd))
+      //log("Screen size: " | U32.show(local@screen@size@fst) | ", " | U32.show(local@screen@size@snd))
       let picks = App.KL.Game.Cast.picks_of(local@user, game)
       let new_local = local@preview <- (local@preview@picks <- picks)
-      let new_local = new_local@screen_size <- event.info.screen_size
+      open new_local
+      // let screen = new_local.screen@size <- event.info.screen_size
+      let new_local = 
+        case local@scroll as a {
+          none: new_local
+          some:
+            let x         = a.value@last_pos@fst - local@mouse@fst
+            let y         = a.value@last_pos@snd - local@mouse@snd
+            let position  = {new_local.screen@position@fst + x, new_local.screen@position@snd + y}
+            let screen    = new_local.screen@position <- position
+            open new_local
+            let scroll    = some(App.KL.Game.Scroll.new(0, local@mouse))
+            let new_local = new_local@scroll <- scroll 
+            let new_local = new_local@screen <- screen
+            new_local
+        }
+      let new_local = new_local@screen <- screen
+      App.set_local!(App.KL.State.Local.game(new_local))
+    mouse_up:
+      let new_local = local@scroll <- none
       App.set_local!(App.KL.State.Local.game(new_local))
     mouse_move:
       // mouse move on canvas
@@ -42,12 +61,33 @@ App.KL.Game.Phase.Play.when(
         let local = local@hud <- controls
         App.set_local!(App.KL.State.Local.game(local))
     key_down:
-      // if tab (esc) pressed 
-      if event.code =? 32#16 then
-        log("ENTROU")
-        let local = App.KL.Game.Phase.Play.when.invert_tab(true, controls, local)
-        App.set_local!(App.KL.State.Local.game(local))
-      else 
+      log("U16 for corresponding Key: " | U16.show(event.code))
+      switch U16.eql(event.code) {
+        32#16: 
+          log("ENTROU")
+          let local = App.KL.Game.Phase.Play.when.invert_tab(true, controls, local)
+          App.set_local!(App.KL.State.Local.game(local))
+        189#16: IO {  
+          let scale       = local@screen@scale
+          let new_scale   = if scale <=? 1.0 then scale else scale - 1.0
+          let new_screen  = local@screen@scale <- new_scale
+          let new_local   = local@screen <- new_screen
+          App.set_local<App.KL.State>(App.KL.State.Local.game(new_local))
+        }
+        187#16: IO { 
+          let scale       = local@screen@scale
+          let new_scale   = if scale >=? 5.0 then scale else scale + 1.0
+          let new_screen  = local@screen@scale <- new_scale
+          let new_local   = local@screen <- new_screen
+          App.set_local<App.KL.State>(App.KL.State.Local.game(new_local))
+        }
+        36#16:
+          let screen      = local@screen
+          let new_screen  = screen@position <- {0, 0}
+          let new_local   = local@screen <- new_screen
+          App.set_local<App.KL.State>(App.KL.State.Local.game(new_local))
+
+      }default
         case game@moment {
           preparation:
             let preview = local@preview
@@ -57,7 +97,7 @@ App.KL.Game.Phase.Play.when(
                 let preview = preview@skill <- none
                 IO {
                   App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_casts)
-                  App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+                  App.set_local<App.KL.State>(App.KL.State.Local.game(local@preview <- preview))
                 }
             }default
             local = 
@@ -88,16 +128,22 @@ App.KL.Game.Phase.Play.when(
         App.set_local!(App.KL.State.Local.game(local))
       else
         App.pass!
-    mouse_down: 
-      case game.moment {
-        initial:
-          App.KL.Game.Phase.Play.when.initial.mouse_down(room, local, game)
-        preparation:
-          App.KL.Game.Phase.Play.when.preparation.mouse_down(room, local, game)
-        execution:
-          let preview = local@preview
-          let preview = preview@skill <- none
-          App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+    mouse_down:
+      let local = local@scroll <- some(App.KL.Game.Scroll.new(0, local@mouse))
+      IO { 
+        case game.moment {
+          initial:
+            IO {
+              App.KL.Game.Phase.Play.when.initial.mouse_down(room, local, game)
+              App.set_local!(App.KL.State.Local.game(local))
+            }
+          preparation:
+            App.KL.Game.Phase.Play.when.preparation.mouse_down(room, local, game)
+          execution:
+            let preview = local@preview
+            let preview = preview@skill <- none
+            App.set_local!(App.KL.State.Local.game(local@preview <- preview))
+        }
       }
     mouse_click:
       // switch tab
@@ -134,9 +180,12 @@ App.KL.Game.Phase.Play.when.invert_tab(
   let local = local@hud <- controls
   local
 
-App.KL.Game.Phase.Play.when.initial.mouse_down(room: String, local: App.KL.Game.State.Local, game: App.KL.Game): IO<Maybe<App.State.local<App.KL.State>>>
-  let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, U32.to_i32(local@screen_size@fst) / 4, U32.to_i32(local@screen_size@snd) / 4)
-  
+App.KL.Game.Phase.Play.when.initial.mouse_down(
+  room: String,
+  local: App.KL.Game.State.Local,
+  game: App.KL.Game
+): IO<Maybe<App.State.local<App.KL.State>>>
+  let coord = App.KL.Game.Phase.Play.draw.canvas.from_xy(local@mouse, local@screen)
   if App.KL.Game.Board.Blueprint.base.valid(coord, local@user, game@players, game@blueprint) then
     App.new_post!(room, App.KL.Game.Phase.Play.Event.set_init_pos.serial(coord))
   else
@@ -148,12 +197,12 @@ App.KL.Game.Phase.Play.when.preparation.mouse_down(room: String, local: App.KL.G
   let preview = local@preview
   case preview@skill as skill{
     none:
-      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, U32.to_i32(local@screen_size@fst) / 4, U32.to_i32(local@screen_size@snd) / 4)
+      let coord = App.KL.Game.Phase.Play.draw.canvas.from_xy(local@mouse, local@screen)
       let new_local = local@info <- coord
       App.set_local!(App.KL.State.Local.game(new_local))
     some:
       let {char, count} = skill.value // Skill key and count for how many coords have been chosen after selecting skill
-      let coord = Hexagonal.Axial.from_screen_xy(local@mouse, App.KL.Constants.hexagon_radius, U32.to_i32(local@screen_size@fst) / 4, U32.to_i32(local@screen_size@snd) / 4)
+      let coord = App.KL.Game.Phase.Play.draw.canvas.from_xy(local@mouse, local@screen)
       let skill = App.KL.Game.Skill.get(local@user, char, game)
       case skill {
         none: App.pass!

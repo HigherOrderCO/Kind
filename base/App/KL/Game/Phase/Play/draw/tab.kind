@@ -30,7 +30,7 @@ App.KL.Game.Phase.Play.draw.tab(
           <img src=App.KL.Game.Phase.Play.Assets.tab.background></img>
           { App.KL.Game.Phase.Play.draw.tab.close }
           { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
-          { App.KL.Game.Phase.Play.draw.tab.timer }
+          { App.KL.Game.Phase.Play.draw.tab.timer(game@tick) }
           { App.KL.Game.Phase.Play.draw.tab.content(tab_which, local@user, players_info) }
           { App.KL.Game.Phase.Play.draw.tab.controls(tab_which) }
         </div>
@@ -68,7 +68,15 @@ App.KL.Game.Phase.Play.draw.tab.close: DOM
     <img src=App.KL.Game.Phase.Play.Assets.tab.button.close></img>
   </div>
 
-App.KL.Game.Phase.Play.draw.tab.timer: DOM
+App.KL.Game.Phase.Play.draw.tab.timer(
+  tick: Nat
+): DOM
+  let seconds = (tick / 16) % 60
+  let seconds = Nat.show(seconds)
+  let seconds = String.pad_left(2, '0', seconds)
+  let minutes = (tick / 16) / 60
+  let minutes = Nat.show(minutes)
+  let minutes = String.pad_left(2, '0', minutes)
   <div style={
     "position": "absolute"
     "top": "8.3%"
@@ -79,7 +87,7 @@ App.KL.Game.Phase.Play.draw.tab.timer: DOM
     "text-align": "center"
     "color": App.KL.Game.Phase.Play.draw.theme.secondary
   }>
-    <span>"13:58"</span>
+    <span>minutes | ":" | seconds</span>
   </div>
 
 App.KL.Game.Phase.Play.draw.tab.content(
@@ -232,7 +240,7 @@ App.KL.Game.Phase.Play.draw.tab.content.stats.table(
         "flex-direction": flex_direction
       }>
         <div style={"flex": "2"}></div>
-        <div style={"flex": "1"}>"Hp"</div>
+        <div style={"flex": "1"}>"TP"</div>
         <div style={"flex": "1"}>"Kills"</div>
         <div style={"flex": "1"}>"Deaths"</div>
         <div style={"flex": "1"}>"Assists"</div>
@@ -299,10 +307,10 @@ App.KL.Game.Phase.Play.draw.tab.stats.table.row(
           </div>
         </div>
       </div>
-      <div style={"flex": "1"}><p>I32.show(App.KL.Game.Phase.Play.draw.get_life(creature))</p></div>
+      <div style={"flex": "1"}><p>I32.show(player@scoreboard@xp)</p></div>
       <div style={"flex": "1"}><p>I32.show(player@scoreboard@kills)</p></div>
       <div style={"flex": "1"}><p>I32.show(player@scoreboard@deaths)</p></div>
-      <div style={"flex": "1"}><p>"100"</p></div>
+      <div style={"flex": "1"}><p>I32.show(player@scoreboard@assists)</p></div>
     </div>
     {
       if last then
@@ -456,7 +464,8 @@ App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(
     none: 0
     some:  
       let number = I32.abs(number)
-      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(creature.value@hero@max_hp))
+      let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature.value)
+      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(max_hp))
   }
 
 App.KL.Game.Phase.Play.draw.tab.controls(

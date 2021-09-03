@@ -1,0 +1,2 @@
+Ether.Address.Bits.length(len : Nat, x : Bits) : Type
+  Ether.Bits.get_bytes_size(x) == len

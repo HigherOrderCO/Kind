@@ -1,0 +1,10 @@
+PriorityQueue.Tree.In.in_implies_not_empty<A: Type>(
+    tree: PriorityQueue.Tree<A>, 
+    a: A,
+    Hyp: PriorityQueue.Tree.In!(tree, a)): PriorityQueue.Tree.is_empty!(tree) == false
+  case tree with Hyp {
+    empty:
+      Empty.absurd!(Hyp)
+    node:
+      refl
+  }!

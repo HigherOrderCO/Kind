@@ -27,6 +27,7 @@ App.KL.Game.Creature.Status.add(
       //heal over time(hot)
       hot: App.KL.Game.Creature.Status.hot.add(creature, status.cast_data, status.id, status.duration, status.amount)
       invulnerable: App.KL.Game.Creature.Status.invulnerable.add(creature, status.cast_data, status.id, status.duration)
+      opposite: App.KL.Game.Creature.Status.opposite.add(creature, status.cast_data, status.duration)
       protect: App.KL.Game.Creature.Status.protect.add(creature, status.cast_data, status.duration, status.amount)
       root: App.KL.Game.Creature.Status.root.add(creature, status.cast_data, status.duration)
       shield: App.KL.Game.Creature.Status.shield.add(creature, status.cast_data, status.id, status.duration, status.amount)

@@ -1,0 +1,5 @@
+App.KL.Game.Board.Creature.get.on_stepped(creature: App.KL.Game.Creature): Maybe<App.KL.Game.Effect.FromTo<Unit>>
+  case creature@category as category {
+    hero: none
+    summon: category.data@on_stepped
+  }

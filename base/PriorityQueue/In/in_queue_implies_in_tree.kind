@@ -1,0 +1,7 @@
+PriorityQueue.In.in_queue_implies_in_tree<A: Type>(
+  queue: PriorityQueue<A>,
+  a: A,
+  Hyp: PriorityQueue.In<A>(queue, a)
+  ): PriorityQueue.Tree.In<A>(PriorityQueue.tree_of!(queue), a)
+  let qed = Hyp :: rewrite x in (x) with PriorityQueue.In.in_queue_equals_in_tree!(queue, a)
+  qed

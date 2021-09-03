@@ -1,3 +1,6 @@
-type Test{
-  new(P: Nat),
-}
+Foo: Type
+  Either<Foo, Unit>
+
+Test: Foo
+  Either.left!!(Either.left!!(Either.left!!(Either.right!!(unit))))
+  

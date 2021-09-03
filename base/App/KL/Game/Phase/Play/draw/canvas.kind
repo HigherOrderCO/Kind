@@ -2,27 +2,53 @@ App.KL.Game.Phase.Play.draw.canvas.elem(
   local: App.KL.Game.State.Local, 
   game: App.KL.Game, img: VoxBox
 ): DOM
-  <div style={
-    "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
-    "max-width": "max(100vw, 900px)",
-    "max-height": "max(100vh, 650px)",
-    "overflow": "scroll",
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-  }>{
-    let width = Nat.show(U32.to_nat(local@screen_size@fst / 2))
-    let height = Nat.show(U32.to_nat(local@screen_size@snd / 2))
-    DOM.vbox({
-        "class": "pixel-art" 
-        "id": "game_screen",
-        "width": width,
-        "height": height,
-        "scale": "2"
-      },
-      {},
-      App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
-  }</div>
+  <div style={"display": "flex", "justify-content": "center", "align-items": "center", "width": "max(100vw, 900px)", "height": "max(100vh, 650px)"}>
+    <div style={
+      "cursor": "url("| App.KL.Game.Phase.Play.draw.get_cursor(local, game) | "), auto"
+      "max-height": "100%",
+      "max-width": "100%",
+      "overflow": "scroll",
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "center"
+    }>{
+      let width  = F64.show(F64.round(I32.to_f64(U32.to_i32(local@screen@size@fst)) / local@screen@scale))
+      let height = F64.show(F64.round(I32.to_f64(U32.to_i32(local@screen@size@snd)) / local@screen@scale))
+      DOM.vbox({
+          "class": "pixel-art" 
+          "id": "game_screen",
+          "width": width,
+          "height": height,
+          "scale": String.show_clean(F64.show(local@screen@scale))
+        },
+        {},
+        App.KL.Game.Phase.Play.draw.canvas(img, local, game)) 
+    }</div>
+  </div>
+
+// Auxiliar Function
+App.KL.Game.Phase.Play.draw.canvas.to_xy( 
+  coord: Hexagonal.Axial
+  screen: App.KL.Game.Screen
+): Pair<U32, U32>
+    
+    // Calculus to find the center of the canvas
+    let x = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@fst)) / screen@scale) / 2) 
+    let y = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@snd)) / screen@scale) / 2) 
+    let {x, y} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, x, y)
+    {x - screen@position@fst, y - screen@position@snd }
+
+
+App.KL.Game.Phase.Play.draw.canvas.from_xy( 
+  position: Pair<U32, U32> 
+  screen: App.KL.Game.Screen
+): Hexagonal.Axial
+
+  let position = {screen@position@fst + ((2#32 * position@fst) / F64.to_u32(screen@scale)), screen@position@snd + ((2#32 * position@snd) / F64.to_u32(screen@scale))}
+  let x = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@fst)) / screen@scale) / 2)
+  let y = F64.to_i32((I32.to_f64(U32.to_i32(screen@size@snd)) / screen@scale) / 2)
+  Hexagonal.Axial.from_screen_xy(position, App.KL.Constants.hexagon_radius, x, y)
+    
 
 // CANVAS DRAWING
 // ================
@@ -39,14 +65,18 @@ App.KL.Game.Phase.Play.draw.canvas(
     preparation: none
     execution: some(game.moment.hits)
   }
-  let img = App.KL.Game.Phase.Play.draw.canvas.board(game, local@preview, hits, local@user, local@mouse, local@screen_size, img) 
-  let img = App.KL.Game.Phase.Play.draw.canvas.bases(game, local@user, local@screen_size, img)
-  let img = App.KL.Game.Phase.Play.draw.canvas.cursor(local@mouse, game.board, local@screen_size, img)
+  let img = App.KL.Game.Phase.Play.draw.canvas.board(game, local@preview, hits, local@user, local@mouse, local@screen, img) 
+  let img = App.KL.Game.Phase.Play.draw.canvas.bases(game, local@user, local@screen, img)
+  let img = App.KL.Game.Phase.Play.draw.canvas.cursor(local@mouse, game.board, local@screen, img)
   img
 
 
 // draw canvas board
-App.KL.Game.Phase.Play.draw.canvas.landscape(blueprint: App.KL.Game.Board.Blueprint, screen: Pair<U32, U32> img: VoxBox): VoxBox
+App.KL.Game.Phase.Play.draw.canvas.landscape(
+  blueprint: App.KL.Game.Board.Blueprint,
+  screen: App.KL.Game.Screen
+  img: VoxBox
+): VoxBox
   let landscape = blueprint@landscape
   for coord:tile in landscape with img:
     App.KL.Game.Phase.Play.draw.canvas.tile.terrain(tile, Hexagonal.Axial.Map.new!, none, coord, screen, img)
@@ -59,13 +89,13 @@ App.KL.Game.Phase.Play.draw.canvas.board(
   hits:    Maybe<App.KL.Game.Indicators>
   user:    String
   mouse:   Pair<U32, U32>
-  screen:  Pair<U32, U32>
+  screen:  App.KL.Game.Screen
   img:     VoxBox
 ): VoxBox
   open game
   let team        = App.KL.Game.Phase.Draft.to_team(game@players, user) <> App.KL.Game.Team.neutral
   let map         = game@board
-  let mouse_coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+  let mouse_coord = App.KL.Game.Phase.Play.draw.canvas.from_xy(mouse, screen)
   let indicators  = App.KL.Game.Phase.Play.Draw.canvas.get_indicators(preview, mouse_coord, user, game)
   let ap_used     = App.KL.Game.Moment.get_player_used_ap(game) // If there is a skill being cast, returns the player address and used ap
   let img         = App.KL.Game.Phase.Play.draw.canvas.landscape(game@blueprint, screen, img)
@@ -84,7 +114,7 @@ App.KL.Game.Phase.Play.draw.canvas.board(
 App.KL.Game.Phase.Play.draw.canvas.grid(
   coord:  Hexagonal.Axial
   moment: App.KL.Game.Moment
-  screen: Pair<U32, U32>
+  screen: App.KL.Game.Screen
   img:    VoxBox
 ): VoxBox
   case moment {
@@ -102,7 +132,7 @@ App.KL.Game.Phase.Play.draw.canvas.tile.token(
   game: App.KL.Game
   token: Maybe<App.KL.Game.Token>,
   token_coord: Hexagonal.Axial,
-  screen: Pair<U32, U32>
+  screen: App.KL.Game.Screen
   team: App.KL.Game.Team
   img: VoxBox
 ): VoxBox
@@ -128,22 +158,19 @@ App.KL.Game.Phase.Play.draw.canvas.tile.token(
       none:
         img
       some:
-        let {cx, cy} = 
-          Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
-        
+        let {cx, cy} = App.KL.Game.Phase.Play.draw.canvas.to_xy(coord, screen)
         if Hexagonal.Axial.eql(coord, token_coord) then
           VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,10,10,col,img)
         else
           VoxBox.Draw.square(cx,cy,App.KL.Constants.z_index.token,5,5,col,img)
     }
-    
   img
 
   
 App.KL.Game.Phase.Play.draw.canvas.bases(
   game: App.KL.Game
   user: String
-  screen: Pair<U32, U32>
+  screen: App.KL.Game.Screen
   img: VoxBox
 ): VoxBox
   case game@moment {
@@ -189,8 +216,8 @@ App.KL.Game.Phase.Play.Draw.canvas.get_indicators(
     get creature   = App.KL.Game.Board.Creature.get(center, game@board)
     let indicator  = App.KL.Game.Indicator.blue_line
     let indicators = Hexagonal.Axial.Map.new!
-    let distance   = App.KL.Game.Creature.Status.movement_range(Nat.to_i32(U64.to_nat(skill@range)), creature)
-    let coords     = Hexagonal.Axial.range(center, distance)
+    //let distance   = App.KL.Game.Creature.Status.movement_range(Nat.to_i32(U64.to_nat(skill@range)), creature)
+    let coords     = skill@range(game@board, center, targets)
     // set range indicator
     for coord in coords with indicators:
       Hexagonal.Axial.Map.set!(coord, indicator, indicators)
@@ -202,10 +229,10 @@ App.KL.Game.Phase.Play.Draw.canvas.get_indicators(
 App.KL.Game.Phase.Play.draw.canvas.cursor(
   mouse: Pair<U32, U32>
   board: App.KL.Game.Board
-  screen: Pair<U32, U32>  
+  screen: App.KL.Game.Screen
   img: VoxBox
 ): VoxBox
-  coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+  let coord = App.KL.Game.Phase.Play.draw.canvas.from_xy(mouse, screen)
   {x,y} = App.KL.Game.Phase.Play.draw.centralize.old(coord, screen)
   let has_tile = App.KL.Game.Tile.get(coord, board)
   case has_tile { 
@@ -221,7 +248,7 @@ App.KL.Game.Phase.Play.draw.canvas.tile.terrain(
   picks:      App.KL.Game.Picks
   indicator:  Maybe<App.KL.Game.Indicator>
   tile_coord: Hexagonal.Axial
-  screen:     Pair<U32, U32>
+  screen: App.KL.Game.Screen
   img:        VoxBox
 ): VoxBox
   let indicator = indicator <> App.KL.Game.Indicator.background
@@ -235,7 +262,7 @@ App.KL.Game.Phase.Play.draw.canvas.tile.terrain(
 App.KL.Game.Phase.Play.draw.canvas.tile.indicator(
   indicator:  Maybe<App.KL.Game.Indicator>
   tile_coord: Hexagonal.Axial
-  screen:     Pair<U32,U32>
+  screen:     App.KL.Game.Screen
   img:        VoxBox
 ): VoxBox
   without indicator: img
@@ -282,7 +309,7 @@ App.KL.Game.Phase.Play.draw.canvas.tile.creature(
   creature: Maybe<App.KL.Game.Creature>,
   coord: Hexagonal.Axial,
   ap_used: Maybe<Pair<String, I32>>
-  screen: Pair<U32,U32>
+  screen: App.KL.Game.Screen
   user_id: String
   img: VoxBox
 ): VoxBox
@@ -290,18 +317,18 @@ App.KL.Game.Phase.Play.draw.canvas.tile.creature(
     none: img
     some:
       let team = App.KL.Game.Phase.Draft.to_team(game@players, user_id)
-      let hero = creature.value@hero
+      let draw = App.KL.Game.Board.Creature.get.draw(creature.value)
       let draw_pose = App.KL.Game.Phase.Play.draw.canvas.tile.creature.get_draw_pose(game, coord)
-      let {draw_coord, draw_voxbox} = hero@draw@vbox_img(draw_pose)
+      let {draw_coord, draw_voxbox} = draw@vbox_img(draw_pose)
       let draw_coord = draw_coord <> coord
       //let aux = I32.to_u32(App.KL.Constants.hexagon_radius) //U32
       //let cy = cy - (aux * 2) //U32
       //let cx = cx - aux //U32
       //log(U32.show( cy + 100))
-      {cx, cy} = Hexagonal.Axial.to_screen_xy(draw_coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+      let {cx, cy} = App.KL.Game.Phase.Play.draw.canvas.to_xy(draw_coord, screen)
       let img_x = cx - (128::U32)
       let img_y = cy - (128::U32)
-      let height = I32.to_u32(hero@draw@height)
+      let height = I32.to_u32(draw@height)
       let img = VoxBox.Draw.image(img_x, img_y, App.KL.Constants.z_index.hero, draw_voxbox, img)
       open creature.value as creature
       case creature.player { 

@@ -1,0 +1,54 @@
+// The Cat in the Hat puzzle
+// from https://www.youtube.com/watch?v=cyb20AgH9vQ
+
+// There are 3 hats which may have a cat (true) or not (false)
+
+User.dvberkel.CatInTheHat.hat_1: Bool
+  false
+
+User.dvberkel.CatInTheHat.hat_2: Bool
+  true
+
+User.dvberkel.CatInTheHat.hat_3: Bool
+  false
+
+// Statement 1: "there is a cat on hat 1"
+
+User.dvberkel.CatInTheHat.statement_1: Bool
+  Bool.eql(User.dvberkel.CatInTheHat.hat_1, true)
+
+// Statement 2: "there is a not cat on hat 2"
+
+User.dvberkel.CatInTheHat.statement_2: Bool
+  Bool.eql(User.dvberkel.CatInTheHat.hat_2, false)
+
+// Statement 2: "there is a not cat on hat 1"
+
+User.dvberkel.CatInTheHat.statement_3: Bool
+  Bool.eql(User.dvberkel.CatInTheHat.hat_3, false)
+
+// Exactly one of the statements is true.
+
+User.dvberkel.CatInTheHat.Truth1: Type
+  List.count!(Bool.is_true, [
+    User.dvberkel.CatInTheHat.statement_1,
+    User.dvberkel.CatInTheHat.statement_2,
+    User.dvberkel.CatInTheHat.statement_3,
+  ]) == 1
+
+// Exactly one hat contains a cat.
+
+User.dvberkel.CatInTheHat.Truth2: Type
+  List.count!(Bool.is_true, [
+    User.dvberkel.CatInTheHat.hat_1,
+    User.dvberkel.CatInTheHat.hat_2,
+    User.dvberkel.CatInTheHat.hat_3,
+  ]) == 1
+
+// Can you fill the hats in a way that respect the truths?
+
+User.dvberkel.CatInTheHat.Truth1.proof: User.dvberkel.CatInTheHat.Truth1
+  refl
+
+User.dvberkel.CatInTheHat.Truth2.proof: User.dvberkel.CatInTheHat.Truth2
+  refl

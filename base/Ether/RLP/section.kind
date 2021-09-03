@@ -1,0 +1,24 @@
+bool_dec(b : Bool, b2 : Bool) : Decidable<b == b2>
+  case b {
+    true : case b2 {
+       true : Decidable.yep!(refl)
+       false : Decidable.nop!((H) Bool.false_neq_true(mirror(H)))
+    }!
+    false : case b2 {
+        true : Decidable.nop!(Bool.false_neq_true)
+        false : Decidable.yep!(refl)
+    }!
+  }!
+
+Ether.RLP.section(tree : Ether.RLP.Tree) : Ether.RLP.decode(Ether.RLP.encode(tree)) == tree
+  case tree {
+      tip : 
+        def bytes_size = Ether.Bits.get_bytes_size(tree.value)
+      //  def bytes_len = bool_dec(Nat.eql(bytes_size,1), true)
+        case Nat.eql(Ether.Bits.get_bytes_size(tree.value),1) {
+          true : ?a
+          false : ?b
+        }! :: Nat.eql(Ether.Bits.get_bytes_size(tree.value),1)!!! == true
+      list : ?b
+  }!
+

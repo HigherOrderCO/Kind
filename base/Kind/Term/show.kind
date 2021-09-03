@@ -33,7 +33,7 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
             Kind.Term.var(term.self, 0),
             Kind.Term.var(term.name, 0)),
           Kind.Path.Maybe.Builder.i(path));
-        String.flatten([self,open,name,":",type,clos," ",body]),
+        String.flatten([self,open,name,":",type,clos," -> ",body]),
       lam:
         let name = Kind.Name.show(term.name);
         let body = Kind.Term.show.go(

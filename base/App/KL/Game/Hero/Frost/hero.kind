@@ -18,40 +18,62 @@ App.KL.Game.Hero.Frost.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let walk_range = {2,2} ::Pair<U64, I32>
-  let summon_wall_range = {5, 5} ::Pair<U64, I32>
+  let walk_range = {2,2} ::Pair<I32, I32>
+  let summon_wall_range = {5, 5} ::Pair<I32, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name |".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.new(
+      "Walk", 500, 8,
+      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
+      "Walk to another tile within 2 range from " | name |".",
+      App.KL.Game.Cursor.move
+    )
 
-    "Q": App.KL.Game.Skill.new("Summon Wall", 93, 48, summon_wall_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.summon_wall(summon_wall_range@snd, 1),
-    "Frost summons a Frozen Wall in a position, preventing heroes to walk on it.", App.KL.Game.Cursor.attack)
+    "Q": App.KL.Game.Skill.new(
+      "Summon Wall", 93, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, summon_wall_range@fst)
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Frost.Skills.summon_wall(summon_wall_range@snd, 1),
+      "Frost summons a Frozen Wall in a position, preventing heroes to walk on it.",
+      App.KL.Game.Cursor.attack
+    )
 
-    "W": App.KL.Game.Skill.new("Ice Fall", 701, 48, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.ice_fall(2, 1),
-    "Frost creates a slipping surface around him, pulling enemies nearby.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new(
+      "Ice Fall", 701, 48,
+      (board, center, targets) [],
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Frost.Skills.ice_fall(2, 1),
+      "Frost creates a slipping surface around him, pulling enemies nearby.",
+      App.KL.Game.Cursor.attack
+    )
 
-    "E": App.KL.Game.Skill.new("Ravenous Bite", 702, 48, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1),
-    "Frost quickly bites all enemies in front of him, dealing 3 damage.", App.KL.Game.Cursor.attack)
+    "E": App.KL.Game.Skill.new(
+      "Ravenous Bite", 702, 48,
+      (board, center, targets) Hexagonal.Axial.range(center, 1)
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Frost.Skills.ravenous_bite(3, 1),
+      "Frost quickly bites all enemies in front of him, dealing 3 damage.",
+      App.KL.Game.Cursor.attack
+    )
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       1 // Damage
       4 // Resistance
       2 // Mobility
       3 // Range
       4 // Utility
       4 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.tank)
+  let role = App.KL.Game.Hero.Role.tank
 
   let description = "Frost is a resistant warrior with several different crowd control skills."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS
@@ -63,8 +85,8 @@ App.KL.Game.Hero.Frost.Skills.ravenous_bite(dmg: I32, ap_cost: I32): App.KL.Game
     get center = App.KL.Game.Effect.coord.get_center
     let clamp = Hexagonal.Axial.clamp(1, center, target)
     let area = App.KL.Game.Areas.semi_circle(center, clamp)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
     let eff = App.KL.Game.Effect.hp.damage_at(dmg)
     App.KL.Game.Effect.area!(enemy(eff), area)
@@ -78,11 +100,12 @@ App.KL.Game.Hero.Frost.Skills.summon_wall(range: I32, ap_cost: I32): App.KL.Game
     get center = App.KL.Game.Effect.coord.get_center
     get board = App.KL.Game.Effect.board.get
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, [target])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, [target])
     if App.KL.Game.Board.is_occupied(target, board) then
       App.KL.Game.Effect.pass
     else
-      let wall = App.KL.Game.Creature.new(none, App.KL.Game.Hero.Frost.hero.wall, App.KL.Game.Team.neutral, [], 0, 0)
+      let category = App.KL.Game.Creature.Category.summon(App.KL.Game.Hero.Frost.summon.wall)
+      let wall = App.KL.Game.Creature.new(none, category, App.KL.Game.Team.neutral, [], 0)
       App.KL.Game.Effect.board.summon(wall, target)
   }
 
@@ -98,8 +121,8 @@ App.KL.Game.Hero.Frost.Skills.ice_fall(area: I32, ap_cost: I32): App.KL.Game.Eff
       App.KL.Game.Areas.straight_line(2, center, direction_coord) ++ area
 
     App.KL.Game.Effect.ap.use(ap_cost)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_line, area)
-    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_line, [center])
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
+    App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
     let enemy = App.KL.Game.Effect.At.enemy!
     let pull = App.KL.Game.Effect.movement.pull_at(false)
     App.KL.Game.Effect.area!(enemy(pull), area)
@@ -107,7 +130,7 @@ App.KL.Game.Hero.Frost.Skills.ice_fall(area: I32, ap_cost: I32): App.KL.Game.Eff
   }
 
 
-App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
+App.KL.Game.Hero.Frost.summon.wall: App.KL.Game.Summon
   let name = "Frozen_wall"
   let vbox_img = (pose) {none, App.KL.Game.Field.Elements.rock_11_0}
   let b64_portrait = (bool, time) App.KL.Game.Hero.Frost.Assets.b64_portrait
@@ -115,11 +138,7 @@ App.KL.Game.Hero.Frost.hero.wall: App.KL.Game.Hero
   let height = 20 :: I32
   let draw = App.KL.Game.Entity.Draw.new(vbox_img, b64_portrait, b64_img, height)
   let max_hp = 12 :: I32
-  let max_ap = 0 :: I32
-  let skills = {}
   let on_stepped = some((from,to) App.KL.Game.Effect { return unit })
-  let attributes = none
-  let role = none
   let description = "A wall created by Frost that blocks a tile"
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Summon.new(name, draw, max_hp, on_stepped, description)
 

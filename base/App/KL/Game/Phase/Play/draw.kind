@@ -14,7 +14,12 @@ SkillInfo: Type
   Pair<String,Pair<App.KL.Game.Hero, App.KL.Game.Skill>>
 
 // draw all the screen (round, seconds, canvas, list of skills)
-App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: App.KL.Game): DOM
+App.KL.Game.Phase.Play.draw(
+  img: VoxBox, 
+  local: App.KL.Game.State.Local, 
+  game: App.KL.Game,
+  draw_interface: Bool
+): DOM
   let players_info = App.KL.Game.Phase.Play.draw.get_players_info(game@players, game@board)
   <div style={ 
     "width": "max(100vw, 900px)",
@@ -24,11 +29,21 @@ App.KL.Game.Phase.Play.draw(img: VoxBox, local: App.KL.Game.State.Local, game: A
     "background-color":" #071840"
   }>
     // interface
-    { App.KL.Game.Phase.Play.draw.interface(local, game, players_info) }
+    { 
+      if draw_interface then 
+        App.KL.Game.Phase.Play.draw.interface(local, game, players_info) 
+      else
+        App.KL.Game.Phase.draw.none
+    }
     // canvas
     { App.KL.Game.Phase.Play.draw.canvas.elem(local, game, img) }
     // tab
-    { App.KL.Game.Phase.Play.draw.tab(local, game, players_info) }
+    { 
+      if draw_interface then 
+        App.KL.Game.Phase.Play.draw.tab(local, game, players_info)
+      else
+        App.KL.Game.Phase.draw.none
+    }
   </div>
 
 
@@ -130,6 +145,7 @@ App.KL.Game.Phase.Play.draw.get_players_info(
     Maybe {
       get creature = tile@creature
       get id = creature@player
+      get data = case creature@category as category {hero: some(category.data), summon: none}
       get info = result{id}
       return result{id} <- info@fst <- some(creature)
     } <> result
@@ -143,14 +159,29 @@ App.KL.Game.Phase.Play.draw.get_life(creature: Maybe<App.KL.Game.Creature>): I32
 
 App.KL.Game.Phase.Play.draw.get_life_percentage(creature: Maybe<App.KL.Game.Creature>): F64
   case creature {
-    none: 0
-    some: F64.mul(100.0, I32.to_f64(creature.value@hp) / I32.to_f64(creature.value@hero@max_hp))
+    none: 0 :: F64
+    some: 
+      let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature.value)
+      F64.mul(100.0, I32.to_f64(creature.value@hp) / I32.to_f64(max_hp))
+  }
+
+App.KL.Game.Phase.Play.draw.get_life_info(info: PlayersInfo): Pair<I32, I32>
+  let {creature, player} = info
+  let hero     = App.KL.Game.Phase.Play.draw.get_player_hero(player)
+  let max_life = Maybe.map!!((x) x@max_hp, hero) <> (0 :: I32)
+  case creature {
+    none: {0, max_life}
+    some: {creature.value@hp, max_life}
   }
 
 App.KL.Game.Phase.Play.draw.get_ap(creature: Maybe<App.KL.Game.Creature>): I32
   case creature {
-    none: 0
-    some: creature.value@ap
+    none: 0 :: I32
+    some: 
+      case creature.value@category as category {
+        hero: category.ap
+        summon: 0 :: I32
+      }
   }
 
 App.KL.Game.Phase.Play.draw.wrapper(width: Nat, height: Nat, bt: Nat, id: String, fator: F64, background: String, inner: DOM): DOM
@@ -183,25 +214,28 @@ App.KL.Game.Phase.Play.draw.get_cursor(
 App.KL.Game.Phase.Play.draw.letter(
   tile_coord: Hexagonal.Axial
   picks: App.KL.Game.Picks
-  screen: Pair<U32, U32>
+  screen: App.KL.Game.Screen
   img: VoxBox
 ): VoxBox
   case Hexagonal.Axial.Map.get!(tile_coord, picks) as got {
     none: img
     some: 
-      screen_coord = Hexagonal.Axial.to_screen_xy(tile_coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+      let screen_coord = App.KL.Game.Phase.Play.draw.canvas.to_xy(tile_coord, screen)
       {cx, cy} = App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord)
       VoxBox.Draw.text(Char.to_string(got.value), PixelFont.black, Pos32.new(cx,cy,App.KL.Constants.z_index.letter), img)
   }
 
-App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord: Pair<U32, U32>): Pair<U32, U32>
+App.KL.Game.Phase.Play.draw.centralize_letter(
+  screen_coord: Pair<U32, U32>
+): Pair<U32, U32>
+
   { screen_coord@fst - 2, screen_coord@snd - 6 }
   
 App.KL.Game.Phase.Play.draw.centralize.new(
   coord: Hexagonal.Axial
-  screen: Pair<U32, U32>
+  screen: App.KL.Game.Screen
 ): Pair(U32, U32)
-  let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+  let {i, j} = App.KL.Game.Phase.Play.draw.canvas.to_xy(coord, screen)
   let i = i - 128
   let j = j - 128 - I32.to_u32(App.KL.Constants.hexagon.extra_height / 2)
   {i, j}
@@ -210,9 +244,9 @@ App.KL.Game.Phase.Play.draw.centralize.new(
 // TODO: won't be used after we start using assets from KL only
 App.KL.Game.Phase.Play.draw.centralize.old(
   coord: Hexagonal.Axial
-  screen: Pair<U32, U32>
+  screen: App.KL.Game.Screen
 ): Pair(U32, U32)
-  let {i, j} = Hexagonal.Axial.to_screen_xy(coord, App.KL.Constants.hexagon_radius, U32.to_i32(screen@fst) / 4, U32.to_i32(screen@snd) / 4)
+  let {i, j} = App.KL.Game.Phase.Play.draw.canvas.to_xy(coord, screen)
   // log(U32.show(i))
   // log(U32.show(j))
   let aux = I32.to_u32(App.KL.Constants.hexagon_radius)
@@ -237,16 +271,22 @@ App.KL.Game.Phase.Play.draw.ap(
   ap_used: Maybe<Pair<String, I32>>
   img: VoxBox
 ): VoxBox
-  no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, creature@ap, 0, 0, I32.to_u32(creature@hero@max_ap), img)
-  case ap_used {
-    none: 
-      no_cast
-    some:
-      // Verifies if the creature is the one casting current ability
-      if String.eql(ap_used.value@fst, creature@player <> "none") then 
-        App.KL.Game.Phase.Play.draw.ap.bars(x, y, creature@ap, ap_used.value@snd, 0, I32.to_u32(creature@hero@max_ap), img)
-      else
-        no_cast
+  let ap = App.KL.Game.Board.Creature.get.ap(creature)
+  let max_ap = App.KL.Game.Board.Creature.get.max_ap(creature)
+  no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, 0, 0, I32.to_u32(max_ap), img)
+  case creature@category {
+    summon: img
+    hero:
+      case ap_used {
+        none: 
+          no_cast
+        some:
+          // Verifies if the creature is the one casting current ability
+          if String.eql(ap_used.value@fst, creature@player <> "none") then 
+            App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, ap_used.value@snd, 0, I32.to_u32(max_ap), img)
+          else
+            no_cast
+      }
   }
 
       

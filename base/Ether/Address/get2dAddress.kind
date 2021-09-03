@@ -1,0 +1,20 @@
+Ether.Address.get2dAddress(
+  from : Bits,
+  salt : Bits,
+//  size_of_salt : Ether.Address.Bits.length(32, salt),
+  initCodeHash : Bits,
+ // size_of_init : Ether.Address.Bits.length(32, initCodeHash)
+  ) : String 
+  
+  let list = 
+      [
+        Nat.to_bits(255),
+        from,
+        salt,
+        initCodeHash
+      ]
+  
+  let hex = "0x" | List.foldr!!("", (x, y) String.reverse(Bits.hex.encode(x)) | y, list)
+  let buffer = Buffer8.from_hex(String.drop(2, hex))
+  let hash = Crypto.Keccak.hash.bytes(buffer)
+  String.drop((12 * 2),Buffer8.to_hex(hash))

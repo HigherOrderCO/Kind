@@ -8,7 +8,7 @@ type App.KL.Lobby.State.Local {
   new(
     user: String
     page: App.KL.Lobby.State.Local.Page
-    screen_size: Pair<U32, U32>
+    screen: App.KL.Game.Screen
   )
 }
 
@@ -31,51 +31,52 @@ App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State):
     {
       open local
       case local.page as page{
-        front: App.KL.Lobby.draw.front(local@user, page.room_input, global)
-        heroes: App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
+        front:  App.KL.Lobby.draw.front(local@user, page.room_input, global)
+        heroes: App.KL.Game.Phase.draw.none //App.KL.Lobby.draw.heroes(page.hero, page.skill, page.tab)
       }
     }
   </div>
 
-App.KL.Lobby.draw.heroes(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
-  let style = {
-    "width": "100%", 
-    "height": "100%", 
-    "background-image": "linear-gradient(#0e0c0e, #242324)",
-    "display": "flex", 
-    "flex-direction": "column", 
-    "justify-content": "center", 
-    "align-items": "center",
-    "font-size": "2rem"
-  }
+// TODO proper design
+// App.KL.Lobby.draw.heroes(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
+//   let style = {
+//     "width": "100%", 
+//     "height": "100%", 
+//     "background-image": "linear-gradient(#0e0c0e, #242324)",
+//     "display": "flex", 
+//     "flex-direction": "column", 
+//     "justify-content": "center", 
+//     "align-items": "center",
+//     "font-size": "2rem"
+//   }
 
-  main_style = 
-  {
-    "width": "70%",
-    "height": "40%"
-    "display": "flex"
-    "justify-content": "center"
-    "align-items": "center"
-  }
+//   main_style = 
+//   {
+//     "width": "70%",
+//     "height": "40%"
+//     "display": "flex"
+//     "justify-content": "center"
+//     "align-items": "center"
+//   }
   
-  display_style = 
-  { 
-    "display": "flex",
-    "flex-wrap": "wrap",
-    "justify-content": "center", 
-    "width": "100%"
-  }
+//   display_style = 
+//   { 
+//     "display": "flex",
+//     "flex-wrap": "wrap",
+//     "justify-content": "center", 
+//     "width": "100%"
+//   }
 
-  hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, App.KL.Game.Hero.list)
+//   hero_list = List.map!!(App.KL.Game.Phase.Draft.draw.selection, App.KL.Game.Hero.list)
 
-  <div style=style>
-    <div style=main_style>
-      <div style=display_style>
-        for div in hero_list: div
-      </div>
-    </div>
-    {App.KL.Lobby.draw.heroes.hero_menu(hero, skill, tab)}
-  </div>
+//   <div style=style>
+//     <div style=main_style>
+//       <div style=display_style>
+//         for div in hero_list: div
+//       </div>
+//     </div>
+//     {App.KL.Lobby.draw.heroes.hero_menu(hero, skill, tab)}
+//   </div>
 
 App.KL.Lobby.draw.heroes.hero_menu(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
   descriptions_style = 
@@ -217,36 +218,39 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
     "justify-content": "center", 
     "align-items": "center",
     "font-size": "2rem"
+    "color": "white"
   }
-  <div style=style>
-    <h1 style={"margin-bottom": "10px", "text-align": "center"}>
-      "Welcome to Kaelin"
-    </h1>
-    <div style={
-      "display": "flex",
-      "justify-content": "center", 
-      "flex-wrap": "wrap",
-      "text-align": "center"
-    }>
-      "Room number: "
-      {App.KL.Lobby.draw.front.input("text", room_input)}
-      <div>
-        {App.KL.Lobby.draw.front.button("ready", "Enter")}
-        //{App.KL.Lobby.draw.front.button("random", "Random")}
-        //{App.KL.Lobby.draw.front.button("heroes", "Heroes")}
+  let content = 
+    <div style=style>
+      <h1 style={"margin-bottom": "10px", "text-align": "center"}>
+        "Welcome to Kaelin"
+      </h1>
+      <div style={
+        "display": "flex",
+        "justify-content": "center", 
+        "flex-wrap": "wrap",
+        "text-align": "center"
+      }>
+        "Room number: "
+        {App.KL.Lobby.draw.front.input("text", room_input)}
+        <div>
+          {App.KL.Lobby.draw.front.button("ready", "Enter")}
+          //{App.KL.Lobby.draw.front.button("random", "Random")}
+          //{App.KL.Lobby.draw.front.button("heroes", "Heroes")}
+        </div>
       </div>
-    </div>
-    <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
-"Hello! To start with Kaelin it's easy.
-1. Enter a random room number and copy it
-2. Invite your friends to access: http://uwu.tech/App.KL
-3. Share the room number with them
+      <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
+        "Hello! To start with Kaelin it's easy.
+        1. Enter a random room number and copy it
+        2. Invite your friends to access: http://uwu.tech/App.KL
+        3. Share the room number with them
 
-Enjoy our little Kind game! (WIP)
-We will love to hear about your experience <3
-Join us: http://discord.gg/SNhNx9gUgh "
-    </pre>
-  </div>
+        Enjoy our little Kind game! (WIP)
+        We will love to hear about your experience <3
+        Join us: http://discord.gg/SNhNx9gUgh "
+      </pre>
+    </div>
+  App.KL.Game.Draw.background(content)
 
 // Lobby.When
 // ----------
@@ -260,7 +264,9 @@ App.KL.Lobby.when(
   case event {
     init:
       let new_local = local@user <- String.to_lower(event.user)
-      let new_local = new_local@screen_size <- event.info@screen_size
+      open new_local
+      let screen = new_local.screen@size <- event.info@screen_size
+      let new_local = new_local@screen <- screen
       App.set_local<App.KL.State>(App.KL.State.Local.lobby(new_local))
     input:
       case page {
@@ -284,7 +290,7 @@ App.KL.Lobby.when(
                   IO {
                     App.watch<App.KL.State>(room)
                     App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
-                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen_size)))
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen)))
                   }
               }
             // "heroes": IO {
@@ -328,7 +334,7 @@ App.KL.Lobby.when(
                   IO {
                     App.watch<App.KL.State>(room)
                     App.new_post<App.KL.State>(room, App.KL.Game.Phase.Draft.Event.join_room.serial)
-                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen_size)))
+                    App.set_local<App.KL.State>(App.KL.State.Local.game(App.KL.Game.State.Local.init(local@user, page.room_input, local@screen)))
                   }
               }
           }default App.pass<App.KL.State>

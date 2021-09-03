@@ -1,17 +1,11 @@
-String.test.all_tests: _
-  [ 
-    String.test.to_hex,
-    String.test.to_u16,
-    String.test.is_nat
-  ]
+String.test.all: TestSuite
+  TestSuite.many("String", 
+    [ 
+      String.test.to_hex,
+      String.test.is_nat
+    ])
 
-String.test.all: _
-  TestSuite.many("String", String.test.all_tests)
-
-// Print all tests
+// Show all tests for String
 String.test.show: _
-  let a = ""
-  for test in String.test.all_tests with a:
-    log(TestSuite.show(test, 0))
-    ""
-  a
+  log(TestSuite.show(String.test.all, 0))
+  0

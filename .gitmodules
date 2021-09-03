@@ -1,6 +1,0 @@
-[submodule "bin/scm/chez-exe"]
-	path = bin/scm/chez-exe
-	url = git@github.com:rigille/chez-exe.git
-[submodule "bin/scm/ChezScheme"]
-	path = bin/scm/ChezScheme
-	url = git@github.com:racket/ChezScheme.git

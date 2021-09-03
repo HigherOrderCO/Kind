@@ -1,0 +1,13 @@
+App.KL.Game.Creature.create_hero(
+  hero_id: U8,
+  player_addr: Maybe<String>,
+  team: App.KL.Game.Team
+): Maybe<App.KL.Game.Creature>
+  let hero = App.KL.Game.Hero.get_by_id(U8.to_nat(hero_id))
+  case hero {
+    none: none
+    some: 
+      let category = App.KL.Game.Creature.Category.hero(hero.value, hero.value@max_ap - 2, 1)
+      let new_creature = App.KL.Game.Creature.new(player_addr, category, team, [], hero.value@max_hp)
+      some(App.KL.Game.Creature.Status.invulnerable.add(new_creature, {'B', "System"}, "begin_game", 1)) 
+  }

@@ -25,15 +25,14 @@ App.KL.Game.Effect.movement.move_to(
           return true
         }
     }
-    open to_creature
-    open to_creature.hero
-    without to_creature.hero.on_stepped: App.KL.Game.Effect {
+    let on_stepped = App.KL.Game.Board.Creature.get.on_stepped(to_creature)
+    without on_stepped: App.KL.Game.Effect {
       return false
     }
     if Hexagonal.Axial.eql(from, to) then App.KL.Game.Effect {
       return true
     } else App.KL.Game.Effect {
-      to_creature.hero.on_stepped(from, to)
+      on_stepped(from, to)
       return true
     }
   }
