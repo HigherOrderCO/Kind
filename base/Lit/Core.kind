@@ -21,7 +21,7 @@ type Lit.Core.Term {
     type: String
     name: String
     expr: Lit.Core.Term
-    cses: List<Lit.Core.Term>
+    cses: List<Pair<List<String>,Lit.Core.Term>>
   )
   // Creates a symbol
   label( 
@@ -37,7 +37,7 @@ type Lit.Core.Term {
   )
   // Calls an external program
   call(
-    bvar: String
+    name: String
     func: String
     argm: Lit.Core.Term
     cont: Lit.Core.Term
@@ -198,14 +198,15 @@ Lit.Core.World.check.term(
           false
         adt:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
-          let cses = Lit.Core.World.check.match.cases(term.cses, type, expr_type.forms, term.name, ctx, world)
+          let cses = List.mapped!(term.cses)!((x) x@snd)
+          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.forms, term.name, ctx, world)
           expr && cses
       }
     call:
       use bond = Lit.Core.World.get_bond(term.func,world) abort false
       use inty = Lit.Core.World.get_type(bond.inty,world) abort false
       use outy = Lit.Core.World.get_type(bond.outy,world) abort false
-      let ctx2 = ctx{term.bvar} <- outy
+      let ctx2 = ctx{term.name} <- outy
       let argm = Lit.Core.World.check.term(term.argm, inty, ctx, world)
       let cont = Lit.Core.World.check.term(term.cont, inty, ctx2, world)
       argm && cont
@@ -257,6 +258,70 @@ Lit.Core.World.check.match.cases(
     nil nil:
       true
   } default false
+
+// Validation
+// ----------
+
+// Checks if:
+// - no global binders with the same name
+// - variables are used at most once
+Litereum.Core.World.validate(
+  term: Lit.Core.Term
+  used: Map<Bool>
+): Pair<Map<Bool>,Bool>
+  case term {
+    var:
+      case used{term.name} as was_used {
+        none:
+          // undefined variable
+          {used, false}
+        some: 
+          if was_used.value then
+            // variable already used
+            {used, false}
+          else
+            // first use of the variable
+            {used{term.name} <- true, true}
+      }
+    create:
+      let state = {used, true}
+      let state = for val in term.vals:
+        let {used, res0} = state
+        let {used, res1} = Litereum.Core.World.validate(val, used)
+        {used, res0 && res1}
+      state
+    match:
+      let state = Litereum.Core.World.validate(term.expr, used)
+      let state = for cse in term.cses:
+        let {fields, body} = cse
+        let state = for field in fields:
+          let {used, resx} = state
+          case used{field} as got {
+            some: {used, false} // same name used more than once
+            none: {used{field} <- false, resx}
+          }
+        state
+      state
+    label:
+      {used, true}
+    compare:
+      let {used, res0} = Litereum.Core.World.validate(term.val0, used)
+      let {used, res1} = Litereum.Core.World.validate(term.val1, used)
+      let {used, res2} = Litereum.Core.World.validate(term.iflt, used)
+      let {used, res3} = Litereum.Core.World.validate(term.ifeq, used)
+      let {used, res4} = Litereum.Core.World.validate(term.ifgt, used)
+      {used, res0 && res1 && res2 && res3 && res4}
+    call:
+      let used = used{term.name} <- false
+      let {used, res0} = Litereum.Core.World.validate(term.argm, used)
+      let {used, res1} = Litereum.Core.World.validate(term.cont, used)
+      {used, res0 && res1}
+    bind:
+      let used = used{term.name} <- false
+      let {used, res0} = Litereum.Core.World.validate(term.main, used)
+      let {used, res1} = Litereum.Core.World.validate(term.cont, used)
+      {used, res0 && res1}
+  }
 
 // Execution
 // ---------
@@ -318,8 +383,6 @@ Lit.Core.World.run.line(
           user: 
             use user = entry.value
             let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
-            // TODO: swap new public_key
-            //let world = world{exec.user} <- Lit.Core.Entry.user(user@pkey <- exec.pkey)
             log("- ext_exec: " | Lit.Lang.show.term(result, world))
             some(world)
         } default log("error: exec user not a user") none
@@ -333,7 +396,7 @@ Lit.Core.World.run.term(
   vars: Map<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
   //log("- run " | Lit.Lang.show.term(term,world))
-  //log("- var " | String.join(",", List.map!!((x) Lit.Lang.show.term(x,world), vars)))
+  //log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars))))
   //log("")
   case term {
     var: 
@@ -344,22 +407,14 @@ Lit.Core.World.run.term(
     match: Maybe {
       let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
       case expr {
-        create:
-          let body = term.cses[expr.form] abort {term,world}
-          let entry = world{term.type} abort {term, world}
-          case entry {
-            type:
-              let type = entry.value
-              case type {
-                adt:
-                  use form = type.forms[expr.form] abort {term, world}
-                  let kvs = List.zip_with!!!((f,t) {term.name|"."|f@name,t}, form.fields, expr.vals)
-                  for kv in kvs with vars:
-                    let {k,v} = kv
-                    vars{k} <- v
-                  Lit.Core.World.run.term(body, self, world, vars)
-              } default {term, world}
-          } default {term, world} 
+        create: case term.cses[expr.form] as selected_case {
+          some: 
+            let {case_fields, case_body} = selected_case.value
+            let vars = for subst in List.zip!!(case_fields, expr.vals):
+              let {field, value} = subst
+              vars{field} <- value
+            Lit.Core.World.run.term(case_body, self, world, vars)
+        } default {term, world}
       } default {term,world}
     }
     create:
@@ -377,7 +432,7 @@ Lit.Core.World.run.term(
           let main_vars = main_vars{"caller"} <- Lit.Core.Term.label(self)
           let {done,world} = Lit.Core.World.run.term(bond.main, term.func, world, main_vars)
           let cont_vars = vars
-          let cont_vars = cont_vars{term.bvar} <- done
+          let cont_vars = cont_vars{term.name} <- done
           Lit.Core.World.run.term(term.cont, self, world, cont_vars)
       } default {term,world}
     }
@@ -448,7 +503,10 @@ Lit.Core: _
     }
 
     type NatBool {
-      new{x: Nat, y: Bool}
+      new{
+        x: Nat,
+        y: Bool
+      }
     }
 
     bond not {

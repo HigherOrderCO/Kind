@@ -35,7 +35,7 @@ Roadmap
 
 That's all: Litereum is final and won't require updates.
 
-LiSign
+LitSign
 ------
 
 TODO

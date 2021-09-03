@@ -110,7 +110,7 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
               let fields = List.map!!((x) name | "." | x@name, List.reverse!(form@fields))
               form@name
               | ": "
-              | Lit.Lang.show.term(cse, world),
+              | Lit.Lang.show.term(cse@snd, world),
             type.forms,
             term.cses)
           return "case " | name | " : " | type.name | " = " | expr | " { " | String.join(", ",vals) | " }" 
@@ -118,11 +118,11 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
       }
     } <> "?"
     call: Maybe {
-      let bvar = term.bvar
+      let name = term.name
       let func = term.func
       let argm = Lit.Lang.show.term(term.argm, world)
       let cont = Lit.Lang.show.term(term.cont, world)
-      return "call " | bvar | " = " | func | "(" | argm | "); " | cont
+      return "call " | name | " = " | func | "(" | argm | "); " | cont
     } <> "?"
     bind: Maybe {
       let name = term.name
@@ -383,7 +383,7 @@ Lit.Lang.parser.term.match(world: Lit.Core.World): Parser<Lit.Core.Term>
     }
   }
 
-Lit.Lang.parser.term.match.cses(cses: List<Lit.Core.Type.Form>, name: String, world: Lit.Core.World): Parser<List<Lit.Core.Term>>
+Lit.Lang.parser.term.match.cses(cses: List<Lit.Core.Type.Form>, name: String, world: Lit.Core.World): Parser<List<Pair<List<String>,Lit.Core.Term>>>
   case cses {
     nil: Parser {
       return []
@@ -393,7 +393,8 @@ Lit.Lang.parser.term.match.cses(cses: List<Lit.Core.Type.Form>, name: String, wo
       Lit.Lang.parser.text(form.name)
       Lit.Lang.parser.text(":")
       let fields = List.map!!((x) name | "." | x@name, List.reverse!(form.fields))
-      get head = Lit.Lang.parser.term(world)
+      get term = Lit.Lang.parser.term(world)
+      let head = {fields, term}
       Parser.maybe!(Lit.Lang.parser.text(","))
       get tail = Lit.Lang.parser.term.match.cses(cses.tail, name, world)
       return head & tail
@@ -418,15 +419,15 @@ Lit.Lang.parser.term.var(world: Lit.Core.World): Parser<Lit.Core.Term>
 Lit.Lang.parser.term.call(world: Lit.Core.World): Parser<Lit.Core.Term>
   Parser {
     Lit.Lang.parser.text("call ")
-    get bvar = Lit.Lang.parser.name
-    Lit.Lang.parser.text("=")
     get name = Lit.Lang.parser.name
+    Lit.Lang.parser.text("=")
+    get func = Lit.Lang.parser.name
     Lit.Lang.parser.text("(")
     get argm = Lit.Lang.parser.term(world)
     Lit.Lang.parser.text(")")
     Parser.maybe!(Lit.Lang.parser.text(";"))
     get cont = Lit.Lang.parser.term(world)
-    return Lit.Core.Term.call(bvar, name, argm, cont)
+    return Lit.Core.Term.call(name, func, argm, cont)
   }
 
 Lit.Lang.parser.term.bind(world: Lit.Core.World): Parser<Lit.Core.Term>
