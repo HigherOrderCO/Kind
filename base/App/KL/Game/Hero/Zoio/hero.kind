@@ -19,14 +19,7 @@ App.KL.Game.Hero.Zoio.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new(
-      "Walk", 500, 12,
-      (board, center, targets) Hexagonal.Axial.range(center, 1),
-      App.KL.Game.Skill.Pattern.single,
-      App.KL.Game.Effect.common.walk(1, 1),
-      "Walk to another tile within 1 range from " | name | ".",
-      App.KL.Game.Cursor.move
-    )
+    "X": App.KL.Game.Skill.walk(1, name)
 
     "Q": App.KL.Game.Skill.new(
       "Tentackle", 300, 48,

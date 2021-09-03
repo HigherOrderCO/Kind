@@ -19,14 +19,7 @@ App.KL.Game.Hero.Flina.hero: App.KL.Game.Hero
   let max_ap = 3 :: I32
 
   let skills = {
-    "X": App.KL.Game.Skill.new(
-      "Walk", 500, 12,
-      (board, center, targets) Hexagonal.Axial.range(center, 2),
-      App.KL.Game.Skill.Pattern.single,
-      App.KL.Game.Effect.common.walk(2, 1),
-      "Walk to another tile within 2 range from " | name |".",
-      App.KL.Game.Cursor.move
-    )
+    "X": App.KL.Game.Skill.walk(2, name)
 
     "Q": App.KL.Game.Skill.new(
       "Haste", 320, 48,

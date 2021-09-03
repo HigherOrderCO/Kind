@@ -24,14 +24,7 @@ App.KL.Game.Hero.Croni.hero: App.KL.Game.Hero
   let void_range = {8,8} ::Pair<I32, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new(
-      "Walk", 500, 8,
-      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
-      App.KL.Game.Skill.Pattern.single,
-      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-      "Walk to another tile within 2 range from " | name |".",
-      App.KL.Game.Cursor.move
-    )
+    "X": App.KL.Game.Skill.walk(2, name)
 
     "Q": App.KL.Game.Skill.new(
       "Flux", 860, 48,

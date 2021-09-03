@@ -17,19 +17,11 @@ App.KL.Game.Hero.Fields.hero: App.KL.Game.Hero
   let max_hp = 10 :: I32
 
   let max_ap = 3 :: I32
-
-  let walk_range = {1,1} ::Pair<I32, I32>
+  
   let summon_move_terry = {2, 3} ::Pair<I32, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new(
-      "Walk", 500, 8,
-      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
-      App.KL.Game.Skill.Pattern.single,
-      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-      "Walk to another tile within 1 range from " | name |".",
-      App.KL.Game.Cursor.move
-    )
+    "X": App.KL.Game.Skill.walk(1, name)
 
     "Q": App.KL.Game.Skill.new(
       "Summon/Move Terry", 450, 8,
