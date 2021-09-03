@@ -43,11 +43,11 @@ Bytes.test.from_string.5: TestSuite
 Bytes.test.from_string: TestSuite
   TestSuite.many("from_string", [
     Bytes.test.from_string.0
-    Bytes.test.from_string.1
-    Bytes.test.from_string.2
-    Bytes.test.from_string.3
-    Bytes.test.from_string.4
-    Bytes.test.from_string.5
+    // Bytes.test.from_string.1
+    // Bytes.test.from_string.2
+    // Bytes.test.from_string.3
+    // Bytes.test.from_string.4
+    // Bytes.test.from_string.5
   ])
 
 

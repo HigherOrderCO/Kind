@@ -1,0 +1,2 @@
+Char.is_digit(c: Char): Bool
+  Bool.and(U16.gte(c,'0'),U16.lte(c,'9'))

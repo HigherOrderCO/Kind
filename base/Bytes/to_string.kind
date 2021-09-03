@@ -1,3 +1,17 @@
 Bytes.to_string(b: Bytes): String
   // let rmv_notation = String.drop(2, b) // removes 0x from the beginning
-  String.hex.decode.utf8(b)
+  let rmv_start = Bytes.drop(4, b)
+  log("rmv start: " | rmv_start)
+  Bytes.to_string.aux(rmv_start)
+  //String.hex.decode.utf8(b)
+
+Bytes.to_string.aux(b: Bytes): String
+  log("b: "| b)
+  let c = Bytes.take(2, b) //Bytes.at(b)
+  c
+  // case c {
+  //   none: ""
+  //   some: 
+  //     c.value
+  // }
+

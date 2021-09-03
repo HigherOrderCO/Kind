@@ -68,4 +68,17 @@ String.hex.encode.utf8(str: String): String
 
 // TODO: create String.hex.decode.utf8
 String.hex.decode.utf8(hex: String): String
-  U16.to_string.utf8(hex)
+  //U16.from_hex.utf8(hex)
+  let rmv_start = String.drop(4, hex) // remove "0x" + first byte
+  Bytes.to_string.aux(rmv_start)
+
+String.hex.decode.utf8.aux(hex: String): U16
+  log("b: "| hex)
+  let c = Bytes.take(2, hex)
+  String.to_u16(c)
+
+
+String.hex.test: _
+  log("decode")
+  // String.hex.decode.utf8("0x3233343536373839")
+  String.hex.decode.utf8("0xa2")

@@ -1,11 +1,3 @@
-Test: _
-  let a = {
-    "blue": "alo"
-    "red": "hello"
-    "green": "heehee"
-  }
-
-  <div>
-    for color:text in a:
-      <button style={"color": color}>text</button>
-  </div>
+type Test{
+  new(P: Nat),
+}
