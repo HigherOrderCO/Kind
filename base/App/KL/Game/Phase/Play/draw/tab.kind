@@ -28,7 +28,7 @@ App.KL.Game.Phase.Play.draw.tab(
           "position": "relative"
         }>
           <img src=App.KL.Game.Phase.Play.Assets.tab.background></img>
-          { App.KL.Game.Phase.Play.draw.tab.close }
+          // { App.KL.Game.Phase.Play.draw.tab.close }
           { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
           { App.KL.Game.Phase.Play.draw.tab.timer(game@tick) }
           { App.KL.Game.Phase.Play.draw.tab.content(tab_which, local@user, players_info) }
