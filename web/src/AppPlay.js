@@ -285,7 +285,7 @@ module.exports = class AppPlay extends Component {
         this.forceUpdate();
       }
       var compute_from_tick = this.app_global_tick; 
-      var compute_to_tick = Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
+      var compute_to_tick = restore ? tick : Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
       if (restored) {
         console.log("tick começo computado " + this.show_tick(compute_from_tick), compute_from_tick);
         console.log("tick fim computado " + this.show_tick(compute_to_tick), compute_to_tick);
