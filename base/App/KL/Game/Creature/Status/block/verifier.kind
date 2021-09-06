@@ -3,13 +3,13 @@ App.KL.Game.Creature.Status.block.verifier(
   caster: App.KL.Game.Creature
 ): Bool
 
-  let caster_hero_name = caster@hero@name
+  let caster_name = App.KL.Game.Board.Creature.get.name(caster)
   denied = App.KL.Game.Creature.Status.block.check(denied)
   let result = false
   for target in denied with result:
     let affected = target@fst // Verifies if the Target is affected by block
     let affected_hero_name = target@snd
-    let same_id = String.eql(affected_hero_name, caster_hero_name)
+    let same_id = String.eql(affected_hero_name, caster_name)
     if affected && same_id then
       true
     else 

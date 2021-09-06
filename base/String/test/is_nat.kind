@@ -1,0 +1,47 @@
+String.test.is_nat: TestSuite
+  TestSuite.many("String.is_number", [
+    String.test.is_nat.0, String.test.is_nat.1, String.test.is_nat.2,
+    String.test.is_nat.3, String.test.is_nat.4, String.test.is_nat.5,
+  ])
+
+String.test.is_nat.0: TestSuite
+  let test = "0123"
+  let got = Bool.show(String.is_nat(test))
+  let exp = "Bool.true"
+  let name = "0"
+  TestSuite.show.string(name, test, exp, got)
+
+String.test.is_nat.1: TestSuite
+  let test = "-987"
+  let got = Bool.show(String.is_nat(test))
+  let exp = "Bool.false"
+  let name = "1"
+  TestSuite.show.string(name, test, exp, got)
+
+String.test.is_nat.2: TestSuite
+  let test = "0865a"
+  let got = Bool.show(String.is_nat(test))
+  let exp = "Bool.false"
+  let name = "2"
+  TestSuite.show.string(name, test, exp, got)
+
+String.test.is_nat.3: TestSuite
+  let test = "9007199254740991n"
+  let got = Bool.show(String.is_nat(test))
+  let exp = "Bool.false"
+  let name = "3"
+  TestSuite.show.string(name, test, exp, got)
+
+String.test.is_nat.4: TestSuite
+  let test = "011101011101"
+  let got = Bool.show(String.is_nat(test))
+  let exp = "Bool.true"
+  let name = "4"
+  TestSuite.show.string(name, test, exp, got)
+
+String.test.is_nat.5: TestSuite
+  let test = "2.3847623487236483e+24"
+  let got = Bool.show(String.is_nat(test))
+  let exp = "Bool.false"
+  let name = "5"
+  TestSuite.show.string(name, test, exp, got)

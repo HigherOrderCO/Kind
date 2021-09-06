@@ -1,4 +1,5 @@
 // Returns a map with the player Address as the key to its respective coordinate 
+// Unused
 App.KL.Game.Board.find_players(board: App.KL.Game.Board): Map<Hexagonal.Axial>
   let players = []
   for coord:tile in board with players:

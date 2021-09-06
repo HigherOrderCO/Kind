@@ -9,6 +9,7 @@ App.KL.Game.Creature.Status.show(
     haste: "Hasted for:"| String.show_clean(I32.show(status.duration)) |turn| ", extra distance:" | String.show_clean(I32.show(status.amount))
     hot: "Healing for: "|String.show_clean(I32.show(status.duration)) |turn| ", heal amount:" | String.show_clean(I32.show(status.amount)) | ", stacks:" | String.show_clean(I32.show(status.stack))
     invulnerable: "Invulnerable for:" | String.show_clean(I32.show(status.duration)) |turn
+    opposite: ""
     protect: "Denies"|String.show_clean(I32.show(status.amount))| " damage" | if I32.gtn(1, status.amount) then " skills " else " skill "| "for the next:"|String.show_clean(I32.show(status.duration))|turn|" or until you run out of stacks"
     root: "Rooted for: " | String.show_clean(I32.show(status.duration))|turn
     silence: "Silenced for: " | String.show_clean(I32.show(status.duration))|turn

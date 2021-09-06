@@ -1,0 +1,25 @@
+App.KL.Game.Creature.Status.opposite.add(
+  creature: App.KL.Game.Creature
+  cast_data: Pair<Char, String>
+  duration: I32
+): App.KL.Game.Creature
+  
+  let opposite_added = App.KL.Game.Creature.Status.opposite.add.aux(cast_data, duration, creature@status)
+  creature@status <- opposite_added
+
+App.KL.Game.Creature.Status.opposite.add.aux(
+  cast_data: Pair<Char, String>
+  duration: I32
+  status: List<App.KL.Game.Creature.Status>
+): List<App.KL.Game.Creature.Status>
+
+  let new_opposite = App.KL.Game.Creature.Status.opposite(cast_data, duration)
+  case status { 
+    nil:
+      new_opposite & status
+    cons:
+      case status.head { 
+        opposite: 
+          status
+      }default status.head & App.KL.Game.Creature.Status.opposite.add.aux(cast_data, duration, status.tail)
+  }

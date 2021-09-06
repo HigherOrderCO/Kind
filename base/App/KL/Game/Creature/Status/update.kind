@@ -24,6 +24,7 @@ App.KL.Game.Creature.Status.update.aux(
         //heal over time(hot)
         hot : App.KL.Game.Creature.Status.hot(status.head.cast_data, status.head.id, I32.sub(status.head.duration, 1), status.head.stack, status.head.amount)
         invulnerable: App.KL.Game.Creature.Status.invulnerable(status.head.cast_data, status.head.id, I32.sub(status.head.duration ,1))
+        opposite: App.KL.Game.Creature.Status.opposite(status.head.cast_data, I32.sub(status.head.duration, 1))
         protect: App.KL.Game.Creature.Status.protect(status.head.cast_data, I32.sub(status.head.duration, 1), status.head.amount)
         root: App.KL.Game.Creature.Status.root(status.head.cast_data, I32.sub(status.head.duration, 1))
         shield: App.KL.Game.Creature.Status.shield(status.head.cast_data, status.head.id, I32.sub(status.head.duration, 1), status.head.amount)
@@ -41,6 +42,7 @@ App.KL.Game.Creature.Status.update.aux(
         //heal over time(hot)
         hot : if I32.gtn(head.duration,0) then head & tail else tail
         invulnerable : if I32.gtn(head.duration,0) then head & tail else tail
+        opposite: if I32.gtn(head.duration,0) then head & tail else tail
         protect : if I32.gtn(head.duration,0) then head & tail else tail
         root : if I32.gtn(head.duration,0) then head & tail else tail
         shield: if I32.gtn(head.duration,0) then head & tail else tail

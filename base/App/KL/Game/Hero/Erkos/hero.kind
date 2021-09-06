@@ -18,40 +18,54 @@ App.KL.Game.Hero.Erkos.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let walk_range = {2,2} ::Pair<U64, I32>
-  let fire_ball_range = {4,4} ::Pair<U64, I32>
+  let fire_ball_range = {4,4} ::Pair<I32, I32>
 
   let skills = {
-    "X": App.KL.Game.Skill.new("Walk", 500, 8, walk_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-    "Walk to another tile within 2 range from " | name | ".", App.KL.Game.Cursor.move)
+    "X": App.KL.Game.Skill.walk(1, name)
 
-    "Q": App.KL.Game.Skill.new("Fire Ball", 554, 24, fire_ball_range@fst, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(fire_ball_range@snd, 4, 1),
-    "After charging, Erkos throws a Fire Ball in a position, dealing 4 damage to all enemies hit.", App.KL.Game.Cursor.attack)
+    "Q": App.KL.Game.Skill.new(
+      "Fire Ball", 554, 24,
+      (board, center, targets) Hexagonal.Axial.range(center, fire_ball_range@fst),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Erkos.hero.Skills.fire_ball(fire_ball_range@snd, 4, 1),
+      "After charging, Erkos throws a Fire Ball in a position, dealing 4 damage to all enemies hit.",
+      App.KL.Game.Cursor.attack
+    )
 
-    "W": App.KL.Game.Skill.new("Fire Wave", 820, 24, 1, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(5, 6, 1),
-    "After charging, Erkos sends a Wave of a fire in 3 directions, dealing  6 damage and doting all enemies hit.", App.KL.Game.Cursor.attack)
+    "W": App.KL.Game.Skill.new(
+      "Fire Wave", 820, 24,
+      (board, center, targets) Hexagonal.Axial.range(center, 1),
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Erkos.hero.Skills.fire_wave(5, 6, 1),
+      "After charging, Erkos sends a Wave of a fire in 3 directions, dealing  6 damage and doting all enemies hit.",
+      App.KL.Game.Cursor.attack
+    )
 
-    "E": App.KL.Game.Skill.new("Fire Ring", 903, 24, 0, App.KL.Game.Skill.Pattern.single, App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 12, 3),
-    "Erkos slowly expands his flames around him, dealing massive damage to all enemies nearby.", App.KL.Game.Cursor.attack)
+    "E": App.KL.Game.Skill.new(
+      "Fire Ring", 903, 24,
+      (board, center, targets) [],
+      App.KL.Game.Skill.Pattern.single,
+      App.KL.Game.Hero.Erkos.hero.Skills.fire_ring(1, 12, 3),
+      "Erkos slowly expands his flames around him, dealing massive damage to all enemies nearby.",
+      App.KL.Game.Cursor.attack
+    )
   }
 
-  let on_stepped = none
-
-  let attributes =
-    some(App.KL.Game.Hero.Attributes.set(
+   let attributes =
+    App.KL.Game.Hero.Attributes.set(
       5 // Damage
       1 // Resistance
       2 // Mobility
       5 // Range
       0 // Utility
       1 // Difficulty
-  ))
+  )
 
-  let role = some(App.KL.Game.Hero.Role.ranged)
+  let role = App.KL.Game.Hero.Role.ranged
 
   let description = "Erkos is a fragile fire mage with high damage in large areas."
 
-  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, on_stepped, attributes, role, description)
+  App.KL.Game.Hero.new(name, draw, max_hp, max_ap, skills, attributes, role, description)
 
 
 // SKILLS

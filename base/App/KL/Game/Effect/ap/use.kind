@@ -11,7 +11,8 @@ App.KL.Game.Effect.ap.use(
     let tile = App.KL.Game.Tile.get(target, board)
     without tile: App.KL.Game.Effect.fail("out of Action Points")
     without caster: App.KL.Game.Effect.fail("out of Action Points")
-    if I32.gtn(cost, caster@ap) then 
+    let ap = App.KL.Game.Board.Creature.get.ap(caster)
+    if I32.gtn(cost, ap) then 
       App.KL.Game.Effect.fail("out of Action Points")
     else
       App.KL.Game.Effect { 

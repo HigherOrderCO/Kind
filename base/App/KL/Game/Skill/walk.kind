@@ -1,0 +1,24 @@
+App.KL.Game.Skill.walk(range: I32, name: String): App.KL.Game.Skill
+  
+  App.KL.Game.Skill.new(
+    "Walk", 500, 8,
+    (board, center, targets) App.KL.Game.Skill.walk.range(range, board, center, targets),
+    App.KL.Game.Skill.Pattern.single,
+    App.KL.Game.Effect.common.walk(range, 1),
+    "Walk to another tile within 2 range from " | name |".",
+    App.KL.Game.Cursor.move
+  )
+
+App.KL.Game.Skill.walk.range(
+  range: I32,
+  board: App.KL.Game.Board,
+  center: Hexagonal.Axial,
+  targets: List<Hexagonal.Axial>
+): List<Hexagonal.Axial>
+  let caster = App.KL.Game.Board.Creature.get(center, board)
+  case caster {
+    none: [] :: List<Hexagonal.Axial>
+    some: 
+      let a = App.KL.Game.Creature.Status.movement_range(range, caster.value)
+      Hexagonal.Axial.range(center, a)
+  }
