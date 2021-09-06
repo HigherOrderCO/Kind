@@ -259,13 +259,13 @@ module.exports = class AppPlay extends Component {
           this.app_state.global = this.app.init.global;
         // Otherwise, restore found state
         } else {
-          console.log("tick do post - ", this.show_tick(tick));
-          console.log("tick do atual - ", this.show_tick(this.app_global_tick));
-          console.log("ultimos cinco posts", Object.keys(this.app_global_posts).sort().map(x => this.show_tick(x)).reverse().slice(0, 5));
+          // console.log("tick do post - ", this.show_tick(tick));
+          // console.log("tick do atual - ", this.show_tick(this.app_global_tick));
+          // console.log("ultimos cinco posts", Object.keys(this.app_global_posts).sort().map(x => this.show_tick(x)).reverse().slice(0, 5));
           restored = true;
           this.app_global_tick = latest.tick;
           this.app_state.global = latest.state;
-          console.log("tick imediatamente antes do tick do post encontrado " + this.show_tick(latest.tick) + " STATE: " + latest.state);
+          // console.log("tick imediatamente antes do tick do post encontrado " + this.show_tick(latest.tick) + " STATE: " + latest.state);
         }
       }
       if (this.app_global_tick === null) {
@@ -285,31 +285,60 @@ module.exports = class AppPlay extends Component {
         this.forceUpdate();
       }
       var compute_from_tick = this.app_global_tick; 
-      var compute_to_tick = restore ? tick : Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
+      var compute_to_tick = restored ? tick : Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
+      // if (restored) {
+        // console.log("tick começo computado " + this.show_tick(compute_from_tick), compute_from_tick);
+        // console.log("tick fim computado " + this.show_tick(compute_to_tick), compute_to_tick);
+      // }
+
       if (restored) {
-        console.log("tick começo computado " + this.show_tick(compute_from_tick), compute_from_tick);
-        console.log("tick fim computado " + this.show_tick(compute_to_tick), compute_to_tick);
-      }
-      for (var t = compute_from_tick; t < compute_to_tick; ++t) {
-        //++count_ticks;
-        var posts = this.app_global_posts[String(t)];
-        var state = this.app_state.global;
-        if (posts) {
-          for (var i = 0; i < posts.length; ++i) {
-            var post = posts[i];
-            console.log("fazendo post do tick: ", this.show_tick(post.tick));
-            console.log(state);
-            state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
-            console.log(state);
-            //++count_posts;
+        var post_ticks = [];
+        for (let key in this.app_global_posts) {
+          if (key > this.app_global_tick) post_ticks.push(key);
+        }
+        post_ticks.sort();
+        for (var j = 0; j < post_ticks.length - 1 ; j++) {
+          var t = post_ticks[j];
+          var posts = this.app_global_posts[String(t)];
+          var state = this.app_state.global;
+          if (posts) {
+            for (var i = 0; i < posts.length; ++i) {
+              var post = posts[i];
+              console.log("WAS RESTORED fazendo post do tick: ", this.show_tick(post.tick));
+              // console.log(state);
+              state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
+              // console.log(state);
+              //++count_posts;
+            }
           }
+          if (this.app_has_ticker) {
+            state = this.app.tick(BigInt(t))(state);
+          }
+          this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
+          this.app_state.global = state;
         }
-        if (this.app_has_ticker) {
-          state = this.app.tick(BigInt(t))(state);
-        }
-        this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
-        this.app_state.global = state;
-      };
+      } else {
+        for (var t = compute_from_tick; t < compute_to_tick; ++t) {
+          //++count_ticks;
+          var posts = this.app_global_posts[String(t)];
+          var state = this.app_state.global;
+          if (posts) {
+            for (var i = 0; i < posts.length; ++i) {
+              var post = posts[i];
+              console.log("NOT RESTORED fazendo post do tick: ", this.show_tick(post.tick));
+              // console.log(state);
+              state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
+              // console.log(state);
+              //++count_posts;
+            }
+          }
+          if (this.app_has_ticker) {
+            state = this.app.tick(BigInt(t))(state);
+          }
+          this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
+          this.app_state.global = state;
+        };
+      }
       this.display = null;
       this.app_global_tick = tick;
       //if (this.app_global_tick > (Date.now() - 1000) / 62.5) {
