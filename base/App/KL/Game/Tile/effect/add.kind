@@ -3,7 +3,8 @@ App.KL.Game.Tile.effect.add(
   cast_data: Pair<Char,String>
   effect: App.KL.Game.Effect<Unit>
   duration: I32
+  activation: App.KL.Game.Tile.Activation
 ): App.KL.Game.Tile
 
-  let new_effect = App.KL.Game.Tile.Effect.new(cast_data, effect, duration)
+  let new_effect = App.KL.Game.Tile.Effect.new(cast_data, effect, duration, activation)
   tile@effect <- some(new_effect)

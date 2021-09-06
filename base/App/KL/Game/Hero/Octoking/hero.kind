@@ -46,7 +46,7 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
       "Paradigm Break", 512, 48,
       (board, center, targets) Hexagonal.Axial.range(center, pbreak_range@fst),
       App.KL.Game.Skill.Pattern.single,
-      App.KL.Game.Hero.Octoking.hero.Skills.p_break(pbreak_range@snd, 1, 2, 2),
+      App.KL.Game.Hero.Octoking.hero.Skills.p_break(pbreak_range@snd, 1, 10, 2),
       "Lela provides 4 Shield Points to an ally.",
       App.KL.Game.Cursor.heal
     )
@@ -130,8 +130,11 @@ App.KL.Game.Hero.Octoking.hero.Skills.p_break(range: I32, radius: I32, duration:
     get target = App.KL.Game.Effect.coord.get_target
     App.KL.Game.Effect.ap.use(ap_cost)
     let area = App.KL.Game.Areas.circle(target, radius)
+    let activation_method = App.KL.Game.Tile.Activation.turn_end
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.tile.add_effect(App.KL.Game.Effect.status.opposite.add(1), duration), area)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.tile.add_effect(App.KL.Game.Effect.status.opposite.add(1), duration, activation_method), area)
     return unit
   }
+
+//App.KL.Game.Hero.Octoking.hero.Skills.e_efforts(range: I32, radius: I32, duration: I32, ap_cost: I32): App.KL.Game.Effect<Unit>

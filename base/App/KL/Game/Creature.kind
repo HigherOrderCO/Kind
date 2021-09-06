@@ -46,4 +46,3 @@ App.KL.Game.Creature.Status.get_effect(
     dot: App.KL.Game.Effect.status.dot.apply(status.cast_data, status.id, status.duration, status.amount)
     hot: App.KL.Game.Effect.status.hot.apply(status.cast_data, status.id, status.duration, status.amount)
   } default (pos)App.KL.Game.Effect { return +0#32 }
- 
