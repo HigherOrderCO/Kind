@@ -229,7 +229,7 @@ module.exports = class AppPlay extends Component {
         this.app_global_posts[key] = [];
       }
       this.app_global_posts[key].push(post);
-      //console.log("New post at " + post.time + "; local tick is " + window.KindEvents.get_tick() + "; delay is " + (Date.now() - window.KindEvents.get_time()));
+      // console.log("New post at " + this.show_tick(post.tick));
       if (!this.app_global_begin || post.tick < this.app_global_begin) {
         this.app_global_begin = post.tick;
         this.app_global_states = null;
@@ -241,8 +241,13 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  show_tick(tick){
+    return (new Date(tick * 62.5)).toUTCString();
+  }
+
   // Computes the global state at given tick (rollback netcode)
   register_tick(tick) {
+    var restored = false;
     if (this.app && this.app_global_begin !== null) {
       // If the tick is older than the current state, rollback
       if (this.app_global_tick !== null && tick < this.app_global_tick) {
@@ -254,9 +259,13 @@ module.exports = class AppPlay extends Component {
           this.app_state.global = this.app.init.global;
         // Otherwise, restore found state
         } else {
-          //console.log("- RESTORE TO " + latest.tick);
+          console.log("tick do post - ", this.show_tick(tick));
+          console.log("tick do atual - ", this.show_tick(this.app_global_tick));
+          console.log("ultimos cinco posts", Object.keys(this.app_global_posts).sort().map(x => this.show_tick(x)).reverse().slice(0, 5));
+          restored = true;
           this.app_global_tick = latest.tick;
           this.app_state.global = latest.state;
+          console.log("tick imediatamente antes do tick do post encontrado " + this.show_tick(latest.tick) + " STATE: " + latest.state);
         }
       }
       if (this.app_global_tick === null) {
@@ -277,6 +286,10 @@ module.exports = class AppPlay extends Component {
       }
       var compute_from_tick = this.app_global_tick; 
       var compute_to_tick = Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
+      if (restored) {
+        console.log("tick começo computado " + this.show_tick(compute_from_tick), compute_from_tick);
+        console.log("tick fim computado " + this.show_tick(compute_to_tick), compute_to_tick);
+      }
       for (var t = compute_from_tick; t < compute_to_tick; ++t) {
         //++count_ticks;
         var posts = this.app_global_posts[String(t)];
@@ -284,7 +297,10 @@ module.exports = class AppPlay extends Component {
         if (posts) {
           for (var i = 0; i < posts.length; ++i) {
             var post = posts[i];
+            console.log("fazendo post do tick: ", this.show_tick(post.tick));
+            console.log(state);
             state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
+            console.log(state);
             //++count_posts;
           }
         }
@@ -329,7 +345,7 @@ module.exports = class AppPlay extends Component {
         }
         break;
       case "IO.ask":
-        console.log("IO.ask", io);
+        // console.log("IO.ask", io);
         return new Promise((res, err) => {
           switch (io.query) {
             case "print":
@@ -373,7 +389,7 @@ module.exports = class AppPlay extends Component {
                 window.KindEvents.unwatch_room(io.param);
                 this.recompute_posts();
               } else {
-                console.log("Error: invalid input on App.Action.unwatch");
+                // console.log("Error: invalid input on App.Action.unwatch");
               }
               return this.run_io(io.then("")).then(res).catch(err);
             case "watch":
@@ -389,7 +405,7 @@ module.exports = class AppPlay extends Component {
                   //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
-                console.log("Error: invalid input on App.Action.watch");
+                // console.log("Error: invalid input on App.Action.watch");
               }
               return this.run_io(io.then("")).then(res).catch(err);
             case "post":
@@ -397,7 +413,7 @@ module.exports = class AppPlay extends Component {
               if (utils.is_valid_hex(64, room) && utils.is_valid_hex(null, data)) {
                 window.KindEvents.send_post(room, data);
               } else {
-                console.log("Error: invalid input on App.Action.post");
+                // console.log("Error: invalid input on App.Action.post");
               }
               return this.run_io(io.then("")).then(res).catch(err);
           }
@@ -517,7 +533,7 @@ module.exports = class AppPlay extends Component {
   // Gets a pixel-art canvas
   get_canvas(id, width, height, scale=1) {
     if (!this.canvas[id] || this.canvas[id].width !== width || this.canvas[id].height !== height) {
-      console.log("creating canvas", id, width, height);
+      // console.log("creating canvas", id, width, height);
       this.remove_canvas(id);
       this.canvas[id] = document.createElement("canvas");
       this.canvas[id].id = id;
