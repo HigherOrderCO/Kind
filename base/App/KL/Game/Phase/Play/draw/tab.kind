@@ -28,7 +28,7 @@ App.KL.Game.Phase.Play.draw.tab(
           "position": "relative"
         }>
           <img src=App.KL.Game.Phase.Play.Assets.tab.background></img>
-          { App.KL.Game.Phase.Play.draw.tab.close }
+          // { App.KL.Game.Phase.Play.draw.tab.close }
           { App.KL.Game.Phase.Play.draw.tab.score(game@score) }
           { App.KL.Game.Phase.Play.draw.tab.timer(game@tick) }
           { App.KL.Game.Phase.Play.draw.tab.content(tab_which, local@user, players_info) }
@@ -464,7 +464,8 @@ App.KL.Game.Phase.Play.draw.tab.content.recap.get_percentage(
     none: 0
     some:  
       let number = I32.abs(number)
-      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(creature.value@hero@max_hp))
+      let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature.value)
+      F64.mul(100.0, I32.to_f64(number) / I32.to_f64(max_hp))
   }
 
 App.KL.Game.Phase.Play.draw.tab.controls(

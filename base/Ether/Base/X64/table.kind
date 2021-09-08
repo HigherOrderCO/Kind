@@ -1,0 +1,3 @@
+Ether.Base.X64.table : List<U16>
+     String.fold("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", 
+       _, [], List.cons!)
