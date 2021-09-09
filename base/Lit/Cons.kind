@@ -37,8 +37,8 @@ type Lit.Cons.Received {
 type Lit.Cons.Post {
   new(
     body: Lit.Cons.Body // post contents (1280 bytes)
-    work: U256         // extra info and nonce (32 bytes)
-    prev: U256         // previous post (32 bytes)
+    work: U256          // extra info and nonce (32 bytes)
+    prev: U256          // previous post (32 bytes)
   )
 } deriving (serializer, deserializer)
 
