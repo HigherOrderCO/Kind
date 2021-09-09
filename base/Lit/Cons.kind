@@ -9,7 +9,7 @@ Lit.Cons.Hash: Type
 // An IP networking address
 type Lit.Cons.Address {
   ipv4(ip0: U8, ip1: U8, ip2: U8, ip3: U8, port: U16)
-} deriving (serializer, deserializer)
+}
 
 // A networking peer
 type Lit.Cons.Peer {
@@ -23,7 +23,7 @@ type Lit.Cons.Message {
   ping(addresses: List<Lit.Cons.Address>)
   request_post(hash: Lit.Cons.Hash)
   share_post(post: Lit.Cons.Post)
-} deriving (serializer, deserializer)
+}
 
 // A network message received from a sender
 type Lit.Cons.Received {
@@ -40,7 +40,7 @@ type Lit.Cons.Post {
     work: U256          // extra info and nonce (32 bytes)
     prev: U256          // previous post (32 bytes)
   )
-} deriving (serializer, deserializer)
+}
 
 // Holds all the posts and aux structures
 type Lit.Cons.Store {
@@ -63,171 +63,9 @@ type Lit.Cons.Node {
   )
 }
 
-Lit.Cons.serialize.uint(size: Nat, value: Nat): Bits
-  case size {
-    zero: Bits.e
-    succ: if (value % 2) =? 0
-      then Bits.o(Lit.Cons.serialize.uint(size.pred, value / 2))
-      else Bits.i(Lit.Cons.serialize.uint(size.pred, value / 2))
-  }
-
-Lit.Cons.deserialize.uint.go(size: Nat, bits: Bits): Pair<Bits,Nat>
-  case size {
-    zero: {bits, 0}
-    succ: case bits {
-      e: {Bits.e, 0}
-      o:
-        let {bits, value} = Lit.Cons.deserialize.uint.go(size.pred, bits.pred)
-        {bits, 2 * value}
-      i:
-        let {bits, value} = Lit.Cons.deserialize.uint.go(size.pred, bits.pred)
-        {bits, 1 + 2 * value}
-    }
-  }
-
-Lit.Cons.deserialize.uint(size: Nat, bits: Bits): Nat
-  Pair.snd!!(Lit.Cons.deserialize.uint.go(size, bits))
-  
-Lit.Cons.serialize.hash(hash: Lit.Cons.Hash): Bits
-  Lit.Cons.serialize.uint(256, U256.to_nat(hash))
-
-Lit.Cons.deserialize.hash.go(bits: Bits): Pair<Bits,Lit.Cons.Hash>
-  let {bits, value} = Lit.Cons.deserialize.uint.go(256, bits)
-  {bits, Nat.to_u256(value)}
-
-Lit.Cons.deserialize.hash(bits: Bits): Lit.Cons.Hash
-  Pair.snd!!(Lit.Cons.deserialize.hash.go(bits))
-
-Lit.Cons.serialize.words(length: Nat, words: Vector<U256,length>): Bits
-  case length with words {
-    zero: Bits.e
-    succ: case words {
-      cons: Bits.concat(Lit.Cons.serialize.uint(256, U256.to_nat(words.head)), Lit.Cons.serialize.words(length.pred, words.tail))
-    }
-  }!
-
-Lit.Cons.deserialize.words.go(length: Nat, bits: Bits): Pair<Bits,Vector<U256,length>>
-  case length {
-    zero: {bits, Vector.nil!}
-    succ: 
-      let {bits, head} = Lit.Cons.deserialize.uint.go(256, bits)
-      let {bits, tail} = Lit.Cons.deserialize.words.go(length.pred, bits)
-      {bits, Vector.cons!<length.pred>(Nat.to_u256(head), tail)}
-  }!
-
-Lit.Cons.deserialize.words(length: Nat, bits: Bits): Vector<U256,length>
-  Pair.snd!!(Lit.Cons.deserialize.words.go(length, bits))
-
-Lit.Cons.serialize.address(address: Lit.Cons.Address): Bits
-  open address
-  Bits.flatten([
-    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip0)),
-    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip1)),
-    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip2)),
-    Lit.Cons.serialize.uint(8, U8.to_nat(address.ip3)),
-    Lit.Cons.serialize.uint(16, U16.to_nat(address.port)),
-  ])
-
-Lit.Cons.deserialize.address.go(bits: Bits): Pair<Bits,Lit.Cons.Address>
-  let {bits, ip0} = Lit.Cons.deserialize.uint.go(8, bits)
-  let {bits, ip1} = Lit.Cons.deserialize.uint.go(8, bits)
-  let {bits, ip2} = Lit.Cons.deserialize.uint.go(8, bits)
-  let {bits, ip3} = Lit.Cons.deserialize.uint.go(8, bits)
-  let {bits, port} = Lit.Cons.deserialize.uint.go(16, bits)
-  {bits, Lit.Cons.Address.ipv4(Nat.to_u8(ip0), Nat.to_u8(ip1), Nat.to_u8(ip2), Nat.to_u8(ip3), Nat.to_u16(port))}
-
-Lit.Cons.deserialize.address(bits: Bits): Lit.Cons.Address
-  Pair.snd!!(Lit.Cons.deserialize.address.go(bits))
-
-Lit.Cons.serialize.many<A: Type>(item: A -> Bits, list: List<A>): Bits
-  case list {
-    nil: Bits.o(Bits.e)
-    cons: Bits.i(Bits.concat(item(list.head), Lit.Cons.serialize.many<A>(item, list.tail)))
-  }
-
-Lit.Cons.deserialize.many.go<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits,List<A>>
-  case bits {
-    e:
-      {Bits.e, []}
-    o:
-      {bits.pred, []}
-    i:
-      let bits = bits.pred
-      let {bits, head} = item(bits)
-      let {bits, tail} = Lit.Cons.deserialize.many.go<A>(item, bits)
-      {bits, head & tail}
-  }
-
-Lit.Cons.deserialize.many<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): List<A>
-  Pair.snd!!(Lit.Cons.deserialize.many.go<A>(item, bits))
-
-Lit.Cons.serialize.post(post: Lit.Cons.Post): Bits
-  open post
-  Bits.flatten([
-    Lit.Cons.serialize.words(40, post.body),
-    Lit.Cons.serialize.uint(256, U256.to_nat(post.work)),
-    Lit.Cons.serialize.uint(256, U256.to_nat(post.prev)),
-  ])
-
-Lit.Cons.deserialize.post.go(bits: Bits): Pair<Bits,Lit.Cons.Post>
-  let {bits,body} = Lit.Cons.deserialize.words.go(40, bits)
-  let {bits,work} = Lit.Cons.deserialize.uint.go(256, bits)
-  let {bits,prev} = Lit.Cons.deserialize.uint.go(256, bits)
-  {bits, Lit.Cons.Post.new(body, Nat.to_u256(work), Nat.to_u256(prev))}
-
-Lit.Cons.deserialize.post(bits: Bits): Lit.Cons.Post
-  Pair.snd!!(Lit.Cons.deserialize.post.go(bits))
-
-Lit.Cons.serialize.message(message: Lit.Cons.Message): Bits
-  case message {
-    ping: 
-      Bits.concat(Lit.Cons.serialize.uint(8,0), Lit.Cons.serialize.many!(Lit.Cons.serialize.address, message.addresses))
-    request_post:
-      Bits.concat(Lit.Cons.serialize.uint(8,1), Lit.Cons.serialize.uint(256, U256.to_nat(message.hash)))
-    share_post:
-      Bits.concat(Lit.Cons.serialize.uint(8,2), Lit.Cons.serialize.post(message.post))
-  }
-
-Lit.Cons.deserialize.message.go(bits: Bits): Pair<Bits,Lit.Cons.Message>
-  let {bits, variant} = Lit.Cons.deserialize.uint.go(4,bits)
-  switch Nat.eql(variant) {
-    0:
-      let {bits, addresses} = Lit.Cons.deserialize.many.go!(Lit.Cons.deserialize.address.go, bits)
-      {bits, Lit.Cons.Message.ping(addresses)}
-    1: 
-      let {bits, hash} = Lit.Cons.deserialize.uint.go(256, bits)
-      {bits, Lit.Cons.Message.request_post(Nat.to_u256(hash))}
-    2:
-      let {bits, post} = Lit.Cons.deserialize.post.go(bits)
-      {bits, Lit.Cons.Message.share_post(post)}
-  } default {bits, Lit.Cons.Message.ping([])}
-
-Lit.Cons.deserialize.message(bits: Bits): Lit.Cons.Message
-  Pair.snd!!(Lit.Cons.deserialize.message.go(bits))
-  
-Lit.Cons.Hash.serializer: Serializer<Lit.Cons.Hash>
-  U256.serializer
-
-Lit.Cons.Hash.deserializer: Deserializer<Lit.Cons.Hash>
-  U256.deserializer
-
-Lit.Cons.Body.deserializer: Deserializer<Lit.Cons.Body>
-  Vector.deserializer!(40,U256.deserializer)
-
-Lit.Cons.Body.serializer: Serializer<Lit.Cons.Body>
-  Vector.serializer!(40,U256.serializer)
-
-Lit.Cons.Message.serialize(message: Lit.Cons.Message): String
-  let hex = Bits.hex.encode(Serializer.run!(Lit.Cons.Message.serializer, message))
-  let hex = if Nat.mod(String.length(hex),2) =? 0 then hex else hex | "0"
-  hex
-
-Lit.Cons.Message.deserialize(string: String): Maybe<Lit.Cons.Message>
-  Deserializer.run!(Lit.Cons.Message.deserializer, Bits.hex.decode(string))
-
 Lit.Cons.Message.show(message: Lit.Cons.Message): String
   case message {
-    ping: "ping"
+    ping: "ping(" | String.join(",", List.map!!(Lit.Cons.Address.show, message.addresses)) | ")"
     share_post: "share_post(" | Lit.Cons.Hash.show(Lit.Cons.Hash.from_post(message.post)) | ")"
     request_post: "request_post(" | Lit.Cons.Hash.show(message.hash) | ")"
   }
@@ -247,14 +85,6 @@ Lit.Cons.Hash.from_post(post: Lit.Cons.Post): Lit.Cons.Hash
   else
     let words = Vector.to_list!(40, post.body) ++ [post.work, post.prev]
     Lit.Cons.Hash.from_words(words)
-
-Lit.Cons.Message.serialize(message: Lit.Cons.Message): String
-  let hex = Bits.hex.encode(Serializer.run!(Lit.Cons.Message.serializer, message))
-  let hex = if Nat.mod(String.length(hex),2) =? 0 then hex else hex | "0"
-  hex
-
-Lit.Cons.Message.deserialize(string: String): Maybe<Lit.Cons.Message>
-  Deserializer.run!(Lit.Cons.Message.deserializer, Bits.hex.decode(string))
 
 // Estimates how many attempts were needed to make this hash
 Lit.Cons.Hash.score(hash: U256): U256
@@ -385,7 +215,7 @@ Lit.Cons.Received.from_udp_message(time: Nat, recv: IO.recv_udp.Message): Maybe<
     get ip2 = ip[2]
     get ip3 = ip[3]
     let peer = Lit.Cons.Peer.new(time, Lit.Cons.Address.ipv4(ip0, ip1, ip2, ip3, port))
-    get msge = Lit.Cons.Message.deserialize(recv.data)
+    let msge = Lit.Bits.deserialize.message(Bits.hex.decode(recv.data))
     return Lit.Cons.Received.new(peer, msge)
   }
 
@@ -396,8 +226,7 @@ Lit.Cons.Node.send(node: Lit.Cons.Node, peer: Lit.Cons.Peer, message: Lit.Cons.M
   let from_port = node.port
   let to_ip     = Lit.Cons.Address.show.ip(peer.address)
   let to_port   = U16.to_nat(peer.address.port)
-  //log("SENDING: " | Lit.Cons.Message.serialize(message))
-  IO.send_udp(from_port, to_ip, to_port, Lit.Cons.Message.serialize(message))
+  IO.send_udp(from_port, to_ip, to_port, Bits.hex.encode(Lit.Bits.serialize.message(message)))
 
 Lit.Cons.Node.get_random_peers(node: Lit.Cons.Node, count: Nat): IO<List<Lit.Cons.Peer>>
   open node

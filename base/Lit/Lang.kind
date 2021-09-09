@@ -16,15 +16,11 @@ Lit.Lang.show.line(line: Lit.Core.Line, world: Lit.Core.World): String
 
 Lit.Lang.show.type.short(type: Lit.Core.Type): String
   case type {
-    lab: "Label"
-    eff: "Effect<" | type.name | ">"
     adt: type.name
   }
 
 Lit.Lang.show.type(type: Lit.Core.Type, world: Lit.Core.World): String
   case type {
-    lab: "Label"
-    eff: "Effect<" | type.name | ">"
     adt:
       "type " | type.name
       | " { "
@@ -82,8 +78,6 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
     create: Maybe {
       get type = Lit.Core.World.get_type(term.type, world)
       case type {
-        lab: none
-        eff: none
         adt: Maybe {
           get form = type.forms[term.form]
           use form = form
@@ -103,8 +97,6 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
     match: Maybe {
       get type = Lit.Core.World.get_type(term.type, world)
       case type {
-        lab: none
-        eff: none
         adt: Maybe {
           let expr = Lit.Lang.show.term(term.expr, world)
           let name = term.name
@@ -331,10 +323,6 @@ Lit.Lang.parser.term.match(world: Lit.Core.World): Parser<Lit.Core.Term>
       some: Parser {
         let type = found.value
         case type {
-          lab:
-            Parser.fail!("Match type not an ADT.")
-          eff:
-            Parser.fail!("Match type not an ADT.")
           adt: Parser {
             get expr = Parser.choice!([
               Parser {

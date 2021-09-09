@@ -40,10 +40,6 @@ type Lit.Core.Term {
 
 // Lit.Core types are algebraic datatypes (ADTs)
 type Lit.Core.Type {
-  lab
-  eff(
-    name: String
-  )
   adt(
     name: String
     forms: List<Lit.Core.Type.Form>
@@ -144,8 +140,6 @@ Lit.Core.World.get_user(name: String, world: Lit.Core.World): Maybe<Lit.Core.Use
 
 Lit.Core.Type.find_form(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Form>>
   case type {
-    lab: none
-    eff: none
     adt: List.ifind!((i,f) String.eql(f@name,name), type.forms)
   }
 
@@ -154,8 +148,6 @@ Lit.Core.Type.find_form(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.C
 
 Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
   case a b {
-    lab lab: true
-    eff eff: String.eql(a.name, b.name)
     adt adt: String.eql(a.name, b.name)
   } default false
 
@@ -175,10 +167,6 @@ Lit.Core.World.check.term(
       //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
       Lit.Core.Type.equal(var_type, type)
     create: case type {
-      lab:
-        false
-      eff:
-        false
       adt:
         use term_type = Lit.Core.World.get_type(term.type,world) abort false
         if Lit.Core.Type.equal(term_type, type) then
@@ -190,10 +178,6 @@ Lit.Core.World.check.term(
     match:
       let expr_type = Lit.Core.World.get_type(term.type,world) abort false
       case expr_type {
-        lab:
-          false
-        eff:
-          false
         adt:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
           let cses = List.mapped!(term.cses)!((x) x@snd)
@@ -245,7 +229,7 @@ Lit.Core.World.check.match.cases(
     cons cons:
       let ext_ctx = ctx
       for field in forms.head@fields with ext_ctx:
-        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.lab
+        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.adt("Empty", [])
         ext_ctx{name | "." | field@name} <- type
       let case_ok = Lit.Core.World.check.term(cases.head, type, ext_ctx, world)
       let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, forms.tail, name, ctx, world)
@@ -336,10 +320,6 @@ Lit.Core.World.run.line(
       // TODO: check something?
       let type = line.value
       case type {
-        eff:
-          none
-        lab:
-          none
         adt: 
           log("- new_type: " | type.name)
           case world{type.name} as got_type {
@@ -475,6 +455,21 @@ Lit.Core: _
   let world = {}
 
   let code = `
+    alias 0000 = MrDog.call.blablabla
+
+
+    4 bits = tamanho
+    1-16 * 6 bits = nome
+
+
+
+
+
+
+
+
+
+
     user MrDog {
       0123456789abcdef
     }
@@ -495,7 +490,7 @@ Lit.Core: _
 
     type NatBool {
       new{
-        x: Nat,
+        x: Nat
         y: Bool
       }
     }
