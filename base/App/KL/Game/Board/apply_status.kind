@@ -8,14 +8,20 @@ App.KL.Game.Board.apply_status(
     // Applies Tile's Effect if it has one
     result = Maybe {
       get effect = tile@effect
-      let tile_result = effect@effect(coord, [coord], effect@cast_data, result@fst)
-      let result = case tile_result {
-        err: result
-        new: 
-          let board = tile_result.board
-          let cemetery = result@snd@fst ++ tile_result.cemetery
-          let player_data = App.KL.Game.Effect.player_data.union(result@snd@snd, tile_result.player_data)
-          {board, {cemetery, player_data}}
+      let activation = effect@activation
+      let result = case activation { 
+        turn_end:
+          let tile_result = effect@effect(coord, [coord], effect@cast_data, result@fst)
+          let result = case tile_result {
+            err: result
+            new: 
+              let board = tile_result.board
+              let cemetery = result@snd@fst ++ tile_result.cemetery
+              let player_data = App.KL.Game.Effect.player_data.union(result@snd@snd, tile_result.player_data)
+              {board, {cemetery, player_data}}
+          }
+          result
+        walking: result
       }
       return result
     } <> result    
@@ -23,11 +29,11 @@ App.KL.Game.Board.apply_status(
     without new_creature: result
 
     // Applies all damage or healing from Statuses in the creature in that tile
-    let status = new_creature@status
-    for dot in status with result:
-      let effect = App.KL.Game.Creature.Status.get_effect(dot)
-      open dot
-      let effect_result = effect(coord, coord, [coord], dot.cast_data, result@fst)
+    let status_list = new_creature@status
+    for status in status_list with result:
+      let effect = App.KL.Game.Creature.Status.get_effect(status)
+      open status
+      let effect_result = effect(coord, coord, [coord], status.cast_data, result@fst)
       case effect_result { 
         err: result
         new: 
@@ -38,7 +44,7 @@ App.KL.Game.Board.apply_status(
       }
     result
     
-  // Reduces duration for all Tile effects and Statuses
+  // Reduces duration for all Tile Effects
   let new_board     = App.KL.Game.Board.tile_update(result@fst) 
   // Updates Scoreboard and Recap in the list of players
   let new_players   = App.KL.Game.Player.player_data.map.update(game@players, result@snd@snd)
