@@ -455,21 +455,6 @@ Lit.Core: _
   let world = {}
 
   let code = `
-    alias 0000 = MrDog.call.blablabla
-
-
-    4 bits = tamanho
-    1-16 * 6 bits = nome
-
-
-
-
-
-
-
-
-
-
     user MrDog {
       0123456789abcdef
     }
