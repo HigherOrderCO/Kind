@@ -500,42 +500,42 @@ Lit.Core: _
       }
     }
 
-    not{x: Bool}: Bool
+    not(x: Bool): Bool
       case x : Bool {
         true: Bool/false
         false: Bool/true
       }
 
-    double{x: Nat}: Nat
+    double(x: Nat): Nat
       case x : Nat {
         zero:
           Nat/zero
         succ:
-          get rest = double{x: x.pred}
+          call rest = double(x.pred)
           Nat/succ{pred: Nat/succ{pred: rest}}
       }
 
     with MrDog {
-      get n = double{x: Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}}}
-      get b = not{x: Bool/true}
+      call n = double(Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}})
+      call b = not(Bool/true)
       NatBool/new{x: n, y: b}
-    } signed {}
+    } signed { 0123abcd }
 
-    COUNT of Count: Nat
+    Count @ COUNT(): Nat
       Nat/zero
 
-    Count.inc: Unit
-      get count = COUNT
-      set COUNT = Nat/succ{pred: count}
+    Count.inc(): Unit
+      call count = COUNT()
+      bind COUNT = Nat/succ{pred: count}
       Unit/new
 
     with MrDog {
-      get x = Count.inc
-      get x = Count.inc
-      get x = Count.inc
-      get x = COUNT
+      call x = Count.inc()
+      call x = Count.inc()
+      call x = Count.inc()
+      call x = COUNT()
       x
-    } signed {}
+    } signed { 0123abcd }
   `
 
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
