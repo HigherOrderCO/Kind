@@ -36,9 +36,9 @@ type Lit.Cons.Received {
 // A Lit.Cons page
 type Lit.Cons.Page {
   new(
-    body: Lit.Cons.Body // page contents (1280 bytes)
-    work: U256          // extra info and nonce (32 bytes)
-    prev: U256          // previous page (32 bytes)
+    body: Vector<U256,40> // block contents (1280 bytes)
+    nonc: U256            // nonce + extra data (32 bytes)
+    prev: U256            // previous block (32 bytes)
   )
 }
 
@@ -80,10 +80,10 @@ Lit.Cons.Hash.show(hash: Lit.Cons.Hash): String
 // Returns the PageHash
 Lit.Cons.Hash.from_page(page: Lit.Cons.Page): Lit.Cons.Hash
   use page = page
-  if U256.eql(page.prev, 0) && U256.eql(page.work, 0) then
+  if U256.eql(page.prev, 0) && U256.eql(page.nonc, 0) then
     0#256
   else
-    let words = Vector.to_list!(40, page.body) ++ [page.work, page.prev]
+    let words = Vector.to_list!(40, page.body) ++ [page.nonc, page.prev]
     Lit.Cons.Hash.from_words(words)
 
 // Estimates how many attempts were needed to make this hash
@@ -102,7 +102,7 @@ Lit.Cons.Page.mine(page: Lit.Cons.Page, target_score: U256, attempts: U256): May
   else if U256.gte(page_score, target_score) then
     some(page)
   else
-    Lit.Cons.Page.mine(page@work <- page@work + 1, target_score, attempts - 1)
+    Lit.Cons.Page.mine(page@nonc <- page@nonc + 1, target_score, attempts - 1)
 
 // Adds a page to the chain, updating the score, children and tip
 // If the prev is null, it is added to a pending map and re-added later
@@ -156,7 +156,7 @@ Lit.Cons.Store.genesis: Lit.Cons.Store
   let chain.tip = {0#256, 0#256}
   Lit.Cons.Store.new(chain.page, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
 
-// Returns the longest chain, i.e., the one with most accumulated work
+// Returns the longest chain, i.e., the one with most accumulated nonc
 Lit.Cons.Store.longest_chain(chain: Lit.Cons.Store): List<Lit.Cons.Page>
   open chain
   open chain.tip

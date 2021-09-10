@@ -43,7 +43,26 @@ TODO
 LitCons
 -------
 
-TODO
+LitCons is a data-only blockchain. It could be described as "Bitcoin without the
+coin". It is the consensus layer used by Litereum to order blocks (pages) in its
+decentralized network, but it is fully independent from it. Like most components
+of Litereum, LitCons's design is extremely minimal. 
+
+A LitCons page is similar to a Bitcoin block header, but it has only 3 fields: a
+256-bit nonce (that can also be used to store extra data), a Keccak-256 hash
+pointing to the previous page, and a 1280-bytes body that can store arbitrary
+data. It is not a header. The page is complete by itself. In Kind, it is
+represented by the following type:
+
+```
+type Lit.Cons.Page {
+  new(
+    body: Vector<U256,40> // block contents (1280 bytes)
+    work: U256            // nonce + extra data (32 bytes)
+    prev: U256            // previous block (32 bytes)
+  )
+}
+```
 
 LitCore
 -------
