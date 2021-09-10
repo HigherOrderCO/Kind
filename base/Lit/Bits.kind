@@ -96,31 +96,31 @@ Lit.Bits.deserialize.list.go<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): P
 Lit.Bits.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): List<A>
   Pair.snd!!(Lit.Bits.deserialize.list.go<A>(item, bits))
 
-Lit.Bits.serialize.post(post: Lit.Cons.Post): Bits
-  open post
+Lit.Bits.serialize.page(page: Lit.Cons.Page): Bits
+  open page
   Bits.flatten([
-    Lit.Bits.serialize.words(40, post.body),
-    Lit.Bits.serialize.uint(256, U256.to_nat(post.work)),
-    Lit.Bits.serialize.uint(256, U256.to_nat(post.prev)),
+    Lit.Bits.serialize.words(40, page.body),
+    Lit.Bits.serialize.uint(256, U256.to_nat(page.work)),
+    Lit.Bits.serialize.uint(256, U256.to_nat(page.prev)),
   ])
 
-Lit.Bits.deserialize.post.go(bits: Bits): Pair<Bits,Lit.Cons.Post>
+Lit.Bits.deserialize.page.go(bits: Bits): Pair<Bits,Lit.Cons.Page>
   let {bits,body} = Lit.Bits.deserialize.words.go(40, bits)
   let {bits,work} = Lit.Bits.deserialize.uint.go(256, bits)
   let {bits,prev} = Lit.Bits.deserialize.uint.go(256, bits)
-  {bits, Lit.Cons.Post.new(body, Nat.to_u256(work), Nat.to_u256(prev))}
+  {bits, Lit.Cons.Page.new(body, Nat.to_u256(work), Nat.to_u256(prev))}
 
-Lit.Bits.deserialize.post(bits: Bits): Lit.Cons.Post
-  Pair.snd!!(Lit.Bits.deserialize.post.go(bits))
+Lit.Bits.deserialize.page(bits: Bits): Lit.Cons.Page
+  Pair.snd!!(Lit.Bits.deserialize.page.go(bits))
 
 Lit.Bits.serialize.message(message: Lit.Cons.Message): Bits
   case message {
     ping: 
       Bits.concat(Lit.Bits.serialize.uint(4,0), Lit.Bits.serialize.list!(Lit.Bits.serialize.address, message.addresses))
-    request_post:
+    request_page:
       Bits.concat(Lit.Bits.serialize.uint(4,1), Lit.Bits.serialize.uint(256, U256.to_nat(message.hash)))
-    share_post:
-      Bits.concat(Lit.Bits.serialize.uint(4,2), Lit.Bits.serialize.post(message.post))
+    share_page:
+      Bits.concat(Lit.Bits.serialize.uint(4,2), Lit.Bits.serialize.page(message.page))
   }
 
 Lit.Bits.deserialize.message.go(bits: Bits): Pair<Bits,Lit.Cons.Message>
@@ -131,10 +131,10 @@ Lit.Bits.deserialize.message.go(bits: Bits): Pair<Bits,Lit.Cons.Message>
       {bits, Lit.Cons.Message.ping(addresses)}
     1: 
       let {bits, hash} = Lit.Bits.deserialize.uint.go(256, bits)
-      {bits, Lit.Cons.Message.request_post(Nat.to_u256(hash))}
+      {bits, Lit.Cons.Message.request_page(Nat.to_u256(hash))}
     2:
-      let {bits, post} = Lit.Bits.deserialize.post.go(bits)
-      {bits, Lit.Cons.Message.share_post(post)}
+      let {bits, page} = Lit.Bits.deserialize.page.go(bits)
+      {bits, Lit.Cons.Message.share_page(page)}
   } default {bits, Lit.Cons.Message.ping([])}
 
 Lit.Bits.deserialize.message(bits: Bits): Lit.Cons.Message

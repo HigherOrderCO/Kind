@@ -1,4 +1,4 @@
-// The body of a Lit.Cons Post can hold up to 8 words
+// The body of a Lit.Cons Page can hold up to 8 words
 Lit.Cons.Body: Type
   Vector<U256,40>
 
@@ -21,8 +21,8 @@ type Lit.Cons.Peer {
 
 type Lit.Cons.Message {
   ping(addresses: List<Lit.Cons.Address>)
-  request_post(hash: Lit.Cons.Hash)
-  share_post(post: Lit.Cons.Post)
+  request_page(hash: Lit.Cons.Hash)
+  share_page(page: Lit.Cons.Page)
 }
 
 // A network message received from a sender
@@ -33,24 +33,24 @@ type Lit.Cons.Received {
   )
 }
 
-// A Lit.Cons post
-type Lit.Cons.Post {
+// A Lit.Cons page
+type Lit.Cons.Page {
   new(
-    body: Lit.Cons.Body // post contents (1280 bytes)
+    body: Lit.Cons.Body // page contents (1280 bytes)
     work: U256          // extra info and nonce (32 bytes)
-    prev: U256          // previous post (32 bytes)
+    prev: U256          // previous page (32 bytes)
   )
 }
 
-// Holds all the posts and aux structures
+// Holds all the pages and aux structures
 type Lit.Cons.Store {
   new(
-    post: Map<Lit.Cons.Post>           // maps PostHash to Post object
-    seen: Map<Unit>                    // set of PostHash that I have downloaded
-    children: Map<List<Lit.Cons.Hash>> // maps PostHash to list of PostHash that link to it
-    pending: Map<List<Lit.Cons.Post>>  // maps PostHash to list of posts waiting it for inclusion
-    score: Map<Lit.Cons.Hash>          // maps PostHash to cached score
-    tip: Pair<U256,Lit.Cons.Hash>      // current tip PostHash
+    page: Map<Lit.Cons.Page>           // maps PageHash to Page object
+    seen: Map<Unit>                    // set of PageHash that I have downloaded
+    children: Map<List<Lit.Cons.Hash>> // maps PageHash to list of PageHash that link to it
+    pending: Map<List<Lit.Cons.Page>>  // maps PageHash to list of pages waiting it for inclusion
+    score: Map<Lit.Cons.Hash>          // maps PageHash to cached score
+    tip: Pair<U256,Lit.Cons.Hash>      // current tip PageHash
   )
 }
 
@@ -66,8 +66,8 @@ type Lit.Cons.Node {
 Lit.Cons.Message.show(message: Lit.Cons.Message): String
   case message {
     ping: "ping(" | String.join(",", List.map!!(Lit.Cons.Address.show, message.addresses)) | ")"
-    share_post: "share_post(" | Lit.Cons.Hash.show(Lit.Cons.Hash.from_post(message.post)) | ")"
-    request_post: "request_post(" | Lit.Cons.Hash.show(message.hash) | ")"
+    share_page: "share_page(" | Lit.Cons.Hash.show(Lit.Cons.Hash.from_page(message.page)) | ")"
+    request_page: "request_page(" | Lit.Cons.Hash.show(message.hash) | ")"
   }
 
 // Takes the Keccak hash of a list of words
@@ -77,13 +77,13 @@ Lit.Cons.Hash.from_words(words: List<U256>): Lit.Cons.Hash
 Lit.Cons.Hash.show(hash: Lit.Cons.Hash): String
   String.pad_left(64, '0', Nat.hex.encode(U256.to_nat(hash)))
 
-// Returns the PostHash
-Lit.Cons.Hash.from_post(post: Lit.Cons.Post): Lit.Cons.Hash
-  use post = post
-  if U256.eql(post.prev, 0) && U256.eql(post.work, 0) then
+// Returns the PageHash
+Lit.Cons.Hash.from_page(page: Lit.Cons.Page): Lit.Cons.Hash
+  use page = page
+  if U256.eql(page.prev, 0) && U256.eql(page.work, 0) then
     0#256
   else
-    let words = Vector.to_list!(40, post.body) ++ [post.work, post.prev]
+    let words = Vector.to_list!(40, page.body) ++ [page.work, page.prev]
     Lit.Cons.Hash.from_words(words)
 
 // Estimates how many attempts were needed to make this hash
@@ -93,90 +93,90 @@ Lit.Cons.Hash.score(hash: U256): U256
   else
     Nat.to_u256(Nat.pow(2,256) / U256.to_nat(hash))
 
-// Increases the Post nonce until it is above target_score
-Lit.Cons.Post.mine(post: Lit.Cons.Post, target_score: U256, attempts: U256): Maybe<Lit.Cons.Post>
-  let post_score = Lit.Cons.Hash.score(Lit.Cons.Hash.from_post(post))
-  //log("Mining. Score: " | U256.hex.encode(Lit.Cons.Hash.from_post(post)) | " " | U256.show(post_score))
+// Increases the Page nonce until it is above target_score
+Lit.Cons.Page.mine(page: Lit.Cons.Page, target_score: U256, attempts: U256): Maybe<Lit.Cons.Page>
+  let page_score = Lit.Cons.Hash.score(Lit.Cons.Hash.from_page(page))
+  //log("Mining. Score: " | U256.hex.encode(Lit.Cons.Hash.from_page(page)) | " " | U256.show(page_score))
   if U256.eql(attempts,0) then
     none
-  else if U256.gte(post_score, target_score) then
-    some(post)
+  else if U256.gte(page_score, target_score) then
+    some(page)
   else
-    Lit.Cons.Post.mine(post@work <- post@work + 1, target_score, attempts - 1)
+    Lit.Cons.Page.mine(page@work <- page@work + 1, target_score, attempts - 1)
 
-// Adds a post to the chain, updating the score, children and tip
+// Adds a page to the chain, updating the score, children and tip
 // If the prev is null, it is added to a pending map and re-added later
-Lit.Cons.Store.add_post(post: Lit.Cons.Post, chain: Lit.Cons.Store): Lit.Cons.Store
-  open post
+Lit.Cons.Store.add_page(page: Lit.Cons.Page, chain: Lit.Cons.Store): Lit.Cons.Store
+  open page
   open chain
   open chain.tip
-  let post_hash = Lit.Cons.Hash.from_post(post)
-  case chain.post{U256.show(post_hash)} as got_post {
-    some: // Post already included: do nothing
+  let page_hash = Lit.Cons.Hash.from_page(page)
+  case chain.page{U256.show(page_hash)} as got_page {
+    some: // Page already included: do nothing
       chain
-    none: // Post not included
-      let prev_hash = post.prev
-      case chain.post{U256.show(prev_hash)} as got_prev {
-        some: // Parent included: add post and compute infos
+    none: // Page not included
+      let prev_hash = page.prev
+      case chain.page{U256.show(prev_hash)} as got_prev {
+        some: // Parent included: add page and compute infos
           let prev_score     = chain.score{U256.show(prev_hash)} abort chain
-          let post_score     = U256.add(prev_score, Lit.Cons.Hash.score(post_hash))
+          let page_score     = U256.add(prev_score, Lit.Cons.Hash.score(page_hash))
           let prev_children  = chain.children{U256.show(prev_hash)} <> []
-          let pendings       = chain.pending{U256.show(post_hash)} <> []
-          let chain.post     = chain.post{U256.show(post_hash)} <- post
-          let chain.seen     = chain.seen{U256.show(post_hash)} <- unit
-          let chain.score    = chain.score{U256.show(post_hash)} <- post_score
-          let chain.children = chain.children{U256.show(prev_hash)} <- post_hash & prev_children
-          let chain.tip      = if post_score >? Pair.fst!!(chain.tip) then {post_score,post_hash} else chain.tip
-          let chain.pending  = Map.delete!(U256.show(post_hash), chain.pending)
-          let chain          = Lit.Cons.Store.new(chain.post, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
-          let chain          = for pending in pendings: Lit.Cons.Store.add_post(pending, chain)
+          let pendings       = chain.pending{U256.show(page_hash)} <> []
+          let chain.page     = chain.page{U256.show(page_hash)} <- page
+          let chain.seen     = chain.seen{U256.show(page_hash)} <- unit
+          let chain.score    = chain.score{U256.show(page_hash)} <- page_score
+          let chain.children = chain.children{U256.show(prev_hash)} <- page_hash & prev_children
+          let chain.tip      = if page_score >? Pair.fst!!(chain.tip) then {page_score,page_hash} else chain.tip
+          let chain.pending  = Map.delete!(U256.show(page_hash), chain.pending)
+          let chain          = Lit.Cons.Store.new(chain.page, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
+          let chain          = for pending in pendings: Lit.Cons.Store.add_page(pending, chain)
           chain
         none: // Parent not included
-          case chain.seen{U256.show(post_hash)} as seen_post {
+          case chain.seen{U256.show(page_hash)} as seen_page {
             some:
-              // Post seen before: do nothing
+              // Page seen before: do nothing
               chain
             none:
-              // Brand new post: add to pending list
-              let pending_list  = post & (chain.pending{U256.show(prev_hash)} <> []) // TODO: avoid adding duplicates
-              let chain.seen    = chain.seen{U256.show(post_hash)} <- unit
+              // Brand new page: add to pending list
+              let pending_list  = page & (chain.pending{U256.show(prev_hash)} <> []) // TODO: avoid adding duplicates
+              let chain.seen    = chain.seen{U256.show(page_hash)} <- unit
               let chain.pending = chain.pending{U256.show(prev_hash)} <- pending_list
-              Lit.Cons.Store.new(chain.post, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
+              Lit.Cons.Store.new(chain.page, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
           }
       }
   }
 
 // The initial chain state
 Lit.Cons.Store.genesis: Lit.Cons.Store
-  let chain.post = {U256.show(0): Lit.Cons.Post.new(Vector.create!(40,()0),0,0)}
+  let chain.page = {U256.show(0): Lit.Cons.Page.new(Vector.create!(40,()0),0,0)}
   let chain.seen = {}
   let chain.score = {U256.show(0): 0#256}
   let chain.pending = {}
   let chain.children = {U256.show(0): []}
   let chain.tip = {0#256, 0#256}
-  Lit.Cons.Store.new(chain.post, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
+  Lit.Cons.Store.new(chain.page, chain.seen, chain.children, chain.pending, chain.score, chain.tip)
 
 // Returns the longest chain, i.e., the one with most accumulated work
-Lit.Cons.Store.longest_chain(chain: Lit.Cons.Store): List<Lit.Cons.Post>
+Lit.Cons.Store.longest_chain(chain: Lit.Cons.Store): List<Lit.Cons.Page>
   open chain
   open chain.tip
-  case chain.post{U256.show(Pair.snd!!(chain.tip))} as tip_post {
+  case chain.page{U256.show(Pair.snd!!(chain.tip))} as tip_page {
     none: []
-    some: Lit.Cons.Store.longest_chain.go(tip_post.value, chain.post, [])
+    some: Lit.Cons.Store.longest_chain.go(tip_page.value, chain.page, [])
   }
 
 Lit.Cons.Store.longest_chain.go(
-  post: Lit.Cons.Post
-  posts: Map<Lit.Cons.Post>
-  result: List<Lit.Cons.Post>
-): List<Lit.Cons.Post>
-  open post
-  let result = List.cons!(post, result)
-  if U256.eql(post.prev, 0) then
+  page: Lit.Cons.Page
+  pages: Map<Lit.Cons.Page>
+  result: List<Lit.Cons.Page>
+): List<Lit.Cons.Page>
+  open page
+  let result = List.cons!(page, result)
+  if U256.eql(page.prev, 0) then
     result
-  else case posts{U256.show(post.prev)} as prev {
+  else case pages{U256.show(page.prev)} as prev {
     none: result
-    some: Lit.Cons.Store.longest_chain.go(prev.value, posts, result)
+    some: Lit.Cons.Store.longest_chain.go(prev.value, pages, result)
   }
 
 // Converts the IP of an address to a string
@@ -281,12 +281,12 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
     get inbox = IO.recv_udp(node@port)
     get node = Lit.Cons.Node.handle_inbox(node, inbox)
 
-    // Attempts to mine a post and adds it if successful
+    // Attempts to mine a page and adds it if successful
     get time = IO.get_time
     let time = Nat.to_u256(time)
     let body = Vector.create!(40, (i) if i =? 39 then time else 0#256)
-    let post = Lit.Cons.Post.new(body, 0, node@store@tip@snd)
-    let node = Lit.Cons.Node.mine(node, post) <> node
+    let page = Lit.Cons.Page.new(body, 0, node@store@tip@snd)
+    let node = Lit.Cons.Node.mine(node, page) <> node
 
     // Pings random neighbors, sending random peers to them
     Lit.Cons.Node.ping(node)
@@ -294,7 +294,7 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
     // Shares our best block with random neighbors
     Lit.Cons.Node.share_tip(node)
 
-    // Requests contents of pending posts
+    // Requests contents of pending pages
     Lit.Cons.Node.request_pendings(node)
 
     // Forgets peers that look inactive
@@ -310,8 +310,8 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
 Lit.Cons.Node.display(node: Lit.Cons.Node): IO<Unit>
   open node
   open node.store
-  let posts = Lit.Cons.Store.longest_chain(node.store)
-  //let posts = Map.values!(node.store.post)
+  let pages = Lit.Cons.Store.longest_chain(node.store)
+  //let pages = Map.values!(node.store.page)
   IO {
     IO.clear
     get time = IO.get_time
@@ -319,32 +319,32 @@ Lit.Cons.Node.display(node: Lit.Cons.Node): IO<Unit>
     IO.print("Time     : " | Nat.show(time))
     IO.print("Peers    : " | Nat.show(List.length!(Map.to_list!(node.peers))))
     IO.print("Pendings : " | Nat.show(List.length!(Map.to_list!(node.store.pending))))
-    let posts_length = List.length!(posts)
-    let posts_indexed = List.index!(posts)
+    let pages_length = List.length!(pages)
+    let pages_indexed = List.index!(pages)
     IO.print("index  | body[0]                                                         | hash                                                             | score") 
-    for index_post in posts_indexed: IO {
-      let {index, post} = index_post
+    for index_page in pages_indexed: IO {
+      let {index, page} = index_page
       let half_count = 6
-      if Nat.between(half_count, index, posts_length - half_count) then
+      if Nat.between(half_count, index, pages_length - half_count) then
         if index =? 4
         then IO.print("(...)")
         else IO.pass
       else IO {
-        open post
-        let post_hash = Lit.Cons.Hash.from_post(post)
-        let score = node.store.score{U256.show(post_hash)} <> 0#256
+        open page
+        let page_hash = Lit.Cons.Hash.from_page(page)
+        let score = node.store.score{U256.show(page_hash)} <> 0#256
         let show_index = Nat.show(index)
-        let show_body = String.hex.decode(Nat.hex.encode(U256.to_nat(Vector.head!!(post.body))))
-        //let show_body = List.show!(U256.show,Vector.to_list!(32,post.body))
-        let show_hash = Lit.Cons.Hash.show(post_hash)
-        //let show_hash = Lit.Cons.Hash.show(post.prev)
+        let show_body = String.hex.decode(Nat.hex.encode(U256.to_nat(Vector.head!!(page.body))))
+        //let show_body = List.show!(U256.show,Vector.to_list!(32,page.body))
+        let show_hash = Lit.Cons.Hash.show(page_hash)
+        //let show_hash = Lit.Cons.Hash.show(page.prev)
         let show_score = U256.show(score)
         IO.print(""
           | String.pad_left_exact(6, '0', show_index) | " | "
           | String.pad_left_exact(64, '0', show_body) | " | "
           | String.pad_left_exact(64, '0', show_hash) | " | "
           | String.pad_left_exact(8, '0', show_score))
-        //IO.print("[" | Nat.show(index) | "] " | Lit.Cons.Hash.show(post_hash) | " -- score: " | U256.show(score))
+        //IO.print("[" | Nat.show(index) | "] " | Lit.Cons.Hash.show(page_hash) | " -- score: " | U256.show(score))
       }
     }
   }
@@ -361,20 +361,20 @@ Lit.Cons.Node.on_message(node: Lit.Cons.Node, received: Lit.Cons.Received): IO<L
         //Lit.Cons.Node.send(node, received.sender, Lit.Cons.Message.pong)
         return node
       }
-      request_post: 
+      request_page: 
         //log("~ received request")
-        case node.store.post{U256.show(received.message.hash)} as got {
+        case node.store.page{U256.show(received.message.hash)} as got {
           none: IO {
             return node
           }
           some: IO {
-            Lit.Cons.Node.send(node, received.sender, Lit.Cons.Message.share_post(got.value))
+            Lit.Cons.Node.send(node, received.sender, Lit.Cons.Message.share_page(got.value))
             return node
           }
         }
-      share_post: IO {
-        //log("~ received post")
-        return Lit.Cons.Node.add_post(node, received.message.post)
+      share_page: IO {
+        //log("~ received page")
+        return Lit.Cons.Node.add_page(node, received.message.page)
       }
     } default IO {
       return node
@@ -391,9 +391,9 @@ Lit.Cons.Node.refresh_peer(node: Lit.Cons.Node, peer: Lit.Cons.Peer): IO<Lit.Con
     return node
   }
 
-Lit.Cons.Node.add_post(node: Lit.Cons.Node, post: Lit.Cons.Post): Lit.Cons.Node
+Lit.Cons.Node.add_page(node: Lit.Cons.Node, page: Lit.Cons.Page): Lit.Cons.Node
   open node
-  node@store <- Lit.Cons.Store.add_post(post, node.store)
+  node@store <- Lit.Cons.Store.add_page(page, node.store)
 
 Lit.Cons.Node.handle_inbox(node: Lit.Cons.Node, inbox: List<IO.recv_udp.Message>): IO<Lit.Cons.Node>
   IO {
@@ -445,8 +445,8 @@ Lit.Cons.Node.share_tip(node: Lit.Cons.Node): IO<Unit>
   open node.store
   IO {
     log("Sharing tip with peers...")
-    let tip_post = node.store.post{U256.show(Pair.snd!!(node.store.tip))} abort IO.pass
-    let message = Lit.Cons.Message.share_post(tip_post)
+    let tip_page = node.store.page{U256.show(Pair.snd!!(node.store.tip))} abort IO.pass
+    let message = Lit.Cons.Message.share_page(tip_page)
     Lit.Cons.Node.broadcast(node, message)
   }
 
@@ -459,21 +459,21 @@ Lit.Cons.Node.request_pendings(node: Lit.Cons.Node): IO<Unit>
     for pending in pendings:
       case node.store.seen{U256.show(pending)} as seen {
         none: 
-          let message = Lit.Cons.Message.request_post(pending)
+          let message = Lit.Cons.Message.request_page(pending)
           Lit.Cons.Node.broadcast(node, message)
         some:
           IO.pass
       }
   }
 
-Lit.Cons.Node.mine(node: Lit.Cons.Node, post: Lit.Cons.Post): Maybe<Lit.Cons.Node>
+Lit.Cons.Node.mine(node: Lit.Cons.Node, page: Lit.Cons.Page): Maybe<Lit.Cons.Node>
   IO {
-    log("Mining post...")
+    log("Mining page...")
     open node
     open node.store
-    let mined_post = Lit.Cons.Post.mine(post, 32, 64)
-    case mined_post {
+    let mined_page = Lit.Cons.Page.mine(page, 32, 64)
+    case mined_page {
       none: log("- Failure.") none
-      some: log("- Success!") some(Lit.Cons.Node.add_post(node, mined_post.value))
+      some: log("- Success!") some(Lit.Cons.Node.add_page(node, mined_page.value))
     }
   }
