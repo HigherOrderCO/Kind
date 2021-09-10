@@ -9,6 +9,7 @@
 // - mais de um usuário ser dono (ownr : List<String>)
 // - conseguir modificar o dono no Lit.Core.Term.bind
 // - revisar e usar a função validate
+// - do blocks (um "with" anonimo, sem assinatura)
 
 // Types
 // -----
