@@ -9,6 +9,7 @@ Crypto.Keccak.hash.word(u256: U256): U256
   let u256 = Buffer8.to_u256(hash.snd)
   u256
 
+// FIXME: output has hex chars in wrong order, investigate
 Crypto.Keccak.hash.words(list: List<U256>): U256
   let buf8 = Buffer8.from_list.256(list)
   use hash = Crypto.Keccak.hash.bytes(buf8)
