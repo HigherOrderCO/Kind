@@ -99,16 +99,16 @@ Lit.Bits.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): List
 Lit.Bits.serialize.page(page: Lit.Cons.Page): Bits
   open page
   Bits.flatten([
-    Lit.Bits.serialize.words(40, page.body),
-    Lit.Bits.serialize.uint(256, U256.to_nat(page.nonc)),
     Lit.Bits.serialize.uint(256, U256.to_nat(page.prev)),
+    Lit.Bits.serialize.uint(256, U256.to_nat(page.nonc)),
+    Lit.Bits.serialize.words(40, page.body),
   ])
 
 Lit.Bits.deserialize.page.go(bits: Bits): Pair<Bits,Lit.Cons.Page>
-  let {bits,body} = Lit.Bits.deserialize.words.go(40, bits)
   let {bits,nonc} = Lit.Bits.deserialize.uint.go(256, bits)
   let {bits,prev} = Lit.Bits.deserialize.uint.go(256, bits)
-  {bits, Lit.Cons.Page.new(body, Nat.to_u256(nonc), Nat.to_u256(prev))}
+  let {bits,body} = Lit.Bits.deserialize.words.go(40, bits)
+  {bits, Lit.Cons.Page.new(Nat.to_u256(prev), Nat.to_u256(nonc), body)}
 
 Lit.Bits.deserialize.page(bits: Bits): Lit.Cons.Page
   Pair.snd!!(Lit.Bits.deserialize.page.go(bits))

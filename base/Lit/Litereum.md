@@ -49,10 +49,9 @@ decentralized network, but it is fully independent from it. Like most components
 of Litereum, LitCons's design is extremely minimal. 
 
 A LitCons page is similar to a Bitcoin block header, but it has only 3 fields: a
-256-bit nonce (that can also be used to store extra data), a Keccak-256 hash
-pointing to the previous page, and a 1280-bytes body that can store arbitrary
-data. It is not a header. The page is complete by itself. In Kind, it is
-represented by the following type:
+Keccak-256 hash pointing to the previous page, a 256-bit nonce (that can also be
+used to store extra data), and a 1280-bytes body that can store arbitrary data.
+In Kind, it is represented by the following type:
 
 ```
 type Lit.Cons.Page {
@@ -63,6 +62,10 @@ type Lit.Cons.Page {
   )
 }
 ```
+
+
+
+
 
 LitCore
 -------
