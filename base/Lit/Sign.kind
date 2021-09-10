@@ -27,18 +27,8 @@ Lit.Sign.Signature: Type
 Lit.Sign.Summary: Type
   Vector<U8, 32>
 
-// The body of a Lit.Sign Post can hold up to 8 words
-Lit.Sign.Body: Type
-  Vector<U256,8>
-
 // Serialization
 // -------------
-
-Lit.Sign.Body.deserializer: Deserializer<Lit.Sign.Body>
-  Vector.deserializer!(8,U256.deserializer)
-
-Lit.Sign.Body.serializer: Serializer<Lit.Sign.Body>
-  Vector.serializer!(8,U256.serializer)
 
 Lit.Sign.Signature.deserializer: Deserializer<Lit.Sign.Signature>
   Vector.deserializer!(32,U256.deserializer)

@@ -16,17 +16,13 @@ Design
 
 Litereum's design is a combination of 3 components:
 
-1. LitSign: a minimal, hash-based signature scheme that can't be broken by quantum
-   computers. It is an adaptation of WOTS signatures.
+1. LitSign: a minimal, quantum-resistant, hash-based signature scheme.
 
-2. LitCons: a minimal, proof-of-work consensus algorithm for peer-to-peer
-   transactions. It is a simplification of Nakamoto Consensus.
+2. LitCons: a minimal, proof-of-work consensus algorithm.
 
-3. LitCore: a minimal, statically-typed language prone to formal
-   verification. It is a stateful calculus based on datatypes and recursion.
+3. LitCore: a minimal, well-typed linear calculus used for scripting. 
 
-Litereum doesn't have a native currency. Instead, it is a truly pure and neutral
-decentralized computer.
+Litereum doesn't have a native currency. (...)
 
 Roadmap
 -------
@@ -35,10 +31,24 @@ Roadmap
 
 That's all: Litereum is final and won't require updates.
 
+LitCore
+-------
+
+TODO
+
 LitSign
 ------
 
-TODO
+LitCons uses a configuration of WOTS for message authentication. To be able to
+sign messages, an user must first generate:
+
+- A private key, that consists of 32 random 256-bit words.
+
+- A public key, that consists of Keccak256^32(w), for each word in the private key.
+
+- A public address, that consists of Keccak256(public_key).
+
+Then, to sign a message, M, the user must (... TODO ...)
 
 LitCons
 -------
@@ -48,29 +58,34 @@ coin". It is the consensus layer used by Litereum to order blocks (pages) in its
 decentralized network, but it is fully independent from it. Like most components
 of Litereum, LitCons's design is extremely minimal. 
 
-A LitCons page is similar to a Bitcoin block header, but it has only 3 fields: a
+A LitCons page is similar to a Bitcoin block, but it has only 4 fields: a
 Keccak-256 hash pointing to the previous page, a 256-bit nonce (that can also be
-used to store extra data), and a 1280-bytes body that can store arbitrary data.
-In Kind, it is represented by the following type:
+used to store extra data), the miner's address, and a 1280-bytes body that can
+store arbitrary data. In Kind, it is represented by the following type:
 
 ```
 type Lit.Cons.Page {
   new(
-    body: Vector<U256,40> // block contents (1280 bytes)
-    work: U256            // nonce + extra data (32 bytes)
-    prev: U256            // previous block (32 bytes)
+    prev: U256            // previous page (32 bytes)
+    user: U256            // miner address or identifier
+    nonc: U256            // nonce + extra data (32 bytes)
+    body: Vector<U256,40> // page contents (1280 bytes)
   )
 }
 ```
 
+Unlike Bitcoin blocks, a LitCons page doesn't hold a set of transactions.
+Instead, it stores an arbitrary blob of 1280 bytes of data. The size was chosen
+to allow a full block to fit in a small UDP packet, allowing for fast
+propagation. There are no "block headers": a page stores all its data. There
+aren't native tokens, nor transaction fees. The incentives to include Litereum
+commands (transactions) in a page are determined by miners and users: fees can
+be paid with any internal token.
 
-
-
-
-LitCore
--------
-
-TODO
+Nakamoto Consensus [BITCOIN_WHITEPAPER] is used to publish, propagate and order
+LitCons pages in a manner such that network participants agree to a single
+canonical list of posts, except a single Keccak-256 is used to take the block
+hash and (TODO: parameters here).
 
 
 

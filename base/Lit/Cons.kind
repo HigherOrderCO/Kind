@@ -36,9 +36,10 @@ type Lit.Cons.Received {
 // A Lit.Cons page
 type Lit.Cons.Page {
   new(
-    prev: U256            // previous block (32 bytes)
+    prev: U256            // previous page (32 bytes)
     nonc: U256            // nonce + extra data (32 bytes)
-    body: Vector<U256,40> // block contents (1280 bytes)
+    user: U256            // miner address or identifier
+    body: Vector<U256,40> // page contents (1280 bytes)
   )
 }
 
@@ -148,7 +149,7 @@ Lit.Cons.Store.add_page(page: Lit.Cons.Page, chain: Lit.Cons.Store): Lit.Cons.St
 
 // The initial chain state
 Lit.Cons.Store.genesis: Lit.Cons.Store
-  let chain.page = {U256.show(0): Lit.Cons.Page.new(0,0,Vector.create!(40,()0))}
+  let chain.page = {U256.show(0): Lit.Cons.Page.new(0,0,0,Vector.create!(40,()0))}
   let chain.seen = {}
   let chain.score = {U256.show(0): 0#256}
   let chain.pending = {}
@@ -285,7 +286,7 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
     get time = IO.get_time
     let time = Nat.to_u256(time)
     let body = Vector.create!(40, (i) if i =? 39 then time else 0#256)
-    let page = Lit.Cons.Page.new( node@store@tip@snd, 0, body)
+    let page = Lit.Cons.Page.new(node@store@tip@snd, 0, 0, body)
     let node = Lit.Cons.Node.mine(node, page) <> node
 
     // Pings random neighbors, sending random peers to them
