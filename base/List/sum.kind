@@ -1,2 +1,17 @@
 List.sum(xs: List<Nat>) : Nat
   List.sum.go(xs, Nat.zero)
+
+List.sum.go(xs: List<Nat>, n: Nat): Nat
+  case xs {
+    nil: n
+    cons: List.sum.go(xs.tail, Nat.add(xs.head, n))
+  }
+
+List.sum.u32(xs: List<U32>): U32
+  List.sum.u32.go(xs, 0#32)
+
+List.sum.u32.go(xs: List<U32>, n: U32): U32
+  case xs {
+    nil: n
+    cons: List.sum.u32.go(xs.tail, U32.add(xs.head, n))
+  }
