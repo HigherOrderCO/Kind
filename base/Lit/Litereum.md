@@ -120,9 +120,9 @@ This signature scheme has 120 bits of classical security, and 80 bits of
 post-quantum security. It has a signature size of 1024 bytes, and requires an
 average of 4096 hashes per signature and verification. This is an one-time
 signature scheme, which means that, once a message is signed with a public key,
-that public key must be discarded. In Litereum, every time an user makes a
-transaction, he generates another private and public key pair, and broadcasts
-the new private key to the network.
+that public key must be thrown away, and a new one must be generated. In
+Litereum, every time an user makes a transaction, he/she broadcasts the new
+public key to the network.
 
 LitCons
 -------
