@@ -10,6 +10,7 @@
 // - conseguir modificar o dono no Lit.Core.Term.bind
 // - revisar e usar a função validate
 // - do blocks (um "with" anonimo, sem assinatura)
+// - consertar parser para ir ate o final do arquivo?
 
 // Types
 // -----
