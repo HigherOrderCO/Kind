@@ -11,6 +11,7 @@
 // - revisar e usar a função validate
 // - do blocks (um "with" anonimo, sem assinatura)
 // - consertar parser para ir ate o final do arquivo?
+// - block difficulty (nakamoto consensus)
 
 // Types
 // -----
