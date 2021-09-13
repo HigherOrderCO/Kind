@@ -1,0 +1,29 @@
+Bytes.test.parse_string.0: TestSuite
+  let test = "0x"
+  let got = Bytes.parse_string(test)
+  let exp = ""
+  let name = "0"
+  TestSuite.show.log_string(name, test, exp, got)
+
+Bytes.test.parse_string.1: TestSuite
+  let test = "0x30313233343536373839"
+  let got = Bytes.parse_string(test)
+  let exp = "0123456789"
+  let name = "1"
+  TestSuite.show.log_string(name, test, exp, got)
+
+Bytes.test.parse_string.2: TestSuite
+  let test = "0xc2a2"
+  let got = Bytes.parse_string(test)
+  let exp = "¢"
+  let name = "2"
+  TestSuite.show.log_string(name, test, exp, got)
+
+Bytes.test.parse_string: TestSuite
+  TestSuite.many("parse_string", [
+    Bytes.test.parse_string.0
+    Bytes.test.parse_string.1
+    Bytes.test.parse_string.2
+    // Bytes.test.parse_string.3
+    // Bytes.test.parse_string.4
+  ])

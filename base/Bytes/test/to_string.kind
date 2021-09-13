@@ -5,12 +5,12 @@ Bytes.test.to_string.0: TestSuite
   let name = "0"
   TestSuite.show.log_string(name, test, exp, got)
 
-// Bytes.test.to_string.1: TestSuite
-//   let test = "0x";
-//   let got = Bytes.to_string(test)
-//   let exp = ""
-//   let name = "1"
-//   TestSuite.show.log_string(name, test, exp, got)
+Bytes.test.to_string.1: TestSuite
+  let test = "0x";
+  let got = Bytes.to_string(test)
+  let exp = ""
+  let name = "1"
+  TestSuite.show.log_string(name, test, exp, got)
 
 // Bytes.test.to_string.2: TestSuite
 //   let test = "0x30313233343536373839"
@@ -46,7 +46,7 @@ Bytes.test.to_string.0: TestSuite
 Bytes.test.to_string: TestSuite
   TestSuite.many("to_string", [
     Bytes.test.to_string.0
-    // Bytes.test.to_string.1
+    Bytes.test.to_string.1
     // Bytes.test.to_string.2
     // Bytes.test.to_string.3
     // Bytes.test.to_string.4
