@@ -5,11 +5,11 @@ In 2013, the first decentralized computer, Ethereum, was proposed, extending
 Bitcoin with a stateful scripting language that allowed arbitrary transactions
 to be settled without third parties. Due to its experimental nature, Ethereum
 grew incresingly complex, leading to security issues and an asymmetry of power
-between developers and users. Litereum is a massive simplification and clean-up
-of the concept, which trades scalability and cutting-edge features for sheer
-simplicity and code qualited. Designed to be final and never require updates,
-Litereum eliminates the core developer class, giving birth to a minimal
-decentralized computer that is inherently secure and truly apolitical.
+between developers and users. Litereum is a massive simplification of the
+concept, which trades scalability and cutting-edge features for sheer simplicity
+and code quality. Designed to be final and never require updates, Litereum
+eliminates the core developer class, giving birth to a minimal decentralized
+computer that is inherently secure and truly apolitical.
 
 Design
 ------
