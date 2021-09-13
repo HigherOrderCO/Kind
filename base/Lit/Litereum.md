@@ -36,10 +36,10 @@ LitSign
 -------
 
 LitCons uses a configuration of WOTS for message authentication, based on the
-Keccak256 function. To be able to sign messages, an user must first generate
-a random 256-bit word as its seed. From this seed, the user can generate
-private keys by concatenating `keccak(seed | n | i)` for each natural number `i`
-up to `32` (exclusive), where `n` is the number of the private key. That is:
+Keccak256 function. To be able to sign messages, an user must first generate a
+random 256-bit word as its seed. From this seed, the user can generate private
+keys by concatenating and hashing `keccak(seed | n | i)` for each natural number
+`i` up to `32` (exclusive), where `n` is the number of the private key. That is:
 
 ```
 function private_key(seed, n):
