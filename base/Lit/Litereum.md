@@ -30,7 +30,70 @@ of these components will be specified below.
 LitCore
 -------
 
-TODO
+// TODO this needs to be more concise, less examples and instead use the implementations?
+
+LitCore is the underlying computation model of the network. It aims to be simple, turing-complete and have predictable performance. The interface is composed of 4 primitive operations. The first primitive is a datatype definitions, for example:
+
+```
+type Bool {
+  true
+  false
+}
+```
+
+Defines a type with two constructors, namely `Bool/true` and `Bool/false`. Another example
+
+```
+type Pair.Bool {
+  new{
+    left: Bool
+    right: Bool
+  }
+}
+```
+
+Defines a type with a single constructor that carries two bools. For example `Pair.Bool/new(Bool/true, Bool/false)`. It's also possible to define a type with any number of constructors such that each of them carry any number of values
+
+```
+type List.Bool {
+  nil
+  cons{
+    head: Bool
+    tail: List.Bool
+  }
+}
+```
+
+However more advanced type-level features like polymorphic types and dependent types aren't included, this is to guarantee that the cost of typechecking a program is linear on its length.
+
+The second primitive is a function declaration,
+
+```
+// TODO is this parenthesis really needed?
+Binary.nine(): Bool
+  List.Bool/cons(Bool/true,
+  List.Bool/cons(Bool/true,
+  List.Bool/cons(Bool/false,
+  List.Bool/cons(Bool/true,
+  List.Bool/nil))))
+
+Bool.identity(x: Bool): Bool
+  x
+
+not(x: Bool): Bool
+  case x : Bool {
+    true:
+      Bool/false
+    false:
+      Bool/true
+  }
+```
+
+The body of a function is a term. A term may be:
+
+- a concrete value as in the body of `Binary.nine`.
+- a variable, as in the body of `Bool.identity`.
+- 
 
 LitSign
 -------

@@ -12,6 +12,8 @@
 // - do blocks (um "with" anonimo, sem assinatura)
 // - consertar parser para ir ate o final do arquivo?
 // - block difficulty (nakamoto consensus)
+// - owned types/constructors?
+// - use railroad diagrams for syntax
 
 // Types
 // -----
@@ -187,8 +189,6 @@ Lit.Core.World.check.term(
         else
           false
     }
-    match:
-      let expr_type = Lit.Core.World.get_type(term.type,world) abort false
       case expr_type {
         adt:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
