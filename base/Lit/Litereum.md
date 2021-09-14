@@ -36,10 +36,10 @@ LitSign
 -------
 
 LitCons uses a configuration of WOTS for message authentication, based on the
-Keccak256 function. To be able to sign messages, an user must first generate
-a random 256-bit word as its seed. From this seed, the user can generate
-private keys by concatenating `keccak(seed | n | i)` for each natural number `i`
-up to `32`, where `n` is the number of the private key. That is:
+Keccak256 function. To be able to sign messages, an user must first generate a
+random 256-bit word as its seed. From this seed, the user can generate private
+keys by concatenating and hashing `keccak(seed | n | i)` for each natural number
+`i` up to `32` (exclusive), where `n` is the number of the private key. That is:
 
 ```
 function private_key(seed, n):
@@ -63,11 +63,10 @@ function public_key(private_key):
   return keccak(public_key)
 ```
 
-The user must then broadcast his public_key as his public identifier, and keep
-his private key secret. The public key doesn't need to be published. To sign a
-message, `M`, the user must first generate a `256-bit Summary` of `M`. That
-summary consists of the last `30 bytes` of the Keccak of the message, prefixed
-with the sum of these bytes. That is:
+The user must then broadcast his public key as his public identifier, and keep
+his private key secret. To sign a message `M` the user must first generate a
+256-bit summary of `M`. That summary consists of the last 30 bytes of the
+Keccak of the message, prefixed with the sum of these bytes. That is:
 
 ```
 function summary(message):
@@ -78,7 +77,7 @@ function summary(message):
   return summary
 ```
 
-Then, for each natural number `i`, up to `32` (exclusive), the signer must take
+Then, for each natural number `i`, up to `32`, the signer must take
 `256 - summary[i]` consecutive hashes of `private_key[i]`. The concatenation of
 these 32 hashes is the 1024-bytes signature. That is:
 
@@ -121,7 +120,7 @@ post-quantum security. It has a signature size of 1024 bytes, and requires an
 average of 4096 hashes per signature and verification. This is an one-time
 signature scheme, which means that, once a message is signed with a public key,
 that public key must be thrown away, and a new one must be generated. In
-Litereum, every time an user makes a transaction, he/she broadcasts the new
+Litereum, every time an user makes a transaction, they broadcasts the new
 public key to the network.
 
 LitCons
