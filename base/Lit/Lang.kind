@@ -43,8 +43,8 @@ Lit.Lang.show.type(type: Lit.Core.Type, world: Lit.Core.World): String
 Lit.Lang.show.func(func: Lit.Core.Func, world: Lit.Core.World): String
   open func
   case func.ownr {
-    none: ""
-    some: func.ownr.value | "@"
+    nil: ""
+    cons: List.show!(Function.id!, func.ownr)  | "@"
   }
   | func.name
   | " ( "
@@ -196,10 +196,14 @@ Lit.Lang.parser.user(world: Lit.Core.World): Parser<Lit.Core.User>
 Lit.Lang.parser.func(world: Lit.Core.World): Parser<Lit.Core.Func>
   Parser {
     get ownr = Parser.maybe!(Parser {
-      get name = Lit.Lang.parser.name
-      Lit.Lang.parser.text("@")
-      return name
+      get names = Parser.until!(Lit.Lang.parser.text("@"), Parser {
+        get names = Lit.Lang.parser.name
+        Parser.maybe!(Kind.Parser.text(","))
+        return names
+      })
+      return names
     })
+    let ownr = ownr <> []
     get name = Lit.Lang.parser.name
     get args = Parser.wrap!(
       Lit.Lang.parser.text("("),

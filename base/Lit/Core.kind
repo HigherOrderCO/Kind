@@ -6,7 +6,7 @@
 // - check do call.cont
 // - Lit.Core.Term.get_caller
 // - tipo "Bits" nativo no bloco genesis
-// - mais de um usuário ser dono (ownr : List<String>)
+// - mais de um usuário ser dono (ownr : List<String>) DONE
 // - conseguir modificar o dono no Lit.Core.Term.bind
 // - revisar e usar a função validate
 // - do blocks (um "with" anonimo, sem assinatura)
@@ -86,7 +86,7 @@ type Lit.Core.User {
 type Lit.Core.Func {
   new(
     name: String
-    ownr: Maybe<String>
+    ownr: List<String>
     main: Lit.Core.Term
     iarg: List<String>
     ityp: List<String>
@@ -340,7 +340,7 @@ Lit.Core.World.run.line(
       }
     new_func:
       use func = line.value
-      log("- new_func: " | func.name)
+      log("- new_func: " | func.name | List.show!(Function.id!, func.ownr))
       case world{func.name} as got {
         none:
           let new_world = world{func.name} <- Lit.Core.Entry.func(func)
@@ -507,18 +507,29 @@ Lit.Core: _
           Nat/succ{pred: Nat/succ{pred: rest}}
       }
 
+    Nat.pred(x: Nat): Nat
+      case x : Nat {
+        zero: Nat/zero
+        succ: x.pred
+      }
+
     with MrDog {
       call n = double(Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}})
       call b = not(Bool/true)
       NatBool/new{x: n, y: b}
     } signed { 0123abcd }
 
-    Count @ COUNT(): Nat
+    Count.dec, Count.inc @ COUNT(): Nat
       Nat/zero
 
     Count.inc(): Unit
       call count = COUNT()
       bind COUNT = Nat/succ{pred: count}
+      Unit/new
+
+    Count.dec(): Unit
+      call count = COUNT()
+      bind COUNT = Nat.pred(count)
       Unit/new
 
     with MrDog {
