@@ -1,0 +1,35 @@
+List.neighbours(ls : List<U16>) : List<Pair<U16, List<U16>>> 
+  case ls {
+    nil : []
+    cons : 
+      let items = List.take_while!((x) x =? 61, ls.tail)
+      {ls.head, items} & List.neighbours(ls.tail)
+  }
+
+Ether.Base.X64.decode(blocks :  List<U16>) : Bits
+  let bits = Bits.e
+  let blocks = List.chunks_of!(3, List.reverse!(blocks))
+  for i in blocks with bits :
+    let acc = List.filter!((x) not(x =? 61), i)
+    let block_bits = Bits.e
+      for j in acc with block_bits :
+        def r = BBT.lookup!!(U16.cmp, j, Ether.Base.X64.table.decode) <> 0
+        block_bits = Bits.concat(Nat.to_bits(r), block_bits)
+     //   log(U16.show(j) | " " | Bits.show(Bits.e))
+        block_bits
+    def size = Ether.Bits.get_bytes_size(block_bits)
+    def dif = List.length!(i) - List.length!(acc)
+    //log(Bits.show(block_bits))
+    bits = Bits.concat(bits, Bits.drop(dif*(2*size), block_bits))
+  // def r = BBT.lookup!!(U16.cmp, i, Ether.Base.X64.table.decode) <> 0
+    bits
+  
+  //  def r = BBT.lookup!!(U16.cmp, i, Ether.Base.X64.table.decode) <> 0
+    //log(U16.show(i))
+    //log(Maybe.show!(Nat.show, BBT.lookup!!(U16.cmp, i, Ether.Base.X64.table.decode)))
+    //bits = if (i =? 61) then
+      //       bits
+        //    else
+          //   Bits.concat(Bits.pad_left(3, false, Nat.to_bits(r)), bits)
+   // bits
+  bits

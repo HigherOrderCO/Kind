@@ -1,3 +1,10 @@
 Ether.Base.X64.table : List<U16>
      String.fold("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", 
        _, [], List.cons!)
+
+Ether.Base.X64.table.decode : BBT<U16, Nat>
+ let indexes = {0, BBT.tip(U16, Nat)}
+ for i in Ether.Base.X64.table with indexes :
+   let {j, map} = indexes
+   {j+1, BBT.insert!!(U16.cmp, i, j, map)}
+ Pair.snd!!(indexes)
