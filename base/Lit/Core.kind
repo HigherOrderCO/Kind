@@ -189,13 +189,6 @@ Lit.Core.World.check.term(
         else
           false
     }
-      case expr_type {
-        adt:
-          let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
-          let cses = List.mapped!(term.cses)!((x) x@snd)
-          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.forms, term.name, ctx, world)
-          expr && cses
-      }
     call:
       use func = Lit.Core.World.get_func(term.func,world) abort false
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
@@ -209,7 +202,9 @@ Lit.Core.World.check.term(
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
       let nofn = List.is_empty!(func.iarg)
       let main = Lit.Core.World.check.term(term.main, otyp, ctx, world)
-      nofn && main
+      // TODO: check cont
+      //let cont = Lit.Core.World.check.term(term.cont, otyp, ctx2, world)
+      nofn && main// && cont
   } default false
 
 Lit.Core.World.check.many(
@@ -466,6 +461,10 @@ Lit.Core: _
 
   let world = {}
 
+//  let code = `
+//type Unit {
+//  new
+//}`
   let code = `
     user MrDog {
       0123456789abcdef
