@@ -30,70 +30,114 @@ of these components will be specified below.
 LitCore
 -------
 
-// TODO this needs to be more concise, less examples and instead use the implementations?
 
-LitCore is the underlying computation model of the network. It aims to be simple, turing-complete and have predictable performance. The interface is composed of 4 primitive operations. The first primitive is a datatype definitions, for example:
+LitCore is the underlying computation model of the network. It can be described
+as a minimal functional language featuring linear functions, algebraic
+datatypes, pattern-matching and a mutable global state. This language is split
+in two parts: terms and commands.
+
+Unlike most blockchain platforms, Litereum isn't a crypto-currency. Instead, it
+is a pure computation network. One can see it as a global Haskell REPL. Instead
+of blocks, Litereum has `Page`s, which is like a file in a programming language.
+Instead of transactions, Litereum has `Command`s, which are like statements in a
+programming language. And instead of stack-based opcodes, Litereum has `Term`s,
+which are like pure expressions that compute and return values.
+
+### Page (block)
+
+A Litereum Page is just a list of commands. It is equivalent to a block in a
+crypto-currency, but, instead of storing transactions, it stores a list of
+commands. When a page is mined, these commands will execute in order, each one
+altering the network state.
+
+### Command (transaction)
+
+Instead of monetary transactions, a Litereum page (block) has a list of
+commands. A command executes a single action that alters the blockchain state in
+a specific way. Unlike transactions in other networks, commands don't require a
+monetary transfer ("amount/to"), a fee ("gasPrice", "gasLimit", etc.), and not
+even a signature (they can be anonymous). This is efficient, as it allows
+certain transactions to avoid lengthly signatures: for example, there is no need
+for a signature to create a new type, or a new function (contract). Users can
+still emulate conventional transactions by making a signed command that pays
+money and fees in specific tokens. There are 4 variants of commands:
+
+1. `new_type`
+
+The `new_type` command performs a global type declaration, defining a new
+algebraic datatype that will then be available to be used in functions and other
+commands. It has one argument: the type to be created.
+
+A Litereum Type specifies a simply-typed, linear, possibly recursive algebraic
+datatype. It has a name, and a number of forms. A Form represents a single
+constructor of an algebraic datatype. It has a name, and a number of fields. A
+field represents a value stored inside a constructor. It has a name and a type
+(represented by its name). In code:
 
 ```
-type Bool {
-  true
-  false
+record Lit.Core.Type {
+  name: String
+  forms: List<Lit.Core.Type.Form>
+}
+
+record Lit.Core.Type.Form {
+  name: String
+  fields: List<Lit.Core.Type.Field>
+}
+
+record Lit.Core.Type.Field {
+  name: String
+  type: String
 }
 ```
 
-Defines a type with two constructors, namely `Bool/true` and `Bool/false`. Another example
+2. `new_func`
 
-```
-type Pair.Bool {
-  new{
-    left: Bool
-    right: Bool
-  }
-}
-```
+The `new_func` command creates a new global function that is then available to
+be used in other functions or inside blocks. It has one argument: the function
+to be created.  
 
-Defines a type with a single constructor that carries two bools. For example `Pair.Bool/new(Bool/true, Bool/false)`. It's also possible to define a type with any number of constructors such that each of them carry any number of values
+A Litereum `Func` is a record with 6 fields: a `name`, ... <TODO>
 
-```
-type List.Bool {
-  nil
-  cons{
-    head: Bool
-    tail: List.Bool
-  }
-}
-```
+3. `new_user`
 
-However more advanced type-level features like polymorphic types and dependent types aren't included, this is to guarantee that the cost of typechecking a program is linear on its length.
+<TODO: creates a new user>
 
-The second primitive is a function declaration,
+4. `ext_exec`
 
-```
-// TODO is this parenthesis really needed?
-Binary.nine(): Bool
-  List.Bool/cons(Bool/true,
-  List.Bool/cons(Bool/true,
-  List.Bool/cons(Bool/false,
-  List.Bool/cons(Bool/true,
-  List.Bool/nil))))
+<TODO: performs an inline call, possibly signed>
 
-Bool.identity(x: Bool): Bool
-  x
+### Term
 
-not(x: Bool): Bool
-  case x : Bool {
-    true:
-      Bool/false
-    false:
-      Bool/true
-  }
-```
+A Litereum term is an expression that performs a computation and returns a
+value. There are 5 variants:
 
-The body of a function is a term. A term may be:
+1. `create`
 
-- a concrete value as in the body of `Binary.nine`.
-- a variable, as in the body of `Bool.identity`.
-- 
+Represents the instantiation, or allocation, of an algebraic datatype
+constructor. The `create` variant receives 3 arguments:
+
+- `type : String`: stores the name of the type to be created.
+
+- `form : Nat`: stores the index of the form, or variant, to be created.
+
+- <TODO>
+
+2. `match`
+
+<TODO>
+
+3. `call`
+
+<TODO>
+
+4. `bind`
+
+<TODO>
+
+5. `var`
+
+<TODO>
 
 LitSign
 -------
