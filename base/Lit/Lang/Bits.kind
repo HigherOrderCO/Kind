@@ -1,0 +1,44 @@
+Lit.Lang.Bits: String
+
+`
+type Bits { 
+  e
+  o{pred: Bits}
+  i{pred: Bits}
+}
+
+
+Bits.inc(a: Bits): Bits
+  case a : Bits { 
+    e: Bits/i{pred: Bits/e}
+    o: Bits/i{pred: a.pred}
+    i:
+      call inc = Bits.inc(a.pred)
+      Bits/o{pred: inc}
+  }
+
+
+Bits.add(a: Bits, b: Bits): Bits
+  case b : Bits { 
+    e: a
+    o: case a : Bits { 
+      e: b
+      o: 
+        call rec = Bits.add(a.pred, b.pred)
+        Bits/o{pred: rec}
+      i:
+        call rec = Bits.add(a.pred, b.pred)
+        Bits/i{pred: rec}
+    }
+    i: case a : Bits { 
+      e: b
+      o:
+        call rec = Bits.add(a.pred, b.pred)
+        Bits/i{pred: rec}
+      i:
+        call inc = Bits.inc(a.pred)
+        call rec = Bits.add(inc, b.pred)
+        Bits/o{pred: rec}
+    }
+  }
+`
