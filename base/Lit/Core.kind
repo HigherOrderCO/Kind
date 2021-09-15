@@ -196,6 +196,15 @@ Lit.Core.World.check.term(
       let args = Lit.Core.World.check.many(term.args, func.ityp, ctx, world)
       let cont = Lit.Core.World.check.term(term.cont, otyp, ctx2, world)
       args && cont
+    match:
+      let expr_type = Lit.Core.World.get_type(term.type,world) abort false
+      case expr_type {
+        adt:
+          let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
+          let cses = List.mapped!(term.cses)!((x) x@snd)
+          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.forms, term.name, ctx, world)
+          expr && cses
+      }
     bind:
       // TODO: check access
       use func = Lit.Core.World.get_func(term.name,world) abort false
@@ -490,54 +499,54 @@ Lit.Core: _
         y: Bool
       }
     }
-
-    not(x: Bool): Bool
-      case x : Bool {
-        true: Bool/false
-        false: Bool/true
-      }
-
-    double(x: Nat): Nat
-      case x : Nat {
-        zero:
-          Nat/zero
-        succ:
-          call rest = double(x.pred)
-          Nat/succ{pred: Nat/succ{pred: rest}}
-      }
-
-    Nat.pred(x: Nat): Nat
-      case x : Nat {
-        zero: Nat/zero
-        succ: x.pred
-      }
-
-    with MrDog {
-      call n = double(Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}})
-      call b = not(Bool/true)
-      NatBool/new{x: n, y: b}
-    } signed { 0123abcd }
-
-    Count.dec, Count.inc @ COUNT(): Nat
-      Nat/zero
-
-    Count.inc(): Unit
-      call count = COUNT()
-      bind COUNT = Nat/succ{pred: count}
-      Unit/new
-
-    Count.dec(): Unit
-      call count = COUNT()
-      bind COUNT = Nat.pred(count)
-      Unit/new
-
-    with MrDog {
-      call x = Count.inc()
-      call x = Count.inc()
-      call x = Count.inc()
-      call x = COUNT()
-      x
-    } signed { 0123abcd }
+//
+//    not(x: Bool): Bool
+//      case x : Bool {
+//        true: Bool/false
+//        false: Bool/true
+//      }
+//
+//    double(x: Nat): Nat
+//      case x : Nat {
+//        zero:
+//          Nat/zero
+//        succ:
+//          call rest = double(x.pred)
+//          Nat/succ{pred: Nat/succ{pred: rest}}
+//      }
+//
+//    Nat.pred(x: Nat): Nat
+//      case x : Nat {
+//        zero: Nat/zero
+//        succ: x.pred
+//      }
+//
+//    with MrDog {
+//      call n = double(Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}})
+//      call b = not(Bool/true)
+//      NatBool/new{x: n, y: b}
+//    } signed { 0123abcd }
+//
+//    Count.dec, Count.inc @ COUNT(): Nat
+//      Nat/zero
+//
+//    Count.inc(): Unit
+//      call count = COUNT()
+//      bind COUNT = Nat/succ{pred: count}
+//      Unit/new
+//
+//    Count.dec(): Unit
+//      call count = COUNT()
+//      bind COUNT = Nat.pred(count)
+//      Unit/new
+//
+//    with MrDog {
+//      call x = Count.inc()
+//      call x = Count.inc()
+//      call x = Count.inc()
+//      call x = COUNT()
+//      x
+//    } signed { 0123abcd }
   `
 
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
