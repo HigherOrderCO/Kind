@@ -391,16 +391,18 @@ Lit.Core.World.run.term(
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
-  //log("- run " | Lit.Lang.show.term(term,world))
-  //log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars))))
+  //log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
+  //log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
   //log("")
   case term {
     var: 
+      //log("var") // DEBUG
       case vars{term.name} as got {
         none: {term, world}
         some: Lit.Core.World.run.term(got.value, self, world, vars)
       }
     match: Maybe {
+      //log("match") // DEBUG
       let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
       case expr {
         create: case term.cses[expr.form] as selected_case {
@@ -414,9 +416,12 @@ Lit.Core.World.run.term(
       } default {term,world}
     }
     create:
+      //log("create") // DEBUG
       let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
       {Lit.Core.Term.create(term.type, term.form, vals), world}
-    call: case world{term.func} as got {
+    call:
+      //log("call") // DEBUG
+      case world{term.func} as got {
       none:
         {term, world}
       some: case got.value as entry {
@@ -425,6 +430,7 @@ Lit.Core.World.run.term(
           let main_vars = vars
           let state = {main_vars, world}
           let state = for arg in List.zip!!(func.iarg, term.args):
+            let {main_vars, world} = state
             let {arg_name, arg_term} = arg
             let {arg_term, world} = Lit.Core.World.run.term(arg_term, self, world, main_vars)
             let main_vars = main_vars{arg_name} <- arg_term
@@ -435,7 +441,9 @@ Lit.Core.World.run.term(
           Lit.Core.World.run.term(term.cont, self, world, vars)
       } default {term,world}
     }
-    bind: case world{term.name} as got {
+    bind:
+      //log("bind") // DEBUG
+      case world{term.name} as got {
       none:
         {term, world}
       some: case got.value as entry {
@@ -465,40 +473,44 @@ Lit.Core.World.run.terms(
 
 // Tests
 // -----
-
 Lit.Core: _
-
   let world = {}
+  let code = Lit.Lang.Bits|`
+user MrDog {
+  01234
+}
 
+with MrDog {
+  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
+  ret
+} signed {
+  confia
+}`
 //  let code = `
-//type Unit {
-//  new
-//}`
-  let code = `
-    user MrDog {
-      0123456789abcdef
-    }
-
-    type Unit {
-      new
-    }
-
-    type Bool {
-      true
-      false
-    }
-
-    type Nat {
-      zero
-      succ{pred: Nat}
-    }
-
-    type NatBool {
-      new{
-        x: Nat
-        y: Bool
-      }
-    }
+//    user MrDog {
+//      0123456789abcdef
+//    }
+//
+//    type Unit {
+//      new
+//    }
+//
+//    type Bool {
+//      true
+//      false
+//    }
+//
+//    type Nat {
+//      zero
+//      succ{pred: Nat}
+//    }
+//
+//    type NatBool {
+//      new{
+//        x: Nat
+//        y: Bool
+//      }
+//    }
 //
 //    not(x: Bool): Bool
 //      case x : Bool {
@@ -536,18 +548,16 @@ Lit.Core: _
 //      Unit/new
 //
 //    Count.dec(): Unit
-//      call count = COUNT()
-//      bind COUNT = Nat.pred(count)
 //      Unit/new
 //
-//    with MrDog {
-//      call x = Count.inc()
-//      call x = Count.inc()
-//      call x = Count.inc()
-//      call x = COUNT()
-//      x
-//    } signed { 0123abcd }
-  `
+////    with MrDog {
+////      call x = Count.inc()
+////      call x = Count.inc()
+////      call x = Count.inc()
+////      call x = COUNT()
+////      x
+////    } signed { 0123abcd }
+//  `
 
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
 
