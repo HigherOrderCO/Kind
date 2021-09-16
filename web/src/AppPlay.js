@@ -229,7 +229,7 @@ module.exports = class AppPlay extends Component {
         this.app_global_posts[key] = [];
       }
       this.app_global_posts[key].push(post);
-      //console.log("New post at " + post.time + "; local tick is " + window.KindEvents.get_tick() + "; delay is " + (Date.now() - window.KindEvents.get_time()));
+      // console.log("New post at " + this.show_tick(post.tick));
       if (!this.app_global_begin || post.tick < this.app_global_begin) {
         this.app_global_begin = post.tick;
         this.app_global_states = null;
@@ -241,8 +241,13 @@ module.exports = class AppPlay extends Component {
     }
   }
 
+  show_tick(tick){
+    return (new Date(tick * 62.5)).toUTCString();
+  }
+
   // Computes the global state at given tick (rollback netcode)
   register_tick(tick) {
+    var restored = false;
     if (this.app && this.app_global_begin !== null) {
       // If the tick is older than the current state, rollback
       if (this.app_global_tick !== null && tick < this.app_global_tick) {
@@ -254,7 +259,7 @@ module.exports = class AppPlay extends Component {
           this.app_state.global = this.app.init.global;
         // Otherwise, restore found state
         } else {
-          //console.log("- RESTORE TO " + latest.tick);
+          restored = true;
           this.app_global_tick = latest.tick;
           this.app_state.global = latest.state;
         }
@@ -275,31 +280,77 @@ module.exports = class AppPlay extends Component {
         this.display += "UpTo : " + to_date.toUTCString().slice(5) + "\n";
         this.forceUpdate();
       }
-      var compute_from_tick = this.app_global_tick; 
-      var compute_to_tick = Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
-      for (var t = compute_from_tick; t < compute_to_tick; ++t) {
-        //++count_ticks;
-        var posts = this.app_global_posts[String(t)];
-        var state = this.app_state.global;
-        if (posts) {
-          for (var i = 0; i < posts.length; ++i) {
-            var post = posts[i];
-            state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
-            //++count_posts;
+
+      // amount of ticks done after one post
+      var tick_limit = 16 * 64;
+      if (restored) {
+        // posts between latest state and actual tick
+        var post_ticks = [];
+        // post before latest state
+        // used to redo ticks between latest and first restored post
+        var immediately_before = undefined;
+        for (let key in this.app_global_posts) {
+          let n_key = Number(key)
+          // finding which posts restore
+          if (n_key > this.app_global_tick) post_ticks.push(n_key);
+          else
+            // find post immediately before latest state
+            if (n_key > immediately_before || immediately_before === undefined)
+              immediately_before = n_key;
+        }
+        // order posts
+        post_ticks.sort();
+
+        // do ticks between latest state and first post restored
+        if (immediately_before) {
+          var compute_from_tick = this.app_global_tick;
+          var compute_to_tick   = Math.min(this.app_global_tick 
+            + (tick_limit - (this.app_global_tick - immediately_before)), post_ticks[0]);
+          for (var t = compute_from_tick; t < compute_to_tick; ++t) {
+            this.execute(t);
           }
         }
-        if (this.app_has_ticker) {
-          state = this.app.tick(BigInt(t))(state);
+
+        // restore posts and their ticks between latest state and actual tick
+        for (var j = 0; j < post_ticks.length - 1 ; j++) {
+          var until = Math.min(post_ticks[j + 1] - post_ticks[j], tick_limit);
+          var compute_from_tick = post_ticks[j];
+          var compute_to_tick = compute_from_tick + until;
+          for (var t = compute_from_tick; t < compute_to_tick; ++t) {
+            this.execute(t);
+          }
         }
-        this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
-        this.app_state.global = state;
-      };
+      } else {
+        var compute_from_tick = this.app_global_tick; 
+        var compute_to_tick = Math.min(compute_from_tick + tick_limit, tick); // pauses after 16*64 ticks of no posts
+        for (var t = compute_from_tick; t < compute_to_tick; ++t) {
+          //++count_ticks;
+          this.execute(t);
+        };
+      }
       this.display = null;
       this.app_global_tick = tick;
       //if (this.app_global_tick > (Date.now() - 1000) / 62.5) {
         //console.log("At " + tick + "("+(compute_to_tick-compute_from_tick)+" computed)");
       //}
     }
+  }
+
+  // receives a timestamp and execute its posts and tick
+  execute(t) {
+    var posts = this.app_global_posts[String(t)];
+    var state = this.app_state.global;
+    if (posts) {
+      for (var i = 0; i < posts.length; ++i) {
+        var post = posts[i];
+        state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
+      }
+    }
+    if (this.app_has_ticker) {
+      state = this.app.tick(BigInt(t))(state);
+    }
+    this.app_global_states = StateList.push({tick: t+1, state}, this.app_global_states);
+    this.app_state.global = state;
   }
 
   // Resets the state and recomputes all posts
@@ -329,7 +380,7 @@ module.exports = class AppPlay extends Component {
         }
         break;
       case "IO.ask":
-        console.log("IO.ask", io);
+        // console.log("IO.ask", io);
         return new Promise((res, err) => {
           switch (io.query) {
             case "print":
@@ -373,7 +424,7 @@ module.exports = class AppPlay extends Component {
                 window.KindEvents.unwatch_room(io.param);
                 this.recompute_posts();
               } else {
-                console.log("Error: invalid input on App.Action.unwatch");
+                // console.log("Error: invalid input on App.Action.unwatch");
               }
               return this.run_io(io.then("")).then(res).catch(err);
             case "watch":
@@ -389,7 +440,7 @@ module.exports = class AppPlay extends Component {
                   //this.register_event({ _: "App.Event.post", time, room, addr : addr, data });
                 });
               } else {
-                console.log("Error: invalid input on App.Action.watch");
+                // console.log("Error: invalid input on App.Action.watch");
               }
               return this.run_io(io.then("")).then(res).catch(err);
             case "post":
@@ -397,7 +448,7 @@ module.exports = class AppPlay extends Component {
               if (utils.is_valid_hex(64, room) && utils.is_valid_hex(null, data)) {
                 window.KindEvents.send_post(room, data);
               } else {
-                console.log("Error: invalid input on App.Action.post");
+                // console.log("Error: invalid input on App.Action.post");
               }
               return this.run_io(io.then("")).then(res).catch(err);
           }
@@ -517,7 +568,7 @@ module.exports = class AppPlay extends Component {
   // Gets a pixel-art canvas
   get_canvas(id, width, height, scale=1) {
     if (!this.canvas[id] || this.canvas[id].width !== width || this.canvas[id].height !== height) {
-      console.log("creating canvas", id, width, height);
+      // console.log("creating canvas", id, width, height);
       this.remove_canvas(id);
       this.canvas[id] = document.createElement("canvas");
       this.canvas[id].id = id;
