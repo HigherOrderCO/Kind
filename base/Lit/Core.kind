@@ -212,8 +212,8 @@ Lit.Core.World.check.term(
       let nofn = List.is_empty!(func.iarg) // should we allow binds with functions?
       let main = Lit.Core.World.check.term(term.main, otyp, ctx, world)
       // should the ctx change?
-      //let cont = Lit.Core.World.check.term(term.cont, otyp, ctx, world)
-      nofn && main// && cont
+      let cont = Lit.Core.World.check.term(term.cont, type, ctx, world)
+      nofn && main && cont
   } default false
 
 Lit.Core.World.check.many(
@@ -475,7 +475,23 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
-  let code = Lit.Lang.Bits|`
+  let code = Lit.Lang.Bits|Lit.Lang.Bits.fs|`
+type BoolList {
+  nil
+  cons{
+    head: Bool
+    tail: NatList
+  }
+}
+
+type NatList {
+  nil
+  cons{
+    head: Nat
+    tail: BoolList
+  }
+}
+
 type Unit {
   new
 }
@@ -485,7 +501,7 @@ Count(): Bits
 
 Count.inc(): Unit
   call c = Count();
-  call d = Bits.inc(c);
+  call d = Bits.add(c, c);
   bind Count = d;
   Unit/new
 
