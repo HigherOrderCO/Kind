@@ -1,2 +1,2 @@
 Test: _
-  "Hi"
+  Vector.cons!(1, "primeiro", Vector.cons!(0, "segundo", Vector.nil!))

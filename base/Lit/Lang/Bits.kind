@@ -9,11 +9,16 @@ Bits.tail(a: Bits): Bits
 
 Bits.inc(a: Bits): Bits
   case a : Bits { 
-    e: Bits/i{pred: Bits/e}
-    o: Bits/i{pred: a.pred}
+    e:
+      Bits/e
+//      Bits/i{pred: Bits/e}
+    o:
+      Bits/e
+//      Bits/i{pred: a.pred}
     i:
-      call inc = Bits.inc(a.pred)
-      Bits/o{pred: inc}
+      Bits/e
+//      call inc = Bits.inc(a.pred)
+//      Bits/o{pred: inc}
   }
 
 Bits.size.aux(b: Bits, n: Nat, s: Nat): Nat

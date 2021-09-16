@@ -171,9 +171,9 @@ Lit.Core.World.check.term(
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
-  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
-  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
-  log("")
+  //log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
+  //log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
+  //log("")
   open world
   case term {
     var:
@@ -260,54 +260,72 @@ Lit.Core.World.check.match.cases(
 // Checks if:
 // - no global binders with the same name
 // - variables are used at most once
-Litereum.Core.World.validate(
+Lit.Core.World.validate(
   term: Lit.Core.Term
   used: Map<Bool>
 ): Pair<Map<Bool>,Bool>
+  //log("- vld " | String.join(", ", List.map!!((a) a@fst|":"|Bool.show(a@snd), Map.to_list!(used)))) // DEBUG
+  //log("") // DEBUG
   case term {
     var:
+      //log("var") // DEBUG
+      //log(term.name)
       case used{term.name} as was_used {
         none:
           // undefined variable
           {used, false}
         some: 
           if was_used.value then
+            //log("here")
             // variable already used
             {used, false}
           else
+            //log("there")
             // first use of the variable
             {used{term.name} <- true, true}
       }
     create:
+      //log("create") // DEBUG
       let state = {used, true}
       let state = for val in term.vals:
         let {used, res0} = state
-        let {used, res1} = Litereum.Core.World.validate(val, used)
+        let {used, res1} = Lit.Core.World.validate(val, used)
         {used, res0 && res1}
       state
     match:
-      let state = Litereum.Core.World.validate(term.expr, used)
-      let state = for cse in term.cses:
+      //log("match") // DEBUG
+      let state = Lit.Core.World.validate(term.expr, used)
+      let valid = true
+      let valid = for cse in term.cses:
+        //log("cse")
         let {fields, body} = cse
-        let state = for field in fields:
-          let {used, resx} = state
+        let field_state = state
+        let field_state = for field in fields:
+          //log("field: "|field)
+          let {used, resx} = field_state
           case used{field} as got {
-            some: {used, false} // same name used more than once
-            none: {used{field} <- false, resx}
+            some:
+              //log("some")
+              {used, false} // same name used more than once
+            none:
+              //log("none")
+              {used{field} <- false, resx}
           }
-        state
-      state
+        field_state@snd
+      {state@fst, valid}
     call:
+      //log("call") // DEBUG
       let state = {used, true}
       let state = for arg in term.args:
         let {used, res0} = state
-        let {used, res1} = Litereum.Core.World.validate(arg, used)
+        let {used, res1} = Lit.Core.World.validate(arg, used)
         {used, res0 && res1}
       state
     bind:
+      //log("bind") // DEBUG
       let used = used{term.name} <- false
-      let {used, res0} = Litereum.Core.World.validate(term.main, used)
-      let {used, res1} = Litereum.Core.World.validate(term.cont, used)
+      let {used, res0} = Lit.Core.World.validate(term.main, used)
+      let {used, res1} = Lit.Core.World.validate(term.cont, used)
       {used, res0 && res1}
   }
 
@@ -355,13 +373,22 @@ Lit.Core.World.run.line(
             get typ = Lit.Core.World.get_type(arg_type, world)
             return ctx{arg_name} <- typ
           }
+          let vld = {}
+          let vld = for iarg in func.iarg:
+            vld{iarg} <- false
           case ctx {
             none:
               log("error: func input type undefined: " | func.name) none
             some:
               let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
               if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world) then
-                some(new_world)
+                let {ah, ok} = Lit.Core.World.validate(func.main, vld)
+                if ok then
+                  //log("here")
+                  some(new_world)
+                else
+                  //log("there")
+                  log("error: func invalid: " | func.name) none
               else
                 log("error: func ill-typed: " | func.name) none
           }
@@ -475,7 +502,7 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
-  let code = Lit.Lang.Bits|Lit.Lang.Bits.fs|`
+  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|`
 type BoolList {
   nil
   cons{
@@ -492,16 +519,12 @@ type NatList {
   }
 }
 
-type Unit {
-  new
-}
-
 Count(): Bits
   Bits/o{pred: Bits/e}
 
 Count.inc(): Unit
   call c = Count();
-  call d = Bits.add(c, c);
+  call d = Bits.inc(c);
   bind Count = d;
   Unit/new
 
