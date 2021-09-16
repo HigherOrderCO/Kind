@@ -171,9 +171,9 @@ Lit.Core.World.check.term(
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
-  //log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
-  //log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
-  //log("")
+  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
+  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
+  log("")
   open world
   case term {
     var:
@@ -194,7 +194,7 @@ Lit.Core.World.check.term(
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
       let ctx2 = ctx{term.name} <- otyp
       let args = Lit.Core.World.check.many(term.args, func.ityp, ctx, world)
-      let cont = Lit.Core.World.check.term(term.cont, otyp, ctx2, world)
+      let cont = Lit.Core.World.check.term(term.cont, type, ctx2, world)
       args && cont
     match:
       let expr_type = Lit.Core.World.get_type(term.type,world) abort false
@@ -209,10 +209,10 @@ Lit.Core.World.check.term(
       // TODO: check access
       use func = Lit.Core.World.get_func(term.name,world) abort false
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
-      let nofn = List.is_empty!(func.iarg)
+      let nofn = List.is_empty!(func.iarg) // should we allow binds with functions?
       let main = Lit.Core.World.check.term(term.main, otyp, ctx, world)
-      // TODO: check cont
-      //let cont = Lit.Core.World.check.term(term.cont, otyp, ctx2, world)
+      // should the ctx change?
+      //let cont = Lit.Core.World.check.term(term.cont, otyp, ctx, world)
       nofn && main// && cont
   } default false
 
@@ -476,13 +476,28 @@ Lit.Core.World.run.terms(
 Lit.Core: _
   let world = {}
   let code = Lit.Lang.Bits|`
+type Unit {
+  new
+}
+
+Count(): Bits
+  Bits/o{pred: Bits/e}
+
+Count.inc(): Unit
+  bind Count = Bits/e
+  call c = Count()
+  //bind Count = Bits.inc(c)
+  Unit/new
+
 user MrDog {
   01234
 }
 
 with MrDog {
-  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
-  ret
+  call ret = Count.inc()
+  call c = Count()
+  //call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
+  c
 } signed {
   confia
 }`
