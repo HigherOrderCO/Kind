@@ -127,7 +127,7 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
       let cont = Lit.Lang.show.term(term.cont, world)
       return "bind " | name | " = " | main | " ; " | cont
     } <> "?"
-  } default "?"
+  }// default "?"
 
 // Parser
 // ------
@@ -258,8 +258,8 @@ Lit.Lang.parser.term(world: Lit.Core.World): Parser<Lit.Core.Term>
   Parser.choice!([
     Lit.Lang.parser.term.create(world)
     Lit.Lang.parser.term.match(world)
-    Lit.Lang.parser.term.call(world)
     Lit.Lang.parser.term.bind(world)
+    Lit.Lang.parser.term.call(world)
     Lit.Lang.parser.term.var(world)
   ])
 

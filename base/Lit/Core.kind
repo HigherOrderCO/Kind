@@ -484,9 +484,9 @@ Count(): Bits
   Bits/o{pred: Bits/e}
 
 Count.inc(): Unit
-  bind Count = Bits/e
-  call c = Count()
-  //bind Count = Bits.inc(c)
+  call c = Count();
+  call d = Bits.inc(c);
+  bind Count = d;
   Unit/new
 
 user MrDog {
@@ -573,10 +573,10 @@ with MrDog {
 ////      x
 ////    } signed { 0123abcd }
 //  `
-
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
-
   case Lit.Core.World.run.page(page, world) as result {
-    none: IO.print("failure")
-    some: IO.print("success")
+    none:
+      IO.print("failure")
+    some:
+      IO.print("success")
   }
