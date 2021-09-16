@@ -1,0 +1,35 @@
+Lit.Lang.Nat: String
+`
+//Mathematical Operations
+Nat.add(n: Nat, m: Nat): Nat
+  case n : Nat { 
+    zero: m
+    succ: 
+      call rec = Nat.add(n.pred, Nat/succ{pred: m})
+      rec
+  }
+
+Nat.sub(n: Nat, m: Nat): Nat
+  case n : Nat { 
+    zero: n
+    succ: case m : Nat { 
+      zero: Nat/zero
+      succ: 
+        call sub = Nat.sub(n.pred, m.pred)
+        sub
+    }
+  }
+
+Nat.mul.aux(n: Nat, m: Nat, r: Nat): Nat
+  case n : Nat { 
+    zero: r
+    succ: 
+      call add = Nat.add(m, r)
+      call mul = Nat.mul.aux(n.pred, m, add)
+      mul
+  }
+
+Nat.mul(n: Nat, m: Nat): Nat
+  call mul = Nat.mul.aux(n, m, Nat/zero)
+  mul
+`
