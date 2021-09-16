@@ -1,6 +1,7 @@
 Ether.tests : _
-  let ab = Bits.read("001111010011110100001010")
-  String.from_list(Ether.Base.X64.encode(ab))
+  let ab = Bits.read("10101010")
+  log(String.from_list(Ether.Base.X64.encode(ab)))
+  Ether.Base.X64.decode(Ether.Base.X64.encode(ab))
 
   //let buffer = Buffer8.from_hex("d69429d7d1dd5b6f9c864d9db560d72a247c178ae86b0a")
   //let hash = Crypto.Keccak.hash.bytes(buffer)
