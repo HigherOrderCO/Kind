@@ -1,39 +1,40 @@
 Lit.Lang.Bits: String
 `
-type Bits { 
-  e
-  o{pred: Bits}
-  i{pred: Bits}
-}
-`
-
-Lit.Lang.Bits.fs: String
-`
-//Bits.drop(n: Nat, xs: Bits): Bits
-//  case n : Nat {
-//    zero: xs
-//    succ: case xs : Bits { 
-//      e: xs
-//      o:
-//        call rec = Bits.drop(n.pred, xs.pred)
-//        rec
-//      i:
-//        call rec = Bits.drop(n.pred, xs.pred)
-//        rec
-//    }
-//  }
-
+Bits.tail(a: Bits): Bits
+  case a : Bits { 
+    e: Bits/e
+    o: a.pred
+    i: a.pred
+  }
 
 Bits.inc(a: Bits): Bits
   case a : Bits { 
-    e: Bits/i{pred: Bits/e}
-    o: Bits/i{pred: a.pred}
+    e:
+      Bits/e
+//      Bits/i{pred: Bits/e}
+    o:
+      Bits/e
+//      Bits/i{pred: a.pred}
     i:
-      call inc = Bits.inc(a.pred)
-      Bits/o{pred: inc}
+      Bits/e
+//      call inc = Bits.inc(a.pred)
+//      Bits/o{pred: inc}
   }
 
+Bits.size.aux(b: Bits, n: Nat, s: Nat): Nat
+  case b : Bits {
+    e: s
+    o: 
+      call rec = Bits.size.aux(b.pred, Nat/succ{pred: n}, s)
+      rec
+    i:
+      call rec = Bits.size.aux(b.pred, Nat/succ{pred: n}, Nat/succ{pred: n})
+      rec
+  }
 
+Bits.size(b: Bits): Nat
+  call size = Bits.size.aux(b, Nat/zero, Nat/zero)
+  size
 
 Bits.and(a: Bits, b: Bits): Bits
   case a : Bits { 
@@ -198,4 +199,107 @@ Bits.mul.aux(a: Bits, b: Bits, r: Bits): Bits
 Bits.mul(a: Bits, b: Bits): Bits
   call mul = Bits.mul.aux(a, b, Bits/e)
   mul
+
+//Bits.div(a: Bits, b: Bits): Bits
+  //call asize = Bits.size(a)
+  //call bsize = Bits.size(b)
+
+  
+
+////////////
+
+Bits.drop(n: Nat, xs: Bits): Bits
+ case n : Nat {
+   zero: xs
+   succ: case xs : Bits { 
+     e: xs
+     o:
+       call rec = Bits.drop(n.pred, xs.pred)
+       rec
+     i:
+       call rec = Bits.drop(n.pred, xs.pred)
+       rec
+   }
+ }
+
+//Comparisons
+
+Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): Cmp
+  case a : Bits { 
+    e: case b : Bits {
+      e: c
+      o:
+        call rec = Bits.cmp.aux(Bits/e, b.pred, c)
+        rec
+      i: Cmp/ltn
+    }
+    o: case b : Bits { 
+      e:
+        call rec = Bits.cmp.aux(a.pred, Bits/e, c)
+        rec
+      o:
+        call rec = Bits.cmp.aux(a.pred, b.pred, c)
+        rec
+      i:
+        call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/ltn)
+        rec
+      }
+    i: case b : Bits { 
+      e: Cmp/gtn
+      o: 
+        call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/gtn)
+        rec
+      i:
+        call rec = Bits.cmp.aux(a.pred, b.pred, c)
+        rec
+    }
+  }
+
+
+Bits.eql(a: Bits, b: Bits): Bool
+  case a : Bits { 
+    e: case b : Bits { 
+      e: Bool/true
+      o: Bool/false
+      i: Bool/false
+    }
+    o: case b : Bits { 
+      e: Bool/false
+      o:
+        call rec = Bits.eql(a.pred, b.pred)
+        rec
+      i: Bool/false
+    }
+    i: case b : Bits { 
+      e: Bool/false
+      o: Bool/false
+      i: 
+        call rec = Bits.eql(a.pred, b.pred)
+        rec
+    }
+  }
+
+Bits.cmp(a: Bits, b: Bits): Cmp
+  call cmp = Bits.cmp.aux(a, b, Cmp/eql)
+  cmp
+
+Bits.gte(a: Bits, b: Bits): Bool
+  call cmp = Bits.cmp(a,b)
+  call gte = Cmp.as_gte(cmp)
+  gte
+
+Bits.gtn(a: Bits, b: Bits): Bool
+  call cmp = Bits.cmp(a,b)
+  call gtn = Cmp.as_gtn(cmp)
+  gtn
+
+Bits.lte(a: Bits, b: Bits): Bool
+  call cmp = Bits.cmp(a,b)
+  call lte = Cmp.as_lte(cmp)
+  lte
+
+Bits.ltn(a: Bits, b: Bits): Bool
+  call cmp = Bits.cmp(a,b)
+  call ltn = Cmp.as_ltn(cmp)
+  ltn
 `

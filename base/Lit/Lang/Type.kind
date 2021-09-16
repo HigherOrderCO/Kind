@@ -1,0 +1,28 @@
+Lit.Lang.Type: String
+`
+type Bits { 
+  e
+  o{pred: Bits}
+  i{pred: Bits}
+}
+
+type Nat { 
+  zero
+  succ{pred: Nat}
+}
+
+type Bool { 
+  true
+  false
+}
+
+type Unit { 
+  new
+}
+
+type Cmp { 
+  ltn
+  eql
+  gtn
+}
+`
