@@ -1,0 +1,5 @@
+V2.sqrdist(a: V2, b: V2): F64
+  open a
+  open b
+  F64.pow((a.x - b.x), 2) +
+  F64.pow((a.y - b.y), 2)

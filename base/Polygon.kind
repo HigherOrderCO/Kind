@@ -1,0 +1,43 @@
+// TODO: store segments instead, create Polygon.from_segments
+
+type Polygon {
+  new(vertices: List<V2>)
+}
+
+Polygon.segments(polygon: Polygon): List<Segment>
+  let vertices = polygon@vertices
+  Polygon.segments.go(vertices, List.last!(vertices) <> V2.new(0.0,0.0))
+
+Polygon.segments.go(
+  vertices: List<V2>
+  last_vertex: V2
+): List<Segment>
+  case vertices {
+    nil:
+      []
+    cons:
+      let v0   = last_vertex
+      let v1   = vertices.head
+      let head = Segment.new(v0, v1)
+      let tail = Polygon.segments.go(vertices.tail, v1)
+      head & tail
+  }
+
+// Given a polygon and two points, returns true if
+// the polygon is blocking sigth between the points
+// The "ds" argument is used as a F64 eql tolerance
+Polygon.blocks_sight(a: V2, b: V2, ds: F64, poly: Polygon): Bool
+  let blocked = false
+  let blocked = for seg in Polygon.segments(poly):
+    open seg
+    let aa = F64.ltn(V2.sqrdist(seg.a,a),ds) // seg.a ~= a
+    let ab = F64.ltn(V2.sqrdist(seg.a,b),ds) // seg.a ~= b
+    let ba = F64.ltn(V2.sqrdist(seg.b,a),ds) // seg.b ~= a
+    let bb = F64.ltn(V2.sqrdist(seg.b,b),ds) // seg.b ~= b
+    // If a-b shares a vertex with the tested segment, there is no blockage
+    if aa || ab || ba || bb then
+      blocked
+    // Otherwise, if a-b crosses polygon segment, then sight is blocked
+    else
+      blocked || Segment.intersects(Segment.new(a,b),seg)
+  blocked

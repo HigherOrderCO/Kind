@@ -1,0 +1,26 @@
+type Segment {
+  new(a: V2, b: V2)
+}
+
+Segment.zero: Segment
+  Segment.new(V2.new(0.0,0.0),V2.new(0.0,0.0))
+
+Segment.intersects.ccw(a: V2, b: V2, c: V2): Bool
+  open a
+  open b
+  open c
+  let p = (c.y - a.y)
+  let q = (b.x - a.x)
+  let r = (b.y - a.y)
+  let s = (c.x - a.x)
+  F64.gtn(p * q, r * s)
+  
+Segment.intersects(a: Segment, b: Segment): Bool
+  open a
+  open b
+  let p = Segment.intersects.ccw(a.a, b.a, b.b)
+  let q = Segment.intersects.ccw(a.b, b.a, b.b)
+  let r = Segment.intersects.ccw(a.a, a.b, b.a)
+  let s = Segment.intersects.ccw(a.a, a.b, b.b)
+  Bool.not(Bool.eql(p,q)) && Bool.not(Bool.eql(r,s))
+

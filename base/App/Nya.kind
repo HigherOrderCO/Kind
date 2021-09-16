@@ -1,0 +1,187 @@
+type Nya.State {
+  new(
+    map: List<Polygon>
+    pos: V2
+  )
+}
+
+has_line_of_sight(a: V2, b: V2, ds: F64, map: List<Polygon>): Bool
+  case map {
+    nil:
+      true
+    cons:
+      Bool.not(Polygon.blocks_sight(a, b, ds, map.head))
+      && has_line_of_sight(a, b, ds, map.tail)
+  }
+
+visibles(a: V2, map: List<Polygon>): List<V2>
+  let visibles = []
+  let visibles = for poly in map:
+    let visibles = for seg in Polygon.segments(poly):
+      // TODO: flatten
+      let visibles = for vec in [seg@a, seg@b]:
+        if has_line_of_sight(a, vec, 0.5, map) then
+          vec & visibles
+        else
+          visibles
+      visibles
+    visibles
+  visibles
+
+Nya.State.initial: Nya.State
+  let map = [
+    Polygon.new([
+      V2.new(294.0, 75.0)
+      V2.new(617.0, 55.0)
+      V2.new(462.0, 414.0)
+      V2.new(441.0, 297.0)
+      V2.new(372.0, 258.0)
+    ])
+    Polygon.new([
+      V2.new(139.0, 383.0)
+      V2.new(180.0, 272.0)
+      V2.new(320.0, 236.0)
+      V2.new(402.0, 316.0)
+      V2.new(341.0, 440.0)
+    ])
+    Polygon.new([
+      V2.new(293.0, 628.0)
+      V2.new(419.0, 457.0)
+      V2.new(510.0, 457.0)
+      V2.new(583.0, 676.0)
+      V2.new(404.0, 763.0)
+    ])
+    Polygon.new([
+      V2.new(551.0, 414.0)
+      V2.new(609.0, 194.0)
+      V2.new(867.0, 102.0)
+      V2.new(962.0, 479.0)
+      V2.new(713.0, 648.0)
+    ])
+  ]
+  let pos = V2.new(0.0, 0.0)
+  Nya.State.new(map, pos)
+
+// App states (local = clicks, global = visitors)
+App.Nya.State: App.State
+  App.State.new(Nya.State, Nat)
+
+// Initial state
+App.Nya.init: App.Init<App.Nya.State>
+  App.Store.new<App.Nya.State>(Nya.State.initial, 0)
+
+// Render function
+App.Nya.draw: App.Draw<App.Nya.State>
+  (state)
+  open state
+  open state.local
+  let pos = state.local.pos
+  let map = state.local.map
+  <div>
+    <svg width="1016" height="784">
+      // Cursor
+      <circle cx=F64.show(pos@x) cy=F64.show(pos@y) r="3"></circle>
+
+      // Neighbor graph
+      //{
+        //let vecs = List.flat_map!!((x) x@vertices, state.local@map)
+        //let lines = []
+        //let lines = for pos in vecs:
+          //let lines = for vec in visibles(pos,map):
+            //App.Nya.draw.segment(Segment.new(pos,vec),"green") & lines
+          //lines
+        //<g>
+          //for line in lines:
+            //line
+        //</g>
+      //}
+
+      // Map
+      for seg in List.flat_map!!(Polygon.segments, state.local@map):
+        App.Nya.draw.segment(seg, "black")
+
+      // Visible vertices
+      for vec in visibles(pos,map):
+        App.Nya.draw.segment(Segment.new(pos,vec),"blue")
+    </svg>
+  </div>
+
+App.Nya.draw.segment(seg: Segment, color: String): DOM
+  open seg 
+  open seg.a
+  open seg.b
+  let x1 = F64.show(seg.a.x)
+  let y1 = F64.show(seg.a.y)
+  let x2 = F64.show(seg.b.x) 
+  let y2 = F64.show(seg.b.y) 
+  <line x1=x1 y1=y1 x2=x2 y2=y2 stroke=color></line>
+
+// Event handler
+App.Nya.when: App.When<App.Nya.State>
+  (event, state)
+  open state
+  case event {
+    init: IO {
+      App.watch!(App.room_zero)
+      App.new_post!(App.room_zero, "")
+    }
+    mouse_move: IO {
+      let x = U32.to_f64(event.mouse_pos@fst)
+      let y = U32.to_f64(event.mouse_pos@snd)
+      App.set_local!(state.local@pos <- V2.new(x,y))
+    }
+  } default App.pass!
+
+// Global ticker: not used
+App.Nya.tick: App.Tick<App.Nya.State>
+  App.no_tick<App.Nya.State>
+
+// Global visitor: counts posts to room_zero
+App.Nya.post: App.Post<App.Nya.State>
+  (time, room, addr, data, global_state)
+  global_state + 1
+
+// A "Nya, world!" + counter application
+App.Nya: App<App.Nya.State>
+  App.new<App.Nya.State>(
+    App.Nya.init
+    App.Nya.draw
+    App.Nya.when
+    App.Nya.tick
+    App.Nya.post
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
