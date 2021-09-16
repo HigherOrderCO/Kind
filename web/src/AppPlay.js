@@ -259,13 +259,9 @@ module.exports = class AppPlay extends Component {
           this.app_state.global = this.app.init.global;
         // Otherwise, restore found state
         } else {
-          // console.log("tick do post - ", this.show_tick(tick));
-          // console.log("tick do atual - ", this.show_tick(this.app_global_tick));
-          // console.log("ultimos cinco posts", Object.keys(this.app_global_posts).sort().map(x => this.show_tick(x)).reverse().slice(0, 5));
           restored = true;
           this.app_global_tick = latest.tick;
           this.app_state.global = latest.state;
-          // console.log("tick imediatamente antes do tick do post encontrado " + this.show_tick(latest.tick) + " STATE: " + latest.state);
         }
       }
       if (this.app_global_tick === null) {
@@ -284,27 +280,52 @@ module.exports = class AppPlay extends Component {
         this.display += "UpTo : " + to_date.toUTCString().slice(5) + "\n";
         this.forceUpdate();
       }
-      // if (restored) {
-        // console.log("tick começo computado " + this.show_tick(compute_from_tick), compute_from_tick);
-        // console.log("tick fim computado " + this.show_tick(compute_to_tick), compute_to_tick);
-      // }
 
+      // amount of ticks done after one post
+      var tick_limit = 16 * 64;
       if (restored) {
+        // posts between latest state and actual tick
         var post_ticks = [];
+        // post before latest state
+        // used to redo ticks between latest and first restored post
+        var immediately_before = undefined;
         for (let key in this.app_global_posts) {
-          if (key > this.app_global_tick) post_ticks.push(key);
+          let n_key = Number(key)
+          // finding which posts restore
+          if (n_key > this.app_global_tick) post_ticks.push(n_key);
+          else
+            // find post immediately before latest state
+            if (n_key > immediately_before || immediately_before === undefined)
+              immediately_before = n_key;
         }
+        // order posts
         post_ticks.sort();
+
+        // do ticks between latest state and first post restored
+        if (immediately_before) {
+          var compute_from_tick = this.app_global_tick;
+          var compute_to_tick   = Math.min(this.app_global_tick 
+            + (tick_limit - (this.app_global_tick - immediately_before)), post_ticks[0]);
+          for (var t = compute_from_tick; t < compute_to_tick; ++t) {
+            this.execute(t);
+          }
+        }
+
+        // restore posts and their ticks between latest state and actual tick
         for (var j = 0; j < post_ticks.length - 1 ; j++) {
-          var t = post_ticks[j];
-          this.execute_post(t);
+          var until = Math.min(post_ticks[j + 1] - post_ticks[j], tick_limit);
+          var compute_from_tick = post_ticks[j];
+          var compute_to_tick = compute_from_tick + until;
+          for (var t = compute_from_tick; t < compute_to_tick; ++t) {
+            this.execute(t);
+          }
         }
       } else {
         var compute_from_tick = this.app_global_tick; 
-        var compute_to_tick = Math.min(compute_from_tick + 16 * 64, tick); // pauses after 16*64 ticks of no posts
+        var compute_to_tick = Math.min(compute_from_tick + tick_limit, tick); // pauses after 16*64 ticks of no posts
         for (var t = compute_from_tick; t < compute_to_tick; ++t) {
           //++count_ticks;
-          this.execute_post(t);
+          this.execute(t);
         };
       }
       this.display = null;
@@ -315,17 +336,14 @@ module.exports = class AppPlay extends Component {
     }
   }
 
-  execute_post(t) {
+  // receives a timestamp and execute its posts and tick
+  execute(t) {
     var posts = this.app_global_posts[String(t)];
     var state = this.app_state.global;
     if (posts) {
       for (var i = 0; i < posts.length; ++i) {
         var post = posts[i];
-        
-        // console.log(state);
         state = this.app.post(post.tick)(post.room)(post.addr)(post.data)(state);
-        // console.log(state);
-        //++count_posts;
       }
     }
     if (this.app_has_ticker) {
