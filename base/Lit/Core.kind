@@ -475,7 +475,23 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
-  let code = Lit.Lang.Bits|`
+  let code = Lit.Lang.Bits|Lit.Lang.Bits.fs|`
+type BoolList {
+  nil
+  cons{
+    head: Bool
+    tail: NatList
+  }
+}
+
+type NatList {
+  nil
+  cons{
+    head: Nat
+    tail: BoolList
+  }
+}
+
 type Unit {
   new
 }
@@ -485,9 +501,9 @@ Count(): Bits
 
 Count.inc(): Unit
   call c = Count();
-  call d = Bits.inc(c);
+  call d = Bits.add(c, c);
   bind Count = d;
-  Bits/e
+  Unit/new
 
 user MrDog {
   01234

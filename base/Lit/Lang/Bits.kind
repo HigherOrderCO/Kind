@@ -1,24 +1,27 @@
 Lit.Lang.Bits: String
-
-//Bits.drop(n: Nat, xs: Bits): Bits
-  //case n : Nat {
-    //zero: xs
-    //succ: case xs : Bits { 
-      //e: xs
-      //o:
-        //call rec = Bits.drop(n.pred, xs.pred)
-        //rec
-      //i:
-        //call rec = Bits.drop(n.pred, xs.pred)
-        //rec
-    //}
-  //}
 `
 type Bits { 
   e
   o{pred: Bits}
   i{pred: Bits}
 }
+`
+
+Lit.Lang.Bits.fs: String
+`
+//Bits.drop(n: Nat, xs: Bits): Bits
+//  case n : Nat {
+//    zero: xs
+//    succ: case xs : Bits { 
+//      e: xs
+//      o:
+//        call rec = Bits.drop(n.pred, xs.pred)
+//        rec
+//      i:
+//        call rec = Bits.drop(n.pred, xs.pred)
+//        rec
+//    }
+//  }
 
 
 Bits.inc(a: Bits): Bits
