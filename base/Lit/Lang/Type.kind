@@ -26,6 +26,7 @@ type Cmp {
   gtn
 }
 
+// TODO use Bits.e instead
 type Maybe.Bits {
   none
   some{val: Bits}
@@ -34,5 +35,13 @@ type Maybe.Bits {
 type BitsMap {
   new
   tie{val: Maybe.Bits, lft: BitsMap, rgt: BitsMap}
+}
+
+type Pair.BitsMap {
+  new{fst: BitsMap, snd: BitsMap}
+}
+
+type Pair.Bits {
+  new{fst: Bits, snd: Bits}
 }
 `

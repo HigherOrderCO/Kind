@@ -10,15 +10,12 @@ Bits.tail(a: Bits): Bits
 Bits.inc(a: Bits): Bits
   case a : Bits { 
     e:
-      Bits/e
-//      Bits/i{pred: Bits/e}
+      Bits/i{pred: Bits/e}
     o:
-      Bits/e
-//      Bits/i{pred: a.pred}
+      Bits/i{pred: a.pred}
     i:
-      Bits/e
-//      call inc = Bits.inc(a.pred)
-//      Bits/o{pred: inc}
+      call inc = Bits.inc(a.pred)
+      Bits/o{pred: inc}
   }
 
 Bits.size.aux(b: Bits, n: Nat, s: Nat): Nat
@@ -310,4 +307,13 @@ Bits.ltn(a: Bits, b: Bits): Bool
   call cmp = Bits.cmp(a,b)
   call ltn = Cmp.as_ltn(cmp)
   ltn
+
+Bits.dup(a: Bits): Pair.Bits
+  case a : Bits {
+    e:
+      Bits/new{fst: Bits/e, snd: Bits/e}
+    o:
+      Bits/new
+    i:
+  }
 `

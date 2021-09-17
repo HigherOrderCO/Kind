@@ -44,4 +44,15 @@ BitsMap.get(map: BitsMap, key: Bits): Maybe.Bits
           val
       }
   }
+
+BitsMap.dup(m: BitsMap): Pair.BitsMap
+  case m : BitsMap {
+    new:
+      Pair.BitsMap/new{fst: BitsMap/new, snc: BitsMap/new}
+    tie:
+      Pair.BitsMap/new{fst: BitsMap/tie{val: }, snc: BitsMap/tie{}}
+  }
+
+// TODO BitsMap.transact
+//BitsMap.transact(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
 `
