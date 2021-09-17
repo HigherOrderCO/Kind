@@ -5,22 +5,36 @@ type Segment {
 Segment.zero: Segment
   Segment.new(V2.new(0.0,0.0),V2.new(0.0,0.0))
 
-Segment.intersects.ccw(a: V2, b: V2, c: V2): Bool
-  open a
-  open b
-  open c
-  let p = (c.y - a.y)
-  let q = (b.x - a.x)
-  let r = (b.y - a.y)
-  let s = (c.x - a.x)
-  F64.gtn(p * q, r * s)
-  
+// From: https://stackoverflow.com/a/61699051/1031791
 Segment.intersects(a: Segment, b: Segment): Bool
   open a
   open b
-  let p = Segment.intersects.ccw(a.a, b.a, b.b)
-  let q = Segment.intersects.ccw(a.b, b.a, b.b)
-  let r = Segment.intersects.ccw(a.a, a.b, b.a)
-  let s = Segment.intersects.ccw(a.a, a.b, b.b)
-  Bool.not(Bool.eql(p,q)) && Bool.not(Bool.eql(r,s))
-
+  open a.a
+  open a.b
+  open b.a
+  open b.b
+  let p =
+    let p = b.b.y - a.a.y
+    let q = b.a.x - a.a.x
+    let r = b.a.y - a.a.y
+    let s = b.b.x - a.a.x
+    F64.gtn(p * q, r * s)
+  let q =
+    let p = b.b.y - a.b.y
+    let q = b.a.x - a.b.x
+    let r = b.a.y - a.b.y
+    let s = b.b.x - a.b.x
+    F64.gtn(p * q, r * s)
+  let r =
+    let p = b.a.y - a.a.y
+    let q = a.b.x - a.a.x
+    let r = a.b.y - a.a.y
+    let s = b.a.x - a.a.x
+    F64.gtn(p * q, r * s)
+  let s =
+    let p = b.b.y - a.a.y
+    let q = a.b.x - a.a.x
+    let r = a.b.y - a.a.y
+    let s = b.b.x - a.a.x
+    F64.gtn(p * q, r * s)
+  Bool.not(Bool.eql(p,q) || Bool.eql(r,s))
