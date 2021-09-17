@@ -25,4 +25,14 @@ type Cmp {
   eql
   gtn
 }
+
+type Maybe.Bits {
+  none
+  some{val: Bits}
+}
+
+type BitsMap {
+  new
+  tie{val: Maybe.Bits, lft: BitsMap, rgt: BitsMap}
+}
 `
