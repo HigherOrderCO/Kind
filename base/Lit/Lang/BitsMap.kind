@@ -1,0 +1,58 @@
+Lit.Lang.BitsMap: String
+`
+BitsMap.set(map: BitsMap, key: Bits, value: Bits): BitsMap
+  case map : BitsMap {
+    new:
+      case key : Bits {
+        e:
+          BitsMap/tie{val: Maybe.Bits/some{val: value}, lft: BitsMap/new, rgt: BitsMap/new}
+        o:
+          call ins = BitsMap.set(BitsMap/new, key.pred, value)
+          BitsMap/tie{val: Maybe.Bits/none, lft: ins, rgt: BitsMap/new}
+        i:
+          call ins = BitsMap.set(BitsMap/new, key.pred, value)
+          BitsMap/tie{val: Maybe.Bits/none, lft: BitsMap/new, rgt: ins}
+      }
+    tie:
+      case key : Bits {
+        e:
+          BitsMap/tie{val: Maybe.Bits/some{val: value}, lft: BitsMap/new, rgt: BitsMap/new}
+        o:
+          call ins = BitsMap.set(map.lft, key.pred, value)
+          BitsMap/tie{val: map.val, lft: ins, rgt: map.rgt}
+        i:
+          call ins = BitsMap.set(map.rgt, key.pred, value)
+          BitsMap/tie{val: map.val, lft: map.lft, rgt: ins}
+      }
+  }
+
+// TODO this function is almost useless because you need to duplicate the map to use it
+// very expensive!
+BitsMap.get(map: BitsMap, key: Bits): Maybe.Bits
+  case map : BitsMap {
+    new:
+      Maybe.Bits/none
+    tie:
+      case key : Bits {
+        e:
+          map.val
+        o:
+          call val = BitsMap.get(map.lft, key.pred)
+          val
+        i:
+          call val = BitsMap.get(map.rgt, key.pred)
+          val
+      }
+  }
+
+BitsMap.dup(m: BitsMap): Pair.BitsMap
+  case m : BitsMap {
+    new:
+      Pair.BitsMap/new{fst: BitsMap/new, snc: BitsMap/new}
+    tie:
+      Pair.BitsMap/new{fst: BitsMap/tie{val: }, snc: BitsMap/tie{}}
+  }
+
+// TODO BitsMap.transact
+//BitsMap.transact(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+`
