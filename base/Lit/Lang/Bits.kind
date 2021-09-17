@@ -200,13 +200,21 @@ Bits.mul(a: Bits, b: Bits): Bits
   call mul = Bits.mul.aux(a, b, Bits/e)
   mul
 
-//Bits.div(a: Bits, b: Bits): Bits
-  //call asize = Bits.size(a)
-  //call bsize = Bits.size(b)
-
-  
-
 ////////////
+
+Bits.take(n: Nat, xs: Bits): Bits
+  case n : Nat {
+    zero: Bits/e
+    succ: case xs : Bits {
+      e: Bits/e
+      o: 
+        call rec = Bits.take(n.pred, xs.pred)
+        Bits/o{pred: rec}
+      i:
+        call rec = Bits.take(n.pred, xs.pred)
+        Bits/i{pred: rec}
+    }
+  }
 
 Bits.drop(n: Nat, xs: Bits): Bits
  case n : Nat {

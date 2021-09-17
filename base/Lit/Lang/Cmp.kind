@@ -36,4 +36,10 @@ Cmp.as_ltn(cmp: Cmp): Bool
     gtn: Bool/false
   }
 
+Cmp.inv(cmp: Cmp): Cmp
+  case cmp : Cmp {
+    ltn: Cmp/gtn
+    eql: Cmp/eql
+    gtn: Cmp/ltn
+  }
 `
