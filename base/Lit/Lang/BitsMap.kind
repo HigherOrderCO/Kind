@@ -25,4 +25,23 @@ BitsMap.set(map: BitsMap, key: Bits, value: Bits): BitsMap
           BitsMap/tie{val: map.val, lft: map.lft, rgt: ins}
       }
   }
+
+// TODO this function is almost useless because you need to duplicate the map to use it
+// very expensive!
+BitsMap.get(map: BitsMap, key: Bits): Maybe.Bits
+  case map : BitsMap {
+    new:
+      Maybe.Bits/none
+    tie:
+      case key : Bits {
+        e:
+          map.val
+        o:
+          call val = BitsMap.get(map.lft, key.pred)
+          val
+        i:
+          call val = BitsMap.get(map.rgt, key.pred)
+          val
+      }
+  }
 `
