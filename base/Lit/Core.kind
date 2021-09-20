@@ -114,6 +114,7 @@ type Lit.Core.Exec {
     user: String
     sign: String
     expr: Lit.Core.Term
+    otyp: String
   )
 }
 
@@ -181,7 +182,7 @@ Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
 // TODO: the `type` input must not be a Maybe. Add the type to `Exec` instead.
 Lit.Core.World.check.term(
   term: Lit.Core.Term
-  type: Maybe<Lit.Core.Type>
+  type: Lit.Core.Type
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
   calr: String
@@ -193,18 +194,12 @@ Lit.Core.World.check.term(
     var:
       let var_type = ctx{term.name} abort false
       //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
-      case type {
-        none: true
-        some: Lit.Core.Type.equal(var_type, type.value)
-      }
+      Lit.Core.Type.equal(var_type, type)
     create: 
       use term_type = Lit.Core.World.get_type(term.type,world) abort false
       use ctor = term_type.ctors[term.ctor] abort false
       let args = Lit.Core.World.check.many(term.vals, List.mapped!(ctor.fields)!((x) x@type), ctx, world, calr)
-      case type {
-        none: args
-        some:args && Lit.Core.Type.equal(term_type, type.value)
-      }
+      args && Lit.Core.Type.equal(term_type, type)
     call:
       // verify owner
       let ownr = Lit.Core.World.check.owner(calr, term.func, world)
@@ -218,7 +213,7 @@ Lit.Core.World.check.term(
       let expr_type = Lit.Core.World.get_type(term.type,world) abort false
       case expr_type {
         adt:
-          let expr = Lit.Core.World.check.term(term.expr, some(expr_type), ctx, world, calr)
+          let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world, calr)
           let cses = List.mapped!(term.cses)!((x) x@body)
           let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.ctors, term.name, ctx, world, calr)
           expr && cses
@@ -229,7 +224,7 @@ Lit.Core.World.check.term(
       use func = Lit.Core.World.get_func(term.name,world) abort false
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
       let nofn = List.is_empty!(func.iarg) // should we allow binds with functions?
-      let main = Lit.Core.World.check.term(term.main, some(otyp), ctx, world, calr)
+      let main = Lit.Core.World.check.term(term.main, otyp, ctx, world, calr)
       // should the ctx change?
       let cont = Lit.Core.World.check.term(term.cont, type, ctx, world, calr)
       ownr && nofn && main && cont
@@ -246,7 +241,7 @@ Lit.Core.World.check.many(
   case terms types {
     cons cons:
       let type = Lit.Core.World.get_type(types.head, world) abort false
-      let head = Lit.Core.World.check.term(terms.head, some(type), ctx, world, calr)
+      let head = Lit.Core.World.check.term(terms.head, type, ctx, world, calr)
       let tail = Lit.Core.World.check.many(terms.tail, types.tail, ctx, world, calr)
       head && tail
     nil nil:
@@ -255,7 +250,7 @@ Lit.Core.World.check.many(
 
 Lit.Core.World.check.match.cases(
   cases: List<Lit.Core.Term>
-  type: Maybe<Lit.Core.Type>
+  type: Lit.Core.Type
   ctors: List<Lit.Core.Type.Ctor>
   name: String
   ctx: Map<Lit.Core.Type>
@@ -423,7 +418,7 @@ Lit.Core.World.run.line(
               log("error: func input type undefined: " | func.name) none
             some:
               let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
-              if Lit.Core.World.check.term(func.main, some(otyp), ctx.value, new_world, func.name) then
+              if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, func.name) then
                 let {ah, ok} = Lit.Core.World.validate(func.main, vld)
                 if ok then
                   //log("here")
@@ -443,11 +438,12 @@ Lit.Core.World.run.line(
       } default log("error: user redefinition: " | user.name) none
     ext_exec:
       use exec = line.value
+      let otyp = Lit.Core.World.get_type(exec.otyp, world) abort log("error: exec otyp not found") none
       case world{exec.user} as got_entry {
         some: case got_entry.value as entry {
           user: 
             use user = entry.value
-            if Lit.Core.World.check.term(exec.expr, none, {}, world, exec.user) then
+            if Lit.Core.World.check.term(exec.expr, otyp, {}, world, exec.user) then
               let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
               log("- ext_exec: " | Lit.Lang.show.term(result, world))
               some(world)
@@ -585,83 +581,11 @@ with MrDog {
   call c = Count()
   call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
   call dupped = Bits.dup(ret)
-  dupped
+  Unit/new
 } signed {
   confia
-}
+}: Unit
 `
-//  let code = `
-//    user MrDog {
-//      0123456789abcdef
-//    }
-//
-//    type Unit {
-//      new
-//    }
-//
-//    type Bool {
-//      true
-//      false
-//    }
-//
-//    type Nat {
-//      zero
-//      succ{pred: Nat}
-//    }
-//
-//    type NatBool {
-//      new{
-//        x: Nat
-//        y: Bool
-//      }
-//    }
-//
-//    not(x: Bool): Bool
-//      case x : Bool {
-//        true: Bool/false
-//        false: Bool/true
-//      }
-//
-//    double(x: Nat): Nat
-//      case x : Nat {
-//        zero:
-//          Nat/zero
-//        succ:
-//          call rest = double(x.pred)
-//          Nat/succ{pred: Nat/succ{pred: rest}}
-//      }
-//
-//    Nat.pred(x: Nat): Nat
-//      case x : Nat {
-//        zero: Nat/zero
-//        succ: x.pred
-//      }
-//
-//    with MrDog {
-//      call n = double(Nat/succ{pred: Nat/succ{pred: Nat/succ{pred: Nat/zero}}})
-//      call b = not(Bool/true)
-//      NatBool/new{x: n, y: b}
-//    } signed { 0123abcd }
-//
-//    Count.dec, Count.inc @ COUNT(): Nat
-//      Nat/zero
-//
-//    Count.inc(): Unit
-//      call count = COUNT()
-//      bind COUNT = Nat/succ{pred: count}
-//      Unit/new
-//
-//    Count.dec(): Unit
-//      Unit/new
-//
-////    with MrDog {
-////      call x = Count.inc()
-////      call x = Count.inc()
-////      call x = Count.inc()
-////      call x = COUNT()
-////      x
-////    } signed { 0123abcd }
-//  `
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
   case Lit.Core.World.run.page(page, world) as result {
     none:
