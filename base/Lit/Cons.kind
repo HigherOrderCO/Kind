@@ -327,7 +327,7 @@ Lit.Cons.Node.display(node: Lit.Cons.Node): IO<Unit>
       let {index, page} = index_page
       let half_count = 6
       if Nat.between(half_count, index, pages_length - half_count) then
-        if index =? 4
+        if index =? half_count
         then IO.print("(...)")
         else IO.pass
       else IO {

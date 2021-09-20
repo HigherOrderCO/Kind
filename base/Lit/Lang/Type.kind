@@ -38,4 +38,20 @@ type Pair.BitsMap {
 type Pair.Bits {
   new{fst: Bits, snd: Bits}
 }
+
+type BitsBitsCmp {
+  new{
+    fst: Bits
+    snd: Bits
+    trd: Cmp
+  }
+}
+
+type BitsBitsBool {
+  new{
+    fst: Bits
+    snd: Bits
+    trd: Bool
+  }
+}
 `
