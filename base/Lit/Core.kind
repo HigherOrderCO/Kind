@@ -6,14 +6,17 @@
 // - check do call.cont
 // - Lit.Core.Term.get_caller
 // - tipo "Bits" nativo no bloco genesis
-// - mais de um usuário ser dono (ownr : List<String>) DONE
 // - conseguir modificar o dono no Lit.Core.Term.bind
 // - revisar e usar a função validate
-// - do blocks (um "with" anonimo, sem assinatura)
-// - consertar parser para ir ate o final do arquivo?
 // - block difficulty (nakamoto consensus)
 // - owned types/constructors?
-// - use railroad diagrams for syntax
+// - melhorar mensagens de erro
+// - Lit.Lang:
+//   - consertar parser para ir ate o final do arquivo?
+//   - do blocks (um "with" anonimo, sem assinatura)
+//   - open?
+// - paper:
+//   - use railroad diagrams for syntax
 
 // Types
 // -----
@@ -172,10 +175,9 @@ Lit.Core.World.check.term(
   world: Lit.Core.World
   calr: String
 ): Bool
-  //log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
-  //log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
-  //log("")
-  // log(Lit.Lang.show.term(term, world))
+//  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
+//  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
+//  log("")
   case term {
     var:
       let var_type = ctx{term.name} abort false
@@ -534,7 +536,7 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
-  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|`
+  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|Lit.Lang.BitsMap|`
 type BoolList {
   nil
   cons{
@@ -570,11 +572,13 @@ with MrDog {
   call ret = Count.inc()
   call ret = Count.inc()
   call c = Count()
-  // call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
-  c
+  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
+  call dupped = Bits.dup(ret)
+  dupped
 } signed {
   confia
-}`
+}
+`
 //  let code = `
 //    user MrDog {
 //      0123456789abcdef

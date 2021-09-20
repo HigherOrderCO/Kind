@@ -1,3 +1,84 @@
+PathGraph: Type
+  Map<List<V2>>
+
+PathGraph.empty: PathGraph
+  {}
+
+PathGraph.new_link(a: V2, b: V2, graph: PathGraph): PathGraph
+  let a_id = V2.show(a)
+  case graph{a_id} as neighbors {
+    none: graph{a_id} <- b & []
+    some: graph{a_id} <- b & neighbors.value
+  }
+
+PathGraph.new_edge(a: V2, b: V2, graph: PathGraph): PathGraph
+  let graph = PathGraph.new_link(a, b, graph)
+  let graph = PathGraph.new_link(b, a, graph)
+  graph
+
+type PathGraph.a_star_search.state {
+  new(
+    frontier: PriorityQueue<Pair<V2,F64>>
+    come_from: Map<V2>
+    cost_so_far: Map<F64>
+  )
+}
+
+PathGraph.a_star_search(start: V2, goal: V2, graph: PathGraph): PathGraph.a_star_search.state
+  let frontier = PriorityQueue.empty!((x) F64.to_nat(x@snd))
+  let frontier = PriorityQueue.insert!({start, 0.0}, frontier)
+  let come_from = {} :: Map<V2>
+  let cost_so_far = {V2.show(start): 0.0} :: Map<F64>
+  let state = PathGraph.a_star_search.state.new(frontier, come_from, cost_so_far)
+  while Bool.not(PriorityQueue.is_empty!(state@frontier)) with state:
+    let current = PriorityQueue.head!(state@frontier) abort state
+    let current = Pair.fst!!(current)
+    //use state = state@count <- state@count + 1
+    use state = state@frontier <- PriorityQueue.tail!(state@frontier)
+    //log("Estou em: " | V2.show(current))
+    if V2.eql(current, goal) then
+      //log("cheguei no goal")
+      state
+    else
+      //log("A")
+      let neighbors = graph{V2.show(current)} abort state
+      //log("tenho " | Nat.show(List.length!(neighbors)) | " vizinhos")
+      for next in neighbors with state:
+        open state
+        //log("Indo para: " | V2.show(next))
+        let new_cost = (state.cost_so_far{V2.show(current)}<>0.0) + V2.dist(current, next)
+        let improved = case state.cost_so_far{V2.show(next)} as got {
+          none: true
+          some: new_cost <? got.value
+        }
+        if improved then
+          //log("melhorei")
+          //let count = state.count
+          let priority = new_cost + V2.dist(next, goal) // PathGraph.a_star_search.heuristic(next, goal)
+          let frontier = PriorityQueue.insert!({next, priority}, state.frontier)
+          let come_from = state.come_from{V2.show(next)} <- current
+          let cost_so_far = state.cost_so_far{V2.show(next)} <- new_cost
+          //log("... melhorei o " | V2.show(next) | ": cost=" | F64.show(new_cost) | " | priority=" | F64.show(priority))
+          PathGraph.a_star_search.state.new(frontier, come_from, cost_so_far)
+        else
+          //log("mantive")
+          state
+      state
+  state
+
+PathGraph.shortest_path(start: V2, goal: V2, graph: PathGraph): List<V2>
+  use result = PathGraph.a_star_search(start, goal, graph)
+  PathGraph.shortest_path.go(goal, result.come_from, [])
+
+PathGraph.shortest_path.go(current: V2, come_from: Map<V2>, result: List<V2>): List<V2>
+  //log("voltando pro: " | V2.show(current))
+  case come_from{V2.show(current)} as got {
+    none:
+      current & result
+    some:
+      PathGraph.shortest_path.go(got.value, come_from, current & result)
+  }
+
 type Nya.State {
   new(
     map: List<Polygon>
@@ -5,28 +86,40 @@ type Nya.State {
   )
 }
 
-has_line_of_sight(a: V2, b: V2, ds: F64, map: List<Polygon>): Bool
+has_line_of_sight(a: V2, b: V2, map: List<Polygon>): Bool
   case map {
     nil:
       true
     cons:
-      Bool.not(Polygon.blocks_sight(a, b, ds, map.head))
-      && has_line_of_sight(a, b, ds, map.tail)
+      Bool.not(Polygon.blocks_sight(a, b, map.head))
+      && has_line_of_sight(a, b, map.tail)
   }
 
-visibles(a: V2, map: List<Polygon>): List<V2>
+visible_vertices_from_point(pos: V2, map: List<Polygon>): List<V2>
   let visibles = []
-  let visibles = for poly in map:
-    let visibles = for seg in Polygon.segments(poly):
-      // TODO: flatten
-      let visibles = for vec in [seg@a, seg@b]:
-        if has_line_of_sight(a, vec, 0.5, map) then
-          vec & visibles
-        else
-          visibles
-      visibles
+  for poly in map with visibles:
+    open poly
+    for target in poly.vertices with visibles:
+      if has_line_of_sight(pos, target, map) then
+        target & visibles
+      else
+        visibles
     visibles
   visibles
+
+pathgraph_add_vertex(pos: V2, map: List<Polygon>, graph: PathGraph): PathGraph
+  let graph = for target in visible_vertices_from_point(pos, map):
+    PathGraph.new_edge(pos, target, graph)
+  graph
+
+pathgraph_from_map(map: List<Polygon>): PathGraph
+  let graph = PathGraph.empty
+  let graph = for pos in List.flat_map!!((x) x@vertices, map):
+    pathgraph_add_vertex(pos, map, graph)
+  graph
+
+
+
 
 Nya.State.initial: Nya.State
   let map = [
@@ -84,25 +177,46 @@ App.Nya.draw: App.Draw<App.Nya.State>
 
       // Neighbor graph
       //{
-        //let vecs = List.flat_map!!((x) x@vertices, state.local@map)
+        //let vecs = List.flat_map!!((x) x@vertices, map)
         //let lines = []
         //let lines = for pos in vecs:
-          //let lines = for vec in visibles(pos,map):
+          //let lines = for vec in visible_vertices_from_point(pos,map):
             //App.Nya.draw.segment(Segment.new(pos,vec),"green") & lines
           //lines
-        //<g>
-          //for line in lines:
-            //line
-        //</g>
+        //<g>for line in lines: line</g>
       //}
 
       // Map
-      for seg in List.flat_map!!(Polygon.segments, state.local@map):
+      for seg in List.flat_map!!(Polygon.edges, state.local@map):
         App.Nya.draw.segment(seg, "black")
 
       // Visible vertices
-      for vec in visibles(pos,map):
-        App.Nya.draw.segment(Segment.new(pos,vec),"blue")
+      //for vec in visible_vertices_from_point(pos,map):
+        //App.Nya.draw.segment(Segment.new(pos,vec),"blue")
+
+      // Shortest path
+      {
+        //log("a")
+        let graph = pathgraph_from_map(map)
+        //log(List.show!((x) x@fst|":"|List.show!(V2.show,x@snd), Map.to_list!(graph)))
+        //log("b")
+        //let pos = V2.new(10.0, 10.0)
+        let graph = pathgraph_add_vertex(pos, map, graph)
+        //log("c")
+        let path = PathGraph.shortest_path(pos, V2.new(962.0,479.0), graph)
+        //log("path: " | List.show!(V2.show, path))
+        //log("d")
+        let segments = List.zip_with!!!(Segment.new, path, List.tail!(path))
+        //log("e")
+        let lines = []
+        let lines = for segment in segments:
+          App.Nya.draw.segment(segment,"red") & lines
+        <g>for line in lines: line</g>
+      }
+      //50% nada acontecer
+      //35% loop infinito
+      //10% algo bugar
+       //5% funcionar
     </svg>
   </div>
 

@@ -1,2 +1,15 @@
 Test: _
-  Vector.cons!(1, "primeiro", Vector.cons!(0, "segundo", Vector.nil!))
+  let state = {0,0} :: Pair<Nat,Nat>
+  while state@fst <? 10 with state:
+    open state
+    {state@fst + 1, state@snd + state@fst}
+  state
+
+//Test: String
+  //let idx = 0
+  //let str = ""
+  //while idx <? 10 with {idx, str}:
+    //log("idx=" | Nat.show(idx) | " str=" | str)
+    //{idx + 1, str | Nat.show(idx)}
+  //str
+  //V2.show(V2.new(1.234, -7.555111))

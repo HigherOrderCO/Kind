@@ -10,15 +10,12 @@ bool_dec(b : Bool, b2 : Bool) : Decidable<b == b2>
     }!
   }!
 
-Ether.RLP.section(tree : Ether.RLP.Tree) : Ether.RLP.decode(Ether.RLP.encode(tree)) == tree
+Ether.RLP.section(tree : Ether.RLP.Tree) : Equal(Ether.RLP.Tree, Ether.RLP.decode(Ether.RLP.encode(tree)), tree)
   case tree {
-      tip : 
-        def bytes_size = Ether.Bits.get_bytes_size(tree.value)
-      //  def bytes_len = bool_dec(Nat.eql(bytes_size,1), true)
-        case Nat.eql(Ether.Bits.get_bytes_size(tree.value),1) {
-          true : ?a
-          false : ?b
-        }! :: Nat.eql(Ether.Bits.get_bytes_size(tree.value),1)!!! == true
-      list : ?b
+      tip: 
+        ?a :: 
+         Equal(Ether.RLP.Tree, Ether.RLP.decode(Ether.Bits.read_bytes(Ether.RLP.encode.bytes(Ether.RLP.Tree.tip(tree.value)))),
+             Ether.RLP.Tree.tip(tree.value))
+      list:
+        ?b
   }!
-

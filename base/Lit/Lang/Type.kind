@@ -25,4 +25,33 @@ type Cmp {
   eql
   gtn
 }
+
+type BitsMap {
+  new
+  tie{val: Bits, lft: BitsMap, rgt: BitsMap}
+}
+
+type Pair.BitsMap {
+  new{fst: BitsMap, snd: BitsMap}
+}
+
+type Pair.Bits {
+  new{fst: Bits, snd: Bits}
+}
+
+type BitsBitsCmp {
+  new{
+    fst: Bits
+    snd: Bits
+    trd: Cmp
+  }
+}
+
+type BitsBitsBool {
+  new{
+    fst: Bits
+    snd: Bits
+    trd: Bool
+  }
+}
 `

@@ -1,0 +1,99 @@
+Lit.Lang.BitsMap: String
+`
+BitsMap.set(map: BitsMap, key: Bits, value: Bits): BitsMap
+  case map : BitsMap {
+    new:
+      case key : Bits {
+        e:
+          BitsMap/tie{val: value, lft: BitsMap/new, rgt: BitsMap/new}
+        o:
+          call ins = BitsMap.set(BitsMap/new, key.pred, value)
+          BitsMap/tie{val: Bits/e, lft: ins, rgt: BitsMap/new}
+        i:
+          call ins = BitsMap.set(BitsMap/new, key.pred, value)
+          BitsMap/tie{val: Bits/e, lft: BitsMap/new, rgt: ins}
+      }
+    tie:
+      case key : Bits {
+        e:
+          BitsMap/tie{val: value, lft: BitsMap/new, rgt: BitsMap/new}
+        o:
+          call ins = BitsMap.set(map.lft, key.pred, value)
+          BitsMap/tie{val: map.val, lft: ins, rgt: map.rgt}
+        i:
+          call ins = BitsMap.set(map.rgt, key.pred, value)
+          BitsMap/tie{val: map.val, lft: map.lft, rgt: ins}
+      }
+  }
+
+// TODO this function is almost useless because you need to duplicate the map to use it
+// very expensive!
+BitsMap.get(map: BitsMap, key: Bits): Bits
+  case map : BitsMap {
+    new:
+      Bits/e
+    tie:
+      case key : Bits {
+        e:
+          map.val
+        o:
+          call val = BitsMap.get(map.lft, key.pred)
+          val
+        i:
+          call val = BitsMap.get(map.rgt, key.pred)
+          val
+      }
+  }
+
+BitsMap.dup(m: BitsMap): Pair.BitsMap
+  case m : BitsMap {
+    new:
+      Pair.BitsMap/new{fst: BitsMap/new, snd: BitsMap/new}
+    tie:
+      call dup_bits = Bits.dup(m.val)
+      call dup_lft = BitsMap.dup(m.lft)
+      call dup_rgt = BitsMap.dup(m.rgt)
+      case dup_bits : Pair.Bits {
+        new:
+          case dup_lft : Pair.BitsMap {
+            new:
+              case dup_rgt : Pair.BitsMap {
+                new:
+                  Pair.BitsMap/new{
+                    fst: BitsMap/tie{val: dup_bits.fst, lft: dup_lft.fst, rgt: dup_rgt.fst}
+                    snd: BitsMap/tie{val: dup_bits.snd, lft: dup_lft.snd, rgt: dup_rgt.snd}
+                  }
+              }
+          }
+      }
+  }
+
+// TODO this shouldn't run what's happening?
+BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+  call dup_state = BitsMap.dup(state)
+  state
+
+//BitsMap.transact(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+//  // TODO stop the dups save the environment
+//  call dup_state = BitsMap.dup(state)
+//  case dup_state : Pair.BitsMap {
+//    new:
+//      call dup_from = Bits.dup(from)
+//      case dup_from : Pair.Bits {
+//        new:
+//          call balance = BitsMap.get(dup_state.snd, dup_from.snd)
+//          call dup_balance = Bits.dup(balance)
+//          case dup_balance : Pair.Bits {
+//            new:
+//              call ok = Bits.lte(dup_balance.snd, sum)
+//              case ok : Bool {
+//                true:
+//                  call 
+//                  state
+//                false:
+//                  dup_state.fst
+//              }
+//          }
+//      }
+//  }
+`
