@@ -229,37 +229,6 @@ Bits.drop(n: Nat, xs: Bits): Bits
 
 // Comparisons
 
-Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): Cmp
-  case a : Bits { 
-    e: case b : Bits {
-      e: c
-      o:
-        call rec = Bits.cmp.aux(Bits/e, b.pred, c)
-        rec
-      i: Cmp/ltn
-    }
-    o: case b : Bits { 
-      e:
-        call rec = Bits.cmp.aux(a.pred, Bits/e, c)
-        rec
-      o:
-        call rec = Bits.cmp.aux(a.pred, b.pred, c)
-        rec
-      i:
-        call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/ltn)
-        rec
-      }
-    i: case b : Bits { 
-      e: Cmp/gtn
-      o: 
-        call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/gtn)
-        rec
-      i:
-        call rec = Bits.cmp.aux(a.pred, b.pred, c)
-        rec
-    }
-  }
-
 Bits.eql(a: Bits, b: Bits): Bool
   case a : Bits { 
     e: case b : Bits { 
@@ -283,29 +252,147 @@ Bits.eql(a: Bits, b: Bits): Bool
     }
   }
 
-Bits.cmp(a: Bits, b: Bits): Cmp
-  call cmp = Bits.cmp.aux(a, b, Cmp/eql)
-  cmp
+Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
+  case a : Bits { 
+    e: case b : Bits {
+      e:
+        BitsBitsCmp/new{
+          fst: Bits/e
+          snd: Bits/e
+          trd: c
+        }
+      o:
+        call rec = Bits.cmp.aux(Bits/e, b.pred, c)
+        case rec : BitsBitsCmp {
+          new:
+            BitsBitsCmp/new{
+              fst: Bits/e
+              snd: Bits/o{pred: rec.snd}
+              trd: rec.trd
+            }
+        }
+      i:
+        BitsBitsCmp/new{
+          fst: Bits/e
+          snd: Bits/o{pred: b.pred}
+          trd: Cmp/ltn
+        }
+    }
+    o:
+      case b : Bits { 
+        e:
+          call rec = Bits.cmp.aux(a.pred, Bits/e, c)
+          case rec : BitsBitsCmp {
+            new:
+              BitsBitsCmp/new{
+                fst: Bits/o{pred: rec.fst}
+                snd: Bits/e
+                trd: rec.trd
+              }
+          }
+        o:
+          call rec = Bits.cmp.aux(a.pred, b.pred, c)
+          case rec : BitsBitsCmp {
+            new:
+              BitsBitsCmp/new{
+                fst: Bits/o{pred: rec.fst}
+                snd: Bits/o{pred: rec.snd}
+                trd: rec.trd
+              }
+          }
+        i:
+          call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/ltn)
+          case rec : BitsBitsCmp {
+            new:
+              BitsBitsCmp/new{
+                fst: Bits/o{pred: rec.fst}
+                snd: Bits/o{pred: rec.snd}
+                trd: rec.trd
+              }
+          }
+      }
+    i:
+      case b : Bits { 
+        e:
+          BitsBitsCmp/new{
+            fst: Bits/i{pred: a.pred}
+            snd: Bits/e
+            trd: Cmp/gtn
+          }
+        o: 
+          call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/gtn)
+          case rec : BitsBitsCmp {
+            new:
+              BitsBitsCmp/new{
+                fst: Bits/i{pred: rec.fst}
+                snd: Bits/o{pred: rec.snd}
+                trd: rec.trd
+              }
+          }
+        i:
+          call rec = Bits.cmp.aux(a.pred, b.pred, c)
+          case rec : BitsBitsCmp {
+            new:
+              BitsBitsCmp/new{
+                fst: Bits/i{pred: rec.fst}
+                snd: Bits/i{pred: rec.snd}
+                trd: rec.trd
+              }
+          }
+      }
+  }
 
-Bits.gte(a: Bits, b: Bits): Bool
-  call cmp = Bits.cmp(a,b)
-  call gte = Cmp.as_gte(cmp)
-  gte
+Bits.cmp(a: Bits, b: Bits): BitsBitsCmp
+  call bbcmp = Bits.cmp.aux(a, b, Cmp/eql)
+  bbcmp
 
-Bits.gtn(a: Bits, b: Bits): Bool
-  call cmp = Bits.cmp(a,b)
-  call gtn = Cmp.as_gtn(cmp)
-  gtn
+Bits.gte(a: Bits, b: Bits): BitsBitsBool
+  call bbcmp = Bits.cmp(a, b)
+  case bbcmp : BitsBitsCmp {
+    new:
+      call gte = Cmp.as_gte(bbcmp.trd)
+      BitsBitsBool/new{
+        fst: bbcmp.fst
+        snd: bbcmp.snd
+        trd: gte
+      }
+  }
 
-Bits.lte(a: Bits, b: Bits): Bool
-  call cmp = Bits.cmp(a,b)
-  call lte = Cmp.as_lte(cmp)
-  lte
+Bits.gtn(a: Bits, b: Bits): BitsBitsBool
+  call bbcmp = Bits.cmp(a, b)
+  case bbcmp : BitsBitsCmp {
+    new:
+      call gtn = Cmp.as_gtn(bbcmp.trd)
+      BitsBitsBool/new{
+        fst: bbcmp.fst
+        snd: bbcmp.snd
+        trd: gtn
+      }
+  }
 
-Bits.ltn(a: Bits, b: Bits): Bool
-  call cmp = Bits.cmp(a,b)
-  call ltn = Cmp.as_ltn(cmp)
-  ltn
+Bits.lte(a: Bits, b: Bits): BitsBitsBool
+  call bbcmp = Bits.cmp(a,b)
+  case bbcmp : BitsBitsCmp {
+    new:
+      call lte = Cmp.as_lte(bbcmp.trd)
+      BitsBitsBool/new{
+        fst: bbcmp.fst
+        snd: bbcmp.snd
+        trd: lte
+      }
+  }
+
+Bits.ltn(a: Bits, b: Bits): BitsBitsBool
+  call bbcmp = Bits.cmp(a,b)
+  case bbcmp : BitsBitsCmp {
+    new:
+      call ltn = Cmp.as_ltn(bbcmp.trd)
+      BitsBitsBool/new{
+        fst: bbcmp.fst
+        snd: bbcmp.snd
+        trd: ltn
+      }
+  }
 
 Bits.dup(a: Bits): Pair.Bits
   case a : Bits {

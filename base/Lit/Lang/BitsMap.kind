@@ -60,7 +60,7 @@ BitsMap.dup(m: BitsMap): Pair.BitsMap
               case dup_rgt : Pair.BitsMap {
                 new:
                   Pair.BitsMap/new{
-                    fst: BitsMap/tie{val: dup_bits.fst, lft: dup_lft.fst, rgt: dup_rgt.fst},
+                    fst: BitsMap/tie{val: dup_bits.fst, lft: dup_lft.fst, rgt: dup_rgt.fst}
                     snd: BitsMap/tie{val: dup_bits.snd, lft: dup_lft.snd, rgt: dup_rgt.snd}
                   }
               }
@@ -68,6 +68,32 @@ BitsMap.dup(m: BitsMap): Pair.BitsMap
       }
   }
 
-// TODO BitsMap.transact
+// TODO this shouldn't run what's happening?
+BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+  call dup_state = BitsMap.dup(state)
+  state
+
 //BitsMap.transact(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+//  // TODO stop the dups save the environment
+//  call dup_state = BitsMap.dup(state)
+//  case dup_state : Pair.BitsMap {
+//    new:
+//      call dup_from = Bits.dup(from)
+//      case dup_from : Pair.Bits {
+//        new:
+//          call balance = BitsMap.get(dup_state.snd, dup_from.snd)
+//          call dup_balance = Bits.dup(balance)
+//          case dup_balance : Pair.Bits {
+//            new:
+//              call ok = Bits.lte(dup_balance.snd, sum)
+//              case ok : Bool {
+//                true:
+//                  call 
+//                  state
+//                false:
+//                  dup_state.fst
+//              }
+//          }
+//      }
+//  }
 `

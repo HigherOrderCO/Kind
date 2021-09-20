@@ -174,9 +174,9 @@ Lit.Core.World.check.term(
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
-  //log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
-  //log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
-  //log("")
+//  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
+//  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
+//  log("")
   open world
   case term {
     var:
