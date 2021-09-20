@@ -178,6 +178,7 @@ Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
     adt adt: String.eql(a.name, b.name)
   } default false
 
+// TODO: the `type` input must not be a Maybe. Add the type to `Exec` instead.
 Lit.Core.World.check.term(
   term: Lit.Core.Term
   type: Maybe<Lit.Core.Type>
