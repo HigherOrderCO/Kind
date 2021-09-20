@@ -27,9 +27,8 @@ Litereum's design is a combination of 3 components:
 
 LitCore is a affine, simply typed, functional language featuring recurive
 functions, algebraic datatypes, pattern-matching and a global state, called
-world. It can be seen as the virtual machine running inside Litereum.
-
-Below is a complete list of types and algorithms used on LitCore.
+world. It can be seen as the virtual machine running inside Litereum. Every type
+and algorithm required to implement LitCore will be specified below.
 
 #### Bits
 
@@ -105,29 +104,51 @@ Tracing a parallel to conventional blockchains, a command is like a transaction,
 and a page is like a block. The main difference is that commands don't need to
 be signed. There are 4 variants of commands:
 
-1. `new_type(type)`
+##### 1. `new_type(type)`
 
 Defines a new Type on the global state.
 
-2. `new_func(func)`
+If the type's name already exists, then this command fails.
+
+##### 2. `new_func(func)`
 
 Defines a new Function on the global state.
 
-3. `new_user(user)`
+If the function's name already exists, then this command fails.
+
+If the function's body is ill-typed with a type context initialized with the
+function's argument list, then this command fails. The function body
+is ill-typed if it doesn't pass the type-check procedure, with a type context
+initialized with each variable on the function's argument list.
+
+If the function's body is invalid, then this command fails. The function body is
+invalid if it doesn't pass the validate procecure.
+
+##### 3. `new_user(user)`
 
 Defines a new User on the global state.
 
-4. `with_user(user, signature, term)`
+If the user's name already exists, then this command fails.
 
-Executes an expression in behalf of an external user, if a signature is valid,
-or anonymously, otherwise.
+##### 4. `with_user(user, signature, term)`
+
+Executes an expression in behalf of an external user.
+
+If the signature is invalid, the command is executed anonymously, with the
+username being set as the empty bitstring.
+
+If the expression's body is ill-typed, then this command fails. The function body
+is ill-typed if it doesn't pass the type-check procedure with an empty context.
+
+If the expression's body is invalid, then this command fails. The expression
+body is invalid if it doesn't pass the validate procedure.
 
 #### Term
 
 A Litereum term is an expression that performs a computation and returns a
 value. There are 5 variants:
 
-1. `var(name)`
+##### 1. `var(name)`
 
 Represents a variable bound by a global function, or by a pattern-matching
 clause. When a function is called, or a pattern-match takes place, the bound
@@ -136,7 +157,7 @@ affine, which means the same bound variable can only be used at most once, and
 must be unique, which means the same name can't be bound to two different
 variables, globally.
 
-2. `create(type, form, vals)`
+##### 2. `create(type, form, vals)`
 
 Instantiates a constructor of an algebraic datatype. It has 3 fields:
 
@@ -146,7 +167,19 @@ Instantiates a constructor of an algebraic datatype. It has 3 fields:
 
 - `vals : List<Term>`: the values of the fields to be created.
 
-3. `match`
+A create variant is well-typed if:
+
+1. The `type` exists on the global state
+
+2. The `ctor` index is smaller than number of constructors in `type`
+
+3. For each index `0 < i < length(vals)`, the value `vals[i]` is well-typed, and
+   its type matches the type stored on `fields[i]`, where `fields` is the list
+   of fields stored on the constructor of number `ctor` in the selected type
+
+The create variant doesn't compute. It is irreducible.
+
+##### 3. `match`
 
 Performs a pattern-match. It has 4 fields:
 
@@ -158,7 +191,17 @@ Performs a pattern-match. It has 4 fields:
 
 - `cses : List<Case>`: a list of cases.
 
-4. `call`
+The `match` variant is well-typed if: 
+
+<TODO>
+
+The `match` variant computes if the matched constructor, `expr`, is of the
+`create` variant. In this case, the expression reduces to the selected case,
+`cses[ctor]`, where `ctor` is the index stored on `expr`, with each variable
+bound by the selected case is substituted by the respective field of the matched
+constructor. <TODO: improve this paragraph>
+
+##### 4. `call`
 
 Calls an external function, returning a value. It has 4 fields:
 
@@ -170,7 +213,11 @@ Calls an external function, returning a value. It has 4 fields:
 
 - `cont : Term`: the body of the call.
 
-5. `bind`
+The `call` variant is well-typed if: <TODO>
+
+The `call` variant computes: <TODO>
+
+##### 5. `bind`
 
 Binds a global definition, possibly mutating an existing value. It has 3 fields:
 
@@ -179,6 +226,10 @@ Binds a global definition, possibly mutating an existing value. It has 3 fields:
 - `main : Bits`: the value to be bound.
 
 - `cont : Term`: the body of the bind.
+
+The `bind` variant is well-typed if: <TODO>
+
+The `bind` variant computes: <TODO>
 
 #### Case
 
