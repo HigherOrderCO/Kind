@@ -505,7 +505,7 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
-  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|`
+  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|Lit.Lang.BitsMap|`
 type BoolList {
   nil
   cons{
@@ -545,7 +545,6 @@ with MrDog {
   confia
 }
 `
-
 //  let code = `
 //    user MrDog {
 //      0123456789abcdef
