@@ -538,11 +538,14 @@ user MrDog {
 with MrDog {
   call ret = Count.inc()
   call c = Count()
-  //call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
-  c
+  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
+  call dupped = Bits.dup(ret)
+  dupped
 } signed {
   confia
-}`
+}
+`
+
 //  let code = `
 //    user MrDog {
 //      0123456789abcdef

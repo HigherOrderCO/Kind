@@ -227,7 +227,7 @@ Bits.drop(n: Nat, xs: Bits): Bits
    }
  }
 
-//Comparisons
+// Comparisons
 
 Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): Cmp
   case a : Bits { 
@@ -259,7 +259,6 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): Cmp
         rec
     }
   }
-
 
 Bits.eql(a: Bits, b: Bits): Bool
   case a : Bits { 
@@ -311,9 +310,24 @@ Bits.ltn(a: Bits, b: Bits): Bool
 Bits.dup(a: Bits): Pair.Bits
   case a : Bits {
     e:
-      Bits/new{fst: Bits/e, snd: Bits/e}
+      Pair.Bits/new{fst: Bits/e, snd: Bits/e}
     o:
-      Bits/new
+      call dupped = Bits.dup(a.pred)
+      case dupped : Pair.Bits {
+        new:
+          Pair.Bits/new{
+            fst: Bits/o{pred: dupped.fst},
+            snd: Bits/o{pred: dupped.snd},
+          }
+      }
     i:
+      call dupped = Bits.dup(a.pred)
+      case dupped : Pair.Bits {
+        new:
+          Pair.Bits/new{
+            fst: Bits/i{pred: dupped.fst},
+            snd: Bits/i{pred: dupped.snd},
+          }
+      }
   }
 `
