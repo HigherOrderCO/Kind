@@ -1,143 +1,192 @@
-Litereum: the minimal decentralized computer
-============================================
+Litereum: a minimal decentralized computer
+==========================================
 
-In 2013, the first decentralized computer, Ethereum, was proposed, extending
-Bitcoin with a stateful scripting language that allowed arbitrary transactions
-to be settled without third parties. Due to its experimental nature, Ethereum
-grew increasingly complex, leading to security issues and an asymmetry of power
-between developers and users. Litereum is a massive simplification of the
-concept, which trades scalability and cutting-edge features for sheer simplicity
-and code quality. Designed to be final and never require updates, Litereum
-eliminates the core developer class, giving birth to a minimal decentralized
-computer that is inherently secure and truly apolitical.
+In 2013, the first smart-contract blockchain, Ethereum, was proposed, extending
+Bitcoin with a stateful scripting language that allowed arbitrary financial
+transactions to be settled without third parties. Notably, Ethereum's built-in
+virtual machine made it a general-purpose computer, even though most of the
+protocol's complexity wasn't required to achieve Turing completeness. Litereum
+is a massive simplification of this concept, trading features for simplicity.
+Without a native token, it, technically, isn't a cryptocurrency, even though
+tokens can be created internally as stateful programs. In essence, Litereum is
+just the Lambda Calculus running in a peer-to-peer network, making it a
+politically neutral decentralized computer.
 
-Design
-------
+Implementation
+--------------
 
-Litereum's design is a combination of 3 main components:
+Litereum's design is a combination of 3 components:
 
 1. LitCons: a minimal, proof of work consensus algorithm.
 
 2. LitSign: a minimal, quantum-resistant, hash-based signature scheme.
 
-3. LitCore: a minimal, statically typed linear calculus used for scripting. 
+3. LitCore: a minimal, statically typed affine calculus used for scripting. 
 
-Litereum doesn't have a native currency: it is a purely computational network.
-Of course, users can implement their own currencies as smart-contracts, and
-miners can be incentivized with any of these internal tokens. The design of each
-of these components will be specified below.
+### LitCore
 
-LitCore
--------
+LitCore is a affine, simply typed, functional language featuring recurive
+functions, algebraic datatypes, pattern-matching and a global state, called
+world. It can be seen as the virtual machine running inside Litereum.
 
+Below is a complete list of types and algorithms used on LitCore.
 
-LitCore is the underlying computation model of the network. It can be described
-as a minimal functional language featuring linear functions, algebraic
-datatypes, pattern-matching and a mutable global state. This language is split
-in two parts: terms and commands.
+#### Bits
 
-Unlike most blockchain platforms, Litereum isn't a crypto-currency. Instead, it
-is a pure computation network. One can see it as a global Haskell REPL. Instead
-of blocks, Litereum has `Page`s, which is like a file in a programming language.
-Instead of transactions, Litereum has `Command`s, which are like statements in a
-programming language. And instead of stack-based opcodes, Litereum has `Term`s,
-which are like pure expressions that compute and return values.
+A string that can be either empty or any sequence of bits
 
-### Page (block)
+#### World
 
-A Litereum Page is just a list of commands. It is equivalent to a block in a
-crypto-currency, but, instead of storing transactions, it stores a list of
-commands. When a page is mined, these commands will execute in order, each one
-altering the network state.
+The global state of LitCore. It is just a map from names to entries.
 
-### Command (transaction)
+#### Entry
 
-Instead of monetary transactions, a Litereum page (block) has a list of
-commands. A command executes a single action that alters the blockchain state in
-a specific way. Unlike transactions in other networks, commands don't require a
-monetary transfer ("amount/to"), a fee ("gasPrice", "gasLimit", etc.), and not
-even a signature (they can be anonymous). This is efficient, as it allows
-certain transactions to avoid lengthly signatures: for example, there is no need
-for a signature to create a new type, or a new function (contract). Users can
-still emulate conventional transactions by making a signed command that pays
-money and fees in specific tokens. There are 4 variants of commands:
+An entry on the global state. It can be either an User, a Type, or a Function.
 
-1. `new_type`
+#### User
 
-The `new_type` command performs a global type declaration, defining a new
-algebraic datatype that will then be available to be used in functions and other
-commands. It has one argument: the type to be created.
+An external user capable of running authenticated scripts. It has 2 fields:
 
-A Litereum Type specifies a simply-typed, linear, possibly recursive algebraic
-datatype. It has a name, and a number of forms. A Form represents a single
-constructor of an algebraic datatype. It has a name, and a number of fields. A
-field represents a value stored inside a constructor. It has a name and a type
-(represented by its name). In code:
+- `name : Bits`: the name of the user
 
-```
-record Lit.Core.Type {
-  name: String
-  forms: List<Lit.Core.Type.Form>
-}
+- `pkey : Bits`: the public key of the user
 
-record Lit.Core.Type.Form {
-  name: String
-  fields: List<Lit.Core.Type.Field>
-}
+#### Type
 
-record Lit.Core.Type.Field {
-  name: String
-  type: String
-}
-```
+An algebraic datatype. It has two fields:
 
-2. `new_func`
+- `name : Bits`: the name of the type
 
-The `new_func` command creates a new global function that is then available to
-be used in other functions or inside blocks. It has one argument: the function
-to be created.  
+- `ctors : List<Constructor>`: a list of Constructors
 
-A Litereum `Func` is a record with 6 fields: a `name`, ... <TODO>
+#### Constructor
 
-3. `new_user`
+A Constructor has two fields:
 
-<TODO: creates a new user>
+- `name : Bits`: the name of the constructor
 
-4. `ext_exec`
+- `fields : List<Field>`: a list of Fields
 
-<TODO: performs an inline call, possibly signed>
+#### Field
 
-### Term
+A Field has two fields:
+
+- `name : Bits`: the name of the field 
+
+- `type : List<Type>`: the type of the field
+
+The type of a field can be the name of any type defined previously, or a
+recursive occurrence of the type being defined.
+
+#### Function
+
+A global, affine, simply typed function that can be called by external users, or
+by other functions. Functions are pure, except for one stateful operation that
+can rebind other functions in the global state.
+
+A function has 6 fields:
+
+- `name`: the name of the function being defined
+
+- `ownr`: a list of owners that can redefine this function
+
+- `main`: a Term, representing the body of the function
+
+- `iarg`: a list of argument names
+
+- `ityp`: a list of argument types
+
+- `otyp`: the output type of the function
+
+#### Command
+
+A top-level command that alters the global state. Commands are grouped in pages.
+Tracing a parallel to conventional blockchains, a command is like a transaction,
+and a page is like a block. The main difference is that commands don't need to
+be signed. There are 4 variants of commands:
+
+1. `new_type(type)`
+
+Defines a new Type on the global state.
+
+2. `new_func(func)`
+
+Defines a new Function on the global state.
+
+3. `new_user(user)`
+
+Defines a new User on the global state.
+
+4. `with_user(user, signature, term)`
+
+Executes an expression in behalf of an external user, if a signature is valid,
+or anonymously, otherwise.
+
+#### Term
 
 A Litereum term is an expression that performs a computation and returns a
 value. There are 5 variants:
 
-1. `create`
+1. `var(name)`
 
-Represents the instantiation, or allocation, of an algebraic datatype
-constructor. The `create` variant receives 3 arguments:
+Represents a variable bound by a global function, or by a pattern-matching
+clause. When a function is called, or a pattern-match takes place, the bound
+variable will be substituted by its called, or matched, value. Variables must be
+affine, which means the same bound variable can only be used at most once, and
+must be unique, which means the same name can't be bound to two different
+variables, globally.
 
-- `type : String`: stores the name of the type to be created.
+2. `create(type, form, vals)`
 
-- `form : Nat`: stores the index of the form, or variant, to be created.
+Instantiates a constructor of an algebraic datatype. It has 3 fields:
 
-- <TODO>
+- `type : Bits`: the name of the type to be created.
 
-2. `match`
+- `ctor : Nat`: the index of the constructor to be created.
 
-<TODO>
+- `vals : List<Term>`: the values of the fields to be created.
 
-3. `call`
+3. `match`
 
-<TODO>
+Performs a pattern-match. It has 4 fields:
 
-4. `bind`
+- `type : Bits`: the name of the type of the matched value.
 
-<TODO>
+- `name : Bits`: a name for the matched value.
 
-5. `var`
+- `expr : Term`: the matched value.
 
-<TODO>
+- `cses : List<Case>`: a list of cases.
+
+4. `call`
+
+Calls an external function, returning a value. It has 4 fields:
+
+- `name : Bits`: the name of the returned value.
+
+- `func : Bits`: the name of the function to be called.
+
+- `args : List<Term>`: the list of arguments.
+
+- `cont : Term`: the body of the call.
+
+5. `bind`
+
+Binds a global definition, possibly mutating an existing value. It has 3 fields:
+
+- `name : Bits`: the name of the definition to be altered.
+
+- `main : Bits`: the value to be bound.
+
+- `cont : Term`: the body of the bind.
+
+#### Case
+
+A case in a pattern-match. It has 2 fields:
+
+- `flds : List<Bits>`: a list of field names
+
+- `body : Term`: the term returned by that case
 
 LitSign
 -------
@@ -297,11 +346,3 @@ naturally critical and resistant to such improvement proposals, even if they
 come from ourselves. If the codebase becomes large and complex enough, it will,
 once again, concentrate the power in the hands of a few core developers, which
 goes against the proposal.
-
-
-
-
-
-
-
-// TODO: comment programas grandes podem ser split em varias paginas

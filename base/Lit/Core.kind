@@ -21,6 +21,13 @@
 // Types
 // -----
 
+type Lit.Core.Term.Case {
+  new(
+    flds: List<String>
+    body: Lit.Core.Term
+  )
+}
+
 // A Litereum term
 type Lit.Core.Term {
   // A variable
@@ -30,7 +37,7 @@ type Lit.Core.Term {
   // Creates a value
   create(
     type: String
-    form: Nat
+    ctor: Nat
     vals: List<Lit.Core.Term>
   )
   // Pattern-matches a value
@@ -38,7 +45,7 @@ type Lit.Core.Term {
     type: String
     name: String
     expr: Lit.Core.Term
-    cses: List<Pair<List<String>,Lit.Core.Term>>
+    cses: List<Lit.Core.Term.Case>
   )
   // Calls an external program
   call(
@@ -59,12 +66,12 @@ type Lit.Core.Term {
 type Lit.Core.Type {
   adt(
     name: String
-    forms: List<Lit.Core.Type.Form>
+    ctors: List<Lit.Core.Type.Ctor>
   )
 }
 
 // A constructor of an ADT
-type Lit.Core.Type.Form {
+type Lit.Core.Type.Ctor {
   new(
     name: String
     fields: List<Lit.Core.Type.Field>
@@ -100,6 +107,7 @@ type Lit.Core.Func {
 }
 
 // An external call
+// TODO: remove this type (move these fields to inside Lit.Core.Line.ext_exec)
 type Lit.Core.Exec {
   new(
     user: String
@@ -109,6 +117,7 @@ type Lit.Core.Exec {
 }
 
 // A paragraph in a Litereum page
+// TODO: rename to Lit.Core.Command
 type Lit.Core.Line {
   new_type(value: Lit.Core.Type)
   new_func(value: Lit.Core.Func)
@@ -155,9 +164,9 @@ Lit.Core.World.get_user(name: String, world: Lit.Core.World): Maybe<Lit.Core.Use
     } default none
   } default none
 
-Lit.Core.Type.find_form(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Form>>
+Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Ctor>>
   case type {
-    adt: List.ifind!((i,f) String.eql(f@name,name), type.forms)
+    adt: List.ifind!((i,f) String.eql(f@name,name), type.ctors)
   }
 
 // Type-Checking
@@ -187,8 +196,8 @@ Lit.Core.World.check.term(
       adt:
         use term_type = Lit.Core.World.get_type(term.type,world) abort false
         if Lit.Core.Type.equal(term_type, type) then
-          use form = type.forms[term.form] abort false
-          Lit.Core.World.check.many(term.vals, List.mapped!(form.fields)!((x) x@type), ctx, world)
+          use ctor = type.ctors[term.ctor] abort false
+          Lit.Core.World.check.many(term.vals, List.mapped!(ctor.fields)!((x) x@type), ctx, world)
         else
           false
     }
@@ -204,8 +213,8 @@ Lit.Core.World.check.term(
       case expr_type {
         adt:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
-          let cses = List.mapped!(term.cses)!((x) x@snd)
-          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.forms, term.name, ctx, world)
+          let cses = List.mapped!(term.cses)!((x) x@body)
+          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.ctors, term.name, ctx, world)
           expr && cses
       }
     bind:
@@ -239,19 +248,19 @@ Lit.Core.World.check.many(
 Lit.Core.World.check.match.cases(
   cases: List<Lit.Core.Term>
   type: Lit.Core.Type
-  forms: List<Lit.Core.Type.Form>
+  ctors: List<Lit.Core.Type.Ctor>
   name: String
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
 ): Bool
-  case cases forms {
+  case cases ctors {
     cons cons:
       let ext_ctx = ctx
-      for field in forms.head@fields with ext_ctx:
+      for field in ctors.head@fields with ext_ctx:
         let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.adt("Empty", [])
         ext_ctx{name | "." | field@name} <- type
       let case_ok = Lit.Core.World.check.term(cases.head, type, ext_ctx, world)
-      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, forms.tail, name, ctx, world)
+      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, ctors.tail, name, ctx, world)
       case_ok && rest_ok
     nil nil:
       true
@@ -435,7 +444,7 @@ Lit.Core.World.run.term(
       //log("match") // DEBUG
       let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
       case expr {
-        create: case term.cses[expr.form] as selected_case {
+        create: case term.cses[expr.ctor] as selected_case {
           some: 
             let {case_fields, case_body} = selected_case.value
             let vars = for subst in List.zip!!(case_fields, expr.vals):
@@ -448,7 +457,7 @@ Lit.Core.World.run.term(
     create:
       //log("create") // DEBUG
       let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
-      {Lit.Core.Term.create(term.type, term.form, vals), world}
+      {Lit.Core.Term.create(term.type, term.ctor, vals), world}
     call:
       //log("call") // DEBUG
       case world{term.func} as got {

@@ -24,14 +24,14 @@ Lit.Lang.show.type(type: Lit.Core.Type, world: Lit.Core.World): String
     adt:
       "type " | type.name
       | " { "
-      | String.join(", ", List.mapped!(type.forms)!((form)
-          open form
-          if List.is_empty!(form.fields) then
-            form.name
+      | String.join(", ", List.mapped!(type.ctors)!((ctor)
+          open ctor
+          if List.is_empty!(ctor.fields) then
+            ctor.name
           else
-            form.name
+            ctor.name
             | "{"
-            | String.join(", ", List.mapped!(form.fields)!((field)
+            | String.join(", ", List.mapped!(ctor.fields)!((field)
                 open field
                 field.name | ": " | field.type
               ))
@@ -79,18 +79,18 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
       get type = Lit.Core.World.get_type(term.type, world)
       case type {
         adt: Maybe {
-          get form = type.forms[term.form]
-          use form = form
+          get ctor = type.ctors[term.ctor]
+          use ctor = ctor
           let text = ""
           let vals = List.zip_with!!!(
             (field,value)
               field@name
               | ":"
               | Lit.Lang.show.term(value, world),
-            form.fields,
+            ctor.fields,
             term.vals)
           let vals = if List.is_empty!(vals) then "" else "{" | String.join(",",vals) | "}"
-          return type.name | "/" | form.name | vals
+          return type.name | "/" | ctor.name | vals
         }
       }
     } <> "?"
@@ -101,12 +101,12 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
           let expr = Lit.Lang.show.term(term.expr, world)
           let name = term.name
           let vals = List.zip_with!!!(
-            (form,cse)
-              let fields = List.map!!((x) name | "." | x@name, List.reverse!(form@fields))
-              form@name
+            (ctor,cse)
+              let fields = List.map!!((x) name | "." | x@name, List.reverse!(ctor@fields))
+              ctor@name
               | ": "
-              | Lit.Lang.show.term(cse@snd, world),
-            type.forms,
+              | Lit.Lang.show.term(cse@body, world),
+            type.ctors,
             term.cses)
           return "case " | name | " : " | type.name | " = " | expr | " { " | String.join(", ",vals) | " }" 
         }
@@ -221,18 +221,18 @@ Lit.Lang.parser.type(world: Lit.Core.World): Parser<Lit.Core.Type>
   Parser {
     Lit.Lang.parser.text("type")
     get name = Lit.Lang.parser.name
-    get forms = Parser.wrap!(
+    get ctors = Parser.wrap!(
       Lit.Lang.parser.text("{")
       Parser {
         Parser.maybe!(Lit.Lang.parser.text(","))
-        Lit.Lang.parser.type.form(world)
+        Lit.Lang.parser.type.ctor(world)
       }
       Lit.Lang.parser.text("}")
     )
-    return Lit.Core.Type.adt(name, forms)
+    return Lit.Core.Type.adt(name, ctors)
   }
 
-Lit.Lang.parser.type.form(world: Lit.Core.World): Parser<Lit.Core.Type.Form>
+Lit.Lang.parser.type.ctor(world: Lit.Core.World): Parser<Lit.Core.Type.Ctor>
   Parser {
     get name = Lit.Lang.parser.name
     get fields = Parser.choice!([
@@ -251,7 +251,7 @@ Lit.Lang.parser.type.form(world: Lit.Core.World): Parser<Lit.Core.Type.Form>
         return []
       }
     ])
-    return Lit.Core.Type.Form.new(name, fields)
+    return Lit.Core.Type.Ctor.new(name, fields)
   }
 
 Lit.Lang.parser.term(world: Lit.Core.World): Parser<Lit.Core.Term>
@@ -270,21 +270,21 @@ Lit.Lang.parser.term.create(world: Lit.Core.World): Parser<Lit.Core.Term>
       none: Parser.fail!("Type not found.")
       some: Parser {
         Lit.Lang.parser.text("/")
-        get form_name = Lit.Lang.parser.name
+        get ctor_name = Lit.Lang.parser.name
         use type = found.value
-        case Lit.Core.Type.find_form(form_name, type) as found {
-          none: Parser.fail!("Form not found.")
+        case Lit.Core.Type.find_ctor(ctor_name, type) as found {
+          none: Parser.fail!("Ctor not found.")
           some: Parser {
-            let {form_num, form} = found.value
-            let fields = form@fields
+            let {ctor_num, ctor} = found.value
+            let fields = ctor@fields
             if List.is_empty!(fields) then Parser {
-              return Lit.Core.Term.create(type_name, form_num, [])
+              return Lit.Core.Term.create(type_name, ctor_num, [])
             } else Parser {
               let fields = List.map!!((x) x@name, fields)
               Lit.Lang.parser.text("{")
               get vals = Lit.Lang.parser.term.args(fields, world)
               Lit.Lang.parser.text("}")
-              return Lit.Core.Term.create(type_name, form_num, vals)
+              return Lit.Core.Term.create(type_name, ctor_num, vals)
             }
           }
         }
@@ -338,7 +338,7 @@ Lit.Lang.parser.term.match(world: Lit.Core.World): Parser<Lit.Core.Term>
               }
             ])
             Lit.Lang.parser.text("{")
-            get cses = Lit.Lang.parser.term.match.cses(type.forms, name, world)
+            get cses = Lit.Lang.parser.term.match.cses(type.ctors, name, world)
             Lit.Lang.parser.text("}")
             return Lit.Core.Term.match(type_name, name, expr, cses)
           }
@@ -347,18 +347,18 @@ Lit.Lang.parser.term.match(world: Lit.Core.World): Parser<Lit.Core.Term>
     }
   }
 
-Lit.Lang.parser.term.match.cses(cses: List<Lit.Core.Type.Form>, name: String, world: Lit.Core.World): Parser<List<Pair<List<String>,Lit.Core.Term>>>
+Lit.Lang.parser.term.match.cses(cses: List<Lit.Core.Type.Ctor>, name: String, world: Lit.Core.World): Parser<List<Lit.Core.Term.Case>>
   case cses {
     nil: Parser {
       return []
     }
     cons: Parser {
-      use form = cses.head
-      Lit.Lang.parser.text(form.name)
+      use ctor = cses.head
+      Lit.Lang.parser.text(ctor.name)
       Lit.Lang.parser.text(":")
-      let fields = List.map!!((x) name | "." | x@name, List.reverse!(form.fields))
+      let fields = List.map!!((x) name | "." | x@name, List.reverse!(ctor.fields))
       get term = Lit.Lang.parser.term(world)
-      let head = {fields, term}
+      let head = Lit.Core.Term.Case.new(fields, term)
       Parser.maybe!(Lit.Lang.parser.text(","))
       get tail = Lit.Lang.parser.term.match.cses(cses.tail, name, world)
       return head & tail
