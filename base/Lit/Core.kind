@@ -6,14 +6,17 @@
 // - check do call.cont
 // - Lit.Core.Term.get_caller
 // - tipo "Bits" nativo no bloco genesis
-// - mais de um usuário ser dono (ownr : List<String>) DONE
 // - conseguir modificar o dono no Lit.Core.Term.bind
 // - revisar e usar a função validate
-// - do blocks (um "with" anonimo, sem assinatura)
-// - consertar parser para ir ate o final do arquivo?
 // - block difficulty (nakamoto consensus)
 // - owned types/constructors?
-// - use railroad diagrams for syntax
+// - melhorar mensagens de erro
+// - Lit.Lang:
+//   - consertar parser para ir ate o final do arquivo?
+//   - do blocks (um "with" anonimo, sem assinatura)
+//   - open?
+// - paper:
+//   - use railroad diagrams for syntax
 
 // Types
 // -----
