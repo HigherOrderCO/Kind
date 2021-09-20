@@ -180,7 +180,9 @@ Lit.Lang.parser.exec(world: Lit.Core.World): Parser<Lit.Core.Exec>
     Lit.Lang.parser.text("{")
     get sign = Lit.Lang.parser.name
     Lit.Lang.parser.text("}")
-    return Lit.Core.Exec.new(user, sign, expr)
+    Lit.Lang.parser.text(":")
+    get otyp = Lit.Lang.parser.name
+    return Lit.Core.Exec.new(user, sign, expr, otyp)
   }
 
 Lit.Lang.parser.user(world: Lit.Core.World): Parser<Lit.Core.User>
