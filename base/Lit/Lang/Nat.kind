@@ -37,11 +37,11 @@ Nat.mul(n: Nat, m: Nat): Nat
 Nat.cmp(a: Nat, b: Nat): Cmp
   case a : Nat {
     zero: case b : Nat {
-      zero: Cmp.eql
-      succ: Cmp.ltn
+      zero: Cmp/eql
+      succ: Cmp/ltn
     }
     succ: case b : Nat {
-      zero: Cmp.gtn
+      zero: Cmp/gtn
       succ:
         call rec = Nat.cmp(a.pred, b.pred)
         rec

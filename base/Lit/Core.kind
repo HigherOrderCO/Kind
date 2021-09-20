@@ -167,53 +167,59 @@ Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
 
 Lit.Core.World.check.term(
   term: Lit.Core.Term
-  type: Lit.Core.Type
+  type: Maybe<Lit.Core.Type>
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
+  calr: String
 ): Bool
   //log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
   //log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
   //log("")
-  open world
+  // log(Lit.Lang.show.term(term, world))
   case term {
     var:
       let var_type = ctx{term.name} abort false
       //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
-      Lit.Core.Type.equal(var_type, type)
-    create: case type {
-      adt:
-        use term_type = Lit.Core.World.get_type(term.type,world) abort false
-        if Lit.Core.Type.equal(term_type, type) then
-          use form = type.forms[term.form] abort false
-          Lit.Core.World.check.many(term.vals, List.mapped!(form.fields)!((x) x@type), ctx, world)
-        else
-          false
-    }
+      case type {
+        none: true
+        some: Lit.Core.Type.equal(var_type, type.value)
+      }
+    create: 
+      use term_type = Lit.Core.World.get_type(term.type,world) abort false
+      use form = term_type.forms[term.form] abort false
+      let args = Lit.Core.World.check.many(term.vals, List.mapped!(form.fields)!((x) x@type), ctx, world, calr)
+      case type {
+        none: args
+        some:args && Lit.Core.Type.equal(term_type, type.value)
+      }
     call:
+      // verify owner
+      let ownr = Lit.Core.World.check.owner(calr, term.func, world)
       use func = Lit.Core.World.get_func(term.func,world) abort false
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
       let ctx2 = ctx{term.name} <- otyp
-      let args = Lit.Core.World.check.many(term.args, func.ityp, ctx, world)
-      let cont = Lit.Core.World.check.term(term.cont, type, ctx2, world)
-      args && cont
+      let args = Lit.Core.World.check.many(term.args, func.ityp, ctx, world, calr)
+      let cont = Lit.Core.World.check.term(term.cont, type, ctx2, world, calr)
+      ownr && args && cont
     match:
       let expr_type = Lit.Core.World.get_type(term.type,world) abort false
       case expr_type {
         adt:
-          let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world)
+          let expr = Lit.Core.World.check.term(term.expr, some(expr_type), ctx, world, calr)
           let cses = List.mapped!(term.cses)!((x) x@snd)
-          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.forms, term.name, ctx, world)
+          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.forms, term.name, ctx, world, calr)
           expr && cses
       }
     bind:
       // TODO: check access
+      let ownr = Lit.Core.World.check.owner(calr, term.name, world)
       use func = Lit.Core.World.get_func(term.name,world) abort false
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
       let nofn = List.is_empty!(func.iarg) // should we allow binds with functions?
-      let main = Lit.Core.World.check.term(term.main, otyp, ctx, world)
+      let main = Lit.Core.World.check.term(term.main, some(otyp), ctx, world, calr)
       // should the ctx change?
-      let cont = Lit.Core.World.check.term(term.cont, type, ctx, world)
-      nofn && main && cont
+      let cont = Lit.Core.World.check.term(term.cont, type, ctx, world, calr)
+      ownr && nofn && main && cont
   } default false
 
 Lit.Core.World.check.many(
@@ -221,13 +227,14 @@ Lit.Core.World.check.many(
   types: List<String>
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
+  calr: String
 ): Bool
   open world
   case terms types {
     cons cons:
       let type = Lit.Core.World.get_type(types.head, world) abort false
-      let head = Lit.Core.World.check.term(terms.head, type, ctx, world)
-      let tail = Lit.Core.World.check.many(terms.tail, types.tail, ctx, world)
+      let head = Lit.Core.World.check.term(terms.head, some(type), ctx, world, calr)
+      let tail = Lit.Core.World.check.many(terms.tail, types.tail, ctx, world, calr)
       head && tail
     nil nil:
       true
@@ -235,11 +242,12 @@ Lit.Core.World.check.many(
 
 Lit.Core.World.check.match.cases(
   cases: List<Lit.Core.Term>
-  type: Lit.Core.Type
+  type: Maybe<Lit.Core.Type>
   forms: List<Lit.Core.Type.Form>
   name: String
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
+  calr: String
 ): Bool
   case cases forms {
     cons cons:
@@ -247,12 +255,33 @@ Lit.Core.World.check.match.cases(
       for field in forms.head@fields with ext_ctx:
         let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.adt("Empty", [])
         ext_ctx{name | "." | field@name} <- type
-      let case_ok = Lit.Core.World.check.term(cases.head, type, ext_ctx, world)
-      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, forms.tail, name, ctx, world)
+      let case_ok = Lit.Core.World.check.term(cases.head, type, ext_ctx, world, calr)
+      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, forms.tail, name, ctx, world, calr)
       case_ok && rest_ok
     nil nil:
       true
   } default false
+
+Lit.Core.World.check.owner(
+  calr: String
+  name: String
+  world: Lit.Core.World
+): Bool
+  let entry = world{name}
+  case entry {
+    none: false
+    some: 
+      case entry.value as func{
+        func: 
+          if calr =? name then true
+          else
+            use f = func.value
+            case f.ownr {
+              nil: true
+              cons: List.in!(String.eql(calr), f.ownr)
+            }
+      } default false
+  }
 
 // Validation
 // ----------
@@ -381,7 +410,7 @@ Lit.Core.World.run.line(
               log("error: func input type undefined: " | func.name) none
             some:
               let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
-              if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world) then
+              if Lit.Core.World.check.term(func.main, some(otyp), ctx.value, new_world, func.name) then
                 let {ah, ok} = Lit.Core.World.validate(func.main, vld)
                 if ok then
                   //log("here")
@@ -405,9 +434,12 @@ Lit.Core.World.run.line(
         some: case got_entry.value as entry {
           user: 
             use user = entry.value
-            let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
-            log("- ext_exec: " | Lit.Lang.show.term(result, world))
-            some(world)
+            if Lit.Core.World.check.term(exec.expr, none, {}, world, exec.user) then
+              let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
+              log("- ext_exec: " | Lit.Lang.show.term(result, world))
+              some(world)
+            else
+              log("error: exec failed in typecheck") none
         } default log("error: exec user not a user") none
       } default log("error: exec user undefined") none
   }
@@ -519,7 +551,7 @@ type NatList {
   }
 }
 
-Count(): Bits
+Count.inc, MrDog @ Count(): Bits
   Bits/o{pred: Bits/e}
 
 Count.inc(): Unit
@@ -534,8 +566,11 @@ user MrDog {
 
 with MrDog {
   call ret = Count.inc()
+  call ret = Count.inc()
+  call ret = Count.inc()
+  call ret = Count.inc()
   call c = Count()
-  //call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
+  // call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
   c
 } signed {
   confia
