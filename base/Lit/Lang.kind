@@ -4,14 +4,14 @@
 // -----------
 
 Lit.Lang.show.page(page: Lit.Core.Page, world: Lit.Core.World): String
-  String.join("\n", List.mapped!(page)!((s) Lit.Lang.show.line(s,world)))
+  String.join("\n", List.mapped!(page)!((s) Lit.Lang.show.command(s,world)))
 
-Lit.Lang.show.line(line: Lit.Core.Command, world: Lit.Core.World): String
-  case line {
-    new_type: Lit.Lang.show.type(line.value, world)
-    new_func: Lit.Lang.show.func(line.value, world)
-    new_user: Lit.Lang.show.user(line.value, world)
-    ext_exec: Lit.Lang.show.exec(line.value, world)
+Lit.Lang.show.command(command: Lit.Core.Command, world: Lit.Core.World): String
+  case command {
+    new_type: Lit.Lang.show.type(command.value, world)
+    new_func: Lit.Lang.show.func(command.value, world)
+    new_user: Lit.Lang.show.user(command.value, world)
+    ext_exec: Lit.Lang.show.exec(command.value, world)
   }
 
 Lit.Lang.show.type.short(type: Lit.Core.Type): String
@@ -135,7 +135,7 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
 Lit.Lang.parser.page(world: Lit.Core.World): Parser<Lit.Core.Page>
   Parser.choice!([
     Parser {
-      get head = Lit.Lang.parser.line(world)
+      get head = Lit.Lang.parser.command(world)
       let world = case head {
         new_type: case head.value {
           adt: world{head.value.name} <- Lit.Core.Entry.type(head.value)
@@ -149,7 +149,7 @@ Lit.Lang.parser.page(world: Lit.Core.World): Parser<Lit.Core.Page>
     }
   ])
 
-Lit.Lang.parser.line(world: Lit.Core.World): Parser<Lit.Core.Command> 
+Lit.Lang.parser.command(world: Lit.Core.World): Parser<Lit.Core.Command> 
   Parser.choice!([
     Parser {
       get func = Lit.Lang.parser.func(world)
