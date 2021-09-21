@@ -287,7 +287,6 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
     let time = Nat.to_u256(time)
     let body = Vector.create!(40, (i) if i =? 39 then time else 0#256)
     let page = Lit.Cons.Page.new(node@store@tip@snd, 0, 0, body)
-    let node = Lit.Cons.Node.mine(node, page) <> node
 
     // Pings random neighbors, sending random peers to them
     Lit.Cons.Node.ping(node)
@@ -301,8 +300,10 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
     // Forgets peers that look inactive
     get node = Lit.Cons.Node.forget_inactive_peers(node)
 
+    let node = Lit.Cons.Node.mine(node, page) <> node
+
     // Loop
-    IO.sleep(2000)
+    IO.sleep(0)
     Lit.Cons.Node.loop(node)
 
     return unit
@@ -472,9 +473,25 @@ Lit.Cons.Node.mine(node: Lit.Cons.Node, page: Lit.Cons.Page): Maybe<Lit.Cons.Nod
     log("Mining page...")
     open node
     open node.store
-    let mined_page = Lit.Cons.Page.mine(page, 32, 64)
+    let target_score = 512#256
+    let mined_page = Lit.Cons.Page.mine(page, target_score, target_score/2)
     case mined_page {
       none: log("- Failure.") none
       some: log("- Success!") some(Lit.Cons.Node.add_page(node, mined_page.value))
     }
   }
+
+// Debugging
+
+Lit.Cons.plot_graph(store: Lit.Cons.Store): String
+  open store
+  let lines = []
+  for pc in Map.to_list!(store.children) with lines:
+    let {parent, children} = pc
+    let lines_inner = []
+    for child in children with lines_inner:
+      List.cons!(parent | "<-" | U256.show(child), lines_inner)
+    List.concat!(lines, lines_inner)
+  String.join("\n")(lines)
+
+// TODO test
