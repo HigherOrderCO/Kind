@@ -108,7 +108,7 @@ type Lit.Core.Func {
 }
 
 // An external call
-// TODO: remove this type (move these fields to inside Lit.Core.Line.ext_exec)
+// TODO: remove this type (move these fields to inside Lit.Core.Command.ext_exec)
 type Lit.Core.Exec {
   new(
     user: String
@@ -119,8 +119,7 @@ type Lit.Core.Exec {
 }
 
 // A paragraph in a Litereum page
-// TODO: rename to Lit.Core.Command
-type Lit.Core.Line {
+type Lit.Core.Command {
   new_type(value: Lit.Core.Type)
   new_func(value: Lit.Core.Func)
   new_user(value: Lit.Core.User)
@@ -129,7 +128,7 @@ type Lit.Core.Line {
 
 // A page of the Litereum book
 Lit.Core.Page: Type
-  List<Lit.Core.Line>
+  List<Lit.Core.Command>
 
 // A Lit.Core global entry
 type Lit.Core.Entry {
@@ -179,7 +178,6 @@ Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
     adt adt: String.eql(a.name, b.name)
   } default false
 
-// TODO: the `type` input must not be a Maybe. Add the type to `Exec` instead.
 Lit.Core.World.check.term(
   term: Lit.Core.Term
   type: Lit.Core.Type
@@ -219,7 +217,6 @@ Lit.Core.World.check.term(
           expr && cses
       }
     bind:
-      // TODO: check access
       let ownr = Lit.Core.World.check.owner(calr, term.name, world)
       use func = Lit.Core.World.get_func(term.name,world) abort false
       use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
@@ -375,21 +372,21 @@ Lit.Core.World.run.page(
 ): Maybe<Lit.Core.World>
   case page {
     nil: some(world)
-    cons: case Lit.Core.World.run.line(page.head, world) as new_world {
+    cons: case Lit.Core.World.run.command(page.head, world) as new_world {
       none: none
       some: Lit.Core.World.run.page(page.tail, new_world.value)
     }
   }
 
 
-Lit.Core.World.run.line(
-  line: Lit.Core.Line
+Lit.Core.World.run.command(
+  command: Lit.Core.Command
   world: Lit.Core.World
 ): Maybe<Lit.Core.World>
-  case line {
+  case command {
     new_type:
       // TODO: check something?
-      let type = line.value
+      let type = command.value
       case type {
         adt: 
           log("- new_type: " | type.name)
@@ -398,7 +395,7 @@ Lit.Core.World.run.line(
           } default log("error: type redefinition: " | type.name) none
       }
     new_func:
-      use func = line.value
+      use func = command.value
       log("- new_func: " | func.name | List.show!(Function.id!, func.ownr))
       case world{func.name} as got {
         none:
@@ -431,13 +428,13 @@ Lit.Core.World.run.line(
           }
       } default log("error: func redefinition: " | func.name) none
     new_user:
-      use user = line.value
+      use user = command.value
       log("- new_user: " | user.name)
       case world{user.name} as got {
         none: some(world{user.name} <- Lit.Core.Entry.user(user))
       } default log("error: user redefinition: " | user.name) none
     ext_exec:
-      use exec = line.value
+      use exec = command.value
       let otyp = Lit.Core.World.get_type(exec.otyp, world) abort log("error: exec otyp not found") none
       case world{exec.user} as got_entry {
         some: case got_entry.value as entry {

@@ -6,7 +6,7 @@
 Lit.Lang.show.page(page: Lit.Core.Page, world: Lit.Core.World): String
   String.join("\n", List.mapped!(page)!((s) Lit.Lang.show.line(s,world)))
 
-Lit.Lang.show.line(line: Lit.Core.Line, world: Lit.Core.World): String
+Lit.Lang.show.line(line: Lit.Core.Command, world: Lit.Core.World): String
   case line {
     new_type: Lit.Lang.show.type(line.value, world)
     new_func: Lit.Lang.show.func(line.value, world)
@@ -149,23 +149,23 @@ Lit.Lang.parser.page(world: Lit.Core.World): Parser<Lit.Core.Page>
     }
   ])
 
-Lit.Lang.parser.line(world: Lit.Core.World): Parser<Lit.Core.Line> 
+Lit.Lang.parser.line(world: Lit.Core.World): Parser<Lit.Core.Command> 
   Parser.choice!([
     Parser {
       get func = Lit.Lang.parser.func(world)
-      return Lit.Core.Line.new_func(func)
+      return Lit.Core.Command.new_func(func)
     }
     Parser {
       get type = Lit.Lang.parser.type(world)
-      return Lit.Core.Line.new_type(type)
+      return Lit.Core.Command.new_type(type)
     }
     Parser {
       get user = Lit.Lang.parser.user(world)
-      return Lit.Core.Line.new_user(user)
+      return Lit.Core.Command.new_user(user)
     }
     Parser {
       get exec = Lit.Lang.parser.exec(world)
-      return Lit.Core.Line.ext_exec(exec)
+      return Lit.Core.Command.ext_exec(exec)
     }
   ])
 
