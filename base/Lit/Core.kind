@@ -88,7 +88,7 @@ type Lit.Core.Operation {
 // A pattern-matching case
 type Lit.Core.Term.Case {
   new(
-    flds: List<String>
+    fields: List<String>
     body: Lit.Core.Term
   )
 }
@@ -312,94 +312,93 @@ Lit.Core.World.check.owner(
       } default false
   }
 
-//// Validation
-//// ----------
-//
-//// Checks if:
-//// - no global binders with the same name
-//// - variables are used at most once
-//Lit.Core.World.validate(
-//  term: Lit.Core.Term
-//  used: Map<Bool>
-//): Pair<Map<Bool>,Bool>
-//  //log("- vld " | String.join(", ", List.map!!((a) a@fst|":"|Bool.show(a@snd), Map.to_list!(used)))) // DEBUG
-//  //log("") // DEBUG
-//  case term {
-//    var:
-//      //log("var") // DEBUG
-//      //log(term.name)
-//      case used{term.name} as was_used {
-//        none:
-//          // undefined variable
-//          {used, false}
-//        some: 
-//          if was_used.value then
-//            //log("here")
-//            // variable already used
-//            {used, false}
-//          else
-//            //log("there")
-//            // first use of the variable
-//            {used{term.name} <- true, true}
-//      }
-//    create:
-//      //log("create") // DEBUG
-//      let state = {used, true}
-//      let state = for val in term.vals:
-//        let {used, res0} = state
-//        let {used, res1} = Lit.Core.World.validate(val, used)
-//        {used, res0 && res1}
-//      state
-//    match:
-//      //log("match") // DEBUG
-//      let state = Lit.Core.World.validate(term.expr, used)
-//      let valid = true
-//      let valid = for cse in term.cses:
-//        //log("cse")
-//        let {fields, body} = cse
-//        let field_state = state
-//        let field_state = for field in fields:
-//          //log("field: "|field)
-//          let {used, resx} = field_state
-//          case used{field} as got {
-//            some:
-//              //log("some")
-//              {used, false} // same name used more than once
-//            none:
-//              //log("none")
-//              {used{field} <- false, resx}
-//          }
-//        field_state@snd
-//      {state@fst, valid}
-//    call:
-//      //log("call") // DEBUG
-//      let state = {used, true}
-//      let state = for arg in term.args:
-//        let {used, res0} = state
-//        let {used, res1} = Lit.Core.World.validate(arg, used)
-//        {used, res0 && res1}
-//      state
-//    bind:
-//      //log("bind") // DEBUG
-//      let used = used{term.name} <- false
-//      let {used, res0} = Lit.Core.World.validate(term.main, used)
-//      let {used, res1} = Lit.Core.World.validate(term.cont, used)
-//      {used, res0 && res1}
-//    word:
-//      {used, true}
-//    compare:
-//      let {used, val0} = Lit.Core.World.validate(term.val0, used)
-//      let {used, val1} = Lit.Core.World.validate(term.val1, used)
-//      let {used, iflt} = Lit.Core.World.validate(term.iflt, used)
-//      let {used, ifeq} = Lit.Core.World.validate(term.ifeq, used)
-//      let {used, ifgt} = Lit.Core.World.validate(term.ifgt, used)
-//      {used, val0 && val1 && iflt && ifeq && ifgt}
-//    operate:
-//      let {used, val0} = Lit.Core.World.validate(term.val0, used)
-//      let {used, val1} = Lit.Core.World.validate(term.val1, used)
-//      {used, val0 && val1}
-//  }
-//
+// Validation
+// ----------
+// Checks if:
+// - no global binders with the same name
+// - variables are used at most once
+
+// TODO:
+//  - error list
+
+Lit.Core.World.validate(
+  term: Lit.Core.Term
+  used: Map<Bool>
+): Pair<Map<Bool>,Bool>
+  Lit.Core.World.validate.aux({used, true}, term)
+
+Lit.Core.World.validate.aux(
+  state: Pair<Map<Bool>, Bool>
+  term: Lit.Core.Term
+): Pair<Map<Bool>, Bool>
+  //log("- vld " | String.join(", ", List.map!!((a) a@fst|":"|Bool.show(a@snd), Map.to_list!(used)))) // DEBUG
+  //log("") // DEBUG
+
+  case term {
+    var:
+      let {used, valid} = state
+      case used{term.name} as was_used {
+        none:
+          // undefined variable
+          {used, false}
+        some:
+          if was_used.value then
+            // variable already used
+            {used, false}
+          else
+            // first use of the variable
+            {used{term.name} <- true, valid}
+      }
+
+    create:
+      for val in term.vals with state:
+        Lit.Core.World.validate.aux(state, val)
+      state
+
+    match:
+      let state = Lit.Core.World.validate.aux(state, term.expr)
+      for cse in term.cses with state:
+        let {fields, _} = cse
+        let field_state = state
+        for field in fields with field_state:
+          let {used, valid} = field_state
+          case used{field} {
+            some:
+              {used, false} // same name used more than once
+            none:
+              {used{field} <- false, valid}
+          }
+        state
+      state
+
+    call:
+      for arg in term.args with state:
+        Lit.Core.World.validate.aux(state, arg)
+      state
+
+    bind:
+      let {used, valid} = state
+      let used = used{term.name} <- false
+      let state = {used, valid}
+      let state = Lit.Core.World.validate.aux(state, term.main)
+      let state = Lit.Core.World.validate.aux(state, term.cont)
+      state
+
+    word:
+      state
+
+    compare:
+      let terms = [term.val0, term.val1, term.iflt, term.ifeq, term.ifgt]
+      for i_term in terms with state:
+        Lit.Core.World.validate.aux(state, i_term)
+      state
+
+    operate:
+      let state = Lit.Core.World.validate.aux(state, term.val0)
+      let state = Lit.Core.World.validate.aux(state, term.val1)
+      state
+  }
+
 // Execution
 // ---------
 
@@ -508,86 +507,93 @@ Lit.Core.World.run.term(
       let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
       {Lit.Core.Term.create(term.type, term.ctor, vals), world}
     match:
-      _
+      Maybe {
+        let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
+        case expr {
+          create: case term.cses[expr.ctor] as selected_case {
+            some: 
+              let {case_fields, case_body} = selected_case.value
+              let vars = for subst in List.zip!!(case_fields, expr.vals):
+                let {field, value} = subst
+                vars{field} <- value
+              Lit.Core.World.run.term(case_body, self, world, vars)
+          } default {term, world}
+        } default {term,world}
+      }
     word:
       {term, world}
     compare:
-      _
+      let {val0, world} = Lit.Core.World.run.term(term.val0, self, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, self, world, vars)
+      case val0 val1 {
+          word word:
+            case U64.cmp(val0.numb, val1.numb) {
+              ltn:
+                Lit.Core.World.run.term(term.iflt, self, world, vars)
+              eql:
+                Lit.Core.World.run.term(term.ifeq, self, world, vars)
+              gtn:
+                Lit.Core.World.run.term(term.ifgt, self, world, vars)
+            }
+      } default log("error: operands didn't reduce to words") {term, world}
     operate:
-//    operate(
-//      oper: Lit.Core.Operation
-//      val0: Lit.Core.Term
-//      val1: Lit.Core.Term
-//    )
-      _
+      let {val0, world} = Lit.Core.World.run.term(term.val0, self, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, self, world, vars)
+      case val0 val1 {
+        word word:
+          case term.oper {
+            add:
+              {Lit.Core.Term.word(val0.numb + val1.numb), world}
+            sub:
+              {Lit.Core.Term.word(val0.numb - val1.numb), world}
+            mul:
+              {Lit.Core.Term.word(val0.numb * val1.numb), world}
+            div:
+              {Lit.Core.Term.word(val0.numb / val1.numb), world}
+            mod:
+              {Lit.Core.Term.word(val0.numb % val1.numb), world}
+            or:
+              {Lit.Core.Term.word(val0.numb || val1.numb), world}
+            and:
+              {Lit.Core.Term.word(val0.numb && val1.numb), world}
+            xor:
+              {Lit.Core.Term.word(U64.xor(val0.numb, val1.numb)), world}
+          }
+      } default log("error: operands didn't reduce to words") {term, world}
     call:
-      _
+      case world{term.func} as got {
+        none:
+          {term, world}
+        some: case got.value as entry {
+          func:
+            use func = entry.value
+            let main_vars = vars
+            let state = {main_vars, world}
+            let state = for arg in List.zip!!(func.iarg, term.args):
+              let {main_vars, world} = state
+              let {arg_name, arg_term} = arg
+              let {arg_term, world} = Lit.Core.World.run.term(arg_term, self, world, main_vars)
+              let main_vars = main_vars{arg_name} <- arg_term
+              {main_vars, world}
+            let {main_vars, world} = state
+            let {done, world} = Lit.Core.World.run.term(func.main, term.func, world, main_vars)
+            let vars = vars{term.name} <- done
+            Lit.Core.World.run.term(term.cont, self, world, vars)
+        } default {term, world}
+      }
     bind:
-      _
+      case world{term.name} as got {
+      none:
+        {term, world}
+      some: case got.value as entry {
+        func:
+          use func = entry.value
+          let {main, world} = Lit.Core.World.run.term(term.main, self, world, vars)
+          let world = world{term.name} <- Lit.Core.Entry.func(func@main <- main)
+          Lit.Core.World.run.term(term.cont, self, world, vars)
+      } default {term, world}
+    }
   }
-//  case term {
-//    var: 
-//      //log("var") // DEBUG
-//      case vars{term.name} as got {
-//        none: {term, world}
-//        some: Lit.Core.World.run.term(got.value, self, world, vars)
-//      }
-//    match: Maybe {
-//      //log("match") // DEBUG
-//      let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
-//      case expr {
-//        create: case term.cses[expr.ctor] as selected_case {
-//          some: 
-//            let {case_fields, case_body} = selected_case.value
-//            let vars = for subst in List.zip!!(case_fields, expr.vals):
-//              let {field, value} = subst
-//              vars{field} <- value
-//            Lit.Core.World.run.term(case_body, self, world, vars)
-//        } default {term, world}
-//      } default {term,world}
-//    }
-//    create:
-//      //log("create") // DEBUG
-//      let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
-//      {Lit.Core.Term.create(term.type, term.ctor, vals), world}
-//    call:
-//      //log("call") // DEBUG
-//      case world{term.func} as got {
-//      none:
-//        {term, world}
-//      some: case got.value as entry {
-//        vovo:
-//          bumbumdegolfinho
-//        func:
-//          use func = entry.value
-//          let main_vars = vars
-//          let state = {main_vars, world}
-//          let state = for arg in List.zip!!(func.iarg, term.args):
-//            let {main_vars, world} = state
-//            let {arg_name, arg_term} = arg
-//            let {arg_term, world} = Lit.Core.World.run.term(arg_term, self, world, main_vars)
-//            let main_vars = main_vars{arg_name} <- arg_term
-//            {main_vars, world}
-//          let {main_vars, world} = state
-//          let {done, world} = Lit.Core.World.run.term(func.main, term.func, world, main_vars)
-//          let vars = vars{term.name} <- done
-//          Lit.Core.World.run.term(term.cont, self, world, vars)
-//      } default {term,world}
-//    }
-//    bind:
-//      //log("bind") // DEBUG
-//      case world{term.name} as got {
-//      none:
-//        {term, world}
-//      some: case got.value as entry {
-//        func:
-//          use func = entry.value
-//          let {main, world} = Lit.Core.World.run.term(term.main, self, world, vars)
-//          let world = world{term.name} <- Lit.Core.Entry.func(func@main <- main)
-//          Lit.Core.World.run.term(term.cont, self, world, vars)
-//      } default {term, world}
-//    }
-//  } //default {term,world}
 
 Lit.Core.World.run.terms(
   terms: List<Lit.Core.Term>
