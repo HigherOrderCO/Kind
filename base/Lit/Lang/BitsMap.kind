@@ -45,6 +45,37 @@ BitsMap.get(map: BitsMap, key: Bits): Bits
       }
   }
 
+
+
+BitsMap.get_p(map: BitsMap, key: Bits): PlsRename
+  case map : BitsMap {
+    new:
+      PlsRename/new{key: Bits/e, map: BitsMap/new}
+    tie:
+      case key : Bits { 
+        e:
+          call dup = Bits.dup(map.val)
+          case dup { 
+            new:
+              PlsRename/new{value: dup.fst, map: BitsMap/tie{val: dup.snd, map.lft, map.rgt}}
+          }
+        o:
+          call rec = BitsMap.get_p(map.lft, key.pred)
+          case rec : PlsRename { 
+            new:
+              PlsRename/new{rec.val, BitsMap/tie{val: map.val, rec.map, map.rgt}}
+          }
+
+        i:
+          call rec = Bits.get_p(map.rgt, key.pred)
+          case rec : PlsRename {
+            new:
+              PlsRename/new{rec.val, BitsMap/tie{val: map.val, map.lft, rec.map}}
+          }
+      }
+  }
+
+
 BitsMap.dup(m: BitsMap): Pair.BitsMap
   case m : BitsMap {
     new:
@@ -73,6 +104,39 @@ BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
   call dup_state = BitsMap.dup(state)
   state
 
+
+//propriedades:
+//1 - Se você fizer uma transação e depois fizer reversa, o mapa deve voltar ao
+//primeiro estado
+
+//2 - A soma de todos os saldos é igual após a transação
+
+
+BitsMap.transct_2(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+  call balance = BitsMap.get_p(state, from)
+  case balance : PlsRename { 
+    new:
+      call ok = Bits.lte(sum, balance.value)
+      case ok : Bool {
+        true:
+          call receiver = BitsMap.get_p(state, to)
+          case receiver : PlsRename {
+            new:
+              call sender = Bits.sub(sum, balance.value)
+              call received = Bits.add_p(sum, receiver.value) 
+                case received : BitsBitsBits { 
+                  new:
+                    call newmap = BitsMap.set(balance.map, from, sender)
+                    call newermap = BitsMap.set(newmap, to, received.trd)
+                    newermap
+                }
+          }
+        false:
+          balance.map
+      }
+  }
+
+
 //BitsMap.transact(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
 //  // TODO stop the dups save the environment
 //  call dup_state = BitsMap.dup(state)
@@ -85,9 +149,14 @@ BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
 //          call dup_balance = Bits.dup(balance)
 //          case dup_balance : Pair.Bits {
 //            new:
-//              call ok = Bits.lte(dup_balance.snd, sum)
+//              call ok = Bits.lte(sum, dup_balance.snd)
 //              case ok : Bool {
 //                true:
+                      //alterar o valor do sender pra reduzir o valor antigo
+                      //[[dando um set]]
+                      
+                      //alterar o valor do receiver (adicionar o sum )
+                      [[dando um set ]]
 //                  call 
 //                  state
 //                false:
@@ -97,3 +166,4 @@ BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
 //      }
 //  }
 `
+

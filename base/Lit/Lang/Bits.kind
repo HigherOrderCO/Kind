@@ -1,6 +1,7 @@
 Lit.Lang.Bits: String
 `
-Bits.tail(a: Bits): Bits
+
+Bits.tail(a: Bits): Pair.Bits
   case a : Bits { 
     e: Bits/e
     o: a.pred
@@ -25,9 +26,11 @@ Bits.size.aux(b: Bits, n: Nat, s: Nat): Nat
       call rec = Bits.size.aux(b.pred, Nat/succ{pred: n}, s)
       rec
     i:
-      call rec = Bits.size.aux(b.pred, Nat/succ{pred: n}, Nat/succ{pred: n})
+      call m = Nat.add(n, s)
+      call rec = Bits.size.aux(b.pred, Nat/zero, Nat/succ{pred: m})
       rec
   }
+
 
 Bits.size(b: Bits): Nat
   call size = Bits.size.aux(b, Nat/zero, Nat/zero)
@@ -35,9 +38,9 @@ Bits.size(b: Bits): Nat
 
 Bits.and(a: Bits, b: Bits): Bits
   case a : Bits { 
-    e: a
+    e: b
     o: case b : Bits { 
-      e: b
+      e: Bits/o{pred: a.pred}
       o: 
         call rec = Bits.and(a.pred, b.pred)
         Bits/o{pred: rec}
@@ -46,7 +49,7 @@ Bits.and(a: Bits, b: Bits): Bits
         Bits/o{pred: rec}
       }
     i: case b : Bits { 
-      e: b
+      e: Bits/i{pred: a.pred}
       o:
         call rec = Bits.and(a.pred, b.pred)
         Bits/o{pred: rec}
@@ -58,7 +61,7 @@ Bits.and(a: Bits, b: Bits): Bits
 
 Bits.concat(a: Bits, b: Bits): Bits
   case a : Bits { 
-    e: b,
+    e: b
     o:
       call rec = Bits.concat(a.pred, b)
       Bits/o{pred: rec}
@@ -66,6 +69,7 @@ Bits.concat(a: Bits, b: Bits): Bits
       call rec = Bits.concat(a.pred, b)
       Bits/i{pred: rec}
   }
+
 
 Bits.not(b: Bits): Bits 
   case b : Bits {
@@ -82,7 +86,7 @@ Bits.or(a: Bits, b: Bits): Bits
   case a : Bits { 
     e: b
     o: case b : Bits { 
-      e: a
+      e: Bits/o{pred: a.pred}
       o: 
         call rec = Bits.or(a.pred, b.pred)
         Bits/o{pred: rec}
@@ -91,7 +95,7 @@ Bits.or(a: Bits, b: Bits): Bits
         Bits/i{pred: rec}
     }
     i: case b : Bits { 
-      e: a
+      e: Bits/i{pred: a.pred}
       o: 
         call rec = Bits.or(a.pred, b.pred)
         Bits/i{pred: rec}
@@ -122,7 +126,7 @@ Bits.add(a: Bits, b: Bits): Bits
   case b : Bits { 
     e: a
     o: case a : Bits { 
-      e: b
+      e: Bits/o{pred: a.pred}
       o: 
         call rec = Bits.add(a.pred, b.pred)
         Bits/o{pred: rec}
@@ -131,7 +135,7 @@ Bits.add(a: Bits, b: Bits): Bits
         Bits/i{pred: rec}
     }
     i: case a : Bits { 
-      e: b
+      e: Bits/i{pred: a.pred}
       o:
         call rec = Bits.add(a.pred, b.pred)
         Bits/i{pred: rec}
@@ -141,6 +145,87 @@ Bits.add(a: Bits, b: Bits): Bits
         Bits/o{pred: rec}
     }
   }
+
+
+Bits.add_p(a: Bits, b: Bits): BitsBitsBits
+  case a : Bits {
+    e: 
+      call dup = Bits.dup(b)
+      case dup : Pair.Bits {
+        new: 
+          BitsBitsBits/new {
+            fst: Bits/e,
+            snd: dup.fst,
+            trd: dup.snd
+          }
+      }
+    o: case b : Bits {
+      e:
+        call dup = Bits.dup(Bits/o{pred: a.pred})
+        case dup : Pair.Bits {
+          new:
+            BitsBitsBits/new {
+              fst: dup.fst,
+              snd: Bits/e,
+              trd: dup.snd
+            }
+        }
+      o:
+        call rec = Bits.add_p(a.pred, b.pred)
+        case rec : BitsBitsBits { 
+          new:
+            BitsBitsBits/new{
+              fst: Bits/o{pred: rec.fst}
+              snd: Bits/o{pred: rec.snd}
+              trd: Bits/o{pred: rec.trd}
+        }
+
+      i:
+        call rec = Bits.add_p(a.pred, b.pred)
+        case rec : BitsBitsBits { 
+          new:
+            BitsBitsBits/new{
+              fst: Bits/i{pred: rec.fst}
+              snd: Bits/i{pred: rec.snd}
+              trd: Bits/i{pred: rec.trd}
+        }
+    }
+
+    i: case b: Bits {
+      e:
+        call dup = Bits.dup(Bits/i{pred: a.pred})
+        case dup : Pair.Bits {
+          new:
+            BitsBitsBits/new {
+              fst: dup.fst,
+              snd: Bits/e,
+              trd: dup.snd
+            }
+        }
+      o:
+        call rec = Bits.add_p(a.pred, b.pred)
+        case rec : BitsBitsBits { 
+          new:
+            BitsBitsBits/new{
+              fst: Bits/i{pred: rec.fst}
+              snd: Bits/o{pred: rec.snd}
+              trd: Bits/i{pred: rec.trd}
+        }
+    }
+      i:
+        call rec = Bits.add_p(a.pred, b.pred)
+        case rec : BitsBitsBits {
+          new:
+            call inc = Bits.inc(rec.trd)
+            BitsBitsBits/new { 
+              fst: Bits/i{pred: rec.fst}
+              snd: Bits/i{pred: rec.snd}
+              trd: Bits/o{pred: inc}
+            }
+        }
+      }
+  }
+  
 
 Bits.sub.aux(a: Bits, b: Bits, r: Bits): Bits
   case b : Bits { 
@@ -155,7 +240,7 @@ Bits.sub.aux(a: Bits, b: Bits, r: Bits): Bits
     }
     o: case a : Bits { 
       e: 
-        call rec = Bits.sub.aux(a, b.pred, Bits/o{pred: r})
+        call rec = Bits.sub.aux(Bits/o{pred: a.pred}, b.pred, Bits/o{pred: r})
         rec
       o:
         call rec = Bits.sub.aux(a.pred, b.pred, Bits/o{pred: r})
@@ -189,7 +274,7 @@ Bits.mul.aux(a: Bits, b: Bits, r: Bits): Bits
       rec
     i:
       call add = Bits.add(a, r)
-      call rec = Bits.mul.aux(Bits/o{pred:a}, b.pred, add)
+      call rec = Bits.mul.aux(Bits/o{pred: a}, b.pred, add)
       rec
   }
 
