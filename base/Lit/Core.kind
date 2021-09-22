@@ -400,9 +400,9 @@ Lit.Core.World.check.owner(
 //      {used, val0 && val1}
 //  }
 //
-//// Execution
-//// ---------
-//
+// Execution
+// ---------
+
 //Lit.Core.World.run.page(
 //  page: Lit.Core.Page
 //  world: Lit.Core.World
@@ -414,8 +414,8 @@ Lit.Core.World.check.owner(
 //      some: Lit.Core.World.run.page(page.tail, new_world.value)
 //    }
 //  }
-//
-//
+
+
 //Lit.Core.World.run.statement(
 //  statement: Lit.Core.Statement
 //  world: Lit.Core.World
@@ -486,16 +486,45 @@ Lit.Core.World.check.owner(
 //        } default log("error: exec user not a user") none
 //      } default log("error: exec user undefined") none
 //  }
-//
-//Lit.Core.World.run.term(
-//  term: Lit.Core.Term
-//  self: String
-//  world: Lit.Core.World
-//  vars: Map<Lit.Core.Term>
-//): Pair<Lit.Core.Term, Lit.Core.World>
-//  //log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
-//  //log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
-//  //log("")
+
+Lit.Core.World.run.term(
+  term: Lit.Core.Term
+  self: String
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+): Pair<Lit.Core.Term, Lit.Core.World>
+//  log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
+//  log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
+//  log("")
+  case term {
+    var:
+      case vars{term.name} as got {
+        none:
+          {term, world}
+        some:
+          Lit.Core.World.run.term(got.value, self, world, vars)
+      }
+    create:
+      let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
+      {Lit.Core.Term.create(term.type, term.ctor, vals), world}
+    match:
+      _
+    word:
+      {term, world}
+    compare:
+      _
+    operate:
+//    operate(
+//      oper: Lit.Core.Operation
+//      val0: Lit.Core.Term
+//      val1: Lit.Core.Term
+//    )
+      _
+    call:
+      _
+    bind:
+      _
+  }
 //  case term {
 //    var: 
 //      //log("var") // DEBUG
@@ -527,6 +556,8 @@ Lit.Core.World.check.owner(
 //      none:
 //        {term, world}
 //      some: case got.value as entry {
+//        vovo:
+//          bumbumdegolfinho
 //        func:
 //          use func = entry.value
 //          let main_vars = vars
@@ -556,23 +587,23 @@ Lit.Core.World.check.owner(
 //          Lit.Core.World.run.term(term.cont, self, world, vars)
 //      } default {term, world}
 //    }
-//  } default {term,world}
-//
-//Lit.Core.World.run.terms(
-//  terms: List<Lit.Core.Term>
-//  self: String
-//  world: Lit.Core.World
-//  vars: Map<Lit.Core.Term>
-//): Pair<List<Lit.Core.Term>, Lit.Core.World>
-//  case terms {
-//    nil:
-//      {[], world}
-//    cons:
-//      let {head, world} = Lit.Core.World.run.term(terms.head, self, world, vars)
-//      let {tail, world} = Lit.Core.World.run.terms(terms.tail, self, world, vars)
-//      {head & tail, world}
-//  }
-//
+//  } //default {term,world}
+
+Lit.Core.World.run.terms(
+  terms: List<Lit.Core.Term>
+  self: String
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+): Pair<List<Lit.Core.Term>, Lit.Core.World>
+  case terms {
+    nil:
+      {[], world}
+    cons:
+      let {head, world} = Lit.Core.World.run.term(terms.head, self, world, vars)
+      let {tail, world} = Lit.Core.World.run.terms(terms.tail, self, world, vars)
+      {head & tail, world}
+  }
+
 //// Tests
 //// -----
 //Lit.Core: _
