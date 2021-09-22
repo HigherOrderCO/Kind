@@ -312,94 +312,98 @@ Lit.Core.World.check.owner(
       } default false
   }
 
-//// Validation
-//// ----------
-//
-//// Checks if:
-//// - no global binders with the same name
-//// - variables are used at most once
-//Lit.Core.World.validate(
-//  term: Lit.Core.Term
-//  used: Map<Bool>
-//): Pair<Map<Bool>,Bool>
-//  //log("- vld " | String.join(", ", List.map!!((a) a@fst|":"|Bool.show(a@snd), Map.to_list!(used)))) // DEBUG
-//  //log("") // DEBUG
-//  case term {
-//    var:
-//      //log("var") // DEBUG
-//      //log(term.name)
-//      case used{term.name} as was_used {
-//        none:
-//          // undefined variable
-//          {used, false}
-//        some: 
-//          if was_used.value then
-//            //log("here")
-//            // variable already used
-//            {used, false}
-//          else
-//            //log("there")
-//            // first use of the variable
-//            {used{term.name} <- true, true}
-//      }
-//    create:
-//      //log("create") // DEBUG
-//      let state = {used, true}
-//      let state = for val in term.vals:
-//        let {used, res0} = state
-//        let {used, res1} = Lit.Core.World.validate(val, used)
-//        {used, res0 && res1}
-//      state
-//    match:
-//      //log("match") // DEBUG
-//      let state = Lit.Core.World.validate(term.expr, used)
-//      let valid = true
-//      let valid = for cse in term.cses:
-//        //log("cse")
-//        let {fields, body} = cse
-//        let field_state = state
-//        let field_state = for field in fields:
-//          //log("field: "|field)
-//          let {used, resx} = field_state
-//          case used{field} as got {
-//            some:
-//              //log("some")
-//              {used, false} // same name used more than once
-//            none:
-//              //log("none")
-//              {used{field} <- false, resx}
-//          }
-//        field_state@snd
-//      {state@fst, valid}
-//    call:
-//      //log("call") // DEBUG
-//      let state = {used, true}
-//      let state = for arg in term.args:
-//        let {used, res0} = state
-//        let {used, res1} = Lit.Core.World.validate(arg, used)
-//        {used, res0 && res1}
-//      state
-//    bind:
-//      //log("bind") // DEBUG
-//      let used = used{term.name} <- false
-//      let {used, res0} = Lit.Core.World.validate(term.main, used)
-//      let {used, res1} = Lit.Core.World.validate(term.cont, used)
-//      {used, res0 && res1}
-//    word:
-//      {used, true}
-//    compare:
-//      let {used, val0} = Lit.Core.World.validate(term.val0, used)
-//      let {used, val1} = Lit.Core.World.validate(term.val1, used)
-//      let {used, iflt} = Lit.Core.World.validate(term.iflt, used)
-//      let {used, ifeq} = Lit.Core.World.validate(term.ifeq, used)
-//      let {used, ifgt} = Lit.Core.World.validate(term.ifgt, used)
-//      {used, val0 && val1 && iflt && ifeq && ifgt}
-//    operate:
-//      let {used, val0} = Lit.Core.World.validate(term.val0, used)
-//      let {used, val1} = Lit.Core.World.validate(term.val1, used)
-//      {used, val0 && val1}
-//  }
-//
+// Validation
+// ----------
+// Checks if:
+// - no global binders with the same name
+// - variables are used at most once
+
+Lit.Core.World.validate(
+  term: Lit.Core.Term
+  used: Map<Bool>
+): Pair<Map<Bool>,Bool>
+  Lit.Core.World.validate.aux({used, true}, term)
+
+Lit.Core.World.validate.aux(
+  state: Pair<Map<Bool>, Bool>
+  term: Lit.Core.Term
+): Pair<Map<Bool>, Bool>
+  //log("- vld " | String.join(", ", List.map!!((a) a@fst|":"|Bool.show(a@snd), Map.to_list!(used)))) // DEBUG
+  //log("") // DEBUG
+
+  case term {
+    var:
+      let {used, valid} = state
+      case used{term.name} as was_used {
+        none:
+          // undefined variable
+          {used, false}
+        some:
+          if was_used.value then
+            // variable already used
+            {used, false}
+          else
+            // first use of the variable
+            {used{term.name} <- true, valid}
+      }
+
+    create:
+      let state = for val in term.vals:
+        let {used, res0} = state
+        let {used, res1} = Lit.Core.World.validate(val, used)
+        {used, res0 && res1}
+      state
+
+    match:
+      let state = Lit.Core.World.validate.aux(state, term.expr)
+      let {used, valid} = state
+      let valid = for cse in term.cses:
+        let {fields, body} = cse
+        let field_state = state
+        let field_state = for field in fields:
+          let {used, res} = field_state
+          case used{field} {
+            some:
+              {used, false} // same name used more than once
+            none:
+              {used{field} <- false, res}
+          }
+        field_state@snd
+      {state@fst, valid}
+
+    call:
+      let state = for arg in term.args:
+        let {used, res0} = state
+        let {used, res1} = Lit.Core.World.validate(arg, used)
+        {used, res0 && res1}
+      state
+
+    bind:
+      let {used, valid} = state
+      let used = used{term.name} <- false
+      let {used, res0} = Lit.Core.World.validate(term.main, used)
+      let {used, res1} = Lit.Core.World.validate(term.cont, used)
+      {used, valid && res0 && res1}
+
+    word:
+      state
+
+    compare:
+      let {used, valid} = state
+      let {used, val0} = Lit.Core.World.validate(term.val0, used)
+      let {used, val1} = Lit.Core.World.validate(term.val1, used)
+      let {used, iflt} = Lit.Core.World.validate(term.iflt, used)
+      let {used, ifeq} = Lit.Core.World.validate(term.ifeq, used)
+      let {used, ifgt} = Lit.Core.World.validate(term.ifgt, used)
+      {used, valid && val0 && val1 && iflt && ifeq && ifgt}
+
+    operate:
+      let {used, valid} = state
+      let {used, val0} = Lit.Core.World.validate(term.val0, used)
+      let {used, val1} = Lit.Core.World.validate(term.val1, used)
+      {used, val0 && val1}
+  }
+
 // Execution
 // ---------
 
