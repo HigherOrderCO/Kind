@@ -168,11 +168,11 @@ Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bon
     } default none
   } default none
 
-// Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Ctor>>
-//   case type {
-//     word: none
-//     data: List.ifind!((i,f) String.eql(f@name,name), type.ctors)
-//   }
+Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Constructor>>
+  case type {
+    word: none
+    data: List.ifind!((i,f) String.eql(f@name,name), type.constructors)
+  }
 
 // Type-Checking
 // -------------
