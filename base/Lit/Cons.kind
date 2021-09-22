@@ -303,7 +303,15 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node, iteration: Nat): IO<Unit>
     let node = Lit.Cons.Node.mine(node, page) <> node
 
     // Loop
-    IO.sleep(0)
+    // IO.sleep(0)
+
+    //let MAX_ITER = 20
+    //if iteration >=? MAX_ITER
+    //  then IO {
+    //    IO.print(Lit.Cons.plot_graph(node@store))
+    //    return unit
+    //  }
+    //  else
     Lit.Cons.Node.loop(node, Nat.succ(iteration))
 
     return unit
@@ -491,8 +499,13 @@ Lit.Cons.plot_graph(store: Lit.Cons.Store): String
     let {parent, children} = pc
     let lines_inner = []
     for child in children with lines_inner:
-      List.cons!(parent | "<-" | U256.show(child), lines_inner)
+      let parent_txt = String.take(6, parent)
+      let child_txt = String.take(6, U256.show(child))
+      List.cons!(child_txt | " -> " | parent_txt, lines_inner)
     List.concat!(lines, lines_inner)
-  String.join("\n")(lines)
-
-// TODO test
+  let body = String.join("\n")(lines)
+  let br = "\n"
+  "digraph G {" | br
+    | "rankdir=\"BT\";" | br
+    | body | br 
+    | "}" | br
