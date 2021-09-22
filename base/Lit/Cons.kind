@@ -269,13 +269,13 @@ Lit.Cons.Node.init(port: Nat): IO<Unit>
       Lit.Cons.Peer.new(time, Lit.Cons.Address.ipv4(127,0,0,1,42003))
     ])
     let node = Lit.Cons.Node.new(port, peers, Lit.Cons.Store.genesis)
-    Lit.Cons.Node.loop(node)
+    Lit.Cons.Node.loop(node, 0)
   }
   
-Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
+Lit.Cons.Node.loop(node: Lit.Cons.Node, iteration: Nat): IO<Unit>
   IO {
     // Displays UI
-    Lit.Cons.Node.display(node)
+    Lit.Cons.Node.display(node, iteration)
     IO.print("")
 
     // Handle incoming messages
@@ -304,18 +304,19 @@ Lit.Cons.Node.loop(node: Lit.Cons.Node): IO<Unit>
 
     // Loop
     IO.sleep(0)
-    Lit.Cons.Node.loop(node)
+    Lit.Cons.Node.loop(node, Nat.succ(iteration))
 
     return unit
   }
 
-Lit.Cons.Node.display(node: Lit.Cons.Node): IO<Unit>
+Lit.Cons.Node.display(node: Lit.Cons.Node, iteration: Nat): IO<Unit>
   open node
   open node.store
   let pages = Lit.Cons.Store.longest_chain(node.store)
   //let pages = Map.values!(node.store.page)
   IO {
     IO.clear
+    IO.print("iteration: " | Nat.show(iteration))
     get time = IO.get_time
     IO.print("~~ String:Chain ~~")
     IO.print("Time     : " | Nat.show(time))
