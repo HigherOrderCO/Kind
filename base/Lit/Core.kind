@@ -507,86 +507,93 @@ Lit.Core.World.run.term(
       let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
       {Lit.Core.Term.create(term.type, term.ctor, vals), world}
     match:
-      _
+      Maybe {
+        let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
+        case expr {
+          create: case term.cses[expr.ctor] as selected_case {
+            some: 
+              let {case_fields, case_body} = selected_case.value
+              let vars = for subst in List.zip!!(case_fields, expr.vals):
+                let {field, value} = subst
+                vars{field} <- value
+              Lit.Core.World.run.term(case_body, self, world, vars)
+          } default {term, world}
+        } default {term,world}
+      }
     word:
       {term, world}
     compare:
-      _
+      let {val0, world} = Lit.Core.World.run.term(term.val0, self, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, self, world, vars)
+      case val0 val1 {
+          word word:
+            case U64.cmp(val0.numb, val1.numb) {
+              ltn:
+                Lit.Core.World.run.term(term.iflt, self, world, vars)
+              eql:
+                Lit.Core.World.run.term(term.ifeq, self, world, vars)
+              gtn:
+                Lit.Core.World.run.term(term.ifgt, self, world, vars)
+            }
+      } default log("error: operands didn't reduce to words") {term, world}
     operate:
-//    operate(
-//      oper: Lit.Core.Operation
-//      val0: Lit.Core.Term
-//      val1: Lit.Core.Term
-//    )
-      _
+      let {val0, world} = Lit.Core.World.run.term(term.val0, self, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, self, world, vars)
+      case val0 val1 {
+        word word:
+          case term.oper {
+            add:
+              {Lit.Core.Term.word(val0.numb + val1.numb), world}
+            sub:
+              {Lit.Core.Term.word(val0.numb - val1.numb), world}
+            mul:
+              {Lit.Core.Term.word(val0.numb * val1.numb), world}
+            div:
+              {Lit.Core.Term.word(val0.numb / val1.numb), world}
+            mod:
+              {Lit.Core.Term.word(val0.numb % val1.numb), world}
+            or:
+              {Lit.Core.Term.word(val0.numb || val1.numb), world}
+            and:
+              {Lit.Core.Term.word(val0.numb && val1.numb), world}
+            xor:
+              {Lit.Core.Term.word(U64.xor(val0.numb, val1.numb)), world}
+          }
+      } default log("error: operands didn't reduce to words") {term, world}
     call:
-      _
+      case world{term.func} as got {
+        none:
+          {term, world}
+        some: case got.value as entry {
+          func:
+            use func = entry.value
+            let main_vars = vars
+            let state = {main_vars, world}
+            let state = for arg in List.zip!!(func.iarg, term.args):
+              let {main_vars, world} = state
+              let {arg_name, arg_term} = arg
+              let {arg_term, world} = Lit.Core.World.run.term(arg_term, self, world, main_vars)
+              let main_vars = main_vars{arg_name} <- arg_term
+              {main_vars, world}
+            let {main_vars, world} = state
+            let {done, world} = Lit.Core.World.run.term(func.main, term.func, world, main_vars)
+            let vars = vars{term.name} <- done
+            Lit.Core.World.run.term(term.cont, self, world, vars)
+        } default {term, world}
+      }
     bind:
-      _
+      case world{term.name} as got {
+      none:
+        {term, world}
+      some: case got.value as entry {
+        func:
+          use func = entry.value
+          let {main, world} = Lit.Core.World.run.term(term.main, self, world, vars)
+          let world = world{term.name} <- Lit.Core.Entry.func(func@main <- main)
+          Lit.Core.World.run.term(term.cont, self, world, vars)
+      } default {term, world}
+    }
   }
-//  case term {
-//    var: 
-//      //log("var") // DEBUG
-//      case vars{term.name} as got {
-//        none: {term, world}
-//        some: Lit.Core.World.run.term(got.value, self, world, vars)
-//      }
-//    match: Maybe {
-//      //log("match") // DEBUG
-//      let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
-//      case expr {
-//        create: case term.cses[expr.ctor] as selected_case {
-//          some: 
-//            let {case_fields, case_body} = selected_case.value
-//            let vars = for subst in List.zip!!(case_fields, expr.vals):
-//              let {field, value} = subst
-//              vars{field} <- value
-//            Lit.Core.World.run.term(case_body, self, world, vars)
-//        } default {term, world}
-//      } default {term,world}
-//    }
-//    create:
-//      //log("create") // DEBUG
-//      let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
-//      {Lit.Core.Term.create(term.type, term.ctor, vals), world}
-//    call:
-//      //log("call") // DEBUG
-//      case world{term.func} as got {
-//      none:
-//        {term, world}
-//      some: case got.value as entry {
-//        vovo:
-//          bumbumdegolfinho
-//        func:
-//          use func = entry.value
-//          let main_vars = vars
-//          let state = {main_vars, world}
-//          let state = for arg in List.zip!!(func.iarg, term.args):
-//            let {main_vars, world} = state
-//            let {arg_name, arg_term} = arg
-//            let {arg_term, world} = Lit.Core.World.run.term(arg_term, self, world, main_vars)
-//            let main_vars = main_vars{arg_name} <- arg_term
-//            {main_vars, world}
-//          let {main_vars, world} = state
-//          let {done, world} = Lit.Core.World.run.term(func.main, term.func, world, main_vars)
-//          let vars = vars{term.name} <- done
-//          Lit.Core.World.run.term(term.cont, self, world, vars)
-//      } default {term,world}
-//    }
-//    bind:
-//      //log("bind") // DEBUG
-//      case world{term.name} as got {
-//      none:
-//        {term, world}
-//      some: case got.value as entry {
-//        func:
-//          use func = entry.value
-//          let {main, world} = Lit.Core.World.run.term(term.main, self, world, vars)
-//          let world = world{term.name} <- Lit.Core.Entry.func(func@main <- main)
-//          Lit.Core.World.run.term(term.cont, self, world, vars)
-//      } default {term, world}
-//    }
-//  } //default {term,world}
 
 Lit.Core.World.run.terms(
   terms: List<Lit.Core.Term>
