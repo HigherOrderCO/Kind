@@ -1,9 +1,5 @@
 Test: _
-  let state = {0,0} :: Pair<Nat,Nat>
-  while state@fst <? 10 with state:
-    open state
-    {state@fst + 1, state@snd + state@fst}
-  state
+  Lit.Core
 
 //Test: String
   //let idx = 0

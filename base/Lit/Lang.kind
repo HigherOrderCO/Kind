@@ -64,13 +64,16 @@ Lit.Lang.show.user(user: Lit.Core.User, world: Lit.Core.World): String
 
 Lit.Lang.show.exec(exec: Lit.Core.Exec, world: Lit.Core.World): String
   open exec
-  "with "
-  | exec.user
+  Maybe.map!!((x) "With " | x,  exec.user) <> "Do"
   | "{ "
-  | Lit.Lang.show.term(exec.expr, world)
-  | " } signed { "
-  | exec.sign
-  | " } "
+  | Lit.Lang.show.term(exec.expr, world) 
+  | case exec.sign as sign{
+      none: ""
+      some: " } signed { "
+            | sign.value
+            | " } "
+    }
+  
 
 Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
   case term {
@@ -170,6 +173,12 @@ Lit.Lang.parser.command(world: Lit.Core.World): Parser<Lit.Core.Command>
   ])
 
 Lit.Lang.parser.exec(world: Lit.Core.World): Parser<Lit.Core.Exec>
+  Parser.choice!([
+    Lit.Lang.Parser.exec.user(world),
+    Lit.Lang.Parser.exec.anon(world)
+  ])
+
+Lit.Lang.Parser.exec.user(world: Lit.Core.World): Parser<Lit.Core.Exec>
   Parser {
     Lit.Lang.parser.text("with")
     get user = Lit.Lang.parser.name
@@ -182,7 +191,18 @@ Lit.Lang.parser.exec(world: Lit.Core.World): Parser<Lit.Core.Exec>
     Lit.Lang.parser.text("}")
     Lit.Lang.parser.text(":")
     get otyp = Lit.Lang.parser.name
-    return Lit.Core.Exec.new(user, sign, expr, otyp)
+    return Lit.Core.Exec.new(some(user), some(sign), expr, otyp)
+  }
+
+Lit.Lang.Parser.exec.anon(world: Lit.Core.World): Parser<Lit.Core.Exec>
+  Parser { 
+    Lit.Lang.parser.text("do")
+    Lit.Lang.parser.text("{")
+    get expr = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("}")
+    Lit.Lang.parser.text(":")
+    get otyp = Lit.Lang.parser.name
+    return Lit.Core.Exec.new(none, none, expr, otyp)
   }
 
 Lit.Lang.parser.user(world: Lit.Core.World): Parser<Lit.Core.User>

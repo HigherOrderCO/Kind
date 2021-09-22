@@ -111,8 +111,8 @@ type Lit.Core.Func {
 // TODO: remove this type (move these fields to inside Lit.Core.Command.ext_exec)
 type Lit.Core.Exec {
   new(
-    user: String
-    sign: String
+    user: Maybe<String>
+    sign: Maybe<String>
     expr: Lit.Core.Term
     otyp: String
   )
@@ -183,7 +183,7 @@ Lit.Core.World.check.term(
   type: Lit.Core.Type
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
-  calr: String
+  calr: Maybe<String>
 ): Bool
 //  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
 //  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
@@ -232,7 +232,7 @@ Lit.Core.World.check.many(
   types: List<String>
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
-  calr: String
+  calr: Maybe<String>
 ): Bool
   open world
   case terms types {
@@ -252,7 +252,7 @@ Lit.Core.World.check.match.cases(
   name: String
   ctx: Map<Lit.Core.Type>
   world: Lit.Core.World
-  calr: String
+  calr: Maybe<String>
 ): Bool
   case cases ctors {
     cons cons:
@@ -268,7 +268,7 @@ Lit.Core.World.check.match.cases(
   } default false
 
 Lit.Core.World.check.owner(
-  calr: String
+  calr: Maybe<String>
   name: String
   world: Lit.Core.World
 ): Bool
@@ -278,12 +278,16 @@ Lit.Core.World.check.owner(
     some: 
       case entry.value as func{
         func: 
-          if calr =? name then true
+          if Maybe.if!((calr) calr =? name, calr) then true
           else
             use f = func.value
             case f.ownr {
               nil: true
-              cons: List.in!(String.eql(calr), f.ownr)
+              cons: 
+                case calr {
+                  none: false
+                  some: List.in!(String.eql(calr.value), f.ownr)
+                }
             }
       } default false
   }
@@ -415,7 +419,7 @@ Lit.Core.World.run.command(
               log("error: func input type undefined: " | func.name) none
             some:
               let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
-              if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, func.name) then
+              if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, some(func.name)) then
                 let {ah, ok} = Lit.Core.World.validate(func.main, vld)
                 if ok then
                   //log("here")
@@ -436,23 +440,33 @@ Lit.Core.World.run.command(
     ext_exec:
       use exec = command.value
       let otyp = Lit.Core.World.get_type(exec.otyp, world) abort log("error: exec otyp not found") none
-      case world{exec.user} as got_entry {
-        some: case got_entry.value as entry {
-          user: 
-            use user = entry.value
-            if Lit.Core.World.check.term(exec.expr, otyp, {}, world, exec.user) then
-              let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
-              log("- ext_exec: " | Lit.Lang.show.term(result, world))
-              some(world)
-            else
-              log("error: exec failed in typecheck") none
-        } default log("error: exec user not a user") none
-      } default log("error: exec user undefined") none
+      case exec.user as user {
+        none: Lit.Core.World.run.exec(exec, world)
+        some:
+          case world{user.value} as got_entry {
+            some: case got_entry.value as entry {
+              user: Lit.Core.World.run.exec(exec, world)
+            } default log("error: exec user not a user") none
+          } default log("error: exec user undefined") none
+      }
   }
+
+Lit.Core.World.run.exec(
+  exec: Lit.Core.Exec
+  world: Lit.Core.World
+): Maybe<Lit.Core.World>
+  open exec
+  let type = Lit.Core.World.get_type(exec.otyp, world) abort log("error: exec otyp not found") none
+  if Lit.Core.World.check.term(exec.expr, type, {}, world, exec.user) then
+    let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
+    log("- ext_exec: " | Lit.Lang.show.term(result, world))
+    some(world)
+  else
+    log("error: exec failed in typecheck") none
 
 Lit.Core.World.run.term(
   term: Lit.Core.Term
-  self: String
+  self: Maybe<String>
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
@@ -501,7 +515,7 @@ Lit.Core.World.run.term(
             let main_vars = main_vars{arg_name} <- arg_term
             {main_vars, world}
           let {main_vars, world} = state
-          let {done, world} = Lit.Core.World.run.term(func.main, term.func, world, main_vars)
+          let {done, world} = Lit.Core.World.run.term(func.main, some(term.func), world, main_vars)
           let vars = vars{term.name} <- done
           Lit.Core.World.run.term(term.cont, self, world, vars)
       } default {term,world}
@@ -523,7 +537,7 @@ Lit.Core.World.run.term(
 
 Lit.Core.World.run.terms(
   terms: List<Lit.Core.Term>
-  self: String
+  self: Maybe<String>
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<List<Lit.Core.Term>, Lit.Core.World>
@@ -570,17 +584,10 @@ user MrDog {
   01234
 }
 
-with MrDog {
-  call ret = Count.inc()
-  call ret = Count.inc()
-  call ret = Count.inc()
-  call ret = Count.inc()
-  call c = Count()
+do {
   call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
   call dupped = Bits.dup(ret)
   Unit/new
-} signed {
-  confia
 }: Unit
 `
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
