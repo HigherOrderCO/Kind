@@ -98,7 +98,7 @@ type Lit.Core.Type {
   word
   data(
     name: String
-    constructors: List<Lit.Core.Type.Constructors>
+    constructors: List<Lit.Core.Type.Constructor>
   )
 }
 
@@ -151,166 +151,167 @@ type Lit.Core.Statement {
 Lit.Core.Page: Type
   List<Lit.Core.Statement>
 
-//// Getters and Setters
-//// -------------------
-//
-//Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Type>
-//  case world{name} as entry {
-//    some: case entry.value {
-//      type: some(entry.value.value)
-//    } default none
-//  } default none
-//  
-//Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Func>
-//  case world{name} as entry {
-//    some: case entry.value {
-//      func: some(entry.value.value)
-//    } default none
-//  } default none
-//
-//Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Ctor>>
-//  case type {
-//    word: none
-//    data: List.ifind!((i,f) String.eql(f@name,name), type.ctors)
-//  }
-//
-//// Type-Checking
-//// -------------
-//
-//Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
-//  case a b {
-//    word word: true
-//    data data: String.eql(a.name, b.name)
-//  } default false
-//
-//Lit.Core.World.check.term(
-//  term: Lit.Core.Term
-//  type: Lit.Core.Type
-//  context: Map<Lit.Core.Type>
-//  world: Lit.Core.World
-//  caller: String
-//): Bool
-////  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
-////  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
-////  log("")
-//  case term {
-//    var:
-//      let vtyp = context{term.name} abort false
-//      //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
-//      Lit.Core.Type.equal(vtyp, type)
-//    create: 
-//      let ttyp = Lit.Core.World.get_type(term.type,world) abort false
-//      case ttyp {
-//        data:
-//          use ctor = ttyp.ctors[term.ctor] abort false
-//          let args = Lit.Core.World.check.many(term.vals, List.mapped!(ctor.fields)!((x) x@type), context, world, caller)
-//          args && Lit.Core.Type.equal(ttyp, type)
-//      } default false
-//    call:
-//      // verify owner
-//      let ownr = Lit.Core.World.check.owner(caller, term.func, world)
-//      use func = Lit.Core.World.get_func(term.func,world) abort false
-//      use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
-//      let args = Lit.Core.World.check.many(term.args, func.ityp, context, world, caller)
-//      let cont = Lit.Core.World.check.term(term.cont, type, context{term.name} <- otyp, world, caller)
-//      ownr && args && cont
-//    match:
-//      let expr_type = Lit.Core.World.get_type(term.type,world) abort false
-//      case expr_type {
-//        data:
-//          let expr = Lit.Core.World.check.term(term.expr, expr_type, context, world, caller)
-//          let cses = List.mapped!(term.cses)!((x) x@body)
-//          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.ctors, term.name, context, world, caller)
-//          expr && cses
-//      } default false
-//    bind:
-//      // TODO: check access
-//      let ownr = Lit.Core.World.check.owner(caller, term.name, world)
-//      use func = Lit.Core.World.get_func(term.name,world) abort false
-//      use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
-//      let nofn = List.is_empty!(func.iarg) // should we allow binds with functions?
-//      let main = Lit.Core.World.check.term(term.main, otyp, context, world, caller)
-//      // should the ctx change?
-//      let cont = Lit.Core.World.check.term(term.cont, type, context, world, caller)
-//      ownr && nofn && main && cont
-//    word:
-//      case type {
-//        word: true
-//      } default false
-//    compare:
-//      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
-//      let val1 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
-//      let iflt = Lit.Core.World.check.term(term.iflt, type, context, world, caller)
-//      let ifeq = Lit.Core.World.check.term(term.ifeq, type, context, world, caller)
-//      let ifgt = Lit.Core.World.check.term(term.ifgt, type, context, world, caller)
-//      val0 && val1 && iflt && ifeq && ifgt
-//    operate:
-//      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
-//      let val1 = Lit.Core.World.check.term(term.val1, Lit.Core.Type.word, context, world, caller)
-//      val0 && val1
-//  }
-//
-//Lit.Core.World.check.many(
-//  terms: List<Lit.Core.Term>
-//  types: List<String>
-//  context: Map<Lit.Core.Type>
-//  world: Lit.Core.World
-//  caller: String
-//): Bool
-//  open world
-//  case terms types {
-//    cons cons:
-//      let type = Lit.Core.World.get_type(types.head, world) abort false
-//      let head = Lit.Core.World.check.term(terms.head, type, context, world, caller)
-//      let tail = Lit.Core.World.check.many(terms.tail, types.tail, context, world, caller)
-//      head && tail
-//    nil nil:
-//      true
-//  } default false
-//
-//Lit.Core.World.check.match.cases(
-//  cases: List<Lit.Core.Term>
-//  type: Lit.Core.Type
-//  ctors: List<Lit.Core.Type.Ctor>
-//  name: String
-//  context: Map<Lit.Core.Type>
-//  world: Lit.Core.World
-//  caller: String
-//): Bool
-//  case cases ctors {
-//    cons cons:
-//      let ext_context = context
-//      for field in ctors.head@fields with ext_context:
-//        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.data("Empty", [])
-//        ext_context{name | "." | field@name} <- type
-//      let case_ok = Lit.Core.World.check.term(cases.head, type, ext_context, world, caller)
-//      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, ctors.tail, name, context, world, caller)
-//      case_ok && rest_ok
-//    nil nil:
-//      true
-//  } default false
-//
-//Lit.Core.World.check.owner(
-//  caller: String
-//  name: String
-//  world: Lit.Core.World
-//): Bool
-//  let entry = world{name}
-//  case entry {
-//    none: false
-//    some: 
-//      case entry.value as func{
-//        func: 
-//          if caller =? name then true
-//          else
-//            use f = func.value
-//            case f.ownr {
-//              nil: true
-//              cons: List.in!(String.eql(caller), f.ownr)
-//            }
-//      } default false
-//  }
-//
+// Getters and Setters
+// -------------------
+
+Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Type>
+  case world{name} as entry {
+    some: case entry.value {
+      type: some(entry.value.value)
+    } default none
+  } default none
+  
+Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bond>
+  case world{name} as entry {
+    some: case entry.value {
+      func: some(entry.value.value)
+    } default none
+  } default none
+
+// Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Ctor>>
+//   case type {
+//     word: none
+//     data: List.ifind!((i,f) String.eql(f@name,name), type.ctors)
+//   }
+
+// Type-Checking
+// -------------
+
+Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
+  case a b {
+    word word: true
+    data data: String.eql(a.name, b.name)
+  } default false
+
+// TODO: the `type` input must not be a Maybe. Add the type to `Exec` instead.
+Lit.Core.World.check.term(
+  term: Lit.Core.Term
+  type: Lit.Core.Type
+  context: Map<Lit.Core.Type>
+  world: Lit.Core.World
+  caller: String
+): Bool
+//  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
+//  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
+//  log("")
+  case term {
+    var:
+      let vtyp = context{term.name} abort false
+      //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
+      Lit.Core.Type.equal(vtyp, type)
+    create: 
+      let ttyp = Lit.Core.World.get_type(term.type,world) abort false
+      case ttyp {
+        data:
+          use ctor = ttyp.constructors[term.ctor] abort false
+          let args = Lit.Core.World.check.many(term.vals, List.mapped!(ctor.fields)!((x) x@type), context, world, caller)
+          args && Lit.Core.Type.equal(ttyp, type)
+      } default false
+    call:
+      // verify owner
+      let ownr = Lit.Core.World.check.owner(caller, term.func, world)
+      use func = Lit.Core.World.get_func(term.func,world) abort false
+      use otyp = Lit.Core.World.get_type(func.output_type,world) abort false
+      let args = Lit.Core.World.check.many(term.args, func.input_types, context, world, caller)
+      let cont = Lit.Core.World.check.term(term.cont, type, context{term.name} <- otyp, world, caller)
+      ownr && args && cont
+    match:
+      let expr_type = Lit.Core.World.get_type(term.type,world) abort false
+      case expr_type {
+        data:
+          let expr = Lit.Core.World.check.term(term.expr, expr_type, context, world, caller)
+          let cses = List.mapped!(term.cses)!((x) x@body)
+          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.constructors, term.name, context, world, caller)
+          expr && cses
+      } default false
+    bind:
+      // TODO: check access
+      let ownr = Lit.Core.World.check.owner(caller, term.name, world)
+      use func = Lit.Core.World.get_func(term.name,world) abort false
+      use otyp = Lit.Core.World.get_type(func.output_type,world) abort false
+      let nofn = List.is_empty!(func.input_names) // should we allow binds with functions?
+      let main = Lit.Core.World.check.term(term.main, otyp, context, world, caller)
+      // should the ctx change?
+      let cont = Lit.Core.World.check.term(term.cont, type, context, world, caller)
+      ownr && nofn && main && cont
+    word:
+      case type {
+        word: true
+      } default false
+    compare:
+      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
+      let val1 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
+      let iflt = Lit.Core.World.check.term(term.iflt, type, context, world, caller)
+      let ifeq = Lit.Core.World.check.term(term.ifeq, type, context, world, caller)
+      let ifgt = Lit.Core.World.check.term(term.ifgt, type, context, world, caller)
+      val0 && val1 && iflt && ifeq && ifgt
+    operate:
+      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
+      let val1 = Lit.Core.World.check.term(term.val1, Lit.Core.Type.word, context, world, caller)
+      val0 && val1
+  }
+
+Lit.Core.World.check.many(
+  terms: List<Lit.Core.Term>
+  types: List<String>
+  context: Map<Lit.Core.Type>
+  world: Lit.Core.World
+  caller: String
+): Bool
+  open world
+  case terms types {
+    cons cons:
+      let type = Lit.Core.World.get_type(types.head, world) abort false
+      let head = Lit.Core.World.check.term(terms.head, type, context, world, caller)
+      let tail = Lit.Core.World.check.many(terms.tail, types.tail, context, world, caller)
+      head && tail
+    nil nil:
+      true
+  } default false
+
+Lit.Core.World.check.match.cases(
+  cases: List<Lit.Core.Term>
+  type: Lit.Core.Type
+  ctors: List<Lit.Core.Type.Constructor>
+  name: String
+  context: Map<Lit.Core.Type>
+  world: Lit.Core.World
+  caller: String
+): Bool
+  case cases ctors {
+    cons cons:
+      let ext_context = context
+      for field in ctors.head@fields with ext_context:
+        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.data("Empty", [])
+        ext_context{name | "." | field@name} <- type
+      let case_ok = Lit.Core.World.check.term(cases.head, type, ext_context, world, caller)
+      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, ctors.tail, name, context, world, caller)
+      case_ok && rest_ok
+    nil nil:
+      true
+  } default false
+
+Lit.Core.World.check.owner(
+  caller: String
+  name: String
+  world: Lit.Core.World
+): Bool
+  let entry = world{name}
+  case entry {
+    none: false
+    some: 
+      case entry.value as func{
+        func: 
+          if caller =? name then true
+          else
+            use f = func.value
+            case f.ownr {
+              nil: true
+              cons: List.in!(String.eql(caller), f.ownr)
+            }
+      } default false
+  }
+
 //// Validation
 //// ----------
 //
