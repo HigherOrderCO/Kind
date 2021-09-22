@@ -1,41 +1,4 @@
-// 09/09/21
-// TODO: 
-// - remover os next do código: usar "at"?
-// - fazer uma dessas partes funcionar
-
-Bytes.parse_string.testt: _
-  Bytes.parse_string("0x30313233343536373839")
-
-Bytes.parse_string(b: Bytes): String
-  let rmv_start = Bytes.drop(2, b) // removes 0x from the beginning
-  Bytes.parse_string.aux(rmv_start, "")
-  
-Bytes.parse_string.aux(b: Bytes, s: String): String
-  let c = String.drop(2, Bytes.take(4, b))  // 4 initial chars
-  log("current byte 4: " | Bytes.take(4, b))
-  log("take 2: " | c)
-  let c = Bytes.to_nat(c) 
-  log("c to nat: " | Nat.show(c))
-  let fst = Bytes.take(2, b)
-  log("\nfst byte: " | fst)
-  let fst = Bytes.to_nat(fst)
-  log("fst to nat: " | Nat.show(fst))
-
-  let fst = Nat.to_u16(fst)
-  let c = Nat.to_u16(c)
-
-  let concat_s = (a: String) s | a
-  let b_tail = String.drop(2, b)
-
-  let s_aux = ""
-  if U16.gtn(c, 127) then
-    let c = case Bytes.parse_string.gtn_one_byte(c, fst) as res {
-      none: 0 // TODO: this line means that couldn't parse the piece of byte. Must be treated.
-      some: res.value
-    }
-    Bytes.parse_string.aux(b_tail, )
-
-    // ===========================
+  // ===========================
     // TODO: 12/09
     // problema: o que está acontecendo no código do bytes.js nesse trecho de código?
     // - por que nada muda no "s"? 
@@ -43,40 +6,104 @@ Bytes.parse_string.aux(b: Bytes, s: String): String
     // - qual é o retorno desse trecho aqui no código?
     // - esse trecho de código é um caso de if...else? 
 
-  else 
-    // log("[parse] c is bigger than 127 ")
-  if U16.ltn(c, 0xffff) then
-    log("c ltn 0xffff: " | U16.show(c))
-    let parsed = Char.to_string(c)
-    Bytes.parse_string.aux(b_tail, concat_s(parsed)) // String.fromCharCode(c)
-  else if U16.lte(c, 0x10ffff) then// c <= 0x10ffff
-    let aux = U16.sub(c, 0x10000)
-    let a = Char.to_string(U16.or(U16.shr(c, 10),  0xd800)) // String.fromCharCode(c >> 10 | 0xd800)
-    let b = Char.to_string(U16.or(U16.and(c, 0x3FF), 0xdc00)) // String.fromCharCode(c & 0x3FF | 0xdc00)
-    let parsed = a | b
-    log("c ltn 0x10ffff: " | parsed)
-    Bytes.parse_string.aux(b_tail, concat_s(parsed))
-  else
-    ""
+  // UPD: 15/09
+  // - os bytes são 
+  //   1. transformados (verificado se são maiores que 127) 
+  //   2. adicionados à "s"
+
+Bytes.parse_string.testt: _
+  Bytes.parse_string("0x30313233343536373839")
+
+Bytes.parse_string(b: Bytes): String
+  let rmv_start = Bytes.drop(2, b) // removes 0x from the beginning
+  Bytes.parse_string.aux(rmv_start, "")
+
+Bytes.parse_string.take_bytes_pair(b: Bytes): Pair(Bytes, Maybe(Bytes))
+  let fst = Bytes.take(2, b)
+  let snd = String.drop(2, Bytes.take(4, b))
+  if String.is_empty(snd)
+  then {fst, Maybe.none!}
+  else {fst, Maybe.some!(snd)}
+
+Bytes.parse_string.aux(b: Bytes, s: String): String
+  log("bytes: " | b)
+
+  // Auxiliary
+  let concat_s = (a: String) s | a
+  let b_tail = String.drop(2, b)
+
+  let {fst, snd} = Bytes.parse_string.take_bytes_pair(b)
+  case snd {
+    none: s
+    some: 
+    let snd = snd.value
+    log("next byte: " | snd)
+    let snd = Bytes.to_nat(snd) 
+    log("next byte to nat: " | Nat.show(snd))
+    // let fst = Bytes.take(2, b)
+    log("\nfst byte: " | fst)
+    let fst = Bytes.to_nat(fst)
+    log("fst to nat: " | Nat.show(fst))
+
+    let fst = Nat.to_u16(fst)
+    let snd = Nat.to_u16(snd)
+  
+    let s_temp = 
+      if U16.gtn(snd, 127) then
+        case Bytes.parse_string.gtn_one_byte(fst, snd) as res {
+          none: log("  > parsed none") 1#16 // TODO: this line means that couldn't parse the piece of byte. Must be treated.
+          some: res.value
+        }
+      else 
+        log("  not bigger than 127: " | U16.show(snd))
+        snd
+
+    if U16.ltn(s_temp, 0xffff) then
+      log("c ltn 0xffff: " | U16.show(s_temp))
+      let parsed = Char.to_string(s_temp)
+      log("parsed: " | parsed)
+      Bytes.parse_string.aux(b_tail, concat_s(parsed)) // String.fromCharCode(c)
+    else if U16.lte(s_temp, 0x10ffff) then// c <= 0x10ffff
+      let aux = U16.sub(s_temp, 0x10000)
+      let a = Char.to_string(U16.or(U16.shr(s_temp, 10),  0xd800)) // String.fromCharCode(c >> 10 | 0xd800)
+      let b = Char.to_string(U16.or(U16.and(s_temp, 0x3FF), 0xdc00)) // String.fromCharCode(c & 0x3FF | 0xdc00)
+      let parsed = a | b
+      log("c ltn 0x10ffff: " | parsed)
+      Bytes.parse_string.aux(b_tail, concat_s(parsed))
+    else
+      ""
+
+  }
+
+  // }
+
+
 
 // Auxiliar to parse chunks bigger than 1 byte
 Bytes.parse_string.gtn_one_byte(c: U16, fst: U16): Maybe(U16)
   let two_bytes   = Bool.and(U16.gtn(c, 191), U16.ltn(c, 224)) // (c > 191 && c < 224)
   let three_bytes = Bool.and(U16.gtn(c, 223), U16.ltn(c, 240)) // (c > 223 && c < 240)
   let four_bytes  = Bool.and(U16.gtn(c, 239), U16.ltn(c, 248)) // (c > 239 && c < 248)
+  log(" > gtn_one_byte c: " | U16.show(c))
   if two_bytes then 
     let l = U16.shl(U16.and(c, 31), 6) // (c & 31) << 6 
     let r = U16.and(fst, 63) // bytes[i++] & 63
-    Maybe.some!(U16.or(l, r)) // l | r 
+    let res = U16.or(l, r)
+    log("2b: " | U16.show(res))
+    Maybe.some!(res) // l | r 
   else if three_bytes then 
     let l = U16.shl(U16.and(c, 15), 12) // (c & 15) << 12 
     let m = U16.shl(U16.and(fst, 63), 6) // (bytes[i++] & 63) << 6
     let r = U16.and(fst, 63) // bytes[i++] & 63
-    Maybe.some!(U16.or(l, U16.or(m, r))) // l | m | r;
+    let res = U16.or(l, U16.or(m, r))
+    log("3b: " | U16.show(res))
+    Maybe.some!(res) // l | m | r;
   else if four_bytes then
     let l  = U16.shl(U16.and(c, 7), 18) // (c & 7) << 18
     let m0 = U16.shl(U16.and(fst, 63), 12) // (bytes[i++] & 63) << 12
     let m1 = U16.shl(U16.and(fst, 63), 6) // (bytes[i++] & 63) << 6
     let r  = U16.and(fst, 63) // bytes[i++] & 63 
-    Maybe.some!(U16.or(U16.or(l, m0), U16.or(m1, r))) // l | m0 | m1 | r
+    let res = U16.or(U16.or(l, m0), U16.or(m1, r))
+    log("4b: " | U16.show(res))
+    Maybe.some!(res) // l | m0 | m1 | r
   else Maybe.none! // UTF-8 decode: unknown multibyte

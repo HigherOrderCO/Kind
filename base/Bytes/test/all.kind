@@ -4,15 +4,17 @@ Bytes.test.all: _
       // Bytes.test.from_nat
       // Bytes.test.length
       // Bytes.test.slice
-      Bytes.test.to_nat
+      // Bytes.test.to_nat
       // Bytes.test.from_string
       // Bytes.test.to_string
+      Bytes.test.parse_string
     ]
   )
 
 // Print all tests
 Bytes.test.all.show: _
-   log(TestSuite.show(Bytes.test.all, 0))
+  log(TestSuite.show(Bytes.test.all, 0))
+  // log(String.drop(2, "abcd"))
   0
   
 

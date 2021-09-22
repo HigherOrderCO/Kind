@@ -1,6 +1,5 @@
-Foo: Type
-  Either<Foo, Unit>
 
-Test: Foo
-  Either.left!!(Either.left!!(Either.left!!(Either.right!!(unit))))
+Test: _
+  let t = String.eql("", String.nil)
+  t
   
