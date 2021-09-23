@@ -433,7 +433,54 @@ Lit.Core.World.run.statement(
 ): Maybe<Lit.Core.World>
   case statement {
     define:
-      _
+      case statement.entry {
+        type:
+          let type = statement.entry.value
+          case type {
+            word:
+              log("error: word as an entry definition")
+              none
+            data: 
+              log("- new_type: " | type.name)
+              case world{type.name} as got_type {
+                none: some(world{type.name} <- Lit.Core.Entry.type(type))
+              } default log("error: type redefinition: " | type.name) none
+          }
+        bond:
+          _
+//        use func = line.value
+//        log("- new_func: " | func.name | List.show!(Function.id!, func.ownr))
+//        case world{func.name} as got {
+//          none:
+//            let new_world = world{func.name} <- Lit.Core.Entry.func(func)
+//            let ctx = some({})
+//            let ctx = for arg in List.zip!!(func.iarg, func.ityp): Maybe {
+//              let {arg_name, arg_type} = arg
+//              get ctx = ctx
+//              get typ = Lit.Core.World.get_type(arg_type, world)
+//              return ctx{arg_name} <- typ
+//            }
+//            let vld = {}
+//            let vld = for iarg in func.iarg:
+//              vld{iarg} <- false
+//            case ctx {
+//              none:
+//                log("error: func input type undefined: " | func.name) none
+//              some:
+//                let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
+//                if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, func.name) then
+//                  let {ah, ok} = Lit.Core.World.validate(func.main, vld)
+//                  if ok then
+//                    //log("here")
+//                    some(new_world)
+//                  else
+//                    //log("there")
+//                    log("error: func invalid: " | func.name) none
+//                else
+//                  log("error: func ill-typed: " | func.name) none
+//            }
+//        } default log("error: func redefinition: " | func.name) none
+      }
     call:
       let exec = statement.expr
       // This assumes that the type Unit is already defined to avoid
