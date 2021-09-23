@@ -106,7 +106,7 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
    } <> "CREATE"
    match: Maybe {
      get type = Lit.Core.World.get_type(term.type, world)
-     log(term.type)
+     //log(term.type)
      case type {
        word: Maybe {return "U64/new"}
        data: Maybe {
