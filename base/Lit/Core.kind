@@ -164,7 +164,7 @@ Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Typ
 Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bond>
   case world{name} as entry {
     some: case entry.value {
-      func: some(entry.value.value)
+      bond: some(entry.value.value)
     } default none
   } default none
 
@@ -317,9 +317,7 @@ Lit.Core.World.check.owner(
                   false
               }
           }
-        type:
-          _
-      }// default false
+      } default false
   }
 
 // Validation
@@ -567,24 +565,24 @@ Lit.Core.World.run.term(
             xor:
               {Lit.Core.Term.word(U64.xor(val0.numb, val1.numb)), world}
           }
-      } default log("error: operand didn't reduce to words") {term, world}
+      } default log("error: operand didn't reduce to word") {term, world}
     call:
       case world{term.func} as got {
         none:
           {term, world}
         some: case got.value as entry {
-          func:
+          bond:
             use func = entry.value
             let main_vars = vars
             let state = {main_vars, world}
-            let state = for arg in List.zip!!(func.iarg, term.args):
+            let state = for arg in List.zip!!(func.input_names, term.args):
               let {main_vars, world} = state
               let {arg_name, arg_term} = arg
               let {arg_term, world} = Lit.Core.World.run.term(arg_term, world, main_vars)
               let main_vars = main_vars{arg_name} <- arg_term
               {main_vars, world}
             let {main_vars, world} = state
-            let {done, world} = Lit.Core.World.run.term(func.main, term.func, world, main_vars)
+            let {done, world} = Lit.Core.World.run.term(func.main, world, main_vars)
             let vars = vars{term.name} <- done
             Lit.Core.World.run.term(term.cont, world, vars)
         } default {term, world}
@@ -594,10 +592,10 @@ Lit.Core.World.run.term(
       none:
         {term, world}
       some: case got.value as entry {
-        func:
+        bond:
           use func = entry.value
           let {main, world} = Lit.Core.World.run.term(term.main, world, vars)
-          let world = world{term.name} <- Lit.Core.Entry.func(func@main <- main)
+          let world = world{term.name} <- Lit.Core.Entry.bond(func@main <- main)
           Lit.Core.World.run.term(term.cont, world, vars)
       } default {term, world}
     }
@@ -617,57 +615,57 @@ Lit.Core.World.run.terms(
       {head & tail, world}
   }
 
-//// Tests
-//// -----
-//Lit.Core: _
-//  let world = {}
-//  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|Lit.Lang.BitsMap|`
-//type BoolList {
-//  nil
-//  cons{
-//    head: Bool
-//    tail: NatList
-//  }
-//}
-//
-//type NatList {
-//  nil
-//  cons{
-//    head: Nat
-//    tail: BoolList
-//  }
-//}
-//
-//Count.inc, MrDog @ Count(): Bits
-//  Bits/o{pred: Bits/e}
-//
-//Count.inc(): Unit
-//  call c = Count();
-//  call d = Bits.inc(c);
-//  bind Count = d;
-//  Unit/new
-//
-//user MrDog {
-//  01234
-//}
-//
-//with MrDog {
-//  call ret = Count.inc()
-//  call ret = Count.inc()
-//  call ret = Count.inc()
-//  call ret = Count.inc()
-//  call c = Count()
-//  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
-//  call dupped = Bits.dup(ret)
-//  Unit/new
-//} signed {
-//  confia
-//}: Unit
-//`
-//  let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
-//  case Lit.Core.World.run.page(page, world) as result {
-//    none:
-//      IO.print("failure")
-//    some:
-//      IO.print("success")
-//  }
+// Tests
+// -----
+Lit.Core: _
+  let world = {}
+  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|Lit.Lang.BitsMap|`
+type BoolList {
+  nil
+  cons{
+    head: Bool
+    tail: NatList
+  }
+}
+
+type NatList {
+  nil
+  cons{
+    head: Nat
+    tail: BoolList
+  }
+}
+
+Count.inc, MrDog @ Count(): Bits
+  Bits/o{pred: Bits/e}
+
+Count.inc(): Unit
+  call c = Count();
+  call d = Bits.inc(c);
+  bind Count = d;
+  Unit/new
+
+user MrDog {
+  01234
+}
+
+with MrDog {
+  call ret = Count.inc()
+  call ret = Count.inc()
+  call ret = Count.inc()
+  call ret = Count.inc()
+  call c = Count()
+  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
+  call dupped = Bits.dup(ret)
+  Unit/new
+} signed {
+  confia
+}: Unit
+`
+  let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
+  case Lit.Core.World.run.page(page, world) as result {
+    none:
+      IO.print("failure")
+    some:
+      IO.print("success")
+  }
