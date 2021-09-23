@@ -189,7 +189,7 @@ Lit.Core.World.check.term(
   type: Lit.Core.Type
   context: Map<Lit.Core.Type>
   world: Lit.Core.World
-  caller: String
+  caller: Maybe<String>
 ): Bool
 //  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
 //  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
@@ -256,7 +256,7 @@ Lit.Core.World.check.many(
   types: List<String>
   context: Map<Lit.Core.Type>
   world: Lit.Core.World
-  caller: String
+  caller: Maybe<String>
 ): Bool
   open world
   case terms types {
@@ -276,7 +276,7 @@ Lit.Core.World.check.match.cases(
   name: String
   context: Map<Lit.Core.Type>
   world: Lit.Core.World
-  caller: String
+  caller: Maybe<String>
 ): Bool
   case cases ctors {
     cons cons:
@@ -292,7 +292,7 @@ Lit.Core.World.check.match.cases(
   } default false
 
 Lit.Core.World.check.owner(
-  caller: String
+  caller: Maybe<String>
   name: String
   world: Lit.Core.World
 ): Bool
@@ -300,15 +300,23 @@ Lit.Core.World.check.owner(
   case entry {
     none: false
     some: 
-      case entry.value as func{
+      case entry.value as func {
         func: 
-          if caller =? name then true
-          else
-            use f = func.value
-            case f.ownr {
-              nil: true
-              cons: List.in!(String.eql(caller), f.ownr)
-            }
+          use f = func.value
+          case f.ownr {
+            nil:
+              true
+            cons:
+              case caller {
+                some:
+                  if caller.value =? name then
+                    true
+                  else
+                    List.in!(String.eql(caller.value), f.ownr)
+                none:
+                  false
+              }
+          }
       } default false
   }
 
@@ -430,7 +438,7 @@ Lit.Core.World.run.statement(
       let exec = statement.expr
       // This assumes that the type Unit is already defined to avoid
       // duplicating the typechecking function.
-      let term_ok = Lit.Core.World.check.term(exec, Lit.Core.Type.word, {}, world)
+      let term_ok = Lit.Core.World.check.term(exec, Lit.Core.Type.word, {}, world, none)
       if term_ok then
         let {result, world} = Lit.Core.World.run.term(exec, world, {})
         log("- ext_exec: " | Lit.Lang.show.term(result, world))
@@ -507,7 +515,6 @@ Lit.Core.World.run.statement(
 
 Lit.Core.World.run.term(
   term: Lit.Core.Term
-  self: String
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
@@ -520,14 +527,14 @@ Lit.Core.World.run.term(
         none:
           {term, world}
         some:
-          Lit.Core.World.run.term(got.value, self, world, vars)
+          Lit.Core.World.run.term(got.value, world, vars)
       }
     create:
-      let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
+      let {vals, world} = Lit.Core.World.run.terms(term.vals, world, vars)
       {Lit.Core.Term.create(term.type, term.ctor, vals), world}
     match:
       Maybe {
-        let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
+        let {expr, world} = Lit.Core.World.run.term(term.expr, world, vars)
         case expr {
           create: case term.cses[expr.ctor] as selected_case {
             some: 
@@ -535,29 +542,29 @@ Lit.Core.World.run.term(
               let vars = for subst in List.zip!!(case_fields, expr.vals):
                 let {field, value} = subst
                 vars{field} <- value
-              Lit.Core.World.run.term(case_body, self, world, vars)
+              Lit.Core.World.run.term(case_body, world, vars)
           } default {term, world}
         } default {term,world}
       }
     word:
       {term, world}
     compare:
-      let {val0, world} = Lit.Core.World.run.term(term.val0, self, world, vars)
-      let {val1, world} = Lit.Core.World.run.term(term.val1, self, world, vars)
+      let {val0, world} = Lit.Core.World.run.term(term.val0, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, world, vars)
       case val0 val1 {
           word word:
             case U64.cmp(val0.numb, val1.numb) {
               ltn:
-                Lit.Core.World.run.term(term.iflt, self, world, vars)
+                Lit.Core.World.run.term(term.iflt, world, vars)
               eql:
-                Lit.Core.World.run.term(term.ifeq, self, world, vars)
+                Lit.Core.World.run.term(term.ifeq, world, vars)
               gtn:
-                Lit.Core.World.run.term(term.ifgt, self, world, vars)
+                Lit.Core.World.run.term(term.ifgt, world, vars)
             }
       } default log("error: operands didn't reduce to words") {term, world}
     operate:
-      let {val0, world} = Lit.Core.World.run.term(term.val0, self, world, vars)
-      let {val1, world} = Lit.Core.World.run.term(term.val1, self, world, vars)
+      let {val0, world} = Lit.Core.World.run.term(term.val0, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, world, vars)
       case val0 val1 {
         word word:
           case term.oper {
@@ -578,7 +585,7 @@ Lit.Core.World.run.term(
             xor:
               {Lit.Core.Term.word(U64.xor(val0.numb, val1.numb)), world}
           }
-      } default log("error: operands didn't reduce to words") {term, world}
+      } default log("error: operand didn't reduce to words") {term, world}
     call:
       case world{term.func} as got {
         none:
@@ -591,13 +598,13 @@ Lit.Core.World.run.term(
             let state = for arg in List.zip!!(func.iarg, term.args):
               let {main_vars, world} = state
               let {arg_name, arg_term} = arg
-              let {arg_term, world} = Lit.Core.World.run.term(arg_term, self, world, main_vars)
+              let {arg_term, world} = Lit.Core.World.run.term(arg_term, world, main_vars)
               let main_vars = main_vars{arg_name} <- arg_term
               {main_vars, world}
             let {main_vars, world} = state
             let {done, world} = Lit.Core.World.run.term(func.main, term.func, world, main_vars)
             let vars = vars{term.name} <- done
-            Lit.Core.World.run.term(term.cont, self, world, vars)
+            Lit.Core.World.run.term(term.cont, world, vars)
         } default {term, world}
       }
     bind:
@@ -607,16 +614,15 @@ Lit.Core.World.run.term(
       some: case got.value as entry {
         func:
           use func = entry.value
-          let {main, world} = Lit.Core.World.run.term(term.main, self, world, vars)
+          let {main, world} = Lit.Core.World.run.term(term.main, world, vars)
           let world = world{term.name} <- Lit.Core.Entry.func(func@main <- main)
-          Lit.Core.World.run.term(term.cont, self, world, vars)
+          Lit.Core.World.run.term(term.cont, world, vars)
       } default {term, world}
     }
   }
 
 Lit.Core.World.run.terms(
   terms: List<Lit.Core.Term>
-  self: String
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<List<Lit.Core.Term>, Lit.Core.World>
@@ -624,8 +630,8 @@ Lit.Core.World.run.terms(
     nil:
       {[], world}
     cons:
-      let {head, world} = Lit.Core.World.run.term(terms.head, self, world, vars)
-      let {tail, world} = Lit.Core.World.run.terms(terms.tail, self, world, vars)
+      let {head, world} = Lit.Core.World.run.term(terms.head, world, vars)
+      let {tail, world} = Lit.Core.World.run.terms(terms.tail, world, vars)
       {head & tail, world}
   }
 
