@@ -447,7 +447,11 @@ Lit.Core.World.run.statement(
             data: 
               log("- new_type: " | type.name)
               case world{type.name} as got_type {
-                none: some(world{type.name} <- Lit.Core.Entry.type(type))
+                none:
+                  if not(type.name =? "U64") then
+                    some(world{type.name} <- Lit.Core.Entry.type(type))
+                  else
+                    log("error: cannot redefine built-in type named 'U64'") none
               } default log("error: type redefinition: " | type.name) none
           }
         bond:
@@ -623,7 +627,13 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
-  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|Lit.Lang.BitsMap|`
+  let code = 
+    Lit.Lang.Type
+    | Lit.Lang.Cmp
+    | Lit.Lang.Nat
+    | Lit.Lang.Bits
+    | Lit.Lang.BitsMap
+    |`
 type BoolList {
   nil
   cons{

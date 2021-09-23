@@ -67,4 +67,6 @@ type BitsBitsBits {
     snd: Bits
     trd: Bits
   }
+}
+
 `

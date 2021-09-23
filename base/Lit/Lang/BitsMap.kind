@@ -156,7 +156,7 @@ BitsMap.transct_2(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
                       //[[dando um set]]
                       
                       //alterar o valor do receiver (adicionar o sum )
-                      [[dando um set ]]
+                      // [[dando um set ]]
 //                  call 
 //                  state
 //                false:
