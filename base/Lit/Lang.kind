@@ -349,7 +349,7 @@ Lit.Lang.parser.term.compare(world: Lit.Core.World): Parser<Lit.Core.Term>
 
 Lit.Lang.parser.term.operate(world: Lit.Core.World): Parser<Lit.Core.Term>
   Parser {
-    // OBS.: will faild miserably with infix notation without parentheses
+    // OBS.: will fail miserably with infix notation without parentheses
     Lit.Lang.parser.text("(")
     get operation = Lit.Lang.parser.term.operate.operation
     get val0 = Lit.Lang.parser.term(world)
