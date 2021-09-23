@@ -301,9 +301,9 @@ Lit.Core.World.check.owner(
     none: false
     some: 
       case entry.value as func {
-        func: 
+        bond: 
           use f = func.value
-          case f.ownr {
+          case f.owners {
             nil:
               true
             cons:
@@ -312,12 +312,14 @@ Lit.Core.World.check.owner(
                   if caller.value =? name then
                     true
                   else
-                    List.in!(String.eql(caller.value), f.ownr)
+                    List.in!(String.eql(caller.value), f.owners)
                 none:
                   false
               }
           }
-      } default false
+        type:
+          _
+      }// default false
   }
 
 // Validation
@@ -447,39 +449,38 @@ Lit.Core.World.run.statement(
               } default log("error: type redefinition: " | type.name) none
           }
         bond:
-          _
-//        use func = line.value
-//        log("- new_func: " | func.name | List.show!(Function.id!, func.ownr))
-//        case world{func.name} as got {
-//          none:
-//            let new_world = world{func.name} <- Lit.Core.Entry.func(func)
-//            let ctx = some({})
-//            let ctx = for arg in List.zip!!(func.iarg, func.ityp): Maybe {
-//              let {arg_name, arg_type} = arg
-//              get ctx = ctx
-//              get typ = Lit.Core.World.get_type(arg_type, world)
-//              return ctx{arg_name} <- typ
-//            }
-//            let vld = {}
-//            let vld = for iarg in func.iarg:
-//              vld{iarg} <- false
-//            case ctx {
-//              none:
-//                log("error: func input type undefined: " | func.name) none
-//              some:
-//                let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
-//                if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, func.name) then
-//                  let {ah, ok} = Lit.Core.World.validate(func.main, vld)
-//                  if ok then
-//                    //log("here")
-//                    some(new_world)
-//                  else
-//                    //log("there")
-//                    log("error: func invalid: " | func.name) none
-//                else
-//                  log("error: func ill-typed: " | func.name) none
-//            }
-//        } default log("error: func redefinition: " | func.name) none
+          use func = statement.entry.value
+          log("- new_func: " | func.name | List.show!(Function.id!, func.owners))
+          case world{func.name} as got {
+            none:
+              let new_world = world{func.name} <- Lit.Core.Entry.bond(func)
+              let ctx = some({})
+              let ctx = for arg in List.zip!!(func.input_names, func.input_types): Maybe {
+                let {arg_name, arg_type} = arg
+                get ctx = ctx
+                get typ = Lit.Core.World.get_type(arg_type, world)
+                return ctx{arg_name} <- typ
+              }
+              let vld = {}
+              let vld = for iarg in func.input_names:
+                vld{iarg} <- false
+              case ctx {
+                none:
+                  log("error: func input type undefined: " | func.name) none
+                some:
+                  let otyp = Lit.Core.World.get_type(func.output_type, world) abort log("error: func otyp not found: " | func.name) none
+                  if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, some(func.name)) then
+                    let {ah, ok} = Lit.Core.World.validate(func.main, vld)
+                    if ok then
+                      //log("here")
+                      some(new_world)
+                    else
+                      //log("there")
+                      log("error: func invalid: " | func.name) none
+                  else
+                    log("error: func ill-typed: " | func.name) none
+              }
+          } default log("error: func redefinition: " | func.name) none
       }
     call:
       let exec = statement.expr
@@ -493,72 +494,6 @@ Lit.Core.World.run.statement(
       else
         log("error: exec failed in typecheck") none
   }
-//  case line {
-//    new_type:
-//      // TODO: check something?
-//      let type = line.value
-//      case type {
-//        adt: 
-//          log("- new_type: " | type.name)
-//          case world{type.name} as got_type {
-//            none: some(world{type.name} <- Lit.Core.Entry.type(type))
-//          } default log("error: type redefinition: " | type.name) none
-//      }
-//    new_func:
-//      use func = line.value
-//      log("- new_func: " | func.name | List.show!(Function.id!, func.ownr))
-//      case world{func.name} as got {
-//        none:
-//          let new_world = world{func.name} <- Lit.Core.Entry.func(func)
-//          let ctx = some({})
-//          let ctx = for arg in List.zip!!(func.iarg, func.ityp): Maybe {
-//            let {arg_name, arg_type} = arg
-//            get ctx = ctx
-//            get typ = Lit.Core.World.get_type(arg_type, world)
-//            return ctx{arg_name} <- typ
-//          }
-//          let vld = {}
-//          let vld = for iarg in func.iarg:
-//            vld{iarg} <- false
-//          case ctx {
-//            none:
-//              log("error: func input type undefined: " | func.name) none
-//            some:
-//              let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
-//              if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, func.name) then
-//                let {ah, ok} = Lit.Core.World.validate(func.main, vld)
-//                if ok then
-//                  //log("here")
-//                  some(new_world)
-//                else
-//                  //log("there")
-//                  log("error: func invalid: " | func.name) none
-//              else
-//                log("error: func ill-typed: " | func.name) none
-//          }
-//      } default log("error: func redefinition: " | func.name) none
-//    new_user:
-//      use user = line.value
-//      log("- new_user: " | user.name)
-//      case world{user.name} as got {
-//        none: some(world{user.name} <- Lit.Core.Entry.user(user))
-//      } default log("error: user redefinition: " | user.name) none
-//    ext_exec:
-//      use exec = line.value
-//      let otyp = Lit.Core.World.get_type(exec.otyp, world) abort log("error: exec otyp not found") none
-//      case world{exec.user} as got_entry {
-//        some: case got_entry.value as entry {
-//          user: 
-//            use user = entry.value
-//            if Lit.Core.World.check.term(exec.expr, otyp, {}, world, exec.user) then
-//              let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
-//              log("- ext_exec: " | Lit.Lang.show.term(result, world))
-//              some(world)
-//            else
-//              log("error: exec failed in typecheck") none
-//        } default log("error: exec user not a user") none
-//      } default log("error: exec user undefined") none
-//  }
 
 Lit.Core.World.run.term(
   term: Lit.Core.Term
