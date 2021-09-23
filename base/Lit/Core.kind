@@ -197,17 +197,16 @@ Lit.Core.World.check.term(
   world: Lit.Core.World
   caller: Maybe<String>
 ): Bool
-  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
-  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))
-  log("")
+  log("- chk " | Lit.Lang.show.term(term, world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
+  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))  // DEBUG
+  log("")  // DEBUG
   case term {
     var:
-      log("var") // DEBUG
-      let vtyp = context{term.name} abort false
-      //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
-      Lit.Core.Type.equal(vtyp, type)
-    create: 
-      log("crate") // DEBUG
+      let var_type = context{term.name} abort false
+      log("-- var " | Lit.Lang.show.type.short(var_type) | " " | Lit.Lang.show.type.short(type))  // DEBUG
+      Lit.Core.Type.equal(var_type, type)
+    create:
+      log("-- create")  // DEBUG
       let ttyp = Lit.Core.World.get_type(term.type,world) abort false
       case ttyp {
         data:
@@ -216,7 +215,7 @@ Lit.Core.World.check.term(
           args && Lit.Core.Type.equal(ttyp, type)
       } default false
     call:
-      log("call") // DEBUG
+      log("-- call")  // DEBUG
       // verify owner
       let ownr = Lit.Core.World.check.owner(caller, term.func, world)
       use func = Lit.Core.World.get_func(term.func,world) abort false
@@ -225,8 +224,9 @@ Lit.Core.World.check.term(
       let cont = Lit.Core.World.check.term(term.cont, type, context{term.name} <- otyp, world, caller)
       ownr && args && cont
     match:
-      log("match") // DEBUG
-      let expr_type = Lit.Core.World.get_type(term.type,world) abort false
+      log("-- match ")  // DEBUG
+      let expr_type = Lit.Core.World.get_type(term.type, world) abort false
+
       case expr_type {
         data:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, context, world, caller)
@@ -235,7 +235,7 @@ Lit.Core.World.check.term(
           expr && cses
       } default false
     bind:
-      log("bind") // DEBUG
+      log("-- bind ")  // DEBUG
       // TODO: check access
       let ownr = Lit.Core.World.check.owner(caller, term.name, world)
       use func = Lit.Core.World.get_func(term.name,world) abort false
@@ -246,7 +246,7 @@ Lit.Core.World.check.term(
       let cont = Lit.Core.World.check.term(term.cont, type, context, world, caller)
       ownr && nofn && main && cont
     word:
-      log("word") // DEBUG
+      log("-- word ")  // DEBUG
       case type {
         word:
           log("word!") // DEBUG
@@ -255,7 +255,7 @@ Lit.Core.World.check.term(
         log("not word")
         false
     compare:
-      log("compare") // DEBUG
+      log("-- compare ")  // DEBUG
       let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
       let val1 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
       let iflt = Lit.Core.World.check.term(term.iflt, type, context, world, caller)
@@ -263,7 +263,7 @@ Lit.Core.World.check.term(
       let ifgt = Lit.Core.World.check.term(term.ifgt, type, context, world, caller)
       val0 && val1 && iflt && ifeq && ifgt
     operate:
-      log("operate") // DEBUG
+      log("-- operate ")  // DEBUG
       let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
       let val1 = Lit.Core.World.check.term(term.val1, Lit.Core.Type.word, context, world, caller)
       val0 && val1
