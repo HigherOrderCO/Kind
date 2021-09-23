@@ -402,23 +402,42 @@ Lit.Core.World.validate.aux(
 // Execution
 // ---------
 
-//Lit.Core.World.run.page(
-//  page: Lit.Core.Page
-//  world: Lit.Core.World
-//): Maybe<Lit.Core.World>
-//  case page {
-//    nil: some(world)
-//    cons: case Lit.Core.World.run.statement(page.head, world) as new_world {
-//      none: none
-//      some: Lit.Core.World.run.page(page.tail, new_world.value)
-//    }
-//  }
+Lit.Core.World.run.page(
+  page: Lit.Core.Page
+  world: Lit.Core.World
+): Maybe<Lit.Core.World>
+  case page {
+    nil:
+      some(world)
+    cons:
+      case Lit.Core.World.run.statement(page.head, world) as new_world {
+        none:
+          none
+        some:
+          Lit.Core.World.run.page(page.tail, new_world.value)
+      }
+  }
 
 
-//Lit.Core.World.run.statement(
-//  statement: Lit.Core.Statement
-//  world: Lit.Core.World
-//): Maybe<Lit.Core.World>
+Lit.Core.World.run.statement(
+  statement: Lit.Core.Statement
+  world: Lit.Core.World
+): Maybe<Lit.Core.World>
+  case statement {
+    define:
+      _
+    call:
+      let exec = statement.expr
+      // This assumes that the type Unit is already defined to avoid
+      // duplicating the typechecking function.
+      let term_ok = Lit.Core.World.check.term(exec, Lit.Core.Type.word, {}, world)
+      if term_ok then
+        let {result, world} = Lit.Core.World.run.term(exec, world, {})
+        log("- ext_exec: " | Lit.Lang.show.term(result, world))
+        some(world)
+      else
+        log("error: exec failed in typecheck") none
+  }
 //  case line {
 //    new_type:
 //      // TODO: check something?
