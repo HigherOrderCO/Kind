@@ -106,7 +106,7 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
    } <> "CREATE"
    match: Maybe {
      get type = Lit.Core.World.get_type(term.type, world)
-     log(term.type)
+     //log(term.type)
      case type {
        word: Maybe {return "U64/new"}
        data: Maybe {
@@ -315,14 +315,15 @@ Lit.Lang.parser.term(world: Lit.Core.World): Parser<Lit.Core.Term>
     Lit.Lang.parser.term.match(world)
     Lit.Lang.parser.term.bind(world)
     Lit.Lang.parser.term.call(world)
+    Lit.Lang.parser.term.word
     Lit.Lang.parser.term.var(world)
     Lit.Lang.parser.term.compare(world)
-    Lit.Lang.parser.term.word
     Lit.Lang.parser.term.operate(world)
  ])
 
 Lit.Lang.parser.term.word: Parser<Lit.Core.Term>
   Parser {
+    Lit.Lang.parser.ignore
     get num = Parser.nat
     if num >? 18446744073709551615 then
       Parser.fail!("Number out of bound")
@@ -537,6 +538,10 @@ Lit.Lang.parser.ignore: Parser(List<Unit>)
    }
  ]))
 
+// TODO solve ambiguity with numbers by putting
+// the word parser before the nat parser.
+// right now this seems to be looping the parser
+// I don't know why
 Lit.Lang.parser.name: Parser<String>
  Parser {
    Lit.Lang.parser.ignore
