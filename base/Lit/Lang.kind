@@ -540,8 +540,23 @@ Lit.Lang.parser.ignore: Parser(List<Unit>)
 Lit.Lang.parser.name: Parser<String>
  Parser {
    Lit.Lang.parser.ignore
-   get chrs = Parser.many1<Kind.Letter>(Lit.Lang.parser.letter)
-   return List.fold!(chrs)!(String.nil, String.cons)
+   get fst_chr = Lit.Lang.parser.letter
+   get chrs = Parser.many<Kind.Letter>(Lit.Lang.parser.letter)
+   return String.cons(fst_chr, List.fold!(chrs)!(String.nil, String.cons))
+ }
+
+Lit.Lang.parser.letter: Parser(Kind.Letter)
+ (pst)
+ open pst
+ case pst.str {
+   nil:
+     Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Unexpected eof."),
+   cons:
+     if Lit.Lang.parser.is_letter(pst.str.head) then
+       let pst = Parser.State.new(pst.err, pst.nam, pst.ini, Nat.succ(pst.idx), pst.str.tail)
+       Parser.Reply.value!(pst, pst.str.head)
+     else
+       Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Expected name."),
  }
 
 Lit.Lang.parser.letter: Parser(Kind.Letter)
@@ -559,6 +574,11 @@ Lit.Lang.parser.letter: Parser(Kind.Letter)
  }
 
 Lit.Lang.parser.is_letter(chr: Char): Bool
+ if      U16.btw('A', chr, 'Z') then Bool.true
+ else if U16.btw('a', chr, 'z') then Bool.true
+ else                                Bool.false
+
+Lit.Lang.parser.is_id(chr: Char): Bool
  if      U16.btw('A', chr, 'Z') then Bool.true
  else if U16.btw('a', chr, 'z') then Bool.true
  else if U16.btw('0', chr, '9') then Bool.true

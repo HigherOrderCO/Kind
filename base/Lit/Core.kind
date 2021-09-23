@@ -175,8 +175,10 @@ Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bon
 
 Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Constructor>>
   case type {
-    word: none
-    data: List.ifind!((i,f) String.eql(f@name,name), type.constructors)
+    word:
+      none
+    data:
+      List.ifind!((i,f) String.eql(f@name,name), type.constructors)
   }
 
 // Type-Checking
@@ -195,15 +197,17 @@ Lit.Core.World.check.term(
   world: Lit.Core.World
   caller: Maybe<String>
 ): Bool
-//  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
-//  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
-//  log("")
+  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
+  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))
+  log("")
   case term {
     var:
+      log("var") // DEBUG
       let vtyp = context{term.name} abort false
       //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
       Lit.Core.Type.equal(vtyp, type)
     create: 
+      log("crate") // DEBUG
       let ttyp = Lit.Core.World.get_type(term.type,world) abort false
       case ttyp {
         data:
@@ -212,6 +216,7 @@ Lit.Core.World.check.term(
           args && Lit.Core.Type.equal(ttyp, type)
       } default false
     call:
+      log("call") // DEBUG
       // verify owner
       let ownr = Lit.Core.World.check.owner(caller, term.func, world)
       use func = Lit.Core.World.get_func(term.func,world) abort false
@@ -220,6 +225,7 @@ Lit.Core.World.check.term(
       let cont = Lit.Core.World.check.term(term.cont, type, context{term.name} <- otyp, world, caller)
       ownr && args && cont
     match:
+      log("match") // DEBUG
       let expr_type = Lit.Core.World.get_type(term.type,world) abort false
       case expr_type {
         data:
@@ -229,6 +235,7 @@ Lit.Core.World.check.term(
           expr && cses
       } default false
     bind:
+      log("bind") // DEBUG
       // TODO: check access
       let ownr = Lit.Core.World.check.owner(caller, term.name, world)
       use func = Lit.Core.World.get_func(term.name,world) abort false
@@ -239,10 +246,16 @@ Lit.Core.World.check.term(
       let cont = Lit.Core.World.check.term(term.cont, type, context, world, caller)
       ownr && nofn && main && cont
     word:
+      log("word") // DEBUG
       case type {
-        word: true
-      } default false
+        word:
+          log("word!") // DEBUG
+          true
+      } default
+        log("not word")
+        false
     compare:
+      log("compare") // DEBUG
       let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
       let val1 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
       let iflt = Lit.Core.World.check.term(term.iflt, type, context, world, caller)
@@ -250,6 +263,7 @@ Lit.Core.World.check.term(
       let ifgt = Lit.Core.World.check.term(term.ifgt, type, context, world, caller)
       val0 && val1 && iflt && ifeq && ifgt
     operate:
+      log("operate") // DEBUG
       let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
       let val1 = Lit.Core.World.check.term(term.val1, Lit.Core.Type.word, context, world, caller)
       val0 && val1
@@ -627,48 +641,47 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
-  let code = 
-    Lit.Lang.Type
-    | Lit.Lang.Cmp
-    | Lit.Lang.Nat
-    | Lit.Lang.Bits
-    | Lit.Lang.BitsMap
-    |`
-type BoolList {
-  nil
-  cons{
-    head: Bool
-    tail: NatList
-  }
-}
-
-type NatList {
-  nil
-  cons{
-    head: Nat
-    tail: BoolList
-  }
-}
-
-Count.inc, MrDog @ Count(): Bits
-  Bits/o{pred: Bits/e}
-
-Count.inc(): Unit
-  call c = Count();
-  call d = Bits.inc(c);
-  bind Count = d;
-  Unit/new
-
-user MrDog {
-  01234
-}
-
-do {
-  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
-  call dupped = Bits.dup(ret)
-  Unit/new
-}: Unit
+  let code =
 `
+Test(): U64
+  2
+`
+//  let code = Lit.Lang.Type|Lit.Lang.Cmp|Lit.Lang.Nat|Lit.Lang.Bits|Lit.Lang.BitsMap|`
+//type BoolList {
+//  nil
+//  cons{
+//    head: Bool
+//    tail: NatList
+//  }
+//}
+//
+//type NatList {
+//  nil
+//  cons{
+//    head: Nat
+//    tail: BoolList
+//  }
+//}
+//
+//Count.inc, MrDog @ Count(): Bits
+//  Bits/o{pred: Bits/e}
+//
+//Count.inc(): Unit
+//  call c = Count();
+//  call d = Bits.inc(c);
+//  bind Count = d;
+//  Unit/new
+//
+//user MrDog {
+//  01234
+//}
+//
+//do {
+//  call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
+//  call dupped = Bits.dup(ret)
+//  Unit/new
+//}: Unit
+//`
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
   case Lit.Core.World.run.page(page, world) as result {
     none:
