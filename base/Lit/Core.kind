@@ -641,33 +641,43 @@ Lit.Core.World.run.terms(
 // -----
 Lit.Core: _
   let world = {}
+
   let code =
-`
-type Unit {
-  new
-}
+    Lit.Lang.Type
+    | Lit.Lang.Cmp
+    | Lit.Lang.Nat
+    | Lit.Lang.Bits
+    | Lit.Lang.BitsMap
+    | Lit.Lang.Test
 
-FirstTest(): Unit
-  Unit/new
+  // let code =
+  // `
+  //   type Unit {
+  //     new
+  //   }
 
-//type Lit.Core.Operation {
-//  add ok!
-//  sub ok!
-//  mul ok!
-//  div ok!
-//  mod ok!
-//  or
-//  and
-//  xor
-//}
-SecondTest(): U64
-  (|| (% (&& (- (/ (- (* (+ 2 (* 2 2)) 7) 2) 2) 4) 31) 3) 16)
+  //   FirstTest(): Unit
+  //     Unit/new
 
-do {
-  call b = SecondTest()
-  b
-}
-`
+  //   //type Lit.Core.Operation {
+  //   //  add ok!
+  //   //  sub ok!
+  //   //  mul ok!
+  //   //  div ok!
+  //   //  mod ok!
+  //   //  or
+  //   //  and
+  //   //  xor
+  //   //}
+  //   SecondTest(): U64
+  //     (|| (% (&& (- (/ (- (* (+ 2 (* 2 2)) 7) 2) 2) 4) 31) 3) 16)
+
+  //   do {
+  //     call b = SecondTest()
+  //     b
+  //   }
+  // `
+
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
   log("parsed:")
   log(Lit.Lang.show.page(page, world))
