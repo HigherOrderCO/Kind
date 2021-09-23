@@ -1,6 +1,30 @@
 Lit.Lang.Bits: String
 `
 
+Bits.dup(a: Bits): Pair.Bits
+  case a : Bits {
+    e:
+      Pair.Bits/new{fst: Bits/e, snd: Bits/e}
+    o:
+      call dupped = Bits.dup(a.pred)
+      case dupped : Pair.Bits {
+        new:
+          Pair.Bits/new {
+            fst: Bits/o{pred: dupped.fst},
+            snd: Bits/o{pred: dupped.snd},
+          }
+      }
+    i:
+      call dupped = Bits.dup(a.pred)
+      case dupped : Pair.Bits {
+        new:
+          Pair.Bits/new {
+            fst: Bits/i{pred: dupped.fst},
+            snd: Bits/i{pred: dupped.snd},
+          }
+      }
+  }
+
 Bits.tail(a: Bits): Bits
   case a : Bits { 
     e: Bits/e
@@ -30,7 +54,6 @@ Bits.size.aux(b: Bits, n: Nat, s: Nat): Nat
       call rec = Bits.size.aux(b.pred, Nat/zero, Nat/succ{pred: m})
       rec
   }
-
 
 Bits.size(b: Bits): Nat
   call size = Bits.size.aux(b, Nat/zero, Nat/zero)
@@ -126,7 +149,7 @@ Bits.add(a: Bits, b: Bits): Bits
   case b : Bits { 
     e: a
     o: case a : Bits { 
-      e: Bits/o{pred: a.pred}
+      e: Bits/o{pred: b.pred}
       o: 
         call rec = Bits.add(a.pred, b.pred)
         Bits/o{pred: rec}
@@ -135,7 +158,7 @@ Bits.add(a: Bits, b: Bits): Bits
         Bits/i{pred: rec}
     }
     i: case a : Bits { 
-      e: Bits/i{pred: a.pred}
+      e: Bits/i{pred: b.pred}
       o:
         call rec = Bits.add(a.pred, b.pred)
         Bits/i{pred: rec}
@@ -149,83 +172,87 @@ Bits.add(a: Bits, b: Bits): Bits
 
 Bits.add_p(a: Bits, b: Bits): BitsBitsBits
   case a : Bits {
-    e: 
+
+    e:
       call dup = Bits.dup(b)
       case dup : Pair.Bits {
-        new: 
+        new:
           BitsBitsBits/new {
-            fst: Bits/e,
-            snd: dup.fst,
+            fst: Bits/e
+            snd: dup.fst
             trd: dup.snd
           }
       }
-    o: case b : Bits {
-      e:
-        call dup = Bits.dup(Bits/o{pred: a.pred})
-        case dup : Pair.Bits {
-          new:
-            BitsBitsBits/new {
-              fst: dup.fst,
-              snd: Bits/e,
-              trd: dup.snd
-            }
-        }
-      o:
-        call rec = Bits.add_p(a.pred, b.pred)
-        case rec : BitsBitsBits { 
-          new:
-            BitsBitsBits/new{
-              fst: Bits/o{pred: rec.fst}
-              snd: Bits/o{pred: rec.snd}
-              trd: Bits/o{pred: rec.trd}
-        }
 
-      i:
-        call rec = Bits.add_p(a.pred, b.pred)
-        case rec : BitsBitsBits { 
-          new:
-            BitsBitsBits/new{
-              fst: Bits/i{pred: rec.fst}
-              snd: Bits/i{pred: rec.snd}
-              trd: Bits/i{pred: rec.trd}
-        }
-    }
+    o:
+      case b : Bits {
+        e:
+          call dup = Bits.dup(Bits/o{pred: a.pred})
+          case dup : Pair.Bits {
+            new:
+              BitsBitsBits/new {
+                fst: dup.fst,
+                snd: Bits/e,
+                trd: dup.snd
+              }
+          }
+        o:
+          call rec = Bits.add_p(a.pred, b.pred)
+          case rec : BitsBitsBits {
+            new:
+              BitsBitsBits/new {
+                fst: Bits/o{pred: rec.fst}
+                snd: Bits/o{pred: rec.snd}
+                trd: Bits/o{pred: rec.trd}
+              }
+          }
+        i:
+          call rec = Bits.add_p(a.pred, b.pred)
+          case rec : BitsBitsBits {
+            new:
+              BitsBitsBits/new {
+                fst: Bits/i{pred: rec.fst}
+                snd: Bits/i{pred: rec.snd}
+                trd: Bits/i{pred: rec.trd}
+              }
+          }
+      }
 
-    i: case b: Bits {
-      e:
-        call dup = Bits.dup(Bits/i{pred: a.pred})
-        case dup : Pair.Bits {
-          new:
-            BitsBitsBits/new {
-              fst: dup.fst,
-              snd: Bits/e,
-              trd: dup.snd
-            }
-        }
-      o:
-        call rec = Bits.add_p(a.pred, b.pred)
-        case rec : BitsBitsBits { 
-          new:
-            BitsBitsBits/new{
-              fst: Bits/i{pred: rec.fst}
-              snd: Bits/o{pred: rec.snd}
-              trd: Bits/i{pred: rec.trd}
-        }
-    }
-      i:
-        call rec = Bits.add_p(a.pred, b.pred)
-        case rec : BitsBitsBits {
-          new:
-            call inc = Bits.inc(rec.trd)
-            BitsBitsBits/new { 
-              fst: Bits/i{pred: rec.fst}
-              snd: Bits/i{pred: rec.snd}
-              trd: Bits/o{pred: inc}
-            }
-        }
+    i:
+      case b: Bits {
+        e:
+          call dup = Bits.dup(Bits/i{pred: a.pred})
+          case dup : Pair.Bits {
+            new:
+              BitsBitsBits/new {
+                fst: dup.fst,
+                snd: Bits/e,
+                trd: dup.snd
+              }
+          }
+        o:
+          call rec = Bits.add_p(a.pred, b.pred)
+          case rec : BitsBitsBits {
+            new:
+              BitsBitsBits/new {
+                fst: Bits/i{pred: rec.fst}
+                snd: Bits/o{pred: rec.snd}
+                trd: Bits/i{pred: rec.trd}
+              }
+          }
+        i:
+          call rec = Bits.add_p(a.pred, b.pred)
+          case rec : BitsBitsBits {
+            new:
+              call inc = Bits.inc(rec.trd)
+              BitsBitsBits/new {
+                fst: Bits/i{pred: rec.fst}
+                snd: Bits/i{pred: rec.snd}
+                trd: Bits/o{pred: inc}
+              }
+          }
       }
   }
-  
 
 Bits.sub.aux(a: Bits, b: Bits, r: Bits): Bits
   case b : Bits { 
@@ -240,7 +267,7 @@ Bits.sub.aux(a: Bits, b: Bits, r: Bits): Bits
     }
     o: case a : Bits { 
       e: 
-        call rec = Bits.sub.aux(Bits/o{pred: a.pred}, b.pred, Bits/o{pred: r})
+        call rec = Bits.sub.aux(Bits/o{pred: Bits/e}, b.pred, Bits/o{pred: r})
         rec
       o:
         call rec = Bits.sub.aux(a.pred, b.pred, Bits/o{pred: r})
@@ -253,7 +280,7 @@ Bits.sub.aux(a: Bits, b: Bits, r: Bits): Bits
       e: Bits/e
       o:
         call inc = Bits.inc(b.pred)
-        call rec = Bits.sub.aux(a.pred, inc , Bits/i{pred: r})
+        call rec = Bits.sub.aux(a.pred, inc, Bits/i{pred: r})
         rec
       i:
         call rec = Bits.sub.aux(a.pred, b.pred, Bits/o{pred: r})
@@ -341,7 +368,7 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
   case a : Bits { 
     e: case b : Bits {
       e:
-        BitsBitsCmp/new{
+        BitsBitsCmp/new {
           fst: Bits/e
           snd: Bits/e
           trd: c
@@ -350,14 +377,14 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
         call rec = Bits.cmp.aux(Bits/e, b.pred, c)
         case rec : BitsBitsCmp {
           new:
-            BitsBitsCmp/new{
+            BitsBitsCmp/new {
               fst: Bits/e
               snd: Bits/o{pred: rec.snd}
               trd: rec.trd
             }
         }
       i:
-        BitsBitsCmp/new{
+        BitsBitsCmp/new {
           fst: Bits/e
           snd: Bits/o{pred: b.pred}
           trd: Cmp/ltn
@@ -379,7 +406,7 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
           call rec = Bits.cmp.aux(a.pred, b.pred, c)
           case rec : BitsBitsCmp {
             new:
-              BitsBitsCmp/new{
+              BitsBitsCmp/new {
                 fst: Bits/o{pred: rec.fst}
                 snd: Bits/o{pred: rec.snd}
                 trd: rec.trd
@@ -389,7 +416,7 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
           call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/ltn)
           case rec : BitsBitsCmp {
             new:
-              BitsBitsCmp/new{
+              BitsBitsCmp/new {
                 fst: Bits/o{pred: rec.fst}
                 snd: Bits/o{pred: rec.snd}
                 trd: rec.trd
@@ -399,7 +426,7 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
     i:
       case b : Bits { 
         e:
-          BitsBitsCmp/new{
+          BitsBitsCmp/new {
             fst: Bits/i{pred: a.pred}
             snd: Bits/e
             trd: Cmp/gtn
@@ -408,7 +435,7 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
           call rec = Bits.cmp.aux(a.pred, b.pred, Cmp/gtn)
           case rec : BitsBitsCmp {
             new:
-              BitsBitsCmp/new{
+              BitsBitsCmp/new {
                 fst: Bits/i{pred: rec.fst}
                 snd: Bits/o{pred: rec.snd}
                 trd: rec.trd
@@ -418,7 +445,7 @@ Bits.cmp.aux(a: Bits, b: Bits, c: Cmp): BitsBitsCmp
           call rec = Bits.cmp.aux(a.pred, b.pred, c)
           case rec : BitsBitsCmp {
             new:
-              BitsBitsCmp/new{
+              BitsBitsCmp/new {
                 fst: Bits/i{pred: rec.fst}
                 snd: Bits/i{pred: rec.snd}
                 trd: rec.trd
@@ -436,7 +463,7 @@ Bits.gte(a: Bits, b: Bits): BitsBitsBool
   case bbcmp : BitsBitsCmp {
     new:
       call gte = Cmp.as_gte(bbcmp.trd)
-      BitsBitsBool/new{
+      BitsBitsBool/new {
         fst: bbcmp.fst
         snd: bbcmp.snd
         trd: gte
@@ -448,7 +475,7 @@ Bits.gtn(a: Bits, b: Bits): BitsBitsBool
   case bbcmp : BitsBitsCmp {
     new:
       call gtn = Cmp.as_gtn(bbcmp.trd)
-      BitsBitsBool/new{
+      BitsBitsBool/new {
         fst: bbcmp.fst
         snd: bbcmp.snd
         trd: gtn
@@ -460,7 +487,7 @@ Bits.lte(a: Bits, b: Bits): BitsBitsBool
   case bbcmp : BitsBitsCmp {
     new:
       call lte = Cmp.as_lte(bbcmp.trd)
-      BitsBitsBool/new{
+      BitsBitsBool/new {
         fst: bbcmp.fst
         snd: bbcmp.snd
         trd: lte
@@ -472,34 +499,11 @@ Bits.ltn(a: Bits, b: Bits): BitsBitsBool
   case bbcmp : BitsBitsCmp {
     new:
       call ltn = Cmp.as_ltn(bbcmp.trd)
-      BitsBitsBool/new{
+      BitsBitsBool/new {
         fst: bbcmp.fst
         snd: bbcmp.snd
         trd: ltn
       }
   }
 
-Bits.dup(a: Bits): Pair.Bits
-  case a : Bits {
-    e:
-      Pair.Bits/new{fst: Bits/e, snd: Bits/e}
-    o:
-      call dupped = Bits.dup(a.pred)
-      case dupped : Pair.Bits {
-        new:
-          Pair.Bits/new{
-            fst: Bits/o{pred: dupped.fst},
-            snd: Bits/o{pred: dupped.snd},
-          }
-      }
-    i:
-      call dupped = Bits.dup(a.pred)
-      case dupped : Pair.Bits {
-        new:
-          Pair.Bits/new{
-            fst: Bits/i{pred: dupped.fst},
-            snd: Bits/i{pred: dupped.snd},
-          }
-      }
-  }
 `

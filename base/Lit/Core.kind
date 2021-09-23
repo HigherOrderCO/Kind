@@ -224,7 +224,6 @@ Lit.Core.World.check.term(
     match:
       log("-- match ")  // DEBUG
       let expr_type = Lit.Core.World.get_type(term.type, world) abort false
-      log("-- match2 ")  // DEBUG
       case expr_type {
         data:
           let expr = Lit.Core.World.check.term(term.expr, expr_type, context, world, caller)
