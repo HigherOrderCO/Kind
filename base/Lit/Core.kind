@@ -492,19 +492,6 @@ Lit.Core.World.run.statement(
         log("error: exec failed in typecheck") none
   }
 
-Lit.Core.World.run.exec(
-  exec: Lit.Core.Exec
-  world: Lit.Core.World
-): Maybe<Lit.Core.World>
-  open exec
-  let type = Lit.Core.World.get_type(exec.otyp, world) abort log("error: exec otyp not found") none
-  if Lit.Core.World.check.term(exec.expr, type, {}, world, exec.user) then
-    let {result, world} = Lit.Core.World.run.term(exec.expr, exec.user, world, {})
-    log("- ext_exec: " | Lit.Lang.show.term(result, world))
-    some(world)
-  else
-    log("error: exec failed in typecheck") none
-
 Lit.Core.World.run.term(
   term: Lit.Core.Term
   world: Lit.Core.World
