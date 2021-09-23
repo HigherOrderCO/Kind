@@ -6,29 +6,177 @@ Bitcoin with a stateful scripting language that allowed arbitrary financial
 transactions to be settled without third parties. Notably, Ethereum's built-in
 virtual machine made it a general-purpose computer, even though most of the
 protocol's complexity wasn't required to achieve Turing completeness. Litereum
-is a massive simplification of this concept, trading features for simplicity.
-Without a native token, it, technically, isn't a cryptocurrency, even though
-tokens can be created internally as stateful programs. In essence, Litereum is
-just the Lambda Calculus running in a peer-to-peer network, making it a
-politically neutral decentralized computer.
+is a massive simplification of this concept, trading features for raw
+simplicity. Since it doesn't have a native token, it isn't a cryptocurrency
+itself, but currencies can be created as internal programs. In essence, Litereum
+is a peer-to-peer Lambda Calculus interpreter, making it a minimal decentralized
+computer, and a politically neutral smart-contract platform.
+
+Introduction
+------------
+
+Litereum's design and implementation is, essentially, a massively distillation
+of Ethereum, taking away all the complex features that are either historical
+artifacts or optimizations, and keeping only the bare minimum required to
+establish a decentralized computer and smart-contract platform. For comparison,
+our reference Python full node requires about **3000 lines of code**, while the
+standard Ethereum full node has <TODO>.
+
+### Why keep it so simple?
+
+Having a simpler implementation has two major benefits. 
+
+#### 1. Litereum is secure
+
+Since there is less code, the attack surface is narrower, making a full node
+much easier to audit. Moreover, the internal scripting language is prone to
+formal verification, further reinforcing security. This is only possible because
+it isn't based on stack machines, but on a simply-typed affine calculus that is
+type-checked on-chain and has a clear cost model, preventing reentrancy attacks
+(that would lead to invalid states, hindering formal verification) and spam
+(which would be unavoidable in the usual lambda calculus, due to the
+impossibility of measuring the cost of a beta-reduction).
+
+#### 2. Litereum is apolitical
+
+Ethereum's complexity makes it politically centralized in the hands of the few
+developers that fully understand the protocol. While this is fine for most
+common users, big companies and governments will avoid throwing large amounts of
+money in networks that are strongly influenced by private entities. Litereum's
+simplicity makes it viable for companies, and even individuals, to implement
+their own full nodes, without trusting anyone else's code. This transparency
+makes Litereum politically decentralized and, thus, a less risky choice for big
+players looking to migrate their assets from fiduciary to cryptographic money.
+
+### How is that possible?
+
+Below are some of the major differences that make this possible:
+
+#### 1. No native account system
+
+Ethereum uses the Elliptic Curve Digital Signature Algorithm (ECDSA) for message
+authentication as a hard-coded algorithm that is part of the protocol. As of
+2021, it is still not possible to create Ethereum accounts that don't depend on
+ECDSA signatures. Since ECDSA is vulnerable to quantum attackers, if a quantum
+computer of reasonable scale is developed, most Ethereum accounts will have
+their private keys exposed, which would be catastrophic to the network.
+
+Litereum doesn't have a native account system or signature scheme. Instead,
+users create accounts by simply deploying smart-contracts that they control
+through their preferred authentication scheme. As such, users are free to use a
+cheaper, but less secure, signature algorithm, like ECDSA, or an expensive, but
+more secure, algorithm, like Lamport or WOTS. They can even set up multiple
+signature options for the same account. Nothing is hard-coded.
+
+#### 2. No native currencies, only functions
+
+Ethereum has a native currency, Ether, that is used to pay miner fees. Litereum
+not only has no "preferred currency", but it has no built-in currency at all: it
+is a pure computation network. Of course, users can still create their own
+tokens as contracts, but every internal currency is treated equally.
+
+As a consequence, Litereum transactions don't have the "from", "to", "value",
+"gasPrice" or "gasLimit" fields. Instead, a transaction is just a block of code
+that is executed when mined in order to alter the blockchain state.
+Ethereum-like transactions can be emulated by a suitable script. For example,
+the following snippet:
+
+    @Katarina({
+      call miner = get_miner_identity()
+      call Dog.send(42, miner)
+      call Lit.send(42, miner)
+      call Lit.send(1000, @Ahri)
+      done
+    }, "c803cb81...cb92880c") // signature here
+
+Is a block of code signed by an user called @Katarina. Once mined, that snippet
+would run in behalf of Katarina, paying 42 DOG and 42 LIT tokens as fees for the
+block miner, and sending 1000 LIT tokens to @Ahri. In effect, this has the exact
+same behavior as a classic Ethereum transaction.
+
+Like Ethereum, the computational cost of a transaction is measured in gas, and
+blocks have a size (space) and gas (time) limit. This keeps the cost of running
+a full node, both in terms of computation and storage cost, previsible. Since
+there isn't a native currency, there isn't a built-in gas-to-native-token
+conversion either. Instead, a free market emerges, where users choose the exact
+amount of fees they want to pay, and miners select transactions that fit in a
+block, considering both space and computation costs, in a manner that maximies
+their individual profits.
+
+#### 3. A simpler block structure
+
+Ethereum block structure is complex due to both historical artifacts that are
+often regarded as mistakes (such as logs), and to optimizations that, while
+clever, are not used in practice and sometimes even obsolete (such as
+patricia-merkle trees).
+
+![ethereum_block_header.png](Ethereum block structure)
+
+Litereum takes a minimalistic approach: blocks store just the previous block,
+the nonce, the miner identity and a list of transactions (which are, themselves,
+just blocks of code). Of course, that means that features like light clients
+aren't possible, but we argue that these aren't used in practice: users either
+run full nodes, or trust someone that does.
+
+#### 4. A simple concensus algorithm
+
+Ethereum aims to migrate to a complex Proof-of-Stake consensus algorithm. While
+that choice will bring several benefits such as lower energy consumption and
+faster finality times, it also makes the protocol, as a whole, considerably more
+complex. Even Ethereum's current implementation of Proof-of-Work is complex due
+to the adoption of Ethash and the GHOST.
+
+Litereum's consensus algorithm is just Proof-of-Work, exactly as used on
+Bitcoin, except slightly simpler since there are no native fees. Proof-of-Work
+is straightforward to implement and, in fact, only a small fraction of
+Litereum's code.
+
+#### 5. It is slower
+
+Finally, it must be stressed that Litereum is not designed to have a high layer
+1 throughput. It has a very limited block size and computation budget. This
+allows us to avoid design choices that would make it more scalable for the cost
+of added complexity. In general, Litereum should be less scalable than Ethereum
+on its layer 1.
+
+There are, though, key differences that make it better in some cases. For
+example, deploying contracts don't require signatures, and these are smaller
+than their Ethereum counterparts, due to shorter serialization and global
+sharing of functions. Deploying blocks and performing non-signed calls should be
+more scalable on Litereum.
+
+Regardless, we argue that layer 1 scalability is not the most important
+end-goal. Most layer 2 optimizations that make Ethereum more scalable apply to
+Litereum, so, a slower layer 1 won't detain long-term scalability.
+
+Design
+------
+
+Litereum's design is split in two parts:
+
+### 1. LitCore
+
+The execution environment where users create and interact with tokens, contracts
+and applications. It has a built-in scripting language based on the affine,
+simply-typed, lambda calculus. Recursive functions, algebraic datatypes,
+pattern-matching and 64-bit unsigned integers are the only computational
+primitives. Stateful computation is possible because programs are allowed to
+mutably rebind global definitions. Communication is possible because programs
+can call each-other. That is, a message is just an external function call, and
+the reply is just the returned value.
+
+### 2. LitCons
+
+The consensus algorithm. Nodes connect in a peer-to-peer network to create and
+exchange blocks of pure data. LitCons is completely separate from LitCore, 
+<TODO>
 
 Implementation
 --------------
 
-Litereum's design is a combination of 3 components:
+### 1. LitCore
 
-1. LitCons: a minimal, proof of work consensus algorithm.
-
-2. LitSign: a minimal, quantum-resistant, hash-based signature scheme.
-
-3. LitCore: a minimal, statically typed affine calculus used for scripting. 
-
-### LitCore
-
-LitCore is a affine, simply typed, functional language featuring recurive
-functions, algebraic datatypes, pattern-matching and a global state, called
-world. It can be seen as the virtual machine running inside Litereum. Every type
-and algorithm required to implement LitCore will be specified below.
+Types:
 
 #### Bits
 
@@ -239,99 +387,7 @@ A case in a pattern-match. It has 2 fields:
 
 - `body : Term`: the term returned by that case
 
-LitSign
--------
-
-LitCons uses a configuration of WOTS for message authentication, based on the
-Keccak256 function. To be able to sign messages, an user must first generate a
-random 256-bit word as its seed. From this seed, the user can generate private
-keys by concatenating and hashing `keccak(seed | n | i)` for each natural number
-`i` up to `32` (exclusive), where `n` is the number of the private key. That is:
-
-```
-function private_key(seed, n):
-  private_key = []
-  for i from 0 to 32:
-    private_key.push(keccak(seed | n | i))
-  return private_key
-```
-
-A public key can then be generated by taking `keccak^256(w)`, for each word `w`
-in the private key, concatenating these results, and taking its hash. That is:
-
-```
-function public_key(private_key):
-  public_key = []
-  for i from 0 to 32:
-    hash = private_key[i]
-    for j from 0 to 256:
-      hash = keccak(hash)
-    public_key.push(hash)
-  return keccak(public_key)
-```
-
-The user must then broadcast his public key as his public identifier, and keep
-his private key secret. To sign a message `M` the user must first generate a
-256-bit summary of `M`. That summary consists of the last 30 bytes of the
-Keccak of the message, prefixed with the sum of these bytes. That is:
-
-```
-function summary(message):
-  hash    = keccak(message)[2..32]  # last 30 bytes of the hash
-  byte_0  = sum(hash) / 256         # first byte of the checksum
-  byte_1  = sum(hash) % 256         # second byte of the checksum
-  summary = byte_0 | byte_1 | hash  # the 32-byte summary
-  return summary
-```
-
-Then, for each natural number `i`, up to `32`, the signer must take
-`256 - summary[i]` consecutive hashes of `private_key[i]`. The concatenation of
-these 32 hashes is the 1024-bytes signature. That is:
-
-```
-function sign(private_key, summary):
-  signature = []
-  for i from 0 to 32:
-    value = private_key[i]
-    for i from 0 to 256 - summary[i]:
-      value = keccak(value)
-    signature.push(value)
-  return signature
-```
-
-A public key can be recovered from a signature and a summary by, for each
-natural number `i`, up to `32`, taking `summary[i]` consecutive hashes of
-`signature[i]`. That is:
-
-```
-function recover(summary, signature):
-  public_key = []
-  for i from 0 to 32:
-    hash = signature[i]
-    for i from 0 to summary[i]:
-      hash = keccak(hash)
-    public_key.push(hash)
-  return keccak(public_key)
-```
-
-To check if a signature is valid, the verifier must check if the public key
-returned by `recover()` matches with the one published. That is:
-
-```
-function valid(message, signature, public_key):
-  return recover(summary(message), signature) == public_key
-```
-
-This signature scheme has 120 bits of classical security, and 80 bits of
-post-quantum security. It has a signature size of 1024 bytes, and requires an
-average of 4096 hashes per signature and verification. This is an one-time
-signature scheme, which means that, once a message is signed with a public key,
-that public key must be thrown away, and a new one must be generated. In
-Litereum, every time an user makes a transaction, they broadcasts the new
-public key to the network.
-
-LitCons
--------
+### 2. LitCons
 
 LitCons is a data-only blockchain. It could be described as "Bitcoin without the
 coin". It is the consensus layer used by Litereum to order blocks (pages) in its
