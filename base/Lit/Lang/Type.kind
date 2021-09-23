@@ -26,6 +26,7 @@ type Cmp {
   gtn
 }
 
+//todo Rename to MapOfBits?
 type BitsMap {
   new
   tie{val: Bits, lft: BitsMap, rgt: BitsMap}
@@ -33,6 +34,11 @@ type BitsMap {
 
 type Pair.BitsMap {
   new{fst: BitsMap, snd: BitsMap}
+}
+
+//I mean it, please rename
+type PlsRename {
+  new{value: Bits, map: BitsMap}
 }
 
 type Pair.Bits {
@@ -54,4 +60,13 @@ type BitsBitsBool {
     trd: Bool
   }
 }
+
+type BitsBitsBits { 
+  new{
+    fst: Bits
+    snd: Bits
+    trd: Bits
+  }
+}
+
 `
