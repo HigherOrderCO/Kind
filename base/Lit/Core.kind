@@ -642,47 +642,21 @@ Lit.Core.World.run.terms(
 Lit.Core: _
   let world = {}
   let code =
-    Lit.Lang.Type
-    | Lit.Lang.Cmp
-    | Lit.Lang.Nat
-    | Lit.Lang.Bits
-    | Lit.Lang.BitsMap
-    |
-  `
-  type BoolList {
-    nil
-    cons{
-      head: Bool
-      tail: NatList
-    }
-  }
+`
+type Unit {
+  new
+}
 
-  type NatList {
-    nil
-    cons{
-      head: Nat
-      tail: BoolList
-    }
-  }
+FirstTest(): Unit
+  Unit/new
 
-  Count.inc, MrDog @ Count(): Bits
-    Bits/o{pred: Bits/e}
-
-  Count.inc(): Unit
-    call c = Count();
-    call d = Bits.inc(c);
-    bind Count = d;
-    Unit/new
-
-  do {
-    call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
-    call dupped = Bits.dup(ret)
-    Unit/new
-  }: Unit
-
-  `
-
+SecondTest(): U64
+  2
+`
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
+  log("parsed:")
+  log(Lit.Lang.show.page(page, world))
+
   case Lit.Core.World.run.page(page, world) as result {
     none:
       IO.print("failure")
