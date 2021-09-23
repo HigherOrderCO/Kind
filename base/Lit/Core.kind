@@ -164,8 +164,6 @@ Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Typ
       } default none
     } default none
 
-// TODO prevent users from defining type named "U64"
-
 Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bond>
   case world{name} as entry {
     some: case entry.value {
@@ -200,10 +198,10 @@ Lit.Core.World.check.term(
   log("- chk " | Lit.Lang.show.term(term, world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
   log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))  // DEBUG
   log("")  // DEBUG
-  case term {
+  let result = case term {
     var:
       let var_type = context{term.name} abort false
-      log("-- var " | Lit.Lang.show.type.short(var_type) | " " | Lit.Lang.show.type.short(type))  // DEBUG
+      log("-- var " | term.name | " " | Lit.Lang.show.type.short(var_type) | " " | Lit.Lang.show.type.short(type))  // DEBUG
       Lit.Core.Type.equal(var_type, type)
     create:
       log("-- create")  // DEBUG
@@ -268,6 +266,8 @@ Lit.Core.World.check.term(
       let val1 = Lit.Core.World.check.term(term.val1, Lit.Core.Type.word, context, world, caller)
       val0 && val1
   }
+  log("\n")
+  result
 
 Lit.Core.World.check.many(
   terms: List<Lit.Core.Term>

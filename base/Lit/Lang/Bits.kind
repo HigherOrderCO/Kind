@@ -1,7 +1,7 @@
 Lit.Lang.Bits: String
 `
 
-Bits.tail(a: Bits): Pair.Bits
+Bits.tail(a: Bits): Bits
   case a : Bits { 
     e: Bits/e
     o: a.pred

@@ -457,7 +457,7 @@ Lit.Lang.parser.term.match(world: Lit.Core.World): Parser<Lit.Core.Term>
             Lit.Lang.parser.text("{")
             get cses = Lit.Lang.parser.term.match.cses(type.constructors, name, world)
             Lit.Lang.parser.text("}")
-            return Lit.Core.Term.match(type_name, name, expr, cses)
+            return Lit.Core.Term.match(name, type_name, expr, cses)
           }
         }
       }
