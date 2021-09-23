@@ -316,7 +316,66 @@ Lit.Lang.parser.term(world: Lit.Core.World): Parser<Lit.Core.Term>
    Lit.Lang.parser.term.bind(world)
    Lit.Lang.parser.term.call(world)
    Lit.Lang.parser.term.var(world)
+   Lit.Lang.parser.term.compare(world)
+   Lit.Lang.parser.term.word
+   Lit.Lang.parser.term.operate(world)
  ])
+
+Lit.Lang.parser.term.word: Parser<Lit.Core.Term>
+  Parser {
+    get num = Parser.nat
+    if num >? 18446744073709551615 then
+      Parser.fail!("Number out of bound")
+    else
+      Parser { return Lit.Core.Term.word(Nat.to_u64(num)) }
+  }
+
+Lit.Lang.parser.term.compare(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    Lit.Lang.parser.text("cmp")
+    get val0 = Lit.Lang.parser.term(world)
+    get val1 = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("{")
+    Lit.Lang.parser.text("ltn:")
+    get iflt = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("eql:")
+    get ifeq = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("gtn:")
+    get ifgt = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text("}")
+
+    return Lit.Core.Term.compare(val0, val1, iflt, ifeq, ifgt)
+  }
+
+Lit.Lang.parser.term.operate(world: Lit.Core.World): Parser<Lit.Core.Term>
+  Parser {
+    get val0 = Lit.Lang.parser.term(world)
+    get operation = Lit.Lang.parser.term.operate.operation
+    get val1 = Lit.Lang.parser.term(world)
+
+    return Lit.Core.Term.operate(operation, val0, val1)
+  }
+
+Lit.Lang.parser.term.operate.operation: Parser<Lit.Core.Operation>
+  let ops = ["+","*","-","/","%","&&","||","^"]
+  Parser.choice!(List.map!!((op)
+    Parser { 
+      Lit.Lang.parser.text(op)
+      let result = Lit.Lang.parser.term.operate.text_to_operation(op) abort Parser.fail!("Unknown operation " | op)
+      return result
+    },ops))
+
+Lit.Lang.parser.term.operate.text_to_operation(op: String): Maybe<Lit.Core.Operation>
+  switch String.eql(op) {
+    "+":  some(Lit.Core.Operation.add)
+    "*":  some(Lit.Core.Operation.mul)
+    "-":  some(Lit.Core.Operation.sub)
+    "/":  some(Lit.Core.Operation.div)
+    "%":  some(Lit.Core.Operation.mod)
+    "&&": some(Lit.Core.Operation.and)
+    "||": some(Lit.Core.Operation.or)
+    "^":  some(Lit.Core.Operation.xor)
+  } default none
 
 Lit.Lang.parser.term.create(world: Lit.Core.World): Parser<Lit.Core.Term>
  Parser {
