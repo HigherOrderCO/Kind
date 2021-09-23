@@ -155,12 +155,17 @@ Lit.Core.Page: Type
 // -------------------
 
 Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Type>
-  case world{name} as entry {
-    some: case entry.value {
-      type: some(entry.value.value)
+  if name =? "U64" then
+    some(Lit.Core.Type.word)
+  else
+    case world{name} as entry {
+      some: case entry.value {
+        type: some(entry.value.value)
+      } default none
     } default none
-  } default none
-  
+
+// TODO prevent users from defining type named "U64"
+
 Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bond>
   case world{name} as entry {
     some: case entry.value {
