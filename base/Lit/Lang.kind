@@ -311,14 +311,14 @@ Lit.Lang.parser.type.constructor(world: Lit.Core.World): Parser<Lit.Core.Type.Co
 
 Lit.Lang.parser.term(world: Lit.Core.World): Parser<Lit.Core.Term>
  Parser.choice!([
-   Lit.Lang.parser.term.create(world)
-   Lit.Lang.parser.term.match(world)
-   Lit.Lang.parser.term.bind(world)
-   Lit.Lang.parser.term.call(world)
-   Lit.Lang.parser.term.var(world)
-   Lit.Lang.parser.term.compare(world)
-   Lit.Lang.parser.term.word
-   Lit.Lang.parser.term.operate(world)
+    Lit.Lang.parser.term.create(world)
+    Lit.Lang.parser.term.match(world)
+    Lit.Lang.parser.term.bind(world)
+    Lit.Lang.parser.term.call(world)
+    Lit.Lang.parser.term.var(world)
+    Lit.Lang.parser.term.compare(world)
+    Lit.Lang.parser.term.word
+    Lit.Lang.parser.term.operate(world)
  ])
 
 Lit.Lang.parser.term.word: Parser<Lit.Core.Term>
@@ -349,10 +349,12 @@ Lit.Lang.parser.term.compare(world: Lit.Core.World): Parser<Lit.Core.Term>
 
 Lit.Lang.parser.term.operate(world: Lit.Core.World): Parser<Lit.Core.Term>
   Parser {
-    get val0 = Lit.Lang.parser.term(world)
+    // OBS.: will faild miserably with infix notation without parentheses
+    Lit.Lang.parser.text("(")
     get operation = Lit.Lang.parser.term.operate.operation
+    get val0 = Lit.Lang.parser.term(world)
     get val1 = Lit.Lang.parser.term(world)
-
+    Lit.Lang.parser.text(")")
     return Lit.Core.Term.operate(operation, val0, val1)
   }
 
