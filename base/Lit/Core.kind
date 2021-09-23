@@ -35,10 +35,28 @@ type Lit.Core.Term {
   )
   // Pattern-matches a value
   match(
-    type: String
     name: String
+    type: String
     expr: Lit.Core.Term
     cses: List<Lit.Core.Term.Case>
+  )
+  // Creates a new 64-bit word
+  word(
+    numb: U64
+  )
+  // Compares two words
+  compare(
+    val0: Lit.Core.Term
+    val1: Lit.Core.Term
+    iflt: Lit.Core.Term
+    ifeq: Lit.Core.Term
+    ifgt: Lit.Core.Term
+  )
+  // Word addition
+  operate(
+    oper: Lit.Core.Operation
+    val0: Lit.Core.Term
+    val1: Lit.Core.Term
   )
   // Calls an external program
   call(
@@ -55,24 +73,37 @@ type Lit.Core.Term {
   )
 }
 
+// An operation
+type Lit.Core.Operation {
+  add
+  sub
+  mul
+  div
+  mod
+  or
+  and
+  xor
+}
+
 // A pattern-matching case
 type Lit.Core.Term.Case {
   new(
-    flds: List<String>
+    fields: List<String>
     body: Lit.Core.Term
   )
 }
 
 // Lit.Core types are algebraic datatypes (ADTs)
 type Lit.Core.Type {
-  adt(
+  word
+  data(
     name: String
-    ctors: List<Lit.Core.Type.Ctor>
+    constructors: List<Lit.Core.Type.Constructor>
   )
 }
 
 // A constructor of an ADT
-type Lit.Core.Type.Ctor {
+type Lit.Core.Type.Constructor {
   new(
     name: String
     fields: List<Lit.Core.Type.Field>
@@ -87,59 +118,38 @@ type Lit.Core.Type.Field {
   )
 }
 
-// A user
-type Lit.Core.User {
-  new(
-    name: String
-    pkey: String
-  )
-}
-
 // A function
-type Lit.Core.Func {
+type Lit.Core.Bond {
   new(
     name: String
-    ownr: List<String>
+    owners: List<String>
     main: Lit.Core.Term
-    iarg: List<String>
-    ityp: List<String>
-    otyp: String
+    input_names: List<String>
+    input_types: List<String>
+    output_type: String
   )
 }
-
-// An external call
-// TODO: remove this type (move these fields to inside Lit.Core.Command.ext_exec)
-type Lit.Core.Exec {
-  new(
-    user: Maybe<String>
-    sign: Maybe<String>
-    expr: Lit.Core.Term
-    otyp: String
-  )
-}
-
-// A paragraph in a Litereum page
-type Lit.Core.Command {
-  new_type(value: Lit.Core.Type)
-  new_func(value: Lit.Core.Func)
-  new_user(value: Lit.Core.User)
-  ext_exec(value: Lit.Core.Exec)
-}
-
-// A page of the Litereum book
-Lit.Core.Page: Type
-  List<Lit.Core.Command>
 
 // A Lit.Core global entry
 type Lit.Core.Entry {
   type(value: Lit.Core.Type)
-  func(value: Lit.Core.Func)
-  user(value: Lit.Core.User)
+  bond(value: Lit.Core.Bond)
 }
 
 // Lit.Core's global state
 Lit.Core.World: Type
   Map<Lit.Core.Entry>
+
+// A paragraph in a Litereum page
+// TODO: rename to Lit.Core.Command
+type Lit.Core.Statement {
+  define(entry: Lit.Core.Entry)
+  call(expr: Lit.Core.Term)
+}
+
+// A page of the Litereum book
+Lit.Core.Page: Type
+  List<Lit.Core.Statement>
 
 // Getters and Setters
 // -------------------
@@ -151,23 +161,17 @@ Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Typ
     } default none
   } default none
   
-Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Func>
+Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bond>
   case world{name} as entry {
     some: case entry.value {
-      func: some(entry.value.value)
+      bond: some(entry.value.value)
     } default none
   } default none
 
-Lit.Core.World.get_user(name: String, world: Lit.Core.World): Maybe<Lit.Core.User>
-  case world{name} as entry {
-    some: case entry.value {
-      user: some(entry.value.value)
-    } default none
-  } default none
-
-Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Ctor>>
+Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Constructor>>
   case type {
-    adt: List.ifind!((i,f) String.eql(f@name,name), type.ctors)
+    word: none
+    data: List.ifind!((i,f) String.eql(f@name,name), type.constructors)
   }
 
 // Type-Checking
@@ -175,71 +179,90 @@ Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.C
 
 Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
   case a b {
-    adt adt: String.eql(a.name, b.name)
+    word word: true
+    data data: String.eql(a.name, b.name)
   } default false
 
 Lit.Core.World.check.term(
   term: Lit.Core.Term
   type: Lit.Core.Type
-  ctx: Map<Lit.Core.Type>
+  context: Map<Lit.Core.Type>
   world: Lit.Core.World
-  calr: Maybe<String>
+  caller: Maybe<String>
 ): Bool
 //  log("- chk " | Lit.Lang.show.term(term,world) | " : " | Lit.Lang.show.type.short(type))
 //  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(ctx))))
 //  log("")
   case term {
     var:
-      let var_type = ctx{term.name} abort false
+      let vtyp = context{term.name} abort false
       //log("-- var " | Lit.Core.Type.show(var_type) | " " | Lit.Core.Type.show(type))
-      Lit.Core.Type.equal(var_type, type)
+      Lit.Core.Type.equal(vtyp, type)
     create: 
-      use term_type = Lit.Core.World.get_type(term.type,world) abort false
-      use ctor = term_type.ctors[term.ctor] abort false
-      let args = Lit.Core.World.check.many(term.vals, List.mapped!(ctor.fields)!((x) x@type), ctx, world, calr)
-      args && Lit.Core.Type.equal(term_type, type)
+      let ttyp = Lit.Core.World.get_type(term.type,world) abort false
+      case ttyp {
+        data:
+          use ctor = ttyp.constructors[term.ctor] abort false
+          let args = Lit.Core.World.check.many(term.vals, List.mapped!(ctor.fields)!((x) x@type), context, world, caller)
+          args && Lit.Core.Type.equal(ttyp, type)
+      } default false
     call:
       // verify owner
-      let ownr = Lit.Core.World.check.owner(calr, term.func, world)
+      let ownr = Lit.Core.World.check.owner(caller, term.func, world)
       use func = Lit.Core.World.get_func(term.func,world) abort false
-      use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
-      let ctx2 = ctx{term.name} <- otyp
-      let args = Lit.Core.World.check.many(term.args, func.ityp, ctx, world, calr)
-      let cont = Lit.Core.World.check.term(term.cont, type, ctx2, world, calr)
+      use otyp = Lit.Core.World.get_type(func.output_type,world) abort false
+      let args = Lit.Core.World.check.many(term.args, func.input_types, context, world, caller)
+      let cont = Lit.Core.World.check.term(term.cont, type, context{term.name} <- otyp, world, caller)
       ownr && args && cont
     match:
       let expr_type = Lit.Core.World.get_type(term.type,world) abort false
       case expr_type {
-        adt:
-          let expr = Lit.Core.World.check.term(term.expr, expr_type, ctx, world, calr)
+        data:
+          let expr = Lit.Core.World.check.term(term.expr, expr_type, context, world, caller)
           let cses = List.mapped!(term.cses)!((x) x@body)
-          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.ctors, term.name, ctx, world, calr)
+          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.constructors, term.name, context, world, caller)
           expr && cses
-      }
+      } default false
     bind:
-      let ownr = Lit.Core.World.check.owner(calr, term.name, world)
+      // TODO: check access
+      let ownr = Lit.Core.World.check.owner(caller, term.name, world)
       use func = Lit.Core.World.get_func(term.name,world) abort false
-      use otyp = Lit.Core.World.get_type(func.otyp,world) abort false
-      let nofn = List.is_empty!(func.iarg) // should we allow binds with functions?
-      let main = Lit.Core.World.check.term(term.main, otyp, ctx, world, calr)
+      use otyp = Lit.Core.World.get_type(func.output_type,world) abort false
+      let nofn = List.is_empty!(func.input_names) // should we allow binds with functions?
+      let main = Lit.Core.World.check.term(term.main, otyp, context, world, caller)
       // should the ctx change?
-      let cont = Lit.Core.World.check.term(term.cont, type, ctx, world, calr)
+      let cont = Lit.Core.World.check.term(term.cont, type, context, world, caller)
       ownr && nofn && main && cont
-  } default false
+    word:
+      case type {
+        word: true
+      } default false
+    compare:
+      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
+      let val1 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
+      let iflt = Lit.Core.World.check.term(term.iflt, type, context, world, caller)
+      let ifeq = Lit.Core.World.check.term(term.ifeq, type, context, world, caller)
+      let ifgt = Lit.Core.World.check.term(term.ifgt, type, context, world, caller)
+      val0 && val1 && iflt && ifeq && ifgt
+    operate:
+      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
+      let val1 = Lit.Core.World.check.term(term.val1, Lit.Core.Type.word, context, world, caller)
+      val0 && val1
+  }
 
 Lit.Core.World.check.many(
   terms: List<Lit.Core.Term>
   types: List<String>
-  ctx: Map<Lit.Core.Type>
+  context: Map<Lit.Core.Type>
   world: Lit.Core.World
-  calr: Maybe<String>
+  caller: Maybe<String>
 ): Bool
   open world
   case terms types {
     cons cons:
       let type = Lit.Core.World.get_type(types.head, world) abort false
-      let head = Lit.Core.World.check.term(terms.head, type, ctx, world, calr)
-      let tail = Lit.Core.World.check.many(terms.tail, types.tail, ctx, world, calr)
+      let head = Lit.Core.World.check.term(terms.head, type, context, world, caller)
+      let tail = Lit.Core.World.check.many(terms.tail, types.tail, context, world, caller)
       head && tail
     nil nil:
       true
@@ -248,27 +271,27 @@ Lit.Core.World.check.many(
 Lit.Core.World.check.match.cases(
   cases: List<Lit.Core.Term>
   type: Lit.Core.Type
-  ctors: List<Lit.Core.Type.Ctor>
+  ctors: List<Lit.Core.Type.Constructor>
   name: String
-  ctx: Map<Lit.Core.Type>
+  context: Map<Lit.Core.Type>
   world: Lit.Core.World
-  calr: Maybe<String>
+  caller: Maybe<String>
 ): Bool
   case cases ctors {
     cons cons:
-      let ext_ctx = ctx
-      for field in ctors.head@fields with ext_ctx:
-        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.adt("Empty", [])
-        ext_ctx{name | "." | field@name} <- type
-      let case_ok = Lit.Core.World.check.term(cases.head, type, ext_ctx, world, calr)
-      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, ctors.tail, name, ctx, world, calr)
+      let ext_context = context
+      for field in ctors.head@fields with ext_context:
+        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.data("Empty", [])
+        ext_context{name | "." | field@name} <- type
+      let case_ok = Lit.Core.World.check.term(cases.head, type, ext_context, world, caller)
+      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, ctors.tail, name, context, world, caller)
       case_ok && rest_ok
     nil nil:
       true
   } default false
 
 Lit.Core.World.check.owner(
-  calr: Maybe<String>
+  caller: Maybe<String>
   name: String
   world: Lit.Core.World
 ): Bool
@@ -276,95 +299,111 @@ Lit.Core.World.check.owner(
   case entry {
     none: false
     some: 
-      case entry.value as func{
-        func: 
-          if Maybe.if!((calr) calr =? name, calr) then true
-          else
-            use f = func.value
-            case f.ownr {
-              nil: true
-              cons: 
-                case calr {
-                  none: false
-                  some: List.in!(String.eql(calr.value), f.ownr)
-                }
-            }
+      case entry.value as func {
+        bond: 
+          use f = func.value
+          case f.owners {
+            nil:
+              true
+            cons:
+              case caller {
+                some:
+                  if caller.value =? name then
+                    true
+                  else
+                    List.in!(String.eql(caller.value), f.owners)
+                none:
+                  false
+              }
+          }
       } default false
   }
 
 // Validation
 // ----------
-
 // Checks if:
 // - no global binders with the same name
 // - variables are used at most once
+
+// TODO:
+//  - error list
+
 Lit.Core.World.validate(
   term: Lit.Core.Term
   used: Map<Bool>
 ): Pair<Map<Bool>,Bool>
+  Lit.Core.World.validate.aux({used, true}, term)
+
+Lit.Core.World.validate.aux(
+  state: Pair<Map<Bool>, Bool>
+  term: Lit.Core.Term
+): Pair<Map<Bool>, Bool>
   //log("- vld " | String.join(", ", List.map!!((a) a@fst|":"|Bool.show(a@snd), Map.to_list!(used)))) // DEBUG
   //log("") // DEBUG
+
   case term {
     var:
-      //log("var") // DEBUG
-      //log(term.name)
+      let {used, valid} = state
       case used{term.name} as was_used {
         none:
           // undefined variable
           {used, false}
-        some: 
+        some:
           if was_used.value then
-            //log("here")
             // variable already used
             {used, false}
           else
-            //log("there")
             // first use of the variable
-            {used{term.name} <- true, true}
+            {used{term.name} <- true, valid}
       }
+
     create:
-      //log("create") // DEBUG
-      let state = {used, true}
-      let state = for val in term.vals:
-        let {used, res0} = state
-        let {used, res1} = Lit.Core.World.validate(val, used)
-        {used, res0 && res1}
+      for val in term.vals with state:
+        Lit.Core.World.validate.aux(state, val)
       state
+
     match:
-      //log("match") // DEBUG
-      let state = Lit.Core.World.validate(term.expr, used)
-      let valid = true
-      let valid = for cse in term.cses:
-        //log("cse")
-        let {fields, body} = cse
+      let state = Lit.Core.World.validate.aux(state, term.expr)
+      for cse in term.cses with state:
+        let {fields, _} = cse
         let field_state = state
-        let field_state = for field in fields:
-          //log("field: "|field)
-          let {used, resx} = field_state
-          case used{field} as got {
+        for field in fields with field_state:
+          let {used, valid} = field_state
+          case used{field} {
             some:
-              //log("some")
               {used, false} // same name used more than once
             none:
-              //log("none")
-              {used{field} <- false, resx}
+              {used{field} <- false, valid}
           }
-        field_state@snd
-      {state@fst, valid}
-    call:
-      //log("call") // DEBUG
-      let state = {used, true}
-      let state = for arg in term.args:
-        let {used, res0} = state
-        let {used, res1} = Lit.Core.World.validate(arg, used)
-        {used, res0 && res1}
+        state
       state
+
+    call:
+      for arg in term.args with state:
+        Lit.Core.World.validate.aux(state, arg)
+      state
+
     bind:
-      //log("bind") // DEBUG
+      let {used, valid} = state
       let used = used{term.name} <- false
-      let {used, res0} = Lit.Core.World.validate(term.main, used)
-      let {used, res1} = Lit.Core.World.validate(term.cont, used)
-      {used, res0 && res1}
+      let state = {used, valid}
+      let state = Lit.Core.World.validate.aux(state, term.main)
+      let state = Lit.Core.World.validate.aux(state, term.cont)
+      state
+
+    word:
+      state
+
+    compare:
+      let terms = [term.val0, term.val1, term.iflt, term.ifeq, term.ifgt]
+      for i_term in terms with state:
+        Lit.Core.World.validate.aux(state, i_term)
+      state
+
+    operate:
+      let state = Lit.Core.World.validate.aux(state, term.val0)
+      let state = Lit.Core.World.validate.aux(state, term.val1)
+      state
   }
 
 // Execution
@@ -375,80 +414,82 @@ Lit.Core.World.run.page(
   world: Lit.Core.World
 ): Maybe<Lit.Core.World>
   case page {
-    nil: some(world)
-    cons: case Lit.Core.World.run.command(page.head, world) as new_world {
-      none: none
-      some: Lit.Core.World.run.page(page.tail, new_world.value)
-    }
+    nil:
+      some(world)
+    cons:
+      case Lit.Core.World.run.statement(page.head, world) as new_world {
+        none:
+          none
+        some:
+          Lit.Core.World.run.page(page.tail, new_world.value)
+      }
   }
 
 
-Lit.Core.World.run.command(
-  command: Lit.Core.Command
+Lit.Core.World.run.statement(
+  statement: Lit.Core.Statement
   world: Lit.Core.World
 ): Maybe<Lit.Core.World>
-  case command {
-    new_type:
-      // TODO: check something?
-      let type = command.value
-      case type {
-        adt: 
-          log("- new_type: " | type.name)
-          case world{type.name} as got_type {
-            none: some(world{type.name} <- Lit.Core.Entry.type(type))
-          } default log("error: type redefinition: " | type.name) none
-      }
-    new_func:
-      use func = command.value
-      log("- new_func: " | func.name | List.show!(Function.id!, func.ownr))
-      case world{func.name} as got {
-        none:
-          let new_world = world{func.name} <- Lit.Core.Entry.func(func)
-          let ctx = some({})
-          let ctx = for arg in List.zip!!(func.iarg, func.ityp): Maybe {
-            let {arg_name, arg_type} = arg
-            get ctx = ctx
-            get typ = Lit.Core.World.get_type(arg_type, world)
-            return ctx{arg_name} <- typ
+  case statement {
+    define:
+      case statement.entry {
+        type:
+          let type = statement.entry.value
+          case type {
+            word:
+              log("error: word as an entry definition")
+              none
+            data: 
+              log("- new_type: " | type.name)
+              case world{type.name} as got_type {
+                none: some(world{type.name} <- Lit.Core.Entry.type(type))
+              } default log("error: type redefinition: " | type.name) none
           }
-          let vld = {}
-          let vld = for iarg in func.iarg:
-            vld{iarg} <- false
-          case ctx {
+        bond:
+          use func = statement.entry.value
+          log("- new_func: " | func.name | List.show!(Function.id!, func.owners))
+          case world{func.name} as got {
             none:
-              log("error: func input type undefined: " | func.name) none
-            some:
-              let otyp = Lit.Core.World.get_type(func.otyp, world) abort log("error: func otyp not found: " | func.name) none
-              if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, some(func.name)) then
-                let {ah, ok} = Lit.Core.World.validate(func.main, vld)
-                if ok then
-                  //log("here")
-                  some(new_world)
-                else
-                  //log("there")
-                  log("error: func invalid: " | func.name) none
-              else
-                log("error: func ill-typed: " | func.name) none
-          }
-      } default log("error: func redefinition: " | func.name) none
-    new_user:
-      use user = command.value
-      log("- new_user: " | user.name)
-      case world{user.name} as got {
-        none: some(world{user.name} <- Lit.Core.Entry.user(user))
-      } default log("error: user redefinition: " | user.name) none
-    ext_exec:
-      use exec = command.value
-      let otyp = Lit.Core.World.get_type(exec.otyp, world) abort log("error: exec otyp not found") none
-      case exec.user as user {
-        none: Lit.Core.World.run.exec(exec, world)
-        some:
-          case world{user.value} as got_entry {
-            some: case got_entry.value as entry {
-              user: Lit.Core.World.run.exec(exec, world)
-            } default log("error: exec user not a user") none
-          } default log("error: exec user undefined") none
+              let new_world = world{func.name} <- Lit.Core.Entry.bond(func)
+              let ctx = some({})
+              let ctx = for arg in List.zip!!(func.input_names, func.input_types): Maybe {
+                let {arg_name, arg_type} = arg
+                get ctx = ctx
+                get typ = Lit.Core.World.get_type(arg_type, world)
+                return ctx{arg_name} <- typ
+              }
+              let vld = {}
+              let vld = for iarg in func.input_names:
+                vld{iarg} <- false
+              case ctx {
+                none:
+                  log("error: func input type undefined: " | func.name) none
+                some:
+                  let otyp = Lit.Core.World.get_type(func.output_type, world) abort log("error: func otyp not found: " | func.name) none
+                  if Lit.Core.World.check.term(func.main, otyp, ctx.value, new_world, some(func.name)) then
+                    let {ah, ok} = Lit.Core.World.validate(func.main, vld)
+                    if ok then
+                      //log("here")
+                      some(new_world)
+                    else
+                      //log("there")
+                      log("error: func invalid: " | func.name) none
+                  else
+                    log("error: func ill-typed: " | func.name) none
+              }
+          } default log("error: func redefinition: " | func.name) none
       }
+    call:
+      let exec = statement.expr
+      // This assumes that the type Unit is already defined to avoid
+      // duplicating the typechecking function.
+      let term_ok = Lit.Core.World.check.term(exec, Lit.Core.Type.word, {}, world, none)
+      if term_ok then
+        let {result, world} = Lit.Core.World.run.term(exec, world, {})
+        log("- ext_exec: " | Lit.Lang.show.term(result, world))
+        some(world)
+      else
+        log("error: exec failed in typecheck") none
   }
 
 Lit.Core.World.run.exec(
@@ -466,78 +507,114 @@ Lit.Core.World.run.exec(
 
 Lit.Core.World.run.term(
   term: Lit.Core.Term
-  self: Maybe<String>
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
-  //log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
-  //log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
-  //log("")
+//  log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
+//  log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
+//  log("")
   case term {
-    var: 
-      //log("var") // DEBUG
+    var:
       case vars{term.name} as got {
-        none: {term, world}
-        some: Lit.Core.World.run.term(got.value, self, world, vars)
+        none:
+          {term, world}
+        some:
+          Lit.Core.World.run.term(got.value, world, vars)
       }
-    match: Maybe {
-      //log("match") // DEBUG
-      let {expr, world} = Lit.Core.World.run.term(term.expr, self, world, vars)
-      case expr {
-        create: case term.cses[expr.ctor] as selected_case {
-          some: 
-            let {case_fields, case_body} = selected_case.value
-            let vars = for subst in List.zip!!(case_fields, expr.vals):
-              let {field, value} = subst
-              vars{field} <- value
-            Lit.Core.World.run.term(case_body, self, world, vars)
-        } default {term, world}
-      } default {term,world}
-    }
     create:
-      //log("create") // DEBUG
-      let {vals, world} = Lit.Core.World.run.terms(term.vals, self, world, vars)
+      let {vals, world} = Lit.Core.World.run.terms(term.vals, world, vars)
       {Lit.Core.Term.create(term.type, term.ctor, vals), world}
+    match:
+      Maybe {
+        let {expr, world} = Lit.Core.World.run.term(term.expr, world, vars)
+        case expr {
+          create: case term.cses[expr.ctor] as selected_case {
+            some: 
+              let {case_fields, case_body} = selected_case.value
+              let vars = for subst in List.zip!!(case_fields, expr.vals):
+                let {field, value} = subst
+                vars{field} <- value
+              Lit.Core.World.run.term(case_body, world, vars)
+          } default {term, world}
+        } default {term,world}
+      }
+    word:
+      {term, world}
+    compare:
+      let {val0, world} = Lit.Core.World.run.term(term.val0, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, world, vars)
+      case val0 val1 {
+          word word:
+            case U64.cmp(val0.numb, val1.numb) {
+              ltn:
+                Lit.Core.World.run.term(term.iflt, world, vars)
+              eql:
+                Lit.Core.World.run.term(term.ifeq, world, vars)
+              gtn:
+                Lit.Core.World.run.term(term.ifgt, world, vars)
+            }
+      } default log("error: operands didn't reduce to words") {term, world}
+    operate:
+      let {val0, world} = Lit.Core.World.run.term(term.val0, world, vars)
+      let {val1, world} = Lit.Core.World.run.term(term.val1, world, vars)
+      case val0 val1 {
+        word word:
+          case term.oper {
+            add:
+              {Lit.Core.Term.word(val0.numb + val1.numb), world}
+            sub:
+              {Lit.Core.Term.word(val0.numb - val1.numb), world}
+            mul:
+              {Lit.Core.Term.word(val0.numb * val1.numb), world}
+            div:
+              {Lit.Core.Term.word(val0.numb / val1.numb), world}
+            mod:
+              {Lit.Core.Term.word(val0.numb % val1.numb), world}
+            or:
+              {Lit.Core.Term.word(val0.numb || val1.numb), world}
+            and:
+              {Lit.Core.Term.word(val0.numb && val1.numb), world}
+            xor:
+              {Lit.Core.Term.word(U64.xor(val0.numb, val1.numb)), world}
+          }
+      } default log("error: operand didn't reduce to word") {term, world}
     call:
-      //log("call") // DEBUG
       case world{term.func} as got {
-      none:
-        {term, world}
-      some: case got.value as entry {
-        func:
-          use func = entry.value
-          let main_vars = vars
-          let state = {main_vars, world}
-          let state = for arg in List.zip!!(func.iarg, term.args):
+        none:
+          {term, world}
+        some: case got.value as entry {
+          bond:
+            use func = entry.value
+            let main_vars = vars
+            let state = {main_vars, world}
+            let state = for arg in List.zip!!(func.input_names, term.args):
+              let {main_vars, world} = state
+              let {arg_name, arg_term} = arg
+              let {arg_term, world} = Lit.Core.World.run.term(arg_term, world, main_vars)
+              let main_vars = main_vars{arg_name} <- arg_term
+              {main_vars, world}
             let {main_vars, world} = state
-            let {arg_name, arg_term} = arg
-            let {arg_term, world} = Lit.Core.World.run.term(arg_term, self, world, main_vars)
-            let main_vars = main_vars{arg_name} <- arg_term
-            {main_vars, world}
-          let {main_vars, world} = state
-          let {done, world} = Lit.Core.World.run.term(func.main, some(term.func), world, main_vars)
-          let vars = vars{term.name} <- done
-          Lit.Core.World.run.term(term.cont, self, world, vars)
-      } default {term,world}
-    }
+            let {done, world} = Lit.Core.World.run.term(func.main, world, main_vars)
+            let vars = vars{term.name} <- done
+            Lit.Core.World.run.term(term.cont, world, vars)
+        } default {term, world}
+      }
     bind:
-      //log("bind") // DEBUG
       case world{term.name} as got {
       none:
         {term, world}
       some: case got.value as entry {
-        func:
+        bond:
           use func = entry.value
-          let {main, world} = Lit.Core.World.run.term(term.main, self, world, vars)
-          let world = world{term.name} <- Lit.Core.Entry.func(func@main <- main)
-          Lit.Core.World.run.term(term.cont, self, world, vars)
+          let {main, world} = Lit.Core.World.run.term(term.main, world, vars)
+          let world = world{term.name} <- Lit.Core.Entry.bond(func@main <- main)
+          Lit.Core.World.run.term(term.cont, world, vars)
       } default {term, world}
     }
-  } default {term,world}
+  }
 
 Lit.Core.World.run.terms(
   terms: List<Lit.Core.Term>
-  self: Maybe<String>
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<List<Lit.Core.Term>, Lit.Core.World>
@@ -545,8 +622,8 @@ Lit.Core.World.run.terms(
     nil:
       {[], world}
     cons:
-      let {head, world} = Lit.Core.World.run.term(terms.head, self, world, vars)
-      let {tail, world} = Lit.Core.World.run.terms(terms.tail, self, world, vars)
+      let {head, world} = Lit.Core.World.run.term(terms.head, world, vars)
+      let {tail, world} = Lit.Core.World.run.terms(terms.tail, world, vars)
       {head & tail, world}
   }
 
