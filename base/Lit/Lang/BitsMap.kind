@@ -52,25 +52,45 @@ BitsMap.get_p(map: BitsMap, key: Bits): PlsRename
     new:
       PlsRename/new{key: Bits/e, map: BitsMap/new}
     tie:
-      case key : Bits { 
+      case key : Bits {
         e:
           call dup = Bits.dup(map.val)
-          case dup { 
+          case dup : Pair.Bits {
             new:
-              PlsRename/new{value: dup.fst, map: BitsMap/tie{val: dup.snd, map.lft, map.rgt}}
+              PlsRename/new {
+                value: dup.fst,
+                map: BitsMap/tie {
+                  val: dup.snd
+                  lft: map.lft
+                  rgt: map.rgt
+                }
+              }
           }
         o:
           call rec = BitsMap.get_p(map.lft, key.pred)
-          case rec : PlsRename { 
+          case rec : PlsRename {
             new:
-              PlsRename/new{rec.val, BitsMap/tie{val: map.val, rec.map, map.rgt}}
+              PlsRename/new {
+                value: rec.val,
+                map: BitsMap/tie {
+                  val: map.val
+                  lft: rec.map
+                  rgt: map.rgt
+                }
+              }
           }
-
         i:
           call rec = Bits.get_p(map.rgt, key.pred)
           case rec : PlsRename {
             new:
-              PlsRename/new{rec.val, BitsMap/tie{val: map.val, map.lft, rec.map}}
+              PlsRename/new {
+                value: rec.val
+                map: BitsMap/tie {
+                  val: map.val
+                  lft: map.lft
+                  rgt: rec.map
+                }
+              }
           }
       }
   }
