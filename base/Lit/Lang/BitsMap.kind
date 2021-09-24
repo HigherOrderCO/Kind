@@ -145,11 +145,11 @@ BitsMap.transact2(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
                     call newermap = BitsMap.set(newmap, to, received.trd)
                     newermap
                 }
-          }
+            }
           false:
             balance.map
-      }
+        }
     }
   }
-`
 
+`

@@ -19,7 +19,7 @@ Lit.Lang.show.entry(
   case entry {
     type: Lit.Lang.show.type(entry.value, world)
     bond: Lit.Lang.show.bond(entry.value, world)
-  }
+  } | "\n"
 
 Lit.Lang.show.type.short(type: Lit.Core.Type): String
  case type {
@@ -105,22 +105,21 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
      }
    } <> "CREATE"
    match: Maybe {
-     get type = Lit.Core.World.get_type(term.type, world)
-     //log(term.type)
-     case type {
-       word: Maybe {return "U64/new"}
-       data: Maybe {
-         let expr = Lit.Lang.show.term(term.expr, world)
-         let name = term.name
-         let vals = List.zip_with!!!(
-           (ctor,cse)
-             let fields = List.map!!((x) name | "." | x@name, List.reverse!(ctor@fields))
-             ctor@name
-             | ": "
-             | Lit.Lang.show.term(cse@body, world),
-           type.constructors,
-           term.cses)
-         return "case " | name | " : " | type.name | " = " | expr | " { " | String.join(", ",vals) | " }" 
+      get type = Lit.Core.World.get_type(term.type, world)
+      case type {
+        word: Maybe {return "U64/new"}
+        data: Maybe {
+          let expr = Lit.Lang.show.term(term.expr, world)
+          let name = term.name
+          let vals = List.zip_with!!!(
+            (ctor, cse)
+              let fields = List.map!!((x) name | "." | x@name, List.reverse!(ctor@fields))
+              ctor@name
+              | ": "
+              | Lit.Lang.show.term(cse@body, world),
+            type.constructors,
+            term.cses)
+          return "case " | name | " : " | type.name | " = " | expr | " { " | String.join(", ",vals) | " }"
        }
      }
    } <> "MATCH"
@@ -132,14 +131,14 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
      let args = String.join(",",List.mapped!(List.zip!!(func.input_names,term.args))!((x)x@fst|": "|Lit.Lang.show.term(x@snd,world)))
      let cont = Lit.Lang.show.term(term.cont, world)
      return "call " | name | " = " | fnam | "(" | args | "); " | cont
-   } <> "?"
+   } <> "CALL"
    bind: Maybe {
      let name = term.name
      let main = Lit.Lang.show.term(term.main, world)
      let cont = Lit.Lang.show.term(term.cont, world)
      return "bind " | name | " = " | main | " ; " | cont
-   } <> "?"
-   word: 
+   } <> "BIND"
+   word:
      U64.show(term.numb)
    compare:
      "cmp " | Lit.Lang.show.term(term.val0, world) | " " | Lit.Lang.show.term(term.val1, world) | " "
@@ -149,8 +148,8 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
      | " gtn: " | Lit.Lang.show.term(term.ifgt, world)
      | " } "
    operate:
-      Lit.Lang.show.term(term.val0, world) 
-      | " " 
+      Lit.Lang.show.term(term.val0, world)
+      | " "
       | Lit.Lang.show.operation(term.oper)
       | " "
       | Lit.Lang.show.term(term.val1, world)
