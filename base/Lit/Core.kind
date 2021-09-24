@@ -504,9 +504,10 @@ Lit.Core.World.run.statement(
       }
     call:
       let exec = statement.expr
-      // This assumes that the type Unit is already defined to avoid
+      // This assumes that the call returns the built-in type Word to avoid
       // duplicating the typechecking function.
-      let term_ok = Lit.Core.World.check.term(exec, Lit.Core.Type.word, {}, world, none)
+      let call_type = Lit.Core.Type.word
+      let term_ok = Lit.Core.World.check.term(exec, call_type, {}, world, none)
       if term_ok then
         let {result, world} = Lit.Core.World.run.term(exec, world, {})
         log("- ext_exec: " | Lit.Lang.show.term(result, world))
@@ -684,7 +685,12 @@ Lit.Core: _
 
   case Lit.Core.World.run.page(page, world) as result {
     none:
-      IO.print("failure")
+      IO.print("FAILURE")
     some:
-      IO.print("success")
+      IO {
+        // log("page:")
+        // let new_world = result.value
+        // log(Lit.Lang.show.page(page, new_world))
+        IO.print("SUCCESS")
+      }
   }

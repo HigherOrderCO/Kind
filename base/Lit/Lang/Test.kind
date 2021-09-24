@@ -29,7 +29,7 @@ Count.inc(): Unit
 do {
   call ret = Bits.add(Bits/i{pred:Bits/i{pred: Bits/e}}, Bits/i{pred: Bits/e})
   call dupped = Bits.dup(ret)
-  Unit/new
-}: Unit
+  0
+}
 
 `
