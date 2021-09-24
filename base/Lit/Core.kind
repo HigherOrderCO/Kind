@@ -651,33 +651,26 @@ Lit.Core: _
     | Lit.Lang.BitsMap
     | Lit.Lang.Test
 
-  // let code =
-  // `
-  //   type Unit {
-  //     new
-  //   }
+  let code = code |
+  `
+    //type Lit.Core.Operation {
+    //  add ok!
+    //  sub ok!
+    //  mul ok!
+    //  div ok!
+    //  mod ok!
+    //  or
+    //  and
+    //  xor
+    //}
+    WordTest(): U64
+      (|| (% (&& (- (/ (- (* (+ 2 (* 2 2)) 7) 2) 2) 4) 31) 3) 16)
 
-  //   FirstTest(): Unit
-  //     Unit/new
-
-  //   //type Lit.Core.Operation {
-  //   //  add ok!
-  //   //  sub ok!
-  //   //  mul ok!
-  //   //  div ok!
-  //   //  mod ok!
-  //   //  or
-  //   //  and
-  //   //  xor
-  //   //}
-  //   SecondTest(): U64
-  //     (|| (% (&& (- (/ (- (* (+ 2 (* 2 2)) 7) 2) 2) 4) 31) 3) 16)
-
-  //   do {
-  //     call b = SecondTest()
-  //     b
-  //   }
-  // `
+    do {
+      call b = WordTest()
+      b
+    }
+  `
 
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
   log("parsed:")
