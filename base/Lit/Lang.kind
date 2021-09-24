@@ -315,8 +315,8 @@ Lit.Lang.parser.term(world: Lit.Core.World): Parser<Lit.Core.Term>
     Lit.Lang.parser.term.bind(world)
     Lit.Lang.parser.term.call(world)
     Lit.Lang.parser.term.word
-    Lit.Lang.parser.term.var(world)
     Lit.Lang.parser.term.compare(world)
+    Lit.Lang.parser.term.var(world)
     Lit.Lang.parser.term.operate(world)
  ])
 
@@ -334,6 +334,7 @@ Lit.Lang.parser.term.compare(world: Lit.Core.World): Parser<Lit.Core.Term>
   Parser {
     Lit.Lang.parser.text("cmp")
     get val0 = Lit.Lang.parser.term(world)
+    Lit.Lang.parser.text(",")
     get val1 = Lit.Lang.parser.term(world)
     Lit.Lang.parser.text("{")
     Lit.Lang.parser.text("ltn:")
