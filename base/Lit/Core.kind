@@ -2,19 +2,15 @@
 // ==========================================
 
 // TODO:
+// - merge type-checking and validation / allow reusing word terms
 // - cost measure
-// - check do call.cont
-// - Lit.Core.Term.get_caller
-// - tipo "Bits" nativo no bloco genesis
+// - Lit.Core.Term.get_caller ?
+// - owned types/constructors ?
 // - conseguir modificar o dono no Lit.Core.Term.bind
-// - revisar e usar a função validate
 // - block difficulty (nakamoto consensus)
-// - owned types/constructors?
-// - melhorar mensagens de erro
 // - Lit.Lang:
-//   - consertar parser para ir ate o final do arquivo?
-//   - do blocks (um "with" anonimo, sem assinatura)
-//   - open?
+//   - consertar parser para ir ate o final do arquivo !
+//
 // - paper:
 //   - use railroad diagrams for syntax
 
@@ -141,7 +137,6 @@ Lit.Core.World: Type
   Map<Lit.Core.Entry>
 
 // A paragraph in a Litereum page
-// TODO: rename to Lit.Core.Command
 type Lit.Core.Statement {
   define(entry: Lit.Core.Entry)
   call(expr: Lit.Core.Term)
