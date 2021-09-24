@@ -195,9 +195,9 @@ Lit.Core.World.check.term(
   world: Lit.Core.World
   caller: Maybe<String>
 ): Bool
-  // log("- chk " | Lit.Lang.show.term(term, world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
-  // log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))  // DEBUG
-  // log("")  // DEBUG
+  log("- chk " | Lit.Lang.show.term(term, world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
+  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))  // DEBUG
+  log("")  // DEBUG
   let result = case term {
     var:
       let var_type = context{term.name} abort false
@@ -657,15 +657,15 @@ Lit.Core.World.run.terms(
 Lit.Core: _
   let world = {}
 
-  let code =
-    Lit.Lang.Type
-    | Lit.Lang.Cmp
-    | Lit.Lang.Nat
-    | Lit.Lang.Bits
-    | Lit.Lang.BitsMap
-    | Lit.Lang.Test
+//  let code =
+//    Lit.Lang.Type
+//    | Lit.Lang.Cmp
+//    | Lit.Lang.Nat
+//    | Lit.Lang.Bits
+//    | Lit.Lang.BitsMap
+//    | Lit.Lang.Test
 
-  let code = code |
+  let code = //code |
   `
     //type Lit.Core.Operation {
     //  add ok!
@@ -673,12 +673,19 @@ Lit.Core: _
     //  mul ok!
     //  div ok!
     //  mod ok!
-    //  or
-    //  and
-    //  xor
+    //  or  ok!
+    //  and ok!
+    //  xor ok!
     //}
     WordTest(): U64
-      (|| (% (&& (- (/ (- (* (+ 2 (* 2 2)) 7) 2) 2) 4) 31) 3) 16)
+      cmp 2 3 {
+        ltn: 
+          0
+        eql: 
+          1
+        gtn: 
+          2
+      }
 
     do {
       call b = WordTest()
