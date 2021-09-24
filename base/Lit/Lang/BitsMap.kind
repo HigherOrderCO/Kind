@@ -50,7 +50,7 @@ BitsMap.get(map: BitsMap, key: Bits): Bits
 BitsMap.get_p(map: BitsMap, key: Bits): PlsRename
   case map : BitsMap {
     new:
-      PlsRename/new{key: Bits/e, map: BitsMap/new}
+      PlsRename/new{value: Bits/e, map: BitsMap/new}
     tie:
       case key : Bits {
         e:
@@ -71,7 +71,7 @@ BitsMap.get_p(map: BitsMap, key: Bits): PlsRename
           case rec : PlsRename {
             new:
               PlsRename/new {
-                value: rec.val,
+                value: rec.value,
                 map: BitsMap/tie {
                   val: map.val
                   lft: rec.map
@@ -80,11 +80,11 @@ BitsMap.get_p(map: BitsMap, key: Bits): PlsRename
               }
           }
         i:
-          call rec = Bits.get_p(map.rgt, key.pred)
+          call rec = BitsMap.get_p(map.rgt, key.pred)
           case rec : PlsRename {
             new:
               PlsRename/new {
-                value: rec.val
+                value: rec.value
                 map: BitsMap/tie {
                   val: map.val
                   lft: map.lft
@@ -125,25 +125,20 @@ BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
   state
 
 
-//propriedades:
-//1 - Se você fizer uma transação e depois fizer reversa, o mapa deve voltar ao
-//primeiro estado
-
-//2 - A soma de todos os saldos é igual após a transação
-
-
-BitsMap.transct_2(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+BitsMap.transact2(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
   call balance = BitsMap.get_p(state, from)
   case balance : PlsRename { 
     new:
       call ok = Bits.lte(sum, balance.value)
-      case ok : Bool {
-        true:
-          call receiver = BitsMap.get_p(state, to)
-          case receiver : PlsRename {
-            new:
-              call sender = Bits.sub(sum, balance.value)
-              call received = Bits.add_p(sum, receiver.value) 
+      case ok : BitsBitsBool {
+        new:
+        case ok.trd : Bool { 
+          true:
+            call receiver = BitsMap.get_p(state, to)
+            case receiver : PlsRename {
+              new:
+                call sender = Bits.sub(sum, balance.value)
+                call received = Bits.add_p(sum, receiver.value) 
                 case received : BitsBitsBits { 
                   new:
                     call newmap = BitsMap.set(balance.map, from, sender)
@@ -151,39 +146,10 @@ BitsMap.transct_2(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
                     newermap
                 }
           }
-        false:
-          balance.map
+          false:
+            balance.map
       }
+    }
   }
-
-
-//BitsMap.transact(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
-//  // TODO stop the dups save the environment
-//  call dup_state = BitsMap.dup(state)
-//  case dup_state : Pair.BitsMap {
-//    new:
-//      call dup_from = Bits.dup(from)
-//      case dup_from : Pair.Bits {
-//        new:
-//          call balance = BitsMap.get(dup_state.snd, dup_from.snd)
-//          call dup_balance = Bits.dup(balance)
-//          case dup_balance : Pair.Bits {
-//            new:
-//              call ok = Bits.lte(sum, dup_balance.snd)
-//              case ok : Bool {
-//                true:
-                      //alterar o valor do sender pra reduzir o valor antigo
-                      //[[dando um set]]
-                      
-                      //alterar o valor do receiver (adicionar o sum )
-                      // [[dando um set ]]
-//                  call 
-//                  state
-//                false:
-//                  dup_state.fst
-//              }
-//          }
-//      }
-//  }
 `
 
