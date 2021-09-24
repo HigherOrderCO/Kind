@@ -195,9 +195,9 @@ Lit.Core.World.check.term(
   world: Lit.Core.World
   caller: Maybe<String>
 ): Bool
-  log("- chk " | Lit.Lang.show.term(term, world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
-  log("- ctx " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))  // DEBUG
-  log("")  // DEBUG
+  // log("- chk: " | Lit.Lang.show.term(term, world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
+  // log("- ctx: " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))  // DEBUG
+  // log("")  // DEBUG
   let result = case term {
     var:
       let var_type = context{term.name} abort false
@@ -357,8 +357,18 @@ Lit.Core.validate.term.aux(
   state: Pair<Map<Bool>, Bool>
   term: Lit.Core.Term
 ): Pair<Map<Bool>, Bool>
-  //log("- vld " | String.join(", ", List.map!!((a) a@fst|":"|Bool.show(a@snd), Map.to_list!(used)))) // DEBUG
-  //log("") // DEBUG
+  // log(  // DEBUG
+  //   "- vld: " | Lit.Lang.show.term(term, {}) | " ; "
+  //   | "ctx: "
+  //   | String.join(
+  //     ", ",
+  //     List.map!!(
+  //       (a) a@fst | ":" | Bool.show(a@snd),
+  //       Map.to_list!(state@fst)
+  //     )
+  //   )
+  // )
+  // log("")  // DEBUG
 
   case term {
     var:
@@ -398,9 +408,12 @@ Lit.Core.validate.term.aux(
       state
 
     call:
+      let {used, valid} = state
+      let used = used{term.name} <- false
+      let state = {used, valid}
       for arg in term.args with state:
         Lit.Core.validate.term.aux(state, arg)
-      state
+      Lit.Core.validate.term.aux(state, term.cont)
 
     bind:
       let {used, valid} = state
@@ -449,7 +462,7 @@ Lit.Core.World.run.statement(
   statement: Lit.Core.Statement
   world: Lit.Core.World
 ): Maybe<Lit.Core.World>
-  case statement {
+  let result = case statement {
     define:
       case statement.entry {
         type:
@@ -512,6 +525,7 @@ Lit.Core.World.run.statement(
       }
     call:
       let exec_term = statement.expr
+      // log(Lit.Lang.show.term(exec_term, world))  // DEBUG
       // This assumes that the call returns the built-in type Word to avoid
       // duplicating the typechecking function.
       let call_type = Lit.Core.Type.word
@@ -522,22 +536,24 @@ Lit.Core.World.run.statement(
         if ok then
           let {result, new_world} =
             Lit.Core.World.run.term(exec_term, world, {})
-        log("- ext_exec: " | Lit.Lang.show.term(result, world))
-          some(new_world)
+            log("- ext_exec: " | Lit.Lang.show.term(result, world))
+            some(new_world)
         else
           log("error: exec is invalid") none
       else
         log("error: exec failed in typecheck") none
   }
+  // log("")  // DEBUG
+  result
 
 Lit.Core.World.run.term(
   term: Lit.Core.Term
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
 ): Pair<Lit.Core.Term, Lit.Core.World>
-//  log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
-//  log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
-//  log("")
+  // log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
+  // log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
+  // log("")
   case term {
     var:
       case vars{term.name} as got {
@@ -657,41 +673,59 @@ Lit.Core.World.run.terms(
 Lit.Core: _
   let world = {}
 
-//  let code =
-//    Lit.Lang.Type
-//    | Lit.Lang.Cmp
-//    | Lit.Lang.Nat
-//    | Lit.Lang.Bits
-//    | Lit.Lang.BitsMap
-//    | Lit.Lang.Test
+  let code = ""
 
-  let code = //code |
+  let code = code |
+    Lit.Lang.Type
+    | Lit.Lang.Cmp
+    | Lit.Lang.Nat
+    | Lit.Lang.Bits
+    | Lit.Lang.BitsMap
+    //  | Lit.Lang.Test
+
+  let code = code |
   `
-    //type Lit.Core.Operation {
-    //  add ok!
-    //  sub ok!
-    //  mul ok!
-    //  div ok!
-    //  mod ok!
-    //  or  ok!
-    //  and ok!
-    //  xor ok!
-    //}
-    WordTest(): U64
-      cmp 2 3 {
-        ltn: 
-          0
-        eql: 
-          1
-        gtn: 
-          2
-      }
+    GiveUnit(): Unit
+      Unit/new
+
+    TakeUnit(x: Unit): U64
+      42
 
     do {
-      call b = WordTest()
-      b
+      call a1 = GiveUnit()
+      call a2 = GiveUnit()
+      call b = TakeUnit(a1)
+      call c = TakeUnit(a2)
+      (+ b c)
     }
   `
+
+  // let code = code |
+  // `
+  //   //type Lit.Core.Operation {
+  //   //  add ok!
+  //   //  sub ok!
+  //   //  mul ok!
+  //   //  div ok!
+  //   //  mod ok!
+  //   //  or  ok!
+  //   //  and ok!
+  //   //  xor ok!
+  //   //}
+  //   WordTest(): U64
+  //     cmp 2 3 {
+  //       ltn: 
+  //         0
+  //       eql: 
+  //         1
+  //       gtn: 
+  //         2
+  //     }
+  //   do {
+  //     call b = WordTest()
+  //     b
+  //   }
+  // `
 
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
   log("parsed:")

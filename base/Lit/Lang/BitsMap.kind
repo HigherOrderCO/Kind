@@ -119,10 +119,10 @@ BitsMap.dup(m: BitsMap): Pair.BitsMap
       }
   }
 
-// TODO this shouldn't run what's happening?
-BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
-  call dup_state = BitsMap.dup(state)
-  state
+// // TODO this shouldn't run what's happening?
+// BitsMap.bug(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
+//   call dup_state = BitsMap.dup(state)
+//   state
 
 
 BitsMap.transact2(state: BitsMap, from: Bits, to: Bits, sum: Bits): BitsMap
