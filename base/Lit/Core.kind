@@ -3,7 +3,7 @@
 
 // TODO:
 // - merge type-checking and validation / allow reusing word terms
-// - cost measure
+// - cost measure, WIP rígille
 // - Lit.Core.Term.get_caller ?
 // - owned types/constructors ?
 // - conseguir modificar o dono no Lit.Core.Term.bind
@@ -145,6 +145,27 @@ type Lit.Core.Statement {
 // A page of the Litereum book
 Lit.Core.Page: Type
   List<Lit.Core.Statement>
+
+type Lit.Core.Costs {
+  new(
+    var: Nat
+    create: Nat
+    match: Nat
+    compare: Nat
+    operate: Nat
+    call: Nat
+  )
+}
+
+Lit.Core.Costs.default: Lit.Core.Costs
+  Lit.Core.Costs.new(
+    Nat.pow(2, 8*0)
+    Nat.pow(2, 8*1)
+    Nat.pow(2, 8*2)
+    Nat.pow(2, 8*3)
+    Nat.pow(2, 8*4)
+    Nat.pow(2, 8*5)
+  )
 
 // Getters and Setters
 // -------------------

@@ -1,0 +1,7 @@
+type Triple <A: Type, B: Type, C: Type> {
+  new(
+    fst: A
+    snd: B
+    trd: C
+  )
+}
