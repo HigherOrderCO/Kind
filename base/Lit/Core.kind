@@ -601,102 +601,21 @@ Lit.Core.World.run.term(
   // log("")
   case term {
     var:
-      case vars{term.name} as got {
-        none:
-          {term, world}
-        some:
-          Lit.Core.World.run.term(got.value, world, vars)
-      }
+      Lit.Core.World.run.term.var(world, vars, term.name)
     create:
-      let {vals, world} = Lit.Core.World.run.terms(term.vals, world, vars)
-      {Lit.Core.Term.create(term.type, term.ctor, vals), world}
+      Lit.Core.World.run.term.create(world, vars, term.type, term.ctor, term.vals)
     match:
-      Maybe {
-        let {expr, world} = Lit.Core.World.run.term(term.expr, world, vars)
-        case expr {
-          create: case term.cses[expr.ctor] as selected_case {
-            some: 
-              let {case_fields, case_body} = selected_case.value
-              let vars = for subst in List.zip!!(case_fields, expr.vals):
-                let {field, value} = subst
-                vars{field} <- value
-              Lit.Core.World.run.term(case_body, world, vars)
-          } default {term, world}
-        } default {term,world}
-      }
+      Lit.Core.World.run.term.match(world, vars, term.name, term.type, term.expr, term.cses)
     word:
       {term, world}
     compare:
-      let {val0, world} = Lit.Core.World.run.term(term.val0, world, vars)
-      let {val1, world} = Lit.Core.World.run.term(term.val1, world, vars)
-      case val0 val1 {
-          word word:
-            case U64.cmp(val0.numb, val1.numb) {
-              ltn:
-                Lit.Core.World.run.term(term.iflt, world, vars)
-              eql:
-                Lit.Core.World.run.term(term.ifeq, world, vars)
-              gtn:
-                Lit.Core.World.run.term(term.ifgt, world, vars)
-            }
-      } default log("error: operands didn't reduce to words") {term, world}
+      Lit.Core.World.run.term.compare(world, vars, term.val0, term.val1, term.iflt, term.ifeq, term.ifgt)
     operate:
-      let {val0, world} = Lit.Core.World.run.term(term.val0, world, vars)
-      let {val1, world} = Lit.Core.World.run.term(term.val1, world, vars)
-      case val0 val1 {
-        word word:
-          case term.oper {
-            add:
-              {Lit.Core.Term.word(val0.numb + val1.numb), world}
-            sub:
-              {Lit.Core.Term.word(val0.numb - val1.numb), world}
-            mul:
-              {Lit.Core.Term.word(val0.numb * val1.numb), world}
-            div:
-              {Lit.Core.Term.word(val0.numb / val1.numb), world}
-            mod:
-              {Lit.Core.Term.word(val0.numb % val1.numb), world}
-            or:
-              {Lit.Core.Term.word(val0.numb || val1.numb), world}
-            and:
-              {Lit.Core.Term.word(val0.numb && val1.numb), world}
-            xor:
-              {Lit.Core.Term.word(U64.xor(val0.numb, val1.numb)), world}
-          }
-      } default log("error: operand didn't reduce to word") {term, world}
+      Lit.Core.World.run.term.operate(world, vars, term.oper, term.val0, term.val1)
     call:
-      case world{term.func} as got {
-        none:
-          {term, world}
-        some: case got.value as entry {
-          bond:
-            use func = entry.value
-            let main_vars = vars
-            let state = {main_vars, world}
-            let state = for arg in List.zip!!(func.input_names, term.args):
-              let {main_vars, world} = state
-              let {arg_name, arg_term} = arg
-              let {arg_term, world} = Lit.Core.World.run.term(arg_term, world, main_vars)
-              let main_vars = main_vars{arg_name} <- arg_term
-              {main_vars, world}
-            let {main_vars, world} = state
-            let {done, world} = Lit.Core.World.run.term(func.main, world, main_vars)
-            let vars = vars{term.name} <- done
-            Lit.Core.World.run.term(term.cont, world, vars)
-        } default {term, world}
-      }
+      Lit.Core.World.run.term.call(world, vars, term.name, term.func, term.args, term.cont)
     bind:
-      case world{term.name} as got {
-      none:
-        {term, world}
-      some: case got.value as entry {
-        bond:
-          use func = entry.value
-          let {main, world} = Lit.Core.World.run.term(term.main, world, vars)
-          let world = world{term.name} <- Lit.Core.Entry.bond(func@main <- main)
-          Lit.Core.World.run.term(term.cont, world, vars)
-      } default {term, world}
-    }
+      Lit.Core.World.run.term.bind(world, vars, term.name, term.main, term.cont)
   }
 
 Lit.Core.World.run.terms(
@@ -713,7 +632,154 @@ Lit.Core.World.run.terms(
       {head & tail, world}
   }
 
-//
+Lit.Core.World.run.term.call(
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+  name: String
+  func: String
+  args: List<Lit.Core.Term>
+  cont: Lit.Core.Term
+): Pair<Lit.Core.Term, Lit.Core.World>
+  case world{func} as got {
+    none:
+      {Lit.Core.Term.call(name, func, args, cont), world}
+    some:
+      case got.value as entry {
+        bond:
+          use func = entry.value
+          let main_vars = vars
+          let state = {main_vars, world}
+          let state = for arg in List.zip!!(func.input_names, args):
+            let {main_vars, world} = state
+            let {arg_name, arg_term} = arg
+            let {arg_term, world} = Lit.Core.World.run.term(arg_term, world, main_vars)
+            let main_vars = main_vars{arg_name} <- arg_term
+            {main_vars, world}
+          let {main_vars, world} = state
+          let {done, world} = Lit.Core.World.run.term(func.main, world, main_vars)
+          let vars = vars{name} <- done
+          Lit.Core.World.run.term(cont, world, vars)
+      } default {Lit.Core.Term.call(name, func, args, cont), world}
+  }
+
+Lit.Core.World.run.term.compare(
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+  val0: Lit.Core.Term
+  val1: Lit.Core.Term
+  iflt: Lit.Core.Term
+  ifeq: Lit.Core.Term
+  ifgt: Lit.Core.Term
+): Pair<Lit.Core.Term, Lit.Core.World>
+  let {val0, world} = Lit.Core.World.run.term(val0, world, vars)
+  let {val1, world} = Lit.Core.World.run.term(val1, world, vars)
+  case val0 val1 {
+    word word:
+      case U64.cmp(val0.numb, val1.numb) {
+        ltn:
+          Lit.Core.World.run.term(iflt, world, vars)
+        eql:
+          Lit.Core.World.run.term(ifeq, world, vars)
+        gtn:
+          Lit.Core.World.run.term(ifgt, world, vars)
+      }
+  } default log("error: operands didn't reduce to words") {Lit.Core.Term.compare(val0, val1, iflt, ifeq, ifgt), world}
+
+
+Lit.Core.World.run.term.match(
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+  name: String
+  type: String
+  expr: Lit.Core.Term
+  cses: List<Lit.Core.Term.Case>
+): Pair<Lit.Core.Term, Lit.Core.World>
+  let {expr, world} = Lit.Core.World.run.term(expr, world, vars)
+  case expr {
+    create: case cses[expr.ctor] as selected_case {
+      some: 
+        let {case_fields, case_body} = selected_case.value
+        let vars = for subst in List.zip!!(case_fields, expr.vals):
+          let {field, value} = subst
+          vars{field} <- value
+        Lit.Core.World.run.term(case_body, world, vars)
+    } default {Lit.Core.Term.match(name, type, expr, cses), world}
+  } default {Lit.Core.Term.match(name, type, expr, cses), world}
+
+Lit.Core.World.run.term.create(
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+  type: String
+  ctor: Nat
+  vals: List<Lit.Core.Term>
+): Pair<Lit.Core.Term, Lit.Core.World>
+  let {vals, world} = Lit.Core.World.run.terms(vals, world, vars)
+  {Lit.Core.Term.create(type, ctor, vals), world}
+
+Lit.Core.World.run.term.var(
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+  name: String
+): Pair<Lit.Core.Term, Lit.Core.World>
+  case vars{name} as got {
+    none:
+      {Lit.Core.Term.var(name), world}
+    some:
+      Lit.Core.World.run.term(got.value, world, vars)
+  }
+
+Lit.Core.World.run.term.operate(
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+  oper: Lit.Core.Operation
+  val0: Lit.Core.Term
+  val1: Lit.Core.Term
+): Pair<Lit.Core.Term, Lit.Core.World>
+  let {val0, world} = Lit.Core.World.run.term(val0, world, vars)
+  let {val1, world} = Lit.Core.World.run.term(val1, world, vars)
+  case val0 val1 {
+    word word:
+      case oper {
+        add:
+          {Lit.Core.Term.word(val0.numb + val1.numb), world}
+        sub:
+          {Lit.Core.Term.word(val0.numb - val1.numb), world}
+        mul:
+          {Lit.Core.Term.word(val0.numb * val1.numb), world}
+        div:
+          {Lit.Core.Term.word(val0.numb / val1.numb), world}
+        mod:
+          {Lit.Core.Term.word(val0.numb % val1.numb), world}
+        or:
+          {Lit.Core.Term.word(val0.numb || val1.numb), world}
+        and:
+          {Lit.Core.Term.word(val0.numb && val1.numb), world}
+        xor:
+          {Lit.Core.Term.word(U64.xor(val0.numb, val1.numb)), world}
+      }
+  } default log("error: operand didn't reduce to word")
+    {Lit.Core.Term.operate(oper, val0, val1), world}
+
+Lit.Core.World.run.term.bind(
+  world: Lit.Core.World
+  vars: Map<Lit.Core.Term>
+  name: String
+  main: Lit.Core.Term
+  cont: Lit.Core.Term
+): Pair<Lit.Core.Term, Lit.Core.World>
+  case world{name} as got {
+    none:
+      {Lit.Core.Term.bind(name, main, cont), world}
+    some:
+      case got.value as entry {
+        bond:
+          use func = entry.value
+          let {main, world} = Lit.Core.World.run.term(main, world, vars)
+          let world = world{name} <- Lit.Core.Entry.bond(func@main <- main)
+          Lit.Core.World.run.term(cont, world, vars)
+      } default {Lit.Core.Term.bind(name, main, cont), world}
+  }
+
 // Tests
 // -----
 

@@ -1,5 +1,10 @@
 Test: _
-  Lit.Core
+  case 2 as two {
+    zero:
+      ?a
+    succ:
+      ?b
+  }
 
 //Test: String
   //let idx = 0
