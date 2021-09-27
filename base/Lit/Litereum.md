@@ -96,7 +96,7 @@ same behavior as a classic Ethereum transaction.
 
 Like Ethereum, the computational cost of a transaction is measured in gas, and
 blocks have a size (space) and gas (time) limit. This keeps the cost of running
-a full node, both in terms of computation and storage cost, previsible. Since
+a full node, both in terms of computation and storage cost, predictable. Since
 there isn't a native currency, there isn't a built-in gas-to-native-token
 conversion either. Instead, a free market emerges, where users choose the exact
 amount of fees they want to pay, and miners select transactions that fit in a
