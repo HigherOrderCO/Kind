@@ -14,6 +14,7 @@
 // - paper:
 //   - use railroad diagrams for syntax
 
+//
 // Types
 // -----
 
@@ -167,6 +168,7 @@ Lit.Core.Costs.default: Lit.Core.Costs
     Nat.pow(2, 8*5)
   )
 
+//
 // Getters and Setters
 // -------------------
 
@@ -195,6 +197,7 @@ Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.C
       List.ifind!((i,f) String.eql(f@name,name), type.constructors)
   }
 
+//
 // Type-Checking
 // -------------
 
@@ -204,62 +207,81 @@ Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
     data data: String.eql(a.name, b.name)
   } default false
 
+type Lit.Core.Check.Context {
+  new(
+    world: Lit.Core.World
+    caller: Maybe<String>
+    variables: Map<Lit.Core.Type>
+  )
+}
+
+Lit.Core.Check.Context.from_world(world: Lit.Core.World): Lit.Core.Check.Context
+  Lit.Core.Check.Context.new(world, none, {})
+
+Lit.Core.Check.Context.add_var(
+  context: Lit.Core.Check.Context
+  name: String
+  type: Lit.Core.Type
+): Lit.Core.Check.Context
+  open context
+  let new_variables = context.variables{name} <- type
+  Lit.Core.Check.Context.new(context.world, context.caller, new_variables)
+
 Lit.Core.World.check.term(
+  context: Lit.Core.Check.Context
   term: Lit.Core.Term
   type: Lit.Core.Type
-  context: Map<Lit.Core.Type>
-  world: Lit.Core.World
-  caller: Maybe<String>
 ): Bool
-  // log("- chk: " | Lit.Lang.show.term(term, world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
-  // log("- ctx: " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(context))))  // DEBUG
+  // log("- chk: " | Lit.Lang.show.term(term, context@world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
+  // log("- ctx: " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(variables))))  // DEBUG
   // log("")  // DEBUG
   let result = case term {
     var:
-      let var_type = context{term.name} abort false
+      let var_type = context@variables{term.name} abort false
       //log("-- var " | term.name | " " | Lit.Lang.show.type.short(var_type) | " " | Lit.Lang.show.type.short(type))  // DEBUG
       Lit.Core.Type.equal(var_type, type)
     create:
       //log("-- create")  // DEBUG
-      let ttyp = Lit.Core.World.get_type(term.type,world) abort false
+      let ttyp = Lit.Core.World.get_type(term.type, context@world) abort false
       case ttyp {
         data:
           use ctor = ttyp.constructors[term.ctor] abort false
-          let args = Lit.Core.World.check.many(term.vals, List.mapped!(ctor.fields)!((x) x@type), context, world, caller)
+          let args = Lit.Core.World.check.many(context, term.vals, List.mapped!(ctor.fields)!((x) x@type))
           args && Lit.Core.Type.equal(ttyp, type)
       } default false
     call:
       //log("-- call")  // DEBUG
       // verify owner
-      let ownr = Lit.Core.World.check.owner(caller, term.func, world)
-      use func = Lit.Core.World.get_func(term.func,world) abort false
-      use otyp = Lit.Core.World.get_type(func.output_type,world) abort false
-      let args = Lit.Core.World.check.many(term.args, func.input_types, context, world, caller)
-      let cont = Lit.Core.World.check.term(term.cont, type, context{term.name} <- otyp, world, caller)
+      let ownr = Lit.Core.World.check.owner(context, term.func)
+      use func = Lit.Core.World.get_func(term.func, context@world) abort false
+      use otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
+      let args = Lit.Core.World.check.many(context, term.args, func.input_types)
+      let context_new = Lit.Core.Check.Context.add_var(context, term.name, otyp)
+      let cont = Lit.Core.World.check.term(context_new, term.cont, type)
       ownr && args && cont
     match:
       //log("-- match ")  // DEBUG
-      let expr_type = Lit.Core.World.get_type(term.type, world) abort false
+      let expr_type = Lit.Core.World.get_type(term.type, context@world) abort false
       //log("-- match2 ")  // DEBUG
 
       case expr_type {
         data:
-          let expr = Lit.Core.World.check.term(term.expr, expr_type, context, world, caller)
+          let expr = Lit.Core.World.check.term(context, term.expr, expr_type)
           let cses = List.mapped!(term.cses)!((x) x@body)
-          let cses = Lit.Core.World.check.match.cases(cses, type, expr_type.constructors, term.name, context, world, caller)
+          let cses = Lit.Core.World.check.match.cases(context, cses, type, expr_type.constructors, term.name)
           expr && cses
       } default false
     bind:
       //log("-- bind ")  // DEBUG
       // TODO: check access
-      let ownr = Lit.Core.World.check.owner(caller, term.name, world)
-      use func = Lit.Core.World.get_func(term.name,world) abort false
-      use otyp = Lit.Core.World.get_type(func.output_type,world) abort false
-      let nofn = List.is_empty!(func.input_names) // should we allow binds with functions?
-      let main = Lit.Core.World.check.term(term.main, otyp, context, world, caller)
+      let owner_ok = Lit.Core.World.check.owner(context, term.name)
+      use func = Lit.Core.World.get_func(term.name, context@world) abort false
+      use out_type = Lit.Core.World.get_type(func.output_type, context@world) abort false
+      let nofn_ok = List.is_empty!(func.input_names)  // TODO: should we allow binds with functions?
+      let main_ok = Lit.Core.World.check.term(context, term.main, out_type)
       // should the ctx change?
-      let cont = Lit.Core.World.check.term(term.cont, type, context, world, caller)
-      ownr && nofn && main && cont
+      let cont_ok = Lit.Core.World.check.term(context, term.cont, type)
+      owner_ok && nofn_ok && main_ok && cont_ok
     word:
       //log("-- word ")  // DEBUG
       case type {
@@ -270,67 +292,71 @@ Lit.Core.World.check.term(
         false
     compare:
       //log("-- compare ")  // DEBUG
-      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
-      let val1 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
-      let iflt = Lit.Core.World.check.term(term.iflt, type, context, world, caller)
-      let ifeq = Lit.Core.World.check.term(term.ifeq, type, context, world, caller)
-      let ifgt = Lit.Core.World.check.term(term.ifgt, type, context, world, caller)
+      let val0 = Lit.Core.World.check.term(context, term.val0, Lit.Core.Type.word)
+      let val1 = Lit.Core.World.check.term(context, term.val0, Lit.Core.Type.word)
+      let iflt = Lit.Core.World.check.term(context, term.iflt, type)
+      let ifeq = Lit.Core.World.check.term(context, term.ifeq, type)
+      let ifgt = Lit.Core.World.check.term(context, term.ifgt, type)
       val0 && val1 && iflt && ifeq && ifgt
     operate:
       //log("-- operate ")  // DEBUG
-      let val0 = Lit.Core.World.check.term(term.val0, Lit.Core.Type.word, context, world, caller)
-      let val1 = Lit.Core.World.check.term(term.val1, Lit.Core.Type.word, context, world, caller)
+      let val0 = Lit.Core.World.check.term(context, term.val0, Lit.Core.Type.word)
+      let val1 = Lit.Core.World.check.term(context, term.val1, Lit.Core.Type.word)
       val0 && val1
   }
   //log("\n")
   result
 
 Lit.Core.World.check.many(
+  context: Lit.Core.Check.Context,
   terms: List<Lit.Core.Term>
   types: List<String>
-  context: Map<Lit.Core.Type>
-  world: Lit.Core.World
-  caller: Maybe<String>
 ): Bool
-  open world
   case terms types {
     cons cons:
-      let type = Lit.Core.World.get_type(types.head, world) abort false
-      let head = Lit.Core.World.check.term(terms.head, type, context, world, caller)
-      let tail = Lit.Core.World.check.many(terms.tail, types.tail, context, world, caller)
+      let type = Lit.Core.World.get_type(types.head, context@world) abort false
+      let head = Lit.Core.World.check.term(context, terms.head, type)
+      let tail = Lit.Core.World.check.many(context, terms.tail, types.tail)
       head && tail
     nil nil:
       true
   } default false
 
 Lit.Core.World.check.match.cases(
+  context: Lit.Core.Check.Context
   cases: List<Lit.Core.Term>
   type: Lit.Core.Type
   ctors: List<Lit.Core.Type.Constructor>
   name: String
-  context: Map<Lit.Core.Type>
-  world: Lit.Core.World
-  caller: Maybe<String>
 ): Bool
+  open context
   case cases ctors {
     cons cons:
-      let ext_context = context
-      for field in ctors.head@fields with ext_context:
-        let type = Lit.Core.World.get_type(field@type, world) <> Lit.Core.Type.data("Empty", [])
-        ext_context{name | "." | field@name} <- type
-      let case_ok = Lit.Core.World.check.term(cases.head, type, ext_context, world, caller)
-      let rest_ok = Lit.Core.World.check.match.cases(cases.tail, type, ctors.tail, name, context, world, caller)
+      let ext_variables = context.variables
+      
+      for field in ctors.head@fields with ext_variables:
+        let field_type =
+          Lit.Core.World.get_type(field@type, context.world)
+            <> Lit.Core.Type.data("Empty", [])
+        ext_variables{name | "." | field@name} <- field_type
+      let new_context = Lit.Core.Check.Context.new(
+        context.world
+        context.caller
+        ext_variables
+      )
+      let case_ok = Lit.Core.World.check.term(new_context, cases.head, type)
+      let rest_ok = Lit.Core.World.check.match.cases(new_context, cases.tail, type, ctors.tail, name)
       case_ok && rest_ok
     nil nil:
       true
   } default false
 
 Lit.Core.World.check.owner(
-  caller: Maybe<String>
+  context: Lit.Core.Check.Context
   name: String
-  world: Lit.Core.World
 ): Bool
-  let entry = world{name}
+  open context
+  let entry = context.world{name}
   case entry {
     none: false
     some: 
@@ -341,7 +367,7 @@ Lit.Core.World.check.owner(
             nil:
               true
             cons:
-              case caller {
+              case context.caller as caller {
                 some:
                   if caller.value =? name then
                     true
@@ -354,14 +380,12 @@ Lit.Core.World.check.owner(
       } default false
   }
 
+//
 // Validation
 // ----------
 // Checks if:
 // - TODO: no global binders with the same name
 // - variables are used at most once
-
-// TODO:
-//  - error list
 
 Lit.Core.validate.term(
   term: Lit.Core.Term
@@ -454,6 +478,7 @@ Lit.Core.validate.term.aux(
       state
   }
 
+//
 // Execution
 // ---------
 
@@ -521,12 +546,16 @@ Lit.Core.World.run.statement(
                 some:
                   let otyp = Lit.Core.World.get_type(func.output_type, world)
                     abort log("error: func otyp not found: " | func.name) none
+                  let new_context =
+                    Lit.Core.Check.Context.new(
+                      new_world
+                      some(func.name)
+                      ctx.value
+                    )
                   let term_ok = Lit.Core.World.check.term(
-                      func.main,
-                      otyp,
-                      ctx.value,
-                      new_world,
-                      some(func.name),
+                      new_context
+                      func.main
+                      otyp
                     )
                   if term_ok then
                     let {_, ok} = Lit.Core.validate.term(func.main, vld)
@@ -545,8 +574,8 @@ Lit.Core.World.run.statement(
       // This assumes that the call returns the built-in type Word to avoid
       // duplicating the typechecking function.
       let call_type = Lit.Core.Type.word
-      let term_ok =
-        Lit.Core.World.check.term(exec_term, call_type, {}, world, none)
+      let context = Lit.Core.Check.Context.from_world(world)
+      let term_ok = Lit.Core.World.check.term(context, exec_term, call_type)
       if term_ok then
         let {_, ok} = Lit.Core.validate.term(exec_term, {})
         if ok then
@@ -684,8 +713,10 @@ Lit.Core.World.run.terms(
       {head & tail, world}
   }
 
+//
 // Tests
 // -----
+
 Lit.Core: _
   let world = {}
 
