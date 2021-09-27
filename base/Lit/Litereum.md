@@ -141,7 +141,7 @@ its layer 1.
 However, there are key differences that are a better fit for some scenarios.
 For example, the deployment of contracts does not require signatures; These
 contracts are smaller than their Ethereum counterparts for technical aspects
-such as shorter serializarion and global sharing of functions. Therefore,
+such as shorter serialization and global sharing of functions. Therefore,
 deploying blocks and performing non-signed calls should be more scalable on
 Litereum.
 
