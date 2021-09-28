@@ -1,3 +1,3 @@
 Ether.Bits.get_bytes_size(bytes : Bits) : Nat
     let bytes_size = Bits.length(bytes) / 8
-    if (Nat.mod(Bits.length(bytes), 8)) >? 0 then bytes_size +1 else bytes_size
+    if (Nat.mod(Bits.length(bytes), 8)) >? 0 then bytes_size +1 else Nat.max(1, bytes_size)
