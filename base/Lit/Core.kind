@@ -2,15 +2,11 @@
 // ==========================================
 
 // TODO:
-// - merge type-checking and validation / allow reusing word terms
-// - cost measure, WIP rígille
+// - cost measure Almost there
 // - Lit.Core.Term.get_caller ?
-// - owned types/constructors ?
-// - conseguir modificar o dono no Lit.Core.Term.bind
 // - block difficulty (nakamoto consensus)
 // - Lit.Lang:
 //   - consertar parser para ir ate o final do arquivo !
-//
 // - paper:
 //   - use railroad diagrams for syntax
 
@@ -161,17 +157,21 @@ type Lit.Core.Costs {
   )
 }
 
+// TODO remove this
+TempWidth: Nat
+  3
+
 Lit.Core.Costs.default: Lit.Core.Costs
   Lit.Core.Costs.new(
-    Nat.pow(2, 16*0)
-    Nat.pow(2, 16*1)
-    Nat.pow(2, 16*2)
-    Nat.pow(2, 16*3)
-    Nat.pow(2, 16*4)
-    Nat.pow(2, 16*5)
-    Nat.pow(2, 16*6)
-    Nat.pow(2, 16*7)
-    Nat.pow(2, 16*8)
+    Nat.pow(10, TempWidth*0)
+    Nat.pow(10, TempWidth*1)
+    Nat.pow(10, TempWidth*2)
+    Nat.pow(10, TempWidth*3)
+    Nat.pow(10, TempWidth*4)
+    Nat.pow(10, TempWidth*5)
+    Nat.pow(10, TempWidth*6)
+    Nat.pow(10, TempWidth*7)
+    Nat.pow(10, TempWidth*8)
   )
 
 //
@@ -494,7 +494,16 @@ Lit.Core.World.run.statement(
           Lit.Core.World.run.term(exec_term, world, {}, 0) // TODO
         log("- ext_exec: "
           | Lit.Lang.show.term(ctx.term, world)
-          | " (gas: " | String.pad_left(32, '0', Nat.to_string_base(16, ctx.gas)) | ")"
+          | " (gas:\n"
+          | let ops = List.reverse!(["var", "create", "match", "match_substitution", "word", "compare", "operate", "call", "bind"])
+            let str = String.pad_left(TempWidth*9, '0', Nat.show(ctx.gas))
+            let str_list = List.zip!!(ops, String.chunks_of(TempWidth, str))
+            let fin = ""
+            for os in str_list with fin:
+              let {op, s} = os
+              fin | "  " | op | ": " | s | "\n"
+            fin
+          | ")"
         )
         some(ctx.world)
       else
@@ -829,19 +838,8 @@ Lit.Core: _
 //      bind: Nat
 //    )
 //  }
-//     WordTest(): U64
-//       cmp 2 3 {
-//         ltn: 
-//           0
-//         eql: 
-//           1
-//         gtn: 
-//           2
-//       }
-     TestWord(): U64
-       0
      do {
-       bind TestWord = 1
+       call m = VotingMap.add(VotingMap/new, Bits/o{pred: Bits/e})
        0
      }
    `

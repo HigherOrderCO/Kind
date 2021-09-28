@@ -219,9 +219,14 @@ VotingMap.vote(map: VotingMap, key: Bits, vote: Nat, candidates: Candidates): Vo
       }
   }
 
+VotingMap.add(map: VotingMap, key: Bits): VotingMap
+  call ret = VotingMap.set(map, key, Voter/new{allowed: Bool/false, voted: Bool/false})
+  ret
+
 Candidates.get_winner.aux(candidates: Candidates, index: Nat, greater: Nat): Nat
   case candidates : Candidates {
-    nil: greater
+    nil:
+      greater
     cons: 
       call comp = Nat.cmp(candidates.count, greater) 
       case comp : Cmp {
