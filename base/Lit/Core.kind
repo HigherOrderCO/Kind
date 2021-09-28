@@ -381,104 +381,6 @@ Lit.Core.World.check.owner(
   }
 
 //
-// Validation
-// ----------
-// Checks if:
-// - TODO: no global binders with the same name
-// - variables are used at most once
-
-Lit.Core.validate.term(
-  term: Lit.Core.Term
-  used: Map<Bool>
-): Pair<Map<Bool>,Bool>
-  Lit.Core.validate.term.aux({used, true}, term)
-
-Lit.Core.validate.term.aux(
-  state: Pair<Map<Bool>, Bool>
-  term: Lit.Core.Term
-): Pair<Map<Bool>, Bool>
-  // log(  // DEBUG
-  //   "- vld: " | Lit.Lang.show.term(term, {}) | " ; "
-  //   | "ctx: "
-  //   | String.join(
-  //     ", ",
-  //     List.map!!(
-  //       (a) a@fst | ":" | Bool.show(a@snd),
-  //       Map.to_list!(state@fst)
-  //     )
-  //   )
-  // )
-  // log("")  // DEBUG
-
-  case term {
-    var:
-      let {used, valid} = state
-      case used{term.name} as was_used {
-        none:
-          // undefined variable
-          {used, false}
-        some:
-          if was_used.value then
-            // variable already used
-            {used, false}
-          else
-            // first use of the variable
-            {used{term.name} <- true, valid}
-      }
-
-    create:
-      for val in term.vals with state:
-        Lit.Core.validate.term.aux(state, val)
-      state
-
-    match:
-      let state = Lit.Core.validate.term.aux(state, term.expr)
-      for cse in term.cses with state:
-        let {fields, _} = cse
-        let field_state = state
-        for field in fields with field_state:
-          let {used, valid} = field_state
-          case used{field} {
-            some:
-              {used, false} // same name used more than once
-            none:
-              {used{field} <- false, valid}
-          }
-        state
-      state
-
-    call:
-      let {used, valid} = state
-      let used = used{term.name} <- false
-      let state = {used, valid}
-      for arg in term.args with state:
-        Lit.Core.validate.term.aux(state, arg)
-      Lit.Core.validate.term.aux(state, term.cont)
-
-    bind:
-      let {used, valid} = state
-      let used = used{term.name} <- false
-      let state = {used, valid}
-      let state = Lit.Core.validate.term.aux(state, term.main)
-      let state = Lit.Core.validate.term.aux(state, term.cont)
-      state
-
-    word:
-      state
-
-    compare:
-      let terms = [term.val0, term.val1, term.iflt, term.ifeq, term.ifgt]
-      for i_term in terms with state:
-        Lit.Core.validate.term.aux(state, i_term)
-      state
-
-    operate:
-      let state = Lit.Core.validate.term.aux(state, term.val0)
-      let state = Lit.Core.validate.term.aux(state, term.val1)
-      state
-  }
-
-//
 // Execution
 // ---------
 
@@ -558,11 +460,7 @@ Lit.Core.World.run.statement(
                       otyp
                     )
                   if term_ok then
-                    let {_, ok} = Lit.Core.validate.term(func.main, vld)
-                    if ok then
-                      some(new_world)
-                    else
-                      log("error: func invalid: " | func.name) none
+                    some(new_world)
                   else
                     log("error: func ill-typed: " | func.name) none
               }
@@ -577,14 +475,10 @@ Lit.Core.World.run.statement(
       let context = Lit.Core.Check.Context.from_world(world)
       let term_ok = Lit.Core.World.check.term(context, exec_term, call_type)
       if term_ok then
-        let {_, ok} = Lit.Core.validate.term(exec_term, {})
-        if ok then
-          let {result, new_world} =
-            Lit.Core.World.run.term(exec_term, world, {})
-            log("- ext_exec: " | Lit.Lang.show.term(result, world))
-            some(new_world)
-        else
-          log("error: exec is invalid") none
+        let {result, new_world} =
+          Lit.Core.World.run.term(exec_term, world, {})
+          log("- ext_exec: " | Lit.Lang.show.term(result, world))
+        some(new_world)
       else
         log("error: exec failed in typecheck") none
   }
