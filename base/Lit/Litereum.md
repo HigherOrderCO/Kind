@@ -5,9 +5,9 @@ In 2013, the first smart-contract blockchain, Ethereum, was proposed, extending
 Bitcoin with a stateful scripting language that allowed arbitrary financial
 transactions to be settled without third parties. Notably, Ethereum's built-in
 virtual machine made it a general-purpose computer, even though most of the
-protocol's complexity wasn't required to achieve Turing completeness. Litereum
+protocol's complexity was not required to achieve Turing completeness. Litereum
 is a massive simplification of this concept, trading features for raw
-simplicity. Since it doesn't have a native token, it isn't a cryptocurrency
+simplicity. Since it does not have a native token, it is not a cryptocurrency
 itself, but currencies can be created as internal programs. In essence, Litereum
 is a peer-to-peer Lambda Calculus interpreter, making it a minimal decentralized
 computer, and a politically neutral smart-contract platform.
@@ -31,7 +31,7 @@ Having a simpler implementation has two major benefits.
 Since there is less code, the attack surface is narrower, making a full node
 much easier to audit. Moreover, the internal scripting language is prone to
 formal verification, further reinforcing security. This is only possible because
-it isn't based on stack machines, but on a simply-typed affine calculus that is
+it is not based on stack machines, but on a simply-typed affine calculus that is
 type-checked on-chain and has a clear cost model, preventing reentrancy attacks
 (that would lead to invalid states, hindering formal verification) and spam
 (which would be unavoidable in the usual lambda calculus, due to the
@@ -56,12 +56,12 @@ Below are some of the major differences that make this possible:
 
 Ethereum uses the Elliptic Curve Digital Signature Algorithm (ECDSA) for message
 authentication as a hard-coded algorithm that is part of the protocol. As of
-2021, it is still not possible to create Ethereum accounts that don't depend on
+2021, it is still not possible to create Ethereum accounts that do not depend on
 ECDSA signatures. Since ECDSA is vulnerable to quantum attackers, if a quantum
 computer of reasonable scale is developed, most Ethereum accounts will have
 their private keys exposed, which would be catastrophic to the network.
 
-Litereum doesn't have a native account system or signature scheme. Instead,
+Litereum does not have a native account system or signature scheme. Instead,
 users create accounts by simply deploying smart-contracts that they control
 through their preferred authentication scheme. As such, users are free to use a
 cheaper, but less secure, signature algorithm, like ECDSA, or an expensive, but
@@ -75,7 +75,7 @@ not only has no "preferred currency", but it has no built-in currency at all: it
 is a pure computation network. Of course, users can still create their own
 tokens as contracts, but every internal currency is treated equally.
 
-As a consequence, Litereum transactions don't have the "from", "to", "value",
+As a consequence, Litereum transactions do not have the "from", "to", "value",
 "gasPrice" or "gasLimit" fields. Instead, a transaction is just a block of code
 that is executed when mined in order to alter the blockchain state.
 Ethereum-like transactions can be emulated by a suitable script. For example,
@@ -97,10 +97,10 @@ same behavior as a classic Ethereum transaction.
 Like Ethereum, the computational cost of a transaction is measured in gas, and
 blocks have a size (space) and gas (time) limit. This keeps the cost of running
 a full node, both in terms of computation and storage cost, predictable. Since
-there isn't a native currency, there isn't a built-in gas-to-native-token
+there is not a native currency, there is not a built-in gas-to-native-token
 conversion either. Instead, a free market emerges, where users choose the exact
 amount of fees they want to pay, and miners select transactions that fit in a
-block, considering both space and computation costs, in a manner that maximies
+block, considering both space and computation costs, in a manner that maximizes
 their individual profits.
 
 #### 3. A simpler block structure
@@ -115,7 +115,7 @@ patricia-merkle trees).
 Litereum takes a minimalistic approach: blocks store just the previous block,
 the nonce, the miner identity and a list of transactions (which are, themselves,
 just blocks of code). Of course, that means that features like light clients
-aren't possible, but we argue that these aren't used in practice: users either
+are not possible, but we argue that these are not used in practice: users either
 run full nodes, or trust someone that does.
 
 #### 4. A simple concensus algorithm
@@ -134,20 +134,20 @@ Litereum's code.
 #### 5. It is slower
 
 Finally, it must be stressed that Litereum is not designed to have a high layer
-1 throughput. It has a very limited block size and computation budget. This
-allows us to avoid design choices that would make it more scalable for the cost
-of added complexity. In general, Litereum should be less scalable than Ethereum
-on its layer 1.
+1 throughput. It has a very limited block size and computation budget. Thus, its
+complexity is reduced, but at the cost of being less scalable than Ethereum on
+its layer 1.
 
-There are, though, key differences that make it better in some cases. For
-example, deploying contracts don't require signatures, and these are smaller
-than their Ethereum counterparts, due to shorter serialization and global
-sharing of functions. Deploying blocks and performing non-signed calls should be
-more scalable on Litereum.
+However, there are key differences that are a better fit for some scenarios.
+For example, the deployment of contracts does not require signatures; These
+contracts are smaller than their Ethereum counterparts for technical aspects
+such as shorter serialization and global sharing of functions. Therefore,
+deploying blocks and performing non-signed calls should be more scalable on
+Litereum.
 
 Regardless, we argue that layer 1 scalability is not the most important
 end-goal. Most layer 2 optimizations that make Ethereum more scalable apply to
-Litereum, so, a slower layer 1 won't detain long-term scalability.
+Litereum, so, a slower layer 1 will not detain long-term scalability.
 
 Design
 ------
@@ -249,7 +249,7 @@ A function has 6 fields:
 
 A top-level command that alters the global state. Commands are grouped in pages.
 Tracing a parallel to conventional blockchains, a command is like a transaction,
-and a page is like a block. The main difference is that commands don't need to
+and a page is like a block. The main difference is that commands do not need to
 be signed. There are 4 variants of commands:
 
 ##### 1. `new_type(type)`
@@ -266,11 +266,11 @@ If the function's name already exists, then this command fails.
 
 If the function's body is ill-typed with a type context initialized with the
 function's argument list, then this command fails. The function body
-is ill-typed if it doesn't pass the type-check procedure, with a type context
+is ill-typed if it does not pass the type-check procedure, with a type context
 initialized with each variable on the function's argument list.
 
 If the function's body is invalid, then this command fails. The function body is
-invalid if it doesn't pass the validate procecure.
+invalid if it does not pass the validate procedure.
 
 ##### 3. `new_user(user)`
 
@@ -286,10 +286,10 @@ If the signature is invalid, the command is executed anonymously, with the
 username being set as the empty bitstring.
 
 If the expression's body is ill-typed, then this command fails. The function body
-is ill-typed if it doesn't pass the type-check procedure with an empty context.
+is ill-typed if it does not pass the type-check procedure with an empty context.
 
 If the expression's body is invalid, then this command fails. The expression
-body is invalid if it doesn't pass the validate procedure.
+body is invalid if it does not pass the validate procedure.
 
 #### Term
 
@@ -302,7 +302,7 @@ Represents a variable bound by a global function, or by a pattern-matching
 clause. When a function is called, or a pattern-match takes place, the bound
 variable will be substituted by its called, or matched, value. Variables must be
 affine, which means the same bound variable can only be used at most once, and
-must be unique, which means the same name can't be bound to two different
+must be unique, which means the same name cannot be bound to two different
 variables, globally.
 
 ##### 2. `create(type, form, vals)`
@@ -325,7 +325,7 @@ A create variant is well-typed if:
    its type matches the type stored on `fields[i]`, where `fields` is the list
    of fields stored on the constructor of number `ctor` in the selected type
 
-The create variant doesn't compute. It is irreducible.
+The create variant does not compute. It is irreducible.
 
 ##### 3. `match`
 
@@ -410,11 +410,11 @@ type Lit.Cons.Page {
 }
 ```
 
-Unlike Bitcoin blocks, a LitCons page doesn't hold a set of transactions.
+Unlike Bitcoin blocks, a LitCons page does not hold a set of transactions.
 Instead, it stores an arbitrary blob of 1280 bytes of data. The size was chosen
 to allow a full block to fit in a small UDP packet, allowing for fast
 propagation. There are no "block headers": a page stores all its data. There
-aren't native tokens, nor transaction fees. The incentives to include Litereum
+are not native tokens, nor transaction fees. The incentives to include Litereum
 commands (transactions) in a page are determined by miners and users: fees can
 be paid with any internal token.
 

@@ -1,0 +1,72 @@
+Bits.concat.go(a: Bits, b: Bits): Bits
+  case a {
+    e: b,
+    o: Bits.concat(a.pred, Bits.o(b))
+    i: Bits.concat(a.pred, Bits.i(b))
+  }
+
+Ether.RLP.proof.encode.bytes(tree : Ether.RLP.Tree) : Bits
+  case tree {
+      tip : 
+        let bytes_size = Ether.Bits.get_bytes_size(tree.value)
+       // let u16_char = Bits.trim(4, tree.value)
+        if (bytes_size =? 1) && Bits.ltn(tree.value, Ether.RLP.Constants.bits_128) then
+          tree.value
+        else
+          Bits.concat.go(Ether.RPL.proof.encode_length(bytes_size, 128), tree.value)
+      list :
+         let bytes = Bits.e
+         for item in tree.value with bytes :
+           Bits.concat(bytes, Ether.RLP.proof.encode.bytes(item))
+         let bytes_size = Ether.Bits.get_bytes_size(bytes)
+         log("Second encoding " | Nat.show(bytes_size))
+         Bits.concat.go(Ether.RPL.proof.encode_length(bytes_size, 192), bytes)
+  }
+
+Ether.RPL.proof.encode_length(value : Nat, offSet : Nat) : Bits
+  switch(Nat.ltn(value)) {
+    56 : 
+      Nat.to_bits(value + offSet)
+  } default
+    let binary_encoding = Ether.RPL.proof.encode.binary(value)
+    let len = Ether.Bits.get_bytes_size(binary_encoding)
+    log(Nat.show(value) | " " | Bits.show(Bits.concat.go(Nat.to_bits(len + offSet + 55), binary_encoding)))
+    Bits.concat.go(Nat.to_bits(len + offSet + 55), binary_encoding)
+
+Ether.RPL.proof.encode.binary(value : Nat) : Bits
+  if (value =? 0) then
+    Bits.e
+  else
+    Bits.concat.go(Ether.RPL.proof.encode.binary(value / 256), Nat.to_bits(value % 256))
+
+Bits.break(len : Nat, bits : Bits) : Pair<Bits, Bits>
+  {Bits.take(len, bits), Bits.drop(len, bits)}
+
+Ether.RLP.proof.encode.read.binary(value : Bits) : Nat
+  let {head, rest} = Bits.break(8, value)
+  let decode = Bits.to_nat(head)
+  if (Bits.eql(rest, Bits.o(Bits.e))) then
+    decode
+  else
+    Ether.RLP.proof.encode.read.binary(rest) + (decode * 256)
+
+Ether.RLP.proof.encode.read(bits : Bits) : String
+  let {byte_prefix, rest} = Bits.break(8, bits)
+  "0x" | switch (Bits.ltn(byte_prefix)) {
+    Ether.RLP.Constants.bits_128 : 
+      String.reverse(Bits.hex.encode(bits))  // between (0, 127)
+    Ether.RLP.Constants.bits_184 : 
+      let content_length = (Bits.to_nat(byte_prefix) - 128) * 8
+      let {prefix, rest} = Bits.break(content_length, rest)
+      String.reverse(Bits.hex.encode(byte_prefix)) | String.reverse(Bits.hex.encode(prefix))
+    Ether.RLP.Constants.bits_192 :
+     let content_length = (Bits.to_nat(byte_prefix) - 183) * 8
+     let {head, rest} = Bits.break(content_length, rest)
+     let length = Ether.RLP.proof.encode.read.binary(head)
+     let {prefix, rest} = Bits.break(length*8, rest)
+     String.reverse(Bits.hex.encode(byte_prefix)) | String.reverse(Bits.hex.encode(head))
+       | String.reverse(Bits.hex.encode(prefix))
+
+   //  {Ether.RLP.Tree.tip(Bits.hex.decode(String.reverse(prefix))), rest}
+
+  } default ""
