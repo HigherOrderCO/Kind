@@ -838,10 +838,41 @@ Lit.Core: _
 //      bind: Nat
 //    )
 //  }
-     do {
-       call m = VotingMap.add(VotingMap/new, Bits/o{pred: Bits/e})
-       0
-     }
+    
+    candidates(): Candidates
+      Candidates/cons{
+        count: Nat/zero, tail: Candidates/cons{
+          count: Nat/zero, tail: Candidates/cons{
+            count: Nat/zero, tail: Candidates/nil }}}
+    
+    key1(): Bits
+      Bits/o{pred: Bits/e}
+    
+    key2(): Bits
+      Bits/i{pred: Bits/e}
+
+    do {
+      call cand  = candidates()
+      call joao  = key1()
+      call maria = key2()
+      
+      call m     = VotingMap.add(VotingMap/new, joao)
+      call new_m = VotingMap.add(m, maria)
+
+      call new_m = VotingMap.allow_vote(new_m, joao)
+      call new_m = VotingMap.allow_vote(new_m, maria)
+
+      call result = VotingMap.vote(new_m, joao, Nat/succ{pred: Nat/zero}, cand)
+      case result : VoteResult {
+        new:
+          call new_result = VotingMap.vote(result.map, maria, Nat/zero, result.candidates)
+          case new_result : VoteResult {
+            new:
+              call winner = Candidates.get_winner(new_result.candidates)
+              0
+          }
+      }
+    }
    `
 
   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
