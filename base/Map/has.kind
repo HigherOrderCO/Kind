@@ -1,0 +1,2 @@
+Map.has<A: Type>(key: String, map: Map<A>): Bool
+  Maybe.is_some!(BBT.lookup!!(String.cmp, key, map))

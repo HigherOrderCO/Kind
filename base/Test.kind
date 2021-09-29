@@ -1,5 +1,16 @@
-
 Test: _
-  let t = String.eql("", String.nil)
-  t
-  
+  case 2 as two {
+    zero:
+      ?a
+    succ:
+      ?b
+  }
+
+//Test: String
+  //let idx = 0
+  //let str = ""
+  //while idx <? 10 with {idx, str}:
+    //log("idx=" | Nat.show(idx) | " str=" | str)
+    //{idx + 1, str | Nat.show(idx)}
+  //str
+  //V2.show(V2.new(1.234, -7.555111))

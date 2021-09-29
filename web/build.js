@@ -9,10 +9,9 @@ var kind_dir = __dirname+"/../base";
 
 // TODO: remove from "src/apps" the ones that are no longer in "base/Apps"
 
-process.chdir(code_dir);
-var all_js_apps   = fs.readdirSync("apps").filter(x => x.startsWith("App."));
 process.chdir(kind_dir);
 var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
+var all_js_apps = [];
 // console.log(all_kind_apps)
 
 // App that will be displayed when accessing http://uwu.tech
@@ -55,6 +54,7 @@ if (process.argv[2]) { // Only build 1 App
 // Compile app from ".kind" to ".js"
 // Save it in "src/apps/"
 function compile_app(name) {
+  all_js_apps.push("App."+name.replace(".kind",".js"));
   process.chdir(kind_dir);
   var name = "App."+name.slice(0,-5);
   console.log("- " + name);
@@ -94,6 +94,7 @@ for (var app of apps_in_index ) {
   index += add_line(app);
 }
 index += "}\n";
+
 fs.writeFileSync("apps/index.js", index);
 
 console.log("\n[2/2] Building index.js...");

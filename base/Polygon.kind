@@ -1,0 +1,36 @@
+// TODO: store segments instead, create Polygon.from_segments
+
+type Polygon {
+  new(vertices: List<V2>)
+}
+
+Polygon.edges(polygon: Polygon): List<Segment>
+  let vertices = polygon@vertices
+  Polygon.edges.go(vertices, List.last!(vertices) <> V2.new(0.0,0.0))
+
+Polygon.edges.go(
+  vertices: List<V2>
+  last_vertex: V2
+): List<Segment>
+  case vertices {
+    nil:
+      []
+    cons:
+      let head = Segment.new(last_vertex, vertices.head)
+      let tail = Polygon.edges.go(vertices.tail, vertices.head)
+      head & tail
+  }
+
+// Given a polygon and two points, returns true if
+// the polygon is blocking sigth between the points
+Polygon.blocks_sight(a: V2, b: V2, poly: Polygon): Bool
+  let blocked = false
+  let blocked = for seg in Polygon.edges(poly):
+    open seg
+    // If endpoint is a vertex of this edge, there is no blockage
+    if V2.eql(seg.a,b) || V2.eql(seg.b,b) then
+      blocked
+    // Otherwise, if a-b crosses edge, then sight is blocked
+    else
+      blocked || Segment.intersects(Segment.new(a,b),seg)
+  blocked

@@ -1,24 +1,55 @@
-bool_dec(b : Bool, b2 : Bool) : Decidable<b == b2>
-  case b {
-    true : case b2 {
-       true : Decidable.yep!(refl)
-       false : Decidable.nop!((H) Bool.false_neq_true(mirror(H)))
-    }!
-    false : case b2 {
-        true : Decidable.nop!(Bool.false_neq_true)
-        false : Decidable.yep!(refl)
-    }!
+Bool.and.eq_sym(x : Bool, y : Bool, H : Equal(Bool, Bool.and(x, y), true)) : Pair<x == true, y == true>
+  case x y with H {
+    true true : {refl, refl}
+    false false : 
+      def H = Bool.false_neq_true(H)
+      Empty.absurd!(H)
+    true false : 
+      def H = Bool.false_neq_true(H)
+      Empty.absurd!(H)
+    false true : 
+      def H = Bool.false_neq_true(H)
+      Empty.absurd!(H)
   }!
 
-Ether.RLP.section(tree : Ether.RLP.Tree) : Ether.RLP.decode(Ether.RLP.encode(tree)) == tree
+
+Ether.RLP.section(tree : Ether.RLP.Tree) : Equal(Ether.RLP.Tree, Ether.RLP.decode(Ether.RLP.encode(tree)), tree)
   case tree {
-      tip : 
-        def bytes_size = Ether.Bits.get_bytes_size(tree.value)
-      //  def bytes_len = bool_dec(Nat.eql(bytes_size,1), true)
-        case Nat.eql(Ether.Bits.get_bytes_size(tree.value),1) {
-          true : ?a
-          false : ?b
-        }! :: Nat.eql(Ether.Bits.get_bytes_size(tree.value),1)!!! == true
-      list : ?b
-  }!
+      tip: 
+        let e = refl :: Ether.Bits.read_bytes(Bool.and(Nat.eql(Ether.Bits.get_bytes_size(tree.value),1),Bits.ltn(tree.value,Ether.RLP.Constants.bits_128),() List(Bits),List.cons(Bits,tree.value,List.nil(Bits)),List.concat(Bits,Ether.RPL.encode_length(Ether.Bits.get_bytes_size(tree.value),128),List.cons(Bits,tree.value,List.nil(Bits))))) == Ether.RLP.encode(Ether.RLP.Tree.tip(tree.value))
+        case e {
+          refl: 
+            let remember = case Bool.and(Nat.eql(Ether.Bits.get_bytes_size(tree.value),1), Bits.ltn(tree.value,Ether.RLP.Constants.bits_128)) {
+              true : (H) 
+                let {bite_size_cond, bits_ltn_cond} = Bool.and.eq_sym!!(mirror(H))
+                ?ak-142-2
+              false : ?bk
+            } : Equal(Bool, self, Bool.and(Nat.eql(Ether.Bits.get_bytes_size(tree.value),1), Bits.ltn(tree.value,Ether.RLP.Constants.bits_128))) -> Ether.RLP.decode(Ether.Bits.read_bytes(self(() List(Bits),List.cons(Bits,tree.value,List.nil(Bits)),List.concat(Bits,Ether.RPL.encode_length(Ether.Bits.get_bytes_size(tree.value),128),List.cons(Bits,tree.value,List.nil(Bits)))))) == Ether.RLP.Tree.tip(tree.value)
+            remember(refl)
+          //  case remember.fst with remember.snd {
+            //  true : ?a
+             // false : ?b
+           // } : Ether.RLP.decode(Ether.Bits.read_bytes(Bool.and(Nat.eql(Ether.Bits.get_bytes_size(tree.value),1),Bits.ltn(tree.value,Ether.RLP.Constants.bits_128),() List(Bits),List.cons(Bits,tree.value,List.nil(Bits)),List.concat(Bits,Ether.RPL.encode_length(Ether.Bits.get_bytes_size(tree.value),128),List.cons(Bits,tree.value,List.nil(Bits)))))) == Ether.RLP.Tree.tip(tree.value)
+            //let remember_eq = refl :: Bool.and(Nat.eql(Ether.Bits.get_bytes_size(tree.value),1), Bits.ltn(tree.value,Ether.RLP.Constants.bits_128)) == eq 
+            //case Bool.and(Nat.eql(Ether.Bits.get_bytes_size(tree.value),1), Bits.ltn(tree.value,Ether.RLP.Constants.bits_128)) with remember_eq {
+             // true : ?a
+              //false : ?b
+            //}!
+        } : Ether.RLP.decode(e.b) == Ether.RLP.Tree.tip(tree.value)
+        
+          //  case Nat.eql(Ether.Bits.get_bytes_size(tree.value),1) as eq {
+            //  true: ?a
+        //      false: ?b
+            //}: Ether.RLP.decode(Ether.Bits.read_bytes(Bool.and(eq,Bits.ltn(tree.value,Ether.RLP.Constants.bits_128),() List(Bits),List.cons(Bits,tree.value,List.nil(Bits)),List.concat(Bits,Ether.RPL.encode_length(Ether.Bits.get_bytes_size(tree.value),128),List.cons(Bits,tree.value,List.nil(Bits)))))) == Ether.RLP.Tree.tip(tree.value)
+        //}: Ether.RLP.decode(e.b) == Ether.RLP.Tree.tip(tree.value)
 
+      //  case e {
+        //  refl:
+          //  case Nat.eql(Ether.Bits.get_bytes_size(tree.value),1) as eq {
+            //  true: ?a
+          //    false: ?b
+            //}: Ether.RLP.decode(Ether.Bits.read_bytes(Bool.and(eq,Bits.ltn(tree.value,Ether.RLP.Constants.bits_128),() List(Bits),List.cons(Bits,tree.value,List.nil(Bits)),List.concat(Bits,Ether.RPL.encode_length(Ether.Bits.get_bytes_size(tree.value),128),List.cons(Bits,tree.value,List.nil(Bits)))))) == Ether.RLP.Tree.tip(tree.value)
+        //}: Ether.RLP.decode(e.b) == Ether.RLP.Tree.tip(tree.value)
+      list:
+        ?list_goal
+  } : Equal(Ether.RLP.Tree, Ether.RLP.decode(Ether.RLP.encode(tree)), tree)

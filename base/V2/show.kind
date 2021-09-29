@@ -1,0 +1,3 @@
+V2.show(vec: V2): String
+  open vec
+  "V2(" | F64.show(vec.x) | "," | F64.show(vec.y) | ")"

@@ -1,0 +1,63 @@
+Kind.Term.show_pretty(term: Kind.Term): String
+  case term {
+    var:
+      Kind.Name.show(term.name)
+    ref:
+      Kind.Name.show(term.name)
+    typ:
+      "Type"
+    all:
+      let op = if term.eras then "<" else "("
+      let cl = if term.eras then ">" else ")"
+      Kind.Name.show(term.self)|op|Kind.Name.show(term.name)|": "
+      |Kind.Term.show_pretty(term.xtyp)|cl|" -> "|Kind.Term.show_pretty(term.body(Kind.Term.ref(term.self), Kind.Term.ref(term.name)))
+    lam:
+      "("|Kind.Name.show(term.name)|") "|Kind.Term.show_pretty(term.body(Kind.Term.ref(term.name)))
+    app:
+      Kind.Term.show_pretty(term.func)|"("|Kind.Term.show_pretty(term.argm)|")"
+    let:
+      "let "|Kind.Name.show(term.name)|" = "|Kind.Term.show_pretty(term.expr)|" "
+      |Kind.Term.show_pretty(term.body(Kind.Term.ref(term.name)))
+    def:
+      "def "|Kind.Name.show(term.name)|" = "|Kind.Term.show_pretty(term.expr)|" "
+      |Kind.Term.show_pretty(term.body(Kind.Term.ref(term.name)))
+    ann:
+      Kind.Term.show_pretty(term.term)|" :: "|Kind.Term.show_pretty(term.type)
+    gol:
+      "?"|Kind.Name.show(term.name)
+    hol:
+      "_"
+    nat:
+      Nat.show(term.natx)
+    chr:
+      "'"|Char.to_string(term.chrx)|"'"
+    str:
+      `"`|term.strx|`"`
+    num:
+      case term.sign {
+        some:
+          if term.sign.value then "+" else "-"
+        none:
+          ""
+      }
+      |Nat.show(term.numb)
+      |case term.frac {
+        none:
+          ""
+        some:
+          "."|Nat.show(term.frac.value)
+      }
+    cse:
+      ?a
+    new:
+      let string_list = List.map!!(Kind.Term.show_pretty, term.args)
+      "{"|String.join(", ", string_list)|"}"
+    get:
+      Kind.Term.show_pretty(term.expr)|"@"|term.fkey
+    set:
+      Kind.Term.show_pretty(term.expr)|"@"|term.fkey|" <- "|Kind.Term.show_pretty(term.fval)
+    ope:
+      Kind.Term.show_pretty(term.arg0)|" "|term.name|" "|Kind.Term.show_pretty(term.arg1)
+    ori:
+      Kind.Term.show_pretty(term.expr)
+  }

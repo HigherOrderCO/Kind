@@ -18,7 +18,6 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
 
   let max_ap = 3 :: I32
 
-  let walk_range = {2,2} ::Pair<I32, I32>
   let swap_range = {4, 4} ::Pair<I32, I32>
   let swap_range_2 = {6, 6} ::Pair<I32, I32>
   let pbreak_range = {4, 4} ::Pair<I32, I32>
@@ -32,14 +31,7 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
      //R = Death Manipulation 
 
   let skills = {
-    "X": App.KL.Game.Skill.new(
-      "Walk", 500, 8,
-      (board, center, targets) Hexagonal.Axial.range(center, walk_range@fst),
-      App.KL.Game.Skill.Pattern.single,
-      App.KL.Game.Effect.common.walk(walk_range@snd, 1),
-      "Walk to another tile within 2 range from " | name |".",
-      App.KL.Game.Cursor.move
-    )
+    "X": App.KL.Game.Skill.walk(2, name)
     
     "Q": App.KL.Game.Skill.new(
       "Swap",499, 48,
@@ -54,7 +46,7 @@ App.KL.Game.Hero.Octoking.hero: App.KL.Game.Hero
       "Paradigm Break", 512, 48,
       (board, center, targets) Hexagonal.Axial.range(center, pbreak_range@fst),
       App.KL.Game.Skill.Pattern.single,
-      App.KL.Game.Hero.Octoking.hero.Skills.p_break(pbreak_range@snd, 1, 2, 2),
+      App.KL.Game.Hero.Octoking.hero.Skills.p_break(pbreak_range@snd, 1, 10, 2),
       "Lela provides 4 Shield Points to an ally.",
       App.KL.Game.Cursor.heal
     )
@@ -138,8 +130,11 @@ App.KL.Game.Hero.Octoking.hero.Skills.p_break(range: I32, radius: I32, duration:
     get target = App.KL.Game.Effect.coord.get_target
     App.KL.Game.Effect.ap.use(ap_cost)
     let area = App.KL.Game.Areas.circle(target, radius)
+    let activation_method = App.KL.Game.Tile.Activation.turn_end
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.red_fill, area)
     App.KL.Game.Effect.indicators.list(App.KL.Game.Indicator.blue_fill, [center])
-    App.KL.Game.Effect.area!(App.KL.Game.Effect.tile.add_effect(App.KL.Game.Effect.status.opposite.add(1), duration), area)
+    App.KL.Game.Effect.area!(App.KL.Game.Effect.tile.add_effect(App.KL.Game.Effect.status.opposite.add(1), duration, activation_method), area)
     return unit
   }
+
+//App.KL.Game.Hero.Octoking.hero.Skills.e_efforts(range: I32, radius: I32, duration: I32, ap_cost: I32): App.KL.Game.Effect<Unit>

@@ -13,5 +13,11 @@ type App.KL.Game.Tile.Effect {
     cast_data: Pair<Char, String>
     effect: App.KL.Game.Effect<Unit>
     duration: I32
+    activation: App.KL.Game.Tile.Activation
   )
+}
+
+type App.KL.Game.Tile.Activation { 
+  turn_end
+  walking
 }

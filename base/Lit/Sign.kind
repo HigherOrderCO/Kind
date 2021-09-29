@@ -27,31 +27,6 @@ Lit.Sign.Signature: Type
 Lit.Sign.Summary: Type
   Vector<U8, 32>
 
-// The body of a Lit.Sign Post can hold up to 8 words
-Lit.Sign.Body: Type
-  Vector<U256,8>
-
-// Serialization
-// -------------
-
-Lit.Sign.Body.deserializer: Deserializer<Lit.Sign.Body>
-  Vector.deserializer!(8,U256.deserializer)
-
-Lit.Sign.Body.serializer: Serializer<Lit.Sign.Body>
-  Vector.serializer!(8,U256.serializer)
-
-Lit.Sign.Signature.deserializer: Deserializer<Lit.Sign.Signature>
-  Vector.deserializer!(32,U256.deserializer)
-
-Lit.Sign.Signature.serializer: Serializer<Lit.Sign.Signature>
-  Vector.serializer!(32,U256.serializer)
-
-Lit.Sign.Hash.serializer: Serializer<Lit.Sign.Hash>
-  U256.serializer
-
-Lit.Sign.Hash.deserializer: Deserializer<Lit.Sign.Hash>
-  U256.deserializer
-
 // Signatures
 // ----------
 
@@ -59,15 +34,20 @@ Lit.Sign.Hash.deserializer: Deserializer<Lit.Sign.Hash>
 Lit.Sign.Hash.from_words(words: List<U256>): Lit.Sign.Hash
   Crypto.Keccak.hash.words(words)
 
-// Hashes a buffer into a 1024-byte signable string
-Lit.Sign.Summary.from_bytes(len_bytes: Pair<U32,Buffer8>): Lit.Sign.Summary
-  let vals = Buffer8.to_list(Crypto.Keccak.hash.bytes(len_bytes))
-  let csum = 7650 :: U32
-  let csum = for i from 2 to List.length!(vals): csum - U8.to_u32(vals[i] <> 0)
-  let vals = vals[0] <- U32.to_u8(U32.div(csum, 256))
-  let vals = vals[1] <- U32.to_u8(U32.mod(csum, 256))
-  let vals = Vector.from_list.length!(32, 0, vals)
-  vals
+// Hashes a buffer into a 256-bit signable string
+Lit.Sign.Summary.from_bytes(bytes: Pair<U32,Buffer8>): Lit.Sign.Summary
+  let hash_bytes = List.drop!(2,Buffer8.to_list(Crypto.Keccak.hash.bytes(bytes)))
+  let checksum = List.sum.u32(List.map!!(U8.to_u32,hash_bytes))
+  let byte_0 = U32.to_u8(U32.div(checksum, 256))
+  let byte_1 = U32.to_u8(U32.mod(checksum, 256))
+  Vector.from_list.length!(32, 0, byte_0 & byte_1 & hash_bytes)
+  //let vals = Buffer8.to_list(Crypto.Keccak.hash.bytes(bytes))
+  //let csum = 7680 :: U32
+  //let csum = for i from 2 to List.length!(vals): csum - U8.to_u32(vals[i] <> 0)
+  //let vals = vals[0] <- U32.to_u8(U32.div(csum, 256))
+  //let vals = vals[1] <- U32.to_u8(U32.mod(csum, 256))
+  //let vals = Vector.from_list.length!(32, 0, vals)
+  //vals
 
 // Converts a list of words to a signable
 Lit.Sign.Summary.from_words(words: List<U256>): Lit.Sign.Summary
@@ -139,16 +119,19 @@ Lit.Sign.Signature.verify(msg: Lit.Sign.Summary, addr: Lit.Sign.Address, sig: Li
 
 // Checks if the signable checksum is correct
 Lit.Sign.Signature.checksum(msg: Lit.Sign.Summary): Bool
-  Lit.Sign.Signature.checksum.go(32, msg)
-
-Lit.Sign.Signature.checksum.go(len: Nat, msg: Vector<U8,len>): Bool
-  let vals = Vector.to_list<U8>(len, msg)
-  let csum = 7650 :: U32
-  let csum = for i from 2 to List.length!(vals):
-    csum - U8.to_u32(vals[i] <> 0)
-  let cs_0 = U8.to_u32(vals[0] <> 0)
-  let cs_1 = U8.to_u32(vals[1] <> 0)
-  U32.eql(csum, U32.add(U32.mul(cs_0, 256), cs_1))
+  let bytes = Vector.to_list<U8>(32, msg)
+  let byte_0 = U8.to_u32(bytes[0] <> 0#8)
+  let byte_1 = U8.to_u32(bytes[1] <> 0#8)
+  let checksum_a = List.sum.u32(List.map!!(U8.to_u32,List.drop!(2, bytes)))
+  let checksum_b = U32.add(U32.mul(byte_0,256),byte_1)
+  U32.eql(checksum_a, checksum_b)
+  //let vals = Vector.to_list<U8>(len, msg)
+  //let csum = 7650 :: U32
+  //let csum = for i from 2 to List.length!(vals):
+    //csum - U8.to_u32(vals[i] <> 0)
+  //let cs_0 = U8.to_u32(vals[0] <> 0)
+  //let cs_1 = U8.to_u32(vals[1] <> 0)
+  //U32.eql(csum, U32.add(U32.mul(cs_0, 256), cs_1))
 
 // Returns the public key that signed a message
 Lit.Sign.Signature.recover(msg: Lit.Sign.Summary, sig: Lit.Sign.Signature): Lit.Sign.Address
@@ -158,7 +141,7 @@ Lit.Sign.Signature.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,le
   case len with msg sig {
     zero: Vector.nil!
     succ: case msg sig {
-      cons cons cons:
+      cons cons:
         let hash = sig.head
         let hash = for i from 0 to U8.to_nat(msg.head): Lit.Sign.Hash.from_words([hash])
         Vector.cons<U256,len.pred>(hash, Lit.Sign.Signature.recover.go(len.pred, msg.tail, sig.tail))
@@ -168,10 +151,13 @@ Lit.Sign.Signature.recover.go(len: Nat, msg: Vector<U8,len>, sig: Vector<U256,le
 Lit.Sign: _
   let pvt = Lit.Sign.Private.from_seed(123)
   let pub = Lit.Sign.Public.from_private(pvt)
-  let sum = Lit.Sign.Summary.from_utf8("oi tudo bem?")
-  let sig = Lit.Sign.Signature.sign(sum, pvt)
+  let adr = Lit.Sign.Address.from_public(pub)
+  let msg = Lit.Sign.Summary.from_utf8("oi tudo bem?")
+  let sig = Lit.Sign.Signature.sign(msg, pvt)
+  let oks = Lit.Sign.Signature.verify(msg, adr, sig)
   IO {
     for val in Vector.to_list!(32, sig):
       IO.print(U256.hex.encode(val))
+    IO.print(Bool.show(oks))
   }
 
