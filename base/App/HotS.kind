@@ -118,39 +118,55 @@ App.HotS.draw: App.Draw<App.HotS.State>
     </div>
   else
     <div>
-      <div>
-        "Team:"
-        " "
-        <input id="_team_"></input>
+      <div style={"height":"40px"}>
+        <div style={"margin": "4px"}>
+          "Team:"
+          " "
+          <input id="_team_"></input>
+        </div>
+        <div style={"margin": "4px"}>
+          "Cash: $" | Nat.show(cash{team} <> 0)
+        </div>
       </div>
-      <div>
-        "Cash: " | Nat.show(cash{team} <> 0)
-      </div>
-      <table style={"border-spacing":"0","border-collapse":"collapse"}>
-        <tr style={"font-weight": "bold"}>
-          {App.HotS.draw.cell(<span>"Player"</span>)}
-          {App.HotS.draw.cell(<span>"Role"</span>)}
-          {App.HotS.draw.cell(<span>"Value"</span>)}
-          {App.HotS.draw.cell(<span>"Team"</span>)}
-          {App.HotS.draw.cell(<span>"Buy"</span>)}
-        </tr>
+      <div style={
+        "height":"calc(100%-40px)"
+        "width": "100%"
+        "display": "flex"
+        "flex-flow": "row wrap"
+      }>
         for entry in Map.to_list!(App.HotS.players): 
           let {name, player} = entry
-          open player
-          use bid = bids{name} <> App.HotS.Bid.new(0, "none") 
-          <tr>
-            {App.HotS.draw.cell(<span>name</span>)}
-            {App.HotS.draw.cell(<span>player.rank</span>)}
-            {App.HotS.draw.cell(<span>Nat.show(bid.value)</span>)}
-            {App.HotS.draw.cell(<span>bid.team</span>)}
-            {App.HotS.draw.cell(<button id=name style={"cursor":"pointer"}>"buy"</button>)}
-          </tr>
-      </table>
+          use bid = bids{name} <> App.HotS.Bid.new(0, "") 
+          <div style={
+            "height": "24px"
+            "border-radius": "2px"
+            "border": "1px solid #A0A0A0"
+            "background": "#FAFAFA"
+            "margin": "2px"
+            "width": "260px"
+            "flex-basis": "260px"
+            "display": "flex"
+            "align-content": "center"
+          }>
+            {App.HotS.draw.cell(120, <span style={"font-weight":"bold"}>name</span>)}
+            {App.HotS.draw.cell(120, <span>bid.team</span>)}
+            {App.HotS.draw.cell(40, <span>"$"|Nat.show(bid.value)</span>)}
+            {App.HotS.draw.cell(40, <div id=name style={"cursor":"pointer","text-decoration":"underline"}>"buy"</div>)}
+          </div>
+      </div>
     </div>
 
-App.HotS.draw.cell(child: DOM): DOM
-  <td style={"padding": "4px", "border": "1px solid gray"}>{child}</td>
-  
+App.HotS.draw.cell(width: Nat, child: DOM): DOM
+  let style = {
+    "display": "inline-block"
+    "overflow": "hidden"
+    "padding": "4px"
+    "width": Nat.show(width)|"px"
+    "height": "24px"
+  }
+  <div style=style>
+    {child}
+  </div>
 
 // Event handler
 App.HotS.when: App.When<App.HotS.State>
