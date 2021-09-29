@@ -10,7 +10,6 @@
 // - paper:
 //   - use railroad diagrams for syntax
 
-//
 // Types
 // -----
 
@@ -51,6 +50,23 @@ type Lit.Core.Term {
     val0: Lit.Core.Term
     val1: Lit.Core.Term
   )
+  // The monadic effect binder
+  bind(
+    effe: Lit.Core.Effect
+    cont: Lit.Core.Term
+  )
+  // The monadic effect return
+  return(
+    expr: Lit.Core.Term
+  )
+}
+
+type Lit.Core.Effect {
+  // Stores a global state
+  define(
+    name: String
+    expr: Lit.Core.Term
+  )
   // Calls an external program
   call(
     name: String
@@ -58,12 +74,22 @@ type Lit.Core.Term {
     args: List<Lit.Core.Term>
     cont: Lit.Core.Term
   )
-  // Binds an new program
-  bind(
-    name: String
-    main: Lit.Core.Term   // TODO rename to `body`
-    cont: Lit.Core.Term
+  // Gets the name of the nth caller
+  get_caller(
+    indx: Lit.Core.Term
   )
+  // Gets the nth 64-bit word of the call serialization
+  get_call_code(
+    indx: Lit.Core.Term
+  )
+  // Gets the size of the call serialization, in bits
+  get_call_size
+  // Gets the block miner
+  get_block_miner
+  // Gets the block nonce
+  get_block_nonce
+  // Gets the block number
+  get_block_number
 }
 
 // An operation
@@ -86,12 +112,18 @@ type Lit.Core.Term.Case {
   )
 }
 
-// Lit.Core types are algebraic datatypes (ADTs)
+// Lit.Core types
 type Lit.Core.Type {
+  // A 64-bit word
   word
+  // An algebraic datatype
   data(
     name: String
     constructors: List<Lit.Core.Type.Constructor>
+  )
+  // A monadic effect
+  effect(
+    result: Lit.Core.Type
   )
 }
 
@@ -357,6 +389,7 @@ Lit.Core.World.check.match.cases(
       true
   } default false
 
+// TODO: simplify
 Lit.Core.World.check.owner(
   context: Lit.Core.Check.Context
   name: String
@@ -749,6 +782,7 @@ Lit.Core.World.run.term.bind(
         {Lit.Core.Term.bind(name, main, cont), world, gas}
   }
 
+// TODO: I think we can actually remove this, I believe we're safe
 Lit.Core.run.term.check_sanity(term: Lit.Core.Term): Bool
   case term {
     var:
@@ -787,6 +821,57 @@ Lit.Core.run.term.check_sanity(term: Lit.Core.Term): Bool
         && Lit.Core.run.term.check_sanity(term.cont)
   }
 
+// Serialization
+// -------------
+// TODO: remove Bits.kind, move serialization here, complete it
+
+Lit.Bits.serialize.uint(size: Nat, value: Nat): Bits
+  case size {
+    zero: Bits.e
+    succ: if (value % 2) =? 0
+      then Bits.o(Lit.Bits.serialize.uint(size.pred, value / 2))
+      else Bits.i(Lit.Bits.serialize.uint(size.pred, value / 2))
+  }
+
+Lit.Bits.deserialize.uint.go(size: Nat, bits: Bits): Pair<Bits,Nat>
+  case size {
+    zero:
+      {bits, 0}
+    succ: case bits {
+      e:
+        {Bits.e, 0}
+      o:
+        let {bits, value} = Lit.Bits.deserialize.uint.go(size.pred, bits.pred)
+        {bits, 2 * value}
+      i:
+        let {bits, value} = Lit.Bits.deserialize.uint.go(size.pred, bits.pred)
+        {bits, 1 + 2 * value}
+    }
+  }
+
+Lit.Bits.deserialize.uint(size: Nat, bits: Bits): Nat
+  Pair.snd!!(Lit.Bits.deserialize.uint.go(size, bits))
+
+Lit.Bits.serialize.name(name: String): Bits
+  Lit.Bits.serialize.name.go(10, name)
+
+Lit.Bits.serialize.name.go(size: Nat, name: String): Bits
+  case size {
+    zero:
+      Bits.e
+    succ:
+      let head = case name { nil: '.', cons: name.head }
+      let numb =
+        (    if U16.btw('0', head, '9') then U16.add(U16.sub(head, '0'), 52#16)
+        else if U16.btw('A', head, 'Z') then U16.sub(head, 'A')
+        else if U16.btw('a', head, 'z') then U16.add(U16.sub(head, 'a'), 26#16)
+        else if U16.btw('_', head, '_') then 62#16
+        else if U16.btw('.', head, '.') then 63#16
+        else                                      0#16)
+      let head = Lit.Bits.serialize.uint(if size >? 1 then 6 else 4, U16.to_nat(numb))
+      let tail = Lit.Bits.serialize.name(case name { nil: "", cons: name.tail })
+      Bits.concat(head, tail)
+  }
 
 //
 // Tests
