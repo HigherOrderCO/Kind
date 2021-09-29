@@ -1,11 +1,12 @@
-  // UPD: 15/09
-  // - os bytes são 
-  //   1. transformados (verificado se são maiores que 127) 
-  //   2. adicionados à "s"
+// 28 Sep 21
+// Author: Maisa Milena
+// FIX:
+// - parse characters using 3 and 4 bytes
+// - deal with parse error
+// Hint: check the test cases in Bytes/test/parse_string.kind
+// and add more tests
 
-Bytes.parse_string.testt: _
-  Bytes.parse_string("0x30313233343536373839")
-
+// Parse bytes into a decoded String
 Bytes.parse_string(b: Bytes): String
   Bytes.parse_string.aux(b, "")
 
@@ -17,8 +18,6 @@ Bytes.parse_string.take_bytes_pair(b: Bytes): Pair(Bytes, Maybe(Bytes))
   else {fst, Maybe.some!(snd)}
 
 Bytes.parse_string.aux(b: Bytes, s: String): String
-  // log("bytes: " | b)
-
   // Auxiliary
   let concat_s = (a: String) s | a
   let b_tail = String.drop(2, b)
@@ -34,55 +33,49 @@ Bytes.parse_string.aux(b: Bytes, s: String): String
     let fst = Nat.to_u16(fst)
     let snd = Nat.to_u16(snd)
   
+    let control_num = 999#16 
     let s_temp = 
       if U16.gtn(snd, 127) then
         case Bytes.parse_string.gtn_one_byte(fst, snd) as res {
-          none: 1#16 // TODO: this line means that couldn't parse the piece of byte. Must be treated.
+          none: control_num // got parsing error or help parsing symbols. Confusing, I know
           some: res.value
         }
-      else 
+      else
         snd
 
     if U16.ltn(s_temp, 0xffff) then
-      log("c ltn 0xffff: " | U16.show(s_temp))
-      let parsed = Char.to_string(s_temp)
-      log("parsed value: " | parsed)
+      // log("c ltn 0xffff: " | U16.show(s_temp))
+      let parsed = 
+        if U16.eql(s_temp, control_num) 
+        then "" // Couldn't parse byte, but may be not and error (like for some symbols)
+        else Char.to_string(s_temp)
+      // log("  parsed value: " | parsed)
       Bytes.parse_string.aux(b_tail, concat_s(parsed)) // String.fromCharCode(c)
     else if U16.lte(s_temp, 0x10ffff) then// c <= 0x10ffff
       let aux = U16.sub(s_temp, 0x10000)
       let a = Char.to_string(U16.or(U16.shr(s_temp, 10),  0xd800)) // String.fromCharCode(c >> 10 | 0xd800)
       let b = Char.to_string(U16.or(U16.and(s_temp, 0x3FF), 0xdc00)) // String.fromCharCode(c & 0x3FF | 0xdc00)
       let parsed = a | b
-      log("c ltn 0x10ffff: " | parsed)
+      // log("c ltn 0x10ffff: " | parsed)
       Bytes.parse_string.aux(b_tail, concat_s(parsed))
-    else
-      log("else case")
-      ""
-
+    else ""
   }
-
-  // }
-
-
 
 // Auxiliar to parse chunks bigger than 1 byte
 Bytes.parse_string.gtn_one_byte(c: U16, fst: U16): Maybe(U16)
   let two_bytes   = Bool.and(U16.gtn(c, 191), U16.ltn(c, 224)) // (c > 191 && c < 224)
   let three_bytes = Bool.and(U16.gtn(c, 223), U16.ltn(c, 240)) // (c > 223 && c < 240)
   let four_bytes  = Bool.and(U16.gtn(c, 239), U16.ltn(c, 248)) // (c > 239 && c < 248)
-  log(" > gtn_one_byte c: " | U16.show(c))
   if two_bytes then 
     let l = U16.shl(U16.and(c, 31), 6) // (c & 31) << 6 
     let r = U16.and(fst, 63) // bytes[i++] & 63
     let res = U16.or(l, r)
-    log("2b: " | U16.show(res))
     Maybe.some!(res) // l | r 
   else if three_bytes then 
     let l = U16.shl(U16.and(c, 15), 12) // (c & 15) << 12 
     let m = U16.shl(U16.and(fst, 63), 6) // (bytes[i++] & 63) << 6
     let r = U16.and(fst, 63) // bytes[i++] & 63
     let res = U16.or(l, U16.or(m, r))
-    log("3b: " | U16.show(res))
     Maybe.some!(res) // l | m | r;
   else if four_bytes then
     let l  = U16.shl(U16.and(c, 7), 18) // (c & 7) << 18
@@ -90,6 +83,5 @@ Bytes.parse_string.gtn_one_byte(c: U16, fst: U16): Maybe(U16)
     let m1 = U16.shl(U16.and(fst, 63), 6) // (bytes[i++] & 63) << 6
     let r  = U16.and(fst, 63) // bytes[i++] & 63 
     let res = U16.or(U16.or(l, m0), U16.or(m1, r))
-    log("4b: " | U16.show(res))
     Maybe.some!(res) // l | m0 | m1 | r
-  else Maybe.none! // UTF-8 decode: unknown multibyte
+  else Maybe.none! // UTF-8 decode: unknown multibyte or auxiliary to parse symbols
