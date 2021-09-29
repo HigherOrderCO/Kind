@@ -1,18 +1,24 @@
+// TODO: limitar pra 6 jogadores
+// TODO: custo inicial = 0
+// TODO: mostrar times
+
 // App states (local = clicks, global = visitors)
 App.HotS.State: App.State
-  App.State.new(String, App.HotS.State.Global)
+  App.State.new(App.HotS.State.Local, App.HotS.State.Global)
 
 // Initial state
 App.HotS.init: App.Init<App.HotS.State>
   let bids = {} :: Map<App.HotS.Bid>
-  let cash = {
-    "toph": 25
-    "arluki": 25
-    "derenash": 25
-    "gunnar": 25
-    "katson": 25
-  } :: Map<Nat>
-  App.Store.new<App.HotS.State>("", App.HotS.State.Global.new(bids, cash))
+  let cash = {} :: Map<Nat>
+  App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "", ""), App.HotS.State.Global.new(bids, cash))
+
+type App.HotS.State.Local {
+  new(
+    joined: Bool
+    room: String
+    team: String
+  )
+}
 
 type App.HotS.State.Global {
   new(
@@ -43,128 +49,148 @@ type App.HotS.Action {
 
 App.HotS.players: Map<App.HotS.Player>
   {
-    "Adones": App.HotS.Player.new("sla")
-    "AnneO": App.HotS.Player.new("sla")
-    "Arluki": App.HotS.Player.new("sla")
-    "ChampofHorde": App.HotS.Player.new("sla")
-    "Crono": App.HotS.Player.new("sla")
-    "Dashblue": App.HotS.Player.new("sla")
-    "Derenash": App.HotS.Player.new("sla")
-    "Drau": App.HotS.Player.new("sla")
-    "Dugalle": App.HotS.Player.new("sla")
-    "Entropy": App.HotS.Player.new("sla")
-    "Escondidinho": App.HotS.Player.new("sla")
-    "Exorr": App.HotS.Player.new("sla")
-    "FFJujubaKid": App.HotS.Player.new("sla")
-    "Focofi": App.HotS.Player.new("sla")
-    "GiantAxe": App.HotS.Player.new("sla")
-    "Goddan": App.HotS.Player.new("sla")
-    "Josuecs": App.HotS.Player.new("sla")
-    "Juzehlito": App.HotS.Player.new("sla")
-    "Katson": App.HotS.Player.new("sla")
-    "KchoXs": App.HotS.Player.new("sla")
-    "Korhal": App.HotS.Player.new("sla")
-    "Kristrex": App.HotS.Player.new("sla")
-    "MacSF": App.HotS.Player.new("sla")
-    "MatadorFivee": App.HotS.Player.new("sla")
-    "Monthoros": App.HotS.Player.new("sla")
-    "Moonlight": App.HotS.Player.new("sla")
-    "Motta": App.HotS.Player.new("sla")
-    "MrNewVegas": App.HotS.Player.new("sla")
-    "Patoshin": App.HotS.Player.new("sla")
-    "Pitchulinha": App.HotS.Player.new("sla")
-    "Player": App.HotS.Player.new("sla")
-    "Predator": App.HotS.Player.new("sla")
-    "Psycho": App.HotS.Player.new("sla")
-    "RamonBR": App.HotS.Player.new("sla")
-    "Rooxyz": App.HotS.Player.new("sla")
-    "Simon": App.HotS.Player.new("sla")
-    "Sipher": App.HotS.Player.new("sla")
-    "SpyGames": App.HotS.Player.new("sla")
-    "Talicwolf": App.HotS.Player.new("sla")
-    "Thunder": App.HotS.Player.new("sla")
-    "Zaryanova": App.HotS.Player.new("sla")
-    "Zuiurac": App.HotS.Player.new("sla")
+    "Adones": App.HotS.Player.new("?")
+    "AnneO": App.HotS.Player.new("?")
+    "Arluki": App.HotS.Player.new("?")
+    "ChampofHorde": App.HotS.Player.new("?")
+    "Crono": App.HotS.Player.new("?")
+    "Dashblue": App.HotS.Player.new("?")
+    "Derenash": App.HotS.Player.new("?")
+    "Drau": App.HotS.Player.new("?")
+    "Dugalle": App.HotS.Player.new("?")
+    "Entropy": App.HotS.Player.new("?")
+    "Escondidinho": App.HotS.Player.new("?")
+    "Exorr": App.HotS.Player.new("?")
+    "FFJujubaKid": App.HotS.Player.new("?")
+    "Focofi": App.HotS.Player.new("?")
+    "GiantAxe": App.HotS.Player.new("?")
+    "Goddan": App.HotS.Player.new("?")
+    "Josuecs": App.HotS.Player.new("?")
+    "Juzehlito": App.HotS.Player.new("?")
+    "Katson": App.HotS.Player.new("?")
+    "KchoXs": App.HotS.Player.new("?")
+    "Korhal": App.HotS.Player.new("?")
+    "Kristrex": App.HotS.Player.new("?")
+    "MacSF": App.HotS.Player.new("?")
+    "Malvadah": App.HotS.Player.new("?")
+    "MatadorFivee": App.HotS.Player.new("?")
+    "Monthoros": App.HotS.Player.new("?")
+    "Moonlight": App.HotS.Player.new("?")
+    "Motta": App.HotS.Player.new("?")
+    "MrNewVegas": App.HotS.Player.new("?")
+    "Patoshin": App.HotS.Player.new("?")
+    "Pitchulinha": App.HotS.Player.new("?")
+    "Player": App.HotS.Player.new("?")
+    "Predator": App.HotS.Player.new("?")
+    "Psycho": App.HotS.Player.new("?")
+    "RamonBR": App.HotS.Player.new("?")
+    "Rooxyz": App.HotS.Player.new("?")
+    "Simon": App.HotS.Player.new("?")
+    "Sipher": App.HotS.Player.new("?")
+    "SpyGames": App.HotS.Player.new("?")
+    "Talicwolf": App.HotS.Player.new("?")
+    "Thunder": App.HotS.Player.new("?")
+    "Zaryanova": App.HotS.Player.new("?")
+    "Zuiurac": App.HotS.Player.new("?")
   }
-
-
-
-
-
-
-
-
-
-
-
 
 // Render function
 App.HotS.draw: App.Draw<App.HotS.State>
   (state)
   open state
   open state.global
+  open state.local
   let bids = state.global.bids
   let cash = state.global.cash
-  let team = state.local
-  <div>
+  let team = state.local.team
+  let joined = state.local.joined
+  if Bool.not(joined) then
     <div>
-      "Team: "
-      <input id="YourTeam"></input>
+      <div>
+        "Room: "
+        <input id="_room_"></input>
+        " "
+        <button id="_enter_">"Enter"</button>
+      </div>
+      <div>
+        "Digite a sala para entrar, ou um nome qualquer para criar uma nova."
+      </div>
     </div>
+  else
     <div>
-      "Cash: " | Nat.show(cash{team} <> 0)
-    </div>
-    <table>
-      <tr style={"font-weight": "bold"}>
-        <td style={"width": "100px"}>"Player"</td>
-        <td style={"width": "100px"}>"Rank"</td>
-        <td style={"width": "100px"}>"Value"</td>
-        <td style={"width": "100px"}>"Team"</td>
-        <td style={"width": "100px"}>"Buy"</td>
-      </tr>
-      for entry in Map.to_list!(App.HotS.players): 
-        let {name, player} = entry
-        open player
-        use bid = bids{name} <> App.HotS.Bid.new(0, "none") 
-        <tr>
-          <td>name</td>
-          <td>player.rank</td>
-          <td>Nat.show(bid.value)</td>
-          <td>bid.team</td>
-          <td id=name style={"cursor": "pointer"}>"[buy]"</td>
+      <div>
+        "Team:"
+        " "
+        <input id="_team_"></input>
+      </div>
+      <div>
+        "Cash: " | Nat.show(cash{team} <> 0)
+      </div>
+      <table style={"border-spacing":"0","border-collapse":"collapse"}>
+        <tr style={"font-weight": "bold"}>
+          {App.HotS.draw.cell(<span>"Player"</span>)}
+          {App.HotS.draw.cell(<span>"Role"</span>)}
+          {App.HotS.draw.cell(<span>"Value"</span>)}
+          {App.HotS.draw.cell(<span>"Team"</span>)}
+          {App.HotS.draw.cell(<span>"Buy"</span>)}
         </tr>
-    </table>
-  </div>
+        for entry in Map.to_list!(App.HotS.players): 
+          let {name, player} = entry
+          open player
+          use bid = bids{name} <> App.HotS.Bid.new(0, "none") 
+          <tr>
+            {App.HotS.draw.cell(<span>name</span>)}
+            {App.HotS.draw.cell(<span>player.rank</span>)}
+            {App.HotS.draw.cell(<span>Nat.show(bid.value)</span>)}
+            {App.HotS.draw.cell(<span>bid.team</span>)}
+            {App.HotS.draw.cell(<button id=name style={"cursor":"pointer"}>"buy"</button>)}
+          </tr>
+      </table>
+    </div>
 
-App.HotS.room: String
-  "e3ba48bd5379e903"
+App.HotS.draw.cell(child: DOM): DOM
+  <td style={"padding": "4px", "border": "1px solid gray"}>{child}</td>
+  
 
 // Event handler
 App.HotS.when: App.When<App.HotS.State>
   (event, state)
-  let team = state@local
+  open state
+  use local = state.local
+  let team = local.team
+  let room = local.room
   case event {
-    init: IO {
-      App.watch!(App.HotS.room)
-      App.new_post!(App.HotS.room, "")
-    }
     input: IO {
-      App.set_local!(event.text)
+      switch String.eql(event.id) {
+        "_team_": IO {
+          App.set_local<App.HotS.State>(local@team <- event.text)
+        }
+        "_room_": IO {
+          App.set_local<App.HotS.State>(local@room <- event.text)
+        }
+      } default App.pass!
     }
     mouse_click: IO {
-      log(event.id)
-      let has_player = case App.HotS.players{event.id} as got { none: false, some: true }
-      let has_team = case state@global@cash{team} as got { none: false, some: true }
-      if has_player && has_team then IO {
-        //IO.print("clicked: " | event.id)
-        let action = App.HotS.Action.buy(team, event.id)
-        let serial = Bits.hex.encode(Serializer.run!(App.HotS.Action.serializer, action))
-        let serial = if Nat.mod(String.length(serial),2) =? 0 then serial else serial | "0"
-        //log("sent-action:" | action@team | " <- " | action@player)
-        //log("sent-serial:" | serial)
-        App.new_post!(App.HotS.room, serial)
-        App.pass!
-      } else App.pass!
+      if String.eql(event.id,"_enter_") then IO {
+        App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
+        App.set_local<App.HotS.State>(local@joined <- true)
+      } else
+        //log(event.id)
+        log("A")
+        let player = event.id
+        let has_player = Bool.not(String.is_empty(player))
+        let has_team = Bool.not(String.is_empty(team))
+        if has_player && has_team then IO {
+          log("B")
+          //IO.print("clicked: " | event.id)
+          let action = App.HotS.Action.buy(team, player)
+          let serial = Bits.hex.encode(Serializer.run!(App.HotS.Action.serializer, action))
+          let serial = if Nat.mod(String.length(serial),2) =? 0 then serial else serial | "0"
+          log("sent-action: " | action@team | " <- " | action@player)
+          log("sent-serial:" | String.take(16,Crypto.Keccak.hash("0"|room)) | " " | serial)
+          App.new_post!(String.take(16,Crypto.Keccak.hash("0"|room)), serial)
+          App.pass!
+        } else App.pass!
     }
   } default App.pass!
 
@@ -180,16 +206,23 @@ App.HotS.post: App.Post<App.HotS.State>
   let post = Deserializer.run!(App.HotS.Action.deserializer, Bits.hex.decode(data)) abort global
   case post {
     buy:
-      log(post.team | " purchased " | post.player)
+      let initial_cash = 25
       let player_value = (case global.bids{post.player} as bid { none: 0, some: bid.value@value })
       let last_team = (case global.bids{post.player} as bid { none: "", some: bid.value@team })
-      let team_cash = global.cash{post.team} <> 0
-      log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
-      if team_cash >? player_value then
+      let team_cash = global.cash{post.team} <> initial_cash
+      let team_size = List.count!((x) String.eql(x@team,post.team), Map.values!(global.bids))
+      let rebuy = (case global.bids{post.player} as bid { none: false, some: String.eql(bid.value@team,post.team) })
+      let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 6)
+      //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
+      if can_buy then
+        log(post.team | " purchased " | post.player)
         let bids = global.bids{post.player} <- App.HotS.Bid.new(player_value + 1, post.team)
         let cash = global.cash
-        let cash = cash{post.team} <- team_cash - (player_value + 1)
-        let cash = cash{last_team} <- (cash{last_team} <> 0) + player_value
+        let cash = case global.bids{post.player} as bid {
+          none: cash
+          some: cash{bid.value@team} <- (cash{bid.value@team} <> initial_cash) + (player_value - 1)
+        }
+        let cash = cash{post.team} <- (cash{post.team} <> initial_cash) - player_value
         App.HotS.State.Global.new(bids, cash)
       else
         global
