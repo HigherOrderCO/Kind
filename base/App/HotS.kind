@@ -176,18 +176,18 @@ App.HotS.when: App.When<App.HotS.State>
         App.set_local<App.HotS.State>(local@joined <- true)
       } else
         //log(event.id)
-        log("A")
+        //log("A")
         let player = event.id
         let has_player = Bool.not(String.is_empty(player))
         let has_team = Bool.not(String.is_empty(team))
         if has_player && has_team then IO {
-          log("B")
+          //log("B")
           //IO.print("clicked: " | event.id)
           let action = App.HotS.Action.buy(team, player)
           let serial = Bits.hex.encode(Serializer.run!(App.HotS.Action.serializer, action))
           let serial = if Nat.mod(String.length(serial),2) =? 0 then serial else serial | "0"
-          log("sent-action: " | action@team | " <- " | action@player)
-          log("sent-serial:" | String.take(16,Crypto.Keccak.hash("0"|room)) | " " | serial)
+          //log("sent-action: " | action@team | " <- " | action@player)
+          //log("sent-serial:" | String.take(16,Crypto.Keccak.hash("0"|room)) | " " | serial)
           App.new_post!(String.take(16,Crypto.Keccak.hash("0"|room)), serial)
           App.pass!
         } else App.pass!
