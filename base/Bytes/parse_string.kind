@@ -1,12 +1,12 @@
 // 28 Sep 21
 // Author: Maisa Milena
-// FIX:
+// FIXME:
 // - parse characters using 3 and 4 bytes
 // - deal with parse error
 // Hint: check the test cases in Bytes/test/parse_string.kind
 // and add more tests
 
-// Parse bytes into a decoded String
+// Decode a UTF8 data into a String
 Bytes.parse_string(b: Bytes): String
   Bytes.parse_string.aux(b, "")
 
@@ -85,3 +85,7 @@ Bytes.parse_string.gtn_one_byte(c: U16, fst: U16): Maybe(U16)
     let res = U16.or(U16.or(l, m0), U16.or(m1, r))
     Maybe.some!(res) // l | m0 | m1 | r
   else Maybe.none! // UTF-8 decode: unknown multibyte or auxiliary to parse symbols
+
+// Reference: 
+// - https://gist.github.com/pascaldekloe/62546103a1576803dade9269ccf76330
+// - 

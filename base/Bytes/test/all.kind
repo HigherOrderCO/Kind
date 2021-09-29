@@ -1,12 +1,11 @@
 Bytes.test.all: _
   TestSuite.many("Bytes", 
     [ 
-      // Bytes.test.from_nat
-      // Bytes.test.length
-      // Bytes.test.slice
-      // Bytes.test.to_nat
-      // Bytes.test.from_string
-      // Bytes.test.to_string
+      Bytes.test.from_nat
+      Bytes.test.length
+      Bytes.test.slice
+      Bytes.test.to_nat
+      Bytes.test.from_string
       Bytes.test.parse_string
     ]
   )
@@ -14,7 +13,6 @@ Bytes.test.all: _
 // Print all tests
 Bytes.test.all.show: _
   log(TestSuite.show(Bytes.test.all, 0))
-  // log(String.drop(2, "abcd"))
   0
   
 
