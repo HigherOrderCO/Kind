@@ -233,6 +233,8 @@ Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.C
       none
     data:
       List.ifind!((i,f) String.eql(f@name,name), type.constructors)
+    effect:
+      _ // TODO
   }
 
 //
@@ -341,6 +343,8 @@ Lit.Core.World.check.term(
       let val0 = Lit.Core.World.check.term(context, term.val0, Lit.Core.Type.word)
       let val1 = Lit.Core.World.check.term(context, term.val1, Lit.Core.Type.word)
       val0 && val1
+    return:
+      _ // TODO
   }
   //log("\n")
   result
@@ -470,6 +474,8 @@ Lit.Core.World.run.statement(
                   else
                     log("error: cannot redefine built-in type named 'U64'") none
               } default log("error: type redefinition: " | type.name) none
+            effect:
+              _ // TODO
           }
         bond:
           use func = statement.entry.value
@@ -587,6 +593,8 @@ Lit.Core.World.run.term(
       log("bind!") // DEBUG
       let gas = gas + Lit.Core.Costs.default@bind
       Lit.Core.World.run.term.bind(world, vars, term.name, term.main, term.cont, gas)
+    return:
+      _ // TODO
   }
 
 Lit.Core.World.run.terms(
@@ -819,6 +827,8 @@ Lit.Core.run.term.check_sanity(term: Lit.Core.Term): Bool
     bind:
       Lit.Core.run.term.check_sanity(term.main)
         && Lit.Core.run.term.check_sanity(term.cont)
+    return:
+      _ // TODO
   }
 
 // Serialization
