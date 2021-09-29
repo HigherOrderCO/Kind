@@ -52,7 +52,9 @@ type Lit.Core.Term {
   )
   // The monadic effect binder
   bind(
-    effe: Lit.Core.Effect
+    name: Maybe<String>
+    otype: Lit.Core.Type
+    effect: Lit.Core.Effect
     cont: Lit.Core.Term
   )
   // The monadic effect return
@@ -69,10 +71,8 @@ type Lit.Core.Effect {
   )
   // Calls an external program
   call(
-    name: String
     func: String
     args: List<Lit.Core.Term>
-    cont: Lit.Core.Term
   )
   // Gets the name of the nth caller
   get_caller(
@@ -267,7 +267,7 @@ Lit.Core.Check.Context.add_var(
   let new_variables = context.variables{name} <- type
   Lit.Core.Check.Context.new(context.world, context.caller, new_variables)
 
-Lit.Core.World.check.term(
+Lit.Core.check.term(
   context: Lit.Core.Check.Context
   term: Lit.Core.Term
   type: Lit.Core.Type
@@ -297,7 +297,7 @@ Lit.Core.World.check.term(
       use otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
       let args = Lit.Core.World.check.many(context, term.args, func.input_types)
       let context_new = Lit.Core.Check.Context.add_var(context, term.name, otyp)
-      let cont = Lit.Core.World.check.term(context_new, term.cont, type)
+      let cont = Lit.Core.check.term(context_new, term.cont, type)
       ownr && args && cont
     match:
       //log("-- match ")  // DEBUG
@@ -306,22 +306,24 @@ Lit.Core.World.check.term(
 
       case expr_type {
         data:
-          let expr = Lit.Core.World.check.term(context, term.expr, expr_type)
+          let expr = Lit.Core.check.term(context, term.expr, expr_type)
           let cses = List.mapped!(term.cses)!((x) x@body)
           let cses = Lit.Core.World.check.match.cases(context, cses, type, expr_type.constructors, term.name)
           expr && cses
       } default false
+    // bind:
+    //   // log("-- bind ")  // DEBUG
+    //   // TODO: check access
+    //   let owner_ok = Lit.Core.World.check.owner(context, term.name)
+    //   use func = Lit.Core.World.get_func(term.name, context@world) abort false
+    //   use out_type = Lit.Core.World.get_type(func.output_type, context@world) abort false
+    //   let nofn_ok = List.is_empty!(func.input_names)  // TODO: should we allow binds with functions?
+    //   let main_ok = Lit.Core.check.term(context, term.main, out_type)
+    //   // should the ctx change?
+    //   let cont_ok = Lit.Core.check.term(context, term.cont, type)
+    //   owner_ok && nofn_ok && main_ok && cont_ok
     bind:
-      // log("-- bind ")  // DEBUG
-      // TODO: check access
-      let owner_ok = Lit.Core.World.check.owner(context, term.name)
-      use func = Lit.Core.World.get_func(term.name, context@world) abort false
-      use out_type = Lit.Core.World.get_type(func.output_type, context@world) abort false
-      let nofn_ok = List.is_empty!(func.input_names)  // TODO: should we allow binds with functions?
-      let main_ok = Lit.Core.World.check.term(context, term.main, out_type)
-      // should the ctx change?
-      let cont_ok = Lit.Core.World.check.term(context, term.cont, type)
-      owner_ok && nofn_ok && main_ok && cont_ok
+      _  // TODO
     word:
       // log("-- word ")  // DEBUG
       case type {
@@ -332,22 +334,46 @@ Lit.Core.World.check.term(
         false
     compare:
       //log("-- compare ")  // DEBUG
-      let val0 = Lit.Core.World.check.term(context, term.val0, Lit.Core.Type.word)
-      let val1 = Lit.Core.World.check.term(context, term.val0, Lit.Core.Type.word)
-      let iflt = Lit.Core.World.check.term(context, term.iflt, type)
-      let ifeq = Lit.Core.World.check.term(context, term.ifeq, type)
-      let ifgt = Lit.Core.World.check.term(context, term.ifgt, type)
+      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+      let val1 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+      let iflt = Lit.Core.check.term(context, term.iflt, type)
+      let ifeq = Lit.Core.check.term(context, term.ifeq, type)
+      let ifgt = Lit.Core.check.term(context, term.ifgt, type)
       val0 && val1 && iflt && ifeq && ifgt
     operate:
       //log("-- operate ")  // DEBUG
-      let val0 = Lit.Core.World.check.term(context, term.val0, Lit.Core.Type.word)
-      let val1 = Lit.Core.World.check.term(context, term.val1, Lit.Core.Type.word)
+      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+      let val1 = Lit.Core.check.term(context, term.val1, Lit.Core.Type.word)
       val0 && val1
     return:
       _ // TODO
   }
   //log("\n")
   result
+
+Lit.Core.check.effect(
+  context: Lit.Core.Check.Context
+  type: Lit.Core.Type
+  effect: Lit.Core.Effect
+): Bool
+  case effect {
+    define:
+      _ // TODO
+    call:
+      _ // TODO
+    get_caller:
+      _ // TODO
+    get_call_code:
+      _ // TODO
+    get_call_size:
+      _ // TODO
+    get_block_miner:
+      _ // TODO
+    get_block_nonce:
+      _ // TODO
+    get_block_number:
+      _ // TODO
+  }
 
 Lit.Core.World.check.many(
   context: Lit.Core.Check.Context,
@@ -357,7 +383,7 @@ Lit.Core.World.check.many(
   case terms types {
     cons cons:
       let type = Lit.Core.World.get_type(types.head, context@world) abort false
-      let head = Lit.Core.World.check.term(context, terms.head, type)
+      let head = Lit.Core.check.term(context, terms.head, type)
       let tail = Lit.Core.World.check.many(context, terms.tail, types.tail)
       head && tail
     nil nil:
@@ -386,7 +412,7 @@ Lit.Core.World.check.match.cases(
         context.caller
         ext_variables
       )
-      let case_ok = Lit.Core.World.check.term(new_context, cases.head, type)
+      let case_ok = Lit.Core.check.term(new_context, cases.head, type)
       let rest_ok = Lit.Core.World.check.match.cases(new_context, cases.tail, type, ctors.tail, name)
       case_ok && rest_ok
     nil nil:
@@ -507,7 +533,7 @@ Lit.Core.World.run.statement(
                       some(func.name)
                       ctx.value
                     )
-                  let term_ok = Lit.Core.World.check.term(
+                  let term_ok = Lit.Core.check.term(
                       new_context
                       func.main
                       otyp
@@ -527,23 +553,23 @@ Lit.Core.World.run.statement(
       // duplicating the typechecking function.
       let call_type = Lit.Core.Type.word
       let context = Lit.Core.Check.Context.from_world(world)
-      let term_ok = Lit.Core.World.check.term(context, exec_term, call_type)
+      let term_ok = Lit.Core.check.term(context, exec_term, call_type)
       if term_ok then
         use ctx =
           Lit.Core.World.run.term(exec_term, world, {}, 0) // TODO
-        log("- ext_exec: "
-          | Lit.Lang.show.term(ctx.term, world)
-          | " (gas:\n"
-          | let ops = List.reverse!(["var", "create", "match", "match_substitution", "word", "compare", "operate", "call", "bind"])
-            let str = String.pad_left(TempWidth*9, '0', Nat.show(ctx.gas))
-            let str_list = List.zip!!(ops, String.chunks_of(TempWidth, str))
-            let fin = ""
-            for os in str_list with fin:
-              let {op, s} = os
-              fin | "  " | op | ": " | s | "\n"
-            fin
-          | ")"
-        )
+        // log("- ext_exec: "  // DEBUG
+        //   | Lit.Lang.show.term(ctx.term, world)
+        //   | " (gas:\n"
+        //   | let ops = List.reverse!(["var", "create", "match", "match_substitution", "word", "compare", "operate", "call", "bind"])
+        //     let str = String.pad_left(TempWidth*9, '0', Nat.show(ctx.gas))
+        //     let str_list = List.zip!!(ops, String.chunks_of(TempWidth, str))
+        //     let fin = ""
+        //     for os in str_list with fin:
+        //       let {op, s} = os
+        //       fin | "  " | op | ": " | s | "\n"
+        //     fin
+        //   | ")"
+        // )
         some(ctx.world)
       else
         log("error: exec failed in typecheck") none
@@ -589,12 +615,14 @@ Lit.Core.World.run.term(
       log("call!") // DEBUG
       let gas = gas + Lit.Core.Costs.default@call
       Lit.Core.World.run.term.call(world, vars, term.name, term.func, term.args, term.cont, gas)
+    // bind:
+    //   log("bind!") // DEBUG
+    //   let gas = gas + Lit.Core.Costs.default@bind
+    //   Lit.Core.World.run.term.bind(world, vars, term.name, term.main, term.cont, gas)
     bind:
-      log("bind!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@bind
-      Lit.Core.World.run.term.bind(world, vars, term.name, term.main, term.cont, gas)
+      _  // TODO
     return:
-      _ // TODO
+      _  // TODO
   }
 
 Lit.Core.World.run.terms(
@@ -622,7 +650,8 @@ Lit.Core.World.run.term.call(
 ): Lit.Core.run.Context
   case world{func} as got {
     none:
-      {Lit.Core.Term.call(name, func, args, cont), world, gas}
+      // {Lit.Core.Term.call(name, func, args, cont), world, gas}
+      _   // TODO
     some:
       case got.value as entry {
         bond:
@@ -651,7 +680,8 @@ Lit.Core.World.run.term.call(
           let vars = vars{name} <- ctx.term
           Lit.Core.World.run.term(cont, ctx.world, vars, ctx.gas)
       } default
-        {Lit.Core.Term.call(name, func, args, cont), world, gas}
+        // {Lit.Core.Term.call(name, func, args, cont), world, gas}
+        _ // TODO
   }
 
 Lit.Core.World.run.term.compare(
@@ -767,28 +797,35 @@ Lit.Core.World.run.term.operate(
     log("error: operand didn't reduce to word")
     {Lit.Core.Term.operate(oper, val0, val1), world, gas}
 
-Lit.Core.World.run.term.bind(
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
-  name: String
-  main: Lit.Core.Term
+// Lit.Core.World.run.term.bind(
+//   world: Lit.Core.World
+//   vars: Map<Lit.Core.Term>
+//   name: String
+//   main: Lit.Core.Term
+//   cont: Lit.Core.Term
+//   gas: Nat
+// ): Lit.Core.run.Context
+//   case world{name} as got {
+//     none:
+//       {Lit.Core.Term.bind(name, main, cont), world, gas}
+//     some:
+//       case got.value as entry {
+//         bond:
+//           // TODO calculate gas based upon size of bound term?
+//           use func = entry.value
+//           use ctx = Lit.Core.World.run.term(main, world, vars, gas)
+//           let world = ctx.world{name} <- Lit.Core.Entry.bond(func@main <- ctx.term)
+//           Lit.Core.World.run.term(cont, world, vars, ctx.gas)
+//       } default
+//         {Lit.Core.Term.bind(name, main, cont), world, gas}
+//   }
+
+Lit.Core.run.term.bind(
+  context: Lit.Core.run.Context
+  effect: Lit.Core.Effect
   cont: Lit.Core.Term
-  gas: Nat
 ): Lit.Core.run.Context
-  case world{name} as got {
-    none:
-      {Lit.Core.Term.bind(name, main, cont), world, gas}
-    some:
-      case got.value as entry {
-        bond:
-          // TODO calculate gas based upon size of bound term?
-          use func = entry.value
-          use ctx = Lit.Core.World.run.term(main, world, vars, gas)
-          let world = ctx.world{name} <- Lit.Core.Entry.bond(func@main <- ctx.term)
-          Lit.Core.World.run.term(cont, world, vars, ctx.gas)
-      } default
-        {Lit.Core.Term.bind(name, main, cont), world, gas}
-  }
+  _
 
 // TODO: I think we can actually remove this, I believe we're safe
 Lit.Core.run.term.check_sanity(term: Lit.Core.Term): Bool
@@ -825,8 +862,9 @@ Lit.Core.run.term.check_sanity(term: Lit.Core.Term): Bool
         valid && Lit.Core.run.term.check_sanity(arg)
       valid && Lit.Core.run.term.check_sanity(term.cont)
     bind:
-      Lit.Core.run.term.check_sanity(term.main)
-        && Lit.Core.run.term.check_sanity(term.cont)
+      // Lit.Core.run.term.check_sanity(term.main)
+      //   && Lit.Core.run.term.check_sanity(term.cont)
+      _ // TODO
     return:
       _ // TODO
   }
@@ -887,102 +925,102 @@ Lit.Bits.serialize.name.go(size: Nat, name: String): Bits
 // Tests
 // -----
 
-Lit.Core: _
-  let world = {}
+// Lit.Core: _
+//   let world = {}
 
-  let code = ""
+//   let code = ""
 
-  let code = code |
-    Lit.Lang.Type
-    | Lit.Lang.Cmp
-    | Lit.Lang.Nat
-    | Lit.Lang.Bits
-    | Lit.Lang.BitsMap
-    | Lit.Lang.Voting
-    //| Lit.Lang.Test
+//   let code = code |
+//     Lit.Lang.Type
+//     | Lit.Lang.Cmp
+//     | Lit.Lang.Nat
+//     | Lit.Lang.Bits
+//     | Lit.Lang.BitsMap
+//     | Lit.Lang.Voting
+//     //| Lit.Lang.Test
 
-//  let code = code |
-//  `
-//    GiveUnit(): Unit
-//      Unit/new
-//
-//    TakeUnit(x: Unit): U64
-//      42
-//
-//    do {
-//      call a1 = GiveUnit()
-//      call a2 = GiveUnit()
-//      call b = TakeUnit(a1)
-//      call c = TakeUnit(a2)
-//      (+ b c)
-//    }
-//  `
+// //  let code = code |
+// //  `
+// //    GiveUnit(): Unit
+// //      Unit/new
+// //
+// //    TakeUnit(x: Unit): U64
+// //      42
+// //
+// //    do {
+// //      call a1 = GiveUnit()
+// //      call a2 = GiveUnit()
+// //      call b = TakeUnit(a1)
+// //      call c = TakeUnit(a2)
+// //      (+ b c)
+// //    }
+// //  `
 
-   let code = code |
-   `
-//  type Lit.Core.Costs {
-//    new(
-//      var: Nat
-//      create: Nat
-//      match: Nat
-//      match_substitution: Nat
-//      word: Nat
-//      compare: Nat
-//      operate: Nat
-//      call: Nat
-//      bind: Nat
-//    )
-//  }
+//    let code = code |
+//    `
+// //  type Lit.Core.Costs {
+// //    new(
+// //      var: Nat
+// //      create: Nat
+// //      match: Nat
+// //      match_substitution: Nat
+// //      word: Nat
+// //      compare: Nat
+// //      operate: Nat
+// //      call: Nat
+// //      bind: Nat
+// //    )
+// //  }
     
-    candidates(): Candidates
-      Candidates/cons{
-        count: Nat/zero, tail: Candidates/cons{
-          count: Nat/zero, tail: Candidates/cons{
-            count: Nat/zero, tail: Candidates/nil }}}
+//     candidates(): Candidates
+//       Candidates/cons{
+//         count: Nat/zero, tail: Candidates/cons{
+//           count: Nat/zero, tail: Candidates/cons{
+//             count: Nat/zero, tail: Candidates/nil }}}
     
-    key1(): Bits
-      Bits/o{pred: Bits/e}
+//     key1(): Bits
+//       Bits/o{pred: Bits/e}
     
-    key2(): Bits
-      Bits/i{pred: Bits/e}
+//     key2(): Bits
+//       Bits/i{pred: Bits/e}
 
-    do {
-      call cand  = candidates()
-      call joao  = key1()
-      call maria = key2()
+//     do {
+//       call cand  = candidates()
+//       call joao  = key1()
+//       call maria = key2()
       
-      call m     = VotingMap.add(VotingMap/new, joao)
-      call new_m = VotingMap.add(m, maria)
+//       call m     = VotingMap.add(VotingMap/new, joao)
+//       call new_m = VotingMap.add(m, maria)
 
-      call new_m = VotingMap.allow_vote(new_m, joao)
-      call new_m = VotingMap.allow_vote(new_m, maria)
+//       call new_m = VotingMap.allow_vote(new_m, joao)
+//       call new_m = VotingMap.allow_vote(new_m, maria)
 
-      call result = VotingMap.vote(new_m, joao, Nat/succ{pred: Nat/zero}, cand)
-      case result : VoteResult {
-        new:
-          call new_result = VotingMap.vote(result.map, maria, Nat/zero, result.candidates)
-          case new_result : VoteResult {
-            new:
-              call winner = Candidates.get_winner(new_result.candidates)
-              0
-          }
-      }
-    }
-   `
+//       call result = VotingMap.vote(new_m, joao, Nat/succ{pred: Nat/zero}, cand)
+//       case result : VoteResult {
+//         new:
+//           call new_result = VotingMap.vote(result.map, maria, Nat/zero, result.candidates)
+//           case new_result : VoteResult {
+//             new:
+//               call winner = Candidates.get_winner(new_result.candidates)
+//               0
+//           }
+//       }
+//     }
+//    `
 
-  let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
+//   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
 
-  log("PARSED:")   // DEBUG
-  log(Lit.Lang.show.page(page, world))   // DEBUG
+//   log("PARSED:")   // DEBUG
+//   log(Lit.Lang.show.page(page, world))   // DEBUG
 
-  case Lit.Core.World.run.page(page, world) as result {
-    none:
-      IO.print("FAILURE")
-    some:
-      IO {
-        // log("PAGE:")  // DEBUG
-        // let new_world = result.value  // DEBUG
-        // log(Lit.Lang.show.page(page, new_world))  // DEBUG
-        IO.print("SUCCESS")
-      }
-  }
+//   case Lit.Core.World.run.page(page, world) as result {
+//     none:
+//       IO.print("FAILURE")
+//     some:
+//       IO {
+//         // log("PAGE:")  // DEBUG
+//         // let new_world = result.value  // DEBUG
+//         // log(Lit.Lang.show.page(page, new_world))  // DEBUG
+//         IO.print("SUCCESS")
+//       }
+//   }
