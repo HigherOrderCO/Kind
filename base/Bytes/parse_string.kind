@@ -1,11 +1,3 @@
-  // ===========================
-    // TODO: 12/09
-    // problema: o que está acontecendo no código do bytes.js nesse trecho de código?
-    // - por que nada muda no "s"? 
-    // - qual é o impacto das modificações em "c" feitas pelo "gtn_one_byte"
-    // - qual é o retorno desse trecho aqui no código?
-    // - esse trecho de código é um caso de if...else? 
-
   // UPD: 15/09
   // - os bytes são 
   //   1. transformados (verificado se são maiores que 127) 
@@ -15,8 +7,7 @@ Bytes.parse_string.testt: _
   Bytes.parse_string("0x30313233343536373839")
 
 Bytes.parse_string(b: Bytes): String
-  let rmv_start = Bytes.drop(2, b) // removes 0x from the beginning
-  Bytes.parse_string.aux(rmv_start, "")
+  Bytes.parse_string.aux(b, "")
 
 Bytes.parse_string.take_bytes_pair(b: Bytes): Pair(Bytes, Maybe(Bytes))
   let fst = Bytes.take(2, b)
@@ -26,7 +17,7 @@ Bytes.parse_string.take_bytes_pair(b: Bytes): Pair(Bytes, Maybe(Bytes))
   else {fst, Maybe.some!(snd)}
 
 Bytes.parse_string.aux(b: Bytes, s: String): String
-  log("bytes: " | b)
+  // log("bytes: " | b)
 
   // Auxiliary
   let concat_s = (a: String) s | a
@@ -37,13 +28,8 @@ Bytes.parse_string.aux(b: Bytes, s: String): String
     none: s
     some: 
     let snd = snd.value
-    log("next byte: " | snd)
     let snd = Bytes.to_nat(snd) 
-    log("next byte to nat: " | Nat.show(snd))
-    // let fst = Bytes.take(2, b)
-    log("\nfst byte: " | fst)
     let fst = Bytes.to_nat(fst)
-    log("fst to nat: " | Nat.show(fst))
 
     let fst = Nat.to_u16(fst)
     let snd = Nat.to_u16(snd)
@@ -51,17 +37,16 @@ Bytes.parse_string.aux(b: Bytes, s: String): String
     let s_temp = 
       if U16.gtn(snd, 127) then
         case Bytes.parse_string.gtn_one_byte(fst, snd) as res {
-          none: log("  > parsed none") 1#16 // TODO: this line means that couldn't parse the piece of byte. Must be treated.
+          none: 1#16 // TODO: this line means that couldn't parse the piece of byte. Must be treated.
           some: res.value
         }
       else 
-        log("  not bigger than 127: " | U16.show(snd))
         snd
 
     if U16.ltn(s_temp, 0xffff) then
       log("c ltn 0xffff: " | U16.show(s_temp))
       let parsed = Char.to_string(s_temp)
-      log("parsed: " | parsed)
+      log("parsed value: " | parsed)
       Bytes.parse_string.aux(b_tail, concat_s(parsed)) // String.fromCharCode(c)
     else if U16.lte(s_temp, 0x10ffff) then// c <= 0x10ffff
       let aux = U16.sub(s_temp, 0x10000)
@@ -71,6 +56,7 @@ Bytes.parse_string.aux(b: Bytes, s: String): String
       log("c ltn 0x10ffff: " | parsed)
       Bytes.parse_string.aux(b_tail, concat_s(parsed))
     else
+      log("else case")
       ""
 
   }
