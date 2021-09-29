@@ -34,9 +34,9 @@ const build_server = process.env.PRODUCTION;
 
 if (process.argv[2]) { // Only build 1 App
   app = all_kind_apps.filter(name => {
-    const match = process.argv[2].toLowerCase().slice(4) // remove "App."
+    const match = process.argv[2].toLowerCase()
     return name.toLowerCase().endsWith(match) 
-      || name.toLowerCase().endsWith(match+".kind");
+        || name.toLowerCase().endsWith(match+".kind");
   })[0];
   if (app) {
     compiled_apps = compile_app(app);
