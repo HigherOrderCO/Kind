@@ -47,6 +47,8 @@ Lit.Lang.show.type(type: Lit.Core.Type, world: Lit.Core.World): String
            | "}"
        ))
      | " }"
+   effect:
+     _ // TODO
  }
 
 Lit.Lang.show.bond(bond: Lit.Core.Bond, world: Lit.Core.World): String
@@ -102,6 +104,8 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
          let vals = if List.is_empty!(vals) then "" else "{" | String.join(",",vals) | "}"
          return type.name | "/" | ctor.name | vals
        }
+       effect:
+         _ // TODO
      }
    } <> "CREATE"
    match: Maybe {
@@ -121,6 +125,8 @@ Lit.Lang.show.term(term: Lit.Core.Term, world: Lit.Core.World): String
             term.cses)
           return "case " | name | " : " | type.name | " = " | expr | " { " | String.join(", ",vals) | " }"
        }
+       effect:
+         _ // TODO
      }
    } <> "MATCH"
    call: Maybe {
@@ -180,8 +186,12 @@ Lit.Lang.parser.page(world: Lit.Core.World): Parser<Lit.Core.Page>
         define: case head.entry as entry {
           type: 
             case entry.value {
-              word: world
-              data: world{entry.value.name} <- Lit.Core.Entry.type(entry.value)
+              word:
+                world
+              data:
+                world{entry.value.name} <- Lit.Core.Entry.type(entry.value)
+              effect:
+                _ // TODO
             }
         }  default world
       } default world 
@@ -460,6 +470,8 @@ Lit.Lang.parser.term.match(world: Lit.Core.World): Parser<Lit.Core.Term>
             Lit.Lang.parser.text("}")
             return Lit.Core.Term.match(name, type_name, expr, cses)
           }
+          effect:
+            _ // TODO
         }
       }
     }
