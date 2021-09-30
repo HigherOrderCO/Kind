@@ -60,6 +60,7 @@ type Lit.Core.Term {
   // Call external function
   call(
     func: String
+    otyp: Lit.Core.Type
     args: List<Lit.Core.Term>
   )
   // The monadic effect binder
@@ -309,8 +310,6 @@ Lit.Core.check.term(
     match:
       //log("-- match ")  // DEBUG
       let expr_type = Lit.Core.World.get_type(term.type, context@world) abort false
-      //log("-- match2 ")  // DEBUG
-
       case expr_type {
         data:
           let expr = Lit.Core.check.term(context, term.expr, expr_type)
@@ -319,65 +318,54 @@ Lit.Core.check.term(
           expr && cses
       } default false
     word:
-      _ // TODO
+      // log("-- word ")  // DEBUG
+      case type {
+        word:
+          true
+      } default false
     compare:
-      _ // TODO
+      //log("-- compare ")  // DEBUG
+      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+      let val1 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+      let iflt = Lit.Core.check.term(context, term.iflt, type)
+      let ifeq = Lit.Core.check.term(context, term.ifeq, type)
+      let ifgt = Lit.Core.check.term(context, term.ifgt, type)
+      val0 && val1 && iflt && ifeq && ifgt
     operate:
-      _ // TODO
+      //log("-- operate ")  // DEBUG
+      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+      let val1 = Lit.Core.check.term(context, term.val1, Lit.Core.Type.word)
+      val0 && val1
     let:
-      _ // TODO
+      //log("-- let ")  // DEBUG
+      let exp = Lit.Core.check.term(context, term.expr, term.otyp)
+      let new_context = Lit.Core.Check.Context.add_var(context, term.name, term.otyp)
+      let cont = Lit.Core.check.term(new_context, term.body, type)
+      exp && cont
     call:
-      _ // TODO
+      //log("-- call ")  // DEBUG
+      let ownr = Lit.Core.World.check.owner(context, term.func)
+      use func = Lit.Core.World.get_func(term.func, context@world) abort false
+      let otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
+      let args = Lit.Core.World.check.many(context, term.args, func.input_types)
+      let type_ok = Lit.Core.Type.equal(otyp, type)
+      args && type_ok
     bind:
-      _ // TODO
+      //log("-- bind ")  // DEBUG
+      case type {
+        effect:
+          let effe = Lit.Core.check.effect(context, term.effe, term.otyp)
+          let new_context = Lit.Core.Check.Context.add_var(context, term.name, term.otyp)
+          let cont = Lit.Core.check.term(new_context, term.body, type)
+          effe && cont
+      } default false
     return:
-      _ // TODO
-//    call:
-//      // log("-- call ")  // DEBUG
-//      // verify owner
-//      let ownr = Lit.Core.World.check.owner(context, term.func)
-//      use func = Lit.Core.World.get_func(term.func, context@world) abort false
-//      use otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
-//      let args = Lit.Core.World.check.many(context, term.args, func.input_types)
-//      let context_new = Lit.Core.Check.Context.add_var(context, term.name, otyp)
-//      let cont = Lit.Core.check.term(context_new, term.cont, type)
-//      ownr && args && cont
-//    match:
-//    word:
-//      // log("-- word ")  // DEBUG
-//      case type {
-//        word:
-//          true
-//      } default
-//        log("not word")
-//        false
-//    compare:
-//      //log("-- compare ")  // DEBUG
-//      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-//      let val1 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-//      let iflt = Lit.Core.check.term(context, term.iflt, type)
-//      let ifeq = Lit.Core.check.term(context, term.ifeq, type)
-//      let ifgt = Lit.Core.check.term(context, term.ifgt, type)
-//      val0 && val1 && iflt && ifeq && ifgt
-//    operate:
-//      //log("-- operate ")  // DEBUG
-//      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-//      let val1 = Lit.Core.check.term(context, term.val1, Lit.Core.Type.word)
-//      val0 && val1
-//    bind:
-//      // log("-- bind ") // DEBUG
-//      let effect_type = Lit.Core.Type.effect(term.otyp)
-//      let otype_ok    = Lit.Core.check.effect(context, term.effe, effect_type)
-//      let cont_ok     = Lit.Core.check.term(context, term.body, type)
-//      otype_ok && cont_ok
-//    return:
-//      // log("-- return ") // DEBUG
-//      case type {
-//        effect:
-//          Lit.Core.check.term(context, term.expr, type.result)
-//      } default false
+      // log("-- return ") // DEBUG
+      case type {
+        effect:
+          Lit.Core.check.term(context, term.expr, type.result)
+      } default false
   }
-  //log("\n")
   result
 
 Lit.Core.check.effect(
