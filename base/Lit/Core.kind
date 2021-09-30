@@ -1014,10 +1014,10 @@ Lit.serialize.term(term: Lit.Core.Term): Bits
       Bits.i(Bits.o(Bits.i(Bits.concat(oper, Bits.concat(val0, val1)))))
     bind:
       let name = Lit.serialize.name(term.name <> "")
-      let otyp = Lit.serialize.type(term.otype)
-      let effe = Lit.serialize.effect(term.effect)
-      let cont = Lit.serialize.term(term.cont)
-      Bits.o(Bits.i(Bits.i(Bits.concat(name, Bits.concat(otyp, Bits.concat(effe, cont))))))
+      let otyp = Lit.serialize.type(term.otyp)
+      let effe = Lit.serialize.effect(term.effe)
+      let body = Lit.serialize.term(term.body)
+      Bits.o(Bits.i(Bits.i(Bits.concat(name, Bits.concat(otyp, Bits.concat(effe, body))))))
     return:
       let expr = Lit.serialize.term(term.expr)
       Bits.i(Bits.i(Bits.i(expr)))
@@ -1073,8 +1073,8 @@ Lit.deserialize.term(bits: Bits): Pair<Bits,Lit.Core.Term>
       let {bits,name} = Lit.deserialize.name(bits)
       let {bits,otyp} = Lit.deserialize.type(bits)
       let {bits,effe} = Lit.deserialize.effect(bits)
-      let {bits,cont} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Term.bind(some(name),otyp,effe,cont)}
+      let {bits,body} = Lit.deserialize.term(bits)
+      {bits, Lit.Core.Term.bind(some(name),otyp,effe,body)}
     7#16:
       let {bits,expr} = Lit.deserialize.term(bits)
       {bits, Lit.Core.Term.return(expr)}
