@@ -872,55 +872,326 @@ Lit.Core.run.term.check_sanity(term: Lit.Core.Term): Bool
 // -------------
 // TODO: remove Bits.kind, move serialization here, complete it
 
-Lit.Bits.serialize.uint(size: Nat, value: Nat): Bits
+Lit.serialize.uint(size: Nat, value: Nat): Bits
   case size {
     zero: Bits.e
     succ: if (value % 2) =? 0
-      then Bits.o(Lit.Bits.serialize.uint(size.pred, value / 2))
-      else Bits.i(Lit.Bits.serialize.uint(size.pred, value / 2))
+      then Bits.o(Lit.serialize.uint(size.pred, value / 2))
+      else Bits.i(Lit.serialize.uint(size.pred, value / 2))
   }
 
-Lit.Bits.deserialize.uint.go(size: Nat, bits: Bits): Pair<Bits,Nat>
+Lit.deserialize.uint(size: Nat, bits: Bits): Pair<Bits,Nat>
   case size {
     zero:
       {bits, 0}
-    succ: case bits {
-      e:
-        {Bits.e, 0}
-      o:
-        let {bits, value} = Lit.Bits.deserialize.uint.go(size.pred, bits.pred)
-        {bits, 2 * value}
-      i:
-        let {bits, value} = Lit.Bits.deserialize.uint.go(size.pred, bits.pred)
-        {bits, 1 + 2 * value}
-    }
+    succ: 
+      case bits {
+        e:
+          {Bits.e, 0}
+        o:
+          let {bits, value} = Lit.deserialize.uint(size.pred, bits.pred)
+          {bits, 2 * value}
+        i:
+          let {bits, value} = Lit.deserialize.uint(size.pred, bits.pred)
+          {bits, 1 + 2 * value}
+      }
   }
 
-Lit.Bits.deserialize.uint(size: Nat, bits: Bits): Nat
-  Pair.snd!!(Lit.Bits.deserialize.uint.go(size, bits))
-
-Lit.Bits.serialize.name(name: String): Bits
-  Lit.Bits.serialize.name.go(10, name)
-
-Lit.Bits.serialize.name.go(size: Nat, name: String): Bits
-  case size {
-    zero:
+Lit.serialize.name(name: String): Bits
+  case name {
+    nil:
       Bits.e
-    succ:
-      let head = case name { nil: '.', cons: name.head }
+    cons:
       let numb =
-        (    if U16.btw('0', head, '9') then U16.add(U16.sub(head, '0'), 52#16)
-        else if U16.btw('A', head, 'Z') then U16.sub(head, 'A')
-        else if U16.btw('a', head, 'z') then U16.add(U16.sub(head, 'a'), 26#16)
-        else if U16.btw('_', head, '_') then 62#16
-        else if U16.btw('.', head, '.') then 63#16
-        else                                      0#16)
-      let head = Lit.Bits.serialize.uint(if size >? 1 then 6 else 4, U16.to_nat(numb))
-      let tail = Lit.Bits.serialize.name(case name { nil: "", cons: name.tail })
+        (    if U16.btw('0', name.head, '9') then U16.sub(name.head, '0')
+        else if U16.btw('A', name.head, 'Z') then U16.add(U16.sub(name.head, 'A'), 10#16)
+        else if U16.btw('a', name.head, 'z') then U16.add(U16.sub(name.head, 'a'), 36#16)
+        else if U16.btw('_', name.head, '_') then 62#16
+        else 63#16)
+      let head = Lit.serialize.uint(6, U16.to_nat(numb))
+      let tail = Lit.serialize.name(name.tail)
       Bits.concat(head, tail)
   }
 
-//
+Lit.deserialize.name(bits: Bits): Pair<Bits,String>
+  let {bits, numb} = Lit.deserialize.uint(6, bits)
+  let {bits, tail} = Lit.deserialize.name(bits)
+  let numb = Nat.to_u16(numb)
+  let head =
+    (    if U16.btw( 0, numb,  9) then U16.add(numb, '0')
+    else if U16.btw(10, numb, 35) then U16.add(U16.sub(numb,10#16), 'A')
+    else if U16.btw(36, numb, 61) then U16.add(U16.sub(numb,36#16), 'a')
+    else if U16.btw(62, numb, 62) then '_'
+    else '.')
+  {bits, String.cons(head,tail)}
+
+Lit.serialize.list<A: Type>(item: A -> Bits, list: List<A>): Bits
+  case list {
+    nil: Bits.o(Bits.e)
+    cons: Bits.i(Bits.concat(item(list.head), Lit.serialize.list<A>(item, list.tail)))
+  }
+
+Lit.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits,List<A>>
+  case bits {
+    e:
+      {Bits.e, []}
+    o:
+      {bits.pred, []}
+    i:
+      let {bits, head} = item(bits.pred)
+      let {bits, tail} = Lit.deserialize.list<A>(item, bits)
+      {bits, head & tail}
+  }
+
+Lit.serialize.term(term: Lit.Core.Term): Bits
+  case term {
+    var:
+      Bits.o(Bits.o(Bits.o(Lit.serialize.name(term.name))))
+    create:
+      let type = Lit.serialize.name(term.type)
+      let ctor = Lit.serialize.uint(8, term.ctor)
+      let vals = Lit.serialize.list!(Lit.serialize.term, term.vals)
+      Bits.i(Bits.o(Bits.o(Bits.concat(type, Bits.concat(ctor, vals)))))
+    match:
+      let name = Lit.serialize.name(term.name)
+      let type = Lit.serialize.name(term.type)
+      let expr = Lit.serialize.term(term.expr)
+      let cses = Lit.serialize.list!((cse)
+        open cse
+        let fields = Lit.serialize.list!(Lit.serialize.name, cse.fields)
+        let body = Lit.serialize.term(cse.body)
+        Bits.concat(fields, body),
+        term.cses)
+      Bits.o(Bits.i(Bits.o(Bits.concat(name, Bits.concat(type, Bits.concat(expr, cses))))))
+    word:
+      let numb = Lit.serialize.uint(64, U64.to_nat(term.numb))
+      Bits.i(Bits.i(Bits.o(numb)))
+    compare:
+      let val0 = Lit.serialize.term(term.val0)
+      let val1 = Lit.serialize.term(term.val1)
+      let iflt = Lit.serialize.term(term.iflt)
+      let ifeq = Lit.serialize.term(term.ifeq)
+      let ifgt = Lit.serialize.term(term.ifgt)
+      Bits.o(Bits.o(Bits.i(Bits.concat(val0, Bits.concat(val1, Bits.concat(iflt, Bits.concat(ifeq, ifgt)))))))
+    operate:
+      let oper = Lit.serialize.uint(3, case term.oper { add:0, sub:1, mul:2, div:3, mod:4, or:5, and:6, xor:7 })
+      let val0 = Lit.serialize.term(term.val0)
+      let val1 = Lit.serialize.term(term.val1)
+      Bits.i(Bits.o(Bits.i(Bits.concat(oper, Bits.concat(val0, val1)))))
+    bind:
+      let name = Lit.serialize.name(term.name <> "")
+      let otyp = Lit.serialize.type(term.otype)
+      let effe = Lit.serialize.effect(term.effect)
+      let cont = Lit.serialize.term(term.cont)
+      Bits.o(Bits.i(Bits.i(Bits.concat(name, Bits.concat(otyp, Bits.concat(effe, cont))))))
+    return:
+      let expr = Lit.serialize.term(term.expr)
+      Bits.i(Bits.i(Bits.i(expr)))
+  }
+
+Lit.deserialize.term(bits: Bits): Pair<Bits,Lit.Core.Term>
+  let {bits,ctor} = Lit.deserialize.uint(3, bits)
+  switch U16.eql(Nat.to_u16(ctor)) {
+    0#16:
+      let {bits,name} = Lit.deserialize.name(bits)
+      {bits, Lit.Core.Term.var(name)}
+    1#16:
+      let {bits,type} = Lit.deserialize.name(bits)
+      let {bits,ctor} = Lit.deserialize.uint(8, bits)
+      let {bits,vals} = Lit.deserialize.list!(Lit.deserialize.term, bits)
+      {bits, Lit.Core.Term.create(type, ctor, vals)}
+    2#16:
+      let {bits,name} = Lit.deserialize.name(bits)
+      let {bits,type} = Lit.deserialize.name(bits)
+      let {bits,expr} = Lit.deserialize.term(bits)
+      let {bits,cses} = Lit.deserialize.list!((bits)
+        let {bits,fields} = Lit.deserialize.list!(Lit.deserialize.name, bits)
+        let {bits,body} = Lit.deserialize.term(bits)
+        {bits, Lit.Core.Term.Case.new(fields, body)},
+        bits)
+      {bits, Lit.Core.Term.match(name,type,expr,cses)}
+    3#16:
+      let {bits,numb} = Lit.deserialize.uint(8,bits)
+      {bits, Lit.Core.Term.word(Nat.to_u64(numb))}
+    4#16:
+      let {bits,val0} = Lit.deserialize.term(bits)
+      let {bits,val1} = Lit.deserialize.term(bits)
+      let {bits,iflt} = Lit.deserialize.term(bits)
+      let {bits,ifeq} = Lit.deserialize.term(bits)
+      let {bits,ifgt} = Lit.deserialize.term(bits)
+      {bits, Lit.Core.Term.compare(val0,val1,iflt,ifeq,ifgt)}
+    5#16:
+      let {bits,oper} = Lit.deserialize.uint(3, bits)
+      let {bits,val0} = Lit.deserialize.term(bits)
+      let {bits,val1} = Lit.deserialize.term(bits)
+      let oper = switch U16.eql(Nat.to_u16(oper)) {
+        0#16: Lit.Core.Operation.add
+        1#16: Lit.Core.Operation.sub
+        2#16: Lit.Core.Operation.mul
+        3#16: Lit.Core.Operation.div
+        4#16: Lit.Core.Operation.mod
+        5#16: Lit.Core.Operation.or
+        6#16: Lit.Core.Operation.and
+        7#16: Lit.Core.Operation.xor
+      } default Lit.Core.Operation.add
+      {bits, Lit.Core.Term.operate(oper,val0,val1)}
+    6#16:
+      let {bits,name} = Lit.deserialize.name(bits)
+      let {bits,otyp} = Lit.deserialize.type(bits)
+      let {bits,effe} = Lit.deserialize.effect(bits)
+      let {bits,cont} = Lit.deserialize.term(bits)
+      {bits, Lit.Core.Term.bind(some(name),otyp,effe,cont)}
+    7#16:
+      let {bits,expr} = Lit.deserialize.term(bits)
+      {bits, Lit.Core.Term.return(expr)}
+  } default {bits, Lit.Core.Term.word(0)}
+
+// GPT-3 
+
+Lit.serialize.effect(effect: Lit.Core.Effect): Bits
+  case effect {
+    define:
+      let expr = Lit.serialize.term(effect.expr)
+      Bits.o(Bits.o(Bits.o(expr)))
+    call:
+      let func = Lit.serialize.name(effect.func)
+      let args = Lit.serialize.list!(Lit.serialize.term, effect.args)
+      Bits.i(Bits.o(Bits.o(Bits.concat(func, args))))
+    get_caller:
+      let indx = Lit.serialize.term(effect.indx)
+      Bits.o(Bits.i(Bits.o(indx)))
+    get_call_code:
+      let indx = Lit.serialize.term(effect.indx)
+      Bits.i(Bits.i(Bits.o(indx)))
+    get_call_size:
+      Bits.o(Bits.o(Bits.i(Bits.e)))
+    get_block_miner:
+      Bits.i(Bits.o(Bits.i(Bits.e)))
+    get_block_nonce:
+      Bits.o(Bits.i(Bits.i(Bits.e)))
+    get_block_number:
+      Bits.i(Bits.i(Bits.i(Bits.e)))
+  }
+
+Lit.deserialize.effect(bits: Bits): Pair<Bits,Lit.Core.Effect>
+  let {bits,ctor} = Lit.deserialize.uint(3, bits)
+  switch U16.eql(Nat.to_u16(ctor)) {
+    0#16:
+      let {bits,expr} = Lit.deserialize.term(bits)
+      {bits, Lit.Core.Effect.define(expr)}
+    1#16:
+      let {bits,func} = Lit.deserialize.name(bits)
+      let {bits,args} = Lit.deserialize.list!(Lit.deserialize.term, bits)
+      {bits, Lit.Core.Effect.call(func, args)}
+    2#16:
+      let {bits,indx} = Lit.deserialize.term(bits)
+      {bits, Lit.Core.Effect.get_caller(indx)}
+    3#16:
+      let {bits,indx} = Lit.deserialize.term(bits)
+      {bits, Lit.Core.Effect.get_call_code(indx)}
+    4#16:
+      {bits, Lit.Core.Effect.get_call_size}
+    5#16:
+      {bits, Lit.Core.Effect.get_block_miner}
+    6#16:
+      {bits, Lit.Core.Effect.get_block_nonce}
+    7#16:
+      {bits, Lit.Core.Effect.get_block_number}
+  } default {bits, Lit.Core.Effect.get_block_number}
+
+Lit.serialize.type(typ: Lit.Core.Type): Bits
+  case typ {
+    word:
+      Bits.o(Bits.o(Bits.e))
+    data:
+      let name = Lit.serialize.name(typ.name)
+      let ctors = Lit.serialize.list!(Lit.serialize.constructor, typ.constructors)
+      Bits.i(Bits.o(Bits.concat(name, ctors)))
+    effect:
+      let result = Lit.serialize.type(typ.result)
+      Bits.o(Bits.i(result))
+  }
+
+Lit.deserialize.type(bits: Bits): Pair<Bits,Lit.Core.Type>
+  let {bits,ctor} = Lit.deserialize.uint(2, bits)
+  switch U16.eql(Nat.to_u16(ctor)) {
+    0#16:
+      {bits, Lit.Core.Type.word}
+    1#16:
+      let {bits,name} = Lit.deserialize.name(bits)
+      let {bits,ctors} = Lit.deserialize.list!(Lit.deserialize.constructor, bits)
+      {bits, Lit.Core.Type.data(name, ctors)}
+    2#16:
+      let {bits,result} = Lit.deserialize.type(bits)
+      {bits, Lit.Core.Type.effect(result)}
+  } default {bits, Lit.Core.Type.word}
+
+Lit.deserialize.constructor(bits: Bits): Pair<Bits,Lit.Core.Type.Constructor>
+  let {bits,name} = Lit.deserialize.name(bits)
+  let {bits,fields} = Lit.deserialize.list!(Lit.deserialize.type.field, bits)
+  {bits, Lit.Core.Type.Constructor.new(name, fields)}
+
+Lit.serialize.constructor(ctor: Lit.Core.Type.Constructor): Bits
+  open ctor
+  let name = Lit.serialize.name(ctor.name)
+  let fields = Lit.serialize.list!(Lit.serialize.type.field, ctor.fields)
+  Bits.concat(name, fields)
+
+Lit.serialize.type.field(field: Lit.Core.Type.Field): Bits
+  open field
+  let name = Lit.serialize.name(field.name)
+  let type = Lit.serialize.name(field.type)
+  Bits.i(Bits.i(Bits.i(Bits.concat(name, type))))
+
+Lit.deserialize.type.field(bits: Bits): Pair<Bits,Lit.Core.Type.Field>
+  let {bits,name} = Lit.deserialize.name(bits)
+  let {bits,type} = Lit.deserialize.name(bits)
+  {bits, Lit.Core.Type.Field.new(name, type)}
+
+Lit.serialize.bond(bond: Lit.Core.Bond): Bits
+  open bond
+  let name = Lit.serialize.name(bond.name)
+  let owners = Lit.serialize.list!(Lit.serialize.name, bond.owners)
+  let main = Lit.serialize.term(bond.main)
+  let input_names = Lit.serialize.list!(Lit.serialize.name, bond.input_names)
+  let input_types = Lit.serialize.list!(Lit.serialize.name, bond.input_types)
+  let output_type = Lit.serialize.name(bond.output_type)
+  Bits.concat(name,
+  Bits.concat(owners,
+  Bits.concat(main,
+  Bits.concat(input_names,
+  Bits.concat(input_types, output_type)))))
+
+Lit.deserialize.bond(bits: Bits): Pair<Bits,Lit.Core.Bond>
+  let {bits,name} = Lit.deserialize.name(bits)
+  let {bits,owners} = Lit.deserialize.list!(Lit.deserialize.name, bits)
+  let {bits,main} = Lit.deserialize.term(bits)
+  let {bits,input_names} = Lit.deserialize.list!(Lit.deserialize.name, bits)
+  let {bits,input_types} = Lit.deserialize.list!(Lit.deserialize.name, bits)
+  let {bits,output_type} = Lit.deserialize.name(bits)
+  {bits, Lit.Core.Bond.new(name, owners, main, input_names, input_types, output_type)}
+
+Lit.serialize.entry(entry: Lit.Core.Entry): Bits
+  case entry {
+    type:
+      let type = Lit.serialize.type(entry.value)
+      Bits.o(type)
+    bond:
+      let bond = Lit.serialize.bond(entry.value)
+      Bits.i(bond)
+  }
+
+Lit.deserialize.entry(bits: Bits): Pair<Bits,Lit.Core.Entry>
+  let {bits,ctor} = Lit.deserialize.uint(1, bits)
+  switch U16.eql(Nat.to_u16(ctor)) {
+    0#16:
+      let {bits,type} = Lit.deserialize.type(bits)
+      {bits, Lit.Core.Entry.type(type)}
+    1#16:
+      let {bits,bond} = Lit.deserialize.bond(bits)
+      {bits, Lit.Core.Entry.bond(bond)}
+  } default {bits, Lit.Core.Entry.type(Lit.Core.Type.word)}
+
 // Tests
 // -----
 
