@@ -50,9 +50,21 @@ type Lit.Core.Term {
     val0: Lit.Core.Term
     val1: Lit.Core.Term
   )
+  // Binds a variable
+  let(
+    name: String
+    otyp: Lit.Core.Type
+    expr: Lit.Core.Term
+    body: Lit.Core.Term
+  )
+  // Call external function
+  call(
+    func: String
+    args: List<Lit.Core.Term>
+  )
   // The monadic effect binder
   bind(
-    name: Maybe<String>
+    name: String
     otyp: Lit.Core.Type
     effe: Lit.Core.Effect
     body: Lit.Core.Term
@@ -65,30 +77,36 @@ type Lit.Core.Term {
 
 type Lit.Core.Effect {
   // Stores a global state
-  define(
+  store(
+    name: String
     expr: Lit.Core.Term
   )
-  // Calls an external program
-  call(
-    func: String
-    args: List<Lit.Core.Term>
+  // Runs a monadic value
+  run(
+    expr: Lit.Core.Term
   )
-  // Gets the name of the nth caller
-  get_caller(
-    indx: Lit.Core.Term
+  get(
+    val: Lit.Core.Getter
   )
-  // Gets the nth 64-bit word of the call serialization
-  get_call_code(
-    indx: Lit.Core.Term
-  )
-  // Gets the size of the call serialization, in bits
-  get_call_size
+}
+
+type Lit.Core.Getter {
+  // Gets the size of the `do` block serialization, in bits
+  get_code_size
+  // Gets the nth 64-bit word of the `do` block serialization
+  get_code_chunk(indx: Lit.Core.Term)
+  // Gets the size of the extra data, in bits
+  get_extra_size
+  // Gets the nth 64-bit word of the extra data
+  get_extra_chunk(indx: Lit.Core.Term)
   // Gets the block miner
   get_block_miner
-  // Gets the block nonce
-  get_block_nonce
   // Gets the block number
   get_block_number
+  // Gets the block nonce
+  get_block_nonce
+  // Gets the name of the nth caller
+  get_caller(indx: Lit.Core.Term)
 }
 
 // An operation
@@ -288,16 +306,6 @@ Lit.Core.check.term(
           let args = Lit.Core.World.check.many(context, term.vals, List.mapped!(ctor.fields)!((x) x@type))
           args && Lit.Core.Type.equal(ttyp, type)
       } default false
-    call:
-      // log("-- call ")  // DEBUG
-      // verify owner
-      let ownr = Lit.Core.World.check.owner(context, term.func)
-      use func = Lit.Core.World.get_func(term.func, context@world) abort false
-      use otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
-      let args = Lit.Core.World.check.many(context, term.args, func.input_types)
-      let context_new = Lit.Core.Check.Context.add_var(context, term.name, otyp)
-      let cont = Lit.Core.check.term(context_new, term.cont, type)
-      ownr && args && cont
     match:
       //log("-- match ")  // DEBUG
       let expr_type = Lit.Core.World.get_type(term.type, context@world) abort false
@@ -311,38 +319,63 @@ Lit.Core.check.term(
           expr && cses
       } default false
     word:
-      // log("-- word ")  // DEBUG
-      case type {
-        word:
-          true
-      } default
-        log("not word")
-        false
+      _ // TODO
     compare:
-      //log("-- compare ")  // DEBUG
-      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-      let val1 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-      let iflt = Lit.Core.check.term(context, term.iflt, type)
-      let ifeq = Lit.Core.check.term(context, term.ifeq, type)
-      let ifgt = Lit.Core.check.term(context, term.ifgt, type)
-      val0 && val1 && iflt && ifeq && ifgt
+      _ // TODO
     operate:
-      //log("-- operate ")  // DEBUG
-      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-      let val1 = Lit.Core.check.term(context, term.val1, Lit.Core.Type.word)
-      val0 && val1
+      _ // TODO
+    let:
+      _ // TODO
+    call:
+      _ // TODO
     bind:
-      // log("-- bind ") // DEBUG
-      let effect_type = Lit.Core.Type.effect(term.otyp)
-      let otype_ok    = Lit.Core.check.effect(context, term.effe, effect_type)
-      let cont_ok     = Lit.Core.check.term(context, term.body, type)
-      otype_ok && cont_ok
+      _ // TODO
     return:
-      // log("-- return ") // DEBUG
-      case type {
-        effect:
-          Lit.Core.check.term(context, term.expr, type.result)
-      } default false
+      _ // TODO
+//    call:
+//      // log("-- call ")  // DEBUG
+//      // verify owner
+//      let ownr = Lit.Core.World.check.owner(context, term.func)
+//      use func = Lit.Core.World.get_func(term.func, context@world) abort false
+//      use otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
+//      let args = Lit.Core.World.check.many(context, term.args, func.input_types)
+//      let context_new = Lit.Core.Check.Context.add_var(context, term.name, otyp)
+//      let cont = Lit.Core.check.term(context_new, term.cont, type)
+//      ownr && args && cont
+//    match:
+//    word:
+//      // log("-- word ")  // DEBUG
+//      case type {
+//        word:
+//          true
+//      } default
+//        log("not word")
+//        false
+//    compare:
+//      //log("-- compare ")  // DEBUG
+//      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+//      let val1 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+//      let iflt = Lit.Core.check.term(context, term.iflt, type)
+//      let ifeq = Lit.Core.check.term(context, term.ifeq, type)
+//      let ifgt = Lit.Core.check.term(context, term.ifgt, type)
+//      val0 && val1 && iflt && ifeq && ifgt
+//    operate:
+//      //log("-- operate ")  // DEBUG
+//      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
+//      let val1 = Lit.Core.check.term(context, term.val1, Lit.Core.Type.word)
+//      val0 && val1
+//    bind:
+//      // log("-- bind ") // DEBUG
+//      let effect_type = Lit.Core.Type.effect(term.otyp)
+//      let otype_ok    = Lit.Core.check.effect(context, term.effe, effect_type)
+//      let cont_ok     = Lit.Core.check.term(context, term.body, type)
+//      otype_ok && cont_ok
+//    return:
+//      // log("-- return ") // DEBUG
+//      case type {
+//        effect:
+//          Lit.Core.check.term(context, term.expr, type.result)
+//      } default false
   }
   //log("\n")
   result
@@ -380,32 +413,35 @@ Lit.Core.check.effect(
 //  get_block_number
 //}
   case effect {
-    define:
+    store:
       _ // TODO
-    call:
-    // bind:
-    //   let owner_ok = Lit.Core.World.check.owner(context, term.name)
-    //   use func = Lit.Core.World.get_func(term.name, context@world) abort false
-    //   use out_type = Lit.Core.World.get_type(func.output_type, context@world) abort false
-    //   let nofn_ok = List.is_empty!(func.input_names)  // TODO: should we allow binds with functions?
-    //   let main_ok = Lit.Core.check.term(context, term.main, out_type)
-    //   // should the ctx change?
-    //   let cont_ok = Lit.Core.check.term(context, term.cont, type)
-    //   owner_ok && nofn_ok && main_ok && cont_ok
+    run:
+      _ // TODO
+    get:
+      _ // TODO
+  }
 
-      _ // TODO
-    get_caller:
-      _ // TODO
-    get_call_code:
-      _ // TODO
-    get_call_size:
-      _ // TODO
+Lit.Core.check.getter(
+  context: Lit.Core.Check.Context
+  getter: Lit.Core.Getter
+): Bool
+  case getter {
+    get_code_size:
+      true
+    get_code_chunk:
+      Lit.Core.check.term(context, getter.indx, Lit.Core.Type.word)
+    get_extra_size:
+      true
+    get_extra_chunk:
+      Lit.Core.check.term(context, getter.indx, Lit.Core.Type.word)
     get_block_miner:
-      _ // TODO
-    get_block_nonce:
-      _ // TODO
+      true
     get_block_number:
-      _ // TODO
+      true
+    get_block_nonce:
+      true
+    get_caller:
+      Lit.Core.check.term(context, getter.indx, Lit.Core.Type.word)
   }
 
 Lit.Core.World.check.many(
@@ -487,6 +523,7 @@ Lit.Core.World.check.owner(
 // ---------
 
 //Pair<Lit.Core.Term, Lit.Core.World>
+// TODO remove. pass all as parameters
 type Lit.Core.run.Context {
   new(
     term: Lit.Core.Term
@@ -647,7 +684,8 @@ Lit.Core.World.run.term(
     call:
       log("call!") // DEBUG
       let gas = gas + Lit.Core.Costs.default@call
-      Lit.Core.World.run.term.call(world, vars, term.name, term.func, term.args, term.cont, gas)
+      //Lit.Core.World.run.term.call(world, vars, term.func, term.args, term.cont, gas)
+      _ // TODO
     // bind:
     //   log("bind!") // DEBUG
     //   let gas = gas + Lit.Core.Costs.default@bind
@@ -656,6 +694,8 @@ Lit.Core.World.run.term(
       _  // TODO
     return:
       _  // TODO
+    let:
+      _ // TODO
   }
 
 Lit.Core.World.run.terms(
@@ -672,10 +712,10 @@ Lit.Core.World.run.terms(
       use tail = Lit.Core.World.run.terms(terms.tail, ctx.world, vars, ctx.gas)
       {ctx.term & tail.fst, tail.snd, tail.trd}
   }
+
 Lit.Core.World.run.term.call(
   world: Lit.Core.World
   vars: Map<Lit.Core.Term>
-  name: String
   func: String
   args: List<Lit.Core.Term>
   cont: Lit.Core.Term
@@ -699,7 +739,6 @@ Lit.Core.World.run.term.call(
             let gas = state.trd
             let {arg_name, arg_term} = arg
             use ctx = Lit.Core.World.run.term(arg_term, world, inner_vars, gas)
-            let _ = Lit.Core.run.term.check_sanity(ctx.term)  // DEBUG-ish
             let inner_vars = inner_vars{arg_name} <- ctx.term
             {inner_vars, ctx.world, ctx.gas}
           //let {inner_vars, world} = state
@@ -709,9 +748,8 @@ Lit.Core.World.run.term.call(
           let world = state.snd
           let gas = state.trd
           use ctx = Lit.Core.World.run.term(func.main, world, inner_vars, gas)
-          let _ = Lit.Core.run.term.check_sanity(ctx.term)  // DEBUG-ish
-          let vars = vars{name} <- ctx.term
-          Lit.Core.World.run.term(cont, ctx.world, vars, ctx.gas)
+          //Lit.Core.World.run.term(cont, ctx.world, vars, ctx.gas)
+          _ //TODO
       } default
         // {Lit.Core.Term.call(name, func, args, cont), world, gas}
         _ // TODO
@@ -858,49 +896,7 @@ Lit.Core.run.term.bind(
   effect: Lit.Core.Effect
   cont: Lit.Core.Term
 ): Lit.Core.run.Context
-  _
-
-// TODO: I think we can actually remove this, I believe we're safe
-Lit.Core.run.term.check_sanity(term: Lit.Core.Term): Bool
-  case term {
-    var:
-      log("==> SANITY CHECK FAILED: found term: " | "'" | term.name | "'")
-      false
-    create:
-      let valid = true
-      for val in term.vals with valid:
-        valid && Lit.Core.run.term.check_sanity(val)
-      valid
-    match:
-      let valid = Lit.Core.run.term.check_sanity(term.expr)
-      for cse in term.cses with valid:
-        valid && Lit.Core.run.term.check_sanity(cse@body)
-      valid
-    word:
-      true
-    compare:
-      Lit.Core.run.term.check_sanity(term.val0)
-        && Lit.Core.run.term.check_sanity(term.val1)
-        && Lit.Core.run.term.check_sanity(term.iflt)
-        && Lit.Core.run.term.check_sanity(term.ifeq)
-        && Lit.Core.run.term.check_sanity(term.ifgt)
-    operate:
-      Lit.Core.run.term.check_sanity(term.val0)
-        && Lit.Core.run.term.check_sanity(term.val1)
-    call:
-      // TODO I don't know what I'm doing
-      // should this return false (invalid) ?
-      let valid = true
-      for arg in term.args with valid:
-        valid && Lit.Core.run.term.check_sanity(arg)
-      valid && Lit.Core.run.term.check_sanity(term.cont)
-    bind:
-      // Lit.Core.run.term.check_sanity(term.main)
-      //   && Lit.Core.run.term.check_sanity(term.cont)
-      _ // TODO
-    return:
-      _ // TODO
-  }
+  _ // TODO
 
 // Serialization
 // -------------
@@ -1013,7 +1009,7 @@ Lit.serialize.term(term: Lit.Core.Term): Bits
       let val1 = Lit.serialize.term(term.val1)
       Bits.i(Bits.o(Bits.i(Bits.concat(oper, Bits.concat(val0, val1)))))
     bind:
-      let name = Lit.serialize.name(term.name <> "")
+      let name = Lit.serialize.name(term.name)
       let otyp = Lit.serialize.type(term.otyp)
       let effe = Lit.serialize.effect(term.effe)
       let body = Lit.serialize.term(term.body)
@@ -1021,6 +1017,10 @@ Lit.serialize.term(term: Lit.Core.Term): Bits
     return:
       let expr = Lit.serialize.term(term.expr)
       Bits.i(Bits.i(Bits.i(expr)))
+    call:
+      _ // TODO
+    let:
+      _ // TODO
   }
 
 Lit.deserialize.term(bits: Bits): Pair<Bits,Lit.Core.Term>
@@ -1074,7 +1074,7 @@ Lit.deserialize.term(bits: Bits): Pair<Bits,Lit.Core.Term>
       let {bits,otyp} = Lit.deserialize.type(bits)
       let {bits,effe} = Lit.deserialize.effect(bits)
       let {bits,body} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Term.bind(some(name),otyp,effe,body)}
+      {bits, Lit.Core.Term.bind(name,otyp,effe,body)}
     7#16:
       let {bits,expr} = Lit.deserialize.term(bits)
       {bits, Lit.Core.Term.return(expr)}
@@ -1084,54 +1084,67 @@ Lit.deserialize.term(bits: Bits): Pair<Bits,Lit.Core.Term>
 
 Lit.serialize.effect(effect: Lit.Core.Effect): Bits
   case effect {
-    define:
+    store:
+      // TODO name
       let expr = Lit.serialize.term(effect.expr)
       Bits.o(Bits.o(Bits.o(expr)))
-    call:
-      let func = Lit.serialize.name(effect.func)
-      let args = Lit.serialize.list!(Lit.serialize.term, effect.args)
-      Bits.i(Bits.o(Bits.o(Bits.concat(func, args))))
-    get_caller:
-      let indx = Lit.serialize.term(effect.indx)
-      Bits.o(Bits.i(Bits.o(indx)))
-    get_call_code:
-      let indx = Lit.serialize.term(effect.indx)
-      Bits.i(Bits.i(Bits.o(indx)))
-    get_call_size:
-      Bits.o(Bits.o(Bits.i(Bits.e)))
-    get_block_miner:
-      Bits.i(Bits.o(Bits.i(Bits.e)))
-    get_block_nonce:
-      Bits.o(Bits.i(Bits.i(Bits.e)))
-    get_block_number:
-      Bits.i(Bits.i(Bits.i(Bits.e)))
+    run:
+      // let func = Lit.serialize.name(effect.func)
+      // let args = Lit.serialize.list!(Lit.serialize.term, effect.args)
+      // Bits.i(Bits.o(Bits.o(Bits.concat(func, args))))
+      _
+    get:
+      _ // TODO
+//    get_caller:
+//      let indx = Lit.serialize.term(effect.indx)
+//      Bits.o(Bits.i(Bits.o(indx)))
+//    get_call_code:
+//      let indx = Lit.serialize.term(effect.indx)
+//      Bits.i(Bits.i(Bits.o(indx)))
+//    get_call_size:
+//      Bits.o(Bits.o(Bits.i(Bits.e)))
+//    get_block_miner:
+//      Bits.i(Bits.o(Bits.i(Bits.e)))
+//    get_block_nonce:
+//      Bits.o(Bits.i(Bits.i(Bits.e)))
+//    get_block_number:
+//      Bits.i(Bits.i(Bits.i(Bits.e)))
   }
 
 Lit.deserialize.effect(bits: Bits): Pair<Bits,Lit.Core.Effect>
   let {bits,ctor} = Lit.deserialize.uint(3, bits)
   switch U16.eql(Nat.to_u16(ctor)) {
     0#16:
+      // TODO name
       let {bits,expr} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Effect.define(expr)}
+      {bits, Lit.Core.Effect.store("", expr)}
     1#16:
-      let {bits,func} = Lit.deserialize.name(bits)
-      let {bits,args} = Lit.deserialize.list!(Lit.deserialize.term, bits)
-      {bits, Lit.Core.Effect.call(func, args)}
+      // let {bits,func} = Lit.deserialize.name(bits)
+      // let {bits,args} = Lit.deserialize.list!(Lit.deserialize.term, bits)
+      // {bits, Lit.Core.Effect.call(func, args)}
+      _ // TODO
     2#16:
-      let {bits,indx} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Effect.get_caller(indx)}
+      // let {bits,indx} = Lit.deserialize.term(bits)
+      // {bits, Lit.Core.Effect.get_caller(indx)}
+      _ // TODO
     3#16:
-      let {bits,indx} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Effect.get_call_code(indx)}
+      // let {bits,indx} = Lit.deserialize.term(bits)
+      // {bits, Lit.Core.Effect.get_call_code(indx)}
+      _ // TODO
     4#16:
-      {bits, Lit.Core.Effect.get_call_size}
+      // {bits, Lit.Core.Effect.get_call_size}
+      _ // TODO
     5#16:
-      {bits, Lit.Core.Effect.get_block_miner}
+      // {bits, Lit.Core.Effect.get_block_miner}
+      _ // TODO
     6#16:
-      {bits, Lit.Core.Effect.get_block_nonce}
+      // {bits, Lit.Core.Effect.get_block_nonce}
+      _ // TODO
     7#16:
-      {bits, Lit.Core.Effect.get_block_number}
-  } default {bits, Lit.Core.Effect.get_block_number}
+      // {bits, Lit.Core.Effect.get_block_number}
+      _ // TODO
+  } default // {bits, Lit.Core.Effect.get_block_number}
+    _ // TODO
 
 Lit.serialize.type(typ: Lit.Core.Type): Bits
   case typ {
