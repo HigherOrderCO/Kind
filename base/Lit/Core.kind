@@ -44,7 +44,7 @@ type Lit.Core.Term {
     ifeq: Lit.Core.Term
     ifgt: Lit.Core.Term
   )
-  // Word addition
+  // Binary operation on words
   operate(
     oper: Lit.Core.Operation
     val0: Lit.Core.Term
@@ -52,6 +52,7 @@ type Lit.Core.Term {
   )
   // The monadic effect binder
   bind(
+    name: String
     effe: Lit.Core.Effect
     cont: Lit.Core.Term
   )
@@ -64,12 +65,10 @@ type Lit.Core.Term {
 type Lit.Core.Effect {
   // Stores a global state
   define(
-    name: String
     expr: Lit.Core.Term
   )
   // Calls an external program
   call(
-    name: String
     func: String
     args: List<Lit.Core.Term>
     cont: Lit.Core.Term
