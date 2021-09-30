@@ -53,9 +53,9 @@ type Lit.Core.Term {
   // The monadic effect binder
   bind(
     name: Maybe<String>
-    otype: Lit.Core.Type
-    effect: Lit.Core.Effect
-    cont: Lit.Core.Term
+    otyp: Lit.Core.Type
+    effe: Lit.Core.Effect
+    body: Lit.Core.Term
   )
   // The monadic effect return
   return(
@@ -310,19 +310,6 @@ Lit.Core.check.term(
           let cses = Lit.Core.World.check.match.cases(context, cses, type, expr_type.constructors, term.name)
           expr && cses
       } default false
-    // bind:
-    //   // log("-- bind ")  // DEBUG
-    //   // TODO: check access
-    //   let owner_ok = Lit.Core.World.check.owner(context, term.name)
-    //   use func = Lit.Core.World.get_func(term.name, context@world) abort false
-    //   use out_type = Lit.Core.World.get_type(func.output_type, context@world) abort false
-    //   let nofn_ok = List.is_empty!(func.input_names)  // TODO: should we allow binds with functions?
-    //   let main_ok = Lit.Core.check.term(context, term.main, out_type)
-    //   // should the ctx change?
-    //   let cont_ok = Lit.Core.check.term(context, term.cont, type)
-    //   owner_ok && nofn_ok && main_ok && cont_ok
-    bind:
-      _  // TODO
     word:
       // log("-- word ")  // DEBUG
       case type {
@@ -344,21 +331,68 @@ Lit.Core.check.term(
       let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
       let val1 = Lit.Core.check.term(context, term.val1, Lit.Core.Type.word)
       val0 && val1
+    bind:
+      // log("-- bind ") // DEBUG
+      let effect_type = Lit.Core.Type.effect(term.otyp)
+      let otype_ok    = Lit.Core.check.effect(context, term.effe, effect_type)
+      let cont_ok     = Lit.Core.check.term(context, term.body, type)
+      otype_ok && cont_ok
     return:
-      _ // TODO
+      // log("-- return ") // DEBUG
+      case type {
+        effect:
+          Lit.Core.check.term(context, term.expr, type.result)
+      } default false
   }
   //log("\n")
   result
 
 Lit.Core.check.effect(
   context: Lit.Core.Check.Context
-  type: Lit.Core.Type
   effect: Lit.Core.Effect
+  type: Lit.Core.Type
 ): Bool
+//type Lit.Core.Effect {
+//  // Stores a global state
+//  define(
+//    expr: Lit.Core.Term
+//  )
+//  // Calls an external program
+//  call(
+//    func: String
+//    args: List<Lit.Core.Term>
+//  )
+//  // Gets the name of the nth caller
+//  get_caller(
+//    indx: Lit.Core.Term
+//  )
+//  // Gets the nth 64-bit word of the call serialization
+//  get_call_code(
+//    indx: Lit.Core.Term
+//  )
+//  // Gets the size of the call serialization, in bits
+//  get_call_size
+//  // Gets the block miner
+//  get_block_miner
+//  // Gets the block nonce
+//  get_block_nonce
+//  // Gets the block number
+//  get_block_number
+//}
   case effect {
     define:
       _ // TODO
     call:
+    // bind:
+    //   let owner_ok = Lit.Core.World.check.owner(context, term.name)
+    //   use func = Lit.Core.World.get_func(term.name, context@world) abort false
+    //   use out_type = Lit.Core.World.get_type(func.output_type, context@world) abort false
+    //   let nofn_ok = List.is_empty!(func.input_names)  // TODO: should we allow binds with functions?
+    //   let main_ok = Lit.Core.check.term(context, term.main, out_type)
+    //   // should the ctx change?
+    //   let cont_ok = Lit.Core.check.term(context, term.cont, type)
+    //   owner_ok && nofn_ok && main_ok && cont_ok
+
       _ // TODO
     get_caller:
       _ // TODO
