@@ -269,13 +269,13 @@ Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
 type Lit.Core.Check.Context {
   new(
     world: Lit.Core.World
-    caller: Maybe<String>
+    caller: List<String>
     variables: Map<Lit.Core.Type>
   )
 }
 
 Lit.Core.Check.Context.from_world(world: Lit.Core.World): Lit.Core.Check.Context
-  Lit.Core.Check.Context.new(world, none, {})
+  Lit.Core.Check.Context.new(world, [], {})
 
 Lit.Core.Check.Context.add_var(
   context: Lit.Core.Check.Context
@@ -345,7 +345,7 @@ Lit.Core.check.term(
       exp && cont
     call:
       //log("-- call ")  // DEBUG
-      let ownr = Lit.Core.World.check.owner(context, term.func)
+      //let ownr = Lit.Core.World.check.owner(context, term.func)
       use func = Lit.Core.World.get_func(term.func, context@world) abort false
       let otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
       let args = Lit.Core.World.check.many(context, term.args, func.input_types)
@@ -382,7 +382,7 @@ Lit.Core.check.effect(
     store:
       open context
       // check owner
-      let ownr = Lit.Core.World.check.owner(context, effect.name)
+      let ownr = Lit.Core.World.check.can_store(List.head!(context.caller) <> "", effect.name, context.world)
       let entry = context.world{effect.name} abort false
       case entry {
         bond:
@@ -474,34 +474,17 @@ Lit.Core.World.check.match.cases(
       true
   } default false
 
-// TODO: simplify
-Lit.Core.World.check.owner(
-  context: Lit.Core.Check.Context
-  name: String
+// Checks if 
+Lit.Core.World.check.can_store(
+  user: String
+  target: String
+  world: Lit.Core.World
 ): Bool
-  open context
-  let entry = context.world{name}
-  case entry {
-    none: false
-    some: 
-      case entry.value as func {
-        bond: 
-          use f = func.value
-          case f.owners {
-            nil:
-              true
-            cons:
-              case context.caller as caller {
-                some:
-                  if caller.value =? name then
-                    true
-                  else
-                    List.in!(String.eql(caller.value), f.owners)
-                none:
-                  false
-              }
-          }
-      } default false
+  if String.eql(user, target) then
+    true
+  else case Lit.Core.World.get_func(target, world) as bond {
+    none: true
+    some: List.in!(String.eql(user), bond.value@owners)
   }
 
 //
@@ -586,7 +569,7 @@ Lit.Core.World.run.statement(
                   let new_context =
                     Lit.Core.Check.Context.new(
                       new_world
-                      some(func.name)
+                      [func.name] // TODO: should append to the caller list, not redefine it!
                       ctx.value
                     )
                   let term_ok = Lit.Core.check.term(
