@@ -112,26 +112,6 @@ app_when: App.When<App.Hello.State>
     }
   } default App.pass!
 
-// Parses a number
-Parser.num: Parser(Parser.Number)
-  Parser {
-    get sign = Parser.choice!([
-      Parser.text("+")
-      Parser.text("-")
-    ])
-    get numb = Parser.nat
-    get frac = Parser {
-      Parser.maybe!(Parser.text("."))
-      Parser.maybe!(Parser.nat)
-    }
-    return Parser.Number.new(sign, numb, frac)
-  }
-
-
-
-
-
-
-
-
+// Renders the name of 3 different League of Legends characters
+render_lol_champions: DOM
 
