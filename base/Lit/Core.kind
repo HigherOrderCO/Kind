@@ -3,7 +3,7 @@
 
 // TODO:
 // - cost measure Almost there
-// - Lit.Core.Term.get_caller ?
+// - Litereum.Term.get_caller ?
 // - block difficulty (nakamoto consensus)
 // - Lit.Lang:
 //   - consertar parser para ir ate o final do arquivo !
@@ -14,23 +14,22 @@
 // -----
 
 // A Litereum term
-type Lit.Core.Term {
+type Litereum.Term {
   // A variable
   var(
     name: String
   )
   // Creates a value
   create(
-    type: String
+    type: Litereum.Type
     ctor: Nat
-    vals: List<Lit.Core.Term>
+    vals: List<Litereum.Term>
   )
   // Pattern-matches a value
   match(
-    name: String
-    type: String
-    expr: Lit.Core.Term
-    cses: List<Lit.Core.Term.Case>
+    type: Litereum.Type
+    expr: Litereum.Term
+    cses: List<Litereum.Case>
   )
   // Creates a new 64-bit word
   word(
@@ -38,80 +37,46 @@ type Lit.Core.Term {
   )
   // Compares two words
   compare(
-    val0: Lit.Core.Term
-    val1: Lit.Core.Term
-    iflt: Lit.Core.Term
-    ifeq: Lit.Core.Term
-    ifgt: Lit.Core.Term
+    val0: Litereum.Term
+    val1: Litereum.Term
+    iflt: Litereum.Term
+    ifeq: Litereum.Term
+    ifgt: Litereum.Term
   )
   // Binary operation on words
   operate(
-    oper: Lit.Core.Operation
-    val0: Lit.Core.Term
-    val1: Lit.Core.Term
+    oper: Litereum.Operation
+    val0: Litereum.Term
+    val1: Litereum.Term
   )
   // Binds a variable
   let(
     name: String
-    otyp: Lit.Core.Type
-    expr: Lit.Core.Term
-    body: Lit.Core.Term
+    type: Litereum.Type
+    expr: Litereum.Term
+    body: Litereum.Term
   )
   // Call external function
   call(
-    func: String
-    otyp: Lit.Core.Type
-    args: List<Lit.Core.Term>
+    bond: String
+    args: List<Litereum.Term>
   )
-  // The monadic effect binder
-  bind(
-    name: String
-    otyp: Lit.Core.Type
-    effe: Lit.Core.Effect
-    body: Lit.Core.Term
-  )
-  // The monadic effect return
-  return(
-    expr: Lit.Core.Term
+  // An monadic IO block
+  io(
+    bloc: Litereum.IO
   )
 }
 
-type Lit.Core.Effect {
-  // Stores a global state
-  store(
-    name: String
-    expr: Lit.Core.Term
-  )
-  // Runs a monadic value
-  run(
-    expr: Lit.Core.Term
-  )
-  get(
-    val: Lit.Core.Getter
+// A pattern-matching case
+type Litereum.Case {
+  new(
+    fields: List<String>
+    body: Litereum.Term
   )
 }
 
-type Lit.Core.Getter {
-  // Gets the size of the `do` block serialization, in bits
-  get_code_size
-  // Gets the nth 64-bit word of the `do` block serialization
-  get_code_chunk(indx: Lit.Core.Term)
-  // Gets the size of the extra data, in bits
-  get_extra_size
-  // Gets the nth 64-bit word of the extra data
-  get_extra_chunk(indx: Lit.Core.Term)
-  // Gets the block miner
-  get_block_miner
-  // Gets the block number
-  get_block_number
-  // Gets the block nonce
-  get_block_nonce
-  // Gets the name of the nth caller
-  get_caller(indx: Lit.Core.Term)
-}
-
-// An operation
-type Lit.Core.Operation {
+// A binary operation on words
+type Litereum.Operation {
   add
   sub
   mul
@@ -122,123 +87,188 @@ type Lit.Core.Operation {
   xor
 }
 
-// A pattern-matching case
-type Lit.Core.Term.Case {
-  new(
-    fields: List<String>
-    body: Lit.Core.Term
+// An effectiful computation
+type Litereum.IO {
+  // Chains two effects monadically
+  bind(
+    name: String
+    type: Litereum.Type
+    effe: Litereum.Effect
+    body: Litereum.IO
+  )
+  // Returns an expression from the block
+  pure(
+    expr: Litereum.Term
   )
 }
 
-// Lit.Core types
-type Lit.Core.Type {
-  // A 64-bit word
+// An IO effect
+type Litereum.Effect {
+  // Runs a monadic value
+  run(
+    expr: Litereum.Term
+  )
+  // Redefines a global bond
+  def(
+    name: String
+    main: Litereum.Term
+  )
+  // Gets the size of the `do` block serialization, in bits
+  //get_code_size
+  //// Gets the nth 64-bit word of the `do` block serialization
+  //get_code_chunk(
+    //indx: Litereum.Term
+  //)
+  //// Gets the size of the extra data, in bits
+  //get_extra_size
+  //// Gets the nth 64-bit word of the extra data
+  //get_extra_chunk(
+    //indx: Litereum.Term
+  //)
+  //// Gets the block miner
+  //get_block_miner
+  //// Gets the block number
+  //get_block_number
+  //// Gets the block nonce
+  //get_block_nonce
+  //// Gets the name of the nth caller
+  //get_caller(indx: Litereum.Term)
+}
+
+// A type reference
+type Litereum.Type {
   word
-  // An algebraic datatype
-  data(
-    name: String
-    constructors: List<Lit.Core.Type.Constructor>
-  )
-  // A monadic effect
-  effect(
-    result: Lit.Core.Type
-  )
+  data(name: String)
+  io(result: Litereum.Type)
 }
 
-// A constructor of an ADT
-type Lit.Core.Type.Constructor {
+// A global algebraic datatype (ADT) declaration
+type Litereum.Data {
   new(
     name: String
-    fields: List<Lit.Core.Type.Field>
+    constructors: List<Litereum.Constructor>
   )
 }
 
-// A field of an ADT's constructor
-type Lit.Core.Type.Field {
+// An ADT's constructor
+type Litereum.Constructor {
   new(
     name: String
-    type: String
+    fields: List<Litereum.Annotation>
   )
 }
 
-// A function
-type Lit.Core.Bond {
+// A name:term pair
+// TODO: find a better name
+type Litereum.Substitution {
+  new(
+    name: String
+    term: Litereum.Term
+  )
+}
+
+// A name:type pair
+// TODO: find a better name
+type Litereum.Annotation {
+  new(
+    name: String
+    type: Litereum.Type
+  )
+}
+
+// A global smart-contract
+type Litereum.Bond {
   new(
     name: String
     owners: List<String>
-    main: Lit.Core.Term
-    input_names: List<String>
-    input_types: List<String>
-    output_type: String
+    main: Litereum.Term
+    inputs: List<Litereum.Annotation>
+    output: Litereum.Type
   )
 }
 
-// A Lit.Core global entry
-type Lit.Core.Entry {
-  type(value: Lit.Core.Type)
-  bond(value: Lit.Core.Bond)
+// A global entry
+type Litereum.Entry {
+  data(value: Litereum.Data)
+  bond(value: Litereum.Bond)
 }
 
-// Lit.Core's global state
-Lit.Core.World: Type
-  Map<Lit.Core.Entry>
+// Litereum's global state
+Litereum.World: Type
+  Map<Litereum.Entry>
 
 // A paragraph in a Litereum page
-type Lit.Core.Statement {
-  define(entry: Lit.Core.Entry)
-  call(expr: Lit.Core.Term)
+type Litereum.Statement {
+  define(entry: Litereum.Entry)
+  call(expr: Litereum.Term)
 }
 
 // A page of the Litereum book
-Lit.Core.Page: Type
-  List<Lit.Core.Statement>
+Litereum.Page: Type
+  List<Litereum.Statement>
 
-type Lit.Core.Costs {
+// A type-checking context
+type Litereum.Check.Context {
   new(
-    var: Nat
-    create: Nat
-    match: Nat
-    match_substitution: Nat
-    word: Nat
-    compare: Nat
-    operate: Nat
-    call: Nat
-    bind: Nat
+    world: Litereum.World
+    types: Map<Litereum.Type>
+    caller: List<String>
   )
 }
 
-// TODO remove this
-TempWidth: Nat
-  3
-
-Lit.Core.Costs.default: Lit.Core.Costs
-  Lit.Core.Costs.new(
-    Nat.pow(10, TempWidth*0)
-    Nat.pow(10, TempWidth*1)
-    Nat.pow(10, TempWidth*2)
-    Nat.pow(10, TempWidth*3)
-    Nat.pow(10, TempWidth*4)
-    Nat.pow(10, TempWidth*5)
-    Nat.pow(10, TempWidth*6)
-    Nat.pow(10, TempWidth*7)
-    Nat.pow(10, TempWidth*8)
+// An execution context
+type Litereum.Reduce.Context {
+  new(
+    world: Litereum.World
+    terms: Map<Litereum.Term>
+    caller: List<String>
   )
+}
+
+//type Litereum.Costs {
+  //new(
+    //var: Nat
+    //create: Nat
+    //match: Nat
+    //match_substitution: Nat
+    //word: Nat
+    //compare: Nat
+    //operate: Nat
+    //call: Nat
+    //bind: Nat
+  //)
+//}
+
+//// TODO remove this
+//TempWidth: Nat
+  //3
+
+//Litereum.Costs.default: Litereum.Costs
+  //Litereum.Costs.new(
+    //Nat.pow(10, TempWidth*0)
+    //Nat.pow(10, TempWidth*1)
+    //Nat.pow(10, TempWidth*2)
+    //Nat.pow(10, TempWidth*3)
+    //Nat.pow(10, TempWidth*4)
+    //Nat.pow(10, TempWidth*5)
+    //Nat.pow(10, TempWidth*6)
+    //Nat.pow(10, TempWidth*7)
+    //Nat.pow(10, TempWidth*8)
+  //)
 
 //
 // Getters and Setters
 // -------------------
 
-Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Type>
-  if name =? "U64" then
-    some(Lit.Core.Type.word)
-  else Maybe {
+Litereum.World.get_data(world: Litereum.World, name: String): Maybe<Litereum.Data>
+  Maybe {
     get entry = world{name}
     case entry {
       type: some(entry.value)
     } default none
   }
 
-Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bond>
+Litereum.World.get_bond(world: Litereum.World, name: String): Maybe<Litereum.Bond>
   Maybe {
     get entry = world{name}
     case entry {
@@ -246,640 +276,467 @@ Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bon
     } default none
   }
 
-Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Constructor>>
-  case type {
-    word:
-      none
-    data:
-      List.ifind!((i,f) String.eql(f@name,name), type.constructors)
-    effect:
-      none
+Litereum.get_constructor_by_name(data: Litereum.Data, name: String): Maybe<Pair<Nat,Litereum.Constructor>>
+  case data {
+    new: List.ifind!((i,f) String.eql(f@name,name), data.constructors)
   }
 
 //
 // Type-Checking
 // -------------
 
-Lit.Core.Type.equal(a: Lit.Core.Type, b: Lit.Core.Type): Bool
+Litereum.Type.equal(a: Litereum.Type, b: Litereum.Type): Bool
   case a b {
     word word: true
     data data: String.eql(a.name, b.name)
+    io io: Litereum.Type.equal(a.result, b.result)
   } default false
 
-type Lit.Core.Check.Context {
-  new(
-    world: Lit.Core.World
-    caller: List<String>
-    variables: Map<Lit.Core.Type>
-  )
-}
+Litereum.Check.Context.empty(world: Litereum.World): Litereum.Check.Context
+  Litereum.Check.Context.new(world, {}, [])
 
-Lit.Core.Check.Context.from_world(world: Lit.Core.World): Lit.Core.Check.Context
-  Lit.Core.Check.Context.new(world, [], {})
-
-Lit.Core.Check.Context.add_var(
-  context: Lit.Core.Check.Context
-  name: String
-  type: Lit.Core.Type
-): Lit.Core.Check.Context
+Litereum.Check.Context.extend(
+  context: Litereum.Check.Context
+  annotations: List<Litereum.Annotation>
+): Litereum.Check.Context
   open context
-  let new_variables = context.variables{name} <- type
-  Lit.Core.Check.Context.new(context.world, context.caller, new_variables)
+  case annotations {
+    cons: 
+      let {name, type} = annotations.head
+      let context = Litereum.Check.Context.new(context.world, context.types{name} <- type, context.caller)
+      let context = Litereum.Check.Context.extend(context, annotations.tail)
+      context
+  } default context
 
-Lit.Core.check.term(
-  context: Lit.Core.Check.Context
-  term: Lit.Core.Term
-  type: Lit.Core.Type
+Litereum.Check.term(
+  context: Litereum.Check.Context
+  term: Litereum.Term
+  type: Litereum.Type
 ): Bool
+  open context
   // log("- chk: " | Lit.Lang.show.term(term, context@world) | " : " | Lit.Lang.show.type.short(type))  // DEBUG
   // log("- ctx: " | String.join(", ", List.map!!((a) a@fst|":"|Lit.Lang.show.type.short(a@snd), Map.to_list!(variables))))  // DEBUG
   // log("")  // DEBUG
-  let result = case term {
+  case term {
     var:
-      let var_type = context@variables{term.name} abort false
-      //log("-- var " | term.name | " " | Lit.Lang.show.type.short(var_type) | " " | Lit.Lang.show.type.short(type))  // DEBUG
-      Lit.Core.Type.equal(var_type, type)
-    create:
-      //log("-- create")  // DEBUG
-      let ttyp = Lit.Core.World.get_type(term.type, context@world) abort false
-      case ttyp {
-        data:
-          use ctor = ttyp.constructors[term.ctor] abort false
-          let args = Lit.Core.World.check.many(context, term.vals, List.mapped!(ctor.fields)!((x) x@type))
-          args && Lit.Core.Type.equal(ttyp, type)
-      } default false
-    match:
-      //log("-- match ")  // DEBUG
-      let expr_type = Lit.Core.World.get_type(term.type, context@world) abort false
-      case expr_type {
-        data:
-          let expr = Lit.Core.check.term(context, term.expr, expr_type)
-          let cses = List.mapped!(term.cses)!((x) x@body)
-          let cses = Lit.Core.World.check.match.cases(context, cses, type, expr_type.constructors, term.name)
-          expr && cses
-      } default false
-    word:
-      // log("-- word ")  // DEBUG
-      case type {
-        word:
-          true
-      } default false
+      let var_type = context.types{term.name} abort false
+      ////log("-- var " | term.name | " " | Lit.Lang.show.type.short(var_type) | " " | Lit.Lang.show.type.short(type))  // DEBUG
+      Litereum.Type.equal(var_type, type)
+    create: case term.type type {
+      data data:
+        if String.eql(term.type.name, type.name) then
+          use data = Litereum.World.get_data(context.world, term.type.name) abort false
+          use ctor = data.constructors[term.ctor] abort false
+          Litereum.Check.terms(context, term.vals, List.mapped!(ctor.fields)!((x) x@type))
+        else
+          false
+    } default false
+    match: case term.type {
+      data:
+        use data = Litereum.World.get_data(context.world, term.type.name) abort false
+        let expr = Litereum.Check.term(context, term.expr, term.type)
+        let cses = Litereum.Check.cases(context, List.map!!((x) x@body, term.cses), data.constructors, type)
+        expr && cses
+    } default false
+    word: case type {
+      word: true
+    } default false
     compare:
       //log("-- compare ")  // DEBUG
-      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-      let val1 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-      let iflt = Lit.Core.check.term(context, term.iflt, type)
-      let ifeq = Lit.Core.check.term(context, term.ifeq, type)
-      let ifgt = Lit.Core.check.term(context, term.ifgt, type)
+      let val0 = Litereum.Check.term(context, term.val0, Litereum.Type.word)
+      let val1 = Litereum.Check.term(context, term.val0, Litereum.Type.word)
+      let iflt = Litereum.Check.term(context, term.iflt, type)
+      let ifeq = Litereum.Check.term(context, term.ifeq, type)
+      let ifgt = Litereum.Check.term(context, term.ifgt, type)
       val0 && val1 && iflt && ifeq && ifgt
     operate:
-      //log("-- operate ")  // DEBUG
-      let val0 = Lit.Core.check.term(context, term.val0, Lit.Core.Type.word)
-      let val1 = Lit.Core.check.term(context, term.val1, Lit.Core.Type.word)
+      let val0 = Litereum.Check.term(context, term.val0, Litereum.Type.word)
+      let val1 = Litereum.Check.term(context, term.val1, Litereum.Type.word)
       val0 && val1
     let:
       //log("-- let ")  // DEBUG
-      let exp = Lit.Core.check.term(context, term.expr, term.otyp)
-      let new_context = Lit.Core.Check.Context.add_var(context, term.name, term.otyp)
-      let cont = Lit.Core.check.term(new_context, term.body, type)
-      exp && cont
+      let expr = Litereum.Check.term(context, term.expr, term.type)
+      let ctx2 = Litereum.Check.Context.extend(context, [Litereum.Annotation.new(term.name, term.type)])
+      let cont = Litereum.Check.term(ctx2, term.body, type)
+      expr && cont
     call:
       //log("-- call ")  // DEBUG
-      //let ownr = Lit.Core.World.check.owner(context, term.func)
-      use func = Lit.Core.World.get_func(term.func, context@world) abort false
-      let otyp = Lit.Core.World.get_type(func.output_type, context@world) abort false
-      let args = Lit.Core.World.check.many(context, term.args, func.input_types)
-      let type_ok = Lit.Core.Type.equal(otyp, type)
-      args && type_ok
-    bind:
-      //log("-- bind ")  // DEBUG
-      case type {
-        effect:
-          let effe = Lit.Core.check.effect(context, term.effe, term.otyp)
-          // TODO should we extend the context even if we get and empty string as name?
-          let new_context = Lit.Core.Check.Context.add_var(context, term.name, term.otyp)
-          let cont = Lit.Core.check.term(new_context, term.body, type)
-          effe && cont
-      } default false
-    return:
-      // log("-- return ") // DEBUG
-      case type {
-        effect:
-          Lit.Core.check.term(context, term.expr, type.result)
-      } default false
-  }
-  result
-
-//bind k = v
-// store ab = 0
-// Unit/new
-Lit.Core.check.effect(
-  context: Lit.Core.Check.Context
-  effect: Lit.Core.Effect
-  type: Lit.Core.Type
-): Bool
-  case effect {
-    store:
-      open context
-      // check owner
-      let ownr = Lit.Core.World.check.can_store(List.head!(context.caller) <> "", effect.name, context.world)
-      let entry = context.world{effect.name} abort false
-      case entry {
-        bond:
-          open entry.value as bond
-          let inputs_ok = List.is_empty!(bond.input_names) && List.is_empty!(bond.input_types)
-          let otyp = context.variables{bond.output_type} abort false
-          let term_ok = Lit.Core.check.term(context, effect.expr, otyp)
-          ownr && inputs_ok && term_ok
-        type:
-          false
-      }
-    run:
-      Lit.Core.check.term(context, effect.expr, Lit.Core.Type.effect(type))
-    get: case type {
-      word: case effect.val {
-        get_code_chunk:
-          Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
-        get_extra_chunk:
-          Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
-        get_caller:
-          Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
-      } default true
+      //let ownr = Litereum.World.check.owner(context, term.func)
+      use bond = Litereum.World.get_bond(context.world, term.bond) abort false
+      let otyp = Litereum.Type.equal(bond.output, type)
+      let args = Litereum.Check.terms(context, term.args, List.map!!((x) x@type, bond.inputs))
+      otyp && args
+    io: case type {
+      io: Litereum.Check.io(context, term.bloc, type.result)
     } default false
-  }
+  } default false
 
-Lit.Core.check.getter(
-  context: Lit.Core.Check.Context
-  getter: Lit.Core.Getter
+Litereum.Check.io(
+  context: Litereum.Check.Context
+  term: Litereum.IO
+  type: Litereum.Type
 ): Bool
-  case getter {
-    get_code_size:
-      true
-    get_code_chunk:
-      Lit.Core.check.term(context, getter.indx, Lit.Core.Type.word)
-    get_extra_size:
-      true
-    get_extra_chunk:
-      Lit.Core.check.term(context, getter.indx, Lit.Core.Type.word)
-    get_block_miner:
-      true
-    get_block_number:
-      true
-    get_block_nonce:
-      true
-    get_caller:
-      Lit.Core.check.term(context, getter.indx, Lit.Core.Type.word)
+  case term { 
+    bind:
+      let effe = Litereum.Check.effect(context, term.effe, term.type)
+      let ctx2 = Litereum.Check.Context.extend(context, [Litereum.Annotation.new(term.name, term.type)])
+      let body = Litereum.Check.io(ctx2, term.body, type)
+      effe && body
+    pure:
+      Litereum.Check.term(context, term.expr, type)
   }
 
-Lit.Core.World.check.many(
-  context: Lit.Core.Check.Context,
-  terms: List<Lit.Core.Term>
-  types: List<String>
+Litereum.Check.effect(
+  context: Litereum.Check.Context
+  effect: Litereum.Effect
+  type: Litereum.Type
+): Bool
+  open context
+  case effect {
+    run:
+      // The run effect returns its annotated type.
+      //   bind x : A = $run(do { ... })
+      // In order for it to be valid, the type of its argument must be `IO<A>`.
+      Litereum.Check.term(context, effect.expr, Litereum.Type.io(type))
+    def: 
+      // The define effect always returns 0:
+      //   bind x : Word = $define(@foo, value)
+      // It rebinds the bond `@foo` as `value`, then sets `x = 0`. 
+      // In order for it to be valid, the annotated type *must* be Word, the
+      // bond must exist, must be a constant (no inputs), and the caller must be
+      // listed on the bond's owners list.
+      case type {
+        word:
+          open context
+          use bond = Litereum.World.get_bond(context.world, effect.name) abort false
+          let cllr = List.head!(context.caller) <> ""
+          let ownr = String.eql(cllr, effect.name) || List.in!(String.eql(cllr), bond.owners)
+          let ityp = List.is_empty!(bond.inputs)
+          ownr && ityp
+      } default false
+    // TODO: getter effects
+    //get: ...
+  } default false
+
+Litereum.Check.terms(
+  context: Litereum.Check.Context
+  terms: List<Litereum.Term>
+  types: List<Litereum.Type>
 ): Bool
   case terms types {
     cons cons:
-      let type = Lit.Core.World.get_type(types.head, context@world) abort false
-      let head = Lit.Core.check.term(context, terms.head, type)
-      let tail = Lit.Core.World.check.many(context, terms.tail, types.tail)
+      let head = Litereum.Check.term(context, terms.head, types.head)
+      let tail = Litereum.Check.terms(context, terms.tail, types.tail)
       head && tail
     nil nil:
       true
   } default false
 
-Lit.Core.World.check.match.cases(
-  context: Lit.Core.Check.Context
-  cases: List<Lit.Core.Term>
-  type: Lit.Core.Type
-  ctors: List<Lit.Core.Type.Constructor>
-  name: String
+Litereum.Check.cases(
+  context: Litereum.Check.Context
+  cases: List<Litereum.Term>
+  ctors: List<Litereum.Constructor>
+  type: Litereum.Type
 ): Bool
   open context
   case cases ctors {
     cons cons:
-      let ext_variables = context.variables
-      for field in ctors.head@fields with ext_variables:
-        let field_type =
-          Lit.Core.World.get_type(field@type, context.world)
-            <> Lit.Core.Type.data("Empty", [])
-        ext_variables{name | "." | field@name} <- field_type
-      let new_context = Lit.Core.Check.Context.new(
-        context.world
-        context.caller
-        ext_variables
-      )
-      let case_ok = Lit.Core.check.term(new_context, cases.head, type)
-      let rest_ok = Lit.Core.World.check.match.cases(new_context, cases.tail, type, ctors.tail, name)
-      case_ok && rest_ok
+      let ctx2 = Litereum.Check.Context.extend(context, ctors.head@fields)
+      let head = Litereum.Check.term(ctx2, cases.head, type)
+      let tail = Litereum.Check.cases(context, cases.tail, ctors.tail, type)
+      head && tail
     nil nil:
       true
   } default false
 
-// Checks if 
-Lit.Core.World.check.can_store(
-  user: String
-  target: String
-  world: Lit.Core.World
-): Bool
-  if String.eql(user, target) then
-    true
-  else case Lit.Core.World.get_func(target, world) as bond {
-    none: true
-    some: List.in!(String.eql(user), bond.value@owners)
-  }
-
-//
 // Execution
 // ---------
 
-//Pair<Lit.Core.Term, Lit.Core.World>
-// TODO remove. pass all as parameters
-type Lit.Core.run.Context {
-  new(
-    term: Lit.Core.Term
-    world: Lit.Core.World
-    gas: Nat
-  )
-}
+Litereum.Reduce.Context.substitute(
+  context: Litereum.Reduce.Context
+  substitutions: List<Litereum.Substitution>
+): Litereum.Reduce.Context
+  open context
+  case substitutions {
+    cons: 
+      use substitution = substitutions.head
+      let terms = context.terms{substitution.name} <- substitution.term
+      let context = Litereum.Reduce.Context.new(context.world, terms, context.caller)
+      let context = Litereum.Reduce.Context.substitute(context, substitutions.tail)
+      context
+  } default context
 
-Lit.Core.World.run.page(
-  page: Lit.Core.Page
-  world: Lit.Core.World
-): Maybe<Lit.Core.World>
-  case page {
-    nil:
-      some(world)
-    cons:
-      case Lit.Core.World.run.statement(page.head, world) as new_world {
-        none:
-          none
-        some:
-          Lit.Core.World.run.page(page.tail, new_world.value)
-      }
-  }
-
-Lit.Core.World.run.statement(
-  statement: Lit.Core.Statement
-  world: Lit.Core.World
-): Maybe<Lit.Core.World>
-  let result = case statement {
-    define:
-      case statement.entry {
-        type:
-          let type = statement.entry.value
-          case type {
-            word:
-              log("error: word as an entry definition")
-              none
-            data: 
-              log("- new_type: " | type.name)
-              case world{type.name} as got_type {
-                none:
-                  if not(type.name =? "U64") then
-                    some(world{type.name} <- Lit.Core.Entry.type(type))
-                  else
-                    log("error: cannot redefine built-in type named 'U64'") none
-              } default log("error: type redefinition: " | type.name) none
-            effect:
-              _ // TODO
-          }
-        bond:
-          use func = statement.entry.value
-          log("- new_func: " | func.name | List.show!(Function.id!, func.owners))
-          case world{func.name} as got {
-            none:
-              let new_world = world{func.name} <- Lit.Core.Entry.bond(func)
-              let ctx = some({})
-              let args = List.zip!!(func.input_names, func.input_types)
-              let ctx = for arg in args:
-                Maybe {
-                let {arg_name, arg_type} = arg
-                get ctx = ctx
-                get typ = Lit.Core.World.get_type(arg_type, world)
-                return ctx{arg_name} <- typ
-              }
-              let vld = {}
-              let vld = for iarg in func.input_names:
-                vld{iarg} <- false
-              case ctx {
-                none:
-                  log("error: func input type undefined: " | func.name) none
-                some:
-                  let otyp = Lit.Core.World.get_type(func.output_type, world)
-                    abort log("error: func otyp not found: " | func.name) none
-                  let new_context =
-                    Lit.Core.Check.Context.new(
-                      new_world
-                      [func.name] // TODO: should append to the caller list, not redefine it!
-                      ctx.value
-                    )
-                  let term_ok = Lit.Core.check.term(
-                      new_context
-                      func.main
-                      otyp
-                    )
-                  if term_ok then
-                    some(new_world)
-                  else
-                    // log(Lit.Lang.show.type(otyp, world))
-                    log("error: func ill-typed: " | func.name) none
-              }
-          } default log("error: func redefinition: " | func.name) none
-      }
-    call:
-      let exec_term = statement.expr
-      // log(Lit.Lang.show.term(exec_term, world))  // DEBUG
-      // This assumes that the call returns the built-in type Word to avoid
-      // duplicating the typechecking function.
-      let call_type = Lit.Core.Type.word
-      let context = Lit.Core.Check.Context.from_world(world)
-      let term_ok = Lit.Core.check.term(context, exec_term, call_type)
-      if term_ok then
-        use ctx =
-          Lit.Core.World.run.term(exec_term, world, {}, 0) // TODO
-        // log("- ext_exec: "  // DEBUG
-        //   | Lit.Lang.show.term(ctx.term, world)
-        //   | " (gas:\n"
-        //   | let ops = List.reverse!(["var", "create", "match", "match_substitution", "word", "compare", "operate", "call", "bind"])
-        //     let str = String.pad_left(TempWidth*9, '0', Nat.show(ctx.gas))
-        //     let str_list = List.zip!!(ops, String.chunks_of(TempWidth, str))
-        //     let fin = ""
-        //     for os in str_list with fin:
-        //       let {op, s} = os
-        //       fin | "  " | op | ": " | s | "\n"
-        //     fin
-        //   | ")"
-        // )
-        some(ctx.world)
-      else
-        log("error: exec failed in typecheck") none
-  }
-  // log("")  // DEBUG
-  result
-
-Lit.Core.World.run.term(
-  term: Lit.Core.Term
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
+Litereum.Reduce.term(
+  context: Litereum.Reduce.Context
+  term: Litereum.Term
   gas: Nat
-): Lit.Core.run.Context
+): Pair<Nat, Litereum.Term>
   // log("- run " | Lit.Lang.show.term(term,world)) // DEBUG
   // log("- var " | String.join(", ", List.map!!((x) x@fst|":"|Lit.Lang.show.term(x@snd,world), Map.to_list!(vars)))) // DEBUG
   // log("")
+  open context
   case term {
     var:
-      log("var!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@var
-      Lit.Core.World.run.term.var(world, vars, term.name, gas)
+      {gas, context.terms{term.name} <> term}
     create:
-      log("create!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@create
-      Lit.Core.World.run.term.create(world, vars, term.type, term.ctor, term.vals, gas)
+      let {gas,vals} = Litereum.Reduce.terms(context, term.vals, gas)
+      {gas, Litereum.Term.create(term.type, term.ctor, vals)}
     match:
-      log("match!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@match
-      Lit.Core.World.run.term.match(world, vars, term.name, term.type, term.expr, term.cses, gas)
+      let {gas,expr} = Litereum.Reduce.term(context, term.expr, gas)
+      case expr {
+        create:
+          use matched_case = term.cses[expr.ctor] abort {gas,term}
+          let substitutions = List.zip_with!!!(Litereum.Substitution.new, matched_case.fields, expr.vals)
+          let context = Litereum.Reduce.Context.substitute(context, substitutions)
+          Litereum.Reduce.term(context, matched_case.body, gas)
+      } default {gas,term}
     word:
-      log("word!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@word
-      {term, world, gas}
+      {gas, term}
     compare:
-      log("compare!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@compare
-      Lit.Core.World.run.term.compare(world, vars, term.val0, term.val1, term.iflt, term.ifeq, term.ifgt, gas)
+      let {gas,val0} = Litereum.Reduce.term(context, term.val0, gas)
+      let {gas,val1} = Litereum.Reduce.term(context, term.val1, gas)
+      case val0 val1 {
+        word word: case U64.cmp(val0.numb, val0.numb) {
+          ltn: Litereum.Reduce.term(context, term.iflt, gas)
+          eql: Litereum.Reduce.term(context, term.ifeq, gas)
+          gtn: Litereum.Reduce.term(context, term.ifgt, gas)
+        }
+      } default {gas, term}
     operate:
-      log("operate!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@operate
-      Lit.Core.World.run.term.operate(world, vars, term.oper, term.val0, term.val1, gas)
-    call:
-      log("call!") // DEBUG
-      let gas = gas + Lit.Core.Costs.default@call
-      //Lit.Core.World.run.term.call(world, vars, term.func, term.args, term.cont, gas)
-      _ // TODO
-    // bind:
-    //   log("bind!") // DEBUG
-    //   let gas = gas + Lit.Core.Costs.default@bind
-    //   Lit.Core.World.run.term.bind(world, vars, term.name, term.main, term.cont, gas)
-    bind:
-      _  // TODO
-    return:
-      _  // TODO
+      let {gas,val0} = Litereum.Reduce.term(context, term.val0, gas)
+      let {gas,val1} = Litereum.Reduce.term(context, term.val1, gas)
+      case val0 val1 {
+        word word: case term.oper {
+          add: {gas, Litereum.Term.word(U64.add(val0.numb,val1.numb))}
+          sub: {gas, Litereum.Term.word(U64.sub(val0.numb,val1.numb))}
+          mul: {gas, Litereum.Term.word(U64.mul(val0.numb,val1.numb))}
+          div: {gas, Litereum.Term.word(U64.div(val0.numb,val1.numb))}
+          mod: {gas, Litereum.Term.word(U64.mod(val0.numb,val1.numb))}
+          or:  {gas, Litereum.Term.word(U64.or( val0.numb,val1.numb))}
+          and: {gas, Litereum.Term.word(U64.and(val0.numb,val1.numb))}
+          xor: {gas, Litereum.Term.word(U64.xor(val0.numb,val1.numb))}
+        }
+      } default {gas, term}
     let:
-      _ // TODO
+      let {gas,expr} = Litereum.Reduce.term(context, term.expr, gas)
+      let context = Litereum.Reduce.Context.substitute(context, [Litereum.Substitution.new(term.name, expr)])
+      let {gas,body} = Litereum.Reduce.term(context, term.body, gas)
+      {gas, body}
+    call:
+      use bond = Litereum.World.get_bond(context.world, term.bond) abort {gas, term}
+      let {gas,args} = Litereum.Reduce.terms(context, term.args, gas)
+      let substitutions = List.zip_with!!!(Litereum.Substitution.new, List.map!!((x) x@name, bond.inputs), args)
+      let context = Litereum.Reduce.Context.substitute(context, substitutions)
+      let {gas,term} = Litereum.Reduce.term(context, bond.main, gas)
+      {gas, term}
+    io:
+      let {gas,bloc} = Litereum.Reduce.io(context, term.bloc, gas)
+      {gas, Litereum.Term.io(bloc)}
   }
 
-Lit.Core.World.run.terms(
-  terms: List<Lit.Core.Term>
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
+Litereum.Reduce.terms(
+  context: Litereum.Reduce.Context
+  terms: List<Litereum.Term>
   gas: Nat
-): Triple<List<Lit.Core.Term>, Lit.Core.World, Nat>
+): Pair<Nat, List<Litereum.Term>>
+  open context
   case terms {
     nil:
-      {[], world, gas}
+      {gas, []}
     cons:
-      use ctx = Lit.Core.World.run.term(terms.head, world, vars, gas)
-      use tail = Lit.Core.World.run.terms(terms.tail, ctx.world, vars, ctx.gas)
-      {ctx.term & tail.fst, tail.snd, tail.trd}
+      let {gas,head} = Litereum.Reduce.term(context, terms.head, gas)
+      let {gas,tail} = Litereum.Reduce.terms(context, terms.tail, gas)
+      {gas, head & tail}
   }
 
-Lit.Core.World.run.term.call(
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
-  func: String
-  args: List<Lit.Core.Term>
-  cont: Lit.Core.Term
+Litereum.Reduce.io(
+  context: Litereum.Reduce.Context
+  term: Litereum.IO
   gas: Nat
-): Lit.Core.run.Context
-  case world{func} as got {
-    none:
-      // {Lit.Core.Term.call(name, func, args, cont), world, gas}
-      _   // TODO
-    some:
-      case got.value as entry {
-        bond:
-          use func = entry.value
-          let inner_vars = vars
-          let state = Triple.new!!!(inner_vars, world, gas)
-          for arg in List.zip!!(func.input_names, args) with state:
-            // TODO destructuring assignment for triples
-            open state
-            let inner_vars = state.fst
-            let world = state.snd
-            let gas = state.trd
-            let {arg_name, arg_term} = arg
-            use ctx = Lit.Core.World.run.term(arg_term, world, inner_vars, gas)
-            let inner_vars = inner_vars{arg_name} <- ctx.term
-            {inner_vars, ctx.world, ctx.gas}
-          //let {inner_vars, world} = state
-          // TODO destructuring assignment for triples
-          open state
-          let inner_vars = state.fst
-          let world = state.snd
-          let gas = state.trd
-          use ctx = Lit.Core.World.run.term(func.main, world, inner_vars, gas)
-          //Lit.Core.World.run.term(cont, ctx.world, vars, ctx.gas)
-          _ //TODO
-      } default
-        // {Lit.Core.Term.call(name, func, args, cont), world, gas}
-        _ // TODO
+): Pair<Nat, Litereum.IO>
+  case term {
+    bind:
+      let {gas,effe} = Litereum.Reduce.effect(context, term.effe, gas)
+      let context = Litereum.Reduce.Context.substitute(context, [Litereum.Substitution.new(term.name, Litereum.Term.var(term.name))])
+      let {gas,body} = Litereum.Reduce.io(context, term.body, gas)
+      {gas, Litereum.IO.bind(term.name, term.type, effe, body)}
+    pure:
+      let {gas,expr} = Litereum.Reduce.term(context, term.expr, gas)
+      {gas, Litereum.IO.pure(expr)}
   }
 
-Lit.Core.World.run.term.compare(
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
-  val0: Lit.Core.Term
-  val1: Lit.Core.Term
-  iflt: Lit.Core.Term
-  ifeq: Lit.Core.Term
-  ifgt: Lit.Core.Term
+Litereum.Reduce.effect(
+  context: Litereum.Reduce.Context
+  effect: Litereum.Effect
   gas: Nat
-): Lit.Core.run.Context
-  use ctx0 = Lit.Core.World.run.term(val0, world, vars, gas)
-  use ctx1 = Lit.Core.World.run.term(val1, ctx0.world, vars, ctx0.gas)
-  case ctx0.term ctx1.term {
-    word word:
-      case U64.cmp(ctx0.term.numb, ctx1.term.numb) {
-        ltn:
-          Lit.Core.World.run.term(iflt, world, vars, ctx1.gas)
-        eql:
-          Lit.Core.World.run.term(ifeq, world, vars, ctx1.gas)
-        gtn:
-          Lit.Core.World.run.term(ifgt, world, vars, ctx1.gas)
-      }
-  } default
-    log("error: operands didn't reduce to words")
-    {Lit.Core.Term.compare(val0, val1, iflt, ifeq, ifgt), world, gas}
+): Pair<Nat, Litereum.Effect>
+  case effect {
+    run:
+      let {gas,expr} = Litereum.Reduce.term(context, effect.expr, gas)
+      {gas, Litereum.Effect.run(expr)}
+    def:
+      // TODO: must extend context with vars to avoid substitution
+      let {gas,main} = Litereum.Reduce.term(context, effect.main, gas)
+      {gas, Litereum.Effect.def(effect.name, main)}
+  } default {gas, effect}
 
-
-Lit.Core.World.run.term.match(
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
-  name: String
-  type: String
-  expr: Lit.Core.Term
-  cses: List<Lit.Core.Term.Case>
+Litereum.Run.io(
+  context: Litereum.Reduce.Context
+  io: Litereum.IO
   gas: Nat
-): Lit.Core.run.Context
-  use ctx = Lit.Core.World.run.term(expr, world, vars, gas)
-  case ctx.term {
-    create: case cses[ctx.term.ctor] as selected_case {
-      some: 
-        let {case_fields, case_body} = selected_case.value
-        let substs = List.zip!!(case_fields, ctx.term.vals)
-        let vars = for subst in substs:
-          let {field, value} = subst
-          vars{field} <- value
-        let cost = Lit.Core.Costs.default@match_substitution*List.length!(substs)
-        let gas = ctx.gas + cost
-        Lit.Core.World.run.term(case_body, ctx.world, vars, gas)
-    } default
-      {Lit.Core.Term.match(name, type, ctx.term, cses), world, ctx.gas}
-  } default
-    {Lit.Core.Term.match(name, type, ctx.term, cses), world, ctx.gas}
-
-Lit.Core.World.run.term.create(
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
-  type: String
-  ctor: Nat
-  vals: List<Lit.Core.Term>
-  gas: Nat
-): Lit.Core.run.Context
-  use ret = Lit.Core.World.run.terms(vals, world, vars, gas)
-  {Lit.Core.Term.create(type, ctor, ret.fst), ret.snd, ret.trd}
-
-Lit.Core.World.run.term.var(
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
-  name: String
-  gas: Nat
-): Lit.Core.run.Context
-  case vars{name} as got {
-    none:
-      {Lit.Core.Term.var(name), world, gas}
-    some:
-      Lit.Core.World.run.term(got.value, world, vars, gas)
+): Triple<Litereum.World, Nat, Litereum.Term>
+  open context
+  case io {
+    bind: case io.effe {
+      run:
+        let {gas, expr} = Litereum.Reduce.term(context, io.effe.expr, gas)
+        case expr {
+          io: 
+            use result = Litereum.Run.io(context, expr.bloc, gas)
+            let context = Litereum.Reduce.Context.substitute(context, [Litereum.Substitution.new(io.name, result.trd)])
+            let context = context@world <- result.fst
+            Litereum.Run.io(context, io.body, result.snd)
+        } default {context.world, gas, Litereum.Term.word(0)}
+      def:
+        let {gas,main} = Litereum.Reduce.term(context, io.effe.main, gas)
+        use bond = Litereum.World.get_bond(context.world, io.effe.name) abort {context.world, gas, Litereum.Term.word(0)}
+        let bond = bond@main <- main
+        let world = context.world{io.effe.name} <- Litereum.Entry.bond(bond)
+        let context = Litereum.Reduce.Context.substitute(context, [Litereum.Substitution.new(io.name, Litereum.Term.word(0))])
+        let context = context@world <- world
+        Litereum.Run.io(context, io.body, gas)
+    }
+    pure:
+      {context.world, gas, io.expr}
   }
 
-Lit.Core.World.run.term.operate(
-  world: Lit.Core.World
-  vars: Map<Lit.Core.Term>
-  oper: Lit.Core.Operation
-  val0: Lit.Core.Term
-  val1: Lit.Core.Term
-  gas: Nat
-): Lit.Core.run.Context
-  use ctx0 = Lit.Core.World.run.term(val0, world, vars, gas)
-  use ctx1 = Lit.Core.World.run.term(val1, ctx0.world, vars, ctx0.gas)
-  case ctx0.term ctx1.term {
-    word word:
-      let numb0 = ctx0.term.numb
-      let numb1 = ctx1.term.numb
-      case oper {
-        add:
-          {Lit.Core.Term.word(numb0 + numb1), world, gas}
-        sub:
-          {Lit.Core.Term.word(numb0 - numb1), world, gas}
-        mul:
-          {Lit.Core.Term.word(numb0 * numb1), world, gas}
-        div:
-          {Lit.Core.Term.word(numb0 / numb1), world, gas}
-        mod:
-          {Lit.Core.Term.word(numb0 % numb1), world, gas}
-        or:
-          {Lit.Core.Term.word(numb0 || numb1), world, gas}
-        and:
-          {Lit.Core.Term.word(numb0 && numb1), world, gas}
-        xor:
-          {Lit.Core.Term.word(U64.xor(numb0, numb1)), world, gas}
-      }
-  } default
-    log("error: operand didn't reduce to word")
-    {Lit.Core.Term.operate(oper, val0, val1), world, gas}
+//Litereum.World.run.page(
+  //page: Litereum.Page
+  //world: Litereum.World
+//): Maybe<Litereum.World>
+  //case page {
+    //nil:
+      //some(world)
+    //cons:
+      //case Litereum.World.run.statement(page.head, world) as new_world {
+        //none:
+          //none
+        //some:
+          //Litereum.World.run.page(page.tail, new_world.value)
+      //}
+  //}
 
-// Lit.Core.World.run.term.bind(
-//   world: Lit.Core.World
-//   vars: Map<Lit.Core.Term>
-//   name: String
-//   main: Lit.Core.Term
-//   cont: Lit.Core.Term
-//   gas: Nat
-// ): Lit.Core.run.Context
-//   case world{name} as got {
-//     none:
-//       {Lit.Core.Term.bind(name, main, cont), world, gas}
-//     some:
-//       case got.value as entry {
-//         bond:
-//           // TODO calculate gas based upon size of bound term?
-//           use func = entry.value
-//           use ctx = Lit.Core.World.run.term(main, world, vars, gas)
-//           let world = ctx.world{name} <- Lit.Core.Entry.bond(func@main <- ctx.term)
-//           Lit.Core.World.run.term(cont, world, vars, ctx.gas)
-//       } default
-//         {Lit.Core.Term.bind(name, main, cont), world, gas}
-//   }
-
-Lit.Core.run.term.bind(
-  context: Lit.Core.run.Context
-  effect: Lit.Core.Effect
-  cont: Lit.Core.Term
-): Lit.Core.run.Context
-  _ // TODO
+//Litereum.World.run.statement(
+  //statement: Litereum.Statement
+  //world: Litereum.World
+//): Maybe<Litereum.World>
+  //let result = case statement {
+    //define:
+      //case statement.entry {
+        //type:
+          //let type = statement.entry.value
+          //case type {
+            //word:
+              //log("error: word as an entry definition")
+              //none
+            //data: 
+              //log("- new_type: " | type.name)
+              //case world{type.name} as got_type {
+                //none:
+                  //if not(type.name =? "U64") then
+                    //some(world{type.name} <- Litereum.Entry.type(type))
+                  //else
+                    //log("error: cannot redefine built-in type named 'U64'") none
+              //} default log("error: type redefinition: " | type.name) none
+            //effect:
+              //_ // TODO
+          //}
+        //bond:
+          //use func = statement.entry.value
+          //log("- new_func: " | func.name | List.show!(Function.id!, func.owners))
+          //case world{func.name} as got {
+            //none:
+              //let new_world = world{func.name} <- Litereum.Entry.bond(func)
+              //let ctx = some({})
+              //let args = List.zip!!(func.input_names, func.input_types)
+              //let ctx = for arg in args:
+                //Maybe {
+                //let {arg_name, arg_type} = arg
+                //get ctx = ctx
+                //get typ = Litereum.World.get_type(arg_type, world)
+                //return ctx{arg_name} <- typ
+              //}
+              //let vld = {}
+              //let vld = for iarg in func.input_names:
+                //vld{iarg} <- false
+              //case ctx {
+                //none:
+                  //log("error: func input type undefined: " | func.name) none
+                //some:
+                  //let otyp = Litereum.World.get_type(func.output_type, world)
+                    //abort log("error: func otyp not found: " | func.name) none
+                  //let new_context =
+                    //Litereum.Check.Context.new(
+                      //new_world
+                      //[func.name] // TODO: should append to the caller list, not redefine it!
+                      //ctx.value
+                    //)
+                  //let term_ok = Litereum.check.term(
+                      //new_context
+                      //func.main
+                      //otyp
+                    //)
+                  //if term_ok then
+                    //some(new_world)
+                  //else
+                    //// log(Lit.Lang.show.type(otyp, world))
+                    //log("error: func ill-typed: " | func.name) none
+              //}
+          //} default log("error: func redefinition: " | func.name) none
+      //}
+    //call:
+      //let exec_term = statement.expr
+      //// log(Lit.Lang.show.term(exec_term, world))  // DEBUG
+      //// This assumes that the call returns the built-in type Word to avoid
+      //// duplicating the typechecking function.
+      //let call_type = Litereum.Type.word
+      //let context = Litereum.Check.Context.from_world(world)
+      //let term_ok = Litereum.check.term(context, exec_term, call_type)
+      //if term_ok then
+        //use ctx =
+          //Litereum.Compute.term(exec_term, world, {}, 0) // TODO
+        //// log("- ext_exec: "  // DEBUG
+        ////   | Lit.Lang.show.term(ctx.term, world)
+        ////   | " (gas:\n"
+        ////   | let ops = List.reverse!(["var", "create", "match", "match_substitution", "word", "compare", "operate", "call", "bind"])
+        ////     let str = String.pad_left(TempWidth*9, '0', Nat.show(ctx.gas))
+        ////     let str_list = List.zip!!(ops, String.chunks_of(TempWidth, str))
+        ////     let fin = ""
+        ////     for os in str_list with fin:
+        ////       let {op, s} = os
+        ////       fin | "  " | op | ": " | s | "\n"
+        ////     fin
+        ////   | ")"
+        //// )
+        //some(ctx.world)
+      //else
+        //log("error: exec failed in typecheck") none
+  //}
+  //// log("")  // DEBUG
+  //result
 
 // Serialization
 // -------------
-// TODO: remove Bits.kind, move serialization here, complete it
 
-Lit.serialize.uint(size: Nat, value: Nat): Bits
+Litereum.serialize.uint(size: Nat, value: Nat): Bits
   case size {
     zero: Bits.e
     succ: if (value % 2) =? 0
-      then Bits.o(Lit.serialize.uint(size.pred, value / 2))
-      else Bits.i(Lit.serialize.uint(size.pred, value / 2))
+      then Bits.o(Litereum.serialize.uint(size.pred, value / 2))
+      else Bits.i(Litereum.serialize.uint(size.pred, value / 2))
   }
 
-Lit.deserialize.uint(size: Nat, bits: Bits): Pair<Bits,Nat>
+Litereum.deserialize.uint(size: Nat, bits: Bits): Pair<Bits,Nat>
   case size {
     zero:
       {bits, 0}
@@ -888,15 +745,15 @@ Lit.deserialize.uint(size: Nat, bits: Bits): Pair<Bits,Nat>
         e:
           {Bits.e, 0}
         o:
-          let {bits, value} = Lit.deserialize.uint(size.pred, bits.pred)
+          let {bits, value} = Litereum.deserialize.uint(size.pred, bits.pred)
           {bits, 2 * value}
         i:
-          let {bits, value} = Lit.deserialize.uint(size.pred, bits.pred)
+          let {bits, value} = Litereum.deserialize.uint(size.pred, bits.pred)
           {bits, 1 + 2 * value}
       }
   }
 
-Lit.serialize.name(name: String): Bits
+Litereum.serialize.name(name: String): Bits
   case name {
     nil:
       Bits.e
@@ -907,14 +764,14 @@ Lit.serialize.name(name: String): Bits
         else if U16.btw('a', name.head, 'z') then U16.add(U16.sub(name.head, 'a'), 36#16)
         else if U16.btw('_', name.head, '_') then 62#16
         else 63#16)
-      let head = Lit.serialize.uint(6, U16.to_nat(numb))
-      let tail = Lit.serialize.name(name.tail)
+      let head = Litereum.serialize.uint(6, U16.to_nat(numb))
+      let tail = Litereum.serialize.name(name.tail)
       Bits.concat(head, tail)
   }
 
-Lit.deserialize.name(bits: Bits): Pair<Bits,String>
-  let {bits, numb} = Lit.deserialize.uint(6, bits)
-  let {bits, tail} = Lit.deserialize.name(bits)
+Litereum.deserialize.name(bits: Bits): Pair<Bits,String>
+  let {bits, numb} = Litereum.deserialize.uint(6, bits)
+  let {bits, tail} = Litereum.deserialize.name(bits)
   let numb = Nat.to_u16(numb)
   let head =
     (    if U16.btw( 0, numb,  9) then U16.add(numb, '0')
@@ -924,13 +781,13 @@ Lit.deserialize.name(bits: Bits): Pair<Bits,String>
     else '.')
   {bits, String.cons(head,tail)}
 
-Lit.serialize.list<A: Type>(item: A -> Bits, list: List<A>): Bits
+Litereum.serialize.list<A: Type>(item: A -> Bits, list: List<A>): Bits
   case list {
     nil: Bits.o(Bits.e)
-    cons: Bits.i(Bits.concat(item(list.head), Lit.serialize.list<A>(item, list.tail)))
+    cons: Bits.i(Bits.concat(item(list.head), Litereum.serialize.list<A>(item, list.tail)))
   }
 
-Lit.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits,List<A>>
+Litereum.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits,List<A>>
   case bits {
     e:
       {Bits.e, []}
@@ -938,375 +795,374 @@ Lit.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits
       {bits.pred, []}
     i:
       let {bits, head} = item(bits.pred)
-      let {bits, tail} = Lit.deserialize.list<A>(item, bits)
+      let {bits, tail} = Litereum.deserialize.list<A>(item, bits)
       {bits, head & tail}
   }
 
-Lit.serialize.term(term: Lit.Core.Term): Bits
+Litereum.serialize.term(term: Litereum.Term): Bits
   case term {
     var:
-      Bits.o(Bits.o(Bits.o(Lit.serialize.name(term.name))))
+      Bits.o(Litereum.serialize.name(term.name))
     create:
-      let type = Lit.serialize.name(term.type)
-      let ctor = Lit.serialize.uint(8, term.ctor)
-      let vals = Lit.serialize.list!(Lit.serialize.term, term.vals)
-      Bits.i(Bits.o(Bits.o(Bits.concat(type, Bits.concat(ctor, vals)))))
+      let type = Litereum.serialize.type(term.type)
+      let ctor = Litereum.serialize.uint(8, term.ctor)
+      let vals = Litereum.serialize.list!(Litereum.serialize.term, term.vals)
+      Bits.i(Bits.o(Bits.o(Bits.o(Bits.concat(type, Bits.concat(ctor, vals))))))
     match:
-      let name = Lit.serialize.name(term.name)
-      let type = Lit.serialize.name(term.type)
-      let expr = Lit.serialize.term(term.expr)
-      let cses = Lit.serialize.list!((cse)
-        open cse
-        let fields = Lit.serialize.list!(Lit.serialize.name, cse.fields)
-        let body = Lit.serialize.term(cse.body)
-        Bits.concat(fields, body),
-        term.cses)
-      Bits.o(Bits.i(Bits.o(Bits.concat(name, Bits.concat(type, Bits.concat(expr, cses))))))
+      let type = Litereum.serialize.type(term.type)
+      let expr = Litereum.serialize.term(term.expr)
+      let cses = Litereum.serialize.list!(Litereum.serialize.case, term.cses)
+      Bits.i(Bits.i(Bits.o(Bits.o(Bits.concat(type, Bits.concat(expr, cses))))))
     word:
-      let numb = Lit.serialize.uint(64, U64.to_nat(term.numb))
-      Bits.i(Bits.i(Bits.o(numb)))
+      let numb = Litereum.serialize.uint(64, U64.to_nat(term.numb))
+      Bits.i(Bits.o(Bits.i(Bits.o(numb))))
     compare:
-      let val0 = Lit.serialize.term(term.val0)
-      let val1 = Lit.serialize.term(term.val1)
-      let iflt = Lit.serialize.term(term.iflt)
-      let ifeq = Lit.serialize.term(term.ifeq)
-      let ifgt = Lit.serialize.term(term.ifgt)
-      Bits.o(Bits.o(Bits.i(Bits.concat(val0, Bits.concat(val1, Bits.concat(iflt, Bits.concat(ifeq, ifgt)))))))
+      let val0 = Litereum.serialize.term(term.val0)
+      let val1 = Litereum.serialize.term(term.val1)
+      let iflt = Litereum.serialize.term(term.iflt)
+      let ifeq = Litereum.serialize.term(term.ifeq)
+      let ifgt = Litereum.serialize.term(term.ifgt)
+      Bits.i(Bits.i(Bits.i(Bits.o(Bits.concat(val0, Bits.concat(val1, Bits.concat(iflt, Bits.concat(ifeq, ifgt))))))))
     operate:
-      let oper = Lit.serialize.uint(3, case term.oper { add:0, sub:1, mul:2, div:3, mod:4, or:5, and:6, xor:7 })
-      let val0 = Lit.serialize.term(term.val0)
-      let val1 = Lit.serialize.term(term.val1)
-      Bits.i(Bits.o(Bits.i(Bits.concat(oper, Bits.concat(val0, val1)))))
-    bind:
-      let name = Lit.serialize.name(term.name)
-      let otyp = Lit.serialize.type(term.otyp)
-      let effe = Lit.serialize.effect(term.effe)
-      let body = Lit.serialize.term(term.body)
-      Bits.o(Bits.i(Bits.i(Bits.concat(name, Bits.concat(otyp, Bits.concat(effe, body))))))
-    return:
-      let expr = Lit.serialize.term(term.expr)
-      Bits.i(Bits.i(Bits.i(expr)))
-    call:
-      _ // TODO
+      let oper = Litereum.serialize.uint(3, case term.oper { add:0, sub:1, mul:2, div:3, mod:4, or:5, and:6, xor:7 })
+      let val0 = Litereum.serialize.term(term.val0)
+      let val1 = Litereum.serialize.term(term.val1)
+      Bits.i(Bits.o(Bits.o(Bits.i(Bits.concat(oper, Bits.concat(val0, val1))))))
     let:
-      _ // TODO
+      let name = Litereum.serialize.name(term.name)
+      let type = Litereum.serialize.type(term.type)
+      let expr = Litereum.serialize.term(term.expr)
+      let body = Litereum.serialize.term(term.body)
+      Bits.i(Bits.i(Bits.o(Bits.i(Bits.concat(name, Bits.concat(type, Bits.concat(expr, body)))))))
+    call:
+      let bond = Litereum.serialize.name(term.bond)
+      let args = Litereum.serialize.list!(Litereum.serialize.term, term.args)
+      Bits.i(Bits.o(Bits.i(Bits.i(Bits.concat(bond, args)))))
+    io:
+      let bloc = Litereum.serialize.io(term.bloc)
+      Bits.i(Bits.i(Bits.i(Bits.i(bloc))))
   }
 
-Lit.deserialize.term(bits: Bits): Pair<Bits,Lit.Core.Term>
-  let {bits,ctor} = Lit.deserialize.uint(3, bits)
-  switch U16.eql(Nat.to_u16(ctor)) {
-    0#16:
-      let {bits,name} = Lit.deserialize.name(bits)
-      {bits, Lit.Core.Term.var(name)}
-    1#16:
-      let {bits,type} = Lit.deserialize.name(bits)
-      let {bits,ctor} = Lit.deserialize.uint(8, bits)
-      let {bits,vals} = Lit.deserialize.list!(Lit.deserialize.term, bits)
-      {bits, Lit.Core.Term.create(type, ctor, vals)}
-    2#16:
-      let {bits,name} = Lit.deserialize.name(bits)
-      let {bits,type} = Lit.deserialize.name(bits)
-      let {bits,expr} = Lit.deserialize.term(bits)
-      let {bits,cses} = Lit.deserialize.list!((bits)
-        let {bits,fields} = Lit.deserialize.list!(Lit.deserialize.name, bits)
-        let {bits,body} = Lit.deserialize.term(bits)
-        {bits, Lit.Core.Term.Case.new(fields, body)},
-        bits)
-      {bits, Lit.Core.Term.match(name,type,expr,cses)}
-    3#16:
-      let {bits,numb} = Lit.deserialize.uint(8,bits)
-      {bits, Lit.Core.Term.word(Nat.to_u64(numb))}
-    4#16:
-      let {bits,val0} = Lit.deserialize.term(bits)
-      let {bits,val1} = Lit.deserialize.term(bits)
-      let {bits,iflt} = Lit.deserialize.term(bits)
-      let {bits,ifeq} = Lit.deserialize.term(bits)
-      let {bits,ifgt} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Term.compare(val0,val1,iflt,ifeq,ifgt)}
-    5#16:
-      let {bits,oper} = Lit.deserialize.uint(3, bits)
-      let {bits,val0} = Lit.deserialize.term(bits)
-      let {bits,val1} = Lit.deserialize.term(bits)
-      let oper = switch U16.eql(Nat.to_u16(oper)) {
-        0#16: Lit.Core.Operation.add
-        1#16: Lit.Core.Operation.sub
-        2#16: Lit.Core.Operation.mul
-        3#16: Lit.Core.Operation.div
-        4#16: Lit.Core.Operation.mod
-        5#16: Lit.Core.Operation.or
-        6#16: Lit.Core.Operation.and
-        7#16: Lit.Core.Operation.xor
-      } default Lit.Core.Operation.add
-      {bits, Lit.Core.Term.operate(oper,val0,val1)}
-    6#16:
-      let {bits,name} = Lit.deserialize.name(bits)
-      let {bits,otyp} = Lit.deserialize.type(bits)
-      let {bits,effe} = Lit.deserialize.effect(bits)
-      let {bits,body} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Term.bind(name,otyp,effe,body)}
-    7#16:
-      let {bits,expr} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Term.return(expr)}
-  } default {bits, Lit.Core.Term.word(0)}
+Litereum.deserialize.term(bits: Bits): Pair<Bits,Litereum.Term>
+  case bits {
+    o:
+      let {bits,name} = Litereum.deserialize.name(bits.pred)
+      {bits, Litereum.Term.var(name)}
+    i:
+      let {bits,ctor} = Litereum.deserialize.uint(3, bits.pred)
+      switch Nat.eql(ctor) {
+        0:
+          let {bits,type} = Litereum.deserialize.type(bits)
+          let {bits,ctor} = Litereum.deserialize.uint(8, bits)
+          let {bits,vals} = Litereum.deserialize.list!(Litereum.deserialize.term, bits)
+          {bits, Litereum.Term.create(type, ctor, vals)}
+        1:
+          let {bits,type} = Litereum.deserialize.type(bits)
+          let {bits,expr} = Litereum.deserialize.term(bits)
+          let {bits,cses} = Litereum.deserialize.list!(Litereum.deserialize.case, bits)
+          {bits, Litereum.Term.match(type,expr,cses)}
+        2:
+          let {bits,numb} = Litereum.deserialize.uint(8,bits)
+          {bits, Litereum.Term.word(Nat.to_u64(numb))}
+        3:
+          let {bits,val0} = Litereum.deserialize.term(bits)
+          let {bits,val1} = Litereum.deserialize.term(bits)
+          let {bits,iflt} = Litereum.deserialize.term(bits)
+          let {bits,ifeq} = Litereum.deserialize.term(bits)
+          let {bits,ifgt} = Litereum.deserialize.term(bits)
+          {bits, Litereum.Term.compare(val0,val1,iflt,ifeq,ifgt)}
+        4:
+          let {bits,oper} = Litereum.deserialize.uint(3, bits)
+          let {bits,val0} = Litereum.deserialize.term(bits)
+          let {bits,val1} = Litereum.deserialize.term(bits)
+          let oper = switch U16.eql(Nat.to_u16(oper)) {
+            0#16: Litereum.Operation.add
+            1#16: Litereum.Operation.sub
+            2#16: Litereum.Operation.mul
+            3#16: Litereum.Operation.div
+            4#16: Litereum.Operation.mod
+            5#16: Litereum.Operation.or
+            6#16: Litereum.Operation.and
+            7#16: Litereum.Operation.xor
+          } default Litereum.Operation.add
+          {bits, Litereum.Term.operate(oper,val0,val1)}
+        5:
+          let {bits,name} = Litereum.deserialize.name(bits)
+          let {bits,type} = Litereum.deserialize.type(bits)
+          let {bits,expr} = Litereum.deserialize.term(bits)
+          let {bits,body} = Litereum.deserialize.term(bits)
+          {bits, Litereum.Term.let(name,type,expr,body)}
+        6:
+          let {bits,bond} = Litereum.deserialize.name(bits)
+          let {bits,args} = Litereum.deserialize.list!(Litereum.deserialize.term, bits)
+          {bits, Litereum.Term.call(bond,args)}
+        7:
+          let {bits,bloc} = Litereum.deserialize.io(bits)
+          {bits, Litereum.Term.io(bloc)}
+      } default {bits, Litereum.Term.word(0)}
+  } default {bits, Litereum.Term.word(0)}
 
-// GPT-3 
+Litereum.serialize.case(cse: Litereum.Case): Bits
+  open cse
+  let fields = Litereum.serialize.list!(Litereum.serialize.name, cse.fields)
+  let body = Litereum.serialize.term(cse.body)
+  Bits.concat(fields, body)
 
-Lit.serialize.effect(effect: Lit.Core.Effect): Bits
+Litereum.deserialize.case(bits: Bits): Pair<Bits, Litereum.Case>
+  let {bits,fields} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
+  let {bits,body} = Litereum.deserialize.term(bits)
+  {bits, Litereum.Case.new(fields,body)}
+
+Litereum.serialize.io(io: Litereum.IO): Bits
+  case io {
+    bind:
+      let name = Litereum.serialize.name(io.name)
+      let type = Litereum.serialize.type(io.type)
+      let effe = Litereum.serialize.effect(io.effe)
+      let body = Litereum.serialize.io(io.body)
+      Bits.o(Bits.concat(name, Bits.concat(type, Bits.concat(effe, body))))
+    pure:
+      let expr = Litereum.serialize.term(io.expr)
+      Bits.i(expr)
+  }
+
+Litereum.deserialize.io(bits: Bits): Pair<Bits,Litereum.IO>
+  case bits {
+    o:
+      let {bits,name} = Litereum.deserialize.name(bits.pred)
+      let {bits,type} = Litereum.deserialize.type(bits)
+      let {bits,effe} = Litereum.deserialize.effect(bits)
+      let {bits,body} = Litereum.deserialize.io(bits)
+      {bits, Litereum.IO.bind(name,type,effe,body)}
+    i:
+      let {bits,expr} = Litereum.deserialize.term(bits.pred)
+      {bits, Litereum.IO.pure(expr)}
+  } default {bits, Litereum.IO.pure(Litereum.Term.word(0))}
+
+Litereum.serialize.effect(effect: Litereum.Effect): Bits
   case effect {
-    store:
-      // TODO name
-      let expr = Lit.serialize.term(effect.expr)
-      Bits.o(Bits.o(Bits.o(expr)))
     run:
-      // let func = Lit.serialize.name(effect.func)
-      // let args = Lit.serialize.list!(Lit.serialize.term, effect.args)
-      // Bits.i(Bits.o(Bits.o(Bits.concat(func, args))))
-      _
-    get:
-      _ // TODO
-//    get_caller:
-//      let indx = Lit.serialize.term(effect.indx)
-//      Bits.o(Bits.i(Bits.o(indx)))
-//    get_call_code:
-//      let indx = Lit.serialize.term(effect.indx)
-//      Bits.i(Bits.i(Bits.o(indx)))
-//    get_call_size:
-//      Bits.o(Bits.o(Bits.i(Bits.e)))
-//    get_block_miner:
-//      Bits.i(Bits.o(Bits.i(Bits.e)))
-//    get_block_nonce:
-//      Bits.o(Bits.i(Bits.i(Bits.e)))
-//    get_block_number:
-//      Bits.i(Bits.i(Bits.i(Bits.e)))
-  }
+      let expr = Litereum.serialize.term(effect.expr)
+      Bits.o(expr)
+    def:
+      let name = Litereum.serialize.name(effect.name)
+      let body = Litereum.serialize.term(effect.main)
+      Bits.i(Bits.concat(name, body))
+  } default Bits.e
 
-Lit.deserialize.effect(bits: Bits): Pair<Bits,Lit.Core.Effect>
-  let {bits,ctor} = Lit.deserialize.uint(3, bits)
-  switch U16.eql(Nat.to_u16(ctor)) {
-    0#16:
-      // TODO name
-      let {bits,expr} = Lit.deserialize.term(bits)
-      {bits, Lit.Core.Effect.store("", expr)}
-    1#16:
-      // let {bits,func} = Lit.deserialize.name(bits)
-      // let {bits,args} = Lit.deserialize.list!(Lit.deserialize.term, bits)
-      // {bits, Lit.Core.Effect.call(func, args)}
-      _ // TODO
-    2#16:
-      // let {bits,indx} = Lit.deserialize.term(bits)
-      // {bits, Lit.Core.Effect.get_caller(indx)}
-      _ // TODO
-    3#16:
-      // let {bits,indx} = Lit.deserialize.term(bits)
-      // {bits, Lit.Core.Effect.get_call_code(indx)}
-      _ // TODO
-    4#16:
-      // {bits, Lit.Core.Effect.get_call_size}
-      _ // TODO
-    5#16:
-      // {bits, Lit.Core.Effect.get_block_miner}
-      _ // TODO
-    6#16:
-      // {bits, Lit.Core.Effect.get_block_nonce}
-      _ // TODO
-    7#16:
-      // {bits, Lit.Core.Effect.get_block_number}
-      _ // TODO
-  } default // {bits, Lit.Core.Effect.get_block_number}
-    _ // TODO
+Litereum.deserialize.effect(bits: Bits): Pair<Bits,Litereum.Effect>
+  let {bits,ctor} = Litereum.deserialize.uint(4, bits)
+  switch Nat.eql(ctor) {
+    0: 
+      let {bits,expr} = Litereum.deserialize.term(bits)
+      {bits, Litereum.Effect.run(expr)}
+    1: 
+      let {bits,name} = Litereum.deserialize.name(bits)
+      let {bits,body} = Litereum.deserialize.term(bits)
+      {bits, Litereum.Effect.def(name,body)}
+  } default {bits, Litereum.Effect.run(Litereum.Term.word(0))}
 
-Lit.serialize.type(typ: Lit.Core.Type): Bits
+Litereum.serialize.type(typ: Litereum.Type): Bits
   case typ {
     word:
       Bits.o(Bits.o(Bits.e))
     data:
-      let name = Lit.serialize.name(typ.name)
-      let ctors = Lit.serialize.list!(Lit.serialize.constructor, typ.constructors)
-      Bits.i(Bits.o(Bits.concat(name, ctors)))
-    effect:
-      let result = Lit.serialize.type(typ.result)
+      let name = Litereum.serialize.name(typ.name)
+      Bits.i(Bits.o(name))
+    io:
+      let result = Litereum.serialize.type(typ.result)
       Bits.o(Bits.i(result))
   }
 
-Lit.deserialize.type(bits: Bits): Pair<Bits,Lit.Core.Type>
-  let {bits,ctor} = Lit.deserialize.uint(2, bits)
-  switch U16.eql(Nat.to_u16(ctor)) {
-    0#16:
-      {bits, Lit.Core.Type.word}
-    1#16:
-      let {bits,name} = Lit.deserialize.name(bits)
-      let {bits,ctors} = Lit.deserialize.list!(Lit.deserialize.constructor, bits)
-      {bits, Lit.Core.Type.data(name, ctors)}
-    2#16:
-      let {bits,result} = Lit.deserialize.type(bits)
-      {bits, Lit.Core.Type.effect(result)}
-  } default {bits, Lit.Core.Type.word}
+Litereum.deserialize.type(bits: Bits): Pair<Bits,Litereum.Type>
+  let {bits,ctor} = Litereum.deserialize.uint(2, bits)
+  switch Nat.eql(ctor) {
+    0:
+      {bits, Litereum.Type.word}
+    1:
+      let {bits,name} = Litereum.deserialize.name(bits)
+      {bits, Litereum.Type.data(name)}
+    2:
+      let {bits,result} = Litereum.deserialize.type(bits)
+      {bits, Litereum.Type.io(result)}
+  } default {bits, Litereum.Type.word}
 
-Lit.deserialize.constructor(bits: Bits): Pair<Bits,Lit.Core.Type.Constructor>
-  let {bits,name} = Lit.deserialize.name(bits)
-  let {bits,fields} = Lit.deserialize.list!(Lit.deserialize.type.field, bits)
-  {bits, Lit.Core.Type.Constructor.new(name, fields)}
+Litereum.serialize.data(data: Litereum.Data): Bits
+  open data
+  let name = Litereum.serialize.name(data.name)
+  let ctrs = Litereum.serialize.list!(Litereum.serialize.constructor, data.constructors)
+  Bits.concat(name, ctrs)
 
-Lit.serialize.constructor(ctor: Lit.Core.Type.Constructor): Bits
+Litereum.deserialize.data(bits: Bits): Pair<Bits, Litereum.Data>
+  let {bits,name} = Litereum.deserialize.name(bits)
+  let {bits,ctrs} = Litereum.deserialize.list!(Litereum.deserialize.constructor, bits)
+  {bits, Litereum.Data.new(name,ctrs)}
+  
+Litereum.deserialize.constructor(bits: Bits): Pair<Bits,Litereum.Constructor>
+  let {bits,name} = Litereum.deserialize.name(bits)
+  let {bits,fields} = Litereum.deserialize.list!(Litereum.deserialize.annotation, bits)
+  {bits, Litereum.Constructor.new(name, fields)}
+
+Litereum.serialize.constructor(ctor: Litereum.Constructor): Bits
   open ctor
-  let name = Lit.serialize.name(ctor.name)
-  let fields = Lit.serialize.list!(Lit.serialize.type.field, ctor.fields)
+  let name = Litereum.serialize.name(ctor.name)
+  let fields = Litereum.serialize.list!(Litereum.serialize.annotation, ctor.fields)
   Bits.concat(name, fields)
 
-Lit.serialize.type.field(field: Lit.Core.Type.Field): Bits
-  open field
-  let name = Lit.serialize.name(field.name)
-  let type = Lit.serialize.name(field.type)
+Litereum.serialize.annotation(annotation: Litereum.Annotation): Bits
+  open annotation
+  let name = Litereum.serialize.name(annotation.name)
+  let type = Litereum.serialize.type(annotation.type)
   Bits.i(Bits.i(Bits.i(Bits.concat(name, type))))
 
-Lit.deserialize.type.field(bits: Bits): Pair<Bits,Lit.Core.Type.Field>
-  let {bits,name} = Lit.deserialize.name(bits)
-  let {bits,type} = Lit.deserialize.name(bits)
-  {bits, Lit.Core.Type.Field.new(name, type)}
+Litereum.deserialize.annotation(bits: Bits): Pair<Bits,Litereum.Annotation>
+  let {bits,name} = Litereum.deserialize.name(bits)
+  let {bits,type} = Litereum.deserialize.type(bits)
+  {bits, Litereum.Annotation.new(name, type)}
 
-Lit.serialize.bond(bond: Lit.Core.Bond): Bits
-  open bond
-  let name = Lit.serialize.name(bond.name)
-  let owners = Lit.serialize.list!(Lit.serialize.name, bond.owners)
-  let main = Lit.serialize.term(bond.main)
-  let input_names = Lit.serialize.list!(Lit.serialize.name, bond.input_names)
-  let input_types = Lit.serialize.list!(Lit.serialize.name, bond.input_types)
-  let output_type = Lit.serialize.name(bond.output_type)
-  Bits.concat(name,
-  Bits.concat(owners,
-  Bits.concat(main,
-  Bits.concat(input_names,
-  Bits.concat(input_types, output_type)))))
+//Litereum.serialize.bond(bond: Litereum.Bond): Bits
+  //open bond
+  //let name = Litereum.serialize.name(bond.name)
+  //let owners = Litereum.serialize.list!(Litereum.serialize.name, bond.owners)
+  //let main = Litereum.serialize.term(bond.main)
+  //let input_names = Litereum.serialize.list!(Litereum.serialize.name, bond.input_names)
+  //let input_types = Litereum.serialize.list!(Litereum.serialize.name, bond.input_types)
+  //let output_type = Litereum.serialize.name(bond.output_type)
+  //Bits.concat(name,
+  //Bits.concat(owners,
+  //Bits.concat(main,
+  //Bits.concat(input_names,
+  //Bits.concat(input_types, output_type)))))
 
-Lit.deserialize.bond(bits: Bits): Pair<Bits,Lit.Core.Bond>
-  let {bits,name} = Lit.deserialize.name(bits)
-  let {bits,owners} = Lit.deserialize.list!(Lit.deserialize.name, bits)
-  let {bits,main} = Lit.deserialize.term(bits)
-  let {bits,input_names} = Lit.deserialize.list!(Lit.deserialize.name, bits)
-  let {bits,input_types} = Lit.deserialize.list!(Lit.deserialize.name, bits)
-  let {bits,output_type} = Lit.deserialize.name(bits)
-  {bits, Lit.Core.Bond.new(name, owners, main, input_names, input_types, output_type)}
+//Litereum.deserialize.bond(bits: Bits): Pair<Bits,Litereum.Bond>
+  //let {bits,name} = Litereum.deserialize.name(bits)
+  //let {bits,owners} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
+  //let {bits,main} = Litereum.deserialize.term(bits)
+  //let {bits,input_names} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
+  //let {bits,input_types} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
+  //let {bits,output_type} = Litereum.deserialize.name(bits)
+  //{bits, Litereum.Bond.new(name, owners, main, input_names, input_types, output_type)}
 
-Lit.serialize.entry(entry: Lit.Core.Entry): Bits
-  case entry {
-    type:
-      let type = Lit.serialize.type(entry.value)
-      Bits.o(type)
-    bond:
-      let bond = Lit.serialize.bond(entry.value)
-      Bits.i(bond)
-  }
+//Litereum.serialize.entry(entry: Litereum.Entry): Bits
+  //case entry {
+    //type:
+      //let type = Litereum.serialize.type(entry.value)
+      //Bits.o(type)
+    //bond:
+      //let bond = Litereum.serialize.bond(entry.value)
+      //Bits.i(bond)
+  //}
 
-Lit.deserialize.entry(bits: Bits): Pair<Bits,Lit.Core.Entry>
-  let {bits,ctor} = Lit.deserialize.uint(1, bits)
-  switch U16.eql(Nat.to_u16(ctor)) {
-    0#16:
-      let {bits,type} = Lit.deserialize.type(bits)
-      {bits, Lit.Core.Entry.type(type)}
-    1#16:
-      let {bits,bond} = Lit.deserialize.bond(bits)
-      {bits, Lit.Core.Entry.bond(bond)}
-  } default {bits, Lit.Core.Entry.type(Lit.Core.Type.word)}
+//Litereum.deserialize.entry(bits: Bits): Pair<Bits,Litereum.Entry>
+  //let {bits,ctor} = Litereum.deserialize.uint(1, bits)
+  //switch U16.eql(Nat.to_u16(ctor)) {
+    //0#16:
+      //let {bits,type} = Litereum.deserialize.type(bits)
+      //{bits, Litereum.Entry.type(type)}
+    //1#16:
+      //let {bits,bond} = Litereum.deserialize.bond(bits)
+      //{bits, Litereum.Entry.bond(bond)}
+  //} default {bits, Litereum.Entry.type(Litereum.Type.word)}
 
-// Tests
-// -----
+//// Tests
+//// -----
 
-// Lit.Core: _
-//   let world = {}
+//// Litereum: _
+////   let world = {}
 
-//   let code = ""
+////   let code = ""
 
-//   let code = code |
-//     Lit.Lang.Type
-//     | Lit.Lang.Cmp
-//     | Lit.Lang.Nat
-//     | Lit.Lang.Bits
-//     | Lit.Lang.BitsMap
-//     | Lit.Lang.Voting
-//     //| Lit.Lang.Test
+////   let code = code |
+////     Litereum.Lang.Type
+////     | Litereum.Lang.Cmp
+////     | Litereum.Lang.Nat
+////     | Litereum.Lang.Bits
+////     | Litereum.Lang.BitsMap
+////     | Litereum.Lang.Voting
+////     //| Litereum.Lang.Test
 
-// //  let code = code |
-// //  `
-// //    GiveUnit(): Unit
-// //      Unit/new
-// //
-// //    TakeUnit(x: Unit): U64
-// //      42
-// //
-// //    do {
-// //      call a1 = GiveUnit()
-// //      call a2 = GiveUnit()
-// //      call b = TakeUnit(a1)
-// //      call c = TakeUnit(a2)
-// //      (+ b c)
-// //    }
-// //  `
+//// //  let code = code |
+//// //  `
+//// //    GiveUnit(): Unit
+//// //      Unit/new
+//// //
+//// //    TakeUnit(x: Unit): U64
+//// //      42
+//// //
+//// //    do {
+//// //      call a1 = GiveUnit()
+//// //      call a2 = GiveUnit()
+//// //      call b = TakeUnit(a1)
+//// //      call c = TakeUnit(a2)
+//// //      (+ b c)
+//// //    }
+//// //  `
 
-//    let code = code |
-//    `
-// //  type Lit.Core.Costs {
-// //    new(
-// //      var: Nat
-// //      create: Nat
-// //      match: Nat
-// //      match_substitution: Nat
-// //      word: Nat
-// //      compare: Nat
-// //      operate: Nat
-// //      call: Nat
-// //      bind: Nat
-// //    )
-// //  }
+////    let code = code |
+////    `
+//// //  type Litereum.Costs {
+//// //    new(
+//// //      var: Nat
+//// //      create: Nat
+//// //      match: Nat
+//// //      match_substitution: Nat
+//// //      word: Nat
+//// //      compare: Nat
+//// //      operate: Nat
+//// //      call: Nat
+//// //      bind: Nat
+//// //    )
+//// //  }
     
-//     candidates(): Candidates
-//       Candidates/cons{
-//         count: Nat/zero, tail: Candidates/cons{
-//           count: Nat/zero, tail: Candidates/cons{
-//             count: Nat/zero, tail: Candidates/nil }}}
+////     candidates(): Candidates
+////       Candidates/cons{
+////         count: Nat/zero, tail: Candidates/cons{
+////           count: Nat/zero, tail: Candidates/cons{
+////             count: Nat/zero, tail: Candidates/nil }}}
     
-//     key1(): Bits
-//       Bits/o{pred: Bits/e}
+////     key1(): Bits
+////       Bits/o{pred: Bits/e}
     
-//     key2(): Bits
-//       Bits/i{pred: Bits/e}
+////     key2(): Bits
+////       Bits/i{pred: Bits/e}
 
-//     do {
-//       call cand  = candidates()
-//       call joao  = key1()
-//       call maria = key2()
+////     do {
+////       call cand  = candidates()
+////       call joao  = key1()
+////       call maria = key2()
       
-//       call m     = VotingMap.add(VotingMap/new, joao)
-//       call new_m = VotingMap.add(m, maria)
+////       call m     = VotingMap.add(VotingMap/new, joao)
+////       call new_m = VotingMap.add(m, maria)
 
-//       call new_m = VotingMap.allow_vote(new_m, joao)
-//       call new_m = VotingMap.allow_vote(new_m, maria)
+////       call new_m = VotingMap.allow_vote(new_m, joao)
+////       call new_m = VotingMap.allow_vote(new_m, maria)
 
-//       call result = VotingMap.vote(new_m, joao, Nat/succ{pred: Nat/zero}, cand)
-//       case result : VoteResult {
-//         new:
-//           call new_result = VotingMap.vote(result.map, maria, Nat/zero, result.candidates)
-//           case new_result : VoteResult {
-//             new:
-//               call winner = Candidates.get_winner(new_result.candidates)
-//               0
-//           }
-//       }
-//     }
-//    `
+////       call result = VotingMap.vote(new_m, joao, Nat/succ{pred: Nat/zero}, cand)
+////       case result : VoteResult {
+////         new:
+////           call new_result = VotingMap.vote(result.map, maria, Nat/zero, result.candidates)
+////           case new_result : VoteResult {
+////             new:
+////               call winner = Candidates.get_winner(new_result.candidates)
+////               0
+////           }
+////       }
+////     }
+////    `
 
-//   let page = Parser.run!(Lit.Lang.parser.page(world), code) abort IO.print("parse error")
+////   let page = Parser.run!(Litereum.Lang.parser.page(world), code) abort IO.print("parse error")
 
-//   log("PARSED:")   // DEBUG
-//   log(Lit.Lang.show.page(page, world))   // DEBUG
+////   log("PARSED:")   // DEBUG
+////   log(Litereum.Lang.show.page(page, world))   // DEBUG
 
-//   case Lit.Core.World.run.page(page, world) as result {
-//     none:
-//       IO.print("FAILURE")
-//     some:
-//       IO {
-//         // log("PAGE:")  // DEBUG
-//         // let new_world = result.value  // DEBUG
-//         // log(Lit.Lang.show.page(page, new_world))  // DEBUG
-//         IO.print("SUCCESS")
-//       }
-//   }
+////   case Litereum.World.run.page(page, world) as result {
+////     none:
+////       IO.print("FAILURE")
+////     some:
+////       IO {
+////         // log("PAGE:")  // DEBUG
+////         // let new_world = result.value  // DEBUG
+////         // log(Litereum.Lang.show.page(page, new_world))  // DEBUG
+////         IO.print("SUCCESS")
+////       }
+////   }
