@@ -207,12 +207,6 @@ type Lit.Core.Costs {
   )
 }
 
-Lit.Core.Type.is_word(t: Lit.Core.Type): Bool
-  case t {
-    word:
-      true
-  } default false
-
 // TODO remove this
 TempWidth: Nat
   3
@@ -401,18 +395,16 @@ Lit.Core.check.effect(
       }
     run:
       Lit.Core.check.term(context, effect.expr, Lit.Core.Type.effect(type))
-    get:
-      let word = Lit.Core.Type.is_word(type)
-      let get_ok =
-        case effect.val {
-          get_code_chunk:
-            Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
-          get_extra_chunk:
-            Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
-          get_caller:
-            Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
-        } default true
-      word && get_ok
+    get: case type {
+      word: case effect.val {
+        get_code_chunk:
+          Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
+        get_extra_chunk:
+          Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
+        get_caller:
+          Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
+      } default true
+    } default false
   }
 
 Lit.Core.check.getter(
