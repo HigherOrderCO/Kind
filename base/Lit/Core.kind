@@ -231,19 +231,20 @@ Lit.Core.Costs.default: Lit.Core.Costs
 Lit.Core.World.get_type(name: String, world: Lit.Core.World): Maybe<Lit.Core.Type>
   if name =? "U64" then
     some(Lit.Core.Type.word)
-  else
-    case world{name} as entry {
-      some: case entry.value {
-        type: some(entry.value.value)
-      } default none
+  else Maybe {
+    get entry = world{name}
+    case entry {
+      type: some(entry.value)
     } default none
+  }
 
 Lit.Core.World.get_func(name: String, world: Lit.Core.World): Maybe<Lit.Core.Bond>
-  case world{name} as entry {
-    some: case entry.value {
-      bond: some(entry.value.value)
+  Maybe {
+    get entry = world{name}
+    case entry {
+      bond: some(entry.value)
     } default none
-  } default none
+  }
 
 Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.Core.Type.Constructor>>
   case type {
