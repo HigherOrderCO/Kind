@@ -207,6 +207,12 @@ type Lit.Core.Costs {
   )
 }
 
+Lit.Core.Type.is_word(t: Lit.Core.Type): Bool
+  case t {
+    word:
+      true
+  } default false
+
 // TODO remove this
 TempWidth: Nat
   3
@@ -355,6 +361,7 @@ Lit.Core.check.term(
       case type {
         effect:
           let effe = Lit.Core.check.effect(context, term.effe, term.otyp)
+          // TODO should we extend the context even if we get and empty string as name?
           let new_context = Lit.Core.Check.Context.add_var(context, term.name, term.otyp)
           let cont = Lit.Core.check.term(new_context, term.body, type)
           effe && cont
@@ -368,45 +375,44 @@ Lit.Core.check.term(
   }
   result
 
+//bind k = v
+// store ab = 0
+// Unit/new
 Lit.Core.check.effect(
   context: Lit.Core.Check.Context
   effect: Lit.Core.Effect
   type: Lit.Core.Type
 ): Bool
-//type Lit.Core.Effect {
-//  // Stores a global state
-//  define(
-//    expr: Lit.Core.Term
-//  )
-//  // Calls an external program
-//  call(
-//    func: String
-//    args: List<Lit.Core.Term>
-//  )
-//  // Gets the name of the nth caller
-//  get_caller(
-//    indx: Lit.Core.Term
-//  )
-//  // Gets the nth 64-bit word of the call serialization
-//  get_call_code(
-//    indx: Lit.Core.Term
-//  )
-//  // Gets the size of the call serialization, in bits
-//  get_call_size
-//  // Gets the block miner
-//  get_block_miner
-//  // Gets the block nonce
-//  get_block_nonce
-//  // Gets the block number
-//  get_block_number
-//}
   case effect {
     store:
-      _ // TODO
+      open context
+      // check owner
+      let ownr = Lit.Core.World.check.owner(context, effect.name)
+      let entry = context.world{effect.name} abort false
+      case entry {
+        bond:
+          open entry.value as bond
+          let inputs_ok = List.is_empty!(bond.input_names) && List.is_empty!(bond.input_types)
+          let otyp = context.variables{bond.output_type} abort false
+          let term_ok = Lit.Core.check.term(context, effect.expr, otyp)
+          ownr && inputs_ok && term_ok
+        type:
+          false
+      }
     run:
-      _ // TODO
+      Lit.Core.check.term(context, effect.expr, Lit.Core.Type.effect(type))
     get:
-      _ // TODO
+      let word = Lit.Core.Type.is_word(type)
+      let get_ok =
+        case effect.val {
+          get_code_chunk:
+            Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
+          get_extra_chunk:
+            Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
+          get_caller:
+            Lit.Core.check.term(context, effect.val.indx, Lit.Core.Type.word)
+        } default true
+      word && get_ok
   }
 
 Lit.Core.check.getter(
@@ -458,7 +464,6 @@ Lit.Core.World.check.match.cases(
   case cases ctors {
     cons cons:
       let ext_variables = context.variables
-      
       for field in ctors.head@fields with ext_variables:
         let field_type =
           Lit.Core.World.get_type(field@type, context.world)
