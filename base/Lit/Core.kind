@@ -253,7 +253,7 @@ Lit.Core.Type.find_ctor(name: String, type: Lit.Core.Type): Maybe<Pair<Nat,Lit.C
     data:
       List.ifind!((i,f) String.eql(f@name,name), type.constructors)
     effect:
-      _ // TODO
+      none
   }
 
 //
