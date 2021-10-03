@@ -1,8 +1,6 @@
 Test: _
-  let list = [{1,"a"},{2,"b"},{3,"c"}] :: List<Pair<Nat,String>>
-  let sum  = ""
-  let sum  = for {a,b} in list: sum | b
-  sum
-  //let foo = {1, "foo", "bar"} :: Triple<Nat,String,String>
-  //let {a,b,c} = foo
-  //IO.print(b)
+  IO {
+    for i from 0 to 32:
+      let serial = Litereum.serialize.word.varlen(Nat.to_u64(i))
+      IO.print(Nat.show(i) | ": " | Bits.show(serial))
+  }

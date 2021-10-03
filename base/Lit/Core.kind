@@ -10,15 +10,6 @@
 // - paper:
 //   - use railroad diagrams for syntax
 
-//Buffer.nil
-//Buffer.cons
-//100 ~> "0"
-//101 ~> "1"
-//11000 ~> "00"
-//11001 ~> "01"
-//11010 ~> "10"
-//11011 ~> "11"
-
 // Types
 // -----
 
@@ -118,20 +109,21 @@ type Litereum.Entry {
   bond(value: Litereum.Bond)
 }
 
-type Litereum.World {
-  new(
-    count: Nat
-    names: Map<String>
-    entry: Map<Litereum.Entry>
-  )
-}
-
 // A Litereum transaction
 type Litereum.Transaction {
   new_name(name: String)
   new_data(data: Litereum.Data)
   new_bond(bond: Litereum.Bond)
   run_term(term: Litereum.Term)
+}
+
+type Litereum.World {
+  new(
+    name_count: Nat
+    name_to_index: Map<Nat>
+    index_to_name: Map<String>
+    entry: Map<Litereum.Entry>
+  )
 }
 
 // Utils
@@ -337,9 +329,10 @@ Litereum.Transaction.run(
   open world
   case transaction {
     new_name:
-      let count = world.count
-      let world = world@count <- Nat.succ(count)
-      let world = world@names <- (world.names{Nat.show(count)} <- transaction.name)
+      let world = world@name_count <- world.name_count + 1
+      let world = world@name_to_index <- (world.name_to_index{transaction.name} <- world.name_count)
+      let world = world@index_to_name <- (world.index_to_name{Nat.show(world.name_count)} <- transaction.name)
+      let world = world@names <- names
       some(world)
     new_data:
       use data = transaction.data
@@ -373,356 +366,338 @@ Litereum.Transaction.run(
         none
   }
 
-//Litereum.Transaction.run.many(
-  //transactions: List<Litereum.Transaction>
-  //world: Litereum.World
-//): Maybe<Litereum.World>
-  //case transactions {
-    //nil:
-      //some(world)
-    //cons:
-      //case Litereum.Transaction.run(transactions.head, world) as result {
-        //none: none
-        //some: Litereum.Transaction.run.many(transactions.tail, result.value)
-      //}
-  //}
+Litereum.Transaction.run.many(
+  transactions: List<Litereum.Transaction>
+  world: Litereum.World
+): Maybe<Litereum.World>
+  case transactions {
+    nil: some(world)
+    cons: case Litereum.Transaction.run(transactions.head, world) as result {
+      none: none
+      some: Litereum.Transaction.run.many(transactions.tail, result.value)
+    }
+  }
 
-//// Serialization
-//// -------------
+// Serialization
+// -------------
 
-//Litereum.serialize.uint(size: Nat, value: Nat): Bits
-  //case size {
-    //zero: Bits.e
-    //succ: if (value % 2) =? 0
-      //then Bits.o(Litereum.serialize.uint(size.pred, value / 2))
-      //else Bits.i(Litereum.serialize.uint(size.pred, value / 2))
-  //}
+Litereum.serialize.varlen(value: Nat): Bits
+  Litereum.serialize.varlen.go(Nat.add(value,1))
 
-//Litereum.deserialize.uint(size: Nat, bits: Bits): Pair<Bits,Nat>
-  //case size {
-    //zero: {bits, 0}
-    //succ: case bits {
-      //e:
-        //{Bits.e, 0}
-      //o:
-        //let {bits, value} = Litereum.deserialize.uint(size.pred, bits.pred)
-        //{bits, 2 * value}
-      //i:
-        //let {bits, value} = Litereum.deserialize.uint(size.pred, bits.pred)
-        //{bits, 1 + 2 * value}
-    //}
-  //}
+Litereum.deserialize.varlen(bits: Bits): Pair<Bits,Nat>
+  let {bits,value} = Litereum.deserialize.varlen.go(bits)
+  {bits, Nat.sub(value,1)}
 
-//Litereum.serialize.name(name: String): Bits
-  //case name {
-    //nil:
-      //Bits.e
-    //cons:
-      //let numb =
-        //(    if U16.btw('0', name.head, '9') then U16.sub(name.head, '0')
-        //else if U16.btw('A', name.head, 'Z') then U16.add(U16.sub(name.head, 'A'), 10#16)
-        //else if U16.btw('a', name.head, 'z') then U16.add(U16.sub(name.head, 'a'), 36#16)
-        //else if U16.btw('_', name.head, '_') then 62#16
-        //else 63#16)
-      //let head = Litereum.serialize.uint(6, U16.to_nat(numb))
-      //let tail = Litereum.serialize.name(name.tail)
-      //Bits.concat(head, tail)
-  //}
+Litereum.serialize.varlen.go(value: Nat): Bits
+  if Nat.eql(value,1) then
+    Bits.o(Bits.e)
+  else if Nat.eql(Nat.mod(value,2),0)
+    then Bits.i(Bits.o(Litereum.serialize.varlen.go(Nat.div(value,2))))
+    else Bits.i(Bits.i(Litereum.serialize.varlen.go(Nat.div(value,2))))
 
-//Litereum.deserialize.name(bits: Bits): Pair<Bits,String>
-  //let {bits, numb} = Litereum.deserialize.uint(6, bits)
-  //let {bits, tail} = Litereum.deserialize.name(bits)
-  //let numb = Nat.to_u16(numb)
-  //let head =
-    //(    if U16.btw( 0, numb,  9) then U16.add(numb, '0')
-    //else if U16.btw(10, numb, 35) then U16.add(U16.sub(numb,10#16), 'A')
-    //else if U16.btw(36, numb, 61) then U16.add(U16.sub(numb,36#16), 'a')
-    //else if U16.btw(62, numb, 62) then '_'
-    //else '.')
-  //{bits, String.cons(head,tail)}
+Litereum.deserialize.varlen.go(bits: Bits): Pair<Bits,Nat>
+  case bits {
+    e: {Bits.e, 0}
+    o: {bits.pred, 0}
+    i: case bits.pred {
+      e: {bits.pred, 0}
+      o:
+        let {bits,x} = Litereum.deserialize.varlen.go(bits.pred.pred)
+        {bits, Nat.mul(x,2)}
+      i:
+        let {bits,x} = Litereum.deserialize.varlen.go(bits.pred.pred)
+        {bits, Nat.add(Nat.mul(x,2),1)}
+    }
+  }
 
-//Litereum.serialize.list<A: Type>(item: A -> Bits, list: List<A>): Bits
-  //case list {
-    //nil: Bits.o(Bits.e)
-    //cons: Bits.i(Bits.concat(item(list.head), Litereum.serialize.list<A>(item, list.tail)))
-  //}
+Litereum.serialize.fixlen(size: Nat, value: Nat): Bits
+  case size {
+    zero: Bits.e
+    succ: if Nat.eql(Nat.mod(value,2),0)
+      then Bits.o(Litereum.serialize.fixlen(size.pred, Nat.div(value,2)))
+      else Bits.i(Litereum.serialize.fixlen(size.pred, Nat.div(value,2)))
+  }
 
-//Litereum.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits,List<A>>
-  //case bits {
-    //e:
-      //{Bits.e, []}
-    //o:
-      //{bits.pred, []}
-    //i:
-      //let {bits, head} = item(bits.pred)
-      //let {bits, tail} = Litereum.deserialize.list<A>(item, bits)
-      //{bits, head & tail}
-  //}
+Litereum.deserialize.fixlen(size: Nat, bits: Bits): Pair<Bits,Nat>
+  case size {
+    zero: {bits, 0}
+    succ: case bits {
+      e: {Bits.e, 0}
+      o:
+        let {bits,x} = Litereum.deserialize.fixlen(size.pred, bits.pred)
+        {bits, Nat.mul(x,2)}
+      i:
+        let {bits,x} = Litereum.deserialize.fixlen(size.pred, bits.pred)
+        {bits, Nat.add(Nat.mul(x,2),1)}
+    }
+  }
 
-//Litereum.serialize.term(term: Litereum.Term): Bits
-  //case term {
-    //var:
-      //Bits.o(Litereum.serialize.name(term.name))
-    //create:
-      //let type = Litereum.serialize.type(term.type)
-      //let ctor = Litereum.serialize.uint(8, term.ctor)
-      //let vals = Litereum.serialize.list!(Litereum.serialize.term, term.vals)
-      //Bits.i(Bits.o(Bits.o(Bits.o(Bits.concat(type, Bits.concat(ctor, vals))))))
-    //match:
-      //let type = Litereum.serialize.type(term.type)
-      //let expr = Litereum.serialize.term(term.expr)
-      //let cses = Litereum.serialize.list!(Litereum.serialize.case, term.cses)
-      //Bits.i(Bits.i(Bits.o(Bits.o(Bits.concat(type, Bits.concat(expr, cses))))))
-    //word:
-      //let numb = Litereum.serialize.uint(64, U64.to_nat(term.numb))
-      //Bits.i(Bits.o(Bits.i(Bits.o(numb))))
-    //compare:
-      //let val0 = Litereum.serialize.term(term.val0)
-      //let val1 = Litereum.serialize.term(term.val1)
-      //let iflt = Litereum.serialize.term(term.iflt)
-      //let ifeq = Litereum.serialize.term(term.ifeq)
-      //let ifgt = Litereum.serialize.term(term.ifgt)
-      //Bits.i(Bits.i(Bits.i(Bits.o(Bits.concat(val0, Bits.concat(val1, Bits.concat(iflt, Bits.concat(ifeq, ifgt))))))))
-    //operate:
-      //let oper = Litereum.serialize.uint(3, case term.oper { add:0, sub:1, mul:2, div:3, mod:4, or:5, and:6, xor:7 })
-      //let val0 = Litereum.serialize.term(term.val0)
-      //let val1 = Litereum.serialize.term(term.val1)
-      //Bits.i(Bits.o(Bits.o(Bits.i(Bits.concat(oper, Bits.concat(val0, val1))))))
-    //let:
-      //let name = Litereum.serialize.name(term.name)
-      //let type = Litereum.serialize.type(term.type)
-      //let expr = Litereum.serialize.term(term.expr)
-      //let body = Litereum.serialize.term(term.body)
-      //Bits.i(Bits.i(Bits.o(Bits.i(Bits.concat(name, Bits.concat(type, Bits.concat(expr, body)))))))
-    //call:
-      //let bond = Litereum.serialize.name(term.bond)
-      //let args = Litereum.serialize.list!(Litereum.serialize.term, term.args)
-      //Bits.i(Bits.o(Bits.i(Bits.i(Bits.concat(bond, args)))))
-    //io:
-      //let bloc = Litereum.serialize.io(term.bloc)
-      //Bits.i(Bits.i(Bits.i(Bits.i(bloc))))
-  //}
+Litereum.serialize.list<A: Type>(item: A -> Bits, list: List<A>): Bits
+  case list {
+    nil: Bits.o(Bits.e)
+    cons: Bits.i(Bits.concat(item(list.head), Litereum.serialize.list<A>(item, list.tail)))
+  }
 
-//Litereum.deserialize.term(bits: Bits): Pair<Bits,Litereum.Term>
-  //case bits {
-    //o:
-      //let {bits,name} = Litereum.deserialize.name(bits.pred)
-      //{bits, Litereum.Term.var(name)}
-    //i:
-      //let {bits,ctor} = Litereum.deserialize.uint(3, bits.pred)
-      //switch Nat.eql(ctor) {
-        //0:
-          //let {bits,type} = Litereum.deserialize.type(bits)
-          //let {bits,ctor} = Litereum.deserialize.uint(8, bits)
-          //let {bits,vals} = Litereum.deserialize.list!(Litereum.deserialize.term, bits)
-          //{bits, Litereum.Term.create(type, ctor, vals)}
-        //1:
-          //let {bits,type} = Litereum.deserialize.type(bits)
-          //let {bits,expr} = Litereum.deserialize.term(bits)
-          //let {bits,cses} = Litereum.deserialize.list!(Litereum.deserialize.case, bits)
-          //{bits, Litereum.Term.match(type,expr,cses)}
-        //2:
-          //let {bits,numb} = Litereum.deserialize.uint(8,bits)
-          //{bits, Litereum.Term.word(Nat.to_u64(numb))}
-        //3:
-          //let {bits,val0} = Litereum.deserialize.term(bits)
-          //let {bits,val1} = Litereum.deserialize.term(bits)
-          //let {bits,iflt} = Litereum.deserialize.term(bits)
-          //let {bits,ifeq} = Litereum.deserialize.term(bits)
-          //let {bits,ifgt} = Litereum.deserialize.term(bits)
-          //{bits, Litereum.Term.compare(val0,val1,iflt,ifeq,ifgt)}
-        //4:
-          //let {bits,oper} = Litereum.deserialize.uint(3, bits)
-          //let {bits,val0} = Litereum.deserialize.term(bits)
-          //let {bits,val1} = Litereum.deserialize.term(bits)
-          //let oper = switch U16.eql(Nat.to_u16(oper)) {
-            //0#16: Litereum.Operation.add
-            //1#16: Litereum.Operation.sub
-            //2#16: Litereum.Operation.mul
-            //3#16: Litereum.Operation.div
-            //4#16: Litereum.Operation.mod
-            //5#16: Litereum.Operation.or
-            //6#16: Litereum.Operation.and
-            //7#16: Litereum.Operation.xor
-          //} default Litereum.Operation.add
-          //{bits, Litereum.Term.operate(oper,val0,val1)}
-        //5:
-          //let {bits,name} = Litereum.deserialize.name(bits)
-          //let {bits,type} = Litereum.deserialize.type(bits)
-          //let {bits,expr} = Litereum.deserialize.term(bits)
-          //let {bits,body} = Litereum.deserialize.term(bits)
-          //{bits, Litereum.Term.let(name,type,expr,body)}
-        //6:
-          //let {bits,bond} = Litereum.deserialize.name(bits)
-          //let {bits,args} = Litereum.deserialize.list!(Litereum.deserialize.term, bits)
-          //{bits, Litereum.Term.call(bond,args)}
-        //7:
-          //let {bits,bloc} = Litereum.deserialize.io(bits)
-          //{bits, Litereum.Term.io(bloc)}
-      //} default {bits, Litereum.Term.word(0)}
-  //} default {bits, Litereum.Term.word(0)}
+Litereum.deserialize.list<A: Type>(item: Bits -> Pair<Bits,A>, bits: Bits): Pair<Bits,List<A>>
+  case bits {
+    e: {Bits.e, []}
+    o: {bits.pred, []}
+    i:
+      let {bits, head} = item(bits.pred)
+      let {bits, tail} = Litereum.deserialize.list<A>(item, bits)
+      {bits, head & tail}
+  }
 
-//Litereum.serialize.case(cse: Litereum.Case): Bits
-  //open cse
-  //let fields = Litereum.serialize.list!(Litereum.serialize.name, cse.fields)
-  //let body = Litereum.serialize.term(cse.body)
-  //Bits.concat(fields, body)
+Litereum.serialize.name.new(name: String): Bits
+  case name {
+    nil:
+      Bits.e
+    cons:
+      let numb =
+        if U16.btw('0', name.head, '9') then
+          U16.sub(name.head, '0')
+        else if U16.btw('A', name.head, 'Z') then
+          U16.add(U16.sub(name.head, 'A'), 10#16)
+        else if U16.btw('a', name.head, 'z') then
+          U16.add(U16.sub(name.head, 'a'), 36#16)
+        else if U16.btw('_', name.head, '_') then
+          62#16
+        else
+          63#16
+      let head = Litereum.serialize.fixlen(6, U16.to_nat(numb))
+      let tail = Litereum.serialize.name.new(name.tail)
+      Bits.concat(head, tail)
+  }
 
-//Litereum.deserialize.case(bits: Bits): Pair<Bits, Litereum.Case>
-  //let {bits,fields} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
-  //let {bits,body} = Litereum.deserialize.term(bits)
-  //{bits, Litereum.Case.new(fields,body)}
+Litereum.deserialize.name.new(bits: Bits): Pair<Bits,String>
+  let {bits, numb} = Litereum.deserialize.fixlen(6, bits)
+  let {bits, tail} = Litereum.deserialize.name.new(bits)
+  let numb = Nat.to_u16(numb)
+  let head =
+    if U16.btw( 0, numb,  9) then
+      U16.add(numb, '0')
+    else if U16.btw(10, numb, 35) then
+      U16.add(U16.sub(numb,10#16), 'A')
+    else if U16.btw(36, numb, 61) then
+      U16.add(U16.sub(numb,36#16), 'a')
+    else if U16.btw(62, numb, 62) then
+      '_'
+    else
+      '.'
+  {bits, String.cons(head,tail)}
 
-//Litereum.serialize.io(io: Litereum.IO): Bits
-  //case io {
-    //bind:
-      //let name = Litereum.serialize.name(io.name)
-      //let type = Litereum.serialize.type(io.type)
-      //let effe = Litereum.serialize.effect(io.effe)
-      //let body = Litereum.serialize.io(io.body)
-      //Bits.o(Bits.concat(name, Bits.concat(type, Bits.concat(effe, body))))
-    //pure:
-      //let expr = Litereum.serialize.term(io.expr)
-      //Bits.i(expr)
-  //}
+Litereum.serialize.name.old(world: Litereum.World, name: String): Bits
+  open world
+  let value = world.name_to_index{name} abort Bits.e
+  let bits = Litereum.serialize.varlen(value)
+  bits
 
-//Litereum.deserialize.io(bits: Bits): Pair<Bits,Litereum.IO>
-  //case bits {
-    //o:
-      //let {bits,name} = Litereum.deserialize.name(bits.pred)
-      //let {bits,type} = Litereum.deserialize.type(bits)
-      //let {bits,effe} = Litereum.deserialize.effect(bits)
-      //let {bits,body} = Litereum.deserialize.io(bits)
-      //{bits, Litereum.IO.bind(name,type,effe,body)}
-    //i:
-      //let {bits,expr} = Litereum.deserialize.term(bits.pred)
-      //{bits, Litereum.IO.pure(expr)}
-  //} default {bits, Litereum.IO.pure(Litereum.Term.word(0))}
+Litereum.deserialize.name.old(world: Litereum.World, bits: Bits): Pair<Bits,String>
+  open world
+  let {bits, value} = Litereum.deserialize.varlen(bits)
+  let text = world.index_to_name{Nat.show(value)} abort {bits, ""}
+  {bits, text}
 
-//Litereum.serialize.effect(effect: Litereum.Effect): Bits
-  //case effect {
-    //run:
-      //let expr = Litereum.serialize.term(effect.expr)
-      //Bits.o(expr)
-    //def:
-      //let name = Litereum.serialize.name(effect.name)
-      //let body = Litereum.serialize.term(effect.main)
-      //Bits.i(Bits.concat(name, body))
-  //} default Bits.e
+Litereum.serialize.term(world: Litereum.World, term: Litereum.Term): Bits
+  case term {
+    var:
+      Bits.o(Bits.o(Bits.o(Litereum.serialize.name.old(world,term.name))))
+    let:
+      let name = Litereum.serialize.name.old(world,term.name)
+      let type = Litereum.serialize.type(world,term.type) // TODO
+      let expr = Litereum.serialize.term(world,term.expr)
+      let body = Litereum.serialize.term(world,term.body)
+      Bits.i(Bits.o(Bits.o(Bits.concat(name, Bits.concat(type, Bits.concat(expr, body))))))
+    create:
+      let data = Litereum.serialize.name.old(world,term.data)
+      let ctor = Litereum.serialize.varlen(term.ctor)
+      let vals = Litereum.serialize.list!(Litereum.serialize.term(world), term.vals)
+      Bits.o(Bits.i(Bits.o(Bits.concat(data, Bits.concat(ctor, vals)))))
+    match:
+      let name = Litereum.serialize.name.old(world,term.name)
+      let expr = Litereum.serialize.term(world,term.expr)
+      let cses = Litereum.serialize.list!(Litereum.serialize.term(world), term.cses)
+      Bits.i(Bits.i(Bits.o(Bits.concat(name, Bits.concat(expr, cses)))))
+    word:
+      let numb = Litereum.serialize.fixlen(64, U64.to_nat(term.numb))
+      Bits.o(Bits.o(Bits.i(numb)))
+    compare:
+      let val0 = Litereum.serialize.term(world,term.val0)
+      let val1 = Litereum.serialize.term(world,term.val1)
+      let iflt = Litereum.serialize.term(world,term.iflt)
+      let ifeq = Litereum.serialize.term(world,term.ifeq)
+      let ifgt = Litereum.serialize.term(world,term.ifgt)
+      Bits.i(Bits.o(Bits.i(Bits.concat(val0, Bits.concat(val1, Bits.concat(iflt, Bits.concat(ifeq, ifgt)))))))
+    operate:
+      let oper = Litereum.serialize.fixlen(3, case term.oper { add:0, sub:1, mul:2, div:3, mod:4, or:5, and:6, xor:7 })
+      let val0 = Litereum.serialize.term(world,term.val0)
+      let val1 = Litereum.serialize.term(world,term.val1)
+      Bits.o(Bits.i(Bits.i(Bits.concat(oper, Bits.concat(val0, val1)))))
+    call:
+      let bond = Litereum.serialize.name.old(world,term.bond)
+      let args = Litereum.serialize.list!(Litereum.serialize.term(world), term.args)
+      Bits.i(Bits.i(Bits.i(Bits.concat(bond, args))))
+  } default _
 
-//Litereum.deserialize.effect(bits: Bits): Pair<Bits,Litereum.Effect>
-  //let {bits,ctor} = Litereum.deserialize.uint(4, bits)
-  //switch Nat.eql(ctor) {
-    //0: 
-      //let {bits,expr} = Litereum.deserialize.term(bits)
-      //{bits, Litereum.Effect.run(expr)}
-    //1: 
-      //let {bits,name} = Litereum.deserialize.name(bits)
-      //let {bits,body} = Litereum.deserialize.term(bits)
-      //{bits, Litereum.Effect.def(name,body)}
-  //} default {bits, Litereum.Effect.run(Litereum.Term.word(0))}
+Litereum.deserialize.term(world: Litereum.World, bits: Bits): Pair<Bits,Litereum.Term>
+  let {bits,ctor} = Litereum.deserialize.fixlen(3, bits)
+  switch Nat.eql(ctor) {
+    0:
+      let {bits,name} = Litereum.deserialize.name.old(world, bits)
+      {bits, Litereum.Term.var(name)}
+    1:
+      let {bits,name} = Litereum.deserialize.name.old(world,bits)
+      let {bits,type} = Litereum.deserialize.type(world,bits)
+      let {bits,expr} = Litereum.deserialize.term(world,bits)
+      let {bits,body} = Litereum.deserialize.term(world,bits)
+      {bits, Litereum.Term.let(name,type,expr,body)}
+    2:
+      let {bits,data} = Litereum.deserialize.name.old(world,bits)
+      let {bits,ctor} = Litereum.deserialize.varlen(bits)
+      let {bits,vals} = Litereum.deserialize.list!(Litereum.deserialize.term(world), bits)
+      {bits, Litereum.Term.create(data, ctor, vals)}
+    3:
+      let {bits,name} = Litereum.deserialize.name.old(world,bits)
+      let {bits,expr} = Litereum.deserialize.term(world,bits)
+      let {bits,cses} = Litereum.deserialize.list!(Litereum.deserialize.term(world), bits)
+      {bits, Litereum.Term.match(name,expr,cses)}
+    4:
+      let {bits,numb} = Litereum.deserialize.fixlen(64,bits)
+      {bits, Litereum.Term.word(Nat.to_u64(numb))}
+    5:
+      let {bits,val0} = Litereum.deserialize.term(world,bits)
+      let {bits,val1} = Litereum.deserialize.term(world,bits)
+      let {bits,iflt} = Litereum.deserialize.term(world,bits)
+      let {bits,ifeq} = Litereum.deserialize.term(world,bits)
+      let {bits,ifgt} = Litereum.deserialize.term(world,bits)
+      {bits, Litereum.Term.compare(val0,val1,iflt,ifeq,ifgt)}
+    6:
+      let {bits,oper} = Litereum.deserialize.fixlen(3, bits)
+      let {bits,val0} = Litereum.deserialize.term(world,bits)
+      let {bits,val1} = Litereum.deserialize.term(world,bits)
+      let oper = switch Nat.eql(oper) {
+        0: Litereum.Operation.add
+        1: Litereum.Operation.sub
+        2: Litereum.Operation.mul
+        3: Litereum.Operation.div
+        4: Litereum.Operation.mod
+        5: Litereum.Operation.or
+        6: Litereum.Operation.and
+        7: Litereum.Operation.xor
+      } default Litereum.Operation.add
+      {bits, Litereum.Term.operate(oper,val0,val1)}
+    7:
+      let {bits,bond} = Litereum.deserialize.name.old(world,bits)
+      let {bits,args} = Litereum.deserialize.list!(Litereum.deserialize.term(world), bits)
+      {bits, Litereum.Term.call(bond,args)}
+  } default {bits, Litereum.Term.word(0)}
 
-//Litereum.serialize.type(typ: Litereum.Type): Bits
-  //case typ {
-    //word:
-      //Bits.o(Bits.o(Bits.e))
-    //data:
-      //let name = Litereum.serialize.name(typ.name)
-      //Bits.i(Bits.o(name))
-    //io:
-      //let result = Litereum.serialize.type(typ.result)
-      //Bits.o(Bits.i(result))
-  //}
+Litereum.serialize.type(world: Litereum.World, typ: Litereum.Type): Bits
+  case typ {
+    word: Bits.o(Bits.e)
+    data: Bits.i(Litereum.serialize.name.old(world,typ.name))
+  }
 
-//Litereum.deserialize.type(bits: Bits): Pair<Bits,Litereum.Type>
-  //let {bits,ctor} = Litereum.deserialize.uint(2, bits)
-  //switch Nat.eql(ctor) {
-    //0:
-      //{bits, Litereum.Type.word}
-    //1:
-      //let {bits,name} = Litereum.deserialize.name(bits)
-      //{bits, Litereum.Type.data(name)}
-    //2:
-      //let {bits,result} = Litereum.deserialize.type(bits)
-      //{bits, Litereum.Type.io(result)}
-  //} default {bits, Litereum.Type.word}
+Litereum.deserialize.type(world: Litereum.World, bits: Bits): Pair<Bits,Litereum.Type>
+  case bits {
+    o:
+      {bits.pred, Litereum.Type.word}
+    i:
+      let {bits,name} = Litereum.deserialize.name.old(world, bits.pred)
+      {bits, Litereum.Type.data(name)}
+  } default {bits, Litereum.Type.word}
 
-//Litereum.serialize.data(data: Litereum.Data): Bits
-  //open data
-  //let name = Litereum.serialize.name(data.name)
-  //let ctrs = Litereum.serialize.list!(Litereum.serialize.constructor, data.constructors)
-  //Bits.concat(name, ctrs)
+Litereum.serialize.data(world: Litereum.World, data: Litereum.Data): Bits
+  open data
+  let name = Litereum.serialize.name.old(world, data.name)
+  let ctrs = Litereum.serialize.list!(Litereum.serialize.constructor(world), data.constructors)
+  Bits.concat(name, ctrs)
 
-//Litereum.deserialize.data(bits: Bits): Pair<Bits, Litereum.Data>
-  //let {bits,name} = Litereum.deserialize.name(bits)
-  //let {bits,ctrs} = Litereum.deserialize.list!(Litereum.deserialize.constructor, bits)
-  //{bits, Litereum.Data.new(name,ctrs)}
+Litereum.deserialize.data(world: Litereum.World, bits: Bits): Pair<Bits, Litereum.Data>
+  let {bits,name} = Litereum.deserialize.name.old(world, bits)
+  let {bits,ctrs} = Litereum.deserialize.list!(Litereum.deserialize.constructor(world), bits)
+  {bits, Litereum.Data.new(name,ctrs)}
+
+Litereum.serialize.constructor(world: Litereum.World, ctor: Litereum.Constructor): Bits
+  open ctor
+  let name = Litereum.serialize.name.old(world,ctor.name)
+  let nams = Litereum.serialize.list!(Litereum.serialize.name.old(world), ctor.field_names)
+  let typs = Litereum.serialize.list!(Litereum.serialize.type(world), ctor.field_types)
+  Bits.concat(name, Bits.concat(nams, typs))
   
-//Litereum.deserialize.constructor(bits: Bits): Pair<Bits,Litereum.Constructor>
-  //let {bits,name} = Litereum.deserialize.name(bits)
-  //let {bits,fields} = Litereum.deserialize.list!(Litereum.deserialize.annotation, bits)
-  //{bits, Litereum.Constructor.new(name, fields)}
+Litereum.deserialize.constructor(world: Litereum.World, bits: Bits): Pair<Bits,Litereum.Constructor>
+  let {bits,name} = Litereum.deserialize.name.old(world,bits)
+  let {bits,nams} = Litereum.deserialize.list!(Litereum.deserialize.name.old(world), bits)
+  let {bits,typs} = Litereum.deserialize.list!(Litereum.deserialize.type(world), bits)
+  {bits, Litereum.Constructor.new(name, nams, typs)}
 
-//Litereum.serialize.constructor(ctor: Litereum.Constructor): Bits
-  //open ctor
-  //let name = Litereum.serialize.name(ctor.name)
-  //let fields = Litereum.serialize.list!(Litereum.serialize.annotation, ctor.fields)
-  //Bits.concat(name, fields)
+Litereum.serialize.bond(world: Litereum.World, bond: Litereum.Bond): Bits
+  open bond
+  let name = Litereum.serialize.name.old(world, bond.name)
+  let owners = Litereum.serialize.list!(Litereum.serialize.name.old(world), bond.owners)
+  let main = Litereum.serialize.term(world, bond.main)
+  let input_names = Litereum.serialize.list!(Litereum.serialize.name.old(world), bond.input_names)
+  let input_types = Litereum.serialize.list!(Litereum.serialize.type(world), bond.input_types)
+  let output_type = Litereum.serialize.type(world, bond.output_type)
+  Bits.concat(name, Bits.concat(owners, Bits.concat(main, Bits.concat(input_names, Bits.concat(input_types, output_type)))))
 
-//Litereum.serialize.annotation(annotation: Litereum.Annotation): Bits
-  //open annotation
-  //let name = Litereum.serialize.name(annotation.name)
-  //let type = Litereum.serialize.type(annotation.type)
-  //Bits.i(Bits.i(Bits.i(Bits.concat(name, type))))
+Litereum.deserialize.bond(world: Litereum.World, bits: Bits): Pair<Bits,Litereum.Bond>
+  let {bits,name} = Litereum.deserialize.name.old(world,bits)
+  let {bits,owners} = Litereum.deserialize.list!(Litereum.deserialize.name.old(world), bits)
+  let {bits,main} = Litereum.deserialize.term(world,bits)
+  let {bits,input_names} = Litereum.deserialize.list!(Litereum.deserialize.name.old(world), bits)
+  let {bits,input_types} = Litereum.deserialize.list!(Litereum.deserialize.type(world), bits)
+  let {bits,output_type} = Litereum.deserialize.type(world, bits)
+  {bits, Litereum.Bond.new(name, owners, main, input_names, input_types, output_type)}
 
-//Litereum.deserialize.annotation(bits: Bits): Pair<Bits,Litereum.Annotation>
-  //let {bits,name} = Litereum.deserialize.name(bits)
-  //let {bits,type} = Litereum.deserialize.type(bits)
-  //{bits, Litereum.Annotation.new(name, type)}
+Litereum.serialize.entry(world: Litereum.World, entry: Litereum.Entry): Bits
+  case entry {
+    data: Bits.o(Litereum.serialize.data(world,entry.value))
+    bond: Bits.i(Litereum.serialize.bond(world,entry.value))
+  }
 
-////Litereum.serialize.bond(bond: Litereum.Bond): Bits
-  ////open bond
-  ////let name = Litereum.serialize.name(bond.name)
-  ////let owners = Litereum.serialize.list!(Litereum.serialize.name, bond.owners)
-  ////let main = Litereum.serialize.term(bond.main)
-  ////let input_names = Litereum.serialize.list!(Litereum.serialize.name, bond.input_names)
-  ////let input_types = Litereum.serialize.list!(Litereum.serialize.name, bond.input_types)
-  ////let output_type = Litereum.serialize.name(bond.output_type)
-  ////Bits.concat(name,
-  ////Bits.concat(owners,
-  ////Bits.concat(main,
-  ////Bits.concat(input_names,
-  ////Bits.concat(input_types, output_type)))))
+Litereum.deserialize.entry(world: Litereum.World, bits: Bits): Pair<Bits,Litereum.Entry>
+  case bits {
+    o:
+      let {bits,data} = Litereum.deserialize.data(world,bits.pred)
+      {bits, Litereum.Entry.data(data)}
+    i:
+      let {bits,bond} = Litereum.deserialize.bond(world,bits.pred)
+      {bits, Litereum.Entry.bond(bond)}
+  } default {bits, Litereum.Entry.data(Litereum.Data.new("",[]))}
 
-////Litereum.deserialize.bond(bits: Bits): Pair<Bits,Litereum.Bond>
-  ////let {bits,name} = Litereum.deserialize.name(bits)
-  ////let {bits,owners} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
-  ////let {bits,main} = Litereum.deserialize.term(bits)
-  ////let {bits,input_names} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
-  ////let {bits,input_types} = Litereum.deserialize.list!(Litereum.deserialize.name, bits)
-  ////let {bits,output_type} = Litereum.deserialize.name(bits)
-  ////{bits, Litereum.Bond.new(name, owners, main, input_names, input_types, output_type)}
+Litereum.serialize.transaction(world: Litereum.World, transaction: Litereum.Transaction): Bits
+  case transaction {
+    new_name:
+      let name = Litereum.serialize.name.old(world, transaction.name)
+      Bits.o(Bits.o(name))
+    new_data:
+      let data = Litereum.serialize.data(world, transaction.data)
+      Bits.i(Bits.o(data))
+    new_bond:
+      let bond = Litereum.serialize.bond(world, transaction.bond)
+      Bits.o(Bits.i(bond))
+    run_term:
+      let term = Litereum.serialize.term(world, transaction.term)
+      Bits.i(Bits.i(term))
+  }
 
-////Litereum.serialize.entry(entry: Litereum.Entry): Bits
-  ////case entry {
-    ////type:
-      ////let type = Litereum.serialize.type(entry.value)
-      ////Bits.o(type)
-    ////bond:
-      ////let bond = Litereum.serialize.bond(entry.value)
-      ////Bits.i(bond)
-  ////}
-
-////Litereum.deserialize.entry(bits: Bits): Pair<Bits,Litereum.Entry>
-  ////let {bits,ctor} = Litereum.deserialize.uint(1, bits)
-  ////switch U16.eql(Nat.to_u16(ctor)) {
-    ////0#16:
-      ////let {bits,type} = Litereum.deserialize.type(bits)
-      ////{bits, Litereum.Entry.type(type)}
-    ////1#16:
-      ////let {bits,bond} = Litereum.deserialize.bond(bits)
-      ////{bits, Litereum.Entry.bond(bond)}
-  ////} default {bits, Litereum.Entry.type(Litereum.Type.word)}
+Litereum.deserialize.transaction(world: Litereum.World, bits: Bits): Pair<Bits,Litereum.Transaction>
+  let {bits,ctor} = Litereum.deserialize.fixlen(2, bits)
+  switch Nat.eql(ctor) {
+    0:
+      let {bits,name} = Litereum.deserialize.name.old(world, bits)
+      {bits, Litereum.Transaction.new_name(name)}
+    1:
+      let {bits,data} = Litereum.deserialize.data(world, bits)
+      {bits, Litereum.Transaction.new_data(data)}
+    2:
+      let {bits,bond} = Litereum.deserialize.bond(world, bits)
+      {bits, Litereum.Transaction.new_bond(bond)}
+    3:
+      let {bits,term} = Litereum.deserialize.term(world, bits)
+      {bits, Litereum.Transaction.run_term(term)}
+  } default {bits, Litereum.Transaction.new_name("")}
 
 ////// Tests
 ////// -----
