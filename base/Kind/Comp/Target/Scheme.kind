@@ -87,7 +87,7 @@ Kind.Comp.Target.Scheme.program(main: String, defs: String): String
 Kind.Comp.Target.Scheme.select(term: String, cse_body_list: List<Pair<String, String>>): String
   let cses = ""
   for cse_body in cse_body_list with cses:
-    {cse, body} = cse_body
+    let {cse, body} = cse_body
     cses|" ("|cse|" "|body|")"
   "(case "|term|cses|")"
 
