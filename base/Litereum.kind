@@ -420,7 +420,7 @@ Litereum.serialize.varlen.go(value: Nat): Bits
 Litereum.deserialize.varlen.go(bits: Bits): Pair<Bits,Nat>
   case bits {
     e: {Bits.e, 0}
-    o: {bits.pred, 0}
+    o: {bits.pred, 1}
     i: case bits.pred {
       e: {bits.pred, 0}
       o:
@@ -1235,15 +1235,15 @@ Litereum: _
     for tx in block:
       IO.print("- " | Litereum.show.transaction(world, tx))
     log("Evaluation: ")
-    let tmp = Litereum.run.block(world, block)
+    let tmp = Litereum.run.block(world, block) abort IO.print("failed execution")
     IO.print("Done!")
 
     IO.print("")
     IO.print("Serialization:")
-    let bits = Litereum.serialize.block(world, block)
-    let {bits,block} = Litereum.deserialize.block(world, bits)
+    let bits = Litereum.serialize.block(tmp, block)
+    let {bits,block} = Litereum.deserialize.block(tmp, bits)
     IO.print("- " | Bits.show(bits))
     IO.print("Deserialization:")
     for tx in block:
-      IO.print("- " | Litereum.show.transaction(world, tx))
+      IO.print("- " | Litereum.show.transaction(tmp, tx))
   }
