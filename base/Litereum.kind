@@ -187,28 +187,32 @@ Litereum.check(
   type: Litereum.Type
 ): Bool
   open context
+  open world
   //log("-- chk " | Litereum.show.term(world,term) | " : " | Litereum.show.type(world,type))
   //log("- ctx: " | String.join(", ", List.map!!((a) a@fst|":"|Litereum.show.type.short(a@snd), Map.to_list!(variables))))  // DEBUG
   //log("")  // DEBUG
   case term {
     var:
       let var_type = context{term.name} abort false
+      let def0 = Maybe.is_some!(world.name_to_index{term.name})
       ////log("-- var " | term.name | " " | Litereum.show.type.short(var_type) | " " | Litereum.show.type.short(type))  // DEBUG
-      Litereum.equal(var_type, type)
+      def0 && Litereum.equal(var_type, type)
     let:
       //log("-- let ")  // DEBUG
+      let def0 = Maybe.is_some!(world.name_to_index{term.name})
       let expr = Litereum.check(context, world, term.expr, term.type)
       let ctx2 = context{term.name} <- term.type
       let cont = Litereum.check(ctx2, world, term.body, type)
-      expr && cont
+      def0 && expr && cont
     call:
       //log("-- call ")  // DEBUG
       //let ownr = Litereum.World.check.owner(context, term.func)
+      let def0 = Maybe.is_some!(world.name_to_index{term.bond})
       use bond = Litereum.get_bond(world, term.bond) abort false
       let otyp = Litereum.equal(bond.output_type, type)
       let args = List.zip!!(term.args, bond.input_types)
       let args = List.all!((x) Litereum.check(context, world, x@fst, x@snd), args)
-      otyp && args
+      def0 && otyp && args
     create: case type {
       data:
         use data = Litereum.get_data(world, type.name) abort false
@@ -220,6 +224,8 @@ Litereum.check(
     } default false
     match: 
       use data = Litereum.get_data(world, term.data) abort false
+      let def0 = Maybe.is_some!(world.name_to_index{term.name})
+      let def1 = Maybe.is_some!(world.name_to_index{term.data})
       let type = context{term.name} abort false
       let size = Nat.eql(List.length!(term.cses),List.length!(data.constructors))
       let expr = Litereum.check(context, world, Litereum.Term.var(term.name), Litereum.Type.data(term.data))
@@ -228,7 +234,7 @@ Litereum.check(
         let typs = case_ctor@field_types
         let ctx2 = Litereum.extend!(context, nams, typs)
         Litereum.check(ctx2, world, case_body, type))
-      size && List.and(cses)
+      def0 && def1 && size && List.and(cses)
     word: case type {
       word: true
     } default false
@@ -708,6 +714,12 @@ Litereum.deserialize.eval(world: Litereum.World, bits: Bits): Pair<Bits,Litereum
   let {bits,type} = Litereum.deserialize.type(world, bits)
   {bits, Litereum.Eval.new(term,type)}
 
+Litereum.serialize.block(world: Litereum.World, block: List<Litereum.Transaction>): Bits
+  Litereum.serialize.list!(Litereum.serialize.transaction(world), block)
+
+Litereum.deserialize.block(world: Litereum.World, bits: Bits): Pair<Bits, List<Litereum.Transaction>>
+  Litereum.deserialize.list!(Litereum.deserialize.transaction(world), bits)
+
 // Stringification
 // ---------------
 
@@ -1167,6 +1179,18 @@ Litereum.parse.block(world: Litereum.World): Parser<List<Litereum.Transaction>>
 Litereum: _
   let world = Litereum.genesis
   let code = `
+    name Bool
+    name true
+    name false
+    name Nat
+    name zero
+    name succ
+    name pred
+    name not
+    name x
+    name double
+    name x.pred
+
     eval {
       #50
     } : #word
@@ -1213,4 +1237,13 @@ Litereum: _
     log("Evaluation: ")
     let tmp = Litereum.run.block(world, block)
     IO.print("Done!")
+
+    IO.print("")
+    IO.print("Serialization:")
+    let bits = Litereum.serialize.block(world, block)
+    let {bits,block} = Litereum.deserialize.block(world, bits)
+    IO.print("- " | Bits.show(bits))
+    IO.print("Deserialization:")
+    for tx in block:
+      IO.print("- " | Litereum.show.transaction(world, tx))
   }
