@@ -7,7 +7,7 @@
 //   - consertar parser para ir ate o final do arquivo !
 // - paper:
 //   - use railroad diagrams for syntax
-// - check if name is registered
+// - check if name is registered DONE?
 
 // Types
 // -----
@@ -346,13 +346,19 @@ Litereum.run(
   open world
   case transaction {
     new_name:
-      // TODO: check if name already defined
-      let world = world@name_count <- world.name_count + 1
-      let world = world@name_to_index <- (world.name_to_index{transaction.name} <- world.name_count)
-      let world = world@index_to_name <- (world.index_to_name{Nat.show(world.name_count)} <- transaction.name)
-      let world = world@names <- names
-      log("- name: " | transaction.name)
-      some(world)
+      // TODO: check if name already defined DONE?
+      let index = world@name_to_index{transaction.name}
+      case index {
+        none:
+          let world = world@name_count <- world.name_count + 1
+          let world = world@name_to_index <- (world.name_to_index{transaction.name} <- world.name_count)
+          let world = world@index_to_name <- (world.index_to_name{Nat.show(world.name_count)} <- transaction.name)
+          log("- name: " | transaction.name)
+          some(world)
+        some:
+          log("error: redefinition of name: " | transaction.name)
+          none
+      }
     new_data:
       use data = transaction.data
       case world.entry{data.name} as got_type {
