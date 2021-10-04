@@ -1,0 +1,9 @@
+Parser.letter(is_letter: Char -> Bool): Parser<Char>
+  (pst)
+  open pst
+  case pst.str {
+    nil: Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Unexpected eof."),
+    cons: if is_letter(pst.str.head)
+      then Parser.Reply.value!(Parser.State.new(pst.err, pst.nam, pst.ini, Nat.succ(pst.idx), pst.str.tail), pst.str.head)
+      else Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Expected letter."),
+ }

@@ -1,6 +1,16 @@
 Test: _
+  let world = Litereum.genesis
+  let code = `
+    eval #50
+    type Bool { true{} false{} }
+    eval +(#10, #20)
+  `
+  let block = Parser.run!(Litereum.parse.block(world), code) abort IO.print("deu ruim")
   IO {
-    for i from 0 to 32:
-      let serial = Litereum.serialize.word.varlen(Nat.to_u64(i))
-      IO.print(Nat.show(i) | ": " | Bits.show(serial))
+    log("Block: ")
+    for tx in block:
+      IO.print("- " | Litereum.show.transaction(world, tx))
+    log("Evaluation: ")
+    let tmp = Litereum.run.block(world, block)
+    IO.print("Done!")
   }
