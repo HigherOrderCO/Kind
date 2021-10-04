@@ -124,8 +124,8 @@ Kind.Comp.Prim.elim(lang: Kind.Comp.Language, term: Kind.Comp, depth: Nat, defs:
         let args = for i from 0 to lams_len: args ++ [Kind.Comp.var("c"|Nat.show(i))]
         let self = "self" | Nat.show(depth)
         def build_cse = (item)
-          {cse, arg} = item
-          {name, flds} = cse
+          let {cse, arg} = item
+          let {name, flds} = cse
 
           let flds_len = List.length!(flds)
           let let_args_n = List.reverse!(List.seq(flds_len))
