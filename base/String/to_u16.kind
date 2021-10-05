@@ -1,0 +1,13 @@
+// Check if a String is a natural number
+String.to_u16(s: String): U16
+  String.to_u16.aux(s, 0)
+
+String.to_u16.aux(s: String, counter: U16): U16
+  let zero_ascii = 48#16
+  case s {
+    nil: counter
+    cons:
+      let new_c = (counter * 10) + (s.head - zero_ascii)
+      String.to_u16.aux(s.tail, new_c)
+  }
+  

@@ -1,0 +1,5 @@
+String.to_char(str: String): Char
+  case str {
+    nil : 0
+    cons: str.head
+  }

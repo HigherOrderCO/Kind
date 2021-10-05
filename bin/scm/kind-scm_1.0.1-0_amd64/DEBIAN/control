@@ -1,6 +1,0 @@
-Package: kind-scm
-Version: 1.0.93
-Architecture: amd64
-Maintainer: Rígille S. B. Menezes <rigillesbmenezes@protonmail.com>
-Description: ChezScheme release of the kind programming language.
- A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. That means it can handle mathematical theorems just like Coq, Idris, Lean and Agda. On the surface, it aims to be more practical and looks more like TypeScript.

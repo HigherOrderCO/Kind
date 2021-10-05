@@ -1,0 +1,81 @@
+// Tests using NodeJS as reference
+String.test.to_u16: TestSuite
+  TestSuite.many("String.to_u16", [
+    String.test.to_u16.0, String.test.to_u16.1, String.test.to_u16.2,
+    String.test.to_u16.3, //String.test.to_u16.4, //String.test.to_u16.5,
+    // String.test.to_u16.6, String.test.to_u16.7, String.test.to_u16.8,
+    // String.test.to_u16.9
+  ])
+
+String.test.to_u16.0: TestSuite
+  let test = "0"
+  let got = U16.show(String.to_u16(test))
+  let exp = "0"
+  let name = "0"
+  TestSuite.show.log_string(name, test, exp, got)
+
+String.test.to_u16.1: TestSuite
+  let test = "12345"
+  let got = U16.show(String.to_u16(test))
+  let exp = "12345"
+  let name = "1"
+  TestSuite.show.log_string(name, test, exp, got)
+
+String.test.to_u16.2: TestSuite
+  let test = "0007874"
+  let got = U16.show(String.to_u16(test))
+  let exp = "7874"
+  let name = "2"
+  TestSuite.show.log_string(name, test, exp, got)
+
+String.test.to_u16.3: TestSuite
+  let test = "-42"
+  let got = U16.show(String.to_u16(test))
+  let exp = "42"
+  let name = "3"
+  TestSuite.show.log_string(name, test, exp, got)
+
+// String.test.to_u16.4: TestSuite
+//   let test = "e0"
+//   let got = U16.show(String.to_u16(test))
+//   let exp = "224"
+//   let name = "4"
+//   TestSuite.show.log_string(name, test, exp, got)
+
+// String.test.to_u16.5: TestSuite
+//   let test = "1234567890"
+//   let got = U16.show(String.to_u16(test))
+//   let exp = "31323334353637383930"
+//   let name = "5"
+//   TestSuite.show.log_string(name, test, exp, got)
+
+// String.test.to_u16.6: TestSuite
+//   let test = "{%$@"
+//   let got = U16.show(String.to_u16(test))
+//   let exp = "7b252440"
+//   let name = "6"
+//   TestSuite.show.log_string(name, test, exp, got)
+
+// // 2 bytes UTF-8
+// String.test.to_u16.7: TestSuite
+//   let test = "¢"
+//   let got = U16.show(String.to_u16(test))
+//   let exp = "c2a2"
+//   let name = "7"
+//   TestSuite.show.log_string(name, test, exp, got)
+
+// // 3 bytes UTF-8
+// String.test.to_u16.8: TestSuite
+//   let test = "ह€"
+//   let got = U16.show(String.to_u16(test))
+//   let exp = "e0a4b9e282ac"
+//   let name = "8"
+//   TestSuite.show.log_string(name, test, exp, got)
+
+// // 4 bytes UTF-8
+// String.test.to_u16.9: TestSuite
+//   let test = "𐍈"
+//   let got = U16.show(String.to_u16(test))
+//   let exp = "f0908d88"
+//   let name = "9"
+//   TestSuite.show.log_string(name, test, exp, got)
