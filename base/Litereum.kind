@@ -1241,12 +1241,13 @@ Litereum: _
   `
   let block = Parser.run!(Litereum.parse.block(world), code) abort IO.print("deu ruim")
   IO {
-    log("Block: ")
-    for tx in block:
-      IO.print("- " | Litereum.show.transaction(world, tx))
     log("Evaluation: ")
     let tmp = Litereum.run.block(world, block) abort IO.print("failed execution")
     IO.print("Done!")
+
+    log("Block: ")
+    for tx in block:
+      IO.print("- " | Litereum.show.transaction(tmp, tx))
 
     IO.print("")
     IO.print("Serialization:")
