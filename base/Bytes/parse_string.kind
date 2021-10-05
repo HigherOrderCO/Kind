@@ -6,6 +6,8 @@
 // Hint: check the test cases in Bytes/test/parse_string.kind
 // and add more tests
 
+// IMPORTANT: do not use these functions yet. Still WIP
+
 // Decode a UTF8 data into a String
 Bytes.parse_string(b: Bytes): String
   Bytes.parse_string.aux(b, "")
