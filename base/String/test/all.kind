@@ -2,7 +2,8 @@ String.test.all: TestSuite
   TestSuite.many("String", 
     [ 
       String.test.to_hex,
-      String.test.is_nat
+      String.test.is_nat,
+      String.test.to_u16
     ])
 
 // Show all tests for String

@@ -1,3 +1,4 @@
+// Values between 0 and 255 inclusive
 type U8 {
   new(value: Word(8))
 }

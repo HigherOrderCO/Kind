@@ -1,0 +1,4 @@
+// Convert a hexstring to a Uint8Array
+Bytes.arrayify(value: String): Buffer8
+  let {_,buf} = Buffer8.from_hex(String.to_hex(value))
+  buf

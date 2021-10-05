@@ -1,0 +1,2 @@
+Bytes.from_string(s: String): Bytes
+  "0x"|String.to_hex(s)

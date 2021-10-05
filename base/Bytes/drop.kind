@@ -1,0 +1,2 @@
+Bytes.drop(n: Nat, b: Bytes): Bytes
+  String.drop(n, b)

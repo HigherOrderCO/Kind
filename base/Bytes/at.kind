@@ -1,0 +1,11 @@
+// Return 2 characters from "bytes", if available
+Bytes.at(bytes: String): Maybe(String)
+  case bytes {
+    nil: Maybe.none!
+    cons: 
+      case bytes.tail {
+        nil: Maybe.none!
+        cons: 
+        Maybe.some!(Char.to_string(bytes.head) | Char.to_string(bytes.tail.head))
+      }
+  }
