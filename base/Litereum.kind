@@ -1252,8 +1252,8 @@ Litereum: _
     IO.print("")
     IO.print("Serialization:")
     let bits = Litereum.serialize.block(tmp, block)
-    let {bits,block} = Litereum.deserialize.block(tmp, bits)
     IO.print("- " | Bits.show(bits))
+    let {bits,block} = Litereum.deserialize.block(tmp, bits)
     IO.print("Deserialization:")
     for tx in block:
       IO.print("- " | Litereum.show.transaction(tmp, tx))
