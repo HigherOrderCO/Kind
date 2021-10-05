@@ -417,11 +417,15 @@ Litereum.deserialize.varlen(bits: Bits): Pair<Bits,Nat>
   {bits, Nat.sub(value,1)}
 
 Litereum.serialize.varlen.go(value: Nat): Bits
-  if Nat.eql(value,1) then
-    Bits.o(Bits.e)
-  else if Nat.eql(Nat.mod(value,2),0)
-    then Bits.i(Bits.o(Litereum.serialize.varlen.go(Nat.div(value,2))))
-    else Bits.i(Bits.i(Litereum.serialize.varlen.go(Nat.div(value,2))))
+  case value {
+    zero: Bits.e
+    succ:
+      if Nat.eql(value,1) then
+        Bits.o(Bits.e)
+      else if Nat.eql(Nat.mod(value,2),0)
+        then Bits.i(Bits.o(Litereum.serialize.varlen.go(Nat.div(value,2))))
+        else Bits.i(Bits.i(Litereum.serialize.varlen.go(Nat.div(value,2))))
+  }
 
 Litereum.deserialize.varlen.go(bits: Bits): Pair<Bits,Nat>
   case bits {
