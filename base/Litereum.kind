@@ -344,6 +344,15 @@ Litereum.reduce.many(
 // Transaction
 // -----------
 
+Litereum.def(
+  world: Litereum.World
+  transaction: Litereum.Transaction
+): Litereum.World
+  open world
+  case transaction {
+    new_data: world@entry <- (world.entry{transaction.data@name} <- Litereum.Entry.data(transaction.data))
+  } default world
+
 Litereum.run(
   world: Litereum.World
   transaction: Litereum.Transaction
@@ -558,7 +567,7 @@ Litereum.serialize.term(world: Litereum.World, vars: List<String>, term: Litereu
     match:
       let name = Litereum.serialize.name.old(world,term.name)
       let data = Litereum.serialize.name.old(world,term.data)
-      let cses = Litereum.serialize.cases(world,vars,term.name,Litereum.get_constructors(world,term.name)<>[],term.cses)
+      let cses = Litereum.serialize.cases(world,vars,term.name,Litereum.get_constructors(world,term.data)<>[],term.cses)
       Bits.o(Bits.o(Bits.i(Bits.concat(name, Bits.concat(data, cses)))))
     word:
       let numb = Litereum.serialize.fixlen(64, U64.to_nat(term.numb))
@@ -603,7 +612,7 @@ Litereum.deserialize.term(world: Litereum.World, vars: List<String>, bits: Bits)
     4:
       let {bits,name} = Litereum.deserialize.name.old(world,bits)
       let {bits,data} = Litereum.deserialize.name.old(world,bits)
-      let {bits,cses} = Litereum.deserialize.cases(world,vars,name,Litereum.get_constructors(world,name)<>[],bits)
+      let {bits,cses} = Litereum.deserialize.cases(world,vars,name,Litereum.get_constructors(world,data)<>[],bits)
       {bits, Litereum.Term.match(name,data,cses)}
     5:
       let {bits,numb} = Litereum.deserialize.fixlen(64,bits)
@@ -769,10 +778,22 @@ Litereum.deserialize.eval(world: Litereum.World, bits: Bits): Pair<Bits,Litereum
   {bits, Litereum.Eval.new(term,type)}
 
 Litereum.serialize.block(world: Litereum.World, block: List<Litereum.Transaction>): Bits
-  Litereum.serialize.list!(Litereum.serialize.transaction(world), block)
+  case block {
+    nil:
+      Bits.e
+    cons:
+      let head = Litereum.serialize.transaction(world, block.head)
+      let tail = Litereum.serialize.block(Litereum.def(world,block.head), block.tail)
+      Bits.concat(head, tail)
+  }
 
 Litereum.deserialize.block(world: Litereum.World, bits: Bits): Pair<Bits, List<Litereum.Transaction>>
-  Litereum.deserialize.list!(Litereum.deserialize.transaction(world), bits)
+  if Bits.is_empty(bits) then
+    {Bits.e, []}
+  else
+    let {bits,head} = Litereum.deserialize.transaction(world, bits)
+    let {bits,tail} = Litereum.deserialize.block(Litereum.def(world,head), bits)
+    {bits, head & tail}
 
 // Stringification
 // ---------------
@@ -892,6 +913,19 @@ Litereum.show.transaction(
     new_bond: "bond " | Litereum.show.bond(world, transaction.bond)
     new_eval: "eval " | Litereum.show.eval(world, transaction.eval)
   }
+
+Litereum.show.block(
+  world: Litereum.World
+  block: List<Litereum.Transaction>
+): String
+  case block {
+    nil:
+      ""
+    cons:
+      let head = Litereum.show.transaction(world, block.head)
+      let tail = Litereum.show.block(Litereum.def(world,block.head), block.tail)
+      head | "\n" | tail
+    }
 
 // Parsing
 // -------
@@ -1214,10 +1248,7 @@ Litereum.parse.block(world: Litereum.World): Parser<List<Litereum.Transaction>>
   Parser.choice!([
     Parser {
       get transaction = Litereum.parse.transaction(world)
-      let world = case transaction {
-        new_data: world@entry <- (world@entry{transaction.data@name} <- Litereum.Entry.data(transaction.data))
-      } default world
-      get block_rest = Litereum.parse.block(world)
+      get block_rest = Litereum.parse.block(Litereum.def(world,transaction))
       return transaction & block_rest
     }
     Parser {
@@ -1286,19 +1317,23 @@ Litereum: _
   let block = Parser.run!(Litereum.parse.block(world), code) abort IO.print("deu ruim")
   IO {
     log("Evaluation: ")
-    let tmp = Litereum.run.block(world, block) abort IO.print("failed execution")
+    let world = Litereum.run.block(world, block) abort IO.print("failed execution")
     IO.print("Done!")
 
+    IO.print("")
+
     log("Block: ")
-    for tx in block:
-      IO.print("- " | Litereum.show.transaction(tmp, tx))
+    IO.print(Litereum.show.block(world, block))
 
     IO.print("")
+
     IO.print("Serialization:")
-    let bits = Litereum.serialize.block(tmp, block)
-    IO.print("- " | Bits.show(bits))
-    let {bits,block} = Litereum.deserialize.block(tmp, bits)
+    let bits = Litereum.serialize.block(world, block)
+    IO.print("- " | Bits.hex.encode(bits))
+
+    IO.print("")
+
     IO.print("Deserialization:")
-    for tx in block:
-      IO.print("- " | Litereum.show.transaction(tmp, tx))
+    let {bits,block} = Litereum.deserialize.block(world, bits)
+    IO.print(Litereum.show.block(world,block))
   }

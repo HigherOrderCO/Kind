@@ -1,0 +1,4 @@
+Bits.is_empty(bits: Bits): Bool
+  case bits {
+    e: true
+  } default false
