@@ -200,9 +200,8 @@ Litereum.check(
   case term {
     var:
       let var_type = context{term.name} abort false
-      let def0 = Maybe.is_some!(world.name_to_index{term.name})
       ////log("-- var " | term.name | " " | Litereum.show.type.short(var_type) | " " | Litereum.show.type.short(type))  // DEBUG
-      def0 && Litereum.equal(var_type, type)
+      Litereum.equal(var_type, type)
     let:
       //log("-- let ")  // DEBUG
       let def0 = Maybe.is_some!(world.name_to_index{term.name})
