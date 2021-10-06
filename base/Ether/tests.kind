@@ -1,23 +1,11 @@
-Bits.concat.go(a: Bits, b: Bits): Bits
-  case a {
-    e: b,
-    o: Bits.concat(a.pred, Bits.o(b))
-    i: Bits.concat(a.pred, Bits.i(b))
-  }
-
 Ether.tests : _
   //let v = Ether.RLP.Tree.list(
    // [
   //    Ether.RLP.Tree.tip(Bits.read(String.reverse("1000111011111010110"))),
    //   Ether.RLP.Tree.tip(Bits.read(String.reverse("1000111011111010110")))    
 //    ])
-  let v = Ether.RLP.Tree.tip(Bits.read("1000000100000000000000000110110000000000000000000010000000000000000011011000111111111111111111111111111111111011111000000000000100011111111111111111111111111111111101111100000000000000000000000000000001000000000000000001101100100011111111111111111111111111111111101111100000000000010001111111111111111111111111111111110111110000000000000000000000000000000100000000000000000110110000000000000000000010000000000000000011011000000000000000000010110110"))
-  let test1 = Ether.RLP.proof.encode.bytes(v)
-  let test2 = Ether.RLP.encode.bytes(v)
-  log(Ether.RLP.proof.encode.read(test1))
-  log(Ether.RLP.encode.read(test2))
-  let test2 = List.foldr!!(Bits.e, Bits.concat.go, test2)
-  {test1, test2}
+  Ether.RLP.proof.pad_bytes(Nat.to_bits(10000))
+
   //let buffer = Buffer8.from_hex("d69429d7d1dd5b6f9c864d9db560d72a247c178ae86b0a")
   //let hash = Crypto.Keccak.hash.bytes(buffer)
   //Buffer8.to_hex(hash)  

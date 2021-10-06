@@ -1,9 +1,127 @@
-Bits.concat.go(a: Bits, b: Bits): Bits
-  case a {
-    e: b,
-    o: Bits.concat(a.pred, Bits.o(b))
-    i: Bits.concat(a.pred, Bits.i(b))
-  }
+Ether.RLP.proof.pad_bytes(bits : Bits) : Bits
+  let {pred, succ} = Bits.break(8, bits)
+  def bytes_pad = Bits.trim(8, pred)
+  case succ {
+    e : bytes_pad
+  } default Bits.concat(bytes_pad, Ether.RLP.proof.pad_bytes(succ))
+
+
+Bits.size.rec(x : Bits, n : Nat) : 
+  Nat.succ(Bits.length.go(x, n)) == Bits.length.go(x, Nat.succ(n))
+    case x {
+      e : refl
+      i : Bits.size.rec(x.pred, Nat.succ(n))
+      o : Bits.size.rec(x.pred, Nat.succ(n))
+    }!
+
+Ether.RLP.proof.add_self_absurd(x : Nat, n: Nat) : Equal(Nat, Nat.add(n, Nat.succ(x)), n) -> Empty
+  case n {
+    succ : 
+      (H)
+         let H = Nat.succ_inj!!(H)
+         let qed = Ether.RLP.proof.add_self_absurd(x, n.pred, H)
+         qed
+    zero : (H) Nat.succ_neq_zero!(H)
+  }!
+  
+Ether.RLP.proof.add_injective(x : Nat, y : Nat, n : Nat, H : Nat.add(Nat.succ(n), x) == Nat.add(Nat.succ(n), y)) : x == y
+  case x with H {
+    succ : case y with H {
+      succ : 
+        let com_H = Nat.add.comm(Nat.succ(n), Nat.succ(x.pred))
+        let com_H2 = Nat.add.comm(Nat.succ(n), Nat.succ(y.pred))
+        let H_rewrite = H :: rewrite Y in Y == _ with com_H
+        let H_rewrite = H_rewrite :: rewrite Y in _ == Y with com_H2
+        let H_rewrite_inj = Nat.succ_inj!!(H_rewrite)
+        let H_rewrite_inj = H_rewrite_inj :: rewrite Y in Y == _ with Nat.add.comm(x.pred, Nat.succ(n))
+        let H_rewrite_inj = H_rewrite_inj :: rewrite Y in _ == Y with Nat.add.comm(y.pred, Nat.succ(n))
+        let H2 = Ether.RLP.proof.add_injective(x.pred, y.pred, n, H_rewrite_inj)
+        Equal.apply!!!!(Nat.succ, H2)
+      zero : 
+        let rewrite_0_com = 
+          Nat.add.comm(Nat.succ(n), 0)
+        let H = H :: rewrite Y in _ == Y with rewrite_0_com
+        let absurd = Ether.RLP.proof.add_self_absurd!!(H)
+        Empty.absurd!(absurd)
+    }!
+    zero : case y with H {
+      succ : 
+        let H = mirror(H)
+        let rewrite_0_com = Nat.add.comm(Nat.succ(n), 0)
+        let H = H :: rewrite Y in _ == Y with rewrite_0_com
+        let absurd = Ether.RLP.proof.add_self_absurd!!(H)
+        Empty.absurd!(absurd)
+      zero : refl
+    }!
+  }!
+
+Ether.RLP.proof.mul_injective(x : Nat, y : Nat, n : Nat, H : Nat.mul(Nat.succ(n), x) == Nat.mul(Nat.succ(n), y)) : x == y
+  case x with H {
+    succ : case y with H {
+      succ : 
+        let inj_add = Ether.RLP.proof.add_injective(Nat.mul(Nat.succ(n), x.pred), Nat.mul(Nat.succ(n), y.pred), n, H)
+        let H = Ether.RLP.proof.mul_injective(x.pred, y.pred, n, inj_add)
+        Equal.apply!!!!(Nat.succ, H)
+      zero : 
+        let H4 = Nat.succ_neq_zero!(H)
+        Empty.absurd!(H4)
+     }!
+    zero : case y with H {
+      succ : 
+       let H2 = refl :: 0 == Nat.mul(Nat.succ(n),0)
+       let H4 = Nat.succ_neq_zero!(mirror(H))
+       Empty.absurd!(H4)
+      zero : 
+        refl
+    }!
+  }!
+
+Ether.RLP.proof.succ_pad_nat(x : Bits) : 
+  Bits.to_nat(Bits.trim(Nat.succ(Bits.length(x)), x)) == Bits.to_nat(x)
+  case x {
+    e : refl 
+    o : 
+      let remove_tail_rec = Bits.size.rec(x.pred, 0)
+      let refl_cont =
+        refl :: 
+          Bits.length.go(x.pred, 1) == Bits.length(Bits.o(x.pred))
+      case refl_cont {
+        refl : 
+          case remove_tail_rec {
+            refl : 
+              let rec = Ether.RLP.proof.succ_pad_nat(x.pred)
+              let rec = Equal.apply!!!!(Nat.mul(2), rec)
+              rec
+          }!
+        }!
+    i : 
+      let remove_tail_rec = Bits.size.rec(x.pred, 0)
+      let refl_cont =
+        refl :: 
+          Bits.length.go(x.pred, 1) == Bits.length(Bits.i(x.pred))
+      case refl_cont {
+        refl : 
+          case remove_tail_rec {
+            refl : 
+              let rec = Ether.RLP.proof.succ_pad_nat(x.pred)
+              let rec = Equal.apply!!!!(Nat.mul(2), rec)
+              Equal.apply(Nat, Nat, Nat.mul(2,Bits.to_nat(Bits.trim(Nat.succ(Bits.length.go(x.pred,0)),x.pred))),
+                Nat.mul(2,Bits.to_nat(x.pred)), Nat.succ, rec)
+          }!
+        }!
+  }!
+
+Ether.RLP.proof.pad_nat(x : Bits, y : Nat) : Bits.to_nat(Bits.trim(Nat.add(Bits.length(x), y), x)) == Bits.to_nat(x)
+  case x {
+    e: 
+      case y {
+        succ : 
+          ?a
+        zero : refl
+      }!
+    o : ?b
+    i : ?c
+  }!
 
 Ether.RLP.proof.encode.bytes(tree : Ether.RLP.Tree) : Bits
   case tree {
@@ -19,7 +137,6 @@ Ether.RLP.proof.encode.bytes(tree : Ether.RLP.Tree) : Bits
          for item in tree.value with bytes :
            Bits.concat(bytes, Ether.RLP.proof.encode.bytes(item))
          let bytes_size = Ether.Bits.get_bytes_size(bytes)
-         log("Second encoding " | Nat.show(bytes_size))
          Bits.concat.go(Ether.RPL.proof.encode_length(bytes_size, 192), bytes)
   }
 
@@ -30,7 +147,8 @@ Ether.RPL.proof.encode_length(value : Nat, offSet : Nat) : Bits
   } default
     let binary_encoding = Ether.RPL.proof.encode.binary(value)
     let len = Ether.Bits.get_bytes_size(binary_encoding)
-    log(Nat.show(value) | " " | Bits.show(Bits.concat.go(Nat.to_bits(len + offSet + 55), binary_encoding)))
+
+    //log(Bits.show(Nat.to_bits(len + offSet + 55)) | " " | Bits.show(Bits.concat.go(Nat.to_bits(len + offSet + 55), binary_encoding)))
     Bits.concat.go(Nat.to_bits(len + offSet + 55), binary_encoding)
 
 Ether.RPL.proof.encode.binary(value : Nat) : Bits
@@ -45,13 +163,15 @@ Bits.break(len : Nat, bits : Bits) : Pair<Bits, Bits>
 Ether.RLP.proof.encode.read.binary(value : Bits) : Nat
   let {head, rest} = Bits.break(8, value)
   let decode = Bits.to_nat(head)
-  if (Bits.eql(rest, Bits.o(Bits.e))) then
+  if (Bits.eql(rest, Bits.e)) then
     decode
   else
     Ether.RLP.proof.encode.read.binary(rest) + (decode * 256)
 
 Ether.RLP.proof.encode.read(bits : Bits) : String
   let {byte_prefix, rest} = Bits.break(8, bits)
+  log(Bits.show(byte_prefix))
+
   "0x" | switch (Bits.ltn(byte_prefix)) {
     Ether.RLP.Constants.bits_128 : 
       String.reverse(Bits.hex.encode(bits))  // between (0, 127)
@@ -63,7 +183,10 @@ Ether.RLP.proof.encode.read(bits : Bits) : String
      let content_length = (Bits.to_nat(byte_prefix) - 183) * 8
      let {head, rest} = Bits.break(content_length, rest)
      let length = Ether.RLP.proof.encode.read.binary(head)
+     log("teste :  " | Bits.show(head))
+
      let {prefix, rest} = Bits.break(length*8, rest)
+
      String.reverse(Bits.hex.encode(byte_prefix)) | String.reverse(Bits.hex.encode(head))
        | String.reverse(Bits.hex.encode(prefix))
 
