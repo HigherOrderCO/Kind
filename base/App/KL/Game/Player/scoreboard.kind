@@ -1,0 +1,16 @@
+App.KL.Game.Player.scoreboard.update(
+  new: App.KL.Game.Scoreboard
+  player: App.KL.Game.Player
+): App.KL.Game.Player
+  player@scoreboard <- App.KL.Game.Scoreboard.union(player@scoreboard, new)
+
+ 
+App.KL.Game.Player.scoreboard.map.show(
+  map: Map<App.KL.Game.Player>
+): String
+  let result = ""
+  for id:player in map with result:
+    "id: " | id | "\n" |
+    App.KL.Game.Scoreboard.show(player@scoreboard) |
+    result
+  result

@@ -1,0 +1,3 @@
+App.KL.Game.Board.Creature.get.draw(creature: App.KL.Game.Creature): App.KL.Game.Entity.Draw
+  open creature@category as category
+  category.data@draw

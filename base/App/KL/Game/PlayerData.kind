@@ -1,0 +1,2 @@
+App.KL.Game.PlayerData: Type
+  Map<Pair<App.KL.Game.Scoreboard, Maybe<App.KL.Game.Recap>>>

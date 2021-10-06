@@ -4,5 +4,29 @@ App.KL.Game.Board.find_player_coord(
   player: String,
   board: App.KL.Game.Board
 ): Maybe<Hexagonal.Axial>
+  let list = Hexagonal.Axial.Map.to_list!(board)
+  App.KL.Game.Board.find_player_coord.go(player, list)
 
-  App.KL.Game.Board.find_players(board){player}
+App.KL.Game.Board.find_player_coord.go(
+  player: String,
+  board: List(Pair(Hexagonal.Axial,App.KL.Game.Tile))
+): Maybe<Hexagonal.Axial>
+  case board {
+    nil: none
+    cons:
+      let go = App.KL.Game.Board.find_player_coord.go(player, board.tail)
+      let tile = board.head@snd
+      let creature = tile@creature
+      without creature: go
+      case creature@category as category {
+        hero:
+          let creature_player = creature@player 
+          without creature_player: go
+          if creature_player =? player then
+            some(board.head@fst)
+          else
+            go
+        summon:
+          go
+      }
+  }

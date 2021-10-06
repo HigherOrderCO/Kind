@@ -1,0 +1,13 @@
+PriorityQueue.Tree.merge<A: Type>(priority: A -> Nat, a: PriorityQueue.Tree<A>, b: PriorityQueue.Tree<A>): PriorityQueue.Tree<A>
+  case a {
+    empty: b
+    node:
+      case b {
+          empty: a
+          node:
+            if Nat.lte(priority(a.element), priority(b.element)) then
+              PriorityQueue.Tree.make!(a.element, a.left, PriorityQueue.Tree.merge!(priority, a.right, b))
+            else
+              PriorityQueue.Tree.make!(b.element, b.left, PriorityQueue.Tree.merge!(priority, a, b.right))
+      }
+  }

@@ -1,15 +1,12 @@
 type App.KL.Game.Hero {
   new(
     name: String
-    draw: App.KL.Game.Hero.Draw.Pose -> App.KL.Game.Hero.Draw.Result
-    picture: Bool -> U64 -> String // rename to portrait?
-    height: I32
+    draw: App.KL.Game.Entity.Draw
     max_hp: I32
     max_ap: I32
-    skills: Map<App.KL.Game.Skill> // letter -> skill
-    //on_turn_end: App.KL.Game.Creature -> App.KL.Game.Creature //TODO: ADD
-    on_stepped: Maybe<App.KL.Game.Effect.FromTo<Unit>>
-    attributes: Maybe<App.KL.Game.Hero.Attributes>
+    skills: Map<App.KL.Game.Skill>
+    attributes: App.KL.Game.Hero.Attributes
+    role: App.KL.Game.Hero.Role
     description: String
   )
 }
@@ -50,3 +47,33 @@ App.KL.Game.Hero.Attributes.set(damage: Nat, resistance: Nat, mobility: Nat, ran
     max(utility)
     max(difficulty)
   )
+
+App.KL.Game.Hero.Attributes.to_map(attrs: App.KL.Game.Hero.Attributes): Map<Nat>
+  {
+    "damage":     attrs@damage
+    "resistance": attrs@resistance
+    "mobility":   attrs@mobility
+    "range":      attrs@range
+    "utility":    attrs@utility
+    "difficulty": attrs@difficulty
+  }
+  
+type App.KL.Game.Hero.Role {
+  melee
+  ranged
+  specialist
+  support
+  tank
+}
+
+App.KL.Game.Hero.Role.all: List<App.KL.Game.Hero.Role>
+  [App.KL.Game.Hero.Role.melee, App.KL.Game.Hero.Role.ranged, App.KL.Game.Hero.Role.specialist, App.KL.Game.Hero.Role.support, App.KL.Game.Hero.Role.tank]
+
+App.KL.Game.Hero.Role.show(role: App.KL.Game.Hero.Role): String
+  case role {
+    melee: "Melee DPS"
+    ranged: "Ranged DPS"
+    specialist: "Specialist"
+    support: "Support"
+    tank: "Tank"
+  }

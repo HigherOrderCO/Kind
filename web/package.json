@@ -9,6 +9,7 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
+    "dotenv": "^10.0.0",
     "formcore-js": "^0.1.76",
     "inferno": "^7.4.6",
     "inferno-hyperscript": "^7.4.6",

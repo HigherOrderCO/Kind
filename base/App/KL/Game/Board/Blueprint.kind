@@ -1,46 +1,89 @@
 type App.KL.Game.Board.Blueprint {
   new(
-    terrains: List<Pair<Hexagonal.Axial, App.KL.Game.Terrain>>
-    tokens: List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
+    terrains:  Hexagonal.Axial.Map<App.KL.Game.Terrain>
+    tokens:    Hexagonal.Axial.Map<App.KL.Game.Token>
+    bases:     Hexagonal.Axial.Map<App.KL.Game.Team>
+    initial:   Hexagonal.Axial.Map<App.KL.Game.Team>
+    landscape: Hexagonal.Axial.Map<App.KL.Game.Terrain>
   )
 }
+// Hexagonal.Axial.Map.set<A : Type>(
+//   key : Hexagonal.Axial,
+//   val : A,
+//   map : Hexagonal.Axial.Map<A>
+// ): Hexagonal.Axial.Map<A>
 
 App.KL.Game.Board.Blueprint.build.terrains(
   terrains: List<Pair<Pair<I32, I32>, Nat>> // {coord, field_id}
-): List<Pair<Hexagonal.Axial, App.KL.Game.Terrain>>
-  let transform = 
-    ((x) 
-      open x
-      {Hexagonal.Axial.new(x.fst@fst, x.fst@snd), App.KL.Game.Terrain.new(x@snd, none)}) :: Pair<Pair<I32,I32>, Nat> -> Pair<Hexagonal.Axial, App.KL.Game.Terrain>
-  
-  [transform(x) for x in terrains]
+): Hexagonal.Axial.Map<App.KL.Game.Terrain>
+  map = Hexagonal.Axial.Map.new!
+  for tile in terrains with map:
+    let coord   = Hexagonal.Axial.new(tile@fst@fst, tile@fst@snd)
+    let terrain = App.KL.Game.Terrain.new(tile@snd, none)
+    Hexagonal.Axial.Map.set!(coord, terrain, map)
+  map
 
 App.KL.Game.Board.Blueprint.build.tokens(
   tokens: List<Pair<Pair<I32, I32>, App.KL.Game.Token>> // {coord, token}
-): List<Pair<Hexagonal.Axial, App.KL.Game.Token>>
-  let transform = 
-    ((x) 
-      open x
-      {Hexagonal.Axial.new(x.fst@fst, x.fst@snd), x@snd}) :: Pair<Pair<I32,I32>, App.KL.Game.Token> -> Pair<Hexagonal.Axial, App.KL.Game.Token>
-  
-  [transform(x) for x in tokens]
-  
+): Hexagonal.Axial.Map<App.KL.Game.Token>
+  map = Hexagonal.Axial.Map.new!
+  for tile in tokens with map:
+    let coord   = Hexagonal.Axial.new(tile@fst@fst, tile@fst@snd)
+    let token   = tile@snd
+    Hexagonal.Axial.Map.set!(coord, token, map)
+  map
+
 
 App.KL.Game.Board.Blueprint.build.board(
   blueprint: App.KL.Game.Board.Blueprint
 ): App.KL.Game.Board
   let board  = Hexagonal.Axial.Map.new<App.KL.Game.Tile>
   open blueprint
-  for terrain in blueprint.terrains with board:
-    let coord   = terrain@fst
-    let terrain = terrain@snd
+  for coord:terrain in blueprint.terrains with board:
     let entity  = App.KL.Game.Entity.terrain(terrain)
     App.KL.Game.Board.push(coord, entity, board)
   
-  for token in blueprint.tokens with board:
-    let coord   = token@fst
-    let token   = token@snd
+  for coord:token in blueprint.tokens with board:
     let entity  = App.KL.Game.Entity.token(token)
     App.KL.Game.Board.push(coord, entity, board)
   
   board
+
+App.KL.Game.Board.Blueprint.build.team_coords(
+  blueprint: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>>
+): Hexagonal.Axial.Map<App.KL.Game.Team>
+  let map = Hexagonal.Axial.Map.new!
+  for info in blueprint with map:
+    let {team, coords} = info
+    for coord in coords with map:
+      Hexagonal.Axial.Map.set!(coord, team, map)
+    map
+  map
+
+// verify if a coord is a valid base coordinate
+App.KL.Game.Board.Blueprint.base.valid(
+  coord: Hexagonal.Axial
+  user: String
+  players: Map<App.KL.Game.Player>
+  blueprint: App.KL.Game.Board.Blueprint
+): Bool
+  let bases = blueprint@bases
+  Maybe {
+    get player      = players{user}
+    get team_coord  = Hexagonal.Axial.Map.get!(coord, bases)
+    let same_team   = App.KL.Game.Team.eql(team_coord, player@team)
+    let result = case same_team {
+      false: false
+      true: 
+        // check if coord is not selected by allies
+        let result = true
+        for player in App.KL.Game.Player.get_allies_list(player, players) with result:
+          case player@init_pos as init_pos {
+            none: result
+            some:
+              Bool.not(Hexagonal.Axial.eql(coord, init_pos.value)) && result
+          }
+        result
+    }
+    return result
+  } <> false

@@ -1,17 +1,73 @@
 App.KL.Game.Phase.End.when(
-  local  : App.KL.Game.State.Local
-  global : App.KL.Game
-  event  : App.Event,
+  local: App.KL.Game.State.Local
+  game : App.KL.Game
+  event: App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
-  let players = global@players
-  let room = String.take(16, Crypto.Keccak.hash(local@room))
-
+  let room     = String.take(16, Crypto.Keccak.hash(local@room))
+  let screen   = App.KL.Game.Screen.new({0,0}, 2, {0,0})
+  let controls = local@end
+  
   case event {
+    frame:
+      let controls   = App.KL.Game.Phase.End.when.get_result_animation(local, game, controls)
+      let animations = controls@animations
+      let animations = App.KL.Game.Assets.Animation.update_map(animations)
+      let controls   = controls@animations <- animations
+      let local      = local@end <- controls
+      let local      = App.KL.Game.Assets.Animation.update_local(animations, local)
+      App.set_local!(App.KL.State.Local.game(local))
     mouse_click:
       switch String.eql(event.id) {
-        "return" : // Set initial position
-          App.new_post!(room, App.KL.Game.Phase.End.Event.go_lobby.serial)
+        "go_to_lobby": 
+          let new_local = App.KL.State.Local.lobby(App.KL.Lobby.State.Local.new(App.KL.Constants.room, App.KL.Lobby.State.Local.Page.front(""), screen))
+          IO { 
+            App.unwatch!(room)
+            App.watch!(App.KL.Constants.room)
+            App.set_local<App.KL.State>(new_local)
+          }
+        "to-end":
+          let animations = controls@animations
+          let panel_animation = animations{"panel-result"}
+          let controls =
+            case panel_animation {
+              none: controls
+              some: 
+                let panel_animation = panel_animation.value@active <- false
+                let animations = animations{"panel-result"} <- panel_animation
+                let controls   = controls@animations <- animations
+                controls
+            }
+          let local = local@end <- controls
+          App.set_local!(App.KL.State.Local.game(local))
       } default App.pass!
-  
-  } default App.pass!
+  }default App.pass!
 
+App.KL.Game.Phase.End.when.get_result_animation(
+  local: App.KL.Game.State.Local
+  game : App.KL.Game
+  controls: App.KL.Game.Controls.End
+): App.KL.Game.Controls.End
+  let first_time = controls@panel_first_time
+
+  if first_time then
+    let animations = controls@animations
+    let animations = 
+      Maybe {
+        let user        = local@user
+        get player      = game@players{user}
+        let score       = game@score
+        get winner_team = App.KL.Game.Score.get_winner(score)
+        let animations  = controls@animations
+
+        let animations =
+          if winner_team =? player@team then
+            animations{"panel-result"} <- App.KL.Game.Phase.Play.Assets.end.victory
+          else
+            animations{"panel-result"} <- App.KL.Game.Phase.Play.Assets.end.defeat
+        return animations
+      } <> animations
+    let controls = controls@animations <- animations
+    let controls = controls@panel_first_time <- false
+    controls
+  else 
+    controls

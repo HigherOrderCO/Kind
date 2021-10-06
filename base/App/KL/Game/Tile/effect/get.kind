@@ -1,7 +1,7 @@
 App.KL.Game.Tile.effect.get(
   tile: App.KL.Game.Tile
-): App.KL.Game.Effect<Unit>
+): Maybe<App.KL.Game.Effect<Unit>>
 
   open tile
-  without tile.effect: App.KL.Game.Effect.pass
-  tile.effect@effect
+  without tile.effect: none
+  some(tile.effect@effect)

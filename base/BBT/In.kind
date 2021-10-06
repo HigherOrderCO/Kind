@@ -2,14 +2,14 @@
 BBT.In<K: Type, V: Type>(map: BBT<K, V>, key: K): Type
   case map {
     tip: 
-      self<P: BBT.In<K, V>(BBT.tip<K, V>, key) -> Type>
+      self<P: BBT.In<K, V>(BBT.tip<K, V>, key) -> Type> ->
       P(self)
     bin:
       def mmap = BBT.bin<K, V>(map.size, map.key, map.val, map.left, map.right)
-      self<P: BBT.In<K, V>(mmap, key) -> Type>
-      (left: (H: BBT.In<K, V>(map.left, key)) P(BBT.In.left<K, V>(map.size, map.key, map.val, map.left, map.right, key, H)))
-      (right: (H: BBT.In<K, V>(map.right, key)) P(BBT.In.right<K, V>(map.size, map.key, map.val, map.left, map.right, key, H)))
-      (here: P(BBT.In.here<K, V>(map.size, key, map.val, map.left, map.right)))
+      self<P: BBT.In<K, V>(mmap, key) -> Type> ->
+      (left: (H: BBT.In<K, V>(map.left, key)) -> P(BBT.In.left<K, V>(map.size, map.key, map.val, map.left, map.right, key, H))) ->
+      (right: (H: BBT.In<K, V>(map.right, key)) -> P(BBT.In.right<K, V>(map.size, map.key, map.val, map.left, map.right, key, H))) ->
+      (here: P(BBT.In.here<K, V>(map.size, key, map.val, map.left, map.right))) ->
       P(self)
   }!
 

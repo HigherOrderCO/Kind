@@ -1,0 +1,2 @@
+BytesLike: Type
+  Either<Bytes, String>

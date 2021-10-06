@@ -6,9 +6,10 @@ App.KL.Game.Board.Creature.change_ap(
 
   let creature = App.KL.Game.Board.Creature.get(pos, board)
   without creature: {+0#32, board}
-  let hero = creature@hero
-  let new_ap = I32.max((creature@ap + value), 0)
-  let new_ap = I32.min(new_ap, hero@max_ap)
+  let ap = App.KL.Game.Board.Creature.get.ap(creature)
+  let max_ap = App.KL.Game.Board.Creature.get.max_ap(creature)
+  let new_ap = I32.max((ap + value), 0)
+  let new_ap = I32.min(new_ap, max_ap)
   let aux = App.KL.Game.Board.Creature.change_ap.aux(value)
   let new_board = App.KL.Game.Board.Creature.modify_at(aux, pos, board)
   {new_ap, new_board}
@@ -17,10 +18,12 @@ App.KL.Game.Board.Creature.change_ap(
   
 
 App.KL.Game.Board.Creature.change_ap.aux(
-  value: I32
+  value: I32,
   creature: App.KL.Game.Creature
 ): App.KL.Game.Creature
-
-  let hero = creature@hero
-  let new_ap = I32.min((creature@ap + value), hero@max_ap)
-  creature@ap <- new_ap
+  case creature@category as category {
+    hero: 
+      let new_ap = I32.min((category.ap + value), category.data@max_ap)
+      creature@category <- App.KL.Game.Creature.Category.hero(category.data, new_ap, category.id)
+    summon: creature
+  }

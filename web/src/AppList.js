@@ -25,7 +25,7 @@ module.exports = class AppList extends Component {
         "font-family": "monospace",
       }
     }, [
-      h("div", {}, [h("pre", {}, ["Select an application:"])]),
+      h("div", {}, [h("pre", {style: {"margin-bottom": "10px"}}, ["Select an application:"])]),
       list,
     ]);
   }

@@ -1,34 +1,31 @@
+Kind.Parser.get.names: Parser(List<Kind.Name>)
+  Kind.Parser.items!("{", Kind.Parser.name1, "}")
+
+Kind.Parser.get.open(names: List<Kind.Name>, tuple: Kind.Term, body: Kind.Term): Kind.Term
+  let term = tuple
+  let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)))
+  let term = Kind.Term.app(term, List.fold!(names)!(body, (nam,bod) Kind.Term.lam(nam, (x) bod)))
+  term
+
 Kind.Parser.get(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("let", Parser {
     Kind.Parser.text("let ")
-    Kind.Parser.text("{")
-    get nam0 = Kind.Parser.name1
-    Kind.Parser.text(",")
-    get nam1 = Kind.Parser.name1
-    Kind.Parser.text("}")
+    get nams = Kind.Parser.get.names
     Kind.Parser.text("=")
     get expr = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
     get body = body(unit)
-    let term = expr
-    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)))
-    let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)))
-    return term
+    return Kind.Parser.get.open(nams, expr, body)
   })
 
 Kind.Parser.get.omit(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
   Kind.Parser.block("let", Parser {
     Kind.Parser.text("{")
-    get nam0 = Kind.Parser.name1
-    Kind.Parser.text(",")
-    get nam1 = Kind.Parser.name1
+    get nams = Kind.Parser.get.names
     Kind.Parser.text("}")
     Kind.Parser.text("= ")
     get expr = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
     get body = body(unit)
-    let term = expr
-    let term = Kind.Term.app(term, Kind.Term.lam("", (x) Kind.Term.hol(Bits.e)))
-    let term = Kind.Term.app(term, Kind.Term.lam(nam0, (x) Kind.Term.lam(nam1, (y) body)))
-    return term
+    return Kind.Parser.get.open(nams, expr, body)
   })

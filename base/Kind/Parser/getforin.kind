@@ -1,0 +1,46 @@
+Kind.Parser.getforin(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
+  Kind.Parser.block("get-for", Parser {
+    Kind.Parser.text("let ")
+    get name = Kind.Parser.name1
+    Kind.Parser.text("=")
+    Kind.Parser.text("for ")
+    get elem = Kind.Parser.get.names
+    Kind.Parser.text("in")
+    get list = Kind.Parser.term
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = body(unit)
+    let term = Kind.Term.ref("List.for")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, list)
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.ref(name))
+    let lamb = Kind.Term.lam(".tuple", (i) Kind.Term.lam(name, (x) Kind.Parser.get.open(elem, Kind.Term.ref(".tuple"), loop)))
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.let(name, term, (x) body)
+    return term
+  })
+
+Kind.Parser.getforin.with(body: Unit -> Parser(Kind.Term)): Parser(Kind.Term)
+  Kind.Parser.block("for", Parser {
+    Kind.Parser.text("for ")
+    get elem = Kind.Parser.get.names
+    Kind.Parser.text("in")
+    get list = Kind.Parser.term
+    Kind.Parser.text("with")
+    get name = Kind.Parser.name1
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = body(unit)
+    let term = Kind.Term.ref("List.for")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, list)
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.ref(name))
+    let lamb = Kind.Term.lam(".tuple", (i) Kind.Term.lam(name, (x) Kind.Parser.get.open(elem, Kind.Term.ref(".tuple"), loop)))
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.let(name, term, (x) body)
+    return term
+  })

@@ -1,0 +1,4 @@
+type PriorityQueue.Tree <A: Type> {
+    empty
+    node(rank: Nat, element: A, left: PriorityQueue.Tree<A>, right: PriorityQueue.Tree<A>)
+}

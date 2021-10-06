@@ -1,17 +1,3 @@
-Test: Char
-  a
-
-//IntLib.add(a: Int, b: Int): Int
-  //a + b
-
-//IntLib.neg(a: Int): Int
-  //0 - a
-
-//IntLib: Module
-  //{
-    //"add": Dynamic.new!(IntLib.add) // Int -> Int -> Int
-    //"neg": Dynamic.new!(IntLib.neg) // Int -> Int
-  //}
-
-//five: Int
-  //Module.value_of(IntLib, "add")(+2, +3)
+Test: _
+  let b = Litereum.serialize.varlen.go(12)
+  Litereum.deserialize.varlen.go(b)

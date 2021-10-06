@@ -12,36 +12,26 @@ App.KL.Game.Phase.Draft.post(
       log("- join_room")
       let player = Map.get!(addr, game@players)
       let game = case player {
-        none: game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false), game@players) 
+        none: game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, App.KL.Game.Team.neutral, false, App.KL.Game.Scoreboard.pure, []), game@players) 
         some: game@players <- Map.set!(addr, player.value, game@players) 
       }
       game
 
     set_team:
       log("- set_team")
-      game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false), game@players)
-
-    set_init_pos:
-      log("- set_init_pos")
-      Maybe {
-        let players     = game@players
-        get player      = players{addr}
-        let player_list = Map.to_list!(players)
-        let is_occupied = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_coord(event.coord), player_list), _, false, Bool.or)
-        let game        = game@players <- players{addr} <- player@init_pos <- some(event.coord) // New_Coord -> Player -> Players -> Game 
-        if is_occupied then none else some(game)
-      } <> game
+      game@players <- Map.set!(addr, App.KL.Game.Player.new(none, none, event.team, false, App.KL.Game.Scoreboard.pure, []), game@players)
 
     set_hero:
       log("- set_hero")
       Maybe {
         let players     = game@players
         get player      = players{addr}
+        let team        = player@team
         let player_list = Map.to_list!(players)
-        let same_team = App.KL.Game.Player.same_team(player, players) // Verifies if a player is on the same team with another player
-        let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero), player_list), _, false, Bool.or)
+        //let same_team   = App.KL.Game.Player.same_team(player, players) // Verifies if a player is on the same team with another player
+        let is_picked   = List.fold!(List.map!!(App.KL.Game.Phase.Draft.has_hero(event.hero, team), player_list), _, false, Bool.or)
         let game        = game@players <- players{addr} <- player@hero_id <- some(U8.to_nat(event.hero)) // New_Hero -> Player -> Players -> Game 
-        if is_picked && same_team then none 
+        if is_picked then none 
         else some(game)
       } <> game 
         

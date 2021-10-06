@@ -1,0 +1,5 @@
+PriorityQueue.Tree.is_empty<A: Type>(tree: PriorityQueue.Tree<A>): Bool
+  case tree {
+      empty: true
+      node: false
+  }

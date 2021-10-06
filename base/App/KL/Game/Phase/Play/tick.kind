@@ -1,6 +1,31 @@
 App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
   open game
+  // update tick
+  let game = game@tick <- game@tick + 1
+  
   case game.moment {
+    // Inital phase
+    initial:
+      // Countdown positive: decrease countdown
+      if U64.gtn(game.moment.countdown, App.KL.Constants.initital_delay) then
+        let game = game@moment <- App.KL.Game.Moment.initial(game.moment.countdown - 1)
+        game
+      // Countdown zero: go to preparation phase
+      else
+        // Delay time
+        if U64.gtn(game.moment.countdown, 0) then 
+          // Create board only one time
+          if U64.eql(game.moment.countdown, App.KL.Constants.initital_delay) then
+            let game = game@board <- App.KL.Game.Moment.preparation.create_board(game@players, game@blueprint, game@board)
+            let game = game@moment <- App.KL.Game.Moment.initial(game.moment.countdown - 1)
+            game
+          else
+            let game = game@moment <- App.KL.Game.Moment.initial(game.moment.countdown - 1)
+            game
+        else
+          let game = game@moment <- App.KL.Game.Moment.preparation(App.KL.Constants.round_time)
+          let game = game@casts <- []
+          game
     // Preparation phase
     preparation:
       // Countdown positive: decrease countdown
@@ -31,6 +56,8 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
               success: 
                 let coord = App.KL.Game.Cast.get_coord(game.moment.casts.head, game)
                 let game = cast_result.game
+                log("Scoreboard: \n " | App.KL.Game.Player.scoreboard.map.show(game@players))
+                log("Recap: \n " | App.KL.Game.Player.recap.map.show(game@players))
                 let game = game@moment <- App.KL.Game.Moment.execution(game.moment.casts, game.moment.previous_casts, game.moment.frame + 1, coord, cast_result.hits, cast_result.ap_used, Either.right!!(unit))
                 game
             // On the other frames, just update the counter
@@ -51,9 +78,11 @@ App.KL.Game.Phase.Play.tick(tick: U64, game: App.KL.Game): App.KL.Game
           // apply status TODO redo
           let game = App.KL.Game.Board.apply_status(game)
           // token update
-          let game   = game@board <- App.KL.Game.Token.board.capture(game@board)
+          let {board, players } = App.KL.Game.Token.board.capture(game@board, game@players)
+          let game = game@board <- board
+          let game = game@players <- players
           // score update
-          let game   = game@score <- App.KL.Game.Token.score.capture(game@board, game@score)
+          let game = game@score <- App.KL.Game.Token.score.update(game@board, game@score)
           // Verify if game ended  
           let winner = App.KL.Game.Score.get_winner(game@score)
           case winner {

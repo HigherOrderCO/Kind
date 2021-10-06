@@ -5,33 +5,82 @@ App.KL.Game.Phase.Draft.when(
   event  : App.Event,
 ): IO<Maybe<App.State.local<App.KL.State>>>
   let players = global@players
-  let room = String.take(16, Crypto.Keccak.hash(local@room))
+  let room  = String.take(16, Crypto.Keccak.hash(local@room))
+  let ready = Maybe.if!((x) x@ready, players{local@user}) // verify if local user is ready
+  let controls = local@draft // buttons controls (hover, click, active, etc)
 
   case event {
+    frame:
+      let animations = controls@animations
+      let animations = App.KL.Game.Assets.Animation.update_map(animations)
+      let controls   = controls@animations <- animations
+      let local      = local@draft <- controls
+      App.set_local!(App.KL.State.Local.game(local))
+    input: 
+      switch String.starts_with(event.id) {
+        "HF": // HF = hero-filter = name of hero to filter
+          let controls = controls@filter <- controls@filter@hero_name <- event.text
+          let local    = local@draft <- controls
+          App.set_local!(App.KL.State.Local.game(local))
+      } default App.pass!
+    mouse_move:
+      let default_controls = App.KL.Game.Controls.Draft.default(ready, controls)
+      let controls = switch String.starts_with(event.id) {
+        "R": // ready
+          if ready then
+            if controls@main_button_hovered then
+              controls
+            else
+              let new_button = App.KL.Game.Phase.Draft.Assets.main_button.cancel
+              let animations = controls@animations
+              let animations = animations{"main-button"} <- new_button
+              let controls   = controls@animations <- animations
+              let controls   = controls@main_button_hovered <- true
+              controls
+          else 
+            controls
+        "btn-header-": // hover in header buttons
+          let event_id = String.drop(11, event.id)
+          App.KL.Game.Controls.Draft.header.update(event_id, default_controls)
+      } default default_controls
+      let local = local@draft <- controls
+      App.set_local!(App.KL.State.Local.game(local))
     mouse_click:
       switch String.starts_with(event.id) {
-        "C" : // Set initial position 
-          let coord_nat = String.drop(1, event.id)
-          let coord     = Hexagonal.Axial.from_nat(Nat.read(coord_nat))
-          App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_init_pos.serial(coord))
         "H" : // Set Player Hero
           let hero_name = String.drop(1, event.id)
           let hero_id   = Maybe.map!!(Nat.to_u8, App.KL.Game.Hero.name_to_id(hero_name))
           case hero_id {
             none: App.pass!
-            some: App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_hero.serial(hero_id.value))
+            some: 
+              let controls = controls@skills_tab <- none
+              let local    = local@draft <- controls
+              log(local@draft@skills_tab <> "NADA")
+              IO {
+                App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_hero.serial(hero_id.value))
+                App.set_local!(App.KL.State.Local.game(local))
+              }
           }
         "R" : // Toggle Ready
           let player = players{local@user}
           case player {
             none: App.pass!
             some:
-              let can_ready = App.KL.Game.Player.has_hero_and_pos(player.value)
-              let ready_u8 = 
-                if player.value@ready then 0#8 
-                else if can_ready then 1#8 
-                else 0#8
-              App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_u8))
+              let can_ready  = App.KL.Game.Player.has_hero(player.value)
+              let ready_info = 
+                if player.value@ready then {0#8, App.KL.Game.Phase.Draft.Assets.main_button.ready}
+                else 
+                  if can_ready then { 1#8, App.KL.Game.Phase.Draft.Assets.main_button.waiting}
+                  else {0#8, App.KL.Game.Phase.Draft.Assets.main_button.ready}
+              
+              let animations = controls@animations
+              let animations = animations{"main-button"} <- ready_info@snd
+              let controls   = controls@animations <-animations
+              let local = local@draft <- controls
+              IO {
+                App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_ready.serial(ready_info@fst))
+                App.set_local!(App.KL.State.Local.game(local))
+              }
           }        
         "T" : // Set a team
           let player_count = String.drop(1, event.id)
@@ -44,16 +93,32 @@ App.KL.Game.Phase.Draft.when(
               "red" : App.KL.Game.Team.red
             } default App.KL.Game.Team.neutral
             App.new_post!(room, App.KL.Game.Phase.Draft.Event.set_team.serial(team))
+        "FC": // FC = filter-class = hero class to filter
+          let class = String.drop(2, event.id)
+          let options = controls@filter@options
+          let option = options{class}
+          case option {
+            none: App.pass!
+            some:
+              let new_options = options{class}  <- Bool.not(option.value)
+              let controls    = controls@filter <- controls@filter@options <- new_options
+              let local       = local@draft  <- controls
+              App.set_local!(App.KL.State.Local.game(local))
+          }
+        "D": // Set which tab to show
+          let tab   = String.drop(1, event.id)
+          let controls = 
+            if tab =? "I" then
+             controls@skills_tab <- none
+            else
+             controls@skills_tab <- some(tab)
+          let local = local@draft <- controls
+          App.set_local!(App.KL.State.Local.game(local))
+        "user-card":
+          let new_page = if String.eql(controls@page, "heroes") then "users" else "heroes"
+          let controls = controls@page  <- new_page
+          let local    = local@draft <- controls
+          App.set_local!(App.KL.State.Local.game(local))
       } default App.pass!
-  mouse_over:
-    switch String.starts_with(event.id) {
-      "D": // Set which tab to show
-        let tab   = String.drop(1, event.id)
-        let local = case tab {
-          nil: local 
-          cons: local@tab <- tab
-        }
-        App.set_local!(App.KL.State.Local.game(local))
-    }default App.set_local!(App.KL.State.Local.game(local@tab <- "D"))
   } default App.pass!
 

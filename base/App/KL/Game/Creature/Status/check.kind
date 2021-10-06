@@ -9,10 +9,11 @@ App.KL.Game.Creature.Status.check(
     case verify status { 
       block block : true
       dot dot: true
-      dampen dampen: true
       haste haste: true
       hot hot: true
       invulnerable invulnerable: true
+      opposite opposite: true
+      protect protect: true
       root root: true
       shield shield: true
       silence silence: true

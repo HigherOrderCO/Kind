@@ -1,24 +1,72 @@
 type App.KL.Game.Token {
   new(
-    dominance: I32 // blue and red TODO
-    range: I32
-    max: I32
-    score: I32
-  )
-}
+    dominance: I32 // actual dominance (-max == dominated by red, max == dominated by blue)
+    range: I32 // range of token
+    max: I32 // max dominance
+    score: I32 // how much score it given
+  ) 
+} deriving (serializer, deserializer)
 
-App.KL.Game.Token.score.capture(board: App.KL.Game.Board, score: App.KL.Game.Score): App.KL.Game.Score
+App.KL.Game.Token.score.update(
+  board: App.KL.Game.Board, 
+  score: App.KL.Game.Score
+): App.KL.Game.Score
   let tokens = App.KL.Game.Token.get_tokens(board)
-  for coord:token in tokens with score:
+  let result = score
+  for coord:token in tokens with result:
     let team = App.KL.Game.Token.get_dominance(token)
-    without team: score // no team dominating
-      {blue_score, red_score} = score@points
-      case team {
-        blue: score@points <- {I32.min(blue_score + token@score, score@max), red_score}
-        red : score@points <- {blue_score, I32.min(red_score + token@score, score@max)}
-      } default score // no team dominating
-  score
+    without team: result // no team dominating
+
+    let score = result
+    let score = App.KL.Game.Token.score.update.score(score, team, token)
+    score
+  result
   
+App.KL.Game.Token.score.update.score(
+  score: App.KL.Game.Score
+  team:  App.KL.Game.Team
+  token: App.KL.Game.Token
+): App.KL.Game.Score
+  {blue_score, red_score} = score@points
+  case team {
+    blue: score@points <- {I32.min(blue_score + token@score, score@max), red_score}
+    red : score@points <- {blue_score, I32.min(red_score + token@score, score@max)}
+  } default score // no team dominating
+
+App.KL.Game.Token.score.update.players(
+  players: Map<App.KL.Game.Player>
+  board: App.KL.Game.Board,
+  coord: Hexagonal.Axial,
+  old_token: App.KL.Game.Token
+  new_token: App.KL.Game.Token
+): Map<App.KL.Game.Player>
+  let old_token_team = App.KL.Game.Token.get_dominance(old_token)
+  let new_token_team = App.KL.Game.Token.get_dominance(new_token)
+  // only change players in a change of no team dominating
+  // to a team dominating the token
+  case old_token_team new_token_team {
+    none some:
+      let dominating_creatures = App.KL.Game.Token.get_creatures(true, coord, board, new_token)
+      for creature in dominating_creatures with players:
+        Maybe {
+          get player_id = creature@player
+          get player    = players{player_id}
+          let player    = App.KL.Game.Token.score.update.player(player)
+          let players   = players{player_id} <- player
+          return players
+        } <> players
+      players   
+  } default players
+
+
+App.KL.Game.Token.score.update.player(
+  player: App.KL.Game.Player
+): App.KL.Game.Player
+  let player_scoreboard = player@scoreboard
+  let player_scoreboard = player_scoreboard@xp <- player_scoreboard@xp + 1
+  let player = player@scoreboard <- player_scoreboard
+  player
+
 // get all tokens in board
 App.KL.Game.Token.get_tokens(board: App.KL.Game.Board): Hexagonal.Axial.Map<App.KL.Game.Token>
   let result = Hexagonal.Axial.Map.new!
@@ -29,17 +77,29 @@ App.KL.Game.Token.get_tokens(board: App.KL.Game.Board): Hexagonal.Axial.Map<App.
     }
   result
 
-App.KL.Game.Token.board.capture(board: App.KL.Game.Board): App.KL.Game.Board
+App.KL.Game.Token.board.capture(
+  board: App.KL.Game.Board,
+  players: Map<App.KL.Game.Player>
+): Pair<App.KL.Game.Board, Map<App.KL.Game.Player>>
   let tokens = App.KL.Game.Token.get_tokens(board)
-  for coord:token in tokens with board:
+  let result = {board, players}
+  for coord:token in tokens with result:
+    let {board, players} = result
     let new_token = App.KL.Game.Token.capture(coord, board, token)
+    let players   = App.KL.Game.Token.score.update.players(players, board, coord, token, new_token)
     // log(I32.show(new_token@dominance))
     let token_entity = App.KL.Game.Entity.token(new_token)
-    App.KL.Game.Board.push(coord, token_entity, board)
-  board
+    let board = App.KL.Game.Board.push(coord, token_entity, board)
+    {board, players}
+  result
 
 // get creatures around token
-App.KL.Game.Token.get_creatures(coord: Hexagonal.Axial, board: App.KL.Game.Board, token: App.KL.Game.Token): List<App.KL.Game.Creature>
+App.KL.Game.Token.get_creatures(
+  only_dominating: Bool
+  coord: Hexagonal.Axial, 
+  board: App.KL.Game.Board, 
+  token: App.KL.Game.Token
+): List<App.KL.Game.Creature>
   let coords    = Hexagonal.Axial.range(coord, token@range)
   let creatures = []
   for coord in coords with creatures:
@@ -47,7 +107,15 @@ App.KL.Game.Token.get_creatures(coord: Hexagonal.Axial, board: App.KL.Game.Board
     without tile: creatures
       let creature = tile@creature
     without creature: creatures
-      creature & creatures
+      if only_dominating then
+        let dominating_team = App.KL.Game.Token.get_dominance(token)
+        without dominating_team: []
+        if dominating_team =? creature@team then
+          creature & creatures
+        else 
+          creatures
+      else
+        creature & creatures
   
   creatures
 
@@ -64,7 +132,7 @@ App.KL.Game.Token.get_dominance(token: App.KL.Game.Token): Maybe<App.KL.Game.Tea
 // get team around the token exclusively, if any
 // apply points, if any team around
 App.KL.Game.Token.capture(coord: Hexagonal.Axial, board: App.KL.Game.Board, token: App.KL.Game.Token): App.KL.Game.Token
-  let creatures = App.KL.Game.Token.get_creatures(coord, board, token)
+  let creatures = App.KL.Game.Token.get_creatures(false, coord, board, token)
   let dom_team  = App.KL.Game.Token.get_team(creatures, token)
   App.KL.Game.Token.apply_dominance(dom_team, token)
 

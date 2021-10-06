@@ -1,0 +1,14 @@
+App.KL.Game.Player.get_allies_list(
+  player:  App.KL.Game.Player
+  players: Map<App.KL.Game.Player>
+): List<App.KL.Game.Player>
+  let team = player@team
+  let result = []
+
+  for user:player in players with result:
+    if App.KL.Game.Team.eql(player@team, team) then
+      player & result
+    else
+      result
+  
+  result

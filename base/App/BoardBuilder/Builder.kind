@@ -3,8 +3,14 @@ type App.BoardBuilder.Builder.State.local {
     room: String,
     canvas_size: Pair<I32, I32>,
     mouse: Maybe<Pair<U32, U32>>,
-    actual_terrain: Nat,
-    command: Maybe<Char>,
+    mouse_press: Bool,
+    terrain: Nat,
+    token: App.KL.Game.Token,
+    team: App.KL.Game.Team,
+    tool: App.BoardBuilder.Builder.Tool,
+    command: Char,
+    show_grid: Bool,
+    map_name: String,
     array: String,
   )
 }

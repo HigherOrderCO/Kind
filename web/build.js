@@ -2,25 +2,41 @@
 
 var fs = require("fs");
 var {exec, execSync} = require("child_process");
+require('dotenv/config');
 
 var code_dir = __dirname+"/src";
 var kind_dir = __dirname+"/../base";
 
 // TODO: remove from "src/apps" the ones that are no longer in "base/Apps"
 
-process.chdir(code_dir);
-var all_js_apps   = fs.readdirSync("apps").filter(x => x.startsWith("App."));
 process.chdir(kind_dir);
 var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
+var all_js_apps = [];
+// console.log(all_kind_apps)
+
+// App that will be displayed when accessing http://uwu.tech
+var server_apps = [
+  'Browser.kind',   
+  'Hello.kind',
+  'Kind.kind',
+  'KL.kind',
+  'Playground.kind',
+  'Pong.kind',
+  'Seta.kind',
+  'TicTacToe.kind'
+]
+
 var app = "";
 var compiled_apps = [];
 
 console.log("[1/2] Compiling apps:")
+const build_server = process.env.PRODUCTION;
+
 if (process.argv[2]) { // Only build 1 App
   app = all_kind_apps.filter(name => {
-    const match = process.argv[2].toLowerCase().slice(4) // remove "App."
+    const match = process.argv[2].toLowerCase()
     return name.toLowerCase().endsWith(match) 
-      || name.toLowerCase().endsWith(match+".kind");
+        || name.toLowerCase().endsWith(match+".kind");
   })[0];
   if (app) {
     compiled_apps = compile_app(app);
@@ -29,7 +45,8 @@ if (process.argv[2]) { // Only build 1 App
   }
 } else { // Build all Apps
   console.log("Tip: to build only 1 app, use \x1b[2mnode build.js app_name\x1b[0m.")
-  for (var file of all_kind_apps) {
+  const apps = build_server ? server_apps : all_kind_apps;
+  for (var file of apps) {
     compiled_apps.push(compile_app(file));
   }
 }
@@ -37,6 +54,7 @@ if (process.argv[2]) { // Only build 1 App
 // Compile app from ".kind" to ".js"
 // Save it in "src/apps/"
 function compile_app(name) {
+  all_js_apps.push("App."+name.replace(".kind",".js"));
   process.chdir(kind_dir);
   var name = "App."+name.slice(0,-5);
   console.log("- " + name);
@@ -60,12 +78,23 @@ if (app !== "" && app !== undefined) { // Check if need to add App to the export
   const app_export_format = "App."+app.slice(0,-5)+".js";
   if (all_js_apps.includes(app_export_format)) all_js_apps.concat(app_export_format);
 }
+
+const formatted_server_app = (app) => app.slice(4).slice(0, -3) + ".kind";
+
+// Define which Apps will be on index.js file
+const apps_in_index =
+build_server 
+? all_js_apps.filter((app) => server_apps.includes(formatted_server_app(app)))
+: all_js_apps;
+
 // Order Apps alphabetically
-all_js_apps.sort((a, b) => a.localeCompare(b)) 
-for (var app of all_js_apps ) {
+apps_in_index.sort((a, b) => a.localeCompare(b)) 
+
+for (var app of apps_in_index ) {
   index += add_line(app);
 }
 index += "}\n";
+
 fs.writeFileSync("apps/index.js", index);
 
 console.log("\n[2/2] Building index.js...");

@@ -1,4 +1,12 @@
 String.test.all: TestSuite
-  TestSuite.many("String", [
-    String.test.to_hex
-  ])
+  TestSuite.many("String", 
+    [ 
+      String.test.to_hex,
+      String.test.is_nat,
+      String.test.to_u16
+    ])
+
+// Show all tests for String
+String.test.show: _
+  log(TestSuite.show(String.test.all, 0))
+  0

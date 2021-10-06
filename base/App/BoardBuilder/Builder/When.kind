@@ -13,64 +13,213 @@ App.BoardBuilder.Builder.When(
         "height":
           let new_local = local@canvas_size <- {local.canvas_size@fst, I32.read(event.text)}
           App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        "TOK-range":
+          let token = local@token
+          let range = if String.starts_with(event.text, "-") then event.text else String.concat("+", event.text)
+          let new_token = token@range <- I32.read(range)
+          let new_local = local@token <- new_token
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        "TOK-maximum":
+          let token = local@token
+          let max = if String.starts_with(event.text, "-") then event.text else String.concat("+", event.text)
+          let new_token = token@max <- I32.read(max)
+          let new_local = local@token <- new_token
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        "TOK-damage":
+          let token = local@token
+          let damage = if String.starts_with(event.text, "-") then event.text else String.concat("+", event.text)
+          let new_token = token@score <- I32.read(damage)
+          let new_local = local@token <- new_token
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        "map_name":
+          let new_local = local@map_name <- event.text
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
       } default App.pass!
+    frame:
+      if local@mouse_press then
+        let command = local.command
+        let mouse = local@mouse
+        case mouse {
+          none: App.pass!
+          some:
+            let coord = Hexagonal.Axial.from_screen_xy(mouse.value, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2 , local.canvas_size@snd / 2 )
+            switch Char.eql(command) {
+              'X':
+                let post =
+                  case local@tool {
+                    terrains: App.BoardBuilder.Post.Event.terrain_add(coord, local.terrain)
+                    landscape: App.BoardBuilder.Post.Event.landscape_add(coord, local.terrain)
+                    bases: App.BoardBuilder.Post.Event.bases_add(coord, local.team)
+                    initial: App.BoardBuilder.Post.Event.initial_add(coord, local.team)
+                    tokens: App.BoardBuilder.Post.Event.token_add(coord, local.token)
+                  }default App.BoardBuilder.Post.Event.terrain_add(coord, local.terrain)
+                App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(post))
+              'Z':
+                  let post =
+                    case local@tool {
+                      terrains: App.BoardBuilder.Post.Event.terrain_del(coord)
+                      landscape: App.BoardBuilder.Post.Event.landscape_del(coord)
+                      bases: App.BoardBuilder.Post.Event.bases_del(coord)
+                      initial: App.BoardBuilder.Post.Event.initial_del(coord)
+                      tokens: App.BoardBuilder.Post.Event.token_del(coord)
+                    }default App.BoardBuilder.Post.Event.terrain_del(coord)
+                  App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(post))
+            } default App.pass!
+          }
+      else
+        App.pass!
+
     mouse_move:
       if String.eql("game_screen", event.id) then
         let {x,y} = event.mouse_pos
-        let command = local.command <> ' '
         let mouse = {x / 2, y / 2}
-        let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2, local.canvas_size@snd / 2)
         let new_local = local@mouse <- some(mouse)
-        switch Char.eql(command) {
-          'X':
-            IO {
-              App.set_local<App.BoardBuilder.State>(App.BoardBuilder.State.local.builder(new_local))
-              App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(App.BoardBuilder.Post.Event.add(coord, local.actual_terrain)))
-            }
-          'Z':
-            IO {
-              App.set_local<App.BoardBuilder.State>(App.BoardBuilder.State.local.builder(new_local))
-              App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(App.BoardBuilder.Post.Event.del(coord)))
-            }
-        } default App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        App.set_local<App.BoardBuilder.State>(App.BoardBuilder.State.local.builder(new_local))
       else
         let new_local = local@mouse <- none
         App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+
     mouse_click:
-      if (event.id =? "generate_array") then
-        let new_local = local@array <- App.BoardBuilder.When.generate_array(global@board)
-        App.set_local!(App.BoardBuilder.State.local.builder(new_local))
-      else
-        if String.starts_with(event.id, "T") then
-          let terrain = Nat.read(String.drop(1, event.id))
-          let new_local = local@actual_terrain <- terrain
+      switch String.eql(String.take(3, event.id)) {
+        "TAB":
+          let tab = String.drop(4, event.id)
+          let new_tool = 
+            switch String.eql(tab) {
+              "terrains"  : App.BoardBuilder.Builder.Tool.terrains
+              "tokens"    : App.BoardBuilder.Builder.Tool.tokens
+              "bases"     : App.BoardBuilder.Builder.Tool.bases
+              "initial"   : App.BoardBuilder.Builder.Tool.initial
+              "landscape" : App.BoardBuilder.Builder.Tool.landscape
+            }default App.BoardBuilder.Builder.Tool.terrains
+          let new_local = local@tool <- new_tool
           App.set_local!(App.BoardBuilder.State.local.builder(new_local))
-        else 
-          App.pass!
-    mouse_up:
-      let mouse = local.mouse
-      without mouse: App.pass!
-        let command = local.command <> ' '
-        let coord = Hexagonal.Axial.from_screen_xy(mouse, App.KL.Constants.hexagon_radius, local.canvas_size@fst / 2, local.canvas_size@snd / 2)
-        let event = 
-          if Char.eql(command, 'Z') then
-            App.BoardBuilder.Post.Event.del(coord)
-          else 
-            App.BoardBuilder.Post.Event.add(coord, local.actual_terrain)
-        App.new_post!(local.room, App.BoardBuilder.Post.Event.serialize_post(event))
-    key_up:
-      let new_local = local@command <- none
+        "TEA":
+          let team = String.drop(4, event.id)
+          let new_team =
+            switch String.eql(team) {
+              "blue": App.KL.Game.Team.blue
+              "red" : App.KL.Game.Team.red
+            }default App.KL.Game.Team.neutral
+          let new_local = local@team <- new_team
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        "GEN":
+          let new_local = local@array <- App.BoardBuilder.When.generate_file(global, local@map_name)
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        "TER":
+          let terrain = Nat.read(String.drop(4, event.id))
+          let new_local = local@terrain <- terrain
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+      }default App.pass!
+
+    mouse_down:
+      new_local = local@mouse_press <- true 
       App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+
+    mouse_up:
+      new_local = local@mouse_press <- false
+      App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+
+    key_up:
+      log(U16.show(event.code))
+      switch U16.eql(event.code) {
+        16#16: 
+          new_local = local@show_grid <- false
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+      }default App.pass!
+
     key_down:
-      let new_local = local@command <- some(event.code)
+      switch U16.eql(event.code) {
+        16#16: 
+          new_local = local@show_grid <- true
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+        17#16:
+          new_local = local@show_grid <- not(local@show_grid)
+          App.set_local!(App.BoardBuilder.State.local.builder(new_local))
+      }default
+      let new_local = local@command <- event.code
       App.set_local!(App.BoardBuilder.State.local.builder(new_local))
   } default App.pass!
 
-App.BoardBuilder.When.generate_array(board: Hexagonal.Axial.Map<App.KL.Game.Terrain>): String
-  let string = ""
-  for coord:terrain in board with string:
+
+App.BoardBuilder.When.generate_file(global: App.BoardBuilder.State.global, map_name: String): String
+  open global
+  let introduction = 
+  "App.KL.Game.Board.Boards."|map_name|": App.KL.Game.Board.Blueprint" | 
+  "\n  App.KL.Game.Board.Blueprint.new(" |
+    "\n    App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards."|map_name|".terrains)" |
+    "\n    App.KL.Game.Board.Blueprint.build.tokens(App.KL.Game.Board.Boards."|map_name|".tokens)" |
+    "\n    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards."|map_name|".bases)" |
+    "\n    App.KL.Game.Board.Blueprint.build.team_coords(App.KL.Game.Board.Boards."|map_name|".initial)" |
+    "\n    App.KL.Game.Board.Blueprint.build.terrains(App.KL.Game.Board.Boards."|map_name|".landscape)" |
+  "\n  )"
+  
+  let terrains = ""
+  for coord:terrain in global.terrains with terrains:
     let coord_string   = "{" | I32.show(coord@i) | ", " | I32.show(coord@j) | "}"
     let terrain_string = Nat.show(terrain@field_id)
-    "{" | coord_string | "," | terrain_string | "}" | ",\n" | string
+    "    {" | coord_string | "," | terrain_string | "}" | ",\n" | terrains
+  let terrains = 
+    "\n\n" |
+    "App.KL.Game.Board.Boards."|map_name|".terrains: List<Pair<Pair<I32, I32>, Nat>> \n" |
+    "  [ \n" |
+    terrains |
+    "  ]"
   
-  "[\n" | string | "]"
+  let landscape = ""
+  for coord:terrain in global.landscape with landscape:
+    let coord_string   = "{" | I32.show(coord@i) | ", " | I32.show(coord@j) | "}"
+    let terrain_string = Nat.show(terrain@field_id)
+    "    {" | coord_string | "," | terrain_string | "}" | ",\n" | landscape
+  let landscape = 
+    "\n\n" |
+    "App.KL.Game.Board.Boards."|map_name|".landscape: List<Pair<Pair<I32, I32>, Nat>> \n" |
+    "  [ \n" |
+    landscape |
+    "  ]"
+
+  let tokens = ""
+  for coord:token in global.tokens with tokens:
+    let coord_string  = "{" | I32.show(coord@i) | ", " | I32.show(coord@j) | "}"
+    let token_string  = "App.KL.Game.Token.new("|I32.show(token@dominance)|", "|I32.show(token@range)|", "|I32.show(token@max)|", "|I32.show(token@score)|")"
+    "    {" | coord_string | "," | token_string | "}" | ",\n" | tokens
+  let tokens = 
+    "\n\n" |
+    "App.KL.Game.Board.Boards."|map_name|".tokens: List<Pair<Pair<I32, I32>, App.KL.Game.Token>> \n" |
+    "  [ \n" |
+    tokens |
+    "  ]"
+
+  let red  = ""
+  let blue = ""
+  let bases = {red, blue}
+  for coord:team in global@bases with bases:
+    let coord_string  = "      {" | I32.show(coord@i) | ", " | I32.show(coord@j) | "} :: Hexagonal.Axial \n"
+    case team {
+      blue: {coord_string | bases@fst, bases@snd}
+      red : {bases@fst, coord_string | bases@snd}
+      neutral: bases
+    }
+  let bases = 
+    "\n\n" |
+    "App.KL.Game.Board.Boards."|map_name|".bases: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>> \n" |
+    "  [ \n" |
+    "    {App.KL.Game.Team.blue, [ \n" | bases@fst | "    ]}, \n" |
+    "    {App.KL.Game.Team.red,  [ \n" | bases@snd | "    ]} \n" |
+    "  ]"
+
+  let initial = {red, blue}
+  for coord:team in global@initial with initial:
+    let coord_string  = "      {" | I32.show(coord@i) | ", " | I32.show(coord@j) | "} :: Hexagonal.Axial \n"
+    case team {
+      blue: {coord_string | initial@fst, initial@snd}
+      red : {initial@fst, coord_string | initial@snd}
+      neutral: initial
+    }
+  let initial = 
+    "\n\n" |
+    "App.KL.Game.Board.Boards."|map_name|".initial: List<Pair<App.KL.Game.Team, List<Hexagonal.Axial>>> \n" |
+    "  [ \n" |
+    "    {App.KL.Game.Team.blue, [ \n" | initial@fst | "    ]}, \n" |
+    "    {App.KL.Game.Team.red,  [ \n" | initial@snd | "    ]} \n" |
+    "  ]"
+  introduction | terrains | tokens | bases | initial | landscape

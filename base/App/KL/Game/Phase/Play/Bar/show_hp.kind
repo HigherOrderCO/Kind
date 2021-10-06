@@ -1,23 +1,30 @@
 App.KL.Game.Phase.Play.Bar.show_hp(
   cx: U32,
-  cy: U32, 
+  cy: U32,
+  user_id: String,
+  team: App.KL.Game.Team,
   creature: App.KL.Game.Creature,
   img: VoxBox
 ): VoxBox
-  open creature
-  let hero = creature.hero
-  open hero
+  let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature)
   let shield = App.KL.Game.Creature.Status.shield.total(creature)
   
-  if I32.gtn(creature.hp, 0) then
-    let col = case creature.team {
-      red: Col32.new(200, 20, 20, 255)
-      blue: Col32.new(20, 200, 200, 255)
-      neutral: Col32.new(100, 20, 100, 255)
-    }
+  if I32.gtn(creature@hp, 0) then
+    let col = 
+    if String.eql(user_id, creature@player <> "") then
+      Col32.new(255, 255, 20, 255) // Yellow
+    else
+      if App.KL.Game.Team.eql(team, creature@team) then
+        Col32.new(20, 200, 200, 255) // Blue
+      else 
+        if App.KL.Game.Team.eql(App.KL.Game.Team.neutral, creature@team) then
+          Col32.new(100, 20, 100, 255) // gray
+        else
+          Col32.new(200, 20, 20, 255) // red
+
     let bar = App.KL.Game.Phase.Play.Bar.Progress.new(
-      I32.to_u32(hero.max_hp),
-      I32.to_u32(creature.hp),
+      I32.to_u32(max_hp),
+      I32.to_u32(creature@hp),
       I32.to_u32(shield),
       col,
       Col32.new(202, 202, 201, 255),

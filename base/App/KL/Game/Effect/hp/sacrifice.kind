@@ -2,7 +2,13 @@ App.KL.Game.Effect.hp.sacrifice(
   dmg: I32
 ): App.KL.Game.Effect<I32>
 
-  App.KL.Game.Effect { 
+  App.KL.Game.Effect {
+    let dmg = I32.neg(dmg) 
     get center = App.KL.Game.Effect.coord.get_center
-    App.KL.Game.Effect.hp.change_at(I32.neg(dmg), center)
+    get caster = App.KL.Game.Effect.board.creature.caster
+    case caster {
+      none: App.KL.Game.Effect { return unit }
+      some: App.KL.Game.Effect.player_data.add(caster.value@player <> "", dmg, caster.value@hp + dmg, App.KL.Game.Effect.player_data.add.recap.damage)
+    }
+    App.KL.Game.Effect.hp.change_at(dmg, center)
   }

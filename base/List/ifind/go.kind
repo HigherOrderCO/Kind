@@ -1,8 +1,8 @@
-List.ifind.go<A: Type>(xs: List<A>, f: A -> Nat -> Bool, i: Nat): Maybe<Pair<A,Nat>>
+List.ifind.go<A: Type>(xs: List<A>, f: Nat -> A -> Bool, i: Nat): Maybe<Pair<Nat,A>>
   case xs {
-    nil : Maybe.none!,
-    cons: case f(xs.head,i) {
-      true : Maybe.some!(Pair.new!!(xs.head)(i)),
-      false: List.ifind.go!(xs.tail,f,Nat.succ(i))
+    nil: none,
+    cons: case f(i,xs.head) {
+      true: some({i, xs.head}),
+      false: List.ifind.go!(xs.tail, f, Nat.succ(i))
     }
   }

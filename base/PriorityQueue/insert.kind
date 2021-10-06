@@ -1,0 +1,5 @@
+PriorityQueue.insert<A: Type>(a: A, queue: PriorityQueue<A>): PriorityQueue<A>
+  open queue
+  let singleton = PriorityQueue.Tree.singleton!(a)
+  let merged = PriorityQueue.Tree.merge!(queue.priority, singleton queue.tree)
+  PriorityQueue.new!(queue.priority, merged)

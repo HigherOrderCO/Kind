@@ -1,0 +1,20 @@
+User.quleuber.KeccakTest: _
+
+    IO {
+        use sizbuf = Buffer8.from_list.256([256#256, 1#256])
+        // IO.print(U32.show(sizbuf.fst))
+        // IO.print(Buffer8.show(sizbuf.snd))
+
+        let hash = Crypto.Keccak.hash.words([])
+        let hash_lenbuf = Buffer8.from_list.256([hash])
+
+        IO.print("Buffer8.show : " | Buffer8.show(hash_lenbuf@snd))
+        IO.print("Buffer8.to_hex : " | Buffer8.to_hex(hash_lenbuf))
+
+        IO.print("")
+
+        let u256_hash = Buffer8.to_u256(hash_lenbuf@snd)
+        IO.print("U256.hex.encode : " | U256.hex.encode(u256_hash))
+
+        return Unit.new
+    }

@@ -1,0 +1,40 @@
+type Segment {
+  new(a: V2, b: V2)
+}
+
+Segment.zero: Segment
+  Segment.new(V2.new(0.0,0.0),V2.new(0.0,0.0))
+
+// From: https://stackoverflow.com/a/61699051/1031791
+Segment.intersects(a: Segment, b: Segment): Bool
+  open a
+  open b
+  open a.a
+  open a.b
+  open b.a
+  open b.b
+  let p =
+    let p = b.b.y - a.a.y
+    let q = b.a.x - a.a.x
+    let r = b.a.y - a.a.y
+    let s = b.b.x - a.a.x
+    F64.gtn(p * q, r * s)
+  let q =
+    let p = b.b.y - a.b.y
+    let q = b.a.x - a.b.x
+    let r = b.a.y - a.b.y
+    let s = b.b.x - a.b.x
+    F64.gtn(p * q, r * s)
+  let r =
+    let p = b.a.y - a.a.y
+    let q = a.b.x - a.a.x
+    let r = a.b.y - a.a.y
+    let s = b.a.x - a.a.x
+    F64.gtn(p * q, r * s)
+  let s =
+    let p = b.b.y - a.a.y
+    let q = a.b.x - a.a.x
+    let r = a.b.y - a.a.y
+    let s = b.b.x - a.a.x
+    F64.gtn(p * q, r * s)
+  Bool.not(Bool.eql(p,q) || Bool.eql(r,s))

@@ -114,7 +114,7 @@ App.Playground.when: App.When<App.Playground.State>
           App.set_local!(stt)
         else 
           IO {
-            get checked = IO.request("http://18.222.191.174:3030/api/check_term?code=" | state.code)
+            get checked = IO.request("http://18.222.191.174:3030/api/check_term?code='" | state.code | "'")
             let stt = App.Playground.set_output(checked, state)
             let stt = App.Playground.set_window(window, stt)
             App.set_local!(stt)

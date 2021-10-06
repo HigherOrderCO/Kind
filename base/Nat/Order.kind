@@ -1,0 +1,266 @@
+Nat.Order.refl(a: Nat): Nat.lte(a, a) == true
+  case a {
+    zero:
+      refl
+    succ:
+      ind = Nat.Order.refl(a.pred)
+      ind
+  }!
+
+Nat.Order.conn(a: Nat, b: Nat): Or<Nat.lte(a, b) == true, Nat.lte(b, a) == true>
+  case a b {
+    zero zero:
+      left(refl)
+    zero succ:
+      left(refl)
+    succ zero:
+      right(refl)
+    succ succ:
+      ind = Nat.Order.conn(a.pred, b.pred)
+      ind
+  }!
+
+Nat.Order.anti_symm(
+  a: Nat
+  b: Nat
+  Hyp0: Nat.lte(a, b) == true
+  Hyp1: Nat.lte(b, a) == true
+): a == b
+  case a b with Hyp0 Hyp1 {
+    zero zero:
+      refl
+    zero succ:
+      contra = Bool.true_neq_false(mirror(Hyp1))
+      Empty.absurd!(contra)
+    succ zero:
+      contra = Bool.true_neq_false(mirror(Hyp0))
+      Empty.absurd!(contra)
+    succ succ:
+      ind = Nat.Order.anti_symm(
+        a.pred,
+        b.pred,
+        Hyp0,
+        Hyp1
+      )
+      let qed = apply(Nat.succ, ind)
+      qed
+  }!
+
+Nat.Order.chain.aux(
+  a: Nat
+  Hyp: Nat.lte(a, 0) == true
+): a == 0
+  case a with Hyp {
+    zero: refl
+    succ: contra = Bool.true_neq_false(mirror(Hyp))
+          Empty.absurd!(contra)
+  }!
+
+Nat.Order.chain(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp0: Nat.lte(a, b) == true
+  Hyp1: Nat.lte(b, c) == true
+): Nat.lte(a, c) == true
+  case b with Hyp0 Hyp1 {
+    zero:
+      a_zero = mirror(Nat.Order.chain.aux(a, Hyp0))
+      qed = Hyp1 :: rewrite X in Nat.lte(X, _) == _ with a_zero
+      qed
+    succ:
+      case a with Hyp0 Hyp1 {
+        zero:
+          refl
+        succ:
+          case c with Hyp0 Hyp1 {
+            zero:
+              b_zero = Nat.Order.chain.aux(Nat.succ(b.pred), Hyp1)
+              contra = Nat.succ_neq_zero!(b_zero)
+              Empty.absurd!(contra)
+            succ:
+              ind = Nat.Order.chain(a.pred, b.pred, c.pred, Hyp0, Hyp1)
+              ind
+          }!
+      }!
+  }!
+
+Nat.Order.add.left(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Nat.lte(a, b) == true
+): Nat.lte(c + a, c + b) == true
+  case c {
+    zero:
+      Hyp
+    succ:
+      Nat.Order.add.left(a, b, c.pred, Hyp)
+  }!
+
+Nat.Order.add.right(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Nat.lte(a, b) == true
+): Nat.lte(a + c, b + c) == true
+  (Nat.Order.add.left!!(c, Hyp)
+    :: rewrite X in Nat.lte(X, _) == _ with Nat.add.comm!!)
+    :: rewrite X in Nat.lte(_, X) == _ with Nat.add.comm!!
+
+Nat.Order.add.combine(
+  a: Nat
+  b: Nat
+  c: Nat
+  d: Nat
+  Hyp0: Nat.lte(a, b) == true
+  Hyp1: Nat.lte(c, d) == true
+): Nat.lte(a + c, b + d) == true
+  left_lem = Nat.Order.add.right!!(c, Hyp0)
+  right_lem = Nat.Order.add.left!!(b, Hyp1)
+  qed = Nat.Order.chain!!!(left_lem, right_lem)
+  qed
+
+Nat.Order.mul.right(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Nat.lte(a, b) == true
+): Nat.lte(Nat.mul(a, c), Nat.mul(b, c)) == true
+  c(
+    (c) Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, c)), true),
+    refl,
+    (c.pred)
+      let ind = Nat.Order.mul.right(a, b, c.pred, Hyp)
+      let qed = Nat.Order.add.combine(a, b, Nat.mul(a,c.pred), Nat.mul(b,c.pred), Hyp, ind)
+      qed
+   )
+
+Nat.Order.mul.left(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), Bool.true)
+): Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), Bool.true)
+  lem = Nat.Order.mul.right(a, b, c, Hyp)
+  lem = lem :: rewrite X in Nat.lte(X, Nat.mul(b, c)) == true with Nat.mul.comm(a, c)
+  qed = lem :: rewrite X in Nat.lte(Nat.mul(c, a), X) == true with Nat.mul.comm(b, c)
+  qed
+
+Nat.Order.mul.combine(
+  a: Nat,
+  b: Nat,
+  c: Nat,
+  d: Nat,
+  Hyp0: Equal<Bool>(Nat.lte(a, b), Bool.true),
+  Hyp1: Equal<Bool>(Nat.lte(c, d), Bool.true)
+): Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, d)), Bool.true)
+  let left_lem = Nat.Order.mul.right(a, b, c, Hyp0);
+  let right_lem = Nat.Order.mul.left(c, d, b, Hyp1);
+  let qed = Nat.Order.chain(Nat.mul(a, c), Nat.mul(b, c), Nat.mul(b, d), left_lem, right_lem);
+  qed
+
+//Nat.Order.bernoulli(
+//  a: Nat,
+//  b: Nat,
+//// 1 + a*b <= (1 + a)^b
+//): Nat.lte(Nat.add(1, Nat.mul(a, b)), Nat.pow(Nat.add(1, a), b)) == true
+//  ?bernoulli
+//
+//Nat.Order.am_gm2(
+//  a: Nat
+//  b: Nat
+//// 4*a*b <= (a + b)^2
+//): Nat.lte(Nat.mul(4, Nat.mul(a, b)), Nat.pow(Nat.add(a, b), 2)) == true
+//  ?am_gm2
+//
+//Nat.Order.am_gm(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//):   Nat.lte(
+//       Nat.pow(Vector.Nat.sum(n, u), n)
+//       Nat.mul(
+//         Nat.pow(n, n)
+//         Vector.Nat.product(n, u)))
+//     == true
+//  ?am_gm
+//
+//Nat.Order.cauchy(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//  v: Vector<Nat>(n)
+//):   Nat.lte(
+//       Nat.pow(Vector.Nat.dot(n, u, v), 2)
+//       Nat.mul(Vector.Nat.dot(n, u, u), Vector.Nat.dot(n, v, v)))
+//     == true
+//  ?cauchy
+//
+//Nat.Order.rearrangement.upper(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//  v: Vector<Nat>(n)
+//): Nat.lte(
+//     Vector.Nat.dot(n, u, v)
+//     Vector.Nat.dot(n, Vector.Nat.sort(n, u), Vector.Nat.sort(n, v)))
+//   == true
+// ?rearrangement.upper
+//
+//Nat.Order.rearrangement.lower(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//  v: Vector<Nat>(n)
+//): Nat.lte(
+//     Vector.Nat.dot(n, Vector.Nat.sort(n, u), Vector.Nat.reverse_sort(n, v))
+//     Vector.Nat.dot(n, u, v))
+//   == true
+// ?rearrangement.lower
+//
+//Vector.Nat.sum(
+//  n: Nat
+//  v: Vector<Nat>(n)
+//): Nat
+//  ?vec.nat.sum
+//
+//Vector.Nat.product(
+//  n: Nat
+//  v: Vector<Nat>(n)
+//): Nat
+//  ?vec.nat.product
+//
+//Vector.Nat.dot(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//  v: Vector<Nat>(n)
+//): Nat
+//  ?vec.nat.dot
+//
+//Vector.Perm<A: Type>(
+//  n: Nat
+//  u: Vector<A>(n)
+//  v: Vector<A>(n)
+//): Type
+//  ?vector.perm
+//
+//Vector.Nat.increasing(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//): Type
+//  ?vector.nat.increasing
+//
+//Vector.Nat.decreasing(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//): Type
+//  ?vector.nat.decreasing
+//
+//Vector.Nat.sort(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//): Vector<Nat>(n)
+//  ?vector.nat.sort
+//
+//Vector.Nat.reverse_sort(
+//  n: Nat
+//  u: Vector<Nat>(n)
+//): Vector<Nat>(n)
+//  ?vector.nat.reverse_sort

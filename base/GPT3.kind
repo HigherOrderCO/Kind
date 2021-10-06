@@ -1,0 +1,117 @@
+// A natural number
+type Nat {
+  zero
+  succ(pred: Nat)
+}
+
+// Product type
+type Pair <A: Type, B: Type> {
+  new(fst: A, snd: B)
+}
+
+// Sum type
+type Either <A: Type, B: Type> {
+  left(value: A)
+  right(value: B)
+}
+
+// List
+type List <A: Type> {
+  nil
+  cons(head: A, tail: List<A>)
+}
+
+// Propositional equality
+type Equal <A: Type> <a: A> ~ (b: A) {
+  refl ~ (b = a)
+}
+
+// Nat addition
+Nat.add(n: Nat, m: Nat): Nat
+  case n {
+    zero: m
+    succ: Nat.succ(Nat.add(n.pred, m))
+  }
+
+// Nat equality
+Nat.equal(n: Nat, m: Nat): Bool
+  case n m {
+    zero zero: Bool.true
+    zero succ: Bool.false
+    succ zero: Bool.false
+    succ succ: Nat.equal(n.pred, n.pred)
+  }
+
+// Linear congruential generator
+Nat.random(seed: Nat): Nat
+  let m =	1664525
+  let i = 1013904223
+  let q = 4294967296
+  Nat.mod(Nat.add(Nat.mul(seed, m), i), q)
+
+// Maps a function to a list
+List.map<A: Type, B: Type>(f: A -> B, as: List<A>): List<B>
+  case as {
+    nil: List.nil!
+    cons: List.cons!(f(as.head), List.map!!(f,as.tail))
+  }
+
+// Filters a list based on a predicate
+List.filter<A: Type>(f: A -> Bool, xs: List<A>): List<A>
+  case xs{
+    nil: List.nil!
+    cons: case f(xs.head) {
+      true: List.cons!(xs.head, List.filter!(f, xs.tail))
+      false: List.filter!(f, xs.tail)
+    }
+  }
+
+// Equality symmetry
+Equal.mirror<A: Type, a: A, b: A>(e: Equal<A, a, b>): Equal<A, b, a>
+  case e {
+    refl: Equal.refl<A, a>
+  }: Equal<A, e.b, a>
+
+// Commutation of addition proof
+add_comm(a: Nat, b: Nat): Equal<Nat, Nat.add(a,b), Nat.add(b,a)>
+  case a {
+    zero:
+      add_comm_zero(b)
+    succ:
+      let ind = apply(Nat.succ, add_comm(a.pred,b))
+      let aux = add_comm_succ(b, a.pred)
+      Equal.chain!!!!(ind, aux)
+  }!
+
+// Hello, world!
+hello: IO<Unit>
+  IO {
+    IO.print("Your name?")
+    var name = IO.get_line
+    IO.print("Hi, " | name | "!")
+  }
+
+// Renders a list of users to HTML
+render_users(users: List<User>): DOM
+  <div style={"border": "1px solid black"}>
+    <div style={"font-weight": "bold"}>"Users:"</div>
+    for user in users:
+      <div>"Name: " | user.name | ", " | "Age: " | user.age</div>
+  </div>
+
+// Handles 
+app_when: App.When<App.Hello.State>
+  (event, state)
+  case event {
+    init: IO {
+      App.print("Welcome!")
+    }
+    mouse_down: IO {
+      App.print("You clicked: " | Nat.show(event.mouse_x))
+      App.set_state(state@clicks <- state@clicks + 1)
+    }
+  } default App.pass!
+
+// Renders the name of 3 different League of Legends characters
+render_lol_champions: DOM
+

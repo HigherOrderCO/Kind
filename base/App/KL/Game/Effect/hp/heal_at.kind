@@ -4,7 +4,44 @@ App.KL.Game.Effect.hp.heal_at(
   (pos)
 
   App.KL.Game.Effect { 
-    let heals = String.show_clean(I32.show(heal))
-    App.KL.Game.Effect.description.add("Heal for"| heals)
-    App.KL.Game.Effect.hp.change_at(heal, pos)
+    get creature = App.KL.Game.Effect.board.creature.get(pos)
+    without creature: App.KL.Game.Effect { return +0#32 }
+    App.KL.Game.Effect {
+      let opposite = App.KL.Game.Creature.Status.opposite.check(creature)
+      get caster = App.KL.Game.Effect.board.creature.caster
+      let real_effect = if opposite then I32.neg(heal) else heal
+      get real_heal = App.KL.Game.Effect.hp.change_at(real_effect, pos)
+      let heals = String.show_clean(I32.show(real_heal))
+      App.KL.Game.Effect.description.add("Heal for"| heals)
+      without caster: App.KL.Game.Effect { return real_heal }
+      App.KL.Game.Effect { 
+        App.KL.Game.Effect.player_data.caster.add.heal(creature@player <> "", real_heal, creature@hp + real_heal)
+        return real_heal
+      }
+    }
   }
+
+
+
+  //App.KL.Game.Effect { 
+    //get creature = App.KL.Game.Effect.board.creature.get(pos)
+    //without creature: App.KL.Game.Effect { return +0#32 }
+    //let opposite = App.KL.Game.Creature.Status.opposite.check(creature.value)
+    //get real_heal = App.KL.Game.Effect.hp.change_at(heal, pos)
+    //let heals = String.show_clean(I32.show(real_heal))
+    //App.KL.Game.Effect.description.add("Heal for"| heals)
+    //get caster = App.KL.Game.Effect.board.creature.caster
+    //case creature { 
+      //none: App.KL.Game.Effect { return +0#32 } 
+      //some: 
+        //case caster {
+          //none:
+            //App.KL.Game.Effect { return real_heal }
+          //some:
+            //App.KL.Game.Effect {
+              //App.KL.Game.Effect.player_data.caster.add.heal(creature.value@player <> "", real_heal, creature.value@hp + real_heal)
+              //return real_heal
+            //}
+        //}
+    //}
+  //}

@@ -1,0 +1,9 @@
+App.KL.Game.Effect.player_data.kill(
+  victim: String
+): App.KL.Game.Effect<Unit>
+  App.KL.Game.Effect {
+    get cast_data = App.KL.Game.Effect.cast_data.get
+    let killer = cast_data@snd
+    // add death to victim
+    App.KL.Game.Effect.player_data.add.death(victim)
+  }

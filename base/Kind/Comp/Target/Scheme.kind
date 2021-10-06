@@ -87,7 +87,7 @@ Kind.Comp.Target.Scheme.program(main: String, defs: String): String
 Kind.Comp.Target.Scheme.select(term: String, cse_body_list: List<Pair<String, String>>): String
   let cses = ""
   for cse_body in cse_body_list with cses:
-    {cse, body} = cse_body
+    let {cse, body} = cse_body
     cses|" ("|cse|" "|body|")"
   "(case "|term|cses|")"
 
@@ -383,8 +383,9 @@ Kind.Comp.Target.Scheme.basics: Kind.Comp.Basics
     ""
     (kstring-append
       (if fst "" sep)
-      (car strs)
-      (kstring_join sep (cdr strs) #f))))
+      (kstring-append
+        (car strs)
+        (kstring_join sep (cdr strs) #f)))))
 
 ; Short alias to vector-ref
 (define get vector-ref)
@@ -658,7 +659,7 @@ Kind.Comp.Target.Scheme.cli: String
         (if (suffix? fst_arg ".kind")
           (run_io (Kind.api.io.check_file fst_arg))
           (if (suffix? fst_arg "/")
-            (run_io (Kind.api.check_files (find-all-kind-files fst_arg)))
+            (run_io (Kind.api.io.check_files (find-all-kind-files fst_arg)))
             (run_io (Kind.api.io.check_term fst_arg))))
         (let ((snd_arg (car tail_args)))
           (case snd_arg

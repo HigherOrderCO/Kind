@@ -1,0 +1,5 @@
+type PriorityQueue.Tree.Either<A: Type, B: Type, C:Type> {
+  left(value: A)
+  here(value: B)
+  right(value: C)
+}

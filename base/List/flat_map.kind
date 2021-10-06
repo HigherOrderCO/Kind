@@ -1,0 +1,2 @@
+List.flat_map<A: Type, B: Type>(f: A -> List<B>, as: List<A>): List<B>
+  List.flatten<B>(List.map<A,List<B>>(f,as))

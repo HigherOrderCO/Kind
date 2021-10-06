@@ -1,0 +1,130 @@
+// Draft controls
+type App.KL.Game.Controls.Draft {
+  new(
+    // animations
+    animations: Map<App.KL.Game.Assets.Animation>
+    // ready button controls
+    main_button_hovered: Bool
+    // header button controls
+    header: Map<App.KL.Game.Assets.ButtonClick> // id -> (img, state, action)
+    // skills tab
+    skills_tab:  Maybe<String> // which skill is selected
+    // page
+    page: String // page in draft -> heroes or users for now TODO transform in type
+    // filter
+    filter: App.KL.Game.Controls.Draft.Filter
+  )
+}
+
+App.KL.Game.Controls.Draft.animations: Map<App.KL.Game.Assets.Animation>
+  {
+    "main-button": App.KL.Game.Phase.Draft.Assets.main_button.ready
+    "test": App.KL.Game.Phase.Play.Assets.end.defeat
+  }
+
+App.KL.Game.Controls.Draft.initial: App.KL.Game.Controls.Draft
+  App.KL.Game.Controls.Draft.new(
+    // animations
+    App.KL.Game.Controls.Draft.animations
+    // ready button hover
+    false
+    // header buttons
+    App.KL.Game.Controls.Draft.header.buttons
+    // skills tab
+    none
+    // page
+    "users"
+    // filter
+    App.KL.Game.Controls.Draft.Filter.default
+  )
+
+// default when mouse_move/mouse_down is not active
+App.KL.Game.Controls.Draft.default(
+  ready: Bool, 
+  controls: App.KL.Game.Controls.Draft
+): App.KL.Game.Controls.Draft
+  // animations update when no hover
+  let animations = controls@animations
+  let animations =
+    if ready then 
+      let button_animation = animations{"main-button"}
+      let actual_frame = case button_animation {
+        none: 0
+        some: button_animation.value@actual_frame
+      }
+      let new_button = App.KL.Game.Phase.Draft.Assets.main_button.waiting
+      let new_button = new_button@actual_frame <- actual_frame
+      animations{"main-button"} <- new_button
+    else
+      animations
+  
+  let controls = controls@animations <- animations
+  let controls = controls@main_button_hovered <- false
+  let controls = controls@header <- App.KL.Game.Controls.Draft.header.buttons
+  controls
+
+// HEADER BUTTONS
+App.KL.Game.Controls.Draft.header.buttons: Map<App.KL.Game.Assets.ButtonClick>
+  { 
+    "exit": App.KL.Game.Assets.ButtonClick.generate(exit_button),
+    "help": App.KL.Game.Assets.ButtonClick.generate(help_button),
+    "friend": App.KL.Game.Assets.ButtonClick.generate(friend_button),
+    "collection": App.KL.Game.Assets.ButtonClick.generate(collection_button),
+    "store": App.KL.Game.Assets.ButtonClick.generate(store_button),
+    "config": App.KL.Game.Assets.ButtonClick.generate(config_button),
+  }
+App.KL.Game.Controls.Draft.header.update(
+  event_id: String
+  controls: App.KL.Game.Controls.Draft
+): App.KL.Game.Controls.Draft
+  let buttons  = controls@header
+  let button   = buttons{event_id}
+  case button {
+    none: controls
+    some:
+      let buttons = buttons{event_id} <- button.value@hovered <- true
+      controls@header <- buttons
+  }
+
+// assets
+exit_button: App.KL.Game.Assets.ButtonClick.Image
+  App.KL.Game.Assets.ButtonClick.Image.new(
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABdUlEQVR42u3bOwrCQBAG4LmAhZWViFjYWIsQewsrvYSNhbU3sPcwHsebREZYCMEkM65Zd/7MwBDBGPI5m908NjRdHEvOeXEq1+MzZBJHDLSYXKO+T4aMhZqoJDqU6oEIpU+BBqWmQIJSW6BAqSsQoCQJ61CSRh/IVCcKjuwb6c1VkNvtTbQ9r2SuSG0LSI6s7mDTZ4hKBlB9aQKp2Vled7W7JxlGfl5JyZ2CAOTekZddlTbb8ZiuZNdYxhmqB3vGk6pHzWac3DyepSZ4/eTImEoEoAb6F2RMVoG8HM32ojSLlAIhkNJmrm22XyNje8Y6UnMsa6FZVFLzO/5DtFCTSC00S2QVIM1BINuO6yyRkqGkDoRDaoBJkE1DzbcdjxZosnfVAk0PIZoTCHNI01chkMhBXE+GoSD7OwO/gGrT5LOQ7JE5TCnzh7COdKQjHelIRzrSJxD6VNBBTOqFn54NP9Ee/pUJ+JdfqsDD8gKV8MA3Eh3I+QLLm7B2ywCYiwAAAABJRU5ErkJggg=="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABdklEQVR42u3bOwrCQBAG4LmAtZVYeAILwRPY2AmWIngSb6LgEWxsbTyHN4mMsBAWk8xkdd35MwNDBGPI52x289jQZLapOBe7c7UdnyCTOFKgu+k16ftsyFSoiUqiQykORCh9CjQoNQUSlNoCBUpdgQAlSViHkjR+gcx1ouDIXyO9uQpyv7mLtueVLBWpbQHZkfUdbPoMUckAipcmkJqd5XVXh0eWYeTrlZTcKQhA7h152VVpsx2P6Up2jWWcoXqwZzy5etRixsnl7VlpgtfPjkypRABqoH9BpmQdyMvRdC1Ks0gpEAIpbebaZtsbmdozxkjNsayFFlFJze/4D9FCTSK10CKRdYA0B4FsO66LREqGkhgIh9QAsyCbhpq+HY8WaLJ31QJNDyGaEwhzSNNXIZDIQVxPhqGg+DsD34Bq0+SzkOKRJUwp84ewjnSkIx3pSEc60icQ+lTQQUzqhZ+eDT/RHv6VCfiXX+rA4/wClfDANxIdyPkCvEaIRmHpIP4AAAAASUVORK5CYII="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABeElEQVR42u3bTWrDMBAF4LlASRdeFQJtfIvs0kUXgXTRkhu0y95/6UQFBWGcekZqZM3LEwwOxA7+MrJ+bFnW/ccQ43n1BhkSSgl087gv+r4ashTqIpPoUBkXRKhMFTSoXCtIUPmroEBlriBARVO8Q0VbboGsNVAg8tZIVlfN8U/vqt9jJltFWmtAdWR6gtc+Q2QygsZbF0jLyYZ9++6zSjfy75nU3Cm4AM+tY9jOZdptw+M6k3N9WYiYPdgRT4S9bL+G4+FHHWF/V9U1Ai3QxZC51S0Fhu1Dt1OFq0ymSC0QAqmt5jnVtgmk5VrOgWYjS5r/FGk5LvwhOdDFM2lF5kCbQ6YAbdwFcu66bg6p6UrGQDikFeiu4ckB1pmFTHQ1pUjrCMhlF2Id4rlCuh27lkyhOJ9cGhm7Aug7A9pO3/V8MhfKR3et3ePhUy0iiSSSSCKJJJILCLkUlIt6uTz7zhbaw78ykQJf+2+YgAdekMjAXyTq64RpnAA97jWvD4vjZQAAAABJRU5ErkJggg=="
+  )
+
+help_button: App.KL.Game.Assets.ButtonClick.Image
+  App.KL.Game.Assets.ButtonClick.Image.new(
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABCklEQVR42u3aMQrCMBTG8V7AwclJRBycXEXoEdy6eAQXB2cHz+VxvEm0QrE8bGi0ryYv/8Bbsv36kRfSpJivKlfXsjy67fSUVBUhAyhQoECBAn1XObuQqGloO+FgaIppBkFBggQJEiRIkCBBgswVubvdnRz1nBnkJ6AGtDlyjY70AbUSHR0pMZPF/lUSbwLZBjZlDimBppBtlJw3h/Q1pOQbT99mZAopu2pX0kkjtVOMDqkB/AtS3l+YRPbdUpJEdt1AaSG/ug/R7q5ax6zoGo9ZZBZJZrEmTXVX/tZZQ/pebGSX5JAfgyRZkyBBggSpiTT/UhIgQIAAAQ4FrNbnpArgr8DD5ho/8DkeXVaVqCOK3UcAAAAASUVORK5CYII="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABCklEQVR42u3aMQrCMBTG8V7A2Uk6eAIHQc/gJjj2Lq6eQsEjOOhxvEm0QrE8bGi0ryYv/8Bbsv36kRfSpJjNt66uZXVyu+kxqSpCBlCgQIECBfquqryQqGloO+FgaIppBkFBggQJEiRIkCBBgswVubrdnRz1nBnkJ6AGtDlyjY70AbUSHR0pMZNy8yqJN4FsA5syh5RAU8g2Ss6bQ/oaUvKNp28zMoWUXbUr6aSR2ilGh9QA/gUp7y9MIvtuKUkiu26gtJBf3Ydod1etY1Z0jccsMosks1iTprorf+usIX0vNrJLcsiPQZKsSZAgQYLURJp/KQkQIECAAIcC7hfnpArgr8DD+ho/8DkePipsipfxmJwAAAAASUVORK5CYII="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABDUlEQVR42u3asQuCUBDHcdeGqME1KCTaG9uCaGsx+g/aIuj/XwwD63WUWHl67/oKv+Ut8vF851NfMsnyosp0tDWfwXh5T/LJARQoUKBAgT6SpXsqCrQOGgPya2hsyBAKEiRIkCBBggQJUgU5Wx2Lw+78lHLMDfIVUAvaC7IOqAHtBSkxw3R9i8S7QIbAKu6QEugKGaLkuDtkXUOKvvE0bUaukLKrtgk0g9Ssoklk20CQ2sjw/8W7R4qrSrpDyj9QYXfVeM0qz2duTrq9XTUryZz0gjQzJ/laBzKiFc/fV7KNi0ElmZMgQYIE2cW2M/cbCAECBAiwM2C+uJhPiAX4K3AzP9kHxrRMk2m6WrsCMWlsRLvaUcQAAAAASUVORK5CYII="
+  )
+
+friend_button: App.KL.Game.Assets.ButtonClick.Image
+  App.KL.Game.Assets.ButtonClick.Image.new(
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABY0lEQVR42u3avwrCMBAG8L6Ag5OTiDi46CpC3R2cdPERXBycHdwcnFx8GB/H93CoHPTKEZK0gf7J2S/wYVtF+HHtJRiT8eyQUabpKVsNz6qShAxAAQXUm3R0RUUBBRRQQBOtyCAokEACCaQKZBPrUyDbRMaCQyWBrBG5fn8yOehcBVLCXMc2oIQOJjs9jcd8NYEM4vB1On5+70WivV0Jtti+rLcsDwmU0OiQhJAV4xBws3kUUI6rimZUV9JXRQlzpRMkVcu8Rjj5LPK5bDaqkCHd1dZFVSJ986Q5bah/JqssAGzVjLK7hkbOh2Y16bp6JCNcz6ZEykSPlHOjbxlX9pnOkTxFhCzGzQbUFLDV7vq3SNtKxwXxDRXIMkSV96NH1jGABLLFxuNbp5ZFTXftBbLLnyex4QMkkEACif1JVBJIIPvxB0IAAQQwKLbtQVQQwBy4n19ayXF5q+V7ogXWFQDz8QO+5KRoOZ+bkAAAAABJRU5ErkJggg=="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABZElEQVR42u3aPQrCQBAF4FzA2kpSeAILQS9gYxewFMGT2FhYeQQFj2ChrY3n8B4WkYFMGJbdTRbys2PewsMkivAxyezimkymWU6Zb6/5ZnxRlSRkAAoooN5s0zsqCiiggAKaaEUGQYEEEkggVSDbWJ8C2SUyFhwqCWSDyMXzk8tB5yqQEuY6tgEldJSu9TQe89UEMojD1+n4/D2WifZ2Jdhq/7besjwkUEKjQxJCVoxDwF32KqEcVxXNqK6kr4oS5kovSKqWeY1w8lnkc9lsVCFDuquti6pE+uZJc9pQ/0zWWQDYqhlldw2NnA/NatJ19UhGuJ5NiZSJHinnRt8yruozvSN5ighZjJsNqC1gp931b5G2lY4L4hsqkFWIOu9Hj2xiAAlkh43Ht06tipruOghknz9PYsMHSCCBBBL7k6gkkEAO4w+EAAIIYFBs24OoIIAF8DC7dZLT8tHI90QLbCoAFuMHWxM4Ge0gYCEAAAAASUVORK5CYII="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABcElEQVR42u3asWvCQBQG8Kwdig5OhYJt6D/g2M1SHAJ2qDi410mE/v9L9A3veH3cXXKpJveSL/BBjDr8+HKX06R4Lr9rynK2MZGH+cqlSNkABRTQaF7nFRoFFFBAAS0sITtDrSElFEgggZwQ8lbrUyCHQg6NQ5N9Il/ef+r99uxCr00jNVYDJfRxsc4fKUG0HwIyiMPHab/6PbhkP/H4TlduTQIl1AySgeVi9wcaalEnO6Q8JXnfAZ++HJQSa1HCQsm+STnZmENSW/oY4fTY9M2iZpvUs2vosmFqTKYsBiTU16a52dUXeT3UbdJx80hGhMamRMqYQIaWcBLZ9BkTTcYQhLwH8OZIvmSMGtk0u4YQDIm9b35MtkGaGJMxQNsACWSPl5DYOrUpZlY8k0BO5l7IEP/BokkggQQSSNyfRJNAjhuZ/NjZ6B8gBBBAANN+pnluD6LBNsCP8thbPt9Onb8rsdkC/xMA9WZtqZYMvG4XiCypA5Cd7OYAAAAASUVORK5CYII="
+  )
+
+config_button: App.KL.Game.Assets.ButtonClick.Image
+  App.KL.Game.Assets.ButtonClick.Image.new(
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABLElEQVR42u3aMQ6CMBTGcS7g4ORkjHFwcjUmHMGNhSO4ODg7eC6P401QhsbatECx1L76b/ISSRj8+fWRB1IsN1XT1ro8Nfv5WVQVPgsoUKBAgQJ9V7m4kmjWUD1hb6jENL2gIEGCBAkSJEiQIEH21OH+aNRqP2eH1IFTQaMjzdRcK0S66pYrOnLsEpWkKzW9xCNNRHs8Wx0/ynaO2CRtQBdUBLIrQfPc0IlGQ9r60AbUobb+BJnqdvVBJr9dVZ8N/dIm0NW/SSKHpONzkWIYSAmZzVinhuVYA/qo/0NCJdk32bgmIVHbtW+Ec416om+aXbNrdo8/pgD+tCd5WgdSELLrjY2/SzLkj0GS9CRIkCBBTonM/k1JgAABAgQYClhtL6IK4LfAendLH/haT4qjWTLT5E5NAAAAAElFTkSuQmCC"
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABLElEQVR42u3aMQ6CMBTGcS7g7GQYPIGDiZ7BzcSRu7hyCk08goMex5ugDI21aYFiqX313+QlkjD48+sjD6RYLPdNW+vq3BzmJ1FV+CygQIECBQr0XVV5JdGsoXrC3lCJaXpBQYIECRIkSJAgQYLsqc390ajVfs4OqQOngkZHmqm5Voh01S1XdOTYJSpJV2p6iUeaiPZ4Vu4+ynaO2CRtQBdUBLIrQfPc0IlGQ9r60AbUobb+BJnqdvVBJr9dVZ8N/dIm0NW/SSKHpONzkWIYSAmZzVinhuVYA/qo/0NCJdk32bgmIVHbtW+Ec416om+aXbNrdo8/pgD+tCd5WgdSELLrjY2/SzLkj0GS9CRIkCBBTonM/k1JgAABAgQYCnhcXUQVwG+B9faWPvC1npxoBWlAW1gmAAAAAElFTkSuQmCC"
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABMElEQVR42u3avQrCMBSG4a4OokNXQSni7ugmiJtLxTtwE8H7XyoRqjEk/W+T077CAaUFfXp65DMmWiVpltd6cQ6+Zsv9t6I6D6BAgQIFCvRXSXylo0CLoBKQjaHSkDoUJEiQIEGCBAnSL3JzuGe3y/NT6vnokDqwD6gXpNk1E2g71gbtBelClZV4pOqUXuKRJkK9nsfHv7KdI7aTNqALKgJZ1EHz3C47OijSNoc2oA61zSfIUG/XOsjgb9d8zqp+aBPomt8gkVW6U+dLijBArCOgN0eqf6DKko0rCTV9Py+dLItwrqgn+kezK7uObvmjL+AkFrK8zSRLkiCFIc0dG5PuZBcXg04ykyBBggQ5xLaz0W8gBAgQIMDBgOnuFXzpWIBtgaftI3ygpJhmVtW09gbwLZ8j7DojNAAAAABJRU5ErkJggg=="
+  )
+
+collection_button: App.KL.Game.Assets.ButtonClick.Image
+  App.KL.Game.Assets.ButtonClick.Image.new(
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABeElEQVR42u2aOwrCQBRF3YCFlZWIWFjZipDswEobl2BjYW1h745cjjuJDCQQYiTzeb+J98EDi0TmzL0zbz6ZLNanyuWquFS72VU8i/k9+t1JSMSApjSOMtlBrSRAAToAWpZPM3Dt+QGKAhSgtutqMGiOagaBAvLfIPvGnvY617SSVJ0Du0pCclpaZExqdwrsGgtpaYcCJSkgszsHgpLGlIs+LUhRcv96VxTh/sekXakAU0DZITnCFCS1ikNq/poTWCE5w4ySgGSGFCshULKO6fLwlVlB9gFQpSpke5sV0mhXFjggXXvUFwNNgxsL+thVXcmuXX3HVvf3KCFj1M8GMiYAqQHJsdXyhWxWPSJ1knLTbKJOSiwITB5kcQDiBB2QgZDWrgNUjyRhV0DS3LdkCdkGY4O0dOchZleuWda3M4eeS4aMVVXSDeJfSkpbXf1TUG7g0X7rGrSH5AJ0jYCCFgEt1Uwo2AU8bm7eed4+gp7nSFZACwnAOj5HZMzcC1c1fgAAAABJRU5ErkJggg=="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABeElEQVR42u2aOwrCQBRF3YC1laRwBRaCrsEuYBnciq2rUHAJFtq6E3cSGUggxEjm834T74MHFonMmXtn3nwyW67K2uWmutaHxUU8q+Ie/e4sJGJAUxpHmeygVhKgAB0BPZYvM3Dd+QGKAhSgtutqMGiOagaBAvLfIIfGnvY617SSVJ0Du0pCclpaZExqdwrsGgtpaYcCJSkgszsHgpLGlIs+LUhRcvt81xTh/sekXakAU0DZITnCFCS1imNq/poTWCE5w4ySgGSGFCshULKJebH/yqwghwCoUhWyu80KabQrCxyQrj3qi4G2wa0FfeyqrmTfrr5jq/97kpAx6mcDGROA1IDk2Gr5QrarHpE6SblpNlEnJRYEJg+yOABxgg7IQEhr1wGqR5KwKyBp7luyhOyCsUFauvMQsyvXLOvbmWPPJUPGqirpBvEvJaWtrv4pKDfwZL91DdpDcgG6RkBBi4CWaiYU7AOe1jfvPO8eQc9zJCughQRgEx9tODcZ+LwMMgAAAABJRU5ErkJggg=="
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABd0lEQVR42u2avwrCMBDGXR1EBydBUIsv4OimiJsOim+gk/j+o9KhUmrFXHJ/cvUrfOAQpb98l1zuTG9anJ6VZsO9uorxmTS+P1q91aM8MaDUl+OUKqilAApQAuhicoSjAAWoY1DNvJoM6sHNaFBvkHVQQMZAtq09q3OuCydTJwfhagEpEdKqa9JqUhCuqZC5VChwkgvSsg8EJ1Mg25ybr6/Py+GRrPJ3qFGk4iQXYCyoCiQnYKWsILldjHFTHFIC8JebzT2hk5B/4eTfQaqkkJCXHYw3H3LlZBsAl1xClmnBFWS9zAoJ12pcNTGh38nGydC11fzcSUjKhuUOMkaAtICUKLWyTCGcRXN2eVLqQJBlj8cKsBONLHTQAUmEzOnCkllLEuEKSJ5d1jVkHUwM0vrfKpNwldplQyfz2zg2yFhXpaOBfO2M86akRqibAmpea8kCsNMOlu7BQQAyA26LW7B2yztpPJfqsKKAVgJg8/FUOjUVelp7AS1k8rRAMJo4AAAAAElFTkSuQmCC"
+  )
+
+store_button: App.KL.Game.Assets.ButtonClick.Image
+  App.KL.Game.Assets.ButtonClick.Image.new(
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABp0lEQVR42u2aPW7DMAyFc4EOnTIVRZOhyAWKAskNMqUn6NalQ+fcoDfqcXoTtxoECIJimxJ/RPsRIJAYTqwPj6IomZuH/dsQ/On4Mbzcf7ryDcUACtCFgh63V7GBpv9d8xwo2gMoZ4RA0ZLtDu8IXW4/nb5tQSOkZIY1VdRryAKSCtlzCENJKInEA0j1GhdKAtLIX39+h2jhsxnknHlTM7dSQHNIqcSSwt09nn2F6xxVUxXDd3eQc7xWRXHIfA5xGFVFcUhuq1FRFTIMrsZbVVQN11bIWhVVEk++plHWx5aMqgYZBpUPNAUoOVdGZYUcUyYOrFShTEFyqagSrmNqSq2LopAlVcfUlJ6LqhVPrmbMnKX7uDKqCWRNcRB/23pIpla75mpKVTfmkFTn2tGo70KiolGp1NPrXR1/UF+13Tq+qDnW6HY/uQrIW2HZdbi2JqCp626PJKeKARwuAxKQ/iAp9awbyJYindSZRenjCff08oodL2FbIa2UzJ9rpiR3D12zkotvCV0tYGmu9dasBAUBuATAUr+5ly5lsoKX5y9XDsBVAP7bH6xXMpCUBsQjAAAAAElFTkSuQmCC"
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABp0lEQVR42u2aPWoDMRCFfQHXqYwhqVK6CPgO6QwpjXOU3CSBHCGNW98kN9lEhUAIeXdHmh/N7hsYsJe1Vx9vNBppZ7N7Og3BX85fw9vDpyvfUAygAF0o6Hn/IzbQ9L9rngNFewDljBAoWrLH53eELrdfTjdb0AgpmWFNFfUasoCkQvYcwlASSiLxAFK9xoWSgDTy4/V3iBY+m0HOmTc1cysFNIeUSiwp3Hb/6itc56iaqhi+u4Oc47UqikPmc4jDqCqKQ3JbjYqqkGFwNd6qomq4tkLWqqiSePI1jbI+tmRUNcgwqHygKUDJuTIqK+SYMnFgpQplCpJLRZVwHVNTal0UhSypOqam9FxUrXhyNWPmLN3HlVFNIGuKg/jb1kMytdo1V1OqujGHpDrXjkZ9FxIVjUqlnl7v6viD+qrt3vFFzbFGt/vJVUDeC8uuw7U1AU1dd3skOVUM4HAZkID0B0mpZ91AthTppM4sSh9PuKeXV+x4CdsKaaVk/lwzJbl76JqVXHxL6GoBS3Ott2YlKAjAJQCW+s29dCmTFfw4fLtyAK4C8N/+AMf42RSlpqo6AAAAAElFTkSuQmCC"
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAABACAYAAACgNd+MAAABnklEQVR42u2aPQvCMBCGXR1EBydB8GMQV0c3FzcdKu4OroL/f1EqREKIbS693CX1LRxoEZuHJ7lckwzm6+plYjE+Zh/Dye4bA8oFUID2FHQ9vSRrtP3foc+B0dxAu/YQGG27Vtsbui53rGZnfdDUGVbVaEld1gUFJAUyxy4MkzCJxANI8RoXJnOFXO7vr+vp8Yn6c+8gbcAsIEPGDXXKseFG00PZ3dUHb1usvxcJ2WY1xqIIpDuGOIJiUQSSG5BqURyyblxMdLEo3l27QsZYFEs87pxGmTZiM6ooZN0ot6E2gC84Mqo4pM9mCCSHRVbIpi7YZDPFvKgyJptsphyLSSF9Vl2bJnP6fseRUVXKOtdmqupGvXZ1bVKrm9hFMnFIahS7MmCMGlN22Pe53mhUIH8tX1CXNcRNUrbaioXs0l3b7hcL6UsuKZKO6vJHWzGAFXRAAhKQ2UKG1LPFQcYU6WRIczKLstehvcWOTVguSC2T5rnqJjnO0LEeO+v9kdC/BfSNtRwOK8EgAPsMWG2e2YcNC8C/ACzp/dCN0GrtDQGWlhKAoUJ2AAAAAElFTkSuQmCC"
+  )

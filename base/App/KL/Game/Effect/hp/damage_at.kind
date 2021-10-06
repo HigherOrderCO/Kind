@@ -32,7 +32,12 @@ App.KL.Game.Effect.hp.damage_at(
           none: App.KL.Game.Effect { return +0#32 } 
           some: App.KL.Game.Effect { 
             let debuffer = App.KL.Game.Creature.Status.weaken.total(caster.value)
-            get real_dmg = App.KL.Game.Effect.hp.change_at(I32.neg(dmg - debuffer), pos)
+            let opposite = App.KL.Game.Creature.Status.opposite.check(creature.value)
+            let minimum_damage = dmg - debuffer
+            let max_debuff = if I32.lte(minimum_damage, 0) then 0 else minimum_damage
+            let real_effect = if opposite then max_debuff else I32.neg(max_debuff)
+            get real_dmg = App.KL.Game.Effect.hp.change_at(real_effect, pos)
+            App.KL.Game.Effect.player_data.caster.add.damage(creature.value@player <> "", real_dmg, creature.value@hp + real_dmg)
             let damage = String.show_clean(I32.show(I32.neg(real_dmg)))
             App.KL.Game.Effect.description.add("Deal "| damage | " damage")
             return real_dmg 

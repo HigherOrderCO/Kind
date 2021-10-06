@@ -1,0 +1,29 @@
+// End screen controls
+type App.KL.Game.Controls.End {
+  new(
+    animations: Map<App.KL.Game.Assets.Animation>
+    // control if its the first time of showing panel
+    // used to control animation
+    panel_first_time: Bool
+    // control which page user are
+    page: App.KL.Game.Controls.End.Page
+  )
+}
+
+App.KL.Game.Controls.End.animations: Map<App.KL.Game.Assets.Animation>
+  {}
+
+App.KL.Game.Controls.End.initial: App.KL.Game.Controls.End
+  App.KL.Game.Controls.End.new(
+    App.KL.Game.Controls.End.animations
+    true
+    App.KL.Game.Controls.End.Page.transition
+  )
+
+// PAGE
+// ============================
+
+type App.KL.Game.Controls.End.Page {
+  transition
+  stats
+}

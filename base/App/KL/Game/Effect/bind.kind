@@ -4,25 +4,27 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
 ): App.KL.Game.Effect<B>
 
   //TODO: Verify problem with error result A and B
-  (center, targets, board)
-  case effect(center, targets, board) as result_a {
+  (center, targets, cast_data, board)
+  case effect(center, targets, cast_data, board) as result_a {
     err: App.KL.Game.Effect.Result.err<B>(result_a.message)
-    new: case next(result_a.value)(result_a.center, targets, result_a.board) as result_b {
+    new: case next(result_a.value)(result_a.center, targets, result_a.cast_data, result_a.board) as result_b {
       err: App.KL.Game.Effect.Result.err<B>(result_b.message)
       new:
         center      = result_b.center
         value       = result_b.value
+        cast_data   = result_b.cast_data
         map         = result_b.board
         indicators  = Hexagonal.Axial.Map.union!(result_a.indicators, result_b.indicators)
         ap_used     = result_a.ap_used + result_b.ap_used
         cemetery    = result_a.cemetery ++ result_b.cemetery
-        description = App.KL.Game.Effect.bind.description_aux(result_a.description, result_b.description)
-        App.KL.Game.Effect.Result.new<B>(value, center, map, indicators, ap_used, cemetery, description)
+        description = App.KL.Game.Effect.bind.description(result_a.description, result_b.description)
+        player_data = App.KL.Game.Effect.player_data.union(result_a.player_data, result_b.player_data)
+        App.KL.Game.Effect.Result.new<B>(value, center, cast_data, map, indicators, ap_used, cemetery, description, player_data)
     }
   }
 
 //Auxiliary effect so descriptions look cleaner
-App.KL.Game.Effect.bind.description_aux(
+App.KL.Game.Effect.bind.description(
   a: String
   b: String
 ): String
@@ -33,5 +35,3 @@ App.KL.Game.Effect.bind.description_aux(
     cons nil: a 
     cons cons: a | "\n" | b
   }
-
-    

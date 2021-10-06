@@ -1,0 +1,3 @@
+PriorityQueue.priority<A: Type>(queue: PriorityQueue<A>, a: A): Nat
+  open queue
+  queue.priority(a)

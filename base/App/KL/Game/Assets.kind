@@ -1,0 +1,157 @@
+// ANIMATIONS
+// ==========================
+type App.KL.Game.Assets.Animation {
+  new(
+    frames: List<String>
+    actual_frame: Nat
+    init_loop: Nat
+    end_loop:  Nat 
+    ticks_per_frame: App.KL.Game.Assets.Animation.Velocity
+    when_end: Maybe<App.KL.Game.State.Local -> App.KL.Game.State.Local>
+    active: Bool
+  )
+}
+
+type App.KL.Game.Assets.Animation.Velocity {
+  new(
+    initial: Nat
+    loop:    Nat
+    final:   Nat
+  )
+}
+
+App.KL.Game.Assets.Animation.update_map(
+  animations: Map<App.KL.Game.Assets.Animation>
+): Map<App.KL.Game.Assets.Animation>
+  for id:animation in animations with animations:
+    let animation = App.KL.Game.Assets.Animation.increment_frame(animation)
+    animations{id} <- animation
+  animations
+
+App.KL.Game.Assets.Animation.update_local(
+  animations: Map<App.KL.Game.Assets.Animation>
+  local: App.KL.Game.State.Local
+): App.KL.Game.State.Local
+  for id:animation in animations with local:
+    let actual_frame = animation@actual_frame
+    let end_frame    = App.KL.Game.Assets.Animation.get_limit(animation)
+    
+    if actual_frame =? end_frame then
+      let action = animation@when_end
+      case action {
+        none: local
+        some: action.value(local)
+      }
+    else
+      local
+  local
+
+App.KL.Game.Assets.Animation.increment_frame(
+  animation: App.KL.Game.Assets.Animation
+): App.KL.Game.Assets.Animation
+  let {init_loop_frame, end_loop_frame} = App.KL.Game.Assets.Animation.get_loop_bounds(animation)
+  let actual_frame = animation@actual_frame
+  let end_frame    = App.KL.Game.Assets.Animation.get_limit(animation)
+  let active       = animation@active
+
+  let animation = 
+    if actual_frame =? end_loop_frame then
+      if active then
+        animation@actual_frame <- init_loop_frame
+      else
+        if actual_frame =? end_frame then
+          animation
+        else 
+          animation@actual_frame <- actual_frame + 1
+    else
+      animation@actual_frame <- actual_frame + 1
+  
+  animation
+
+App.KL.Game.Assets.Animation.get_actual_img(
+  animation: App.KL.Game.Assets.Animation
+): Maybe<String>
+  let actual_frame          = animation@actual_frame
+  let {init_loop, end_loop} = App.KL.Game.Assets.Animation.get_loop_bounds(animation)
+  
+  let {index, frames} = 
+    if actual_frame <? init_loop then
+      let index = Nat.div(actual_frame, animation@ticks_per_frame@initial)
+      {index, animation@frames}
+    else 
+      if actual_frame <=? end_loop then
+        let index = actual_frame - init_loop
+        let index = Nat.div(index, animation@ticks_per_frame@loop)
+        let index = index + animation@init_loop
+        {index, animation@frames}
+      else
+        let index = actual_frame - end_loop
+        let index = Nat.div(index, animation@ticks_per_frame@final)
+        let index = index + animation@end_loop
+        {index, animation@frames}
+  
+  log(Nat.show(index))
+  List.get!(index, frames)
+
+App.KL.Game.Assets.Animation.get_loop_bounds(
+  animation: App.KL.Game.Assets.Animation
+): Pair<Nat, Nat>
+  let initial_velocity = animation@ticks_per_frame@initial
+  let initial = animation@init_loop
+  let initial = initial * initial_velocity
+
+  let loop_velocity = animation@ticks_per_frame@loop
+  let loop_size     = (animation@end_loop - animation@init_loop)
+  let final         = initial + ((loop_size * loop_velocity) - 1)
+  // log("INITIAL " | Nat.show(initial))
+  // log("FINAL " | Nat.show(final))
+  {initial, final}
+
+App.KL.Game.Assets.Animation.get_limit(
+  animation: App.KL.Game.Assets.Animation
+): Nat
+  let {_, end_loop_frame} = App.KL.Game.Assets.Animation.get_loop_bounds(animation)
+  let end_loop_index = animation@end_loop
+  let final_velocity = animation@ticks_per_frame@final
+  let frames_size    = List.length!(animation@frames)
+  let final_size     = frames_size - end_loop_index
+
+  let end_frame = end_loop_frame + (final_size * final_velocity)
+  end_frame
+
+App.KL.Game.Assets.Animation.deactivate(
+  animation: App.KL.Game.Assets.Animation
+): App.KL.Game.Assets.Animation
+  let animation = animation@active <- false
+  let animation = animation@actual_frame <- 0
+  animation
+
+// BUTTON CLICK
+// ==========================
+type App.KL.Game.Assets.ButtonClick.Image {
+  new(
+    normal: String,
+    hover: String,
+    click: String
+  )
+}
+
+type App.KL.Game.Assets.ButtonClick {
+  new(image: App.KL.Game.Assets.ButtonClick.Image, hovered: Bool, clicked: Bool)
+}
+
+App.KL.Game.Assets.ButtonClick.generate(
+  image: App.KL.Game.Assets.ButtonClick.Image
+): App.KL.Game.Assets.ButtonClick
+  App.KL.Game.Assets.ButtonClick.new(image, false, false)
+
+App.KL.Game.Assets.ButtonClick.get_img(
+  button: App.KL.Game.Assets.ButtonClick
+): String
+  if button@clicked then
+    button@image@click
+  else
+    if button@hovered then
+      button@image@hover
+    else
+      button@image@normal

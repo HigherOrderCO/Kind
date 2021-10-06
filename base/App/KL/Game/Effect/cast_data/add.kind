@@ -1,0 +1,6 @@
+App.KL.Game.Effect.cast_data.add(
+  cast_data: Pair<Char, String>
+): App.KL.Game.Effect<Unit>
+  (center, targets, cast_data, board)
+
+  App.KL.Game.Effect.Result.new!(unit, center, cast_data, board, Hexagonal.Axial.Map.new!, 0, [], "", {})

@@ -1,0 +1,20 @@
+String.chunks_of.go(
+  len: Nat,       // length of each chunk
+  str: String,    // string to be split
+  need: Nat,      // number of vals to complete chunk
+  chunk: String   // current chunk
+): List<String>
+  case str {
+    nil:
+      [String.reverse(chunk)]
+    cons:
+      case need {
+        zero: 
+          let head = String.reverse(chunk)
+          let tail = String.chunks_of.go(len, str, len, "")
+          List.cons!(head, tail),
+        succ: 
+          let chunk = String.cons(str.head, chunk)
+          String.chunks_of.go(len, str.tail, need.pred, chunk)
+      }
+  }

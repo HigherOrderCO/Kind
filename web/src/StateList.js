@@ -26,7 +26,17 @@ function latest(before_tick, states) {
   }
 }
 
+function show(states) {
+  if (states === null) {
+    console.log("END");
+  } else {
+    console.log((new Date(states.state.tick * 62.5)).toUTCString());
+    show(states.older);
+  }
+}
+
 module.exports = {
   push,
   latest,
+  show
 };

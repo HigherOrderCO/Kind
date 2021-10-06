@@ -6,14 +6,18 @@
 // AUX FUNCTIONS
 // ==============================
 
-// check if player has a coord
-App.KL.Game.Phase.Draft.has_hero(hero_id: U8, player: Pair<String, App.KL.Game.Player>): Bool
-  x = player@snd@hero_id
-  case x {
-    none: false
-    some: U8.eql(Nat.to_u8(x.value), hero_id)
-  }
 
+App.KL.Game.Phase.Draft.has_hero(hero_id: U8, team: App.KL.Game.Team, player: Pair<String, App.KL.Game.Player>): Bool
+  x = player@snd@hero_id
+  if App.KL.Game.Team.eql(team, player@snd@team) then
+    case x {
+      none: false
+      some: U8.eql(Nat.to_u8(x.value), hero_id)
+    }
+  else
+    false
+
+// check if player has a coord
 App.KL.Game.Phase.Draft.has_coord(coord: Hexagonal.Axial, player: Pair<String, App.KL.Game.Player>): Bool
   x = player@snd@init_pos
   case x {
@@ -36,9 +40,35 @@ App.KL.Game.Phase.Draft.to_team(players: Map<App.KL.Game.Player>, user: String):
 // BOARD CREATION
 // ====================
 
-App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>): App.KL.Game.Board
-  log(" - criando mapa")
-  board = App.KL.Game.Board.Blueprint.build.board(App.KL.Game.Board.Boards.arena)
-  for user:player in players with board:    
-    App.KL.Game.Board.Player.set(user, player, board)
+App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>, blueprint: App.KL.Game.Board.Blueprint): App.KL.Game.Board
+  let count   = BBT.tip!!
+  let board   = App.KL.Game.Board.Blueprint.build.board(blueprint)
+  let result  = {board, count}
+  let initial = Hexagonal.Axial.Map.to_list!(blueprint@initial)
+  for id:player in players with result:
+    open player
+    Maybe {
+      let coord_list = List.filter!((x) player.team =? x@snd, initial)
+      let count = case BBT.lookup!!(App.KL.Game.Team.cmp, player.team, result@snd) as c_team {
+        none: BBT.insert!!(App.KL.Game.Team.cmp, player.team, 0, result@snd)
+        some: BBT.insert!!(App.KL.Game.Team.cmp, player.team, c_team.value + 1, result@snd)
+      }
+      get index = BBT.lookup!!(App.KL.Game.Team.cmp, player.team, count)
+      // log(Nat.show(index))
+      get coord = List.get!(index, coord_list)
+      let coord = coord@fst
+      // log(Hexagonal.Axial.show(coord))
+      let board = App.KL.Game.Board.Player.set_initial(id, player, coord, result@fst)
+      return {board, count}
+    } <> {board, count}
+  let board = result@fst
   board
+
+// 
+
+// App.KL.Game.Phase.Draft.create_board(players: Map<App.KL.Game.Player>): Pair<App.KL.Game.Board, App.KL.Game.Board.Blueprint>
+//   log(" - criando mapa")
+//   board = App.KL.Game.Board.Blueprint.build.board(App.KL.Game.Board.Boards.arena)
+//   for user:player in players with board:    
+//     App.KL.Game.Board.Player.set(user, player, board)
+//   board

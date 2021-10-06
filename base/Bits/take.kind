@@ -1,0 +1,9 @@
+Bits.take(n: Nat, xs: Bits): Bits
+  case n {
+    zero: Bits.e
+    succ: case xs {
+      e: Bits.e
+      o: Bits.o(Bits.take(n.pred, xs.pred))
+      i: Bits.i(Bits.take(n.pred, xs.pred))
+    }
+  }

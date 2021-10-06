@@ -1,0 +1,4 @@
+V2.eql(a: V2, b: V2): Bool
+  open a
+  open b
+  F64.eql(a.x,b.x) && F64.eql(a.y,b.y)
