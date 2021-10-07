@@ -1,10 +1,9 @@
-Ether.RLP.proof.pad_bytes(bits : Bits) : Bits
-  let {pred, succ} = Bits.break(8, bits)
-  def bytes_pad = Bits.trim(8, pred)
-  case succ {
-    e : bytes_pad
-  } default Bits.concat(bytes_pad, Ether.RLP.proof.pad_bytes(succ))
 
+
+Ether.RLP.proof.pad_bytes(bits : Bits) : Bits
+  let size = Bits.length(bits)
+  Bits.trim(((8 * ((size + 7) / 8)) - size) + size, bits)
+  
 
 Bits.size.rec(x : Bits, n : Nat) : 
   Nat.succ(Bits.length.go(x, n)) == Bits.length.go(x, Nat.succ(n))
@@ -77,7 +76,7 @@ Ether.RLP.proof.mul_injective(x : Nat, y : Nat, n : Nat, H : Nat.mul(Nat.succ(n)
   }!
 
 Ether.RLP.proof.succ_pad_nat(x : Bits) : 
-  Bits.to_nat(Bits.trim(Nat.succ(Bits.length(x)), x)) == Bits.to_nat(x)
+  Bits.to_nat(Bits.trim(Bits.length(x), x)) == Bits.to_nat(x)
   case x {
     e : refl 
     o : 
@@ -105,23 +104,63 @@ Ether.RLP.proof.succ_pad_nat(x : Bits) :
             refl : 
               let rec = Ether.RLP.proof.succ_pad_nat(x.pred)
               let rec = Equal.apply!!!!(Nat.mul(2), rec)
-              Equal.apply(Nat, Nat, Nat.mul(2,Bits.to_nat(Bits.trim(Nat.succ(Bits.length.go(x.pred,0)),x.pred))),
+              Equal.apply(Nat, Nat, Nat.mul(2,Bits.to_nat(Bits.trim(Bits.length.go(x.pred,0),x.pred))),
                 Nat.mul(2,Bits.to_nat(x.pred)), Nat.succ, rec)
           }!
         }!
   }!
 
-Ether.RLP.proof.pad_nat(x : Bits, y : Nat) : Bits.to_nat(Bits.trim(Nat.add(Bits.length(x), y), x)) == Bits.to_nat(x)
-  case x {
-    e: 
-      case y {
-        succ : 
-          ?a
-        zero : refl
+Ether.RLP.proof.nat_succ_pad_nat(y : Nat, x : Bits, H : 
+  Bits.to_nat(Bits.trim(y, x)) == Bits.to_nat(x)) : 
+    Bits.to_nat(Bits.trim(Nat.succ(y), x)) == Bits.to_nat(x)
+    case y with H {
+      zero : 
+        case x with H {
+          i :
+            let H = H :: 0 == Nat.succ(Nat.mul(2, Bits.to_nat(x.pred)))
+            let absurd = Nat.succ_neq_zero!(mirror(H))
+            Empty.absurd!(absurd)
+          o : 
+            let H = H :: 0 == Nat.mul(2, Bits.to_nat(x.pred))
+            H
+          e : refl
+        }!
+      succ : case x with H {
+        i : 
+          let H = H :: Nat.succ(Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,x.pred)))) == Nat.succ(Nat.mul(2, Bits.to_nat(x.pred)))
+          let H = Nat.succ_inj(Nat.mul(2,Bits.to_nat(Bits.trim(y.pred,x.pred))), Nat.mul(2,Bits.to_nat(x.pred)), H)
+          let H = Ether.RLP.proof.mul_injective(Bits.to_nat(Bits.trim(y.pred,x.pred)), Bits.to_nat(x.pred), 1, H)
+          let H2 = Ether.RLP.proof.nat_succ_pad_nat(y.pred, x.pred, H)
+          let qed = Equal.apply!!!!(Nat.succ . Nat.mul(2), H2)
+          qed
+        o :  
+          let H = H :: Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,x.pred))) == Nat.mul(2, Bits.to_nat(x.pred))
+          let H = Ether.RLP.proof.mul_injective(Bits.to_nat(Bits.trim(y.pred,x.pred)), Bits.to_nat(x.pred), 1, H)
+          let H2 = Ether.RLP.proof.nat_succ_pad_nat(y.pred, x.pred, H)
+          let qed = Equal.apply!!!!(Nat.mul(2), H2)
+          qed
+        e : 
+          let H = H :: Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,Bits.e))) == Nat.mul(2, 0)
+          let absurd_mul_injective = Ether.RLP.proof.mul_injective(Bits.to_nat(Bits.trim(y.pred,Bits.e)), 0, 1, H)
+          let H2 = Ether.RLP.proof.nat_succ_pad_nat(y.pred, Bits.e, absurd_mul_injective)
+          let qed = Equal.apply!!!!(Nat.mul(2), H2)
+          qed
       }!
-    o : ?b
-    i : ?c
+    }!
+
+Ether.RLP.proof.pad_nat(x : Bits, y : Nat) : 
+  Bits.to_nat(Bits.trim(Nat.add(y, Bits.length(x)), x)) == Bits.to_nat(x)
+  case y {
+    succ : 
+      let H = Ether.RLP.proof.pad_nat(x, y.pred)
+      Ether.RLP.proof.nat_succ_pad_nat!!(H)
+    zero : Ether.RLP.proof.succ_pad_nat(x)
   }!
+
+Ether.RLP.proof.pad_bytes_identity(bits : Bits) : 
+  Bits.to_nat(Ether.RLP.proof.pad_bytes(bits)) == Bits.to_nat(bits)
+  Ether.RLP.proof.pad_nat(bits, Nat.sub(Nat.mul(8,Nat.div(Nat.add(Bits.length(bits),7),8)), 
+    Bits.length(bits)))
 
 Ether.RLP.proof.encode.bytes(tree : Ether.RLP.Tree) : Bits
   case tree {
