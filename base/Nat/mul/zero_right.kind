@@ -1,2 +1,7 @@
-Nat.mul.zero_right(a: Nat): (a * 0) == 0
-  refl
+Nat.mul.zero_right(a: Nat): Equal<Nat>(Nat.mul(a, 0), 0)
+  case a {
+    zero:
+      Equal.refl<Nat>(0)
+    succ:
+      Nat.mul.zero_right(a.pred)
+  }: Equal<Nat>(Nat.mul(a, 0), 0)

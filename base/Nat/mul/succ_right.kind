@@ -1,3 +1,42 @@
-Nat.mul.succ_right(a: Nat, b: Nat)
-: (a * Nat.succ(b)) == a + (a * b)
-  refl
+Nat.mul.succ_right(
+  a: Nat, b: Nat
+): Equal<Nat>(Nat.mul(a, Nat.succ(b)), Nat.add(a, Nat.mul(a, b)))
+  case a {
+    zero:
+      Equal.refl<Nat>(0)
+    succ:
+      let ind = Nat.mul.succ_right(a.pred, b)
+      let lemma = Equal.apply<Nat, Nat>(
+        Nat.mul(a.pred,Nat.succ(b)), Nat.add(a.pred, Nat.mul(a.pred, b)),
+        (x) Nat.add(b, x), ind
+      )
+      let assoc_to = 
+        Equal.mirror<Nat>(
+          Nat.add(Nat.add(b, a.pred), Nat.mul(a.pred, b)), Nat.add(b, Nat.add(a.pred, Nat.mul(a.pred, b))),
+          Nat.add.assoc(b, a.pred, Nat.mul(a.pred, b))
+        )
+      let lemma = Equal.rewrite<Nat>(
+        Nat.add(b, Nat.add(a.pred, Nat.mul(a.pred,b))), Nat.add(Nat.add(b, a.pred),Nat.mul(a.pred,b)),
+        assoc_to,
+        (x) Equal<Nat>(Nat.add(b, Nat.mul(a.pred, Nat.succ(b))), x),
+        lemma
+      )
+      let lemma = Equal.rewrite<Nat>(
+        Nat.add(b, a.pred), Nat.add(a.pred, b),
+        Nat.add.comm(b, a.pred),
+        (x) Equal<Nat>(Nat.add(b, Nat.mul(a.pred, Nat.succ(b))), Nat.add(x,Nat.mul(a.pred,b))),
+        lemma
+      )
+      let assoc_back = Nat.add.assoc(a.pred, b, Nat.mul(a.pred, b))
+      let lemma = Equal.rewrite<Nat>(
+        Nat.add(Nat.add(a.pred, b),Nat.mul(a.pred,b)), Nat.add(a.pred, Nat.add(b, Nat.mul(a.pred,b))),
+        assoc_back,
+        (x) Equal<Nat>(Nat.add(b, Nat.mul(a.pred, Nat.succ(b))), x),
+        lemma
+      )
+      let qed = Equal.apply<Nat, Nat>(
+        Nat.add(b,Nat.mul(a.pred,Nat.succ(b))), Nat.add(a.pred,Nat.add(b,Nat.mul(a.pred,b))),
+        Nat.succ, lemma
+      )
+      qed
+  }: Equal<Nat>(Nat.mul(a, Nat.succ(b)), Nat.add(a, Nat.mul(a, b)))
