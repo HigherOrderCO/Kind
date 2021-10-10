@@ -208,26 +208,6 @@ Nat.Order.add.combine(
   let right_lem = Nat.Order.add.left(c, d, b, Hyp1)
   let qed = Nat.Order.chain(Nat.add(a, c), Nat.add(b, c), Nat.add(b,d), left_lem, right_lem)
   qed
-//  left_lem = Nat.Order.add.right!!(c, Hyp0)
-//  right_lem = Nat.Order.add.left!!(b, Hyp1)
-//  qed = Nat.Order.chain!!!(left_lem, right_lem)
-//  qed
-
-Nat.Order.mul.right(
-  a: Nat
-  b: Nat
-  c: Nat
-  Hyp: Equal<Bool>(Nat.lte(a, b), true)
-): Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, c)), true)
-  // TODO
-  case c {
-    zero:
-      Equal.refl<Bool>(true)
-    succ:
-      let ind = Nat.Order.mul.right(a, b, c.pred, Hyp)
-      let qed = Nat.Order.add.combine(a, b, Nat.mul(a,c.pred), Nat.mul(b,c.pred), Hyp, ind)
-      qed
-  }: Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, c)), true)
 
 Nat.Order.mul.left(
   a: Nat
@@ -236,20 +216,32 @@ Nat.Order.mul.left(
   Hyp: Equal<Bool>(Nat.lte(a, b), Bool.true)
 ): Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), Bool.true)
   // TODO
-  let lem = Nat.Order.mul.right(a, b, c, Hyp)
+  case c {
+    zero:
+      Equal.refl<Bool>(true)
+    succ:
+      let ind = Nat.Order.mul.left(a, b, c.pred, Hyp)
+      let qed = Nat.Order.add.combine(a, b, Nat.mul(c.pred,a),Nat.mul(c.pred,b), Hyp, ind)
+      qed
+  }: Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), true)
+
+
+Nat.Order.mul.right(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), true)
+): Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, c)), true)
+  let lem = Nat.Order.mul.left(a, b, c, Hyp)
   let lem = Equal.rewrite<Nat>(
-    Nat.mul(a, c), Nat.mul(c, a), Nat.mul.comm(a, c),
-    (x) Equal<Bool>(Nat.lte(x, Nat.mul(b, c)), Bool.true), lem
+    Nat.mul(c,a), Nat.mul(a, c), Nat.mul.comm(c, a)
+    (x) Equal<Bool>(Nat.lte(x, Nat.mul(c, b)), Bool.true), lem
   )
   let qed = Equal.rewrite<Nat>(
-    Nat.mul(b, c), Nat.mul(c, b), Nat.mul.comm(b, c),
-    (x) Equal<Bool>(Nat.lte(Nat.mul(c, a), x), Bool.true), lem
+    Nat.mul(c, b), Nat.mul(b, c), Nat.mul.comm(c, b)
+    (x) Equal<Bool>(Nat.lte(Nat.mul(a, c), x), Bool.true), lem
   )
   qed
-//  lem = Nat.Order.mul.right(a, b, c, Hyp)
-//  lem = lem :: rewrite X in Nat.lte(X, Nat.mul(b, c)) == true with Nat.mul.comm(a, c)
-//  qed = lem :: rewrite X in Nat.lte(Nat.mul(c, a), X) == true with Nat.mul.comm(b, c)
-//  qed
 
 Nat.Order.mul.combine(
   a: Nat,
