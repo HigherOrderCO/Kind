@@ -1,140 +1,213 @@
-Nat.Order.refl(a: Nat): Nat.lte(a, a) == true
+Nat.Order.refl(a: Nat): Equal<Bool>(Nat.lte(a, a), true)
   case a {
     zero:
-      refl
+      Equal.refl<Bool>(true)
     succ:
-      ind = Nat.Order.refl(a.pred)
+      let ind = Nat.Order.refl(a.pred)
       ind
-  }!
+  }: Equal<Bool>(Nat.lte(a, a), true)
 
-Nat.Order.conn(a: Nat, b: Nat): Or<Nat.lte(a, b) == true, Nat.lte(b, a) == true>
-  case a b {
-    zero zero:
-      left(refl)
-    zero succ:
-      left(refl)
-    succ zero:
-      right(refl)
-    succ succ:
-      ind = Nat.Order.conn(a.pred, b.pred)
-      ind
-  }!
+Nat.Order.conn(a: Nat, b: Nat): Or<Equal<Bool>(Nat.lte(a, b), true), Equal<Bool>(Nat.lte(b, a), true)>
+  case a {
+    zero:
+      case b {
+        zero:
+          Either.left<
+            Equal<Bool>(Nat.lte(0, 0), true)
+            Equal<Bool>(Nat.lte(0, 0), true)
+          >(Equal.refl<Bool>(true))
+        succ:
+          Either.left<
+            Equal<Bool>(Nat.lte(0, Nat.succ(b.pred)), true)
+            Equal<Bool>(Nat.lte(Nat.succ(b.pred), 0), true)
+          >(Equal.refl<Bool>(true))
+      }: Or<Equal<Bool>(Nat.lte(0, b), true), Equal<Bool>(Nat.lte(b, 0), true)>
+    succ:
+      case b {
+        zero:
+          Either.right<
+            Equal<Bool>(Nat.lte(Nat.succ(a.pred), 0), true)
+            Equal<Bool>(Nat.lte(0, Nat.succ(a.pred)), true)
+          >(Equal.refl<Bool>(true))
+        succ:
+          let ind = Nat.Order.conn(a.pred, b.pred)
+          ind
+      }: Or<Equal<Bool>(Nat.lte(Nat.succ(a.pred), b), true), Equal<Bool>(Nat.lte(b, Nat.succ(a.pred)), true)>
+  }: Or<Equal<Bool>(Nat.lte(a, b), true), Equal<Bool>(Nat.lte(b, a), true)>
 
 Nat.Order.anti_symm(
   a: Nat
   b: Nat
-  Hyp0: Nat.lte(a, b) == true
-  Hyp1: Nat.lte(b, a) == true
-): a == b
-  case a b with Hyp0 Hyp1 {
-    zero zero:
-      refl
-    zero succ:
-      contra = Bool.true_neq_false(mirror(Hyp1))
-      Empty.absurd!(contra)
-    succ zero:
-      contra = Bool.true_neq_false(mirror(Hyp0))
-      Empty.absurd!(contra)
-    succ succ:
-      ind = Nat.Order.anti_symm(
-        a.pred,
-        b.pred,
-        Hyp0,
-        Hyp1
-      )
-      let qed = apply(Nat.succ, ind)
-      qed
-  }!
+  Hyp0: Equal<Bool>(Nat.lte(a, b), true)
+  Hyp1: Equal<Bool>(Nat.lte(b, a), true)
+): Equal<Nat>(a, b)
+  (case a {
+    zero:
+      (Hyp0, Hyp1)
+        (case b {
+          zero:
+            (Hyp0, Hyp1)
+              Equal.refl<Nat>(0)
+          succ:
+            (Hyp0, Hyp1)
+              let contra = Bool.true_neq_false(
+                Equal.mirror<Bool>(
+                  Nat.lte(Nat.succ(b.pred), 0)
+                  Bool.true
+                  Hyp1
+                )
+              )
+              Empty.absurd<Equal<Nat>(0, Nat.succ(b.pred))>(contra)
+        }: (Hyp0: Equal<Bool>(Nat.lte(0, b), true)) -> (Hyp1: Equal<Bool>(Nat.lte(b, 0), true)) -> Equal<Nat>(0, b))(
+          Hyp0
+          Hyp1
+        )
+    succ:
+      (Hyp0, Hyp1)
+        (case b {
+          zero:
+            (Hyp0, Hyp1)
+              let contra = Bool.true_neq_false(
+                Equal.mirror<Bool>(
+                  Nat.lte(Nat.succ(a.pred), 0)
+                  Bool.true
+                  Hyp0
+                )
+              )
+              Empty.absurd<Equal<Nat>(Nat.succ(a.pred), 0)>(contra)
+          succ:
+            (Hyp0, Hyp1)
+              let ind = Nat.Order.anti_symm(
+                a.pred, b.pred,
+                Hyp0, Hyp1,
+              )
+              let qed = Equal.apply<Nat, Nat>(a.pred, b.pred, Nat.succ, ind)
+              qed
+        }: (Hyp0: Equal<Bool>(Nat.lte(Nat.succ(a.pred), b), true)) ->
+           (Hyp1: Equal<Bool>(Nat.lte(b, Nat.succ(a.pred)), true)) ->
+           Equal<Nat>(Nat.succ(a.pred), b))(
+          Hyp0
+          Hyp1
+        )
+  }: (Hyp0: Equal<Bool>(Nat.lte(a, b), true)) -> (Hyp1: Equal<Bool>(Nat.lte(b, a), true)) -> Equal<Nat>(a, b))(
+    Hyp0
+    Hyp1
+  )
 
 Nat.Order.chain.aux(
   a: Nat
-  Hyp: Nat.lte(a, 0) == true
-): a == 0
-  case a with Hyp {
-    zero: refl
-    succ: contra = Bool.true_neq_false(mirror(Hyp))
-          Empty.absurd!(contra)
-  }!
+  Hyp: Equal<Bool>(Nat.lte(a, 0), true)
+): Equal<Nat>(a, 0)
+  (case a {
+    zero:
+      (Hyp)
+        Equal.refl<Nat>(0)
+    succ:
+      (Hyp)
+        let contra = Bool.false_neq_true(Hyp)
+        Empty.absurd<Equal<Nat>(Nat.succ(a.pred), 0)>(contra)
+  }: (Hyp: Equal<Bool>(Nat.lte(a, 0), true)) -> Equal<Nat>(a, 0))(
+    Hyp
+  )
 
 Nat.Order.chain(
   a: Nat
   b: Nat
   c: Nat
-  Hyp0: Nat.lte(a, b) == true
-  Hyp1: Nat.lte(b, c) == true
-): Nat.lte(a, c) == true
-  case b with Hyp0 Hyp1 {
+  Hyp0: Equal<Bool>(Nat.lte(a, b), true)
+  Hyp1: Equal<Bool>(Nat.lte(b, c), true)
+): Equal<Bool>(Nat.lte(a, c), true)
+  (case b {
     zero:
-      a_zero = mirror(Nat.Order.chain.aux(a, Hyp0))
-      qed = Hyp1 :: rewrite X in Nat.lte(X, _) == _ with a_zero
-      qed
+      (Hyp0, Hyp1)
+        let a_zero = Equal.mirror<Nat>(a, 0, Nat.Order.chain.aux(a, Hyp0))
+        let qed = Equal.rewrite<Nat>(0, a, a_zero, (x) Equal<Bool>(Nat.lte(x, c), true), Hyp1)
+        qed
     succ:
-      case a with Hyp0 Hyp1 {
-        zero:
-          refl
-        succ:
-          case c with Hyp0 Hyp1 {
-            zero:
-              b_zero = Nat.Order.chain.aux(Nat.succ(b.pred), Hyp1)
-              contra = Nat.succ_neq_zero!(b_zero)
-              Empty.absurd!(contra)
-            succ:
-              ind = Nat.Order.chain(a.pred, b.pred, c.pred, Hyp0, Hyp1)
-              ind
-          }!
-      }!
-  }!
+      (Hyp0, Hyp1)
+        (case a {
+          zero:
+            (Hyp0, Hyp1)
+              Equal.refl<Bool>(true)
+          succ:
+            (Hyp0, Hyp1)
+              (case c {
+                zero:
+                  (Hyp0, Hyp1)
+                    let b_zero = Nat.Order.chain.aux(Nat.succ(b.pred), Hyp1)
+                    let contra = Nat.succ_neq_zero(b.pred, b_zero)
+                    Empty.absurd(Equal<Bool>(Nat.lte(Nat.succ(a.pred), 0), true), contra)
+                succ:
+                  (Hyp0, Hyp1)
+                    let ind = Nat.Order.chain(a.pred, b.pred, c.pred, Hyp0, Hyp1)
+                    ind
+              }:
+                (Hyp0: Equal<Bool>(Nat.lte(Nat.succ(a.pred), Nat.succ(b.pred)), true)) ->
+                (Hyp1: Equal<Bool>(Nat.lte(Nat.succ(b.pred), c), true)) ->
+                Equal<Bool>(Nat.lte(Nat.succ(a.pred), c), true))(
+                  Hyp0
+                  Hyp1
+                )
+        }:
+          (Hyp0: Equal<Bool>(Nat.lte(a, Nat.succ(b.pred)), true)) ->
+          (Hyp1: Equal<Bool>(Nat.lte(Nat.succ(b.pred), c), true)) ->
+          Equal<Bool>(Nat.lte(a, c), true))(
+            Hyp0
+            Hyp1
+          )
+  }: (Hyp0: Equal<Bool>(Nat.lte(a, b), true), Hyp1: Equal<Bool>(Nat.lte(b, c), true)) -> Equal<Bool>(Nat.lte(a, c), true))(
+    Hyp0
+    Hyp1
+  )
 
 Nat.Order.add.left(
   a: Nat
   b: Nat
   c: Nat
-  Hyp: Nat.lte(a, b) == true
-): Nat.lte(c + a, c + b) == true
-  case c {
+  Hyp: Equal<Bool>(Nat.lte(a, b), true)
+): Equal<Bool>(Nat.lte(Nat.add(c, a), Nat.add(c, b)), true)
+  (case c {
     zero:
-      Hyp
+      (Hyp)
+        Hyp
     succ:
-      Nat.Order.add.left(a, b, c.pred, Hyp)
-  }!
+      (Hyp)
+        Nat.Order.add.left(a, b, c.pred, Hyp)
+  }:
+    (Hyp: Equal<Bool>(Nat.lte(a, b), true)) ->
+    Equal<Bool>(Nat.lte(Nat.add(c, a), Nat.add(c, b)), true))(
+      Hyp
+    )
 
 Nat.Order.add.right(
   a: Nat
   b: Nat
   c: Nat
-  Hyp: Nat.lte(a, b) == true
-): Nat.lte(a + c, b + c) == true
-  (Nat.Order.add.left!!(c, Hyp)
-    :: rewrite X in Nat.lte(X, _) == _ with Nat.add.comm!!)
-    :: rewrite X in Nat.lte(_, X) == _ with Nat.add.comm!!
+  Hyp: Equal<Bool>(Nat.lte(a, b), true)
+): Equal<Bool>(Nat.lte(Nat.add(a, c), Nat.add(b, c)), true)
+  let lem = Nat.Order.add.left(a, b, c, Hyp)
+  let lem = Equal.rewrite<Nat>(
+    Nat.add(c, a), Nat.add(a, c), Nat.add.comm(c, a),
+    (x) Equal<Bool>(Nat.lte(x, Nat.add(c, b)), true), lem
+  )
+  let qed = Equal.rewrite<Nat>(
+    Nat.add(c, b), Nat.add(b, c), Nat.add.comm(c, b),
+    (x) Equal<Bool>(Nat.lte(Nat.add(a, c), x), true), lem
+  )
+  qed
 
 Nat.Order.add.combine(
   a: Nat
   b: Nat
   c: Nat
   d: Nat
-  Hyp0: Nat.lte(a, b) == true
-  Hyp1: Nat.lte(c, d) == true
-): Nat.lte(a + c, b + d) == true
-  left_lem = Nat.Order.add.right!!(c, Hyp0)
-  right_lem = Nat.Order.add.left!!(b, Hyp1)
-  qed = Nat.Order.chain!!!(left_lem, right_lem)
+  Hyp0: Equal<Bool>(Nat.lte(a, b), true)
+  Hyp1: Equal<Bool>(Nat.lte(c, d), true)
+): Equal<Bool>(Nat.lte(Nat.add(a, c), Nat.add(b, d)), true)
+  let left_lem = Nat.Order.add.right(a, b, c, Hyp0)
+  let right_lem = Nat.Order.add.left(c, d, b, Hyp1)
+  let qed = Nat.Order.chain(Nat.add(a, c), Nat.add(b, c), Nat.add(b,d), left_lem, right_lem)
   qed
-
-Nat.Order.mul.right(
-  a: Nat
-  b: Nat
-  c: Nat
-  Hyp: Nat.lte(a, b) == true
-): Nat.lte(Nat.mul(a, c), Nat.mul(b, c)) == true
-  c(
-    (c) Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, c)), true),
-    refl,
-    (c.pred)
-      let ind = Nat.Order.mul.right(a, b, c.pred, Hyp)
-      let qed = Nat.Order.add.combine(a, b, Nat.mul(a,c.pred), Nat.mul(b,c.pred), Hyp, ind)
-      qed
-   )
 
 Nat.Order.mul.left(
   a: Nat
@@ -142,9 +215,32 @@ Nat.Order.mul.left(
   c: Nat
   Hyp: Equal<Bool>(Nat.lte(a, b), Bool.true)
 ): Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), Bool.true)
-  lem = Nat.Order.mul.right(a, b, c, Hyp)
-  lem = lem :: rewrite X in Nat.lte(X, Nat.mul(b, c)) == true with Nat.mul.comm(a, c)
-  qed = lem :: rewrite X in Nat.lte(Nat.mul(c, a), X) == true with Nat.mul.comm(b, c)
+  // TODO
+  case c {
+    zero:
+      Equal.refl<Bool>(true)
+    succ:
+      let ind = Nat.Order.mul.left(a, b, c.pred, Hyp)
+      let qed = Nat.Order.add.combine(a, b, Nat.mul(c.pred,a),Nat.mul(c.pred,b), Hyp, ind)
+      qed
+  }: Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), true)
+
+
+Nat.Order.mul.right(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), true)
+): Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, c)), true)
+  let lem = Nat.Order.mul.left(a, b, c, Hyp)
+  let lem = Equal.rewrite<Nat>(
+    Nat.mul(c,a), Nat.mul(a, c), Nat.mul.comm(c, a)
+    (x) Equal<Bool>(Nat.lte(x, Nat.mul(c, b)), Bool.true), lem
+  )
+  let qed = Equal.rewrite<Nat>(
+    Nat.mul(c, b), Nat.mul(b, c), Nat.mul.comm(c, b)
+    (x) Equal<Bool>(Nat.lte(Nat.mul(a, c), x), Bool.true), lem
+  )
   qed
 
 Nat.Order.mul.combine(
@@ -155,9 +251,9 @@ Nat.Order.mul.combine(
   Hyp0: Equal<Bool>(Nat.lte(a, b), Bool.true),
   Hyp1: Equal<Bool>(Nat.lte(c, d), Bool.true)
 ): Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, d)), Bool.true)
-  let left_lem = Nat.Order.mul.right(a, b, c, Hyp0);
-  let right_lem = Nat.Order.mul.left(c, d, b, Hyp1);
-  let qed = Nat.Order.chain(Nat.mul(a, c), Nat.mul(b, c), Nat.mul(b, d), left_lem, right_lem);
+  let left_lem = Nat.Order.mul.right(a, b, c, Hyp0)
+  let right_lem = Nat.Order.mul.left(c, d, b, Hyp1)
+  let qed = Nat.Order.chain(Nat.mul(a, c), Nat.mul(b, c), Nat.mul(b, d), left_lem, right_lem)
   qed
 
 //Nat.Order.bernoulli(

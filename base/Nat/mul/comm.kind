@@ -1,5 +1,24 @@
-Nat.mul.comm(a: Nat, b: Nat): (a * b) == b * a
-  case b {
-    zero: mirror(Nat.mul.zero_left(a))
-    succ: mirror(Nat.mul.comm(Nat.succ(b.pred), a))
-  }!
+Nat.mul.comm(a: Nat, b: Nat): Equal<Nat>(Nat.mul(a, b), Nat.mul(b, a))
+  case a {
+    zero:
+      Equal.mirror<Nat>(Nat.mul(b, 0), 0, Nat.mul.zero_right(b))
+    succ:
+      let ind = Nat.mul.comm(a.pred, b)
+      let lemma = Equal.apply<Nat, Nat>(
+        Nat.mul(a.pred,b), Nat.mul(b,a.pred)
+        Nat.add(b), ind
+      )
+      let succ_right = mirror(Nat.mul.succ_right(b, a.pred))
+      let qed = Equal.rewrite<Nat>(
+        Nat.add(b,Nat.mul(b,a.pred)), Nat.mul(b,Nat.succ(a.pred))
+        succ_right,
+        (x) Equal<Nat>(Nat.add(b,Nat.mul(a.pred,b)), x)
+        lemma
+      )
+      qed
+  }: Equal<Nat>(Nat.mul(a, b), Nat.mul(b, a))
+
+// ind:        a.pred * b == b * a.pred
+//       b + a.pred * b == b + b * a.pred
+//       b + a.pred * b == b * succ(a.pred)
+// goal: succ(a.pred) * b == b * succ(a.pred)

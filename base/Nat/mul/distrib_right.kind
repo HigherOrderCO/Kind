@@ -1,0 +1,27 @@
+Nat.mul.distrib_right(
+  a: Nat, b: Nat, c: Nat
+): Equal<Nat>(Nat.mul(Nat.add(a, b), c), Nat.add(Nat.mul(a, c), Nat.mul(b, c)))
+  case a {
+    zero:
+      Equal.refl<Nat>(Nat.mul(b, c))
+    succ:
+      // ind:       (a.pred + b) * c == (a.pred * c) + (b * c)
+      // lemma: c + (a.pred + b) * c ==  c + (a.pred * c)  + (b * c)
+      // qed:   c + (a.pred + b) * c == (c + (a.pred * c)) + (b * c)
+      let ind = Nat.mul.distrib_right(
+        a.pred, b, c
+      )
+      let lemma = Equal.apply<Nat, Nat>(
+        Nat.mul(Nat.add(a.pred,b),c), Nat.add(Nat.mul(a.pred,c),Nat.mul(b,c)), Nat.add(c), ind
+      )
+      let assoc = Equal.mirror<Nat>(
+        Nat.add(Nat.add(c,Nat.mul(a.pred,c)),Nat.mul(b,c)), Nat.add(c,Nat.add(Nat.mul(a.pred,c),Nat.mul(b,c)))
+        Nat.add.assoc(c, Nat.mul(a.pred, c), Nat.mul(b, c))
+      )
+      let qed = Equal.rewrite<Nat>(
+        Nat.add(c,Nat.add(Nat.mul(a.pred,c),Nat.mul(b,c))), Nat.add(Nat.add(c,Nat.mul(a.pred,c)),Nat.mul(b,c)), assoc,
+        (x) Equal<Nat>(Nat.add(c, Nat.mul(Nat.add(a.pred, b), c)), x)
+        lemma
+      )
+      qed
+  }: Equal<Nat>(Nat.mul(Nat.add(a, b), c), Nat.add(Nat.mul(a, c), Nat.mul(b, c)))
