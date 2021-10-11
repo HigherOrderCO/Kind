@@ -1,3 +1,79 @@
+type Nat.AddExp {
+  const(value: Nat)
+  var(idx: Nat)
+  add(left: Nat.AddExp, right: Nat.AddExp)
+}
+
+Nat.AddExp.dimension(
+  exp: Nat.AddExp
+): Nat
+  case exp {
+    const:
+      0
+    add:
+      let left_dim = Nat.AddExp.dimension(exp.left)
+      let right_dim = Nat.AddExp.dimension(exp.right)
+      Nat.max(left_dim, right_dim)
+    var:
+      Nat.succ(exp.idx)
+  }
+
+Nat.AddExp.constant(exp: Nat.AddExp): Type
+  case exp {
+    const:
+      Unit
+    var:
+      Empty
+    add:
+      And<Nat.AddExp.constant(exp.left), Nat.AddExp.constant(exp.right)>
+  }
+
+Nat.AddExp.dimension.zero(
+  exp: Nat.AddExp
+  Hyp: Equal<Nat>(Nat.AddExp.dimension(exp), 0)
+): Nat.AddExp.constant(exp)
+  (case exp {
+    const:
+      (Hyp)
+        unit
+    var:
+      (Hyp)
+        ?var
+    add:
+      (Hyp)
+        def left_dim = Nat.AddExp.dimension(exp.left)
+        let left_lemma =
+          (case left_dim {
+            zero:
+              (left_dim, Hyp)
+                ?zero
+            succ:
+              (left_dim, Hyp)
+                ?succ
+          }: (left_dim: Nat
+              Hyp: Equal<Nat>(Nat.max(left_dim, Nat.AddExp.dimension(exp.right)), 0)) ->
+              Equal<Nat>(left_dim, 0))(
+            left_dim,
+            Hyp
+          )
+//        let left = Nat.AddExp.dimension.zero(exp.left)
+//        let right = Nat.AddExp.dimension.zero(exp.right)
+        ?add
+        //Pair.new!!(left, right)
+  }: (Hyp: Equal<Nat>(Nat.AddExp.dimension(exp), 0)) -> Nat.AddExp.constant(exp))(
+    Hyp
+  )
+
+Nat.AddExp.substitution(
+  exp: Nat.AddExp
+): Variadic(Nat.AddExp.dimension(exp), Nat, Nat)
+  ?substitution
+
+Nat.AddExp.substitution.aux(
+  n: Nat
+  exp: Nat.AddExp
+): Variadic(n, Nat, Nat)
+  ?substitution
+
 Test: _
-  let b = Litereum.serialize.varlen.go(12)
-  Litereum.deserialize.varlen.go(b)
+  "hi"
