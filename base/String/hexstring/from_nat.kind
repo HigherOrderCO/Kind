@@ -1,0 +1,7 @@
+String.hexstring.from_nat(num: Nat): String
+  let hex = Nat.to_string_base(16, num)
+  if Nat.eql(String.length(hex) % 2, 0)  then 
+    "0x" | hex
+  else 
+    "0x0" | hex
+  

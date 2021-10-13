@@ -1,7 +1,0 @@
-// https://github.com/MaiaVictor/eth-lib/blob/da0971f5b09964d9c8449975fa87933f0c9fef35/lib/bytes.js#L19
-Bytes.reverse(hex: String): String
-  let rev = "0x"
-  let len = ((String.length(hex) - 2) / 2)
-  for i from 0 to len with rev:
-    String.concat(rev, String.slice((len-i)*2, ((len-i)+1)*2, hex))
-  rev

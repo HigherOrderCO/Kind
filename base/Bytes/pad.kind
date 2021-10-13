@@ -1,7 +1,0 @@
-// Bytes.pad(len: Nat, hex: String): String
-//   if Nat.eql(String.length(hex), (len*2)+2) 
-//   then hex
-//   else Bytes.pad(len, "0x" | "0" | String.slice(0, 2, hex))
-
-Bytes.pad_left(len: Nat, hex: String): String
-  "0x" | String.pad_left(len, String.to_char("0"), hex)

@@ -1,2 +1,0 @@
-Bytes.pad_right(len: Nat, hex: String): String
-  String.pad_right(len, String.to_char("0"), hex)

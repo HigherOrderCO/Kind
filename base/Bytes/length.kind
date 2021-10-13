@@ -1,2 +1,0 @@
-Bytes.length(b: Bytes): Nat
-  (String.length(b) - 2) / 2
