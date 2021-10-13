@@ -6,6 +6,7 @@ Nat.max.comm(
   case lemma {
     fst:
       let lemma_ba = Nat.lte.comm.false!!(lemma.value)
+      let lemma_ba = Nat.lte.succ_left!!(lemma_ba)
       let qed = Equal.refl<Nat>(a)
       let qed = Equal.rewrite<Bool>(
         false, Nat.lte(a, b), mirror(lemma.value),
@@ -28,6 +29,7 @@ Nat.max.comm(
       qed
     trd:
       let lemma_ab = Nat.lte.comm.false!!(lemma.value)
+      let lemma_ab = Nat.lte.succ_left!!(lemma_ab)
       let qed = Equal.refl<Nat>(b)
       let qed = Equal.rewrite<Bool>(
         false, Nat.lte(b, a), mirror(lemma.value),

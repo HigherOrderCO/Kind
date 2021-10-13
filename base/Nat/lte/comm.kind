@@ -2,12 +2,12 @@ Nat.lte.comm.false(
   a: Nat
   b: Nat
   Hyp: Equal<Bool>(Nat.lte(a, b), false)
-): Equal<Bool>(Nat.lte(b, a), true)
+): Equal<Bool>(Nat.lte(Nat.succ(b), a), true)
   (case a {
     zero:
       (Hyp)
         let contra = Bool.true_neq_false(Hyp)
-        Empty.absurd<Equal<Bool>(Nat.lte(b, 0), true)>(contra)
+        Empty.absurd<Equal<Bool>(Nat.lte(Nat.succ(b), 0), true)>(contra)
     succ:
       (Hyp)
         (case b {
@@ -18,10 +18,10 @@ Nat.lte.comm.false(
             (Hyp)
               let qed = Nat.lte.comm.false(a.pred, b.pred, Hyp)
               qed
-        }: (Hyp: Equal<Bool>(Nat.lte(Nat.succ(a.pred), b), false)) -> Equal<Bool>(Nat.lte(b, Nat.succ(a.pred)), true))(
+        }: (Hyp: Equal<Bool>(Nat.lte(Nat.succ(a.pred), b), false)) -> Equal<Bool>(Nat.lte(Nat.succ(b), Nat.succ(a.pred)), true))(
           Hyp
         )
-  }: (Hyp: Equal<Bool>(Nat.lte(a, b), false)) -> Equal<Bool>(Nat.lte(b, a), true))(
+  }: (Hyp: Equal<Bool>(Nat.lte(a, b), false)) -> Equal<Bool>(Nat.lte(Nat.succ(b), a), true))(
     Hyp
   )
 

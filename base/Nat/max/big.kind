@@ -11,6 +11,7 @@ Nat.max.big(
     false:
       (lemma_ab)
         let lemma_ba = Nat.lte.comm.false!!(lemma_ab)
+        let lemma_ba = Nat.lte.succ_left!!(lemma_ba)
         Pair.new!!(Nat.Order.refl(a), lemma_ba)
   }: (lemma_ab: Equal<Bool>(Nat.lte(a, b), cmp_ab)) -> And<
     Equal<Bool>(Nat.lte(a, case cmp_ab { true: b, false: a }), true),

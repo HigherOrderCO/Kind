@@ -1,0 +1,22 @@
+Nat.max.combine.right(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), true)
+): Equal<Bool>(Nat.lte(a, Nat.max(b, c)), true)
+  Nat.Order.chain!!!(Hyp, Nat.max.big.left(b, c))
+
+Nat.max.combine.left(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp0: Equal<Bool>(Nat.lte(a, b), true)
+  Hyp1: Equal<Bool>(Nat.lte(c, b), true)
+): Equal<Bool>(Nat.lte(Nat.max(a, c), b), true)
+  def cmp_ac = Nat.lte(a, c)
+  case cmp_ac {
+    true:
+      Hyp1
+    false:
+      Hyp0
+  }! :: Equal<Bool>(Nat.lte(cmp_ac(() Nat, c, a), b), true)

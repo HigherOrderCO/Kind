@@ -1,0 +1,8 @@
+Nat.max.split.left(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(Nat.max(a, b), c), true)
+): And<Equal<Bool>(Nat.lte(a, c), true), Equal<Bool>(Nat.lte(b, c), true)>
+  let {left_lemma, right_lemma} = Nat.max.big(a, b)
+  {Nat.Order.chain!!!(left_lemma, Hyp), Nat.Order.chain!!!(right_lemma, Hyp)}
