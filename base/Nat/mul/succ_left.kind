@@ -1,7 +1,2 @@
-// FIXME: this proof isn't working as written anymore
-Nat.mul.succ_left(a: Nat, b: Nat): (Nat.succ(a) * b) == b + (a * b)
-  Nat.mul.succ_left(a, b)
-  //let h = Nat.mul.succ_right(b,a)
-  //let left = h :: rewrite x in x == _ with Nat.mul.comm(_ _)
-  //let final = left :: rewrite x in _ == Nat.add(b,x) with Nat.mul.comm(_ _)
-  //final
+Nat.mul.succ_left(a: Nat, b: Nat): Equal<Nat>(Nat.mul(Nat.succ(a), b), Nat.add(b, Nat.mul(a, b)))
+  Equal.refl<Nat>(Nat.mul(Nat.succ(a), b))

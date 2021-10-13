@@ -9,7 +9,16 @@ App.HotS.State: App.State
 // Initial state
 App.HotS.init: App.Init<App.HotS.State>
   let bids = {} :: Map<App.HotS.Bid>
-  let cash = {} :: Map<Nat>
+  let cash = {
+    "Green": 23
+    "Blue": 24
+    "Red": 25
+    "Yellow": 26
+    "Purple": 27
+    "White": 28
+    "Black": 29
+    "Orange": 30
+  } :: Map<Nat>
   App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "", ""), App.HotS.State.Global.new(bids, cash))
 
 type App.HotS.State.Local {
@@ -229,8 +238,9 @@ App.HotS.post: App.Post<App.HotS.State>
       let team_size = List.count!((x) String.eql(x@team,post.team), Map.values!(global.bids))
       let rebuy = (case global.bids{post.player} as bid { none: false, some: String.eql(bid.value@team,post.team) })
       let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 6)
+      let player_exists = Map.has!(post.player, App.HotS.players)
       //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
-      if can_buy then
+      if can_buy && player_exists then
         log(post.team | " purchased " | post.player)
         let bids = global.bids{post.player} <- App.HotS.Bid.new(player_value + 1, post.team)
         let cash = global.cash

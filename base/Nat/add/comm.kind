@@ -1,13 +1,26 @@
-Nat.add.comm(a: Nat, b:Nat): (a + b) == (b + a)
-  case a{
-    zero: mirror(Nat.add.zero_right(b))
+Nat.add.comm(
+  a: Nat, b:Nat
+): Equal<Nat>(Nat.add(a, b), Nat.add(b, a))
+  case a {
+    zero:
+      Equal.mirror<Nat>(
+        Nat.add(b,0), b
+        Nat.add.zero_right(b)
+      )
     succ: 
-      let p0 = Nat.add.succ_right(b, a.pred)
-      let p1 = mirror(p0)
-      let h2 = Nat.add.comm(b, a.pred)
-      let p3 = p1 :: rewrite x in Nat.succ(x) == Nat.add(b,Nat.succ(a.pred)) with h2
-      // here p3 should close the goal.
-      let p4 = mirror(Nat.add.succ_left(a.pred,b))
-      let p5 = p3 :: rewrite x in x == _ with p4
-      p5
-  }!
+      let ind = Nat.add.comm(a.pred, b)
+      let lemma = Equal.apply<Nat, Nat>(
+        Nat.add(a.pred,b), Nat.add(b,a.pred)
+        Nat.succ, ind
+      )
+      let succ_right = Equal.mirror<Nat>(
+        Nat.add(b,Nat.succ(a.pred)), Nat.succ(Nat.add(b,a.pred))
+        Nat.add.succ_right(b, a.pred)
+      )
+      let qed = Equal.rewrite<Nat>(
+        Nat.succ(Nat.add(b,a.pred)), Nat.add(b,Nat.succ(a.pred)), succ_right
+        (x) Equal<Nat>(Nat.add(Nat.succ(a.pred), b), x)
+        lemma
+      )
+      qed
+  }: Equal<Nat>(Nat.add(a, b), Nat.add(b, a))

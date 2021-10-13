@@ -1,0 +1,48 @@
+Variadic.Equal<A: Type, B: Type>(
+  n: Nat
+  l: Variadic(n)<A, B>
+  r: Variadic(n)<A, B>
+): Variadic(n)<A, Type>
+  case n with l r {
+    zero:
+      Equal<B>(l, r)
+    succ:
+      (x) Variadic.Equal<A, B>(n.pred, l(x), r(x))
+  }!
+
+Nat.AlgExp.from_nat(n: Nat): Nat.AlgExp
+  Nat.AlgExp.const(n)
+
+Nat.AlgExp.dimension(exp: Nat.AlgExp): Nat
+  ?dimension
+
+Nat.AlgExp.substitution(exp: Nat.AlgExp): Variadic(Nat.AlgExp.dimension(exp), Nat, Nat)
+  ?substitution
+
+Nat.AlgExp.eql(exp0: Nat.AlgExp, exp1: Nat.AlgExp): Bool
+  ?equal
+
+type Nat.AlgExp {
+  const(value: Nat)
+  var(idx: Nat)
+  add(left: Nat.AlgExp, right: Nat.AlgExp)
+  mul(left: Nat.AlgExp, right: Nat.AlgExp)
+}
+
+Nat.AlgExp.decide(
+  exp0: Nat.AlgExp
+  exp1: Nat.AlgExp
+):  let eql = Nat.AlgExp.eql(exp0, exp1)
+    if eql then
+      Variadic.Equal(n, Nat.AlgExp.substitution(exp0), Nat.AlgExp.substitution(exp1))
+    else
+      Variadic.NotEqual(n, Nat.AlgExp.substitution(exp0), Nat.AlgExp.substitution(exp1))
+  ?equivalence
+
+Test(a: Nat, b: Nat): Equal<Nat>((a + b) * (a + b), (a * a) + (2 * a * b) + (b * b))
+  let x = Nat.AlgExp.var(0)
+  let y = Nat.AlgExp.var(1)
+  let exp0 = (x + y) * (x + y)
+  let exp1 = (x * x) + (2 * x * y) + (y * y)
+  Nat.AlgExp.decide(exp0, exp1, a, b)
+

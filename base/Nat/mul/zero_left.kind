@@ -1,7 +1,8 @@
-Nat.mul.zero_left(a: Nat): (0 * a) == 0
-  case a{
-    zero: refl
+Nat.mul.zero_left(a: Nat): Equal<Nat>(Nat.mul(0, a), 0)
+  case a {
+    zero:
+      Equal.refl<Nat>(0)
     succ: 
       let h = Nat.mul.zero_left(a.pred)
-      apply((x) (0+x), h)
-  }!
+      h
+  }: Equal<Nat>(Nat.mul(0, a), 0)

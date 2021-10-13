@@ -4,9 +4,9 @@ Nat.Order.mul.combine(
   c: Nat,
   d: Nat,
   Hyp0: Equal<Bool>(Nat.lte(a, b), Bool.true),
-  Hyp1: Equal<Bool>(Nat.lte(c, d), Bool.true),
+  Hyp1: Equal<Bool>(Nat.lte(c, d), Bool.true)
 ): Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, d)), Bool.true)
-  let left_lem = Nat.Order.mul.right(a, b, c, Hyp0);
-  let right_lem = Nat.Order.mul.left(c, d, b, Hyp1);
-  let qed = Nat.Order.chain(Nat.mul(a, c), Nat.mul(b, c), Nat.mul(b, d), left_lem, right_lem);
+  let left_lem = Nat.Order.mul.right(a, b, c, Hyp0)
+  let right_lem = Nat.Order.mul.left(c, d, b, Hyp1)
+  let qed = Nat.Order.chain(Nat.mul(a, c), Nat.mul(b, c), Nat.mul(b, d), left_lem, right_lem)
   qed
