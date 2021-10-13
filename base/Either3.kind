@@ -1,0 +1,5 @@
+type Either3 <A: Type, B: Type, C: Type> {
+  fst(value: A)
+  snd(value: B)
+  trd(value: C)
+}
