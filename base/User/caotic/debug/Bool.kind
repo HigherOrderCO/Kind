@@ -1,0 +1,10 @@
+type Bool {
+  true
+  false
+}
+
+Bool.true_neq_false: Bool.true != Bool.false
+  (e) Equal.rewrite!!!(e, (x) case x { true: Unit, false: Empty }, Unit.new)
+
+Bool.false_neq_true: Bool.false != Bool.true
+  (e) Equal.rewrite!!!(e, (x) case x { true: Empty, false: Unit }, Unit.new)

@@ -4,3 +4,13 @@ Bits.concat(a: Bits, b: Bits): Bits
     o: Bits.o(Bits.concat(a.pred, b)),
     i: Bits.i(Bits.concat(a.pred, b))
   }
+
+Bits.concat.tail(a: Bits, b: Bits): Bits
+  case a {
+    e: b,
+    o: Bits.concat.tail(a.pred, Bits.o(b))
+    i: Bits.concat.tail(a.pred, Bits.i(b))
+  }
+
+Bits.concat.go(a : Bits, b : Bits) : Bits
+  Bits.concat.tail(Bits.reverse(a), b)
