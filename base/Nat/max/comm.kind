@@ -1,0 +1,45 @@
+Nat.max.comm(
+  a: Nat
+  b: Nat
+): Equal<Nat>(Nat.max(a, b), Nat.max(b, a))
+  let lemma = Nat.Order.trichotomy(a, b)
+  case lemma {
+    fst:
+      let lemma_ba = Nat.lte.comm.false!!(lemma.value)
+      let lemma_ba = Nat.lte.succ_left!!(lemma_ba)
+      let qed = Equal.refl<Nat>(a)
+      let qed = Equal.rewrite<Bool>(
+        false, Nat.lte(a, b), mirror(lemma.value),
+        (x) Equal<Nat>(x(() Nat, b, a), true(() Nat, a, b))
+        qed
+      )
+      let qed = Equal.rewrite<Bool>(
+        true, Nat.lte(b, a), mirror(lemma_ba),
+        (x) Equal<Nat>(Nat.lte(a, b, () Nat, b, a), x(() Nat, a, b))
+        qed
+      )
+      qed
+    snd:
+      let qed = Equal.refl<Nat>(Nat.max(a, a))
+      let qed = Equal.rewrite<Nat>(
+        a, b, lemma.value
+        (x) Equal<Nat>(Nat.max(a, x), Nat.max(x, a))
+        qed
+      )
+      qed
+    trd:
+      let lemma_ab = Nat.lte.comm.false!!(lemma.value)
+      let lemma_ab = Nat.lte.succ_left!!(lemma_ab)
+      let qed = Equal.refl<Nat>(b)
+      let qed = Equal.rewrite<Bool>(
+        false, Nat.lte(b, a), mirror(lemma.value),
+        (x) Equal<Nat>(true(() Nat, b, a), x(() Nat, a, b))
+        qed
+      )
+      let qed = Equal.rewrite<Bool>(
+        true, Nat.lte(a, b), mirror(lemma_ab),
+        (x) Equal<Nat>(x(() Nat, b, a), Nat.lte(b, a, () Nat, a, b))
+        qed
+      )
+      qed
+  }

@@ -243,18 +243,41 @@ Nat.Order.mul.right(
   )
   qed
 
-Nat.Order.mul.combine(
-  a: Nat,
-  b: Nat,
-  c: Nat,
-  d: Nat,
-  Hyp0: Equal<Bool>(Nat.lte(a, b), Bool.true),
-  Hyp1: Equal<Bool>(Nat.lte(c, d), Bool.true)
-): Equal<Bool>(Nat.lte(Nat.mul(a, c), Nat.mul(b, d)), Bool.true)
-  let left_lem = Nat.Order.mul.right(a, b, c, Hyp0)
-  let right_lem = Nat.Order.mul.left(c, d, b, Hyp1)
-  let qed = Nat.Order.chain(Nat.mul(a, c), Nat.mul(b, c), Nat.mul(b, d), left_lem, right_lem)
-  qed
+//Nat.Order.max.big(
+//  a: Nat
+//  b: Nat
+//): And<Equal<Bool>(Nat.lte(a, Nat.max(a, b)), true), Equal<Bool>(Nat.lte(b, Nat.max(a, b)), true)>
+//  case a {
+//    zero:
+//      Pair.new!!(Equal.refl<Bool>(true), Nat.Order.refl(b))
+//    succ:
+//      let ind = Nat.Order.max(a.pred, b)
+//      ?succ
+//  }!
+
+Nat.Order.trichotomy(
+  a: Nat
+  b: Nat
+):  Either3<
+      Equal<Bool>(Nat.lte(a, b), false)
+      Equal<Nat>(a, b)
+      Equal<Bool>(Nat.lte(b, a), false)
+    >
+  def cmp_ab = Nat.lte(a, b)
+  def cmp_ba = Nat.lte(b, a)
+  let lemma_ab = Equal.refl<Bool>(cmp_ab)
+  let lemma_ba = Equal.refl<Bool>(cmp_ba)
+  case cmp_ab with lemma_ab: cmp_ab^ == cmp_ab {
+    false:
+      Either3.fst!!!(Equal.refl<Bool>(false))
+    true:
+      case cmp_ba with lemma_ba: cmp_ba^ == cmp_ba {
+        false:
+          Either3.trd!!!(Equal.refl<Bool>(false))
+        true:
+          Either3.snd!!!(Nat.Order.anti_symm!!(lemma_ab, lemma_ba))
+      }!
+  }!
 
 //Nat.Order.bernoulli(
 //  a: Nat,

@@ -1,3 +1,16 @@
-Test: _
-  let b = Litereum.serialize.varlen.go(12)
-  Litereum.deserialize.varlen.go(b)
+Test<A: Type, B: Type>(
+  f: A -> B,
+  Hyp: (
+    C: Type
+    g: B -> C
+    h: B -> C
+    a: A
+    HHyp: g(f(a)) == h(f(a))
+    b: B
+  ) -> g(b) == h(b)
+  target: B
+): [a: A] f(a) == target
+  let g = ((b) true) :: B -> Bool
+  let h = ((b) Decidable([a: A] f(a) == b)) :: B -> Bool
+  let hmm = Hyp(Type, g, h)
+  ?test

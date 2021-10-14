@@ -1,0 +1,44 @@
+Nat.lte.comm.false(
+  a: Nat
+  b: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), false)
+): Equal<Bool>(Nat.lte(Nat.succ(b), a), true)
+  (case a {
+    zero:
+      (Hyp)
+        let contra = Bool.true_neq_false(Hyp)
+        Empty.absurd<Equal<Bool>(Nat.lte(Nat.succ(b), 0), true)>(contra)
+    succ:
+      (Hyp)
+        (case b {
+          zero:
+            (Hyp)
+              Equal.refl<Bool>(true)
+          succ:
+            (Hyp)
+              let qed = Nat.lte.comm.false(a.pred, b.pred, Hyp)
+              qed
+        }: (Hyp: Equal<Bool>(Nat.lte(Nat.succ(a.pred), b), false)) -> Equal<Bool>(Nat.lte(Nat.succ(b), Nat.succ(a.pred)), true))(
+          Hyp
+        )
+  }: (Hyp: Equal<Bool>(Nat.lte(a, b), false)) -> Equal<Bool>(Nat.lte(Nat.succ(b), a), true))(
+    Hyp
+  )
+
+Nat.lte.comm.true(
+  a: Nat
+  b: Nat
+  Hyp: Equal<Bool>(Nat.lte(Nat.succ(a), b), true)
+): Equal<Bool>(Nat.lte(b, a), false)
+  case b with Hyp {
+    zero:
+      let contra = Bool.false_neq_true(Hyp)
+      Empty.absurd!(contra)
+    succ:
+      case a with Hyp {
+        zero:
+          Equal.refl<Bool>(false)
+        succ:
+          Nat.lte.comm.true(a.pred, b.pred, Hyp)
+      }!
+  }!
