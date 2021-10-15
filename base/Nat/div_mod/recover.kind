@@ -1,10 +1,13 @@
-//Nat.div_mod.recover(
-//  n: Nat, m: Nat
-//): Equal<Nat>(
-//  Nat.add(Nat.mod(n, m), Nat.mul(Nat.div(n, m), m))
-//  m
-//)
-//  ?recover
+Nat.div_mod.recover(
+  n: Nat, m: Nat
+): Equal<Nat>(
+     Nat.add(Nat.mod(n, m), Nat.mul(Nat.div(n, m), m))
+     n
+   )
+  let lemma = Nat.div_mod.recover.go(n, m, 0, n, refl)
+  let comm = Nat.add.comm(Nat.mul(Nat.div(n, m), m), Nat.mod(n, m))
+  let qed = lemma :: rewrite X in Equal<Nat>(X, n) with comm
+  qed
 
 //Nat.div_mod.go(2, 0, 7) Nat.div_mod.recover.go(7, 2, 0, 7, 0*2 + 7 == 7)
 //Nat.div_mod.go(2, 1, 5) Nat.div_mod.recover.go(7, 2, 1, 5, 1*2 + 5 == 7)
@@ -30,14 +33,35 @@ Nat.div_mod.recover.go(
   (case cmp {
     true:
       (cmp_eq)
-        let ind = Nat.div_mod.recover.go(m, n,Nat.succ(d), Nat.sub(r,n), ?lemma)
+        let comm = Nat.add.comm(Nat.mul(d,n), r)
+        let lemma = Hyp :: rewrite X in Equal<Nat>(X, m) with comm
+        let sub = mirror(Nat.sub.add!!(cmp_eq))
+        let lemma = lemma :: rewrite X in Equal<Nat>(Nat.add(X,Nat.mul(d,n)), m) with sub
+        let assoc = mirror(Nat.add.assoc(Nat.sub(r,n), n, Nat.mul(d,n)))
+        let lemma = chain(assoc, lemma)
+        let comm = Nat.add.comm(Nat.add(n,Nat.mul(d,n)), Nat.sub(r,n))
+        let lemma = chain(comm, lemma)
+        let ind = Nat.div_mod.recover.go(m, n,Nat.succ(d), Nat.sub(r,n), lemma)
         ind
     false:
       (cmp_eq)
         Hyp
-  }: (cmp_eq: Equal<Bool>(Nat.lte(n, r), cmp)) -> Equal<Nat>(
-     Nat.add(Nat.mul(Pair.fst(Nat,Nat,cmp(() Pair(Nat,Nat),Nat.div_mod.go(n,Nat.succ(d),Nat.sub(r,n)),Pair.new(Nat,Nat,d,r))),n),Pair.snd(Nat,Nat,cmp(() Pair(Nat,Nat),Nat.div_mod.go(n,Nat.succ(d),Nat.sub(r,n)),Pair.new(Nat,Nat,d,r))))
-     m
-   ))(
-     cmp_eq
-   )
+  }: (cmp_eq: Equal<Bool>(Nat.lte(n, r), cmp)) ->
+  Equal<Nat>(
+    def p =
+      cmp(
+        () Pair(Nat,Nat)
+        Nat.div_mod.go(n,Nat.succ(d),Nat.sub(r,n))
+        Pair.new(Nat,Nat,d,r)
+      )
+    Nat.add(
+      Nat.mul(
+        Pair.fst<Nat,Nat>(p)
+        n
+      )
+      Pair.snd<Nat, Nat>(p)
+    )
+    m
+  ))(
+    cmp_eq
+  )
