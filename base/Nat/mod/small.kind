@@ -1,0 +1,5 @@
+Nat.mod.small(
+  n: Nat
+  m: Nat
+): ?mod.small.type
+  ?mod.small.body

@@ -1,10 +1,12 @@
+// (n % m) + (n / m) * m = n
 Nat.div_mod.recover(
   n: Nat, m: Nat
+  Hyp: Equal<Bool>(Nat.lte(1, m), true)
 ): Equal<Nat>(
      Nat.add(Nat.mod(n, m), Nat.mul(Nat.div(n, m), m))
      n
    )
-  let lemma = Nat.div_mod.recover.go(n, m, 0, n, refl)
+  let lemma = Nat.div_mod.recover.go(n, m, 0, n, Hyp, refl)
   let comm = Nat.add.comm(Nat.mul(Nat.div(n, m), m), Nat.mod(n, m))
   let qed = lemma :: rewrite X in Equal<Nat>(X, n) with comm
   qed
@@ -20,7 +22,8 @@ Nat.div_mod.recover.go(
   n: Nat
   d: Nat
   r: Nat
-  Hyp: Equal<Nat>(Nat.add(Nat.mul(d, n), r), m)
+  Hyp0: Equal<Bool>(Nat.lte(1, n), true)
+  Hyp1: Equal<Nat>(Nat.add(Nat.mul(d, n), r), m)
 ):  def p = Nat.div_mod.go(n, d, r)
     def d = Pair.fst<Nat, Nat>(p)
     def r = Pair.snd<Nat, Nat>(p)
@@ -30,24 +33,21 @@ Nat.div_mod.recover.go(
     )
   def cmp = Nat.lte(n, r)
   def cmp_eq = refl :: cmp == cmp
-  (case cmp {
+  case cmp with cmp_eq : cmp^ == cmp {
     true:
-      (cmp_eq)
-        let comm = Nat.add.comm(Nat.mul(d,n), r)
-        let lemma = Hyp :: rewrite X in Equal<Nat>(X, m) with comm
-        let sub = mirror(Nat.sub.add!!(cmp_eq))
-        let lemma = lemma :: rewrite X in Equal<Nat>(Nat.add(X,Nat.mul(d,n)), m) with sub
-        let assoc = mirror(Nat.add.assoc(Nat.sub(r,n), n, Nat.mul(d,n)))
-        let lemma = chain(assoc, lemma)
-        let comm = Nat.add.comm(Nat.add(n,Nat.mul(d,n)), Nat.sub(r,n))
-        let lemma = chain(comm, lemma)
-        let ind = Nat.div_mod.recover.go(m, n,Nat.succ(d), Nat.sub(r,n), lemma)
-        ind
+      let comm = Nat.add.comm(Nat.mul(d,n), r)
+      let lemma = Hyp1 :: rewrite X in Equal<Nat>(X, m) with comm
+      let sub = mirror(Nat.sub.add!!(cmp_eq))
+      let lemma = lemma :: rewrite X in Equal<Nat>(Nat.add(X,Nat.mul(d,n)), m) with sub
+      let assoc = mirror(Nat.add.assoc(Nat.sub(r,n), n, Nat.mul(d,n)))
+      let lemma = chain(assoc, lemma)
+      let comm = Nat.add.comm(Nat.add(n,Nat.mul(d,n)), Nat.sub(r,n))
+      let lemma = chain(comm, lemma)
+      let ind = Nat.div_mod.recover.go(m, n, Nat.succ(d), Nat.sub(r,n), Hyp0, lemma)
+      ind
     false:
-      (cmp_eq)
-        Hyp
-  }: (cmp_eq: Equal<Bool>(Nat.lte(n, r), cmp)) ->
-  Equal<Nat>(
+      Hyp1
+  }! :: Equal<Nat>(
     def p =
       cmp(
         () Pair(Nat,Nat)
@@ -62,6 +62,4 @@ Nat.div_mod.recover.go(
       Pair.snd<Nat, Nat>(p)
     )
     m
-  ))(
-    cmp_eq
   )
