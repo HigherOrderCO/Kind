@@ -1,0 +1,24 @@
+Nat.sub.add(
+  n: Nat
+  m: Nat
+  Hyp: Equal<Bool>(Nat.lte(n, m), true)
+): Equal<Nat>(Nat.add(Nat.sub(m, n), n), m)
+  case m with Hyp {
+    zero:
+      let zero_n = mirror(Nat.Order.chain.aux!(Hyp))
+      let lemma = refl :: Nat.add(Nat.sub(0, 0), 0) == 0
+      let qed = lemma :: rewrite X in Equal<Nat>(Nat.add(Nat.sub(0, X), X), 0) with zero_n
+      qed
+    succ:
+      case n with Hyp {
+        zero:
+          let qed = Nat.add.zero_right(Nat.succ(m.pred))
+          qed
+        succ:
+          let lemma = Nat.sub.add(n.pred, m.pred, Hyp)
+          let lemma = apply(Nat.succ, lemma)
+          let lemma_left = Nat.add.succ_right(Nat.sub(m.pred,n.pred),n.pred)
+          let qed = chain(lemma_left, lemma)
+          qed
+      }!
+  }!

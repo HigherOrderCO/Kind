@@ -1,0 +1,43 @@
+//Nat.div_mod.recover(
+//  n: Nat, m: Nat
+//): Equal<Nat>(
+//  Nat.add(Nat.mod(n, m), Nat.mul(Nat.div(n, m), m))
+//  m
+//)
+//  ?recover
+
+//Nat.div_mod.go(2, 0, 7) Nat.div_mod.recover.go(7, 2, 0, 7, 0*2 + 7 == 7)
+//Nat.div_mod.go(2, 1, 5) Nat.div_mod.recover.go(7, 2, 1, 5, 1*2 + 5 == 7)
+//Nat.div_mod.go(2, 2, 3) Nat.div_mod.recover.go(7, 2, 2, 3, 2*2 + 3 == 7)
+//Nat.div_mod.go(2, 3, 1) Nat.div_mod.recover.go(7, 2, 3, 1, 3*2 + 1 == 7)
+//{3, 1}
+
+Nat.div_mod.recover.go(
+  m: Nat
+  n: Nat
+  d: Nat
+  r: Nat
+  Hyp: Equal<Nat>(Nat.add(Nat.mul(d, n), r), m)
+):  def p = Nat.div_mod.go(n, d, r)
+    def d = Pair.fst<Nat, Nat>(p)
+    def r = Pair.snd<Nat, Nat>(p)
+    Equal<Nat>(
+      Nat.add(Nat.mul(d, n), r)
+      m
+    )
+  def cmp = Nat.lte(n, r)
+  def cmp_eq = refl :: cmp == cmp
+  (case cmp {
+    true:
+      (cmp_eq)
+        let ind = Nat.div_mod.recover.go(m, n,Nat.succ(d), Nat.sub(r,n), ?lemma)
+        ind
+    false:
+      (cmp_eq)
+        Hyp
+  }: (cmp_eq: Equal<Bool>(Nat.lte(n, r), cmp)) -> Equal<Nat>(
+     Nat.add(Nat.mul(Pair.fst(Nat,Nat,cmp(() Pair(Nat,Nat),Nat.div_mod.go(n,Nat.succ(d),Nat.sub(r,n)),Pair.new(Nat,Nat,d,r))),n),Pair.snd(Nat,Nat,cmp(() Pair(Nat,Nat),Nat.div_mod.go(n,Nat.succ(d),Nat.sub(r,n)),Pair.new(Nat,Nat,d,r))))
+     m
+   ))(
+     cmp_eq
+   )
