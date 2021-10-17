@@ -29,8 +29,8 @@ situation, but they 1. have considerable runtime cost, 2. require big external
 libraries, 3. can be overkill, 4. are still not as succinct as JS.
 
 To be fair, the JavaScript version, while terse, is problematic. Not only
-because it mutates the original object, but because, if any of these keys don't
-exist, the program above will crash. To make this program safe, one must make
+because it mutates the original object, but because, if any of the keys don't
+exist, the program will crash. To make that program safe, one must make
 several checks that end up making the code verbose too:
 
 ```javascript
