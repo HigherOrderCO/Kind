@@ -4,7 +4,7 @@ Getters and Setters in Kind
 The verbosity of nested fields
 ------------------------------
 
-One of the most annoying parts of pure functional programming is getting,
+One of the most annoying aspects of pure functional programming is getting,
 setting and mutating deeply nested fields. In impure languages like JavaScript,
 this was never a problem. For example, consider the following object:
 
@@ -18,15 +18,15 @@ let obj = {
 }
 ```
 
-Setting nested fields is easy:
+Altering a nested field is easy:
 
 ```javascript
 obj.data["a"][0] = 42.0
 ```
 
-In Haskell, the equivalent code is verbose. Lenses greatly improve the
+In Haskell, the equivalent code is very verbose. Lenses greatly improve the
 situation, but they 1. have considerable runtime cost, 2. require big external
-libraries, 3. can be overkill, 4. are still not as succinct as the JS code.
+libraries, 3. can be overkill, 4. are still not as succinct as JS.
 
 To be fair, the JavaScript version, while terse, is problematic. Not only
 because it mutates the original object, but because, if any of these keys don't
@@ -60,7 +60,7 @@ obj: Object
   })
 ```
 
-And, like on most pure languages, setting nested fields was verbose:
+And, like on most pure languages, altering nested fields was verbose:
 
 ```javascript
 obj2: Object
@@ -78,21 +78,18 @@ obj2: Object
 Kind's obvious solution
 -----------------------
 
-Since the last version, Kind features built-in getter and setter syntaxes that
-make these operations succinct. It does the obvious thing that every language
-should do:
+Since the last version, Kind features a built-in getter and setter syntax that
+makes these operations succinct:
 
 ```javascript
-obj2: Object
+new_obj: Object
   obj@data{"a"}[0] <- 42.0
 ```
 
 This small one-liner is equivalent to the huge case tree we had to write before.
-It immutably alters the first number of `obj` to 42.
-
-The way it works is `x@field` focuses a field, `x{key}` focuses a Map entry, and
-`x[index]` focuses a List element. These focusers can be chained to get deep
-fields:
+It immutably alters the first number of `obj` to `42`. The way it works is
+`x@field` focuses a field, `x{key}` focuses a Map entry, and `x[index]` focuses
+a List element. These focusers can be chained to get deep fields:
 
 ```javascript
 data: Map<List<F64>>
@@ -105,28 +102,28 @@ number: Maybe<F64>
   obj@data{"a"}[0]
 ```
 
-As expected, `Maybe` shows up only when needed, such as when getting an element
-from a list or map. To set, just append a `<- new_val`. This will overwrite the
-focused field, immutably. You can also use `<=` to apply a function instead:
+And, to set, just append a `<- new_val`. This will overwrite the focused field,
+immutably. You can also use `<=` to apply a function instead:
 
 ```javascript
-obj3: Object
-  obj@data{"a"}[0] <= Nat.mul(2)
+new_obj: Object
+  obj@data{"a"}[0] <= F64.mul(2.0)
 ```
 
-Finally, you can "mutate" an object in a JS-like fashion by using a `let`
-expression together with an immutable setter:
+Note that, as expected, `Maybe` shows up only when needed, such as when getting
+an element from a list or map. Finally, you can "mutate" an object in a JS-like
+fashion by using a `let` expression together with an immutable setter:
 
 ```
-let obj = obj@data{"a"}[0] <= 2.0
+let obj = obj@data{"a"}[0] <= F64.mul(2.0)
 ```
 
 This "mutation" is actually pure: the original `obj` wasn't changed, you just
 made a new object with the same name. You can still access the old one by
-writing `obj^`. This, in effect, does the same as a JS assignment:
+writing `obj^`. This, in effect, does the same as a JS assignment operator:
 
 ```
-obj.data["a"][0] *= 42.0
+obj.data["a"][0] *= 2.0
 ```
 
 Except without mutability, without annoying checks, without runtime errors, with
@@ -134,22 +131,22 @@ strong types, and with the flexibility to use any function, instead of just `*`,
 `+`, etc. To make it even more terse, the line above can be abbreviated as:
 
 ```
-let obj@data{"a"}[0] <= F64.mul(42.0)
+let obj@data{"a"}[0] <= F64.mul(2.0)
 ```
 
-And that's all! These syntaxes desugar to efficient, linear
-[Form-Core](https://github.com/moonad/FormCoreJS) programs that don't use heavy
-lenses and avoid re-getting nested fields. 
+And that's all! This desugars to an efficient, linear
+[Form-Core](https://github.com/moonad/FormCoreJS) program that doesn't use heavy
+lenses, and avoids re-getting nested fields. 
 
 Conclusion
 ----------
 
-In short, dealing with nested fields in JavaScript looks nice but is
-terrible; in Haskell, it looks terrible and is; in Kind, is the a joyful
-experience that makes you proud about your career choice.
+In short, dealing with nested fields in JavaScript looks nice but is terrible;
+in Haskell, it looks terrible and is; in Kind, it is a joyful experience that
+makes you proud of your career choice.
 
 I'm making this post because this is such a huge, needed quality-of-life
-improvement that I really think every pure language should come with something
+improvement that I believe every pure language should come with something
 similar out-of-the-box, and I don't understand why they make it so hard. You
 shouldn't need huge third party libs to do something that fundamental.
 
