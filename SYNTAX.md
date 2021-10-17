@@ -1022,6 +1022,8 @@ case foo { new: foo.x }
 
 It can be used to get a field of a single-constructor datatype.
 
+Check [this post](https://github.com/kind-lang/Kind/blob/master/blog/3-getters-and-setters.md) for more info.
+
 
 Record setter
 -------------
@@ -1037,6 +1039,8 @@ case foo { new: Foo.new(100, foo.y) }
 ```
 
 It can be used to set a field of a single-constructor datatype.
+
+Check [this post](https://github.com/kind-lang/Kind/blob/master/blog/3-getters-and-setters.md) for more info.
 
 List literal
 ------------
@@ -1096,6 +1100,8 @@ List.get!(4, list)
 
 This returns the element at index 4 as a `Maybe`.
 
+Check [this post](https://github.com/kind-lang/Kind/blob/master/blog/3-getters-and-setters.md) for more info.
+
 
 List setter
 -----------
@@ -1111,6 +1117,8 @@ List.set!(4, 100, list)
 ```
 
 This sets the element at index 4 to `100`.
+
+Check [this post](https://github.com/kind-lang/Kind/blob/master/blog/3-getters-and-setters.md) for more info.
 
 Map literal
 -----------
@@ -1155,6 +1163,7 @@ Map.get!("foo", map)
 
 This returns the element at key "foo" as a `Maybe`.
 
+Check [this post](https://github.com/kind-lang/Kind/blob/master/blog/3-getters-and-setters.md) for more info.
 
 Map setter
 ----------
@@ -1170,6 +1179,8 @@ Map.set!("foo", 100, map)
 ```
 
 This sets the element at key "foo" to `100`.
+
+Check [this post](https://github.com/kind-lang/Kind/blob/master/blog/3-getters-and-setters.md) for more info.
 
 Equal.apply
 -----------
