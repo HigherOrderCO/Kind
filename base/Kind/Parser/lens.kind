@@ -26,22 +26,37 @@ Kind.Parser.lens.path: Parser<Kind.Parser.lens.dir>
   ])
 
 Kind.Parser.lens(term: Kind.Term): Parser<Kind.Term>
-  Parser.choice!([
-    Parser {
-      get dirs = Parser.until1!(Kind.Parser.text("<-"), Kind.Parser.lens.path)
-      get xval = Kind.Parser.term
-      return Kind.Parser.lens.mutter(term, () xval, dirs)
-    }
-    Parser {
-      get dirs = Parser.until1!(Kind.Parser.text("<="), Kind.Parser.lens.path)
-      get xfun = Kind.Parser.term
-      return Kind.Parser.lens.mutter(term, (x) Kind.Term.app(xfun, x), dirs)
-    }
-    Parser {
-      get dirs = Parser.many1!(Kind.Parser.lens.path)
-      return Kind.Parser.lens.getter(term, dirs)
-    }
-  ])
+  Parser {
+    get dirs = Parser.many1!(Kind.Parser.lens.path)
+    Parser.choice!([
+      Parser {
+        Kind.Parser.text("<-")
+        get xval = Kind.Parser.term
+        return Kind.Parser.lens.mutter(term, () xval, dirs)
+      }
+      Parser {
+        Kind.Parser.text("<=")
+        get xfun = Kind.Parser.term
+        return Kind.Parser.lens.mutter(term, (x) Kind.Term.app(xfun, x), dirs)
+      }
+      Parser {
+        return Kind.Parser.lens.getter(term, dirs)
+      }
+    ])
+  }
+
+Kind.Parser.lens.let(body: Unit -> Parser(Kind.Term)): Parser<Kind.Term>
+  Parser {
+    Kind.Parser.text("let ")
+    get name = Kind.Parser.name1
+    get dirs = Parser.many1!(Kind.Parser.lens.path)
+    get symb = Parser.option([Kind.Parser.text("<-"), Kind.Parser.text("<=")])
+    get expr = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = body(unit)
+    let expr = Kind.Parser.lens.mutter(Kind.Term.ref(name), case symb { zero: () expr, succ: (x) Kind.Term.app(expr,x) }, dirs)
+    return Kind.Term.let(name, expr, (x) body)
+  }
 
 Kind.Parser.lens.mutter(expr: Kind.Term, func: Kind.Term -> Kind.Term, dirs: List<Kind.Parser.lens.dir>): Kind.Term
   case dirs {

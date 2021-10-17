@@ -5,11 +5,10 @@ type Object {
   )
 }
 
-obj: Object
-  Object.new("sample", {
+Test: Maybe<F64>
+  let obj = Object.new("sample", {
     "a": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
     "b": [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
   })
-
-obj2: Object
-  obj@data{"a"}[0] <- 42.0
+  let obj@data{"a"}[0] <= F64.mul(2.0)
+  obj@data{"a"}[0]

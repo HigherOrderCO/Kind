@@ -28,6 +28,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.get((x) Kind.Parser.term)
       Kind.Parser.get.omit((x) Kind.Parser.term)
       Kind.Parser.def((x) Kind.Parser.term)
+      Kind.Parser.lens.let((x) Kind.Parser.term)
       Kind.Parser.use.abort((x) Kind.Parser.term)
       Kind.Parser.use((x) Kind.Parser.term)
       Kind.Parser.goal_rewrite
