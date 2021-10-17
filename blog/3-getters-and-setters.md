@@ -1,8 +1,8 @@
 Getters and setters in Kind
 ===========================
 
-One of the most annoying aspects of pure functional programming is getting,
-setting and mutating deeply nested fields. In mutable languages like JavaScript,
+One of the most annoying parts of pure functional programming is getting,
+setting and mutating deeply nested fields. In impure languages like JavaScript,
 this was never a problem. For example, consider the following object:
 
 ```javascript
@@ -21,15 +21,14 @@ Setting nested fields is easy:
 obj.data["a"][0] = 42.0
 ```
 
-In Haskell, the equivalent code is verbose too. Lenses greatly improve the
+In Haskell, the equivalent code is verbose. Lenses greatly improve the
 situation, but they 1. have considerable runtime cost, 2. require big external
-libraries, 3. do much more than just getting/setting and can be overkill, 4. the
-end result is still not as succinct as the JS code.
+libraries, 3. can be overkill, 4. are still not as succinct as the JS code.
 
-To be fair, the JavaScript version, while terser, is problematic. Not only
+To be fair, the JavaScript version, while terse, is problematic. Not only
 because it mutates the original object, but because, if any of these keys don't
 exist, the program above will crash. To make this program safe, one must make
-several checks that end up making the code verbose:
+several checks that end up making the code verbose too:
 
 ```javascript
 var data = obj.data
@@ -58,7 +57,7 @@ obj: Object
   })
 ```
 
-And, like on many pure functional languages, setting nested fields was verbose:
+And, like on most pure languages, setting nested fields was verbose:
 
 ```javascript
 obj2: Object
@@ -81,9 +80,9 @@ obj2: Object
   obj@data{"a"}[0] <- 42.0
 ```
 
-Much simpler! Notice how `x@field` accesses a field, `x{key}` accesses a Map
-entry, and `x[index]` accesses a List element. These accessors can be chained
-to access deep fields:
+Notice how `x@field` accesses a field, `x{key}` accesses a Map entry, and
+`x[index]` accesses a List element. These accessors can be chained to access
+deep fields:
 
 ```javascript
 data: Map<List<F64>>
@@ -96,29 +95,28 @@ number: Maybe<F64>
   obj@data{"a"}[0]
 ```
 
-And, if you and the access with a `<-`, instead of getting the field, you'll set
-it. You can also use `<=` to apply a function instead of setting:
+Notice a `Maybe` shows up only when needed (such as when getting an element from
+a list or map). If you and the access with a `<-`, instead of getting the field,
+you'll set it. You can also use `<=` to apply a function instead of setting:
 
 ```javascript
 obj3: Object
   obj@data{"a"}[0] <= Nat.mul(2)
 ```
 
-Notice a `Maybe` shows up only when needed (such as when getting an element from
-a list or map). This desugars to an efficient, linear core program that doesn't
-involve heavy lenses and avoids re-getting nested fields.
+This desugars to an efficient, linear core program that doesn't involve heavy
+lenses and avoids re-getting nested fields. 
 
 So, in short, dealing with nested fields in JavaScript looks nice but is
 terrible; in Haskell, it looks terrible and is; in Kind, is the a joyful
 experience that makes you proud about your career choice.
 
-I'm making a post about this because this is such a huge quality of life
-improvement for pure functional languages that I really think every one of them
-should come with something similar out of the box, and I don't understand why
-this is so hard. You shouldn't need to install third party libraries to do
-something as simple.
+I'm making this post because this is such a huge, needed quality of life
+improvement that I really think every pure language should come with something
+similar out of the box, and I don't understand why this is so hard. You
+shouldn't need huge third party libs to do something as simple.
 
-Finally, note this is *not* a built-in lens implementation, since lenses are
-first-class values. Instead, it is just a baseline syntax for immutably setting,
-getting and modifying nested values in records, lists and maps. And that
-completely changes how practical the language feels.
+Finally, note this is *not* a built-in lens implementation. Lenses are
+first-class objects. Instead, it is just a baseline syntax for immutably
+setting, getting and modifying nested values in records, lists and maps. And
+that completely changes how the language feels.
