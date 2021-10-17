@@ -111,10 +111,10 @@ So, in short, dealing with nested fields in JavaScript looks nice but is
 terrible; in Haskell, it looks terrible and is; in Kind, is the a joyful
 experience that makes you proud about your career choice.
 
-I'm making this post because this is such a huge, needed quality of life
+I'm making this post because this is such a huge, needed quality-of-life
 improvement that I really think every pure language should come with something
-similar out of the box, and I don't understand why this is so hard. You
-shouldn't need huge third party libs to do something as simple.
+similar out-of-the-box, and I don't understand why this is made hard. You
+shouldn't need huge third party libs to do something that foundamental.
 
 Finally, note this is *not* a built-in lens implementation. Lenses are
 first-class objects. Instead, it is just a baseline syntax for immutably
