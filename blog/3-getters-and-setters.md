@@ -113,7 +113,7 @@ experience that makes you proud of your career choice.
 
 I'm making this post because this is such a huge, needed quality-of-life
 improvement that I really think every pure language should come with something
-similar out-of-the-box, and I don't understand why this is made hard. You
+similar out-of-the-box, and I don't understand why they make it so hard. You
 shouldn't need huge third party libs to do something that fundamental.
 
 Finally, note this is *not* a built-in lens implementation. Lenses are
