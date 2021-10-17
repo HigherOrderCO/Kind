@@ -12,3 +12,15 @@ Test: Maybe<F64>
   })
   let obj@data{"a"}[0] <~ F64.mul(2.0)
   obj@data{"a"}[0]
+
+// ------------------------------------
+
+id<A: $Type>(x: A): A
+  x
+
+explicit: Nat
+  id<$Nat>(7)
+
+implicit: Nat
+  id(7)
+

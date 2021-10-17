@@ -31,6 +31,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.lens.let((x) Kind.Parser.term)
       Kind.Parser.use.abort((x) Kind.Parser.term)
       Kind.Parser.use((x) Kind.Parser.term)
+      Kind.Parser.implicit
       Kind.Parser.goal_rewrite
       Kind.Parser.if
       Kind.Parser.char
@@ -90,6 +91,7 @@ Kind.Parser.term.suffix(term: Kind.Term): Parser(Kind.Term)
   (pst)
   open pst
   let suffix_parser = Parser.choice!([
+   Kind.Parser.application.hole(term)
    Kind.Parser.application(term)
    Kind.Parser.application.erased(term)
    Kind.Parser.lens(term)
@@ -116,7 +118,6 @@ Kind.Parser.term.suffix(term: Kind.Term): Parser(Kind.Term)
    Kind.Parser.inequality(term)
    Kind.Parser.rewrite(term)
    Kind.Parser.annotation(term)
-   Kind.Parser.application.hole(term)
   ]);
   case suffix_parser(pst) as suffix_parsed {
     error:

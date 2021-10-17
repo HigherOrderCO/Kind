@@ -16,6 +16,8 @@ Kind.Term.inline.reduce(term: Kind.Term, defs: Kind.Defs): Kind.Term
         let: Kind.Term.let(func.name, func.expr, (x) Kind.Term.inline.reduce(Kind.Term.app(func.body(x), term.argm), defs)),
         _: term,
       },
+    imp:
+      Kind.Term.inline.reduce(term.expr, defs),
     ori:
       Kind.Term.inline.reduce(term.expr, defs),
     _: term,

@@ -1,3 +1,27 @@
+## Kind 1.0.104
+
+- Implicit arguments are here!
+
+    ```
+    id<A: $Type>(x: A): A
+      x
+
+    explicit: Nat
+      id<$Nat>(7)
+
+    implicit: Nat
+      id(7)
+    ```
+
+- Nullary function call can be used instead of `!`
+
+    ```
+    let a = Map.new!
+    let b = Map.new()
+    ```
+
+    This is helpful, because implicit arguments only trigger on calls.
+
 ## Kind 1.0.101
 
 - Mutter syntax and improvements on the getter/setter syntax.

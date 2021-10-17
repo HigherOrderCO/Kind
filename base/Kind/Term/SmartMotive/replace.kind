@@ -54,6 +54,8 @@ Kind.Term.SmartMotive.replace(term: Kind.Term, from: Kind.Term, to: Kind.Term, l
       let arg0 = Kind.Term.SmartMotive.replace(term.arg0, from, to, lv);
       let arg1 = Kind.Term.SmartMotive.replace(term.arg1, from, to, lv);
       Kind.Term.ope(term.name, arg0, arg1)
+    imp:
+      Kind.Term.SmartMotive.replace(term.expr, from, to, lv),
     ori:
       Kind.Term.SmartMotive.replace(term.expr, from, to, lv),
   } default term

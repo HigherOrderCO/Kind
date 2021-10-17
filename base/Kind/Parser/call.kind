@@ -1,0 +1,6 @@
+Kind.Parser.call: Parser<Kind.Term>
+  Parser {
+    get func = Kind.Parser.name1
+    get args = Kind.Parser.items_now!("(", Kind.Parser.term, ")")
+    return Kind.Term.cal(func, args)
+  }

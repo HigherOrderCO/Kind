@@ -110,6 +110,10 @@ type Kind.Term {
     arg0: Kind.Term,
     arg1: Kind.Term,
   )
+  // An implicit type or term
+  imp(
+    expr: Kind.Term,
+  )
   // An origin
   ori(
     orig: Pair<Nat,Nat>,

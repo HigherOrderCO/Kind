@@ -22,6 +22,8 @@ Kind.Term.reduce(term: Kind.Term, defs: Kind.Defs): Kind.Term
       Kind.Term.reduce(Kind.Term.unroll_chr(term.chrx), defs),
     str:
       Kind.Term.reduce(Kind.Term.unroll_str(term.strx), defs),
+    imp:
+      Kind.Term.reduce(term.expr, defs),
     ori:
       Kind.Term.reduce(term.expr, defs),
     _: term,

@@ -39,6 +39,8 @@ Kind.Term.normalize(term: Kind.Term, defs: Kind.Defs): Kind.Term
       Kind.Term.chr(term.chrx),
     str:
       Kind.Term.str(term.strx),
+    imp:
+      Kind.Term.normalize(term.expr, defs),
     ori:
       Kind.Term.normalize(term.expr, defs),
   } default term

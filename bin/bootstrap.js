@@ -8,7 +8,7 @@ var kind_path = path.join(__dirname, "js/src/kind.js");
 process.chdir(path.join(__dirname, "../base"));
 
 // Restores last kind.js from git in case we destroyed it 
-execSync("git checkout "+kind_path);
+//execSync("git checkout "+kind_path);
 
 // Creates kind.js
 console.log("Generating kind.js");
