@@ -72,17 +72,17 @@ obj2: Object
   }
 ```
 
-Since the last version, Kind features a built-in getter and setter syntax that
-makes these operations very succinct. The program above can be written as just:
+Since the last version, Kind features built-in getter and setter syntaxes that
+make these operations succinct:
 
 ```javascript
 obj2: Object
   obj@data{"a"}[0] <- 42.0
 ```
 
-`x@field` accesses a field, `x{key}` accesses a Map entry, and
-`x[index]` accesses a List element. These accessors can be chained to access
-deep fields:
+This small one-liner is equivalent to the huge case tree we had to write before.
+`x@field` accesses a field, `x{key}` accesses a Map entry, and `x[index]`
+accesses a List element. These accessors can be chained to get deep fields:
 
 ```javascript
 data: Map<List<F64>>
@@ -95,9 +95,9 @@ number: Maybe<F64>
   obj@data{"a"}[0]
 ```
 
-As expected, a `Maybe` shows up only when needed (such as when getting an element from
-a list or map). If you end the access with a `<-`, you'll overwrite the field, immutably
-You can also use `<=` to apply a function instead:
+As expected, `Maybe` shows up only when needed, such as when getting an element from
+a list or map. To set, just end the syntax with a `<-`. This will overwrite the nested
+field, immutably. You can also use `<=` to apply a function instead:
 
 ```javascript
 obj3: Object
