@@ -104,10 +104,10 @@ obj3: Object
   obj@data{"a"}[0] <= Nat.mul(2)
 ```
 
-This desugars to an efficient, linear core program that doesn't involve heavy
-lenses and avoids re-getting nested fields. 
+And that's all. This just works as expected, and compiles to efficient, linear core
+programs that don't involve heavy lenses and avoid re-getting nested fields. 
 
-So, in short, dealing with nested fields in JavaScript looks nice but is
+In short, dealing with nested fields in JavaScript looks nice but is
 terrible; in Haskell, it looks terrible and is; in Kind, it is the joyful
 experience that makes you proud of your career choice.
 
