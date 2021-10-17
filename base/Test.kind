@@ -1,12 +1,15 @@
-type Bar {
-  new(map: Map<List<List<Nat>>>)
+type Object {
+  new(
+    name: String
+    data: Map<List<F64>>
+  )
 }
 
-type Foo {
-  new(bar: Bar)
-}
+obj: Object
+  Object.new("sample", {
+    "a": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+    "b": [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
+  })
 
-Test: _
-  let a = Foo.new(Bar.new({"list": [[1,2,3],[4,5,6],[7,8,9]]}))
-  let a = a@bar@map{"list"}[0][0] <= Nat.mul(10)
-  a@bar@map{"list"}[0][0]
+obj2: Object
+  obj@data{"a"}[0] <- 42.0
