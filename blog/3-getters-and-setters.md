@@ -75,10 +75,11 @@ obj2: Object
   }
 ```
 
-Kind's obvious solution
+Kind-Lang's obvious solution
 -----------------------
 
-Since the last version, Kind features a built-in getter and setter syntax that
+Since the last version, [Kind-Lang](https://github.com/kind-lang/kind), a modern functional
+programming language and theorem prover, features a built-in getter and setter syntax that
 makes these operations succinct:
 
 ```javascript
