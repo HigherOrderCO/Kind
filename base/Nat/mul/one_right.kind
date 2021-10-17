@@ -1,2 +1,11 @@
-Nat.mul.one_right(a: Nat): (a * 1) == a
-  Nat.add.zero_right(a)
+Nat.mul.one_right(a: Nat): Equal<Nat>(Nat.mul(a, 1), a)
+  case a {
+    zero:
+      Equal.refl<Nat>(0)
+    succ:
+      let ind = Nat.mul.one_right(a.pred)
+      let qed = Equal.apply<Nat, Nat>(
+        Nat.mul(a.pred, 1), a.pred, Nat.succ, ind
+      )
+      qed
+  }: Equal<Nat>(Nat.mul(a, 1), a)

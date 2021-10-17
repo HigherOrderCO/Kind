@@ -1,3 +1,0 @@
-// Take the first 'n' characters from 'b'
-Bytes.take(n: Nat, b: Bytes): Bytes
-  String.take(n, b)

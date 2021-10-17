@@ -1,0 +1,17 @@
+Nat.lte.succ_left(
+  a: Nat
+  b: Nat
+  Hyp: Equal<Bool>(Nat.lte(Nat.succ(a), b), true)
+): Equal<Bool>(Nat.lte(a, b), true)
+  case b with Hyp {
+    zero:
+      let contra = Bool.false_neq_true(Hyp)
+      Empty.absurd!(contra)
+    succ:
+      case a with Hyp {
+        zero:
+          refl
+        succ:
+          Nat.lte.succ_left(a.pred, b.pred, Hyp)
+      }!
+  }!

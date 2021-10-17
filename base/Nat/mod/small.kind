@@ -1,0 +1,35 @@
+//Nat.mod.small(
+//  n: Nat
+//  m: Nat
+//  Hyp: Equal<Bool>(Nat.lte(1, m), true)
+//): Equal<Bool>(Nat.lte(m, Nat.mod(n, m)), false)
+//  ?mod.small.body
+
+Nat.mod.small.aux(
+  n: Nat
+  d: Nat
+  r: Nat
+  Hyp: Equal<Bool>(Nat.lte(1, n), true)
+): Equal<Bool>(Nat.lte(n, Pair.snd<Nat, Nat>(Nat.div_mod.go(n, d, r))), false)
+  def cmp = Nat.lte(n, r)
+  let cmp_eq = refl :: cmp == cmp
+  case cmp with cmp_eq : cmp^ == cmp {
+    true:
+      Nat.mod.small.aux(n, Nat.succ(d), Nat.sub(r, n), Hyp)
+    false:
+      cmp_eq
+  }! ::
+    Equal<Bool>(
+      Nat.lte(
+        n
+        Pair.snd(
+          Nat, Nat
+          cmp(
+            () Pair(Nat,Nat)
+            Nat.div_mod.go(n,Nat.succ(d),Nat.sub(r,n))
+            Pair.new(Nat,Nat,d,r)
+          )
+        )
+      )
+      Bool.false
+    )

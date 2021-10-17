@@ -1,3 +1,0 @@
-Bytes.to_nat(b: Bytes): Nat
-  Nat.hex.decode(String.reverse(b))
-  

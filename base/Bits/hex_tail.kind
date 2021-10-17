@@ -1,0 +1,65 @@
+Bits.hex_tail.encode(x: Bits): String
+  String.reverse(Bits.hex_tail.encode.go(x, ""))
+
+Bits.hex_tail.encode.go(x: Bits, str: String): String
+  case x {
+    e: str
+    o: case x.pred as x {
+      e: Bits.hex_tail.encode.go(x.pred, "0" | str)
+      o: case x.pred as x {
+        e: Bits.hex_tail.encode.go(x.pred, "0" | str)
+        o: case x.pred as x {
+          e: Bits.hex_tail.encode.go(x.pred, "0" | str)
+          o: Bits.hex_tail.encode.go(x.pred, "0" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "8" | str)
+        }
+        i: case x.pred as x {
+          e: "4" | str
+          o: Bits.hex_tail.encode.go(x.pred, "4" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "c" | str)
+        }
+      }
+      i: case x.pred as x {
+        e: "2" | str
+        o: case x.pred as x {
+          e: "2" | str
+          o: Bits.hex_tail.encode.go(x.pred, "2" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "a" | str)
+        }
+        i: case x.pred as x {
+          e: "6" | str
+          o: Bits.hex_tail.encode.go(x.pred, "6" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "e" | str)
+        }
+      }
+    }
+    i: case x.pred as x {
+      e: "1" | str
+      o: case x.pred as x {
+        e: "1" | str
+        o: case x.pred as x {
+          e: "1" | str
+          o: Bits.hex_tail.encode.go(x.pred, "1" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "9" | str)
+        }
+        i: case x.pred as x {
+          e: "5" |str 
+          o: Bits.hex_tail.encode.go(x.pred, "5" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "d" | str)
+        }
+      }
+      i: case x.pred as x {
+        e: "3" | str
+        o: case x.pred as x {
+          e: "3" | str
+          o: Bits.hex_tail.encode.go(x.pred, "3" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "b" | str)
+        }
+        i: case x.pred as x {
+          e: "7" | str
+          o: Bits.hex_tail.encode.go(x.pred, "7" | str)
+          i: Bits.hex_tail.encode.go(x.pred, "f" | str)
+        }
+      }
+    }
+  }

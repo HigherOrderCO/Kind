@@ -1,9 +1,22 @@
-Nat.add.cancel_left(a: Nat, b: Nat, c: Nat, e0: (a + b) == a + c): b == c
-  case a with e0 {
-    zero: e0
+Nat.add.cancel_left(a: Nat, b: Nat, c: Nat, e0: Equal<Nat>(Nat.add(a, b), Nat.add(a, c))): Equal<Nat>(b, c)
+  (case a {
+    zero:
+      (e0)
+        e0
     succ: 
-      let e2 = e0 :: rewrite x in x == _ with Nat.add.succ_left(a.pred, b) 
-      let e3 = e2 :: rewrite x in _ == x with Nat.add.succ_left(a.pred, c)
-      let e4 = Nat.succ_inj!!(e3)
-      Nat.add.cancel_left!!!(e4)
-  }!
+      (e0)
+        let e2 = Equal.rewrite<Nat>(
+          Nat.add(Nat.succ(a.pred),b), Nat.succ(Nat.add(a.pred,b)),
+          Nat.add.succ_left(a.pred, b),
+          (x) Equal<Nat>(x, Nat.add(Nat.succ(a.pred),c)), e0
+        )
+        let e3 = Equal.rewrite<Nat>(
+          Nat.add(Nat.succ(a.pred),c), Nat.succ(Nat.add(a.pred,c))
+          Nat.add.succ_left(a.pred, c)
+          (x) Equal<Nat>(Nat.succ(Nat.add(a.pred,b)), x), e2
+        )
+        let e4 = Nat.succ_inj(Nat.add(a.pred,b), Nat.add(a.pred,c), e3)
+        Nat.add.cancel_left(a.pred, b, c, e4)
+  }: (e0: Equal<Nat>(Nat.add(a, b), Nat.add(a, c))) -> Equal<Nat>(b, c))(
+    e0
+  )

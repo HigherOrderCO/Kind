@@ -1,8 +1,32 @@
-Nat.mul.assoc(a: Nat, b: Nat, c: Nat): (a * b * c) == (a * b) * c
-  case c{
-    zero: refl
-    succ: 
-      let begin = Equal.refl<_, (a * b) + (a * (b * c.pred))>
-      let second = begin :: rewrite x in x == (a * b) + (a * (b * c.pred)) with mirror(Nat.mul.distrib_left(a, b, b * c.pred))
-      second :: rewrite x in _ == (a * b) + x with Nat.mul.assoc(a,b,c.pred)
-  }!
+Nat.mul.assoc(
+  a: Nat, b: Nat, c: Nat
+): Equal<Nat>(Nat.mul(a, Nat.mul(b, c)), Nat.mul(Nat.mul(a, b), c))
+  case a {
+    zero:
+      Equal.refl<Nat>(0)
+    succ:
+      let ind = Nat.mul.assoc(a.pred, b, c)
+      let lemma = Equal.apply<Nat, Nat>(
+        Nat.mul(a.pred,Nat.mul(b,c)), Nat.mul(Nat.mul(a.pred,b),c), Nat.add(Nat.mul(b, c))
+        ind
+      )
+      let distrib = Equal.mirror<Nat>(
+        Nat.mul(Nat.add(b,Nat.mul(a.pred,b)),c), Nat.add(Nat.mul(b,c),Nat.mul(Nat.mul(a.pred,b),c))
+        Nat.mul.distrib_right(b, Nat.mul(a.pred, b), c)
+      )
+      let qed = Equal.rewrite<Nat>(
+        Nat.add(Nat.mul(b,c),Nat.mul(Nat.mul(a.pred,b),c))
+        Nat.mul(Nat.add(b,Nat.mul(a.pred,b)),c)
+        distrib,
+        (x) Equal<Nat>(Nat.add(Nat.mul(b,c),Nat.mul(a.pred,Nat.mul(b,c))), x)
+        lemma
+      )
+      qed
+  }: Equal<Nat>(Nat.mul(a, Nat.mul(b, c)), Nat.mul(Nat.mul(a, b), c))
+
+// induction on a
+// - ind:             a.pred * b * c  ==            (a.pred * b) * c  ok
+//         (b * c) + (a.pred * b * c) == (b * c) + ((a.pred * b) * c) ok
+//         (b * c) + (a.pred * b * c) == (b + a.pred * b) * c
+//         succ(a.pred) * b * c == (succ(a.pred) * b) * c
+// - goal: succ(a.pred) * b * c == (succ(a.pred) * b) * c

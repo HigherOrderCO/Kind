@@ -1,4 +1,0 @@
-// A Bytes 
-// valid byte range (i.e. between 0 and 255 inclusive)
-Bytes: Type
-  String

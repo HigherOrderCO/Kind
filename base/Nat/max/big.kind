@@ -1,0 +1,26 @@
+Nat.max.big(
+  a: Nat
+  b: Nat
+): And<Equal<Bool>(Nat.lte(a, Nat.max(a, b)), true), Equal<Bool>(Nat.lte(b, Nat.max(a,b)), true)>
+  def cmp_ab = Nat.lte(a, b)
+  let lemma_ab = Equal.refl!(cmp_ab)
+  (case cmp_ab {
+    true:
+      (lemma_ab)
+        Pair.new!!(lemma_ab, Nat.Order.refl(b))
+    false:
+      (lemma_ab)
+        let lemma_ba = Nat.lte.comm.false!!(lemma_ab)
+        let lemma_ba = Nat.lte.succ_left!!(lemma_ba)
+        Pair.new!!(Nat.Order.refl(a), lemma_ba)
+  }: (lemma_ab: Equal<Bool>(Nat.lte(a, b), cmp_ab)) -> And<
+    Equal<Bool>(Nat.lte(a, case cmp_ab { true: b, false: a }), true),
+    Equal<Bool>(Nat.lte(b, case cmp_ab { true: b, false: a }), true)>)(
+    lemma_ab
+  )
+
+Nat.max.big.left(a: Nat, b: Nat): Equal<Bool>(Nat.lte(a, Nat.max(a, b)), true)
+  Pair.fst!!(Nat.max.big(a, b))
+
+Nat.max.big.right(a: Nat, b: Nat): Equal<Bool>(Nat.lte(b, Nat.max(a,b)), true)
+  Pair.snd!!(Nat.max.big(a, b))

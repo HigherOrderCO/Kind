@@ -1,0 +1,49 @@
+//Equal : @(A:*) @(a:A) @(b:A) * =
+//  #A #a #b
+//  %Equal.Self(
+//    P:@(b:A) @(:(((Equal A) a) b)) *)
+//  @(refl:((P a) ((Equal.refl A) a)))
+//  ((P b) Equal.Self);
+//
+//Equal.refl : %(A:*) %(a:A) (((Equal A) a) a) =
+//  #A #a #P #refl
+//  refl;
+
+Equal(A: Type, a: A, b: A): Type
+  Equal.Self<
+    P: (b: A) -> (Equal(A, a, b)) -> Type
+  > ->
+  (refl:
+    P(a, Equal.refl(A, a))) ->
+  P(b, Equal.Self)
+
+Equal.refl(A: Type, a: A): Equal(A, a, a)
+  (P, r) r
+//
+//type Equal <A: Type> <a: A> ~ (b: A) {
+//  refl ~ (b = a)
+//}
+
+Equal.rewrite<A: Type, a: A, b: A>(e: Equal<A,a,b>)<P: A -> Type>(x: P(a)): P(b)
+  case e {
+    refl: x
+  }: P(e.b)
+
+Equal.mirror<A: Type, a: A, b: A>(e: Equal<A, a, b>): Equal<A, b, a>
+  case e {
+    refl: Equal.refl<A, a>
+  } : Equal<A, e.b, a>
+
+Equal.apply<
+  A: Type,
+  B: Type,
+  a: A,
+  b: A,
+  f: A -> B
+>(e: Equal<A,a,b>): Equal<B, f(a), f(b)>
+  case e {
+    refl: Equal.refl<B, f(a)>
+  }: Equal<B, f(a), f(e.b)>
+
+Empty.absurd<P: Type>(x: Empty): P
+  case x {}

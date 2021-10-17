@@ -1,2 +1,0 @@
-Bytes.slice(i: Nat, j: Nat, bs: Bytes): Bytes
-  "0x" | String.slice((i*2)+2, ((j*2)+2), bs)  

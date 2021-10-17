@@ -1,5 +1,7 @@
-Nat.div_mod.go(n: Nat, m: Nat, d: Nat): Pair<Nat, Nat>
-  case Nat.sub_rem(n, m) as p {
-    left: Nat.div_mod.go(p.value, m, Nat.succ(d)),
-    right: Pair.new!!(d, n),
+Nat.div_mod.go(n: Nat, d: Nat, r: Nat): Pair<Nat, Nat>
+  case Nat.lte(n, r) {
+    false:
+      Pair.new!!(d, r)
+    true:
+      Nat.div_mod.go(n, Nat.succ(d), Nat.sub(r, n))
   }

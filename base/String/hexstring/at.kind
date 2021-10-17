@@ -1,5 +1,5 @@
 // Return 2 characters from "bytes", if available
-Bytes.at(bytes: String): Maybe(String)
+String.hexstring.at(bytes: String): Maybe(String)
   case bytes {
     nil: Maybe.none!
     cons: 

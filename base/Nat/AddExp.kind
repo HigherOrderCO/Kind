@@ -1,0 +1,155 @@
+type Nat.AddExp {
+  const(value: Nat)
+  var(idx: Nat)
+  add(left: Nat.AddExp, right: Nat.AddExp)
+}
+
+Nat.AddExp.from_nat: Nat -> Nat.AddExp
+  Nat.AddExp.const
+
+Nat.AddExp.dimension(
+  exp: Nat.AddExp
+): Nat
+  case exp {
+    const:
+      0
+    add:
+      let left_dim = Nat.AddExp.dimension(exp.left)
+      let right_dim = Nat.AddExp.dimension(exp.right)
+      Nat.max(left_dim, right_dim)
+    var:
+      Nat.succ(exp.idx)
+  }
+
+Nat.AddExp.constant(exp: Nat.AddExp): Type
+  case exp {
+    const:
+      Unit
+    var:
+      Empty
+    add:
+      And<Nat.AddExp.constant(exp.left), Nat.AddExp.constant(exp.right)>
+  }
+
+Nat.AddExp.dimension.zero(
+  exp: Nat.AddExp
+  Hyp: Equal<Nat>(Nat.AddExp.dimension(exp), 0)
+): Nat.AddExp.constant(exp)
+  (case exp {
+    const:
+      (Hyp)
+        unit
+    var:
+      (Hyp)
+        let contra = Nat.succ_neq_zero!(Hyp)
+        Empty.absurd!(contra)
+    add:
+      (Hyp)
+        let {left_small, right_small} = Nat.max.big(Nat.AddExp.dimension(exp.left), Nat.AddExp.dimension(exp.right))
+        def max = Nat.max(Nat.AddExp.dimension(exp.left), Nat.AddExp.dimension(exp.right))
+        let left_zero = Nat.Order.chain.aux!(Equal.rewrite<Nat>(
+          max, 0, Hyp,
+          (x) Equal<Bool>(Nat.lte(Nat.AddExp.dimension(exp.left), x), true),
+          left_small
+        ))
+        let right_zero = Nat.Order.chain.aux!(Equal.rewrite<Nat>(
+          max, 0, Hyp
+          (x) Equal<Bool>(Nat.lte(Nat.AddExp.dimension(exp.right), x), true),
+          right_small
+        ))
+        let left = Nat.AddExp.dimension.zero(exp.left, left_zero)
+        let right = Nat.AddExp.dimension.zero(exp.right, right_zero)
+        Pair.new!!(left, right)
+  }: (Hyp: Equal<Nat>(Nat.AddExp.dimension(exp), 0)) -> Nat.AddExp.constant(exp))(
+    Hyp
+  )
+
+Nat.AddExp.compute(
+  exp: Nat.AddExp
+  Hyp: Nat.AddExp.constant(exp)
+): Nat
+  case exp with Hyp {
+    const:
+      exp.value
+    var:
+      Empty.absurd!(Hyp)
+    add:
+      open Hyp
+      Nat.add(Nat.AddExp.compute(exp.left, Hyp.fst), Nat.AddExp.compute(exp.right, Hyp.snd))
+  }!
+
+Nat.AddExp.substitution(
+  exp: Nat.AddExp
+): Variadic(Nat.AddExp.dimension(exp), Nat, Nat)
+  def dim = Nat.AddExp.dimension(exp)
+  def Hyp = Nat.Order.refl(dim)
+  Nat.AddExp.substitution.aux0(dim, exp, Hyp)
+
+Nat.AddExp.substitution.aux0(
+  n: Nat
+  exp: Nat.AddExp
+  Hyp: Equal<Bool>(Nat.lte(Nat.AddExp.dimension(exp), n), true)
+): Variadic(n, Nat, Nat)
+  case n with Hyp {
+    zero:
+      def Hyp = Nat.Order.chain.aux!(Hyp)
+      def Hyp = Nat.AddExp.dimension.zero!(Hyp)
+      Nat.AddExp.compute(exp, Hyp)
+    succ:
+      (value)
+        def new_exp = Nat.AddExp.substitution.aux1(exp, value, n.pred)
+        let Hyp = Nat.AddExp.substitution.aux2(exp, value, n.pred, Hyp)
+        Nat.AddExp.substitution.aux0(n.pred, new_exp, Hyp)
+  }!
+
+Nat.AddExp.substitution.aux1(
+  exp: Nat.AddExp
+  value: Nat
+  idx: Nat
+): Nat.AddExp
+  case exp {
+    const:
+      exp
+    var:
+      case Nat.lte(idx, exp.idx) {
+        true:
+          Nat.AddExp.const(value)
+        false:
+          exp
+      }
+    add:
+      Nat.AddExp.add(
+        Nat.AddExp.substitution.aux1(exp.left, value, idx)
+        Nat.AddExp.substitution.aux1(exp.right, value, idx)
+      )
+  }
+
+Nat.AddExp.substitution.aux2(
+  exp: Nat.AddExp
+  value: Nat
+  idx: Nat
+  Hyp: Equal<Bool>(Nat.lte(Nat.AddExp.dimension(exp), Nat.succ(idx)), true)
+): let new_exp = Nat.AddExp.substitution.aux1(exp, value, idx)
+   Equal<Bool>(Nat.lte(Nat.AddExp.dimension(new_exp), idx), true)
+  case exp with Hyp {
+    const:
+      Equal.refl<Bool>(true)
+    var:
+      def cmp = Nat.lte(idx, exp.idx)
+      let cmp_eq = refl :: cmp == cmp
+      case cmp with cmp_eq: ^cmp == cmp {
+        true:
+          Equal.refl<Bool>(true)
+        false:
+          Nat.lte.comm.false(idx, exp.idx, cmp_eq)
+      }! :: Equal<Bool>(Nat.lte(Nat.AddExp.dimension(cmp(() Nat.AddExp, Nat.AddExp.const(value), Nat.AddExp.var(exp.idx))), idx), true)
+    add:
+      let {left_bound, right_bound} = Nat.max.split.left(
+        Nat.AddExp.dimension(exp.left),
+        Nat.AddExp.dimension(exp.right),
+        Nat.succ(idx), Hyp
+      )
+      let ind_left = Nat.AddExp.substitution.aux2(exp.left, value, idx, left_bound)
+      let ind_right = Nat.AddExp.substitution.aux2(exp.right, value, idx, right_bound)
+      Nat.max.combine.left!!!(ind_left, ind_right)
+  }!

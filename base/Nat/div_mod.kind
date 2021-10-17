@@ -1,2 +1,2 @@
 Nat.div_mod(n: Nat, m: Nat): Pair<Nat, Nat>
-  Nat.div_mod.go(n, m, Nat.zero)
+  Nat.div_mod.go(m, 0, n)

@@ -1,5 +1,7 @@
 Nat.mul(n: Nat, m: Nat): Nat
-  case m {
-    zero: Nat.zero,
-    succ: Nat.add(n, Nat.mul(n, m.pred)),
+  case n {
+    zero:
+      0
+    succ:
+      Nat.add(m, Nat.mul(n.pred, m))
   }
