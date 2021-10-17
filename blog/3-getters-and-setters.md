@@ -80,7 +80,7 @@ obj2: Object
   obj@data{"a"}[0] <- 42.0
 ```
 
-Notice how `x@field` accesses a field, `x{key}` accesses a Map entry, and
+`x@field` accesses a field, `x{key}` accesses a Map entry, and
 `x[index]` accesses a List element. These accessors can be chained to access
 deep fields:
 
@@ -95,9 +95,9 @@ number: Maybe<F64>
   obj@data{"a"}[0]
 ```
 
-Notice a `Maybe` shows up only when needed (such as when getting an element from
-a list or map). If you and the access with a `<-`, instead of getting the field,
-you'll set it. You can also use `<=` to apply a function instead of setting:
+As expected, a `Maybe` shows up only when needed (such as when getting an element from
+a list or map). If you end the access with a `<-`, you'll overwrite the field, immutably
+You can also use `<=` to apply a function instead:
 
 ```javascript
 obj3: Object
