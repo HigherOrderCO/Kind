@@ -1,6 +1,0 @@
-Kind.Parser.field_get(term: Kind.Term): Parser(Kind.Term)
-  Parser {
-    Kind.Parser.text("@")
-    get fkey = Kind.Parser.name1
-    return Kind.Term.get(term, fkey)
-  }

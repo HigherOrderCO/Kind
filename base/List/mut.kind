@@ -1,0 +1,8 @@
+List.mut<A: Type>(index: Nat, func: A -> A, list: List<A>): List<A>
+  case list {
+    nil: []
+    cons: case index {
+      zero: func(list.head) & list.tail
+      succ: list.head & List.mut<A>(index.pred, func, list.tail)
+    }
+  }

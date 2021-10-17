@@ -1,8 +1,0 @@
-Kind.Parser.field_set(term: Kind.Term): Parser(Kind.Term)
-  Parser {
-    Kind.Parser.text("@")
-    get fkey = Kind.Parser.name1
-    Kind.Parser.text("<-")
-    get fval = Kind.Parser.term
-    return Kind.Term.set(term, fkey, fval)
-  }

@@ -98,6 +98,12 @@ type Kind.Term {
     fkey: String,
     fval: Kind.Term,
   ),
+  // A field-mut expression
+  mut(
+    expr: Kind.Term,
+    fkey: String,
+    ffun: Kind.Term,
+  ),
   // An operator
   ope(
     name: String,

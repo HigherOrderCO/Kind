@@ -1,3 +1,18 @@
+type Bar {
+  new(map: Map<List<List<Nat>>>)
+}
+
+type Foo {
+  new(bar: Bar)
+}
+
 Test: _
-  let b = Litereum.serialize.varlen.go(12)
-  Litereum.deserialize.varlen.go(b)
+  let a = Foo.new(Bar.new({"list": [[1,2,3],[4,5,6],[7,8,9]]}))
+  let a = a@bar@map{"list"}[0][0] <= Nat.mul(10)
+  a@bar@map{"list"}[0][0]
+
+
+  //let y = x[0][2] <- 42
+  //let y = List.mut(List(Nat),0,(x) List.mut(Nat,2,(x) 42,x),x)
+  //let y = Maybe.bind(_,_,List.get(_,0,x),(x) Maybe.some(_,x))
+  //List.show!(List.show!(Nat.show), y)
