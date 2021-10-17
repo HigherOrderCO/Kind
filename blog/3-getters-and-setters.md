@@ -1,4 +1,4 @@
-Getters and setters in Kind
+Getters and Setters in Kind
 ===========================
 
 One of the most annoying parts of pure functional programming is getting,
