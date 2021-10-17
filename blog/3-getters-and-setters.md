@@ -103,11 +103,11 @@ number: Maybe<F64>
 ```
 
 And, to set, just append a `<- new_val`. This will overwrite the focused field,
-immutably. You can also use `<=` to apply a function instead:
+immutably. You can also use `<~` to apply a function instead:
 
 ```javascript
 new_obj: Object
-  obj@data{"a"}[0] <= F64.mul(2.0)
+  obj@data{"a"}[0] <~ F64.mul(2.0)
 ```
 
 Note that, as expected, `Maybe` shows up only when needed, such as when getting
@@ -115,7 +115,7 @@ an element from a list or map. Finally, you can "mutate" an object in a JS-like
 fashion by using a `let` expression together with an immutable setter:
 
 ```
-let obj = obj@data{"a"}[0] <= F64.mul(2.0)
+let obj = obj@data{"a"}[0] <~ F64.mul(2.0)
 ```
 
 This "mutation" is actually pure: the original `obj` wasn't changed, you just
@@ -131,7 +131,7 @@ strong types, and with the flexibility to use any function, instead of just `*`,
 `+`, etc. To make it even more terse, the line above can be abbreviated as:
 
 ```
-let obj@data{"a"}[0] <= F64.mul(2.0)
+let obj@data{"a"}[0] <~ F64.mul(2.0)
 ```
 
 And that's all! This desugars to an efficient, linear
