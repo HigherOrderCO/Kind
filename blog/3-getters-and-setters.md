@@ -1,4 +1,4 @@
-Getters and setters in Kind
+Getters and Setters in Kind
 ===========================
 
 One of the most annoying parts of pure functional programming is getting,
@@ -72,17 +72,17 @@ obj2: Object
   }
 ```
 
-Since the last version, Kind features a built-in getter and setter syntax that
-makes these operations very succinct. The program above can be written as just:
+Since the last version, Kind features built-in getter and setter syntaxes that
+make these operations succinct:
 
 ```javascript
 obj2: Object
   obj@data{"a"}[0] <- 42.0
 ```
 
-Notice how `x@field` accesses a field, `x{key}` accesses a Map entry, and
-`x[index]` accesses a List element. These accessors can be chained to access
-deep fields:
+This small one-liner is equivalent to the huge case tree we had to write before.
+`x@field` accesses a field, `x{key}` accesses a Map entry, and `x[index]`
+accesses a List element. These accessors can be chained to get deep fields:
 
 ```javascript
 data: Map<List<F64>>
@@ -95,26 +95,26 @@ number: Maybe<F64>
   obj@data{"a"}[0]
 ```
 
-Notice a `Maybe` shows up only when needed (such as when getting an element from
-a list or map). If you and the access with a `<-`, instead of getting the field,
-you'll set it. You can also use `<=` to apply a function instead of setting:
+As expected, `Maybe` shows up only when needed, such as when getting an element from
+a list or map. To set, just end the syntax with a `<-`. This will overwrite the nested
+field, immutably. You can also use `<=` to apply a function instead:
 
 ```javascript
 obj3: Object
   obj@data{"a"}[0] <= Nat.mul(2)
 ```
 
-This desugars to an efficient, linear core program that doesn't involve heavy
-lenses and avoids re-getting nested fields. 
+And that's all. This just works as expected, and compiles to efficient, linear core
+programs that don't involve heavy lenses and avoid re-getting nested fields. 
 
-So, in short, dealing with nested fields in JavaScript looks nice but is
-terrible; in Haskell, it looks terrible and is; in Kind, is the a joyful
-experience that makes you proud about your career choice.
+In short, dealing with nested fields in JavaScript looks nice but is
+terrible; in Haskell, it looks terrible and is; in Kind, it is the joyful
+experience that makes you proud of your career choice.
 
-I'm making this post because this is such a huge, needed quality of life
+I'm making this post because this is such a huge, needed quality-of-life
 improvement that I really think every pure language should come with something
-similar out of the box, and I don't understand why this is so hard. You
-shouldn't need huge third party libs to do something as simple.
+similar out-of-the-box, and I don't understand why they make it so hard. You
+shouldn't need huge third party libs to do something that fundamental.
 
 Finally, note this is *not* a built-in lens implementation. Lenses are
 first-class objects. Instead, it is just a baseline syntax for immutably
