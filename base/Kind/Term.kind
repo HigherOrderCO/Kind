@@ -98,11 +98,21 @@ type Kind.Term {
     fkey: String,
     fval: Kind.Term,
   ),
+  // A field-mut expression
+  mut(
+    expr: Kind.Term,
+    fkey: String,
+    ffun: Kind.Term,
+  ),
   // An operator
   ope(
     name: String,
     arg0: Kind.Term,
     arg1: Kind.Term,
+  )
+  // An implicit type or term
+  imp(
+    expr: Kind.Term,
   )
   // An origin
   ori(

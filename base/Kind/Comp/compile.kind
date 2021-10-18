@@ -39,6 +39,8 @@ Kind.Comp.compile(
           let term_cmp = Kind.Comp.let(name_uid, expr_cmp, body_cmp)
           let term_typ = body_typ
           {term_cmp, term_typ}
+        imp:
+          Kind.Comp.compile(term.expr, type, defs, size)
         ori:
           Kind.Comp.compile(term.expr, type, defs, size)
       } default 
@@ -92,6 +94,8 @@ Kind.Comp.compile(
         {Kind.Comp.chr(term.chrx), Kind.Term.ref("Char")}
       str:
         {Kind.Comp.str(term.strx), Kind.Term.ref("String")}
+      imp:
+        Kind.Comp.compile(term.expr, none, defs, size)
       ori:
         Kind.Comp.compile(term.expr, none, defs, size)
     } default {Kind.Comp.nil, Kind.Term.typ}

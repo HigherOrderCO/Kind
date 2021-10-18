@@ -46,11 +46,17 @@ Kind.Term.patch_at(path: Bits, term: Kind.Term, fn: Kind.Term -> Kind.Term): Kin
       o: Kind.Term.set(Kind.Term.patch_at(path.pred,term.expr,fn), term.fkey, term.fval)
       i: Kind.Term.set(term.expr, term.fkey, Kind.Term.patch_at(path.pred,term.fval,fn))
     }
+    mut: case path {
+      e: fn(term)
+      o: Kind.Term.mut(Kind.Term.patch_at(path.pred,term.expr,fn), term.fkey, term.ffun)
+      i: Kind.Term.mut(term.expr, term.fkey, Kind.Term.patch_at(path.pred,term.ffun,fn))
+    }
     ope: case path {
       e: fn(term)
       o: Kind.Term.ope(term.name, Kind.Term.patch_at(path.pred,term.arg0,fn), term.arg1)
       i: Kind.Term.ope(term.name, term.arg0, Kind.Term.patch_at(path.pred,term.arg1,fn))
     }
+    imp: Kind.Term.imp(Kind.Term.patch_at(path, term.expr, fn))
     ori: Kind.Term.ori(term.orig, Kind.Term.patch_at(path, term.expr, fn))
     _: case path {
       e: fn(term)

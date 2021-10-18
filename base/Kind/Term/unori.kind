@@ -1,0 +1,4 @@
+Kind.Term.unori(term: Kind.Term): Kind.Term
+  case term {
+    ori: Kind.Term.unori(term.expr)
+  } default term

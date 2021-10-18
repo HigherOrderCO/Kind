@@ -45,6 +45,8 @@ Kind.Meta.IsCore(term: Kind.Term): Type
       Unit
     str:
       Unit
+    imp:
+      Kind.Meta.IsCore(term.expr)
     ori:
       Kind.Meta.IsCore(term.expr)
   } default Empty

@@ -13,7 +13,14 @@ Kind.Parser.application.erased(func: Kind.Term): Parser(Kind.Term)
   }
 
 Kind.Parser.application.hole(term: Kind.Term): Parser(Kind.Term)
-  Parser {
-    Kind.Parser.text_now("!")
-    return Kind.Term.app(term, Kind.Term.hol(Bits.e))
-  }
+  Parser.choice!([
+    Parser {
+      Kind.Parser.text_now("()")
+      return Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    }
+    Parser {
+      Kind.Parser.text_now("!")
+      return Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    }
+  ])
+

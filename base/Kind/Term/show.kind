@@ -111,10 +111,17 @@ Kind.Term.show.go(term: Kind.Term, path: Maybe<Bits -> Bits>): String
         let expr = Kind.Term.show.go(term.expr, Kind.Path.Maybe.Builder.o(path));
         let fval = Kind.Term.show.go(term.fval, Kind.Path.Maybe.Builder.i(path));
         String.flatten([expr,"@",term.fkey," <- ",fval])
+      mut:
+        let expr = Kind.Term.show.go(term.expr, Kind.Path.Maybe.Builder.o(path));
+        let ffun = Kind.Term.show.go(term.ffun, Kind.Path.Maybe.Builder.i(path));
+        String.flatten([expr,"@",term.fkey," <= ",ffun])
       ope:
         let arg0 = Kind.Term.show.go(term.arg0, Kind.Path.Maybe.Builder.o(path));
         let arg1 = Kind.Term.show.go(term.arg1, Kind.Path.Maybe.Builder.i(path));
         String.flatten(["(",arg0," ",term.name," ",arg1,")"])
+      imp:
+        let expr = Kind.Term.show.go(term.expr, path)
+        String.flatten(["$",expr])
       ori:
         Kind.Term.show.go(term.expr, path),
       num:

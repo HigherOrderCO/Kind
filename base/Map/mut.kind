@@ -1,0 +1,5 @@
+Map.mut<A: Type>(key: String, func: A -> A, map: Map(A)): Map(A)
+  case Map.get<A>(key, map) as got {
+    none: map
+    some: Map.set<A>(key, func(got.value), map)
+  }

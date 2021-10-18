@@ -1,0 +1,137 @@
+type Kind.Parser.lens.dir {
+  record(key: Kind.Name)
+  list(key: Kind.Term)
+  map(key: Kind.Term)
+}
+
+Kind.Parser.lens.path: Parser<Kind.Parser.lens.dir>
+  Parser.choice!([
+    Parser {
+      Kind.Parser.text("@")
+      get key = Kind.Parser.name1
+      return Kind.Parser.lens.dir.record(key)
+    }
+    Parser {
+      Kind.Parser.text_now("[")
+      get key = Kind.Parser.term
+      Kind.Parser.text("]")
+      return Kind.Parser.lens.dir.list(key)
+    }
+    Parser {
+      Kind.Parser.text_now("{")
+      get key = Kind.Parser.term
+      Kind.Parser.text("}")
+      return Kind.Parser.lens.dir.map(key)
+    }
+  ])
+
+Kind.Parser.lens(term: Kind.Term): Parser<Kind.Term>
+  Parser {
+    get dirs = Parser.many1!(Kind.Parser.lens.path)
+    Parser.choice!([
+      Parser {
+        Kind.Parser.text("<-")
+        get xval = Kind.Parser.term
+        return Kind.Parser.lens.mutter(term, () xval, dirs)
+      }
+      Parser {
+        Kind.Parser.text("<~")
+        get xfun = Kind.Parser.term
+        return Kind.Parser.lens.mutter(term, (x) Kind.Term.app(xfun, x), dirs)
+      }
+      Parser {
+        return Kind.Parser.lens.getter(term, dirs)
+      }
+    ])
+  }
+
+Kind.Parser.lens.let(body: Unit -> Parser(Kind.Term)): Parser<Kind.Term>
+  Parser {
+    Kind.Parser.text("let ")
+    get name = Kind.Parser.name1
+    get dirs = Parser.many1!(Kind.Parser.lens.path)
+    get symb = Parser.option([Kind.Parser.text("<-"), Kind.Parser.text("<~")])
+    get expr = Kind.Parser.term
+    Parser.maybe!(Kind.Parser.text(";"))
+    get body = body(unit)
+    let expr = Kind.Parser.lens.mutter(Kind.Term.ref(name), case symb { zero: () expr, succ: (x) Kind.Term.app(expr,x) }, dirs)
+    return Kind.Term.let(name, expr, (x) body)
+  }
+
+Kind.Parser.lens.mutter(expr: Kind.Term, func: Kind.Term -> Kind.Term, dirs: List<Kind.Parser.lens.dir>): Kind.Term
+  case dirs {
+    nil: func(expr)
+    cons: case dirs.head {
+      record:
+        //foo@x <- 7
+        Kind.Term.mut(expr, dirs.head.key, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail)))
+      list:
+        let term = Kind.Term.ref("List.mut")
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, dirs.head.key)
+        let term = Kind.Term.app(term, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail)))
+        let term = Kind.Term.app(term, expr)
+        term
+      map:
+        let term = Kind.Term.ref("Map.mut")
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, dirs.head.key)
+        let term = Kind.Term.app(term, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail)))
+        let term = Kind.Term.app(term, expr)
+        term
+    }
+  }
+
+Kind.Parser.lens.getter(expr: Kind.Term, dirs: List<Kind.Parser.lens.dir>): Kind.Term
+  case dirs {
+    nil:
+      let term = Kind.Term.ref("Maybe.some")
+      let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+      let term = Kind.Term.app(term, expr)
+      term
+    cons: case dirs.head {
+      record:
+        let term = Kind.Term.get(expr, dirs.head.key)
+        case dirs.tail {
+          nil:
+            term
+          cons:
+            Kind.Parser.lens.getter(term, dirs.tail)
+        }
+      list:
+        let term = Kind.Term.ref("List.get")
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, dirs.head.key)
+        let term = Kind.Term.app(term, expr)
+        case dirs.tail {
+          nil:
+            term
+          cons:
+            let bind = Kind.Term.ref("Maybe.bind")
+            let bind = Kind.Term.app(bind, Kind.Term.hol(Bits.e))
+            let bind = Kind.Term.app(bind, Kind.Term.hol(Bits.e))
+            let bind = Kind.Term.app(bind, term)
+            let bind = Kind.Term.app(bind, Kind.Term.lam("x", (x) Kind.Parser.lens.getter(x, dirs.tail)))
+            bind
+        }
+      map:
+        let term = Kind.Term.ref("Map.get")
+        let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+        let term = Kind.Term.app(term, dirs.head.key)
+        let term = Kind.Term.app(term, expr)
+        case dirs.tail {
+          nil:
+            term
+          cons:
+            let bind = Kind.Term.ref("Maybe.bind")
+            let bind = Kind.Term.app(bind, Kind.Term.hol(Bits.e))
+            let bind = Kind.Term.app(bind, Kind.Term.hol(Bits.e))
+            let bind = Kind.Term.app(bind, term)
+            let bind = Kind.Term.app(bind, Kind.Term.lam("x", (x) Kind.Parser.lens.getter(x, dirs.tail)))
+            bind
+        }
+    }
+  }
+  
+      
+  

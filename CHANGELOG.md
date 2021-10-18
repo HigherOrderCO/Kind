@@ -1,11 +1,65 @@
+## Kind 1.0.104
+
+- Implicit arguments are here!
+
+    ```
+    id<A: $Type>(x: A): A
+      x
+
+    explicit: Nat
+      id<$Nat>(7)
+
+    implicit: Nat
+      id(7)
+    ```
+
+- Nullary function call can be used instead of `!`
+
+    ```
+    let a = Map.new!
+    let b = Map.new()
+    ```
+
+    This is helpful, because implicit arguments only trigger on calls.
+
+## Kind 1.0.101
+
+- Mutter syntax and improvements on the getter/setter syntax.
+
+  Now you can get/set deeply nested fields.  For example, `list[0][0]` works and
+  returns a `Maybe`, and `list[0][0] <- 7` works as expected. Moreover, the `<=`
+  syntax can now be used to apply a function to the focused field. Example:
+
+  ```
+  type Bar {
+    new(map: Map<List<List<Nat>>>)
+  }
+
+  type Foo {
+    new(bar: Bar)
+  }
+
+  Test: Maybe<Nat>
+    // Creates a value
+    let a = Foo.new(Bar.new({"list": [[1,2,3],[4,5,6],[7,8,9]]}))
+
+    // Applies a function to a nested element
+    let a = a@bar@map{"list"}[0][0] <= Nat.mul(10)
+
+    // Gets a nested element
+    a@bar@map{"list"}[0][0]
+  ```
+
 ### Kind 1.0.91
 
 - Forall now demands `->`
+
 - Now you can assign types in lambda parameters as in
-```
-Test: _
-  (x: Nat, y) x + y
-```
+
+    ```
+    Test: _
+      (x: Nat, y) x + y
+    ```
 
 ### Kind 1.0.85
 

@@ -58,6 +58,8 @@ Kind.Term.serialize.go(term: Kind.Term, depth: Nat, init: Nat, diff: Bits -> Bit
       Kind.Term.serialize.go(Kind.Term.unroll_chr(term.chrx), depth, init, diff, x),
     str:
       Kind.Term.serialize.go(Kind.Term.unroll_str(term.strx), depth, init, diff, x),
+    imp:
+      Kind.Term.serialize.go(term.expr, depth, init, diff, x),
     ori:
       Kind.Term.serialize.go(term.expr, depth, init, diff, x),
   } default diff(x)

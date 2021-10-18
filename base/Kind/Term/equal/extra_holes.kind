@@ -11,6 +11,7 @@ Kind.Term.equal.extra_holes.funari(
 ): Maybe<Pair<String, Nat>>
   case term {
     app: Kind.Term.equal.extra_holes.funari(term.func, Nat.succ(arity))
+    imp: Kind.Term.equal.extra_holes.funari(term.expr, arity)
     ori: Kind.Term.equal.extra_holes.funari(term.expr, arity)
     ref: some({term.name, arity})
     var: some({term.name, arity}) // is this right?
@@ -28,13 +29,16 @@ Kind.Term.equal.extra_holes.filler(
         Kind.Term.equal.extra_holes.filler(a.func, b.func);
         Kind.Term.equal.extra_holes.filler(a.argm, b.argm);
       },
+      imp: Kind.Term.equal.extra_holes.filler(a, b.expr),
       ori: Kind.Term.equal.extra_holes.filler(a, b.expr),
       hol: do Kind.Check { Kind.Term.equal.hole(b.path, a); return Unit.new; }, 
       _: do Kind.Check { return Unit.new; },
     },
+    imp: Kind.Term.equal.extra_holes.filler(a.expr, b),
     ori: Kind.Term.equal.extra_holes.filler(a.expr, b),
     hol: do Kind.Check { Kind.Term.equal.hole(a.path, b); return Unit.new; },
     _: case b {
+      imp: Kind.Term.equal.extra_holes.filler(a, b.expr),
       ori: Kind.Term.equal.extra_holes.filler(a, b.expr),
       hol: do Kind.Check { Kind.Term.equal.hole(b.path, a); return Unit.new; }, 
       _: do Kind.Check { return Unit.new; },

@@ -59,6 +59,8 @@ Kind.Core.show.go(term: Kind.Term, indx: Nat, vars: List<Kind.Name>): String
       String.flatten(["'", Kind.Code.escape.char(term.chrx), "'"])
     str:
       String.flatten(["\"", Kind.Code.escape(term.strx), "\""])
+    imp:
+      Kind.Core.show.go(term.expr, indx, vars)
     ori:
       Kind.Core.show.go(term.expr, indx, vars)
   } default "*"

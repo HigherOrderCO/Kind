@@ -1,0 +1,6 @@
+Kind.Parser.implicit: Parser<Kind.Term>
+  Kind.Parser.block("implicit", Parser {
+    Kind.Parser.text("$")
+    get expr = Kind.Parser.term
+    return Kind.Term.imp(expr)
+  })

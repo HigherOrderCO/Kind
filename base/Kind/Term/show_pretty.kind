@@ -56,8 +56,12 @@ Kind.Term.show_pretty(term: Kind.Term): String
       Kind.Term.show_pretty(term.expr)|"@"|term.fkey
     set:
       Kind.Term.show_pretty(term.expr)|"@"|term.fkey|" <- "|Kind.Term.show_pretty(term.fval)
+    mut:
+      Kind.Term.show_pretty(term.expr)|"@"|term.fkey|" <= "|Kind.Term.show_pretty(term.fval)
     ope:
       Kind.Term.show_pretty(term.arg0)|" "|term.name|" "|Kind.Term.show_pretty(term.arg1)
+    imp:
+      Kind.Term.show_pretty(term.expr)
     ori:
       Kind.Term.show_pretty(term.expr)
   }

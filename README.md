@@ -1,6 +1,6 @@
 # Kind
 
-A minimal, efficient and practical proof and programming language. Under the hoods, it is basically Haskell, except purer and with dependent types. That means it can handle mathematical theorems just like Coq, Idris, Lean and Agda. On the surface, it aims to be more practical and looks more like TypeScript. Compared to other proof assistants, Kind has:
+A minimal, efficient and practical programming language that aims to rethink functional programming from the scratch, and make it right. Under the hoods, it is basically Haskell, except without historical mistakes, and with a modern, consistent design. On the surface, it aims to be more practical, and to look more like conventional languages. Kind is statically typed, and its types are so powerful that you can prove mathematical theorems on it. Compared to proof assistants, Kind has:
 
 1. The smallest core. Check [FormCore.js](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) or [Core.kind](https://github.com/uwu-tech/Kind/blob/master/base/Kind/Core.kind). Both are `< 1000-LOC` complete implementations!
 

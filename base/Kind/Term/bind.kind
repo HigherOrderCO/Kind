@@ -88,10 +88,16 @@ Kind.Term.bind(vars: Kind.Context, path: Kind.Path.Builder, term: Kind.Term): Ki
       let expr = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.expr);
       let fval = Kind.Term.bind(vars, Kind.Path.Builder.i(path), term.fval);
       Kind.Term.set(expr, term.fkey, fval)
+    mut:
+      let expr = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.expr);
+      let ffun = Kind.Term.bind(vars, Kind.Path.Builder.i(path), term.ffun);
+      Kind.Term.mut(expr, term.fkey, ffun)
     ope:
       let arg0 = Kind.Term.bind(vars, Kind.Path.Builder.o(path), term.arg0);
       let arg1 = Kind.Term.bind(vars, Kind.Path.Builder.i(path), term.arg1);
       Kind.Term.ope(term.name, arg0, arg1)
+    imp:
+      Kind.Term.imp(Kind.Term.bind(vars, path, term.expr)),
     ori:
       Kind.Term.ori(term.orig, Kind.Term.bind(vars, path, term.expr)),
   }
