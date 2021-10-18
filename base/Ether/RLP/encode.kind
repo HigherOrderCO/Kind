@@ -1,43 +1,250 @@
-Ether.RLP.encode.bytes(tree : Ether.RLP.Tree) : List<Bits>
+Ether.RLP.pad_bytes(bits : Bits) : Bits
+  let size = Bits.length(bits)
+  Bits.trim(((8 * ((size + 7) / 8)) - size) + size, bits)
+
+Ether.RLP.pad_8bits(bits : Bits) : Bits
+  let size = Bits.length(bits)
+  Bits.trim(8, bits)
+
+Bits.size.rec(x : Bits, n : Nat) : 
+  Nat.succ(Bits.length.go(x, n)) == Bits.length.go(x, Nat.succ(n))
+    case x {
+      e : refl
+      i : Bits.size.rec(x.pred, Nat.succ(n))
+      o : Bits.size.rec(x.pred, Nat.succ(n))
+    }!
+
+Ether.RLP.add_self_absurd(x : Nat, n: Nat) : Equal(Nat, Nat.add(n, Nat.succ(x)), n) -> Empty
+  case n {
+    succ : 
+      (H)
+         let H = Nat.succ_inj!!(H)
+         let qed = Ether.RLP.add_self_absurd(x, n.pred, H)
+         qed
+    zero : (H) Nat.succ_neq_zero!(H)
+  }!
+  
+Ether.RLP.add_injective(x : Nat, y : Nat, n : Nat, H : Nat.add(Nat.succ(n), x) == Nat.add(Nat.succ(n), y)) : x == y
+  case x with H {
+    succ : case y with H {
+      succ : 
+        let com_H = Nat.add.comm(Nat.succ(n), Nat.succ(x.pred))
+        let com_H2 = Nat.add.comm(Nat.succ(n), Nat.succ(y.pred))
+        let H_rewrite = H :: rewrite Y in Y == _ with com_H
+        let H_rewrite = H_rewrite :: rewrite Y in _ == Y with com_H2
+        let H_rewrite_inj = Nat.succ_inj!!(H_rewrite)
+        let H_rewrite_inj = H_rewrite_inj :: rewrite Y in Y == _ with Nat.add.comm(x.pred, Nat.succ(n))
+        let H_rewrite_inj = H_rewrite_inj :: rewrite Y in _ == Y with Nat.add.comm(y.pred, Nat.succ(n))
+        let H2 = Ether.RLP.add_injective(x.pred, y.pred, n, H_rewrite_inj)
+        Equal.apply!!!!(Nat.succ, H2)
+      zero : 
+        let rewrite_0_com = 
+          Nat.add.comm(Nat.succ(n), 0)
+        let H = H :: rewrite Y in _ == Y with rewrite_0_com
+        let absurd = Ether.RLP.add_self_absurd!!(H)
+        Empty.absurd!(absurd)
+    }!
+    zero : case y with H {
+      succ : 
+        let H = mirror(H)
+        let rewrite_0_com = Nat.add.comm(Nat.succ(n), 0)
+        let H = H :: rewrite Y in _ == Y with rewrite_0_com
+        let absurd = Ether.RLP.add_self_absurd!!(H)
+        Empty.absurd!(absurd)
+      zero : refl
+    }!
+  }!
+
+Ether.RLP.mul_injective(x : Nat, y : Nat, n : Nat, H : Nat.mul(Nat.succ(n), x) == Nat.mul(Nat.succ(n), y)) : x == y
+  case x with H {
+    succ : case y with H {
+      succ : 
+        
+        let H = H :: rewrite Y in Y == _ with Nat.mul.succ_right(Nat.succ(n), x.pred)
+        let H = H :: rewrite Y in _ == Y with Nat.mul.succ_right(Nat.succ(n), y.pred)
+        let inj_add = Ether.RLP.add_injective(Nat.mul(Nat.succ(n), x.pred), Nat.mul(Nat.succ(n), y.pred), n, H)
+        let H = Ether.RLP.mul_injective(x.pred, y.pred, n, inj_add)
+        Equal.apply!!!!(Nat.succ, H)
+      zero : 
+        let H = H :: rewrite Y in _ == Y with Nat.mul.comm(Nat.succ(n), 0)
+        let H4 = Nat.succ_neq_zero!(H)
+        Empty.absurd!(H4)
+     }!
+    zero : case y with H {
+      succ : 
+       let H = H :: rewrite Y in Y == _ with Nat.mul.comm(Nat.succ(n), 0)
+       let H4 = Nat.succ_neq_zero!(mirror(H))
+       Empty.absurd!(H4)
+      zero : 
+        refl
+    }!
+  }!
+
+Ether.RLP.succ_pad_nat(x : Bits) : 
+  Bits.to_nat(Bits.trim(Bits.length(x), x)) == Bits.to_nat(x)
+  case x {
+    e : refl 
+    o : 
+      let remove_tail_rec = Bits.size.rec(x.pred, 0)
+      let refl_cont =
+        refl :: 
+          Bits.length.go(x.pred, 1) == Bits.length(Bits.o(x.pred))
+      case refl_cont {
+        refl : 
+          case remove_tail_rec {
+            refl : 
+              let rec = Ether.RLP.succ_pad_nat(x.pred)
+              let rec = Equal.apply!!!!(Nat.mul(2), rec)
+              rec
+          }!
+        }!
+    i : 
+      let remove_tail_rec = Bits.size.rec(x.pred, 0)
+      let refl_cont =
+        refl :: 
+          Bits.length.go(x.pred, 1) == Bits.length(Bits.i(x.pred))
+      case refl_cont {
+        refl : 
+          case remove_tail_rec {
+            refl : 
+              let rec = Ether.RLP.succ_pad_nat(x.pred)
+              let rec = Equal.apply!!!!(Nat.mul(2), rec)
+              Equal.apply(Nat, Nat, Nat.mul(2,Bits.to_nat(Bits.trim(Bits.length.go(x.pred,0),x.pred))),
+                Nat.mul(2,Bits.to_nat(x.pred)), Nat.succ, rec)
+          }!
+        }!
+  }!
+
+Ether.RLP.nat_succ_pad_nat(y : Nat, x : Bits, H : 
+  Bits.to_nat(Bits.trim(y, x)) == Bits.to_nat(x)) : 
+    Bits.to_nat(Bits.trim(Nat.succ(y), x)) == Bits.to_nat(x)
+    case y with H {
+      zero : 
+        case x with H {
+          i :
+            let H = H :: 0 == Nat.succ(Nat.mul(2, Bits.to_nat(x.pred)))
+            let absurd = Nat.succ_neq_zero!(mirror(H))
+            Empty.absurd!(absurd)
+          o : 
+            let H = H :: 0 == Nat.mul(2, Bits.to_nat(x.pred))
+            H
+          e : refl
+        }!
+      succ : case x with H {
+        i : 
+          let H = H :: Nat.succ(Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,x.pred)))) == Nat.succ(Nat.mul(2, Bits.to_nat(x.pred)))
+          let H = Nat.succ_inj(Nat.mul(2,Bits.to_nat(Bits.trim(y.pred,x.pred))), Nat.mul(2,Bits.to_nat(x.pred)), H)
+          let H = Ether.RLP.mul_injective(Bits.to_nat(Bits.trim(y.pred,x.pred)), Bits.to_nat(x.pred), 1, H)
+          let H2 = Ether.RLP.nat_succ_pad_nat(y.pred, x.pred, H)
+          let qed = Equal.apply!!!!(Nat.succ . Nat.mul(2), H2)
+          qed
+        o :  
+          let H = H :: Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,x.pred))) == Nat.mul(2, Bits.to_nat(x.pred))
+          let H = Ether.RLP.mul_injective(Bits.to_nat(Bits.trim(y.pred,x.pred)), Bits.to_nat(x.pred), 1, H)
+          let H2 = Ether.RLP.nat_succ_pad_nat(y.pred, x.pred, H)
+          let qed = Equal.apply!!!!(Nat.mul(2), H2)
+          qed
+        e : 
+          let H = H :: Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,Bits.e))) == Nat.mul(2, 0)
+          let absurd_mul_injective = Ether.RLP.mul_injective(Bits.to_nat(Bits.trim(y.pred,Bits.e)), 0, 1, H)
+          let H2 = Ether.RLP.nat_succ_pad_nat(y.pred, Bits.e, absurd_mul_injective)
+          let qed = Equal.apply!!!!(Nat.mul(2), H2)
+          qed
+      }!
+    }!
+
+Ether.RLP.pad_nat(x : Bits, y : Nat) : 
+  Bits.to_nat(Bits.trim(Nat.add(y, Bits.length(x)), x)) == Bits.to_nat(x)
+  case y {
+    succ : 
+      let H = Ether.RLP.pad_nat(x, y.pred)
+      Ether.RLP.nat_succ_pad_nat!!(H)
+    zero : Ether.RLP.succ_pad_nat(x)
+  }!
+
+Ether.RLP.pad_bytes_identity(bits : Bits) : 
+  Bits.to_nat(Ether.RLP.pad_bytes(bits)) == Bits.to_nat(bits)
+  Ether.RLP.pad_nat(bits, Nat.sub(Nat.mul(8,Nat.div(Nat.add(Bits.length(bits),7),8)), 
+    Bits.length(bits)))
+
+Ether.RLP.encode(tree : Ether.RLP.Tree) : Bits
   case tree {
       tip : 
         let bytes_size = Ether.Bits.get_bytes_size(tree.value)
        // let u16_char = Bits.trim(4, tree.value)
         if (bytes_size =? 1) && Bits.ltn(tree.value, Ether.RLP.Constants.bits_128) then
-          [tree.value]
+          Ether.RLP.pad_bytes(tree.value)
         else
-          Ether.RPL.encode_length(bytes_size, 128) ++ [tree.value]
-      list : 
-        let bytes = []
-        for item in tree.value with bytes :
-          bytes ++ Ether.RLP.encode.bytes(item)
-        let bytes_size = List.foldr!!(0, (x, y) Ether.Bits.get_bytes_size(x) + y, bytes)    
-    //    log("first encoding " | Nat.show(bytes_size))
-        Ether.RPL.encode_length(bytes_size, 192) ++ bytes
+          Bits.concat.go(Ether.RPL.proof.encode_length(bytes_size, 128), Ether.RLP.pad_bytes(tree.value))
+      list :
+         let bytes = Bits.e
+         for item in tree.value with bytes :
+           Bits.concat(bytes, Ether.RLP.encode(item))
+         let bytes_size = Ether.Bits.get_bytes_size(bytes)
+         Bits.concat.go(Ether.RPL.proof.encode_length(bytes_size, 192), bytes)
   }
-//56 + 
-Ether.RPL.encode_length(value : Nat, offSet : Nat) : List<Bits>
+
+Ether.RPL.proof.encode_length(value : Nat, offSet : Nat) : Bits
   switch(Nat.ltn(value)) {
     56 : 
-      [Nat.to_bits(value + offSet)]
-    18446744073709551616 : 
-      let binary_encoding = Ether.RPL.encode.binary(value)
-      let len = List.foldr!!(0, (x, y) Ether.Bits.get_bytes_size(x) + y, binary_encoding)
-  //    log(Nat.show(value) | " " | Bits.show(List.foldr!!(Bits.e, Bits.concat, [Nat.to_bits(len + offSet + 55)] ++ binary_encoding)))
+      Ether.RLP.pad_8bits(Nat.to_bits(value + offSet))
+  } 
+  default
+    let binary_encoding = Ether.RPL.proof.encode.binary(value)
+    let len = Ether.Bits.get_bytes_size(binary_encoding)
+    let len = Ether.RLP.pad_8bits(Nat.to_bits(len + offSet + 55))
+    //log(Bits.show(Nat.to_bits(len + offSet + 55)) | " " | Bits.show(Bits.concat.go(Nat.to_bits(len + offSet + 55), binary_encoding)))
+    Bits.concat.go(len, binary_encoding)
 
-      [Nat.to_bits(len + offSet + 55)] ++ binary_encoding
-  } default [] // This case has to be treated within a proof
-
-// refinements : value <= (2^16) -1
-Ether.RPL.encode.binary(value : Nat) : List<Bits>
+Ether.RPL.proof.encode.binary(value : Nat) : Bits
   if (value =? 0) then
-    []
+    Bits.e
   else
-    Ether.RPL.encode.binary(value / 256) ++ [Nat.to_bits(value % 256)]
+    Bits.concat.go(Ether.RPL.proof.encode.binary(value / 256), Ether.RLP.pad_8bits(Nat.to_bits(value % 256)))
 
-Ether.RLP.encode.read(bits : List<Bits>) : String
-  let hexfify = List.map!!((x) String.pad_left(2, '0', String.reverse(Bits.hex.encode(x))), bits)
-  "0x" | String.join("", hexfify)
+Bits.break(len : Nat, bits : Bits) : Pair<Bits, Bits>
+  {Bits.take(len, bits), Bits.drop(len, bits)}
 
-Ether.RLP.encode(value : Ether.RLP.Tree) : String
-  Ether.Bits.read_bytes(Ether.RLP.encode.bytes(value))
+Ether.RLP.encode.read.binary(value : Bits) : Nat
+  let {head, rest} = Bits.break(8, value)
+  let decode = Bits.to_nat(head)
+  if (Bits.eql(rest, Bits.e)) then
+    decode
+  else
+    Ether.RLP.encode.read.binary(rest) + (decode * 256)
+
+Ether.RLP.encode.read_list(value : Bits) : Pair<String, Bits>
+  if (Bits.eql(value, Bits.e)) then
+    {"" value}
+  else
+    let {tree, rest} = Ether.RLP.encode.read(value)
+    let {trees, rest} = Ether.RLP.encode.read_list(rest)
+    {tree | trees, rest}
+
+Ether.RLP.encode.read(bits : Bits) : Pair<String, Bits>
+  let {byte_prefix, rest} = Bits.break(8, bits)
+   switch (Bits.ltn(byte_prefix)) {
+    Ether.RLP.Constants.bits_128 : 
+      {String.reverse(Bits.hex.encode(bits)), rest}  // between (0, 127)
+    Ether.RLP.Constants.bits_184 : 
+      let content_length = (Bits.to_nat(byte_prefix) - 128) * 8
+      let {prefix, rest} = Bits.break(content_length, rest)
+      {String.reverse(Bits.hex.encode(byte_prefix)) | String.reverse(Bits.hex.encode(prefix)), rest}
+    Ether.RLP.Constants.bits_192 :
+     let content_length = (Bits.to_nat(byte_prefix) - 183) * 8
+     let {head, rest} = Bits.break(content_length, rest)
+     let length = Ether.RLP.encode.read.binary(head)
+     let {prefix, rest} = Bits.break(length*8, rest)
+     {String.reverse(Bits.hex.encode(byte_prefix)) | String.reverse(Bits.hex.encode(head))
+       | String.reverse(Bits.hex.encode(prefix)), rest}
+    Ether.RLP.Constants.bits_248 : 
+     let content_length = (Bits.to_nat(byte_prefix) - 192) * 8
+     let {xs, rest} = Ether.RLP.encode.read_list(rest)
+     {String.reverse(Bits.hex.encode(byte_prefix)) | xs, rest}
+    Ether.RLP.Constants.bits_255 : 
+      let content_length = (Bits.to_nat(byte_prefix) - 247) * 8    
+      let {head, rest} = Bits.break(content_length, rest)
+      let length = Ether.RLP.encode.read.binary(head)
+      let {xs, rest} = Ether.RLP.encode.read_list(rest)
+      {String.reverse(Bits.hex.encode(byte_prefix)) | xs, rest}
+  } default {"", Bits.e}
