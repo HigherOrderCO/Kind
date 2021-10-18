@@ -89,7 +89,7 @@ Kind.Comp.Target.Javascript.nat(nat: Nat): String
 Kind.Comp.Target.Javascript.select(term: String, cse_body_list: List<Pair<String,String>>): String
   let switch_body = ""
   let switch_body = for cse_body in cse_body_list:
-    {cse, body} = cse_body
+    let {cse, body} = cse_body
     switch_body|"case "|cse|": return "|body|";\n"
   "(() => { switch ("|term|") {\n"|switch_body|"} })()"
 
@@ -213,7 +213,7 @@ Kind.Comp.Target.Javascript.natives: Kind.Comp.Natives
       // Inst
       let insts = []
       for ctr in prim.ctrs with insts:
-        {ctr_name, ctr_fields} = ctr
+        let {ctr_name, ctr_fields} = ctr
         let ctr_length = List.length!(ctr_fields)
         if Nat.gtn(ctr_length, 0) then
           let fields = List.imap!!((idx, ctr_field) "'"|ctr_field|"': $"|Nat.show(idx), ctr_fields)
