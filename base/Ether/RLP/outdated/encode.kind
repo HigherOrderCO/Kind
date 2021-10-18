@@ -1,0 +1,43 @@
+Ether.RLP.encode.bytes(tree : Ether.RLP.Tree) : List<Bits>
+  case tree {
+      tip : 
+        let bytes_size = Ether.Bits.get_bytes_size(tree.value)
+       // let u16_char = Bits.trim(4, tree.value)
+        if (bytes_size =? 1) && Bits.ltn(tree.value, Ether.RLP.Constants.bits_128) then
+          [tree.value]
+        else
+          Ether.RPL.encode_length(bytes_size, 128) ++ [tree.value]
+      list : 
+        let bytes = []
+        for item in tree.value with bytes :
+          bytes ++ Ether.RLP.encode.bytes(item)
+        let bytes_size = List.foldr!!(0, (x, y) Ether.Bits.get_bytes_size(x) + y, bytes)    
+    //    log("first encoding " | Nat.show(bytes_size))
+        Ether.RPL.encode_length(bytes_size, 192) ++ bytes
+  }
+//56 + 
+Ether.RPL.encode_length(value : Nat, offSet : Nat) : List<Bits>
+  switch(Nat.ltn(value)) {
+    56 : 
+      [Nat.to_bits(value + offSet)]
+    18446744073709551616 : 
+      let binary_encoding = Ether.RPL.encode.binary(value)
+      let len = List.foldr!!(0, (x, y) Ether.Bits.get_bytes_size(x) + y, binary_encoding)
+  //    log(Nat.show(value) | " " | Bits.show(List.foldr!!(Bits.e, Bits.concat, [Nat.to_bits(len + offSet + 55)] ++ binary_encoding)))
+
+      [Nat.to_bits(len + offSet + 55)] ++ binary_encoding
+  } default [] // This case has to be treated within a proof
+
+// refinements : value <= (2^16) -1
+Ether.RPL.encode.binary(value : Nat) : List<Bits>
+  if (value =? 0) then
+    []
+  else
+    Ether.RPL.encode.binary(value / 256) ++ [Nat.to_bits(value % 256)]
+
+Ether.RLP.encode.read(bits : List<Bits>) : String
+  let hexfify = List.map!!((x) String.pad_left(2, '0', String.reverse(Bits.hex.encode(x))), bits)
+  "0x" | String.join("", hexfify)
+
+Ether.RLP.encode(value : Ether.RLP.Tree) : String
+  Ether.Bits.read_bytes(Ether.RLP.encode.bytes(value))

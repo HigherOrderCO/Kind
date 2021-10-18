@@ -1,0 +1,2 @@
+Ether.Bits.break(len : Nat, bits : Bits) : Pair<Bits, Bits>
+  {Bits.take(len, bits), Bits.drop(len, bits)}
