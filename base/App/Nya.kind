@@ -242,7 +242,10 @@ App.Nya.when: App.When<App.Nya.State>
     mouse_move: IO {
       let x = U32.to_f64(event.mouse_pos@fst)
       let y = U32.to_f64(event.mouse_pos@snd)
-      App.set_local!(state.local@pos <- V2.new(x,y))
+      let pos = V2.new(x, y)
+      App.set_local!(state.local@pos <- pos)
+      // TODO verify bug
+      // App.set_local!(state.local@pos <- V2.new(x,y))
     }
   } default App.pass!
 

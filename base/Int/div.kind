@@ -1,5 +1,5 @@
 Int.div(n: Int, d: Int): Int
-  {neg, d_nat} = Int.to_nat_signed(d)
+  let {neg, d_nat} = Int.to_nat_signed(d)
   if neg then
     Int.neg(Int.div_nat(n, d_nat))
   else
