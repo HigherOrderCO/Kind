@@ -19,7 +19,7 @@ App.KL.Game.Phase.Draft.when(
     input: 
       switch String.starts_with(event.id) {
         "HF": // HF = hero-filter = name of hero to filter
-          let controls = controls@filter <- controls@filter@hero_name <- event.text
+          let controls = controls@filter@hero_name <- event.text
           let local    = local@draft <- controls
           App.set_local!(App.KL.State.Local.game(local))
       } default App.pass!
@@ -101,7 +101,7 @@ App.KL.Game.Phase.Draft.when(
             none: App.pass!
             some:
               let new_options = options{class}  <- Bool.not(option.value)
-              let controls    = controls@filter <- controls@filter@options <- new_options
+              let controls    = controls@filter@options <- new_options
               let local       = local@draft  <- controls
               App.set_local!(App.KL.State.Local.game(local))
           }

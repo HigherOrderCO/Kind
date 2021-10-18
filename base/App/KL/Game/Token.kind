@@ -27,7 +27,7 @@ App.KL.Game.Token.score.update.score(
   team:  App.KL.Game.Team
   token: App.KL.Game.Token
 ): App.KL.Game.Score
-  {blue_score, red_score} = score@points
+  let {blue_score, red_score} = score@points
   case team {
     blue: score@points <- {I32.min(blue_score + token@score, score@max), red_score}
     red : score@points <- {blue_score, I32.min(red_score + token@score, score@max)}
