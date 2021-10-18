@@ -42,8 +42,9 @@ if ( obj.data !== undefined
 }
 ```
 
-In Kind, the earlier versions of the language suffered from a similar problem.
-The equivalent object could be defined as:
+In [Kind](https://github.com/kind-lang/kind), the earlier versions of the 
+language suffered from a similar problem. The equivalent object could be
+defined as:
 
 ```javascript
 type Object {
@@ -76,10 +77,9 @@ obj2: Object
 ```
 
 Kind-Lang's obvious solution
------------------------
+----------------------------
 
-Since the last version, [Kind-Lang](https://github.com/kind-lang/kind), a modern functional
-programming language and theorem prover, features a built-in getter and setter syntax that
+Since the last version, Kind features a built-in getter and setter syntax that
 makes these operations succinct:
 
 ```javascript
