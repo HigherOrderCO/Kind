@@ -1,0 +1,16 @@
+Nat.mul.equal_zero(
+  n: Nat, m: Nat
+  Hyp: Equal<Nat>(Nat.mul(n, m), 0)
+): Or<Equal<Nat>(n, 0), Equal<Nat>(m, 0)>
+  case n with Hyp {
+    zero:
+      left(refl)
+    succ:
+      case m with Hyp {
+        zero:
+          right(refl)
+        succ:
+          let contra = Nat.succ_neq_zero!(Hyp)
+          Empty.absurd!(contra)
+      }!
+  }!
