@@ -13,8 +13,8 @@ App.KL.Game.Phase.Play.draw.interface(
 App.KL.Game.Phase.Play.draw.interface.casts(user: String, moment: App.KL.Game.Moment, players: Map<App.KL.Game.Player>): DOM
   case moment {
     execution:
-      casts = moment.casts
-      p_cst = moment.previous_casts
+      let casts = moment.casts
+      let p_cst = moment.previous_casts
       
       <div style={
         "position": "absolute"
@@ -430,7 +430,7 @@ App.KL.Game.Phase.Play.draw.interface.bottom.get_skills(
   skills: Map<App.KL.Game.Skill>, 
   max: Nat
 ): List<Pair<String, App.KL.Game.Skill>>
-  result = {[] :: List<Pair<String, App.KL.Game.Skill>>, max}
+  let result = {[] :: List<Pair<String, App.KL.Game.Skill>>, max}
   for key: skill in skills with result:
     if (max <=? 0) || (skill@name =? "Walk") then 
       result

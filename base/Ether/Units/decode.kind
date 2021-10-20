@@ -3,8 +3,8 @@ Ether.Units.decode(encoding : Pair<List<Nat>, List<Nat>>, ether_ref : Nat) : May
   if (Nat.ltn(ether_ref, List.length!(frac))) then
     none
   else
-    int =  Nat.from_base(10, int)
-    frac =  Nat.from_base(10, frac)
+    let int =  Nat.from_base(10, int)
+    let frac =  Nat.from_base(10, frac)
     let dec = (int * Nat.pow(10, ether_ref))
     some(dec + 
       (frac * Nat.pow(10, Nat.log(10, dec) -  (Nat.log(10, frac)) + 1)))

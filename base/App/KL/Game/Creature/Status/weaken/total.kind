@@ -2,7 +2,7 @@ App.KL.Game.Creature.Status.weaken.total(
     creature: App.KL.Game.Creature
 ): I32
 
-  total_weaken = +0#32
+  let total_weaken = +0#32
   for weaken in creature@status with total_weaken:
     case weaken { 
       weaken:

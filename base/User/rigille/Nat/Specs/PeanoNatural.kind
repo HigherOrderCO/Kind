@@ -1,8 +1,8 @@
-Nat.Specs.PeanoNatural: Specs.PeanoNatural(Nat, Nat.zero, Nat.succ)
-  succ_neq_zero = Nat.succ_neq_zero
-  succ_inj = Nat.succ_inj
-  induction = Nat.Specs.induction
-  Specs.PeanoNatural.new<Nat, Nat.zero, Nat.succ>(
+Nat.Specs.PeanoNatural: User.rigille.Specs.PeanoNatural(Nat, Nat.zero, Nat.succ)
+  let succ_neq_zero = Nat.succ_neq_zero
+  let succ_inj = Nat.succ_inj
+  let induction = Nat.Specs.induction
+  User.rigille.Specs.PeanoNatural.new<Nat, Nat.zero, Nat.succ>(
     succ_neq_zero,
     succ_inj,
     induction,

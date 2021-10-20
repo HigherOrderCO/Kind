@@ -4,7 +4,7 @@ App.KL.Game.Board.Creature.change_hp(
   board: App.KL.Game.Board
 ): Pair<I32, Pair<App.KL.Game.Board, Maybe<String>>>
 
-  creature = App.KL.Game.Board.Creature.get(pos, board)
+  let creature = App.KL.Game.Board.Creature.get(pos, board)
   without creature: {+0#32, {board, none}}
     let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature)
     let new_hp = I32.max((creature@hp + value) , 0)

@@ -4,7 +4,7 @@ App.KL.Game.Creature.Status.root.add(
   duration: I32
 ): App.KL.Game.Creature
   
-  root_added = App.KL.Game.Creature.Status.root.add.aux(cast_data, duration, creature@status)
+  let root_added = App.KL.Game.Creature.Status.root.add.aux(cast_data, duration, creature@status)
   creature@status <- root_added
 
 App.KL.Game.Creature.Status.root.add.aux(

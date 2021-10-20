@@ -11,7 +11,7 @@ User.rigille.List.Perm.In<A: Type>(
     nil: Empty.absurd!(Hyp0)
     skip: case Hyp0 {
             left: left(Hyp0.value)
-            right: ind = this(x, Hyp1.l1, Hyp1.l0, Hyp0.value, Hyp1.Hyp)
+            right: let ind = this(x, Hyp1.l1, Hyp1.l0, Hyp0.value, Hyp1.Hyp)
                    right(ind)
           }
     swap: case Hyp0 {
@@ -21,7 +21,8 @@ User.rigille.List.Perm.In<A: Type>(
                      right: right(right(Hyp0.value.value))
                    }
           }
-    trans: chain_first = this(x, Hyp1.l2, Hyp1.l1, Hyp0, Hyp1.Hyp1)
-           chain_second = this(x, Hyp1.l1, Hyp1.l0, chain_first, Hyp1.Hyp0)
+    trans: 
+           let chain_first = this(x, Hyp1.l2, Hyp1.l1, Hyp0, Hyp1.Hyp1)
+           let chain_second = this(x, Hyp1.l1, Hyp1.l0, chain_first, Hyp1.Hyp0)
            chain_second
   }!

@@ -8,7 +8,7 @@
 
 
 App.KL.Game.Phase.Draft.has_hero(hero_id: U8, team: App.KL.Game.Team, player: Pair<String, App.KL.Game.Player>): Bool
-  x = player@snd@hero_id
+  let x = player@snd@hero_id
   if App.KL.Game.Team.eql(team, player@snd@team) then
     case x {
       none: false
@@ -19,7 +19,7 @@ App.KL.Game.Phase.Draft.has_hero(hero_id: U8, team: App.KL.Game.Team, player: Pa
 
 // check if player has a coord
 App.KL.Game.Phase.Draft.has_coord(coord: Hexagonal.Axial, player: Pair<String, App.KL.Game.Player>): Bool
-  x = player@snd@init_pos
+  let x = player@snd@init_pos
   case x {
     none: false
     some: Hexagonal.Axial.eql(x.value, coord)
@@ -27,7 +27,7 @@ App.KL.Game.Phase.Draft.has_coord(coord: Hexagonal.Axial, player: Pair<String, A
 
 // get team of a player
 App.KL.Game.Phase.Draft.to_team(players: Map<App.KL.Game.Player>, user: String): Maybe<App.KL.Game.Team>
-  player = players{user}
+  let player = players{user}
   case player {
     none: none
     some: some(player.value@team)

@@ -1,6 +1,6 @@
 App.KL.Game.Effect.limit_range_at(range: I32, coord: Hexagonal.Axial): App.KL.Game.Effect<Unit>
   (center, targets, cast_data, board)
-  in_range = true
+  let in_range = true
   for target in targets with in_range:
     in_range && I32.lte(Hexagonal.Axial.distance(coord, target), range)
 

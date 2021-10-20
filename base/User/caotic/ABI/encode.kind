@@ -54,11 +54,11 @@ User.caotic.ABI.methodData(method : User.caotic.Encode.ABI.Method) : _
     open coder
     if coder.snd then
       let dataLoc = (encodeSize*32) + String.length(dataBlock)
-      headBlock = headBlock | String.pad_left(64, '0', Nat.hex.encode(dataLoc))
-      dataBlock = dataBlock | coder.fst
+      let headBlock = headBlock | String.pad_left(64, '0', Nat.hex.encode(dataLoc))
+      let dataBlock = dataBlock | coder.fst
       {dataBlock, headBlock}
     else
-      dataBlock = dataBlock | coder.fst
+      let dataBlock = dataBlock | coder.fst
       {dataBlock, headBlock}
   methodHash | Pair.snd!!(hexs) | Pair.fst!!(hexs)
 
@@ -134,8 +134,8 @@ User.caotic.encode(length : Nat, coder : List<Method.Type>) : Pair<List<String>,
 
 User.caotic.encode.read(enconding : Pair<List<String>, List<String>>) : String
   let {static, dynamic} = enconding
-  static = List.map!!((x) "0x" | x, static)
-  dynamic = List.map!!((x) "0x" | x, dynamic)
+  let static = List.map!!((x) "0x" | x, static)
+  let dynamic = List.map!!((x) "0x" | x, dynamic)
   String.join("", static) | String.join("", dynamic)
 
 User.caotic.ABI.encode : _

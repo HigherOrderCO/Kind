@@ -14,13 +14,13 @@ Ether.Base.X64.decode(blocks :  List<U16>) : Bits
     let block_bits = Bits.e
       for j in acc with block_bits :
         def r = BBT.lookup!!(U16.cmp, j, Ether.Base.X64.table.decode) <> 0
-        block_bits = Bits.concat(Nat.to_bits(r), block_bits)
+        let block_bits = Bits.concat(Nat.to_bits(r), block_bits)
      //   log(U16.show(j) | " " | Bits.show(Bits.e))
         block_bits
     def size = Ether.Bits.get_bytes_size(block_bits)
     def dif = List.length!(i) - List.length!(acc)
     //log(Bits.show(block_bits))
-    bits = Bits.concat(bits, Bits.drop(dif*(2*size), block_bits))
+    let bits = Bits.concat(bits, Bits.drop(dif*(2*size), block_bits))
   // def r = BBT.lookup!!(U16.cmp, i, Ether.Base.X64.table.decode) <> 0
     bits
   

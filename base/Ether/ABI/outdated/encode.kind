@@ -52,10 +52,10 @@ Ether.ABI.methodData(method : Ether.Encode.ABI.Method) : String
     open coder
     if coder.snd then
       let dataLoc = (encodeSize*32) + String.length(dataBlock)
-      headBlock = headBlock | String.pad_left(64, '0', Nat.hex.encode(dataLoc))
-      dataBlock = dataBlock | coder.fst
+      let headBlock = headBlock | String.pad_left(64, '0', Nat.hex.encode(dataLoc))
+      let dataBlock = dataBlock | coder.fst
       {dataBlock, headBlock}
     else
-      dataBlock = dataBlock | coder.fst
+      let dataBlock = dataBlock | coder.fst
       {dataBlock, headBlock}
   methodHash | Pair.snd!!(hexs) | Pair.fst!!(hexs)

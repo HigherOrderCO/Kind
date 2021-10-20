@@ -19,7 +19,7 @@ App.KL.Game.Effect.player_data.union(
             some none: some(a_recap.value)
             some some: some(a_recap.value ++ b_recap.value)
           }
-        new_data = Pair.new!!(scoreboard, recap)
+        let new_data = Pair.new!!(scoreboard, recap)
         a{id} <- new_data 
     }
   a

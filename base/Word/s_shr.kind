@@ -1,7 +1,8 @@
 Word.s_shr<size: Nat>(n: Word(size), value: Word(size)): Word(size)
-  neg = Word.is_neg!(n)
+  let neg = Word.is_neg!(n)
   case neg {
     false: Word.shr!(n, value)
-    true: n = Word.neg!(n)
-          Word.shl!(n, value)
+    true: 
+      let n = Word.neg!(n)
+      Word.shl!(n, value)
   }

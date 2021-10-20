@@ -17,14 +17,14 @@ App.KL.Game.Creature.Status.dot.add.aux(
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  new_dot = App.KL.Game.Creature.Status.dot(cast_data, id, duration, 1, amount)
+  let new_dot = App.KL.Game.Creature.Status.dot(cast_data, id, duration, 1, amount)
   case status { 
     nil:
       new_dot & status
     cons:
       case status.head { 
         dot: 
-          is_same = String.eql(id, status.head.id)
+          let is_same = String.eql(id, status.head.id)
           if is_same then
             let dot_duration = status.head.duration + 1
             let dot_stacks = status.head.stack + 1

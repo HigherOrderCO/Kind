@@ -4,7 +4,7 @@ Hexagonal.Axial.circular(
   distance: I32
 ): List<Hexagonal.Axial>
 
-  range = Hexagonal.Axial.range(coord, distance)
+  let range = Hexagonal.Axial.range(coord, distance)
   List.filter!((x)not(Hexagonal.Axial.eql(coord, x)), range)
 
 

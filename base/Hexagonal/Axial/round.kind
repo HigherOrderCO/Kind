@@ -4,31 +4,31 @@ Hexagonal.Axial.round(
   axial_y: F64
 ): Hexagonal.Axial
 
-  i = F64.to_i32
-  axial_z = (0.0 - axial_x) - axial_y
+  let i = F64.to_i32
+  let axial_z = (0.0 - axial_x) - axial_y
 
-  round_x = Hexagonal.Axial.aux.round_F64(axial_x)
-  round_y = Hexagonal.Axial.aux.round_F64(axial_y)
-  round_z = Hexagonal.Axial.aux.round_F64(axial_z)
+  let round_x = Hexagonal.Axial.aux.round_F64(axial_x)
+  let round_y = Hexagonal.Axial.aux.round_F64(axial_y)
+  let round_z = Hexagonal.Axial.aux.round_F64(axial_z)
 
-  diff_x  = Hexagonal.Axial.aux.abs_diff(axial_x, round_x)
-  diff_y  = Hexagonal.Axial.aux.abs_diff(axial_y, round_y)
-  diff_z  = Hexagonal.Axial.aux.abs_diff(axial_z, round_z)
+  let diff_x  = Hexagonal.Axial.aux.abs_diff(axial_x, round_x)
+  let diff_y  = Hexagonal.Axial.aux.abs_diff(axial_y, round_y)
+  let diff_z  = Hexagonal.Axial.aux.abs_diff(axial_z, round_z)
   
   case F64.gtn(diff_x, diff_z) {
     true:
       case F64.gtn(diff_y, diff_x) {
         true: 
-          new_y = (0.0 - round_x) - round_z
+          let new_y = (0.0 - round_x) - round_z
           Hexagonal.Axial.new(i(round_x), i(new_y))
         false:
-          new_x = (0.0 - round_y) - round_z
+          let new_x = (0.0 - round_y) - round_z
           Hexagonal.Axial.new(i(new_x), i(round_y))
       }
     false:
       case F64.gtn(diff_y, diff_z) {
         true:
-          new_y = (0.0 - round_x) - round_z
+          let new_y = (0.0 - round_x) - round_z
           Hexagonal.Axial.new(i(round_x), i(new_y))
         false:
           Hexagonal.Axial.new(i(round_x), i(round_y))
@@ -39,10 +39,10 @@ Hexagonal.Axial.round(
 // TODO: Rheidner
 // Rounds a F64 number to the nearest integer
 Hexagonal.Axial.aux.round_F64(n: F64): F64
-  half = 0.5
-  big_number = 1000.0 // TODO while F64.gtn, cmp and ltn is broken
-  n = n + big_number
-  result = Hexagonal.Axial.aux.floor(n + half)
+  let half = 0.5
+  let big_number = 1000.0 // TODO while F64.gtn, cmp and ltn is broken
+  let n = n + big_number
+  let result = Hexagonal.Axial.aux.floor(n + half)
   result - big_number
 
 // TODO

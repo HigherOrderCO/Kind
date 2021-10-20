@@ -2,7 +2,7 @@ App.KL.Game.Creature.Status.slow.total(
   creature: App.KL.Game.Creature
 ): I32
 
-  total_slow = +0#32
+  let total_slow = +0#32
   for slow in creature@status with total_slow:
     case slow { 
       slow:

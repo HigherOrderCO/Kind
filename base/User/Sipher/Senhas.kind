@@ -47,7 +47,7 @@ Nat.randoms(len: Nat, seed: Nat, max: Nat): List<Nat>
     zero:
       []
     succ:
-      new_seed = Nat.random(seed)
+      let new_seed = Nat.random(seed)
       (new_seed % max) & Nat.randoms(len.pred, new_seed, max)
     }
 

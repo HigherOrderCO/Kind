@@ -1,5 +1,5 @@
 App.ATB.Hero.char_3: App.ATB.Hero.hero_type
-    char_id = "char_3"
-    name = "Personagem 3"
-    hp_max = 110
+    let char_id = "char_3"
+    let name = "Personagem 3"
+    let hp_max = 110
     App.ATB.Hero.hero_type.new(char_id, name, hp_max, hp_max)

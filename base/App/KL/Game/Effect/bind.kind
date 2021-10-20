@@ -10,15 +10,15 @@ App.KL.Game.Effect.bind<A: Type, B: Type>(
     new: case next(result_a.value)(result_a.center, targets, result_a.cast_data, result_a.board) as result_b {
       err: App.KL.Game.Effect.Result.err<B>(result_b.message)
       new:
-        center      = result_b.center
-        value       = result_b.value
-        cast_data   = result_b.cast_data
-        map         = result_b.board
-        indicators  = Hexagonal.Axial.Map.union!(result_a.indicators, result_b.indicators)
-        ap_used     = result_a.ap_used + result_b.ap_used
-        cemetery    = result_a.cemetery ++ result_b.cemetery
-        description = App.KL.Game.Effect.bind.description(result_a.description, result_b.description)
-        player_data = App.KL.Game.Effect.player_data.union(result_a.player_data, result_b.player_data)
+        let center      = result_b.center
+        let value       = result_b.value
+        let cast_data   = result_b.cast_data
+        let map         = result_b.board
+        let indicators  = Hexagonal.Axial.Map.union!(result_a.indicators, result_b.indicators)
+        let ap_used     = result_a.ap_used + result_b.ap_used
+        let cemetery    = result_a.cemetery ++ result_b.cemetery
+        let description = App.KL.Game.Effect.bind.description(result_a.description, result_b.description)
+        let player_data = App.KL.Game.Effect.player_data.union(result_a.player_data, result_b.player_data)
         App.KL.Game.Effect.Result.new<B>(value, center, cast_data, map, indicators, ap_used, cemetery, description, player_data)
     }
   }

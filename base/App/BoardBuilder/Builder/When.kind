@@ -112,28 +112,28 @@ App.BoardBuilder.Builder.When(
       }default App.pass!
 
     mouse_down:
-      new_local = local@mouse_press <- true 
+      let new_local = local@mouse_press <- true 
       App.set_local!(App.BoardBuilder.State.local.builder(new_local))
 
     mouse_up:
-      new_local = local@mouse_press <- false
+      let new_local = local@mouse_press <- false
       App.set_local!(App.BoardBuilder.State.local.builder(new_local))
 
     key_up:
       log(U16.show(event.code))
       switch U16.eql(event.code) {
         16#16: 
-          new_local = local@show_grid <- false
+          let new_local = local@show_grid <- false
           App.set_local!(App.BoardBuilder.State.local.builder(new_local))
       }default App.pass!
 
     key_down:
       switch U16.eql(event.code) {
         16#16: 
-          new_local = local@show_grid <- true
+          let new_local = local@show_grid <- true
           App.set_local!(App.BoardBuilder.State.local.builder(new_local))
         17#16:
-          new_local = local@show_grid <- not(local@show_grid)
+          let new_local = local@show_grid <- not(local@show_grid)
           App.set_local!(App.BoardBuilder.State.local.builder(new_local))
       }default
       let new_local = local@command <- event.code

@@ -5,9 +5,9 @@ Hexagonal.Axial.clamp(
   target: Hexagonal.Axial
 ): Hexagonal.Axial
 
-  f = I32.to_f64
-  distance = Hexagonal.Axial.distance(center, target)
-  distance_64 = f(distance)
-  range_64 = f(range)
+  let f = I32.to_f64
+  let distance = Hexagonal.Axial.distance(center, target)
+  let distance_64 = f(distance)
+  let range_64 = f(range)
 
   Hexagonal.Axial.lerp(range_64 / distance_64, center, target)

@@ -2,7 +2,7 @@ App.KL.Game.Creature.Status.shield.total(
   creature: App.KL.Game.Creature
 ): I32
 
-  total_shield = +0#32
+  let total_shield = +0#32
   for shield in creature@status with total_shield:
     case shield { 
       shield:

@@ -4,6 +4,6 @@ Hexagonal.Cubic.to_axial(
 ): Hexagonal.Axial
 
   open coord
-  i = coord.x
-  j = coord.z
+  let i = coord.x
+  let j = coord.z
   Hexagonal.Axial.new(i, j)

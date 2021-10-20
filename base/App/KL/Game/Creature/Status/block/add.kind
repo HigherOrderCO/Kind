@@ -24,7 +24,7 @@ App.KL.Game.Creature.Status.block.add.aux(
     cons:
       case status.head { 
         block:
-          is_same = String.eql(id, status.head.id)
+          let is_same = String.eql(id, status.head.id)
           if is_same then
             status
           else

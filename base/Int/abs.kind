@@ -3,7 +3,7 @@ Int.abs(a: Int): Nat
   case neg {
     false: open a
            a.pos
-    true: a = Int.neg(a)
+    true: let a = Int.neg(a)
           open a
           a.pos
   }

@@ -101,7 +101,7 @@ App.KL.Game.Phase.Play.when(
                   App.set_local<App.KL.State>(App.KL.State.Local.game(local@preview <- preview))
                 }
             }default
-              local = 
+              let local = 
                 Maybe {
                   get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
                   let skill       =

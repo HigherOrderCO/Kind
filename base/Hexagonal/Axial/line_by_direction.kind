@@ -5,13 +5,13 @@ Hexagonal.Axial.line_by_direction(
   origin: Hexagonal.Axial
 ): List<Hexagonal.Axial>
   
-  coords = []
+  let coords = []
   let diff = Hexagonal.Axial.sub(origin, line_start)
   for i from 0 to I32.to_nat(size) with coords:
     case coords {
       nil: [origin]
       cons:
-        coord = Hexagonal.Axial.add(coords.head, diff)
+        let coord = Hexagonal.Axial.add(coords.head, diff)
         coord & coords
     }
   coords

@@ -6,22 +6,22 @@ App.BoardBuilder.Post: App.Post<App.BoardBuilder.State>
       some:
         case eventglob.value as event {
           terrain_add: 
-            glob = glob@terrains  <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@terrains)
-            glob = glob@landscape <- Hexagonal.Axial.Map.delete!(event.coord, glob@landscape)
+            let glob = glob@terrains  <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@terrains)
+            let glob = glob@landscape <- Hexagonal.Axial.Map.delete!(event.coord, glob@landscape)
             glob
           terrain_del: 
-            glob = glob@terrains <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
-            glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
-            glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
+            let glob = glob@terrains <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
+            let glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
+            let glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
             glob
           landscape_add:
-            glob = glob@landscape <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@landscape)
-            glob = glob@terrains  <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
-            glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
-            glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
+            let glob = glob@landscape <- Hexagonal.Axial.Map.set!(event.coord, App.KL.Game.Terrain.new(event.field_id, none), glob@landscape)
+            let glob = glob@terrains  <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
+            let glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
+            let glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
             glob
           landscape_del: 
-            glob = glob@landscape <- Hexagonal.Axial.Map.delete!(event.coord, glob@landscape)
+            let glob = glob@landscape <- Hexagonal.Axial.Map.delete!(event.coord, glob@landscape)
             glob
           bases_add:
             case Hexagonal.Axial.Map.get!(event.coord, glob@terrains) {
@@ -33,10 +33,10 @@ App.BoardBuilder.Post: App.Post<App.BoardBuilder.State>
           bases_del:
             glob@bases <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
           initial_add:
-            glob = glob@initial   <- Hexagonal.Axial.Map.set!(event.coord, event.team, glob@initial)
-            glob = glob@terrains  <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
-            glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
-            glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
+            let glob = glob@initial   <- Hexagonal.Axial.Map.set!(event.coord, event.team, glob@initial)
+            let glob = glob@terrains  <- Hexagonal.Axial.Map.delete!(event.coord, glob@terrains)
+            let glob = glob@bases     <- Hexagonal.Axial.Map.delete!(event.coord, glob@bases)
+            let glob = glob@tokens    <- Hexagonal.Axial.Map.delete!(event.coord, glob@tokens)
             glob
           initial_del:
             glob@initial <- Hexagonal.Axial.Map.delete!(event.coord, glob@initial)

@@ -4,7 +4,7 @@ Hexagonal.Axial.semi_circle(
   goal: Hexagonal.Axial
 ): List<Hexagonal.Axial>
 
-  new = Hexagonal.Axial.new
+  let new = Hexagonal.Axial.new
   open origin as a
   open goal   as b
   let coords =

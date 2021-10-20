@@ -99,7 +99,7 @@ App.KL.Game.Hero.Octoking.hero.Skills.swap(range_fst: I32, range_snd: I32, ap_co
           App.KL.Game.Effect.fail("No primary target was selected")
         }
       cons:
-        in_range = true
+        let in_range = true
         for target in targets with in_range:
           in_range && I32.lte(Hexagonal.Axial.distance(targets.head, target), range_snd)
 

@@ -38,8 +38,8 @@ Ether.encode(length : Nat, coder : List<Ether.ABI.Type>) : Pair<List<String>, Li
 
 Ether.encode.read(enconding : Pair<List<String>, List<String>>) : String
   let {static, dynamic} = enconding
-  static = List.map!!((x) "0x" | x, static)
-  dynamic = List.map!!((x) "0x" | x, dynamic)
+  let static = List.map!!((x) "0x" | x, static)
+  let dynamic = List.map!!((x) "0x" | x, dynamic)
   String.join("", static) | String.join("", dynamic)
 
 

@@ -6,16 +6,16 @@ Hexagonal.Cubic.rotate_right(
   open a
   open b
 
-  x = a.x - b.x
-  y = a.y - b.y
-  z = a.z - b.z
+  let x = a.x - b.x
+  let y = a.y - b.y
+  let z = a.z - b.z
 
-  x_new = z * -1
-  y_new = x * -1
-  z_new = y * -1
+  let x_new = z * -1
+  let y_new = x * -1
+  let z_new = y * -1
 
-  x = b.x + x_new
-  y = b.y + y_new
-  z = b.z + z_new
+  let x = b.x + x_new
+  let y = b.y + y_new
+  let z = b.z + z_new
 
   Hexagonal.Cubic.new(x, y, z)

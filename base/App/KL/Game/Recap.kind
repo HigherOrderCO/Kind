@@ -11,7 +11,7 @@ type App.KL.Game.Recap.Episode {
 }
 
 App.KL.Game.Recap.show(recap: App.KL.Game.Recap): String
-  text = ""
+  let text = ""
   for episode in recap with text:
     text | "\n" |
     "key: "    | Char.to_string(episode@skill_key)  | "\n" | 

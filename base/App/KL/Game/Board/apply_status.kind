@@ -6,7 +6,7 @@ App.KL.Game.Board.apply_status(
   for coord:tile in game@board with result:
 
     // Applies Tile's Effect if it has one
-    result = Maybe {
+    let result = Maybe {
       get effect = tile@effect
       let activation = effect@activation
       let result = case activation { 
