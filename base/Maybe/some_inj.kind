@@ -1,0 +1,8 @@
+Maybe.some_inj<A: Type>(
+  x: A, y: A
+  eq: Equal<Maybe<A>>(Maybe.some<A>(x), Maybe.some<A>(y))
+): Equal<A>(x, y)
+  apply(
+    (m) Maybe.default<A>(m, x),
+    eq
+  )
