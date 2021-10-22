@@ -29,7 +29,7 @@ User.rigille.List.Monotone.exists<A: Type>(after: A -> A -> Type, O: User.rigill
           def ret = ext.fst & tail_call.fst
 
           // prove return value is a permutation
-          let ret_perm = (lem_left = User.rigille.List.Perm.refl<A>(xs.head & xs.tail)
+          let ret_perm = (let lem_left = User.rigille.List.Perm.refl<A>(xs.head & xs.tail)
                       // Perm(min_split.fst ++ [ext.fst] ++ min_split.snd.fst, xs.head & xs.tail)
                       let lem_right = lem_left :: rewrite X in Perm(X, _) with min_split.snd.snd
                       // Perm([ext.fst] ++ min_split.fst, min_split.fst ++ [ext.fst])
@@ -54,10 +54,10 @@ User.rigille.List.Monotone.exists<A: Type>(after: A -> A -> Type, O: User.rigill
           let ret_monotone = case tail_call.fst
                            with tail_call.snd.snd 
                                 ret_perm {
-                            nil: qed = unit :: User.rigille.List.Monotone<A, after, O>(ext.fst & [])
+                            nil: let qed = unit :: User.rigille.List.Monotone<A, after, O>(ext.fst & [])
                                  qed
 
-                            cons: in_tail_call = right(left(refl)) :: User.rigille.List.In<A>(ext.fst & tail_call.fst.head & tail_call.fst.tail, tail_call.fst.head)
+                            cons: let in_tail_call = right(left(refl)) :: User.rigille.List.In<A>(ext.fst & tail_call.fst.head & tail_call.fst.tail, tail_call.fst.head)
                                   let in_param = User.rigille.List.Perm.In<A>(_, _, _,
                                                in_tail_call, User.rigille.List.Perm.symm<A>(_, _, ret_perm))
                                   let qed = ext.snd.snd(_, in_param)
