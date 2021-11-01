@@ -1,0 +1,13 @@
+Nat.eql.reflexivity(x : Nat, y : Nat, H : Nat.eql(x, y) == true) : x == y
+  case x with H {
+    succ : case y with H {
+      succ : Equal.apply!!!!(Nat.succ, Nat.eql.reflexivity(x.pred, y.pred, H))
+      zero : 
+        Empty.absurd!(Bool.false_neq_true(H))
+    }!
+    zero : case y with H {
+      succ : 
+        Empty.absurd!(Bool.false_neq_true(H))
+      zero : refl
+    }!
+  }!

@@ -1,0 +1,13 @@
+Nat.lte.succ_both(x : Nat, y : Nat, H : Nat.lte(x, y) == true) : Nat.lte(Nat.succ(x), Nat.succ(y)) == true
+  case y with H {
+    zero : 
+      let H2 = Nat.lte.zero_right(x, H)
+      let H2 = mirror(H2)
+      case H2 {
+        refl : refl
+      } : Nat.lte(Nat.succ(H2.b),1) == Bool.true
+    succ : case x with H {
+        zero : refl
+        succ : Nat.lte.succ_both(x.pred, y.pred, H)
+    }!
+  }!

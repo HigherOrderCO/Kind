@@ -1,0 +1,8 @@
+Nat.mod.le_mod(x : Nat, y : Nat, H : Nat.lte(Nat.succ(x), y) == true) : Nat.mod(x, y) == x
+  let simpl = refl :: Pair.snd(Nat,Nat,Nat.lte(y,x,(self) Pair(Nat,Nat),Nat.div_mod.go(y,1,Nat.sub(x,y)),Pair.new(Nat,Nat,0,x))) == Nat.mod(x, y)
+  let H2 = Nat.Order.trichotomy(y, x)
+  case simpl {
+      refl : 
+        let H = mirror(Nat.lte.comm.true!!(H))
+        refl :: rewrite Y in Pair.snd(Nat,Nat,Y((self) Pair(Nat,Nat),Nat.div_mod.go(y,1,Nat.sub(x,y)),Pair.new(Nat,Nat,0,x))) == x with H
+  }!
