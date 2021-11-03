@@ -3,6 +3,7 @@ Funcional Alquimista
 
 O Haskell e outras linguagens funcionais usam tipos algébricos, declarados com a sintaxe "data":
 
+```
 data Bool    = True | False
 data Jokenpo = Rock | Paper | Scissor
 data Pair x  = MakePair x x
@@ -10,6 +11,7 @@ data Maybe x = Nothing | Just x
 data Nat     = Zero | Succ Nat
 data List x  = Nil | Cons x (List x)
 data Tree x  = Empty | Branch x (List (Tree x))
+```
 
 Se você não entende o que está acontecendo acima, o resto não vai fazer sentido (e tudo bem); nesse caso, recomendo ler algum tutorial de Haskell caso ainda tenha interesse nesse post. Se as linhas acima fazem sentido para você, continue lendo, pois lhe contarei a história de um alquimista funcional que foi longe demais.
 
