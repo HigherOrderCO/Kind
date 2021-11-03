@@ -1,0 +1,28 @@
+Bits.trim.preserve_length(n : Nat, bits : Bits) : Bits.length(Bits.trim(n, bits)) == n
+  case n {
+    succ : case bits {
+      e : 
+        let rec = Bits.trim.preserve_length(n.pred, Bits.e)
+        let rec = Equal.apply!!!!(Nat.succ, rec)
+        let simpl = refl :: Bits.length.go(Bits.trim(n.pred,Bits.e),1) == Bits.length(Bits.trim(Nat.succ(n.pred),Bits.e))
+        case simpl {
+          refl : 
+            rec :: rewrite X in X == Nat.succ(n.pred) with Bits.length.succ(Bits.trim(n.pred,Bits.e), 0)
+        }!
+      o : 
+        let rec = Bits.trim.preserve_length(n.pred, bits.pred)
+        let rec = Equal.apply!!!!(Nat.succ, rec)
+        let simpl = refl :: Bits.length.go(Bits.trim(n.pred,bits.pred),1) == Bits.length(Bits.trim(Nat.succ(n.pred), Bits.o(bits.pred)))
+        case simpl {
+          refl : rec :: rewrite X in X == Nat.succ(n.pred) with Bits.length.succ(Bits.trim(n.pred, bits.pred), 0)
+        }!
+      i : 
+        let rec = Bits.trim.preserve_length(n.pred, bits.pred)
+        let rec = Equal.apply!!!!(Nat.succ, rec)
+        let simpl = refl :: Bits.length.go(Bits.trim(n.pred,bits.pred),1) == Bits.length(Bits.trim(Nat.succ(n.pred), Bits.i(bits.pred)))
+        case simpl {
+          refl : rec :: rewrite X in X == Nat.succ(n.pred) with Bits.length.succ(Bits.trim(n.pred, bits.pred), 0)
+        }!
+    }!
+    zero : refl
+  }!

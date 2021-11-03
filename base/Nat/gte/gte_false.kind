@@ -1,0 +1,8 @@
+Nat.gte.gte_false(x : Nat, y : Nat, H : Nat.gte(x, y) == false) : Nat.gte(y, x) == true
+  case x with H {
+    succ : case y with H {
+      succ : Nat.gte.gte_false(x.pred, y.pred, H)
+      zero : Empty.absurd!(Bool.false_neq_true(mirror(H)))
+    }!
+    zero : refl
+  }!
