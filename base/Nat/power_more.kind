@@ -1,0 +1,69 @@
+pow.add(a: Nat b: Nat c: Nat): Nat.pow(a, Nat.add(b,c)) == Nat.mul(Nat.pow(a,b), Nat.pow(a,c))
+    // a^(b+c) = a^b a^c
+    case b {
+      zero: 
+        let l = Nat.mul.one_left(Nat.pow(a,c))
+        refl :: rewrite x in (Nat.pow(a,c) == x) with mirror(l)
+      succ:
+        let inds = apply((x) Nat.mul(a,x), pow.add(a, b.pred, c))
+        let ma = Nat.mul.assoc(a, Nat.pow(a,b.pred), Nat.pow(a,c))
+        inds :: rewrite x in Nat.mul(a,Nat.pow(a,Nat.add(b.pred,c))) == x with ma
+    }!
+
+pow.one(b: Nat): Nat.pow(1, b) == 1
+  // 1^b = 1
+  case b {
+    zero: refl,
+    succ: 
+      let ind = pow.one(b.pred)
+      let o = Nat.mul.one_left(1)
+      let p = apply((x) Nat.mul(1,x), ind)
+      p :: rewrite x in Nat.mul(1,Nat.pow(1,b.pred)) == x with o
+  }!
+
+pow.swap(a: Nat b:Nat a1:Nat b1:Nat): Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) == Nat.mul(Nat.mul(a,a1),Nat.mul(b,b1))
+  // (a b)(a' b') = (a a')(b b')
+  let assoc = Nat.mul.assoc
+  let comm = Nat.mul.comm
+  let m = Nat.mul
+  let r1 = refl :: Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1))
+  let as1 = assoc(a,b,Nat.mul(a1,b1))
+  let r2 = r1 :: rewrite x in x == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with mirror(as1)
+  let as2 = assoc(b,a1,b1)
+  let r3 = r2 :: rewrite x in Nat.mul(a,x) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with as2
+  let cm = comm(b,a1)
+  let r4 = r3 :: rewrite x in Nat.mul(a,Nat.mul(x,b1)) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with cm
+  let as3 = assoc(a,Nat.mul(a1,b), b1)
+  let r5 = r4 :: rewrite x in x == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with as3
+  let as4 = assoc(a,a1,b)
+  let r6 = r5 :: rewrite x in Nat.mul(x,b1) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with as4
+  let as5 = assoc(Nat.mul(a,a1),b,b1)
+  let r7 = r6 :: rewrite x in x == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with mirror(as5)
+  mirror(r7)
+
+pow.mul_dist(a: Nat b:Nat c:Nat): Nat.pow(Nat.mul(a,b), c) == Nat.mul(Nat.pow(a,c), Nat.pow(b,c))
+  // (ab)^c = a^c b^c
+  case c {
+    zero: 
+      let o = Nat.mul.one_left(1)
+      refl :: rewrite x in 1 == x with mirror(o) 
+    succ: 
+      let ind = pow.mul_dist(a, b, c.pred)
+      let p = apply((x) Nat.mul(Nat.mul(a,b),x), ind)
+      let sw = pow.swap(a,Nat.pow(a,c.pred),b,Nat.pow(b,c.pred))
+      p :: rewrite x in Nat.mul(Nat.mul(a,b),Nat.pow(Nat.mul(a,b),c.pred)) == x with mirror(sw)
+  }!
+
+pow.mul(a: Nat b: Nat c: Nat): Nat.pow(Nat.pow(a, b), c) == Nat.pow(a, Nat.mul(b,c))
+  // (a^b)^c = a^(bc)
+  case b {
+    zero: pow.one(c), 
+    succ: 
+      let ind = pow.mul(a,b.pred,c)
+      let p = apply((x) Nat.mul(Nat.pow(a,c),x),ind)
+      let rs = pow.add(a,c,Nat.mul(b.pred,c))
+      let lm = pow.mul_dist(a,Nat.pow(a,b.pred),c)
+      let q = p :: rewrite x in Nat.mul(Nat.pow(a,c),Nat.pow(Nat.pow(a,b.pred),c)) == x with mirror(rs)
+      q :: rewrite x in x == Nat.pow(a,Nat.add(c,Nat.mul(b.pred,c))) with mirror(lm)
+  }!
+
