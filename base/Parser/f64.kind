@@ -1,0 +1,15 @@
+Parser.f64: Parser<F64>
+  Parser {
+    get num = Parser.num
+    open num
+    let val = Nat.to_f64(num.numb)
+    let val = case num.sign {
+      none: val
+      some: if num.sign.value then val * 1.0 else val * -1.0
+    }
+    let val = case num.frac {
+      none: val
+      some: log("TODO") val
+    }
+    return val
+  }

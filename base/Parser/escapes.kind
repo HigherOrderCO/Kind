@@ -1,0 +1,16 @@
+Parser.escapes: List<Pair<String, Char>>
+  [
+    {"\\b" , '\b'},
+    {"\\f" , '\f'},
+    {"\\n" , '\n'},
+    {"\\r" , '\r'},
+    {"\\t" , '\t'},
+    {"\\v" , '\v'},
+    {String.cons(Parser.escapes.backslash, String.cons(Parser.escapes.backslash, String.nil)), Parser.escapes.backslash},
+    {"\\\"", '"'},
+    {"\\0" , '\0'},
+    {"\\'" , '\''},
+  ]
+
+Parser.escapes.backslash: Char
+  Nat.to_u16(92)

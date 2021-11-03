@@ -1,0 +1,22 @@
+Parser.string.go(delim: Char, str: String): Parser<String>
+  (pst)
+  open pst
+  case pst.str {
+    nil:
+      Parser.Reply.fail<String>(pst.nam, pst.ini, pst.idx, "Non-terminating string.")
+    cons:
+      if U16.eql(pst.str.head, delim) then
+        let pst = Parser.State.new(pst.err, pst.nam, pst.ini, Nat.succ(pst.idx), pst.str.tail)
+        Parser.Reply.value<String>(pst, String.reverse(str))
+      else case Parser.char.single(pst) as parsed {
+        error: Parser.Reply.error<String>(parsed.err)
+        value: Parser.string.go(delim, String.cons(parsed.val,str), parsed.pst)
+      }
+  }
+
+Parser.string: Parser<String>
+  Parser {
+    Parser.text(String.cons('"', String.nil))
+    get strx = Parser.string.go('"', "")
+    return strx
+  }
