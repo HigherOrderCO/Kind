@@ -1,0 +1,11 @@
+Example.json: IO<Unit>
+  IO {
+    let result = Maybe {
+      get name = JSON.parse(`"Roberta"`)
+      get json = JSON.parse(`{"name": "Robert", "age": 42, "items": ["sword", "shield","book"]}`)
+      get json = JSON.set(json, "name", name)
+      return JSON.stringify(json)
+    } <> ""
+    IO.print(result)
+  }
+
