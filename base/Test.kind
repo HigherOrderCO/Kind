@@ -1,26 +1,4 @@
-type Object {
-  new(
-    name: String
-    data: Map<List<F64>>
-  )
-}
-
-Test: Maybe<F64>
-  let obj = Object.new("sample", {
-    "a": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-    "b": [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
-  })
-  let obj@data{"a"}[0] <~ F64.mul(2.0)
-  obj@data{"a"}[0]
-
-// ------------------------------------
-
-id<A: $Type>(x: A): A
-  x
-
-explicit: Nat
-  id<$Nat>(7)
-
-implicit: Nat
-  id(7)
-
+Test: _
+  let x = {"a": {"x":3}, "b": {"x":1}}
+  let x = x{"a"}{"y"} <- 10
+  List.show!(Nat.show, Map.values!(x{"a"} <> {}))
