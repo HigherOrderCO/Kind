@@ -1,3 +1,11 @@
+## Kind 1.0.107
+
+- Mapped list comprehension syntax
+
+    [map x when Nat.is_even(x) in [0 to 10]: x * 2]
+
+    as an alternative to the "for" list comprehension
+
 ## Kind 1.0.104
 
 - Implicit arguments are here!
