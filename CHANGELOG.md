@@ -1,10 +1,8 @@
-## Kind 1.0.107
+## Kind 1.0.108
 
-- Mapped list comprehension syntax
+- Allow "for" to be on the left side of a list comprehension
 
-    [map x when Nat.is_even(x) in [0 to 10]: x * 2]
-
-    as an alternative to the "for" list comprehension
+    [for x in [0 to 10] where Nat.is_even(x): x * 2]
 
 ## Kind 1.0.104
 

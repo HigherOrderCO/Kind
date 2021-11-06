@@ -36,15 +36,15 @@ Kind.Parser.comprehension: Parser<Kind.Term>
 Kind.Parser.comprehension.mapped: Parser<Kind.Term>
   Parser {
     Kind.Parser.text("[")
-    Kind.Parser.text("map")
+    Kind.Parser.text("for")
     get elem = Kind.Parser.name1
+    Kind.Parser.text("in")
+    get list = Kind.Parser.term
     get cond = Parser.maybe!(Parser {
-      Kind.Parser.text("when")
+      Kind.Parser.text("where")
       get cond = Kind.Parser.term
       return cond
     })
-    Kind.Parser.text("in")
-    get list = Kind.Parser.term
     Kind.Parser.text(":")
     get loop = Kind.Parser.term
     Kind.Parser.text("]")
