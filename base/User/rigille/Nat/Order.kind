@@ -10,7 +10,7 @@ User.rigille.Nat.Order: User.rigille.Order<Nat>(User.rigille.Nat.after)
 User.rigille.Nat.Order.refl(a: Nat): User.rigille.Nat.after(a, a)
   case a {
     zero: refl
-    succ: ind = User.rigille.Nat.Order.refl(a.pred)
+    succ: let ind = User.rigille.Nat.Order.refl(a.pred)
           ind
   }!
 
@@ -19,7 +19,7 @@ User.rigille.Nat.Order.conn(a: Nat, b: Nat): Or<User.rigille.Nat.after(a, b), Us
     zero zero: left(refl)
     zero succ: left(refl)
     succ zero: right(refl)
-    succ succ: ind = User.rigille.Nat.Order.conn(a.pred, b.pred)
+    succ succ: let ind = User.rigille.Nat.Order.conn(a.pred, b.pred)
                ind
   }!
 
@@ -31,17 +31,17 @@ User.rigille.Nat.Order.anti_symm(
 ): a == b
   case a b with Hyp0 Hyp1 {
     zero zero: refl
-    zero succ: contra = Bool.true_neq_false(mirror(Hyp1))
+    zero succ: let contra = Bool.true_neq_false(mirror(Hyp1))
                Empty.absurd!(contra)
-    succ zero: contra = Bool.true_neq_false(mirror(Hyp0))
+    succ zero: let contra = Bool.true_neq_false(mirror(Hyp0))
                Empty.absurd!(contra)
-    succ succ: ind = User.rigille.Nat.Order.anti_symm(
+    succ succ: let ind = User.rigille.Nat.Order.anti_symm(
                        a.pred,
                        b.pred,
                        Hyp0,
                        Hyp1
                      )
-               qed = apply(Nat.succ, ind)
+               let qed = apply(Nat.succ, ind)
                qed
   }!
   
@@ -52,7 +52,7 @@ User.rigille.Nat.Order.chain.aux(
 ): a == 0
   case a with Hyp {
     zero: refl
-    succ: contra = Bool.true_neq_false(mirror(Hyp))
+    succ: let contra = Bool.true_neq_false(mirror(Hyp))
           Empty.absurd!(contra)
   }!
 
@@ -64,16 +64,16 @@ User.rigille.Nat.Order.chain(
   Hyp1: User.rigille.Nat.after(b, c)
 ): User.rigille.Nat.after(a, c)
   case b with Hyp0 Hyp1 {
-    zero: a_zero = mirror(User.rigille.Nat.Order.chain.aux(a, Hyp0))
-          qed = Hyp1 :: rewrite X in User.rigille.Nat.after(X, _) with a_zero
+    zero: let a_zero = mirror(User.rigille.Nat.Order.chain.aux(a, Hyp0))
+          let qed = Hyp1 :: rewrite X in User.rigille.Nat.after(X, _) with a_zero
           qed
     succ: case a with Hyp0 Hyp1 {
             zero: refl
             succ: case c with Hyp0 Hyp1 {
-                    zero: b_zero = User.rigille.Nat.Order.chain.aux(Nat.succ(b.pred), Hyp1)
-                          contra = Nat.succ_neq_zero!(b_zero)
+                    zero: let b_zero = User.rigille.Nat.Order.chain.aux(Nat.succ(b.pred), Hyp1)
+                          let contra = Nat.succ_neq_zero!(b_zero)
                           Empty.absurd!(contra)
-                    succ: ind = User.rigille.Nat.Order.chain(a.pred, b.pred, c.pred, Hyp0, Hyp1)
+                    succ: let ind = User.rigille.Nat.Order.chain(a.pred, b.pred, c.pred, Hyp0, Hyp1)
                           ind
                   }!
           }!

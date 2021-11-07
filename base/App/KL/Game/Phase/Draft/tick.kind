@@ -16,8 +16,8 @@ App.KL.Game.Phase.Draft.tick(
 
   if pair@fst && pair@snd then
   log("- to_board")
-    game = game@phase <- App.KL.Game.Phase.play // Phase -> Game
-    game = game@board <- App.KL.Game.Phase.Draft.create_board(players, game@blueprint) // App.KL.Game.Phase.Draft.create_board(players)
+    let game = game@phase <- App.KL.Game.Phase.play // Phase -> Game
+    let game = game@board <- App.KL.Game.Phase.Draft.create_board(players, game@blueprint) // App.KL.Game.Phase.Draft.create_board(players)
     game
   else
     game

@@ -2,7 +2,7 @@ App.KL.Game.Creature.Status.protect.update(
   creature: App.KL.Game.Creature
 ): App.KL.Game.Creature
   
-  protect_updated = App.KL.Game.Creature.Status.protect.update.aux(creature@status)
+  let protect_updated = App.KL.Game.Creature.Status.protect.update.aux(creature@status)
   creature@status <- protect_updated
 
 App.KL.Game.Creature.Status.protect.update.aux(

@@ -1,0 +1,10 @@
+Logic.Equivalence.Relation (A : Type) : Type
+  A -> A -> Type
+
+type Logic.Equivalence(A : Type, R : Logic.Equivalence.Relation(A)) {
+    new(
+        reflexive : (x : A) -> R(x, x),
+        symmetry : (x : A) -> (y : A) -> R(x, y) -> R(y, x)
+        transivity : (x : A) -> (y : A) -> (z : A) -> R(x, y) -> R(y, z) -> R(x, z)
+    )  
+}

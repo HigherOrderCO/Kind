@@ -16,7 +16,7 @@ type App.KL.Game.Board.Blueprint {
 App.KL.Game.Board.Blueprint.build.terrains(
   terrains: List<Pair<Pair<I32, I32>, Nat>> // {coord, field_id}
 ): Hexagonal.Axial.Map<App.KL.Game.Terrain>
-  map = Hexagonal.Axial.Map.new!
+  let map = Hexagonal.Axial.Map.new!
   for tile in terrains with map:
     let coord   = Hexagonal.Axial.new(tile@fst@fst, tile@fst@snd)
     let terrain = App.KL.Game.Terrain.new(tile@snd, none)
@@ -26,7 +26,7 @@ App.KL.Game.Board.Blueprint.build.terrains(
 App.KL.Game.Board.Blueprint.build.tokens(
   tokens: List<Pair<Pair<I32, I32>, App.KL.Game.Token>> // {coord, token}
 ): Hexagonal.Axial.Map<App.KL.Game.Token>
-  map = Hexagonal.Axial.Map.new!
+  let map = Hexagonal.Axial.Map.new!
   for tile in tokens with map:
     let coord   = Hexagonal.Axial.new(tile@fst@fst, tile@fst@snd)
     let token   = tile@snd

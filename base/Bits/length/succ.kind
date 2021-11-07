@@ -1,0 +1,7 @@
+Bits.length.succ(x : Bits, n : Nat) : 
+  Nat.succ(Bits.length.go(x, n)) == Bits.length.go(x, Nat.succ(n))
+    case x {
+      e : refl
+      i : Bits.length.succ(x.pred, Nat.succ(n))
+      o : Bits.length.succ(x.pred, Nat.succ(n))
+    }!

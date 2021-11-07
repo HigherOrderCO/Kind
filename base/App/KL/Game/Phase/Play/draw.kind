@@ -66,7 +66,13 @@ App.KL.Game.Phase.Play.draw.get_players_heroes(players: Map<App.KL.Game.Player>)
 App.KL.Game.Phase.Play.draw.get_players_skills(players: Map<App.KL.Game.Player>): List<SkillInfo>
   let game_heroes = App.KL.Game.Phase.Play.draw.get_players_heroes(players)
   let game_skills = List.flatten!(List.mapped!(game_heroes)!((hero) List.mapped!(Map.to_list!(hero@skills))!((x) {Pair.fst!!(x), {hero,Pair.snd!!(x)}})))
-  let game_skills = List.sort!((a,b) let as = Pair.snd!!(Pair.snd!!(a)); bs = Pair.snd!!(Pair.snd!!(b)); U64.cmp(as@delay, bs@delay), game_skills)
+  let game_skills = List.sort!(
+    (a,b) 
+      let as = Pair.snd!!(Pair.snd!!(a)); 
+      let bs = Pair.snd!!(Pair.snd!!(b)); 
+      U64.cmp(as@delay, bs@delay), 
+    game_skills
+  )
   game_skills
 
 // return a list with skill info of all players
@@ -221,7 +227,7 @@ App.KL.Game.Phase.Play.draw.letter(
     none: img
     some: 
       let screen_coord = App.KL.Game.Phase.Play.draw.canvas.to_xy(tile_coord, screen)
-      {cx, cy} = App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord)
+      let {cx, cy} = App.KL.Game.Phase.Play.draw.centralize_letter(screen_coord)
       VoxBox.Draw.text(Char.to_string(got.value), PixelFont.black, Pos32.new(cx,cy,App.KL.Constants.z_index.letter), img)
   }
 
@@ -273,7 +279,7 @@ App.KL.Game.Phase.Play.draw.ap(
 ): VoxBox
   let ap = App.KL.Game.Board.Creature.get.ap(creature)
   let max_ap = App.KL.Game.Board.Creature.get.max_ap(creature)
-  no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, 0, 0, I32.to_u32(max_ap), img)
+  let no_cast = App.KL.Game.Phase.Play.draw.ap.bars(x, y, ap, 0, 0, I32.to_u32(max_ap), img)
   case creature@category {
     summon: img
     hero:
@@ -296,13 +302,13 @@ App.KL.Game.Phase.Play.draw.ap.bars(x: U32 y: U32, blue: I32, red: I32, bar_idx:
       if U32.gte(bar_idx, bar_quantity) then
         img
       else 
-        img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.gray, img)
+        let img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.gray, img)
         App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red, bar_idx + 1, bar_quantity, img)
     else
-      img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.red, img)
+      let img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.red, img)
       App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue, red - 1, bar_idx + 1, bar_quantity, img)
   else 
-    img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.blue, img)
+    let img = VoxBox.Draw.image(x + (12 * bar_idx), y, App.KL.Constants.z_index.ap_bar, App.KL.Game.Phase.Play.Ap.Assets.blue, img)
     App.KL.Game.Phase.Play.draw.ap.bars(x, y, blue - 1, red, bar_idx + 1, bar_quantity, img)
 
 

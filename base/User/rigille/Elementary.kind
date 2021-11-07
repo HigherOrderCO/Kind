@@ -125,7 +125,7 @@ User.rigille.Elementary.derive(
           D(exp.fst_arg)*exp.snd_arg + exp.fst_arg*D(exp.snd_arg)
       }
     fun:
-      outer_derivative = User.rigille.Elementary.Function.derive(exp.name)
+      let outer_derivative = User.rigille.Elementary.Function.derive(exp.name)
       outer_derivative(exp.arg)*D(exp.arg)
     const:
       User.rigille.Elementary.constexp(0)
@@ -180,8 +180,8 @@ User.rigille.Elementary.reduce(
   case e {
     bin:
       // #TODO make this properly tail-recursive
-      red_fst = User.rigille.Elementary.reduce(e.fst_arg)
-      red_snd = User.rigille.Elementary.reduce(e.snd_arg)
+      let red_fst = User.rigille.Elementary.reduce(e.fst_arg)
+      let red_snd = User.rigille.Elementary.reduce(e.snd_arg)
       case e.op red_fst red_snd {
         add  const const:
           case red_fst.val red_snd.val {

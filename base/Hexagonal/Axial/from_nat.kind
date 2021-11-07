@@ -5,11 +5,11 @@ Hexagonal.Axial.from_nat(
   n: Nat
 ): Hexagonal.Axial
 
-  n_converted = Nat.to_u32(n)
-  coord_i = n_converted /  1000  //U32
-  coord_i = U32.to_i32(coord_i)
-  coord_i = coord_i - 100   // I32
-  coord_j = U32.mod(n_converted, 1000) // U32
-  coord_j = U32.to_i32(coord_j)
-  coord_j = coord_j - 100 // I32
+  let n_converted = Nat.to_u32(n)
+  let coord_i = n_converted /  1000  //U32
+  let coord_i = U32.to_i32(coord_i)
+  let coord_i = coord_i - 100   // I32
+  let coord_j = U32.mod(n_converted, 1000) // U32
+  let coord_j = U32.to_i32(coord_j)
+  let coord_j = coord_j - 100 // I32
   Hexagonal.Axial.new(coord_i, coord_j)

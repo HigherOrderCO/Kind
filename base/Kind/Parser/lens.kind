@@ -29,15 +29,17 @@ Kind.Parser.lens(term: Kind.Term): Parser<Kind.Term>
   Parser {
     get dirs = Parser.many1!(Kind.Parser.lens.path)
     Parser.choice!([
-      Parser {
-        Kind.Parser.text("<-")
-        get xval = Kind.Parser.term
-        return Kind.Parser.lens.mutter(term, () xval, dirs)
-      }
+      // mut
       Parser {
         Kind.Parser.text("<~")
         get xfun = Kind.Parser.term
-        return Kind.Parser.lens.mutter(term, (x) Kind.Term.app(xfun, x), dirs)
+        return Kind.Parser.lens.mutter(term, (x) Kind.Term.app(xfun, x), dirs, false)
+      }
+      // set
+      Parser {
+        Kind.Parser.text("<-")
+        get xval = Kind.Parser.term
+        return Kind.Parser.lens.mutter(term, () xval, dirs, true)
       }
       Parser {
         return Kind.Parser.lens.getter(term, dirs)
@@ -50,33 +52,37 @@ Kind.Parser.lens.let(body: Unit -> Parser(Kind.Term)): Parser<Kind.Term>
     Kind.Parser.text("let ")
     get name = Kind.Parser.name1
     get dirs = Parser.many1!(Kind.Parser.lens.path)
-    get symb = Parser.option([Kind.Parser.text("<-"), Kind.Parser.text("<~")])
+    get symb = Parser.option([Kind.Parser.text("<~"), Kind.Parser.text("<-")])
     get expr = Kind.Parser.term
     Parser.maybe!(Kind.Parser.text(";"))
     get body = body(unit)
-    let expr = Kind.Parser.lens.mutter(Kind.Term.ref(name), case symb { zero: () expr, succ: (x) Kind.Term.app(expr,x) }, dirs)
+    let expr = case symb {
+      zero: Kind.Parser.lens.mutter(Kind.Term.ref(name), (x) Kind.Term.app(expr,x), dirs, false)
+      succ: Kind.Parser.lens.mutter(Kind.Term.ref(name), (x) expr, dirs, true)
+    }
     return Kind.Term.let(name, expr, (x) body)
   }
 
-Kind.Parser.lens.mutter(expr: Kind.Term, func: Kind.Term -> Kind.Term, dirs: List<Kind.Parser.lens.dir>): Kind.Term
+Kind.Parser.lens.mutter(expr: Kind.Term, func: Kind.Term -> Kind.Term, dirs: List<Kind.Parser.lens.dir>, is_set: Bool): Kind.Term
   case dirs {
     nil: func(expr)
     cons: case dirs.head {
       record:
-        //foo@x <- 7
-        Kind.Term.mut(expr, dirs.head.key, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail)))
+        Kind.Term.mut(expr, dirs.head.key, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail, is_set)))
       list:
         let term = Kind.Term.ref("List.mut")
         let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
         let term = Kind.Term.app(term, dirs.head.key)
-        let term = Kind.Term.app(term, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail)))
+        let term = Kind.Term.app(term, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail, is_set)))
         let term = Kind.Term.app(term, expr)
         term
       map:
-        let term = Kind.Term.ref("Map.mut")
+        let sets = List.is_empty!(dirs.tail) && is_set
+        let term = Kind.Term.ref(if sets then "Map.set" else "Map.mut")
         let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
         let term = Kind.Term.app(term, dirs.head.key)
-        let term = Kind.Term.app(term, Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail)))
+        let argf = if sets then func(Kind.Term.ref("?")) else Kind.Term.lam("x", (x) Kind.Parser.lens.mutter(x, func, dirs.tail, is_set))
+        let term = Kind.Term.app(term, argf)
         let term = Kind.Term.app(term, expr)
         term
     }

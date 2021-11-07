@@ -289,7 +289,7 @@ App.KL.Game.Phase.Play.draw.canvas.cursor(
   img: VoxBox
 ): VoxBox
   let coord = App.KL.Game.Phase.Play.draw.canvas.from_xy(mouse, screen)
-  {x,y} = App.KL.Game.Phase.Play.draw.centralize.old(coord, screen)
+  let {x,y} = App.KL.Game.Phase.Play.draw.centralize.old(coord, screen)
   let has_tile = App.KL.Game.Tile.get(coord, board)
   case has_tile { 
     none:

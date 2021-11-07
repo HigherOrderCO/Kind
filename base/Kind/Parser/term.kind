@@ -22,11 +22,11 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.getforin.with((x) Kind.Parser.term)
       Kind.Parser.let.abort((x) Kind.Parser.term)
       Kind.Parser.let((x) Kind.Parser.term)
-      Kind.Parser.let.omit((x) Kind.Parser.term)
+      // Kind.Parser.let.omit((x) Kind.Parser.term)
       Kind.Parser.getwhile((x) Kind.Parser.term)
       Kind.Parser.getwhile.with((x) Kind.Parser.term)
       Kind.Parser.get((x) Kind.Parser.term)
-      Kind.Parser.get.omit((x) Kind.Parser.term)
+      // Kind.Parser.get.omit((x) Kind.Parser.term)
       Kind.Parser.def((x) Kind.Parser.term)
       Kind.Parser.lens.let((x) Kind.Parser.term)
       Kind.Parser.use.abort((x) Kind.Parser.term)
@@ -47,6 +47,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.chain
       Kind.Parser.mirror
       Kind.Parser.comprehension
+      Kind.Parser.comprehension.mapped
       Kind.Parser.comprehension_range
       Kind.Parser.list
       Kind.Parser.map

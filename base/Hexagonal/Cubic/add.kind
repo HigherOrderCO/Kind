@@ -6,7 +6,7 @@ Hexagonal.Cubic.add(
 
   open coord_a
   open coord_b
-  x = coord_a.x + coord_b.x // I32
-  y = coord_a.y + coord_b.y // I32
-  z = coord_a.z + coord_b.z // I32
+  let x = coord_a.x + coord_b.x // I32
+  let y = coord_a.y + coord_b.y // I32
+  let z = coord_a.z + coord_b.z // I32
   Hexagonal.Cubic.new(x, y, z)

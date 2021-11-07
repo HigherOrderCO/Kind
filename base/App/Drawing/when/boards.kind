@@ -1,25 +1,25 @@
 App.Drawing.when.boards(event: App.Event, state: App.Store<App.Drawing.State>): IO(Maybe(App.State.local(App.Drawing.State)))
-local = state@local
+let local = state@local
 case event{
   key_down:
     //log(U16.show(event.code))
     switch U16.eql(event.code) {
       'A': 
-        style = local@style
-        style = style@color <- Col32.new(0#32,0#32,255#32,255#32)
-        new_local = local@style <- style
+        let style = local@style
+        let style = style@color <- Col32.new(0#32,0#32,255#32,255#32)
+        let new_local = local@style <- style
         App.set_local!(new_local)
       'S':
-        style = local@style
-        style = style@color <- Col32.new(255#32,0#32,0#32,255#32)
-        new_local = local@style <- style
+        let style = local@style
+        let style = style@color <- Col32.new(255#32,0#32,0#32,255#32)
+        let new_local = local@style <- style
         App.set_local!(new_local)
       'Z': 
         App.set_local!(App.Drawing.Action.local.ctrl_z(local))
     }default App.pass!
 
   mouse_down:
-    new_local = local@drawing <- true
+    let new_local = local@drawing <- true
     App.set_local!(new_local)
 
   frame:
@@ -32,8 +32,8 @@ case event{
     App.set_local!(new_local)    
 
   mouse_up:
-    new_local = local@drawing <- false
-    new_local = App.Drawing.Action.local.save(new_local)
+    let new_local = local@drawing <- false
+    let new_local = App.Drawing.Action.local.save(new_local)
     App.set_local!(new_local)
 
 

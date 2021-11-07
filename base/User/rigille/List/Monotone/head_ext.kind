@@ -8,12 +8,14 @@ User.rigille.List.Monotone.head_ext<A: Type, after: A -> A -> Type, O: User.rigi
     nil: Empty.absurd!(Hyp1)
     cons: open Hyp
           case Hyp1 {
-            left: qed = Hyp.fst :: rewrite X in after(x, X) with mirror(Hyp1.value)
+            left: 
+                  let qed = Hyp.fst :: rewrite X in after(x, X) with mirror(Hyp1.value)
                   qed
-            right: ind = User.rigille.List.Monotone.head_ext<A, after, O>(xs.head, xs.tail, Hyp.snd)
-                   lem = ind(y, Hyp1.value)
+            right: 
+                   let ind = User.rigille.List.Monotone.head_ext<A, after, O>(xs.head, xs.tail, Hyp.snd)
+                   let lem = ind(y, Hyp1.value)
                    open O
-                   qed = O.chain!!!(Hyp.fst, lem)
+                   let qed = O.chain!!!(Hyp.fst, lem)
                    qed
           }
   }!

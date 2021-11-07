@@ -1,9 +1,9 @@
-//Nat.mod.small(
-//  n: Nat
-//  m: Nat
-//  Hyp: Equal<Bool>(Nat.lte(1, m), true)
-//): Equal<Bool>(Nat.lte(m, Nat.mod(n, m)), false)
-//  ?mod.small.body
+Nat.mod.small(
+  n: Nat
+  m: Nat
+  Hyp: Equal<Bool>(Nat.lte(1, m), true)
+): Equal<Bool>(Nat.lte(m, Nat.mod(n, m)), false)
+  Nat.mod.small.aux(m,0, n, Hyp)
 
 Nat.mod.small.aux(
   n: Nat

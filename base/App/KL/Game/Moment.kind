@@ -55,7 +55,7 @@ App.KL.Game.Moment.create_board.choose_coord(
   board: App.KL.Game.Board
 ): App.KL.Game.Board
 
-  position = none :: Maybe<App.KL.Game.Board>
+  let position = none :: Maybe<App.KL.Game.Board>
     for coord:team in coords with position:
       case position {
         none:

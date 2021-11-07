@@ -12,7 +12,7 @@ App.KL.Game.Phase.Play.when(
       open event.info
       //log("Screen size: " | U32.show(local@screen@size@fst) | ", " | U32.show(local@screen@size@snd))
       let picks = App.KL.Game.Cast.picks_of(local@user, game)
-      let new_local = local@preview <- (local@preview@picks <- picks)
+      let new_local = local@preview@picks <- picks
       open new_local
       // let screen = new_local.screen@size <- event.info.screen_size
       let new_local = 
@@ -37,9 +37,12 @@ App.KL.Game.Phase.Play.when(
     mouse_move:
       // mouse move on canvas
       if String.eql("game_screen", event.id) then
-        let {x,y} = event.mouse_pos
-        let local = local@hud <- local@hud@skill <- none
-        let local = local@mouse <- {x / 2, y / 2}
+        let {x, y} = event.mouse_pos
+        let x = x / 2
+        let y = y / 2
+        let mouse = Pair.new!!(x, y) //TODO verify bug
+        let local = local@mouse <- mouse
+        let local = local@hud@skill <- none
         App.set_local!(App.KL.State.Local.game(local))
       // mouse move on interface
       else
@@ -54,7 +57,7 @@ App.KL.Game.Phase.Play.when(
                 get hero_id  = user@hero_id
                 get hero     = App.KL.Game.Hero.get_by_id(hero_id)
                 get skill    = hero@skills{key}
-                let controls = local@hud@skill <- some(skill)
+                let controls = controls@skill <- some(skill)
                 return controls
               } <> controls
           } default controls
@@ -70,15 +73,13 @@ App.KL.Game.Phase.Play.when(
         189#16: IO {  
           let scale       = local@screen@scale
           let new_scale   = if scale <=? 1.0 then scale else scale - 1.0
-          let new_screen  = local@screen@scale <- new_scale
-          let new_local   = local@screen <- new_screen
+          let new_local   = local@screen@scale <- new_scale
           App.set_local<App.KL.State>(App.KL.State.Local.game(new_local))
         }
         187#16: IO { 
           let scale       = local@screen@scale
           let new_scale   = if scale >=? 5.0 then scale else scale + 1.0
-          let new_screen  = local@screen@scale <- new_scale
-          let new_local   = local@screen <- new_screen
+          let new_local   = local@screen@scale <- new_scale
           App.set_local<App.KL.State>(App.KL.State.Local.game(new_local))
         }
         36#16:
@@ -100,21 +101,21 @@ App.KL.Game.Phase.Play.when(
                   App.set_local<App.KL.State>(App.KL.State.Local.game(local@preview <- preview))
                 }
             }default
-            local = 
-              Maybe {
-                get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
-                let skill       =
-                  case preview@skill as skill {
-                    none: 
-                      some({event.code, 1})
-                    some:
-                      if skill.value@fst =? event.code then
-                        none
-                      else 
+              let local = 
+                Maybe {
+                  get casted_skill  = App.KL.Game.Skill.get(local@user, event.code, game)
+                  let skill       =
+                    case preview@skill as skill {
+                      none: 
                         some({event.code, 1})
-                  }          
-                return local@preview <- preview@skill <- skill
-              } <> local
+                      some:
+                        if skill.value@fst =? event.code then
+                          none
+                        else 
+                          some({event.code, 1})
+                    }          
+                  return local@preview <- preview@skill <- skill
+                } <> local
             IO {
               App.new_post!(room, App.KL.Game.Phase.Play.Event.cast.cancel_skill(event.code))
               App.set_local!(App.KL.State.Local.game(local))

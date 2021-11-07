@@ -1,0 +1,71 @@
+Parser.JSON: Parser<JSON>
+  Parser.choice!([
+    Parser.JSON.string
+    Parser.JSON.array
+    Parser.JSON.object
+    Parser.JSON.null
+    Parser.JSON.bool
+    Parser.JSON.number
+  ])
+
+Parser.JSON.null: Parser<JSON>
+  Parser {
+    Parser.spaces_text("null")
+    return JSON.null
+  }
+
+Parser.JSON.bool: Parser<JSON>
+  Parser.choice!([
+    Parser {
+      Parser.spaces_text("true")
+      return JSON.bool(true)
+    }
+    Parser {
+      Parser.spaces_text("false")
+      return JSON.bool(false)
+    }
+  ])
+
+Parser.JSON.number: Parser<JSON>
+  Parser {
+    Parser.spaces
+    get val = Parser.f64
+    return JSON.number(val)
+  }
+
+Parser.JSON.string: Parser<JSON>
+  Parser {
+    Parser.spaces
+    get str = Parser.string
+    return JSON.string(str)
+  }
+
+Parser.JSON.array: Parser<JSON>
+  Parser {
+    get vals = Parser.wrap!(
+      Parser.spaces_text("[")
+      Parser {
+        get val = Parser.JSON
+        Parser.maybe!(Parser.spaces_text(","))
+        return val
+      }
+      Parser.spaces_text("]"))
+    return JSON.array(vals)
+  }
+    
+Parser.JSON.object: Parser<JSON>
+  Parser {
+    get key_vals = Parser.wrap!(
+      Parser.spaces_text("{")
+      Parser {
+        Parser.spaces
+        get key = Parser.string
+        Parser.spaces_text(":")
+        get val = Parser.JSON
+        Parser.maybe!(Parser.spaces_text(","))
+        return {key, val}
+      }
+      Parser.spaces_text("}"))
+    return JSON.object(Map.from_list!(key_vals))
+  }
+

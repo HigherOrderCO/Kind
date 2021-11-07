@@ -1,3 +1,87 @@
 Ether.Bits.get_bytes_size(bytes : Bits) : Nat
     let bytes_size = Bits.length(bytes) / 8
     if (Nat.mod(Bits.length(bytes), 8)) >? 0 then bytes_size +1 else Nat.max(1, bytes_size)
+
+Nat.gte.zero_right(n: Nat, Hyp: Nat.gtn(n, 0) == false): n == 0
+  case n with Hyp {
+   zero : refl
+   succ : Empty.absurd!(Bool.false_neq_true(mirror(Hyp)))
+  }!
+
+Ether.Bits.get_bytes_size.identity_bits_8(bytes : Bits) : 
+  ((Ether.Bits.get_bytes_size(bytes) =? 1) == true) -> Nat.lte(Bits.length(bytes), 8) == true
+ let remember = case Nat.gtn(Nat.mod(Bits.length(bytes),8), 0) {
+     true : (H)
+      let H = mirror(H)
+       case H {
+           refl : 
+             let H3 = refl :: Bool.true(() Nat,Nat.add(Nat.div(Bits.length(bytes),8),1),Nat.max(1,Nat.div(Bits.length(bytes),8))) == Nat.add(Nat.div(Bits.length(bytes),8),1)
+             let H3 = Equal.mirror(Nat, Bool.true(() Nat,Nat.add(Nat.div(Bits.length(bytes),8),1),Nat.max(1,Nat.div(Bits.length(bytes),8))), Nat.add(Nat.div(Bits.length(bytes),8),1), H3)
+             case H3 {
+              refl : 
+                let remember = case (Nat.div(Bits.length(bytes),8)) as s {
+                    zero : (H4, H5) 
+                      let H5 = Nat.div_mod.recover(Bits.length(bytes), 8, refl)
+                      let H5 = H5 :: rewrite Y in Nat.add(Nat.mod(Bits.length(bytes),8),Nat.mul(Y,8)) == Bits.length(bytes) with H4
+                      let H5 = (H5 :: rewrite Y in Y == Bits.length(bytes) with Nat.add.comm(Nat.mod(Bits.length(bytes),8), 0)) :: Nat.mod(Bits.length(bytes),8) == Bits.length(bytes) 
+                      let H6 = Nat.lte.comm.false(8, Nat.mod(Bits.length(bytes),8), Nat.mod.small(Bits.length(bytes), 8, refl))
+                      let H6 = Nat.lte.succ_left(Nat.mod(Bits.length(bytes),8), 8, H6)
+                      let H6 = H6 :: rewrite Y in Nat.lte(Y,8) == Bool.true with H5
+                      H6
+                    succ : (H4, H5)
+                      let H6 = Nat.div_mod.recover(Bits.length(bytes), 8, refl)
+                      let H7 = Nat.eql.reflexivity(Nat.add(Nat.div(Bits.length(bytes),8),1), 1, H5)
+                      let H7 = H7 :: rewrite X in X == _ with Nat.add.comm(Nat.div(Bits.length(bytes),8), 1)
+                      let H7 = Nat.succ_inj!!(H7 :: Nat.succ(Nat.div(Bits.length(bytes),8)) == 1)
+                      let H4 = mirror(H4) :: rewrite Y in _ == Y with H7
+                      Empty.absurd!(Nat.succ_neq_zero!(H4))
+                } : (Nat.div(Bits.length(bytes),8) == s) -> (:Nat.eql(Nat.add(Nat.div(Bits.length(bytes),8),1),1) == Bool.true) -> Nat.lte(Bits.length(bytes),8) == Bool.true
+                remember(refl)
+             }!
+       } : (:Nat.eql(H.b(() Nat,Nat.add(Nat.div(Bits.length(bytes),8),1),Nat.max(1,Nat.div(Bits.length(bytes),8))),1) == Bool.true) -> Nat.lte(Bits.length(bytes),8) == Bool.true
+     false : 
+       (H, H2)
+         let H_lte = Nat.gte.zero_right(Nat.mod(Bits.length(bytes),8), H)
+         case Nat.gtn(Nat.mod(Bits.length(bytes),8), 0) with H2 {
+           true : 
+             def H2 = H2 :: Nat.eql(Nat.add(Nat.div(Bits.length(bytes),8),1),1) == Bool.true
+             def H2 = Equal.rewrite(Nat, Nat.add(Nat.div(Bits.length(bytes),8),1), Nat.add(1,Nat.div(Bits.length(bytes),8)), Nat.add.comm(Nat.div(Bits.length(bytes),8), 1),
+               (Y) Nat.eql(Y,1) == Bool.true, H2)
+             let H2 = Nat.eql.reflexivity(Nat.div(Bits.length(bytes),8), 0, H2 :: Nat.eql(Nat.div(Bits.length(bytes),8),0) == Bool.true)
+             let H3 = Nat.div_mod.recover(Bits.length(bytes), 8, refl)
+             let H3 = H3 :: rewrite Y in
+               Nat.add(Y,Nat.mul(Nat.div(Bits.length(bytes),8),8)) == Bits.length(bytes) with H_lte
+             let H3 = H3 :: rewrite Y in
+                 Nat.add(0,Nat.mul(Y,8)) == Bits.length(bytes) with H2
+             let H3 = H3 :: 0 == Bits.length(bytes)
+             refl :: rewrite Y in Nat.lte(Y,8) == Bool.true with H3
+           false : 
+             let H2 = H2 :: Nat.eql(Nat.max(1,Nat.div(Bits.length(bytes),8)),1) == Bool.true
+             let H2 = Nat.eql.reflexivity(Nat.max(1,Nat.div(Bits.length(bytes),8)), 1, H2)
+             let H2 = Nat.max.less!!(H2)
+             (case Nat.div(Bits.length(bytes),8) {
+               zero : (dec)
+                  let H3 = Nat.div_mod.recover(Bits.length(bytes), 8, refl)
+                  let H3 = H3 :: rewrite Y in Nat.add(Nat.mod(Bits.length(bytes),8),Nat.mul(Y,8)) == Bits.length(bytes) with dec
+                  let H3 = H3 :: rewrite Y in Nat.add(Y,Nat.mul(0,8)) == Bits.length(bytes) with H_lte
+                  let H3 = H3 :: 0 == Bits.length(bytes)
+                  refl :: rewrite X in Nat.lte(X,8) == Bool.true with H3
+               succ : (dec) (case self.pred as dec_number {
+                 zero : (dec_number) 
+                   let dec = dec :: rewrite X in Nat.div(Bits.length(bytes),8) == Nat.succ(X) with dec_number
+                   let H3 = Nat.div_mod.recover(Bits.length(bytes), 8, refl)
+                   let H3 = H3 :: rewrite Y in Nat.add(Nat.mod(Bits.length(bytes),8),Nat.mul(Y,8)) == Bits.length(bytes) with dec
+                   let H3 = H3 :: rewrite Y in Nat.add(Y,Nat.mul(1,8)) == Bits.length(bytes) with H_lte
+                   let H3 = H3 :: 8 == Bits.length(bytes)
+                   refl :: rewrite X in Nat.lte(X,8) == Bool.true with H3
+                 succ : (dec_number) 
+                   let dec = dec :: rewrite X in Nat.div(Bits.length(bytes),8) == Nat.succ(X) with dec_number
+                   let H2 = H2 :: rewrite X in Nat.lte(X,1) == Bool.true with dec
+                   Empty.absurd!(Bool.false_neq_true(H2))
+               } : (self.pred == dec_number) -> _)(refl)
+
+             } : (Nat.div(Bits.length(bytes),8) == self) -> Nat.lte(Bits.length(bytes),8) == Bool.true)(refl)
+         }!
+ } : (Nat.gtn(Nat.mod(Bits.length(bytes),8), 0) == self) -> (:Nat.eql(Nat.gtn(Nat.mod(Bits.length(bytes),8),0,() Nat,Nat.add(Nat.div(Bits.length(bytes),8),1),Nat.max(1,Nat.div(Bits.length(bytes),8))),1) == Bool.true) -> Nat.lte(Bits.length(bytes),8) == Bool.true
+remember(refl)
+

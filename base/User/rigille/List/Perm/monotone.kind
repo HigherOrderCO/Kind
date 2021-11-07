@@ -10,20 +10,20 @@ User.rigille.List.Perm.Monotone<A: Type>(
   def this = User.rigille.List.Perm.Monotone<A, after, O>
   case Hyp2 with Hyp0 Hyp1 Hyp2 {
     nil: refl
-    skip: l0_monotone = User.rigille.List.Monotone.tail<A, after, O>!!(Hyp0)
-          l1_monotone = User.rigille.List.Monotone.tail<A, after, O>!!(Hyp1)
-          ind = this(Hyp2.l0, Hyp2.l1, l0_monotone, l1_monotone, Hyp2.Hyp)
-          qed = apply(List.cons<A>(Hyp2.x), ind)
+    skip: let l0_monotone = User.rigille.List.Monotone.tail<A, after, O>!!(Hyp0)
+          let l1_monotone = User.rigille.List.Monotone.tail<A, after, O>!!(Hyp1)
+          let ind = this(Hyp2.l0, Hyp2.l1, l0_monotone, l1_monotone, Hyp2.Hyp)
+          let qed = apply(List.cons<A>(Hyp2.x), ind)
           qed
     swap: open O
           open Hyp0
           open Hyp1
-          heads_eq = O.anti_symm!!(Hyp0.fst, Hyp1.fst)
-          tails_eq = refl :: Hyp2.l == Hyp2.l
+          let heads_eq = O.anti_symm!!(Hyp0.fst, Hyp1.fst)
+          let tails_eq = refl :: Hyp2.l == Hyp2.l
           def cons_y = List.cons<A>(Hyp2.y)
-          lem = apply(cons_y, apply(cons_y, tails_eq))
-          qed = lem :: rewrite X in (Hyp2.y & X & Hyp2.l) == (X & Hyp2.y & Hyp2.l) with heads_eq
+          let lem = apply(cons_y, apply(cons_y, tails_eq))
+          let qed = lem :: rewrite X in (Hyp2.y & X & Hyp2.l) == (X & Hyp2.y & Hyp2.l) with heads_eq
           qed
-    trans: ind = this(Hyp2.l0, Hyp2.l2, Hyp0, Hyp1, Hyp2)
+    trans: let ind = this(Hyp2.l0, Hyp2.l2, Hyp0, Hyp1, Hyp2)
            ind
   }!

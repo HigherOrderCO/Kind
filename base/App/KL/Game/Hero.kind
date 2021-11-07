@@ -38,7 +38,7 @@ type App.KL.Game.Hero.Attributes {
 }
 
 App.KL.Game.Hero.Attributes.set(damage: Nat, resistance: Nat, mobility: Nat, range: Nat, utility: Nat, difficulty: Nat): App.KL.Game.Hero.Attributes
-  max = Nat.min(5)
+  let max = Nat.min(5)
   App.KL.Game.Hero.Attributes.new(
     max(damage)
     max(resistance)

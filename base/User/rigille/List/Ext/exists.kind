@@ -5,32 +5,32 @@ User.rigille.List.Ext.exists<A: Type>(after: A -> A -> Type, O: User.rigille.Ord
   case xs with Hyp {
     nil: Empty.absurd!(Hyp(refl))
     cons: case xs.tail with Hyp {
-            nil: head_in = left(refl) :: User.rigille.List.In<A>([xs.head], xs.head)
+            nil: let head_in = left(refl) :: User.rigille.List.In<A>([xs.head], xs.head)
                  open O
-                 prop = (y, Hyp) case Hyp {
-                          left: qed = O.refl(y)
-                                qed = qed :: rewrite X in after(X, y) with Hyp.value
+                 let prop = (y, Hyp) case Hyp {
+                          left: let qed = O.refl(y)
+                                let qed = qed :: rewrite X in after(X, y) with Hyp.value
                                 qed
                           right: Empty.absurd!(Hyp.value)
                         }
                  xs.head ~ head_in ~ prop
             cons: open O
-                  not_empty = Nat.succ_neq_zero(List.length<A>(xs.tail.tail))
-                  ind = User.rigille.List.Ext.exists<A, after, O>(xs.tail.head & xs.tail.tail, not_empty)
+                  let not_empty = Nat.succ_neq_zero(List.length<A>(xs.tail.tail))
+                  let ind = User.rigille.List.Ext.exists<A, after, O>(xs.tail.head & xs.tail.tail, not_empty)
                   open ind
                   open ind.snd
                   case O.conn(xs.head, ind.fst) as ord {
-                    left: head_in = left(refl) :: User.rigille.List.In<A>(xs.head & xs.tail.head & xs.tail.tail, xs.head)
-                          head_ext = ((y, Hyp) case Hyp {
-                                                 left: duh = O.refl(y)
+                    left: let head_in = left(refl) :: User.rigille.List.In<A>(xs.head & xs.tail.head & xs.tail.tail, xs.head)
+                          let head_ext = ((y, Hyp) case Hyp {
+                                                 left: let duh = O.refl(y)
                                                        duh :: rewrite X in after(X, y) with Hyp.value
-                                                 right: smaller = ind.snd.snd(y, Hyp.value)
+                                                 right: let smaller = ind.snd.snd(y, Hyp.value)
                                                         O.chain!!!(ord.value, smaller)
                                                }!)
                           xs.head ~ head_in ~ head_ext
-                    right: ind_in = right(ind.snd.fst) :: User.rigille.List.In<A>(xs.head & xs.tail.head & xs.tail.tail, ind.fst)
-                           ind_ext = ((y, Hyp) case Hyp {
-                                                 left: qed = ord.value :: rewrite X in after(ind.fst, X) with mirror(Hyp.value)
+                    right: let ind_in = right(ind.snd.fst) :: User.rigille.List.In<A>(xs.head & xs.tail.head & xs.tail.tail, ind.fst)
+                           let ind_ext = ((y, Hyp) case Hyp {
+                                                 left: let qed = ord.value :: rewrite X in after(ind.fst, X) with mirror(Hyp.value)
                                                        qed
                                                  right: ind.snd.snd(y, Hyp.value)
                                                }!)

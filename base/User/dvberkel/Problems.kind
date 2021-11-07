@@ -300,8 +300,8 @@ User.dvberkel.Problems.t11(n: Nat): Nat.same(n) == n
  case n {
      zero: refl
      succ:
-       ind = User.dvberkel.Problems.t11(n.pred)
-       qed = apply(Nat.succ, ind)
+       let ind = User.dvberkel.Problems.t11(n.pred)
+       let qed = apply(Nat.succ, ind)
        qed
  }!
 
@@ -309,8 +309,8 @@ User.dvberkel.Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
   case n {
       zero: refl
       succ:
-        ind = User.dvberkel.Problems.t12(n.pred)
-        qed = apply(Nat.succ, ind)
+        let ind = User.dvberkel.Problems.t12(n.pred)
+        let qed = apply(Nat.succ, ind)
         qed
   }!
 
@@ -321,8 +321,8 @@ User.dvberkel.Problems.t14(n: Nat): Nat.add(n,0) == n
   case n {
       zero: refl
       succ:
-        ind = User.dvberkel.Problems.t14(n.pred)
-        qed = apply(Nat.succ, ind)
+        let ind = User.dvberkel.Problems.t14(n.pred)
+        let qed = apply(Nat.succ, ind)
         qed
   }!
 
@@ -330,8 +330,8 @@ User.dvberkel.Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(N
  case n {
      zero: refl
      succ:
-        ind = User.dvberkel.Problems.t15(n.pred, m)
-        qed = apply(Nat.succ, ind)
+        let ind = User.dvberkel.Problems.t15(n.pred, m)
+        let qed = apply(Nat.succ, ind)
         qed
  }!
   
@@ -339,8 +339,8 @@ User.dvberkel.Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(N
   case n {
       zero: refl
       succ:
-        ind = User.dvberkel.Problems.t16(n.pred, m)
-        qed = apply(Nat.succ, ind)
+        let ind = User.dvberkel.Problems.t16(n.pred, m)
+        let qed = apply(Nat.succ, ind)
         qed
   }!
 

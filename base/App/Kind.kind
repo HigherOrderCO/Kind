@@ -48,13 +48,13 @@ App.Kind.draw_page(stt: App.Kind.State.local): DOM
 // Executes the application
 App.Kind: App(App.Kind.State)
 
-  init = 
+  let init = 
     App.Store.new!(App.Kind.State.local.new(Device.big_desktop, App.Kind.Page.home, ""), unit)
 
-  draw = (state)
+  let draw = (state)
     App.Kind.draw_page(state@local)
 
-  when = (event, state)
+  let when = (event, state)
     case event {
       init: 
         open event.info
@@ -71,10 +71,10 @@ App.Kind: App(App.Kind.State)
         App.set_local!(App.Kind.State.local.new(device, state.page, state.mouse_over))
     } default App.pass!
   
-  tick = (tick, glob)
+  let tick = (tick, glob)
     glob
   
-  post = (time, room, addr, data, glob)
+  let post = (time, room, addr, data, glob)
     glob
 
   // The application

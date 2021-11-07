@@ -19,12 +19,12 @@ Ether.Address.Checksum.generate(encoding : List<Pair<Bits, Pair<String, String>>
        let {char, char1} = chars
        let str = Ether.Address.Checksum.generate(encoding.tail)
 
-       str = if Bits.lte(Nat.to_bits(8), Bits.and(Nat.to_bits(15), hash)) then
+       let str = if Bits.lte(Nat.to_bits(8), Bits.and(Nat.to_bits(15), hash)) then
                String.to_upper(char1) | str
              else
                String.to_lower(char1) | str
            
-       str = if Bits.lte(Nat.to_bits(8), Bits.shift_right(4, hash)) then
+       let str = if Bits.lte(Nat.to_bits(8), Bits.shift_right(4, hash)) then
                String.to_upper(char) | str
              else
                String.to_lower(char) | str

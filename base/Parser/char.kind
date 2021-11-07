@@ -1,0 +1,18 @@
+Parser.char: Parser<Char>
+  Parser {
+    Parser.text("'")
+    get chrx = Parser.char.single
+    Parser.text("'")
+    return chrx
+  }
+
+Parser.char.single: Parser<Char>
+  Parser.choice!([
+    Parser.choice!(List.mapped!(Parser.escapes)!((esc) case esc {
+      new: Parser {
+        Parser.text(esc.fst)
+        return esc.snd
+      }
+    }))
+    Parser.one
+  ])

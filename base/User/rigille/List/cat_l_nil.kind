@@ -1,7 +1,7 @@
 User.rigille.List.cat_l_nil<A: Type>(xs: List<A>): xs == xs ++ []
   case xs {
     nil: refl
-    cons: ind = User.rigille.List.cat_l_nil!(xs.tail)
-          qed = apply(List.cons!(xs.head), ind)
+    cons: let ind = User.rigille.List.cat_l_nil!(xs.tail)
+          let qed = apply(List.cons!(xs.head), ind)
           qed
   }!

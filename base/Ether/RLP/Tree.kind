@@ -1,4 +1,5 @@
-type Ether.RLP.Tree {
-    tip(value : Bits)
-    list(value : List<Ether.RLP.Tree>)
+//changed to become a functor
+type Ether.RLP.Tree<A : Type> {
+    tip(value : A)
+    list(value : List<Ether.RLP.Tree<A>>)
 }

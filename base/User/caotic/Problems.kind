@@ -374,7 +374,7 @@ Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.l
   }!
 
 Problems.aux_reverse(xs : List<Nat>, a : Nat) :
-  List.reverse.go(Nat, xs, [a]) == List.reverse.go(Nat, List.cons(Nat, a, xs), []) 
+  let List.reverse.go(Nat, xs, [a]) == List.reverse.go(Nat, List.cons(Nat, a, xs), []) 
   refl
 
 // List.cons(Nat,a,List.reverse.go(Nat,xs.tail,List.cons(Nat,xs.head,List.nil(Nat)))) ==
@@ -410,7 +410,7 @@ push_back_reverse(A : Type, xs : List<A>) : theorem_push_back_reverse(A, xs)
         push_back(A,List.cons(A,xs.head,ls),k),
         List.cons(A,xs.head,push_back(A,ls,k)),
         e
-        (X) push_back(A,List.reverse.go(A,xs.tail,List.cons(A,xs.head,ls)),k) == List.reverse.go(A,xs.tail,X),
+        let (X) push_back(A,List.reverse.go(A,xs.tail,List.cons(A,xs.head,ls)),k) == List.reverse.go(A,xs.tail,X),
         a>
       k
   } : theorem_push_back_reverse(A, xs)

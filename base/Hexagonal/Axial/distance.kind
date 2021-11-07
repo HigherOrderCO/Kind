@@ -4,6 +4,6 @@ Hexagonal.Axial.distance(
   snd_coord: Hexagonal.Axial
 ): I32
 
-  convert_fst = Hexagonal.Axial.to_cubic(fst_coord)
-  convert_snd = Hexagonal.Axial.to_cubic(snd_coord)
+  let convert_fst = Hexagonal.Axial.to_cubic(fst_coord)
+  let convert_snd = Hexagonal.Axial.to_cubic(snd_coord)
   Hexagonal.Cubic.distance(convert_fst, convert_snd)

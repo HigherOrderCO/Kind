@@ -7,17 +7,17 @@ Hexagonal.Axial.line(
   open start
   open goal
 
-  {si, sj} = {I32.to_f64(start.i), I32.to_f64(start.j)}
-  {gi, gj} = {I32.to_f64(goal.i), I32.to_f64(goal.j)}
+  let {si, sj} = {I32.to_f64(start.i), I32.to_f64(start.j)}
+  let {gi, gj} = {I32.to_f64(goal.i), I32.to_f64(goal.j)}
   
-  coords = []
-  distance = I32.to_nat(Hexagonal.Axial.distance(start, goal))
+  let coords = []
+  let distance = I32.to_nat(Hexagonal.Axial.distance(start, goal))
   for i from 0 to distance with coords:
-    i = F64.from_nat(i + 1)
-    distance = F64.from_nat(distance)
-    ratio = i/distance
-    inter_x = F64.lerp(si, gi, ratio)
-    inter_y = F64.lerp(sj, gj, ratio)
-    {new_i, new_j} = Hexagonal.Axial.round(inter_x, inter_y)
+    let i = F64.from_nat(i + 1)
+    let distance = F64.from_nat(distance)
+    let ratio = i/distance
+    let inter_x = F64.lerp(si, gi, ratio)
+    let inter_y = F64.lerp(sj, gj, ratio)
+    let {new_i, new_j} = Hexagonal.Axial.round(inter_x, inter_y)
     Hexagonal.Axial.new(new_i, new_j) & coords
   coords

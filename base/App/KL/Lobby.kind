@@ -79,7 +79,7 @@ App.KL.Lobby.draw(local: App.KL.Lobby.State.Local, global: App.KL.Global.State):
 //   </div>
 
 App.KL.Lobby.draw.heroes.hero_menu(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<App.KL.Game.Skill>, tab: String): DOM
-  descriptions_style = 
+   let descriptions_style = 
   { 
     "width": "85%",
     "height": "50%"
@@ -94,7 +94,7 @@ App.KL.Lobby.draw.heroes.hero_menu(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<A
     "border-radius": "5px"
   }
 
-  skill_show_style = 
+   let skill_show_style = 
   {
     "width": "30%"
     "height": "90%"
@@ -117,7 +117,7 @@ App.KL.Lobby.draw.heroes.hero_menu(hero: Maybe<App.KL.Game.Hero>, skill: Maybe<A
 
 App.KL.Lobby.draw.heroes.skill(hero: App.KL.Game.Hero): DOM
   
-  skills_style = 
+   let skills_style = 
   {
     "width": "30%"
     "height": "90%"
@@ -127,7 +127,7 @@ App.KL.Lobby.draw.heroes.skill(hero: App.KL.Game.Hero): DOM
     "align-items": "center"
   }
   
-  skill_buttons_style = 
+   let skill_buttons_style = 
     {
       "width": "100%"
       "height": "90%"
@@ -138,7 +138,7 @@ App.KL.Lobby.draw.heroes.skill(hero: App.KL.Game.Hero): DOM
       
     }
 
-  list = []
+   let list = []
   for key:skill in hero@skills with list:
     key & list
   <div style=skills_style>
@@ -151,8 +151,8 @@ App.KL.Lobby.draw.heroes.skill(hero: App.KL.Game.Hero): DOM
 
 App.KL.Lobby.draw.heroes.skill_button(char: String): DOM
   
-  id = "S" | char
-  skill_button_style = 
+   let id = "S" | char
+   let skill_button_style = 
   {
     "width": "100%"
     "height": "90%"
@@ -169,7 +169,7 @@ App.KL.Lobby.draw.heroes.skill_button(char: String): DOM
   </div>
 
 App.KL.Lobby.draw.heroes.skill_description(skill: Maybe<App.KL.Game.Skill>): DOM
-  skill_description_style = 
+   let skill_description_style = 
   {
     "width": "30%"
     "height": "90%"
@@ -313,8 +313,8 @@ App.KL.Lobby.when(
             "S":
               let skill_key = String.drop(1, event.id)
               let skill     = Maybe {
-                get hero = page.hero
-                get skill = hero@skills{skill_key}
+                 get hero = page.hero
+                 get skill = hero@skills{skill_key}
                 return skill
               }
               let new_page = App.KL.Lobby.State.Local.Page.heroes(page.hero, skill, page.tab)

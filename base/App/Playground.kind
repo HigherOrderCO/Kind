@@ -152,13 +152,13 @@ App.Playground.when: App.When<App.Playground.State>
 
 // Executes the application
 App.Playground: App(App.Playground.State)
-  init = App.Store.new<App.Playground.State>(
+  let init = App.Store.new<App.Playground.State>(
     App.Playground.State.local_empty, 
     unit)
-  draw = (state) App.playground.body(state@local)
-  when = App.Playground.when
-  tick = (tick, glob) glob
-  post = (time, room, addr, data, glob) glob
+  let draw = (state) App.playground.body(state@local)
+  let when = App.Playground.when
+  let tick = (tick, glob) glob
+  let post = (time, room, addr, data, glob) glob
 
   App.new!(init, draw, when, tick, post)
 

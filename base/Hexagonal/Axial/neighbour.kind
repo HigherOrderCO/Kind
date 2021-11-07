@@ -2,15 +2,15 @@ Hexagonal.Axial.neighbour(
   coord: Hexagonal.Axial
 ): List<Hexagonal.Axial>
 
-  i = coord@i
-  j = coord@j
+  let i = coord@i
+  let j = coord@j
 
-  right       = Hexagonal.Axial.new(i + 1, j    )
-  top_right   = Hexagonal.Axial.new(i + 1, j - 1)
-  top_left    = Hexagonal.Axial.new(i    , j - 1)
-  left        = Hexagonal.Axial.new(i - 1, j    )
-  bottom_left = Hexagonal.Axial.new(i - 1, j + 1)
-  bottom_right= Hexagonal.Axial.new(i    , j + 1)
+  let right       = Hexagonal.Axial.new(i + 1, j    )
+  let top_right   = Hexagonal.Axial.new(i + 1, j - 1)
+  let top_left    = Hexagonal.Axial.new(i    , j - 1)
+  let left        = Hexagonal.Axial.new(i - 1, j    )
+  let bottom_left = Hexagonal.Axial.new(i - 1, j + 1)
+  let bottom_right= Hexagonal.Axial.new(i    , j + 1)
 
 
 [right, top_right, top_left, left, bottom_left, bottom_right]

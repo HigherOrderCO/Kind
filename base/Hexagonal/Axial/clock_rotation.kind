@@ -3,5 +3,5 @@ Hexagonal.Axial.clock_rotation(
   start: Hexagonal.Axial
 ): List<Hexagonal.Axial>
 
-  coord = Hexagonal.Axial.to_cubic(start)
+  let coord = Hexagonal.Axial.to_cubic(start)
   List.map!!(Hexagonal.Cubic.to_axial, Hexagonal.Cubic.clock_rotation(coord))

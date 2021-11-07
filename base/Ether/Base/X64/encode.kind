@@ -3,7 +3,7 @@ Ether.Base.X64.translate(code : Bits) : List<U16>
   let list = []
   for i in blocks with list :
     def index = Bits.to_nat(Bits.reverse(i))
-    list = List.cons!(Ether.Base.X64.table[index] <> 0#16, list)
+    let list = List.cons!(Ether.Base.X64.table[index] <> 0#16, list)
     list
   list
 
@@ -13,8 +13,8 @@ Ether.Base.X64.encode(code : Bits) : List<U16>
   for i in blocks with list :
     def size = Ether.Bits.get_bytes_size(i)
     let pad = (3-size)
-    i = Bits.concat(i, Bits.repeat(pad*2, false))
-    list = list ++ Ether.Base.X64.translate(i) ++ List.repeat!(pad, 61)
+    let i = Bits.concat(i, Bits.repeat(pad*2, false))
+    let list = list ++ Ether.Base.X64.translate(i) ++ List.repeat!(pad, 61)
     list
   list
   

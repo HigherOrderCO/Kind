@@ -23,7 +23,7 @@ Equal.if.true<A: Type>(
     true:
       h1
     false:
-      contra = Bool.false_neq_true(h0)
+      let contra = Bool.false_neq_true(h0)
       Empty.absurd!(contra)
   }!
 
@@ -35,7 +35,7 @@ Equal.if.false<A: Type>(
 ): v0 == if cond then v1 else v2
   case cond with h0 {
     true:
-      contra = Bool.true_neq_false(h0)
+      let contra = Bool.true_neq_false(h0)
       Empty.absurd!(contra)
     false:
       h1

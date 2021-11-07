@@ -4,17 +4,17 @@ Hexagonal.Cubic.neighbors(
   coord: Hexagonal.Cubic
 ): List<Hexagonal.Cubic>
   
-  x = coord@x
-  y = coord@y
-  z = coord@z
+  let x = coord@x
+  let y = coord@y
+  let z = coord@z
 
 //https://www.redblobgames.com/grids/hexagons/#neighbors
-  right       = Hexagonal.Cubic.new(x + 1, y - 1, z    )
-  top_right   = Hexagonal.Cubic.new(x + 1, y    , z - 1)
-  top_left    = Hexagonal.Cubic.new(x    , y + 1, z - 1)
-  left        = Hexagonal.Cubic.new(x - 1, y + 1, z    )
-  bottom_left = Hexagonal.Cubic.new(x - 1, y    , z + 1)
-  bottom_right= Hexagonal.Cubic.new(x    , y - 1, z + 1)
+  let right       = Hexagonal.Cubic.new(x + 1, y - 1, z    )
+  let top_right   = Hexagonal.Cubic.new(x + 1, y    , z - 1)
+  let top_left    = Hexagonal.Cubic.new(x    , y + 1, z - 1)
+  let left        = Hexagonal.Cubic.new(x - 1, y + 1, z    )
+  let bottom_left = Hexagonal.Cubic.new(x - 1, y    , z + 1)
+  let bottom_right= Hexagonal.Cubic.new(x    , y - 1, z + 1)
 
 
 [right, top_right, top_left, left, bottom_left, bottom_right]

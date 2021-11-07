@@ -1,8 +1,8 @@
 type JSON {
-  null,
-  bool(x: Bool),
-  number(x: F64),
-  string(x: String),
-  array(x: List<JSON>),
-  object(x: List<Pair<String, JSON>>)
+  null
+  bool(value: Bool)
+  number(value: F64)
+  string(value: String)
+  array(value: List<JSON>)
+  object(value: Map<JSON>)
 }

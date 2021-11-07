@@ -6,26 +6,26 @@ User.rigille.List.span_splits<A: Type>(
 ): xs == (Pair.fst!!(List.span<A>(f,xs)) ++ Pair.snd!!(List.span<A>(f, xs)))
   case xs {
     nil: refl
-    cons: ind = User.rigille.List.span_splits<A>(f, xs.tail)
+    cons: let ind = User.rigille.List.span_splits<A>(f, xs.tail)
           // i'm sorry i don't know any other way
           def bagulho_monstro = f(xs.head,(self) Pair(List(A),List(A)),Pair.new(List(A),List(A),List.cons(A,xs.head,Pair.fst(List(A),List(A),List.span(A,f,xs.tail))),Pair.snd(List(A),List(A),List.span(A,f,xs.tail))),Pair.new(List(A),List(A),List.nil(A),List.cons(A,xs.head,xs.tail)))
-          fear = refl :: (List.span<A>(f, xs.head & xs.tail)) == bagulho_monstro
+          let fear = refl :: (List.span<A>(f, xs.head & xs.tail)) == bagulho_monstro
           case f(xs.head) with fear {
-            true: ind = User.rigille.List.span_splits<A>(f, xs.tail)
+            true: let ind = User.rigille.List.span_splits<A>(f, xs.tail)
                   //hmm = apply(List.cons<A>(xs.head), ind)
                   def tail_call = List.span<A>(f, xs.tail)
                   def predicted_result = { List.cons<A>(xs.head, Pair.fst<List<A>, List<A>>(tail_call)), Pair.snd<List<A>, List<A>>(tail_call) }
-                  lem = refl :: _ == predicted_result
-                  lem = mirror(Equal.chain!!!!(fear, lem))
-                  calc = refl :: (Pair.fst<List<A>, List<A>>(predicted_result) ++ Pair.snd<List<A>, List<A>>(predicted_result))
-                                 == ((xs.head & Pair.fst<List<A>, List<A>>(tail_call)) ++ (Pair.snd<List<A>, List<A>>(tail_call)))
+                  let lem = refl :: _ == predicted_result
+                  let lem = mirror(Equal.chain!!!!(fear, lem))
+                  let calc = refl :: (Pair.fst<List<A>, List<A>>(predicted_result) ++ Pair.snd<List<A>, List<A>>(predicted_result))
+                                  == ((xs.head & Pair.fst<List<A>, List<A>>(tail_call)) ++ (Pair.snd<List<A>, List<A>>(tail_call)))
                   //lem = Equal.chain!!!(lem, ind)
                   ?a
             false: def predicted_result = {List.nil<A>, (xs.head & xs.tail)}
-                   qed = refl :: (xs.head & xs.tail) == (Pair.fst!!(predicted_result) ++ Pair.snd!!(predicted_result))
-                   lem = refl :: _ == predicted_result
-                   lem = mirror(Equal.chain!!!!(fear, lem))
-                   qed = qed :: rewrite X in _ == (Pair.fst!!(X) ++ Pair.snd!!(X)) with lem
+                   let qed = refl :: (xs.head & xs.tail) == (Pair.fst!!(predicted_result) ++ Pair.snd!!(predicted_result))
+                   let lem = refl :: _ == predicted_result
+                   let lem = mirror(Equal.chain!!!!(fear, lem))
+                   let qed = qed :: rewrite X in _ == (Pair.fst!!(X) ++ Pair.snd!!(X)) with lem
                    qed
           }!
   }!

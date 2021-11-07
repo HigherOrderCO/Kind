@@ -4,13 +4,13 @@ Hexagonal.Axial.minimum(
   goal: Hexagonal.Axial
 ): Maybe(Hexagonal.Axial)
 
-  neighborhood = Hexagonal.Axial.moore(origin)
-sort = ((x, y) 
+  let neighborhood = Hexagonal.Axial.moore(origin)
+let sort = ((x, y) 
   case y {
     none: 
       some(x)
     some: 
-     shorter = Hexagonal.Axial.shorter(goal, x, y.value)
+     let shorter = Hexagonal.Axial.shorter(goal, x, y.value)
       if shorter then
         some(x)
       else 

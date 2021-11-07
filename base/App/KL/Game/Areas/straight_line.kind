@@ -4,5 +4,5 @@ App.KL.Game.Areas.straight_line(
   goal: Hexagonal.Axial
 ): List<Hexagonal.Axial>
 
-  direction = Hexagonal.Axial.clamp(1, origin, goal)
+  let direction = Hexagonal.Axial.clamp(1, origin, goal)
   Hexagonal.Axial.line_by_direction(size, origin, direction)

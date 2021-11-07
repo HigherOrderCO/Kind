@@ -4,7 +4,7 @@
 (let ([args (cdr (command-line))])
   (if (null? args)
     (print-lines
-    '("# kind-scm 1.0.95"
+    '("# kind-scm 1.0.104"
       ""
       "Usage:"
       ""

@@ -4,7 +4,7 @@ App.KL.Game.Creature.Status.block.verifier(
 ): Bool
 
   let caster_name = App.KL.Game.Board.Creature.get.name(caster)
-  denied = App.KL.Game.Creature.Status.block.check(denied)
+  let denied = App.KL.Game.Creature.Status.block.check(denied)
   let result = false
   for target in denied with result:
     let affected = target@fst // Verifies if the Target is affected by block

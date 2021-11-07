@@ -1,0 +1,213 @@
+Ether.Bits.pad(n : Nat bits : Bits) : Bits
+  let size = Bits.length(bits)
+  if Nat.eql(Nat.mod(size, n), 0) then
+    bits
+  else
+    Bits.trim(size + (n - (Nat.mod(size, n))), bits)
+
+Ether.Bits.add_round_is_multiple(n : Nat, bits : Bits) 
+  : Nat.mod(Bits.length(Ether.Bits.pad(n, bits)), n) == 0
+  let norm = refl :: Nat.eql(Nat.mod(Bits.length(bits),n),0,() Bits,bits,Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits)) == Ether.Bits.pad(n, bits)
+  case norm {
+    refl : (case Nat.eql(Nat.mod(Bits.length(bits),n),0) {
+      true : (H)
+        let H = Equal.mirror(Bool, Nat.eql(Nat.mod(Bits.length(bits),n),0), true, H)
+        case H {
+          refl : 
+            let H = Nat.eql.reflexivity(Nat.mod(Bits.length(bits),n), 0, mirror(H))
+            let norm = refl :: 
+               bits == Bool.true(() Bits,bits,Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits))
+            case norm {
+              refl : H
+            }!
+        } : Nat.mod(Bits.length(H.b(() Bits,bits,Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits))),n) == 0
+      false : (H)
+         let H = Equal.mirror(Bool, Nat.eql(Nat.mod(Bits.length(bits),n),0), false, H)
+         case H {
+           refl : 
+             let norm = refl :: Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits) == Bool.false(() Bits,bits,Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits))
+             case norm {
+               refl :
+                 def H = Bits.trim.preserve_length(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))), bits)
+                 def H = Equal.mirror(Nat, Bits.length(Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits)),  Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))), H)
+                 case H {
+                   refl : 
+                     let H = Nat.div_mod.recover(Bits.length(bits), n)
+                     _ // (m + (n - (m % n))) % n = 0
+                     
+                 } : Nat.mod(H.b, n) == 0
+             }!
+         } :  Nat.mod(Bits.length(H.b(() Bits,bits,Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits))),n) == 0
+    } : (Nat.eql(Nat.mod(Bits.length(bits),n),0) == self) -> _)(refl)
+  }!
+
+Ether.Bits.add_self_absurd(x : Nat, n: Nat) : Equal(Nat, Nat.add(n, Nat.succ(x)), n) -> Empty
+  case n {
+    succ : 
+      (H)
+         let H = Nat.succ_inj!!(H)
+         let qed = Ether.Bits.add_self_absurd(x, n.pred, H)
+         qed
+    zero : (H) Nat.succ_neq_zero!(H)
+  }!
+  
+Ether.Bits.add_injective(x : Nat, y : Nat, n : Nat, H : Nat.add(Nat.succ(n), x) == Nat.add(Nat.succ(n), y)) : x == y
+  case x with H {
+    succ : case y with H {
+      succ : 
+        let com_H = Nat.add.comm(Nat.succ(n), Nat.succ(x.pred))
+        let com_H2 = Nat.add.comm(Nat.succ(n), Nat.succ(y.pred))
+        let H_rewrite = H :: rewrite Y in Y == _ with com_H
+        let H_rewrite = H_rewrite :: rewrite Y in _ == Y with com_H2
+        let H_rewrite_inj = Nat.succ_inj!!(H_rewrite)
+        let H_rewrite_inj = H_rewrite_inj :: rewrite Y in Y == _ with Nat.add.comm(x.pred, Nat.succ(n))
+        let H_rewrite_inj = H_rewrite_inj :: rewrite Y in _ == Y with Nat.add.comm(y.pred, Nat.succ(n))
+        let H2 = Ether.Bits.add_injective(x.pred, y.pred, n, H_rewrite_inj)
+        Equal.apply!!!!(Nat.succ, H2)
+      zero : 
+        let rewrite_0_com = 
+          Nat.add.comm(Nat.succ(n), 0)
+        let H = H :: rewrite Y in _ == Y with rewrite_0_com
+        let absurd = Ether.Bits.add_self_absurd!!(H)
+        Empty.absurd!(absurd)
+    }!
+    zero : case y with H {
+      succ : 
+        let H = mirror(H)
+        let rewrite_0_com = Nat.add.comm(Nat.succ(n), 0)
+        let H = H :: rewrite Y in _ == Y with rewrite_0_com
+        let absurd = Ether.Bits.add_self_absurd!!(H)
+        Empty.absurd!(absurd)
+      zero : refl
+    }!
+  }!
+
+
+Ether.Bits.mul_injective(x : Nat, y : Nat, n : Nat, H : Nat.mul(Nat.succ(n), x) == Nat.mul(Nat.succ(n), y)) : x == y
+  case x with H {
+    succ : case y with H {
+      succ : 
+        
+        let H = H :: rewrite Y in Y == _ with Nat.mul.succ_right(Nat.succ(n), x.pred)
+        let H = H :: rewrite Y in _ == Y with Nat.mul.succ_right(Nat.succ(n), y.pred)
+        let inj_add = Ether.Bits.add_injective(Nat.mul(Nat.succ(n), x.pred), Nat.mul(Nat.succ(n), y.pred), n, H)
+        let H = Ether.Bits.mul_injective(x.pred, y.pred, n, inj_add)
+        Equal.apply!!!!(Nat.succ, H)
+      zero : 
+        let H = H :: rewrite Y in _ == Y with Nat.mul.comm(Nat.succ(n), 0)
+        let H4 = Nat.succ_neq_zero!(H)
+        Empty.absurd!(H4)
+     }!
+    zero : case y with H {
+      succ : 
+       let H = H :: rewrite Y in Y == _ with Nat.mul.comm(Nat.succ(n), 0)
+       let H4 = Nat.succ_neq_zero!(mirror(H))
+       Empty.absurd!(H4)
+      zero : 
+        refl
+    }!
+  }!
+
+  Ether.Bits.succ_pad_nat(x : Bits) : 
+  Bits.to_nat(Bits.trim(Bits.length(x), x)) == Bits.to_nat(x)
+  case x {
+    e : refl 
+    o : 
+      let remove_tail_rec = Bits.length.succ(x.pred, 0)
+      let refl_cont =
+        refl :: 
+          Bits.length.go(x.pred, 1) == Bits.length(Bits.o(x.pred))
+      case refl_cont {
+        refl : 
+          case remove_tail_rec {
+            refl : 
+              let rec = Ether.Bits.succ_pad_nat(x.pred)
+              let rec = Equal.apply!!!!(Nat.mul(2), rec)
+              rec
+          }!
+        }!
+    i : 
+      let remove_tail_rec = Bits.length.succ(x.pred, 0)
+      let refl_cont =
+        refl :: 
+          Bits.length.go(x.pred, 1) == Bits.length(Bits.i(x.pred))
+      case refl_cont {
+        refl : 
+          case remove_tail_rec {
+            refl : 
+              let rec = Ether.Bits.succ_pad_nat(x.pred)
+              let rec = Equal.apply!!!!(Nat.mul(2), rec)
+              Equal.apply(Nat, Nat, Nat.mul(2,Bits.to_nat(Bits.trim(Bits.length.go(x.pred,0),x.pred))),
+                Nat.mul(2,Bits.to_nat(x.pred)), Nat.succ, rec)
+          }!
+        }!
+  }!
+
+Ether.Bits.nat_succ_pad_nat(y : Nat, x : Bits, H : 
+  Bits.to_nat(Bits.trim(y, x)) == Bits.to_nat(x)) : 
+    Bits.to_nat(Bits.trim(Nat.succ(y), x)) == Bits.to_nat(x)
+    case y with H {
+      zero : 
+        case x with H {
+          i :
+            let H = H :: 0 == Nat.succ(Nat.mul(2, Bits.to_nat(x.pred)))
+            let absurd = Nat.succ_neq_zero!(mirror(H))
+            Empty.absurd!(absurd)
+          o : 
+            let H = H :: 0 == Nat.mul(2, Bits.to_nat(x.pred))
+            H
+          e : refl
+        }!
+      succ : case x with H {
+        i : 
+          let H = H :: Nat.succ(Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,x.pred)))) == Nat.succ(Nat.mul(2, Bits.to_nat(x.pred)))
+          let H = Nat.succ_inj(Nat.mul(2,Bits.to_nat(Bits.trim(y.pred,x.pred))), Nat.mul(2,Bits.to_nat(x.pred)), H)
+          let H = Ether.Bits.mul_injective(Bits.to_nat(Bits.trim(y.pred,x.pred)), Bits.to_nat(x.pred), 1, H)
+          let H2 = Ether.Bits.nat_succ_pad_nat(y.pred, x.pred, H)
+          let qed = Equal.apply!!!!(Nat.succ . Nat.mul(2), H2)
+          qed
+        o :  
+          let H = H :: Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,x.pred))) == Nat.mul(2, Bits.to_nat(x.pred))
+          let H = Ether.Bits.mul_injective(Bits.to_nat(Bits.trim(y.pred,x.pred)), Bits.to_nat(x.pred), 1, H)
+          let H2 = Ether.Bits.nat_succ_pad_nat(y.pred, x.pred, H)
+          let qed = Equal.apply!!!!(Nat.mul(2), H2)
+          qed
+        e : 
+          let H = H :: Nat.mul(2, Bits.to_nat(Bits.trim(y.pred,Bits.e))) == Nat.mul(2, 0)
+          let absurd_mul_injective = Ether.Bits.mul_injective(Bits.to_nat(Bits.trim(y.pred,Bits.e)), 0, 1, H)
+          let H2 = Ether.Bits.nat_succ_pad_nat(y.pred, Bits.e, absurd_mul_injective)
+          let qed = Equal.apply!!!!(Nat.mul(2), H2)
+          qed
+      }!
+    }!
+
+Ether.Bits.pad_nat(x : Bits, y : Nat) : 
+  Bits.to_nat(Bits.trim(Nat.add(y, Bits.length(x)), x)) == Bits.to_nat(x)
+  case y {
+    succ : 
+      let H = Ether.Bits.pad_nat(x, y.pred)
+      Ether.Bits.nat_succ_pad_nat!!(H)
+    zero : Ether.Bits.succ_pad_nat(x)
+  }!
+
+Ether.Bits.pad_bytes_identity(n : Nat, bits : Bits) : Bits.to_nat(Ether.Bits.pad(n, bits)) == Bits.to_nat(bits)
+ let simpl = refl ::
+   (Nat.eql(Nat.mod(Bits.length(bits),n),0,() Bits,bits,Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits)) == Ether.Bits.pad(n, bits))
+ case simpl {
+  refl : case Nat.eql(Nat.mod(Bits.length(bits),n),0) {
+    true : 
+      refl
+    false : 
+      let simpl = refl :: Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits) == Bool.false(() Bits,bits,Bits.trim(Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))),bits))
+      case simpl {
+        refl : 
+         let H = Ether.Bits.pad_nat(bits, Nat.sub(n,Nat.mod(Bits.length(bits),n)))
+         let H1 = Nat.add.comm(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n)))
+         let H1 = Equal.mirror(Nat, Nat.add(Bits.length(bits),Nat.sub(n,Nat.mod(Bits.length(bits),n))), Nat.add(Nat.sub(n,Nat.mod(Bits.length(bits),n)),Bits.length(bits)), H1)
+         case H1 {
+           refl : Ether.Bits.pad_nat(bits, Nat.sub(n,Nat.mod(Bits.length(bits),n)))
+         } : Bits.to_nat(Bits.trim(H1.b, bits)) == Bits.to_nat(bits)
+      }!
+  }!
+ }!
+

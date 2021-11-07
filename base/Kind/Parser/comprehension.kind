@@ -19,8 +19,8 @@ Kind.Parser.comprehension: Parser<Kind.Term>
 
     let filter_fun = Kind.Term.ref("List.filter")
     let filter_fun = Kind.Term.app(filter_fun, Kind.Term.hol(Bits.e))
-    let lamb_filter = Kind.Term.lam(elem, (i) and)
-    let filter_fun = Kind.Term.app(filter_fun, lamb_filter)
+    let lam_filter = Kind.Term.lam(elem, (i) and)
+    let filter_fun = Kind.Term.app(filter_fun, lam_filter)
     let filter_fun = Kind.Term.app(filter_fun, list)
     
     let term = Kind.Term.ref("List.map")
@@ -29,6 +29,41 @@ Kind.Parser.comprehension: Parser<Kind.Term>
     let lamb = Kind.Term.lam(elem, (i) loop)
     let term = Kind.Term.app(term, lamb)
     let term = Kind.Term.app(term, filter_fun)
+    
+    return term
+  }
+
+Kind.Parser.comprehension.mapped: Parser<Kind.Term>
+  Parser {
+    Kind.Parser.text("[")
+    Kind.Parser.text("for")
+    get elem = Kind.Parser.name1
+    Kind.Parser.text("in")
+    get list = Kind.Parser.term
+    get cond = Parser.maybe!(Parser {
+      Kind.Parser.text("where")
+      get cond = Kind.Parser.term
+      return cond
+    })
+    Kind.Parser.text(":")
+    get loop = Kind.Parser.term
+    Kind.Parser.text("]")
+
+    let term = Kind.Term.ref("List.map")
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
+    let lamb = Kind.Term.lam(elem, (i) loop)
+    let term = Kind.Term.app(term, lamb)
+    let term = Kind.Term.app(term, case cond {
+      none:
+        list
+      some:
+        let filt = Kind.Term.ref("List.filter")
+        let filt = Kind.Term.app(filt, Kind.Term.hol(Bits.e))
+        let filt = Kind.Term.app(filt, Kind.Term.lam(elem, (i) cond.value))
+        let filt = Kind.Term.app(filt, list)
+        filt
+    })
     
     return term
   }

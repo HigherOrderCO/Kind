@@ -18,14 +18,14 @@ App.KL.Game.Creature.Status.hot.add.aux(
   status: List<App.KL.Game.Creature.Status>
 ): List<App.KL.Game.Creature.Status>
 
-  new_hot = App.KL.Game.Creature.Status.hot(cast_data, id, duration, 1, amount)
+  let new_hot = App.KL.Game.Creature.Status.hot(cast_data, id, duration, 1, amount)
   case status { 
     nil:
       new_hot & status
     cons:
       case status.head { 
         hot: 
-          is_same = String.eql(id, status.head.id)
+          let is_same = String.eql(id, status.head.id)
           if is_same then
             let hot_duration = status.head.duration + 1
             let hot_stacks = status.head.stack + 1

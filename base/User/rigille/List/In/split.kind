@@ -7,15 +7,15 @@ User.rigille.List.In.split<A: Type>(
   case xs with Hyp {
     nil: Empty.absurd!(Hyp)
     cons: case Hyp {
-            left: inner = refl :: ((xs.head & xs.tail) == (List.nil<A> ++ [xs.head] ++ xs.tail))
-                  qed = inner :: rewrite X in ((xs.head & xs.tail) == (List.nil<A> ++ [X] ++ xs.tail)) with mirror(Hyp.value)
+            left: let inner = refl :: ((xs.head & xs.tail) == (List.nil<A> ++ [xs.head] ++ xs.tail))
+                  let qed = inner :: rewrite X in ((xs.head & xs.tail) == (List.nil<A> ++ [X] ++ xs.tail)) with mirror(Hyp.value)
                   List.nil<A> ~ xs.tail ~ qed
-            right: ind = this(xs.tail, Hyp.value)
+            right: let ind = this(xs.tail, Hyp.value)
                    open ind
                    open ind.snd
-                   lem = apply(List.cons<A>(xs.head), ind.snd.snd)
-                   calc = refl :: (xs.head & (ind.fst ++ [x] ++ ind.snd.fst)) == ((xs.head & ind.fst) ++ [x] ++ ind.snd.fst)
-                   qed = Equal.chain!!!!(lem, calc)
+                   let lem = apply(List.cons<A>(xs.head), ind.snd.snd)
+                   let calc = refl :: (xs.head & (ind.fst ++ [x] ++ ind.snd.fst)) == ((xs.head & ind.fst) ++ [x] ++ ind.snd.fst)
+                   let qed = Equal.chain!!!!(lem, calc)
                    (xs.head & ind.fst) ~ ind.snd.fst ~ qed
           }
   }!

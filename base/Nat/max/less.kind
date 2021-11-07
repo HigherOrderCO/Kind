@@ -1,0 +1,11 @@
+Nat.max.less(x : Nat, y : Nat) : (Nat.max(x, y) == x) -> Nat.lte(y, x) == true
+  (H : Nat.lte(x,y,(self) Nat,y,x) == x) (case Nat.lte(x, y) {
+    true : (Hyp) 
+       def H = H :: rewrite X in X((self) Nat, y, x) == x with Hyp
+       let H = H :: y == x
+       Nat.Order.refl(y) :: rewrite N in Nat.lte(y, N) == true with H
+    false : (inverse) 
+      let inverse = Nat.lte.comm.false!!(inverse)
+      let inverse = Nat.lte.succ_left!!(inverse)
+      inverse
+  } : (Nat.lte(x, y) == self) -> Nat.lte(y, x) == true)(refl)

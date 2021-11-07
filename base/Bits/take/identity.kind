@@ -1,0 +1,34 @@
+Bits.take.identity(n : Nat, bits : Bits, H : Nat.lte(Bits.length(bits), n) == true) : Bits.take(n, bits) == bits
+  case n with H {
+    zero : case bits with H {
+      e : refl
+      i : 
+        let H2 = refl :: Bits.length(Bits.i(bits.pred)) == Bits.length.go(bits.pred, 1)
+        let H = H :: rewrite X in Nat.lte(X,0) == Bool.true with H2
+        let H = H :: rewrite X in Nat.lte(X,0) == Bool.true with mirror(Bits.length.succ(bits.pred, 0))
+        let absurd = Bool.false_neq_true(H)        
+        Empty.absurd!(absurd)
+      o :   
+        let H2 = refl :: Bits.length(Bits.o(bits.pred)) == Bits.length.go(bits.pred, 1)
+        let H = H :: rewrite X in Nat.lte(X,0) == Bool.true with H2
+        let H = H :: rewrite X in Nat.lte(X,0) == Bool.true with mirror(Bits.length.succ(bits.pred, 0))
+        let absurd = Bool.false_neq_true(H)        
+        Empty.absurd!(absurd)
+    }!
+    succ : 
+      case bits with H {
+        e : refl
+        i : 
+          let H2 = refl :: Bits.length(Bits.i(bits.pred)) == Bits.length.go(bits.pred, 1)
+          let H = Equal.rewrite(Nat, Bits.length(Bits.i(bits.pred)), Bits.length.go(bits.pred, 1), H2, (Y) Nat.lte(Y,Nat.succ(n.pred)) == Bool.true, H)
+          let H = Equal.rewrite(Nat, Bits.length.go(bits.pred, 1), Nat.succ(Bits.length.go(bits.pred, 0)), Equal.mirror(Nat, Nat.succ(Bits.length.go(bits.pred, 0)), Bits.length.go(bits.pred, 1), Bits.length.succ(bits.pred, 0)), (Y) Nat.lte(Y,Nat.succ(n.pred)) == Bool.true, H)    
+          let rec = Bits.take.identity(n.pred, bits.pred, H)
+          Equal.apply!!!!(Bits.i, rec)
+        o :   
+          let H2 = refl :: Bits.length(Bits.o(bits.pred)) == Bits.length.go(bits.pred, 1)
+          let H = Equal.rewrite(Nat, Bits.length(Bits.o(bits.pred)), Bits.length.go(bits.pred, 1), H2, (Y) Nat.lte(Y,Nat.succ(n.pred)) == Bool.true, H)
+          let H = Equal.rewrite(Nat, Bits.length.go(bits.pred, 1), Nat.succ(Bits.length.go(bits.pred, 0)), Equal.mirror(Nat, Nat.succ(Bits.length.go(bits.pred, 0)), Bits.length.go(bits.pred, 1), Bits.length.succ(bits.pred, 0)), (Y) Nat.lte(Y,Nat.succ(n.pred)) == Bool.true, H)    
+          let rec = Bits.take.identity(n.pred, bits.pred, H)
+          Equal.apply!!!!(Bits.o, rec)
+      }!
+  }!

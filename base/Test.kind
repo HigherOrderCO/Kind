@@ -1,26 +1,3 @@
-type Object {
-  new(
-    name: String
-    data: Map<List<F64>>
-  )
-}
-
-Test: Maybe<F64>
-  let obj = Object.new("sample", {
-    "a": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-    "b": [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
-  })
-  let obj@data{"a"}[0] <~ F64.mul(2.0)
-  obj@data{"a"}[0]
-
-// ------------------------------------
-
-id<A: $Type>(x: A): A
-  x
-
-explicit: Nat
-  id<$Nat>(7)
-
-implicit: Nat
-  id(7)
-
+Test: _
+  let list = [for x in [0 to 10] where Nat.is_even(x): x * 2]
+  List.show!(Nat.show, list)

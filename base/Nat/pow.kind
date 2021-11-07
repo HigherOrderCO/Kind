@@ -1,10 +1,8 @@
 // x ^ y
-Nat.pow(x: Nat, y: Nat): Nat
-  Nat.pow.aux(x, y, 1)
-  
-Nat.pow.aux(x: Nat, y: Nat, aux: Nat): Nat
+Nat.pow(x : Nat, y : Nat) : Nat
   case y {
-    zero: x  
-    succ: Nat.pow.aux(x, y.pred, Nat.mul(aux, 2))
+    zero:
+      Nat.succ(Nat.zero)
+    succ:
+      Nat.mul(x, Nat.pow(x,y.pred))
   }
-

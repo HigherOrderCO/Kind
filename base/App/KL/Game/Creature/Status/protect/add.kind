@@ -5,7 +5,7 @@ App.KL.Game.Creature.Status.protect.add(
   amount: I32
 ): App.KL.Game.Creature
   
-  protect_added = App.KL.Game.Creature.Status.protect.add.aux(cast_data, duration, amount, creature@status)
+  let protect_added = App.KL.Game.Creature.Status.protect.add.aux(cast_data, duration, amount, creature@status)
   creature@status <- protect_added
 
 App.KL.Game.Creature.Status.protect.add.aux(

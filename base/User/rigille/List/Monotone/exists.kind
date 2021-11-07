@@ -8,20 +8,20 @@ User.rigille.List.Monotone.exists<A: Type>(after: A -> A -> Type, O: User.rigill
     nil: [] ~ {User.rigille.List.Perm.refl<A>([]), unit}
 
     cons: // prove list isn't empty
-          not_empty = Nat.succ_neq_zero(List.length<A>(xs.tail)) :: Not(List.length<A>(xs.head & xs.tail) == 0)
+          let not_empty = Nat.succ_neq_zero(List.length<A>(xs.tail)) :: Not(List.length<A>(xs.head & xs.tail) == 0)
 
           // find minimum element
-          ext = User.rigille.List.Ext.exists<A, after, O>(xs.head & xs.tail, not_empty)
+          let ext = User.rigille.List.Ext.exists<A, after, O>(xs.head & xs.tail, not_empty)
           open ext
           open ext.snd
 
           // split list at minimum
-          min_split = User.rigille.List.In.split<A>(ext.fst, xs.head & xs.tail, ext.snd.fst)
+          let min_split = User.rigille.List.In.split<A>(ext.fst, xs.head & xs.tail, ext.snd.fst)
           open min_split
           open min_split.snd
 
           // call function recursively on remaining elements
-          tail_call = User.rigille.List.Monotone.exists<A, after, O>(min_split.fst ++ min_split.snd.fst)
+          let tail_call = User.rigille.List.Monotone.exists<A, after, O>(min_split.fst ++ min_split.snd.fst)
           open tail_call
           open tail_call.snd
 
@@ -29,38 +29,38 @@ User.rigille.List.Monotone.exists<A: Type>(after: A -> A -> Type, O: User.rigill
           def ret = ext.fst & tail_call.fst
 
           // prove return value is a permutation
-          ret_perm = (lem_left = User.rigille.List.Perm.refl<A>(xs.head & xs.tail)
+          let ret_perm = (lem_left = User.rigille.List.Perm.refl<A>(xs.head & xs.tail)
                       // Perm(min_split.fst ++ [ext.fst] ++ min_split.snd.fst, xs.head & xs.tail)
-                      lem_right = lem_left :: rewrite X in Perm(X, _) with min_split.snd.snd
+                      let lem_right = lem_left :: rewrite X in Perm(X, _) with min_split.snd.snd
                       // Perm([ext.fst] ++ min_split.fst, min_split.fst ++ [ext.fst])
-                      lem_middle = User.rigille.List.Perm.cat_comm<A>(min_split.fst, [ext.fst])
+                      let lem_middle = User.rigille.List.Perm.cat_comm<A>(min_split.fst, [ext.fst])
                       // Perm(([ext.fst] ++ min_split.fst) ++ min_split.snd.fst, (min_split.fst ++ [ext.fst]) ++ min_split.snd.fst)
-                      lem_middle = User.rigille.List.Perm.push_tail<A>(_, _, min_split.snd.fst, lem_middle)
+                      let lem_middle = User.rigille.List.Perm.push_tail<A>(_, _, min_split.snd.fst, lem_middle)
                       // Perm([ext.fst] ++ min_split.fst ++ min_split.snd.fst, (min_split.fst ++ [ext.fst]) ++ min_split.snd.fst)
-                      lem_middle = lem_middle :: rewrite X in Perm(X, _) with mirror(User.rigille.List.cat_assoc<A>([ext.fst], min_split.fst, min_split.snd.fst))
+                      let lem_middle = lem_middle :: rewrite X in Perm(X, _) with mirror(User.rigille.List.cat_assoc<A>([ext.fst], min_split.fst, min_split.snd.fst))
                       // Perm([ext.fst] ++ min_split.fst ++ min_split.snd.fst, min_split.fst ++ [ext.fst] ++ min_split.snd.fst)
-                      lem_middle = lem_middle :: rewrite X in Perm(_, X) with mirror(User.rigille.List.cat_assoc<A>(min_split.fst, [ext.fst], min_split.snd.fst))
+                      let lem_middle = lem_middle :: rewrite X in Perm(_, X) with mirror(User.rigille.List.cat_assoc<A>(min_split.fst, [ext.fst], min_split.snd.fst))
                       // Perm(ext.fst & tail_call.fst, ext.fst & min_split.fst ++ min_split.snd.fst)
-                      lem_left = User.rigille.List.Perm.skip<A>(ext.fst, _, _, tail_call.snd.fst)
+                      let lem_left = User.rigille.List.Perm.skip<A>(ext.fst, _, _, tail_call.snd.fst)
 
                       // Perm([ext.fst] ++ min_split.fst ++ min_split.snd.fst, min_split.fst ++ [ext.fst] ++ min_split.snd.fst)
-                      qed = User.rigille.List.Perm.trans<A>(_, _, _, lem_middle, lem_right)
+                      let qed = User.rigille.List.Perm.trans<A>(_, _, _, lem_middle, lem_right)
                       // Perm(ext.fst & tail_call.fst, xs.head & xs.tail 
-                      qed = User.rigille.List.Perm.trans<A>(_, _, _, lem_left, qed)
+                      let qed = User.rigille.List.Perm.trans<A>(_, _, _, lem_left, qed)
                       qed
                      ) :: User.rigille.List.Perm<A>(ret, xs.head & xs.tail)
 
           // prove result is monotone
-          ret_monotone = case tail_call.fst
+          let ret_monotone = case tail_call.fst
                            with tail_call.snd.snd 
                                 ret_perm {
                             nil: qed = unit :: User.rigille.List.Monotone<A, after, O>(ext.fst & [])
                                  qed
 
                             cons: in_tail_call = right(left(refl)) :: User.rigille.List.In<A>(ext.fst & tail_call.fst.head & tail_call.fst.tail, tail_call.fst.head)
-                                  in_param = User.rigille.List.Perm.In<A>(_, _, _,
+                                  let in_param = User.rigille.List.Perm.In<A>(_, _, _,
                                                in_tail_call, User.rigille.List.Perm.symm<A>(_, _, ret_perm))
-                                  qed = ext.snd.snd(_, in_param)
+                                  let qed = ext.snd.snd(_, in_param)
                                   {qed, tail_call.snd.snd}
                           }! :: User.rigille.List.Monotone<A, after, O>(ret)
          ret ~ {ret_perm, ret_monotone}

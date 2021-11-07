@@ -1,7 +1,7 @@
 // the s stands for signed comparison
 Word.s_cmp<size: Nat>(a: Word(size), b: Word(size)): Cmp
-  a_neg = Word.is_neg!(a)
-  b_neg = Word.is_neg!(b)
+  let a_neg = Word.is_neg!(a)
+  let b_neg = Word.is_neg!(b)
   case a_neg b_neg {
     false false: Word.cmp!(a, b)
     false true: Cmp.gtn

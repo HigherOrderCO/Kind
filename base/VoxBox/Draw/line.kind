@@ -46,10 +46,10 @@ VoxBox.Draw.line.coords.low(
   x1: I32,
   y1: I32,
 ): List<Pair<I32, I32>>
-  dx = I32.sub(x1, x0)
-  dy = I32.abs(I32.sub(y1, y0))
-  yi = if I32.gtn(y1, y0) then +1#32 else -1#32
-  d = I32.sub(I32.mul(+2#32, dy), dx)
+  let dx = I32.sub(x1, x0)
+  let dy = I32.abs(I32.sub(y1, y0))
+  let yi = if I32.gtn(y1, y0) then +1#32 else -1#32
+  let d = I32.sub(I32.mul(+2#32, dy), dx)
   VoxBox.Draw.line.coords.low.go(x0, y0, x1, y1, yi, dx, dy, d, [])
 
 VoxBox.Draw.line.coords.low.go(
@@ -66,13 +66,13 @@ VoxBox.Draw.line.coords.low.go(
   if I32.eql(x0, x1) then
     {x0, y0} & coords
   else
-    new_x = I32.add(+1#32, x0)
+    let new_x = I32.add(+1#32, x0)
     if I32.gtn(d, +0#32) then
-      new_y = I32.add(yi, y0)
-      new_d = I32.add(d, I32.mul(+2#32, I32.sub(dy, dx)))
+      let new_y = I32.add(yi, y0)
+      let new_d = I32.add(d, I32.mul(+2#32, I32.sub(dy, dx)))
       VoxBox.Draw.line.coords.low.go(new_x, new_y, x1, y1, yi, dx, dy, new_d, {x0, y0} & coords)
     else
-      new_d = I32.add(d, I32.mul(+2#32, dy))
+      let new_d = I32.add(d, I32.mul(+2#32, dy))
       VoxBox.Draw.line.coords.low.go(new_x, y0, x1, y1, yi, dx, dy, new_d, {x0, y0} & coords)
 
 VoxBox.Draw.line.coords.high(
@@ -81,10 +81,10 @@ VoxBox.Draw.line.coords.high(
   x1: I32,
   y1: I32,
 ): List<Pair<I32, I32>>
-  dx = I32.abs(I32.sub(x1, x0))
-  dy = I32.sub(y1, y0)
-  xi = if I32.gtn(x0, x1) then -1#32 else +1#32
-  d = I32.sub(I32.mul(+2#32, dx), dy)
+  let dx = I32.abs(I32.sub(x1, x0))
+  let dy = I32.sub(y1, y0)
+  let xi = if I32.gtn(x0, x1) then -1#32 else +1#32
+  let d = I32.sub(I32.mul(+2#32, dx), dy)
   VoxBox.Draw.line.coords.high.go(x0, y0, x1, y1, xi, dx, dy, d, [])
 
 VoxBox.Draw.line.coords.high.go(
@@ -101,11 +101,11 @@ VoxBox.Draw.line.coords.high.go(
   if I32.eql(y0, y1) then
     {x0, y0} & coords
   else
-    new_y = I32.add(+1#32, y0)
+    let new_y = I32.add(+1#32, y0)
     if I32.gtn(d, +0#32) then
-      new_x = I32.add(x0, xi)
-      new_d = I32.add(d, I32.mul(+2#32, I32.sub(dx, dy)))
+      let new_x = I32.add(x0, xi)
+      let new_d = I32.add(d, I32.mul(+2#32, I32.sub(dx, dy)))
       VoxBox.Draw.line.coords.high.go(new_x, new_y, x1, y1, xi, dx, dy, new_d, {x0, y0} & coords)
     else
-      new_d = I32.add(d, I32.mul(+2#32, dx))
+      let new_d = I32.add(d, I32.mul(+2#32, dx))
       VoxBox.Draw.line.coords.high.go(x0, new_y, x1, y1, xi, dx, dy, new_d, {x0, y0} & coords)

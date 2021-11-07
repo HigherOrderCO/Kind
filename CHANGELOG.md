@@ -1,3 +1,9 @@
+## Kind 1.0.108
+
+- Allow "for" to be on the left side of a list comprehension
+
+    [for x in [0 to 10] where Nat.is_even(x): x * 2]
+
 ## Kind 1.0.104
 
 - Implicit arguments are here!

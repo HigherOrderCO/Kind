@@ -4,7 +4,7 @@ App.KL.Game.Board.Creature.change_hp(
   board: App.KL.Game.Board
 ): Pair<I32, Pair<App.KL.Game.Board, Maybe<String>>>
 
-  creature = App.KL.Game.Board.Creature.get(pos, board)
+  let creature = App.KL.Game.Board.Creature.get(pos, board)
   without creature: {+0#32, {board, none}}
     let max_hp = App.KL.Game.Board.Creature.get.max_hp(creature)
     let new_hp = I32.max((creature@hp + value) , 0)
@@ -32,16 +32,16 @@ App.KL.Game.Board.Creature.change_hp.aux(
   case verify { 
     ltn:
       //dmg
-      {status, blocked} = App.KL.Game.Creature.Status.shield.hit(I32.neg(change), creature@status)
-      true_dmg = change - blocked 
-      new_creature = creature@status <- status
-      new_hp = I32.min((creature@hp + true_dmg), max_hp)
+      let {status, blocked} = App.KL.Game.Creature.Status.shield.hit(I32.neg(change), creature@status)
+      let true_dmg = change - blocked 
+      let new_creature = creature@status <- status
+      let new_hp = I32.min((creature@hp + true_dmg), max_hp)
       new_creature@hp <- new_hp
     eql:
       //nothing
       creature
     gtn:
       //heal
-      new_hp = I32.min((creature@hp + change), max_hp)
+      let new_hp = I32.min((creature@hp + change), max_hp)
       creature@hp <- new_hp
   }

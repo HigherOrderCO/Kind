@@ -2,7 +2,7 @@ App.KL.Game.Creature.Status.dot.total(
   creature: App.KL.Game.Creature
 ): I32
 
-  total_dot = +0#32
+  let total_dot = +0#32
   for status in creature@status with total_dot:
     case status { 
       dot:

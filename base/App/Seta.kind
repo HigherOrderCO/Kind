@@ -39,13 +39,13 @@ App.Seta.when: App.When<App.Seta.State>
     input:
       switch String.eql(event.id) {
         "0":
-          App.set_local!(state.local@fst <- state.local@fst@fst <- I32.read(event.text))
+          App.set_local!(state.local@fst@fst <- I32.read(event.text))
         "1":
-          App.set_local!(state.local@fst <- state.local@fst@snd <- I32.read(event.text))
+          App.set_local!(state.local@fst@snd <- I32.read(event.text))
         "2":
-          App.set_local!(state.local@snd <- state.local@snd@fst <- I32.read(event.text))
+          App.set_local!(state.local@snd@fst <- I32.read(event.text))
         "3":
-          App.set_local!(state.local@snd <- state.local@snd@snd <- I32.read(event.text))
+          App.set_local!(state.local@snd@snd <- I32.read(event.text))
       } default App.pass!
   } default App.pass!
 
