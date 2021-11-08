@@ -1,2 +1,8 @@
 Test: _
-  U32.murmur2(U32.murmur2(123))
+  Kindelia.hash_code("oi tudo bem? aaa", 0)
+
+Kindelia.hash_code(str: String, hash: U32): U32
+  case str {
+    nil: hash
+    cons: Kindelia.hash_code(str.tail, (U32.shl(hash, 5) - hash) + U16.to_u32(str.head))
+  }
