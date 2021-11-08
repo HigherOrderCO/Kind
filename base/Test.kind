@@ -1,3 +1,2 @@
 Test: _
-  let list = [for x in [0 to 10] where Nat.is_even(x): x * 2]
-  List.show!(Nat.show, list)
+  U32.murmur2(U32.murmur2(123))
