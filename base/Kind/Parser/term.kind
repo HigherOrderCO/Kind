@@ -47,6 +47,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.chain
       Kind.Parser.mirror
       Kind.Parser.comprehension
+      Kind.Parser.comprehension.mapped
       Kind.Parser.comprehension_range
       Kind.Parser.list
       Kind.Parser.map

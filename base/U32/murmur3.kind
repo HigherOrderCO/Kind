@@ -1,0 +1,7 @@
+U32.murmur3(h: U32): U32
+  let h = U32.xor(h, U32.shr(h, 16))
+  let h = U32.mul(h, 0x85ebca6b)
+  let h = U32.xor(h, U32.shr(h, 13))
+  let h = U32.mul(h, 0xc2b2ae35)
+  let h = U32.xor(h, U32.shr(h, 16))
+  h
