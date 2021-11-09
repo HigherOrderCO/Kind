@@ -1,0 +1,3 @@
+// TODO:
+Ether.RLP.bitify.byte(b: Byte): Ether.RLP.Tree
+  Ether.RLP.Tree.tip(Bits.empty)
