@@ -7,3 +7,10 @@ Bits.trim(new_len: Nat, bits: Bits): Bits
       i: Bits.i(Bits.trim(new_len.pred, bits.pred)),
     }
   }
+
+Bits.trim.insert(bits: Bits): Bits
+  case bits {
+    e : Bits.o(Bits.e)
+    o : Bits.o(Bits.trim.insert(bits.pred))
+    i : Bits.i(Bits.trim.insert(bits.pred))
+  }

@@ -1,0 +1,31 @@
+Bits.cmp.identity_by_o.aux.left(y : Bits) : Bits.cmp.go(Bits.e,y,Cmp.ltn) == Cmp.ltn
+  case y {
+   e : refl
+   o : Bits.cmp.identity_by_o.aux.left(y.pred)
+   i : refl
+  }!
+
+Bits.cmp.identity(x : Bits, y : Bits, j : Cmp, j2 : Cmp, H : Bits.cmp.go(x, y, j) == j2)
+  : Bits.cmp.go(Bits.trim.insert(x), y, j) == j2
+  case x with H {
+    o : 
+      case y with H {
+        i : Bits.cmp.identity(x.pred, y.pred, Cmp.ltn, j2, H)
+        o : Bits.cmp.identity(x.pred, y.pred, j, j2, H)
+        e : Bits.cmp.identity(x.pred, Bits.e, j, j2, H)
+      }!
+    i : case y with H {
+      i : Bits.cmp.identity(x.pred, y.pred, j, j2, H)
+      o : Bits.cmp.identity(x.pred, y.pred, Cmp.gtn, j2, H)
+      e : H
+    }!
+    e : case y with H {
+      i : 
+        let H = H :: Cmp.ltn == j2
+        case H {
+          refl : Bits.cmp.identity_by_o.aux.left(y.pred)
+        }!
+      o : H
+      e : H
+    }!
+  }!
