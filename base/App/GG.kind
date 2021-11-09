@@ -98,7 +98,7 @@ App.GG.movement_keys(key: U16, grid: App.GG.Grid): App.GG.Grid
       some: some(coord)
     } 
   Maybe {
-    get ori = char_tile
+    get ori = char_tile // Origin Coord 
     get d_c = // Destination Coord 
       switch U16.eql(key) {
         // left
