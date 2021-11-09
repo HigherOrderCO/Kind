@@ -3,7 +3,7 @@ App.GG.State: App.State
   App.State.new(App.GG.State.local, Unit)
 
 App.GG.Grid: Type
-  BBT<Pair<Nat, Nat>, App.GG.Tile>
+  BBT<Pair<U32, U32>, App.GG.Tile>
 
 type App.GG.State.local {
   new(
@@ -11,72 +11,123 @@ type App.GG.State.local {
 }
 
 App.GG.Coord: Type
-  Pair<Nat, Nat>
+  Pair<U32, U32>
 
-App.GG.Grid.cmp(a: Pair<Nat, Nat>, b: Pair<Nat, Nat>): Cmp
-  let fst_cmp = Nat.cmp(a@fst, b@fst)
-  let snd_cmp = Nat.cmp(a@snd, b@snd)
+App.GG.Grid.cmp(a: Pair<U32, U32>, b: Pair<U32, U32>): Cmp
+  let fst_cmp = U32.cmp(a@fst, b@fst)
   case fst_cmp {
     ltn: Cmp.ltn
-    eql:
-      case snd_cmp {
-        ltn: Cmp.ltn
-        eql: Cmp.eql
-        gtn: Cmp.gtn
-      }
+    eql: U32.cmp(a@snd, b@snd)
     gtn: Cmp.gtn
   }
+
+App.GG.Monster.to_vbox(monster: App.GG.Monster): VoxBox
+  case monster {
+    slime: monster.data@sprite
+    minion: monster.data@sprite
+  }
+
+App.GG.draw.grid(
+  grid: App.GG.Grid
+  img: VoxBox
+): VoxBox
+  for key:val in grid with img:
+    App.GG.draw.tile(key, val, {32,32}, {40,40}, img)
+  img
 
 App.GG.draw.tile(
   coord: App.GG.Coord,
   tile: App.GG.Tile,
   tile_size: Pair<U32, U32>,
-  starting_point: Pair<U32, U32>
+  start: Pair<U32, U32>
   img: VoxBox
 ): VoxBox
-  img
-  // VoxBox.draw
-  // let vbox = 
-  // case tipo@monster {
-  //   none:
-  //   some:
-  // }
+  let x = (start@fst + (tile_size@fst * coord@fst)) - 128
+  let y = (start@snd + (tile_size@snd * coord@snd)) - 128
+  let tile_img = tile@img
+  let img = 
+    VoxBox.Draw.image(x, y, 0, tile@img, img)
+  case tile@monster as monster {
+    none: img 
+    some:
+      let sprite = App.GG.Monster.to_vbox(monster.value)
+      VoxBox.Draw.image(x, y, 1, sprite, img)
+  }
 
 App.GG.init.grid: App.GG.Grid
+
+  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.img.slime))
   let list = 
     [
-      {{0,0}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{0,1}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{0,2}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{1,0}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{1,1}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{1,2}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{2,0}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{2,1}, App.GG.Tile.new(none, App.GG.Team.blue)}
-      {{2,2}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{0#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{0#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{0#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{1#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{1#32,1#32}, App.GG.Tile.new(App.GG.img.tile, some(monster), App.GG.Team.blue)}
+      {{1#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{2#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{2#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{2#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
 
-      {{3,0}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{3,1}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{3,2}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{4,0}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{4,1}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{4,2}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{5,0}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{5,1}, App.GG.Tile.new(none, App.GG.Team.red)}
-      {{5,2}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{3#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{3#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{3#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{4#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{4#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{4#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{5#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{5#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{5#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
     ]
   BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
 
 type App.GG.Tile {
   new(
-    // img: VoxBox
+    img: VoxBox
     monster: Maybe<App.GG.Monster>
     owner: App.GG.Team
   )
 }
 
-// App.GG.Tile.img.basic: VoxBox
 
+App.GG.movement_keys(key: U16, grid: App.GG.Grid): App.GG.Grid
+  let char_tile = none :: Maybe<App.GG.Coord>
+  for coord:tile in grid with char_tile:
+    case tile@monster {
+      none: char_tile
+      some: some(coord)
+    } 
+  Maybe {
+    get ori = char_tile
+    get d_c = // Destination Coord 
+      switch U16.eql(key) {
+        // left
+        37#16: some({ori@fst - 1, ori@snd})
+        // up
+        38#16: some({ori@fst, ori@snd - 1})
+        // right
+        39#16: some({ori@fst + 1, ori@snd})
+        // down
+        40#16: some({ori@fst, ori@snd + 1})
+      }default none
+    get d_t = BBT.lookup!!(App.GG.Grid.cmp, d_c, grid)
+    return App.GG.move(ori, d_c, grid)
+  } <> grid
+
+App.GG.move(origin: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  let t_origin = BBT.lookup!!(App.GG.Grid.cmp, origin, grid)
+  let t_destination = BBT.lookup!!(App.GG.Grid.cmp, destination, grid)
+  Maybe {
+    get ori = t_origin
+    get des = t_destination
+    let mon = ori@monster
+    let new_ori = ori@monster <- none
+    let new_des = des@monster <- mon
+    let new_grid = BBT.insert!!(App.GG.Grid.cmp, destination, new_des, grid)
+    let new_grid = BBT.insert!!(App.GG.Grid.cmp, origin, new_ori, new_grid)
+    log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
+    return new_grid
+  } <> grid
 
 type App.GG.Animation {
   idle
@@ -86,13 +137,13 @@ type App.GG.Animation {
 
 type App.GG.Slime {
   new(
-    sprite: App.GG.Animation -> U64 -> VoxBox
+    sprite: VoxBox //App.GG.Animation -> U64 -> VoxBox
   )
 }
 
 type App.GG.Minion {
   new(
-    sprite: App.GG.Animation -> U64 -> VoxBox
+    sprite: VoxBox //App.GG.Animation -> U64 -> VoxBox
   )
 }
 
@@ -109,7 +160,7 @@ type App.GG.Team {
 
 // Initial state
 App.GG.init: App.Init<App.GG.State>
-  let grid = BBT.tip!!
+  let grid = App.GG.init.grid
   let local = App.GG.State.local.new(grid)
   App.Store.new<App.GG.State>(local, unit)
 
@@ -139,21 +190,25 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
             "scale": "4"
           },
           {},
-          img) 
+          App.GG.draw.grid(state@local@grid, img)) 
       }</div>
   </div>
 
 // Event handler
 App.GG.when: App.When<App.GG.State>
   (event, state)
+  let local = state@local
   case event {
-    init: IO {
-      App.watch!(App.room_zero)
-      App.new_post!(App.room_zero, "")
-    }
-    // mouse_down: IO {
-    //   App.set_local!(state@local + 1)
+    // init: IO {
+    //   App.watch!(App.room_zero)
+    //   App.new_post!(App.room_zero, "")
     // }
+    key_down:
+      log(U16.show(event.code))
+      let grid = local@grid
+      let new_grid = App.GG.movement_keys(event.code, grid)
+      let new_local = local@grid <- new_grid
+      App.set_local!(new_local)
   } default App.pass!
 
 // Global ticker: not used
