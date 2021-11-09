@@ -1,0 +1,23 @@
+Bits.trim.identity(bits : Bits) : Bits.trim(Bits.length(bits), bits) == bits
+  case bits {
+    e : refl
+    o : 
+      let rec = Bits.trim.identity(bits.pred)
+      case refl :: Bits.length.go(bits.pred,1) == Bits.length(Bits.o(bits.pred)) {
+        refl :
+          let H = Bits.length.succ(bits.pred, 0)
+          case H {
+            refl : Equal.apply!!!!(Bits.o, rec)
+          }! 
+      }!
+      
+    i : 
+      let rec = Bits.trim.identity(bits.pred)
+      case refl :: Bits.length.go(bits.pred,1) == Bits.length(Bits.i(bits.pred)) {
+        refl :
+          let H = Bits.length.succ(bits.pred, 0)
+          case H {
+            refl : Equal.apply!!!!(Bits.i, rec)
+          }! 
+      }!
+  }!
