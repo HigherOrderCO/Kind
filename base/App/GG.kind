@@ -1,0 +1,177 @@
+// App states (local = clicks, global = visitors)
+App.GG.State: App.State
+  App.State.new(App.GG.State.local, Unit)
+
+App.GG.Grid: Type
+  BBT<Pair<Nat, Nat>, App.GG.Tile>
+
+type App.GG.State.local {
+  new(
+    grid: App.GG.Grid)
+}
+
+App.GG.Coord: Type
+  Pair<Nat, Nat>
+
+App.GG.Grid.cmp(a: Pair<Nat, Nat>, b: Pair<Nat, Nat>): Cmp
+  let fst_cmp = Nat.cmp(a@fst, b@fst)
+  let snd_cmp = Nat.cmp(a@snd, b@snd)
+  case fst_cmp {
+    ltn: Cmp.ltn
+    eql:
+      case snd_cmp {
+        ltn: Cmp.ltn
+        eql: Cmp.eql
+        gtn: Cmp.gtn
+      }
+    gtn: Cmp.gtn
+  }
+
+App.GG.draw.tile(
+  coord: App.GG.Coord,
+  tile: App.GG.Tile,
+  tile_size: Pair<U32, U32>,
+  starting_point: Pair<U32, U32>
+  img: VoxBox
+): VoxBox
+  img
+  // VoxBox.draw
+  // let vbox = 
+  // case tipo@monster {
+  //   none:
+  //   some:
+  // }
+
+App.GG.init.grid: App.GG.Grid
+  let list = 
+    [
+      {{0,0}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{0,1}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{0,2}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{1,0}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{1,1}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{1,2}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{2,0}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{2,1}, App.GG.Tile.new(none, App.GG.Team.blue)}
+      {{2,2}, App.GG.Tile.new(none, App.GG.Team.blue)}
+
+      {{3,0}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{3,1}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{3,2}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{4,0}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{4,1}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{4,2}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{5,0}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{5,1}, App.GG.Tile.new(none, App.GG.Team.red)}
+      {{5,2}, App.GG.Tile.new(none, App.GG.Team.red)}
+    ]
+  BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
+
+type App.GG.Tile {
+  new(
+    // img: VoxBox
+    monster: Maybe<App.GG.Monster>
+    owner: App.GG.Team
+  )
+}
+
+// App.GG.Tile.img.basic: VoxBox
+
+
+type App.GG.Animation {
+  idle
+  moving
+  attack
+}
+
+type App.GG.Slime {
+  new(
+    sprite: App.GG.Animation -> U64 -> VoxBox
+  )
+}
+
+type App.GG.Minion {
+  new(
+    sprite: App.GG.Animation -> U64 -> VoxBox
+  )
+}
+
+type App.GG.Monster {
+  minion(data: App.GG.Minion)
+  slime(data: App.GG.Slime)
+}
+
+type App.GG.Team {
+  neutral
+  blue
+  red
+}
+
+// Initial state
+App.GG.init: App.Init<App.GG.State>
+  let grid = BBT.tip!!
+  let local = App.GG.State.local.new(grid)
+  App.Store.new<App.GG.State>(local, unit)
+
+App.GG.draw.canvas(img: VoxBox, local: App.GG.State.local): VoxBox
+  img
+
+// Render function
+App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
+  (state)
+  <div style={
+    "height": "100vh"
+    "width": "100vw"
+  }>
+    <div style={
+        "max-height": "100%",
+        "max-width": "100%",
+        "overflow": "scroll",
+        "display": "flex",
+        "align-items": "center",
+        "justify-content": "center"
+      }>{
+        DOM.vbox({
+            "class": "pixel-art" 
+            "id": "game_screen",
+            "width": "1024px",
+            "height": "1024px",
+            "scale": "4"
+          },
+          {},
+          img) 
+      }</div>
+  </div>
+
+// Event handler
+App.GG.when: App.When<App.GG.State>
+  (event, state)
+  case event {
+    init: IO {
+      App.watch!(App.room_zero)
+      App.new_post!(App.room_zero, "")
+    }
+    // mouse_down: IO {
+    //   App.set_local!(state@local + 1)
+    // }
+  } default App.pass!
+
+// Global ticker: not used
+App.GG.tick: App.Tick<App.GG.State>
+  App.no_tick<App.GG.State>
+
+// Global visitor: counts posts to room_zero
+App.GG.post: App.Post<App.GG.State>
+  (time, room, addr, data, global_state)
+  global_state
+
+// A "GG, world!" + counter application
+App.GG: App<App.GG.State>
+  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  App.new<App.GG.State>(
+    App.GG.init
+    App.GG.draw(img)
+    App.GG.when
+    App.GG.tick
+    App.GG.post
+  )
