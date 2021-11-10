@@ -33,6 +33,7 @@ Kind.Parser.term: Parser(Kind.Term)
       Kind.Parser.use((x) Kind.Parser.term)
       Kind.Parser.implicit
       Kind.Parser.goal_rewrite
+      Kind.Parser.goal_replace
       Kind.Parser.if
       Kind.Parser.char
       Kind.Parser.string('"')
