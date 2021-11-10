@@ -1,0 +1,81 @@
+// Bytes
+// =====
+
+//Byte: Type
+  //Word<8>
+
+Bytes: Type
+  List<U8>
+
+Bytes.show(bytes: Bytes): String
+  List.show!(Bits.show, List.map!!(U8.to_bits, bytes))
+
+Bytes.to_nat.go<size: Nat>(byte: Word<size>): Nat
+  case byte {
+    e: Nat.zero
+    o: Nat.double(Bytes.to_nat.go<byte.size>(byte.pred))
+    i: Nat.succ(Nat.double(Bytes.to_nat.go<byte.size>(byte.pred)))
+  }
+
+Bytes.to_nat(bytes: Bytes): Nat
+  case bytes {
+    nil:
+      Nat.zero
+    cons: 
+      let head = Bytes.to_nat.go<8>(bytes.head@value)
+      let tail = Bytes.to_nat(bytes.tail)
+      Nat.add(head, Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(tail)))))))))
+  }
+
+Bytes.from_nat.go(n: Nat, r: Bytes): Bytes
+  case n {
+    zero: r
+    succ: Bytes.from_nat.go(n.pred, Bytes.inc(r))
+  }
+
+Bytes.from_nat(n: Nat): Bytes
+  Bytes.from_nat.go(n, [])
+
+//Bytes.inc.go<size: Nat>(byte: Word<size>): Pair<Word<size>, Bool>
+  //case byte {
+    //e: {Word.e, true}
+    //o: {Word.i!(byte.pred), false}
+    //i: case Bytes.inc.go!(byte.pred) as result {
+      //new: {Word.o!(result.fst), result.snd}
+    //}
+  //}!
+
+Bytes.inc(bytes: Bytes): Bytes
+  case bytes {
+    nil:
+      [1#8]
+    cons:
+      if U8.eql(bytes.head, 255#8) then
+        List.cons!(0#8, Bytes.inc(bytes.tail))
+      else
+        List.cons!(U8.inc(bytes.head), bytes.tail)
+  }
+  //case bytes {
+    //nil: [1#8]
+    //cons: case Bytes.inc.go!(bytes.head@value) as result {
+      //new: case result.snd {
+        //true: List.cons!(U8.new(result.fst), Bytes.inc(bytes.tail))
+        //false: List.cons!(U8.new(result.fst), bytes.tail)
+      //}
+    //}
+  //}
+
+//Bytes.from_nat.identity(n: Nat): Equal<Nat, Bytes.to_nat(Bytes.from_nat(n)), n>
+  //Bytes.from_nat.identity(n)
+
+//Aux.1(
+  //n: Nat
+  //e0: Nat.ltn(0, n) == true
+  //e1: Nat.ltn(n, 256) == true
+//): Equal<Bytes, Bytes.from_nat(n), [Nat.apply!(n, Word.inc<8>, Word.zero(8))]>
+  //Aux.1(n, e0, e1)
+
+
+
+
+
