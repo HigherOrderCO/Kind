@@ -63,6 +63,28 @@ RLP.decode.length(add: Nat, bytes: Bytes): Nat
     new: got.snd
   }
 
+// Repeat
+// ------
+
+RLP.encode.repeat<A: Type>(encode: A -> Bytes, values: List<A>): Bytes
+  case values {
+    nil: []
+    cons: List.concat!(encode(values.head), RLP.encode.repeat<A>(encode, values.tail))
+  }
+
+RLP.decoder.repeat<A: Type>(decoder: Bytes -> Pair<Bytes,A>, count: Nat, bytes: Bytes): Pair<Bytes, List<A>>
+  case count {
+    zero:
+      {bytes, []}
+    succ:
+      let {bytes, head} = decoder(bytes)
+      let {bytes, tail} = RLP.decoder.repeat<A>(decoder, count.pred, bytes)
+      {bytes, head & tail}
+  }
+
+RLP.encode.many(trees: List<RLP>): Bytes
+  RLP.encode.repeat<RLP>(RLP.encode, trees)
+
 // RLP
 // ---
 
@@ -98,25 +120,3 @@ RLP.decode(bytes: Bytes): RLP
   case RLP.decoder(bytes) as got {
     new: got.snd
   }
-
-// Repeat
-// ------
-
-RLP.encode.repeat<A: Type>(encode: A -> Bytes, values: List<A>): Bytes
-  case values {
-    nil: []
-    cons: List.concat!(encode(values.head), RLP.encode.repeat<A>(encode, values.tail))
-  }
-
-RLP.decoder.repeat<A: Type>(decoder: Bytes -> Pair<Bytes,A>, count: Nat, bytes: Bytes): Pair<Bytes, List<A>>
-  case count {
-    zero:
-      {bytes, []}
-    succ:
-      let {bytes, head} = decoder(bytes)
-      let {bytes, tail} = RLP.decoder.repeat<A>(decoder, count.pred, bytes)
-      {bytes, head & tail}
-  }
-
-RLP.encode.many(trees: List<RLP>): Bytes
-  RLP.encode.repeat<RLP>(RLP.encode, trees)

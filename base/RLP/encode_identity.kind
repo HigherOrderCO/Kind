@@ -1,3 +1,10 @@
+RLP.encode_identity(rlp: RLP): RLP.decode(RLP.encode(rlp)) == rlp
+  let pf = RLP.encode_identity.go(rlp, [])
+  let e0 = RLP.aux.16(RLP.encode(rlp))
+  let e1 = pf :: rewrite X in RLP.decoder(X) == Pair.new(Bytes,RLP,List.nil(U8),rlp) with e0
+  replace X with mirror(e1) in X((got) RLP,(got.fst) (got.snd) got.snd) == rlp
+  refl
+
 RLP.encode_identity.go(rlp: RLP, bts: Bytes): Equal<Pair<Bytes,RLP>, RLP.decoder(List.concat<U8>(RLP.encode(rlp),bts)), Pair.new<Bytes,RLP>(bts,rlp)>
   let ref_0 = RLP.encode_length_identity.go
   let ref_1 = RLP.encode_repeat_identity.go
@@ -63,10 +70,3 @@ RLP.encode_identity.go(rlp: RLP, bts: Bytes): Equal<Pair<Bytes,RLP>, RLP.decoder
           refl
       } : RLP.decoder(List.concat(U8,List.concat(U8,X,RLP.encode.many(rlp.child)),bts)) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
   }!
-
-RLP.encode_identity(rlp: RLP): RLP.decode(RLP.encode(rlp)) == rlp
-  let pf = RLP.encode_identity.go(rlp, [])
-  let e0 = RLP.aux.16(RLP.encode(rlp))
-  let e1 = pf :: rewrite X in RLP.decoder(X) == Pair.new(Bytes,RLP,List.nil(U8),rlp) with e0
-  replace X with mirror(e1) in X((got) RLP,(got.fst) (got.snd) got.snd) == rlp
-  refl
