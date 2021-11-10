@@ -45,25 +45,29 @@ App.GG.draw.tile(
   let x = (start@fst + (tile_size@fst * coord@fst)) - 128
   let y = (start@snd + (tile_size@snd * coord@snd)) - 128
   let tile_img = tile@img
+  let creature = tile@creature
   let img = 
     VoxBox.Draw.image(x, y, 0, tile@img, img)
-  case tile@monster as monster {
-    none: img 
+  case creature {
+    none:
+      img
     some:
-      let sprite = App.GG.Monster.to_vbox(monster.value)
+      let sprite = App.GG.Monster.to_vbox(creature.value@category)
       VoxBox.Draw.image(x, y, 1, sprite, img)
   }
 
 App.GG.init.grid: App.GG.Grid
 
-  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.img.slime))
+  let dna = App.GG.Creature.Dna.new("cartinhas", App.GG.Creature.Attributes.new(10, 10, 10, 10))
+  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.img.slime, dna))
+  let creature = App.GG.Creature.Creature.new(monster, App.GG.Team.blue, [], 10)
   let list = 
     [
       {{0#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
       {{0#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
       {{0#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
       {{1#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
-      {{1#32,1#32}, App.GG.Tile.new(App.GG.img.tile, some(monster), App.GG.Team.blue)}
+      {{1#32,1#32}, App.GG.Tile.new(App.GG.img.tile, some(creature), App.GG.Team.blue)}
       {{1#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
       {{2#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
       {{2#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
@@ -84,7 +88,7 @@ App.GG.init.grid: App.GG.Grid
 type App.GG.Tile {
   new(
     img: VoxBox
-    monster: Maybe<App.GG.Monster>
+    creature: Maybe<App.GG.Creature.Creature>
     owner: App.GG.Team
   )
 }
@@ -93,7 +97,7 @@ type App.GG.Tile {
 App.GG.movement_keys(key: U16, grid: App.GG.Grid): App.GG.Grid
   let char_tile = none :: Maybe<App.GG.Coord>
   for coord:tile in grid with char_tile:
-    case tile@monster {
+    case tile@creature {
       none: char_tile
       some: some(coord)
     } 
@@ -120,9 +124,9 @@ App.GG.move(origin: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid):
   Maybe {
     get ori = t_origin
     get des = t_destination
-    let mon = ori@monster
-    let new_ori = ori@monster <- none
-    let new_des = des@monster <- mon
+    let mon = ori@creature
+    let new_ori = ori@creature <- none
+    let new_des = des@creature <- mon
     let new_grid = BBT.insert!!(App.GG.Grid.cmp, destination, new_des, grid)
     let new_grid = BBT.insert!!(App.GG.Grid.cmp, origin, new_ori, new_grid)
     log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
@@ -138,6 +142,7 @@ type App.GG.Animation {
 type App.GG.Slime {
   new(
     sprite: VoxBox //App.GG.Animation -> U64 -> VoxBox
+    dna: App.GG.Creature.Dna
   )
 }
 
