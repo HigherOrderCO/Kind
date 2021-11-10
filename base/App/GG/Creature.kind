@@ -1,4 +1,4 @@
-type App.GG.Creature.Creature { 
+type App.GG.Creature { 
   new(
     category: App.GG.Monster
     team: App.GG.Team
@@ -70,11 +70,54 @@ App.GG.Creature.Effect.bind<A: Type, B: Type>(
   
 //===========================================================
 
+App.GG.Creature.get_tile(
+  place: App.GG.Coord
+  grid: App.GG.Grid
+): Maybe<App.GG.Tile>
+
+  BBT.lookup!!(App.GG.Grid.cmp, place, grid)
+
+
+App.GG.Creature.grid_set(
+  place: App.GG.Coord
+  tile: App.GG.Tile
+  grid: App.GG.Grid
+): App.GG.Grid
+
+  BBT.insert!!(App.GG.Grid.cmp, place, tile, grid)
+
+
 //===========================================================
 //Creature Management
 
-//App.GG.Creature.change_hp_at(
-  //grid: App.GG.Grid
-  //value: I32
-//): 
+App.GG.Creature.get(
+  place: App.GG.Coord
+  grid: App.GG.Grid
+): Maybe<App.GG.Creature>
+
+  let tile = App.GG.Creature.get_tile(place, grid)
+  case tile { 
+    none:
+      none
+    some:
+      tile.value@creature
+  }
+
+
+App.GG.Creature.change_hp_at(
+  mod: App.GG.Creature -> App.GG.Creature
+  pos: App.GG.Coord
+  grid: App.GG.Grid
+): App.GG.Grid
+  
+  let result = Maybe { 
+    get tile = App.GG.Creature.get_tile(pos, grid)
+    get creature = tile@creature
+    let new_creature = mod(creature)
+    let new_tile = App.GG.Tile.new(tile@img, some(creature), tile@owner)
+    let new_map = App.GG.Creature.grid_set(pos, new_tile, grid)
+    return new_map
+  }
+  result <> grid
+
 

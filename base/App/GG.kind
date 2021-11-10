@@ -60,7 +60,7 @@ App.GG.init.grid: App.GG.Grid
 
   let dna = App.GG.Creature.Dna.new("cartinhas", App.GG.Creature.Attributes.new(10, 10, 10, 10))
   let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.img.slime, dna))
-  let creature = App.GG.Creature.Creature.new(monster, App.GG.Team.blue, [], 10)
+  let creature = App.GG.Creature.new(monster, App.GG.Team.blue, [], 10)
   let list = 
     [
       {{0#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
@@ -88,7 +88,7 @@ App.GG.init.grid: App.GG.Grid
 type App.GG.Tile {
   new(
     img: VoxBox
-    creature: Maybe<App.GG.Creature.Creature>
+    creature: Maybe<App.GG.Creature>
     owner: App.GG.Team
   )
 }
