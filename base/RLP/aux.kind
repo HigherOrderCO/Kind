@@ -5,14 +5,9 @@
 RLP.aux.0(
   add: Nat
   len: Nat
-  H0: Either<Equal<Nat, add, 128>, Equal<Nat, add, 192>>
+  pf0: Either<Equal<Nat, add, 128>, Equal<Nat, add, 192>>
 ): Nat.ltn(0,Nat.add(add,len)) == Bool.true
-  case H0 {
-  } default
-    case mirror(H0.value) {
-      refl:
-        refl
-    }: Nat.ltn(0,Nat.add(self.b,len)) == Bool.true
+  RLP.aux.0(add, len, pf0)
 
 // TODO: include `a <= 192`
 RLP.aux.1(
