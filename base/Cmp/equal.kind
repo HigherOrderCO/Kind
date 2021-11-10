@@ -1,0 +1,22 @@
+Cmp.equal(x : Cmp, y : Cmp) : Bool
+  case x {
+    gtn : Cmp.as_gtn(y)
+    ltn : Cmp.as_ltn(y)
+    eql : Cmp.as_eql(y)
+  }
+
+Cmp.equal.absurd(x : Cmp, y : Cmp, H : x == y, H2 : Cmp.equal(x, y) == false) : Empty
+  case x with H H2 {
+    gtn : 
+      case H with H2 {
+        refl : Empty.absurd!(Bool.false_neq_true(mirror(H2)))
+      }!
+    ltn :   
+      case H with H2 {
+        refl : Empty.absurd!(Bool.false_neq_true(mirror(H2)))
+      }!
+    eql :
+      case H with H2 {
+        refl : Empty.absurd!(Bool.false_neq_true(mirror(H2)))
+      }!
+  }!
