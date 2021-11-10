@@ -69,25 +69,6 @@ App.GG.Creature.Effect.bind<A: Type, B: Type>(
   }
   
 //===========================================================
-
-App.GG.Creature.get_tile(
-  place: App.GG.Coord
-  grid: App.GG.Grid
-): Maybe<App.GG.Tile>
-
-  BBT.lookup!!(App.GG.Grid.cmp, place, grid)
-
-
-App.GG.Creature.grid_set(
-  place: App.GG.Coord
-  tile: App.GG.Tile
-  grid: App.GG.Grid
-): App.GG.Grid
-
-  BBT.insert!!(App.GG.Grid.cmp, place, tile, grid)
-
-
-//===========================================================
 //Creature Management
 
 App.GG.Creature.get(

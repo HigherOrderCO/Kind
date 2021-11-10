@@ -1,0 +1,41 @@
+App.GG.Grid: Type
+  BBT<Pair<U32, U32>, App.GG.Tile>
+
+// Cmp
+App.GG.Grid.cmp(a: Pair<U32, U32>, b: Pair<U32, U32>): Cmp
+  let fst_cmp = U32.cmp(a@fst, b@fst)
+  case fst_cmp {
+    ltn: Cmp.ltn
+    eql: U32.cmp(a@snd, b@snd)
+    gtn: Cmp.gtn
+  }
+
+// Returns the Tile in a coord if there is any
+App.GG.Grid.get(
+  place: App.GG.Coord
+  grid: App.GG.Grid
+): Maybe<App.GG.Tile>
+
+  BBT.lookup!!(App.GG.Grid.cmp, place, grid)
+
+// Adds a Tile or updates an existing one
+App.GG.Grid.set(
+  place: App.GG.Coord
+  tile: App.GG.Tile
+  grid: App.GG.Grid
+): App.GG.Grid
+
+  BBT.insert!!(App.GG.Grid.cmp, place, tile, grid)
+
+// Updates a Tile if there is one
+App.GG.Grid.update(
+  place: App.GG.Coord
+  update: App.GG.Tile -> App.GG.Tile
+  grid: App.GG.Grid 
+): App.GG.Grid
+  case App.GG.Grid.get(place, grid) as old_tile {
+    none: grid
+    some: 
+      let new_tile = update(old_tile.value)
+      App.GG.Grid.set(place, new_tile, grid)
+  }

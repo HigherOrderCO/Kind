@@ -1,0 +1,4 @@
+type App.GG.Monster {
+  minion(data: App.GG.Minion)
+  slime(data: App.GG.Slime)
+}

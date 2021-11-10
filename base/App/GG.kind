@@ -13,14 +13,6 @@ type App.GG.State.local {
 App.GG.Coord: Type
   Pair<U32, U32>
 
-App.GG.Grid.cmp(a: Pair<U32, U32>, b: Pair<U32, U32>): Cmp
-  let fst_cmp = U32.cmp(a@fst, b@fst)
-  case fst_cmp {
-    ltn: Cmp.ltn
-    eql: U32.cmp(a@snd, b@snd)
-    gtn: Cmp.gtn
-  }
-
 App.GG.Monster.to_vbox(monster: App.GG.Monster): VoxBox
   case monster {
     slime: monster.data@sprite
@@ -85,13 +77,6 @@ App.GG.init.grid: App.GG.Grid
     ]
   BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
 
-type App.GG.Tile {
-  new(
-    img: VoxBox
-    creature: Maybe<App.GG.Creature>
-    owner: App.GG.Team
-  )
-}
 
 
 App.GG.movement_keys(key: U16, grid: App.GG.Grid): App.GG.Grid
@@ -133,35 +118,6 @@ App.GG.move(origin: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid):
     return new_grid
   } <> grid
 
-type App.GG.Animation {
-  idle
-  moving
-  attack
-}
-
-type App.GG.Slime {
-  new(
-    sprite: VoxBox //App.GG.Animation -> U64 -> VoxBox
-    dna: App.GG.Creature.Dna
-  )
-}
-
-type App.GG.Minion {
-  new(
-    sprite: VoxBox //App.GG.Animation -> U64 -> VoxBox
-  )
-}
-
-type App.GG.Monster {
-  minion(data: App.GG.Minion)
-  slime(data: App.GG.Slime)
-}
-
-type App.GG.Team {
-  neutral
-  blue
-  red
-}
 
 // Initial state
 App.GG.init: App.Init<App.GG.State>

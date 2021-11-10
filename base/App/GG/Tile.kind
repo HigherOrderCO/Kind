@@ -1,0 +1,19 @@
+type App.GG.Tile {
+  new(
+    img: VoxBox
+    creature: Maybe<App.GG.Creature>
+    owner: App.GG.Team
+  )
+}
+
+App.GG.Tile.update_creature(
+  update: App.GG.Creature -> App.GG.Creature, 
+  tile: App.GG.Tile
+): App.GG.Tile
+  case tile@creature as creature{
+    none: tile
+    some: 
+      let new_creature = update(creature.value)
+      let new_tile = tile@creature <- some(new_creature)
+      new_tile
+  }

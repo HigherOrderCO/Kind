@@ -1,0 +1,5 @@
+type App.GG.Animation {
+  idle
+  moving
+  attack
+}
