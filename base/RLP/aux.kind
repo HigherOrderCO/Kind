@@ -1,3 +1,6 @@
+// These sub-theorems were not proven yet!
+// Most of them are simple, and should be finished over the next days
+
 // TODO: include `a <= 192`
 RLP.aux.0(
   add: Nat
