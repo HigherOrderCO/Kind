@@ -1,0 +1,21 @@
+RLP.encode_repeat_identity.go<A: Type>(
+  encode: A -> Bytes
+  decoder: Bytes -> Pair<Bytes,A>
+  identity: (val: A, bts: Bytes) -> Equal<Pair<Bytes,A>, decoder(List.concat<U8>(encode(val),bts)), Pair.new<Bytes,A>(bts,val)>
+  values: List<A>
+  rest: Bytes
+) : def encoded = List.concat<U8>(RLP.encode.repeat<A>(encode, values), rest)
+    def decoded = RLP.decoder.repeat<A>(decoder, List.length!(values), encoded)
+    Equal<Pair<Bytes, List<A>>, decoded, Pair.new<Bytes, List<A>>(rest, values)>
+  case values {
+    nil:
+      refl
+    cons:
+      let e0 = RLP.aux.23<U8>(encode(values.head), RLP.encode.repeat(A,encode,values.tail), rest)
+      replace X with mirror(e0) in decoder(X)(() Pair(Bytes,List(A)),(bytes) (head) RLP.decoder.repeat(A,decoder,List.length(A,values.tail),bytes,() Pair(Bytes,List(A)),(bytes) (tail) Pair.new(Bytes,List(A),bytes,List.cons(A,head,tail)))) == Pair.new(Bytes,List(A),rest,List.cons(A,values.head,values.tail))
+      let e1 = identity(values.head, List.concat<U8>(RLP.encode.repeat(A,encode,values.tail),rest))
+      replace X with mirror(e1) in X(() Pair(Bytes,List(A)),(bytes) (head) RLP.decoder.repeat(A,decoder,List.length(A,values.tail),bytes,() Pair(Bytes,List(A)),(bytes) (tail) Pair.new(Bytes,List(A),bytes,List.cons(A,head,tail)))) == Pair.new(Bytes,List(A),rest,List.cons(A,values.head,values.tail))
+      let e2 = RLP.encode_repeat_identity.go<A>(encode, decoder, identity, values.tail, rest)
+      replace X with mirror(e2) in X(() Pair(Bytes,List(A)),(bytes) (tail) Pair.new(Bytes,List(A),bytes,List.cons(A,values.head,tail))) == Pair.new(Bytes,List(A),rest,List.cons(A,values.head,values.tail))
+      refl
+  }!

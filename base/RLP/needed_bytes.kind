@@ -1,0 +1,5 @@
+RLP.needed_bytes(length: Nat): Nat
+  case length {
+    zero: 0
+    succ: Nat.succ(RLP.needed_bytes(Nat.half(Nat.half(Nat.half(Nat.half(Nat.half(Nat.half(Nat.half(Nat.half(length))))))))))
+  }
