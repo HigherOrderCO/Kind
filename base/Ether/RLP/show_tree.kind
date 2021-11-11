@@ -1,4 +1,4 @@
-Ether.RLP.show_tree(t: Ether.RLP.Tree): String 
+Ether.RLP.show_tree(t: Ether.RLP.Tree<Bits>): String 
   case t {
     tip : "[" | Bits.show(t.value) | "]"
     list: Ether.RLP.show_list_tree(t.value)

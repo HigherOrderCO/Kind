@@ -1,4 +1,4 @@
-Ether.RLP.to_string(t: List(Ether.RLP.Tree) ): String
+Ether.RLP.to_string(t: List(Ether.RLP.Tree<Bits>)): String
   case t {
     nil : ""
     cons: 
