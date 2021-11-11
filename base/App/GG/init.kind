@@ -1,0 +1,36 @@
+// Initial state
+App.GG.init: App.Init<App.GG.State>
+  let grid = App.GG.init.grid
+  let local = App.GG.State.local.new(grid)
+  App.Store.new<App.GG.State>(local, unit)
+
+
+App.GG.init.grid: App.GG.Grid
+
+  let dna = App.GG.Creature.Dna.new("cartinhas", App.GG.Creature.Attributes.new(10, 10, 10, 10))
+  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.img.slime, dna))
+  let creature = App.GG.Creature.new(monster, App.GG.Team.blue, [], 10)
+  let list = 
+    [
+      {{0#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{0#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{0#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{1#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{1#32,1#32}, App.GG.Tile.new(App.GG.img.tile, some(creature), App.GG.Team.blue)}
+      {{1#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{2#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{2#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+      {{2#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.blue)}
+
+      {{3#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{3#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{3#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{4#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{4#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{4#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{5#32,0#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{5#32,1#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+      {{5#32,2#32}, App.GG.Tile.new(App.GG.img.tile, none, App.GG.Team.red)}
+    ]
+  BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
+

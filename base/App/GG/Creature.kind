@@ -7,7 +7,6 @@ type App.GG.Creature {
   )
 }
 
-
 type App.GG.Creature.Dna {
   new(
     alteration: String //TODO

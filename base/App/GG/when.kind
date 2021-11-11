@@ -1,0 +1,41 @@
+// Event handler
+App.GG.when: App.When<App.GG.State>
+  (event, state)
+  let local = state@local
+  case event {
+    // init: IO {
+    //   App.watch!(App.room_zero)
+    //   App.new_post!(App.room_zero, "")
+    // }
+    key_down:
+      log(U16.show(event.code))
+      let grid = local@grid
+      let new_grid = App.GG.when.movement_keys(event.code, grid)
+      let new_local = local@grid <- new_grid
+      App.set_local!(new_local)
+  } default App.pass!
+
+App.GG.when.movement_keys(key: U16, grid: App.GG.Grid): App.GG.Grid
+  let char_tile = none :: Maybe<App.GG.Coord>
+  for coord:tile in grid with char_tile:
+    case tile@creature {
+      none: char_tile
+      some: some(coord)
+    } 
+  Maybe {
+    get ori = char_tile // Origin Coord 
+    get d_c = // Destination Coord 
+      switch U16.eql(key) {
+        // left
+        37#16: some({ori@fst - 1, ori@snd})
+        // up
+        38#16: some({ori@fst, ori@snd - 1})
+        // right
+        39#16: some({ori@fst + 1, ori@snd})
+        // down
+        40#16: some({ori@fst, ori@snd + 1})
+      }default none
+    get d_t = BBT.lookup!!(App.GG.Grid.cmp, d_c, grid)
+    return App.GG.Grid.move_creature(ori, d_c, grid)
+  } <> grid
+

@@ -1,0 +1,36 @@
+type App.GG.Projectile {
+  new(
+    info: App.GG.Projectile.Info
+    func: App.GG.Projectile.Effect // Change
+  )
+}
+
+
+type App.GG.Projectile.Result {
+  new(
+    projectiles: List<App.GG.Projectile>
+    grid: App.GG.Grid
+    img: VoxBox
+  )
+}
+
+App.GG.Projectile.Effect: Type
+  App.GG.Projectile.Info ->
+  App.GG.Grid ->
+  VoxBox ->
+  App.GG.Projectile.Result
+
+type App.GG.Projectile.Info {
+  new(
+    team: App.GG.Team
+    status: App.GG.Projectile.Status
+    position: App.GG.Coord
+    frame: U64
+  )
+}
+
+type App.GG.Projectile.Status {
+  coord(val: App.GG.Coord)
+  nat(val: Nat)
+  ids(val: List<String>)
+}

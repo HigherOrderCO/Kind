@@ -1,0 +1,2 @@
+App.GG.Coord: Type
+  Pair<U32, U32>

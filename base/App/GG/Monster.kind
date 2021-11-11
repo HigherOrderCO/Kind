@@ -2,3 +2,9 @@ type App.GG.Monster {
   minion(data: App.GG.Minion)
   slime(data: App.GG.Slime)
 }
+
+App.GG.Monster.to_vbox(monster: App.GG.Monster): VoxBox
+  case monster {
+    slime: monster.data@sprite
+    minion: monster.data@sprite
+  }

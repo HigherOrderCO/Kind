@@ -1,0 +1,57 @@
+// Renders App
+App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
+  (state)
+  <div style={
+    "height": "100vh"
+    "width": "100vw"
+  }>
+    <div style={
+        "max-height": "100%",
+        "max-width": "100%",
+        "overflow": "scroll",
+        "display": "flex",
+        "align-items": "center",
+        "justify-content": "center"
+      }>{
+        DOM.vbox({
+            "class": "pixel-art" 
+            "id": "game_screen",
+            "width": "1024px",
+            "height": "1024px",
+            "scale": "4"
+          },
+          {},
+          App.GG.draw.grid(state@local@grid, img)) 
+      }</div>
+  </div>
+
+// Draws the grid
+App.GG.draw.grid(
+  grid: App.GG.Grid
+  img: VoxBox
+): VoxBox
+  for key:val in grid with img:
+    App.GG.draw.tile(key, val, {32,32}, {40,40}, img)
+  img
+
+// Draws a tile and its contents
+App.GG.draw.tile(
+  coord: App.GG.Coord,
+  tile: App.GG.Tile,
+  tile_size: Pair<U32, U32>,
+  start: Pair<U32, U32>
+  img: VoxBox
+): VoxBox
+  let x = (start@fst + (tile_size@fst * coord@fst)) - 128
+  let y = (start@snd + (tile_size@snd * coord@snd)) - 128
+  let tile_img = tile@img
+  let creature = tile@creature
+  let img = 
+    VoxBox.Draw.image(x, y, 0, tile@img, img)
+  case creature {
+    none:
+      img
+    some:
+      let sprite = App.GG.Monster.to_vbox(creature.value@category)
+      VoxBox.Draw.image(x, y, 1, sprite, img)
+  }
