@@ -1,2 +1,10 @@
 Test: _
-  RLP.encode.length(128, Nat.pow(256,7))
+  let a = RLP.encode
+  let b = RLP.decode
+  0
+  //let a = RLP.encode(RLP.data([0x80#8,0x80#8,0x80#8]))
+  //let b = RLP.decode(a)
+  //{
+    //Bytes.show(a)
+    //b
+  //}

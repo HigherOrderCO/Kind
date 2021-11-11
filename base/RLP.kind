@@ -77,8 +77,8 @@ RLP.decoder.repeat<A: Type>(decoder: Bytes -> Pair<Bytes,A>, count: Nat, bytes: 
     zero:
       {bytes, []}
     succ:
-      let {bytes, head} = decoder(bytes)
-      let {bytes, tail} = RLP.decoder.repeat<A>(decoder, count.pred, bytes)
+      let {bytes_0, head} = decoder(bytes)
+      let {bytes_1, tail} = RLP.decoder.repeat<A>(decoder, Nat.sub(count.pred, Nat.sub(List.length!(bytes),List.length!(bytes_0))), bytes_0)
       {bytes, head & tail}
   }
 
@@ -96,7 +96,8 @@ RLP.encode(tree: RLP): Bytes
       else
         List.concat!(RLP.encode.length(128, List.length!(tree.value)), tree.value)
     node:
-      List.concat!(RLP.encode.length(192, List.length!(tree.child)), RLP.encode.many(tree.child))
+      let rest = RLP.encode.many(tree.child)
+      List.concat!(RLP.encode.length(192, List.length!(rest)), rest)
   }
   
 RLP.decoder(bytes: Bytes): Pair<Bytes, RLP>
