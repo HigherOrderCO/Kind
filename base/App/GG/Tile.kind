@@ -1,6 +1,7 @@
 type App.GG.Tile {
   new(
     img: VoxBox
+    projectiles: List<App.GG.Projectile>
     creature: Maybe<App.GG.Creature>
     owner: App.GG.Team
   )

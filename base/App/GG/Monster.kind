@@ -1,6 +1,9 @@
 type App.GG.Monster {
   minion(data: App.GG.Minion)
-  slime(data: App.GG.Slime)
+  slime(
+    data: App.GG.Slime
+    chips: List<App.GG.Chip>
+  )
 }
 
 App.GG.Monster.to_vbox(monster: App.GG.Monster): VoxBox
@@ -8,3 +11,4 @@ App.GG.Monster.to_vbox(monster: App.GG.Monster): VoxBox
     slime: monster.data@sprite
     minion: monster.data@sprite
   }
+

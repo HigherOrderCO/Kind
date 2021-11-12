@@ -1,2 +1,7 @@
 App.GG.Coord: Type
   Pair<U32, U32>
+
+App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
+  let x = (40#32 + (32#32 * coord@fst)) - 128#32
+  let y = (40#32 + (32#32 * coord@snd)) - 128#32
+  {x, y}

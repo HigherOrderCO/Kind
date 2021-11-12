@@ -1,0 +1,33 @@
+type App.GG.Actions {
+  new(
+    current: Maybe<App.GG.Actions.Data>
+    next: Maybe<App.GG.Actions.Data>
+    has_acted: Bool
+  )
+} 
+
+type App.GG.Actions.Data {
+  new(
+    time: U64
+    effect: App.GG.Effect
+    category: App.GG.Actions.Category 
+  )
+}
+
+type App.GG.Actions.Category {
+  movement
+  chip
+}
+
+App.GG.Actions.inc(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid 
+  Maybe {
+    get tile = App.GG.Grid.get(coord, grid)
+    get creature = tile@creature
+    let actions = creature@actions
+    get current = actions@current
+    let new_actions = actions@current <- some(current@time <- current@time + 1)
+    let new_creature = creature@actions <- new_actions
+    let new_tile = tile@creature <- some(new_creature)
+    let new_grid = App.GG.Grid.set(coord, new_tile, grid)
+    return new_grid
+  } <> grid

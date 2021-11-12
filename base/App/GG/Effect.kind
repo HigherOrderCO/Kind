@@ -1,0 +1,22 @@
+App.GG.Effect: Type
+  App.GG.Coord ->
+  App.GG.Effect.Origin ->
+  App.GG.Grid ->
+  App.GG.Effect.Result
+
+type App.GG.Effect.Result {
+  err
+  new(
+    grid: App.GG.Grid
+    img: VoxBox -> VoxBox
+  )
+}
+
+type App.GG.Effect.Origin {
+  creature
+  projectile(id: Nat)
+}
+
+App.GG.Effect.vbox_unchanged(img: VoxBox): VoxBox
+  img
+

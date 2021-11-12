@@ -1,0 +1,7 @@
+type App.GG.Chip {
+  new(
+    name: String
+    effect: App.GG.Effect
+    img: VoxBox
+  )
+}

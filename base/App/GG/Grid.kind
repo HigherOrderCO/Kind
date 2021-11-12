@@ -42,16 +42,16 @@ App.GG.Grid.update(
 
 
 App.GG.Grid.move_creature(origin: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
-  let t_origin = BBT.lookup!!(App.GG.Grid.cmp, origin, grid)
-  let t_destination = BBT.lookup!!(App.GG.Grid.cmp, destination, grid)
+  let t_origin = App.GG.Grid.get(origin, grid)
+  let t_destination = App.GG.Grid.get(destination, grid)
   Maybe {
     get ori = t_origin
     get des = t_destination
     let mon = ori@creature
     let new_ori = ori@creature <- none
     let new_des = des@creature <- mon
-    let new_grid = BBT.insert!!(App.GG.Grid.cmp, destination, new_des, grid)
-    let new_grid = BBT.insert!!(App.GG.Grid.cmp, origin, new_ori, new_grid)
+    let new_grid = App.GG.Grid.set(destination, new_des, grid)
+    let new_grid = App.GG.Grid.set(origin, new_ori, new_grid)
     log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
     return new_grid
   } <> grid

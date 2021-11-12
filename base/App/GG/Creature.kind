@@ -2,10 +2,13 @@ type App.GG.Creature {
   new(
     category: App.GG.Monster
     team: App.GG.Team
+    animation: App.GG.Animation
+    actions: App.GG.Actions
     status: List<App.GG.Creature.Status>
     hp: I32
   )
 }
+
 
 type App.GG.Creature.Dna {
   new(
@@ -33,7 +36,7 @@ type App.GG.Creature.Status {
 type App.GG.Creature.Effect.Result<A: Type> {
   new(
     value: A,
-    center: Pair<U32, U32>
+    center: App.GG.Coord
     cast_data: Pair<Char,String>
     grid: App.GG.Grid
     energy_cost: I32 
@@ -43,8 +46,8 @@ type App.GG.Creature.Effect.Result<A: Type> {
 
 
 App.GG.Creature.Effect(A: Type): Type
-  ((center: Pair<U32, U32>) ->
-   (targets: List<Pair<U32, U32>>) ->
+  ((center: App.GG.Coord) ->
+   (targets: List<App.GG.Coord>) ->
    (cast_data: Pair<Char,String>) ->
    (grid: App.GG.Grid) ->
    App.GG.Creature.Effect.Result(A))
@@ -71,34 +74,32 @@ App.GG.Creature.Effect.bind<A: Type, B: Type>(
 //===========================================================
 //Creature Management
 
-App.GG.Creature.get(
-  place: App.GG.Coord
-  grid: App.GG.Grid
-): Maybe<App.GG.Creature>
-
-  let tile = App.GG.Creature.get_tile(place, grid)
-  case tile { 
-    none:
-      none
-    some:
-      tile.value@creature
-  }
-
-
-App.GG.Creature.change_hp_at(
+App.GG.Creature.modify_at(
   mod: App.GG.Creature -> App.GG.Creature
   pos: App.GG.Coord
   grid: App.GG.Grid
 ): App.GG.Grid
   
   let result = Maybe { 
-    get tile = App.GG.Creature.get_tile(pos, grid)
-    get creature = tile@creature
-    let new_creature = mod(creature)
-    let new_tile = App.GG.Tile.new(tile@img, some(creature), tile@owner)
-    let new_map = App.GG.Creature.grid_set(pos, new_tile, grid)
-    return new_map
+    get creature = App.GG.Creature.get(pos, grid)
+    let mod = App.GG.Tile.update_creature(mod)
+    let new_grid = App.GG.Grid.update(pos, mod, grid)
+    return new_grid
   }
   result <> grid
+
+
+App.GG.Creature.get(
+  place: App.GG.Coord
+  grid: App.GG.Grid
+): Maybe<App.GG.Creature>
+
+  let tile = App.GG.Grid.get(place, grid)
+  case tile { 
+    none:
+      none
+    some:
+      tile.value@creature
+  }
 
 

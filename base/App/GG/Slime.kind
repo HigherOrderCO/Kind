@@ -4,3 +4,17 @@ type App.GG.Slime {
     dna: App.GG.Creature.Dna
   )
 }
+
+App.GG.Slime.find_coord(grid: App.GG.Grid): Maybe<Pair<App.GG.Creature, App.GG.Coord>>
+  let char_tile = none :: Maybe<Pair<App.GG.Creature, App.GG.Coord>>
+  for coord:tile in grid with char_tile:
+    case tile@creature as creature {
+      none: char_tile
+      some: 
+        case creature.value@category {
+          minion: char_tile
+          slime: some({creature.value, coord})
+        }
+    }
+  char_tile
+  

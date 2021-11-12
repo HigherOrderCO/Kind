@@ -1,0 +1,83 @@
+App.GG.Chip.Shockwave: App.GG.Chip
+  App.GG.Chip.new(
+    "ShockWave"
+    App.GG.Chip.Shockwave.Effect
+    App.GG.img.chip
+  )
+
+App.GG.Chip.Shockwave.Effect(
+  coord: App.GG.Coord,
+  origin: App.GG.Effect.Origin,
+  grid: App.GG.Grid
+): App.GG.Effect.Result
+  let vbox = 
+    let {x, y} = App.GG.Coord.to_xy(coord)
+    VoxBox.Draw.image(x, y, 0, App.GG.img.target_tile)
+  let grid = App.GG.Actions.inc(coord, grid)
+  let new_grid = 
+    Maybe {
+      get tile = App.GG.Grid.get(coord, grid)
+      get creature = App.GG.Creature.get(coord, grid)
+      let actions = creature@actions
+      get current = actions@current
+      log("Action - Shockwave's current frame: " | U64.show(current@time))
+      let new_grid = 
+      if current@time =? 16 then 
+        let new_actions = actions@current <- none
+        let new_creature = creature@actions <- new_actions
+        let new_tile = tile@creature <- some(new_creature)
+        let new_grid = App.GG.Grid.set(coord, new_tile, grid)
+        let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, coord, 0#64)
+        let projectile_effect = App.GG.Chip.Shockwave.Projectile.Effect  
+        let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+        let new_grid = App.GG.Projectile.create(coord, projectile, new_grid)
+        new_grid
+      else
+        grid
+      return new_grid 
+    } <> grid
+  App.GG.Effect.Result.new(new_grid, vbox)
+
+App.GG.Chip.Shockwave.Projectile.Effect: App.GG.Effect
+  (coord, origin, grid)
+  let vbox = 
+    let {x, y} = App.GG.Coord.to_xy(coord)
+    VoxBox.Draw.image(x, y, 10, App.GG.img.target_tile)
+  let tile = App.GG.Grid.get(coord, grid)
+  case tile {
+    none: App.GG.Effect.Result.err
+    some:
+      case origin {
+        creature: App.GG.Effect.Result.err
+        projectile:
+          let grid = App.GG.Projectile.inc(coord, origin.id, grid)
+          let projectile = List.get!(origin.id, tile.value@projectiles)
+          case projectile {
+            none: App.GG.Effect.Result.err
+            some: 
+              let info = projectile.value@info
+              let new_grid =
+                case tile.value@creature as creature {
+                  none: grid
+                  some: 
+                    case info@team creature.value@team {
+                      blue red: log("deals dmg") grid
+                      red blue: log("deals dmg") grid 
+                    }default log("same team") grid 
+                }
+              log("Projectile - Shockwave's current frame: " | U64.show(info@frame))
+              let new_grid =
+                if (info@frame % 16) =? (0) then 
+                  let new_coord = case info@team {
+                    blue: {coord@fst + 1, coord@snd}
+                    red:  {coord@fst - 1, coord@snd}
+                    neutral: coord
+                  }
+                  log(U32.show(new_coord@fst) | U32.show(new_coord@snd))
+                  App.GG.Projectile.move(coord, new_coord, origin.id, new_grid)
+                else
+                  new_grid
+              App.GG.Effect.Result.new(new_grid, vbox)
+          }
+      }
+  }

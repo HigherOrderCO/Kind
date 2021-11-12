@@ -31,7 +31,7 @@ App.GG.draw.grid(
   img: VoxBox
 ): VoxBox
   for key:val in grid with img:
-    App.GG.draw.tile(key, val, {32,32}, {40,40}, img)
+    App.GG.draw.tile(key, val, {32,32}, {40,40}, grid, img)
   img
 
 // Draws a tile and its contents
@@ -40,18 +40,29 @@ App.GG.draw.tile(
   tile: App.GG.Tile,
   tile_size: Pair<U32, U32>,
   start: Pair<U32, U32>
+  grid: App.GG.Grid
   img: VoxBox
 ): VoxBox
-  let x = (start@fst + (tile_size@fst * coord@fst)) - 128
-  let y = (start@snd + (tile_size@snd * coord@snd)) - 128
+  let {x, y} = App.GG.Coord.to_xy(coord)
   let tile_img = tile@img
   let creature = tile@creature
   let img = 
     VoxBox.Draw.image(x, y, 0, tile@img, img)
-  case creature {
-    none:
-      img
-    some:
-      let sprite = App.GG.Monster.to_vbox(creature.value@category)
-      VoxBox.Draw.image(x, y, 1, sprite, img)
-  }
+  let img =
+    case creature {
+      none:
+        img
+      some:
+        let sprite = App.GG.Monster.to_vbox(creature.value@category)
+        VoxBox.Draw.image(x, y, 20, sprite, img)
+    }
+  let pair = {0, img}
+  for projectile in tile@projectiles with pair:
+    let {idx, img} = pair
+    let origin = App.GG.Effect.Origin.projectile(idx)
+    let result = projectile@effect(coord, origin, grid)
+    case result {
+      err: {idx + 1, img}
+      new: {idx + 1, result.img(img)}
+    }
+  img

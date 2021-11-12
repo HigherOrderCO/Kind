@@ -1,36 +1,92 @@
 type App.GG.Projectile {
   new(
     info: App.GG.Projectile.Info
-    func: App.GG.Projectile.Effect // Change
+    effect: App.GG.Effect // Change
   )
 }
-
-
-type App.GG.Projectile.Result {
-  new(
-    projectiles: List<App.GG.Projectile>
-    grid: App.GG.Grid
-    img: VoxBox
-  )
-}
-
-App.GG.Projectile.Effect: Type
-  App.GG.Projectile.Info ->
-  App.GG.Grid ->
-  VoxBox ->
-  App.GG.Projectile.Result
 
 type App.GG.Projectile.Info {
   new(
     team: App.GG.Team
     status: App.GG.Projectile.Status
-    position: App.GG.Coord
+    origin: App.GG.Coord
     frame: U64
   )
 }
+
 
 type App.GG.Projectile.Status {
   coord(val: App.GG.Coord)
   nat(val: Nat)
   ids(val: List<String>)
+  unit
 }
+
+App.GG.Projectile.create(place: App.GG.Coord, projectile: App.GG.Projectile, grid: App.GG.Grid): App.GG.Grid
+  let tile = App.GG.Grid.get(place, grid)
+  case tile {
+    none: grid
+    some: 
+      let projectiles = projectile & tile.value@projectiles
+      let new_tile = tile.value@projectiles <- projectiles
+      App.GG.Grid.set(place, new_tile, grid)
+  }
+  
+App.GG.Projectile.move(origin: App.GG.Coord, destination: App.GG.Coord, id: Nat, grid: App.GG.Grid): App.GG.Grid
+  let a = App.GG.Grid.get(origin, grid)
+  let b = App.GG.Grid.get(destination, grid)
+  case a {
+    none: grid
+    some: 
+      let new_tile = a.value@projectiles <- List.delete_at!(id, a.value@projectiles)
+      let new_grid = App.GG.Grid.set(origin, new_tile, grid)
+      case b {
+        none: new_grid
+        some: 
+          case List.get!(id, a.value@projectiles) as prj {
+            none: new_grid 
+            some: 
+              let new_tile = b.value@projectiles <- prj.value & b.value@projectiles
+              let new_grid = App.GG.Grid.set(destination, new_tile, new_grid)
+              new_grid
+          }
+          
+      }
+  }
+
+App.GG.Projectile.inc(coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid 
+  Maybe {
+    get tile = App.GG.Grid.get(coord, grid)
+    let projectiles = tile@projectiles
+    get projectile = List.get!(idx, projectiles)
+    let info = projectile@info
+    let new_info = info@frame <- info@frame + 1
+    let new_projectile = projectile@info <- new_info
+    let new_projectiles = List.set!(idx, new_projectile, projectiles)
+    let new_tile = tile@projectiles <- new_projectiles
+    let new_grid = App.GG.Grid.set(coord, new_tile, grid)
+    return new_grid
+  } <> grid
+
+App.GG.Projectile.get_list(
+  place: App.GG.Coord
+  grid: App.GG.Grid
+): Maybe<List<App.GG.Projectile>>
+
+  let tile = App.GG.Grid.get(place, grid)
+  case tile {
+    none: none
+    some: some(tile.value@projectiles)
+  }
+
+type App.GG.Minion.SpecificStatus {
+  mettaur(
+    // adds 1 each time the slime is at the same lane as mettaur. When it reaches X time, start to attack and reset counter
+    time_seeing_enemy: I32
+    // adds 1 each time the slime is not at the same lane as mettaur. When it reaches x time, move to the side and reduces a bit
+    time_without_seeing_enemy: I32
+  )
+}
+
+// let new_projectile = ?s
+
