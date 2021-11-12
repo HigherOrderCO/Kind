@@ -10,6 +10,9 @@ Bytes: Type
 Bytes.show(bytes: Bytes): String
   List.show!(Bits.show, List.map!!(U8.to_bits, bytes))
 
+Bytes.split: (bytes: Bytes, n: Nat) -> Pair<Bytes, Bytes>
+  List.split<U8>
+
 Bytes.to_nat.go<size: Nat>(byte: Word<size>): Nat
   case byte {
     e: Nat.zero
@@ -35,6 +38,17 @@ Bytes.from_nat.go(n: Nat, r: Bytes): Bytes
 
 Bytes.from_nat(n: Nat): Bytes
   Bytes.from_nat.go(n, [])
+
+Bytes.to_hex(b: Bytes): String
+  Bytes.to_hex.go("", b)
+
+Bytes.to_hex.go(acc: String, b: Bytes): String
+  case b {
+    nil:
+      acc
+    cons:
+      Bytes.to_hex.go(acc|U8.to_hex(b.head), b.tail)
+  }
 
 //Bytes.inc.go<size: Nat>(byte: Word<size>): Pair<Word<size>, Bool>
   //case byte {

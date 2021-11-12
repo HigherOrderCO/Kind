@@ -28,13 +28,24 @@ type RLP {
   node(child: List<RLP>)
 }
 
+RLP.show(r: RLP): String
+  case r {
+    data:
+      Bytes.to_hex(r.value)
+    node:
+      let ret = "["
+      for child in r.child with ret:
+        ret|RLP.show(child)|","
+      ret|"]"
+  }
+
 // Length
 // ------
 
-RLP.decoder.byte(bytes: Bytes): Pair<Bytes, U8>
+RLP.decoder.byte(bytes: Bytes): U8
   case bytes {
-    nil: {[], 0#8}
-    cons: {bytes.tail, bytes.head}
+    nil: 0#8
+    cons: bytes.head
   }
 
 RLP.encode.length(add: Nat, length: Nat): Bytes
@@ -45,22 +56,17 @@ RLP.encode.length(add: Nat, length: Nat): Bytes
     let b = Bytes.from_nat(length)
     List.concat!(a, b)
 
-RLP.decoder.length(add: Nat, bytes: Bytes): Pair<Bytes, Nat>
+RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
   case bytes {
     nil:
-      {[], 0}
+      {[], []}
     cons:
-      let fst = Nat.sub(Bytes.to_nat([bytes.head]), add)
+      let fst = Nat.sub(U8.to_nat(bytes.head), add)
       if Nat.ltn(fst, 56) then
-        {bytes.tail, fst}
+        Bytes.split(bytes.tail, fst)
       else
-        let {bytes, length} = RLP.decoder.repeat!(RLP.decoder.byte, Nat.sub(fst,56), bytes.tail)
-        {bytes, Bytes.to_nat(length)}
-  }
-
-RLP.decode.length(add: Nat, bytes: Bytes): Nat
-  case RLP.decoder.length(add, bytes) as got {
-    new: got.snd
+        let {length, tail} = Bytes.split(bytes.tail, Nat.sub(fst, 56))
+        Bytes.split(tail, Bytes.to_nat(length))
   }
 
 // Repeat
@@ -70,16 +76,6 @@ RLP.encode.repeat<A: Type>(encode: A -> Bytes, values: List<A>): Bytes
   case values {
     nil: []
     cons: List.concat!(encode(values.head), RLP.encode.repeat<A>(encode, values.tail))
-  }
-
-RLP.decoder.repeat<A: Type>(decoder: Bytes -> Pair<Bytes,A>, count: Nat, bytes: Bytes): Pair<Bytes, List<A>>
-  case count {
-    zero:
-      {bytes, []}
-    succ:
-      let {bytes_0, head} = decoder(bytes)
-      let {bytes_1, tail} = RLP.decoder.repeat<A>(decoder, Nat.sub(count, Nat.sub(List.length!(bytes),List.length!(bytes_0))), bytes_0)
-      {bytes, head & tail}
   }
 
 RLP.encode.many(trees: List<RLP>): Bytes
@@ -100,24 +96,20 @@ RLP.encode(tree: RLP): Bytes
       List.concat!(RLP.encode.length(192, List.length!(rest)), rest)
   }
   
-RLP.decoder(bytes: Bytes): Pair<Bytes, RLP>
+RLP.decode.many(bytes: Bytes): List<RLP>
   case bytes {
     nil:
-      {[], RLP.data([])}
+      []
     cons:
       if U8.ltn(bytes.head, 128#8) then
-        {List.tail!(bytes), RLP.data([List.head_with_default!(0#8,bytes)])}
+        RLP.data([bytes.head]) & RLP.decode.many(bytes.tail)
       else if U8.ltn(bytes.head, 192#8) then
-        let {bytes, count} = RLP.decoder.length(128, bytes)
-        let {bytes, value} = RLP.decoder.repeat!(RLP.decoder.byte, count, bytes)
-        {bytes, RLP.data(value)}
+        let {head, tail} = RLP.split.length(128, bytes)
+        RLP.data(head) & RLP.decode.many(tail)
       else
-        let {bytes, count} = RLP.decoder.length(192, bytes)
-        let {bytes, child} = RLP.decoder.repeat!(RLP.decoder, count, bytes)
-        {bytes, RLP.node(child)}
+        let {head, tail} = RLP.split.length(192, bytes)
+        RLP.node(RLP.decode.many(head)) & RLP.decode.many(tail)
   }
 
 RLP.decode(bytes: Bytes): RLP
-  case RLP.decoder(bytes) as got {
-    new: got.snd
-  }
+  List.head!(RLP.decode.many(bytes)) <> RLP.data([])
