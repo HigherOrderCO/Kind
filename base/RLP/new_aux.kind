@@ -1,0 +1,17 @@
+         //    forall A x,
+               //    Nat.eql(List.length(U8,rlp.value),1) == Bool.true ->
+               //    List.head_with_default(A ,Nat.to_u8(0),x) :: [] == x
+
+
+Rlp.new_aux.list_length_1_identity(A : Type, 
+                                   x : List<A>, 
+                                   y : A,
+                                   H : Nat.eql(List.length(A,x),1) == Bool.true) :
+                                   List.cons(A, List.head_with_default(A ,y,x), List.nil(A)) == x
+  case x with H {
+    nil : Empty.absurd!(Bool.false_neq_true(H))
+    cons : case x.tail as X with H : Nat.eql(List.length(A,List.cons(A,x.head,X)),1) == Bool.true {
+       nil : refl
+       cons : Empty.absurd!(Bool.false_neq_true(H))
+      } : List.cons(A,List.head_with_default(A,y,List.cons(A,x.head, X)),List.nil(A)) == List.cons(A,x.head, X)
+  }!
