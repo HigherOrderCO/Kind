@@ -42,12 +42,6 @@ RLP.show(r: RLP): String
 // Length
 // ------
 
-RLP.decoder.byte(bytes: Bytes): U8
-  case bytes {
-    nil: 0#8
-    cons: bytes.head
-  }
-
 RLP.encode.length(add: Nat, length: Nat): Bytes
   if Nat.ltn(length, 56) then
     Bytes.from_nat(Nat.add(add,length))
