@@ -1,0 +1,20 @@
+App.GG.Creatures.minion: App.GG.Monster
+  let monster = App.GG.Monster.minion(App.GG.Minion.new(App.GG.Creatures.minion.vbox))
+  monster
+
+App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
+  case animation {
+    idle:
+      switch U64.eql((frame % 60)/10) {
+        0#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+        1#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_1
+        2#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_2
+        3#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_3
+        4#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_4
+        5#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_5
+      }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+    moving:
+      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+    attack:
+      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+  }

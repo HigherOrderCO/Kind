@@ -8,8 +8,8 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
     <div style={
         "max-height": "100%",
         "max-width": "100%",
-        "overflow": "scroll",
         "display": "flex",
+        "overflow": "hidden",
         "align-items": "center",
         "justify-content": "center"
       }>{
@@ -53,7 +53,8 @@ App.GG.draw.tile(
       none:
         img
       some:
-        let sprite = App.GG.Monster.to_vbox(creature.value@category)
+        let f = App.GG.Monster.to_vbox(creature.value@category)
+        let sprite = f(creature.value@animation@fst, creature.value@animation@snd)
         VoxBox.Draw.image(x, y, 20, sprite, img)
     }
   let pair = {0, img}

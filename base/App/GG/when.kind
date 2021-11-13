@@ -38,7 +38,7 @@ App.GG.when.update_tile(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   let new_grid = 
     Maybe {
       get creature = App.GG.Creature.get(coord, grid)
-      let mod = App.GG.when.update_action
+      let mod = (x) App.GG.when.update_frame(App.GG.when.update_action(x))
       let new_grid = App.GG.Creature.modify_at(mod, coord, grid)
       return new_grid
     } <> grid
@@ -88,6 +88,10 @@ App.GG.when.use_chip(grid: App.GG.Grid): App.GG.Grid
           }
       }
   }
+
+App.GG.when.update_frame(creature: App.GG.Creature): App.GG.Creature
+  let new_creature = creature@animation <- {creature@animation@fst, creature@animation@snd + 1}
+  new_creature
 
 App.GG.when.update_action(creature: App.GG.Creature): App.GG.Creature
   let as = creature@actions

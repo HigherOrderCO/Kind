@@ -1,5 +1,5 @@
 type App.GG.Minion {
   new(
-    sprite: VoxBox //App.GG.Animation -> U64 -> VoxBox
+    sprite: App.GG.Animation -> U64 -> VoxBox
   )
 }

@@ -6,7 +6,7 @@ type App.GG.Monster {
   )
 }
 
-App.GG.Monster.to_vbox(monster: App.GG.Monster): VoxBox
+App.GG.Monster.to_vbox(monster: App.GG.Monster): App.GG.Animation -> U64 -> VoxBox
   case monster {
     slime: monster.data@sprite
     minion: monster.data@sprite

@@ -1,6 +1,6 @@
 type App.GG.Slime {
   new(
-    sprite: VoxBox //App.GG.Animation -> U64 -> VoxBox
+    sprite: App.GG.Animation -> U64 -> VoxBox
     dna: App.GG.Creature.Dna
   )
 }

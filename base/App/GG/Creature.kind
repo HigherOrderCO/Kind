@@ -2,7 +2,7 @@ type App.GG.Creature {
   new(
     category: App.GG.Monster
     team: App.GG.Team
-    animation: App.GG.Animation
+    animation: Pair<App.GG.Animation, U64>
     actions: App.GG.Actions
     status: List<App.GG.Creature.Status>
     hp: I32
