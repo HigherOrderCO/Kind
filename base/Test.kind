@@ -1,16 +1,49 @@
-Test<A: Type, B: Type>(
-  f: A -> B,
-  Hyp: (
-    C: Type
-    g: B -> C
-    h: B -> C
-    a: A
-    HHyp: g(f(a)) == h(f(a))
-    b: B
-  ) -> g(b) == h(b)
-  target: B
-): [a: A] f(a) == target
-  let g = ((b) true) :: B -> Bool
-  let h = ((b) Decidable([a: A] f(a) == b)) :: B -> Bool
-  let hmm = Hyp(Type, g, h)
-  ?test
+type Fraction {
+  new(
+    num: Int
+    den: Int
+  )
+}
+
+Fraction.show(q: Fraction): String
+  open q
+  Int.show(q.num)|"/"|Int.show(q.den)
+
+Fraction.from_nat(n: Nat): Fraction
+  Fraction.new(Int.from_nat(n), 1)
+
+Fraction.add(p: Fraction, q: Fraction): Fraction
+  open p
+  open q
+  Fraction.new((p.num*q.den) + (p.den*q.num), p.den*q.den)
+
+Fraction.mul(p: Fraction, q: Fraction): Fraction
+  open p
+  open q
+  Fraction.new(p.num*q.num, p.den*q.den)
+
+Fraction.reduce(p: Fraction): Fraction
+  open p
+  let gcd = Int.from_nat(Nat.gcd(Int.abs(p.num), Int.abs(p.den)))
+  Fraction.new(p.num/gcd, p.den/gcd)
+
+Fraction.div(p: Fraction, q: Fraction): Fraction
+  open p
+  open q
+  Fraction.new(p.num*q.den, p.den*q.num)
+
+Fraction.sqrt2(n: Nat): Fraction
+  case n {
+    zero:
+      1
+    succ:
+      (1 :: Fraction) + (1/(1 + Fraction.sqrt2(n.pred)))
+  }
+
+Test: _
+  let app = Fraction.sqrt2(1)
+  IO {
+    IO.print(Fraction.show(app))
+    IO.print(Fraction.show(app*app))
+  }
+  
