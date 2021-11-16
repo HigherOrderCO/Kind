@@ -1,3 +1,16 @@
+RlP.new_aux.list_length_1_identity(A : Type, 
+                                   x : List<A>, 
+                                   y : A,
+                                   H : Nat.eql(List.length(A,x),1) == Bool.true) :
+                                   List.cons(A, List.head_with_default(A ,y,x), List.nil(A)) == x
+  case x with H {
+    nil : Empty.absurd!(Bool.false_neq_true(H))
+    cons : case x.tail as X with H : Nat.eql(List.length(A,List.cons(A,x.head,X)),1) == Bool.true {
+       nil : refl
+       cons : Empty.absurd!(Bool.false_neq_true(H))
+      } : List.cons(A,List.head_with_default(A,y,List.cons(A,x.head, X)),List.nil(A)) == List.cons(A,x.head, X)
+  }!
+
 RLP.encode_identity(rlp: RLP): RLP.decode(RLP.encode(rlp)) == rlp
   case rlp {
     data : 
@@ -11,7 +24,7 @@ RLP.encode_identity(rlp: RLP): RLP.decode(RLP.encode(rlp)) == rlp
           let ensure_non_empty = RLP.aux.12(rlp.value, break_and1)
           replace X with mirror(ensure_non_empty) in Maybe.default(RLP,List.head(RLP,X((bytes) List(RLP),List.nil(RLP),(bytes.head) (bytes.tail) U8.ltn(bytes.head,Nat.to_u8(128),() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,bytes.head,List.nil(U8))),RLP.decode.many(bytes.tail)),U8.ltn(bytes.head,Nat.to_u8(192),() List(RLP),RLP.split.length(128,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
           replace X with mirror(break_and2) in Maybe.default(RLP,List.head(RLP,X(() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),rlp.value),List.nil(U8))),RLP.decode.many(List.nil(U8))),U8.ltn(List.head_with_default(U8,Nat.to_u8(0),rlp.value),Nat.to_u8(192),() List(RLP),RLP.split.length(128,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail)))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
-          let list_length_1 = Rlp.new_aux.list_length_1_identity(U8, rlp.value, Nat.to_u8(0), break_and1)
+          let list_length_1 = RlP.new_aux.list_length_1_identity(U8, rlp.value, Nat.to_u8(0), break_and1)
           replace X with mirror(list_length_1) in RLP.data(X) == RLP.data(rlp.value)
           refl
         false : 
