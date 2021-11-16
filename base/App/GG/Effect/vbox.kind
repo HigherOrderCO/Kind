@@ -1,0 +1,9 @@
+App.GG.Effect.vbox.set(vbox: VoxBox -> VoxBox): App.GG.Effect<Unit>
+  (center, origin, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, grid, vbox, 0, "")
+
+App.GG.Effect.vbox.in_tile(vbox: VoxBox): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let {x, y}  = App.GG.Coord.to_xy(center)
+  let img     = VoxBox.Draw.image(x, y, 0, vbox)
+  App.GG.Effect.Result.new!(unit, center, origin, grid, img, 0, "")

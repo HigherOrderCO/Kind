@@ -1,0 +1,51 @@
+App.GG.Effect.projectile.add_at(pos: App.GG.Coord, projectile: App.GG.Projectile): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let new_grid = App.GG.Projectile.create(pos, projectile, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+
+
+App.GG.Effect.projectile.get: App.GG.Effect<Maybe<App.GG.Projectile>>
+  (center, origin, grid)
+  let projectile = App.GG.Projectile.get(center, origin, grid)
+  App.GG.Effect.Result.new!(projectile, center, origin, grid, (img) img, 0, "")
+
+
+App.GG.Effect.projectile.move(new_pos: App.GG.Coord): App.GG.Effect<Bool>
+  (center, origin, grid)
+  let {bool, new_grid} = 
+    case origin {
+      creature: {false, grid}
+      projectile:
+        let tile_exists =
+          Maybe.is_some!(App.GG.Grid.get(new_pos, grid))
+        let new_grid = App.GG.Projectile.move(center, new_pos, origin.id, grid)
+        {tile_exists, new_grid}
+    }
+  App.GG.Effect.Result.new!(bool, center, origin, new_grid, (img) img, 0, "")
+
+App.GG.Effect.projectile.add_hit(pos: App.GG.Coord): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let new_grid =
+    let creature = App.GG.Creature.get(pos, grid)
+    without creature: grid
+    let id = creature@id
+    case origin {
+      creature: grid
+      projectile:
+        App.GG.Projectile.add_hit(id, center, origin.id, grid)
+    }
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+
+App.GG.Effect.projectile.has_hit(pos: App.GG.Coord): App.GG.Effect<Bool>
+  (center, origin, grid)
+  let bool =
+    Maybe {
+      get creature = App.GG.Creature.get(pos, grid)
+      get projectile = App.GG.Projectile.get(center, origin, grid)
+      let info = projectile@info
+      let bool = NatSet.has(creature@id, info@hits)
+      return bool
+    } <> false
+  App.GG.Effect.Result.new!(bool, center, origin, grid, (img) img, 0, "")
+
+  

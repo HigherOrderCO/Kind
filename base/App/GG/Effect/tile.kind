@@ -1,0 +1,4 @@
+App.GG.Effect.tile.get: App.GG.Effect<Maybe<App.GG.Tile>>
+  (center, origin, grid)
+  let tile = App.GG.Grid.get(center, grid)
+  App.GG.Effect.Result.new!(tile, center, origin, grid, (img) img, 0, "")

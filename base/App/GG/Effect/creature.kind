@@ -1,0 +1,36 @@
+App.GG.Effect.creature.is_enemy(coord: App.GG.Coord): App.GG.Effect<Bool>
+  (center, origin, grid)
+  let bool =
+    Maybe {
+      get creature = App.GG.Creature.get(coord, grid)
+      get team  = App.GG.Effect.team.get(center, origin, grid)
+      let bool = App.GG.Team.is_same(creature@team, team)
+      return not(bool) 
+    } <> false
+  App.GG.Effect.Result.new!(bool, center, origin, grid, (img) img, 0, "")
+
+App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord): App.GG.Effect<I32>
+  (center, origin, grid)
+  let {real_dmg, new_grid} =
+    Maybe {
+      get tile = App.GG.Grid.get(pos, grid)
+      get creature = tile@creature
+      let hp = creature@hp
+      let new_hp = I32.max(hp + dmg, 0)
+      let new_creature = creature@hp <- new_hp
+      let new_tile = tile@creature <- some(new_creature)
+      let real_dmg = hp - new_hp
+      let new_grid = App.GG.Grid.set(pos, new_tile, grid)
+      return {real_dmg, new_grid}
+    } <> {+0#32, grid}
+  App.GG.Effect.Result.new!(real_dmg, center, origin, new_grid, (img) img, 0, "")
+
+App.GG.Effect.creature.get: App.GG.Effect<Maybe<App.GG.Creature>>
+  (center, origin, grid)
+  let creature = App.GG.Creature.get(center, grid)
+  App.GG.Effect.Result.new!(creature, center, origin, grid, (img) img, 0, "")
+
+App.GG.Effect.creature.get_at(pos: App.GG.Coord): App.GG.Effect<Maybe<App.GG.Creature>>
+  (center, origin, grid)
+  let creature = App.GG.Creature.get(pos, grid)
+  App.GG.Effect.Result.new!(creature, center, origin, grid, (img) img, 0, "")

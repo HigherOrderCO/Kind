@@ -1,0 +1,3 @@
+App.GG.Effect.coord.get_center: App.GG.Effect<App.GG.Coord>
+  (center, origin, grid)
+  App.GG.Effect.Result.new!(center, center, origin, grid, (img) img, 0, "")

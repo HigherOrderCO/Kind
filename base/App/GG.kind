@@ -19,8 +19,6 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// Organize Effect Folder with Shockwave.kind functions
-// Chips should be wasted on use (Shockwave.kind line 262)
 // Make movement become an effect
 // Create flinch mechanic
 // Associate chips with stats and DNA
@@ -34,6 +32,8 @@ App.GG: App<App.GG.State>
 // Create 3 minions
 // Add comments to everything
 
+// DONE: Organize Effect Folder with Shockwave.kind functions
+// DONE: Chips should be wasted on use (Shockwave.kind line 262)
 // DONE: Create damage interaction
 // DONE: Show Hp above minion
 // DONE: Change Effect to work like a monad

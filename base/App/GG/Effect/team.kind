@@ -1,0 +1,16 @@
+App.GG.Effect.team.get(center: App.GG.Coord, origin: App.GG.Effect.Origin, grid: App.GG.Grid): Maybe<App.GG.Team>
+  case origin {
+    creature: 
+      Maybe {
+        get creature = App.GG.Creature.get(center, grid)
+        return creature@team
+      }
+    projectile:
+      Maybe {
+        get projectile = App.GG.Projectile.get(center, origin, grid)
+        let info = projectile@info
+        return info@team
+      }
+  }
+
+
