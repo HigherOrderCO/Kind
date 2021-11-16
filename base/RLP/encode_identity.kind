@@ -14,7 +14,22 @@ RLP.encode_identity(rlp: RLP): RLP.decode(RLP.encode(rlp)) == rlp
           let list_length_1 = Rlp.new_aux.list_length_1_identity(U8, rlp.value, Nat.to_u8(0), break_and1)
           replace X with mirror(list_length_1) in RLP.data(X) == RLP.data(rlp.value)
           refl
-        false : ?a
+        false : 
+          let list_u8 = Equal.refl<Bytes, RLP.encode.length(128,List.length(U8,rlp.value))>
+          case RLP.encode.length(128,List.length(U8,rlp.value)) as X with list_u8 : Equal(Bytes, RLP.encode.length(128,List.length(U8,rlp.value)), X) {
+            nil : 
+             let absurd_rlp_length = RLP.aux.17(List.length(U8,rlp.value))
+             Empty.absurd!(absurd_rlp_length(list_u8))
+            cons : 
+              let u8_le_128 = RLP.aux.19(List.length(U8,rlp.value), X.head, X.tail, list_u8)
+              replace X with mirror(u8_le_128) in Maybe.default(RLP,List.head(RLP, X(() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,X.head,List.nil(U8))),RLP.decode.many(List.concat(U8,X.tail,rlp.value))),U8.ltn(X.head,Nat.to_u8(192),() List(RLP),RLP.split.length(128,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail)))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
+              let u8_le_192 = RLP.aux.20(List.length(U8,rlp.value) X.head, X.tail, list_u8)
+              replace X with mirror(u8_le_192) in Maybe.default(RLP,List.head(RLP, X(() List(RLP),RLP.split.length(128,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
+              let e3 = RLP.aux.15.sym(X.head, X.tail)
+
+              ?a-282-
+          } : RLP.decode(List.concat(U8,X,rlp.value)) == RLP.data(rlp.value)
+          
       } : RLP.decode(X(() List(U8),rlp.value,List.concat(U8,RLP.encode.length(128,List.length(U8,rlp.value)),rlp.value))) == RLP.data(rlp.value)
     node : _
   }!
