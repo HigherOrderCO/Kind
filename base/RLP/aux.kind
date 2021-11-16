@@ -15,7 +15,7 @@ RLP.aux.split.0(
             refl:
               List.split.length(U8, payload, tail)
           }: H.b(() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)), List.length(U8, payload)),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))) == Pair.new(Bytes,Bytes,payload,tail)
-      }: Nat.lte(recover_num.b,55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)), recover_num.b),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))) == Pair.new(Bytes,Bytes,payload,tail)
+      }: Nat.lte(  recover_num.b  ,55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)),  recover_num.b  ),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))) == Pair.new(Bytes,Bytes,payload,tail)
   }: RLP.split.length(128,List.concat(U8,  H.b(  () Bytes,List.cons(U8,Nat.to_u8(Nat.add(128,List.length(U8,payload))),List.nil(U8)),List.concat(U8,Bytes.from_nat(Nat.add(56,Nat.add(128,RLP.needed_bytes(List.length(U8,payload))))),Bytes.from_nat(List.length(U8,payload)))),List.concat(U8,payload,tail))) == Pair.new(Bytes,Bytes,payload,tail)
 
 RLP.aux.split.1(

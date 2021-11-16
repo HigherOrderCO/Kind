@@ -30,14 +30,13 @@ Bytes.to_nat(bytes: Bytes): Nat
       Nat.add(head, Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(tail)))))))))
   }
 
-Bytes.from_nat.go(n: Nat, r: Bytes): Bytes
-  case n {
-    zero: r
-    succ: Bytes.from_nat.go(n.pred, Bytes.inc(r))
-  }
-
 Bytes.from_nat(n: Nat): Bytes
-  Bytes.from_nat.go(n, [])
+  case n {
+    zero:
+      List.nil!
+    succ:
+      Bytes.from_nat(n/256) ++ [U8.from_nat(Nat.mod(n, 256))]
+  }
 
 Bytes.to_hex(b: Bytes): String
   Bytes.to_hex.go("", b)
