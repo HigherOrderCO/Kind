@@ -1,10 +1,2 @@
 Test: _
-  let a = RLP.encode
-  let b = RLP.decode
-  0
-  //let a = RLP.encode(RLP.data([0x80#8,0x80#8,0x80#8]))
-  //let b = RLP.decode(a)
-  //{
-    //Bytes.show(a)
-    //b
-  //}
+  [0] ++ [1]

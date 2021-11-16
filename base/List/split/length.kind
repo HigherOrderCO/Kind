@@ -1,4 +1,6 @@
-List.split.length<A: Type>(fst: List<A>, snd: List<A>): List.split<A>(fst ++ snd, List.length<A>(fst)) == Pair.new!!(fst, snd)
+List.split.length<A: Type>(
+  fst: List<A>, snd: List<A>
+): List.split<A>(fst ++ snd, List.length<A>(fst)) == Pair.new!!(fst, snd)
   case fst {
     nil:
       refl
