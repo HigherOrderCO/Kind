@@ -4,15 +4,23 @@ RLP.aux.split.0(
   payload: Bytes
   tail: Bytes
   H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
-): RLP.split.length(128, RLP.encode.length(128, List.length!(payload)) ++ payload ++ tail) == {payload, tail}
-  ?test
+): RLP.split.length(128, RLP.encode.length(128, List.length<U8>(payload)) ++ payload ++ tail) == {payload, tail}
+  case Nat.lte(List.length<U8>(payload), 55) with H {
+    true:
+      //?test ::
+      // RLP.split.length(128, Bytes.from_nat(Nat.add(128, length)) ++ payload ++ tail) == {payload, tail}
+      // Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128, length))), 128)!!! == {payload, tail}
+      // Bytes.split(payload ++ tail, List.length!(payload))
+    false:
+      Empty.absurd!(Bool.false_neq_true(H))
+  }! :: RLP.split.length(128, Nat.lte(List.length<U8>(payload), 55)!!! ++ payload ++ tail) == {payload, tail}
 
-RLP.aux.split.1(
-  payload: Bytes
-  tail: Bytes
-  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
-): RLP.split.length(128, RLP.encode.length(128, List.length!(payload)) ++ payload ++ tail) == {payload, tail}
-  ?test
+//RLP.aux.split.1(
+//  payload: Bytes
+//  tail: Bytes
+//  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
+//): RLP.split.length(128, RLP.encode.length(128, List.length!(payload)) ++ payload ++ tail) == {payload, tail}
+//  ?test
 
 // TODO: include `a <= 192`
 //RLP.aux.0(

@@ -43,8 +43,8 @@ RLP.show(r: RLP): String
 // ------
 
 RLP.encode.length(add: Nat, length: Nat): Bytes
-  if Nat.ltn(length, 56) then
-    Bytes.from_nat(Nat.add(add,length))
+  if Nat.lte(length, 55) then
+    [Nat.to_u8(Nat.add(add,length))]
   else
     let a = Bytes.from_nat(Nat.add(56, Nat.add(add, RLP.needed_bytes(length))))
     let b = Bytes.from_nat(length)
@@ -56,7 +56,7 @@ RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
       {[], []}
     cons:
       let fst = Nat.sub(U8.to_nat(bytes.head), add)
-      if Nat.ltn(fst, 56) then
+      if Nat.lte(fst, 55) then
         Bytes.split(bytes.tail, fst)
       else
         let {length, tail} = Bytes.split(bytes.tail, Nat.sub(fst, 56))

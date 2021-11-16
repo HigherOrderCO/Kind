@@ -88,8 +88,3 @@ Bytes.inc(bytes: Bytes): Bytes
   //e1: Nat.ltn(n, 256) == true
 //): Equal<Bytes, Bytes.from_nat(n), [Nat.apply!(n, Word.inc<8>, Word.zero(8))]>
   //Aux.1(n, e0, e1)
-
-
-
-
-
