@@ -6,6 +6,7 @@ type App.GG.Creature {
     actions: App.GG.Actions
     status: List<App.GG.Creature.Status>
     hp: I32
+    id: Nat
   )
 }
 

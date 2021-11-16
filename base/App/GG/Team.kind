@@ -3,3 +3,10 @@ type App.GG.Team {
   blue
   red
 }
+
+App.GG.Team.is_same(a: App.GG.Team, b: App.GG.Team): Bool
+  case a b {
+    blue    blue    : true
+    red     red     : true
+    neutral neutral : true
+  }default false

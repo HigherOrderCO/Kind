@@ -8,8 +8,8 @@ type App.GG.Actions {
 
 type App.GG.Actions.Data {
   new(
-    time: U64
-    effect: App.GG.Effect
+    frame: U64
+    effect: App.GG.Effect<Unit>
     category: App.GG.Actions.Category 
   )
 }
@@ -25,7 +25,7 @@ App.GG.Actions.inc(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
     get creature = tile@creature
     let actions = creature@actions
     get current = actions@current
-    let new_actions = actions@current <- some(current@time <- current@time + 1)
+    let new_actions = actions@current <- some(current@frame <- current@frame + 1)
     let new_creature = creature@actions <- new_actions
     let new_tile = tile@creature <- some(new_creature)
     let new_grid = App.GG.Grid.set(coord, new_tile, grid)

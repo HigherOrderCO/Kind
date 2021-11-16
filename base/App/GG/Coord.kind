@@ -5,3 +5,12 @@ App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
   let x = (40#32 + (32#32 * coord@fst)) - 128#32
   let y = (40#32 + (32#32 * coord@snd)) - 128#32
   {x, y}
+
+App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
+  let new_coord = 
+    case team {
+      blue: {coord@fst + 1, coord@snd}
+      red:  {coord@fst - 1, coord@snd}
+      neutral: coord
+    }
+  new_coord

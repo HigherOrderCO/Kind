@@ -1,7 +1,7 @@
 type App.GG.Projectile {
   new(
     info: App.GG.Projectile.Info
-    effect: App.GG.Effect // Change
+    effect: App.GG.Effect<Unit> // Change
   )
 }
 
@@ -9,7 +9,7 @@ type App.GG.Projectile.Info {
   new(
     team: App.GG.Team
     status: App.GG.Projectile.Status
-    origin: App.GG.Coord
+    hits: NatSet
     frame: U64
   )
 }
@@ -54,6 +54,25 @@ App.GG.Projectile.move(origin: App.GG.Coord, destination: App.GG.Coord, id: Nat,
       }
   }
 
+App.GG.Projectile.add_hit(creature_id: Nat, coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid
+  let f = 
+    (projectile: App.GG.Projectile)
+      let info = projectile@info
+      let new_hits = NatSet.set(creature_id, info@hits)
+      let new_info = info@hits <- new_hits
+      projectile@info <- new_info
+  App.GG.Projectile.modify(f, coord, idx, grid)
+
+App.GG.Projectile.modify(mod: App.GG.Projectile -> App.GG.Projectile, coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid
+  Maybe {
+    get list = App.GG.Projectile.get_list(coord, grid)
+    get projectile = List.get!(idx, list)
+    let new_list = List.set!(idx, mod(projectile), list)
+    let f = (tile: App.GG.Tile) tile@projectiles <- new_list
+    let new_grid = App.GG.Grid.update(coord, f, grid)
+    return new_grid
+  } <> grid
+
 App.GG.Projectile.inc(coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid 
   Maybe {
     get tile = App.GG.Grid.get(coord, grid)
@@ -90,3 +109,13 @@ type App.GG.Minion.SpecificStatus {
 
 // let new_projectile = ?s
 
+App.GG.Projectile.get(coord: App.GG.Coord, origin: App.GG.Effect.Origin, grid: App.GG.Grid): Maybe<App.GG.Projectile>
+  case origin {
+    creature: none
+    projectile:
+      Maybe {
+        get tile = App.GG.Grid.get(coord, grid)
+        get projectile = List.get!(origin.id, tile@projectiles)
+        return projectile
+      }
+  }

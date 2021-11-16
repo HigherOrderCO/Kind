@@ -44,10 +44,15 @@ App.GG.draw.tile(
   img: VoxBox
 ): VoxBox
   let {x, y} = App.GG.Coord.to_xy(coord)
-  let tile_img = tile@img
+  let tile_img = 
+    case tile@owner {
+      blue:     App.GG.img.ally_tile
+      red:      App.GG.img.enemy_tile
+      neutral:  App.GG.img.target_tile
+    }
   let creature = tile@creature
   let img = 
-    VoxBox.Draw.image(x, y, 0, tile@img, img)
+    VoxBox.Draw.image(x, y, 0, tile_img, img)
   let img =
     case creature {
       none:
@@ -55,8 +60,11 @@ App.GG.draw.tile(
       some:
         let f = App.GG.Monster.to_vbox(creature.value@category)
         let sprite = f(creature.value@animation@fst, creature.value@animation@snd)
-        VoxBox.Draw.image(x, y, 20, sprite, img)
+        let img = VoxBox.Draw.image(x, y, 20, sprite, img)
+        let img = VoxBox.Draw.text(I32.show(creature.value@hp), PixelFont.small_black, Pos32.new(x + 122,y + 100, 200), img)
+        img
     }
+  
   let pair = {0, img}
   for projectile in tile@projectiles with pair:
     let {idx, img} = pair

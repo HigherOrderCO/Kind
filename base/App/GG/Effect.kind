@@ -1,16 +1,16 @@
-App.GG.Effect: Type
-  App.GG.Coord ->
-  App.GG.Effect.Origin ->
-  App.GG.Grid ->
-  App.GG.Effect.Result
+// App.GG.Effect: Type
+//   App.GG.Coord ->
+//   App.GG.Effect.Origin ->
+//   App.GG.Grid ->
+//   App.GG.Effect.Result
 
-type App.GG.Effect.Result {
-  err
-  new(
-    grid: App.GG.Grid
-    img: VoxBox -> VoxBox
-  )
-}
+// type App.GG.Effect.Result {
+//   err
+//   new(
+//     grid: App.GG.Grid
+//     img: VoxBox -> VoxBox
+//   )
+// }
 
 type App.GG.Effect.Origin {
   creature
@@ -20,3 +20,52 @@ type App.GG.Effect.Origin {
 App.GG.Effect.vbox_unchanged(img: VoxBox): VoxBox
   img
 
+type App.GG.Effect.Result<A: Type> {
+  err
+  new(
+    value: A,
+    center: App.GG.Coord
+    origin: App.GG.Effect.Origin
+    grid: App.GG.Grid
+    img: VoxBox -> VoxBox
+    energy_cost: I32 
+    description: String
+  )
+}
+
+
+App.GG.Effect(A: Type): Type
+  App.GG.Coord ->
+  App.GG.Effect.Origin ->
+  App.GG.Grid ->
+  App.GG.Effect.Result(A)
+
+App.GG.Effect.bind<A: Type, B: Type>(
+  effect: App.GG.Effect<A>
+  next: A -> App.GG.Effect<B>
+): App.GG.Effect<B>
+
+  (center, origin, grid)
+  let a = effect(center, origin, grid)
+  case a {
+    err: App.GG.Effect.Result.err<B>
+    new: case next(a.value)(a.center, a.origin, a.grid) as b {
+      err: App.GG.Effect.Result.err<B>
+      new: 
+        let center      = b.center
+        let value       = b.value
+        let origin      = b.origin
+        let grid        = b.grid
+        let img         = (img: VoxBox) b.img(a.img(img))
+        let energy_used = a.energy_cost + b.energy_cost
+        let description = b.description
+        App.GG.Effect.Result.new<B>(value, center, origin, grid, img, energy_used, description)
+    }
+  }
+
+App.GG.Effect.monad: Monad(App.GG.Effect)
+  Monad.new<App.GG.Effect>(App.GG.Effect.bind, App.GG.Effect.pure)
+
+App.GG.Effect.pure<A: Type>(value: A): App.GG.Effect<A>
+  (center, origin, grid)
+  App.GG.Effect.Result.new<A>(value, center, origin, grid, (img) img, 0, "")

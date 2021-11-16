@@ -9,29 +9,29 @@ App.GG.init.grid: App.GG.Grid
 
   let slime = App.GG.Creatures.slime
   let minion = App.GG.Creatures.minion
-  let creature1 = App.GG.Creature.new(slime, App.GG.Team.blue, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 10)
-  let creature2 = App.GG.Creature.new(minion, App.GG.Team.red, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 10)
+  let creature1 = App.GG.Creature.new(slime, App.GG.Team.blue, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 50, 0)
+  let creature2 = App.GG.Creature.new(minion, App.GG.Team.red, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 50, 1)
   let list = 
     [
-      {{0#32,0#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
-      {{0#32,1#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
-      {{0#32,2#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
-      {{1#32,0#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
-      {{1#32,1#32}, App.GG.Tile.new(App.GG.img.tile, [], some(creature1), App.GG.Team.blue)}
-      {{1#32,2#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
-      {{2#32,0#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
-      {{2#32,1#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
-      {{2#32,2#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.blue)}
+      {{0#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
+      {{0#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
+      {{0#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
+      {{1#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
+      {{1#32,1#32}, App.GG.Tile.new([], some(creature1), App.GG.Team.blue)}
+      {{1#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
+      {{2#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
+      {{2#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
+      {{2#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
 
-      {{3#32,0#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
-      {{3#32,1#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
-      {{3#32,2#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
-      {{4#32,0#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
-      {{4#32,1#32}, App.GG.Tile.new(App.GG.img.tile, [], some(creature2), App.GG.Team.red)}
-      {{4#32,2#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
-      {{5#32,0#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
-      {{5#32,1#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
-      {{5#32,2#32}, App.GG.Tile.new(App.GG.img.tile, [], none, App.GG.Team.red)}
+      {{3#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{3#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{3#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{4#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{4#32,1#32}, App.GG.Tile.new([], some(creature2), App.GG.Team.red)}
+      {{4#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{5#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{5#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{5#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
     ]
   BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
 

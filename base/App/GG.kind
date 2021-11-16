@@ -19,15 +19,12 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// Change Effect to work like a monad
+// Organize Effect Folder with Shockwave.kind functions
+// Chips should be wasted on use (Shockwave.kind line 262)
 // Make movement become an effect
-// Create damage interaction
-// Show Hp above minion
 // Create flinch mechanic
-// Turn shockwave into several small functions
 // Associate chips with stats and DNA
 // Create a deck when starting a match
-// Chips should be wasted on use (add this individually to each chip's effects)
 // Add pewpew shot mechanic
 // Create turns where you can choose chips from your deck
 // Create simple AI based on time in front of a slime and time not in front of a slime
@@ -35,3 +32,9 @@ App.GG: App<App.GG.State>
 // Fix centralization of tiles (currently the start of the drawing is defined to {40, 40})
 // Create more chips
 // Create 3 minions
+// Add comments to everything
+
+// DONE: Create damage interaction
+// DONE: Show Hp above minion
+// DONE: Change Effect to work like a monad
+// DONE: Turn shockwave into several small functions
