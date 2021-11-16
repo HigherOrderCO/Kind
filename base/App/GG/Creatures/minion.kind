@@ -13,7 +13,7 @@ App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
         4#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_4
         5#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_5
       }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
-    moving:
+    movement:
       App.GG.img.DarkSlime.idle.slime_enemy_idle_0
     attack:
       App.GG.img.DarkSlime.idle.slime_enemy_idle_0

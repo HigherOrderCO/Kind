@@ -10,22 +10,25 @@ App.GG.when: App.When<App.GG.State>
     frame:
       let new_grid = App.GG.when.update_grid(local@grid)
       let new_local = local@grid <- new_grid
-      App.set_local!(new_local)
+      App.set_local<App.GG.State>(new_local)
     key_down:
       log(U16.show(event.code))
-      if (event.code <? 41#16) && (event.code >? 36) then  
-        let new_grid = App.GG.when.movement_keys(event.code, local@grid)
+      let grid = local@grid
+      if (event.code <? 41#16) && (event.code >? 36) then
+        let coord = App.GG.Slime.find_coord(grid)
+        without coord: App.pass!
+        let new_grid = App.GG.Creature.modify_at(App.GG.when.add_action(App.GG.Actions.movement(event.code)), coord@snd, grid)
         let new_local = local@grid <- new_grid
-        App.set_local!(new_local)
+        App.set_local<App.GG.State>(new_local)
       else
         switch U16.eql(event.code) {
           // Spacebar
           32#16: 
             let new_grid = App.GG.when.use_chip(local@grid)
             let new_local = local@grid <- new_grid
-            App.set_local!(new_local)
-        }default App.pass!
-  } default App.pass!
+            App.set_local<App.GG.State>(new_local)
+        }default App.pass<App.GG.State>
+  } default App.pass<App.GG.State>
 
 App.GG.when.update_grid(grid: App.GG.Grid): App.GG.Grid
   let new_grid = grid 
@@ -120,23 +123,24 @@ App.GG.when.add_action(action: App.GG.Actions.Data, creature: App.GG.Creature): 
   let new_actions = actions@next <- some(action)
   creature@actions <- new_actions
 
-App.GG.when.movement_keys(key: U16, grid: App.GG.Grid): App.GG.Grid
-  let char_tile = App.GG.Slime.find_coord(grid)
-  Maybe {
-    get pair = char_tile // creature + coord
-    let ori = pair@snd
-    get d_c = // Destination Coord 
-      switch U16.eql(key) {
-        // left
-        37#16: some({ori@fst - 1, ori@snd})
-        // up
-        38#16: some({ori@fst, ori@snd - 1})
-        // right
-        39#16: some({ori@fst + 1, ori@snd})
-        // down
-        40#16: some({ori@fst, ori@snd + 1})
-      }default none
-    get d_t = BBT.lookup!!(App.GG.Grid.cmp, d_c, grid)
-    return App.GG.Grid.move_creature(ori, d_c, grid)
-  } <> grid
-
+App.GG.when.movement_keys(key: U16, coord: App.GG.Coord, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  let new_coord = 
+    switch U16.eql(key) {
+      // left
+      37#16: some({coord@fst - 1, coord@snd})
+      // up
+      38#16: some({coord@fst, coord@snd - 1})
+      // right
+      39#16: some({coord@fst + 1, coord@snd})
+      // down
+      40#16: some({coord@fst, coord@snd + 1})
+    }default none
+  case new_coord {
+    none: none
+    some:
+      let tile = App.GG.Grid.get(new_coord.value, grid)
+      case tile {
+        some: new_coord
+        none: none
+      }
+  }

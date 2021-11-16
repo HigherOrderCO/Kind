@@ -1,0 +1,31 @@
+App.GG.Effect.movement(key: U16): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    get center = App.GG.Effect.coord.get_center
+    get grid = App.GG.Effect.grid.get
+    let new_pos = App.GG.when.movement_keys(key, center, grid)
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    log("frame: " | U64.show(frame) )
+    without new_pos:
+      App.GG.Effect { 
+        App.GG.Effect.actions.del
+        App.GG.Effect.animation.update(App.GG.Animation.idle)
+      }
+    switch U64.eql(frame) {
+      0:
+        App.GG.Effect.animation.update(App.GG.Animation.movement)
+      12:
+          App.GG.Effect.movement.move(new_pos)
+      24:
+        App.GG.Effect {
+          App.GG.Effect.actions.del
+          App.GG.Effect.animation.update(App.GG.Animation.idle)
+        }
+      } default App.GG.Effect.pass
+  }
+
+App.GG.Effect.movement.move(new_pos: App.GG.Coord): App.GG.Effect<Unit>
+  (center, origin, grid) 
+  let new_grid = App.GG.Grid.move_creature(center, new_pos, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")

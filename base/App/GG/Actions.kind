@@ -31,3 +31,9 @@ App.GG.Actions.inc(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
     let new_grid = App.GG.Grid.set(coord, new_tile, grid)
     return new_grid
   } <> grid
+
+App.GG.Actions.movement(key: U16): App.GG.Actions.Data
+  let frame = 0#64
+  let effect = App.GG.Effect.movement(key)
+  let category = App.GG.Actions.Category.movement
+  App.GG.Actions.Data.new(frame, effect, category)

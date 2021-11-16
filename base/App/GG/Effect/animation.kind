@@ -1,0 +1,9 @@
+App.GG.Effect.animation.update(new_animation: App.GG.Animation): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let mod =
+    (creature)
+      let creature = creature@animation <- {new_animation, 0}
+      creature
+  let new_grid = App.GG.Creature.modify_at(mod, center, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+   

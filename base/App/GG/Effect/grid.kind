@@ -1,3 +1,7 @@
 App.GG.Effect.grid.get: App.GG.Effect<App.GG.Grid>
   (center, origin, grid)
   App.GG.Effect.Result.new!(grid, center, origin, grid, (img) img, 0, "")
+
+App.GG.Effect.grid.set(new_grid:App.GG.Grid): App.GG.Effect<Unit>
+  (center, origin, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
