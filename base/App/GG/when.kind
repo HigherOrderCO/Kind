@@ -82,11 +82,11 @@ App.GG.when.use_chip(grid: App.GG.Grid): App.GG.Grid
       case creature@category as category {
         minion: grid
         slime:
-          case category.chips {
+          case category.hand {
             nil: grid
             cons: 
-              open category.chips.head
-              let action = App.GG.Actions.Data.new(0, category.chips.head.effect, App.GG.Actions.Category.chip)
+              open category.hand.head
+              let action = App.GG.Actions.Data.new(0, category.hand.head.effect, App.GG.Actions.Category.chip)
               App.GG.Creature.modify_at(App.GG.when.add_action(action), coord, grid)
           }
       }

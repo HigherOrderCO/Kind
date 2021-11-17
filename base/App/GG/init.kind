@@ -9,7 +9,9 @@ App.GG.init.grid: App.GG.Grid
 
   let slime = App.GG.Creatures.slime
   let minion = App.GG.Creatures.minion
-  let creature1 = App.GG.Creature.new(slime, App.GG.Team.blue, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 50, 0)
+  let parts = App.GG.Body.Parts.new(0,0,0)
+  let body = App.GG.Body.new(parts, parts, parts, parts)
+  let creature1 = App.GG.Creature.new(slime(body), App.GG.Team.blue, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 50, 0)
   let creature2 = App.GG.Creature.new(minion, App.GG.Team.red, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 50, 1)
   let list = 
     [

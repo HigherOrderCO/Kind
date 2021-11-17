@@ -1,6 +1,12 @@
-App.GG.Creatures.slime: App.GG.Monster
-  let dna = App.GG.Creature.Dna.new("cartinhas", App.GG.Creature.Attributes.new(10, 10, 10, 10))
-  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.Creatures.slime.vbox, dna), [App.GG.Chip.Shockwave, App.GG.Chip.Shockwave])
+App.GG.Creatures.slime(
+  body: App.GG.Body
+): App.GG.Monster
+
+  let data = App.GG.Body.data(body)
+  let base_attr = App.GG.Creature.Attributes.new(10,10,10,10)
+  let attributes = App.GG.Creature.Attributes.add(base_attr, data@fst)
+  let dna = App.GG.Creature.Dna.new("cartinhas", attributes, body)
+  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.Creatures.slime.vbox, dna), [App.GG.Chip.Shockwave, App.GG.Chip.Shockwave], data@snd)
   monster
 
 App.GG.Creatures.slime.vbox(animation: App.GG.Animation, frame: U64): VoxBox

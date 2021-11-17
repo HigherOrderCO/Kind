@@ -1,0 +1,3 @@
+App.GG.Chips: Type
+  List<App.GG.Chip>
+

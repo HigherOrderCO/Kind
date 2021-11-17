@@ -1,0 +1,124 @@
+type App.GG.Body.Triple< A: Type, B: Type, C: Type > { 
+  new(fst: A, snd: B, trd: C)
+}
+
+type App.GG.Body {
+  new(
+    upper: App.GG.Body.Parts
+    lower: App.GG.Body.Parts
+    arm_1: App.GG.Body.Parts
+    arm_2: App.GG.Body.Parts
+  )
+}
+
+type App.GG.Body.Component {
+  new(
+    chip: App.GG.Chip
+    attributes: App.GG.Creature.Attributes
+  )
+}
+
+type App.GG.Body.Parts { 
+  new(
+    fst: Nat
+    snd: Nat
+    trd: Nat
+  )
+}
+
+App.GG.Body.Components.upper: App.GG.Body.Components
+  [App.GG.Components.shockwave]
+
+App.GG.Body.Components.lower: App.GG.Body.Components
+  [App.GG.Components.shockwave]
+
+App.GG.Body.Components.arm1: App.GG.Body.Components
+  [App.GG.Components.shockwave]
+
+App.GG.Body.Components.arm2: App.GG.Body.Components
+  [App.GG.Components.shockwave]
+
+App.GG.Body.Component.Generic: App.GG.Body.Component
+  App.GG.Body.Component.new(App.GG.Chip.Shockwave, App.GG.Creature.Attributes.new(1,2,3,4))
+  
+
+App.GG.Body.Components: Type
+  List<App.GG.Body.Component>
+
+
+App.GG.Body.is_right(
+  components: App.GG.Body.Components
+  id: Nat
+): App.GG.Body.Component
+
+  List.get!(id, components) <> App.GG.Body.Component.Generic
+
+App.GG.Body.generic(
+  body: App.GG.Body.Parts,
+  components: App.GG.Body.Components
+): App.GG.Body.Triple<App.GG.Body.Component, App.GG.Body.Component, App.GG.Body.Component>
+
+  let f = App.GG.Body.is_right(components)
+  {f(body@fst), f(body@snd) , f(body@trd)}
+
+
+//============================================
+  //Attribute Functions
+  
+App.GG.Body.add_generic(
+  parts: App.GG.Body.Parts
+  components: App.GG.Body.Components
+): Pair<App.GG.Creature.Attributes, App.GG.Chips>
+
+  let f = App.GG.Body.generic(parts, components)
+  let fst = f@fst@attributes
+  let snd = f@snd@attributes
+  let trd = f@trd@attributes
+  let add = App.GG.Creature.Attributes.add
+  let attributes = add(fst, add(snd, trd))
+  let chips = [f@fst@chip, f@snd@chip, f@trd@chip]
+  {attributes, chips}
+  
+
+App.GG.Body.add_upper(
+  body: App.GG.Body
+): Pair<App.GG.Creature.Attributes, App.GG.Chips>
+  
+  App.GG.Body.add_generic(body@upper, App.GG.Body.Components.upper)
+
+
+App.GG.Body.add_lower(
+  body: App.GG.Body
+): Pair<App.GG.Creature.Attributes, App.GG.Chips>
+  
+  App.GG.Body.add_generic(body@lower, App.GG.Body.Components.lower)
+
+
+App.GG.Body.add_arm1(
+  body: App.GG.Body
+): Pair<App.GG.Creature.Attributes, App.GG.Chips>
+  
+  App.GG.Body.add_generic(body@arm_1, App.GG.Body.Components.arm1)
+
+
+App.GG.Body.add_arm2(
+  body: App.GG.Body
+): Pair<App.GG.Creature.Attributes, App.GG.Chips>
+  
+  App.GG.Body.add_generic(body@arm_2, App.GG.Body.Components.arm2)
+
+//============================================
+
+App.GG.Body.data(
+  body: App.GG.Body
+): Pair<App.GG.Creature.Attributes, App.GG.Chips>
+
+  let upper = App.GG.Body.add_upper(body)
+  let lower = App.GG.Body.add_lower(body)
+  let arm_1 = App.GG.Body.add_arm1(body)
+  let arm_2 = App.GG.Body.add_arm2(body)
+  let add = App.GG.Creature.Attributes.add
+  let attributes = add(upper@fst, add(lower@fst, add(arm_1@fst, arm_2@fst)))
+  let chips = upper@snd ++ lower@snd ++ arm_1@snd ++ arm_2@snd
+  {attributes, chips}
+

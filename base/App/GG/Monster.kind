@@ -2,7 +2,8 @@ type App.GG.Monster {
   minion(data: App.GG.Minion)
   slime(
     data: App.GG.Slime
-    chips: List<App.GG.Chip>
+    hand: App.GG.Chips
+    folder: App.GG.Chips
   )
 }
 

@@ -5,3 +5,4 @@ type App.GG.Chip {
     img: VoxBox
   )
 }
+

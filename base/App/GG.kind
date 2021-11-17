@@ -20,7 +20,6 @@ App.GG: App<App.GG.State>
 
 // Todos:
 // Create flinch mechanic
-// Associate chips with stats and DNA
 // Create a deck when starting a match
 // Add pewpew shot mechanic
 // Create turns where you can choose chips from your deck
@@ -31,6 +30,8 @@ App.GG: App<App.GG.State>
 // Create 3 minions
 // Add comments to everything
 
+// DONE: Create Attributes from Body
+// DONE: Associate chips with stats and DNA
 // DONE: Make movement become an effect
 // DONE: Organize Effect Folder with Shockwave.kind functions
 // DONE: Chips should be wasted on use (Shockwave.kind line 262)

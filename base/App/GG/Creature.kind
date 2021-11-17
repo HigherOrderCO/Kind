@@ -15,6 +15,7 @@ type App.GG.Creature.Dna {
   new(
     alteration: String //TODO
     attributes: App.GG.Creature.Attributes
+    body: App.GG.Body
   )
 }
 
@@ -27,51 +28,22 @@ type App.GG.Creature.Attributes {
   )
 }
 
+
 type App.GG.Creature.Status {
   stun(duration: I32)
 }
 
-//===========================================================
-//Effect functions
+App.GG.Creature.Attributes.add(
+  a: App.GG.Creature.Attributes
+  b: App.GG.Creature.Attributes
+): App.GG.Creature.Attributes
 
-type App.GG.Creature.Effect.Result<A: Type> {
-  new(
-    value: A,
-    center: App.GG.Coord
-    cast_data: Pair<Char,String>
-    grid: App.GG.Grid
-    energy_cost: I32 
-    description: String
-  )
-}
+  let hp = a@hp + b@hp
+  let energy = a@energy + b@energy
+  let damage = a@damage + b@damage
+  let corruption = a@corruption + b@corruption
+  App.GG.Creature.Attributes.new(hp, energy, damage, corruption)
 
-
-App.GG.Creature.Effect(A: Type): Type
-  ((center: App.GG.Coord) ->
-   (targets: List<App.GG.Coord>) ->
-   (cast_data: Pair<Char,String>) ->
-   (grid: App.GG.Grid) ->
-   App.GG.Creature.Effect.Result(A))
-
-App.GG.Creature.Effect.bind<A: Type, B: Type>(
-  effect: App.GG.Creature.Effect<A>
-  next: A -> App.GG.Creature.Effect<B>
-): App.GG.Creature.Effect<B>
-
-  (center, targets, cast_data, grid)
-  case effect(center, targets, cast_data, grid) as result_a {
-    new: case next(result_a.value)(result_a.center, targets, result_a.cast_data, result_a.grid) as result_b {
-      new: 
-        let center      = result_b.center
-        let value       = result_b.value
-        let cast_data   = result_b.cast_data
-        let grid        = result_b.grid
-        let energy_used = result_a.energy_cost + result_b.energy_cost
-        let description = result_b.description
-        App.GG.Creature.Effect.Result.new<B>(value, center, cast_data, grid, energy_used, description)
-    }
-  }
-  
 //===========================================================
 //Creature Management
 

@@ -7,8 +7,8 @@ App.GG.Effect.chip.waste: App.GG.Effect<Unit>
       let new_grid = case creature@category as monster {
         minion: grid
         slime: 
-          let new_chips = List.tail!(monster.chips)
-          let new_monster = App.GG.Monster.slime(monster.data, new_chips)
+          let new_chips = List.tail!(monster.hand)
+          let new_monster = App.GG.Monster.slime(monster.data, new_chips, monster.folder)
           let new_creature = creature@category <- new_monster
           let new_tile = tile@creature <- some(new_creature)
           let new_grid = App.GG.Grid.set(center, new_tile, grid)
