@@ -1,16 +1,35 @@
 Kind.Parser.do: Parser(Kind.Term)
   Kind.Parser.block("do", Parser {
     Parser.maybe!(Kind.Parser.text("do "))
-    get name = Kind.Parser.name1
+    get name   = Kind.Parser.name1
+    get params = Parser.until!(Kind.Parser.text_now(" {"),
+      Parser.choice!([
+        Kind.Parser.items_now!("(", Kind.Parser.term, ")")
+        Kind.Parser.items_now!("<", Kind.Parser.term, ">")
+        Parser {
+          Kind.Parser.text_now("!")
+          return [Kind.Term.hol(Bits.e)]
+        }
+      ])
+    )
+    let params = List.flatten!(params)
+    let type   = Kind.Term.ref(name)
+    let monad  = Kind.Term.ref(String.concat(name, ".monad"))
+    let result = {type, monad}
+    for param in params with result:
+      open result
+      let n_type  = Kind.Term.app(result.fst, param)
+      let n_monad = Kind.Term.app(result.snd, param)
+      {n_type, n_monad}
+    let {type, monad} = result
     if String.is_upper(String.slice(0,1,name)) then Parser {
-      Parser.text(" {")
-      get term = Kind.Parser.do.statements(name)
+      get term = Kind.Parser.do.statements(name, type, monad)
       Kind.Parser.text("}")
       return term
     } else Parser.fail!("Not a do-block.")
   })
 
-Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
+Kind.Parser.do.statements(monad_name: Kind.Name, type: Kind.Term, monad: Kind.Term): Parser(Kind.Term)
   Parser.choice!([
     // Binding call: @ask x = expr rest@
     Kind.Parser.block("do-get", Parser {
@@ -22,9 +41,9 @@ Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
       Kind.Parser.text("=")
       get expr = Kind.Parser.term
       Parser.maybe!(Kind.Parser.text(";"))
-      get body = Kind.Parser.do.statements(monad_name)
-      let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), Kind.Term.ref(monad_name))
-      let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+      get body = Kind.Parser.do.statements(monad_name, type, monad)
+      let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), type)
+      let term = Kind.Term.app(term, monad)
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
       let term = Kind.Term.app(term, expr)
@@ -36,8 +55,8 @@ Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
       Kind.Parser.text("return ")
       get expr = Kind.Parser.term
       Parser.maybe!(Kind.Parser.text(";"))
-      let term = Kind.Term.app(Kind.Term.ref("Monad.pure"), Kind.Term.ref(monad_name))
-      let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+      let term = Kind.Term.app(Kind.Term.ref("Monad.pure"), type)
+      let term = Kind.Term.app(term, monad)
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
       let term = Kind.Term.app(term, expr)
       return term
@@ -52,15 +71,15 @@ Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
       get upto = Kind.Parser.term
       Kind.Parser.text(":")
       get loop = Kind.Parser.term
-      get body = Parser.maybe!(Kind.Parser.do.statements(monad_name))
+      get body = Parser.maybe!(Kind.Parser.do.statements(monad_name, type, monad))
       let expr = Kind.Term.ref("Nat.for.io")
       let expr = Kind.Term.app(expr, from)
       let expr = Kind.Term.app(expr, upto)
       let expr = Kind.Term.app(expr, Kind.Term.lam(name, (x) loop))
       case body {
         some: Parser {
-          let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), Kind.Term.ref(monad_name))
-          let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+          let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), type)
+          let term = Kind.Term.app(term, monad)
           let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
           let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
           let term = Kind.Term.app(term, expr)
@@ -80,15 +99,15 @@ Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
       get list = Kind.Parser.term
       Kind.Parser.text(":")
       get loop = Kind.Parser.term
-      get body = Parser.maybe!(Kind.Parser.do.statements(monad_name))
+      get body = Parser.maybe!(Kind.Parser.do.statements(monad_name, type, monad))
       let expr = Kind.Term.ref("List.for.io")
       let expr = Kind.Term.app(expr, Kind.Term.hol(Bits.e))
       let expr = Kind.Term.app(expr, list)
       let expr = Kind.Term.app(expr, Kind.Term.lam(name, (x) loop))
       case body {
         some: Parser {
-          let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), Kind.Term.ref(monad_name))
-          let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+          let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), type)
+          let term = Kind.Term.app(term, monad)
           let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
           let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
           let term = Kind.Term.app(term, expr)
@@ -101,34 +120,34 @@ Kind.Parser.do.statements(monad_name: Kind.Name): Parser(Kind.Term)
       }
     })
     // Binders
-    Kind.Parser.letforrange.u32((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.letforrange.u32.with((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.letforrange.nat((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.letforrange.nat.with((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.letforin((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.letforin.with((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.letwhile((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.letwhile.with((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.getforin((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.getforin.with((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.let.abort((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.let((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.getwhile((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.getwhile.with((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.get((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.def((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.lens.let((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.use.abort((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.use((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.log((x) Kind.Parser.do.statements(monad_name))
-    Kind.Parser.open((x) Kind.Parser.do.statements(monad_name))
+    Kind.Parser.letforrange.u32((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.letforrange.u32.with((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.letforrange.nat((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.letforrange.nat.with((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.letforin((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.letforin.with((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.letwhile((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.letwhile.with((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.getforin((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.getforin.with((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.let.abort((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.let((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.getwhile((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.getwhile.with((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.get((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.def((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.lens.let((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.use.abort((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.use((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.log((x) Kind.Parser.do.statements(monad_name, type, monad))
+    Kind.Parser.open((x) Kind.Parser.do.statements(monad_name, type, monad))
     // Non-binding call: @expr rest@
     Kind.Parser.block("do-statement", Parser {
       get expr = Kind.Parser.term
       Parser.maybe!(Kind.Parser.text(";"))
-      get body = Kind.Parser.do.statements(monad_name)
-      let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), Kind.Term.ref(monad_name))
-      let term = Kind.Term.app(term, Kind.Term.ref(String.concat(monad_name, ".monad")))
+      get body = Kind.Parser.do.statements(monad_name, type, monad)
+      let term = Kind.Term.app(Kind.Term.ref("Monad.bind"), type)
+      let term = Kind.Term.app(term, monad)
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
       let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
       let term = Kind.Term.app(term, expr)

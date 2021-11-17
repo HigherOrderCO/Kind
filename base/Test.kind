@@ -1,2 +1,18 @@
 Test: _
-  RLP.encode.length(128, Nat.pow(256,7))
+  Either<String> {
+    get a = bar([[2]])
+    get b = foo(a)
+    return b
+  }
+
+bar(ll: List<List<Nat>>): Either<String, List<Nat>>
+  case ll {
+    nil: Either.left!!("no lists")
+    cons: Either.right!!(ll.head)
+  }
+
+foo(l: List<Nat>): Either<String, Nat>
+  case l {
+    nil: Either.left!!("empty list")
+    cons: Either.right!!(l.head)
+  } 
