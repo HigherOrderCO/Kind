@@ -9,28 +9,12 @@ App.GG.Chip.Shockwave.Effect: App.GG.Effect<Unit>
   App.GG.Effect {
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
-    get frame = App.GG.Effect.frame.get
-    // App.GG.Effect.vbox.in_tile(App.GG.img.target_tile) // Cannon image if has
-    App.GG.Effect.frame.inc // Increases action's frame by 1
     without creature: App.GG.Effect.pass
-    without frame: App.GG.Effect.pass
-    App.GG.Effect {
-      if frame =? 16 then // At 16th frame
-        App.GG.Effect {
-          App.GG.Effect.actions.del // Delete action from creature
-          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
-          let projectile_effect = App.GG.Chip.Shockwave.Projectile.Effect 
-          let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-          let projectile_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
-          App.GG.Effect.projectile.add_at(projectile_coord, projectile)
-        }
-      else
-        App.GG.Effect.pass
-      if frame =? 0 then 
-        App.GG.Effect.chip.waste
-      else
-        App.GG.Effect.pass
-    }
+    let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
+    let projectile_effect = App.GG.Chip.Shockwave.Projectile.Effect 
+    let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+    let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
+    App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack)
   }
 
 App.GG.Chip.Shockwave.Projectile.Effect: App.GG.Effect<Unit>

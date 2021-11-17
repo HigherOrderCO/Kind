@@ -3,8 +3,8 @@ App.GG.Effect.movement(key: U16): App.GG.Effect<Unit>
     get frame = App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
     get grid = App.GG.Effect.grid.get
-    let new_pos = App.GG.when.movement_keys(key, center, grid)
-    App.GG.Effect.frame.inc
+    let new_pos = App.GG.Effect.movement.direction(key, center, grid)
+    App.GG.Effect.frame.inc 
     without frame: App.GG.Effect.pass
     log("frame: " | U64.show(frame) )
     without new_pos:
@@ -29,3 +29,26 @@ App.GG.Effect.movement.move(new_pos: App.GG.Coord): App.GG.Effect<Unit>
   (center, origin, grid) 
   let new_grid = App.GG.Grid.move_creature(center, new_pos, grid)
   App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+
+App.GG.Effect.movement.direction(key: U16, coord: App.GG.Coord, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  
+  let new_coord = 
+    switch U16.eql(key) {
+      // left
+      37#16: some({coord@fst - 1, coord@snd})
+      // up
+      38#16: some({coord@fst, coord@snd - 1})
+      // right
+      39#16: some({coord@fst + 1, coord@snd})
+      // down
+      40#16: some({coord@fst, coord@snd + 1})
+    }default none
+  Maybe {
+    get new_coord = new_coord
+    get previous_tile = App.GG.Grid.get(coord, grid)
+    get next_tile = App.GG.Grid.get(new_coord, grid)
+    if App.GG.Team.eql(previous_tile@owner, next_tile@owner) then
+      some(new_coord)
+    else
+      none
+  }

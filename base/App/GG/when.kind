@@ -123,24 +123,3 @@ App.GG.when.add_action(action: App.GG.Actions.Data, creature: App.GG.Creature): 
   let new_actions = actions@next <- some(action)
   creature@actions <- new_actions
 
-App.GG.when.movement_keys(key: U16, coord: App.GG.Coord, grid: App.GG.Grid): Maybe<App.GG.Coord>
-  let new_coord = 
-    switch U16.eql(key) {
-      // left
-      37#16: some({coord@fst - 1, coord@snd})
-      // up
-      38#16: some({coord@fst, coord@snd - 1})
-      // right
-      39#16: some({coord@fst + 1, coord@snd})
-      // down
-      40#16: some({coord@fst, coord@snd + 1})
-    }default none
-  case new_coord {
-    none: none
-    some:
-      let tile = App.GG.Grid.get(new_coord.value, grid)
-      case tile {
-        some: new_coord
-        none: none
-      }
-  }

@@ -4,7 +4,7 @@ App.GG.Effect.creature.is_enemy(coord: App.GG.Coord): App.GG.Effect<Bool>
     Maybe {
       get creature = App.GG.Creature.get(coord, grid)
       get team  = App.GG.Effect.team.get(center, origin, grid)
-      let bool = App.GG.Team.is_same(creature@team, team)
+      let bool = App.GG.Team.eql(creature@team, team)
       return not(bool) 
     } <> false
   App.GG.Effect.Result.new!(bool, center, origin, grid, (img) img, 0, "")
