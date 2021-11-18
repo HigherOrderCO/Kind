@@ -79,7 +79,7 @@ RLP.encode.many(trees: List<RLP>): Bytes
 RLP.encode(tree: RLP): Bytes
   case tree {
     data:
-      if Bool.and(Nat.eql(List.length!(tree.value),1), U8.ltn(List.head_with_default!(0#8,tree.value), 128#8)) then
+      if Bool.and(Nat.eql(List.length!(tree.value),1), Nat.ltn(U8.to_nat((List.head_with_default!(0#8,tree.value))), 128)) then
         tree.value
       else
         List.concat!(RLP.encode.length(128, List.length!(tree.value)), tree.value)

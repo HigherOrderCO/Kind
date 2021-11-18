@@ -1,10 +1,14 @@
+because_i_said_so<A: Type>: A
+  because_i_said_so<A>
+
 // These sub-theorems were not proven yet!
 // Most of them are simple, and should be finished over the next days
-//RLP.aux.split.0(
-//  payload: Bytes
-//  tail: Bytes
-//  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
-//): RLP.split.length(128, RLP.encode.length(128, List.length<U8>(payload)) ++ payload ++ tail) == {payload, tail}
+RLP.aux.split.0(
+  payload: Bytes
+  tail: Bytes
+  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
+): Pair.new(Bytes, Bytes, payload, tail) == RLP.split.length(128, Nat.to_u8(Nat.add(128, List.length!(payload))) & payload ++ tail)
+  because_i_said_so!
 //  let H = mirror(H)
 //  case H {
 //    refl:
@@ -21,13 +25,30 @@
 RLP.aux.split.1(
   payload: Bytes
   tail: Bytes
+  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
+): Pair.new(Bytes, Bytes, payload, tail) ==
+     let b = Bytes.from_nat(List.length!(payload))
+     let a = Nat.to_u8(Nat.add(56, Nat.add(128, List.length!(b))))
+     RLP.split.length(192, a & (b ++ payload) ++ tail)
+  because_i_said_so!
+
+RLP.aux.split.2(
+  payload: Bytes
+  tail: Bytes
+  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
+): Pair.new(Bytes, Bytes, payload, tail) == RLP.split.length(192, Nat.to_u8(Nat.add(192, List.length!(payload))) & payload ++ tail)
+  because_i_said_so!
+
+RLP.aux.split.3(
+  payload: Bytes
+  tail: Bytes
   H1: Equal<Bool>(Nat.lte(List.length!(payload), 55), false)
   H0: Equal<Bool>(Nat.lte(List.length!(payload), RLP.max), true)
 ): Pair.new(Bytes, Bytes, payload, tail) == 
      let b = Bytes.from_nat(List.length!(payload))
      let a = Nat.to_u8(Nat.add(56, Nat.add(192, List.length!(b))))
      RLP.split.length(192, a & (b ++ payload) ++ tail)
-  RLP.aux.split.1(payload, tail, H1, H0)
+  because_i_said_so!
 // let H1 = mirror(H1)
 // case H1 {
 //   refl:
