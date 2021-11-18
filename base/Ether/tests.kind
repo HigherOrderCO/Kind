@@ -5,7 +5,7 @@ round_n(n : Nat, m : Nat) : Nat
   }
 
 Ether.tests : _
-  Bits.cmp.go(Bits.o(Bits.i(Bits.e)), Bits.i(Bits.e), Cmp.eql)
+  Nat.to_u8(100000)
 
 
   //let buffer = Buffer8.from_hex("d69429d7d1dd5b6f9c864d9db560d72a247c178ae86b0a")

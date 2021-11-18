@@ -1,0 +1,16 @@
+RLP.new_aux.Nat.lte.max_add(x : Nat, y : Nat, z : Nat, H : Nat.lte(Nat.succ(y), z - x) == true) 
+  : Nat.lte(Nat.add(x y), z) == true
+  case x with H {
+    succ : case z with H {
+      succ : 
+        let H = H :: rewrite X in Nat.lte(Nat.succ(y), X) == Bool.true with (Nat.sub.succ_both(z.pred,x.pred))
+        let rec = RLP.new_aux.Nat.lte.max_add(x.pred, y, z.pred, H)
+        rec
+      zero : 
+        let H = H :: Nat.lte(Nat.succ(y),0) == Bool.true
+        Empty.absurd!(Bool.false_neq_true(H))
+    }!
+    zero : 
+      let H = H :: Nat.lte(Nat.succ(y), z) == Bool.true
+      Nat.lte.succ_left!!(H)
+  }!

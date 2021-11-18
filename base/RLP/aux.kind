@@ -3,25 +3,28 @@ because_i_said_so<A: Type>: A
 
 // These sub-theorems were not proven yet!
 // Most of them are simple, and should be finished over the next days
+Nat.to_u8.safe_conversion(x : Nat, H : Nat.lte(x, 255) == true) : x == U8.to_nat(Nat.to_u8(x))
+  because_i_said_so!
+
+// These sub-theorems were not proven yet!
+// Most of them are simple, and should be finished over the next days
 RLP.aux.split.0(
   payload: Bytes
   tail: Bytes
   H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
 ): Pair.new(Bytes, Bytes, payload, tail) == RLP.split.length(128, Nat.to_u8(Nat.add(128, List.length!(payload))) & payload ++ tail)
-  because_i_said_so!
-//  let H = mirror(H)
-//  case H {
-//    refl:
-//      let recover_num = ?test :: List.length(U8, payload) == Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128)
-//      case recover_num {
-//        refl:
-//          case H {
-//            refl:
-//              List.split.length(U8, payload, tail)
-//          }: H.b(() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)), List.length(U8, payload)),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))) == Pair.new(Bytes,Bytes,payload,tail)
-//      }: Nat.lte(  recover_num.b  ,55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)),  recover_num.b  ),Bytes.split(List.concat(U8,List.nil(U8),List.concat(U8,payload,tail)),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))) == Pair.new(Bytes,Bytes,payload,tail)
-//  }: RLP.split.length(128,List.concat(U8,  H.b(  () Bytes,List.cons(U8,Nat.to_u8(Nat.add(128,List.length(U8,payload))),List.nil(U8)),List.concat(U8,Bytes.from_nat(Nat.add(56,Nat.add(128,RLP.needed_bytes(List.length(U8,payload))))),Bytes.from_nat(List.length(U8,payload)))),List.concat(U8,payload,tail))) == Pair.new(Bytes,Bytes,payload,tail)
-
+  let chain = Nat.Order.chain(List.length(U8,payload), 55, 126, H, refl)
+  let H0 = RLP.new_aux.Nat.lte.max_add(128, List.length(U8,payload), 255, chain)
+  let H1 = Nat.to_u8.safe_conversion(Nat.add(128,List.length(U8,payload)), H0) 
+  replace X with H1 in Pair.new(Bytes,Bytes,payload,tail) == Nat.lte(Nat.sub(X,128),55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,payload,tail),Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128)),Bytes.split(List.concat(U8,payload,tail),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
+  let H2 = Nat.sub.add.left(128, List.length(U8,payload)) :: rewrite X in Nat.sub(X,128) == List.length(U8,payload) with Nat.add.comm(List.length(U8,payload),128)
+  replace X with mirror(H2) in Pair.new(Bytes,Bytes,payload,tail) == Nat.lte(X,55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,payload,tail),Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128)),Bytes.split(List.concat(U8,payload,tail),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
+  replace X with mirror(H) in Pair.new(Bytes,Bytes,payload,tail) == X(() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,payload,tail),Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128)),Bytes.split(List.concat(U8,payload,tail),Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,payload)))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
+  replace X with H1 in Pair.new(Bytes,Bytes,payload,tail) == Bytes.split(List.concat(U8,payload,tail),Nat.sub(X,128))
+  replace X with mirror(H2) in Pair.new(Bytes,Bytes,payload,tail) == Bytes.split(List.concat(U8,payload,tail),X)
+  let split = List.split.length!(payload, tail)
+  mirror(split)
+  
 RLP.aux.split.1(
   payload: Bytes
   tail: Bytes
