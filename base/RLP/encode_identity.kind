@@ -1,9 +1,3 @@
-typeof<A: Type>(a: A): Type
-  A
-
-because_i_said_so<A: Type>: A
-  because_i_said_so<A>
-
 RLP.encode_identity(
   rlps: List<RLP>
   H: Equal<Bool>(Nat.lte(List.length(U8, RLP.encode.many(rlps)), RLP.max), true)
@@ -14,16 +8,23 @@ RLP.encode_identity(
     cons:
       case rlps.head {
         data:
-          let split_conditions = Bool.and.split(Nat.eql(List.length!(rlps.head.value),1), Nat.ltn(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 128))
-          def condition =Bool.and(Nat.eql(List.length!(rlps.head.value),1), Nat.ltn(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 128))
-          case condition with split_conditions {
+          let conditions = Bool.and.split(Nat.eql(List.length!(rlps.head.value),1), Nat.lte(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 127))
+          def condition = Bool.and(Nat.eql(List.length!(rlps.head.value),1), Nat.lte(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 127))
+          case condition with conditions {
             true:
-              let conditions = split_conditions(refl)
               case rlps.head.value with conditions {
                 cons:
                   case rlps.head.value.tail with conditions {
                     nil:
-                      ?nil-70-10
+                      open conditions
+                      let conditions.snd = mirror(conditions.snd)
+                      case conditions.snd {
+                        refl:
+                          // data([rlps.head.value.head]) & RLP.decode.many(RLP.encode.many(rlps.tail)) == data([rlps.head.value.head]) & rlps.tail
+                          let ind = RLP.encode_identity(rlps.tail, ?todo.8)
+                          apply(List.cons(RLP, RLP.data([rlps.head.value.head])), ind)
+                      }: conditions.snd.b( () List(RLP),List.cons(RLP,RLP.data(List.cons(U8,rlps.head.value.head,List.nil(U8))),RLP.decode.many(List.concat(U8,List.nil(U8),RLP.encode.many(rlps.tail)))),Nat.lte(U8.to_nat(rlps.head.value.head),191,() List(RLP),RLP.split.length(128,List.cons(U8,rlps.head.value.head,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,rlps.head.value.head,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.data(List.cons(U8,rlps.head.value.head,List.nil(U8))),rlps.tail)
+
                     cons:
                       open conditions
                       Empty.absurd!(Bool.false_neq_true(conditions.fst))
@@ -34,146 +35,80 @@ RLP.encode_identity(
                   Empty.absurd!(Bool.false_neq_true(conditions.fst))
               }!
             false:
-              ?false-278
+              //?false-278-10-2370-152742
+              case Nat.lte(List.length(U8,rlps.head.value),55) {
+                true:
+                  let recover_prefix = ?todo.9 :: Nat.add(128, List.length(U8, rlps.head.value)) == U8.to_nat(Nat.to_u8(Nat.add(128,List.length(U8,rlps.head.value))))
+                  case recover_prefix {
+                    refl:
+                      let limit_size = ?todo.10 :: true == Nat.lte(List.length(U8,rlps.head.value), 63)
+                      case limit_size {
+                        refl:
+                          let split_id = RLP.aux.split.0(rlps.head.value, RLP.encode.many(rlps.tail), ?todo.11)
+                          case split_id {
+                            refl:
+                              let ind = RLP.encode_identity(rlps.tail, ?todo.12)
+                              apply(List.cons(RLP,RLP.data(rlps.head.value)), ind)
+                          }: split_id.b(() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+                      }: limit_size.b(() List(RLP),RLP.split.length(128,List.concat(U8,List.concat(U8,List.cons(U8,Nat.to_u8(Nat.add(128,List.length(U8,rlps.head.value))),List.nil(U8)),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.concat(U8,List.concat(U8,RLP.encode.length(128,List.length(U8,rlps.head.value)),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail)))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+
+                  }: Nat.lte(    recover_prefix.b    ,127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,Nat.to_u8(Nat.add(128,List.length(U8,rlps.head.value))),List.nil(U8))),RLP.decode.many(List.concat(U8,List.concat(U8,List.nil(U8),rlps.head.value),RLP.encode.many(rlps.tail)))),Nat.lte(    recover_prefix.b   ,191,() List(RLP),RLP.split.length(128,List.concat(U8,List.concat(U8,List.cons(U8,Nat.to_u8(Nat.add(128,List.length(U8,rlps.head.value))),List.nil(U8)),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.concat(U8,List.concat(U8,RLP.encode.length(128,List.length(U8,rlps.head.value)),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+
+//                  ?true-4418-1090-258-258
+                false:
+                  let recover_prefix = ?todo.13 :: Nat.add(184, List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value)))) == U8.to_nat(Nat.to_u8(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value)))))))
+                  case recover_prefix {
+                    refl:
+                      let limit_length = ?todo.14 :: true == Nat.lte(List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value))), 7)
+                      case limit_length {
+                        refl:
+                          let recover_split = RLP.aux.split.1(rlps.head.value, RLP.encode.many(rlps.tail), ?todo.15)
+                          case recover_split {
+                            refl:
+                              let ind = RLP.encode_identity(rlps.tail, ?todo.16)
+                              apply(List.cons(RLP,RLP.data(rlps.head.value)), ind)
+                          }: recover_split.b(() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+
+                      }: limit_length.b(  () List(RLP),RLP.split.length(128,List.concat(U8,List.concat(U8,List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value)))))),Bytes.from_nat(List.length(U8,rlps.head.value))),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.concat(U8,List.concat(U8,RLP.encode.length(128,List.length(U8,rlps.head.value)),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail)))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+
+                  }: Nat.lte(   recover_prefix.b   ,127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value)))))),List.nil(U8))),RLP.decode.many(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,rlps.head.value)),rlps.head.value),RLP.encode.many(rlps.tail)))),Nat.lte(   recover_prefix.b    ,191,() List(RLP),RLP.split.length(128,List.concat(U8,List.concat(U8,List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value)))))),Bytes.from_nat(List.length(U8,rlps.head.value))),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.concat(U8,List.concat(U8,RLP.encode.length(128,List.length(U8,rlps.head.value)),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+
+                  //?false-4418-1090-258-258
+              }: List.concat(U8,List.concat(U8,    self(    () Bytes,List.cons(U8,Nat.to_u8(Nat.add(128,List.length(U8,rlps.head.value))),List.nil(U8)),List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value)))))),Bytes.from_nat(List.length(U8,rlps.head.value)))),rlps.head.value),RLP.encode.many(rlps.tail),(bytes) List(RLP),List.nil(RLP),(bytes.head) (bytes.tail) Nat.lte(U8.to_nat(bytes.head),127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,bytes.head,List.nil(U8))),RLP.decode.many(bytes.tail)),Nat.lte(U8.to_nat(bytes.head),191,() List(RLP),RLP.split.length(128,List.concat(U8,List.concat(U8,    self(    () Bytes,List.cons(U8,Nat.to_u8(Nat.add(128,List.length(U8,rlps.head.value))),List.nil(U8)),List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,rlps.head.value)))))),Bytes.from_nat(List.length(U8,rlps.head.value)))),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.concat(U8,List.concat(U8,RLP.encode.length(128,List.length(U8,rlps.head.value)),rlps.head.value),RLP.encode.many(rlps.tail)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail)))))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+
           }! :: RLP.decode.many(List.concat(U8,   condition(    () List(U8),rlps.head.value,List.concat(U8,RLP.encode.length(128,List.length(U8,rlps.head.value)),rlps.head.value)),RLP.encode.many(rlps.tail))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
-//          ?data-22-86
-//          let remember = Equal.refl(Bool, Bool.and(Nat.eql(List.length!(rlp.value),1), U8.ltn(List.head_with_default!(0#8,rlp.value), 128#8)))
-//          case Bool.and(Nat.eql(List.length!(rlp.value),1), U8.ltn(List.head_with_default!(0#8,rlp.value), 128#8)) as X
-//                with remember : Equal(Bool, Bool.and(Nat.eql(List.length!(rlp.value),1), U8.ltn(List.head_with_default!(0#8,rlp.value), 128#8)), X)
-//           {
-//            true : 
-//              let break_and1 = RLP.aux.10!!(remember)
-//              let break_and2 = RLP.aux.11!!(remember)
-//              let ensure_non_empty = RLP.aux.12(rlp.value, break_and1)
-//              replace X with mirror(ensure_non_empty) in Maybe.default(RLP,List.head(RLP,X((bytes) List(RLP),List.nil(RLP),(bytes.head) (bytes.tail) U8.ltn(bytes.head,Nat.to_u8(128),() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,bytes.head,List.nil(U8))),RLP.decode.many(bytes.tail)),U8.ltn(bytes.head,Nat.to_u8(192),() List(RLP),RLP.split.length(128,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
-//              replace X with mirror(break_and2) in Maybe.default(RLP,List.head(RLP,X(() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),rlp.value),List.nil(U8))),RLP.decode.many(List.nil(U8))),U8.ltn(List.head_with_default(U8,Nat.to_u8(0),rlp.value),Nat.to_u8(192),() List(RLP),RLP.split.length(128,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,rlp.value,() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail)))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
-//              let list_length_1 = RlP.new_aux.list_length_1_identity(U8, rlp.value, Nat.to_u8(0), break_and1)
-//              replace X with mirror(list_length_1) in RLP.data(X) == RLP.data(rlp.value)
-//              refl
-//            false : 
-//              let list_u8 = Equal.refl<Bytes, RLP.encode.length(128,List.length(U8,rlp.value))>
-//              case RLP.encode.length(128,List.length(U8,rlp.value)) as X with list_u8 : Equal(Bytes, RLP.encode.length(128,List.length(U8,rlp.value)), X) {
-//                nil : 
-//                 let absurd_rlp_length = RLP.aux.17(List.length(U8,rlp.value))
-//                 Empty.absurd!(absurd_rlp_length(list_u8))
-//                cons : 
-//                  let u8_le_128 = RLP.aux.19(List.length(U8,rlp.value), X.head, X.tail, list_u8)
-//                  replace X with mirror(u8_le_128) in Maybe.default(RLP,List.head(RLP, X(() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,X.head,List.nil(U8))),RLP.decode.many(List.concat(U8,X.tail,rlp.value))),U8.ltn(X.head,Nat.to_u8(192),() List(RLP),RLP.split.length(128,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail)))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
-//                  let u8_le_192 = RLP.aux.20(List.length(U8,rlp.value) X.head, X.tail, list_u8)
-//                  replace X with mirror(u8_le_192) in Maybe.default(RLP,List.head(RLP, X(() List(RLP),RLP.split.length(128,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,X.head,List.concat(U8,X.tail,rlp.value)),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))),RLP.data(List.nil(U8))) == RLP.data(rlp.value)
-//                  let e3 = RLP.aux.15.sym(X.head, X.tail)
-//     
-//                  ?a-282-
-//              } : RLP.decode(List.concat(U8,X,rlp.value)) == RLP.data(rlp.value)
-//              
-//          } : RLP.decode(X(() List(U8),rlp.value,List.concat(U8,RLP.encode.length(128,List.length(U8,rlp.value)),rlp.value))) == RLP.data(rlp.value)
-          //?data
         node:
-          because_i_said_so!
-//          let ind = RLP.encode_identity(rlps.head.child, ?todo.0)
-//          case Nat.lte(List.length(U8,RLP.encode.many(rlps.head.child)), 55) {
-//            true:
-//              let recover_prefix = ?todo.5 :: Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child))) == U8.to_nat(Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))))
-//              case recover_prefix {
-//                refl:
-//                  let lemma = RLP.aux.split.2(RLP.encode.many(rlps.head.child), RLP.encode.many(rlps.tail), ?todo.2)
-//                  case lemma {
-//                    refl:
-//                      let ind_right = RLP.encode_identity(rlps.tail, ?todo.7)
-//                      let ind_left  = apply(RLP.node, RLP.encode_identity(rlps.head.child, ?todo.8))
-//                      Equal.vapply(2)!!!!(ind_right)!!!(ind_left, List.cons(RLP))
-//                  }: lemma.b(() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))) == _
-//
-//              }: Nat.lte(    recover_prefix.b    ,127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.nil(U8))),RLP.decode.many(List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail)))),Nat.lte(    recover_prefix.b    ,191,() List(RLP),RLP.split.length(128,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
-//
-//            false:
-//              let recover_prefix = ?todo.1 :: Nat.add(248, List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))) == U8.to_nat(Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))))
-//              case recover_prefix {
-//                refl:
-//                  let lemma = RLP.aux.split.3(RLP.encode.many(rlps.head.child), RLP.encode.many(rlps.tail), ?todo.2, ?todo.3)
-//                  case lemma {
-//                    refl:
-//                      let ind_right = RLP.encode_identity(rlps.tail, ?todo.4)
-//                      let ind_left  = apply(RLP.node, RLP.encode_identity(rlps.head.child, ?todo.5))
-//                      Equal.vapply(2)!!!!(ind_right)!!!(ind_left, List.cons(RLP))
-//
-//                  }: lemma.b( () List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
-//
-//              }: Nat.lte(    recover_prefix.b,    127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),List.nil(U8))),RLP.decode.many(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail)))),Nat.lte(    recover_prefix.b    ,191,() List(RLP),RLP.split.length(128,List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
-//
-//          }: RLP.decode.many(List.concat(U8,List.concat(U8,    self(    () Bytes,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.nil(U8)),List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
+          let ind = RLP.encode_identity(rlps.head.child, ?todo.0)
+          case Nat.lte(List.length(U8,RLP.encode.many(rlps.head.child)), 55) {
+            true:
+              let recover_prefix = ?todo.5 :: Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child))) == U8.to_nat(Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))))
+              case recover_prefix {
+                refl:
+                  let lemma = RLP.aux.split.2(RLP.encode.many(rlps.head.child), RLP.encode.many(rlps.tail), ?todo.2)
+                  case lemma {
+                    refl:
+                      let ind_right = RLP.encode_identity(rlps.tail, ?todo.7)
+                      let ind_left  = apply(RLP.node, RLP.encode_identity(rlps.head.child, ?todo.8))
+                      Equal.vapply(2)!!!!(ind_right)!!!(ind_left, List.cons(RLP))
+                  }: lemma.b(() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))) == _
+
+              }: Nat.lte(    recover_prefix.b    ,127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.nil(U8))),RLP.decode.many(List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail)))),Nat.lte(    recover_prefix.b    ,191,() List(RLP),RLP.split.length(128,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
+
+            false:
+              let recover_prefix = ?todo.1 :: Nat.add(248, List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))) == U8.to_nat(Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))))
+              case recover_prefix {
+                refl:
+                  let lemma = RLP.aux.split.3(RLP.encode.many(rlps.head.child), RLP.encode.many(rlps.tail), ?todo.2, ?todo.3)
+                  case lemma {
+                    refl:
+                      let ind_right = RLP.encode_identity(rlps.tail, ?todo.4)
+                      let ind_left  = apply(RLP.node, RLP.encode_identity(rlps.head.child, ?todo.5))
+                      Equal.vapply(2)!!!!(ind_right)!!!(ind_left, List.cons(RLP))
+
+                  }: lemma.b( () List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
+
+              }: Nat.lte(    recover_prefix.b,    127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),List.nil(U8))),RLP.decode.many(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail)))),Nat.lte(    recover_prefix.b    ,191,() List(RLP),RLP.split.length(128,List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
+
+          }: RLP.decode.many(List.concat(U8,List.concat(U8,    self(    () Bytes,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.nil(U8)),List.cons(U8,Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))))),Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
       }!
   }!
-
-
-  // let pf = RLP.encode_identity.go(rlp, [])
-  // let e0 = RLP.aux.16(RLP.encode(rlp))
-  // let e1 = pf :: rewrite X in RLP.decoder(X) == Pair.new(Bytes,RLP,List.nil(U8),rlp) with e0
-  // replace X with mirror(e1) in X((got) RLP,(got.fst) (got.snd) got.snd) == rlp
-  // refl
-
-// RLP.encode_identity.go(rlp: RLP, bts: Bytes): Equal<Pair<Bytes,RLP>, RLP.decoder(List.concat<U8>(RLP.encode(rlp),bts)), Pair.new<Bytes,RLP>(bts,rlp)>
-//   let ref_0 = RLP.encode_length_identity.go
-//   let ref_1 = RLP.encode_repeat_identity.go
-//   case rlp {
-//     data:
-//       let e0 = Equal.refl<Bool, Bool.and(Nat.eql(List.length(U8,rlp.value),1),U8.ltn(List.head_with_default(U8,Nat.to_u8(0),rlp.value),Nat.to_u8(128)))>
-//       case Bool.and(Nat.eql(List.length(U8,rlp.value),1),U8.ltn(List.head_with_default(U8,Nat.to_u8(0),rlp.value),Nat.to_u8(128))) as X
-//       with e0 : Equal<Bool, Bool.and(Nat.eql(List.length(U8,rlp.value),1),U8.ltn(List.head_with_default(U8,Nat.to_u8(0),rlp.value),Nat.to_u8(128))), X> {
-//         true:
-//           let e1 = RLP.aux.10(_, _, e0)
-//           let e2 = RLP.aux.11(_, _, e0)
-//           let e3 = RLP.aux.12(rlp.value, e1)
-//           replace X with mirror(e3) in List.concat(U8,X,bts,(bytes) Pair(Bytes,RLP),Pair.new(Bytes,RLP,List.nil(U8),RLP.data(List.nil(U8))),(bytes.head) (bytes.tail) U8.ltn(bytes.head,Nat.to_u8(128),() Pair(Bytes,RLP),Pair.new(List(U8),RLP,List.tail(U8,List.concat(U8,rlp.value,bts)),RLP.data(List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),List.concat(U8,rlp.value,bts)),List.nil(U8)))),U8.ltn(bytes.head,Nat.to_u8(192),() Pair(Bytes,RLP),RLP.decoder.length(128,List.concat(U8,rlp.value,bts),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))),RLP.decoder.length(192,List.concat(U8,rlp.value,bts),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child))))))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//           replace X with mirror(e2) in X(() Pair(Bytes,RLP),Pair.new(List(U8),RLP,List.tail(U8,List.concat(U8,rlp.value,bts)),RLP.data(List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),List.concat(U8,rlp.value,bts)),List.nil(U8)))),U8.ltn(List.head_with_default(U8,Nat.to_u8(0),rlp.value),Nat.to_u8(192),() Pair(Bytes,RLP),RLP.decoder.length(128,List.concat(U8,rlp.value,bts),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))),RLP.decoder.length(192,List.concat(U8,rlp.value,bts),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child)))))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//           let e4 = RLP.aux.13(rlp.value, bts, e1)
-//           replace X with mirror(e4) in Pair.new(List(U8),RLP,X,RLP.data(List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),List.concat(U8,rlp.value,bts)),List.nil(U8)))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//           let e5 = RLP.aux.14(rlp.value, bts, e1)
-//           replace X with mirror(e5) in Pair.new(List(U8),RLP,bts,RLP.data(X)) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//           refl
-//         false:
-//           let e1 = Equal.refl<Bytes, RLP.encode.length(128,List.length(U8,rlp.value))>
-//           case RLP.encode.length(128,List.length(U8,rlp.value)) as X
-//           with e1 : Equal<Bytes, RLP.encode.length(128,List.length(U8,rlp.value)), X> {
-//             nil:
-//               let e2 = RLP.aux.17(List.length(U8,rlp.value))
-//               let e3 = e2(e1)
-//               Empty.absurd!(e3)
-//             cons:
-//               let e2 = RLP.aux.19(List.length(U8,rlp.value), X.head, X.tail, e1)
-//               replace X with mirror(e2) in X(() Pair(Bytes,RLP),Pair.new(List(U8),RLP,List.tail(U8,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,rlp.value),bts))),RLP.data(List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,rlp.value),bts))),List.nil(U8)))),U8.ltn(X.head,Nat.to_u8(192),() Pair(Bytes,RLP),RLP.decoder.length(128,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,rlp.value),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))),RLP.decoder.length(192,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,rlp.value),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child)))))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//               let e3 = RLP.aux.20(List.length(U8,rlp.value), X.head, X.tail, e1)
-//               replace X with mirror(e3) in X(() Pair(Bytes,RLP),RLP.decoder.length(128,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,rlp.value),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))),RLP.decoder.length(192,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,rlp.value),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child))))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//               let e4 = RLP.aux.15.sym(X.head, X.tail, rlp.value, bts)
-//               replace X with e4 in RLP.decoder.length(128,X,() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//               replace X with e1 in RLP.decoder.length(128,List.concat(U8,X,List.concat(U8,rlp.value,bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//               let e5 = RLP.encode_length_identity.go(128, List.length<U8>(rlp.value), List.concat(U8,rlp.value,bts), Either.left!!(refl))
-//               replace X with mirror(e5) in X(() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//               let e6 = RLP.aux.8(rlp.value, bts)
-//               replace X with mirror(e6) in X(() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value))) == Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))
-//               refl
-//           }: Equal<Pair<Bytes,RLP>, RLP.decoder(List.concat(U8,List.concat(U8,X,rlp.value),bts)), Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))>
-//       } : Equal<Pair<Bytes,RLP>, RLP.decoder(List.concat(U8,X(() List(U8),rlp.value,List.concat(U8,RLP.encode.length(128,List.length(U8,rlp.value)),rlp.value)),bts)), Pair.new(Bytes,RLP,bts,RLP.data(rlp.value))>
-//     node:
-//       let e0 = refl
-//       case RLP.encode.length(192,List.length(RLP,rlp.child)) as X
-//       with e0 : Equal<Bytes, RLP.encode.length(192,List.length(RLP,rlp.child)), X> {
-//         nil:
-//           let e1 = RLP.aux.18(List.length(RLP,rlp.child))
-//           let e2 = e1(e0)
-//           Empty.absurd!(e2)
-//         cons:
-//           let e1 = RLP.aux.21(List.length(RLP,rlp.child), X.head, X.tail, e0)
-//           replace X with mirror(e1) in X(() Pair(Bytes,RLP),Pair.new(List(U8),RLP,List.tail(U8,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,RLP.encode.many(rlp.child)),bts))),RLP.data(List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,RLP.encode.many(rlp.child)),bts))),List.nil(U8)))),U8.ltn(X.head,Nat.to_u8(192),() Pair(Bytes,RLP),RLP.decoder.length(128,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,RLP.encode.many(rlp.child)),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))),RLP.decoder.length(192,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,RLP.encode.many(rlp.child)),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child)))))) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
-//           let e2 = RLP.aux.22(List.length(RLP,rlp.child), X.head, X.tail, e0)
-//           replace X with mirror(e2) in X(() Pair(Bytes,RLP),RLP.decoder.length(128,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,RLP.encode.many(rlp.child)),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(U8,RLP.decoder.byte,count,bytes,() Pair(Bytes,RLP),(bytes) (value) Pair.new(Bytes,RLP,bytes,RLP.data(value)))),RLP.decoder.length(192,List.cons(U8,X.head,List.concat(U8,List.concat(U8,X.tail,RLP.encode.many(rlp.child)),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child))))) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
-//           let e3 = RLP.aux.15.sym(X.head, X.tail, RLP.encode.many(rlp.child), bts)
-//           replace X with e3 in RLP.decoder.length(192,X,() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child)))) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
-//           replace X with e0 in RLP.decoder.length(192,List.concat(U8,X,List.concat(U8,RLP.encode.many(rlp.child),bts)),() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child)))) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
-//           let e4 = RLP.encode_length_identity.go(192, List.length(RLP,rlp.child), List.concat(U8,RLP.encode.many(rlp.child),bts), Either.right!!(refl))
-//           replace X with mirror(e4) in X(() Pair(Bytes,RLP),(bytes) (count) RLP.decoder.repeat(RLP,RLP.decoder,count,bytes,() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child)))) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
-//           let e5 = RLP.encode_repeat_identity.go<RLP>(RLP.encode, RLP.decoder, RLP.encode_identity.go, rlp.child, bts)
-//           replace X with mirror(e5) in X(() Pair(Bytes,RLP),(bytes) (child) Pair.new(Bytes,RLP,bytes,RLP.node(child))) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
-//           refl
-//       } : RLP.decoder(List.concat(U8,List.concat(U8,X,RLP.encode.many(rlp.child)),bts)) == Pair.new(Bytes,RLP,bts,RLP.node(rlp.child))
-//   }!
