@@ -1,0 +1,2 @@
+Refinement.symmetric_difference<T: Type>(A: Refinement<T>, B: Refinement<T>): Refinement<T>
+    Refinement.union<T>(Refinement.difference<T>(A, B), Refinement.difference<T>(B, A))

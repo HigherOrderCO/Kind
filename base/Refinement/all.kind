@@ -1,0 +1,2 @@
+Refinement.all<A: Type>: Refinement<A>
+    (a: A) Unit

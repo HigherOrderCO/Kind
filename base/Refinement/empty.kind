@@ -1,0 +1,2 @@
+Refinement.empty<A: Type>: Refinement<A>
+    (a: A) Empty
