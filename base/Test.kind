@@ -1,8 +1,7 @@
 Test: _
-  Kindelia.hash_code("oi tudo bem? aaa", 0)
-
-Kindelia.hash_code(str: String, hash: U32): U32
-  case str {
-    nil: hash
-    cons: Kindelia.hash_code(str.tail, (U32.shl(hash, 5) - hash) + U16.to_u32(str.head))
-  }
+  let red = Col32.new(255, 0, 0, 255)
+  let hsl = Col32.Hsl.to(red)
+  let string_hsl = F64.show(hsl@h) | "   " | F64.show(hsl@s) | "   " | F64.show(hsl@l)
+  let new_red = Col32.Hsl.from(hsl)
+  let string_rgb = U32.show(Col32.r(new_red)) | "   " | U32.show(Col32.g(new_red)) | "   " | U32.show(Col32.b(new_red))
+  string_rgb

@@ -1,0 +1,3 @@
+HSL.change_hue(hsl: HSL, mod: U32 -> U32): HSL
+  let new_hsl = hsl@h <- mod(hsl@h)
+  new_hsl

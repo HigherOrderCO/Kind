@@ -1,0 +1,39 @@
+HSL.to_col32(hsl: HSL): Col32
+  let h = U32.to_f64(hsl@h) / 255
+  let s = hsl@s
+  let l = hsl@l
+
+  if (s =? 0) then
+    let l = F64.to_u32(l)
+    Col32.new(l, l, l, 255)
+    else 
+
+    let q = if l <? 0.5 then  l * (1 + s) else l + s - (l * s)
+    let p = (2.0 * l)- q
+
+    let r = Hsl.to_col32.hue_to_rgb(p, q, h + 0.33)
+    let g = Hsl.to_col32.hue_to_rgb(p, q, h)
+    let b = Hsl.to_col32.hue_to_rgb(p, q, h - 0.33)
+    Col32.new(F64.to_u32(r * 255), F64.to_u32(g * 255), F64.to_u32(b * 255), 255)
+
+Hsl.to_col32.hue_to_rgb(p: F64, q: F64, t: F64): F64
+  let t = 
+    if t <? 0 then
+      t + 1 
+    else 
+      t
+  let t = 
+    if t >? 1 then
+      t - 1  
+    else 
+      t
+  if t <? 0.17 then
+    p + (q - p) * 6 * t
+  else
+    if t <? 0.5 then
+      q
+    else
+      if t <? 0.67 then
+        p + (q - p) * (0.67 - t) * 6
+      else
+        p
