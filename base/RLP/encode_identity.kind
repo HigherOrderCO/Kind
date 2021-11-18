@@ -15,14 +15,28 @@ RLP.encode_identity(
       case rlps.head {
         data:
           let split_conditions = Bool.and.split(Nat.eql(List.length!(rlps.head.value),1), Nat.ltn(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 128))
-          case Bool.and(Nat.eql(List.length!(rlps.head.value),1), Nat.ltn(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 128)) with split_conditions {
+          def condition =Bool.and(Nat.eql(List.length!(rlps.head.value),1), Nat.ltn(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 128))
+          case condition with split_conditions {
             true:
-              use conditions = split_conditions(refl)
-              ?true
+              let conditions = split_conditions(refl)
+              case rlps.head.value with conditions {
+                cons:
+                  case rlps.head.value.tail with conditions {
+                    nil:
+                      ?nil-70-10
+                    cons:
+                      open conditions
+                      Empty.absurd!(Bool.false_neq_true(conditions.fst))
+                  }! :: RLP.decode.many(List.concat(U8,List.cons(U8,rlps.head.value.head,rlps.head.value.tail),RLP.encode.many(rlps.tail))) == List.cons(RLP,RLP.data(List.cons(U8,rlps.head.value.head,rlps.head.value.tail)),rlps.tail)
+                  //?true-278
+                nil:
+                  open conditions
+                  Empty.absurd!(Bool.false_neq_true(conditions.fst))
+              }!
             false:
-              ?false
-          }!
-          //?data-22-86-
+              ?false-278
+          }! :: RLP.decode.many(List.concat(U8,   condition(    () List(U8),rlps.head.value,List.concat(U8,RLP.encode.length(128,List.length(U8,rlps.head.value)),rlps.head.value)),RLP.encode.many(rlps.tail))) == List.cons(RLP,RLP.data(rlps.head.value),rlps.tail)
+//          ?data-22-86
 //          let remember = Equal.refl(Bool, Bool.and(Nat.eql(List.length!(rlp.value),1), U8.ltn(List.head_with_default!(0#8,rlp.value), 128#8)))
 //          case Bool.and(Nat.eql(List.length!(rlp.value),1), U8.ltn(List.head_with_default!(0#8,rlp.value), 128#8)) as X
 //                with remember : Equal(Bool, Bool.and(Nat.eql(List.length!(rlp.value),1), U8.ltn(List.head_with_default!(0#8,rlp.value), 128#8)), X)
