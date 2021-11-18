@@ -1,62 +1,65 @@
 // This function is fully expanded for max performance
 Bits.hex.encode(x: Bits): String
+  Bits.hex.encode.go("", x)
+
+Bits.hex.encode.go(acc: String, x: Bits): String
   case x {
-    e: ""
+    e: acc
     o: case x.pred as x {
-      e: "0"
+      e: acc|"0"
       o: case x.pred as x {
-        e: "0"
+        e: acc|"0"
         o: case x.pred as x {
-          e: "0"
-          o: "0" | Bits.hex.encode(x.pred)
-          i: "8" | Bits.hex.encode(x.pred)
+          e: acc|"0"
+          o: Bits.hex.encode.go(acc|"0", x.pred)
+          i: Bits.hex.encode.go(acc|"8", x.pred)
         }
         i: case x.pred as x {
-          e: "4"
-          o: "4" | Bits.hex.encode(x.pred)
-          i: "c" | Bits.hex.encode(x.pred)
+          e: acc|"4"
+          o: Bits.hex.encode.go(acc|"4", x.pred)
+          i: Bits.hex.encode.go(acc|"c", x.pred)
         }
       }
       i: case x.pred as x {
-        e: "2"
+        e: acc|"2"
         o: case x.pred as x {
-          e: "2" 
-          o: "2" | Bits.hex.encode(x.pred)
-          i: "a" | Bits.hex.encode(x.pred)
+          e: acc|"2" 
+          o: Bits.hex.encode.go(acc|"2", x.pred)
+          i: Bits.hex.encode.go(acc|"a", x.pred)
         }
         i: case x.pred as x {
-          e: "6"
-          o: "6" | Bits.hex.encode(x.pred)
-          i: "e" | Bits.hex.encode(x.pred)
+          e: acc|"6"
+          o: Bits.hex.encode.go(acc|"6", x.pred)
+          i: Bits.hex.encode.go(acc|"e", x.pred)
         }
       }
     }
     i: case x.pred as x {
-      e: "1"
+      e: acc|"1"
       o: case x.pred as x {
-        e: "1"
+        e: acc|"1"
         o: case x.pred as x {
-          e: "1"
-          o: "1" | Bits.hex.encode(x.pred)
-          i: "9" | Bits.hex.encode(x.pred)
+          e: acc|"1"
+          o: Bits.hex.encode.go(acc|"1", x.pred)
+          i: Bits.hex.encode.go(acc|"9", x.pred)
         }
         i: case x.pred as x {
-          e: "5"
-          o: "5" | Bits.hex.encode(x.pred)
-          i: "d" | Bits.hex.encode(x.pred)
+          e: acc|"5"
+          o: Bits.hex.encode.go(acc|"5", x.pred)
+          i: Bits.hex.encode.go(acc|"d", x.pred)
         }
       }
       i: case x.pred as x {
-        e: "3"
+        e: acc|"3"
         o: case x.pred as x {
-          e: "3" 
-          o: "3" | Bits.hex.encode(x.pred)
-          i: "b" | Bits.hex.encode(x.pred)
+          e: acc|"3" 
+          o: Bits.hex.encode.go(acc|"3", x.pred)
+          i: Bits.hex.encode.go(acc|"b", x.pred)
         }
         i: case x.pred as x {
-          e: "7"
-          o: "7" | Bits.hex.encode(x.pred)
-          i: "f" | Bits.hex.encode(x.pred)
+          e: acc|"7"
+          o: Bits.hex.encode.go(acc|"7", x.pred)
+          i: Bits.hex.encode.go(acc|"f", x.pred)
         }
       }
     }

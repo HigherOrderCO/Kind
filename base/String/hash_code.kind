@@ -1,0 +1,10 @@
+// From https://stackoverflow.com/a/8831937/1031791
+
+String.hash_code(str: String): U32
+  String.hash_code.go(str, 0)
+
+String.hash_code.go(str: String, hash: U32): U32
+  case str {
+    nil: hash
+    cons: String.hash_code.go(str.tail, (U32.shl(hash, 5) - hash) + U16.to_u32(str.head))
+  }

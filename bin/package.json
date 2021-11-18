@@ -9,6 +9,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "formcore-js": "^0.1.92"
+    "formcore-js": "^0.1.95"
   }
 }

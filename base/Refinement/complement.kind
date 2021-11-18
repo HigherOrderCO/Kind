@@ -1,0 +1,2 @@
+Refinement.complement<T: Type>(A: Refinement<T>): Refinement<T>
+    (a: T) Not(A(a))

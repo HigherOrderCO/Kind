@@ -1,0 +1,10 @@
+Ether.RLP.show_list_tree(l: List<Ether.RLP.Tree<Bits>>): String
+  Ether.RLP.show_list_tree.aux(l, "")
+
+Ether.RLP.show_list_tree.aux(l: List<Ether.RLP.Tree<Bits>>, aux: String): String
+  case l {
+    nil : aux
+    cons: 
+      let s = aux | Ether.RLP.show_tree(l.head)
+      Ether.RLP.show_list_tree.aux(l.tail, s)
+  }

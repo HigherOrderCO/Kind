@@ -1,0 +1,22 @@
+Bits.to_nat.identity.aux0(x: Bits): Bits.to_nat(Bits.inc(x)) == Nat.succ(Bits.to_nat(x))
+  case x {
+    e: refl
+    o: refl
+    i: apply(Nat.double, Bits.to_nat.identity.aux0(x.pred))
+  }!
+
+Bits.to_nat.identity.aux1(x: Nat): Nat.to_bits(Nat.succ(x)) == Bits.inc(Nat.to_bits(x))
+  case x {
+    zero: refl
+    succ: apply(Bits.inc, Bits.to_nat.identity.aux1(x.pred))
+  }!
+
+Bits.to_nat.identity(n: Nat): Equal<Nat, n, Bits.to_nat(Nat.to_bits(n))>
+  case n {
+    zero:
+      refl
+    succ: 
+      rewrite X in Nat.succ(n.pred) == Bits.to_nat(X) with Bits.to_nat.identity.aux1(n.pred)
+      rewrite X in Nat.succ(n.pred) == X with Bits.to_nat.identity.aux0(Nat.to_bits(n.pred))
+      apply(Nat.succ, Bits.to_nat.identity(n.pred))
+  }!

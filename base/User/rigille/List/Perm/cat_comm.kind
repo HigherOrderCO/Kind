@@ -4,11 +4,11 @@ User.rigille.List.Perm.cat_comm<A: Type>(
 ): User.rigille.List.Perm<A>(ys ++ xs, xs ++ ys)
   def Perm = User.rigille.List.Perm<A>
   case xs {
-    nil: lem = User.rigille.List.Perm.refl<A>(ys)
+    nil: let lem = User.rigille.List.Perm.refl<A>(ys)
          let calc = User.rigille.List.cat_l_nil!(ys)
          let qed = lem :: rewrite X in (Perm(X, ys)) with calc
          qed
-    cons: ind = User.rigille.List.Perm.cat_comm<A>(xs.tail, ys)
+    cons: let ind = User.rigille.List.Perm.cat_comm<A>(xs.tail, ys)
           let lem_right = User.rigille.List.Perm.skip<A>(xs.head, _, _, ind)
           let lem_left = User.rigille.List.Perm.front_to_back<A>(xs.head, ys)
           let lem_left = User.rigille.List.Perm.push_tail<A>(_, _, xs.tail, lem_left)

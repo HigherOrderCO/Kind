@@ -1,6 +1,6 @@
 {
   "name": "kind-lang",
-  "version": "1.0.105",
+  "version": "1.0.113",
   "description": "Kind-Lang in JavaScript",
   "main": "src/kind.js",
   "scripts": {
@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/uwu-tech/kind#readme",
   "dependencies": {
-    "formcore-js": "^0.1.92"
+    "formcore-js": "^0.1.95"
   }
 }

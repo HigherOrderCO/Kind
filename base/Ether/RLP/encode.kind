@@ -11,7 +11,10 @@ Ether.RLP.encode(tree : Ether.RLP.Tree<Bits>) : Bits
          let bytes = Bits.e
          for item in tree.value with bytes :
            Bits.concat(bytes, Ether.RLP.encode(item))
-         let bytes_size = Ether.Bits.get_bytes_size(bytes)
+         let bytes_size = if Bits.eql(bytes, Bits.e) then 
+                            0
+                          else
+                            Ether.Bits.get_bytes_size(bytes)
          Bits.concat.go(Ether.RPL.proof.encode_length(bytes_size, 192), bytes)
   }
 
@@ -64,18 +67,20 @@ Ether.RLP.encode.read(bits : Bits) : Pair<String, Bits>
     Ether.RLP.Constants.bits_192 :
      let content_length = (Bits.to_nat(byte_prefix) - 183) * 8
      let {head, rest} = Bits.break(content_length, rest)
-     let length = Ether.RLP.encode.read.binary(head)
-     let {prefix, rest} = Bits.break(length*8, rest)
+     let length = Ether.RLP.encode.read.binary(head) * 8
+     let {prefix, rest} = Bits.break(length, rest)
      {String.reverse(Bits.hex.encode(byte_prefix)) | String.reverse(Bits.hex.encode(head))
        | String.reverse(Bits.hex.encode(prefix)), rest}
     Ether.RLP.Constants.bits_248 : 
      let content_length = (Bits.to_nat(byte_prefix) - 192) * 8
-     let {xs, rest} = Ether.RLP.encode.read_list(rest)
+     let {content, rest} = Ether.Bits.break(content_length, rest)
+     let {xs, _} = Ether.RLP.encode.read_list(content)
      {String.reverse(Bits.hex.encode(byte_prefix)) | xs, rest}
     Ether.RLP.Constants.bits_255 : 
       let content_length = (Bits.to_nat(byte_prefix) - 247) * 8    
       let {head, rest} = Bits.break(content_length, rest)
-      let length = Ether.RLP.encode.read.binary(head)
-      let {xs, rest} = Ether.RLP.encode.read_list(rest)
-      {String.reverse(Bits.hex.encode(byte_prefix)) | xs, rest}
+      let length = Ether.RLP.encode.read.binary(head) * 8
+      let {content, rest} = Ether.Bits.break(length, rest)
+      let {xs, _} = Ether.RLP.encode.read_list(content)
+      {String.reverse(Bits.hex.encode(byte_prefix)) | String.reverse(Bits.hex.encode(head)) | xs, rest}
   } default {"", Bits.e}

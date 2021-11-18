@@ -1,0 +1,32 @@
+RLP.encode_length_identity.go(
+  add: Nat
+  len: Nat
+  bts: Bytes
+  pf0: Either<Equal<Nat, add, 128>, Equal<Nat, add, 192>>
+): Equal<Pair<Bytes,Nat>, RLP.decoder.length(add,List.concat<U8>(RLP.encode.length(add,len),bts)), Pair.new<Bytes,Nat>(bts,len)>
+  let e0 = refl
+  case Nat.ltn(len,56) as X with e0 : Equal<Bool, Nat.ltn(len,56), X> {
+    true:
+      let e1 = RLP.aux.0(add, len, pf0)
+      let e2 = RLP.aux.1(add, len, e0)
+      let e3 = RLP.aux.2(Nat.add(add,len), e1, e2)
+      replace X with mirror(e3) in RLP.decoder.length(add,List.concat(U8,X,bts)) == Pair.new(Bytes,Nat,bts,len)
+      let e4 = RLP.aux.3(add, len, e0)
+      replace X with mirror(e4) in X(() Pair(Bytes,Nat),Pair.new(List(U8),Nat,List.concat(U8,List.nil(U8),bts),Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(add,len),U8.inc,U8.zero),List.nil(U8))),add)),RLP.decoder.repeat(U8,RLP.decoder.byte,Nat.sub(Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(add,len),U8.inc,U8.zero),List.nil(U8))),add),56),List.concat(U8,List.nil(U8),bts),() Pair(Bytes,Nat),(bytes) (length) Pair.new(Bytes,Nat,bytes,Bytes.to_nat(length)))) == Pair.new(Bytes,Nat,bts,len)
+      let e5 = RLP.aux.4(add, len, e0)
+      replace X with mirror(e5) in Pair.new(List(U8),Nat,bts,X) == Pair.new(Bytes,Nat,bts,len)
+      refl
+    false:
+      let e1 = RLP.aux.5(add, len)
+      let e2 = RLP.aux.2(Nat.add(56,Nat.add(add,RLP.needed_bytes(len))), refl, e1)
+      replace X with mirror(e2) in RLP.decoder.length(add,List.concat(U8,List.concat(U8,X,Bytes.from_nat(len)),bts)) == Pair.new(Bytes,Nat,bts,len)
+      let e3 = RLP.aux.6(add, len)
+      replace X with mirror(e3) in X(() Pair(Bytes,Nat),Pair.new(List(U8),Nat,List.concat(U8,List.concat(U8,List.nil(U8),Bytes.from_nat(len)),bts),Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(56,Nat.add(add,RLP.needed_bytes(len))),U8.inc,U8.zero),List.nil(U8))),add)),RLP.decoder.repeat(U8,RLP.decoder.byte,Nat.sub(Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(56,Nat.add(add,RLP.needed_bytes(len))),U8.inc,U8.zero),List.nil(U8))),add),56),List.concat(U8,List.concat(U8,List.nil(U8),Bytes.from_nat(len)),bts),() Pair(Bytes,Nat),(bytes) (length) Pair.new(Bytes,Nat,bytes,Bytes.to_nat(length)))) == Pair.new(Bytes,Nat,bts,len)
+      let e4 = RLP.aux.7(add, len)
+      replace X with mirror(e4) in RLP.decoder.repeat(U8,RLP.decoder.byte,X,List.concat(U8,List.concat(U8,List.nil(U8),Bytes.from_nat(len)),bts),() Pair(Bytes,Nat),(bytes) (length) Pair.new(Bytes,Nat,bytes,Bytes.to_nat(length))) == Pair.new(Bytes,Nat,bts,len)
+      let e5 = RLP.aux.8(Bytes.from_nat(len), bts)
+      replace X with mirror(e5) in X(() Pair(Bytes,Nat),(bytes) (length) Pair.new(Bytes,Nat,bytes,Bytes.to_nat(length))) == Pair.new(Bytes,Nat,bts,len)
+      let e6 = RLP.aux.9(len)
+      replace X with mirror(e6) in Pair.new(Bytes,Nat,bts,X) == Pair.new(Bytes,Nat,bts,len)
+      refl
+  }: RLP.decoder.length(add,List.concat(U8,X(() Bytes,Bytes.from_nat(Nat.add(add,len)),List.concat(U8,Bytes.from_nat(Nat.add(56,Nat.add(add,RLP.needed_bytes(len)))),Bytes.from_nat(len))),bts)) == Pair.new(Bytes,Nat,bts,len)

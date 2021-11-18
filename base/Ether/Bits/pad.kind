@@ -108,7 +108,7 @@ Ether.Bits.mul_injective(x : Nat, y : Nat, n : Nat, H : Nat.mul(Nat.succ(n), x) 
     }!
   }!
 
-  Ether.Bits.succ_pad_nat(x : Bits) : 
+Ether.Bits.succ_pad_nat(x : Bits) : 
   Bits.to_nat(Bits.trim(Bits.length(x), x)) == Bits.to_nat(x)
   case x {
     e : refl 

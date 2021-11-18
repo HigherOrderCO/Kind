@@ -1,0 +1,184 @@
+// These sub-theorems were not proven yet!
+// Most of them are simple, and should be finished over the next days
+
+// TODO: include `a <= 192`
+RLP.aux.0(
+  add: Nat
+  len: Nat
+  pf0: Either<Equal<Nat, add, 128>, Equal<Nat, add, 192>>
+): Nat.ltn(0,Nat.add(add,len)) == Bool.true
+  RLP.aux.0(add, len, pf0)
+
+// TODO: include `a <= 192`
+RLP.aux.1(
+  a: Nat
+  n: Nat
+  e: Equal<Bool, Nat.ltn(n,56), true>
+): Equal<Bool, Nat.ltn(Nat.add(a,n), 256), true>
+  RLP.aux.1(a, n, e)
+
+RLP.aux.2(
+  n: Nat
+  e0: Equal<Bool, Nat.ltn(0, n), true>
+  e1: Equal<Bool, Nat.ltn(n, 256), true>
+): Equal<Bytes, Bytes.from_nat(n), [Nat.apply<U8>(n, U8.inc, U8.zero)]>
+  RLP.aux.2(n, e0, e1)
+
+// TODO: include `a <= 192`
+RLP.aux.3(
+  a: Nat
+  n: Nat
+  e: Equal<Bool, Nat.ltn(n,56), true>
+): Equal<Bool, Nat.ltn(Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(a,n),U8.inc,U8.zero),List.nil(U8))),a),56), true>
+  RLP.aux.3(a, n, e)
+
+// TODO: include `a <= 192`
+RLP.aux.4(
+  a: Nat
+  n: Nat
+  e: Equal<Bool, Nat.ltn(n,56), true>
+): Equal<Nat, Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(a,n),U8.inc,U8.zero),List.nil(U8))),a), n>
+  RLP.aux.4(a, n, e)
+
+// TODO: include `a <= 192`
+// TODO: include `n < RLP.max_len` (otherwise this is actually false)
+RLP.aux.5(
+  a: Nat
+  n: Nat
+): Equal<Bool, Nat.ltn(Nat.add(56, Nat.add(a, RLP.needed_bytes(n))), 256), true>
+  RLP.aux.5(a, n)
+ 
+// TODO: include `a <= 192`
+RLP.aux.6(
+  a: Nat
+  n: Nat
+): Equal<Bool, Nat.ltn(Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(56,Nat.add(a,RLP.needed_bytes(n))),U8.inc,U8.zero),List.nil(U8))),a),56), false>
+  RLP.aux.6(a, n)
+  
+// TODO: include `a <= 192`
+RLP.aux.7(
+  a: Nat
+  n: Nat
+): Equal<Nat, Nat.sub(Nat.sub(Bytes.to_nat(List.cons(U8,Nat.apply(U8,Nat.add(56,Nat.add(a,RLP.needed_bytes(n))),U8.inc,U8.zero),List.nil(U8))),a),56), List.length(U8,Bytes.from_nat(n))>
+  RLP.aux.7(a, n)
+
+RLP.aux.8(
+  xs: Bytes
+  ys: Bytes
+): Equal<Pair<Bytes,Bytes>, RLP.decoder.repeat<U8>(RLP.decoder.byte,List.length(U8,xs),List.concat<U8>(xs,ys)), Pair.new!!(ys, xs)>
+  RLP.aux.8(xs,ys)
+
+RLP.aux.9(
+  n: Nat
+): Equal<Nat, Bytes.to_nat(Bytes.from_nat(n)), n>
+  RLP.aux.9(n)
+
+RLP.aux.10(
+  a: Bool
+  b: Bool
+  e: Equal<Bool, Bool.and(a,b), true>
+): Equal<Bool, a, true>
+  RLP.aux.10(a, b, e)
+
+RLP.aux.11(
+  a: Bool
+  b: Bool
+  e: Equal<Bool, Bool.and(a,b), true>
+): Equal<Bool, b, true>
+  RLP.aux.11(a, b, e)
+
+RLP.aux.12(
+  xs: List<U8>
+  e1: Equal<Bool, Nat.eql(List.length(U8,xs),1), Bool.true>
+): Equal<List<U8>, xs, List.cons<U8>(List.head_with_default<U8>(Nat.to_u8(0),xs), List.nil<U8>)>
+  RLP.aux.12(xs, e1)
+
+RLP.aux.13(
+  xs: Bytes
+  ys: Bytes
+  e0: Nat.eql(List.length(U8,xs),1) == Bool.true
+): Equal<Bytes, List.tail(U8,List.concat(U8,xs,ys)), ys>
+  RLP.aux.13(xs, ys, e0)
+
+RLP.aux.14(
+  xs: Bytes
+  ys: Bytes
+  e0: Nat.eql(List.length(U8,xs),1) == Bool.true
+): Equal<Bytes, List.cons(U8,List.head_with_default(U8,Nat.to_u8(0),List.concat(U8,xs,ys)),List.nil(U8)), xs>
+  RLP.aux.14(xs, ys, e0)
+
+RLP.aux.15(
+  x: U8
+  xs: Bytes
+  ys: Bytes
+  zs: Bytes
+): Equal<Bytes, List.cons(U8,x,List.concat(U8,List.concat(U8,xs,ys),zs)), List.concat(U8,List.cons(U8,x,xs),List.concat(U8,ys,zs))>
+  RLP.aux.15(x, xs, ys, zs)
+
+RLP.aux.15.sym(
+  x: U8
+  xs: Bytes
+  ys: Bytes
+  zs: Bytes
+): Equal<Bytes, List.concat(U8,List.cons(U8,x,xs),List.concat(U8,ys,zs)), List.cons(U8,x,List.concat(U8,List.concat(U8,xs,ys),zs))>
+  mirror(RLP.aux.15(x, xs, ys, zs))
+
+RLP.aux.16(
+  xs: Bytes
+): Equal<Bytes, List.concat<U8>(xs, List.nil<U8>), xs>
+  case xs {
+    nil: refl
+    cons:
+      let a = RLP.aux.16(xs.tail)
+      let b = apply(List.cons<U8>(xs.head), a)
+      b
+  }!
+  
+RLP.aux.17(
+  len: Nat
+): Not<Equal<Bytes, RLP.encode.length(128, len), List.nil(U8)>>
+  RLP.aux.17(len)
+
+RLP.aux.18(
+  len: Nat
+): Not<Equal<Bytes, RLP.encode.length(192, len), List.nil(U8)>>
+  RLP.aux.18(len)
+
+RLP.aux.19(
+  len: Nat
+  head: U8
+  tail: Bytes
+  prof: Equal<Bytes, RLP.encode.length(128,len), List.cons(U8,head,tail)>
+): Equal<Bool, U8.ltn(head, 128#8), false>
+  RLP.aux.19(len, head, tail, prof)
+
+RLP.aux.20(
+  len: Nat
+  head: U8
+  tail: Bytes
+  prof: Equal<Bytes, RLP.encode.length(128,len), List.cons(U8,head,tail)>
+): Equal<Bool, U8.ltn(head, 192#8), true>
+  RLP.aux.20(len, head, tail, prof)
+
+RLP.aux.21(
+  len: Nat
+  head: U8
+  tail: Bytes
+  prof: Equal<Bytes, RLP.encode.length(192,len), List.cons(U8,head,tail)>
+): Equal<Bool, U8.ltn(head, 128#8), false>
+  RLP.aux.21(len, head, tail, prof)
+
+RLP.aux.22(
+  len: Nat
+  head: U8
+  tail: Bytes
+  prof: Equal<Bytes, RLP.encode.length(192,len), List.cons(U8,head,tail)>
+): Equal<Bool, U8.ltn(head, 192#8), false>
+  RLP.aux.22(len, head, tail, prof)
+
+RLP.aux.23<A: Type>(
+  xs: List<A>
+  ys: List<A>
+  zs: List<A>
+): Equal<List<A>, List.concat<A>(List.concat<A>(xs,ys),zs), List.concat<A>(xs,List.concat<A>(ys,zs))>
+  RLP.aux.23<A>(xs, ys, zs)

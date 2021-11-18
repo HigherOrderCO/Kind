@@ -1,0 +1,2 @@
+Refinement<A: Type>: Type
+    (a: A) -> Type

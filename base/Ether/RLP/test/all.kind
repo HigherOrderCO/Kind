@@ -1,0 +1,10 @@
+RLP.test.all: TestSuite
+  TestSuite.many("RLP", 
+    [ 
+     RLP.test.encode
+    ])
+
+// Show all tests for String
+RLP.test.show: _
+  log(TestSuite.show(RLP.test.all, 0))
+  0

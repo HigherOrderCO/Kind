@@ -1,13 +1,8 @@
-round_n(n : Nat, m : Nat) : Nat
-  case Nat.lte(m, 8) {
-    true : 8 - m
-    false : round_n(n, m-8)
-  }
-
-Ether.tests : Nat
-  let m = 32
-  let n = 8
-  m + (n - (if Nat.eql(Nat.mod(m, n), 0) then m else Nat.mod(m, n)))
+Ether.tests : _
+  let test = Ether.RLP.Tree.list!([Ether.RLP.Tree.tip!(Nat.to_bits(222222))])
+  //let list = [test, test, test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test,test]
+ // let tree = Ether.RLP.Tree.list(Bits, [Ether.RLP.Tree.list!(list)])
+  Ether.RLP.encode.read(Ether.RLP.encode(test))
 
 
   //let buffer = Buffer8.from_hex("d69429d7d1dd5b6f9c864d9db560d72a247c178ae86b0a")

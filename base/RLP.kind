@@ -1,0 +1,122 @@
+// The RLP format
+// 
+// Serialization and deserialization for the BytesTree type, under the following grammar:
+// | First byte | Meaning                                                                    |
+// | ---------- | -------------------------------------------------------------------------- |
+// | 0   to 127 | HEX(leaf)                                                                  |
+// | 128 to 183 | HEX(length_of_leaf + 128) + HEX(leaf)                                      |
+// | 184 to 191 | HEX(length_of_length_of_leaf + 128 + 56) + HEX(length_of_leaf) + HEX(leaf) |
+// | 192 to 247 | HEX(length_of_node + 192) + HEX(node)                                      |
+// | 248 to 255 | HEX(length_of_length_of_node + 192 + 56) + HEX(length_of_node) + HEX(node) |
+// 
+// The first byte of RLP.encode.length
+// buffer length (len) | RLP.encode.length(add,len)[0]
+// ------------------- | -----------------------------
+// 56     ~ 256**1-1   | 185
+// 256**1 ~ 256**2-1   | 186
+// 256**2 ~ 256**3-1   | 187
+// 256**3 ~ 256**4-1   | 188
+// 256**4 ~ 256**5-1   | 189
+// 256**5 ~ 256**6-1   | 190
+// 256**6 ~ 256**7-1   | 191
+
+// Type
+// ----
+
+type RLP {
+  data(value: List<U8>)
+  node(child: List<RLP>)
+}
+
+// Length
+// ------
+
+RLP.decoder.byte(bytes: Bytes): Pair<Bytes, U8>
+  case bytes {
+    nil: {[], 0#8}
+    cons: {bytes.tail, bytes.head}
+  }
+
+RLP.encode.length(add: Nat, length: Nat): Bytes
+  if Nat.ltn(length, 56) then
+    Bytes.from_nat(Nat.add(add,length))
+  else
+    let a = Bytes.from_nat(Nat.add(56, Nat.add(add, RLP.needed_bytes(length))))
+    let b = Bytes.from_nat(length)
+    List.concat!(a, b)
+
+RLP.decoder.length(add: Nat, bytes: Bytes): Pair<Bytes, Nat>
+  case bytes {
+    nil:
+      {[], 0}
+    cons:
+      let fst = Nat.sub(Bytes.to_nat([bytes.head]), add)
+      if Nat.ltn(fst, 56) then
+        {bytes.tail, fst}
+      else
+        let {bytes, length} = RLP.decoder.repeat!(RLP.decoder.byte, Nat.sub(fst,56), bytes.tail)
+        {bytes, Bytes.to_nat(length)}
+  }
+
+RLP.decode.length(add: Nat, bytes: Bytes): Nat
+  case RLP.decoder.length(add, bytes) as got {
+    new: got.snd
+  }
+
+// Repeat
+// ------
+
+RLP.encode.repeat<A: Type>(encode: A -> Bytes, values: List<A>): Bytes
+  case values {
+    nil: []
+    cons: List.concat!(encode(values.head), RLP.encode.repeat<A>(encode, values.tail))
+  }
+
+RLP.decoder.repeat<A: Type>(decoder: Bytes -> Pair<Bytes,A>, count: Nat, bytes: Bytes): Pair<Bytes, List<A>>
+  case count {
+    zero:
+      {bytes, []}
+    succ:
+      let {bytes, head} = decoder(bytes)
+      let {bytes, tail} = RLP.decoder.repeat<A>(decoder, count.pred, bytes)
+      {bytes, head & tail}
+  }
+
+RLP.encode.many(trees: List<RLP>): Bytes
+  RLP.encode.repeat<RLP>(RLP.encode, trees)
+
+// RLP
+// ---
+
+RLP.encode(tree: RLP): Bytes
+  case tree {
+    data:
+      if Bool.and(Nat.eql(List.length!(tree.value),1), U8.ltn(List.head_with_default!(0#8,tree.value), 128#8)) then
+        tree.value
+      else
+        List.concat!(RLP.encode.length(128, List.length!(tree.value)), tree.value)
+    node:
+      List.concat!(RLP.encode.length(192, List.length!(tree.child)), RLP.encode.many(tree.child))
+  }
+  
+RLP.decoder(bytes: Bytes): Pair<Bytes, RLP>
+  case bytes {
+    nil:
+      {[], RLP.data([])}
+    cons:
+      if U8.ltn(bytes.head, 128#8) then
+        {List.tail!(bytes), RLP.data([List.head_with_default!(0#8,bytes)])}
+      else if U8.ltn(bytes.head, 192#8) then
+        let {bytes, count} = RLP.decoder.length(128, bytes)
+        let {bytes, value} = RLP.decoder.repeat!(RLP.decoder.byte, count, bytes)
+        {bytes, RLP.data(value)}
+      else
+        let {bytes, count} = RLP.decoder.length(192, bytes)
+        let {bytes, child} = RLP.decoder.repeat!(RLP.decoder, count, bytes)
+        {bytes, RLP.node(child)}
+  }
+
+RLP.decode(bytes: Bytes): RLP
+  case RLP.decoder(bytes) as got {
+    new: got.snd
+  }

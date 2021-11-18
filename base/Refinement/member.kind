@@ -1,0 +1,2 @@
+Refinement.member<T: Type>(x: T, A: Refinement<T>): Type
+    A(x)

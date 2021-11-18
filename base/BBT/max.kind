@@ -1,0 +1,12 @@
+BBT.max<K: Type, V: Type>(map: BBT<K, V>): Maybe<Pair<K, V>>
+  case map {
+    tip:
+      none
+    bin:
+      case map.right {
+        tip:
+          some({map.key, map.val})
+        bin:
+          BBT.max!!(map.right)
+      }
+  }
