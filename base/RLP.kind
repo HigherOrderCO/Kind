@@ -46,9 +46,9 @@ RLP.encode.length(add: Nat, length: Nat): Bytes
   if Nat.lte(length, 55) then
     [Nat.to_u8(Nat.add(add,length))]
   else
-    let a = Bytes.from_nat(Nat.add(56, Nat.add(add, RLP.needed_bytes(length))))
     let b = Bytes.from_nat(length)
-    List.concat!(a, b)
+    let a = Nat.to_u8(Nat.add(56, Nat.add(add, List.length!(b))))
+    a & b
 
 RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
   case bytes {
@@ -65,15 +65,13 @@ RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
 
 // Repeat
 // ------
-
-RLP.encode.repeat<A: Type>(encode: A -> Bytes, values: List<A>): Bytes
-  case values {
-    nil: []
-    cons: List.concat!(encode(values.head), RLP.encode.repeat<A>(encode, values.tail))
-  }
-
 RLP.encode.many(trees: List<RLP>): Bytes
-  RLP.encode.repeat<RLP>(RLP.encode, trees)
+  case trees {
+    nil:
+      []
+    cons:
+      List.concat!(RLP.encode(trees.head), RLP.encode.many(trees.tail))
+  }
 
 // RLP
 // ---
@@ -95,15 +93,19 @@ RLP.decode.many(bytes: Bytes): List<RLP>
     nil:
       []
     cons:
-      if U8.ltn(bytes.head, 128#8) then
+      let prefix = U8.to_nat(bytes.head)
+      if Nat.lte(prefix, 127) then
         RLP.data([bytes.head]) & RLP.decode.many(bytes.tail)
-      else if U8.ltn(bytes.head, 192#8) then
+      else if Nat.lte(prefix, 191) then
         let {head, tail} = RLP.split.length(128, bytes)
         RLP.data(head) & RLP.decode.many(tail)
       else
         let {head, tail} = RLP.split.length(192, bytes)
         RLP.node(RLP.decode.many(head)) & RLP.decode.many(tail)
   }
+
+RLP.max: Nat
+  Nat.sub(Nat.pow(256, 7), 1)
 
 RLP.decode(bytes: Bytes): RLP
   List.head!(RLP.decode.many(bytes)) <> RLP.data([])
