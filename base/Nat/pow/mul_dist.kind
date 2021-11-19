@@ -1,0 +1,12 @@
+Nat.pow.mul_dist(a: Nat b:Nat c:Nat): Nat.pow(Nat.mul(a,b), c) == Nat.mul(Nat.pow(a,c), Nat.pow(b,c))
+  // (ab)^c = a^c b^c
+  case c {
+    zero: 
+      let o = Nat.mul.one_left(1)
+      refl :: rewrite x in 1 == x with mirror(o) 
+    succ: 
+      let ind = Nat.pow.mul_dist(a, b, c.pred)
+      let p = apply((x) Nat.mul(Nat.mul(a,b),x), ind)
+      let sw = Nat.mul.comm.swap(a,Nat.pow(a,c.pred),b,Nat.pow(b,c.pred))
+      p :: rewrite x in Nat.mul(Nat.mul(a,b),Nat.pow(Nat.mul(a,b),c.pred)) == x with mirror(sw)
+  }!
