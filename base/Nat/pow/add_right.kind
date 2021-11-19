@@ -1,0 +1,11 @@
+Nat.pow.add_right(a: Nat b: Nat c: Nat): Nat.pow(a, Nat.add(b,c)) == Nat.mul(Nat.pow(a,b), Nat.pow(a,c))
+    // a^(b+c) = a^b a^c
+    case b {
+      zero: 
+        let l = Nat.mul.one_left(Nat.pow(a,c))
+        refl :: rewrite x in (Nat.pow(a,c) == x) with mirror(l)
+      succ:
+        let inds = apply((x) Nat.mul(a,x), Nat.pow.add_right(a, b.pred, c))
+        let ma = Nat.mul.assoc(a, Nat.pow(a,b.pred), Nat.pow(a,c))
+        inds :: rewrite x in Nat.mul(a,Nat.pow(a,Nat.add(b.pred,c))) == x with ma
+    }!
