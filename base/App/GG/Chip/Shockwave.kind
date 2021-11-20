@@ -5,19 +5,50 @@ App.GG.Chip.Shockwave: App.GG.Chip
     App.GG.img.chip
   )
 
+App.GG.Chip.Shockwave.img(frame: U64): VoxBox
+  switch U64.eql((frame % 24)/2) {
+    0#64: App.GG.img.Slime.hand.slime_wp_character__fire_00
+    1#64: App.GG.img.Slime.hand.slime_wp_character__fire_01
+    2#64: App.GG.img.Slime.hand.slime_wp_character__fire_02
+    3#64: App.GG.img.Slime.hand.slime_wp_character__fire_03
+    4#64: App.GG.img.Slime.hand.slime_wp_character__fire_04
+    5#64: App.GG.img.Slime.hand.slime_wp_character__fire_05
+    6#64: App.GG.img.Slime.hand.slime_wp_character__fire_06
+    7#64: App.GG.img.Slime.hand.slime_wp_character__fire_07
+    8#64: App.GG.img.Slime.hand.slime_wp_character__fire_08
+    9#64: App.GG.img.Slime.hand.slime_wp_character__fire_09
+    10#64: App.GG.img.Slime.hand.slime_wp_character__fire_10
+    11#64: App.GG.img.Slime.hand.slime_wp_character__fire_11
+  }default App.GG.img.Slime.hand.slime_wp_character__fire_00
+
+
 App.GG.Chip.Shockwave.Effect: App.GG.Effect<Unit>
   App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
     without creature: App.GG.Effect.pass
-    let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
-    let projectile_effect = App.GG.Chip.Shockwave.Projectile.Effect 
-    let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-    let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
-    App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack)
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Shockwave.img(frame))
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
+      let projectile_effect = App.GG.Chip.Shockwave.Projectile.Effect 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
+      App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+    }
   }
 
+App.GG.Chip.Shockwave.bullet_position_x(current_frame: U64, max_frame: U64): I32
+  let tile_x = +32#32
+  let c = F64.to_i32(U64.to_f64(current_frame - 1))
+  let m = F64.to_i32(U64.to_f64(max_frame ))  
+  let x = ((c % m) * (tile_x / m)) - (tile_x / 2) 
+  x
+  
+
 App.GG.Chip.Shockwave.Projectile.Effect: App.GG.Effect<Unit>
+  let max_frame = 32#64
   App.GG.Effect {
     App.GG.Effect.vbox.in_tile(App.GG.img.target_tile) // Adds image bound to tile
     App.GG.Effect.frame.inc // Increases projectile frame by 1
@@ -28,7 +59,7 @@ App.GG.Chip.Shockwave.Projectile.Effect: App.GG.Effect<Unit>
     get has_hit  = App.GG.Effect.projectile.has_hit(center) // Checks if projectile has already hit that enemy
     if is_enemy && not(has_hit) then
       App.GG.Effect {
-        App.GG.Effect.projectile.add_hit(center) // Adds enemy to lits of targets hit by projectile
+        App.GG.Effect.projectile.add_hit(center) // Adds enemy to list of targets hit by projectile
         App.GG.Effect.creature.change_hp_at(-10, center) 
         return unit
       }
@@ -36,13 +67,17 @@ App.GG.Chip.Shockwave.Projectile.Effect: App.GG.Effect<Unit>
       App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     without projectile: App.GG.Effect.pass
-    if (frame % 16) =? 0 then // Each 16 frames
-      App.GG.Effect {
-        let new_pos = App.GG.Coord.front(center, projectile@info@team) // Gets coord in front of projectile's
-        App.GG.Effect.projectile.move(new_pos) // Moves projectile a tile forward
-        return unit
-      }
-    else
-      App.GG.Effect.pass
+    let x = App.GG.Chip.Shockwave.bullet_position_x(frame, max_frame)
+    App.GG.Effect {
+      App.GG.Effect.vbox.at_tile_with_variation(center, x, -5, App.GG.img.bullet)
+      if (frame % max_frame) =? 0 then // Each time it reaches max_frame
+        App.GG.Effect {
+          let new_pos = App.GG.Coord.front(center, projectile@info@team) // Gets coord in front of projectile's
+          App.GG.Effect.projectile.move(new_pos) // Moves projectile a tile forward
+          return unit
+        }
+      else
+        App.GG.Effect.pass
+    }
   }
     

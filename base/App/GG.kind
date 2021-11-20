@@ -19,7 +19,7 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// Create flinch mechanic
+// Create flinch mechanic - working on it
 // Create a deck when starting a match
 // Add pewpew shot mechanic
 // Create turns where you can choose chips from your deck

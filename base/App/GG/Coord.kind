@@ -14,3 +14,11 @@ App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
       neutral: coord
     }
   new_coord
+
+App.GG.Coord.above(coord: App.GG.Coord): App.GG.Coord
+  let new_coord = {coord@fst, coord@snd -1}
+  new_coord
+
+App.GG.Coord.below(coord: App.GG.Coord): App.GG.Coord
+  let new_coord = {coord@fst, coord@snd +1}
+  new_coord
