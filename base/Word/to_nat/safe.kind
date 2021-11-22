@@ -1,4 +1,5 @@
+// TODO
 Word.to_nat.safe<size: Nat>(
   n: Nat, H: Nat.lte(Nat.succ(n), Nat.pow(2, size)) == true
-): Word.to_nat(Nat.to_word(size, n)) == n
-  ?word.to_nat.safe
+): n == Word.to_nat(size, Nat.to_word(size, n))
+  Word.to_nat.safe(size, n, H)
