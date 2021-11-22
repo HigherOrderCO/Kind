@@ -38,6 +38,9 @@ Bytes.from_nat(n: Nat): Bytes
       Bytes.from_nat(n/256) ++ [U8.from_nat(Nat.mod(n, 256))]
   }
 
+Bytes.from_nat.length(n: Nat): Nat.log2(Nat.succ(n))/8 == List.length(U8, Bytes.from_nat(n))
+  ?bytes.from_nat.length
+
 Bytes.to_hex(b: Bytes): String
   Bytes.to_hex.go("", b)
 

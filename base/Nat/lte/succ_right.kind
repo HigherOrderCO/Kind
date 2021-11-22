@@ -1,8 +1,14 @@
-Nat.lte.succ_right(x : Nat, y : Nat, H : Nat.lte(x, y) == true) : Nat.lte(x, Nat.succ(y)) == true
+Nat.lte.succ_right(
+  x: Nat, y: Nat, H: Nat.lte(x, y) == true
+): Nat.lte(x, Nat.succ(y)) == true
   case x with H {
-    zero : refl
-    succ : case y with H {
-      succ : Nat.lte.succ_right(x.pred, y.pred, H)
-      zero : Empty.absurd!(Bool.false_neq_true(H))
-    }!
+    zero:
+      refl
+    succ:
+      case y with H {
+       succ:
+          Nat.lte.succ_right(x.pred, y.pred, H)
+        zero:
+          Empty.absurd!(Bool.false_neq_true(H))
+      }!
   }!
