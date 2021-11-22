@@ -1,2 +1,2 @@
-Ether.RLP.bifity.nat(n: Nat): Ether.RLP.Tree
-  Ether.RLP.Tree.tip(Nat.to_bits(n))
+Ether.RLP.bifity.nat(n: Nat): Ether.RLP.Tree<Bits>
+  Ether.RLP.Tree.tip!(Nat.to_bits(n))

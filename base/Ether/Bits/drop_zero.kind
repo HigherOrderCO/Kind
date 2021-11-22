@@ -1,9 +1,9 @@
-Ether.Bits.dropZeros(bytes : List<Bits>) : List<Bits>
+Ether.Bits.drop_zero(bytes : List<Bits>) : List<Bits>
   case bytes {
     nil : []
     cons : 
       if Bits.eql(bytes.head, Bits.o(Bits.e)) then
-        Ether.Bits.dropZeros(bytes.tail)
+        Ether.Bits.drop_zero(bytes.tail)
       else
         List.cons!(bytes.head, bytes.tail)
   }

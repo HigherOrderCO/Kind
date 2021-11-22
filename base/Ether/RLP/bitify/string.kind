@@ -1,2 +1,2 @@
-Ether.RLP.bitify.string(s: String): Ether.RLP.Tree
-  Ether.RLP.Tree.tip(String.to_bits(s))
+Ether.RLP.bitify.string(s: String): Ether.RLP.Tree<Bits>
+  Ether.RLP.Tree.tip!(String.to_bits(s))

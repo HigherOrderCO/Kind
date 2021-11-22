@@ -1,0 +1,19 @@
+Nat.mul.comm.swap(a: Nat b:Nat a1:Nat b1:Nat): Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) == Nat.mul(Nat.mul(a,a1),Nat.mul(b,b1))
+  // (a b)(a' b') = (a a')(b b')
+  let assoc = Nat.mul.assoc
+  let comm = Nat.mul.comm
+  let m = Nat.mul
+  let r1 = refl :: Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1))
+  let as1 = assoc(a,b,Nat.mul(a1,b1))
+  let r2 = r1 :: rewrite x in x == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with mirror(as1)
+  let as2 = assoc(b,a1,b1)
+  let r3 = r2 :: rewrite x in Nat.mul(a,x) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with as2
+  let cm = comm(b,a1)
+  let r4 = r3 :: rewrite x in Nat.mul(a,Nat.mul(x,b1)) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with cm
+  let as3 = assoc(a,Nat.mul(a1,b), b1)
+  let r5 = r4 :: rewrite x in x == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with as3
+  let as4 = assoc(a,a1,b)
+  let r6 = r5 :: rewrite x in Nat.mul(x,b1) == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with as4
+  let as5 = assoc(Nat.mul(a,a1),b,b1)
+  let r7 = r6 :: rewrite x in x == Nat.mul(Nat.mul(a,b),Nat.mul(a1,b1)) with mirror(as5)
+  mirror(r7)

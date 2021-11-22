@@ -1,0 +1,10 @@
+Nat.pow.one(b: Nat): Nat.pow(1, b) == 1
+  // 1^b = 1
+  case b {
+    zero: refl,
+    succ: 
+      let ind = Nat.pow.one(b.pred)
+      let o = Nat.mul.one_left(1)
+      let p = apply((x) Nat.mul(1,x), ind)
+      p :: rewrite x in Nat.mul(1,Nat.pow(1,b.pred)) == x with o
+  }!
