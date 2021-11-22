@@ -1,4 +1,4 @@
-Ether.Address.isAddress(address : String) : Bool
+Ether.Address.is_address(address : String) : Bool
   def parser = Parser {
     Parser.text("0x")
     Parser.many1<Nat>(Parser.hex_digit)

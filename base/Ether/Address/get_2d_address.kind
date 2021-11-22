@@ -1,4 +1,4 @@
-Ether.Address.get2dAddress(
+Ether.Address.get_2d_address(
   from : Bits,
   salt : Bits,
 //  size_of_salt : Ether.Address.Bits.length(32, salt),

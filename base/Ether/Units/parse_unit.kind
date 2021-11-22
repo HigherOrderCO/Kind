@@ -1,3 +1,3 @@
-Ether.Units.parseUnit(number : String, unit_ref : Nat) : Maybe<Nat>
+Ether.Units.parse_unit(number : String, unit_ref : Nat) : Maybe<Nat>
   let number = Parser.run!(Ether.Units.parse, number)
   Maybe.join!(Maybe.map!!((n) Ether.Units.decode(n, unit_ref), number))

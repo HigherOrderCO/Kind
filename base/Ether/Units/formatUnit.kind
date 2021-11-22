@@ -1,9 +1,0 @@
-Ether.Units.formatUnit(value : Nat, unit_ref : Nat) : String
-  case unit_ref {
-    succ : 
-      let fraction = Ether.Units.formatUnit(value/10, unit_ref-1)
-      fraction | Nat.show(Nat.mod(value, 10))
-    zero : 
-       Nat.show(value) | "."
-  }
-  
