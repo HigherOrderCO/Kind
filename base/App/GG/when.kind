@@ -89,7 +89,8 @@ App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<
   case local@phase as phase {
     setup:
       let {x, y} = {mouse@fst / 4, mouse@snd / 4}
-      switch Point_to_rectangle({x,y}) {
+      let point = V2.new(U32.to_f64(x), U32.to_f64(y))
+      switch Shape.Point.collision.rectangle(point) {
         App.GG.when.table:
           let x = x - (App.GG.draw.chips_starting_position@fst - (App.GG.draw.chip_size@fst/2))
           let y = y - (App.GG.draw.chips_starting_position@snd - (App.GG.draw.chip_size@snd/2))
@@ -110,27 +111,18 @@ App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<
   }
 
 
-type Rectangle {
-  new(x1: U32, x2: U32, y1: U32, y2: U32)
-}
 
-Point_to_rectangle(point: Pair<U32, U32>, rect: Rectangle): Bool
-  let {x1, x2} = {rect@x1, rect@x2}
-  let {y1, y2} = {rect@y1, rect@y2}
-  let {px, py} = point
-    (px >=? x1) && 
-    (px <=? x2) && 
-    (py >=? y1) && 
-    (py <=? y2)
 
-App.GG.when.table: Rectangle
+
+
+App.GG.when.table: Shape.Rectangle
   let {x1, y1} = {(App.GG.draw.chips_starting_position@fst - (App.GG.draw.chip_size@fst/2)) (App.GG.draw.chips_starting_position@snd - (App.GG.draw.chip_size@snd/2))}
   let {vx, vy} = App.GG.draw.chips_variation
   let {cx, cy} = App.GG.draw.chip_size
   let {r,  c } = App.GG.draw.chips_line_size
   let {x2, y2} = {x1 + ((cx + vx) * r), y1 + ((cy + vy) * c)}
   log(U32.show(x1) | " " | U32.show(x2) | " " | U32.show(y1) | " " | U32.show(y2))
-  Rectangle.new(x1, x2, y1, y2)
+  Shape.Rectangle.new(U32.to_f64(x1), U32.to_f64(x2), U32.to_f64(y1), U32.to_f64(y2))
 
 
 App.GG.when.chip(mouse_pos: Pair<U32, U32>): Maybe<Nat>
