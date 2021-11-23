@@ -1,0 +1,72 @@
+VoxBox.Draw.circle(
+  xc:   I32
+  yc:   I32
+  r:    I32 
+  z:    I32,
+  col:  Col32,
+  img:  VoxBox,
+): VoxBox
+
+  let z = I32.to_u32(z)
+	let x = +0#32
+  let y = r
+  log(I32.show(r))
+	let d = +3#32 - (+2#32 * r)
+	let img = VoxBox.Draw.circle.all_sides(xc, yc, x, y, z, col, img)
+	VoxBox.Draw.circle.go(x, y, d, xc, yc, z, col, img)
+
+VoxBox.Draw.circle.go(
+  x:    I32
+  y:    I32
+  d:    I32
+  xc:   I32
+  yc:   I32
+  z:    U32
+  col:  Col32
+  img:  VoxBox
+): VoxBox
+  if y >=? x then
+    let {y, d} = 
+      if d >? 0 then
+        log(" D: " | I32.show(d) | " X: "| I32.show(x) | " Y: " |I32.show(y))
+        let d = d + (4 * (x - y)) + 10
+        let y = y - 1
+        {y, d}
+      else
+        log(" D: " | I32.show(d) | " X: "| I32.show(x) | " Y: " |I32.show(y))
+        let d = d + (4 * x) + 6
+        {y, d}
+    let x = x + 1
+    let img = VoxBox.Draw.circle.all_sides(xc, yc, x, y, z, col, img)
+    VoxBox.Draw.circle.go(x, y, d, xc, yc, z, col, img)
+  else
+    img 
+
+
+
+// Function to put pixels
+// at subsequence points
+// xc = center x, yc = center y
+VoxBox.Draw.circle.all_sides(
+  xc:   I32
+  yc:   I32
+  x:    I32
+  y:    I32
+  z:    U32
+  col:  Col32
+  img:  VoxBox
+): VoxBox
+let f = 
+  (a: I32, b: I32, z: U32)
+  Pos32.new(I32.to_u32(a), I32.to_u32(b), z)
+let img = 
+  let img = VoxBox.push(f(xc+x, yc+y, z), col, img)
+  let img = VoxBox.push(f(xc-x, yc+y, z), col, img)
+  let img = VoxBox.push(f(xc+x, yc-y, z), col, img)
+  let img = VoxBox.push(f(xc-x, yc-y, z), col, img)
+  let img = VoxBox.push(f(xc+y, yc+x, z), col, img)
+  let img = VoxBox.push(f(xc-y, yc+x, z), col, img)
+  let img = VoxBox.push(f(xc+y, yc-x, z), col, img)
+  let img = VoxBox.push(f(xc-y, yc-x, z), col, img)
+  img
+img

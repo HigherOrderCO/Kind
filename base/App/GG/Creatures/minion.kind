@@ -17,4 +17,15 @@ App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
       App.GG.img.DarkSlime.idle.slime_enemy_idle_0
     attack:
       App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+    sword: 
+      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+    damage:
+      switch U64.eql((frame % 24)/4) {
+        0#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_0
+        1#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_1
+        2#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_2
+        3#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_3
+        4#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_4
+        5#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_5
+      }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
   }

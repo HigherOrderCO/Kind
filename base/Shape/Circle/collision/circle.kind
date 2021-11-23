@@ -1,0 +1,8 @@
+Shape.Circle.collision.circle(circle0: Shape.Circle, circle1: Shape.Circle): Bool
+  let r0 = circle0@radius
+  let r1 = circle1@radius
+  let c0 = circle0@center
+  let c1 = circle1@center
+  
+  let dist = V2.dist(c0, c1)
+  dist <=? r0 + r1 

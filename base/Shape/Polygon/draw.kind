@@ -1,0 +1,11 @@
+Shape.Polygon.draw(polygon: Shape.Polygon, z: I32, color: Col32,  img: VoxBox): VoxBox
+  case polygon {
+    nil: img
+    cons:
+      let polygon = polygon ++ [polygon.head]
+      let f =
+        (v: V2)
+          {F64.to_u32(v@x), F64.to_u32(v@y)}
+      let list = List.map!!(f, polygon)
+      VoxBox.Draw.poly(list, I32.to_u32(z), color, img)
+  }

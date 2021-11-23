@@ -1,0 +1,2 @@
+Shape.Rectangle.collision.circle(rectangle: Shape.Rectangle, circle: Shape.Circle): Bool
+  Shape.Circle.collision.rectangle(circle, rectangle)

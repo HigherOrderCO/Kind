@@ -6,7 +6,7 @@ App.GG.Effect.movement(key: U16): App.GG.Effect<Unit>
     let new_pos = App.GG.Effect.movement.direction(key, center, grid)
     App.GG.Effect.frame.inc 
     without frame: App.GG.Effect.pass
-    log("frame: " | U64.show(frame) )
+    //log("frame: " | U64.show(frame) )
     without new_pos:
       App.GG.Effect { 
         App.GG.Effect.actions.del

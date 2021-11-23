@@ -1,0 +1,9 @@
+type App.GG.Phase {
+  setup(
+    table: App.GG.Table
+    hand: App.GG.Chips
+    energy: Nat
+  )
+  game
+}
+

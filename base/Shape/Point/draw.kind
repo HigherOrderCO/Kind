@@ -1,0 +1,2 @@
+Shape.Point.draw(point: Shape.Point, z: I32, color: Col32,  img: VoxBox): VoxBox
+  VoxBox.Draw.circle(F64.to_i32(point@x), F64.to_i32(point@y), 1, z, color, img)

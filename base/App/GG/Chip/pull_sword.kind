@@ -1,0 +1,48 @@
+App.GG.Chip.pull_sword: App.GG.Chip
+  App.GG.Chip.new(
+    "Pull_sword"
+    App.GG.Chip.pull_sword.Effect
+    App.GG.img.chip
+  )
+
+App.GG.Chip.pull_sword.Effect: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Shockwave.img(frame))
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
+      let projectile_effect = App.GG.Chip.pull_sword.Projectile.Effect 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
+      let spawn_coord = front(front(center)) // Gets the coordinate in front of the creature
+      App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+App.GG.Chip.pull_sword.Projectile.Effect: App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get center = App.GG.Effect.coord.get_center
+    get projectile = App.GG.Effect.projectile.get
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    let coords = [App.GG.Coord.above(center), center, App.GG.Coord.below(center)]
+    let eff = 
+      (coord)
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+        App.GG.Effect.projectile.hit(-15, coord)
+        return unit
+      }
+    App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+    without frame: App.GG.Effect.pass
+    without projectile: App.GG.Effect.pass
+    if frame =? 8 then // At frame 8
+      App.GG.Effect.projectile.delete
+    else
+      App.GG.Effect.pass
+  }

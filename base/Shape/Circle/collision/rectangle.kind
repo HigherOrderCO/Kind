@@ -1,0 +1,18 @@
+Shape.Circle.collision.rectangle(circle: Shape.Circle, rectangle: Shape.Rectangle): Bool
+  let {tx, cx} = {circle@center@x, circle@center@x}
+  let {ty, cy} = {circle@center@y, circle@center@y}
+  let tx = 
+    if cx <? rectangle@x0 then
+      rectangle@x0
+    else 
+      rectangle@x1
+  let ty =
+    if cy <? rectangle@y0 then
+      rectangle@y0
+    else 
+      rectangle@y1
+
+let distX = cx - tx
+let distY = cy - ty
+let distance = F64.sqrt((distX*distX) + (distY*distY))
+distance <? circle@radius

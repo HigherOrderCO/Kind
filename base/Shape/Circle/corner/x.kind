@@ -1,0 +1,4 @@
+Shape.Circle.corner.x(circle: Shape.Circle): Pair<F64, F64>
+  let x0 = circle@center@x - circle@radius 
+  let x1 = circle@center@x + circle@radius 
+  {x0, x1}

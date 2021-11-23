@@ -1,0 +1,3 @@
+Shape.Rectangle.draw(rectangle: Shape.Rectangle, z: I32, color: Col32,  img: VoxBox): VoxBox
+  let polygon = Shape.Rectangle.to_polygon(rectangle)
+  Shape.Polygon.draw(polygon, z, color, img)

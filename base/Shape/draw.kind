@@ -1,0 +1,8 @@
+Shape.draw(shape: Shape, z: I32, col: Col32, img: VoxBox): VoxBox
+  case shape {
+    point: Shape.Point.draw(shape.val, z, col, img)
+    line: Shape.Line.draw(shape.val, z, col, img)
+    circle: Shape.Circle.draw(shape.val, z, col, img)
+    rectangle: Shape.Rectangle.draw(shape.val, z, col, img)
+    polygon: Shape.Polygon.draw(shape.val, z, col, img)
+  }

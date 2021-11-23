@@ -1,0 +1,4 @@
+Shape.Point.corner.y(point: Shape.Point): Pair<F64, F64>
+  let {y0, y1} =
+    {point@y, point@y}
+  {y0, y1}

@@ -1,0 +1,25 @@
+BVH.collision<K: Type, V: Type>(
+  eql: K -> K -> Bool
+  collision: V -> V -> Bool
+  key: Maybe<K>
+  val: V
+  bvh: BVH<K, V>
+): List<K>
+  let col = BVH.collision<K, V>(eql, collision, key, val)
+  case bvh {
+    tip: []
+    box: 
+      if collision(bvh.val, val) then
+        col(bvh.lft) ++ col(bvh.rgt)
+      else
+        []
+    end:
+      let is_same = case key {
+        none: true
+        some: Bool.not(eql(key.value, bvh.key))
+      }
+      if collision(bvh.val, val) && is_same then 
+        [bvh.key]
+      else 
+        []
+  }

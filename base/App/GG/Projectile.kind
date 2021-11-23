@@ -119,3 +119,13 @@ App.GG.Projectile.get(coord: App.GG.Coord, origin: App.GG.Effect.Origin, grid: A
         return projectile
       }
   }
+
+App.GG.Projectile.delete(origin: App.GG.Coord, id: Nat, grid: App.GG.Grid): App.GG.Grid
+  let a = App.GG.Grid.get(origin, grid)
+  case a {
+    none: grid
+    some: 
+      let new_tile = a.value@projectiles <- List.delete_at!(id, a.value@projectiles)
+      let new_grid = App.GG.Grid.set(origin, new_tile, grid)
+      new_grid
+  }

@@ -1,6 +1,7 @@
 // Renders App
 App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
   (state)
+  let local = state@local
   <div style={
     "height": "100vh"
     "width": "100vw"
@@ -21,9 +22,53 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
             "scale": "4"
           },
           {},
-          App.GG.draw.grid(state@local@grid, img)) 
+          let img = App.GG.draw.grid(local@grid, img)
+          App.GG.draw.setup(local@phase,img))
       }</div>
   </div>
+
+App.GG.draw.chip_size: Pair<U32, U32>
+  {40, 22}
+
+App.GG.draw.chips_starting_position: Pair<U32, U32>
+  {25, 25}
+
+App.GG.draw.chips_variation: Pair<U32, U32>
+  {3, 3}
+
+App.GG.draw.chips_line_size: Pair<U32, U32>
+  {2, 5}
+
+App.GG.draw.setup(phase: App.GG.Phase, img: VoxBox): VoxBox
+  case phase {
+    setup: 
+      let img = VoxBox.Draw.image(15 - 96, 13 - 66, 150, App.GG.img.background, img)
+      let {x, y} = App.GG.draw.chips_starting_position
+      App.GG.draw.setup.chips(0, phase.table, x, y, img)
+    game: img
+  }
+//40x22
+
+App.GG.draw.setup.chips(count: U32, table: App.GG.Table, x: U32, y: U32, img: VoxBox): VoxBox
+  case table {
+    nil:img
+    cons:
+      let {cx, cy} = App.GG.draw.chip_size
+      let {vx, vy} = App.GG.draw.chips_variation
+      let max_stack = App.GG.draw.chips_line_size@snd
+      let {x, y} = if ((count + 1) % (max_stack + 1)) =? 0 then {x + (cx + vx), y - ((cy + vy) * max_stack)} else {x, y} 
+      case table.head@chip as chip {
+        none: App.GG.draw.setup.chips(count + 1, table.tail, x, y + (cy + vy), img)
+        some:
+          let img = VoxBox.Draw.image(x - 128, y - 128, 200, chip.value@img, img)
+          App.GG.draw.setup.chips(count + 1, table.tail, x, y + (cy + vy), img)
+      }
+  }
+
+// App.GG.draw.setup.chip(chip: App.GG.Chip, x: U32, y: U32, img:VoxBox): VoxBox
+//   VoxBox.Draw.image(x, y, 200, chip@img, img)
+
+
 
 // Draws the grid
 App.GG.draw.grid(
@@ -60,8 +105,19 @@ App.GG.draw.tile(
       some:
         let f = App.GG.Monster.to_vbox(creature.value@category)
         let sprite = f(creature.value@animation@fst, creature.value@animation@snd)
-        let img = VoxBox.Draw.image_colorize(x, y, 20, Col32.new_hue(F64.to_u32(U64.to_f64((creature.value@animation@snd % 1024) / 4))), sprite, img)
-        let img = VoxBox.Draw.text(I32.show(creature.value@hp), PixelFont.small_black, Pos32.new(x + 122,y + 100, 200), img)
+        //let img = VoxBox.Draw.image_colorize(x, y, 20, Col32.new_hue(F64.to_u32(U64.to_f64((creature.value@animation@snd % 1024) / 4))), sprite, img)
+        let img = VoxBox.Draw.image(x, y, 20, sprite, img)
+        let img = VoxBox.Draw.text(I32.show(creature.value@hp), PixelFont.small_black, Pos32.new(x + 122,y + 100, 100), img)
+        let img = 
+          let actions = creature.value@actions
+          let current = actions@current
+          without current: img
+          open current
+          let result = current@effect(coord, App.GG.Effect.Origin.creature, grid)
+          case result {
+            err: img
+            new: result.img(img)
+          }
         img
     }
   

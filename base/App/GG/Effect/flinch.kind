@@ -1,0 +1,16 @@
+App.GG.Effect.flinch: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc // Increases action's frame by 1
+    without frame: App.GG.Effect.pass
+    log(U64.show(frame))
+    switch U64.eql(frame) {
+      0 : App.GG.Effect.animation.update(App.GG.Animation.damage)
+      24: 
+        App.GG.Effect {
+          App.GG.Effect.actions.del
+          App.GG.Effect.animation.update(App.GG.Animation.idle)
+        }
+    }default App.GG.Effect.pass
+  }
+

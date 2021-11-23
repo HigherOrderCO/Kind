@@ -1,0 +1,13 @@
+Shape.Polygon.corner.y(polygon: Shape.Polygon): Pair<F64, F64>
+  case polygon {
+    nil:  {0.0,0.0}
+    cons:
+      let ys = {polygon.head@y, polygon.head@y}
+      for v in polygon.tail with ys:
+        let y0 = 
+          if v@y <? ys@fst then v@y else ys@fst
+        let y1 = 
+          if v@y <? ys@snd then v@y else ys@snd
+        {y0, y1}
+      ys
+  }

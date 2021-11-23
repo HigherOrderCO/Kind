@@ -7,6 +7,7 @@ type App.GG.Monster {
     data: App.GG.Slime
     hand: App.GG.Chips
     folder: App.GG.Chips
+    energy: Nat
   )
 }
 

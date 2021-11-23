@@ -1,0 +1,8 @@
+App.GG.Table: Type
+  List<App.GG.Table.Slot>
+
+type App.GG.Table.Slot {
+  new(
+    chip: Maybe<App.GG.Chip>
+  )
+}

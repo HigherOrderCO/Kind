@@ -3,10 +3,11 @@ App.GG.Creatures.slime(
 ): App.GG.Monster
 
   let data = App.GG.Body.data(body)
+  let folder = App.GG.Body.to_folder(body)
   let base_attr = App.GG.Creature.Attributes.new(10,10,10,10)
   let attributes = App.GG.Creature.Attributes.add(base_attr, data@fst)
   let dna = App.GG.Creature.Dna.new("cartinhas", attributes, body)
-  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.Creatures.slime.vbox, dna), [App.GG.Chip.Shockwave, App.GG.Chip.Shockwave], data@snd)
+  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.Creatures.slime.vbox, dna), [], folder, 0)
   monster
 
 App.GG.Creatures.slime.vbox(animation: App.GG.Animation, frame: U64): VoxBox
@@ -36,5 +37,28 @@ App.GG.Creatures.slime.vbox(animation: App.GG.Animation, frame: U64): VoxBox
         11#64: App.GG.img.Slime.movement.slime_character_teleport_11
       }default App.GG.img.Slime.idle.slime_character_idle_0
     attack:
-      App.GG.img.Slime.idle.slime_character_idle_0
+      switch U64.eql((frame % 24)/2) {
+        0#64: App.GG.img.Slime.shoot.slime_character__fire_00
+        1#64: App.GG.img.Slime.shoot.slime_character__fire_01
+        2#64: App.GG.img.Slime.shoot.slime_character__fire_02
+        3#64: App.GG.img.Slime.shoot.slime_character__fire_03
+        4#64: App.GG.img.Slime.shoot.slime_character__fire_04
+        5#64: App.GG.img.Slime.shoot.slime_character__fire_05
+        6#64: App.GG.img.Slime.shoot.slime_character__fire_06
+        7#64: App.GG.img.Slime.shoot.slime_character__fire_07
+        8#64: App.GG.img.Slime.shoot.slime_character__fire_08
+        9#64: App.GG.img.Slime.shoot.slime_character__fire_09
+        10#64: App.GG.img.Slime.shoot.slime_character__fire_10
+        11#64: App.GG.img.Slime.shoot.slime_character__fire_11
+      }default App.GG.img.Slime.shoot.slime_character__fire_00
+    sword: App.GG.img.Slime.shoot.slime_character__fire_00
+    damage:
+      switch U64.eql((frame % 24)/4) {
+        0#64: App.GG.img.Slime.Hit.slime_character_Hit_0
+        1#64: App.GG.img.Slime.Hit.slime_character_Hit_1
+        2#64: App.GG.img.Slime.Hit.slime_character_Hit_2
+        3#64: App.GG.img.Slime.Hit.slime_character_Hit_3
+        4#64: App.GG.img.Slime.Hit.slime_character_Hit_4
+        5#64: App.GG.img.Slime.Hit.slime_character_Hit_5
+      }default App.GG.img.Slime.idle.slime_character_idle_0
   }

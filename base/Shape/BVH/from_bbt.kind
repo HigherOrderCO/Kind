@@ -1,0 +1,2 @@
+Shape.BVH.from_bbt<K: Type>(bbt: BBT<K, Shape>): BVH<K, Shape>
+  BVH.from_bbt<K, Shape>(bbt, Shape.to_box, Shape.cmp)

@@ -1,0 +1,6 @@
+Shape.Rectangle.to_polygon(rectangle: Shape.Rectangle): Shape.Polygon
+  let a = V2.new(rectangle@x0, rectangle@y0)
+  let b = V2.new(rectangle@x0, rectangle@y1)
+  let c = V2.new(rectangle@x1, rectangle@y1)
+  let d = V2.new(rectangle@x1, rectangle@y0)
+  [a,b,c,d]

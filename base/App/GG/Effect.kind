@@ -1,16 +1,8 @@
-// App.GG.Effect: Type
-//   App.GG.Coord ->
-//   App.GG.Effect.Origin ->
-//   App.GG.Grid ->
-//   App.GG.Effect.Result
-
-// type App.GG.Effect.Result {
-//   err
-//   new(
-//     grid: App.GG.Grid
-//     img: VoxBox -> VoxBox
-//   )
-// }
+App.GG.Effect(A: Type): Type
+  App.GG.Coord ->
+  App.GG.Effect.Origin ->
+  App.GG.Grid ->
+  App.GG.Effect.Result(A)
 
 type App.GG.Effect.Origin {
   creature
@@ -33,12 +25,6 @@ type App.GG.Effect.Result<A: Type> {
   )
 }
 
-
-App.GG.Effect(A: Type): Type
-  App.GG.Coord ->
-  App.GG.Effect.Origin ->
-  App.GG.Grid ->
-  App.GG.Effect.Result(A)
 
 App.GG.Effect.bind<A: Type, B: Type>(
   effect: App.GG.Effect<A>
