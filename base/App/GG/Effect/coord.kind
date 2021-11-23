@@ -1,3 +1,18 @@
 App.GG.Effect.coord.get_center: App.GG.Effect<App.GG.Coord>
   (center, origin, grid)
   App.GG.Effect.Result.new!(center, center, origin, grid, (img) img, 0, "")
+
+
+
+
+App.GG.Effect.coord.closest_y: App.GG.Effect<Maybe<App.GG.Coord>>
+  (center, origin, grid)
+
+  let find_player = App.GG.Slime.find_coord(grid)
+  without find_player: App.GG.Effect.Result.new!(none, center, origin, grid, (img) img, 0, "")
+  let destination = 
+  if U32.gtn(find_player@snd@snd, center@snd) then
+    App.GG.Coord.below(center)
+  else
+    App.GG.Coord.above(center)
+  App.GG.Effect.Result.new!(some(destination), center, origin, grid, (img) img, 0, "")

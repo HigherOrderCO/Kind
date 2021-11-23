@@ -15,6 +15,58 @@ App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
     }
   new_coord
 
+
+App.GG.Coord.front_all.go(
+  coord: App.GG.Coord,
+  coords: List<App.GG.Coord>
+  team: App.GG.Team,
+  grid: App.GG.Grid
+): List<App.GG.Coord>
+  let next_coord = 
+    case team {
+      blue: {coord@fst + 1, coord@snd}
+      red:  {coord@fst - 1, coord@snd}
+      neutral: coord
+    }
+  let tile = App.GG.Grid.get(next_coord, grid)
+  case tile { 
+    none: 
+      coords
+    some:
+      let new_list = next_coord & coords
+      App.GG.Coord.front_all.go(next_coord, new_list, team, grid)
+  }
+
+App.GG.Coord.front_all(
+  coord: App.GG.Coord,
+  team: App.GG.Team,
+  grid: App.GG.Grid
+): List<App.GG.Coord>
+  App.GG.Coord.front_all.go(coord, [], team, grid)
+
+App.GG.Coord.has_enemy(
+  coord: App.GG.Coord
+  team: App.GG.Team
+  grid: App.GG.Grid
+): Bool
+
+  let coords = App.GG.Coord.front_all(coord, team, grid)
+  let enemy = false
+  for target in coords with enemy:
+    let any_creature = App.GG.Creature.get(target, grid)
+    case any_creature {
+      none:
+        enemy
+      some:
+        let same_team = App.GG.Team.eql(team, any_creature.value@team)
+        if same_team then
+          enemy
+        else
+          true
+    }
+  enemy
+
+
 App.GG.Coord.above(coord: App.GG.Coord): App.GG.Coord
   let new_coord = {coord@fst, coord@snd -1}
   new_coord

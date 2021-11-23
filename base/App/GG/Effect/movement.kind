@@ -1,27 +1,24 @@
-App.GG.Effect.movement(key: U16): App.GG.Effect<Unit>
+App.GG.Effect.movement.generic_movement(
+  coord: App.GG.Coord
+  move_frame: U64
+  final_frame: U64
+): App.GG.Effect<Unit>
+
   App.GG.Effect {
-    get frame = App.GG.Effect.frame.get
+    get frame =  App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
     get grid = App.GG.Effect.grid.get
-    let new_pos = App.GG.Effect.movement.direction(key, center, grid)
+    let tile = App.GG.Grid.get(coord, grid)
     App.GG.Effect.frame.inc 
     without frame: App.GG.Effect.pass
-    //log("frame: " | U64.show(frame) )
-    without new_pos:
-      App.GG.Effect { 
-        App.GG.Effect.actions.del
-        App.GG.Effect.animation.update(App.GG.Animation.idle)
-      }
+    log("frame: " | U64.show(frame) )
+    without tile: App.GG.Effect.actions.reset
     switch U64.eql(frame) {
-      0:
-        App.GG.Effect.animation.update(App.GG.Animation.movement)
-      12:
-          App.GG.Effect.movement.move(new_pos)
-      24:
-        App.GG.Effect {
-          App.GG.Effect.actions.del
-          App.GG.Effect.animation.update(App.GG.Animation.idle)
-        }
+      0: App.GG.Effect.animation.update(App.GG.Animation.movement)
+      move_frame: App.GG.Effect.movement.move(coord)
+      final_frame: 
+        log("aelqwe")
+        App.GG.Effect.actions.reset
       } default App.GG.Effect.pass
   }
 
@@ -52,3 +49,22 @@ App.GG.Effect.movement.direction(key: U16, coord: App.GG.Coord, grid: App.GG.Gri
     else
       none
   }
+
+
+App.GG.Effect.movement.player_movement(key: U16): App.GG.Effect<Unit>
+  let move_frame = 12#64
+  let final_frame = 24#64
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    get center = App.GG.Effect.coord.get_center
+    get grid = App.GG.Effect.grid.get
+    without frame: App.GG.Effect.pass
+    let new_pos = 
+      if frame <? 13 then
+        App.GG.Effect.movement.direction(key, center, grid)
+      else
+        some(center)
+    without new_pos: App.GG.Effect.pass
+    App.GG.Effect.movement.generic_movement(new_pos, move_frame, final_frame)
+  }
+    

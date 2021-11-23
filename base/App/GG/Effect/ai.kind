@@ -1,0 +1,27 @@
+App.GG.Effect.ai.update(
+  mod: App.GG.AI -> App.GG.AI
+): App.GG.Effect<Unit>
+  (center, origin, grid)
+
+  let new_grid = App.GG.Creature.modify_at(App.GG.AI.update(mod), center, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+
+
+App.GG.Effect.ai.get: App.GG.Effect<Maybe<App.GG.AI>>
+  (center, origin, grid)
+
+  let new_AI = App.GG.AI.get(center, grid)
+  App.GG.Effect.Result.new!(new_AI, center, origin, grid, (img) img, 0, "")
+
+App.GG.Effect.ai.inc: App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get center = App.GG.Effect.coord.get_center
+    get creature = App.GG.Effect.creature.get
+    get grid = App.GG.Effect.grid.get
+    without creature: App.GG.Effect.pass
+    let coords = App.GG.Coord.front_all(center, creature@team, grid)
+    let target = false
+    for coord in coords with target:
+      target || App.GG.Coord.has_enemy(coord, creature@team, grid)
+    App.GG.Effect.ai.update(App.GG.AI.inc(target))
+  }

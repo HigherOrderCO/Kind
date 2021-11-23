@@ -1,5 +1,8 @@
 type App.GG.Monster {
-  minion(data: App.GG.Minion)
+  minion(
+    AI: App.GG.AI
+    data: App.GG.Minion
+  )
   slime(
     data: App.GG.Slime
     hand: App.GG.Chips
