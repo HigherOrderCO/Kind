@@ -103,16 +103,14 @@ App.GG.Creature.status_update_aux(
       }
   }
 
-//App.GG.Creature.status_add(
-  //creature: App.GG.Creature
-  //duration: U64
-//): App.GG.Creature
-
   
-//App.GG.Creature.status_add_stun(
-  //creature: App.GG.Creature
-  //duration: U64
-//): App.GG.Creature
+App.GG.Creature.status_add_stun(
+  creature: App.GG.Creature
+  duration: U64
+): App.GG.Creature
+  
+  let new_status = App.GG.Creature.status_add_stun_aux(duration, creature@status)
+  creature@status <- new_status
 
 
 App.GG.Creature.status_add_stun_aux(
@@ -126,6 +124,9 @@ App.GG.Creature.status_add_stun_aux(
     cons:
       case status.head { 
         stun:
-          status
+          if U64.gtn(status.head.duration, duration) then
+            status
+          else
+            new_stun & status.tail
       }default status.head & App.GG.Creature.status_add_stun_aux(duration, status.tail)
   }
