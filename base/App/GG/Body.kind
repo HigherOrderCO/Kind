@@ -122,3 +122,11 @@ App.GG.Body.data(
   let chips = upper@snd ++ lower@snd ++ arm_1@snd ++ arm_2@snd
   {attributes, chips}
 
+App.GG.Body.to_folder(body: App.GG.Body): App.GG.Chips
+  let data = App.GG.Body.data(body)
+  let f = 
+    (chip: App.GG.Chip)
+      [chip, chip, chip]
+  let new_list = List.map!!(f, data@snd)
+  let flat = List.flatten!(new_list)
+  flat

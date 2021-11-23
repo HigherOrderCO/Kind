@@ -9,7 +9,7 @@ App.GG.Effect.creature.is_enemy(coord: App.GG.Coord): App.GG.Effect<Bool>
     } <> false
   App.GG.Effect.Result.new!(bool, center, origin, grid, (img) img, 0, "")
 
-App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord): App.GG.Effect<I32>
+App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): App.GG.Effect<I32>
   (center, origin, grid)
   let {real_dmg, new_grid} =
     Maybe {
@@ -21,6 +21,7 @@ App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord): App.GG.Effect<
       let new_tile = tile@creature <- some(new_creature)
       let real_dmg = hp - new_hp
       let new_grid = App.GG.Grid.set(pos, new_tile, grid)
+      let new_grid = if flinch then App.GG.Actions.new_actions(pos, new_grid, App.GG.Actions.flinch) else new_grid
       return {real_dmg, new_grid}
     } <> {+0#32, grid}
   App.GG.Effect.Result.new!(real_dmg, center, origin, new_grid, (img) img, 0, "")

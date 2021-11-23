@@ -2,7 +2,7 @@ App.GG.Chip.Shockwave: App.GG.Chip
   App.GG.Chip.new(
     "ShockWave"
     App.GG.Chip.Shockwave.Effect
-    App.GG.img.chip
+    App.GG.img.bazooka
   )
 
 App.GG.Chip.Shockwave.img(frame: U64): VoxBox
@@ -48,7 +48,7 @@ App.GG.Chip.Shockwave.bullet_position_x(current_frame: U64, max_frame: U64): I32
   
 
 App.GG.Chip.Shockwave.Projectile.Effect: App.GG.Effect<Unit>
-  let max_frame = 32#64
+  let max_frame = 8#64
   App.GG.Effect {
     App.GG.Effect.vbox.in_tile(App.GG.img.target_tile) // Adds image bound to tile
     App.GG.Effect.frame.inc // Increases projectile frame by 1
@@ -60,7 +60,7 @@ App.GG.Chip.Shockwave.Projectile.Effect: App.GG.Effect<Unit>
     if is_enemy && not(has_hit) then
       App.GG.Effect {
         App.GG.Effect.projectile.add_hit(center) // Adds enemy to list of targets hit by projectile
-        App.GG.Effect.creature.change_hp_at(-10, center) 
+        App.GG.Effect.creature.change_hp_at(-10, center, true) 
         return unit
       }
     else

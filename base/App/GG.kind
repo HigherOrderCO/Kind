@@ -4,7 +4,11 @@ App.GG.State: App.State
 
 type App.GG.State.local {
   new(
-    grid: App.GG.Grid)
+    phase: App.GG.Phase
+    grid: App.GG.Grid
+    mouse: Pair<U32, U32>
+    
+  )
 }
 
 // App
@@ -19,10 +23,8 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// Create flinch mechanic - working on it
-// Create a deck when starting a match
-// Add pewpew shot mechanic
-// Create turns where you can choose chips from your deck
+// Working - Add pewpew shot mechanic
+// Working - Create turns where you can choose chips from your deck
 // Create simple AI based on time in front of a slime and time not in front of a slime
 // Create simple statuses (stun, frozen, poison)
 // Fix centralization of tiles (currently the start of the drawing is defined to {40, 40})
@@ -30,6 +32,8 @@ App.GG: App<App.GG.State>
 // Create 3 minions
 // Add comments to everything
 
+// DONE: Create a deck when starting a match
+// DONE: Create flinch mechanic
 // DONE: Create Attributes from Body
 // DONE: Associate chips with stats and DNA
 // DONE: Make movement become an effect

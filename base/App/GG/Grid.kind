@@ -52,6 +52,6 @@ App.GG.Grid.move_creature(origin: App.GG.Coord, destination: App.GG.Coord, grid:
     let new_des = des@creature <- mon
     let new_grid = App.GG.Grid.set(destination, new_des, grid)
     let new_grid = App.GG.Grid.set(origin, new_ori, new_grid)
-    log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
+    //log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
     return new_grid
   } <> grid

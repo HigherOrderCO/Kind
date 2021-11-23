@@ -1,7 +1,5 @@
 Test: _
-  let red = Col32.new(255, 0, 0, 255)
-  let hsl = Col32.Hsl.to(red)
-  let string_hsl = F64.show(hsl@h) | "   " | F64.show(hsl@s) | "   " | F64.show(hsl@l)
-  let new_red = Col32.Hsl.from(hsl)
-  let string_rgb = U32.show(Col32.r(new_red)) | "   " | U32.show(Col32.g(new_red)) | "   " | U32.show(Col32.b(new_red))
-  string_rgb
+  let f = p(3)
+  F64.show(f)
+  p(n: Nat): F64
+  ((5.0/100.0) * (95.0/100.0) * p(n-2) + (95.0/100.0 )*p(n-1))/2.0

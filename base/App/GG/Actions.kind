@@ -17,7 +17,24 @@ type App.GG.Actions.Data {
 type App.GG.Actions.Category {
   movement
   chip
+  flinch
 }
+
+App.GG.Actions.flinch: App.GG.Actions.Data
+  let frame = 0#64
+  let category = App.GG.Actions.Category.flinch
+  let effect = App.GG.Effect.flinch
+  App.GG.Actions.Data.new(frame, effect, category)
+
+App.GG.Actions.new_actions(coord: App.GG.Coord, grid: App.GG.Grid, new_current: App.GG.Actions.Data): App.GG.Grid
+    let f = 
+    (creature)
+      let actions = creature@actions
+      let new_actions = actions@current <- some(new_current)
+      let new_actions = new_actions@next <- none
+      creature@actions <- new_actions
+  let new_grid = App.GG.Creature.modify_at(f, coord, grid)
+  new_grid
 
 App.GG.Actions.inc(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid 
   Maybe {
