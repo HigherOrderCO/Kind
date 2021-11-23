@@ -29,10 +29,6 @@ type App.GG.Creature.Attributes {
 }
 
 
-type App.GG.Creature.Status {
-  stun(duration: I32)
-}
-
 App.GG.Creature.Attributes.add(
   a: App.GG.Creature.Attributes
   b: App.GG.Creature.Attributes
@@ -76,3 +72,60 @@ App.GG.Creature.get(
   }
 
 
+//===========================================================
+//Status Management
+
+type App.GG.Creature.Status {
+  stun(duration: U64)
+}
+
+App.GG.Creature.status_update(
+  creature: App.GG.Creature
+): App.GG.Creature
+  
+  let status_update = App.GG.Creature.status_update_aux(creature@status)
+  creature@status <- status_update
+
+App.GG.Creature.status_update_aux(
+  status: List<App.GG.Creature.Status>
+):List<App.GG.Creature.Status>
+
+  case status { 
+    nil:
+      []
+    cons:
+      let head = case status.head { 
+        stun: App.GG.Creature.Status.stun(U64.sub(status.head.duration, 60))
+      }
+      let tail = App.GG.Creature.status_update_aux(status.tail)
+      case head { 
+        stun: if U64.gtn(head.duration, 0) then head & tail else tail
+      }
+  }
+
+//App.GG.Creature.status_add(
+  //creature: App.GG.Creature
+  //duration: U64
+//): App.GG.Creature
+
+  
+//App.GG.Creature.status_add_stun(
+  //creature: App.GG.Creature
+  //duration: U64
+//): App.GG.Creature
+
+
+App.GG.Creature.status_add_stun_aux(
+  duration: U64
+  status: List<App.GG.Creature.Status>
+): List<App.GG.Creature.Status>
+
+  let new_stun = App.GG.Creature.Status.stun(duration)
+  case status {
+    nil: new_stun & status
+    cons:
+      case status.head { 
+        stun:
+          status
+      }default status.head & App.GG.Creature.status_add_stun_aux(duration, status.tail)
+  }
