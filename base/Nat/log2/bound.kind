@@ -1,0 +1,2 @@
+Nat.log2.bound.up(n: Nat, m: Nat, H: Nat.lte(Nat.succ(n), Nat.pow(2, m)) == true): Nat.lte(Nat.succ(Nat.log2(n)), m) == true
+  ?nat.log2.bound.up

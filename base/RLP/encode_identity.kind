@@ -114,7 +114,12 @@ RLP.encode_identity(
                   }: Nat.lte(    recover_prefix.b    ,127,() List(RLP),List.cons(RLP,RLP.data(List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.nil(U8))),RLP.decode.many(List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail)))),Nat.lte(    recover_prefix.b    ,191,() List(RLP),RLP.split.length(128,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.data(head),RLP.decode.many(tail))),RLP.split.length(192,List.cons(U8,Nat.to_u8(Nat.add(192,List.length(U8,RLP.encode.many(rlps.head.child)))),List.concat(U8,List.concat(U8,List.nil(U8),RLP.encode.many(rlps.head.child)),RLP.encode.many(rlps.tail))),() List(RLP),(head) (tail) List.cons(RLP,RLP.node(RLP.decode.many(head)),RLP.decode.many(tail))))) == List.cons(RLP,RLP.node(rlps.head.child),rlps.tail)
 
                 false:
-                  let recover_prefix = Nat.to_u8.safe_conversion(Nat.add(248, List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))), ?todo.1)
+                  let bound_bytes_from_nat = RLP.aux.bytes_from_nat(List.length(U8,RLP.encode.many(rlps.head.child)), bound_child.fst)
+                  let recover_prefix =
+                    Nat.to_u8.safe_conversion(
+                      Nat.add(248,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child)))))
+                      bound_bytes_from_nat
+                    ) :: Equal(Nat, Nat.add(248, List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child))))), U8.to_nat(Nat.to_u8(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,RLP.encode.many(rlps.head.child)))))))))
                   case recover_prefix {
                     refl:
                       let lemma = RLP.aux.split.3(RLP.encode.many(rlps.head.child), RLP.encode.many(rlps.tail), remember_condition, bound_child.fst)

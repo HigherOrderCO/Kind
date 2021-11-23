@@ -105,7 +105,7 @@ RLP.decode.many(bytes: Bytes): List<RLP>
   }
 
 RLP.max: Nat
-  Nat.sub(Nat.pow(256, 7), 1)
+  Nat.sub(Nat.pow(2, Nat.mul(8, 7)), 1)
 
 RLP.decode(bytes: Bytes): RLP
   List.head!(RLP.decode.many(bytes)) <> RLP.data([])
