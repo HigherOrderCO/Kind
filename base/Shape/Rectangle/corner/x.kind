@@ -1,0 +1,2 @@
+Shape.Rectangle.corner.x(rectangle: Shape.Rectangle): Pair<F64, F64>
+  {rectangle@x0, rectangle@x1}

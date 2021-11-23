@@ -19,7 +19,7 @@ VoxBox.Draw.poly(
             let curr_x = p.fst
             let curr_y = p.snd
 
-            let new_img = VoxBox.Draw.line(prev_x, prev_y, p.fst, p.snd, z, col, data.fst)
+            let new_img = VoxBox.Draw.line(U32.to_i32(prev_x), U32.to_i32(prev_y), U32.to_i32(p.fst), U32.to_i32(p.snd), U32.to_i32(z), col, data.fst)
             {new_img, Maybe.some!(p)}
     }
   let data = List.fold!(vts, _, {img, Maybe.none<Pair<U32, U32>>}, draw_segment)

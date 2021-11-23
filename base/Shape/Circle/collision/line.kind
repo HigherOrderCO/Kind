@@ -1,0 +1,18 @@
+Shape.Circle.collision.line(circle: Shape.Circle, line: Shape.Line): Bool
+  let a = line@a
+  let b = line@b
+  if   
+    (Shape.Circle.collision.point(circle, a)) ||
+    (Shape.Circle.collision.point(circle, a))
+  then
+    true
+  else
+    let length = V2.dist(a,b)
+    let dot = V2.dot(a,b) / F64.pow(length, 2)
+    let cx = a@x + (dot * (b@x-a@x))
+    let cy = a@y + (dot * (b@y-a@y))
+    let cp = V2.new(cx, cy)
+    if Shape.Point.collision.line(cp, line) then
+      Shape.Point.collision.circle(cp, circle)
+    else
+      false

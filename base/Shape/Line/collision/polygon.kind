@@ -1,0 +1,2 @@
+Shape.Line.collision.polygon(line: Shape.Line, polygon: Shape.Polygon): Bool
+  Shape.Polygon.collision.line(polygon, line)

@@ -1,0 +1,2 @@
+Shape.Polygon.collision.rectangle(polygon: Shape.Polygon, rectangle: Shape.Rectangle): Bool
+  Shape.Polygon.collision.to_line<Shape.Rectangle>(Shape.Line.collision.rectangle, polygon, rectangle)

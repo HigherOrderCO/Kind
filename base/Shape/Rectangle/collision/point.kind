@@ -1,0 +1,2 @@
+Shape.Rectangle.collision.point(rectangle: Shape.Rectangle, point: Shape.Point): Bool
+  Shape.Point.collision.rectangle(point, rectangle)

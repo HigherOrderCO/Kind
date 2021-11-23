@@ -1,0 +1,2 @@
+Shape.Line.collision.point(line: Shape.Line, point: Shape.Point): Bool
+  Shape.Point.collision.line(point, line)

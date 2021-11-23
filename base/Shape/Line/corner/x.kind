@@ -1,0 +1,7 @@
+Shape.Line.corner.x(line: Shape.Line): Pair<F64, F64>
+  let {x0, x1} =
+    if line@a@x <? line@b@x then 
+      {line@a@x, line@b@x}
+    else 
+      {line@b@x, line@a@x}
+  {x0, x1}

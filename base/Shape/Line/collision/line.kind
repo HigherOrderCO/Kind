@@ -1,0 +1,30 @@
+Shape.Line.collision.line(line0: Shape.Line, line1: Shape.Line): Bool
+  let a0 = line0@a
+  let a1 = line1@a
+  let b0 = line0@b
+  let b1 = line1@b
+  let p =
+    let p = b1@y - a0@y
+    let q = a1@x - a0@x
+    let r = a1@y - a0@y
+    let s = b1@x - a0@x
+    F64.gtn(p * q, r * s)
+  let q =
+    let p = b1@y - b0@y
+    let q = a1@x - b0@x
+    let r = a1@y - b0@y
+    let s = b1@x - b0@x
+    F64.gtn(p * q, r * s)
+  let r =
+    let p = a1@y - a0@y
+    let q = b0@x - a0@x
+    let r = b0@y - a0@y
+    let s = a1@x - a0@x
+    F64.gtn(p * q, r * s)
+  let s =
+    let p = b1@y - a0@y
+    let q = b0@x - a0@x
+    let r = b0@y - a0@y
+    let s = b1@x - a0@x
+    F64.gtn(p * q, r * s)
+  Bool.not(Bool.eql(p,q) || Bool.eql(r,s))

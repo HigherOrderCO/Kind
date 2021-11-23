@@ -1,0 +1,11 @@
+BVH.sort<K: Type, V: Type>(
+  count: Nat
+  list: List<Pair<K,V>> 
+  cmp: Nat -> V -> V -> Cmp
+): List<Pair<K,V>>
+  let cmp_new = 
+    (x: Pair<K,V>, z: Pair<K,V>)
+      let a = x@snd
+      let b = z@snd
+      cmp(count, a, b)
+  List.sort<Pair<K,V>>(cmp_new, list)

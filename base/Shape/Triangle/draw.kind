@@ -1,0 +1,9 @@
+Shape.Triangle.draw(triangle: Shape.Triangle, z: I32, color: Col32,  img: VoxBox): VoxBox
+  let a = triangle@a
+  let b = triangle@b
+  let c = triangle@c
+  let f = 
+    (v: V2)
+      {F64.to_u32(v@x), F64.to_u32(v@y)}
+  let list = List.map!!(f, [a,b,c])
+  VoxBox.Draw.poly(list, I32.to_u32(z), color, img)

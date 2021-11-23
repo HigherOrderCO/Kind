@@ -1,0 +1,21 @@
+Shape.to_box(shapes: List<Shape>): Shape
+  case shapes {
+    nil: Shape.polygon([])
+    cons:
+      let {x0, x1} = Shape.corner_x(shapes.head)
+      let {y0, y1} = Shape.corner_y(shapes.head)
+      let xys = {{x0, x1}, {y0, y1}}
+      for shape in shapes with xys:
+        let xs = xys@fst
+        let ys = xys@snd
+        let {x0, x1} = xs
+        let {y0, y1} = ys
+        let {sx0, sx1} = Shape.corner_x(shape)
+        let {sy0, sy1} = Shape.corner_y(shape)
+        let x0 = if sx0 <? x0 then sx0 else x0 
+        let x1 = if sx1 >? x1 then sx1 else x1
+        let y0 = if sy0 <? y0 then sy0 else y0 
+        let y1 = if sy1 >? y1 then sy1 else y1
+        {{x0, x1}{y0, y1}}
+      Shape.rectangle(Shape.Rectangle.new(xys@fst@fst, xys@fst@snd, xys@snd@fst, xys@snd@snd))
+  }

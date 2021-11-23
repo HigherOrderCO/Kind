@@ -1,0 +1,4 @@
+Shape.Circle.draw(circle: Shape.Circle, z: I32, color: Col32,  img: VoxBox): VoxBox
+  let c = circle@center
+  let r = circle@radius
+  VoxBox.Draw.circle(F64.to_i32(c@x), F64.to_i32(c@y), F64.to_i32(r), z, color, img)

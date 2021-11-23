@@ -1,0 +1,23 @@
+Shape.Polygon.collision.to_line<A: Type>(collision: Shape.Line -> A -> Bool, polygon: Shape.Polygon, shape: A): Bool
+  case polygon {
+    nil: false
+    cons:
+      Shape.Polygon.collision.to_line.go<A>(collision, polygon, shape, polygon.head)
+  }
+
+Shape.Polygon.collision.to_line.go<A: Type>(collision: Shape.Line -> A -> Bool, vs: List<V2>, shape: A, first: V2): Bool
+  case vs {
+    nil: false
+    cons:
+      let current = vs.head
+      let next = 
+        case vs.tail {
+          nil: first
+          cons: vs.tail.head
+        }
+      let line = Shape.Line.new(current, next)
+      if collision(line, shape) then
+        true
+      else
+        Shape.Polygon.collision.to_line.go<A>(collision, vs.tail, shape, first)
+  }

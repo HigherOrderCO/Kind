@@ -1,0 +1,32 @@
+Shape.collision(a: Shape, b: Shape): Bool
+  case a b {
+    point point         : Shape.Point.collision.point(a.val, b.val)
+    point line          : Shape.Point.collision.line(a.val, b.val)
+    point circle        : Shape.Point.collision.circle(a.val, b.val)
+    point rectangle     : Shape.Point.collision.rectangle(a.val, b.val)
+    point polygon       : Shape.Point.collision.polygon(a.val, b.val)
+
+    line point          : Shape.Line.collision.point(a.val, b.val)
+    line line           : Shape.Line.collision.line(a.val, b.val)
+    line circle         : Shape.Line.collision.circle(a.val, b.val)
+    line rectangle      : Shape.Line.collision.rectangle(a.val, b.val)
+    line polygon        : Shape.Line.collision.polygon(a.val, b.val)
+
+    circle point        : Shape.Circle.collision.point(a.val, b.val)
+    circle line         : Shape.Circle.collision.line(a.val, b.val)
+    circle circle       : Shape.Circle.collision.circle(a.val, b.val)
+    circle rectangle    : Shape.Circle.collision.rectangle(a.val, b.val)
+    circle polygon      : Shape.Circle.collision.polygon(a.val, b.val)
+
+    rectangle point     : Shape.Rectangle.collision.point(a.val, b.val)
+    rectangle line      : Shape.Rectangle.collision.line(a.val, b.val)
+    rectangle circle    : Shape.Rectangle.collision.circle(a.val, b.val)
+    rectangle rectangle : Shape.Rectangle.collision.rectangle(a.val, b.val)
+    rectangle polygon   : Shape.Rectangle.collision.polygon(a.val, b.val)
+
+    polygon point       : Shape.Polygon.collision.point(a.val, b.val)
+    polygon line        : Shape.Polygon.collision.line(a.val, b.val)
+    polygon circle      : Shape.Polygon.collision.circle(a.val, b.val)
+    polygon rectangle   : Shape.Polygon.collision.rectangle(a.val, b.val)
+    polygon polygon     : Shape.Polygon.collision.polygon(a.val, b.val)
+  }

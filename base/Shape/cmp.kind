@@ -1,0 +1,8 @@
+Shape.cmp(count: Nat, shape0: Shape, shape1: Shape): Cmp
+  let func =
+    (sh: Shape)
+    if count =? 0 then
+      Pair.fst!!(Shape.corner_x(sh))
+    else
+      Pair.fst!!(Shape.corner_y(sh))
+  F64.cmp(func(shape0), func(shape1))

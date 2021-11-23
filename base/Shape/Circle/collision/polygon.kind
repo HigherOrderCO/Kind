@@ -1,0 +1,2 @@
+Shape.Circle.collision.polygon(circle: Shape.Circle, polygon: Shape.Polygon): Bool
+  Shape.Polygon.collision.circle(polygon, circle)

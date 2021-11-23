@@ -1,0 +1,29 @@
+BVH.from_list<K: Type, V: Type>(
+  list: List<Pair<K, V>>, 
+  to_box: List<V> -> V, 
+  cmp: Nat -> V -> V -> Cmp
+): BVH<K, V>
+
+  BVH.from_list.go<K, V>(0, list, to_box, cmp)
+
+BVH.from_list.go<K: Type, V: Type>(
+  count: Nat,
+  list: List<Pair<K, V>>, 
+  to_box: List<V> -> V, 
+  cmp: Nat -> V -> V -> Cmp
+): BVH<K, V>
+  let sorted = BVH.sort<K, V>(count, list, cmp)
+  let {a, b} = BVH.split<K, V>(count, list)
+
+  let func = 
+    (x: List<Pair<K, V>>)
+      case x {
+        nil: BVH.tip<K, V>
+        cons:
+          case x.tail {
+            nil: BVH.end<K, V>(x.head@fst, x.head@snd)
+            cons: BVH.from_list.go<K, V>(count + 1, x.tail, to_box, cmp)
+          }
+      }
+  let box = List.map!!(Pair.snd!!, list)
+  BVH.box<K, V>(to_box(box), func(a), func(b))

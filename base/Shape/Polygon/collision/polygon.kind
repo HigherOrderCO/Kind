@@ -1,0 +1,16 @@
+Shape.Polygon.collision.polygon(polygon0: Shape.Polygon, polygon1: Shape.Polygon): Bool
+  if Shape.Polygon.collision.polygon.vx_is_inside(polygon0, polygon1) then
+    true
+  else 
+    Shape.Polygon.collision.to_line<Shape.Polygon>(Shape.Line.collision.polygon, polygon0, polygon1)
+
+
+Shape.Polygon.collision.polygon.vx_is_inside(polygon0: Shape.Polygon, polygon1: Shape.Polygon): Bool
+  case polygon1 {
+    nil: false
+    cons:
+      if Shape.Polygon.collision.point(polygon0, polygon1.head) then
+        true
+      else 
+        Shape.Polygon.collision.polygon.vx_is_inside(polygon0, polygon1.tail)
+  }
