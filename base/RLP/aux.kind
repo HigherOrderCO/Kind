@@ -29,7 +29,7 @@ RLP.aux.split.0(
 RLP.aux.split.1(
   payload: Bytes
   tail: Bytes
-  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
+  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), false)
 ): Pair.new(Bytes, Bytes, payload, tail) ==
      let b = Bytes.from_nat(List.length!(payload))
      let a = Nat.to_u8(Nat.add(56, Nat.add(128, List.length!(b))))
