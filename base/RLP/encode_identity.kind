@@ -1,9 +1,3 @@
-Nat.to_u8.safe_conversion(n: Nat, H: Nat.lte(n, 255) == true): n == U8.to_nat(Nat.to_u8(n))
-  Word.to_nat.safe(8, n, H)
-
-because_i_said_so<A: Type>: A
-  because_i_said_so<A>
-
 RLP.encode_identity(
   rlps: List<RLP>
   H: Equal<Bool>(Nat.lte(List.length(U8, RLP.encode.many(rlps)), RLP.max), true)
@@ -83,7 +77,7 @@ RLP.encode_identity(
                           let limit_length = mirror(RLP.aux.bytes_from_nat(List.length(U8,rlps.head.value), bound.snd.fst))
                           case limit_length {
                             refl:
-                              let recover_split = RLP.aux.split.1(rlps.head.value, RLP.encode.many(rlps.tail), size_limit, ?hole)
+                              let recover_split = RLP.aux.split.1(rlps.head.value, RLP.encode.many(rlps.tail), size_limit, bound.snd.fst)
                               case recover_split {
                                 refl:
                                   open bound.snd.snd as bound_tail
