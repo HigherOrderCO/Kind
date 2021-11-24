@@ -1,5 +1,5 @@
 // x ^ y
-Nat.pow(x : Nat, y : Nat) : Nat
+Nat.pow(x: Nat, y: Nat): Nat
   case y {
     zero:
       Nat.succ(Nat.zero)

@@ -13,22 +13,56 @@ Bytes.show(bytes: Bytes): String
 Bytes.split: (bytes: Bytes, n: Nat) -> Pair<Bytes, Bytes>
   List.split<U8>
 
-Bytes.to_nat.go<size: Nat>(byte: Word<size>): Nat
-  case byte {
-    e: Nat.zero
-    o: Nat.double(Bytes.to_nat.go<byte.size>(byte.pred))
-    i: Nat.succ(Nat.double(Bytes.to_nat.go<byte.size>(byte.pred)))
-  }
-
 Bytes.to_nat(bytes: Bytes): Nat
+  Bytes.to_nat.go(bytes, 0)
+
+Bytes.to_nat.go(bytes: Bytes, acc: Nat): Nat
   case bytes {
     nil:
-      Nat.zero
-    cons: 
-      let head = Bytes.to_nat.go<8>(bytes.head@value)
-      let tail = Bytes.to_nat(bytes.tail)
-      Nat.add(head, Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(Nat.double(tail)))))))))
+      acc
+    cons:
+      let digit = U8.to_nat(bytes.head)
+      Bytes.to_nat.go(bytes.tail, digit + 256*acc)
   }
+
+Bytes.to_nat.concat(
+  b0: Bytes, b1: Bytes
+): (Bytes.to_nat(b1) + Nat.pow(256, List.length(U8, b1))*Bytes.to_nat(b0)) == Bytes.to_nat(b0 ++ b1)
+  case b1 {
+    nil:
+      case List.concat.nil_right(U8, b0) {
+        refl:
+          Nat.add.zero_right(Bytes.to_nat(b0))
+      }: Nat.add(Bytes.to_nat(List.nil(U8)),Nat.mul(Nat.pow(256,List.length(U8,List.nil(U8))),Bytes.to_nat(b0))) == Bytes.to_nat(self.b)
+    cons:
+      let reassoc = mirror(List.concat.assoc(U8, b0, [b1.head], b1.tail))
+      case reassoc {
+        refl:
+          let ind = Bytes.to_nat.concat(List.concat(U8,b0,[b1.head]),b1.tail)
+          case ind {
+
+// proof sketch:
+// to_nat(bh & bt)                         + 256^succ(len(bt)) * to_nat(t)  == to_nat(bt) + 256^len(bt) * to_nat(t ++ [bh])
+// (to_nat(bt) + 256^len(bt)*to_nat([bh])) + 256^succ(len(bt)) * to_nat(t)  == to_nat(bt) + 256^len(bt) * to_nat(t ++ [bh])
+// to_nat(bt) + (256^len(bt)*to_nat([bh])  + 256^succ(len(bt)) * to_nat(t)) == to_nat(bt) + 256^len(bt) * to_nat(t ++ [bh])
+//              (256^len(bt)*to_nat([bh])  + 256^succ(len(bt)) * to_nat(t)) ==              256^len(bt) * to_nat(t ++ [bh])
+//              (256^len(bt)*to_nat([bh])  + (256*256^len(bt)) * to_nat(t)) ==              256^len(bt) * to_nat(t ++ [bh])
+//              (256^len(bt)*to_nat([bh])  + (256^len(bt)*256) * to_nat(t)) ==              256^len(bt) * to_nat(t ++ [bh])
+//              (256^len(bt)*to_nat([bh])  + 256^len(bt)*(256 * to_nat(t))  ==              256^len(bt) * to_nat(t ++ [bh])
+//               256^len(bt)*(to_nat([bh]                 + 255*to_nat(t))) ==              256^len(bt) * to_nat(t ++ [bh])
+//               256^len(bt)*(to_nat([bh]                 + 255*to_nat(t))) ==  256^len(bt) * (to_nat([bh]) + 256*to_nat(t))
+            refl:
+              let ind = Bytes.to_nat.concat(b0, [b1.head])
+              case ind {
+                refl:
+                  ?refl
+
+              }: Nat.add(Bytes.to_nat(List.cons(U8,b1.head,b1.tail)),Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))) == Nat.add(Bytes.to_nat(b1.tail),Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),    ind.b    ))
+
+          }: Nat.add(Bytes.to_nat(List.cons(U8,b1.head,b1.tail)),Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))) == ind.b
+
+      }: Nat.add(Bytes.to_nat(List.cons(U8,b1.head,b1.tail)),Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))) == Bytes.to_nat(reassoc.b)
+  }!
 
 Bytes.from_nat(n: Nat): Bytes
   case n {
@@ -38,8 +72,13 @@ Bytes.from_nat(n: Nat): Bytes
       Bytes.from_nat(n/256) ++ [U8.from_nat(Nat.mod(n, 256))]
   }
 
-Bytes.to_nat.from_nat(n: Nat): n == Bytes.to_nat(Bytes.from_nat(n))
-  ?bytes.to_nat.from_nat
+//Bytes.to_nat.from_nat(n: Nat): n == Bytes.to_nat(Bytes.from_nat(n))
+//  case n {
+//    zero:
+//      refl
+//    succ:
+//      ?succ//-11-5-129-
+//  }!
 
 Bytes.from_nat.length(n: Nat): Nat.succ(Nat.log2(n)/8) == List.length(U8, Bytes.from_nat(n))
   ?bytes.from_nat.length
