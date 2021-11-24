@@ -83,7 +83,7 @@ RLP.encode_identity(
                           let limit_length = mirror(RLP.aux.bytes_from_nat(List.length(U8,rlps.head.value), bound.snd.fst))
                           case limit_length {
                             refl:
-                              let recover_split = RLP.aux.split.1(rlps.head.value, RLP.encode.many(rlps.tail), size_limit)
+                              let recover_split = RLP.aux.split.1(rlps.head.value, RLP.encode.many(rlps.tail), size_limit, ?hole)
                               case recover_split {
                                 refl:
                                   open bound.snd.snd as bound_tail

@@ -1,6 +1,3 @@
-because_i_said_so<A: Type>: A
-  because_i_said_so<A>
-
 // These sub-theorems were not proven yet!
 // Most of them are simple, and should be finished over the next days
 RLP.aux.split.0(
@@ -23,12 +20,32 @@ RLP.aux.split.0(
 RLP.aux.split.1(
   payload: Bytes
   tail: Bytes
-  H: Equal<Bool>(Nat.lte(List.length!(payload), 55), false)
+  H0: Equal<Bool>(Nat.lte(List.length!(payload), 55), false)
+  H1: Equal<Bool>(Nat.lte(List.length(U8, payload), RLP.max), true)
 ): Pair.new(Bytes, Bytes, payload, tail) ==
      let b = Bytes.from_nat(List.length!(payload))
      let a = Nat.to_u8(Nat.add(56, Nat.add(128, List.length!(b))))
      RLP.split.length(128, a & (b ++ payload) ++ tail)
-  because_i_said_so!
+  let bytes_from_nat_length = Nat.lte.slack_left(List.length(U8, Bytes.from_nat(List.length(U8,payload))), 7, 64, RLP.aux.bytes_from_nat(List.length(U8, payload), H1))
+  let safe_conversion = Nat.to_u8.safe_conversion(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,payload))))), bytes_from_nat_length)
+  case safe_conversion {
+    refl:
+      let concat_assoc = List.concat.assoc(U8,Bytes.from_nat(List.length(U8,payload)),payload,tail)
+      case concat_assoc {
+        refl:
+          let splitted_pair = mirror(List.split.length(U8, Bytes.from_nat(List.length(U8,payload)), List.concat(U8, payload, tail)))
+          case splitted_pair {
+            refl:
+              let recover_length = Bytes.to_nat.from_nat(List.length(U8,payload))
+              case recover_length {
+                refl:
+                  mirror(List.split.length(U8, payload, tail))
+              }: Pair.new(Bytes,Bytes,payload,tail) == List.split(U8, List.concat(U8, payload, tail), recover_length.b)
+          }: Pair.new(Bytes,Bytes,payload,tail) ==    splitted_pair.b(    () Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))
+
+      }: Pair.new(Bytes,Bytes,payload,tail) == Bytes.split(    concat_assoc.b,    Nat.sub(Nat.sub(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,payload))))),128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))
+
+  }: Pair.new(Bytes,Bytes,payload,tail) == Nat.lte(Nat.sub(    safe_conversion.b,    128),55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(    safe_conversion.b,    128)),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(Nat.sub(    safe_conversion.b,    128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
 
 RLP.aux.split.2(
   payload: Bytes
