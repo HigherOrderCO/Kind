@@ -40,7 +40,6 @@ Bytes.to_nat.concat(
         refl:
           let ind = Bytes.to_nat.concat(List.concat(U8,b0,[b1.head]),b1.tail)
           case ind {
-
 // proof sketch:
 // to_nat(bh & bt)                         + 256^succ(len(bt)) * to_nat(t)  == to_nat(bt) + 256^len(bt) * to_nat(t ++ [bh])
 // (to_nat(bt) + 256^len(bt)*to_nat([bh])) + 256^succ(len(bt)) * to_nat(t)  == to_nat(bt) + 256^len(bt) * to_nat(t ++ [bh])
@@ -52,12 +51,44 @@ Bytes.to_nat.concat(
 //               256^len(bt)*(to_nat([bh]                 + 255*to_nat(t))) ==              256^len(bt) * to_nat(t ++ [bh])
 //               256^len(bt)*(to_nat([bh]                 + 255*to_nat(t))) ==  256^len(bt) * (to_nat([bh]) + 256*to_nat(t))
             refl:
-              let ind = Bytes.to_nat.concat(b0, [b1.head])
+              let ind = Bytes.to_nat.concat([b1.head], b1.tail)
               case ind {
                 refl:
-                  ?refl
+                  let reassoc = mirror(Nat.add.assoc(Bytes.to_nat(b1.tail), Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Bytes.to_nat(List.cons(U8,b1.head,List.nil(U8)))), Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))))
+                  case reassoc {
+                    refl:
+                      let mul_reassoc = case mirror(Nat.mul.assoc(Nat.pow(256,List.length(U8,b1.tail)),256, Bytes.to_nat(b0))) {
+                        refl:
+                          case Nat.mul.comm(256, Nat.pow(256,List.length(U8,b1.tail))) {
+                            refl:
+                              Equal.refl(Nat, Nat.mul(Nat.mul(256,Nat.pow(256,List.length(U8,b1.tail))),Bytes.to_nat(b0)))
+                          }: Nat.mul(    self.b,    Bytes.to_nat(b0)) == Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))
+                      }: self.b == Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))
+                      let lemma = case mul_reassoc {
+                        refl:
+                          let mul_factor = Nat.mul.distrib_left(Nat.pow(256,List.length(U8,b1.tail)), Bytes.to_nat(List.cons(U8,b1.head,List.nil(U8))), Nat.mul(256,Bytes.to_nat(b0)))
+                          case mul_factor {
+                            refl:
+                              let ind = Bytes.to_nat.concat(b0, List.cons(U8, b1.head, List.nil(U8)))
+                              case ind {
+                                refl:
+                                  let obvious = mirror(Nat.mul.one_right(256)) :: Equal(Nat, 256, Nat.pow(256,List.length(U8,List.cons(U8,b1.head,List.nil(U8)))))
+                                  case obvious {
+                                    refl:
+                                      refl
+                                  }: Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Nat.add(Bytes.to_nat(List.cons(U8,b1.head,List.nil(U8))),Nat.mul(256,Bytes.to_nat(b0)))) == Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Nat.add(Bytes.to_nat(List.cons(U8,b1.head,List.nil(U8))),Nat.mul(    obvious.b,    Bytes.to_nat(b0))))
+                              }: Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Nat.add(Bytes.to_nat(List.cons(U8,b1.head,List.nil(U8))),Nat.mul(256,Bytes.to_nat(b0)))) == Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),    ind.b    )
 
-              }: Nat.add(Bytes.to_nat(List.cons(U8,b1.head,b1.tail)),Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))) == Nat.add(Bytes.to_nat(b1.tail),Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),    ind.b    ))
+                          }: mul_factor.b == Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Bytes.to_nat(List.concat(U8,b0,List.cons(U8,b1.head,List.nil(U8)))))
+                      }: Nat.add(Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Bytes.to_nat(List.cons(U8,b1.head,List.nil(U8)))),    mul_reassoc.b    ) == Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Bytes.to_nat(List.concat(U8,b0,List.cons(U8,b1.head,List.nil(U8)))))
+                      case lemma {
+                        refl:
+                          refl
+                      }: Nat.add(Bytes.to_nat(b1.tail),Nat.add(Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Bytes.to_nat(List.cons(U8,b1.head,List.nil(U8)))),Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0)))) == Nat.add(Bytes.to_nat(b1.tail),    lemma.b    )
+
+                  }: reassoc.b == Nat.add(Bytes.to_nat(b1.tail),Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Bytes.to_nat(List.concat(U8,b0,List.cons(U8,b1.head,List.nil(U8))))))
+
+              }: Nat.add(ind.b, Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))) == Nat.add(Bytes.to_nat(b1.tail),Nat.mul(Nat.pow(256,List.length(U8,b1.tail)),Bytes.to_nat(List.concat(U8,b0,List.cons(U8,b1.head,List.nil(U8))))))
 
           }: Nat.add(Bytes.to_nat(List.cons(U8,b1.head,b1.tail)),Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,b1.head,b1.tail))),Bytes.to_nat(b0))) == ind.b
 
