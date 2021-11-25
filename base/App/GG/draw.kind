@@ -3,16 +3,16 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
   (state)
   let local = state@local
   <div style={
-    "height": "100vh"
+    "height": "max(100%, 600px)"
     "width": "100vw"
+    "display": "flex",
+    "align-items": "center",
+    "justify-content": "center"
   }>
     <div style={
         "max-height": "100%",
         "max-width": "100%",
-        "display": "flex",
         "overflow": "hidden",
-        "align-items": "center",
-        "justify-content": "center"
       }>{
         DOM.vbox({
             "class": "pixel-art" 
