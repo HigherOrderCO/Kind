@@ -7,14 +7,18 @@ App.GG.Effect.movement.generic_movement(
   App.GG.Effect {
     get frame =  App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
+    get creature = App.GG.Effect.creature.get
     get grid = App.GG.Effect.grid.get
-    let tile = App.GG.Grid.get(coord, grid)
     App.GG.Effect.frame.inc 
     without frame: App.GG.Effect.pass
+    without creature: App.GG.Effect.pass
     log("frame: " | U64.show(frame) )
-    without tile: App.GG.Effect.actions.reset
     switch U64.eql(frame) {
-      0: App.GG.Effect.animation.update(App.GG.Animation.movement)
+      0: 
+        if App.GG.Effect.movement.get_possible_tile(coord, creature@team, grid) then
+          App.GG.Effect.animation.update(App.GG.Animation.movement)
+        else
+          App.GG.Effect.actions.reset
       move_frame: App.GG.Effect.movement.move(coord)
       final_frame: 
         log("aelqwe")
@@ -22,49 +26,48 @@ App.GG.Effect.movement.generic_movement(
       } default App.GG.Effect.pass
   }
 
+App.GG.Effect.movement.get_possible_tile(destination: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Bool
+  let tile = App.GG.Grid.get(destination, grid)
+  case tile {
+    none: false
+    some:
+      let creature = tile.value@creature
+      case creature {
+        some: false
+        none:
+          if App.GG.Team.eql(tile.value@owner, team) then
+            true
+          else
+            false
+      }
+  }
+
+
+type App.GG.Effect.movement.Arrow {
+  up
+  down
+  left
+  right
+}
+
+App.GG.Effect.movement.Arrow.direction(coord: App.GG.Coord, arrow: App.GG.Effect.movement.Arrow): App.GG.Coord
+  case arrow {
+    up    : {coord@fst, coord@snd - 1}
+    down  : {coord@fst, coord@snd + 1}
+    left  : {coord@fst - 1, coord@snd}
+    right : {coord@fst + 1, coord@snd}
+  }
+
 App.GG.Effect.movement.move(new_pos: App.GG.Coord): App.GG.Effect<Unit>
   (center, origin, grid) 
   let new_grid = App.GG.Grid.move_creature(center, new_pos, grid)
   App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
 
-App.GG.Effect.movement.direction(key: U16, coord: App.GG.Coord, grid: App.GG.Grid): Maybe<App.GG.Coord>
-  
-  let new_coord = 
-    switch U16.eql(key) {
-      // left
-      37#16: some({coord@fst - 1, coord@snd})
-      // up
-      38#16: some({coord@fst, coord@snd - 1})
-      // right
-      39#16: some({coord@fst + 1, coord@snd})
-      // down
-      40#16: some({coord@fst, coord@snd + 1})
-    }default none
-  Maybe {
-    get new_coord = new_coord
-    get previous_tile = App.GG.Grid.get(coord, grid)
-    get next_tile = App.GG.Grid.get(new_coord, grid)
-    if App.GG.Team.eql(previous_tile@owner, next_tile@owner) then
-      some(new_coord)
-    else
-      none
-  }
-
-
-App.GG.Effect.movement.player_movement(key: U16): App.GG.Effect<Unit>
-  let move_frame = 12#64
-  let final_frame = 24#64
+App.GG.Effect.movement.player_movement(arrow: App.GG.Effect.movement.Arrow): App.GG.Effect<Unit>
   App.GG.Effect {
-    get frame = App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
-    get grid = App.GG.Effect.grid.get
-    without frame: App.GG.Effect.pass
-    let new_pos = 
-      if frame <? 13 then
-        App.GG.Effect.movement.direction(key, center, grid)
-      else
-        some(center)
-    without new_pos: App.GG.Effect.pass
-    App.GG.Effect.movement.generic_movement(new_pos, move_frame, final_frame)
+    let coord = App.GG.Effect.movement.Arrow.direction(center, arrow)
+    App.GG.Effect.movement.generic_movement(coord, 12, 24)
   }
+
     

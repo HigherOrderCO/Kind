@@ -2,8 +2,10 @@ type App.GG.Phase {
   setup(
     table: App.GG.Table
     hand: App.GG.Chips
-    energy: Nat
+    energy: I32
   )
-  game
+  game(
+    turn_bar: U64
+  )
 }
 

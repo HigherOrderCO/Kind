@@ -130,3 +130,10 @@ App.GG.Creature.status_add_stun_aux(
             new_stun & status.tail
       }default status.head & App.GG.Creature.status_add_stun_aux(duration, status.tail)
   }
+
+App.GG.Creature.sub_folder(quantity: Nat, creature: App.GG.Creature): App.GG.Creature
+  case creature@category as monster {
+    minion: creature
+    slime:
+      creature@monster <- App.GG.Monster.slime(monster.data, monster.hand, List.drop!(quantity, monster.folder), monster.energy)
+  }

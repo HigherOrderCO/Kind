@@ -22,7 +22,9 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
             "scale": "4"
           },
           {},
+          let bar = case local@phase as phase {setup: 0#64, game: phase.turn_bar} 
           let img = App.GG.draw.grid(local@grid, img)
+          let img = App.GG.draw.turn_bar(bar, img)
           App.GG.draw.setup(local@phase,img))
       }</div>
   </div>
@@ -48,6 +50,9 @@ App.GG.draw.setup(phase: App.GG.Phase, img: VoxBox): VoxBox
     game: img
   }
 //40x22
+App.GG.draw.turn_bar(turn_bar: U64, img: VoxBox): VoxBox
+  let max = U32.min(F64.to_u32(U64.to_f64(turn_bar)), 1200)
+  VoxBox.Draw.rect(21, 15, 100, max / 6, 4, Col32.new(100, 255, 100, 255), img)
 
 App.GG.draw.setup.chips(count: U32, table: App.GG.Table, x: U32, y: U32, img: VoxBox): VoxBox
   case table {

@@ -6,3 +6,20 @@ type App.GG.Table.Slot {
     chip: Maybe<App.GG.Chip>
   )
 }
+
+App.GG.Table.from_folder(countdown: Nat, folder: App.GG.Chips): App.GG.Table
+  if countdown =? 0 then
+    List.nil<App.GG.Table.Slot>
+  else
+    case folder {
+    nil: 
+      List.cons<App.GG.Table.Slot>(
+        App.GG.Table.Slot.new(none),
+        App.GG.Table.from_folder(countdown -1, folder)
+      )
+    cons: 
+      List.cons<App.GG.Table.Slot>(
+        App.GG.Table.Slot.new(some(folder.head)),
+        App.GG.Table.from_folder(countdown -1, folder.tail)
+      )
+  }

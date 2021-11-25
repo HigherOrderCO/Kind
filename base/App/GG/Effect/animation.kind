@@ -7,3 +7,10 @@ App.GG.Effect.animation.update(new_animation: App.GG.Animation): App.GG.Effect<U
   let new_grid = App.GG.Creature.modify_at(mod, center, grid)
   App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
    
+App.GG.Effect.animation.get: App.GG.Effect<Maybe<Pair<App.GG.Animation, U64>>>
+  (center, origin, grid)
+  let result = Maybe {
+    get creature = App.GG.Creature.get(center, grid)
+    return creature@animation
+  }
+  App.GG.Effect.Result.new!(result, center, origin, grid, (img) img, 0, "")

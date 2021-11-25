@@ -11,5 +11,9 @@ App.GG.Effect.actions.del: App.GG.Effect<Unit>
 App.GG.Effect.actions.reset: App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.actions.del // Delete action from creature
-    App.GG.Effect.animation.update(App.GG.Animation.idle)
+    get animation = App.GG.Effect.animation.get
+    without animation: App.GG.Effect.pass
+    case animation@fst {
+      idle: App.GG.Effect.pass
+    }default App.GG.Effect.animation.update(App.GG.Animation.idle)
   }
