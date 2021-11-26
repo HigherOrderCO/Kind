@@ -1,2 +1,2 @@
 Nat.pow.one_right(n: Nat): n == Nat.pow(n, 1)
-  ?one_right
+  mirror(Nat.mul.one_right(n))
