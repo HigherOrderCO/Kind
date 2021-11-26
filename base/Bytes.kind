@@ -40,7 +40,7 @@ Bytes.to_nat.concat(
     nil:
       case List.concat.nil_right(U8, b0) {
         refl:
-          refl
+          Nat.add.zero_right(Bytes.to_nat(b0))
       }: Nat.add(Bytes.to_nat(List.nil(U8)),Nat.mul(Nat.pow(256,List.length(U8,List.nil(U8))),Bytes.to_nat(b0))) == Bytes.to_nat(self.b)
     cons:
       let reassoc = mirror(List.concat.assoc(U8, b0, [b1.head], b1.tail))
