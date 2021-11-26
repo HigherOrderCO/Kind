@@ -1,0 +1,37 @@
+Bytes.to_nat.from_nat(n: Nat): n == Bytes.to_nat(Bytes.from_nat(n))
+  case n {
+    zero:
+      refl
+    succ:
+      let ind = Bytes.to_nat.concat(Bytes.from_nat(Nat.div(Nat.succ(n.pred),256)),List.cons(U8,U8.from_nat(Nat.mod(Nat.succ(n.pred),256)),List.nil(U8)))
+      case ind {
+        refl:
+          let mod_small = Nat.lte.comm.false(256, Nat.mod(Nat.succ(n.pred), 256), Nat.mod.small(Nat.succ(n.pred), 256, refl))
+          let mod_safe_conversion = Nat.to_u8.safe_conversion(Nat.mod(Nat.succ(n.pred),256), mod_small)
+          case mod_safe_conversion {
+            refl:
+              let len_one = refl :: Equal(Nat, 1, List.length(U8,List.cons(U8,U8.from_nat(Nat.mod(Nat.succ(n.pred),256)),List.nil(U8))))
+              let pow_one = case len_one {
+                refl:
+                  Nat.pow.one_right(256)
+              }: Equal(Nat, 256, Nat.pow(256, len_one.b))
+              case pow_one {
+                refl:
+                  let ind = Bytes.to_nat.from_nat(Nat.div(Nat.succ(n.pred),256))
+                  case ind {
+                    refl:
+                      let comm = Nat.mul.comm(Nat.div(Nat.succ(n.pred),256), 256)
+                      case comm {
+                        refl:
+                          mirror(Nat.div_mod.recover(Nat.succ(n.pred), 256, refl))
+
+                      }: Equal(Nat, Nat.succ(n.pred), Nat.add(Nat.mod(Nat.succ(n.pred),256),comm.b))
+
+                  }: Equal(Nat, Nat.succ(n.pred), Nat.add(Nat.mod(Nat.succ(n.pred),256),Nat.mul(256,ind.b)))
+
+              }: Equal(Nat, Nat.succ(n.pred), Nat.add(Nat.mod(Nat.succ(n.pred),256),Nat.mul(    pow_one.b,    Bytes.to_nat(Bytes.from_nat(Nat.div(Nat.succ(n.pred),256))))))
+
+          }: Equal(Nat, Nat.succ(n.pred), Nat.add(    mod_safe_conversion.b,    Nat.mul(Nat.pow(256,List.length(U8,List.cons(U8,U8.from_nat(Nat.mod(Nat.succ(n.pred),256)),List.nil(U8)))),Bytes.to_nat(Bytes.from_nat(Nat.div(Nat.succ(n.pred),256))))))
+
+      }: Equal(Nat, Nat.succ(n.pred), ind.b)
+  }!

@@ -92,6 +92,3 @@ RLP.aux.split.3(
       }: Pair.new(Bytes,Bytes,payload,tail) == List.split(U8, concat_assoc.b, Nat.sub(Nat.sub(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,payload))))),192),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))
 
   }: Pair.new(Bytes,Bytes,payload,tail) == Nat.lte(Nat.sub(    safe_conversion.b,    192),55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(    safe_conversion.b,    192)),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(Nat.sub(    safe_conversion.b,    192),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
-
-RLP.aux.bytes_from_nat(n: Nat, H: Nat.lte(n, RLP.max) == true): Nat.lte(List.length(U8, Bytes.from_nat(n)), 7) == true
-  ?RLP.bound.from_nat
