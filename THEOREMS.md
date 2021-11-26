@@ -30,7 +30,7 @@ If that looks alien to you, don't worry for now, it will become clear. The
 
 ```
 Equal.refl : (A: Type) -> (x: A) -> Equal(A,x,x)
-````
+```
 
 That means `refl` receives a type (`A`), and element `x` of type `A`, and
 returns `Equal(A,x,x)`. As an example, the program below:
