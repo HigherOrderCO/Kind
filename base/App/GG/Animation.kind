@@ -4,4 +4,5 @@ type App.GG.Animation {
   sword
   attack
   damage
+  basic_attack
 }

@@ -57,16 +57,21 @@ App.GG.Effect.projectile.delete: App.GG.Effect<Unit>
     }
   App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
 App.GG.Effect.projectile.hit(dmg: I32, coord: App.GG.Coord): App.GG.Effect<I32>
-    App.GG.Effect {
-      get has_hit  = App.GG.Effect.projectile.has_hit(coord) // Checks if projectile has already hit that enemy
-      get is_enemy = App.GG.Effect.creature.is_enemy(coord) // Checks if projectile is over an enemy
-      //log((if is_enemy then "has enemy " else "no enemy ") | (if not(has_hit) then "and can hit." else "and cannot hit."))
-      if is_enemy && not(has_hit) then
-        App.GG.Effect {
-          App.GG.Effect.projectile.add_hit(coord) // Adds enemy to list of targets hit by projectile
-          get dmg = App.GG.Effect.creature.change_hp_at(dmg, coord, true) 
-          return dmg
-        }
-      else
-        App.GG.Effect {return +0#32}
-    } 
+  App.GG.Effect {
+    get can_hit = App.GG.Effect.projectile.can_hit(coord)
+    if can_hit then
+      App.GG.Effect {
+        App.GG.Effect.projectile.add_hit(coord) // Adds enemy to list of targets hit by projectile
+        get dmg = App.GG.Effect.creature.change_hp_at(dmg, coord, true) 
+        return dmg
+      }
+    else
+      App.GG.Effect {return +0#32}
+  } 
+
+App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
+  App.GG.Effect {
+    get has_hit  = App.GG.Effect.projectile.has_hit(coord) // Checks if projectile has already hit that enemy
+    get is_enemy = App.GG.Effect.creature.is_enemy(coord) // Checks if projectile is over an enemy
+    return not(has_hit) && is_enemy
+  }

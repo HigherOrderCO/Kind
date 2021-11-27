@@ -27,16 +27,16 @@ type App.GG.Body.Parts {
 }
 
 App.GG.Body.Components.upper: App.GG.Body.Components
-  [App.GG.Components.shockwave]
+  [App.GG.Components.pull_sword]
 
 App.GG.Body.Components.lower: App.GG.Body.Components
-  [App.GG.Components.shockwave]
+  [App.GG.Components.pull_sword]
 
 App.GG.Body.Components.arm1: App.GG.Body.Components
-  [App.GG.Components.shockwave]
+  [App.GG.Components.pull_sword]
 
 App.GG.Body.Components.arm2: App.GG.Body.Components
-  [App.GG.Components.shockwave]
+  [App.GG.Components.pull_sword]
 
 App.GG.Body.Component.Generic: App.GG.Body.Component
   App.GG.Body.Component.new(App.GG.Chip.Shockwave, App.GG.Creature.Attributes.new(1,2,3,4))

@@ -29,34 +29,36 @@ App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
         4#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_4
         5#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_5
       }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+    basic_attack:
+      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
   }
 
-App.GG.Creatures.minion.cast(
-  projectile: App.GG.Projectile,
-  spawn_coord: App.GG.Coord,
-  animation: App.GG.Animation
-  spawn_frame: U64
-  final_frame: U64
-): App.GG.Effect<Unit>
+// App.GG.Creatures.minion.cast(
+//   projectile: App.GG.Projectile,
+//   spawn_coord: App.GG.Coord,
+//   animation: App.GG.Animation
+//   spawn_frame: U64
+//   final_frame: U64
+// ): App.GG.Effect<Unit>
   
-  App.GG.Effect { 
-    get AI = App.GG.Effect.ai.get
-    get center = App.GG.Effect.coord.get_center
-    get creature = App.GG.Effect.creature.get
-    get grid = App.GG.Effect.grid.get
-    without creature: App.GG.Effect.pass
-    without AI: App.GG.Effect.pass
-    App.GG.Effect { 
-      App.GG.Effect.ai.inc
-      let spotted = AI@spotted
-      let unspotted = AI@unspotted
-      if U64.gtn(spotted, unspotted) then 
-        App.GG.Effect.generic_shoot(projectile, spawn_coord, animation, spawn_frame, final_frame)
-      else
-        App.GG.Effect { 
-          get destination = App.GG.Effect.coord.closest_y
-          without destination: App.GG.Effect.pass
-          App.GG.Effect.movement.generic_movement(destination, 12, 24)
-        }
-    }
-  }
+//   App.GG.Effect { 
+//     get AI = App.GG.Effect.ai.get
+//     get center = App.GG.Effect.coord.get_center
+//     get creature = App.GG.Effect.creature.get
+//     get grid = App.GG.Effect.grid.get
+//     without creature: App.GG.Effect.pass
+//     without AI: App.GG.Effect.pass
+//     App.GG.Effect { 
+//       App.GG.Effect.ai.inc
+//       let spotted = AI@spotted
+//       let unspotted = AI@unspotted
+//       if U64.gtn(spotted, unspotted) then 
+//         App.GG.Effect.generic_shoot(projectile, spawn_coord, animation, spawn_frame, final_frame)
+//       else
+//         App.GG.Effect { 
+//           get destination = App.GG.Effect.coord.closest_y
+//           without destination: App.GG.Effect.pass
+//           App.GG.Effect.movement.arrow_movement(destination, 12, 24)
+//         }
+//     }
+//   }

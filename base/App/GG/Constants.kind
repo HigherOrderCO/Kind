@@ -1,0 +1,14 @@
+App.GG.Constants.chip_size: Pair<U32, U32>
+  {40, 22}
+
+App.GG.Constants.chips_starting_position: Pair<U32, U32>
+  {25, 25}
+
+App.GG.Constants.chips_space_between: Pair<U32, U32>
+  {3, 3}
+
+App.GG.Constants.chips_array: Pair<U32, U32>
+  {2, 5}
+
+App.GG.Constants.map_starting_position: Pair<U32, U32>
+ {40, 40}

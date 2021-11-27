@@ -29,23 +29,11 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
       }</div>
   </div>
 
-App.GG.draw.chip_size: Pair<U32, U32>
-  {40, 22}
-
-App.GG.draw.chips_starting_position: Pair<U32, U32>
-  {25, 25}
-
-App.GG.draw.chips_variation: Pair<U32, U32>
-  {3, 3}
-
-App.GG.draw.chips_line_size: Pair<U32, U32>
-  {2, 5}
-
 App.GG.draw.setup(phase: App.GG.Phase, img: VoxBox): VoxBox
   case phase {
     setup: 
       let img = VoxBox.Draw.image(15 - 96, 13 - 66, 150, App.GG.img.background, img)
-      let {x, y} = App.GG.draw.chips_starting_position
+      let {x, y} = App.GG.Constants.chips_starting_position
       App.GG.draw.setup.chips(0, phase.table, x, y, img)
     game: img
   }
@@ -58,9 +46,9 @@ App.GG.draw.setup.chips(count: U32, table: App.GG.Table, x: U32, y: U32, img: Vo
   case table {
     nil:img
     cons:
-      let {cx, cy} = App.GG.draw.chip_size
-      let {vx, vy} = App.GG.draw.chips_variation
-      let max_stack = App.GG.draw.chips_line_size@snd
+      let {cx, cy} = App.GG.Constants.chip_size
+      let {vx, vy} = App.GG.Constants.chips_space_between
+      let max_stack = App.GG.Constants.chips_array@snd
       let {x, y} = if ((count + 1) % (max_stack + 1)) =? 0 then {x + (cx + vx), y - ((cy + vy) * max_stack)} else {x, y} 
       case table.head@chip as chip {
         none: App.GG.draw.setup.chips(count + 1, table.tail, x, y + (cy + vy), img)
@@ -81,7 +69,7 @@ App.GG.draw.grid(
   img: VoxBox
 ): VoxBox
   for key:val in grid with img:
-    App.GG.draw.tile(key, val, {32,32}, {40,40}, grid, img)
+    App.GG.draw.tile(key, val, {32,32}, grid, img)
   img
 
 // Draws a tile and its contents
@@ -89,7 +77,6 @@ App.GG.draw.tile(
   coord: App.GG.Coord,
   tile: App.GG.Tile,
   tile_size: Pair<U32, U32>,
-  start: Pair<U32, U32>
   grid: App.GG.Grid
   img: VoxBox
 ): VoxBox

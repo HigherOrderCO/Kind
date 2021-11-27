@@ -16,3 +16,11 @@ App.GG.Effect.coord.closest_y: App.GG.Effect<Maybe<App.GG.Coord>>
   else
     App.GG.Coord.above(center)
   App.GG.Effect.Result.new!(some(destination), center, origin, grid, (img) img, 0, "")
+
+App.GG.Effect.coord.first_enemy_in_front: App.GG.Effect<Maybe<App.GG.Coord>>
+  (center, origin, grid)
+  let result =
+    let team = App.GG.Effect.team.get(center, origin, grid)
+    without team: none
+    App.GG.Coord.first_enemy_in_front(team, grid, center)
+  App.GG.Effect.Result.new!(result, center, origin, grid, (img) img, 0, "")

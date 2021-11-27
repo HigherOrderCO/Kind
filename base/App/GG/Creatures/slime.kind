@@ -61,4 +61,6 @@ App.GG.Creatures.slime.vbox(animation: App.GG.Animation, frame: U64): VoxBox
         4#64: App.GG.img.Slime.Hit.slime_character_Hit_4
         5#64: App.GG.img.Slime.Hit.slime_character_Hit_5
       }default App.GG.img.Slime.idle.slime_character_idle_0
+    basic_attack:
+      App.GG.img.Slime.idle.slime_character_idle_0
   }
