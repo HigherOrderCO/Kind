@@ -1,0 +1,12 @@
+Word.to_nat.inc<
+  size: Nat
+>(w: Word(size)
+): Word.to_nat(size, Word.inc(size, w)) == Nat.mod(Nat.succ(Word.to_nat(size, w)), Nat.pow(2, size))
+  case w {
+    e:
+      refl
+    o:
+      ?o-38-18-77
+    i:
+      ?i
+  }: Equal(Nat, Word.to_nat(w.size,Word.inc(w.size,w)), Nat.mod(Nat.succ(Word.to_nat(w.size,w)),Nat.pow(2,w.size)))
