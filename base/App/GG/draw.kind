@@ -50,10 +50,12 @@ App.GG.draw.setup.chips(count: U32, table: App.GG.Table, x: U32, y: U32, img: Vo
       let {vx, vy} = App.GG.Constants.chips_space_between
       let max_stack = App.GG.Constants.chips_array@snd
       let {x, y} = if ((count + 1) % (max_stack + 1)) =? 0 then {x + (cx + vx), y - ((cy + vy) * max_stack)} else {x, y} 
+      let {tx, ty} = {(x + 2) - (App.GG.Constants.chip_size@fst / 2), (y + 4) - (App.GG.Constants.chip_size@snd / 2)}
       case table.head@chip as chip {
         none: App.GG.draw.setup.chips(count + 1, table.tail, x, y + (cy + vy), img)
         some:
-          let img = VoxBox.Draw.image(x - 128, y - 128, 200, chip.value@img, img)
+          let img = VoxBox.Draw.image_colorize(x - 128, y - 128, 200, Col32.new_hue(chip.value@hue) App.GG.img.back_w_outline_brighter, img)
+          let img = VoxBox.Draw.text(chip.value@name, PixelFont.black, Pos32.new(tx,ty,200), img)
           App.GG.draw.setup.chips(count + 1, table.tail, x, y + (cy + vy), img)
       }
   }

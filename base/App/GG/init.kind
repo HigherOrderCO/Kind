@@ -1,8 +1,28 @@
 // Initial state
 App.GG.init: App.Init<App.GG.State>
   let grid = App.GG.init.grid
-  let slot = App.GG.Table.Slot.new(some(App.GG.Chip.pull_sword))
-  let phase = App.GG.Phase.setup([slot, slot, slot, slot, slot, slot, slot, slot, slot, slot], [], 0)
+  let setup = App.GG.Phase.setup([], [], 0)
+  let grid  = 
+    let slime = App.GG.Slime.find_coord(grid)
+    without slime: grid
+    let new_grid = App.GG.Creature.modify_at(App.GG.Creature.shuffle_folder(10000), slime@snd, grid) 
+    new_grid
+
+  let {phase, grid} =
+    let slime = App.GG.Slime.find_coord(grid)
+    without slime: {setup grid}
+    case slime@fst@category as monster {
+      minion: {setup grid}
+      slime: 
+        let table_size = 10
+        let mod = App.GG.Creature.sub_folder(table_size)
+        let table = App.GG.Table.from_folder(table_size, monster.folder)
+        let hand = [] :: App.GG.Chips
+        let energy = monster.energy + monster.data@dna@attributes@energy
+        let phase = App.GG.Phase.setup(table, hand, energy)
+        let new_grid  = App.GG.Creature.modify_at(mod, slime@snd, grid)
+        {phase, new_grid}
+    }
   let local = App.GG.State.local.new(phase, grid, {0, 0})
   App.Store.new<App.GG.State>(local, unit)
 

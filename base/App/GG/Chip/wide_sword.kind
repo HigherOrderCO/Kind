@@ -1,12 +1,12 @@
-App.GG.Chip.pull_sword: App.GG.Chip
+App.GG.Chip.wide_sword: App.GG.Chip
   App.GG.Chip.new(
-    "PulSwd"
-    223
-    App.GG.Chip.pull_sword.Effect
+    "WdeSwd"
+    155
+    App.GG.Chip.wide_sword.Effect
     App.GG.img.bazooka
   )
 
-App.GG.Chip.pull_sword.Effect: App.GG.Effect<Unit>
+App.GG.Chip.wide_sword.Effect: App.GG.Effect<Unit>
   App.GG.Effect {
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
@@ -16,15 +16,15 @@ App.GG.Chip.pull_sword.Effect: App.GG.Effect<Unit>
     App.GG.Effect {
       App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
-      let projectile_effect = App.GG.Chip.pull_sword.Projectile.Effect 
+      let projectile_effect = App.GG.Chip.wide_sword.Projectile.Effect 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
-      let spawn_coord = front(front(center)) // Gets the coordinate in front of the creature
+      let spawn_coord = front(center) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
     }
   }
 
-App.GG.Chip.pull_sword.Projectile.Effect: App.GG.Effect<Unit>
+App.GG.Chip.wide_sword.Projectile.Effect: App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.frame.inc // Increases projectile frame by 1
     get center = App.GG.Effect.coord.get_center
@@ -39,14 +39,7 @@ App.GG.Chip.pull_sword.Projectile.Effect: App.GG.Effect<Unit>
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
         get can_hit = App.GG.Effect.projectile.can_hit(coord)
-        App.GG.Effect.projectile.hit(-15, coord)
-        get grid = App.GG.Effect.grid.get
-        if can_hit then 
-          log("as")
-          let destination = App.GG.Coord.front(coord, App.GG.Team.opposite(projectile@info@team))
-          App.GG.Effect.movement.move_at(coord, destination)
-        else
-          App.GG.Effect.pass
+        App.GG.Effect.projectile.hit(-20, coord)
         return unit
       }
     App.GG.Effect {

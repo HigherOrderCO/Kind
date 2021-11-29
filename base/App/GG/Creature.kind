@@ -135,5 +135,21 @@ App.GG.Creature.sub_folder(quantity: Nat, creature: App.GG.Creature): App.GG.Cre
   case creature@category as monster {
     minion: creature
     slime:
-      creature@monster <- App.GG.Monster.slime(monster.data, monster.hand, List.drop!(quantity, monster.folder), monster.energy)
+      creature@category <- App.GG.Monster.slime(monster.data, monster.hand, List.drop!(quantity, monster.folder), monster.energy)
+  }
+
+App.GG.Creature.shuffle_folder(seed: Nat, creature: App.GG.Creature): App.GG.Creature
+  case creature@category as monster {
+    minion: creature
+    slime:
+      let new_folder = App.GG.Chips.shuffle(seed, monster.folder)
+      creature@category <- App.GG.Monster.slime(monster.data, monster.hand, new_folder, monster.energy)
+  }
+
+App.GG.Creature.add_chip(chip: App.GG.Chip, creature: App.GG.Creature): App.GG.Creature
+  case creature@category as monster {
+    minion: creature
+    slime:
+      let category = App.GG.Monster.slime(monster.data, chip & monster.hand, monster.folder, monster.energy)
+      creature@category <- category
   }

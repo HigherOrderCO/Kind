@@ -4,10 +4,14 @@ App.GG.when: App.When<App.GG.State>
   let local = state@local
   let phase = local@phase
   case event {
-    // init: IO {
-    //   App.watch!(App.room_zero)
-    //   App.new_post!(App.room_zero, "")
-    // }
+    // init: 
+      // log(U64.show(event.time))
+      // let grid = local@grid
+      // let slime = App.GG.Slime.find_coord(grid)
+      // without slime: App.pass<App.GG.State>
+      // let new_grid = App.GG.Creature.modify_at(App.GG.Creature.shuffle_folder(10000), slime@snd, grid) // U64.to_nat(event.time % 10000)
+      // let new_local = local@grid <- new_grid
+      // App.set_local<App.GG.State>(new_local)
     frame:
       case phase {
         setup:
@@ -73,8 +77,8 @@ App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<A
             minion: none
             slime: 
               let data = monster.data
-              let hand = phase.hand
-              let fold = monster.folder ++ List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table))
+              let hand = List.reverse!(phase.hand)
+              let fold = List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table)) ++ monster.folder
               let enrg = monster.energy 
               some(App.GG.Monster.slime(data, hand, fold, enrg))
           }
@@ -137,7 +141,6 @@ App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<
         App.GG.when.table:
           let x = x - (App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2))
           let y = y - (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))
-          let a = App.GG.when.chip({x, y})
           Maybe {
             get nat = App.GG.when.chip({x, y})
             log(Nat.show(nat))
