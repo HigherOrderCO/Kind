@@ -1,0 +1,25 @@
+App.GG.Effect.basic_attack: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.frame.inc
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      if frame =? 0 then
+        App.GG.Effect.animation.update(App.GG.Animation.basic_attack)
+      else if frame =? 8 then 
+        App.GG.Effect {
+          get enemy_coord = App.GG.Effect.coord.first_enemy_in_front
+          App.GG.Effect.actions.reset
+          without enemy_coord: App.GG.Effect.pass
+          App.GG.Effect {
+            get dmg = App.GG.Effect.creature.change_hp_at(-1, enemy_coord, false) 
+            return unit 
+          }
+        }
+      else
+        App.GG.Effect.pass
+    }
+  }

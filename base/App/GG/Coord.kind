@@ -2,8 +2,9 @@ App.GG.Coord: Type
   Pair<U32, U32>
 
 App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
-  let x = (40#32 + (32#32 * coord@fst)) - 128#32
-  let y = (40#32 + (32#32 * coord@snd)) - 128#32
+  let start = App.GG.Constants.map_starting_position
+  let x = (start@fst + (32#32 * coord@fst)) - 128#32
+  let y = (start@snd + (32#32 * coord@snd)) - 128#32
   {x, y}
 
 App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
@@ -15,6 +16,23 @@ App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
     }
   new_coord
 
+App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): Bool
+  let f_tile = App.GG.Grid.get(from, grid)
+  let d_tile = App.GG.Grid.get(destination, grid)
+  Maybe {
+    get f = f_tile
+    get d = d_tile
+    get f_creature = f@creature
+    let result = case d@creature {
+      none: 
+        if App.GG.Team.eql(f_creature@team, d@owner) then
+          true
+        else
+          false
+      some: false
+    }
+    return result
+  } <> false
 
 App.GG.Coord.front_all.go(
   coord: App.GG.Coord,
@@ -74,3 +92,15 @@ App.GG.Coord.above(coord: App.GG.Coord): App.GG.Coord
 App.GG.Coord.below(coord: App.GG.Coord): App.GG.Coord
   let new_coord = {coord@fst, coord@snd +1}
   new_coord
+
+App.GG.Coord.first_enemy_in_front(team: App.GG.Team, grid: App.GG.Grid, coord: App.GG.Coord): Maybe<App.GG.Coord>
+  let next = App.GG.Coord.first_enemy_in_front(team, grid)
+  let new_coord = App.GG.Coord.front(coord, team)
+  let tile = App.GG.Grid.get(new_coord, grid)
+  without tile: none
+  let creature = tile@creature
+  without creature: next(new_coord)
+  if App.GG.Team.eql(creature@team, team) then 
+    next(new_coord)
+  else
+    some(new_coord)

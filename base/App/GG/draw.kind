@@ -29,23 +29,11 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
       }</div>
   </div>
 
-App.GG.draw.chip_size: Pair<U32, U32>
-  {40, 22}
-
-App.GG.draw.chips_starting_position: Pair<U32, U32>
-  {25, 25}
-
-App.GG.draw.chips_variation: Pair<U32, U32>
-  {3, 3}
-
-App.GG.draw.chips_line_size: Pair<U32, U32>
-  {2, 5}
-
 App.GG.draw.setup(phase: App.GG.Phase, img: VoxBox): VoxBox
   case phase {
     setup: 
       let img = VoxBox.Draw.image(15 - 96, 13 - 66, 150, App.GG.img.background, img)
-      let {x, y}   = App.GG.draw.chips_starting_position
+      let {x, y}   = App.GG.Constants.chips_starting_position
       let selected = App.GG.Table.Slot.get_selected_index(phase.table)
       App.GG.draw.setup.chips(0, phase.table@slots, selected, x, y, img)
     game: img
@@ -67,15 +55,17 @@ App.GG.draw.setup.chips(
     nil : img
     cons:
       // get constants
-      let {cx, cy} = App.GG.draw.chip_size
-      let {vx, vy} = App.GG.draw.chips_variation
-      let max_stack = App.GG.draw.chips_line_size@snd
+      let {cx, cy} = App.GG.Constants.chip_size
+      let {vx, vy} = App.GG.Constants.chips_space_between
+      let max_stack = App.GG.Constants.chips_array@snd
       // calculate x and y
       let {x, y} = 
         if ((count + 1) % (max_stack + 1)) =? 0 then 
           {x + (cx + vx), y - ((cy + vy) * max_stack)} 
         else 
           {x, y} 
+      let {tx, ty} = {(x + 2) - (App.GG.Constants.chip_size@fst / 2), (y + 4) - (App.GG.Constants.chip_size@snd / 2)}
+
       // draw user selection if chip is selected
       let img = App.GG.draw.setup.chips.selected_chip(
         x, y, count, selected, img
@@ -84,6 +74,7 @@ App.GG.draw.setup.chips(
       let img = Maybe {
         get chip = slots.head@chip
         let img = VoxBox.Draw.image(x - 128, y - 128, 200, chip@img, img)
+        let img = VoxBox.Draw.text(chip@name, PixelFont.black, Pos32.new(tx,ty,200), img)
         return img
       } <> img
       // recursion
@@ -101,7 +92,7 @@ App.GG.draw.setup.chips.selected_chip(
     get selected = selected
     let img = 
       if selected =? count then 
-        VoxBox.Draw.rect(x, y, 250, 10, 10, Col32.new(100, 255, 100, 255), img)
+        VoxBox.Draw.rect(x - 5, y - 5, 250, 10, 10, Col32.new(100, 255, 100, 255), img)
       else 
         img
     return img
@@ -118,7 +109,7 @@ App.GG.draw.grid(
   img: VoxBox
 ): VoxBox
   for key:val in grid with img:
-    App.GG.draw.tile(key, val, {32,32}, {40,40}, grid, img)
+    App.GG.draw.tile(key, val, {32,32}, grid, img)
   img
 
 // Draws a tile and its contents
@@ -126,7 +117,6 @@ App.GG.draw.tile(
   coord: App.GG.Coord,
   tile: App.GG.Tile,
   tile_size: Pair<U32, U32>,
-  start: Pair<U32, U32>
   grid: App.GG.Grid
   img: VoxBox
 ): VoxBox

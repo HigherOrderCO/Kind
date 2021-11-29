@@ -4,10 +4,14 @@ App.GG.when: App.When<App.GG.State>
   let local = state@local
   let phase = local@phase
   case event {
-    // init: IO {
-    //   App.watch!(App.room_zero)
-    //   App.new_post!(App.room_zero, "")
-    // }
+    // init: 
+      // log(U64.show(event.time))
+      // let grid = local@grid
+      // let slime = App.GG.Slime.find_coord(grid)
+      // without slime: App.pass<App.GG.State>
+      // let new_grid = App.GG.Creature.modify_at(App.GG.Creature.shuffle_folder(10000), slime@snd, grid) // U64.to_nat(event.time % 10000)
+      // let new_local = local@grid <- new_grid
+      // App.set_local<App.GG.State>(new_local)
     frame:
       case phase {
         setup:
@@ -27,19 +31,24 @@ App.GG.when: App.When<App.GG.State>
           let table = phase.table
           switch U16.eql(event.code) {
             13#16:  App.GG.when.setup_to_game(local)
-            37#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.left)
-            38#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.up)
-            39#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.right)
-            40#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.down)
+            37#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.left)
+            38#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.up)
+            39#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.right)
+            40#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.down)
 
             32#16:  App.GG.when.select_chip.space(local)
           }default  App.pass<App.GG.State> 
         game: 
           switch U16.eql(event.code) {
-            37#16:  App.GG.when.move(local, App.GG.Effect.movement.Arrow.left)
-            38#16:  App.GG.when.move(local, App.GG.Effect.movement.Arrow.up)
-            39#16:  App.GG.when.move(local, App.GG.Effect.movement.Arrow.right)
-            40#16:  App.GG.when.move(local, App.GG.Effect.movement.Arrow.down)
+            37#16:  App.GG.when.move(local, App.GG.Arrow.left)
+            38#16:  App.GG.when.move(local, App.GG.Arrow.up)
+            39#16:  App.GG.when.move(local, App.GG.Arrow.right)
+            40#16:  App.GG.when.move(local, App.GG.Arrow.down)
+            // X 
+            88#16:
+              let new_grid = App.GG.when.basic_attack(local@grid)
+              let new_local = local@grid <- new_grid
+              App.set_local<App.GG.State>(new_local)
             // Spacebar
             32#16: 
               let new_grid = App.GG.when.use_chip(local@grid)
@@ -75,8 +84,8 @@ App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<A
             minion: none
             slime: 
               let data = monster.data
-              let hand = phase.hand
-              let fold = monster.folder ++ List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table@slots))
+              let hand = List.reverse!(phase.hand)
+              let fold = List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table@slots)) ++ monster.folder
               let enrg = monster.energy 
               some(App.GG.Monster.slime(data, hand, fold, enrg))
           }
@@ -146,7 +155,7 @@ App.GG.when.select_chip.space(
 // move the chip selection
 App.GG.when.move.chip_selection(
   local: App.GG.State.local 
-  arrow: App.GG.Effect.movement.Arrow
+  arrow: App.GG.Arrow
 ): IO<Maybe<App.State.local<App.GG.State>>>
   open local
   case local.phase as phase {
@@ -175,7 +184,7 @@ App.GG.when.move.chip_selection(
       App.set_local!(new_local)
   } default App.pass!
 
-App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Effect.movement.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
+App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
   let grid            = local@grid
   let slime_coord     = App.GG.Slime.find_coord(grid)
   without slime_coord : App.pass<App.GG.State>
@@ -194,8 +203,8 @@ App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<
       let point = V2.new(U32.to_f64(x), U32.to_f64(y))
       switch Shape.Point.collision.rectangle(point) {
         App.GG.when.table:
-          let x = x - (App.GG.draw.chips_starting_position@fst - (App.GG.draw.chip_size@fst/2))
-          let y = y - (App.GG.draw.chips_starting_position@snd - (App.GG.draw.chip_size@snd/2))
+          let x = x - (App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2))
+          let y = y - (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))
           Maybe {
             get index = App.GG.when.chip({x, y})
             let {new_hand, new_table} = App.GG.when.get_chip(index, phase.hand, phase.table)
@@ -232,20 +241,20 @@ App.GG.when.update_phase(phase: App.GG.Phase): App.GG.Phase
 
 
 App.GG.when.table: Shape.Rectangle
-  let {x1, y1} = {(App.GG.draw.chips_starting_position@fst - (App.GG.draw.chip_size@fst/2)) (App.GG.draw.chips_starting_position@snd - (App.GG.draw.chip_size@snd/2))}
-  let {vx, vy} = App.GG.draw.chips_variation
-  let {cx, cy} = App.GG.draw.chip_size
-  let {r,  c } = App.GG.draw.chips_line_size
+  let {x1, y1} = {(App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2)) (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))}
+  let {vx, vy} = App.GG.Constants.chips_space_between
+  let {cx, cy} = App.GG.Constants.chip_size
+  let {r,  c } = App.GG.Constants.chips_array
   let {x2, y2} = {x1 + ((cx + vx) * r), y1 + ((cy + vy) * c)}
   log(U32.show(x1) | " " | U32.show(x2) | " " | U32.show(y1) | " " | U32.show(y2))
   Shape.Rectangle.new(U32.to_f64(x1), U32.to_f64(x2), U32.to_f64(y1), U32.to_f64(y2))
 
 
 App.GG.when.chip(mouse_pos: Pair<U32, U32>): Maybe<Nat>
-  let {r,   c  } = App.GG.draw.chips_line_size
+  let {r,   c  } = App.GG.Constants.chips_array
   let {x,   y  } = mouse_pos
-  let {v_x, v_y} = App.GG.draw.chips_variation              // Space between Chips
-  let {c_x, c_y} = App.GG.draw.chip_size                    // Chips size
+  let {v_x, v_y} = App.GG.Constants.chips_space_between              // Space between Chips
+  let {c_x, c_y} = App.GG.Constants.chip_size                    // Chips size
   let {t_x, t_y} = {c_x + v_x, c_y + v_y}
   let {s_x, s_y} = {x % t_x, y % t_y}
   let row        = x / t_x
@@ -289,24 +298,40 @@ App.GG.when.update_tile(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
       return pair@snd
     } <> new_grid
 
-
   new_grid
+
+App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid
+  let pair = App.GG.Slime.find_coord(grid)
+  case pair {
+    none: grid
+    some:
+      let {creature, coord} = pair.value
+      case creature@category as category {
+        minion: grid
+        slime:
+          case category.hand {
+            nil: grid
+            cons: 
+              let action = App.GG.Actions.basic_attack
+              App.GG.Creature.modify_at(App.GG.when.add_action(action), coord, grid)
+          }
+      }
+  }
+
 
 App.GG.when.use_chip(grid: App.GG.Grid): App.GG.Grid
   let pair = App.GG.Slime.find_coord(grid)
   case pair {
-    none: log("1")  grid
+    none: grid
     some:
       let {creature, coord} = pair.value
       case creature@category as category {
-        minion: log("2") grid
+        minion: grid
         slime:
           case category.hand {
-            nil: log("3") grid
+            nil: grid
             cons: 
-              log("4")
-              open category.hand.head
-              let action = App.GG.Actions.Data.new(0, category.hand.head.effect, App.GG.Actions.Category.chip)
+              let action = App.GG.Actions.Data.new(0, category.hand.head@effect, App.GG.Actions.Category.chip)
               App.GG.Creature.modify_at(App.GG.when.add_action(action), coord, grid)
           }
       }

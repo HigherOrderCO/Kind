@@ -10,3 +10,10 @@ App.GG.Team.eql(a: App.GG.Team, b: App.GG.Team): Bool
     red     red     : true
     neutral neutral : true
   }default false
+
+App.GG.Team.opposite(team: App.GG.Team): App.GG.Team
+  case team {
+    blue    : App.GG.Team.red
+    red     : App.GG.Team.blue
+    neutral : App.GG.Team.neutral
+  }

@@ -1,3 +1,6 @@
 App.GG.Chips: Type
   List<App.GG.Chip>
 
+App.GG.Chips.shuffle(seed: Nat, chips: App.GG.Chips): App.GG.Chips
+  let result = List.get_randoms!(seed, 50, chips)
+  result@result

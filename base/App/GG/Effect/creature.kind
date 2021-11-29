@@ -35,3 +35,13 @@ App.GG.Effect.creature.get_at(pos: App.GG.Coord): App.GG.Effect<Maybe<App.GG.Cre
   (center, origin, grid)
   let creature = App.GG.Creature.get(pos, grid)
   App.GG.Effect.Result.new!(creature, center, origin, grid, (img) img, 0, "")
+
+App.GG.Effect.creature.modify(mod: App.GG.Creature -> App.GG.Creature): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let new_grid = App.GG.Creature.modify_at(mod, center, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+
+App.GG.Effect.creature.modify_at(mod: App.GG.Creature -> App.GG.Creature, pos: App.GG.Coord): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let new_grid = App.GG.Creature.modify_at(mod, pos, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")

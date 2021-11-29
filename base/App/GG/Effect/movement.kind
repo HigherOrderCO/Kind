@@ -1,5 +1,5 @@
-App.GG.Effect.movement.generic_movement(
-  coord: App.GG.Coord
+App.GG.Effect.movement(
+  destination: App.GG.Coord
   move_frame: U64
   final_frame: U64
 ): App.GG.Effect<Unit>
@@ -7,67 +7,55 @@ App.GG.Effect.movement.generic_movement(
   App.GG.Effect {
     get frame =  App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
-    get creature = App.GG.Effect.creature.get
     get grid = App.GG.Effect.grid.get
     App.GG.Effect.frame.inc 
     without frame: App.GG.Effect.pass
-    without creature: App.GG.Effect.pass
     log("frame: " | U64.show(frame) )
     switch U64.eql(frame) {
       0: 
-        if App.GG.Effect.movement.get_possible_tile(coord, creature@team, grid) then
+        if App.GG.Coord.can_walk(center, destination, grid) then
           App.GG.Effect.animation.update(App.GG.Animation.movement)
         else
           App.GG.Effect.actions.reset
-      move_frame: App.GG.Effect.movement.move(coord)
+      move_frame: 
+        App.GG.Effect.movement.move(destination)
       final_frame: 
-        log("aelqwe")
         App.GG.Effect.actions.reset
-      } default App.GG.Effect.pass
+    } default App.GG.Effect.pass
   }
 
-App.GG.Effect.movement.get_possible_tile(destination: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Bool
-  let tile = App.GG.Grid.get(destination, grid)
-  case tile {
-    none: false
-    some:
-      let creature = tile.value@creature
-      case creature {
-        some: false
-        none:
-          if App.GG.Team.eql(tile.value@owner, team) then
-            true
-          else
-            false
-      }
+App.GG.Arrow_movement(
+  arrow: App.GG.Arrow
+  move_frame: U64
+  final_frame: U64
+): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    let destination = App.GG.Arrow.direction(center, arrow)
+    App.GG.Effect.movement(destination, move_frame, final_frame)
   }
 
-
-type App.GG.Effect.movement.Arrow {
-  up
-  down
-  left
-  right
-}
-
-App.GG.Effect.movement.Arrow.direction(coord: App.GG.Coord, arrow: App.GG.Effect.movement.Arrow): App.GG.Coord
-  case arrow {
-    up    : {coord@fst, coord@snd - 1}
-    down  : {coord@fst, coord@snd + 1}
-    left  : {coord@fst - 1, coord@snd}
-    right : {coord@fst + 1, coord@snd}
-  }
+App.GG.Effect.movement.move_at(from: App.GG.Coord, destination: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get grid = App.GG.Effect.grid.get
+    let can_walk = App.GG.Coord.can_walk(from, destination, grid)
+    let new_grid =
+      if can_walk then
+        App.GG.Grid.move_creature(from, destination, grid)
+      else
+        grid
+    App.GG.Effect.grid.set(new_grid)
+  }  
 
 App.GG.Effect.movement.move(new_pos: App.GG.Coord): App.GG.Effect<Unit>
   (center, origin, grid) 
   let new_grid = App.GG.Grid.move_creature(center, new_pos, grid)
   App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
 
-App.GG.Effect.movement.player_movement(arrow: App.GG.Effect.movement.Arrow): App.GG.Effect<Unit>
+App.GG.Effect.movement.player_movement(arrow: App.GG.Arrow): App.GG.Effect<Unit>
   App.GG.Effect {
     get center = App.GG.Effect.coord.get_center
-    let coord = App.GG.Effect.movement.Arrow.direction(center, arrow)
-    App.GG.Effect.movement.generic_movement(coord, 12, 24)
+    App.GG.Arrow_movement(arrow, 12, 24)
   }
 
     

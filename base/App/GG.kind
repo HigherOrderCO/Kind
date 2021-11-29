@@ -7,7 +7,6 @@ type App.GG.State.local {
     phase: App.GG.Phase
     grid: App.GG.Grid
     mouse: Pair<U32, U32>
-    
   )
 }
 
@@ -23,27 +22,34 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// Working - Add pewpew shot mechanic
+// Kill creature when life is 0 
+// Create a pre-game screen
+// Add classes to chips 
+// Make chips cost energy (using chips from different classes requires more energy)
+// Show energy in chips selection
+// Make attributes from body impact on life, energy (maybe dmg)
+// Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
+// As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
 // Create simple AI based on time in front of a slime and time not in front of a slime
 // Create simple statuses (stun, frozen, poison)
-// Fix centralization of tiles (currently the start of the drawing is defined to {40, 40})
-// Create more chips
+// working - Create more chips
 // Create 3 minions
-// Select chips through arrow keys
+// working - Select chips through arrow keys
 // Make the player keep the remaining chips from the previous round if no chips are selected
 // Add tile statuses
-// create customizations for buttons
+// Create customizations for buttons
 // Add comments to everything
 
-
+// DONE: Fix centralization of tiles (currently the start of the drawing is defined to {40, 40})
+// DONE: Add pewpew shot mechanic (currently binded to X without animation)
 // DONE: Create turns where you can choose chips from your deck
 // DONE: Create a deck when starting a match
 // DONE: Create flinch mechanic
 // DONE: Create Attributes from Body
 // DONE: Associate chips with stats and DNA
 // DONE: Make movement become an effect
-// DONE: Organize Effect Folder with Shockwave.kind functions
-// DONE: Chips should be wasted on use (Shockwave.kind line 262)
+// DONE: Organize Effect Folder with shockwave.kind functions
+// DONE: Chips should be wasted on use (shockwave.kind line 262)
 // DONE: Create damage interaction
 // DONE: Show Hp above minion
 // DONE: Change Effect to work like a monad

@@ -33,7 +33,7 @@ App.GG.Table.Slot.get_selected_index(
 ): Maybe<U32>
   Maybe {
     get selected = table@selected
-    let max_stack = App.GG.draw.chips_line_size@snd
+    let max_stack = App.GG.Constants.chips_array@snd
     let index = (selected@snd * max_stack) + selected@fst
     return index
   }

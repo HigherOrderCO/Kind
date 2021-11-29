@@ -15,6 +15,7 @@ type App.GG.Actions.Data {
 }
 
 type App.GG.Actions.Category {
+  basic_attack
   movement
   chip
   flinch
@@ -49,8 +50,14 @@ App.GG.Actions.inc(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
     return new_grid
   } <> grid
 
-App.GG.Actions.movement(arrow: App.GG.Effect.movement.Arrow): App.GG.Actions.Data
+App.GG.Actions.movement(arrow: App.GG.Arrow): App.GG.Actions.Data
   let frame = 0#64
   let effect = App.GG.Effect.movement.player_movement(arrow)
   let category = App.GG.Actions.Category.movement
+  App.GG.Actions.Data.new(frame, effect, category)
+
+App.GG.Actions.basic_attack: App.GG.Actions.Data
+  let frame = 0#64
+  let effect = App.GG.Effect.basic_attack
+  let category = App.GG.Actions.Category.basic_attack
   App.GG.Actions.Data.new(frame, effect, category)
