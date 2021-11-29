@@ -24,9 +24,16 @@ App.GG.when: App.When<App.GG.State>
       log("Key pressed: " |U16.show(event.code))
       case phase {
         setup:
+          let table = phase.table
           switch U16.eql(event.code) {
-            13#16: App.GG.when.setup_to_game(local)
-          }default App.pass<App.GG.State> 
+            13#16:  App.GG.when.setup_to_game(local)
+            37#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.left)
+            38#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.up)
+            39#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.right)
+            40#16:  App.GG.when.move.chip_selection(local, App.GG.Effect.movement.Arrow.down)
+
+            32#16:  App.GG.when.select_chip.space(local)
+          }default  App.pass<App.GG.State> 
         game: 
           switch U16.eql(event.code) {
             37#16:  App.GG.when.move(local, App.GG.Effect.movement.Arrow.left)
@@ -55,7 +62,7 @@ App.GG.when.update_grid(grid: App.GG.Grid): App.GG.Grid
   for coord:tile in grid with new_grid:
     App.GG.when.update_tile(coord, new_grid)
   new_grid
-    
+
 App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
   let grid = local@grid
   case local@phase as phase {
@@ -69,7 +76,7 @@ App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<A
             slime: 
               let data = monster.data
               let hand = phase.hand
-              let fold = monster.folder ++ List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table))
+              let fold = monster.folder ++ List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table@slots))
               let enrg = monster.energy 
               some(App.GG.Monster.slime(data, hand, fold, enrg))
           }
@@ -97,11 +104,11 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
           minion: App.pass<App.GG.State>
           slime:
             let table_size = 10
-            let mod = App.GG.Creature.sub_folder(table_size)
-            let table = App.GG.Table.from_folder(table_size, monster.folder)
+            let mod   = App.GG.Creature.sub_folder(table_size)
+            let slots = App.GG.Table.from_folder(table_size, monster.folder)
             let hand = [] :: App.GG.Chips
             let energy = monster.energy + monster.data@dna@attributes@energy
-            let phase = App.GG.Phase.setup(table, hand, energy)
+            let phase = App.GG.Phase.setup({slots, none}, hand, energy)
             let new_grid  = App.GG.Creature.modify_at(mod, coord, grid)
             let new_local = local@phase <- phase
             let new_local = new_local@grid <- new_grid
@@ -110,6 +117,63 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
       else
         App.pass<App.GG.State>
   }
+
+// when users press space
+// get the selected chip 
+App.GG.when.select_chip.space(
+  local: App.GG.State.local
+): IO<Maybe<App.State.local<App.GG.State>>>
+  open local
+  case local.phase as phase {
+    // only works if in setup phase
+    setup:
+      Maybe {
+        let table = phase.table
+        get selected_chip = table@selected
+        let index = (selected_chip@snd * 5) + selected_chip@fst
+        let index = U32.to_nat(index)
+        // new_hand with the chip
+        // new_table without the chip
+        let {new_hand, new_table} = App.GG.when.get_chip(index, phase.hand, table)
+        let updated_phase = App.GG.Phase.setup(new_table, new_hand, phase.energy)
+        let new_local     = local@phase <- updated_phase
+        
+        return App.set_local!(new_local)
+      } <> App.pass!
+  } default App.pass!
+
+// when user press the arrows buttons
+// move the chip selection
+App.GG.when.move.chip_selection(
+  local: App.GG.State.local 
+  arrow: App.GG.Effect.movement.Arrow
+): IO<Maybe<App.State.local<App.GG.State>>>
+  open local
+  case local.phase as phase {
+    // only work in setup phase
+    setup:
+      let table = phase.table
+      let new_table = case table@selected as selected {
+        none:
+          // case no chip was selected before
+          // initialize in 0,0 
+          table@selected <- some({0, 0})
+        some:
+          let selected  = selected.value
+          // moving
+          let new_value = case arrow {
+            up:    selected@fst <- selected@fst - 1
+            down:  selected@fst <- selected@fst + 1
+            left:  selected@snd <- selected@snd - 1
+            right: selected@snd <- selected@snd + 1
+          }
+          // checking bounds
+          let new_value = {U32.mod(new_value@fst, 5), U32.mod(new_value@snd, 2)}
+          table@selected <- some(new_value)
+      }
+      let new_local = local@phase <- App.GG.Phase.setup(new_table, phase.hand, phase.energy)
+      App.set_local!(new_local)
+  } default App.pass!
 
 App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Effect.movement.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
   let grid            = local@grid
@@ -132,15 +196,9 @@ App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<
         App.GG.when.table:
           let x = x - (App.GG.draw.chips_starting_position@fst - (App.GG.draw.chip_size@fst/2))
           let y = y - (App.GG.draw.chips_starting_position@snd - (App.GG.draw.chip_size@snd/2))
-          let a = App.GG.when.chip({x, y})
           Maybe {
-            get nat = App.GG.when.chip({x, y})
-            log(Nat.show(nat))
-            get item = List.get!(nat, phase.table)
-            get chip = item@chip 
-            let new_hand = chip & phase.hand
-            let new_item = item@chip <- none
-            let new_table = phase.table[nat] <- new_item
+            get index = App.GG.when.chip({x, y})
+            let {new_hand, new_table} = App.GG.when.get_chip(index, phase.hand, phase.table)
             let new_local = local@phase <- App.GG.Phase.setup(new_table, new_hand, phase.energy)
             return App.set_local<App.GG.State>(new_local)
           } <> App.pass<App.GG.State>
@@ -148,6 +206,22 @@ App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<
     game: App.pass<App.GG.State>
   }
 
+// function used to get a chip
+// puts the chip on hand
+// removes the chip from table
+App.GG.when.get_chip(
+  index: Nat // index of 'removed' slot
+  hand:  App.GG.Chips // chips in hand
+  table: App.GG.Table
+): Pair<App.GG.Chips, App.GG.Table>
+  Maybe {
+    get item = table@slots[index]
+    get chip = item@chip
+    let new_hand  = chip & hand
+    let new_item  = item@chip <- none
+    let new_table = table@slots[index] <- new_item
+    return { new_hand, new_table }
+  } <> { hand, table }
 
 App.GG.when.update_phase(phase: App.GG.Phase): App.GG.Phase
   case phase {

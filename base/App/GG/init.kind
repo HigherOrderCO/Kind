@@ -2,7 +2,7 @@
 App.GG.init: App.Init<App.GG.State>
   let grid = App.GG.init.grid
   let slot = App.GG.Table.Slot.new(some(App.GG.Chip.Shockwave))
-  let phase = App.GG.Phase.setup([slot, slot, slot, slot, slot, slot, slot, slot, slot, slot], [], 0)
+  let phase = App.GG.Phase.setup({[slot, slot, slot, slot, slot, slot, slot, slot, slot, slot], none}, [], 0)
   let local = App.GG.State.local.new(phase, grid, {0, 0})
   App.Store.new<App.GG.State>(local, unit)
 

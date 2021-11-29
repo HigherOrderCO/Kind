@@ -45,8 +45,9 @@ App.GG.draw.setup(phase: App.GG.Phase, img: VoxBox): VoxBox
   case phase {
     setup: 
       let img = VoxBox.Draw.image(15 - 96, 13 - 66, 150, App.GG.img.background, img)
-      let {x, y} = App.GG.draw.chips_starting_position
-      App.GG.draw.setup.chips(0, phase.table, x, y, img)
+      let {x, y}   = App.GG.draw.chips_starting_position
+      let selected = App.GG.Table.Slot.get_selected_index(phase.table)
+      App.GG.draw.setup.chips(0, phase.table@slots, selected, x, y, img)
     game: img
   }
 //40x22
@@ -54,21 +55,57 @@ App.GG.draw.turn_bar(turn_bar: U64, img: VoxBox): VoxBox
   let max = U32.min(F64.to_u32(U64.to_f64(turn_bar)), 1200)
   VoxBox.Draw.rect(21, 15, 100, max / 6, 4, Col32.new(100, 255, 100, 255), img)
 
-App.GG.draw.setup.chips(count: U32, table: App.GG.Table, x: U32, y: U32, img: VoxBox): VoxBox
-  case table {
-    nil:img
+App.GG.draw.setup.chips(
+  count: U32, 
+  slots: List<App.GG.Table.Slot>, 
+  selected: Maybe<U32>,
+  x: U32, 
+  y: U32, 
+  img: VoxBox
+): VoxBox
+  case slots {
+    nil : img
     cons:
+      // get constants
       let {cx, cy} = App.GG.draw.chip_size
       let {vx, vy} = App.GG.draw.chips_variation
       let max_stack = App.GG.draw.chips_line_size@snd
-      let {x, y} = if ((count + 1) % (max_stack + 1)) =? 0 then {x + (cx + vx), y - ((cy + vy) * max_stack)} else {x, y} 
-      case table.head@chip as chip {
-        none: App.GG.draw.setup.chips(count + 1, table.tail, x, y + (cy + vy), img)
-        some:
-          let img = VoxBox.Draw.image(x - 128, y - 128, 200, chip.value@img, img)
-          App.GG.draw.setup.chips(count + 1, table.tail, x, y + (cy + vy), img)
-      }
+      // calculate x and y
+      let {x, y} = 
+        if ((count + 1) % (max_stack + 1)) =? 0 then 
+          {x + (cx + vx), y - ((cy + vy) * max_stack)} 
+        else 
+          {x, y} 
+      // draw user selection if chip is selected
+      let img = App.GG.draw.setup.chips.selected_chip(
+        x, y, count, selected, img
+      )
+      // draw chips
+      let img = Maybe {
+        get chip = slots.head@chip
+        let img = VoxBox.Draw.image(x - 128, y - 128, 200, chip@img, img)
+        return img
+      } <> img
+      // recursion
+      App.GG.draw.setup.chips(count + 1, slots.tail, selected, x, y + (cy + vy), img)
   }
+
+App.GG.draw.setup.chips.selected_chip(
+  x: U32
+  y: U32
+  count: U32
+  selected: Maybe<U32>
+  img: VoxBox
+): VoxBox
+  Maybe {
+    get selected = selected
+    let img = 
+      if selected =? count then 
+        VoxBox.Draw.rect(x, y, 250, 10, 10, Col32.new(100, 255, 100, 255), img)
+      else 
+        img
+    return img
+  } <> img
 
 // App.GG.draw.setup.chip(chip: App.GG.Chip, x: U32, y: U32, img:VoxBox): VoxBox
 //   VoxBox.Draw.image(x, y, 200, chip@img, img)

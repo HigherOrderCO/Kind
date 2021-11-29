@@ -1,5 +1,9 @@
-App.GG.Table: Type
-  List<App.GG.Table.Slot>
+type App.GG.Table {
+  new(
+    slots: List<App.GG.Table.Slot>
+    selected: Maybe<Pair<U32, U32>>
+  )
+}
 
 type App.GG.Table.Slot {
   new(
@@ -7,7 +11,7 @@ type App.GG.Table.Slot {
   )
 }
 
-App.GG.Table.from_folder(countdown: Nat, folder: App.GG.Chips): App.GG.Table
+App.GG.Table.from_folder(countdown: Nat, folder: App.GG.Chips): List<App.GG.Table.Slot>
   if countdown =? 0 then
     List.nil<App.GG.Table.Slot>
   else
@@ -22,4 +26,14 @@ App.GG.Table.from_folder(countdown: Nat, folder: App.GG.Chips): App.GG.Table
         App.GG.Table.Slot.new(some(folder.head)),
         App.GG.Table.from_folder(countdown -1, folder.tail)
       )
+  }
+
+App.GG.Table.Slot.get_selected_index(
+  table: App.GG.Table
+): Maybe<U32>
+  Maybe {
+    get selected = table@selected
+    let max_stack = App.GG.draw.chips_line_size@snd
+    let index = (selected@snd * max_stack) + selected@fst
+    return index
   }
