@@ -1,12 +1,36 @@
 Word.to_nat.inc<
   size: Nat
 >(w: Word(size)
-): Word.to_nat(size, Word.inc(size, w)) == Nat.mod(Nat.succ(Word.to_nat(size, w)), Nat.pow(2, size))
+): Nat.mod(Nat.succ(Word.to_nat(size, w)), Nat.pow(2, size)) == Word.to_nat(size, Word.inc(size, w))
   case w {
     e:
       refl
     o:
-      ?o-38-18-77
+      let calc = refl :: Equal(Nat, Nat.mul(2,Word.to_nat(w.size,w.pred)), Word.to_nat(Nat.succ(w.size),Word.o(w.size,w.pred)))
+      case calc {
+        refl:
+          let pre_bound = Word.to_nat.bound(w.size,w.pred)
+          let bound = case Nat.mul.distrib_left(2, 1, Word.to_nat(w.size,w.pred)) {
+            refl:
+              Nat.Order.mul.left(Nat.succ(Word.to_nat(w.size,w.pred)), Nat.pow(2,w.size), 2, pre_bound)
+          }: Equal(Bool, Nat.lte(self.b, Nat.mul(2, Nat.pow(2, w.size))), true)
+          let qed = Nat.mod.le_mod(Nat.succ(Nat.mul(2,Word.to_nat(w.size,w.pred))),Nat.pow(2,Nat.succ(w.size)), bound)
+          qed
+      }: Equal(Nat, Nat.mod(Nat.succ(calc.b),Nat.pow(2,Nat.succ(w.size))), Nat.succ(Nat.mul(2,Word.to_nat(w.size,w.pred))))
     i:
-      ?i
-  }: Equal(Nat, Word.to_nat(w.size,Word.inc(w.size,w)), Nat.mod(Nat.succ(Word.to_nat(w.size,w)),Nat.pow(2,w.size)))
+      let calc = refl :: Equal(Nat, Nat.succ(Nat.mul(2,Word.to_nat(w.size,w.pred))), Word.to_nat(Nat.succ(w.size),Word.i(w.size,w.pred)))
+      case calc {
+        refl:
+          let ind = Word.to_nat.inc(w.size, w.pred)
+          case ind {
+            refl:
+// mul(c,mod(n,m)) == mod(mul(c, n), mul(c, m))
+
+// mul(2,mod(succ(n),pow(2,size))) == mul(2,mod(succ(n),pow(2,size)))
+// mod(mul(2,mod(succ(n),pow(2,size))),pow(2,succ(size))) == mul(2,mod(succ(n),pow(2,size)))
+// mod(mul(2,mod(succ(n),pow(2,size))),pow(2,succ(size))) == mul(2,mod(succ(n),pow(2,size)))
+// mod(succ(succ(mul(2,n))),pow(2,succ(size))) == mul(2, mod(succ(n),pow(2,size)))
+              ?refl
+          }: Nat.mod(Nat.succ(Nat.succ(Nat.mul(2,Word.to_nat(w.size,w.pred)))),Nat.pow(2,Nat.succ(w.size))) == Nat.mul(2,ind.b)
+      }: Equal(Nat, Nat.mod(Nat.succ(calc.b),Nat.pow(2,Nat.succ(w.size))), Nat.mul(2,Word.to_nat(w.size,Word.inc(w.size,w.pred))))
+  }: Equal(Nat, Nat.mod(Nat.succ(Word.to_nat(w.size,w)),Nat.pow(2,w.size)), Word.to_nat(w.size,Word.inc(w.size,w)))

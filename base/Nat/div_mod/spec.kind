@@ -1,0 +1,9 @@
+Nat.div_mod.spec(
+  n: Nat
+  q: Nat
+  d: Nat
+  r: Nat
+  H0: Equal(Nat, n, Nat.add(r, Nat.mul(q, d)))
+  H1: Equal(Bool, Nat.lte(Nat.succ(r), d), true)
+): Equal(Pair<Nat, Nat>, Pair.new(Nat, Nat, q, r), Nat.div_mod(n, d))
+  ?test

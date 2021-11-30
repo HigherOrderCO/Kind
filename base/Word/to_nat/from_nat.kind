@@ -68,46 +68,15 @@ Word.to_nat.from_nat<size: Nat>(
           chain(lemma_left, lemma_right)
         succ:
           let lemma = refl :: Word.inc(Nat.succ(size.pred),Nat.to_word(Nat.succ(size.pred),n.pred)) == Nat.to_word(Nat.succ(size.pred),Nat.succ(n.pred))
-          case lemma {
-            refl:
-              let ind = mirror(Word.to_nat.from_nat(Nat.succ(size.pred), n.pred))
-              (case Nat.to_word(Nat.succ(size.pred),n.pred) {
-                e:
-                  (ind)
-                    case (refl :: 1 == Nat.pow(2, 0)) {
-                      refl:
-                        mirror(Nat.mod.one(Nat.succ(n.pred)))
-                    }: 0 == Nat.mod(Nat.succ(n.pred), self.b)
-                o:
-                  (ind)
-                    case ind {
-                      refl:
-                        let right_small = ?todo :: Nat.lte(Nat.succ(Nat.succ(n.pred)), Nat.pow(2,Nat.succ(self.size))) == true
-                        let right_ok = mirror(Nat.mod.le_mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(self.size)), right_small))
-                        let left_small = Nat.lte.succ_left(Nat.succ(n.pred), Nat.pow(2,Nat.succ(self.size)), right_small)
-                        let left_ok = mirror(Nat.mod.le_mod(n.pred,Nat.pow(2,Nat.succ(self.size)), left_small))
-                        case right_ok {
-                          refl:
-                            case left_ok {
-                              refl:
-                                ?refl
-                            }: Nat.succ(left_ok.b) == Nat.succ(n.pred)
-                        }: Nat.succ(Nat.mod(n.pred,Nat.pow(2,Nat.succ(size.pred)))) == right_ok.b
-                    }: Nat.succ(ind.b) == Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(self.size)))
-                    //?oooo-38-18
-                i:
-                  (ind)
-                    ?iiii
-              }: (ind: Nat.mod(n.pred,Nat.pow(2,Nat.succ(size.pred))) == Word.to_nat(self.size,self)) -> Word.to_nat(self.size, Word.inc(self.size, self)) == Nat.mod(Nat.succ(n.pred),Nat.pow(2,self.size)))(ind)
-              // Nat.succ(Nat.mul(2,Word.to_nat(self.size,self.pred))) == Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(self.size)))
-              // Nat.mod(n.pred,Nat.pow(2,self.size)) == Word.to_nat(self.size,Nat.to_word(self.size,n.pred))
-              // Word.to_nat(Nat.succ(size.pred), Word.inc(size.pred, Nat.to_word(Nat.succ(size.pred),n.pred))) == Nat.mod(Nat.succ(n.pred),Nat.pow(2,self.size))
-          }: Word.to_nat(Nat.succ(size.pred), lemma.b) == Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred)))
+          ?succ
       }!
   }!
-//  to_nat(to_word(succ(size.pred), succ(n.pred))) == succ(n.pred) % 2^succ(size.pred)
-//  to_nat(inc(to_word(succ(size.pred), n.pred))) == succ(n.pred) % 2^succ(size.pred)
-//    - to_nat(2*self) == succ(self.size) % 2^succ(self.size)
+// to_nat(_, to_word(_, succ(n.pred))) == mod(succ(n.pred), 2^succ(size.pred))
+// to_nat(_, inc(to_word(_, n.pred)))  == mod(succ(n.pred), 2^succ(size.pred))
+//   * to_nat(_, inc(to_word(_, n.pred)))  == mod(succ(n.pred), 2^succ(size.pred))
+// ind:
+//   to_nat(_, to_word(_, n.pred)) == mod(n.pred, 2^succ(size.pred))
+
 
 Word.to_nat.zero(size: Nat): 0 == Word.to_nat(size, Word.zero(size))
   case size {

@@ -1,0 +1,9 @@
+Nat.mod.mul_both(
+  a: Nat
+  b: Nat
+  c: Nat
+  H0: Equal(Bool, Nat.lte(1, a), true)
+  H1: Equal(Bool, Nat.lte(1, c), true)
+): Equal(Nat, Nat.mul(a, Nat.mod(b, c)), Nat.mod(Nat.mul(a, b), Nat.mul(a, c)))
+  let bound_lemma = Nat.lte.comm.false(c, Nat.mod(b, c), Nat.mod.small(b, c, H1))
+  ?mul_both
