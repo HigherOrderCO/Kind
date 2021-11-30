@@ -1,1 +1,2 @@
-Nat.mod.succ_left(n: Nat, m: Nat)
+Nat.mod.succ_left(n: Nat, m: Nat, H: Equal(Bool, Nat.lte(m, 0), false)): Equal(Nat, Nat.mod(Nat.succ(n), m), Nat.mod(Nat.succ(Nat.mod(n, m)), m))
+  ?succ_left
