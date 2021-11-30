@@ -168,12 +168,21 @@ App.GG.Creature.delete(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   let new_tile = tile@creature <- none
   App.GG.Grid.set(coord, new_tile, grid)
 
-// App.GG.Creature.create_from_monster(monster: App.GG.Monster, team: App.GG.Team,)
-//   case monster {
-//     slime:
+// App.GG.Creature.create_slime(slime: App.GG.Slime, grid: App.GG.Grid): App.GG.Creature
+//   let tema = App.GG.Team.blue
+//   let animation = {App.GG.Animation.idle, 0}
+//   let actions = App.GG.Actions.new(none, none, false)
+//   let status = [] :: List<App.GG.Creature.Status>
+//   let id = App.GG.Grid.next_id(grid)
+//   let dna 
+//   open slime
+//   open slime.dna
+//   let hand = []
+//   let folder = ?s
+  
 
-//     minion:
-//   }
+// PROJECTILE HAS ACETED
+
 
 // // type App.GG.Creature { 
 //   new(
@@ -186,3 +195,10 @@ App.GG.Creature.delete(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
 //     id: Nat
 //   )
 // }
+
+// slime(
+//     data: App.GG.Slime
+//     hand: App.GG.Chips
+//     folder: App.GG.Chips
+//     energy: I32
+//   )

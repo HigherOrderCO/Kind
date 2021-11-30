@@ -55,3 +55,20 @@ App.GG.Grid.move_creature(origin: App.GG.Coord, destination: App.GG.Coord, grid:
     //log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
     return new_grid
   } <> grid
+
+App.GG.Grid.id_list(grid: App.GG.Grid): List<Nat>
+  let ids = []
+  for coord:tile in grid with ids:
+    let creature = tile@creature
+    without creature: ids
+    creature@id & ids
+  ids
+
+App.GG.Grid.next_id(grid: App.GG.Grid): Nat
+  let ids = App.GG.Grid.id_list(grid)
+  App.GG.Grid.next_id.go(0, ids)
+
+App.GG.Grid.next_id.go(count: Nat, ids: List<Nat>): Nat
+  let id = List.find<Nat>(Nat.eql(count), ids)
+  without id: count
+  App.GG.Grid.next_id.go(count + 1, ids)
