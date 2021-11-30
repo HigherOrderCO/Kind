@@ -84,6 +84,9 @@ App.GG.Creature.get(
 //Status Management
 
 type App.GG.Creature.Status {
+  invulnerable(duration: U64)
+  poison(duration: U64, damage: I32)
+  root(duration: U64)
   stun(duration: U64)
 }
 
@@ -103,12 +106,131 @@ App.GG.Creature.status_update_aux(
       []
     cons:
       let head = case status.head { 
+        invulnerable: App.GG.Creature.Status.invulnerable(U64.sub(status.head.duration, 60))
+        poison: App.GG.Creature.Status.poison(U64.sub(status.head.duration, 60), status.head.damage)
+        root: App.GG.Creature.Status.root(U64.sub(status.head.duration, 60))
         stun: App.GG.Creature.Status.stun(U64.sub(status.head.duration, 60))
+
       }
       let tail = App.GG.Creature.status_update_aux(status.tail)
       case head { 
+        invulnerable: if U64.gtn(head.duration, 0) then head & tail else tail
+        poison: if U64.gtn(head.duration, 0) then head & tail else tail
+        root: if U64.gtn(head.duration, 0) then head & tail else tail
         stun: if U64.gtn(head.duration, 0) then head & tail else tail
       }
+  }
+
+
+App.GG.Creature.add_status(
+  creature: App.GG.Creature
+  status:  App.GG.Creature.Status
+): App.GG.Creature
+
+  let invul = App.GG.Creature.status_check_invulnerable(creature)
+  if invul then 
+    case status { 
+      invulnerable: App.GG.Creature.status_add_invulnerable(creature, status.duration)
+    }default creature
+  else
+    case status {
+      invulnerable: App.GG.Creature.status_add_invulnerable(creature, status.duration)
+      poison: App.GG.Creature.status_add_poison(creature, status.duration, status.damage)
+      root:App.GG.Creature.status_add_root(creature, status.duration)
+      stun: App.GG.Creature.status_add_stun(creature, status.duration)
+    }
+
+App.GG.Creature.status_add_invulnerable(
+  creature: App.GG.Creature
+  duration: U64
+): App.GG.Creature
+  
+  let new_status = App.GG.Creature.status_add_invulnerable_aux(duration, creature@status)
+  creature@status <- new_status
+
+App.GG.Creature.status_add_invulnerable_aux(
+  duration: U64
+  status: List<App.GG.Creature.Status>
+): List<App.GG.Creature.Status>
+
+  let new_invul = App.GG.Creature.Status.invulnerable(duration)
+  case status {
+    nil: new_invul & status
+    cons:
+      case status.head { 
+        invulnerable:
+          if U64.gtn(status.head.duration, duration) then
+            status
+          else
+            new_invul & status.tail
+      }default status.head & App.GG.Creature.status_add_invulnerable_aux(duration, status.tail)
+  }
+
+
+App.GG.Creature.status_check_invulnerable(
+  creature: App.GG.Creature
+): Bool
+  let status = creature@status
+  case status { 
+    invulnerable: true
+  }default false
+
+
+App.GG.Creature.status_add_poison(
+  creature: App.GG.Creature
+  duration: U64
+  damage: I32
+): App.GG.Creature
+  
+  let new_status = App.GG.Creature.status_add_poison_aux(duration, damage, creature@status)
+  creature@status <- new_status
+
+
+App.GG.Creature.status_add_poison_aux(
+  duration: U64
+  damage: I32
+  status: List<App.GG.Creature.Status>
+): List<App.GG.Creature.Status>
+
+  let new_poison = App.GG.Creature.Status.poison(duration, damage)
+  case status {
+    nil: new_poison & status
+    cons:
+      case status.head { 
+        poison:
+          if U64.gtn(status.head.duration, duration) then
+            status
+          else
+            new_poison & status.tail
+      }default status.head & App.GG.Creature.status_add_poison_aux(duration, damage, status.tail)
+  }
+
+
+App.GG.Creature.status_add_root(
+  creature: App.GG.Creature
+  duration: U64
+): App.GG.Creature
+  
+  let new_status = App.GG.Creature.status_add_root_aux(duration, creature@status)
+  creature@status <- new_status
+
+
+App.GG.Creature.status_add_root_aux(
+  duration: U64
+  status: List<App.GG.Creature.Status>
+): List<App.GG.Creature.Status>
+
+  let new_root = App.GG.Creature.Status.root(duration)
+  case status {
+    nil: new_root & status
+    cons:
+      case status.head { 
+        root:
+          if U64.gtn(status.head.duration, duration) then
+            status
+          else
+            new_root & status.tail
+      }default status.head & App.GG.Creature.status_add_root_aux(duration, status.tail)
   }
 
   
@@ -138,6 +260,10 @@ App.GG.Creature.status_add_stun_aux(
             new_stun & status.tail
       }default status.head & App.GG.Creature.status_add_stun_aux(duration, status.tail)
   }
+
+
+
+
 
 App.GG.Creature.sub_folder(quantity: Nat, creature: App.GG.Creature): App.GG.Creature
   case creature@category as monster {
