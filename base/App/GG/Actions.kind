@@ -18,13 +18,13 @@ type App.GG.Actions.Category {
   basic_attack
   movement
   chip
-  flinch
+  stun
 }
 
-App.GG.Actions.flinch: App.GG.Actions.Data
+App.GG.Actions.stun(status: App.GG.Creature.Status, animation: App.GG.Animation, duration: U64): App.GG.Actions.Data
   let frame = 0#64
-  let category = App.GG.Actions.Category.flinch
-  let effect = App.GG.Effect.flinch
+  let category = App.GG.Actions.Category.stun
+  let effect = App.GG.Effect.stun(status, animation, duration)
   App.GG.Actions.Data.new(frame, effect, category)
 
 App.GG.Actions.new_actions(coord: App.GG.Coord, grid: App.GG.Grid, new_current: App.GG.Actions.Data): App.GG.Grid
