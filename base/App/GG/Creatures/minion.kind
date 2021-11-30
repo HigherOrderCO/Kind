@@ -31,6 +31,21 @@ App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
       }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
     basic_attack:
       App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+    death:
+      switch U64.eql((frame % 24)/2) {
+        0#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_00
+        1#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_01
+        2#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_02
+        3#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_03
+        4#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_04
+        5#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_05
+        6#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_06
+        7#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_07
+        8#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_08
+        9#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_09
+        10#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_10
+        11#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_11
+      }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
   }
 
 // App.GG.Creatures.minion.cast(
@@ -58,7 +73,7 @@ App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
 //         App.GG.Effect { 
 //           get destination = App.GG.Effect.coord.closest_y
 //           without destination: App.GG.Effect.pass
-//           App.GG.Arrow_movement(destination, 12, 24)
+//           App.GG.Effect.movement.arrow(destination, 12, 24)
 //         }
 //     }
 //   }

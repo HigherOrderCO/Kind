@@ -3,6 +3,7 @@ App.GG.Chip.wide_sword: App.GG.Chip
     "WdeSwd"
     155
     App.GG.Chip.wide_sword.Effect
+    10
     App.GG.img.bazooka
   )
 

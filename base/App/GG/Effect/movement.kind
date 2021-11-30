@@ -24,7 +24,7 @@ App.GG.Effect.movement(
     } default App.GG.Effect.pass
   }
 
-App.GG.Arrow_movement(
+App.GG.Effect.movement.arrow(
   arrow: App.GG.Arrow
   move_frame: U64
   final_frame: U64
@@ -55,7 +55,7 @@ App.GG.Effect.movement.move(new_pos: App.GG.Coord): App.GG.Effect<Unit>
 App.GG.Effect.movement.player_movement(arrow: App.GG.Arrow): App.GG.Effect<Unit>
   App.GG.Effect {
     get center = App.GG.Effect.coord.get_center
-    App.GG.Arrow_movement(arrow, 12, 24)
+    App.GG.Effect.movement.arrow(arrow, 12, 24)
   }
 
     

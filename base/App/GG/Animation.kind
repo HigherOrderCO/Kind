@@ -5,4 +5,5 @@ type App.GG.Animation {
   attack
   damage
   basic_attack
+  death
 }

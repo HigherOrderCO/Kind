@@ -6,6 +6,7 @@ App.GG.Chip.recursive_gun_2(casts: Nat, dmg: Nat): App.GG.Chip
     "RcsvGn"
     113
     App.GG.Chip.recursive_gun.Effect_2(casts, dmg)
+    15
     App.GG.img.bazooka
   )
 App.GG.Chip.recursive_gun.img(frame: U64): VoxBox

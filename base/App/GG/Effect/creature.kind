@@ -22,6 +22,16 @@ App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): 
       let real_dmg = hp - new_hp
       let new_grid = App.GG.Grid.set(pos, new_tile, grid)
       let new_grid = if flinch then App.GG.Actions.new_actions(pos, new_grid, App.GG.Actions.flinch) else new_grid
+      let new_grid = 
+        if new_hp =? 0 then
+          let vbox = App.GG.Monster.to_vbox(creature@category)
+          let vbox = vbox(App.GG.Animation.death)
+          let new_grid = App.GG.Creature.delete(pos, new_grid)
+          let new_grid = App.GG.Projectile.create(pos, App.GG.Projectile.death(vbox, 23#64), new_grid)
+          new_grid
+        else
+          new_grid 
+
       return {real_dmg, new_grid}
     } <> {+0#32, grid}
   App.GG.Effect.Result.new!(real_dmg, center, origin, new_grid, (img) img, 0, "")

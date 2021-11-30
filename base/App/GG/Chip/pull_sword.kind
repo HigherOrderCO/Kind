@@ -3,6 +3,7 @@ App.GG.Chip.pull_sword: App.GG.Chip
     "PulSwd"
     223
     App.GG.Chip.pull_sword.Effect
+    15
     App.GG.img.bazooka
   )
 

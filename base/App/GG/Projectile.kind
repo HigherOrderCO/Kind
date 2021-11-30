@@ -129,3 +129,27 @@ App.GG.Projectile.delete(origin: App.GG.Coord, id: Nat, grid: App.GG.Grid): App.
       let new_grid = App.GG.Grid.set(origin, new_tile, grid)
       new_grid
   }
+
+App.GG.Projectile.death(img: U64 -> VoxBox, duration: U64): App.GG.Projectile
+  let team    = App.GG.Team.neutral
+  let status  = App.GG.Projectile.Status.unit
+  let hits    = NatSet.new
+  let frame   = 0#64
+  let effect  = App.GG.Projectile.death.effect(img, duration)
+  let info    = App.GG.Projectile.Info.new(team, status, hits, frame)
+  App.GG.Projectile.new(info, effect)
+
+App.GG.Projectile.death.effect(img: U64 -> VoxBox, duration: U64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      let img = img(frame)
+      App.GG.Effect.frame.inc
+      App.GG.Effect.vbox.in_tile(img)
+      if frame =? duration then
+        App.GG.Effect.projectile.delete
+      else
+        App.GG.Effect.pass
+    }
+  }

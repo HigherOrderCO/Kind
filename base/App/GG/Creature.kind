@@ -40,6 +40,14 @@ App.GG.Creature.Attributes.add(
   let corruption = a@corruption + b@corruption
   App.GG.Creature.Attributes.new(hp, energy, damage, corruption)
 
+App.GG.Creature.Attributes.base: App.GG.Creature.Attributes
+  App.GG.Creature.Attributes.new(
+    25 // hp
+    25 // energy
+    25 // damage
+    25 // corruption
+  )
+
 //===========================================================
 //Creature Management
 
@@ -153,3 +161,28 @@ App.GG.Creature.add_chip(chip: App.GG.Chip, creature: App.GG.Creature): App.GG.C
       let category = App.GG.Monster.slime(monster.data, chip & monster.hand, monster.folder, monster.energy)
       creature@category <- category
   }
+
+App.GG.Creature.delete(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  let tile = App.GG.Grid.get(coord, grid)
+  without tile: grid
+  let new_tile = tile@creature <- none
+  App.GG.Grid.set(coord, new_tile, grid)
+
+// App.GG.Creature.create_from_monster(monster: App.GG.Monster, team: App.GG.Team,)
+//   case monster {
+//     slime:
+
+//     minion:
+//   }
+
+// // type App.GG.Creature { 
+//   new(
+//     category: App.GG.Monster
+//     team: App.GG.Team
+//     animation: Pair<App.GG.Animation, U64>
+//     actions: App.GG.Actions
+//     status: List<App.GG.Creature.Status>
+//     hp: I32
+//     id: Nat
+//   )
+// }

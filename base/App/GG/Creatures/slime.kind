@@ -4,7 +4,7 @@ App.GG.Creatures.slime(
 
   let data = App.GG.Body.data(body)
   let folder = App.GG.Body.to_folder(body)
-  let base_attr = App.GG.Creature.Attributes.new(10,10,10,10)
+  let base_attr = App.GG.Creature.Attributes.base
   let attributes = App.GG.Creature.Attributes.add(base_attr, data@fst)
   let dna = App.GG.Creature.Dna.new("cartinhas", attributes, body)
   let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.Creatures.slime.vbox, dna), [], folder, 0)
@@ -63,4 +63,19 @@ App.GG.Creatures.slime.vbox(animation: App.GG.Animation, frame: U64): VoxBox
       }default App.GG.img.Slime.idle.slime_character_idle_0
     basic_attack:
       App.GG.img.Slime.idle.slime_character_idle_0
+    death:
+      switch U64.eql((frame % 24)/2) {
+        0#64: App.GG.img.Slime.movement.slime_character_teleport_00
+        1#64: App.GG.img.Slime.movement.slime_character_teleport_01
+        2#64: App.GG.img.Slime.movement.slime_character_teleport_02
+        3#64: App.GG.img.Slime.movement.slime_character_teleport_03
+        4#64: App.GG.img.Slime.movement.slime_character_teleport_04
+        5#64: App.GG.img.Slime.movement.slime_character_teleport_05
+        6#64: App.GG.img.Slime.movement.slime_character_teleport_06
+        7#64: App.GG.img.Slime.movement.slime_character_teleport_07
+        8#64: App.GG.img.Slime.movement.slime_character_teleport_08
+        9#64: App.GG.img.Slime.movement.slime_character_teleport_09
+        10#64: App.GG.img.Slime.movement.slime_character_teleport_10
+        11#64: App.GG.img.Slime.movement.slime_character_teleport_11
+      }default VoxBox.empty
   }

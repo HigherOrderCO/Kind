@@ -1,2 +1,2 @@
 App.GG.Components.pull_sword: App.GG.Body.Component
-  App.GG.Body.Component.new(App.GG.Chip.pull_sword, App.GG.Creature.Attributes.new(1,1,0,0))
+  App.GG.Body.Component.new(App.GG.Chip.pull_sword, App.GG.Creature.Attributes.new(1,3,0,0))

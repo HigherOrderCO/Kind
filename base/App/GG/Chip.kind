@@ -3,6 +3,7 @@ type App.GG.Chip {
     name: String
     hue: U32
     effect: App.GG.Effect<Unit>
+    energy: I32
     img: VoxBox
   )
 }
