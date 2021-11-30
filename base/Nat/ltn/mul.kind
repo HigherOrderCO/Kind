@@ -1,3 +1,8 @@
 // TODO
 Nat.ltn.mul(
-)
+  a: Nat
+  b: Nat
+  c: Nat
+  H: Equal(Bool, Nat.ltn(a, b), true)
+): Equal(Bool, Nat.ltn(Nat.mul(c, a), Nat.mul(c, b)), true)
+  ?Nat.ltn.mul

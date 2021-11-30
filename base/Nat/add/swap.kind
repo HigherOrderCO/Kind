@@ -1,0 +1,6 @@
+Nat.add.swap(
+  a: Nat
+  b: Nat
+  c: Nat
+): Equal(Nat, Nat.add(a, Nat.add(b, c)), Nat.add(b, Nat.add(a, c)))
+  ?Nat.add.swap

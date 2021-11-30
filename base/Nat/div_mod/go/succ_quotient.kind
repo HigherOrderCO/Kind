@@ -1,0 +1,11 @@
+Nat.div_mod.go.succ_quotient(
+  d: Nat, q: Nat, r: Nat
+): Equal(
+    Pair(Nat, Nat)
+    Nat.div_mod.go(d, q, r)(
+      () Pair(Nat, Nat)
+      (fst, snd) Pair.new(Nat, Nat, Nat.succ(fst), snd)
+    )
+    Nat.div_mod.go(d, Nat.succ(q), r)
+  )
+  ?Nat.div_mod.go.succ_quotient

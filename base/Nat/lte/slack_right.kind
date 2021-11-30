@@ -1,0 +1,6 @@
+Nat.lte.slack_right(
+  a: Nat, b: Nat, c: Nat
+  H: Equal(Bool, Nat.lte(a, b), true)
+): Equal(Bool, Nat.lte(a, Nat.add(b, c)), true)
+  ?Nat.lte.slack_right
+

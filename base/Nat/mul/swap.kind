@@ -1,0 +1,6 @@
+Nat.mul.swap(
+  a: Nat
+  b: Nat
+  c: Nat
+): Equal(Nat, Nat.mul(a, Nat.mul(b, c)), Nat.mul(b, Nat.mul(a, c)))
+  ?Nat.mul.swap
