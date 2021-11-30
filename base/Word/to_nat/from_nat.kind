@@ -1,31 +1,3 @@
-Word.size.zero(w: Word(0)): w((w, w.size) Type, Unit, (size, pred) Empty, (size, pred) Empty)
-  let contra = refl :: 0 == 0
-  (case w {
-    e:
-      (contra)
-        unit
-    o:
-      (contra)
-        Empty.absurd!(Nat.succ_neq_zero(w.size, contra))
-    i:
-      (contra)
-        Empty.absurd!(Nat.succ_neq_zero(w.size, contra))
-  }: (h: w.size == 0) -> w((k, k.size) Type, Unit, (size, pred) Empty, (size, pred) Empty))(contra)
-
-Word.size.succ(n: Nat, w: Word(Nat.succ(n))): w((w, w.size) Type, Empty, (size, pred) Unit, (size, pred) Unit)
-  let contra = refl :: Nat.succ(n) == Nat.succ(n)
-  (case w {
-    e:
-      (contra)
-        Empty.absurd!(Nat.succ_neq_zero(n, contra))
-    o:
-      (contra)
-        unit
-    i:
-      (contra)
-        unit
-  }: (h: Nat.succ(n) == w.size) -> w((k, k.size) Type, Empty, (size, pred) Unit, (size, pred) Unit))(contra)
-
 Word.to_nat.from_nat<size: Nat>(
   n: Nat
 ): Word.to_nat(size, Nat.to_word(size, n)) == Nat.mod(n, Nat.pow(2, size))
@@ -84,21 +56,4 @@ Word.to_nat.from_nat<size: Nat>(
               }: Equal(Nat, self.b, Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred))))
           }: Equal(Nat, Word.to_nat(Nat.succ(size.pred),lemma.b), Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred))))
       }!
-  }!
-// to_nat(_, to_word(_, succ(n.pred))) == mod(succ(n.pred), 2^succ(size.pred))
-// to_nat(_, inc(to_word(_, n.pred)))  == mod(succ(n.pred), 2^succ(size.pred))
-//   * to_nat(_, inc(to_word(_, n.pred)))  == mod(succ(n.pred), 2^succ(size.pred))
-// ind:
-//   to_nat(_, to_word(_, n.pred)) == mod(n.pred, 2^succ(size.pred))
-
-
-Word.to_nat.zero(size: Nat): 0 == Word.to_nat(size, Word.zero(size))
-  case size {
-    zero:
-      refl
-    succ:
-      case Word.to_nat.zero(size.pred) {
-        refl:
-          refl
-      }: 0 == Nat.mul(2, self.b)
   }!
