@@ -7,7 +7,7 @@ Nat.mod.mul_both(
   H1: Equal(Bool, Nat.lte(1, c), true)
 ): Equal(Nat, Nat.mul(a, Nat.mod(b, c)), Nat.mod(Nat.mul(a, b), Nat.mul(a, c)))
   let bound_lemma = Nat.lte.comm.false(c, Nat.mod(b, c), Nat.mod.small(b, c, H1))
-  let bound = Nat.ltn.mul( Nat.mod(b,c), c, a, bound_lemma)
+  let bound = Nat.ltn.mul(Nat.mod(b,c), c, a, H0, bound_lemma)
   let id_lemma = Nat.div_mod.recover(b, c, H1)
   let id_lemma = apply(Nat.mul(a), id_lemma)
   let distrib = Nat.mul.distrib_left(a,Nat.mod(b,c),Nat.mul(Nat.div(b,c),c))
