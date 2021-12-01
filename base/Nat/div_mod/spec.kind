@@ -40,7 +40,19 @@ Nat.div_mod.spec(
               let succ_out = Nat.div_mod.go.succ_quotient(d, 0, Nat.sub(n,d))
               case succ_out {
                 refl:
-                  let ind = Nat.div_mod.spec(Nat.sub(n, d), q.pred, d, r, ?H0, ?H1)
+                  let H0 = mirror(H0)
+                  let H0 = case Nat.add.swap(r, d, Nat.mul(q.pred, d)) {
+                    refl:
+                      H0
+                  }: Equal(Nat, n, self.b)
+                  let H0 = apply((x) Nat.sub(x, d), H0)
+                  let H0 = case Nat.add.sub(d, Nat.add(r, Nat.mul(q.pred, d))) {
+                    refl:
+                      H0
+                  }: Equal(Nat, Nat.sub(n, d), self.b)
+                  let H1 = mirror(H1)
+                  let H1 = Nat.lte.comm.false(d, r, H1)
+                  let ind = Nat.div_mod.spec(Nat.sub(n, d), q.pred, d, r, H0, H1)
                   case ind {
                     refl:
                       refl
