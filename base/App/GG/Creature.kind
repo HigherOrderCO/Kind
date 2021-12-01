@@ -286,37 +286,46 @@ App.GG.Creature.delete(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   let new_tile = tile@creature <- none
   App.GG.Grid.set(coord, new_tile, grid)
 
-// App.GG.Creature.create_slime(slime: App.GG.Slime, grid: App.GG.Grid): App.GG.Creature
-//   let tema = App.GG.Team.blue
-//   let animation = {App.GG.Animation.idle, 0}
-//   let actions = App.GG.Actions.new(none, none, false)
-//   let status = [] :: List<App.GG.Creature.Status>
-//   let id = App.GG.Grid.next_id(grid)
-//   let dna = slime@dna
-//   open dna
-//   let hand = []
-//   let folder = ?f
-//   ?d
-  
+App.GG.Creature.create_slime(slime: App.GG.Slime, grid: App.GG.Grid): App.GG.Creature
+  let team = App.GG.Team.blue
+  let animation = {App.GG.Animation.idle, 0#64}
+  let actions = App.GG.Actions.new(none, none, false)
+  let status = [] :: List<App.GG.Creature.Status>
+  let id = App.GG.Grid.next_id(grid)
+  let dna = slime@dna
+  let body = dna@body
+  let data = slime
+  let hand = []
+  let folder = App.GG.Body.to_folder(body)
+  let hp = dna@attributes@hp * 10
+  let energy = 0 :: I32
+  let monster = App.GG.Monster.slime(data, hand, folder, energy)
+  App.GG.Creature.new(monster, team, animation, actions, status, hp, id)
 
-// PROJECTILE HAS ACETED
+App.GG.Creature.create_minion(minion: App.GG.Minion, grid: App.GG.Grid): App.GG.Creature
+  let team = App.GG.Team.red
+  let animation = {App.GG.Animation.idle, 0#64}
+  let actions = App.GG.Actions.new(none, none, false)
+  let status = [] :: List<App.GG.Creature.Status>
+  let id = App.GG.Grid.next_id(grid)
+  let AI = App.GG.AI.new(0, 0)
+  let hp = minion@hp
+  let monster = App.GG.Monster.minion(minion, AI)
+  App.GG.Creature.new(monster, team, animation, actions, status, hp, id)
 
+App.GG.Creature.place(creature: App.GG.Creature, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  let f = 
+    (tile: App.GG.Tile)
+    tile@creature <- some(creature)
+  App.GG.Grid.update(coord, f, grid)
 
-// // type App.GG.Creature { 
-//   new(
-//     category: App.GG.Monster
-//     team: App.GG.Team
-//     animation: Pair<App.GG.Animation, U64>
-//     actions: App.GG.Actions
-//     status: List<App.GG.Creature.Status>
-//     hp: I32
-//     id: Nat
-//   )
-// }
-
-// slime(
-//     data: App.GG.Slime
-//     hand: App.GG.Chips
-//     folder: App.GG.Chips
-//     energy: I32
-//   )
+App.GG.Creature.dmg_with_attribute(creature: App.GG.Creature, dmg: I32): I32
+  case creature@category as monster {
+    minion: dmg
+    slime:
+      let slime = monster.data
+      let dna = slime@dna
+      let attributes = dna@attributes
+      let destruction = attributes@damage
+      (dmg * destruction) / 25
+  }

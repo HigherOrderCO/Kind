@@ -130,3 +130,13 @@ App.GG.Body.to_folder(body: App.GG.Body): App.GG.Chips
   let new_list = List.map!!(f, data@snd)
   let flat = List.flatten!(new_list)
   flat
+
+App.GG.Body.to_energy(body: App.GG.Body): I32
+  let {attributes, chips} = App.GG.Body.data(body)
+  let energy = attributes@energy
+  energy
+
+App.GG.Body.to_hp(body: App.GG.Body): I32
+  let {attributes, chips} = App.GG.Body.data(body)
+  let hp = attributes@hp
+  hp * 10

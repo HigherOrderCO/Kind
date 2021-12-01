@@ -1,7 +1,7 @@
 type App.GG.Chip {
   new(
     name: String
-    hue: U32
+    class: App.GG.Class
     effect: App.GG.Effect<Unit>
     energy: I32
     img: VoxBox

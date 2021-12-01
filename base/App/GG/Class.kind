@@ -1,0 +1,14 @@
+type App.GG.Class {
+  strength
+  destruction
+  power
+  control
+}
+
+App.GG.Class.to_hue(class: App.GG.Class): U32
+  case class {
+    strength    : 80#32  // Green
+    destruction : 0#32   // Red
+    power       : 38#32  // Yellow
+    control     : 183#32 // Purple
+  }

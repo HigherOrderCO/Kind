@@ -22,23 +22,39 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// Create a pre-game screen
+// - Organize functions inside files by section (like attributes is in creature)
+//     App.GG.when needs to be organized and commented       
+// - Make Basic Attack scale with damage attribute (maybe dealing 2 dmg baseline, that is increased by 1 each 5 points?)
+// - Add an animation to basic attack (x key)
+// - Create a panel steal Chip
+// - Show chips in hand in setup phase
+// - Show chips in hand in game phase
+// - Add higher energy cost for using chips from different types
+// - make poison do damage
+// - create more control chips that apply statuses
+// - update status each frame before everything happens
+// - Create counter mechanic - double damage after interrupting a chip action (needs status)
+// - Create blinking status (status to be applied after taking chip damage,
+//     protecting from next damages, it can be called invisiblity)
+// - Create a pre-game screen
+// - Fix Projectile running twice in a frame (since each tile is scanned once,
+//     a moving projectile can run its effect twice in a frame).
+//     Currently this does not happen to creature's actions, due to the parameter
+//     "has_acted", that becomes true after one interaction and resets after each frame.
+// - Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
+//     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
+// - Create simple AI based on time in front of a slime and time not in front of a slime
+// - Create 3 minions
+// - Make the player keep the remaining chips from the previous round if no chips are selected
+// - Add tile statuses
+// - Create customizations for buttons
+// - Add comments to everything
 
-// Add classes to chips 
-// working on it - Make chips cost energy (using chips from different classes requires more energy)
-// Show energy in chips selection
-// Make attributes from body impact on life, energy (maybe dmg)
-// Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
-// As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
-// Create simple AI based on time in front of a slime and time not in front of a slime
-// Create simple statuses (stun, frozen, poison)
-// working - Create more chips
-// Create 3 minions
-// Make the player keep the remaining chips from the previous round if no chips are selected
-// Add tile statuses
-// Create customizations for buttons
-// Add comments to everything
-
+// DONE: Create simple statuses (stun, invulnerable, root, poison)
+// DONE: Make attributes from body impact on life, energy, *AND DAMAGE*
+// DONE: Show energy in chips selection
+// DONE: Make chips cost energy (using chips from different classes requires more energy)
+// DONE: Add classes to chips 
 // DONE: Select chips through arrow keys
 // DONE: Kill creature when life is 0 
 // DONE: Fix centralization of tiles (currently the start of the drawing is defined to {40, 40})

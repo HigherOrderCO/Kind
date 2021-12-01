@@ -1,14 +1,12 @@
 App.GG.Creatures.slime(
   body: App.GG.Body
-): App.GG.Monster
+): App.GG.Slime
 
   let data = App.GG.Body.data(body)
-  let folder = App.GG.Body.to_folder(body)
   let base_attr = App.GG.Creature.Attributes.base
   let attributes = App.GG.Creature.Attributes.add(base_attr, data@fst)
   let dna = App.GG.Creature.Dna.new("cartinhas", attributes, body)
-  let monster = App.GG.Monster.slime(App.GG.Slime.new(App.GG.Creatures.slime.vbox, dna), [], folder, 0)
-  monster
+  App.GG.Slime.new(App.GG.Creatures.slime.vbox, dna)
 
 App.GG.Creatures.slime.vbox(animation: App.GG.Animation, frame: U64): VoxBox
   case animation {

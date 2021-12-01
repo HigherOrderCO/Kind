@@ -1,11 +1,11 @@
 App.GG.Chip.recursive_gun: App.GG.Chip
-  App.GG.Chip.recursive_gun_2(2, 5)
+  App.GG.Chip.recursive_gun_2(4, 2)
 
 App.GG.Chip.recursive_gun_2(casts: Nat, dmg: Nat): App.GG.Chip
   App.GG.Chip.new(
-    "RcsvGn"
-    113
-    App.GG.Chip.recursive_gun.Effect_2(casts, dmg)
+    "RcvGun"
+    App.GG.Class.destruction
+    App.GG.Chip.recursive_gun.Effect(casts, dmg)
     15
     App.GG.img.bazooka
   )
@@ -27,9 +27,9 @@ App.GG.Chip.recursive_gun.img(frame: U64): VoxBox
 
 
 // App.GG.Chip.recursive_gun.Effect: App.GG.Effect<Unit>
-//   App.GG.Chip.recursive_gun.Effect_2(4, 2)
+//   App.GG.Chip.recursive_gun.Effect(4, 2)
 
-App.GG.Chip.recursive_gun.Effect_2(casts: Nat, dmg: Nat): App.GG.Effect<Unit>
+App.GG.Chip.recursive_gun.Effect(casts: Nat, dmg: Nat): App.GG.Effect<Unit>
   App.GG.Effect {
     get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
@@ -54,7 +54,8 @@ App.GG.Chip.recursive_gun.Effect_2(casts: Nat, dmg: Nat): App.GG.Effect<Unit>
                 App.GG.Effect.pass
               else 
                 App.GG.Effect.creature.modify(App.GG.Creature.add_chip(App.GG.Chip.recursive_gun_2(casts - 1, dmg * 2)))
-              get dmg = App.GG.Effect.creature.change_hp_at(0 - Nat.to_i32(dmg), enemy_coord, true) 
+              let dmg = App.GG.Creature.dmg_with_attribute(creature, Nat.to_i32(dmg))
+              get dmg = App.GG.Effect.creature.change_hp_at(0 - dmg, enemy_coord, true) 
               return unit 
             }
         }

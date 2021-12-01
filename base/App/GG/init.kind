@@ -29,20 +29,13 @@ App.GG.init: App.Init<App.GG.State>
 
 
 App.GG.init.grid: App.GG.Grid
-
-  let slime = App.GG.Creatures.slime
-  let minion = App.GG.Creatures.minion
-  let parts = App.GG.Body.Parts.new(0,0,0)
-  let body = App.GG.Body.new(parts, parts, parts, parts)
-  let creature1 = App.GG.Creature.new(slime(body), App.GG.Team.blue, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 50, 0)
-  let creature2 = App.GG.Creature.new(minion, App.GG.Team.red, {App.GG.Animation.idle, 0#64}, App.GG.Actions.new(none, none, false), [], 50, 1)
   let list = 
     [
       {{0#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
       {{0#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
       {{0#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
       {{1#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{1#32,1#32}, App.GG.Tile.new([], some(creature1), App.GG.Team.blue)}
+      {{1#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
       {{1#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
       {{2#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
       {{2#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
@@ -52,11 +45,19 @@ App.GG.init.grid: App.GG.Grid
       {{3#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
       {{3#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
       {{4#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{4#32,1#32}, App.GG.Tile.new([], some(creature2), App.GG.Team.red)}
+      {{4#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
       {{4#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
       {{5#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
       {{5#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
       {{5#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
     ]
-  BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
+  let grid = BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
+  let parts = App.GG.Body.Parts.new(0,0,0)
+  let body = App.GG.Body.new(parts, parts, parts, parts)
+  let slime = App.GG.Creature.create_slime(App.GG.Creatures.slime(body), grid)
+  let minion =  App.GG.Creature.create_minion(App.GG.Creatures.minion, grid)
+  let grid = App.GG.Creature.place(slime,  {1#32,1#32}, grid)
+  let grid = App.GG.Creature.place(minion, {4#32,1#32}, grid)
+  grid
+  
 

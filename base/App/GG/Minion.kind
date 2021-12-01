@@ -2,5 +2,6 @@ type App.GG.Minion {
   new(
     sprite: App.GG.Animation -> U64 -> VoxBox
     effect: App.GG.Effect<Unit>
+    hp: I32
   )
 }

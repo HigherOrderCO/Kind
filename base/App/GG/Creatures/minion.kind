@@ -1,7 +1,5 @@
-App.GG.Creatures.minion: App.GG.Monster
-  let AI = App.GG.AI.new(0, 0)
-  let monster = App.GG.Monster.minion(AI, App.GG.Minion.new(App.GG.Creatures.minion.vbox, App.GG.Effect.pass ))
-  monster
+App.GG.Creatures.minion: App.GG.Minion
+  App.GG.Minion.new(App.GG.Creatures.minion.vbox, App.GG.Effect.pass, 200)
 
 App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
   case animation {

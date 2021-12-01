@@ -1,7 +1,7 @@
 type App.GG.Monster {
   minion(
-    AI: App.GG.AI
     data: App.GG.Minion
+    AI: App.GG.AI
   )
   slime(
     data: App.GG.Slime

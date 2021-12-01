@@ -36,7 +36,9 @@ App.GG.draw.setup(phase: App.GG.Phase, img: VoxBox): VoxBox
       let {x, y}   = App.GG.Constants.chips_starting_position
       let selected = App.GG.Table.Slot.get_selected_index(phase.table)
       let img = App.GG.draw.setup.chips(0, phase.table@slots, selected, x, y, img)
-      let img = VoxBox.Draw.text(I32.show(phase.energy), PixelFont.black, Pos32.new(100,20,200), img)
+      let img = VoxBox.Draw.text(I32.show(phase.energy), PixelFont.black, Pos32.new(93,80,200), img)
+      let bar = I32.to_u32((phase.energy * 64) / 100)
+      let img = VoxBox.Draw.rect(93, 80 - bar, 100, 11, bar, Col32.new(240, 220, 0, 255), img)
       img
     game: img
   }
@@ -76,8 +78,7 @@ App.GG.draw.setup.chips(
       let {tx, ty} = {(x + 2) - (App.GG.Constants.chip_size@fst / 2), (y + 4) - (App.GG.Constants.chip_size@snd / 2)} // get text position
       let img = Maybe {
         get chip = slots.head@chip
-        let img = VoxBox.Draw.image_colorize(x - 128, y - 128, 200, Col32.new_hue(chip@hue) App.GG.img.back_w_outline_brighter, img)
-        let img = VoxBox.Draw.text(chip@name, PixelFont.black, Pos32.new(tx,ty,200), img)
+        let img = VoxBox.Draw.image_colorize(x - 128, y - 128, 200, Col32.new_hue(App.GG.Class.to_hue(chip@class)) App.GG.img.back_w_outline_brighter, img)
         // let img = VoxBox.Draw.image(x - 128, y - 128, 200, chip@img, img)
         let img = VoxBox.Draw.text(chip@name, PixelFont.black, Pos32.new(tx,ty,200), img)
         return img
@@ -104,7 +105,7 @@ App.GG.draw.setup.chips.selected_chip(
     get selected = selected
     let img = 
       if selected =? count then 
-        VoxBox.Draw.rect(x - 5, y - 5, 250, 10, 10, Col32.new(100, 255, 100, 255), img)
+        VoxBox.Draw.image(x - 128, y - 128, 250, App.GG.img.outline_selected, img)
       else 
         img
     return img

@@ -1,8 +1,8 @@
 App.GG.Chip.shockwave: App.GG.Chip
   App.GG.Chip.new(
     "ShkWve"
-    46
-    App.GG.Chip.shockwave.Effect
+    App.GG.Class.power
+    App.GG.Chip.shockwave.Effect(-30)
     8
     App.GG.img.bazooka
   )
@@ -24,7 +24,7 @@ App.GG.Chip.shockwave.img(frame: U64): VoxBox
   }default App.GG.img.Slime.hand.slime_wp_character__fire_00
 
 
-App.GG.Chip.shockwave.Effect: App.GG.Effect<Unit>
+App.GG.Chip.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect {
     get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
@@ -33,8 +33,9 @@ App.GG.Chip.shockwave.Effect: App.GG.Effect<Unit>
     without frame: App.GG.Effect.pass
     App.GG.Effect {
       App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
+      let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
-      let projectile_effect = App.GG.Chip.shockwave.Projectile.Effect 
+      let projectile_effect = App.GG.Chip.shockwave.Projectile.Effect(dmg)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
@@ -49,7 +50,7 @@ App.GG.Chip.shockwave.bullet_position_x(current_frame: U64, max_frame: U64): I32
   x
   
 
-App.GG.Chip.shockwave.Projectile.Effect: App.GG.Effect<Unit>
+App.GG.Chip.shockwave.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
   let max_frame = 8#64
   App.GG.Effect {
     App.GG.Effect.vbox.in_tile(App.GG.img.target_tile) // Adds image bound to tile
@@ -62,7 +63,7 @@ App.GG.Chip.shockwave.Projectile.Effect: App.GG.Effect<Unit>
     if is_enemy && not(has_hit) then
       App.GG.Effect {
         App.GG.Effect.projectile.add_hit(center) // Adds enemy to list of targets hit by projectile
-        App.GG.Effect.creature.change_hp_at(-10, center, true) 
+        App.GG.Effect.creature.change_hp_at(dmg, center, true) 
         return unit
       }
     else
