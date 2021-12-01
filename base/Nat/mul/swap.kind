@@ -3,4 +3,13 @@ Nat.mul.swap(
   b: Nat
   c: Nat
 ): Equal(Nat, Nat.mul(a, Nat.mul(b, c)), Nat.mul(b, Nat.mul(a, c)))
-  ?Nat.mul.swap
+  case mirror(Nat.mul.assoc(a, b, c)) {
+    refl:
+      case Nat.mul.comm(b, a) {
+        refl:
+          case mirror(Nat.mul.assoc(b, a, c)) {
+            refl:
+              refl
+          }: Equal(Nat, Nat.mul(Nat.mul(b, a), c), self.b)
+      }: Equal(Nat, Nat.mul(self.b, c), Nat.mul(b, Nat.mul(a, c)))
+  }: Equal(Nat, self.b, Nat.mul(b, Nat.mul(a, c)))

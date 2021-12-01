@@ -3,4 +3,13 @@ Nat.add.swap(
   b: Nat
   c: Nat
 ): Equal(Nat, Nat.add(a, Nat.add(b, c)), Nat.add(b, Nat.add(a, c)))
-  ?Nat.add.swap
+  case Nat.add.assoc(a, b, c) {
+    refl:
+      case Nat.add.comm(b, a) {
+        refl:
+          case Nat.add.assoc(b, a, c) {
+            refl:
+              refl
+          }: Equal(Nat, Nat.add(Nat.add(b, a), c), self.b)
+      }: Equal(Nat, Nat.add(self.b, c), Nat.add(b, Nat.add(a, c)))
+  }: Equal(Nat, self.b, Nat.add(b, Nat.add(a, c)))
