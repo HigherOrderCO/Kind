@@ -37,7 +37,10 @@ Nat.div_mod.spec(
           }: Equal(Bool, Bool.true, Nat.lte(d, self.b))
           case cond {
             refl:
-              let succ_out = Nat.div_mod.go.succ_quotient(d, 0, Nat.sub(n,d))
+              let H1 = mirror(H1)
+              let H1 = Nat.lte.comm.false(d, r, H1)
+              let succ_out_hyp = Nat.Order.chain(1, Nat.succ(r), d, refl, H1)
+              let succ_out = Nat.div_mod.go.succ_quotient(d, 0, Nat.sub(n,d), succ_out_hyp)
               case succ_out {
                 refl:
                   let H0 = mirror(H0)
@@ -50,8 +53,6 @@ Nat.div_mod.spec(
                     refl:
                       H0
                   }: Equal(Nat, Nat.sub(n, d), self.b)
-                  let H1 = mirror(H1)
-                  let H1 = Nat.lte.comm.false(d, r, H1)
                   let ind = Nat.div_mod.spec(Nat.sub(n, d), q.pred, d, r, H0, H1)
                   case ind {
                     refl:
