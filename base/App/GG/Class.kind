@@ -12,3 +12,11 @@ App.GG.Class.to_hue(class: App.GG.Class): U32
     power       : 38#32  // Yellow
     control     : 183#32 // Purple
   }
+
+App.GG.Class.eql(a: App.GG.Class, b: App.GG.Class): Bool
+  case a b {
+    strength strength: true
+    destruction destruction: true
+    power power: true
+    control control: true
+  }default false

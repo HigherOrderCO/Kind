@@ -29,7 +29,6 @@ App.GG: App<App.GG.State>
 // - Create a panel steal Chip
 // - Show chips in hand in setup phase
 // - Show chips in hand in game phase
-// - Add higher energy cost for using chips from different types
 // - make poison do damage
 // - create more control chips that apply statuses
 // - update status each frame before everything happens
@@ -50,6 +49,7 @@ App.GG: App<App.GG.State>
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: Add higher energy cost for using chips from different types
 // DONE: Create simple statuses (stun, invulnerable, root, poison)
 // DONE: Make attributes from body impact on life, energy, *AND DAMAGE*
 // DONE: Show energy in chips selection

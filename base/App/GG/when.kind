@@ -229,7 +229,8 @@ App.GG.when.get_chip(
       Maybe {
         get item = table@slots[index]
         get chip = item@chip
-        get new_energy = App.GG.when.get_new_energy(chip@energy, energy)
+        get energy_cost = App.GG.when.get_energy_cost(chip, phase)
+        let new_energy = phase.energy - energy_cost
         let new_item   = item@chip <- none
         let new_table  = table@slots[index] <- new_item
         let new_hand   = chip & hand
@@ -240,11 +241,45 @@ App.GG.when.get_chip(
       phase
   }
 
-App.GG.when.get_new_energy(chip: I32, table: I32): Maybe<I32>
-  if chip >? table then
-    none
-  else
-    some(table - chip)
+App.GG.when.get_energy_cost(chip: App.GG.Chip, phase: App.GG.Phase): Maybe<I32>
+  case phase {
+    setup:
+      let energy_cost_extra = App.GG.when.get_energy_cost.extra(chip, phase.hand)
+      let energy_cost = chip@energy + energy_cost_extra
+      if energy_cost >? phase.energy then
+        none
+      else
+        some(energy_cost)
+    game: none 
+  }
+
+App.GG.when.get_energy_cost.extra(chip: App.GG.Chip, hand: App.GG.Chips): I32
+  let class_a = chip@class
+  let energy = 0 :: I32
+  let f =
+    (c: App.GG.Chip)
+      let class_b = c@class
+      App.GG.Class.eql(class_a, class_b)
+  let f2 = 
+    (class: App.GG.Class, c: App.GG.Chip,)
+      if App.GG.Class.eql(class, class_a) then
+        false
+      else
+        App.GG.Class.eql(class, c@class)
+
+  let has_class = List.find!(f, hand)
+  case has_class {
+    none:
+      for class in [App.GG.Class.strength, App.GG.Class.destruction, App.GG.Class.power, App.GG.Class.control] with energy:
+        if Maybe.is_some!(List.find!(f2(class), hand)) then 
+          energy + 10
+        else
+          energy
+      energy
+    some:
+      energy
+  }
+// caso não tenha sua classe - verificar quantas outras tem,
 
 App.GG.when.return_chip(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
   let new_phase = App.GG.when.return_chip.phase(local@phase)
@@ -266,7 +301,9 @@ App.GG.when.return_chip.phase(
         cons:
           let chip = hand.head
           let slots = App.GG.when.return_chip.go(chip, table@slots)
-          let new_energy = chip@energy + phase.energy
+          let energy_cost_extra = App.GG.when.get_energy_cost.extra(chip, hand.tail)
+          let energy_cost = chip@energy + energy_cost_extra
+          let new_energy = energy_cost + phase.energy
           let new_table = table@slots <- slots
           let new_hand = hand.tail
           let new_phase = App.GG.Phase.setup(new_table, new_hand, new_energy)
