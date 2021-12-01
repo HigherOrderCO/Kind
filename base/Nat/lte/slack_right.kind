@@ -2,5 +2,8 @@ Nat.lte.slack_right(
   a: Nat, b: Nat, c: Nat
   H: Equal(Bool, Nat.lte(a, b), true)
 ): Equal(Bool, Nat.lte(a, Nat.add(b, c)), true)
-  ?Nat.lte.slack_right
+  case Nat.add.comm(c, b) {
+    refl:
+      Nat.lte.slack_left(a, b, c, H)
+  }: Equal(Bool, Nat.lte(a, self.b), true)
 
