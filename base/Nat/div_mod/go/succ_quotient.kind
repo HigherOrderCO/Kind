@@ -1,11 +1,17 @@
 Nat.div_mod.go.succ_quotient(
   d: Nat, q: Nat, r: Nat
-): Equal(
-    Pair(Nat, Nat)
-    Nat.div_mod.go(d, q, r)(
-      () Pair(Nat, Nat)
-      (fst, snd) Pair.new(Nat, Nat, Nat.succ(fst), snd)
+  H: Equal(Bool, Nat.ltn(0, d), true)
+):  Equal(
+     Pair(Nat, Nat)
+     Nat.div_mod.go(d, q, r)(
+       () Pair(Nat, Nat)
+       (fst, snd) Pair.new(Nat, Nat, Nat.succ(fst), snd)
+     )
+     Nat.div_mod.go(d, Nat.succ(q), r)
     )
-    Nat.div_mod.go(d, Nat.succ(q), r)
-  )
-  ?Nat.div_mod.go.succ_quotient
+  case Nat.lte(d, r) {
+    false:
+      refl
+    true:
+      Nat.div_mod.go.succ_quotient(d,Nat.succ(q),Nat.sub(r,d), H)
+  }: Equal(Pair(Nat, Nat), self(() Pair(Nat,Nat),Nat.div_mod.go(d,Nat.succ(q),Nat.sub(r,d)),Pair.new(Nat,Nat,q,r),() Pair(Nat,Nat),(fst) (snd) Pair.new(Nat,Nat,Nat.succ(fst),snd)), self(() Pair(Nat,Nat),Nat.div_mod.go(d,Nat.succ(Nat.succ(q)),Nat.sub(r,d)),Pair.new(Nat,Nat,Nat.succ(q),r)))
