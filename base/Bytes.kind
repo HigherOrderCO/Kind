@@ -1,9 +1,5 @@
 // Bytes
 // =====
-
-//Byte: Type
-  //Word<8>
-
 Bytes: Type
   List<U8>
 
@@ -33,9 +29,6 @@ Bytes.from_nat(n: Nat): Bytes
       Bytes.from_nat(n/256) ++ [U8.from_nat(Nat.mod(n, 256))]
   }
 
-Bytes.from_nat.length(n: Nat): Nat.succ(Nat.log2(n)/8) == List.length(U8, Bytes.from_nat(n))
-  ?bytes.from_nat.length
-
 Bytes.to_hex(b: Bytes): String
   Bytes.to_hex.go("", b)
 
@@ -47,15 +40,6 @@ Bytes.to_hex.go(acc: String, b: Bytes): String
       Bytes.to_hex.go(acc|U8.to_hex(b.head), b.tail)
   }
 
-//Bytes.inc.go<size: Nat>(byte: Word<size>): Pair<Word<size>, Bool>
-  //case byte {
-    //e: {Word.e, true}
-    //o: {Word.i!(byte.pred), false}
-    //i: case Bytes.inc.go!(byte.pred) as result {
-      //new: {Word.o!(result.fst), result.snd}
-    //}
-  //}!
-
 Bytes.inc(bytes: Bytes): Bytes
   case bytes {
     nil:
@@ -66,22 +50,3 @@ Bytes.inc(bytes: Bytes): Bytes
       else
         List.cons!(U8.inc(bytes.head), bytes.tail)
   }
-  //case bytes {
-    //nil: [1#8]
-    //cons: case Bytes.inc.go!(bytes.head@value) as result {
-      //new: case result.snd {
-        //true: List.cons!(U8.new(result.fst), Bytes.inc(bytes.tail))
-        //false: List.cons!(U8.new(result.fst), bytes.tail)
-      //}
-    //}
-  //}
-
-//Bytes.from_nat.identity(n: Nat): Equal<Nat, Bytes.to_nat(Bytes.from_nat(n)), n>
-  //Bytes.from_nat.identity(n)
-
-//Aux.1(
-  //n: Nat
-  //e0: Nat.ltn(0, n) == true
-  //e1: Nat.ltn(n, 256) == true
-//): Equal<Bytes, Bytes.from_nat(n), [Nat.apply!(n, Word.inc<8>, Word.zero(8))]>
-  //Aux.1(n, e0, e1)
