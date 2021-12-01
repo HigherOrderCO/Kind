@@ -11,6 +11,7 @@ type App.GG.Projectile.Info {
     status: App.GG.Projectile.Status
     hits: NatSet
     frame: U64
+    has_acted: Bool
   )
 }
 
@@ -136,7 +137,7 @@ App.GG.Projectile.death(img: U64 -> VoxBox, duration: U64): App.GG.Projectile
   let hits    = NatSet.new
   let frame   = 0#64
   let effect  = App.GG.Projectile.death.effect(img, duration)
-  let info    = App.GG.Projectile.Info.new(team, status, hits, frame)
+  let info    = App.GG.Projectile.Info.new(team, status, hits, frame, false)
   App.GG.Projectile.new(info, effect)
 
 App.GG.Projectile.death.effect(img: U64 -> VoxBox, duration: U64): App.GG.Effect<Unit>
@@ -153,3 +154,10 @@ App.GG.Projectile.death.effect(img: U64 -> VoxBox, duration: U64): App.GG.Effect
         App.GG.Effect.pass
     }
   }
+
+App.GG.Projectile.updated_has_acted(bool: Bool, projectile: App.GG.Projectile): App.GG.Projectile
+  // log(Bool.show(bool))
+  let info = projectile@info
+  let new_info = info@has_acted <- bool
+  let projectile = projectile@info <- new_info
+  projectile

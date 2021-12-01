@@ -17,7 +17,7 @@ App.GG.Chip.pull_sword.Effect(dmg: I32): App.GG.Effect<Unit>
     App.GG.Effect {
       App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
       let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
-      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
       let projectile_effect = App.GG.Chip.pull_sword.Projectile.Effect(dmg) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)

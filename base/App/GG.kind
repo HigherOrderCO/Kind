@@ -36,10 +36,6 @@ App.GG: App<App.GG.State>
 // - Create blinking status (status to be applied after taking chip damage,
 //     protecting from next damages, it can be called invisiblity)
 // - Create a pre-game screen
-// - Fix Projectile running twice in a frame (since each tile is scanned once,
-//     a moving projectile can run its effect twice in a frame).
-//     Currently this does not happen to creature's actions, due to the parameter
-//     "has_acted", that becomes true after one interaction and resets after each frame.
 // - Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
 //     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
 // - Create simple AI based on time in front of a slime and time not in front of a slime
@@ -49,6 +45,7 @@ App.GG: App<App.GG.State>
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: Fix Projectile running twice in a frame
 // DONE: Add higher energy cost for using chips from different types
 // DONE: Create simple statuses (stun, invulnerable, root, poison)
 // DONE: Make attributes from body impact on life, energy, *AND DAMAGE*

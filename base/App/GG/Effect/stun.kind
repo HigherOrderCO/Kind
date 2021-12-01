@@ -4,7 +4,7 @@ App.GG.Effect.stun(status: App.GG.Creature.Status, animation: App.GG.Animation, 
     get center = App.GG.Effect.coord.get_center
     App.GG.Effect.frame.inc // Increases action's frame by 1
     without frame: App.GG.Effect.pass
-    log(U64.show(frame))
+    //log(U64.show(frame))
     switch U64.eql(frame) {
       0 : 
         App.GG.Effect {

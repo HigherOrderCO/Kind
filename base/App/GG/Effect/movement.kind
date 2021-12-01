@@ -10,7 +10,7 @@ App.GG.Effect.movement(
     get grid = App.GG.Effect.grid.get
     App.GG.Effect.frame.inc 
     without frame: App.GG.Effect.pass
-    log("frame: " | U64.show(frame) )
+    //log("frame: " | U64.show(frame) )
     switch U64.eql(frame) {
       0: 
         if App.GG.Coord.can_walk(center, destination, grid) then
