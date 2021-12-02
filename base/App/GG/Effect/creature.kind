@@ -60,3 +60,6 @@ App.GG.Effect.creature.modify_at(mod: App.GG.Creature -> App.GG.Creature, pos: A
   (center, origin, grid)
   let new_grid = App.GG.Creature.modify_at(mod, pos, grid)
   App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+
+App.GG.Effect.creature.damage_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): App.GG.Effect<I32>
+  App.GG.Effect.creature.change_hp_at(I32.neg(dmg), pos, flinch)
