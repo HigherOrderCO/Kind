@@ -1,0 +1,25 @@
+Nat.ltn.mul_right(
+  a: Nat, b: Nat, c: Nat
+  H: Equal(Bool, Nat.ltn(a, Nat.mul(b, c)), true)
+): Equal(Bool, Nat.ltn(Nat.div(a, b), c), true)
+  // proof sketch:
+  // H: succ(a) <= b*c
+  // a = (a/b)*b + (a%b)
+  // succ((a/b)*b + (a%b)) <= b*c
+  // (a/b)*b + succ((a%b)) <= b*c
+  // ((a/b)*b + succ((a%b)))/b <= c
+  // ((a/b)*b + succ((a%b)))/b <= c
+  // ((a/b)*b)/b + succ((a%b))/b <= c
+  // (a/b) + succ((a%b))/b <= c
+  // (a/b) + 1 <= c
+  // succ(a/b) <= c
+
+  // lemmas:
+  // - a <= b -> a/c <= b/c
+
+  // - a/c + b/c <= (a + b)/c
+  //   * a + b = c*((a + b)/c) + (a + b)%c
+  //     a = c*a/c + a%c
+  //     b = c*b/c + b%c
+  //     a + b = c*(a/c + b/c) + a%c + b%c
+  ?mul_right

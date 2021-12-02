@@ -1,0 +1,9 @@
+Nat.div.lte(
+  a: Nat, b: Nat
+  H: Equal(Bool, Nat.lte(a, b), true)
+): Equal(Nat, 0, Nat.div(a, Nat.succ(b)))
+  let H = mirror(Nat.lte.comm.true(a, Nat.succ(b), H))
+  case H {
+    refl:
+      refl
+  }: Equal(Nat, 0, Pair.fst(Nat,Nat,H.b((self) Pair(Nat,Nat),Nat.div_mod.go(Nat.succ(b),1,Nat.sub(a,Nat.succ(b))),Pair.new(Nat,Nat,0,a))))

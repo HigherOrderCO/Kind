@@ -1,4 +1,20 @@
 Nat.pow.lte.div_pred(
   a: Nat, b: Nat, c: Nat, H: Nat.lte(a, Nat.pred(Nat.pow(Nat.succ(b), Nat.succ(c)))) == true
 ): Equal(Bool, Nat.lte(Nat.div(a, Nat.succ(b)), Nat.pred(Nat.pow(Nat.succ(b), c))), true)
-  ?div_pred
+  // proof sketch:
+  // H: succ(a) <= b^(1 + c)
+  // succ(a) <= b^(1 + c)
+  // succ(a) <= b*b^c
+  // a/b < b^c
+  let H = H :: Equal(Bool, Nat.lte(Nat.succ(a), Nat.succ(Nat.pred(Nat.pow(Nat.succ(b), Nat.succ(c))))), true)
+  let remove_pred_in = mirror(Nat.succ.pred(Nat.pow(Nat.succ(b), Nat.succ(c)), Nat.lte.comm.false!(0, Nat.pow.lte(b, Nat.succ(c)))))
+  let remove_pred_out = Nat.succ.pred(Nat.pow(Nat.succ(b), c), Nat.lte.comm.false!(0, Nat.pow.lte(b, c)))
+  case remove_pred_out {
+    refl:
+      let H = case remove_pred_in {
+        refl:
+          H
+      }: Equal(Bool, Nat.lte(Nat.succ(a), remove_pred_in.b), true)
+      let qed = Nat.ltn.mul_right(a, Nat.succ(b), Nat.pow(Nat.succ(b), c), H)
+      qed
+  }: Equal(Bool, Nat.lte(Nat.succ(Nat.div(a, Nat.succ(b))), remove_pred_out.b), true)
