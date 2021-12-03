@@ -1,0 +1,72 @@
+Ether.RLP.bound_encoding(
+  rlps: List<Ether.RLP>, bound: Nat
+  H: Equal(Bool, Nat.lte(List.length(U8, Ether.RLP.encode.many(rlps)), bound), true)
+): Ether.RLP.bound_encoding.type(rlps, bound)
+  Pair.new!!(
+    H
+    case rlps with H {
+      nil:
+        unit
+      cons:
+        Pair.new!!(
+          case rlps.head with H {
+            data:
+              let split_concat = List.concat.length<U8>(Ether.RLP.encode(Ether.RLP.data(rlps.head.value)), Ether.RLP.encode.many(rlps.tail))
+              case split_concat with H: Nat.lte(split_concat.b, bound) == true {
+                refl:
+                  let H = Nat.lte.cut_right(List.length(U8,Ether.RLP.encode(Ether.RLP.data(rlps.head.value))),List.length(U8,Ether.RLP.encode.many(rlps.tail)),bound, H)
+                  def condition = Bool.and(Nat.eql(List.length!(rlps.head.value),1), Nat.lte(U8.to_nat((List.head_with_default!(0#8,rlps.head.value))), 127))
+                  case condition with H: Nat.lte(List.length(U8, condition(() Bytes, rlps.head.value, List.concat(U8, Ether.RLP.encode.length(128, List.length(U8, rlps.head.value)), rlps.head.value))), bound) == true {
+                    true:
+                      H
+                    false:
+                      let split_concat = List.concat.length<U8>(Ether.RLP.encode.length(128,List.length(U8,rlps.head.value)), rlps.head.value)
+                      case split_concat with H: Nat.lte(split_concat.b,bound) == Bool.true {
+                        refl:
+                          let H = Nat.lte.cut_left(List.length(U8,Ether.RLP.encode.length(128,List.length(U8,rlps.head.value))),List.length(U8,rlps.head.value),bound, H)
+                          H
+                      }!
+                  }!
+              }! :: Nat.lte(List.length(U8,rlps.head.value),bound) == true
+            node:
+              let split_concat = List.concat.length<U8>(Ether.RLP.encode(Ether.RLP.node(rlps.head.child)), Ether.RLP.encode.many(rlps.tail))
+              case split_concat with H: Nat.lte(split_concat.b, bound) == true {
+                refl:
+                  let H = Nat.lte.cut_right(List.length(U8,Ether.RLP.encode(Ether.RLP.node(rlps.head.child))),List.length(U8,Ether.RLP.encode.many(rlps.tail)), bound, H)
+                  let split_concat =
+                    List.concat.length<U8>(Ether.RLP.encode.length(192, List.length(U8, Ether.RLP.encode.many(rlps.head.child))), Ether.RLP.encode.many(rlps.head.child))
+                  case split_concat with H: Nat.lte(split_concat.b, bound) == true {
+                    refl:
+                      let H = Nat.lte.cut_left(List.length(U8,Ether.RLP.encode.length(192,List.length(U8,Ether.RLP.encode.many(rlps.head.child)))),List.length(U8,Ether.RLP.encode.many(rlps.head.child)), bound, H)
+                      Ether.RLP.bound_encoding(rlps.head.child, bound, H)
+                  }!
+              }! :: Ether.RLP.bound_encoding.type(rlps.head.child,bound)
+          }! :: rlps.head!!!
+          let H = H :: Nat.lte(List.length(U8,List.concat(U8, Ether.RLP.encode(rlps.head), Ether.RLP.encode.many(rlps.tail))),bound) == true
+          case List.concat.length<U8>(Ether.RLP.encode(rlps.head), Ether.RLP.encode.many(rlps.tail)) with H: Nat.lte(self.b, bound) == true {
+            refl:
+              let H = Nat.lte.cut_left(List.length(U8, Ether.RLP.encode(rlps.head)), List.length(U8, Ether.RLP.encode.many(rlps.tail)), bound, H)
+              Ether.RLP.bound_encoding(rlps.tail, bound, H)
+          }!
+        )
+    }! :: rlps!!!
+  )
+
+Ether.RLP.bound_encoding.type(rlps: List<Ether.RLP>, bound: Nat): Type
+  And<
+    Equal<Bool>(Nat.lte(List.length(U8, Ether.RLP.encode.many(rlps)), bound), true)
+    case rlps {
+      nil:
+        Unit
+      cons:
+        And<
+          case rlps.head {
+            data:
+              Equal(Bool, Nat.lte(List.length(U8, rlps.head.value), bound), true)
+            node:
+              Ether.RLP.bound_encoding.type(rlps.head.child, bound)
+          }
+          Ether.RLP.bound_encoding.type(rlps.tail, bound)
+        >
+    }
+  >

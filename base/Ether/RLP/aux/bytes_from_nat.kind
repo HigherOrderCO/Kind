@@ -1,9 +1,9 @@
-RLP.aux.bytes_from_nat(
+Ether.RLP.aux.bytes_from_nat(
   n: Nat, H: Nat.lte(n, Nat.pred(Nat.pow(256, 7))) == true
 ): Nat.lte(List.length(U8, Bytes.from_nat(n)), 7) == true
-  RLP.aux.bytes.from_nat.aux(n, 7, H)
+  Ether.RLP.aux.bytes.from_nat.aux(n, 7, H)
 
-RLP.aux.bytes.from_nat.aux(
+Ether.RLP.aux.bytes.from_nat.aux(
   n: Nat, m: Nat, H: Nat.lte(n, Nat.pred(Nat.pow(256, m))) == true
 ): Nat.lte(List.length(U8, Bytes.from_nat(n)), m) == true
   case n with H {
@@ -20,7 +20,7 @@ RLP.aux.bytes.from_nat.aux(
               let comm = Nat.add.comm(List.length(U8,List.cons(U8,U8.from_nat(Nat.mod(Nat.succ(n.pred),256)),List.nil(U8))), List.length(U8,Bytes.from_nat(Nat.div(Nat.succ(n.pred),256))))
               case comm {
                 refl:
-                  let ind = RLP.aux.bytes.from_nat.aux(Nat.div(Nat.succ(n.pred), 256), m.pred, Nat.pow.lte.div_pred(Nat.succ(n.pred), 255, m.pred, H))
+                  let ind = Ether.RLP.aux.bytes.from_nat.aux(Nat.div(Nat.succ(n.pred), 256), m.pred, Nat.pow.lte.div_pred(Nat.succ(n.pred), 255, m.pred, H))
                   ind
               }: Equal(Bool, Nat.lte(comm.b,Nat.succ(m.pred)), Bool.true)
           }!

@@ -1,9 +1,9 @@
 // These are lemmas about how RLP decoding may split a list of Bytes
-RLP.aux.split.0(
+Ether.RLP.aux.split.0(
   payload: Bytes
   tail: Bytes
   H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
-): Pair.new(Bytes, Bytes, payload, tail) == RLP.split.length(128, Nat.to_u8(Nat.add(128, List.length!(payload))) & payload ++ tail)
+): Pair.new(Bytes, Bytes, payload, tail) == Ether.RLP.split.length(128, Nat.to_u8(Nat.add(128, List.length!(payload))) & payload ++ tail)
   let chain = Nat.Order.chain(List.length(U8,payload), 55, 126, H, refl)
   let H0 = Nat.ltn.sub_right(128, List.length(U8,payload), 255, chain)
   let H1 = Nat.to_u8.safe_conversion(Nat.add(128,List.length(U8,payload)), H0) 
@@ -16,16 +16,16 @@ RLP.aux.split.0(
   let split = List.split.length!(payload, tail)
   mirror(split)
 
-RLP.aux.split.1(
+Ether.RLP.aux.split.1(
   payload: Bytes
   tail: Bytes
   H0: Equal<Bool>(Nat.lte(List.length!(payload), 55), false)
-  H1: Equal<Bool>(Nat.lte(List.length(U8, payload), RLP.max), true)
+  H1: Equal<Bool>(Nat.lte(List.length(U8, payload), Ether.RLP.max), true)
 ): Pair.new(Bytes, Bytes, payload, tail) ==
      let b = Bytes.from_nat(List.length!(payload))
      let a = Nat.to_u8(Nat.add(56, Nat.add(128, List.length!(b))))
-     RLP.split.length(128, a & (b ++ payload) ++ tail)
-  let bytes_from_nat_length = Nat.lte.slack_left(List.length(U8, Bytes.from_nat(List.length(U8,payload))), 7, 64, RLP.aux.bytes_from_nat(List.length(U8, payload), H1))
+     Ether.RLP.split.length(128, a & (b ++ payload) ++ tail)
+  let bytes_from_nat_length = Nat.lte.slack_left(List.length(U8, Bytes.from_nat(List.length(U8,payload))), 7, 64, Ether.RLP.aux.bytes_from_nat(List.length(U8, payload), H1))
   let safe_conversion = Nat.to_u8.safe_conversion(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,payload))))), bytes_from_nat_length)
   case safe_conversion {
     refl:
@@ -46,11 +46,11 @@ RLP.aux.split.1(
 
   }: Pair.new(Bytes,Bytes,payload,tail) == Nat.lte(Nat.sub(    safe_conversion.b,    128),55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(    safe_conversion.b,    128)),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(Nat.sub(    safe_conversion.b,    128),56),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
 
-RLP.aux.split.2(
+Ether.RLP.aux.split.2(
   payload: Bytes
   tail: Bytes
   H: Equal<Bool>(Nat.lte(List.length!(payload), 55), true)
-): Pair.new(Bytes, Bytes, payload, tail) == RLP.split.length(192, Nat.to_u8(Nat.add(192, List.length!(payload))) & payload ++ tail)
+): Pair.new(Bytes, Bytes, payload, tail) == Ether.RLP.split.length(192, Nat.to_u8(Nat.add(192, List.length!(payload))) & payload ++ tail)
   let chain = Nat.Order.chain(List.length(U8,payload), 55, 62, H, refl)
   let H0 = Nat.ltn.sub_right(192, List.length(U8,payload), 255, chain)
   let H1 = Nat.to_u8.safe_conversion(Nat.add(192,List.length(U8,payload)), H0) 
@@ -61,16 +61,16 @@ RLP.aux.split.2(
   let split = List.split.length!(payload, tail)
   mirror(split)
 
-RLP.aux.split.3(
+Ether.RLP.aux.split.3(
   payload: Bytes
   tail: Bytes
   H1: Equal<Bool>(Nat.lte(List.length(U8, payload), 55), false)
-  H0: Equal<Bool>(Nat.lte(List.length(U8, payload), RLP.max), true)
+  H0: Equal<Bool>(Nat.lte(List.length(U8, payload), Ether.RLP.max), true)
 ): Pair.new(Bytes, Bytes, payload, tail) == 
      let b = Bytes.from_nat(List.length!(payload))
      let a = Nat.to_u8(Nat.add(56, Nat.add(192, List.length!(b))))
-     RLP.split.length(192, a & (b ++ payload) ++ tail)
-  let bytes_from_nat_length = RLP.aux.bytes_from_nat(List.length(U8, payload), H0)
+     Ether.RLP.split.length(192, a & (b ++ payload) ++ tail)
+  let bytes_from_nat_length = Ether.RLP.aux.bytes_from_nat(List.length(U8, payload), H0)
   let safe_conversion = Nat.to_u8.safe_conversion(Nat.add(56,Nat.add(192,List.length(U8,Bytes.from_nat(List.length(U8,payload))))), bytes_from_nat_length)
   case safe_conversion {
     refl:

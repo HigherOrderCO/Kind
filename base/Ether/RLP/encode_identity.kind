@@ -1,0 +1,27 @@
+Ether.RLP.encode_identity(
+  rlp: Ether.RLP
+  H: Equal<Bool>(Nat.lte(List.length(U8, Ether.RLP.encode(rlp)), Ether.RLP.max), true)
+): Ether.RLP.decode(Ether.RLP.encode(rlp)) == rlp
+    // first rewrite the bound on the length of the encoding
+    // so we're able to call the lemma
+    let H = case List.concat.length(U8, Ether.RLP.encode(rlp), List.nil(U8)) {
+      refl:
+        case mirror(Nat.add.zero_right(List.length(U8, Ether.RLP.encode(rlp)))) {
+          refl:
+            H
+         }: Equal<Bool>(Nat.lte(self.b, Ether.RLP.max), true)
+    }: Equal(Bool, Nat.lte(self.b, Ether.RLP.max), true)
+    let lemma = Ether.RLP.encode_identity.many([rlp], H)
+
+    // simplify concatenation with empty list
+    let lemma = case mirror(List.concat.nil_right(U8,Ether.RLP.encode(rlp))) {
+      refl:
+        lemma
+    }: Equal(List(Ether.RLP), Ether.RLP.decode.many(self.b), List.cons(Ether.RLP,rlp,List.nil(Ether.RLP)))
+    let lemma = mirror(lemma)
+
+    // substitute lemma inside goal
+    case lemma {
+      refl:
+        refl
+    }: Equal(Ether.RLP, Maybe.default(Ether.RLP,List.head(Ether.RLP,lemma.b),Ether.RLP.data(List.nil(U8))), rlp)

@@ -9,8 +9,8 @@
 // | 192 to 247 | HEX(length_of_node + 192) + HEX(node)                                      |
 // | 248 to 255 | HEX(length_of_length_of_node + 192 + 56) + HEX(length_of_node) + HEX(node) |
 // 
-// The first byte of RLP.encode.length
-// buffer length (len) | RLP.encode.length(add,len)[0]
+// The first byte of Ether.RLP.encode.length
+// buffer length (len) | Ether.RLP.encode.length(add,len)[0]
 // ------------------- | -----------------------------
 // 56     ~ 256**1-1   | 185
 // 256**1 ~ 256**2-1   | 186
@@ -22,27 +22,26 @@
 
 // Type
 // ----
-
-type RLP {
+type Ether.RLP {
   data(value: List<U8>)
-  node(child: List<RLP>)
+  node(child: List<Ether.RLP>)
 }
 
-RLP.show(r: RLP): String
+Ether.RLP.show(r: Ether.RLP): String
   case r {
     data:
       Bytes.to_hex(r.value)
     node:
       let ret = "["
       for child in r.child with ret:
-        ret|RLP.show(child)|","
+        ret|Ether.RLP.show(child)|","
       ret|"]"
   }
 
 // Length
 // ------
 
-RLP.encode.length(add: Nat, length: Nat): Bytes
+Ether.RLP.encode.length(add: Nat, length: Nat): Bytes
   if Nat.lte(length, 55) then
     [Nat.to_u8(Nat.add(add,length))]
   else
@@ -50,7 +49,7 @@ RLP.encode.length(add: Nat, length: Nat): Bytes
     let a = Nat.to_u8(Nat.add(56, Nat.add(add, List.length!(b))))
     a & b
 
-RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
+Ether.RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
   case bytes {
     nil:
       {[], []}
@@ -65,47 +64,47 @@ RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
 
 // Repeat
 // ------
-RLP.encode.many(trees: List<RLP>): Bytes
+Ether.RLP.encode.many(trees: List<Ether.RLP>): Bytes
   case trees {
     nil:
       []
     cons:
-      List.concat!(RLP.encode(trees.head), RLP.encode.many(trees.tail))
+      List.concat!(Ether.RLP.encode(trees.head), Ether.RLP.encode.many(trees.tail))
   }
 
 // RLP
 // ---
 
-RLP.encode(tree: RLP): Bytes
+Ether.RLP.encode(tree: Ether.RLP): Bytes
   case tree {
     data:
       if Bool.and(Nat.eql(List.length!(tree.value),1), Nat.lte(U8.to_nat((List.head_with_default!(0#8,tree.value))), 127)) then
         tree.value
       else
-        List.concat!(RLP.encode.length(128, List.length!(tree.value)), tree.value)
+        List.concat!(Ether.RLP.encode.length(128, List.length!(tree.value)), tree.value)
     node:
-      let rest = RLP.encode.many(tree.child)
-      List.concat!(RLP.encode.length(192, List.length!(rest)), rest)
+      let rest = Ether.RLP.encode.many(tree.child)
+      List.concat!(Ether.RLP.encode.length(192, List.length!(rest)), rest)
   }
   
-RLP.decode.many(bytes: Bytes): List<RLP>
+Ether.RLP.decode.many(bytes: Bytes): List<Ether.RLP>
   case bytes {
     nil:
       []
     cons:
       let prefix = U8.to_nat(bytes.head)
       if Nat.lte(prefix, 127) then
-        RLP.data([bytes.head]) & RLP.decode.many(bytes.tail)
+        Ether.RLP.data([bytes.head]) & Ether.RLP.decode.many(bytes.tail)
       else if Nat.lte(prefix, 191) then
-        let {head, tail} = RLP.split.length(128, bytes)
-        RLP.data(head) & RLP.decode.many(tail)
+        let {head, tail} = Ether.RLP.split.length(128, bytes)
+        Ether.RLP.data(head) & Ether.RLP.decode.many(tail)
       else
-        let {head, tail} = RLP.split.length(192, bytes)
-        RLP.node(RLP.decode.many(head)) & RLP.decode.many(tail)
+        let {head, tail} = Ether.RLP.split.length(192, bytes)
+        Ether.RLP.node(Ether.RLP.decode.many(head)) & Ether.RLP.decode.many(tail)
   }
 
-RLP.max: Nat
+Ether.RLP.max: Nat
   Nat.pred(Nat.pow(256, 7))
 
-RLP.decode(bytes: Bytes): RLP
-  List.head!(RLP.decode.many(bytes)) <> RLP.data([])
+Ether.RLP.decode(bytes: Bytes): Ether.RLP
+  List.head!(Ether.RLP.decode.many(bytes)) <> Ether.RLP.data([])
