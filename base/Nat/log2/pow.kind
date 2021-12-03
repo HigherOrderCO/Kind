@@ -1,2 +1,0 @@
-Nat.log2.pow(n: Nat): n == Nat.log2(Nat.pow(2, n))
-  ?nat.log2.pow
