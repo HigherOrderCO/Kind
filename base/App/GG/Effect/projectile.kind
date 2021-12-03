@@ -73,5 +73,7 @@ App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
   App.GG.Effect {
     get has_hit  = App.GG.Effect.projectile.has_hit(coord) // Checks if projectile has already hit that enemy
     get is_enemy = App.GG.Effect.creature.is_enemy(coord) // Checks if projectile is over an enemy
-    return not(has_hit) && is_enemy
+    get is_invulnerable = App.GG.Effect.status.is_invulnerable(coord) // Checks if projectile is trying to affect an invulnerable enemy
+    get is_noname = App.GG.Effect.status.is_noname(coord) // Checks if projectile is trying to affect a creature with noname
+    return not(is_noname) && not(is_invulnerable) && not(has_hit) && is_enemy
   }
