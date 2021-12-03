@@ -1,0 +1,2 @@
+Ether.RLP.max: Nat
+  Nat.pred(Nat.pow(256, 7))

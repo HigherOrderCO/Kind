@@ -1,0 +1,10 @@
+Ether.RLP.show(r: Ether.RLP): String
+  case r {
+    data:
+      Bytes.to_hex(r.value)
+    node:
+      let ret = "["
+      for child in r.child with ret:
+        ret|Ether.RLP.show(child)|","
+      ret|"]"
+  }
