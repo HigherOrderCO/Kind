@@ -4,7 +4,23 @@ type App.GG.Tile {
     projectiles: List<App.GG.Projectile>
     creature: Maybe<App.GG.Creature>
     owner: App.GG.Team
+    statuses: App.GG.Tile.Statuses
   )
+}
+
+type App.GG.Tile.Statuses {
+  new(
+    stolen: Maybe<App.GG.Tile.Status>
+    broken: Maybe<App.GG.Tile.Status>
+  )
+}
+
+App.GG.Tile.Statuses.pure: App.GG.Tile.Statuses
+  App.GG.Tile.Statuses.new(none, none)
+
+type App.GG.Tile.Status {
+  stolen(duration: U64)
+  broken(duration: U64)
 }
 
 App.GG.Tile.update_creature(
@@ -18,3 +34,94 @@ App.GG.Tile.update_creature(
       let new_tile = tile@creature <- some(new_creature)
       new_tile
   }
+
+App.GG.Tile.original_owner(coord: App.GG.Coord): App.GG.Team
+  if coord@fst <? 3 then
+    App.GG.Team.blue
+  else if coord@fst <? 6 then 
+    App.GG.Team.red
+  else
+    App.GG.Team.neutral
+
+App.GG.Tile.original_owner.update(coord: App.GG.Coord, tile: App.GG.Tile): App.GG.Tile
+  let new_team = App.GG.Tile.original_owner(coord)
+  tile@owner <- new_team
+
+App.GG.Tile.Status.del_from_nat(count: Nat, tile: App.GG.Tile): App.GG.Tile
+  let statuses = tile@statuses
+  let new_statuses = 
+    switch Nat.eql(count) {
+    0: statuses@stolen <- none
+    1: statuses@broken <- none
+  }default statuses
+  tile@statuses <- new_statuses
+
+App.GG.Tile.Status.add(status: App.GG.Tile.Status, tile: App.GG.Tile): App.GG.Tile
+  let statuses = tile@statuses
+  let new_statuses = 
+    case status {
+      stolen: statuses@stolen <- some(status)
+      broken: statuses@broken <- some(status)
+    }
+  tile@statuses <- new_statuses
+
+App.GG.Tile.Status.get_from_nat(count: Nat, statuses: App.GG.Tile.Statuses): Maybe<Maybe<App.GG.Tile.Status>>
+  switch Nat.eql(count) {
+    0: some(statuses@stolen)
+    1: some(statuses@broken)
+  }default none
+
+App.GG.Tile.Status.update_grid(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  App.GG.Tile.Status.update_grid.go(0, coord, grid)
+
+App.GG.Tile.Status.update_grid.go(count: Nat, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  let new_grid = 
+    Maybe {
+      get tile = App.GG.Grid.get(coord, grid)
+      let statuses = tile@statuses
+      get status = App.GG.Tile.Status.get_from_nat(count, statuses)
+      let new_grid = 
+        case status {
+          none: grid 
+          some: 
+            case status.value {
+              stolen: App.GG.Tile.Status.update_stolen(status.value, coord, grid)
+              broken: App.GG.Tile.Status.update_broken(status.value, coord, grid)
+            }default grid
+        }
+      let new_grid = App.GG.Tile.Status.update_grid.go(count +1, coord, new_grid)
+      return new_grid
+    } <> grid
+  new_grid
+
+//App.GG.Tile.Status.update(status: App.GG.Tile.Status, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+
+App.GG.Tile.Status.update_stolen(status: App.GG.Tile.Status, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  case status {
+    stolen: 
+      log(U64.show(status.duration))
+      if status.duration =? 0 then
+        let new_tile = App.GG.Tile.original_owner.update(coord)
+        let new_grid = App.GG.Grid.update(coord, new_tile, grid)
+        let new_tile = App.GG.Tile.Status.del_from_nat(0)
+        let new_grid = App.GG.Grid.update(coord, new_tile, new_grid)
+       new_grid 
+      else
+        let new_tile = App.GG.Tile.Status.add(App.GG.Tile.Status.stolen(status.duration - 1))
+        let new_grid = App.GG.Grid.update(coord, new_tile, grid)
+        new_grid
+  }default grid
+
+App.GG.Tile.Status.update_broken(status: App.GG.Tile.Status, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  case status {
+    stolen: 
+      if status.duration =? 0 then
+        let new_tile = App.GG.Tile.Status.del_from_nat(1)
+        let new_grid = App.GG.Grid.update(coord, new_tile, grid)
+        new_grid 
+      else
+        let new_tile = App.GG.Tile.Status.add(App.GG.Tile.Status.stolen(status.duration - 1))
+        let new_grid = App.GG.Grid.update(coord, new_tile, grid)
+        new_grid
+  }default grid
+// New Status

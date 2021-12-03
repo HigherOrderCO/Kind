@@ -24,9 +24,7 @@ App.GG: App<App.GG.State>
 // Todos:
 // - Organize functions inside files by section (like attributes is in creature)
 //     App.GG.when needs to be organized and commented       
-// - Make Basic Attack scale with damage attribute (maybe dealing 2 dmg baseline, that is increased by 1 each 5 points?)
 // - Add an animation to basic attack (x key)
-// - Create a panel steal Chip
 // - Show chips in hand in setup phase
 // - Show chips in hand in game phase
 // - make poison do damage
@@ -40,11 +38,13 @@ App.GG: App<App.GG.State>
 //     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
 // - Create simple AI based on time in front of a slime and time not in front of a slime
 // - Create 3 minions
-// - Make the player keep the remaining chips from the previous round if no chips are selected
-// - Add tile statuses
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: Add tile statuses
+// DONE: Create a panel steal Chip
+// DONE: Make Basic Attack scale with damage attribute
+// DONE: Make the player keep the remaining chips from the previous round if no chips are selected
 // DONE: Fix Projectile running twice in a frame
 // DONE: Add higher energy cost for using chips from different types
 // DONE: Create simple statuses (stun, invulnerable, root, poison)

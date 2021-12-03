@@ -104,3 +104,12 @@ App.GG.Coord.first_enemy_in_front(team: App.GG.Team, grid: App.GG.Grid, coord: A
     next(new_coord)
   else
     some(new_coord)
+
+App.GG.Coord.first_enemy_tile(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  let front_coord = App.GG.Coord.front(coord, team)
+  let front_tile  = App.GG.Grid.get(front_coord, grid)
+  without front_tile: none
+  if App.GG.Team.eql(team, front_tile@owner) then
+    App.GG.Coord.first_enemy_tile(front_coord, team, grid)
+  else
+    some(front_coord)

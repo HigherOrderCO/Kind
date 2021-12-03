@@ -1,0 +1,2 @@
+App.GG.Components.panel_steal: App.GG.Body.Component
+  App.GG.Body.Component.new(App.GG.Chip.panel_steal, App.GG.Creature.Attributes.new(0,0,3,1))

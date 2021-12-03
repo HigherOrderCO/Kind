@@ -1,0 +1,39 @@
+App.GG.Chip.panel_steal: App.GG.Chip
+  App.GG.Chip.new(
+    "PSteal"
+    App.GG.Class.control
+    App.GG.Chip.panel_steal.Effect
+    10
+    App.GG.img.bazooka
+  )
+
+// App.GG.Chip.panel_steal.Effect: App.GG.Effect<Unit>
+//   App.GG.Chip.panel_steal.Effect(4, 2)
+
+App.GG.Chip.panel_steal.Effect: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get grid = App.GG.Effect.grid.get
+    get tile = App.GG.Effect.tile.get
+    App.GG.Effect.frame.inc // Increases action's frame by 1
+    without tile: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.chip.waste
+      App.GG.Effect.actions.reset
+      let enemy_coord = App.GG.Coord.first_enemy_tile(center, tile@owner, grid)
+      without enemy_coord: App.GG.Effect.pass
+      App.GG.Effect {
+        get enemy = App.GG.Effect.creature.get_at(enemy_coord)
+        without enemy: 
+          App.GG.Effect {
+            App.GG.Effect.tile.change_owner(tile@owner, enemy_coord)
+            App.GG.Effect.tile.add_status(App.GG.Tile.Status.stolen(300), enemy_coord)
+          }
+        App.GG.Effect.pass
+      }
+    }
+  }
+
+
+  
+

@@ -29,27 +29,17 @@ App.GG.init: App.Init<App.GG.State>
 
 
 App.GG.init.grid: App.GG.Grid
+  let blue = App.GG.Tile.new([], none, App.GG.Team.blue, App.GG.Tile.Statuses.pure)
+  let red = App.GG.Tile.new([], none, App.GG.Team.red, App.GG.Tile.Statuses.pure)
   let list = 
     [
-      {{0#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{0#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{0#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{1#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{1#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{1#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{2#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{2#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-      {{2#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.blue)}
-
-      {{3#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{3#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{3#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{4#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{4#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{4#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{5#32,0#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{5#32,1#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
-      {{5#32,2#32}, App.GG.Tile.new([], none, App.GG.Team.red)}
+      {{0#32,0#32}, blue} {{1#32,0#32}, blue} {{2#32,0#32}, blue}
+      {{0#32,1#32}, blue} {{1#32,1#32}, blue} {{2#32,1#32}, blue}
+      {{0#32,2#32}, blue} {{1#32,2#32}, blue} {{2#32,2#32}, blue}
+     
+      {{3#32,0#32}, red } {{4#32,0#32}, red } {{5#32,0#32}, red }
+      {{3#32,1#32}, red } {{4#32,1#32}, red } {{5#32,1#32}, red }
+      {{3#32,2#32}, red } {{4#32,2#32}, red } {{5#32,2#32}, red }
     ]
   let grid = BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
   let parts = App.GG.Body.Parts.new(0,0,0)

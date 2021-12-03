@@ -2,3 +2,17 @@ App.GG.Effect.tile.get: App.GG.Effect<Maybe<App.GG.Tile>>
   (center, origin, grid)
   let tile = App.GG.Grid.get(center, grid)
   App.GG.Effect.Result.new!(tile, center, origin, grid, (img) img, 0, "")
+
+App.GG.Effect.tile.add_status(status: App.GG.Tile.Status, coord: App.GG.Coord): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let tile = App.GG.Grid.get(coord, grid)
+  let new_grid =
+    without tile: grid
+    App.GG.Grid.update(coord, App.GG.Tile.Status.add(status), grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+
+App.GG.Effect.tile.change_owner(team: App.GG.Team, coord: App.GG.Coord): App.GG.Effect<Unit>
+  (center, origin, grid)
+  let f = (tile: App.GG.Tile) tile@owner <- team
+  let new_grid = App.GG.Grid.update(coord, f, grid)
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")

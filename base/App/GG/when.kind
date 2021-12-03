@@ -84,7 +84,7 @@ App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<A
             minion: none
             slime: 
               let data = monster.data
-              let hand = List.reverse!(phase.hand)
+              let hand = if List.is_empty!(phase.hand) then monster.hand else List.reverse!(phase.hand)
               let fold = List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table@slots)) ++ monster.folder
               let enrg = phase.energy
               some(App.GG.Monster.slime(data, hand, fold, enrg))
@@ -279,7 +279,6 @@ App.GG.when.get_energy_cost.extra(chip: App.GG.Chip, hand: App.GG.Chips): I32
     some:
       energy
   }
-// caso não tenha sua classe - verificar quantas outras tem,
 
 App.GG.when.return_chip(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
   let new_phase = App.GG.when.return_chip.phase(local@phase)
@@ -414,6 +413,7 @@ App.GG.when.update_tile(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
       return pair@snd
     } <> new_grid
 
+  let new_grid = App.GG.Tile.Status.update_grid(coord, new_grid)
   new_grid
 
 App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid

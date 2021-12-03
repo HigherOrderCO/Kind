@@ -83,6 +83,7 @@ App.GG.Creature.get(
 //===========================================================
 //Status Management
 
+
 type App.GG.Creature.Status {
   invulnerable(duration: U64)
   poison(duration: U64, damage: I32)
@@ -320,12 +321,25 @@ App.GG.Creature.place(creature: App.GG.Creature, coord: App.GG.Coord, grid: App.
   App.GG.Grid.update(coord, f, grid)
 
 App.GG.Creature.dmg_with_attribute(creature: App.GG.Creature, dmg: I32): I32
+  let attributes = App.GG.Creature.Attributes.get(creature)
+  without attributes: dmg
+  let destruction = attributes@damage
+  (dmg * destruction) / 25
+
+App.GG.Creature.basic_attack_dmg(creature: App.GG.Creature): I32
+  let attributes = App.GG.Creature.Attributes.get(creature)
+  without attributes: 0 :: I32
+  let base_dmg  = 2 :: I32
+  let extra_dmg = (attributes@damage - 25) / 5
+  let total_dmg = base_dmg + extra_dmg
+  I32.neg(total_dmg)
+
+App.GG.Creature.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Creature.Attributes>
   case creature@category as monster {
-    minion: dmg
+    minion: none
     slime:
       let slime = monster.data
       let dna = slime@dna
       let attributes = dna@attributes
-      let destruction = attributes@damage
-      (dmg * destruction) / 25
+      some(attributes)
   }
