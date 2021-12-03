@@ -30,20 +30,33 @@ App.GG.when: App.When<App.GG.State>
         setup:
           let table = phase.table
           switch U16.eql(event.code) {
+            // Move arrow functions
+              // Left Arrow
+              37#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.left)
+              // Up Arrow
+              38#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.up)
+              // Right Arrow
+              39#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.right)
+              // Down Arrow
+              40#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.down)
+            // Return
             13#16:  App.GG.when.setup_to_game(local)
-            37#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.left)
-            38#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.up)
-            39#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.right)
-            40#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.down)
+            // Esc
             27#16:  App.GG.when.return_chip(local)
+            // Spacebar
             32#16:  App.GG.when.select_chip.space(local)
           }default  App.pass<App.GG.State> 
         game: 
           switch U16.eql(event.code) {
-            37#16:  App.GG.when.move(local, App.GG.Arrow.left)
-            38#16:  App.GG.when.move(local, App.GG.Arrow.up)
-            39#16:  App.GG.when.move(local, App.GG.Arrow.right)
-            40#16:  App.GG.when.move(local, App.GG.Arrow.down)
+            // Move character functions
+              // Left Arrow
+              37#16:  App.GG.when.move(local, App.GG.Arrow.left)
+              // Up Arrow
+              38#16:  App.GG.when.move(local, App.GG.Arrow.up)
+              // Right Arrow
+              39#16:  App.GG.when.move(local, App.GG.Arrow.right)
+              // Down Arrow
+              40#16:  App.GG.when.move(local, App.GG.Arrow.down)
             // X 
             88#16:
               let new_grid = App.GG.when.basic_attack(local@grid)
@@ -66,17 +79,15 @@ App.GG.when: App.When<App.GG.State>
       App.GG.when.click_element(local, local@mouse)      
   }default App.pass<App.GG.State>
 
-App.GG.when.update_grid(grid: App.GG.Grid): App.GG.Grid
-  let new_grid = grid 
-  for coord:tile in grid with new_grid:
-    App.GG.when.update_tile(coord, new_grid)
-  new_grid
+// ============================================================================
+// Transitions between game phases
 
 App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
   let grid = local@grid
   case local@phase as phase {
     setup: 
       let new_grid = Maybe {
+        // Finds your character
         get pair = App.GG.Slime.find_coord(grid)
         let {creature, coord} = pair
         get slime = 
@@ -84,19 +95,22 @@ App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<A
             minion: none
             slime: 
               let data = monster.data
-              let hand = if List.is_empty!(phase.hand) then monster.hand else List.reverse!(phase.hand)
+              // If you have no chips in hand, stay with your last round's chips
+              let hand = if List.is_empty!(phase.hand) then monster.hand else List.reverse!(phase.hand) 
+              // Places all the remaining table chips back into the folder
               let fold = List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table@slots)) ++ monster.folder
               let enrg = phase.energy
               some(App.GG.Monster.slime(data, hand, fold, enrg))
           }
+        // Fills Slime's hand, folder and energy with the new values
         let new_grid = App.GG.Creature.modify_at((c: App.GG.Creature) c@category <- slime , coord, grid)
         return new_grid
       } <> grid
+      // Game phase with 0 frames
       let new_phase = App.GG.Phase.game(0#64)
       let new_local = local@grid <- new_grid
       let new_local = new_local@phase <- new_phase
       App.set_local<App.GG.State>(new_local)
-
     game: App.pass<App.GG.State>
   }
 
@@ -105,17 +119,23 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
   case local@phase as phase {
     setup: App.pass<App.GG.State>
     game:
+      // If turn bar is full
       if U64.gte(phase.turn_bar, 1200) then
+        // Finds your character
         let slime = App.GG.Slime.find_coord(grid)
         without slime: App.pass<App.GG.State>
         let {creature, coord} = slime
         case creature@category as monster {
           minion: App.pass<App.GG.State>
           slime:
+            // How many chips are displayed
             let table_size = 10
+            // Subtracts x chips from the creature's folder
             let mod   = App.GG.Creature.sub_folder(table_size)
+            // Places those chips on the table
             let slots = App.GG.Table.from_folder(table_size, monster.folder)
             let hand = [] :: App.GG.Chips
+            // Adds to the monster's energy his energy obtained each round (obtained from DNA's attributes), maximum 100
             let energy = I32.min(monster.energy + monster.data@dna@attributes@energy, 100)
             let phase = App.GG.Phase.setup({slots, none}, hand, energy)
             let new_grid  = App.GG.Creature.modify_at(mod, coord, grid)
@@ -126,6 +146,9 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
       else
         App.pass<App.GG.State>
   }
+
+// ============================================================================
+// Functions to get chips in setup phase
 
 // when users press space
 // get the selected chip 
@@ -182,37 +205,6 @@ App.GG.when.move.chip_selection(
       App.set_local!(new_local)
   } default App.pass!
 
-App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
-  let grid            = local@grid
-  let slime_coord     = App.GG.Slime.find_coord(grid)
-  without slime_coord : App.pass<App.GG.State>
-  let {slime, coord}  = slime_coord
-  let move_action     = App.GG.Actions.movement(arrow)
-  let mod_creature    = App.GG.when.add_action(move_action)
-  let new_grid        = App.GG.Creature.modify_at(mod_creature, coord, grid)
-  let new_local       = local@grid <- new_grid
-  App.set_local<App.GG.State>(new_local)
-
-App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<Maybe<App.State.local<App.GG.State>>>
-  //log("x: " | U32.show(event.mouse_pos@fst) | "  y: " | U32.show(event.mouse_pos@snd))
-  let phase = local@phase
-  case phase {
-    setup:
-      let {x, y} = {mouse@fst / 4, mouse@snd / 4}
-      let point = V2.new(U32.to_f64(x), U32.to_f64(y))
-      switch Shape.Point.collision.rectangle(point) {
-        App.GG.when.table:
-          let x = x - (App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2))
-          let y = y - (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))
-          Maybe {
-            get index = App.GG.when.chip({x, y})
-            let updated_phase = App.GG.when.get_chip(index, phase)
-            let new_local = local@phase <- updated_phase
-            return App.set_local<App.GG.State>(new_local)
-          } <> App.pass<App.GG.State>
-      }default App.pass<App.GG.State>
-    game: App.pass<App.GG.State>
-  }
 
 // function used to get a chip
 // puts the chip on hand
@@ -227,11 +219,14 @@ App.GG.when.get_chip(
       let hand   = phase.hand
       let energy = phase.energy
       Maybe {
+        // Gets the chip of the index
         get item = table@slots[index]
         get chip = item@chip
+        // Gets the energy cost based on chip's energy cost and maybe on having different classes than the already picked chips
         get energy_cost = App.GG.when.get_energy_cost(chip, phase)
         let new_energy = phase.energy - energy_cost
         let new_item   = item@chip <- none
+        // Removes that chip from the table
         let new_table  = table@slots[index] <- new_item
         let new_hand   = chip & hand
         let new_phase  = App.GG.Phase.setup(new_table, new_hand, new_energy)
@@ -244,6 +239,7 @@ App.GG.when.get_chip(
 App.GG.when.get_energy_cost(chip: App.GG.Chip, phase: App.GG.Phase): Maybe<I32>
   case phase {
     setup:
+      // gets if the chip demands extra energy based on already picked chips
       let energy_cost_extra = App.GG.when.get_energy_cost.extra(chip, phase.hand)
       let energy_cost = chip@energy + energy_cost_extra
       if energy_cost >? phase.energy then
@@ -253,25 +249,28 @@ App.GG.when.get_energy_cost(chip: App.GG.Chip, phase: App.GG.Phase): Maybe<I32>
     game: none 
   }
 
+// If you are not picking your first chip, and there are no currently
+// picked chips from your class, adds 10 to the energy cost for
+// each already class already picked.
 App.GG.when.get_energy_cost.extra(chip: App.GG.Chip, hand: App.GG.Chips): I32
-  let class_a = chip@class
+  let main_class = chip@class
   let energy = 0 :: I32
-  let f =
-    (c: App.GG.Chip)
-      let class_b = c@class
-      App.GG.Class.eql(class_a, class_b)
-  let f2 = 
-    (class: App.GG.Class, c: App.GG.Chip,)
-      if App.GG.Class.eql(class, class_a) then
-        false
-      else
-        App.GG.Class.eql(class, c@class)
-
-  let has_class = List.find!(f, hand)
+  // checks if the analized chip has the same class as the selected chip
+  let same_class  = (chip: App.GG.Chip) App.GG.Class.eql(main_class, chip@class)
+  // checks if the chip have a different class than the selected chip's class
+  let diff_class = (class: App.GG.Class, chip: App.GG.Chip)
+    if App.GG.Class.eql(class, main_class) then
+      false
+    else
+      App.GG.Class.eql(class, chip@class)
+  // searches for a chip with the same class as selected's chip
+  let has_class = List.find!(same_class, hand)
+  // if there hasn't a chip from that class
   case has_class {
     none:
+      // Checks how many classes are already selected, and add 10 to the energy cost for each.
       for class in [App.GG.Class.strength, App.GG.Class.destruction, App.GG.Class.power, App.GG.Class.control] with energy:
-        if Maybe.is_some!(List.find!(f2(class), hand)) then 
+        if Maybe.is_some!(List.find!(diff_class(class), hand)) then 
           energy + 10
         else
           energy
@@ -280,6 +279,7 @@ App.GG.when.get_energy_cost.extra(chip: App.GG.Chip, hand: App.GG.Chips): I32
       energy
   }
 
+// Returns the last selected chip onto the table
 App.GG.when.return_chip(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
   let new_phase = App.GG.when.return_chip.phase(local@phase)
   let new_local = local@phase <- new_phase
@@ -299,8 +299,11 @@ App.GG.when.return_chip.phase(
         nil: phase
         cons:
           let chip = hand.head
+          // returns the table with the chip on it
           let slots = App.GG.when.return_chip.go(chip, table@slots)
+          // gets how much energy was wasted
           let energy_cost_extra = App.GG.when.get_energy_cost.extra(chip, hand.tail)
+          // recovers wasted energy
           let energy_cost = chip@energy + energy_cost_extra
           let new_energy = energy_cost + phase.energy
           let new_table = table@slots <- slots
@@ -312,7 +315,7 @@ App.GG.when.return_chip.phase(
       phase
   }
   
-
+// Adds the selected chip to the first available slot in the table
 App.GG.when.return_chip.go(chip: App.GG.Chip, slots: List<App.GG.Table.Slot>): List<App.GG.Table.Slot>
   case slots {
     nil: []
@@ -321,102 +324,124 @@ App.GG.when.return_chip.go(chip: App.GG.Chip, slots: List<App.GG.Table.Slot>): L
       without table_chip: App.GG.Table.Slot.new(some(chip)) & slots.tail
       slots.head & App.GG.when.return_chip.go(chip, slots.tail)
   }
-  // Maybe {
-  //   get item = table@slots[index]
-  //   get chip = item@chip
-  //   let new_hand  = chip & hand
-  //   let new_item  = item@chip <- none
-  //   let new_table = table@slots[index] <- new_item
-  //   return { new_hand, new_table }
-  // } <> { hand, table }
 
+// ============================================================================
+// Functions to get chip from mouse
+
+// Gets chip with mouse based on mouse's position
+App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<Maybe<App.State.local<App.GG.State>>>
+  let phase = local@phase
+  case phase {
+    setup:
+      // Gets mouse's location divide by the game's scale
+      let {x, y} = {mouse@fst / 4, mouse@snd / 4}
+      let point = V2.new(U32.to_f64(x), U32.to_f64(y))
+      switch Shape.Point.collision.rectangle(point) {
+        // Rectangle representing table
+        App.GG.when.table:
+          // Subtracts the x corresponding to the space before the table
+          let x = x - (App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2))
+          // Subtracts the y corresponding to the space before the table
+          let y = y - (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))
+          Maybe {
+            // Gets the Chip's index on the table
+            get index = App.GG.when.chip({x, y})
+            // Places the chip in your hand if able
+            let updated_phase = App.GG.when.get_chip(index, phase)
+            let new_local = local@phase <- updated_phase
+            return App.set_local<App.GG.State>(new_local)
+          } <> App.pass<App.GG.State>
+      }default App.pass<App.GG.State>
+    game: App.pass<App.GG.State>
+  }
+
+// Rectangle of the table in setup phase
+App.GG.when.table: Shape.Rectangle
+  // gets the top left position of the rectangle
+  let {x1, y1} = {(App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2)) (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))}
+  let {vx, vy} = App.GG.Constants.chips_space_between
+  let {cx, cy} = App.GG.Constants.chip_size
+  // gets how many items are in each row and column
+  let {r,  c } = App.GG.Constants.chips_array
+  // gets the bottom right position of the rectangle
+  let {x2, y2} = {x1 + ((cx + vx) * r), y1 + ((cy + vy) * c)}
+  //log(U32.show(x1) | " " | U32.show(x2) | " " | U32.show(y1) | " " | U32.show(y2))
+  Shape.Rectangle.new(U32.to_f64(x1), U32.to_f64(x2), U32.to_f64(y1), U32.to_f64(y2))
+
+// Gets the index of the hover chip
+App.GG.when.chip(mouse_pos: Pair<U32, U32>): Maybe<Nat>
+  // gets how many items are in each row and column
+  let {r,   c  } = App.GG.Constants.chips_array
+  let {x,   y  } = mouse_pos
+  let {v_x, v_y} = App.GG.Constants.chips_space_between
+  let {c_x, c_y} = App.GG.Constants.chip_size
+  // total chip size = chip size + space between chips
+  let {t_x, t_y} = {c_x + v_x, c_y + v_y}
+  // x and y positions on the hovered chip size + spacebetween chips area
+  let {s_x, s_y} = {x % t_x, y % t_y}
+  let row        = x / t_x
+  let column     = y / t_y
+  // if mouse is not positioned over a gap between objects, return the row and index of the hovered chip
+  if ((x % (c_x + v_x)) <? c_x) && ((y % (c_y + v_y)) <? c_y) then 
+    some(U32.to_nat(column + (row * c)))
+  else
+    none
+
+// ============================================================================
+// Game phase functions
+
+// Moves the character to a direction
+App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
+  let grid            = local@grid
+  // Finds your character
+  let slime_coord     = App.GG.Slime.find_coord(grid)
+  without slime_coord : App.pass<App.GG.State>
+  let {slime, coord}  = slime_coord
+  // Gets the movement action to be added in the creature
+  let move_action     = App.GG.Actions.movement(arrow)
+  // Adds the movement action to the creature
+  let mod_creature    = App.GG.Actions.add(move_action)
+  let new_grid        = App.GG.Creature.modify_at(mod_creature, coord, grid)
+  let new_local       = local@grid <- new_grid
+  App.set_local<App.GG.State>(new_local)
+
+// Updates turn bar 
 App.GG.when.update_phase(phase: App.GG.Phase): App.GG.Phase
   case phase {
     setup: phase
     game: App.GG.Phase.game(phase.turn_bar + 2)
   }
 
+// changes all tiles's has_acted field to false
+// updates all tiles that has has_acted as false
+// This must be done as there are projectiles or creatures that will move
+// during a frame, and these should not run twice.
+App.GG.when.update_grid(grid: App.GG.Grid): App.GG.Grid
+  for coord:tile in grid with grid:
+    App.GG.when.update_tile.has_acted(coord, grid)
+  for coord:tile in grid with grid:
+    App.GG.when.update_tile.run(coord, grid)
+  grid
 
+App.GG.when.update_tile.has_acted(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  // Resets Creature's has_acted 
+  let new_grid = App.GG.Creature.reset_actions(coord, grid)
+  // Resets Projectile's has_acted
+  let new_grid = App.GG.Projectile.reset_actions(coord, new_grid)
+  new_grid
 
-App.GG.when.table: Shape.Rectangle
-  let {x1, y1} = {(App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2)) (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))}
-  let {vx, vy} = App.GG.Constants.chips_space_between
-  let {cx, cy} = App.GG.Constants.chip_size
-  let {r,  c } = App.GG.Constants.chips_array
-  let {x2, y2} = {x1 + ((cx + vx) * r), y1 + ((cy + vy) * c)}
-  log(U32.show(x1) | " " | U32.show(x2) | " " | U32.show(y1) | " " | U32.show(y2))
-  Shape.Rectangle.new(U32.to_f64(x1), U32.to_f64(x2), U32.to_f64(y1), U32.to_f64(y2))
-
-
-App.GG.when.chip(mouse_pos: Pair<U32, U32>): Maybe<Nat>
-  let {r,   c  } = App.GG.Constants.chips_array
-  let {x,   y  } = mouse_pos
-  let {v_x, v_y} = App.GG.Constants.chips_space_between              // Space between Chips
-  let {c_x, c_y} = App.GG.Constants.chip_size                    // Chips size
-  let {t_x, t_y} = {c_x + v_x, c_y + v_y}
-  let {s_x, s_y} = {x % t_x, y % t_y}
-  let row        = x / t_x
-  let column     = y / t_y
-  if ((x % (c_x + v_x)) <? c_x) && ((y % (c_y + v_y)) <? c_y) then 
-    some(U32.to_nat(column + (row * c)))
-  else
-    none
-
-
-App.GG.when.update_tile(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
-  let new_grid = 
-    Maybe {
-      get creature = App.GG.Creature.get(coord, grid)
-      let mod = (x) App.GG.when.update_frame(App.GG.when.update_action(x))
-      let new_grid = App.GG.Creature.modify_at(mod, coord, grid)
-      return new_grid
-    } <> grid
-
-  let new_grid =
-    Maybe {
-      get projectiles = App.GG.Projectile.get_list(coord, new_grid)
-      let idx = 0
-      let pair = {idx, new_grid}
-      for projectile in projectiles with pair:
-        let {idx, new_grid} = pair
-        let new_grid = App.GG.Projectile.modify(App.GG.Projectile.updated_has_acted(false), coord, idx, new_grid)
-        {idx + 1, new_grid}
-      return pair@snd
-    } <> new_grid
-
-  let new_grid = 
-    Maybe {
-      get creature = App.GG.Creature.get(coord, new_grid)
-      get action = creature@actions@current 
-      get hasnt_acted = if creature@actions@has_acted then none else some(unit)
-      let origin = App.GG.Effect.Origin.creature
-      let result = action@effect(coord, origin, new_grid) 
-      get new_grid = case result {err: none, new: some(result.grid)}
-      return new_grid
-    } <> new_grid
-
-  let new_grid =
-    Maybe {
-      get projectiles = App.GG.Projectile.get_list(coord, new_grid)
-      let pair = {0, new_grid}
-      for projectile in projectiles with pair:
-        let {idx, new_grid} = pair
-        //log(Bool.show(projectile@info@has_acted))
-        if projectile@info@has_acted then
-          {idx + 1, new_grid}
-        else 
-          let new_grid = App.GG.Projectile.modify(App.GG.Projectile.updated_has_acted(true), coord, idx, new_grid)
-          let origin = App.GG.Effect.Origin.projectile(idx)
-          let result = projectile@effect(coord, origin, new_grid)
-          let new_grid = case result {err: new_grid, new: result.grid}
-          {idx +1, new_grid}
-      return pair@snd
-    } <> new_grid
-
+App.GG.when.update_tile.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  // If Creature hasn't acted yet, update its animation frame, runs its action's Effect and if there isn't a current action, moves next action to current.
+  let new_grid = App.GG.Creature.run(coord, grid)
+  // If Projectile hasn't acted yet, run its action's effect and update the projectile's frame
+  let new_grid = App.GG.Projectile.run(coord, new_grid)
+  // Runs the tile statuses
   let new_grid = App.GG.Tile.Status.update_grid(coord, new_grid)
   new_grid
 
+// Adds the basic Attack action to the creature's next action
 App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid
+  // Finds your character
   let pair = App.GG.Slime.find_coord(grid)
   case pair {
     none: grid
@@ -426,12 +451,13 @@ App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid
         minion: grid
         slime:
           let action = App.GG.Actions.basic_attack
-          App.GG.Creature.modify_at(App.GG.when.add_action(action), coord, grid)
+          App.GG.Creature.modify_at(App.GG.Actions.add(action), coord, grid)
       }
   }
 
-
+// Use the first chip in your hand
 App.GG.when.use_chip(grid: App.GG.Grid): App.GG.Grid
+  // finds your character
   let pair = App.GG.Slime.find_coord(grid)
   case pair {
     none: grid
@@ -443,42 +469,11 @@ App.GG.when.use_chip(grid: App.GG.Grid): App.GG.Grid
           case category.hand {
             nil: grid
             cons: 
+              // creates an action with the used chip's action
               let action = App.GG.Actions.Data.new(0, category.hand.head@effect, App.GG.Actions.Category.chip)
-              App.GG.Creature.modify_at(App.GG.when.add_action(action), coord, grid)
+              App.GG.Creature.modify_at(App.GG.Actions.add(action), coord, grid)
           }
       }
   }
 
-App.GG.when.update_frame(creature: App.GG.Creature): App.GG.Creature
-  let new_creature = creature@animation <- {creature@animation@fst, creature@animation@snd + 1}
-  let actions = new_creature@actions
-  let new_actions = actions@has_acted <- false
-  new_creature@actions <- new_actions
-
-App.GG.when.update_action(creature: App.GG.Creature): App.GG.Creature
-  let as = creature@actions
-  let na = as@next
-  let a  = as@current
-  if as@has_acted then creature else 
-    case a {
-      none:
-        case na {
-          none: creature
-          some:
-            //log("22") 
-            let new_actions = as@current <- some(na.value)
-            let new_actions = new_actions@next <- none
-            let new_creature = creature@actions <- new_actions
-            new_creature
-        }
-      some:
-        creature
-    }
-
-
-App.GG.when.add_action(action: App.GG.Actions.Data, creature: App.GG.Creature): App.GG.Creature
-  let actions = creature@actions
-  
-  let new_actions = actions@next <- some(action)
-  creature@actions <- new_actions
 

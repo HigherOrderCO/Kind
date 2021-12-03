@@ -161,3 +161,32 @@ App.GG.Projectile.updated_has_acted(bool: Bool, projectile: App.GG.Projectile): 
   let new_info = info@has_acted <- bool
   let projectile = projectile@info <- new_info
   projectile
+
+App.GG.Projectile.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  Maybe {
+    get projectiles = App.GG.Projectile.get_list(coord, grid)
+    let pair = {0, grid}
+    for projectile in projectiles with pair:
+      let {idx, grid} = pair
+      if projectile@info@has_acted then
+        {idx + 1, grid}
+      else 
+        let new_grid = App.GG.Projectile.modify(App.GG.Projectile.updated_has_acted(true), coord, idx, grid)
+        let origin = App.GG.Effect.Origin.projectile(idx)
+        let result = projectile@effect(coord, origin, new_grid)
+        let new_grid = case result {err: new_grid, new: result.grid}
+        {idx +1, new_grid}
+    return pair@snd
+  } <> grid
+
+App.GG.Projectile.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  Maybe {
+    get projectiles = App.GG.Projectile.get_list(coord, grid)
+    let idx = 0
+    let pair = {idx, grid}
+    for projectile in projectiles with pair:
+      let {idx, grid} = pair
+      let new_grid = App.GG.Projectile.modify(App.GG.Projectile.updated_has_acted(false), coord, idx, grid)
+      {idx + 1, new_grid}
+    return pair@snd
+  } <> grid

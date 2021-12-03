@@ -21,9 +21,7 @@ App.GG: App<App.GG.State>
     App.GG.post
   )
 
-// Todos:
-// - Organize functions inside files by section (like attributes is in creature)
-//     App.GG.when needs to be organized and commented       
+// Todos:      
 // - Add an animation to basic attack (x key)
 // - Show chips in hand in setup phase
 // - Show chips in hand in game phase
@@ -41,6 +39,7 @@ App.GG: App<App.GG.State>
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: Organize when.kind
 // DONE: Add tile statuses
 // DONE: Create a panel steal Chip
 // DONE: Make Basic Attack scale with damage attribute

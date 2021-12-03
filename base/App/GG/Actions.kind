@@ -21,6 +21,11 @@ type App.GG.Actions.Category {
   stun
 }
 
+App.GG.Actions.add(action: App.GG.Actions.Data, creature: App.GG.Creature): App.GG.Creature
+  let actions = creature@actions
+  let new_actions = actions@next <- some(action)
+  creature@actions <- new_actions
+
 App.GG.Actions.stun(status: App.GG.Creature.Status, animation: App.GG.Animation, duration: U64): App.GG.Actions.Data
   let frame = 0#64
   let category = App.GG.Actions.Category.stun
@@ -61,3 +66,14 @@ App.GG.Actions.basic_attack: App.GG.Actions.Data
   let effect = App.GG.Effect.basic_attack
   let category = App.GG.Actions.Category.basic_attack
   App.GG.Actions.Data.new(frame, effect, category)
+
+// Runs the effect of Current action if there is any
+App.GG.Actions.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  Maybe {
+    get creature = App.GG.Creature.get(coord, grid)
+    get action = creature@actions@current 
+    let origin = App.GG.Effect.Origin.creature
+    let result = action@effect(coord, origin, grid) 
+    get new_grid = case result {err: none, new: some(result.grid)}
+    return new_grid
+  } <> grid

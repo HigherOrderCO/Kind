@@ -397,3 +397,54 @@ App.GG.Creature.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Creature
       let attributes = dna@attributes
       some(attributes)
   }
+
+// ============================================================================
+// Grid Update functions
+
+// If creature hasn't acted, update its actions, run its effects and update animation to next frame
+App.GG.Creature.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  if App.GG.Creature.has_acted(coord, grid) then 
+    grid
+  else
+    let new_grid = App.GG.Creature.update_actions(coord, grid)
+    let new_grid = App.GG.Creature.update_animation(coord, new_grid)
+    let new_grid = App.GG.Actions.run(coord, new_grid)
+    new_grid
+
+// Checks if creature has acted in this frame
+App.GG.Creature.has_acted(coord: App.GG.Coord, grid:App.GG.Grid): Bool
+  let creature = App.GG.Creature.get(coord, grid)
+  without creature: false
+  creature@actions@has_acted
+
+App.GG.Creature.reset_actions.aux(creature: App.GG.Creature): App.GG.Creature
+  let actions = creature@actions
+  let new_actions = actions@has_acted <- false
+  creature@actions <- new_actions
+
+// Updates animation to its next frame
+App.GG.Creature.update_animation(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  let mod = (creature: App.GG.Creature) creature@animation <- {creature@animation@fst, creature@animation@snd + 1}
+  App.GG.Creature.modify_at(mod, coord, grid)
+
+// If current action is "none", moves next action to its place
+App.GG.Creature.update_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  App.GG.Creature.modify_at(App.GG.Creature.update_actions.aux, coord, grid)
+
+App.GG.Creature.update_actions.aux(creature: App.GG.Creature): App.GG.Creature
+  let actions = creature@actions
+  let next_action = actions@next
+  let curr_action  = actions@current
+  without curr_action: 
+    without next_action: creature
+    let new_actions = actions@current <- some(next_action)
+    let new_actions = new_actions@next <- none
+    let new_creature = creature@actions <- new_actions
+    new_creature
+  creature
+
+// Changes creature's has_acted to false
+App.GG.Creature.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  App.GG.Creature.modify_at(App.GG.Creature.reset_actions.aux, coord, grid)
+
+// ============================================================================
