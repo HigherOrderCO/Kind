@@ -3,23 +3,32 @@ Nat.ltn.mul_right(
   H: Equal(Bool, Nat.ltn(a, Nat.mul(b, c)), true)
 ): Equal(Bool, Nat.ltn(Nat.div(a, b), c), true)
   // proof sketch:
-  // H: succ(a) <= b*c
-  // a = (a/b)*b + (a%b)
-  // succ((a/b)*b + (a%b)) <= b*c
-  // (a/b)*b + succ((a%b)) <= b*c
-  // ((a/b)*b + succ((a%b)))/b <= c
-  // ((a/b)*b + succ((a%b)))/b <= c
-  // ((a/b)*b)/b + succ((a%b))/b <= c
-  // (a/b) + succ((a%b))/b <= c
-  // (a/b) + 1 <= c
-  // succ(a/b) <= c
-
-  // lemmas:
-  // - a <= b -> a/c <= b/c
-
-  // - a/c + b/c <= (a + b)/c
-  //   * a + b = c*((a + b)/c) + (a + b)%c
-  //     a = c*a/c + a%c
-  //     b = c*b/c + b%c
-  //     a + b = c*(a/c + b/c) + a%c + b%c
-  ?mul_right
+  // Nat.lte(c, Nat.div(a, b)) is either true or false, suppose it's true
+  // Nat.lte(b*c, b*Nat.div(a, b))
+  // Nat.lte(b*c, a) absurd
+  let b_not_zero = (case b {
+    zero:
+      (H)
+        H
+    succ:
+      (H)
+        refl
+  }: (H: Equal(Bool, Nat.lte(Nat.succ(a), Nat.mul(b, c)), true)) -> Equal(Bool, Nat.lte(1, b), true))(H)
+  def cmp = Nat.ltn(Nat.div(a, b), c)
+  let contra = refl :: Nat.ltn(Nat.div(a, b), c) == Nat.ltn(Nat.div(a, b), c)
+  case cmp with contra: ^cmp == cmp {
+    true:
+      refl
+    false:
+      let contra = Nat.lte.comm.false(Nat.succ(Nat.div(a,b)), c, contra)
+      let contra = contra :: Equal(Bool, Nat.lte(c,Nat.div(a,b)), true)
+      let contra = Nat.Order.mul.left(c,Nat.div(a,b), b, contra)
+      let chain_right = Nat.lte.mul_div(a, b, b_not_zero)
+      let contra = Nat.Order.chain(Nat.mul(b,c), Nat.mul(b,Nat.div(a,b)), a, contra, chain_right)
+      let H = Nat.lte.comm.true(a,Nat.mul(b,c), H)
+      let contra = case H {
+        refl:
+          contra
+      }: Equal(Bool, H.b, true)
+      contra
+  }!

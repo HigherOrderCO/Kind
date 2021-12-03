@@ -31,10 +31,13 @@ Nat.mod.succ_left(
       let lemma = apply(Pair.snd(Nat, Nat), lemma) :: Equal(Nat, 0, Nat.mod(Nat.succ(n), m)) 
       case lemma {
         refl:
-          let equal_m = mirror(equal_m)
+          let equal_m = Equal.mirror(Nat, Nat.succ(Nat.mod(n,m)), m, equal_m)
           case equal_m {
             refl:
-              mirror(Nat.mod.self(m, m_not_zero))
+              case Nat.mod.self(m, m_not_zero) {
+                refl:
+                  Equal.refl(Nat, Nat.mod(m,m))
+              }: Equal(Nat, self.b, Nat.mod(m, m))
           }: Equal(Nat, 0, Nat.mod(equal_m.b,m))
 
       }: Equal(Nat, lemma.b, Nat.mod(Nat.succ(Nat.mod(n,m)),m))
