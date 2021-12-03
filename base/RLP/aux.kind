@@ -1,5 +1,4 @@
-// These sub-theorems were not proven yet!
-// Most of them are simple, and should be finished over the next days
+// These are lemmas about how RLP decoding may split a list of Bytes
 RLP.aux.split.0(
   payload: Bytes
   tail: Bytes
