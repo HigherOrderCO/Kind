@@ -1,2 +1,2 @@
-Ether.RLP.bitify.empty: Ether.RLP.Tree
-  Ether.RLP.Tree.tip(Bits.e)
+Ether.RLP.bitify.empty: Ether.RLP.Tree<Bits>
+  Ether.RLP.Tree.tip!(Bits.e)

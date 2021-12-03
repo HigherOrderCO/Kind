@@ -1,0 +1,12 @@
+Nat.pow.mul(a: Nat b: Nat c: Nat): Nat.pow(Nat.pow(a, b), c) == Nat.pow(a, Nat.mul(b,c))
+  // (a^b)^c = a^(bc)
+  case b {
+    zero: Nat.pow.one(c), 
+    succ: 
+      let ind = Nat.pow.mul(a,b.pred,c)
+      let p = apply((x) Nat.mul(Nat.pow(a,c),x),ind)
+      let rs = Nat.pow.add_right(a,c,Nat.mul(b.pred,c))
+      let lm = Nat.pow.mul_dist(a,Nat.pow(a,b.pred),c)
+      let q = p :: rewrite x in Nat.mul(Nat.pow(a,c),Nat.pow(Nat.pow(a,b.pred),c)) == x with mirror(rs)
+      q :: rewrite x in x == Nat.pow(a,Nat.add(c,Nat.mul(b.pred,c))) with mirror(lm)
+  }!

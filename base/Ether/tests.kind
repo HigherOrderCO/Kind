@@ -1,13 +1,2 @@
-round_n(n : Nat, m : Nat) : Nat
-  case Nat.lte(m, 8) {
-    true : 8 - m
-    false : round_n(n, m-8)
-  }
-
 Ether.tests : _
-  Nat.to_u8(100000)
-
-
-  //let buffer = Buffer8.from_hex("d69429d7d1dd5b6f9c864d9db560d72a247c178ae86b0a")
-  //let hash = Crypto.Keccak.hash.bytes(buffer)
-  //Buffer8.to_hex(hash)  
+  "Ether.tests"

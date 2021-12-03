@@ -21,17 +21,19 @@ Ether.RLP.decode(bits : Bits) : Pair<Ether.RLP.Tree<Bits>, Bits>
     Ether.RLP.Constants.bits_192 :
      let content_length = (Bits.to_nat(byte_prefix) - 183) * 8
      let {head, rest} = Ether.Bits.break(content_length, rest)
-     let length = Ether.RLP.encode.read.binary(head)
+     let length = Ether.RLP.encode.read.binary(head) * 8
      let {prefix, rest} = Ether.Bits.break(length*8, rest)
     {Ether.RLP.Tree.tip!(prefix), rest}
     Ether.RLP.Constants.bits_248 : 
      let content_length = (Bits.to_nat(byte_prefix) - 192) * 8
-     let {xs, rest} = Ether.RLP.decode.decode_list(rest)
+     let {content, _} = Ether.Bits.break(content_length, rest)
+     let {xs, rest} = Ether.RLP.decode.decode_list(content)
      {Ether.RLP.Tree.list!(xs), rest}
     Ether.RLP.Constants.bits_255 : 
       let content_length = (Bits.to_nat(byte_prefix) - 247) * 8    
       let {head, rest} = Ether.Bits.break(content_length, rest)
-      let length = Ether.RLP.encode.read.binary(head)
-      let {xs, rest} = Ether.RLP.decode.decode_list(rest)
+      let length = Ether.RLP.encode.read.binary(head) * 8
+      let {content, _} = Ether.Bits.break(length, rest)
+      let {xs, rest} = Ether.RLP.decode.decode_list(content)
      {Ether.RLP.Tree.list!(xs), rest}
    } default {Ether.RLP.Tree.tip!(Bits.e), Bits.e}
