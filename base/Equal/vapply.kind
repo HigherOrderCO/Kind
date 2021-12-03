@@ -1,0 +1,40 @@
+Equal.vapply(
+  n: Nat
+  X: Type
+): Equal.vapply.type(n, X, X, (x) x, (x) x)
+  Equal.vapply.aux(n, X, X, (x) x, (x) x, (f) refl)
+
+Equal.vapply.type(
+  n: Nat
+  X: Type
+  ftype: Type
+  acc_left: ftype -> X
+  acc_right: ftype -> X
+): Type
+  case n {
+    zero:
+      (f: ftype) -> Equal<X>(acc_left(f), acc_right(f))
+    succ:
+      <A: Type> -> (a0: A, a1: A, ae: Equal<A>(a0, a1)) ->
+      Equal.vapply.type(n.pred, X, A -> ftype, (f) acc_left(f(a0)), (f) acc_right(f(a1)))
+  }
+
+Equal.vapply.aux(
+  n: Nat
+  X: Type
+  ftype: Type
+  acc_left: ftype -> X
+  acc_right: ftype -> X
+  Hyp: (f: ftype) -> Equal<X>(acc_left(f), acc_right(f))
+): Equal.vapply.type(n, X, ftype, acc_left, acc_right)
+  case n {
+    zero:
+      Hyp
+    succ:
+      (A, a0, a1, ae)
+        let lemma = (f)
+          let both_a0 = Hyp(f(a0))
+          let qed = both_a0 :: rewrite R in Equal<X>(acc_left(f(a0)), acc_right(f(R))) with ae
+          qed
+        Equal.vapply.aux(n.pred, X, A -> ftype, (f) acc_left(f(a0)), (f) acc_right(f(a1)), lemma)
+  }!

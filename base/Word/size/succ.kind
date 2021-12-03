@@ -1,0 +1,13 @@
+Word.size.succ(n: Nat, w: Word(Nat.succ(n))): w((w, w.size) Type, Empty, (size, pred) Unit, (size, pred) Unit)
+  let contra = refl :: Nat.succ(n) == Nat.succ(n)
+  (case w {
+    e:
+      (contra)
+        Empty.absurd!(Nat.succ_neq_zero(n, contra))
+    o:
+      (contra)
+        unit
+    i:
+      (contra)
+        unit
+  }: (h: Nat.succ(n) == w.size) -> w((k, k.size) Type, Empty, (size, pred) Unit, (size, pred) Unit))(contra)

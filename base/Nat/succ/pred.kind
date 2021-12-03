@@ -1,0 +1,7 @@
+Nat.succ.pred(n: Nat, H: Nat.ltn(0, n) == true): Equal(Nat, n, Nat.succ(Nat.pred(n)))
+  case n with H {
+    zero:
+      Empty.absurd!(Bool.false_neq_true(H))
+    succ:
+      refl
+  }!

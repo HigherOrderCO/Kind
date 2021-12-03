@@ -1,11 +1,10 @@
-Ether.RLP.to_string(t: List(Ether.RLP.Tree<Bits>)): String
-  case t {
-    nil : ""
-    cons: 
-      "[ " |
-      case t.head as tree {
-        tip : Bits.show(tree.value) | ", "
-        list: Ether.RLP.to_string(t.tail)
-      }
-      | " ]"
+Ether.RLP.show(r: Ether.RLP): String
+  case r {
+    data:
+      Bytes.to_hex(r.value)
+    node:
+      let ret = "["
+      for child in r.child with ret:
+        ret|Ether.RLP.show(child)|","
+      ret|"]"
   }

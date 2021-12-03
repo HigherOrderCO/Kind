@@ -1,0 +1,11 @@
+Nat.lte.slack_left(
+  a: Nat, b: Nat, c: Nat
+  H: Equal(Bool, Nat.lte(a, b), true)
+): Equal(Bool, Nat.lte(a, Nat.add(c, b)), true)
+  case c {
+    zero:
+      H
+    succ:
+      let ind = Nat.lte.slack_left(a, b, c.pred, H)
+      Nat.lte.succ_right(a, Nat.add(c.pred, b), ind)
+  }!

@@ -22,3 +22,44 @@ Nat.sub.add(
           qed
       }!
   }!
+
+Nat.sub.add.left(
+  n: Nat
+  m: Nat
+): Equal<Nat>(Nat.sub(Nat.add(m, n), n), m)
+  case m {
+    zero : Nat.sub.cancel(n)
+    succ : 
+      case n {
+        zero : 
+          refl :: rewrite X in Nat.succ(X) == Nat.succ(m.pred) with Nat.add.comm(0, m.pred)
+        succ : 
+          let r = Nat.add.succ_right(m.pred, n.pred)
+          let rec = Nat.sub.add.left(n.pred, m.pred)
+          let H1 = Nat.sub.add.left.aux(Nat.add(m.pred,n.pred), n.pred, m.pred, Nat.add.lte(m.pred, n.pred), rec)
+          case Equal.mirror(Nat, Nat.add(m.pred,Nat.succ(n.pred)),  Nat.succ(Nat.add(m.pred,n.pred)), r) as X {
+            refl : H1
+          } : Nat.sub(X.b,n.pred) == Nat.succ(m.pred)
+      }!
+  }!
+
+Nat.sub.add.left.aux(
+  m: Nat
+  n: Nat
+  z : Nat
+  H : Nat.lte(n, m) == true
+  H1 : Equal<Nat>(Nat.sub(m, n), z)) : Equal<Nat>(Nat.sub(Nat.succ(m), n), Nat.succ(z))
+  case m with H H1 {
+    succ : 
+      case n with H H1 {
+        succ : Nat.sub.add.left.aux(m.pred, n.pred, z, H, H1)
+        zero :
+         Equal.apply!!!!(Nat.succ, H1)
+      }!
+    zero : case n with H H1 {
+      zero : 
+        Equal.apply!!!!(Nat.succ, H1)
+      succ : 
+         Empty.absurd!(Bool.false_neq_true(H))        
+    }!
+  }!

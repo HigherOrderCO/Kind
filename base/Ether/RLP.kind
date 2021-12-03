@@ -1,0 +1,28 @@
+// The RLP format
+// 
+// Serialization and deserialization for the BytesTree type, under the following grammar:
+// | First byte | Meaning                                                                    |
+// | ---------- | -------------------------------------------------------------------------- |
+// | 0   to 127 | HEX(leaf)                                                                  |
+// | 128 to 183 | HEX(length_of_leaf + 128) + HEX(leaf)                                      |
+// | 184 to 191 | HEX(length_of_length_of_leaf + 128 + 56) + HEX(length_of_leaf) + HEX(leaf) |
+// | 192 to 247 | HEX(length_of_node + 192) + HEX(node)                                      |
+// | 248 to 255 | HEX(length_of_length_of_node + 192 + 56) + HEX(length_of_node) + HEX(node) |
+// 
+// The first byte of Ether.RLP.encode.length
+// buffer length (len) | Ether.RLP.encode.length(add,len)[0]
+// ------------------- | -----------------------------
+// 56     ~ 256**1-1   | 185
+// 256**1 ~ 256**2-1   | 186
+// 256**2 ~ 256**3-1   | 187
+// 256**3 ~ 256**4-1   | 188
+// 256**4 ~ 256**5-1   | 189
+// 256**5 ~ 256**6-1   | 190
+// 256**6 ~ 256**7-1   | 191
+
+// Type
+// ----
+type Ether.RLP {
+  data(value: List<U8>)
+  node(child: List<Ether.RLP>)
+}

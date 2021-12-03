@@ -1,0 +1,34 @@
+Nat.ltn.mul_right(
+  a: Nat, b: Nat, c: Nat
+  H: Equal(Bool, Nat.ltn(a, Nat.mul(b, c)), true)
+): Equal(Bool, Nat.ltn(Nat.div(a, b), c), true)
+  // proof sketch:
+  // Nat.lte(c, Nat.div(a, b)) is either true or false, suppose it's true
+  // Nat.lte(b*c, b*Nat.div(a, b))
+  // Nat.lte(b*c, a) absurd
+  let b_not_zero = (case b {
+    zero:
+      (H)
+        H
+    succ:
+      (H)
+        refl
+  }: (H: Equal(Bool, Nat.lte(Nat.succ(a), Nat.mul(b, c)), true)) -> Equal(Bool, Nat.lte(1, b), true))(H)
+  def cmp = Nat.ltn(Nat.div(a, b), c)
+  let contra = refl :: Nat.ltn(Nat.div(a, b), c) == Nat.ltn(Nat.div(a, b), c)
+  case cmp with contra: ^cmp == cmp {
+    true:
+      refl
+    false:
+      let contra = Nat.lte.comm.false(Nat.succ(Nat.div(a,b)), c, contra)
+      let contra = contra :: Equal(Bool, Nat.lte(c,Nat.div(a,b)), true)
+      let contra = Nat.Order.mul.left(c,Nat.div(a,b), b, contra)
+      let chain_right = Nat.lte.mul_div(a, b, b_not_zero)
+      let contra = Nat.Order.chain(Nat.mul(b,c), Nat.mul(b,Nat.div(a,b)), a, contra, chain_right)
+      let H = Nat.lte.comm.true(a,Nat.mul(b,c), H)
+      let contra = case H {
+        refl:
+          contra
+      }: Equal(Bool, H.b, true)
+      contra
+  }!

@@ -1,0 +1,24 @@
+Nat.ltn.mul(
+  a: Nat
+  b: Nat
+  c: Nat
+  H0: Equal(Bool, Nat.ltn(0, c), true)
+  H1: Equal(Bool, Nat.ltn(a, b), true)
+): Equal(Bool, Nat.ltn(Nat.mul(c, a), Nat.mul(c, b)), true)
+  case c with H0 H1 {
+    succ:
+      let H1 = Nat.Order.mul.left(Nat.succ(a), b, Nat.succ(c.pred), H1)
+      let H1 = case Nat.mul.succ_right(Nat.succ(c.pred), a) {
+        refl:
+          H1
+      }: Equal(Bool, Nat.lte(self.b,Nat.mul(Nat.succ(c.pred),b)), true)
+      let H1 = H1 :: Equal(Bool, Nat.lte(Nat.succ(Nat.add(c.pred,Nat.mul(Nat.succ(c.pred),a))),Nat.mul(Nat.succ(c.pred),b)), true)
+      let calc = mirror(Nat.add.succ_right(c.pred, Nat.mul(Nat.succ(c.pred),a)))
+      let H1 = case calc {
+        refl:
+          H1
+      }: Equal(Bool, Nat.lte(calc.b,Nat.mul(Nat.succ(c.pred),b)), true)
+      Nat.lte.cut_left(c.pred, Nat.succ(Nat.mul(Nat.succ(c.pred),a)),Nat.mul(Nat.succ(c.pred),b), H1)
+    zero:
+      H0
+  }!
