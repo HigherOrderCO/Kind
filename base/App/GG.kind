@@ -25,12 +25,9 @@ App.GG: App<App.GG.State>
 // - Add an animation to basic attack (x key)
 // - Show chips in hand in setup phase
 // - Show chips in hand in game phase
-// - make poison do damage
 // - create more control chips that apply statuses
-// - update status each frame before everything happens
 // - Create counter mechanic - double damage after interrupting a chip action (needs status)
-// - Create blinking status (status to be applied after taking chip damage,
-//     protecting from next damages, it can be called invisiblity)
+// - Create intangible status (status to be applied after taking chip damage)
 // - Create a pre-game screen
 // - Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
 //     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
@@ -39,6 +36,8 @@ App.GG: App<App.GG.State>
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: update status each frame before everything happens
+// DONE: make poison do damage
 // DONE: Organize when.kind
 // DONE: Add tile statuses
 // DONE: Create a panel steal Chip
