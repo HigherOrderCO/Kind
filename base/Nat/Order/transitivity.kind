@@ -1,0 +1,29 @@
+Nat.Order.Transitivity(
+	a: Nat, 
+	b: Nat, 
+	c: Nat,
+	Hyp1: Nat.lte(a, b) == true
+	Hyp2: Nat.lte(b, c) == true
+	//a<b && b<c => a<c
+) : Nat.lte(a, c) == true
+
+	case b with Hyp1 Hyp2{
+		zero: 
+			azero = mirror(Nat.lte.zero_right(a,Hyp1))
+			q = Hyp2 :: rewrite x in (Nat.lte(x,c)==true) with azero
+			q
+		succ: 
+			case a with Hyp1 Hyp2{
+				zero: refl
+				succ: 
+					case c with Hyp1 Hyp2{
+						zero: 
+							bzero = Nat.lte.zero_right(Nat.succ(b.pred),Hyp2)
+							contra = Nat.succ_neq_zero!(bzero)
+							Empty.absurd!(contra)
+						succ:
+							let ind = Nat.Order.Transitivity(a.pred,b.pred,c.pred,Hyp1,Hyp2)
+							ind
+					}!
+			}!
+	}!
