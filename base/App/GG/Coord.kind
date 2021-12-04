@@ -113,3 +113,24 @@ App.GG.Coord.first_enemy_tile(coord: App.GG.Coord, team: App.GG.Team, grid: App.
     App.GG.Coord.first_enemy_tile(front_coord, team, grid)
   else
     some(front_coord)
+
+// returns all the coords in a coord's column, and all the columns ahead of it
+App.GG.Coord.self_and_front_columns(coord: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
+  let tile = App.GG.Grid.get(coord, grid)
+  without tile: []
+  let team = tile@owner
+  App.GG.Coord.self_and_front_columns.go(coord, team, grid)
+
+App.GG.Coord.self_and_front_columns.go(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): List<App.GG.Coord>
+  let list = 
+    [{coord@fst, 0#32}, {coord@fst, 1#32}, {coord@fst, 2#32}]
+  let exists = true
+    for c in list with exists:
+      let tile = App.GG.Grid.get(c, grid)
+      without tile: false
+      exists
+  if exists then 
+    App.GG.Coord.self_and_front_columns.go(App.GG.Coord.front(coord, team), team, grid) ++ list
+  else
+    []
+

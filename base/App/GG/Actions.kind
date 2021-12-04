@@ -26,10 +26,10 @@ App.GG.Actions.add(action: App.GG.Actions.Data, creature: App.GG.Creature): App.
   let new_actions = actions@next <- some(action)
   creature@actions <- new_actions
 
-App.GG.Actions.stun(status: App.GG.Creature.Status, animation: App.GG.Animation, duration: U64): App.GG.Actions.Data
+App.GG.Actions.stun(stun: App.GG.Creature.Status.Stun, animation: App.GG.Animation, duration: U64): App.GG.Actions.Data
   let frame = 0#64
   let category = App.GG.Actions.Category.stun
-  let effect = App.GG.Effect.stun(status, animation, duration)
+  let effect = App.GG.Effect.stun(stun, animation, duration)
   App.GG.Actions.Data.new(frame, effect, category)
 
 App.GG.Actions.new_actions(coord: App.GG.Coord, grid: App.GG.Grid, new_current: App.GG.Actions.Data): App.GG.Grid

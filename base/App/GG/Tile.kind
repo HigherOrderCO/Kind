@@ -101,11 +101,15 @@ App.GG.Tile.Status.update_stolen(status: App.GG.Tile.Status, coord: App.GG.Coord
     stolen: 
       log(U64.show(status.duration))
       if status.duration =? 0 then
-        let new_tile = App.GG.Tile.original_owner.update(coord)
-        let new_grid = App.GG.Grid.update(coord, new_tile, grid)
-        let new_tile = App.GG.Tile.Status.del_from_nat(0)
-        let new_grid = App.GG.Grid.update(coord, new_tile, new_grid)
-       new_grid 
+        let can_rtrn = App.GG.Tile.can_be_returned(coord, grid)
+        if can_rtrn then 
+          let new_tile = App.GG.Tile.original_owner.update(coord)
+          let new_grid = App.GG.Grid.update(coord, new_tile, grid)
+          let new_tile = App.GG.Tile.Status.del_from_nat(0)
+          let new_grid = App.GG.Grid.update(coord, new_tile, new_grid)
+          new_grid
+        else
+          grid
       else
         let new_tile = App.GG.Tile.Status.add(App.GG.Tile.Status.stolen(status.duration - 1))
         let new_grid = App.GG.Grid.update(coord, new_tile, grid)
@@ -114,14 +118,29 @@ App.GG.Tile.Status.update_stolen(status: App.GG.Tile.Status, coord: App.GG.Coord
 
 App.GG.Tile.Status.update_broken(status: App.GG.Tile.Status, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   case status {
-    stolen: 
+    broken: 
       if status.duration =? 0 then
         let new_tile = App.GG.Tile.Status.del_from_nat(1)
         let new_grid = App.GG.Grid.update(coord, new_tile, grid)
         new_grid 
       else
-        let new_tile = App.GG.Tile.Status.add(App.GG.Tile.Status.stolen(status.duration - 1))
+        let new_tile = App.GG.Tile.Status.add(App.GG.Tile.Status.broken(status.duration - 1))
         let new_grid = App.GG.Grid.update(coord, new_tile, grid)
         new_grid
   }default grid
 // New Status
+
+App.GG.Tile.can_be_returned(coord: App.GG.Coord, grid: App.GG.Grid): Bool
+  let coords = App.GG.Coord.self_and_front_columns(coord, grid)
+  let tile = App.GG.Grid.get(coord, grid)
+  without tile: false
+  let team = tile@owner
+  let can_return = true
+  for c in coords with can_return:
+    let creature = App.GG.Creature.get(c, grid)
+    without creature: can_return
+    if App.GG.Team.eql(tile@owner, creature@team) then 
+      false
+    else
+      can_return
+  can_return

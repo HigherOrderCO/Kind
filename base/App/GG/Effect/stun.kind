@@ -1,4 +1,4 @@
-App.GG.Effect.stun(status: App.GG.Creature.Status, animation: App.GG.Animation, duration: U64): App.GG.Effect<Unit>
+App.GG.Effect.stun(status: App.GG.Creature.Status.Stun, animation: App.GG.Animation, duration: U64): App.GG.Effect<Unit>
   App.GG.Effect {
     get frame = App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
@@ -8,13 +8,13 @@ App.GG.Effect.stun(status: App.GG.Creature.Status, animation: App.GG.Animation, 
     switch U64.eql(frame) {
       0 : 
         App.GG.Effect {
-          let mod = App.GG.Creature.modify_at(App.GG.Creature.add_status(status), center)
+          let mod = App.GG.Creature.modify_at(App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status)), center)
           App.GG.Effect.grid.modify(mod)
           App.GG.Effect.animation.update(animation)
         }
       duration: 
         App.GG.Effect {
-          let mod = App.GG.Creature.modify_at(App.GG.Creature.del_status(status), center)
+          let mod = App.GG.Creature.modify_at(App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status)), center)
           App.GG.Effect.grid.modify(mod)
           App.GG.Effect.actions.del
           App.GG.Effect.animation.update(App.GG.Animation.idle)

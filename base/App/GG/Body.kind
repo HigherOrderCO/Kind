@@ -27,7 +27,7 @@ type App.GG.Body.Parts {
 }
 
 App.GG.Body.Components.upper: App.GG.Body.Components
-  [App.GG.Components.panel_steal]
+  [App.GG.Components.recursive_gun]
 
 App.GG.Body.Components.lower: App.GG.Body.Components
   [App.GG.Components.pull_sword]

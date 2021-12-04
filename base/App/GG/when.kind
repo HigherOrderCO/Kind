@@ -437,6 +437,8 @@ App.GG.when.update_tile.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   let new_grid = App.GG.Projectile.run(coord, new_grid)
   // Runs the tile statuses
   let new_grid = App.GG.Tile.Status.update_grid(coord, new_grid)
+  // Runs Creature's Status
+  let new_grid = App.GG.Creature.Status.update_grid(coord, new_grid)
   new_grid
 
 // Adds the basic Attack action to the creature's next action

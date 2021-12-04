@@ -23,7 +23,7 @@ App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): 
       let new_grid = App.GG.Grid.set(pos, new_tile, grid)
       let new_grid = 
         if flinch then
-          let stun = App.GG.Actions.stun(App.GG.Creature.Status.stun, App.GG.Animation.damage, 24)
+          let stun = App.GG.Actions.stun(App.GG.Creature.Status.Stun.flinch, App.GG.Animation.damage, 24)
           App.GG.Actions.new_actions(pos, new_grid, stun)
         else
           new_grid
