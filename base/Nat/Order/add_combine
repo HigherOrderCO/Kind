@@ -1,0 +1,12 @@
+Nat.Order.add.combine(
+  a: Nat
+  b: Nat
+  c: Nat
+  d: Nat
+  Hyp0: Equal<Bool>(Nat.lte(a, b), true)
+  Hyp1: Equal<Bool>(Nat.lte(c, d), true)
+): Equal<Bool>(Nat.lte(Nat.add(a, c), Nat.add(b, d)), true)
+  let left_lem = Nat.Order.add.right(a, b, c, Hyp0)
+  let right_lem = Nat.Order.add.left(c, d, b, Hyp1)
+  let qed = Nat.Order.Transitivity(Nat.add(a, c), Nat.add(b, c), Nat.add(b,d), left_lem, right_lem)
+  qed
