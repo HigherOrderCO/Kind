@@ -1,0 +1,10 @@
+Ether.RLP.test.builder(rlp: Ether.RLP, expected: String): IO<Maybe<String>>
+  let result = Bytes.to_hex(Ether.RLP.encode(rlp))
+  if result =? expected then
+    IO {
+      return none
+    }
+  else
+    IO {
+      return some(`expected "`|expected|`" got "`|result|`"`)
+    }

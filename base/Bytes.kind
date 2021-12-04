@@ -29,6 +29,23 @@ Bytes.from_nat(n: Nat): Bytes
       Bytes.from_nat(n/256) ++ [U8.from_nat(Nat.mod(n, 256))]
   }
 
+Bytes.from_str(str: String): Bytes
+  Bytes.from_hex(String.to_hex(str))
+
+Bytes.from_hex(str: String): Bytes
+  case str {
+    nil:
+      []
+    cons:
+      case str.tail {
+        nil: 
+          [U8.shl(Char.hex_value8(str.head), 4)]
+        cons: 
+          let val = U8.add(Char.hex_value8(str.tail.head), U8.mul(Char.hex_value8(str.head),16))
+          val & Bytes.from_hex(str.tail.tail)
+      }
+  }
+
 Bytes.to_hex(b: Bytes): String
   Bytes.to_hex.go("", b)
 

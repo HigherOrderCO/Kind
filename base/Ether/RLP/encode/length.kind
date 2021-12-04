@@ -3,5 +3,5 @@ Ether.RLP.encode.length(add: Nat, length: Nat): Bytes
     [Nat.to_u8(Nat.add(add,length))]
   else
     let b = Bytes.from_nat(length)
-    let a = Nat.to_u8(Nat.add(56, Nat.add(add, List.length!(b))))
+    let a = Nat.to_u8(Nat.add(56, Nat.add(add, Nat.sub(List.length!(b), 1))))
     a & b
