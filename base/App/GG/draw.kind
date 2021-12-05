@@ -151,7 +151,7 @@ App.GG.draw.tile(
         let f = App.GG.Monster.to_vbox(creature.value@category)
         let sprite = f(creature.value@animation@fst, creature.value@animation@snd)
         //let img = VoxBox.Draw.image_colorize(x, y, 20, Col32.new_hue(F64.to_u32(U64.to_f64((creature.value@animation@snd % 1024) / 4))), sprite, img)
-        let img = VoxBox.Draw.image(x, y, 20, sprite, img)
+        let img = if App.GG.Team.eql(App.GG.Team.red, creature.value@team) then VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(12), sprite, img) else VoxBox.Draw.image(x, y, 20, sprite, img)
         let img = VoxBox.Draw.text(I32.show(creature.value@hp), PixelFont.small_black, Pos32.new(x + 122,y + 100, 100), img)
         let img = 
           let actions = creature.value@actions
@@ -161,7 +161,7 @@ App.GG.draw.tile(
           let result = current@effect(coord, App.GG.Effect.Origin.creature, grid)
           case result {
             err: img
-            new: result.img(img)
+            new: result.img(App.GG.Team.eql(App.GG.Team.red, creature.value@team), img)
           }
         img
     }
@@ -173,6 +173,14 @@ App.GG.draw.tile(
     let result = projectile@effect(coord, origin, grid)
     case result {
       err: {idx + 1, img}
-      new: {idx + 1, result.img(img)}
+      new: {idx + 1, result.img(App.GG.Team.eql(App.GG.Team.red, projectile@info@team), img)}
     }
   img
+
+App.GG.draw.image(x: U32, y: U32, z: U32, img: VoxBox, enemy: Bool, src: VoxBox): VoxBox
+  let f = 
+    if enemy then
+      VoxBox.Draw.image_reverse_x
+    else
+      VoxBox.Draw.image
+  f(x, y, z, img, src)

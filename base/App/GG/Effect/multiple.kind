@@ -10,6 +10,7 @@ App.GG.Effect.multiple.go(list: List<App.GG.Effect<Unit>>): App.GG.Effect<Unit>
     cons:
       App.GG.Effect {
         list.head
+        log("happens")
         App.GG.Effect.multiple.go(list.tail)
       }
   }

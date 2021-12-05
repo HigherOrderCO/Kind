@@ -497,7 +497,8 @@ App.GG.Creature.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   if App.GG.Creature.has_acted(coord, grid) then 
     grid
   else
-    let new_grid = App.GG.Creature.update_actions(coord, grid)
+    let new_grid = App.GG.Creature.run_ai(coord, grid)
+    let new_grid = App.GG.Creature.update_actions(coord, new_grid)
     let new_grid = App.GG.Creature.update_animation(coord, new_grid)
     let new_grid = App.GG.Actions.run(coord, new_grid)
     new_grid
@@ -537,5 +538,15 @@ App.GG.Creature.update_actions.aux(creature: App.GG.Creature): App.GG.Creature
 // Changes creature's has_acted to false
 App.GG.Creature.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   App.GG.Creature.modify_at(App.GG.Creature.reset_actions.aux, coord, grid)
+
+App.GG.Creature.run_ai(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  Maybe {
+    get creature = App.GG.AI.get(coord, grid)
+    get minion = App.GG.Minion.get(coord, grid)
+    let result = minion@effect(coord, App.GG.Effect.Origin.creature, grid)
+    let new_grid = case result {err: grid, new: result.grid}
+    return new_grid
+  } <> grid
+    
 
 // ============================================================================

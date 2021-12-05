@@ -5,3 +5,14 @@ type App.GG.Minion {
     hp: I32
   )
 }
+
+App.GG.Minion.get(coord: App.GG.Coord, grid: App.GG.Grid): Maybe<App.GG.Minion>
+  Maybe {
+    get creature = App.GG.Creature.get(coord, grid)
+    get result = 
+      case creature@category as monster {
+        slime: none
+        minion: some(monster.data)
+      }
+    return result
+  }

@@ -6,7 +6,7 @@
 //       get creature = App.GG.Creature.get(pos, grid)
 //       return App.GG.Creature.status_check_invulnerable(creature)
 //     } <> false
-//   App.GG.Effect.Result.new!(bool, center, origin, grid, (img) img, 0, "")
+//   App.GG.Effect.Result.new!(bool, center, origin, grid, (enemy, img) img, 0, "")
 
 
 // App.GG.Effect.status.is_noname(pos: App.GG.Coord): App.GG.Effect<Bool>
@@ -16,7 +16,7 @@
 //       get creature = App.GG.Creature.get(pos, grid)
 //       return App.GG.Creature.status_check_noname(creature)
 //     } <> false
-//   App.GG.Effect.Result.new!(bool, center, origin, grid, (img) img, 0, "")
+//   App.GG.Effect.Result.new!(bool, center, origin, grid, (enemy, img) img, 0, "")
 
 
 // App.GG.Effect.status.add_noname(duration: U64): App.GG.Effect<Unit>

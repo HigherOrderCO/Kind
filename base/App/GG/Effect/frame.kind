@@ -5,7 +5,7 @@ App.GG.Effect.frame.inc: App.GG.Effect<Unit>
       creature: App.GG.Actions.inc(center, grid)
       projectile: App.GG.Projectile.inc(center, origin.id, grid)
     }
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
 
 App.GG.Effect.frame.get: App.GG.Effect<Maybe<U64>>
   (center, origin, grid)
@@ -25,4 +25,4 @@ App.GG.Effect.frame.get: App.GG.Effect<Maybe<U64>>
           return info@frame
         }
     }
-  App.GG.Effect.Result.new!(frame, center, origin, grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(frame, center, origin, grid, (enemy, img) img, 0, "")

@@ -1,7 +1,7 @@
 type App.GG.AI {
   new(
-    spotted: U64
-    unspotted: U64
+    seen: U64
+    unseen: U64
   )
 }
 
@@ -27,7 +27,7 @@ App.GG.AI.update(
   case category { 
     minion: 
       let mod = mod(category.AI)
-      let new_monster = App.GG.Monster.minion(mod, category.data)
+      let new_monster = App.GG.Monster.minion(category.data, mod)
       creature@category <- new_monster
     slime: creature
   }
@@ -39,26 +39,41 @@ App.GG.AI.inc(
 
   case enemy { 
     true:
-     let spotted =  AI@spotted + 1
-     let unspotted = 0 :: U64
-     App.GG.AI.new(spotted, unspotted)
+     let seen =  AI@seen + 1
+     let unseen = 0 :: U64
+     App.GG.AI.new(seen, unseen)
     false: 
-     let spotted = 0 :: U64
-     let unspotted = AI@unspotted + 1
-     App.GG.AI.new(spotted, unspotted)
+     let seen = 0 :: U64
+     let unseen = AI@unseen + 1
+     App.GG.AI.new(seen, unseen)
   }
 
+App.GG.AI.inc_no_reset(
+  enemy: Bool
+  AI: App.GG.AI
+): App.GG.AI
 
-App.GG.Effect.ai.inc: App.GG.Effect<Unit>
-
-  App.GG.Effect { 
-    get center = App.GG.Effect.coord.get_center
-    get creature = App.GG.Effect.creature.get
-    get grid = App.GG.Effect.grid.get
-    without creature: App.GG.Effect.pass
-    let coords = App.GG.Coord.front_all(center, creature@team, grid)
-    let target = false
-    for coord in coords with target:
-      target || App.GG.Coord.has_enemy(coord, creature@team, grid)
-    App.GG.Effect.ai.update(App.GG.AI.inc(target))
+  case enemy { 
+    true:
+     let seen =  AI@seen + 1
+     let unseen = AI@unseen
+     App.GG.AI.new(seen, unseen)
+    false: 
+     let seen = AI@seen
+     let unseen = AI@unseen + 1
+     App.GG.AI.new(seen, unseen)
   }
+
+// App.GG.Effect.ai.inc: App.GG.Effect<Unit>
+
+//   App.GG.Effect { 
+//     get center = App.GG.Effect.coord.get_center
+//     get creature = App.GG.Effect.creature.get
+//     get grid = App.GG.Effect.grid.get
+//     without creature: App.GG.Effect.pass
+//     let coords = App.GG.Coord.front_all(center, creature@team, grid)
+//     let target = false
+//     for coord in coords with target:
+//       target || App.GG.Coord.has_enemy(coord, creature@team, grid)
+//     App.GG.Effect.ai.update(App.GG.AI.inc(target))
+//   }

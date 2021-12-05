@@ -1,9 +1,9 @@
 // Pastes an image into another
-VoxBox.Draw.image_reverse_x(x: U32, y: U32, z: U32, src: VoxBox, img: VoxBox): VoxBox
+VoxBox.Draw.image_colorize_reverse_x(x: U32, y: U32, z: U32, mod: Col32 -> Col32, src: VoxBox, img: VoxBox): VoxBox
   let len = VoxBox.get_len(src)
   let img = for i : U32 from 0#32 to len:
     let pos = VoxBox.get_pos(i, src)
-    let col = VoxBox.get_col(i, src)
+    let col = mod(VoxBox.get_col(i, src))
     let p_x = U32.and(pos, 4095#32) // Pos32.get_x
     let p_y = U32.shr(U32.and(pos, 16773120#32), 12#32) // Pos32.get_y
     let p_z = U32.shr(U32.and(pos, 4278190080#32), 24#32) // Pos32.get_z

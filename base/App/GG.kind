@@ -21,7 +21,13 @@ App.GG: App<App.GG.State>
     App.GG.post
   )
 
-// Todos:      
+// Todos:
+// - add a way to ramdomize things in effects
+// - develop more statuses ( counter and intangible should be priority)
+// - stop using colorize on draw
+// - Fix death projectile not being considered an enemy
+// - move minion.ai functions to a more generic section
+// - improve draw.kind to better reflect images      
 // - Add an animation to basic attack (x key)
 // - Show chips in hand in setup phase
 // - Show chips in hand in game phase
@@ -31,11 +37,11 @@ App.GG: App<App.GG.State>
 // - Create a pre-game screen
 // - Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
 //     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
-// - Create simple AI based on time in front of a slime and time not in front of a slime
 // - Create 3 minions
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: Create simple AI based on time in front of a slime and time not in front of a slime
 // DONE: update status each frame before everything happens
 // DONE: make poison do damage
 // DONE: Organize when.kind

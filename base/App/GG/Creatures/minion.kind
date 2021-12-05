@@ -1,77 +1,190 @@
 App.GG.Creatures.minion: App.GG.Minion
-  App.GG.Minion.new(App.GG.Creatures.minion.vbox, App.GG.Effect.pass, 200)
+  App.GG.Minion.new(App.GG.Creatures.minion.vbox, App.GG.Creatures.minion.Effect, 200)
 
 App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
   case animation {
-    idle:
+    idle: 
       switch U64.eql((frame % 60)/10) {
-        0#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_0
-        1#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_1
-        2#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_2
-        3#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_3
-        4#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_4
-        5#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_5
-      }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+        0#64: App.GG.img.Slime.idle.slime_character_idle_0
+        1#64: App.GG.img.Slime.idle.slime_character_idle_1
+        2#64: App.GG.img.Slime.idle.slime_character_idle_2
+        3#64: App.GG.img.Slime.idle.slime_character_idle_3
+        4#64: App.GG.img.Slime.idle.slime_character_idle_4
+        5#64: App.GG.img.Slime.idle.slime_character_idle_5
+      }default App.GG.img.Slime.idle.slime_character_idle_0
     movement:
-      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+      switch U64.eql(if frame >? 11 then 12#64 - (frame - 11) else frame) {
+        0#64: App.GG.img.Slime.movement.slime_character_teleport_00
+        1#64: App.GG.img.Slime.movement.slime_character_teleport_01
+        2#64: App.GG.img.Slime.movement.slime_character_teleport_02
+        3#64: App.GG.img.Slime.movement.slime_character_teleport_03
+        4#64: App.GG.img.Slime.movement.slime_character_teleport_04
+        5#64: App.GG.img.Slime.movement.slime_character_teleport_05
+        6#64: App.GG.img.Slime.movement.slime_character_teleport_06
+        7#64: App.GG.img.Slime.movement.slime_character_teleport_07
+        8#64: App.GG.img.Slime.movement.slime_character_teleport_08
+        9#64: App.GG.img.Slime.movement.slime_character_teleport_09
+        10#64: App.GG.img.Slime.movement.slime_character_teleport_10
+        11#64: App.GG.img.Slime.movement.slime_character_teleport_11
+      }default App.GG.img.Slime.idle.slime_character_idle_0
     attack:
-      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
-    sword: 
-      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+      switch U64.eql((frame % 24)/2) {
+        0#64: App.GG.img.Slime.shoot.slime_character__fire_00
+        1#64: App.GG.img.Slime.shoot.slime_character__fire_01
+        2#64: App.GG.img.Slime.shoot.slime_character__fire_02
+        3#64: App.GG.img.Slime.shoot.slime_character__fire_03
+        4#64: App.GG.img.Slime.shoot.slime_character__fire_04
+        5#64: App.GG.img.Slime.shoot.slime_character__fire_05
+        6#64: App.GG.img.Slime.shoot.slime_character__fire_06
+        7#64: App.GG.img.Slime.shoot.slime_character__fire_07
+        8#64: App.GG.img.Slime.shoot.slime_character__fire_08
+        9#64: App.GG.img.Slime.shoot.slime_character__fire_09
+        10#64: App.GG.img.Slime.shoot.slime_character__fire_10
+        11#64: App.GG.img.Slime.shoot.slime_character__fire_11
+      }default App.GG.img.Slime.shoot.slime_character__fire_00
+    sword: App.GG.img.Slime.shoot.slime_character__fire_00
     damage:
       switch U64.eql((frame % 24)/4) {
-        0#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_0
-        1#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_1
-        2#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_2
-        3#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_3
-        4#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_4
-        5#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_5
-      }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+        0#64: App.GG.img.Slime.Hit.slime_character_Hit_0
+        1#64: App.GG.img.Slime.Hit.slime_character_Hit_1
+        2#64: App.GG.img.Slime.Hit.slime_character_Hit_2
+        3#64: App.GG.img.Slime.Hit.slime_character_Hit_3
+        4#64: App.GG.img.Slime.Hit.slime_character_Hit_4
+        5#64: App.GG.img.Slime.Hit.slime_character_Hit_5
+      }default App.GG.img.Slime.idle.slime_character_idle_0
     basic_attack:
-      App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+      App.GG.img.Slime.idle.slime_character_idle_0
     death:
       switch U64.eql((frame % 24)/2) {
-        0#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_00
-        1#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_01
-        2#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_02
-        3#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_03
-        4#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_04
-        5#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_05
-        6#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_06
-        7#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_07
-        8#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_08
-        9#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_09
-        10#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_10
-        11#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_11
-      }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+        0#64: App.GG.img.Slime.movement.slime_character_teleport_00
+        1#64: App.GG.img.Slime.movement.slime_character_teleport_01
+        2#64: App.GG.img.Slime.movement.slime_character_teleport_02
+        3#64: App.GG.img.Slime.movement.slime_character_teleport_03
+        4#64: App.GG.img.Slime.movement.slime_character_teleport_04
+        5#64: App.GG.img.Slime.movement.slime_character_teleport_05
+        6#64: App.GG.img.Slime.movement.slime_character_teleport_06
+        7#64: App.GG.img.Slime.movement.slime_character_teleport_07
+        8#64: App.GG.img.Slime.movement.slime_character_teleport_08
+        9#64: App.GG.img.Slime.movement.slime_character_teleport_09
+        10#64: App.GG.img.Slime.movement.slime_character_teleport_10
+        11#64: App.GG.img.Slime.movement.slime_character_teleport_11
+      }default VoxBox.empty
   }
 
-// App.GG.Creatures.minion.cast(
-//   projectile: App.GG.Projectile,
-//   spawn_coord: App.GG.Coord,
-//   animation: App.GG.Animation
-//   spawn_frame: U64
-//   final_frame: U64
-// ): App.GG.Effect<Unit>
-  
-//   App.GG.Effect { 
-//     get AI = App.GG.Effect.ai.get
-//     get center = App.GG.Effect.coord.get_center
-//     get creature = App.GG.Effect.creature.get
-//     get grid = App.GG.Effect.grid.get
-//     without creature: App.GG.Effect.pass
-//     without AI: App.GG.Effect.pass
-//     App.GG.Effect { 
-//       App.GG.Effect.ai.inc
-//       let spotted = AI@spotted
-//       let unspotted = AI@unspotted
-//       if U64.gtn(spotted, unspotted) then 
-//         App.GG.Effect.generic_shoot(projectile, spawn_coord, animation, spawn_frame, final_frame)
-//       else
-//         App.GG.Effect { 
-//           get destination = App.GG.Effect.coord.closest_y
-//           without destination: App.GG.Effect.pass
-//           App.GG.Effect.movement.arrow(destination, 12, 24)
-//         }
-//     }
-//   }
+// case animation {
+//     idle:
+//       switch U64.eql((frame % 60)/10) {
+//         0#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+//         1#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_1
+//         2#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_2
+//         3#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_3
+//         4#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_4
+//         5#64: App.GG.img.DarkSlime.idle.slime_enemy_idle_5
+//       }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+//     movement:
+//       switch U64.eql(if frame >? 11 then 12#64 - (frame - 11) else frame) {
+//         0#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_00
+//         1#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_01
+//         2#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_02
+//         3#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_03
+//         4#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_04
+//         5#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_05
+//         6#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_06
+//         7#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_07
+//         8#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_08
+//         9#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_09
+//         10#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_10
+//         11#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_11
+//       }default App.GG.img.Slime.idle.slime_character_idle_0
+//     attack:
+//       App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+//     sword: 
+//       App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+//     damage:
+//       switch U64.eql((frame % 24)/4) {
+//         0#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_0
+//         1#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_1
+//         2#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_2
+//         3#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_3
+//         4#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_4
+//         5#64: App.GG.img.DarkSlime.Hit.slime_enemy_hit_5
+//       }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+//     basic_attack:
+//       App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+//     death:
+//       switch U64.eql((frame % 24)/2) {
+//         0#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_00
+//         1#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_01
+//         2#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_02
+//         3#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_03
+//         4#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_04
+//         5#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_05
+//         6#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_06
+//         7#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_07
+//         8#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_08
+//         9#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_09
+//         10#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_10
+//         11#64: App.GG.img.DarkSlime.Teleport.slime_enemy_teleport_11
+//       }default App.GG.img.DarkSlime.idle.slime_enemy_idle_0
+
+App.GG.Creatures.minion.Effect.attack: App.GG.Effect<Unit>
+  App.GG.Effect {
+    // get frame = App.GG.Effect.frame.get
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    // without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      // App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
+      let dmg = -50 :: I32
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile_effect = App.GG.Chip.shockwave.Projectile.Effect(dmg, true)
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
+      App.GG.Effect.ai.update_seen((ai) 0#64)
+      App.GG.Effect {
+        let eff = 
+          App.GG.Effect {
+            get frame = App.GG.Effect.frame.get
+            without frame: App.GG.Effect.pass
+            App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
+            App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+          }
+        let new_action = App.GG.Actions.Data.new(0, eff, App.GG.Actions.Category.chip)
+        let new_grid   = App.GG.Creature.modify_at(App.GG.Actions.add(new_action), center)
+        App.GG.Effect.grid.modify(new_grid)
+      }
+    }
+  }
+
+App.GG.Creatures.minion.Effect.move: App.GG.Effect<Unit>
+  App.GG.Effect {
+    //App.GG.Effect.ai.update_unseen((x) 0#64)
+    get center = App.GG.Effect.coord.get_center
+    get grid = App.GG.Effect.grid.get
+    let slime = App.GG.Slime.find_coord(grid)
+    without slime: App.GG.Effect.pass
+    let {slime, coord} = slime
+    App.GG.Effect {
+      let arrow = 
+        case U32.cmp(coord@snd, center@snd) {
+          ltn: some(App.GG.Arrow.up)
+          eql: none
+          gtn: some(App.GG.Arrow.down)
+        }
+      without arrow: App.GG.Effect.pass
+      App.GG.Effect {
+        App.GG.Effect.ai.update_unseen((ai) 0#64)
+        let eff = App.GG.Effect.movement.arrow(arrow, 12, 24)
+        let new_action = App.GG.Actions.Data.new(0, eff, App.GG.Actions.Category.movement)
+        let new_grid   = App.GG.Creature.modify_at(App.GG.Actions.add(new_action), center)
+        App.GG.Effect.grid.modify(new_grid)
+      }
+    }
+  }
+
+App.GG.Creatures.minion.Effect: App.GG.Effect<Unit>
+  log("?")
+  let seen = [{240#64, App.GG.Creatures.minion.Effect.attack}]
+  let unseen = [{60#64, App.GG.Creatures.minion.Effect.move}]
+  App.GG.Effect.ai.run(seen, unseen, false)

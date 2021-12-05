@@ -131,8 +131,8 @@ App.GG.Projectile.delete(origin: App.GG.Coord, id: Nat, grid: App.GG.Grid): App.
       new_grid
   }
 
-App.GG.Projectile.death(img: U64 -> VoxBox, duration: U64): App.GG.Projectile
-  let team    = App.GG.Team.neutral
+App.GG.Projectile.death(img: U64 -> VoxBox, duration: U64, team: App.GG.Team): App.GG.Projectile
+  let team    = team
   let status  = App.GG.Projectile.Status.unit
   let hits    = NatSet.new
   let frame   = 0#64

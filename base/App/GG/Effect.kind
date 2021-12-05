@@ -19,7 +19,7 @@ type App.GG.Effect.Result<A: Type> {
     center: App.GG.Coord
     origin: App.GG.Effect.Origin
     grid: App.GG.Grid
-    img: VoxBox -> VoxBox
+    img: Bool -> VoxBox -> VoxBox
     energy_cost: I32 
     description: String
   )
@@ -42,7 +42,7 @@ App.GG.Effect.bind<A: Type, B: Type>(
         let value       = b.value
         let origin      = b.origin
         let grid        = b.grid
-        let img         = (img: VoxBox) b.img(a.img(img))
+        let img         = (enemy: Bool, img: VoxBox) b.img(enemy, a.img(enemy, img))
         let energy_used = a.energy_cost + b.energy_cost
         let description = b.description
         App.GG.Effect.Result.new<B>(value, center, origin, grid, img, energy_used, description)
@@ -54,4 +54,4 @@ App.GG.Effect.monad: Monad(App.GG.Effect)
 
 App.GG.Effect.pure<A: Type>(value: A): App.GG.Effect<A>
   (center, origin, grid)
-  App.GG.Effect.Result.new<A>(value, center, origin, grid, (img) img, 0, "")
+  App.GG.Effect.Result.new<A>(value, center, origin, grid, (enemy, img) img, 0, "")

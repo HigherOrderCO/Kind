@@ -16,4 +16,4 @@ App.GG.Effect.chip.waste: App.GG.Effect<Unit>
       }
       return new_grid
     } <> grid
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")

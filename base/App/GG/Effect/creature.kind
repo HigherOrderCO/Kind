@@ -7,7 +7,7 @@ App.GG.Effect.creature.is_enemy(coord: App.GG.Coord): App.GG.Effect<Bool>
       let bool = App.GG.Team.eql(creature@team, team)
       return not(bool) 
     } <> false
-  App.GG.Effect.Result.new!(bool, center, origin, grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(bool, center, origin, grid, (enemy, img) img, 0, "")
 
 App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): App.GG.Effect<I32>
   (center, origin, grid)
@@ -31,35 +31,37 @@ App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): 
         if new_hp =? 0 then
           let vbox = App.GG.Monster.to_vbox(creature@category)
           let vbox = vbox(App.GG.Animation.death)
+          let target = App.GG.Creature.get(pos, new_grid)
+          without target: new_grid 
           let new_grid = App.GG.Creature.delete(pos, new_grid)
-          let new_grid = App.GG.Projectile.create(pos, App.GG.Projectile.death(vbox, 23#64), new_grid)
+          let new_grid = App.GG.Projectile.create(pos, App.GG.Projectile.death(vbox, 23#64, target@team), new_grid)
           new_grid
         else
           new_grid 
 
       return {real_dmg, new_grid}
     } <> {+0#32, grid}
-  App.GG.Effect.Result.new!(real_dmg, center, origin, new_grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(real_dmg, center, origin, new_grid, (enemy, img) img, 0, "")
 
 App.GG.Effect.creature.get: App.GG.Effect<Maybe<App.GG.Creature>>
   (center, origin, grid)
   let creature = App.GG.Creature.get(center, grid)
-  App.GG.Effect.Result.new!(creature, center, origin, grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(creature, center, origin, grid, (enemy, img) img, 0, "")
 
 App.GG.Effect.creature.get_at(pos: App.GG.Coord): App.GG.Effect<Maybe<App.GG.Creature>>
   (center, origin, grid)
   let creature = App.GG.Creature.get(pos, grid)
-  App.GG.Effect.Result.new!(creature, center, origin, grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(creature, center, origin, grid, (enemy, img) img, 0, "")
 
 App.GG.Effect.creature.modify(mod: App.GG.Creature -> App.GG.Creature): App.GG.Effect<Unit>
   (center, origin, grid)
   let new_grid = App.GG.Creature.modify_at(mod, center, grid)
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
 
 App.GG.Effect.creature.modify_at(mod: App.GG.Creature -> App.GG.Creature, pos: App.GG.Coord): App.GG.Effect<Unit>
   (center, origin, grid)
   let new_grid = App.GG.Creature.modify_at(mod, pos, grid)
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (img) img, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
 
 App.GG.Effect.creature.damage_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): App.GG.Effect<I32>
   App.GG.Effect.creature.change_hp_at(I32.neg(dmg), pos, flinch)
