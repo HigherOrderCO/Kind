@@ -23,7 +23,7 @@ App.GG: App<App.GG.State>
 
 // Todos:
 // - add a way to ramdomize things in effects
-// - develop more statuses ( counter and intangible should be priority)
+// - develop more statuses (counter and intangible should be priority)
 // - stop using colorize on draw
 // - Fix death projectile not being considered an enemy
 // - move minion.ai functions to a more generic section

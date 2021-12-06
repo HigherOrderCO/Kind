@@ -48,9 +48,10 @@ App.GG.Effect.movement.move_at(from: App.GG.Coord, destination: App.GG.Coord): A
   }  
 
 App.GG.Effect.movement.move(new_pos: App.GG.Coord): App.GG.Effect<Unit>
-  (center, origin, grid) 
-  let new_grid = App.GG.Grid.move_creature(center, new_pos, grid)
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
+  (center, origin, local) 
+  let new_grid = App.GG.Grid.move_creature(center, new_pos, local@grid)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
 
 App.GG.Effect.movement.player_movement(arrow: App.GG.Arrow): App.GG.Effect<Unit>
   App.GG.Effect.movement.arrow(arrow, 12, 24)

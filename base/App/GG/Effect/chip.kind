@@ -1,5 +1,6 @@
 App.GG.Effect.chip.waste: App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
+  let grid = local@grid
   let new_grid = 
     Maybe {
       get tile = App.GG.Grid.get(center, grid)
@@ -16,4 +17,5 @@ App.GG.Effect.chip.waste: App.GG.Effect<Unit>
       }
       return new_grid
     } <> grid
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
+    let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")

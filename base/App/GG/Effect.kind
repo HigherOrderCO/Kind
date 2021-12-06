@@ -1,7 +1,11 @@
+// Effect has been changed to receive App.GG.State.local instead of App.GG.Grid
+// This has been done because some effects might change turn bar's progress time, or that needed
+//   random numbers obtained from Time.
+
 App.GG.Effect(A: Type): Type
   App.GG.Coord ->
   App.GG.Effect.Origin ->
-  App.GG.Grid ->
+  App.GG.State.local ->
   App.GG.Effect.Result(A)
 
 type App.GG.Effect.Origin {
@@ -18,7 +22,7 @@ type App.GG.Effect.Result<A: Type> {
     value: A,
     center: App.GG.Coord
     origin: App.GG.Effect.Origin
-    grid: App.GG.Grid
+    local: App.GG.State.local
     img: Bool -> VoxBox -> VoxBox
     energy_cost: I32 
     description: String
@@ -31,21 +35,21 @@ App.GG.Effect.bind<A: Type, B: Type>(
   next: A -> App.GG.Effect<B>
 ): App.GG.Effect<B>
 
-  (center, origin, grid)
-  let a = effect(center, origin, grid)
+  (center, origin, local)
+  let a = effect(center, origin, local)
   case a {
     err: App.GG.Effect.Result.err<B>
-    new: case next(a.value)(a.center, a.origin, a.grid) as b {
+    new: case next(a.value)(a.center, a.origin, a.local) as b {
       err: App.GG.Effect.Result.err<B>
       new: 
         let center      = b.center
         let value       = b.value
         let origin      = b.origin
-        let grid        = b.grid
+        let local        = b.local
         let img         = (enemy: Bool, img: VoxBox) b.img(enemy, a.img(enemy, img))
         let energy_used = a.energy_cost + b.energy_cost
         let description = b.description
-        App.GG.Effect.Result.new<B>(value, center, origin, grid, img, energy_used, description)
+        App.GG.Effect.Result.new<B>(value, center, origin, local, img, energy_used, description)
     }
   }
 
@@ -53,5 +57,5 @@ App.GG.Effect.monad: Monad(App.GG.Effect)
   Monad.new<App.GG.Effect>(App.GG.Effect.bind, App.GG.Effect.pure)
 
 App.GG.Effect.pure<A: Type>(value: A): App.GG.Effect<A>
-  (center, origin, grid)
-  App.GG.Effect.Result.new<A>(value, center, origin, grid, (enemy, img) img, 0, "")
+  (center, origin, local)
+  App.GG.Effect.Result.new<A>(value, center, origin, local, (enemy, img) img, 0, "")

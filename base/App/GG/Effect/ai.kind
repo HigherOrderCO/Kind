@@ -1,17 +1,18 @@
 App.GG.Effect.ai.update(
   mod: App.GG.AI -> App.GG.AI
 ): App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
 
-  let new_grid = App.GG.Creature.modify_at(App.GG.AI.update(mod), center, grid)
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
+  let new_grid = App.GG.Creature.modify_at(App.GG.AI.update(mod), center, local@grid)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
 
 
 App.GG.Effect.ai.get: App.GG.Effect<Maybe<App.GG.AI>>
-  (center, origin, grid)
+  (center, origin, local)
 
-  let new_AI = App.GG.AI.get(center, grid)
-  App.GG.Effect.Result.new!(new_AI, center, origin, grid, (enemy, img) img, 0, "")
+  let new_AI = App.GG.AI.get(center, local@grid)
+  App.GG.Effect.Result.new!(new_AI, center, origin, local, (enemy, img) img, 0, "")
 
 App.GG.Effect.ai.inc(reset: Bool): App.GG.Effect<Unit>
   App.GG.Effect { 

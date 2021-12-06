@@ -1,14 +1,17 @@
 App.GG.Effect.frame.inc: App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
+  let grid = local@grid
   let new_grid =
     case origin {
       creature: App.GG.Actions.inc(center, grid)
       projectile: App.GG.Projectile.inc(center, origin.id, grid)
     }
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
 
 App.GG.Effect.frame.get: App.GG.Effect<Maybe<U64>>
-  (center, origin, grid)
+  (center, origin, local)
+  let grid = local@grid
   let frame =  
     case origin {
       creature: 
@@ -25,4 +28,4 @@ App.GG.Effect.frame.get: App.GG.Effect<Maybe<U64>>
           return info@frame
         }
     }
-  App.GG.Effect.Result.new!(frame, center, origin, grid, (enemy, img) img, 0, "")
+  App.GG.Effect.Result.new!(frame, center, origin, local, (enemy, img) img, 0, "")

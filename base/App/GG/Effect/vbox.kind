@@ -1,26 +1,28 @@
 App.GG.Effect.vbox.set(vbox: Bool -> VoxBox -> VoxBox): App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
   
-  App.GG.Effect.Result.new!(unit, center, origin, grid, vbox, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, local, vbox, 0, "")
 
 App.GG.Effect.vbox.in_tile(vbox: VoxBox): App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
   let {x, y}  = App.GG.Coord.to_xy(center)
   let img     = App.GG.draw.image(x, y, 0, vbox)
-  App.GG.Effect.Result.new!(unit, center, origin, grid, img, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, local, img, 0, "")
 
 App.GG.Effect.vbox.at_tile(coord: App.GG.Coord, vbox: VoxBox): App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
+  let grid = local@grid
   let tile = App.GG.Grid.get(coord, grid)
   let img =
     without tile: (enemy, img) img
     let {x, y}  = App.GG.Coord.to_xy(coord)
     App.GG.draw.image(x, y, 5, vbox)
-  App.GG.Effect.Result.new!(unit, center, origin, grid, img, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, local, img, 0, "")
 
 App.GG.Effect.vbox.at_tile_with_variation(coord: App.GG.Coord, x_var: I32, y_var: I32, vbox: VoxBox): App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
   //log(I32.show(x_var))
+  let grid = local@grid
   let tile = App.GG.Grid.get(coord, grid)
   let img =
     without tile: (enemy, img) img
@@ -28,4 +30,4 @@ App.GG.Effect.vbox.at_tile_with_variation(coord: App.GG.Coord, x_var: I32, y_var
     let new_x = I32.to_u32(U32.to_i32(x) + x_var)
     let new_y = I32.to_u32(U32.to_i32(y) + y_var)
     App.GG.draw.image(new_x, new_y, 5, vbox)
-  App.GG.Effect.Result.new!(unit, center, origin, grid, img, 0, "")
+  App.GG.Effect.Result.new!(unit, center, origin, local, img, 0, "")

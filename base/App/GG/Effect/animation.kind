@@ -1,16 +1,17 @@
 App.GG.Effect.animation.update(new_animation: App.GG.Animation): App.GG.Effect<Unit>
-  (center, origin, grid)
+  (center, origin, local)
   let mod =
     (creature)
       let creature = creature@animation <- {new_animation, 0}
       creature
-  let new_grid = App.GG.Creature.modify_at(mod, center, grid)
-  App.GG.Effect.Result.new!(unit, center, origin, new_grid, (enemy, img) img, 0, "")
+  let new_grid = App.GG.Creature.modify_at(mod, center, local@grid)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
    
 App.GG.Effect.animation.get: App.GG.Effect<Maybe<Pair<App.GG.Animation, U64>>>
-  (center, origin, grid)
+  (center, origin, local)
   let result = Maybe {
-    get creature = App.GG.Creature.get(center, grid)
+    get creature = App.GG.Creature.get(center, local@grid)
     return creature@animation
   }
-  App.GG.Effect.Result.new!(result, center, origin, grid, (enemy, img) img, 0, "")
+  App.GG.Effect.Result.new!(result, center, origin, local, (enemy, img) img, 0, "")

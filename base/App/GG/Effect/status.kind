@@ -1,6 +1,6 @@
 // //TODO
 // App.GG.Effect.status.is_invulnerable(pos: App.GG.Coord): App.GG.Effect<Bool>
-//   (center, origin, grid)
+//   (center, origin, local)
 //   let bool = 
 //     Maybe { 
 //       get creature = App.GG.Creature.get(pos, grid)
@@ -10,7 +10,7 @@
 
 
 // App.GG.Effect.status.is_noname(pos: App.GG.Coord): App.GG.Effect<Bool>
-//   (center, origin, grid)
+//   (center, origin, local)
 //   let bool = 
 //     Maybe { 
 //       get creature = App.GG.Creature.get(pos, grid)

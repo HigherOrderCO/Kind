@@ -131,30 +131,32 @@ App.GG.Creature.Status.get_from_nat(count: Nat, statuses: App.GG.Creature.Status
     1: some(statuses@stun)
   }default none
 
-App.GG.Creature.Status.update_grid(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
-  App.GG.Creature.Status.update_grid.go(0, coord, grid)
+App.GG.Creature.Status.update_grid(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  App.GG.Creature.Status.update_grid.go(0, coord, local)
 
-App.GG.Creature.Status.update_grid.go(count: Nat, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
-  let new_grid = 
+App.GG.Creature.Status.update_grid.go(count: Nat, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+let grid = local@grid
+  let new_local = 
     Maybe {
       get creature = App.GG.Creature.get(coord, grid)
       let statuses = creature@statuses
       get status = App.GG.Creature.Status.get_from_nat(count, statuses)
-      let new_grid = 
-        without status: grid
+      let new_local = 
+        without status: local
         case status {
-          poison: App.GG.Creature.Status.update_poison(status, coord, grid)
-          stun: App.GG.Creature.Status.update_stun(status, coord, grid)
-        }default grid
-      let new_grid = App.GG.Creature.Status.update_grid.go(count +1, coord, new_grid)
-      return new_grid
-    } <> grid
-  new_grid
+          poison: App.GG.Creature.Status.update_poison(status, coord, local)
+          stun: App.GG.Creature.Status.update_stun(status, coord, local)
+        }default local
+      let new_local = App.GG.Creature.Status.update_grid.go(count +1, coord, new_local)
+      return new_local
+    } <> local
+  new_local
 
-App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   case status {
     poison: 
       log(U64.show(status.duration))
+      let grid = local@grid
       let new_grid = 
         if status.duration =? 0 then
           let new_creature = App.GG.Creature.Status.del_from_nat(0)
@@ -164,21 +166,25 @@ App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.
           let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.poison(status.duration - 1, status.damage))
           let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
           new_grid
+      let new_local = local@grid <- new_grid
       if (status.duration % 10) =? 0 then 
         let eff = App.GG.Effect.creature.change_hp_at(status.damage, coord, false)
-        let result = eff(coord, App.GG.Effect.Origin.creature, new_grid)
-        case result {err: new_grid, new: result.grid}
+        let result = eff(coord, App.GG.Effect.Origin.creature, new_local)
+        case result {err: new_local, new: result.local}
       else
-        new_grid
-  }default grid
+        new_local
 
-App.GG.Creature.Status.update_stun(status: App.GG.Creature.Status, coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  }default local
+
+App.GG.Creature.Status.update_stun(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   case status {
     stun: 
+      let grid = local@grid
       let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category))
       let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
-      new_grid
-  }default grid
+      let new_local    = local@grid <- new_grid
+      new_local
+  }default local
 // New Status
 
 
@@ -493,19 +499,19 @@ App.GG.Creature.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Creature
 // Grid Update functions
 
 // If creature hasn't acted, update its actions, run its effects and update animation to next frame
-App.GG.Creature.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
-  if App.GG.Creature.has_acted(coord, grid) then 
-    grid
+App.GG.Creature.run(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  if App.GG.Creature.has_acted(coord, local) then 
+    local
   else
-    let new_grid = App.GG.Creature.run_ai(coord, grid)
-    let new_grid = App.GG.Creature.update_actions(coord, new_grid)
-    let new_grid = App.GG.Creature.update_animation(coord, new_grid)
-    let new_grid = App.GG.Actions.run(coord, new_grid)
-    new_grid
+    let new_local = App.GG.Creature.run_ai(coord, local)
+    let new_local = App.GG.Creature.update_actions(coord, new_local)
+    let new_local = App.GG.Creature.update_animation(coord, new_local)
+    let new_local = App.GG.Actions.run(coord, new_local)
+    new_local
 
 // Checks if creature has acted in this frame
-App.GG.Creature.has_acted(coord: App.GG.Coord, grid:App.GG.Grid): Bool
-  let creature = App.GG.Creature.get(coord, grid)
+App.GG.Creature.has_acted(coord: App.GG.Coord, local: App.GG.State.local): Bool
+  let creature = App.GG.Creature.get(coord, local@grid)
   without creature: false
   creature@actions@has_acted
 
@@ -515,13 +521,17 @@ App.GG.Creature.reset_actions.aux(creature: App.GG.Creature): App.GG.Creature
   creature@actions <- new_actions
 
 // Updates animation to its next frame
-App.GG.Creature.update_animation(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+App.GG.Creature.update_animation(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   let mod = (creature: App.GG.Creature) creature@animation <- {creature@animation@fst, creature@animation@snd + 1}
-  App.GG.Creature.modify_at(mod, coord, grid)
-
+  let new_grid = App.GG.Creature.modify_at(mod, coord, local@grid)
+  let new_local = local@grid <- new_grid
+  new_local
 // If current action is "none", moves next action to its place
-App.GG.Creature.update_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
-  App.GG.Creature.modify_at(App.GG.Creature.update_actions.aux, coord, grid)
+App.GG.Creature.update_actions(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  let grid = local@grid
+  let new_grid = App.GG.Creature.modify_at(App.GG.Creature.update_actions.aux, coord, grid)
+  let new_local = local@grid <- new_grid
+  new_local
 
 App.GG.Creature.update_actions.aux(creature: App.GG.Creature): App.GG.Creature
   let actions = creature@actions
@@ -539,14 +549,15 @@ App.GG.Creature.update_actions.aux(creature: App.GG.Creature): App.GG.Creature
 App.GG.Creature.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   App.GG.Creature.modify_at(App.GG.Creature.reset_actions.aux, coord, grid)
 
-App.GG.Creature.run_ai(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+App.GG.Creature.run_ai(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   Maybe {
+    let grid = local@grid
     get creature = App.GG.AI.get(coord, grid)
     get minion = App.GG.Minion.get(coord, grid)
-    let result = minion@effect(coord, App.GG.Effect.Origin.creature, grid)
-    let new_grid = case result {err: grid, new: result.grid}
-    return new_grid
-  } <> grid
+    let result = minion@effect(coord, App.GG.Effect.Origin.creature, local)
+    let new_local = case result {err: local, new: result.local}
+    return new_local
+  } <> local
     
 
 // ============================================================================

@@ -17,9 +17,8 @@ App.GG.when: App.When<App.GG.State>
         setup:
           App.pass<App.GG.State>
         game:
-          let new_grid  = App.GG.when.update_grid(local@grid)
+          let new_local  = App.GG.when.update_grid(local)
           let new_phase = App.GG.when.update_phase(phase)
-          let new_local = local@grid <- new_grid
           let new_local = new_local@phase <- new_phase
           App.set_local<App.GG.State>(new_local)
       }
@@ -416,30 +415,32 @@ App.GG.when.update_phase(phase: App.GG.Phase): App.GG.Phase
 // updates all tiles that has has_acted as false
 // This must be done as there are projectiles or creatures that will move
 // during a frame, and these should not run twice.
-App.GG.when.update_grid(grid: App.GG.Grid): App.GG.Grid
-  for coord:tile in grid with grid:
-    App.GG.when.update_tile.has_acted(coord, grid)
-  for coord:tile in grid with grid:
-    App.GG.when.update_tile.run(coord, grid)
-  grid
+App.GG.when.update_grid(local: App.GG.State.local): App.GG.State.local
+  for coord:tile in local@grid with local:
+    App.GG.when.update_tile.has_acted(coord, local)
+  for coord:tile in local@grid with local:
+    App.GG.when.update_tile.run(coord, local)
+  local
 
-App.GG.when.update_tile.has_acted(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+App.GG.when.update_tile.has_acted(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  let grid = local@grid
   // Resets Creature's has_acted 
   let new_grid = App.GG.Creature.reset_actions(coord, grid)
   // Resets Projectile's has_acted
   let new_grid = App.GG.Projectile.reset_actions(coord, new_grid)
-  new_grid
+  let new_local = local@grid <- new_grid 
+  new_local
 
-App.GG.when.update_tile.run(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+App.GG.when.update_tile.run(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   // If Creature hasn't acted yet, update its animation frame, runs its action's Effect and if there isn't a current action, moves next action to current.
-  let new_grid = App.GG.Creature.run(coord, grid)
+  let new_local = App.GG.Creature.run(coord, local)
   // If Projectile hasn't acted yet, run its action's effect and update the projectile's frame
-  let new_grid = App.GG.Projectile.run(coord, new_grid)
+  let new_local = App.GG.Projectile.run(coord, new_local)
   // Runs the tile statuses
-  let new_grid = App.GG.Tile.Status.update_grid(coord, new_grid)
+  let new_local = App.GG.Tile.Status.update_grid(coord, new_local)
   // Runs Creature's Status
-  let new_grid = App.GG.Creature.Status.update_grid(coord, new_grid)
-  new_grid
+  let new_local = App.GG.Creature.Status.update_grid(coord, new_local)
+  new_local
 
 // Adds the basic Attack action to the creature's next action
 App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid
