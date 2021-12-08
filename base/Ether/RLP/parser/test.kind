@@ -1,0 +1,130 @@
+Ether.RLP.parser.test: IO<Unit>
+  TestSuite.run(Ether.RLP.parser.test.suite, 0)
+
+Ether.RLP.parser.test.suite: TestSuite
+  TestSuite.many("Parser", [
+    Ether.RLP.parser.test.nat0
+    Ether.RLP.parser.test.nat1
+    Ether.RLP.parser.test.nat2
+    Ether.RLP.parser.test.hex0
+    Ether.RLP.parser.test.hex1
+    Ether.RLP.parser.test.hex2
+    Ether.RLP.parser.test.str0
+    Ether.RLP.parser.test.str1
+    Ether.RLP.parser.test.str2
+    Ether.RLP.parser.test.list0
+    Ether.RLP.parser.test.list1
+    Ether.RLP.parser.test.list2
+  ])
+
+Ether.RLP.parser.test.builder(str: String, expected: Ether.RLP): IO<Maybe<String>>
+  let result = Ether.RLP.from_string(str)
+  case result {
+    none:
+      IO {
+        return some("string \`"|str|"\` didn't parse");
+      }
+    some:
+      case result.value =? expected {
+        false:
+          IO {
+            return some(`expected `|Ether.RLP.show(expected)|` and got `|Ether.RLP.show(result.value));
+          }
+        true:
+          IO {
+            return none
+          }
+      }
+  }
+
+Ether.RLP.parser.test.nat0: TestSuite
+  TestSuite.unit("nat0",
+    Ether.RLP.parser.test.builder("0", Ether.RLP.data([]))
+  )
+
+Ether.RLP.parser.test.nat1: TestSuite
+  TestSuite.unit("nat1",
+    Ether.RLP.parser.test.builder("255", Ether.RLP.data([0xff#8]))
+  )
+
+Ether.RLP.parser.test.nat2: TestSuite
+  TestSuite.unit("nat2",
+    Ether.RLP.parser.test.builder("65280", Ether.RLP.data([0xff#8, 0x00#8]))
+  )
+
+Ether.RLP.parser.test.hex0: TestSuite
+  TestSuite.unit("hex0",
+    Ether.RLP.parser.test.builder("0x0", Ether.RLP.data([]))
+  )
+
+Ether.RLP.parser.test.hex1: TestSuite
+  TestSuite.unit("hex1",
+    Ether.RLP.parser.test.builder("0xff", Ether.RLP.data([0xff#8]))
+  )
+
+Ether.RLP.parser.test.hex2: TestSuite
+  TestSuite.unit("hex2",
+    Ether.RLP.parser.test.builder("0xff00", Ether.RLP.data([0xff#8, 0x00#8]))
+  )
+
+Ether.RLP.parser.test.str0: TestSuite
+  TestSuite.unit("str0",
+    Ether.RLP.parser.test.builder(`"hi"`, Ether.RLP.data([0x68#8, 0x69#8]))
+  )
+
+Ether.RLP.parser.test.str1: TestSuite
+  TestSuite.unit("str1",
+    Ether.RLP.parser.test.builder(`"hello, world!"`, Ether.RLP.data([0x68#8, 0x65#8, 0x6c#8, 0x6c#8, 0x6f#8, 0x2c#8, 0x20#8, 0x77#8, 0x6f#8, 0x72#8, 0x6c#8, 0x64#8, 0x21#8]))
+  )
+
+Ether.RLP.parser.test.str2: TestSuite
+  TestSuite.unit("str2",
+    Ether.RLP.parser.test.builder(`"cação!"`, Ether.RLP.data([0x63#8, 0x61#8, 0xc3#8, 0xa7#8, 0xc3#8, 0xa3#8, 0x6f#8, 0x21#8, 0x20#8, 0xf0#8, 0x9f#8, 0x98#8, 0xbb#8]))
+  )
+
+
+Ether.RLP.parser.test.list0: TestSuite
+  TestSuite.unit("list0",
+    Ether.RLP.parser.test.builder(
+      `[]`
+      Ether.RLP.node([
+      ])
+    )
+  )
+
+Ether.RLP.parser.test.list1: TestSuite
+  TestSuite.unit("list1",
+    Ether.RLP.parser.test.builder(
+      `[[],[[]],[[],[[]]]]`
+      Ether.RLP.node([
+        Ether.RLP.node([
+        ])
+        Ether.RLP.node([
+          Ether.RLP.node([
+          ])
+        ])
+        Ether.RLP.node([
+          Ether.RLP.node([
+          ])
+          Ether.RLP.node([
+            Ether.RLP.node([
+            ])
+          ])
+        ])
+      ])
+    )
+  )
+
+Ether.RLP.parser.test.list2: TestSuite
+  TestSuite.unit("list2",
+    Ether.RLP.parser.test.builder(
+      `[65280, [0xff00, "hi"]]`
+      Ether.RLP.node([
+        Ether.RLP.data([0xff#8, 0x00#8])
+        Ether.RLP.node([
+          Ether.RLP.data([0xff#8, 0x00#8])
+          Ether.RLP.data([0x68#8, 0x69#8])
+        ])
+      ])
+    )
+  )

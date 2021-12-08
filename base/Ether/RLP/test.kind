@@ -33,6 +33,7 @@ Ether.RLP.test.suite: TestSuite
     Ether.RLP.test.listsoflists2
     Ether.RLP.test.dictTest1
     Ether.RLP.test.bigint
+    Ether.RLP.parser.test.suite
   ])
 
 Ether.RLP.test.emptystring: TestSuite
@@ -173,7 +174,7 @@ Ether.RLP.test.emptylist: TestSuite
   )
 
 Ether.RLP.test.stringlist: TestSuite
-  def from_str = Ether.RLP.from_str
+  def from_str = Ether.RLP.data.from_str
   TestSuite.unit("stringlist",
     Ether.RLP.test.builder(
       Ether.RLP.node([from_str("dog"), from_str("god"), from_str("cat")])
@@ -182,8 +183,8 @@ Ether.RLP.test.stringlist: TestSuite
   )
 
 Ether.RLP.test.multilist: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("multilist",
     Ether.RLP.test.builder(
       Ether.RLP.node([
@@ -198,8 +199,8 @@ Ether.RLP.test.multilist: TestSuite
   )
 
 Ether.RLP.test.shortListMax1: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("shortListMax1",
     Ether.RLP.test.builder(
       Ether.RLP.node([
@@ -220,8 +221,8 @@ Ether.RLP.test.shortListMax1: TestSuite
   )
 
 Ether.RLP.test.longList1: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("longList1",
     Ether.RLP.test.builder(
       let list =
@@ -241,8 +242,8 @@ Ether.RLP.test.longList1: TestSuite
   )
 
 Ether.RLP.test.longList2: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("longList2",
     Ether.RLP.test.builder(
       let list =
@@ -290,8 +291,8 @@ Ether.RLP.test.longList2: TestSuite
   )
 
 Ether.RLP.test.listsoflists: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("listoflists",
     Ether.RLP.test.builder(
       Ether.RLP.node([
@@ -309,8 +310,8 @@ Ether.RLP.test.listsoflists: TestSuite
   )
 
 Ether.RLP.test.listsoflists2: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("listoflists2",
     Ether.RLP.test.builder(
       Ether.RLP.node([
@@ -334,8 +335,8 @@ Ether.RLP.test.listsoflists2: TestSuite
   )
 
 Ether.RLP.test.dictTest1: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("dictTest1",
     Ether.RLP.test.builder(
       Ether.RLP.node([
@@ -349,8 +350,8 @@ Ether.RLP.test.dictTest1: TestSuite
   )
 
 Ether.RLP.test.bigint: TestSuite
-  def from_str = Ether.RLP.from_str
-  def from_nat = Ether.RLP.from_nat
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
   TestSuite.unit("bigint",
     Ether.RLP.test.builder(
       from_nat(115792089237316195423570985008687907853269984665640564039457584007913129639936)
