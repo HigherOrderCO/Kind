@@ -1,0 +1,130 @@
+App.RLP.article: DOM
+  <article> 
+  <h3>` Kind is amazing ^-^ `</h3>
+  <p>`
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+  incididunt ut labore et dolore magna aliqua. Nibh ipsum consequat nisl vel
+  pretium lectus quam id. Tempor orci eu lobortis elementum nibh. Nulla facilisi
+  cras fermentum odio eu feugiat. Est velit egestas dui id. Blandit aliquam
+  etiam erat velit. 
+  `</p>
+  <p>`
+  Donec ultrices tincidunt arcu non. Eu nisl nunc mi ipsum faucibus vitae
+  aliquet nec. Duis tristique sollicitudin nibh sit amet commodo nulla facilisi
+  nullam. Malesuada bibendum arcu vitae elementum curabitur vitae nunc sed
+  velit. Nullam eget felis eget nunc lobortis mattis aliquam faucibus purus. 
+  `</p>
+  </article>
+
+App.RLP.State: App.State
+  App.State.new(App.RLP.State.Local, App.RLP.State.Global)
+
+type App.RLP.State.Local {
+  new
+}
+
+App.RLP.State.Global: Type
+  Unit
+
+App.RLP.draw(local_state: App.RLP.State.Local): DOM
+  <div>
+  <style>`
+    .center-box {
+      margin: auto;
+      max-width: 512px;
+    }
+    main > * {
+      margin-bottom: 1em;
+    }
+    main hr {
+      border-color: #FDFDFD;
+    }
+    .page-block {
+      width: 100%;
+      padding: 16px;
+      // margin-bottom: 12px;
+    }
+    .page-block.bg {
+      border-radius: 8px;
+      background-color: rgb(245,245,245);
+    }
+    .block-label {
+      padding-bottom: 0.5em;
+    }
+    textarea.text-input {
+      width: 100%;
+      min-height: 10em;
+    }
+    .button-wrapper button {
+      display: inline-block;
+      margin-left: auto;
+      margin-right: 0;
+    }
+    article * {
+      margin-bottom: 1em;
+    }
+    footer {
+      display: flex;
+      // flex-direction: row;
+      justify-content: space-between;
+      padding: 2em 0;
+    }
+  `</style>
+  <main class="center-box">
+    <div class="page-block">
+      <h1> "RLP encoder/decoder" </h1>
+      <p class="subtitle"> "Formally verified with Kind!" </p>
+    </div>
+    <div class="page-block bg">
+      <p class="block-label"> "Input:" </p>
+      <textarea class="text-input">
+      </textarea>
+      <div class="button-wrapper">
+        <button id="encode-button">` Encode `</button>
+      </div>
+    </div>
+    <div class="page-block bg">
+      <p class="block-label"> "Output:" </p>
+      <textarea class="text-input">
+      </textarea>
+      <div class="button-wrapper">
+        <button id="decode-button">` Decode `</button>
+      </div>
+    </div>
+    <hr></hr>
+    <div class="page-block bg">
+      {App.RLP.article}
+    </div>
+  </main>
+  <footer class="center-box">
+    <div id="join-us">
+      <p><strong>` Join Us `</strong></p>
+      <p><a href="https://github.com/kind-lang/Kind">
+        `Github`
+      </a></p>
+      <p><a href="https://t.me/formality_lang">
+        `Telegram`
+      </a></p>
+    </div>
+    <div>
+      `made with ❤ using `
+      <a href="https://github.com/kind-lang/Kind">
+        `Kind-lang`
+      </a>
+      // ` by Taelin Foundation ??`
+    </div>
+  </footer>
+  </div>
+ 
+App.RLP: App(App.RLP.State)
+  let init =
+    App.Store.new!(
+      App.RLP.State.Local.new
+      Unit.new
+    )
+  def St = App.RLP.State
+  let draw = (state) App.RLP.draw(state@local)
+  let when = App.no_when<St>
+  let tick = App.no_tick<St>
+  let post = App.no_post<St>
+  App.new!(init, draw, when, tick, post)
