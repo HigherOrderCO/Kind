@@ -15,13 +15,13 @@ Ether.RLP.nat: Parser(Ether.RLP)
       Parser.hex_nat
       Parser.nat
     ])
-    return Ether.RLP.data(Bytes.from_nat(n))
+    return Ether.RLP.data.from_nat(n)
   }
 
 Ether.RLP.string: Parser(Ether.RLP)
   Parser {
     get str = Parser.string
-    return Ether.RLP.data(Bytes.from_str(str))
+    return Ether.RLP.data.from_str(str)
   }
 
 Ether.RLP.list: Parser(Ether.RLP)
