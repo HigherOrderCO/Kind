@@ -31,9 +31,8 @@ Ether.RLP.aux.split.1(
      let a = Nat.to_u8(Nat.add(56, Nat.add(128, Nat.sub(List.length(U8, b), 1))))
      Ether.RLP.split.length(128, List.concat(U8, List.concat(U8, List.cons(U8, a, b), payload), tail))
    )
-  let basic_length = Ether.RLP.aux.bytes_from_nat(List.length(U8, payload), H1)
   let lim_length = Nat.lte.sub_both(
-    List.length(U8, Bytes.from_nat(List.length(U8,payload))), 8, 1, basic_length
+    List.length(U8, Bytes.from_nat(List.length(U8,payload))), 8, 1, Ether.RLP.aux.bytes_from_nat(List.length(U8, payload), H1)
   )
   let bytes_from_nat_length = Nat.lte.slack_left(Nat.sub(List.length(U8, Bytes.from_nat(List.length(U8,payload))), 1), 7, 64, 
     lim_length
@@ -44,28 +43,31 @@ Ether.RLP.aux.split.1(
       let concat_assoc = List.concat.assoc(U8,Bytes.from_nat(List.length(U8,payload)),payload,tail)
       case concat_assoc {
         refl:
-          //TODO prove that Bytes.from_nat is non-empty if it takes a positive parameter
-//          let len_not_zero = Nat.lte.cut_left(55, 1, List.length(U8, Bytes.from_nat(List.length(U8,payload))), Nat.lte.comm.false(List.length(U8, payload), 55, H0))
-//          let cancel_sub_one = Nat.sub.comm_add(128,List.length(U8,Bytes.from_nat(List.length(U8,payload))),1, refl, len_not_zero)
-//          let splitted_pair = mirror(List.split.length(U8, Bytes.from_nat(List.length(U8,payload)), List.concat(U8, payload, tail)))
-//          Pair.new(Bytes,Bytes,payload,tail) == Bytes.split(List.concat(U8,Bytes.from_nat(List.length(U8,payload)),List.concat(U8,payload,tail)),Nat.succ(Nat.sub(Nat.sub(Nat.add(56,Nat.add(128,Nat.sub(List.length(U8,Bytes.from_nat(List.length(U8,payload))),1))),128),56)),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))
-          ?refl
+          let payload_len_not_zero = Nat.lte.cut_left(55, 1, List.length(U8,payload), Nat.lte.comm.false(List.length(U8,payload), 55, H0))
+          let from_nat_len_not_zero = Bytes.from_nat.succ(List.length(U8,payload), payload_len_not_zero)
+          let swap_sub = Nat.sub.comm_add(128,List.length(U8,Bytes.from_nat(List.length(U8,payload))),1,refl,from_nat_len_not_zero)
+          case swap_sub {
+            refl:
+              let cancel_succ = case Nat.add.comm(Nat.sub(List.length(U8,Bytes.from_nat(List.length(U8,payload))),1),1) {
+                refl:
+                  Nat.sub.add(1, List.length(U8,Bytes.from_nat(List.length(U8,payload))),from_nat_len_not_zero)
+              }: Equal(Nat, self.b, List.length(U8,Bytes.from_nat(List.length(U8,payload))))
+              let cancel_succ = mirror(cancel_succ)
+              case cancel_succ {
+                refl:
+                  let splitted_pair = mirror(List.split.length(U8, Bytes.from_nat(List.length(U8,payload)), List.concat(U8, payload, tail)))
+                  case splitted_pair {
+                    refl:
+                      let recover_length = Bytes.to_nat.from_nat(List.length(U8,payload))
+                      case recover_length {
+                        refl:
+                          mirror(List.split.length(U8, payload, tail))
+                      }: Pair.new(Bytes,Bytes,payload,tail) == Bytes.split(List.concat(U8,payload,tail),recover_length.b)
+                  }: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), splitted_pair.b(() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
+              }: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), Bytes.split(List.concat(U8,Bytes.from_nat(List.length(U8,payload)),List.concat(U8,payload,tail)),    cancel_succ.b,    () Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
+          }: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), Bytes.split(List.concat(U8,Bytes.from_nat(List.length(U8,payload)),List.concat(U8,payload,tail)),Nat.succ(Nat.sub(Nat.sub(Nat.add(56,    swap_sub.b    ),128),56)),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
       }: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), Bytes.split(concat_assoc.b,Nat.succ(Nat.sub(Nat.sub(Nat.add(56,Nat.add(128,Nat.sub(List.length(U8,Bytes.from_nat(List.length(U8,payload))),1))),128),56)),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
-////          case splitted_pair {
-////            refl:
-////          }: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), splitted_pair.b(() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
   }: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), Nat.lte(Nat.sub(safe_conversion.b,128),55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(safe_conversion.b,128)),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.succ(Nat.sub(Nat.sub(safe_conversion.b,128),56)),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))))
-
-//  ?hole-545-129-129
-//    :: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), Nat.lte(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(56,Nat.add(128,Nat.sub(List.length(U8,Bytes.from_nat(List.length(U8,payload))),1))))),128),55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(56,Nat.add(128,Nat.sub(List.length(U8,Bytes.from_nat(List.length(U8,payload))),1))))),128)),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.succ(Nat.sub(Nat.sub(U8.to_nat(Nat.to_u8(Nat.add(56,Nat.add(128,Nat.sub(List.length(U8,Bytes.from_nat(List.length(U8,payload))),1))))),128),56)),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length)))))
-
-//  case safe_conversion {
-//    refl:
-//      ?refl
-//
-//      }: Equal(Pair(Bytes, Bytes), Pair.new(Bytes,Bytes,payload,tail), Bytes.split(    concat_assoc.b,    Nat.succ(Nat.sub(Nat.sub(Nat.add(56,Nat.add(128,List.length(U8,Bytes.from_nat(List.length(U8,payload))))),128),56)),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
-//
-//  }: Pair.new(Bytes,Bytes,payload,tail) == Nat.lte(Nat.sub(    safe_conversion.b,    128),55,() Pair(Bytes,Bytes),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.sub(    safe_conversion.b,    128)),Bytes.split(List.concat(U8,List.concat(U8,Bytes.from_nat(List.length(U8,payload)),payload),tail),Nat.succ(Nat.sub(Nat.sub(    safe_conversion.b,    128),56)),() Pair(Bytes,Bytes),(length) (tail) Bytes.split(tail,Bytes.to_nat(length))))
 
 //Ether.RLP.aux.split.2(
 //  payload: Bytes

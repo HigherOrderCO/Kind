@@ -1,4 +1,4 @@
-Bytes.to_nat.succ(
+Bytes.from_nat.succ(
   n: Nat
   H: Equal(Bool, Nat.ltn(0, n), true)
 ): Equal(Bool, Nat.ltn(0, List.length(U8, Bytes.from_nat(n))), true)
