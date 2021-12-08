@@ -1,0 +1,31 @@
+Ether.RLP.parser: Parser(Ether.RLP)
+  Parser {
+    Kind.Parser.spaces
+    get ret = Parser.choice!([
+      Ether.RLP.list
+      Ether.RLP.string
+      Ether.RLP.nat
+    ])
+    return ret
+  }
+
+Ether.RLP.nat: Parser(Ether.RLP)
+  Parser {
+    get n = Parser.choice!([
+      Parser.hex_nat
+      Parser.nat
+    ])
+    return Ether.RLP.data(Bytes.from_nat(n))
+  }
+
+Ether.RLP.string: Parser(Ether.RLP)
+  Parser {
+    get str = Parser.string
+    return Ether.RLP.data(Bytes.from_str(str))
+  }
+
+Ether.RLP.list: Parser(Ether.RLP)
+  Parser {
+    get rlp_list = Kind.Parser.items!("[", Ether.RLP.parser, "]")
+    return Ether.RLP.node(rlp_list)
+  }
