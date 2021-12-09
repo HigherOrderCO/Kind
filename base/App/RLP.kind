@@ -20,8 +20,14 @@ App.RLP.State: App.State
   App.State.new(App.RLP.State.Local, App.RLP.State.Global)
 
 type App.RLP.State.Local {
-  new
+  new(
+    decoded_text: String
+    encoded_text: String
+  )
 }
+
+App.RLP.State.Local.default: App.RLP.State.Local
+  App.RLP.State.Local.new("", "")
 
 App.RLP.State.Global: Type
   Unit
@@ -42,7 +48,6 @@ App.RLP.draw(local_state: App.RLP.State.Local): DOM
     .page-block {
       width: 100%;
       padding: 16px;
-      // margin-bottom: 12px;
     }
     .page-block.bg {
       border-radius: 8px;
@@ -65,9 +70,8 @@ App.RLP.draw(local_state: App.RLP.State.Local): DOM
     }
     footer {
       display: flex;
-      // flex-direction: row;
       justify-content: space-between;
-      padding: 2em 0;
+      padding: 2em 1em;
     }
   `</style>
   <main class="center-box">
@@ -77,23 +81,23 @@ App.RLP.draw(local_state: App.RLP.State.Local): DOM
     </div>
     <div class="page-block bg">
       <p class="block-label"> "Input:" </p>
-      <textarea class="text-input">
+      <textarea id="decoded-text" class="text-input" value=local_state@decoded_text>
       </textarea>
       <div class="button-wrapper">
-        <button id="encode-button">` Encode `</button>
+        <button id="btn-encode">` Encode `</button>
       </div>
     </div>
     <div class="page-block bg">
       <p class="block-label"> "Output:" </p>
-      <textarea class="text-input">
+      <textarea id="encoded-text" class="text-input" value=local_state@encoded_text>
       </textarea>
       <div class="button-wrapper">
-        <button id="decode-button">` Decode `</button>
+        <button id="btn-decode">` Decode `</button>
       </div>
     </div>
     <hr></hr>
     <div class="page-block bg">
-      {App.RLP.article}
+      { App.RLP.article }
     </div>
   </main>
   <footer class="center-box">
@@ -111,20 +115,40 @@ App.RLP.draw(local_state: App.RLP.State.Local): DOM
       <a href="https://github.com/kind-lang/Kind">
         `Kind-lang`
       </a>
-      // ` by Taelin Foundation ??`
+      // ` by ??`
     </div>
   </footer>
   </div>
  
+App.RLP.when(
+  event: App.Event
+  store: App.Store<App.RLP.State>
+): IO<Maybe<App.State.local(App.RLP.State)>>
+  let state = store@local
+  case event {
+    input:
+      switch String.eql(event.id) {
+        "decoded-text": App.set_local!(state@decoded_text <- event.text)
+        "encoded-text": App.set_local!(state@encoded_text <- event.text)
+      } default App.pass!
+    mouse_click:
+      switch String.eql(event.id) {
+        "btn-encode":
+          App.set_local!(state@encoded_text <- "NEW")
+        "btn-decode":
+          App.set_local!(state@decoded_text <- "NEW")
+      } default App.pass!
+  } default App.pass!
+
 App.RLP: App(App.RLP.State)
   let init =
     App.Store.new!(
-      App.RLP.State.Local.new
+      App.RLP.State.Local.default
       Unit.new
     )
   def St = App.RLP.State
   let draw = (state) App.RLP.draw(state@local)
-  let when = App.no_when<St>
+  let when = App.RLP.when
   let tick = App.no_tick<St>
   let post = App.no_post<St>
   App.new!(init, draw, when, tick, post)
