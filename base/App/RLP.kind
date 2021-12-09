@@ -200,7 +200,7 @@ App.RLP.when(
           log("encoded input: " | event.text)
           let input = event.text
           let state = state@encoded_input <- input 
-          let state = state@decoded_input_invalid <- false
+          let state = state@encoded_input_invalid <- false
           App.RLP.do_decode(state, input)
       } default App.pass!
     // mouse_click:
