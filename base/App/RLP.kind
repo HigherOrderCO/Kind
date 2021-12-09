@@ -128,8 +128,24 @@ App.RLP.when(
   case event {
     input:
       switch String.eql(event.id) {
-        "decoded-text": App.set_local!(state@decoded_text <- event.text)
-        "encoded-text": App.set_local!(state@encoded_text <- event.text)
+        "decoded-text":
+          log("decoded: "|event.text)
+          let state = state@decoded_text <- event.text
+          case Parser.run!(Ether.RLP.parser, event.text) {
+            none:
+              App.set_local!(state)
+            some:
+              App.set_local!(state@encoded_text <- Bytes.to_hex(Ether.RLP.encode(self.value)))
+          }
+        "encoded-text":
+          log("encoded: "|event.text)
+          let state = state@encoded_text <- event.text
+          let cond = (Nat.mod(String.length(event.text), 2) =? 0) && String.is_hex(event.text)
+          if cond then
+            App.set_local!(state@decoded_text <- Ether.RLP.show(Ether.RLP.decode(Bytes.from_hex(event.text))))
+          else
+            App.set_local!(state)
+          //App.set_local!(state@decoded_text <- Ether.RLP.show(Ether.RLP.decode(Bytes.from_hex(event.text))))
       } default App.pass!
     mouse_click:
       switch String.eql(event.id) {
