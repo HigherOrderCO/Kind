@@ -21,20 +21,39 @@ App.RLP.State: App.State
 
 type App.RLP.State.Local {
   new(
-    decoded_text: String
-    encoded_text: String
+    decoded_input: String
+    encoded_input: String
+    decoded_result: String
+    encoded_result: String
+    decoded_input_invalid: Bool
+    encoded_input_invalid: Bool
   )
 }
 
 App.RLP.State.Local.default: App.RLP.State.Local
-  App.RLP.State.Local.new("", "")
+  let init_decoded = `["hihi"]`
+  let init_encoded =
+    case Parser.run!(Ether.RLP.parser, init_decoded) {
+      none: ""
+      some: App.RLP.encode(self.value)
+    }
+  App.RLP.State.Local.new(
+    init_decoded
+    init_encoded
+    init_decoded
+    init_encoded 
+    false
+    false
+  )
 
 App.RLP.State.Global: Type
   Unit
 
-App.RLP.draw(local_state: App.RLP.State.Local): DOM
-  <div>
-  <style>`
+App.RLP.css: String
+  `
+    .hidden {
+      display: none !important;
+    }
     .center-box {
       margin: auto;
       max-width: 512px;
@@ -60,6 +79,9 @@ App.RLP.draw(local_state: App.RLP.State.Local): DOM
       width: 100%;
       min-height: 10em;
     }
+    textarea.text-input.invalid {
+      border-color: red;
+    }
     .button-wrapper button {
       display: inline-block;
       margin-left: auto;
@@ -73,28 +95,65 @@ App.RLP.draw(local_state: App.RLP.State.Local): DOM
       justify-content: space-between;
       padding: 2em 1em;
     }
-  `</style>
+  `
+
+App.RLP.draw(state: App.RLP.State.Local): DOM
+  let add_invalid =
+    (flag: Bool, txt: String)
+      if flag then txt | " invalid" else txt
+  <div>
+  <style> App.RLP.css </style>
+  <script>`
+    document.getElementById('btn-decode').onclick = () => {
+      const input_el = document.getElementById('decoded-input');
+      input_el.value =
+        document.getElementById('decoded-result').innerText;
+      const ev = new Event('input');
+      input_el.dispatchEvent(ev);
+    }
+    document.getElementById('btn-encode').onclick = () => {
+      const input_el = document.getElementById('encoded-input');
+      input_el.value =
+        document.getElementById('encoded-result').innerText;
+      const ev = new Event('input');
+      input_el.dispatchEvent(ev);
+    }
+  `</script>
   <main class="center-box">
     <div class="page-block">
       <h1> "RLP encoder/decoder" </h1>
       <p class="subtitle"> "Formally verified with Kind!" </p>
     </div>
     <div class="page-block bg">
-      <p class="block-label"> "Input:" </p>
-      <textarea id="decoded-text" class="text-input" value=local_state@decoded_text>
+      <p class="block-label">
+        "Decoded:"
+      </p>
+      <textarea id="decoded-input"
+        class=add_invalid(state@decoded_input_invalid)("text-input")
+        // value=state@decoded_result
+        >
+        state@decoded_input
       </textarea>
       <div class="button-wrapper">
         <button id="btn-encode">` Encode `</button>
       </div>
     </div>
     <div class="page-block bg">
-      <p class="block-label"> "Output:" </p>
-      <textarea id="encoded-text" class="text-input" value=local_state@encoded_text>
+      <p class="block-label">
+        "Encoded:"
+      </p>
+      <textarea id="encoded-input"
+        class=add_invalid(state@encoded_input_invalid)("text-input")
+        // value=state@encoded_result
+        >
+        state@encoded_input
       </textarea>
       <div class="button-wrapper">
         <button id="btn-decode">` Decode `</button>
       </div>
     </div>
+    <p class="hidden" id="encoded-result"> state@encoded_result </p>
+    <p class="hidden" id="decoded-result"> state@decoded_result </p>
     <hr></hr>
     <div class="page-block bg">
       { App.RLP.article }
@@ -119,42 +178,63 @@ App.RLP.draw(local_state: App.RLP.State.Local): DOM
     </div>
   </footer>
   </div>
- 
+
+App.RLP.IO: Type
+  IO<Maybe<App.State.local(App.RLP.State)>>
+
 App.RLP.when(
   event: App.Event
   store: App.Store<App.RLP.State>
-): IO<Maybe<App.State.local(App.RLP.State)>>
+): App.RLP.IO
   let state = store@local
   case event {
     input:
       switch String.eql(event.id) {
-        "decoded-text":
-          log("decoded: "|event.text)
-          let state = state@decoded_text <- event.text
-          case Parser.run!(Ether.RLP.parser, event.text) {
-            none:
-              App.set_local!(state)
-            some:
-              App.set_local!(state@encoded_text <- Bytes.to_hex(Ether.RLP.encode(self.value)))
-          }
-        "encoded-text":
-          log("encoded: "|event.text)
-          let state = state@encoded_text <- event.text
-          let cond = (Nat.mod(String.length(event.text), 2) =? 0) && String.is_hex(event.text)
-          if cond then
-            App.set_local!(state@decoded_text <- Ether.RLP.show(Ether.RLP.decode(Bytes.from_hex(event.text))))
-          else
-            App.set_local!(state)
-          //App.set_local!(state@decoded_text <- Ether.RLP.show(Ether.RLP.decode(Bytes.from_hex(event.text))))
+        "decoded-input":
+          log("decoded input: " | event.text)
+          let input = event.text
+          let state = state@decoded_input <- input 
+          let state = state@decoded_input_invalid <- false
+          App.RLP.do_encode(state, input)
+        "encoded-input":
+          log("encoded input: " | event.text)
+          let input = event.text
+          let state = state@encoded_input <- input 
+          let state = state@decoded_input_invalid <- false
+          App.RLP.do_decode(state, input)
       } default App.pass!
-    mouse_click:
-      switch String.eql(event.id) {
-        "btn-encode":
-          App.set_local!(state@encoded_text <- "NEW")
-        "btn-decode":
-          App.set_local!(state@decoded_text <- "NEW")
-      } default App.pass!
+    // mouse_click:
+    //   switch String.eql(event.id) {
+    //     "btn-encode":
+    //       let input = state@decoded_input
+    //       App.pass!
+    //     "btn-decode":
+    //       let input = state@encoded_input
+    //       App.pass!
+    //   } default App.pass!
   } default App.pass!
+
+App.RLP.do_decode(state: App.RLP.State.Local, input: String): App.RLP.IO
+  let valid =
+    (Nat.mod(String.length(input), 2) =? 0) && String.is_hex(input)
+  if not(valid) then
+    App.set_local!(state@encoded_input_invalid <- true)
+  else
+    App.set_local!(state@decoded_result <- App.RLP.decode(input))
+
+App.RLP.do_encode(state: App.RLP.State.Local, input: String): App.RLP.IO
+  case Parser.run!(Ether.RLP.parser, input) {
+    none:
+      App.set_local!(state@decoded_input_invalid <- true)
+    some:
+      App.set_local!(state@encoded_result <- App.RLP.encode(self.value))
+  }
+
+App.RLP.decode(input: String): String
+  Ether.RLP.show(Ether.RLP.decode(Bytes.from_hex(input)))
+
+App.RLP.encode(input: Ether.RLP): String
+  Bytes.to_hex(Ether.RLP.encode(input))
 
 App.RLP: App(App.RLP.State)
   let init =
