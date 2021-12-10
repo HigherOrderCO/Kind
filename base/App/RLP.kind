@@ -19,11 +19,6 @@ App.RLP.article: DOM
 App.RLP.State: App.State
   App.State.new(App.RLP.State.Local, App.RLP.State.Global)
 
-type App.RLP.Mode {
-  encoding
-  decoding
-}
-
 App.RLP.State.Global: Type
   Unit
 
@@ -37,210 +32,165 @@ type App.RLP.State.Local {
   )
 }
 
-App.RLP.State.Local.show(s: App.RLP.State.Local): String
-  open s
-  "input: "|s.input
-  |" / output: "|s.output
-  |" / mode: "
-  |case s.mode {
-    encoding:
-      "encoding"
-    decoding:
-      "decoding"
+type App.RLP.Mode {
+  encoding
+  decoding
+}
+
+App.RLP.Mode.toggle(m: App.RLP.Mode): App.RLP.Mode
+  case m {
+    encoding: App.RLP.Mode.decoding
+    decoding: App.RLP.Mode.encoding
   }
-  |" / dirty: "
-  |Bool.show(s.dirty)
-  |" / error: "
-  |(s.error <> "none")
-  
 
 App.RLP.State.Local.default: App.RLP.State.Local
   let input = `["hihi"]`
   let output = 
     case Parser.run!(Ether.RLP.parser, input) {
-      none:
-        ""
-      some:
-        Bytes.to_hex(Ether.RLP.encode(self.value))
+      none: ""
+      some: Bytes.to_hex(Ether.RLP.encode(self.value))
     }
   App.RLP.State.Local.new(
     input
     output
     App.RLP.Mode.encoding
-    true
+    false
     none
   )
 
-//App.RLP.css: String
-//  `
-//    .hidden {
-//      display: none !important;
-//    }
-//    .center-box {
-//      margin: auto;
-//      max-width: 512px;
-//    }
-//    main > * {
-//      margin-bottom: 1em;
-//    }
-//    main hr {
-//      border-color: #FDFDFD;
-//    }
-//    .page-block {
-//      width: 100%;
-//      padding: 16px;
-//    }
-//    .page-block.bg {
-//      border-radius: 8px;
-//      background-color: rgb(245,245,245);
-//    }
-//    .block-label {
-//      padding-bottom: 0.5em;
-//    }
-//    textarea.text-input {
-//      width: 100%;
-//      min-height: 10em;
-//    }
-//    textarea.text-input.invalid {
-//      border-color: red;
-//    }
-//    .button-wrapper button {
-//      display: inline-block;
-//      margin-left: auto;
-//      margin-right: 0;
-//    }
-//    article * {
-//      margin-bottom: 1em;
-//    }
-//    footer {
-//      display: flex;
-//      justify-content: space-between;
-//      padding: 2em 1em;
-//    }
-//  `
-
-App.RLP.Mode.toggle(m: App.RLP.Mode): App.RLP.Mode
-  case m {
-    encoding:
-      App.RLP.Mode.decoding
-    decoding:
-      App.RLP.Mode.encoding
-  }
+App.RLP.css: String
+  `
+    .error {
+      color: red;
+    }
+    .center-box {
+      margin: auto;
+      max-width: 512px;
+    }
+    main > * {
+      margin-bottom: 1em;
+    }
+    main hr {
+      border-color: #FDFDFD;
+    }
+    .page-block {
+      width: 100%;
+      padding: 16px;
+    }
+    .page-block.bg {
+      border-radius: 8px;
+      background-color: #F2F2F2;
+    }
+    .page-block > * {
+      margin: 0.5em 0;
+    }
+    .block-label {
+      font-weight: bold;
+    }
+    .text-input {
+      width: 100%;
+      min-height: 8em;
+    }
+    .text-output {
+      background-color: #FDFDFD;
+      padding: 1em;
+    }
+    .text-output.dirty {
+      color: #A0A0A0;
+    }
+    .button-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .button-wrapper button {
+      padding: 0.5em 1em;
+    }
+    article * {
+      margin-bottom: 1em;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 2em 1em;
+    }
+  `
 
 App.RLP.Mode.present(m: App.RLP.Mode): String
   case m {
-    encoding:
-      "RLP"
-    decoding:
-      "Bytes"
+    encoding: "RLP"
+    decoding: "Bytes"
   }
 
 App.RLP.draw(state: App.RLP.State.Local): DOM
   open state
   def toggle = App.RLP.Mode.toggle
   <div>
-    <p>App.RLP.Mode.present(state.mode)</p>
-    <textarea id="input">
-    </textarea>
-    <p>
-      case state.error {
-        none:
-          ""
-        some:
-          state.error.value
-      }
-    </p>
-    <button id="switch">
-      "Switch"
-    </button>
-    <button id="button">
-      case state.mode {
-        encoding:
-          "Encode"
-        decoding:
-          "Decode"
-      }
-    </button>
-    <p>App.RLP.Mode.present(toggle(state.mode))</p>
-    <p>
-      state@output
-    </p>
+  <style> App.RLP.css </style>
+  <main class="center-box">
+    <div class="page-block">
+      <h1> "RLP encoder/decoder" </h1>
+      <p class="subtitle"> "Formally verified with Kind!" </p>
+    </div>
+    <div class="page-block bg">
+      <p class="block-label">
+        App.RLP.Mode.present(state.mode)
+      </p>
+      <textarea id="input" class="text-input">
+        state@input
+      </textarea>
+      <div class="button-wrapper">
+        <button id="btn-switch">
+          "Switch"
+        </button>
+        <button id="btn-translate">
+          case state.mode {
+            encoding: "Encode"
+            decoding: "Decode"
+          }
+        </button>
+      </div>
+      <p class="error">
+        case state.error {
+          none: ""
+          some: state.error.value
+        }
+      </p>
+    </div>
+    <div class="page-block bg">
+      <p class="block-label">
+        App.RLP.Mode.present(toggle(state.mode))
+      </p>
+      <p 
+        class= "text-output " | if state@dirty then "dirty" else ""
+        >
+        state@output
+      </p>
+    </div>
+    <hr></hr>
+    <div class="page-block bg">
+      { App.RLP.article }
+    </div>
+  </main>
+  <footer class="center-box">
+    <div id="join-us">
+      <p><strong>` Join Us `</strong></p>
+      <p><a href="https://github.com/kind-lang/Kind">
+        `Github`
+      </a></p>
+      <p><a href="https://t.me/formality_lang">
+        `Telegram`
+      </a></p>
+    </div>
+    <div>
+      `made with ❤ using `
+      <a href="https://github.com/kind-lang/Kind">
+        `Kind-lang`
+      </a>
+      // ` by ??`
+    </div>
+  </footer>
   </div>
-
-//App.RLP.draw(state: App.RLP.State.Local): DOM
-//  let add_invalid =
-//    (flag: Bool, txt: String)
-//      if flag then txt | " invalid" else txt
-//  open state
-//  <div>
-//  <style> App.RLP.css </style>
-//  <main class="center-box">
-//    <div class="page-block">
-//      <h1> "RLP encoder/decoder" </h1>
-//      <p class="subtitle"> "Formally verified with Kind!" </p>
-//    </div>
-//    <div class="page-block bg">
-//      <p class="block-label">
-//        "Decoded:"
-//      </p>
-//      {
-//        case state.focus {
-//          decoding:
-//            <textarea id="decoded-input">
-//            </textarea>
-//        } default
-//            <textarea>
-//              state@decoded_input
-//            </textarea>
-//      }
-//      <div class="button-wrapper">
-//        <button id="btn-encode">` Encode `</button>
-//      </div>
-//    </div>
-//    <div class="page-block bg">
-//      <p class="block-label">
-//        "Encoded:"
-//      </p>
-//      {
-//        case state.focus {
-//          encoding:
-//           <textarea id="encoded-input">
-//           </textarea>
-//        } default
-//            <textarea
-//              id="encoded-input"
-//              value=state@encoded_input
-//            >
-//            </textarea>
-//      }
-//      <div class="button-wrapper">
-//        <button id="btn-decode">` Decode `</button>
-//      </div>
-//    </div>
-//    <hr></hr>
-//    <div class="page-block bg">
-//      { App.RLP.article }
-//    </div>
-//  </main>
-//  <footer class="center-box">
-//    <div id="join-us">
-//      <p><strong>` Join Us `</strong></p>
-//      <p><a href="https://github.com/kind-lang/Kind">
-//        `Github`
-//      </a></p>
-//      <p><a href="https://t.me/formality_lang">
-//        `Telegram`
-//      </a></p>
-//    </div>
-//    <div>
-//      `made with ❤ using `
-//      <a href="https://github.com/kind-lang/Kind">
-//        `Kind-lang`
-//      </a>
-//      // ` by ??`
-//    </div>
-//  </footer>
-//  </div>
 
 App.RLP.parser: Parser(Ether.RLP)
   Parser {
@@ -264,19 +214,18 @@ App.RLP.when(
         "input":
           let state = state@input <- event.text
           let state = state@dirty <- true
-          log(App.RLP.State.Local.show(state))
           App.set_local!(state)
       } default App.pass!
     mouse_click:
       switch String.eql(event.id) {
-        "button":
+        "btn-translate":
           let state =
             case state@mode {
               encoding:
                 let parsed_rlp = Parser.run!(App.RLP.parser, state@input)
                 case parsed_rlp {
                   none:
-                    let state = state@error <- some("Parsing failed.")
+                    let state = state@error <- some("Error: parsing failed.")
                     let state = state@dirty <- true
                     state
                   some:
@@ -286,67 +235,30 @@ App.RLP.when(
                     state
                 }
               decoding:
-                let state = state@output <- App.RLP.decode(state@input)
-                let state = state@error <- none
-                let state = state@dirty <- false
-                state
+                let parsed_bytes = Parser.run!(Ether.RLP.parser.bytes, state@input)
+                case parsed_bytes {
+                  none:
+                    let state = state@error <- some("Error: bytes parsing failed.")
+                    let state = state@dirty <- true
+                    state
+                  some:
+                    let state = state@error <- none
+                    let state = state@dirty <- false
+                    let state = state@output <- App.RLP.decode(parsed_bytes.value)
+                    state
+                }
             }
-          log(App.RLP.State.Local.show(state))
           App.set_local!(state)
-        "switch":
+        "btn-switch":
+          let state = state@error <- none
           let state = state@mode <- App.RLP.Mode.toggle(state@mode)
           let state = state@dirty <- true
-          log(App.RLP.State.Local.show(state))
           App.set_local!(state)
       } default App.pass!
   } default App.pass!
-//  case event {
-//    input:
-//      log("input")
-//      log(App.RLP.State.Local.show(state))
-//      open state
-//      switch String.eql(event.id) {
-//        "decoded-input":
-//          log("decoded input: " | event.text)
-//          let state = state@decoded_input <- event.text 
-//          let state = state@focus <- App.RLP.Focus.decoding
-//          App.set_local!(state)
-//        "encoded-input":
-//          log("encoded input: " | event.text)
-//          let state = state@encoded_input <- event.text
-//          let state = state@focus <- App.RLP.Focus.encoding
-//          App.set_local!(state)
-//      } default App.pass!
-//    mouse_click:
-//      log("input")
-//      log(App.RLP.State.Local.show(state))
-//      open state
-//       switch String.eql(event.id) {
-//         "btn-encode":
-//           App.set_local!(state@encoded_input <- "olha só")
-//         "btn-decode":
-//           App.set_local!(state@decoded_input <- "olha só")
-//       } default App.pass!
-//  } default App.pass!
-//
-//App.RLP.do_decode(state: App.RLP.State.Local, input: String): App.RLP.IO
-//  let valid =
-//    (Nat.mod(String.length(input), 2) =? 0) && String.is_hex(input)
-//  if not(valid) then
-//    App.set_local!(state@encoded_input_invalid <- true)
-//  else
-//    App.set_local!(state@decoded_result <- App.RLP.decode(input))
-//
-//App.RLP.do_encode(state: App.RLP.State.Local, input: String): App.RLP.IO
-//  case Parser.run!(Ether.RLP.parser, input) {
-//    none:
-//      App.set_local!(state@decoded_input_invalid <- true)
-//    some:
-//      App.set_local!(state@encoded_result <- App.RLP.encode(self.value))
-//  }
 
-App.RLP.decode(input: String): String
-  Ether.RLP.show(Ether.RLP.decode(Bytes.from_hex(input)))
+App.RLP.decode(input:Bytes): String
+  Ether.RLP.show(Ether.RLP.decode(input))
 
 App.RLP.encode(input: Ether.RLP): String
   Bytes.to_hex(Ether.RLP.encode(input))

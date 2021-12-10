@@ -4,7 +4,7 @@ Ether.RLP.parser: Parser(Ether.RLP)
     get ret = Parser.choice!([
       Ether.RLP.parser.list
       Ether.RLP.parser.string
-      Ether.RLP.parser.bytes
+      Ether.RLP.parser.rlp_bytes
       Ether.RLP.parser.nat
     ])
     return ret
@@ -17,7 +17,10 @@ Ether.RLP.parser.byte: Parser(U8)
     return U8.or(U8.shl(U8.from_nat(snd), 4), U8.from_nat(fst))
   }
 
-Ether.RLP.parser.bytes: Parser(Ether.RLP)
+Ether.RLP.parser.bytes: Parser(Bytes)
+    Parser.many1!(Ether.RLP.parser.byte)
+
+Ether.RLP.parser.rlp_bytes: Parser(Ether.RLP)
   Parser {
     Parser.text("0x")
     get bytes = Parser.many1!(Ether.RLP.parser.byte)
