@@ -2,29 +2,48 @@ Ether.RLP.parser: Parser(Ether.RLP)
   Parser {
     Kind.Parser.spaces
     get ret = Parser.choice!([
-      Ether.RLP.list
-      Ether.RLP.string
-      Ether.RLP.nat
+      Ether.RLP.parser.list
+      Ether.RLP.parser.string
+      Ether.RLP.parser.bytes
+      Ether.RLP.parser.nat
     ])
     return ret
   }
 
-Ether.RLP.nat: Parser(Ether.RLP)
+Ether.RLP.parser.byte: Parser(U8)
   Parser {
-    get n = Parser.choice!([
-      Parser.hex_nat
-      Parser.nat
-    ])
+    get snd = Parser.hex_digit
+    get fst = Parser.hex_digit
+    return U8.or(U8.shl(U8.from_nat(snd), 4), U8.from_nat(fst))
+  }
+
+Ether.RLP.parser.bytes: Parser(Ether.RLP)
+  Parser {
+    Parser.text("0x")
+    get bytes = Parser.many1!(Ether.RLP.parser.byte)
+    return Ether.RLP.data(bytes)
+  }
+
+Ether.RLP.parser.nat: Parser(Ether.RLP)
+  Parser {
+    get n = Parser.nat
     return Ether.RLP.data.from_nat(n)
   }
 
-Ether.RLP.string: Parser(Ether.RLP)
+Ether.RLP.parser.string: Parser(Ether.RLP)
   Parser {
     get str = Parser.string
-    return Ether.RLP.data.from_str(str)
+    case String.is_ascii(str) {
+      true:
+        Parser {
+          return Ether.RLP.data.from_str(str)
+        }
+      false:
+        Parser.fail!("String literals must contain only ascii characters")
+    }
   }
 
-Ether.RLP.list: Parser(Ether.RLP)
+Ether.RLP.parser.list: Parser(Ether.RLP)
   Parser {
     get rlp_list = Kind.Parser.items!("[", Ether.RLP.parser, "]")
     return Ether.RLP.node(rlp_list)
