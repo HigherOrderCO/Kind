@@ -1,11 +1,10 @@
 type App.GG.Slime {
   new(
-    sprite: App.GG.Animation -> U64 -> VoxBox
-    dna: App.GG.Creature.Dna
+    body: App.GG.Body
   )
 }
 
-App.GG.Slime.find_coord(grid: App.GG.Grid): Maybe<Pair<App.GG.Creature, App.GG.Coord>>
+App.GG.Slime.find(grid: App.GG.Grid): Maybe<Pair<App.GG.Creature, App.GG.Coord>>
   let char_tile = none :: Maybe<Pair<App.GG.Creature, App.GG.Coord>>
   for coord:tile in grid with char_tile:
     case tile@creature as creature {

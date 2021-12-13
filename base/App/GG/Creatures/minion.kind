@@ -141,7 +141,7 @@ App.GG.Creatures.minion.Effect.attack: App.GG.Effect<Unit>
       let projectile_effect = App.GG.Chip.shockwave.Projectile.Effect(dmg, true)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
-      App.GG.Effect.ai.update_seen((ai) 0#64)
+      App.GG.Effect.ai.modify("seen", (x) +0#32)
       App.GG.Effect {
         let eff = 
           App.GG.Effect {
@@ -162,7 +162,7 @@ App.GG.Creatures.minion.Effect.move: App.GG.Effect<Unit>
     //App.GG.Effect.ai.update_unseen((x) 0#64)
     get center = App.GG.Effect.coord.get_center
     get grid = App.GG.Effect.grid.get
-    let slime = App.GG.Slime.find_coord(grid)
+    let slime = App.GG.Slime.find(grid)
     without slime: App.GG.Effect.pass
     let {slime, coord} = slime
     App.GG.Effect {
@@ -174,7 +174,7 @@ App.GG.Creatures.minion.Effect.move: App.GG.Effect<Unit>
         }
       without arrow: App.GG.Effect.pass
       App.GG.Effect {
-        App.GG.Effect.ai.update_unseen((ai) 0#64)
+        App.GG.Effect.ai.modify("unseen", (x) +0#32)
         let eff = App.GG.Effect.movement.arrow(arrow, 12, 24)
         let new_action = App.GG.Actions.Data.new(0, eff, App.GG.Actions.Category.movement)
         let new_grid   = App.GG.Creature.modify_at(App.GG.Actions.add(new_action), center)
@@ -185,6 +185,10 @@ App.GG.Creatures.minion.Effect.move: App.GG.Effect<Unit>
 
 App.GG.Creatures.minion.Effect: App.GG.Effect<Unit>
   log("?")
-  let seen = [{240#64, App.GG.Creatures.minion.Effect.attack}]
-  let unseen = [{60#64, App.GG.Creatures.minion.Effect.move}]
-  App.GG.Effect.ai.run(seen, unseen, false)
+  let seen = {"seen", [{I32.eql(240), App.GG.Creatures.minion.Effect.attack}]}
+  let unseen = {"unseen", [{I32.eql(60), App.GG.Creatures.minion.Effect.move}]}
+  let effs = [seen, unseen]
+  App.GG.Effect {
+    App.GG.Effect.ai.run(effs)
+    App.GG.Effect.ai.inc(true)
+  }

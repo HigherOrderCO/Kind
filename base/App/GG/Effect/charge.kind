@@ -1,0 +1,32 @@
+App.GG.Effect.charge.get: App.GG.Effect<Maybe<Maybe<U64>>>
+  (center, origin, local)
+  let charge = 
+    let grid = local@grid
+    let creature = App.GG.Creature.get(center, grid)
+    without creature: none
+    case creature@category as monster{
+      minion: none
+      slime: some(monster.charge)
+    }
+  App.GG.Effect.Result.new!(charge, center, origin, local, (enemy, img) img, 0, "")
+
+App.GG.Effect.charge.update(mod: Maybe<U64> -> Maybe<U64>): App.GG.Effect<Unit>
+  (center, origin, local)
+  let grid = local@grid
+  let mod = (creature: App.GG.Creature)
+    case creature@category as monster {
+      minion: creature
+      slime:
+        let monster = App.GG.Monster.slime(monster.data, monster.attributes, mod(monster.charge), monster.hand, monster.folder, monster.energy)
+        let new_creature = creature@category <- monster
+        new_creature
+    }
+  let new_grid = App.GG.Creature.modify_at(mod, center, grid)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
+
+App.GG.Effect.charge.reset: App.GG.Effect<Unit>
+  let mod = 
+    (charge: Maybe<U64>)
+      none
+  App.GG.Effect.charge.update(mod)

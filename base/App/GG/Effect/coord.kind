@@ -8,7 +8,7 @@ App.GG.Effect.coord.get_center: App.GG.Effect<App.GG.Coord>
 App.GG.Effect.coord.closest_y: App.GG.Effect<Maybe<App.GG.Coord>>
   (center, origin, local)
   let grid = local@grid
-  let find_player = App.GG.Slime.find_coord(grid)
+  let find_player = App.GG.Slime.find(grid)
   without find_player: App.GG.Effect.Result.new!(none, center, origin, local, (enemy, img) img, 0, "")
   let destination = 
   if U32.gtn(find_player@snd@snd, center@snd) then

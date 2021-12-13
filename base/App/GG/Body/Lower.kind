@@ -1,0 +1,6 @@
+type App.GG.Body.Lower {
+  new(parts: App.GG.Parts)
+}
+
+App.GG.Body.Lower.chips: App.GG.Chips
+  [App.GG.Chip.pull_sword]

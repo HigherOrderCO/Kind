@@ -1,0 +1,9 @@
+type App.GG.Body.Arms {
+  new(parts: App.GG.Parts)
+}
+
+App.GG.Body.Arms.chips: App.GG.Chips
+  [
+    App.GG.Chip.wide_sword
+    App.GG.Chip.shockwave
+  ]

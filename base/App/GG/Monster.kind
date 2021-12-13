@@ -5,6 +5,8 @@ type App.GG.Monster {
   )
   slime(
     data: App.GG.Slime
+    attributes: App.GG.Attributes
+    charge: Maybe<U64>
     hand: App.GG.Chips
     folder: App.GG.Chips
     energy: I32
@@ -13,7 +15,9 @@ type App.GG.Monster {
 
 App.GG.Monster.to_vbox(monster: App.GG.Monster): App.GG.Animation -> U64 -> VoxBox
   case monster {
-    slime: monster.data@sprite
+    slime: 
+      let data = App.GG.Body.Hull.Form.data(monster.data@body@hull@form)
+      data@sprite
     minion: monster.data@sprite
   }
 

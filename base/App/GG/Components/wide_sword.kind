@@ -1,2 +1,0 @@
-App.GG.Components.wide_sword: App.GG.Body.Component
-  App.GG.Body.Component.new(App.GG.Chip.wide_sword, App.GG.Creature.Attributes.new(3,0,1,0))

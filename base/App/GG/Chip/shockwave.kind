@@ -5,6 +5,7 @@ App.GG.Chip.shockwave: App.GG.Chip
     App.GG.Chip.shockwave.Effect(-30)
     8
     App.GG.img.bazooka
+    App.GG.Attributes.new(1,0,3,0)
   )
 
 App.GG.Chip.shockwave.img(frame: U64): VoxBox
@@ -26,6 +27,7 @@ App.GG.Chip.shockwave.img(frame: U64): VoxBox
 
 App.GG.Chip.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect {
+    App.GG.Effect.charge.reset
     get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center

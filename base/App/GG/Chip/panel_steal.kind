@@ -5,6 +5,7 @@ App.GG.Chip.panel_steal: App.GG.Chip
     App.GG.Chip.panel_steal.Effect
     10
     App.GG.img.bazooka
+    App.GG.Attributes.new(0,0,3,1)
   )
 
 // App.GG.Chip.panel_steal.Effect: App.GG.Effect<Unit>

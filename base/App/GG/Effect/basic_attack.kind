@@ -1,5 +1,6 @@
 App.GG.Effect.basic_attack: App.GG.Effect<Unit>
   App.GG.Effect {
+    App.GG.Effect.charge.reset
     get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center

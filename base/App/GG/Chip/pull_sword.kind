@@ -5,10 +5,12 @@ App.GG.Chip.pull_sword: App.GG.Chip
     App.GG.Chip.pull_sword.Effect(-25)
     15
     App.GG.img.bazooka
+    App.GG.Attributes.new(1,3,0,0)
   )
 
 App.GG.Chip.pull_sword.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect {
+    App.GG.Effect.charge.reset
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
     get frame = App.GG.Effect.frame.get

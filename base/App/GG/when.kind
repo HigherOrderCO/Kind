@@ -7,7 +7,7 @@ App.GG.when: App.When<App.GG.State>
     // init: 
       // log(U64.show(event.time))
       // let grid = local@grid
-      // let slime = App.GG.Slime.find_coord(grid)
+      // let slime = App.GG.Slime.find(grid)
       // without slime: App.pass<App.GG.State>
       // let new_grid = App.GG.Creature.modify_at(App.GG.Creature.shuffle_folder(10000), slime@snd, grid) // U64.to_nat(event.time % 10000)
       // let new_local = local@grid <- new_grid
@@ -17,7 +17,7 @@ App.GG.when: App.When<App.GG.State>
         setup:
           App.pass<App.GG.State>
         game:
-          let new_local  = App.GG.when.update_grid(local)
+          let new_local = App.GG.when.update_grid(local)
           let new_phase = App.GG.when.update_phase(phase)
           let new_local = new_local@phase <- new_phase
           App.set_local<App.GG.State>(new_local)
@@ -58,8 +58,7 @@ App.GG.when: App.When<App.GG.State>
               40#16:  App.GG.when.move(local, App.GG.Arrow.down)
             // X 
             88#16:
-              let new_grid = App.GG.when.basic_attack(local@grid)
-              let new_local = local@grid <- new_grid
+              let new_local = App.GG.when.start_charge(local)
               App.set_local<App.GG.State>(new_local)
             // Spacebar
             32#16: 
@@ -70,6 +69,18 @@ App.GG.when: App.When<App.GG.State>
             13#16: App.GG.when.game_to_setup(local)
           }default App.pass<App.GG.State> 
       }
+    key_up:
+      case phase {
+        setup: App.pass<App.GG.State>
+        game:
+          switch U16.eql(event.code) {
+            // X 
+            88#16: 
+              let new_grid = App.GG.when.basic_attack(local@grid)
+              let new_local = local@grid <- new_grid
+              App.set_local<App.GG.State>(new_local)
+          }default App.pass<App.GG.State>
+      }
     mouse_move:
       // log("x: " | U32.show(event.mouse_pos@fst) | "  y: " | U32.show(event.mouse_pos@snd))
       let new_local = local@mouse <- event.mouse_pos
@@ -77,7 +88,7 @@ App.GG.when: App.When<App.GG.State>
     mouse_down:
       App.GG.when.click_element(local, local@mouse)      
   }default App.pass<App.GG.State>
-
+  
 // ============================================================================
 // Transitions between game phases
 
@@ -87,19 +98,21 @@ App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<A
     setup: 
       let new_grid = Maybe {
         // Finds your character
-        get pair = App.GG.Slime.find_coord(grid)
+        get pair = App.GG.Slime.find(grid)
         let {creature, coord} = pair
         get slime = 
           case creature@category as monster {
             minion: none
             slime: 
               let data = monster.data
+              let attributes = monster.attributes
+              let charge = monster.charge
               // If you have no chips in hand, stay with your last round's chips
               let hand = if List.is_empty!(phase.hand) then monster.hand else List.reverse!(phase.hand) 
               // Places all the remaining table chips back into the folder
               let fold = List.somes!(List.map!!((x: App.GG.Table.Slot) x@chip, phase.table@slots)) ++ monster.folder
               let enrg = phase.energy
-              some(App.GG.Monster.slime(data, hand, fold, enrg))
+              some(App.GG.Monster.slime(data, attributes, charge, hand, fold, enrg))
           }
         // Fills Slime's hand, folder and energy with the new values
         let new_grid = App.GG.Creature.modify_at((c: App.GG.Creature) c@category <- slime , coord, grid)
@@ -121,7 +134,7 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
       // If turn bar is full
       if U64.gte(phase.turn_bar, 1200) then
         // Finds your character
-        let slime = App.GG.Slime.find_coord(grid)
+        let slime = App.GG.Slime.find(grid)
         without slime: App.pass<App.GG.State>
         let {creature, coord} = slime
         case creature@category as monster {
@@ -135,7 +148,7 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
             let slots = App.GG.Table.from_folder(table_size, monster.folder)
             let hand = [] :: App.GG.Chips
             // Adds to the monster's energy his energy obtained each round (obtained from DNA's attributes), maximum 100
-            let energy = I32.min(monster.energy + monster.data@dna@attributes@energy, 100)
+            let energy = I32.min(monster.energy + monster.attributes@energy, 100)
             let phase = App.GG.Phase.setup({slots, none}, hand, energy)
             let new_grid  = App.GG.Creature.modify_at(mod, coord, grid)
             let new_local = local@phase <- phase
@@ -393,7 +406,7 @@ App.GG.when.chip(mouse_pos: Pair<U32, U32>): Maybe<Nat>
 App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
   let grid            = local@grid
   // Finds your character
-  let slime_coord     = App.GG.Slime.find_coord(grid)
+  let slime_coord     = App.GG.Slime.find(grid)
   without slime_coord : App.pass<App.GG.State>
   let {slime, coord}  = slime_coord
   // Gets the movement action to be added in the creature
@@ -442,18 +455,44 @@ App.GG.when.update_tile.run(coord: App.GG.Coord, local: App.GG.State.local): App
   let new_local = App.GG.Creature.Status.update_grid(coord, new_local)
   new_local
 
+// Starts charging if the creature isn't charging yet
+App.GG.when.start_charge(local: App.GG.State.local): App.GG.State.local
+  let grid = local@grid
+  let new_grid = 
+    Maybe {
+      // Finds your character
+      get pair = App.GG.Slime.find(grid)
+      let {creature, coord} = pair
+      get slime = 
+        case creature@category as monster {
+          minion: none
+          slime:
+            if Maybe.is_none!(monster.charge) then 
+              some(App.GG.Monster.slime(monster.data, monster.attributes, some(0), monster.hand, monster.folder, monster.energy))
+            else
+              none
+        }
+      let mod = (creature) creature@category <- slime
+      let new_grid = App.GG.Creature.modify_at(mod, coord, grid)
+      return new_grid
+    } <> grid
+  let new_local = local@grid <- new_grid
+  new_local
+
 // Adds the basic Attack action to the creature's next action
 App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid
   // Finds your character
-  let pair = App.GG.Slime.find_coord(grid)
+  let pair = App.GG.Slime.find(grid)
   case pair {
     none: grid
     some:
       let {creature, coord} = pair.value
-      case creature@category as category {
+      case creature@category as monster {
         minion: grid
         slime:
-          let action = App.GG.Actions.basic_attack
+          let data = App.GG.Body.Hull.Form.data(monster.data@body@hull@form)
+          let charge = if Maybe.if!(U64.eql(960), monster.charge) then data@charge else App.GG.Effect.basic_attack
+          let action = App.GG.Actions.basic_attack(charge)
           App.GG.Creature.modify_at(App.GG.Actions.add(action), coord, grid)
       }
   }
@@ -461,7 +500,7 @@ App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid
 // Use the first chip in your hand
 App.GG.when.use_chip(grid: App.GG.Grid): App.GG.Grid
   // finds your character
-  let pair = App.GG.Slime.find_coord(grid)
+  let pair = App.GG.Slime.find(grid)
   case pair {
     none: grid
     some:

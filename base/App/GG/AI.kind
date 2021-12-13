@@ -1,9 +1,15 @@
-type App.GG.AI {
-  new(
-    seen: U64
-    unseen: U64
-  )
-}
+App.GG.AI: Type
+  Map<I32>
+
+App.GG.AI.modify(key: String, mod: I32 -> I32, AI: App.GG.AI): App.GG.AI
+  let val = AI{key}
+  case val {
+    none: AI
+    some: 
+      let new_val = mod(val.value)
+      let new_AI = AI{key} <- new_val 
+      new_AI
+  }
 
 App.GG.AI.get(
   coord: App.GG.Coord
@@ -32,21 +38,25 @@ App.GG.AI.update(
     slime: creature
   }
 
-App.GG.AI.inc(
+App.GG.AI.vision_inc(
   enemy: Bool
   AI: App.GG.AI
 ): App.GG.AI
 
-  case enemy { 
-    true:
-     let seen =  AI@seen + 1
-     let unseen = 0 :: U64
-     App.GG.AI.new(seen, unseen)
-    false: 
-     let seen = 0 :: U64
-     let unseen = AI@unseen + 1
-     App.GG.AI.new(seen, unseen)
+  let {seen, unseen} = 
+    case enemy { 
+      true:
+        let seen    = (n: I32) n + +1#32
+        let unseen  = (n: I32) +0#32
+        {seen, unseen}
+      false: 
+        let seen    = (n: I32) +0#32
+        let unseen  = (n: I32) n + +1#32
+        {seen, unseen}
   }
+  let AI = App.GG.AI.modify("seen", seen, AI)
+  let AI = App.GG.AI.modify("unseen", unseen, AI)
+  AI
 
 App.GG.AI.inc_no_reset(
   enemy: Bool
@@ -55,13 +65,13 @@ App.GG.AI.inc_no_reset(
 
   case enemy { 
     true:
-     let seen =  AI@seen + 1
-     let unseen = AI@unseen
-     App.GG.AI.new(seen, unseen)
+      let seen = (n: I32) n + +1#32
+      let AI = App.GG.AI.modify("seen", seen, AI)
+      AI
     false: 
-     let seen = AI@seen
-     let unseen = AI@unseen + 1
-     App.GG.AI.new(seen, unseen)
+      let unseen  = (n: I32) n + +1#32
+      let AI = App.GG.AI.modify("unseen", unseen, AI)
+      AI
   }
 
 // App.GG.Effect.ai.inc: App.GG.Effect<Unit>

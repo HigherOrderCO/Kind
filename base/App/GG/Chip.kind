@@ -5,6 +5,9 @@ type App.GG.Chip {
     effect: App.GG.Effect<Unit>
     energy: I32
     img: VoxBox
+    attributes: App.GG.Attributes
   )
 }
 
+App.GG.Chip.Generic: App.GG.Chip
+  App.GG.Chip.shockwave

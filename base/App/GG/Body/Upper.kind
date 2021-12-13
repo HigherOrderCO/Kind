@@ -1,0 +1,6 @@
+type App.GG.Body.Upper {
+  new(parts: App.GG.Parts)
+}
+
+App.GG.Body.Upper.chips: App.GG.Chips
+  [App.GG.Chip.recursive_gun]

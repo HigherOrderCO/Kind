@@ -24,59 +24,61 @@ App.GG.Effect.ai.inc(reset: Bool): App.GG.Effect<Unit>
     let target = false
     for coord in coords with target:
       target || App.GG.Coord.has_enemy(coord, creature@team, grid)
-    let inc = if reset then App.GG.AI.inc else App.GG.AI.inc_no_reset
+    let inc = if reset then App.GG.AI.vision_inc else App.GG.AI.inc_no_reset
     App.GG.Effect.ai.update(inc(target))
   }
 
+
+// Effects =
+// Each item is a pair of two things:
+//   a String -> the key for the AI map, "seen", in example
+//   a List of pairs ->
+//     I32 -> Bool ->  when the value for that key in the map is reached
+//     Effect ->  run this effect
+//
+// This functions runs all the possible effects in the list
 App.GG.Effect.ai.run(
-  seen: List<Pair<U64, App.GG.Effect<Unit>>>
-  unseen: List<Pair<U64, App.GG.Effect<Unit>>>
-  reset_ai: Bool
+  effects: List<Pair<String, List<Pair<I32 -> Bool, App.GG.Effect<Unit>>>>>
 ): App.GG.Effect<Unit>
   App.GG.Effect { 
-    get ai = App.GG.Effect.ai.get
-    without ai: App.GG.Effect.pass
-    App.GG.Effect { 
-      App.GG.Effect.ai.inc(reset_ai)
-      let effs = App.GG.Effect.ai.run.get_action(ai@seen, seen)
-      let effs = effs ++ App.GG.Effect.ai.run.get_action(ai@unseen, unseen)
-      log(U64.show(ai@seen))
+    get AI = App.GG.Effect.ai.get
+    without AI: App.GG.Effect.pass
+    App.GG.Effect {
+      let effs = []
+      for pair in effects with effs:
+        let key = pair@fst
+        let conditions = pair@snd
+        let effs = effs ++ App.GG.Effect.ai.run.get_action(key, conditions, AI)
+        effs
       log("LIST LENGTH: " | Nat.show(List.length!(effs)))
       let mod = (effect: App.GG.Effect<Unit>) effect
       App.GG.Effect.multiple<App.GG.Effect<Unit>>(mod, effs)
     }
   }
 
-App.GG.Effect.ai.update_unseen(mod: U64 -> U64): App.GG.Effect<Unit>
+App.GG.Effect.ai.modify(key: String, mod: I32 -> I32): App.GG.Effect<Unit>
   App.GG.Effect {
-    get ai = App.GG.Effect.ai.get
-    without ai: App.GG.Effect.pass
-    let new_ai = (AI) AI@unseen <- mod(AI@unseen)
-    App.GG.Effect.ai.update(new_ai)
+    let mod = App.GG.AI.modify(key, mod)
+    App.GG.Effect.ai.update(mod)
   }
 
-App.GG.Effect.ai.update_seen(mod: U64 -> U64): App.GG.Effect<Unit>
-  App.GG.Effect {
-    get ai = App.GG.Effect.ai.get
-    without ai: App.GG.Effect.pass
-    let new_ai = (AI) AI@seen <- mod(AI@seen)
-    App.GG.Effect.ai.update(new_ai)
-  }
-
-App.GG.Effect.ai.run.aux(eff: App.GG.Effect<Unit>): App.GG.Effect<Unit>
-  eff
-
-App.GG.Effect.ai.run.get_action(AI: U64, effs: List<Pair<U64, App.GG.Effect<Unit>>>): List<App.GG.Effect<Unit>>
-  case effs {
-    nil: []
-    cons:
-      let num = effs.head@fst
-      let eff = effs.head@snd
-      let new_eff = 
-        if AI =? num then
-          [eff]
-        else
-          []
-      new_eff ++ App.GG.Effect.ai.run.get_action(AI, effs.tail)
+App.GG.Effect.ai.run.get_action(key: String, effs: List<Pair<I32 -> Bool, App.GG.Effect<Unit>>>, AI: App.GG.AI): List<App.GG.Effect<Unit>>
+  let val = AI{key}
+  case val {
+    none: []
+    some:
+      case effs {
+        nil: []
+        cons:
+          log("key: "| key | " value: " | I32.show(val.value))
+          let condition = effs.head@fst
+          let eff = effs.head@snd
+          let new_eff = 
+            if condition(val.value) then
+              [eff]
+            else
+              []
+          new_eff ++ App.GG.Effect.ai.run.get_action(key, effs.tail, AI)
+      }
   }
 

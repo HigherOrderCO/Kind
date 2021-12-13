@@ -1,0 +1,36 @@
+type App.GG.Attributes {
+  new(
+    hp:I32
+    energy:I32
+    damage:I32
+    corruption: I32
+  )
+}
+
+
+App.GG.Attributes.add(
+  a: App.GG.Attributes
+  b: App.GG.Attributes
+): App.GG.Attributes
+
+  let hp = a@hp + b@hp
+  let energy = a@energy + b@energy
+  let damage = a@damage + b@damage
+  let corruption = a@corruption + b@corruption
+  App.GG.Attributes.new(hp, energy, damage, corruption)
+
+App.GG.Attributes.pure: App.GG.Attributes
+  App.GG.Attributes.new(
+    0
+    0
+    0
+    0
+  )
+
+App.GG.Attributes.base: App.GG.Attributes
+  App.GG.Attributes.new(
+    25 // hp
+    25 // energy
+    25 // damage
+    25 // corruption
+  )

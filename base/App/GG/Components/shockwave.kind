@@ -1,2 +1,0 @@
-App.GG.Components.shockwave: App.GG.Body.Component
-  App.GG.Body.Component.new(App.GG.Chip.shockwave, App.GG.Creature.Attributes.new(1,0,3,0))

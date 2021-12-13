@@ -5,10 +5,12 @@ App.GG.Chip.wide_sword: App.GG.Chip
     App.GG.Chip.wide_sword.Effect(-50)
     10
     App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0)
   )
 
 App.GG.Chip.wide_sword.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect {
+    App.GG.Effect.charge.reset
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
     get frame = App.GG.Effect.frame.get

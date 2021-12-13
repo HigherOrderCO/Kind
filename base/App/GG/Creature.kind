@@ -10,44 +10,6 @@ type App.GG.Creature {
   )
 }
 
-
-type App.GG.Creature.Dna {
-  new(
-    alteration: String //TODO
-    attributes: App.GG.Creature.Attributes
-    body: App.GG.Body
-  )
-}
-
-type App.GG.Creature.Attributes {
-  new(
-    hp:I32
-    energy:I32
-    damage:I32
-    corruption: I32
-  )
-}
-
-
-App.GG.Creature.Attributes.add(
-  a: App.GG.Creature.Attributes
-  b: App.GG.Creature.Attributes
-): App.GG.Creature.Attributes
-
-  let hp = a@hp + b@hp
-  let energy = a@energy + b@energy
-  let damage = a@damage + b@damage
-  let corruption = a@corruption + b@corruption
-  App.GG.Creature.Attributes.new(hp, energy, damage, corruption)
-
-App.GG.Creature.Attributes.base: App.GG.Creature.Attributes
-  App.GG.Creature.Attributes.new(
-    25 // hp
-    25 // energy
-    25 // damage
-    25 // corruption
-  )
-
 //===========================================================
 //Creature Management
 
@@ -413,7 +375,7 @@ App.GG.Creature.sub_folder(quantity: Nat, creature: App.GG.Creature): App.GG.Cre
   case creature@category as monster {
     minion: creature
     slime:
-      creature@category <- App.GG.Monster.slime(monster.data, monster.hand, List.drop!(quantity, monster.folder), monster.energy)
+      creature@category <- App.GG.Monster.slime(monster.data, monster.attributes, monster.charge, monster.hand, List.drop!(quantity, monster.folder), monster.energy)
   }
 
 App.GG.Creature.shuffle_folder(seed: Nat, creature: App.GG.Creature): App.GG.Creature
@@ -421,14 +383,14 @@ App.GG.Creature.shuffle_folder(seed: Nat, creature: App.GG.Creature): App.GG.Cre
     minion: creature
     slime:
       let new_folder = App.GG.Chips.shuffle(seed, monster.folder)
-      creature@category <- App.GG.Monster.slime(monster.data, monster.hand, new_folder, monster.energy)
+      creature@category <- App.GG.Monster.slime(monster.data, monster.attributes, monster.charge, monster.hand, new_folder, monster.energy)
   }
 
 App.GG.Creature.add_chip(chip: App.GG.Chip, creature: App.GG.Creature): App.GG.Creature
   case creature@category as monster {
     minion: creature
     slime:
-      let category = App.GG.Monster.slime(monster.data, chip & monster.hand, monster.folder, monster.energy)
+      let category = App.GG.Monster.slime(monster.data, monster.attributes, monster.charge, chip & monster.hand, monster.folder, monster.energy)
       creature@category <- category
   }
 
@@ -444,14 +406,15 @@ App.GG.Creature.create_slime(slime: App.GG.Slime, grid: App.GG.Grid): App.GG.Cre
   let actions = App.GG.Actions.new(none, none, false)
   let status = App.GG.Creature.Statuses.pure
   let id = App.GG.Grid.next_id(grid)
-  let dna = slime@dna
-  let body = dna@body
+  let body = slime@body
   let data = slime
+  let charge = none
   let hand = []
   let folder = App.GG.Body.to_folder(body)
-  let hp = dna@attributes@hp * 10
+  let attributes = App.GG.Attributes.add(App.GG.Attributes.base, App.GG.Body.attributes(body))
+  let hp = attributes@hp * 10
   let energy = 0 :: I32
-  let monster = App.GG.Monster.slime(data, hand, folder, energy)
+  let monster = App.GG.Monster.slime(data, attributes, none, hand, folder, energy)
   App.GG.Creature.new(monster, team, animation, actions, status, hp, id)
 
 App.GG.Creature.create_minion(minion: App.GG.Minion, grid: App.GG.Grid): App.GG.Creature
@@ -460,7 +423,7 @@ App.GG.Creature.create_minion(minion: App.GG.Minion, grid: App.GG.Grid): App.GG.
   let actions = App.GG.Actions.new(none, none, false)
   let status = App.GG.Creature.Statuses.pure
   let id = App.GG.Grid.next_id(grid)
-  let AI = App.GG.AI.new(0, 0)
+  let AI = {"seen": +0#32, "unseen": +0#32}
   let hp = minion@hp
   let monster = App.GG.Monster.minion(minion, AI)
   App.GG.Creature.new(monster, team, animation, actions, status, hp, id)
@@ -472,27 +435,24 @@ App.GG.Creature.place(creature: App.GG.Creature, coord: App.GG.Coord, grid: App.
   App.GG.Grid.update(coord, f, grid)
 
 App.GG.Creature.dmg_with_attribute(creature: App.GG.Creature, dmg: I32): I32
-  let attributes = App.GG.Creature.Attributes.get(creature)
+  let attributes = App.GG.Attributes.get(creature)
   without attributes: dmg
   let destruction = attributes@damage
   (dmg * destruction) / 25
 
 App.GG.Creature.basic_attack_dmg(creature: App.GG.Creature): I32
-  let attributes = App.GG.Creature.Attributes.get(creature)
+  let attributes = App.GG.Attributes.get(creature)
   without attributes: 0 :: I32
   let base_dmg  = 2 :: I32
   let extra_dmg = (attributes@damage - 25) / 5
   let total_dmg = base_dmg + extra_dmg
   I32.neg(total_dmg)
 
-App.GG.Creature.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Creature.Attributes>
+App.GG.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Attributes>
   case creature@category as monster {
     minion: none
     slime:
-      let slime = monster.data
-      let dna = slime@dna
-      let attributes = dna@attributes
-      some(attributes)
+      some(monster.attributes)
   }
 
 // ============================================================================
@@ -503,6 +463,7 @@ App.GG.Creature.run(coord: App.GG.Coord, local: App.GG.State.local): App.GG.Stat
   if App.GG.Creature.has_acted(coord, local) then 
     local
   else
+    let new_local = App.GG.Creature.update_charge()
     let new_local = App.GG.Creature.run_ai(coord, local)
     let new_local = App.GG.Creature.update_actions(coord, new_local)
     let new_local = App.GG.Creature.update_animation(coord, new_local)
@@ -552,12 +513,27 @@ App.GG.Creature.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Gr
 App.GG.Creature.run_ai(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   Maybe {
     let grid = local@grid
-    get creature = App.GG.AI.get(coord, grid)
     get minion = App.GG.Minion.get(coord, grid)
     let result = minion@effect(coord, App.GG.Effect.Origin.creature, local)
     let new_local = case result {err: local, new: result.local}
     return new_local
   } <> local
-    
+
+App.GG.Creature.update_charge(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  let grid = local@grid
+  let mod = (creature: App.GG.Creature)
+    case creature@category as monster {
+      minion: creature
+      slime:
+        let body = monster.data@body
+        let hull_data = App.GG.Body.Hull.Form.data(body@hull@form) 
+        let extra_charge = hull_data@frame_charge
+        let new_charge = Maybe.map!!(U64.min(960) Maybe.map!!(U64.add(extra_charge), monster.charge))
+        let monster = App.GG.Monster.slime(monster.data, monster.attributes, new_charge, monster.hand, monster.folder, monster.energy)
+        creature@category <- monster
+    }
+  let new_grid = App.GG.Creature.modify_at(mod, coord, grid)
+  let new_local = local@grid <- new_grid
+  new_local
 
 // ============================================================================

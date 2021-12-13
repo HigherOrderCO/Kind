@@ -8,7 +8,9 @@ App.GG.Chip.recursive_gun_2(casts: Nat, dmg: Nat): App.GG.Chip
     App.GG.Chip.recursive_gun.Effect(casts, dmg)
     15
     App.GG.img.bazooka
+    App.GG.Attributes.new(1,1,2,0)
   )
+  
 App.GG.Chip.recursive_gun.img(frame: U64): VoxBox
   switch U64.eql((frame % 24)/2) {
     0#64: App.GG.img.Slime.hand.slime_wp_character__fire_00
@@ -31,6 +33,7 @@ App.GG.Chip.recursive_gun.img(frame: U64): VoxBox
 
 App.GG.Chip.recursive_gun.Effect(casts: Nat, dmg: Nat): App.GG.Effect<Unit>
   App.GG.Effect {
+    App.GG.Effect.charge.reset
     get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
     get grid = App.GG.Effect.grid.get

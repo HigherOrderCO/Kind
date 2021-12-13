@@ -3,13 +3,13 @@ App.GG.init: App.Init<App.GG.State>
   let grid = App.GG.init.grid
   let setup = App.GG.Phase.setup({[], none}, [], 0)
   let grid  = 
-    let slime = App.GG.Slime.find_coord(grid)
+    let slime = App.GG.Slime.find(grid)
     without slime: grid
     let new_grid = App.GG.Creature.modify_at(App.GG.Creature.shuffle_folder(10000), slime@snd, grid) 
     new_grid
 
   let {phase, grid} =
-    let slime = App.GG.Slime.find_coord(grid)
+    let slime = App.GG.Slime.find(grid)
     without slime: {setup grid}
     case slime@fst@category as monster {
       minion: {setup grid}
@@ -19,7 +19,7 @@ App.GG.init: App.Init<App.GG.State>
         let slots = App.GG.Table.from_folder(table_size, monster.folder)
         let table = App.GG.Table.new(slots, none)
         let hand = [] :: App.GG.Chips
-        let energy = monster.energy + monster.data@dna@attributes@energy
+        let energy = monster.energy + monster.attributes@energy
         let phase = App.GG.Phase.setup(table, hand, energy)
         let new_grid  = App.GG.Creature.modify_at(mod, slime@snd, grid)
         {phase, new_grid}
@@ -42,8 +42,14 @@ App.GG.init.grid: App.GG.Grid
       {{3#32,2#32}, red } {{4#32,2#32}, red } {{5#32,2#32}, red }
     ]
   let grid = BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
-  let parts = App.GG.Body.Parts.new(0,0,0)
-  let body = App.GG.Body.new(parts, parts, parts, parts)
+  let parts = App.GG.Parts.new(0,0,0)
+  let body = 
+    App.GG.Body.new(
+      App.GG.Body.Hull.new(App.GG.Body.Hull.Form.classic, parts)
+      App.GG.Body.Upper.new(parts),
+      App.GG.Body.Lower.new(parts),
+      App.GG.Body.Arms.new(parts),
+      App.GG.Body.Arms.new(parts))
   let slime = App.GG.Creature.create_slime(App.GG.Creatures.slime(body), grid)
   let minion =  App.GG.Creature.create_minion(App.GG.Creatures.minion, grid)
   let grid = App.GG.Creature.place(slime,  {1#32,1#32}, grid)

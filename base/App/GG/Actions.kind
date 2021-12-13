@@ -61,9 +61,8 @@ App.GG.Actions.movement(arrow: App.GG.Arrow): App.GG.Actions.Data
   let category = App.GG.Actions.Category.movement
   App.GG.Actions.Data.new(frame, effect, category)
 
-App.GG.Actions.basic_attack: App.GG.Actions.Data
+App.GG.Actions.basic_attack(effect: App.GG.Effect<Unit>): App.GG.Actions.Data
   let frame = 0#64
-  let effect = App.GG.Effect.basic_attack
   let category = App.GG.Actions.Category.basic_attack
   App.GG.Actions.Data.new(frame, effect, category)
 

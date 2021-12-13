@@ -1,2 +1,0 @@
-App.GG.Components.recursive_gun: App.GG.Body.Component
-  App.GG.Body.Component.new(App.GG.Chip.recursive_gun, App.GG.Creature.Attributes.new(1,1,2,0))

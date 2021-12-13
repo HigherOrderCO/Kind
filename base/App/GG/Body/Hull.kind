@@ -1,0 +1,24 @@
+type App.GG.Body.Hull {
+  new(
+    form: App.GG.Body.Hull.Form
+    parts: App.GG.Parts
+    )
+}
+
+type App.GG.Body.Hull.Form {
+  classic
+}
+
+App.GG.Body.Hull.Form.data(form: App.GG.Body.Hull.Form): App.GG.Body.Hull.Data
+  case form {
+    classic: App.GG.Body.Hull.classic
+  }
+
+type App.GG.Body.Hull.Data {
+  new(
+    sprite: App.GG.Animation -> U64 -> VoxBox
+    frame_charge: U64 // How much charge is generated each frame (max charge is obtained at 1020#64)
+    charge: App.GG.Effect<Unit> // Effect to be added to actions when the shot button is released (Should decide what to do based on the creature's charge)
+    chips: App.GG.Chips
+  )
+}
