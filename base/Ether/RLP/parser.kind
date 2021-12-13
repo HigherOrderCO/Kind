@@ -12,42 +12,50 @@ Ether.RLP.parser: Parser(Ether.RLP)
 
 Ether.RLP.parser.byte: Parser(U8)
   Parser {
-    get snd = Parser.hex_digit
-    get fst = Parser.hex_digit
+    get snd = Parser.with_error!(Parser.hex_digit, "Expected hexadecimal digit.")
+    get fst = Parser.with_error!(Parser.hex_digit, "Expected even number of hexadecimal digits.")
     return U8.or(U8.shl(U8.from_nat(snd), 4), U8.from_nat(fst))
   }
 
 Ether.RLP.parser.bytes: Parser(Bytes)
-    Parser.many1!(Ether.RLP.parser.byte)
+  Parser.many1!(Ether.RLP.parser.byte)
 
 Ether.RLP.parser.rlp_bytes: Parser(Ether.RLP)
-  Parser {
-    Parser.text("0x")
-    get bytes = Parser.many1!(Ether.RLP.parser.byte)
-    return Ether.RLP.data(bytes)
-  }
+    Parser.block!("hex_literal",
+      Parser {
+        Parser.text("0x")
+        get bytes = Parser.many1!(Ether.RLP.parser.byte)
+        return Ether.RLP.data(bytes)
+      }
+    )
 
-Ether.RLP.parser.nat: Parser(Ether.RLP)
-  Parser {
-    get n = Parser.nat
-    return Ether.RLP.data.from_nat(n)
-  }
+    Ether.RLP.parser.nat: Parser(Ether.RLP)
+    Parser.block!("nat",
+      Parser {
+        get n = Parser.nat
+        return Ether.RLP.data.from_nat(n)
+      }
+    )
 
 Ether.RLP.parser.string: Parser(Ether.RLP)
-  Parser {
-    get str = Parser.string
-    case String.is_ascii(str) {
-      true:
-        Parser {
-          return Ether.RLP.data.from_str(str)
+    Parser.block!("string",
+      Parser {
+        get str = Parser.string
+        case String.is_ascii(str) {
+          true:
+            Parser {
+              return Ether.RLP.data.from_str(str)
+            }
+          false:
+            Parser.fail!("String literals must contain only ascii characters")
         }
-      false:
-        Parser.fail!("String literals must contain only ascii characters")
-    }
-  }
+      }
+    )
 
 Ether.RLP.parser.list: Parser(Ether.RLP)
-  Parser {
-    get rlp_list = Kind.Parser.items!("[", Ether.RLP.parser, "]")
-    return Ether.RLP.node(rlp_list)
-  }
+    Parser.block!("list",
+      Parser {
+        get rlp_list = Kind.Parser.items!("[", Ether.RLP.parser, "]")
+        return Ether.RLP.node(rlp_list)
+      }
+    )

@@ -13,7 +13,8 @@ App.RLP.article: DOM
   aliquet nec. Duis tristique sollicitudin nibh sit amet commodo nulla facilisi
   nullam. Malesuada bibendum arcu vitae elementum curabitur vitae nunc sed
   velit. Nullam eget felis eget nunc lobortis mattis aliquam faucibus purus. 
-  `</p>
+  `
+  </p>
   </article>
 
 App.RLP.State: App.State
@@ -28,7 +29,7 @@ type App.RLP.State.Local {
     output: String
     mode: App.RLP.Mode
     dirty: Bool
-    error: Maybe<String>
+    error: Maybe<DOM>
   )
 }
 
@@ -130,7 +131,13 @@ App.RLP.draw(state: App.RLP.State.Local): DOM
   <main class="center-box">
     <div class="page-block">
       <h1> "RLP encoder/decoder" </h1>
-      <p class="subtitle"> "Formally verified with Kind!" </p>
+      <p class="subtitle">
+        "Formally verified with "
+        <a href="https://github.com/kind-lang/Kind">
+        "Kind"
+        </a>
+        "!"
+      </p>
     </div>
     <div class="page-block bg">
       <p class="block-label">
@@ -150,12 +157,12 @@ App.RLP.draw(state: App.RLP.State.Local): DOM
           }
         </button>
       </div>
-      <p class="error">
+      <p class="error">{
         case state.error {
-          none: ""
+          none: <p></p>
           some: state.error.value
         }
-      </p>
+      }</p>
     </div>
     <div class="page-block bg">
       <p class="block-label">
@@ -222,23 +229,22 @@ App.RLP.when(
           let state =
             case state@mode {
               encoding:
-                let parsed_rlp = Parser.run!(App.RLP.parser, state@input)
-                case parsed_rlp {
-                  none:
-                    let state = state@error <- some("Error: parsing failed.")
+                case App.RLP.parser(Parser.State.from_code(state@input)) as parsed_rlp {
+                  error:
+                    let state = state@error <- some(Parser.Error.to_dom(state@input, parsed_rlp.err))
                     let state = state@dirty <- true
                     state
-                  some:
+                  value:
                     let state = state@error <- none
                     let state = state@dirty <- false
-                    let state = state@output <- App.RLP.encode(parsed_rlp.value)
+                    let state = state@output <- App.RLP.encode(parsed_rlp.val)
                     state
                 }
               decoding:
                 let parsed_bytes = Parser.run!(Ether.RLP.parser.bytes, state@input)
                 case parsed_bytes {
                   none:
-                    let state = state@error <- some("Error: bytes parsing failed.")
+                    let state = state@error <- some(<p>"Error: bytes parsing failed."</p>)
                     let state = state@dirty <- true
                     state
                   some:

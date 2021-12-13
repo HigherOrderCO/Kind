@@ -1,0 +1,9 @@
+// shows a pretty error in HTML
+Parser.Error.to_dom(code: String, err: Parser.Error): DOM
+  open err
+  let ascii_art = String.repeat(" ", err.ini)|String.repeat("~", err.idx - err.ini)|"^"
+  <pre><code>
+    code|"\n"
+    |ascii_art|"\n"
+    |"Error: "|err.msg
+  </code></pre>
