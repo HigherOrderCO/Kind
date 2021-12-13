@@ -7,8 +7,8 @@ Nat.lte.base(
     //if a<=b then a^c <= b^c
     case c {
         zero:
-            aux = Nat.Order.refl(1)
+            Nat.Order.refl(1)
         succ: 
             let ind = Nat.lte.base(a, b, c.pred, Hyp)
-            qed = Nat.Order.mul.combine(a, b, Nat.pow(a, c.pred), Nat.pow(b, c.pred), Hyp, ind)
+            Nat.Order.mul.combine(a, b, Nat.pow(a, c.pred), Nat.pow(b, c.pred), Hyp, ind)
     }!
