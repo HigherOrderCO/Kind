@@ -1,7 +1,3 @@
-mul_expan(a: Nat, b: Nat): (Nat.add(b, Nat.mul(a,b))) == Nat.mul(Nat.succ(a),b)
-    refl
-
-
 Nat.lte.mul.left(
   a: Nat
   b: Nat
@@ -16,7 +12,5 @@ Nat.lte.mul.left(
     succ:
       let ind = Nat.Order.mul.left(a, b, c.pred, Hyp)
       let qed = Nat.Order.add.combine(a, b, Nat.mul(c.pred,a),Nat.mul(c.pred,b), Hyp, ind)
-      let qed2 = qed :: rewrite X in (Nat.lte(X,Nat.add(b,Nat.mul(c.pred,b))) == Bool.true) with mul_expan(c.pred,a)
-      let qed3 = qed2 :: rewrite X in (Nat.lte(Nat.mul(Nat.succ(c.pred),a),X) == Bool.true) with mul_expan(c.pred,b)
-      qed3
+      qed
   }: Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), true)
