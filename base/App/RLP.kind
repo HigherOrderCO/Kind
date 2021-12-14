@@ -82,6 +82,9 @@ App.RLP.css: String
       border-radius: 8px;
       background-color: #F2F2F2;
     }
+    .page-block.bg.bytes {
+      background-color: #333333;
+    }
     .page-block > * {
       margin: 0.5em 0;
     }
@@ -119,13 +122,25 @@ App.RLP.css: String
 
 App.RLP.Mode.present(m: App.RLP.Mode): String
   case m {
-    encoding: "RLP"
-    decoding: "Bytes"
+    encoding:
+      "RLP"
+    decoding:
+      "Bytes"
+  }
+
+App.RLP.input_background(m: App.RLP.Mode, classes: String): String
+  case m {
+    encoding:
+      classes
+    decoding:
+      classes | " bytes"
   }
 
 App.RLP.draw(state: App.RLP.State.Local): DOM
   open state
   def toggle = App.RLP.Mode.toggle
+  let style_top = App.RLP.input_background(state.mode)
+  let style_bottom = App.RLP.input_background(toggle(state.mode))
   <div>
   <style> App.RLP.css </style>
   <main class="center-box">
@@ -139,8 +154,8 @@ App.RLP.draw(state: App.RLP.State.Local): DOM
         "!"
       </p>
     </div>
-    <div class="page-block bg">
-      <p class="block-label">
+    <div class=style_top("page-block bg")>
+      <p class=style_top("block-label")>
         App.RLP.Mode.present(state.mode)
       </p>
       <textarea id="input" class="text-input">
@@ -164,8 +179,8 @@ App.RLP.draw(state: App.RLP.State.Local): DOM
         }
       }</p>
     </div>
-    <div class="page-block bg">
-      <p class="block-label">
+    <div class=style_bottom("page-block bg")>
+      <p class=style_bottom("block-label")>
         App.RLP.Mode.present(toggle(state.mode))
       </p>
       <p 
@@ -207,6 +222,14 @@ App.RLP.parser: Parser(Ether.RLP)
     return rlp
   }
 
+App.RLP.parser.bytes: Parser(Bytes)
+  Parser {
+    get bytes = Ether.RLP.parser.bytes
+    Kind.Parser.spaces
+    Parser.eof
+    return bytes
+  }
+
 App.RLP.IO: Type
   IO<Maybe<App.State.local(App.RLP.State)>>
 
@@ -241,17 +264,23 @@ App.RLP.when(
                     state
                 }
               decoding:
-                let parsed_bytes = Parser.run!(Ether.RLP.parser.bytes, state@input)
-                case parsed_bytes {
-                  none:
-                    let state = state@error <- some(<p>"Error: bytes parsing failed."</p>)
+                case App.RLP.parser.bytes(Parser.State.from_code(state@input)) as parsed_bytes {
+                  error:
+                    let state = state@error <- some(Parser.Error.to_dom(state@input, parsed_bytes.err))
                     let state = state@dirty <- true
                     state
-                  some:
-                    let state = state@error <- none
-                    let state = state@dirty <- false
-                    let state = state@output <- App.RLP.decode(parsed_bytes.value)
-                    state
+                  value:
+                    case Ether.RLP.decode.check(parsed_bytes.val) {
+                      true:
+                        let state = state@error <- none
+                        let state = state@dirty <- false
+                        let state = state@output <- App.RLP.decode(parsed_bytes.val)
+                        state
+                      false:
+                        let state = state@error <- some(<p>"Error: invalid remainder"</p>)
+                        let state = state@dirty <- true
+                        state
+                    }
                 }
             }
           App.set_local!(state)
