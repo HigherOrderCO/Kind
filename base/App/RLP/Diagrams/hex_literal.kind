@@ -1,0 +1,48 @@
+App.RLP.Diagrams.hex_literal: DOM
+  <svg class="railroad-diagram" width="390" height="71" viewBox="0 0 390 71">
+    <g transform="translate(.5 .5)">
+        <g>
+            <path d="M20 21v20m10 -20v20m-10 -10h20"></path>
+        </g>
+        <path d="M40 31h10"></path>
+        <g class="terminal ">
+            <path d="M50 31h0"></path>
+            <path d="M87 31h0"></path>
+            <rect x="50" y="20" width="37" height="22" rx="10" ry="10"></rect>
+            <text x="68.5" y="35">"0x"</text>
+        </g>
+        <path d="M87 31h10"></path>
+        <path d="M97 31h10"></path>
+        <g>
+            <path d="M107 31h0"></path>
+            <path d="M340 31h0"></path>
+            <path d="M107 31h10"></path>
+            <g>
+                <path d="M117 31h0"></path>
+                <path d="M330 31h0"></path>
+                <g class="non-terminal ">
+                    <path d="M117 31h0"></path>
+                    <path d="M213.5 31h0"></path>
+                    <rect x="117" y="20" width="96.5" height="22"></rect>
+                    <text x="165.25" y="35">"hex_digit"</text>
+                </g>
+                <path d="M213.5 31h10"></path>
+                <path d="M223.5 31h10"></path>
+                <g class="non-terminal ">
+                    <path d="M233.5 31h0"></path>
+                    <path d="M330 31h0"></path>
+                    <rect x="233.5" y="20" width="96.5" height="22"></rect>
+                    <text x="281.75" y="35">"hex_digit"</text>
+                </g>
+            </g>
+            <path d="M330 31h10"></path>
+            <path d="M117 31a10 10 0 0 0 -10 10v0a10 10 0 0 0 10 10"></path>
+            <g>
+                <path d="M117 51h213"></path>
+            </g>
+            <path d="M330 51a10 10 0 0 0 10 -10v0a10 10 0 0 0 -10 -10"></path>
+        </g>
+        <path d="M340 31h10"></path>
+        <path d="M 350 31 h 20 m -10 -10 v 20 m 10 -20 v 20"></path>
+    </g>
+</svg>

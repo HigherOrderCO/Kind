@@ -1,0 +1,37 @@
+App.RLP.Diagrams.data: DOM
+  <svg class="railroad-diagram" width="242" height="122" viewBox="0 0 242 122">
+    <g transform="translate(.5 .5)">
+        <g>
+            <path d="M20 21v20m10 -20v20m-10 -10h20"></path>
+        </g>
+        <g>
+            <path d="M40 31h0"></path>
+            <path d="M202 31h0"></path>
+            <path d="M40 31h20"></path>
+            <g class="non-terminal ">
+                <path d="M60 31h4.25"></path>
+                <path d="M177.75 31h4.25"></path>
+                <rect x="64.25" y="20" width="113.5" height="22"></rect>
+                <text x="121" y="35">"hex_literal"</text>
+            </g>
+            <path d="M182 31h20"></path>
+            <path d="M40 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"></path>
+            <g class="non-terminal ">
+                <path d="M60 61h25.5"></path>
+                <path d="M156.5 61h25.5"></path>
+                <rect x="85.5" y="50" width="71" height="22"></rect>
+                <text x="121" y="65">"number"</text>
+            </g>
+            <path d="M182 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"></path>
+            <path d="M40 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"></path>
+            <g class="non-terminal ">
+                <path d="M60 91h0"></path>
+                <path d="M182 91h0"></path>
+                <rect x="60" y="80" width="122" height="22"></rect>
+                <text x="121" y="95">"ascii_string"</text>
+            </g>
+            <path d="M182 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"></path>
+        </g>
+        <path d="M 202 31 h 20 m -10 -10 v 20 m 10 -20 v 20"></path>
+    </g>
+</svg>
