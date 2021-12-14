@@ -1,4 +1,4 @@
-Nat.lte.base(
+Nat.lte_base(
     a: Nat
     b: Nat
     c: Nat
@@ -9,6 +9,6 @@ Nat.lte.base(
         zero:
             Nat.Order.refl(1)
         succ: 
-            let ind = Nat.lte.base(a, b, c.pred, Hyp)
+            let ind = Nat.lte_base(a, b, c.pred, Hyp)
             Nat.Order.mul.combine(a, b, Nat.pow(a, c.pred), Nat.pow(b, c.pred), Hyp, ind)
     }!
