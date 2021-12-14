@@ -82,8 +82,11 @@ App.RLP.css: String
       border-radius: 8px;
       background-color: #F2F2F2;
     }
+    .page-block.bg.rlp {
+      background-color: #d0e4e8;
+    }
     .page-block.bg.bytes {
-      background-color: #333333;
+      background-color: #e5dece;
     }
     .page-block > * {
       margin: 0.5em 0;
@@ -131,7 +134,7 @@ App.RLP.Mode.present(m: App.RLP.Mode): String
 App.RLP.input_background(m: App.RLP.Mode, classes: String): String
   case m {
     encoding:
-      classes
+      classes | " rlp"
     decoding:
       classes | " bytes"
   }
