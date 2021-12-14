@@ -1,0 +1,346 @@
+// TestSuite for RLP encoding
+Ether.RLP.decode.test: IO<Unit>
+  TestSuite.run(Ether.RLP.decode.test.suite, 0)
+
+// Tests from Ethereum's repository:
+// https://github.com/ethereum/tests/blob/develop/RLPTests/rlptest.json
+Ether.RLP.decode.test.suite: TestSuite
+  TestSuite.many("DecodeIntegrity", [
+    Ether.RLP.decode.test.emptystring
+    Ether.RLP.decode.test.bytestring00
+    Ether.RLP.decode.test.bytestring01
+    Ether.RLP.decode.test.bytestring7F
+    Ether.RLP.decode.test.shortstring
+    Ether.RLP.decode.test.shortstring2
+    Ether.RLP.decode.test.longstring
+    Ether.RLP.decode.test.longstring2
+    Ether.RLP.decode.test.zero
+    Ether.RLP.decode.test.smallint
+    Ether.RLP.decode.test.smallint2
+    Ether.RLP.decode.test.smallint3
+    Ether.RLP.decode.test.smallint4
+    Ether.RLP.decode.test.mediumint1
+    Ether.RLP.decode.test.mediumint2
+    Ether.RLP.decode.test.mediumint3
+    Ether.RLP.decode.test.mediumint4
+    Ether.RLP.decode.test.emptylist
+    Ether.RLP.decode.test.stringlist
+    Ether.RLP.decode.test.multilist
+    Ether.RLP.decode.test.shortListMax1
+    Ether.RLP.decode.test.longList1
+    Ether.RLP.decode.test.longList2
+    Ether.RLP.decode.test.listsoflists
+    Ether.RLP.decode.test.listsoflists2
+    Ether.RLP.decode.test.dictTest1
+    Ether.RLP.decode.test.bigint
+  ])
+
+Ether.RLP.decode.test.builder(rlp: Ether.RLP): IO<Maybe<String>>
+  if Ether.RLP.decode.check(Ether.RLP.encode(rlp)) then
+    IO {
+      return none;
+    }
+  else
+    IO {
+      return some("encode corrupted")
+    }
+
+Ether.RLP.decode.test.emptystring: TestSuite
+  TestSuite.unit("emptystring", 
+    Ether.RLP.decode.test.builder(Ether.RLP.data([]))
+  )
+
+Ether.RLP.decode.test.bytestring00: TestSuite
+  TestSuite.unit("bytestring00", 
+    Ether.RLP.decode.test.builder(Ether.RLP.data([0x00]))
+  )
+
+Ether.RLP.decode.test.bytestring01: TestSuite
+  TestSuite.unit("bytestring01", 
+    Ether.RLP.decode.test.builder(Ether.RLP.data([0x01]))
+  )
+
+Ether.RLP.decode.test.bytestring7F: TestSuite
+  TestSuite.unit("bytestring7F",
+    Ether.RLP.decode.test.builder(Ether.RLP.data([0x7F]))
+  )
+
+Ether.RLP.decode.test.shortstring: TestSuite
+  TestSuite.unit("shortstring",
+    Ether.RLP.decode.test.builder(Ether.RLP.data(Bytes.from_str("dog")))
+  )
+
+Ether.RLP.decode.test.shortstring2: TestSuite
+  TestSuite.unit("shortstring2",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_str("Lorem ipsum dolor sit amet, consectetur adipisicing eli"))
+    )
+  )
+
+Ether.RLP.decode.test.longstring: TestSuite
+  TestSuite.unit("longstring",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_str("Lorem ipsum dolor sit amet, consectetur adipisicing elit"))
+    )
+  )
+
+Ether.RLP.decode.test.longstring2: TestSuite
+  TestSuite.unit("longstring2",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_str("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur mauris magna, suscipit sed vehicula non, iaculis faucibus tortor. Proin suscipit ultricies malesuada. Duis tortor elit, dictum quis tristique eu, ultrices at risus. Morbi a est imperdiet mi ullamcorper aliquet suscipit nec lorem. Aenean quis leo mollis, vulputate elit varius, consequat enim. Nulla ultrices turpis justo, et posuere urna consectetur nec. Proin non convallis metus. Donec tempor ipsum in mauris congue sollicitudin. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse convallis sem vel massa faucibus, eget lacinia lacus tempor. Nulla quis ultricies purus. Proin auctor rhoncus nibh condimentum mollis. Aliquam consequat enim at metus luctus, a eleifend purus egestas. Curabitur at nibh metus. Nam bibendum, neque at auctor tristique, lorem libero aliquet arcu, non interdum tellus lectus sit amet eros. Cras rhoncus, metus ac ornare cursus, dolor justo ultrices metus, at ullamcorper volutpat"))
+    )
+  )
+
+Ether.RLP.decode.test.zero: TestSuite
+  TestSuite.unit("zero",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(0))
+    )
+  )
+
+Ether.RLP.decode.test.smallint: TestSuite
+  TestSuite.unit("smallint",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(1))
+    )
+  )
+
+Ether.RLP.decode.test.smallint2: TestSuite
+  TestSuite.unit("smallint2",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(16))
+    )
+  )
+
+Ether.RLP.decode.test.smallint3: TestSuite
+  TestSuite.unit("smallint3",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(79))
+    )
+  )
+
+Ether.RLP.decode.test.smallint4: TestSuite
+  TestSuite.unit("smallint4",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(127))
+    )
+  )
+
+Ether.RLP.decode.test.mediumint1: TestSuite
+  TestSuite.unit("mediumint1",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(128))
+    )
+  )
+
+Ether.RLP.decode.test.mediumint2: TestSuite
+  TestSuite.unit("mediumint2",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(1000))
+    )
+  )
+
+Ether.RLP.decode.test.mediumint3: TestSuite
+  TestSuite.unit("mediumint3",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(100000))
+    )
+  )
+
+Ether.RLP.decode.test.mediumint4: TestSuite
+  TestSuite.unit("mediumint4",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(83729609699884896815286331701780722))
+    )
+  )
+
+Ether.RLP.decode.test.mediumint5: TestSuite
+  TestSuite.unit("mediumint5",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.data(Bytes.from_nat(105315505618206987246253880190783558935785933862974822347068935681))
+    )
+  )
+
+Ether.RLP.decode.test.emptylist: TestSuite
+  TestSuite.unit("emptylist",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.node([])
+    )
+  )
+
+Ether.RLP.decode.test.stringlist: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  TestSuite.unit("stringlist",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.node([from_str("dog"), from_str("god"), from_str("cat")])
+    )
+  )
+
+Ether.RLP.decode.test.multilist: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("multilist",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.node([
+        from_str("zw")
+        Ether.RLP.node([
+          from_nat(4)
+        ])
+        from_nat(1)
+      ])
+    )
+  )
+
+Ether.RLP.decode.test.shortListMax1: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("shortListMax1",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.node([
+        from_str("asdf")
+        from_str("qwer")
+        from_str("zxcv")
+        from_str("asdf")
+        from_str("qwer")
+        from_str("zxcv")
+        from_str("asdf")
+        from_str("qwer")
+        from_str("zxcv")
+        from_str("asdf")
+        from_str("qwer")
+      ])
+    )
+  )
+
+Ether.RLP.decode.test.longList1: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("longList1",
+    Ether.RLP.decode.test.builder(
+      let list =
+        Ether.RLP.node([
+          from_str("asdf")
+          from_str("qwer")
+          from_str("zxcv")
+        ])
+      Ether.RLP.node([
+        list
+        list
+        list
+        list
+      ])
+    )
+  )
+
+Ether.RLP.decode.test.longList2: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("longList2",
+    Ether.RLP.decode.test.builder(
+      let list =
+        Ether.RLP.node([
+          from_str("asdf")
+          from_str("qwer")
+          from_str("zxcv")
+        ])
+      Ether.RLP.node([
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+        list
+      ])
+    )
+  )
+
+Ether.RLP.decode.test.listsoflists: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("listoflists",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.node([
+        Ether.RLP.node([
+          Ether.RLP.node([
+          ])
+          Ether.RLP.node([
+          ])
+        ])
+        Ether.RLP.node([
+        ])
+      ])
+    )
+  )
+
+Ether.RLP.decode.test.listsoflists2: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("listoflists2",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.node([
+        Ether.RLP.node([
+        ])
+        Ether.RLP.node([
+          Ether.RLP.node([
+          ])
+        ])
+        Ether.RLP.node([
+          Ether.RLP.node([
+          ])
+          Ether.RLP.node([
+            Ether.RLP.node([
+            ])
+          ])
+        ])
+      ])
+    )
+  )
+
+Ether.RLP.decode.test.dictTest1: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("dictTest1",
+    Ether.RLP.decode.test.builder(
+      Ether.RLP.node([
+        Ether.RLP.node([from_str("key1"), from_str("val1")])
+        Ether.RLP.node([from_str("key2"), from_str("val2")])
+        Ether.RLP.node([from_str("key3"), from_str("val3")])
+        Ether.RLP.node([from_str("key4"), from_str("val4")])
+      ])
+    )
+  )
+
+Ether.RLP.decode.test.bigint: TestSuite
+  def from_str = Ether.RLP.data.from_str
+  def from_nat = Ether.RLP.data.from_nat
+  TestSuite.unit("bigint",
+    Ether.RLP.decode.test.builder(
+      from_nat(115792089237316195423570985008687907853269984665640564039457584007913129639936)
+    )
+  )
