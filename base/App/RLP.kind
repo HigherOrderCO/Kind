@@ -1,20 +1,43 @@
 App.RLP.article: DOM
   <article> 
-  <h3>` Kind is amazing ^-^ `</h3>
+  <h3>` About `</h3>
   <p>`
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-  incididunt ut labore et dolore magna aliqua. Nibh ipsum consequat nisl vel
-  pretium lectus quam id. Tempor orci eu lobortis elementum nibh. Nulla facilisi
-  cras fermentum odio eu feugiat. Est velit egestas dui id. Blandit aliquam
-  etiam erat velit. 
+  This app uses `<a href="https://github.com/kind-lang/Kind/blob/master/base/Ether/RLP/encode.kind">`Kind's implementation`</a>` of Ethereum's RLP to encode and decode data. We also provide a `<a href="https://github.com/kind-lang/Kind/blob/master/base/Ether/RLP/encode_identity.kind">`proof`</a>` to ensure that all encoded RLPs will be correctly decoded. Since Ethereum's specification is informal, we checked we comply with it using `<a href="https://github.com/kind-lang/Kind/blob/master/base/Ether/RLP/encode/test.kind">`tests`</a>`.
   `</p>
   <p>`
-  Donec ultrices tincidunt arcu non. Eu nisl nunc mi ipsum faucibus vitae
-  aliquet nec. Duis tristique sollicitudin nibh sit amet commodo nulla facilisi
-  nullam. Malesuada bibendum arcu vitae elementum curabitur vitae nunc sed
-  velit. Nullam eget felis eget nunc lobortis mattis aliquam faucibus purus. 
-  `
-  </p>
+  The proof highlighted that theoretically RLP can't encode any kind of data. Indeed when the length reaches 2^64 the bytes overflow and the encoding fails. However 2^64 should be plenty for applications.
+  `</p>
+  <h3>` Grammar `</h3>
+  <h4>`
+  RLP
+  `</h4>
+  {
+    App.RLP.Diagrams.RLP
+  }
+  <h4>`
+  data
+  `</h4>
+  {
+    App.RLP.Diagrams.data
+  }
+  <h4>`
+  hex_literal
+  `</h4>
+  {
+    App.RLP.Diagrams.hex_literal
+  }
+  <h4>`
+  number
+  `</h4>
+  {
+    App.RLP.Diagrams.number
+  }
+  <h4>`
+  ascii_string
+  `</h4>
+  {
+    App.RLP.Diagrams.ascii_string
+  }
   </article>
 
 App.RLP.State: App.State
@@ -45,7 +68,7 @@ App.RLP.Mode.toggle(m: App.RLP.Mode): App.RLP.Mode
   }
 
 App.RLP.State.Local.default: App.RLP.State.Local
-  let input = `["hihi"]`
+  let input = `["hi",[[[42]],[]],0xd4e56740f876aef8]`
   let output = 
     case Parser.run!(Ether.RLP.parser, input) {
       none: ""
@@ -75,6 +98,7 @@ App.RLP.css: String
       border-color: #FDFDFD;
     }
     .page-block {
+      overflow-wrap: anywhere;
       width: 100%;
       padding: 16px;
     }
@@ -122,6 +146,7 @@ App.RLP.css: String
       padding: 2em 1em;
     }
   `
+  |App.RLP.Diagrams.style
 
 App.RLP.Mode.present(m: App.RLP.Mode): String
   case m {
@@ -175,7 +200,7 @@ App.RLP.draw(state: App.RLP.State.Local): DOM
           }
         </button>
       </div>
-      <p class="error">{
+      <p>{
         case state.error {
           none: <p></p>
           some: state.error.value

@@ -1,5 +1,5 @@
-App.RLP.Diagrams.style: DOM
-  <style>`
+App.RLP.Diagrams.style: String
+  `
     svg {
       background-color: hsl(30,20%,95%);
       display: block;
@@ -48,4 +48,4 @@ App.RLP.Diagrams.style: DOM
     g.diagram-text:hover path.diagram-text {
       fill: #eee;
     }
-  `</style>
+  `
