@@ -18,7 +18,7 @@ Nat.double_add(a: Nat): (a+a) == Nat.double(a)
       let h10 = h9 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == Nat.add(X,1)) with Nat.add.succ_right(Nat.double(a.pred),0)
       let h11 = h10 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == Nat.add(Nat.succ(X),1)) with Nat.add.zero_right(Nat.double(a.pred))
       let h12 = h11 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == X) with Nat.add.succ_right(Nat.succ(Nat.double(a.pred)),0)
-      let h13 = h12 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == Nat.succ(X)) with Nat.add.zero_right(Nat.succ(Nat.double(a.pred)))
-      h13
+      let qed = h12 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == Nat.succ(X)) with Nat.add.zero_right(Nat.succ(Nat.double(a.pred)))
+      qed
       
   }!
