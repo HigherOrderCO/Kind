@@ -1,0 +1,8 @@
+Vector.Nat.dot(n: Nat, u: Vector<Nat>(n), v: Vector<Nat>(n)): Nat
+  case n with u v{
+    zero: 0
+    succ: 
+      open u
+      open v
+      Nat.mul(u.head,v.head) + Vector.Nat.dot(n.pred, u.tail, v.tail)
+  }!
