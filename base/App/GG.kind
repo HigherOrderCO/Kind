@@ -22,10 +22,8 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// - add a way to ramdomize things in effects
 // - develop more statuses (counter and intangible should be priority)
 // - stop using colorize on draw
-// - Fix death projectile not being considered an enemy
 // - move minion.ai functions to a more generic section
 // - improve draw.kind to better reflect images      
 // - Add an animation to basic attack (x key)
@@ -41,6 +39,8 @@ App.GG: App<App.GG.State>
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: Fix death projectile not being considered an enemy
+// DONE: add a way to ramdomize things in effects
 // DONE: Create simple AI based on time in front of a slime and time not in front of a slime
 // DONE: update status each frame before everything happens
 // DONE: make poison do damage

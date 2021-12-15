@@ -7,3 +7,9 @@ App.GG.Body.Arms.chips: App.GG.Chips
     App.GG.Chip.wide_sword
     App.GG.Chip.shockwave
   ]
+
+App.GG.Body.Arms.get_chips_1(body: App.GG.Body): App.GG.Chips
+  App.GG.Parts.chips_list(body@arm_1@parts, App.GG.Body.Arms.chips)
+
+App.GG.Body.Arms.get_chips_2(body: App.GG.Body): App.GG.Chips
+  App.GG.Parts.chips_list(body@arm_2@parts, App.GG.Body.Arms.chips)

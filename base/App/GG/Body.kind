@@ -33,11 +33,11 @@ App.GG.Body.chips(
   body: App.GG.Body
 ): App.GG.Chips
 
-  let hull  = App.GG.Parts.chips_list(body@hull@parts,  App.GG.Parts.hull(body@hull@form))
-  let upper = App.GG.Parts.chips_list(body@upper@parts, App.GG.Body.Upper.chips)
-  let lower = App.GG.Parts.chips_list(body@lower@parts, App.GG.Body.Lower.chips)
-  let arm_1 = App.GG.Parts.chips_list(body@arm_1@parts, App.GG.Body.Arms.chips)
-  let arm_2 = App.GG.Parts.chips_list(body@arm_2@parts, App.GG.Body.Arms.chips)
+  let hull  = App.GG.Body.Hull.get_chips(body)
+  let upper = App.GG.Body.Upper.get_chips(body)
+  let lower = App.GG.Body.Lower.get_chips(body)
+  let arm_1 = App.GG.Body.Arms.get_chips_1(body)
+  let arm_2 = App.GG.Body.Arms.get_chips_2(body)
   let chips = hull ++ upper ++ lower ++ arm_1 ++ arm_2
   chips
 

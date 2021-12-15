@@ -22,3 +22,6 @@ type App.GG.Body.Hull.Data {
     chips: App.GG.Chips
   )
 }
+
+App.GG.Body.Hull.get_chips(body: App.GG.Body): App.GG.Chips
+  App.GG.Parts.chips_list(body@hull@parts,  App.GG.Parts.hull(body@hull@form))

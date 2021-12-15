@@ -7,18 +7,6 @@ type App.GG.Parts {
 }
 
 
-App.GG.Parts.upper: App.GG.Chips
-  [App.GG.Chip.recursive_gun]
-
-App.GG.Parts.lower: App.GG.Chips
-  [App.GG.Chip.pull_sword]
-
-App.GG.Parts.arms: App.GG.Chips
-  [
-    App.GG.Chip.wide_sword
-    App.GG.Chip.shockwave
-  ]
-
 App.GG.Parts.hull(form: App.GG.Body.Hull.Form): App.GG.Chips
   case form {
     classic: App.GG.Body.Hull.classic.chips
