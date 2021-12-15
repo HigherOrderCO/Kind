@@ -49,7 +49,7 @@ App.RLP.State.Global: Type
 type App.RLP.State.Local {
   new(
     input: String
-    output: String
+    output: DOM
     mode: App.RLP.Mode
     dirty: Bool
     error: Maybe<DOM>
@@ -76,7 +76,7 @@ App.RLP.State.Local.default: App.RLP.State.Local
     }
   App.RLP.State.Local.new(
     input
-    output
+    <p>output</p>
     App.RLP.Mode.encoding
     false
     none
@@ -213,9 +213,9 @@ App.RLP.draw(state: App.RLP.State.Local): DOM
       </p>
       <p 
         class= "text-output " | if state@dirty then "dirty" else ""
-        >
+        >{
         state@output
-      </p>
+      }</p>
     </div>
     <hr></hr>
     <div class="page-block bg">
@@ -288,7 +288,7 @@ App.RLP.when(
                   value:
                     let state = state@error <- none
                     let state = state@dirty <- false
-                    let state = state@output <- App.RLP.encode(parsed_rlp.val)
+                    let state = state@output <- <p>App.RLP.encode(parsed_rlp.val)</p>
                     state
                 }
               decoding:
@@ -302,7 +302,12 @@ App.RLP.when(
                       true:
                         let state = state@error <- none
                         let state = state@dirty <- false
-                        let state = state@output <- App.RLP.decode(parsed_bytes.val)
+                        let state = state@output <- <p>App.RLP.decode(parsed_bytes.val)
+                          <br></br><br></br>
+                          Ether.RLP.show.str(Ether.RLP.decode(parsed_bytes.val))
+                          <br></br><br></br>
+                          Ether.RLP.show.nat(Ether.RLP.decode(parsed_bytes.val))
+                          </p>
                         state
                       false:
                         let state = state@error <- some(<p>"Error: invalid remainder"</p>)
