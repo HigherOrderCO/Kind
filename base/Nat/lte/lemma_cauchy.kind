@@ -1,0 +1,11 @@
+
+Nat.lte.lemma.cauchy(
+  a: Nat
+  b: Nat
+): Nat.lte(Nat.double(a*b), Nat.pow(a,2) + Nat.pow(b,2)) == true
+  let h2 = Nat.equal_squares(a,b)
+  let h3 = Nat.Order.refl(Nat.double(a*b))
+  let aux1 = Nat.Order.add.combine(0,Nat.pow(Nat.sub_abs(a,b),2), Nat.double(a*b), Nat.double(a*b), _, h3)
+  let aux2 = aux1 :: rewrite X in (Nat.lte(X,Nat.add(Nat.pow(Nat.sub_abs(a,b),2),Nat.double(Nat.mul(a,b)))) == Bool.true) with one_add_n(Nat.double(a*b))
+  let aux3 = aux2 :: rewrite X in (Nat.lte(Nat.double(Nat.mul(a,b)),Nat.add(Nat.pow(Nat.sub_abs(a,b),2),X)) == Bool.true) with double_def(a*b)
+  aux3 :: rewrite X in (Nat.lte(Nat.double(Nat.mul(a,b)),X) == Bool.true) with Nat.equal_squares(a,b)
