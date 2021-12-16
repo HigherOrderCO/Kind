@@ -1,5 +1,5 @@
 
-Nat.lte.lemma.cauchy(
+Nat.lte.lemma_cauchy(
   a: Nat
   b: Nat
 ): Nat.lte(Nat.double(a*b), Nat.pow(a,2) + Nat.pow(b,2)) == true

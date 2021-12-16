@@ -1,4 +1,4 @@
-Nat.square.sum(a:Nat, b: Nat): Nat.pow(a+b,2) == Nat.pow(a,2) + Nat.pow(b,2) + Nat.double(a*b)
+Nat.square_sum(a:Nat, b: Nat): Nat.pow(a+b,2) == Nat.pow(a,2) + Nat.pow(b,2) + Nat.double(a*b)
   let h = Nat.reflexivity(Nat.pow(a+b,2))
   let h1 = h :: rewrite X in (Nat.pow(a+b,2) == X) with Nat.pow.pow_square(a+b)
   let h2 = h1 :: rewrite X in (Nat.pow(Nat.add(a,b),2) == X) with Nat.mul.distrib_right(a,b,a+b)

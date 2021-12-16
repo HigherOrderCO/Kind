@@ -1,4 +1,4 @@
-Nat.lte.sum_squares.pow_sum(
+Nat.lte.sum_squares_pow_sum(
   a:Nat
   b: Nat
 ): Nat.lte(Nat.pow(a,2) + Nat.pow(b,2), Nat.pow(a+b,2)) == true
@@ -6,5 +6,5 @@ Nat.lte.sum_squares.pow_sum(
   let h1 = Nat.Order.add.combine(Nat.pow(a,2)+Nat.pow(b,2), Nat.pow(a,2)+Nat.pow(b,2), 0, Nat.double(a*b), h, _)
   let h2 = h1 :: rewrite X in (Nat.lte(X,Nat.add(Nat.add(Nat.pow(a,2),Nat.pow(b,2)),Nat.double(Nat.mul(a,b)))) == Bool.true) with Nat.add.zero_right(Nat.pow(a,2)+ Nat.pow(b,2))
   let h3 = h2 :: rewrite X in (Nat.lte(Nat.add(Nat.pow(a,2),Nat.pow(b,2)),X) == Bool.true) with Nat.add.assoc(Nat.pow(a,2),Nat.pow(b,2),Nat.double(a*b))
-  let h4 = h3 :: rewrite X in (Nat.lte(Nat.add(Nat.pow(a,2),Nat.pow(b,2)),X) == Bool.true) with mirror(Nat.square.sum(a,b))
+  let h4 = h3 :: rewrite X in (Nat.lte(Nat.add(Nat.pow(a,2),Nat.pow(b,2)),X) == Bool.true) with mirror(Nat.square_sum(a,b))
   h4
