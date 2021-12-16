@@ -1,4 +1,4 @@
-Nat.Order.Ineq.bernoulli.lemma(
+Nat.Order.Ineq.bernoulli_lemma(
   a: Nat
   b: Nat
 //(1+a)^b + a <= (1+a)^b
