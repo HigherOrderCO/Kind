@@ -1,7 +1,9 @@
 Nat.sub_abs(a: Nat, b: Nat): Nat
-  case Nat.lte(a, b) {
-  true:
-    Nat.sub(a, b)
-  false:
-    Nat.sub(b, a)
-}!
+  case a{
+    zero: b
+    succ: 
+      case b{
+        zero: a
+        succ: Nat.sub_abs(a.pred,b.pred)
+      }!
+  }!
