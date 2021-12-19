@@ -1,4 +1,4 @@
-Nat.lte.mul.right(
+Nat.lte.mul_right(
   a: Nat
   b: Nat
   c: Nat

@@ -5,7 +5,7 @@ Nat.Order.Ineq.bernoulli_lemma(
 ): Equal<Bool>(Nat.lte(Nat.add(Nat.pow(Nat.add(1,a),b),a), Nat.pow(Nat.add(1, a), Nat.succ(b))),true)
   let aux = Nat.Order.add.combine(1,1,0,a,Nat.Order.refl(1),_)
   let aux1 = Nat.pow.lte.lte_base(1 + 0, Nat.add(1, a), b, aux)
-  let aux2 = Nat.lte.mul.right(Nat.pow(1,b),Nat.pow(Nat.add(1,a),b), a, aux1)
+  let aux2 = Nat.lte.mul_right(Nat.pow(1,b),Nat.pow(Nat.add(1,a),b), a, aux1)
   let aux3 = Nat.Order.add.left(Nat.mul(Nat.pow(1,b),a), Nat.mul(Nat.pow(Nat.add(1,a),b),a), Nat.mul(Nat.pow(Nat.add(1, a), b), 1), aux2)
   let aux4 = aux3 :: rewrite X in (Nat.lte(Nat.add(Nat.mul(Nat.pow(Nat.add(1,a),b),1),Nat.mul(Nat.pow(1,b),a)),X) == Bool.true) with mirror(Nat.mul.distrib_left(Nat.pow(Nat.add(1,a),b),1,a))
   let aux5 = aux4 :: rewrite X in (Nat.lte(Nat.add(Nat.mul(Nat.pow(Nat.add(1,a),b),1),Nat.mul(Nat.pow(1,b),a)),X) == Bool.true) with Nat.mul.comm(Nat.pow(Nat.add(1,a),b),Nat.add(1,a))

@@ -1,0 +1,5 @@
+Nat.Order.Ineq._2am_gm_v3(
+  a: Nat
+  b: Nat
+): Nat.lte(2*(a*b), Nat.pow(a,2) + Nat.pow(b,2)) == true
+  Nat.Order.Ineq._2am_gm_v2(a, b) :: rewrite X in (Nat.lte(X,_) == _) with Nat.double_mul!
