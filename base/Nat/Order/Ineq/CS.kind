@@ -1,11 +1,3 @@
-Vector.dot_nat(n: Nat, u: Vector<Nat>(n), v: Vector<Nat>(n)): Nat
-  case n with u v{
-    zero: 0
-    succ: 
-      open u
-      open v
-      Nat.mul(u.head,v.head) + Vector.dot_nat(n.pred, u.tail, v.tail)
-  }!
 
 // Vector.dot_nat_expan(
 //   n: Nat
@@ -90,7 +82,7 @@ Nat.Order.Ineq.CS(
           let H13 = H12 :: rewrite X in (Nat.lte(_, Nat.mul(Nat.add(X,_),_)) == _) with Nat.pow.pow_square!
           let H14 = H13 :: rewrite X in (Nat.lte(_, Nat.mul(_, Nat.add(X, _))) == _) with Nat.pow.pow_square!
           //let H15 = Equal<Bool>(Nat.lte(Nat.pow(Vector.dot_nat(Nat.succ(n.pred), u, v),2),Nat.mul(Nat.add(Nat.mul(u.head,u.head),Vector.dot_nat(n.pred,u.tail,u.tail)),Nat.add(Nat.mul(v.head,v.head),Vector.dot_nat(n.pred,v.tail,v.tail)))), true)
-          ?H14-554-
+          ?H14
     }: (u: Vector<Nat>(n), v: Vector<Nat>(n)) -> Equal(Bool,
          Nat.lte(
            Nat.pow(Vector.dot_nat(n, u, v), 2)
