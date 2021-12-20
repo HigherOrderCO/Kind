@@ -9,6 +9,6 @@ Ether.RLP.split.length(add: Nat, bytes: Bytes): Pair<Bytes, Bytes>
       if Nat.lte(fst, 55) then
         Bytes.split(bytes.tail, fst)
       else
-        let {length, tail} = Bytes.split(bytes.tail, Nat.sub(fst, 56))
+        let {length, tail} = Bytes.split(bytes.tail, Nat.succ(Nat.sub(fst, 56)))
         Bytes.split(tail, Bytes.to_nat(length))
   }

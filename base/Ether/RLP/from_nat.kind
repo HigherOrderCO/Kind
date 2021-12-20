@@ -1,2 +1,0 @@
-Ether.RLP.from_nat(n: Nat): Ether.RLP
-  Ether.RLP.data(Bytes.from_nat(n))

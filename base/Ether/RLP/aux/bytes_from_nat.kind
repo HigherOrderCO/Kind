@@ -1,7 +1,7 @@
 Ether.RLP.aux.bytes_from_nat(
-  n: Nat, H: Nat.lte(n, Nat.pred(Nat.pow(256, 7))) == true
-): Nat.lte(List.length(U8, Bytes.from_nat(n)), 7) == true
-  Ether.RLP.aux.bytes.from_nat.aux(n, 7, H)
+  n: Nat, H: Nat.lte(n, Nat.pred(Nat.pow(256, 8))) == true
+): Nat.lte(List.length(U8, Bytes.from_nat(n)), 8) == true
+  Ether.RLP.aux.bytes.from_nat.aux(n, 8, H)
 
 Ether.RLP.aux.bytes.from_nat.aux(
   n: Nat, m: Nat, H: Nat.lte(n, Nat.pred(Nat.pow(256, m))) == true

@@ -1,2 +1,0 @@
-Ether.RLP.from_str(s: String): Ether.RLP
-  Ether.RLP.data(Bytes.from_str(s))

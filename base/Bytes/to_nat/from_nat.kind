@@ -1,4 +1,4 @@
-Bytes.to_nat.from_nat(n: Nat): n == Bytes.to_nat(Bytes.from_nat(n))
+Bytes.to_nat.from_nat(n: Nat): Equal(Nat, n, Bytes.to_nat(Bytes.from_nat(n)))
   case n {
     zero:
       refl

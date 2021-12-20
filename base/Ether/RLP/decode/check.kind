@@ -1,0 +1,21 @@
+Ether.RLP.decode.check(bytes: Bytes): Bool
+  case bytes {
+    nil:
+      true
+    cons:
+      let prefix = U8.to_nat(bytes.head)
+      if Nat.lte(prefix, 127) then
+        Ether.RLP.decode.check(bytes.tail)
+      else if Nat.lte(prefix, 191) then
+        if Ether.RLP.decode.check.split(128, bytes) then
+          let {head, tail} = Ether.RLP.split.length(128, bytes)
+          Ether.RLP.decode.check(tail)
+        else
+          false
+      else
+        if Ether.RLP.decode.check.split(192, bytes) then
+          let {head, tail} = Ether.RLP.split.length(192, bytes)
+          Ether.RLP.decode.check(tail)
+        else
+          false
+  }

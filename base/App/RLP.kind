@@ -1,0 +1,355 @@
+App.RLP.article: DOM
+  <article> 
+  <h3>` About `</h3>
+  <p>`
+  This app uses ` {App.RLP.link.kind_imp("Kind's implementation")} ` of ` {App.RLP.link.rlp("Ethereum's RLP")} ` to encode and decode data. We also provide a ` {App.RLP.link.proof("proof")} ` to ensure that all encoded RLPs will be correctly decoded. Since Ethereum's specification is informal, we checked we comply with it using ` {App.RLP.link.tests("tests")} `.
+  `</p>
+  <p>`
+  The proof highlighted that theoretically RLP can't encode any kind of data. Indeed when the length of the output reaches 2^64 the bytes overflow and the encoding fails. However 2^64 should be plenty for applications.
+  `</p>
+  <h3>` Grammar `</h3>
+  <h4>` RLP `</h4>
+  { App.RLP.Diagrams.RLP }
+  <h4>` data `</h4>
+  { App.RLP.Diagrams.data }
+  <h4>` hex_literal `</h4>
+  { App.RLP.Diagrams.hex_literal }
+  <h4>` number `</h4>
+  { App.RLP.Diagrams.number }
+  <h4>` ascii_string `</h4>
+  { App.RLP.Diagrams.ascii_string }
+  <sub>` This app itself ` {App.RLP.link.kind_app("was also written in Kind")} `. `</sub>
+  </article>
+
+// Links
+
+App.RLP.link(href: String, text: String): DOM
+  <a href=href> text </a>
+
+App.RLP.link.kind_imp: (:String) -> DOM
+  App.RLP.link("https://github.com/kind-lang/Kind/blob/master/base/Ether/RLP/encode.kind")
+
+App.RLP.link.rlp: (:String) -> DOM
+  App.RLP.link("https://eth.wiki/fundamentals/rlp")
+
+App.RLP.link.proof: (:String) -> DOM
+  App.RLP.link("https://github.com/kind-lang/Kind/blob/master/base/Ether/RLP/encode_identity.kind")
+
+App.RLP.link.tests: (:String) -> DOM
+  App.RLP.link("https://github.com/kind-lang/Kind/blob/master/base/Ether/RLP/encode/test.kind")
+
+App.RLP.link.kind_app: (:String) -> DOM
+  App.RLP.link("https://github.com/kind-lang/Kind/blob/master/base/App/RLP.kind")
+
+// App state
+
+App.RLP.State: App.State
+  App.State.new(App.RLP.State.Local, App.RLP.State.Global)
+
+App.RLP.State.Global: Type
+  Unit
+
+type App.RLP.State.Local {
+  new(
+    input: String
+    output: DOM
+    mode: App.RLP.Mode
+    dirty: Bool
+    error: Maybe<DOM>
+  )
+}
+
+type App.RLP.Mode {
+  encoding
+  decoding
+}
+
+App.RLP.Mode.toggle(m: App.RLP.Mode): App.RLP.Mode
+  case m {
+    encoding: App.RLP.Mode.decoding
+    decoding: App.RLP.Mode.encoding
+  }
+
+App.RLP.State.Local.default: App.RLP.State.Local
+  let input = `["hi",[[[42]],[]],0xd4e56740f876aef8]`
+  let output = 
+    case Parser.run!(Ether.RLP.parser, input) {
+      none: ""
+      some: Bytes.to_hex(Ether.RLP.encode(self.value))
+    }
+  App.RLP.State.Local.new(
+    input
+    <p>output</p>
+    App.RLP.Mode.encoding
+    false
+    none
+  )
+
+// Styling
+
+App.RLP.css: String
+  `
+    html {
+      background-color: white;
+    }
+    .error {
+      color: red;
+    }
+    .center-box {
+      margin: auto;
+      max-width: 512px;
+    }
+    main > * {
+      margin-bottom: 1em;
+    }
+    main hr {
+      border-color: #FDFDFD;
+    }
+    .page-block {
+      overflow-wrap: anywhere;
+      width: 100%;
+      padding: 16px;
+    }
+    .page-block.bg {
+      border-radius: 8px;
+    }
+    .page-block.bg.rlp {
+      background-color: hsl(202, 90%, 90%);
+    }
+    .page-block.bg.bytes {
+      background-color: hsl(98, 90%, 90%);
+    }
+    .page-block > * {
+      margin: 0.5em 0;
+    }
+    .block-label {
+      font-weight: bold;
+    }
+    .text-input {
+      width: 100%;
+      min-height: 8em;
+    }
+    .text-output {
+      background-color: #FDFDFD;
+      padding: 1em;
+    }
+    .text-output.dirty {
+      color: #A0A0A0;
+    }
+    .button-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .button-wrapper button {
+      padding: 0.5em 1em;
+    }
+    article * {
+      margin-bottom: 1em;
+      text-align: justify;
+    }
+    article h3 {
+      margin-top: 2em;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 2em 1em;
+    }
+  `
+  | App.RLP.Diagrams.style
+
+// Contents
+
+App.RLP.Mode.present(m: App.RLP.Mode): String
+  case m {
+    encoding:
+      "RLP"
+    decoding:
+      "Bytes"
+  }
+
+App.RLP.mode_class(m: App.RLP.Mode, classes: String): String
+  case m {
+    encoding:
+      classes | " rlp"
+    decoding:
+      classes | " bytes"
+  }
+
+App.RLP.draw(state: App.RLP.State.Local): DOM
+  open state
+  def toggle = App.RLP.Mode.toggle
+  let style_top = App.RLP.mode_class(state.mode)
+  let style_bottom = App.RLP.mode_class(toggle(state.mode))
+  <div>
+  <style> App.RLP.css </style>
+  <main class="center-box">
+    <div class="page-block">
+      <h1> "RLP encoder/decoder" </h1>
+      <p class="subtitle">
+        "Formally verified with "
+        <a href="https://github.com/kind-lang/Kind">
+        "Kind"
+        </a>
+        "!"
+      </p>
+    </div>
+    <div class=style_top("page-block bg")>
+      <p class=style_top("block-label")>
+        App.RLP.Mode.present(state.mode)
+      </p>
+      <textarea id="input" class="text-input">
+        state@input
+      </textarea>
+      <div class="button-wrapper">
+        <button id="btn-switch">
+          "Switch"
+        </button>
+        <button id="btn-translate">
+          case state.mode {
+            encoding: "Encode"
+            decoding: "Decode"
+          }
+        </button>
+      </div>
+      <p>{
+        case state.error {
+          none: <p></p>
+          some: state.error.value
+        }
+      }</p>
+    </div>
+    <div class=style_bottom("page-block bg")>
+      <p class=style_bottom("block-label")>
+        App.RLP.Mode.present(toggle(state.mode))
+      </p>
+      <p 
+        class= "text-output " | if state@dirty then "dirty" else ""
+        >{
+        state@output
+      }</p>
+    </div>
+    { App.RLP.article }
+  </main>
+  <footer class="center-box">
+    <div id="join-us">
+      <p><strong>` Join Us `</strong></p>
+      <p><a href="https://github.com/kind-lang/Kind">
+        `Github`
+      </a></p>
+      <p><a href="https://t.me/formality_lang">
+        `Telegram`
+      </a></p>
+    </div>
+    <div>
+      `made with ❤ using `
+      <a href="https://github.com/kind-lang/Kind">
+        `Kind-lang`
+      </a>
+      // ` by ??`
+    </div>
+  </footer>
+  </div>
+
+App.RLP.parser: Parser(Ether.RLP)
+  Parser {
+    get rlp = Ether.RLP.parser
+    Kind.Parser.spaces
+    Parser.eof
+    return rlp
+  }
+
+App.RLP.parser.bytes: Parser(Bytes)
+  Parser {
+    get bytes = Ether.RLP.parser.bytes
+    Kind.Parser.spaces
+    Parser.eof
+    return bytes
+  }
+
+App.RLP.IO: Type
+  IO<Maybe<App.State.local(App.RLP.State)>>
+
+App.RLP.when(
+  event: App.Event
+  store: App.Store<App.RLP.State>
+): App.RLP.IO
+  let state = store@local
+  case event {
+    input:
+      switch String.eql(event.id) {
+        "input":
+          let state = state@input <- event.text
+          let state = state@dirty <- true
+          App.set_local!(state)
+      } default App.pass!
+    mouse_click:
+      switch String.eql(event.id) {
+        "btn-translate":
+          let state =
+            case state@mode {
+              encoding:
+                case App.RLP.parser(Parser.State.from_code(state@input)) as parsed_rlp {
+                  error:
+                    let state = state@error <- some(Parser.Error.to_dom(state@input, parsed_rlp.err))
+                    let state = state@dirty <- true
+                    state
+                  value:
+                    let state = state@error <- none
+                    let state = state@dirty <- false
+                    let state = state@output <- <p>App.RLP.encode(parsed_rlp.val)</p>
+                    state
+                }
+              decoding:
+                case App.RLP.parser.bytes(Parser.State.from_code(state@input)) as parsed_bytes {
+                  error:
+                    let state = state@error <- some(Parser.Error.to_dom(state@input, parsed_bytes.err))
+                    let state = state@dirty <- true
+                    state
+                  value:
+                    case Ether.RLP.decode.check(parsed_bytes.val) {
+                      true:
+                        let state = state@error <- none
+                        let state = state@dirty <- false
+                        let state = state@output <- <p>App.RLP.decode(parsed_bytes.val)
+                          <br></br><br></br>
+                          Ether.RLP.show.str(Ether.RLP.decode(parsed_bytes.val))
+                          <br></br><br></br>
+                          Ether.RLP.show.nat(Ether.RLP.decode(parsed_bytes.val))
+                          </p>
+                        state
+                      false:
+                        let state = state@error <- some(<p>"Error: invalid remainder"</p>)
+                        let state = state@dirty <- true
+                        state
+                    }
+                }
+            }
+          App.set_local!(state)
+        "btn-switch":
+          let state = state@error <- none
+          let state = state@mode <- App.RLP.Mode.toggle(state@mode)
+          let state = state@dirty <- true
+          App.set_local!(state)
+      } default App.pass!
+  } default App.pass!
+
+App.RLP.decode(input:Bytes): String
+  Ether.RLP.show(Ether.RLP.decode(input))
+
+App.RLP.encode(input: Ether.RLP): String
+  Bytes.to_hex(Ether.RLP.encode(input))
+
+App.RLP: App(App.RLP.State)
+  let init =
+    App.Store.new!(
+      App.RLP.State.Local.default
+      Unit.new
+    )
+  def St = App.RLP.State
+  let draw = (state) App.RLP.draw(state@local)
+  let when = App.RLP.when
+  let tick = App.no_tick<St>
+  let post = App.no_post<St>
+  App.new!(init, draw, when, tick, post)

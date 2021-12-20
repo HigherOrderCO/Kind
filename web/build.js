@@ -66,6 +66,10 @@ function compile_app(name) {
   }
   // Write compiled App file
   process.chdir(code_dir);
+  // create apps folder if doesn't exist
+  if (!fs.existsSync("apps")) {
+    fs.mkdirSync("apps")
+  }
   fs.writeFileSync("apps/"+name+".js", code);
   return name;
 }

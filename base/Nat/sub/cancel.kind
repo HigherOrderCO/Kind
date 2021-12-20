@@ -1,5 +1,5 @@
-Nat.sub.cancel(x : Nat) : Nat.sub(x, x) == 0
+Nat.sub.cancel(x: Nat): Nat.sub(x, x) == 0
   case x {
-    zero : refl
-    succ : Nat.sub.cancel(x.pred)
+    zero: refl
+    succ: Nat.sub.cancel(x.pred)
   }!

@@ -1,0 +1,15 @@
+Ether.RLP.decode.check.split(add: Nat, bytes: Bytes): Bool
+  case bytes {
+    nil:
+      false
+    cons:
+      let fst = Nat.sub(U8.to_nat(bytes.head), add)
+      if Nat.lte(fst, 55) then
+        Nat.lte(List.length!(bytes.tail), fst)
+      else
+        if Nat.lte(Nat.succ(Nat.sub(fst, 56)), List.length!(bytes.tail)) then
+          let {length, tail} = Bytes.split(bytes.tail, Nat.succ(Nat.sub(fst, 56)))
+          Nat.lte(List.length!(tail), Bytes.to_nat(length))
+        else
+          false
+  }
