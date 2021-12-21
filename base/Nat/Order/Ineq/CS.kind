@@ -64,25 +64,43 @@ Nat.Order.Ineq.CS(
         refl
       succ:
         (u, v)
-          open u
-          open v
-          let HI = Nat.Order.Ineq.CS(n.pred, u.tail, v.tail)
-          let H1 = Nat.Order.add.right!!(Nat.add(Nat.pow(Nat.mul(u.head, v.head),2), Nat.double(Nat.mul(Vector.dot_nat(n.pred, u.tail, v.tail), Nat.mul(u.head, v.head)))), HI)
-          let H2 = H1 :: rewrite X in (Nat.lte(X, _) == _) with mirror(Nat.square_sum!!) 
-          let H3 = H2 :: rewrite X in (Nat.lte(Nat.pow(X, 2), _)==_) with Nat.add.comm!!
-          let H4 = Nat.Order.Ineq.cauchy_lemma(v.head, u.head, n.pred, u.tail, v.tail, HI)
-          let H5 = Nat.Order.add.left!!(Nat.pow(Nat.mul(u.head,v.head),2), H4)
-          let H6 = Nat.Order.add.left!!(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)), H5)
-          let H7 = H6 :: rewrite X in (Nat.lte(Nat.add(_,Nat.add(_,Nat.double(Nat.mul(_,X)))),_) == _) with Nat.mul.comm!!
-          let H8 = Nat.Order.transitivity!!!(H3, H7)
-          let H9 = H8 :: rewrite X in (Nat.lte(_, Nat.add(_, Nat.add(X, _))) == _) with Nat.pow.mul_dist(u.head, v.head, 2)
-          let H10 = H9 :: rewrite X in (Nat.lte(_, X) == _) with mirror(Nat.mul.binom_dist!!!!)
-          let H11 = H10 :: rewrite X in (Nat.lte(_, Nat.mul(X,_)) == _) with Nat.add.comm!!
-          let H12 = H11 :: rewrite X in (Nat.lte(_, Nat.mul(_,X)) == _) with Nat.add.comm!!
-          let H13 = H12 :: rewrite X in (Nat.lte(_, Nat.mul(Nat.add(X,_),_)) == _) with Nat.pow.pow_square!
-          let H14 = H13 :: rewrite X in (Nat.lte(_, Nat.mul(_, Nat.add(X, _))) == _) with Nat.pow.pow_square!
-          //let H15 = Equal<Bool>(Nat.lte(Nat.pow(Vector.dot_nat(Nat.succ(n.pred), u, v),2),Nat.mul(Nat.add(Nat.mul(u.head,u.head),Vector.dot_nat(n.pred,u.tail,u.tail)),Nat.add(Nat.mul(v.head,v.head),Vector.dot_nat(n.pred,v.tail,v.tail)))), true)
-          ?H14
+          u(
+            (u) Equal(Bool, Nat.lte(Nat.pow(Vector.dot_nat(Nat.succ(n.pred),u,v),2),Nat.mul(Vector.dot_nat(Nat.succ(n.pred),u,u),Vector.dot_nat(Nat.succ(n.pred),v,v))), true)
+            (u.head, u.tail)
+              v(
+                (v) Equal(Bool, Nat.lte(Nat.pow(Vector.dot_nat(Nat.succ(n.pred),Vector.cons(Nat,n.pred,u.head,u.tail),v),2),Nat.mul(Vector.dot_nat(Nat.succ(n.pred),Vector.cons(Nat,n.pred,u.head,u.tail),Vector.cons(Nat,n.pred,u.head,u.tail)),Vector.dot_nat(Nat.succ(n.pred),v,v))), true)
+                (v.head, v.tail)
+                  let HI = Nat.Order.Ineq.CS(n.pred, u.tail, v.tail)
+                  let H1 = Nat.Order.add.right(
+                    Nat.pow(Vector.dot_nat(n.pred,u.tail,v.tail),2)
+                    Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)),
+                    Nat.add(Nat.pow(Nat.mul(u.head, v.head),2), Nat.double(Nat.mul(Vector.dot_nat(n.pred, u.tail, v.tail), Nat.mul(u.head, v.head)))), HI
+                  )
+                  let H2 = case mirror(Nat.square_sum(Vector.dot_nat(n.pred,u.tail,v.tail), Nat.mul(u.head,v.head))) {
+                    refl:
+                      H1
+                  }: Nat.lte(self.b, Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)),Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.double(Nat.mul(Vector.dot_nat(n.pred,u.tail,v.tail),Nat.mul(u.head,v.head)))))) == true
+                  let H3 = case Nat.add.comm(Vector.dot_nat(n.pred,u.tail,v.tail), Nat.mul(u.head,v.head)) {
+                    refl:
+                      H2
+                  }: Nat.lte(Nat.pow(self.b, 2), Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)),Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.double(Nat.mul(Vector.dot_nat(n.pred,u.tail,v.tail),Nat.mul(u.head,v.head)))))) == true
+                  let H4 = Nat.Order.Ineq.cauchy_lemma(v.head, u.head, n.pred, u.tail, v.tail, HI)
+                  let H5 = Nat.Order.add.left(Nat.double(Nat.mul(Vector.dot_nat(n.pred,u.tail,v.tail),Nat.mul(v.head,u.head))),Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Nat.pow(v.head,2)),Nat.mul(Vector.dot_nat(n.pred,v.tail,v.tail),Nat.pow(u.head,2))), Nat.pow(Nat.mul(u.head,v.head),2), H4)
+                  let H6 = Nat.Order.add.left(Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.double(Nat.mul(Vector.dot_nat(n.pred,u.tail,v.tail),Nat.mul(v.head,u.head)))),Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Nat.pow(v.head,2)),Nat.mul(Vector.dot_nat(n.pred,v.tail,v.tail),Nat.pow(u.head,2)))), Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)), H5)
+                  let H7 = case Nat.mul.comm(v.head, u.head) {
+                    refl:
+                      H6
+                  }: Nat.lte(Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)),Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.double(Nat.mul(Vector.dot_nat(n.pred,u.tail,v.tail),self.b)))),Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)),Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Nat.pow(v.head,2)),Nat.mul(Vector.dot_nat(n.pred,v.tail,v.tail),Nat.pow(u.head,2)))))) == true
+                  let H8 = Nat.Order.transitivity(Nat.pow(Nat.add(Nat.mul(u.head,v.head),Vector.dot_nat(n.pred,u.tail,v.tail)),2),Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)),Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.double(Nat.mul(Vector.dot_nat(n.pred,u.tail,v.tail),Nat.mul(u.head,v.head))))), Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Vector.dot_nat(n.pred,v.tail,v.tail)),Nat.add(Nat.pow(Nat.mul(u.head,v.head),2),Nat.add(Nat.mul(Vector.dot_nat(n.pred,u.tail,u.tail),Nat.pow(v.head,2)),Nat.mul(Vector.dot_nat(n.pred,v.tail,v.tail),Nat.pow(u.head,2))))), H3, H7)
+                  let H9 = H8 :: rewrite X in (Nat.lte(_, Nat.add(_, Nat.add(X, _))) == _) with Nat.pow.mul_dist(u.head, v.head, 2)
+                  let H10 = H9  :: rewrite X in (Nat.lte(_, X) == _) with mirror(Nat.mul.binom_dist!!!!)
+                  let H11 = H10 :: rewrite X in (Nat.lte(_, Nat.mul(X,_)) == _) with Nat.add.comm!!
+                  let H12 = H11 :: rewrite X in (Nat.lte(_, Nat.mul(_,X)) == _) with Nat.add.comm!!
+                  let H13 = H12 :: rewrite X in (Nat.lte(_, Nat.mul(Nat.add(X,_),_)) == _) with Nat.pow.pow_square!
+                  let H14 = H13 :: rewrite X in (Nat.lte(_, Nat.mul(_, Nat.add(X, _))) == _) with Nat.pow.pow_square!
+                  H14
+              )
+          )
     }: (u: Vector<Nat>(n), v: Vector<Nat>(n)) -> Equal(Bool,
          Nat.lte(
            Nat.pow(Vector.dot_nat(n, u, v), 2)
