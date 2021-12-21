@@ -1,0 +1,7 @@
+type App.GG.Game {
+  new(
+    phase: App.GG.Phase
+    grid: App.GG.Grid
+    mouse: Pair<U32, U32>
+  )
+}

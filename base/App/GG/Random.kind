@@ -1,0 +1,2 @@
+App.GG.Random: Random.Nat
+  Random.Nat.generator(134456, 8121, 28411)

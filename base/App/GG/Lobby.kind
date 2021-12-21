@@ -1,0 +1,5 @@
+type App.GG.Lobby {
+  new(
+    body: Maybe<App.GG.Body>
+  )
+}

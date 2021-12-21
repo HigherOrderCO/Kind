@@ -3,16 +3,13 @@ App.GG.State: App.State
   App.State.new(App.GG.State.local, Unit)
 
 type App.GG.State.local {
-  new(
-    phase: App.GG.Phase
-    grid: App.GG.Grid
-    mouse: Pair<U32, U32>
-  )
+  game(state: App.GG.Game)
+  lobby(state: App.GG.Lobby)
 }
 
 // App
 App.GG: App<App.GG.State>
-  let img = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
+  let img  = VoxBox.alloc_capacity(U32.mul(65536#32, 8#32))
   App.new<App.GG.State>(
     App.GG.init
     App.GG.draw(img)

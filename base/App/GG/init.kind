@@ -1,6 +1,11 @@
 // Initial state
 App.GG.init: App.Init<App.GG.State>
-  let grid = App.GG.init.grid
+  let lobby = App.GG.Lobby.new(none)
+  let local = App.GG.State.local.lobby(lobby)
+  App.Store.new<App.GG.State>(local, unit)
+
+App.GG.init.game(body: App.GG.Body): App.GG.State.local
+  let grid = App.GG.init.grid(body)
   let setup = App.GG.Phase.setup({[], none}, [], 0)
   let grid  = 
     let slime = App.GG.Slime.find(grid)
@@ -24,11 +29,10 @@ App.GG.init: App.Init<App.GG.State>
         let new_grid  = App.GG.Creature.modify_at(mod, slime@snd, grid)
         {phase, new_grid}
     }
-  let local = App.GG.State.local.new(phase, grid, {0, 0})
-  App.Store.new<App.GG.State>(local, unit)
+  let local = App.GG.State.local.game({phase, grid, {0, 0}})
+  local
 
-
-App.GG.init.grid: App.GG.Grid
+App.GG.init.grid(body: App.GG.Body): App.GG.Grid
   let blue = App.GG.Tile.new([], none, App.GG.Team.blue, App.GG.Tile.Statuses.pure)
   let red = App.GG.Tile.new([], none, App.GG.Team.red, App.GG.Tile.Statuses.pure)
   let list = 
@@ -43,13 +47,6 @@ App.GG.init.grid: App.GG.Grid
     ]
   let grid = BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
   let parts = App.GG.Parts.new(0,0,0)
-  let body = 
-    App.GG.Body.new(
-      App.GG.Body.Hull.new(App.GG.Body.Hull.Form.classic, parts)
-      App.GG.Body.Upper.new(parts),
-      App.GG.Body.Lower.new(parts),
-      App.GG.Body.Arms.new(parts),
-      App.GG.Body.Arms.new(parts))
   let slime = App.GG.Creature.create_slime(App.GG.Creatures.slime(body), grid)
   let minion =  App.GG.Creature.create_minion(App.GG.Creatures.minion, grid)
   let grid = App.GG.Creature.place(slime,  {1#32,1#32}, grid)

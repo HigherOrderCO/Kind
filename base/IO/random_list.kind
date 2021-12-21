@@ -1,0 +1,29 @@
+IO.random_list(
+  max: Nat
+  size: Nat
+): IO<List<Nat>>
+  if Nat.ltn(max, size) then 
+    IO { return [] }
+  else
+    IO.random_list.go(max, size, IO { return [] })
+
+IO.random_list.go(
+  max: Nat
+  size: Nat
+  result: IO<List<Nat>>
+): IO<List<Nat>>
+  case size {
+    zero: result
+    succ:
+      IO {
+        get rand   = IO.random(max)
+        log("c")
+        get result = result
+        let contains = List.found!(Nat.eql(rand), result)
+        case contains {
+          true: IO.random_list.go(max, size, IO { return result })
+          false: IO.random_list.go(max, size - 1, IO { return rand & result })
+        }
+      }
+  }
+

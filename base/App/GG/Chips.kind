@@ -2,5 +2,29 @@ App.GG.Chips: Type
   List<App.GG.Chip>
 
 App.GG.Chips.shuffle(seed: Nat, chips: App.GG.Chips): App.GG.Chips
-  let result = List.get_randoms!(seed, 50, chips)
+  let result = List.get_randoms!(seed, App.GG.Random, 50, chips, false)
   result@result
+
+// adds all chips attributes
+// starts with the base
+App.GG.Chips.attributes(base: App.GG.Attributes, chips: App.GG.Chips): App.GG.Attributes
+  let f = 
+    (chip: App.GG.Chip, attributes: App.GG.Attributes) 
+      App.GG.Attributes.add(attributes, chip@attributes)
+  let attributes = List.foldr!!(base, f, chips)
+  attributes
+
+// separate the chips in a map of: class -> chips
+App.GG.Chips.separate_classes(chips: App.GG.Chips): BBT<App.GG.Class, App.GG.Chips>
+  let acc = BBT.tip<App.GG.Class, App.GG.Chips>
+  for chip in chips with acc:
+    let list = BBT.lookup!!(App.GG.Class.cmp, chip@class, acc)
+    case list {
+      none:
+        let list = [chip]
+        BBT.insert!!(App.GG.Class.cmp, chip@class, list, acc)
+      some:
+        let list = chip & list.value
+        BBT.insert!!(App.GG.Class.cmp, chip@class, list, acc)
+    }
+  acc

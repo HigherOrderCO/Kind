@@ -2,6 +2,16 @@
 App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
   (state)
   let local = state@local
+  case local {
+    lobby: App.GG.Lobby.draw(local.state)
+    game:  App.GG.draw.game(local.state, img)
+  }
+
+
+App.GG.draw.game(
+  game: App.GG.Game
+  img: VoxBox
+): DOM
   <div style={
     "height": "max(100%, 600px)"
     "width": "100vw"
@@ -22,10 +32,10 @@ App.GG.draw(img: VoxBox): App.Draw<App.GG.State>
             "scale": "4"
           },
           {},
-          let bar = case local@phase as phase {setup: 0#64, game: phase.turn_bar} 
-          let img = App.GG.draw.grid(local, img)
+          let bar = case game@phase as phase {setup: 0#64, game: phase.turn_bar} 
+          let img = App.GG.draw.grid(game, img)
           let img = App.GG.draw.turn_bar(bar, img)
-          App.GG.draw.setup(local@phase,img))
+          App.GG.draw.setup(game@phase,img))
       }</div>
   </div>
 
@@ -118,11 +128,11 @@ App.GG.draw.setup.chips.selected_chip(
 
 // Draws the grid
 App.GG.draw.grid(
-  local: App.GG.State.local
+  game: App.GG.Game
   img: VoxBox
 ): VoxBox
-  for key:val in local@grid with img:
-    App.GG.draw.tile(key, val, {32,32}, local, img)
+  for key:val in game@grid with img:
+    App.GG.draw.tile(key, val, {32,32}, game, img)
   img
 
 // Draws a tile and its contents
@@ -130,7 +140,7 @@ App.GG.draw.tile(
   coord: App.GG.Coord,
   tile: App.GG.Tile,
   tile_size: Pair<U32, U32>,
-  local: App.GG.State.local
+  game: App.GG.Game
   img: VoxBox
 ): VoxBox
   let {x, y} = App.GG.Coord.to_xy(coord)
@@ -158,7 +168,7 @@ App.GG.draw.tile(
           let current = actions@current
           without current: img
           open current
-          let result = current@effect(coord, App.GG.Effect.Origin.creature, local)
+          let result = current@effect(coord, App.GG.Effect.Origin.creature, game)
           case result {
             err: img
             new: result.img(App.GG.Team.eql(App.GG.Team.red, creature.value@team), img)
@@ -170,7 +180,7 @@ App.GG.draw.tile(
   for projectile in tile@projectiles with pair:
     let {idx, img} = pair
     let origin = App.GG.Effect.Origin.projectile(idx)
-    let result = projectile@effect(coord, origin, local)
+    let result = projectile@effect(coord, origin, game)
     case result {
       err: {idx + 1, img}
       new: {idx + 1, result.img(App.GG.Team.eql(App.GG.Team.red, projectile@info@team), img)}
