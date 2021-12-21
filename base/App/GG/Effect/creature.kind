@@ -4,7 +4,7 @@ App.GG.Effect.creature.is_enemy(coord: App.GG.Coord): App.GG.Effect<Bool>
   let bool =
     Maybe {
       get creature = App.GG.Creature.get(coord, grid)
-      get team  = App.GG.Effect.team.get(center, origin, grid)
+      get team  = App.GG.Team.get(center, origin, grid)
       let bool = App.GG.Team.eql(creature@team, team)
       return not(bool) 
     } <> false
@@ -18,7 +18,7 @@ App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): 
       get tile = App.GG.Grid.get(pos, grid)
       get creature = tile@creature
       let hp = creature@hp
-      let new_hp = I32.max(hp + dmg, 0)
+      let new_hp = I32.max(hp - dmg, 0)
       let new_creature = creature@hp <- new_hp
       let new_tile = tile@creature <- some(new_creature)
       let real_dmg = hp - new_hp
@@ -67,6 +67,3 @@ App.GG.Effect.creature.modify_at(mod: App.GG.Creature -> App.GG.Creature, pos: A
   let new_grid = App.GG.Creature.modify_at(mod, pos, local@grid)
   let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
-
-App.GG.Effect.creature.damage_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): App.GG.Effect<I32>
-  App.GG.Effect.creature.change_hp_at(I32.neg(dmg), pos, flinch)

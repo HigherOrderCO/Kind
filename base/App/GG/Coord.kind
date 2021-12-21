@@ -16,6 +16,25 @@ App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
     }
   new_coord
 
+
+App.GG.Coord.front_sized(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid, size: Nat): List<App.GG.Coord>
+  App.GG.Coord.front_sized.go(coord, [], team, grid, size)
+
+App.GG.Coord.front_sized.go(coord: App.GG.Coord, coords: List<App.GG.Coord>, team: App.GG.Team, grid: App.GG.Grid, size: Nat): List<App.GG.Coord>
+  let next_coord = 
+    case team {
+      blue: {coord@fst + 1, coord@snd}
+      red:  {coord@fst - 1, coord@snd}
+      neutral: coord
+    }
+  let tile = App.GG.Grid.get(next_coord, grid)
+  case size tile { 
+    succ some:
+      let new_list = next_coord & coords
+      let new_size = size - 1
+      App.GG.Coord.front_sized.go(next_coord, new_list, team, grid, new_size)
+    } default coords
+
 App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): Bool
   let f_tile = App.GG.Grid.get(from, grid)
   let d_tile = App.GG.Grid.get(destination, grid)
@@ -33,6 +52,23 @@ App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.G
     }
     return result
   } <> false
+
+App.GG.Coord.adjacent_all(
+  center: App.GG.Coord
+  grid: App.GG.Grid
+): List<App.GG.Coord>
+  
+    let above = App.GG.Coord.above(center)
+    let below = App.GG.Coord.below(center)
+    let {top_right, top_left} = {{above@fst + 1 , above@snd} , {above@fst - 1, above@snd}}
+    let {bot_right, bot_left} = {{below@fst + 1 , below@snd} , {below@fst - 1, below@snd}}
+    let {ctr_left, ctr_right} = {{center@fst + 1, center@snd}, {center@fst - 1, center@snd}}
+    [
+    top_left,   above   ,top_right
+    ctr_left,            ctr_right
+    bot_left,   below   ,bot_right
+    ]
+
 
 App.GG.Coord.front_all.go(
   coord: App.GG.Coord,

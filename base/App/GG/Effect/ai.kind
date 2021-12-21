@@ -50,7 +50,7 @@ App.GG.Effect.ai.run(
         let conditions = pair@snd
         let effs = effs ++ App.GG.Effect.ai.run.get_action(key, conditions, AI)
         effs
-      log("LIST LENGTH: " | Nat.show(List.length!(effs)))
+      //log("LIST LENGTH: " | Nat.show(List.length!(effs)))
       let mod = (effect: App.GG.Effect<Unit>) effect
       App.GG.Effect.multiple<App.GG.Effect<Unit>>(mod, effs)
     }
@@ -70,7 +70,7 @@ App.GG.Effect.ai.run.get_action(key: String, effs: List<Pair<I32 -> Bool, App.GG
       case effs {
         nil: []
         cons:
-          log("key: "| key | " value: " | I32.show(val.value))
+          //log("key: "| key | " value: " | I32.show(val.value))
           let condition = effs.head@fst
           let eff = effs.head@snd
           let new_eff = 

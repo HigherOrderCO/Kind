@@ -2,7 +2,7 @@ App.GG.Chip.shockwave: App.GG.Chip
   App.GG.Chip.new(
     "ShkWve"
     App.GG.Class.power
-    App.GG.Chip.shockwave.Effect(-30)
+    App.GG.Chip.shockwave.Effect(30)
     8
     App.GG.img.bazooka
     App.GG.Attributes.new(1,0,3,0)
