@@ -5,28 +5,6 @@ App.GG.Effect.generic_shoot(
   spawn_frame: U64
   final_frame: U64
   ): App.GG.Effect<Unit>
-  App.GG.Effect {
-    get creature = App.GG.Effect.creature.get
-    get center = App.GG.Effect.coord.get_center
-    get frame = App.GG.Effect.frame.get
-    App.GG.Effect.frame.inc // Increases action's frame by 1
-    without creature: App.GG.Effect.pass
-    without frame: App.GG.Effect.pass
-    App.GG.Effect {
-      if frame =? spawn_frame then // frame to spawn projectile
-          App.GG.Effect.projectile.add_at(spawn_coord, projectile)
-      else
-        App.GG.Effect.pass
-      if frame =? final_frame then
-        App.GG.Effect.actions.reset
-      else
-        App.GG.Effect.pass
-      if frame =? 0 then 
-        App.GG.Effect {
-          App.GG.Effect.chip.waste
-          App.GG.Effect.animation.update(animation) // Sets animation for creature
-        }
-      else
-        App.GG.Effect.pass
-    }
-  }
+
+  let effect = App.GG.Effect.projectile.add_at(spawn_coord, projectile)
+  App.GG.Effect.generic_attack(effect, animation, spawn_frame, final_frame)
