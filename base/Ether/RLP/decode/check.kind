@@ -15,7 +15,7 @@ Ether.RLP.decode.check(bytes: Bytes): Bool
       else
         if Ether.RLP.decode.check.split(192, bytes) then
           let {head, tail} = Ether.RLP.split.length(192, bytes)
-          Ether.RLP.decode.check(tail)
+          Ether.RLP.decode.check(head) && Ether.RLP.decode.check(tail)
         else
           false
   }
