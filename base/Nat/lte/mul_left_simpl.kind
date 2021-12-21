@@ -1,0 +1,9 @@
+Nat.lte.mul_left_simpl(
+  a: Nat
+  b: Nat
+  c: Nat
+  H: Equal(Bool, Nat.lte(Nat.mul(Nat.succ(b), a), Nat.mul(Nat.succ(b), c)), true)
+): Equal(Bool, Nat.lte(a, c), true)
+  let H1 = (H :: rewrite X in (Nat.lte(X,_) == _) with Nat.mul.comm(Nat.succ(b), a)) 
+              :: rewrite X in (Nat.lte(_,X) == _) with Nat.mul.comm(Nat.succ(b), c)
+  Nat.lte.mul_right_simpl(a,b,c,H1)

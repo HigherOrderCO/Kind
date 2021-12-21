@@ -1,0 +1,7 @@
+Nat.Order.Ineq._2am_gm_v4(
+  a: Nat
+  b: Nat
+): Nat.lte(4*(a*b), Nat.pow(a+b,2)) == true
+  let H1 = (Nat.Order.Ineq._2am_gm(a, b) :: rewrite X in (Nat.lte(X, _) == _) with Nat.double_mul!)
+         :: rewrite X in (Nat.lte(Nat.mul(2, X), _) == _) with Nat.double_mul(Nat.mul(a,b))
+  H1 :: rewrite X in (Nat.lte(X, _) == _) with Nat.mul.assoc(2, 2, Nat.mul(a, b))

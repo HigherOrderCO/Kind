@@ -1,0 +1,27 @@
+Nat.Order.Ineq.bernoulli(
+  a: Nat,
+  b: Nat,
+// 1 + a*b <= (1 + a)^b
+): Nat.lte(Nat.add(1, Nat.mul(a, b)), Nat.pow(Nat.add(1, a), b)) == true
+  case b {
+      zero: 
+        let aux = Nat.Order.refl(1+0)
+        let qed = aux :: rewrite X in (Nat.lte(1+X,1) == true) with mirror(Nat.mul.zero_right(a))
+        qed
+      succ: 
+        let aux1 = Nat.Order.Ineq.bernoulli(a, b.pred)
+        let aux2 = Nat.Order.add.right(Nat.add(1,Nat.mul(a,b.pred)), Nat.pow(Nat.add(1,a),b.pred), a, aux1)
+        let aux = Nat.add.assoc(1,Nat.mul(a,b.pred),a)
+        let aux3 = Equal.rewrite<Nat>(
+          Nat.add(Nat.add(1,Nat.mul(a,b.pred)),a), Nat.add(1,Nat.add(Nat.mul(a,b.pred),a))
+          aux,
+          (X) Equal<Bool>(Nat.lte(X,Nat.add(Nat.pow(Nat.add(1,a),b.pred),a)), true)
+          aux2
+        )
+        let aux4 = aux3 :: rewrite X in (Nat.lte(Nat.add(1, X),Nat.add(Nat.pow(Nat.add(1,a),b.pred),a)) == Bool.true) with Nat.add.comm(Nat.mul(a,b.pred),a)
+        let aux5 = aux4 :: rewrite X in (Nat.lte(Nat.add(1,Nat.add(a,X)),Nat.add(Nat.pow(Nat.add(1,a),b.pred),a)) == Bool.true) with Nat.mul.comm(a,b.pred)
+        let aux6 = aux5 :: rewrite X in (Nat.lte(Nat.add(1,X),Nat.add(Nat.pow(Nat.add(1,a),b.pred),a)) == Bool.true) with Nat.mul.comm(Nat.succ(b.pred),a)
+        let aux7 = Nat.Order.Ineq.bernoulli_lemma(a, b.pred)
+        let qed = Nat.Order.transitivity(Nat.add(1,Nat.mul(a,Nat.succ(b.pred))), Nat.add(Nat.pow(Nat.add(1,a),b.pred),a), Nat.pow(Nat.add(1,a),Nat.succ(b.pred)), aux6, aux7)
+        qed
+  }!

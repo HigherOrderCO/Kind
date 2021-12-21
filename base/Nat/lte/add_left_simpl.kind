@@ -1,0 +1,9 @@
+Nat.lte.add_left_simpl(
+  a: Nat
+  b: Nat
+  c: Nat
+  H: Equal(Bool, Nat.lte(Nat.add(b, a), Nat.add(b, c)), true)
+): Equal(Bool, Nat.lte(a, c), true)
+  let H1 = (H :: rewrite X in (Nat.lte(X,Nat.add(b,c)) == Bool.true) with Nat.add.comm(b, a)) 
+              :: rewrite X in (Nat.lte(Nat.add(a,b),X) == Bool.true) with Nat.add.comm(b, c)
+  Nat.lte.add_right_simpl(a, b, c, H1)

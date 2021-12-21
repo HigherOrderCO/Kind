@@ -1,0 +1,16 @@
+Nat.lte.mul.left(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), Bool.true)
+): Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), Bool.true)
+  case c {
+    zero: 
+        let aux = Nat.Order.refl(0)
+        (aux :: rewrite X in (Equal<Bool>(Nat.lte(X, 0), Bool.true)) with mirror(Nat.mul.zero_left(a)))
+             :: rewrite X in (Equal<Bool>(Nat.lte(Nat.mul(0,a), X), Bool.true)) with mirror(Nat.mul.zero_left(b))
+    succ:
+      let ind = Nat.Order.mul.left(a, b, c.pred, Hyp)
+      let qed = Nat.Order.add.combine(a, b, Nat.mul(c.pred,a),Nat.mul(c.pred,b), Hyp, ind)
+      qed
+  }: Equal<Bool>(Nat.lte(Nat.mul(c, a), Nat.mul(c, b)), true)

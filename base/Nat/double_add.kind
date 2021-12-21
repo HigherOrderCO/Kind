@@ -1,0 +1,24 @@
+Nat.double_add(a: Nat): (a+a) == Nat.double(a)
+  case a{
+    zero: refl
+    succ: 
+      let h = Nat.double_add(a.pred)
+      let aux1 = apply(Nat.add(1+1),h)
+      let aux2 = aux1 :: rewrite X in (X == Nat.add(Nat.add(1,1),Nat.double(a.pred))) with Nat.add.comm(Nat.add(1,1),Nat.add(a.pred,a.pred))
+      let aux3 = aux2 :: rewrite X in (Nat.add(Nat.add(a.pred,a.pred),Nat.add(1,1)) == X) with Nat.add.comm(Nat.add(1,1),Nat.double(a.pred))
+      let h1 = aux3 :: rewrite X in (X == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with Nat.add.assoc(a.pred,a.pred,Nat.add(1,1))
+      let h2 = h1 :: rewrite X in (Nat.add(a.pred,X) == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with mirror(Nat.add.assoc(a.pred,1,1))
+      let h3 = h2 :: rewrite X in (Nat.add(a.pred,Nat.add(X,1)) == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with Nat.add.succ_right(a.pred,0)
+      let h4 = h3 :: rewrite X in (Nat.add(a.pred,Nat.add(Nat.succ(X),1)) == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with Nat.add.zero_right(a.pred)
+      let h5 = h4 :: rewrite X in (Nat.add(a.pred,X) == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with Nat.add.comm(Nat.succ(a.pred),1)
+      let h6 = h5 :: rewrite X in (X == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with mirror(Nat.add.assoc(a.pred,1,Nat.succ(a.pred)))
+      let h7 = h6 :: rewrite X in (Nat.add(X,Nat.succ(a.pred)) == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with Nat.add.succ_right(a.pred,0)
+      let h8 = h7 :: rewrite X in (Nat.add(Nat.succ(X),Nat.succ(a.pred)) == Nat.add(Nat.double(a.pred),Nat.add(1,1))) with Nat.add.zero_right(a.pred)
+      let h9 = h8 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == X) with mirror(Nat.add.assoc(Nat.double(a.pred),1,1))
+      let h10 = h9 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == Nat.add(X,1)) with Nat.add.succ_right(Nat.double(a.pred),0)
+      let h11 = h10 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == Nat.add(Nat.succ(X),1)) with Nat.add.zero_right(Nat.double(a.pred))
+      let h12 = h11 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == X) with Nat.add.succ_right(Nat.succ(Nat.double(a.pred)),0)
+      let qed = h12 :: rewrite X in (Nat.add(Nat.succ(a.pred),Nat.succ(a.pred)) == Nat.succ(X)) with Nat.add.zero_right(Nat.succ(Nat.double(a.pred)))
+      qed
+      
+  }!

@@ -1,0 +1,16 @@
+Nat.mul.binom_dist(
+  a: Nat
+  b: Nat
+  c: Nat
+  d: Nat
+): ((a + b)*(c + d)) == ((a*c) + ((b*d) + ((a*d) + (c*b))))
+  let H1 = Nat.mul.distrib_left(a + b, c, d)
+  let H2 = H1 :: rewrite X in (_== Nat.add(X, _)) with Nat.mul.distrib_right!!!
+  let H3 = H2 :: rewrite X in (_== Nat.add(_, X)) with Nat.mul.distrib_right!!!
+  let H4 = H3 :: rewrite X in (_== Nat.add(Nat.add(_,X),_)) with Nat.mul.comm!!
+  let H5 = H4 :: rewrite X in (_== X) with Nat.add.assoc!!!
+  let H6 = H5 :: rewrite X in (_== Nat.add(_, Nat.add(_, X))) with Nat.add.comm!!
+  let H7 = H6 :: rewrite X in (_== Nat.add(_, X)) with mirror(Nat.add.assoc!!!)
+  let H8 = H7 :: rewrite X in (_== Nat.add(_, Nat.add(X, _))) with Nat.add.comm!!
+  let H9 = H8 :: rewrite X in (_== Nat.add(_, X)) with Nat.add.assoc!!!
+  H9 :: rewrite X in (_== Nat.add(_, Nat.add(_, X))) with Nat.add.comm!!

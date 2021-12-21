@@ -1,0 +1,4 @@
+Nat.double_mul(a: Nat): Nat.double(a) == Nat.mul(2,a)
+  let h = Nat.reflexivity(a+a)
+  let h1 = h :: rewrite X in (X == Nat.add(a,a)) with Nat.double_add(a)
+  h1 :: rewrite X in (Nat.double(a) == Nat.add(a,X)) with mirror(Nat.add.zero_right(a))
