@@ -1,3 +1,0 @@
-Test: _
-  log(String.to_hex("dog"))
-  Bytes.to_hex(Bytes.from_hex(String.to_hex("dog")))
