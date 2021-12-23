@@ -3,7 +3,7 @@ Ether.RLP.encode(tree: Ether.RLP): Bytes
     data:
       let length_one = Nat.eql(List.length!(tree.value),1)
       let nat_byte = U8.to_nat(List.head_with_default!(0#8,tree.value))
-      let small_byte = nat_byte <? 127
+      let small_byte = nat_byte <=? 127
       if Bool.and(length_one, small_byte) then
         tree.value
       else
