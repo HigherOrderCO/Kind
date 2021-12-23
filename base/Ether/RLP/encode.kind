@@ -1,11 +1,16 @@
 Ether.RLP.encode(tree: Ether.RLP): Bytes
   case tree {
     data:
-      if Bool.and(Nat.eql(List.length!(tree.value),1), Nat.lte(U8.to_nat((List.head_with_default!(0#8,tree.value))), 127)) then
+      let length_one = Nat.eql(List.length!(tree.value),1)
+      let nat_byte = U8.to_nat(List.head_with_default!(0#8,tree.value))
+      let small_byte = nat_byte <? 127
+      if Bool.and(length_one, small_byte) then
         tree.value
       else
-        List.concat!(Ether.RLP.encode.length(128, List.length!(tree.value)), tree.value)
+        let encoded_length = Ether.RLP.encode.length(128, List.length!(tree.value))
+        List.concat!(encoded_length, tree.value)
     node:
+      let encoded_length = Ether.RLP.encode.length(192, List.length!(rest))
       let rest = Ether.RLP.encode.many(tree.child)
-      List.concat!(Ether.RLP.encode.length(192, List.length!(rest)), rest)
+      List.concat!(encoded_length, rest)
   }
