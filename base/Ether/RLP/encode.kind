@@ -10,7 +10,7 @@ Ether.RLP.encode(tree: Ether.RLP): Bytes
         let encoded_length = Ether.RLP.encode.length(128, List.length!(tree.value))
         List.concat!(encoded_length, tree.value)
     node:
-      let encoded_length = Ether.RLP.encode.length(192, List.length!(rest))
       let rest = Ether.RLP.encode.many(tree.child)
+      let encoded_length = Ether.RLP.encode.length(192, List.length!(rest))
       List.concat!(encoded_length, rest)
   }
