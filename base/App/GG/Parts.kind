@@ -6,6 +6,8 @@ type App.GG.Parts {
   )
 }
 
+App.GG.Parts.quantity: Nat
+  3
 
 App.GG.Parts.hull(form: App.GG.Body.Hull.Form): App.GG.Chips
   case form {
@@ -20,4 +22,28 @@ App.GG.Parts.chips_list(
   let triple = App.GG.Body.generic(parts, chips)
   let chips = [triple@fst, triple@snd, triple@trd]
   chips
+
+// generate a part from a list 
+App.GG.Parts.from_list(
+  default: Nat
+  list: List<Nat>
+): App.GG.Parts
+  {
+    list[0] <> default
+    list[1] <> default
+    list[2] <> default
+  }
+
+// generate a random part
+App.GG.Parts.random(seed: Nat, chips: App.GG.Chips): App.GG.Parts
+  let parts_quantity = App.GG.Parts.quantity
+  let max = List.length!(chips)
+  let random_list = List.get_randoms!(seed, App.GG.Random, parts_quantity, [0 to max], true)
+  let random_list = random_list@result
+  let parts = App.GG.Parts.from_list(parts_quantity, random_list)
+
+  parts
   
+App.GG.Parts.show(parts: App.GG.Parts): String
+  let f = Nat.show
+  "[" | f(parts@fst) | f(parts@snd) | f(parts@trd) | "]"

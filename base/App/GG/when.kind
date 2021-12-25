@@ -1,7 +1,83 @@
-// Event handler
 App.GG.when: App.When<App.GG.State>
   (event, state)
   let local = state@local
+
+  case local {
+    lobby: App.GG.when.lobby(event, local.state)
+    game:  App.GG.when.game(event, local.state)
+  }
+
+App.GG.when.lobby(
+  event: App.Event,
+  local: App.GG.Lobby
+): IO<Maybe<App.State.local(App.GG.State)>>
+  case event {
+    init:
+      App.GG.when.lobby.init(local)
+    mouse_click:
+      App.GG.when.lobby.mouse_click(local, event.id)
+  } default App.pass!
+
+App.GG.when.lobby.init(
+  local: App.GG.Lobby
+): IO<Maybe<App.State.local(App.GG.State)>>
+  IO {
+    get seed = IO.get_time
+    let body = App.GG.Body.random(seed)
+    let new_local = local@body <- some(body)
+    let new_state = App.GG.State.local.lobby(new_local)
+    App.set_local!(new_state)
+  }
+
+App.GG.when.lobby.mouse_click(
+  local: App.GG.Lobby
+  id: String
+): IO<Maybe<App.State.local<App.GG.State>>>
+  switch String.starts_with(id) {
+    "start-button":
+      use body = local@body abort App.pass!
+      let new_local = App.GG.init.game(body)
+      App.set_local!(new_local)
+    
+    "randomize-":
+      let part = String.drop(10, id)
+
+      if part =? "all" then
+        IO {
+          get seed = IO.get_time
+          let body = App.GG.Body.random(seed)
+          let new_local = local@body <- some(body)
+          let new_state = App.GG.State.local.lobby(new_local)
+          App.set_local<App.GG.State>(new_state)
+        }
+      else
+        use body = local@body abort App.pass!
+        let {chips, fragment} = switch String.eql(part) {
+          "Hull": 
+            { App.GG.Parts.hull(body@hull@form), App.GG.Body.Fragment.hull }
+          "Arm1": 
+            { App.GG.Body.Arms.chips, App.GG.Body.Fragment.arm_1 }
+          "Arm2": 
+            { App.GG.Body.Arms.chips, App.GG.Body.Fragment.arm_2 } 
+          "Upper Body": 
+            { App.GG.Body.Upper.chips, App.GG.Body.Fragment.upper }
+          "Lower Body": 
+            { App.GG.Body.Lower.chips, App.GG.Body.Fragment.lower }
+        } default { [], App.GG.Body.Fragment.hull }
+        IO {
+          get seed = IO.get_time
+          let body = App.GG.Body.Fragment.random(seed, chips, fragment, body)
+          let new_local = local@body <- some(body)
+          let new_state = App.GG.State.local.lobby(new_local)
+          App.set_local<App.GG.State>(new_state)
+        }
+  } default App.pass!
+
+// Event handler
+App.GG.when.game(
+  event: App.Event,
+  local: App.GG.Game
+): IO<Maybe<App.State.local(App.GG.State)>>
   let phase = local@phase
   case event {
     // init: 
@@ -20,6 +96,7 @@ App.GG.when: App.When<App.GG.State>
           let new_local = App.GG.when.update_grid(local)
           let new_phase = App.GG.when.update_phase(phase)
           let new_local = new_local@phase <- new_phase
+          let new_local = App.GG.State.local.game(new_local)
           App.set_local<App.GG.State>(new_local)
       }
       
@@ -59,11 +136,13 @@ App.GG.when: App.When<App.GG.State>
             // X 
             88#16:
               let new_local = App.GG.when.start_charge(local)
+              let new_local = App.GG.State.local.game(new_local)
               App.set_local<App.GG.State>(new_local)
             // Spacebar
             32#16: 
               let new_grid = App.GG.when.use_chip(local@grid)
               let new_local = local@grid <- new_grid
+              let new_local = App.GG.State.local.game(new_local)
               App.set_local<App.GG.State>(new_local)
             // Return
             13#16: App.GG.when.game_to_setup(local)
@@ -78,12 +157,14 @@ App.GG.when: App.When<App.GG.State>
             88#16: 
               let new_grid = App.GG.when.basic_attack(local@grid)
               let new_local = local@grid <- new_grid
+              let new_local = App.GG.State.local.game(new_local)
               App.set_local<App.GG.State>(new_local)
           }default App.pass<App.GG.State>
       }
     mouse_move:
       // log("x: " | U32.show(event.mouse_pos@fst) | "  y: " | U32.show(event.mouse_pos@snd))
       let new_local = local@mouse <- event.mouse_pos
+      let new_local = App.GG.State.local.game(new_local)
       App.set_local<App.GG.State>(new_local)
     mouse_down:
       App.GG.when.click_element(local, local@mouse)      
@@ -92,7 +173,7 @@ App.GG.when: App.When<App.GG.State>
 // ============================================================================
 // Transitions between game phases
 
-App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
+App.GG.when.setup_to_game(local: App.GG.Game): IO<Maybe<App.State.local<App.GG.State>>>
   let grid = local@grid
   case local@phase as phase {
     setup: 
@@ -122,11 +203,12 @@ App.GG.when.setup_to_game(local: App.GG.State.local): IO<Maybe<App.State.local<A
       let new_phase = App.GG.Phase.game(0#64)
       let new_local = local@grid <- new_grid
       let new_local = new_local@phase <- new_phase
+      let new_local = App.GG.State.local.game(new_local)
       App.set_local<App.GG.State>(new_local)
     game: App.pass<App.GG.State>
   }
 
-App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
+App.GG.when.game_to_setup(local: App.GG.Game): IO<Maybe<App.State.local<App.GG.State>>>
   let grid = local@grid
   case local@phase as phase {
     setup: App.pass<App.GG.State>
@@ -153,6 +235,7 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
             let new_grid  = App.GG.Creature.modify_at(mod, coord, grid)
             let new_local = local@phase <- phase
             let new_local = new_local@grid <- new_grid
+            let new_local = App.GG.State.local.game(new_local)
             App.set_local<App.GG.State>(new_local)
         }
       else
@@ -165,7 +248,7 @@ App.GG.when.game_to_setup(local: App.GG.State.local): IO<Maybe<App.State.local<A
 // when users press space
 // get the selected chip 
 App.GG.when.select_chip.space(
-  local: App.GG.State.local
+  local: App.GG.Game
 ): IO<Maybe<App.State.local<App.GG.State>>>
   open local
   case local.phase as phase {
@@ -180,14 +263,15 @@ App.GG.when.select_chip.space(
         // new_table without the chip
         let new_local = local@phase <- App.GG.when.get_chip(index, phase)
         
-        return App.set_local<App.GG.State>(new_local)
+        let new_local = App.GG.State.local.game(new_local)return 
+        App.set_local<App.GG.State>(new_local)
       } <> App.pass<App.GG.State>
   } default App.pass<App.GG.State>
 
 // when user press the arrows buttons
 // move the chip selection
 App.GG.when.move.chip_selection(
-  local: App.GG.State.local 
+  local: App.GG.Game 
   arrow: App.GG.Arrow
 ): IO<Maybe<App.State.local<App.GG.State>>>
   open local
@@ -214,6 +298,7 @@ App.GG.when.move.chip_selection(
           table@selected <- some(new_value)
       }
       let new_local = local@phase <- App.GG.Phase.setup(new_table, phase.hand, phase.energy)
+      let new_local = App.GG.State.local.game(new_local)
       App.set_local!(new_local)
   } default App.pass!
 
@@ -292,9 +377,10 @@ App.GG.when.get_energy_cost.extra(chip: App.GG.Chip, hand: App.GG.Chips): I32
   }
 
 // Returns the last selected chip onto the table
-App.GG.when.return_chip(local: App.GG.State.local): IO<Maybe<App.State.local<App.GG.State>>>
+App.GG.when.return_chip(local: App.GG.Game): IO<Maybe<App.State.local<App.GG.State>>>
   let new_phase = App.GG.when.return_chip.phase(local@phase)
   let new_local = local@phase <- new_phase
+  let new_local = App.GG.State.local.game(new_local)
   App.set_local<App.GG.State>(new_local)
 
 // function used to return a chip
@@ -341,7 +427,7 @@ App.GG.when.return_chip.go(chip: App.GG.Chip, slots: List<App.GG.Table.Slot>): L
 // Functions to get chip from mouse
 
 // Gets chip with mouse based on mouse's position
-App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<Maybe<App.State.local<App.GG.State>>>
+App.GG.when.click_element(local: App.GG.Game, mouse: Pair<U32, U32>): IO<Maybe<App.State.local<App.GG.State>>>
   let phase = local@phase
   case phase {
     setup:
@@ -361,7 +447,8 @@ App.GG.when.click_element(local: App.GG.State.local, mouse: Pair<U32, U32>): IO<
             // Places the chip in your hand if able
             let updated_phase = App.GG.when.get_chip(index, phase)
             let new_local = local@phase <- updated_phase
-            return App.set_local<App.GG.State>(new_local)
+            let new_local = App.GG.State.local.game(new_local)return 
+            App.set_local<App.GG.State>(new_local)
           } <> App.pass<App.GG.State>
       }default App.pass<App.GG.State>
     game: App.pass<App.GG.State>
@@ -403,7 +490,7 @@ App.GG.when.chip(mouse_pos: Pair<U32, U32>): Maybe<Nat>
 // Game phase functions
 
 // Moves the character to a direction
-App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
+App.GG.when.move(local: App.GG.Game, arrow: App.GG.Arrow): IO<Maybe<App.State.local<App.GG.State>>>
   let grid            = local@grid
   // Finds your character
   let slime_coord     = App.GG.Slime.find(grid)
@@ -415,6 +502,7 @@ App.GG.when.move(local: App.GG.State.local, arrow: App.GG.Arrow): IO<Maybe<App.S
   let mod_creature    = App.GG.Actions.add(move_action)
   let new_grid        = App.GG.Creature.modify_at(mod_creature, coord, grid)
   let new_local       = local@grid <- new_grid
+  let new_local = App.GG.State.local.game(new_local)
   App.set_local<App.GG.State>(new_local)
 
 // Updates turn bar 
@@ -428,14 +516,14 @@ App.GG.when.update_phase(phase: App.GG.Phase): App.GG.Phase
 // updates all tiles that has has_acted as false
 // This must be done as there are projectiles or creatures that will move
 // during a frame, and these should not run twice.
-App.GG.when.update_grid(local: App.GG.State.local): App.GG.State.local
+App.GG.when.update_grid(local: App.GG.Game): App.GG.Game
   for coord:tile in local@grid with local:
     App.GG.when.update_tile.has_acted(coord, local)
   for coord:tile in local@grid with local:
     App.GG.when.update_tile.run(coord, local)
   local
 
-App.GG.when.update_tile.has_acted(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.when.update_tile.has_acted(coord: App.GG.Coord, local: App.GG.Game): App.GG.Game
   let grid = local@grid
   // Resets Creature's has_acted 
   let new_grid = App.GG.Creature.reset_actions(coord, grid)
@@ -444,7 +532,7 @@ App.GG.when.update_tile.has_acted(coord: App.GG.Coord, local: App.GG.State.local
   let new_local = local@grid <- new_grid 
   new_local
 
-App.GG.when.update_tile.run(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.when.update_tile.run(coord: App.GG.Coord, local: App.GG.Game): App.GG.Game
   // If Creature hasn't acted yet, update its animation frame, runs its action's Effect and if there isn't a current action, moves next action to current.
   let new_local = App.GG.Creature.run(coord, local)
   // If Projectile hasn't acted yet, run its action's effect and update the projectile's frame
@@ -456,7 +544,7 @@ App.GG.when.update_tile.run(coord: App.GG.Coord, local: App.GG.State.local): App
   new_local
 
 // Starts charging if the creature isn't charging yet
-App.GG.when.start_charge(local: App.GG.State.local): App.GG.State.local
+App.GG.when.start_charge(local: App.GG.Game): App.GG.Game
   let grid = local@grid
   let new_grid = 
     Maybe {

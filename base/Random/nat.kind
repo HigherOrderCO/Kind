@@ -1,0 +1,7 @@
+Random.Nat: Type
+  Nat -> Nat
+
+// generate a linear congruential generator
+Random.Nat.generator(m: Nat, i: Nat, q: Nat): Random.Nat
+  (seed: Nat)
+    Nat.mod(Nat.add(Nat.mul(seed, m), i), q)

@@ -1,0 +1,4 @@
+type App.GG.Stage {
+  game(stage: App.GG.Game)
+  lobby(stage: App.GG.Lobby)
+}

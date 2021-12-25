@@ -1,5 +1,6 @@
 Test: _
-  let f = p(3)
-  F64.show(f)
-  p(n: Nat): F64
-  ((5.0/100.0) * (95.0/100.0) * p(n-2) + (95.0/100.0 )*p(n-1))/2.0
+  IO {
+    get seed = IO.get_time
+    let r = List.get_randoms!(seed, 9, [0 to 10], true)
+    IO.print(List.show!(Nat.show, r@result))
+  }
