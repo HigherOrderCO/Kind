@@ -227,6 +227,12 @@ App.GG.Creature.basic_attack_dmg(creature: App.GG.Creature): I32
   let total_dmg = base_dmg + extra_dmg
   I32.neg(total_dmg)
 
+App.GG.Creature.max_hp_percentage(creature: App.GG.Creature): I32
+  let max_hp = App.GG.Monster.get_max_hp(creature@category)
+  let actual_hp = creature@hp
+  actual_hp/max_hp
+
+
 App.GG.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Attributes>
   case creature@category as monster {
     minion: none
@@ -266,6 +272,7 @@ App.GG.Creature.update_animation(coord: App.GG.Coord, local: App.GG.State.local)
   let new_grid = App.GG.Creature.modify_at(mod, coord, local@grid)
   let new_local = local@grid <- new_grid
   new_local
+
 // If current action is "none", moves next action to its place
 App.GG.Creature.update_actions(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   let grid = local@grid

@@ -9,7 +9,11 @@ App.GG.Body.Arms.chips: App.GG.Chips
     //App.GG.Chip.long_sword
     //App.GG.Chip.x_strike
     //App.GG.Chip.cannon
-    App.GG.Chip.bazooka
+    //App.GG.Chip.bazooka
+    //App.GG.Chip.energy_strike
+    //App.GG.Chip.quick_strike
+    //App.GG.Chip.poison_bomb // TODO : Not Finished
+    //App.GG.Chip.paralyzing_ray //TODO: Not Finished
   ]
 
 App.GG.Body.Arms.get_chips_1(body: App.GG.Body): App.GG.Chips

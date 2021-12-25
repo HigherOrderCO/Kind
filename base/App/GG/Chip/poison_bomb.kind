@@ -1,0 +1,64 @@
+App.GG.Chip.poison_bomb: App.GG.Chip
+  App.GG.Chip.new(
+    "PseBmb"
+    App.GG.Class.strength
+    App.GG.Chip.poison_bomb.Effect(50) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.poison_bomb.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
+      let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile_effect = App.GG.Chip.poison_bomb.Projectile.Effect(dmg) 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
+      let spawn_coord = front(center) // Gets the coordinate in front of the creature
+      App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+App.GG.Chip.poison_bomb.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+  let max_frame = 40#64
+  App.GG.Effect {
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get team = App.GG.Effect.team.get
+    without frame: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    let eff = 
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile) //change to coord
+        get can_hit = App.GG.Effect.projectile.can_hit(center) //change to coord
+        App.GG.Effect.projectile.hit(dmg, center) // change to coord
+        return unit
+      }
+    App.GG.Effect {
+      eff
+      if (frame % max_frame) =? 0 then // At frame 30
+        App.GG.Effect { 
+          get best_target = App.GG.Effect.coord.best_target
+          let no_target = {center@fst + 1, center@snd}
+          without best_target: App.GG.Effect { App.GG.Effect.projectile.move(no_target) return unit }
+          App.GG.Effect { 
+          let next_coord = App.GG.Coord.projectile_chase(center, best_target)
+          App.GG.Effect.projectile.move(next_coord)
+            return unit
+          }
+        }
+      else
+        App.GG.Effect.pass
+    }
+  }

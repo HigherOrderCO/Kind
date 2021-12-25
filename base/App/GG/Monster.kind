@@ -21,3 +21,10 @@ App.GG.Monster.to_vbox(monster: App.GG.Monster): App.GG.Animation -> U64 -> VoxB
     minion: monster.data@sprite
   }
 
+App.GG.Monster.get_max_hp(monster: App.GG.Monster): I32
+  case monster { 
+    minion:
+      monster.data@hp
+    slime:
+      monster.attributes@hp
+  }

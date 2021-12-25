@@ -10,6 +10,7 @@ App.GG.Effect.creature.is_enemy(coord: App.GG.Coord): App.GG.Effect<Bool>
     } <> false
   App.GG.Effect.Result.new!(bool, center, origin, local, (enemy, img) img, 0, "")
 
+
 App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): App.GG.Effect<I32>
   (center, origin, local)
   let grid = local@grid
@@ -45,6 +46,32 @@ App.GG.Effect.creature.change_hp_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): 
     } <> {+0#32, grid}
     let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(real_dmg, center, origin, new_local, (enemy, img) img, 0, "")
+
+
+App.GG.Effect.creature.change_energy_at(val: I32, pos: App.GG.Coord): App.GG.Effect<I32>
+  (center, origin, local)
+  let grid = local@grid
+  let {real_val, new_grid} = 
+    Maybe { 
+      get tile = App.GG.Grid.get(pos, grid)
+      get creature = tile@creature
+      let category = creature@category
+      let {mod_monster, energy} = case category {
+        minion: {category, +0#32}
+        slime:
+          let new_energy = I32.max(category.energy - val , 0)
+          {App.GG.Monster.slime(category.data, category.attributes, category.charge, category.hand, category.folder, new_energy), category.energy}
+      }
+      let modif_energy = I32.max(energy - val , 0)
+      let new_creature = creature@category <- mod_monster
+      let new_tile = tile@creature <- some(new_creature)
+      let real_val = energy - modif_energy
+      let new_grid = App.GG.Grid.set(pos, new_tile, grid)
+
+      return {real_val, new_grid}
+    } <> {+0#32, grid}
+    let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(real_val, center, origin, new_local, (enemy, img) img, 0, "")
 
 App.GG.Effect.creature.get: App.GG.Effect<Maybe<App.GG.Creature>>
   (center, origin, local)

@@ -136,7 +136,7 @@ App.GG.Creatures.minion.Effect.attack: App.GG.Effect<Unit>
     // without frame: App.GG.Effect.pass
     App.GG.Effect {
       // App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
-      let dmg = -50 :: I32
+      let dmg = 50 :: I32
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
       let projectile_effect = App.GG.Chip.shockwave.Projectile.Effect(dmg, true)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
