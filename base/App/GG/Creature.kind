@@ -49,52 +49,12 @@ type App.GG.Creature.Statuses {
   new(
     poison: Maybe<App.GG.Creature.Status>
     stun: Maybe<App.GG.Creature.Status>
+    barrier: Maybe<App.GG.Creature.Status>
   )
 }
 
-type App.GG.Creature.Status {
-  // invulnerable(duration: U64)
-  // intangible(duration: U64)
-  // poison(duration: U64, damage: I32)
-  // root(duration: U64)
-  poison(duration: U64, damage: I32)
-  stun(category: App.GG.Creature.Status.Stun)
-}
-
 App.GG.Creature.Statuses.pure: App.GG.Creature.Statuses
-  App.GG.Creature.Statuses.new(none, none)
-
-type App.GG.Creature.Status.Stun {
-  flinch
-  shock
-}
-
-App.GG.Creature.Status.del_from_nat(count: Nat, creature: App.GG.Creature): App.GG.Creature
-  let statuses = creature@statuses
-  let new_statuses = 
-    switch Nat.eql(count) {
-    0: statuses@poison <- none
-    1: statuses@stun <- none
-  }default statuses
-  creature@statuses <- new_statuses
-
-App.GG.Creature.Status.add(status: App.GG.Creature.Status, creature: App.GG.Creature): App.GG.Creature
-  let statuses = creature@statuses
-  let new_statuses = 
-    case status {
-      poison: statuses@poison <- some(status)
-      stun: statuses@stun <- some(status)
-    }
-  creature@statuses <- new_statuses
-
-App.GG.Creature.Status.get_from_nat(count: Nat, statuses: App.GG.Creature.Statuses): Maybe<Maybe<App.GG.Creature.Status>>
-  switch Nat.eql(count) {
-    0: some(statuses@poison)
-    1: some(statuses@stun)
-  }default none
-
-App.GG.Creature.Status.update_grid(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
-  App.GG.Creature.Status.update_grid.go(0, coord, local)
+  App.GG.Creature.Statuses.new(none, none, none)
 
 App.GG.Creature.Status.update_grid.go(count: Nat, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
 let grid = local@grid
@@ -105,14 +65,61 @@ let grid = local@grid
       get status = App.GG.Creature.Status.get_from_nat(count, statuses)
       let new_local = 
         without status: local
-        case status {
-          poison: App.GG.Creature.Status.update_poison(status, coord, local)
-          stun: App.GG.Creature.Status.update_stun(status, coord, local)
-        }default local
+        App.GG.Creature.Status.update_function(status, coord, local)
       let new_local = App.GG.Creature.Status.update_grid.go(count +1, coord, new_local)
       return new_local
     } <> local
   new_local
+
+type App.GG.Creature.Status {
+  // invulnerable(duration: U64)
+  // intangible(duration: U64)
+  // poison(duration: U64, damage: I32)
+  // root(duration: U64)
+  barrier(duration: U64, health: I32)
+  poison(duration: U64, damage: I32)
+  stun(category: App.GG.Creature.Status.Stun)
+}
+
+App.GG.Creature.Status.del_from_nat(count: Nat, creature: App.GG.Creature): App.GG.Creature
+  let statuses = creature@statuses
+  let new_statuses = 
+    switch Nat.eql(count) {
+    0: statuses@poison <- none
+    1: statuses@stun <- none
+    2: statuses@barrier <- none
+  }default statuses
+  creature@statuses <- new_statuses
+
+App.GG.Creature.Status.add(status: App.GG.Creature.Status, creature: App.GG.Creature): App.GG.Creature
+  let statuses = creature@statuses
+  let new_statuses = 
+    case status {
+      poison: statuses@poison <- some(status)
+      stun: statuses@stun <- some(status)
+      barrier: statuses@barrier <- some(status)
+    }
+  creature@statuses <- new_statuses
+
+App.GG.Creature.Status.get_from_nat(count: Nat, statuses: App.GG.Creature.Statuses): Maybe<Maybe<App.GG.Creature.Status>>
+  switch Nat.eql(count) {
+    0: some(statuses@poison)
+    1: some(statuses@stun)
+    2: some(statuses@barrier)
+  }default none
+
+App.GG.Creature.Status.update_function(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  case status {
+    poison: App.GG.Creature.Status.update_poison(status, coord, local)
+    stun: App.GG.Creature.Status.update_stun(status, coord, local)
+    barrier: App.GG.Creature.Status.update_barrier(status, coord, local)
+  }default local
+
+App.GG.Creature.Status.update_grid(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  App.GG.Creature.Status.update_grid.go(0, coord, local)
+
+// =============================================================
+// Poison Status
 
 App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   case status {
@@ -130,7 +137,7 @@ App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.
           new_grid
       let new_local = local@grid <- new_grid
       if (status.duration % 10) =? 0 then 
-        let eff = App.GG.Effect.creature.change_hp_at(status.damage, coord, false)
+        let eff = App.GG.Effect.change_hp(status.damage, false, coord)
         let result = eff(coord, App.GG.Effect.Origin.creature, new_local)
         case result {err: new_local, new: result.local}
       else
@@ -138,20 +145,48 @@ App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.
 
   }default local
 
+
+// =============================================================
+// Stun Status
+
+type App.GG.Creature.Status.Stun {
+  flinch
+  shock
+}
+
 App.GG.Creature.Status.update_stun(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
   case status {
     stun: 
+      // let grid = local@grid
+      // let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category))
+      // let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
+      // let new_local    = local@grid <- new_grid
+      // new_local
+      local
+  }default local
+
+// =============================================================
+// Barrier Status
+
+App.GG.Creature.Status.update_barrier(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+  case status {
+    barrier:
       let grid = local@grid
-      let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category))
-      let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
-      let new_local    = local@grid <- new_grid
+      let new_grid = 
+        if status.duration =? 0 then
+          let new_creature = App.GG.Creature.Status.del_from_nat(2)
+          let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
+          new_grid
+        else
+          let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.barrier(status.duration - 1, status.health))
+          let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
+          new_grid
+      let new_local = local@grid <- new_grid
       new_local
   }default local
+
+
 // New Status
-
-
-
-
 // App.GG.Creature.status_update(
 //   creature: App.GG.Creature
 // ): App.GG.Creature

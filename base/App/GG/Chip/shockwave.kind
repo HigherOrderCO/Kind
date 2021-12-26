@@ -65,7 +65,7 @@ App.GG.Chip.shockwave.Projectile.Effect(dmg: I32, reverse: Bool): App.GG.Effect<
     if is_enemy && not(has_hit) then
       App.GG.Effect {
         App.GG.Effect.projectile.add_hit(center) // Adds enemy to list of targets hit by projectile
-        App.GG.Effect.creature.change_hp_at(dmg, center, true) 
+        App.GG.Effect.change_hp(dmg, true, center) 
         return unit
       }
     else
