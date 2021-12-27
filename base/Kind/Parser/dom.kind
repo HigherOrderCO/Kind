@@ -1,17 +1,41 @@
 Kind.Parser.dom: Parser<Kind.Term>
   Parser {
-    get term = Kind.Parser.dom.node
+    get term = Parser.choice!([
+      Kind.Parser.dom.fragment
+      Kind.Parser.dom.node,
+    ])
     case term {
       left: Parser { return term.value }
       right:
         let resu = Kind.Term.ref("DOM.node")
         let resu = Kind.Term.app(resu, Kind.Term.str("div"))
-        let resu = Kind.Term.app(resu, empty_map)
-        let resu = Kind.Term.app(resu, empty_map)
+        let resu = Kind.Term.app(resu, Kind.Parser.dom.empty_map)
+        let resu = Kind.Term.app(resu, Kind.Parser.dom.empty_map)
         let resu = Kind.Term.app(resu, term.value)
         Parser { return resu }
     }
   }
+
+Kind.Parser.dom.fragment: Parser<Either<Kind.Term, Kind.Term>>
+  let tag_name = "fragment"
+  Parser.block!("DOM.fragment", Parser {
+    Kind.Parser.text("<")
+    Kind.Parser.text(tag_name)
+    Kind.Parser.text(">")
+
+    get children = Parser.many!(Parser.choice!([
+      Kind.Parser.dom.fragment,
+      Kind.Parser.dom.node,
+      Kind.Parser.dom.leaf,
+    ]))
+    let children = Kind.Parser.dom.transform_children(children)
+
+    Kind.Parser.text("</"| tag_name |">")
+    let term = Kind.Term.ref("DOM.fragment")
+    let term = Kind.Term.app(term, children)
+
+    return Either.left!!(term)
+  })
 
 // main parser
 Kind.Parser.dom.node: Parser<Either<Kind.Term, Kind.Term>>
@@ -28,6 +52,7 @@ Kind.Parser.dom.node: Parser<Either<Kind.Term, Kind.Term>>
 
     // children
     get children = Parser.many!(Parser.choice!([
+      Kind.Parser.dom.fragment,
       Kind.Parser.dom.node,
       Kind.Parser.dom.leaf,
     ]))
@@ -47,13 +72,13 @@ Kind.Parser.dom.node: Parser<Either<Kind.Term, Kind.Term>>
   })
 
 // helpers for dom's for's
-empty_list: Kind.Term 
+Kind.Parser.dom.empty_list: Kind.Term 
   Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
 
-list_cons: Kind.Term
+Kind.Parser.dom.list_cons: Kind.Term
   Kind.Term.app(Kind.Term.ref("List.cons"), Kind.Term.hol(Bits.e))
 
-empty_map: Kind.Term 
+Kind.Parser.dom.empty_map: Kind.Term 
   Kind.Term.app(Kind.Term.ref("Map.new"),  Kind.Term.hol(Bits.e))
 
 // Kind.Parser.dom.for.wrapper(term: Kind.Term): Kind.Term
@@ -63,11 +88,11 @@ empty_map: Kind.Term
 //   let display_content = Kind.Term.app(Kind.Term.ref("Map.set"),  Kind.Term.hol(Bits.e))
 //   let display_content = Kind.Term.app(display_content, Kind.Term.str("display"))
 //   let display_content = Kind.Term.app(display_content, Kind.Term.str("contents"))
-//   let display_content = Kind.Term.app(display_content, empty_map)
+//   let display_content = Kind.Term.app(display_content, Kind.Parser.dom.empty_map)
 
 //   let root = Kind.Term.ref("DOM.node")
 //   let root = Kind.Term.app(root, Kind.Term.str("div"))
-//   let root = Kind.Term.app(root, empty_map)
+//   let root = Kind.Term.app(root, Kind.Parser.dom.empty_map)
 //   let root = Kind.Term.app(root, display_content)
 //   let root = Kind.Term.app(root, term)
 //   root
@@ -92,8 +117,8 @@ Kind.Parser.dom.for: Parser<Kind.Term>
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, list)
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
-    let term = Kind.Term.app(term, empty_list)
-    let lamb = Kind.Term.lam(elem, (i) Kind.Term.lam("placeholder", (b) Kind.Term.app(Kind.Term.app(list_cons, loop), b)))
+    let term = Kind.Term.app(term, Kind.Parser.dom.empty_list)
+    let lamb = Kind.Term.lam(elem, (i) Kind.Term.lam("placeholder", (b) Kind.Term.app(Kind.Term.app(Kind.Parser.dom.list_cons, loop), b)))
     let term = Kind.Term.app(term, lamb)
     
     // let root = Kind.Parser.dom.for.wrapper(term)
@@ -123,8 +148,8 @@ Kind.Parser.dom.formap: Parser<Kind.Term>
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, map)
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
-    let term = Kind.Term.app(term, empty_list)
-    let lamb = Kind.Term.lam(key, (k) Kind.Term.lam(value, (v) Kind.Term.lam("placeholder", (z) Kind.Term.app(Kind.Term.app(list_cons, loop), z))))
+    let term = Kind.Term.app(term, Kind.Parser.dom.empty_list)
+    let lamb = Kind.Term.lam(key, (k) Kind.Term.lam(value, (v) Kind.Term.lam("placeholder", (z) Kind.Term.app(Kind.Term.app(Kind.Parser.dom.list_cons, loop), z))))
     let term = Kind.Term.app(term, lamb)
     
     // let root = Kind.Parser.dom.for.wrapper(term)
@@ -180,7 +205,7 @@ Kind.Parser.dom.dynamic: Parser<Kind.Term>
     let term = Kind.Term.ref("List.cons")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, item)
-    let term = Kind.Term.app(term, empty_list)
+    let term = Kind.Term.app(term, Kind.Parser.dom.empty_list)
     return term
   })
 
@@ -195,7 +220,7 @@ Kind.Parser.dom.text: Parser<Kind.Term>
     let term = Kind.Term.ref("List.cons")
     let term = Kind.Term.app(term, Kind.Term.hol(Bits.e))
     let term = Kind.Term.app(term, item)
-    let term = Kind.Term.app(term, empty_list)
+    let term = Kind.Term.app(term, Kind.Parser.dom.empty_list)
     return term
   })
 
@@ -207,11 +232,11 @@ Kind.Parser.dom.none: Parser(DOM)
   }
 
 // prop type
-Prop: Type
+Kind.Parser.dom.Prop: Type
   Pair<String, Kind.Term>
 
 // parser one prop
-Kind.Parser.dom.prop: Parser<Prop>
+Kind.Parser.dom.prop: Parser<Kind.Parser.dom.Prop>
   Parser {
     get prop  = Kind.Parser.name1
     let prop  = Kind.Parser.dom.prop.camel_to_kebab(prop)
@@ -234,7 +259,7 @@ Kind.Parser.dom.prop.camel_to_kebab.go(str: String, result: String): String
         Kind.Parser.dom.prop.camel_to_kebab.go(str.tail, String.cons(str.head, result))
   }
 
-// Kind.Parser.dom.dynamic_prop: Parser<Prop>
+// Kind.Parser.dom.dynamic_prop: Parser<Kind.Parser.dom.Prop>
 //   Parser {
 //     get prop = Kind.Parser.name1
 //     Kind.Parser.text("=")
@@ -248,10 +273,8 @@ Kind.Parser.dom.prop.camel_to_kebab.go(str: String, result: String): String
 // get list of props and parses into a pair
 // first pos of pair will be a Kind.Term of a map of props
 // second pos of pair will be a Kind.Term of a map of styles
-Kind.Parser.dom.gen_prop(values: List<Prop>): Pair<Kind.Term, Kind.Term>
-  let empty_list = Kind.Term.app(Kind.Term.ref("List.nil"), Kind.Term.hol(Bits.e))
-  let empty_map  = Kind.Term.app(Kind.Term.ref("Map.new") , Kind.Term.hol(Bits.e))
-  let {list_prop, styles} = Kind.Parser.dom.gen_prop.go(values, {empty_list, empty_map})
+Kind.Parser.dom.gen_prop(values: List<Kind.Parser.dom.Prop>): Pair<Kind.Term, Kind.Term>
+  let {list_prop, styles} = Kind.Parser.dom.gen_prop.go(values, {Kind.Parser.dom.empty_list, Kind.Parser.dom.empty_map})
 
   let term_prop = Kind.Term.ref("Map.from_list")
   let term_prop = Kind.Term.app(term_prop, Kind.Term.hol(Bits.e))
@@ -276,7 +299,7 @@ Kind.Parser.dom.gen_prop(values: List<Prop>): Pair<Kind.Term, Kind.Term>
 // get list of props and parses into a pair
 // first pos of pair will be a Kind.Term of a map of props
 // second pos of pair will be a Kind.Term of a map of styles
-Kind.Parser.dom.gen_prop.go(values: List<Prop>, result: Pair<Kind.Term, Kind.Term>): Pair<Kind.Term, Kind.Term>
+Kind.Parser.dom.gen_prop.go(values: List<Kind.Parser.dom.Prop>, result: Pair<Kind.Term, Kind.Term>): Pair<Kind.Term, Kind.Term>
   case values {
     nil: result
     cons: 

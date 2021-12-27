@@ -459,26 +459,27 @@ module.exports = class AppPlay extends Component {
   // Renders a document
   render_dom(elem) {
     //console.log("render_dom", elem);
+    // console.log(elem._);
     switch (elem._) {
       // Renders a HTML element
+      case "DOM.fragment":
+        console.log("no fragmento");
+        return h(Fragment, {}, 
+          utils.list_to_array(elem.children).map(x => this.render_dom(x))
+        );
       case "DOM.node":
         let props = utils.map_to_object(elem.props);
         let style = utils.map_to_object(elem.style);
-
-        if (elem.tag === "fragment") {
-          return h(Fragment, {}, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
-        } else {
-          return h(elem.tag, {
-            ...props,
-            style: style,
-            onInput: (event) => {
-              if (elem.tag === "input" || elem.tag === "textarea") {
-                let time = BigInt(Date.now());
-                this.register_event({_: "App.Event.input", time, id: props.id, text: event.target.value});
-              }
-            },
-          }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
-        }
+        return h(elem.tag, {
+          ...props,
+          style: style,
+          onInput: (event) => {
+            if (elem.tag === "input" || elem.tag === "textarea") {
+              let time = BigInt(Date.now());
+              this.register_event({_: "App.Event.input", time, id: props.id, text: event.target.value});
+            }
+          },
+        }, utils.list_to_array(elem.children).map(x => this.render_dom(x)));
       // Renders a VoxBox using a canvas
       case "DOM.vbox":
         let canvas_props = utils.map_to_object(elem.props);
