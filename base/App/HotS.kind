@@ -9,38 +9,129 @@ App.HotS.State: App.State
 // Initial state
 App.HotS.init: App.Init<App.HotS.State>
   let bids = {} :: Map<App.HotS.Bid>
-  let cash = {
-    "Green": 23
-    "Blue": 24
-    "Red": 25
-    "Yellow": 26
-    "Purple": 27
-    "White": 28
-    "Black": 29
-    "Orange": 30
-  } :: Map<Nat>
-  App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "", ""), App.HotS.State.Global.new(bids, cash))
+  let teams = {
+    "Branco": "9556cb7cbc30102cf4b9d59a768a00c66490eb985d62a29a2cf323bd26e1edf2"
+    "Verde": "f99e8d094ee97e7be9a3d7269f09f9996041160cc5c134b6a863be5b0ce9b5bd"
+    "Amarelo": "27617207effe6bfd81a3e2b21d8a20c4e622b23e5422d607771b4f8b8ba006fa"
+    "Azul": "fa187c1e7b6b42ab8b2d9415ab7e6b1e71b551fcdc8151ebafe46e40a10d90ad"
+    "Vermelho": "8eec9d5ae546887db6b6a3889e6591fe96f3c16bc9d921551a4aac3adce52996"
+    "Preto": "cd39e4b5a3bdc91dff58d0487ec1187739723321e0d423a3db36aae72e5aaa17"
+  }
+  let cash = Map.new<Nat>
+  let history = []
+  for team:hash in teams with cash:
+    Map.set<Nat>(team, 25, cash)
+  App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "Calamity Cup", "", "", none), App.HotS.State.Global.new(teams, bids, cash, history))
 
 type App.HotS.State.Local {
   new(
     joined: Bool
     room: String
     team: String
+    pass: String
+    confirmation: Maybe<App.HotS.History>
   )
 }
 
 type App.HotS.State.Global {
   new(
+    teams: Map<String>
     bids: Map<App.HotS.Bid>
     cash: Map<Nat>
+    history: List<App.HotS.History>
+  )
+}
+
+type App.HotS.History {
+  new(
+    buyer: String
+    item: String
+    previous_owner: String
+    price: Nat
   )
 }
 
 type App.HotS.Player {
   new(
     rank: String
+    role: App.HotS.Role
   )
 }
+
+type App.HotS.Role {
+  tank
+  dps
+  bruiser
+  healer
+}
+
+
+App.HotS.Role.show(role: App.HotS.Role): String
+  case role {
+    tank   : "Tank"
+    dps    : "Dps"
+    bruiser: "Bruiser"
+    healer : "Healer"
+  }
+
+App.HotS.Role.list: List<App.HotS.Role>
+  [
+    App.HotS.Role.tank
+    App.HotS.Role.dps
+    App.HotS.Role.healer
+    App.HotS.Role.bruiser
+  ]
+
+App.HotS.Player.get_role(role: App.HotS.Role players: Map<App.HotS.Player>): Map<App.HotS.Player>
+  let new_players = Map.new<App.HotS.Player>
+  for name:player in players with new_players:
+    if App.HotS.Role.eql(role, player@role) then
+      new_players{name} <- player
+    else
+      new_players
+  new_players
+
+App.HotS.Role.eql(a: App.HotS.Role, b: App.HotS.Role): Bool
+  case a b {
+    tank    tank   : true
+    dps     dps    : true
+    bruiser bruiser: true
+    healer  healer : true
+  }default false
+
+App.HotS.Role.cmp(a: App.HotS.Role, b: App.HotS.Role): Cmp
+  let f =
+    (role: App.HotS.Role)
+      case role {
+        tank: 0
+        dps: 1
+        healer: 2
+        bruiser: 3
+      }
+  Nat.cmp(f(a), f(b))
+
+
+App.HotS.Role.title(role: App.HotS.Role): Map<String>
+  let {border_color, background} = 
+    case role {
+      tank    : {"Blue"    "LightBlue"   }
+      dps     : {"DarkRed" "LightCoral"  }
+      healer  : {"Green"   "LightGreen"  }
+      bruiser : {"Purple"  "Plum"        }
+    }
+  
+  {
+    "font-size": "2em"
+    "height": "48px"
+    "border-radius": "2px"
+    "margin": "2px"
+    "width": "100%"
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+    "border": "1px solid " | border_color
+    "background": background
+  }
 
 type App.HotS.Bid {
   new(
@@ -49,59 +140,61 @@ type App.HotS.Bid {
   )
 }
 
+
 type App.HotS.Action {
   buy(
     team: String
+    pass: String
     player: String
   )
 } deriving (serializer, deserializer)
 
 App.HotS.players: Map<App.HotS.Player>
   {
-    "Adones": App.HotS.Player.new("?")
-    "AnneO": App.HotS.Player.new("?")
-    "Arluki": App.HotS.Player.new("?")
-    "ChampofHorde": App.HotS.Player.new("?")
-    "Crono": App.HotS.Player.new("?")
-    "Dashblue": App.HotS.Player.new("?")
-    "Derenash": App.HotS.Player.new("?")
-    "Drau": App.HotS.Player.new("?")
-    "Dugalle": App.HotS.Player.new("?")
-    "Entropy": App.HotS.Player.new("?")
-    "Escondidinho": App.HotS.Player.new("?")
-    "Exorr": App.HotS.Player.new("?")
-    "FFJujubaKid": App.HotS.Player.new("?")
-    "Focofi": App.HotS.Player.new("?")
-    "GiantAxe": App.HotS.Player.new("?")
-    "Goddan": App.HotS.Player.new("?")
-    "Josuecs": App.HotS.Player.new("?")
-    "Juzehlito": App.HotS.Player.new("?")
-    "Katson": App.HotS.Player.new("?")
-    "KchoXs": App.HotS.Player.new("?")
-    "Korhal": App.HotS.Player.new("?")
-    "Kristrex": App.HotS.Player.new("?")
-    "MacSF": App.HotS.Player.new("?")
-    "Malvadah": App.HotS.Player.new("?")
-    "MatadorFivee": App.HotS.Player.new("?")
-    "Monthoros": App.HotS.Player.new("?")
-    "Moonlight": App.HotS.Player.new("?")
-    "Motta": App.HotS.Player.new("?")
-    "MrNewVegas": App.HotS.Player.new("?")
-    "Patoshin": App.HotS.Player.new("?")
-    "Pitchulinha": App.HotS.Player.new("?")
-    "Player": App.HotS.Player.new("?")
-    "Predator": App.HotS.Player.new("?")
-    "Psycho": App.HotS.Player.new("?")
-    "RamonBR": App.HotS.Player.new("?")
-    "Rooxyz": App.HotS.Player.new("?")
-    "Simon": App.HotS.Player.new("?")
-    "Sipher": App.HotS.Player.new("?")
-    "SpyGames": App.HotS.Player.new("?")
-    "Talicwolf": App.HotS.Player.new("?")
-    "Thunder": App.HotS.Player.new("?")
-    "Zaryanova": App.HotS.Player.new("?")
-    "Zuiurac": App.HotS.Player.new("?")
-  }
+    "Adones": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "AnneO": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "Arluki": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "ChampofHorde": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "Crono": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Dashblue": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "Derenash": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Drau": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "Dugalle": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Entropy": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "Escondidinho": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Exorr": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "FFJujubaKid": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Focofi": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "GiantAxe": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Goddan": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "Josuecs": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Juzehlito": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "Katson": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "KchoXs": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "Korhal": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Kristrex": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "MacSF": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Malvadah": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "MatadorFivee": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Monthoros": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "Moonlight": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Motta": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "MrNewVegas": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Patoshin": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "Pitchulinha": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Player": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "Predator": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Psycho": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "RamonBR": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Rooxyz": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "Simon": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Sipher": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "SpyGames": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+    "Talicwolf": App.HotS.Player.new("?", App.HotS.Role.healer)
+    "Thunder": App.HotS.Player.new("?", App.HotS.Role.dps)
+    "Zaryanova": App.HotS.Player.new("?", App.HotS.Role.tank)
+    "Zuiurac": App.HotS.Player.new("?", App.HotS.Role.bruiser)
+}
 
 // Render function
 App.HotS.draw: App.Draw<App.HotS.State>
@@ -113,68 +206,385 @@ App.HotS.draw: App.Draw<App.HotS.State>
   let cash = state.global.cash
   let team = state.local.team
   let joined = state.local.joined
+  let user_cash = cash{team} <> 0
+  let team_size = List.count!((x) String.eql(x@team, team), Map.values!(bids))
+  let team_count = List.length!(Map.to_list!(state.global.teams))
+  let {my_cash, other_cash} = App.HotS.take_team(team, cash)
+  let button_style = 
+    {
+      "height": "40px"
+      "width": "120px"
+      "font-size": "24px"
+      "margin": "10px"
+    }
   if Bool.not(joined) then
-    <div>
-      <div>
-        "Room: "
-        <input id="_room_"></input>
-        " "
-        <button id="_enter_">"Enter"</button>
-      </div>
-      <div>
-        "Digite a sala para entrar, ou um nome qualquer para criar uma nova."
+    <div style = {"height": "500px", "display": "flex", "flex-direction": "column", "align-items": "center", "justify-content": "center"}>
+      <div style = {"display":"flex", "flex-direction": "column", "align-items": "center"}>
+        <div style = {"margin": "5px"}>
+          <div>
+            <div>"Room:"</div>
+            <input id="_room_" value = state.local.room></input>
+            // " "
+            // <button id="_enter_">"Enter"</button>
+          </div>
+        </div>
+        <div style = {"margin": "5px"}>
+          <div>
+            <div>"Login: "</div>
+            <input id="_team_"></input>
+            // " "
+            // <button id="_enter_">"Enter"</button>
+          </div>
+        </div>
+        <div style = {"margin": "5px"}>
+          <div>
+            <div>"Password: "</div>
+            <input id="_pass_" type="password"></input>
+            // " "
+            // <button id="_enter_">"Enter"</button>
+          </div>
+        </div>
+        <div style = {"margin-top": "5px"}>
+          <button id="_enter_" style = button_style>"Enter"</button>
+        </div>
+        <div style = {"margin-top": "5px"}>
+          <button id="_spectate_" style = button_style>"Spectate"</button>
+        </div>
       </div>
     </div>
   else
-    <div>
-      <div style={"height":"40px"}>
-        <div style={"margin": "4px"}>
-          "Team:"
-          " "
-          <input id="_team_"></input>
-        </div>
-        <div style={"margin": "4px"}>
-          "Cash: $" | Nat.show(cash{team} <> 0)
+    let {visibility, opacity} = if Maybe.is_some!(state.local.confirmation) then {"visible", "1"} else {"hidden", "0"}
+    <div style ={"padding": "50px"}>
+      <div style ={
+        "position": "fixed"
+        "top": "0"
+        "bottom": "0"
+        "left": "0"
+        "right": "0"
+        "background": "rgba(0, 0, 0, 0.7)"
+        "transition": "opacity 500ms"
+        "visibility": visibility
+        "opacity": opacity
+      }>
+        <div style ={
+          "visibility": visibility
+          "margin": "200px auto"
+          "padding": "20px"
+          "background": "#fff"
+          "border-radius": "5px"
+          "width": "25%"
+          "position": "relative"
+          "transition": "all 1s ease-in-out"
+        }>
+          {
+            case state.local.confirmation as info {
+              none: <div></div>
+              some:
+                <div style={
+                  "display": "flex"
+                  "flex-direction": "column"
+                  "justify-content": "center"
+                  "align-items": "center"
+                }>
+                  <span style={"font-size": "16px", "font-weight": "bold", "margin": "10px"}>
+                    if info.value@buyer =? info.value@previous_owner then
+                      "Are you sure you want to increase your Offer for " | info.value@item | " to " | Nat.show(info.value@price) | "?"
+                    else
+                      "Are you sure you want to Offer " | Nat.show(info.value@price) | " for " | info.value@item | "?"
+                    </span>
+                  <div style ={
+                    "display": "flex"
+                    "flex-direction": "row"
+                    "justify-content": "center"
+                    "align-items": "center"
+                  }>
+                    <button id = "_yes_" style = button_style>"Yes"</button>
+                    <button id = "_no_"  style = button_style>"No"</button>         
+                  </div>
+                </div>   
+            }    
+          }
         </div>
       </div>
       <div style={
         "height":"calc(100%-40px)"
         "width": "100%"
         "display": "flex"
-        "flex-flow": "row wrap"
+        "flex-direction": "row"
       }>
-        for entry in Map.to_list!(App.HotS.players): 
-          let {name, player} = entry
-          use bid = bids{name} <> App.HotS.Bid.new(0, "") 
+        for role in App.HotS.Role.list:
+          <div style = {
+          "height": "100%"
+          "width": "24%"
+          "margin": "0px 0.5%"
+          "display": "flex"
+          "flex-direction": "column"
+          }>
+            <div style = App.HotS.Role.title(role)>
+              App.HotS.Role.show(role)
+            </div>
+            for entry in Map.to_list!(App.HotS.Player.get_role(role, App.HotS.players)): 
+              let {name, player} = entry
+              use bid = bids{name} <> App.HotS.Bid.new(0, "")
+              <div style = {
+                "display":"flex"
+                "flex-direction":"row"
+              }> 
+                <div style={
+                  "height": "24px"
+                  "border-radius": "2px"
+                  "border": "1px solid #A0A0A0"
+                  "background": "#FAFAFA"
+                  "margin": "2px"
+                  "width": "80%"
+                  "display": "flex"
+                  "align-content": "center"
+                }>
+                  {App.HotS.draw.cell(50, <span style={"font-weight":"bold"}>name</span>)}
+                  {App.HotS.draw.cell(50, <span>bid.team</span>)}
+                </div>
+                <button style ={
+                  "border-radius": "2px"
+                  "border": "1px solid #A0A0A0"
+                  "background": "#FAFAFA"
+                  "margin": "2px 2px 2px 2px"
+                  "width": "10%"
+                }>
+                  "$"|Nat.show(bid.value)
+                </button>
+                <button id=name style={
+                  "border-radius": "2px"
+                  "border": "1px solid #A0A0A0"
+                  "background": 
+                    if bid.team =? team then
+                      "LightBlue"
+                    else
+                      if (team_size <? 6) && not(team =? "spectator") then
+                        if user_cash >=? bid.value then
+                          "LightGreen"
+                        else
+                          "LightCoral"
+                      else
+                        "LightGray"
+                  "margin": "2px 0 2px 2px"
+                  "width": "10%"
+                  "cursor":"pointer"
+                }>"buy"</button>
+              </div>
+          </div>
+      </div>
+      <div style={
+        "height":"calc(100%-40px)"
+        "width": "100%"
+        "padding": "40px 20px"
+        "display": "flex"
+        "flex-direction": "row"
+      }>
+        for team:cash in my_cash:
+          let players = List.filter!((x: Pair<String, App.HotS.Bid>) String.eql(team, x@snd@team), Map.to_list!(bids))
+          let player_cmp = 
+            (a: String, b: String)
+              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+              let {a, b} = {data(a), data(b)}
+              App.HotS.Role.cmp(a@role, b@role)
+          let players = List.sort!((x, y) player_cmp(x@fst, y@fst), players)
           <div style={
-            "height": "24px"
+            "height": "420px"
             "border-radius": "2px"
             "border": "1px solid #A0A0A0"
             "background": "#FAFAFA"
-            "margin": "2px"
-            "width": "260px"
-            "flex-basis": "260px"
+            "margin": "5px"
+            "padding": "20px 0"
+            "width": "25%"
             "display": "flex"
-            "align-content": "center"
+            "flex-direction": "column"
+            "align-items": "center"
+            "justify-content": "start"
           }>
-            {App.HotS.draw.cell(120, <span style={"font-weight":"bold"}>name</span>)}
-            {App.HotS.draw.cell(120, <span>bid.team</span>)}
-            {App.HotS.draw.cell(40, <span>"$"|Nat.show(bid.value)</span>)}
-            {App.HotS.draw.cell(40, <div id=name style={"cursor":"pointer","text-decoration":"underline"}>"buy"</div>)}
+            <div style =
+              {
+                "height": "100px"
+                "font-size": "22px"
+                "border-radius": "2px"
+                "border": "1px solid #A0A0A0"
+                "background": "#FAFAFA"
+                "margin": "3px 3px 15px 3px"
+                "width": "90%"
+                "display": "flex"
+                "align-items": "center"
+                "justify-content": "center"
+                "flex-direction": "column"
+              }>
+                <div>
+                  {App.HotS.draw.large_cell(100, <span style={"font-weight":"bold"}>team</span>)}
+                </div>
+                <div>
+                  {App.HotS.draw.large_cell(100, <span style={"font-weight":"bold"}>"Remaining Cash: " | Nat.show(cash)</span>)}
+                </div>
+            </div>
+            for pair in players:
+              let {player, bid} = pair
+              let player_data = App.HotS.players{player} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+              <div style =
+                {
+                  "height": "32px"
+                  "font-size": "16px"
+                  "border-radius": "2px"
+                  "border": "1px solid #A0A0A0"
+                  "background": "#FAFAFA"
+                  "margin": "5px 2px"
+                  "width": "90%"
+                  "display": "flex"
+                  "align-items": "center"
+                  "justify-content": "center"
+                }>
+                {App.HotS.draw.large_cell(45, <span>player</span>)}
+                {App.HotS.draw.large_cell(45, <span>App.HotS.Role.show(player_data@role)</span>)}
+                {App.HotS.draw.large_cell(10, <span>Nat.show(bid@value - 1)</span>)}
+              </div>
+          </div>  
+        <div style={
+          "height":"calc(100%-40px)"
+          "width": if List.is_empty!(Map.to_list!(my_cash)) then "75%" else "50%"
+          "padding": "0px 20px"
+          "display": "flex"
+          "flex-flow": "row wrap"
+          "justify-content": "center"
+        }>
+          for team:cash in other_cash:
+            let players = List.filter!((x: Pair<String, App.HotS.Bid>) String.eql(team, x@snd@team), Map.to_list!(bids))
+            let player_cmp = 
+            (a: String, b: String)
+              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+              let {a, b} = {data(a), data(b)}
+              App.HotS.Role.cmp(a@role, b@role)
+            let players = List.sort!((x, y) player_cmp(x@fst, y@fst), players)
+            <div style={
+              "height": "260px"
+              "border-radius": "2px"
+              "border": "1px solid #A0A0A0"
+              "background": "#FAFAFA"
+              "margin": "5px"
+              "padding-top": "10px"
+              "width": "25%"
+              "flex-basis": "260px"
+              "display": "flex"
+              "flex-direction": "column"
+              "align-items": "center"
+              "justify-content": "start"
+            }>
+              <div style =
+                {
+                  "height": "60px"
+                  "border-radius": "2px"
+                  "border": "1px solid #A0A0A0"
+                  "background": "#FAFAFA"
+                  "margin": "2px 2px 8px 2px"
+                  "width": "90%"
+                  "display": "flex"
+                  "align-items": "center"
+                  "justify-content": "center"
+                  "flex-direction": "column"
+                }>
+                  <div>
+                    {App.HotS.draw.cell(100, <span style={"font-weight":"bold"}>team</span>)}
+                  </div>
+                  <div>
+                    {App.HotS.draw.cell(100, <span style={"font-weight":"bold"}>"Remaining Cash: " | Nat.show(cash)</span>)}
+                  </div>
+              </div>
+              for pair in players:
+                let {player, bid} = pair
+                let player_data = App.HotS.players{player} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+                <div style =
+                  {
+                    "height": "24px"
+                    "border-radius": "2px"
+                    "border": "1px solid #A0A0A0"
+                    "background": "#FAFAFA"
+                    "margin": "2px"
+                    "width": "90%"
+                    "display": "flex"
+                    "align-items": "center"
+                    "justify-content": "center"
+                  }>
+                  {App.HotS.draw.cell(45, <span style={"font-weight":"bold"}>player</span>)}
+                  {App.HotS.draw.cell(45, <span>App.HotS.Role.show(player_data@role)</span>)}
+                  {App.HotS.draw.cell(10, <span>Nat.show(bid@value - 1)</span>)}
+                </div>
           </div>
+        </div>
+        <div style={
+          "height": "420px"
+          "border-radius": "2px"
+          "border": "1px solid #A0A0A0"
+          "background": "#FAFAFA"
+          "margin": "5px"
+          "padding": "15px"
+          "width": "25%"
+          "display": "flex"
+          "flex-direction": "column"
+          // "align-items": "center"
+          "justify-content": "start"
+          "overflow-y": "scroll"
+        }>
+          for history in state.global.history:
+            let target_bid = case state.global.bids{history@item} as bid { none: App.HotS.Bid.new(0, "empty"), some: bid.value}
+            let text =
+              if history@buyer =? history@previous_owner then 
+                history@buyer | " raised their offer for " | history@item | " to $" | Nat.show(history@price)
+              else
+                if history@previous_owner =? "" then
+                  history@buyer | " made an offer for " | history@item | " of $" | Nat.show(history@price)
+                else
+                  history@buyer | " raised " | history@previous_owner | "'s offer for " | history@item | " to $" | Nat.show(history@price)
+            <div style = 
+              {
+                "margin": "2px"
+                "color": 
+                  switch String.eql(team) {
+                    history@buyer: "green"
+                    history@previous_owner: "red"
+                  }default "black"
+              }>text</div>
+        </div>
       </div>
+        
     </div>
+
+App.HotS.take_team(team: String, captains: Map<Nat>): Pair<Map<Nat>, Map<Nat>>
+  let pair = {Map.new<Nat>, captains}
+  for captain:cash in captains with pair:
+    let user = pair@fst
+    let rest = pair@snd
+    if team =? captain then
+      {(user{team} <- cash), (Map.delete<Nat>(captain, rest))}
+    else
+      pair
+  pair
 
 App.HotS.draw.cell(width: Nat, child: DOM): DOM
   let style = {
     "display": "inline-block"
     "overflow": "hidden"
     "padding": "4px"
-    "width": Nat.show(width)|"px"
+    "width": Nat.show(width)|"%"
     "height": "24px"
   }
   <div style=style>
-    {child}
+    {child} 
+  </div>
+
+App.HotS.draw.large_cell(width: Nat, child: DOM): DOM
+  let style = {
+    "display": "inline-block"
+    "overflow": "hidden"
+    "padding": "4px"
+    "width": Nat.show(width)|"%"
+    "height": "32px"
+  }
+  <div style=style>
+    {child} 
   </div>
 
 // Event handler
@@ -182,7 +592,9 @@ App.HotS.when: App.When<App.HotS.State>
   (event, state)
   open state
   use local = state.local
+  use glob = state.global
   let team = local.team
+  let pass = local.pass
   let room = local.room
   case event {
     input: IO {
@@ -190,32 +602,85 @@ App.HotS.when: App.When<App.HotS.State>
         "_team_": IO {
           App.set_local<App.HotS.State>(local@team <- event.text)
         }
+        "_pass_": IO {
+          App.set_local<App.HotS.State>(local@pass <- event.text)
+        }
         "_room_": IO {
           App.set_local<App.HotS.State>(local@room <- event.text)
         }
       } default App.pass!
     }
-    mouse_click: IO {
-      if String.eql(event.id,"_enter_") then IO {
-        App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
-        App.set_local<App.HotS.State>(local@joined <- true)
-      } else
-        //log(event.id)
-        //log("A")
-        let player = event.id
-        let has_player = Bool.not(String.is_empty(player))
-        let has_team = Bool.not(String.is_empty(team))
-        if has_player && has_team then IO {
-          //log("B")
-          //IO.print("clicked: " | event.id)
-          let action = App.HotS.Action.buy(team, player)
-          let serial = Bits.hex.encode(Serializer.run!(App.HotS.Action.serializer, action))
-          let serial = if Nat.mod(String.length(serial),2) =? 0 then serial else serial | "0"
-          //log("sent-action: " | action@team | " <- " | action@player)
-          //log("sent-serial:" | String.take(16,Crypto.Keccak.hash("0"|room)) | " " | serial)
-          App.new_post!(String.take(16,Crypto.Keccak.hash("0"|room)), serial)
+    key_up:
+      if event.code =? 13#16 then
+        if App.HotS.confirm_password(local.team, local.pass, glob.teams) then 
+          IO {
+            App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
+            App.set_local<App.HotS.State>(local@joined <- true)
+          }
+        else
           App.pass!
-        } else App.pass!
+      else
+        App.pass!
+    mouse_click: IO {
+      if String.eql(event.id,"_enter_") then 
+        if App.HotS.confirm_password(local.team, local.pass, glob.teams) then 
+          IO {
+            App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
+            App.set_local<App.HotS.State>(local@joined <- true)
+          }
+        else
+          App.pass!
+      else
+        if String.eql(event.id, "_spectate_") then
+          let new_local = local@joined <- true
+          let new_local = new_local@team <- "spectator"
+          IO {
+            App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
+            App.set_local<App.HotS.State>(new_local)
+          }
+        else 
+          if String.eql(event.id, "_yes_") then 
+            case local.confirmation {
+              none: App.pass!
+              some:
+                IO {
+                  //log("B")
+                  //IO.print("clicked: " | event.id)
+                  let action = App.HotS.Action.buy(team, pass, local.confirmation.value@item)
+                  let serial = Bits.hex.encode(Serializer.run!(App.HotS.Action.serializer, action))
+                  let serial = if Nat.mod(String.length(serial),2) =? 0 then serial else serial | "0"
+                  //log("sent-action: " | action@team | " <- " | action@player)
+                  //log("sent-serial:" | String.take(16,Crypto.Keccak.hash("0"|room)) | " " | serial)
+                  App.new_post!(String.take(16,Crypto.Keccak.hash("0"|room)), serial)
+                  let new_local = state.local@confirmation <- none
+                  App.set_local<App.HotS.State>(new_local)
+                }
+            }
+          else
+            if String.eql(event.id, "_no_") then 
+            let new_local = state.local@confirmation <- none
+            App.set_local!(new_local)
+          else
+          //log(event.id)
+          //log("A")
+            let player = event.id
+            let has_player = Bool.not(String.is_empty(player))
+            let has_team = Bool.not(String.is_empty(team))
+            let player_value = (case glob.bids{player} as bid { none: 0, some: bid.value@value })
+            let team_cash = glob.cash{team} <> 0
+            let team_size = List.count!((x) String.eql(x@team,team), Map.values!(glob.bids))
+            let rebuy = (case glob.bids{player} as bid { none: false, some: String.eql(bid.value@team,team) })
+            let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 6)
+            let player_exists = Map.has!(player, App.HotS.players) && not(team =? "spectator")
+            //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
+            if can_buy && player_exists then
+              if has_player && has_team then 
+                let bid = glob.bids{player} <> App.HotS.Bid.new(0, "")
+                let history = App.HotS.History.new(team, player,  bid@team, bid@value)
+                let new_local = local@confirmation <- some(history)
+                App.set_local!(new_local)
+              else App.pass!
+            else App.pass!
     }
   } default App.pass!
 
@@ -231,25 +696,29 @@ App.HotS.post: App.Post<App.HotS.State>
   let post = Deserializer.run!(App.HotS.Action.deserializer, Bits.hex.decode(data)) abort global
   case post {
     buy:
-      let initial_cash = 25
-      let player_value = (case global.bids{post.player} as bid { none: 0, some: bid.value@value })
-      let last_team = (case global.bids{post.player} as bid { none: "", some: bid.value@team })
-      let team_cash = global.cash{post.team} <> initial_cash
-      let team_size = List.count!((x) String.eql(x@team,post.team), Map.values!(global.bids))
-      let rebuy = (case global.bids{post.player} as bid { none: false, some: String.eql(bid.value@team,post.team) })
-      let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 6)
-      let player_exists = Map.has!(post.player, App.HotS.players)
-      //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
-      if can_buy && player_exists then
-        log(post.team | " purchased " | post.player)
-        let bids = global.bids{post.player} <- App.HotS.Bid.new(player_value + 1, post.team)
-        let cash = global.cash
-        let cash = case global.bids{post.player} as bid {
-          none: cash
-          some: cash{bid.value@team} <- (cash{bid.value@team} <> initial_cash) + (player_value - 1)
-        }
-        let cash = cash{post.team} <- (cash{post.team} <> initial_cash) - player_value
-        App.HotS.State.Global.new(bids, cash)
+      if App.HotS.confirm_password(post.team, post.pass, global.teams) then 
+        let initial_cash = 0
+        let teams = global.teams
+        let player_value = (case global.bids{post.player} as bid { none: 0, some: bid.value@value })
+        let last_team = (case global.bids{post.player} as bid { none: "", some: bid.value@team })
+        let team_cash = global.cash{post.team} <> initial_cash
+        let team_size = List.count!((x) String.eql(x@team,post.team), Map.values!(global.bids))
+        let rebuy = (case global.bids{post.player} as bid { none: false, some: String.eql(bid.value@team,post.team) })
+        let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 6)
+        let player_exists = Map.has!(post.player, App.HotS.players)
+        //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
+        if can_buy && player_exists then
+          log(post.team | " purchased " | post.player)
+          let bids = global.bids{post.player} <- App.HotS.Bid.new(player_value + 1, post.team)
+          let cash = global.cash
+          let cash = case global.bids{post.player} as bid {
+            none: cash
+            some: cash{bid.value@team} <- (cash{bid.value@team} <> initial_cash) + (player_value - 1)
+          }
+          let cash = cash{post.team} <- (cash{post.team} <> initial_cash) - player_value
+          App.HotS.State.Global.new(teams, bids, cash, App.HotS.History.new(post.team, post.player, last_team, player_value) & global.history )
+        else
+          global
       else
         global
   }
@@ -263,3 +732,12 @@ App.HotS: App<App.HotS.State>
     App.HotS.tick
     App.HotS.post
   )
+
+App.HotS.confirm_password(team: String, pass: String, teams: Map<String>): Bool
+  let hash = Crypto.Keccak.hash(pass)
+  let team_hash = Map.get<String>(team, teams)
+  without team_hash: false
+  if hash =? team_hash then
+    true
+  else
+    false
