@@ -21,7 +21,7 @@ App.HotS.init: App.Init<App.HotS.State>
   let history = []
   for team:hash in teams with cash:
     Map.set<Nat>(team, 25, cash)
-  App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "Calamity Cup", "", "", none), App.HotS.State.Global.new(teams, bids, cash, history))
+  App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "Calamity", "", "", none), App.HotS.State.Global.new(teams, bids, cash, history))
 
 type App.HotS.State.Local {
   new(
