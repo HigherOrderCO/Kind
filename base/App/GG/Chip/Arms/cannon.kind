@@ -39,7 +39,7 @@ App.GG.Chip.Arms.cannon.img(frame: U64): VoxBox
       let func = (coord: App.GG.Coord)
         App.GG.Effect { 
           let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
-          get dmg = App.GG.Effect.creature.change_hp_at(dmg, coord, true) 
+          get dmg = App.GG.Effect.damage(dmg, true, true, coord)
           return unit
         }
     App.GG.Effect.direct_shoot(func, animation, 8, 8)

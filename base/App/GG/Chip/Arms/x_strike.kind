@@ -2,7 +2,7 @@ App.GG.Chip.Arms.x_strike: App.GG.Chip
   App.GG.Chip.new(
     "XStrke"
     App.GG.Class.strength
-    App.GG.Chip.Arms.x_strike.Effect(50) // TODO : Alter
+    App.GG.Chip.Arms.x_strike.Effect(10) // TODO : Alter
     10
     App.GG.img.bazooka
     App.GG.Attributes.new(3,0,1,0) // TODO : Alter
@@ -43,7 +43,7 @@ App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg: I32, coords: List<App.GG.Coord>
       (coord)
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
-        App.GG.Effect.projectile.hit.damage_at(dmg, coord)
+        App.GG.Effect.projectile.hit.damage_at(dmg, coord, true, false)
         return unit
       }
     App.GG.Effect {
