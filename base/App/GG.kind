@@ -19,23 +19,22 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// - develop more statuses (counter and intangible should be priority)
+// - Create counter mechanic - double damage after interrupting a chip action (needs status)
 // - stop using colorize on draw
 // - move minion.ai functions to a more generic section
 // - improve draw.kind to better reflect images      
 // - Add an animation to basic attack (x key)
 // - Show chips in hand in setup phase
 // - Show chips in hand in game phase
-// - create more control chips that apply statuses
-// - Create counter mechanic - double damage after interrupting a chip action (needs status)
-// - Create intangible status (status to be applied after taking chip damage)
-// - Create a pre-game screen
 // - Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
 //     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
 // - Create 3 minions
 // - Create customizations for buttons
 // - Add comments to everything
 
+// DONE: Create a pre-game screen
+// DONE: Control Chips 
+// DONE: Intangible
 // DONE: Fix death projectile not being considered an enemy
 // DONE: add a way to ramdomize things in effects
 // DONE: Create simple AI based on time in front of a slime and time not in front of a slime

@@ -160,9 +160,17 @@ App.GG.draw.tile(
       some:
         let f = App.GG.Monster.to_vbox(creature.value@category)
         let sprite = f(creature.value@animation@fst, creature.value@animation@snd)
+        let vbox = App.GG.Creature.Status.draw(creature.value@statuses, {x, y})
         //let img = VoxBox.Draw.image_colorize(x, y, 20, Col32.new_hue(F64.to_u32(U64.to_f64((creature.value@animation@snd % 1024) / 4))), sprite, img)
-        let img = if App.GG.Team.eql(App.GG.Team.red, creature.value@team) then VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(12), sprite, img) else VoxBox.Draw.image(x, y, 20, sprite, img)
+        let img = 
+          if App.GG.Creature.Status.intangible_draw_invisible(creature.value@statuses) then
+            img
+          else
+            if App.GG.Team.eql(App.GG.Team.red, creature.value@team) then
+              VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(12), sprite, img)
+            else VoxBox.Draw.image(x, y, 20, sprite, img)
         let img = VoxBox.Draw.text(I32.show(creature.value@hp), PixelFont.small_black, Pos32.new(x + 122,y + 100, 100), img)
+        let img = vbox(img)
         let img = 
           let actions = creature.value@actions
           let current = actions@current

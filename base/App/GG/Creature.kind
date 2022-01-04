@@ -49,49 +49,14 @@ type App.GG.Creature.Statuses {
   new(
     poison: Maybe<App.GG.Creature.Status>
     stun: Maybe<App.GG.Creature.Status>
+    barrier: Maybe<App.GG.Creature.Status>
+    intangible: Maybe<App.GG.Creature.Status>
+    intangible_immunity: Maybe<App.GG.Creature.Status>
   )
 }
 
-type App.GG.Creature.Status {
-  // invulnerable(duration: U64)
-  // intangible(duration: U64)
-  // poison(duration: U64, damage: I32)
-  // root(duration: U64)
-  poison(duration: U64, damage: I32)
-  stun(category: App.GG.Creature.Status.Stun)
-}
-
 App.GG.Creature.Statuses.pure: App.GG.Creature.Statuses
-  App.GG.Creature.Statuses.new(none, none)
-
-type App.GG.Creature.Status.Stun {
-  flinch
-  shock
-}
-
-App.GG.Creature.Status.del_from_nat(count: Nat, creature: App.GG.Creature): App.GG.Creature
-  let statuses = creature@statuses
-  let new_statuses = 
-    switch Nat.eql(count) {
-    0: statuses@poison <- none
-    1: statuses@stun <- none
-  }default statuses
-  creature@statuses <- new_statuses
-
-App.GG.Creature.Status.add(status: App.GG.Creature.Status, creature: App.GG.Creature): App.GG.Creature
-  let statuses = creature@statuses
-  let new_statuses = 
-    case status {
-      poison: statuses@poison <- some(status)
-      stun: statuses@stun <- some(status)
-    }
-  creature@statuses <- new_statuses
-
-App.GG.Creature.Status.get_from_nat(count: Nat, statuses: App.GG.Creature.Statuses): Maybe<Maybe<App.GG.Creature.Status>>
-  switch Nat.eql(count) {
-    0: some(statuses@poison)
-    1: some(statuses@stun)
-  }default none
+  App.GG.Creature.Statuses.new(none, none, none, none, none)
 
 App.GG.Creature.Status.update_grid(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   App.GG.Creature.Status.update_grid.go(0, coord, game)
@@ -105,15 +70,92 @@ let grid = game@grid
       get status = App.GG.Creature.Status.get_from_nat(count, statuses)
       let new_game = 
         without status: game
-        case status {
-          poison: App.GG.Creature.Status.update_poison(status, coord, game)
-          stun: App.GG.Creature.Status.update_stun(status, coord, game)
-        }default game
+        App.GG.Creature.Status.update_function(status, coord, game)
       let new_game = App.GG.Creature.Status.update_grid.go(count +1, coord, new_game)
       return new_game
     } <> game
   new_game
 
+type App.GG.Creature.Status {
+  // invulnerable(duration: U64)
+  // intangible(duration: U64)
+  // poison(duration: U64, damage: I32)
+  // root(duration: U64)
+  barrier(duration: U64, health: I32)
+  poison(duration: U64, damage: I32)
+  stun(category: App.GG.Creature.Status.Stun)
+  intangible(duration: U64)
+  intangible_immunity
+}
+
+App.GG.Creature.Status.del_from_nat(count: Nat, creature: App.GG.Creature): App.GG.Creature
+  let statuses = creature@statuses
+  let new_statuses = 
+    switch Nat.eql(count) {
+    0: statuses@poison <- none
+    1: statuses@stun <- none
+    2: statuses@barrier <- none
+    3: statuses@intangible <- none
+    4: statuses@intangible_imunity <- none
+  }default statuses
+  creature@statuses <- new_statuses
+
+App.GG.Creature.Status.add(status: App.GG.Creature.Status, creature: App.GG.Creature): App.GG.Creature
+  let statuses = creature@statuses
+  let new_statuses = 
+    case status {
+      poison: statuses@poison <- some(status)
+      stun: statuses@stun <- some(status)
+      barrier: statuses@barrier <- some(status)
+      intangible: statuses@intangible <- some(status)
+      intangible_immunity: statuses@intangible_immunity <- some(status)
+    }
+  creature@statuses <- new_statuses
+
+App.GG.Creature.Status.get_from_nat(count: Nat, statuses: App.GG.Creature.Statuses): Maybe<Maybe<App.GG.Creature.Status>>
+  switch Nat.eql(count) {
+    0: some(statuses@poison)
+    1: some(statuses@stun)
+    2: some(statuses@barrier)
+    3: some(statuses@intangible)
+    4: some(statuses@intangible_immunity)
+  }default none
+
+App.GG.Creature.Status.update_function(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  case status {
+    poison:     
+      App.GG.Creature.Status.update_poison(status, coord, game)
+    stun:       
+      App.GG.Creature.Status.update_stun(status, coord, game)
+    barrier:      
+      App.GG.Creature.Status.update_barrier(status, coord, game)
+    intangible: 
+      App.GG.Creature.Status.update_intangible(status, coord, game)
+    intangible_immunity: 
+      App.GG.Creature.Status.update_intangible_immunity(status, coord, game)
+  }default game
+
+App.GG.Creature.Status.draw(statuses: App.GG.Creature.Statuses, xy: Pair<U32, U32>, img: VoxBox): VoxBox
+  App.GG.Creature.Status.draw.go(0, statuses, xy, img)
+
+App.GG.Creature.Status.draw.go(count: Nat, statuses: App.GG.Creature.Statuses, xy: Pair<U32, U32>, img: VoxBox): VoxBox
+  let next = App.GG.Creature.Status.draw.go(count + 1, statuses, xy)
+  let status = App.GG.Creature.Status.get_from_nat(count, statuses)
+  without status: img
+  without status: next(img)
+  let img = App.GG.Creature.Status.draw.function(status, xy, img)
+  next(img)
+
+App.GG.Creature.Status.draw.function(status: App.GG.Creature.Status, xy: Pair<U32, U32>, img: VoxBox): VoxBox
+  case status {
+    poison:     App.GG.Creature.Status.draw.poison(status, xy, img)
+    // stun:       App.GG.Creature.Status.draw.stun(status, img)
+    barrier:    App.GG.Creature.Status.draw.barrier(status, xy, img)
+    // intangible: App.GG.Creature.Status.draw.intangible(status, img)
+  }default img
+
+// =============================================================
+// Poison Status
 
 App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
@@ -139,15 +181,309 @@ App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.
 
   } default game
 
+App.GG.Creature.Status.draw.poison(status: App.GG.Creature.Status, xy: Pair<U32, U32>, img: VoxBox): VoxBox
+  let poison = App.GG.img.Status.poison.poison
+  VoxBox.Draw.image(xy@fst, xy@snd, 20, poison, img)
+  
+// =============================================================
+// Stun Status
+
+type App.GG.Creature.Status.Stun {
+  flinch
+  shock
+}
+
 App.GG.Creature.Status.update_stun(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     stun: 
+      // let grid = game@grid
+      // let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category))
+      // let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
+      // let new_game    = game@grid <- new_grid
+      // new_game
+      game
+  }default game
+
+// =============================================================
+// Barrier Status
+
+App.GG.Creature.Status.update_barrier(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  case status {
+    barrier:
       let grid = game@grid
-      let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category))
-      let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
-      let new_game    = game@grid <- new_grid
+      let new_grid = 
+        if status.duration =? 0 then
+          let new_creature = App.GG.Creature.Status.del_from_nat(2)
+          let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
+          new_grid
+        else
+          let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.barrier(status.duration - 1, status.health))
+          let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
+          new_grid
+      let new_game = game@grid <- new_grid
       new_game
-  } default game
+  }default game
+
+App.GG.Creature.Status.draw.barrier(status: App.GG.Creature.Status, xy: Pair<U32, U32>, img: VoxBox): VoxBox
+  let barrier = App.GG.img.Status.barrier.barrier
+  VoxBox.Draw.image(xy@fst, xy@snd, 20, barrier, img)
+
+// =============================================================
+// Intangible Status
+
+App.GG.Creature.Status.update_intangible(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  case status {
+    intangible:
+      let grid = game@grid
+      let new_grid = 
+        if status.duration =? 0 then
+          let new_creature = App.GG.Creature.Status.del_from_nat(3)
+          let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
+          new_grid
+        else
+          let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.intangible(status.duration - 1))
+          let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
+          new_grid
+      let new_game = game@grid <- new_grid
+      new_game
+  }default game
+
+App.GG.Creature.Status.intangible_draw_invisible(statuses: App.GG.Creature.Statuses): Bool
+  let intangible = statuses@intangible
+  case intangible {
+    none: false
+    some: 
+      case intangible.value {
+        intangible: (intangible.value.duration % 5) <? 2
+      }default false
+  }
+
+// =============================================================
+// Intangible_immunity Status
+
+App.GG.Creature.Status.update_intangible_immunity(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  case status {
+    intangible_immunity: game
+  }default game
+
+
+// New Status
+// App.GG.Creature.status_update(
+//   creature: App.GG.Creature
+// ): App.GG.Creature
+  
+//   let status_update = App.GG.Creature.status_update_aux(creature@status)
+//   creature@status <- status_update
+
+// App.GG.Creature.status_update_aux(
+//   status: List<App.GG.Creature.Status>
+// ):List<App.GG.Creature.Status>
+
+//   case status { 
+//     nil:
+//       []
+//     cons:
+//       let head = case status.head { 
+//         flinch: App.GG.Creature.Status.flinch
+//         invulnerable: App.GG.Creature.Status.invulnerable(status.head.duration - 1)
+//         noname: App.GG.Creature.Status.noname(status.head.duration -1)
+//         poison: App.GG.Creature.Status.poison(status.head.duration - 1, status.head.damage)
+//         root: App.GG.Creature.Status.root(status.head.duration - 1)
+//         stun: App.GG.Creature.Status.stun
+
+//       }
+//       let tail = App.GG.Creature.status_update_aux(status.tail)
+//       case head { 
+//         flinch: head & tail
+//         invulnerable: if U64.gtn(head.duration, 0) then head & tail else tail
+//         noname: head & tail
+//         poison: if U64.gtn(head.duration, 0) then head & tail else tail
+//         root: if U64.gtn(head.duration, 0) then head & tail else tail
+//         stun: head & tail
+//       }
+//   }
+
+
+// App.GG.Creature.add_status(
+//   status:  App.GG.Creature.Status
+//   creature: App.GG.Creature
+// ): App.GG.Creature
+
+//   let invul = App.GG.Creature.status_check_invulnerable(creature)
+//   if invul then 
+//     case status { 
+//       invulnerable: App.GG.Creature.status_add_invulnerable(creature, status.duration)
+//     }default creature
+//   else
+//     case status {
+//       flinch: App.GG.Creature.status_add_flinch(creature)
+//       invulnerable: App.GG.Creature.status_add_invulnerable(creature, status.duration)
+//       noname: App.GG.Creature.status_add_noname(creature, status.duration)
+//       poison: App.GG.Creature.status_add_poison(creature, status.duration, status.damage)
+//       root:App.GG.Creature.status_add_root(creature, status.duration)
+//       stun: App.GG.Creature.status_add_stun(creature)
+//     }
+
+
+// App.GG.Creature.status_add_flinch(
+//   creature: App.GG.Creature
+// ): App.GG.Creature
+  
+//   let new_status = App.GG.Creature.Status.flinch & creature@status
+//   creature@status <- new_status
+
+// App.GG.Creature.status_add_invulnerable(
+//   creature: App.GG.Creature
+//   duration: U64
+// ): App.GG.Creature
+  
+//   let new_status = App.GG.Creature.status_add_invulnerable_aux(duration, creature@status)
+//   creature@status <- new_status
+
+// App.GG.Creature.status_add_invulnerable_aux(
+//   duration: U64
+//   status: List<App.GG.Creature.Status>
+// ): List<App.GG.Creature.Status>
+
+//   let new_invul = App.GG.Creature.Status.invulnerable(duration)
+//   case status {
+//     nil: new_invul & status
+//     cons:
+//       case status.head { 
+//         invulnerable:
+//           if U64.gtn(status.head.duration, duration) then
+//             status
+//           else
+//             new_invul & status.tail
+//       }default status.head & App.GG.Creature.status_add_invulnerable_aux(duration, status.tail)
+//   }
+
+
+// App.GG.Creature.status_check_invulnerable(
+//   creature: App.GG.Creature
+// ): Bool
+//   let status = creature@status
+//   case status { 
+//     invulnerable: true
+//   }default false
+
+
+// App.GG.Creature.status_add_noname(
+//   creature: App.GG.Creature
+//   duration: U64
+// ): App.GG.Creature
+  
+//   let new_status = App.GG.Creature.status_add_noname_aux(duration, creature@status)
+//   creature@status <- new_status
+
+
+// App.GG.Creature.status_add_noname_aux(
+//   duration: U64
+//   status: List<App.GG.Creature.Status>
+// ): List<App.GG.Creature.Status>
+
+//   let new_noname = App.GG.Creature.Status.noname(duration)
+//   case status {
+//     nil: new_noname & status
+//     cons:
+//       case status.head { 
+//         noname:
+//           if U64.gtn(status.head.duration, duration) then
+//             status
+//           else
+//             new_noname & status.tail
+//       }default status.head & App.GG.Creature.status_add_noname_aux(duration, status.tail)
+//   }
+
+// App.GG.Creature.status_check_noname(
+//   creature: App.GG.Creature
+// ): Bool
+//   let status = creature@status
+//   case status { 
+//     noname: true
+//   }default false
+
+
+// App.GG.Creature.status_add_poison(
+//   creature: App.GG.Creature
+//   duration: U64
+//   damage: I32
+// ): App.GG.Creature
+  
+//   let new_status = App.GG.Creature.status_add_poison_aux(duration, damage, creature@status)
+//   creature@status <- new_status
+
+
+// App.GG.Creature.status_add_poison_aux(
+//   duration: U64
+//   damage: I32
+//   status: List<App.GG.Creature.Status>
+// ): List<App.GG.Creature.Status>
+
+//   let new_poison = App.GG.Creature.Status.poison(duration, damage)
+//   case status {
+//     nil: new_poison & status
+//     cons:
+//       case status.head { 
+//         poison:
+//           if U64.gtn(status.head.duration, duration) then
+//             status
+//           else
+//             new_poison & status.tail
+//       }default status.head & App.GG.Creature.status_add_poison_aux(duration, damage, status.tail)
+//   }
+
+
+// App.GG.Creature.status_add_root(
+//   creature: App.GG.Creature
+//   duration: U64
+// ): App.GG.Creature
+  
+//   let new_status = App.GG.Creature.status_add_root_aux(duration, creature@status)
+//   creature@status <- new_status
+
+
+// App.GG.Creature.status_add_root_aux(
+//   duration: U64
+//   status: List<App.GG.Creature.Status>
+// ): List<App.GG.Creature.Status>
+
+//   let new_root = App.GG.Creature.Status.root(duration)
+//   case status {
+//     nil: new_root & status
+//     cons:
+//       case status.head { 
+//         root:
+//           if U64.gtn(status.head.duration, duration) then
+//             status
+//           else
+//             new_root & status.tail
+//       }default status.head & App.GG.Creature.status_add_root_aux(duration, status.tail)
+//   }
+
+  
+// App.GG.Creature.status_add_stun(
+//   creature: App.GG.Creature
+// ): App.GG.Creature
+  
+//   let new_status = App.GG.Creature.Status.stun & creature@status
+//   creature@status <- new_status
+
+// App.GG.Creature.status_eql(a: App.GG.Creature.Status, b: App.GG.Creature.Status): Bool
+//   case a b {
+//     invulnerable invulnerable: true
+//     poison poison: true
+//     root root: true
+//     stun root: true
+//   }default false
+
+// App.GG.Creature.status_different(a: App.GG.Creature.Status, b: App.GG.Creature.Status): Bool
+//   not(App.GG.Creature.status_eql(a, b))
+
+// App.GG.Creature.del_status(status: App.GG.Creature.Status, creature: App.GG.Creature): App.GG.Creature
+//   let new_status = List.filter!(App.GG.Creature.status_different(status), creature@status)
+//   creature@status <- new_status
+
 
 //===========================================================
 
@@ -202,6 +538,8 @@ App.GG.Creature.create_minion(minion: App.GG.Minion, grid: App.GG.Grid): App.GG.
   let animation = {App.GG.Animation.idle, 0#64}
   let actions = App.GG.Actions.new(none, none, false)
   let status = App.GG.Creature.Statuses.pure
+  let status = status@barrier <- some(App.GG.Creature.Status.barrier(400, 30))
+  let status = status@intangible_immunity <- some(App.GG.Creature.Status.intangible_immunity)
   let id = App.GG.Grid.next_id(grid)
   let AI = {"seen": +0#32, "unseen": +0#32}
   let hp = minion@hp
