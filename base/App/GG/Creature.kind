@@ -114,27 +114,28 @@ let grid = game@grid
     } <> game
   new_game
 
+
 App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     poison: 
-      log(U64.show(status.duration))
       let grid = game@grid
+      let new_duration = App.GG.Creature.Status.add(App.GG.Creature.Status.poison(status.duration - 1, status.damage))
+      let update = (x: App.GG.Creature -> App.GG.Creature) App.GG.Creature.modify_at(x, coord, grid)
       let new_grid = 
         if status.duration =? 0 then
           let new_creature = App.GG.Creature.Status.del_from_nat(0)
-          let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
-          new_grid
+          update(new_creature)
         else
-          let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.poison(status.duration - 1, status.damage))
-          let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
-          new_grid
-      let new_game = game@grid <- new_grid
-      if (status.duration % 10) =? 0 then 
-        let eff = App.GG.Effect.creature.change_hp_at(status.damage, coord, false)
-        let result = eff(coord, App.GG.Effect.Origin.creature, new_game)
-        case result {err: new_game, new: result.game}
-      else
-        new_game
+          if (status.duration % 10) =? 0 then 
+          //log(U64.show(status.duration) | " Hits")
+          let eff = App.GG.Effect.creature.change_hp_at(status.damage, coord, false)
+          let new_game = game@grid <- update(new_duration)
+          let result = eff(coord, App.GG.Effect.Origin.creature, new_game)
+          case result {err: grid, new: result.game@grid}
+        else
+          update(new_duration)
+
+        game@grid<- new_grid
 
   } default game
 
@@ -203,6 +204,17 @@ App.GG.Creature.create_minion(minion: App.GG.Minion, grid: App.GG.Grid): App.GG.
   let status = App.GG.Creature.Statuses.pure
   let id = App.GG.Grid.next_id(grid)
   let AI = {"seen": +0#32, "unseen": +0#32}
+  let hp = minion@hp
+  let monster = App.GG.Monster.minion(minion, AI)
+  App.GG.Creature.new(monster, team, animation, actions, status, hp, id)
+
+
+App.GG.Creature.create_minion_2(minion: App.GG.Minion, team: App.GG.Team, grid: App.GG.Grid): App.GG.Creature
+  let animation = {App.GG.Animation.idle, 0#64}
+  let actions = App.GG.Actions.new(none, none, false)
+  let status = App.GG.Creature.Statuses.pure
+  let id = App.GG.Grid.next_id(grid)
+  let AI = {"": +0#32, "": +0#32}
   let hp = minion@hp
   let monster = App.GG.Monster.minion(minion, AI)
   App.GG.Creature.new(monster, team, animation, actions, status, hp, id)

@@ -1,0 +1,87 @@
+App.GG.Creatures.mine(team: App.GG.Team): App.GG.Minion
+  App.GG.Minion.new(App.GG.Creatures.mine.vbox, App.GG.Creatures.mine.Effect(team), 5)
+
+
+App.GG.Creatures.mine.vbox(animation: App.GG.Animation, frame: U64): VoxBox
+  case animation {
+    idle: App.GG.img.Slime.idle.slime_character_idle_0
+    damage:
+      switch U64.eql((frame % 24)/4) {
+        0#64: App.GG.img.Slime.Hit.slime_character_Hit_0
+        1#64: App.GG.img.Slime.Hit.slime_character_Hit_1
+        2#64: App.GG.img.Slime.Hit.slime_character_Hit_2
+        3#64: App.GG.img.Slime.Hit.slime_character_Hit_3
+        4#64: App.GG.img.Slime.Hit.slime_character_Hit_4
+        5#64: App.GG.img.Slime.Hit.slime_character_Hit_5
+      }default App.GG.img.Slime.idle.slime_character_idle_0
+    death:
+      switch U64.eql((frame % 24)/2) {
+        0#64: App.GG.img.Slime.movement.slime_character_teleport_00
+        1#64: App.GG.img.Slime.movement.slime_character_teleport_01
+        2#64: App.GG.img.Slime.movement.slime_character_teleport_02
+        3#64: App.GG.img.Slime.movement.slime_character_teleport_03
+        4#64: App.GG.img.Slime.movement.slime_character_teleport_04
+        5#64: App.GG.img.Slime.movement.slime_character_teleport_05
+        6#64: App.GG.img.Slime.movement.slime_character_teleport_06
+        7#64: App.GG.img.Slime.movement.slime_character_teleport_07
+        8#64: App.GG.img.Slime.movement.slime_character_teleport_08
+        9#64: App.GG.img.Slime.movement.slime_character_teleport_09
+        10#64: App.GG.img.Slime.movement.slime_character_teleport_10
+        11#64: App.GG.img.Slime.movement.slime_character_teleport_11
+      }default VoxBox.empty
+  }default VoxBox.empty
+
+
+App.GG.Creatures.mine.Projectile.Effect: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      let coords = center & App.GG.Coord.adjacent_all(center, grid)
+      let eff = 
+        (coord: App.GG.Coord)
+        App.GG.Effect { 
+          let status = App.GG.Creature.Status.poison(100, 3)
+          App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+          let add_status = App.GG.Effect.status.add_at(status)
+          get hit = App.GG.Effect.projectile.hit.effect<Unit>(coord, add_status)
+          without hit: App.GG.Effect.pass
+          App.GG.Effect { 
+           return hit
+          }
+        }
+      App.GG.Effect {
+        App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+        switch U64.eql(frame) {
+          12: App.GG.Effect.projectile.delete
+        }default App.GG.Effect.pass
+      }
+    }
+  }
+
+App.GG.Creatures.mine.Projectile(team: App.GG.Team): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect { 
+      let animation = App.GG.Animation.attack
+      let projectile_effect = App.GG.Creatures.mine.Projectile.Effect
+      let projectile_info = App.GG.Projectile.Info.new(team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      App.GG.Effect.projectile.add_at(center, projectile)
+    }
+  }
+
+
+App.GG.Creatures.mine.Effect(team: App.GG.Team): App.GG.Effect<Unit>
+  let explode = {"explode", [{I32.eql(120), App.GG.Creatures.mine.Projectile(team)}]}
+  let effs = [explode]
+  App.GG.Effect {
+    App.GG.Effect.ai.run(effs)
+    App.GG.Effect.ai.inc("explode")
+  }
+

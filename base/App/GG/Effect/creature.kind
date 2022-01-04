@@ -94,3 +94,9 @@ App.GG.Effect.creature.modify_at(mod: App.GG.Creature -> App.GG.Creature, pos: A
   let new_grid = App.GG.Creature.modify_at(mod, pos, local@grid)
   let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
+
+App.GG.Effect.creature.spawn_at(creature: App.GG.Creature, pos: App.GG.Coord): App.GG.Effect<Unit> 
+  (center, origin, local)
+  let new_grid = App.GG.Creature.place(creature, pos, local@grid)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")

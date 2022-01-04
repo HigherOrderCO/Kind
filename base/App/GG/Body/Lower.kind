@@ -3,7 +3,7 @@ type App.GG.Body.Lower {
 }
 
 App.GG.Body.Lower.chips: App.GG.Chips
-  [App.GG.Chip.pull_sword]
+  [App.GG.Chip.Arms.pull_sword]
 
 App.GG.Body.Lower.get_chips(body: App.GG.Body): App.GG.Chips
   App.GG.Parts.chips_list(body@lower@parts, App.GG.Body.Lower.chips)

@@ -3,6 +3,11 @@ App.GG.Effect.tile.get: App.GG.Effect<Maybe<App.GG.Tile>>
   let tile = App.GG.Grid.get(center, local@grid)
   App.GG.Effect.Result.new!(tile, center, origin, local, (enemy, img) img, 0, "")
 
+App.GG.Effect.tile.get_at(coord: App.GG.Coord): App.GG.Effect<Maybe<App.GG.Tile>>
+  (center, origin, local)
+  let tile = App.GG.Grid.get(coord, local@grid)
+  App.GG.Effect.Result.new!(tile, center, origin, local, (enemy, img) img, 0, "")
+
 App.GG.Effect.tile.add_status(status: App.GG.Tile.Status, coord: App.GG.Coord): App.GG.Effect<Unit>
   (center, origin, local)
   let grid = local@grid

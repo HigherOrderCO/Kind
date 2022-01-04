@@ -1,14 +1,14 @@
-App.GG.Chip.shockwave: App.GG.Chip
+App.GG.Chip.Arms.shockwave: App.GG.Chip
   App.GG.Chip.new(
     "ShkWve"
     App.GG.Class.power
-    App.GG.Chip.shockwave.Effect(30)
+    App.GG.Chip.Arms.shockwave.Effect(30)
     8
     App.GG.img.bazooka
     App.GG.Attributes.new(1,0,3,0)
   )
 
-App.GG.Chip.shockwave.img(frame: U64): VoxBox
+App.GG.Chip.Arms.shockwave.img(frame: U64): VoxBox
   switch U64.eql((frame % 24)/2) {
     0#64: App.GG.img.Slime.hand.slime_wp_character__fire_00
     1#64: App.GG.img.Slime.hand.slime_wp_character__fire_01
@@ -25,7 +25,7 @@ App.GG.Chip.shockwave.img(frame: U64): VoxBox
   }default App.GG.img.Slime.hand.slime_wp_character__fire_00
 
 
-App.GG.Chip.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
+App.GG.Chip.Arms.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.charge.reset
     get frame = App.GG.Effect.frame.get
@@ -34,17 +34,17 @@ App.GG.Chip.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
     without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     App.GG.Effect {
-      App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
       let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
-      let projectile_effect = App.GG.Chip.shockwave.Projectile.Effect(dmg, false)
+      let projectile_effect = App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg, false)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
     }
   }
 
-App.GG.Chip.shockwave.bullet_position_x(current_frame: U64, max_frame: U64, reverse: Bool): I32
+App.GG.Chip.Arms.shockwave.bullet_position_x(current_frame: U64, max_frame: U64, reverse: Bool): I32
   let tile_x = +32#32
   let c = F64.to_i32(U64.to_f64(current_frame - 1))
   let m = F64.to_i32(U64.to_f64(max_frame ))  
@@ -52,7 +52,7 @@ App.GG.Chip.shockwave.bullet_position_x(current_frame: U64, max_frame: U64, reve
   if reverse then +0#32 - x else x
   
 
-App.GG.Chip.shockwave.Projectile.Effect(dmg: I32, reverse: Bool): App.GG.Effect<Unit>
+App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg: I32, reverse: Bool): App.GG.Effect<Unit>
   let max_frame = 32#64
   App.GG.Effect {
     App.GG.Effect.vbox.in_tile(App.GG.img.target_tile) // Adds image bound to tile
@@ -72,7 +72,7 @@ App.GG.Chip.shockwave.Projectile.Effect(dmg: I32, reverse: Bool): App.GG.Effect<
       App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     without projectile: App.GG.Effect.pass
-    let x = App.GG.Chip.shockwave.bullet_position_x(frame, max_frame, reverse)
+    let x = App.GG.Chip.Arms.shockwave.bullet_position_x(frame, max_frame, reverse)
     App.GG.Effect {
       App.GG.Effect.vbox.at_tile_with_variation(center, x, -5, App.GG.img.bullet)
       if (frame % max_frame) =? 0 then // Each time it reaches max_frame

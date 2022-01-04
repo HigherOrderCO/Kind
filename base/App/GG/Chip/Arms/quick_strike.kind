@@ -1,15 +1,15 @@
-App.GG.Chip.quick_strike: App.GG.Chip
+App.GG.Chip.Arms.quick_strike: App.GG.Chip
   App.GG.Chip.new(
     "QckStk"
     App.GG.Class.strength
-    App.GG.Chip.quick_strike.Effect(10) // TODO: Alter
+    App.GG.Chip.Arms.quick_strike.Effect(10) // TODO: Alter
     10
     App.GG.img.bazooka
     App.GG.Attributes.new(3,0,1,0) // TODO : Alter
   )
 
 
-App.GG.Chip.quick_strike.Effect(damage: I32): App.GG.Effect<Unit>
+App.GG.Chip.Arms.quick_strike.Effect(damage: I32): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.charge.reset
     get frame = App.GG.Effect.frame.get
@@ -18,26 +18,26 @@ App.GG.Chip.quick_strike.Effect(damage: I32): App.GG.Effect<Unit>
     without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     App.GG.Effect { 
-      //App.GG.Effect.vbox.in_tile(App.GG.Chip.cannon.img(frame)) // Add animation
+      //App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.cannon.img(frame)) // Add animation
       let animation = App.GG.Animation.attack
       let func = (coord: App.GG.Coord)
         App.GG.Effect { 
           let team = creature@team
           let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
-          App.GG.Chip.quick_strike.Projectile(dmg, coord, team)
+          App.GG.Chip.Arms.quick_strike.Projectile(dmg, coord, team)
         }
     App.GG.Effect.direct_shoot(func, animation, 2, 4)
     }
   }
 
-App.GG.Chip.quick_strike.Projectile(damage: I32, coord: App.GG.Coord, team: App.GG.Team): App.GG.Effect<Unit>
+App.GG.Chip.Arms.quick_strike.Projectile(damage: I32, coord: App.GG.Coord, team: App.GG.Team): App.GG.Effect<Unit>
   App.GG.Effect { 
     let below = App.GG.Coord.below(coord)
     let coords = coord & [below]
 
     let status = App.GG.Projectile.Status.unit
     let info = App.GG.Projectile.Info.new(team, status, NatSet.new, 0#64, false)
-    let effect = App.GG.Chip.quick_strike.Projectile.Effect(damage)
+    let effect = App.GG.Chip.Arms.quick_strike.Projectile.Effect(damage)
     let projectile = App.GG.Projectile.new(info, effect)
 
     let func = 
@@ -47,7 +47,7 @@ App.GG.Chip.quick_strike.Projectile(damage: I32, coord: App.GG.Coord, team: App.
     App.GG.Effect.multiple<App.GG.Coord>(func, coords)
   }
 
-App.GG.Chip.quick_strike.Projectile.Effect(damage: I32): App.GG.Effect<Unit>
+App.GG.Chip.Arms.quick_strike.Projectile.Effect(damage: I32): App.GG.Effect<Unit>
   App.GG.Effect { 
     App.GG.Effect.frame.inc
     get center = App.GG.Effect.coord.get_center
@@ -55,7 +55,7 @@ App.GG.Chip.quick_strike.Projectile.Effect(damage: I32): App.GG.Effect<Unit>
     without frame: App.GG.Effect.pass
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
-        App.GG.Effect.projectile.hit(damage, center)
+        App.GG.Effect.projectile.hit.damage_at(damage, center)
         switch U64.eql(frame) {
           4: App.GG.Effect.projectile.delete
         }default App.GG.Effect.pass

@@ -1,8 +1,8 @@
-App.GG.Chip.bazooka: App.GG.Chip
+App.GG.Chip.Arms.bazooka: App.GG.Chip
   App.GG.Chip.new(
     "Bazoka"
     App.GG.Class.strength
-    App.GG.Chip.bazooka.Effect(50) // TODO: Alter
+    App.GG.Chip.Arms.bazooka.Effect(50) // TODO: Alter
     10
     App.GG.img.bazooka
     App.GG.Attributes.new(3,0,1,0) // TODO : Alter
@@ -10,7 +10,7 @@ App.GG.Chip.bazooka: App.GG.Chip
 
 
 
-App.GG.Chip.bazooka.img(frame: U64): VoxBox
+App.GG.Chip.Arms.bazooka.img(frame: U64): VoxBox
   switch U64.eql((frame % 24)/2) {
     0#64: App.GG.img.Slime.hand.slime_wp_character__fire_00
     1#64: App.GG.img.Slime.hand.slime_wp_character__fire_01
@@ -27,7 +27,7 @@ App.GG.Chip.bazooka.img(frame: U64): VoxBox
   }default App.GG.img.Slime.hand.slime_wp_character__fire_00
 
 
-  App.GG.Chip.bazooka.Effect(damage: I32): App.GG.Effect<Unit>
+  App.GG.Chip.Arms.bazooka.Effect(damage: I32): App.GG.Effect<Unit>
     App.GG.Effect {
       App.GG.Effect.charge.reset
       get frame = App.GG.Effect.frame.get
@@ -36,7 +36,7 @@ App.GG.Chip.bazooka.img(frame: U64): VoxBox
       without creature: App.GG.Effect.pass
       without frame: App.GG.Effect.pass
       App.GG.Effect { 
-        App.GG.Effect.vbox.in_tile(App.GG.Chip.bazooka.img(frame))
+        App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
         let animation = App.GG.Animation.attack
 
         let func = (coord: App.GG.Coord)
@@ -45,7 +45,7 @@ App.GG.Chip.bazooka.img(frame: U64): VoxBox
 
             let coords = coord & App.GG.Coord.adjacent_all(coord, grid)
 
-            let projectile_effect = App.GG.Chip.bazooka.Projectile.Effect(dmg)
+            let projectile_effect = App.GG.Chip.Arms.bazooka.Projectile.Effect(dmg)
             let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
             let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
             let func = 
@@ -59,7 +59,7 @@ App.GG.Chip.bazooka.img(frame: U64): VoxBox
   }
 
 
-App.GG.Chip.bazooka.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+App.GG.Chip.Arms.bazooka.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
 
   App.GG.Effect {
     get center = App.GG.Effect.coord.get_center
@@ -68,7 +68,7 @@ App.GG.Chip.bazooka.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
     without frame: App.GG.Effect.pass
     App.GG.Effect { 
       App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
-      App.GG.Effect.projectile.hit(dmg, center)
+      App.GG.Effect.projectile.hit.damage_at(dmg, center)
       switch U64.eql(frame) {
         8: App.GG.Effect.projectile.delete
       }default App.GG.Effect.pass

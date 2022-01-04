@@ -1,0 +1,69 @@
+App.GG.Chip.Arms.poison_cloud: App.GG.Chip
+  App.GG.Chip.new(
+    "Psecld"
+    App.GG.Class.strength
+    App.GG.Chip.Arms.poison_cloud.Effect(10) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+
+
+App.GG.Chip.Arms.poison_cloud.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get team = App.GG.Effect.team.get
+    without creature: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile_effect = App.GG.Chip.Arms.poison_cloud.Projectile.Effect(dmg) 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      App.GG.Effect.generic_shoot(projectile, center, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+App.GG.Chip.Arms.poison_cloud.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get center = App.GG.Effect.coord.get_center
+    get team = App.GG.Effect.team.get
+    get grid = App.GG.Effect.grid.get
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+
+    let eff = 
+      (coord : App.GG.Coord)
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile) //change to coord
+        App.GG.Effect.projectile.hit.damage_at(dmg, coord) // change to coord
+      }
+      let pos = App.GG.Coord.furthest_tile_in_range(center, team, grid, 3)
+      let creature =  App.GG.Creature.create_minion_2(App.GG.Creatures.mine(team), App.GG.Team.neutral, grid)
+      let has_creature = App.GG.Coord.has_creature(pos, grid)
+      if frame =? 30 then
+        if has_creature then 
+          let has_enemy = App.GG.Coord.has_enemy(pos, team, grid)
+          if has_enemy then
+            App.GG.Effect { 
+              eff(pos)
+                switch U64.eql(frame) {
+                  38: App.GG.Effect.projectile.delete
+                }default App.GG.Effect.pass
+            }
+          else
+            App.GG.Effect.pass
+        else
+          App.GG.Effect.creature.spawn_at(creature, pos)
+      else
+        App.GG.Effect.pass
+  }

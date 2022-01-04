@@ -10,4 +10,4 @@ type App.GG.Chip {
 }
 
 App.GG.Chip.Generic: App.GG.Chip
-  App.GG.Chip.shockwave
+  App.GG.Chip.Arms.shockwave

@@ -10,22 +10,9 @@ App.GG.Coord.show(coord: App.GG.Coord): String
 App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
   let start = App.GG.Constants.map_starting_position
   let x = (start@fst + (32#32 * coord@fst)) - 128#32
-  let y = (start@snd + (32#32 * coord@snd)) - 128#32
+  let y = (start@snd + 32#32 * (App.GG.Constants.grid_size@snd - coord@snd)) - 128#32
   {x, y}
 
-
-  
-App.GG.Coord.highest_y(grid: App.GG.Grid): U32
-  let y = 0#32
-  for coord:tile in grid with y: 
-    U32.max(coord@snd, y)
-  y
-
-App.GG.Coord.lowest_y(grid: App.GG.Grid): U32
-  let y = 4294967296#32
-  for coord:tile in grid with y: 
-    U32.min(coord@snd, y)
-  y
 
 App.GG.Coord.column(center: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
   let result = []
@@ -41,8 +28,8 @@ App.GG.Coord.column(center: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
 
 App.GG.Coord.mid_y(grid:App.GG.Grid): Maybe<U32>
   let size = App.GG.Grid.y_size(grid)
-  let lowest_y = App.GG.Coord.lowest_y(grid)
-  let highest_y = App.GG.Coord.highest_y(grid)
+  let lowest_y = App.GG.Grid.lowest_y(grid)
+  let highest_y = App.GG.Grid.highest_y(grid)
   if not(Nat.is_even(size)) then
     some((highest_y + lowest_y) / 2)
   else
@@ -82,12 +69,7 @@ App.GG.Coord.front_sized(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Gr
   App.GG.Coord.front_sized.go(coord, [], team, grid, size)
 
 App.GG.Coord.front_sized.go(coord: App.GG.Coord, coords: List<App.GG.Coord>, team: App.GG.Team, grid: App.GG.Grid, size: Nat): List<App.GG.Coord>
-  let next_coord = 
-    case team {
-      blue: {coord@fst + 1, coord@snd}
-      red:  {coord@fst - 1, coord@snd}
-      neutral: coord
-    }
+  let next_coord = App.GG.Coord.front(coord, team)
   let tile = App.GG.Grid.get(next_coord, grid)
   case size tile { 
     succ some:
@@ -95,6 +77,16 @@ App.GG.Coord.front_sized.go(coord: App.GG.Coord, coords: List<App.GG.Coord>, tea
       let new_size = size - 1
       App.GG.Coord.front_sized.go(next_coord, new_list, team, grid, new_size)
     } default coords
+
+App.GG.Coord.furthest_tile_in_range(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid, range: Nat): App.GG.Coord
+  let next_coord =  App.GG.Coord.front(coord, team)
+  let tile = App.GG.Grid.get(next_coord, grid)
+  case range tile { 
+    succ some:
+      let new_range = range - 1
+      App.GG.Coord.furthest_tile_in_range(next_coord, team, grid, new_range)
+    } default coord
+  
 
 App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): Bool
   let f_tile = App.GG.Grid.get(from, grid)
@@ -165,29 +157,38 @@ App.GG.Coord.has_enemy(
   grid: App.GG.Grid
 ): Bool
 
-  let coords = App.GG.Coord.front_all(coord, team, grid)
-  let enemy = false
-  for target in coords with enemy:
-    let any_creature = App.GG.Creature.get(target, grid)
-    case any_creature {
-      none:
-        enemy
-      some:
-        let same_team = App.GG.Team.eql(team, any_creature.value@team)
-        if same_team then
-          enemy
-        else
-          true
-    }
-  enemy
+  let any_creature = App.GG.Creature.get(coord, grid)
+  case any_creature {
+    none:
+      false
+    some:
+      let same_team = App.GG.Team.eql(team, any_creature.value@team)
+      if same_team then
+        false
+      else
+        true
+  }
 
+
+App.GG.Coord.has_creature(
+  coord: App.GG.Coord
+  grid: App.GG.Grid
+): Bool
+
+  let any_creature = App.GG.Creature.get(coord, grid)
+  case any_creature {
+    none:
+      false
+    some:
+      true
+  }
 
 App.GG.Coord.above(coord: App.GG.Coord): App.GG.Coord
-  let new_coord = {coord@fst, coord@snd -1}
+  let new_coord = {coord@fst, coord@snd + 1}
   new_coord
 
 App.GG.Coord.below(coord: App.GG.Coord): App.GG.Coord
-  let new_coord = {coord@fst, coord@snd +1}
+  let new_coord = {coord@fst, coord@snd - 1}
   new_coord
 
 App.GG.Coord.all_coords_past_center(center: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid):List<App.GG.Coord>
@@ -285,9 +286,17 @@ App.GG.Coord.closest_coord(center: App.GG.Coord, coords: List<App.GG.Coord>):App
           {new_dist, coord}
     distance_coord@snd
 
+App.GG.Coord.best_target_by_hp(coords: List<App.GG.Coord>,  grid: App.GG.Grid): Maybe<App.GG.Coord>
+  let result = []
+  for enemy in coords with result:
+    let creature = App.GG.Creature.get(enemy, grid)
+    without creature: result
+    let percentage_hp = App.GG.Creature.max_hp_percentage(creature)
+    {percentage_hp, enemy} & result
 
+  App.GG.Coord.best_target_by_hp_aux(result)
 
-App.GG.Coord.best_target_by_hp(coords: List<Pair<I32, App.GG.Coord>>): Maybe<App.GG.Coord>
+App.GG.Coord.best_target_by_hp_aux(coords: List<Pair<I32, App.GG.Coord>>): Maybe<App.GG.Coord>
   case coords { 
     nil:
       none
@@ -305,37 +314,29 @@ App.GG.Coord.best_target_by_hp(coords: List<Pair<I32, App.GG.Coord>>): Maybe<App
             let y2 = coords.tail.head@snd@snd
             if y1 >? y2 then
               let new_list = {p1, coords.head@snd} & coords.tail.tail
-              App.GG.Coord.best_target_by_hp(new_list)
+              App.GG.Coord.best_target_by_hp_aux(new_list)
             else
               let new_list = {p2, coords.tail.head@snd} & coords.tail.tail
-              App.GG.Coord.best_target_by_hp(new_list)
+              App.GG.Coord.best_target_by_hp_aux(new_list)
           else
             let y1 = coords.head@snd@snd
             let y2 = coords.tail.head@snd@snd
             if y1 >? y2 then
               let new_list = {p1, coords.head@snd} & coords.tail.tail
-              App.GG.Coord.best_target_by_hp(new_list)
+              App.GG.Coord.best_target_by_hp_aux(new_list)
             else
               let new_list = {p2, coords.tail.head@snd} & coords.tail.tail
-              App.GG.Coord.best_target_by_hp(new_list)
+              App.GG.Coord.best_target_by_hp_aux(new_list)
         else
           if p1 >? p2 then
             let new_list = {p1, coords.head@snd} & coords.tail.tail
-            App.GG.Coord.best_target_by_hp(new_list)
+            App.GG.Coord.best_target_by_hp_aux(new_list)
           else
             let new_list = {p2, coords.tail.head@snd} & coords.tail.tail
-            App.GG.Coord.best_target_by_hp(new_list)
+            App.GG.Coord.best_target_by_hp_aux(new_list)
     }
   }
 
-App.GG.Coord.best_target_by_hp_aux(coords: List<App.GG.Coord>,  grid: App.GG.Grid): List<Pair<I32, App.GG.Coord>>
-  let result = []
-  for enemy in coords with result:
-    let creature = App.GG.Creature.get(enemy, grid)
-    without creature: result
-    let percentage_hp = App.GG.Creature.max_hp_percentage(creature)
-    {percentage_hp, enemy} & result
-  result
 
   
 App.GG.Coord.next_closer(center: App.GG.Coord, target: App.GG.Coord): App.GG.Coord
@@ -374,9 +375,7 @@ App.GG.Coord.projectile_best_target(start: App.GG.Coord, team: App.GG.Team, grid
       list
     else
       coord & list
-  let aux = App.GG.Coord.best_target_by_hp_aux(list, grid)
-  let best = App.GG.Coord.best_target_by_hp(aux)
-  best
+  App.GG.Coord.best_target_by_hp(list, grid)
 
 App.GG.Coord.projectile_chase(current: App.GG.Coord, target: App.GG.Coord): App.GG.Coord
   let y1 = current@snd

@@ -66,18 +66,28 @@ App.GG.Effect.projectile.delete: App.GG.Effect<Unit>
   let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
 
-App.GG.Effect.projectile.hit(dmg: I32, coord: App.GG.Coord): App.GG.Effect<I32>
+
+App.GG.Effect.projectile.hit.effect<A: Type>(coord: App.GG.Coord, f: App.GG.Coord -> App.GG.Effect<A>): App.GG.Effect<Maybe<A>>
   App.GG.Effect {
     get can_hit = App.GG.Effect.projectile.can_hit(coord)
     if can_hit then
-      App.GG.Effect {
+      App.GG.Effect { 
         App.GG.Effect.projectile.add_hit(coord) // Adds enemy to list of targets hit by projectile
-        get dmg = App.GG.Effect.creature.change_hp_at(dmg, coord, true) 
-        return dmg
+        get value = f(coord)
+        return some(value)
       }
-    else
-      App.GG.Effect {return +0#32}
+  else
+    App.GG.Effect { return none }
   } 
+
+App.GG.Effect.projectile.hit.damage_at(dmg: I32, coord: App.GG.Coord): App.GG.Effect<I32>
+  App.GG.Effect { 
+    let dmg = (x: App.GG.Coord) App.GG.Effect.creature.change_hp_at(dmg, x, true) 
+    get dmg_dealt = App.GG.Effect.projectile.hit.effect<I32>(coord, dmg)
+    return 
+      without dmg_dealt: +0#32
+      dmg_dealt
+  }
 
 App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
   App.GG.Effect {
@@ -87,3 +97,4 @@ App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
     let is_noname = false //App.GG.Effect.status.is_noname(coord) // Checks if projectile is trying to affect a creature with noname
     return not(is_noname) && not(is_invulnerable) && not(has_hit) && is_enemy
   }
+  

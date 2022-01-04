@@ -35,22 +35,32 @@ App.GG.init.game(body: App.GG.Body): App.GG.State.local
 App.GG.init.grid(body: App.GG.Body): App.GG.Grid
   let blue = App.GG.Tile.new([], none, App.GG.Team.blue, App.GG.Tile.Statuses.pure)
   let red = App.GG.Tile.new([], none, App.GG.Team.red, App.GG.Tile.Statuses.pure)
-  let list = 
-    [
-      {{0#32,0#32}, blue} {{1#32,0#32}, blue} {{2#32,0#32}, blue}
-      {{0#32,1#32}, blue} {{1#32,1#32}, blue} {{2#32,1#32}, blue}
-      {{0#32,2#32}, blue} {{1#32,2#32}, blue} {{2#32,2#32}, blue}
-     
-      {{3#32,0#32}, red } {{4#32,0#32}, red } {{5#32,0#32}, red }
-      {{3#32,1#32}, red } {{4#32,1#32}, red } {{5#32,1#32}, red }
-      {{3#32,2#32}, red } {{4#32,2#32}, red } {{5#32,2#32}, red }
-    ]
+  let {max_x, max_y} = App.GG.Constants.grid_size
+  let cx = U32.to_nat(max_x)
+  let cy = U32.to_nat(max_y)
+
+  let nat_list = []
+  for x from 0 to cx with nat_list:
+    let owner =
+      if x <? cx/2 then 
+        blue
+      else
+        red
+    for y from 0 to cy with nat_list:
+      let coord = {x + 1, y + 1}
+      {coord, owner} & nat_list
+    nat_list
+    
+  let list = []
+  for pairs in nat_list with list:
+    let {x,y} = pairs@fst
+    let coords = {Nat.to_u32(x), Nat.to_u32(y)}
+    Pair.new!!(coords, pairs@snd) & list
+
   let grid = BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
   let parts = App.GG.Parts.new(0,0,0)
   let slime = App.GG.Creature.create_slime(App.GG.Creatures.slime(body), grid)
   let minion =  App.GG.Creature.create_minion(App.GG.Creatures.minion, grid)
-  let grid = App.GG.Creature.place(slime,  {1#32,1#32}, grid)
-  let grid = App.GG.Creature.place(minion, {4#32,1#32}, grid)
+  let grid = App.GG.Creature.place(slime,  {2#32,2#32}, grid)
+  let grid = App.GG.Creature.place(minion, {5#32,2#32}, grid)
   grid
-  
-

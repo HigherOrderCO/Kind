@@ -138,7 +138,7 @@ App.GG.Creatures.minion.Effect.attack: App.GG.Effect<Unit>
       // App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
       let dmg = 50 :: I32
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
-      let projectile_effect = App.GG.Chip.shockwave.Projectile.Effect(dmg, true)
+      let projectile_effect = App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg, true)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
       App.GG.Effect.ai.modify("seen", (x) +0#32)
@@ -147,7 +147,7 @@ App.GG.Creatures.minion.Effect.attack: App.GG.Effect<Unit>
           App.GG.Effect {
             get frame = App.GG.Effect.frame.get
             without frame: App.GG.Effect.pass
-            App.GG.Effect.vbox.in_tile(App.GG.Chip.shockwave.img(frame))
+            App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
             App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
           }
         let new_action = App.GG.Actions.Data.new(0, eff, App.GG.Actions.Category.chip)
@@ -168,9 +168,9 @@ App.GG.Creatures.minion.Effect.move: App.GG.Effect<Unit>
     App.GG.Effect {
       let arrow = 
         case U32.cmp(coord@snd, center@snd) {
-          ltn: some(App.GG.Arrow.up)
+          ltn: some(App.GG.Arrow.down)
           eql: none
-          gtn: some(App.GG.Arrow.down)
+          gtn: some(App.GG.Arrow.up)
         }
       without arrow: App.GG.Effect.pass
       App.GG.Effect {
@@ -190,5 +190,5 @@ App.GG.Creatures.minion.Effect: App.GG.Effect<Unit>
   let effs = [seen, unseen]
   App.GG.Effect {
     App.GG.Effect.ai.run(effs)
-    App.GG.Effect.ai.inc(true)
+    App.GG.Effect.ai.inc_vision(true)
   }

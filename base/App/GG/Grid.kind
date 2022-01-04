@@ -73,9 +73,24 @@ App.GG.Grid.next_id.go(count: Nat, ids: List<Nat>): Nat
   without id: count
   App.GG.Grid.next_id.go(count + 1, ids)
 
+
+//Gives the highest y value
+App.GG.Grid.highest_y(grid: App.GG.Grid): U32
+  let y = 0#32
+  for coord:tile in grid with y: 
+    U32.max(coord@snd, y)
+  y
+
+//Gives the lowest y value
+App.GG.Grid.lowest_y(grid: App.GG.Grid): U32
+  let y = 4294967296#32
+  for coord:tile in grid with y: 
+    U32.min(coord@snd, y)
+  y
+
 //Gives the Y size of the grid
 App.GG.Grid.y_size(grid: App.GG.Grid): Nat
-  let highest_y = App.GG.Coord.highest_y(grid)
-  let lowest_y = App.GG.Coord.lowest_y(grid)
+  let highest_y = App.GG.Grid.highest_y(grid)
+  let lowest_y = App.GG.Grid.lowest_y(grid)
   let diff = U32.to_nat(highest_y - lowest_y)
   1 + diff

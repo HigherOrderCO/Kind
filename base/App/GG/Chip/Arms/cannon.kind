@@ -1,17 +1,15 @@
-App.GG.Chip.recursive_gun: App.GG.Chip
-  App.GG.Chip.recursive_gun_2(4, 2)
-
-App.GG.Chip.recursive_gun_2(casts: Nat, dmg: I32): App.GG.Chip
+App.GG.Chip.Arms.cannon: App.GG.Chip
   App.GG.Chip.new(
-    "RcvGun"
-    App.GG.Class.destruction
-    App.GG.Chip.recursive_gun.Effect(casts, dmg)
-    15
+    "Cannon"
+    App.GG.Class.strength
+    App.GG.Chip.Arms.cannon.Effect(20) // TODO: Alter
+    10
     App.GG.img.bazooka
-    App.GG.Attributes.new(1,1,2,0)
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
   )
-  
-App.GG.Chip.recursive_gun.img(frame: U64): VoxBox
+
+
+App.GG.Chip.Arms.cannon.img(frame: U64): VoxBox
   switch U64.eql((frame % 24)/2) {
     0#64: App.GG.img.Slime.hand.slime_wp_character__fire_00
     1#64: App.GG.img.Slime.hand.slime_wp_character__fire_01
@@ -27,31 +25,23 @@ App.GG.Chip.recursive_gun.img(frame: U64): VoxBox
     11#64: App.GG.img.Slime.hand.slime_wp_character__fire_11
   }default App.GG.img.Slime.hand.slime_wp_character__fire_00
 
-
-
-App.GG.Chip.recursive_gun.Effect(casts: Nat, damage: I32): App.GG.Effect<Unit>
+  App.GG.Chip.Arms.cannon.Effect(damage: I32): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.charge.reset
     get frame = App.GG.Effect.frame.get
-    get creature = App.GG.Effect.creature.get
     get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
     without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
-    App.GG.Effect {
-      App.GG.Effect.vbox.in_tile(App.GG.Chip.recursive_gun.img(frame))
+    App.GG.Effect { 
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.cannon.img(frame))
       let animation = App.GG.Animation.attack
       let func = (coord: App.GG.Coord)
-        App.GG.Effect {
+        App.GG.Effect { 
           let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
           get dmg = App.GG.Effect.creature.change_hp_at(dmg, coord, true) 
-          if casts =? 0 then
-            App.GG.Effect.pass
-          else 
-            App.GG.Effect.creature.modify(App.GG.Creature.add_chip(App.GG.Chip.recursive_gun_2(casts - 1, damage * 2)))
-            log(I32.show(dmg))
-            return unit
+          return unit
         }
-    App.GG.Effect.direct_shoot(func, animation, 8, 12)
+    App.GG.Effect.direct_shoot(func, animation, 8, 8)
     }
   }
-
