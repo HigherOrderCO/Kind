@@ -38,5 +38,3 @@ App.GG.Effect.creature.modify_at(mod: App.GG.Creature -> App.GG.Creature, pos: A
   let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
 
-App.GG.Effect.creature.damage_at(dmg: I32, pos: App.GG.Coord, flinch: Bool): App.GG.Effect<I32>
-  App.GG.Effect.change_hp(I32.neg(dmg), flinch, pos)

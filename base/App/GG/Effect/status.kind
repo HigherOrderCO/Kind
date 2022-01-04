@@ -27,7 +27,6 @@
 //     let mod = App.GG.Creature.modify_at(App.GG.Creature.add_status(status), center)
 //     App.GG.Effect.grid.modify(mod)
 //   }
-  
 
 // App.GG.Effect.status.noname(
 //   iframe: Bool
@@ -41,6 +40,16 @@
 //     else
 //       App.GG.Effect.pass
 //   }
+
+App.GG.Effect.status.get_at(id: Nat, pos: App.GG.Coord): App.GG.Effect<Maybe<Maybe<App.GG.Creature.Status>>>
+  App.GG.Effect {
+    get creature = App.GG.Effect.creature.get_at(pos)
+    without creature: App.GG.Effect {return none}
+    App.GG.Effect {
+      return App.GG.Creature.Status.get_from_nat(id, creature@statuses)
+    }
+  }
+
 
 App.GG.Effect.status.add_at(
   status: App.GG.Creature.Status

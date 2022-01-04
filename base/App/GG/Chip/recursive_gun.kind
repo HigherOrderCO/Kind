@@ -58,7 +58,7 @@ App.GG.Chip.recursive_gun.Effect(casts: Nat, dmg: Nat): App.GG.Effect<Unit>
               else 
                 App.GG.Effect.creature.modify(App.GG.Creature.add_chip(App.GG.Chip.recursive_gun_2(casts - 1, dmg * 2)))
               let dmg = App.GG.Creature.dmg_with_attribute(creature, Nat.to_i32(dmg))
-              get dmg = App.GG.Effect.change_hp(0 - dmg, true, enemy_coord) 
+              get dmg = App.GG.Effect.change_hp(0 - dmg, true, true, enemy_coord) 
               return unit 
             }
         }
@@ -87,7 +87,7 @@ App.GG.Chip.recursive_gun.Projectile.Effect: App.GG.Effect<Unit>
     if is_enemy && not(has_hit) then
       App.GG.Effect {
         App.GG.Effect.projectile.add_hit(center) // Adds enemy to list of targets hit by projectile
-        App.GG.Effect.change_hp(-10, true, center) 
+        App.GG.Effect.change_hp(-10, true, true, center) 
         return unit
       }
     else

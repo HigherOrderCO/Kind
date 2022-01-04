@@ -185,7 +185,7 @@ App.GG.Creatures.minion.Effect.move: App.GG.Effect<Unit>
 
 App.GG.Creatures.minion.Effect: App.GG.Effect<Unit>
   log("?")
-  let seen = {"seen", [{I32.eql(240), App.GG.Creatures.minion.Effect.attack}]}
+  let seen = {"seen", [{I32.eql(10), App.GG.Creatures.minion.Effect.attack}]}
   let unseen = {"unseen", [{I32.eql(60), App.GG.Creatures.minion.Effect.move}]}
   let effs = [seen, unseen]
   App.GG.Effect {
