@@ -67,13 +67,13 @@ App.GG.Actions.basic_attack(effect: App.GG.Effect<Unit>): App.GG.Actions.Data
   App.GG.Actions.Data.new(frame, effect, category)
 
 // Runs the effect of Current action if there is any
-App.GG.Actions.run(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Actions.run(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   Maybe {
-    let grid = local@grid
+    let grid = game@grid
     get creature = App.GG.Creature.get(coord, grid)
     get action = creature@actions@current 
     let origin = App.GG.Effect.Origin.creature
-    let result = action@effect(coord, origin, local) 
-    get new_local = case result {err: none, new: some(result.local)}
-    return new_local
-  } <> local
+    let result = action@effect(coord, origin, game) 
+    get new_game = case result {err: none, new: some(result.game)}
+    return new_game
+  } <> game

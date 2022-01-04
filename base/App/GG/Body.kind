@@ -12,6 +12,14 @@ type App.GG.Body {
   )
 }
 
+type App.GG.Body.Fragment {
+  hull
+  upper
+  lower
+  arm_1
+  arm_2
+}
+
 App.GG.Body.get_correspondent_chip(
   chips: App.GG.Chips
   id: Nat
@@ -45,8 +53,7 @@ App.GG.Body.attributes(
   body: App.GG.Body
 ): App.GG.Attributes
   let chips = App.GG.Body.chips(body)
-  let f = (chip: App.GG.Chip, attributes: App.GG.Attributes) App.GG.Attributes.add(attributes, chip@attributes)
-  let attributes = List.foldr!!(App.GG.Attributes.pure, f, chips)
+  let attributes = App.GG.Chips.attributes(App.GG.Attributes.base, chips)
   attributes
 
 App.GG.Body.to_folder(body: App.GG.Body): App.GG.Chips
@@ -57,3 +64,57 @@ App.GG.Body.to_folder(body: App.GG.Body): App.GG.Chips
   let new_list = List.map!!(f, chips)
   let flat = List.flatten!(new_list)
   flat
+
+// generate a random body
+App.GG.Body.random(seed: Nat): App.GG.Body
+  let hull_form  = App.GG.Body.Hull.Form.classic
+  let hull_chips = App.GG.Parts.hull(hull_form)
+
+  let arms_chips  = App.GG.Body.Arms.chips
+  let upper_chips = App.GG.Body.Upper.chips
+  let lower_chips = App.GG.Body.Lower.chips
+  
+  let hull_parts = App.GG.Parts.random(seed, hull_chips)
+  let arm1_parts = App.GG.Parts.random(seed + 1, arms_chips)
+  let arm2_parts = App.GG.Parts.random(seed + 2, arms_chips)
+  let upper_parts = App.GG.Parts.random(seed + 3, upper_chips)
+  let lower_parts = App.GG.Parts.random(seed + 4, lower_chips)
+
+  let body = App.GG.Body.new(
+    App.GG.Body.Hull.new(hull_form, hull_parts)
+    App.GG.Body.Upper.new(upper_parts)
+    App.GG.Body.Lower.new(lower_parts)
+    App.GG.Body.Arms.new(arm1_parts)
+    App.GG.Body.Arms.new(arm2_parts)
+  )
+
+  body
+
+// generate a random fragment of the body
+App.GG.Body.Fragment.random(
+  seed: Nat
+  chips: App.GG.Chips
+  fragment: App.GG.Body.Fragment
+  body: App.GG.Body
+): App.GG.Body
+  let parts = App.GG.Parts.random(seed, chips)
+  let body = case fragment {
+    hull:  body@hull@parts  <- parts
+    upper: body@upper@parts <- parts
+    lower: body@lower@parts <- parts
+    arm_1: body@arm_1@parts <- parts
+    arm_2: body@arm_2@parts <- parts
+  }
+  body
+
+// shows body fragment
+App.GG.Body.Fragment.show(
+  fragment: App.GG.Body.Fragment
+): String
+  case fragment {
+    hull: "Hull"
+    upper: "Upper Body"
+    lower: "Lower Body"
+    arm_1: "Arm1"
+    arm_2: "Arm2"
+  }

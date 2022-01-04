@@ -2,7 +2,7 @@ App.GG.Chip.shockwave: App.GG.Chip
   App.GG.Chip.new(
     "ShkWve"
     App.GG.Class.power
-    App.GG.Chip.shockwave.Effect(-30)
+    App.GG.Chip.shockwave.Effect(30)
     8
     App.GG.img.bazooka
     App.GG.Attributes.new(1,0,3,0)
@@ -65,7 +65,7 @@ App.GG.Chip.shockwave.Projectile.Effect(dmg: I32, reverse: Bool): App.GG.Effect<
     if is_enemy && not(has_hit) then
       App.GG.Effect {
         App.GG.Effect.projectile.add_hit(center) // Adds enemy to list of targets hit by projectile
-        App.GG.Effect.change_hp(dmg, true, true, center) 
+        App.GG.Effect.damage(dmg, true, true, center) 
         return unit
       }
     else

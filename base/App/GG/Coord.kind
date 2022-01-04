@@ -1,11 +1,72 @@
 App.GG.Coord: Type
   Pair<U32, U32>
 
+App.GG.Coord.show(coord: App.GG.Coord): String
+  let x = U32.show(coord@fst)
+  let y = U32.show(coord@snd)
+  "{ "| x |", "|y|" } "
+
+
 App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
   let start = App.GG.Constants.map_starting_position
   let x = (start@fst + (32#32 * coord@fst)) - 128#32
   let y = (start@snd + (32#32 * coord@snd)) - 128#32
   {x, y}
+
+
+  
+App.GG.Coord.highest_y(grid: App.GG.Grid): U32
+  let y = 0#32
+  for coord:tile in grid with y: 
+    U32.max(coord@snd, y)
+  y
+
+App.GG.Coord.lowest_y(grid: App.GG.Grid): U32
+  let y = 4294967296#32
+  for coord:tile in grid with y: 
+    U32.min(coord@snd, y)
+  y
+
+App.GG.Coord.column(center: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
+  let result = []
+  for coord:tile in grid with result:
+    let x1 = center@fst
+    let x2 = coord@fst
+      if x1 =? x2 then 
+        coord & result
+      else
+        result
+    result
+  
+
+App.GG.Coord.mid_y(grid:App.GG.Grid): Maybe<U32>
+  let size = App.GG.Grid.y_size(grid)
+  let lowest_y = App.GG.Coord.lowest_y(grid)
+  let highest_y = App.GG.Coord.highest_y(grid)
+  if not(Nat.is_even(size)) then
+    some((highest_y + lowest_y) / 2)
+  else
+    none
+  
+
+App.GG.Coord.distance(center: App.GG.Coord, target: App.GG.Coord): Nat
+  let {x1, y1} = {center@fst, center@snd}
+  let {x2, y2} = {target@fst, target@snd}
+  let x1_is_greater = U32.gtn(x1, x2)
+  let y1_is_greater = U32.gtn(y1, y2)
+  let x_dist = 
+    if x1_is_greater then 
+      x1 - x2 
+    else
+      x2 - x1
+  let y_dist = 
+    if y1_is_greater then 
+      y1 - y2 
+    else
+      y2 - y1
+  U32.to_nat(x_dist + y_dist)
+
+
 
 App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
   let new_coord = 
@@ -15,6 +76,25 @@ App.GG.Coord.front(coord: App.GG.Coord, team: App.GG.Team): App.GG.Coord
       neutral: coord
     }
   new_coord
+
+
+App.GG.Coord.front_sized(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid, size: Nat): List<App.GG.Coord>
+  App.GG.Coord.front_sized.go(coord, [], team, grid, size)
+
+App.GG.Coord.front_sized.go(coord: App.GG.Coord, coords: List<App.GG.Coord>, team: App.GG.Team, grid: App.GG.Grid, size: Nat): List<App.GG.Coord>
+  let next_coord = 
+    case team {
+      blue: {coord@fst + 1, coord@snd}
+      red:  {coord@fst - 1, coord@snd}
+      neutral: coord
+    }
+  let tile = App.GG.Grid.get(next_coord, grid)
+  case size tile { 
+    succ some:
+      let new_list = next_coord & coords
+      let new_size = size - 1
+      App.GG.Coord.front_sized.go(next_coord, new_list, team, grid, new_size)
+    } default coords
 
 App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): Bool
   let f_tile = App.GG.Grid.get(from, grid)
@@ -33,6 +113,23 @@ App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.G
     }
     return result
   } <> false
+
+App.GG.Coord.adjacent_all(
+  center: App.GG.Coord
+  grid: App.GG.Grid
+): List<App.GG.Coord>
+  
+    let above = App.GG.Coord.above(center)
+    let below = App.GG.Coord.below(center)
+    let {top_right, top_left} = {{above@fst + 1 , above@snd} , {above@fst - 1, above@snd}}
+    let {bot_right, bot_left} = {{below@fst + 1 , below@snd} , {below@fst - 1, below@snd}}
+    let {ctr_left, ctr_right} = {{center@fst + 1, center@snd}, {center@fst - 1, center@snd}}
+    [
+    top_left,   above   ,top_right
+    ctr_left,            ctr_right
+    bot_left,   below   ,bot_right
+    ]
+
 
 App.GG.Coord.front_all.go(
   coord: App.GG.Coord,
@@ -93,6 +190,21 @@ App.GG.Coord.below(coord: App.GG.Coord): App.GG.Coord
   let new_coord = {coord@fst, coord@snd +1}
   new_coord
 
+App.GG.Coord.all_coords_past_center(center: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid):List<App.GG.Coord>
+  let column = App.GG.Coord.column(center, grid)
+  let lists =  List.map!!((x) App.GG.Coord.front_all(x, team, grid), column)
+  List.flatten!(lists)
+
+App.GG.Coord.enemy_pos(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  Maybe { 
+    get creature = App.GG.Creature.get(coord, grid)
+    let same_team = App.GG.Team.eql(creature@team, team)
+    if same_team then
+      none
+    else
+      some(coord)
+  }
+
 App.GG.Coord.first_enemy_in_front(team: App.GG.Team, grid: App.GG.Grid, coord: App.GG.Coord): Maybe<App.GG.Coord>
   let next = App.GG.Coord.first_enemy_in_front(team, grid)
   let new_coord = App.GG.Coord.front(coord, team)
@@ -105,6 +217,186 @@ App.GG.Coord.first_enemy_in_front(team: App.GG.Team, grid: App.GG.Grid, coord: A
   else
     some(new_coord)
 
+
+App.GG.Coord.all_enemies_in_coords(coord: App.GG.Coord, coords: List<App.GG.Coord>, team: App.GG.Team, grid: App.GG.Grid): Maybe<List<App.GG.Coord>>
+  let result = []
+  for enemy_coord in coords with result:
+    let enemy_pos = App.GG.Coord.enemy_pos(enemy_coord, team, grid)
+    without enemy_pos: result
+    enemy_pos & result
+
+  let empty = List.is_empty<App.GG.Coord>(result)
+  if empty then
+    none
+  else
+    some(result)
+
+
+
+App.GG.Coord.all_creature_hp(grid: App.GG.Grid): List<Pair<I32, App.GG.Coord>>
+  let result = []
+  for coord:tile in grid with result:
+    let creature = App.GG.Creature.get(coord, grid)
+    without creature: result
+    {creature@hp, coord} & result
+  result
+
+
+App.GG.Coord.all_enemies_hp(grid: App.GG.Grid, team: App.GG.Team):List<Pair<I32, App.GG.Coord>>
+  let result = []
+  for coord:tile in grid with result:
+    let creature = App.GG.Creature.get(coord, grid)
+    without creature: result
+    let same_team = App.GG.Team.eql(creature@team, team)
+    if same_team then 
+      result
+    else
+      {creature@hp, coord} & result
+  result
+
+
+App.GG.Coord.closest_coord(center: App.GG.Coord, coords: List<App.GG.Coord>):App.GG.Coord
+  let closer = {0#32, 0#32}
+  let distance = 10
+  let distance_coord = Pair.new!!(distance, closer)
+
+  for coord in coords with distance_coord:
+    let new_dist = App.GG.Coord.distance(center, coord)
+      if new_dist =? distance_coord@fst then // Verifies if the new_distance is same as the old one
+        let y1 = distance_coord@snd@snd // Gets the current y
+        let y2 = coord@snd // Gets the new Y
+        let center_y = center@snd // Gets the first coordinate
+        let firsty = U32.eql(center_y, y1) // Verifies if the actual Y is equal to the same in the first coordinate
+        let secondy = U32.eql(center_y, y2) // Verifies if the new Y is equal to the same in the first coordinate 
+        if firsty then  //If the first Y is the same as the first coordinate
+          distance_coord 
+        else if secondy then //If not, verifies if the second Y is the same as the first coordinate
+          {new_dist, coord} 
+        else 
+          let y1_greater = U32.gtn(y1, y2) //Verifies which of the Ys is greater
+          if y1_greater then 
+            distance_coord 
+          else 
+            {new_dist, coord} 
+      else 
+        if new_dist >? distance_coord@fst then  //Verifies if the new distance is greater than the one saved currently
+          distance_coord
+        else
+          {new_dist, coord}
+    distance_coord@snd
+
+
+
+App.GG.Coord.best_target_by_hp(coords: List<Pair<I32, App.GG.Coord>>): Maybe<App.GG.Coord>
+  case coords { 
+    nil:
+      none
+    cons: case coords.tail { 
+      nil: 
+        some(coords.head@snd)
+      cons: 
+        let p1 = coords.head@fst
+        let p2 = coords.tail.head@fst
+        if p1 =? p2 then
+          let x1 = coords.head@snd@fst
+          let x2 = coords.tail.head@snd@fst
+          if x1 =? x2 then
+            let y1 = coords.head@snd@snd
+            let y2 = coords.tail.head@snd@snd
+            if y1 >? y2 then
+              let new_list = {p1, coords.head@snd} & coords.tail.tail
+              App.GG.Coord.best_target_by_hp(new_list)
+            else
+              let new_list = {p2, coords.tail.head@snd} & coords.tail.tail
+              App.GG.Coord.best_target_by_hp(new_list)
+          else
+            let y1 = coords.head@snd@snd
+            let y2 = coords.tail.head@snd@snd
+            if y1 >? y2 then
+              let new_list = {p1, coords.head@snd} & coords.tail.tail
+              App.GG.Coord.best_target_by_hp(new_list)
+            else
+              let new_list = {p2, coords.tail.head@snd} & coords.tail.tail
+              App.GG.Coord.best_target_by_hp(new_list)
+        else
+          if p1 >? p2 then
+            let new_list = {p1, coords.head@snd} & coords.tail.tail
+            App.GG.Coord.best_target_by_hp(new_list)
+          else
+            let new_list = {p2, coords.tail.head@snd} & coords.tail.tail
+            App.GG.Coord.best_target_by_hp(new_list)
+    }
+  }
+
+App.GG.Coord.best_target_by_hp_aux(coords: List<App.GG.Coord>,  grid: App.GG.Grid): List<Pair<I32, App.GG.Coord>>
+  let result = []
+  for enemy in coords with result:
+    let creature = App.GG.Creature.get(enemy, grid)
+    without creature: result
+    let percentage_hp = App.GG.Creature.max_hp_percentage(creature)
+    {percentage_hp, enemy} & result
+  result
+
+  
+App.GG.Coord.next_closer(center: App.GG.Coord, target: App.GG.Coord): App.GG.Coord
+  let center_x = center@fst
+  let target_x = target@fst
+  let same_x = U32.eql(center_x, target_x)
+  if not(same_x) then
+    let center_x_higher = U32.gtn(center_x, target_x)
+    if center_x_higher then
+      {center_x - 1, center@snd}
+    else
+      {center_x + 1, center@snd}
+  else
+    let center_y = center@snd
+    let target_y = target@snd
+    let same_y = U32.eql(center_y, target_y)
+    if not(same_y) then
+      let center_y_higher = U32.gtn(center_y, target_y)
+      if center_y_higher then
+        {center@fst, center@snd - 1}
+      else
+        {center@fst, center@snd + 1}
+    else
+      target
+
+App.GG.Coord.projectile_best_target(start: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  let closest_enemy = App.GG.Coord.closest_enemy_in_front(start, team, grid)
+  without closest_enemy: none
+  let list = []
+  let same_column = App.GG.Coord.column(closest_enemy, grid)
+  for coord in same_column with list:
+    let y1 = start@snd
+    let y2 = coord@snd
+    let diff = if y1 >? y2 then y1 - y2 else y2 - y1
+    if diff >? 1 then
+      list
+    else
+      coord & list
+  let aux = App.GG.Coord.best_target_by_hp_aux(list, grid)
+  let best = App.GG.Coord.best_target_by_hp(aux)
+  best
+
+App.GG.Coord.projectile_chase(current: App.GG.Coord, target: App.GG.Coord): App.GG.Coord
+  let y1 = current@snd
+  let y2 = target@snd
+  if y1 =? y2 then
+    {current@fst + 1, current@snd}
+  else if y1 >? y2 then
+    {current@fst +1, current@snd - 1}
+    else
+      {current@fst + 1, current@snd +1}
+    
+
+App.GG.Coord.closest_enemy_in_front(center: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  let coords = App.GG.Coord.all_coords_past_center(center, team, grid)
+  let all_enemies = App.GG.Coord.all_enemies_in_coords(center, coords, team, grid)
+  without all_enemies: none
+  let closest_enemy = App.GG.Coord.closest_coord(center, all_enemies)
+  some(closest_enemy)
+
+
 App.GG.Coord.first_enemy_tile(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
   let front_coord = App.GG.Coord.front(coord, team)
   let front_tile  = App.GG.Grid.get(front_coord, grid)
@@ -113,6 +405,7 @@ App.GG.Coord.first_enemy_tile(coord: App.GG.Coord, team: App.GG.Team, grid: App.
     App.GG.Coord.first_enemy_tile(front_coord, team, grid)
   else
     some(front_coord)
+
 
 // returns all the coords in a coord's column, and all the columns ahead of it
 App.GG.Coord.self_and_front_columns(coord: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>

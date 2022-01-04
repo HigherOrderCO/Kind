@@ -58,23 +58,23 @@ type App.GG.Creature.Statuses {
 App.GG.Creature.Statuses.pure: App.GG.Creature.Statuses
   App.GG.Creature.Statuses.new(none, none, none, none, none)
 
-App.GG.Creature.Status.update_grid(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
-  App.GG.Creature.Status.update_grid.go(0, coord, local)
+App.GG.Creature.Status.update_grid(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  App.GG.Creature.Status.update_grid.go(0, coord, game)
 
-App.GG.Creature.Status.update_grid.go(count: Nat, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
-let grid = local@grid
-  let new_local = 
+App.GG.Creature.Status.update_grid.go(count: Nat, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+let grid = game@grid
+  let new_game = 
     Maybe {
       get creature = App.GG.Creature.get(coord, grid)
       let statuses = creature@statuses
       get status = App.GG.Creature.Status.get_from_nat(count, statuses)
-      let new_local = 
-        without status: local
-        App.GG.Creature.Status.update_function(status, coord, local)
-      let new_local = App.GG.Creature.Status.update_grid.go(count +1, coord, new_local)
-      return new_local
-    } <> local
-  new_local
+      let new_game = 
+        without status: game
+        App.GG.Creature.Status.update_function(status, coord, game)
+      let new_game = App.GG.Creature.Status.update_grid.go(count +1, coord, new_game)
+      return new_game
+    } <> game
+  new_game
 
 type App.GG.Creature.Status {
   // invulnerable(duration: U64)
@@ -121,19 +121,19 @@ App.GG.Creature.Status.get_from_nat(count: Nat, statuses: App.GG.Creature.Status
     4: some(statuses@intangible_immunity)
   }default none
 
-App.GG.Creature.Status.update_function(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.Status.update_function(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     poison:     
-      App.GG.Creature.Status.update_poison(status, coord, local)
+      App.GG.Creature.Status.update_poison(status, coord, game)
     stun:       
-      App.GG.Creature.Status.update_stun(status, coord, local)
+      App.GG.Creature.Status.update_stun(status, coord, game)
     barrier:      
-      App.GG.Creature.Status.update_barrier(status, coord, local)
+      App.GG.Creature.Status.update_barrier(status, coord, game)
     intangible: 
-      App.GG.Creature.Status.update_intangible(status, coord, local)
+      App.GG.Creature.Status.update_intangible(status, coord, game)
     intangible_immunity: 
-      App.GG.Creature.Status.update_intangible_immunity(status, coord, local)
-  }default local
+      App.GG.Creature.Status.update_intangible_immunity(status, coord, game)
+  }default game
 
 App.GG.Creature.Status.draw(statuses: App.GG.Creature.Statuses, xy: Pair<U32, U32>, img: VoxBox): VoxBox
   App.GG.Creature.Status.draw.go(0, statuses, xy, img)
@@ -157,11 +157,11 @@ App.GG.Creature.Status.draw.function(status: App.GG.Creature.Status, xy: Pair<U3
 // =============================================================
 // Poison Status
 
-App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     poison: 
       log(U64.show(status.duration))
-      let grid = local@grid
+      let grid = game@grid
       let new_grid = 
         if status.duration =? 0 then
           let new_creature = App.GG.Creature.Status.del_from_nat(0)
@@ -171,15 +171,15 @@ App.GG.Creature.Status.update_poison(status: App.GG.Creature.Status, coord: App.
           let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.poison(status.duration - 1, status.damage))
           let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
           new_grid
-      let new_local = local@grid <- new_grid
+      let new_game = game@grid <- new_grid
       if (status.duration % 10) =? 0 then 
-        let eff = App.GG.Effect.change_hp(status.damage, false, false, coord)
-        let result = eff(coord, App.GG.Effect.Origin.creature, new_local)
-        case result {err: new_local, new: result.local}
+        let eff = App.GG.Effect.damage(status.damage, false, false, coord)
+        let result = eff(coord, App.GG.Effect.Origin.creature, new_game)
+        case result {err: new_game, new: result.game}
       else
-        new_local
+        new_game
 
-  }default local
+  } default game
 
 App.GG.Creature.Status.draw.poison(status: App.GG.Creature.Status, xy: Pair<U32, U32>, img: VoxBox): VoxBox
   let poison = App.GG.img.Status.poison.poison
@@ -193,24 +193,24 @@ type App.GG.Creature.Status.Stun {
   shock
 }
 
-App.GG.Creature.Status.update_stun(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.Status.update_stun(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     stun: 
-      // let grid = local@grid
+      // let grid = game@grid
       // let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category))
       // let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
-      // let new_local    = local@grid <- new_grid
-      // new_local
-      local
-  }default local
+      // let new_game    = game@grid <- new_grid
+      // new_game
+      game
+  }default game
 
 // =============================================================
 // Barrier Status
 
-App.GG.Creature.Status.update_barrier(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.Status.update_barrier(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     barrier:
-      let grid = local@grid
+      let grid = game@grid
       let new_grid = 
         if status.duration =? 0 then
           let new_creature = App.GG.Creature.Status.del_from_nat(2)
@@ -220,9 +220,9 @@ App.GG.Creature.Status.update_barrier(status: App.GG.Creature.Status, coord: App
           let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.barrier(status.duration - 1, status.health))
           let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
           new_grid
-      let new_local = local@grid <- new_grid
-      new_local
-  }default local
+      let new_game = game@grid <- new_grid
+      new_game
+  }default game
 
 App.GG.Creature.Status.draw.barrier(status: App.GG.Creature.Status, xy: Pair<U32, U32>, img: VoxBox): VoxBox
   let barrier = App.GG.img.Status.barrier.barrier
@@ -231,10 +231,10 @@ App.GG.Creature.Status.draw.barrier(status: App.GG.Creature.Status, xy: Pair<U32
 // =============================================================
 // Intangible Status
 
-App.GG.Creature.Status.update_intangible(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.Status.update_intangible(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     intangible:
-      let grid = local@grid
+      let grid = game@grid
       let new_grid = 
         if status.duration =? 0 then
           let new_creature = App.GG.Creature.Status.del_from_nat(3)
@@ -244,9 +244,9 @@ App.GG.Creature.Status.update_intangible(status: App.GG.Creature.Status, coord: 
           let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.intangible(status.duration - 1))
           let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
           new_grid
-      let new_local = local@grid <- new_grid
-      new_local
-  }default local
+      let new_game = game@grid <- new_grid
+      new_game
+  }default game
 
 App.GG.Creature.Status.intangible_draw_invisible(statuses: App.GG.Creature.Statuses): Bool
   let intangible = statuses@intangible
@@ -261,10 +261,10 @@ App.GG.Creature.Status.intangible_draw_invisible(statuses: App.GG.Creature.Statu
 // =============================================================
 // Intangible_immunity Status
 
-App.GG.Creature.Status.update_intangible_immunity(status: App.GG.Creature.Status, coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.Status.update_intangible_immunity(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
-    intangible_immunity: local
-  }default local
+    intangible_immunity: game
+  }default game
 
 
 // New Status
@@ -527,7 +527,7 @@ App.GG.Creature.create_slime(slime: App.GG.Slime, grid: App.GG.Grid): App.GG.Cre
   let charge = none
   let hand = []
   let folder = App.GG.Body.to_folder(body)
-  let attributes = App.GG.Attributes.add(App.GG.Attributes.base, App.GG.Body.attributes(body))
+  let attributes = App.GG.Body.attributes(body)
   let hp = attributes@hp * 10
   let energy = 0 :: I32
   let monster = App.GG.Monster.slime(data, attributes, none, hand, folder, energy)
@@ -566,6 +566,12 @@ App.GG.Creature.basic_attack_dmg(creature: App.GG.Creature): I32
   let total_dmg = base_dmg + extra_dmg
   I32.neg(total_dmg)
 
+App.GG.Creature.max_hp_percentage(creature: App.GG.Creature): I32
+  let max_hp = App.GG.Monster.get_max_hp(creature@category)
+  let actual_hp = creature@hp
+  actual_hp/max_hp
+
+
 App.GG.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Attributes>
   case creature@category as monster {
     minion: none
@@ -577,20 +583,20 @@ App.GG.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Attributes>
 // Grid Update functions
 
 // If creature hasn't acted, update its actions, run its effects and update animation to next frame
-App.GG.Creature.run(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
-  if App.GG.Creature.has_acted(coord, local) then 
-    local
+App.GG.Creature.run(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  if App.GG.Creature.has_acted(coord, game) then 
+    game
   else
-    let new_local = App.GG.Creature.update_charge()
-    let new_local = App.GG.Creature.run_ai(coord, local)
-    let new_local = App.GG.Creature.update_actions(coord, new_local)
-    let new_local = App.GG.Creature.update_animation(coord, new_local)
-    let new_local = App.GG.Actions.run(coord, new_local)
-    new_local
+    let new_game = App.GG.Creature.update_charge()
+    let new_game = App.GG.Creature.run_ai(coord, game)
+    let new_game = App.GG.Creature.update_actions(coord, new_game)
+    let new_game = App.GG.Creature.update_animation(coord, new_game)
+    let new_game = App.GG.Actions.run(coord, new_game)
+    new_game
 
 // Checks if creature has acted in this frame
-App.GG.Creature.has_acted(coord: App.GG.Coord, local: App.GG.State.local): Bool
-  let creature = App.GG.Creature.get(coord, local@grid)
+App.GG.Creature.has_acted(coord: App.GG.Coord, game: App.GG.Game): Bool
+  let creature = App.GG.Creature.get(coord, game@grid)
   without creature: false
   creature@actions@has_acted
 
@@ -600,17 +606,17 @@ App.GG.Creature.reset_actions.aux(creature: App.GG.Creature): App.GG.Creature
   creature@actions <- new_actions
 
 // Updates animation to its next frame
-App.GG.Creature.update_animation(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.update_animation(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   let mod = (creature: App.GG.Creature) creature@animation <- {creature@animation@fst, creature@animation@snd + 1}
-  let new_grid = App.GG.Creature.modify_at(mod, coord, local@grid)
-  let new_local = local@grid <- new_grid
-  new_local
+  let new_grid = App.GG.Creature.modify_at(mod, coord, game@grid)
+  let new_game = game@grid <- new_grid
+  new_game
 // If current action is "none", moves next action to its place
-App.GG.Creature.update_actions(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
-  let grid = local@grid
+App.GG.Creature.update_actions(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  let grid = game@grid
   let new_grid = App.GG.Creature.modify_at(App.GG.Creature.update_actions.aux, coord, grid)
-  let new_local = local@grid <- new_grid
-  new_local
+  let new_game = game@grid <- new_grid
+  new_game
 
 App.GG.Creature.update_actions.aux(creature: App.GG.Creature): App.GG.Creature
   let actions = creature@actions
@@ -628,17 +634,17 @@ App.GG.Creature.update_actions.aux(creature: App.GG.Creature): App.GG.Creature
 App.GG.Creature.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   App.GG.Creature.modify_at(App.GG.Creature.reset_actions.aux, coord, grid)
 
-App.GG.Creature.run_ai(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Creature.run_ai(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   Maybe {
-    let grid = local@grid
+    let grid = game@grid
     get minion = App.GG.Minion.get(coord, grid)
-    let result = minion@effect(coord, App.GG.Effect.Origin.creature, local)
-    let new_local = case result {err: local, new: result.local}
-    return new_local
-  } <> local
+    let result = minion@effect(coord, App.GG.Effect.Origin.creature, game)
+    let new_game = case result {err: game, new: result.game}
+    return new_game
+  } <> game
 
-App.GG.Creature.update_charge(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
-  let grid = local@grid
+App.GG.Creature.update_charge(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  let grid = game@grid
   let mod = (creature: App.GG.Creature)
     case creature@category as monster {
       minion: creature
@@ -651,7 +657,7 @@ App.GG.Creature.update_charge(coord: App.GG.Coord, local: App.GG.State.local): A
         creature@category <- monster
     }
   let new_grid = App.GG.Creature.modify_at(mod, coord, grid)
-  let new_local = local@grid <- new_grid
-  new_local
+  let new_game = game@grid <- new_grid
+  new_game
 
 // ============================================================================

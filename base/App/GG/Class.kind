@@ -5,6 +5,28 @@ type App.GG.Class {
   control
 }
 
+App.GG.Class.all: List<App.GG.Class>
+  [
+    App.GG.Class.strength
+    App.GG.Class.destruction
+    App.GG.Class.power
+    App.GG.Class.control
+  ]
+
+App.GG.Class.show(class: App.GG.Class): String
+  case class {
+    strength    : "strength"
+    destruction : "destruction"
+    power       : "power"
+    control     : "control"
+  }
+
+App.GG.Class.cmp(a: App.GG.Class, b: App.GG.Class): Cmp
+  String.cmp(
+    App.GG.Class.show(a)
+    App.GG.Class.show(b)
+  )
+
 App.GG.Class.to_hue(class: App.GG.Class): U32
   case class {
     strength    : 80#32  // Green

@@ -72,7 +72,7 @@ App.GG.Effect.projectile.hit(dmg: I32, coord: App.GG.Coord): App.GG.Effect<I32>
     if can_hit then
       App.GG.Effect {
         App.GG.Effect.projectile.add_hit(coord) // Adds enemy to list of targets hit by projectile
-        get dmg = App.GG.Effect.change_hp(dmg, true, true, coord) // TODO - change second true
+        get dmg = App.GG.Effect.damage(dmg, true, true, coord) // TODO - change second true
         return dmg
       }
     else

@@ -162,25 +162,25 @@ App.GG.Projectile.updated_has_acted(bool: Bool, projectile: App.GG.Projectile): 
   let projectile = projectile@info <- new_info
   projectile
 
-App.GG.Projectile.run(coord: App.GG.Coord, local: App.GG.State.local): App.GG.State.local
+App.GG.Projectile.run(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   Maybe {
-    let grid = local@grid
+    let grid = game@grid
     get projectiles = App.GG.Projectile.get_list(coord, grid)
-    let pair = {0, local}
+    let pair = {0, game}
     for projectile in projectiles with pair:
-      let {idx, local} = pair
+      let {idx, game} = pair
       if projectile@info@has_acted then
-        {idx + 1, local}
+        {idx + 1, game}
       else 
-        let grid = local@grid
+        let grid = game@grid
         let new_grid = App.GG.Projectile.modify(App.GG.Projectile.updated_has_acted(true), coord, idx, grid)
-        let new_local = local@grid <- new_grid
+        let new_game = game@grid <- new_grid
         let origin = App.GG.Effect.Origin.projectile(idx)
-        let result = projectile@effect(coord, origin, new_local)
-        let new_local = case result {err: new_local@grid <- new_grid, new: result.local}
-        {idx +1, new_local}
+        let result = projectile@effect(coord, origin, new_game)
+        let new_game = case result {err: new_game@grid <- new_grid, new: result.game}
+        {idx +1, new_game}
     return pair@snd
-  } <> local
+  } <> game
 
 App.GG.Projectile.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
   Maybe {

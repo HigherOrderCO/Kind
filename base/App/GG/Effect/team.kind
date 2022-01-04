@@ -1,16 +1,12 @@
-App.GG.Effect.team.get(center: App.GG.Coord, origin: App.GG.Effect.Origin, grid: App.GG.Grid): Maybe<App.GG.Team>
-  case origin {
-    creature: 
-      Maybe {
-        get creature = App.GG.Creature.get(center, grid)
-        return creature@team
-      }
-    projectile:
-      Maybe {
-        get projectile = App.GG.Projectile.get(center, origin, grid)
-        let info = projectile@info
-        return info@team
-      }
+App.GG.Effect.team.get_at(pos: App.GG.Coord): App.GG.Effect<Maybe<App.GG.Team>>
+  (center, origin, local)
+  let grid = local@grid
+  let team = App.GG.Team.get(pos, origin, grid)
+  App.GG.Effect.Result.new!(team, center, origin, local, (enemy, img) img, 0, "")
+
+
+App.GG.Effect.team.get: App.GG.Effect<Maybe<App.GG.Team>>
+  App.GG.Effect { 
+  get center = App.GG.Effect.coord.get_center
+  App.GG.Effect.team.get_at(center)
   }
-
-

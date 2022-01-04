@@ -17,7 +17,7 @@ App.GG.Effect.basic_attack: App.GG.Effect<Unit>
           without enemy_coord: App.GG.Effect.pass
           App.GG.Effect {
             let dmg = App.GG.Creature.basic_attack_dmg(creature) 
-            get real_dmg = App.GG.Effect.change_hp(dmg, false, false, enemy_coord) 
+            get real_dmg = App.GG.Effect.damage(dmg, false, false, enemy_coord) 
             return unit 
           }
         }

@@ -34,3 +34,11 @@ App.GG.Attributes.base: App.GG.Attributes
     25 // damage
     25 // corruption
   )
+
+App.GG.Attributes.show(attribute: App.GG.Attributes): String
+  let show = I32.show
+
+  "Hp: " | show(attribute@hp) | " | " |
+  "Energy: " | show(attribute@energy) | " | " |
+  "Damage: " | show(attribute@damage) | " | " |
+  "Corruption: " | show(attribute@corruption)

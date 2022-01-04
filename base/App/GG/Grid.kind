@@ -72,3 +72,10 @@ App.GG.Grid.next_id.go(count: Nat, ids: List<Nat>): Nat
   let id = List.find<Nat>(Nat.eql(count), ids)
   without id: count
   App.GG.Grid.next_id.go(count + 1, ids)
+
+//Gives the Y size of the grid
+App.GG.Grid.y_size(grid: App.GG.Grid): Nat
+  let highest_y = App.GG.Coord.highest_y(grid)
+  let lowest_y = App.GG.Coord.lowest_y(grid)
+  let diff = U32.to_nat(highest_y - lowest_y)
+  1 + diff
