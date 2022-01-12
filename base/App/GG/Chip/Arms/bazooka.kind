@@ -1,3 +1,7 @@
+// A chip that shoots a Bazooka at the first enemy in the front of the creature
+// If there is no enemy in front of it, the shot deals no damage
+// If there is an enemy in its front, explode dealing damage to the 8 nearby tiles
+
 App.GG.Chip.Arms.bazooka: App.GG.Chip
   App.GG.Chip.new(
     "Bazoka"

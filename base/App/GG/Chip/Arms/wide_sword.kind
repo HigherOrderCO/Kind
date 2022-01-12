@@ -43,7 +43,7 @@ App.GG.Chip.Arms.wide_sword.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
         get can_hit = App.GG.Effect.projectile.can_hit(coord)
-        App.GG.Effect.projectile.hit.damage_at(dmg, coord)
+        App.GG.Effect.projectile.hit.damage_at(dmg, coord, true, true)
         return unit
       }
     App.GG.Effect {

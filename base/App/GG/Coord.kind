@@ -1,6 +1,12 @@
 App.GG.Coord: Type
   Pair<U32, U32>
 
+App.GG.Coord.eql(a: App.GG.Coord, b: App.GG.Coord): Bool
+  if a@fst =? b@fst then
+    a@snd =? b@snd
+  else
+    false
+
 App.GG.Coord.show(coord: App.GG.Coord): String
   let x = U32.show(coord@fst)
   let y = U32.show(coord@snd)
@@ -9,8 +15,8 @@ App.GG.Coord.show(coord: App.GG.Coord): String
 
 App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
   let start = App.GG.Constants.map_starting_position
-  let x = (start@fst + (32#32 * coord@fst)) - 128#32
-  let y = (start@snd + 32#32 * (App.GG.Constants.grid_size@snd - coord@snd)) - 128#32
+  let x = ((start@fst + (32#32 * coord@fst)) - 128#32) - 16
+  let y = ((start@snd + 32#32 * (App.GG.Constants.grid_size@snd - coord@snd)) - 128#32) + 16
   {x, y}
 
 
@@ -88,7 +94,7 @@ App.GG.Coord.furthest_tile_in_range(coord: App.GG.Coord, team: App.GG.Team, grid
     } default coord
   
 
-App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): Bool
+App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid, restriction: Bool): Bool
   let f_tile = App.GG.Grid.get(from, grid)
   let d_tile = App.GG.Grid.get(destination, grid)
   Maybe {
@@ -97,10 +103,23 @@ App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.G
     get f_creature = f@creature
     let result = case d@creature {
       none: 
-        if App.GG.Team.eql(f_creature@team, d@owner) then
-          true
+        let not_reserved =
+          case d@statuses@reserved as stt {
+            none: true
+            some: 
+              case stt.value {
+                reserved: 
+                  if f_creature@id =? stt.value.id then
+                    true
+                  else
+                    false
+
+              }default false
+          }
+        if restriction then
+          App.GG.Team.eql(f_creature@team, d@owner) && not_reserved
         else
-          false
+          not_reserved
       some: false
     }
     return result

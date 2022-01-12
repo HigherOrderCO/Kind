@@ -15,7 +15,7 @@ App.GG.when.lobby(
     init:
       App.GG.when.lobby.init(local)
     mouse_click:
-      App.GG.when.lobby.mouse_click(local, event.id)
+      App.GG.when.lobby.mouse_click(local, event.id, U64.to_nat(event.time))
   } default App.pass!
 
 App.GG.when.lobby.init(
@@ -32,11 +32,12 @@ App.GG.when.lobby.init(
 App.GG.when.lobby.mouse_click(
   local: App.GG.Lobby
   id: String
+  time: Nat
 ): IO<Maybe<App.State.local<App.GG.State>>>
   switch String.starts_with(id) {
     "start-button":
       use body = local@body abort App.pass!
-      let new_local = App.GG.init.game(body)
+      let new_local = App.GG.init.game(body, time)
       App.set_local!(new_local)
     
     "randomize-":
@@ -76,9 +77,9 @@ App.GG.when.lobby.mouse_click(
 // Event handler
 App.GG.when.game(
   event: App.Event,
-  local: App.GG.Game
+  game: App.GG.Game
 ): IO<Maybe<App.State.local(App.GG.State)>>
-  let phase = local@phase
+  let phase = game@phase
   case event {
     // init: 
       // log(U64.show(event.time))
@@ -89,16 +90,19 @@ App.GG.when.game(
       // let new_local = local@grid <- new_grid
       // App.set_local<App.GG.State>(new_local)
     frame:
-      case phase {
-        setup:
-          App.pass<App.GG.State>
-        game:
-          let new_local = App.GG.when.update_grid(local)
-          let new_phase = App.GG.when.update_phase(phase)
-          let new_local = new_local@phase <- new_phase
-          let new_local = App.GG.State.local.game(new_local)
-          App.set_local<App.GG.State>(new_local)
-      }
+      let new_game = 
+        case phase {
+          setup:
+            game
+          game:
+            let new_game = App.GG.when.update_grid(game)
+            let new_phase = App.GG.when.update_phase(phase)
+            new_game@phase <- new_phase
+        }
+      let new_game = new_game@random <- Nat.random(new_game@random)
+      //log("time = " | U64.show(event.time))
+      let new_local = App.GG.State.local.game(new_game)
+      App.set_local<App.GG.State>(new_local)
       
     key_down:
       log("Key pressed: " |U16.show(event.code))
@@ -108,44 +112,44 @@ App.GG.when.game(
           switch U16.eql(event.code) {
             // Move arrow functions
               // Left Arrow
-              37#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.left)
+              37#16:  App.GG.when.move.chip_selection(game, App.GG.Arrow.left)
               // Up Arrow
-              38#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.up)
+              38#16:  App.GG.when.move.chip_selection(game, App.GG.Arrow.up)
               // Right Arrow
-              39#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.right)
+              39#16:  App.GG.when.move.chip_selection(game, App.GG.Arrow.right)
               // Down Arrow
-              40#16:  App.GG.when.move.chip_selection(local, App.GG.Arrow.down)
+              40#16:  App.GG.when.move.chip_selection(game, App.GG.Arrow.down)
             // Return
-            13#16:  App.GG.when.setup_to_game(local)
+            13#16:  App.GG.when.setup_to_game(game)
             // Esc
-            27#16:  App.GG.when.return_chip(local)
+            27#16:  App.GG.when.return_chip(game)
             // Spacebar
-            32#16:  App.GG.when.select_chip.space(local)
+            32#16:  App.GG.when.select_chip.space(game)
           }default  App.pass<App.GG.State> 
         game: 
           switch U16.eql(event.code) {
             // Move character functions
               // Left Arrow
-              37#16:  App.GG.when.move(local, App.GG.Arrow.left)
+              37#16:  App.GG.when.move(game, App.GG.Arrow.left)
               // Up Arrow
-              38#16:  App.GG.when.move(local, App.GG.Arrow.up)
+              38#16:  App.GG.when.move(game, App.GG.Arrow.up)
               // Right Arrow
-              39#16:  App.GG.when.move(local, App.GG.Arrow.right)
+              39#16:  App.GG.when.move(game, App.GG.Arrow.right)
               // Down Arrow
-              40#16:  App.GG.when.move(local, App.GG.Arrow.down)
+              40#16:  App.GG.when.move(game, App.GG.Arrow.down)
             // X 
             88#16:
-              let new_local = App.GG.when.start_charge(local)
-              let new_local = App.GG.State.local.game(new_local)
+              let new_game = App.GG.when.start_charge(game)
+              let new_local = App.GG.State.local.game(new_game)
               App.set_local<App.GG.State>(new_local)
             // Spacebar
             32#16: 
-              let new_grid = App.GG.when.use_chip(local@grid)
-              let new_local = local@grid <- new_grid
-              let new_local = App.GG.State.local.game(new_local)
+              let new_grid = App.GG.when.use_chip(game@grid)
+              let new_game = game@grid <- new_grid
+              let new_local = App.GG.State.local.game(new_game)
               App.set_local<App.GG.State>(new_local)
             // Return
-            13#16: App.GG.when.game_to_setup(local)
+            13#16: App.GG.when.game_to_setup(game)
           }default App.pass<App.GG.State> 
       }
     key_up:
@@ -155,19 +159,19 @@ App.GG.when.game(
           switch U16.eql(event.code) {
             // X 
             88#16: 
-              let new_grid = App.GG.when.basic_attack(local@grid)
-              let new_local = local@grid <- new_grid
-              let new_local = App.GG.State.local.game(new_local)
+              let new_grid = App.GG.when.basic_attack(game@grid)
+              let new_game = game@grid <- new_grid
+              let new_local = App.GG.State.local.game(new_game)
               App.set_local<App.GG.State>(new_local)
           }default App.pass<App.GG.State>
       }
     mouse_move:
       // log("x: " | U32.show(event.mouse_pos@fst) | "  y: " | U32.show(event.mouse_pos@snd))
-      let new_local = local@mouse <- event.mouse_pos
-      let new_local = App.GG.State.local.game(new_local)
+      let new_game = game@mouse <- event.mouse_pos
+      let new_local = App.GG.State.local.game(new_game)
       App.set_local<App.GG.State>(new_local)
     mouse_down:
-      App.GG.when.click_element(local, local@mouse)      
+      App.GG.when.click_element(game, game@mouse)      
   }default App.pass<App.GG.State>
   
 // ============================================================================
@@ -214,7 +218,7 @@ App.GG.when.game_to_setup(local: App.GG.Game): IO<Maybe<App.State.local<App.GG.S
     setup: App.pass<App.GG.State>
     game:
       // If turn bar is full
-      if U64.gte(phase.turn_bar, 1200) then
+      if U64.gte(phase.turn_bar, 1024) then
         // Finds your character
         let slime = App.GG.Slime.find(grid)
         without slime: App.pass<App.GG.State>
@@ -432,15 +436,16 @@ App.GG.when.click_element(local: App.GG.Game, mouse: Pair<U32, U32>): IO<Maybe<A
   case phase {
     setup:
       // Gets mouse's location divide by the game's scale
-      let {x, y} = {mouse@fst / 4, mouse@snd / 4}
+      let {x, y} = {mouse@fst / 2, mouse@snd / 2}
       let point = V2.new(U32.to_f64(x), U32.to_f64(y))
+      log(U32.show(x) | "    " | U32.show(y))
       switch Shape.Point.collision.rectangle(point) {
         // Rectangle representing table
         App.GG.when.table:
           // Subtracts the x corresponding to the space before the table
-          let x = x - (App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2))
+          let x = x - ((App.GG.Constants.chips_starting_position@fst + 160) - (App.GG.Constants.chip_size@fst/2))
           // Subtracts the y corresponding to the space before the table
-          let y = y - (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))
+          let y = y - ((App.GG.Constants.chips_starting_position@snd + 262) - (App.GG.Constants.chip_size@snd/2))
           Maybe {
             // Gets the Chip's index on the table
             get index = App.GG.when.chip({x, y})
@@ -457,14 +462,14 @@ App.GG.when.click_element(local: App.GG.Game, mouse: Pair<U32, U32>): IO<Maybe<A
 // Rectangle of the table in setup phase
 App.GG.when.table: Shape.Rectangle
   // gets the top left position of the rectangle
-  let {x1, y1} = {(App.GG.Constants.chips_starting_position@fst - (App.GG.Constants.chip_size@fst/2)) (App.GG.Constants.chips_starting_position@snd - (App.GG.Constants.chip_size@snd/2))}
+  let {x1, y1} = {((App.GG.Constants.chips_starting_position@fst + 160) - (App.GG.Constants.chip_size@fst/2)) ((App.GG.Constants.chips_starting_position@snd + 262) - (App.GG.Constants.chip_size@snd/2))}
   let {vx, vy} = App.GG.Constants.chips_space_between
   let {cx, cy} = App.GG.Constants.chip_size
   // gets how many items are in each row and column
   let {r,  c } = App.GG.Constants.chips_array
   // gets the bottom right position of the rectangle
   let {x2, y2} = {x1 + ((cx + vx) * r), y1 + ((cy + vy) * c)}
-  //log(U32.show(x1) | " " | U32.show(x2) | " " | U32.show(y1) | " " | U32.show(y2))
+  log(U32.show(x1) | " " | U32.show(x2) | " " | U32.show(y1) | " " | U32.show(y2))
   Shape.Rectangle.new(U32.to_f64(x1), U32.to_f64(x2), U32.to_f64(y1), U32.to_f64(y2))
 
 // Gets the index of the hover chip

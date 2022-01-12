@@ -1,0 +1,122 @@
+App.GG.Creatures.minion.swordsman(level: Nat): App.GG.Minion
+  App.GG.Minion.new(App.GG.Creatures.minion.swordsman.vbox, App.GG.Creatures.minion.swordsman.Effect, level, 200)
+
+App.GG.Creatures.minion.swordsman.vbox(animation: App.GG.Animation, frame: U64): VoxBox
+  case animation {
+    idle: 
+      App.GG.img.penguim
+  }default App.GG.img.penguim
+
+App.GG.Creatures.minion.swordsman.Effect.attack: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get random = App.GG.Effect.random.get
+    without creature: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.ai.modify("seen", (x) +0#32)
+      App.GG.Effect {
+        let new_action = App.GG.Actions.Data.new(0, App.GG.Creatures.minion.swordsman.Effect.slash(random % 2), App.GG.Actions.Category.chip)
+        let new_grid   = App.GG.Creature.modify_at(App.GG.Actions.add(new_action), center)
+        App.GG.Effect.grid.modify(new_grid)
+      }
+    }
+  }
+
+App.GG.Creatures.minion.swordsman.Effect.slash(n: Nat): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get random = App.GG.Effect.random.get
+    App.GG.Effect.ai.modify("move", (x) Nat.to_i32(random % 50))
+    App.GG.Effect.ai.modify("attack", (x) +0#32)
+    get frame = App.GG.Effect.frame.get
+    get center = App.GG.Effect.coord.get_center
+    get team = App.GG.Effect.team.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    App.GG.Effect.frame.inc
+    without creature: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      switch U64.eql(frame) {
+        0#64:
+          App.GG.Effect.animation.update(App.GG.Animation.sword)
+        60#64:
+          let enemy_coord = App.GG.Coord.closest_enemy_in_front(center, team, grid)
+          without enemy_coord: log("?????") App.GG.Effect.actions.reset  
+          let move_coord = if App.GG.Team.eql(team, App.GG.Team.red) then {enemy_coord@fst +1, enemy_coord@snd} else {enemy_coord@fst - 1, enemy_coord@snd}
+          if App.GG.Coord.can_walk(center, move_coord, grid, false) then 
+            App.GG.Effect {
+              let pendent_movement = App.GG.Creature.Status.pendent_movement(80, center)
+              App.GG.Effect.status.add(pendent_movement)
+              App.GG.Effect.tile.add_status(App.GG.Tile.Status.reserved(80, creature@id), center)
+              App.GG.Effect.animation.update(App.GG.Animation.attack)
+              let eff = App.GG.Effect.projectile.add_image([App.GG.img.yellow_tile], 60)
+              let coords = 
+                if (n % 2) =? 0 then 
+                  [
+                    {enemy_coord@fst, enemy_coord@snd + 1},
+                    enemy_coord,
+                    {enemy_coord@fst, enemy_coord@snd - 1}
+                  ]
+                else 
+                  [
+                    if App.GG.Team.eql(team, App.GG.Team.red) then
+                      {enemy_coord@fst - 1, enemy_coord@snd}
+                    else
+                      {enemy_coord@fst + 1, enemy_coord@snd},
+                    enemy_coord
+                  ]
+              App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+              App.GG.Effect.movement.move_at(center, move_coord, false)
+            }
+          else
+            log("ue") App.GG.Effect.actions.reset  
+        120#64:
+          let attack_coord = App.GG.Coord.front(center, team)
+          let effect =
+            if (n % 2) =? 0 then 
+              App.GG.Chip.Arms.wide_sword.Projectile.Effect
+            else
+              App.GG.Chip.Arms.long_sword.Projectile.Effect
+          let data = App.GG.Projectile.Info.new(team, App.GG.Projectile.Status.unit, NatSet.new, 0, false)
+          let projectile = App.GG.Projectile.new(data, effect(50))
+          App.GG.Effect.projectile.add_at(attack_coord, projectile)
+        140#64: 
+          App.GG.Effect.actions.reset         
+      }default App.GG.Effect.pass
+    }
+
+  }
+
+App.GG.Creatures.minion.swordsman.Effect.move: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get grid = App.GG.Effect.grid.get
+    get team = App.GG.Effect.team.get
+    get random = App.GG.Effect.random.get
+    App.GG.Effect.ai.modify("move", (x) Nat.to_i32(random % 50))
+    without team: App.GG.Effect.pass
+    let coords = App.GG.Grid.get_team_tiles(grid, team)
+    let length = List.length!(coords)
+    let idx    = random % length
+    let coord  = coords[idx]
+    // log(Nat.show(idx) | ", ")
+    without coord: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.ai.inc("attack")
+      let eff = App.GG.Effect.movement(coord, 12, 24)
+      let new_action = App.GG.Actions.Data.new(0, eff, App.GG.Actions.Category.movement)
+      let new_grid   = App.GG.Creature.modify_at(App.GG.Actions.add(new_action), center)
+      App.GG.Effect.grid.modify(new_grid)
+    }
+  }
+
+App.GG.Creatures.minion.swordsman.Effect: App.GG.Effect<Unit>
+  let move   = {"move",    [{I32.eql(150), App.GG.Creatures.minion.swordsman.Effect.move}]}
+  let attack = {"attack",  [{I32.eql(3),  App.GG.Creatures.minion.swordsman.Effect.attack}]}
+  let effs = [move, attack]
+  App.GG.Effect {
+    App.GG.Effect.ai.run(effs)
+    App.GG.Effect.ai.inc("move")
+  }

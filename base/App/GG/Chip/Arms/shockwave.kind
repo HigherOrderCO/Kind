@@ -37,7 +37,7 @@ App.GG.Chip.Arms.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
       let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
-      let projectile_effect = App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg, false)
+      let projectile_effect = App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg, 32, false)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
@@ -46,20 +46,20 @@ App.GG.Chip.Arms.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
 
 App.GG.Chip.Arms.shockwave.bullet_position_x(current_frame: U64, max_frame: U64, reverse: Bool): I32
   let tile_x = +32#32
-  let c = F64.to_i32(U64.to_f64(current_frame - 1))
-  let m = F64.to_i32(U64.to_f64(max_frame ))  
-  let x = ((c % m) * (tile_x / m)) - (tile_x / 2) 
+  let start = 0.0
+  let end = 32.0
+  let pos = F64.lerp(start, end, U64.to_f64(current_frame) / U64.to_f64(max_frame))
+  let x = F64.to_i32(pos) - (tile_x / 2) 
   if reverse then +0#32 - x else x
   
 
-App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg: I32, reverse: Bool): App.GG.Effect<Unit>
-  let max_frame = 32#64
+App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg: I32, projectile_period: U64, reverse: Bool): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.vbox.in_tile(App.GG.img.target_tile) // Adds image bound to tile
     App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get frame = App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
     get projectile = App.GG.Effect.projectile.get
-    get frame = App.GG.Effect.frame.get
     get is_enemy = App.GG.Effect.creature.is_enemy(center) // Checks if projectile is over an enemy
     get has_hit  = App.GG.Effect.projectile.has_hit(center) // Checks if projectile has already hit that enemy
     if is_enemy && not(has_hit) then
@@ -72,10 +72,10 @@ App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg: I32, reverse: Bool): App.GG.Ef
       App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     without projectile: App.GG.Effect.pass
-    let x = App.GG.Chip.Arms.shockwave.bullet_position_x(frame, max_frame, reverse)
+    let x = App.GG.Chip.Arms.shockwave.bullet_position_x((frame  - 1 )% projectile_period, projectile_period, reverse)
     App.GG.Effect {
       App.GG.Effect.vbox.at_tile_with_variation(center, x, -5, App.GG.img.bullet)
-      if (frame % max_frame) =? 0 then // Each time it reaches max_frame
+      if ((frame % projectile_period) =? 0) && (frame >? 0) then // Each time it reaches projectile_period
         App.GG.Effect {
           let new_pos = App.GG.Coord.front(center, projectile@info@team) // Gets coord in front of projectile's
           App.GG.Effect.projectile.move(new_pos) // Moves projectile a tile forward

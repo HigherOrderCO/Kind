@@ -1,0 +1,10 @@
+VoxBox.Large: Type
+  List<Pair<Pair<U32, U32>, VoxBox>>
+
+VoxBox.Large.draw(f: U32 -> U32 -> VoxBox -> VoxBox -> VoxBox, vbs: VoxBox.Large, img: VoxBox): VoxBox
+  for pair in vbs with img:
+    let {xy, vb} = pair
+    let {x, y}   = xy
+    // log(U32.show(x) | " and " | U32.show(y))
+    f(x, y, vb, img)
+  img

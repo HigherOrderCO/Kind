@@ -98,3 +98,31 @@ App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
     return not(is_noname) && not(is_invulnerable) && not(has_hit) && is_enemy
   }
   
+App.GG.Effect.projectile.add_image(img: List<VoxBox>, duration: U64, coord: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect {
+    let eff = App.GG.Effect.projectile.add_image.effect(img, duration)
+    get team = App.GG.Effect.team.get
+    without team: App.GG.Effect.pass
+    let status = App.GG.Projectile.Status.unit
+    let hits = NatSet.new
+    let frame = 0#64
+    let has_acted = false
+    let projectile = App.GG.Projectile.new(App.GG.Projectile.Info.new(team, status, hits, frame, has_acted), eff)
+    App.GG.Effect.projectile.add_at(coord, projectile)
+  }
+
+App.GG.Effect.projectile.add_image.effect(img: List<VoxBox>, duration: U64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      let img = img[U64.to_nat(frame) % List.length!(img)] 
+      App.GG.Effect.vbox.at_tile(center, img <> VoxBox.empty)
+      if frame =? duration then
+        App.GG.Effect.projectile.delete
+      else
+        App.GG.Effect.pass
+    }
+  }

@@ -48,7 +48,7 @@ App.GG.Chip.Arms.recursive_gun.Effect(casts: Nat, damage: I32): App.GG.Effect<Un
             App.GG.Effect.pass
           else 
             App.GG.Effect.creature.modify(App.GG.Creature.add_chip(App.GG.Chip.Arms.recursive_gun_2(casts - 1, damage * 2)))
-            log(I32.show(dmg))
+            // log(I32.show(dmg))
             return unit
         }
     App.GG.Effect.direct_shoot(func, animation, 8, 12)

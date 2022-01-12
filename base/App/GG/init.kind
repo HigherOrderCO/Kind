@@ -4,8 +4,8 @@ App.GG.init: App.Init<App.GG.State>
   let local = App.GG.State.local.lobby(lobby)
   App.Store.new<App.GG.State>(local, unit)
 
-App.GG.init.game(body: App.GG.Body): App.GG.State.local
-  let grid = App.GG.init.grid(body)
+App.GG.init.game(body: App.GG.Body, rand: Nat): App.GG.State.local
+  let grid = App.GG.init.grid(body, rand)
   let setup = App.GG.Phase.setup({[], none}, [], 0)
   let grid  = 
     let slime = App.GG.Slime.find(grid)
@@ -29,10 +29,10 @@ App.GG.init.game(body: App.GG.Body): App.GG.State.local
         let new_grid  = App.GG.Creature.modify_at(mod, slime@snd, grid)
         {phase, new_grid}
     }
-  let local = App.GG.State.local.game({phase, grid, {0, 0}})
+  let local = App.GG.State.local.game({phase, grid, {0, 0}, rand})
   local
 
-App.GG.init.grid(body: App.GG.Body): App.GG.Grid
+App.GG.init.grid(body: App.GG.Body, rand: Nat): App.GG.Grid
   let blue = App.GG.Tile.new([], none, App.GG.Team.blue, App.GG.Tile.Statuses.pure)
   let red = App.GG.Tile.new([], none, App.GG.Team.red, App.GG.Tile.Statuses.pure)
   let {max_x, max_y} = App.GG.Constants.grid_size
@@ -60,7 +60,13 @@ App.GG.init.grid(body: App.GG.Body): App.GG.Grid
   let grid = BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
   let parts = App.GG.Parts.new(0,0,0)
   let slime = App.GG.Creature.create_slime(App.GG.Creatures.slime(body), grid)
-  let minion =  App.GG.Creature.create_minion(App.GG.Creatures.minion, grid)
   let grid = App.GG.Creature.place(slime,  {2#32,2#32}, grid)
-  let grid = App.GG.Creature.place(minion, {5#32,2#32}, grid)
+  let swordsman = App.GG.Creature.create_minion(App.GG.Creatures.minion.swordsman(0), grid)
+  let grid = App.GG.Creature.place(swordsman, {6#32,1#32}, grid)
+  let gunner_1 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(rand % 3), grid)
+  let grid = App.GG.Creature.place(gunner_1, {7#32,3#32}, grid)
+  // let gunner_2 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(1), grid)
+  // let grid = App.GG.Creature.place(gunner_2, {6#32,1#32}, grid)
+  // let gunner_3 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(2), grid)
+  // let grid = App.GG.Creature.place(gunner_3, {5#32,2#32}, grid)
   grid

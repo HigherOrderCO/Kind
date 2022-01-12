@@ -52,11 +52,12 @@ type App.GG.Creature.Statuses {
     barrier: Maybe<App.GG.Creature.Status>
     intangible: Maybe<App.GG.Creature.Status>
     intangible_immunity: Maybe<App.GG.Creature.Status>
+    pendent_movement: Maybe<App.GG.Creature.Status>
   )
 }
 
 App.GG.Creature.Statuses.pure: App.GG.Creature.Statuses
-  App.GG.Creature.Statuses.new(none, none, none, none, none)
+  App.GG.Creature.Statuses.new(none, none, none, none, none, none)
 
 App.GG.Creature.Status.update_grid(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   App.GG.Creature.Status.update_grid.go(0, coord, game)
@@ -86,6 +87,7 @@ type App.GG.Creature.Status {
   stun(category: App.GG.Creature.Status.Stun)
   intangible(duration: U64)
   intangible_immunity
+  pendent_movement(duration: U64, destination: App.GG.Coord)
 }
 
 App.GG.Creature.Status.del_from_nat(count: Nat, creature: App.GG.Creature): App.GG.Creature
@@ -97,6 +99,7 @@ App.GG.Creature.Status.del_from_nat(count: Nat, creature: App.GG.Creature): App.
     2: statuses@barrier <- none
     3: statuses@intangible <- none
     4: statuses@intangible_imunity <- none
+    5: statuses@pendent_movement <- none
   }default statuses
   creature@statuses <- new_statuses
 
@@ -109,6 +112,7 @@ App.GG.Creature.Status.add(status: App.GG.Creature.Status, creature: App.GG.Crea
       barrier: statuses@barrier <- some(status)
       intangible: statuses@intangible <- some(status)
       intangible_immunity: statuses@intangible_immunity <- some(status)
+      pendent_movement: statuses@pendent_movement <- some(status)
     }
   creature@statuses <- new_statuses
 
@@ -119,6 +123,7 @@ App.GG.Creature.Status.get_from_nat(count: Nat, statuses: App.GG.Creature.Status
     2: some(statuses@barrier)
     3: some(statuses@intangible)
     4: some(statuses@intangible_immunity)
+    5: some(statuses@pendent_movement)
   }default none
 
 App.GG.Creature.Status.update_function(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
@@ -133,6 +138,8 @@ App.GG.Creature.Status.update_function(status: App.GG.Creature.Status, coord: Ap
       App.GG.Creature.Status.update_intangible(status, coord, game)
     intangible_immunity: 
       App.GG.Creature.Status.update_intangible_immunity(status, coord, game)
+    pendent_movement: 
+      App.GG.Creature.Status.update_pendent_movement(status, coord, game)
   }default game
 
 App.GG.Creature.Status.draw(statuses: App.GG.Creature.Statuses, xy: Pair<U32, U32>, img: VoxBox): VoxBox
@@ -267,7 +274,28 @@ App.GG.Creature.Status.update_intangible_immunity(status: App.GG.Creature.Status
   }default game
 
 
-//===========================================================
+// =============================================================
+// Pendent_movement Status
+
+App.GG.Creature.Status.update_pendent_movement(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  case status {
+    pendent_movement:
+      let grid = game@grid
+      let new_grid = 
+        if status.duration =? 0 then
+          let new_creature = App.GG.Creature.Status.del_from_nat(5)
+          let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
+          let new_grid     = App.GG.Grid.move_creature(coord, status.destination, new_grid, false)
+          new_grid
+        else
+          let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.pendent_movement(status.duration - 1, status.destination))
+          let new_grid = App.GG.Creature.modify_at(new_creature, coord, grid)
+          new_grid
+      let new_game = game@grid <- new_grid
+      new_game
+  }default game
+
+// ============================
 
 App.GG.Creature.sub_folder(quantity: Nat, creature: App.GG.Creature): App.GG.Creature
   case creature@category as monster {
@@ -320,7 +348,7 @@ App.GG.Creature.create_minion(minion: App.GG.Minion, grid: App.GG.Grid): App.GG.
   let animation = {App.GG.Animation.idle, 0#64}
   let actions = App.GG.Actions.new(none, none, false)
   let status = App.GG.Creature.Statuses.pure
-  let status = status@barrier <- some(App.GG.Creature.Status.barrier(400, 30))
+  // let status = status@barrier <- some(App.GG.Creature.Status.barrier(400, 30))
   let status = status@intangible_immunity <- some(App.GG.Creature.Status.intangible_immunity)
   let id = App.GG.Grid.next_id(grid)
   let AI = {"seen": +0#32, "unseen": +0#32}
@@ -357,7 +385,7 @@ App.GG.Creature.basic_attack_dmg(creature: App.GG.Creature): I32
   let base_dmg  = 2 :: I32
   let extra_dmg = (attributes@damage - 25) / 5
   let total_dmg = base_dmg + extra_dmg
-  I32.neg(total_dmg)
+  total_dmg
 
 App.GG.Creature.max_hp_percentage(creature: App.GG.Creature): I32
   let max_hp = App.GG.Monster.get_max_hp(creature@category)
