@@ -438,7 +438,6 @@ App.GG.when.click_element(local: App.GG.Game, mouse: Pair<U32, U32>): IO<Maybe<A
       // Gets mouse's location divide by the game's scale
       let {x, y} = {mouse@fst / 2, mouse@snd / 2}
       let point = V2.new(U32.to_f64(x), U32.to_f64(y))
-      log(U32.show(x) | "    " | U32.show(y))
       switch Shape.Point.collision.rectangle(point) {
         // Rectangle representing table
         App.GG.when.table:
