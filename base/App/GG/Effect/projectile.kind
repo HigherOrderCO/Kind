@@ -80,7 +80,7 @@ App.GG.Effect.projectile.hit.effect<A: Type>(coord: App.GG.Coord, f: App.GG.Coor
     App.GG.Effect { return none }
   } 
 
-App.GG.Effect.projectile.hit.damage_at(dmg: I32, coord: App.GG.Coord, flinch: Bool, intangible: Bool): App.GG.Effect<I32>
+App.GG.Effect.projectile.hit.damage_at(dmg: I32, flinch: Bool, intangible: Bool, coord: App.GG.Coord): App.GG.Effect<I32>
   App.GG.Effect { 
     let dmg = App.GG.Effect.damage(dmg, flinch, intangible)
     get dmg_dealt = App.GG.Effect.projectile.hit.effect<I32>(coord, dmg)

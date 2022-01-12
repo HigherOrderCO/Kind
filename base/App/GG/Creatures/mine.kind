@@ -4,31 +4,8 @@ App.GG.Creatures.mine(team: App.GG.Team): App.GG.Minion
 
 App.GG.Creatures.mine.vbox(animation: App.GG.Animation, frame: U64): VoxBox
   case animation {
-    idle: App.GG.img.Slime.idle.slime_character_idle_0
-    damage:
-      switch U64.eql((frame % 24)/4) {
-        0#64: App.GG.img.Slime.Hit.slime_character_Hit_0
-        1#64: App.GG.img.Slime.Hit.slime_character_Hit_1
-        2#64: App.GG.img.Slime.Hit.slime_character_Hit_2
-        3#64: App.GG.img.Slime.Hit.slime_character_Hit_3
-        4#64: App.GG.img.Slime.Hit.slime_character_Hit_4
-        5#64: App.GG.img.Slime.Hit.slime_character_Hit_5
-      }default App.GG.img.Slime.idle.slime_character_idle_0
-    death:
-      switch U64.eql((frame % 24)/2) {
-        0#64: App.GG.img.Slime.movement.slime_character_teleport_00
-        1#64: App.GG.img.Slime.movement.slime_character_teleport_01
-        2#64: App.GG.img.Slime.movement.slime_character_teleport_02
-        3#64: App.GG.img.Slime.movement.slime_character_teleport_03
-        4#64: App.GG.img.Slime.movement.slime_character_teleport_04
-        5#64: App.GG.img.Slime.movement.slime_character_teleport_05
-        6#64: App.GG.img.Slime.movement.slime_character_teleport_06
-        7#64: App.GG.img.Slime.movement.slime_character_teleport_07
-        8#64: App.GG.img.Slime.movement.slime_character_teleport_08
-        9#64: App.GG.img.Slime.movement.slime_character_teleport_09
-        10#64: App.GG.img.Slime.movement.slime_character_teleport_10
-        11#64: App.GG.img.Slime.movement.slime_character_teleport_11
-      }default VoxBox.empty
+    idle: App.GG.img.granade
+    damage: App.GG.img.granade
   }default VoxBox.empty
 
 

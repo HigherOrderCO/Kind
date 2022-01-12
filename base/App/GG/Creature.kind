@@ -83,7 +83,7 @@ type App.GG.Creature.Status {
   // root(duration: U64)
   barrier(duration: U64, health: I32)
   poison(duration: U64, damage: I32)
-  stun(category: App.GG.Creature.Status.Stun)
+  stun(category: App.GG.Creature.Status.Stun, frame: U64)
   intangible(duration: U64)
   intangible_immunity
 }
@@ -149,7 +149,7 @@ App.GG.Creature.Status.draw.go(count: Nat, statuses: App.GG.Creature.Statuses, x
 App.GG.Creature.Status.draw.function(status: App.GG.Creature.Status, xy: Pair<U32, U32>, img: VoxBox): VoxBox
   case status {
     poison:     App.GG.Creature.Status.draw.poison(status, xy, img)
-    // stun:       App.GG.Creature.Status.draw.stun(status, img)
+    stun:       App.GG.Creature.Status.draw.stun(status, xy, img)
     barrier:    App.GG.Creature.Status.draw.barrier(status, xy, img)
     // intangible: App.GG.Creature.Status.draw.intangible(status, img)
   }default img
@@ -193,16 +193,42 @@ type App.GG.Creature.Status.Stun {
   shock
 }
 
+
+App.GG.Creature.stun_with_attribute(creature: App.GG.Creature, duration: U64): U64
+  let attributes = App.GG.Attributes.get(creature)
+  without attributes: duration
+  let corruption = attributes@corruption
+  let corrupt = I32.to_u64(corruption)
+  (duration * corrupt) / 25
+
 App.GG.Creature.Status.update_stun(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     stun: 
-      // let grid = game@grid
-      // let new_creature = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category))
-      // let new_grid     = App.GG.Creature.modify_at(new_creature, coord, grid)
-      // let new_game    = game@grid <- new_grid
-      // new_game
-      game
+      let frame_inc = status.frame + 1
+      let grid = game@grid
+      let new_frame = App.GG.Creature.Status.add(App.GG.Creature.Status.stun(status.category, frame_inc))
+      let update = (x: App.GG.Creature -> App.GG.Creature) App.GG.Creature.modify_at(x, coord, grid)
+      game@grid <- update(new_frame)
   }default game
+
+
+App.GG.Creature.Status.draw.stun(status: App.GG.Creature.Status, xy: Pair<U32, U32>, img: VoxBox): VoxBox
+  case status { 
+    stun:
+      case status.category { 
+        shock:
+          let shock =
+            if (status.frame % 4) <? 2 then
+              App.GG.img.Status.shock.Shock_00
+            else
+              App.GG.img.Status.shock.Shock_01
+          VoxBox.Draw.image(xy@fst, xy@snd, 20, shock, img)
+        flinch:
+          img
+      }
+  }default img
+
+  
 
 // =============================================================
 // Barrier Status
@@ -321,7 +347,7 @@ App.GG.Creature.create_minion(minion: App.GG.Minion, grid: App.GG.Grid): App.GG.
   let actions = App.GG.Actions.new(none, none, false)
   let status = App.GG.Creature.Statuses.pure
   let status = status@barrier <- some(App.GG.Creature.Status.barrier(400, 30))
-  let status = status@intangible_immunity <- some(App.GG.Creature.Status.intangible_immunity)
+  //let status = status@intangible_immunity <- some(App.GG.Creature.Status.intangible_immunity)
   let id = App.GG.Grid.next_id(grid)
   let AI = {"seen": +0#32, "unseen": +0#32}
   let hp = minion@hp
@@ -350,6 +376,12 @@ App.GG.Creature.dmg_with_attribute(creature: App.GG.Creature, dmg: I32): I32
   without attributes: dmg
   let destruction = attributes@damage
   (dmg * destruction) / 25
+
+App.GG.Creature.heal_with_attribute(creature: App.GG.Creature, heal: I32): I32
+  let attributes = App.GG.Attributes.get(creature)
+  without attributes: heal
+  let power = attributes@energy
+  (heal * power) / 25
 
 App.GG.Creature.basic_attack_dmg(creature: App.GG.Creature): I32
   let attributes = App.GG.Attributes.get(creature)

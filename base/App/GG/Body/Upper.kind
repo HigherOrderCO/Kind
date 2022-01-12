@@ -3,7 +3,10 @@ type App.GG.Body.Upper {
 }
 
 App.GG.Body.Upper.chips: App.GG.Chips
-  [App.GG.Chip.Arms.recursive_gun]
+  [
+  //App.GG.Chip.Arms.recursive_gun
+  App.GG.Chip.Upper.regen
+  ]
 
 App.GG.Body.Upper.get_chips(body: App.GG.Body): App.GG.Chips
   App.GG.Parts.chips_list(body@upper@parts, App.GG.Body.Upper.chips)

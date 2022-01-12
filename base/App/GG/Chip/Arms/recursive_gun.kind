@@ -43,7 +43,7 @@ App.GG.Chip.Arms.recursive_gun.Effect(casts: Nat, damage: I32): App.GG.Effect<Un
       let func = (coord: App.GG.Coord)
         App.GG.Effect {
           let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
-          get dmg = App.GG.Effect.damage(dmg, true, true, coord) 
+          get dmg = App.GG.Effect.damage(dmg, true, false, coord) 
           if casts =? 0 then
             App.GG.Effect.pass
           else 

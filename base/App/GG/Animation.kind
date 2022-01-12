@@ -2,6 +2,7 @@ type App.GG.Animation {
   idle
   movement
   sword
+  stun
   attack
   damage
   basic_attack

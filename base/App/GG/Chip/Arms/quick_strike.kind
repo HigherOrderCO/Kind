@@ -55,7 +55,7 @@ App.GG.Chip.Arms.quick_strike.Projectile.Effect(damage: I32): App.GG.Effect<Unit
     without frame: App.GG.Effect.pass
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
-        App.GG.Effect.projectile.hit.damage_at(damage, center)
+        App.GG.Effect.projectile.hit.damage_at(damage, true, true, center)
         switch U64.eql(frame) {
           4: App.GG.Effect.projectile.delete
         }default App.GG.Effect.pass

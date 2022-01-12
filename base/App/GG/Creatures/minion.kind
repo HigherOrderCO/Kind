@@ -43,6 +43,8 @@ App.GG.Creatures.minion.vbox(animation: App.GG.Animation, frame: U64): VoxBox
         11#64: App.GG.img.Slime.shoot.slime_character__fire_11
       }default App.GG.img.Slime.shoot.slime_character__fire_00
     sword: App.GG.img.Slime.shoot.slime_character__fire_00
+    stun:
+      App.GG.img.Slime.idle.slime_character_idle_0
     damage:
       switch U64.eql((frame % 24)/4) {
         0#64: App.GG.img.Slime.Hit.slime_character_Hit_0

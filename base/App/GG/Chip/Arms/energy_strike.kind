@@ -76,7 +76,7 @@ App.GG.Chip.Arms.energy_strike.Projectile.Effect(dmg: I32, intangible: Bool): Ap
       (coord)
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
-        App.GG.Effect.projectile.hit.damage_at(dmg, coord)
+        App.GG.Effect.projectile.hit.damage_at(dmg, true, intangible, coord)
         return unit
       }
     App.GG.Effect {

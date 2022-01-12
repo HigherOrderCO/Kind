@@ -6,10 +6,102 @@ App.GG.Coord.show(coord: App.GG.Coord): String
   let y = U32.show(coord@snd)
   "{ "| x |", "|y|" } "
 
+//Lerp
+App.GG.Coord.lerp(from: App.GG.Coord, to: App.GG.Coord, t: F64): Pair<F64, F64>
+  let {xfrom, yfrom} = {U32.to_f64(from@fst), U32.to_f64(from@snd)}
+  let {xto, yto} = {U32.to_f64(to@fst), U32.to_f64(to@snd)} 
+  let x = F64.lerp(xfrom, xto, t)
+  let y = F64.lerp(yfrom, yto, t)
+  {x, y}
+
+App.GG.Coord.lerp_2(from: App.GG.Coord, to: Pair<F64, F64>, t: F64): Pair<F64, F64>
+  let {xfrom, yfrom} = {U32.to_f64(from@fst), U32.to_f64(from@snd)}
+  let x = F64.lerp(xfrom, to@fst, t)
+  let y = F64.lerp(yfrom, to@snd, t)
+  {x, y}
+
+
+App.GG.Coord.lerp_3(from: Pair<F64, F64>, to: App.GG.Coord, t: F64): Pair<F64, F64>
+  let {xto, yto} = {U32.to_f64(to@fst), U32.to_f64(to@snd)} 
+  let x = F64.lerp(from@fst, xto, t)
+  let y = F64.lerp(from@snd, yto, t)
+  {x, y}
+
+
+App.GG.Coord.lerp_4(from: Pair<F64, F64>, to: Pair<F64, F64>, t: F64): Pair<F64, F64>
+  let x = F64.lerp(from@fst, to@fst, t)
+  let y = F64.lerp(from@snd, to@snd, t)
+  {x, y}
+  
+
+//Slerp
+App.GG.Coord.center_point(from: App.GG.Coord, to: App.GG.Coord): Pair<F64, F64>
+  let {x1, x2} = {U32.to_f64(from@fst), U32.to_f64(to@fst)}
+  let {y1, y2} = {U32.to_f64(from@snd), U32.to_f64(to@snd)}
+  let mid_x = ((x1 + x2) / 2)
+  let mid_y = ((y1 + y2) / 2)
+  {mid_x, mid_y}
+
+
+App.GG.Coord.center_point_f64(from: Pair<F64, F64>, to: Pair<F64, F64>): Pair<F64, F64>
+  let mid_x = ((from@fst + to@fst) / 2)
+  let mid_y = ((from@snd + to@snd) / 2)
+  {mid_x, mid_y}
+
+App.GG.Coord.center_point_extended(from: App.GG.Coord, to: App.GG.Coord, ext: F64): Pair<F64, F64>
+  let center_point = App.GG.Coord.center_point(from, to)
+  let cng = 1.0 + ext/100
+  let new_y = center_point@snd * cng
+  let x = center_point@fst
+  let y = new_y
+  {x, y}
+
+
+App.GG.Coord.distance_between_two_points(from: Pair<F64, F64>, to: Pair<F64, F64>): F64
+  let {x1, x2} = {from@fst, to@fst}
+  let {y1, y2} = {from@snd, to@snd}
+  let x_dif = F64.pow((x2 - x1), 2)
+  let y_dif = F64.pow((y2 - y1), 2)
+  let sum = x_dif + y_dif
+  F64.sqrt(sum)
+
+
+App.GG.Coord.slerp(from: App.GG.Coord, to: App.GG.Coord, t: F64): Pair<F64, F64>
+  let center_point = App.GG.Coord.center_point(from, to)
+  let angle = t * (0 - F64.pi)
+  let {x1, y1} = {U32.to_f64(from@fst), U32.to_f64(from@snd)}
+  let x_diff = x1 - center_point@fst
+  let y_diff = y1 - center_point@snd
+  let x = ((F64.cos(angle) * x_diff) - (F64.sin(angle) * y_diff)) + center_point@fst
+  let y = ((F64.sin(angle) * x_diff) + (F64.cos(angle) * y_diff)) + center_point@snd
+  {x , y}
+
+
+App.GG.Coord.quadratic_bezier(from: App.GG.Coord, to: App.GG.Coord, pivot: Pair<F64, F64>, t: F64): Pair<F64, F64>
+  let flerp = App.GG.Coord.lerp_2(from, pivot, t)
+  let tlerp = App.GG.Coord.lerp_3(pivot, to, t)
+  App.GG.Coord.lerp_4(flerp, tlerp, t)
+
+
+App.GG.Coord.slerp_to_xy(from: App.GG.Coord, slerp: Pair<F64, F64>, v: F64): Pair<U32, U32>
+  let cng = 1.0 + v/100
+  let {f1, f2} = {U32.to_f64(from@fst), U32.to_f64(from@snd)}
+  let {x, y} = 
+    if slerp@fst >? f1 then
+      {slerp@fst - f1, f2 - slerp@snd}
+    else
+      {f1 - slerp@fst, f2 - slerp@snd}
+  let {xv, yv} = {x * cng, y * cng}
+  let new_x = xv * 32
+  let new_y = yv * 32
+  {F64.to_u32(new_x), F64.to_u32(new_y)}
+
+//============
+
 
 App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
   let start = App.GG.Constants.map_starting_position
-  let x = (start@fst + (32#32 * coord@fst)) - 128#32
+  let x = ((start@fst + (32#32 * coord@fst)) - 128#32) - 32#32
   let y = (start@snd + 32#32 * (App.GG.Constants.grid_size@snd - coord@snd)) - 128#32
   {x, y}
 
@@ -19,11 +111,11 @@ App.GG.Coord.column(center: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
   for coord:tile in grid with result:
     let x1 = center@fst
     let x2 = coord@fst
-      if x1 =? x2 then 
-        coord & result
-      else
-        result
-    result
+    if x1 =? x2 then 
+      coord & result
+    else
+      result
+  result
   
 
 App.GG.Coord.mid_y(grid:App.GG.Grid): Maybe<U32>

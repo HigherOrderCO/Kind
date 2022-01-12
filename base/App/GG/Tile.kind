@@ -36,12 +36,12 @@ App.GG.Tile.update_creature(
   }
 
 App.GG.Tile.original_owner(coord: App.GG.Coord): App.GG.Team
-  if coord@fst <? 3 then
+  let map_size = App.GG.Constants.grid_size
+  if coord@fst <? map_size@fst/2 then
     App.GG.Team.blue
-  else if coord@fst <? 6 then 
-    App.GG.Team.red
   else
-    App.GG.Team.neutral
+    App.GG.Team.red
+
 
 App.GG.Tile.original_owner.update(coord: App.GG.Coord, tile: App.GG.Tile): App.GG.Tile
   let new_team = App.GG.Tile.original_owner(coord)

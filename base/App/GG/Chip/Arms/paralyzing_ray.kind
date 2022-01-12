@@ -2,14 +2,14 @@ App.GG.Chip.Arms.paralyzing_ray: App.GG.Chip
   App.GG.Chip.new(
     "parray"
     App.GG.Class.strength
-    App.GG.Chip.Arms.paralyzing_ray.Effect(50) // TODO: Alter
+    App.GG.Chip.Arms.paralyzing_ray.Effect(10, 30) // TODO: Alter
     10
     App.GG.img.bazooka
     App.GG.Attributes.new(3,0,1,0) // TODO : Alter
   )
 
 
-App.GG.Chip.Arms.paralyzing_ray.Effect(dmg: I32): App.GG.Effect<Unit>
+App.GG.Chip.Arms.paralyzing_ray.Effect(dmg: I32, duration: U64): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.charge.reset
     get creature = App.GG.Effect.creature.get
@@ -26,9 +26,10 @@ App.GG.Chip.Arms.paralyzing_ray.Effect(dmg: I32): App.GG.Effect<Unit>
     without frame: App.GG.Effect.pass
     App.GG.Effect {
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      let duration = App.GG.Creature.stun_with_attribute(creature, duration)
       let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
-      let projectile_effect = App.GG.Chip.Arms.paralyzing_ray.Projectile.Effect(dmg) 
+      let projectile_effect = App.GG.Chip.Arms.paralyzing_ray.Projectile.Effect(dmg, duration) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let highest_y = App.GG.Grid.highest_y(grid)
       let spawn_coord = {closest_enemy@fst, highest_y} // Gets the coordinate in front of the creature
@@ -37,8 +38,8 @@ App.GG.Chip.Arms.paralyzing_ray.Effect(dmg: I32): App.GG.Effect<Unit>
   }
 
 
-App.GG.Chip.Arms.paralyzing_ray.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
-  let max_frame = 12#64
+App.GG.Chip.Arms.paralyzing_ray.Projectile.Effect(dmg: I32, duration: U64): App.GG.Effect<Unit>
+  let max_frame = 24#64
   App.GG.Effect {
     App.GG.Effect.frame.inc // Increases projectile frame by 1
     get center = App.GG.Effect.coord.get_center
@@ -49,10 +50,11 @@ App.GG.Chip.Arms.paralyzing_ray.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
     without team: App.GG.Effect.pass
     let eff = 
       App.GG.Effect {
+        let shock = App.GG.Creature.Status.Stun.shock
+        let animation = App.GG.Animation.stun
         App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile) //change to coord
-        get can_hit = App.GG.Effect.projectile.can_hit(center) //change to coord
-        App.GG.Effect.projectile.hit.damage_at(dmg, center) // change to coord
-        return unit
+        App.GG.Effect.projectile.hit.damage_at(dmg, false, false, center) // change to coord
+        App.GG.Effect.stun.add(shock, animation , duration)
       }
     App.GG.Effect {
       eff

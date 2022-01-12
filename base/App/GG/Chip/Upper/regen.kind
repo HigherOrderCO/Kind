@@ -1,0 +1,27 @@
+App.GG.Chip.Upper.regen: App.GG.Chip
+  App.GG.Chip.new(
+    "Regen"
+    App.GG.Class.power
+    App.GG.Chip.Upper.regen.Effect(10) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Upper.regen.Effect(heal: I32): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      (pos)
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      let animation = App.GG.Animation.idle
+      let heals = App.GG.Creature.heal_with_attribute(creature, heal)
+      get heald = App.GG.Effect.heal(heal, center)
+      return unit
+    }
+  }

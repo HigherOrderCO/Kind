@@ -31,6 +31,15 @@ App.GG.Chip.Arms.poison_cloud.Effect(dmg: I32): App.GG.Effect<Unit>
     }
   }
 
+App.GG.Chip.Arms.poison_cloud.mine_position(current: U64, final_frame: U64): F64
+  let fc = U64.to_f64(current)
+  let ff = U64.to_f64(final_frame)
+  let result = fc/ff
+  //let result = U32.to_f64(F64.to_u32(result * 10))
+  //let result = result/10
+  result
+
+
 App.GG.Chip.Arms.poison_cloud.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect { 
     get center = App.GG.Effect.coord.get_center
@@ -41,29 +50,46 @@ App.GG.Chip.Arms.poison_cloud.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
     without team: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
 
+    let pos = App.GG.Coord.furthest_tile_in_range(center, team, grid, 3)
+
     let eff = 
       (coord : App.GG.Coord)
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile) //change to coord
-        App.GG.Effect.projectile.hit.damage_at(dmg, coord, true, true) // change to coord
+        App.GG.Effect.projectile.hit.damage_at(dmg, true, true, coord) // change to coord
       }
-      let pos = App.GG.Coord.furthest_tile_in_range(center, team, grid, 3)
-      let creature =  App.GG.Creature.create_minion_2(App.GG.Creatures.mine(team), App.GG.Team.neutral, grid)
-      let has_creature = App.GG.Coord.has_creature(pos, grid)
-      if frame =? 30 then
-        if has_creature then 
-          let has_enemy = App.GG.Coord.has_enemy(pos, team, grid)
-          if has_enemy then
-            App.GG.Effect { 
-              eff(pos)
-                switch U64.eql(frame) {
-                  38: App.GG.Effect.projectile.delete
-                }default App.GG.Effect.pass
-            }
+    let arc = 
+      App.GG.Effect { 
+        let t = App.GG.Chip.Arms.poison_cloud.mine_position(frame, 30)
+        if t <=? 1 then
+          App.GG.Effect { 
+          log(F64.show(t))
+            let starting_coord = {(center@fst + center@fst/4), (center@snd + center@snd/4)}
+            let pivot = App.GG.Coord.center_point_extended(starting_coord, pos, 500)
+            App.GG.Effect.vbox.quadratic_bezier(starting_coord, pos, pivot, 0, t, App.GG.img.granade)
+          }
+        else
+          App.GG.Effect { return unit } 
+      }
+    let creature =  App.GG.Creature.create_minion_2(App.GG.Creatures.mine(team), App.GG.Team.neutral, grid)
+    let has_creature = App.GG.Coord.has_creature(pos, grid)
+      App.GG.Effect { 
+        arc
+          if frame =? 30 then
+            if has_creature then 
+              let has_enemy = App.GG.Coord.has_enemy(pos, team, grid)
+              if has_enemy then
+                App.GG.Effect { 
+                  eff(pos)
+                    switch U64.eql(frame) {
+                      38: App.GG.Effect.projectile.delete
+                    }default App.GG.Effect.pass
+                }
+              else
+                App.GG.Effect.pass
+            else
+              App.GG.Effect.creature.spawn_at(creature, pos)
           else
             App.GG.Effect.pass
-        else
-          App.GG.Effect.creature.spawn_at(creature, pos)
-      else
-        App.GG.Effect.pass
+    }
   }
