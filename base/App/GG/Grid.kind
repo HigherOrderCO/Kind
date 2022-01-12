@@ -41,20 +41,24 @@ App.GG.Grid.update(
   }
 
 
-App.GG.Grid.move_creature(origin: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+App.GG.Grid.move_creature(origin: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid, restriction: Bool): App.GG.Grid
+
   let t_origin = App.GG.Grid.get(origin, grid)
   let t_destination = App.GG.Grid.get(destination, grid)
-  Maybe {
-    get ori = t_origin
-    get des = t_destination
-    let mon = ori@creature
-    let new_ori = ori@creature <- none
-    let new_des = des@creature <- mon
-    let new_grid = App.GG.Grid.set(destination, new_des, grid)
-    let new_grid = App.GG.Grid.set(origin, new_ori, new_grid)
-    //log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
-    return new_grid
-  } <> grid
+  let can_walk = App.GG.Coord.can_walk(origin, destination, grid, restriction)
+  if can_walk then
+    Maybe {
+      get ori = t_origin
+      get des = t_destination
+      let mon = ori@creature
+      let new_ori = ori@creature <- none
+      let new_des = des@creature <- mon
+      let new_grid = App.GG.Grid.set(destination, new_des, grid)
+      let new_grid = App.GG.Grid.set(origin, new_ori, new_grid)
+      //log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
+      return new_grid
+    } <> grid
+  else grid
 
 App.GG.Grid.id_list(grid: App.GG.Grid): List<Nat>
   let ids = []
@@ -94,3 +98,12 @@ App.GG.Grid.y_size(grid: App.GG.Grid): Nat
   let lowest_y = App.GG.Grid.lowest_y(grid)
   let diff = U32.to_nat(highest_y - lowest_y)
   1 + diff
+
+App.GG.Grid.get_team_tiles(grid: App.GG.Grid, team: App.GG.Team): List<App.GG.Coord>
+  let coords = [] :: List<App.GG.Coord>
+  for coord:tile in grid with coords:
+    if App.GG.Team.eql(tile@owner, team) then
+      coord & coords
+    else
+      coords
+  coords 

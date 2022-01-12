@@ -6,6 +6,12 @@ App.GG.Effect.status.add_at(
   let mod = App.GG.Creature.modify_at(status_add, pos)
   App.GG.Effect.grid.modify(mod)
 
+App.GG.Effect.status.add(status: App.GG.Creature.Status): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.status.add_at(status, center)
+  }
+
 App.GG.Effect.status.get_at(id: Nat, pos: App.GG.Coord): App.GG.Effect<Maybe<Maybe<App.GG.Creature.Status>>>
   App.GG.Effect {
     get creature = App.GG.Effect.creature.get_at(pos)

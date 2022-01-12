@@ -8,20 +8,25 @@ App.GG.Effect.movement(
     get frame =  App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
     get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
     App.GG.Effect.frame.inc 
+    without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
-    //log("frame: " | U64.show(frame) )
-    switch U64.eql(frame) {
-      0: 
-        if App.GG.Coord.can_walk(center, destination, grid) then
-          App.GG.Effect.animation.update(App.GG.Animation.movement)
-        else
+    if App.GG.Coord.eql(center, destination) then App.GG.Effect.actions.reset else 
+    if App.GG.Coord.can_walk(center, destination, grid, true) then
+      switch U64.eql(frame) {
+        0: 
+          App.GG.Effect {
+            App.GG.Effect.animation.update(App.GG.Animation.movement)
+            App.GG.Effect.tile.add_status(App.GG.Tile.Status.reserved(final_frame, creature@id), destination)
+          }
+        move_frame: 
+          App.GG.Effect.movement.move_at(center, destination, true)
+        final_frame: 
           App.GG.Effect.actions.reset
-      move_frame: 
-        App.GG.Effect.movement.move(destination)
-      final_frame: 
-        App.GG.Effect.actions.reset
-    } default App.GG.Effect.pass
+      } default App.GG.Effect.pass
+    else
+      App.GG.Effect.actions.reset
   }
 
 App.GG.Effect.movement.arrow(
@@ -35,23 +40,12 @@ App.GG.Effect.movement.arrow(
     App.GG.Effect.movement(destination, move_frame, final_frame)
   }
 
-App.GG.Effect.movement.move_at(from: App.GG.Coord, destination: App.GG.Coord): App.GG.Effect<Unit>
+App.GG.Effect.movement.move_at(from: App.GG.Coord, destination: App.GG.Coord, restriction: Bool): App.GG.Effect<Unit>
   App.GG.Effect {
     get grid = App.GG.Effect.grid.get
-    let can_walk = App.GG.Coord.can_walk(from, destination, grid)
-    let new_grid =
-      if can_walk then
-        App.GG.Grid.move_creature(from, destination, grid)
-      else
-        grid
+    let new_grid = App.GG.Grid.move_creature(from, destination, grid, restriction)
     App.GG.Effect.grid.set(new_grid)
   }  
-
-App.GG.Effect.movement.move(new_pos: App.GG.Coord): App.GG.Effect<Unit>
-  (center, origin, local) 
-  let new_grid = App.GG.Grid.move_creature(center, new_pos, local@grid)
-  let new_local = local@grid <- new_grid
-  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
 
 App.GG.Effect.movement.player_movement(arrow: App.GG.Arrow): App.GG.Effect<Unit>
   App.GG.Effect.movement.arrow(arrow, 12, 24)

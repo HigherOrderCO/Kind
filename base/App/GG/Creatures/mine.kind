@@ -1,5 +1,5 @@
 App.GG.Creatures.mine(team: App.GG.Team): App.GG.Minion
-  App.GG.Minion.new(App.GG.Creatures.mine.vbox, App.GG.Creatures.mine.Effect(team), 5)
+  App.GG.Minion.new(App.GG.Creatures.mine.vbox, App.GG.Creatures.mine.Effect(team),0 , 5)
 
 
 App.GG.Creatures.mine.vbox(animation: App.GG.Animation, frame: U64): VoxBox

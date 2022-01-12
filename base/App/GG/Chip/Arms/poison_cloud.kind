@@ -65,7 +65,7 @@ App.GG.Chip.Arms.poison_cloud.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
           App.GG.Effect { 
           log(F64.show(t))
             let starting_coord = {(center@fst + center@fst/4), (center@snd + center@snd/4)}
-            let pivot = App.GG.Coord.center_point_extended(starting_coord, pos, 500)
+            let pivot = App.GG.Coord.center_point_extended(starting_coord, pos, 4)
             App.GG.Effect.vbox.quadratic_bezier(starting_coord, pos, pivot, 0, t, App.GG.img.granade)
           }
         else

@@ -12,15 +12,17 @@ type App.GG.Tile.Statuses {
   new(
     stolen: Maybe<App.GG.Tile.Status>
     broken: Maybe<App.GG.Tile.Status>
+    reserved: Maybe<App.GG.Tile.Status>
   )
 }
 
 App.GG.Tile.Statuses.pure: App.GG.Tile.Statuses
-  App.GG.Tile.Statuses.new(none, none)
+  App.GG.Tile.Statuses.new(none, none, none)
 
 type App.GG.Tile.Status {
   stolen(duration: U64)
   broken(duration: U64)
+  reserved(duration: U64, id: Nat)
 }
 
 App.GG.Tile.update_creature(
@@ -37,7 +39,7 @@ App.GG.Tile.update_creature(
 
 App.GG.Tile.original_owner(coord: App.GG.Coord): App.GG.Team
   let map_size = App.GG.Constants.grid_size
-  if coord@fst <? map_size@fst/2 then
+  if coord@fst <=? map_size@fst/2 then
     App.GG.Team.blue
   else
     App.GG.Team.red
@@ -53,6 +55,7 @@ App.GG.Tile.Status.del_from_nat(count: Nat, tile: App.GG.Tile): App.GG.Tile
     switch Nat.eql(count) {
     0: statuses@stolen <- none
     1: statuses@broken <- none
+    2: statuses@reserved <- none
   }default statuses
   tile@statuses <- new_statuses
 
@@ -62,6 +65,7 @@ App.GG.Tile.Status.add(status: App.GG.Tile.Status, tile: App.GG.Tile): App.GG.Ti
     case status {
       stolen: statuses@stolen <- some(status)
       broken: statuses@broken <- some(status)
+      reserved: statuses@reserved <- some(status)
     }
   tile@statuses <- new_statuses
 
@@ -69,6 +73,7 @@ App.GG.Tile.Status.get_from_nat(count: Nat, statuses: App.GG.Tile.Statuses): May
   switch Nat.eql(count) {
     0: some(statuses@stolen)
     1: some(statuses@broken)
+    2: some(statuses@reserved)
   }default none
 
 App.GG.Tile.Status.update_grid(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
@@ -87,6 +92,7 @@ App.GG.Tile.Status.update_grid.go(count: Nat, coord: App.GG.Coord, game: App.GG.
             case status.value {
               stolen: App.GG.Tile.Status.update_stolen(status.value, coord, game)
               broken: App.GG.Tile.Status.update_broken(status.value, coord, game)
+              reserved: App.GG.Tile.Status.update_reserved(status.value, coord, game)
             }default game
         }
       let new_local = App.GG.Tile.Status.update_grid.go(count +1, coord, new_local)
@@ -100,7 +106,7 @@ App.GG.Tile.Status.update_stolen(status: App.GG.Tile.Status, coord: App.GG.Coord
   case status {
     stolen: 
       let grid = game@grid
-      log(U64.show(status.duration))
+      //log(U64.show(status.duration))
       if status.duration =? 0 then
         let can_rtrn = App.GG.Tile.can_be_returned(coord, grid)
         if can_rtrn then 
@@ -135,6 +141,22 @@ App.GG.Tile.Status.update_broken(status: App.GG.Tile.Status, coord: App.GG.Coord
         new_local
   }default game
 // New Status
+
+App.GG.Tile.Status.update_reserved(status: App.GG.Tile.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  let grid = game@grid
+  case status {
+    reserved: 
+      if status.duration =? 0 then
+        let new_tile = App.GG.Tile.Status.del_from_nat(2)
+        let new_grid = App.GG.Grid.update(coord, new_tile, grid)
+        let new_local = game@grid <- new_grid
+        new_local
+      else
+        let new_tile = App.GG.Tile.Status.add(App.GG.Tile.Status.reserved(status.duration - 1, status.id))
+        let new_grid = App.GG.Grid.update(coord, new_tile, grid)
+        let new_local = game@grid <- new_grid
+        new_local
+  }default game
 
 App.GG.Tile.can_be_returned(coord: App.GG.Coord, grid: App.GG.Grid): Bool
   let coords = App.GG.Coord.self_and_front_columns(coord, grid)

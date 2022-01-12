@@ -3,5 +3,6 @@ type App.GG.Game {
     phase: App.GG.Phase
     grid: App.GG.Grid
     mouse: Pair<U32, U32>
+    random: Nat
   )
 }

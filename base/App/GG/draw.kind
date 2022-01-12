@@ -16,6 +16,7 @@ App.GG.draw.game(
     "height": "max(100%, 600px)"
     "width": "100vw"
     "display": "flex",
+    "background-color": "#17191d",
     "align-items": "center",
     "justify-content": "center"
   }>
@@ -23,39 +24,62 @@ App.GG.draw.game(
         "max-height": "100%",
         "max-width": "100%",
         "overflow": "hidden",
+        "margin-top": "-512px",
       }>{
         DOM.vbox({
-            "class": "pixel-art" 
+            "class": "pixel-art",
             "id": "game_screen",
-            "width": "1024px",
-            "height": "1024px",
-            "scale": "4"
+            "width": "576",
+            "height": "480",
+            "scale": "2"
           },
           {},
           let bar = case game@phase as phase {setup: 0#64, game: phase.turn_bar} 
+          let img = App.GG.draw.map(img)
           let img = App.GG.draw.grid(game, img)
           let img = App.GG.draw.turn_bar(bar, img)
           App.GG.draw.setup(game@phase,img))
       }</div>
   </div>
 
+App.GG.draw.map(img: VoxBox): VoxBox
+  let map =
+    [
+      {{0#32,   0#32  }, App.GG.img.map.0x0}
+      {{256#32, 0#32  }, App.GG.img.map.1x0}
+      {{512#32, 0#32  }, App.GG.img.map.2x0}
+      {{0#32,   256#32}, App.GG.img.map.0x1}
+      {{256#32, 256#32}, App.GG.img.map.1x1}
+      {{512#32, 256#32}, App.GG.img.map.1x2}
+    ]
+  let f =
+    (x: U32, y: U32, i: VoxBox, j: VoxBox)
+     VoxBox.Draw.image(x, y, 0, i, j)
+  VoxBox.Large.draw(f, map, img)
+
 App.GG.draw.setup(phase: App.GG.Phase, img: VoxBox): VoxBox
   case phase {
     setup: 
-      let img = VoxBox.Draw.image(15 - 96, 13 - 66, 150, App.GG.img.background, img)
-      let {x, y}   = App.GG.Constants.chips_starting_position
+      let {sx, sy} = App.GG.Constants.map_starting_position
+      let {cx, cy} = App.GG.Constants.chips_starting_position
+      let {x,  y } = {cx + sx, cy + sy}
+      let img = VoxBox.Draw.image((x - 128) + 22, (y - 128) + 23, 150, App.GG.img.background, img)
       let selected = App.GG.Table.Slot.get_selected_index(phase.table)
-      let img = App.GG.draw.setup.chips(0, phase.table@slots, selected, x, y, img)
-      let img = VoxBox.Draw.text(I32.show(phase.energy), PixelFont.black, Pos32.new(93,80,200), img)
+      let img = App.GG.draw.setup.chips(0, phase.table@slots, selected, x, y - 27, img)
+      let img = VoxBox.Draw.text(I32.show(phase.energy), PixelFont.black, Pos32.new(x + 70, y + 60,200), img)
       let bar = I32.to_u32((phase.energy * 64) / 100)
-      let img = VoxBox.Draw.rect(93, 80 - bar, 100, 11, bar, Col32.new(240, 220, 0, 255), img)
+      let img = VoxBox.Draw.rect(x + 70, (y + 55) - bar, 240, 11, bar, Col32.new(240, 220, 0, 255), img)
       img
     game: img
   }
 //40x22
 App.GG.draw.turn_bar(turn_bar: U64, img: VoxBox): VoxBox
-  let max = U32.min(F64.to_u32(U64.to_f64(turn_bar)), 1200)
-  VoxBox.Draw.rect(21, 15, 100, max / 6, 4, Col32.new(100, 255, 100, 255), img)
+  let tile_size = 32#32
+  let map_x = App.GG.Constants.grid_size@fst
+  let proportion = 1024#32 / (tile_size * map_x)
+  let max = U32.min(F64.to_u32(U64.to_f64(turn_bar)), 1024)
+  let {sx, sy} = App.GG.Constants.map_starting_position
+  VoxBox.Draw.rect(sx, sy - 5, 100, max / proportion, 4, Col32.new(100, 255, 100, 255), img)
 
 App.GG.draw.setup.chips(
   count: U32, 
@@ -145,10 +169,15 @@ App.GG.draw.tile(
 ): VoxBox
   let {x, y} = App.GG.Coord.to_xy(coord)
   let tile_img = 
-    case tile@owner {
-      blue:     App.GG.img.ally_tile
-      red:      App.GG.img.enemy_tile
-      neutral:  App.GG.img.target_tile
+    case tile@statuses@reserved {
+      none:
+        case tile@owner {
+          blue:     App.GG.img.ally_tile
+          red:      App.GG.img.enemy_tile
+          neutral:  App.GG.img.target_tile
+        }
+      some:
+        VoxBox.empty
     }
   let creature = tile@creature
   let img = 
@@ -167,7 +196,10 @@ App.GG.draw.tile(
             img
           else
             if App.GG.Team.eql(App.GG.Team.red, creature.value@team) then
-              VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(12), sprite, img)
+              case creature.value@category as monster {
+                minion: VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(Nat.to_u32(monster.data@level * 50) + 12), sprite, img)
+                slime: VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(12), sprite, img)
+              }
             else VoxBox.Draw.image(x, y, 20, sprite, img)
         let img = VoxBox.Draw.text(I32.show(creature.value@hp), PixelFont.small_black, Pos32.new(x + 122,y + 100, 100), img)
         let img = vbox(img)

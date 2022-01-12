@@ -62,7 +62,7 @@ App.GG.Chip.Arms.paralyzing_ray.Projectile.Effect(dmg: I32, duration: U64): App.
         App.GG.Effect { 
           get center = App.GG.Effect.coord.get_center
           let next_coord = {center@fst, center@snd - 1}
-          log(App.GG.Coord.show(next_coord))
+          //log(App.GG.Coord.show(next_coord))
           App.GG.Effect.projectile.move(next_coord)
             return unit
           }
