@@ -1,7 +1,7 @@
 // Converts a Kind.Core term to Lambolt
 Kind.Core.to_lambolt(term: Kind.Core.Term): String
-  let {st, term} = Kind.Core.to_lambolt.aux({0, "", {}}, term)
-  let {n, defs, lambolt_vars} = st
+  let {n_defs, term} = Kind.Core.to_lambolt.aux({0, "", {}}, term)
+  let {n, defs} = n_defs
   defs|term
 
 type ToLambolt.State {
@@ -15,48 +15,68 @@ type ToLambolt.State {
 Kind.Core.to_lambolt.aux(
   st: ToLambolt.State
   term: Kind.Core.Term
-): Pair<ToLambolt.State, String>
+): Pair<Pair<Nat, String>, String>
   let {n, ids, lambda_refs} = st
   case term {
     var:
-//      {0, "", ""}
-      ?var
+      {{n, ids}, term.name}
 
     ref:
-//      {0, "", ""}
-      ?ref
+      case lambda_refs{term.name} {
+        none:
+          {{n, ids}, "(Ref ("|String.capitalize(term.name)|"))"}
+        some:
+          {{n, ids}, term.name}
+      }
 
     typ:
-      {{n, ids, lambda_refs}, "(Typ)"}
+      {{n, ids}, "(Typ)"}
 
     all: 
-//      {0, "", ""}
-      ?all
+      let eras = if term.eras then "(true)" else "(false)"
+      let self = "("|String.capitalize(term.self)|")"
+      let name = "("|String.capitalize(term.name)|")"
+      let {n_ids, xtyp_code} = Kind.Core.to_lambolt.aux(
+        {n, ids, lambda_refs}
+        term.xtyp
+      )
+      let lambda_refs = lambda_refs{term.self} <- unit
+      let lambda_refs = lambda_refs{term.name} <- unit
+      let {n_ids, body_code} = Kind.Core.to_lambolt.aux(
+        {n, ids, lambda_refs}
+        term.xtyp
+      )
+      {n_ids, "(All "|eras|" "|self|" "|name|" "|xtyp_code|" "|body_code|")"}
 
     lam:
-//      {0, "", ""}
-      ?lam
+      let {n_ids, lam_body} = Kind.Core.to_lambolt.aux(
+        {n, ids, lambda_refs{term.name} <- unit}
+        term.body(Kind.Core.Term.ref(term.name))
+      )
+      {{n_ids@fst, n_ids@snd}, "λ"|term.name|" "|lam_body}
 
     app:
-//      let {n, ids, fcode}   = Kind.Core.to_lambolt.aux({n, ids, lambda_refs}, term.func)
-//      let {n, ids, argcode} = Kind.Core.to_lambolt.aux({n, ids, lambda_refs}, term.argm)
-//      {n, ids, "("|fcode|" "|argcode|")"}
-      ?app
+      let {n_ids, fun} = Kind.Core.to_lambolt.aux({n, ids, lambda_refs}, term.func)
+      let {n_ids, arg} = Kind.Core.to_lambolt.aux({n_ids@fst, n_ids@snd, lambda_refs}, term.argm)
+      {{n_ids@fst, n_ids@snd}, "(App "|fun|" "|arg|")"}
 
     let:
-      let {st, code} = Kind.Core.to_lambolt.aux({n, ids, lambda_refs}, term.expr)
-      let {n, ids, lambda_refs} = st
+      let {n_ids, code} = Kind.Core.to_lambolt.aux({n, ids, lambda_refs}, term.expr)
+
+      let {n_ids, let_expr} = Kind.Core.to_lambolt.aux(
+        {n_ids@fst, n_ids@snd, lambda_refs}
+        term.expr
+      )
 
       let ids = ids|"("|term.name|") = "|Nat.show(n)|"\n"
-      let {st, let_body} = Kind.Core.to_lambolt.aux(
+      let {n_ids, let_body} = Kind.Core.to_lambolt.aux(
         {n+1, ids, lambda_refs{term.name} <- unit}
         term.body(Kind.Core.Term.ref(term.name))
       )
-      let {n, ids, old_lambda_refs} = st
-      {{n, ids, lambda_refs}, "(Let ("|String.to_upper(term.name)|") λ"|term.name|" "
-      |let_body|")"}
+      {{n_ids@fst, n_ids@snd}, "(Let ("|String.capitalize(term.name)|") "|let_expr|" λ"|term.name|" "|let_body|")"}
 
-    ann: 
-//      {0, "", ""}
-      ?ann
+    ann:
+      let {n_ids, expr} = Kind.Core.to_lambolt.aux({n, ids, lambda_refs}, term.expr)
+      let {n_ids, type} = Kind.Core.to_lambolt.aux({n_ids@fst, n_ids@snd, lambda_refs}, term.type)
+      {{n_ids@fst, n_ids@snd}, "(Ann "|expr|" "|type|")"}
   }
