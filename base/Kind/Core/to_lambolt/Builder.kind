@@ -1,0 +1,27 @@
+type Kind.Core.to_lambolt.Builder.aux {
+  new(
+    n: Nat
+    ids: String
+  )
+}
+
+Kind.Core.to_lambolt.Builder(T: Type): Type
+  Kind.Core.to_lambolt.Builder.aux -> Map<Unit> -> Pair<Kind.Core.to_lambolt.Builder.aux, T>
+
+Kind.Core.to_lambolt.Builder.monad: Monad<Kind.Core.to_lambolt.Builder>
+  Monad.new<Kind.Core.to_lambolt.Builder>(Kind.Core.to_lambolt.Builder.bind, Kind.Core.to_lambolt.Builder.pure)
+
+Kind.Core.to_lambolt.Builder.bind<
+  A: Type
+  B: Type
+>(
+  here: Kind.Core.to_lambolt.Builder(A)
+  next: A -> Kind.Core.to_lambolt.Builder(B)
+): Kind.Core.to_lambolt.Builder(B)
+  (st, ids)
+    let {new_st, reply} = here(st, ids)
+    next(reply, new_st, ids)
+
+Kind.Core.to_lambolt.Builder.pure<A: Type>(a: A): Kind.Core.to_lambolt.Builder(A)
+  (st, ids)
+    {st, a}
