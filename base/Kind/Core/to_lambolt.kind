@@ -1,24 +1,57 @@
 // Converts a Kind.Core term to Lambolt
-Kind.Core.to_lambolt(term: Kind.Core.Term): String
-  let {n_defs, term} = Kind.Core.to_lambolt.aux(term, {1, "(Typ) = 0\n"}, {})
-  let {n, defs} = n_defs
-  defs|term
+Kind.Core.to_lambolt(defs: Kind.Core.Defs): String
+  let def_list = List.map!!((p) p@snd, Map.to_list!(defs))
+  let st = Kind.Core.to_lambolt.Builder.aux.new(2, "(Z) = 0\n(Typ) = 1")
+  let ret = {st, ""}
+  for def in def_list with ret:
+    let {st, head} = ret
+    let {st, tail} = Kind.Core.Def.to_lambolt(def, st, {})
+    {st, head|tail}
+  let {st, code} = ret
+  let {n, ids} = st
+  ids|code
+
+
+Kind.Core.to_lambolt.lam_ref: Bool
+  true
+
+Kind.Core.to_lambolt.let_ref: Bool
+  false
 
 Kind.Core.to_lambolt.get_idx: Kind.Core.to_lambolt.Builder(Nat)
   (st, ids)
     open st
     {{st.n + 1, st.ids} :: Kind.Core.to_lambolt.Builder.aux, st.n}
 
-Kind.Core.to_lambolt.add_binder<A: Type>(
+Kind.Core.to_lambolt.to_defname(name: String): String
+  "("|String.capitalize(name)|")"
+
+Kind.Core.to_lambolt.add_defname(name: String): Kind.Core.to_lambolt.Builder(Unit)
+  (st, ids)
+    open st
+    {
+      {st.n + 1, st.ids|"\n"|Kind.Core.to_lambolt.to_defname(name)|" = "|Nat.show(st.n)}
+        :: Kind.Core.to_lambolt.Builder.aux
+      unit
+    }
+
+Kind.Core.to_lambolt.add_var<A: Type>(
   b: Kind.Core.to_lambolt.Builder(A)
   id: String
 ): Kind.Core.to_lambolt.Builder(A)
   (st, ids)
-    b(st, ids{id} <- unit)
+    b(st, ids{id} <- Kind.Core.to_lambolt.lam_ref)
 
-Kind.Core.to_lambolt.test_binder(id: String): Kind.Core.to_lambolt.Builder(Bool)
+Kind.Core.to_lambolt.add_let<A: Type>(
+  b: Kind.Core.to_lambolt.Builder(A)
+  id: String
+): Kind.Core.to_lambolt.Builder(A)
   (st, ids)
-    {st, Maybe.is_some!(ids{id})}
+    b(st, ids{id} <- Kind.Core.to_lambolt.let_ref)
+
+Kind.Core.to_lambolt.test_ref(id: String): Kind.Core.to_lambolt.Builder(Maybe<Bool>)
+  (st, ids)
+    {st, ids{id}}
 
 //Kind.Core.to_lambolt.Builder.show(
 //  st: Kind.Core.to_lambolt.Builder.aux
@@ -29,27 +62,45 @@ Kind.Core.to_lambolt.test_binder(id: String): Kind.Core.to_lambolt.Builder(Bool)
 //  |"  "|st.ids|",\n"
 //  |"  "|Map.show!((u) "*", st.local_binders)|"\n"
 //  |"}"
-//
+
+Kind.Core.to_lambolt.handle_empty(
+  str: String
+): String
+  case str {
+    nil:
+      "(Z)"
+    cons:
+      str
+  }
+
 // TODO add indentation level
-Kind.Core.to_lambolt.aux(
+Kind.Core.Term.to_lambolt(
   term: Kind.Core.Term
 ): Kind.Core.to_lambolt.Builder(String)
   case term {
     var:
       Kind.Core.to_lambolt.Builder {
-        return term.name
+        return 
+          Kind.Core.to_lambolt.handle_empty(term.name)
       }
     ref:
       Kind.Core.to_lambolt.Builder {
-        get cond = Kind.Core.to_lambolt.test_binder(term.name)
-        if cond then
-          Kind.Core.to_lambolt.Builder {
-            return "(Ref ("|String.capitalize(term.name)|"))"
+        get cond = Kind.Core.to_lambolt.test_ref(term.name)
+        let ret =
+          case cond {
+            some:
+              if cond.value then
+                Kind.Core.to_lambolt.handle_empty(term.name)
+              else
+                "(Ref ("
+                |Kind.Core.to_lambolt.handle_empty(String.to_lower(term.name))
+                |"))"
+            none:
+              "(Ref ("
+              |Kind.Core.to_lambolt.handle_empty(String.capitalize(term.name))
+              |"))"
           }
-        else
-          Kind.Core.to_lambolt.Builder {
-            return term.name
-          }
+        return ret
       }
     typ:
       Kind.Core.to_lambolt.Builder {
@@ -58,54 +109,68 @@ Kind.Core.to_lambolt.aux(
     all: 
       Kind.Core.to_lambolt.Builder {
         let eras = if term.eras then "(True)" else "(False)"
-        get xtyp_code = Kind.Core.to_lambolt.aux(term.xtyp)
-        get body_code = Kind.Core.to_lambolt.add_binder!(
-          Kind.Core.to_lambolt.add_binder!(
-            Kind.Core.to_lambolt.aux(
+        get xtyp_code = Kind.Core.Term.to_lambolt(term.xtyp)
+        get body_code = Kind.Core.to_lambolt.add_var!(
+          Kind.Core.to_lambolt.add_var!(
+            Kind.Core.Term.to_lambolt(
               term.body(Kind.Core.Term.ref(term.self), Kind.Core.Term.ref(term.name))
             )
             term.self
           )
           term.name
         )
-        get self_n = Kind.Core.to_lambolt.get_idx
-        let let_self =
-          case term.self {
-              nil:
-                ""
-              cons:
-                "\nlet "|term.self|" = "|Nat.show(self_n)
-          }
-        get name_n = Kind.Core.to_lambolt.get_idx
-        let let_name =
+        get let_name =
           case term.name {
             nil:
-              ""
+              Kind.Core.to_lambolt.Builder {
+                return ""
+              }
             cons:
-              "\nlet "|term.name|" = "|Nat.show(name_n)
+              Kind.Core.to_lambolt.Builder {
+                get name_n = Kind.Core.to_lambolt.get_idx
+                return "\nlet "|term.name|" = "|Nat.show(name_n)
+              }
+          }
+        get let_self =
+          case term.self {
+              nil:
+                Kind.Core.to_lambolt.Builder {
+                  return ""
+                }
+              cons:
+                Kind.Core.to_lambolt.Builder {
+                  get self_n = Kind.Core.to_lambolt.get_idx
+                  return "\nlet "|term.self|" = "|Nat.show(self_n)
+                }
           }
         return 
           let_self
           |let_name|"\n"
-          |"(All "|eras|" "|term.self|" "|term.name|" "|xtyp_code|" λ"|term.self|" λ"|term.name|" "|body_code|")"
+          |"(All "|eras|" "
+          |Kind.Core.to_lambolt.handle_empty(term.self)|" "
+          |Kind.Core.to_lambolt.handle_empty(term.name)|" "
+          |xtyp_code|" λ"|term.self|" λ"|term.name|" "|body_code|")"
       }
     lam:
       Kind.Core.to_lambolt.Builder {
         let new_body = term.body(Kind.Core.Term.ref(term.name))
-        get lam_body = Kind.Core.to_lambolt.add_binder!(Kind.Core.to_lambolt.aux(new_body), term.name)
+        get lam_body = Kind.Core.to_lambolt.add_var!(Kind.Core.Term.to_lambolt(new_body), term.name)
         return "λ"|term.name|" "|lam_body
       }
     app:
       Kind.Core.to_lambolt.Builder {
-        get fun = Kind.Core.to_lambolt.aux(term.func)
-        get arg = Kind.Core.to_lambolt.aux(term.argm)
+        get fun = Kind.Core.Term.to_lambolt(term.func)
+        get arg = Kind.Core.Term.to_lambolt(term.argm)
         return "(App "|fun|" "|arg|")"
       }
     let:
       Kind.Core.to_lambolt.Builder {
-        get let_expr = Kind.Core.to_lambolt.aux(term.expr)
-        get let_body = Kind.Core.to_lambolt.add_binder!(
-          Kind.Core.to_lambolt.aux(term.body(Kind.Core.Term.ref(term.name)))
+        get let_expr = Kind.Core.to_lambolt.add_let!(
+          Kind.Core.Term.to_lambolt(term.expr)
+          term.name
+        )
+        get let_body = Kind.Core.to_lambolt.add_var!(
+          Kind.Core.Term.to_lambolt(term.body(Kind.Core.Term.ref(term.name)))
           term.name
         )
         get n = Kind.Core.to_lambolt.get_idx
@@ -113,14 +178,23 @@ Kind.Core.to_lambolt.aux(
       }
     ann:
       Kind.Core.to_lambolt.Builder {
-        get expr = Kind.Core.to_lambolt.aux(term.expr)
-        get type = Kind.Core.to_lambolt.aux(term.type)
+        get expr = Kind.Core.Term.to_lambolt(term.expr)
+        get type = Kind.Core.Term.to_lambolt(term.type)
         return "(Ann "|expr|" "|type|")"
       }
   }
-//  log("============================")
-//  log("state:")
-//  log(Kind.Core.to_lambolt.Builder.show(st))
-//  log("term:")
-//  log(Kind.Core.show(Kind.Core.to_kind(term)))
-//  let {n, ids, local_binders} = st
+
+Kind.Core.Def.to_lambolt(def: Kind.Core.Def): Kind.Core.to_lambolt.Builder(String)
+  open def
+  Kind.Core.to_lambolt.Builder {
+    get type_code = Kind.Core.Term.to_lambolt(def.type)
+    get term_code = Kind.Core.Term.to_lambolt(def.term)
+    Kind.Core.to_lambolt.add_defname(def.name)
+    return 
+      "\n"
+      |Kind.Core.to_lambolt.to_defname(def.name|"Def")
+      |" =\n(Def "
+      |Kind.Core.to_lambolt.to_defname(def.name)|" "
+      |type_code|" "
+      |term_code|")"
+  }

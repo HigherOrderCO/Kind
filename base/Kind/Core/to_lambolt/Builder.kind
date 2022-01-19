@@ -6,7 +6,7 @@ type Kind.Core.to_lambolt.Builder.aux {
 }
 
 Kind.Core.to_lambolt.Builder(T: Type): Type
-  Kind.Core.to_lambolt.Builder.aux -> Map<Unit> -> Pair<Kind.Core.to_lambolt.Builder.aux, T>
+  Kind.Core.to_lambolt.Builder.aux -> Map<Bool> -> Pair<Kind.Core.to_lambolt.Builder.aux, T>
 
 Kind.Core.to_lambolt.Builder.monad: Monad<Kind.Core.to_lambolt.Builder>
   Monad.new<Kind.Core.to_lambolt.Builder>(Kind.Core.to_lambolt.Builder.bind, Kind.Core.to_lambolt.Builder.pure)
