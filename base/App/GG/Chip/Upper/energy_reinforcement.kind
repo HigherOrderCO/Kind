@@ -73,7 +73,7 @@ App.GG.Chip.Upper.energy_reinforcement.Projectile.Effect(energy_val: I32, durati
             let y = App.GG.Chip.Upper.energy_reinforcement.globe_position(frame - uinterval, udelay) 
             App.GG.Effect { 
               App.GG.Effect.vbox.at_tile(center, App.GG.img.yellow_tile)
-              App.GG.Effect.vbox.at_tile_with_variation(center, 0, y, App.GG.img.missle_down)
+              App.GG.Effect.vbox.at_tile_with_variation(center, 0, y, App.GG.img.missile_down)
 
             }
           else

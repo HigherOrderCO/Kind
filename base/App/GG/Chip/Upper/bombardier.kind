@@ -70,9 +70,9 @@ App.GG.Chip.Upper.bombardier.Projectile.Effect(dmg: I32, delay: F64): App.GG.Eff
               let pivot = App.GG.Coord.center_point_extended(starting_coord, pos, 30)
               let img = 
                 if t <? 0.5 then
-                  App.GG.img.missle_up
+                  App.GG.img.missile_up
                 else
-                  App.GG.img.missle_down
+                  App.GG.img.missile_down
               App.GG.Effect.vbox.quadratic_bezier(starting_coord, pos, pivot, 0, t, img)
             }
           else

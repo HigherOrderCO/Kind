@@ -19,13 +19,11 @@ App.GG: App<App.GG.State>
   )
 
 // Todos:
-// - Create counter mechanic - double damage after interrupting a chip action (needs status)
 // - stop using colorize on draw
-// - move minion.ai functions to a more generic section
 // - improve draw.kind to better reflect images      
 // - Add an animation to basic attack (x key)
-// - Show chips in hand in setup phase
-// - Show chips in hand in game phase
+// - Show chips in hand in setup phase - postponed to when we have improved interface
+// - Show chips in hand in game phase - postponed to when we have improved interface
 // - Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
 //     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
 // - Create 3 minions

@@ -11,6 +11,7 @@ App.GG.Chip.Arms.long_sword: App.GG.Chip
 App.GG.Chip.Arms.long_sword.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(12, 24)
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
     get frame = App.GG.Effect.frame.get

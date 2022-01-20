@@ -490,7 +490,12 @@ App.GG.Creature.reset_actions.aux(creature: App.GG.Creature): App.GG.Creature
 
 // Updates animation to its next frame
 App.GG.Creature.update_animation(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
-  let mod = (creature: App.GG.Creature) creature@animation <- {creature@animation@fst, creature@animation@snd + 1}
+  let mod = 
+    (creature: App.GG.Creature)
+      case creature@animation as ani {
+        idle: creature@animation <- {ani@fst, ani@snd + 1}
+      }default creature
+        
   let new_grid = App.GG.Creature.modify_at(mod, coord, game@grid)
   let new_game = game@grid <- new_grid
   new_game

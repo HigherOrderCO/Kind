@@ -5,6 +5,7 @@ App.GG.Effect.movement(
 ): App.GG.Effect<Unit>
 
   App.GG.Effect {
+    App.GG.Effect.animation.modify_by_duration(24, final_frame)
     get frame =  App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
     get grid = App.GG.Effect.grid.get
