@@ -20,6 +20,7 @@ type App.GG.Projectile.Status {
   coord(val: App.GG.Coord)
   nat(val: Nat)
   ids(val: List<String>)
+  casts(val: Nat)
   unit
 }
 
@@ -193,3 +194,30 @@ App.GG.Projectile.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.
       {idx + 1, new_grid}
     return pair@snd
   } <> grid
+
+App.GG.Projectile.get_cast(projectile: App.GG.Projectile): Nat
+  let status = projectile@info@status
+  case status { 
+    casts: status.val
+  }default 0
+
+App.GG.Projectile.casts_aux(projectile: App.GG.Projectile, count: Nat): App.GG.Projectile
+  let status = App.GG.Projectile.Status.casts(count)
+  projectile@info@status <- status
+  
+
+App.GG.Projectile.casts(f: Nat -> App.GG.Projectile, coords: List<App.GG.Coord>): List<Pair<App.GG.Projectile, App.GG.Coord>>
+  App.GG.Projectile.casts.go(0, f, coords)
+  
+App.GG.Projectile.casts.go(count: Nat, f: Nat -> App.GG.Projectile, coords: List<App.GG.Coord>): List<Pair<App.GG.Projectile, App.GG.Coord>>
+  case coords { 
+    nil: 
+      []
+    cons:
+      let coord = coords.head
+      let projectile = f(count)
+      let pair = Pair.new<App.GG.Projectile, App.GG.Coord>(projectile, coord)
+      pair & App.GG.Projectile.casts.go(count + 1, f, coords.tail)
+  } 
+
+  

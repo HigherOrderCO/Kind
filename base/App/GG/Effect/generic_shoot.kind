@@ -7,4 +7,4 @@ App.GG.Effect.generic_shoot(
   ): App.GG.Effect<Unit>
 
   let effect = App.GG.Effect.projectile.add_at(spawn_coord, projectile)
-  App.GG.Effect.generic_attack(effect, animation, spawn_frame, final_frame)
+  App.GG.Effect.generic_action(effect, animation, spawn_frame, final_frame)

@@ -185,7 +185,7 @@ App.GG.Creatures.minion.gunner.Effect.attack(dmg: I32, projectile_period: U64, m
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
       let projectile_effect = App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg, projectile_period, true)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-      let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
+      let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
       App.GG.Effect.ai.modify("seen", (x) Nat.to_i32(random) % maximum_early_attack)
       App.GG.Effect {
         let eff = 

@@ -4,6 +4,21 @@ App.GG.Effect.projectile.add_at(pos: App.GG.Coord, projectile: App.GG.Projectile
   let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
 
+App.GG.Effect.projectile.different_status_aux(pair: Pair<App.GG.Projectile, App.GG.Coord>): App.GG.Effect<Unit>
+  App.GG.Effect.projectile.add_at(pair@snd, pair@fst)
+
+App.GG.Effect.projectile.different_status(coords: List<App.GG.Coord>, projectile: App.GG.Projectile): App.GG.Effect<Unit>
+  let f = App.GG.Projectile.casts_aux(projectile)
+  let casts = App.GG.Projectile.casts(f, coords)
+  let func = App.GG.Effect.projectile.different_status_aux
+  App.GG.Effect.multiple!(func, casts)
+
+App.GG.Effect.projectile.get_status: App.GG.Effect<Maybe<App.GG.Projectile.Status>>
+  App.GG.Effect {
+    get projectile = App.GG.Effect.projectile.get
+    without projectile: App.GG.Effect { return none }
+    App.GG.Effect { return some(projectile@info@status) }
+  }
 
 App.GG.Effect.projectile.get: App.GG.Effect<Maybe<App.GG.Projectile>>
   (center, origin, local)
@@ -68,25 +83,74 @@ App.GG.Effect.projectile.delete: App.GG.Effect<Unit>
 
 
 App.GG.Effect.projectile.hit.effect<A: Type>(coord: App.GG.Coord, f: App.GG.Coord -> App.GG.Effect<A>): App.GG.Effect<Maybe<A>>
+  App.GG.Effect { 
+    App.GG.Effect.projectile.add_hit(coord) // Adds enemy to list of targets hit by projectile
+    get value = f(coord)
+    return some(value)
+  }
+
+App.GG.Effect.projectile.hit.damage_at(dmg: I32, flinch: Bool, intangible: Bool, coord: App.GG.Coord): App.GG.Effect<I32>
   App.GG.Effect {
     get can_hit = App.GG.Effect.projectile.can_hit(coord)
     if can_hit then
       App.GG.Effect { 
-        App.GG.Effect.projectile.add_hit(coord) // Adds enemy to list of targets hit by projectile
-        get value = f(coord)
-        return some(value)
+        let dmg = App.GG.Effect.damage(dmg, flinch, intangible)
+        get dmg_dealt = App.GG.Effect.projectile.hit.effect<I32>(coord, dmg)
+        return dmg_dealt <> +0#32
       }
-  else
-    App.GG.Effect { return none }
-  } 
+    else
+      App.GG.Effect { return +0#32 }
+  }
 
-App.GG.Effect.projectile.hit.damage_at(dmg: I32, flinch: Bool, intangible: Bool, coord: App.GG.Coord): App.GG.Effect<I32>
+
+App.GG.Effect.projectile.hit.apply_status_at(status: App.GG.Creature.Status, coord: App.GG.Coord): App.GG.Effect<Unit>
   App.GG.Effect { 
-    let dmg = App.GG.Effect.damage(dmg, flinch, intangible)
-    get dmg_dealt = App.GG.Effect.projectile.hit.effect<I32>(coord, dmg)
-    return 
-      without dmg_dealt: +0#32
-      dmg_dealt
+    get can_apply = App.GG.Effect.projectile.can_apply_status(coord)
+      if can_apply then
+        App.GG.Effect { 
+          let apply = App.GG.Effect.status.add_at(status)
+          get applied = App.GG.Effect.projectile.hit.effect<Unit>(coord, apply)
+          without applied: App.GG.Effect.pass
+          App.GG.Effect { return applied }
+        }
+      else
+        App.GG.Effect.pass
+  }
+
+App.GG.Effect.projectile.hit.heal_at(heal: I32, coord: App.GG.Coord): App.GG.Effect<I32>
+  App.GG.Effect { 
+    get can_heal = App.GG.Effect.projectile.can_apply_positive_effect(coord)
+      if can_heal then
+        App.GG.Effect { 
+          let heals = App.GG.Effect.heal(heal)
+          get healed = App.GG.Effect.projectile.hit.effect<I32>(coord, heals)
+          return healed <> +0#32  
+        }
+      else
+        App.GG.Effect { return +0#32 }
+  }
+
+
+App.GG.Effect.projectile.hit.energy_regen_at(regen: I32, coord: App.GG.Coord): App.GG.Effect<I32>
+  App.GG.Effect { 
+    get can_regen_energy = App.GG.Effect.projectile.can_apply_positive_effect(coord)
+    if can_regen_energy then
+      App.GG.Effect { 
+        let regens = App.GG.Effect.creature.change_energy_at(regen)
+        get regenerated = App.GG.Effect.projectile.hit.effect<I32>(coord, regens)
+        return regenerated <> +0#32
+      }
+    else
+      App.GG.Effect { return +0#32 }
+  }
+
+App.GG.Effect.projectile.hit.dissapear(coord: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get has_hit  = App.GG.Effect.projectile.has_hit(coord) // Checks if projectile has already hit that enemy
+    if has_hit then
+      App.GG.Effect.projectile.delete
+    else
+      App.GG.Effect.pass
   }
 
 App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
@@ -96,6 +160,20 @@ App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
     let is_invulnerable = false //App.GG.Effect.status.is_invulnerable(coord) // Checks if projectile is trying to affect an invulnerable enemy
     let is_noname = false //App.GG.Effect.status.is_noname(coord) // Checks if projectile is trying to affect a creature with noname
     return not(is_noname) && not(is_invulnerable) && not(has_hit) && is_enemy
+  }
+
+App.GG.Effect.projectile.can_apply_positive_effect(coord: App.GG.Coord): App.GG.Effect<Bool>
+  App.GG.Effect { 
+    get has_hit  = App.GG.Effect.projectile.has_hit(coord) // Checks if projectile has already hit that enemy
+    get is_enemy = App.GG.Effect.creature.is_enemy(coord) // Checks if projectile is over an enemy
+    return not(has_hit) && not(is_enemy)
+  }
+
+
+App.GG.Effect.projectile.can_apply_status(coord: App.GG.Coord): App.GG.Effect<Bool>
+  App.GG.Effect { 
+    get has_hit  = App.GG.Effect.projectile.has_hit(coord) // Checks if projectile has already hit that enemy
+    return not(has_hit)
   }
   
 App.GG.Effect.projectile.add_image(img: List<VoxBox>, duration: U64, coord: App.GG.Coord): App.GG.Effect<Unit>
@@ -126,3 +204,4 @@ App.GG.Effect.projectile.add_image.effect(img: List<VoxBox>, duration: U64): App
         App.GG.Effect.pass
     }
   }
+

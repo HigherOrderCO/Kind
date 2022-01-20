@@ -17,8 +17,7 @@ App.GG.Chip.Arms.x_strike.Effect(dmg: I32): App.GG.Effect<Unit>
     without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     App.GG.Effect {
-      let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
-      let c = front(center) // Gets the coordinate in front of the creature
+      let c = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
       let fst = [{c@fst - 1, c@snd - 1}, c, {c@fst + 1, c@snd + 1}]
       let snd = [{c@fst - 1, c@snd + 1}, c, {c@fst + 1, c@snd - 1}]

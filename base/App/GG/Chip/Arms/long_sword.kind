@@ -22,8 +22,7 @@ App.GG.Chip.Arms.long_sword.Effect(dmg: I32): App.GG.Effect<Unit>
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
       let projectile_effect = App.GG.Chip.Arms.long_sword.Projectile.Effect(dmg) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-      let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
-      let spawn_coord = front(center) // Gets the coordinate in front of the creature
+      let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
     }
   }
@@ -39,13 +38,12 @@ App.GG.Chip.Arms.long_sword.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
     without frame: App.GG.Effect.pass
     without projectile: App.GG.Effect.pass
     without team: App.GG.Effect.pass
-    let front_coord = App.GG.Coord.front(center, team)
+    let front_coord = App.GG.Coord.front(team, center)
     let coords = [center, front_coord]
     let eff = 
       (coord)
       App.GG.Effect {
         App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
-        get can_hit = App.GG.Effect.projectile.can_hit(coord)
         App.GG.Effect.projectile.hit.damage_at(dmg, true, true, coord)
         return unit
       }

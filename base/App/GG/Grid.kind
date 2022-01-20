@@ -99,6 +99,12 @@ App.GG.Grid.y_size(grid: App.GG.Grid): Nat
   let diff = U32.to_nat(highest_y - lowest_y)
   1 + diff
 
+App.GG.Grid.all_coords(grid: App.GG.Grid): List<App.GG.Coord>
+  let coords = [] :: List<App.GG.Coord>
+  for coord:tile in grid with coords:
+    coord & coords
+  coords
+
 App.GG.Grid.get_team_tiles(grid: App.GG.Grid, team: App.GG.Team): List<App.GG.Coord>
   let coords = [] :: List<App.GG.Coord>
   for coord:tile in grid with coords:
@@ -107,3 +113,7 @@ App.GG.Grid.get_team_tiles(grid: App.GG.Grid, team: App.GG.Team): List<App.GG.Co
     else
       coords
   coords 
+
+App.GG.Grid.tiles_count_by_team(grid: App.GG.Grid, team: App.GG.Team): Nat
+  let team_tiles = App.GG.Grid.get_team_tiles(grid, team)
+  List.length<App.GG.Coord>(team_tiles)

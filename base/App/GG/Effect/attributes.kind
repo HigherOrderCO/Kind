@@ -1,0 +1,22 @@
+App.GG.Effect.attributes.modify(val: I32, pos: App.GG.Coord, f: I32 -> App.GG.Creature -> Maybe<App.GG.Creature>): App.GG.Effect<Unit>
+  let pass = App.GG.Effect.pass
+  App.GG.Effect {
+    get creature = App.GG.Effect.creature.get_at(pos)
+    without creature: pass
+    let modif_creature = f(val, creature)
+    without modif_creature: pass
+    App.GG.Effect.creature.modify_at((creature) modif_creature, pos)
+  }
+
+
+App.GG.Effect.attributes.modify_hp(val: I32, pos: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect.attributes.modify(val, pos, App.GG.Creature.Attributes.change_hp)
+
+App.GG.Effect.attributes.modify_energy(val: I32, pos: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect.attributes.modify(val, pos, App.GG.Creature.Attributes.change_energy)
+
+App.GG.Effect.attributes.modify_damage(val: I32, pos: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect.attributes.modify(val, pos, App.GG.Creature.Attributes.change_damage)
+
+App.GG.Effect.attributes.modify_corruption(val: I32, pos: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect.attributes.modify(val, pos, App.GG.Creature.Attributes.change_corruption)

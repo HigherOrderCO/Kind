@@ -8,20 +8,25 @@ App.GG.Chip.Upper.regen: App.GG.Chip
     App.GG.Attributes.new(3,0,1,0) // TODO : Alter
   )
 
-App.GG.Chip.Upper.regen.Effect(heal: I32): App.GG.Effect<Unit>
-  App.GG.Effect { 
-    get frame = App.GG.Effect.frame.get
-    get grid = App.GG.Effect.grid.get
+
+App.GG.Chip.Upper.regen.Effect(heal_percentage: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
     without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
-    App.GG.Effect {
-      (pos)
-      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
-      let animation = App.GG.Animation.idle
-      let heals = App.GG.Creature.heal_with_attribute(creature, heal)
-      get heald = App.GG.Effect.heal(heal, center)
-      return unit
-    }
+    let animation = App.GG.Animation.attack
+    let eff = 
+      App.GG.Effect {
+        let hp_percentage = App.GG.Creature.max_hp_by_percentage(creature, heal_percentage)
+        App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+        get heal_at = App.GG.Effect.projectile.hit.heal_at(hp_percentage, center)
+        return unit
+      }
+      App.GG.Effect { 
+        eff
+        App.GG.Effect.chip.waste
+        App.GG.Effect.actions.reset
+      }
   }

@@ -28,7 +28,7 @@ App.GG.Chip.Arms.energy_strike.Effect(dmg: I32): App.GG.Effect<Unit>
       (energy_cost: I32, intangible: Bool)
         App.GG.Effect {
           App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
-          get change = App.GG.Effect.creature.change_energy_at(energy_cost, center)
+          get change = App.GG.Effect.creature.change_energy_at(I32.neg(energy_cost), center)
           let damage = 
             if energy_cost =? 0 then
               dmg * 2
@@ -38,8 +38,7 @@ App.GG.Chip.Arms.energy_strike.Effect(dmg: I32): App.GG.Effect<Unit>
           let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
           let projectile_effect = App.GG.Chip.Arms.energy_strike.Projectile.Effect(dmg, intangible) 
           let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-          let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
-          let spawn_coord = front(center) // Gets the coordinate in front of the creature
+          let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
           App.GG.Effect.projectile.add_at(spawn_coord, projectile)
         }
 
@@ -70,7 +69,7 @@ App.GG.Chip.Arms.energy_strike.Projectile.Effect(dmg: I32, intangible: Bool): Ap
     get team = App.GG.Effect.team.get
     without frame: App.GG.Effect.pass
     without team: App.GG.Effect.pass
-    let front_coord = App.GG.Coord.front(center, team)
+    let front_coord = App.GG.Coord.front(team, center)
     let coords = [center, front_coord]
     let eff = 
       (coord)

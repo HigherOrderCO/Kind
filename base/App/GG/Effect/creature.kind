@@ -23,16 +23,17 @@ App.GG.Effect.creature.change_energy_at(val: I32, pos: App.GG.Coord): App.GG.Eff
       let {mod_monster, energy} = case category {
         minion: {category, +0#32}
         slime:
-          let new_energy = I32.max(category.energy - val , 0)
-          {App.GG.Monster.slime(category.data, category.attributes, category.charge, category.hand, category.folder, new_energy), category.energy}
+          let new_energy = I32.max(category.energy + val , 0)
+          let max_energy = +100#32
+          let real_energy = I32.min(new_energy, max_energy)
+          let real_change = real_energy - category.energy
+          {App.GG.Monster.slime(category.data, category.attributes, category.charge, category.hand, category.folder, real_energy), real_change}
       }
-      let modif_energy = I32.max(energy - val , 0)
       let new_creature = creature@category <- mod_monster
       let new_tile = tile@creature <- some(new_creature)
-      let real_val = energy - modif_energy
       let new_grid = App.GG.Grid.set(pos, new_tile, grid)
 
-      return {real_val, new_grid}
+      return {energy, new_grid}
     } <> {+0#32, grid}
     let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(real_val, center, origin, new_local, (enemy, img) img, 0, "")

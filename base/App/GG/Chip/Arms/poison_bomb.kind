@@ -22,8 +22,7 @@ App.GG.Chip.Arms.poison_bomb.Effect(dmg: I32): App.GG.Effect<Unit>
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
       let projectile_effect = App.GG.Chip.Arms.poison_bomb.Projectile.Effect(dmg) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-      let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
-      let spawn_coord = front(center) // Gets the coordinate in front of the creature
+      let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
     }
   }

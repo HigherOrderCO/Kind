@@ -73,7 +73,7 @@ App.GG.Creatures.minion.swordsman.Effect.slash(n: Nat): App.GG.Effect<Unit>
           else
             log("ue") App.GG.Effect.actions.reset  
         120#64:
-          let attack_coord = App.GG.Coord.front(center, team)
+          let attack_coord = App.GG.Coord.front(team, center)
           let effect =
             if (n % 2) =? 0 then 
               App.GG.Chip.Arms.wide_sword.Projectile.Effect

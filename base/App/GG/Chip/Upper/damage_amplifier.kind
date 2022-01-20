@@ -1,0 +1,24 @@
+App.GG.Chip.Upper.damage_amplifier: App.GG.Chip
+  App.GG.Chip.new(
+    "dmgamp"
+    App.GG.Class.strength
+    App.GG.Chip.Upper.damage_amplifier.Effect(5) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Upper.damage_amplifier.Effect(val: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.attributes.modify_damage(val, center)
+      App.GG.Effect.chip.waste
+      App.GG.Effect.actions.reset
+    }
+  }

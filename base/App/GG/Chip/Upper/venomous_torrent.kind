@@ -1,0 +1,59 @@
+App.GG.Chip.Upper.venomous_torrent: App.GG.Chip
+  App.GG.Chip.new(
+    "VenTor"
+    App.GG.Class.strength
+    App.GG.Chip.Upper.venomous_torrent.Effect(10, 0.5)
+    10                                 //  Damage %, delay
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+
+App.GG.Chip.Upper.venomous_torrent.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get center = App.GG.Effect.coord.get_center
+    get creature = App.GG.Effect.creature.get
+    get grid = App.GG.Effect.grid.get
+    get frame = App.GG.Effect.frame.get
+    get team = App.GG.Effect.team.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile_effect = App.GG.Chip.Upper.venomous_torrent.Projectile.Effect(dmg, delay) 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let spawn_coord = App.GG.Coord.front(team, center)
+      App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+
+App.GG.Chip.Upper.venomous_torrent.Projectile.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get enemy = App.GG.Effect.creature.get_at(center)
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    let udelay = I32.to_u64(F64.to_i32(delay * 60))
+    let hp_percentage = 
+      without enemy: +0#32
+      App.GG.Creature.max_hp_by_percentage(enemy, dmg)
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+      App.GG.Effect.projectile.hit.damage_at(hp_percentage, true, true, center)
+      if not(frame =? 0) && ((frame % udelay) =? 0) then 
+        App.GG.Effect { 
+          get center = App.GG.Effect.coord.get_center
+          let next_coord = {center@fst + 1, center@snd}
+          App.GG.Effect.projectile.move(next_coord)
+          return unit
+        }
+      else
+        App.GG.Effect.pass
+    }
+  }

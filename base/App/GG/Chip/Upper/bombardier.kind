@@ -1,0 +1,93 @@
+App.GG.Chip.Upper.bombardier: App.GG.Chip
+  App.GG.Chip.new(
+    "Bmbier"
+    App.GG.Class.strength
+    App.GG.Chip.Upper.bombardier.Effect(10, 2) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Upper.bombardier.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    get team = App.GG.Effect.team.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
+        App.GG.Effect { 
+          let animation = App.GG.Animation.attack
+          let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
+          let projectile_effect = App.GG.Chip.Upper.bombardier.Projectile.Effect(dmg, delay)
+          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+          let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+          App.GG.Effect.generic_shoot(projectile, center, animation, 12, 24)
+        }
+      }
+    }
+
+
+App.GG.Chip.Upper.bombardier.missle_position(current: U64, final_frame: U64): F64
+  let fc = U64.to_f64(current)
+  let ff = U64.to_f64(final_frame)
+  fc/ff
+
+
+
+App.GG.Chip.Upper.bombardier.Projectile.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get team = App.GG.Effect.team.get
+    App.GG.Effect.frame.inc
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      let udelay = I32.to_u64(F64.to_i32(delay * 60))
+      let pos = App.GG.Coord.furthest_tile_in_range(center, team, grid, 3)
+      let coords = App.GG.Coord.cross(team, grid, 1, 1, pos)
+      let func = 
+        (coord)
+        App.GG.Effect { 
+          App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+          App.GG.Effect.projectile.hit.damage_at(dmg, true, true, coord)
+          return unit
+        }
+      let arc = 
+        App.GG.Effect { 
+          let t = App.GG.Chip.Upper.bombardier.missle_position(frame, udelay)
+          if t <=? 1 then
+            App.GG.Effect { 
+            log(F64.show(t))
+              let starting_coord = {center@fst, (center@snd + center@snd/2)}
+              let pivot = App.GG.Coord.center_point_extended(starting_coord, pos, 30)
+              let img = 
+                if t <? 0.5 then
+                  App.GG.img.missle_up
+                else
+                  App.GG.img.missle_down
+              App.GG.Effect.vbox.quadratic_bezier(starting_coord, pos, pivot, 0, t, img)
+            }
+          else
+            App.GG.Effect { return unit } 
+        }
+      App.GG.Effect { 
+        arc
+        if frame =? (udelay - 20) then
+          App.GG.Effect.multiple<App.GG.Coord>(App.GG.Effect.projectile.add_image([App.GG.img.yellow_tile], 20), coords)
+        else if (frame >? udelay) && (frame <? (udelay + 10)) then
+          App.GG.Effect.multiple<App.GG.Coord>(func, coords)
+        else if frame =? (udelay + 25) then
+          App.GG.Effect.projectile.delete
+          else
+            App.GG.Effect.pass
+        }
+      }
+    }

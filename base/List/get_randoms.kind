@@ -16,10 +16,7 @@ List.get_randoms.go<A: Type>(count: Nat, state: List.get_randoms.Result<A>, repe
   case count length {
     succ succ:
       let seed   = state.generator(state.seed)
-      log("seed: " | Nat.show(state.seed))
-      log("orig: " | Nat.show(seed))
       let index  = seed % length
-      log("index: " | Nat.show(index))
       let got    = state.list[index]
       let result = case got { none: state.result, some: got.value & state.result }
       let list   = 

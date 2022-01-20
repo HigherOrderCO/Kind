@@ -267,6 +267,7 @@ App.GG.Creature.Status.draw.barrier(status: App.GG.Creature.Status, xy: Pair<U32
 App.GG.Creature.Status.update_intangible(status: App.GG.Creature.Status, coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
   case status {
     intangible:
+      //log("intangible duration = "|U64.show(status.duration))
       let grid = game@grid
       let new_grid = 
         if status.duration =? 0 then
@@ -421,8 +422,14 @@ App.GG.Creature.basic_attack_dmg(creature: App.GG.Creature): I32
 
 App.GG.Creature.max_hp_percentage(creature: App.GG.Creature): I32
   let max_hp = App.GG.Monster.get_max_hp(creature@category)
-  let actual_hp = creature@hp
+  let actual_hp = creature@hp * 100
   actual_hp/max_hp
+
+App.GG.Creature.max_hp_by_percentage(creature: App.GG.Creature, val: I32): I32
+  let max_hp = App.GG.Monster.get_max_hp(creature@category)
+  let hp = max_hp * val
+  hp/100
+
 
 
 App.GG.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Attributes>
@@ -431,6 +438,29 @@ App.GG.Attributes.get(creature: App.GG.Creature): Maybe<App.GG.Attributes>
     slime:
       some(monster.attributes)
   }
+
+App.GG.Creature.Attributes.change(val: I32, creature: App.GG.Creature f: I32 -> App.GG.Attributes -> App.GG.Attributes): Maybe<App.GG.Creature>
+  case creature@category as monster {
+    minion: none
+    slime:
+      let attributes = monster.attributes
+      let new_attributes = f(val, monster.attributes)
+      let monster = App.GG.Monster.slime(monster.data, new_attributes, monster.charge, monster.hand, monster.folder, monster.energy)
+      let new_creature = App.GG.Creature.new(monster, creature@team, creature@animation, creature@actions, creature@statuses, creature@hp, creature@id)
+      some(new_creature)
+  }
+
+App.GG.Creature.Attributes.change_hp(val: I32, creature: App.GG.Creature): Maybe<App.GG.Creature>
+  App.GG.Creature.Attributes.change(val, creature, App.GG.Attributes.change_hp)
+
+App.GG.Creature.Attributes.change_energy(val: I32, creature: App.GG.Creature): Maybe<App.GG.Creature>
+  App.GG.Creature.Attributes.change(val, creature, App.GG.Attributes.change_energy)
+
+App.GG.Creature.Attributes.change_damage(val: I32, creature: App.GG.Creature): Maybe<App.GG.Creature>
+  App.GG.Creature.Attributes.change(val, creature, App.GG.Attributes.change_damage)
+
+App.GG.Creature.Attributes.change_corruption(val: I32, creature: App.GG.Creature): Maybe<App.GG.Creature>
+  App.GG.Creature.Attributes.change(val, creature, App.GG.Attributes.change_corruption)
 
 // ============================================================================
 // Grid Update functions

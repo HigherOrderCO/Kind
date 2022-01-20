@@ -8,18 +8,9 @@ App.GG.Effect.heal(heal: I32, pos: App.GG.Coord): App.GG.Effect<I32>
     let max_heal = I32.min(max_hp, heals)
     let hp_min = I32.max(max_heal, 0)
     let new_creature = creature@hp <- hp_min
-    let actual_hp = new_creature@hp
+    let real_heal = hp_min - creature@hp
     App.GG.Effect { 
       App.GG.Effect.creature.modify_at((creature) new_creature, pos)
-      if actual_hp =? 0 then
-        App.GG.Effect {
-          let vbox = App.GG.Monster.to_vbox(creature@category)
-          let vbox = vbox(App.GG.Animation.death)
-          App.GG.Effect.creature.del_at(pos)
-          App.GG.Effect.projectile.add_at(pos, App.GG.Projectile.death(vbox, 23#64, creature@team))
-        }
-      else
-        App.GG.Effect.pass
-      return max_heal
+      return real_heal
     }
   }

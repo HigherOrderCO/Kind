@@ -39,7 +39,7 @@ App.GG.Chip.Arms.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
       let projectile_effect = App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg, 32, false)
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-      let spawn_coord = App.GG.Coord.front(center, creature@team) // Gets the coordinate in front of the creature
+      let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
     }
   }
@@ -77,7 +77,7 @@ App.GG.Chip.Arms.shockwave.Projectile.Effect(dmg: I32, projectile_period: U64, r
       App.GG.Effect.vbox.at_tile_with_variation(center, x, -5, App.GG.img.bullet)
       if ((frame % projectile_period) =? 0) && (frame >? 0) then // Each time it reaches projectile_period
         App.GG.Effect {
-          let new_pos = App.GG.Coord.front(center, projectile@info@team) // Gets coord in front of projectile's
+          let new_pos = App.GG.Coord.front(projectile@info@team, center) // Gets coord in front of projectile's
           App.GG.Effect.projectile.move(new_pos) // Moves projectile a tile forward
           return unit
         }

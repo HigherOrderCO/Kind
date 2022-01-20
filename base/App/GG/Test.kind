@@ -1,43 +1,4 @@
-App.GG.Test.best_target_by_hp(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
-
-  let below = App.GG.Coord.below(coord)
-  let above = App.GG.Coord.above(coord)
-  let list = [above, below]
-  let adjacent_enemies = App.GG.Coord.all_enemies_in_coords(coord, list, team, grid)
-  without adjacent_enemies: none
-  let coordinate = Maybe.none<App.GG.Coord>
-  let percentage = +0#32
-  let result = {percentage, coordinate}
-
-  for enemy in adjacent_enemies with result:
-    let creature = App.GG.Creature.get(enemy, grid)
-    without creature: result
-    let percentage_hp = App.GG.Creature.max_hp_percentage(creature)
-    
-    if result@fst >? percentage_hp then
-      result
-    else
-      if result@fst =? percentage_hp then
-        let x1 = coord@fst
-        let x2 = enemy@fst
-        if x1 =? x2 then 
-          {percentage_hp, some(enemy)}
-        else
-          let y1 = result@snd
-          without y1: result
-          let y2 = enemy@snd
-          if y1@snd >? y2 then
-            result
-          else
-            {percentage_hp, some(enemy)}
-      else
-        {percentage_hp, some(enemy)}
-      
-  result@snd
-      
-
-
-
-  
-
-  
+App.GG.Test.y_extremes(func: U32 -> Bool, grid: App.GG.Grid): U32
+  for coord:tile in grid:
+    func(coord@snd, y)
+  y

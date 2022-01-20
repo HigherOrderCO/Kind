@@ -12,4 +12,4 @@ App.GG.Effect.direct_shoot(
       func(enemy_coord)
     }
 
-  App.GG.Effect.generic_attack(effect, animation, attack_frame, final_frame)
+  App.GG.Effect.generic_action(effect, animation, attack_frame, final_frame)

@@ -1,7 +1,7 @@
-App.GG.Effect.generic_attack(
+App.GG.Effect.generic_action(
   effect: App.GG.Effect<Unit>,
   animation: App.GG.Animation,
-  attack_frame: U64,
+  action_frame: U64,
   final_frame: U64
   ): App.GG.Effect<Unit>
 
@@ -10,7 +10,7 @@ App.GG.Effect.generic_attack(
     App.GG.Effect.frame.inc // Increases action's frame by 1
     without frame: App.GG.Effect.pass
     App.GG.Effect {
-      if frame =? attack_frame then // frame to spawn projectile
+      if frame =? action_frame then // frame to spawn projectile
         effect
       else
         App.GG.Effect.pass

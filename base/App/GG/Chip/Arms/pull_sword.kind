@@ -22,7 +22,7 @@ App.GG.Chip.Arms.pull_sword.Effect(dmg: I32): App.GG.Effect<Unit>
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
       let projectile_effect = App.GG.Chip.Arms.pull_sword.Projectile.Effect(dmg) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-      let front = (x: App.GG.Coord) App.GG.Coord.front(x, creature@team)
+      let front = App.GG.Coord.front(creature@team)
       let spawn_coord = front(front(center)) // Gets the coordinate in front of the creature
       App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
     }
@@ -37,7 +37,7 @@ App.GG.Chip.Arms.pull_sword.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
     get grid = App.GG.Effect.grid.get
     without frame: App.GG.Effect.pass
     without projectile: App.GG.Effect.pass
-    let coords = [App.GG.Coord.above(center), center, App.GG.Coord.below(center)]
+    let coords = App.GG.Coord.column(center, grid)
     let eff = 
       (coord)
       App.GG.Effect {
@@ -47,7 +47,7 @@ App.GG.Chip.Arms.pull_sword.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
         get grid = App.GG.Effect.grid.get
         if can_hit then 
           //log("as")
-          let destination = App.GG.Coord.front(coord, App.GG.Team.opposite(projectile@info@team))
+          let destination = App.GG.Coord.front(App.GG.Team.opposite(projectile@info@team), coord)
           App.GG.Effect.movement.move_at(coord, destination, true)
         else
           App.GG.Effect.pass
