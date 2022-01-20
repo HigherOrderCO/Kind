@@ -32,6 +32,7 @@ App.GG.Chip.Arms.recursive_gun.img(frame: U64): VoxBox
 App.GG.Chip.Arms.recursive_gun.Effect(casts: Nat, damage: I32): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(12, 8)
     get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
     get grid = App.GG.Effect.grid.get

@@ -21,7 +21,7 @@ App.GG.Body.Hull.classic.sprite(animation: App.GG.Animation, frame: U64): VoxBox
         5#64: App.GG.img.Slime.idle.slime_character_idle_5
       }default App.GG.img.Slime.idle.slime_character_idle_0
     movement:
-      switch U64.eql(if frame >? 11 then 12#64 - (frame - 11) else frame) {
+      switch U64.eql(frame % 12) {
         0#64: App.GG.img.Slime.movement.slime_character_teleport_00
         1#64: App.GG.img.Slime.movement.slime_character_teleport_01
         2#64: App.GG.img.Slime.movement.slime_character_teleport_02
@@ -34,9 +34,21 @@ App.GG.Body.Hull.classic.sprite(animation: App.GG.Animation, frame: U64): VoxBox
         9#64: App.GG.img.Slime.movement.slime_character_teleport_09
         10#64: App.GG.img.Slime.movement.slime_character_teleport_10
         11#64: App.GG.img.Slime.movement.slime_character_teleport_11
+        12#64: App.GG.img.Slime.movement.slime_character_teleport_11
+        13#64: App.GG.img.Slime.movement.slime_character_teleport_10
+        14#64: App.GG.img.Slime.movement.slime_character_teleport_09
+        15#64: App.GG.img.Slime.movement.slime_character_teleport_08
+        16#64: App.GG.img.Slime.movement.slime_character_teleport_07
+        17#64: App.GG.img.Slime.movement.slime_character_teleport_06
+        18#64: App.GG.img.Slime.movement.slime_character_teleport_05
+        19#64: App.GG.img.Slime.movement.slime_character_teleport_04
+        20#64: App.GG.img.Slime.movement.slime_character_teleport_03
+        21#64: App.GG.img.Slime.movement.slime_character_teleport_02
+        22#64: App.GG.img.Slime.movement.slime_character_teleport_01
+        23#64: App.GG.img.Slime.movement.slime_character_teleport_00
       }default App.GG.img.Slime.idle.slime_character_idle_0
     attack:
-      switch U64.eql((frame % 24)/2) {
+      switch U64.eql(frame % 12) {
         0#64: App.GG.img.Slime.shoot.slime_character__fire_00
         1#64: App.GG.img.Slime.shoot.slime_character__fire_01
         2#64: App.GG.img.Slime.shoot.slime_character__fire_02
@@ -54,7 +66,7 @@ App.GG.Body.Hull.classic.sprite(animation: App.GG.Animation, frame: U64): VoxBox
     stun:
       App.GG.img.Slime.idle.slime_character_idle_0
     damage:
-      switch U64.eql((frame % 24)/4) {
+      switch U64.eql(frame % 6) {
         0#64: App.GG.img.Slime.Hit.slime_character_Hit_0
         1#64: App.GG.img.Slime.Hit.slime_character_Hit_1
         2#64: App.GG.img.Slime.Hit.slime_character_Hit_2
@@ -65,7 +77,7 @@ App.GG.Body.Hull.classic.sprite(animation: App.GG.Animation, frame: U64): VoxBox
     basic_attack:
       App.GG.img.Slime.idle.slime_character_idle_0
     death:
-      switch U64.eql((frame % 24)/2) {
+      switch U64.eql(frame % 12) {
         0#64: App.GG.img.Slime.movement.slime_character_teleport_00
         1#64: App.GG.img.Slime.movement.slime_character_teleport_01
         2#64: App.GG.img.Slime.movement.slime_character_teleport_02

@@ -38,7 +38,7 @@ App.GG.Effect.damage(dmg: I32, apply_flinch: Bool, apply_intangible: Bool, pos: 
 
 App.GG.Effect.damage.flinch(dmg: I32, flinch: Bool, creature: App.GG.Creature): App.GG.Creature
   if not(dmg =? 0) && flinch then 
-    let stun = App.GG.Actions.stun(App.GG.Creature.Status.Stun.flinch, App.GG.Animation.damage, 24)
+    let stun = App.GG.Actions.stun(App.GG.Creature.Status.Stun.flinch, App.GG.Animation.damage, 12)
     App.GG.Actions.add(stun, creature)
   else
     creature

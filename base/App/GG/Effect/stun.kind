@@ -1,5 +1,6 @@
 App.GG.Effect.stun(status: App.GG.Creature.Status.Stun, animation: App.GG.Animation, duration: U64): App.GG.Effect<Unit>
   App.GG.Effect {
+    App.GG.Effect.animation.modify_by_duration(6, duration)
     get frame = App.GG.Effect.frame.get
     get center = App.GG.Effect.coord.get_center
     App.GG.Effect.frame.inc // Increases action's frame by 1

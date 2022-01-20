@@ -28,6 +28,7 @@ App.GG.Chip.Arms.shockwave.img(frame: U64): VoxBox
 App.GG.Chip.Arms.shockwave.Effect(dmg: I32): App.GG.Effect<Unit>
   App.GG.Effect {
     App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(12, 24)
     get frame = App.GG.Effect.frame.get
     get creature = App.GG.Effect.creature.get
     get center = App.GG.Effect.coord.get_center
