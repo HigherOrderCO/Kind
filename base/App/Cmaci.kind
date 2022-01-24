@@ -1,0 +1,46 @@
+// App states (local = clicks, global = visitors)
+App.Cmaci.State: App.State
+  App.State.new(Unit, Unit)
+
+// Initial state
+App.Cmaci.init: App.Init<App.Cmaci.State>
+  App.Store.new<App.Cmaci.State>(unit, unit)
+
+// Render function
+App.Cmaci.draw: App.Draw<App.Cmaci.State>
+  (state)
+  <div style={"border": "1px solid black"}>
+    <div style={"font-weight": "bold"}>"Hello, world!"</div>
+    <div>"haha"</div>
+    <div>"hoho"</div>
+  </div>
+
+// Event handler
+App.Cmaci.when: App.When<App.Cmaci.State>
+  (event, state)
+  case event {
+    init:
+      App.pass!
+    mouse_down:
+      App.pass!
+  } default App.pass!
+
+// Global ticker: not used
+App.Cmaci.tick: App.Tick<App.Cmaci.State>
+  App.no_tick<App.Cmaci.State>
+
+// Global visitor: counts posts to room_zero
+App.Cmaci.post: App.Post<App.Cmaci.State>
+  (time, room, addr, data, global_state)
+    global_state
+
+// A "Hello, world!" + counter application
+App.Cmaci: App<App.Cmaci.State>
+  App.new<App.Cmaci.State>(
+    App.Cmaci.init
+    App.Cmaci.draw
+    App.Cmaci.when
+    App.Cmaci.tick
+    App.Cmaci.post
+  )
+
