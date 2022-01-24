@@ -1,42 +1,54 @@
-Program: String
-`
-Bool : * =
-  %self(P: @(self: Bool) *)
-  @(true: (P true))
-  @(false: (P false))
-  (P self);
+Parser.float.64: Parser(F64)
+  Parser {
+    Kind.Parser.spaces
+    get sign = Parser.maybe!(Kind.Parser.float.sign)
+    let sign = case sign {
+      some:
+        String.cons(sign.value, "")
+      none:
+        ""
+    }
+    get digits = Parser.many1<Char>(Kind.Parser.float.str_digit)
+    get frac = Parser.maybe!(Parser {
+      Parser.text(".")
+      get frac = Parser.many<Char>(Kind.Parser.float.str_digit)
+      return frac
+    })
+    let float_str = sign|String.from_list(digits)
+      |case frac {
+        none:
+          ""
+        some:
+          "."|String.from_list(frac.value)
+      }
+    return F64.parse(float_str)
+  }
 
-true : Bool =
-  #P #t #f t;
+Parser.vector: Parser(V3)
+  Parser {
+    Kind.Parser.text("(")
+    get a = Parser.float.64
+    Kind.Parser.text(",")
+    get b = Parser.float.64
+    Kind.Parser.text(",")
+    get c = Parser.float.64
+    Kind.Parser.text(")")
+    return V3.new(a, b, c)
+  }
 
-false : Bool =
-  #P #t #f f;
-
-not : @(x: Bool) Bool =
-  #x (((x #self Bool) false) true);
-
-Equal : @(A: *) @(a: A) @(b: A) * =
-  #A #a #b
-  %self(P: @(b: A) @(self: (((Equal A) a) b)) *)
-  @(refl: ((P a) ((refl A) a)))
-  ((P b) self);
-
-refl : %(A: *) %(a: A) (((Equal A) a) a) =
-  #A #x #P #refl refl;
-
-double_negation_theorem : @(b: Bool) (((Equal Bool) (not (not b))) b) =
-  #b (((b #self (((Equal Bool) (not (not self))) self))
-    ((refl Bool) true))
-    ((refl Bool) false));
-
-main : Bool =
-  false
-`
-
-ParsedProgram: Kind.Core.Defs
-  Kind.Core.parse_defs(Program)
+Parser.vector_set: Parser(List<V3>)
+  Kind.Parser.items!("{", Parser.vector, "}")
 
 Test: _
-  IO {
-    IO.print(Kind.Core.to_lambolt(ParsedProgram))
+  let parsed = Parser.vector_set(Parser.State.from_code("{(-1.2,2,+3.111), (1, 2, 3), (-73.12, -1, 0)}"))
+  case parsed {
+    value:
+      IO {
+        IO.print(List.show!(V3.show, parsed.val))
+      }
+    error:
+      IO {
+        open parsed.err
+        IO.print(parsed.err.msg)
+      }
   }
