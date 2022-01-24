@@ -1,0 +1,11 @@
+Parser.V3: Parser(V3)
+  Parser {
+    Kind.Parser.text("(")
+    get a = Parser.float.64
+    Kind.Parser.text(",")
+    get b = Parser.float.64
+    Kind.Parser.text(",")
+    get c = Parser.float.64
+    Kind.Parser.text(")")
+    return V3.new(a, b, c)
+  }
