@@ -1,3 +1,143 @@
+Matrix.row_reduce.zero: F64
+  0.00000001
+
+Matrix.row_reduce.is_zero(x: F64): Bool
+  F64.ltn(F64.abs(x), Matrix.row_reduce.zero)
+
+Matrix.row_reduce.aux(
+  a: Nat, b: Nat, c: Nat
+  idx: Nat
+  A: Matrix<F64>(a, b)
+  R: Matrix<F64>(c, b)
+): Matrix<F64>(Nat.add(a, c), b)
+  case a with A {
+    zero:
+      open A
+      Vector.reverse!!(R)
+    succ:
+      open A
+      def cond = Nat.ltn(idx, b)
+      def Hyp = refl :: cond == cond
+      (case cond {
+        true:
+          (Hyp)
+            let pivot = Vector.at_ltn<F64, b>(A.head, idx)<Hyp>
+            case Matrix.row_reduce.is_zero(pivot) {
+              true:
+                let maybe_swap = Matrix.row_reduce.swap_row(a.pred, b, idx, Hyp, A.head, A.tail)
+                case maybe_swap {
+                  none:
+                    case Nat.add.succ_right(a.pred, c) {
+                      refl:
+                        Matrix.row_reduce.aux(
+                          a.pred, b, Nat.succ(c)
+                          Nat.succ(idx)
+                          A.tail
+                          Vector.cons!(c, A.head, R)
+                        )
+                    }: Matrix(F64,self.b,b)
+                  some:
+                    let {A.head, A.tail} = maybe_swap.value
+                    let A.tail = Matrix.row_reduce.cancel_column(a.pred, b, idx)<Hyp>(A.head, A.tail)
+                    case Nat.add.succ_right(a.pred, c) {
+                      refl:
+                        Matrix.row_reduce.aux(
+                          a.pred, b, Nat.succ(c)
+                          Nat.succ(idx)
+                          A.tail
+                          Vector.cons!(c, A.head, R)
+                        )
+                    }: Matrix(F64,self.b,b)
+                }
+              false:
+                let A.tail = Matrix.row_reduce.cancel_column(a.pred, b, idx)<Hyp>(A.head, A.tail)
+                case Nat.add.succ_right(a.pred, c) {
+                  refl:
+                    Matrix.row_reduce.aux(
+                      a.pred, b, Nat.succ(c)
+                      Nat.succ(idx)
+                      A.tail
+                      Vector.cons!(c, A.head, R)
+                    )
+                }: Matrix(F64,self.b,b)
+            }
+        false:
+          (Hyp)
+            case Nat.add.comm(c,Nat.succ(a.pred)) {
+              refl:
+                let u = Vector.reverse.go!(Nat.succ(a.pred), c, A, R)
+                u
+            }: Matrix(F64,self.b,b)
+      }: <Hyp: ^cond == cond> -> Matrix<F64>(Nat.add(Nat.succ(a.pred), c), b))(Hyp)
+  }!
+
+// swaps a given row with the first row that's isn't zero at idx
+Matrix.row_reduce.swap_row(
+  a: Nat, b: Nat
+  idx: Nat
+)<
+  H: Equal(Bool, Nat.ltn(idx, b), true)
+>(
+  row: Vector<F64>(b)
+  A: Matrix<F64>(a, b)
+): Maybe<Pair<Vector<F64>(b), Matrix<F64>(a, b)>>
+  case a with A {
+    zero:
+      none
+    succ:
+      open A
+      let candidate = Vector.at_ltn<F64, b>(A.head, idx)<H>
+      case Matrix.row_reduce.is_zero(candidate) {
+        true:
+          let swapped = Matrix.row_reduce.swap_row(a.pred, b, idx, H, row, A.tail)
+          case swapped {
+            none:
+              none
+            some:
+              let {new_row, tail} = swapped.value
+              some({new_row, Vector.cons!(a.pred, row, tail)})
+          }
+        false:
+          some({A.head, Vector.cons!(a.pred, row, A.tail)})
+      }
+  }!
+
+Matrix.row_reduce.cancel_column(
+  a: Nat, b: Nat
+  idx: Nat
+)<
+  H: Equal(Bool, Nat.ltn(idx, b), true)
+>(
+  row: Vector(F64, b)
+  A: Matrix(F64, a, b)
+): Matrix(F64, a, b)
+  let pivot = Vector.at_ltn<F64, b>(row, idx)<H>
+  Vector.map(Vector(F64, b), Vector(F64, b), a,
+    (v)
+      let target = Vector.at_ltn<F64, b>(v, idx)<H>
+      let row = Vector.map(F64, F64, b, (x) F64.neg(x*target/pivot), row)
+      Vector.add<F64>(F64.add, b
+        row, v
+      )
+    A
+  )
 
 Test: _
-  "hello, world!"
+  let v = Vector.from_list!([1, 2, 3])
+  Vector.at_ltn(Nat, 3, v, 3)
+
+Test: _
+  let v = Vector.from_list!([1, 2, 3])
+  Vector.at_ltn(Nat, 3, v, 3)
+
+//eduzz
+//  * comunidades (órbita)
+//
+//hotmart
+//  * módulos
+//  * add-ons
+//  * comunidades
+//
+//moodle
+//
+//curso psicometria
