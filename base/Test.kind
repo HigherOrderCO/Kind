@@ -122,9 +122,13 @@ Matrix.row_reduce.cancel_column(
     A
   )
 
-Test: _
-  let v = Vector.from_list!([1, 2, 3])
-  Vector.at_ltn(Nat, 3, v, 3)
+Matrix.to_list<X: Type>(
+  n: Nat, m: Nat
+  A: Matrix(X, n, m)
+): List<List<X>>
+  let vec_list =
+    Vector.map(Vector(X, m), List<X>, n, Vector.to_list(X, m), A)
+  Vector.to_list(List<X>, n, vec_list)
 
 Test: _
   let v = Vector.from_list!([1, 2, 3])

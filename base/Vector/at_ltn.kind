@@ -1,0 +1,17 @@
+Vector.at_ltn<A: Type>(
+  len: Nat, v: Vector<A>(len), idx: Nat
+)<
+  H: Equal(Bool, Nat.ltn(idx, len), true)
+>: A
+  case len with v H {
+    zero:
+      Empty.absurd!(Bool.false_neq_true(H))
+    succ:
+      open v
+      case idx with H {
+        zero:
+          v.head
+        succ:
+          Vector.at_ltn<A, len.pred>(v.tail, idx.pred, H)
+      }!
+  }!
