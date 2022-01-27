@@ -1,0 +1,81 @@
+App.GG.Chip.Hull.damage_chase: App.GG.Chip
+  App.GG.Chip.new(
+    "DmgChs"
+    App.GG.Class.strength
+    App.GG.Chip.Hull.damage_chase.Effect(10 , 0.3, 1, 3)
+    10                              //damage delay between showing and damaging, interval between first and next projectile, projectile num
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+//App.GG.Chip.Upper.burrow_prey.img: List<VoxBox>
+    //[
+      //App.GG.img.Spell.burrow.0,
+      //App.GG.img.Spell.burrow.1, 
+      //App.GG.img.Spell.burrow.2,
+      //App.GG.img.Spell.burrow.3,
+      //App.GG.img.Spell.burrow.4,
+      //App.GG.img.Spell.burrow.5,
+    //]
+    
+
+App.GG.Chip.Hull.damage_chase.Effect(damage: I32, delay: F64, interval: F64, projectile_num: Nat): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(12, 50)
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    get creature = App.GG.Effect.creature.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    let coord = App.GG.Coord.closest_enemy_in_front(center, creature@team, grid)
+    without coord: App.GG.Effect.pass
+    let animation = App.GG.Animation.attack
+    let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
+    let projectile_effect = App.GG.Chip.Hull.damage_chase.Projectile.Effect(dmg, delay, interval, projectile_num)
+    let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+    let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+    App.GG.Effect.generic_shoot(projectile, coord, App.GG.Animation.attack, 12, 50)
+  }
+
+App.GG.Chip.Hull.damage_chase.Projectile.Effect(dmg: I32, delay: F64, interval: F64, chasing_times: Nat): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get team = App.GG.Effect.team.get
+    get grid = App.GG.Effect.grid.get
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    let next_coord = App.GG.Coord.closest_enemy(center, team, grid)
+    without next_coord: App.GG.Effect.pass
+    let udelay = I32.to_u64(F64.to_i32(delay* 60))
+    let uinterval = I32.to_u64(F64.to_i32(interval* 60 ))
+    let uchasing_times = Nat.to_u64(chasing_times)
+    let chasing_time = uinterval * uchasing_times
+
+    let draw = App.GG.Effect.projectile.add_image([App.GG.img.yellow_tile], udelay, center)// on frame 0 to 18,  60 to 78, 120 to 138
+
+    let damages = 
+        App.GG.Effect {
+          App.GG.Effect.projectile.hit.damage_at(dmg, true, false, center)
+          App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+          //App.GG.Effect.vbox.modify_by_duration(App.GG.Chip.Upper.burrow_prey.img, frame % udelay, udelay - 1) 
+        }
+
+    let move =
+      App.GG.Effect { 
+        App.GG.Effect.projectile.move(next_coord) 
+        App.GG.Effect.projectile.clean_hit(center)
+        return unit
+      }
+      if frame =? chasing_time then // no frame 180
+        App.GG.Effect.projectile.delete
+      else 
+        switch U64.eql(frame % 60) {
+          0: draw
+          udelay - 1: damages
+          uinterval - 1: move
+        }default App.GG.Effect.pass
+    }

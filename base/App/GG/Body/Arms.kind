@@ -4,6 +4,7 @@ type App.GG.Body.Arms {
 
 App.GG.Body.Arms.chips: App.GG.Chips
   [
+    App.GG.Chip.Arms.pull_sword
     App.GG.Chip.Arms.wide_sword
     App.GG.Chip.Arms.shockwave
     App.GG.Chip.Arms.long_sword
@@ -12,7 +13,8 @@ App.GG.Body.Arms.chips: App.GG.Chips
     App.GG.Chip.Arms.bazooka
     App.GG.Chip.Arms.energy_strike
     App.GG.Chip.Arms.quick_strike
-    App.GG.Chip.Arms.poison_bomb
+    App.GG.Chip.Arms.burrow_prey
+    App.GG.Chip.Arms.recursive_gun
     App.GG.Chip.Arms.paralyzing_ray 
     App.GG.Chip.Arms.poison_cloud
   ]

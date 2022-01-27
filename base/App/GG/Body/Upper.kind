@@ -4,14 +4,13 @@ type App.GG.Body.Upper {
 
 App.GG.Body.Upper.chips: App.GG.Chips
   [
-  //App.GG.Chip.Arms.recursive_gun
-  //App.GG.Chip.Upper.regen
-  //App.GG.Chip.Upper.intangible
-  //App.GG.Chip.Upper.bombardier
-  //App.GG.Chip.Upper.damage_amplifier
-  //App.GG.Chip.Upper.energy_reinforcement
-  //App.GG.Chip.Upper.venomous_torrent
-  App.GG.Chip.Upper.acid_rain
+    App.GG.Chip.Upper.regen
+    App.GG.Chip.Upper.intangible
+    App.GG.Chip.Upper.bombardier
+    App.GG.Chip.Upper.damage_amplifier
+    App.GG.Chip.Upper.energy_reinforcement
+    App.GG.Chip.Upper.ground_spike
+    App.GG.Chip.Upper.acid_rain
   ]
 
 App.GG.Body.Upper.get_chips(body: App.GG.Body): App.GG.Chips

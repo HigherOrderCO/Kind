@@ -7,7 +7,12 @@ App.GG.Body.Hull.classic: App.GG.Body.Hull.Data
   )
 
 App.GG.Body.Hull.classic.chips: App.GG.Chips
-  []
+  [
+    App.GG.Chip.Hull.blob_shield
+    App.GG.Chip.Hull.damage_chase
+    App.GG.Chip.Hull.slime_jump
+    App.GG.Chip.Hull.acid_steps
+  ]
 
 App.GG.Body.Hull.classic.sprite(animation: App.GG.Animation, frame: U64): VoxBox
   case animation {

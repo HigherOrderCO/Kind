@@ -51,7 +51,7 @@ App.GG.Chip.Arms.bazooka.Effect(damage: I32): App.GG.Effect<Unit>
           let coords = coord & App.GG.Coord.adjacent_all(coord, grid)
 
           let projectile_effect = App.GG.Chip.Arms.bazooka.Projectile.Effect(dmg)
-          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
           let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
           let func = 
             (coord)
@@ -65,7 +65,6 @@ App.GG.Chip.Arms.bazooka.Effect(damage: I32): App.GG.Effect<Unit>
 
 
 App.GG.Chip.Arms.bazooka.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
-
   App.GG.Effect {
     get center = App.GG.Effect.coord.get_center
     get frame = App.GG.Effect.frame.get

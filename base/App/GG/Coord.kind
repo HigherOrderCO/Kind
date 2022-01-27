@@ -112,7 +112,7 @@ App.GG.Coord.to_xy(coord: App.GG.Coord): Pair<U32, U32>
   {x, y}
 
 
-App.GG.Coord.column(center: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
+App.GG.Coord.column(grid: App.GG.Grid, center: App.GG.Coord): List<App.GG.Coord>
   let result = []
   for coord:tile in grid with result:
     let x1 = center@fst
@@ -122,6 +122,19 @@ App.GG.Coord.column(center: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
     else
       result
   result
+
+App.GG.Coord.sized_front_columns(size: Nat, team: App.GG.Team, grid: App.GG.Grid, coord: App.GG.Coord): List<App.GG.Coord>
+  App.GG.Coord.sized_front_columns.go(size, team, grid, [], coord)
+
+App.GG.Coord.sized_front_columns.go(size: Nat, team: App.GG.Team, grid: App.GG.Grid, coords: List<App.GG.Coord>, coord: App.GG.Coord): List<App.GG.Coord>
+  let front = App.GG.Coord.front(team, coord)
+  case size { 
+    zero: coords
+    succ:
+      let column = App.GG.Coord.column(grid, front)
+      let new_list = List.concat<App.GG.Coord>(coords, column)
+      App.GG.Coord.sized_front_columns.go(size.pred, team, grid, new_list, front)
+  }
   
 
 App.GG.Coord.mid_y(grid:App.GG.Grid): Maybe<U32>
@@ -199,8 +212,7 @@ App.GG.Coord.sized_line.go(coords: List<App.GG.Coord>, grid: App.GG.Grid, size: 
   case size tile { 
     succ some:
       let new_list = next_coord & coords
-      let new_size = size - 1
-      App.GG.Coord.sized_line.go(new_list, grid, new_size, next_coord, f)
+      App.GG.Coord.sized_line.go(new_list, grid, size.pred, next_coord, f)
     } default coords
 
 
@@ -213,6 +225,12 @@ App.GG.Coord.furthest_tile_in_range(coord: App.GG.Coord, team: App.GG.Team, grid
       let new_range = range - 1
       App.GG.Coord.furthest_tile_in_range(next_coord, team, grid, new_range)
     } default coord
+
+App.GG.Coord.furthest_tile_in_front(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): App.GG.Coord
+  let next_coord =  App.GG.Coord.front(team, coord)
+  let tile = App.GG.Grid.get(next_coord, grid)
+  without tile: coord
+  App.GG.Coord.furthest_tile_in_front(next_coord, team, grid)
   
 
 App.GG.Coord.can_walk(from: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid, restriction: Bool): Bool
@@ -314,7 +332,6 @@ App.GG.Coord.has_creature(
   coord: App.GG.Coord
   grid: App.GG.Grid
 ): Bool
-
   let any_creature = App.GG.Creature.get(coord, grid)
   case any_creature {
     none:
@@ -325,7 +342,7 @@ App.GG.Coord.has_creature(
 
 
 App.GG.Coord.all_coords_past_center(center: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid):List<App.GG.Coord>
-  let column = App.GG.Coord.column(center, grid)
+  let column = App.GG.Coord.column(grid, center)
   let lists =  List.map!!((x) App.GG.Coord.front_all(x, team, grid), column)
   List.flatten!(lists)
 
@@ -352,7 +369,7 @@ App.GG.Coord.first_enemy_in_front(team: App.GG.Team, grid: App.GG.Grid, coord: A
     some(new_coord)
 
 
-App.GG.Coord.all_enemies_in_coords(coord: App.GG.Coord, coords: List<App.GG.Coord>, team: App.GG.Team, grid: App.GG.Grid): Maybe<List<App.GG.Coord>>
+App.GG.Coord.all_enemies_in_coords(coords: List<App.GG.Coord>, team: App.GG.Team, grid: App.GG.Grid): Maybe<List<App.GG.Coord>>
   let result = []
   for enemy_coord in coords with result:
     let enemy_pos = App.GG.Coord.enemy_pos(enemy_coord, team, grid)
@@ -390,7 +407,7 @@ App.GG.Coord.all_enemies_hp(grid: App.GG.Grid, team: App.GG.Team):List<Pair<I32,
 
 
 App.GG.Coord.closest_coord(center: App.GG.Coord, coords: List<App.GG.Coord>):App.GG.Coord
-  let closer = {0#32, 0#32}
+  let closer = {1#32, 1#32}
   let distance = 10
   let distance_coord = Pair.new!!(distance, closer)
 
@@ -499,7 +516,7 @@ App.GG.Coord.projectile_best_target(start: App.GG.Coord, team: App.GG.Team, grid
   let closest_enemy = App.GG.Coord.closest_enemy_in_front(start, team, grid)
   without closest_enemy: none
   let list = []
-  let same_column = App.GG.Coord.column(closest_enemy, grid)
+  let same_column = App.GG.Coord.column(grid, closest_enemy)
   for coord in same_column with list:
     let y1 = start@snd
     let y2 = coord@snd
@@ -511,19 +528,46 @@ App.GG.Coord.projectile_best_target(start: App.GG.Coord, team: App.GG.Team, grid
   App.GG.Coord.best_target_by_hp(list, grid)
 
 App.GG.Coord.projectile_chase(current: App.GG.Coord, target: App.GG.Coord): App.GG.Coord
+  let x1 = current@fst
+  let x2 = target@fst
   let y1 = current@snd
   let y2 = target@snd
   if y1 =? y2 then
-    {current@fst + 1, current@snd}
-  else if y1 >? y2 then
-    {current@fst +1, current@snd - 1}
+    if x1 =? x2  then
+      current
+    else 
+      if x1 >? x2 then
+        {x1 - 1 , y1}
+      else
+        {x1 + 1 , y1}
+  else
+    if y1 >? y2 then
+      if x1 =? x2  then
+        {x1, y1 - 1}
+      else
+        if x1 >? x2 then
+          {x1 - 1, y1 - 1}
+        else
+          {x1 + 1, y1 - 1}
     else
-      {current@fst + 1, current@snd +1}
+      if x1 =? x2 then
+        {x1, y1 + 1}
+      else
+        if x1 >? x2 then
+          {x1 - 1, y1 + 1}
+        else 
+          {x1 + 1, y1 + 1}
     
+App.GG.Coord.closest_enemy(center: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  let coords = App.GG.Grid.all_coords(grid)
+  let all_enemies = App.GG.Coord.all_enemies_in_coords(coords, team, grid)
+  without all_enemies: none
+  let closest_enemy = App.GG.Coord.closest_coord(center, all_enemies)
+  some(closest_enemy)
 
 App.GG.Coord.closest_enemy_in_front(center: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
   let coords = App.GG.Coord.all_coords_past_center(center, team, grid)
-  let all_enemies = App.GG.Coord.all_enemies_in_coords(center, coords, team, grid)
+  let all_enemies = App.GG.Coord.all_enemies_in_coords(coords, team, grid)
   without all_enemies: none
   let closest_enemy = App.GG.Coord.closest_coord(center, all_enemies)
   some(closest_enemy)
@@ -542,21 +586,27 @@ App.GG.Coord.first_enemy_tile(coord: App.GG.Coord, team: App.GG.Team, grid: App.
 // returns all the coords in a coord's column, and all the columns ahead of it
 App.GG.Coord.self_and_front_columns(coord: App.GG.Coord, grid: App.GG.Grid): List<App.GG.Coord>
   let tile = App.GG.Grid.get(coord, grid)
-  without tile: []
-  let team = tile@owner
-  App.GG.Coord.self_and_front_columns.go(coord, team, grid)
+  without tile: [] 
+  let column = App.GG.Coord.column(grid, coord)
+  let all_ahead = App.GG.Coord.all_coords_past_center(coord, tile@owner, grid)
+  column ++ all_ahead
 
-App.GG.Coord.self_and_front_columns.go(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): List<App.GG.Coord>
-  let list = App.GG.Coord.column(coord, grid)
-  let exists = true
-    for c in list with exists:
-      let tile = App.GG.Grid.get(c, grid)
-      without tile: false
-      exists
-  if exists then 
-    App.GG.Coord.self_and_front_columns.go(App.GG.Coord.front(team, coord), team, grid) ++ list
-  else
-    []
+  //let tile = App.GG.Grid.get(coord, grid)
+  //without tile: []
+  //let team = tile@owner
+  //App.GG.Coord.self_and_front_columns.go(coord, team, grid)
+
+//App.GG.Coord.self_and_front_columns.go(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): List<App.GG.Coord>
+  //let list = App.GG.Coord.column(coord, grid)
+  //let exists = true
+    //for c in list with exists:
+      //let tile = App.GG.Grid.get(c, grid)
+      //without tile: false
+      //exists
+  //if exists then 
+    //App.GG.Coord.self_and_front_columns.go(App.GG.Coord.front(team, coord), team, grid) ++ list
+  //else
+    //[]
 
 App.GG.Coord.random(seed: Nat, coord: App.GG.Coord): App.GG.Coord
   let random_num_x = App.GG.Random(Nat.random(seed))

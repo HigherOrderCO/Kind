@@ -25,7 +25,7 @@ App.GG.Chip.Upper.bombardier.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
           let animation = App.GG.Animation.attack
           let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
           let projectile_effect = App.GG.Chip.Upper.bombardier.Projectile.Effect(dmg, delay)
-          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
           let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
           App.GG.Effect.generic_shoot(projectile, center, animation, 12, 24)
         }
@@ -50,7 +50,7 @@ App.GG.Chip.Upper.bombardier.Projectile.Effect(dmg: I32, delay: F64): App.GG.Eff
     without team: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     App.GG.Effect { 
-      let udelay = I32.to_u64(F64.to_i32(delay * 60))
+      let udelay = F64.to_u64(delay * 60)
       let pos = App.GG.Coord.furthest_tile_in_range(center, team, grid, 3)
       let coords = App.GG.Coord.cross(team, grid, 1, 1, pos)
       let func = 

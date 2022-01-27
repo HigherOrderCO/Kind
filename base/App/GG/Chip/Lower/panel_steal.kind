@@ -1,8 +1,8 @@
-App.GG.Chip.panel_steal: App.GG.Chip
+App.GG.Chip.Lower.panel_steal: App.GG.Chip
   App.GG.Chip.new(
     "PSteal"
     App.GG.Class.control
-    App.GG.Chip.panel_steal.Effect
+    App.GG.Chip.Lower.panel_steal.Effect(5)
     10
     App.GG.img.bazooka
     App.GG.Attributes.new(0,0,3,1)
@@ -11,7 +11,8 @@ App.GG.Chip.panel_steal: App.GG.Chip
 // App.GG.Chip.panel_steal.Effect: App.GG.Effect<Unit>
 //   App.GG.Chip.panel_steal.Effect(4, 2)
 
-App.GG.Chip.panel_steal.Effect: App.GG.Effect<Unit>
+App.GG.Chip.Lower.panel_steal.Effect(duration: F64): App.GG.Effect<Unit>
+  let uduration = F64.to_u64(duration * 60)
   App.GG.Effect {
     get center = App.GG.Effect.coord.get_center
     get grid = App.GG.Effect.grid.get
@@ -28,7 +29,7 @@ App.GG.Chip.panel_steal.Effect: App.GG.Effect<Unit>
         without enemy: 
           App.GG.Effect {
             App.GG.Effect.tile.change_owner(tile@owner, enemy_coord)
-            App.GG.Effect.tile.add_status(App.GG.Tile.Status.stolen(300), enemy_coord)
+            App.GG.Effect.tile.add_status(App.GG.Tile.Status.stolen(uduration), enemy_coord)
           }
         App.GG.Effect.pass
       }

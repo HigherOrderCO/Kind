@@ -19,7 +19,7 @@ App.GG.Chip.Arms.pull_sword.Effect(dmg: I32): App.GG.Effect<Unit>
     App.GG.Effect {
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
       let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
-      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
       let projectile_effect = App.GG.Chip.Arms.pull_sword.Projectile.Effect(dmg) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       let front = App.GG.Coord.front(creature@team)
@@ -37,7 +37,7 @@ App.GG.Chip.Arms.pull_sword.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
     get grid = App.GG.Effect.grid.get
     without frame: App.GG.Effect.pass
     without projectile: App.GG.Effect.pass
-    let coords = App.GG.Coord.column(center, grid)
+    let coords = App.GG.Coord.column(grid, center)
     let eff = 
       (coord)
       App.GG.Effect {

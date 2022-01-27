@@ -65,6 +65,15 @@ App.GG.Projectile.add_hit(creature_id: Nat, coord: App.GG.Coord, idx: Nat, grid:
       projectile@info <- new_info
   App.GG.Projectile.modify(f, coord, idx, grid)
 
+App.GG.Projectile.clean_hit(creature_id: Nat, idx: Nat, grid: App.GG.Grid, coord: App.GG.Coord): App.GG.Grid
+  let f = 
+    (projectile: App.GG.Projectile)
+    let info = projectile@info
+    let new_info = NatSet.del(creature_id, info@hits)
+    let new_info = info@hits <- new_info
+    projectile@info <- new_info
+  App.GG.Projectile.modify(f, coord, idx, grid)
+
 App.GG.Projectile.modify(mod: App.GG.Projectile -> App.GG.Projectile, coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid
   Maybe {
     get list = App.GG.Projectile.get_list(coord, grid)

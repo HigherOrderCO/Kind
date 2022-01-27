@@ -172,3 +172,9 @@ App.GG.Tile.can_be_returned(coord: App.GG.Coord, grid: App.GG.Grid): Bool
     else
       can_return
   can_return
+
+App.GG.Tile.is_ocupied(tile: App.GG.Tile): Bool
+  let creature = tile@creature
+  without creature: false
+  true
+  

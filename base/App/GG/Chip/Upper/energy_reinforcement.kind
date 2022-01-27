@@ -29,7 +29,7 @@ App.GG.Chip.Upper.energy_reinforcement.Effect(energy_val: I32, duration: F64, de
             get seed = App.GG.Effect.random.get
             let coords = App.GG.Coord.randoms_size_by_team(grid, seed, globe_num, team)
             let projectile_effect = App.GG.Chip.Upper.energy_reinforcement.Projectile.Effect(energy_val, duration, delay, interval)
-            let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+            let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
             let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
 
             App.GG.Effect.projectile.different_status(coords, projectile)

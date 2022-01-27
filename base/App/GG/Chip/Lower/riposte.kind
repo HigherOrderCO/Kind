@@ -1,0 +1,61 @@
+App.GG.Chip.Lower.riposte: App.GG.Chip
+  App.GG.Chip.new(
+    "Ripost"
+    App.GG.Class.strength
+    App.GG.Chip.Lower.riposte.Effect(30, 0.5) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Lower.riposte.Effect(damage: I32, reaction_time: F64): App.GG.Effect<Unit>
+  let utime = F64.to_u64(reaction_time * 60)
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(0, utime)
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    get creature = App.GG.Effect.creature.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+
+    let animation = App.GG.Animation.attack
+    let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
+    let projectile_effect = App.GG.Chip.Lower.riposte.Projectile.Effect(dmg)
+    let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+    let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+    let effect = 
+      (coord: App.GG.Coord)
+      App.GG.Effect { 
+        let coords = App.GG.Coord.sized_front_columns(2, creature@team, grid, coord)
+        let func = 
+          (coord: App.GG.Coord)
+          App.GG.Effect.projectile.add_at(coord, projectile)
+
+          App.GG.Effect.multiple<App.GG.Coord>(func, coords)
+      }
+
+    let action = 
+      App.GG.Effect { 
+        App.GG.Effect.status.counter.add(effect, reaction_time)
+        App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
+      }
+
+    App.GG.Effect.generic_action(action, animation, 0, utime)
+  }
+
+App.GG.Chip.Lower.riposte.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+      App.GG.Effect.projectile.hit.damage_at(dmg, true, true center)
+      switch U64.eql(frame) {
+        8: App.GG.Effect.projectile.delete
+      }default App.GG.Effect.pass
+    }
+  }

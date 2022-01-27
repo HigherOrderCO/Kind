@@ -54,11 +54,7 @@ App.GG.Creatures.minion.swordsman.Effect.slash(n: Nat): App.GG.Effect<Unit>
               let eff = App.GG.Effect.projectile.add_image([App.GG.img.yellow_tile], 60)
               let coords = 
                 if (n % 2) =? 0 then 
-                  [
-                    {enemy_coord@fst, enemy_coord@snd + 1},
-                    enemy_coord,
-                    {enemy_coord@fst, enemy_coord@snd - 1}
-                  ]
+                  App.GG.Coord.column(grid, enemy_coord)
                 else 
                   [
                     if App.GG.Team.eql(team, App.GG.Team.red) then

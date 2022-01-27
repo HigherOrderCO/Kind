@@ -21,16 +21,11 @@ App.GG.Creatures.mine.Projectile.Effect: App.GG.Effect<Unit>
       let eff = 
         (coord: App.GG.Coord)
         App.GG.Effect { 
-          let status = App.GG.Creature.Status.poison(100, 3)
+          App.GG.Effect.projectile.hit.add_burn_at(3, 10, coord)
           App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
-          let add_status = App.GG.Effect.status.add_at(status)
-          get hit = App.GG.Effect.projectile.hit.effect<Unit>(coord, add_status)
-          without hit: App.GG.Effect.pass
-          App.GG.Effect { 
-           return hit
-          }
         }
       App.GG.Effect {
+        App.GG.Effect.creature.del_at(center)
         App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
         switch U64.eql(frame) {
           12: App.GG.Effect.projectile.delete

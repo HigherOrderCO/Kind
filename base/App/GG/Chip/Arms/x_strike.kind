@@ -22,7 +22,7 @@ App.GG.Chip.Arms.x_strike.Effect(dmg: I32): App.GG.Effect<Unit>
       let fst = [{c@fst - 1, c@snd - 1}, c, {c@fst + 1, c@snd + 1}]
       let snd = [{c@fst - 1, c@snd + 1}, c, {c@fst + 1, c@snd - 1}]
       let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
-      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
       let projectile_effect = App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg, fst, some(snd), false) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
       App.GG.Effect.generic_shoot(projectile, c, App.GG.Animation.attack, 12, 24)
@@ -53,9 +53,8 @@ App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg: I32, coords: List<App.GG.Coord>
             none:
               App.GG.Effect.pass
             some:
-              //Add intangible
               let status = App.GG.Projectile.Status.unit
-              let info = App.GG.Projectile.Info.new(team, status, NatSet.new, 0#64, false)
+              let info = App.GG.Projectile.Info.new(team, status, NatSet.new, 0#64, true)
               let projectile = App.GG.Projectile.new(info, App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg, next_attack.value, none, true))
               App.GG.Effect.projectile.add_at(center, projectile)
           }

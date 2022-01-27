@@ -37,7 +37,7 @@ App.GG.Chip.Arms.quick_strike.Projectile(damage: I32, coord: App.GG.Coord, team:
     let coords = coord & [below]
 
     let status = App.GG.Projectile.Status.unit
-    let info = App.GG.Projectile.Info.new(team, status, NatSet.new, 0#64, false)
+    let info = App.GG.Projectile.Info.new(team, status, NatSet.new, 0#64, true)
     let effect = App.GG.Chip.Arms.quick_strike.Projectile.Effect(damage)
     let projectile = App.GG.Projectile.new(info, effect)
 
