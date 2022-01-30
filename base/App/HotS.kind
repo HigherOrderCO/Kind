@@ -10,18 +10,74 @@ App.HotS.State: App.State
 App.HotS.init: App.Init<App.HotS.State>
   let bids = {} :: Map<App.HotS.Bid>
   let teams = {
-    "Branco": "9556cb7cbc30102cf4b9d59a768a00c66490eb985d62a29a2cf323bd26e1edf2"
-    "Verde": "f99e8d094ee97e7be9a3d7269f09f9996041160cc5c134b6a863be5b0ce9b5bd"
-    "Amarelo": "27617207effe6bfd81a3e2b21d8a20c4e622b23e5422d607771b4f8b8ba006fa"
-    "Azul": "fa187c1e7b6b42ab8b2d9415ab7e6b1e71b551fcdc8151ebafe46e40a10d90ad"
-    "Vermelho": "8eec9d5ae546887db6b6a3889e6591fe96f3c16bc9d921551a4aac3adce52996"
-    "Preto": "cd39e4b5a3bdc91dff58d0487ec1187739723321e0d423a3db36aae72e5aaa17"
+    "Simon": "db486282027730d54913ae9887f4c2c77900f3b8640842140afd7e3c50176615"
+    "Exorr": "430b700c0ed14291e123337d9e601dbd0318d7096aaa90e77e8bb7a2c93ad75c"
+    "Linharees": "dee7591ec0c54ba2e1df48a247b398064c8a036555ced9b986a22870f80a6ae9"
+    "Rooxyz": "5eee30cf88b6a7556459ebd45406ae502f6ada1214ced55909ec434521beb978"
+    "Dasij": "b8efd18f1503fae789e235dba4b7f7d0ffd5c109265db827f78d0259f5a81646"
   }
   let cash = Map.new<Nat>
+  let sort = ["Name", "Tank", "Dps", "Healer", "Bruiser", "Price"]
   let history = []
   for team:hash in teams with cash:
     Map.set<Nat>(team, 25, cash)
-  App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "Calamity", "", "", none), App.HotS.State.Global.new(teams, bids, cash, history))
+  App.Store.new<App.HotS.State>(App.HotS.State.Local.new(false, "Copa Calamity", "", "", sort, none), App.HotS.State.Global.new(teams, bids, cash, history))
+ 
+App.HotS.sort(bids: Map<App.HotS.Bid> cmp: Cmp, sorts: List<String>, a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
+  case sorts {
+    nil: cmp
+    cons: 
+      let sort = App.HotS.sort.get(bids, sorts.head)
+      let cmp = Cmp.inv(sort(a, b))
+      case cmp {
+        eql: App.HotS.sort(bids, cmp, sorts.tail, a, b)
+      }default cmp
+  }
+
+App.HotS.sort.name(a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
+  String.cmp(a@fst, b@fst)
+
+App.HotS.sort.price(bids: Map<App.HotS.Bid> a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
+  let a = bids{a@fst} <> App.HotS.Bid.new(0, "")
+  let b = bids{b@fst} <> App.HotS.Bid.new(0, "")
+  Nat.cmp(a@value, b@value)
+
+App.HotS.sort.role(role: App.HotS.Role, a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
+  let a = a@snd
+  let b = b@snd
+  if App.HotS.Role.eql(a@role_1, role) then
+    if App.HotS.Role.eql(b@role_1, role) then
+      Cmp.eql
+    else
+      Cmp.gtn
+  else
+    if App.HotS.Role.eql(a@role_2, role) then
+      if App.HotS.Role.eql(b@role_1, role) then
+        Cmp.ltn
+      else 
+        if App.HotS.Role.eql(b@role_2, role) then
+          Cmp.eql
+        else
+          Cmp.gtn
+    else 
+      if App.HotS.Role.eql(b@role_1, role) then
+        Cmp.ltn
+      else
+        if App.HotS.Role.eql(b@role_2, role) then
+          Cmp.ltn
+        else
+          Cmp.eql
+      
+
+App.HotS.sort.get(bids: Map<App.HotS.Bid>, sort: String): Pair<String, App.HotS.Player> -> Pair<String, App.HotS.Player> -> Cmp 
+  switch String.eql(sort) {
+    "Name": App.HotS.sort.name
+    "Price": App.HotS.sort.price(bids)
+    "Tank": App.HotS.sort.role(App.HotS.Role.tank)
+    "Dps": App.HotS.sort.role(App.HotS.Role.dps)
+    "Bruiser": App.HotS.sort.role(App.HotS.Role.bruiser)
+    "Healer": App.HotS.sort.role(App.HotS.Role.healer)
+  }default App.HotS.sort.name
 
 type App.HotS.State.Local {
   new(
@@ -29,6 +85,7 @@ type App.HotS.State.Local {
     room: String
     team: String
     pass: String
+    sort: List<String>
     confirmation: Maybe<App.HotS.History>
   )
 }
@@ -53,8 +110,8 @@ type App.HotS.History {
 
 type App.HotS.Player {
   new(
-    rank: String
-    role: App.HotS.Role
+    role_1: App.HotS.Role
+    role_2: App.HotS.Role
   )
 }
 
@@ -63,15 +120,17 @@ type App.HotS.Role {
   dps
   bruiser
   healer
+  no
 }
 
 
 App.HotS.Role.show(role: App.HotS.Role): String
-  case role {
-    tank   : "Tank"
-    dps    : "Dps"
-    bruiser: "Bruiser"
-    healer : "Healer"
+  case role { 
+    tank    : "Tank"
+    dps     : "Dps"
+    healer  : "Healer"
+    bruiser : "Bruiser"
+    no      : ""
   }
 
 App.HotS.Role.list: List<App.HotS.Role>
@@ -80,12 +139,13 @@ App.HotS.Role.list: List<App.HotS.Role>
     App.HotS.Role.dps
     App.HotS.Role.healer
     App.HotS.Role.bruiser
+    App.HotS.Role.no
   ]
 
 App.HotS.Player.get_role(role: App.HotS.Role players: Map<App.HotS.Player>): Map<App.HotS.Player>
   let new_players = Map.new<App.HotS.Player>
   for name:player in players with new_players:
-    if App.HotS.Role.eql(role, player@role) then
+    if App.HotS.Role.eql(role, player@role_1) then
       new_players{name} <- player
     else
       new_players
@@ -97,6 +157,7 @@ App.HotS.Role.eql(a: App.HotS.Role, b: App.HotS.Role): Bool
     dps     dps    : true
     bruiser bruiser: true
     healer  healer : true
+    no      no     : true
   }default false
 
 App.HotS.Role.cmp(a: App.HotS.Role, b: App.HotS.Role): Cmp
@@ -107,9 +168,18 @@ App.HotS.Role.cmp(a: App.HotS.Role, b: App.HotS.Role): Cmp
         dps: 1
         healer: 2
         bruiser: 3
+        no: 4
       }
   Nat.cmp(f(a), f(b))
 
+App.HotS.Role.img(role: App.HotS.Role): String
+  case role {
+    tank    : "data:image/png;base64,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 "
+    dps     : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAABYRJREFUWEetmFuIHUUQhr+SoATFl0RUFBXiBV1BIgFFYrKrwXsELxsEUdE8aBQUI2IEddeIKCJ4QZKAqAHFwC7EO96QXRIkXljxxXghAaMBlUR88cEblNRMzUxPT/ecs2LDsuec7q76+6+/qmtGsCGAFp+yY4glvvf/XWnW6tFnuj2XW9lvQdBeHlK7pZ++zJbSzTgwPWQAWuuHjpSj64+tIxDtqGBGYJMK04Pk4Ye5HRgb7Ky9ogyxsADln86Uo4p59O8zwCiwpmIyw6YxPQXMgoz1ib3yE/hbFoRY1glsblQyUOwVQMuxNerhjhiqwBkLs6ANg4H5jKeNIA/VSSKwUOE9YGWsy9pA29IZzsyIg2oxWYZVppyxfcA1AnN1sTBqatl0ID7ltneFAE1K6xGuRzkX+Lt03MtkG6SwBmUaYRxlynf+ClxbhniIITwvyiEKawvvkfsjgV1eFc8Hfhtg0sJ8R4JJ05yNv4CrgZtcq5G5yLuwDeW6MorsqOgJOCp434DyGPAVyKWgP6ZBFsYN4FEOMsXQJGASMC22am4rNiVOO5StewW4ofKZqoOLET5HOclBjoN+HWwIq8oMwihqhymAxMPqpDmtyeguKdBV4Gx6FfBR6C9F0IPARp8w52dmpBgmQp9ejcmHM3IpwZUsvuaSqJd2aPezHovyA7Cg7/SuoKCUNBCCzJ9E2+CKuUZ+dblCWI3ydpiYDcAq7RvLB0EXeXQkLLCRtKcob5MqMZqAKsacjRx7NtcAhFOAPSHTaQZLvm3hEgfTOkghwpAB4QAqptU4igbQ/jJ+iuUVwD+AhW0pSe/GOeBs97gMmMvUxJCBjMx6/RwAFgPfAafFBnIaDNPe9ljRfDHj3Q6xHTgxZVzhRuDlzOFOBb71udeBq9o2xAp106VF2rKCuc03bAHWtTa3FssK0O0Ci6IgWxHfVBeZblN8G7DZ7d4NPB3fW8FV12knjwF+csWbPpaCfpPI00qQlzuTh9oagfsUnsjFHDgC+ARkxLW7UmBHW9794jXbbwKr3cnjwP1ph14CLCGUCYRZlLGKjZCV4PMGKG4sG/uB04HfwxJg8JqbJNkTyBWgb7mRn4ELgd0FQ75e67QrfrCMnfDGoG6tEqYtGey2OM5trwesg+mMvvSvFocs2q1ibVUBshoBgCTAyKtl7BvAef67NSfV50EAkzRa8bQSUI0kSJ+cBJkAtcah3d43BfUdhcsCeyOI7EbjDCo3JB+aoqvoBGBf9Nv3fjtsje7oLoPNme3xwMJv/8Nh5cmu1bb8gq+p0Ie/XQS8n1m0FXgV+LBhsKPBpcCVfqOkzFwMfBDjCxNsEMA7gWeC4xl71orFRx7z1itMktTrgGJ/IKa7gGf/E4NuxArtOcAL/vcncAtgLVkAtNBcFcZKg2XTUhoyYI/4jXQYyFpQu6E+BeyRNDnK2zhxziq9tWwY9iaWWDZaq2Wl5wLv4zoAgXf9z26lgwkUS4C9eYDxTKq69omgXH+0F9rRKItPFthTHC5nN0NQKKB+DWaugcymYepga2ttPgU09epjEJ4BB54UmFB7xBQZC2ubwPEK++vqltBVaq73JhkAxpiw55bPwNr0YtSFWrxQa5Fgcg+o3UDzHnmAEZWJl0eVM5OYPfX94j9YooSPoPY98DPEsYNjDHMXpzXTVMGzFL7sVMUmL54E7h1IXYA7DHUhw7JWdd+vzeOsz/nDe3R23SmwYsDL2x7s/c8k2dKZKJyHN71cvc1Cbk3BF7lKlkfWUNOE2Bq8oqMYjrfEqlsFtgRsPQo80AExnPkaxrw1mMdfeN4JLAf5GHR5Da71qq2Pgi76+QPsYVhglZadzSU9HdDQUaouoCgKforeUPROvgTcHBpNrs6ZiH7/F7vpt3P6DTOkAAAAAElFTkSuQmCC "
+    healer  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAuxJREFUWEelWNt1KyEMHHW220VSzU03SRd2Z9zD8lgEerH2TxwjYDSSRgChfQhAqv+M37uB8mWwLV/tyXyUQEh9W7ZDNcx/4KzpQWReEQGpORqcKZt1d3fompb6YKoYOQFp5vgOrWhgDj/jaINm2o3vunYLxZBNzelAXov8THktY/RmShktFZzLsRLCViTrsOS+vQsBh1EX73V2PHlLFX/2+QHwTyOUgL8EfD/d4lOABwGvlT2efIR0JkBg0oe9AmTsu6E4ALxUHaPUJOAEA+iuy1TId0MXcx1gc73QOwF0c3poanFnJMksAKe6moNACWcivOWeZnWyItOWYHh9kDOoO8sY5OTy8MxLuEItTBiJWEKsYNwK8chYdWYjzpxwMwfvGuE56O92W0RkJoOwPlcVO5tmBnWrIT/XiHHJumRh+GkV4VjNL1aOA39QxHxgcFmihm8nIBWXoKWBA4yYp0aI6QCSIsISkBZE9Yw8q9HM8oka6jmoWtCMLiFMyRTl/EgK46Ic1B/Ln8ogN7SK5AIobjcJc6BI7CrKYpfFvLZDh8E+fAD08m5So4fmnctP5YtBiWjWmIeTyV6IBRpN9tcsGYqk3PYy7VOI2ZIiQJ+IUMAHeH3FtYprn7Py4xeEL97km0/O3TLmidDVuKRbRdIm904iaHq2YVIk4SJcBbBo01Brb83dAtDzVhsnHEgF4GLCK/0k0Ft5Q9BFtWfho5eAC0G0kFgB7Ny0hxB7NM7pcnkVbYcd4LrL8IsAoQNUQ6QeDmIM1nU/PQ8+PKJ0BpVDgnRp2glU10Fjkj4kMKgb94NAiAoedU3XbisD/wHCS70M3WicEJcdRInyGA/A/AXwJa/eX84qC4qSLjrFd739FF2wn+eKAuZqVrVqeFFQytSQuUFmBrX1aNUSic0LLuKYFYDdyHgzDmW30FJMAPPganwBDPo6dfHyGN3mRtbYsWmhdS/ua4uPUjnbaWphrFfQeRx4fj8fnxVCWuk/NhQeP6NUMUYAAAAASUVORK5CYII= "
+    bruiser : "data:image/png;base64,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 "
+    no      : "" 
+  }
 
 App.HotS.Role.title(role: App.HotS.Role): Map<String>
   let {border_color, background} = 
@@ -118,6 +188,7 @@ App.HotS.Role.title(role: App.HotS.Role): Map<String>
       dps     : {"DarkRed" "LightCoral"  }
       healer  : {"Green"   "LightGreen"  }
       bruiser : {"Purple"  "Plum"        }
+      no      : {""  ""                  }
     }
   
   {
@@ -151,50 +222,86 @@ type App.HotS.Action {
 
 App.HotS.players: Map<App.HotS.Player>
   {
-    "Adones": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "AnneO": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "Arluki": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "ChampofHorde": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "Crono": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Dashblue": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "Derenash": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Drau": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "Dugalle": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Entropy": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "Escondidinho": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Exorr": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "FFJujubaKid": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Focofi": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "GiantAxe": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Goddan": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "Josuecs": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Juzehlito": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "Katson": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "KchoXs": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "Korhal": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Kristrex": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "MacSF": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Malvadah": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "MatadorFivee": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Monthoros": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "Moonlight": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Motta": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "MrNewVegas": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Patoshin": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "Pitchulinha": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Player": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "Predator": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Psycho": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "RamonBR": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Rooxyz": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "Simon": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Sipher": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "SpyGames": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-    "Talicwolf": App.HotS.Player.new("?", App.HotS.Role.healer)
-    "Thunder": App.HotS.Player.new("?", App.HotS.Role.dps)
-    "Zaryanova": App.HotS.Player.new("?", App.HotS.Role.tank)
-    "Zuiurac": App.HotS.Player.new("?", App.HotS.Role.bruiser)
-}
+    "Josuecs": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
+    "Sirkou": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
+    "Adones": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+    "SorteSim": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+    "Zator": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+    "PREDATOR": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
+    "Drau": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
+    "Focofi": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
+    "OnlyDBreeze": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
+    "FFJujubaKid": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
+    "Escondidinho": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.bruiser)
+    // "Toros": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.bruiser)
+    "JohnMirolha": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
+    "Parasita300": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
+    "Theuw": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.healer)
+    "ChazKendal": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.tank)
+    "Rolamen ": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.tank)
+    "Astrovildo": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+    "Leumas": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
+    "MrNewVegas": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+    "Zaryanova": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
+    "Motta": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.tank)
+    "RAMONBR": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.tank)
+    "Pikeu": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+    "Sunstrider ": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
+    "Katson": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+    "Yuki": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+    "XragonFlame": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+    "Tuts": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
+    "Sandrogado": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.tank)
+    "Kuroudo": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
+    "MajorasMask": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
+    "Toph": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
+    // "Reiafonso": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+  }
+//   {
+//     "Adones": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "AnneO": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "Arluki": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "ChampofHorde": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "Crono": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Dashblue": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "Derenash": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Drau": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "Dugalle": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Entropy": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
+//     "Escondidinho": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Exorr": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "FFJujubaKid": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Focofi": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "GiantAxe": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Goddan": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "Josuecs": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Juzehlito": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "Katson": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "KchoXs": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "Korhal": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Kristrex": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "MacSF": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Malvadah": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "MatadorFivee": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Monthoros": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "Moonlight": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Motta": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "MrNewVegas": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Patoshin": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "Pitchulinha": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Player": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "Predator": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Psycho": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "RamonBR": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Rooxyz": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "Simon": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Sipher": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "SpyGames": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+//     "Talicwolf": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
+//     "Thunder": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+//     "Zaryanova": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
+//     "Zuiurac": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
+// }
 
 // Render function
 App.HotS.draw: App.Draw<App.HotS.State>
@@ -205,6 +312,7 @@ App.HotS.draw: App.Draw<App.HotS.State>
   let bids = state.global.bids
   let cash = state.global.cash
   let team = state.local.team
+  let players = List.sort!(App.HotS.sort(bids, Cmp.eql, state.local.sort), Map.to_list!(App.HotS.players))
   let joined = state.local.joined
   let user_cash = cash{team} <> 0
   let team_size = List.count!((x) String.eql(x@team, team), Map.values!(bids))
@@ -307,59 +415,87 @@ App.HotS.draw: App.Draw<App.HotS.State>
         </div>
       </div>
       <div style={
-        "height":"calc(100%-40px)"
+        "height": "60px"
+        "margin": "5px"
+        "padding": "10px"
         "width": "100%"
         "display": "flex"
-        "flex-direction": "row"
+        "justify-content": "center"
       }>
-        for role in App.HotS.Role.list:
-          <div style = {
-          "height": "100%"
-          "width": "24%"
-          "margin": "0px 0.5%"
+        // <div style ={"width": "10%", "height": "100%"}> "Sort: "</div>
+        for s in state.local.sort: // String List
+          <button id = "XxX" | s style = {"font-size": "16px", "margin": "10px", "width": "10%", "height": "100%", "margin": "5px"}>
+            s
+          </button>
+      </div>
+      <div style ={
+        "height": "100%"
+        "width": "100%"
+        "display": "flex"
+        "align-items": "center"
+        "justify-content": "center"
+      }>
+        <div style={
+          "height":"700px"
+          "width": "100%"
           "display": "flex"
-          "flex-direction": "column"
-          }>
-            <div style = App.HotS.Role.title(role)>
-              App.HotS.Role.show(role)
-            </div>
-            for entry in Map.to_list!(App.HotS.Player.get_role(role, App.HotS.players)): 
-              let {name, player} = entry
-              use bid = bids{name} <> App.HotS.Bid.new(0, "")
-              <div style = {
-                "display":"flex"
-                "flex-direction":"row"
-              }> 
-                <div style={
-                  "height": "24px"
-                  "border-radius": "2px"
-                  "border": "1px solid #A0A0A0"
-                  "background": "#FAFAFA"
-                  "margin": "2px"
-                  "width": "80%"
-                  "display": "flex"
-                  "align-content": "center"
-                }>
-                  {App.HotS.draw.cell(50, <span style={"font-weight":"bold"}>name</span>)}
-                  {App.HotS.draw.cell(50, <span>bid.team</span>)}
-                </div>
+          "flex-flow": "column wrap"
+          "align-items": "center"
+        }>
+          for entry in players: 
+            let {name, player} = entry
+            use bid = bids{name} <> App.HotS.Bid.new(0, "")
+            <div style={
+              "height": "50px"
+              "border-radius": "2px"
+              "border": "1px solid #A0A0A0"
+              "background": "#FAFAFA"
+              "margin": "4px"
+              "padding": "2px 5px"
+              "width": "32%"
+              "display": "flex"
+              "align-items": "center"
+              "justify-content": "center"
+              "font-size": "14px"
+            }>
+              
+                {App.HotS.draw.cell(30, <span style={"font-weight":"bold"}>name</span>)}
+                {App.HotS.draw.cell(30, <span>bid.team</span>)}
+                <img style = {"image-rendering": "pixelated", "align-self": "center", "width": "40px" "height": "40px"}
+                  src = App.HotS.Role.img(player@role_1)>
+                </img>
+                {
+                  if Maybe.is_none!(state.local.confirmation) then
+                    if not(App.HotS.Role.eql(App.HotS.Role.no, player@role_2)) then 
+                      <img style = {"image-rendering": "pixelated", "align-self": "center", "opacity": "0.4", "width": "40px" "height": "40px"}
+                        src = App.HotS.Role.img(player@role_2)>
+                      </img>
+                    else
+                      <div style = {"align-self": "center", "opacity": "0.4", "margin": "20px"}>
+                      </div>
+                  else 
+                      <div style = {"align-self": "center", "opacity": "0.4", "margin": "20px"}>
+                      </div>
+                }
                 <button style ={
                   "border-radius": "2px"
+                  "height": "32px"
                   "border": "1px solid #A0A0A0"
                   "background": "#FAFAFA"
-                  "margin": "2px 2px 2px 2px"
-                  "width": "10%"
+                  "margin": "0 5%"
+                  "width": "15%"
                 }>
                   "$"|Nat.show(bid.value)
                 </button>
                 <button id=name style={
                   "border-radius": "2px"
+                  "height": "32px"
                   "border": "1px solid #A0A0A0"
                   "background": 
                     if bid.team =? team then
                       "LightBlue"
                     else
-                      if (team_size <? 6) && not(team =? "spectator") then
+                      if (team_size <? 5) && not(team =? "spectator") then
                         if user_cash >=? bid.value then
                           "LightGreen"
                         else
@@ -367,12 +503,13 @@ App.HotS.draw: App.Draw<App.HotS.State>
                       else
                         "LightGray"
                   "margin": "2px 0 2px 2px"
-                  "width": "10%"
+                  "width": "15%"
                   "cursor":"pointer"
-                }>"buy"</button>
-              </div>
+                }>"buy"
+                </button>
+            </div>
           </div>
-      </div>
+        </div>
       <div style={
         "height":"calc(100%-40px)"
         "width": "100%"
@@ -384,12 +521,12 @@ App.HotS.draw: App.Draw<App.HotS.State>
           let players = List.filter!((x: Pair<String, App.HotS.Bid>) String.eql(team, x@snd@team), Map.to_list!(bids))
           let player_cmp = 
             (a: String, b: String)
-              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
               let {a, b} = {data(a), data(b)}
-              App.HotS.Role.cmp(a@role, b@role)
+              App.HotS.Role.cmp(a@role_1, b@role_1)
           let players = List.sort!((x, y) player_cmp(x@fst, y@fst), players)
           <div style={
-            "height": "420px"
+            "height": "460px"
             "border-radius": "2px"
             "border": "1px solid #A0A0A0"
             "background": "#FAFAFA"
@@ -424,10 +561,10 @@ App.HotS.draw: App.Draw<App.HotS.State>
             </div>
             for pair in players:
               let {player, bid} = pair
-              let player_data = App.HotS.players{player} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+              let player_data = App.HotS.players{player} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
               <div style =
                 {
-                  "height": "32px"
+                  "height": "50px"
                   "font-size": "16px"
                   "border-radius": "2px"
                   "border": "1px solid #A0A0A0"
@@ -438,8 +575,19 @@ App.HotS.draw: App.Draw<App.HotS.State>
                   "align-items": "center"
                   "justify-content": "center"
                 }>
-                {App.HotS.draw.large_cell(45, <span>player</span>)}
-                {App.HotS.draw.large_cell(45, <span>App.HotS.Role.show(player_data@role)</span>)}
+                {App.HotS.draw.large_cell(40, <span>player</span>)}
+                <img style = {"image-rendering": "pixelated", "align-self": "center", "width": "40px" "height": "40px"}
+                  src = App.HotS.Role.img(player_data@role_1)>
+                </img>
+                {
+                  if not(App.HotS.Role.eql(App.HotS.Role.no, player_data@role_2)) then 
+                    <img style = {"image-rendering": "pixelated", "align-self": "center", "opacity": "0.4", "width": "40px" "height": "40px"}
+                      src = App.HotS.Role.img(player_data@role_2)>
+                    </img>
+                  else
+                    <div style = {"align-self": "center", "margin": "20px"}>
+                    </div>
+                }
                 {App.HotS.draw.large_cell(10, <span>Nat.show(bid@value - 1)</span>)}
               </div>
           </div>  
@@ -455,19 +603,19 @@ App.HotS.draw: App.Draw<App.HotS.State>
             let players = List.filter!((x: Pair<String, App.HotS.Bid>) String.eql(team, x@snd@team), Map.to_list!(bids))
             let player_cmp = 
             (a: String, b: String)
-              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
               let {a, b} = {data(a), data(b)}
-              App.HotS.Role.cmp(a@role, b@role)
+              App.HotS.Role.cmp(a@role_1, b@role_1)
             let players = List.sort!((x, y) player_cmp(x@fst, y@fst), players)
             <div style={
-              "height": "260px"
+              "height": "365px"
               "border-radius": "2px"
               "border": "1px solid #A0A0A0"
               "background": "#FAFAFA"
               "margin": "5px"
               "padding-top": "10px"
               "width": "25%"
-              "flex-basis": "260px"
+              "flex-basis": "350px"
               "display": "flex"
               "flex-direction": "column"
               "align-items": "center"
@@ -495,10 +643,10 @@ App.HotS.draw: App.Draw<App.HotS.State>
               </div>
               for pair in players:
                 let {player, bid} = pair
-                let player_data = App.HotS.players{player} <> App.HotS.Player.new("?", App.HotS.Role.dps)
+                let player_data = App.HotS.players{player} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
                 <div style =
                   {
-                    "height": "24px"
+                    "height": "50px"
                     "border-radius": "2px"
                     "border": "1px solid #A0A0A0"
                     "background": "#FAFAFA"
@@ -508,8 +656,19 @@ App.HotS.draw: App.Draw<App.HotS.State>
                     "align-items": "center"
                     "justify-content": "center"
                   }>
-                  {App.HotS.draw.cell(45, <span style={"font-weight":"bold"}>player</span>)}
-                  {App.HotS.draw.cell(45, <span>App.HotS.Role.show(player_data@role)</span>)}
+                  {App.HotS.draw.cell(50, <span style={"font-weight":"bold"}>player</span>)}
+                  <img style = {"image-rendering": "pixelated", "align-self": "center", "width": "40px" "height": "40px"}
+                    src = App.HotS.Role.img(player_data@role_1)>
+                  </img>
+                  {
+                    if not(App.HotS.Role.eql(App.HotS.Role.no, player_data@role_2)) then 
+                      <img style = {"image-rendering": "pixelated", "align-self": "center", "opacity": "0.4", "width": "40px" "height": "40px"}
+                        src = App.HotS.Role.img(player_data@role_2)>
+                      </img>
+                    else
+                      <div style = {"align-self": "center", "opacity": "0.4", "margin": "20px"}>
+                      </div>
+                  }
                   {App.HotS.draw.cell(10, <span>Nat.show(bid@value - 1)</span>)}
                 </div>
           </div>
@@ -622,65 +781,71 @@ App.HotS.when: App.When<App.HotS.State>
       else
         App.pass!
     mouse_click: IO {
-      if String.eql(event.id,"_enter_") then 
-        if App.HotS.confirm_password(local.team, local.pass, glob.teams) then 
-          IO {
-            App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
-            App.set_local<App.HotS.State>(local@joined <- true)
-          }
-        else
-          App.pass!
+      if String.starts_with(event.id, "XxX") then
+        let sort = (String.drop(3, event.id))
+        let list = List.delete_by!(String.eql, sort, local.sort)
+        let new_list = sort & list
+        App.set_local<App.HotS.State>(local@sort <- new_list)
       else
-        if String.eql(event.id, "_spectate_") then
-          let new_local = local@joined <- true
-          let new_local = new_local@team <- "spectator"
-          IO {
-            App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
-            App.set_local<App.HotS.State>(new_local)
-          }
-        else 
-          if String.eql(event.id, "_yes_") then 
-            case local.confirmation {
-              none: App.pass!
-              some:
-                IO {
-                  //log("B")
-                  //IO.print("clicked: " | event.id)
-                  let action = App.HotS.Action.buy(team, pass, local.confirmation.value@item)
-                  let serial = Bits.hex.encode(Serializer.run!(App.HotS.Action.serializer, action))
-                  let serial = if Nat.mod(String.length(serial),2) =? 0 then serial else serial | "0"
-                  //log("sent-action: " | action@team | " <- " | action@player)
-                  //log("sent-serial:" | String.take(16,Crypto.Keccak.hash("0"|room)) | " " | serial)
-                  App.new_post!(String.take(16,Crypto.Keccak.hash("0"|room)), serial)
-                  let new_local = state.local@confirmation <- none
-                  App.set_local<App.HotS.State>(new_local)
-                }
+        if String.eql(event.id,"_enter_") then 
+          if App.HotS.confirm_password(local.team, local.pass, glob.teams) then 
+            IO {
+              App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
+              App.set_local<App.HotS.State>(local@joined <- true)
             }
           else
-            if String.eql(event.id, "_no_") then 
-            let new_local = state.local@confirmation <- none
-            App.set_local!(new_local)
-          else
-          //log(event.id)
-          //log("A")
-            let player = event.id
-            let has_player = Bool.not(String.is_empty(player))
-            let has_team = Bool.not(String.is_empty(team))
-            let player_value = (case glob.bids{player} as bid { none: 0, some: bid.value@value })
-            let team_cash = glob.cash{team} <> 0
-            let team_size = List.count!((x) String.eql(x@team,team), Map.values!(glob.bids))
-            let rebuy = (case glob.bids{player} as bid { none: false, some: String.eql(bid.value@team,team) })
-            let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 6)
-            let player_exists = Map.has!(player, App.HotS.players) && not(team =? "spectator")
-            //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
-            if can_buy && player_exists then
-              if has_player && has_team then 
-                let bid = glob.bids{player} <> App.HotS.Bid.new(0, "")
-                let history = App.HotS.History.new(team, player,  bid@team, bid@value)
-                let new_local = local@confirmation <- some(history)
-                App.set_local!(new_local)
+            App.pass!
+        else
+          if String.eql(event.id, "_spectate_") then
+            let new_local = local@joined <- true
+            let new_local = new_local@team <- "spectator"
+            IO {
+              App.watch!(String.take(16,Crypto.Keccak.hash("0"|room)))
+              App.set_local<App.HotS.State>(new_local)
+            }
+          else 
+            if String.eql(event.id, "_yes_") then 
+              case local.confirmation {
+                none: App.pass!
+                some:
+                  IO {
+                    //log("B")
+                    //IO.print("clicked: " | event.id)
+                    let action = App.HotS.Action.buy(team, pass, local.confirmation.value@item)
+                    let serial = Bits.hex.encode(Serializer.run!(App.HotS.Action.serializer, action))
+                    let serial = if Nat.mod(String.length(serial),2) =? 0 then serial else serial | "0"
+                    //log("sent-action: " | action@team | " <- " | action@player)
+                    //log("sent-serial:" | String.take(16,Crypto.Keccak.hash("0"|room)) | " " | serial)
+                    App.new_post!(String.take(16,Crypto.Keccak.hash("0"|room)), serial)
+                    let new_local = state.local@confirmation <- none
+                    App.set_local<App.HotS.State>(new_local)
+                  }
+              }
+            else
+              if String.eql(event.id, "_no_") then 
+              let new_local = state.local@confirmation <- none
+              App.set_local!(new_local)
+            else
+            //log(event.id)
+            //log("A")
+              let player = event.id
+              let has_player = Bool.not(String.is_empty(player))
+              let has_team = Bool.not(String.is_empty(team))
+              let player_value = (case glob.bids{player} as bid { none: 0, some: bid.value@value })
+              let team_cash = glob.cash{team} <> 0
+              let team_size = List.count!((x) String.eql(x@team,team), Map.values!(glob.bids))
+              let rebuy = (case glob.bids{player} as bid { none: false, some: String.eql(bid.value@team,team) })
+              let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 5)
+              let player_exists = Map.has!(player, App.HotS.players) && not(team =? "spectator")
+              //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
+              if can_buy && player_exists then
+                if has_player && has_team then 
+                  let bid = glob.bids{player} <> App.HotS.Bid.new(0, "")
+                  let history = App.HotS.History.new(team, player,  bid@team, bid@value)
+                  let new_local = local@confirmation <- some(history)
+                  App.set_local!(new_local)
+                else App.pass!
               else App.pass!
-            else App.pass!
     }
   } default App.pass!
 
@@ -704,7 +869,7 @@ App.HotS.post: App.Post<App.HotS.State>
         let team_cash = global.cash{post.team} <> initial_cash
         let team_size = List.count!((x) String.eql(x@team,post.team), Map.values!(global.bids))
         let rebuy = (case global.bids{post.player} as bid { none: false, some: String.eql(bid.value@team,post.team) })
-        let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 6)
+        let can_buy = if rebuy then team_cash >=? 1 else (team_cash >=? player_value) && (team_size <? 5)
         let player_exists = Map.has!(post.player, App.HotS.players)
         //log(Nat.show(team_cash) | " >=? " | Nat.show(player_value))
         if can_buy && player_exists then
