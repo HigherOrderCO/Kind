@@ -35,7 +35,7 @@ App.HotS.sort(bids: Map<App.HotS.Bid> cmp: Cmp, sorts: List<String>, a: Pair<Str
   }
 
 App.HotS.sort.name(a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
-  String.cmp(a@fst, b@fst)
+  Cmp.inv(String.cmp(a@fst, b@fst))
 
 App.HotS.sort.price(bids: Map<App.HotS.Bid> a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
   let a = bids{a@fst} <> App.HotS.Bid.new(0, "")
@@ -222,7 +222,8 @@ type App.HotS.Action {
 
 App.HotS.players: Map<App.HotS.Player>
   {
-    "Josuecs": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
+    "Psycho": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
+    "Josuecs": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.tank)
     "Sirkou": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
     "Adones": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
     "SorteSim": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
@@ -231,7 +232,7 @@ App.HotS.players: Map<App.HotS.Player>
     "Drau": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
     "Focofi": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
     "OnlyDBreeze": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
-    "FFJujubaKid": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
+    "Jujuba": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
     "Escondidinho": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.bruiser)
     // "Toros": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.bruiser)
     "JohnMirolha": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
