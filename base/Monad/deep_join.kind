@@ -1,0 +1,15 @@
+// Builds the `m (m (m ... a))` type, with `n` depth. Example:
+// `Nest(3, m, a)` is the same as `m(m(m(a)))`
+Monad.deep_join.Nest(n: Nat, F: Type -> Type, A: Type): Type
+  case n {
+    succ: F(Monad.deep_join.Nest(n.pred, F, A))
+    zero: A
+  }
+
+// Given a number `n`, a Monad `m`, and a joiner `∀a. m (m a)) -> m a`,
+// Returns the `∀ a . m (m (m ... a)) -> a` function, for `n` layers of `m`
+Monad.deep_join(n: Nat, m: Type -> Type, join: (a: Type) -> m(m(a)) -> m(a)): (a: Type) -> Monad.deep_join.Nest(Nat.succ(n), m, a) -> m(a)
+  case n {
+    zero: (a,x) x
+    succ: (a,x) Monad.deep_join(n.pred, m, join, a, join(Monad.deep_join.Nest(n.pred, m, a), x))
+  }!

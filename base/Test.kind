@@ -1,18 +1,416 @@
-Test: _
-  Either<String> {
-    get a = bar([[2]])
-    get b = foo(a)
-    return b
+foo : (f: Bool -> Bool) -> f == λx(?x{f,f}) | f == λx(?x{t,f}) | f == λx(?x{f,t}) | f == λx(?x{t,t})
+foo f = case f {
+  (λx.B):
+    // λx.B == λx(?x{f,f}) | λx.B == λx(?x{t,f}) | λx.B == λx(?x{f,t}) | λx.B == λx(?x{t,t})
+    // B : (x: Bool) ~> B
+    case B {
+      (?x{f,f}) => ...
+      (?x{f,t}) => ...
+      (?x{t,f}) => ...
+      (?x{t,t}) => ...
+    }
+}
+
+
+((a,b) == (c,d)) ~> (a == c, b == d)
+((a,b,c,[]) == (d,e,f,[])) ~> (a==d,b==e,c==f,[])
+(λx.f(x)) == (λy.g(y)) ~> 
+
+
+
+
+foo : (f: Bool -> Bool) -> f == λx(?x{f,f}) | f == λx(?x{t,f}) | f == λx(?x{f,t}) | f == λx(?x{t,t})
+foo f = case f {
+  (λx.B):
+    // λx.B == λx(?x{f,f}) | λx.B == λx(?x{t,f}) | λx.B == λx(?x{f,t}) | λx.B == λx(?x{t,t})
+    // B : (x: Bool) ~> B
+    case B {
+      case x {
+        t: t
+        f: t
+      }: left(left(refl))
+      case x {
+        t: t
+        f: f
+      }: left(right(refl))
+      case x {
+        t: f
+        f: t
+      }: right(left(refl))
+      case x {
+        t: f
+        f: f
+      }: right(right(refl))
+    }
+}
+
+funext.bool(
+  f: (x: Bool) -> Bool
+  g: (x: Bool) -> Bool
+  h: (x: Bool) -> f(x) == g(x)
+): f == g
+  case f g {
+    (λfx.F) (λgx.G):
+    // λx.F == λy.G
+    // F : {fx: Bool} Bool
+    // G : {gx: Bool} Bool
+    // h : (x: Bool) -> (λfx.F)(x) == (λgx.G)(x)
+    case F G {
+      ?fx{t,t} ?gx{t,t}:
+        // λfx.(?fx{t,t}) == λgx.(?gx{t,t})
+        // h : (x: Bool) -> ?x{t,t} == ?x{t,t}
+        let r = h(<x,y>) // 
+        h
+      ?fx{t,t} ?gx{t,f}:
+        // λfx.(?fx{t,t}) == λgx.(?gx{t,f})
+        // h : (x: Bool) -> ?x{t,t} == ?x{t,f}
+        case h {
+          (λhx.H):
+          // λfx.(?fx{t,t}) == λgx.(?gx{t,t})
+          // H: {hx: Bool} (λfx.?fx{t,t})(hx) == (λgx.?gx{t,f})(hx)
+          case H {
+            ?hx{refl,refl}:
+              
+          }
+        }
+      (...)
+    }
+  }
+  
+
+
+funext.bool(
+  f: (x: Bool) -> Bool
+  g: (x: Bool) -> Bool
+  h: (x: Bool) -> f(x) == g(x)
+): f == g
+  case f g {
+    (λfx.f(fx)) (λgx.f(gx)):
+    // λfx.f(fx) == λgx.g(gx)
+    // f(fx) : Bool
+    // f(gx) : Bool
+    // h     : (x: Bool) -> f(x) == g(x)
+    case f(fx) g(gx) {
+      ?fx{t,t} ?gx{t,t}:
+        // λfx.?fx{t,t} == λgx.?gx{t,t}
+        // h : (x: Bool) -> x{t,t} == x{t,t}
+        refl
+      ?fx{t,t} ?gx{t,f}:
+        // λfx.?fx{t,t} == λgx.?gx{t,f}
+        // h : (x: Bool) -> x{t,t} == x{t,f}
+        // h(
+      ...
+    }
+  }
+  
+
+
+
+next.bool(
+  f: (x: Bool) -> Bool
+  g: (x: Bool) -> Bool
+  h: (x: Bool) -> f(x) == g(x)
+): f == g
+  case f g {
+    (λx. case x {t,t}) (λx. case x {t,t}): 
+    // (λx. case x {t,t}) == (λx. case x {t,t})
+    // h: (x: Bool) -> (case x {t,t}) == (case x {t,t})
+    (λx. case x {t,t}) (λx. case x {t,f}): 
+    // (λx. case x {t,t}) == (λx. case x {t,f})
+    // h: (x: Bool) -> (case x {t,t}) == (case x {t,f})
   }
 
-bar(ll: List<List<Nat>>): Either<String, List<Nat>>
-  case ll {
-    nil: Either.left!!("no lists")
-    cons: Either.right!!(ll.head)
+
+
+
+next (λx. x(t,t)) (λx. x(t,t)) h = refl
+next (λx. x(t,t)) (λx. x(t,f)) h = absurd(h(f))
+...
+
+
+
+next.bool(
+  f: (x: Bool) -> Bool
+  g: (x: Bool) -> Bool
+  h: (x: Bool) -> f(x) == g(x)
+): f == g
+  case f g {
+    (λx. x(t,t)) (λx. x(t,t)): 
+    // λx.x(t,t) == λx.x(t,t)
+    // h: (x: Bool) -> x(t,t) == x(t,t)
+    (λx. x(t,t)) (λx. x(t,f)): 
+    // λx.x(t,t) == λx.x(t,f)
+    // h: (x: Bool) -> x(t,t) == x(t,f)
   }
 
-foo(l: List<Nat>): Either<String, Nat>
-  case l {
-    nil: Either.left!!("empty list")
-    cons: Either.right!!(l.head)
-  } 
+  foo : (7 + 7) = 14
+  bar = rewrite foo
+
+fun-ext :
+  (A : Type) ->
+  (B : A -> Type) ->
+  (f : (x : A) -> B x) -> 
+  (g : (x : A) -> B x) -> 
+  (h : (x : A) -> f x == g x) ->
+  f == g
+
+fun-ext =
+
+  // goal: f == g
+
+  eta-expand f
+  eta-expand g
+
+  // goal: (λx. f x) == (λx. g x)
+
+  rewrite K in (λx. f x) == (λx. K) with h x
+
+  // goal: (λx. f x) == (λx. f x)
+
+  refl
+
+
+
+
+
+
+
+
+a : (x : Bool) -> f x == 1
+b : P(λ x . 1 + f x)
+
+
+
+
+
+
+Equal.rewrite<A: Type, a: A, b: A>(e: Equal<A,a,b>)<P: A -> Type>(x: P(a)): P(b)
+  case e {
+    refl: x
+  } : P(e.b)
+
+Equal.rewrite<A: Type, a: A, b: A>(e: Equal<A,a,b>)<P: A -> Type>(x: P(a)): P(b)
+  case e {
+    refl: x
+  } : P(e.b)
+
+
+//case list {
+  //(λcons. λnil. (cons h t)): 
+    //...
+  //(λcons. λnil. nil):
+    //...
+//}
+
+
+
+
+
+
+f: Bool -> Bool
+case f(x) {
+  true: ...
+  false: ...
+}
+case f(x) {
+  case x { true: true, false: true }: ...
+  case x { true: true, false: false }: ...
+  case x { true: false, false: true }: ...
+  case x { true: false, false: false }: ...
+}
+
+case f(x) {
+  λt.λf.t: ...
+  λt.λf.f: ...
+}
+
+case f(x) {
+  x(λt.λf.f, λt.λf.f): ...
+  x(λt.λf.t, λt.λf.f): ...
+  x(λt.λf.f, λt.λf.t): ...
+  x(λt.λf.t, λt.λf.t): ...
+}
+
+
+
+// NOT ALLOWED
+case t : Type {
+  Type:
+    ...
+  Fn(A,B):
+    ...
+}
+
+
+case b : ((P: Type, t: P, f: P) -> P) {
+  (λP. λt. λf. t):
+  (λP. λt. λf. f):
+}
+
+case f : Bool -> Bool {
+  λx. case x { 0:0, 1:0 }: ...
+  λx. case x { 0:1, 1:0 }: ...
+  λx. case x { 0:0, 1:1 }: ...
+  λx. case x { 0:1, 1:1 }: ...
+}
+
+case f : Bool -> Bool -> Bool {
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+  λx. case x { 0: case y { 0:0, 1:0 }, 1: case y { 0:0, 1:0 } }: ...
+}
+
+// basicamente: quando dá case em uma função,
+// tem que dar case em sua variável
+
+
+case f : A -> B {
+  λx. case x { ... }
+}
+
+
+
+
+
+funext.bool(
+  f: (x: Bool) -> Bool
+  g: (x: Bool) -> Bool
+  h: (x: Bool) -> f(x) == g(x)
+): f == g
+  case f {
+    (λfx. _):
+      
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+funext<A,B>(
+  f: (x: A) -> B(x)
+  g: (x: A) -> B(x)
+  h: (x: A) -> f(a) == g(a)
+): f == g
+  case f g {
+    (λx.F):
+    // λx.F == λy.G
+    // F : {x:A} B(x)
+    // G : {y:A} B(x)
+    // h : F == G
+    case A {
+      ((Ax:Ai)->Ao(Ax)):
+        // λx.F == λy.G
+        // F : {x:((Ax:Ai)->Ao(Ax))} B(x)
+        // G : {y:((Ax:Ai)->Ao(Ax))} B(x)
+        // h : F == G
+        case F G {
+          ?x{(λh.I): _}
+          ?y{(λj.K): _}:
+
+
+          // λx.?x{(λh.I): _} == λy.?y{(λj.K): _}
+
+        }
+    }
+  }
+
+
+
+
+
+//Bool : Type
+//true : Bool
+//false : Bool
+
+//not : Bool -> Bool
+//not true = false
+//not false = true
+
+//not.id : (b: Bool) -> not(not(b)) == b
+//not.id true = ?a // not(not(true)) == true
+//not.id false = ?b true
+
+////foo : (b: Bool) -> b == t | b == f
+////foo b = case b {
+  ////t: left(refl)
+  ////f: rigth(refl)
+////}
+
+
+
+//IsTrue : (b: Bool) -> Type
+//indeed : IsTrue<true>
+
+//Equal : (A: Type) -> (a: A) -> (b: A) -> Type
+//refl : (A: Type) -> (a: A) -> Equal A a a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Eq(A: Type, a: A, b: A): Type
+  //self(P: Type) ->
+  //(r: Equal(Eq(A,a,b), self, Eq.r(A,a)) -> P) ->
+  //P
+
+//Eq.r(A: Type, a: A): Eq(A, a, a)
+  //(P, r) r(Equal.refl(Eq(A,a,a), Eq.r(A,a)))
+
+//B : Type
+  //self(P: Type) ->
+  //(t: (e: Equal(B, self, B.t)) -> P) ->
+  //(f: (e: Equal(B, self, B.f)) -> P) ->
+  //P
+
+//B.t: B
+  //(P, t, f) 
+  //t(Equal.refl(B, B.t))
+  
+//B.f: B
+  //(P, t, f)
+  //f(Equal.refl(B, B.f))
+
+//neg(b: B): B
+  //case b {
+    //t: B.f
+    //f: B.t
+  //}
+
+//neg.identity(b: B): neg(neg(b)) == b
+  //case b {
+    //t:
+      //?a
+      ////rewrite X in neg(neg(X)) == X with b.e
+      ////refl
+    //f:
+      //?b
+      ////rewrite X in neg(neg(X)) == X with b.e
+      ////refl
+  //}
