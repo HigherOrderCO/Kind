@@ -1,0 +1,50 @@
+Kind.Core.to_lambolt.lower_ids(term: Kind.Core.Term): Kind.Core.Term
+  case term {
+    var:
+      let term.name = String.to_lower(term.name)
+      Kind.Core.Term.var(term.name, term.indx)
+    ref:
+      let term.name = String.to_lower(term.name)
+      Kind.Core.Term.ref(term.name)
+    typ:
+      Kind.Core.Term.typ
+    all: 
+      let term.self = String.to_lower(term.self)
+      let term.name = String.to_lower(term.name)
+      Kind.Core.Term.all(
+        term.eras
+        term.self
+        term.name
+        Kind.Core.to_lambolt.lower_ids(term.xtyp)
+        (self, name)
+          Kind.Core.to_lambolt.lower_ids(term.body(self, name))
+      )
+    lam:
+      let term.name = String.to_lower(term.name)
+      let term.body = Kind.Core.to_lambolt.lower_ids . term.body
+      Kind.Core.Term.lam(
+        term.name
+        term.body
+      )
+    app:
+      let term.func = Kind.Core.to_lambolt.lower_ids(term.func)
+      let term.argm = Kind.Core.to_lambolt.lower_ids(term.argm)
+      Kind.Core.Term.app(term.func, term.argm)
+    let:
+      let term.name = String.to_lower(term.name)
+      let term.expr = Kind.Core.to_lambolt.lower_ids(term.expr)
+      let term.body = Kind.Core.to_lambolt.lower_ids . term.body
+      Kind.Core.Term.let(
+        term.name
+        term.expr
+        term.body
+      )
+    ann:
+      let term.expr = Kind.Core.to_lambolt.lower_ids(term.expr)
+      let term.type = Kind.Core.to_lambolt.lower_ids(term.type)
+      Kind.Core.Term.ann(
+        term.done
+        term.expr
+        term.type
+      )
+  }

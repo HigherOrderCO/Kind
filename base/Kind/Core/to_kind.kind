@@ -1,0 +1,55 @@
+Kind.Core.to_kind.hoas(fun: Kind.Core.Term -> Kind.Core.Term): Kind.Term -> Kind.Term
+  Kind.Core.to_kind . fun . Kind.Core.from_kind
+
+Kind.Core.to_kind.hoas.2(
+  fun: Kind.Core.Term -> Kind.Core.Term -> Kind.Core.Term
+): Kind.Term -> Kind.Term -> Kind.Term
+  (term0, term1)
+    Kind.Core.to_kind(fun(Kind.Core.from_kind(term0), Kind.Core.from_kind(term1)))
+
+Kind.Core.to_kind(term: Kind.Core.Term): Kind.Term
+  case term {
+    var:
+      Kind.Term.var(term.name, term.indx)
+
+    ref:
+      Kind.Term.ref(term.name)
+
+    typ:
+      Kind.Term.typ
+
+    all: 
+      Kind.Term.all(
+        term.eras
+        term.self
+        term.name
+        Kind.Core.to_kind(term.xtyp)
+        Kind.Core.to_kind.hoas.2(term.body)
+      )
+
+    lam:
+      Kind.Term.lam(
+        term.name
+        Kind.Core.to_kind.hoas(term.body)
+      )
+
+    app:
+      Kind.Term.app(
+        Kind.Core.to_kind(term.func)
+        Kind.Core.to_kind(term.argm)
+      )
+
+    let:
+      Kind.Term.let(
+        term.name
+        Kind.Core.to_kind(term.expr)
+        Kind.Core.to_kind.hoas(term.body)
+      )
+
+    ann:
+      Kind.Term.ann(
+        term.done
+        Kind.Core.to_kind(term.expr)
+        Kind.Core.to_kind(term.type)
+      )
+  }

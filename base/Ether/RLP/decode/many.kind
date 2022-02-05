@@ -1,0 +1,15 @@
+Ether.RLP.decode.many(bytes: Bytes): List<Ether.RLP>
+  case bytes {
+    nil:
+      []
+    cons:
+      let prefix = U8.to_nat(bytes.head)
+      if Nat.lte(prefix, 127) then
+        Ether.RLP.data([bytes.head]) & Ether.RLP.decode.many(bytes.tail)
+      else if Nat.lte(prefix, 191) then
+        let {head, tail} = Ether.RLP.split.length(128, bytes)
+        Ether.RLP.data(head) & Ether.RLP.decode.many(tail)
+      else
+        let {head, tail} = Ether.RLP.split.length(192, bytes)
+        Ether.RLP.node(Ether.RLP.decode.many(head)) & Ether.RLP.decode.many(tail)
+  }

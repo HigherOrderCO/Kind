@@ -1,0 +1,14 @@
+Nat.pow.lte.lte_base(
+    a: Nat
+    b: Nat
+    c: Nat
+    Hyp: Nat.lte(a, b) == true
+):  Equal<Bool>(Nat.lte(Nat.pow(a, c), Nat.pow(b, c)), true)
+    //if a<=b then a^c <= b^c
+    case c {
+        zero:
+            Nat.Order.refl(1)
+        succ: 
+            let ind = Nat.pow.lte.lte_base(a, b, c.pred, Hyp)
+            Nat.Order.mul.combine(a, b, Nat.pow(a, c.pred), Nat.pow(b, c.pred), Hyp, ind)
+    }!

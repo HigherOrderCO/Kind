@@ -1,0 +1,59 @@
+Word.to_nat.from_nat<size: Nat>(
+  n: Nat
+): Word.to_nat(size, Nat.to_word(size, n)) == Nat.mod(n, Nat.pow(2, size))
+  case size {
+    zero:
+      let case_elim = Word.size.zero(Nat.to_word(0, n))
+      let qed =
+        case Nat.to_word(0, n) {
+          e:
+            (case_elim)
+              case refl :: 1 == Nat.pow(2, 0) {
+                refl:
+                  case Nat.mod.one(n) {
+                    refl:
+                      refl
+                  }: Equal(Nat, self.b, Nat.mod(n, 1))
+              }: Equal(Nat, 0, Nat.mod(n, self.b))
+          i:
+            (case_elim)
+              Empty.absurd!(case_elim)
+          o:
+            (case_elim)
+              Empty.absurd!(case_elim)
+        }: (case_elim: self((w, w.size) Type, Unit, (size, pred) Empty, (size, pred) Empty)) -> (Word.to_nat(self.size, self) == Nat.mod(n, Nat.pow(2, 0)))
+      qed(case_elim)
+    succ:
+      case n {
+        zero:
+          let lemma_right =
+            let contra = Nat.pow.lte(1, Nat.succ(size.pred))
+            (case Nat.pow(2,Nat.succ(size.pred)) {
+              zero:
+                (contra)
+                  Empty.absurd!(Bool.true_neq_false(contra))
+              succ:
+                (contra)
+                  refl
+            }: (contra: Nat.lte(self,0) == Bool.false) -> (0 == Nat.mod(0,self)))(contra)
+          let lemma_left = mirror(Word.to_nat.zero(Nat.succ(size.pred)))
+          chain(lemma_left, lemma_right)
+        succ:
+          let lemma = refl :: Word.inc(Nat.succ(size.pred),Nat.to_word(Nat.succ(size.pred),n.pred)) == Nat.to_word(Nat.succ(size.pred),Nat.succ(n.pred))
+          case lemma {
+            refl:
+              case Word.to_nat.inc(Nat.succ(size.pred), Nat.to_word(Nat.succ(size.pred), n.pred)) {
+                refl:
+                  let ind = mirror(Word.to_nat.from_nat(Nat.succ(size.pred), n.pred))
+                  case ind {
+                    refl:
+                      let calc = Nat.mod.succ_left(n.pred,Nat.pow(2,Nat.succ(size.pred)), Nat.pow.lte(1, Nat.succ(size.pred)))
+                      case calc {
+                        refl:
+                          Equal.refl(Nat, Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred))))
+                      }: Equal(Nat, calc.b, Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred))))
+                  }: Nat.mod(Nat.succ(ind.b),Nat.pow(2,Nat.succ(size.pred))) == Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred)))
+              }: Equal(Nat, self.b, Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred))))
+          }: Equal(Nat, Word.to_nat(Nat.succ(size.pred),lemma.b), Nat.mod(Nat.succ(n.pred),Nat.pow(2,Nat.succ(size.pred))))
+      }!
+  }!

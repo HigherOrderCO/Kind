@@ -1,0 +1,2 @@
+Ether.RLP.from_string(str: String): Maybe<Ether.RLP>
+  Parser.run!(Ether.RLP.parser, str)

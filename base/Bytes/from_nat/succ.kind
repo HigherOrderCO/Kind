@@ -1,0 +1,18 @@
+Bytes.from_nat.succ(
+  n: Nat
+  H: Equal(Bool, Nat.ltn(0, n), true)
+): Equal(Bool, Nat.ltn(0, List.length(U8, Bytes.from_nat(n))), true)
+  case n with H {
+    zero:
+      Empty.absurd!(Bool.false_neq_true(H))
+    succ:
+      let concat_length = List.concat.length(U8, Bytes.from_nat(Nat.succ(n.pred)/256),[U8.from_nat(Nat.mod(Nat.succ(n.pred),256))])
+      case concat_length {
+        refl:
+          let comm = Nat.add.comm(List.length(U8,List.cons(U8,U8.from_nat(Nat.mod(Nat.succ(n.pred),256)),List.nil(U8))),List.length(U8,Bytes.from_nat(Nat.div(Nat.succ(n.pred),256))))
+          case comm {
+            refl:
+              refl
+          }: Equal(Bool, Nat.ltn(0,comm.b), true)
+      }: Equal(Bool, Nat.ltn(0,concat_length.b), true)
+  }!

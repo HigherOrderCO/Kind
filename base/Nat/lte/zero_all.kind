@@ -1,0 +1,5 @@
+Nat.lte.zero_all(y : Nat) : Nat.lte(0, y) == true
+  case y {
+   zero : refl
+   succ : Nat.lte.zero_all(y.pred)
+  }!

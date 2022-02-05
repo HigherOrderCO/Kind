@@ -1,0 +1,21 @@
+Nat.Order.Ineq.cauchy_lemma(
+  a: Nat
+  b: Nat
+  n: Nat
+  u: Vector<Nat>(n)
+  v: Vector<Nat>(n)
+  H: Nat.lte(
+       Nat.pow(Vector.dot_nat(n, u, v), 2)
+       Nat.mul(Vector.dot_nat(n, u, u), Vector.dot_nat(n, v, v)))
+     == true
+): Equal<Bool>(Nat.lte(Nat.double(Nat.mul(Vector.dot_nat(n,u,v),Nat.mul(a,b))), Nat.add(Nat.mul(Vector.dot_nat(n,u,u),Nat.pow(a,2)),Nat.mul(Vector.dot_nat(n,v,v),Nat.pow(b,2)))), true)
+  let H1 = Nat.Order.mul.right!!(Nat.pow(Nat.mul(a, b),2), H)
+  let H2 = Nat.Order.mul.left!!(4, H1)
+  let H3 = H2 :: rewrite X in (Nat.lte(_, Nat.mul(4, Nat.mul(_, X))) == _) with Nat.pow.mul_dist!!(2)
+  let H4 = H3 :: rewrite X in (Nat.lte(_, Nat.mul(4, X)) == _) with Nat.mul.comm.swap(Vector.dot_nat(n,u,u), Vector.dot_nat(n,v,v), Nat.pow(a,2), Nat.pow(b,2))
+  let H5 = Nat.Order.Ineq._2am_gm_v4(Nat.mul(Vector.dot_nat(n,u,u),Nat.pow(a,2)), Nat.mul(Vector.dot_nat(n,v,v),Nat.pow(b,2)))
+  let H6 = Nat.Order.transitivity!!!(H4, H5)
+  let H7 = H6 :: rewrite X in (Nat.lte(Nat.mul(4,X),_) == _) with mirror(Nat.pow.mul_dist!!(2))
+  let H8 = H7 :: rewrite X in (Nat.lte(X,_) == _) with mirror(Nat.pow.mul_dist(2, Nat.mul(Vector.dot_nat(n,u,v),Nat.mul(a,b)), 2))
+  let H9 = Nat.lte.mul_square!!(H8)
+  H9 :: rewrite X in (Nat.lte(X, _) == _) with mirror(Nat.double_mul!)

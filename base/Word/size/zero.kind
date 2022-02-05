@@ -1,0 +1,13 @@
+Word.size.zero(w: Word(0)): w((w, w.size) Type, Unit, (size, pred) Empty, (size, pred) Empty)
+  let contra = refl :: 0 == 0
+  (case w {
+    e:
+      (contra)
+        unit
+    o:
+      (contra)
+        Empty.absurd!(Nat.succ_neq_zero(w.size, contra))
+    i:
+      (contra)
+        Empty.absurd!(Nat.succ_neq_zero(w.size, contra))
+  }: (h: w.size == 0) -> w((k, k.size) Type, Unit, (size, pred) Empty, (size, pred) Empty))(contra)

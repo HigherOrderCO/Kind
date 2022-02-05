@@ -1,0 +1,14 @@
+Nat.add.lte(x : Nat, y : Nat) : Nat.lte(y, Nat.add(x, y)) == true
+  case x {
+    succ : case y with {
+      succ : 
+        let rec = Nat.add.lte(x.pred, y.pred)
+        let r = Nat.add.succ_both(x.pred, y.pred)
+        let r = Equal.mirror(Nat, Nat.add(Nat.succ(x.pred),Nat.succ(y.pred)), Nat.succ(Nat.succ(Nat.add(x.pred,y.pred))), r)
+        case r {
+          refl : Nat.lte.succ_right!!(rec)
+        }!
+      zero : Nat.lte.zero_all(Nat.add(Nat.succ(x.pred),0))
+    }!
+    zero : Nat.Order.refl(y)
+  }!

@@ -1,0 +1,23 @@
+Word.to_nat.bound<
+  size: Nat
+>(w: Word(size)
+): Equal(Bool, Nat.lte(Nat.succ(Word.to_nat(size, w)), Nat.pow(2, size)), true)
+  case w {
+    e:
+      refl
+    o:
+      let ind = Word.to_nat.bound(w.size, w.pred)
+      let lemma = case Nat.mul.distrib_left(2, 1, Word.to_nat(w.size,w.pred)) {
+        refl:
+          Nat.Order.mul.left(Nat.succ(Word.to_nat(w.size,w.pred)), Nat.pow(2,w.size), 2, ind)
+      }: Equal(Bool, Nat.lte(self.b, Nat.mul(2, Nat.pow(2, w.size))), true)
+      let qed = Nat.lte.succ_left(Nat.succ(Nat.mul(2, Word.to_nat(w.size,w.pred))), Nat.mul(2, Nat.pow(2,w.size)), lemma)
+      qed
+    i:
+      let ind = Word.to_nat.bound(w.size, w.pred)
+      let qed = case Nat.mul.distrib_left(2, 1, Word.to_nat(w.size,w.pred)) {
+        refl:
+          Nat.Order.mul.left(Nat.succ(Word.to_nat(w.size,w.pred)), Nat.pow(2,w.size), 2, ind)
+      }: Equal(Bool, Nat.lte(self.b, Nat.mul(2, Nat.pow(2, w.size))), true)
+      qed
+  }: Equal(Bool, Nat.lte(Nat.succ(Word.to_nat(w.size, w)), Nat.pow(2, w.size)), true)

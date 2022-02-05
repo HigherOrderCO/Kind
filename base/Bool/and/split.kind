@@ -1,0 +1,12 @@
+Bool.and.split(a: Bool, b: Bool): Bool.and(a, b)(() Type, And<a == true, b == true>, Or<a == false, b == false>)
+  case a {
+    true:
+      case b {
+        true:
+          {refl, refl}
+        false:
+          right(refl)
+      }!
+    false:
+      left(refl)
+  }!

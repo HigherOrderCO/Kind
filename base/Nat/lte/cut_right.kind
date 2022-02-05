@@ -1,0 +1,10 @@
+Nat.lte.cut_right(
+  a: Nat
+  b: Nat
+  c: Nat
+  H: Equal(Bool, Nat.lte(Nat.add(a, b), c), true)
+): Equal(Bool, Nat.lte(a, c), true)
+  case Nat.add.comm(b, a) with H: Nat.lte(self.b, c) == true {
+    refl:
+      Nat.lte.cut_left(b, a, c, H)
+  }!

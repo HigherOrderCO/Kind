@@ -1,2 +1,12 @@
-Nat.mod.self(a: Nat): (Nat.succ(a) % Nat.succ(a)) == 0
-    Nat.mod.go_self(a,0)
+Nat.mod.self(a: Nat, H: Equal(Bool, Nat.ltn(0, a), true)): Equal(Nat, Nat.mod(a, a), 0)
+  case Equal.mirror(Bool, Nat.lte(a, a), true, Nat.Order.refl(a)) {
+    refl:
+      case Equal.mirror(Nat, Nat.sub(a, a), 0, Nat.sub.cancel(a)) {
+        refl:
+          let cond = Equal.mirror(Bool, Nat.lte(a,0), false, Nat.lte.comm.true(0, a, H))
+          case cond {
+            refl:
+              Equal.refl(Nat, 0)
+          }: Equal(Nat, Pair.snd(Nat,Nat,cond.b(() Pair(Nat,Nat),Nat.div_mod.go(a,2,Nat.sub(0,a)),Pair.new(Nat,Nat,1,0))), 0)
+      }: Equal(Nat, Pair.snd(Nat,Nat,Nat.div_mod.go(a,1,self.b)), 0)
+  }: Equal(Nat, Pair.snd(Nat,Nat,self.b(() Pair(Nat,Nat),Nat.div_mod.go(a,1,Nat.sub(a,a)),Pair.new(Nat,Nat,0,a))), 0)

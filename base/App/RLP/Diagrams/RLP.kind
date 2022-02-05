@@ -1,0 +1,73 @@
+App.RLP.Diagrams.RLP: DOM
+  <svg class="railroad-diagram" width="302.5" height="142" viewBox="0 0 302.5 142"
+      xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(.5 .5)">
+          <g>
+              <path d="M20 21v20m10 -20v20m-10 -10h20"></path>
+          </g>
+          <g>
+              <path d="M40 31h0"></path>
+              <path d="M262.5 31h0"></path>
+              <path d="M40 31h20"></path>
+              <g class="non-terminal ">
+                  <path d="M60 31h64.25"></path>
+                  <path d="M178.25 31h64.25"></path>
+                  <rect x="124.25" y="20" width="54" height="22"></rect>
+                  <text x="151.25" y="35">"data"</text>
+              </g>
+              <path d="M242.5 31h20"></path>
+              <path d="M40 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"></path>
+              <g>
+                  <path d="M60 61h0"></path>
+                  <path d="M242.5 61h0"></path>
+                  <g class="terminal ">
+                      <path d="M60 61h0"></path>
+                      <path d="M88.5 61h0"></path>
+                      <rect x="60" y="50" width="28.5" height="22" rx="10" ry="10"></rect>
+                      <text x="74.25" y="65">"["</text>
+                  </g>
+                  <path d="M88.5 61h10"></path>
+                  <g>
+                      <path d="M98.5 61h0"></path>
+                      <path d="M204 61h0"></path>
+                      <path d="M98.5 61h20"></path>
+                      <g>
+                          <path d="M118.5 61h65.5"></path>
+                      </g>
+                      <path d="M184 61h20"></path>
+                      <path d="M98.5 61a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"></path>
+                      <g>
+                          <path d="M118.5 81h0"></path>
+                          <path d="M184 81h0"></path>
+                          <path d="M118.5 81h10"></path>
+                          <g class="non-terminal ">
+                              <path d="M128.5 81h0"></path>
+                              <path d="M174 81h0"></path>
+                              <rect x="128.5" y="70" width="45.5" height="22"></rect>
+                              <text x="151.25" y="85">"RLP"</text>
+                          </g>
+                          <path d="M174 81h10"></path>
+                          <path d="M128.5 81a10 10 0 0 0 -10 10v10a10 10 0 0 0 10 10"></path>
+                          <g class="terminal ">
+                              <path d="M128.5 111h8.5"></path>
+                              <path d="M165.5 111h8.5"></path>
+                              <rect x="137" y="100" width="28.5" height="22" rx="10" ry="10"></rect>
+                              <text x="151.25" y="115">","</text>
+                          </g>
+                          <path d="M174 111a10 10 0 0 0 10 -10v-10a10 10 0 0 0 -10 -10"></path>
+                      </g>
+                      <path d="M184 81a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"></path>
+                  </g>
+                  <path d="M204 61h10"></path>
+                  <g class="terminal ">
+                      <path d="M214 61h0"></path>
+                      <path d="M242.5 61h0"></path>
+                      <rect x="214" y="50" width="28.5" height="22" rx="10" ry="10"></rect>
+                      <text x="228.25" y="65">"]"</text>
+                  </g>
+              </g>
+              <path d="M242.5 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"></path>
+          </g>
+          <path d="M 262.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"></path>
+      </g>
+  </svg>

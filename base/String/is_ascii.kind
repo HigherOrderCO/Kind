@@ -1,0 +1,10 @@
+String.is_ascii(s: String): Bool
+  case s {
+    nil:
+      true
+    cons:
+      if s.head <? 255 then
+        String.is_ascii(s.tail)
+      else
+        false
+  }

@@ -1,4 +1,4 @@
-Nat.add.succ_right(a: Nat, b: Nat): (a + Nat.succ(b)) == Nat.succ(Nat.add(a,b))
+Nat.add.succ_right(a: Nat, b: Nat): Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a,b)))
   case a {
     zero: refl
     succ:

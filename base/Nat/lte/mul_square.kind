@@ -1,0 +1,35 @@
+Nat.lte.mul_square(
+  a: Nat
+  b: Nat
+  H: Nat.lte(Nat.pow(a, 2), Nat.pow(b, 2)) == true
+): Nat.lte(a, b) == true
+  case b with H {
+    zero: 
+      let H1 = Nat.lte.zero_right(Nat.pow(a, 2), H)
+      let H2 = Nat.mul.equal_zero(a, a*1, H1)
+      case H2 {
+        left: Nat.lte.zero_all(0) :: rewrite X in (Nat.lte(X, 0) == true) with mirror(H2.value)
+        right: 
+          let H3 = H2.value :: rewrite X in (X == 0) with Nat.mul.one_right(a)
+          Nat.lte.zero_all(0) :: rewrite X in (Nat.lte(X, 0) == true) with mirror(H3)
+      }
+    succ: 
+      let H1 = Nat.Order.add.right(Nat.pow(a, 2), Nat.pow(Nat.succ(b.pred), 2), Nat.pow(Nat.succ(b.pred), 2), H)
+      let H3 = Nat.Order.Ineq._2am_gm_v3(a, Nat.succ(b.pred))
+      let H4 = Nat.Order.transitivity(Nat.mul(2,Nat.mul(a,Nat.succ(b.pred))), Nat.add(Nat.pow(a,2),Nat.pow(Nat.succ(b.pred),2)), Nat.add(Nat.pow(Nat.succ(b.pred),2),Nat.pow(Nat.succ(b.pred),2)), H3, H1)
+      let aux = Nat.add.2_add(Nat.pow(Nat.succ(b.pred),2))
+      let H5 = Equal.rewrite<Nat>(
+          Nat.add(Nat.pow(Nat.succ(b.pred),2),Nat.pow(Nat.succ(b.pred),2)), Nat.mul(2,Nat.pow(Nat.succ(b.pred),2))
+          aux,
+          (X) Equal<Bool>(Nat.lte(Nat.mul(2,Nat.mul(a,Nat.succ(b.pred))),X), true)
+          H4
+        )
+      let H6 = Nat.lte.mul_left_simpl(Nat.mul(a,Nat.succ(b.pred)), 1, Nat.pow(Nat.succ(b.pred),2), H5)
+      let H7 = Equal.rewrite<Nat>(
+          Nat.mul(Nat.succ(b.pred), 1), Nat.succ(b.pred)
+          Nat.mul.one_right(Nat.succ(b.pred)),
+          (X) Equal<Bool>(Nat.lte(Nat.mul(a,Nat.succ(b.pred)),Nat.mul(Nat.succ(b.pred), X)), true)
+          H6
+        )
+      Nat.lte.mul_right_simpl(a, b.pred, Nat.succ(b.pred), H7)
+  }!

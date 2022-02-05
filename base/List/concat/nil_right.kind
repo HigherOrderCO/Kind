@@ -1,0 +1,10 @@
+List.concat.nil_right<A: Type>(l: List<A>): l == l ++ []
+  case l {
+    nil:
+      refl
+    cons:
+      case List.concat.nil_right<A>(l.tail) {
+        refl:
+          refl
+      }: Equal(List<A>, List.cons(A, l.head, l.tail), List.cons(A, l.head, self.b))
+  }!

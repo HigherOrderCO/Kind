@@ -1,0 +1,7 @@
+Word.to_nat.safe<size: Nat>(
+  n: Nat, H: Nat.lte(Nat.succ(n), Nat.pow(2, size)) == true
+): n == Word.to_nat(size, Nat.to_word(size, n))
+  case Nat.mod.le_mod(n, Nat.pow(2, size), H) {
+    refl:
+      mirror(Word.to_nat.from_nat(size, n))
+  }: Equal(Nat, self.b, Word.to_nat(size, Nat.to_word(size, n)))

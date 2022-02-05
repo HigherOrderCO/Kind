@@ -1,0 +1,144 @@
+// App states (local = clicks, global = visitors)
+App.Cmaci.State: App.State
+  App.State.new(App.Cmaci.State.Local, Unit)
+
+App.Cmaci.Parser.vector_set: Parser(List<V3>)
+  Kind.Parser.items!("{", Parser.V3, "}")
+
+type App.Cmaci.State.Local {
+  new(
+    answer: String
+    status: App.Cmaci.Status
+    parser_error: Maybe<String>
+  )
+}
+
+type App.Cmaci.Status {
+  unanswered
+  incorrect
+  correct
+} deriving (stringifier)
+
+App.Cmaci.Status.show(s: App.Cmaci.Status): String
+  Stringifier.run!(App.Cmaci.Status.stringifier, s)
+
+App.Cmaci.State.Local.show(st: App.Cmaci.State.Local): String
+  open st
+  "{ answer: \""|st.answer|"\", status: "|App.Cmaci.Status.show(st.status)|", parser_error: "|(st.parser_error <> "[none]")|" }"
+
+// Initial state
+App.Cmaci.init: App.Init<App.Cmaci.State>
+  App.Store.new<App.Cmaci.State>(
+    App.Cmaci.State.Local.new("", App.Cmaci.Status.unanswered, none)
+    unit
+  )
+
+App.Cmaci.css: String
+`
+  .center-box {
+        margin: auto;
+        max-width: 512px;
+      }
+  .text-input {
+    width: 100%;
+  }
+`
+// Render function
+App.Cmaci.draw: App.Draw<App.Cmaci.State>
+  (state)
+  <div>
+    <style> App.Cmaci.css </style>
+    <main class="center-box">
+      <div>
+        <div>"Encontre uma base para o espaço de soluções do sistema"</div>
+        <br></br>
+          <pre><code>
+` 1*x +  2*y - 4*z = 0
+        7*y - 3*z = 0
+-1*x + 12*y - 2*z = 0
+-2*x +  3*y + 5*z = 0`
+          </code></pre>
+        <br></br>
+        <div>"ex.: {(-1, 2.3, 5.3), (0, 1, 1)}"</div>
+        <input id="input" class="text-input"></input>
+        <button id="verify">
+          "Verificar"
+        </button>
+        <p>state@local@parser_error <> ""</p>
+        <p>
+          case state@local@status {
+            unanswered:
+              ""
+            correct:
+              "Correto ✅"
+            incorrect:
+              "Incorreto ❌"
+          }
+        </p>
+        <br></br>
+        <br></br>
+        <p>"Debug: "|App.Cmaci.State.Local.show(state@local)</p>
+      </div>
+    </main>
+  </div>
+
+App.Cmaci.verify(v: List<V3>): Bool
+  // TODO
+  true
+
+// Event handler
+App.Cmaci.when: App.When<App.Cmaci.State>
+  (event, store)
+  let state = store@local
+  case event {
+    input:
+      switch String.eql(event.id) {
+        "input":
+          let state = state@answer <- event.text
+          App.set_local!(state)
+      } default App.pass!
+    init:
+      App.pass!
+    mouse_click:
+      switch String.eql(event.id) {
+        "verify":
+           let reply = App.Cmaci.Parser.vector_set(Parser.State.from_code(state@answer))
+           case reply {
+             value:
+               let state = state@parser_error <- none
+               case App.Cmaci.verify(reply.val) {
+                 true:
+                   let state = state@status <- App.Cmaci.Status.correct
+                   App.set_local!(state)
+                 false:
+                   let state = state@status <- App.Cmaci.Status.incorrect
+                   App.set_local!(state)
+               }
+             error:
+               open reply.err
+               let state = state@parser_error <- some(reply.err.msg)
+               let state = state@status <- App.Cmaci.Status.unanswered
+               App.set_local!(state)
+           }
+      } default App.pass!
+  } default App.pass!
+
+// Global ticker: not used
+App.Cmaci.tick: App.Tick<App.Cmaci.State>
+  App.no_tick<App.Cmaci.State>
+
+// Global visitor: counts posts to room_zero
+App.Cmaci.post: App.Post<App.Cmaci.State>
+  (time, room, addr, data, global_state)
+    global_state
+
+// A "Hello, world!" + counter application
+App.Cmaci: App<App.Cmaci.State>
+  App.new<App.Cmaci.State>(
+    App.Cmaci.init
+    App.Cmaci.draw
+    App.Cmaci.when
+    App.Cmaci.tick
+    App.Cmaci.post
+  )
+

@@ -1,0 +1,4 @@
+Nat.pow.pow_square(a: Nat): Nat.pow(a,2) == Nat.mul(a,a)
+  let h = Nat.reflexivity(a*a)
+  let h1 = h :: rewrite X in (Nat.mul(a,X) == Nat.mul(a,a)) with Nat.pow.one_right(a)
+  h1

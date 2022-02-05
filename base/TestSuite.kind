@@ -1,4 +1,22 @@
 type TestSuite {
-  unit(name: String, result: Maybe<String>)
+  unit(name: String, result: IO<Maybe<String>>)
   many(name: String, list: List<TestSuite>)
 }
+
+TestSuite.run(t: TestSuite, depth: Nat): IO<Unit>
+  let ind = ""
+  for n from 0 to depth with ind:
+    ind|"  "
+  case t {
+    unit:
+      IO {
+        get result = t.result
+        IO.print(ind|TestSuite.show.test(t.name, result))
+      }
+    many:
+      IO {
+        IO.print(ind|t.name)
+        for x in t.list:
+          TestSuite.run(x, 1 + depth)
+      }
+  }

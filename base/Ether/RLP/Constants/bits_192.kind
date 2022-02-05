@@ -1,2 +1,0 @@
-Ether.RLP.Constants.bits_192 : Bits
-  Nat.to_bits(192)

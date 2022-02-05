@@ -68,10 +68,13 @@ Kind.Core.error(str : String, def_name : String, term : Kind.Core.Term, type : M
 
 Kind.Core.Term.show(term : Kind.Core.Term) : String
   case term {
-    var : term.name
-    ref : term.name
-    typ : "*"
-    all : 
+    var:
+      term.name
+    ref:
+      term.name
+    typ:
+      "*"
+    all: 
       let bind = if term.eras then "%" else "@"
       let self = term.self
       let name = term.name
@@ -387,20 +390,20 @@ Kind.Core.type_infer(term : Kind.Core.Term, def_name : String, defs: Kind.Core.D
   def return = Kind.Core.Term.return
   def throw = Kind.Core.error
   case term {
-    var : return(Kind.Core.Term.var(term.name, term.indx))
-    ref : case Map.get!(term.name, defs) as reference {
-      none : throw("Unbound reference", def_name, term, none, ctx)
-      some : 
+    var: return(Kind.Core.Term.var(term.name, term.indx))
+    ref: case Map.get!(term.name, defs) as reference {
+      none: throw("Unbound reference", def_name, term, none, ctx)
+      some: 
         open reference.value as reference
         return(reference.type)
     }
-    typ : return(Kind.Core.Term.typ)
-    app : 
+    typ: return(Kind.Core.Term.typ)
+    app: 
       IO {
         get func_infer  = Kind.Core.type_infer(term.func, def_name, defs, ctx)
         let func_typ = Kind.Core.reduce(func_infer, defs)
         case func_typ {
-          all : 
+          all: 
              IO {
                let self_var = Kind.Core.Term.ann(true, term.func, func_typ)
                let name_var = Kind.Core.Term.ann(true, term.argm, func_typ.xtyp)
@@ -410,23 +413,23 @@ Kind.Core.type_infer(term : Kind.Core.Term, def_name : String, defs: Kind.Core.D
              }
           } default throw("Non-function application.", def_name, term, none, ctx)
       }
-    let : 
-        IO {
-          get expr_typ = Kind.Core.type_infer(term.expr, def_name, defs, ctx)
-          let expr_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx)+1), expr_typ)
-          let body_ctx = {term.name, expr_typ} & ctx  
-          Kind.Core.type_infer(term.body(expr_var), def_name, defs, body_ctx)
-        }
-    all : 
-         IO {
-           let self_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.self, List.length!(ctx)), term)
-           let name_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx)), term.xtyp)
-           let body_ctx = {term.self, term} & {term.name, term.xtyp} & ctx
-           Kind.Core.type_check(term.xtyp, Kind.Core.Term.typ, def_name, defs, ctx)
-           Kind.Core.type_check(term.body(self_var, name_var), Kind.Core.Term.typ, def_name, defs, body_ctx)
-           return (Kind.Core.Term.typ)
-         }
-    ann : 
+    let:
+      IO {
+        get expr_typ = Kind.Core.type_infer(term.expr, def_name, defs, ctx)
+        let expr_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx)+1), expr_typ)
+        let body_ctx = {term.name, expr_typ} & ctx  
+        Kind.Core.type_infer(term.body(expr_var), def_name, defs, body_ctx)
+      }
+    all:
+      IO {
+        let self_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.self, List.length!(ctx)), term)
+        let name_var = Kind.Core.Term.ann(true, Kind.Core.Term.var(term.name, List.length!(ctx)), term.xtyp)
+        let body_ctx = {term.self, term} & {term.name, term.xtyp} & ctx
+        Kind.Core.type_check(term.xtyp, Kind.Core.Term.typ, def_name, defs, ctx)
+        Kind.Core.type_check(term.body(self_var, name_var), Kind.Core.Term.typ, def_name, defs, body_ctx)
+        return (Kind.Core.Term.typ)
+      }
+    ann:
         if not(term.done) then
           Kind.Core.type_check(term.expr, term.type, def_name defs, ctx)
         else
@@ -437,7 +440,7 @@ Kind.Core.type_infer(term : Kind.Core.Term, def_name : String, defs: Kind.Core.D
 
 Kind.Core.parse_defs(code : String) : Kind.Core.Defs
   case code {
-    cons : 
+    cons: 
       let {code, skip} = Kind.Core.read.spaces(code)
       let {code, name} = Kind.Core.read.name(code)
       let {code, skip} = Kind.Core.read.spaces(code)
@@ -453,7 +456,8 @@ Kind.Core.parse_defs(code : String) : Kind.Core.Defs
       Map.set!(name, Kind.Core.Def.new(name, type([]), body([])), map)
      // {name : Kind.Core.Def.new(name, type([]), body([]))}
 
-    nil : {}
+    nil:
+      {}
   }
 
 Kind.Core.read(code: String): Maybe<Kind.Core.Term>

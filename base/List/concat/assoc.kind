@@ -1,0 +1,11 @@
+List.concat.assoc<A: Type>(
+  xs: List<A>,
+  ys: List<A>,
+  zs: List<A>
+): (xs ++ ys ++ zs) == (xs ++ ys) ++ zs
+  case xs {
+    nil: refl
+    cons: let ind = User.rigille.List.cat_assoc!(xs.tail, ys, zs)
+          let qed = apply(List.cons<A>(xs.head), ind)
+          qed
+  }!

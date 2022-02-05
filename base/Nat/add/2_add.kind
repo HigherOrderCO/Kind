@@ -1,0 +1,5 @@
+Nat.add.2_add(
+  a: Nat
+): (a+a) == (2*a)
+  Nat.double_add(a) :: rewrite X in (_==X) with Nat.double_mul!
+  

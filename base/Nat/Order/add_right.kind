@@ -1,0 +1,16 @@
+Nat.Order.add.right(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), true)
+): Equal<Bool>(Nat.lte(Nat.add(a, c), Nat.add(b, c)), true)
+  let lem = Nat.Order.add.left(a, b, c, Hyp)
+  let lem = Equal.rewrite<Nat>(
+    Nat.add(c, a), Nat.add(a, c), Nat.add.comm(c, a),
+    (x) Equal<Bool>(Nat.lte(x, Nat.add(c, b)), true), lem
+  )
+  let qed = Equal.rewrite<Nat>(
+    Nat.add(c, b), Nat.add(b, c), Nat.add.comm(c, b),
+    (x) Equal<Bool>(Nat.lte(Nat.add(a, c), x), true), lem
+  )
+  qed

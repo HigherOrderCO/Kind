@@ -1,4 +1,4 @@
-const { Component, render } = require("inferno");
+const { Component, render, Fragment } = require("inferno");
 const h = require("inferno-hyperscript").h;
 const apps = require("./apps/index.js");
 const ethsig = require("nano-ethereum-signer");
@@ -459,8 +459,14 @@ module.exports = class AppPlay extends Component {
   // Renders a document
   render_dom(elem) {
     //console.log("render_dom", elem);
+    // console.log(elem._);
     switch (elem._) {
       // Renders a HTML element
+      case "DOM.fragment":
+        console.log("no fragmento");
+        return h(Fragment, {}, 
+          utils.list_to_array(elem.children).map(x => this.render_dom(x))
+        );
       case "DOM.node":
         let props = utils.map_to_object(elem.props);
         let style = utils.map_to_object(elem.style);

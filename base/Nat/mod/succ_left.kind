@@ -1,0 +1,44 @@
+Nat.mod.succ_left(
+  n: Nat, m: Nat
+  H: Equal(Bool, Nat.lte(m, 0), false)
+): Equal(Nat, Nat.mod(Nat.succ(n), m), Nat.mod(Nat.succ(Nat.mod(n, m)), m))
+  let m_not_zero = Nat.lte.comm.false(m, 0, H)
+  let H = Nat.div_mod.recover(n, m, m_not_zero)
+  let H = apply(Nat.succ, H)
+  let H = mirror(H) :: Equal(Nat, Nat.succ(n), Nat.add(Nat.succ(Nat.mod(n,m)),Nat.mul(Nat.div(n,m),m)))
+  def cond = Nat.lte(Nat.succ(Nat.succ(Nat.mod(n, m))), m)
+  let small = refl :: Equal(Bool, cond, cond)
+  case cond with small: Equal(Bool, ^cond, cond) {
+    true:
+      // H: Nat.succ(Nat.add(Nat.mod(n,m),Nat.mul(Nat.div(n,m),m))) == Nat.succ(n)
+      let lemma = Nat.div_mod.spec(Nat.succ(n), Nat.div(n, m), m, Nat.succ(Nat.mod(n, m)), H, small)
+      let lemma = apply(Pair.snd(Nat, Nat), lemma)
+      let lemma = mirror(lemma) :: Equal(Nat, Nat.mod(Nat.succ(n),m), Nat.succ(Nat.mod(n,m)))
+      case mirror(Nat.mod.le_mod(Nat.succ(Nat.mod(n, m)), m, small)) {
+        refl:
+          lemma
+      }: Equal(Nat, Nat.mod(Nat.succ(n),m), self.b)
+    false:
+      let small = Nat.lte.comm.false(Nat.succ(Nat.succ(Nat.mod(n,m))), m, small)
+      let sandwich = Nat.lte.comm.false(m, Nat.mod(n, m), Nat.mod.small(n, m, m_not_zero))
+      let equal_m = Nat.Order.anti_symm(Nat.succ(Nat.mod(n, m)), m, sandwich, small)
+      let H = case equal_m {
+        refl:
+          H
+      }: Equal(Nat, Nat.succ(n), Nat.add(equal_m.b,Nat.mul(Nat.div(n,m),m)))
+      let H = H :: Equal(Nat, Nat.succ(n), Nat.mul(Nat.succ(Nat.div(n,m)),m))
+      let lemma = Nat.div_mod.spec(Nat.succ(n), Nat.succ(Nat.div(n, m)), m, 0, H, m_not_zero)
+      let lemma = apply(Pair.snd(Nat, Nat), lemma) :: Equal(Nat, 0, Nat.mod(Nat.succ(n), m)) 
+      case lemma {
+        refl:
+          let equal_m = Equal.mirror(Nat, Nat.succ(Nat.mod(n,m)), m, equal_m)
+          case equal_m {
+            refl:
+              case Nat.mod.self(m, m_not_zero) {
+                refl:
+                  Equal.refl(Nat, Nat.mod(m,m))
+              }: Equal(Nat, self.b, Nat.mod(m, m))
+          }: Equal(Nat, 0, Nat.mod(equal_m.b,m))
+
+      }: Equal(Nat, lemma.b, Nat.mod(Nat.succ(Nat.mod(n,m)),m))
+  }!

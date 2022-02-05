@@ -1,0 +1,7 @@
+Ether.RLP.eql(left: Ether.RLP, right: Ether.RLP): Bool
+  case left right {
+    node node:
+      List.eql(Ether.RLP, Ether.RLP.eql, left.child, right.child)
+    data data:
+      List.eql(U8, U8.eql, left.value, right.value)
+  } default false

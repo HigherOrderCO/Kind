@@ -1,7 +1,0 @@
-Nat.mod.go_self(a: Nat) (b: Nat): Nat.mod.go(a, a, Nat.succ(b)) == 0
-    case a{
-      zero: refl
-      succ: Nat.mod.go_self(a.pred,Nat.succ(b))
-    }!
-
-

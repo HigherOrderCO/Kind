@@ -1,0 +1,28 @@
+Ether.RLP.aux.bytes_from_nat(
+  n: Nat, H: Nat.lte(n, Nat.pred(Nat.pow(256, 8))) == true
+): Nat.lte(List.length(U8, Bytes.from_nat(n)), 8) == true
+  Ether.RLP.aux.bytes.from_nat.aux(n, 8, H)
+
+Ether.RLP.aux.bytes.from_nat.aux(
+  n: Nat, m: Nat, H: Nat.lte(n, Nat.pred(Nat.pow(256, m))) == true
+): Nat.lte(List.length(U8, Bytes.from_nat(n)), m) == true
+  case n with H {
+    zero:
+      refl
+    succ:
+      let concat_length = List.concat.length(U8,Bytes.from_nat(Nat.div(Nat.succ(n.pred),256)),List.cons(U8,U8.from_nat(Nat.mod(Nat.succ(n.pred),256)),List.nil(U8)))
+      case concat_length {
+        refl:
+          case m with H {
+            zero:
+              Empty.absurd!(Bool.false_neq_true(H))
+            succ:
+              let comm = Nat.add.comm(List.length(U8,List.cons(U8,U8.from_nat(Nat.mod(Nat.succ(n.pred),256)),List.nil(U8))), List.length(U8,Bytes.from_nat(Nat.div(Nat.succ(n.pred),256))))
+              case comm {
+                refl:
+                  let ind = Ether.RLP.aux.bytes.from_nat.aux(Nat.div(Nat.succ(n.pred), 256), m.pred, Nat.pow.lte.div_pred(Nat.succ(n.pred), 255, m.pred, H))
+                  ind
+              }: Equal(Bool, Nat.lte(comm.b,Nat.succ(m.pred)), Bool.true)
+          }!
+      }: Equal(Bool, Nat.lte(concat_length.b, m), Bool.true)
+  }!

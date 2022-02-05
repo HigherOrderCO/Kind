@@ -1,0 +1,64 @@
+// n = r + q*d
+// r < n
+// --------------
+// r = Nat.mod(n, d)
+// q = Nat.div(n, d)
+Nat.div_mod.spec(
+  n: Nat
+  q: Nat
+  d: Nat
+  r: Nat
+  H0: Equal(Nat, n, Nat.add(r, Nat.mul(q, d)))
+  H1: Equal(Bool, Nat.lte(Nat.succ(r), d), true)
+): Equal(Pair<Nat, Nat>, Pair.new(Nat, Nat, q, r), Nat.div_mod(n, d))
+  case q with H0 {
+    zero:
+      let H0 = case Nat.add.zero_right(r) {
+        refl:
+          mirror(H0)
+      }: Equal(Nat, self.b, n)
+      case H0 {
+        refl:
+          let H1 = mirror(Nat.lte.comm.true(r, d, H1))
+          case H1 {
+            refl:
+              refl
+          }: Equal(Pair(Nat, Nat), Pair.new(Nat,Nat,0,r), H1.b((self) Pair(Nat,Nat),Nat.div_mod.go(d,1,Nat.sub(r,d)),Pair.new(Nat,Nat,0,r)))
+      }: Equal(Pair(Nat, Nat), Pair.new(Nat,Nat,0,r), Nat.div_mod(H0.b,d))
+    succ:
+      let H1 = mirror(Nat.lte.comm.true(r, d, H1))
+      let H0 = mirror(H0)
+      case H0 {
+        refl:
+          let pre_cond = mirror(Nat.lte.slack_right(d, d, Nat.add(r,Nat.mul(q.pred,d)), Nat.Order.refl(d)))
+          let cond = case Nat.add.swap(d, r, Nat.mul(q.pred,d)) {
+            refl:
+              pre_cond
+          }: Equal(Bool, Bool.true, Nat.lte(d, self.b))
+          case cond {
+            refl:
+              let H1 = mirror(H1)
+              let H1 = Nat.lte.comm.false(d, r, H1)
+              let succ_out_hyp = Nat.Order.chain(1, Nat.succ(r), d, refl, H1)
+              let succ_out = Nat.div_mod.go.succ_quotient(d, 0, Nat.sub(n,d), succ_out_hyp)
+              case succ_out {
+                refl:
+                  let H0 = mirror(H0)
+                  let H0 = case Nat.add.swap(r, d, Nat.mul(q.pred, d)) {
+                    refl:
+                      H0
+                  }: Equal(Nat, n, self.b)
+                  let H0 = apply((x) Nat.sub(x, d), H0)
+                  let H0 = case Nat.add.sub(d, Nat.add(r, Nat.mul(q.pred, d))) {
+                    refl:
+                      H0
+                  }: Equal(Nat, Nat.sub(n, d), self.b)
+                  let ind = Nat.div_mod.spec(Nat.sub(n, d), q.pred, d, r, H0, H1)
+                  case ind {
+                    refl:
+                      refl
+                  }: Equal(Pair(Nat, Nat), Pair.new(Nat,Nat,Nat.succ(q.pred),r), ind.b(() Pair(Nat,Nat),(fst) (snd) Pair.new(Nat,Nat,Nat.succ(fst),snd)))
+              }: Equal(Pair(Nat, Nat), Pair.new(Nat,Nat,Nat.succ(q.pred),r), succ_out.b)
+          }: Equal(Pair(Nat, Nat), Pair.new(Nat,Nat,Nat.succ(q.pred),r), cond.b((self) Pair(Nat,Nat),Nat.div_mod.go(d,1,Nat.sub(n,d)),Pair.new(Nat,Nat,0,n)))
+      }: Equal(Pair(Nat, Nat), Pair.new(Nat,Nat,Nat.succ(q.pred),r), Nat.lte(d, H0.b,(self) Pair(Nat,Nat),Nat.div_mod.go(d,1,Nat.sub(n,d)),Pair.new(Nat,Nat,0,n)))
+  }!

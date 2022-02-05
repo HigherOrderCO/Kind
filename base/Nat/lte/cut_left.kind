@@ -1,0 +1,13 @@
+Nat.lte.cut_left(
+  a: Nat
+  b: Nat
+  c: Nat
+  H: Equal(Bool, Nat.lte(Nat.add(a, b), c), true)
+): Equal(Bool, Nat.lte(b, c), true)
+  case a with H {
+    zero:
+      H
+    succ:
+      let lemma = Nat.lte.succ_left(Nat.add(a.pred, b), c, H)
+      Nat.lte.cut_left(a.pred, b, c, lemma)
+  }!
