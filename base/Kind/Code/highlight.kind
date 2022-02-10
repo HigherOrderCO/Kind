@@ -2,29 +2,31 @@ Kind.Code.highlight.pos: Type
   Maybe<Pair<Nat, Nat>>
 
 Kind.Code.highlight(
-  header: Maybe<String>,
+  error: Maybe<String>,
   file: Maybe<String>,
   code: String,
   init: Nat,
   idx0: Nat,
   idx1: Nat,
 ): String
-  let {pos, error} = Kind.Code.highlight.go(code|" \n", init, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [], none)
-  let header = Kind.Code.highlight.header(header, file, pos)
-  header | error
+  let {pos, msg} = Kind.Code.highlight.go(code|" \n", init, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [], none)
+  let header = Kind.Code.highlight.header(error, file, pos)
+  header | "\n" | msg
 
 Kind.Code.highlight.header(
-  custom: Maybe<String>,
+  error:  Maybe<String>,
   file: Maybe<String>
   pos: Kind.Code.highlight.pos
 ): String
+  let space = if Maybe.is_some!(error) && Maybe.is_some!(file) then "\n" else ""
+  let error = error <> ""
   let file = Maybe {
     get pos = pos
     let {row, col} = pos
     get file = file
-    return "Inside '" | file | ":" | Nat.show(row) | ":" | Nat.show(col) | "' :\n"
-  }
-  Maybe.or!(custom, file) <> ""
+    return "Inside '" | file | ":" | Nat.show(row) | ":" | Nat.show(col) | "':"
+  } <> ""
+  file | space | error
 
 
 Kind.Code.highlight.end(

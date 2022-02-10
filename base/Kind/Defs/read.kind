@@ -3,7 +3,7 @@ Kind.Defs.read(file: String, code: String, defs: Kind.Defs): Either<String, Kind
     error:
       open parsed.err
       let hdr = if parsed.err.msg =? "" then none else some(parsed.err.msg)
-      let str = Kind.Code.highlight(hdr, none, code, parsed.err.ini, parsed.err.idx, Nat.succ(parsed.err.idx))
+      let str = Kind.Code.highlight(hdr, some(file), code, parsed.err.ini, parsed.err.idx, Nat.succ(parsed.err.idx))
       Either.left!!(str)
     value:
       Either.right!!(parsed.val)
