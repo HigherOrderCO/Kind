@@ -1,10 +1,31 @@
+Kind.Code.highlight.pos: Type
+  Maybe<Pair<Nat, Nat>>
+
 Kind.Code.highlight(
+  header: Maybe<String>,
+  file: Maybe<String>,
   code: String,
   init: Nat,
   idx0: Nat,
   idx1: Nat,
 ): String
-  Kind.Code.highlight.go(code|" \n", init, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [])
+  let {pos, error} = Kind.Code.highlight.go(code|" \n", init, idx0, idx1, 0, 1, Maybe.none!, String.reverse("   1 | "), [], none)
+  let header = Kind.Code.highlight.header(header, file, pos)
+  header | error
+
+Kind.Code.highlight.header(
+  custom: Maybe<String>,
+  file: Maybe<String>
+  pos: Kind.Code.highlight.pos
+): String
+  let file = Maybe {
+    get pos = pos
+    let {row, col} = pos
+    get file = file
+    return "Inside '" | file | ":" | Nat.show(row) | ":" | Nat.show(col) | "' :\n"
+  }
+  Maybe.or!(custom, file) <> ""
+
 
 Kind.Code.highlight.end(
   col: Nat,
@@ -23,7 +44,8 @@ Kind.Code.highlight.go(
   lft: Maybe<Nat>,
   lin: String,
   res: List<String>,
-): String
+  pos: Kind.Code.highlight.pos
+): Pair<Kind.Code.highlight.pos, String>
   //use skip = Debug.log!(String.flatten([
     //"ix0=", Nat.show(ix0), " ",
     //"ix1=", Nat.show(ix1), " ",
@@ -37,12 +59,12 @@ Kind.Code.highlight.go(
   let spa = 3; // how many lines around error to show
   case code {
     nil:
-      Kind.Code.highlight.end(col, row, List.reverse!(res)),
+      {pos, Kind.Code.highlight.end(col, row, List.reverse!(res))},
     cons:
       if U16.eql(code.head, '\n') then
         let stp = Maybe.extract!(lft)!(Bool.false, Nat.is_zero);
         if stp then
-          Kind.Code.highlight.end(col, row, List.reverse!(res))
+          {pos, Kind.Code.highlight.end(col, row, List.reverse!(res))}
         else
           let siz = Nat.succ(Nat.double(spa));
           let lft = case ix1 {
@@ -59,21 +81,22 @@ Kind.Code.highlight.go(
           let row = Nat.succ(row);
           let res = List.cons!(String.reverse(lin), res);
           let lin = String.reverse(String.flatten([String.pad_left(4, ' ', Nat.show(row)), " | "]));
-          Kind.Code.highlight.go(code.tail, ixi, ix0, ix1, col, row, lft, lin, res)
+          Kind.Code.highlight.go(code.tail, ixi, ix0, ix1, col, row, lft, lin, res, pos)
       else
         let chr = String.cons(code.head, String.nil);
-        let chr =
+        let {chr, pos} =
           if Bool.and(Nat.is_zero(ix0), Bool.not(Nat.is_zero(ix1))) then
-            String.reverse(Kind.Code.color("41", Kind.Code.color("37", chr)))
+            let pos = Maybe.or!(pos, some({row, col+1}))
+            {String.reverse(Kind.Code.color("41", Kind.Code.color("37", chr))), pos}
           else if Bool.and(Nat.is_zero(ixi), Bool.not(Nat.is_zero(ix1))) then
-            String.reverse(Kind.Code.color("31", Kind.Code.color("4", chr)))
+            {String.reverse(Kind.Code.color("31", Kind.Code.color("4", chr))), pos}
           else
-            chr
+            {chr, pos}
         let res = if Nat.eql(ix0,1) then List.take!(spa,res) else res;
         let ixi = Nat.pred(ixi);
         let ix0 = Nat.pred(ix0);
         let ix1 = Nat.pred(ix1);
         let col = Nat.succ(col);
         let lin = String.flatten([chr, lin]);
-        Kind.Code.highlight.go(code.tail, ixi, ix0, ix1, col, row, lft, lin, res)
+        Kind.Code.highlight.go(code.tail, ixi, ix0, ix1, col, row, lft, lin, res, pos)
   }

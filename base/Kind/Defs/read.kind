@@ -2,9 +2,8 @@ Kind.Defs.read(file: String, code: String, defs: Kind.Defs): Either<String, Kind
   case Kind.Parser.file(file, code, defs, Parser.State.new(none, "", 0, 0, code)) as parsed {
     error:
       open parsed.err
-      let err = parsed.err.msg | (case parsed.err.nam { nil: "", cons: " Inside " | parsed.err.nam | ":" })
-      let hig = Kind.Code.highlight(code, parsed.err.ini, parsed.err.idx, Nat.succ(parsed.err.idx))
-      let str = String.flatten([err, "\n", hig])
+      let hdr = if parsed.err.msg =? "" then none else some(parsed.err.msg)
+      let str = Kind.Code.highlight(hdr, none, code, parsed.err.ini, parsed.err.idx, Nat.succ(parsed.err.idx))
       Either.left!!(str)
     value:
       Either.right!!(parsed.val)
