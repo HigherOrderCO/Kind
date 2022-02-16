@@ -1,0 +1,11 @@
+Nat.add.sub(
+  n: Nat
+  m: Nat
+): Equal<Nat>(Nat.sub(Nat.add(n, m), n), m)
+  case n {
+    zero:
+      refl
+    succ:
+      Nat.add.sub(n.pred, m)
+  }!
+

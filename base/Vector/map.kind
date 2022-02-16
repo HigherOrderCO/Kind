@@ -1,0 +1,8 @@
+Vector.map<A: Type, B: Type>(size: Nat, f: A -> B, v: Vector(A, size)): Vector(B, size)
+  case size with v {
+    zero:
+      Vector.nil(B)
+    succ:
+      open v
+      Vector.cons(B, size.pred, f(v.head), Vector.map<A, B>(size.pred, f, v.tail))
+  }!

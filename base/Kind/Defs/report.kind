@@ -26,9 +26,8 @@ Kind.Defs.report.errors(defs: Kind.Defs): String
             let ori_val = Kind.Error.origin(err)
             without ori_val: errors | err_msg | "\n"
             open ori_val
-            let inside = "Inside '" | defn.file | "':\n"
-            let source = Kind.Code.highlight(defn.code, ori_val.fst, ori_val.fst, ori_val.snd)
-            errors | err_msg | inside | source | "\n" | "\n"
+            let source = Kind.Code.highlight(none, some(defn.file), defn.code, ori_val.fst, ori_val.fst, ori_val.snd)
+            errors | err_msg | source | "\n" | "\n"
           errors
       }
     } default errors

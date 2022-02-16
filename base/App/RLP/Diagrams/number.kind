@@ -1,0 +1,28 @@
+App.RLP.Diagrams.number: DOM
+  <svg class="railroad-diagram" width="250.5" height="71" viewBox="0 0 250.5 71">
+    <g transform="translate(.5 .5)">
+        <g>
+            <path d="M20 21v20m10 -20v20m-10 -10h20"></path>
+        </g>
+        <path d="M40 31h10"></path>
+        <g>
+            <path d="M50 31h0"></path>
+            <path d="M200.5 31h0"></path>
+            <path d="M50 31h10"></path>
+            <g class="non-terminal ">
+                <path d="M60 31h0"></path>
+                <path d="M190.5 31h0"></path>
+                <rect x="60" y="20" width="130.5" height="22"></rect>
+                <text x="125.25" y="35">"decimal_digit"</text>
+            </g>
+            <path d="M190.5 31h10"></path>
+            <path d="M60 31a10 10 0 0 0 -10 10v0a10 10 0 0 0 10 10"></path>
+            <g>
+                <path d="M60 51h130.5"></path>
+            </g>
+            <path d="M190.5 51a10 10 0 0 0 10 -10v0a10 10 0 0 0 -10 -10"></path>
+        </g>
+        <path d="M200.5 31h10"></path>
+        <path d="M 210.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"></path>
+    </g>
+</svg>

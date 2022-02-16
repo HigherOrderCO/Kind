@@ -1,0 +1,7 @@
+Ether.test: IO<Unit>
+  TestSuite.run(Ether.test.suite, 0)
+
+Ether.test.suite: TestSuite
+  TestSuite.many("Ether", [
+    Ether.RLP.test.suite
+  ])

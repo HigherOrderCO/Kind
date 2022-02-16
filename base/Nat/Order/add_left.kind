@@ -1,0 +1,18 @@
+Nat.Order.add.left(
+  a: Nat
+  b: Nat
+  c: Nat
+  Hyp: Equal<Bool>(Nat.lte(a, b), true)
+): Equal<Bool>(Nat.lte(Nat.add(c, a), Nat.add(c, b)), true)
+  (case c {
+    zero:
+      (Hyp)
+        Hyp
+    succ:
+      (Hyp)
+        Nat.Order.add.left(a, b, c.pred, Hyp)
+  }:
+    (Hyp: Equal<Bool>(Nat.lte(a, b), true)) ->
+    Equal<Bool>(Nat.lte(Nat.add(c, a), Nat.add(c, b)), true))(
+      Hyp
+    )

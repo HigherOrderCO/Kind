@@ -1,0 +1,69 @@
+// Bytes
+// =====
+Bytes: Type
+  List<U8>
+
+Bytes.show(bytes: Bytes): String
+  List.show!(Bits.show, List.map!!(U8.to_bits, bytes))
+
+Bytes.split: (bytes: Bytes, n: Nat) -> Pair<Bytes, Bytes>
+  List.split<U8>
+
+Bytes.to_nat(bytes: Bytes): Nat
+  Bytes.to_nat.go(bytes, 0)
+
+Bytes.to_nat.go(bytes: Bytes, acc: Nat): Nat
+  case bytes {
+    nil:
+      acc
+    cons:
+      let digit = U8.to_nat(bytes.head)
+      Bytes.to_nat.go(bytes.tail, (acc*256) + digit)
+  }
+
+Bytes.from_nat(n: Nat): Bytes
+  case n {
+    zero:
+      List.nil!
+    succ:
+      Bytes.from_nat(n/256) ++ [U8.from_nat(Nat.mod(n, 256))]
+  }
+
+Bytes.from_str(str: String): Bytes
+  Bytes.from_hex(String.to_hex(str))
+
+Bytes.from_hex(str: String): Bytes
+  case str {
+    nil:
+      []
+    cons:
+      case str.tail {
+        nil: 
+          [U8.shl(Char.hex_value8(str.head), 4)]
+        cons: 
+          let val = U8.add(Char.hex_value8(str.tail.head), U8.mul(Char.hex_value8(str.head),16))
+          val & Bytes.from_hex(str.tail.tail)
+      }
+  }
+
+Bytes.to_hex(b: Bytes): String
+  Bytes.to_hex.go("", b)
+
+Bytes.to_hex.go(acc: String, b: Bytes): String
+  case b {
+    nil:
+      acc
+    cons:
+      Bytes.to_hex.go(acc|U8.to_hex(b.head), b.tail)
+  }
+
+Bytes.inc(bytes: Bytes): Bytes
+  case bytes {
+    nil:
+      [1#8]
+    cons:
+      if U8.eql(bytes.head, 255#8) then
+        List.cons!(0#8, Bytes.inc(bytes.tail))
+      else
+        List.cons!(U8.inc(bytes.head), bytes.tail)
+  }

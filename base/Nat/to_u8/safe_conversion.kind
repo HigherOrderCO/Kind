@@ -1,0 +1,2 @@
+Nat.to_u8.safe_conversion(n: Nat, H: Nat.lte(n, 255) == true): n == U8.to_nat(Nat.to_u8(n))
+  Word.to_nat.safe(8, n, H)

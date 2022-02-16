@@ -1,0 +1,10 @@
+Nat.Order.Ineq._2am_gm(
+  a: Nat
+  b: Nat
+): Nat.lte(Nat.double(Nat.double(a*b)), Nat.pow(a+b,2)) == true
+  let h = Nat.lte.lemma_cauchy(a,b)
+  let h1 = Nat.Order.refl(Nat.double(a*b))
+  let aux = Nat.Order.add.combine(Nat.double(a*b), Nat.pow(a,2) + Nat.pow(b,2), Nat.double(a*b), Nat.double(a*b), h, h1)
+  let aux1 = aux :: rewrite X in (Nat.lte(X,Nat.add(Nat.add(Nat.pow(a,2),Nat.pow(b,2)),Nat.double(Nat.mul(a,b)))) == Bool.true) with Nat.double_add(Nat.double(Nat.mul(a,b)))
+  let aux2 = aux1 :: rewrite X in (Nat.lte(Nat.double(Nat.double(Nat.mul(a,b))),X) == Bool.true) with Nat.add.assoc(Nat.pow(a,2),Nat.pow(b,2),Nat.double(Nat.mul(a,b)))
+  aux2 :: rewrite X in (Nat.lte(Nat.double(Nat.double(Nat.mul(a,b))),X) == Bool.true) with mirror(Nat.square_sum(a,b))

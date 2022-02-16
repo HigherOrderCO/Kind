@@ -1,6 +1,9 @@
 Word.inc<size: Nat>(word: Word(size)): Word(size)
   case word {
-    e: Word.e,
-    o: Word.i<word.size>(word.pred),
-    i: Word.o<word.size>(Word.inc<word.size>(word.pred))
-  } : Word(word.size)
+    e:
+      Word.e,
+    o:
+      Word.i<word.size>(word.pred),
+    i:
+      Word.o<word.size>(Word.inc<word.size>(word.pred))
+  }: Word(word.size)

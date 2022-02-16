@@ -1,11 +1,57 @@
-Ether.RLP.to_string(t: List(Ether.RLP.Tree) ): String
-  case t {
-    nil : ""
-    cons: 
-      "[ " |
-      case t.head as tree {
-        tip : Bits.show(tree.value) | ", "
-        list: Ether.RLP.to_string(t.tail)
+Ether.RLP.show(r: Ether.RLP): String
+  case r {
+    data:
+      let ret = Bytes.to_hex(r.value)
+      case ret {
+        nil:
+          `""`
+        cons:
+          "0x"|ret
       }
-      | " ]"
+    node:
+      case r.child {
+        nil:
+          "[]"
+        cons:
+        let ret = ""
+        for child in r.child.tail with ret:
+          ret|", "|Ether.RLP.show(child)
+        "["|Ether.RLP.show(r.child.head)|ret|"]"
+      }
+  }
+
+Ether.RLP.show.str(r: Ether.RLP): String
+  case r {
+    data:
+      let str = String.from_bytes(r.value)
+      if String.is_ascii(str) then
+        `"`|str|`"`
+      else
+        "-"
+    node:
+      case r.child {
+        nil:
+          "[]"
+        cons:
+        let ret = ""
+        for child in r.child.tail with ret:
+          ret|", "|Ether.RLP.show.str(child)
+        "["|Ether.RLP.show.str(r.child.head)|ret|"]"
+      }
+  }
+
+Ether.RLP.show.nat(r: Ether.RLP): String
+  case r {
+    data:
+      Nat.show(Bytes.to_nat(r.value))
+    node:
+      case r.child {
+        nil:
+          "[]"
+        cons:
+        let ret = ""
+        for child in r.child.tail with ret:
+          ret|", "|Ether.RLP.show.nat(child)
+        "["|Ether.RLP.show.nat(r.child.head)|ret|"]"
+      }
   }

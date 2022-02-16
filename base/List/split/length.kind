@@ -1,0 +1,14 @@
+List.split.length<A: Type>(
+  fst: List<A>, snd: List<A>
+): List.split<A>(fst ++ snd, List.length<A>(fst)) == Pair.new!!(fst, snd)
+  case fst {
+    nil:
+      refl
+    cons:
+      let ind = List.split.length<A>(fst.tail, snd)
+      def split = List.split(A, fst.tail ++ snd, List.length<A>(fst.tail))
+      case split with ind: split == Pair.new!!(fst.tail, snd) {
+        new:
+          apply((p) open p Pair.new!!(fst.head & p.fst, p.snd), ind)
+      }! :: split!! == Pair.new!!(fst.head & fst.tail, snd)
+  }!

@@ -1,0 +1,9 @@
+Nat.lte.double_square(
+  a: Nat
+  b: Nat 
+): Nat.lte(Nat.double(a*b), Nat.pow(a+b,2)) == true
+  let h0 = Nat.lte.sum_squares_pow_sum(a,b)
+  let h1 = Nat.Order.add.combine(Nat.double(a*b), Nat.double(a*b), 0, Nat.double(a*b),_,_)
+  let h2 = h1 :: rewrite X in (Nat.lte(Nat.add(Nat.double(a*b),0), X) == true) with Nat.double_add(Nat.double(a*b))
+  let h3 = h2 :: rewrite X in (Nat.lte(X,Nat.double(Nat.double(Nat.mul(a,b)))) == Bool.true) with Nat.add.zero_right(Nat.double(Nat.mul(a,b)))
+  Nat.Order.transitivity(Nat.double(a*b), Nat.double(Nat.double(a*b)), Nat.pow(a+b,2), h3, Nat.Order.Ineq._2am_gm(a,b))

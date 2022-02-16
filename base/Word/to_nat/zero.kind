@@ -1,0 +1,10 @@
+Word.to_nat.zero(size: Nat): 0 == Word.to_nat(size, Word.zero(size))
+  case size {
+    zero:
+      refl
+    succ:
+      case Word.to_nat.zero(size.pred) {
+        refl:
+          refl
+      }: 0 == Nat.mul(2, self.b)
+  }!

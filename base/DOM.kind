@@ -13,4 +13,7 @@ type DOM {
   text(
     value: String
   )
+  fragment(
+    children: List<DOM>
+  )
 }

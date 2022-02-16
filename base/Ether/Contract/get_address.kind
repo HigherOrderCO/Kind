@@ -1,0 +1,9 @@
+Ether.Contract.get_address(trans : Ether.Contract.Transaction) : String
+  open trans
+  let rlp_encoding = Ether.RLP.encode.read(Ether.RLP.encode(Ether.RLP.Tree.list!(
+      [Ether.RLP.Tree.tip!(trans.from),
+      Ether.RLP.Tree.tip!(Nat.to_bits(trans.nonce))
+   ])))
+  let buffer = Buffer8.from_hex(String.drop(2, Pair.fst!!(rlp_encoding)))
+  let hash = Crypto.Keccak.hash.bytes(buffer)
+  String.drop((12 * 2),Buffer8.to_hex(hash))

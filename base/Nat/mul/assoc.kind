@@ -1,3 +1,4 @@
+// TODO associative laws are different for addition and multiplication
 Nat.mul.assoc(
   a: Nat, b: Nat, c: Nat
 ): Equal<Nat>(Nat.mul(a, Nat.mul(b, c)), Nat.mul(Nat.mul(a, b), c))

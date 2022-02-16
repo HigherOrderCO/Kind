@@ -1,0 +1,29 @@
+Nat.sub.comm_add(
+  a: Nat
+  b: Nat
+  c: Nat
+  H0: Equal(Bool, Nat.lte(c, a), true)
+  H1: Equal(Bool, Nat.lte(c, b), true)
+): Equal(Nat, Nat.add(Nat.sub(a, c), b), Nat.add(a, Nat.sub(b, c)))
+  case c with H0 H1 {
+    zero:
+      refl
+    succ:
+      case a with H0 {
+        zero:
+          Empty.absurd!(Bool.false_neq_true(H0))
+        succ:
+          case b with H1 {
+            zero:
+              Empty.absurd!(Bool.false_neq_true(H1))
+            succ:
+              let ind = Nat.sub.comm_add(a.pred, b.pred, c.pred, H0, H1)
+              let lemma = apply(Nat.succ, ind)
+              let succ_right = mirror(Nat.add.succ_right(Nat.sub(a.pred, c.pred), b.pred))
+              case succ_right {
+                refl:
+                  lemma
+              }: Equal(Nat, succ_right.b, Nat.add(Nat.succ(a.pred),Nat.sub(Nat.succ(b.pred),Nat.succ(c.pred))))
+          }!
+      }!
+  }!

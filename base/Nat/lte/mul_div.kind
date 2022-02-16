@@ -1,0 +1,15 @@
+Nat.lte.mul_div(
+  a: Nat, b: Nat
+  H: Equal(Bool, Nat.ltn(0, b), true)
+): Equal(Bool, Nat.lte(Nat.mul(b, Nat.div(a, b)), a), true)
+  let lemma = Nat.div_mod.recover(a, b, H)
+  case lemma {
+    refl:
+      case Nat.mul.comm(b, Nat.div(a,b)) {
+        refl:
+          Nat.lte.slack_left(
+            Nat.mul(b,Nat.div(a,b)), Nat.mul(b,Nat.div(a,b)), Nat.mod(a,b)
+            Nat.Order.refl(Nat.mul(b,Nat.div(a,b)))
+          )
+      }: Equal(Bool, Nat.lte(Nat.mul(b,Nat.div(a,b)),Nat.add(Nat.mod(a,b),self.b)), true)
+  }: Equal(Bool, Nat.lte(Nat.mul(b, Nat.div(a, b)), lemma.b), true)

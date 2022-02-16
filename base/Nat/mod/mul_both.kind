@@ -1,0 +1,28 @@
+// a*(b%c) == (a*b)%(a*c)
+Nat.mod.mul_both(
+  a: Nat
+  b: Nat
+  c: Nat
+  H0: Equal(Bool, Nat.lte(1, a), true)
+  H1: Equal(Bool, Nat.lte(1, c), true)
+): Equal(Nat, Nat.mul(a, Nat.mod(b, c)), Nat.mod(Nat.mul(a, b), Nat.mul(a, c)))
+  let bound_lemma = Nat.lte.comm.false(c, Nat.mod(b, c), Nat.mod.small(b, c, H1))
+  let bound = Nat.ltn.mul(Nat.mod(b,c), c, a, H0, bound_lemma)
+  let id_lemma = Nat.div_mod.recover(b, c, H1)
+  let id_lemma = apply(Nat.mul(a), id_lemma)
+  let distrib = Nat.mul.distrib_left(a,Nat.mod(b,c),Nat.mul(Nat.div(b,c),c))
+  let id_lemma = case distrib {
+    refl:
+      id_lemma
+  }: Equal(Nat, distrib.b, Nat.mul(a,b))
+  let id_lemma = case Nat.mul.swap(a, Nat.div(b,c), c) {
+    refl:
+      id_lemma
+  }: Nat.add(Nat.mul(a,Nat.mod(b,c)), self.b) == Nat.mul(a,b)
+  // Nat.add(Nat.mul(a,Nat.mod(b,c)),Nat.mul(Nat.div(b,c),Nat.mul(a,c))) == Nat.mul(a,b)
+  let almost_qed = Nat.div_mod.spec(Nat.mul(a, b), Nat.div(b,c), Nat.mul(a,c), Nat.mul(a,Nat.mod(b,c)), mirror(id_lemma), bound)
+  let qed = apply(Pair.snd(Nat, Nat), almost_qed)
+  case qed {
+    refl:
+      refl
+  }: Equal(Nat, Nat.mul(a,Nat.mod(b,c)), qed.b)

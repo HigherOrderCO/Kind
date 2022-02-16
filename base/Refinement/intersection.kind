@@ -1,0 +1,2 @@
+Refinement.intersection<T: Type>(A: Refinement<T>, B: Refinement<T>): Refinement<T>
+    (a: T) And(A(a), B(a))

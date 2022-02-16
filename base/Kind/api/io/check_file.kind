@@ -3,7 +3,6 @@ Kind.api.io.check_file(file: String): IO<Unit>
     get loaded = Kind.Synth.file(file, Kind.Map.new!)
     case loaded {
       left: IO {
-        IO.print(String.flatten(["On '", file, "':"]))
         IO.print(loaded.value)
       }
       right: case loaded.value {

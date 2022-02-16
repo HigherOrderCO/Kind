@@ -1,0 +1,25 @@
+Parser.float.64: Parser(F64)
+  Parser {
+    Kind.Parser.spaces
+    get sign = Parser.maybe!(Kind.Parser.float.sign)
+    let sign = case sign {
+      some:
+        String.cons(sign.value, "")
+      none:
+        ""
+    }
+    get digits = Parser.many1<Char>(Kind.Parser.float.str_digit)
+    get frac = Parser.maybe!(Parser {
+      Parser.text(".")
+      get frac = Parser.many<Char>(Kind.Parser.float.str_digit)
+      return frac
+    })
+    let float_str = sign|String.from_list(digits)
+      |case frac {
+        none:
+          ""
+        some:
+          "."|String.from_list(frac.value)
+      }
+    return F64.parse(float_str)
+  }

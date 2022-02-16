@@ -1,0 +1,17 @@
+Nat.lte.sub_expan(
+  a: Nat
+  b: Nat
+): Nat.sub(Nat.succ(a), Nat.succ(b)) == Nat.sub(a, b)
+  refl
+
+Nat.lte.sub_add(
+  a: Nat
+  b: Nat
+): Nat.sub(Nat.add(a, b), b) == a
+  case b {
+    zero: Nat.add.zero_right(a)
+    succ: 
+      let HI = Nat.lte.sub_add(a, b.pred)
+      let H1 = HI :: rewrite X in (X == a) with mirror(Nat.lte.sub_expan(Nat.add(a, b.pred), b.pred))
+      H1 :: rewrite X in (Nat.sub(X , Nat.succ(b.pred)) == a) with mirror(Nat.add.succ_right(a, b.pred))
+  }!

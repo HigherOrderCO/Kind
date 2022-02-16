@@ -1,0 +1,7 @@
+Ether.RLP.encode.many(trees: List<Ether.RLP>): Bytes
+  case trees {
+    nil:
+      []
+    cons:
+      List.concat!(Ether.RLP.encode(trees.head), Ether.RLP.encode.many(trees.tail))
+  }

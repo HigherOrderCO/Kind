@@ -1,0 +1,22 @@
+Nat.lte.mul_right_simpl(
+  a: Nat
+  b: Nat
+  c: Nat
+  H: Equal(Bool, Nat.lte(Nat.mul(a, Nat.succ(b)), Nat.mul(c, Nat.succ(b))), true)
+): Equal(Bool, Nat.lte(a, c), true)
+  case c with H {
+    zero: 
+      let H1 = Nat.lte.zero_right(Nat.mul(a, Nat.succ(b)), H)
+      let H2 = Nat.mul.equal_zero(a, Nat.succ(b), H1)
+      let H3 = Nat.succ_neq_zero(b)
+      case H2 {
+        left: Nat.lte.zero_all(0) :: rewrite X in (Nat.lte(X, 0) == true) with mirror(H2.value)
+        right: Empty.absurd!(H3(H2.value))
+      }!
+    succ: case a with H {
+      zero: Nat.lte.zero_all(Nat.succ(c.pred))
+      succ: 
+        let H1 = Nat.lte.add_left_simpl(Nat.mul(a.pred, Nat.succ(b)), Nat.succ(b), Nat.mul(c.pred, Nat.succ(b)), H)
+        Nat.lte.mul_right_simpl(a.pred, b, c.pred, H1)
+    }!
+  }!

@@ -1,0 +1,12 @@
+// TestSuite for RLP encoding
+Ether.RLP.test: IO<Unit>
+  TestSuite.run(Ether.RLP.test.suite, 0)
+
+// Tests from Ethereum's repository:
+// https://github.com/ethereum/tests/blob/develop/RLPTests/rlptest.json
+Ether.RLP.test.suite: TestSuite
+  TestSuite.many("RLP", [
+    Ether.RLP.encode.test.suite
+    Ether.RLP.decode.test.suite
+    Ether.RLP.parser.test.suite
+  ])

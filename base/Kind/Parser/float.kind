@@ -21,7 +21,7 @@ Kind.Parser.float.sign: Parser(Char)
       Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Expected '+' or '-'.")
     cons:
       if U16.eql(pst.str.head, '+') || U16.eql(pst.str.head, '-') then
-        Parser.Reply.value!(pst, pst.str.head)
+        Parser.Reply.value!(pst@str <- pst.str.tail, pst.str.head)
       else
         Parser.Reply.fail!(pst.nam, pst.ini, pst.idx, "Expected '+' ou '-'.")
   }

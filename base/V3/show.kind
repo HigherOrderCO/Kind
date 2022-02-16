@@ -1,0 +1,3 @@
+V3.show(v: V3): String
+  open v
+  "("|F64.show(v.x)|", "|F64.show(v.y)|", "|F64.show(v.z)|")"

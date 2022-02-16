@@ -1,0 +1,19 @@
+// shows a pretty error in HTML
+Parser.Error.to_dom(code: String, err: Parser.Error): DOM
+  open err
+  let prefix = String.take(err.ini, code)
+  let right = String.drop(err.ini, code)
+  let middle = String.take(err.idx - err.ini, right)
+  let suffix = String.drop(err.idx - err.ini, right)
+  <div>
+  <code style={"color": "black", "font-weight": "normal"}>
+    prefix
+    <span style={"color": "red", "font-weight": "bold"}>
+    middle
+    </span>
+    suffix
+  </code>
+  <p>
+    "Error: "|err.msg
+  </p>
+  </div>

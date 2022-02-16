@@ -1,0 +1,26 @@
+Nat.pow.lte(a: Nat, b: Nat): Equal(Bool, Nat.lte(Nat.pow(Nat.succ(a), b), 0), false)
+  case b {
+    zero:
+      refl
+    succ:
+      let remember = Equal.refl(Bool, Nat.lte(Nat.pow(Nat.succ(a), Nat.succ(b.pred)), 0))
+      def cond = Nat.lte(Nat.pow(Nat.succ(a), Nat.succ(b.pred)), 0)
+      case cond with remember: cond^ == cond {
+        true:
+          let either_zero = Nat.mul.equal_zero(
+            Nat.succ(a), Nat.pow(Nat.succ(a), b.pred)
+            Nat.lte.zero_right(Nat.pow(Nat.succ(a), Nat.succ(b.pred)) remember)
+          )
+          case either_zero {
+            left:
+              apply((n) Bool.not(Nat.is_zero(n)), either_zero.value)
+            right:
+              case either_zero.value {
+                refl:
+                  Nat.pow.lte(a, b.pred)
+              }: Nat.lte(either_zero.value.b, 0) == false
+          }
+        false:
+          refl
+      }!
+  }!

@@ -1,0 +1,13 @@
+List.concat.length<A: Type>(
+  l0: List<A>, l1: List<A>
+): Equal<Nat>(Nat.add(List.length<A>(l0), List.length<A>(l1)), List.length<A>(List.concat<A>(l0, l1)))
+  case l0 {
+    nil:
+      refl
+    cons:
+      let ind = List.concat.length<A>(l0.tail, l1)
+      case ind {
+        refl:
+          refl
+      }: Equal<Nat>(Nat.succ(Nat.add(List.length<A>(l0.tail), List.length<A>(l1))), Nat.succ(ind.b))
+  }!

@@ -1,0 +1,3 @@
+Nat.mod.one(n: Nat): Equal(Nat, Nat.mod(n, 1), 0)
+  let lemma = Nat.lte.comm.false(1, Nat.mod(n, 1), Nat.mod.small(n, 1, refl))
+  Nat.lte.zero_right(Nat.mod(n, 1), lemma)

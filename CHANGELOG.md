@@ -1,3 +1,13 @@
+## Kind 1.0.112
+
+- Replace syntax is like rewrite, but equality is reversed
+
+    replace x with e in goal
+
+    This replaces the right side of the equality by the left side in the goal
+    This should be more robust since it doesn't need to use mirror and, thus,
+    avoids some holes
+
 ## Kind 1.0.108
 
 - Allow "for" to be on the left side of a list comprehension

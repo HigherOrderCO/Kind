@@ -1,0 +1,83 @@
+Kind.Core.from_kind.hoas(fun: Kind.Term -> Kind.Term): Kind.Core.Term -> Kind.Core.Term
+  Kind.Core.from_kind . fun . Kind.Core.to_kind
+
+Kind.Core.from_kind.hoas.2(fun: Kind.Term -> Kind.Term -> Kind.Term): Kind.Core.Term -> Kind.Core.Term -> Kind.Core.Term
+  (term0, term1)
+    Kind.Core.from_kind(fun(Kind.Core.to_kind(term0), Kind.Core.to_kind(term1)))
+
+Kind.Core.from_kind(term: Kind.Term): Kind.Core.Term
+  case term {
+    var:
+      Kind.Core.Term.var(term.name, term.indx)
+
+    ref:
+      Kind.Core.Term.ref(term.name)
+
+    typ:
+      Kind.Core.Term.typ
+
+    all: 
+      Kind.Core.Term.all(
+        term.eras
+        term.self
+        term.name
+        Kind.Core.from_kind(term.xtyp)
+        Kind.Core.from_kind.hoas.2(term.body)
+      )
+
+    lam:
+      Kind.Core.Term.lam(
+        term.name
+        Kind.Core.from_kind.hoas(term.body)
+      )
+
+    app:
+      Kind.Core.Term.app(
+        Kind.Core.from_kind(term.func)
+        Kind.Core.from_kind(term.argm)
+      )
+
+    let:
+      Kind.Core.Term.let(
+        term.name
+        Kind.Core.from_kind(term.expr)
+        Kind.Core.from_kind.hoas(term.body)
+      )
+
+    ann:
+      Kind.Core.Term.ann(
+        term.done
+        Kind.Core.from_kind(term.term)
+        Kind.Core.from_kind(term.type)
+      )
+    def:
+      Kind.Core.Term.typ
+    gol:
+      Kind.Core.Term.typ
+    hol:
+      Kind.Core.Term.typ
+    nat:
+      Kind.Core.Term.typ
+    chr:
+      Kind.Core.Term.typ
+    str:
+      Kind.Core.Term.typ
+    num:
+      Kind.Core.Term.typ
+    cse:
+      Kind.Core.Term.typ
+    new:
+      Kind.Core.Term.typ
+    get:
+      Kind.Core.Term.typ
+    set:
+      Kind.Core.Term.typ
+    mut:
+      Kind.Core.Term.typ
+    ope:
+      Kind.Core.Term.typ
+    imp:
+      Kind.Core.Term.typ
+    ori:
+      Kind.Core.Term.typ
+  }

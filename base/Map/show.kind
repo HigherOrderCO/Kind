@@ -1,0 +1,10 @@
+Map.show<A: Type>(
+  show: A -> String
+  m: Map<A>
+): String
+  let ret = "{"
+  let value_list = Map.to_list!(m)
+  for p in value_list with ret:
+    open p
+    ret|"\n  \""|p.fst|"\": "|show(p.snd)
+  ret|"\n}"

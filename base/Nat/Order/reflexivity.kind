@@ -1,0 +1,8 @@
+Nat.Order.refl(a: Nat): Equal<Bool>(Nat.lte(a, a), true)
+  case a {
+    zero:
+      Equal.refl<Bool>(true)
+    succ:
+      let ind = Nat.Order.refl(a.pred)
+      ind
+  }: Equal<Bool>(Nat.lte(a, a), true)

@@ -1,0 +1,2 @@
+Char.lte: Char -> Char -> Bool
+  U16.lte

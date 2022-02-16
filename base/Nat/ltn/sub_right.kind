@@ -1,0 +1,19 @@
+Nat.ltn.sub_right(
+  x: Nat, y: Nat, z: Nat
+  H: Equal(Bool, Nat.ltn(y, Nat.sub(z, x)), true)
+): Equal(Bool, Nat.lte(Nat.add(x y), z), true)
+  case x with H {
+    succ:
+      case z with H {
+        succ:
+          let H = H :: rewrite X in Nat.lte(Nat.succ(y), X) == Bool.true with (Nat.sub.succ_both(z.pred,x.pred))
+          let rec = Nat.ltn.sub_right(x.pred, y, z.pred, H)
+          rec
+        zero:
+          let H = H :: Nat.lte(Nat.succ(y),0) == Bool.true
+          Empty.absurd!(Bool.false_neq_true(H))
+      }!
+    zero: 
+      let H = H :: Nat.lte(Nat.succ(y), z) == Bool.true
+      Nat.lte.succ_left!!(H)
+  }!
