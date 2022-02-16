@@ -18,7 +18,7 @@ type App.GG.Body.Hull.Data {
   new(
     sprite: App.GG.Animation -> U64 -> VoxBox
     frame_charge: U64 // How much charge is generated each frame (max charge is obtained at 1020#64)
-    charge: App.GG.Effect<Unit> // Effect to be added to actions when the shot button is released (Should decide what to do based on the creature's charge)
+    charge: U64 -> App.GG.Effect<Unit> // Effect to be added to actions when the shot button is released (Should decide what to do based on the creature's charge)
     chips: App.GG.Chips
   )
 }

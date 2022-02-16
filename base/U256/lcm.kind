@@ -1,0 +1,104 @@
+U256.lcm.list(list: List<U256>): U256
+  let size = List.length<U256>(list)
+  if size =? 1 then
+    List.head_with_default<U256>(0#256, list)
+  else
+    U256.lcm.list.go(list, 1)
+
+
+
+U256.lcm.list.go(lcm: List<U256>, r: U256): U256
+  let list =  List.delete_by<U256>(U256.eql ,0#256, lcm)
+  let list =  List.delete_by<U256>(U256.eql ,1#256, list)
+  let list =  List.sort<U256>(U256.cmp, list)
+  let list = List.unique<U256>(U256.eql, list)
+  log(List.show!(U256.show, list))
+  case list { 
+    nil: r 
+    cons:
+      let {even, odd} = U256.lcm.list.split(list)
+      let empty_even = List.is_empty<U256>(even)
+      if empty_even then
+        U256.lcm.list.odd(odd) * r
+      else
+        let lcm_even = U256.lcm.list.even(even)
+        let odd = lcm_even@snd ++ odd
+        U256.lcm.list.go(odd, lcm_even@fst)
+  }
+
+
+//Deal with even numbers
+U256.lcm.list.even(lcm: List<U256>): Pair<U256, List<U256>>//result, odd
+  U256.lcm.list.even.go(lcm , [], 1)
+
+
+//Deal with odd numbers
+U256.lcm.list.odd(lcm: List<U256>): U256
+  U256.lcm.list.odd.go(lcm, 3, 1)
+
+
+//Split the list between even and odd numbers
+//[2, 4, 6] -> Pair.fst
+//[1, 3, 5] -> Pair.snd
+U256.lcm.list.split(lcm: List<U256>): Pair<List<U256>, List<U256>> //odd, even
+  let result = {[], []}
+  for num in lcm with result:
+    if (num % 2) =? 0 then
+      let list_even = List.append<U256>(result@fst, num)
+      {list_even, result@snd}
+    else
+      let list_odd = List.append<U256>(result@snd, num)
+      {result@fst, list_odd}
+result
+
+
+
+U256.lcm.list.even.go(lcm: List<U256>, odds: List<U256>, r: U256): Pair<U256, List<U256>>
+  let list =  List.delete_by<U256>(U256.eql ,0#256, lcm)
+  let list =  List.delete_by<U256>(U256.eql ,1#256, list)
+  let result = {false, {[], odds}}:: Pair<Bool, Pair<List<U256>, List<U256>>>
+  for num in list with result:
+    let new_num = num/2
+    if (new_num % 2) =? 0 then
+      let list_even = List.append<U256>(result@snd@fst, new_num)
+      {true, {list_even, result@snd@snd}}
+    else
+      let list_odd = List.append<U256>(result@snd@snd, new_num)
+      {result@fst, {result@snd@fst, list_odd}}
+
+
+  let new_even =  List.sort<U256>(U256.cmp, result@snd@fst)
+  let new_even = List.unique<U256>(U256.eql, new_even)
+  let new_odd =  List.sort<U256>(U256.cmp, result@snd@snd)
+  let new_odd = List.unique<U256>(U256.eql, new_odd)
+  let r_even = r * 2
+  if result@fst then
+    U256.lcm.list.even.go(new_even, new_odd, r*2)
+  else
+    {r_even, new_odd}
+
+
+
+U256.lcm.list.odd.go(lcm: List<U256>, div: U256, r: U256): U256
+  let list =  List.delete_by<U256>(U256.eql ,1#256, lcm)
+  let size = List.length<U256>(list)
+  if size =? 1 then 
+    r * List.head_with_default<U256>(0#256, list)
+  else
+    let result = {false, []}
+    for num in list with result:
+      if (num % div) =? 0 then
+        let divided = num / div
+        let new_list = List.append<U256>(result@snd, divided)
+        {true, new_list}
+      else
+        {result@fst, List.cons<U256>(num, result@snd)}
+
+    if result@fst then
+      U256.lcm.list.odd.go(result@snd, div, div * r)
+    else
+      case list { 
+        nil: r
+        cons: 
+          U256.lcm.list.odd.go(result@snd, div + 2, r)
+      }

@@ -1,0 +1,5 @@
+U1024.min(a: U1024, b: U1024): U1024
+  if a <=? b then
+    a
+  else
+    b

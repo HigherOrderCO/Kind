@@ -26,7 +26,7 @@ App.GG.Body.Hull.classic.sprite(animation: App.GG.Animation, frame: U64): VoxBox
         5#64: App.GG.img.Slime.idle.slime_character_idle_5
       }default App.GG.img.Slime.idle.slime_character_idle_0
     movement:
-      switch U64.eql(frame % 12) {
+      switch U64.eql(frame % 24) {
         0#64: App.GG.img.Slime.movement.slime_character_teleport_00
         1#64: App.GG.img.Slime.movement.slime_character_teleport_01
         2#64: App.GG.img.Slime.movement.slime_character_teleport_02

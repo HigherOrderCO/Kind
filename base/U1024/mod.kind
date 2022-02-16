@@ -1,0 +1,4 @@
+U1024.mod(a: U1024, b: U1024): U1024
+  open a
+  open b
+  U1024.new(Word.mod!(a.value, b.value))

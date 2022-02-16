@@ -21,7 +21,7 @@ App.GG.Chip.Arms.x_strike.Effect(dmg: I32): App.GG.Effect<Unit>
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
       let fst = [{c@fst - 1, c@snd - 1}, c, {c@fst + 1, c@snd + 1}]
       let snd = [{c@fst - 1, c@snd + 1}, c, {c@fst + 1, c@snd - 1}]
-      let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
+      get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
       let projectile_effect = App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg, fst, some(snd), false) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)

@@ -1,0 +1,2 @@
+U1024.to_dyadic(u: U1024): Dyadic
+  Dyadic.new(Nat.to_int(U1024.to_nat(u)), 0)

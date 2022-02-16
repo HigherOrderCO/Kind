@@ -582,10 +582,19 @@ App.GG.when.basic_attack(grid: App.GG.Grid): App.GG.Grid
       case creature@category as monster {
         minion: grid
         slime:
-          let data = App.GG.Body.Hull.Form.data(monster.data@body@hull@form)
-          let charge = if Maybe.if!(U64.eql(960), monster.charge) then data@charge else App.GG.Effect.basic_attack
-          let action = App.GG.Actions.basic_attack(charge)
-          App.GG.Creature.modify_at(App.GG.Actions.add(action), coord, grid)
+          //let data = App.GG.Body.Hull.Form.data(monster.data@body@hull@form)
+          //let charge = if Maybe.if!(U64.eql(960), monster.charge) then data@charge else App.GG.Effect.basic_attack
+          let charged_attack = monster.charge <> 0#64
+          let update_charges = 
+            if charged_attack <? 320 then
+              log("caiu aqui") 
+              App.GG.Creature.Status.enhance_attack.update_charge(creature, coord, grid)
+            else
+              grid
+
+          let effect = App.GG.Effect.basic_attack(charged_attack)
+          let action = App.GG.Actions.basic_attack(effect)
+          App.GG.Creature.modify_at(App.GG.Actions.add(action), coord, update_charges)
       }
   }
 

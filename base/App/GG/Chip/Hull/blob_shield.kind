@@ -17,11 +17,11 @@ App.GG.Chip.Hull.blob_shield.Effect(damage: I32, counter_duration: F64): App.GG.
     get grid = App.GG.Effect.grid.get
     get center = App.GG.Effect.coord.get_center
     get creature = App.GG.Effect.creature.get
+    get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
     without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
 
     let animation = App.GG.Animation.attack
-    let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
     let projectile_effect = App.GG.Chip.Hull.blob_shield.Projectile.Effect(dmg)
     let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
     let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)

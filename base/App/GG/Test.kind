@@ -1,4 +1,21 @@
-App.GG.Test.y_extremes(func: U32 -> Bool, grid: App.GG.Grid): U32
-  for coord:tile in grid:
-    func(coord@snd, y)
-  y
+App.GG.Test.update_charge(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  let grid = game@grid
+  let mod = (creature: App.GG.Creature)
+    case creature@category as monster {
+      minion: creature
+      slime:
+        let body = monster.data@body
+        let hull_data = App.GG.Body.Hull.Form.data(body@hull@form) 
+        let extra_charge = hull_data@frame_charge
+        let old_charge = 
+          without monster.charge: 0#64
+          monster.charge
+        let added_charge = U64.add(extra_charge, old_charge)
+        let new_charge = U64.min(960, added_charge)
+        //let new_charge = Maybe.map!!(U64.min(960), Maybe.map!!(U64.add(extra_charge), monster.charge))
+        let monster = App.GG.Monster.slime(monster.data, monster.attributes, some(new_charge), monster.hand, monster.folder, monster.energy)
+        creature@category <- monster
+    }
+  let new_grid = App.GG.Creature.modify_at(mod, coord, grid)
+  let new_game = game@grid <- new_grid
+  new_game

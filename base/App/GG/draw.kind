@@ -197,7 +197,8 @@ App.GG.draw.tile(
           else
             if App.GG.Team.eql(App.GG.Team.red, creature.value@team) then
               case creature.value@category as monster {
-                minion: VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(Nat.to_u32(monster.data@level * 50) + 12), sprite, img)
+                //minion: VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(Nat.to_u32(monster.data@level * 50) + 12), sprite, img)
+                minion: VoxBox.Draw.image_reverse_x(x, y, 20, sprite, img)
                 slime: VoxBox.Draw.image_colorize_reverse_x(x, y, 20, Col32.new_hue(12), sprite, img)
               }
             else VoxBox.Draw.image(x, y, 20, sprite, img)

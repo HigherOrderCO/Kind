@@ -29,10 +29,20 @@ App.GG.Monster.get_max_hp(monster: App.GG.Monster): I32
       monster.attributes@hp * 10
   }
 
-App.GG.monster.get_max_energy(monster: App.GG.Monster): I32
+App.GG.Monster.get_max_energy(monster: App.GG.Monster): I32
   case monster {
     minion: 
       +0#32
     slime: 
       monster.attributes@energy
+  }
+
+App.GG.Monster.get_charge(monster: App.GG.Monster): U64
+  case monster { 
+    minion:
+      0#64
+    slime:
+      without monster.charge: 0#64
+      log(U64.show(monster.charge) | " monster_charge")
+      monster.charge
   }

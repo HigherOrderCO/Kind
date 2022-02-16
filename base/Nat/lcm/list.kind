@@ -1,0 +1,95 @@
+Nat.lcm.list.go(lcm: List<Nat>, r: Nat): Nat
+  let list =  List.delete_by<Nat>(Nat.eql ,0, lcm)
+  let list =  List.delete_by<Nat>(Nat.eql ,1, list)
+  let list =  List.sort<Nat>(Nat.cmp, list)
+  let list = List.unique<Nat>(Nat.eql, list)
+  log(List.show!(Nat.show, list))
+  case list { 
+    nil: r 
+    cons:
+      let {even, odd} = Nat.lcm.list.split(list)
+      let empty_even = List.is_empty<Nat>(even)
+      if empty_even then
+        Nat.lcm.list.odd(odd) * r
+      else
+        let lcm_even = Nat.lcm.list.even(even)
+        let odd = lcm_even@snd ++ odd
+        Nat.lcm.list.go(odd, lcm_even@fst)
+  }
+
+
+//Deal with even numbers
+Nat.lcm.list.even(lcm: List<Nat>): Pair<Nat, List<Nat>>//result, odd
+  Nat.lcm.list.even.go(lcm , [], 1)
+
+
+//Deal with odd numbers
+Nat.lcm.list.odd(lcm: List<Nat>): Nat
+  Nat.lcm.list.odd.go(lcm, 3, 1)
+
+
+//Split the list between even and odd numbers
+//[2, 4, 6] -> Pair.fst
+//[1, 3, 5] -> Pair.snd
+Nat.lcm.list.split(lcm: List<Nat>): Pair<List<Nat>, List<Nat>> //odd, even
+  let result = {[], []}
+  for num in lcm with result:
+    if (num % 2) =? 0 then
+      let list_even = List.append<Nat>(result@fst, num)
+      {list_even, result@snd}
+    else
+      let list_odd = List.append<Nat>(result@snd, num)
+      {result@fst, list_odd}
+result
+
+
+
+Nat.lcm.list.even.go(lcm: List<Nat>, odds: List<Nat>, r: Nat): Pair<Nat, List<Nat>>
+  let list =  List.delete_by<Nat>(Nat.eql ,0, lcm)
+  let list =  List.delete_by<Nat>(Nat.eql ,1, list)
+  let result = {false, {[], odds}}:: Pair<Bool, Pair<List<Nat>, List<Nat>>>
+  for num in list with result:
+    let new_num = num/2
+    if (new_num % 2) =? 0 then
+      let list_even = List.append<Nat>(result@snd@fst, new_num)
+      {true, {list_even, result@snd@snd}}
+    else
+      let list_odd = List.append<Nat>(result@snd@snd, new_num)
+      {result@fst, {result@snd@fst, list_odd}}
+
+
+  let new_even =  List.sort<Nat>(Nat.cmp, result@snd@fst)
+  let new_even = List.unique<Nat>(Nat.eql, new_even)
+  let new_odd =  List.sort<Nat>(Nat.cmp, result@snd@snd)
+  let new_odd = List.unique<Nat>(Nat.eql, new_odd)
+  let r_even = r * 2
+  if result@fst then
+    Nat.lcm.list.even.go(new_even, new_odd, r*2)
+  else
+    {r_even, new_odd}
+
+
+
+Nat.lcm.list.odd.go(lcm: List<Nat>, div: Nat, r: Nat): Nat
+  let list =  List.delete_by<Nat>(Nat.eql ,1, lcm)
+  let size = List.length<Nat>(list)
+  if size =? 1 then 
+    r * List.head_with_default<Nat>(0, list)
+  else
+    let result = {false, []}
+    for num in list with result:
+      if (num % div) =? 0 then
+        let divided = num / div
+        let new_list = List.append<Nat>(result@snd, divided)
+        {true, new_list}
+      else
+        {result@fst, List.cons<Nat>(num, result@snd)}
+
+    if result@fst then
+      Nat.lcm.list.odd.go(result@snd, div, div * r)
+    else
+      case list { 
+        nil: r
+        cons: 
+          Nat.lcm.list.odd.go(result@snd, div + 2, r)
+      }

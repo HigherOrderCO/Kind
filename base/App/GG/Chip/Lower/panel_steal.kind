@@ -2,40 +2,79 @@ App.GG.Chip.Lower.panel_steal: App.GG.Chip
   App.GG.Chip.new(
     "PSteal"
     App.GG.Class.control
-    App.GG.Chip.Lower.panel_steal.Effect(5)
+    App.GG.Chip.Lower.panel_steal.Effect(5, 3, 10)
     10
     App.GG.img.bazooka
     App.GG.Attributes.new(0,0,3,1)
   )
 
-// App.GG.Chip.panel_steal.Effect: App.GG.Effect<Unit>
-//   App.GG.Chip.panel_steal.Effect(4, 2)
+App.GG.Chip.Lower.panel_steal.Effect(duration: F64, delay: F64, damage: I32): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get center = App.GG.Effect.coord.get_center
+    get tile = App.GG.Effect.tile.get
+    get grid = App.GG.Effect.grid.get
+    let animation = App.GG.Animation.attack
+    without tile: App.GG.Effect.pass
+    let enemy_coord = App.GG.Coord.first_enemy_tile(center, tile@owner, grid)
+    without enemy_coord: App.GG.Effect.pass
+    let eff = App.GG.Chip.Lower.panel_steal.Effect_at(duration , delay, damage, enemy_coord)
+    App.GG.Effect.generic_action(eff, animation,  8, 12)
+  }
 
-App.GG.Chip.Lower.panel_steal.Effect(duration: F64): App.GG.Effect<Unit>
-  let uduration = F64.to_u64(duration * 60)
+App.GG.Chip.Lower.panel_steal.Effect_at(duration: F64, delay: F64, damage: I32, pos: App.GG.Coord): App.GG.Effect<Unit>
   App.GG.Effect {
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    without creature: App.GG.Effect.pass
+
+    let projectile_effect = App.GG.Chip.Lower.panel_steal.Projectile.Effect(duration, delay, damage, creature@team)
+    let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+    let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+
+    App.GG.Effect.projectile.add_at(pos, projectile)
+  }
+
+App.GG.Chip.Lower.panel_steal.Projectile.Effect(duration: F64, delay: F64, damage: I32, team: App.GG.Team): App.GG.Effect<Unit>
+  let uduration = F64.to_u64(duration * 60)
+  let udelay    = F64.to_u64(delay * 60)
+  App.GG.Effect { 
     get center = App.GG.Effect.coord.get_center
     get grid = App.GG.Effect.grid.get
     get tile = App.GG.Effect.tile.get
-    App.GG.Effect.frame.inc // Increases action's frame by 1
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
     without tile: App.GG.Effect.pass
-    App.GG.Effect {
-      App.GG.Effect.chip.waste
-      App.GG.Effect.actions.reset
-      let enemy_coord = App.GG.Coord.first_enemy_tile(center, tile@owner, grid)
-      without enemy_coord: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    let is_occupied = App.GG.Coord.has_creature(center, grid)
+
+    let steal = 
       App.GG.Effect {
-        get enemy = App.GG.Effect.creature.get_at(enemy_coord)
-        without enemy: 
-          App.GG.Effect {
-            App.GG.Effect.tile.change_owner(tile@owner, enemy_coord)
-            App.GG.Effect.tile.add_status(App.GG.Tile.Status.stolen(uduration), enemy_coord)
-          }
-        App.GG.Effect.pass
+        App.GG.Effect.tile.change_owner(team, center)
+        App.GG.Effect.tile.add_status(App.GG.Tile.Status.stolen(uduration), center)
+        return unit
       }
-    }
+
+    let damage = 
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+        App.GG.Effect.projectile.hit.damage_at(damage, true, true, center)
+        return unit
+      }
+
+    let draw = App.GG.Effect.projectile.add_image([App.GG.img.yellow_tile], udelay, center)
+
+    switch U64.eql(frame) { 
+      0: draw
+      udelay: 
+        App.GG.Effect { 
+          let steal_or_dmg =
+            if is_occupied then
+              damage
+            else
+              steal
+
+          steal_or_dmg
+          App.GG.Effect.projectile.delete
+        }
+    }default App.GG.Effect.pass
   }
-
-
-  
-

@@ -1,0 +1,2 @@
+U1024.xors(n: Nat): Variadic(n, U1024, U1024)
+  Variadic.foldr!!(U1024.xor, 0#1024, n)

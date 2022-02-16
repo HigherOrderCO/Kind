@@ -1,0 +1,4 @@
+U1024.eql(a: U1024, b: U1024): Bool
+  open a
+  open b
+  Word.eql!(a.value, b.value)

@@ -23,7 +23,7 @@ App.GG.Chip.Arms.poison_cloud.Effect(dmg: I32): App.GG.Effect<Unit>
     without frame: App.GG.Effect.pass
     App.GG.Effect {
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
-      let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
+      get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
       let projectile_effect = App.GG.Chip.Arms.poison_cloud.Projectile.Effect(dmg) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)

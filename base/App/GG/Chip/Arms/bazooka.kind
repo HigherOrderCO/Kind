@@ -46,7 +46,7 @@ App.GG.Chip.Arms.bazooka.Effect(damage: I32): App.GG.Effect<Unit>
 
       let func = (coord: App.GG.Coord)
         App.GG.Effect { 
-          let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
+          get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
 
           let coords = coord & App.GG.Coord.adjacent_all(coord, grid)
 

@@ -1,0 +1,24 @@
+App.GG.Chip.Lower.burn_shot: App.GG.Chip
+  App.GG.Chip.new(
+    "BrnSht"
+    App.GG.Class.strength
+    App.GG.Chip.Lower.burn_shot.Effect(1, 5, 5) // damage, burn_ticks, charges
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(0,0,3,1)
+  )
+
+App.GG.Chip.Lower.burn_shot.Effect(damage: I32, ticks: Nat, charges: Nat): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get creature = App.GG.Effect.creature.get
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    without creature: App.GG.Effect.pass
+    App.GG.Effect { 
+      let eff  = App.GG.Effect.projectile.hit.add_burn_at(damage, ticks)
+      App.GG.Effect.status.enhance_attack.add("burn", charges, none, eff)
+      App.GG.Effect.chip.waste
+      App.GG.Effect.actions.reset
+    }
+  }

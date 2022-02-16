@@ -26,7 +26,7 @@ App.GG.Chip.Hull.slime_jump.Effect(damage: I32, duration: F64): App.GG.Effect<Un
       App.GG.Effect { 
         App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
         let animation = App.GG.Animation.attack
-        let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
+        get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
         let projectile_effect = App.GG.Chip.Hull.slime_jump.Projectile.Effect(dmg)
         let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
         let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)

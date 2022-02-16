@@ -3,13 +3,15 @@ App.GG.Effect.damage(dmg: I32, apply_flinch: Bool, apply_intangible: Bool, pos: 
   let dmg = I32.neg(dmg)
   App.GG.Effect {
     get creature = App.GG.Effect.creature.get_at(pos)
-    get intangible = App.GG.Effect.status.get_at(3, pos)
-    get counter = App.GG.Effect.status.get_at(2, pos)
-    get shield = App.GG.Effect.status.get_at(6, pos)
+    get intangible = App.GG.Effect.status.get_at("intangible", pos)
+    get counter = App.GG.Effect.status.get_at("counter", pos)
+    get shield = App.GG.Effect.status.get_at("shield", pos)
+    get vulnerable = App.GG.Effect.status.get_at("attack_stance", pos)
     without counter: pass
     without shield:  pass
     without creature:  pass
     without intangible: pass
+    without vulnerable: pass
     case intangible {
       none:
         case counter { 
@@ -18,12 +20,14 @@ App.GG.Effect.damage(dmg: I32, apply_flinch: Bool, apply_intangible: Bool, pos: 
               none: 
                 App.GG.Effect {
                   let {new_creature, new_dmg} = App.GG.Effect.damage.barrier(creature, dmg)
+                  let extra_dmg = App.GG.Creature.Status.attack_stance.vulnerable_dmg(vulnerable, new_dmg)
                   let old_hp = creature@hp
                   // log(I32.show(new_dmg))
-                  let new_hp = I32.max(new_creature@hp + new_dmg, 0)
+                  let new_hp = I32.max(new_creature@hp + extra_dmg, 0)
                   let real_dmg = new_hp - old_hp
                   log(I32.show(real_dmg))
                   let new_creature = new_creature@hp <- new_hp
+                  let new_creature =  App.GG.Creature.Status.attack_stance.change_num(new_creature)
                   let new_creature = App.GG.Effect.damage.flinch(real_dmg, apply_flinch, new_creature)
                   let new_creature = App.GG.Effect.damage.intangible(real_dmg, apply_intangible, new_creature)
                   // log("new_hp = " | I32.show(new_hp))
@@ -46,14 +50,14 @@ App.GG.Effect.damage(dmg: I32, apply_flinch: Bool, apply_intangible: Bool, pos: 
                   pass
                 else
                   App.GG.Effect { 
-                    let new_creature = App.GG.Creature.Status.del_from_nat(6, creature)
+                    let new_creature = App.GG.Creature.Status.del_from_name("shield", creature)
                     App.GG.Effect.creature.modify_at((creature) new_creature, pos)
                     pass
                   }
             }
           some:
             App.GG.Effect { 
-              let new_creature = App.GG.Creature.Status.del_from_nat(2, creature)
+              let new_creature = App.GG.Creature.Status.del_from_name("counter", creature)
               App.GG.Effect.creature.modify_at((creature) new_creature, pos)
               let eff = App.GG.Creature.Status.counter.get_effect(counter.value)
               without eff: pass
@@ -76,7 +80,7 @@ App.GG.Effect.damage.flinch(dmg: I32, flinch: Bool, creature: App.GG.Creature): 
     creature
 
 App.GG.Effect.damage.intangible(dmg: I32, intangible: Bool, creature: App.GG.Creature): App.GG.Creature
-  let not_immune = Maybe.is_none!(App.GG.Creature.Status.get_from_nat(3, creature@statuses) <> none)
+  let not_immune = Maybe.is_none!(App.GG.Creature.Status.get_from_name("intangible", creature@statuses) <> none)
   if not(dmg =? 0) && intangible && not_immune then 
     let status = App.GG.Creature.Status.intangible(120)
     App.GG.Creature.Status.add(status, creature)
@@ -84,13 +88,14 @@ App.GG.Effect.damage.intangible(dmg: I32, intangible: Bool, creature: App.GG.Cre
     creature
 
 App.GG.Effect.damage.barrier(creature: App.GG.Creature, dmg: I32): Pair<App.GG.Creature, I32>
+  let name = "barrier"
   let statuses = creature@statuses
-  let barrier = App.GG.Creature.Status.get_from_nat(0, statuses)
+  let barrier = App.GG.Creature.Status.get_from_name(name, statuses)
   without barrier: {creature, dmg}
   let {new_barrier, remaining_dmg} = App.GG.Effect.damage.barrier.aux(barrier, dmg)
   let new_creature = 
     case new_barrier {
-      none: App.GG.Creature.Status.del_from_nat(0, creature)
+      none: App.GG.Creature.Status.del_from_name(name, creature)
       some: App.GG.Creature.Status.add(new_barrier.value, creature)
     }
   {new_creature, remaining_dmg}

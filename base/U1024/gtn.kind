@@ -1,0 +1,4 @@
+U1024.gtn(a: U1024, b: U1024): Bool
+  open a
+  open b
+  Word.gtn!(a.value, b.value)

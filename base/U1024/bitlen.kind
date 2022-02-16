@@ -1,0 +1,6 @@
+U1024.bitlen(n: U1024): U1024
+  if U1024.eql(n, 0#1024) then
+    0#1024
+  else
+    U1024.add(1#1024, U1024.bitlen(U1024.div(n, 2#1024)))
+

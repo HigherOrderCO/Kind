@@ -32,3 +32,10 @@ App.GG.Team.get(center: App.GG.Coord, origin: App.GG.Effect.Origin, grid: App.GG
         return info@team
       }
   }
+
+App.GG.Team.show(team: App.GG.Team): String
+  case team { 
+    blue    : "blue"
+    red     : "red"
+    neutral : "neutral"
+  }

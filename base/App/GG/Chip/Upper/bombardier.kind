@@ -23,7 +23,7 @@ App.GG.Chip.Upper.bombardier.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
         App.GG.Effect { 
           let animation = App.GG.Animation.attack
-          let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
+          get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
           let projectile_effect = App.GG.Chip.Upper.bombardier.Projectile.Effect(dmg, delay)
           let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
           let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)

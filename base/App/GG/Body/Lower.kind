@@ -4,10 +4,12 @@ type App.GG.Body.Lower {
 
 App.GG.Body.Lower.chips: App.GG.Chips
   [
-    App.GG.Chip.Lower.riposte
-    App.GG.Chip.Lower.barrier
-    App.GG.Chip.Lower.panel_steal
-    App.GG.Chip.Lower.area_steal
+    //App.GG.Chip.Lower.riposte
+    //App.GG.Chip.Lower.barrier
+    //App.GG.Chip.Lower.panel_steal
+    //App.GG.Chip.Lower.area_steal
+    //App.GG.Chip.Lower.attack_position
+    App.GG.Chip.Lower.burn_shot
   ]
 
 App.GG.Body.Lower.get_chips(body: App.GG.Body): App.GG.Chips

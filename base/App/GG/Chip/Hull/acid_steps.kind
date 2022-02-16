@@ -2,7 +2,7 @@ App.GG.Chip.Hull.acid_steps: App.GG.Chip
   App.GG.Chip.new(
     "AcdSps"
     App.GG.Class.power
-    App.GG.Chip.Hull.acid_steps.Effect(2, 2, 0.5, 5) //damage, duration on ground, delay between respawning, poison_duration
+    App.GG.Chip.Hull.acid_steps.Effect(2, 2, 0.5, 5) //damage, duration on ground, delay between respawning, poison_ticks
     10
     App.GG.img.bazooka
     App.GG.Attributes.new(3,0,1,0) // TODO : Alter
@@ -30,11 +30,10 @@ App.GG.Chip.Hull.acid_steps.Effect(damage: I32, duration: F64, delay: F64, burn_
     let column = App.GG.Coord.column(grid, last_line_coord)
     let coords = List.reverse<App.GG.Coord>(List.tail<App.GG.Coord>(App.GG.Coord.front_all(center, creature@team, grid)))
     let size = List.length<App.GG.Coord>(coords)
-    let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
-    let projectile_effect = App.GG.Chip.Hull.acid_steps.Projectile.Effect(dmg, duration, delay, burn_ticks, size)
+    let projectile_effect = App.GG.Chip.Hull.acid_steps.Projectile.Effect(damage, duration, delay, burn_ticks, size)
     let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
     let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
-    let column_projectile = App.GG.Effect.Hull.acid_steps.Projectile.Effect.column(creature@team, dmg , duration, delay, burn_ticks, size)
+    let column_projectile = App.GG.Effect.Hull.acid_steps.Projectile.Effect.column(creature@team, damage , duration, delay, burn_ticks, size)
     let func = 
       (coord)
       App.GG.Effect.projectile.add_at(coord, column_projectile)

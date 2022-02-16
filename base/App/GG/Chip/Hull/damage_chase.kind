@@ -27,12 +27,12 @@ App.GG.Chip.Hull.damage_chase.Effect(damage: I32, delay: F64, interval: F64, pro
     get grid = App.GG.Effect.grid.get
     get center = App.GG.Effect.coord.get_center
     get creature = App.GG.Effect.creature.get
+    get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
     without creature: App.GG.Effect.pass
     without frame: App.GG.Effect.pass
     let coord = App.GG.Coord.closest_enemy_in_front(center, creature@team, grid)
     without coord: App.GG.Effect.pass
     let animation = App.GG.Animation.attack
-    let dmg = App.GG.Creature.dmg_with_attribute(creature, damage)
     let projectile_effect = App.GG.Chip.Hull.damage_chase.Projectile.Effect(dmg, delay, interval, projectile_num)
     let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
     let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)

@@ -15,7 +15,7 @@ App.GG.Effect.stun(status: App.GG.Creature.Status.Stun, animation: App.GG.Animat
         }
       duration: 
         App.GG.Effect {
-          let mod = App.GG.Creature.modify_at(App.GG.Creature.Status.del_from_nat(7), center)
+          let mod = App.GG.Creature.modify_at(App.GG.Creature.Status.del_from_name("stun"), center)
           App.GG.Effect.grid.modify(mod)
           App.GG.Effect.actions.del
           App.GG.Effect.animation.update(App.GG.Animation.idle)

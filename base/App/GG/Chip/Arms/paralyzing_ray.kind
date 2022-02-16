@@ -28,7 +28,7 @@ App.GG.Chip.Arms.paralyzing_ray.Effect(dmg: I32, duration: F64): App.GG.Effect<U
     App.GG.Effect {
       App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
       let sduration = U64.to_f64(App.GG.Creature.stun_with_attribute(creature, uduration))
-      let dmg = App.GG.Creature.dmg_with_attribute(creature, dmg)
+      get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
       let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
       let projectile_effect = App.GG.Chip.Arms.paralyzing_ray.Projectile.Effect(dmg, sduration) 
       let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)

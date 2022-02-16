@@ -122,7 +122,8 @@ App.GG.Effect.projectile.hit.damage_at(dmg: I32, flinch: Bool, intangible: Bool,
 App.GG.Effect.projectile.hit.add_burn_at(dpa: I32, amount: Nat, coord: App.GG.Coord): App.GG.Effect<Unit>
   App.GG.Effect { 
     get can_apply = App.GG.Effect.projectile.can_apply_status(coord)
-      if can_apply then
+    get is_enemy = App.GG.Effect.creature.is_enemy(coord) // Checks if projectile is over an enemy
+      if can_apply && is_enemy then
         App.GG.Effect { 
         let add_at = App.GG.Effect.status.burn.add_at(dpa, amount)
           get applied = App.GG.Effect.projectile.hit.effect<Unit>(coord, add_at)
@@ -183,13 +184,6 @@ App.GG.Effect.projectile.hit.dissapear(coord: App.GG.Coord): App.GG.Effect<Unit>
       App.GG.Effect.pass
   }
 
-//App.GG.Effect.projectile.hit.counter(effect: App.GG.Effect<Unit>, coord: App.GG.Coord): App.GG.Effect<Unir>
-  //App.GG.Effect {
-    //get has_hit  = App.GG.Effect.projectile.has_hit(coord) // Checks if projectile has already hit that enemy
-    //get has_counter = App.GG.Effect
-      //if has_hit then
-    
-  //}
 
 App.GG.Effect.projectile.can_hit(coord: App.GG.Coord): App.GG.Effect<Bool>
   App.GG.Effect {

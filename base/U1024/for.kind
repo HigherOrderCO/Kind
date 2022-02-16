@@ -1,0 +1,5 @@
+U1024.for<S: Type>(state: S, from: U1024, til: U1024, func: U1024 -> S -> S): S
+  case U1024.eql(from, til){
+    true : state
+    false: U1024.for<S>(func(from, state), U1024.inc(from), til, func)
+  }

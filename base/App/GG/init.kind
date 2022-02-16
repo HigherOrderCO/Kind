@@ -65,8 +65,8 @@ App.GG.init.grid(body: App.GG.Body, rand: Nat): App.GG.Grid
   let grid = App.GG.Creature.place(swordsman, {6#32,1#32}, grid)
   let gunner_1 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(rand % 3), grid)
   let grid = App.GG.Creature.place(gunner_1, {7#32,3#32}, grid)
-  // let gunner_2 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(1), grid)
-  // let grid = App.GG.Creature.place(gunner_2, {6#32,1#32}, grid)
-  // let gunner_3 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(2), grid)
-  // let grid = App.GG.Creature.place(gunner_3, {5#32,2#32}, grid)
+  //let gunner_2 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(1), grid)
+  //let grid = App.GG.Creature.place(gunner_2, {6#32,1#32}, grid)
+  //let gunner_3 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(2), grid)
+  //let grid = App.GG.Creature.place(gunner_3, {5#32,2#32}, grid)
   grid

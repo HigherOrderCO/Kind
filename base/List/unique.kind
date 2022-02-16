@@ -1,0 +1,7 @@
+//The list must be ordained to use this function!
+List.unique<A: Type>(eql: A -> A -> Bool, xs: List<A>): List<A>
+  case xs {
+    nil: []
+    cons: 
+      xs.head & List.unique!(eql, List.drop_while!(eql(xs.head), xs.tail))
+  }

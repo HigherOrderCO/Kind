@@ -340,6 +340,33 @@ App.GG.Coord.has_creature(
       true
   }
 
+App.GG.Coord.nearest_enemy_column(team: App.GG.Team, grid: App.GG.Grid, coord: App.GG.Coord): Maybe<List<App.GG.Coord>>
+  let column = App.GG.Coord.column(grid, coord)
+  let result = {false, coord}
+
+  for pos in column with result: 
+    let tile = App.GG.Grid.get(pos, grid)
+    without tile: result
+    if App.GG.Team.eql(team, tile@owner) then
+      result
+    else
+      {true, pos}
+
+  if result@fst then 
+    some(App.GG.Coord.column(grid, result@snd))
+  else
+    let front_coord = App.GG.Coord.front(team, coord)
+    App.GG.Coord.nearest_enemy_column(team, grid, front_coord)
+
+
+App.GG.Coord.first_enemy_tile(coord: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid): Maybe<App.GG.Coord>
+  let front_coord = App.GG.Coord.front(team, coord)
+  let front_tile  = App.GG.Grid.get(front_coord, grid)
+  without front_tile: none
+  if App.GG.Team.eql(team, front_tile@owner) then
+    App.GG.Coord.first_enemy_tile(front_coord, team, grid)
+  else
+    some(front_coord)
 
 App.GG.Coord.all_coords_past_center(center: App.GG.Coord, team: App.GG.Team, grid: App.GG.Grid):List<App.GG.Coord>
   let column = App.GG.Coord.column(grid, center)
@@ -382,6 +409,14 @@ App.GG.Coord.all_enemies_in_coords(coords: List<App.GG.Coord>, team: App.GG.Team
   else
     some(result)
 
+App.GG.Coord.all_creatures(grid: App.GG.Grid): List<Pair<App.GG.Creature, App.GG.Coord>>
+  let result = []
+  for coord:tile in grid with result:
+    let creature = App.GG.Creature.get(coord, grid)
+    without creature: result
+    let new_pair = Pair.new<App.GG.Creature, App.GG.Coord>(creature, coord)
+    List.cons<Pair<App.GG.Creature, App.GG.Coord>>(new_pair, result)
+  result
 
 
 App.GG.Coord.all_creature_hp(grid: App.GG.Grid): List<Pair<I32, App.GG.Coord>>

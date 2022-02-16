@@ -1,0 +1,11 @@
+U1024.range(ini: U1024, end: U1024): List<U1024>
+  if ini >=? end then
+    []
+  else
+    U1024.range.go(ini, end, [])
+
+U1024.range.go(ini: U1024, end: U1024, result: List<U1024>): List<U1024>
+  if ini =? end then
+    List.reverse!(result)
+  else
+    U1024.range.go(ini + 1, end, ini & result)

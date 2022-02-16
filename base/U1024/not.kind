@@ -1,0 +1,4 @@
+U1024.not(a: U1024): U1024
+  let a_val = U1024.add(1#1024, a)@value
+  U1024.new(Word.neg<1024>(a_val))
+

@@ -38,6 +38,26 @@ App.GG.Effect.creature.change_energy_at(val: I32, pos: App.GG.Coord): App.GG.Eff
     let new_local = local@grid <- new_grid
   App.GG.Effect.Result.new!(real_val, center, origin, new_local, (enemy, img) img, 0, "")
 
+App.GG.Effect.creature.damage_with_attribute(dmg: I32): App.GG.Effect<I32>
+  let pass = App.GG.Effect { return +0#32 }
+  App.GG.Effect { 
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: pass
+    let as = creature@statuses@attack_stance
+    let extra_dmg = App.GG.Creature.Status.attack_stance.extra_dmg(as, dmg)
+    let new_creature =  App.GG.Creature.Status.attack_stance.change_num
+    let attributes = App.GG.Attributes.get(creature)
+    without attributes: App.GG.Effect { return extra_dmg }
+    App.GG.Effect { 
+      let destruction = attributes@damage
+      App.GG.Effect { 
+        App.GG.Effect.creature.modify(new_creature)
+        return (extra_dmg * destruction) / 25
+      }
+    }
+  }
+
 App.GG.Effect.creature.get: App.GG.Effect<Maybe<App.GG.Creature>>
   (center, origin, local)
   let creature = App.GG.Creature.get(center, local@grid)

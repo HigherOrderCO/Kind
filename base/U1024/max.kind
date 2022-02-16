@@ -1,0 +1,5 @@
+U1024.max(a: U1024, b: U1024): U1024
+  if a <=? b then
+    b
+  else
+    a

@@ -1,0 +1,2 @@
+Nat.to_u1024(n: Nat): U1024
+  U1024.new(Nat.to_word!(n))

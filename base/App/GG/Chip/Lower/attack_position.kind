@@ -1,0 +1,36 @@
+App.GG.Chip.Lower.attack_position: App.GG.Chip
+  App.GG.Chip.new(
+    "AtkPos"
+    App.GG.Class.strength
+    App.GG.Chip.Lower.attack_position.Effect(100, 100, 1, 2) // Extra damage given, Extra damage taken, skill quantity, seconds channeling
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(0,0,3,1)
+  )
+
+
+App.GG.Chip.Lower.attack_position.Effect(extra_damage: U64, vulnerability: U64, skill_num: Nat, stand_time: F64): App.GG.Effect<Unit>
+  let ustand = F64.to_u64(stand_time * 60)
+  let pdv = App.GG.Creature.Status.enhance_attack(extra_damage, vulnerability, skill_num)
+  let animation = App.GG.Animation.attack
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.animation.modify_by_duration(0, ustand)
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      get center = App.GG.Effect.coord.get_center
+      switch U64.eql(frame) { 
+      0: 
+        App.GG.Effect {
+          App.GG.Effect.chip.waste
+          App.GG.Effect.animation.update(animation) // Sets animation for creature
+        }
+      ustand:
+        App.GG.Effect { 
+          App.GG.Effect.projectile.hit.apply_status_at(pdv, center)
+          App.GG.Effect.actions.reset
+        }
+      }default App.GG.Effect.pass
+    }
+  }
