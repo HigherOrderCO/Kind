@@ -1,0 +1,84 @@
+App.GG.Effect.status.add_at(
+  status: App.GG.Creature.Status
+  pos: App.GG.Coord
+): App.GG.Effect<Unit>
+  let status_add = App.GG.Creature.Status.add(status)
+  let mod = App.GG.Creature.modify_at(status_add, pos)
+  App.GG.Effect.grid.modify(mod)
+
+App.GG.Effect.status.add(status: App.GG.Creature.Status): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.status.add_at(status, center)
+  }
+
+App.GG.Effect.status.burn.add(dpa: I32, amount: Nat): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.status.burn.add_at(dpa, amount, center)
+  }
+
+App.GG.Effect.status.counter.add(effect: App.GG.Coord -> App.GG.Effect<Unit>, duration: F64): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.status.counter.add_at(effect, duration, center)
+  }
+
+App.GG.Effect.status.enhance_attack.add(name: String, charges: Nat, duration: Maybe<U64>, eff: App.GG.Coord -> App.GG.Effect<Unit>): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.status.enhance_attack.add_at(name, charges, duration, eff, center)
+  }
+
+App.GG.Effect.status.counter.add_at(effect: App.GG.Coord -> App.GG.Effect<Unit>, duration: F64, coord: App.GG.Coord): App.GG.Effect<Unit>
+  let uduration = F64.to_u64(duration * 60)
+  let counter = App.GG.Creature.Status.counter.create(effect, uduration)
+  App.GG.Effect { 
+    get status = App.GG.Effect.status.get_at("counter", coord)
+    without status: App.GG.Effect.pass
+    App.GG.Effect.status.add_at(counter, coord)
+  }
+
+App.GG.Effect.status.burn.add_at(dpa: I32, amount: Nat, pos: App.GG.Coord): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    let create = App.GG.Creature.Status.burn.create(dpa, amount)
+    get status = App.GG.Effect.status.get_at("burn", pos)
+    without status: App.GG.Effect.pass
+    without status: App.GG.Effect.status.add_at(create, pos)
+    let new_status = App.GG.Creature.Status.burn.add(create, status)
+    App.GG.Effect.status.add_at(new_status, pos)
+  }
+
+
+
+App.GG.Effect.status.enhance_attack.add_at(name: String, charges: Nat, duration: Maybe<U64>, eff: App.GG.Coord -> App.GG.Effect<Unit>, pos: App.GG.Coord): App.GG.Effect<Unit>
+  let create = App.GG.Creature.Status.enhance_attack([App.GG.Creature.Status.basic_attack.new(name, charges + 1, duration, eff)])
+  App.GG.Effect { 
+    get status = App.GG.Effect.status.get_at("enhance_attack", pos)
+    without status: App.GG.Effect.pass
+    without status:  App.GG.Effect.status.add_at(create, pos)
+    let new_status = App.GG.Creature.Status.add_enhance_attack(name, charges, duration, eff, status)
+    App.GG.Effect.status.add_at(new_status, pos)
+  }
+
+
+
+//===============================================
+App.GG.Effect.status.get_at(name: String, pos: App.GG.Coord): App.GG.Effect<Maybe<Maybe<App.GG.Creature.Status>>>
+  App.GG.Effect {
+    get creature = App.GG.Effect.creature.get_at(pos)
+    without creature: App.GG.Effect {return none}
+    App.GG.Effect {
+      return App.GG.Creature.Status.get_from_name(name, creature@statuses)
+    }
+  }
+
+App.GG.Effect.status.has_status(name: String, coord: App.GG.Coord): App.GG.Effect<Bool>
+  App.GG.Effect { 
+    get status = App.GG.Effect.status.get_at(name, coord)
+    without status: App.GG.Effect { return Bool.false }
+    without status: App.GG.Effect { return Bool.false } 
+      App.GG.Effect { 
+        return true
+      }
+  }

@@ -1,0 +1,16 @@
+App.GG.Effect.heal(heal: I32, pos: App.GG.Coord): App.GG.Effect<I32>
+  let pass = App.GG.Effect { return +0#32 }
+  App.GG.Effect {
+    get creature = App.GG.Effect.creature.get_at(pos)
+    without creature: pass
+    let max_hp = App.GG.Monster.get_max_hp(creature@category)
+    let heals = creature@hp + heal
+    let max_heal = I32.min(max_hp, heals)
+    let hp_min = I32.max(max_heal, 0)
+    let new_creature = creature@hp <- hp_min
+    let real_heal = hp_min - creature@hp
+    App.GG.Effect { 
+      App.GG.Effect.creature.modify_at((creature) new_creature, pos)
+      return real_heal
+    }
+  }

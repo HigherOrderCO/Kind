@@ -1,0 +1,28 @@
+App.GG.Chip.Lower.area_steal: App.GG.Chip
+  App.GG.Chip.new(
+    "ASteal"
+    App.GG.Class.control
+    App.GG.Chip.Lower.area_steal.Effect(5, 3, 10)
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(0,0,3,1)
+  )
+
+
+App.GG.Chip.Lower.area_steal.Effect(duration: F64, delay: F64, damage: I32): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get creature = App.GG.Effect.creature.get
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    let animation = App.GG.Animation.attack
+    let coords = App.GG.Coord.nearest_enemy_column(creature@team, grid, center)
+    without coords: App.GG.Effect.pass
+    let eff = App.GG.Chip.Lower.panel_steal.Effect_at(duration, delay, damage)
+    let mult = App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+    App.GG.Effect.generic_action(mult, animation,  8, 12)
+  }
+
+
+  
+

@@ -1,0 +1,119 @@
+App.GG.Grid: Type
+  BBT<Pair<U32, U32>, App.GG.Tile>
+
+// Cmp
+App.GG.Grid.cmp(a: Pair<U32, U32>, b: Pair<U32, U32>): Cmp
+  let fst_cmp = U32.cmp(a@fst, b@fst)
+  case fst_cmp {
+    ltn: Cmp.ltn
+    eql: U32.cmp(a@snd, b@snd)
+    gtn: Cmp.gtn
+  }
+
+// Returns the Tile in a coord if there is any
+App.GG.Grid.get(
+  place: App.GG.Coord
+  grid: App.GG.Grid
+): Maybe<App.GG.Tile>
+
+  BBT.lookup!!(App.GG.Grid.cmp, place, grid)
+
+// Adds a Tile or updates an existing one
+App.GG.Grid.set(
+  place: App.GG.Coord
+  tile: App.GG.Tile
+  grid: App.GG.Grid
+): App.GG.Grid
+
+  BBT.insert!!(App.GG.Grid.cmp, place, tile, grid)
+
+// Updates a Tile if there is one
+App.GG.Grid.update(
+  place: App.GG.Coord
+  update: App.GG.Tile -> App.GG.Tile
+  grid: App.GG.Grid 
+): App.GG.Grid
+  case App.GG.Grid.get(place, grid) as old_tile {
+    none: grid
+    some: 
+      let new_tile = update(old_tile.value)
+      App.GG.Grid.set(place, new_tile, grid)
+  }
+
+
+App.GG.Grid.move_creature(origin: App.GG.Coord, destination: App.GG.Coord, grid: App.GG.Grid, restriction: Bool): App.GG.Grid
+
+  let t_origin = App.GG.Grid.get(origin, grid)
+  let t_destination = App.GG.Grid.get(destination, grid)
+  let can_walk = App.GG.Coord.can_walk(origin, destination, grid, restriction)
+  if can_walk then
+    Maybe {
+      get ori = t_origin
+      get des = t_destination
+      let mon = ori@creature
+      let new_ori = ori@creature <- none
+      let new_des = des@creature <- mon
+      let new_grid = App.GG.Grid.set(destination, new_des, grid)
+      let new_grid = App.GG.Grid.set(origin, new_ori, new_grid)
+      //log("origin.x = "| U32.show(origin@fst) |", origin.y = " | U32.show(origin@snd) | ", destination.x = "| U32.show(destination@fst) |", destination.y = " | U32.show(destination@snd))
+      return new_grid
+    } <> grid
+  else grid
+
+App.GG.Grid.id_list(grid: App.GG.Grid): List<Nat>
+  let ids = []
+  for coord:tile in grid with ids:
+    let creature = tile@creature
+    without creature: ids
+    creature@id & ids
+  ids
+
+App.GG.Grid.next_id(grid: App.GG.Grid): Nat
+  let ids = App.GG.Grid.id_list(grid)
+  App.GG.Grid.next_id.go(0, ids)
+
+App.GG.Grid.next_id.go(count: Nat, ids: List<Nat>): Nat
+  let id = List.find<Nat>(Nat.eql(count), ids)
+  without id: count
+  App.GG.Grid.next_id.go(count + 1, ids)
+
+
+//Gives the highest y value
+App.GG.Grid.highest_y(grid: App.GG.Grid): U32
+  let y = 0#32
+  for coord:tile in grid with y: 
+    U32.max(coord@snd, y)
+  y
+
+//Gives the lowest y value
+App.GG.Grid.lowest_y(grid: App.GG.Grid): U32
+  let y = 4294967296#32
+  for coord:tile in grid with y: 
+    U32.min(coord@snd, y)
+  y
+
+//Gives the Y size of the grid
+App.GG.Grid.y_size(grid: App.GG.Grid): Nat
+  let highest_y = App.GG.Grid.highest_y(grid)
+  let lowest_y = App.GG.Grid.lowest_y(grid)
+  let diff = U32.to_nat(highest_y - lowest_y)
+  1 + diff
+
+App.GG.Grid.all_coords(grid: App.GG.Grid): List<App.GG.Coord>
+  let coords = [] :: List<App.GG.Coord>
+  for coord:tile in grid with coords:
+    coord & coords
+  coords
+
+App.GG.Grid.get_team_tiles(grid: App.GG.Grid, team: App.GG.Team): List<App.GG.Coord>
+  let coords = [] :: List<App.GG.Coord>
+  for coord:tile in grid with coords:
+    if App.GG.Team.eql(tile@owner, team) then
+      coord & coords
+    else
+      coords
+  coords 
+
+App.GG.Grid.tiles_count_by_team(grid: App.GG.Grid, team: App.GG.Team): Nat
+  let team_tiles = App.GG.Grid.get_team_tiles(grid, team)
+  List.length<App.GG.Coord>(team_tiles)

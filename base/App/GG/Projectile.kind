@@ -1,0 +1,232 @@
+type App.GG.Projectile {
+  new(
+    info: App.GG.Projectile.Info
+    effect: App.GG.Effect<Unit> // Change
+  )
+}
+
+type App.GG.Projectile.Info {
+  new(
+    team: App.GG.Team
+    status: App.GG.Projectile.Status
+    hits: NatSet
+    frame: U64
+    has_acted: Bool
+  )
+}
+
+
+type App.GG.Projectile.Status {
+  coord(val: App.GG.Coord)
+  nat(val: Nat)
+  ids(val: List<String>)
+  casts(val: Nat)
+  unit
+}
+
+App.GG.Projectile.create(place: App.GG.Coord, projectile: App.GG.Projectile, grid: App.GG.Grid): App.GG.Grid
+  let tile = App.GG.Grid.get(place, grid)
+  case tile {
+    none: grid
+    some: 
+      let projectiles = projectile & tile.value@projectiles
+      let new_tile = tile.value@projectiles <- projectiles
+      App.GG.Grid.set(place, new_tile, grid)
+  }
+  
+App.GG.Projectile.move(origin: App.GG.Coord, destination: App.GG.Coord, id: Nat, grid: App.GG.Grid): App.GG.Grid
+  let a = App.GG.Grid.get(origin, grid)
+  let b = App.GG.Grid.get(destination, grid)
+  case a {
+    none: grid
+    some: 
+      let new_tile = a.value@projectiles <- List.delete_at!(id, a.value@projectiles)
+      let new_grid = App.GG.Grid.set(origin, new_tile, grid)
+      case b {
+        none: new_grid
+        some: 
+          case List.get!(id, a.value@projectiles) as prj {
+            none: new_grid 
+            some: 
+              let new_tile = b.value@projectiles <- prj.value & b.value@projectiles
+              let new_grid = App.GG.Grid.set(destination, new_tile, new_grid)
+              new_grid
+          }
+          
+      }
+  }
+
+App.GG.Projectile.add_hit(creature_id: Nat, coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid
+  let f = 
+    (projectile: App.GG.Projectile)
+      let info = projectile@info
+      let new_hits = NatSet.set(creature_id, info@hits)
+      let new_info = info@hits <- new_hits
+      projectile@info <- new_info
+  App.GG.Projectile.modify(f, coord, idx, grid)
+
+App.GG.Projectile.clean_hit(creature_id: Nat, idx: Nat, grid: App.GG.Grid, coord: App.GG.Coord): App.GG.Grid
+  let f = 
+    (projectile: App.GG.Projectile)
+    let info = projectile@info
+    let new_info = NatSet.del(creature_id, info@hits)
+    let new_info = info@hits <- new_info
+    projectile@info <- new_info
+  App.GG.Projectile.modify(f, coord, idx, grid)
+
+App.GG.Projectile.modify(mod: App.GG.Projectile -> App.GG.Projectile, coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid
+  Maybe {
+    get list = App.GG.Projectile.get_list(coord, grid)
+    get projectile = List.get!(idx, list)
+    let new_list = List.set!(idx, mod(projectile), list)
+    let f = (tile: App.GG.Tile) tile@projectiles <- new_list
+    let new_grid = App.GG.Grid.update(coord, f, grid)
+    return new_grid
+  } <> grid
+
+App.GG.Projectile.inc(coord: App.GG.Coord, idx: Nat, grid: App.GG.Grid): App.GG.Grid 
+  Maybe {
+    get tile = App.GG.Grid.get(coord, grid)
+    let projectiles = tile@projectiles
+    get projectile = List.get!(idx, projectiles)
+    let info = projectile@info
+    let new_info = info@frame <- info@frame + 1
+    let new_projectile = projectile@info <- new_info
+    let new_projectiles = List.set!(idx, new_projectile, projectiles)
+    let new_tile = tile@projectiles <- new_projectiles
+    let new_grid = App.GG.Grid.set(coord, new_tile, grid)
+    return new_grid
+  } <> grid
+
+App.GG.Projectile.get_list(
+  place: App.GG.Coord
+  grid: App.GG.Grid
+): Maybe<List<App.GG.Projectile>>
+
+  let tile = App.GG.Grid.get(place, grid)
+  case tile {
+    none: none
+    some: some(tile.value@projectiles)
+  }
+
+type App.GG.Minion.SpecificStatus {
+  mettaur(
+    // adds 1 each time the slime is at the same lane as mettaur. When it reaches X time, start to attack and reset counter
+    time_seeing_enemy: I32
+    // adds 1 each time the slime is not at the same lane as mettaur. When it reaches x time, move to the side and reduces a bit
+    time_without_seeing_enemy: I32
+  )
+}
+
+// let new_projectile = ?s
+
+App.GG.Projectile.get(coord: App.GG.Coord, origin: App.GG.Effect.Origin, grid: App.GG.Grid): Maybe<App.GG.Projectile>
+  case origin {
+    creature: none
+    projectile:
+      Maybe {
+        get tile = App.GG.Grid.get(coord, grid)
+        get projectile = List.get!(origin.id, tile@projectiles)
+        return projectile
+      }
+  }
+
+App.GG.Projectile.delete(origin: App.GG.Coord, id: Nat, grid: App.GG.Grid): App.GG.Grid
+  let a = App.GG.Grid.get(origin, grid)
+  case a {
+    none: grid
+    some: 
+      let new_tile = a.value@projectiles <- List.delete_at!(id, a.value@projectiles)
+      let new_grid = App.GG.Grid.set(origin, new_tile, grid)
+      new_grid
+  }
+
+App.GG.Projectile.death(img: U64 -> VoxBox, duration: U64, team: App.GG.Team): App.GG.Projectile
+  let team    = team
+  let status  = App.GG.Projectile.Status.unit
+  let hits    = NatSet.new
+  let frame   = 0#64
+  let effect  = App.GG.Projectile.death.effect(img, duration)
+  let info    = App.GG.Projectile.Info.new(team, status, hits, frame, false)
+  App.GG.Projectile.new(info, effect)
+
+App.GG.Projectile.death.effect(img: U64 -> VoxBox, duration: U64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get frame = App.GG.Effect.frame.get
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      let img = img(frame)
+      App.GG.Effect.frame.inc
+      App.GG.Effect.vbox.in_tile(img)
+      if frame =? duration then
+        App.GG.Effect.projectile.delete
+      else
+        App.GG.Effect.pass
+    }
+  }
+
+App.GG.Projectile.updated_has_acted(bool: Bool, projectile: App.GG.Projectile): App.GG.Projectile
+  // log(Bool.show(bool))
+  let info = projectile@info
+  let new_info = info@has_acted <- bool
+  let projectile = projectile@info <- new_info
+  projectile
+
+App.GG.Projectile.run(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  Maybe {
+    let grid = game@grid
+    get projectiles = App.GG.Projectile.get_list(coord, grid)
+    let pair = {0, game}
+    for projectile in projectiles with pair:
+      let {idx, game} = pair
+      if projectile@info@has_acted then
+        {idx + 1, game}
+      else 
+        let grid = game@grid
+        let new_grid = App.GG.Projectile.modify(App.GG.Projectile.updated_has_acted(true), coord, idx, grid)
+        let new_game = game@grid <- new_grid
+        let origin = App.GG.Effect.Origin.projectile(idx)
+        let result = projectile@effect(coord, origin, new_game)
+        let new_game = case result {err: new_game@grid <- new_grid, new: result.game}
+        {idx +1, new_game}
+    return pair@snd
+  } <> game
+
+App.GG.Projectile.reset_actions(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid
+  Maybe {
+    get projectiles = App.GG.Projectile.get_list(coord, grid)
+    let idx = 0
+    let pair = {idx, grid}
+    for projectile in projectiles with pair:
+      let {idx, grid} = pair
+      let new_grid = App.GG.Projectile.modify(App.GG.Projectile.updated_has_acted(false), coord, idx, grid)
+      {idx + 1, new_grid}
+    return pair@snd
+  } <> grid
+
+App.GG.Projectile.get_cast(projectile: App.GG.Projectile): Nat
+  let status = projectile@info@status
+  case status { 
+    casts: status.val
+  }default 0
+
+App.GG.Projectile.casts_aux(projectile: App.GG.Projectile, count: Nat): App.GG.Projectile
+  let status = App.GG.Projectile.Status.casts(count)
+  projectile@info@status <- status
+  
+
+App.GG.Projectile.casts(f: Nat -> App.GG.Projectile, coords: List<App.GG.Coord>): List<Pair<App.GG.Projectile, App.GG.Coord>>
+  App.GG.Projectile.casts.go(0, f, coords)
+  
+App.GG.Projectile.casts.go(count: Nat, f: Nat -> App.GG.Projectile, coords: List<App.GG.Coord>): List<Pair<App.GG.Projectile, App.GG.Coord>>
+  case coords { 
+    nil: 
+      []
+    cons:
+      let coord = coords.head
+      let projectile = f(count)
+      let pair = Pair.new<App.GG.Projectile, App.GG.Coord>(projectile, coord)
+      pair & App.GG.Projectile.casts.go(count + 1, f, coords.tail)
+  } 
+
+  

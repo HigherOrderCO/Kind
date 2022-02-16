@@ -1,0 +1,120 @@
+App.GG.Creatures.turret(
+  team: App.GG.Team,
+  animation: App.GG.Animation -> U64 -> VoxBox,
+  effect: App.GG.Team -> App.GG.Effect<Unit>
+  level: Nat,
+  hp: I32
+): App.GG.Minion
+  App.GG.Minion.new(animation, effect(team), level , hp)
+
+
+App.GG.Creatures.turret.regular(team: App.GG.Team): App.GG.Minion
+  App.GG.Creatures.turret(team, App.GG.Creatures.turret.regular_animation, App.GG.Creatures.turret.regular.Effect, 0 , 50)
+
+App.GG.Creatures.turret.regular_animation(animation: App.GG.Animation, frame: U64): VoxBox
+  case animation { 
+    basic_attack: 
+      switch U64.eql(frame % 6) {  
+        0#64: App.GG.img.Turret.regular.0
+        1#64: App.GG.img.Turret.regular.1
+        2#64: App.GG.img.Turret.regular.2
+        3#64: App.GG.img.Turret.regular.3
+        4#64: App.GG.img.Turret.regular.4
+        5#64: App.GG.img.Turret.regular.5
+      }default App.GG.img.Turret.regular.0
+    idle: App.GG.img.Turret.regular.0
+  }default VoxBox.empty
+
+
+App.GG.Creatures.turret.regular_Projectile(team: App.GG.Team): App.GG.Effect<Unit>
+  let action_frame = 12#64
+  let final_frame = 24#64
+  let projectile_speed = 6#64
+  let dmg = +5#32
+  App.GG.Effect {
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.charge.reset
+    App.GG.Effect { 
+      let animation = App.GG.Animation.basic_attack
+      let projectile_effect = App.GG.Creatures.turret.Effect.regular_attack(dmg, projectile_speed, true)
+      let projectile_info = App.GG.Projectile.Info.new(team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let spawn_pos = App.GG.Coord.front(team, center)
+
+      let eff = 
+        App.GG.Effect { 
+          App.GG.Effect.animation.modify_by_duration(6, final_frame) //How many voxbox imgs has the animation , frame limit
+          get frame = App.GG.Effect.frame.get
+          App.GG.Effect.frame.inc
+          without frame:  App.GG.Effect.pass
+          App.GG.Effect { 
+            App.GG.Effect.ai.modify("shoot", (x) +0#32)
+            switch U64.eql(frame) { 
+              0: App.GG.Effect.animation.update(animation) // Sets animation for creature
+              action_frame: App.GG.Effect.projectile.add_at(spawn_pos, projectile)
+              final_frame:
+                App.GG.Effect { 
+                  App.GG.Effect.actions.reset
+                  App.GG.Effect.damage(+5#32, false, false, center)
+                  return unit
+                }
+            }default App.GG.Effect.pass
+          }
+        }
+
+      let new_action = App.GG.Actions.Data.new(0, eff, App.GG.Actions.Category.basic_attack)
+      let new_grid   = App.GG.Creature.modify_at(App.GG.Actions.add(new_action), center)
+      App.GG.Effect.grid.modify(new_grid)
+    }
+  }
+
+App.GG.Creatures.turret.Effect.regular_attack(dmg: I32, projectile_period: U64, reverse: Bool): App.GG.Effect<Unit>
+  let img = App.GG.img.Turret.regular.slime_projectile
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    let effect = 
+      App.GG.Effect { 
+        App.GG.Effect.projectile.hit.damage_at(dmg, false, false, center)
+        return unit 
+      }
+    App.GG.Creatures.turret.move_projectile(effect, img, projectile_period, reverse)
+  }
+
+
+
+
+App.GG.Creatures.turret.move_projectile(effect: App.GG.Effect<Unit>, img: VoxBox, projectile_period: U64, reverse: Bool): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    get frame = App.GG.Effect.frame.get
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    App.GG.Effect.vbox.in_tile(App.GG.img.target_tile) // Adds image bound to tile
+    effect
+    App.GG.Effect.projectile.hit.dissapear(center)
+    get projectile = App.GG.Effect.projectile.get
+    without frame: App.GG.Effect.pass
+    without projectile: App.GG.Effect.pass
+    let x = App.GG.Effect.basic_attack.bullet_position_x((frame  - 1 )% projectile_period, projectile_period, reverse)
+    App.GG.Effect {
+      App.GG.Effect.vbox.at_tile_with_variation(center, x, -5, img)
+      if ((frame % projectile_period) =? 0) && (frame >? 0) then // Each time it reaches projectile_period
+        App.GG.Effect {
+          let new_pos = App.GG.Coord.front(projectile@info@team, center) // Gets coord in front of projectile's
+          App.GG.Effect.projectile.move(new_pos) // Moves projectile a tile forward
+          return unit
+        }
+      else
+        App.GG.Effect.pass
+    }
+  }
+
+
+App.GG.Creatures.turret.regular.Effect(team: App.GG.Team): App.GG.Effect<Unit>
+  let shoot = {"shoot", [{I32.eql(60), App.GG.Creatures.turret.regular_Projectile(team) }]}
+  let effs =  [shoot]
+  App.GG.Effect {
+    App.GG.Effect.ai.run(effs)
+    App.GG.Effect.ai.inc("shoot")
+  }
+

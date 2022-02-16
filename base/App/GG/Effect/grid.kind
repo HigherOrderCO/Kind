@@ -1,0 +1,15 @@
+App.GG.Effect.grid.get: App.GG.Effect<App.GG.Grid>
+  (center, origin, local)
+  let grid = local@grid
+  App.GG.Effect.Result.new!(grid, center, origin, local, (enemy, img) img, 0, "")
+
+App.GG.Effect.grid.set(new_grid:App.GG.Grid): App.GG.Effect<Unit>
+  (center, origin, local)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
+
+App.GG.Effect.grid.modify(mod: App.GG.Grid -> App.GG.Grid): App.GG.Effect<Unit>
+  (center, origin, local)
+  let new_grid = mod(local@grid)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")

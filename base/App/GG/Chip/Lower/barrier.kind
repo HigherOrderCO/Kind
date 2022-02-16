@@ -1,0 +1,25 @@
+App.GG.Chip.Lower.barrier: App.GG.Chip
+  App.GG.Chip.new(
+    "Barier"
+    App.GG.Class.power
+    App.GG.Chip.Lower.barrier.Effect(30, 5) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+
+App.GG.Chip.Lower.barrier.Effect(barrier_amount: I32, duration: F64): App.GG.Effect<Unit>
+  let uduration = F64.to_u64(duration * 60)
+  let barrier = App.GG.Creature.Status.barrier(uduration, barrier_amount)
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      App.GG.Effect.projectile.hit.apply_status_at(barrier, center)
+      App.GG.Effect.chip.waste
+      App.GG.Effect.actions.reset
+    }
+  }

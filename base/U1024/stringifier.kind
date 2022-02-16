@@ -1,0 +1,4 @@
+U1024.stringifier: Stringifier<U1024>
+  (x, bs) 
+  open x
+  Word.stringifier<1024>(x.value, bs)

@@ -1,0 +1,40 @@
+App.GG.Effect.frame.inc: App.GG.Effect<Unit>
+  (center, origin, local)
+  let grid = local@grid
+  let new_grid =
+    case origin {
+      creature: App.GG.Actions.inc(center, grid)
+      projectile: App.GG.Projectile.inc(center, origin.id, grid)
+    }
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
+
+App.GG.Effect.frame.get: App.GG.Effect<Maybe<U64>>
+  (center, origin, local)
+  let grid = local@grid
+  let frame =  
+    case origin {
+      creature: 
+        Maybe {
+          get creature = App.GG.Creature.get(center, grid)
+          let actions = creature@actions
+          get current = actions@current
+          return current@frame
+        }
+      projectile: 
+        Maybe {
+          get projectile = App.GG.Projectile.get(center, origin, grid)
+          let info = projectile@info
+          return info@frame
+        }
+    }
+  App.GG.Effect.Result.new!(frame, center, origin, local, (enemy, img) img, 0, "")
+
+App.GG.Effect.frame.get_t(final_frame: U64): App.GG.Effect<F64>
+  App.GG.Effect { 
+    get frame = App.GG.Effect.frame.get
+    without frame: App.GG.Effect { return 0.0 }
+    App.GG.Effect { 
+      return U64.to_f64(frame) / U64.to_f64(final_frame)
+    }
+  }

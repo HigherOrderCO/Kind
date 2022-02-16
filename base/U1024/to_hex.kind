@@ -1,0 +1,31 @@
+U1024.to_hex(u: U1024): String
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,28),0xf)),
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,24),0xf)),
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,20),0xf)),
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,16),0xf)),
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,12),0xf)),
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,8),0xf)),
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,4),0xf)),
+  String.cons(U1024.to_hex.4(U1024.and(U1024.shr(u,0),0xf)),
+  String.nil))))))))
+
+U1024.to_hex.4(u: U1024): Char
+  switch U1024.eql(u) {
+     0#1024: '0'
+     1#1024: '1'
+     2#1024: '2'
+     3#1024: '3'
+     4#1024: '4'
+     5#1024: '5'
+     6#1024: '6'
+     7#1024: '7'
+     8#1024: '8'
+     9#1024: '9'
+    10#1024: 'a'
+    11#1024: 'b'
+    12#1024: 'c'
+    13#1024: 'd'
+    14#1024: 'e'
+    15#1024: 'f'
+  } default '0'
+  

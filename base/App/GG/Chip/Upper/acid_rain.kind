@@ -1,0 +1,109 @@
+App.GG.Chip.Upper.acid_rain: App.GG.Chip
+  App.GG.Chip.new(
+    "acdrin"
+    App.GG.Class.power
+    App.GG.Chip.Upper.acid_rain.Effect(30, 0.5, 1, 6)
+    10                            //Damage, delay, interval, drop_num
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Upper.acid_rain.img: List<VoxBox>
+    [
+      App.GG.img.Spell.splash.1, 
+      App.GG.img.Spell.splash.2,
+      App.GG.img.Spell.splash.3,
+      App.GG.img.Spell.splash.4,
+      App.GG.img.Spell.splash.5,
+      App.GG.img.Spell.splash.6,
+      App.GG.img.Spell.splash.7,
+      App.GG.img.Spell.splash.8
+    ]
+
+
+App.GG.Chip.Upper.acid_rain.Effect(dmg: I32, delay: F64, interval: F64, drop_num: Nat): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    App.GG.Effect.charge.reset
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    get team = App.GG.Effect.team.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
+      let animation = App.GG.Animation.attack
+      let func = 
+        (coord: App.GG.Coord)
+          App.GG.Effect { 
+            get seed = App.GG.Effect.random.get
+            let coords = App.GG.Coord.randoms_size_by_team(grid, seed, drop_num, App.GG.Team.opposite(team))
+            let projectile_effect = App.GG.Chip.Upper.acid_rain.Projectile.Effect(dmg, delay, interval)
+            let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+            let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+
+            App.GG.Effect.projectile.different_status(coords, projectile)
+          }
+    App.GG.Effect.generic_action(func(center), animation, 12, 24)
+    }
+  }
+
+
+App.GG.Chip.Upper.acid_rain.drop_position(current_frame: U64, max_frame: U64): I32
+  let tile_y = +32#32
+  let start = 0.0 - 128
+  let end = 32.0
+  let pos = F64.lerp(start, end, U64.to_f64(current_frame) / U64.to_f64(max_frame))
+  F64.to_i32(pos) - tile_y
+
+
+  
+App.GG.Chip.Upper.acid_rain.Projectile.Effect(dmg: I32, delay: F64, interval: F64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get team = App.GG.Effect.team.get
+    get projectile = App.GG.Effect.projectile.get
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    without projectile: App.GG.Effect.pass
+    let status_num = Nat.to_u64(App.GG.Projectile.get_cast(projectile))
+    let udelay = I32.to_u64(F64.to_i32(delay* 60))
+    let uinterval = I32.to_u64(F64.to_i32(interval* 60 )) * status_num
+    without frame: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+      App.GG.Effect {
+        let falling = 
+          if (frame <? (udelay + uinterval)) && (frame >? uinterval) then
+            App.GG.Effect { 
+              let y = App.GG.Chip.Upper.acid_rain.drop_position(frame - uinterval, udelay)
+              App.GG.Effect.vbox.at_tile_with_variation(center, 0, y, App.GG.img.Spell.splash.0)
+              App.GG.Effect.vbox.at_tile(center, App.GG.img.yellow_tile)
+            }
+          else
+            App.GG.Effect.pass
+
+        let on_ground = 
+          if frame >? (udelay + uinterval) then
+            App.GG.Effect { 
+              App.GG.Effect.vbox.modify_by_duration(App.GG.Chip.Upper.acid_rain.img, frame - (uinterval + udelay), 19)
+              App.GG.Effect.projectile.hit.damage_at(dmg, true, false, center)
+              return unit
+            }
+          else
+            App.GG.Effect.pass
+
+      //fase 3 = no chão
+        let time_over = 
+          if frame =? (udelay + uinterval + 20) then
+            App.GG.Effect.projectile.delete
+          else
+            App.GG.Effect.pass
+
+        falling
+        on_ground
+        time_over
+      }
+  }

@@ -1,0 +1,74 @@
+App.GG.Chip.Arms.burrow_prey: App.GG.Chip
+  App.GG.Chip.new(
+    "BurPry"
+    App.GG.Class.strength
+    App.GG.Chip.Arms.burrow_prey.Effect(50, 0.7) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Arms.burrow_prey.img: List<VoxBox>
+    [
+      App.GG.img.Spell.burrow.0,
+      App.GG.img.Spell.burrow.1, 
+      App.GG.img.Spell.burrow.2,
+      App.GG.img.Spell.burrow.3,
+      App.GG.img.Spell.burrow.4,
+      App.GG.img.Spell.burrow.5,
+    ]
+
+
+App.GG.Chip.Arms.burrow_prey.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+      let projectile_effect = App.GG.Chip.Arms.burrow_prey.Projectile.Effect(dmg, delay) 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
+      App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+App.GG.Chip.Arms.burrow_prey.Projectile.Effect(dmg: I32, delay: F64): App.GG.Effect<Unit>
+  let max_frame = I32.to_u64(F64.to_i32(delay* 60))
+  App.GG.Effect {
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get team = App.GG.Effect.team.get
+    without frame: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    let eff = 
+      App.GG.Effect {
+        App.GG.Effect.vbox.modify_by_duration(App.GG.Chip.Arms.burrow_prey.img, frame % max_frame, max_frame - 1) 
+        get can_hit = App.GG.Effect.projectile.can_hit(center) //change to coord
+        App.GG.Effect.projectile.hit.damage_at(dmg, true, true center) // change to coord
+        return unit
+      }
+    App.GG.Effect {
+      eff
+      if (frame % max_frame) =? 0 then // At frame 30
+        App.GG.Effect { 
+          get best_target = App.GG.Effect.coord.best_target
+          let no_target = {center@fst + 1, center@snd}
+          without best_target: App.GG.Effect { App.GG.Effect.projectile.move(no_target) return unit }
+          App.GG.Effect { 
+          let next_coord = App.GG.Coord.projectile_chase(center, best_target)
+          App.GG.Effect.projectile.move(next_coord)
+            return unit
+          }
+        }
+      else
+        App.GG.Effect.pass
+    }
+  }

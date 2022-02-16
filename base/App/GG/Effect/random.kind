@@ -1,0 +1,5 @@
+App.GG.Effect.random.get: App.GG.Effect<Nat>
+  App.GG.Effect {
+    get game = App.GG.Effect.game.get
+    return game@random
+  }

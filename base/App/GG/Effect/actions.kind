@@ -1,0 +1,20 @@
+App.GG.Effect.actions.del: App.GG.Effect<Unit>
+  (center, origin, local)
+  let f = 
+    (creature)
+      let actions = creature@actions
+      let new_actions = actions@current <- none
+      creature@actions <- new_actions
+  let new_grid = App.GG.Creature.modify_at(f, center, local@grid)
+  let new_local = local@grid <- new_grid
+  App.GG.Effect.Result.new!(unit, center, origin, new_local, (enemy, img) img, 0, "")
+
+App.GG.Effect.actions.reset: App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.actions.del // Delete action from creature
+    get animation = App.GG.Effect.animation.get
+    without animation: App.GG.Effect.pass
+    case animation@fst {
+      idle: App.GG.Effect.pass
+    }default App.GG.Effect.animation.update(App.GG.Animation.idle)
+  }

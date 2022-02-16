@@ -1,0 +1,5 @@
+Shape.Line.collision.rectangle(line: Shape.Line, rectangle: Shape.Rectangle): Bool
+  let edges = Shape.Rectangle.to_edges(rectangle)
+  open edges
+  let c = (Shape.Line.collision.line(line))
+  c(edges.a) || c(edges.b) || c(edges.c) || c(edges.d)

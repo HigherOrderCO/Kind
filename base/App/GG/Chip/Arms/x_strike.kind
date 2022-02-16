@@ -1,0 +1,64 @@
+App.GG.Chip.Arms.x_strike: App.GG.Chip
+  App.GG.Chip.new(
+    "XStrke"
+    App.GG.Class.strength
+    App.GG.Chip.Arms.x_strike.Effect(20) // TODO : Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Arms.x_strike.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      let c = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      let fst = [{c@fst - 1, c@snd - 1}, c, {c@fst + 1, c@snd + 1}]
+      let snd = [{c@fst - 1, c@snd + 1}, c, {c@fst + 1, c@snd - 1}]
+      get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+      let projectile_effect = App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg, fst, some(snd), false) 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      App.GG.Effect.generic_shoot(projectile, c, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+
+App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg: I32, coords: List<App.GG.Coord>, next_attack: Maybe<List<App.GG.Coord>>, intangible: Bool): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get team = App.GG.Effect.team.get
+    without team: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    let eff = 
+      (coord)
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+        App.GG.Effect.projectile.hit.damage_at(dmg, true, intangible, coord)
+        return unit
+      }
+    App.GG.Effect {
+      App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+      switch U64.eql(frame) {
+        8: 
+          case next_attack { 
+            none:
+              App.GG.Effect.pass
+            some:
+              let status = App.GG.Projectile.Status.unit
+              let info = App.GG.Projectile.Info.new(team, status, NatSet.new, 0#64, true)
+              let projectile = App.GG.Projectile.new(info, App.GG.Chip.Arms.x_strike.Projectile.Effect(dmg, next_attack.value, none, true))
+              App.GG.Effect.projectile.add_at(center, projectile)
+          }
+        16: App.GG.Effect.projectile.delete
+      }default App.GG.Effect.pass
+    }
+  }

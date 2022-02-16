@@ -1,0 +1,5 @@
+U1024.murmur2(h: U1024): U1024
+  let h = U1024.xor(h, U1024.shr(h, 13))
+  let h = U1024.mul(h, 0x5bd1e995)
+  let h = U1024.xor(h, U1024.shr(h, 15))
+  h

@@ -1,0 +1,5 @@
+U1024.parser: Parser<U1024>
+  Parser {
+    get word = Word.parser<1024>
+    return U1024.new(word)
+  }

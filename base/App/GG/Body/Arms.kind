@@ -1,0 +1,26 @@
+type App.GG.Body.Arms {
+  new(parts: App.GG.Parts)
+}
+
+App.GG.Body.Arms.chips: App.GG.Chips
+  [
+    App.GG.Chip.Arms.pull_sword
+    App.GG.Chip.Arms.wide_sword
+    App.GG.Chip.Arms.shockwave
+    App.GG.Chip.Arms.long_sword
+    App.GG.Chip.Arms.x_strike 
+    App.GG.Chip.Arms.cannon
+    App.GG.Chip.Arms.bazooka
+    App.GG.Chip.Arms.energy_strike
+    App.GG.Chip.Arms.quick_strike
+    App.GG.Chip.Arms.burrow_prey
+    App.GG.Chip.Arms.recursive_gun
+    App.GG.Chip.Arms.paralyzing_ray 
+    App.GG.Chip.Arms.poison_cloud
+  ]
+
+App.GG.Body.Arms.get_chips_1(body: App.GG.Body): App.GG.Chips
+  App.GG.Parts.chips_list(body@arm_1@parts, App.GG.Body.Arms.chips)
+
+App.GG.Body.Arms.get_chips_2(body: App.GG.Body): App.GG.Chips
+  App.GG.Parts.chips_list(body@arm_2@parts, App.GG.Body.Arms.chips)

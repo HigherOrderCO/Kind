@@ -1,0 +1,7 @@
+U1024.cmp(a: U1024, b: U1024): Cmp
+  if U1024.ltn(a, b) then
+    Cmp.ltn
+  else if U1024.eql(a, b) then
+    Cmp.eql
+  else
+    Cmp.gtn

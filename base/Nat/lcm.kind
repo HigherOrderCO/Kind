@@ -1,2 +1,10 @@
 Nat.lcm(a: Nat, b: Nat): Nat
   (a * b) / Nat.gcd(a , b)
+
+
+Nat.lcm.list(list: List<Nat>): Nat
+  let size = List.length<Nat>(list)
+  if size =? 1 then
+    List.head_with_default<Nat>(0, list)
+  else
+    Nat.lcm.list.go(list, 1)

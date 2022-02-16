@@ -1,0 +1,5 @@
+App.GG.Creatures.slime(
+  body: App.GG.Body
+): App.GG.Slime
+  App.GG.Slime.new(body)
+

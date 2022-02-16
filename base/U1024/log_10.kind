@@ -1,0 +1,7 @@
+U1024.log_10.ten: U1024
+  10#1024
+
+U1024.log_10(x : U1024) : U1024
+  open x
+  open U1024.log_10.ten
+  U1024.new(Word.log!(x.value, U1024.log_10.ten.value))

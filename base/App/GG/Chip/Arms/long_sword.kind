@@ -1,0 +1,58 @@
+App.GG.Chip.Arms.long_sword: App.GG.Chip
+  App.GG.Chip.new(
+    "LngSwd"
+    App.GG.Class.strength
+    App.GG.Chip.Arms.long_sword.Effect(50) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Arms.long_sword.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(12, 24)
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+      let projectile_effect = App.GG.Chip.Arms.long_sword.Projectile.Effect(dmg) 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
+      App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+App.GG.Chip.Arms.long_sword.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get center = App.GG.Effect.coord.get_center
+    get projectile = App.GG.Effect.projectile.get
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get team = App.GG.Effect.team.get
+    without frame: App.GG.Effect.pass
+    without projectile: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    let front_coord = App.GG.Coord.front(team, center)
+    let coords = [center, front_coord]
+    let eff = 
+      (coord)
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+        App.GG.Effect.projectile.hit.damage_at(dmg, true, true, coord)
+        return unit
+      }
+    App.GG.Effect {
+      App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+      if frame =? 8 then // At frame 8
+        App.GG.Effect.projectile.delete
+      else
+        App.GG.Effect.pass
+    }
+  }

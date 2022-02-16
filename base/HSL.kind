@@ -1,0 +1,3 @@
+type HSL {
+  new(h: U32, s: F64, l: F64)
+}

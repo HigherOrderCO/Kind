@@ -1,0 +1,90 @@
+App.GG.Chip.Hull.acid_steps: App.GG.Chip
+  App.GG.Chip.new(
+    "AcdSps"
+    App.GG.Class.power
+    App.GG.Chip.Hull.acid_steps.Effect(2, 2, 0.5, 5) //damage, duration on ground, delay between respawning, poison_ticks
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+
+
+App.GG.Effect.Hull.acid_steps.Projectile.Effect.column(team: App.GG.Team, damage: I32, duration: F64, delay: F64, burn_ticks: Nat, size: Nat): App.GG.Projectile
+  let projectile_effect = App.GG.Chip.Hull.acid_steps.Projectile.Effect(damage, duration, delay, burn_ticks, size)
+  let projectile_info = App.GG.Projectile.Info.new(team, App.GG.Projectile.Status.casts(size), NatSet.new, 0#64, true)
+  App.GG.Projectile.new(projectile_info, projectile_effect)
+
+App.GG.Chip.Hull.acid_steps.Effect(damage: I32, duration: F64, delay: F64, burn_ticks: Nat): App.GG.Effect<Unit> //damage, duration on ground
+  App.GG.Effect {
+    App.GG.Effect.animation.modify_by_duration(12, 24)
+    App.GG.Effect.charge.reset
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    get team = App.GG.Effect.team.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    let last_line_coord = App.GG.Coord.furthest_tile_in_front(center, creature@team, grid)
+    let column = App.GG.Coord.column(grid, last_line_coord)
+    let coords = List.reverse<App.GG.Coord>(List.tail<App.GG.Coord>(App.GG.Coord.front_all(center, creature@team, grid)))
+    let size = List.length<App.GG.Coord>(coords)
+    let projectile_effect = App.GG.Chip.Hull.acid_steps.Projectile.Effect(damage, duration, delay, burn_ticks, size)
+    let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+    let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+    let column_projectile = App.GG.Effect.Hull.acid_steps.Projectile.Effect.column(creature@team, damage , duration, delay, burn_ticks, size)
+    let func = 
+      (coord)
+      App.GG.Effect.projectile.add_at(coord, column_projectile)
+    App.GG.Effect { 
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
+      let effect = 
+        App.GG.Effect { 
+          App.GG.Effect.projectile.different_status(coords, projectile)
+          App.GG.Effect.multiple<App.GG.Coord>(func, column)
+        }
+      App.GG.Effect.generic_action(effect, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+
+App.GG.Chip.Hull.acid_steps.Projectile.Effect(damage: I32, duration: F64, delay: F64, burn_ticks: Nat, size: Nat): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get projectile = App.GG.Effect.projectile.get
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    without projectile: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      //let upoison_duration = I32.to_u64(F64.to_i32(poison_duration* 60))
+      //let status = App.GG.Creature.Status.poison(, upoison_duration)
+      let status_num = Nat.to_u64(App.GG.Projectile.get_cast(projectile))
+      let uduration = I32.to_u64(F64.to_i32(duration* 60))
+      let udelay = I32.to_u64(F64.to_i32(delay* 60))
+      let create_next = udelay * status_num
+      let delete_next = uduration + create_next
+
+      let respawning = 
+        if (frame >? create_next) then 
+          App.GG.Effect { 
+            App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+            App.GG.Effect.projectile.hit.add_burn_at(damage, burn_ticks, center)
+            App.GG.Effect.projectile.hit.dissapear(center)
+          }
+        else
+          App.GG.Effect.pass
+
+      let time_over = 
+        if frame =? delete_next then
+          log(U64.show(frame)| " deletou nesse frame")
+          App.GG.Effect.projectile.delete
+        else
+          App.GG.Effect.pass
+
+      respawning 
+      time_over
+    }
+  }

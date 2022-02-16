@@ -1,0 +1,8 @@
+BVH.from_bbt<K: Type, V: Type>(
+  bbt: BBT<K, V>
+  to_box: List<V> -> V, 
+  cmp: Nat -> V -> V -> Cmp
+): BVH<K, V>
+
+  let list = BBT.to_list<K, V>(bbt)
+  BVH.from_list<K, V>(list, to_box, cmp)

@@ -1,0 +1,31 @@
+Shape.Polygon.collision.point(polygon: Shape.Polygon, point: Shape.Point): Bool
+  case polygon {
+    nil: false
+    cons: 
+      Shape.Polygon.collision.point.go(false, polygon, point, polygon.head)
+  }
+
+Shape.Polygon.collision.point.go(bool: Bool, vs: List(V2), point: Shape.Point, first: V2): Bool
+  case vs {
+    nil: bool
+    cons:
+      let current = vs.head
+      let next = 
+        case vs.tail {
+          nil: first
+          cons: vs.tail.head
+        }
+      open point
+      open next
+      open current
+      // Checks if the point is between current and next in y
+      let between_y = Bool.not((point.y <? current.y) =? (point.y <? next.y))
+      // Jordan's curve thereom (?)
+      let jct = point.x <? ((next.x-current.x) * (point.y-current.y) / (next.y-current.y) + current.x)
+      let bool = 
+        if between_y && jct then
+          Bool.not(bool)
+        else
+          bool
+      Shape.Polygon.collision.point.go(bool, vs.tail, point, first)
+  }

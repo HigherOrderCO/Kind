@@ -1,0 +1,7 @@
+type Shape {
+  point (val: Shape.Point)
+  line (val: Shape.Line)
+  circle (val: Shape.Circle)
+  rectangle (val: Shape.Rectangle)
+  polygon (val: Shape.Polygon)
+}

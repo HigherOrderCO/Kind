@@ -1,0 +1,5 @@
+U64.max(a: U64, b: U64): U64
+  if a <=? b then
+    b
+  else
+    a

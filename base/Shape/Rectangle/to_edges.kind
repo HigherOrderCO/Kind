@@ -1,0 +1,12 @@
+Shape.Rectangle.to_edges(rectangle: Shape.Rectangle): Shape.Rectangle.Edges
+  let x0 = rectangle@x0
+  let x1 = rectangle@x1
+  let y0 = rectangle@y0
+  let y1 = rectangle@y1
+
+  let a = Shape.Line.new(V2.new(x0, y0), V2.new(x0, y1))
+  let b = Shape.Line.new(V2.new(x1, y0), V2.new(x1, y1))
+  let c = Shape.Line.new(V2.new(x1, y1), V2.new(x1, y0))
+  let d = Shape.Line.new(V2.new(x0, y1), V2.new(x0, y0))
+
+  Shape.Rectangle.Edges.new(a,b,c,d)

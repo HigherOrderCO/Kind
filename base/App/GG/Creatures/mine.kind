@@ -1,0 +1,59 @@
+App.GG.Creatures.mine(team: App.GG.Team): App.GG.Minion
+  App.GG.Minion.new(App.GG.Creatures.mine.vbox, App.GG.Creatures.mine.Effect(team),0 , 5)
+
+
+App.GG.Creatures.mine.vbox(animation: App.GG.Animation, frame: U64): VoxBox
+  case animation {
+    idle: App.GG.img.granade
+    damage: App.GG.img.granade
+  }default VoxBox.empty
+
+
+App.GG.Creatures.mine.Projectile.Effect: App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      let coords = center & App.GG.Coord.adjacent_all(center, grid)
+      let eff = 
+        (coord: App.GG.Coord)
+        App.GG.Effect { 
+          App.GG.Effect.projectile.hit.add_burn_at(3, 10, coord)
+          App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+        }
+      App.GG.Effect {
+        App.GG.Effect.creature.del_at(center)
+        App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+        switch U64.eql(frame) {
+          12: App.GG.Effect.projectile.delete
+        }default App.GG.Effect.pass
+      }
+    }
+  }
+
+App.GG.Creatures.mine.Projectile(team: App.GG.Team): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    App.GG.Effect { 
+      let animation = App.GG.Animation.attack
+      let projectile_effect = App.GG.Creatures.mine.Projectile.Effect
+      let projectile_info = App.GG.Projectile.Info.new(team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, false)
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      App.GG.Effect.projectile.add_at(center, projectile)
+    }
+  }
+
+
+App.GG.Creatures.mine.Effect(team: App.GG.Team): App.GG.Effect<Unit>
+  let explode = {"explode", [{I32.eql(120), App.GG.Creatures.mine.Projectile(team)}]}
+  let effs = [explode]
+  App.GG.Effect {
+    App.GG.Effect.ai.run(effs)
+    App.GG.Effect.ai.inc("explode")
+  }
+

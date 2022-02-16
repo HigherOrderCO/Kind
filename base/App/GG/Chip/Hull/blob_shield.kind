@@ -1,0 +1,62 @@
+App.GG.Chip.Hull.blob_shield: App.GG.Chip
+  App.GG.Chip.new(
+    "BlbShd"
+    App.GG.Class.power
+    App.GG.Chip.Hull.blob_shield.Effect(10, 2.5)
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+
+App.GG.Chip.Hull.blob_shield.Effect(damage: I32, counter_duration: F64): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(8, 12)
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get center = App.GG.Effect.coord.get_center
+    get creature = App.GG.Effect.creature.get
+    get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+
+    let animation = App.GG.Animation.attack
+    let projectile_effect = App.GG.Chip.Hull.blob_shield.Projectile.Effect(dmg)
+    let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+    let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+    let effect = 
+      (coord: App.GG.Coord)
+      App.GG.Effect { 
+        let coords = App.GG.Coord.adjacent_all(coord, grid)
+        let func = 
+          (coord: App.GG.Coord)
+          App.GG.Effect.projectile.add_at(coord, projectile)
+
+          App.GG.Effect.multiple<App.GG.Coord>(func, coords)
+      }
+
+    let action = 
+      App.GG.Effect { 
+        App.GG.Effect.status.counter.add(effect, counter_duration)
+        App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
+      }
+
+    App.GG.Effect.generic_action(action, animation, 8, 12)
+  }
+
+
+App.GG.Chip.Hull.blob_shield.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+      App.GG.Effect.projectile.hit.damage_at(dmg, true, true center)
+      switch U64.eql(frame) {
+        24: App.GG.Effect.projectile.delete
+      }default App.GG.Effect.pass
+    }
+  }

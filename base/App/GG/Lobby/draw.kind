@@ -1,0 +1,213 @@
+App.GG.Lobby.draw(state: App.GG.Lobby): DOM
+  let body = state@body
+
+  case body {
+    none: 
+      <div>"Loading..."</div>
+    some:
+      <div class="lobby-wrapper">
+        <section class="selection-wrapper">
+          { App.GG.Lobby.card(App.GG.Body.Fragment.hull, body.value@hull@parts, App.GG.Parts.hull(body.value@hull@form)) }
+          { App.GG.Lobby.randomize_all }
+          { App.GG.Lobby.card(App.GG.Body.Fragment.upper, body.value@upper@parts, App.GG.Body.Upper.chips) }
+          { App.GG.Lobby.card(App.GG.Body.Fragment.arm_1, body.value@arm_1@parts, App.GG.Body.Arms.chips) }
+          { App.GG.Lobby.card(App.GG.Body.Fragment.lower, body.value@lower@parts, App.GG.Body.Lower.chips) }
+          { App.GG.Lobby.card(App.GG.Body.Fragment.arm_2, body.value@arm_2@parts, App.GG.Body.Arms.chips) }
+        </section>
+        <section>
+          { App.GG.Lobby.attributes(body.value) }
+        </section>
+        <section>
+          { App.GG.Lobby.classes(body.value) }
+        </section>
+        <section>
+          { App.GG.Lobby.start_button }
+        </section>
+        { App.GG.Lobby.style }
+      </div>
+  }
+
+App.GG.Lobby.start_button: DOM
+  <div class="start-button-wrapper">
+    <button id="start-button">
+      "Start Game"
+    </button>
+
+    <style>`
+      .start-button-wrapper {
+        margin-top: 50px;
+        display: flex;
+        justify-content: center;
+      }
+
+      #start-button {
+        font-size: 2rem;
+        padding: 20px;
+      }
+    `</style>
+  </div>
+
+App.GG.Lobby.classes(body: App.GG.Body): DOM
+  let all_chips = App.GG.Body.chips(body)
+  let all_chips = App.GG.Chips.separate_classes(all_chips)
+  <div class="classes-wrapper">
+    <h1> "Separate by classes" </h1>
+    <div>
+      for class:chips in all_chips:
+        <div class="class-wrapper">
+          <h4>App.GG.Class.show(class)</h4>
+          for chip in chips:
+            <p>chip@name</p>
+        </div>
+    </div>
+    <style>`
+      .classes-wrapper h1 {
+        text-align: center;
+      }
+
+      .classes-wrapper > div {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .class-wrapper {
+        width: 100px;
+        padding: 20px;
+        background-color: white;
+        displa: flex;
+      }
+
+      .class-wrapper > h4 {
+        text-transform: capitalize;
+      }
+
+      .class-wrapper > * {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    `</style>
+  </div>
+
+App.GG.Lobby.attributes(body: App.GG.Body): DOM
+  <div class="total-wrapper">
+    (App.GG.Attributes.show . App.GG.Body.attributes)(body)
+
+    <style>`
+      .total-wrapper {
+        background-color: white;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 50px;
+      }
+    `</style>
+  </div>
+
+
+App.GG.Lobby.randomize_all: DOM
+  <button id="randomize-all" class="randomize-all">
+    "Botao de randomizar tudo"
+
+    <style>`
+      .randomize-all {
+        justify-self: center;
+        align-self: center;
+        font-size: 3rem;
+        padding: 10px;
+
+        background-color: white;
+        text-align: center;
+        cursor: pointer;
+      }
+    `</style>
+  </button>
+
+App.GG.Lobby.card(
+  fragment: App.GG.Body.Fragment,
+  values: App.GG.Parts,
+  chips: App.GG.Chips
+): DOM
+  let name = App.GG.Body.Fragment.show(fragment)
+  let selected_chips = App.GG.Parts.chips_list(values, chips)
+  <div class="card">
+    <div>
+      <p class="title"> name </p>
+
+      for chip in selected_chips:
+        <p>chip@name</p>
+      
+      <p> 
+        (App.GG.Attributes.show . App.GG.Chips.attributes(App.GG.Attributes.pure))(selected_chips) 
+      </p>
+    </div>
+    <button id="randomize-" | name>"New combination"</button>
+
+    <style>`
+      .card {
+        width: 100%;
+        aspect-ratio: 203 / 73;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .card > div {
+        height: 100%;
+        width: 70%;
+        background-color: white;
+        border-radius: 5px;
+        margin-right: 20px;
+
+        display: flex;
+        flex-direction: column;
+      }
+
+      .card > div > * {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .card .title {
+        font-size: 2rem;
+        background-color: cornsilk;
+      }
+    `</style>
+  </div>
+
+App.GG.Lobby.style: DOM
+  <style>`
+    .lobby-wrapper {
+      padding: 50px 150px;
+      min-height: max(600px, 100vh);
+      background-color: lightblue;
+    }
+    
+    .selection-wrapper {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 100px;
+    }
+
+    button {
+      border: 0;
+      outline: none;
+      cursor: pointer;
+      background: white;
+      border-radius: 2px;
+      padding: 15px 8px;
+    }
+
+    button:hover {
+      box-shadow: 0 0 11px rgba(33,33,33,.2);
+      filter: brightness(0.9);
+    }
+
+    button:active {
+      filter: brightness(1);
+    }
+  `</style>

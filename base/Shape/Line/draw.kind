@@ -1,0 +1,4 @@
+Shape.Line.draw(line: Shape.Line, z: I32, color: Col32,  img: VoxBox): VoxBox
+  let a = line@a
+  let b = line@b
+  VoxBox.Draw.line(F64.to_i32(a@x), F64.to_i32(a@y), F64.to_i32(b@x), F64.to_i32(b@y), z, color, img)

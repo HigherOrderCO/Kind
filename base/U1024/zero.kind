@@ -1,0 +1,2 @@
+U1024.zero: U1024
+  U1024.new(Word.zero!)

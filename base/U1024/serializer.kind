@@ -1,0 +1,4 @@
+U1024.serializer: Serializer<U1024>
+  (x, bs) 
+  open x
+  Word.serializer<1024>(x.value, bs)

@@ -1,0 +1,68 @@
+// App states
+App.GG.State: App.State
+  App.State.new(App.GG.State.local, Unit)
+
+type App.GG.State.local {
+  game(state: App.GG.Game)
+  lobby(state: App.GG.Lobby)
+}
+
+// App
+App.GG: App<App.GG.State>
+  let img  = VoxBox.alloc_capacity(U32.mul(1048576#32, 8#32))
+  App.new<App.GG.State>(
+    App.GG.init
+    App.GG.draw(img)
+    App.GG.when
+    App.GG.tick
+    App.GG.post
+  )
+
+// Todos:
+// - stop using colorize on draw
+// - improve draw.kind to better reflect images      
+// - Add an animation to basic attack (x key)
+// - Show chips in hand in setup phase - postponed to when we have improved interface
+// - Show chips in hand in game phase - postponed to when we have improved interface
+// - Make animations receive 2 U64, one for current frame and one for how many frames should it take to run an animation
+//     As example: Walk(0, 24) -> (frame % 24) / (24/image_count)  ->  (frame % 24) / 2 -> for a 12 images animation
+// - Create 3 minions
+// - Create customizations for buttons
+// - Add comments to everything
+
+// DONE: Create a pre-game screen
+// DONE: Control Chips 
+// DONE: Intangible
+// DONE: Fix death projectile not being considered an enemy
+// DONE: add a way to ramdomize things in effects
+// DONE: Create simple AI based on time in front of a slime and time not in front of a slime
+// DONE: update status each frame before everything happens
+// DONE: make poison do damage
+// DONE: Organize when.kind
+// DONE: Add tile statuses
+// DONE: Create a panel steal Chip
+// DONE: Make Basic Attack scale with damage attribute
+// DONE: Make the player keep the remaining chips from the previous round if no chips are selected
+// DONE: Fix Projectile running twice in a frame
+// DONE: Add higher energy cost for using chips from different types
+// DONE: Create simple statuses (stun, invulnerable, root, poison)
+// DONE: Make attributes from body impact on life, energy, *AND DAMAGE*
+// DONE: Show energy in chips selection
+// DONE: Make chips cost energy (using chips from different classes requires more energy)
+// DONE: Add classes to chips 
+// DONE: Select chips through arrow keys
+// DONE: Kill creature when life is 0 
+// DONE: Fix centralization of tiles (currently the start of the drawing is defined to {40, 40})
+// DONE: Add pewpew shot mechanic (currently binded to X without animation)
+// DONE: Create turns where you can choose chips from your deck
+// DONE: Create a deck when starting a match
+// DONE: Create flinch mechanic
+// DONE: Create Attributes from Body
+// DONE: Associate chips with stats and DNA
+// DONE: Make movement become an effect
+// DONE: Organize Effect Folder with shockwave.kind functions
+// DONE: Chips should be wasted on use (shockwave.kind line 262)
+// DONE: Create damage interaction
+// DONE: Show Hp above minion
+// DONE: Change Effect to work like a monad
+// DONE: Turn shockwave into several small functions

@@ -1,0 +1,8 @@
+Shape.Point.collision.line(point: Shape.Point, line: Shape.Line): Bool
+  let v = 1.0 // variance because float values can be misleading 
+  let p = point
+  let a = line@a
+  let b = line@a
+  let d0 = V2.dist(p, a)
+  let d1 = V2.dist(p, b)
+  (d0 <=? d1 + v) && (d0 >=? d1 - v)

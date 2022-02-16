@@ -1,0 +1,14 @@
+type App.GG.Arrow {
+  up
+  down
+  left
+  right
+}
+
+App.GG.Arrow.direction(coord: App.GG.Coord, arrow: App.GG.Arrow): App.GG.Coord
+  case arrow {
+    up    : {coord@fst, coord@snd + 1}
+    down  : {coord@fst, coord@snd - 1}
+    left  : {coord@fst - 1, coord@snd}
+    right : {coord@fst + 1, coord@snd}
+  }

@@ -1,0 +1,48 @@
+type App.GG.Monster {
+  minion(
+    data: App.GG.Minion
+    AI: App.GG.AI
+  )
+  slime(
+    data: App.GG.Slime
+    attributes: App.GG.Attributes
+    charge: Maybe<U64>
+    hand: App.GG.Chips
+    folder: App.GG.Chips
+    energy: I32
+  )
+}
+
+App.GG.Monster.to_vbox(monster: App.GG.Monster): App.GG.Animation -> U64 -> VoxBox
+  case monster {
+    slime: 
+      let data = App.GG.Body.Hull.Form.data(monster.data@body@hull@form)
+      data@sprite
+    minion: monster.data@sprite
+  }
+
+App.GG.Monster.get_max_hp(monster: App.GG.Monster): I32
+  case monster { 
+    minion:
+      monster.data@hp
+    slime:
+      monster.attributes@hp * 10
+  }
+
+App.GG.Monster.get_max_energy(monster: App.GG.Monster): I32
+  case monster {
+    minion: 
+      +0#32
+    slime: 
+      monster.attributes@energy
+  }
+
+App.GG.Monster.get_charge(monster: App.GG.Monster): U64
+  case monster { 
+    minion:
+      0#64
+    slime:
+      without monster.charge: 0#64
+      log(U64.show(monster.charge) | " monster_charge")
+      monster.charge
+  }

@@ -1,0 +1,79 @@
+type App.GG.Actions {
+  new(
+    current: Maybe<App.GG.Actions.Data>
+    next: Maybe<App.GG.Actions.Data>
+    has_acted: Bool
+  )
+} 
+
+type App.GG.Actions.Data {
+  new(
+    frame: U64
+    effect: App.GG.Effect<Unit>
+    category: App.GG.Actions.Category 
+  )
+}
+
+type App.GG.Actions.Category {
+  basic_attack
+  movement
+  chip
+  stun
+}
+
+App.GG.Actions.add(action: App.GG.Actions.Data, creature: App.GG.Creature): App.GG.Creature
+  let actions = creature@actions
+  let new_actions = actions@next <- some(action)
+  creature@actions <- new_actions
+
+App.GG.Actions.stun(stun: App.GG.Creature.Status.Stun, animation: App.GG.Animation, duration: U64): App.GG.Actions.Data
+  let frame = 0#64
+  let category = App.GG.Actions.Category.stun
+  let effect = App.GG.Effect.stun(stun, animation, duration)
+  App.GG.Actions.Data.new(frame, effect, category)
+
+App.GG.Actions.new_actions(coord: App.GG.Coord, grid: App.GG.Grid, new_current: App.GG.Actions.Data): App.GG.Grid
+    let f = 
+    (creature)
+      let actions = creature@actions
+      let new_actions = actions@current <- some(new_current)
+      let new_actions = new_actions@next <- none
+      creature@actions <- new_actions
+  let new_grid = App.GG.Creature.modify_at(f, coord, grid)
+  new_grid
+
+App.GG.Actions.inc(coord: App.GG.Coord, grid: App.GG.Grid): App.GG.Grid 
+  Maybe {
+    get tile = App.GG.Grid.get(coord, grid)
+    get creature = tile@creature
+    let actions = creature@actions
+    get current = actions@current
+    let new_actions = actions@current <- some(current@frame <- current@frame + 1)
+    let new_creature = creature@actions <- new_actions
+    let new_tile = tile@creature <- some(new_creature)
+    let new_grid = App.GG.Grid.set(coord, new_tile, grid)
+    return new_grid
+  } <> grid
+
+App.GG.Actions.movement(arrow: App.GG.Arrow): App.GG.Actions.Data
+  let frame = 0#64
+  let effect = App.GG.Effect.movement.player_movement(arrow)
+  let category = App.GG.Actions.Category.movement
+  App.GG.Actions.Data.new(frame, effect, category)
+
+App.GG.Actions.basic_attack(effect: App.GG.Effect<Unit>): App.GG.Actions.Data
+  let frame = 0#64
+  let category = App.GG.Actions.Category.basic_attack
+  App.GG.Actions.Data.new(frame, effect, category)
+
+// Runs the effect of Current action if there is any
+App.GG.Actions.run(coord: App.GG.Coord, game: App.GG.Game): App.GG.Game
+  Maybe {
+    let grid = game@grid
+    get creature = App.GG.Creature.get(coord, grid)
+    get action = creature@actions@current 
+    let origin = App.GG.Effect.Origin.creature
+    let result = action@effect(coord, origin, game) 
+    get new_game = case result {err: none, new: some(result.game)}
+    return new_game
+  } <> game

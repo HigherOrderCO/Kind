@@ -1,0 +1,80 @@
+// A chip that shoots a Bazooka at the first enemy in the front of the creature
+// If there is no enemy in front of it, the shot deals no damage
+// If there is an enemy in its front, explode dealing damage to the 8 nearby tiles
+
+App.GG.Chip.Arms.bazooka: App.GG.Chip
+  App.GG.Chip.new(
+    "Bazoka"
+    App.GG.Class.strength
+    App.GG.Chip.Arms.bazooka.Effect(50) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+
+
+App.GG.Chip.Arms.bazooka.img(frame: U64): VoxBox
+  switch U64.eql((frame % 24)/2) {
+    0#64: App.GG.img.Slime.hand.slime_wp_character__fire_00
+    1#64: App.GG.img.Slime.hand.slime_wp_character__fire_01
+    2#64: App.GG.img.Slime.hand.slime_wp_character__fire_02
+    3#64: App.GG.img.Slime.hand.slime_wp_character__fire_03
+    4#64: App.GG.img.Slime.hand.slime_wp_character__fire_04
+    5#64: App.GG.img.Slime.hand.slime_wp_character__fire_05
+    6#64: App.GG.img.Slime.hand.slime_wp_character__fire_06
+    7#64: App.GG.img.Slime.hand.slime_wp_character__fire_07
+    8#64: App.GG.img.Slime.hand.slime_wp_character__fire_08
+    9#64: App.GG.img.Slime.hand.slime_wp_character__fire_09
+    10#64: App.GG.img.Slime.hand.slime_wp_character__fire_10
+    11#64: App.GG.img.Slime.hand.slime_wp_character__fire_11
+  }default App.GG.img.Slime.hand.slime_wp_character__fire_00
+
+
+App.GG.Chip.Arms.bazooka.Effect(damage: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    App.GG.Effect.animation.modify_by_duration(12, 50)
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
+      let animation = App.GG.Animation.attack
+
+      let func = (coord: App.GG.Coord)
+        App.GG.Effect { 
+          get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
+
+          let coords = coord & App.GG.Coord.adjacent_all(coord, grid)
+
+          let projectile_effect = App.GG.Chip.Arms.bazooka.Projectile.Effect(dmg)
+          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+          let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+          let func = 
+            (coord)
+            App.GG.Effect.projectile.add_at(coord, projectile)
+
+          App.GG.Effect.multiple<App.GG.Coord>(func, coords)
+        }
+    App.GG.Effect.direct_shoot(func, animation, 24, 50)
+    }
+  }
+
+
+App.GG.Chip.Arms.bazooka.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+      App.GG.Effect.projectile.hit.damage_at(dmg, true, true center)
+      switch U64.eql(frame) {
+        8: App.GG.Effect.projectile.delete
+      }default App.GG.Effect.pass
+    }
+  }

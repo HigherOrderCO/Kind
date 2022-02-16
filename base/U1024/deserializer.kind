@@ -1,0 +1,5 @@
+U1024.deserializer: Deserializer<U1024>
+  Deserializer {
+    get word = Word.deserializer<1024>
+    return U1024.new(word)
+  }

@@ -1,0 +1,4 @@
+U1024.div(a: U1024, b: U1024): U1024
+  open a
+  open b
+  U1024.new(Word.div!(a.value, b.value))

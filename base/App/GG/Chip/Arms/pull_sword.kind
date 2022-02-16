@@ -1,0 +1,63 @@
+App.GG.Chip.Arms.pull_sword: App.GG.Chip
+  App.GG.Chip.new(
+    "PulSwd"
+    App.GG.Class.control
+    App.GG.Chip.Arms.pull_sword.Effect(25)
+    15
+    App.GG.img.bazooka
+    App.GG.Attributes.new(1,3,0,0)
+  )
+
+App.GG.Chip.Arms.pull_sword.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    App.GG.Effect {
+      App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+      get dmg = App.GG.Effect.creature.damage_with_attribute(dmg)
+      let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+      let projectile_effect = App.GG.Chip.Arms.pull_sword.Projectile.Effect(dmg) 
+      let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+      let front = App.GG.Coord.front(creature@team)
+      let spawn_coord = front(front(center)) // Gets the coordinate in front of the creature
+      App.GG.Effect.generic_shoot(projectile, spawn_coord, App.GG.Animation.attack, 12, 24)
+    }
+  }
+
+App.GG.Chip.Arms.pull_sword.Projectile.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get center = App.GG.Effect.coord.get_center
+    get projectile = App.GG.Effect.projectile.get
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    without frame: App.GG.Effect.pass
+    without projectile: App.GG.Effect.pass
+    let coords = App.GG.Coord.column(grid, center)
+    let eff = 
+      (coord)
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+        get can_hit = App.GG.Effect.projectile.can_hit(coord)
+        App.GG.Effect.projectile.hit.damage_at(dmg, true, false, coord)
+        get grid = App.GG.Effect.grid.get
+        if can_hit then 
+          //log("as")
+          let destination = App.GG.Coord.front(App.GG.Team.opposite(projectile@info@team), coord)
+          App.GG.Effect.movement.move_at(coord, destination, true)
+        else
+          App.GG.Effect.pass
+        return unit
+      }
+    App.GG.Effect {
+      App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+      if frame =? 8 then // At frame 8
+        App.GG.Effect.projectile.delete
+      else
+        App.GG.Effect.pass
+    }
+  }

@@ -1,0 +1,5 @@
+// Shift 'n' a bits to the right
+U1024.shr(n: U1024, a: U1024): U1024
+  open n
+  open a
+  U1024.new(Word.shr!(n.value, a.value))

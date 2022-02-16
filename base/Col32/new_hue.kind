@@ -1,0 +1,4 @@
+Col32.new_hue(new_hue: U32, col: Col32): Col32
+  let hsl = Col32.to_hsl(col)
+  let updated_hsl = HSL.change_hue(hsl, (x) new_hue)
+  HSL.to_col32(updated_hsl)

@@ -1,0 +1,8 @@
+Shape.corner_x(shape: Shape): Pair<F64, F64>
+  case shape {
+    point:      Shape.Point.corner.x(shape.val)
+    line:       Shape.Line.corner.x(shape.val)
+    circle:     Shape.Circle.corner.x(shape.val)
+    rectangle:  Shape.Rectangle.corner.x(shape.val)
+    polygon:    Shape.Polygon.corner.x(shape.val)
+  }

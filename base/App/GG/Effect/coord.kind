@@ -1,0 +1,62 @@
+App.GG.Effect.coord.get_center: App.GG.Effect<App.GG.Coord>
+  (center, origin, local)
+  App.GG.Effect.Result.new!(center, center, origin, local, (enemy, img) img, 0, "")
+
+App.GG.Effect.coord.closest_y: App.GG.Effect<Maybe<App.GG.Coord>>
+  (center, origin, local)
+  let grid = local@grid
+  let find_player = App.GG.Slime.find(grid)
+  without find_player: App.GG.Effect.Result.new!(none, center, origin, local, (enemy, img) img, 0, "")
+  let destination = 
+  if U32.gtn(find_player@snd@snd, center@snd) then
+    App.GG.Coord.below(center)
+  else
+    App.GG.Coord.above(center)
+  App.GG.Effect.Result.new!(some(destination), center, origin, local, (enemy, img) img, 0, "")
+
+App.GG.Effect.coord.first_enemy_in_front: App.GG.Effect<Maybe<App.GG.Coord>>
+  (center, origin, local)
+  let grid = local@grid
+  let result =
+    let team = App.GG.Team.get(center, origin, grid)
+    without team: none
+    App.GG.Coord.first_enemy_in_front(team, grid, center)
+  App.GG.Effect.Result.new!(result, center, origin, local, (enemy, img) img, 0, "")
+
+App.GG.Effect.coord.all_enemies_in_front: App.GG.Effect<Maybe<List<App.GG.Coord>>>
+  (center, origin, local)
+  let grid = local@grid
+  let result = 
+    let team = App.GG.Team.get(center, origin, grid)
+    without team: none
+  let coords = App.GG.Coord.all_coords_past_center(center, team, grid)
+  let all_enemies = App.GG.Coord.all_enemies_in_coords(center, coords, team, grid)
+  App.GG.Coord.all_enemies_in_coords(center, coords, team, grid)
+
+  App.GG.Effect.Result.new!(result, center, origin, local, (enemy, img) img, 0, "")
+
+App.GG.Effect.coord.closest_enemy: App.GG.Effect<Maybe<App.GG.Coord>>
+  (center, origin, local)
+  let grid = local@grid
+  let result =
+    let team = App.GG.Team.get(center, origin, grid)
+    without team: none
+    App.GG.Coord.closest_enemy_in_front(center, team, grid)
+  App.GG.Effect.Result.new!(result, center, origin, local, (enemy, img) img, 0, "")
+
+
+App.GG.Effect.coord.shortest_next(target: App.GG.Coord): App.GG.Effect<App.GG.Coord>
+  (center, origin, local)
+  let grid = local@grid
+  let result = App.GG.Coord.shortest_next(center, target)
+  App.GG.Effect.Result.new!(result, center, origin, local, (enemy, img) img, 0, "")
+
+
+App.GG.Effect.coord.best_target: App.GG.Effect<Maybe<App.GG.Coord>>
+  (center, origin, local)
+  let grid = local@grid
+  let result =
+    let team = App.GG.Team.get(center, origin, grid)
+    without team: none
+  App.GG.Coord.projectile_best_target(center, team, grid)
+  App.GG.Effect.Result.new!(result, center, origin, local, (enemy, img) img, 0, "")

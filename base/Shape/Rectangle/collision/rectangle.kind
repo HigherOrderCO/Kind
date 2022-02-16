@@ -1,0 +1,5 @@
+Shape.Rectangle.collision.rectangle(rectangle0: Shape.Rectangle, rectangle1: Shape.Rectangle): Bool
+  (rectangle0@x0 <? rectangle1@x1) &&
+  (rectangle0@x1 >? rectangle1@x0) &&
+  (rectangle0@y0 <? rectangle1@y1) &&
+  (rectangle0@y1 >? rectangle1@y0) 

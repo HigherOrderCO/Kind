@@ -1,0 +1,4 @@
+U1024.gte(a: U1024, b: U1024): Bool
+  open a
+  open b
+  Word.gte!(a.value, b.value)

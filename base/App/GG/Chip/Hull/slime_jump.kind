@@ -1,0 +1,81 @@
+App.GG.Chip.Hull.slime_jump: App.GG.Chip
+  App.GG.Chip.new(
+    "SlmJmp"
+    App.GG.Class.control
+    App.GG.Chip.Hull.slime_jump.Effect(15, 10) // damage, duration
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+
+App.GG.Chip.Hull.slime_jump.Effect(damage: I32, duration: F64): App.GG.Effect<Unit>
+  App.GG.Effect { 
+    let uduration = I32.to_u64(F64.to_i32(duration* 60))
+    App.GG.Effect.animation.modify_by_duration(12, 24)
+    get frame = App.GG.Effect.frame.get
+    get grid = App.GG.Effect.grid.get
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    let coord = App.GG.Coord.front(creature@team, center)
+    App.GG.Effect { 
+      get tile = App.GG.Effect.tile.get_at(coord)
+      without tile: App.GG.Effect.pass
+      App.GG.Effect { 
+        App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.bazooka.img(frame))
+        let animation = App.GG.Animation.attack
+        get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
+        let projectile_effect = App.GG.Chip.Hull.slime_jump.Projectile.Effect(dmg)
+        let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+        let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+        let coords = App.GG.Coord.adjacent_all(coord, grid)
+        let eff = 
+          App.GG.Effect { 
+            App.GG.Effect.tile.change_owner(creature@team, coord)
+            App.GG.Effect.tile.add_status(App.GG.Tile.Status.stolen(uduration), coord)
+          }
+          let func = 
+            (coordinate)
+            App.GG.Effect.projectile.add_at(coordinate, projectile)
+        let damage_eff = App.GG.Effect.multiple<App.GG.Coord>(func, coords)
+        get enemy = App.GG.Effect.creature.get_at(coord)
+        let same_team = App.GG.Team.eql(tile@owner, creature@team)
+        let take_over = 
+          if same_team then 
+            App.GG.Effect { 
+              App.GG.Effect.movement.move_at(center, coord, true)
+              damage_eff
+            }
+          else
+            case enemy { 
+              none:
+                App.GG.Effect {
+                  eff 
+                  App.GG.Effect.movement.move_at(center, coord, true)
+                  damage_eff
+                }
+              some:
+                App.GG.Effect.pass
+          }
+          App.GG.Effect.generic_action(take_over, animation, 12, 24)
+      }
+    }
+  }
+
+
+App.GG.Chip.Hull.slime_jump.Projectile.Effect(damage: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
+    without frame: App.GG.Effect.pass
+    App.GG.Effect { 
+      App.GG.Effect.vbox.at_tile(center, App.GG.img.target_tile)
+      App.GG.Effect.projectile.hit.damage_at(damage, true, true center)
+      switch U64.eql(frame) {
+        12: App.GG.Effect.projectile.delete
+      }default App.GG.Effect.pass
+    }
+  }

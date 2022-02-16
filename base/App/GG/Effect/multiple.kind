@@ -1,0 +1,16 @@
+App.GG.Effect.multiple<A: Type>(eff: A -> App.GG.Effect<Unit>, as: List<A>): App.GG.Effect<Unit>
+  let list = [] :: List<App.GG.Effect<Unit>>
+  for a in as with list:
+    eff(a) & list
+  App.GG.Effect.multiple.go(list)
+
+App.GG.Effect.multiple.go(list: List<App.GG.Effect<Unit>>): App.GG.Effect<Unit>
+  case list {
+    nil: App.GG.Effect.pass
+    cons:
+      App.GG.Effect {
+        list.head
+        // log("happens")
+        App.GG.Effect.multiple.go(list.tail)
+      }
+  }

@@ -1,0 +1,59 @@
+
+
+Col32.to_hsl(col: Col32): HSL
+  let r = U32.to_f64(Col32.r(col)) / 255
+  let g = U32.to_f64(Col32.g(col)) / 255
+  let b = U32.to_f64(Col32.b(col)) / 255
+  
+  let maxs = 
+    (a: F64, b: F64, c: F64)
+      if a <? b then
+        if b <? c then 
+          c
+        else
+          b
+      else
+        if a <? c then 
+          c
+        else
+          a
+  
+  let mins = 
+    (a: F64, b: F64, c: F64)
+      if a >? b then
+        if b >? c then 
+          c
+        else
+          b
+      else
+        if a >? c then 
+          c
+        else
+          a
+
+  let max = maxs(r, g, b)
+  let min = mins(r, g, b)
+  let h = (max + min) / 2
+  let s = (max + min) / 2
+  let l = (max + min) / 2
+
+    if max =? min then
+      HSL.new(0#32, 0.0, l / 6)
+    else
+      let d = max - min;
+      let s = 
+        if l >? 0.5 then
+          d / (2 - max - min)
+        else
+          d / (max + min)
+
+      let h = 
+        switch F64.eql(max) {
+          r: ((g - b) / d) + (if g <? b then 6 else 0)
+          g: ((b - r) / d) + 2
+          b: ((r - g) / d) + 4
+        }default 0
+
+    let h = h / 6
+  HSL.new(F64.to_u32(h * 255),s,l)
+

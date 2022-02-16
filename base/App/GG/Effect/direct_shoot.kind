@@ -1,0 +1,15 @@
+App.GG.Effect.direct_shoot(
+  func: App.GG.Coord -> App.GG.Effect<Unit>,
+  animation: App.GG.Animation,
+  attack_frame: U64,
+  final_frame: U64
+): App.GG.Effect<Unit>
+
+  let effect = 
+    App.GG.Effect {
+      get enemy_coord = App.GG.Effect.coord.first_enemy_in_front
+      without enemy_coord: App.GG.Effect.pass
+      func(enemy_coord)
+    }
+
+  App.GG.Effect.generic_action(effect, animation, attack_frame, final_frame)

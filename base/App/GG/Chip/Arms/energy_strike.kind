@@ -1,0 +1,88 @@
+App.GG.Chip.Arms.energy_strike: App.GG.Chip
+  App.GG.Chip.new(
+    "EgyStk"
+    App.GG.Class.strength
+    App.GG.Chip.Arms.energy_strike.Effect(10) // TODO: Alter
+    10
+    App.GG.img.bazooka
+    App.GG.Attributes.new(3,0,1,0) // TODO : Alter
+  )
+
+App.GG.Chip.Arms.energy_strike.Effect(dmg: I32): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.charge.reset
+    get creature = App.GG.Effect.creature.get
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    App.GG.Effect.frame.inc
+    without creature: App.GG.Effect.pass
+    without frame: App.GG.Effect.pass
+    let category = creature@category
+    let energy = case category {
+      minion: +0#32,
+      slime: category.energy
+    }
+    let has_energy = I32.gtn(energy)
+
+    let effect = 
+      (energy_cost: I32, intangible: Bool)
+        App.GG.Effect {
+          App.GG.Effect.vbox.in_tile(App.GG.Chip.Arms.shockwave.img(frame))
+          get change = App.GG.Effect.creature.change_energy_at(I32.neg(energy_cost), center)
+          let damage = 
+            if energy_cost =? 0 then
+              dmg * 2
+            else
+              dmg
+          get dmg = App.GG.Effect.creature.damage_with_attribute(damage)
+          let projectile_info = App.GG.Projectile.Info.new(creature@team, App.GG.Projectile.Status.unit, NatSet.new, 0#64, true)
+          let projectile_effect = App.GG.Chip.Arms.energy_strike.Projectile.Effect(dmg, intangible) 
+          let projectile = App.GG.Projectile.new(projectile_info, projectile_effect)
+          let spawn_coord = App.GG.Coord.front(creature@team, center) // Gets the coordinate in front of the creature
+          App.GG.Effect.projectile.add_at(spawn_coord, projectile)
+        }
+
+
+    if frame =? 0 then
+      App.GG.Effect { 
+        App.GG.Effect.chip.waste
+        App.GG.Effect.animation.update(App.GG.Animation.attack)
+      }
+    else if frame =? 8 then
+      effect(0, false)
+    else if (frame % 16) =? 8 then
+      if has_energy(10) then
+        let intangible = not(has_energy(20))
+        effect(10, intangible)
+      else
+        App.GG.Effect.actions.reset
+    else
+      App.GG.Effect.pass
+      
+    }
+
+App.GG.Chip.Arms.energy_strike.Projectile.Effect(dmg: I32, intangible: Bool): App.GG.Effect<Unit>
+  App.GG.Effect {
+    App.GG.Effect.frame.inc // Increases projectile frame by 1
+    get center = App.GG.Effect.coord.get_center
+    get frame = App.GG.Effect.frame.get
+    get team = App.GG.Effect.team.get
+    without frame: App.GG.Effect.pass
+    without team: App.GG.Effect.pass
+    let front_coord = App.GG.Coord.front(team, center)
+    let coords = [center, front_coord]
+    let eff = 
+      (coord)
+      App.GG.Effect {
+        App.GG.Effect.vbox.at_tile(coord, App.GG.img.target_tile)
+        App.GG.Effect.projectile.hit.damage_at(dmg, true, intangible, coord)
+        return unit
+      }
+    App.GG.Effect {
+      App.GG.Effect.multiple<App.GG.Coord>(eff, coords)
+      if frame =? 16 then // At frame 16
+        App.GG.Effect.projectile.delete
+      else
+        App.GG.Effect.pass
+    }
+  }

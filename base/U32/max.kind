@@ -1,0 +1,5 @@
+U32.max(a: U32, b: U32): U32
+  if a <=? b then
+    b
+  else
+    a

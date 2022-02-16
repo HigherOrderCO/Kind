@@ -1,0 +1,12 @@
+App.GG.Effect.team.get_at(pos: App.GG.Coord): App.GG.Effect<Maybe<App.GG.Team>>
+  (center, origin, local)
+  let grid = local@grid
+  let team = App.GG.Team.get(pos, origin, grid)
+  App.GG.Effect.Result.new!(team, center, origin, local, (enemy, img) img, 0, "")
+
+
+App.GG.Effect.team.get: App.GG.Effect<Maybe<App.GG.Team>>
+  App.GG.Effect { 
+  get center = App.GG.Effect.coord.get_center
+  App.GG.Effect.team.get_at(center)
+  }

@@ -1,0 +1,2 @@
+U1024.to_u8(x: U1024): U8
+  Nat.to_u8(U1024.to_nat(x))

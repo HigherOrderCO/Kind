@@ -1,0 +1,41 @@
+type App.GG.Team {
+  neutral
+  blue
+  red
+}
+
+App.GG.Team.eql(a: App.GG.Team, b: App.GG.Team): Bool
+  case a b {
+    blue    blue    : true
+    red     red     : true
+    neutral neutral : true
+  }default false
+
+App.GG.Team.opposite(team: App.GG.Team): App.GG.Team
+  case team {
+    blue    : App.GG.Team.red
+    red     : App.GG.Team.blue
+    neutral : App.GG.Team.neutral
+  }
+
+App.GG.Team.get(center: App.GG.Coord, origin: App.GG.Effect.Origin, grid: App.GG.Grid): Maybe<App.GG.Team>
+  case origin {
+    creature: 
+      Maybe {
+        get creature = App.GG.Creature.get(center, grid)
+        return creature@team
+      }
+    projectile:
+      Maybe {
+        get projectile = App.GG.Projectile.get(center, origin, grid)
+        let info = projectile@info
+        return info@team
+      }
+  }
+
+App.GG.Team.show(team: App.GG.Team): String
+  case team { 
+    blue    : "blue"
+    red     : "red"
+    neutral : "neutral"
+  }

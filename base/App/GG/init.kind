@@ -1,0 +1,72 @@
+// Initial state
+App.GG.init: App.Init<App.GG.State>
+  let lobby = App.GG.Lobby.new(none)
+  let local = App.GG.State.local.lobby(lobby)
+  App.Store.new<App.GG.State>(local, unit)
+
+App.GG.init.game(body: App.GG.Body, rand: Nat): App.GG.State.local
+  let grid = App.GG.init.grid(body, rand)
+  let setup = App.GG.Phase.setup({[], none}, [], 0)
+  let grid  = 
+    let slime = App.GG.Slime.find(grid)
+    without slime: grid
+    let new_grid = App.GG.Creature.modify_at(App.GG.Creature.shuffle_folder(10000), slime@snd, grid) 
+    new_grid
+
+  let {phase, grid} =
+    let slime = App.GG.Slime.find(grid)
+    without slime: {setup grid}
+    case slime@fst@category as monster {
+      minion: {setup grid}
+      slime: 
+        let table_size = 10
+        let mod = App.GG.Creature.sub_folder(table_size)
+        let slots = App.GG.Table.from_folder(table_size, monster.folder)
+        let table = App.GG.Table.new(slots, none)
+        let hand = [] :: App.GG.Chips
+        let energy = monster.energy + monster.attributes@energy
+        let phase = App.GG.Phase.setup(table, hand, energy)
+        let new_grid  = App.GG.Creature.modify_at(mod, slime@snd, grid)
+        {phase, new_grid}
+    }
+  let local = App.GG.State.local.game({phase, grid, {0, 0}, rand})
+  local
+
+App.GG.init.grid(body: App.GG.Body, rand: Nat): App.GG.Grid
+  let blue = App.GG.Tile.new([], none, App.GG.Team.blue, App.GG.Tile.Statuses.pure)
+  let red = App.GG.Tile.new([], none, App.GG.Team.red, App.GG.Tile.Statuses.pure)
+  let {max_x, max_y} = App.GG.Constants.grid_size
+  let cx = U32.to_nat(max_x)
+  let cy = U32.to_nat(max_y)
+
+  let nat_list = []
+  for x from 0 to cx with nat_list:
+    let owner =
+      if x <? cx/2 then 
+        blue
+      else
+        red
+    for y from 0 to cy with nat_list:
+      let coord = {x + 1, y + 1}
+      {coord, owner} & nat_list
+    nat_list
+    
+  let list = []
+  for pairs in nat_list with list:
+    let {x,y} = pairs@fst
+    let coords = {Nat.to_u32(x), Nat.to_u32(y)}
+    Pair.new!!(coords, pairs@snd) & list
+
+  let grid = BBT.from_list<App.GG.Coord, App.GG.Tile>(App.GG.Grid.cmp, list)
+  let parts = App.GG.Parts.new(0,0,0)
+  let slime = App.GG.Creature.create_slime(App.GG.Creatures.slime(body), grid)
+  let grid = App.GG.Creature.place(slime,  {2#32,2#32}, grid)
+  let swordsman = App.GG.Creature.create_minion(App.GG.Creatures.minion.swordsman(0), grid)
+  let grid = App.GG.Creature.place(swordsman, {6#32,1#32}, grid)
+  let gunner_1 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(rand % 3), grid)
+  let grid = App.GG.Creature.place(gunner_1, {7#32,3#32}, grid)
+  //let gunner_2 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(1), grid)
+  //let grid = App.GG.Creature.place(gunner_2, {6#32,1#32}, grid)
+  //let gunner_3 = App.GG.Creature.create_minion(App.GG.Creatures.minion.gunner(2), grid)
+  //let grid = App.GG.Creature.place(gunner_3, {5#32,2#32}, grid)
+  grid
