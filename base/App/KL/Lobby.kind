@@ -242,7 +242,7 @@ App.KL.Lobby.draw.front(user: String, room_input: String, global: App.KL.Global.
       <pre style={"margin-top": "30px", "font-size": "medium", "text-align": "start"}>
         "Hello! To start with Kaelin it's easy.
         1. Enter a random room number and copy it
-        2. Invite your friends to access: http://uwu.tech/App.KL
+        2. Invite your friends to access: http://old.kindelia.org/App.KL
         3. Share the room number with them
 
         Enjoy our little Kind game! (WIP)

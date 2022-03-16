@@ -67,7 +67,7 @@ App.Kind.draw_page_home(stt: App.Kind.State.local): DOM
         "box-shadow": App.Kind.constant.primary_color | " -2px 2px 1px"
         "border": "1px solid"}), [
           line("npm i -g kind-lang")
-          line("git clone https://github.com/uwu-tech/Kind")
+          line("git clone https://github.com/Kindelia/Kind")
           line("cd Kind/base")
           line("kind Main")
           line("kind Main --run")

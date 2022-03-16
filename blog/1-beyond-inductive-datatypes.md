@@ -1,7 +1,7 @@
 Beyond inductive datatypes: exploring Self types
 ================================================
 
-[Kind](https://github.com/uwu-tech/kind) is a **proof**gramming language that
+[Kind](https://github.com/Kindelia/Kind) is a **proof**gramming language that
 can be used to define inductive datatypes and prove mathematical theorems by
 induction, just like other proof assistants like Coq, Agda, Idris, Lean. Unlike
 these, though, Kind doesn't include a complex native inductive datatype system.
@@ -266,7 +266,7 @@ same: Int.new(5, 2) == Int.new(3, 0)
 ```
 
 And the algorithms become as clean as you'd expect. Check them on the
-[Kind/base/Int](https://github.com/uwu-tech/Kind/tree/master/base/Int)
+[Kind/base/Int](https://github.com/Kindelia/Kind/tree/master/base/Int)
 directory!
 
 This idea, I believe, can be generalized to represent quotient types; see Aaron
@@ -436,7 +436,7 @@ beautiful.
 Possibility #2: first-class modules
 -----------------------------------
 
-Check [this post](https://github.com/uwu-tech/Kind/blob/master/blog/2-first-class-modules-with-self-types.md) 
+Check [this post](https://github.com/Kindelia/Kind/blob/master/blog/2-first-class-modules-with-self-types.md) 
 for a simple encoding of first-class modules with self types.
 
 Possibility #3: higher inductive types

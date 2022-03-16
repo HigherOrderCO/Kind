@@ -14,14 +14,14 @@ If you'd like to help with donations, grants or funding, obviously let us know (
 
 The best way to start contributing (and to get familiar with the codebase) is to
 just add files to `base`. Kind's
-[base](https://github.com/uwu-tech/Kind/tree/master/base) is in a constant state
+[base](https://github.com/Kindelia/Kind/tree/master/base) is in a constant state
 of evolution. It has several functions that aren't well documented. Some
 functions may have inconsistent names here and there. Some obvious functions may
 be missing. Many data structures are missing. Find anything you can improve,
 work on it and submit a PR. We'll be very happy to review it!
 
 As an example, all the proofs on
-[Nat/Add](https://github.com/uwu-tech/Kind/tree/master/base/Nat/add) were added
+[Nat/Add](https://github.com/Kindelia/Kind/tree/master/base/Nat/add) were added
 by Eloi (thanks!). That kind of contribution is always welcome!
 
 ## Improve the Numeric libraries
@@ -78,7 +78,7 @@ and import it with `require("Your.Term")`. Imagine being able to do that for
 every language? Currently, Kind targets Scheme and JavaScript. We'd like more
 backends, as many as possible. Adding a new back-end is somewhat simple: just
 add its syntax on
-[base/Kind/Comp/Target](https://github.com/uwu-tech/Kind/tree/master/base/Kind/Comp/Target)!
+[base/Kind/Comp/Target](https://github.com/Kindelia/Kind/tree/master/base/Kind/Comp/Target)!
 
 ## Add a rich geometry library
 
@@ -89,7 +89,7 @@ structures and so on. Adding these is always welcome!
 
 ## Add a WebGL renderer
 
-Right now, the [DOM](https://github.com/uwu-tech/Kind/blob/master/base/DOM.kind)
+Right now, the [DOM](https://github.com/Kindelia/Kind/blob/master/base/DOM.kind)
 type allows rendering text, HTML nodes and pixelated canvas. It would be amazing
 to have a render mode that integrated with WebGL. If you'd like to work on that,
 contact us for more instructions!
@@ -97,14 +97,14 @@ contact us for more instructions!
 ## Create apps
 
 Sounds silly, but just creating apps using the `App` type would be amazing. Any
-app added to `base/App` will show up on [http://uwu.tech/](http://uwu.tech).
+app added to `base/App` will show up on [http://old.kindelia.org/](http://old.kindelia.org).
 Sadly, we don't have a tutorial on how apps work, but it should be learnable
 from looking the examples.
 
 ## Get rid of FormCoreJS
 
 Right now, the JavaScript compiler on
-[JavaScript.kind](https://github.com/uwu-tech/Kind/tree/master/base/Kind/Comp/Target)
+[JavaScript.kind](https://github.com/Kindelia/Kind/tree/master/base/Kind/Comp/Target)
 is lackluster, compared to the one in
 [FmcToJs.js](https://github.com/moonad/FormCoreJS/blob/master/FmcToJs.js). That
 is why, when compiling to JS, instead of using the compiler written in Kind, we
@@ -301,7 +301,7 @@ With `✓` standing for "well-typed" and `⊤` standing for "terminating".
 ## Research how to add HoTT features
 
 While we have some interesting insights on the matter (check [this blog
-post](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md)),
+post](https://github.com/Kindelia/Kind/blob/master/blog/1-beyond-inductive-datatypes.md)),
 Kind isn't capable of expressing the most important HoTT features. We could add
 these inspired on Cubical Type Theory, but this would increase the size of
 Kind's core by a few multipliers, which we don't want to. In special, the

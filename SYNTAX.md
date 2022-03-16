@@ -3,7 +3,7 @@ All syntaxes
 
 This document lists all the high-level syntaxes available on the Kind
 language. Every syntax listed below is expanded (desugared) to either a
-primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of the functions available on the [base library](https://github.com/uwu-tech/Kind/tree/master/base). Also, check [this](https://news.ycombinator.com/edit?id=28145337) answer on Hacker News for some thoughts and reasonings about our syntax choices.
+primitive [FormCore](https://github.com/moonad/formcorejs) term, or to one of the functions available on the [base library](https://github.com/Kindelia/Kind/tree/master/base). Also, check [this](https://news.ycombinator.com/edit?id=28145337) answer on Hacker News for some thoughts and reasonings about our syntax choices.
 
 Top-level definition
 --------------------
@@ -266,7 +266,7 @@ Where `~` (it's optional) stands for any number of indices
 ("dynamic polymorphic types"). In the constructor, its fields are also optionally followed by `~` and its concrete indices.
 
 For more examples, check the common types (Maybe, Either, Nat, Vector, List,
-Equal, etc.) on https://github.com/uwu-tech/Kind/tree/master/base.
+Equal, etc.) on https://github.com/Kindelia/Kind/tree/master/base.
 
 Case (pattern matching)
 -----------------------
@@ -1209,7 +1209,7 @@ Equal.rewrite<_,_,_, (x) type>(e, value)
 ```
 
 Using `Equal.rewrite` as defined on
-[Equal.fm](https://github.com/uwu-tech/Kind/blob/master/base/Equal.fm). It
+[Equal.fm](https://github.com/Kindelia/Kind/blob/master/base/Equal.fm). It
 allows rewritting the type of an expression based on an equality proof. For
 example, suppose you have the following values in your context:
 

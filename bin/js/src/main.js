@@ -32,7 +32,7 @@ function find_base_dir() {
     //console.log("# Kind "+require("./../package.json").version);
     //console.log("Couldn't find Kind/base directory.\n");
     //console.log("Go to the directory to run Kind commands or clone the repository:");
-    //console.log("  git clone https://github.com/uwu-tech/Kind");
+    //console.log("  git clone https://github.com/Kindelia/Kind");
     //console.log("New files must be added inside Kind/base directory.");
     //process.exit();
   }

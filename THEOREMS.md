@@ -10,7 +10,7 @@ with the required knowledge to start proving theorems right now.
 
 Before starting, make sure to install Kind via Haskell or JavaScript
 (example: `npm i -g kind-lang`), clone this repository
-(`https://github.com/uwu-tech/kind`) and `cd` into the `kind/base`
+(`https://github.com/Kindelia/Kind`) and `cd` into the `kind/base`
 directory (you **must** be there for now). You'll be editing the `Main.kind` file
 only. Open it in your favorite editor and type `kind Main.kind` to type-check it.
 
@@ -1774,4 +1774,4 @@ Hints:
 - To prove `succ_n_neq_n`, use `case` to specialize `e` (like on `not_a_neq_a`)
   and the inductive hypothesis.
 
-If you got here congratulations! For more challenges read our [problem list for newcomers](https://github.com/uwu-tech/Kind/discussions/259)
+If you got here congratulations! For more challenges read our [problem list for newcomers](https://github.com/Kindelia/Kind/discussions/259)

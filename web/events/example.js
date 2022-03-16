@@ -1,6 +1,6 @@
 var client = require("./client.js");
 var api = client({
-  //url: "ws://uwu.tech:7171",
+  //url: "ws://old.kindelia.org:7171",
   url: "ws://localhost:7171",
   key: "0000000000000000000000000000000000000000000000000000000000000001",
 });

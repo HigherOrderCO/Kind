@@ -1,5 +1,5 @@
 // How to use this file:
-// 1. Clone Kind's repo:     git clone https://github.com/uwu-tech/kind
+// 1. Clone Kind's repo:     git clone https://github.com/Kindelia/Kind
 // 2. Create a dir for you:  mkdir Kind/base/User/YourName
 // 3. Copy that file there:  cp Kind/base/Problems.kind Kind/base/User/YourName
 // 4. Open, uncomment a problem and solve it

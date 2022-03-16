@@ -4,7 +4,7 @@ The Scheme backend handles recursion better than the default Javascript backend.
 
 # Prebuilt binaries
 
-Kind is distributed as a single binary executable. You can download it [here](https://github.com/uwu-tech/Kind/releases).
+Kind is distributed as a single binary executable. You can download it [here](https://github.com/Kindelia/Kind/releases).
 
 # Building from source
 
@@ -26,4 +26,4 @@ nix build .#kind-scm
 
 Nix will build all the dependencies and place the executable inside the `result` folder. Subsequent builds will be much faster because the dependencies are already built.
 
-If something doesn't work, [let us know](https://github.com/uwu-tech/Kind/issues) ;)
+If something doesn't work, [let us know](https://github.com/Kindelia/Kind/issues) ;)

@@ -2,15 +2,15 @@
 
 A minimal, efficient and practical programming language that aims to rethink functional programming from the scratch, and make it right. Under the hoods, it is basically Haskell, except without historical mistakes, and with a modern, consistent design. On the surface, it aims to be more practical, and to look more like conventional languages. Kind is statically typed, and its types are so powerful that you can prove mathematical theorems on it. Compared to proof assistants, Kind has:
 
-1. The smallest core. Check [FormCore.js](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) or [Core.kind](https://github.com/uwu-tech/Kind/blob/master/base/Kind/Core.kind). Both are `< 1000-LOC` complete implementations!
+1. The smallest core. Check [FormCore.js](https://github.com/moonad/FormCoreJS/blob/master/FormCore.js) or [Core.kind](https://github.com/Kindelia/Kind/blob/master/base/Kind/Core.kind). Both are `< 1000-LOC` complete implementations!
 
-2. Novel type-level features. Check [this article](https://github.com/uwu-tech/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
+2. Novel type-level features. Check [this article](https://github.com/Kindelia/Kind/blob/master/blog/1-beyond-inductive-datatypes.md) on super-inductive datatypes.
 
-3. An accessible syntax that makes it less scary. Check [SYNTAX.md](https://github.com/uwu-tech/Kind/blob/master/SYNTAX.md).
+3. An accessible syntax that makes it less scary. Check [SYNTAX.md](https://github.com/Kindelia/Kind/blob/master/SYNTAX.md).
 
-4. A complete bootstrap: the language is implemented in itself. Check it [here](https://github.com/uwu-tech/Kind/tree/master/base/Kind).
+4. A complete bootstrap: the language is implemented in itself. Check it [here](https://github.com/Kindelia/Kind/tree/master/base/Kind).
 
-5. Efficient real-world compilers. Check [http://uwu.tech/](http://uwu.tech) for a list of apps. (WIP)
+5. Efficient real-world compilers. Check [http://old.kindelia.org/](http://old.kindelia.org) for a list of apps. (WIP)
 
 Usage
 -----
@@ -56,7 +56,7 @@ Kind has an universal compiler that targets several back-ends. Just find what yo
 
 ### Create live applications.
 
-Kind has an interconnected back-end that allows you to create rich, interactive applications without ever touching databases, TCP packets or messing with apis. Just add a file to `base/App` and it will be available on [http://uwu.tech/](http://uwu.tech). You can fork entire applications - not just the front-end, but all of it, back-end, database, and networking - in seconds.
+Kind has an interconnected back-end that allows you to create rich, interactive applications without ever touching databases, TCP packets or messing with apis. Just add a file to `base/App` and it will be available on [http://old.kindelia.org/](http://old.kindelia.org). You can fork entire applications - not just the front-end, but all of it, back-end, database, and networking - in seconds.
 
 ### Prove theorems.
 
@@ -139,7 +139,7 @@ my_list: List<Pair<Nat,Nat>>
   }
 ```
 
-Check many List algorithms on [base/List](https://github.com/uwu-tech/Kind/tree/master/base/List)!
+Check many List algorithms on [base/List](https://github.com/Kindelia/Kind/tree/master/base/List)!
 
 ### Some types
 
@@ -232,7 +232,7 @@ type Entity {
 }
 ```
 
-Check all core types on [base](https://github.com/uwu-tech/Kind/tree/master/base)!
+Check all core types on [base](https://github.com/Kindelia/Kind/tree/master/base)!
 
 ### Some proofs
 
@@ -267,7 +267,7 @@ Nat.add.comm(a: Nat, b: Nat): (a + b) == (b + a)
   }!
 ```
 
-Check some Nat proofs on [base/Nat/add](https://github.com/uwu-tech/Kind/tree/master/base/Nat/add)!
+Check some Nat proofs on [base/Nat/add](https://github.com/Kindelia/Kind/tree/master/base/Nat/add)!
 
 ### A web app
 
@@ -295,9 +295,9 @@ App.Hello.when: App.When<App.Hello.State>
   } default App.pass!
 ```
 
-Source: [base/App/Hello.kind](https://github.com/uwu-tech/Kind/blob/master/base/App/Hello.kind)
+Source: [base/App/Hello.kind](https://github.com/Kindelia/Kind/blob/master/base/App/Hello.kind)
 
-Live: [http://uwu.tech/App.Hello](http://uwu.tech/App.Hello)
+Live: [http://old.kindelia.org/App.Hello](http://old.kindelia.org/App.Hello)
 
 In order to run this or any other app you should follow this steps:
   - The app should be in `base/App` folder
@@ -311,4 +311,4 @@ In order to run this or any other app you should follow this steps:
 Future work
 -----------
 
-There are so many things we want to do and improve. Would like to contribute? Check [CONTRIBUTE.md](https://github.com/uwu-tech/Kind/blob/master/CONTRIBUTE.md). Also reach us on [Telegram](https://t.me/formality_lang). We're friendly!
+There are so many things we want to do and improve. Would like to contribute? Check [CONTRIBUTE.md](https://github.com/Kindelia/Kind/blob/master/CONTRIBUTE.md). Also reach us on [Telegram](https://t.me/formality_lang). We're friendly!

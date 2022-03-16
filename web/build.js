@@ -14,7 +14,7 @@ var all_kind_apps = fs.readdirSync("App").filter(x => x.slice(-5) === ".kind");
 var all_js_apps = [];
 // console.log(all_kind_apps)
 
-// App that will be displayed when accessing http://uwu.tech
+// Apps that will be displayed when accessing http://old.kindelia.org
 var server_apps = [
   'Browser.kind',   
   'Hello.kind',

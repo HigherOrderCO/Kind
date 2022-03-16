@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/uwu-tech/kind.git"
+    "url": "git+https://github.com/Kindelia/Kind.git"
   },
   "author": "Victor Maia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/uwu-tech/kind/issues"
+    "url": "https://github.com/Kindelia/Kind/issues"
   },
-  "homepage": "https://github.com/uwu-tech/kind#readme",
+  "homepage": "https://github.com/Kindelia/Kind#readme",
   "dependencies": {
     "formcore-js": "^0.1.95"
   }

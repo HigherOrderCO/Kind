@@ -29,7 +29,7 @@ if (window.KEY.slice(0,2) === "0x") {
   window.KEY = window.KEY.slice(2);
   localStorage.setItem("KEY", window.KEY);
 }
-window.KindEvents = KindEventsClient({url: "ws://uwu.tech:7171", key: window.KEY});
+window.KindEvents = KindEventsClient({url: "ws://old.kindelia.org:7171", key: window.KEY});
 //window.KindEvents = KindEventsClient({url: "ws://localhost:7171", key: window.KEY});
 console.log("KEY: ", window.KEY);
 console.log("ADDRESS: ", EthSign.addressFromKey("0x"+window.KEY).slice(2));

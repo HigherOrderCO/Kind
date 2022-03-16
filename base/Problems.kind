@@ -1,11 +1,11 @@
 // How to use this file:
-// 1. Clone Kind's repo:     git clone https://github.com/uwu-tech/kind
+// 1. Clone Kind's repo:     git clone https://github.com/Kindelia/Kind
 // 2. Create a dir for you:  mkdir Kind/base/User/YourName
 // 3. Copy that file there:  cp Kind/base/Problems.kind Kind/base/User/YourName
 // 4. Open, uncomment a problem and solve it
 // 5. Send a PR if you want!
 // If you need help, read the tutorial on Kind/THEOREMS.md, or ask on Telegram.
-// Answers: https://github.com/uwu-tech/Kind/blob/master/base/User/MaiaVictor/Problems.kind
+// Answers: https://github.com/Kindelia/Kind/blob/master/base/User/MaiaVictor/Problems.kind
 
 // -----------------------------------------------------------------------------
 

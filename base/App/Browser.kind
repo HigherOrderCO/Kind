@@ -169,7 +169,7 @@ App.Browser.when: App.When<App.Browser.State>
     }
     input: switch String.eql(event.id) {
       "file": IO {
-        get code = IO.request("http://uwu.tech:7172/" | event.text)
+        get code = IO.request("http://old.kindelia.org:7172/" | event.text)
         App.unwatch!(App.Browser.State.Local.get_room_serial(local))
         let local = local@file <- event.text
         let local = local@code <- code

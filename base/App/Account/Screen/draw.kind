@@ -58,7 +58,7 @@ App.Account.Screen.draw.home.revoke_prefix: String
 
 App.Account.Screen.draw.welcome: DOM
   <div style=App.Account.Screen.draw.main_style>
-    <div style=App.Account.Screen.draw.text_style>"Welcome to UwU.Tech Accounts :3"</div>
+    <div style=App.Account.Screen.draw.text_style>"Welcome to old.kindelia.org Accounts :3"</div>
       <button id="register_button" style=App.Account.Screen.draw.box_style>
         "Register"
       </button>
