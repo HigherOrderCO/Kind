@@ -1,5 +1,5 @@
 Bool.read(code: String): Maybe(Bool)
   switch String.eql(code) {
-    "Bool.true": some(Bool.true)
-    "Bool.false": some(Bool.false)
+    "true": some(Bool.true)
+    "false": some(Bool.false)
   } default none
