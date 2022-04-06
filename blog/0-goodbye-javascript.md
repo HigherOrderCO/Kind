@@ -61,7 +61,7 @@ your Haskell programs. For example, the
 [`Example.fm`](https://github.com/moonad/Formality/blob/master/src/Example.fm)
 file has the following definition:
 
-```c
+```javascript
 Example.sum(n: Nat): Nat
   case n {
     zero: 0
@@ -146,7 +146,7 @@ Formality   | Haskell
 
 By tagged accessors, I mean that, for example, a program like:
 
-```c
+```javascript
 type FooBar {
   foo(a: String, b: String)
   bar(n: Nat, m: Nat)

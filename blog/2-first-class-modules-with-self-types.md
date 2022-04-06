@@ -5,7 +5,7 @@ Sometimes, heterogeneous data types are desirable, even in a strongly typed
 language. For example, first-class modules could be represented as maps from
 strings to functions. The problem is, the type of these functions may vary:
 
-```
+```javascript
 IntLib.add(a: Int, b: Int): Int
   a + b
 
@@ -33,24 +33,24 @@ values, even though we're in a statically typed language.
 In a dependently typed language, one way to have this is to implement a
 `Dynamic` type, which is a pair of `type, value`:
 
-```
+```agda
 data Dynamic : Set where
   new : (T : Set) -> (value : T) -> Dynamic
 ```
 
 This datatype is like a box that "hides" a value and its type internally, but is
-itself viewed as a single type, called `Dynamic`. This, in turn, allows us to 
+itself viewed as a single type, called `Dynamic`. This, in turn, allows us to
 create collections of types that vary. For example, we may store ints and
 strings in the same `List Dynamic`:
 
-```
+```agda
 elems : List Dynamic
 elems = [new Int 3, new String "foo"]
 ```
 
 We can also make functions to extract the type and the value of a `Dynamic`:
 
-```
+```agda
 typeOf : Dynamic -> Set
 typeOf (new T value) = T
 
@@ -60,7 +60,7 @@ valueOf (new T value) = value
 
 And we can use `valueOf` to recover a typed value from a "static dynamic":
 
-```
+```agda
 dyn : Dynamic
 dyn = new Int 7
 
@@ -78,7 +78,7 @@ since we're always able to cast module functions to their actual types.
 
 If we blindly translate the program above to Kind, this is what we get:
 
-```
+```javascript
 type Dynamic {
   new<T: Type>(value: T)
 }
@@ -120,7 +120,7 @@ $ kind Dynamic.new --show
 
 Then, we replace the `type Dynamic { ... }` syntax sugar by the terms above:
 
-```
+```javascript
 Dynamic: Type
   self<P: Dynamic -> Type>
   (new: <T: Type> (value: T) P(Dynamic.new(T, value)))
@@ -136,7 +136,7 @@ syntax desugar to it. Now, we hack it by making one small change: we replace
 `value : T` in the `new` constructor by `value : type_of(self)`. That's because
 `T` is the first field of `self`, so both are equivalent:
 
-```
+```javascript
 Dynamic: Type
   self<P: Dynamic -> Type>
   (new: <T: Type> (value: Dynamic.type_of(self)) P(Dynamic.new(Dynamic.type_of(self), value)))
@@ -149,7 +149,7 @@ Dynamic.new<T: Type>(value: T): Dynamic
 This should work in any language with self types. Since not every reader is
 familiar with Kind's syntax, here is the same code in an Agda-like syntax:
 
-```
+```javascript
 Dynamic : Set
 Dynamic =
   ∀ self (P : Dynamic -> Set) ->
@@ -163,7 +163,7 @@ new T value = \ P new -> new T value
 With this small change, we're now able to extract values of static dynamics just
 like in Agda. In other words, the following program type-checks just fine:
 
-```
+```javascript
 dyn: Dynamic
   Dynamic.new<Nat>(7)
 
@@ -177,6 +177,6 @@ With this, we're able to represent first-class modules in Kind. The `Dynamic`
 and `Module` modules are already on base. Kind users can already use first-class
 modules in their codes, and the first snippet in this post works as is!
 
-As a last thought, I wonder if, in a future, we should desugar the `type` 
+As a last thought, I wonder if, in a future, we should desugar the `type`
 syntax in a way that does this automatically. I see no reason not to, but
 it would increase the complexity of the desugarer considerably.
