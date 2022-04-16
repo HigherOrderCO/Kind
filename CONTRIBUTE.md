@@ -1,7 +1,7 @@
 # Contributing
 
 Want to contribute? Here are some things we need. If
-you want to work in any of these, [contact us](http://t.me/formality_lang) for
+you want to work in any of these, [contact us](http://t.me/kindelia) for
 instructions!
 
 ## Funding
