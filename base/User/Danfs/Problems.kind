@@ -255,116 +255,243 @@ Problems.p23(xs: List<Nat>): List<Nat>
 
 // Note: these problems use functions from the base libs, NOT the ones above
 
-//Problems.t0: true == true
-//  ?a
+Problems.t0: true == true
+    refl
 
-//Problems.t1(a: Bool): Bool.and(false, a) == false
-//  ?a
+Problems.t1(a: Bool): Bool.and(false, a) == false
+    refl
 
-//Problems.t2(a: Bool): Bool.and(a, false) == false
-//  ?a
+Problems.t2(a: Bool): Bool.and(a, false) == false
+    case a {
+        true:  refl
+        false: refl
+    }!
 
-//Problems.t3(a: Bool): Bool.or(true, a) == true
-//  ?a
+Problems.t3(a: Bool): Bool.or(true, a) == true
+    refl
 
-//Problems.t4(a: Bool): Bool.or(a, true) == true
-//  ?a
+Problems.t4(a: Bool): Bool.or(a, true) == true
+    case a {
+        true:  refl
+        false: refl
+    }!
 
-//Problems.t5(a: Bool): Bool.eql(a, a) == true
-//  ?a
+Problems.t5(a: Bool): Bool.eql(a, a) == true
+    case a {
+        true:  refl
+        false: refl
+    }!
 
-//Problems.t6(a: Bool): Bool.not(Bool.not(a)) == a
-//  ?a
+Problems.t6(a: Bool): Bool.not(Bool.not(a)) == a
+    case a {
+        true:  refl
+        false: refl
+    }!
 
-//Problems.t7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
-//  ?a
+Problems.t7(a: Bool, b: Bool): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+    case a b {
+        true true:   refl
+        true false:  refl
+        false true:  refl
+        false false: refl
+    }!
 
-//Problems.t8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
-//  ?a
+Problems.t8(a: Bool, b: Bool): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+    case a b {
+        true true:   refl
+        true false:  refl
+        false true:  refl
+        false false: refl
+    }!
 
-//Problems.t9(a: Pair<Nat,Nat>): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
-//  ?a
+Problems.t9(a: Pair<Nat,Nat>): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
+    case a {
+        new: refl
+    }!
 
-//Problems.t10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
-//  ?a
+Problems.t10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
+    case a {
+        new: refl
+    }!
 
-//Problems.t11(n: Nat): Nat.same(n) == n
-//  ?a
+Problems.t11(n: Nat): Nat.same(n) == n
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t11(n.pred)
+            let app = apply(Nat.succ, ind)
+            app
+    }!
 
-//Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
-//  ?a
+Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t12(n.pred)
+            let app = apply(Nat.succ, ind)
+            app
+    }!
 
-//Problems.t13(n: Nat): Nat.add(0,n) == n
-//  ?a
+Problems.t13(n: Nat): Nat.add(0,n) == n
+    refl
 
-//Problems.t14(n: Nat): Nat.add(n,0) == n
-//  ?a
+Problems.t14(n: Nat): Nat.add(n,0) == n
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t14(n.pred)
+            let app = apply(Nat.succ, ind)
+            app
+    }!
 
-//Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
-//  ?a
+Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t15(n.pred, m)
+            apply(Nat.succ, ind)
+    }!
   
-//Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
-//  ?a
+Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t16(n.pred, m)
+            apply(Nat.succ, ind)
+    }!
 
-//Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
-//  ?a
+Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+    case n {
+        zero: mirror(Problems.t14(m))
+        succ:
+            let ind = Problems.t17(n.pred, m)
+            let app = apply(Nat.succ, ind)
+            let teo = mirror(Problems.t16(m, n.pred))
+            let ch  = Equal.chain!!!!(app, teo)
+            ch
+    }!
 
-//Problems.t18(n: Nat): Nat.add(n,n) == Nat.double(n)
-//  ?a
+Problems.t18(n: Nat): Nat.add(n,n) == Nat.double(n)
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t18(n.pred)
+            let app = apply(Nat.succ, ind)
+            let teo = Problems.t16(n.pred, n.pred)
+            let ch  = Equal.chain!!!!(teo, app)
+            apply(Nat.succ, ch)
+    }!
 
-//Problems.t19(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
-//  ?a
+Problems.t19(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t19(n.pred)
+            ind
+    }!
 
-//Problems.t20(n: Nat): Nat.gtn(Nat.succ(n), n) == true
-//  ?a
+Problems.t20(n: Nat): Nat.gtn(Nat.succ(n), n) == true
+    case n {
+        zero: refl
+        succ:
+            let ind = Problems.t20(n.pred)
+            ind
+    }!
 
-//Problems.t21(n: Nat): Nat.sub(n,n) == 0
-//  ?a
+Problems.t21(n: Nat): Nat.sub(n,n) == 0
+    case n {
+        zero: refl
+        succ: Problems.t21(n.pred)
+    }!
 
-//Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
-//  ?a
+Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
+    apply(Nat.succ, e)
 
-//Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
-//  ?a
+Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+    case n m with e {
+        zero zero: refl
+        zero succ: Empty.absurd!(Bool.false_neq_true(e))
+        succ zero: Empty.absurd!(Bool.false_neq_true(e))
+        succ succ:
+            let ind = Problems.t23(n.pred, m.pred, e)
+            apply(Nat.succ, ind)
+    }!
 
-//Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
-//  ?a
+Problems.t24(xs: List<Nat>): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)), 0) == true
+    case xs {
+        nil:  refl
+        cons: refl
+    }!
 
-//Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
-//  ?a
+Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+    case xs {
+        nil:  refl
+        cons:
+            let ind = Problems.t25(xs.tail)
+            let app = apply(List.cons<Nat>(xs.head), ind)
+            app
+    }!
 
-//Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
-//  ?a
+Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
+    case xs {
+        nil:  refl
+        cons:
+            let ind = Problems.t26(xs.tail, ys)
+            apply(Nat.succ, ind)
+    }!
 
-//Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
-//  ?a
+// Provar isso aqui pra tamanhos específicos é só dar um refl,
+// mas pra tamanhos desconhecidos (uma lista qqr) é meio difícil :<
+Problems.t27_dummy2(x: Nat, y: Nat): List.reverse<Nat>(List.reverse<Nat>([x,y])) == [x,y]
+    refl
 
-//Problems.t28: true != false
-//  ?a
+Problems.t27_dummy3(x: Nat, y: Nat, z: Nat): List.reverse<Nat>(List.reverse<Nat>([x,y,z])) == [x,y,z]
+    refl
 
-//Problems.t29: 3 != 2
-//  ?a
+// Problems.t27(xs: List<Nat>): List.reverse<Nat>(List.reverse<Nat>(xs)) == xs
+//     case xs {
+//         nil:  refl
+//         cons:
+//             let ind = Problems.t27(xs.tail)
+//             ?c-38-70-18-
+//     }!
 
-//Problems.t30(a: Bool): Bool.or(true, a) != false
-//  ?a
+Problems.t28: true != false
+    (e) Bool.true_neq_false(e)
 
-//Problems.t31(a: Bool): Bool.or(a, true) != false
-//  ?a
+Problems.t29: 3 != 2
+    (e0)
+    let e1 = apply(Nat.pred, e0)
+    let e2 = apply(Nat.pred, e1)
+    let e3 = apply(Nat.is_zero, e2)
+    Bool.false_neq_true(e3)
 
-//Problems.t32(a: Bool): Bool.and(false, a) != true
-//  ?a
+Problems.t30(a: Bool): Bool.or(true, a) != false
+    (e) Bool.true_neq_false(e)
 
-//Problems.t33(a: Bool): Bool.and(a, false) != true
-//  ?a
+Problems.t31(a: Bool): Bool.or(a, true) != false
+    (e) case a with e {
+        true:  Bool.true_neq_false(e)
+        false: Bool.true_neq_false(e)
+    }!
 
-//Problems.t34(a: Nat, b: Nat, e: a == b): b == a
-//  ?a
+Problems.t32(a: Bool): Bool.and(false, a) != true
+    (e) Bool.false_neq_true(e)
 
-//Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
-//  ?a
+Problems.t33(a: Bool): Bool.and(a, false) != true
+    (e) case a with e {
+        true:  Bool.false_neq_true(e)
+        false: Bool.false_neq_true(e)
+    }!
 
-//Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
-//  ?a
+Problems.t34(a: Nat, b: Nat, e: a == b): b == a
+    mirror(e)
 
-User.Danfs.Problems:_
-    List.show!(Nat.show, Problems.p23([1,6,3,0,2,5]))
+Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+    Equal.chain!!!!(e0, e1)
+
+Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+    rewrite X in P(X) with Problems.t11(a)
+    p
+
+// User.Danfs.Problems:_
