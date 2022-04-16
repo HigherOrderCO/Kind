@@ -59,42 +59,42 @@ Problems.p6<A: Type, B: Type>(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
 // Doubles a number
 Problems.p7(n: Nat): Nat
     case n {
-        zero: Nat.zero
-        succ: Nat.succ(Nat.succ(Problems.p7(n.pred)))
+        zero: Nat.zero // 2*0 = 0
+        succ: Nat.succ(Nat.succ(Problems.p7(n.pred))) // 2*n = 2 + (n-1)*2
     }
 
 // Halves a number, rounding down
 Problems.p8(n: Nat): Nat
     case n {
-        zero: Nat.zero
+        zero: Nat.zero // 0/2 = 0
         succ: case n.pred {
-            zero: Nat.zero
-            succ: Nat.succ(Problems.p8(n.pred.pred))
+            zero: Nat.zero // 1/2 = 0
+            succ: Nat.succ(Problems.p8(n.pred.pred)) // n/2 = 1 + (n-2)/2
         }
     }
 
 // Adds two numbers
 Problems.p9(a: Nat, b: Nat): Nat
     case a {
-        zero: b
-        succ: Problems.p9(a.pred, Nat.succ(b))
+        zero: b // 0+b = b
+        succ: Problems.p9(a.pred, Nat.succ(b)) // a+b = (a-1)+(b+1)
     }
 
 // Subtracts two numbers
 Problems.p10(a: Nat, b: Nat): Nat
     case b {
-        zero: a
+        zero: a // 0-b = 0 (because Natural numbers)
         succ: case a {
-            zero: Nat.zero
-            succ: Problems.p10(a.pred, b.pred)
+            zero: Nat.zero // a-0 = a
+            succ: Problems.p10(a.pred, b.pred) // a-b = (a-1)-(b-1)
         }
     }
 
 // Multiplies two numbers
 Problems.p11(a: Nat, b: Nat): Nat
     case b {
-        zero: Nat.zero
-        succ: Problems.p9(a, Problems.p11(a, b.pred))
+        zero: Nat.zero // a*0 = 0
+        succ: Problems.p9(a, Problems.p11(a, b.pred)) // a*b = a + a*(b-1)
     }
 
 // Returns true if a < b
@@ -157,11 +157,11 @@ Problems.p19<A: Type>(xs: List<A>): List<A>
     }
 
 // Returns the same list, with the order reversed - WITH AN AUX FUNCTION
-// It is tail-recursive and probably more efficient than p19
-Problems.p19_aux<A: Type>(xs: List<A>, ys: List<A>): List<A>
+// It is tail recursive and probably more efficient than p19
+Problems.p19_aux<A: Type>(xs: List<A>, acc: List<A>): List<A>
     case xs {
-        nil:  ys
-        cons: Problems.p19_aux!(xs.tail, List.cons!(xs.head, ys))
+        nil:  acc
+        cons: Problems.p19_aux!(xs.tail, List.cons!(xs.head, acc))
     }
 
 Problems.p19_2<A: Type>(xs: List<A>): List<A>
@@ -171,13 +171,19 @@ Problems.p19_2<A: Type>(xs: List<A>): List<A>
 // Ex: Problems.p20!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
 Problems.p20<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
     case xs ys {
-        cons cons: List.cons<Pair<A,B>>(
+        cons cons: List.cons!(
             Pair.new!!(xs.head, ys.head),
             Problems.p20!!(xs.tail, ys.tail)
         )
     } default List.nil!
 
 // Returns the smallest element of a List
+Problems.min(a: Nat, b: Nat): Nat
+    case Problems.p12(a, b) {
+        true:  a
+        false: b
+    }
+
 Problems.p21(xs: List<Nat>): Nat
     case xs {
         nil:  Nat.zero
@@ -185,21 +191,12 @@ Problems.p21(xs: List<Nat>): Nat
             nil: xs.head
             cons:
                 let min_tail = Problems.p21(xs.tail)
-                case Problems.p12(xs.head, min_tail) {
-                    true:  xs.head
-                    false: min_tail
-                }
+                Problems.min(xs.head, min_tail)
         }
     }
 
 // Returns the smallest element of a List - WITH AN AUX FUNCTION
-// Tail recursive, might be better than p21
-Problems.min(a: Nat, b: Nat): Nat
-    case Problems.p12(a, b) {
-        true:  a
-        false: b
-    }
-
+// Tail recursive, probably better than p21
 Problems.p21_aux(xs: List<Nat>, n: Nat): Nat
     case xs {
         nil:  n
@@ -213,7 +210,6 @@ Problems.p21_2(xs: List<Nat>): Nat
         nil:  Nat.zero
         cons: Problems.p21_aux(xs.tail, xs.head)
     }
-
 
 // Returns the same list without the smallest element
 Problems.p22(xs: List<Nat>): List<Nat>
@@ -440,8 +436,8 @@ Problems.t26(xs: List<Nat>, ys: List<Nat>): Nat.add(List.length<Nat>(xs), List.l
             apply(Nat.succ, ind)
     }!
 
-// Provar isso aqui pra tamanhos específicos é só dar um refl,
-// mas pra tamanhos desconhecidos (uma lista qqr) é meio difícil :<
+// For any list with a predefined lenght, you can just refl,
+// but for a general list, it's much harder D:
 Problems.t27_dummy2(x: Nat, y: Nat): List.reverse<Nat>(List.reverse<Nat>([x,y])) == [x,y]
     refl
 
