@@ -311,4 +311,4 @@ In order to run this or any other app you should follow this steps:
 Future work
 -----------
 
-There are so many things we want to do and improve. Would like to contribute? Check [CONTRIBUTE.md](https://github.com/Kindelia/Kind/blob/master/CONTRIBUTE.md). Also reach us on [Telegram](https://t.me/formality_lang). We're friendly!
+There are so many things we want to do and improve. Would like to contribute? Check [CONTRIBUTE.md](https://github.com/Kindelia/Kind/blob/master/CONTRIBUTE.md). Also reach us on [Telegram](https://t.me/kindelia). We're friendly!
