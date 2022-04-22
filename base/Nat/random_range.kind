@@ -1,0 +1,2 @@
+Nat.random_range(min: Nat, max: Nat, seed: Nat): Nat
+  (Nat.random(seed) % max) + min
