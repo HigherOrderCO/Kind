@@ -43,6 +43,8 @@ type App.AirShooter.State.Local {
     mouse_over: String 
     mouse_pos: Pair<U32, U32>
     bullets: List<App.AirShooter.Parts.Bullet>
+    seed: Nat
+    max_enemies: Nat
   )
 }
 
@@ -58,6 +60,15 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
     defaultWeapon
   )
 
+App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
+  let x = Nat.to_f64(Nat.random_range(10, 256, seed))
+  let vel = Nat.to_f64(Nat.random_range(1, 3, seed))
+  let hue = Nat.to_u32(Nat.random_range(30, 255, seed))
+  let cooldown = Nat.to_u32(Nat.random_range(60, 100, seed))
+  let destination = {Nat.to_f64(Nat.random_range(10, 256, Nat.random(seed))), 256.0}
+
+  App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, 10.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown), destination)
+
 // Initial state
 App.AirShooter.init: App.Init<App.AirShooter.State>
   let sprite = App.AirShooter.Sprites.Player_Ship
@@ -65,16 +76,12 @@ App.AirShooter.init: App.Init<App.AirShooter.State>
 
   let ship = App.AirShooter.Ship.Constructor({128.0, 100.0}, 2.5, sprite, 0, true, 7)
 
-  let enemies = [
-    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({025.0, 108.0}, 0.5, enemy_sprite, 60, false, 20)),
-    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({230.0, 060.0}, 1, enemy_sprite, 120, false, 40)),
-    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({125.0, 012.0}, 0.7, enemy_sprite, 200, false, 60))
-  ]
+  let enemies = []
 
   let player = App.AirShooter.Player.new(ship)
   let mouse_over = ""
   let mouse_pos  = {0, 0}
-  let local = App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, [])
+  let local = App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, [], 0, 5)
   App.Store.new<App.AirShooter.State>(local, unit)
 
 App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxBox
@@ -110,6 +117,9 @@ App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
     } 
   </div>
 
+
+
+// move all objects in canvas
 App.AirShooter.when.move(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   let mouse_pos = local@mouse_pos
   let des = {U32.to_f64(mouse_pos@fst / 4), U32.to_f64(mouse_pos@snd / 4)}
@@ -117,14 +127,19 @@ App.AirShooter.when.move(local: App.AirShooter.State.Local): App.AirShooter.Stat
   let local = local@player@ship <- App.AirShooter.Ship.move(des, local@player@ship)
   local
 
+
+// make enemies shoot
 App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   let aux = {local@bullets, []}
-  
+
+  let local = local@enemies <- if List.length!(local@enemies) <=? local@max_enemies then 
+    List.append!(local@enemies, App.AirShooter.Enemy.Constructor(local@seed))
+  else local@enemies
+
   for enemy in local@enemies with aux:
     let pos = enemy@ship@position  
-    let des = {pos@fst, 0.0}
-    let enemy = enemy@ship@position <- if F64.gtn(pos@snd, 256) then {pos@fst, 12} else pos
-    let enemy = enemy@ship <- App.AirShooter.Ship.move(des, enemy@ship)
+
+    let enemy = enemy@ship <- App.AirShooter.Ship.move(enemy@destination, enemy@ship)
   
     let bullet = App.AirShooter.Ship.shoot(enemy@ship)
 
@@ -134,13 +149,13 @@ App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.St
         {List.append!(aux@fst, bullet.value), List.append!(aux@snd, enemy)}
     } default { aux@fst, List.append!(aux@snd, enemy) }
   
-  
-  
   let local = local@bullets <- aux@fst
   let local = local@enemies <- aux@snd
 
   local
 
+
+// player shoot
 App.AirShooter.when.shoot(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   let bullet = App.AirShooter.Ship.shoot(local@player@ship)
   case bullet {
@@ -151,14 +166,10 @@ App.AirShooter.when.shoot(local: App.AirShooter.State.Local): App.AirShooter.Sta
   } default local
 
 App.AirShooter.frame.bullet(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-  let bullets = List.map!!(App.AirShooter.Parts.Bullet.move, local@bullets)
-
-  let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.gtn(bullet@position@snd, 1.0), bullets)
-  let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.ltn(bullet@position@snd, 256.0), bullets)
-
-  let local = local@bullets <- bullets
-
-  local
+  local@bullets <-List.map!!(App.AirShooter.Parts.Bullet.move, local@bullets)
+  // let bullets = List.map!!(App.AirShooter.Parts.Bullet.move, local@bullets)
+  // let local = local@bullets <- bullets
+  // local
 
 
 
@@ -181,11 +192,31 @@ App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter
 
   local
 
+App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  let bullets = local@bullets
+  let enemies = local@enemies
+
+  let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.gtn(bullet@position@snd, 1.0), bullets)
+  let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.ltn(bullet@position@snd, 256.0), bullets)
+
+  let enemies = List.filter<App.AirShooter.Enemy>((enemy) F64.ltn(enemy@ship@position@snd, 256.0), enemies)
+
+  let local = local@bullets <- bullets
+  let local = local@enemies <- enemies  
+
+
+  let local = local@seed <- Nat.random(local@seed)
+  
+  local
+
 // Event handler
 App.AirShooter.when: App.When<App.AirShooter.State>
   (event, state)
   let local = state@local
   case event {
+    init:
+      let local = local@seed <- U64.to_nat(event.time)
+      App.set_local!(local)
     mouse_down: 
       let local = App.AirShooter.when.shoot(local)
       App.set_local!(local)
@@ -194,6 +225,10 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       let local = App.AirShooter.frame.enemy(local)
       let local = App.AirShooter.frame.bullet(local)
       let local = App.AirShooter.frame.cooldown(local)
+      let local = App.AirShooter.frame.garbage_collector(local)
+
+      let local = local@seed <- Nat.random(local@seed)
+
       App.set_local!(local)
     mouse_move:
       let local = 
