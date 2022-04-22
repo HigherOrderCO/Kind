@@ -1,0 +1,5 @@
+App.AirShooter.Ship.draw(ship: App.AirShooter.Ship, img: VoxBox): VoxBox
+  let pos = ship@position
+  let pos = {F64.to_u32(pos@fst), F64.to_u32(pos@snd)}
+  let pos = {pos@fst - 128, pos@snd - 128}
+  VoxBox.Draw.image(pos@fst, pos@snd, 2, ship@skin, img)

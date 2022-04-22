@@ -1,0 +1,5 @@
+type App.AirShooter.Enemy {
+  new(
+    ship: App.AirShooter.Ship
+  )
+}

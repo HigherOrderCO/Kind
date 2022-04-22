@@ -38,61 +38,45 @@ App.AirShooter.State: App.State
 
 type App.AirShooter.State.Local {
   new(
-    player: App.AirShooter.Position
-    enemies: App.AirShooter.Enemies
+    player: App.AirShooter.Player
+    enemies: List<App.AirShooter.Enemy>
     mouse_over: String 
     mouse_pos: Pair<U32, U32>
   )
 }
 
-App.AirShooter.Position: Type
-  Pair<F64, F64>
-
-App.AirShooter.Enemies: Type
-  List<Pair<App.AirShooter.Enemy, App.AirShooter.Position>> 
-
-type App.AirShooter.Enemy {
-  square
-  ball
-}
+App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: VoxBox): App.AirShooter.Ship
+  App.AirShooter.Ship.new(
+    pos,
+    App.AirShooter.Parts.Engine.new(vel),
+    sprite
+  )
 
 // Initial state
 App.AirShooter.init: App.Init<App.AirShooter.State>
-  let player = {128.0, 100.0}
-  let enemies = 
-    [
-      {App.AirShooter.Enemy.square, {025.0, 108.0}}
-      {App.AirShooter.Enemy.square, {230.0, 060.0}}
-      {App.AirShooter.Enemy.ball,   {125.0, 012.0}}
-    ]
+  let sprite = App.AirShooter.Sprites.Player_Ship
+
+  let ship = App.AirShooter.Ship.Constructor({128.0, 100.0}, 2.5, sprite)
+
+  let enemies = [
+    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({025.0, 108.0}, 0.5, sprite)),
+    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({230.0, 060.0}, 0.5, sprite)),
+    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({125.0, 012.0}, 0.5, sprite))
+  ]
+
+  let player = App.AirShooter.Player.new(ship)
   let mouse_over = ""
   let mouse_pos  = {0, 0}
   let local = App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos)
   App.Store.new<App.AirShooter.State>(local, unit)
 
 App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxBox
-  let img = App.AirShooter.draw.player(local@player, img)
+  let img = App.AirShooter.Ship.draw(local@player@ship, img)
+
   for enemy in local@enemies with img:
-    App.AirShooter.draw.enemy(enemy, img)
+    App.AirShooter.Ship.draw(enemy@ship, img)
+
   img
-  
-
-App.AirShooter.draw.enemy(enemy: Pair<App.AirShooter.Enemy, App.AirShooter.Position>, img: VoxBox): VoxBox
-  let col = Col32.new(255, 60, 60, 255)
-  let size = {24#32, 24#32}
-  let pos = enemy@snd
-  let pos = {F64.to_u32(pos@fst), F64.to_u32(pos@snd)}
-  case enemy@fst {
-    square: VoxBox.Draw.rect(pos@fst - size@fst/2, pos@snd - size@fst/2, 1, size@fst, size@snd, col, img)
-    ball: VoxBox.Draw.circle(U32.to_i32(pos@fst), U32.to_i32(pos@snd), U32.to_i32(size@fst/2), 1, col, img)
-  }
-
-App.AirShooter.draw.player(pos: App.AirShooter.Position, img: VoxBox): VoxBox
-  let col = Col32.new(80, 200, 60, 255)
-  let size = {32#32, 32#32}
-  let pos = {F64.to_u32(pos@fst), F64.to_u32(pos@snd)}
-  let pos = {pos@fst - 128, pos@snd - 128}
-  VoxBox.Draw.image(pos@fst, pos@snd, 2, App.AirShooter.Player_Ship, img)
   
 
 // Render function
@@ -103,6 +87,7 @@ App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
     "display": "flex"
     "justify-content": "center"
     "align-items": "center"
+    "background-color": "#000000"
     }>
     {
       DOM.vbox(
@@ -115,28 +100,35 @@ App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
     } 
   </div>
 
-App.AirShooter.when.move(mouse_pos: Pair<U32, U32>, local: App.AirShooter.State.Local): App.AirShooter.State.Local
-// Se o movimento for muito curto, não executar movimento nenhum, para ela não ficar tremendo
-  let mov = 2.5
+App.AirShooter.when.move(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  let mouse_pos = local@mouse_pos
   let des = {U32.to_f64(mouse_pos@fst / 4), U32.to_f64(mouse_pos@snd / 4)}
-  let pos = local@player
-  let x   = des@fst - pos@fst
-  let y   = des@snd - pos@snd 
-  let movement = F64.pos_vector(mov, x, y)
-  let new_pos = {pos@fst + movement@fst, pos@snd + movement@snd} 
-  log("x: " | F64.show(x) | " y: " | F64.show(y) | " mov_x: " | F64.show(movement@fst) | " mov_y: " | F64.show(movement@snd))
-  let local = local@player <- new_pos
+  //TODO: Se o movimento for muito curto, não executar movimento nenhum, para ela não ficar tremendo
+  let local = local@player@ship <- App.AirShooter.Ship.move(des, local@player@ship)
   local
 
+App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  let enemies = []
+
+  for enemy in local@enemies with enemies:
+    let des = {enemy@ship@position@fst, 0.0}
+    let enemy = enemy@ship <- App.AirShooter.Ship.move(des, enemy@ship)
+    List.append!(enemies, enemy)
+
+  let local = local@enemies <- enemies
+  local
 
 // Event handler
 App.AirShooter.when: App.When<App.AirShooter.State>
   (event, state)
   let local = state@local
   case event {
-    mouse_down: App.pass!
+    mouse_down: 
+      log("pew!")
+      App.pass!
     frame:
-      let local = App.AirShooter.when.move(local@mouse_pos, local)
+      let local = App.AirShooter.when.move(local)
+      let local = App.AirShooter.frame.enemy(local)
       App.set_local!(local)
     mouse_move:
       let local = 
@@ -146,11 +138,8 @@ App.AirShooter.when: App.When<App.AirShooter.State>
           local
       App.set_local!(local)
     mouse_over:
-      log("x: " | U32.show(local@mouse_pos@fst) | " y: " | U32.show(local@mouse_pos@snd))
-      // log(event.id)
       let local = local@mouse_over <- event.id
       App.set_local!(local)
-    // mouse_move:
 
   } default App.pass!
 

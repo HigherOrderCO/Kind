@@ -1,0 +1,9 @@
+App.AirShooter.Ship.move(destination: App.AirShooter.Position, ship: App.AirShooter.Ship): App.AirShooter.Ship
+  let mov = ship@engine@velocity
+  let pos = ship@position
+  let x   = destination@fst - pos@fst
+  let y   = destination@snd - pos@snd 
+  let movement = F64.pos_vector(mov, x, y)
+  let new_pos = {pos@fst + movement@fst, pos@snd + movement@snd} 
+  let ship = ship@position <- new_pos
+  ship

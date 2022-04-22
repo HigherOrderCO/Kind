@@ -1,0 +1,7 @@
+type App.AirShooter.Ship {
+  new(
+    position: App.AirShooter.Position
+    engine: App.AirShooter.Parts.Engine
+    skin: VoxBox
+  )
+}

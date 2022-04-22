@@ -1,0 +1,5 @@
+type App.AirShooter.Player {
+  new(
+    ship: App.AirShooter.Ship
+  )
+}
