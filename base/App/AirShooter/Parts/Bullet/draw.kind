@@ -2,4 +2,4 @@ App.AirShooter.Parts.Bullet.draw(bullet: App.AirShooter.Parts.Bullet, img: VoxBo
   let pos = bullet@position
   let pos = {F64.to_u32(pos@fst), F64.to_u32(pos@snd)}
   let pos = {pos@fst - 128, pos@snd - 128}
-  VoxBox.Draw.image_colorize(pos@fst, pos@snd, 2, Col32.new_hue(30), bullet@sprite, img) // TODO: ADD HUE TO BULLET
+  VoxBox.Draw.image_colorize(pos@fst, pos@snd, 1, Col32.new_hue(30), bullet@sprite, img) // TODO: ADD HUE TO BULLET

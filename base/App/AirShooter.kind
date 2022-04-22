@@ -52,7 +52,7 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
     App.AirShooter.Parts.Engine.new(vel),
     sprite,
     hue,
-    App.AirShooter.Parts.Weapon.new(App.AirShooter.Parts.Bullet.new(App.AirShooter.Sprites.Player_Ship, isPlayer, {0, 0}, 10.0), 5) // TODO: Bullet Sprite
+    App.AirShooter.Parts.Weapon.new(App.AirShooter.Parts.Bullet.new(App.AirShooter.Sprites.Bullet, isPlayer, {0, 0}, 10.0), 5)
   )
 
 // Initial state
@@ -153,6 +153,7 @@ App.AirShooter.when: App.When<App.AirShooter.State>
   let local = state@local
   case event {
     mouse_down: 
+      log("pew!")
       let local = App.AirShooter.when.shoot(local)
       App.set_local!(local)
     frame:
