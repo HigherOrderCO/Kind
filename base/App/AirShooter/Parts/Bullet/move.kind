@@ -1,8 +1,9 @@
 App.AirShooter.Parts.Bullet.move(bullet: App.AirShooter.Parts.Bullet): App.AirShooter.Parts.Bullet
   let mov = bullet@velocity
   let pos = bullet@position
-  let y  = pos@fst // TODO: fix something wrong here!
-  let x   = if bullet@isPlayer then 0 else 256
+  let destination = {pos@fst, if Bool.eql(bullet@isPlayer, true) then 256.0 else 0.0}
+  let x = destination@fst - pos@fst
+  let y = destination@snd - pos@snd 
   let movement = F64.pos_vector(mov, x, y)
   let new_pos = {pos@fst + movement@fst, pos@snd + movement@snd} 
   let bullet = bullet@position <- new_pos

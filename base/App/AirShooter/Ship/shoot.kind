@@ -1,5 +1,10 @@
 App.AirShooter.Ship.shoot(ship: App.AirShooter.Ship): Maybe<App.AirShooter.Parts.Bullet>
-  // TODO: check cooldown
-  let bullet = ship@weapon@bullet
-  let bullet = bullet@position <- ship@position
-  some(bullet)
+  let weapon = ship@weapon
+
+  case U32.ltn(weapon@last_fired, weapon@cooldown) {
+    true: none
+    false: 
+      let bullet = ship@weapon@bullet
+      let bullet = bullet@position <- ship@position
+      some(bullet)
+  }

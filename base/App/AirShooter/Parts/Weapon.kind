@@ -2,5 +2,6 @@ type App.AirShooter.Parts.Weapon {
   new(
     bullet: App.AirShooter.Parts.Bullet
     cooldown: U32
+    last_fired: U32
   )
 }
