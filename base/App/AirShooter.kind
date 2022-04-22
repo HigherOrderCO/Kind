@@ -68,7 +68,7 @@ App.AirShooter.init: App.Init<App.AirShooter.State>
   let enemies = [
     App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({025.0, 108.0}, 0.5, enemy_sprite, 60, false, 20)),
     App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({230.0, 060.0}, 1, enemy_sprite, 120, false, 40)),
-    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({125.0, 012.0}, 1.5, enemy_sprite, 200, false, 100))
+    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({125.0, 012.0}, 0.7, enemy_sprite, 200, false, 60))
   ]
 
   let player = App.AirShooter.Player.new(ship)
@@ -187,7 +187,6 @@ App.AirShooter.when: App.When<App.AirShooter.State>
   let local = state@local
   case event {
     mouse_down: 
-      log("pew!")
       let local = App.AirShooter.when.shoot(local)
       App.set_local!(local)
     frame:
