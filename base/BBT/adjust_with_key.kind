@@ -22,6 +22,6 @@ BBT.adjust_with_key<K: Type, V: Type>(
     // k > map.key, we check in the right subtree 
      gtn:  
       let new_right = BBT.adjust_with_key<K,V>(cmp, f, k, map.right)
-      BBT.node<K,V>(map.key, map.val, map.left, map.right)
+      BBT.node<K,V>(map.key, map.val, map.left, new_right)
     }
   }
