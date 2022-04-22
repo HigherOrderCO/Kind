@@ -55,13 +55,14 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
 // Initial state
 App.AirShooter.init: App.Init<App.AirShooter.State>
   let sprite = App.AirShooter.Sprites.Player_Ship
+  let enemy_sprite = App.AirShooter.Sprites.Enemy_Ship
 
   let ship = App.AirShooter.Ship.Constructor({128.0, 100.0}, 2.5, sprite)
 
   let enemies = [
-    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({025.0, 108.0}, 0.5, sprite)),
-    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({230.0, 060.0}, 0.5, sprite)),
-    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({125.0, 012.0}, 0.5, sprite))
+    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({025.0, 108.0}, 0.5, enemy_sprite)),
+    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({230.0, 060.0}, 0.5, enemy_sprite)),
+    App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({125.0, 012.0}, 0.5, enemy_sprite))
   ]
 
   let player = App.AirShooter.Player.new(ship)
