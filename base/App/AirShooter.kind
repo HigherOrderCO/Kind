@@ -111,7 +111,12 @@ App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.St
   let enemies = []
 
   for enemy in local@enemies with enemies:
-    let des = {enemy@ship@position@fst, 0.0}
+    let pos = enemy@ship@position
+    
+    let des = {pos@fst, 0.0}
+
+    let enemy = enemy@ship@position <- if F64.gtn(pos@snd, 256) then {pos@fst, 12} else pos
+
     let enemy = enemy@ship <- App.AirShooter.Ship.move(des, enemy@ship)
     List.append!(enemies, enemy)
 
