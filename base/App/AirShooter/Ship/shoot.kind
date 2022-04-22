@@ -1,0 +1,5 @@
+App.AirShooter.Ship.shoot(ship: App.AirShooter.Ship): Maybe<App.AirShooter.Parts.Bullet>
+  // TODO: check cooldown
+  let bullet = ship@weapon@bullet
+  let bullet = bullet@position <- ship@position
+  some(bullet)

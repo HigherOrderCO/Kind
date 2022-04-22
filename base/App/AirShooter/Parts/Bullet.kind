@@ -1,0 +1,8 @@
+type App.AirShooter.Parts.Bullet {
+  new(
+    sprite: VoxBox
+    isPlayer: Bool
+    position: App.AirShooter.Position
+    velocity: F64
+  )
+}

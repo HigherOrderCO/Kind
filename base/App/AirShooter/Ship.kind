@@ -4,5 +4,6 @@ type App.AirShooter.Ship {
     engine: App.AirShooter.Parts.Engine
     skin: VoxBox
     hue: U32
+    weapon: App.AirShooter.Parts.Weapon
   )
 }
