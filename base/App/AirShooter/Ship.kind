@@ -3,5 +3,6 @@ type App.AirShooter.Ship {
     position: App.AirShooter.Position
     engine: App.AirShooter.Parts.Engine
     skin: VoxBox
+    hue: U32
   )
 }
