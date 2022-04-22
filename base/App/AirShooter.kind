@@ -1,0 +1,175 @@
+//  Criar inteligência artificial para o inimigo
+//  A cada frame mover x distancias para baixo
+//  App.AirShooter.when.enemy.move(enemy: App.AirShooter.Enemy, pos: App.AirShooter.Position): App.AirShooter.Position
+//  new position
+//
+//  App.AirShooter.when.enemies.move(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+//    aplicar App.AirShooter.when.enemy.move a todos inimigos e atualizar sua posição na lista
+//    let new_enemies = []
+//      for enemy in enemies with new_enemies:
+//        ?s
+//
+//  Criar o tipo projétil com projetil seu e do adversário (projétil do adversário guardando direção do tiro)
+//  Criar inteligencia artificial para o projetil 
+//
+//  Converter cada unidade em uma hitbox: Tipo Shape
+//  Adicionar no when um for para conferir se algum projétil está atingindo alguém (apenas conferir se acerta do time adversário do dono do projetil)
+//    Checar colisões com a função Shape.collision
+//  
+//  Adicionar no tipo player informação de Cooldown no tiro
+//  Adicionar no tipo local informação de se está atirando (shooting: Bool)
+//  Adicionar no when para mudar local@shooting no mouse_down 
+//  Adicionar no when para mudar local@shooting no mouse_up 
+//  Adicionar no when para rodar App.AirShooter.when.player.shoot no frame
+//  App.AirShooter.when.player.shoot(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+//    Conferir se o Cooldown do tiro está em 0, se sim, atirar
+//    Se não, reduzir o cooldown em 1
+//
+
+//  npm i -g kind-lang-voxbox-maker
+//  klvm Name.Space.Here [Z_index] [Z_scale]
+
+
+
+
+// App states (local = clicks, global = visitors)
+App.AirShooter.State: App.State
+  App.State.new((App.AirShooter.State.Local), Unit)
+
+type App.AirShooter.State.Local {
+  new(
+    player: App.AirShooter.Position
+    enemies: App.AirShooter.Enemies
+    mouse_over: String 
+    mouse_pos: Pair<U32, U32>
+  )
+}
+
+App.AirShooter.Position: Type
+  Pair<F64, F64>
+
+App.AirShooter.Enemies: Type
+  List<Pair<App.AirShooter.Enemy, App.AirShooter.Position>> 
+
+type App.AirShooter.Enemy {
+  square
+  ball
+}
+
+// Initial state
+App.AirShooter.init: App.Init<App.AirShooter.State>
+  let player = {128.0, 100.0}
+  let enemies = 
+    [
+      {App.AirShooter.Enemy.square, {025.0, 108.0}}
+      {App.AirShooter.Enemy.square, {230.0, 060.0}}
+      {App.AirShooter.Enemy.ball,   {125.0, 012.0}}
+    ]
+  let mouse_over = ""
+  let mouse_pos  = {0, 0}
+  let local = App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos)
+  App.Store.new<App.AirShooter.State>(local, unit)
+
+App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxBox
+  let img = App.AirShooter.draw.player(local@player, img)
+  for enemy in local@enemies with img:
+    App.AirShooter.draw.enemy(enemy, img)
+  img
+  
+
+App.AirShooter.draw.enemy(enemy: Pair<App.AirShooter.Enemy, App.AirShooter.Position>, img: VoxBox): VoxBox
+  let col = Col32.new(255, 60, 60, 255)
+  let size = {24#32, 24#32}
+  let pos = enemy@snd
+  let pos = {F64.to_u32(pos@fst), F64.to_u32(pos@snd)}
+  case enemy@fst {
+    square: VoxBox.Draw.rect(pos@fst - size@fst/2, pos@snd - size@fst/2, 1, size@fst, size@snd, col, img)
+    ball: VoxBox.Draw.circle(U32.to_i32(pos@fst), U32.to_i32(pos@snd), U32.to_i32(size@fst/2), 1, col, img)
+  }
+
+App.AirShooter.draw.player(pos: App.AirShooter.Position, img: VoxBox): VoxBox
+  let col = Col32.new(80, 200, 60, 255)
+  let size = {32#32, 32#32}
+  let pos = {F64.to_u32(pos@fst), F64.to_u32(pos@snd)}
+  let pos = {pos@fst - 128, pos@snd - 128}
+  VoxBox.Draw.image(pos@fst, pos@snd, 2, App.AirShooter.Player_Ship, img)
+  
+
+// Render function
+App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
+  (state)
+  let img = App.AirShooter.draw.canvas(state@local, img)
+  <div style={
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+    }>
+    {
+      DOM.vbox(
+        {
+          "id": "game_screen",
+          "width": "256",
+          "height": "256",
+          "scale": "4"
+        }, {}, img)
+    } 
+  </div>
+
+App.AirShooter.when.move(mouse_pos: Pair<U32, U32>, local: App.AirShooter.State.Local): App.AirShooter.State.Local
+// Se o movimento for muito curto, não executar movimento nenhum, para ela não ficar tremendo
+  let mov = 2.5
+  let des = {U32.to_f64(mouse_pos@fst / 4), U32.to_f64(mouse_pos@snd / 4)}
+  let pos = local@player
+  let x   = des@fst - pos@fst
+  let y   = des@snd - pos@snd 
+  let movement = F64.pos_vector(mov, x, y)
+  let new_pos = {pos@fst + movement@fst, pos@snd + movement@snd} 
+  log("x: " | F64.show(x) | " y: " | F64.show(y) | " mov_x: " | F64.show(movement@fst) | " mov_y: " | F64.show(movement@snd))
+  let local = local@player <- new_pos
+  local
+
+
+// Event handler
+App.AirShooter.when: App.When<App.AirShooter.State>
+  (event, state)
+  let local = state@local
+  case event {
+    mouse_down: App.pass!
+    frame:
+      let local = App.AirShooter.when.move(local@mouse_pos, local)
+      App.set_local!(local)
+    mouse_move:
+      let local = 
+        if local@mouse_over =? "game_screen" then 
+          local@mouse_pos <- event.mouse_pos
+        else
+          local
+      App.set_local!(local)
+    mouse_over:
+      log("x: " | U32.show(local@mouse_pos@fst) | " y: " | U32.show(local@mouse_pos@snd))
+      // log(event.id)
+      let local = local@mouse_over <- event.id
+      App.set_local!(local)
+    // mouse_move:
+
+  } default App.pass!
+
+// Global ticker: not used
+App.AirShooter.tick: App.Tick<App.AirShooter.State>
+  App.no_tick<App.AirShooter.State>
+
+// Global visitor: counts posts to room_zero
+App.AirShooter.post: App.Post<App.AirShooter.State>
+  (time, room, addr, data, global_state)
+  global_state
+
+// A "AS, world!" + counter application
+App.AirShooter: App<App.AirShooter.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  App.new<App.AirShooter.State>(
+    App.AirShooter.init
+    App.AirShooter.draw(img)
+    App.AirShooter.when
+    App.AirShooter.tick
+    App.AirShooter.post
+  )
