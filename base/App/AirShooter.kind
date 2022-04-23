@@ -39,7 +39,7 @@ App.AirShooter.State: App.State
 type App.AirShooter.State.Local {
   new(
     player: App.AirShooter.Player
-    enemies: List<App.AirShooter.Enemy>
+    enemies: Map<App.AirShooter.Enemy>
     mouse_over: String
     mouse_pos: Pair<U32, U32>
     bullets: List<App.AirShooter.Parts.Bullet>
@@ -58,7 +58,7 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
     sprite,
     hue,
     defaultWeapon
-    Shape.Rectangle.new(pos@fst, pos@fst + 64.0, pos@snd, pos@snd + 64.0) // TODO: check?
+    Shape.Circle.new(V2.new(pos@fst, pos@snd), 5.0)
   )
 
 App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
@@ -77,7 +77,7 @@ App.AirShooter.init: App.Init<App.AirShooter.State>
 
   let ship = App.AirShooter.Ship.Constructor({128.0, 100.0}, 2.5, sprite, 0, true, 7)
 
-  let enemies = []
+  let enemies = Map.new<App.AirShooter.Enemy>
 
   let player = App.AirShooter.Player.new(ship)
   let mouse_over = ""
@@ -88,7 +88,7 @@ App.AirShooter.init: App.Init<App.AirShooter.State>
 App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxBox
   let img = App.AirShooter.Ship.draw(local@player@ship, img)
 
-  for enemy in local@enemies with img:
+  for key:enemy in local@enemies with img:
     App.AirShooter.Ship.draw(enemy@ship, img)
 
   for bullet in local@bullets with img:
@@ -131,27 +131,32 @@ App.AirShooter.when.move(local: App.AirShooter.State.Local): App.AirShooter.Stat
 
 // make enemies shoot
 App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-  let aux = {local@bullets, []}
+  // spawn new enemies
+  let local = local@enemies <- if List.length!(Map.to_list!(local@enemies)) <=? local@max_enemies then
+    let key = Nat.show(Nat.random(local@seed))
 
-  let local = local@enemies <- if List.length!(local@enemies) <=? local@max_enemies then
-    List.append!(local@enemies, App.AirShooter.Enemy.Constructor(local@seed))
+    if Map.has!(key, local@enemies) then local@enemies else Map.set!(key, App.AirShooter.Enemy.Constructor(local@seed), local@enemies)
   else local@enemies
 
-  for enemy in local@enemies with aux:
-    let pos = enemy@ship@position
+  // enemies move and shoot
+  for key:enemy in local@enemies with local:
+    
 
+    // move enemy
     let enemy = enemy@ship <- App.AirShooter.Ship.move(enemy@destination, enemy@ship)
 
-    let bullet = App.AirShooter.Ship.shoot(enemy@ship)
+    let local = local@enemies <- Map.set!(key, enemy, local@enemies)
 
+    // enemy shoot
+    let bullet = App.AirShooter.Ship.shoot(enemy@ship)
     case bullet {
       some:
         let enemy = enemy@ship@weapon@last_fired <- 0
-        {List.append!(aux@fst, bullet.value), List.append!(aux@snd, enemy)}
-    } default { aux@fst, List.append!(aux@snd, enemy) }
-
-  let local = local@bullets <- aux@fst
-  let local = local@enemies <- aux@snd
+        // let local = local@enemies <- local@enemies{key} <- enemy
+        let local = local@enemies <- Map.set!(key, enemy, local@enemies)
+        let local = local@bullets <- List.append!(local@bullets, bullet.value)
+        local
+    } default local
 
   local
 
@@ -167,40 +172,13 @@ App.AirShooter.when.shoot(local: App.AirShooter.State.Local): App.AirShooter.Sta
   } default local
 
 
+  // move bullets
 App.AirShooter.frame.bullet(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   let local = local@bullets <-List.map!!(App.AirShooter.Parts.Bullet.move, local@bullets)
-
-  let aux = { local@bullets, local@enemies }
-
-  // TODO: remover bullet!
-  for bullet in local@bullets with aux:
-    case bullet@isPlayer {
-      true:
-        let aux2 = Pair.new<List<App.AirShooter.Parts.Bullet>, List<App.AirShooter.Enemy>>([], [])
-
-        for enemy in local@enemies with aux2:
-          // se colidiu nao inserir na lista
-          case Shape.Circle.collision.rectangle(bullet@hitbox, enemy@ship@hitbox) {
-            false: { List.append!(aux2@fst, bullet), List.append!(aux2@snd, enemy) }
-          } default aux2
-
-        aux2
-
-      false: // checa se colidiu com player
-        case Shape.Circle.collision.rectangle(bullet@hitbox, local@player@ship@hitbox) {
-          true:
-            log("morreu!")
-            aux
-        } default aux
-    }
-
-  let local = local@bullets <- aux@fst
-  let local = local@enemies <- aux@snd
-
   local
 
 
-
+// tick weapons cooldown
 App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   let aux = (ship: App.AirShooter.Ship)
     let weapon = ship@weapon
@@ -214,7 +192,8 @@ App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter
     let enemy = enemy@ship <- aux(enemy@ship)
     enemy
 
-  let local = local@enemies <- List.map!!(f, local@enemies)
+  for key:enemy in local@enemies with local:
+    local@enemies <- Map.set!(key, f(enemy), local@enemies)
 
   let local = local@player@ship <- aux(local@player@ship)
 
@@ -227,11 +206,11 @@ App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.A
   let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.gtn(bullet@position@snd, 1.0), bullets)
   let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.ltn(bullet@position@snd, 256.0), bullets)
 
-  let enemies = List.filter<App.AirShooter.Enemy>((enemy) F64.ltn(enemy@ship@position@snd, 256.0), enemies)
+  for key:enemy in enemies with local:
+    if F64.ltn(enemy@ship@position@snd, 256.0) then local else local@enemies <- Map.delete!(key, local@enemies)
+
 
   let local = local@bullets <- bullets
-  let local = local@enemies <- enemies
-
 
   let local = local@seed <- Nat.random(local@seed)
 
