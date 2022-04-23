@@ -4,5 +4,6 @@ type App.AirShooter.Parts.Bullet {
     isPlayer: Bool
     position: App.AirShooter.Position
     velocity: F64
+    hitbox: Shape.Circle
   )
 }

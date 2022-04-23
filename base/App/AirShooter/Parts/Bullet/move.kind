@@ -7,4 +7,5 @@ App.AirShooter.Parts.Bullet.move(bullet: App.AirShooter.Parts.Bullet): App.AirSh
   let movement = F64.pos_vector(mov, x, y)
   let new_pos = {pos@fst + movement@fst, pos@snd + movement@snd} 
   let bullet = bullet@position <- new_pos
+  let bullet = bullet@hitbox <- Shape.Circle.new(V2.new(new_pos@fst, new_pos@snd), 10.0) // TODO: FIX Shape
   bullet
