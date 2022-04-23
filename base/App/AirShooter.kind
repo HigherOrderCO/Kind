@@ -42,7 +42,7 @@ type App.AirShooter.State.Local {
     enemies: Map<App.AirShooter.Enemy>
     mouse_over: String
     mouse_pos: Pair<U32, U32>
-    bullets: List<App.AirShooter.Parts.Bullet>
+    bullets: Map<App.AirShooter.Parts.Bullet>
     seed: Nat
     max_enemies: Nat
   )
@@ -78,11 +78,12 @@ App.AirShooter.init: App.Init<App.AirShooter.State>
   let ship = App.AirShooter.Ship.Constructor({128.0, 100.0}, 2.5, sprite, 0, true, 7)
 
   let enemies = Map.new<App.AirShooter.Enemy>
+  let bullets = Map.new<App.AirShooter.Parts.Bullet>
 
   let player = App.AirShooter.Player.new(ship)
   let mouse_over = ""
   let mouse_pos  = {0, 0}
-  let local = App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, [], 0, 5)
+  let local = App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, 5)
   App.Store.new<App.AirShooter.State>(local, unit)
 
 App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxBox
@@ -91,7 +92,7 @@ App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxB
   for key:enemy in local@enemies with img:
     App.AirShooter.Ship.draw(enemy@ship, img)
 
-  for bullet in local@bullets with img:
+  for key:bullet in local@bullets with img:
     App.AirShooter.Parts.Bullet.draw(bullet, img)
 
   img
@@ -151,11 +152,16 @@ App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.St
     let bullet = App.AirShooter.Ship.shoot(enemy@ship)
     case bullet {
       some:
-        let enemy = enemy@ship@weapon@last_fired <- 0
-        // let local = local@enemies <- local@enemies{key} <- enemy
-        let local = local@enemies <- Map.set!(key, enemy, local@enemies)
-        let local = local@bullets <- List.append!(local@bullets, bullet.value)
-        local
+        let bulletKey = Nat.show(Nat.random(local@seed))
+
+        if Map.has!(bulletKey, local@bullets) then local else
+          let enemy = enemy@ship@weapon@last_fired <- 0
+          // let local = local@enemies <- local@enemies{key} <- enemy
+          let local = local@enemies <- Map.set!(key, enemy, local@enemies)
+
+
+          let local = local@bullets <- Map.set!(bulletKey, bullet.value, local@bullets)
+          local
     } default local
 
   local
@@ -166,15 +172,19 @@ App.AirShooter.when.shoot(local: App.AirShooter.State.Local): App.AirShooter.Sta
   let bullet = App.AirShooter.Ship.shoot(local@player@ship)
   case bullet {
     some:
-      let local = local@bullets <- List.append!(local@bullets, bullet.value)
-      let local = local@player@ship@weapon@last_fired <- 0
-      local
+      let bulletKey = Nat.show(Nat.random(local@seed))
+      if Map.has!(bulletKey, local@bullets) then local else
+        let local = local@bullets <- Map.set!(bulletKey, bullet.value, local@bullets)
+        let local = local@player@ship@weapon@last_fired <- 0
+        local
   } default local
 
 
   // move bullets
 App.AirShooter.frame.bullet(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-  let local = local@bullets <-List.map!!(App.AirShooter.Parts.Bullet.move, local@bullets)
+  for key:bullet in local@bullets with local:
+    local@bullets <- Map.mut!(key, App.AirShooter.Parts.Bullet.move, local@bullets)
+
   local
 
 
@@ -200,17 +210,13 @@ App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter
   local
 
 App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-  let bullets = local@bullets
-  let enemies = local@enemies
+  for key:bullet in local@bullets with local:
+    if Bool.or(F64.gtn(bullet@position@snd, 1.0), F64.ltn(bullet@position@snd, 256.0)) then local else local@bullets <- Map.delete!(key, local@bullets)
 
-  let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.gtn(bullet@position@snd, 1.0), bullets)
-  let bullets = List.filter<App.AirShooter.Parts.Bullet>((bullet) F64.ltn(bullet@position@snd, 256.0), bullets)
-
-  for key:enemy in enemies with local:
+  for key:enemy in local@enemies with local:
     if F64.ltn(enemy@ship@position@snd, 256.0) then local else local@enemies <- Map.delete!(key, local@enemies)
 
 
-  let local = local@bullets <- bullets
 
   let local = local@seed <- Nat.random(local@seed)
 
@@ -234,7 +240,7 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       let local = App.AirShooter.frame.cooldown(local)
       let local = App.AirShooter.frame.garbage_collector(local)
 
-      let local = local@seed <- Nat.random(local@seed)
+      // let local = local@seed <- Nat.random(local@seed)
 
       App.set_local!(local)
     mouse_move:
