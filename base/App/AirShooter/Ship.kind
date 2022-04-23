@@ -5,6 +5,6 @@ type App.AirShooter.Ship {
     skin: VoxBox
     hue: U32
     weapon: App.AirShooter.Parts.Weapon
-    hitbox: Shape.Rectangle
+    hitbox: Shape.Circle
   )
 }

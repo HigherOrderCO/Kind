@@ -7,5 +7,5 @@ App.AirShooter.Ship.move(destination: App.AirShooter.Position, ship: App.AirShoo
   let new_pos = {pos@fst + movement@fst, pos@snd + movement@snd} 
   let ship = ship@position <- new_pos
   // TODO: UPDATE hitbox
-  let ship = ship@hitbox <- Shape.Rectangle.new(new_pos@fst, new_pos@fst + 64.0, new_pos@snd, new_pos@snd + 64.0)
+  let ship = ship@hitbox <- Shape.Circle.new(V2.new(new_pos@fst, new_pos@snd), 5.0)
   ship
