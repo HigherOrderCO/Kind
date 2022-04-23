@@ -188,6 +188,27 @@ App.AirShooter.frame.bullet(local: App.AirShooter.State.Local): App.AirShooter.S
   local
 
 
+// check collisions
+App.AirShooter.frame.collision(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  for key:bullet in local@bullets with local:
+    if bullet@isPlayer then 
+      for keyEnemy:enemy in local@enemies with local:
+        if Shape.Circle.collision.circle(bullet@hitbox, enemy@ship@hitbox) then
+          let local = local@enemies <- Map.delete!(keyEnemy, local@enemies)
+          let local = local@bullets <- Map.delete!(key, local@bullets)
+          local
+        else
+          local
+      local 
+    else 
+      if Shape.Circle.collision.circle(bullet@hitbox, local@player@ship@hitbox) then
+        let local = local@bullets <- Map.delete!(key, local@bullets)
+        log("atingido")
+        local
+      else
+        local
+  local
+
 // tick weapons cooldown
 App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   let aux = (ship: App.AirShooter.Ship)
@@ -210,13 +231,12 @@ App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter
   local
 
 App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  
   for key:bullet in local@bullets with local:
-    if Bool.or(F64.gtn(bullet@position@snd, 1.0), F64.ltn(bullet@position@snd, 256.0)) then local else local@bullets <- Map.delete!(key, local@bullets)
+    if Bool.or(F64.ltn(bullet@position@snd, 1.0), F64.gtn(bullet@position@snd, 256.0)) then local@bullets <- Map.delete!(key, local@bullets) else local
 
   for key:enemy in local@enemies with local:
     if F64.ltn(enemy@ship@position@snd, 256.0) then local else local@enemies <- Map.delete!(key, local@enemies)
-
-
 
   let local = local@seed <- Nat.random(local@seed)
 
@@ -238,9 +258,8 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       let local = App.AirShooter.frame.enemy(local)
       let local = App.AirShooter.frame.bullet(local)
       let local = App.AirShooter.frame.cooldown(local)
+      let local = App.AirShooter.frame.collision(local)
       let local = App.AirShooter.frame.garbage_collector(local)
-
-      // let local = local@seed <- Nat.random(local@seed)
 
       App.set_local!(local)
     mouse_move:
