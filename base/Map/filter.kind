@@ -1,0 +1,2 @@
+Map.filter<A: Type>(fn: A -> Bool, map: Map<A>): Map<A>
+  Map.for<A>(map)<Map<A>>(map, (key, value, map) if fn(value) then Map.delete<A>(key, map) else map)
