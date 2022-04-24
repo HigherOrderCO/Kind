@@ -52,7 +52,7 @@ type App.AirShooter.State.Local {
 
 
 // Ship constructor
-App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: VoxBox, hue: U32, isPlayer: Bool, cooldown: U32): App.AirShooter.Ship
+App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: VoxBox, hue: U32, isPlayer: Bool, cooldown: U32, hp: Nat): App.AirShooter.Ship
   let bullet_speed = 3.0
   let bullet_hitbox = Shape.Circle.new(V2.new(pos@fst, pos@snd), 1.0)
   let defaultBullet = App.AirShooter.Parts.Bullet.new(App.AirShooter.Sprites.Bullet, isPlayer, {0, 0}, bullet_speed, bullet_hitbox)
@@ -65,7 +65,8 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
     sprite,
     hue,
     defaultWeapon,
-    ship_hitbox
+    ship_hitbox,
+    hp
   )
 
 
@@ -80,11 +81,11 @@ App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
   let hue = random_u32(30, 255)
   let cooldown = random_u32(30, 50)
   let destination = { Nat.to_f64(Nat.random_range(10, 256, Nat.random(seed))), 280.0 }
+  let hp = 1
 
-  App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, -30.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown), destination)
+  App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, -10.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown, hp), destination)
 
-// Initial state
-App.AirShooter.init: App.Init<App.AirShooter.State>
+App.AirShooter.Local.init(): App.AirShooter.State.Local
   let sprite = App.AirShooter.Sprites.Player_Ship
   let enemy_sprite = App.AirShooter.Sprites.Enemy_Ship
   let max_enemies = 5
@@ -92,17 +93,22 @@ App.AirShooter.init: App.Init<App.AirShooter.State>
   let player_speed = 3.0
   let player_hue = Nat.to_u32(0)
   let player_cooldown = Nat.to_u32(15)
+  let player_hp = 5
 
-  let ship = App.AirShooter.Ship.Constructor({128.0, 200}, player_speed, sprite, player_hue, true, player_cooldown)
+  let ship = App.AirShooter.Ship.Constructor({128.0, 200}, player_speed, sprite, player_hue, true, player_cooldown, 5)
 
   let enemies = Map.new<App.AirShooter.Enemy>
   let bullets = Map.new<App.AirShooter.Parts.Bullet>
 
-  let player = App.AirShooter.Player.new(ship)
+  let player = App.AirShooter.Player.new(ship, 0)
   let mouse_over = "game_screen"
   let mouse_pos  = { 128, 200 }
-  let local = App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, player_id, false)
-  App.Store.new<App.AirShooter.State>(local, unit)
+  App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, player_id, false)
+  
+
+// Initial state
+App.AirShooter.init: App.Init<App.AirShooter.State>
+  App.Store.new<App.AirShooter.State>(App.AirShooter.Local.init, unit)
 
 
 // draw all objects in canvas
@@ -122,13 +128,16 @@ App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxB
 // Render function
 App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
   (state)
-  let img = App.AirShooter.draw.canvas(state@local, img)
+  let img = App.AirShooter.draw.canvas(state@local, img) 
   <div style={
     "display": "flex"
     "justify-content": "center"
     "align-items": "center"
-    "background-color": "#000000"
+    "background-color": "#000000",
+    "flex-direction": "column"
     }>
+    <div style={"color": "white", "font-size": "20px"}>"HP: " | Nat.show(state@local@player@ship@hp)</div>
+    <div style={"color": "white", "font-size": "20px"}>"Score: " | U32.show(state@local@player@score)</div>
     {
       DOM.vbox(
         {
@@ -209,6 +218,8 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): App.AirShoote
       for keyEnemy:enemy in local@enemies with local:
         if Bool.not(Shape.Circle.collision.circle(bullet@hitbox, enemy@ship@hitbox)) then local else
           // delete enemy and bullet
+          // todo: check enemy hp
+          let local = local@player@score <- local@player@score + 1
           let local = local@enemies <- Map.delete!(keyEnemy, local@enemies)
           let local = local@bullets <- Map.delete!(key, local@bullets)
           local
@@ -218,8 +229,14 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): App.AirShoote
       if Bool.not(Shape.Circle.collision.circle(bullet@hitbox, local@player@ship@hitbox)) then local else
         // delete bullet and ???
         let local = local@bullets <- Map.delete!(key, local@bullets)
-        log("atingido")
-        local
+
+        let local = local@player@ship@hp <- Nat.pred(local@player@ship@hp)
+
+        // TODO: asdasda
+        if local@player@ship@hp >? 0 then local else App.AirShooter.Local.init
+        // local
+        // log("atingido")
+        // local
   // )
 
   // check if enemy ship hit player

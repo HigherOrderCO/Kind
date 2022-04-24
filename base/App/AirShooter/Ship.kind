@@ -6,5 +6,6 @@ type App.AirShooter.Ship {
     hue: U32
     weapon: App.AirShooter.Parts.Weapon
     hitbox: Shape.Circle
+    hp: Nat
   )
 }
