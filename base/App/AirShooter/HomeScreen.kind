@@ -1,13 +1,10 @@
-App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State), img: VoxBox): DOM
-
-  // sort leaderboard // List<Pair<String, Nat>>
+App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State)): DOM
   let sorted = List.sort!((a) (b) U32.cmp(b@snd, a@snd), Map.values!(state@global@leaderboard))
-
 
   let highscore = List.for!(sorted)!([], 
      (score, scores) 
-    if List.length!(scores) >=? 5 then scores else
-    List.append!(scores, <div>String.to_upper(score@fst) " " U32.show(score@snd)</div>)
+    if List.length!(scores) >? 10 then scores else
+    List.append!(scores, <div>score@fst " " U32.show(score@snd)</div>)
   )
 
   <div style={
@@ -28,10 +25,11 @@ App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
         type="text" 
         id="name" 
         placeholder="nickname" 
+        autocomplete="off"
         style={
           "font-size": "25px"
-          "background": "#464646"
-          "color": "white"
+          "background": "rgb(16 16 16)"
+          "color": "#1ca903"
           "border": "none"
           "padding": "15px"
           "border-radius": "5px"
@@ -47,10 +45,11 @@ App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
           "padding": "4px"
           "border-radius": "10px"
           "background": "black"
+          "opacity": if String.eql(state@local@player@name, "") then "0.5" else "1"
           "border": "solid 3px white"
           "color": "white"
-          "cursor": if String.eql(state@local@player@name, "") then "cursor" else "pointer"
-          "disabled": if String.eql(state@local@player@name, "") then "true" else "false"
+          "cursor": "pointer"
+          "transition": "opacity 0.2s ease 0s"
       }>
         "Start"
       </button>

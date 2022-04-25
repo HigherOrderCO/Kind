@@ -6,7 +6,7 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
     "display": "flex"
     "justify-content": "center"
     "align-items": "center"
-    "background-color": "#000000",
+    "background-color": "#000000"
     }>
     <div style={"flex-direction": "row"}>
       <div style=style>"HP: " | Nat.show(state@local@player@ship@hp)</div>
