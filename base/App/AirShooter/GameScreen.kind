@@ -1,29 +1,70 @@
 App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): DOM
   let img = App.AirShooter.draw.canvas(state@local, img)
-  let style = {"color": "white", "font-size": "25px"}
+  let style = { "color": "white", "font-size": "25px", "user-select": "none" }
+  let statusStyle = {
+    "border": "1px solid white"
+    "border-radius": "4px"
+    "align-items": "center"
+    "display": "flex"
+    "flex-direction": "column"
+    "width": "100%"
+  }
 
   <div style={
     "display": "flex"
     "justify-content": "center"
     "align-items": "center"
     "background-color": "#000000"
-    }>
-    <div style={"flex-direction": "row"}>
-      <div style=style>"HP: " | Nat.show(state@local@player@ship@hp)</div>
-      <div style=style>"Score: " | U32.show(state@local@player@score)</div>
-      // <button id="exit">"EXIT"</button>
+    "height": "inherit"
+  }>
+    <div style={"background": "url(https://i.imgur.com/9RnlN1N.png)"}>
+      {
+        DOM.vbox(
+          {
+            "id": "game_screen",
+            "width": "256",
+            "height": "256",
+            "scale": "4"
+            
+          }, {}, img)
+      }
     </div>
-    {
-      DOM.vbox(
-        {
-          "id": "game_screen",
-          "width": "256",
-          "height": "256",
-          "scale": "4"
-        }, {}, img)
-    }
+        <div style={
+      "display": "flex"
+      "flex-direction": "column"
+      "height": "inherit"
+      "justify-content": "space-between"
+      "align-items": "center"
+      "padding": "100px 0px 100px 25px"
+    }>
+      <div style=statusStyle>
+        <div style=style>"HP"</div>
+        <progress 
+          style={
+            "appearance": "none"
+            "height":" 27px"
+            "width": "13em"
+          }
+          id="hp" 
+          value=Nat.show(state@local@player@ship@hp) 
+          max="5">
+        </progress>
+      </div>
+      <div style=statusStyle>
+        <div style=style>"WEAPON"</div>
+        <progress 
+          style={
+            "height":" 20px"
+            "width": "13em"
+          }
+          id="weapon" 
+          value=U32.show(state@local@player@ship@weapon@last_fired)
+          max=U32.show(state@local@player@ship@weapon@cooldown)>
+        </progress>
+      </div>
+      <div style=statusStyle>
+        <div style=style>"SCORE"</div>
+        <div style=style>U32.show(state@local@player@score)</div>
+      </div>
+    </div>
   </div>
-
-
-App.AirShooter.GameScreen.onExit(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-  local
