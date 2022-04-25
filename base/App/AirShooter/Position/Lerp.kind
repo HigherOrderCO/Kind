@@ -1,0 +1,5 @@
+App.AirShooter.Position.Lerp(origin: App.AirShooter.Position, destination: App.AirShooter.Position, velocity: F64): App.AirShooter.Position
+  let x = destination@fst - origin@fst
+  let y = destination@snd - origin@snd 
+  let movement = F64.pos_vector(velocity, x, y)
+  { origin@fst + movement@fst, origin@snd + movement@snd }

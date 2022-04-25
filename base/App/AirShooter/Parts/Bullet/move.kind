@@ -1,11 +1,10 @@
 App.AirShooter.Parts.Bullet.move(bullet: App.AirShooter.Parts.Bullet): App.AirShooter.Parts.Bullet
-  let mov = bullet@velocity
-  let pos = bullet@position
-  let destination = {pos@fst, if Bool.eql(bullet@isPlayer, true) then 256.0 else 0.0}
-  let x = destination@fst - pos@fst
-  let y = destination@snd - pos@snd 
-  let movement = F64.pos_vector(mov, x, y)
-  let new_pos = {pos@fst + movement@fst, pos@snd + movement@snd} 
+  // if bullet is from player go up else go down
+  let destination = { bullet@position@fst, if bullet@isPlayer then 300.0 else -50.0 }
+
+  let new_pos = App.AirShooter.Position.Lerp(bullet@position, destination, bullet@velocity)
+
   let bullet = bullet@position <- new_pos
-  let bullet = bullet@hitbox <- Shape.Circle.new(V2.new(new_pos@fst, new_pos@snd), 10.0) // TODO: FIX Shape
+  // TODO: check hitbox size
+  let bullet = bullet@hitbox <- Shape.Circle.new(V2.new(new_pos@fst, new_pos@snd), 10.0)
   bullet
