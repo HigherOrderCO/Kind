@@ -1,0 +1,74 @@
+App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State), img: VoxBox): DOM
+
+  // sort leaderboard // List<Pair<String, Nat>>
+  let sorted = List.sort!((a) (b) U32.cmp(b@snd, a@snd), Map.values!(state@global@leaderboard))
+
+
+  let highscore = List.for!(sorted)!([], 
+     (score, scores) 
+    if List.length!(scores) >=? 5 then scores else
+    List.append!(scores, <div>String.to_upper(score@fst) " " U32.show(score@snd)</div>)
+  )
+
+  <div style={
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+    "background-color": "#000000"
+    "height": "100vh"
+    "flex-direction": "column"
+    "text-align": "center"
+    }>
+    <div style={
+      "flex-direction": "column"
+      "margin": "15px"
+      "display": "flex"
+    }>
+      <input 
+        type="text" 
+        id="name" 
+        placeholder="nickname" 
+        style={
+          "font-size": "25px"
+          "background": "#464646"
+          "color": "white"
+          "border": "none"
+          "padding": "15px"
+          "border-radius": "5px"
+          "text-align": "center"
+        }
+        value=state@local@player@name>
+      </input>
+      <button 
+        id="start"      
+        style={
+          "font-size": "25px"
+          "margin":" 30px"
+          "padding": "4px"
+          "border-radius": "10px"
+          "background": "black"
+          "border": "solid 3px white"
+          "color": "white"
+          "cursor": if String.eql(state@local@player@name, "") then "cursor" else "pointer"
+          "disabled": if String.eql(state@local@player@name, "") then "true" else "false"
+      }>
+        "Start"
+      </button>
+    </div>
+
+
+    <div style={
+      "color": "#FFFFFF"
+      "font-size": "25px"
+    }>
+      "LEADERBOARD"
+    </div>
+
+    <div style={
+      "color": "#FFFFFF"
+      "font-size": "25px"
+    }>
+      for score in highscore: score
+    </div>
+  </div> 
+    

@@ -1,0 +1,29 @@
+App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): DOM
+  let img = App.AirShooter.draw.canvas(state@local, img)
+  let style = {"color": "white", "font-size": "25px"}
+
+  <div style={
+    "display": "flex"
+    "justify-content": "center"
+    "align-items": "center"
+    "background-color": "#000000",
+    }>
+    <div style={"flex-direction": "row"}>
+      <div style=style>"HP: " | Nat.show(state@local@player@ship@hp)</div>
+      <div style=style>"Score: " | U32.show(state@local@player@score)</div>
+      // <button id="exit">"EXIT"</button>
+    </div>
+    {
+      DOM.vbox(
+        {
+          "id": "game_screen",
+          "width": "256",
+          "height": "256",
+          "scale": "4"
+        }, {}, img)
+    }
+  </div>
+
+
+App.AirShooter.GameScreen.onExit(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  local
