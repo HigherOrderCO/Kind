@@ -1,31 +1,3 @@
-//  Criar inteligência artificial para o inimigo
-//  A cada frame mover x distancias para baixo
-//  App.AirShooter.when.enemy.move(enemy: App.AirShooter.Enemy, pos: App.AirShooter.Position): App.AirShooter.Position
-//  new position
-//
-//  App.AirShooter.when.enemies.move(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-//    aplicar App.AirShooter.when.enemy.move a todos inimigos e atualizar sua posição na lista
-//    let new_enemies = []
-//      for enemy in enemies with new_enemies:
-//        ?s
-//
-//  Criar o tipo projétil com projetil seu e do adversário (projétil do adversário guardando direção do tiro)
-//  Criar inteligencia artificial para o projetil
-//
-//  Converter cada unidade em uma hitbox: Tipo Shape
-//  Adicionar no when um for para conferir se algum projétil está atingindo alguém (apenas conferir se acerta do time adversário do dono do projetil)
-//    Checar colisões com a função Shape.collision
-//
-//  Adicionar no tipo player informação de Cooldown no tiro
-//  Adicionar no tipo local informação de se está atirando (shooting: Bool)
-//  Adicionar no when para mudar local@shooting no mouse_down
-//  Adicionar no when para mudar local@shooting no mouse_up
-//  Adicionar no when para rodar App.AirShooter.when.player.shoot no frame
-//  App.AirShooter.when.player.shoot(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-//    Conferir se o Cooldown do tiro está em 0, se sim, atirar
-//    Se não, reduzir o cooldown em 1
-//
-
 //  npm i -g kind-lang-voxbox-maker
 //  klvm Name.Space.Here [Z_index] [Z_scale]
 
@@ -58,7 +30,7 @@ type App.AirShooter.Action {
 } deriving (serializer, deserializer)
 
 App.AirShooter.Serializer(action: App.AirShooter.Action): String
-  Bits.hex.encode(Serializer.run!(App.AirShooter.Action.serializer, action))
+  String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.AirShooter.Action.serializer, action)))
 
 App.AirShooter.Deserializer(data: String): Maybe<App.AirShooter.Action>
   Deserializer.run!(App.AirShooter.Action.deserializer, Bits.hex.decode(data))
@@ -126,7 +98,9 @@ App.AirShooter.reset(local: App.AirShooter.State.Local): App.AirShooter.State.Lo
   let local = local@player@ship@hp <- initial@player@ship@hp
   let local = local@player@score <- initial@player@score
   let local = local@player@ship@position <- {128.0, 200}
-  // let local = local@started <- false
+  // TODO: canvas não esta sendo desmontado!
+  // let local = local@started <- false 
+  // App.watch!(App.AirShooter.Room)
 
   local
 
@@ -150,10 +124,10 @@ App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
   if state@local@started then 
     App.AirShooter.GameScreen(state, img)
   else
-    App.AirShooter.HomeScreen(state, img)
+    App.AirShooter.HomeScreen(state)
   
 App.AirShooter.Room: String
-  String.take(16, Crypto.Keccak.hash("testes_leaderboarddd"))
+  String.take(16, Crypto.Keccak.hash("AirShooter_leaderboard"))
 
 // move all objects in canvas
 App.AirShooter.frame.move(local: App.AirShooter.State.Local): App.AirShooter.State.Local
@@ -213,20 +187,18 @@ App.AirShooter.frame.shoot(local: App.AirShooter.State.Local): App.AirShooter.St
       let local = local@player@ship@weapon@last_fired <- 0
       local
 
-App.AirShooter.GameOver(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-  // TODO: post score to global here!
-  // let serial = App.AirShooter.Serializer(App.AirShooter.Action.new_score({local@player@name, local@player@score}))
-  // IO {
-    // App.new_post!(App.AirShooter.Room, serial)
-  App.AirShooter.reset(local)
-  // }
-
-
+App.AirShooter.GameOver(local: App.AirShooter.State.Local): IO<Maybe<App.State.local(App.AirShooter.State)>>
+  let serial  = App.AirShooter.Serializer(App.AirShooter.Action.new_score(local@player@name, local@player@score))
+  let local   = App.AirShooter.reset(local)
+  let room    = App.AirShooter.Room
+  IO {
+    App.new_post!(room, serial)
+    App.set_local!(local)
+  }
 
 // check collisions
-App.AirShooter.frame.collision(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.State.local(App.AirShooter.State)>>
   for key:bullet in local@bullets with local:
-  // let local = Map.for!(local@bullets)!(local, (key, bullet, local)
     // check if players bullets hit enemies
     if bullet@isPlayer then
       for keyEnemy:enemy in local@enemies with local:
@@ -242,7 +214,7 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): App.AirShoote
       if Bool.not(Shape.Circle.collision.circle(bullet@hitbox, local@player@ship@hitbox)) then local else
         let local = local@bullets <- Map.delete!(key, local@bullets)
         let local = local@player@ship@hp <- Nat.pred(local@player@ship@hp)
-        if local@player@ship@hp >? 0 then local else App.AirShooter.GameOver(local)
+        local
 
   // check if enemy ship hit player
   for key:enemy in local@enemies with local:
@@ -250,10 +222,9 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): App.AirShoote
       // if hit, delete enemy, player loses hp
       let local = local@enemies <- Map.delete!(key, local@enemies)
       let local = local@player@ship@hp <- Nat.pred(local@player@ship@hp)
-      if local@player@ship@hp >? 0 then local else App.AirShooter.GameOver(local)
-      // local
+      local
 
-  local
+  if local@player@ship@hp >? 0 then App.set_local!(local) else App.AirShooter.GameOver(local)
 
 // tick weapons cooldowns
 App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter.State.Local
@@ -299,15 +270,18 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       input:
         switch String.eql(event.id) {
           "name": 
-            let local = local@player@name <- String.to_upper(event.text)
+            let local = local@player@name <- event.text
             App.set_local!(local)
         } default App.pass!
-      mouse_click:
+      mouse_click: 
         switch String.eql(event.id) {
             "start": 
               if String.eql(local@player@name, "") then App.pass! else
               let local = local@started <- true
-              App.set_local!(local)
+              IO {
+                App.unwatch!(App.AirShooter.Room)
+                App.set_local!(local)
+              }
         } default App.pass!
     } default App.pass!
   
@@ -324,26 +298,9 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       let local = App.AirShooter.frame.move(local)
       let local = App.AirShooter.frame.enemy(local)
       let local = App.AirShooter.frame.cooldown(local)
-      let local = App.AirShooter.frame.collision(local)
       let local = App.AirShooter.frame.garbage_collector(local)
       let local = App.AirShooter.frame.shoot(local)
-      // TODO: MOVE THIS TO GAMEOVER
-      if Bool.or(String.eql(local@player@name, ""), local@player@score =? 0) then App.set_local!(local) else IO {
-        log(local@player@name)
-        let myScore = Map.get!(local@player@id, state@global@leaderboard)
-        let serial = App.AirShooter.Serializer(App.AirShooter.Action.new_score(local@player@name, local@player@score))
-
-        without myScore: IO {
-          App.new_post!(App.AirShooter.Room, serial)
-          App.set_local!(local)
-        }
-
-        if local@player@score <=? myScore@snd then App.set_local!(local) else IO {
-          App.new_post!(App.AirShooter.Room, serial)
-          App.set_local!(local)
-        }
-
-      }
+      App.AirShooter.frame.collision(local)
     }
     mouse_move:
       let local =
@@ -371,9 +328,6 @@ App.AirShooter.post: App.Post<App.AirShooter.State>
   case action {
     new_score: 
       let score = Map.get!(addr, global@leaderboard)
-      log(action.name)
-      log(U32.show(action.score))
-      if (action.score >? 1000) then global else
 
       without score: 
         global@leaderboard <- Map.set!(addr, { action.name, action.score }, global@leaderboard)
