@@ -63,11 +63,11 @@ App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
   let x = random_f64(10, 256)
   let vel = random_f64(1, 2)
   let hue = random_u32(30, 255)
-  let cooldown = random_u32(30, 50)
+  let cooldown = random_u32(35, 55)
   let destination = { Nat.to_f64(Nat.random_range(10, 256, Nat.random(seed))), 280.0 }
   let hp = 1
 
-  App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, -10.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown, hp), destination)
+  App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, -5.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown, hp), destination)
 
 App.AirShooter.Local.init(): App.AirShooter.State.Local
   let sprite = App.AirShooter.Sprites.Player_Ship
@@ -98,9 +98,7 @@ App.AirShooter.reset(local: App.AirShooter.State.Local): App.AirShooter.State.Lo
   let local = local@player@ship@hp <- initial@player@ship@hp
   let local = local@player@score <- initial@player@score
   let local = local@player@ship@position <- {128.0, 200}
-  // TODO: canvas não esta sendo desmontado!
-  // let local = local@started <- false 
-  // App.watch!(App.AirShooter.Room)
+  let local = local@started <- false 
 
   local
 
@@ -192,6 +190,7 @@ App.AirShooter.GameOver(local: App.AirShooter.State.Local): IO<Maybe<App.State.l
   let local   = App.AirShooter.reset(local)
   let room    = App.AirShooter.Room
   IO {
+    App.watch!(App.AirShooter.Room)
     App.new_post!(room, serial)
     App.set_local!(local)
   }
