@@ -1,0 +1,1327 @@
+App.Ludo.State: App.State
+  App.State.new(App.Ludo.State.Local, App.Ludo.State.Global)
+
+type App.Ludo.State.Local {
+  lobby(data: App.Ludo.Local.Lobby)
+  game(data: App.Ludo.Local.Game)
+}
+
+type App.Ludo.Local.Lobby {
+  new(
+    user:   String
+    input:  String
+  )
+}
+
+type App.Ludo.Local.Game {
+  new(
+    user:       String
+    mouse_pos:  Pair<U32, U32>
+    mouse_over: String
+  )
+}
+
+
+type App.Ludo.State.Global {
+  lobby
+  game(
+    status: App.Ludo.Game
+  )
+}
+
+type App.Ludo.Game {
+  new(
+    room:     String
+    board:    App.Ludo.Map
+    trail:    App.Ludo.Trail
+    players:  Map<App.Ludo.Team>
+    turn:     Nat
+    random:   Nat
+    dice:     App.Ludo.Dice
+    winner:   Maybe<App.Ludo.Team>
+  )
+}
+
+App.Ludo.turn.is_player_turn(id: String, game: App.Ludo.Game): Bool
+  let turn_team = App.Ludo.turn.get_team(game@turn)
+  let plyr_team = App.Ludo.player.get_team(id, game) 
+  without plyr_team: false
+  App.Ludo.Team.eql(turn_team, plyr_team)
+
+App.Ludo.player.get_team(id: String, game: App.Ludo.Game): Maybe<App.Ludo.Team>
+  let players = game@players
+  players{id}
+
+App.Ludo.turn.get_team(turn: Nat): App.Ludo.Team
+  switch Nat.eql(turn % 4) {
+    0: App.Ludo.Team.red
+    1: App.Ludo.Team.yellow
+    2: App.Ludo.Team.blue
+    3: App.Ludo.Team.green
+  } default App.Ludo.Team.red
+
+
+type App.Ludo.Dice {
+  new(
+    rolling: Maybe<U64>
+    seed: Nat
+  )
+}
+
+App.Ludo.Coord: Type
+  Pair<U32, U32>
+
+App.Ludo.Map: Type
+  BBT<App.Ludo.Coord, App.Ludo.Tile>
+
+App.Ludo.Map.set(coord: App.Ludo.Coord, tile: App.Ludo.Tile, map: App.Ludo.Map): App.Ludo.Map
+  BBT.insert<App.Ludo.Coord, App.Ludo.Tile>(App.Ludo.Coord.cmp, coord, tile, map)
+
+App.Ludo.Map.get(coord: App.Ludo.Coord, map: App.Ludo.Map): Maybe<App.Ludo.Tile>
+  BBT.lookup<App.Ludo.Coord, App.Ludo.Tile>(App.Ludo.Coord.cmp, coord, map)
+
+App.Ludo.Map.modify(f: App.Ludo.Tile -> App.Ludo.Tile, coord: App.Ludo.Coord, map: App.Ludo.Map): App.Ludo.Map
+  BBT.adjust<App.Ludo.Coord, App.Ludo.Tile>(App.Ludo.Coord.cmp, f, coord, map)
+  // let tile = App.Ludo.Map.get(coord, map)
+  // without tile: map
+  // App.Ludo.Map.set(coord, f(tile), map)
+
+App.Ludo.Trail: Type
+  BBT<App.Ludo.Coord, App.Ludo.Coord>
+
+App.Ludo.Trail.set(coord: App.Ludo.Coord, next_coord: App.Ludo.Coord, trail: App.Ludo.Trail): App.Ludo.Trail
+  BBT.insert<App.Ludo.Coord, App.Ludo.Coord>(App.Ludo.Coord.cmp, coord, next_coord, trail)
+
+App.Ludo.Trail.get(coord: App.Ludo.Coord, trail: App.Ludo.Trail): Maybe<App.Ludo.Coord>
+  BBT.lookup<App.Ludo.Coord, App.Ludo.Coord>(App.Ludo.Coord.cmp, coord, trail)
+
+
+type App.Ludo.Tile {
+  trail(
+    class: App.Ludo.Tile.Trail
+    pieces: List<App.Ludo.Team>
+    )
+  home(
+    occupied: Bool
+    team: App.Ludo.Team
+  )
+  neutral(
+    color: Col32
+  )
+  dec(
+    img: VoxBox
+  )
+}
+
+type App.Ludo.Tile.Trail {
+  common
+  star(init: Maybe<App.Ludo.Team>)
+  exclusive(team: App.Ludo.Team)
+  door(team: App.Ludo.Team)
+  super(team: App.Ludo.Team)
+}
+
+type App.Ludo.Team {
+  red
+  green
+  blue
+  yellow
+} 
+
+App.Ludo.Team.read(team: String): Maybe<App.Ludo.Team>
+  switch String.eql(team) {
+    "Red":    some(App.Ludo.Team.red)
+    "Green":  some(App.Ludo.Team.green)
+    "Blue":   some(App.Ludo.Team.blue)
+    "Yellow": some(App.Ludo.Team.yellow)
+  } default none
+
+App.Ludo.tile_size: Pair<U32, U32>
+  {40, 40}
+
+App.Ludo.scale: U32
+  2#32
+  
+App.Ludo.board_size: Pair<U32, U32>
+  {15, 15}
+  
+App.Ludo.exclusive_tiles: Map<List<App.Ludo.Coord>>
+  let board_size = App.Ludo.board_size 
+  let half = board_size@fst / 2
+  let get_coords = 
+    (start: U32, end: U32, f: U32 -> App.Ludo.Coord) 
+      let coords = []
+      for x : U32 from start to end with coords:
+        f(x) & coords
+      coords
+      
+  {
+    "Blue":   List.reverse<App.Ludo.Coord>(get_coords(1, half, (x) {x, half}))
+    "Green":  get_coords(half + 1, board_size@fst - 1, (x) {x, half})
+    "Red":    get_coords(half + 1, board_size@fst - 1, (x) {half, x})
+    "Yellow": List.reverse<App.Ludo.Coord>(get_coords(1, half, (x) {half, x}))
+  }
+
+App.Ludo.door_tiles: Map<App.Ludo.Coord>
+let board_size = App.Ludo.board_size 
+  {
+    "Blue":   {0#32, 7#32}
+    "Red":    {7#32, 14#32}
+    "Green":  {14#32, 7#32}
+    "Yellow": {7#32, 0#32}
+  }
+
+App.Ludo.super_tiles: Map<App.Ludo.Coord>
+let board_size = App.Ludo.board_size 
+  {
+    "Blue":   {6#32, 7#32}
+    "Red":    {7#32, 8#32}
+    "Green":  {8#32, 7#32}
+    "Yellow": {7#32, 6#32}
+  }
+
+App.Ludo.base_coord: Map<App.Ludo.Coord>
+let board_size = App.Ludo.board_size 
+  {
+    "Blue": {0#32, 0#32}
+    "Red": {0#32, 9#32}
+    "Green": {9#32, 9#32}
+    "Yellow": {9#32, 0#32}
+  }
+
+App.Ludo.dec_tiles: Map<App.Ludo.Coord>
+  let board_size = App.Ludo.board_size
+  {
+    "All": {board_size@fst/2, board_size@snd/2}, 
+    "Yellow_Blue": {6#32, 6#32}, 
+    "Blue_Red": {6#32, 8#32},
+    "Green_Yellow": {8#32, 6#32},
+    "Green_Red": {8#32, 8#32}  
+  }
+      
+
+App.Ludo.star_tiles: List<App.Ludo.Coord>
+  [ 
+   {2#32, 8#32},
+   {6#32, 2#32},
+   {8#32, 12#32},
+   {12#32, 6#32}
+  ]
+
+App.Ludo.home_tiles: Map<List<App.Ludo.Coord>>
+  {
+    "Blue": [{2#32, 2#32}, {3#32, 3#32}, {3#32, 2#32}, {2#32, 3#32}]
+    "Yellow": [{12#32, 2#32}, {12#32, 3#32}, {11#32, 2#32}, {11#32, 3#32}]
+    "Green": [{12#32, 12#32}, {12#32, 11#32}, {11#32, 12#32}, {11#32, 11#32}]
+    "Red": [{2#32, 12#32}, {3#32, 12#32}, {3#32, 11#32}, {2#32, 11#32}]
+  }
+
+App.Ludo.init_tiles: Map<App.Ludo.Coord>
+  {
+   "Blue":   {1#32, 6#32}, 
+   "Yellow": {8#32, 1#32}, 
+   "Red":    {6#32, 13#32}, 
+   "Green":  {13#32, 8#32}
+  }
+
+
+
+
+App.Ludo.color: Map<U32>
+
+  {
+    "Blue":   Col32.new(91, 110, 225, 255)
+    "Green":  Col32.new(30, 188, 46, 255)
+    "Red":    Col32.new(172, 50, 50, 255)
+    "Yellow": Col32.new(185, 179, 39, 255)
+    "black":  Col32.new(0, 0, 0, 255)
+    "white":  Col32.new(255, 255, 255, 255)
+  }
+
+App.Ludo.z_index: Map<U32> 
+  {
+    "star":       1#32
+    "piece":      2#32
+    "background": 0#32
+  }
+
+App.Ludo.small_trail: Map<List<App.Ludo.Coord>>
+  let board_size = App.Ludo.board_size 
+  let half = board_size@fst / 2
+  let get_coords = 
+    (f: U32 -> App.Ludo.Coord) 
+      let coords = []
+      for x : U32 from (half - 1) to (half + 2) with coords:
+        f(x) & coords
+      coords
+      
+  {
+    "Blue":   get_coords((y) {0, y})
+    "Green":  List.reverse<App.Ludo.Coord>(get_coords((y) {board_size@fst - 1, y}))
+    "Red":    get_coords((x) {x, board_size@snd - 1})
+    "Yellow": List.reverse<App.Ludo.Coord>(get_coords((x) {x, 0}))
+  }
+
+App.Ludo.init_trail: Map<List<App.Ludo.Coord>>
+  let board_size = App.Ludo.board_size 
+  let half = board_size@fst / 2
+  let get_coords = 
+    (start: U32, end: U32, f: U32 -> App.Ludo.Coord) 
+      let coords = []
+      for x : U32 from start to end with coords:
+        f(x) & coords
+      coords
+      
+  {
+    "Blue":   List.reverse<App.Ludo.Coord>(get_coords(0, half - 1, (x) {x, half - 1}))
+    "Green":  get_coords(half + 2, board_size@fst, (x) {x, half + 1})
+    "Red":    get_coords(half + 2, board_size@fst, (y) {half - 1, y})
+    "Yellow": List.reverse<App.Ludo.Coord>(get_coords(0, half - 1, (y) {half + 1, y}))
+  }
+
+App.Ludo.star_trail: Map<List<App.Ludo.Coord>>
+  let board_size = App.Ludo.board_size 
+  let half = board_size@fst / 2
+  let get_coords = 
+    (start: U32, end: U32, f: U32 -> App.Ludo.Coord) 
+      let coords = []
+      for x : U32 from start to end with coords:
+        f(x) & coords
+      coords
+      
+  {
+    "Blue":   get_coords(0, half - 1, (x) {x, half + 1})
+    "Green":  List.reverse<App.Ludo.Coord>(get_coords(half + 2, board_size@fst, (x) {x, half - 1}))
+    "Red":    List.reverse<App.Ludo.Coord>(get_coords(half + 2, board_size@fst, (y) {half + 1, y}))
+    "Yellow": get_coords(0, half - 1, (y) {half - 1, y})
+  }
+
+  App.Ludo.diagonals_trail: Map<List<App.Ludo.Coord>>
+    let init_trail = App.Ludo.init_trail
+    let star_trail = App.Ludo.star_trail
+    let set_diagonals = (init_color: String, star_color: String)
+      [List.last<App.Ludo.Coord>(init_trail{init_color} <> []) <> {0#32, 0#32}, List.head<App.Ludo.Coord>(star_trail{star_color} <> []) <> {0#32, 0#32}]
+    {
+      "Blue":   set_diagonals("Blue", "Yellow")
+      "Green":  set_diagonals("Green", "Red")
+      "Red":    set_diagonals("Red", "Blue")
+      "Yellow": set_diagonals("Yellow", "Green")
+    }
+
+
+
+App.Ludo.Team.eql(fst_team: App.Ludo.Team, snd_team: App.Ludo.Team): Bool 
+  case fst_team snd_team {
+    red red: true
+    blue blue: true
+    yellow yellow: true
+    green green: true
+    } default false 
+
+// Converts coordinates to use VoxBox.Draw.image
+// DO NOT USE FOR ANYTHING ELSE
+App.Ludo.Tile.draw.to_png_pos(x: U32, y: U32): Pair<U32, U32>
+  let x = x * App.Ludo.tile_size@fst
+  let y = y * App.Ludo.tile_size@snd
+  let img_size = 256#32 
+  let x = (x - img_size/2) + (App.Ludo.tile_size@fst / 2)
+  let y = (y - img_size/2) + (App.Ludo.tile_size@snd / 2)
+  {x, y}
+
+//Star
+App.Ludo.Tile.draw.star(coord: App.Ludo.Coord, img: VoxBox): VoxBox
+  let {x, y} = App.Ludo.Tile.draw.to_png_pos(coord@fst, coord@snd)
+  let z = App.Ludo.z_index{"star"} <> 0#32
+  VoxBox.Draw.image(x, y, z, App.Ludo.Star, img)
+
+//Arrow
+App.Ludo.Tile.draw.arrow(coord: App.Ludo.Coord, team: App.Ludo.Team, img: VoxBox): VoxBox
+  let {x, y} = App.Ludo.Tile.draw.to_png_pos(coord@fst, coord@snd)
+  let z = App.Ludo.z_index{"star"} <> 0#32
+  VoxBox.Draw.image(x, y, z, App.Ludo.Tile.draw.get_arrow(team), img)
+
+
+// Piece
+App.Ludo.Tile.draw.piece(coord: App.Ludo.Coord, height: U32, team: App.Ludo.Team, img: VoxBox): VoxBox
+  let {x, y} = App.Ludo.Tile.draw.to_png_pos(coord@fst, coord@snd)
+  let z = App.Ludo.z_index{"piece"} <> 0#32
+  VoxBox.Draw.image(x, y - (height * 5), z + height, App.Ludo.Tile.draw.get_piece(team), img)
+
+App.Ludo.Tile.draw.outline(coord: App.Ludo.Coord, img: VoxBox): VoxBox
+  let size = App.Ludo.tile_size
+  let coord_x = coord@fst
+  let coord_y = coord@snd
+  let init_x  = coord@fst * size@fst
+  let init_y  = coord@snd * size@snd
+  let col = Col32.new(0,0,0,255)
+  let pixel = 
+    (x: U32, y: U32)
+      let pos = Pos32.new(x, y, 1)
+      VoxBox.push(pos, col, img)
+  // top line
+  for i : U32 from 0 to size@fst with img:
+    let vbox_x  = init_x + i
+    pixel(vbox_x, init_y)
+  // bot line
+  for i : U32 from 0 to size@fst with img:
+    let vbox_x  = init_x + i
+    pixel(vbox_x, init_y + size@snd - 1)
+  // lft line
+  for i : U32 from 0 to size@snd with img:
+    let vbox_y  = init_y + i
+    pixel(init_x, vbox_y)
+  // rgt line
+  for i : U32 from 0 to size@snd with img:
+    let vbox_y  = init_y + i
+    pixel(init_x + size@fst - 1, vbox_y)
+      img
+
+// Draws the tile's background corresponding to the team if there is one, the piece if there is one, and the star if there is one
+App.Ludo.Tile.draw.trail(coord: App.Ludo.Coord, trail: App.Ludo.Tile.Trail, pieces: List<App.Ludo.Team>, img: VoxBox): VoxBox
+  let get_color = App.Ludo.Team.get_color
+  let img = 
+    case trail {
+      common:
+        let img = App.Ludo.Tile.draw.outline(coord, img)
+        App.Ludo.Tile.draw.background(coord, App.Ludo.color{"white"} <> 0#32, img)
+      star: 
+        let img = App.Ludo.Tile.draw.outline(coord, img)
+        let img = App.Ludo.Tile.draw.star(coord, img)
+        without trail.init: App.Ludo.Tile.draw.background(coord, App.Ludo.color{"white"} <> 0#32, img)
+        let img = App.Ludo.Tile.draw.background(coord, get_color(trail.init), img)
+        img
+      door: 
+        let img = App.Ludo.Tile.draw.outline(coord, img)
+        let img = App.Ludo.Tile.draw.background(coord, App.Ludo.color{"white"} <> 0#32, img)
+        let img = App.Ludo.Tile.draw.arrow(coord, trail.team, img)
+        img
+      exclusive:
+        let img = App.Ludo.Tile.draw.outline(coord, img)
+        App.Ludo.Tile.draw.background(coord, get_color(trail.team), img)
+      super:
+        App.Ludo.Tile.draw.background(coord, get_color(trail.team), img)
+    }
+  let pair = {0#32, img}
+  for piece in List.reverse!(pieces) with pair:
+    let {height, img} = pair
+    let img = App.Ludo.Tile.draw.piece(coord, height, piece, img)
+    let height = height + 1
+    {height, img}
+  pair@snd
+
+// Draws the background and the piece if there is one
+App.Ludo.Tile.draw.home(coord: App.Ludo.Coord, team: App.Ludo.Team, occupied: Bool, img: VoxBox): VoxBox
+  let get_color = App.Ludo.Team.get_color
+  let background_img = App.Ludo.Tile.draw.background(coord, get_color(team), img)
+  if occupied then
+    App.Ludo.Tile.draw.piece(coord, 0, team, background_img)
+  else
+    background_img
+
+App.Ludo.Tile.draw.get_piece(team: App.Ludo.Team): VoxBox
+  case team {
+    red:    App.Ludo.Red
+    green:  App.Ludo.Green
+    blue:   App.Ludo.Blue
+    yellow: App.Ludo.Yellow
+  }
+
+App.Ludo.Tile.draw.get_dec(str: String): VoxBox
+  switch String.eql(str) {
+    "All": App.Ludo.All
+    "Blue_Red": App.Ludo.Blue_Red
+    "Green_Red": App.Ludo.Green_Red
+    "Green_Yellow": App.Ludo.Green_Yellow
+    "Yellow_Blue": App.Ludo.Yellow_Blue
+  }default VoxBox.empty
+
+App.Ludo.Tile.draw.get_arrow(team: App.Ludo.Team): VoxBox
+  case team {
+    red:    App.Ludo.Red_arrow
+    green:  App.Ludo.Green_arrow
+    blue:   App.Ludo.Blue_arrow
+    yellow: App.Ludo.Yellow_arrow
+  }
+
+App.Ludo.Team.get_color(team: App.Ludo.Team): Col32
+  let colors = App.Ludo.color
+  let get_color = (str: String) colors{str} <> 0#32
+  case team {
+    red:    get_color("Red")
+    green:  get_color("Green")
+    blue:   get_color("Blue")
+    yellow: get_color("Yellow")
+  }
+
+App.Ludo.Tile.draw.dec(coord: App.Ludo.Coord dec_img: VoxBox, img: VoxBox): VoxBox
+  let {x, y} = App.Ludo.Tile.draw.to_png_pos(coord@fst, coord@snd)
+  let z = App.Ludo.z_index{"background"} <> 0#32
+  //let img = App.Ludo.Tile.draw.outline(coord, img)
+  VoxBox.Draw.image(x, y, z, dec_img, img)
+
+// Draws all 32 * 32 pixels in the background of a tile
+App.Ludo.Tile.draw.background(coord: App.Ludo.Coord, col: Col32, img: VoxBox): VoxBox
+  let size = App.Ludo.tile_size
+  let coord_x = coord@fst
+  let coord_y = coord@snd
+  let init_x  = coord_x * size@fst
+  let init_y  = coord_y * size@snd
+  let z = App.Ludo.z_index{"background"} <> 0#32
+  VoxBox.Draw.rect(init_x, init_y, z, App.Ludo.tile_size@fst, App.Ludo.tile_size@snd, col, img)
+
+// Draws the tile
+App.Ludo.Tile.draw(coord: App.Ludo.Coord, tile: App.Ludo.Tile, img: VoxBox): VoxBox
+  case tile {
+    trail:   App.Ludo.Tile.draw.trail(coord, tile.class, tile.pieces, img)
+    home:    App.Ludo.Tile.draw.home(coord, tile.team, tile.occupied, img)
+    neutral: App.Ludo.Tile.draw.background(coord, tile.color, img)
+    dec: App.Ludo.Tile.draw.dec(coord, tile.img, img)
+   }
+
+// Draws the whole board
+App.Ludo.draw.canvas(map: App.Ludo.Map, img: VoxBox): VoxBox
+  for coord:tile in map with img:
+    App.Ludo.Tile.draw(coord, tile, img)
+  img
+
+// Compare 2 Coords
+App.Ludo.Coord.cmp(a: App.Ludo.Coord, b: App.Ludo.Coord): Cmp 
+  let x_cmp = U32.cmp(a@fst, b@fst)
+  let y_cmp = U32.cmp(a@snd, b@snd)
+  case x_cmp {
+    ltn: Cmp.ltn
+    eql: y_cmp
+    gtn: Cmp.gtn
+  }
+
+// Side = Square size
+// base_coord = Square's top left
+App.Ludo.Map.square(side: U32, base_coord: App.Ludo.Coord, tile: App.Ludo.Tile, map: App.Ludo.Map): App.Ludo.Map
+  for x : U32  from base_coord@fst to (base_coord@fst + side - 1) with map:
+    let coord = {x, base_coord@snd}
+    App.Ludo.Map.set(coord, tile, map)
+
+  for x : U32  from base_coord@fst to (base_coord@fst + side) with map:
+    let coord = {x, base_coord@snd + side - 1}
+    App.Ludo.Map.set(coord, tile, map)
+    
+  for y : U32  from base_coord@snd to (base_coord@snd + side - 1) with map:
+    let coord = {base_coord@fst, y}
+    App.Ludo.Map.set(coord, tile, map)
+
+  for y : U32  from base_coord@snd to (base_coord@snd + side - 1) with map:
+    let coord = {base_coord@fst + side - 1, y}
+    App.Ludo.Map.set(coord, tile, map)
+  map
+
+App.Ludo.Map.init.create_base(
+  base_outline: U32,
+  base_inline: U32,
+  base_home: U32,
+  coord: App.Ludo.Coord,
+  code: String
+  map: App.Ludo.Map
+): App.Ludo.Map
+
+  let team = App.Ludo.Team.read(code)
+  without team: map
+  let home    = App.Ludo.Tile.home(true, team)
+  let outline = App.Ludo.Tile.neutral(App.Ludo.color{code} <> 0#32)
+  let white   = App.Ludo.Tile.neutral(App.Ludo.color{"white"} <> 0#32)
+  
+  let map = App.Ludo.Map.square(base_outline, coord,                          outline, map)
+  let map = App.Ludo.Map.square(base_inline,  {coord@fst + 1, coord@snd + 1}, white,   map)
+  let map = App.Ludo.Map.square(base_home,    {coord@fst + 2, coord@snd + 2}, home,    map)
+  map
+
+
+App.Ludo.Team.show(team: App.Ludo.Team): String
+  case team {
+    red: "Red"
+    green: "Green"
+    yellow: "Yellow"
+    blue: "Blue"
+  }
+
+App.Ludo.won(team: App.Ludo.Team, map: App.Ludo.Map): Bool
+  let super_tiles = App.Ludo.super_tiles
+  let tile = App.Ludo.Map.get(super_tiles{App.Ludo.Team.show(team)} <> {0#32, 0#32}, map) 
+  without tile: false 
+  case tile { 
+    trail: case tile.class { 
+      super: List.length!(tile.pieces) =? 4
+    } default false
+  } default false
+
+App.Ludo.get_move_coord(
+  coord: Maybe<App.Ludo.Coord>, 
+  mp:    Nat,
+  team:  App.Ludo.Team,
+  map:   App.Ludo.Map, 
+  trail: App.Ludo.Trail
+): Maybe<App.Ludo.Coord>
+  let tile = App.Ludo.Map.get(coord <> {0#32, 0#32}, map)
+  without tile: coord
+  case tile{
+    trail:
+      for i from 0 to mp with coord:      
+        let exclusive_tiles = App.Ludo.exclusive_tiles 
+        case tile.class {
+          door: if App.Ludo.Team.eql(team, tile.class.team) 
+            then
+              List.head<App.Ludo.Coord>(exclusive_tiles{App.Ludo.Team.show(team)} <> [])
+            else 
+              App.Ludo.Trail.get(coord <> {0#32, 0#32}, trail)
+        } default App.Ludo.Trail.get(coord <> {0#32, 0#32}, trail)
+      coord
+    home: App.Ludo.Trail.get(coord <> {0#32, 0#32}, trail)
+  } default App.Ludo.Trail.get(coord <> {0#32, 0#32}, trail)
+
+App.Ludo.get_possible_moves(
+  mp: Nat,
+  team: App.Ludo.Team,
+  map: App.Ludo.Map
+  trail: App.Ludo.Trail
+  ): List<App.Ludo.Coord>
+    let possible_moves = []
+    for map_coord:tile in map with possible_moves:
+      let map_move_coord = App.Ludo.get_move_coord(some(map_coord), mp, team, map, trail)
+      if App.Ludo.is_move_possible(map_coord, map_move_coord, mp, team, map)
+        then map_coord & possible_moves 
+        else possible_moves
+    possible_moves
+
+
+App.Ludo.is_move_possible(
+  coord: App.Ludo.Coord,
+  move_coord: Maybe<App.Ludo.Coord>,
+  mp: Nat,
+  team: App.Ludo.Team,
+  map: App.Ludo.Map): Bool
+    let no_move_tile = App.Ludo.Map.get(coord, map)
+    without move_coord: false 
+    without no_move_tile: false 
+
+    case no_move_tile {
+      trail: 
+        if List.any!(App.Ludo.Team.eql(team), no_move_tile.pieces)
+          then 
+            let move_tile = App.Ludo.Map.get(move_coord, map)
+            without move_tile: false 
+            case move_tile {
+            trail: case move_tile.class {
+              common: 
+                if List.length!(move_tile.pieces) >? 1 
+                  then List.any!(App.Ludo.Team.eql(team), move_tile.pieces)
+                  else true
+            } default true 
+          } default true  
+          else 
+            false
+      home: ((mp =? 1) || mp =? 6) && no_move_tile.occupied && App.Ludo.Team.eql(team, no_move_tile.team)
+    } default false
+  
+App.Ludo.home_return(team: App.Ludo.Team, map: App.Ludo.Map): App.Ludo.Map  
+  let home_tiles = App.Ludo.home_tiles
+  let home_coords = home_tiles{App.Ludo.Team.show(team)} <> []
+  let home_return = (tile: App.Ludo.Tile)
+    case tile{ 
+      home: if tile.occupied
+        then  
+          tile
+        else  
+          App.Ludo.Tile.home(true, team)
+    } default tile 
+  let result = {false, map} 
+  for coord in home_coords with result:
+    let {returned, map} = result 
+    let home_tile = App.Ludo.Map.get(coord, map)
+    without home_tile: result
+    if returned
+      then
+        result 
+      else 
+        case home_tile {
+          home: if home_tile.occupied
+            then 
+              result
+            else 
+              let returned = true 
+              let map = App.Ludo.Map.modify(home_return, coord, map)
+              {returned, map}
+        } default result         
+  result@snd 
+  
+    
+App.Ludo.eat(coord: App.Ludo.Coord, team: App.Ludo.Team, map: App.Ludo.Map): App.Ludo.Map
+  let tile = App.Ludo.Map.get(coord, map) 
+  without tile: map 
+  let remove_tail = (tile: App.Ludo.Tile)
+    case tile {
+      trail: case tile.class{
+        common: case tile.pieces{
+          nil:  tile 
+          cons: App.Ludo.Tile.trail(tile.class, List.filter<App.Ludo.Team>(App.Ludo.Team.eql(team), tile.pieces))
+        }
+      } default tile 
+    } default tile 
+  let map = case tile { 
+    trail: case tile.class {
+      common: 
+        let eated_team = List.last!(tile.pieces) 
+        without eated_team: map
+        if List.all!(App.Ludo.Team.eql(eated_team), tile.pieces)
+          then map
+          else App.Ludo.home_return(eated_team, map)
+    } default map
+  } default map
+  App.Ludo.Map.modify(remove_tail, coord, map)
+  
+App.Ludo.Move(coord: App.Ludo.Coord, mp: Nat, team: App.Ludo.Team, trail: App.Ludo.Trail, map: App.Ludo.Map): App.Ludo.Map
+  let first_tile = App.Ludo.Map.get(coord, map)
+  without first_tile: map
+  let remove_tail = (tile: App.Ludo.Tile)
+    case tile {
+      trail: App.Ludo.Tile.trail(tile.class, List.delete_el<App.Ludo.Team>(App.Ludo.Team.eql, team, tile.pieces))
+      home: App.Ludo.Tile.home(false, team)
+    } default tile
+   let add_tail = (tile: App.Ludo.Tile)
+          case tile {
+            trail: App.Ludo.Tile.trail(tile.class, team & tile.pieces)
+          } default tile
+  case first_tile {
+    trail: 
+      if mp =? 0
+        then 
+          let map = App.Ludo.eat(coord, team, map)
+          map
+        else
+          let map = App.Ludo.Map.modify(remove_tail, coord, map)
+          let tile = App.Ludo.Map.get(coord, map)
+          without tile: map 
+          let exclusives = App.Ludo.exclusive_tiles 
+          let get_first_exclusive = (str: String)
+                List.head<App.Ludo.Coord>(exclusives{str} <> [])
+
+      let new_coord = case tile {
+        trail: case tile.class {
+          door: if App.Ludo.Team.eql(team, tile.class.team) then
+          case tile.class.team {
+            blue: get_first_exclusive("Blue")
+            red: get_first_exclusive("Red")
+            green: get_first_exclusive("Green")
+            yellow: get_first_exclusive("Yellow")
+          }
+          else App.Ludo.Trail.get(coord, trail)
+        }default App.Ludo.Trail.get(coord, trail)
+      }default App.Ludo.Trail.get(coord, trail)
+
+      without new_coord: map
+
+      let map = App.Ludo.Map.modify(add_tail, new_coord, map)
+      App.Ludo.Move(new_coord, mp - 1, team, trail, map)
+    home: 
+      let new_coord = App.Ludo.Trail.get(coord, trail) <> {0#32, 0#32}
+      let map = App.Ludo.Map.modify(remove_tail, coord, map)
+      let map = App.Ludo.Map.modify(add_tail, new_coord, map)
+      map
+  }default map 
+  
+
+// Initial Map
+App.Ludo.Map.init: App.Ludo.Map
+  let map = BBT.tip<App.Ludo.Coord, App.Ludo.Tile>
+
+  let common_tile = App.Ludo.Tile.trail(App.Ludo.Tile.Trail.common, [])
+  for i : U32 from 0 to 15 with map:
+    for j : U32 from 0 to 15 with map:
+      let coord = {i, j}
+      App.Ludo.Map.set(coord, common_tile, map)
+  map
+
+  let get_star      = (a: Maybe<App.Ludo.Team>) App.Ludo.Tile.trail(App.Ludo.Tile.Trail.star(a), [])
+  let blue_init     = get_star(some(App.Ludo.Team.blue))
+  let yellow_init   = get_star(some(App.Ludo.Team.yellow))
+  let red_init      = get_star(some(App.Ludo.Team.red))
+  let green_init    = get_star(some(App.Ludo.Team.green))
+  let common_star   = get_star(none)
+
+  let get_exclusive = (a: App.Ludo.Team) App.Ludo.Tile.trail(App.Ludo.Tile.Trail.exclusive(a), [])
+  let blue_exc      = get_exclusive(App.Ludo.Team.blue)
+  let yellow_exc    = get_exclusive(App.Ludo.Team.yellow)
+  let red_exc       = get_exclusive(App.Ludo.Team.red)
+  let green_exc     = get_exclusive(App.Ludo.Team.green)
+
+  let get_super = (a: App.Ludo.Team) App.Ludo.Tile.trail(App.Ludo.Tile.Trail.super(a), [])
+  let blue_super      = get_super(App.Ludo.Team.blue)
+  let yellow_super    = get_super(App.Ludo.Team.yellow)
+  let red_super      = get_super(App.Ludo.Team.red)
+  let green_super    = get_super(App.Ludo.Team.green)
+
+  let get_door      = (a: App.Ludo.Team) App.Ludo.Tile.trail(App.Ludo.Tile.Trail.door(a), [])
+  let blue_door     = get_door(App.Ludo.Team.blue)
+  let yellow_door   = get_door(App.Ludo.Team.yellow)
+  let red_door      = get_door(App.Ludo.Team.red)
+  let green_door    = get_door(App.Ludo.Team.green)
+
+  
+  let base_outline_side = 6#32
+  let base_inline_side  = 4#32
+  let base_home_side    = 2#32
+
+
+  let base_coords = App.Ludo.base_coord
+  let set_base = (str: String) App.Ludo.Map.init.create_base(
+    base_outline_side, 
+    base_inline_side, 
+    base_home_side, 
+    base_coords{str} <> {0, 0}, 
+    str
+  )
+  let map  = set_base("Blue", map)
+  let map  = set_base("Yellow", map)
+  let map  = set_base("Red", map)
+  let map  = set_base("Green", map)
+
+
+  let init_tiles = App.Ludo.init_tiles
+  let map = App.Ludo.Map.set(init_tiles{"Blue"} <> {0, 0}, blue_init, map)
+  let map = App.Ludo.Map.set(init_tiles{"Yellow"} <> {0, 0}, yellow_init, map)
+  let map = App.Ludo.Map.set(init_tiles{"Red"} <> {0, 0}, red_init, map)
+  let map = App.Ludo.Map.set(init_tiles{"Green"} <> {0, 0}, green_init, map)
+
+  let star_tiles = App.Ludo.star_tiles
+  for coord in star_tiles with map:
+    App.Ludo.Map.set(coord, common_star, map)
+  
+
+  let exclusive =  (color: String, tile: App.Ludo.Tile, map: App.Ludo.Map)
+    for coord in App.Ludo.exclusive_tiles{color} <> [] with map: 
+      App.Ludo.Map.set(coord, tile, map)
+    map
+
+  let map = exclusive("Blue",   blue_exc,   map)
+  let map = exclusive("Yellow", yellow_exc, map)
+  let map = exclusive("Red",    red_exc,    map)
+  let map = exclusive("Green",  green_exc,  map)
+
+  let door_tiles = App.Ludo.door_tiles
+  let map = App.Ludo.Map.set(door_tiles{"Blue"} <> {0, 0}, blue_door, map)
+  let map = App.Ludo.Map.set(door_tiles{"Red"} <> {0, 0}, red_door, map)
+  let map = App.Ludo.Map.set(door_tiles{"Yellow"} <> {0, 0}, yellow_door, map)
+  let map = App.Ludo.Map.set(door_tiles{"Green"} <> {0, 0}, green_door, map)
+
+  let super_tiles = App.Ludo.super_tiles
+  let map = App.Ludo.Map.set(super_tiles{"Blue"} <> {0, 0}, blue_super, map)
+  let map = App.Ludo.Map.set(super_tiles{"Red"} <> {0, 0}, red_super, map)
+  let map = App.Ludo.Map.set(super_tiles{"Yellow"} <> {0, 0}, yellow_super, map)
+  let map = App.Ludo.Map.set(super_tiles{"Green"} <> {0, 0}, green_super, map)
+
+  let dec_tiles = App.Ludo.dec_tiles
+  for name:coord in dec_tiles with map:
+    let tile = App.Ludo.Tile.dec(App.Ludo.Tile.draw.get_dec(name))
+    App.Ludo.Map.set(coord, tile, map)
+  
+  //let map = App.Ludo.Map.set({7#32, 8#32}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.super(App.Ludo.Team.red), [App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red]), map)
+  // let map = App.Ludo.Map.set({7#32, 9#32}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.exclusive(App.Ludo.Team.red), [App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red]), map)
+  // let map = App.Ludo.Map.set({14, 6}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.common, [App.Ludo.Team.yellow]), map)
+
+  map 
+
+App.Ludo.Trail.init: App.Ludo.Trail
+  let trail = BBT.tip<App.Ludo.Coord, App.Ludo.Coord>
+
+  let set_trail_order =  (map: Map<List<App.Ludo.Coord>>, trail: App.Ludo.Trail)
+    let color_list = ["Blue", "Yellow", "Red", "Green"]
+    for color in color_list with trail:
+      let coord_list      = map{color} <> []
+      let next_coord_list = List.tail<App.Ludo.Coord>(coord_list)
+      for index from 0 to List.length<App.Ludo.Coord>(next_coord_list) with trail: 
+        let coord       = List.at<App.Ludo.Coord>(index, coord_list) <> {0, 0}
+        let next_coord = List.at<App.Ludo.Coord>(index, next_coord_list) <> {0, 0}
+        App.Ludo.Trail.set(coord, next_coord, trail)
+      trail
+    trail
+
+  let set_home_order = (map: Map<List<App.Ludo.Coord>>, trail: App.Ludo.Trail)
+    let color_list = ["Blue", "Yellow", "Red", "Green"]
+    for color in color_list with trail:
+      let coord_list = map{color} <> []
+        let init_trail = App.Ludo.init_trail
+      for coord in coord_list with trail: 
+        App.Ludo.Trail.set(coord, List.at<App.Ludo.Coord>(1, init_trail{color} <> []) <> {0#32, 0#32}, trail)
+        trail
+    trail 
+
+  let trail = set_trail_order(App.Ludo.exclusive_tiles, trail)
+  let trail = set_trail_order(App.Ludo.small_trail,     trail)
+  let trail = set_trail_order(App.Ludo.init_trail,      trail)
+  let trail = set_trail_order(App.Ludo.star_trail,      trail)
+  let trail = set_trail_order(App.Ludo.diagonals_trail, trail)
+
+  let trail = set_home_order(App.Ludo.home_tiles, trail)
+  trail
+
+App.Ludo.mouse_to_coord(mouse_pos: Pair<U32, U32>): App.Ludo.Coord
+  let scale = App.Ludo.scale 
+  let tile_size = App.Ludo.tile_size
+  {mouse_pos@fst/(tile_size@fst * scale), mouse_pos@snd/(tile_size@snd * scale)}
+
+
+type App.Ludo.Game {
+  new(
+    room:     String
+    board:    App.Ludo.Map
+    trail:    App.Ludo.Trail
+    players:  Map<String>
+    turn:     Nat
+    random:   Nat
+    dice:     App.Ludo.Dice
+  )
+}
+
+
+App.Ludo.init.game: App.Ludo.Game
+  let room       = ""
+  let board      = App.Ludo.Map.init
+  let trail      = App.Ludo.Trail.init
+  let players    = Map.new!
+  let turn       = 0
+  let random     = 0
+  let dice       = App.Ludo.Dice.new(none,0)
+  let winner     = none
+  let game       = App.Ludo.Game.new(room, board, trail, players, turn, random, dice, winner)
+  game
+
+// Initial state
+App.Ludo.init: App.Init<App.Ludo.State>
+  let user    = ""
+  let input   = ""
+  let data    = App.Ludo.Local.Lobby.new(user, input)
+  let local   = App.Ludo.State.Local.lobby(data)
+  let global  = App.Ludo.State.Global.lobby
+  App.Store.new<App.Ludo.State>(local, global)
+
+App.Ludo.draw.lobby(data: App.Ludo.Local.Lobby, img: VoxBox): DOM
+  <div style=
+    {
+      "width": "vw"
+      "height": "80%"
+      "display": "flex"
+      "flex-direction": "column"
+      "justify-content": "center"
+      "align-items": "center"
+    }>
+    <div style = {"font-size": "5em", "margin-bottom": "32px"}> "Welcome to Kind's Ludo!" </div>
+    <div style = {"font-size": "3em", "margin-bottom": "16px"}> "Enter a Room:" </div>
+    <input 
+      style =
+        {
+          "width": "512px"
+          "line-height": "1em"
+          "font-size": "3em"
+          "text-align": "center"
+        }
+      id = "lobby_input">
+    </input>
+  </div>
+
+App.Ludo.draw(img: VoxBox): App.Draw<App.Ludo.State>
+  (state)
+  let local  = state@local
+  let global = state@global
+  case local global {
+    lobby lobby:  App.Ludo.draw.lobby(local.data, img)
+    game  game:   App.Ludo.draw.game(local.data, global.status, img)
+  } default DOM.text("")
+
+
+App.Ludo.draw.game(data: App.Ludo.Local.Game, game: App.Ludo.Game, img: VoxBox): DOM
+    let dice = game@dice
+    let new_img = App.Ludo.draw.canvas(game@board, img)
+    let player_team = App.Ludo.player.get_team(String.to_lower(data@user), game)
+    let winner = game@winner
+    let text_box = {"height": "72px", "margin-bottom": "20px", "font-size": "42px"}
+    let {visibility, opacity} = if Maybe.is_some!(game@winner) then {"visible", "1"} else {"hidden", "0"}
+    <div>
+      <div style ={
+          "position": "fixed"
+          "top": "0"
+          "bottom": "0"
+          "left": "0"
+          "right": "0"
+          "background": "rgba(0, 0, 0, 0.7)"
+          "transition": "opacity 500ms"
+          "visibility": visibility
+          "opacity": opacity
+        }>
+          <div style ={
+            "visibility": visibility
+            "margin":           "200px auto"
+            "padding":          "20px"
+            "background":       "#fff"
+            "border-radius":    "5px"
+            "display":          "flex"
+            "flex-direction":   "column"
+            "justify-content":  "center"
+            "align-items":      "center"
+            "width":            "25%"
+            "position":         "relative"
+            "transition":       "all 1s ease-in-out"
+          }>
+           <div style = {"width": "100%", "text-align": "center", "height": "84px", "font-size": "3em"}>"Team " | without winner: "none" App.Ludo.Team.show(winner) | " wins!"</div>
+           <button id = "play_again" style = {"width": "186px", "height": "48px", "font-size": "2em"}>"Play Again?"</button> 
+        </div>
+      </div>
+      <div style=
+        {
+          "display": "flex"
+          "width": "100%"
+          "justify-content": "space-evenly"
+        }>
+          <div style =
+            {
+              "display": "flex"
+              "height": U32.show(App.Ludo.tile_size@fst * 15)
+              "width": "20%"
+              "justify-content": "center"
+              "align-items": "center"
+              "flex-direction": "column"
+            }>
+              <div style = text_box> without player_team: "Spectator" "Your team: " | App.Ludo.Team.show(player_team)</div>
+              <div style = text_box> "Team turn: " | App.Ludo.Team.show(App.Ludo.turn.get_team(game@turn))  </div>
+              
+              
+              <div style = {
+                  "height":"256px"
+                  "width": "256px"
+                  "background-color": "lightgray"
+                  "font-size": "128px"
+                  "text-align": "center"
+                }>
+                <img style = {"height":"256px", "width": "256px"} src=App.Ludo.Dice.get_img(dice@seed)></img>
+              </div>
+              {
+                if Map.has!(String.to_lower(data@user), game@players) then 
+                  <button 
+                    id = "dice_roll"
+                    style = 
+                    {
+                      "height": "72px"
+                      "width": "50%"
+                      "margin-top": "48px"
+                      "font-size": "42px"
+                    }> "Play"
+                  </button>
+                else
+                  <div></div>
+              }
+          </div>
+          {
+            DOM.vbox(
+              {
+                "id": "game_screen",
+                "width": U32.show(App.Ludo.tile_size@fst * 15),
+                "height": U32.show(App.Ludo.tile_size@snd * 15),
+                "scale": U32.show(App.Ludo.scale)
+              }, {}, new_img)
+          }
+          <div style =
+            {
+              "height": U32.show(App.Ludo.tile_size@fst * 15)
+              "width": "20%"
+            }>
+          </div>
+      </div>
+    </div>
+
+App.Ludo.when.move(team: App.Ludo.Team, coord: App.Ludo.Coord, game: App.Ludo.Game): App.Ludo.Game
+  let dice = game@dice
+  let rolling = dice@rolling
+  let move_coord = App.Ludo.get_move_coord(some(coord), (dice@seed % 6) + 1, team, game@board, game@trail)
+
+  without rolling: game
+  if rolling =? 0 then
+    let board = App.Ludo.Move(coord, (dice@seed % 6) + 1, team, game@trail, game@board)
+    let dice  = dice@rolling <- none
+    let game = game@dice <- dice
+    let game = game@board <- board
+    let game = 
+      if (dice@seed % 6) =? 5 then 
+        game
+      else 
+        game@turn <- game@turn + 1
+    game
+  else
+    game
+
+App.Ludo.when.update_dice(game: App.Ludo.Game): App.Ludo.Game
+  let turn = App.Ludo.turn.get_team(game@turn)
+  let dice = game@dice
+  let rolling = dice@rolling
+  without rolling: game
+  if rolling =? 0 then
+    let moves = App.Ludo.get_possible_moves((dice@seed % 6) + 1, turn, game@board, game@trail)
+    // log("possible moves: " | Nat.show(List.length!(moves)))
+    if List.is_empty!(moves) then
+      let dice = dice@rolling <- none
+      let game = game@turn <- game@turn + 1
+      let game = game@dice <- dice
+      game
+    else
+      game
+  else
+    log("dice_rolling")
+    let dice = dice@rolling <- some(rolling - 1)
+    let dice = dice@seed <- Nat.random(dice@seed)
+    game@dice <- dice
+
+App.Ludo.when.lobby(event: App.Event, local: App.Ludo.Local.Lobby): IO<Maybe<App.State.local(App.Ludo.State)>>
+  case event {
+    init:
+      let lobby = local@user <- event.user
+      // log(event.user)
+      let local = App.Ludo.State.Local.lobby(lobby)
+      App.set_local<App.Ludo.State>(local)
+    input:
+      let lobby = local@input <- event.text
+      let local = App.Ludo.State.Local.lobby(lobby)
+      App.set_local<App.Ludo.State>(local)
+    key_down:
+      log("Key pressed: " | U16.show(event.code))
+      switch U16.eql(event.code) {
+        13:
+          let room    = String.take(16, Crypto.Keccak.hash(local@input))
+          let action  = App.Ludo.Action.join
+          let serial  = App.Ludo.Serializer(action)
+          let local   = App.Ludo.State.Local.game(App.Ludo.Local.Game.new(local@user, {0,0}, ""))
+          IO {
+            App.watch<App.Ludo.State>(room)
+            App.new_post<App.Ludo.State>(room, serial)
+            App.set_local<App.Ludo.State>(local)
+          }
+      } default App.pass<App.Ludo.State>
+  } default App.pass<App.Ludo.State>
+
+App.Ludo.when: App.When<App.Ludo.State>
+  (event, state)
+  let local  = state@local
+  let global = state@global
+  case local global {
+    lobby lobby: App.Ludo.when.lobby(event, local.data)
+    game  game: App.Ludo.when.game(event, local.data, global.status)
+  } default App.pass<App.Ludo.State>
+
+
+// type App.Ludo.Game {
+//   new(
+//     room:     String
+//     board:    App.Ludo.Map
+//     trail:    App.Ludo.Trail
+//     players:  Map<String>
+//     turn:     Nat
+//     random:   Nat
+//     dice:     App.Ludo.Dice
+//   )
+// }
+
+type App.Ludo.Action {
+  join
+  move(coord: Pair<U32, U32>)
+  dice
+} deriving (serializer, deserializer)
+
+App.Ludo.Serializer(action: App.Ludo.Action): String
+  String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run<App.Ludo.Action>(App.Ludo.Action.serializer, action)))
+
+App.Ludo.Deserializer(data: String): Maybe<App.Ludo.Action>
+  Deserializer.run<App.Ludo.Action>(App.Ludo.Action.deserializer, Bits.hex.decode(data))
+
+App.Ludo.when.join(id: String, room: String, global: App.Ludo.State.Global): App.Ludo.State.Global
+  case global {
+    lobby:
+      log("Joined in the team: Red")
+      let game    = App.Ludo.init.game
+      let players = game@players
+      let game    = game@room <- room
+      let team    = App.Ludo.Team.red
+      let players = players{id} <- team
+      let game    = game@players <- players
+      let global  = App.Ludo.State.Global.game(game)
+      global
+    game:
+      let game    = global.status
+      let players = game@players
+      let count   = 0
+      for id:team in players with count:
+        count + 1
+      let game =
+        if count <=? 3 then 
+          let team    = App.Ludo.turn.get_team(count)
+          log("Joined in the team: " | App.Ludo.Team.show(team))
+          let players = players{id} <- team
+          let game    = game@players <- players
+          game
+        else
+          game
+      let global  = App.Ludo.State.Global.game(game)
+      global
+  }
+
+
+// Event handler
+App.Ludo.when.game(event: App.Event, local: App.Ludo.Local.Game, game: App.Ludo.Game): IO<Maybe<App.State.local(App.Ludo.State)>>
+  let dice = game@dice
+  let mouse_pos = local@mouse_pos
+  case event {
+    mouse_click:
+      log("mouse click on: " | event.id)
+      switch String.eql(event.id) {
+        "play_again":
+          let room    = String.take(16, Crypto.Keccak.hash(game@room))
+          let action  = App.Ludo.Action.join
+          let serial  = App.Ludo.Serializer(action)
+          let local   = App.Ludo.State.Local.game(App.Ludo.Local.Game.new(local@user, {0,0}, ""))
+          IO {
+            App.unwatch<App.Ludo.State>(game@room)
+            App.watch<App.Ludo.State>(room)
+            App.new_post<App.Ludo.State>(room, serial)
+            App.set_local<App.Ludo.State>(local)
+          }
+        "dice_roll": 
+          let room   = game@room
+          let action = App.Ludo.Action.dice
+          let serial = App.Ludo.Serializer(action)
+          App.new_post!(room, serial)
+       } default App.pass!
+    mouse_down:
+      switch String.eql(local@mouse_over) {
+        "game_screen": 
+          let team = App.Ludo.player.get_team(String.to_lower(local@user), game)
+          without team: log("no user") App.pass!
+          let coord = App.Ludo.mouse_to_coord(local@mouse_pos)
+          let move_coord = App.Ludo.get_move_coord(some(coord), (dice@seed % 6) + 1, team, game@board, game@trail)
+          //log(List.show!(Pair.show!!(U32.show, U32.show), App.Ludo.get_possible_moves(coord, move_coord, (dice@seed % 6) + 1, team, local@board, local@trail))) 
+          let allow_move = App.Ludo.is_move_possible(coord, move_coord, (dice@seed % 6) + 1, team, game@board)
+          if allow_move then
+            let action = App.Ludo.Action.move(coord) // App.Ludo.when.move(team, coord, local) 
+            let serial = App.Ludo.Serializer(action)
+            App.new_post!(game@room, serial)
+          else 
+            App.pass!  
+          // log(Bool.show(App.Ludo.won(local@team, local@board)))     
+      } default App.pass<App.Ludo.State> 
+
+    mouse_move:
+      let local = local@mouse_pos <- event.mouse_pos
+      App.set_local<App.Ludo.State>(App.Ludo.State.Local.game(local))
+
+    mouse_over: 
+      let local = local@mouse_over <- event.id 
+      App.set_local<App.Ludo.State>(App.Ludo.State.Local.game(local))
+
+    frame:
+      // let local = App.Ludo.when.update_dice(local)
+      // let random = Nat.random(local@random)
+      // let local = local@random <- random
+      // App.set_local<App.Ludo.State>(local)
+      App.pass!
+  } default App.pass<App.Ludo.State>
+
+// Global ticker: not used
+App.Ludo.tick: App.Tick<App.Ludo.State>
+  (tick, glob)
+  case glob {
+    lobby: glob
+    game:
+      let game      = glob.status
+      let game      = App.Ludo.when.update_dice(game)
+      let random    = Nat.random(game@random)
+      let game      = game@random <- random
+      let team_turn = App.Ludo.turn.get_team(game@turn)
+      let has_plyr  = false
+      for id:team in game@players with has_plyr:
+        if App.Ludo.Team.eql(team_turn, team) then
+          true
+        else
+          has_plyr
+      let turn      = if has_plyr then game@turn else
+        log("current turn: " | App.Ludo.Team.show(App.Ludo.turn.get_team(game@turn + 1)))
+        game@turn + 1
+      let game      = game@turn <- turn
+      let last_team = App.Ludo.turn.get_team(game@turn - 1)
+      let game = 
+        if App.Ludo.won(last_team, game@board) then
+          game@winner <- some(last_team)
+        else
+          game
+      App.Ludo.State.Global.game(game)
+  }
+  // let local = App.Ludo.when.update_dice(local)
+      // let random = Nat.random(local@random)
+      // let local = local@random <- random
+      // App.set_local<App.Ludo.State>(local)
+
+// Not used
+App.Ludo.post: App.Post<App.Ludo.State>
+  (time, room, addr, data, glob)
+  let action = App.Ludo.Deserializer(data)
+  without action: log("action received unexistent") glob
+  case action {
+    dice: log("action received dice") App.Ludo.post.dice(addr, glob)
+    join: log("action received join") App.Ludo.when.join(addr, room, glob)
+    move: log("action received move")
+      case glob {
+        game:
+          // get team from player address 
+          let game  = glob.status
+          let coord = action.coord
+          let dice  = game@dice
+          let team  = App.Ludo.player.get_team(addr, game)
+          without team: glob
+          // Checks if it's the player's turn
+          if App.Ludo.turn.is_player_turn(addr, game) then
+            // Gets destination coordinate
+            let move_coord = App.Ludo.get_move_coord(some(coord), (dice@seed % 6) + 1, team, game@board, game@trail)
+            // Checks if movement is allowed
+            let allow_move = App.Ludo.is_move_possible(coord, move_coord, (dice@seed % 6) + 1, team, game@board)
+            // log(Bool.show(allow_move))
+            if allow_move then
+              let game = App.Ludo.when.move(team, coord, game)
+              App.Ludo.State.Global.game(game)
+            else 
+              glob
+          else
+            glob
+          //log(List.show!(Pair.show!!(U32.show, U32.show), App.Ludo.get_possible_moves(coord, move_coord, (dice@seed % 6) + 1, local@team, local@board, local@trail))) 
+      } default glob
+  } default glob
+
+App.Ludo.post.dice(id: String, glob: App.Ludo.State.Global): App.Ludo.State.Global
+  // log("addr: " | id)
+  case glob {
+    lobby: glob
+    game : 
+      let game = glob.status
+      let dice = game@dice
+      let game = 
+        if App.Ludo.turn.is_player_turn(id, game) && Maybe.is_none!(dice@rolling) then
+          let dice = dice@rolling <- some(32#64)
+          let dice = dice@seed <- (game@random * 7)
+          let game = game@dice <- dice
+          game
+        else
+          game
+      App.Ludo.State.Global.game(game)
+  }
+
+// Application
+App.Ludo: App<App.Ludo.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  App.new<App.Ludo.State>(
+    App.Ludo.init
+    App.Ludo.draw(img)
+    App.Ludo.when
+    App.Ludo.tick
+    App.Ludo.post
+  )
