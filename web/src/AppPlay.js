@@ -80,7 +80,7 @@ module.exports = class AppPlay extends Component {
     // Init event
     this.register_event({
       _: "App.Event.init",
-      time: BigInt(Date.now()),
+      time: BigInt(0),
       user: ethsig.addressFromKey("0x"+KEY).slice(2),
       info: {
         _: "App.EnvInfo.new",

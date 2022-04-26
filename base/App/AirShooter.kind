@@ -99,6 +99,8 @@ App.AirShooter.reset(local: App.AirShooter.State.Local): App.AirShooter.State.Lo
   let local = local@player@score <- initial@player@score
   let local = local@player@ship@position <- {128.0, 200}
   let local = local@started <- false 
+  let local = local@enemies <- initial@enemies
+  let local = local@bullets <- initial@bullets
 
   local
 
@@ -261,7 +263,6 @@ App.AirShooter.when: App.When<App.AirShooter.State>
   if Bool.not(local@started) then 
     case event {
       init: IO {
-        let local = local@seed <- U64.to_nat(event.time)
         let local = local@player@id <- event.user
         App.watch!(App.AirShooter.Room)
         App.set_local!(local)
@@ -276,6 +277,7 @@ App.AirShooter.when: App.When<App.AirShooter.State>
         switch String.eql(event.id) {
             "start": 
               let my_highest = state@global@leaderboard{String.to_lower(state@local@player@id)} <> { "", Nat.to_u32(0) }
+              let local = local@seed <- U64.to_nat(event.time)
               let local = local@player@highscore <- my_highest@snd
               let local = local@started <- true
               IO {
