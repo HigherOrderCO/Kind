@@ -1,0 +1,10 @@
+App.AirShooter.Parts.Bullet.move(bullet: App.AirShooter.Parts.Bullet): App.AirShooter.Parts.Bullet
+  // if bullet is from player go up else go down
+  let destination = { bullet@position@fst, if bullet@isPlayer then 300.0 else -50.0 }
+
+  let new_pos = App.AirShooter.Position.Lerp(bullet@position, destination, bullet@velocity)
+
+  let bullet = bullet@position <- new_pos
+  // TODO: check hitbox size
+  let bullet = bullet@hitbox <- Shape.Circle.new(V2.new(new_pos@fst, new_pos@snd), 10.0)
+  bullet

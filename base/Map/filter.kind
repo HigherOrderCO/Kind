@@ -1,0 +1,2 @@
+Map.filter<A: Type>(fn: A -> Bool, map: Map<A>): Map<A>
+  Map.for<A>(map)<Map<A>>(Map.new<A>, (key, value, map) if fn(value) then map else Map.set<A>(key, value, map))

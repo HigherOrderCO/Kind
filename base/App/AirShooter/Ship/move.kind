@@ -1,0 +1,7 @@
+App.AirShooter.Ship.move(destination: App.AirShooter.Position, ship: App.AirShooter.Ship): App.AirShooter.Ship
+  let new_pos = App.AirShooter.Position.Lerp(ship@position, destination, ship@engine@velocity)
+
+  let ship = ship@position <- new_pos
+  // TODO: check hitbox size
+  let ship = ship@hitbox <- Shape.Circle.new(V2.new(new_pos@fst, new_pos@snd), 5.0)
+  ship

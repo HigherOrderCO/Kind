@@ -1,0 +1,8 @@
+F64.pos_vector(distance: F64, x: F64, y: F64): Pair<F64, F64>
+  let tan     = y / x 
+  let arc     = F64.atan(tan)
+  let new_x   = distance * F64.cos(arc)
+  let new_y   = distance * F64.sin(arc)
+  let new_x   = if x <=? 0 then new_x * -1 else new_x
+  let new_y   = if x <=? 0 then new_y * -1 else new_y
+  {new_x, new_y}

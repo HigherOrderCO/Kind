@@ -1,0 +1,9 @@
+type App.AirShooter.Player {
+  new(
+    ship: App.AirShooter.Ship
+    score: U32
+    name: String
+    id: String
+    highscore: U32
+  )
+}

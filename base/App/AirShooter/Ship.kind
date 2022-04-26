@@ -1,0 +1,11 @@
+type App.AirShooter.Ship {
+  new(
+    position: App.AirShooter.Position
+    engine: App.AirShooter.Parts.Engine
+    skin: VoxBox
+    hue: U32
+    weapon: App.AirShooter.Parts.Weapon
+    hitbox: Shape.Circle
+    hp: Nat
+  )
+}

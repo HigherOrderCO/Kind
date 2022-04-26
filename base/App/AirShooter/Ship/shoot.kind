@@ -1,0 +1,7 @@
+App.AirShooter.Ship.shoot(ship: App.AirShooter.Ship): Maybe<App.AirShooter.Parts.Bullet>
+  let weapon = ship@weapon
+
+  if weapon@last_fired <? weapon@cooldown then none else
+    let bullet = ship@weapon@bullet
+    let bullet = bullet@position <- ship@position
+    some(bullet)

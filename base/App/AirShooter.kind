@@ -1,0 +1,351 @@
+//  npm i -g kind-lang-voxbox-maker
+//  klvm Name.Space.Here [Z_index] [Z_scale]
+
+
+App.AirShooter.State: App.State
+  App.State.new(App.AirShooter.State.Local, App.AirShooter.State.Global)
+
+type App.AirShooter.State.Local {
+  new(
+    player: App.AirShooter.Player
+    enemies: Map<App.AirShooter.Enemy>
+    mouse_over: String
+    mouse_pos: Pair<U32, U32>
+    bullets: Map<App.AirShooter.Parts.Bullet>
+    seed: Nat
+    max_enemies: Nat
+    shooting: Bool
+    started: Bool
+  )
+}
+
+type App.AirShooter.State.Global {
+  new(
+    leaderboard: Map<Pair<String, U32>>
+  )
+}
+
+type App.AirShooter.Action {
+  new_score(name: String, score: U32)
+} deriving (serializer, deserializer)
+
+App.AirShooter.Serializer(action: App.AirShooter.Action): String
+  String.pad_right_exact(64, '0', Bits.hex.encode(Serializer.run!(App.AirShooter.Action.serializer, action)))
+
+App.AirShooter.Deserializer(data: String): Maybe<App.AirShooter.Action>
+  Deserializer.run!(App.AirShooter.Action.deserializer, Bits.hex.decode(data))
+
+// Ship constructor
+App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: VoxBox, hue: U32, isPlayer: Bool, cooldown: U32, hp: Nat): App.AirShooter.Ship
+  let bullet_speed = 3.0
+  let bullet_hitbox = Shape.Circle.new(V2.new(pos@fst, pos@snd), 1.0)
+  let defaultBullet = App.AirShooter.Parts.Bullet.new(App.AirShooter.Sprites.Bullet, isPlayer, {0, 0}, bullet_speed, bullet_hitbox)
+  let defaultWeapon = App.AirShooter.Parts.Weapon.new(defaultBullet, cooldown, cooldown)
+  let ship_hitbox = Shape.Circle.new(V2.new(pos@fst, pos@snd), 5.0)
+
+  App.AirShooter.Ship.new(
+    pos,
+    App.AirShooter.Parts.Engine.new(vel),
+    sprite,
+    hue,
+    defaultWeapon,
+    ship_hitbox,
+    hp
+  )
+
+
+// Enemy constructor
+App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
+  let ramdom_nat = (min: Nat, max: Nat) Nat.random_range(min, max, seed)
+  let random_f64 = (min: Nat, max: Nat) Nat.to_f64(ramdom_nat(min, max))
+  let random_u32 = (min: Nat, max: Nat) Nat.to_u32(ramdom_nat(min, max))
+
+  let x = random_f64(10, 256)
+  let vel = random_f64(1, 2)
+  let hue = random_u32(30, 255)
+  let cooldown = random_u32(35, 55)
+  let destination = { Nat.to_f64(Nat.random_range(10, 256, Nat.random(seed))), 280.0 }
+  let hp = 1
+
+  App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, -5.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown, hp), destination)
+
+App.AirShooter.Local.init(): App.AirShooter.State.Local
+  let sprite = App.AirShooter.Sprites.Player_Ship
+  let enemy_sprite = App.AirShooter.Sprites.Enemy_Ship
+  let max_enemies = 5
+  let player_speed = 3.0
+  let player_hue = Nat.to_u32(0)
+  let player_cooldown = Nat.to_u32(15)
+  let player_hp = 5
+
+  let ship = App.AirShooter.Ship.Constructor({128.0, 200}, player_speed, sprite, player_hue, true, player_cooldown, 5)
+
+  let enemies = Map.new<App.AirShooter.Enemy>
+  let bullets = Map.new<App.AirShooter.Parts.Bullet>
+
+  let player = App.AirShooter.Player.new(ship, 0, "", "", 0)
+  let mouse_over = "game_screen"
+  let mouse_pos  = { 128, 200 }
+  App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, false, false)
+  
+// Initial state
+App.AirShooter.init: App.Init<App.AirShooter.State>
+  App.Store.new<App.AirShooter.State>(App.AirShooter.Local.init, App.AirShooter.State.Global.new(Map.new<Pair<String, U32>>))
+
+App.AirShooter.reset(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  let initial = App.AirShooter.Local.init
+  
+  let local = local@player@ship@hp <- initial@player@ship@hp
+  let local = local@player@score <- initial@player@score
+  let local = local@player@ship@position <- {128.0, 200}
+  let local = local@started <- false 
+  let local = local@enemies <- initial@enemies
+  let local = local@bullets <- initial@bullets
+
+  local
+
+// draw all objects in canvas
+App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxBox
+  // draw player
+  let img = App.AirShooter.Ship.draw(local@player@ship, img)
+
+  // draw enemies
+  let img = Map.for!(local@enemies)!(img, (key, enemy, img) App.AirShooter.Ship.draw(enemy@ship, img))
+
+  // draw bullets
+  let img = Map.for!(local@bullets)!(img, (key, bullet, img) App.AirShooter.Parts.Bullet.draw(bullet, img))
+
+  img
+
+
+// Render function 
+App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
+  (state)
+  if state@local@started then 
+    App.AirShooter.GameScreen(state, img)
+  else
+    App.AirShooter.HomeScreen(state)
+  
+App.AirShooter.Room: String
+  String.take(16, Crypto.Keccak.hash("AirShooterLeaderboard"))
+
+// move all objects in canvas
+App.AirShooter.frame.move(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  open local
+
+  // move player to mouse position
+  let des = { U32.to_f64(local.mouse_pos@fst / 4), U32.to_f64(local.mouse_pos@snd / 4) }
+  //TODO: Se o movimento for muito curto, não executar movimento nenhum, para ela não ficar tremendo
+  let local = local@player@ship <- App.AirShooter.Ship.move(des, local@player@ship)
+
+  // move bullets
+  let local = local@bullets <- Map.map!!(App.AirShooter.Parts.Bullet.move, local@bullets)
+
+  // move enemies
+  let local = local@enemies <- Map.map!!((enemy) enemy@ship <- App.AirShooter.Ship.move(enemy@destination, enemy@ship), local@enemies)
+
+  local
+
+App.AirShooter.new_key<A: Type>(map: Map<A>, seed: Nat): String
+  let seed = Nat.random(seed)
+  let key = Nat.show(seed)
+
+  if Bool.not(Map.has!(key, map)) then key else
+    App.AirShooter.new_key<A>(map, seed)
+
+// make enemies shoot
+App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  // spawn new enemies
+  let local = local@enemies <- if List.length!(Map.to_list!(local@enemies)) >=? local@max_enemies then local@enemies else
+    // let key = Nat.show(Nat.random(local@seed))
+    let key = App.AirShooter.new_key!(local@enemies, local@seed)
+    Map.set!(key, App.AirShooter.Enemy.Constructor(local@seed), local@enemies)
+
+  // enemy shoot
+  for key:enemy in local@enemies with local:
+    let bullet = App.AirShooter.Ship.shoot(enemy@ship)
+
+    without bullet: local
+
+    let bulletKey = App.AirShooter.new_key!(local@bullets, local@seed)
+
+    let local = local@enemies <- Map.set!(key, enemy@ship@weapon@last_fired <- 0, local@enemies)
+
+    let local = local@bullets <- Map.set!(bulletKey, bullet, local@bullets)
+    local
+
+  local
+
+// player shoot
+App.AirShooter.frame.shoot(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  if Bool.not(local@shooting) then local else
+    let bullet = App.AirShooter.Ship.shoot(local@player@ship)
+    without bullet: local
+    let bulletKey = Nat.show(Nat.random(local@seed))
+    if Map.has!(bulletKey, local@bullets) then local else
+      let local = local@bullets <- Map.set!(bulletKey, bullet, local@bullets)
+      let local = local@player@ship@weapon@last_fired <- 0
+      local
+
+App.AirShooter.GameOver(local: App.AirShooter.State.Local): IO<Maybe<App.State.local(App.AirShooter.State)>>
+  let serial  = App.AirShooter.Serializer(App.AirShooter.Action.new_score(local@player@name, local@player@score))
+  let local   = App.AirShooter.reset(local)
+  let room    = App.AirShooter.Room
+  IO {
+    App.watch!(App.AirShooter.Room)
+    App.new_post!(room, serial)
+    App.set_local!(local)
+  }
+
+// check collisions
+App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.State.local(App.AirShooter.State)>>
+  for key:bullet in local@bullets with local:
+    // check if players bullets hit enemies
+    if bullet@isPlayer then
+      for keyEnemy:enemy in local@enemies with local:
+        if Bool.not(Shape.Circle.collision.circle(bullet@hitbox, enemy@ship@hitbox)) then local else
+          // todo: check enemy hp
+          let local = local@player@score <- local@player@score + 1
+          let local = local@enemies <- Map.delete!(keyEnemy, local@enemies)
+          let local = local@bullets <- Map.delete!(key, local@bullets)
+          local
+      local
+    else
+      // check if enemies bullets hit player
+      if Bool.not(Shape.Circle.collision.circle(bullet@hitbox, local@player@ship@hitbox)) then local else
+        let local = local@bullets <- Map.delete!(key, local@bullets)
+        let local = local@player@ship@hp <- Nat.pred(local@player@ship@hp)
+        local
+
+  // check if enemy ship hit player
+  for key:enemy in local@enemies with local:
+    if Bool.not(Shape.Circle.collision.circle(enemy@ship@hitbox, local@player@ship@hitbox)) then local else
+      // if hit, delete enemy, player loses hp
+      let local = local@enemies <- Map.delete!(key, local@enemies)
+      let local = local@player@ship@hp <- Nat.pred(local@player@ship@hp)
+      local
+
+  if local@player@ship@hp >? 0 then App.set_local!(local) else App.AirShooter.GameOver(local)
+
+// tick weapons cooldowns
+App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  // function to update ship's last_fired
+  let aux = (ship: App.AirShooter.Ship)
+    if ship@weapon@last_fired <? ship@weapon@cooldown then ship@weapon@last_fired <- U32.inc(ship@weapon@last_fired) else ship
+
+  // update enemy last_fired
+  let local = local@enemies <- Map.map!!((enemy) enemy@ship <- aux(enemy@ship), local@enemies)
+
+  // update player last_fired
+  let local = local@player@ship <- aux(local@player@ship)
+
+  local
+
+
+// remove stuff if out of screen
+App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  // remove bullets
+  let local = local@bullets <- Map.filter!((bullet) open bullet Bool.or(bullet.position@snd <? -50.0, bullet.position@snd >? 256.0), local@bullets)
+
+  // remove enemies
+  let local = local@enemies <- Map.filter!((enemy) open enemy enemy.ship@position@snd >? 270.0, local@enemies)
+
+  // update seed
+  let local = local@seed <- Nat.random(local@seed)
+
+  local
+
+// Event handler
+App.AirShooter.when: App.When<App.AirShooter.State>
+  (event, state)
+  let local = state@local
+
+  if Bool.not(local@started) then 
+    case event {
+      init: IO {
+        let local = local@player@id <- event.user
+        App.watch!(App.AirShooter.Room)
+        App.set_local!(local)
+      }
+      input:
+        switch String.eql(event.id) {
+          "name": 
+            let local = local@player@name <- event.text
+            App.set_local!(local)
+        } default App.pass!
+      mouse_click: 
+        switch String.eql(event.id) {
+            "start": 
+              let my_highest = state@global@leaderboard{String.to_lower(state@local@player@id)} <> { "", Nat.to_u32(0) }
+              let local = local@seed <- U64.to_nat(event.time)
+              let local = local@player@highscore <- my_highest@snd
+              let local = local@started <- true
+              IO {
+                App.unwatch!(App.AirShooter.Room)
+                App.set_local!(local)
+              }
+        } default App.pass!
+    } default App.pass!
+  
+  else
+
+  case event {
+    mouse_down:
+      let local = local@shooting <- true
+      App.set_local!(local)
+    mouse_up:
+      let local = local@shooting <- false
+      App.set_local!(local)
+    frame: IO {
+      let local = App.AirShooter.frame.move(local)
+      let local = App.AirShooter.frame.enemy(local)
+      let local = App.AirShooter.frame.cooldown(local)
+      let local = App.AirShooter.frame.garbage_collector(local)
+      let local = App.AirShooter.frame.shoot(local)
+      App.AirShooter.frame.collision(local)
+    }
+    mouse_move:
+      let local =
+        if local@mouse_over =? "game_screen" then
+          local@mouse_pos <- event.mouse_pos
+        else
+          local
+      App.set_local!(local)
+    mouse_over:
+      let local = local@mouse_over <- event.id
+      App.set_local!(local)
+
+  } default App.pass!
+
+// Global ticker: not used
+App.AirShooter.tick: App.Tick<App.AirShooter.State>
+  App.no_tick<App.AirShooter.State>
+
+// Global visitor: counts posts to room_zero
+App.AirShooter.post: App.Post<App.AirShooter.State>
+  (time, room, addr, data, global)
+  let action = App.AirShooter.Deserializer(data)
+
+  without action: global
+  case action {
+    new_score: 
+      let score = Map.get!(addr, global@leaderboard)
+
+      without score: 
+        global@leaderboard <- Map.set!(addr, { action.name, action.score }, global@leaderboard)
+
+      if action.score <? score@snd then global else
+        global@leaderboard <- Map.set!(addr, { action.name, action.score }, global@leaderboard)
+  } default global
+
+
+// A "AS, world!" + counter application
+App.AirShooter: App<App.AirShooter.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  App.new<App.AirShooter.State>(
+    App.AirShooter.init
+    App.AirShooter.draw(img)
+    App.AirShooter.when
+    App.AirShooter.tick
+    App.AirShooter.post
+  )

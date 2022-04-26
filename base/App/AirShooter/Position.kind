@@ -1,0 +1,2 @@
+App.AirShooter.Position: Type
+  Pair<F64, F64>
