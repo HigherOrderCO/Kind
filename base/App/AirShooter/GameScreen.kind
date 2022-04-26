@@ -65,6 +65,8 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
       <div style=statusStyle>
         <div style=style>"SCORE"</div>
         <div style=style>U32.show(state@local@player@score)</div>
+        <div style=style>"HIGHEST"</div>
+        <div style=style>U32.show(state@local@player@highscore)</div>
       </div>
     </div>
   </div>

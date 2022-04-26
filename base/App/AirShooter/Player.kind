@@ -4,5 +4,6 @@ type App.AirShooter.Player {
     score: U32
     name: String
     id: String
+    highscore: U32
   )
 }

@@ -83,7 +83,7 @@ App.AirShooter.Local.init(): App.AirShooter.State.Local
   let enemies = Map.new<App.AirShooter.Enemy>
   let bullets = Map.new<App.AirShooter.Parts.Bullet>
 
-  let player = App.AirShooter.Player.new(ship, 0, "", "")
+  let player = App.AirShooter.Player.new(ship, 0, "", "", 0)
   let mouse_over = "game_screen"
   let mouse_pos  = { 128, 200 }
   App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, false, false)
@@ -275,7 +275,8 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       mouse_click: 
         switch String.eql(event.id) {
             "start": 
-              if String.eql(local@player@name, "") then App.pass! else
+              let my_highest = state@global@leaderboard{String.to_lower(state@local@player@id)} <> { "", Nat.to_u32(0) }
+              let local = local@player@highscore <- my_highest@snd
               let local = local@started <- true
               IO {
                 App.unwatch!(App.AirShooter.Room)
