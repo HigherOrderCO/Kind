@@ -22,9 +22,9 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
         DOM.vbox(
           {
             "id": "game_screen",
-            "width": "256",
-            "height": "256",
-            "scale": "4"
+            "width": Nat.show(App.AirShooter.Canvas.Size@fst),
+            "height": Nat.show(App.AirShooter.Canvas.Size@snd),
+            "scale": Nat.show(App.AirShooter.Canvas.Scale)
             
           }, {}, img)
       }

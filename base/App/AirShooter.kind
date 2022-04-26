@@ -5,6 +5,12 @@
 App.AirShooter.State: App.State
   App.State.new(App.AirShooter.State.Local, App.AirShooter.State.Global)
 
+App.AirShooter.Canvas.Size: Pair<Nat, Nat>
+  { 512, 400 }
+
+App.AirShooter.Canvas.Scale: Nat
+  2
+
 type App.AirShooter.State.Local {
   new(
     player: App.AirShooter.Player
@@ -60,11 +66,11 @@ App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
   let random_f64 = (min: Nat, max: Nat) Nat.to_f64(ramdom_nat(min, max))
   let random_u32 = (min: Nat, max: Nat) Nat.to_u32(ramdom_nat(min, max))
 
-  let x = random_f64(10, 256)
+  let x = random_f64(10, App.AirShooter.Canvas.Size@fst)
   let vel = random_f64(1, 2)
   let hue = random_u32(30, 255)
   let cooldown = random_u32(35, 55)
-  let destination = { Nat.to_f64(Nat.random_range(10, 256, Nat.random(seed))), 280.0 }
+  let destination = { Nat.to_f64(Nat.random_range(10, App.AirShooter.Canvas.Size@fst, Nat.random(seed))), Nat.to_f64(App.AirShooter.Canvas.Size@snd + 20) }
   let hp = 1
 
   App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, -5.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown, hp), destination)
@@ -72,13 +78,13 @@ App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
 App.AirShooter.Local.init(): App.AirShooter.State.Local
   let sprite = App.AirShooter.Sprites.Player_Ship
   let enemy_sprite = App.AirShooter.Sprites.Enemy_Ship
-  let max_enemies = 5
+  let max_enemies = 10
   let player_speed = 3.0
   let player_hue = Nat.to_u32(0)
   let player_cooldown = Nat.to_u32(15)
   let player_hp = 5
 
-  let ship = App.AirShooter.Ship.Constructor({128.0, 200}, player_speed, sprite, player_hue, true, player_cooldown, 5)
+  let ship = App.AirShooter.Ship.Constructor({Nat.to_f64(App.AirShooter.Canvas.Size@fst / 2), Nat.to_f64(App.AirShooter.Canvas.Size@snd - 10)}, player_speed, sprite, player_hue, true, player_cooldown, 5)
 
   let enemies = Map.new<App.AirShooter.Enemy>
   let bullets = Map.new<App.AirShooter.Parts.Bullet>
@@ -134,7 +140,7 @@ App.AirShooter.frame.move(local: App.AirShooter.State.Local): App.AirShooter.Sta
   open local
 
   // move player to mouse position
-  let des = { U32.to_f64(local.mouse_pos@fst / 4), U32.to_f64(local.mouse_pos@snd / 4) }
+  let des = { U32.to_f64(local.mouse_pos@fst / Nat.to_u32(App.AirShooter.Canvas.Scale)), U32.to_f64(local.mouse_pos@snd / Nat.to_u32(App.AirShooter.Canvas.Scale)) }
   //TODO: Se o movimento for muito curto, não executar movimento nenhum, para ela não ficar tremendo
   let local = local@player@ship <- App.AirShooter.Ship.move(des, local@player@ship)
 
@@ -245,10 +251,10 @@ App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter
 // remove stuff if out of screen
 App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   // remove bullets
-  let local = local@bullets <- Map.filter!((bullet) open bullet Bool.or(bullet.position@snd <? -50.0, bullet.position@snd >? 256.0), local@bullets)
+  let local = local@bullets <- Map.filter!((bullet) open bullet Bool.or(bullet.position@snd <? -50.0, bullet.position@snd >? Nat.to_f64(App.AirShooter.Canvas.Size@snd + 10)), local@bullets)
 
   // remove enemies
-  let local = local@enemies <- Map.filter!((enemy) open enemy enemy.ship@position@snd >? 270.0, local@enemies)
+  let local = local@enemies <- Map.filter!((enemy) open enemy enemy.ship@position@snd >? Nat.to_f64(App.AirShooter.Canvas.Size@snd + 20), local@enemies)
 
   // update seed
   let local = local@seed <- Nat.random(local@seed)
