@@ -4,7 +4,17 @@ App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State)): DOM
   let highscore = List.for!(sorted)!([], 
      (score, scores) 
     if List.length!(scores) >? 10 then scores else
-    List.append!(scores, <div>score@fst " " U32.show(score@snd)</div>)
+    List.append!(scores, 
+      <div style={
+        "display": "flex"
+        "flex-direction": "row"
+        "text-align": "left"
+      }>
+        <div style={"width": "2ch", "margin-right": "15px"}>Nat.show(List.length!(scores) + 1)</div>
+        <div style={"flex": "1"}>score@fst</div>
+        <div style={"width": "4ch"}>U32.show(score@snd)</div>
+      </div>
+    )
   )
 
   <div style={
@@ -26,6 +36,7 @@ App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State)): DOM
         id="name" 
         placeholder="nickname" 
         autocomplete="off"
+        maxlength="10"
         style={
           "font-size": "25px"
           "background": "rgb(16 16 16)"
@@ -55,19 +66,26 @@ App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State)): DOM
       </button>
     </div>
 
-
     <div style={
-      "color": "#FFFFFF"
-      "font-size": "25px"
+      "display": "flex"
+      "flex-direction": "column"
+      "padding": "0 33px"
     }>
-      "LEADERBOARD"
-    </div>
+      <div style={
+        "color": "#FFFFFF"
+        "font-size": "25px"
+        "margin-bottom": "10px"
+        "letter-spacing": "15px"
+      }>
+        "LEADERBOARD"
+      </div>
 
-    <div style={
-      "color": "#FFFFFF"
-      "font-size": "25px"
-    }>
-      for score in highscore: score
+      <div style={
+        "color": "#FFFFFF"
+        "font-size": "25px"
+      }>
+        for score in highscore: score
+      </div>
     </div>
   </div> 
     
