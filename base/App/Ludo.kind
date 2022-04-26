@@ -822,9 +822,9 @@ App.Ludo.Map.init: App.Ludo.Map
     let tile = App.Ludo.Tile.dec(App.Ludo.Tile.draw.get_dec(name))
     App.Ludo.Map.set(coord, tile, map)
   
-  let map = App.Ludo.Map.set({7#32, 8#32}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.super(App.Ludo.Team.red), [App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red]), map)
+  //let map = App.Ludo.Map.set({7#32, 8#32}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.super(App.Ludo.Team.red), [App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red]), map)
   // let map = App.Ludo.Map.set({7#32, 9#32}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.exclusive(App.Ludo.Team.red), [App.Ludo.Team.red, App.Ludo.Team.red, App.Ludo.Team.red]), map)
- // let map = App.Ludo.Map.set({14, 6}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.common, [App.Ludo.Team.yellow]), map)
+  // let map = App.Ludo.Map.set({14, 6}, App.Ludo.Tile.trail(App.Ludo.Tile.Trail.common, [App.Ludo.Team.yellow]), map)
 
   map 
 
