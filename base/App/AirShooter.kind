@@ -282,6 +282,8 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       mouse_click: 
         switch String.eql(event.id) {
             "start": 
+              if String.eql(local@player@name, "") then App.pass! else
+
               let my_highest = state@global@leaderboard{String.to_lower(state@local@player@id)} <> { "", Nat.to_u32(0) }
               let local = local@seed <- U64.to_nat(event.time)
               let local = local@player@highscore <- my_highest@snd
