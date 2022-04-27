@@ -8,7 +8,30 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
     "display": "flex"
     "flex-direction": "column"
     "width": "100%"
+    "margin-top": "15px"
   }
+
+  let progressStyle = {
+    "height":" 20px"
+    "width": "13em"
+  }
+
+  let effects = []
+
+  for key:effect in state@local@player@ship@effects with effects:
+    let title = case effect@type {
+      Speed: "SPEED BOOST"
+      Cooldown: "RAPID FIRE"
+    } default ""
+    
+    List.append!(effects, 
+      <div style=statusStyle>
+        <div style=style>title</div>
+        <progress style=progressStyle value=Nat.show(effect@timer) max=Nat.show(App.AirShooter.Effect.Time)></progress>
+      </div>
+    )
+
+
 
   <div style={
     "display": "flex"
@@ -29,11 +52,11 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
           }, {}, img)
       }
     </div>
-        <div style={
+    <div style={
       "display": "flex"
       "flex-direction": "column"
       "height": "inherit"
-      "justify-content": "space-between"
+      // "justify-content": "space-between"
       "align-items": "center"
       "padding": "100px 0px 100px 25px"
     }>
@@ -53,10 +76,7 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
       <div style=statusStyle>
         <div style=style>"WEAPON"</div>
         <progress 
-          style={
-            "height":" 20px"
-            "width": "13em"
-          }
+          style=progressStyle
           id="weapon" 
           value=U32.show(state@local@player@ship@weapon@last_fired)
           max=U32.show(state@local@player@ship@weapon@cooldown)>
@@ -68,5 +88,6 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
         <div style=style>"HIGHEST"</div>
         <div style=style>U32.show(state@local@player@highscore)</div>
       </div>
+      for effect in effects: effect
     </div>
   </div>
