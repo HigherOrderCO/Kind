@@ -16,10 +16,12 @@ var all_js_apps = [];
 
 // Apps that will be displayed when accessing http://old.kindelia.org
 var server_apps = [
+  'AirShooter.kind',
   'Browser.kind',   
   'Hello.kind',
   'Kind.kind',
   'KL.kind',
+  'Ludo.kind',
   'Playground.kind',
   'Pong.kind',
   'Seta.kind',
