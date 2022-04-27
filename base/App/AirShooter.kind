@@ -26,6 +26,9 @@ App.AirShooter.Effect.SpeedModifier: F64
 App.AirShooter.Initial.Velocity: F64
   3.0
 
+App.AirShooter.Initial.HP: Nat
+  5
+
 App.AirShooter.DropRate: Nat // 1 in x per frame
   1000
 
@@ -103,7 +106,7 @@ App.AirShooter.Local.init(): App.AirShooter.State.Local
   let player_speed = App.AirShooter.Initial.Velocity
   let player_hue = Nat.to_u32(0)
   let player_cooldown = App.AirShooter.Initial.Cooldown
-  let player_hp = 5
+  let player_hp = App.AirShooter.Initial.HP
 
   let ship = App.AirShooter.Ship.Constructor({Nat.to_f64(App.AirShooter.Canvas.Size@fst / 2), Nat.to_f64(App.AirShooter.Canvas.Size@snd - 10)}, player_speed, sprite, player_hue, true, player_cooldown, 5)
 
@@ -267,7 +270,7 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.
       let local = local@drops <- Map.delete!(key, local@drops)
 
       case drop@type {
-        HP: local@player@ship@hp <- 5
+        HP: local@player@ship@hp <- App.AirShooter.Initial.HP
       } default 
       // add effect to player effect
       let effect = App.AirShooter.Effect.new(App.AirShooter.Effect.Time, drop@type)
@@ -405,6 +408,13 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       App.set_local!(local)
     mouse_over:
       let local = local@mouse_over <- event.id
+      App.set_local!(local)
+
+    key_down:
+      if Bool.not(event.code =? 32) then App.pass! else 
+      
+      let local = local@shooting <- Bool.not(local@shooting)
+
       App.set_local!(local)
 
   } default App.pass!
