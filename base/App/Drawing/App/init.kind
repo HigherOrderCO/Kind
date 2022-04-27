@@ -6,7 +6,7 @@ App.Drawing.App.init(img: VoxBox): App.Init<App.Drawing.State>
   let stage       = App.Drawing.Stage.boards(phase, [])
 
   let input       = ""
-  user        = ""
+  let user        = ""
   let env_info    = App.EnvInfo.new({256, 256}, {0, 0})
   let tool        = App.Drawing.Tool.pencil
   let size        = 3 :: U32
