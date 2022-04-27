@@ -175,7 +175,7 @@ App.AirShooter.frame.move(local: App.AirShooter.State.Local): App.AirShooter.Sta
   // move enemies
   let local = local@enemies <- Map.map!!((enemy) enemy@ship <- App.AirShooter.Ship.move(enemy@destination, enemy@ship), local@enemies)
 
-  // TODO: move drops
+  // move drops
   let local = local@drops <- Map.map!!(App.AirShooter.Drop.move, local@drops)
 
   local
@@ -261,7 +261,7 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.
 
   if local@player@ship@hp =? 0 then App.AirShooter.GameOver(local) else 
   
-  // TODO: check drop collisions and apply effects if collide
+  // check drop collisions and apply effects if collide
   for key:drop in local@drops with local:
     if Bool.not(Shape.Circle.collision.circle(drop@hitbox, local@player@ship@hitbox)) then local else
       let local = local@drops <- Map.delete!(key, local@drops)
@@ -269,7 +269,7 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.
       case drop@type {
         HP: local@player@ship@hp <- 5
       } default 
-      // TODO: add effect to player effect
+      // add effect to player effect
       let effect = App.AirShooter.Effect.new(App.AirShooter.Effect.Time, drop@type)
 
       let local = local@player@ship@effects <- Map.set!(key, effect, local@player@ship@effects)
@@ -302,7 +302,8 @@ App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.A
   // remove enemies
   let local = local@enemies <- Map.filter!((enemy) open enemy enemy.ship@position@snd >? Nat.to_f64(App.AirShooter.Canvas.Size@snd + 20), local@enemies)
 
-  // TODO: remove drops
+  // remove drops
+  let local = local@drops <- Map.filter!((drop) open drop drop.position@snd >? Nat.to_f64(App.AirShooter.Canvas.Size@snd + 20), local@drops)
 
   // update seed
   let local = local@seed <- Nat.random(local@seed)
