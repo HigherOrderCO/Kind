@@ -5,6 +5,33 @@
 App.AirShooter.State: App.State
   App.State.new(App.AirShooter.State.Local, App.AirShooter.State.Global)
 
+App.AirShooter.Canvas.Size: Pair<Nat, Nat>
+  { 512, 400 }
+
+App.AirShooter.Canvas.Scale: Nat
+  2
+
+App.AirShooter.Initial.Cooldown: U32
+  Nat.to_u32(15)
+
+App.AirShooter.Effect.Time: Nat
+  800
+
+App.AirShooter.Effect.CooldownModifier: U32
+  Nat.to_u32(2)
+
+App.AirShooter.Effect.SpeedModifier: F64
+  1.5
+
+App.AirShooter.Initial.Velocity: F64
+  3.0
+
+App.AirShooter.Initial.HP: Nat
+  5
+
+App.AirShooter.DropRate: Nat // 1 in x per frame
+  1000
+
 type App.AirShooter.State.Local {
   new(
     player: App.AirShooter.Player
@@ -16,6 +43,7 @@ type App.AirShooter.State.Local {
     max_enemies: Nat
     shooting: Bool
     started: Bool
+    drops: Map<App.AirShooter.Drop>
   )
 }
 
@@ -42,6 +70,7 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
   let defaultBullet = App.AirShooter.Parts.Bullet.new(App.AirShooter.Sprites.Bullet, isPlayer, {0, 0}, bullet_speed, bullet_hitbox)
   let defaultWeapon = App.AirShooter.Parts.Weapon.new(defaultBullet, cooldown, cooldown)
   let ship_hitbox = Shape.Circle.new(V2.new(pos@fst, pos@snd), 5.0)
+  let effects = Map.new<App.AirShooter.Effect>
 
   App.AirShooter.Ship.new(
     pos,
@@ -50,7 +79,8 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
     hue,
     defaultWeapon,
     ship_hitbox,
-    hp
+    hp,
+    effects
   )
 
 
@@ -60,11 +90,11 @@ App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
   let random_f64 = (min: Nat, max: Nat) Nat.to_f64(ramdom_nat(min, max))
   let random_u32 = (min: Nat, max: Nat) Nat.to_u32(ramdom_nat(min, max))
 
-  let x = random_f64(10, 256)
+  let x = random_f64(10, App.AirShooter.Canvas.Size@fst)
   let vel = random_f64(1, 2)
   let hue = random_u32(30, 255)
   let cooldown = random_u32(35, 55)
-  let destination = { Nat.to_f64(Nat.random_range(10, 256, Nat.random(seed))), 280.0 }
+  let destination = { Nat.to_f64(Nat.random_range(10, App.AirShooter.Canvas.Size@fst, Nat.random(seed))), Nat.to_f64(App.AirShooter.Canvas.Size@snd + 20) }
   let hp = 1
 
   App.AirShooter.Enemy.new(App.AirShooter.Ship.Constructor({x, -5.0}, vel, App.AirShooter.Sprites.Enemy_Ship, hue, false, cooldown, hp), destination)
@@ -72,21 +102,22 @@ App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
 App.AirShooter.Local.init(): App.AirShooter.State.Local
   let sprite = App.AirShooter.Sprites.Player_Ship
   let enemy_sprite = App.AirShooter.Sprites.Enemy_Ship
-  let max_enemies = 5
-  let player_speed = 3.0
+  let max_enemies = 10
+  let player_speed = App.AirShooter.Initial.Velocity
   let player_hue = Nat.to_u32(0)
-  let player_cooldown = Nat.to_u32(15)
-  let player_hp = 5
+  let player_cooldown = App.AirShooter.Initial.Cooldown
+  let player_hp = App.AirShooter.Initial.HP
 
-  let ship = App.AirShooter.Ship.Constructor({128.0, 200}, player_speed, sprite, player_hue, true, player_cooldown, 5)
+  let ship = App.AirShooter.Ship.Constructor({Nat.to_f64(App.AirShooter.Canvas.Size@fst / 2), Nat.to_f64(App.AirShooter.Canvas.Size@snd - 10)}, player_speed, sprite, player_hue, true, player_cooldown, 5)
 
   let enemies = Map.new<App.AirShooter.Enemy>
   let bullets = Map.new<App.AirShooter.Parts.Bullet>
+  let drops = Map.new<App.AirShooter.Drop>
 
   let player = App.AirShooter.Player.new(ship, 0, "", "", 0)
   let mouse_over = "game_screen"
   let mouse_pos  = { 128, 200 }
-  App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, false, false)
+  App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, false, false, drops)
   
 // Initial state
 App.AirShooter.init: App.Init<App.AirShooter.State>
@@ -95,12 +126,12 @@ App.AirShooter.init: App.Init<App.AirShooter.State>
 App.AirShooter.reset(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   let initial = App.AirShooter.Local.init
   
-  let local = local@player@ship@hp <- initial@player@ship@hp
+  let local = local@player@ship <- initial@player@ship
   let local = local@player@score <- initial@player@score
-  let local = local@player@ship@position <- {128.0, 200}
   let local = local@started <- false 
   let local = local@enemies <- initial@enemies
   let local = local@bullets <- initial@bullets
+  let local = local@drops <- initial@drops
 
   local
 
@@ -114,6 +145,9 @@ App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxB
 
   // draw bullets
   let img = Map.for!(local@bullets)!(img, (key, bullet, img) App.AirShooter.Parts.Bullet.draw(bullet, img))
+
+  // TOOD: draw drops
+  let img = Map.for!(local@drops)!(img, (key, drop, img) App.AirShooter.Drop.draw(drop, img))
 
   img
 
@@ -134,7 +168,7 @@ App.AirShooter.frame.move(local: App.AirShooter.State.Local): App.AirShooter.Sta
   open local
 
   // move player to mouse position
-  let des = { U32.to_f64(local.mouse_pos@fst / 4), U32.to_f64(local.mouse_pos@snd / 4) }
+  let des = { U32.to_f64(local.mouse_pos@fst / Nat.to_u32(App.AirShooter.Canvas.Scale)), U32.to_f64(local.mouse_pos@snd / Nat.to_u32(App.AirShooter.Canvas.Scale)) }
   //TODO: Se o movimento for muito curto, não executar movimento nenhum, para ela não ficar tremendo
   let local = local@player@ship <- App.AirShooter.Ship.move(des, local@player@ship)
 
@@ -143,6 +177,9 @@ App.AirShooter.frame.move(local: App.AirShooter.State.Local): App.AirShooter.Sta
 
   // move enemies
   let local = local@enemies <- Map.map!!((enemy) enemy@ship <- App.AirShooter.Ship.move(enemy@destination, enemy@ship), local@enemies)
+
+  // move drops
+  let local = local@drops <- Map.map!!(App.AirShooter.Drop.move, local@drops)
 
   local
 
@@ -225,7 +262,25 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.
       let local = local@player@ship@hp <- Nat.pred(local@player@ship@hp)
       local
 
-  if local@player@ship@hp >? 0 then App.set_local!(local) else App.AirShooter.GameOver(local)
+  if local@player@ship@hp =? 0 then App.AirShooter.GameOver(local) else 
+  
+  // check drop collisions and apply effects if collide
+  for key:drop in local@drops with local:
+    if Bool.not(Shape.Circle.collision.circle(drop@hitbox, local@player@ship@hitbox)) then local else
+      let local = local@drops <- Map.delete!(key, local@drops)
+
+      case drop@type {
+        HP: local@player@ship@hp <- App.AirShooter.Initial.HP
+      } default 
+      // add effect to player effect
+      let effect = App.AirShooter.Effect.new(App.AirShooter.Effect.Time, drop@type)
+
+      let local = local@player@ship@effects <- Map.set!(key, effect, local@player@ship@effects)
+
+      local 
+  App.set_local!(local)
+
+
 
 // tick weapons cooldowns
 App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter.State.Local
@@ -245,13 +300,49 @@ App.AirShooter.frame.cooldown(local: App.AirShooter.State.Local): App.AirShooter
 // remove stuff if out of screen
 App.AirShooter.frame.garbage_collector(local: App.AirShooter.State.Local): App.AirShooter.State.Local
   // remove bullets
-  let local = local@bullets <- Map.filter!((bullet) open bullet Bool.or(bullet.position@snd <? -50.0, bullet.position@snd >? 256.0), local@bullets)
+  let local = local@bullets <- Map.filter!((bullet) open bullet Bool.or(bullet.position@snd <? -50.0, bullet.position@snd >? Nat.to_f64(App.AirShooter.Canvas.Size@snd + 10)), local@bullets)
 
   // remove enemies
-  let local = local@enemies <- Map.filter!((enemy) open enemy enemy.ship@position@snd >? 270.0, local@enemies)
+  let local = local@enemies <- Map.filter!((enemy) open enemy enemy.ship@position@snd >? Nat.to_f64(App.AirShooter.Canvas.Size@snd + 20), local@enemies)
+
+  // remove drops
+  let local = local@drops <- Map.filter!((drop) open drop drop.position@snd >? Nat.to_f64(App.AirShooter.Canvas.Size@snd + 20), local@drops)
 
   // update seed
   let local = local@seed <- Nat.random(local@seed)
+
+  local
+
+// random drops
+App.AirShooter.frame.drops(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  let random = Nat.random_range(1, App.AirShooter.DropRate, local@seed)
+
+  if random >? 1 then local else
+    let key = App.AirShooter.new_key!(local@drops, local@seed)
+    let local = local@drops <- Map.set!(key, App.AirShooter.Drop.Constructor(local@seed), local@drops)
+    
+    local
+
+// effects frame!
+App.AirShooter.frame.effects(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  for key:effect in local@player@ship@effects with local:
+    if effect@timer <=? 0 then 
+      // effect is over, revert to original values and remove effect from map
+      let local = local@player@ship@effects <- Map.delete!(key, local@player@ship@effects) 
+      case effect@type {
+        Cooldown: local@player@ship@weapon@cooldown <- App.AirShooter.Initial.Cooldown
+        Speed:  local@player@ship@engine@velocity <- App.AirShooter.Initial.Velocity
+      } default local
+    
+    else
+      // decrement effect timer and apply effects
+      let effect = effect@timer <- effect@timer - 1
+      let local = local@player@ship@effects <- Map.set!(key, effect, local@player@ship@effects)
+
+      case effect@type {
+        Cooldown: local@player@ship@weapon@cooldown <- App.AirShooter.Initial.Cooldown / App.AirShooter.Effect.CooldownModifier
+        Speed: local@player@ship@engine@velocity <- App.AirShooter.Initial.Velocity * App.AirShooter.Effect.SpeedModifier
+      } default local
 
   local
 
@@ -276,6 +367,8 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       mouse_click: 
         switch String.eql(event.id) {
             "start": 
+              if String.eql(local@player@name, "") then App.pass! else
+
               let my_highest = state@global@leaderboard{String.to_lower(state@local@player@id)} <> { "", Nat.to_u32(0) }
               let local = local@seed <- U64.to_nat(event.time)
               let local = local@player@highscore <- my_highest@snd
@@ -297,11 +390,13 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       let local = local@shooting <- false
       App.set_local!(local)
     frame: IO {
+      let local = App.AirShooter.frame.effects(local)
       let local = App.AirShooter.frame.move(local)
       let local = App.AirShooter.frame.enemy(local)
       let local = App.AirShooter.frame.cooldown(local)
       let local = App.AirShooter.frame.garbage_collector(local)
       let local = App.AirShooter.frame.shoot(local)
+      let local = App.AirShooter.frame.drops(local)
       App.AirShooter.frame.collision(local)
     }
     mouse_move:
@@ -313,6 +408,13 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       App.set_local!(local)
     mouse_over:
       let local = local@mouse_over <- event.id
+      App.set_local!(local)
+
+    key_down:
+      if Bool.not(event.code =? 32) then App.pass! else 
+      
+      let local = local@shooting <- Bool.not(local@shooting)
+
       App.set_local!(local)
 
   } default App.pass!
