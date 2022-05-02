@@ -165,7 +165,7 @@ App.AirShooter.draw(img: VoxBox): App.Draw<App.AirShooter.State>
     App.AirShooter.HomeScreen(state)
   
 App.AirShooter.Room: String
-  String.take(16, Crypto.Keccak.hash("AirShooterLeaderboard"))
+  String.take(16, Crypto.Keccak.hash("AirShooterLeaderboard2")) // antes 2/5 = AirShooterLeaderboard
 
 // move all objects in canvas
 App.AirShooter.frame.move(local: App.AirShooter.State.Local): App.AirShooter.State.Local
