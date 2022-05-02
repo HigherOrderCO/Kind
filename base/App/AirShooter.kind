@@ -29,6 +29,9 @@ App.AirShooter.Initial.Velocity: F64
 App.AirShooter.Initial.HP: Nat
   5
 
+App.AirShooter.Initial.Enemies: Nat
+  10
+
 App.AirShooter.DropRate: Nat // 1 in x per frame
   1000
 
@@ -68,7 +71,7 @@ App.AirShooter.Ship.Constructor(pos: App.AirShooter.Position, vel: F64, sprite: 
   let bullet_speed = 3.0
   let bullet_hitbox = Shape.Circle.new(V2.new(pos@fst, pos@snd), 1.0)
   let defaultBullet = App.AirShooter.Parts.Bullet.new(App.AirShooter.Sprites.Bullet, isPlayer, {0, 0}, bullet_speed, bullet_hitbox)
-  let defaultWeapon = App.AirShooter.Parts.Weapon.new(defaultBullet, cooldown, cooldown)
+  let defaultWeapon = App.AirShooter.Parts.Weapon.new(defaultBullet, cooldown, cooldown, 0, 400, false)
   let ship_hitbox = Shape.Circle.new(V2.new(pos@fst, pos@snd), 5.0)
   let effects = Map.new<App.AirShooter.Effect>
 
@@ -102,7 +105,7 @@ App.AirShooter.Enemy.Constructor(seed: Nat): App.AirShooter.Enemy
 App.AirShooter.Local.init(): App.AirShooter.State.Local
   let sprite = App.AirShooter.Sprites.Player_Ship
   let enemy_sprite = App.AirShooter.Sprites.Enemy_Ship
-  let max_enemies = 10
+  let max_enemies = App.AirShooter.Initial.Enemies
   let player_speed = App.AirShooter.Initial.Velocity
   let player_hue = Nat.to_u32(0)
   let player_cooldown = App.AirShooter.Initial.Cooldown
@@ -130,6 +133,7 @@ App.AirShooter.reset(local: App.AirShooter.State.Local): App.AirShooter.State.Lo
   let local = local@player@score <- initial@player@score
   let local = local@started <- false 
   let local = local@enemies <- initial@enemies
+  let local = local@max_enemies <- initial@max_enemies
   let local = local@bullets <- initial@bullets
   let local = local@drops <- initial@drops
 
@@ -192,9 +196,11 @@ App.AirShooter.new_key<A: Type>(map: Map<A>, seed: Nat): String
 
 // make enemies shoot
 App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  // increase max_enemies by 2 for every 10 enemies killed
+  let local = local@max_enemies <- App.AirShooter.Initial.Enemies + U32.to_nat(local@player@score / 10) * 2
+
   // spawn new enemies
   let local = local@enemies <- if List.length!(Map.to_list!(local@enemies)) >=? local@max_enemies then local@enemies else
-    // let key = Nat.show(Nat.random(local@seed))
     let key = App.AirShooter.new_key!(local@enemies, local@seed)
     Map.set!(key, App.AirShooter.Enemy.Constructor(local@seed), local@enemies)
 
@@ -215,14 +221,19 @@ App.AirShooter.frame.enemy(local: App.AirShooter.State.Local): App.AirShooter.St
 
 // player shoot
 App.AirShooter.frame.shoot(local: App.AirShooter.State.Local): App.AirShooter.State.Local
-  if Bool.not(local@shooting) then local else
+  if local@player@ship@weapon@overheat then
+    let local = local@player@ship@weapon@heat <- local@player@ship@weapon@heat - 1
+    let local = local@player@ship@weapon@overheat <- local@player@ship@weapon@heat >? 0
+    local
+  else if Bool.not(local@shooting) then local@player@ship@weapon@heat <- local@player@ship@weapon@heat - 1  else
     let bullet = App.AirShooter.Ship.shoot(local@player@ship)
     without bullet: local
-    let bulletKey = Nat.show(Nat.random(local@seed))
-    if Map.has!(bulletKey, local@bullets) then local else
-      let local = local@bullets <- Map.set!(bulletKey, bullet, local@bullets)
-      let local = local@player@ship@weapon@last_fired <- 0
-      local
+    let key = App.AirShooter.new_key!(local@bullets, local@seed)
+    let local = local@player@ship@weapon@heat <- local@player@ship@weapon@heat + (local@player@ship@weapon@max_heat / 100)
+    let local = local@player@ship@weapon@overheat <- local@player@ship@weapon@heat >=? local@player@ship@weapon@max_heat
+    let local = local@bullets <- Map.set!(key, bullet, local@bullets)
+    let local = local@player@ship@weapon@last_fired <- 0
+    local
 
 App.AirShooter.GameOver(local: App.AirShooter.State.Local): IO<Maybe<App.State.local(App.AirShooter.State)>>
   let serial  = App.AirShooter.Serializer(App.AirShooter.Action.new_score(local@player@name, local@player@score))

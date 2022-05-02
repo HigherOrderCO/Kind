@@ -81,6 +81,13 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
           value=U32.show(state@local@player@ship@weapon@last_fired)
           max=U32.show(state@local@player@ship@weapon@cooldown)>
         </progress>
+        <div style=style>if state@local@player@ship@weapon@overheat then "OVERHEAT" else "TEMPERATURE"</div>
+        <progress 
+          style=progressStyle
+          id="weapon_temp" 
+          value=Nat.show(state@local@player@ship@weapon@heat)
+          max=Nat.show(state@local@player@ship@weapon@max_heat)>
+        </progress>
       </div>
       <div style=statusStyle>
         <div style=style>"SCORE"</div>

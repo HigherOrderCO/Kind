@@ -3,7 +3,7 @@ App.AirShooter.HomeScreen(state: App.Store(App.AirShooter.State)): DOM
 
   let highscore = List.for!(sorted)!([], 
      (score, scores) 
-    if List.length!(scores) >? 10 then scores else
+    if List.length!(scores) >? 9 then scores else
     List.append!(scores, 
       <div style={
         "display": "flex"
