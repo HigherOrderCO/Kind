@@ -7,5 +7,6 @@ type App.AirShooter.Ship {
     weapon: App.AirShooter.Parts.Weapon
     hitbox: Shape.Circle
     hp: Nat
+    effects: Map<App.AirShooter.Effect>
   )
 }

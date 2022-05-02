@@ -1,0 +1,5 @@
+App.AirShooter.Drop.draw(drop: App.AirShooter.Drop, img: VoxBox): VoxBox
+  let pos = drop@position
+  let pos = { F64.to_u32(pos@fst), F64.to_u32(pos@snd) }
+  let pos = { pos@fst - 128, pos@snd - 128 }
+  VoxBox.Draw.image(pos@fst, pos@snd, 1, drop@sprite, img)

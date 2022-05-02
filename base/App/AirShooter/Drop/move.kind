@@ -1,0 +1,9 @@
+App.AirShooter.Drop.move(drop: App.AirShooter.Drop): App.AirShooter.Drop
+  let destination = { drop@position@fst, -50.0 }
+
+  let new_pos = App.AirShooter.Position.Lerp(drop@position, destination, drop@velocity)
+
+  let drop = drop@position <- new_pos
+  // TODO: check hitbox size
+  let drop = drop@hitbox <- Shape.Circle.new(V2.new(new_pos@fst, new_pos@snd), 10.0)
+  drop

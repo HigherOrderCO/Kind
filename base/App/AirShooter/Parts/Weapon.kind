@@ -3,5 +3,8 @@ type App.AirShooter.Parts.Weapon {
     bullet: App.AirShooter.Parts.Bullet
     cooldown: U32
     last_fired: U32
+    heat: Nat
+    max_heat: Nat
+    overheat: Bool
   )
 }
