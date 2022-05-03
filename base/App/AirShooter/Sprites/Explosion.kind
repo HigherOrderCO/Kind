@@ -1,0 +1,13 @@
+// numero de sprites = 7
+// frames por sprite = 4
+
+App.AirShooter.Sprites.Explosion(frame: U32): VoxBox
+  switch U32.eql((frame / 4) % 7) {
+    0: App.AirShooter.Sprites.Explosion.Explosion_1
+    1: App.AirShooter.Sprites.Explosion.Explosion_2
+    2: App.AirShooter.Sprites.Explosion.Explosion_3
+    3: App.AirShooter.Sprites.Explosion.Explosion_4
+    4: App.AirShooter.Sprites.Explosion.Explosion_5
+    5: App.AirShooter.Sprites.Explosion.Explosion_6
+    6: App.AirShooter.Sprites.Explosion.Explosion_7
+  } default App.AirShooter.Sprites.Explosion.Explosion_1

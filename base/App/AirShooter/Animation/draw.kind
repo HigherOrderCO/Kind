@@ -1,0 +1,8 @@
+App.AirShooter.Animation.draw(animation: App.AirShooter.Animation, img: VoxBox): VoxBox
+  let pos = animation@position
+  let pos = { F64.to_u32(pos@fst), F64.to_u32(pos@snd) }
+  let pos = { pos@fst - 128, pos@snd - 128 }
+
+  let sprite = animation@sprite(animation@frame)
+
+  VoxBox.Draw.image(pos@fst, pos@snd, 1, sprite, img)

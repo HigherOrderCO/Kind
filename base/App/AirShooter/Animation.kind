@@ -1,0 +1,8 @@
+type App.AirShooter.Animation {
+  new(
+    duration: U32
+    sprite:   U32 -> VoxBox
+    frame:    U32
+    position: App.AirShooter.Position
+  )
+}

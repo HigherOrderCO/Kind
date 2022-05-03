@@ -1,7 +1,3 @@
-//  npm i -g kind-lang-voxbox-maker
-//  klvm Name.Space.Here [Z_index] [Z_scale]
-
-
 App.AirShooter.State: App.State
   App.State.new(App.AirShooter.State.Local, App.AirShooter.State.Global)
 
@@ -47,6 +43,7 @@ type App.AirShooter.State.Local {
     shooting: Bool
     started: Bool
     drops: Map<App.AirShooter.Drop>
+    animations: Map<App.AirShooter.Animation>
   )
 }
 
@@ -116,11 +113,12 @@ App.AirShooter.Local.init(): App.AirShooter.State.Local
   let enemies = Map.new<App.AirShooter.Enemy>
   let bullets = Map.new<App.AirShooter.Parts.Bullet>
   let drops = Map.new<App.AirShooter.Drop>
+  let animations = Map.new<App.AirShooter.Animation>
 
   let player = App.AirShooter.Player.new(ship, 0, "", "", 0)
   let mouse_over = "game_screen"
   let mouse_pos  = { 128, 200 }
-  App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, false, false, drops)
+  App.AirShooter.State.Local.new(player, enemies, mouse_over, mouse_pos, bullets, 0, max_enemies, false, false, drops, animations)
   
 // Initial state
 App.AirShooter.init: App.Init<App.AirShooter.State>
@@ -150,8 +148,11 @@ App.AirShooter.draw.canvas(local: App.AirShooter.State.Local, img: VoxBox): VoxB
   // draw bullets
   let img = Map.for!(local@bullets)!(img, (key, bullet, img) App.AirShooter.Parts.Bullet.draw(bullet, img))
 
-  // TOOD: draw drops
+  // draw drops
   let img = Map.for!(local@drops)!(img, (key, drop, img) App.AirShooter.Drop.draw(drop, img))
+
+  // TODO: draw animations
+  let img = Map.for!(local@animations)!(img, (key, animation, img) App.AirShooter.Animation.draw(animation, img))
 
   img
 
@@ -253,9 +254,16 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.
       for keyEnemy:enemy in local@enemies with local:
         if Bool.not(Shape.Circle.collision.circle(bullet@hitbox, enemy@ship@hitbox)) then local else
           // todo: check enemy hp
+          let enemy = enemy@ship@hp <- enemy@ship@hp - 1
+          let local = local@bullets <- Map.delete!(key, local@bullets)
+          let local = local@enemies <- Map.set!(keyEnemy, enemy, local@enemies)
+
+          if enemy@ship@hp >? 0 then local else
+
+          let animation_key = App.AirShooter.new_key!(local@animations, local@seed)
+          let local = local@animations <- Map.set!(animation_key, App.AirShooter.Animation.new(27, App.AirShooter.Sprites.Explosion, 0, enemy@ship@position), local@animations)
           let local = local@player@score <- local@player@score + 1
           let local = local@enemies <- Map.delete!(keyEnemy, local@enemies)
-          let local = local@bullets <- Map.delete!(key, local@bullets)
           local
       local
     else
@@ -269,6 +277,8 @@ App.AirShooter.frame.collision(local: App.AirShooter.State.Local): IO<Maybe<App.
   for key:enemy in local@enemies with local:
     if Bool.not(Shape.Circle.collision.circle(enemy@ship@hitbox, local@player@ship@hitbox)) then local else
       // if hit, delete enemy, player loses hp
+      let animation_key = App.AirShooter.new_key!(local@animations, local@seed)
+      let local = local@animations <- Map.set!(animation_key, App.AirShooter.Animation.new(27, App.AirShooter.Sprites.Explosion, 0, enemy@ship@position), local@animations)
       let local = local@enemies <- Map.delete!(key, local@enemies)
       let local = local@player@ship@hp <- Nat.pred(local@player@ship@hp)
       local
@@ -357,6 +367,21 @@ App.AirShooter.frame.effects(local: App.AirShooter.State.Local): App.AirShooter.
 
   local
 
+App.AirShooter.frame.animations(local: App.AirShooter.State.Local): App.AirShooter.State.Local
+  
+  for key:animation in local@animations with local:
+
+    if animation@frame >=? animation@duration then local@animations <- Map.delete!(key, local@animations) else
+
+      let animation = animation@frame <- animation@frame + 1
+      
+      let local = local@animations <- Map.set!(key, animation, local@animations)
+
+      local
+
+
+  local
+
 // Event handler
 App.AirShooter.when: App.When<App.AirShooter.State>
   (event, state)
@@ -408,6 +433,7 @@ App.AirShooter.when: App.When<App.AirShooter.State>
       let local = App.AirShooter.frame.garbage_collector(local)
       let local = App.AirShooter.frame.shoot(local)
       let local = App.AirShooter.frame.drops(local)
+      let local = App.AirShooter.frame.animations(local)
       App.AirShooter.frame.collision(local)
     }
     mouse_move:
