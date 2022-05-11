@@ -1,0 +1,41 @@
+type App.AirShooter.Drop.Type {
+  HP
+  Cooldown
+  Speed
+}
+
+type App.AirShooter.Drop {
+  new(
+    position: App.AirShooter.Position
+    velocity: F64
+    sprite: VoxBox
+    hitbox: Shape.Circle
+    type: App.AirShooter.Drop.Type
+  )
+}
+
+App.AirShooter.Drop.Constructor(seed: Nat): App.AirShooter.Drop
+  // TODO: refactor
+  let ramdom_nat = (min: Nat, max: Nat) Nat.random_range(min, max, seed)
+  let random_f64 = (min: Nat, max: Nat) Nat.to_f64(ramdom_nat(min, max))
+  
+  let random = ramdom_nat(0, 99)
+
+  let type = switch Nat.ltn(random) {
+    34: App.AirShooter.Drop.Type.HP
+    67: App.AirShooter.Drop.Type.Cooldown
+    100: App.AirShooter.Drop.Type.Speed
+  } default App.AirShooter.Drop.Type.HP
+
+  let x = random_f64(10, App.AirShooter.Canvas.Size@fst)
+  let position = { x, -10.0 }
+  let velocity = 1.0
+  let sprite = case type {
+    HP: App.AirShooter.Sprites.HP
+    Cooldown: App.AirShooter.Sprites.Cooldown
+    Speed: App.AirShooter.Sprites.Speed
+  }
+  
+  let hitbox = Shape.Circle.new(V2.new(position@fst, position@snd), 1.0)
+  
+  App.AirShooter.Drop.new(position, velocity, sprite, hitbox, type)

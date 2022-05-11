@@ -1,0 +1,217 @@
+// App states (local = clicks, global = visitors)
+App.Snake.State: App.State
+  App.State.new(App.Snake.State.Local, Unit)
+
+type App.Snake.State.Local {
+  new(
+    food:       App.Snake.Coord 
+    snake:      List<App.Snake.Coord>
+    period:     U32 // Time between movements
+    direction:  App.Snake.Direction // Next direction to move
+    random:     Nat
+    top_score:  Nat
+  ) 
+}
+
+App.Snake.Direction: Type
+  App.Snake.Coord -> App.Snake.Coord
+
+// If possible, gets the direction to move from a key
+App.Snake.Direction.get(key: U16): Maybe<App.Snake.Direction>
+    switch U16.eql(key) {
+      'W': some((coord) {coord@fst, coord@snd - 1})
+      'A': some((coord) {coord@fst - 1, coord@snd})
+      'S': some((coord) {coord@fst, coord@snd + 1})
+      'D': some((coord) {coord@fst + 1, coord@snd})
+    }default none
+
+App.Snake.map_size: Pair<U32, U32>
+  {12, 12}
+
+App.Snake.pixel_size: U32
+  32
+
+// Checks if 2 coordinates are equal
+App.Snake.Coord.eql(a: App.Snake.Coord, b: App.Snake.Coord): Bool
+  U32.eql(a@fst, b@fst) && U32.eql(a@snd, b@snd)
+
+// Alias for the type Pair<U32,U32>
+App.Snake.Coord: Type
+  Pair<U32,U32>
+
+// Resets the Local to its default state, but keeps the current highscore
+App.Snake.reset(local: App.Snake.State.Local): App.Snake.State.Local
+  App.Snake.start(Nat.max(List.length!(local@snake) - 3, local@top_score))
+
+App.Snake.start(top_score: Nat): App.Snake.State.Local
+  let food = {2#32, 4#32}
+  let snake = [{4#32, 5#32}, {3#32, 5#32}, {2#32, 5#32}]
+  let period = 0#32
+  let direction = (coord) {coord@fst + 1, coord@snd} // Right
+  let random = 0
+  let local = App.Snake.State.Local.new(food, snake, period, direction, random, top_score)
+  local
+
+// Initial state
+App.Snake.init: App.Init<App.Snake.State>
+  let local = App.Snake.start(0)
+  let global = unit
+  App.Store.new<App.Snake.State>(local, unit)
+
+
+App.Snake.draw.canvas(local: App.Snake.State.Local, img: VoxBox): VoxBox
+  let snake = local@snake
+  let food  = local@food
+  let size  = App.Snake.pixel_size
+  // draws snake
+  for pos in snake with img:
+    // scales pixel to correspond to pixel size
+    let pos  = {pos@fst * size, pos@snd * size}
+    // brown
+    let col  = Col32.new(128, 0, 40, 255)
+    let img  = VoxBox.Draw.rect(pos@fst, pos@snd, 0, size, size, col, img)
+    img
+  // draws food
+  let col  = Col32.new(0, 160, 40, 255)
+  let pos = {food@fst * size, food@snd * size}
+  // Draws the food
+  VoxBox.Draw.rect(pos@fst, pos@snd, 0, size, size, col, img)
+
+// Render function
+App.Snake.draw(img: VoxBox): App.Draw<App.Snake.State>
+  (state)
+  let local = state@local
+  let img = App.Snake.draw.canvas(state@local, img)
+  <div style = {"height": "100%", "width": "100%", "display": "flex", "flex-direction": "column", "justify-content": "center", "align-items": "center"}>
+    <div style = {"font-size": "46px"}>"Highest score: " | Nat.show(local@top_score)</div>
+    <div style = {"border": "5px solid black"}>
+      {
+        DOM.vbox(
+          {
+            "id": "game_screen",
+            // Map size * pixel size
+            "width": U32.show(App.Snake.map_size@fst * App.Snake.pixel_size),
+            "height": U32.show(App.Snake.map_size@snd * App.Snake.pixel_size),
+            "scale": "2"
+          }, {}, img)
+      }
+    </div>
+  </div>
+
+App.Snake.when.init(time: Nat, local: App.Snake.State.Local): App.Snake.State.Local
+  let local = local@random <- time
+  local
+
+// Spawns a food at a random location
+App.Snake.random_food(snake: List<App.Snake.Coord>, seed: Nat): App.Snake.Coord
+  let x = Nat.random_range(0, U32.to_nat(App.Snake.map_size@fst - 1), seed)
+  let y = Nat.random_range(0, U32.to_nat(App.Snake.map_size@snd - 1), seed / 100)
+  let food = {Nat.to_u32(x), Nat.to_u32(y)}
+  // If the snake is already at that spot, try again
+  if List.any!(App.Snake.Coord.eql(food), snake) then
+    App.Snake.random_food(snake, Nat.random(seed))
+  else
+    food
+
+App.Snake.when.move(local: App.Snake.State.Local): App.Snake.State.Local
+  let snake = local@snake
+  let head = snake[0]
+  without head: local
+  // Gets the next tile to move
+  let new_head = local@direction(head)
+  // Creates a new snake deleting the last part and adding a new one on the front
+  let new_snake = new_head & List.init!(snake) 
+  let length    = Nat.to_f64(List.length!(local@snake)) - 2
+  let start     = 15.0 // Starting Period
+  let min       = 3.0  // Minimum possible Period
+  let max_int   = 60.0 // Interactions to reach minimum posssible period
+  let period    = start - F64.log(length) / F64.log(F64.pow(max_int, (1.0 / (start - min))))
+  let period    = if min >? period then min else period
+  let local = local@period <- F64.to_u32(period)
+  // Checks if snake collides with itself
+  if List.any!(App.Snake.Coord.eql(new_head), snake) then
+    App.Snake.reset(local) // Defeat
+  else
+    // If it finds a food on the new location
+    if App.Snake.Coord.eql(new_head, local@food) then
+      let new_snake = new_head & snake
+      let food      = App.Snake.random_food(new_snake, local@random)
+      let local     = local@snake <- new_snake
+      let local     = local@food  <- food
+      local
+    else
+      let local = local@snake <- new_snake
+      local
+
+// Updates the direction to move with a key
+App.Snake.when.direction(key: U16, local: App.Snake.State.Local): App.Snake.State.Local
+  let snake     = local@snake
+  let direction = App.Snake.Direction.get(key)
+  let head_0    = List.get<App.Snake.Coord>(0, snake)
+  let head_1    = List.get<App.Snake.Coord>(1, snake)
+  without direction: local
+  let new_local = local@direction <- direction
+  without head_0: local
+  // If current direction is the same as the previous one, do not update it
+  let new_local = 
+    if App.Snake.Coord.eql(local@direction(head_0), direction(head_0)) then
+      new_local
+    else
+      App.Snake.when.move(new_local)
+  without head_1: new_local
+  if App.Snake.Coord.eql(direction(head_0), head_1) then
+    local
+  else
+    new_local
+
+App.Snake.when.frame(local: App.Snake.State.Local): App.Snake.State.Local
+  let size  = App.Snake.map_size
+  let local = local@random <- Nat.random(local@random)
+  let head  = local@snake[0]
+  without head: local
+  // Checks if snake is inside map
+  if (head@fst <? size@fst) && (head@snd <? size@snd) then
+    if local@period =? 0 then
+      App.Snake.when.move(local)
+    else
+      local@period <- local@period - 1
+  else
+    App.Snake.reset(local)
+
+
+// Event handler
+App.Snake.when: App.When<App.Snake.State>
+  (event, state)
+  let local = state@local
+  case event {
+    init:
+      let local = App.Snake.when.init(Nat.random(7777), local)
+      App.set_local<App.Snake.State>(local)
+    key_down:
+      let local = App.Snake.when.direction(event.code, local)
+      App.set_local<App.Snake.State>(local)
+    frame:
+      let local = App.Snake.when.frame(local)
+      App.set_local<App.Snake.State>(local)
+  } default App.pass<App.Snake.State>
+
+
+// Global ticker: not used
+App.Snake.tick: App.Tick<App.Snake.State>
+  App.no_tick<App.Snake.State>
+
+// Global visitor: counts posts to room_zero
+App.Snake.post: App.Post<App.Snake.State>
+  (time, room, addr, data, global_state)
+  global_state
+
+// A "Snake, world!" + counter application
+App.Snake: App<App.Snake.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  App.new<App.Snake.State>(
+    App.Snake.init
+    App.Snake.draw(img)
+    App.Snake.when
+    App.Snake.tick
+    App.Snake.post
+  )

@@ -8,7 +8,30 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
     "display": "flex"
     "flex-direction": "column"
     "width": "100%"
+    "margin-top": "15px"
   }
+
+  let progressStyle = {
+    "height":" 20px"
+    "width": "13em"
+  }
+
+  let effects = []
+
+  for key:effect in state@local@player@ship@effects with effects:
+    let title = case effect@type {
+      Speed: "SPEED BOOST"
+      Cooldown: "RAPID FIRE"
+    } default ""
+    
+    List.append!(effects, 
+      <div style=statusStyle>
+        <div style=style>title</div>
+        <progress style=progressStyle value=Nat.show(effect@timer) max=Nat.show(App.AirShooter.Effect.Time)></progress>
+      </div>
+    )
+
+
 
   <div style={
     "display": "flex"
@@ -22,18 +45,18 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
         DOM.vbox(
           {
             "id": "game_screen",
-            "width": "256",
-            "height": "256",
-            "scale": "4"
+            "width": Nat.show(App.AirShooter.Canvas.Size@fst),
+            "height": Nat.show(App.AirShooter.Canvas.Size@snd),
+            "scale": Nat.show(App.AirShooter.Canvas.Scale)
             
           }, {}, img)
       }
     </div>
-        <div style={
+    <div style={
       "display": "flex"
       "flex-direction": "column"
       "height": "inherit"
-      "justify-content": "space-between"
+      // "justify-content": "space-between"
       "align-items": "center"
       "padding": "100px 0px 100px 25px"
     }>
@@ -53,13 +76,17 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
       <div style=statusStyle>
         <div style=style>"WEAPON"</div>
         <progress 
-          style={
-            "height":" 20px"
-            "width": "13em"
-          }
+          style=progressStyle
           id="weapon" 
           value=U32.show(state@local@player@ship@weapon@last_fired)
           max=U32.show(state@local@player@ship@weapon@cooldown)>
+        </progress>
+        <div style=style>if state@local@player@ship@weapon@overheat then "OVERHEAT" else "TEMPERATURE"</div>
+        <progress 
+          style=progressStyle
+          id="weapon_temp" 
+          value=Nat.show(state@local@player@ship@weapon@heat)
+          max=Nat.show(state@local@player@ship@weapon@max_heat)>
         </progress>
       </div>
       <div style=statusStyle>
@@ -68,5 +95,6 @@ App.AirShooter.GameScreen(state: App.Store(App.AirShooter.State), img: VoxBox): 
         <div style=style>"HIGHEST"</div>
         <div style=style>U32.show(state@local@player@highscore)</div>
       </div>
+      for effect in effects: effect
     </div>
   </div>
