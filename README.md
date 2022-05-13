@@ -303,9 +303,9 @@ In order to run this or any other app you should follow this steps:
   - The app should be in `base/App` folder
   - Install necessary packages in web folder with `npm i --prefix web/`
   - Install `js-beautify` using `sudo npm i -g js-beautify`
-  - Run our local server with `node web/server`
   - Build the app you want with `node web/build App.[name of app]` (in this example would be `node web/build App.Hello`)
-  - Open `localhost` in your favorite browser and see your app working
+  - Run a local server with `node web/server.js 8080`
+  - Open http://localhost:8080 in your favorite browser and see your app working
 
 
 Future work
