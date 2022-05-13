@@ -20,7 +20,7 @@ App.Kind.comp.footer(device: Device, container_layout: Map(String)): DOM
       DOM.node("div", {}, {}, [
         App.Kind.comp.list([
           App.Kind.comp.link_white("Github", footer_font_size, "https://github.com/Kindelia/Kind"),
-          App.Kind.comp.link_white("Telegram", footer_font_size, "https://t.me/formality_lang")
+          App.Kind.comp.link_white("Telegram", footer_font_size, "https://t.me/kindelia")
         ])
       ]) 
     ])
