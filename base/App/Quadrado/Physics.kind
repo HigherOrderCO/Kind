@@ -30,7 +30,7 @@ App.Quadrado.Physics.Dash.start: App.Quadrado.Physics.Dash
   App.Quadrado.Physics.Dash.new(5.0, some(20))
 
 //Jump starting value
-App.Quadrado..Physics.Air.start: App.Quadrado.Physics.Air
+App.Quadrado.Physics.Air.start: App.Quadrado.Physics.Air
   App.Quadrado.Physics.Air.new(0.0, some(15))
 
 

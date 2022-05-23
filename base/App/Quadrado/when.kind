@@ -1,7 +1,3 @@
-
-
-
-
 //Function to know where the character is looking
 App.Quadrado.when.looks(local: App.Quadrado.State.Local, key: U16): App.Quadrado.State.Local
   let creature = local@creature
@@ -75,23 +71,31 @@ App.Quadrado.when.stop_dash(local: App.Quadrado.State.Local, key: U16): App.Quad
 
 
 //Function to deal with the jump on when
-App.Quadrado.when.jump(local: App.Quadrado.State.Local, key: U16, jumping: Bool): App.Quadrado.State.Local
-  case local@jumps as jumps { 
-    zero:
-      local
-    succ: 
-      switch List.any!(U16.eql(key)) { 
-        ['W', 32#16]:
-          if jumping then
-            log("true")
-            let new_local = local@on_air <- some(App.Quadrado.Air.start)
-            new_local@jumps <- jumps.pred
-          else
-            log("false")
-            let on_air = local@on_air
-            without on_air: local
-            let new_on_air = on_air@rising <- none
-            local@on_air <- some(new_on_air)
-      } default local
-  }
+App.Quadrado.when.jump(local: App.Quadrado.State.Local, w_pressed: Bool): App.Quadrado.State.Local
+  let creature = local@creature
+  let status = creature@status
+  let jumps = status@jumps
+  let physics = creature@physics
+  let on_air = physics@on_air
+    case jumps
+    {
+      zero: 
+        local
+      succ: 
+        if w_pressed then
+          let new_physics = physics@on_air   <- some(App.Quadrado.Physics.Air.start)
+          let new_status  = status@jumps     <- jumps.pred
+          let creature    = creature@status  <- new_status
+          let creature    = creature@physics <- new_physics
+          let local       = local@creature   <- creature
+          local
 
+        else
+          let on_air     = physics@on_air
+          without on_air:  local
+            let new_on_air = on_air@rising    <- none
+            let physics    = physics@on_air   <- some(new_on_air)
+            let creature   = creature@physics <- physics
+            let local      = local@creature   <- creature
+            local
+    }
