@@ -1,0 +1,11 @@
+type App.Quadrado.Movement { 
+  new(
+    direction: Pair<Bool, Bool>
+    looking: Bool
+  )
+}
+
+
+
+
+

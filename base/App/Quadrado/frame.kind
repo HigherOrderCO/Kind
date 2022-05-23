@@ -1,0 +1,121 @@
+// Event handler
+App.Quadrado.when: App.When<App.Quadrado.State>
+  (event, state)
+  let local = state@local
+  case event {
+    key_down:
+      //Jump 
+      let new_local = App.Quadrado.when.jump(local, event.code, Bool.true)
+
+      //Left and Right movement
+      let new_local = App.Quadrado.when.movement(new_local, event.code, Bool.true)
+
+      //Decides where to keep looking
+      let new_local = App.Quadrado.when.looks(new_local, event.code)
+
+      //Dash
+      let new_local = App.Quadrado.when.dash(new_local, event.code)
+      
+      App.set_local<App.Quadrado.State>(new_local)
+    key_up:
+      //Falling
+      let new_local = App.Quadrado.when.jump(local, event.code, Bool.false)
+
+      //Not Moving
+      let new_local = App.Quadrado.when.movement(new_local, event.code, Bool.false)
+
+      //Stop dash
+      let new_local = App.Quadrado.when.stop_dash(new_local, event.code)
+
+      App.set_local<App.Quadrado.State>(new_local)
+    frame: 
+      //Deals with Jump/Falling
+      let new_local = App.Quadrado.when.frame.jump(local)
+
+      //Deals with movement
+      let new_local = App.Quadrado.when.frame.movement(new_local, 60.0)
+
+      //Deals with dash
+      let new_local = App.Quadrado.when.frame.dash(new_local)
+
+      App.set_local<App.Quadrado.State>(new_local)
+
+  } default App.pass<App.Quadrado.State>
+
+App.Quadrado.when.update_creature(local: App.Quadrado.State.Local, creature: App.Quadrado.Creature): App.Quadrado.State.Local
+  local@creature <- creature
+
+
+
+
+
+//Function that deals with dash on frame
+App.Quadrado.when.frame.dash(local: App.Quadrado.State.Local): App.Quadrado.State.Local
+  let dash = local@dashing
+  without dash: local
+  let {x, y} = local@pos 
+  let new_dash = App.Quadrado.Dash.frame(dash)
+  let distance = new_dash@distance
+  without distance: local
+  case distance { 
+    zero:
+      let new_local = local@dashing <- none
+      new_local
+    succ:
+      log("new_distance: "| Nat.show(distance))
+      let dir = (x: F64) if local@looking then F64.sub(x, 1*new_dash@speed) else F64.add(x, 1*new_dash@speed)
+      let new_x = dir(x)
+      let new_coord = Pair.new<F64, F64>(new_x, y)
+      let new_local = local@pos <- new_coord
+      let new_local = new_local@dashing <- some(new_dash)
+      new_local
+  }
+
+
+//Function to deal with the jump on frame
+App.Quadrado.when.frame.jump(local: App.Quadrado.State.Local): App.Quadrado.State.Local
+    let on_air = local@on_air
+    let dash = local@dashing
+    without on_air: local
+    case dash { 
+      none:
+        let rising = on_air@rising
+        let {x,y} = local@pos
+        let new_air = App.Quadrado.Air.frame(on_air, 0.5)
+        //log("old y: "|F64.show(y))                     //log
+        //log("speed: "|F64.show(new_air@speed))         //log
+        let new_y = (y + (new_air@speed * -1))
+        //log("new y: "|F64.show(new_y))                 //log
+        let new_coord = Pair.new<F64, F64>(x, new_y)
+        let new_local = local@pos <- new_coord
+        let new_local = new_local@on_air <- some(new_air)
+        if F64.gtn(y, 0) && Maybe.is_none!(rising) then 
+          let new_local = local@on_air <- none
+          let new_local = new_local@pos <- Pair.new<F64, F64>(new_local@pos@fst, 0)
+          new_local@jumps <- 2
+        else
+          new_local
+      some:
+        let new_air = App.Quadrado.Air.frame(on_air, 0)
+        let falling = new_air@falling <- none
+        let new_local = local@on_air <- some(falling)
+        new_local
+    }
+
+
+//Deals with movement on frame
+App.Quadrado.when.frame.movement(local: App.Quadrado.State.Local, mps: F64): App.Quadrado.State.Local
+  let {x,y} = local@pos
+  let movement = mps/60.0
+  log(Pair.show<Bool,Bool>(Bool.show, Bool.show, local@direction))
+  switch App.Quadrado.pair.equal<Bool, Bool>(Bool.eql, Bool.eql, local@direction) { 
+    {true false}: 
+      let new_x = x - movement
+      let new_pos = Pair.new<F64, F64>(new_x, y)
+      local@pos <- new_pos
+    {false true}:
+      let new_x = x + movement
+      let new_pos = Pair.new<F64, F64>(new_x, y)
+      local@pos <- new_pos
+  } default local
+

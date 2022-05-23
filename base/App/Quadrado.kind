@@ -1,0 +1,57 @@
+App.Quadrado.State: App.State
+//             local  global
+  App.State.new(App.Quadrado.State.Local,  Unit)
+
+// Local state
+type App.Quadrado.State.Local { 
+  new(
+    creature: App.Quadrado.Creature
+  )
+}
+
+//Pair F64 max_min
+App.Quadrado.order(a: F64, b: F64): Pair<F64, F64>
+  if F64.gtn(a,b) then {a,b} else {b,a}
+
+
+// Render function
+App.Quadrado.draw(img: VoxBox): App.Draw<App.Quadrado.State>
+  (state)
+  let img = App.Quadrado.draw.canvas(state@local, state@global, img)
+  <div style={"max-width":"100vw", "height":"100%", "display":"flex", "justify-content":"center", "align-items":"center","background-color":"black"}>
+    <div style={"width":"1600px", "heigth":"875px", "border":"5px solid black","background-color":"white"}>
+      {
+        DOM.vbox({"width": U32.show(App.Quadrado.draw.width_constant),"height": U32.show(App.Quadrado.draw.height_constant),"scale": U32.show(App.Quadrado.draw.scale)}, {}, img)
+      }
+    </div>
+  </div>
+
+
+//Function to verify if a condition is achieved with two pairs
+App.Quadrado.pair.equal<A: Type, B: Type>(fnf: A -> A -> Bool, fns: B -> B -> Bool, a: Pair<A,B>, b: Pair<A,B>): Bool
+  let eqla = fnf(a@fst, b@fst)
+  let eqlb = fns(a@snd, b@snd)
+  Bool.and(eqla, eqlb)
+
+
+
+// Global ticker 
+App.Quadrado.tick: App.Tick<App.Quadrado.State>
+  App.no_tick<App.Quadrado.State>
+
+// Global visitor
+App.Quadrado.post: App.Post<App.Quadrado.State>
+  (time, room, addr, data, glob)
+  glob
+
+
+// A "Quadrado" application
+App.Quadrado: App<App.Quadrado.State>
+  let img = VoxBox.alloc_capacity(8*65536)
+  App.new<App.Quadrado.State>(
+    App.Quadrado.init 
+    App.Quadrado.draw(img)
+    App.Quadrado.when 
+    App.Quadrado.tick 
+    App.Quadrado.post 
+  )

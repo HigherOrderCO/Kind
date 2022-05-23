@@ -1,0 +1,78 @@
+type App.Quadrado.Physics { 
+  new(
+    on_air: Maybe<App.Quadrado.Physics.Air>
+    dashing: Maybe<App.Quadrado.Physics.Dash>
+  )
+}
+
+
+//Type for Jumping
+type App.Quadrado.Physics.Air {
+  new(
+    speed:  F64
+    rising: Maybe<Nat>
+  )
+}
+
+
+//Type for Dashing
+type App.Quadrado.Physics.Dash {
+  new(
+    speed:  F64
+    distance: Maybe<Nat>
+  )
+}
+
+
+
+//Dash starting value
+App.Quadrado.Physics.Dash.start: App.Quadrado.Physics.Dash
+  App.Quadrado.Physics.Dash.new(5.0, some(20))
+
+//Jump starting value
+App.Quadrado..Physics.Air.start: App.Quadrado.Physics.Air
+  App.Quadrado.Physics.Air.new(0.0, some(15))
+
+
+//Dash physics on frame
+App.Quadrado.Physics.Dash.frame(dash: App.Quadrado.Dash): App.Quadrado.Dash
+  let max_dis = dash@distance
+  let speed = dash@speed
+  case max_dis { 
+    none:
+      dash
+    some:
+      case max_dis.value { 
+        zero: 
+          App.Quadrado.Dash.new(speed, none)
+        succ:
+          let new_distance  = some(max_dis.value - 1)
+          App.Quadrado.Dash.new(speed, new_distance)
+      }
+  }
+
+
+//Jump physics on frame
+App.Quadrado.Physics.Air.frame(status: App.Quadrado.Air, rise_spd: F64): App.Quadrado.Air
+  //let rise_spd = 0.5
+  let gravity  = F64.div(2.0, 10)
+  let max_fall = -4.0
+  let max_jump = 3.0
+  let rise     = status@rising
+  let speed    = status@speed
+  case rise {
+    none:
+      let new_speed = Pair.fst!!(App.Quadrado.order(speed - gravity, max_fall))
+      App.Quadrado.Air.new(new_speed, none)
+    some:
+      case rise.value {
+        zero: 
+          App.Quadrado.Air.new(speed, none)
+        succ:
+          let new_speed = Pair.snd!!(App.Quadrado.order(speed + rise_spd, max_jump))
+          let new_rise  = some(rise.value - 1)
+          App.Quadrado.Air.new(new_speed, new_rise)
+      }
+  }
+
+

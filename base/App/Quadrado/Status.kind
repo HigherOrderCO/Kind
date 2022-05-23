@@ -1,0 +1,7 @@
+type App.Quadrado.Status { 
+  new(
+    hp: U32,
+    energy: U32
+    jumps: Nat
+  )
+}
