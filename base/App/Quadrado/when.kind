@@ -1,0 +1,97 @@
+
+
+
+
+//Function to know where the character is looking
+App.Quadrado.when.looks(local: App.Quadrado.State.Local, key: U16): App.Quadrado.State.Local
+  let creature = local@creature
+  let movement = creature@movement
+  switch U16.eql(key) { 
+    'A': 
+      let looks        = movement@looking <- Bool.true
+      let new_mov      = creature@movement <- looks
+      local@creature <- new_mov
+      //local@creature <- new_creature
+    'D':
+      let looks        = movement@looking <- Bool.false
+      let new_mov      = creature@movement <- looks
+      local@creature <- new_mov
+  }default local
+
+
+//Function to deal with the movement on when
+App.Quadrado.when.movement(local: App.Quadrado.State.Local, key: U16, moving: Bool): App.Quadrado.State.Local
+  let dir = 
+    (pair: Pair<Bool,Bool>)
+    switch U16.eql(key) { 
+      'A': Pair.new<Bool, Bool>(moving,   pair@snd)
+      'D': Pair.new<Bool, Bool>(pair@fst, moving  )
+    } default pair
+  let creature = local@creature
+  let movement = creature@movement 
+  let direction = movement@direction
+  let set_dir = movement@direction <- dir(direction)
+  let new_creature = creature@movement <- set_dir
+  App.Quadrado.State.Local.new(new_creature)
+
+
+
+ //Function to deal with dash on when key_press
+App.Quadrado.when.dash(local: App.Quadrado.State.Local, key: U16): App.Quadrado.State.Local
+  let creature = local@creature
+  let physics  = creature@physics
+  let dash     = physics@dashing
+  switch U16.eql(key) { 
+    16#16: 
+      case dash { 
+        none:
+          let new_dash     = App.Quadrado.Physics.Dash.start
+          let new_physics  = App.Quadrado.Physics.new(physics@on_air, some(new_dash))
+          let new_creature = creature@physics <- new_physics
+          local@creature <- new_creature
+        some:
+          local
+      }
+  } default local
+
+
+
+ //Function to deal with dash on when key_release
+App.Quadrado.when.stop_dash(local: App.Quadrado.State.Local, key: U16): App.Quadrado.State.Local
+  let creature = local@creature
+  let physics = creature@physics
+  let dash = physics@dashing
+  switch U16.eql(key) {
+    16#16: 
+      case dash { 
+        none:
+          local
+        some:
+          let new_dash     = physics@dashing <- none
+          let new_creature = creature@physics <- new_dash
+          local@creature <- new_creature
+      }
+  } default local
+
+
+//Function to deal with the jump on when
+App.Quadrado.when.jump(local: App.Quadrado.State.Local, key: U16, jumping: Bool): App.Quadrado.State.Local
+  case local@jumps as jumps { 
+    zero:
+      local
+    succ: 
+      switch List.any!(U16.eql(key)) { 
+        ['W', 32#16]:
+          if jumping then
+            log("true")
+            let new_local = local@on_air <- some(App.Quadrado.Air.start)
+            new_local@jumps <- jumps.pred
+          else
+            log("false")
+            let on_air = local@on_air
+            without on_air: local
+            let new_on_air = on_air@rising <- none
+            local@on_air <- some(new_on_air)
+      } default local
+  }
+

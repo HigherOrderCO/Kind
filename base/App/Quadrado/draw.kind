@@ -1,0 +1,36 @@
+App.Quadrado.draw.scale: U32
+  5
+
+App.Quadrado.draw.width_constant: U32
+  320
+
+App.Quadrado.draw.height_constant: U32
+  175
+
+//Center_x = Width/2 - 128    for draw img
+//Center_y = Height/2 - 128   for draw img
+
+//Function that creates the canvas
+App.Quadrado.draw.canvas(local: App.Quadrado.State.Local, global: Unit, img: VoxBox): VoxBox
+  let {x, y} = local@pos
+  let {x, y} = Pair.new<U32, U32>(F64.to_u32(x),F64.to_u32(y))
+  //let nave = App.Quadrado.img.boneco
+  let nave = App.KL.Game.Hero.Fields.Assets.minion_img
+  let {center_x, center_y} = {App.Quadrado.draw.width_constant/2, App.Quadrado.draw.height_constant/2}
+  let func = 
+    if local@looking then 
+      VoxBox.Draw.image_reverse_x
+    else
+      VoxBox.Draw.image
+  let img = func((x + center_x) -128 , (y + center_y) -132, 1#32 , nave , img)
+  App.Quadrado.draw.lines(0, 44, 1, local, global, img)
+
+
+//VoxBox.Draw.image(x: U32, y: U32, z: U32, src: VoxBox, img: VoxBox): VoxBox
+
+App.Quadrado.draw.lines(x: U32, y: U32, z:U32, local: App.Quadrado.State.Local, global: Unit, img: VoxBox): VoxBox
+  for i: U32 from 0 to 3 with img:
+    let platform = i + 1
+    VoxBox.Draw.rect(x, y*platform, z, App.Quadrado.draw.width_constant, 1, Col32.new(0,0,0,255), img)
+  img
+  

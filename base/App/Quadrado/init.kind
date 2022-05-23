@@ -1,0 +1,25 @@
+//Initial State of the Game
+App.Quadrado.init: App.Init<App.Quadrado.State>
+  let hp     = 100#32
+  let energy = 100#32
+  let jumps  = 2
+  let pos = Pair.new<F64, F64>(0.0, 0.0)
+  let local = App.Quadrado.initial_creature(hp, energy, jumps, pos)
+  let global = unit
+  App.Store.new<App.Quadrado.State>(local, global)
+
+
+
+//Initial Creature
+App.Quadrado.initial_creature(
+  hp: U32
+  energy: U32
+  jumps: Nat
+  pos: App.Quadrado.Coord
+): App.Quadrado.State.Local
+  let status   = App.Quadrado.Status.new(hp, energy,jumps)
+  let physics  = App.Quadrado.Physics.new(none, none)
+  let movement = App.Quadrado.Movement.new(Pair.new<Bool, Bool>(Bool.false, Bool.false), Bool.false)
+  let creature = App.Quadrado.Creature.new(status, pos, physics, movement)
+  App.Quadrado.State.Local.new(creature)
+

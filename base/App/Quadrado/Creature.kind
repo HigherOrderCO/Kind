@@ -1,0 +1,20 @@
+type App.Quadrado.Creature { 
+  new(
+    status: App.Quadrado.Status
+    pos: App.Quadrado.Coord
+    physics: App.Quadrado.Physics
+    movement: App.Quadrado.Movement
+  )
+}
+    //status
+      //hp: U32,
+      //energy: U32
+      //jumps: Nat
+
+    //physics
+      //on_air: Maybe<App.Quadrado.Air>
+      //dashing: Maybe<App.Quadrado.Dash>
+
+    //movement
+      //direction: Pair<Bool, Bool>
+      //looking: Bool

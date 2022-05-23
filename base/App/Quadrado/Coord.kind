@@ -1,0 +1,2 @@
+App.Quadrado.Coord: Type
+  Pair<F64, F64>
