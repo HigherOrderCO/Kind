@@ -1,0 +1,8 @@
+List.map.length<A: Type, B: Type>(
+  f: A -> B,
+  as: List<A>
+): List.length<A>(as) == List.length<B>(List.map<A, B>(f, as))
+  case as {
+    nil : refl
+    cons: apply(Nat.succ, List.map.length<A, B>(f, as.tail))
+  }!
