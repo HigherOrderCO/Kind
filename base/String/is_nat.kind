@@ -6,3 +6,4 @@ String.is_nat(str: String): Bool
       false: false 
     }
   }
+  
