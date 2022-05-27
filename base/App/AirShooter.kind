@@ -14,7 +14,7 @@ App.AirShooter.Effect.Time: Nat
   800
 
 App.AirShooter.Effect.CooldownModifier: U32
-  Nat.to_u32(2)
+  2#32
 
 App.AirShooter.Effect.SpeedModifier: F64
   1.5

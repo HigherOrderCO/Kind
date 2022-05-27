@@ -1,0 +1,8 @@
+// fps = frames per sprite
+
+App.AirShooter.Animation.Build(sprites: List<VoxBox>, fps: Nat): U32 -> VoxBox
+  (frame: U32)
+
+  let idx = (U32.to_nat(frame) / fps) % List.length!(sprites)
+
+  sprites[idx] <> App.AirShooter.Sprites.Explosion.Explosion_1
