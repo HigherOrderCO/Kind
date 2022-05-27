@@ -1,0 +1,824 @@
+// How to use this file:
+// 1. Clone Kind's repo:     git clone https://github.com/Kindelia/Kind
+// 2. Create a dir for you:  mkdir Kind/base/User/YourName
+// 3. Copy that file there:  cp Kind/base/Problems.kind Kind/base/User/YourName
+// 4. Open, uncomment a problem and solve it
+// 5. Send a PR if you want!
+// If you need help, read the tutorial on Kind/THEOREMS.md, or ask on Telegram.
+// Answers: https://github.com/Kindelia/Kind/blob/master/base/User/MaiaVictor/Problems.kind
+
+// -----------------------------------------------------------------------------
+
+// ::::::::::::::
+// :: Programs ::
+// ::::::::::::::
+
+// Returns true if both inputs are true
+Problems.p0(a: Bool, b: Bool): Bool
+ case a b {
+   true true: true
+ } default false
+
+// Returns true if any input is true
+Problems.p1(a: Bool, b: Bool): Bool
+ case a b {
+   false false: false
+ } default true
+
+// Returns true if both inputs are identical
+Problems.p2(a: Bool, b: Bool): Bool
+ case a b {
+   false false: true
+   true  true : true
+ } default false
+
+// Returns the first element of a pair
+Problems.p3<A: Type, B: Type>(pair: Pair<A,B>): A
+ open pair
+ pair.fst
+
+// Returns the second element of a pair
+Problems.p4<A: Type, B: Type>(pair: Pair<A,B>): B
+  open pair
+  pair.snd
+
+// Inverses the order of the elements of a pair
+Problems.p5<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
+  open pair
+  {pair.snd, pair.fst}
+
+// Applies a function to both elements of a Pair
+Problems.p6<A: Type, B: Type>(fn: A -> B, pair: Pair<A,A>): Pair<B,B>
+  open pair
+  {fn(pair.fst), fn(pair.snd)}
+
+// Doubles a number
+Problems.p7(n: Nat): Nat
+  case n {
+    // 0 * 2 == 0
+    zero: 0
+    // 2 + 2*(n-1) == 2 + 2n - 2 == 2n
+    succ: Nat.succ(Nat.succ(Problems.p7(n.pred)))
+  }
+
+// Halves a number, rounding down
+Problems.p8(n: Nat): Nat
+  case n {
+    zero: 0
+    succ: case n.pred {
+      zero: 0
+      // n/2 == 1 + (n-2)/2
+      succ: Nat.succ(Problems.p8(n.pred.pred))
+    }
+  }
+
+// Adds two numbers
+Problems.p9(a: Nat, b: Nat): Nat
+  case a {
+    // 0 ++ b == b
+    zero: b
+    // a + b == (a-1) + (b+1)
+    succ: Problems.p9(a.pred, Nat.succ(b))
+  }
+
+// Subtracts two numbers
+Problems.p10(a: Nat, b: Nat): Nat
+  case a b {
+    // 0 - 0 == 0
+    zero zero: 0
+    // 0 - b == 0
+    zero succ: 0
+    // a - 0 == a
+    succ zero: a
+    // a - b == (a-1) - (b-1)
+    succ succ: Problems.p10(a.pred, b.pred)
+  }
+
+// Multiplies two numbers
+Problems.p11(a: Nat, b: Nat): Nat
+  case a {
+    // 0 * b == b
+    zero: 0
+    // a * b == ((a-1) * b) + b
+    succ: Problems.p9(Problems.p11(a.pred, b), b)
+  }
+
+// Returns true if a < b
+Problems.p12(a: Nat, b: Nat): Bool
+  case a b {
+    // 0 not smaller than 0
+    zero zero: false
+    // 0 smaller than x+1
+    zero succ: true
+    // x+1 not smaller than 0
+    succ zero: false
+    // (a < b) == ((a-1) < (b-1))
+    succ succ: Problems.p12(a.pred, b.pred)
+  }
+
+// Returns true if a == b
+Problems.p13(a: Nat, b: Nat): Bool
+  case a b {
+    zero zero: true
+    zero succ: false
+    succ zero: false
+    // (a = b) == ((a-1) = (b-1))
+    succ succ: Problems.p13(a.pred, b.pred)
+  }
+
+// Returns the first element of a List
+Problems.p14<A: Type>(xs: List<A>): Maybe<A>
+  case xs {
+    nil : none
+    cons: some(xs.head)
+  }
+
+// Returns the list without the first element
+Problems.p15<A: Type>(xs: List<A>): List<A>
+  case xs {
+    nil : []
+    cons: xs.tail
+  }
+
+// Returns the length of a list
+Problems.p16<A: Type>(xs: List<A>): Nat
+  case xs {
+    nil : 0
+    cons: Nat.succ(Problems.p16!(xs.tail))
+  }
+
+// Many poorly optimized funcions below (not tail-recursive, assintotically bad, etc)
+
+// Concatenates two lists
+Problems.p17<A: Type>(xs: List<A>, ys: List<A>): List<A>
+  case xs {
+    nil : ys
+    cons: xs.head & Problems.p17!(xs.tail, ys)
+  }
+
+// Applies a function to all elements of a list
+Problems.p18<A: Type, B: Type>(fn: A -> B, xs: List<A>): List<B>
+  case xs {
+    nil : []
+    cons: fn(xs.head) & Problems.p18!!(fn, xs.tail)
+  }
+
+// Returns the same list, with the order reversed
+Problems.p19<A: Type>(xs: List<A>): List<A>
+  case xs {
+    nil : []
+    // O(n²)?
+    cons: Problems.p19!(xs.tail) ++ [xs.head]
+  }
+
+// Returns pairs of the elements of the 2 input lists on the same index
+// Ex: Problems.p20!!([1,2], ["a","b"]) == [{1,"a"},{2,"b"}]
+Problems.p20<A: Type, B: Type>(xs: List<A>, ys: List<B>): List<Pair<A,B>>
+  case xs ys {
+    cons cons: {xs.head, ys.head} & Problems.p20!!(xs.tail, ys.tail)
+  } default []
+
+
+// Returns the smallest element of a List
+Problems.p21.go(xs: List<Nat>, min: Nat): Nat
+  case xs {
+    nil : min
+    cons:
+      let new_min = if xs.head <? min then xs.head else min
+      Problems.p21.go(xs.tail, new_min)
+  }
+
+Problems.p21(xs: List<Nat>): Nat
+  case xs {
+    nil : 0
+    cons: Problems.p21.go(xs.tail, xs.head)
+  }
+
+// Returns the same list without the smallest element and the smallest element
+// (Original problem didn't return smallest, but i wanted to use it on p23)
+// Peguei a ideia desse video e quebrei em 2 listas, acho que é mais facil de entender
+// https://www.youtube.com/watch?v=rvb70cZS-ao
+Problems.p22.go(
+  xs: List<Nat>
+  heads: List<Nat> -> List<Nat>
+  tails: List<Nat> -> List<Nat>
+  min: Nat
+): Pair<List<Nat>, Nat>
+  case xs {
+    nil : {heads(tails([])), min}
+    cons:
+      if xs.head <? min then
+        Problems.p22.go(
+          xs.tail,
+          (h) heads(min & tails(h)),
+          (t) t,
+          xs.head
+        )
+      else
+        Problems.p22.go(
+          xs.tail,
+          heads,
+          (t) tails(xs.head & t),
+          min
+        )
+  }
+  // [1 2 3 0 4 5]
+  // [2 3 0 4 5]    [h]       [t]      1
+  // [3 0 4 5]      [h]       [2 t]    1
+  // [0 4 5]        [h]       [2 3 t]  1
+  // [4 5]          [1 2 3 h] [t]      0
+  // [5]            [1 2 3 h] [4 t]    0
+  // []             [1 2 3 h] [4 5 t]  0
+  // [1 2 3 4 5]
+
+Problems.p22(xs: List<Nat>): Pair<List<Nat>, Nat>
+  case xs {
+    nil : {[], 0}
+    cons: Problems.p22.go(xs.tail, (h) h, (t) t, xs.head)
+  }
+
+// Returns the same list, in ascending order
+Problems.p23.go(
+  xs: List<Nat>,
+  acc: List<Nat> -> List<Nat>
+): List<Nat>
+  case xs {
+    nil : acc([])
+    cons:
+      let {xs_cut, min} = Problems.p22(xs)
+      Problems.p23.go(xs_cut, (e) acc(min & e))
+  }
+
+Problems.p23(xs: List<Nat>): List<Nat>
+  Problems.p23.go(xs, (e) e)
+
+// -----------------------------------------------------------------------------
+
+// ::::::::::::::
+// :: Theorems ::
+// ::::::::::::::
+
+// Note: these problems use functions from the base libs, NOT the ones above
+
+// Aliases
+Chain: _
+  Equal.chain
+
+Rev: _
+  List.reverse
+
+Rev.go: _
+  List.reverse.go
+
+
+// true is true
+Problems.t0: true == true
+  refl
+
+// "false" short-circuits "and" on first position
+Problems.t1(a: Bool): Bool.and(false, a) == false
+  refl
+
+// "false" short-circuits "and" on second position
+Problems.t2(a: Bool): Bool.and(a, false) == false
+  case a {
+    false: refl
+    true : refl
+  }!
+
+// "true" short-circuits "or" on first position
+Problems.t3(a: Bool): Bool.or(true, a) == true
+  refl
+
+// "true" short-circuits "or" on second position
+Problems.t4(a: Bool): Bool.or(a, true) == true
+  case a {
+    false: refl
+    true : refl
+  }!
+
+// a is always equal to a
+Problems.t5(a: Bool): Bool.eql(a, a) == true
+  case a {
+    false: refl
+    true : refl
+  }!
+
+// Double negation changes nothing
+Problems.t6(a: Bool): Bool.not(Bool.not(a)) == a
+  case a {
+    false: refl
+    true : refl
+  }!
+
+// de Morgan: nand is or(not, not)
+Problems.t7(
+  a: Bool,
+  b: Bool
+): Bool.not(Bool.and(a,b)) == Bool.or(Bool.not(a), Bool.not(b))
+  case a b {
+    false false: refl
+    false true : refl
+    true  false: refl
+    true  true : refl
+  }!
+
+// de Morgan: nor is and(not, not)
+Problems.t8(
+  a: Bool,
+  b: Bool
+): Bool.not(Bool.or(a,b)) == Bool.and(Bool.not(a), Bool.not(b))
+  case a b {
+    false false: refl
+    false true : refl
+    true  false: refl
+    true  true : refl
+  }!
+
+// Taking first and second from pair and putting them back together changes nothing
+Problems.t9(
+  a: Pair<Nat,Nat>
+): Pair.new<Nat,Nat>(Pair.fst<Nat,Nat>(a), Pair.snd<Nat,Nat>(a)) == a
+  case a {
+    new: refl
+  }!
+
+// Swapping pair twice changes nothing
+Problems.t10(a: Pair<Nat,Nat>): Pair.swap<Nat,Nat>(Pair.swap<Nat,Nat>(a)) == a
+  case a {
+    new: refl
+  }!
+
+// every number is same as itself
+Problems.t11(n: Nat): Nat.same(n) == n
+  case n {
+    zero: refl
+    succ:
+      let h = Problems.t11(n.pred)
+      apply(Nat.succ, h)
+  }!
+
+// halving the double changes nothing
+Problems.t12(n: Nat): Nat.half(Nat.double(n)) == n
+  case n {
+    zero: refl
+    succ:
+      let h = Problems.t12(n.pred)
+      apply(Nat.succ, h)
+  }!
+
+// 0 is identity of addition, first position
+Problems.t13(n: Nat): Nat.add(0, n) == n
+  refl
+
+// 0 is identity of addition, second position
+Problems.t14(n: Nat): Nat.add(n, 0) == n
+  case n {
+    zero: refl
+    succ:
+      let h = Problems.t14(n.pred)
+      apply(Nat.succ, h)
+  }!
+
+// Don't know a good description, maybe distributes to addition
+// Addition is associative with successor, first position
+Problems.t15(n: Nat, m: Nat): Nat.add(Nat.succ(n),m) == Nat.succ(Nat.add(n,m))
+  case n {
+    zero: refl
+    succ:
+      let h = Problems.t15(n.pred, m)
+      apply(Nat.succ, h)
+  }!
+
+// Addition is associative with successor, second position
+Problems.t16(n: Nat, m: Nat): Nat.add(n,Nat.succ(m)) == Nat.succ(Nat.add(n,m))
+  case n {
+    zero: refl
+    succ:
+      let h = Problems.t16(n.pred, m)
+      apply(Nat.succ, h)
+  }!
+
+// Addition is commutative on the identity
+Problems.t17.aux(n: Nat): (0 + n) == (n + 0)
+  let a = Problems.t13(n)
+  let b = mirror(Problems.t14(n))
+  Chain!!!!(a, b)
+
+// Addition is commutative
+Problems.t17(n: Nat, m: Nat): Nat.add(n, m) == Nat.add(m, n)
+  case n {
+    zero: Problems.t17.aux(m)
+    succ:
+      let e0 = Problems.t15(n.pred, m)
+      let h = Problems.t17(n.pred, m)
+      let a = apply(Nat.succ, h)
+      let e1 = mirror(Problems.t16(m, n.pred))
+      Chain!!!!(Chain!!!!(e0, a), e1)
+  }!
+
+Problems.t18.aux(
+  n: Nat
+): (Nat.succ(n) + Nat.succ(n)) == Nat.succ(Nat.succ(n + n))
+  apply(Nat.succ, Problems.t16(n, n))
+
+// Equivalency between addition and doubling
+Problems.t18(n: Nat): Nat.add(n,n) == Nat.double(n)
+  case n {
+    zero: refl
+    succ:
+      let h = Problems.t18(n.pred)
+      let a = apply((val) Nat.succ(Nat.succ(val)), h)
+      let e = Problems.t18.aux(n.pred)
+      Chain!!!!(e, a)
+  }!
+
+// A number is always smaller than its successor
+Problems.t19(n: Nat): Nat.ltn(n, Nat.succ(n)) == true
+  case n {
+    zero: refl
+    succ: Problems.t19(n.pred)
+  }!
+
+// A number's successor is always greater than itself
+Problems.t20(n: Nat): Nat.gtn(Nat.succ(n), n) == true
+  case n {
+    zero: refl
+    succ: Problems.t20(n.pred)
+  }!
+
+// n-n is 0
+Problems.t21(n: Nat): Nat.sub(n,n) == 0
+  case n {
+    zero: refl
+    succ: Problems.t21(n.pred)
+  }!
+
+//If n is 1, then S(n) is 2
+Problems.t22(n: Nat, e: n == 1): Nat.succ(n) == 2
+  apply(Nat.succ, e)
+
+// If n ?= m, then n is m
+Problems.t23(n: Nat, m: Nat, e: Nat.eql(n,m) == true): n == m
+  case n with e {
+    zero: case m with e {
+      zero:
+        refl
+      succ:
+        let contra = Bool.false_neq_true(e)
+        Empty.absurd!(contra)
+    }!
+    succ: case m with e {
+      zero:
+        let contra = Bool.false_neq_true(e)
+        Empty.absurd!(contra)
+      succ:
+        let h = Problems.t23(n.pred, m.pred, e)
+        apply(Nat.succ, h)
+    }!
+  }!
+
+// the length of a list with at least one element is greater than zero
+Problems.t24(
+  xs: List<Nat>
+): Nat.gtn(List.length<Nat>(List.cons<Nat>(1,xs)),0) == true
+  case xs {
+    nil : refl
+    cons: Problems.t24(xs.tail)
+  }!
+
+// Mapping a list with the identity function changes nothing
+Problems.t25(xs: List<Nat>): List.map<Nat,Nat>((x) x, xs) == xs
+  case xs {
+    nil : refl
+    cons: apply(List.cons!(xs.head), Problems.t25(xs.tail))
+  }!
+
+// The length of two concatenated lists is the sum of each list's length
+Problems.t26(
+  xs: List<Nat>,
+  ys: List<Nat>
+): (List.length<Nat>(xs) + List.length<Nat>(ys)) == List.length<Nat>(List.concat<Nat>(xs,ys))
+  case xs {
+    nil : refl
+    cons: apply(Nat.succ, Problems.t26(xs.tail, ys))
+  }!
+
+
+// Auxiliary proofs for t27 (reverse(reverse(xs)) == xs)
+
+CatAssociative<A: Type>(
+  xs: List<A>
+  ys: List<A>
+  zs: List<A>
+): (xs ++ (ys ++ zs)) == ((xs ++ ys) ++ zs)
+  case xs {
+    nil: refl
+    cons: apply((e) xs.head & e, CatAssociative!(xs.tail, ys, zs))
+  }!
+
+CatNilRight<A: Type>(xs: List<A>): (xs ++ []) == xs
+  case xs {
+    nil : refl
+    cons: apply((e) xs.head & e, CatNilRight<A>(xs.tail))
+  }!
+
+RevGoStep<A: Type>(
+  n : A
+  xs: List<A>
+  ys: List<A>
+): Rev.go<A>(n & xs, ys) == Rev.go<A>(xs, n & ys)
+  refl
+
+// Second argument of rev.go can be taken out with a concat
+// Alternatively, Rev.go cats the reverse of the first with the second
+RevGoCatYs<A: Type>(
+  xs: List<A>,
+  ys: List<A>
+): Rev.go<A>(xs, ys) == (Rev.go<A>(xs, List.nil<A>) ++ ys)
+  case xs {
+    nil : refl
+    cons:
+      // 1: go(head & tail, ys)            ==  go(tail, head & ys)
+      // 2: go(tail, head & ys)            ==  go(tail, []) ++ (head & ys)
+      // 3: go(tail, []) ++ (head & ys)    ==  go(tail, []) ++ ([head] ++ ys)
+      // 4: go(tail, []) ++ ([head] ++ ys) ==  (go(tail, []) ++ [head]) ++ ys
+      // 5: (go(tail, []) ++ [head]) ++ ys ==  go(tail, [head]) ++ ys
+      // 6: go(tail, [head]) ++ ys         ==  go(head & tail) ++ ys
+      // --------------------------------------------------------------------
+      //    go(head & tail, ys)            ==  go(head & tail) ++ ys
+
+      let t1 = RevGoStep<A>(xs.head, xs.tail, ys)
+
+      // Is this inductive step correct?
+      // Isn't it assuming the thesis?
+      // Isn't this like a fake recursion on ys?
+      // This is not proving that if it works with length(xs) it works with length(xs)+1
+      // I took the idea from a different proof made for Idris that I saw online
+      // reverseReverseOnto from https://github.com/idris-lang/Idris2/blob/main/libs/base/Data/List.idr
+      let t2 = RevGoCatYs<A>(xs.tail, xs.head & ys)
+
+      let t3 = refl :: (xs.head & ys) == ([xs.head] ++ ys)
+      let t3 = apply((e) Rev.go!(xs.tail, []) ++ e, t3)
+
+      let t4 = CatAssociative<A>(Rev.go!(xs.tail, []), [xs.head], ys)
+
+      // This is t2 when ys is nil, which must hold
+      let t5 = RevGoCatYs<A>(xs.tail, [xs.head])  // go(tail, [head]) == go(tail, []) ++ [head]
+      let t5 = mirror(t5)
+      let t5 = apply((e) e ++ ys, t5)
+
+      let t6 = mirror(RevGoStep<A>(xs.head, xs.tail, []))
+      let t6 = apply((e) e ++ ys, t6)
+
+      Chain!!!!(t1, Chain!!!!(t2, Chain!!!!(t3, Chain!!!!(t4, Chain!!!!(t5, t6)))))
+  }!
+
+// First element becomes last when list is reversed
+RevGoHeadGoesLast<A: Type>(
+  n: A
+  xs: List<A>
+): Rev.go<A>(n & xs, []) == (Rev.go<A>(xs, []) ++ [n])
+  // 1: go(n & xs, []) == go(xs, [n])
+  // 2: go(xs, [n])    == go(xs, []) ++ [n]
+  let t1 = RevGoStep!(n, xs, [])
+  let t2 = RevGoCatYs!(xs, [n])
+  Chain!!!!(t1, t2)
+
+
+//Reversing a cat is the same as cating both lists reverted, in opposite order
+RevGoContraDistributive<A: Type>(
+  xs: List<A>
+  ys: List<A>
+): Rev.go<A>(List.concat<A>(xs, ys), List.nil<A>)
+    == List.concat<A>(Rev.go<A>(ys, List.nil<A>), Rev.go<A>(xs, List.nil<A>))
+  // go(xs ++ ys, []) == go(ys, []) ++ go(xs, [])
+  case xs {
+    nil:
+      // 1: go([] ++ ys, [])  ==  go(ys, [])
+      // 2: go(ys, [])        ==  go(ys, []) ++ []
+      let t1 = refl :: Rev.go<A>([] ++ ys, []) == Rev.go<A>(ys, [])
+      let t2 = mirror(CatNilRight<A>(Rev.go!(ys, [])))
+      Chain!!!!(t1, t2)
+    cons:
+      // 1: go((head & tail) ++ ys, [])            ==  go(head & (tail ++ ys), [])
+      // 2: go(head & (tail ++ ys), [])            ==  go(tail ++ ys, []) ++ [head]
+      // 3: go(tail ++ ys, []) ++ [head]           ==  (go(ys, []) ++ go(tail, [])) ++ [head]
+      // 4: (go(ys, []) ++ go(tail, [])) ++ [head] ==  go(ys, []) ++ (go(tail, []) ++ [head])
+      // 5: go(ys, []) ++ (go(tail, []) ++ [head]) ==  go(ys, []) ++ go(head & tail, [])
+      // -------------------------------------------------------------------------------
+      //   go((head & tail) ++ ys, [])             ==  go(ys, []) ++ go(head & tail, [])
+      let t1 = refl ::
+        Rev.go<A>((xs.head & xs.tail) ++ ys, []) ==
+        Rev.go<A>(xs.head & (xs.tail ++ ys), [])
+
+      let t2 = RevGoHeadGoesLast<A>(xs.head, xs.tail ++ ys)
+
+      let t3 = RevGoContraDistributive<A>(xs.tail, ys)
+      let t3 = apply((e) e ++ [xs.head], t3)
+
+      let t4 = CatAssociative<A>(
+        Rev.go<A>(ys, []),
+        Rev.go<A>(xs.tail, []),
+        [xs.head])
+      let t4 = mirror(t4)
+
+      let t5 = mirror(RevGoHeadGoesLast<A>(xs.head, xs.tail))
+      let t5 = apply((e) Rev.go<A>(ys, []) ++ e, t5)
+
+      Chain!!!!(t1, Chain!!!!(t2, Chain!!!!(t3, Chain!!!!(t4, t5))))
+  }!
+
+ReverseReverse<A: Type>(
+  xs: List<A>
+): Rev<A>(Rev<A>(xs)) == xs
+  case xs {
+    nil : refl
+    cons:
+      // 1: rev(rev(head & tail))              ==  go(go(head & tail, []), [])
+      // 2: go(go(head & tail, []), [])        ==  go(go(tail, []) ++ [head], [])
+      // 3: go(go(tail, []) ++ [head], [])     ==  go([head], []) ++ go(go(tail, []))
+      // 4: go([head], []) ++ go(go(tail, [])) ==  go([head], []) ++ tail
+      // 5: go([head], []) ++ tail             ==  [head] ++ tail
+      // 6: [head] ++ tail                     ==  head & tail
+      //   ---------------------------------------------------------------------------
+      //    rev(rev(head & tail))              ==  head & tail
+      let t1 = refl ::
+        Rev<A>(Rev<A>(xs.head & xs.tail)) ==
+        Rev.go<A>(Rev.go<A>(xs.head & xs.tail, []), [])
+
+      let t2 = RevGoHeadGoesLast<A>(xs.head, xs.tail)
+      let t2 = apply((e) Rev.go<A>(e, []), t2)
+
+      let t3 = RevGoContraDistributive<A>(Rev.go<A>(xs.tail, []), [xs.head])
+
+      let t4 = ReverseReverse<A>(xs.tail)
+      let t4 = apply((e) Rev.go<A>([xs.head], []) ++ e, t4)
+
+      let t5 = refl :: Rev.go<A>([xs.head], []) == [xs.head]
+      let t5 = apply((e) e ++ xs.tail, t5)
+
+      let t6 = refl :: ([xs.head] ++ xs.tail) == (xs.head & xs.tail)
+
+      Chain!!!!(t1, Chain!!!!(t2, Chain!!!!(t3, Chain!!!!(t4, Chain!!!!(t5, t6)))))
+  }!
+
+// Reversing twice changes nothing
+Problems.t27(
+  xs: List<Nat>
+): Rev<Nat>(Rev<Nat>(xs)) == xs
+  ReverseReverse<Nat>(xs)
+
+// Alternative proof theorem 27 (taken from Idris)
+
+// Applying reverse on reverse.go swaps xs with ys
+ReverseSwapsReverseGo<A: Type>(
+  xs: List<A>
+  ys: List<A>
+): Rev.go<A>(Rev.go<A>(xs, ys), []) == Rev.go<A>(ys, xs)
+  case xs {
+    nil : refl
+    cons:
+      // go(go(head & tail, ys), []) == go(go(tail, head & ys), [])
+      // go(go(tail, head & ys), []) == go(head & ys, tail)
+      // go(head & ys, tail)         == go(ys, head & tail)
+
+      let t1 = RevGoStep<A>(xs.head, xs.tail, ys)
+      let t1 = apply((e) Rev.go<A>(e, []), t1)
+
+      let t2 = ReverseSwapsReverseGo<A>(xs.tail, xs.head & ys)
+
+      let t3 = RevGoStep<A>(xs.head, ys, xs.tail)
+
+      Chain!!!!(t1, Chain!!!!(t2, t3))
+  }!
+
+ReverseReverseAlt<A: Type>(
+  xs: List<A>
+  ys: List<A>
+): Rev.go<A>(Rev.go<A>(xs, []), []) == xs
+  ReverseSwapsReverseGo<A>(xs, [])
+
+
+// Theorems continue
+
+// true is not false
+Problems.t28: true != false
+  (e) Bool.true_neq_false(e)
+
+// 3 is not 2
+Problems.t29: 3 != 2
+  (e)
+  let a = apply(Nat.eql(2), e)
+  Bool.false_neq_true(a)
+
+// An "or" with "true" in the first position is never false
+Problems.t30(a: Bool): Bool.or(true, a) != false
+  (e)
+  let t = Chain!!!!(mirror(Problems.t3(a)), e)
+  Bool.true_neq_false(t)
+
+// An "or" with "true" in the second position is never false
+Problems.t31(a: Bool): Bool.or(a, true) != false
+  (e)
+  let t = Chain!!!!(mirror(Problems.t4(a)), e)
+  Bool.true_neq_false(t)
+
+// An "and" with "false" in the first position is never true
+Problems.t32(a: Bool): Bool.and(false, a) != true
+  (e)
+  let t = Chain!!!!(mirror(Problems.t1(a)), e)
+  Bool.false_neq_true(t)
+
+// An "and" with "false" in the secind position is never true
+Problems.t33(a: Bool): Bool.and(a, false) != true
+  (e)
+  let t = Chain!!!!(mirror(Problems.t2(a)), e)
+  Bool.false_neq_true(t)
+
+// Equality is commutative
+Problems.t34(a: Nat, b: Nat, e: a == b): b == a
+  // Kinda cheating, the actual proof is the definition of mirror (which also works for any type)
+  mirror(e)
+
+// Equality is transitive
+Problems.t35(a: Nat, b: Nat, c: Nat, e0: a == b, e1: b == c): a == c
+  // Cheating again
+  Chain!!!!(e0, e1)
+
+// P could be returning any type, so we don't know the concrete value of P(Nat.same(a))
+// But since same(a)==a, P(Nat.same(a)) must be P(a)
+// If we can show that to the typechecker, we can just return p which already has the correct type
+Problems.t36(a: Nat, P: Nat -> Type, p: P(a)): P(Nat.same(a))
+  // t11 shows that same(a)==a
+  // We use it to rewrite the type of p to P(same(a)) since both are the same
+  // mirror cause we need a -> same(a)
+  p :: rewrite x in P(x) with mirror(Problems.t11(a))
+
+Problems:_
+  let p0  = Problems.p0(true, true)
+  let p1  = Problems.p1(true, false)
+  let p2  = Problems.p2(false, false)
+  let p3  = Problems.p3!!({1, "second"})
+  let p4  = Problems.p4!!({1, "second"})
+  let p5  = Problems.p5!!({1, "second"})
+  let p6  = Problems.p6<Nat, String>(Nat.show, {1, 2})
+  let p7  = Problems.p7(5)
+  let p8  = Problems.p8(9)
+  let p9  = Problems.p9(5, 13)
+  let p10 = Problems.p10(45, 31)
+  let p11 = Problems.p11(8, 35)
+  let p12 = Problems.p12(3, 29)
+  let p13 = Problems.p13(8, 8)
+  let p14 = Problems.p14!([6 4 23 7 9 4 2 7 0])
+  let p15 = Problems.p15!([6 4 23 7 9 4 2 7 0])
+  let p16 = Problems.p16!([6 4 23 7 9 4 2 7 0])
+  let p17 = Problems.p17!([6 4 23 7 9] [4 2 7 0])
+  let p18 = Problems.p18!!(Nat.show, [6 4 23 7 9 4 2 7 0])
+  let p19 = Problems.p19!([6 4 23 7 9 4 2 7 0])
+  let p20 = Problems.p20!!([1 2], ["1" "2" "3" "4" "5"])
+  let p21 = Problems.p21([6 4 23 7 9 4 2 7 0])
+  let p22 = Problems.p22([6 4 23 7 9 4 2 7 0 0])
+  let p23 = Problems.p23([6 4 23 7 9 4 2 7 0])
+
+  let t0  = Problems.t0
+  let t1  = Problems.t1
+  let t2  = Problems.t2
+  let t3  = Problems.t3
+  let t4  = Problems.t4
+  let t5  = Problems.t5
+  let t6  = Problems.t6
+  let t7  = Problems.t7
+  let t8  = Problems.t8
+  let t9  = Problems.t9
+  let t10 = Problems.t10
+  let t11 = Problems.t11
+  let t12 = Problems.t12
+  let t13 = Problems.t13
+  let t14 = Problems.t14
+  let t15 = Problems.t15
+  let t16 = Problems.t16
+  let t17 = Problems.t17
+  let t18 = Problems.t18
+  let t19 = Problems.t19
+  let t20 = Problems.t20
+  let t21 = Problems.t21
+  let t22 = Problems.t22
+  let t23 = Problems.t23
+  let t24 = Problems.t24
+  let t25 = Problems.t25
+  let t26 = Problems.t26
+  let t27 = Problems.t27
+  let t28 = Problems.t28
+  let t29 = Problems.t29
+  let t30 = Problems.t30
+  let t31 = Problems.t31
+  let t32 = Problems.t32
+  let t33 = Problems.t33
+  let t34 = Problems.t34
+  let t35 = Problems.t35
+  let t36 = Problems.t36
+
+  // p0
+  // List.show!(Nat.show, p23)
+  ?problems
