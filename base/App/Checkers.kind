@@ -1,0 +1,269 @@
+App.Checkers.State: App.State
+  App.State.new(App.Checkers.Local,  App.Checkers.Board)
+
+type App.Checkers.Local {
+  new(
+    mouse_pos: Pair<U32, U32>
+    selected:  Maybe<Pair<Nat, Nat>>
+    team:      Bits
+  )
+}
+
+App.Checkers.room: String
+  "test_room_02"
+
+App.Checkers.scale: U32
+  2
+
+App.Checkers.Board: Type
+  Pair<Bits, Bits>
+
+
+App.Checkers.tile_size: U32
+  32#32
+
+// Initial state
+App.Checkers.init: App.Init<App.Checkers.State>
+  let mouse_pos = {0#32 0#32}
+  let selected  = none
+  let team      = Bits.o(Bits.e)
+  let chunk0    = Bits.trim(60, Nat.to_bits(9817068105))  // 000000000000000000000000001001001001001001001001001001001001
+  let chunk1    = Bits.trim(60, Nat.to_bits(29451204315)) // 000000000000000000000000011011011011011011011011011011011011
+  let local     = App.Checkers.Local.new(mouse_pos, selected, team)
+  let board     = {chunk0, chunk1}
+  App.Store.new<App.Checkers.State>(local, board)
+
+App.Checkers.get(x: Nat, y: Nat, board: App.Checkers.Board): Bits
+  let tile_size = 3 :: Nat
+  // X is divided by 2 because the bitcode does not contain all tiles
+  // It only contains black tiles
+  let index     = ((x / 2) * tile_size) + (y * tile_size * 4)
+  let chunk     = if index <? 60 then board@fst else board@snd
+  let tile      = Bits.slice(3, Bits.drop(index % 60, chunk))
+  tile
+
+App.Checkers.canvas(local: App.Checkers.Local, board: App.Checkers.Board, img: VoxBox): VoxBox
+  let size = App.Checkers.tile_size
+  for i from 0 to 64 with img:
+    let x = i % 8
+    let y = i / 8
+    // We have to draw all the 64 tiles in the board
+    // However, we only store half of the board in the bitcode.
+    // For this reason, we should only access the bits on even tiles
+    // "is_tile" returns true if we're accessing a tile presente in the bitcode
+    let is_tile = Nat.odd(x + y)
+    let draw = VoxBox.Draw.image(((Nat.to_u32(x) * size) - 128) + size/ 2, ((Nat.to_u32(y) * size) - 128) + size/2)
+    // Draws corresponding tile
+    let img = if not(is_tile) then draw(0, App.Checkers.White_Tile, img) else draw(0, App.Checkers.Black_Tile, img)
+    if is_tile then
+      let tile = App.Checkers.get(x, y, board)
+      // Checks if there is a piece on that tile
+      if Bits.slice(1, tile) =? Bits.o(Bits.e) then
+        img
+      else
+        // Draws the piece corresponding to the bits in the tile
+        switch Bits.eql(Bits.drop(1, tile)) {
+          Bits.o(Bits.o(Bits.e)): draw(2, App.Checkers.Black_Normal, img)
+          Bits.i(Bits.o(Bits.e)): draw(2, App.Checkers.Red_Normal, img)
+          Bits.o(Bits.i(Bits.e)): draw(2, App.Checkers.Black_Queen, img)
+          Bits.i(Bits.i(Bits.e)): draw(2, App.Checkers.Red_Queen, img)
+        }default img
+    else 
+      img
+  let selected = local@selected
+  without selected: img
+  let {x, y} = {Nat.to_u32(selected@fst), Nat.to_u32(selected@snd)}
+  // Draws the outline if there is one
+  VoxBox.Draw.image(((x * size) - 128) + size/2, ((y * size) - 128) + size/2, 1, App.Checkers.Outline, img)
+
+// Render function
+App.Checkers.draw(img: VoxBox): App.Draw<App.Checkers.State>
+  (state)
+  let local  = state@local
+  let global = state@global
+  // Updates canvas
+  let new_img = App.Checkers.canvas(local, global, img)
+  <div>
+    {
+    DOM.vbox(
+      {
+        "id": "game_screen",
+        "width": "256"
+        "height": "256"
+        "scale": U32.show(App.Checkers.scale)
+      }, {}, new_img)
+    }
+  </div>
+
+App.Checkers.is_move_possible(x0: Nat, y0: Nat, x1: Nat, y1: Nat, team: Bits, board: App.Checkers.Board): Bool
+  let one  = Bits.i(Bits.e) // 1
+  let zero = Bits.o(Bits.e) // 0
+  // Origin tile
+  let from_tile    = App.Checkers.get(x0, y0, board)
+  // Destination tile
+  let to_tile      = App.Checkers.get(x1, y1, board)
+  // Checks if piece exists
+  let piece_exists = Bits.eql(Bits.slice(1, from_tile), one)
+  // Checks if you own the origin unit
+  let piece_owner  = Bits.eql(Bits.slice(1, Bits.drop(1, from_tile)), team)
+  // Checks if destination is empty
+  let to_is_empty  = Bits.eql(Bits.slice(1, to_tile), zero)
+  // Counts how many tiles you moved forward
+  let move_forward = if Bits.i(Bits.e) =? team then y0 - y1 else y1 - y0
+  // Counts how many tiles you moved sideway
+  let move_sideway = if x0 >? x1 then x0 - x1 else x1 - x0
+  // Checks if destination is adjacent and in front of piece
+  let move_allowed = (move_forward =? 1) && (move_sideway =? 1)
+  // Checks if player's team correspond to team turn  
+  let is_user_turn = Bits.drop(59 board@snd) =? team
+  // Checks all conditions necessary to move a piece
+  if piece_exists && piece_owner && to_is_empty && is_user_turn then
+    // Checks if you are moving instead of jumping pieces
+    if move_allowed then
+      true
+    else
+      // Checks if you're jumping a piece
+      if (move_forward =? 2) && (move_sideway =? 2) then 
+        // Tile to jump
+        let mid_tile    = App.Checkers.get(if x0 >? x1 then x1 + 1 else x0 + 1, if y0 >? y1 then y1 + 1 else y0 + 1, board)
+        // Checks if there is a piece to jump
+        let mid_is_full  = Bool.not(Bits.eql(Bits.slice(1, mid_tile), zero))
+        // Checks if the piece to jump is an enemy
+        let mid_is_enemy = Bool.not(Bits.eql(Bits.slice(1, Bits.drop(1, mid_tile)), team))
+        mid_is_full && piece_owner
+      else
+        false
+  else
+    false
+    
+
+
+
+App.Checkers.move(code: Bits, board: App.Checkers.Board): App.Checkers.Board
+  // Divides the bitcode into team and coordinates
+  let team = Bits.slice(1, code)                  
+  let x0   = Bits.slice(3, Bits.drop(1,  code))   
+  let y0   = Bits.slice(3, Bits.drop(4,  code))   
+  let x1   = Bits.slice(3, Bits.drop(7,  code))   
+  let y1   = Bits.slice(3, Bits.drop(10, code))  
+  let is_possible = App.Checkers.is_move_possible(Bits.to_nat(x0), Bits.to_nat(y0), Bits.to_nat(x1), Bits.to_nat(y1), team, board)
+  // Executes an movement if possible
+  if is_possible then
+    App.Checkers.move.aux(Bits.to_nat(x0), Bits.to_nat(y0), Bits.to_nat(x1), Bits.to_nat(y1), team, board)
+  else
+    board
+ 
+
+App.Checkers.move.aux(x0: Nat, y0: Nat, x1: Nat, y1: Nat, team: Bits, board: App.Checkers.Board): App.Checkers.Board
+  // Gets how many bits we need to skip in order to reach the target bit
+  let from_index = ((x0 / 2) * 3) + (y0 * 12)
+  // Gets which chunk to access
+  let from_chunk = if Nat.ltn(from_index, 60) then board@fst else board@snd
+  // Gets the tile to move
+  let from_tile  = Bits.slice(3, Bits.drop(from_index % 60, from_chunk))
+  // Creates an empty tile to place in from_tile's place
+  let new_tile   = Bits.o(Bits.o(Bits.o(Bits.e)))
+  // Updates chunk
+  let from_chunk = Bits.set(from_index % 60, new_tile, from_chunk)
+  // Places the chunk without the piece back into the board
+  let new_board  = if Nat.ltn(from_index, 60) then board@fst <- from_chunk else board@snd <- from_chunk
+
+  // Gets how many bits we need to skip in order to reach the destination bit
+  let to_index   = ((x1 / 2) * 3) + (y1 * 12)
+  // Gets which chunk to access
+  let to_chunk   = if Nat.ltn(to_index, 60) then new_board@fst else new_board@snd
+  // Places the origin tile into the new position
+  let to_chunk   = Bits.set(to_index % 60, from_tile, to_chunk)
+  // Places the chunk with the piece's new position into the board
+  let new_board  = if Nat.ltn(to_index, 60) then new_board@fst <- to_chunk else new_board@snd <- to_chunk
+  // Changes the turn in the bitcode
+  let new_board  = new_board@snd <- Bits.set(59, Bits.not(team), new_board@snd)
+
+  let forward_2 = if Bits.i(Bits.e) =? team then (y0 - y1) =? 2 else (y1 - y0) =? 2 
+  let sideway_2 = if x0 >? x1               then (x0 - x1) =? 2 else (x1 - x0) =? 2 
+  // Checks if you are jumping a piece
+  if forward_2 && sideway_2 then 
+    // Gets how many bits we need to skip in order to reach the mid bits
+    let mid_index = (((Nat.min(x0, x1) + 1) / 2) * 3) + ((Nat.min(y0, y1) + 1) * 12)
+    // Gets which chunk to access
+    let mid_chunk = if Nat.ltn(mid_index, 60) then new_board@fst else new_board@snd
+    // Removes the piece from the mid_chunk
+    let mid_chunk = Bits.set(mid_index % 60, new_tile, mid_chunk)
+    // Places the chunk without the jumped piece into the board
+    let new_board = if Nat.ltn(mid_index, 60) then new_board@fst <- mid_chunk else new_board@snd <- mid_chunk
+    new_board
+  else
+    new_board
+
+// Converts the mouse coordinate into board coordinates
+App.Checkers.mouse_to_coord(mouse_pos: Pair<U32, U32>): Pair<Nat, Nat>
+  let scale     = App.Checkers.scale
+  let tile_size = App.Checkers.tile_size
+  let x = mouse_pos@fst / (scale * tile_size)
+  let y = mouse_pos@snd / (scale * tile_size)
+  {U32.to_nat(x), U32.to_nat(y)}
+
+// Event handler
+App.Checkers.when: App.When<App.Checkers.State>
+  (event, state)
+  let local = state@local
+  let board = state@global
+  let room = String.take(16, Crypto.Keccak.hash(App.Checkers.room))
+  case event {
+    init: App.watch!(room)
+    key_down: 
+      if event.code =? 'T' then App.set_local!(local@team <- Bits.not(local@team)) else App.pass!
+    mouse_down:
+      log("x: " | U32.show(local@mouse_pos@fst) | " y: " | U32.show(local@mouse_pos@snd))
+      let selected = local@selected
+      let coord = App.Checkers.mouse_to_coord(local@mouse_pos)
+      case selected {
+        none: 
+          let local = local@selected <- some(coord)
+          App.set_local!(local)
+        some:
+          let {x0, y0} = selected.value
+          let {x1, y1} = coord 
+          let is_possible = App.Checkers.is_move_possible(x0, y0, x1, y1, local@team, board)
+          let f = (x: Nat) Bits.trim(3, Nat.to_bits(x))
+          log("when  x0:  " | Bits.show(f(x0)) | " y0:  " | Bits.show(f(y0)) | " x1:  " | Bits.show(f(x1)) | " y1:  " | Bits.show(f(y1)))
+            if is_possible then 
+              let code = Bits.concat(local@team, Bits.concat(f(x0), Bits.concat(f(y0), Bits.concat(f(x1), f(y1)))))
+              log(Bits.show(code))
+              let code = Bits.show(code)
+              IO {
+                App.new_post!(room, code)
+                App.set_local!(local@selected <- none)
+              }
+            else
+              App.set_local!(local@selected <- none)
+      }
+    mouse_move:
+      let local = local@mouse_pos <- event.mouse_pos
+      App.set_local!(local)
+  } default App.pass!
+
+// Global ticker 
+App.Checkers.tick: App.Tick<App.Checkers.State>
+  App.no_tick<App.Checkers.State>
+
+// Global visitor
+App.Checkers.post: App.Post<App.Checkers.State>
+  (time, room, addr, data, glob)
+  let code = Bits.read(data)
+  case code {
+    o: App.Checkers.move(code.pred, glob)
+  }default glob
+
+
+// A "Checkers" application
+App.Checkers: App<App.Checkers.State>
+  let img = VoxBox.alloc_capacity(65536*8)
+  App.new<App.Checkers.State>(
+    App.Checkers.init // Estado inicial da aplicação
+    App.Checkers.draw(img) // Conversão do estado para a tela
+    App.Checkers.when // Interação com eventos
+    App.Checkers.tick // Tick O que atualizar no estado global a cada tick
+    App.Checkers.post // Post Como lidar com mensagens do servidor
+  )
+

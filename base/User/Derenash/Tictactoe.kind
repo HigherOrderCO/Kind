@@ -139,7 +139,7 @@ TicTacToe.show(game: TicTacToe):String
     ts(pc(2,0,gs)) | " | " | ts(pc(2,1,gs)) | " | " | ts(pc(2,2,gs)) | "\n " 
     board
 
-User.Derenash.TicTacToe.Test: IO<Unit>
+Tictactoe: _
   IO {
     // Prints the initial board
     let ttt = TicTacToe.init

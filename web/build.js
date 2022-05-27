@@ -24,6 +24,7 @@ var server_apps = [
   'Ludo.kind',
   'Playground.kind',
   'Pong.kind',
+  'RLP.kind',
   'Seta.kind',
   'TicTacToe.kind'
 ]

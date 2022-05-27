@@ -1,0 +1,39 @@
+App.Template.State: App.State
+//             local  global
+  App.State.new(Unit,  Unit)
+
+// Initial state
+App.Template.init: App.Init<App.Template.State>
+  App.Store.new<App.Template.State>(unit, unit)
+
+// Render function
+App.Template.draw: App.Draw<App.Template.State>
+  (state)
+  <div id = "template">"Template"</div>
+
+// Event handler
+App.Template.when: App.When<App.Template.State>
+  (event, state)
+  case event {
+    init: App.pass!
+  } default App.pass!
+
+// Global ticker 
+App.Template.tick: App.Tick<App.Template.State>
+  App.no_tick<App.Template.State>
+
+// Global visitor
+App.Template.post: App.Post<App.Template.State>
+  (time, room, addr, data, glob)
+  glob
+
+
+// A "Template" application
+App.Template: App<App.Template.State>
+  App.new<App.Template.State>(
+    App.Template.init 
+    App.Template.draw 
+    App.Template.when 
+    App.Template.tick 
+    App.Template.post 
+  )
