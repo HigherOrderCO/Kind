@@ -1,0 +1,12 @@
+// cmp returns if a pair of elements is ordered or not
+List.is_sorted<A: Type>(cmp: A -> A -> Bool, as: List<A>): Bool
+	case as {
+		nil : true
+		cons: case as.tail {
+			nil : true
+			cons: case cmp(as.head, as.tail.head) {
+				false: false
+				true : List.is_sorted<A>(cmp, as.tail)
+			}
+		}
+	}
