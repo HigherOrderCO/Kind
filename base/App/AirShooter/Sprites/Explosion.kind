@@ -1,0 +1,15 @@
+// numero de sprites = 7
+// frames por sprite = 4
+
+App.AirShooter.Sprites.Explosion(frame: U32): VoxBox
+  let sprites = [
+    App.AirShooter.Sprites.Explosion.Explosion_1, 
+    App.AirShooter.Sprites.Explosion.Explosion_2,
+    App.AirShooter.Sprites.Explosion.Explosion_3,
+    App.AirShooter.Sprites.Explosion.Explosion_4,
+    App.AirShooter.Sprites.Explosion.Explosion_5,
+    App.AirShooter.Sprites.Explosion.Explosion_6,
+    App.AirShooter.Sprites.Explosion.Explosion_7
+  ]
+
+  App.AirShooter.Animation.Build(sprites, 4)(frame)
