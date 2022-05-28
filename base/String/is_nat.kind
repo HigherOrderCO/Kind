@@ -1,10 +1,9 @@
-String.is_nat(s: String): Bool
-  String.is_nat.aux(s, true)
-
-String.is_nat.aux(s: String, aux: Bool): Bool
-  case s {
-    nil : aux
-    cons: 
-    let is_digit = Bool.and(Char.is_digit(s.head),aux)
-    String.is_nat.aux(s.tail, is_digit)
+String.is_nat(str: String): Bool
+  case str {
+    nil: true 
+    cons: case Char.is_digit(str.head) {
+      true: String.is_nat(str.tail)
+      false: false 
+    }
   }
+  
