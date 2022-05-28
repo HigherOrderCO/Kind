@@ -1,0 +1,13 @@
+// Returns a pair with the first n bits and the remaining 
+Bits.split(bits: Bits, n: Nat): Pair<Bits, Bits>
+  Bits.split.go(bits, (b) b, n)
+
+Bits.split.go(a: Bits, b: Bits -> Bits, n: Nat): Pair<Bits, Bits>
+  case n {
+    zero : {b(Bits.e), a}
+    succ : case a {
+      e: {b(Bits.e), a}
+      o: Bits.split.go(a.pred, (bb) b(Bits.o(bb)), n.pred) // Add bit to the end
+      i: Bits.split.go(a.pred, (bb) b(Bits.i(bb)), n.pred)
+    }
+  }
