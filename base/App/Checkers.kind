@@ -39,7 +39,7 @@ App.Checkers.get(x: Nat, y: Nat, board: App.Checkers.Board): Bits
   // It only contains black tiles
   let index     = ((x / 2) * tile_size) + (y * tile_size * 4)
   let chunk     = if index <? 60 then board@fst else board@snd
-  let tile      = Bits.slice(3, Bits.drop(index % 60, chunk))
+  let tile      = Bits.take(3, Bits.drop(index % 60, chunk))
   tile
 
 App.Checkers.canvas(local: App.Checkers.Local, board: App.Checkers.Board, img: VoxBox): VoxBox
@@ -58,7 +58,7 @@ App.Checkers.canvas(local: App.Checkers.Local, board: App.Checkers.Board, img: V
     if is_tile then
       let tile = App.Checkers.get(x, y, board)
       // Checks if there is a piece on that tile
-      if Bits.slice(1, tile) =? Bits.o(Bits.e) then
+      if Bits.take(1, tile) =? Bits.o(Bits.e) then
         img
       else
         // Draws the piece corresponding to the bits in the tile
@@ -103,11 +103,11 @@ App.Checkers.is_move_possible(x0: Nat, y0: Nat, x1: Nat, y1: Nat, team: Bits, bo
   // Destination tile
   let to_tile      = App.Checkers.get(x1, y1, board)
   // Checks if piece exists
-  let piece_exists = Bits.eql(Bits.slice(1, from_tile), one)
+  let piece_exists = Bits.eql(Bits.take(1, from_tile), one)
   // Checks if you own the origin unit
-  let piece_owner  = Bits.eql(Bits.slice(1, Bits.drop(1, from_tile)), team)
+  let piece_owner  = Bits.eql(Bits.take(1, Bits.drop(1, from_tile)), team)
   // Checks if destination is empty
-  let to_is_empty  = Bits.eql(Bits.slice(1, to_tile), zero)
+  let to_is_empty  = Bits.eql(Bits.take(1, to_tile), zero)
   // Counts how many tiles you moved forward
   let move_forward = if Bits.i(Bits.e) =? team then y0 - y1 else y1 - y0
   // Counts how many tiles you moved sideway
@@ -127,9 +127,9 @@ App.Checkers.is_move_possible(x0: Nat, y0: Nat, x1: Nat, y1: Nat, team: Bits, bo
         // Tile to jump
         let mid_tile    = App.Checkers.get(if x0 >? x1 then x1 + 1 else x0 + 1, if y0 >? y1 then y1 + 1 else y0 + 1, board)
         // Checks if there is a piece to jump
-        let mid_is_full  = Bool.not(Bits.eql(Bits.slice(1, mid_tile), zero))
+        let mid_is_full  = Bool.not(Bits.eql(Bits.take(1, mid_tile), zero))
         // Checks if the piece to jump is an enemy
-        let mid_is_enemy = Bool.not(Bits.eql(Bits.slice(1, Bits.drop(1, mid_tile)), team))
+        let mid_is_enemy = Bool.not(Bits.eql(Bits.take(1, Bits.drop(1, mid_tile)), team))
         mid_is_full && piece_owner
       else
         false
@@ -141,11 +141,11 @@ App.Checkers.is_move_possible(x0: Nat, y0: Nat, x1: Nat, y1: Nat, team: Bits, bo
 
 App.Checkers.move(code: Bits, board: App.Checkers.Board): App.Checkers.Board
   // Divides the bitcode into team and coordinates
-  let team = Bits.slice(1, code)                  
-  let x0   = Bits.slice(3, Bits.drop(1,  code))   
-  let y0   = Bits.slice(3, Bits.drop(4,  code))   
-  let x1   = Bits.slice(3, Bits.drop(7,  code))   
-  let y1   = Bits.slice(3, Bits.drop(10, code))  
+  let team = Bits.take(1, code)                  
+  let x0   = Bits.take(3, Bits.drop(1,  code))   
+  let y0   = Bits.take(3, Bits.drop(4,  code))   
+  let x1   = Bits.take(3, Bits.drop(7,  code))   
+  let y1   = Bits.take(3, Bits.drop(10, code))  
   let is_possible = App.Checkers.is_move_possible(Bits.to_nat(x0), Bits.to_nat(y0), Bits.to_nat(x1), Bits.to_nat(y1), team, board)
   // Executes an movement if possible
   if is_possible then
@@ -160,7 +160,7 @@ App.Checkers.move.aux(x0: Nat, y0: Nat, x1: Nat, y1: Nat, team: Bits, board: App
   // Gets which chunk to access
   let from_chunk = if Nat.ltn(from_index, 60) then board@fst else board@snd
   // Gets the tile to move
-  let from_tile  = Bits.slice(3, Bits.drop(from_index % 60, from_chunk))
+  let from_tile  = Bits.take(3, Bits.drop(from_index % 60, from_chunk))
   // Creates an empty tile to place in from_tile's place
   let new_tile   = Bits.o(Bits.o(Bits.o(Bits.e)))
   // Updates chunk
