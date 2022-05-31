@@ -1,2 +1,2 @@
-String.join(sep: String, list: List<String>): String
-  String.join.go(sep, list, Bool.true)
+String.join(sep: String, xs: List<String>): String
+  String.join.go(sep, xs, Bool.true)

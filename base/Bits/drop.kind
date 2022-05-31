@@ -1,9 +1,9 @@
-Bits.drop(n: Nat, xs: Bits): Bits
+Bits.drop(n: Nat, bs: Bits): Bits
   case n {
-    zero: xs
-    succ: case xs {
-      e: xs
-      o: Bits.drop(n.pred, xs.pred)
-      i: Bits.drop(n.pred, xs.pred)
+    zero: bs
+    succ: case bs {
+      e: bs
+      o: Bits.drop(n.pred, bs.pred)
+      i: Bits.drop(n.pred, bs.pred)
     }
   }

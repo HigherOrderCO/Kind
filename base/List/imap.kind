@@ -1,5 +1,5 @@
-List.imap<A: Type,B: Type>(f: Nat -> A -> B, xs: List<A>): List<B>
+List.imap<A: Type, B: Type>(f: Nat -> A -> B, xs: List<A>): List<B>
   case xs {
-    nil : List.nil!,
-    cons: List.cons!(f(0,xs.head),List.imap!!((n) f(Nat.succ(n)),xs.tail))
+    nil: List.nil!
+    cons: List.cons!(f(0, xs.head), List.imap!!((n) f(Nat.succ(n)), xs.tail))
   }

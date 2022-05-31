@@ -1,2 +1,2 @@
-Bits.pad_right(size: Nat, bit: Bool, bits: Bits): Bits
-  Bits.concat(bits, Bits.repeat(Nat.sub(size, Bits.length(bits)), bit))
+Bits.pad_right(size: Nat, b: Bool, bs: Bits): Bits
+  Bits.concat(bs, Bits.repeat(Nat.sub(size, Bits.length(bs)), b))

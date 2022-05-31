@@ -1,0 +1,9 @@
+Pair.eql<A: Type, B: Type>(
+  eql_fst: A -> A -> Bool, 
+  eql_snd: B -> B -> Bool,
+  a: Pair<A, B>,
+  b: Pair<A, B>
+): Bool 
+  case a b {
+    new new: Bool.and(eql_fst(a.fst, b.fst), eql_snd(a.snd, b.snd))
+  } 

@@ -1,5 +1,5 @@
 Nat.is_zero(n: Nat): Bool
   case n {
-    zero: Bool.true,
-    succ: Bool.false,
+    zero: Bool.true
+    succ: Bool.false
   }

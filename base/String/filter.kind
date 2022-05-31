@@ -1,8 +1,8 @@
-String.filter(f: Char -> Bool, xs: String): String
-  case xs{
+String.filter(f: Char -> Bool, str: String): String
+  case str{
     nil : String.nil
-    cons: case f(xs.head){
-      true : String.cons(xs.head,String.filter(f, xs.tail))
-      false: String.filter(f, xs.tail)
+    cons: case f(str.head){
+      true : String.cons(str.head,String.filter(f, str.tail))
+      false: String.filter(f, str.tail)
       }
   }

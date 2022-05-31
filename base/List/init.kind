@@ -1,8 +1,8 @@
-List.init<A: Type>(list: List<A>): List<A>
-  case list {
-    cons: case list.tail {
-      cons: List.cons!(list.head, List.init<A>(list.tail)),
-      nil: List.nil!,
-    },
-    nil: List.nil!,
+List.init<A: Type>(xs: List<A>): List<A>
+  case xs {
+    nil: List.nil!
+    cons: case xs.tail {
+      nil: List.nil!
+      cons: List.cons!(xs.head, List.init<A>(xs.tail))
+    }
   }

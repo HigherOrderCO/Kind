@@ -1,0 +1,2 @@
+Bits.concat.go(a: Bits, b: Bits): Bits
+  Bits.concat.tail(Bits.reverse(a), b)

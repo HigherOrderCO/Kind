@@ -2,19 +2,19 @@
 // - List.insert_sort(Nat.gte, [1, 3, 4, 5], 2) == [1, 2, 3, 4, 5]
 // - List.insert_sort((pair, pair2) ... Nat.gte(pair.snd, pair2.snd), [(a, 1), (b, 10)], (c, 4)]) == [(a, 1), (a, 4), (c, 10)]
 
-List.insert_sort<A : Type>(f : A -> A -> Bool, xs : List<A>, v : A) : List<A>
-  let {ls, ys} = List.split(A, xs, Nat.half(List.length(A, xs)))
-  case ls {
-    nil :  case ys {
-      nil : List.cons!(v, List.nil!)
-      cons : if f(v, ys.head) then [ys.head, v] else [v, ys.head] 
+List.insert_sort<A : Type>(f : A -> A -> Bool, xs : List<A>, value : A) : List<A>
+  let {cs, ys} = List.split(A, xs, Nat.half(List.length(A, xs)))
+  case cs {
+    nil: case ys {
+      nil: List.cons!(value, List.nil!)
+      cons: if f(value, ys.head) then [ys.head, value] else [value, ys.head] 
     }
-    cons : case ys {
-      nil : List.insert_sort(A, f, ls, v)
-      cons : 
-        if f(v, ys.head) then
-          (ls ++ List.insert_sort(A, f, ys, v))
+    cons: case ys {
+      nil: List.insert_sort(A, f, cs, value)
+      cons: 
+        if f(value, ys.head) then
+          (cs ++ List.insert_sort(A, f, ys, value))
         else
-          (List.insert_sort(A, f, ls, v) ++ ys)
+          (List.insert_sort(A, f, cs, value) ++ ys)
     }
   }

@@ -1,2 +1,2 @@
 List.indices<A: Type>(xs: List<A>): List<Pair<Nat,A>>
-  List.imap<A,Pair<Nat,A>>((i,x) {i,x}, xs)
+  List.imap<A, Pair<Nat, A>>((i, x) {i, x}, xs)

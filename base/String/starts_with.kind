@@ -1,10 +1,10 @@
-String.starts_with(xs: String, match: String): Bool
+String.starts_with(str: String, match: String): Bool
   case match {
     nil : Bool.true
-    cons: case xs {
+    cons: case str {
       nil : Bool.false
-      cons: case Char.eql(match.head, xs.head){
-        true : String.starts_with(xs.tail, match.tail)
+      cons: case Char.eql(match.head, str.head){
+        true : String.starts_with(str.tail, match.tail)
         false: Bool.false
       }
     }

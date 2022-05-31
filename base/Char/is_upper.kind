@@ -1,5 +1,2 @@
-Char.is_upper(char: Char): Bool
-  if Bool.and(U16.gte(char, 'A'), U16.lte(char, 'Z')) then
-    true
-  else
-    false
+Char.is_upper(chr: Char): Bool
+	U16.is_between('A', chr, 'Z')

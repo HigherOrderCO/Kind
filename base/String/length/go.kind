@@ -1,5 +1,5 @@
-String.length.go(xs: String, n: Nat): Nat
-  case xs {
-    nil : n,
-    cons: String.length.go(xs.tail, Nat.succ(n))
+String.length.go(str: String, n: Nat): Nat
+  case str {
+    nil : n
+    cons: String.length.go(str.tail, Nat.succ(n))
   }

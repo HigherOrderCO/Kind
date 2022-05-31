@@ -1,0 +1,5 @@
+List.create.go<A: Type>(len: Nat, create_value: Nat -> A, result: List<A>): List<A>
+  case len {
+    zero: result
+    succ: List.create.go<A>(len.pred, create_value, create_value(len.pred) & result)
+  }

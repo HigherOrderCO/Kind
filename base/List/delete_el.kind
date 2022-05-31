@@ -1,9 +1,9 @@
-// Deletes the first element that pass a condition 
-List.delete_el<A: Type>(f: A -> A -> Bool, a: A, xs: List<A>): List<A>
+// Deletes the first element that satisfy a condition 
+List.delete_el<A: Type>(cond: A -> A -> Bool, a: A, xs: List<A>): List<A>
   case xs {
-    nil: []
-    cons: case f(a, xs.head){
+    nil: List.nil!
+    cons: case cond(a, xs.head){
 			true: xs.tail
-      false: List.cons!(xs.head, List.delete_el!(f, a, xs.tail))
+      false: List.cons!(xs.head, List.delete_el!(cond, a, xs.tail))
     }
   }

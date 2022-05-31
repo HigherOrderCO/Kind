@@ -1,0 +1,8 @@
+List.find_index.go<A: Type>(xs: List<A>, f: A -> Bool, idx: Nat): Maybe<Nat>
+  case xs {
+    nil: Maybe.none!
+    cons: case f(xs.head) {
+      true: Maybe.some!(idx)
+      false: List.find_index.go!(xs.tail, f, Nat.succ(idx))
+    }
+  }

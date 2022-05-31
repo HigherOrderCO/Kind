@@ -1,2 +1,2 @@
-Nat.ltn(n: Nat, m: Nat): Bool
-  Nat.lte(Nat.succ(n), m)
+Nat.ltn(x: Nat, y: Nat): Bool
+  Nat.lte(Nat.succ(x), y)

@@ -1,10 +1,9 @@
-List.quicksort(list: List<Nat>): List<Nat>
-  case list {
-    nil:
-      []
+List.quicksort(xs: List<Nat>): List<Nat>
+  case xs {
+    nil: List.nil!
     cons:
-      let fst = list.head
-      let min = List.filter!((x) x <? list.head, list.tail)
-      let max = List.filter!((x) x >? list.head, list.tail)
+      let fst = xs.head
+      let min = List.filter!((x) x <? xs.head, xs.tail)
+      let max = List.filter!((x) x >? xs.head, xs.tail)
       List.quicksort(min) ++ [fst] ++ List.quicksort(max)
   }

@@ -1,5 +1,5 @@
-Nat.gcd(n: Nat, m: Nat): Nat
-  case n {
-    zero: m,
-    succ: Nat.gcd(Nat.mod(m, n), n)
+Nat.gcd(x: Nat, y: Nat): Nat
+  case x {
+    zero: y
+    succ: Nat.gcd(Nat.mod(y, x), x)
   }

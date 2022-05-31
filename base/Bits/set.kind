@@ -1,18 +1,10 @@
-
 Bits.set(idx: Nat, a: Bits, b: Bits): Bits
   case idx {
     zero: Bits.set.aux(a, b)
     succ:
       case b {
         e: a
-        i: Bits.i(Bits.set(idx.pred, a, b.pred))
         o: Bits.o(Bits.set(idx.pred, a, b.pred))
+        i: Bits.i(Bits.set(idx.pred, a, b.pred))
       }
-  } 
-
-Bits.set.aux(a: Bits, b: Bits): Bits
-  case a {
-    e: b
-    i: Bits.i(Bits.set.aux(a.pred, Bits.drop(1, b)))
-    o: Bits.o(Bits.set.aux(a.pred, Bits.drop(1, b))) 
-  }
+  }  

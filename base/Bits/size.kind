@@ -1,2 +1,2 @@
-Bits.size(bits: Bits): Nat
-  Bits.size.go(bits, 0, 0)
+Bits.size(bs: Bits): Nat
+  Bits.size.go(bs, 0, 0)

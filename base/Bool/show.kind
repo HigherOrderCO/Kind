@@ -1,5 +1,5 @@
 Bool.show(b: Bool): String
   case b {
-    true: "true",
-    false: "false",
+    true: "true"
+    false: "false"
   }

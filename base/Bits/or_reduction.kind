@@ -1,0 +1,6 @@
+Bits.or_reduction(bs: Bits): Bool
+  case bs {
+    e: false 
+    o: Bits.or_reduction(bs.pred)
+    i: true 
+  }

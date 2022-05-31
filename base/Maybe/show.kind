@@ -1,5 +1,5 @@
-Maybe.show(A : Type, f : A -> String, m : Maybe<A>) : String
+Maybe.show<A: Type>(show: A -> String, m: Maybe<A>): String
   case m {
-      none : "none()"
-      some : "some" | "(" | f(m.value) | ")" 
+    none: "none()"
+    some: "some" | "(" | show(m.value) | ")" 
   } 

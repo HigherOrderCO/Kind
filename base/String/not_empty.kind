@@ -1,5 +1,5 @@
-String.not_empty(xs: String): Bool
-  case xs{
+String.not_empty(str: String): Bool
+  case str{
     nil : false
     cons: true
   }

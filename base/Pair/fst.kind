@@ -1,4 +1,4 @@
-Pair.fst<A: Type, B: Type>(pair: Pair<A, B>): A
-  case pair {
-    new: pair.fst
+Pair.fst<A: Type, B: Type>(p: Pair<A, B>): A
+  case p {
+    new: p.fst
   }

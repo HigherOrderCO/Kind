@@ -1,0 +1,2 @@
+U16.is_between(min: U16, val: U16, max: U16): Bool 
+  Bool.and(U16.gte(val, min), U16.lte(val, max)) 

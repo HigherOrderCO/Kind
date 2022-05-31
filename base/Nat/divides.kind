@@ -1,2 +1,2 @@
-Nat.divides(a: Nat, b: Nat): Type
-  [x: Nat] ((a * x) == b)
+Nat.divides(x: Nat, y: Nat): Type
+  [z: Nat] ((x * z) == y)

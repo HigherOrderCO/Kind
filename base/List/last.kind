@@ -1,8 +1,8 @@
 List.last<A: Type>(xs: List<A>): Maybe<A>
-  List.last.go<A>(xs, none)
-
-List.last.go<A: Type>(xs: List<A>, last: Maybe<A>): Maybe<A>
   case xs {
-    nil: last
-    cons: List.last.go<A>(xs.tail, some(xs.head))
+    nil: Maybe.none!
+    cons: case xs.tail {
+      nil: Maybe.some!(xs.head) 
+      cons: List.last<A>(xs.tail)
+    }
   }

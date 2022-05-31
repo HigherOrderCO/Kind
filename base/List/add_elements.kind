@@ -1,20 +1,2 @@
 List.add_elements<A: Type>(xs: List<A>, ys: List<A>, f: A -> A -> A): List<A>
   List.add_elements.go<A>(xs, ys, [], f)
-
-
-
-
-List.add_elements.go<A: Type>(xs: List<A>, ys: List<A>, result: List<A>, f: A -> A -> A): List<A>
-  case xs { 
-    nil: case ys { 
-      nil: result
-      cons: List.concat<A>(result, ys)
-    }
-    cons: case ys { 
-      nil: List.concat<A>(result, xs)
-      cons: 
-        let added_elem = f(xs.head, ys.head)
-        let new_result = List.cons<A>(added_elem, result)
-        List.add_elements.go<A>(xs.tail, ys.tail, new_result, f)
-    }
-  }

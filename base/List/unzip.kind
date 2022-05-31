@@ -1,6 +1,6 @@
 List.unzip<A: Type, B: Type>(xs: List<Pair<A,B>>): Pair<List<A>,List<B>>
   case xs {
-    nil: {List.nil!, List.nil!},
+    nil: {[], []},
     cons: 
       let rec = List.unzip!!(xs.tail)
       open xs.head

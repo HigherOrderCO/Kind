@@ -1,7 +1,7 @@
 // TODO: deprecate (use Bits.hex instead)
-Bits.to_hex_string(x: Bits): String
-  let hex_to_string = ((x)
-    switch Nat.eql(Bits.to_nat(x)) {
+Bits.to_hex_string(bs: Bits): String
+  let hex_to_string = ((bs)
+    switch Nat.eql(Bits.to_nat(bs)) {
       0 : "0"
       1 : "1"
       2 : "2"
@@ -19,6 +19,6 @@ Bits.to_hex_string(x: Bits): String
       14 : "e"
       15 : "f"
   } default "?") :: Bits -> String
-  let ls = Bits.chunks_of(4, x)
+  let ls = Bits.chunks_of(4, bs)
   List.foldr(Bits, String, "", 
-    (x) Function.flip(_, _ , _, String.concat)(hex_to_string(x)), ls)
+    (bs) Function.flip(_, _ , _, String.concat)(hex_to_string(bs)), ls)

@@ -1,6 +1,6 @@
-List.fold<A: Type>(list: List<A>): <P: Type> -> P -> (A -> P -> P) -> P
+List.fold<A: Type>(xs: List<A>): <P: Type> -> P -> (A -> P -> P) -> P
   <P> (nil, cons)
-  case list {
-    nil : nil,
-    cons: cons(list.head, List.fold<A>(list.tail)<P>(nil, cons))
+  case xs {
+    nil: nil
+    cons: cons(xs.head, List.fold<A>(xs.tail)<P>(nil, cons))
   }

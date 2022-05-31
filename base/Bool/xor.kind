@@ -1,7 +1,5 @@
 Bool.xor(a: Bool, b: Bool): Bool
   case a {
-    true:
-      Bool.not(b)
-    false:
-      b
+    true: Bool.not(b)
+    false: b
   }

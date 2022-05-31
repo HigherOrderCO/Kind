@@ -1,9 +1,9 @@
 String.is_nat(str: String): Bool
   case str {
-    nil: true 
-    cons: case Char.is_digit(str.head) {
-      true: String.is_nat(str.tail)
-      false: false 
+    nil: false
+    cons: case str.tail {
+      nil: Char.is_digit(str.head) 
+      cons: Bool.and(Char.is_digit(str.head), String.is_nat(str.tail))
     }
   }
   

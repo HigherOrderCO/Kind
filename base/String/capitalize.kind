@@ -1,7 +1,5 @@
-String.capitalize(s: String): String
-  case s {
-    nil:
-      ""
-    cons:
-      String.cons(Char.to_upper(s.head), s.tail)
+String.capitalize(str: String): String
+  case str {
+    nil: String.nil
+    cons: String.cons(Char.to_upper(str.head), str.tail)
   }

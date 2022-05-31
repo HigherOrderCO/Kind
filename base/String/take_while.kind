@@ -1,8 +1,8 @@
-String.take_while(f: Char -> Bool, xs: String): String
-  case xs {
+String.take_while(f: Char -> Bool, str: String): String
+  case str {
     nil : String.nil
-    cons: case f(xs.head) {
-      true : String.cons(xs.head, String.take_while(f,xs.tail))
+    cons: case f(str.head) {
+      true : String.cons(str.head, String.take_while(f,str.tail))
       false: String.nil
     }
   }

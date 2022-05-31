@@ -1,11 +1,11 @@
-Nat.eql(n: Nat, m: Nat): Bool
-  case n {
-    zero: case m {
-      zero: Bool.true,
-      succ: Bool.false,
-    },
-    succ: case m {
-      zero: Bool.false,
-      succ: Nat.eql(n.pred, m.pred),
-    },
+Nat.eql(x: Nat, y: Nat): Bool
+  case x {
+    zero: case y {
+      zero: Bool.true
+      succ: Bool.false
+    }
+    succ: case y {
+      zero: Bool.false
+      succ: Nat.eql(x.pred, y.pred)
+    }
   }

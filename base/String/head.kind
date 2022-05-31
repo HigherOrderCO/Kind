@@ -1,5 +1,5 @@
-String.head(xs: String): Maybe<Char>
-  case xs{
+String.head(str: String): Maybe<Char>
+  case str{
     nil : Maybe.none!
-    cons: Maybe.some!(xs.head)
+    cons: Maybe.some!(str.head)
   }

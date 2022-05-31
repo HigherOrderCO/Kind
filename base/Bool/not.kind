@@ -1,5 +1,5 @@
-Bool.not(a: Bool): Bool
-  case a {
-    true: false,
-    false: true,
+Bool.not(b: Bool): Bool
+  case b {
+    true: false
+    false: true
   }

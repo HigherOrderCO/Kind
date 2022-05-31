@@ -1,7 +1,5 @@
 String.from_bytes(b: Bytes): String
   case b {
-    nil:
-      ""
-    cons:
-      String.cons(U8.to_u16(b.head), String.from_bytes(b.tail))
+    nil: String.nil
+    cons: String.cons(U8.to_u16(b.head), String.from_bytes(b.tail))
   }

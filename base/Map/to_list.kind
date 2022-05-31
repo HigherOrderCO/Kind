@@ -1,2 +1,2 @@
-Map.to_list<A: Type>(xs: Map(A)): List<Pair<String,A>>
-  BBT.to_list!!(xs)
+Map.to_list<A: Type>(map: Map<A>): List<Pair<String,A>>
+  BBT.to_list!!(map)

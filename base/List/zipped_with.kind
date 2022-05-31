@@ -1,2 +1,2 @@
-List.zipped_with<A:Type,B:Type>(as: List<A>, bs: List<B>)<C:Type>(f: A -> B -> C): List<C>
-  List.zip_with<A,B,C>(f,as,bs)
+List.zipped_with<A:Type, B:Type>(xs: List<A>, ys: List<B>)<C: Type>(f: A -> B -> C): List<C>
+  List.zip_with<A, B, C>(f, xs, ys)

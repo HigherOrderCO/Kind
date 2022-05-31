@@ -1,5 +1,5 @@
-List.map<A: Type, B: Type>(f: A -> B, as: List<A>): List<B>
-  case as {
-    nil: List.nil!,
-    cons: List.cons!(f(as.head), List.map!!(f,as.tail)),
+List.map<A: Type, B: Type>(f: A -> B, xs: List<A>): List<B>
+  case xs {
+    nil: List.nil!
+    cons: List.cons!(f(xs.head), List.map!!(f, xs.tail)),
   }

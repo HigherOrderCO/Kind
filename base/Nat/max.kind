@@ -1,7 +1,5 @@
-Nat.max(a: Nat, b: Nat): Nat
-  case Nat.lte(a, b) {
-    true:
-      b
-    false:
-      a
+Nat.max(x: Nat, y: Nat): Nat
+  case Nat.lte(x, y) {
+    true: y
+    false: x
   }

@@ -1,8 +1,5 @@
-// x ^ y
 Nat.pow(x: Nat, y: Nat): Nat
   case y {
-    zero:
-      Nat.succ(Nat.zero)
-    succ:
-      Nat.mul(x, Nat.pow(x,y.pred))
+    zero: Nat.succ(Nat.zero)
+    succ: Nat.mul(x, Nat.pow(x, y.pred))
   }

@@ -1,0 +1,8 @@
+Bits.all_o(bs: Bits): Bool 
+	case bs {
+		e: false 
+		i: false 
+		o: case bs.pred {
+			e: true 
+		} default Bits.all_o(bs.pred)
+	}

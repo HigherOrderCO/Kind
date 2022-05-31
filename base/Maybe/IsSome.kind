@@ -1,5 +1,5 @@
-Maybe.IsSome(A: Type,x: Maybe<A>): Type
-  case x{
+Maybe.IsSome<A: Type>(m: Maybe<A>): Type
+  case m {
     none: Empty
     some: A
   }

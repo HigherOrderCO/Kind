@@ -1,0 +1,5 @@
+List.seq.go(n: Nat, xs: List<Nat>): List<Nat>
+  case n {
+    zero: xs
+    succ: List.seq.go(n.pred, n.pred & xs)
+  }

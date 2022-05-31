@@ -1,5 +1,5 @@
-Bits.flatten(list: List<Bits>): Bits
-  case list {
+Bits.flatten(xs: List<Bits>): Bits
+  case xs {
     nil: Bits.e
-    cons: Bits.concat(list.head, Bits.flatten(list.tail))
+    cons: Bits.concat(xs.head, Bits.flatten(xs.tail))
   }

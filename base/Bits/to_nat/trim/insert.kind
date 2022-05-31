@@ -1,0 +1,6 @@
+Bits.trim.insert(bs: Bits): Bits
+  case bs {
+    e: Bits.o(Bits.e)
+    o: Bits.o(Bits.trim.insert(bs.pred))
+    i: Bits.i(Bits.trim.insert(bs.pred))
+  }

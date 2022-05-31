@@ -2,27 +2,27 @@ type List.get_randoms.Result <A: Type> {
   new(
     seed: Nat
     generator: Random.Nat
-    list: List<A>
+    xs: List<A>
     result: List<A>
   )
 }
 
-List.get_randoms<A: Type>(seed: Nat, generator: Random.Nat, count: Nat, list: List<A>, repetitions: Bool): List.get_randoms.Result<A>
-  List.get_randoms.go<A>(count, List.get_randoms.Result.new<A>(seed, generator, list, []), repetitions)
+List.get_randoms<A: Type>(seed: Nat, generator: Random.Nat, count: Nat, xs: List<A>, repetitions: Bool): List.get_randoms.Result<A>
+  List.get_randoms.go<A>(count, List.get_randoms.Result.new<A>(seed, generator, xs, []), repetitions)
 
 List.get_randoms.go<A: Type>(count: Nat, state: List.get_randoms.Result<A>, repetitions: Bool): List.get_randoms.Result<A>
   open state
-  let length = List.length!(state.list)
+  let length = List.length!(state.xs)
   case count length {
     succ succ:
       let seed   = state.generator(state.seed)
       let index  = seed % length
-      let got    = state.list[index]
+      let got    = state.xs[index]
       let result = case got { none: state.result, some: got.value & state.result }
-      let list   = 
+      let xs   = 
         if repetitions then
-          state.list
+          state.xs
         else
-          List.delete_at<A>(index, state.list)
-      List.get_randoms.go<A>(count.pred, List.get_randoms.Result.new<A>(seed, state.generator, list, result), repetitions)
+          List.delete_at<A>(index, state.xs)
+      List.get_randoms.go<A>(count.pred, List.get_randoms.Result.new<A>(seed, state.generator, xs, result), repetitions)
   } default state

@@ -1,2 +1,2 @@
-Bits.reverse(a: Bits): Bits
-  Bits.reverse.tco(a, Bits.e)
+Bits.reverse(bs: Bits): Bits
+  Bits.reverse.tco(bs, Bits.e)

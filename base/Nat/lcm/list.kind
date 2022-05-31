@@ -1,8 +1,8 @@
 Nat.lcm.list.go(lcm: List<Nat>, r: Nat): Nat
-  let list =  List.delete_by<Nat>(Nat.eql ,0, lcm)
-  let list =  List.delete_by<Nat>(Nat.eql ,1, list)
+  let list =  List.delete_by<Nat>(Nat.eql, 0, lcm)
+  let list =  List.delete_by<Nat>(Nat.eql, 1, list)
   let list =  List.sort<Nat>(Nat.cmp, list)
-  let list = List.unique<Nat>(Nat.eql, list)
+  let list =  List.unique<Nat>(Nat.eql, list)
   log(List.show!(Nat.show, list))
   case list { 
     nil: r 

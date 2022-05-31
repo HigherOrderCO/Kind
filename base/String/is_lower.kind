@@ -1,2 +1,8 @@
-String.is_lower(str: String): Bool
-  String.eql(String.to_lower(str), str)
+String.is_lower(str: String): Bool 
+  case str {
+    nil: false  
+    cons: case str.tail {
+      nil:  Char.is_lower(str.head)
+      cons: Bool.and(Char.is_lower(str.head), String.is_lower(str.tail))
+    } 
+  }

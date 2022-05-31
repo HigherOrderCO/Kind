@@ -1,8 +1,8 @@
-Maybe.choice<A: Type>(list: List<Maybe<A>>): Maybe<A>
-  case list {
-    nil: none
-    cons: case list.head {
-      some: some(list.head.value)
-      none: Maybe.choice<A>(list.tail)
+Maybe.first_of<A: Type>(xs: List<Maybe<A>>): Maybe<A>
+  case xs {
+    nil: Maybe.none!
+    cons: case xs.head {
+      some: xs.head
+      none: Maybe.first_of<A>(xs.tail)
     }
   }

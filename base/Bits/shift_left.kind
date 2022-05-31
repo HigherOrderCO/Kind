@@ -1,5 +1,5 @@
-Bits.shift_left(n: Nat, value: Bits): Bits
+Bits.shift_left(n: Nat, bs: Bits): Bits
   case n {
-    zero: value,
-    succ: Bits.o(Bits.shift_left(n.pred, value))
+    zero: bs
+    succ: Bits.o(Bits.shift_left(n.pred, bs))
   }

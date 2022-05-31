@@ -1,11 +1,8 @@
-List.count<A: Type>(cond: A -> Bool, list: List<A>): Nat
-  case list {
-    nil:
-      0
-    cons:
-      let tail_count = List.count<A>(cond, list.tail)
-      if cond(list.head) then
-        Nat.succ(tail_count)
-      else
-        tail_count
+List.count<A: Type>(cond: A -> Bool, xs: List<A>): Nat
+  case xs {
+    nil: 0
+    cons: case cond(xs.head) {
+      true: Nat.succ(List.count<A>(cond, xs.tail))
+      false: List.count<A>(cond, xs.tail)
+    }  
   }

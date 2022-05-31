@@ -1,9 +1,9 @@
-String.join.go(sep: String, list: List<String>, fst: Bool): String
-  case list {
-    nil: "",
+String.join.go(sep: String, xs: List<String>, fst: Bool): String
+  case xs {
+    nil: ""
     cons: String.flatten([
       if fst then "" else sep,
-      list.head, 
-      String.join.go(sep, list.tail, Bool.false),
-    ]),
+      xs.head, 
+      String.join.go(sep, xs.tail, Bool.false),
+    ])
   }

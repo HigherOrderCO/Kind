@@ -1,8 +1,8 @@
-Nat.sub(n: Nat, m: Nat): Nat
-  case m {
-    zero: n,
-    succ: case n {
-      zero: 0,
-      succ: Nat.sub(n.pred, m.pred),
+Nat.sub(x: Nat, y: Nat): Nat
+  case y {
+    zero: x
+    succ: case x {
+      zero: 0
+      succ: Nat.sub(x.pred, y.pred)
     }
   }

@@ -1,5 +1,5 @@
-Maybe.eql<A: Type>(eql: A -> A -> Bool, a: Maybe<A>, b: Maybe<A>):Bool
-  case a b {
+Maybe.eql<A: Type>(eql: A -> A -> Bool, m: Maybe<A>, n: Maybe<A>): Bool
+  case m n {
     none none: true
-    some some: eql(a.value, b.value)
+    some some: eql(m.value, n.value)
   } default false

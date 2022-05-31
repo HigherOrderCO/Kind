@@ -1,0 +1,6 @@
+Bits.set.aux(a: Bits, b: Bits): Bits
+  case a {
+    e: b
+    o: Bits.o(Bits.set.aux(a.pred, Bits.drop(1, b))) 
+    i: Bits.i(Bits.set.aux(a.pred, Bits.drop(1, b)))
+  }

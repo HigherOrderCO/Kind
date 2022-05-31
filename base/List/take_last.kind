@@ -1,2 +1,2 @@
-List.take_last<A: Type>(length: Nat, list: List<A>): List<A>
-  List.drop<A>(Nat.sub(List.length<A>(list), length), list)
+List.take_last<A: Type>(length: Nat, xs: List<A>): List<A>
+  List.drop<A>(Nat.sub(List.length<A>(xs), length), xs)

@@ -1,8 +1,8 @@
-List.sequenceA(A : Type, xs : List<List<A>>) : List<List<A>>
+List.sequenceA<A: Type>(xs: List<List<A>>): List<List<A>>
   case xs {
-      nil : []
-      cons : case xs.tail as xss {
-          nil : List.sequenceA.disjoin!(xs)
-          cons : List.sequenceA.move!(xs.head, List.sequenceA.move!(xss.head, List.sequenceA!(xss.tail)))
+      nil: List.nil!
+      cons: case xs.tail as xs_t {
+          nil: List.sequenceA.disjoin!(xs)
+          cons: List.sequenceA.move!(xs.head, List.sequenceA.move!(xs_t.head, List.sequenceA!(xs_t.tail)))
       }
   }

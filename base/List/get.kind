@@ -1,8 +1,8 @@
-List.get<A: Type>(index: Nat, list: List<A>): Maybe<A>
-  case list {
-    nil: none
-    cons: case index {
-      zero: some(list.head)
-      succ: List.get<A>(index.pred, list.tail)
+List.get<A: Type>(idx: Nat, xs: List<A>): Maybe<A>
+  case xs {
+    nil: Maybe.none!
+    cons: case idx {
+      zero: Maybe.some!(xs.head)
+      succ: List.get<A>(idx.pred, xs.tail)
     }
   }

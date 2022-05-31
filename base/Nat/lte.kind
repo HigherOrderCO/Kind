@@ -1,10 +1,9 @@
-Nat.lte(n: Nat, m: Nat): Bool
-  case n {
-    zero:
-      true,
+Nat.lte(x: Nat, y: Nat): Bool
+  case x {
+    zero: true
     succ:
-      case m {
-        zero: false,
-        succ: Nat.lte(n.pred, m.pred),
+      case y {
+        zero: false
+        succ: Nat.lte(x.pred, y.pred)
       }
   }

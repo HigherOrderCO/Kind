@@ -1,8 +1,8 @@
-String.eql_no_sensitive(a: String, b: String): Bool
-  case a b {
+String.eql_no_sensitive(as: String, bs: String): Bool
+  case as bs {
     nil nil: true
     cons cons: 
-      if U16.eql(Char.to_lower(a.head), Char.to_lower(b.head)) then
-        String.eql_no_sensitive(a.tail, b.tail)
+      if U16.eql(Char.to_lower(as.head), Char.to_lower(bs.head)) then
+        String.eql_no_sensitive(as.tail, bs.tail)
       else false
   } default false

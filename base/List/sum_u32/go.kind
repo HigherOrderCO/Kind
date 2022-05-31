@@ -1,0 +1,5 @@
+List.sum_u32.go(xs: List<U32>, n: U32): U32
+  case xs {
+    nil: n
+    cons: List.sum_u32.go(xs.tail, U32.add(xs.head, n))
+  }

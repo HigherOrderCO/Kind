@@ -1,5 +1,5 @@
-String.to_builder.go(string: String, lb: String.Builder) : String.Builder
-  case string{
+String.to_builder.go(str: String, lb: String.Builder) : String.Builder
+  case str{
     nil : lb
-    cons: String.to_builder.go(string.tail, String.Builder.snoc(string.head, lb))
+    cons: String.to_builder.go(str.tail, String.Builder.snoc(str.head, lb))
   }

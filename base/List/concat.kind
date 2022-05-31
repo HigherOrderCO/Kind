@@ -1,12 +1,12 @@
 // concatenates two lists
 // example:
-//   as = [3, 4]
-//   bs = [1, 2]
-//   List.concat<Nat>(as, bs) == [3, 4, 1, 2]
-List.concat<A: Type>(as: List<A>, bs: List<A>): List<A>
-  case as {
-    nil: bs,
-    cons: List.cons!(as.head, List.concat!(as.tail,bs))
+//   xs = [3, 4]
+//   ys = [1, 2]
+//   List.concat<Nat>(xs, ys) == [3, 4, 1, 2]
+List.concat<A: Type>(xs: List<A>, ys: List<A>): List<A>
+  case xs {
+    nil: ys
+    cons: List.cons!(xs.head, List.concat!(xs.tail, ys))
   }
 
 // this is also where we define concat the cat

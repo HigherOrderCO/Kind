@@ -1,11 +1,10 @@
-List.sort<A: Type>(cmp: A -> A -> Cmp, list: List<A>): List<A>
-  case list {
-    nil:
-      []
+List.sort<A: Type>(cmp: A -> A -> Cmp, xs: List<A>): List<A>
+  case xs {
+    nil: List.nil!
     cons:
-      let fst = list.head
-      let ltn = List.filter!((x) case cmp(x,fst) { ltn: true } default false, list)
-      let eql = List.filter!((x) case cmp(x,fst) { eql: true } default false, list)
-      let gtn = List.filter!((x) case cmp(x,fst) { gtn: true } default false, list)
+      let fst = xs.head
+      let ltn = List.filter!((x) case cmp(x,fst) { ltn: true } default false, xs)
+      let eql = List.filter!((x) case cmp(x,fst) { eql: true } default false, xs)
+      let gtn = List.filter!((x) case cmp(x,fst) { gtn: true } default false, xs)
       List.sort!(cmp, ltn) ++ eql ++ List.sort!(cmp, gtn)
   }

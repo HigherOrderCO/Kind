@@ -1,5 +1,5 @@
-Maybe.if<A: Type>(cond: A -> Bool, x: Maybe<A>): Bool
-  case x {
+Maybe.if<A: Type>(cond: A -> Bool, m: Maybe<A>): Bool
+  case m {
     none: false
-    some: cond(x.value)
+    some: cond(m.value)
   }

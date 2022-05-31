@@ -1,8 +1,8 @@
-List.elem<A: Type>(p: A -> A -> Bool, a: A, as: List<A>): Bool 
-  case as {
-    nil : Bool.false,
-    cons: case p(a, as.head) {
-      true : Bool.true,
-      false: List.elem<A>(p, a, as.tail)
+List.elem<A: Type>(comp: A -> A -> Bool, a: A, xs: List<A>): Bool 
+  case xs {
+    nil: false
+    cons: case comp(a, xs.head) {
+      true: true
+      false: List.elem<A>(comp, a, xs.tail)
     }
   }

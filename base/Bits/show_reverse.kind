@@ -1,2 +1,2 @@
-Bits.show_reverse(bits: Bits): String
-  Bits.show(Bits.reverse(bits))
+Bits.show_reverse(bs: Bits): String
+  Bits.show(Bits.reverse(bs))

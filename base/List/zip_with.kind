@@ -1,9 +1,9 @@
-List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, as: List<A>, bs: List<B>)
+List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, xs: List<A>, ys: List<B>)
   : List<C>
-  case as {
-    nil : List.nil!,
-    cons: case bs {
-      nil : List.nil!,
-      cons: List.cons!(f(as.head,bs.head),List.zip_with!!!(f,as.tail,bs.tail))
+  case xs {
+    nil: List.nil!
+    cons: case ys {
+      nil: List.nil!
+      cons: List.cons!(f(xs.head, ys.head),List.zip_with!!!(f, xs.tail, ys.tail))
     }
   }

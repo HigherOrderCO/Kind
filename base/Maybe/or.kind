@@ -1,5 +1,5 @@
-Maybe.or<A: Type>(a: Maybe<A>, b: Maybe<A>): Maybe<A>
-  case a {
-    none: b,
-    some: Maybe.some!(a.value),
+Maybe.or<A: Type>(m: Maybe<A>, n: Maybe<A>): Maybe<A>
+  case m {
+    none: n
+    some: m
   }

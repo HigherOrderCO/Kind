@@ -1,8 +1,8 @@
-String.take(n: Nat, xs: String): String
-  case xs{
+String.take(n: Nat, str: String): String
+  case str{
     nil : String.nil
     cons: case n{
-      zero : String.nil
-      succ: String.cons(xs.head,String.take(n.pred, xs.tail))
+      zero: String.nil
+      succ: String.cons(str.head, String.take(n.pred, str.tail))
     }
   }

@@ -1,5 +1,2 @@
 Char.is_hex(chr: Char): Bool  
-  Bool.or(Bool.and(U16.gte(chr,'0'),U16.lte(chr,'9')),
-  Bool.or(Bool.and(U16.gte(chr,'a'),U16.lte(chr,'f')),
-  Bool.or(Bool.and(U16.gte(chr,'A'),U16.lte(chr,'F')),
-  false)))
+  Char.is_digit(chr) || U16.is_between('a', chr, 'f') || U16.is_between('A', chr, 'F')

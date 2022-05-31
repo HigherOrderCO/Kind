@@ -1,9 +1,9 @@
-Bits.take(n: Nat, xs: Bits): Bits
+Bits.take(n: Nat, bs: Bits): Bits
   case n {
     zero: Bits.e
-    succ: case xs {
+    succ: case bs {
       e: Bits.e
-      o: Bits.o(Bits.take(n.pred, xs.pred))
-      i: Bits.i(Bits.take(n.pred, xs.pred))
+      o: Bits.o(Bits.take(n.pred, bs.pred))
+      i: Bits.i(Bits.take(n.pred, bs.pred))
     }
   }

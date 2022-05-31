@@ -1,8 +1,8 @@
-List.at<A: Type>(index: Nat, list: List<A>): Maybe<A>
-  case list {
-    nil: Maybe.none!,
-    cons: case index {
-      zero: Maybe.some!(list.head),
-      succ: List.at!(index.pred, list.tail),
+List.at<A: Type>(idx: Nat, xs: List<A>): Maybe<A>
+  case xs {
+    nil: Maybe.none!
+    cons: case idx {
+      zero: Maybe.some!(xs.head)
+      succ: List.at!(idx.pred, xs.tail)
     }
   }

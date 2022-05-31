@@ -1,2 +1,2 @@
-List.range.nat(nat: Nat): List<Nat>
-  List.range.nat.go(nat, List.nil!)
+List.range.nat(n: Nat): List<Nat>
+  List.range.nat.go(n, List.nil!)

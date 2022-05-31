@@ -1,5 +1,5 @@
-Nat.add(n: Nat, m: Nat): Nat
-  case n {
-    zero: m
-    succ: Nat.succ(Nat.add(n.pred, m))
+Nat.add(x: Nat, y: Nat): Nat
+  case x {
+    zero: y
+    succ: Nat.succ(Nat.add(x.pred, y))
   }

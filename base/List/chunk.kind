@@ -1,9 +1,9 @@
 List.chunk<A: Type>(n: Nat, xs: List<A>): Maybe<List<A>>
   case n {
-    zero: Maybe.some!(List.nil!),
+    zero: Maybe.some!(List.nil!)
     succ: case xs {
-      nil : Maybe.none!,
-      cons: Maybe.bind!!(List.chunk!(n.pred,xs.tail),
-              (x) Maybe.some!(List.cons!(xs.head,x)))
+      nil: Maybe.none!
+      cons: Maybe.bind!!(List.chunk!(n.pred, xs.tail)
+              (x) Maybe.some!(List.cons!(xs.head, x)))
     }
   }

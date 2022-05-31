@@ -1,12 +1,12 @@
-String.span(f: Char -> Bool, xs: String): Pair<String,String>
-  case xs{
-    nil : Pair.new!!(String.nil,String.nil)
-    cons: case f(xs.head){
-        true :
-          open String.span(f,xs.tail) as span 
+String.span(f: Char -> Bool, str: String): Pair<String,String>
+  case str{
+    nil : Pair.new!!(String.nil, String.nil)
+    cons: case f(str.head){
+        true:
+          open String.span(f, str.tail) as span 
           let y = span.fst
           let z = span.snd
-          Pair.new!!(String.cons(xs.head,y),z)
-        false: Pair.new!!(String.nil,xs)
+          Pair.new!!(String.cons(str.head, y), z)
+        false: Pair.new!!(String.nil, str)
       }
   }

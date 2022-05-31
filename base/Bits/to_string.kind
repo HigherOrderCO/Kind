@@ -1,3 +1,0 @@
-// TODO:
-Bits.to_string(bits: Bits): String
-  Bits.to_string(bits)

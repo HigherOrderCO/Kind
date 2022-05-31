@@ -1,2 +1,2 @@
-Map.values<A: Type>(xs: Map(A)): List<A>
-  BBT.foldr_with_key!!!((key, value, list) value & list, [], xs)
+Map.values<A: Type>(map: Map(A)): List<A>
+  BBT.foldr_with_key!!!((key, value, list) value & list, [], map)

@@ -1,16 +1,9 @@
-Bits.trim(new_len: Nat, bits: Bits): Bits
+Bits.trim(new_len: Nat, bs: Bits): Bits
   case new_len {
-    zero: Bits.e,
-    succ: case bits {
-      e: Bits.o(Bits.trim(new_len.pred, Bits.e)),
-      o: Bits.o(Bits.trim(new_len.pred, bits.pred)),
-      i: Bits.i(Bits.trim(new_len.pred, bits.pred)),
+    zero: Bits.e
+    succ: case bs {
+      e: Bits.o(Bits.trim(new_len.pred, Bits.e))
+      o: Bits.o(Bits.trim(new_len.pred, bs.pred))
+      i: Bits.i(Bits.trim(new_len.pred, bs.pred))
     }
-  }
-
-Bits.trim.insert(bits: Bits): Bits
-  case bits {
-    e : Bits.o(Bits.e)
-    o : Bits.o(Bits.trim.insert(bits.pred))
-    i : Bits.i(Bits.trim.insert(bits.pred))
   }

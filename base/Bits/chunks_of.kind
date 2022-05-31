@@ -1,2 +1,2 @@
-Bits.chunks_of(len: Nat, bits: Bits): List<Bits>
-  Bits.chunks_of.go(len, bits, len, Bits.e)
+Bits.chunks_of(len: Nat, bs: Bits): List<Bits>
+  Bits.chunks_of.go(len, bs, len, Bits.e)

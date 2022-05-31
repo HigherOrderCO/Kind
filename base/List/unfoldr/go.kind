@@ -1,6 +1,6 @@
 List.unfoldr.go<A: Type, B: Type>(f: A -> Maybe<Pair<A,B>>, a: A, bs: List<B>): List<B>
   case f(a) as res {
-    none: List.nil<B>,
+    none: List.nil<B>
     some: 
       open res.value as pair
       List.unfoldr.go<A,B>(f, pair.fst, List.cons<B>(pair.snd, bs))

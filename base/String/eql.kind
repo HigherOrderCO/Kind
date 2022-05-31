@@ -1,11 +1,11 @@
-String.eql(a: String, b: String): Bool
-  case a {
-    nil: case b {
-      nil: Bool.true,
-      cons: Bool.false,
-    },
-    cons: case b {
-      nil: Bool.false,
-      cons: Bool.and(U16.eql(a.head, b.head), String.eql(a.tail,b.tail)),
-    },
+String.eql(as: String, bs: String): Bool
+  case as {
+    nil: case bs {
+      nil: Bool.true
+      cons: Bool.false
+    }
+    cons: case bs {
+      nil: Bool.false
+      cons: Bool.and(U16.eql(as.head, bs.head), String.eql(as.tail,bs.tail))
+    }
   }

@@ -1,13 +1,13 @@
 // Show pairs of hex values ignoring "00"
-Bits.to_buf_string(x: Bits): String
-  let full = Bits.to_hex_string(x)
+Bits.to_buf_string(bs: Bits): String
+  let full = Bits.to_hex_string(bs)
   Bits.to_buf_string.clean(String.reverse(full), "")
 
-Bits.to_buf_string.clean(xs: String, str: String): String
-  case xs {
+Bits.to_buf_string.clean(bs: String, str: String): String
+  case bs {
     nil : str
     cons: 
-      let {val, res} = String.take_pair(2, xs)
+      let {val, res} = String.take_pair(2, bs)
       let new = String.concat(
         if String.eql(val, "00") then "" else " " | val,
         str)

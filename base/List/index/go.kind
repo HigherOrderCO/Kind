@@ -1,0 +1,5 @@
+List.index.go<A: Type>(idx: Nat, xs: List<A>): List<Pair<Nat,A>>
+  case xs {
+    nil: List.nil<Pair<Nat,A>>
+    cons: List.cons<Pair<Nat,A>>({idx, xs.head}, List.index.go<A>(Nat.succ(idx), xs.tail))
+  }

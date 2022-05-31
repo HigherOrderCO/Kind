@@ -1,8 +1,8 @@
-String.drop_while(f: Char -> Bool, xs: String): String
-  case xs {
+String.drop_while(f: Char -> Bool, str: String): String
+  case str {
     nil : String.nil
-    cons: case f(xs.head) {
-      true : String.drop_while(f,xs.tail)
-      false: xs
+    cons: case f(str.head) {
+      true : String.drop_while(f, str.tail)
+      false: str
     }
   }

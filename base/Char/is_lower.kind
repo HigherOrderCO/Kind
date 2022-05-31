@@ -1,0 +1,3 @@
+Char.is_lower(chr: Char): Bool
+	U16.is_between('a', chr, 'z')
+	

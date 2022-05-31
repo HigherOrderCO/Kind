@@ -1,4 +1,4 @@
-Pair.map<A: Type, B: Type, C: Type>(f: B -> C, p: Pair<A, B>): Pair<A, C>
+Pair.map<A: Type, B: Type, C: Type>(fn: B -> C, p: Pair<A, B>): Pair<A, C>
   case p {
-    new: Pair.new<A, C>(p.fst, f(p.snd))
+    new: Pair.new<A, C>(p.fst, fn(p.snd)) 
   }

@@ -1,0 +1,5 @@
+Maybe.extract.value<A: Type>(m: Maybe<A>, default: A): A
+  case m {
+    none: default
+    some: m.value
+  }

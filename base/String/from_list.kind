@@ -1,5 +1,5 @@
-String.from_list(xs: List<Char>) : String
-  case xs{
+String.from_list(str: List<Char>) : String
+  case str{
     nil : String.nil
-    cons: String.cons(xs.head,String.from_list(xs.tail))
+    cons: String.cons(str.head,String.from_list(str.tail))
   }

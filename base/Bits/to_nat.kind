@@ -1,6 +1,6 @@
-Bits.to_nat(b: Bits): Nat
-  case b {
+Bits.to_nat(bs: Bits): Nat
+  case bs {
     e: Nat.zero
-    o: Nat.double(Bits.to_nat(b.pred))
-    i: Nat.succ(Nat.double(Bits.to_nat(b.pred)))
+    o: Nat.double(Bits.to_nat(bs.pred))
+    i: Nat.succ(Nat.double(Bits.to_nat(bs.pred)))
   }

@@ -1,2 +1,8 @@
-String.is_upper(str: String): Bool
-  String.eql(String.to_upper(str), str)
+String.is_upper(str: String): Bool 
+  case str {
+    nil: false 
+    cons: case str.tail {
+      nil:  Char.is_upper(str.head)
+      cons: Bool.and(Char.is_upper(str.head), String.is_upper(str.tail)) 
+    } 
+  }

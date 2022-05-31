@@ -1,8 +1,8 @@
 List.take<A: Type>(n: Nat, xs: List<A>): List<A>
   case xs {
-    nil : List.nil!,
+    nil: List.nil!
     cons: case n {
-      zero: List.nil!,
-      succ: List.cons!(xs.head,List.take!(n.pred, xs.tail))
+      zero: List.nil!
+      succ: List.cons!(xs.head, List.take!(n.pred, xs.tail))
     }
   }

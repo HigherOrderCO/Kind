@@ -1,6 +1,6 @@
-Bits.length.go(xs: Bits, n: Nat): Nat
-  case xs {
-    e: n,
-    o : Bits.length.go(xs.pred, Nat.succ(n)),
-    i : Bits.length.go(xs.pred, Nat.succ(n))
+Bits.length.go(bs: Bits, n: Nat): Nat
+  case bs {
+    e: n
+    o: Bits.length.go(bs.pred, Nat.succ(n))
+    i: Bits.length.go(bs.pred, Nat.succ(n))
   }

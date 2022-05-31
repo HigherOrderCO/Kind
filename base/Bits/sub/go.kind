@@ -1,18 +1,18 @@
-Bits.sub.go(a: Bits, b: Bits, bits: Bits): Bits
+Bits.sub.go(a: Bits, b: Bits, acum: Bits): Bits 
   case b {
     e: case a {
-      e: bits,
-      o: Bits.sub.go(a.pred, b, Bits.o(bits)),
-      i: Bits.sub.go(a.pred, b, Bits.i(bits))
-    },
+      e: acum
+      o: Bits.sub.go(a.pred, b, Bits.o(acum))
+      i: Bits.sub.go(a.pred, b, Bits.i(acum))
+    }
     o: case a {
-      e: Bits.sub.go(a, b.pred, Bits.o(bits)),
-      o: Bits.sub.go(a.pred, b.pred, Bits.o(bits)),
-      i: Bits.sub.go(a.pred, b.pred, Bits.i(bits))
-    },
+      e: Bits.sub.go(a, b.pred, Bits.o(acum))
+      o: Bits.sub.go(a.pred, b.pred, Bits.o(acum))
+      i: Bits.sub.go(a.pred, b.pred, Bits.i(acum))
+    }
     i: case a {
-      e: Bits.e,
-      o: Bits.sub.go(a.pred, Bits.inc(b.pred), Bits.i(bits)),
-      i: Bits.sub.go(a.pred, b.pred, Bits.o(bits))
+      e: Bits.e
+      o: Bits.sub.go(a.pred, Bits.inc(b.pred), Bits.i(acum))
+      i: Bits.sub.go(a.pred, b.pred, Bits.o(acum))
     }
   }

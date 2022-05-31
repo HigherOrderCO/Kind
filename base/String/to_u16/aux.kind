@@ -1,0 +1,8 @@
+String.to_u16.aux(str: String, counter: U16): U16
+  let zero_ascii = 48#16
+  case str {
+    nil: counter
+    cons:
+      let new_c = (counter * 10) + (str.head - zero_ascii)
+      String.to_u16.aux(str.tail, new_c)
+  }

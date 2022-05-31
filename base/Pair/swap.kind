@@ -1,3 +1,4 @@
-Pair.swap<A: Type, B: Type>(pair: Pair<A,B>): Pair<B,A>
-  open pair
-  Pair.new<B,A>(pair.snd, pair.fst)
+Pair.swap<A: Type, B: Type>(p: Pair<A,B>): Pair<B,A>
+  case p {
+    new: Pair.new<B,A>(p.snd, p.fst)
+  }

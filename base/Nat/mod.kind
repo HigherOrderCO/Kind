@@ -1,3 +1,3 @@
-// Finds the remainder of division of n by m
-Nat.mod(n: Nat, m: Nat): Nat
-  Pair.snd!!(Nat.div_mod(n, m))
+// Finds the remainder of division of x by y
+Nat.mod(x: Nat, y: Nat): Nat
+  Pair.snd!!(Nat.div_mod(x, y))

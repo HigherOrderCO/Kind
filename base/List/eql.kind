@@ -1,11 +1,5 @@
-List.eql<A: Type>(eql: A -> A -> Bool, a: List<A>, b: List<A>): Bool
-  case a {
-    nil: case b {
-      nil: Bool.true,
-      cons: Bool.false,
-    },
-    cons: case b {
-      nil: Bool.false,
-      cons: Bool.and(eql(a.head, b.head), List.eql<A>(eql, a.tail, b.tail)),
-    },
-  }
+List.eql<A: Type>(eql: A -> A -> Bool, xs: List<A>, ys: List<A>): Bool
+  case xs ys {
+    nil nil: true
+    cons cons: Bool.and(eql(xs.head, ys.head), List.eql<A>(eql, xs.tail, ys.tail))    
+  } default false 

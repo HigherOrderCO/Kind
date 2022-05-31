@@ -1,5 +1,5 @@
-String.reverse.go(xs: String, res: String): String
-  case xs {
-    nil: res,
-    cons: String.reverse.go(xs.tail,String.cons(xs.head,res)),
+String.reverse.go(str: String, res: String): String
+  case str {
+    nil: res
+    cons: String.reverse.go(str.tail, String.cons(str.head, res))
   }

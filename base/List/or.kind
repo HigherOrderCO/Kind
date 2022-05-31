@@ -1,2 +1,2 @@
-List.or(list: List<Bool>): Bool
-  List.any!((x) x)(list)
+List.or(xs: List<Bool>): Bool
+  List.any<Bool>(Bool.is_true, xs)

@@ -1,0 +1,2 @@
+List.sum_u32(xs: List<U32>): U32
+  List.sum_u32.go(xs, 0#32)

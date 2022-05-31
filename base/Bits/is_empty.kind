@@ -1,4 +1,4 @@
-Bits.is_empty(bits: Bits): Bool
-  case bits {
+Bits.is_empty(bs: Bits): Bool
+  case bs {
     e: true
   } default false

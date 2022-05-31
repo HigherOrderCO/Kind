@@ -1,6 +1,6 @@
 List.merge_sort.unpack(A : Type, f : A -> A -> Bool, xs : List<List<A>>) : List<A>
   case xs {
-      nil : []
+      nil : List.nil!
       cons : case xs.tail {
           nil : xs.head
           cons : 

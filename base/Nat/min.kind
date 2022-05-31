@@ -1,10 +1,10 @@
-// Returns the minimum value between a and b
+// Returns the minimum value between x and y
 // Ex: Nat.min(5, 3) == 3
-Nat.min(a: Nat, b: Nat): Nat
-  case a {
-    zero: 0,
-    succ: case b {
-      zero: 0,
-      succ: Nat.succ(Nat.min(a.pred, b.pred))
+Nat.min(x: Nat, y: Nat): Nat
+  case x {
+    zero: 0
+    succ: case y {
+      zero: 0
+      succ: Nat.succ(Nat.min(x.pred, y.pred))
     }
   }

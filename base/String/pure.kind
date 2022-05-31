@@ -1,2 +1,2 @@
-String.pure(x : Char) : String
-  String.cons(x, String.nil)
+String.pure(chr : Char) : String
+  String.cons(chr, String.nil)

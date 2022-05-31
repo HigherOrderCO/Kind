@@ -1,6 +1,6 @@
-Bits.tail(a: Bits): Bits
-  case a {
-    e: Bits.e,
-    o: a.pred,
-    i: a.pred,
+Bits.tail(bs: Bits): Bits
+  case bs {
+    e: Bits.e
+    o: bs.pred
+    i: bs.pred
   }

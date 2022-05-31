@@ -1,2 +1,2 @@
-Bits.to_u32(bits: Bits): U32
-  U32.new(Word.from_bits(32, bits))
+Bits.to_u32(bs: Bits): U32
+  U32.new(Word.from_bits(32, bs))

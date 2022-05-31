@@ -1,13 +1,9 @@
-// checks if all characters in a string are hexadecimal digits
+// checks if all characters in a string are hexadecimal digits 
 String.is_hex(str: String): Bool
   case str {
-    nil:
-      true
-    cons:
-      let cond = (('0' <=? str.head) && (str.head <=? '9'))
-        || (('a' <=? str.head) && (str.head <=? 'f'))
-      if cond then
-        String.is_hex(str.tail)
-      else
-        false
+    nil: false
+    cons: case str.tail {
+      nil: Char.is_hex(str.head) 
+      cons: Bool.and(Char.is_hex(str.head), String.is_hex(str.tail)) 
+    } 
   }

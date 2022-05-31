@@ -1,9 +1,9 @@
 List.commute_cons_map<A: Type, B: Type>(
   a: A
-  ls: List<A>
+  xs: List<A>
   f: A -> B
-): (f(a) & List.map<A, B>(f, ls)) == List.map<A, B>(f, a & ls)
-  case ls {
+): (f(a) & List.map<A, B>(f, xs)) == List.map<A, B>(f, a & xs)
+  case xs {
     nil: refl
     cons: refl
   }!

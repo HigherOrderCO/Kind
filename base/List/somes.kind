@@ -1,8 +1,8 @@
-List.somes<A: Type>(list: List<Maybe<A>>): List<A>
-  case list {
-    nil: []
-    cons: case list.head {
-      none: List.somes<A>(list.tail)
-      some: list.head.value & List.somes<A>(list.tail)
+List.somes<A: Type>(xs: List<Maybe<A>>): List<A>
+  case xs {
+    nil: List.nil!
+    cons: case xs.head {
+      none: List.somes<A>(xs.tail)
+      some: List.cons!(xs.head.value, List.somes<A>(xs.tail))
     }
   }

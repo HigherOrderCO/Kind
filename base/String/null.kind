@@ -1,5 +1,5 @@
-String.null(xs: String): Bool
-  case xs{
+String.null(str: String): Bool
+  case str{
     nil : Bool.true
     cons: Bool.false
   }
