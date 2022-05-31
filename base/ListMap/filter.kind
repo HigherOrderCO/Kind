@@ -1,0 +1,10 @@
+ListMap.filter<A: Type>(cond: A -> Bool, lm: ListMap<A>): ListMap<A>
+  case lm { 
+    empty: ListMap.empty<A>
+    cons: 
+      let map_val = lm.head@snd
+      case cond(map_val) {
+        true:  ListMap.cons<A>(lm.head, ListMap.filter<A>(cond, lm.tail))
+        false: ListMap.filter<A>(cond, lm.tail)
+      }
+  }

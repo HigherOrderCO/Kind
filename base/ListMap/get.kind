@@ -1,0 +1,11 @@
+ListMap.get<A: Type>(key: Nat, lm: ListMap<A>): Maybe<A>
+  case lm { 
+    empty: Maybe.none<A>
+    cons:  
+      let map_key = lm.head@fst
+      let result  = lm.head@snd
+      case Nat.eql(key, map_key) { 
+        true:  Maybe.some<A>(result)
+        false: ListMap.get<A>(key, lm.tail)
+      }
+  }

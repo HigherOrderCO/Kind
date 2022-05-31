@@ -1,0 +1,11 @@
+ListMap.set<A: Type>(key: Nat, value: A, lm: ListMap<A>): ListMap<A>
+  let new_pair = Pair.new<Nat, A>(key, value)
+  case lm { 
+    empty: ListMap.cons<A>(new_pair, lm)
+    cons:  
+      let map_key = lm.head@fst
+      case Nat.eql(key, map_key) {
+        true:  ListMap.cons<A>(new_pair, lm.tail)
+        false: ListMap.cons<A>(lm.head, ListMap.set<A>(key, value, lm.tail))
+      }
+  }

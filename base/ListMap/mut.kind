@@ -1,0 +1,13 @@
+ListMap.mut<A: Type>(key: Nat, fn: A -> A, lm: ListMap<A>): ListMap<A>
+  case lm { 
+    empty: ListMap.empty<A>
+    cons: 
+      let map_key = lm.head@fst
+      let map_val = lm.head@snd
+      case Nat.eql(key, map_key) { 
+        true:  
+          let new_pair = Pair.map<Nat, A, A>(fn, lm.head)
+          ListMap.cons<A>(new_pair, lm.tail)
+        false: ListMap.cons<A>(lm.head, ListMap.mut<A>(key, fn, lm.tail))
+      }
+  }

@@ -1,0 +1,4 @@
+type ListMap <A: Type> {
+  empty,
+  cons(head: Pair<Nat, A>, tail: ListMap<A>)
+}

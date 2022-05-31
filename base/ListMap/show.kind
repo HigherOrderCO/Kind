@@ -1,0 +1,12 @@
+ListMap.show.go<A: Type>(fn: Pair<Nat, A> -> String, lm: ListMap<A>): String
+  case lm { 
+    empty: ""
+    cons: 
+      case lm.tail { 
+        empty: fn(lm.head)
+        cons:  fn(lm.head)| ", " | ListMap.show.go<A>(fn, lm.tail)
+      }
+  }
+
+ListMap.show<A: Type>(fn: A -> String, lm: ListMap<A>): String
+  "["| ListMap.show.go<A>(Pair.show<Nat, A>(Nat.show, fn), lm) | "]"
