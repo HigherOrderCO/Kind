@@ -1,0 +1,10 @@
+ListMap.delete<A: Type>(key: Nat, lm: ListMap<A>): ListMap<A>
+  case lm { 
+    empty: ListMap.empty<A>
+    cons:
+      let map_key = lm.head@fst
+      case Nat.eql(key, map_key) {
+        true:  lm.tail
+        false: ListMap.cons<A>(lm.head, ListMap.delete<A>(key, lm.tail))
+      }
+  }
