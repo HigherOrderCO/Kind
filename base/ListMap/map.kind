@@ -1,7 +1,7 @@
-ListMap.map<A: Type>(fn: A -> A, lm: ListMap<A>): ListMap<A>
+ListMap.map<A: Type, B: Type>(fn: A -> B, lm: ListMap<A>): ListMap<B>
   case lm { 
-    empty: ListMap.empty<A>
+    empty: ListMap.empty<B>
     cons:
-      let new_pair = Pair.map<Nat, A, A>(fn, lm.head)
-      ListMap.map<A>(fn, ListMap.cons<A>(new_pair, lm.tail))
+      let new_pair = Pair.map<Nat, A, B>(fn, lm.head)
+      ListMap.cons<B>(new_pair, ListMap.map<A, B>(fn, lm.tail))
   }
