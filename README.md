@@ -14,7 +14,7 @@ A minimal, efficient and practical programming language that aims to rethink fun
 
 Usage
 -----
-![npm](https://img.shields.io/npm/v/kind-lang)  [![telegram](https://img.shields.io/badge/chat-on%20telegram-blue)](https://t.me/formality_lang)
+![npm](https://img.shields.io/npm/v/kind-lang)  [![telegram](https://img.shields.io/badge/chat-on%20telegram-blue)](https://t.me/kindelia)
 
 0. Choose a release. We'll use JavaScript here but ChezScheme is also [available](/INSTALL.md).
 
