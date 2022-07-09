@@ -241,6 +241,9 @@ App.RLP.draw(state: App.RLP.State.Local): DOM
       <p><a href="https://t.me/kindelia">
         `Telegram`
       </a></p>
+      <p><a href="https://discord.gg/kindelia">
+        `Discord`
+      </a></p>
     </div>
     <div>
       `made with ❤ using `
