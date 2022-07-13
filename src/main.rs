@@ -1,7 +1,8 @@
 #![allow(dead_code)] 
 #![allow(unused_variables)] 
 
-// imports hashmap
+// TODO: type{} syntax
+
 use std::collections::HashMap;
 
 //  type Bool {
@@ -19,19 +20,19 @@ use std::collections::HashMap;
 //  }
 //
 //  Add (a: Nat) (b: Nat) : Nat {
-//    {Zero}   b => b
-//    {Succ a} b => {Succ (Add a b)}
+//    Add {Zero}   b => b
+//    Add {Succ a} b => {Succ (Add a b)}
 //  }
 //
 //  Add (a: Nat) (b: Nat) : Nat =
 //    match a {
-//      {Zero}   => b
-//      {Succ a} => {Succ (Add a b)}
+//      Add {Zero}   => b
+//      Add {Succ a} => {Succ (Add a b)}
 //    }
 //
 //   Map <A: Type> <B: Type> (f: A -> B) (xs: List A) : List B {
-//     A B f {Cons x xs} => {Cons (f x) (map A B f xs)}
-//     A B f {Nil}       => {Nil}
+//     Map A B f {Cons x xs} => {Cons (f x) (map A B f xs)}
+//     Map A B f {Nil}       => {Nil}
 //   }
 //
 //   Main : (List Nat) =
@@ -60,9 +61,9 @@ pub enum Term {
   Typ,
   Var { name: String },
   Let { name: String, expr: Box<Term>, body: Box<Term> },
-  App { func: Box<Term>, argm: Box<Term> },
-  Lam { name: String, body: Box<Term> },
   All { name: String, tipo: Box<Term>, body: Box<Term> },
+  Lam { name: String, body: Box<Term> },
+  App { func: Box<Term>, argm: Box<Term> },
   Ctr { name: String, args: Vec<Box<Term>> },
   Fun { name: String, args: Vec<Box<Term>> },
 }
@@ -76,6 +77,7 @@ pub struct Argument {
 
 #[derive(Clone, Debug)]
 pub struct Rule {
+  name: String,
   pats: Vec<Box<Term>>,
   body: Box<Term>,
 }
@@ -92,6 +94,9 @@ pub struct Entry {
 pub struct File {
   entries: HashMap<String, Box<Entry>>
 }
+
+// Parser
+// ======
 
 pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
@@ -247,23 +252,27 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
   let (state, name) = parser::name1(state)?;
   let (state, args) = parser::until(parser::text_parser(":"), Box::new(parse_argument), state)?;
   let (state, tipo) = parse_term(state)?;
-  let (state, head) = parser::get_char(state)?;
+  let (state, head) = parser::peek_char(state)?;
   if head == '=' {
+    let (state, _)    = parser::consume("=", state)?;
     let (state, body) = parse_term(state)?;
-    let rules = vec![Box::new(Rule { pats: vec![], body })];
+    let rules = vec![Box::new(Rule { name: name.clone(), pats: vec![], body })];
     return Ok((state, Box::new(Entry { name, args, tipo, rules })));
   } else if head == '{' {
-    let (state, rules) = parser::until(parser::text_parser("}"), Box::new(parse_rule), state)?;
+    let (state, _)    = parser::consume("{", state)?;
+    let name_clone = name.clone();
+    let (state, rules) = parser::until(parser::text_parser("}"), Box::new(move |state| parse_rule(state, name_clone.clone())), state)?;
     return Ok((state, Box::new(Entry { name, args, tipo, rules })));
   } else {
-    parser::expected("'=' or '{'", 1, state)
+    return Ok((state, Box::new(Entry { name, args, tipo, rules: vec![] })));
   }
 }
 
-pub fn parse_rule(state: parser::State) -> parser::Answer<Box<Rule>> {
-  let (state, pats) = parser::until(parser::text_parser("=>"), Box::new(parse_term), state)?;
+pub fn parse_rule(state: parser::State, name: String) -> parser::Answer<Box<Rule>> {
+  let (state, _)    = parser::consume(&name, state)?;
+  let (state, pats) = parser::until(parser::text_parser("="), Box::new(parse_term), state)?;
   let (state, body) = parse_term(state)?;
-  return Ok((state, Box::new(Rule { pats, body })));
+  return Ok((state, Box::new(Rule { name, pats, body })));
 }
 
 pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
@@ -325,12 +334,13 @@ pub fn show_term(term: &Term) -> String {
 }
 
 pub fn show_rule(rule: &Rule) -> String {
+  let name = &rule.name;
   let mut pats = vec![];
   for pat in &rule.pats {
     pats.push(show_term(pat));
   }
   let body = show_term(&rule.body);
-  format!("{} => {}", pats.join(" "), body)
+  format!("{} {} => {}", name, pats.join(" "), body)
 }
 
 pub fn show_entry(entry: &Entry) -> String {
@@ -339,11 +349,15 @@ pub fn show_entry(entry: &Entry) -> String {
   for arg in &entry.args {
     args.push(format!(" ({}: {})", arg.name, show_term(&arg.tipo)));
   }
-  let mut rules = vec![];
-  for rule in &entry.rules {
-    rules.push(format!("\n {}", show_rule(rule)));
+  if entry.rules.len() == 0 {
+    format!("{}{} : {}", name, args.join(""), show_term(&entry.tipo))
+  } else {
+    let mut rules = vec![];
+    for rule in &entry.rules {
+      rules.push(format!("\n  {}", show_rule(rule)));
+    }
+    format!("{}{} : {} {{{}\n}}", name, args.join(""), show_term(&entry.tipo), rules.join(""))
   }
-  format!("{}{} : {} {{{}\n}}", name, args.join(""), show_term(&entry.tipo), rules.join(""))
 }
 
 pub fn show_file(file: &File) -> String {
@@ -362,56 +376,169 @@ pub fn read_file(code: &str) -> Result<Box<File>, String> {
   parser::read(Box::new(parse_file), code)
 }
 
+// Compiler
+// ========
+
+//pub enum Term {
+  //Typ,
+  //Var { name: String },
+  //Let { name: String, expr: Box<Term>, body: Box<Term> },
+  //App { func: Box<Term>, argm: Box<Term> },
+  //Lam { name: String, body: Box<Term> },
+  //All { name: String, tipo: Box<Term>, body: Box<Term> },
+  //Ctr { name: String, args: Vec<Box<Term>> },
+  //Fun { name: String, args: Vec<Box<Term>> },
+//}
+pub fn compile_term(term: &Term) -> String { 
+  match term {
+    Term::Typ => {
+      format!("Typ")
+    }
+    Term::Var { name } => {
+      name.clone()
+    }
+    Term::Let { name, expr, body } => {
+      todo!()
+    }
+    Term::All { name, tipo, body } => {
+      format!("(All {} λ{} {})", compile_term(tipo), name, compile_term(body))
+    }
+    Term::Lam { name, body } => {
+      format!("(Lam λ{} {})", name, compile_term(body))
+    }
+    Term::App { func, argm } => {
+      format!("(App {} {})", compile_term(func), compile_term(argm))
+    }
+    Term::Ctr { name, args } => {
+      let mut args_strs : Vec<String> = Vec::new();
+      for arg in args {
+        args_strs.push(format!(" {}", compile_term(arg)));
+      }
+      format!("(Ct{} {}.{})", args.len(), name, args_strs.join(""))
+    }
+    Term::Fun { name, args } => {
+      let mut args_strs : Vec<String> = Vec::new();
+      for arg in args {
+        args_strs.push(format!(" {}", compile_term(arg)));
+      }
+      format!("(Fn{} {}.{})", args.len(), name, args_strs.join(""))
+    }
+  }
+}
+
+//pub struct Entry {
+  //name: String,
+  //args: Vec<Box<Argument>>,
+  //tipo: Box<Term>,
+  //rules: Vec<Box<Rule>>
+//}
+pub fn compile_entry(entry: &Entry) -> String {
+  fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
+    if index < args.len() {
+      let arg = &args[index];
+      format!("(All {} λ{} {})", compile_term(&arg.tipo), arg.name, compile_type(args, tipo, index + 1))
+    } else {
+      compile_term(tipo)
+    }
+  }
+
+  fn compile_rule(rule: &Rule) -> String {
+    let mut pats = vec![];
+    for pat in &rule.pats {
+      pats.push(format!(" {}", compile_term(pat)));
+    }
+    let body = compile_term(&rule.body);
+    let mut text = String::new();
+    //text.push_str(&format!("    (Rule{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
+    text.push_str(&format!("    (Rule{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
+    return text;
+  }
+
+  let mut result = String::new();
+  result.push_str(&format!("    (MakeId {}.) = %{}\n", entry.name, entry.name));
+  result.push_str(&format!("    (TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
+  for rule in &entry.rules {
+    result.push_str(&compile_rule(&rule));
+  }
+  return result;
+}
+
+pub fn compile_file(file: &File) -> String {
+  let mut result = String::new();
+  for entry in file.entries.values() {
+    result.push_str(&format!("  // {}\n", entry.name));
+    result.push_str(&format!("  // {}\n", "-".repeat(entry.name.len())));
+    result.push_str(&format!("\n"));
+    result.push_str(&compile_entry(&entry));
+    result.push_str(&format!("\n"));
+  }
+  return result;
+}
+
 fn main() -> Result<(), String> {
 
-  //let term = read_term("{Foo @x(x) {Tic} {Tac}}")?;
-  //println!("Parsed: {}", show_term(&*term));
+  //let file = read_file("
+    //Bool : Type
+      //True  : Bool
+      //False : Bool
+
+    //List (a: Type) : Type
+      //Nil  (a: Type)                       : (List a)
+      //Cons (a: Type) (x: a) (xs: (List a)) : (List a)
+
+    //Add (a: Nat) (b: Nat) : Nat {
+      //Add {Zero}   b = b
+      //Add {Succ a} b = {Succ (Add a b)}
+    //}
+
+    //Not (a: Bool) : Bool {
+      //Not {True}  = {False}
+      //Not {False} = {True}
+    //}
+
+    //Map (a: Type) (b: Type) (f: (x: a) a) (xs: {List a}) : {List b} {
+      //Map a b f {Cons x xs} = {Cons (f x) (Map a b f xs)}
+      //Map a b f Nil         = {Nil}
+    //}
+  //")?;
 
   let file = read_file("
-    Bool : Type {}
-      True  : Bool {}
-      False : Bool {}
+    Bool : Type
+      True  : Bool
+      False : Bool
 
-    Add (a: Nat) (b: Nat) : Nat {
-      {Zero}   b => b
-      {Succ a} b => {Succ (Add a b)}
-    }
+    Nat : Type
+      Zero             : Nat
+      Succ (pred: Nat) : Nat
+
+    List (a: Type) : Type
+      Nil  (a: Type)                       : {List a}
+      Cons (a: Type) (x: a) (xs: {List a}) : {List a}
 
     Not (a: Bool) : Bool {
-      {True}  => {False}
-      {False} => {True}
+      Not True  = False
+      Not False = True
     }
 
-    Map (a: Type) (b: Type) (f: (x: a) a) (xs: (List a)) : (List b) {
-      a b f {Cons x xs} => {Cons (f x) (Map a b f xs)}
-      a b f Nil         => {Nil}
+    And (a: Bool) (b: Bool) : Bool {
+      And True  True  = True
+      And True  False = False
+      And False True  = False
+      And False False = False
     }
+
+    Negate (xs: {List Bool}) : {List Bool} {
+      Negate {Cons Bool x xs} = {Cons Bool (Not x) (Negate xs)}
+      Negate {Nil Bool}       = {Nil Bool}
+    }
+
+    Main : {List Bool} = (Negate {Cons Bool True {Cons Bool False {Nil Bool}}})
   ")?;
 
-  println!("parsed:\n\n{}", show_file(&file));
+  println!("Parsed:\n\n{}\n\n", show_file(&file));
+
+  println!("Compiled:\n\n");
+  println!("{}", compile_file(&file));
 
   return Ok(());
 }
-
-
-
-
-
-//Map (a: {Type}) (b: {Type}) (f: (x: a) a) (xs: ({List} a)) : ({List} b) {
- //a b f {Cons x xs} => {Cons (f x) ({Map} a b f xs)}
- //a b f {Nil}       => {Nil}
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-

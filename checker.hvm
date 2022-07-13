@@ -1,0 +1,611 @@
+Main =
+  let term = (Rule0 Main.)
+  let type = (TypeOf Main.)
+  (Kind2.Result
+    (Checked (Check term type Nil 0))
+    (Reduced (Eval term)))
+
+// Prelude
+// -------
+
+// U60.if -(r: Type) U60 r r : r
+  (U60.if 0 then else) = else
+  (U60.if 1 then else) = then
+
+// U60.equal U60 U60 : Bool
+  (U60.equal a b) = (U60.if (== a b) True False)
+
+// Bool.if -(r: Type) Bool r r : r
+  (Bool.if False then else) = else
+  (Bool.if True  then else) = then
+
+// Bool.and Bool Bool : Bool
+  (Bool.and True  b) = b
+  (Bool.and False b) = False
+
+// Maybe.case -(a: Type) -(r: Type) (Maybe a) r (a -> r) : r
+  (Maybe.case None       none some) = none
+  (Maybe.case (Some val) none some) = (some val)
+
+// Result.chain -(a: Type) -(b: Type) (Result a) (a -> Result b) : Result b
+  (Result.chain (Done val) cont) = (cont val)
+  (Result.chain (Fail msg) cont) = (Fail msg)
+
+// List.at -(a: Type) (List a) U60 : (Maybe a)
+  (List.at (Cons x xs) 0) = (Some x)
+  (List.at (Cons x xs) n) = (List.at xs (- n 1))
+  (List.at Nil         n) = None
+
+// Term.if_all -(r: Type) Term (Term -> (Term -> Term) -> r) r : r
+  (Term.if_all (All type body) then else) = (then type body)
+  (Term.if_all other           then else) = else
+
+// Arr Term Term : Term
+  (Arr type retr) = (All type λx(retr))
+
+// Equal Term Term : Bool 
+// ----------------------
+  
+  // Var equality
+  (Equal (Var a.index) (Var b.index) dep) =
+    (U60.equal a.index b.index)
+
+  // Typ equality
+  (Equal Typ Typ dep) =
+    True
+
+  // All equality
+  (Equal (All a.type a.body) (All b.type b.body) dep) =
+    let type = (Equal a.type b.type dep)
+    let body = (Equal (a.body (Var dep)) (b.body (Var dep)) (+ dep 1))
+    (Bool.and type body)
+
+  // Lam equality
+  (Equal (Lam a.body) (Lam b.body) dep) =
+    let body = (Equal (a.body (Var dep)) (b.body (Var dep)) (+ dep 1)) 
+    body
+
+  // App equality
+  (Equal (App a.func a.argm) (App b.func b.argm) dep) =
+    let func = (Equal a.func b.func dep)
+    let argm = (Equal a.argm b.argm dep)
+    (Bool.and func argm)
+
+  // Ct0 equality
+  (Equal (Ct0 a.ctid) (Ct0 b.ctid) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    ctid
+
+  // Ct1 equality
+  (Equal (Ct1 a.ctid a.x0) (Ct1 b.ctid b.x0) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    (Bool.and ctid x0)
+
+  // Ct2 equality
+  (Equal (Ct2 a.ctid a.x0 a.x1) (Ct2 b.ctid b.x0 b.x1) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    let x1   = (Equal a.x1 b.x1 dep)
+    (Bool.and ctid (Bool.and x0 x1))
+
+  // Ct3 equality
+  (Equal (Ct3 a.ctid a.x0 a.x1 a.x2) (Ct3 b.ctid b.x0 b.x1 b.x2) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    let x1   = (Equal a.x1 b.x1 dep)
+    let x2   = (Equal a.x2 b.x2 dep)
+    (Bool.and ctid (Bool.and x0 (Bool.and x1 x2)))
+
+  // Ct4 equality
+  (Equal (Ct4 a.ctid a.x0 a.x1 a.x2 a.x3) (Ct4 b.ctid b.x0 b.x1 b.x2 b.x3) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    let x1   = (Equal a.x1 b.x1 dep)
+    let x2   = (Equal a.x2 b.x2 dep)
+    let x3   = (Equal a.x3 b.x3 dep)
+    (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 x3))))
+
+  // Ct5 equality
+  (Equal (Ct5 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4) (Ct5 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    let x1   = (Equal a.x1 b.x1 dep)
+    let x2   = (Equal a.x2 b.x2 dep)
+    let x3   = (Equal a.x3 b.x3 dep)
+    let x4   = (Equal a.x4 b.x4 dep)
+    (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 x4)))) )
+
+  // Ct6 equality
+  (Equal (Ct6 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5) (Ct6 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    let x1   = (Equal a.x1 b.x1 dep)
+    let x2   = (Equal a.x2 b.x2 dep)
+    let x3   = (Equal a.x3 b.x3 dep)
+    let x4   = (Equal a.x4 b.x4 dep)
+    let x5   = (Equal a.x5 b.x5 dep)
+    (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 x5))))))
+
+  // Ct7 equality
+  (Equal (Ct7 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6) (Ct7 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    let x1   = (Equal a.x1 b.x1 dep)
+    let x2   = (Equal a.x2 b.x2 dep)
+    let x3   = (Equal a.x3 b.x3 dep)
+    let x4   = (Equal a.x4 b.x4 dep)
+    let x5   = (Equal a.x5 b.x5 dep)
+    let x6   = (Equal a.x6 b.x6 dep)
+    (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 x6)))))))
+
+  // Ct8 equality
+  (Equal (Ct8 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6 a.x7) (Ct8 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6 b.x7) dep) =
+    let ctid = (U60.equal (MakeId a.ctid) (MakeId b.ctid))
+    let x0   = (Equal a.x0 b.x0 dep)
+    let x1   = (Equal a.x1 b.x1 dep)
+    let x2   = (Equal a.x2 b.x2 dep)
+    let x3   = (Equal a.x3 b.x3 dep)
+    let x4   = (Equal a.x4 b.x4 dep)
+    let x5   = (Equal a.x5 b.x5 dep)
+    let x6   = (Equal a.x6 b.x6 dep)
+    let x7   = (Equal a.x7 b.x7 dep)
+    (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 (Bool.and x6 x7))))))))
+
+  // Not equal
+  (Equal a b dep) =
+    False
+
+// Infer Term (List Term) U60 : Result Term
+// ----------------------------------------
+
+  // Infers Var
+  (Infer (Var index) ctx dep) =
+    (Maybe.case (List.at ctx (- (- dep index) 1))
+      // case none:
+      (Fail UnboundVariable)
+      // case some:
+      λvar_type (Done var_type))
+
+  // Infers Typ
+  (Infer Typ ctx dep) =
+    (Done Typ)
+
+  // Infers All
+  (Infer (All type body) ctx dep) =
+    (Result.chain (Check type Typ ctx dep) λtype_chk
+    (Result.chain (Check (body (Var dep)) Typ (Cons type ctx) (+ dep 1)) λbody_chk
+    (Done Typ)))
+
+  // Infers Lam
+  (Infer (Lam body) ctx dep) =
+    (Fail CantInferLambda)
+
+  // Infers App
+  (Infer (App func argm) ctx dep) =
+    (Result.chain (Infer func ctx dep) λfunc_typ
+    (Term.if_all func_typ
+      // then
+      λfunc_typ_type λfunc_typ_body
+        (Result.chain (Check argm func_typ_type ctx dep) λargm_chk
+        (Done (func_typ_body argm)))
+      // else
+      (Fail NonFunctionApplication)
+    ))
+
+  // Infers Ct0
+  (Infer (Ct0 ctid) ctx dep) =
+    (Done (TypeOf ctid))
+
+  // Infers Ct1
+  (Infer (Ct1 ctid x0) ctx dep) =
+    (Infer (App (Ct0 ctid) x0) ctx dep)
+
+  // Infers Ct2
+  (Infer (Ct2 ctid x0 x1) ctx dep) =
+    (Infer (App (App (Ct0 ctid) x0) x1) ctx dep)
+
+  // Infers Ct3
+  (Infer (Ct3 ctid x0 x1 x2) ctx dep) =
+    (Infer (App (App (App (Ct0 ctid) x0) x1) x2) ctx dep)
+
+  // Infers Ct4
+  (Infer (Ct4 ctid x0 x1 x2 x3) ctx dep) =
+    (Infer (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) ctx dep)
+
+  // Infers Ct5
+  (Infer (Ct5 ctid x0 x1 x2 x3 x4) ctx dep) =
+    (Infer (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) ctx dep)
+
+  // Infers Ct6
+  (Infer (Ct6 ctid x0 x1 x2 x3 x4 x5) ctx dep) =
+    (Infer (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5) ctx dep)
+
+  // Infers Ct7
+  (Infer (Ct7 ctid x0 x1 x2 x3 x4 x5 x6) ctx dep) =
+    (Infer (App (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5) x6) ctx dep)
+
+  // Infers Ct8
+  (Infer (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7) ctx dep) =
+    (Infer (App (App (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5) x6) x7) ctx dep)
+
+  // Infers Fn0
+  (Infer (Fn0 ctid) ctx dep) =
+    (Done (TypeOf ctid))
+
+  // Infers Fn1
+  (Infer (Fn1 ctid x0) ctx dep) =
+    (Infer (App (Fn0 ctid) x0) ctx dep)
+
+  // Infers Fn2
+  (Infer (Fn2 ctid x0 x1) ctx dep) =
+    (Infer (App (App (Fn0 ctid) x0) x1) ctx dep)
+
+  // Infers Fn3
+  (Infer (Fn3 ctid x0 x1 x2) ctx dep) =
+    (Infer (App (App (App (Fn0 ctid) x0) x1) x2) ctx dep)
+
+  // Infers Fn4
+  (Infer (Fn4 ctid x0 x1 x2 x3) ctx dep) =
+    (Infer (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) ctx dep)
+
+  // Infers Fn5
+  (Infer (Fn5 ctid x0 x1 x2 x3 x4) ctx dep) =
+    (Infer (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) ctx dep)
+
+  // Infers Fn6
+  (Infer (Fn6 ctid x0 x1 x2 x3 x4 x5) ctx dep) =
+    (Infer (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) ctx dep)
+
+  // Infers Fn7
+  (Infer (Fn7 ctid x0 x1 x2 x3 x4 x5 x6) ctx dep) =
+    (Infer (App (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) x6) ctx dep)
+
+  // Infers Fn8
+  (Infer (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7) ctx dep) =
+    (Infer (App (App (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) x6) x7) ctx dep)
+
+// Check Term Term (List Term) U60 : Result Unit
+// ---------------------------------------------
+
+  // Checks Lam 
+  (Check (Lam body) (All t_type t_body) ctx dep) =
+    (Result.chain (Check (body (Var dep)) (t_body (Var dep)) (Cons t_type ctx) (+ dep 1)) λbody_chk
+    (Done Unit))
+
+  // Checks others
+  (Check term type ctx dep) =
+    (Result.chain (Infer term ctx dep) λterm_typ
+    (Bool.if (Equal term_typ type dep)
+      // then
+      (Done Unit)
+      // else
+      (Fail (TypeMismatch term_typ type)) // TODO: pass up for Rust to display
+    ))
+
+// Show Term U60 : Term
+// ---------------------
+  
+  // Show Var
+  (Show (Var index) dep) =
+    (Var index)
+
+  // Show Typ
+  (Show Typ dep) =
+    Typ
+
+  // Show All
+  (Show (All type body) dep) =
+    (All (Show type dep) λx (Show (body (Var dep)) (+ dep 1)))
+
+  // Show Lam
+  (Show (Lam body) dep) =
+    (Lam λx (Show (body (Var dep)) (+ dep 1)))
+
+  // Show App
+  (Show (App func argm) dep) =
+    (App (Show func dep) (Show argm dep))
+
+  // Show Ct0
+  (Show (Ct0 ctid) dep) =
+    (Ct0 ctid)
+
+  // Show Ct1
+  (Show (Ct1 ctid x0) dep) =
+    (Ct1 ctid (Show x0 dep))
+
+  // Show Ct2
+  (Show (Ct2 ctid x0 x1) dep) =
+    (Ct2 ctid (Show x0 dep) (Show x1 dep))
+
+  // Show Ct3
+  (Show (Ct3 ctid x0 x1 x2) dep) =
+    (Ct3 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep))
+
+  // Show Ct4
+  (Show (Ct4 ctid x0 x1 x2 x3) dep) =
+    (Ct4 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep))
+
+  // Show Ct5
+  (Show (Ct5 ctid x0 x1 x2 x3 x4) dep) =
+    (Ct5 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep))
+
+  // Show Ct6
+  (Show (Ct6 ctid x0 x1 x2 x3 x4 x5) dep) =
+    (Ct6 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep) (Show x5 dep))
+
+  // Show Ct7
+  (Show (Ct7 ctid x0 x1 x2 x3 x4 x5 x6) dep) =
+    (Ct7 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep) (Show x5 dep) (Show x6 dep))
+
+  // Show Ct8
+  (Show (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7) dep) =
+    (Ct8 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep) (Show x5 dep) (Show x6 dep) (Show x7 dep))
+
+  // Show Fn0
+  (Show (Fn0 ctid) dep) =
+    (Fn0 ctid)
+
+  // Show Fn1
+  (Show (Fn1 ctid x0) dep) =
+    (Fn1 ctid (Show x0 dep))
+
+  // Show Fn2
+  (Show (Fn2 ctid x0 x1) dep) =
+    (Fn2 ctid (Show x0 dep) (Show x1 dep))
+
+  // Show Fn3
+  (Show (Fn3 ctid x0 x1 x2) dep) =
+    (Fn3 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep))
+
+  // Show Fn4
+  (Show (Fn4 ctid x0 x1 x2 x3) dep) =
+    (Fn4 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep))
+
+  // Show Fn5
+  (Show (Fn5 ctid x0 x1 x2 x3 x4) dep) =
+    (Fn5 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep))
+
+  // Show Fn6
+  (Show (Fn6 ctid x0 x1 x2 x3 x4 x5) dep) =
+    (Fn6 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep) (Show x5 dep))
+
+  // Show Fn7
+  (Show (Fn7 ctid x0 x1 x2 x3 x4 x5 x6) dep) =
+    (Fn7 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep) (Show x5 dep) (Show x6 dep))
+
+  // Show Fn8
+  (Show (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7) dep) =
+    (Fn8 ctid (Show x0 dep) (Show x1 dep) (Show x2 dep) (Show x3 dep) (Show x4 dep) (Show x5 dep) (Show x6 dep) (Show x7 dep))
+
+// Eval Term (List Term) : Term
+// ----------------------------
+
+  // Eval Var
+  (Eval (Var index)) =
+    (Var index)
+
+  // Eval Typ
+  (Eval Typ) =
+    Typ
+
+  // Eval All
+  (Eval (All type body)) =
+    (All (Eval type) λx (Eval (body x)))
+
+  // Eval Lam
+  (Eval (Lam body)) =
+    (Lam λx (Eval (body x)))
+
+  // Eval App
+  (Eval (App func argm)) =
+    (Apply (Eval func) (Eval argm))
+
+  // Eval Ct0
+  (Eval (Ct0 ctid)) =
+    (Ct0 ctid)
+
+  // Eval Ct1
+  (Eval (Ct1 ctid x0)) =
+    (Ct1 ctid (Eval x0))
+
+  // Eval Ct2
+  (Eval (Ct2 ctid x0 x1)) =
+    (Ct2 ctid (Eval x0) (Eval x1))
+
+  // Eval Ct3
+  (Eval (Ct3 ctid x0 x1 x2)) =
+    (Ct3 ctid (Eval x0) (Eval x1) (Eval x2))
+
+  // Eval Ct4
+  (Eval (Ct4 ctid x0 x1 x2 x3)) =
+    (Ct4 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+
+  // Eval Ct5
+  (Eval (Ct5 ctid x0 x1 x2 x3 x4)) =
+    (Ct5 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+
+  // Eval Ct6
+  (Eval (Ct6 ctid x0 x1 x2 x3 x4 x5)) =
+    (Ct6 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+
+  // Eval Ct7
+  (Eval (Ct7 ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Ct7 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+
+  // Eval Ct8
+  (Eval (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Ct8 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+
+  // Eval Fn0
+  (Eval (Fn0 ctid)) =
+    (Eval (Rule0 ctid))
+
+  // Eval Fn1
+  (Eval (Fn1 ctid x0)) =
+    (Eval (Rule1 ctid (Eval x0)))
+
+  // Eval Fn2
+  (Eval (Fn2 ctid x0 x1)) =
+    (Eval (Rule2 ctid (Eval x0) (Eval x1)))
+
+  // Eval Fn3
+  (Eval (Fn3 ctid x0 x1 x2)) =
+    (Eval (Rule3 ctid (Eval x0) (Eval x1) (Eval x2)))
+
+  // Eval Fn4
+  (Eval (Fn4 ctid x0 x1 x2 x3)) =
+    (Eval (Rule4 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3)))
+
+  // Eval Fn5
+  (Eval (Fn5 ctid x0 x1 x2 x3 x4)) =
+    (Eval (Rule5 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4)))
+
+  // Eval Fn6
+  (Eval (Fn6 ctid x0 x1 x2 x3 x4 x5)) =
+    (Eval (Rule6 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5)))
+
+  // Eval Fn7
+  (Eval (Fn7 ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Eval (Rule7 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6)))
+
+  // Eval Fn8
+  (Eval (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Eval (Rule8 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7)))
+
+
+// Apply Term Term : Term
+// ----------------------
+
+  (Apply (Lam fbody) argm) = (fbody argm)
+  (Apply func        argm) = (App func argm)
+
+//// Reduction Rules
+//// ---------------
+
+  //(Call1 Not. (Ct0 True.))               = (Eval (Ct0 False.))
+  //(Call1 Not. (Ct0 False.))              = (Eval (Ct0 True.))
+  //(Call2 And. (Ct0 True.) (Ct0 True.))   = (Eval (Ct0 True.))
+  //(Call2 And. (Ct0 True.) (Ct0 False.))  = (Eval (Ct0 True.))
+  //(Call2 And. (Ct0 False.) (Ct0 True.))  = (Eval (Ct0 True.))
+  //(Call2 And. (Ct0 False.) (Ct0 False.)) = (Eval (Ct0 True.))
+  //(Call1 Theo. (Ct0 True.))              = (Eval (Ct0 Refl.))
+  //(Call1 Theo. (Ct0 False.))             = (Eval (Ct0 Refl.))
+  //(Call1 Mul2. (Ct0 Zero.))              = (Eval (Ct0 Zero.))
+  //(Call1 Mul2. (Ct1 Succ. n))            = (Eval (Ct1 Succ. (Ct1 Succ. (Call1 Mul2. n))))
+  //(Call1 F. a)                           = (Eval (Lam λb (Fn2 G. a b)))
+  //(Call2 G. (Ct0 U.) (Ct0 U.))           = (Eval (Lam λx x))
+  //(Call0 Test.0.)                        = (Eval (App (Fn1 F. (Ct0 U.)) (Ct0 U.)))
+  //(Call0 Test.1.)                        = (Eval (Fn1 Mul2. (Fn1 Mul2. (Ct1 Succ. (Ct1 Succ. (Ct0 Zero.))))))
+
+//// Type Annotations
+//// ----------------
+
+  //(TypeOf Bool.)  = Typ
+  //(TypeOf True.)  = (Ct0 Bool.)
+  //(TypeOf False.) = (Ct0 Bool.)
+  //(TypeOf Nat.)   = Typ
+  //(TypeOf Zero.)  = (Ct0 Nat.)
+  //(TypeOf Succ.)  = (All (Ct0 Nat.) λx0 (Ct0 Nat.))
+  //(TypeOf Not.)   = (All (Ct0 Bool.) λx0 (Ct0 Bool.))
+  //(TypeOf And.)   = (All (Ct0 Bool.) λx0 (All (Ct0 Bool.) λx1 (Ct0 Bool.)))
+
+//// Label to Id
+//// -----------
+
+  //(MakeId Bool.)  = 0
+  //(MakeId True.)  = 1
+  //(MakeId False.) = 2
+  //(MakeId Nat.)   = 3
+  //(MakeId Zero.)  = 4
+  //(MakeId Succ.)  = 5
+
+// User-Defined Functions
+// ----------------------
+
+  // Nat
+  // ---
+
+    (MakeId Nat.) = %Nat
+    (TypeOf Nat.) = Typ
+
+  // False
+  // -----
+
+    (MakeId False.) = %False
+    (TypeOf False.) = (Ct0 Bool.)
+
+  // List
+  // ----
+
+    (MakeId List.) = %List
+    (TypeOf List.) = (All Typ λa Typ)
+
+  // True
+  // ----
+
+    (MakeId True.) = %True
+    (TypeOf True.) = (Ct0 Bool.)
+
+  // Bool
+  // ----
+
+    (MakeId Bool.) = %Bool
+    (TypeOf Bool.) = Typ
+
+  // Succ
+  // ----
+
+    (MakeId Succ.) = %Succ
+    (TypeOf Succ.) = (All (Ct0 Nat.) λpred (Ct0 Nat.))
+
+  // Negate
+  // ------
+
+    (MakeId Negate.) = %Negate
+    (TypeOf Negate.) = (All (Ct1 List. (Ct0 Bool.)) λxs (Ct1 List. (Ct0 Bool.)))
+    (Rule1 Negate. (Ct3 Cons. (Ct0 Bool.) x xs)) = (Ct3 Cons. (Ct0 Bool.) (Fn1 Not. x) (Fn1 Negate. xs))
+    (Rule1 Negate. (Ct1 Nil. (Ct0 Bool.))) = (Ct1 Nil. (Ct0 Bool.))
+
+  // Cons
+  // ----
+
+    (MakeId Cons.) = %Cons
+    (TypeOf Cons.) = (All Typ λa (All a λx (All (Ct1 List. a) λxs (Ct1 List. a))))
+
+  // And
+  // ---
+
+    (MakeId And.) = %And
+    (TypeOf And.) = (All (Ct0 Bool.) λa (All (Ct0 Bool.) λb (Ct0 Bool.)))
+    (Rule2 And. (Ct0 True.) (Ct0 True.)) = (Ct0 True.)
+    (Rule2 And. (Ct0 True.) (Ct0 False.)) = (Ct0 False.)
+    (Rule2 And. (Ct0 False.) (Ct0 True.)) = (Ct0 False.)
+    (Rule2 And. (Ct0 False.) (Ct0 False.)) = (Ct0 False.)
+
+  // Not
+  // ---
+
+    (MakeId Not.) = %Not
+    (TypeOf Not.) = (All (Ct0 Bool.) λa (Ct0 Bool.))
+    (Rule1 Not. (Ct0 True.)) = (Ct0 False.)
+    (Rule1 Not. (Ct0 False.)) = (Ct0 True.)
+
+  // Nil
+  // ---
+
+    (MakeId Nil.) = %Nil
+    (TypeOf Nil.) = (All Typ λa (Ct1 List. a))
+
+  // Zero
+  // ----
+
+    (MakeId Zero.) = %Zero
+    (TypeOf Zero.) = (Ct0 Nat.)
+
+  // Main
+  // ----
+
+    (MakeId Main.) = %Main
+    (TypeOf Main.) = (Ct1 List. (Ct0 Bool.))
+    (Rule0 Main.) = (Fn1 Negate. (Ct3 Cons. (Ct0 Bool.) (Ct0 True.) (Ct3 Cons. (Ct0 Bool.) (Ct0 False.) (Ct1 Nil. (Ct0 Bool.)))))
