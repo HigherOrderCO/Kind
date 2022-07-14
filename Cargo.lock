@@ -135,6 +135,7 @@ dependencies = [
 name = "kind2"
 version = "0.1.0"
 dependencies = [
+ "clap",
  "hvm",
 ]
 
