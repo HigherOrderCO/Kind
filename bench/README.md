@@ -4,19 +4,25 @@ Bench
 Benchmarks of Kind2 vs other proof assistants. These benchmarks measure the time
 each assistant takes to verify a given file. Replicate as follows:
 
-### Agda:
+### Agda
 
 ```
 time agda -i src file.agda
 ```
 
-### Kind2-i (interpreted HVM)
+### Idris2
+
+```
+time idris2 --check file.idr
+```
+
+### Kind2
 
 ```
 time kind2 check file.kind2
 ```
 
-### Kind2-c (compiled HVM)
+### Kind2-C
 
 ```
 kind2 check file.kind2
@@ -28,14 +34,15 @@ time ./check
 Results
 =======
 
-### slow_num
+### nat_exp
 
-Computes `2 ^ 24`, using the Nat type, on the type level. 
+Computes `3 ^ 8`, using the Nat type, on the type level.
 
 ```
 language | time
 -------- | --------
-Agda     | 11.277 s
-Kind2-i  |  2.350 s 
-Kind2-c  |  0.925 s
+Kind2-C  |   0.17 s
+Kind2    |   0.58 s
+Agda     |  15.55 s
+Idris2   |  67.40 s
 ```
