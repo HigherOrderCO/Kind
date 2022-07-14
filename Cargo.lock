@@ -101,12 +101,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "hvm"
-version = "0.1.38"
+name = "highlight_error"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1e25cb7dd4f63d4640709b13cc1f330189e2195318eaf3ab372d732d12df3aa"
+checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
+
+[[package]]
+name = "hvm"
+version = "0.1.40"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f73a95e6ba27736390f1cdebea112de3740beebac40102291dc09917bd7e721"
 dependencies = [
  "clap",
+ "highlight_error",
  "itertools",
  "num_cpus",
  "regex",

@@ -16,6 +16,12 @@ time agda -i src file.agda
 time idris2 --check file.idr
 ```
 
+### Lean
+
+```
+time lean file.lean
+```
+
 ### Kind2
 
 ```
@@ -45,4 +51,5 @@ Kind2-C  |   0.17 s
 Kind2    |   0.58 s
 Agda     |  15.55 s
 Idris2   |  67.40 s
+Lean     |  timeout
 ```
