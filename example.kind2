@@ -1,0 +1,38 @@
+Bool : Type
+  True  : Bool
+  False : Bool
+
+Nat : Type
+  Zero             : Nat
+  Succ (pred: Nat) : Nat
+
+List (a: Type) : Type
+  Nil  (a: Type)                       : {List a}
+  Cons (a: Type) (x: a) (xs: {List a}) : {List a}
+
+Not (a: Bool) : Bool {
+  Not True  = False
+  Not False = True
+}
+
+And (a: Bool) (b: Bool) : Bool {
+  And True  True  = True
+  And True  False = False
+  And False True  = False
+  And False False = False
+}
+
+Negate (xs: {List Bool}) : {List Bool} {
+  Negate {Cons Bool x xs} = {Cons Bool (Not x) (Negate xs)}
+  Negate {Nil Bool}       = {Nil Bool}
+}
+
+Tail (a: Type) (xs: {List a}) : {List a} {
+  Tail a {Cons t x xs} = xs
+}
+
+Main (x: Bool) (y: {List Bool}) : Bool {
+  Main True  {Cons t x xs} = (And True Type)
+  Main False {Nil t}       = (And True Zero)
+}
+
