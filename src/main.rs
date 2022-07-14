@@ -17,7 +17,6 @@ fn main() {
       eprintln!("{}", err);
     }
   };
-}
 
 // ------------------------------------------------------------
 // ------------------------------------------------------------
@@ -38,6 +37,7 @@ fn run_cli() -> Result<(), String> {
 }
 
 fn kind2(path: &str, main_function: &str) -> Result<(), String> {
+  // Reads definitions from file
   let file = match std::fs::read_to_string(path) {
     Ok(code) => read_file(&code),
     Err(msg) => {
@@ -80,6 +80,10 @@ fn kind2(path: &str, main_function: &str) -> Result<(), String> {
 
   Ok(())
 }
+
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
 
 fn debug_print_parser_state(txt: &str, state: &parser::State) {
   println!("{} ||{}", txt, &state.code[state.index..state.index+32].replace("\n"," || "));
