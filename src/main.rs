@@ -4,57 +4,39 @@
 // TODO: type{} syntax
 
 use std::collections::HashMap;
-
-//  type Bool {
-//    {True}
-//    {False}
-//  }
-//
-//  type List <T: Type> {
-//    {Nil}
-//    {Cons T (List <T>)}
-//  }
-//    
-//  type Equal <T: Type> (a: T) ~ (b: T) {
-//    {Refl} ~ (b = a)
-//  }
-//
-//  Add (a: Nat) (b: Nat) : Nat {
-//    Add {Zero}   b => b
-//    Add {Succ a} b => {Succ (Add a b)}
-//  }
-//
-//  Add (a: Nat) (b: Nat) : Nat =
-//    match a {
-//      Add {Zero}   => b
-//      Add {Succ a} => {Succ (Add a b)}
-//    }
-//
-//   Map <A: Type> <B: Type> (f: A -> B) (xs: List A) : List B {
-//     Map A B f {Cons x xs} => {Cons (f x) (map A B f xs)}
-//     Map A B f {Nil}       => {Nil}
-//   }
-//
-//   Main : (List Nat) =
-//     let x = 50
-//     let y = 60
-//     if (== x y) {
-//       (print "hi")
-//     } else {
-//       (print "bye")
-//     }
-//
-//   alice : Person =
-//     {Person
-//       age: 40
-//       name: "Alice"
-//       items: ["Foo", "Bar", "Tic", "Tac"]
-//     }
-//   
-//   {Cons x xs}
-//   {Cons head: x tail: xs }
-
 use hvm::parser as parser;
+
+fn main() -> Result<(), String> {
+
+  let args: Vec<String> = std::env::args().collect();
+
+  if args.len() <= 2 || args[1] != "check" {
+    println!("{:?}", args);
+    println!("Usage: kind2 check file.kind");
+    return Ok(());
+  }
+
+  let path = &args[2];
+  let file = match std::fs::read_to_string(path) {
+    Ok(code) => read_file(&code)?,
+    Err(msg) => read_file(&DEMO_CODE)?,
+  };
+  let code = compile_file(&file);
+
+  let mut checker = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
+  checker.push_str(&code);
+
+  //std::fs::write("check.tmp.hvm", checker.clone()).ok(); writes checker to the checker.hvm file
+
+  let mut rt = hvm::Runtime::from_code(&checker)?;
+  let main = rt.alloc_code("Main")?;
+  rt.normalize(main);
+  println!("{}", readback_string(&rt, main)); // TODO: optimize by deserializing term into text directly
+
+  return Ok(());
+}
+
+const CHECKER_HVM: &str = include_str!("checker.hvm");
 
 #[derive(Clone, Debug)]
 pub enum Term {
@@ -256,7 +238,11 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
   if head == '=' {
     let (state, _)    = parser::consume("=", state)?;
     let (state, body) = parse_term(state)?;
-    let rules = vec![Box::new(Rule { name: name.clone(), pats: vec![], body })];
+    let mut pats = vec![];
+    for arg in &args {
+      pats.push(Box::new(Term::Var { name: arg.name.clone() }));
+    }
+    let rules = vec![Box::new(Rule { name: name.clone(), pats, body })];
     return Ok((state, Box::new(Entry { name, args, tipo, rules })));
   } else if head == '{' {
     let (state, _)    = parser::consume("{", state)?;
@@ -426,12 +412,6 @@ pub fn compile_term(term: &Term) -> String {
   }
 }
 
-//pub struct Entry {
-  //name: String,
-  //args: Vec<Box<Argument>>,
-  //tipo: Box<Term>,
-  //rules: Vec<Box<Rule>>
-//}
 pub fn compile_entry(entry: &Entry) -> String {
   fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
     if index < args.len() {
@@ -454,17 +434,67 @@ pub fn compile_entry(entry: &Entry) -> String {
     return text;
   }
 
+  fn compile_rule_chk(rule: &Rule, index: usize, vars: &mut u64, args: &mut Vec<String>) -> String {
+    if index < rule.pats.len() {
+      let (inp_patt_str, var_patt_str) = compile_patt_chk(&rule.pats[index], vars);
+      args.push(var_patt_str);
+      let head = inp_patt_str;
+      let tail = compile_rule_chk(rule, index + 1, vars, args);
+      return format!("(LHS {} {})", head, tail);
+    } else {
+      return format!("(RHS (Rule{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
+    }
+  }
+
+  fn compile_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
+    match patt {
+      Term::Var { .. } => {
+        let inp = format!("(Inp {})", vars);
+        let var = format!("(Var {})", vars);
+        *vars += 1;
+        return (inp, var);
+      }
+      Term::Ctr { name, args } => {
+        let mut inp_args_str = String::new();
+        let mut var_args_str = String::new();
+        for arg in args {
+          let (inp_arg_str, var_arg_str) = compile_patt_chk(arg, vars);
+          inp_args_str.push_str(&format!(" {}", inp_arg_str));
+          var_args_str.push_str(&format!(" {}", var_arg_str));
+        }
+        let inp_str = format!("(Ct{} {}.{})", args.len(), name, inp_args_str);
+        let var_str = format!("(Ct{} {}.{})", args.len(), name, var_args_str);
+        return (inp_str, var_str);
+      }
+      _ => {
+        panic!("Invalid left-hand side pattern: {}", show_term(patt));
+      }
+    }
+  }
+
   let mut result = String::new();
-  result.push_str(&format!("    (MakeId {}.) = %{}\n", entry.name, entry.name));
+  result.push_str(&format!("    (NameOf {}.) = \"{}\"\n", entry.name, entry.name));
+  result.push_str(&format!("    (HashOf {}.) = %{}\n", entry.name, entry.name));
   result.push_str(&format!("    (TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
   for rule in &entry.rules {
     result.push_str(&compile_rule(&rule));
   }
+  result.push_str(&format!("    (Verify {}.) =\n", entry.name));
+  for rule in &entry.rules {
+    result.push_str(&format!("      (Cons {}\n", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
+  }
+  result.push_str(&format!("      Nil{}\n", ")".repeat(entry.rules.len())));
   return result;
 }
 
 pub fn compile_file(file: &File) -> String {
   let mut result = String::new();
+  result.push_str(&format!("\n  Functions =\n"));
+  result.push_str(&format!("    let fns = Nil\n"));
+  for entry in file.entries.values() {
+    result.push_str(&format!("    let fns = (Cons {}. fns)\n", entry.    name));
+  }
+  result.push_str(&format!("    fns\n\n"));
   for entry in file.entries.values() {
     result.push_str(&format!("  // {}\n", entry.name));
     result.push_str(&format!("  // {}\n", "-".repeat(entry.name.len())));
@@ -475,70 +505,66 @@ pub fn compile_file(file: &File) -> String {
   return result;
 }
 
-fn main() -> Result<(), String> {
-
-  //let file = read_file("
-    //Bool : Type
-      //True  : Bool
-      //False : Bool
-
-    //List (a: Type) : Type
-      //Nil  (a: Type)                       : (List a)
-      //Cons (a: Type) (x: a) (xs: (List a)) : (List a)
-
-    //Add (a: Nat) (b: Nat) : Nat {
-      //Add {Zero}   b = b
-      //Add {Succ a} b = {Succ (Add a b)}
-    //}
-
-    //Not (a: Bool) : Bool {
-      //Not {True}  = {False}
-      //Not {False} = {True}
-    //}
-
-    //Map (a: Type) (b: Type) (f: (x: a) a) (xs: {List a}) : {List b} {
-      //Map a b f {Cons x xs} = {Cons (f x) (Map a b f xs)}
-      //Map a b f Nil         = {Nil}
-    //}
-  //")?;
-
-  let file = read_file("
-    Bool : Type
-      True  : Bool
-      False : Bool
-
-    Nat : Type
-      Zero             : Nat
-      Succ (pred: Nat) : Nat
-
-    List (a: Type) : Type
-      Nil  (a: Type)                       : {List a}
-      Cons (a: Type) (x: a) (xs: {List a}) : {List a}
-
-    Not (a: Bool) : Bool {
-      Not True  = False
-      Not False = True
+fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
+  let str_cons = rt.get_id("String.cons");
+  let str_nil  = rt.get_id("String.nil");
+  let mut term = rt.ptr(host);
+  let mut text = String::new();
+  //let str_cons = rt.
+  loop {
+    if hvm::get_tag(term) == hvm::CTR {
+      let fid = hvm::get_ext(term);
+      if fid == str_cons {
+        let head = rt.ptr(hvm::get_loc(term, 0));
+        let tail = rt.ptr(hvm::get_loc(term, 1));
+        if hvm::get_tag(head) == hvm::NUM {
+          text.push(std::char::from_u32(hvm::get_num(head) as u32).unwrap_or('?'));
+          term = tail;
+          continue;
+        }
+      }
+      if fid == str_nil {
+        break;
+      }
     }
-
-    And (a: Bool) (b: Bool) : Bool {
-      And True  True  = True
-      And True  False = False
-      And False True  = False
-      And False False = False
-    }
-
-    Negate (xs: {List Bool}) : {List Bool} {
-      Negate {Cons Bool x xs} = {Cons Bool (Not x) (Negate xs)}
-      Negate {Nil Bool}       = {Nil Bool}
-    }
-
-    Main : {List Bool} = (Negate {Cons Bool True {Cons Bool False {Nil Bool}}})
-  ")?;
-
-  println!("Parsed:\n\n{}\n\n", show_file(&file));
-
-  println!("Compiled:\n\n");
-  println!("{}", compile_file(&file));
-
-  return Ok(());
+    panic!("Invalid output: {} {}", hvm::get_tag(term), rt.show(host));
+  }
+  return text;
 }
+
+const DEMO_CODE: &str = "
+  Bool : Type
+    True  : Bool
+    False : Bool
+
+  Nat : Type
+    Zero             : Nat
+    Succ (pred: Nat) : Nat
+
+  List (a: Type) : Type
+    Nil  (a: Type)                       : {List a}
+    Cons (a: Type) (x: a) (xs: {List a}) : {List a}
+
+  Not (a: Bool) : Bool {
+    Not True  = False
+    Not False = True
+  }
+
+  And (a: Bool) (b: Bool) : Bool {
+    And True  True  = True
+    And True  False = False
+    And False True  = False
+    And False False = False
+  }
+
+  Negate (xs: {List Bool}) : {List Bool} {
+    Negate {Cons Bool x xs} = {Cons Bool (Not x) (Negate xs)}
+    Negate {Nil Bool}       = {Nil Bool}
+  }
+
+  Tail (a: Type) (xs: {List a}) : {List a} {
+    Tail a {Cons t x xs} = xs
+  }
+
+  Main (x: Bool) (y: Nat) : {List Bool} = (Tail Bool {Cons Bool x {Cons Bool y {Nil Bool}}})
+";

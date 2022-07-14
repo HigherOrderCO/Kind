@@ -102,9 +102,9 @@ dependencies = [
 
 [[package]]
 name = "hvm"
-version = "0.1.31"
+version = "0.1.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "361a02d7ed07086c16927712c1bf610e54c3a43bd5d78deab7708f56c33ee5fb"
+checksum = "f1e25cb7dd4f63d4640709b13cc1f330189e2195318eaf3ab372d732d12df3aa"
 dependencies = [
  "clap",
  "itertools",
@@ -132,7 +132,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "kind2-rs"
+name = "kind2"
 version = "0.1.0"
 dependencies = [
  "hvm",

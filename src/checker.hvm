@@ -1,0 +1,1081 @@
+//(Main n) =
+  //(Api.check_functions Functions)
+
+Main =
+  let output = (Api.output (Api.check_functions Functions))
+  (Bool.if (String.is_empty output)
+    "All terms check."
+    output)
+
+(Api.check_functions Nil) = Nil
+(Api.check_functions (Cons f fs)) =
+  let head = (Result f (Api.check_function f))
+  let tail = (Api.check_functions fs)
+  (Cons head tail)
+
+(Api.check_function func) =
+  let vers = (Verify func)
+  let type = (TypeOf func)
+  (Api.check_function.verifiers vers type)
+
+(Api.check_function.verifiers Nil type) = Nil
+(Api.check_function.verifiers (Cons verifier verifiers) type) =
+  let head = ((Check.verify verifier type 0) Nil 0)
+  let tail = (Api.check_function.verifiers verifiers type)
+  (Cons head tail)
+
+(Api.output Nil) =
+  String.nil
+(Api.output (Cons (Result fnid checks) rest)) =
+  (Text [
+    (Api.output.function fnid checks)
+    (Api.output rest)
+  ])
+
+(Api.output.function fnid Nil) =
+  String.nil
+(Api.output.function fnid (Cons (Checked ctx dep val) checks)) =
+  (Api.output.function fnid checks)
+(Api.output.function fnid (Cons (Errored err) checks)) =
+  (Text [
+    (Color "1") (Color "31") "Error on " (NameOf fnid) ":" (Color "0") Line
+    Line
+    (Api.output.error err) Line
+    (Api.output.function fnid checks)
+  ])
+
+(Api.output.error (UnboutVariable ctx dep)) =
+  (Text [
+    "Unbound Variable."
+  ])
+(Api.output.error (CantInferLambda ctx dep)) =
+  (Text [
+    "Can't infer lambda."
+  ])
+(Api.output.error (NonFunctionApplication ctx dep)) =
+  (Text [
+    "Non-function application."
+  ])
+(Api.output.error (TypeMismatch ctx dep expected detected)) =
+  (Text [
+    "Type mismatch." Line
+    "- Expected: " (Show (Quote expected dep) dep) Line
+    "- Detected: " (Show (Quote detected dep) dep) Line
+    (Bool.if (U60.equal dep 0) "" (Text [
+      "With context:" Line
+      (Show.context ctx)
+    ]))
+  ])
+
+//(Api.output [
+  //(Result (Negate.) [(Checked [(Ct1 (List.) (Ct0 (Bool.))), (Ct0 (Bool.))] 2 (Unit)), (Checked [] 0 (Unit))]),
+  //(Result (And.) [(Checked [] 0 (Unit)), (Checked [] 0 (Unit)), (Checked [] 0 (Unit)), (Checked [] 0 (Unit))]),
+  //(Result (Nil.) []),
+  //(Result (Main.) [(Errored (TypeMismatch (Ct0 (Nat.)) (Ct0 (Bool.))))]),
+  //(Result (Cons.) []),
+  //(Result (Zero.) []),
+  //(Result (Nat.) []),
+  //(Result (List.) []),
+  //(Result (Succ.) []),
+  //(Result (Bool.) []),
+  //(Result (False.) []),
+  //(Result (Not.) [(Checked [] 0 (Unit)), (Checked [] 0 (Unit))]),
+  //(Result (True.) []),
+  //(Result (Tail.) [(Errored (TypeMismatch (Ct1 (List.) (Inp 1)) (Ct1 (List.) (Var 0))))])
+//])
+
+//(Api.output Nil) = Nil
+//(Api.output (Cons (Result fn checks) results)) =
+  //(Text [
+    
+  //])
+
+
+//(Api.output (Cons (Errored err) results)) = (Cons (Some err) (Api.errors results))
+//(Api.output (Cons other results)) = (Api.errors results)
+
+
+// Prelude
+// -------
+
+// U60.if -(r: Type) U60 r r : r
+  (U60.if 0 then else) = else
+  (U60.if 1 then else) = then
+
+// U60.equal U60 U60 : Bool
+  (U60.equal a b) = (U60.if (== a b) True False)
+
+// U60.show U60 : String
+  (U60.show n) = (U60.show.build n String.nil)
+    (U60.show.build n str) = 
+      let next = (String.cons (+ 48 (% n 10)) str)
+      ((U60.if (< n 10) λx(x) λx(U60.show.build (/ n 10) x)) next)
+
+// Bool.if -(r: Type) Bool r r : r
+  (Bool.if False then else) = else
+  (Bool.if True  then else) = then
+
+// Bool.and Bool Bool : Bool
+  (Bool.and True  b) = b
+  (Bool.and False b) = False
+
+// Maybe.case -(a: Type) -(r: Type) (Maybe a) r (a -> r) : r
+  (Maybe.case None       none some) = none
+  (Maybe.case (Some val) none some) = (some val)
+
+// List.at -(a: Type) (List a) U60 : (Maybe a)
+  (List.at (Cons x xs) 0) = (Some x)
+  (List.at (Cons x xs) n) = (List.at xs (- n 1))
+  (List.at Nil         n) = None
+
+// List.tail -(a: Type) (List a) : (List a)
+  (List.tail (Cons x xs)) = xs
+  (List.tail Nil)         = Nil
+
+// List.reverse.go -(a: Type) (List a) (List a) : (List a)
+  (List.reverse.go Nil         res) = res
+  (List.reverse.go (Cons x xs) res) = (List.reverse.go xs (Cons x res))
+
+// Term.if_all -(r: Type) Term (Term -> (Term -> Term) -> r) r : r
+  (Term.if_all (All type body) then else) = (then type body)
+  (Term.if_all other           then else) = else
+
+// Arr Term Term : Term
+  (Arr type retr) = (All type λx(retr))
+
+// String.concat String String : String
+  (String.concat String.nil         ys) = ys
+  (String.concat (String.cons x xs) ys) = (String.cons x (String.concat xs ys))
+
+// String.is_empty String : Bool
+  (String.is_empty String.nil) = True
+  (String.is_empty other)      = False
+
+// Text (List String) : String
+  (Text Nil)         = String.nil
+  (Text (Cons x xs)) = (String.concat x (Text xs))
+
+// Color String : String
+  (Color x) = (Text [ (String.cons 27 String.nil) "[" x "m" ])
+
+// Line : String
+  Line = (String.cons 10 String.nil)
+
+// Checker Monad
+// -------------
+
+  // type Result (a : Type) {
+  //   {Checked Context U60 a}
+  //   {Errored Error}
+  // }
+
+  // type Checker (a : Type) = (depth: U60) (context: (List Term)) (Result a)
+    
+  // Checker.bind -(a: Type) -(b: Type) (Checker a) : (a -> Checker b) (Checker b)
+  (Checker.bind checker) = λnext λctx λdep ((Checker.bind.result (checker ctx dep)) next)
+
+  // Checker.bind.result -(a: Type) -(b: Type) (Result a) : (a -> Checker b) (Result b)
+  (Checker.bind.result (Checked ctx dep val)) = λnext (next val ctx dep)
+  (Checker.bind.result (Errored err))         = λnext (Errored err)
+
+  // Checker.done -(a: Type) (x: a) : (Checker a)
+  (Checker.done val) = λctx λdep (Checked ctx dep val)
+
+  // Checker.fail -(a: Type) (err: (List Term) -> U60 -> Error) : (Checker a)
+  (Checker.fail err) = λctx λdep (Errored (err ctx dep))
+
+  // Checker.extend -(a: Term) (x: Term) : (Checker Unit)
+  (Checker.extend type) = λctx λdep (Checked (Cons type ctx) (+ dep 1) Unit)
+
+  // Checker.shrink -(a: Term) : (Checker Unit)
+  (Checker.shrink) = λctx λdep (Checked (List.tail ctx) (- dep 1) Unit)
+
+  // Checker.bext -(a: Type) -(b: Type) (Checker a) Term : (a -> Checker b)
+  (Checker.bext checker term) = 
+    ask (Checker.bind (Checker.extend term))
+    ask got = (Checker.bind checker)
+    ask (Checker.bind Checker.shrink)
+    (Checker.done got)
+
+  // Checker.context.at -(a: Type) U60 : (Checker (Maybe Term)) 
+  (Checker.context.at index) = λctx λdep
+    (Checked ctx dep (List.at ctx (- (- dep index) 1)))
+
+  // Checker.get_depth -(a: Type) : (Checker U60)
+  (Checker.get_depth) = λctx λdep
+    (Checked ctx dep dep)
+
+  // Checker.get_context -(a: Type) : (Checker (List Term))
+  (Checker.get_context) = λctx λdep
+    (Checked ctx dep ctx)
+
+// Equal Term Term : (Checker Bool)
+// --------------------------------
+  
+  // Var equality
+  (Equal (Var a.index) (Var b.index)) =
+    (Checker.done (U60.equal a.index b.index))
+
+  // Inp equality (TODO)
+  (Equal (Inp a.index) b) =
+    (Checker.done True)
+
+  // Inp equality (TODO)
+  (Equal a (Inp b.index)) =
+    (Checker.done True)
+
+  // Typ equality
+  (Equal Typ Typ) =
+    (Checker.done True)
+
+  // All equality
+  (Equal (All a.type a.body) (All b.type b.body)) =
+    ask dep  = (Checker.bind Checker.get_depth)
+    ask type = (Checker.bind (Equal a.type b.type))
+    ask body = (Checker.bext (Equal (a.body (Var dep)) (b.body (Var dep))) Null)
+    (Checker.done (Bool.and type body))
+
+  // Lam equality
+  (Equal (Lam a.body) (Lam b.body)) =
+    ask dep  = (Checker.bind Checker.get_depth)
+    ask body = (Checker.bext (Equal (a.body (Var dep)) (b.body (Var dep))) Null)
+    body
+
+  // App equality
+  (Equal (App a.func a.argm) (App b.func b.argm)) =
+    ask func = (Checker.bind (Equal a.func b.func))
+    ask argm = (Checker.bind (Equal a.argm b.argm))
+    (Checker.done (Bool.and func argm))
+
+  // Ct0 equality
+  (Equal (Ct0 a.ctid) (Ct0 b.ctid)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    (Checker.done ctid)
+
+  // Ct1 equality
+  (Equal (Ct1 a.ctid a.x0) (Ct1 b.ctid b.x0)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    (Checker.done (Bool.and ctid x0))
+
+  // Ct2 equality
+  (Equal (Ct2 a.ctid a.x0 a.x1) (Ct2 b.ctid b.x0 b.x1)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    ask x1   = (Checker.bind (Equal a.x1 b.x1))
+    (Checker.done (Bool.and ctid (Bool.and x0 x1)))
+
+  // Ct3 equality
+  (Equal (Ct3 a.ctid a.x0 a.x1 a.x2) (Ct3 b.ctid b.x0 b.x1 b.x2)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    ask x1   = (Checker.bind (Equal a.x1 b.x1))
+    ask x2   = (Checker.bind (Equal a.x2 b.x2))
+    (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 x2))))
+
+  // Ct4 equality
+  (Equal (Ct4 a.ctid a.x0 a.x1 a.x2 a.x3) (Ct4 b.ctid b.x0 b.x1 b.x2 b.x3)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    ask x1   = (Checker.bind (Equal a.x1 b.x1))
+    ask x2   = (Checker.bind (Equal a.x2 b.x2))
+    ask x3   = (Checker.bind (Equal a.x3 b.x3))
+    (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 x3)))))
+
+  // Ct5 equality
+  (Equal (Ct5 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4) (Ct5 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    ask x1   = (Checker.bind (Equal a.x1 b.x1))
+    ask x2   = (Checker.bind (Equal a.x2 b.x2))
+    ask x3   = (Checker.bind (Equal a.x3 b.x3))
+    ask x4   = (Checker.bind (Equal a.x4 b.x4))
+    (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 x4))))))
+
+  // Ct6 equality
+  (Equal (Ct6 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5) (Ct6 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    ask x1   = (Checker.bind (Equal a.x1 b.x1))
+    ask x2   = (Checker.bind (Equal a.x2 b.x2))
+    ask x3   = (Checker.bind (Equal a.x3 b.x3))
+    ask x4   = (Checker.bind (Equal a.x4 b.x4))
+    ask x5   = (Checker.bind (Equal a.x5 b.x5))
+    (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 x5)))))))
+
+  // Ct7 equality
+  (Equal (Ct7 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6) (Ct7 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    ask x1   = (Checker.bind (Equal a.x1 b.x1))
+    ask x2   = (Checker.bind (Equal a.x2 b.x2))
+    ask x3   = (Checker.bind (Equal a.x3 b.x3))
+    ask x4   = (Checker.bind (Equal a.x4 b.x4))
+    ask x5   = (Checker.bind (Equal a.x5 b.x5))
+    ask x6   = (Checker.bind (Equal a.x6 b.x6))
+    (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 x6))))))))
+
+  // Ct8 equality
+  (Equal (Ct8 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6 a.x7) (Ct8 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6 b.x7)) =
+    let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+    ask x0   = (Checker.bind (Equal a.x0 b.x0))
+    ask x1   = (Checker.bind (Equal a.x1 b.x1))
+    ask x2   = (Checker.bind (Equal a.x2 b.x2))
+    ask x3   = (Checker.bind (Equal a.x3 b.x3))
+    ask x4   = (Checker.bind (Equal a.x4 b.x4))
+    ask x5   = (Checker.bind (Equal a.x5 b.x5))
+    ask x6   = (Checker.bind (Equal a.x6 b.x6))
+    ask x7   = (Checker.bind (Equal a.x7 b.x7))
+    (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 (Bool.and x6 x7)))))))))
+
+  // Not equal
+  (Equal a b) =
+    (Checker.done False)
+
+// Infer Term : (Checker Term)
+// ----------------------------------------
+
+  // Infers Var
+  (Infer (Var index)) =
+    ask got_type = (Checker.bind (Checker.context.at index))
+    (Maybe.case got_type
+      (Checker.fail λctx λdep (UnboundVariable ctx dep))
+      λvar_type (Checker.done var_type))
+
+  // Infers Typ
+  (Infer Typ) =
+    (Checker.done Typ)
+
+  // Infers All
+  (Infer (All type body)) =
+    ask dep      = (Checker.bind Checker.get_depth)
+    ask type_chk = (Checker.bind (Check type Typ))
+    ask body_chk = (Checker.bext (Check (body (Var dep)) Typ) type)
+    (Checker.done Typ)
+
+  // Infers Lam
+  (Infer (Lam body)) =
+    (Checker.fail λctx λdep (CantInferLambda ctx dep))
+
+  // Infers App
+  (Infer (App func argm)) =
+    ask func_typ = (Checker.bind (Infer func))
+    (Term.if_all func_typ
+      // then
+      λfunc_typ_type λfunc_typ_body
+        ask argm_ok = (Checker.bind (Check argm func_typ_type))
+        (Checker.done (func_typ_body argm))
+      // else
+      (Checker.fail λctx λdep (NonFunctionApplication ctx dep)))
+
+  // Infers Ct0
+  (Infer (Ct0 ctid)) =
+    (Checker.done (TypeOf ctid))
+
+  // Infers Ct1
+  (Infer (Ct1 ctid x0)) =
+    (Infer (App (Ct0 ctid) x0))
+
+  // Infers Ct2
+  (Infer (Ct2 ctid x0 x1)) =
+    (Infer (App (App (Ct0 ctid) x0) x1))
+
+  // Infers Ct3
+  (Infer (Ct3 ctid x0 x1 x2)) =
+    (Infer (App (App (App (Ct0 ctid) x0) x1) x2))
+
+  // Infers Ct4
+  (Infer (Ct4 ctid x0 x1 x2 x3)) =
+    (Infer (App (App (App (App (Ct0 ctid) x0) x1) x2) x3))
+
+  // Infers Ct5
+  (Infer (Ct5 ctid x0 x1 x2 x3 x4)) =
+    (Infer (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4))
+
+  // Infers Ct6
+  (Infer (Ct6 ctid x0 x1 x2 x3 x4 x5)) =
+    (Infer (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5))
+
+  // Infers Ct7
+  (Infer (Ct7 ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Infer (App (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5) x6))
+
+  // Infers Ct8
+  (Infer (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Infer (App (App (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5) x6) x7))
+
+  // Infers Fn0
+  (Infer (Fn0 ctid)) =
+    (Checker.done (TypeOf ctid))
+
+  // Infers Fn1
+  (Infer (Fn1 ctid x0)) =
+    (Infer (App (Fn0 ctid) x0))
+
+  // Infers Fn2
+  (Infer (Fn2 ctid x0 x1)) =
+    (Infer (App (App (Fn0 ctid) x0) x1))
+
+  // Infers Fn3
+  (Infer (Fn3 ctid x0 x1 x2)) =
+    (Infer (App (App (App (Fn0 ctid) x0) x1) x2))
+
+  // Infers Fn4
+  (Infer (Fn4 ctid x0 x1 x2 x3)) =
+    (Infer (App (App (App (App (Fn0 ctid) x0) x1) x2) x3))
+
+  // Infers Fn5
+  (Infer (Fn5 ctid x0 x1 x2 x3 x4)) =
+    (Infer (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4))
+
+  // Infers Fn6
+  (Infer (Fn6 ctid x0 x1 x2 x3 x4 x5)) =
+    (Infer (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5))
+
+  // Infers Fn7
+  (Infer (Fn7 ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Infer (App (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) x6))
+
+  // Infers Fn8
+  (Infer (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Infer (App (App (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) x6) x7))
+
+// Check Term Term : (Checker Unit)
+// ---------------------------------------------
+
+  // Checks Lam 
+  (Check (Lam body) (All t_type t_body)) =
+    ask dep      = (Checker.bind Checker.get_depth)
+    ask body_chk = (Checker.bext (Check (body (Var dep)) (t_body (Var dep))) t_type)
+    (Checker.done Unit)
+
+  // Checks Inp
+  (Check (Inp index) type) =
+    ask (Checker.bind (Checker.extend type))
+    (Checker.done Unit)
+
+  // Checks others
+  (Check term type) =
+    ask term_typ = (Checker.bind (Infer term))
+    ask is_equal = (Checker.bind (Equal term_typ type))
+    (Bool.if is_equal
+      // then
+      (Checker.done Unit)
+      // else
+      (Checker.fail λctx λdep (TypeMismatch ctx dep term_typ type))) // TODO: pass up for Rust to display
+
+// Check.verify Verifier (List Term) : (Checker Unit)
+// --------------------------------------------------
+
+  //  Foo (t: Type) (a: (List t)) (b: (List t)) (k: (F a b)) : (P t a b p)
+  //  Foo t         (Cons u x xs) (Cons v y ys) K            = ...
+  //  ~~~~~~~~~~~~~~~ Type Context
+  //  - t : Type
+  //  - a : (List t)
+  //  - b : (List t)
+  //  - k : (F a b)
+  //  ~~~~~~~~~~~~~~~ Body Context
+  //  - t      : Type
+  //  - u      : Type
+  //  - t_u_eq : t == u
+  //  - x      : t
+  //  - xs     : (List t)
+  //  - t_v_eq : v == u
+  //  - y      : t
+  //  - ys     : (List t)
+
+  (Check.verify (LHS arg args) (All type body) index) =
+    ask arg_chk  = (Checker.bind (Check arg type))
+    ask args_chk = (Checker.bind (Check.verify args (body (Var index)) (+ index 1)))
+    (Checker.done Unit)
+  (Check.verify (RHS expr) type index) =
+    ask expr_chk = (Checker.bind (Check expr type))
+    (Checker.done Unit)
+
+// Quote Term U60 : Term
+// ---------------------
+  
+  // Quote Var
+  (Quote (Var index) dep) =
+    (Var index)
+
+  // Quote Var
+  (Quote (Inp index) dep) =
+    (Inp index)
+
+  // Quote Typ
+  (Quote Typ dep) =
+    Typ
+
+  // Quote All
+  (Quote (All type body) dep) =
+    (All (Quote type dep) λx (Quote (body (Var dep)) (+ dep 1)))
+
+  // Quote Lam
+  (Quote (Lam body) dep) =
+    (Lam λx (Quote (body (Var dep)) (+ dep 1)))
+
+  // Quote App
+  (Quote (App func argm) dep) =
+    (App (Quote func dep) (Quote argm dep))
+
+  // Quote Ct0
+  (Quote (Ct0 ctid) dep) =
+    (Ct0 ctid)
+
+  // Quote Ct1
+  (Quote (Ct1 ctid x0) dep) =
+    (Ct1 ctid (Quote x0 dep))
+
+  // Quote Ct2
+  (Quote (Ct2 ctid x0 x1) dep) =
+    (Ct2 ctid (Quote x0 dep) (Quote x1 dep))
+
+  // Quote Ct3
+  (Quote (Ct3 ctid x0 x1 x2) dep) =
+    (Ct3 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep))
+
+  // Quote Ct4
+  (Quote (Ct4 ctid x0 x1 x2 x3) dep) =
+    (Ct4 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep))
+
+  // Quote Ct5
+  (Quote (Ct5 ctid x0 x1 x2 x3 x4) dep) =
+    (Ct5 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep))
+
+  // Quote Ct6
+  (Quote (Ct6 ctid x0 x1 x2 x3 x4 x5) dep) =
+    (Ct6 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep) (Quote x5 dep))
+
+  // Quote Ct7
+  (Quote (Ct7 ctid x0 x1 x2 x3 x4 x5 x6) dep) =
+    (Ct7 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep) (Quote x5 dep) (Quote x6 dep))
+
+  // Quote Ct8
+  (Quote (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7) dep) =
+    (Ct8 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep) (Quote x5 dep) (Quote x6 dep) (Quote x7 dep))
+
+  // Quote Fn0
+  (Quote (Fn0 ctid) dep) =
+    (Fn0 ctid)
+
+  // Quote Fn1
+  (Quote (Fn1 ctid x0) dep) =
+    (Fn1 ctid (Quote x0 dep))
+
+  // Quote Fn2
+  (Quote (Fn2 ctid x0 x1) dep) =
+    (Fn2 ctid (Quote x0 dep) (Quote x1 dep))
+
+  // Quote Fn3
+  (Quote (Fn3 ctid x0 x1 x2) dep) =
+    (Fn3 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep))
+
+  // Quote Fn4
+  (Quote (Fn4 ctid x0 x1 x2 x3) dep) =
+    (Fn4 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep))
+
+  // Quote Fn5
+  (Quote (Fn5 ctid x0 x1 x2 x3 x4) dep) =
+    (Fn5 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep))
+
+  // Quote Fn6
+  (Quote (Fn6 ctid x0 x1 x2 x3 x4 x5) dep) =
+    (Fn6 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep) (Quote x5 dep))
+
+  // Quote Fn7
+  (Quote (Fn7 ctid x0 x1 x2 x3 x4 x5 x6) dep) =
+    (Fn7 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep) (Quote x5 dep) (Quote x6 dep))
+
+  // Quote Fn8
+  (Quote (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7) dep) =
+    (Fn8 ctid (Quote x0 dep) (Quote x1 dep) (Quote x2 dep) (Quote x3 dep) (Quote x4 dep) (Quote x5 dep) (Quote x6 dep) (Quote x7 dep))
+
+// Eval Term (List Term) : Term
+// ----------------------------
+
+  // Eval Var
+  (Eval (Var index)) =
+    (Var index)
+
+  // Eval Typ
+  (Eval Typ) =
+    Typ
+
+  // Eval All
+  (Eval (All type body)) =
+    (All (Eval type) λx (Eval (body x)))
+
+  // Eval Lam
+  (Eval (Lam body)) =
+    (Lam λx (Eval (body x)))
+
+  // Eval App
+  (Eval (App func argm)) =
+    (Apply (Eval func) (Eval argm))
+
+  // Eval Ct0
+  (Eval (Ct0 ctid)) =
+    (Ct0 ctid)
+
+  // Eval Ct1
+  (Eval (Ct1 ctid x0)) =
+    (Ct1 ctid (Eval x0))
+
+  // Eval Ct2
+  (Eval (Ct2 ctid x0 x1)) =
+    (Ct2 ctid (Eval x0) (Eval x1))
+
+  // Eval Ct3
+  (Eval (Ct3 ctid x0 x1 x2)) =
+    (Ct3 ctid (Eval x0) (Eval x1) (Eval x2))
+
+  // Eval Ct4
+  (Eval (Ct4 ctid x0 x1 x2 x3)) =
+    (Ct4 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+
+  // Eval Ct5
+  (Eval (Ct5 ctid x0 x1 x2 x3 x4)) =
+    (Ct5 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+
+  // Eval Ct6
+  (Eval (Ct6 ctid x0 x1 x2 x3 x4 x5)) =
+    (Ct6 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+
+  // Eval Ct7
+  (Eval (Ct7 ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Ct7 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+
+  // Eval Ct8
+  (Eval (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Ct8 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+
+  // Eval Fn0
+  (Eval (Fn0 ctid)) =
+    (Eval (Rule_0 ctid))
+
+  // Eval Fn1
+  (Eval (Fn1 ctid x0)) =
+    (Eval (Rule_1 ctid (Eval x0)))
+
+  // Eval Fn2
+  (Eval (Fn2 ctid x0 x1)) =
+    (Eval (Rule_2 ctid (Eval x0) (Eval x1)))
+
+  // Eval Fn3
+  (Eval (Fn3 ctid x0 x1 x2)) =
+    (Eval (Rule_3 ctid (Eval x0) (Eval x1) (Eval x2)))
+
+  // Eval Fn4
+  (Eval (Fn4 ctid x0 x1 x2 x3)) =
+    (Eval (Rule_4 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3)))
+
+  // Eval Fn5
+  (Eval (Fn5 ctid x0 x1 x2 x3 x4)) =
+    (Eval (Rule_5 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4)))
+
+  // Eval Fn6
+  (Eval (Fn6 ctid x0 x1 x2 x3 x4 x5)) =
+    (Eval (Rule_6 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5)))
+
+  // Eval Fn7
+  (Eval (Fn7 ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Eval (Rule_7 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6)))
+
+  // Eval Fn8
+  (Eval (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Eval (Rule_8 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7)))
+
+// Apply Term Term : Term
+// ----------------------
+
+  (Apply (Lam fbody) argm) = (fbody argm)
+  (Apply func        argm) = (App func argm)
+
+// Stringification
+// ---------------
+
+  (Show (Var index) dep) = (Text [
+    "x" (U60.show index)
+  ])
+
+  (Show (Inp index) dep) = (Text [
+    "x" (U60.show index)
+  ])
+
+  (Show Typ dep) = (Text [
+    "Type"
+  ])
+
+  (Show (All type body) dep) = (Text [
+    "(x" (U60.show dep) ": " (Show type dep) ") "
+    (Show (body (Var dep)) (+ dep 1))
+  ])
+
+  (Show (Lam body) dep) = (Text [
+    "@x" (U60.show dep) " "
+    (Show (body (Var dep)) (+ dep 1))
+  ])
+
+  (Show (App func argm) dep) = (Text [
+    "("
+    (Show func dep) " "
+    (Show argm dep)
+    ")"
+  ])
+
+  (Show (Ct0 ctid) dep) = (Text [
+    "{"
+    (NameOf ctid)
+    "}"
+  ])
+
+  (Show (Ct1 ctid x0) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep)
+    "}"
+  ])
+
+  (Show (Ct2 ctid x0 x1) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep)
+    "}"
+  ])
+
+  (Show (Ct3 ctid x0 x1 x2) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep)
+    "}"
+  ])
+
+  (Show (Ct4 ctid x0 x1 x2 x3) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep)
+    "}"
+  ])
+
+  (Show (Ct5 ctid x0 x1 x2 x3 x4) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep)
+    "}"
+  ])
+
+  (Show (Ct6 ctid x0 x1 x2 x3 x4 x5) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep) " "
+    (Show x5 dep)
+    "}"
+  ])
+
+  (Show (Ct7 ctid x0 x1 x2 x3 x4 x5 x6) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep) " "
+    (Show x5 dep) " "
+    (Show x6 dep)
+    "}"
+  ])
+
+  (Show (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7) dep) = (Text [
+    "{"
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep) " "
+    (Show x5 dep) " "
+    (Show x6 dep) " "
+    (Show x7 dep)
+    "}"
+  ])
+
+  (Show (Fn0 ctid) dep) = (Text [
+    "("
+    (NameOf ctid)
+    ")"
+  ])
+
+  (Show (Fn1 ctid x0) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep)
+    ")"
+  ])
+
+  (Show (Fn2 ctid x0 x1) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep)
+    ")"
+  ])
+
+  (Show (Fn3 ctid x0 x1 x2) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep)
+    ")"
+  ])
+
+  (Show (Fn4 ctid x0 x1 x2 x3) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep)
+    ")"
+  ])
+
+  (Show (Fn5 ctid x0 x1 x2 x3 x4) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep)
+    ")"
+  ])
+
+  (Show (Fn6 ctid x0 x1 x2 x3 x4 x5) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep) " "
+    (Show x5 dep)
+    ")"
+  ])
+
+  (Show (Fn7 ctid x0 x1 x2 x3 x4 x5 x6) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep) " "
+    (Show x5 dep) " "
+    (Show x6 dep)
+    ")"
+  ])
+
+  (Show (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7) dep) = (Text [
+    "("
+    (NameOf ctid) " "
+    (Show x0 dep) " "
+    (Show x1 dep) " "
+    (Show x2 dep) " "
+    (Show x3 dep) " "
+    (Show x4 dep) " "
+    (Show x5 dep) " "
+    (Show x6 dep) " "
+    (Show x7 dep)
+    ")"
+  ])
+
+  (Show.context ctx) = (Show.context.go (List.reverse.go ctx Nil) 0)
+    (Show.context.go Nil dep) = String.nil
+    (Show.context.go (Cons term terms) dep) = (Text [
+      "- x" (U60.show dep) ": " (Show term dep) Line
+      (Show.context.go terms (+ dep 1))
+    ])
+
+// User-Defined Functions
+// ----------------------
+////INJECT////
+
+  Functions =
+    let fns = Nil
+    let fns = (Cons And. fns)
+    let fns = (Cons Nil. fns)
+    let fns = (Cons List. fns)
+    let fns = (Cons Succ. fns)
+    let fns = (Cons True. fns)
+    let fns = (Cons Nat. fns)
+    let fns = (Cons Not. fns)
+    let fns = (Cons Bool. fns)
+    let fns = (Cons Negate. fns)
+    let fns = (Cons Tail. fns)
+    let fns = (Cons Main. fns)
+    let fns = (Cons False. fns)
+    let fns = (Cons Cons. fns)
+    let fns = (Cons Zero. fns)
+    fns
+
+  // And
+  // ---
+
+    (NameOf And.) = "And"
+    (HashOf And.) = %And
+    (TypeOf And.) = (All (Ct0 Bool.) λa (All (Ct0 Bool.) λb (Ct0 Bool.)))
+    (Rule2 And. (Ct0 True.) (Ct0 True.)) = (Ct0 True.)
+    (Rule2 And. (Ct0 True.) (Ct0 False.)) = (Ct0 False.)
+    (Rule2 And. (Ct0 False.) (Ct0 True.)) = (Ct0 False.)
+    (Rule2 And. (Ct0 False.) (Ct0 False.)) = (Ct0 False.)
+    (Verify And.) =
+      (Cons (LHS (Ct0 True.) (LHS (Ct0 True.) (RHS (Rule2 And. (Ct0 True.) (Ct0 True.)))))
+      (Cons (LHS (Ct0 True.) (LHS (Ct0 False.) (RHS (Rule2 And. (Ct0 True.) (Ct0 False.)))))
+      (Cons (LHS (Ct0 False.) (LHS (Ct0 True.) (RHS (Rule2 And. (Ct0 False.) (Ct0 True.)))))
+      (Cons (LHS (Ct0 False.) (LHS (Ct0 False.) (RHS (Rule2 And. (Ct0 False.) (Ct0 False.)))))
+      Nil))))
+
+  // Nil
+  // ---
+
+    (NameOf Nil.) = "Nil"
+    (HashOf Nil.) = %Nil
+    (TypeOf Nil.) = (All Typ λa (Ct1 List. a))
+    (Verify Nil.) =
+      Nil
+
+  // List
+  // ----
+
+    (NameOf List.) = "List"
+    (HashOf List.) = %List
+    (TypeOf List.) = (All Typ λa Typ)
+    (Verify List.) =
+      Nil
+
+  // Succ
+  // ----
+
+    (NameOf Succ.) = "Succ"
+    (HashOf Succ.) = %Succ
+    (TypeOf Succ.) = (All (Ct0 Nat.) λpred (Ct0 Nat.))
+    (Verify Succ.) =
+      Nil
+
+  // True
+  // ----
+
+    (NameOf True.) = "True"
+    (HashOf True.) = %True
+    (TypeOf True.) = (Ct0 Bool.)
+    (Verify True.) =
+      Nil
+
+  // Nat
+  // ---
+
+    (NameOf Nat.) = "Nat"
+    (HashOf Nat.) = %Nat
+    (TypeOf Nat.) = Typ
+    (Verify Nat.) =
+      Nil
+
+  // Not
+  // ---
+
+    (NameOf Not.) = "Not"
+    (HashOf Not.) = %Not
+    (TypeOf Not.) = (All (Ct0 Bool.) λa (Ct0 Bool.))
+    (Rule1 Not. (Ct0 True.)) = (Ct0 False.)
+    (Rule1 Not. (Ct0 False.)) = (Ct0 True.)
+    (Verify Not.) =
+      (Cons (LHS (Ct0 True.) (RHS (Rule1 Not. (Ct0 True.))))
+      (Cons (LHS (Ct0 False.) (RHS (Rule1 Not. (Ct0 False.))))
+      Nil))
+
+  // Bool
+  // ----
+
+    (NameOf Bool.) = "Bool"
+    (HashOf Bool.) = %Bool
+    (TypeOf Bool.) = Typ
+    (Verify Bool.) =
+      Nil
+
+  // Negate
+  // ------
+
+    (NameOf Negate.) = "Negate"
+    (HashOf Negate.) = %Negate
+    (TypeOf Negate.) = (All (Ct1 List. (Ct0 Bool.)) λxs (Ct1 List. (Ct0 Bool.)))
+    (Rule1 Negate. (Ct3 Cons. (Ct0 Bool.) x xs)) = (Ct3 Cons. (Ct0 Bool.) (Fn1 Not. x) (Fn1 Negate. xs))
+    (Rule1 Negate. (Ct1 Nil. (Ct0 Bool.))) = (Ct1 Nil. (Ct0 Bool.))
+    (Verify Negate.) =
+      (Cons (LHS (Ct3 Cons. (Ct0 Bool.) (Inp 0) (Inp 1)) (RHS (Rule1 Negate. (Ct3 Cons. (Ct0 Bool.) (Var 0) (Var 1)))))
+      (Cons (LHS (Ct1 Nil. (Ct0 Bool.)) (RHS (Rule1 Negate. (Ct1 Nil. (Ct0 Bool.)))))
+      Nil))
+
+  // Tail
+  // ----
+
+    (NameOf Tail.) = "Tail"
+    (HashOf Tail.) = %Tail
+    (TypeOf Tail.) = (All Typ λa (All (Ct1 List. a) λxs (Ct1 List. a)))
+    (Rule2 Tail. a (Ct3 Cons. t x xs)) = xs
+    (Verify Tail.) =
+      (Cons (LHS (Inp 0) (LHS (Ct3 Cons. (Inp 1) (Inp 2) (Inp 3)) (RHS (Rule2 Tail. (Var 0) (Ct3 Cons. (Var 1) (Var 2) (Var 3))))))
+      Nil)
+
+  // Main
+  // ----
+
+    (NameOf Main.) = "Main"
+    (HashOf Main.) = %Main
+    (TypeOf Main.) = (Ct1 List. (Ct0 Bool.))
+    (Rule0 Main.) = (Fn2 Tail. (Ct0 Bool.) (Ct3 Cons. (Ct0 Bool.) (Ct0 Zero.) (Ct3 Cons. (Ct0 Bool.) (Ct0 False.) (Ct1 Nil. (Ct0 Bool.)))))
+    (Verify Main.) =
+      (Cons (RHS (Rule0 Main.))
+      Nil)
+
+  // False
+  // -----
+
+    (NameOf False.) = "False"
+    (HashOf False.) = %False
+    (TypeOf False.) = (Ct0 Bool.)
+    (Verify False.) =
+      Nil
+
+  // Cons
+  // ----
+
+    (NameOf Cons.) = "Cons"
+    (HashOf Cons.) = %Cons
+    (TypeOf Cons.) = (All Typ λa (All a λx (All (Ct1 List. a) λxs (Ct1 List. a))))
+    (Verify Cons.) =
+      Nil
+
+  // Zero
+  // ----
+
+    (NameOf Zero.) = "Zero"
+    (HashOf Zero.) = %Zero
+    (TypeOf Zero.) = (Ct0 Nat.)
+    (Verify Zero.) =
+      Nil
+
