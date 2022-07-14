@@ -27,12 +27,27 @@ Negate (xs: {List Bool}) : {List Bool} {
   Negate {Nil Bool}       = {Nil Bool}
 }
 
+Double (x: Nat) : Nat {
+  Double {Succ x} = {Succ {Succ (Double x)}}
+  Double {Zero}   = {Zero}
+}
+
+// FIXME: this won't check since `a != t`
 Tail (a: Type) (xs: {List a}) : {List a} {
   Tail a {Cons t x xs} = xs
 }
 
-Main (x: Bool) (y: {List Bool}) : Bool {
-  Main True  {Cons t x xs} = (And True Type)
-  Main False {Nil t}       = (And True Zero)
-}
+The (x: Nat) : Type
+Val (x: Nat) : {The x}
+
+Main : {The {Succ {Succ Zero}}} =
+  {Val (Double {Succ Zero})}
+
+
+
+
+
+
+
+
 

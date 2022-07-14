@@ -1,11 +1,11 @@
-//(Main n) =
-  //(Api.check_functions Functions)
-
-Main =
+Api.check_all =
   let output = (Api.output (Api.check_functions Functions))
   (Bool.if (String.is_empty output)
     "All terms check."
     output)
+
+Api.run_main =
+  (Show (Quote (Eval (Fn0 Main.)) 0) 0)
 
 (Api.check_functions Nil) = Nil
 (Api.check_functions (Cons f fs)) =
@@ -429,7 +429,7 @@ Main =
   // Checks others
   (Check term type) =
     ask term_typ = (Checker.bind (Infer term))
-    ask is_equal = (Checker.bind (Equal term_typ type))
+    ask is_equal = (Checker.bind (Equal (Eval term_typ) (Eval type)))
     (Bool.if is_equal
       // then
       (Checker.done Unit)
@@ -568,6 +568,10 @@ Main =
 
   // Eval Var
   (Eval (Var index)) =
+    (Var index)
+
+  // Eval Inp
+  (Eval (Inp index)) =
     (Var index)
 
   // Eval Typ

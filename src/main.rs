@@ -10,26 +10,35 @@ fn main() -> Result<(), String> {
 
   let args: Vec<String> = std::env::args().collect();
 
-  if args.len() <= 2 || args[1] != "check" {
-    println!("{:?}", args);
-    println!("Usage: kind2 check file.kind");
+  if args.len() <= 2 || args[1] != "check" && args[1] != "run" {
+    println!("Usage:");
+    println!("$ kind2 check file.kind");
+    println!("$ kind2 run file.kind");
     return Ok(());
   }
 
   let path = &args[2];
   let file = match std::fs::read_to_string(path) {
-    Ok(code) => read_file(&code)?,
-    Err(msg) => read_file(&DEMO_CODE)?,
+    Ok(code) => read_file(&code),
+    Err(msg) => read_file(&DEMO_CODE),
   };
+  let file = match file {
+    Ok(file) => file,
+    Err(msg) => {
+      println!("{}", msg);
+      return Ok(());
+    }
+  };
+
   let code = compile_file(&file);
 
   let mut checker = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
   checker.push_str(&code);
 
-  //std::fs::write("check.tmp.hvm", checker.clone()).ok(); writes checker to the checker.hvm file
+  std::fs::write("tmp.hvm", checker.clone()).ok(); // writes checker to the checker.hvm file
 
   let mut rt = hvm::Runtime::from_code(&checker)?;
-  let main = rt.alloc_code("Main")?;
+  let main = rt.alloc_code(if args[1] == "check" { "Api.check_all" } else { "Api.run_main" })?;
   rt.normalize(main);
   println!("{}", readback_string(&rt, main)); // TODO: optimize by deserializing term into text directly
 
@@ -430,7 +439,7 @@ pub fn compile_entry(entry: &Entry) -> String {
     let body = compile_term(&rule.body);
     let mut text = String::new();
     //text.push_str(&format!("    (Rule{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
-    text.push_str(&format!("    (Rule{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
+    text.push_str(&format!("    (Rule_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
     return text;
   }
 
@@ -442,7 +451,7 @@ pub fn compile_entry(entry: &Entry) -> String {
       let tail = compile_rule_chk(rule, index + 1, vars, args);
       return format!("(LHS {} {})", head, tail);
     } else {
-      return format!("(RHS (Rule{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
+      return format!("(RHS (Rule_{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
     }
   }
 
@@ -566,5 +575,5 @@ const DEMO_CODE: &str = "
     Tail a {Cons t x xs} = xs
   }
 
-  Main (x: Bool) (y: Nat) : {List Bool} = (Tail Bool {Cons Bool x {Cons Bool y {Nil Bool}}})
+  Main : {List Bool} = (Tail Bool {Cons Bool True {Cons Bool False {Nil Bool}}})
 ";
