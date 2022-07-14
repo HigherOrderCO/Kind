@@ -17,3 +17,9 @@ cargo install --path .
 ```
 kind2 check example.kind2
 ```
+
+3. Check a Kind2 file:
+
+```
+kind2 run example.kind2
+```
