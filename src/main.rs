@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use hvm::parser as parser;
 
 fn main() -> Result<(), String> {
+  gen();
 
   let args: Vec<String> = std::env::args().collect();
 
@@ -35,14 +36,24 @@ fn main() -> Result<(), String> {
   let mut checker = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
   checker.push_str(&code);
 
-  std::fs::write("tmp.hvm", checker.clone()).ok(); // writes checker to the checker.hvm file
+  std::fs::write(format!("{}.hvm", path), checker.clone()).ok(); // writes checker to the checker.hvm file
 
   let mut rt = hvm::Runtime::from_code(&checker)?;
   let main = rt.alloc_code(if args[1] == "check" { "Api.check_all" } else { "Api.run_main" })?;
   rt.normalize(main);
   println!("{}", readback_string(&rt, main)); // TODO: optimize by deserializing term into text directly
 
+  println!("Rewrites: {}", rt.get_rewrites());
+
   return Ok(());
+}
+
+fn gen() {
+  let file = read_file(&DEMO_CODE).unwrap();
+  let code = compile_file(&file);
+  let mut checker = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
+  checker.push_str(&code);
+  std::fs::write("tmp.hvm", checker.clone()).ok(); // writes checker to the checker.hvm file
 }
 
 const CHECKER_HVM: &str = include_str!("checker.hvm");
@@ -384,7 +395,7 @@ pub fn read_file(code: &str) -> Result<Box<File>, String> {
   //Ctr { name: String, args: Vec<Box<Term>> },
   //Fun { name: String, args: Vec<Box<Term>> },
 //}
-pub fn compile_term(term: &Term) -> String { 
+pub fn compile_term(term: &Term, quote: bool) -> String { 
   match term {
     Term::Typ => {
       format!("Typ")
@@ -396,27 +407,27 @@ pub fn compile_term(term: &Term) -> String {
       todo!()
     }
     Term::All { name, tipo, body } => {
-      format!("(All {} λ{} {})", compile_term(tipo), name, compile_term(body))
+      format!("(All {} λ{} {})", compile_term(tipo, quote), name, compile_term(body, quote))
     }
     Term::Lam { name, body } => {
-      format!("(Lam λ{} {})", name, compile_term(body))
+      format!("(Lam λ{} {})", name, compile_term(body, quote))
     }
     Term::App { func, argm } => {
-      format!("(App {} {})", compile_term(func), compile_term(argm))
+      format!("({} {} {})", if quote { "App" } else { "Apply" }, compile_term(func, quote), compile_term(argm, quote))
     }
     Term::Ctr { name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
       for arg in args {
-        args_strs.push(format!(" {}", compile_term(arg)));
+        args_strs.push(format!(" {}", compile_term(arg, quote)));
       }
       format!("(Ct{} {}.{})", args.len(), name, args_strs.join(""))
     }
     Term::Fun { name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
       for arg in args {
-        args_strs.push(format!(" {}", compile_term(arg)));
+        args_strs.push(format!(" {}", compile_term(arg, quote)));
       }
-      format!("(Fn{} {}.{})", args.len(), name, args_strs.join(""))
+      format!("({}{} {}.{})", if quote { "NewFn" } else { "Rule_" }, args.len(), name, args_strs.join(""))
     }
   }
 }
@@ -425,21 +436,23 @@ pub fn compile_entry(entry: &Entry) -> String {
   fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
     if index < args.len() {
       let arg = &args[index];
-      format!("(All {} λ{} {})", compile_term(&arg.tipo), arg.name, compile_type(args, tipo, index + 1))
+      format!("(All {} λ{} {})", compile_term(&arg.tipo, false), arg.name, compile_type(args, tipo, index + 1))
     } else {
-      compile_term(tipo)
+      compile_term(tipo, false)
     }
   }
 
   fn compile_rule(rule: &Rule) -> String {
     let mut pats = vec![];
     for pat in &rule.pats {
-      pats.push(format!(" {}", compile_term(pat)));
+      pats.push(format!(" {}", compile_term(pat, false)));
     }
-    let body = compile_term(&rule.body);
+    let body_quot = compile_term(&rule.body, true);
+    let body_exec = compile_term(&rule.body, false);
     let mut text = String::new();
     //text.push_str(&format!("    (Rule{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
-    text.push_str(&format!("    (Rule_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
+    text.push_str(&format!("    (Body_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_quot));
+    text.push_str(&format!("    (Rule_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_exec));
     return text;
   }
 
@@ -451,7 +464,7 @@ pub fn compile_entry(entry: &Entry) -> String {
       let tail = compile_rule_chk(rule, index + 1, vars, args);
       return format!("(LHS {} {})", head, tail);
     } else {
-      return format!("(RHS (Rule_{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
+      return format!("(RHS (Body_{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
     }
   }
 
@@ -542,38 +555,45 @@ fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
 }
 
 const DEMO_CODE: &str = "
-  Bool : Type
-    True  : Bool
-    False : Bool
+Nat : Type
+  Zero             : Nat
+  Succ (pred: Nat) : Nat
 
-  Nat : Type
-    Zero             : Nat
-    Succ (pred: Nat) : Nat
+The (x: Nat) : Type
+  Val (x: Nat) : {The x}
 
-  List (a: Type) : Type
-    Nil  (a: Type)                       : {List a}
-    Cons (a: Type) (x: a) (xs: {List a}) : {List a}
+Double (x: Nat) : Nat {
+  Double {Succ x} = {Succ {Succ (Double x)}}
+  Double {Zero}   = {Zero}
+}
 
-  Not (a: Bool) : Bool {
-    Not True  = False
-    Not False = True
-  }
+Pow2 (x: Nat) : Nat {
+  Pow2 {Succ x} = (Double (Pow2 x))
+  Pow2 {Zero}   = {Succ Zero}
+}
 
-  And (a: Bool) (b: Bool) : Bool {
-    And True  True  = True
-    And True  False = False
-    And False True  = False
-    And False False = False
-  }
+Destroy (x: Nat) : Nat {
+  Destroy {Succ n} = (Destroy n)
+  Destroy {Zero}   = {Zero}
+}
 
-  Negate (xs: {List Bool}) : {List Bool} {
-    Negate {Cons Bool x xs} = {Cons Bool (Not x) (Negate xs)}
-    Negate {Nil Bool}       = {Nil Bool}
-  }
-
-  Tail (a: Type) (xs: {List a}) : {List a} {
-    Tail a {Cons t x xs} = xs
-  }
-
-  Main : {List Bool} = (Tail Bool {Cons Bool True {Cons Bool False {Nil Bool}}})
+SlowNumber : Nat =
+  (Destroy (Pow2
+    {Succ {Succ {Succ {Succ
+    {Succ {Succ {Succ {Succ
+    {Succ {Succ {Succ {Succ
+    {Succ {Succ {Succ {Succ
+    {Succ {Succ {Succ {Succ
+    {Succ {Succ {Succ {Succ
+    Zero
+    }}}}
+    }}}}
+    }}}}
+    }}}}
+    }}}}
+    }}}}
+  ))
+  
+// Proof that SlowNumber is 0
+Main : {The (SlowNumber)} = {Val Zero}
 ";

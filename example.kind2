@@ -32,17 +32,12 @@ Double (x: Nat) : Nat {
   Double {Zero}   = {Zero}
 }
 
-// FIXME: this won't check since `a != t`
+// FIXME: shouldn't type-check, but does due to Inp treatment
 Tail (a: Type) (xs: {List a}) : {List a} {
-  Tail a {Cons t x xs} = xs
+  Tail a {Cons t x xs} = x
 }
-
-The (x: Nat) : Type
-Val (x: Nat) : {The x}
-
-Main : {The {Succ {Succ Zero}}} =
-  {Val (Double {Succ Zero})}
-
+  
+Main : Nat = (Double {Succ {Succ Zero}})
 
 
 

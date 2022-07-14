@@ -1,3 +1,5 @@
+Main = Api.check_all
+
 Api.check_all =
   let output = (Api.output (Api.check_functions Functions))
   (Bool.if (String.is_empty output)
@@ -429,7 +431,7 @@ Api.run_main =
   // Checks others
   (Check term type) =
     ask term_typ = (Checker.bind (Infer term))
-    ask is_equal = (Checker.bind (Equal (Eval term_typ) (Eval type)))
+    ask is_equal = (Checker.bind (Equal term_typ type))
     (Bool.if is_equal
       // then
       (Checker.done Unit)
@@ -628,39 +630,78 @@ Api.run_main =
 
   // Eval Fn0
   (Eval (Fn0 ctid)) =
-    (Eval (Rule_0 ctid))
+    (Rule_0 ctid)
 
   // Eval Fn1
   (Eval (Fn1 ctid x0)) =
-    (Eval (Rule_1 ctid (Eval x0)))
+    (Rule_1 ctid (Eval x0))
 
   // Eval Fn2
   (Eval (Fn2 ctid x0 x1)) =
-    (Eval (Rule_2 ctid (Eval x0) (Eval x1)))
+    (Rule_2 ctid (Eval x0) (Eval x1))
 
   // Eval Fn3
   (Eval (Fn3 ctid x0 x1 x2)) =
-    (Eval (Rule_3 ctid (Eval x0) (Eval x1) (Eval x2)))
+    (Rule_3 ctid (Eval x0) (Eval x1) (Eval x2))
 
   // Eval Fn4
   (Eval (Fn4 ctid x0 x1 x2 x3)) =
-    (Eval (Rule_4 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3)))
+    (Rule_4 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
 
   // Eval Fn5
   (Eval (Fn5 ctid x0 x1 x2 x3 x4)) =
-    (Eval (Rule_5 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4)))
+    (Rule_5 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
 
   // Eval Fn6
   (Eval (Fn6 ctid x0 x1 x2 x3 x4 x5)) =
-    (Eval (Rule_6 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5)))
+    (Rule_6 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
 
   // Eval Fn7
   (Eval (Fn7 ctid x0 x1 x2 x3 x4 x5 x6)) =
-    (Eval (Rule_7 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6)))
+    (Rule_7 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
 
   // Eval Fn8
   (Eval (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
-    (Eval (Rule_8 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7)))
+    (Rule_8 ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+
+// Func
+// ----
+
+  // NewFn0 to Fn0
+  (NewFn0 ctid) =
+    (Fn0 ctid)
+
+  // NewFn1 to Fn1
+  (NewFn1 ctid x0) =
+    (Fn1 ctid x0)
+
+  // NewFn2 to Fn2
+  (NewFn2 ctid x0 x1) =
+    (Fn2 ctid x0 x1)
+
+  // NewFn3 to Fn3
+  (NewFn3 ctid x0 x1 x2) =
+    (Fn3 ctid x0 x1 x2)
+
+  // NewFn4 to Fn4
+  (NewFn4 ctid x0 x1 x2 x3) =
+    (Fn4 ctid x0 x1 x2 x3)
+
+  // NewFn5 to Fn5
+  (NewFn5 ctid x0 x1 x2 x3 x4) =
+    (Fn5 ctid x0 x1 x2 x3 x4)
+
+  // NewFn6 to Fn6
+  (NewFn6 ctid x0 x1 x2 x3 x4 x5) =
+    (Fn6 ctid x0 x1 x2 x3 x4 x5)
+
+  // NewFn7 to Fn7
+  (NewFn7 ctid x0 x1 x2 x3 x4 x5 x6) =
+    (Fn7 ctid x0 x1 x2 x3 x4 x5 x6)
+
+  // NewFn8 to Fn8
+  (NewFn8 ctid x0 x1 x2 x3 x4 x5 x6 x7) =
+    (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7)
 
 // Apply Term Term : Term
 // ----------------------
@@ -890,3 +931,258 @@ Api.run_main =
 // User-Defined Functions
 // ----------------------
 ////INJECT////
+
+  Functions =
+    let fns = Nil
+    let fns = (Cons And. fns)
+    let fns = (Cons Bool. fns)
+    let fns = (Cons Not. fns)
+    let fns = (Cons Main. fns)
+    let fns = (Cons Pow2. fns)
+    let fns = (Cons False. fns)
+    let fns = (Cons True. fns)
+    let fns = (Cons Succ. fns)
+    let fns = (Cons Foo. fns)
+    let fns = (Cons Negate. fns)
+    let fns = (Cons Tail. fns)
+    let fns = (Cons Nat. fns)
+    let fns = (Cons Double. fns)
+    let fns = (Cons Zero. fns)
+    let fns = (Cons The. fns)
+    let fns = (Cons List. fns)
+    let fns = (Cons Val. fns)
+    let fns = (Cons Nil. fns)
+    let fns = (Cons Destroy. fns)
+    let fns = (Cons Cons. fns)
+    fns
+
+  // And
+  // ---
+
+    (NameOf And.) = "And"
+    (HashOf And.) = %And
+    (TypeOf And.) = (All (Ct0 Bool.) λa (All (Ct0 Bool.) λb (Ct0 Bool.)))
+    (Body_2 And. (Ct0 True.) (Ct0 True.)) = (Ct0 True.)
+    (Rule_2 And. (Ct0 True.) (Ct0 True.)) = (Ct0 True.)
+    (Body_2 And. (Ct0 True.) (Ct0 False.)) = (Ct0 False.)
+    (Rule_2 And. (Ct0 True.) (Ct0 False.)) = (Ct0 False.)
+    (Body_2 And. (Ct0 False.) (Ct0 True.)) = (Ct0 False.)
+    (Rule_2 And. (Ct0 False.) (Ct0 True.)) = (Ct0 False.)
+    (Body_2 And. (Ct0 False.) (Ct0 False.)) = (Ct0 False.)
+    (Rule_2 And. (Ct0 False.) (Ct0 False.)) = (Ct0 False.)
+    (Verify And.) =
+      (Cons (LHS (Ct0 True.) (LHS (Ct0 True.) (RHS (Body_2 And. (Ct0 True.) (Ct0 True.)))))
+      (Cons (LHS (Ct0 True.) (LHS (Ct0 False.) (RHS (Body_2 And. (Ct0 True.) (Ct0 False.)))))
+      (Cons (LHS (Ct0 False.) (LHS (Ct0 True.) (RHS (Body_2 And. (Ct0 False.) (Ct0 True.)))))
+      (Cons (LHS (Ct0 False.) (LHS (Ct0 False.) (RHS (Body_2 And. (Ct0 False.) (Ct0 False.)))))
+      Nil))))
+
+  // Bool
+  // ----
+
+    (NameOf Bool.) = "Bool"
+    (HashOf Bool.) = %Bool
+    (TypeOf Bool.) = Typ
+    (Verify Bool.) =
+      Nil
+
+  // Not
+  // ---
+
+    (NameOf Not.) = "Not"
+    (HashOf Not.) = %Not
+    (TypeOf Not.) = (All (Ct0 Bool.) λa (Ct0 Bool.))
+    (Body_1 Not. (Ct0 True.)) = (Ct0 False.)
+    (Rule_1 Not. (Ct0 True.)) = (Ct0 False.)
+    (Body_1 Not. (Ct0 False.)) = (Ct0 True.)
+    (Rule_1 Not. (Ct0 False.)) = (Ct0 True.)
+    (Verify Not.) =
+      (Cons (LHS (Ct0 True.) (RHS (Body_1 Not. (Ct0 True.))))
+      (Cons (LHS (Ct0 False.) (RHS (Body_1 Not. (Ct0 False.))))
+      Nil))
+
+  // Main
+  // ----
+
+    (NameOf Main.) = "Main"
+    (HashOf Main.) = %Main
+    (TypeOf Main.) = (Ct0 Nat.)
+    (Body_0 Main.) = (NewFn0 Foo.)
+    (Rule_0 Main.) = (Rule_0 Foo.)
+    (Verify Main.) =
+      (Cons (RHS (Body_0 Main.))
+      Nil)
+
+  // Pow2
+  // ----
+
+    (NameOf Pow2.) = "Pow2"
+    (HashOf Pow2.) = %Pow2
+    (TypeOf Pow2.) = (All (Ct0 Nat.) λx (Ct0 Nat.))
+    (Body_1 Pow2. (Ct1 Succ. x)) = (NewFn1 Double. (NewFn1 Pow2. x))
+    (Rule_1 Pow2. (Ct1 Succ. x)) = (Rule_1 Double. (Rule_1 Pow2. x))
+    (Body_1 Pow2. (Ct0 Zero.)) = (Ct1 Succ. (Ct0 Zero.))
+    (Rule_1 Pow2. (Ct0 Zero.)) = (Ct1 Succ. (Ct0 Zero.))
+    (Verify Pow2.) =
+      (Cons (LHS (Ct1 Succ. (Inp 0)) (RHS (Body_1 Pow2. (Ct1 Succ. (Var 0)))))
+      (Cons (LHS (Ct0 Zero.) (RHS (Body_1 Pow2. (Ct0 Zero.))))
+      Nil))
+
+  // False
+  // -----
+
+    (NameOf False.) = "False"
+    (HashOf False.) = %False
+    (TypeOf False.) = (Ct0 Bool.)
+    (Verify False.) =
+      Nil
+
+  // True
+  // ----
+
+    (NameOf True.) = "True"
+    (HashOf True.) = %True
+    (TypeOf True.) = (Ct0 Bool.)
+    (Verify True.) =
+      Nil
+
+  // Succ
+  // ----
+
+    (NameOf Succ.) = "Succ"
+    (HashOf Succ.) = %Succ
+    (TypeOf Succ.) = (All (Ct0 Nat.) λpred (Ct0 Nat.))
+    (Verify Succ.) =
+      Nil
+
+  // Foo
+  // ---
+
+    (NameOf Foo.) = "Foo"
+    (HashOf Foo.) = %Foo
+    (TypeOf Foo.) = (Ct0 Nat.)
+    (Body_0 Foo.) = (NewFn1 Destroy. (NewFn1 Pow2. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct0 Zero.)))))))))))))))))
+    (Rule_0 Foo.) = (Rule_1 Destroy. (Rule_1 Pow2. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct0 Zero.)))))))))))))))))
+    (Verify Foo.) =
+      (Cons (RHS (Body_0 Foo.))
+      Nil)
+
+  // Negate
+  // ------
+
+    (NameOf Negate.) = "Negate"
+    (HashOf Negate.) = %Negate
+    (TypeOf Negate.) = (All (Ct1 List. (Ct0 Bool.)) λxs (Ct1 List. (Ct0 Bool.)))
+    (Body_1 Negate. (Ct3 Cons. (Ct0 Bool.) x xs)) = (Ct3 Cons. (Ct0 Bool.) (NewFn1 Not. x) (NewFn1 Negate. xs))
+    (Rule_1 Negate. (Ct3 Cons. (Ct0 Bool.) x xs)) = (Ct3 Cons. (Ct0 Bool.) (Rule_1 Not. x) (Rule_1 Negate. xs))
+    (Body_1 Negate. (Ct1 Nil. (Ct0 Bool.))) = (Ct1 Nil. (Ct0 Bool.))
+    (Rule_1 Negate. (Ct1 Nil. (Ct0 Bool.))) = (Ct1 Nil. (Ct0 Bool.))
+    (Verify Negate.) =
+      (Cons (LHS (Ct3 Cons. (Ct0 Bool.) (Inp 0) (Inp 1)) (RHS (Body_1 Negate. (Ct3 Cons. (Ct0 Bool.) (Var 0) (Var 1)))))
+      (Cons (LHS (Ct1 Nil. (Ct0 Bool.)) (RHS (Body_1 Negate. (Ct1 Nil. (Ct0 Bool.)))))
+      Nil))
+
+  // Tail
+  // ----
+
+    (NameOf Tail.) = "Tail"
+    (HashOf Tail.) = %Tail
+    (TypeOf Tail.) = (All Typ λa (All (Ct1 List. a) λxs (Ct1 List. a)))
+    (Body_2 Tail. a (Ct3 Cons. t x xs)) = xs
+    (Rule_2 Tail. a (Ct3 Cons. t x xs)) = xs
+    (Verify Tail.) =
+      (Cons (LHS (Inp 0) (LHS (Ct3 Cons. (Inp 1) (Inp 2) (Inp 3)) (RHS (Body_2 Tail. (Var 0) (Ct3 Cons. (Var 1) (Var 2) (Var 3))))))
+      Nil)
+
+  // Nat
+  // ---
+
+    (NameOf Nat.) = "Nat"
+    (HashOf Nat.) = %Nat
+    (TypeOf Nat.) = Typ
+    (Verify Nat.) =
+      Nil
+
+  // Double
+  // ------
+
+    (NameOf Double.) = "Double"
+    (HashOf Double.) = %Double
+    (TypeOf Double.) = (All (Ct0 Nat.) λx (Ct0 Nat.))
+    (Body_1 Double. (Ct1 Succ. x)) = (Ct1 Succ. (Ct1 Succ. (NewFn1 Double. x)))
+    (Rule_1 Double. (Ct1 Succ. x)) = (Ct1 Succ. (Ct1 Succ. (Rule_1 Double. x)))
+    (Body_1 Double. (Ct0 Zero.)) = (Ct0 Zero.)
+    (Rule_1 Double. (Ct0 Zero.)) = (Ct0 Zero.)
+    (Verify Double.) =
+      (Cons (LHS (Ct1 Succ. (Inp 0)) (RHS (Body_1 Double. (Ct1 Succ. (Var 0)))))
+      (Cons (LHS (Ct0 Zero.) (RHS (Body_1 Double. (Ct0 Zero.))))
+      Nil))
+
+  // Zero
+  // ----
+
+    (NameOf Zero.) = "Zero"
+    (HashOf Zero.) = %Zero
+    (TypeOf Zero.) = (Ct0 Nat.)
+    (Verify Zero.) =
+      Nil
+
+  // The
+  // ---
+
+    (NameOf The.) = "The"
+    (HashOf The.) = %The
+    (TypeOf The.) = (All (Ct0 Nat.) λx Typ)
+    (Verify The.) =
+      Nil
+
+  // List
+  // ----
+
+    (NameOf List.) = "List"
+    (HashOf List.) = %List
+    (TypeOf List.) = (All Typ λa Typ)
+    (Verify List.) =
+      Nil
+
+  // Val
+  // ---
+
+    (NameOf Val.) = "Val"
+    (HashOf Val.) = %Val
+    (TypeOf Val.) = (All (Ct0 Nat.) λx (Ct1 The. x))
+    (Verify Val.) =
+      Nil
+
+  // Nil
+  // ---
+
+    (NameOf Nil.) = "Nil"
+    (HashOf Nil.) = %Nil
+    (TypeOf Nil.) = (All Typ λa (Ct1 List. a))
+    (Verify Nil.) =
+      Nil
+
+  // Destroy
+  // -------
+
+    (NameOf Destroy.) = "Destroy"
+    (HashOf Destroy.) = %Destroy
+    (TypeOf Destroy.) = (All (Ct0 Nat.) λx (Ct0 Nat.))
+    (Body_1 Destroy. (Ct1 Succ. n)) = (NewFn1 Destroy. n)
+    (Rule_1 Destroy. (Ct1 Succ. n)) = (Rule_1 Destroy. n)
+    (Body_1 Destroy. (Ct0 Zero.)) = (Ct0 Zero.)
+    (Rule_1 Destroy. (Ct0 Zero.)) = (Ct0 Zero.)
+    (Verify Destroy.) =
+      (Cons (LHS (Ct1 Succ. (Inp 0)) (RHS (Body_1 Destroy. (Ct1 Succ. (Var 0)))))
+      (Cons (LHS (Ct0 Zero.) (RHS (Body_1 Destroy. (Ct0 Zero.))))
+      Nil))
+
+  // Cons
+  // ----
+
+    (NameOf Cons.) = "Cons"
+    (HashOf Cons.) = %Cons
+    (TypeOf Cons.) = (All Typ λa (All a λx (All (Ct1 List. a) λxs (Ct1 List. a))))
+    (Verify Cons.) =
+      Nil
