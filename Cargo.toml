@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 hvm = "0.1.40"
+clap = { version = "3.1.8", features = ["derive"] }
