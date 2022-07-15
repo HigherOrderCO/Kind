@@ -3,6 +3,7 @@ use hvm::parser as parser;
 
 #[derive(Clone, Debug)]
 pub struct File {
+  names: Vec<String>,
   entries: HashMap<String, Box<Entry>>
 }
 
@@ -44,11 +45,14 @@ pub enum Term {
 // ========
 
 pub fn adjust_file(file: &File) -> File {
+  let mut names = Vec::new();
   let mut entries = HashMap::new(); 
-  for (name, entry) in &file.entries {
-    entries.insert(name.clone(), Box::new(adjust_entry(file, &*entry)));
+  for name in &file.names {
+    let entry = file.entries.get(name).unwrap();
+    names.push(name.clone());
+    entries.insert(name.clone(), Box::new(adjust_entry(file, &entry)));
   }
-  return File { entries };
+  return File { names, entries };
 }
 
 pub fn adjust_entry(file: &File, entry: &Entry) -> Entry {
@@ -365,11 +369,13 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
 
 pub fn parse_file(state: parser::State) -> parser::Answer<Box<File>> {
   let (state, entry_vec) = parser::until(Box::new(parser::done), Box::new(parse_entry), state)?;
+  let mut names = Vec::new();
   let mut entries = HashMap::new();
   for entry in entry_vec {
+    names.push(entry.name.clone());
     entries.insert(entry.name.clone(), entry);
   }
-  return Ok((state, Box::new(File { entries })));
+  return Ok((state, Box::new(File { names, entries })));
 }
 
 pub fn show_term(term: &Term) -> String {
@@ -440,11 +446,11 @@ pub fn show_entry(entry: &Entry) -> String {
 }
 
 pub fn show_file(file: &File) -> String {
-  let mut entries = vec![];
-  for entry in file.entries.values() {
-    entries.push(show_entry(entry));
+  let mut lines = vec![];
+  for name in &file.names {
+    lines.push(show_entry(file.entries.get(name).unwrap()));
   }
-  entries.join("\n")
+  lines.join("\n")
 }
 
 pub fn read_term(code: &str) -> Result<Box<Term>, String> {
@@ -592,13 +598,15 @@ pub fn compile_file(file: &File) -> String {
   let mut result = String::new();
   result.push_str(&format!("\n  Functions =\n"));
   result.push_str(&format!("    let fns = Nil\n"));
-  for entry in file.entries.values() {
+  for name in &file.names {
+    let entry = file.entries.get(name).unwrap();
     result.push_str(&format!("    let fns = (Cons {}. fns)\n", entry.    name));
   }
   result.push_str(&format!("    fns\n\n"));
-  for entry in file.entries.values() {
-    result.push_str(&format!("  // {}\n", entry.name));
-    result.push_str(&format!("  // {}\n", "-".repeat(entry.name.len())));
+  for name in &file.names {
+    let entry = file.entries.get(name).unwrap();
+    result.push_str(&format!("  // {}\n", name));
+    result.push_str(&format!("  // {}\n", "-".repeat(name.len())));
     result.push_str(&format!("\n"));
     result.push_str(&compile_entry(&entry));
     result.push_str(&format!("\n"));
