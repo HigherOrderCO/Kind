@@ -74,7 +74,7 @@ fn kind2(path: &str, main_function: &str) -> Result<(), String> {
   let mut rt = hvm::Runtime::from_code(&checker)?;
   let main = rt.alloc_code(main_function)?;
   rt.normalize(main);
-  println!("{}", readback_string(&rt, main)); // TODO: optimize by deserializing term into text directly
+  print!("{}", readback_string(&rt, main)); // TODO: optimize by deserializing term into text directly
 
   // Display stats
   println!("Rewrites: {}", rt.get_rewrites());

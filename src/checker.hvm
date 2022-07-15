@@ -1,11 +1,8 @@
 Main = Api.check_all
-//Main = (Api.check_function Tail.)
 
 Api.check_all =
   let output = (Api.output (List.reverse (Api.check_functions Functions)))
-  (Bool.if (String.is_empty output)
-    "All terms check."
-    output)
+  (Bool.if (String.is_empty output) "All terms check." output)
 
 Api.run_main =
   (Show (Quote (Eval (Fn0 Main.)) 0) 0)
