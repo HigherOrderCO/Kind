@@ -295,6 +295,12 @@ Api.run_main =
     ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.name dep)) (b.body (Var b.name dep))) Null Null Null))
     (Checker.done (Bool.and expr body))
 
+  // Ann equality
+  (Equal (Ann a.expr a.type) (Ann b.expr b.type)) =
+    ask expr = (Checker.bind (Equal a.expr b.expr))
+    ask type = (Checker.bind (Equal a.type b.type))
+    (Checker.done (Bool.and expr type))
+
   // Ct0 equality
   (Equal (Ct0 a.ctid) (Ct0 b.ctid)) =
     let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
@@ -467,6 +473,11 @@ Api.run_main =
     ask body_typ = (Checker.bind (Checker.extended (Infer (body (Var name dep))) name expr_typ []))
     (Checker.done body_typ)
 
+  // Infers Ann
+  (Infer (Ann expr type)) =
+    ask expr_chk = (Checker.bind (Check expr type))
+    (Checker.done type)
+
   // Infers Ct0
   (Infer (Ct0 ctid)) =
     (Checker.done (TypeOf ctid))
@@ -611,6 +622,10 @@ Api.run_main =
   (Quote (Let name expr body) dep) =
     (Let name (Quote expr dep) (Quote (body (Var name dep)) (+ dep 1)))
 
+  // Quote Let
+  (Quote (Ann expr type) dep) =
+    (Ann (Quote expr dep) (Quote type dep))
+
   // Quote App
   (Quote (App func argm) dep) =
     (App (Quote func dep) (Quote argm dep))
@@ -709,6 +724,10 @@ Api.run_main =
   // Eval Let
   (Eval (Let name expr body)) =
     (Let name (Eval expr) λx (Eval (body x)))
+
+  // Eval Ann
+  (Eval (Ann expr typ)) =
+    (Ann (Eval expr) (Eval typ))
 
   // Eval App
   (Eval (App func argm)) =
@@ -836,6 +855,11 @@ Api.run_main =
 
   (Lets name expr body) = (body expr)
 
+// Annotate Term Term : Term
+// --------------------------
+
+  (Annotate expr type) = expr
+
 // Stringification
 // ---------------
 
@@ -860,6 +884,10 @@ Api.run_main =
   (Show (Let name expr body)) = (Text [
     "let " (Show.name name) " = " (Show (expr (Var name 0))) "; "
     (Show (body (Var name 0)))
+  ])
+
+  (Show (Ann expr type)) = (Text [
+    "{" (Show expr) " : " (Show type) "}"
   ])
 
   (Show (App func argm)) = (Text [

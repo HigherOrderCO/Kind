@@ -33,10 +33,11 @@ pub struct Rule {
 pub enum Term {
   Typ,
   Var { name: String },
-  Let { name: String, expr: Box<Term>, body: Box<Term> },
   All { name: String, tipo: Box<Term>, body: Box<Term> },
   Lam { name: String, body: Box<Term> },
   App { func: Box<Term>, argm: Box<Term> },
+  Let { name: String, expr: Box<Term>, body: Box<Term> },
+  Ann { expr: Box<Term>, tipo: Box<Term> },
   Ctr { name: String, args: Vec<Box<Term>> },
   Fun { name: String, args: Vec<Box<Term>> },
 }
@@ -99,6 +100,11 @@ pub fn adjust_term(file: &File, term: &Term) -> Term {
       let expr = Box::new(adjust_term(file, &*expr));
       let body = Box::new(adjust_term(file, &*body));
       Term::Let { name: name.clone(), expr, body }
+    },
+    Term::Ann { ref expr, ref tipo } => {
+      let expr = Box::new(adjust_term(file, &*expr));
+      let tipo = Box::new(adjust_term(file, &*tipo));
+      Term::Ann { expr, tipo }
     },
     Term::All { ref name, ref tipo, ref body } => {
       let tipo = Box::new(adjust_term(file, &*tipo));
@@ -253,6 +259,21 @@ pub fn parse_let(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   );
 }
 
+pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  return parser::guard(
+    parser::text_parser("{"),
+    Box::new(|state| {
+      let (state, _)    = parser::consume("{", state)?;
+      let (state, expr) = parse_term(state)?;
+      let (state, _)    = parser::text(":", state)?;
+      let (state, tipo) = parse_term(state)?;
+      let (state, _)    = parser::consume("}", state)?;
+      Ok((state, Box::new(Term::Ann { expr, tipo })))
+    }),
+    state,
+  );
+}
+
 pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
     Box::new(|state| {
@@ -294,11 +315,12 @@ pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
   parser::grammar(
     "Term",
     &[
-      Box::new(parse_let), // `let `
       Box::new(parse_all), // `(name:`
       Box::new(parse_ctr), // `(Name`
       Box::new(parse_app), // `(`
       Box::new(parse_lam), // `@`
+      Box::new(parse_let), // `let `
+      Box::new(parse_ann), // `{`
       Box::new(parse_hlp), // `?`
       Box::new(parse_var), // 
       Box::new(|state| Ok((state, None))),
@@ -386,11 +408,6 @@ pub fn show_term(term: &Term) -> String {
     Term::Var { name } => {
       format!("{}", name)
     }
-    Term::Let { name, expr, body } => {
-      let expr = show_term(expr);
-      let body = show_term(body);
-      format!("let {} = {}; {}", name, expr, body)
-    }
     Term::Lam { name, body } => {
       let body = show_term(body);
       format!("@{}({})", name, body)
@@ -408,6 +425,16 @@ pub fn show_term(term: &Term) -> String {
     Term::All { name, tipo, body } => {
       let body = show_term(body);
       format!("({}: {}) {}", name, show_term(tipo), body)
+    }
+    Term::Let { name, expr, body } => {
+      let expr = show_term(expr);
+      let body = show_term(body);
+      format!("let {} = {}; {}", name, expr, body)
+    }
+    Term::Ann { expr, tipo } => {
+      let expr = show_term(expr);
+      let tipo = show_term(tipo);
+      format!("{{{} : {}}}", expr, tipo)
     }
     Term::Ctr { name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
@@ -482,9 +509,6 @@ pub fn compile_term(term: &Term, quote: bool) -> String {
     Term::Var { name } => {
       name.clone()
     }
-    Term::Let { name, expr, body } => {
-      format!("({} {} {} λ{} {})", if quote { "Let" } else { "Lets" }, name_to_u64(name), compile_term(expr, quote), name, compile_term(body, quote))
-    }
     Term::All { name, tipo, body } => {
       format!("(All {} {} λ{} {})", name_to_u64(name), compile_term(tipo, quote), name, compile_term(body, quote))
     }
@@ -493,6 +517,12 @@ pub fn compile_term(term: &Term, quote: bool) -> String {
     }
     Term::App { func, argm } => {
       format!("({} {} {})", if quote { "App" } else { "Apply" }, compile_term(func, quote), compile_term(argm, quote))
+    }
+    Term::Let { name, expr, body } => {
+      format!("({} {} {} λ{} {})", if quote { "Let" } else { "Lets" }, name_to_u64(name), compile_term(expr, quote), name, compile_term(body, quote))
+    }
+    Term::Ann { expr, tipo } => {
+      format!("({} {} {})", if quote { "Ann" } else { "Annotate" }, compile_term(expr, quote), compile_term(tipo, quote))
     }
     Term::Ctr { name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
