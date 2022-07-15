@@ -82,6 +82,7 @@ pub fn adjust_rule(file: &File, rule: &Rule) -> Rule {
   return Rule { name, pats, body };
 }
 
+// TODO: check unbound variables
 pub fn adjust_term(file: &File, term: &Term) -> Term {
   match *term {
     Term::Typ => {

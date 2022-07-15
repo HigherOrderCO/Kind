@@ -64,11 +64,11 @@ Api.run_main =
     "Type mismatch." Line
     "- Expected: " (Show (Quote expected dep) dep) Line
     "- Detected: " (Show (Quote detected dep) dep) Line
-    (Bool.if (U60.equal dep 0) "" (Text [
+    (Bool.if (List.is_empty ctx) "" (Text [
       "With context:" Line
       (Show.context ctx)
     ]))
-    (Bool.if (U60.equal dep 0) "" (Text [
+    (Bool.if (List.is_empty (List.flatten eqt)) "" (Text [
       "With equations:" Line
       (Show.equations eqt)
     ]))
@@ -123,6 +123,18 @@ Api.run_main =
 // List.reverse.go -(a: Type) (List a) (List a) : (List a)
   (List.reverse.go Nil         res) = res
   (List.reverse.go (Cons x xs) res) = (List.reverse.go xs (Cons x res))
+
+// List.is_empty -(a: Type) (List a) : Bool
+  (List.is_empty Nil)         = True
+  (List.is_empty (Cons x xs)) = False
+
+// List.concat -(a: Type) (List a) (List a) : (List a)
+  (List.concat Nil         ys) = Nil
+  (List.concat (Cons x xs) ys) = (Cons x (List.concat xs ys))
+
+// List.flatten -(a: Type) (List (List a)) : (List a)
+  (List.flatten Nil)         = Nil
+  (List.flatten (Cons x xs)) = (List.concat x (List.flatten xs))
 
 // Term.if_all -(r: Type) Term (Term -> (Term -> Term) -> r) r : r
   (Term.if_all (All type body) then else) = (then type body)
@@ -357,14 +369,10 @@ Api.run_main =
     (Bool.if (U60.equal a.index b.index)
       (Checker.done True)
       ask a.eqt = (Checker.bind (Checker.eqt_get_values a.index))
+      ask b.eqt = (Checker.bind (Checker.eqt_get_values b.index))
       ask a.chk = (Checker.bind (Equal.var.try_values a.index a.eqt (Var b.index)))
-      (Bool.if a.chk
-        (Checker.done True)
-        ask b.eqt = (Checker.bind (Checker.eqt_get_values b.index))
-        ask b.chk = (Checker.bind (Equal.var.try_values b.index b.eqt (Var a.index)))
-        (Bool.if b.chk
-          (Checker.done True)
-          (Checker.done False))))
+      ask b.chk = (Checker.bind (Equal.var.try_values b.index b.eqt (Var a.index)))
+      (Checker.done (Bool.or a.chk b.chk)))
   (Equal.var True a.index b) =
     ask eqt = (Checker.bind (Checker.eqt_get_values a.index))
     (Equal.var.try_values a.index eqt b)
