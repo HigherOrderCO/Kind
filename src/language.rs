@@ -265,7 +265,7 @@ pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     Box::new(|state| {
       let (state, _)    = parser::consume("{", state)?;
       let (state, expr) = parse_term(state)?;
-      let (state, _)    = parser::text(":", state)?;
+      let (state, _)    = parser::text("::", state)?;
       let (state, tipo) = parse_term(state)?;
       let (state, _)    = parser::consume("}", state)?;
       Ok((state, Box::new(Term::Ann { expr, tipo })))
@@ -320,7 +320,7 @@ pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
       Box::new(parse_app), // `(`
       Box::new(parse_lam), // `@`
       Box::new(parse_let), // `let `
-      Box::new(parse_ann), // `{`
+      Box::new(parse_ann), // `{x::`
       Box::new(parse_hlp), // `?`
       Box::new(parse_var), // 
       Box::new(|state| Ok((state, None))),
@@ -434,7 +434,7 @@ pub fn show_term(term: &Term) -> String {
     Term::Ann { expr, tipo } => {
       let expr = show_term(expr);
       let tipo = show_term(tipo);
-      format!("{{{} : {}}}", expr, tipo)
+      format!("{{{} :: {}}}", expr, tipo)
     }
     Term::Ctr { name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())

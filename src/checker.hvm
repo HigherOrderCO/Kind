@@ -6,8 +6,10 @@ Api.check_all =
     (Text [ "All terms check." Line Line ])
     output)
 
-Api.run_main =
+Api.run_main = (Text [
   (Show (Quote (Eval (Fn0 Main.)) 0))
+  Line Line
+])
 
 (Api.check_functions Nil) = Nil
 (Api.check_functions (Cons f fs)) =
@@ -887,7 +889,7 @@ Api.run_main =
   ])
 
   (Show (Ann expr type)) = (Text [
-    "{" (Show expr) " : " (Show type) "}"
+    "{" (Show expr) " :: " (Show type) "}"
   ])
 
   (Show (App func argm)) = (Text [
