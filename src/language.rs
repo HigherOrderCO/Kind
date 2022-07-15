@@ -403,7 +403,7 @@ pub fn show_term(term: &Term) -> String {
       format!("({}: {}) {}", name, show_term(tipo), body)
     }
     Term::Ctr { name, args } => {
-      format!("{{{}{}}}", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
+      format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
     }
     Term::Fun { name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
