@@ -1,5 +1,5 @@
-//Main = Api.check_all
-Main = (Api.check_function Tail.)
+Main = Api.check_all
+//Main = (Api.check_function Tail.)
 
 Api.check_all =
   let output = (Api.output (Api.check_functions Functions))
@@ -201,6 +201,10 @@ Api.run_main =
   (Checker.get_rhs) = λctx λdep λrhs λeqt
     (Checked ctx dep rhs eqt rhs)
 
+  // Checker.get_equations
+  (Checker.get_equations) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs eqt eqt)
+
   // Checker.set_rhs -(a: Type) Bool : (Checker Unit)
   (Checker.set_rhs rhs) = λctx λdep λold_rhs λeqt
     (Checked ctx dep rhs eqt Unit)
@@ -344,27 +348,36 @@ Api.run_main =
 
   // If on LHS, extend the variable's equality list
   // If on RHS, check if a and b are equal
+  
+  // Var-Var checker
   (Equal.var False a.index b) =
     ask (Checker.bind (Checker.eqt_add_value a.index b))
     (Checker.done True)
-  (Equal.var True a.index b) =
-    (Bool.if (Equal.var.is_same a.index b)
+  (Equal.var True a.index (Var b.index)) =
+    (Bool.if (U60.equal a.index b.index)
       (Checker.done True)
-      ask eqt = (Checker.bind (Checker.eqt_get_values a.index))
-      (Equal.var.try_values eqt b))
+      ask a.eqt = (Checker.bind (Checker.eqt_get_values a.index))
+      ask a.chk = (Checker.bind (Equal.var.try_values a.index a.eqt (Var b.index)))
+      (Bool.if a.chk
+        (Checker.done True)
+        ask b.eqt = (Checker.bind (Checker.eqt_get_values b.index))
+        ask b.chk = (Checker.bind (Equal.var.try_values b.index b.eqt (Var a.index)))
+        (Bool.if b.chk
+          (Checker.done True)
+          (Checker.done False))))
+  (Equal.var True a.index b) =
+    ask eqt = (Checker.bind (Checker.eqt_get_values a.index))
+    (Equal.var.try_values a.index eqt b)
 
-  // Checks if any of its reductions is equal to 'b'
-  (Equal.var.try_values (Cons a as) b) =
+  // Checks if any of a set of reductions is equal
+  (Equal.var.try_values i (Cons a as) b) =
     ask head = (Checker.bind (Equal a b))
-    (Bool.if head (Checker.done True) (Equal.var.try_values as b))
-  (Equal.var.try_values Nil b) =
+    (Bool.if head
+      (Checker.done True)
+      (Equal.var.try_values i as b))
+  (Equal.var.try_values i Nil b) =
+    ask eqs = (Checker.bind (Checker.get_equations))
     (Checker.done False)
-
-  // Checks if b is already a var with the same index
-  (Equal.var.is_same a.index (Var b.index)) =
-    (U60.equal a.index b.index)
-  (Equal.var.is_same a.index b) =
-    False
 
 // Infer Term : (Checker Term)
 // ---------------------------
@@ -813,58 +826,58 @@ Api.run_main =
   ])
 
   (Show (Ct0 ctid) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid)
-    "}"
+    ")"
   ])
 
   (Show (Ct1 ctid x0) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep)
-    "}"
+    ")"
   ])
 
   (Show (Ct2 ctid x0 x1) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep) " "
     (Show x1 dep)
-    "}"
+    ")"
   ])
 
   (Show (Ct3 ctid x0 x1 x2) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep) " "
     (Show x1 dep) " "
     (Show x2 dep)
-    "}"
+    ")"
   ])
 
   (Show (Ct4 ctid x0 x1 x2 x3) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep) " "
     (Show x1 dep) " "
     (Show x2 dep) " "
     (Show x3 dep)
-    "}"
+    ")"
   ])
 
   (Show (Ct5 ctid x0 x1 x2 x3 x4) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep) " "
     (Show x1 dep) " "
     (Show x2 dep) " "
     (Show x3 dep) " "
     (Show x4 dep)
-    "}"
+    ")"
   ])
 
   (Show (Ct6 ctid x0 x1 x2 x3 x4 x5) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep) " "
     (Show x1 dep) " "
@@ -872,11 +885,11 @@ Api.run_main =
     (Show x3 dep) " "
     (Show x4 dep) " "
     (Show x5 dep)
-    "}"
+    ")"
   ])
 
   (Show (Ct7 ctid x0 x1 x2 x3 x4 x5 x6) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep) " "
     (Show x1 dep) " "
@@ -885,11 +898,11 @@ Api.run_main =
     (Show x4 dep) " "
     (Show x5 dep) " "
     (Show x6 dep)
-    "}"
+    ")"
   ])
 
   (Show (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7) dep) = (Text [
-    "{"
+    "("
     (NameOf ctid) " "
     (Show x0 dep) " "
     (Show x1 dep) " "
@@ -899,7 +912,7 @@ Api.run_main =
     (Show x5 dep) " "
     (Show x6 dep) " "
     (Show x7 dep)
-    "}"
+    ")"
   ])
 
   (Show (Fn0 ctid) dep) = (Text [
