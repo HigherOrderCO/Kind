@@ -1,4 +1,5 @@
-Main = Api.check_all
+//Main = Api.check_all
+Main = (Api.check_function Tail.)
 
 Api.check_all =
   let output = (Api.output (Api.check_functions Functions))
@@ -22,7 +23,7 @@ Api.run_main =
 
 (Api.check_function.verifiers Nil type) = Nil
 (Api.check_function.verifiers (Cons verifier verifiers) type) =
-  let head = ((Check.verify verifier type 0) Nil 0)
+  let head = ((Check.verify verifier type) Nil 0 False [])
   let tail = (Api.check_function.verifiers verifiers type)
   (Cons head tail)
 
@@ -36,7 +37,7 @@ Api.run_main =
 
 (Api.output.function fnid Nil) =
   String.nil
-(Api.output.function fnid (Cons (Checked ctx dep val) checks)) =
+(Api.output.function fnid (Cons (Checked ctx dep rhs eqt val) checks)) =
   (Api.output.function fnid checks)
 (Api.output.function fnid (Cons (Errored err) checks)) =
   (Text [
@@ -46,19 +47,19 @@ Api.run_main =
     (Api.output.function fnid checks)
   ])
 
-(Api.output.error (UnboutVariable ctx dep)) =
+(Api.output.error (UnboutVariable ctx dep rhs eqt)) =
   (Text [
     "Unbound Variable."
   ])
-(Api.output.error (CantInferLambda ctx dep)) =
+(Api.output.error (CantInferLambda ctx dep rhs eqt)) =
   (Text [
     "Can't infer lambda."
   ])
-(Api.output.error (NonFunctionApplication ctx dep)) =
+(Api.output.error (NonFunctionApplication ctx dep rhs eqt)) =
   (Text [
     "Non-function application."
   ])
-(Api.output.error (TypeMismatch ctx dep expected detected)) =
+(Api.output.error (TypeMismatch ctx dep rhs eqt expected detected)) =
   (Text [
     "Type mismatch." Line
     "- Expected: " (Show (Quote expected dep) dep) Line
@@ -66,6 +67,10 @@ Api.run_main =
     (Bool.if (U60.equal dep 0) "" (Text [
       "With context:" Line
       (Show.context ctx)
+    ]))
+    (Bool.if (U60.equal dep 0) "" (Text [
+      "With equations:" Line
+      (Show.equations eqt)
     ]))
   ])
 
@@ -93,6 +98,10 @@ Api.run_main =
   (Bool.and True  b) = b
   (Bool.and False b) = False
 
+// Bool.or Bool Bool : Bool
+  (Bool.or True  b) = True
+  (Bool.or False b) = b
+
 // Maybe.case -(a: Type) -(r: Type) (Maybe a) r (a -> r) : r
   (Maybe.case None       none some) = none
   (Maybe.case (Some val) none some) = (some val)
@@ -101,6 +110,11 @@ Api.run_main =
   (List.at (Cons x xs) 0) = (Some x)
   (List.at (Cons x xs) n) = (List.at xs (- n 1))
   (List.at Nil         n) = None
+
+// List.mut -(a: Type) (List a) U60 (a -> a) : (List a)
+  (List.mut (Cons x xs) 0 f) = (Cons (f x) xs)
+  (List.mut (Cons x xs) n f) = (Cons x (List.mut xs (- n 1) f))
+  (List.mut Nil         n f) = Nil
 
 // List.tail -(a: Type) (List a) : (List a)
   (List.tail (Cons x xs)) = xs
@@ -139,30 +153,30 @@ Api.run_main =
 // -------------
 
   // type Result (a : Type) {
-  //   {Checked Context U60 a}
-  //   {Errored Error}
+  //   (Checked (ctx: Context) (dep: U60) (rhs: Bool) (eqt: (List (List Term))) (ret: a))
+  //   (Errored Error)
   // }
 
-  // type Checker (a : Type) = (depth: U60) (context: (List Term)) (Result a)
+  // type Checker (a : Type) = (depth: U60) (context: (List Term)) (rhs: Bool) (eqt: (List (List Term))) (Result a)
     
   // Checker.bind -(a: Type) -(b: Type) (Checker a) : (a -> Checker b) (Checker b)
-  (Checker.bind checker) = λnext λctx λdep ((Checker.bind.result (checker ctx dep)) next)
+  (Checker.bind checker) = λnext λctx λdep λrhs λeqt ((Checker.bind.result (checker ctx dep rhs eqt)) next)
 
   // Checker.bind.result -(a: Type) -(b: Type) (Result a) : (a -> Checker b) (Result b)
-  (Checker.bind.result (Checked ctx dep val)) = λnext (next val ctx dep)
-  (Checker.bind.result (Errored err))         = λnext (Errored err)
+  (Checker.bind.result (Checked ctx dep rhs eqt val)) = λnext (next val ctx dep rhs eqt)
+  (Checker.bind.result (Errored err))                 = λnext (Errored err)
 
   // Checker.done -(a: Type) (x: a) : (Checker a)
-  (Checker.done val) = λctx λdep (Checked ctx dep val)
+  (Checker.done val) = λctx λdep λrhs λeqt (Checked ctx dep rhs eqt val)
 
-  // Checker.fail -(a: Type) (err: (List Term) -> U60 -> Error) : (Checker a)
-  (Checker.fail err) = λctx λdep (Errored (err ctx dep))
+  // Checker.fail -(a: Type) (err: (List Term) -> U60 -> Bool -> (List (List Term)) -> Error) : (Checker a)
+  (Checker.fail err) = λctx λdep λrhs λeqt (Errored (err ctx dep rhs eqt))
 
   // Checker.extend -(a: Term) (x: Term) : (Checker Unit)
-  (Checker.extend type) = λctx λdep (Checked (Cons type ctx) (+ dep 1) Unit)
+  (Checker.extend type) = λctx λdep λrhs λeqt (Checked (Cons type ctx) (+ dep 1) rhs eqt Unit)
 
   // Checker.shrink -(a: Term) : (Checker Unit)
-  (Checker.shrink) = λctx λdep (Checked (List.tail ctx) (- dep 1) Unit)
+  (Checker.shrink) = λctx λdep λrhs λeqt (Checked (List.tail ctx) (- dep 1) rhs eqt Unit)
 
   // Checker.bext -(a: Type) -(b: Type) (Checker a) Term : (a -> Checker b)
   (Checker.bext checker term) = 
@@ -172,32 +186,40 @@ Api.run_main =
     (Checker.done got)
 
   // Checker.context.at -(a: Type) U60 : (Checker (Maybe Term)) 
-  (Checker.context.at index) = λctx λdep
-    (Checked ctx dep (List.at ctx (- (- dep index) 1)))
+  (Checker.context.at index) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs eqt (List.at ctx (- (- dep index) 1)))
 
   // Checker.get_depth -(a: Type) : (Checker U60)
-  (Checker.get_depth) = λctx λdep
-    (Checked ctx dep dep)
+  (Checker.get_depth) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs eqt dep)
 
   // Checker.get_context -(a: Type) : (Checker (List Term))
-  (Checker.get_context) = λctx λdep
-    (Checked ctx dep ctx)
+  (Checker.get_context) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs eqt ctx)
+
+  // Checker.get_rhs -(a: Type) : (Checker U60)
+  (Checker.get_rhs) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs eqt rhs)
+
+  // Checker.set_rhs -(a: Type) Bool : (Checker Unit)
+  (Checker.set_rhs rhs) = λctx λdep λold_rhs λeqt
+    (Checked ctx dep rhs eqt Unit)
+
+  // Checker.eqt_init -(a: Type) : (Checker Unit)
+  (Checker.eqt_init) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs (Cons Nil eqt) Unit)
+
+  // Checker.eqt_add_value -(a: Type) (idx: U60) (val: Term) : (Checker Unit)
+  (Checker.eqt_add_value idx val) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs (List.mut eqt (- (- dep idx) 1) λeqs(Cons val eqs)) Unit)
+
+  // Checker.eqt_get_values -(a: Type) (idx: U60) : (Checker (Maybe (List Term)))
+  (Checker.eqt_get_values idx) = λctx λdep λrhs λeqt
+    (Checked ctx dep rhs eqt (Maybe.case (List.at eqt (- (- dep idx) 1)) [] λx(x)))
 
 // Equal Term Term : (Checker Bool)
 // --------------------------------
   
-  // Var equality
-  (Equal (Var a.index) (Var b.index)) =
-    (Checker.done (U60.equal a.index b.index))
-
-  // Inp equality (TODO)
-  (Equal (Inp a.index) b) =
-    (Checker.done True)
-
-  // Inp equality (TODO)
-  (Equal a (Inp b.index)) =
-    (Checker.done True)
-
   // Typ equality
   (Equal Typ Typ) =
     (Checker.done True)
@@ -302,18 +324,53 @@ Api.run_main =
     ask x7   = (Checker.bind (Equal a.x7 b.x7))
     (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 (Bool.and x6 x7)))))))))
 
+  // Var equality #0
+  (Equal (Var a.index) b) =
+    ask rhs = (Checker.bind (Checker.get_rhs))
+    (Equal.var rhs a.index b)
+
+  // Var equality #1
+  (Equal a (Var b.index)) =
+    ask rhs = (Checker.bind (Checker.get_rhs))
+    (Equal.var rhs b.index a)
+
   // Not equal
   (Equal a b) =
     (Checker.done False)
 
+  // Variable
+  (Equal.var False a.index b) =
+    ask (Checker.bind (Checker.eqt_add_value a.index b))
+    (Checker.done True)
+  (Equal.var True a.index b) =
+    (Bool.if (Equal.is_var_index a.index b)
+      (Checker.done True)
+      ask eqt = (Checker.bind (Checker.eqt_get_values a.index))
+      (Equal.any eqt b))
+
+  // Any of a list
+  (Equal.any (Cons a as) b) =
+    ask head = (Checker.bind (Equal a b))
+    (Bool.if head (Checker.done True) (Equal.any as b))
+  (Equal.any Nil b) =
+    (Checker.done False)
+
+  // This this term a var with this index?
+  (Equal.is_var_index a.index (Var b.index)) = (U60.equal a.index b.index)
+  (Equal.is_var_index a.index b)             = False
+
+
+    
+    
+
 // Infer Term : (Checker Term)
-// ----------------------------------------
+// ---------------------------
 
   // Infers Var
   (Infer (Var index)) =
     ask got_type = (Checker.bind (Checker.context.at index))
     (Maybe.case got_type
-      (Checker.fail λctx λdep (UnboundVariable ctx dep))
+      (Checker.fail λctx λdep λrhs λeqt (UnboundVariable ctx dep rhs eqt))
       λvar_type (Checker.done var_type))
 
   // Infers Typ
@@ -329,7 +386,7 @@ Api.run_main =
 
   // Infers Lam
   (Infer (Lam body)) =
-    (Checker.fail λctx λdep (CantInferLambda ctx dep))
+    (Checker.fail λctx λdep λrhs λeqt (CantInferLambda ctx dep rhs eqt))
 
   // Infers App
   (Infer (App func argm)) =
@@ -340,7 +397,7 @@ Api.run_main =
         ask argm_ok = (Checker.bind (Check argm func_typ_type))
         (Checker.done (func_typ_body argm))
       // else
-      (Checker.fail λctx λdep (NonFunctionApplication ctx dep)))
+      (Checker.fail λctx λdep λrhs λeqt (NonFunctionApplication ctx dep rhs eqt)))
 
   // Infers Ct0
   (Infer (Ct0 ctid)) =
@@ -423,20 +480,30 @@ Api.run_main =
     ask body_chk = (Checker.bext (Check (body (Var dep)) (t_body (Var dep))) t_type)
     (Checker.done Unit)
 
-  // Checks Inp
-  (Check (Inp index) type) =
-    ask (Checker.bind (Checker.extend type))
-    (Checker.done Unit)
+  // Checks Var
+  (Check (Var index) type) =
+    ask rhs = (Checker.bind (Checker.get_rhs))
+    (Bool.if rhs
+      // then
+      (Check.compare (Var index) type)
+      // else
+      ask (Checker.bind (Checker.extend type))
+      ask (Checker.bind (Checker.eqt_init))
+      (Checker.done Unit))
 
   // Checks others
   (Check term type) =
+    (Check.compare term type)
+
+  // Compares two terms for equality
+  (Check.compare term type) =
     ask term_typ = (Checker.bind (Infer term))
     ask is_equal = (Checker.bind (Equal term_typ type))
     (Bool.if is_equal
       // then
       (Checker.done Unit)
       // else
-      (Checker.fail λctx λdep (TypeMismatch ctx dep term_typ type))) // TODO: pass up for Rust to display
+      (Checker.fail λctx λdep λrhs λeqt (TypeMismatch ctx dep rhs eqt term_typ type))) // TODO: pass up for Rust to display
 
 // Check.verify Verifier (List Term) : (Checker Unit)
 // --------------------------------------------------
@@ -458,11 +525,12 @@ Api.run_main =
   //  - y      : t
   //  - ys     : (List t)
 
-  (Check.verify (LHS arg args) (All type body) index) =
+  (Check.verify (LHS arg args) (All type body)) =
     ask arg_chk  = (Checker.bind (Check arg type))
-    ask args_chk = (Checker.bind (Check.verify args (body (Var index)) (+ index 1)))
+    ask args_chk = (Checker.bind (Check.verify args (body arg)))
     (Checker.done Unit)
-  (Check.verify (RHS expr) type index) =
+  (Check.verify (RHS expr) type) =
+    ask (Checker.bind (Checker.set_rhs True))
     ask expr_chk = (Checker.bind (Check expr type))
     (Checker.done Unit)
 
@@ -474,8 +542,8 @@ Api.run_main =
     (Var index)
 
   // Quote Var
-  (Quote (Inp index) dep) =
-    (Inp index)
+  (Quote (Var index) dep) =
+    (Var index)
 
   // Quote Typ
   (Quote Typ dep) =
@@ -572,8 +640,8 @@ Api.run_main =
   (Eval (Var index)) =
     (Var index)
 
-  // Eval Inp
-  (Eval (Inp index)) =
+  // Eval Var
+  (Eval (Var index)) =
     (Var index)
 
   // Eval Typ
@@ -716,7 +784,7 @@ Api.run_main =
     "x" (U60.show index)
   ])
 
-  (Show (Inp index) dep) = (Text [
+  (Show (Var index) dep) = (Text [
     "x" (U60.show index)
   ])
 
@@ -928,261 +996,18 @@ Api.run_main =
       (Show.context.go terms (+ dep 1))
     ])
 
+  (Show.equations eqt) = (Show.equations.go (List.reverse.go eqt Nil) 0)
+    (Show.equations.go Nil dep) = String.nil
+    (Show.equations.go (Cons values equations) dep) = (Text [
+      (Show.equations.go.values values dep)
+      (Show.equations.go equations (+ dep 1))
+    ])
+    (Show.equations.go.values Nil dep) = String.nil
+    (Show.equations.go.values (Cons val vals) dep) = (Text [
+      "- x" (U60.show dep) " = " (Show val dep) Line
+      (Show.equations.go.values vals dep)
+    ])
+
 // User-Defined Functions
 // ----------------------
 ////INJECT////
-
-  Functions =
-    let fns = Nil
-    let fns = (Cons And. fns)
-    let fns = (Cons Bool. fns)
-    let fns = (Cons Not. fns)
-    let fns = (Cons Main. fns)
-    let fns = (Cons Pow2. fns)
-    let fns = (Cons False. fns)
-    let fns = (Cons True. fns)
-    let fns = (Cons Succ. fns)
-    let fns = (Cons Foo. fns)
-    let fns = (Cons Negate. fns)
-    let fns = (Cons Tail. fns)
-    let fns = (Cons Nat. fns)
-    let fns = (Cons Double. fns)
-    let fns = (Cons Zero. fns)
-    let fns = (Cons The. fns)
-    let fns = (Cons List. fns)
-    let fns = (Cons Val. fns)
-    let fns = (Cons Nil. fns)
-    let fns = (Cons Destroy. fns)
-    let fns = (Cons Cons. fns)
-    fns
-
-  // And
-  // ---
-
-    (NameOf And.) = "And"
-    (HashOf And.) = %And
-    (TypeOf And.) = (All (Ct0 Bool.) λa (All (Ct0 Bool.) λb (Ct0 Bool.)))
-    (Body_2 And. (Ct0 True.) (Ct0 True.)) = (Ct0 True.)
-    (Rule_2 And. (Ct0 True.) (Ct0 True.)) = (Ct0 True.)
-    (Body_2 And. (Ct0 True.) (Ct0 False.)) = (Ct0 False.)
-    (Rule_2 And. (Ct0 True.) (Ct0 False.)) = (Ct0 False.)
-    (Body_2 And. (Ct0 False.) (Ct0 True.)) = (Ct0 False.)
-    (Rule_2 And. (Ct0 False.) (Ct0 True.)) = (Ct0 False.)
-    (Body_2 And. (Ct0 False.) (Ct0 False.)) = (Ct0 False.)
-    (Rule_2 And. (Ct0 False.) (Ct0 False.)) = (Ct0 False.)
-    (Verify And.) =
-      (Cons (LHS (Ct0 True.) (LHS (Ct0 True.) (RHS (Body_2 And. (Ct0 True.) (Ct0 True.)))))
-      (Cons (LHS (Ct0 True.) (LHS (Ct0 False.) (RHS (Body_2 And. (Ct0 True.) (Ct0 False.)))))
-      (Cons (LHS (Ct0 False.) (LHS (Ct0 True.) (RHS (Body_2 And. (Ct0 False.) (Ct0 True.)))))
-      (Cons (LHS (Ct0 False.) (LHS (Ct0 False.) (RHS (Body_2 And. (Ct0 False.) (Ct0 False.)))))
-      Nil))))
-
-  // Bool
-  // ----
-
-    (NameOf Bool.) = "Bool"
-    (HashOf Bool.) = %Bool
-    (TypeOf Bool.) = Typ
-    (Verify Bool.) =
-      Nil
-
-  // Not
-  // ---
-
-    (NameOf Not.) = "Not"
-    (HashOf Not.) = %Not
-    (TypeOf Not.) = (All (Ct0 Bool.) λa (Ct0 Bool.))
-    (Body_1 Not. (Ct0 True.)) = (Ct0 False.)
-    (Rule_1 Not. (Ct0 True.)) = (Ct0 False.)
-    (Body_1 Not. (Ct0 False.)) = (Ct0 True.)
-    (Rule_1 Not. (Ct0 False.)) = (Ct0 True.)
-    (Verify Not.) =
-      (Cons (LHS (Ct0 True.) (RHS (Body_1 Not. (Ct0 True.))))
-      (Cons (LHS (Ct0 False.) (RHS (Body_1 Not. (Ct0 False.))))
-      Nil))
-
-  // Main
-  // ----
-
-    (NameOf Main.) = "Main"
-    (HashOf Main.) = %Main
-    (TypeOf Main.) = (Ct0 Nat.)
-    (Body_0 Main.) = (NewFn0 Foo.)
-    (Rule_0 Main.) = (Rule_0 Foo.)
-    (Verify Main.) =
-      (Cons (RHS (Body_0 Main.))
-      Nil)
-
-  // Pow2
-  // ----
-
-    (NameOf Pow2.) = "Pow2"
-    (HashOf Pow2.) = %Pow2
-    (TypeOf Pow2.) = (All (Ct0 Nat.) λx (Ct0 Nat.))
-    (Body_1 Pow2. (Ct1 Succ. x)) = (NewFn1 Double. (NewFn1 Pow2. x))
-    (Rule_1 Pow2. (Ct1 Succ. x)) = (Rule_1 Double. (Rule_1 Pow2. x))
-    (Body_1 Pow2. (Ct0 Zero.)) = (Ct1 Succ. (Ct0 Zero.))
-    (Rule_1 Pow2. (Ct0 Zero.)) = (Ct1 Succ. (Ct0 Zero.))
-    (Verify Pow2.) =
-      (Cons (LHS (Ct1 Succ. (Inp 0)) (RHS (Body_1 Pow2. (Ct1 Succ. (Var 0)))))
-      (Cons (LHS (Ct0 Zero.) (RHS (Body_1 Pow2. (Ct0 Zero.))))
-      Nil))
-
-  // False
-  // -----
-
-    (NameOf False.) = "False"
-    (HashOf False.) = %False
-    (TypeOf False.) = (Ct0 Bool.)
-    (Verify False.) =
-      Nil
-
-  // True
-  // ----
-
-    (NameOf True.) = "True"
-    (HashOf True.) = %True
-    (TypeOf True.) = (Ct0 Bool.)
-    (Verify True.) =
-      Nil
-
-  // Succ
-  // ----
-
-    (NameOf Succ.) = "Succ"
-    (HashOf Succ.) = %Succ
-    (TypeOf Succ.) = (All (Ct0 Nat.) λpred (Ct0 Nat.))
-    (Verify Succ.) =
-      Nil
-
-  // Foo
-  // ---
-
-    (NameOf Foo.) = "Foo"
-    (HashOf Foo.) = %Foo
-    (TypeOf Foo.) = (Ct0 Nat.)
-    (Body_0 Foo.) = (NewFn1 Destroy. (NewFn1 Pow2. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct0 Zero.)))))))))))))))))
-    (Rule_0 Foo.) = (Rule_1 Destroy. (Rule_1 Pow2. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct1 Succ. (Ct0 Zero.)))))))))))))))))
-    (Verify Foo.) =
-      (Cons (RHS (Body_0 Foo.))
-      Nil)
-
-  // Negate
-  // ------
-
-    (NameOf Negate.) = "Negate"
-    (HashOf Negate.) = %Negate
-    (TypeOf Negate.) = (All (Ct1 List. (Ct0 Bool.)) λxs (Ct1 List. (Ct0 Bool.)))
-    (Body_1 Negate. (Ct3 Cons. (Ct0 Bool.) x xs)) = (Ct3 Cons. (Ct0 Bool.) (NewFn1 Not. x) (NewFn1 Negate. xs))
-    (Rule_1 Negate. (Ct3 Cons. (Ct0 Bool.) x xs)) = (Ct3 Cons. (Ct0 Bool.) (Rule_1 Not. x) (Rule_1 Negate. xs))
-    (Body_1 Negate. (Ct1 Nil. (Ct0 Bool.))) = (Ct1 Nil. (Ct0 Bool.))
-    (Rule_1 Negate. (Ct1 Nil. (Ct0 Bool.))) = (Ct1 Nil. (Ct0 Bool.))
-    (Verify Negate.) =
-      (Cons (LHS (Ct3 Cons. (Ct0 Bool.) (Inp 0) (Inp 1)) (RHS (Body_1 Negate. (Ct3 Cons. (Ct0 Bool.) (Var 0) (Var 1)))))
-      (Cons (LHS (Ct1 Nil. (Ct0 Bool.)) (RHS (Body_1 Negate. (Ct1 Nil. (Ct0 Bool.)))))
-      Nil))
-
-  // Tail
-  // ----
-
-    (NameOf Tail.) = "Tail"
-    (HashOf Tail.) = %Tail
-    (TypeOf Tail.) = (All Typ λa (All (Ct1 List. a) λxs (Ct1 List. a)))
-    (Body_2 Tail. a (Ct3 Cons. t x xs)) = xs
-    (Rule_2 Tail. a (Ct3 Cons. t x xs)) = xs
-    (Verify Tail.) =
-      (Cons (LHS (Inp 0) (LHS (Ct3 Cons. (Inp 1) (Inp 2) (Inp 3)) (RHS (Body_2 Tail. (Var 0) (Ct3 Cons. (Var 1) (Var 2) (Var 3))))))
-      Nil)
-
-  // Nat
-  // ---
-
-    (NameOf Nat.) = "Nat"
-    (HashOf Nat.) = %Nat
-    (TypeOf Nat.) = Typ
-    (Verify Nat.) =
-      Nil
-
-  // Double
-  // ------
-
-    (NameOf Double.) = "Double"
-    (HashOf Double.) = %Double
-    (TypeOf Double.) = (All (Ct0 Nat.) λx (Ct0 Nat.))
-    (Body_1 Double. (Ct1 Succ. x)) = (Ct1 Succ. (Ct1 Succ. (NewFn1 Double. x)))
-    (Rule_1 Double. (Ct1 Succ. x)) = (Ct1 Succ. (Ct1 Succ. (Rule_1 Double. x)))
-    (Body_1 Double. (Ct0 Zero.)) = (Ct0 Zero.)
-    (Rule_1 Double. (Ct0 Zero.)) = (Ct0 Zero.)
-    (Verify Double.) =
-      (Cons (LHS (Ct1 Succ. (Inp 0)) (RHS (Body_1 Double. (Ct1 Succ. (Var 0)))))
-      (Cons (LHS (Ct0 Zero.) (RHS (Body_1 Double. (Ct0 Zero.))))
-      Nil))
-
-  // Zero
-  // ----
-
-    (NameOf Zero.) = "Zero"
-    (HashOf Zero.) = %Zero
-    (TypeOf Zero.) = (Ct0 Nat.)
-    (Verify Zero.) =
-      Nil
-
-  // The
-  // ---
-
-    (NameOf The.) = "The"
-    (HashOf The.) = %The
-    (TypeOf The.) = (All (Ct0 Nat.) λx Typ)
-    (Verify The.) =
-      Nil
-
-  // List
-  // ----
-
-    (NameOf List.) = "List"
-    (HashOf List.) = %List
-    (TypeOf List.) = (All Typ λa Typ)
-    (Verify List.) =
-      Nil
-
-  // Val
-  // ---
-
-    (NameOf Val.) = "Val"
-    (HashOf Val.) = %Val
-    (TypeOf Val.) = (All (Ct0 Nat.) λx (Ct1 The. x))
-    (Verify Val.) =
-      Nil
-
-  // Nil
-  // ---
-
-    (NameOf Nil.) = "Nil"
-    (HashOf Nil.) = %Nil
-    (TypeOf Nil.) = (All Typ λa (Ct1 List. a))
-    (Verify Nil.) =
-      Nil
-
-  // Destroy
-  // -------
-
-    (NameOf Destroy.) = "Destroy"
-    (HashOf Destroy.) = %Destroy
-    (TypeOf Destroy.) = (All (Ct0 Nat.) λx (Ct0 Nat.))
-    (Body_1 Destroy. (Ct1 Succ. n)) = (NewFn1 Destroy. n)
-    (Rule_1 Destroy. (Ct1 Succ. n)) = (Rule_1 Destroy. n)
-    (Body_1 Destroy. (Ct0 Zero.)) = (Ct0 Zero.)
-    (Rule_1 Destroy. (Ct0 Zero.)) = (Ct0 Zero.)
-    (Verify Destroy.) =
-      (Cons (LHS (Ct1 Succ. (Inp 0)) (RHS (Body_1 Destroy. (Ct1 Succ. (Var 0)))))
-      (Cons (LHS (Ct0 Zero.) (RHS (Body_1 Destroy. (Ct0 Zero.))))
-      Nil))
-
-  // Cons
-  // ----
-
-    (NameOf Cons.) = "Cons"
-    (HashOf Cons.) = %Cons
-    (TypeOf Cons.) = (All Typ λa (All a λx (All (Ct1 List. a) λxs (Ct1 List. a))))
-    (Verify Cons.) =
-      Nil

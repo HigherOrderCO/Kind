@@ -273,6 +273,18 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   )
 }
 
+pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  return parser::guard(
+    parser::text_parser("?"),
+    Box::new(|state| {
+      let (state, _)    = parser::consume("?", state)?;
+      let (state, name) = parser::name_here(state)?;
+      Ok((state, Box::new(Term::Typ))) // TODO: Help constructor
+    }),
+    state,
+  );
+}
+
 pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
   parser::grammar(
     "Term",
@@ -282,6 +294,7 @@ pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
       Box::new(parse_ctr), // `(Name`
       Box::new(parse_app), // `(`
       Box::new(parse_lam), // `@`
+      Box::new(parse_hlp), // `?`
       Box::new(parse_var), // 
       Box::new(|state| Ok((state, None))),
     ],
@@ -533,9 +546,10 @@ pub fn compile_entry(entry: &Entry) -> String {
   }
 
   fn compile_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
+    // FIXME: remove redundancy
     match patt {
       Term::Var { .. } => {
-        let inp = format!("(Inp {})", vars);
+        let inp = format!("(Var {})", vars);
         let var = format!("(Var {})", vars);
         *vars += 1;
         return (inp, var);
