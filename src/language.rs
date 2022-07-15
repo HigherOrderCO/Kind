@@ -483,13 +483,13 @@ pub fn compile_term(term: &Term, quote: bool) -> String {
       name.clone()
     }
     Term::Let { name, expr, body } => {
-      todo!()
+      format!("({} {} {} λ{} {})", if quote { "Let" } else { "Lets" }, name_to_u64(name), compile_term(expr, quote), name, compile_term(body, quote))
     }
     Term::All { name, tipo, body } => {
-      format!("(All {} λ{} {})", compile_term(tipo, quote), name, compile_term(body, quote))
+      format!("(All {} {} λ{} {})", name_to_u64(name), compile_term(tipo, quote), name, compile_term(body, quote))
     }
     Term::Lam { name, body } => {
-      format!("(Lam λ{} {})", name, compile_term(body, quote))
+      format!("(Lam {} λ{} {})", name_to_u64(name), name, compile_term(body, quote))
     }
     Term::App { func, argm } => {
       format!("({} {} {})", if quote { "App" } else { "Apply" }, compile_term(func, quote), compile_term(argm, quote))
@@ -515,7 +515,7 @@ pub fn compile_entry(entry: &Entry) -> String {
   fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
     if index < args.len() {
       let arg = &args[index];
-      format!("(All {} λ{} {})", compile_term(&arg.tipo, false), arg.name, compile_type(args, tipo, index + 1))
+      format!("(All {} {} λ{} {})", name_to_u64(&arg.name), compile_term(&arg.tipo, false), arg.name, compile_type(args, tipo, index + 1))
     } else {
       compile_term(tipo, false)
     }
@@ -555,9 +555,9 @@ pub fn compile_entry(entry: &Entry) -> String {
   fn compile_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
     // FIXME: remove redundancy
     match patt {
-      Term::Var { .. } => {
-        let inp = format!("(Var {})", vars);
-        let var = format!("(Var {})", vars);
+      Term::Var { name } => {
+        let inp = format!("(Var {} {})", name_to_u64(name), vars);
+        let var = format!("(Var {} {})", name_to_u64(name), vars);
         *vars += 1;
         return (inp, var);
       }
@@ -638,4 +638,49 @@ pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
     panic!("Invalid output: {} {}", hvm::get_tag(term), rt.show(host));
   }
   return text;
+}
+
+// Name <-> Number
+
+/// Converts a name to a number, using the following table:
+pub fn name_to_u64(name: &str) -> u64 {
+  let mut num: u64 = 0;
+  for (i, chr) in name.chars().enumerate() {
+    if i < 10 {
+      num = (num << 6) + char_to_u64(chr);
+    }
+  }
+  return num;
+}
+
+pub const fn char_to_u64(chr: char) -> u64 {
+  match chr {
+    '.'       =>  0,
+    '0'..='9' =>  1 + chr as u64 - '0' as u64,
+    'A'..='Z' => 11 + chr as u64 - 'A' as u64,
+    'a'..='z' => 37 + chr as u64 - 'a' as u64,
+    '_'       => 63,
+    _         => panic!("Invalid name character."),
+  }
+}
+
+/// Inverse of `name_to_u64`
+pub fn u64_to_name(num: u64) -> String {
+  let mut name = String::new();
+  let mut num = num;
+  while num > 0 {
+    let chr = (num % 64) as u8;
+    let chr =
+        match chr {
+            0         => '.',
+            1  ..= 10 => (chr -  1 + b'0') as char,
+            11 ..= 36 => (chr - 11 + b'A') as char,
+            37 ..= 62 => (chr - 37 + b'a') as char,
+            63        => '_',
+            64 ..     => panic!("impossible character value")
+        };
+    name.push(chr);
+    num = num / 64;
+  }
+  name.chars().rev().collect()
 }
