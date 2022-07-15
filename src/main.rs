@@ -1,27 +1,42 @@
 #![allow(dead_code)] 
 #![allow(unused_variables)] 
 
+mod cli;
 mod language;
 
+use cli::{Cli, Parser, Command};
 use language::{*};
 use hvm::parser as parser;
 
 const CHECKER_HVM: &str = include_str!("checker.hvm");
 
-fn main() -> Result<(), String> {
-  //gen_debug_file();
+fn main() {
+  match run_cli() {
+    Ok(..) => {}
+    Err(err) => {
+      eprintln!("{}", err);
+    }
+  };
 
-  let args: Vec<String> = std::env::args().collect();
+// ------------------------------------------------------------
+// ------------------------------------------------------------
+// ------------------------------------------------------------
 
-  if args.len() <= 2 || args[1] != "check" && args[1] != "run" {
-    println!("Usage:");
-    println!("$ kind2 check file.kind");
-    println!("$ kind2 run file.kind");
-    return Ok(());
+fn run_cli() -> Result<(), String> {
+  let cli_matches = Cli::parse();
+
+  match cli_matches.command {
+    Command::Run { file: path, params } => {
+      kind2(&path, "Api.run_main")
+    }
+
+    Command::Check { file: path, params } => {
+      kind2(&path, "Api.check_all")
+    }
   }
+}
 
-  let path = &args[2];
-
+fn kind2(path: &str, main_function: &str) -> Result<(), String> {
   // Reads definitions from file
   let file = match std::fs::read_to_string(path) {
     Ok(code) => read_file(&code),
@@ -47,7 +62,6 @@ fn main() -> Result<(), String> {
     //println!("[{}]\n{}\n", name, show_entry(entry));
   //}
 
-  // 
   let code = compile_file(&file);
   let mut checker = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
   checker.push_str(&code);
@@ -57,14 +71,14 @@ fn main() -> Result<(), String> {
 
   // Runs with the interpreter 
   let mut rt = hvm::Runtime::from_code(&checker)?;
-  let main = rt.alloc_code(if args[1] == "check" { "Api.check_all" } else { "Api.run_main" })?;
+  let main = rt.alloc_code(main_function)?;
   rt.normalize(main);
   println!("{}", readback_string(&rt, main)); // TODO: optimize by deserializing term into text directly
 
   // Display stats
   println!("Rewrites: {}", rt.get_rewrites());
 
-  return Ok(());
+  Ok(())
 }
 
 // ------------------------------------------------------------
