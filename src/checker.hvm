@@ -338,30 +338,33 @@ Api.run_main =
   (Equal a b) =
     (Checker.done False)
 
-  // Variable
+// Equal.var (rhs : Bool) (index : U60) (b: Term) : (Checker bool)
+// ---------------------------------------------------------------
+// A variable is equal to a term when any of its reductions is
+
+  // If on LHS, extend the variable's equality list
+  // If on RHS, check if a and b are equal
   (Equal.var False a.index b) =
     ask (Checker.bind (Checker.eqt_add_value a.index b))
     (Checker.done True)
   (Equal.var True a.index b) =
-    (Bool.if (Equal.is_var_index a.index b)
+    (Bool.if (Equal.var.is_same a.index b)
       (Checker.done True)
       ask eqt = (Checker.bind (Checker.eqt_get_values a.index))
-      (Equal.any eqt b))
+      (Equal.var.try_values eqt b))
 
-  // Any of a list
-  (Equal.any (Cons a as) b) =
+  // Checks if any of its reductions is equal to 'b'
+  (Equal.var.try_values (Cons a as) b) =
     ask head = (Checker.bind (Equal a b))
-    (Bool.if head (Checker.done True) (Equal.any as b))
-  (Equal.any Nil b) =
+    (Bool.if head (Checker.done True) (Equal.var.try_values as b))
+  (Equal.var.try_values Nil b) =
     (Checker.done False)
 
-  // This this term a var with this index?
-  (Equal.is_var_index a.index (Var b.index)) = (U60.equal a.index b.index)
-  (Equal.is_var_index a.index b)             = False
-
-
-    
-    
+  // Checks if b is already a var with the same index
+  (Equal.var.is_same a.index (Var b.index)) =
+    (U60.equal a.index b.index)
+  (Equal.var.is_same a.index b) =
+    False
 
 // Infer Term : (Checker Term)
 // ---------------------------
@@ -472,7 +475,7 @@ Api.run_main =
     (Infer (App (App (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) x6) x7))
 
 // Check Term Term : (Checker Unit)
-// ---------------------------------------------
+// --------------------------------
 
   // Checks Lam 
   (Check (Lam body) (All t_type t_body)) =
