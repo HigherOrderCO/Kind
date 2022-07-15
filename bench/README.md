@@ -10,6 +10,12 @@ each assistant takes to verify a given file. Replicate as follows:
 time agda -i src file.agda
 ```
 
+### Coq
+
+```
+time coqtop -l file.v -batch -type-in-type
+```
+
 ### Idris2
 
 ```
