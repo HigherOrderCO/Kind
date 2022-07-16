@@ -88,6 +88,7 @@ pub fn adjust_rule(file: &File, rule: &Rule) -> Rule {
 }
 
 // TODO: check unbound variables
+// TODO: prevent defining the same name twice
 pub fn adjust_term(file: &File, term: &Term) -> Term {
   match *term {
     Term::Typ => {
@@ -311,22 +312,48 @@ pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   );
 }
 
-pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
-  parser::grammar(
-    "Term",
-    &[
-      Box::new(parse_all), // `(name:`
-      Box::new(parse_ctr), // `(Name`
-      Box::new(parse_app), // `(`
-      Box::new(parse_lam), // `@`
-      Box::new(parse_let), // `let `
-      Box::new(parse_ann), // `{x::`
-      Box::new(parse_hlp), // `?`
-      Box::new(parse_var), // 
-      Box::new(|state| Ok((state, None))),
-    ],
+pub fn parse_arr(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(Box<Term>) -> Box<Term>>>> {
+  return parser::guard(
+    parser::text_parser("->"),
+    Box::new(|state| {
+      let (state, _)    = parser::consume("->", state)?;
+      let (state, body) = parse_term(state)?;
+      Ok((state, Box::new(move |tipo| {
+        let name = "_".to_string();
+        let tipo = tipo.clone();
+        let body = body.clone();
+        Box::new(Term::All { name, tipo, body })
+      })))
+    }),
     state,
-  )
+  );
+}
+
+pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
+  parser::grammar("Term", &[
+    Box::new(parse_all), // `(name:`
+    Box::new(parse_ctr), // `(Name`
+    Box::new(parse_app), // `(`
+    Box::new(parse_lam), // `@`
+    Box::new(parse_let), // `let `
+    Box::new(parse_ann), // `{x::`
+    Box::new(parse_hlp), // `?`
+    Box::new(parse_var), // 
+    Box::new(|state| Ok((state, None))),
+  ], state)
+}
+
+pub fn parse_term_suffix(state: parser::State) -> parser::Answer<Box<dyn Fn(Box<Term>) -> Box<Term>>> {
+  parser::grammar("Term", &[
+    Box::new(parse_arr),
+    Box::new(|state| Ok((state, Some(Box::new(|term| term))))),
+  ], state)
+}
+
+pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
+  let (state, prefix) = parse_term_prefix(state)?;
+  let (state, suffix) = parse_term_suffix(state)?;
+  return Ok((state, suffix(prefix)));
 }
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
@@ -556,17 +583,22 @@ pub fn compile_entry(entry: &Entry) -> String {
     for pat in &rule.pats {
       pats.push(format!(" {}", compile_term(pat, false)));
     }
-    let mut vars = vec![];
-    for idx in 0 .. pats.len() {
-      vars.push(format!(" x{}", idx));
-    }
     let body_rhs = compile_term(&rule.body, true);
     let rule_rhs = compile_term(&rule.body, false);
     let mut text = String::new();
-    //text.push_str(&format!("    (Rule{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body));
     text.push_str(&format!("    (Body_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_rhs));
-    //text.push_str(&format!("    (Body_{} {}.{}) = (NewFn{} {}.{})\n", rule.pats.len(), rule.name, vars.join(""), rule.pats.len(), rule.name, vars.join("")));
     text.push_str(&format!("    (Rule_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), rule_rhs));
+    return text;
+  }
+
+  fn compile_rule_end(name: &str, size: u64) -> String {
+    let mut vars = vec![];
+    for idx in 0 .. size {
+      vars.push(format!(" x{}", idx));
+    }
+    let mut text = String::new();
+    text.push_str(&format!("    (Body_{} {}.{}) = (NewFn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
+    text.push_str(&format!("    (Rule_{} {}.{}) = (NewFn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
     return text;
   }
 
@@ -615,6 +647,9 @@ pub fn compile_entry(entry: &Entry) -> String {
   result.push_str(&format!("    (TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
   for rule in &entry.rules {
     result.push_str(&compile_rule(&rule));
+  }
+  if entry.rules.len() > 0 {
+    result.push_str(&compile_rule_end(&entry.name, entry.rules[0].pats.len() as u64));
   }
   result.push_str(&format!("    (Verify {}.) =\n", entry.name));
   for rule in &entry.rules {

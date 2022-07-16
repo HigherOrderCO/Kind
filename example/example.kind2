@@ -23,30 +23,34 @@ Bool.and True  False = False
 Bool.and False True  = False
 Bool.and False False = False
 
+Bool.theo (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
+Bool.theo a = ?a
+
+Nat.double (x: Nat) : Nat
+Nat.double (Succ x) = (Succ (Succ (Nat.double x)))
+Nat.double (Zero)   = (Zero)
+  
 List.negate (xs: (List Bool)) : (List Bool)
 List.negate (Cons Bool x xs) = (Cons Bool (Bool.not x) (List.negate xs))
 List.negate (Nil Bool)       = (Nil Bool)
+
+List.tail (a: Type) (xs: (List a)) : (List a)
+List.tail a (Cons t x xs) = xs
 
 List.map (a: Type) (b: Type) (x: (List a)) (f: (x: a) b) : (List b)
 List.map a b (Nil t)       f = (Nil b)
 List.map a b (Cons t x xs) f = (Cons b (f x) (List.map a b xs f))
 
-Nat.double (x: Nat) : Nat
-Nat.double (Succ x) = (Succ (Succ (Nat.double x)))
-Nat.double (Zero)   = (Zero)
-
-List.tail (a: Type) (xs: (List a)) : (List a)
-List.tail a (Cons t x xs) = xs
-  
 Equal.mirror (t: Type) (a: t) (b: t) (e: (Equal t a b)) : (Equal t b a)
 Equal.mirror t a b (Refl u k) = (Refl u k)
 
-Equal.apply (t: Type) (u: Type) (a: t) (b: t) (f: (x: t) t) (e: (Equal t a b)) : (Equal t (f a) (f b))
+Equal.apply (t: Type) (u: Type) (a: t) (b: t) (f: t -> t) (e: (Equal t a b)) : (Equal t (f a) (f b))
 Equal.apply t u a b f (Refl v k) = (Refl v (f k))
 
-Equal.rewrite (t: Type) (a: t) (b: t) (e: (Equal t a b)) (p: (x: t) Type) (x: (p a)) : (p b)
+Equal.rewrite (t: Type) (a: t) (b: t) (e: (Equal t a b)) (p: t -> Type) (x: (p a)) : (p b)
 Equal.rewrite t a b (Refl u k) p x = {x :: (p k)}
 
 Main : Nat {
-  (Nat.double (Succ (Succ (Succ Zero))))
+  let f = {(@x @y y) :: Nat -> Nat -> Nat}
+  (f Zero (Nat.double (Succ (Succ (Succ Zero)))))
 }
