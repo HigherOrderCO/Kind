@@ -16,9 +16,9 @@ Main = API.check_all
 // Name.length Name : U60
 (Name.length name) = (String.length (Show.name name))
 
-// Bool.if -(r: Type) Bool r r : r
-(Bool.if False then else) = else
-(Bool.if True  then else) = then
+// If -(r: Type) Bool r r : r
+(If False then else) = else
+(If True  then else) = then
 
 // Bool.and Bool Bool : Bool
 (Bool.and True  b) = b
@@ -61,10 +61,14 @@ Main = API.check_all
 (String.length (String.cons x xs)) = (+ 1 (String.length xs))
 
 // String.pad_right (str: String) (chr: U60) (len: U60) : String
-
 (String.pad_right str                chr 0)   = String.nil
 (String.pad_right (String.cons x xs) chr len) = (String.cons x   (String.pad_right xs         chr (- len 1)))
 (String.pad_right String.nil         chr len) = (String.cons chr (String.pad_right String.nil chr (- len 1)))
+
+// String.equal (a: String) (b: String) : Bool
+//(String.equal (String.cons a as) (String.cons b bs)) = (If (U60.equal a b) (String.equal as bs) False) 
+//(String.equal String.nil         String.nil)         = True
+//(String.equal as                 bs)                 = False
 
 // Text (List String) : String
 (Text Nil)         = String.nil
@@ -116,7 +120,7 @@ Line = (String.cons 10 String.nil)
 
 // type Result (a : Type) {
 //   (Checked (ctx: Context) (dep: U60) (rhs: Bool) (ret: a))
-//   (Errored Error)
+//   (Errored (ctx: Context) Error)
 // }
 
 // type Checker (a : Type) = (context: (List Term)) (depth: U60) (rhs: Bool) (Result a)
@@ -126,13 +130,13 @@ Line = (String.cons 10 String.nil)
 
 // Checker.bind.result -(a: Type) -(b: Type) (Result a) : (a -> Checker b) (Result b)
 (Checker.bind.result (Checked ctx dep rhs val)) = λnext (next val ctx dep rhs)
-(Checker.bind.result (Errored err))             = λnext (Errored err)
+(Checker.bind.result (Errored ctx err))         = λnext (Errored ctx err)
 
 // Checker.done -(a: Type) (x: a) : (Checker a)
 (Checker.done val) = λctx λdep λrhs (Checked ctx dep rhs val)
 
 // Checker.fail -(a: Type) (err: (List Term) -> U60 -> Error) : (Checker a)
-(Checker.fail err) = λctx λdep λrhs (Errored (err ctx dep))
+(Checker.fail err) = λctx λdep λrhs (Errored ctx err)
 
 // Checker.get_context -(a: Type) : (Checker Context)
 (Checker.get_context) = λctx λdep λrhs
@@ -177,68 +181,125 @@ Line = (String.cons 10 String.nil)
 // ----------
 
 // Term.if_all -(r: Type) Term (Term -> (Term -> Term) -> r) r : r
-(Term.if_all (All name type body) then else) = (then type body)
-(Term.if_all other                then else) = else
+(Term.if_all (All orig name type body) then else) = (then type body)
+(Term.if_all other                     then else) = else
+
+// Term.orig
+(Term.get_origin (Typ orig)) = orig
+(Term.get_origin (Var orig name index)) = orig
+(Term.get_origin (All orig name type body)) = orig
+(Term.get_origin (Lam orig name body)) = orig
+(Term.get_origin (App orig func argm)) = orig
+(Term.get_origin (Let orig name expr body)) = orig
+(Term.get_origin (Ann orig expr type)) = orig
+(Term.get_origin (Ct0 name orig)) = orig
+(Term.get_origin (Ct1 name orig a)) = orig
+(Term.get_origin (Ct2 name orig a b)) = orig
+(Term.get_origin (Ct3 name orig a b c)) = orig
+(Term.get_origin (Ct4 name orig a b c d)) = orig
+(Term.get_origin (Ct5 name orig a b c d e)) = orig
+(Term.get_origin (Ct6 name orig a b c d e f)) = orig
+(Term.get_origin (Ct7 name orig a b c d e f g)) = orig
+(Term.get_origin (Ct8 name orig a b c d e f g h)) = orig
+(Term.get_origin (Fn0 name orig)) = orig
+(Term.get_origin (Fn1 name orig a)) = orig
+(Term.get_origin (Fn2 name orig a b)) = orig
+(Term.get_origin (Fn3 name orig a b c)) = orig
+(Term.get_origin (Fn4 name orig a b c d)) = orig
+(Term.get_origin (Fn5 name orig a b c d e)) = orig
+(Term.get_origin (Fn6 name orig a b c d e f)) = orig
+(Term.get_origin (Fn7 name orig a b c d e f g)) = orig
+(Term.get_origin (Fn8 name orig a b c d e f g h)) = orig
+
+// Term.set_origin
+(Term.set_origin new_orig (Typ orig)) = (Typ new_orig)
+(Term.set_origin new_orig (Var orig name index)) = (Var new_orig name index)
+(Term.set_origin new_orig (All orig name type body)) = (All new_orig name type body)
+(Term.set_origin new_orig (Lam orig name body)) = (Lam new_orig name body)
+(Term.set_origin new_orig (App orig func argm)) = (App new_orig func argm)
+(Term.set_origin new_orig (Let orig name expr body)) = (Let new_orig name expr body)
+(Term.set_origin new_orig (Ann orig expr type)) = (Ann new_orig expr type)
+(Term.set_origin new_orig (Ct0 name orig)) = (Ct0 name new_orig)
+(Term.set_origin new_orig (Ct1 name orig a)) = (Ct1 name new_orig a)
+(Term.set_origin new_orig (Ct2 name orig a b)) = (Ct2 name new_orig a b)
+(Term.set_origin new_orig (Ct3 name orig a b c)) = (Ct3 name new_orig a b c)
+(Term.set_origin new_orig (Ct4 name orig a b c d)) = (Ct4 name new_orig a b c d)
+(Term.set_origin new_orig (Ct5 name orig a b c d e)) = (Ct5 name new_orig a b c d e)
+(Term.set_origin new_orig (Ct6 name orig a b c d e f)) = (Ct6 name new_orig a b c d e f)
+(Term.set_origin new_orig (Ct7 name orig a b c d e f g)) = (Ct7 name new_orig a b c d e f g)
+(Term.set_origin new_orig (Ct8 name orig a b c d e f g h)) = (Ct8 name new_orig a b c d e f g h)
+(Term.set_origin new_orig (Fn0 name orig)) = (Fn0 name new_orig)
+(Term.set_origin new_orig (Fn1 name orig a)) = (Fn1 name new_orig a)
+(Term.set_origin new_orig (Fn2 name orig a b)) = (Fn2 name new_orig a b)
+(Term.set_origin new_orig (Fn3 name orig a b c)) = (Fn3 name new_orig a b c)
+(Term.set_origin new_orig (Fn4 name orig a b c d)) = (Fn4 name new_orig a b c d)
+(Term.set_origin new_orig (Fn5 name orig a b c d e)) = (Fn5 name new_orig a b c d e)
+(Term.set_origin new_orig (Fn6 name orig a b c d e f)) = (Fn6 name new_orig a b c d e f)
+(Term.set_origin new_orig (Fn7 name orig a b c d e f g)) = (Fn7 name new_orig a b c d e f g)
+(Term.set_origin new_orig (Fn8 name orig a b c d e f g h)) = (Fn8 name new_orig a b c d e f g h)
+
+// SO = Term.set_origin
+(SO new_orig term) = (Term.set_origin new_orig term)
 
 // Equal Term Term : (Checker Bool)
 // --------------------------------
 
 // Typ equality
-(Equal Typ Typ) =
+(Equal (Typ orig) (Typ orig)) =
   (Checker.done True)
 
 // All equality
-(Equal (All a.name a.type a.body) (All b.name b.type b.body)) =
+(Equal (All a.orig a.name a.type a.body) (All b.orig b.name b.type b.body)) =
   ask dep  = (Checker.bind Checker.get_depth)
   ask type = (Checker.bind (Equal a.type b.type))
-  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.name dep)) (b.body (Var b.name dep))) Null Null Null))
+  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null Null))
   (Checker.done (Bool.and type body))
 
 // Lam equality
-(Equal (Lam a.name a.body) (Lam b.name b.body)) =
+(Equal (Lam a.orig a.name a.body) (Lam b.orig b.name b.body)) =
   ask dep  = (Checker.bind Checker.get_depth)
-  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.name dep)) (b.body (Var b.name dep))) Null Null Null))
+  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null Null))
   body
 
 // App equality
-(Equal (App a.func a.argm) (App b.func b.argm)) =
+(Equal (App a.orig a.func a.argm) (App b.orig b.func b.argm)) =
   ask func = (Checker.bind (Equal a.func b.func))
   ask argm = (Checker.bind (Equal a.argm b.argm))
   (Checker.done (Bool.and func argm))
 
 // Let equality
-(Equal (Let a.name a.expr a.body) (Let b.name b.expr b.body)) =
+(Equal (Let a.orig a.name a.expr a.body) (Let b.orig b.name b.expr b.body)) =
   ask dep  = (Checker.bind Checker.get_depth)
   ask expr = (Checker.bind (Equal a.expr b.expr))
-  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.name dep)) (b.body (Var b.name dep))) Null Null Null))
+  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null Null))
   (Checker.done (Bool.and expr body))
 
 // Ann equality
-(Equal (Ann a.expr a.type) (Ann b.expr b.type)) =
+(Equal (Ann a.orig a.expr a.type) (Ann b.orig b.expr b.type)) =
   ask expr = (Checker.bind (Equal a.expr b.expr))
   ask type = (Checker.bind (Equal a.type b.type))
   (Checker.done (Bool.and expr type))
 
 // Ct0 equality
-(Equal (Ct0 a.ctid) (Ct0 b.ctid)) =
+(Equal (Ct0 a.ctid a.orig) (Ct0 b.ctid b.orig)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   (Checker.done ctid)
 
 // Ct1 equality
-(Equal (Ct1 a.ctid a.x0) (Ct1 b.ctid b.x0)) =
+(Equal (Ct1 a.ctid a.orig a.x0) (Ct1 b.ctid b.orig b.x0)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   (Checker.done (Bool.and ctid x0))
 
 // Ct2 equality
-(Equal (Ct2 a.ctid a.x0 a.x1) (Ct2 b.ctid b.x0 b.x1)) =
+(Equal (Ct2 a.ctid a.orig a.x0 a.x1) (Ct2 b.ctid b.orig b.x0 b.x1)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
   (Checker.done (Bool.and ctid (Bool.and x0 x1)))
 
 // Ct3 equality
-(Equal (Ct3 a.ctid a.x0 a.x1 a.x2) (Ct3 b.ctid b.x0 b.x1 b.x2)) =
+(Equal (Ct3 a.ctid a.orig a.x0 a.x1 a.x2) (Ct3 b.ctid b.orig b.x0 b.x1 b.x2)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
@@ -246,7 +307,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 x2))))
 
 // Ct4 equality
-(Equal (Ct4 a.ctid a.x0 a.x1 a.x2 a.x3) (Ct4 b.ctid b.x0 b.x1 b.x2 b.x3)) =
+(Equal (Ct4 a.ctid a.orig a.x0 a.x1 a.x2 a.x3) (Ct4 b.ctid b.orig b.x0 b.x1 b.x2 b.x3)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
@@ -255,7 +316,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 x3)))))
 
 // Ct5 equality
-(Equal (Ct5 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4) (Ct5 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4)) =
+(Equal (Ct5 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4) (Ct5 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
@@ -265,7 +326,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 x4))))))
 
 // Ct6 equality
-(Equal (Ct6 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5) (Ct6 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5)) =
+(Equal (Ct6 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4 a.x5) (Ct6 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4 b.x5)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
@@ -276,7 +337,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 x5)))))))
 
 // Ct7 equality
-(Equal (Ct7 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6) (Ct7 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6)) =
+(Equal (Ct7 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6) (Ct7 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
@@ -288,7 +349,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 x6))))))))
 
 // Ct8 equality
-(Equal (Ct8 a.ctid a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6 a.x7) (Ct8 b.ctid b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6 b.x7)) =
+(Equal (Ct8 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6 a.x7) (Ct8 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6 b.x7)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
@@ -301,14 +362,14 @@ Line = (String.cons 10 String.nil)
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 (Bool.and x6 x7)))))))))
 
 // Var equality #0
-(Equal (Var a.name a.index) b) =
+(Equal (Var a.orig a.name a.index) b) =
   ask rhs = (Checker.bind (Checker.get_right_hand_side))
-  (Equal.var rhs a.name a.index b)
+  (Equal.var rhs a.orig a.name a.index b)
 
 // Var equality #1
-(Equal a (Var b.name b.index)) =
+(Equal a (Var b.orig b.name b.index)) =
   ask rhs = (Checker.bind (Checker.get_right_hand_side))
-  (Equal.var rhs b.name b.index a)
+  (Equal.var rhs b.orig b.name b.index a)
 
 // Not equal
 (Equal a b) =
@@ -322,58 +383,57 @@ Line = (String.cons 10 String.nil)
 // If on RHS, check if a and b are equal
 
 // Var-Var checker
-(Equal.var False a.name a.index b) =
+(Equal.var False a.orig a.name a.index b) =
   ask (Checker.bind (Checker.add_value a.index b))
   (Checker.done True)
-(Equal.var True a.name a.index (Var b.name b.index)) =
-  (Bool.if (U60.equal a.index b.index)
+(Equal.var True a.orig a.name a.index (Var b.orig b.name b.index)) =
+  (If (U60.equal a.index b.index)
     (Checker.done True)
     ask a.val = (Checker.bind (Checker.find a.index [] λnλtλv(v)))
     ask b.val = (Checker.bind (Checker.find b.index [] λnλtλv(v)))
-    ask a.chk = (Checker.bind (Equal.var.try_values a.index a.val (Var b.name b.index)))
-    ask b.chk = (Checker.bind (Equal.var.try_values b.index b.val (Var a.name a.index)))
+    ask a.chk = (Checker.bind (Equal.var.try_values a.val (Var b.orig b.name b.index)))
+    ask b.chk = (Checker.bind (Equal.var.try_values b.val (Var a.orig a.name a.index)))
     (Checker.done (Bool.or a.chk b.chk)))
-(Equal.var True a.name a.index b) =
+(Equal.var True a.orig a.name a.index b) =
   ask a.val = (Checker.bind (Checker.find a.index [] λnλtλv(v)))
-  (Equal.var.try_values a.index a.val b)
+  (Equal.var.try_values a.val b)
 
 // Checks if any of a set of reductions is equal
-(Equal.var.try_values i (Cons a as) b) =
+(Equal.var.try_values (Cons a as) b) =
   ask head = (Checker.bind (Equal a b))
-  (Bool.if head
+  (If head
     (Checker.done True)
-    (Equal.var.try_values i as b))
-(Equal.var.try_values i Nil b) =
+    (Equal.var.try_values as b))
+(Equal.var.try_values Nil b) =
   (Checker.done False)
 
 // Infer Term : (Checker Term)
 // ---------------------------
 
 // Infers Var
-(Infer (Var name index)) =
+(Infer (Var orig name index)) =
   ask got_type = (Checker.bind (Checker.find index None λnλtλv(Some t)))
   (Maybe.case got_type
-    (Checker.fail λctx λdep (UnboundVariable ctx dep))
+    (Checker.fail (UnboundVariable (Var orig name index)))
     λvar_type (Checker.done var_type))
 
 // Infers Typ
-(Infer Typ) =
-  (Checker.done Typ)
+(Infer (Typ orig)) =
+  (Checker.done (Typ orig))
 
 // Infers All
-(Infer (All name type body)) =
+(Infer (All orig name type body)) =
   ask dep      = (Checker.bind Checker.get_depth)
-  ask type_chk = (Checker.bind (Check type Typ))
-  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var name dep)) Typ) name type []))
-  (Checker.done Typ)
+  ask type_chk = (Checker.bind (Check type (Typ orig)))
+  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (Typ orig)) name type []))
+  (Checker.done (Typ orig))
 
 // Infers Lam
-(Infer (Lam name body)) =
-  (Checker.fail λctx λdep
-    (CantInferLambda ctx dep))
+(Infer (Lam orig name body)) =
+  (Checker.fail (CantInferLambda (Lam orig name body)))
 
 // Infers App
-(Infer (App func argm)) =
+(Infer (App orig func argm)) =
   ask func_typ = (Checker.bind (Infer func))
   (Term.if_all func_typ
     // then
@@ -381,114 +441,113 @@ Line = (String.cons 10 String.nil)
       ask argm_ok = (Checker.bind (Check argm func_typ_type))
       (Checker.done (func_typ_body argm))
     // else
-    (Checker.fail λctx λdep
-      (NonFunctionApplication ctx dep)))
+    (Checker.fail (InvalidCall (App orig func argm))))
 
 // Infers Let
-(Infer (Let name expr body)) =
+(Infer (Let orig name expr body)) =
   ask dep      = (Checker.bind Checker.get_depth)
   ask expr_typ = (Checker.bind (Infer expr))
-  ask body_typ = (Checker.bind (Checker.extended (Infer (body (Var name dep))) name expr_typ []))
+  ask body_typ = (Checker.bind (Checker.extended (Infer (body (Var orig name dep))) name expr_typ []))
   (Checker.done body_typ)
 
 // Infers Ann
-(Infer (Ann expr type)) =
+(Infer (Ann orig expr type)) =
   ask expr_chk = (Checker.bind (Check expr type))
   (Checker.done type)
 
 // Infers Ct0
-(Infer (Ct0 ctid)) =
+(Infer (Ct0 ctid orig)) =
   (Checker.done (TypeOf ctid))
 
 // Infers Ct1
-(Infer (Ct1 ctid x0)) =
-  (Infer (App (Ct0 ctid) x0))
+(Infer (Ct1 ctid orig x0)) =
+  (Infer (App orig (Ct0 ctid orig) x0))
 
 // Infers Ct2
-(Infer (Ct2 ctid x0 x1)) =
-  (Infer (App (App (Ct0 ctid) x0) x1))
+(Infer (Ct2 ctid orig x0 x1)) =
+  (Infer (App orig (App orig (Ct0 ctid orig) x0) x1))
 
 // Infers Ct3
-(Infer (Ct3 ctid x0 x1 x2)) =
-  (Infer (App (App (App (Ct0 ctid) x0) x1) x2))
+(Infer (Ct3 ctid orig x0 x1 x2)) =
+  (Infer (App orig (App orig (App orig (Ct0 ctid orig) x0) x1) x2))
 
 // Infers Ct4
-(Infer (Ct4 ctid x0 x1 x2 x3)) =
-  (Infer (App (App (App (App (Ct0 ctid) x0) x1) x2) x3))
+(Infer (Ct4 ctid orig x0 x1 x2 x3)) =
+  (Infer (App orig (App orig (App orig (App orig (Ct0 ctid orig) x0) x1) x2) x3))
 
 // Infers Ct5
-(Infer (Ct5 ctid x0 x1 x2 x3 x4)) =
-  (Infer (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4))
+(Infer (Ct5 ctid orig x0 x1 x2 x3 x4)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (Ct0 ctid orig) x0) x1) x2) x3) x4))
 
 // Infers Ct6
-(Infer (Ct6 ctid x0 x1 x2 x3 x4 x5)) =
-  (Infer (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5))
+(Infer (Ct6 ctid orig x0 x1 x2 x3 x4 x5)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (App orig (Ct0 ctid orig) x0) x1) x2) x3) x4) x5))
 
 // Infers Ct7
-(Infer (Ct7 ctid x0 x1 x2 x3 x4 x5 x6)) =
-  (Infer (App (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5) x6))
+(Infer (Ct7 ctid orig x0 x1 x2 x3 x4 x5 x6)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (App orig (App orig (Ct0 ctid orig) x0) x1) x2) x3) x4) x5) x6))
 
 // Infers Ct8
-(Infer (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
-  (Infer (App (App (App (App (App (App (App (App (Ct0 ctid) x0) x1) x2) x3) x4) x5) x6) x7))
+(Infer (Ct8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (App orig (App orig (App orig (Ct0 ctid orig) x0) x1) x2) x3) x4) x5) x6) x7))
 
 // Infers Fn0
-(Infer (Fn0 ctid)) =
+(Infer (Fn0 ctid orig)) =
   (Checker.done (TypeOf ctid))
 
 // Infers Fn1
-(Infer (Fn1 ctid x0)) =
-  (Infer (App (Fn0 ctid) x0))
+(Infer (Fn1 ctid orig x0)) =
+  (Infer (App orig (Fn0 ctid orig) x0))
 
 // Infers Fn2
-(Infer (Fn2 ctid x0 x1)) =
-  (Infer (App (App (Fn0 ctid) x0) x1))
+(Infer (Fn2 ctid orig x0 x1)) =
+  (Infer (App orig (App orig (Fn0 ctid orig) x0) x1))
 
 // Infers Fn3
-(Infer (Fn3 ctid x0 x1 x2)) =
-  (Infer (App (App (App (Fn0 ctid) x0) x1) x2))
+(Infer (Fn3 ctid orig x0 x1 x2)) =
+  (Infer (App orig (App orig (App orig (Fn0 ctid orig) x0) x1) x2))
 
 // Infers Fn4
-(Infer (Fn4 ctid x0 x1 x2 x3)) =
-  (Infer (App (App (App (App (Fn0 ctid) x0) x1) x2) x3))
+(Infer (Fn4 ctid orig x0 x1 x2 x3)) =
+  (Infer (App orig (App orig (App orig (App orig (Fn0 ctid orig) x0) x1) x2) x3))
 
 // Infers Fn5
-(Infer (Fn5 ctid x0 x1 x2 x3 x4)) =
-  (Infer (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4))
+(Infer (Fn5 ctid orig x0 x1 x2 x3 x4)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (Fn0 ctid orig) x0) x1) x2) x3) x4))
 
 // Infers Fn6
-(Infer (Fn6 ctid x0 x1 x2 x3 x4 x5)) =
-  (Infer (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5))
+(Infer (Fn6 ctid orig x0 x1 x2 x3 x4 x5)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (App orig (Fn0 ctid orig) x0) x1) x2) x3) x4) x5))
 
 // Infers Fn7
-(Infer (Fn7 ctid x0 x1 x2 x3 x4 x5 x6)) =
-  (Infer (App (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) x6))
+(Infer (Fn7 ctid orig x0 x1 x2 x3 x4 x5 x6)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (App orig (App orig (Fn0 ctid orig) x0) x1) x2) x3) x4) x5) x6))
 
 // Infers Fn8
-(Infer (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
-  (Infer (App (App (App (App (App (App (App (App (Fn0 ctid) x0) x1) x2) x3) x4) x5) x6) x7))
+(Infer (Fn8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) =
+  (Infer (App orig (App orig (App orig (App orig (App orig (App orig (App orig (App orig (Fn0 ctid orig) x0) x1) x2) x3) x4) x5) x6) x7))
 
 // Check Term Term : (Checker Unit)
 // --------------------------------
 
 // Checks Lam 
-(Check (Lam name body) (All t_name t_type t_body)) =
+(Check (Lam orig name body) (All t_orig t_name t_type t_body)) =
   ask dep      = (Checker.bind Checker.get_depth)
-  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var name dep)) (t_body (Var t_name dep))) t_name t_type []))
+  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (t_body (Var orig t_name dep))) t_name t_type []))
   (Checker.done Unit)
 
 // Checks Let
-(Check (Let name expr body) type) =
+(Check (Let orig name expr body) type) =
   ask dep      = (Checker.bind Checker.get_depth)
   ask expr_typ = (Checker.bind (Infer expr))
-  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var name dep)) type) name expr_typ []))
+  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) type) name expr_typ []))
   (Checker.done Unit)
 
 // Checks Var
-(Check (Var name index) type) =
+(Check (Var orig name index) type) =
   ask rhs = (Checker.bind Checker.get_right_hand_side)
-  (Bool.if rhs
-    (Check.compare (Var name index) type)
+  (If rhs
+    (Check.compare (Var orig name index) type)
     (Checker.extend name type Nil))
 
 // Checks others
@@ -499,19 +558,19 @@ Line = (String.cons 10 String.nil)
 (Check.compare term type) =
   ask term_typ = (Checker.bind (Infer term))
   ask is_equal = (Checker.bind (Equal term_typ type))
-  (Bool.if is_equal
+  (If is_equal
     (Checker.done Unit)
-    (Checker.fail λctx λdep (TypeMismatch ctx dep type term_typ)))
+    (Checker.fail (TypeMismatch term type term_typ)))
 
 // Check.verify Verifier (List Term) : (Checker Unit)
 // --------------------------------------------------
 
-(Check.verify (LHS arg args) (All name type body)) =
+(Check.verify (LHS arg args) (All orig name type body)) =
   ask arg_chk  = (Checker.bind (Check arg type))
   ask args_chk = (Checker.bind (Check.verify args (body arg)))
   (Checker.done Unit)
 (Check.verify (LHS arg args) other) =
-  (Checker.fail λctx λdep (InvalidEquationArity ctx dep))
+  (Checker.fail (TooManyArguments arg))
 (Check.verify (RHS expr) type) =
   ask (Checker.bind (Checker.set_right_hand_side True))
   ask expr_chk = (Checker.bind (Check expr type))
@@ -520,70 +579,73 @@ Line = (String.cons 10 String.nil)
 // APP Term Term : Term
 // ----------------------
 
-(APP (Lam name fbody) argm) = (fbody argm)
-(APP func             argm) = (App func argm)
+(APP orig (Lam orig name fbody) argm) = (fbody argm)
+(APP orig func                  argm) = (App orig func argm)
 
 // LET Name Term Term : Term
 // --------------------------
 
-(LET name expr body) = (body expr)
+(LET orig name expr body) = (body expr)
 
 // ANN Term Term : Term
 // --------------------------
 
-(ANN expr type) = expr
+(ANN orig expr type) = expr
 
 // Stringification
 // ---------------
 
-(Show (Var name index)) = (Text [
+(Show (Var orig name index)) = (Text [
   (Show.name name)
 ])
 
-(Show Typ) = (Text [
+(Show (Typ orig)) = (Text [
   "Type"
 ])
 
-(Show (All name type body)) = (Text [
-  "(" (Show.name name) ": " (Show type) ") "
-  (Show (body (Var name 0)))
-])
+(Show (All orig name type body)) =
+  (U60.if (== name 63) // underscore
+    (Text [
+      (Show type) " -> " (Show (body (Var orig name 0)))
+    ])
+    (Text [
+      "(" (Show.name name) ": " (Show type) ") "
+      (Show (body (Var orig name 0)))
+    ]))
 
-(Show (Lam name body)) = (Text [
+(Show (Lam orig name body)) = (Text [
   "@" (Show.name name) " "
-  (Show (body (Var name 0)))
+  (Show (body (Var orig name 0)))
 ])
 
-(Show (Let name expr body)) = (Text [
-  "let " (Show.name name) " = " (Show (expr (Var name 0))) "; "
-  (Show (body (Var name 0)))
+(Show (Let orig name expr body)) = (Text [
+  "let " (Show.name name) " = " (Show (expr (Var orig name 0))) "; "
+  (Show (body (Var orig name 0)))
 ])
 
-(Show (Ann expr type)) = (Text [
+(Show (Ann orig expr type)) = (Text [
   "{" (Show expr) " :: " (Show type) "}"
 ])
 
-(Show (App func argm)) = (Text [
+(Show (App orig func argm)) = (Text [
   "("
   (Show func) " "
   (Show argm)
   ")"
 ])
 
-(Show (Ct0 ctid)) = (Text [
-  "("
+(Show (Ct0 ctid orig)) = (Text [
   (NameOf ctid)
-  ")"
 ])
 
-(Show (Ct1 ctid x0)) = (Text [
+(Show (Ct1 ctid orig x0)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0)
   ")"
 ])
 
-(Show (Ct2 ctid x0 x1)) = (Text [
+(Show (Ct2 ctid orig x0 x1)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -591,7 +653,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct3 ctid x0 x1 x2)) = (Text [
+(Show (Ct3 ctid orig x0 x1 x2)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -600,7 +662,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct4 ctid x0 x1 x2 x3)) = (Text [
+(Show (Ct4 ctid orig x0 x1 x2 x3)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -610,7 +672,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct5 ctid x0 x1 x2 x3 x4)) = (Text [
+(Show (Ct5 ctid orig x0 x1 x2 x3 x4)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -621,7 +683,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct6 ctid x0 x1 x2 x3 x4 x5)) = (Text [
+(Show (Ct6 ctid orig x0 x1 x2 x3 x4 x5)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -633,7 +695,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct7 ctid x0 x1 x2 x3 x4 x5 x6)) = (Text [
+(Show (Ct7 ctid orig x0 x1 x2 x3 x4 x5 x6)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -646,7 +708,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
+(Show (Ct8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -660,20 +722,18 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn0 ctid)) = (Text [
-  "("
+(Show (Fn0 ctid orig)) = (Text [
   (NameOf ctid)
-  ")"
 ])
 
-(Show (Fn1 ctid x0)) = (Text [
+(Show (Fn1 ctid orig x0)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0)
   ")"
 ])
 
-(Show (Fn2 ctid x0 x1)) = (Text [
+(Show (Fn2 ctid orig x0 x1)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -681,7 +741,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn3 ctid x0 x1 x2)) = (Text [
+(Show (Fn3 ctid orig x0 x1 x2)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -690,7 +750,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn4 ctid x0 x1 x2 x3)) = (Text [
+(Show (Fn4 ctid orig x0 x1 x2 x3)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -700,7 +760,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn5 ctid x0 x1 x2 x3 x4)) = (Text [
+(Show (Fn5 ctid orig x0 x1 x2 x3 x4)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -711,7 +771,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn6 ctid x0 x1 x2 x3 x4 x5)) = (Text [
+(Show (Fn6 ctid orig x0 x1 x2 x3 x4 x5)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -723,7 +783,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn7 ctid x0 x1 x2 x3 x4 x5 x6)) = (Text [
+(Show (Fn7 ctid orig x0 x1 x2 x3 x4 x5 x6)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -736,7 +796,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn8 ctid x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
+(Show (Fn8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -796,12 +856,12 @@ Line = (String.cons 10 String.nil)
 
 API.check_all =
   let output = (API.output (List.reverse (API.check_functions Functions)))
-  (Bool.if (String.is_empty output)
+  (If (String.is_empty output)
     (Text [ "All terms check." Line Line ])
     output)
 
 API.run_main = (Text [
-  (Show (FN0 Main.))
+  (Show (FN0 Main. 0))
   Line Line
 ])
 
@@ -834,40 +894,52 @@ API.run_main = (Text [
   String.nil
 (API.output.function fnid (Cons (Checked ctx dep rhs val) checks)) =
   (API.output.function fnid checks)
-(API.output.function fnid (Cons (Errored err) checks)) =
+(API.output.function fnid (Cons (Errored ctx err) checks)) =
   (Text [
-    (Color "1") (Color "31") "Error on " (NameOf fnid) ":" (Color "0") Line
-    Line
-    (API.output.error err) Line
+    (Color "1") "[" (NameOf fnid) "] " (Color "0") Line
+    (API.output.error err ctx) Line
     (API.output.function fnid checks)
   ])
 
-(API.output.error (UnboundVariable ctx dep)) =
+(API.output.error (UnboundVariable term) ctx) =
   (Text [
-    "Unbound Variable."
+    (Color "4") "Unbound Variable." (Color "0") Line
+    (API.output.error.details ctx term)
   ])
-(API.output.error (CantInferLambda ctx dep)) =
+(API.output.error (CantInferLambda term) ctx) =
   (Text [
-    "Can't infer lambda."
+    (Color "4") "Can't infer lambda." (Color "0") Line
+    (API.output.error.details ctx term)
   ])
-(API.output.error (InvalidEquationArity ctx dep)) =
+(API.output.error (TooManyArguments term) ctx) =
   (Text [
-    "Invalid equation arity."
+    (Color "4") "Too many arguments." (Color "0") Line
+    (API.output.error.details ctx term)
   ])
-(API.output.error (NonFunctionApplication ctx dep)) =
+(API.output.error (InvalidCall term) ctx) =
   (Text [
-    "Non-function application."
+    (Color "4") "Invalid call." (Color "0") Line
+    (API.output.error.details ctx term)
   ])
-(API.output.error (TypeMismatch ctx dep expected detected)) =
+(API.output.error (TypeMismatch term expected detected) ctx) =
   (Text [
-    "Type mismatch." Line
+    (Color "4") "Type mismatch." (Color "0") Line
     "- Expected: " (Show expected) Line
     "- Detected: " (Show detected) Line
-    (Bool.if (Context.is_empty ctx) "" (Text [
-      "With context:" Line
+    (API.output.error.details ctx term)
+  ])
+
+(API.output.error.details ctx term) =
+  let orig = (Term.get_origin term)
+  (Text [
+    (If (Context.is_empty ctx) "" (Text [
+      (Color "4") "Context:" (Color "0") Line
       (Show.context ctx)
     ]))
+    (Color "4") "Source:" (Color "0") Line
+    "{{#"(Show.u60 (& orig 16777215))":"(Show.u60 (>> orig 24))"#}}" Line
   ])
+  
 
 // User-Defined Functions
 // ----------------------

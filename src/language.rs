@@ -31,15 +31,15 @@ pub struct Rule {
 
 #[derive(Clone, Debug)]
 pub enum Term {
-  Typ,
-  Var { name: String },
-  All { name: String, tipo: Box<Term>, body: Box<Term> },
-  Lam { name: String, body: Box<Term> },
-  App { func: Box<Term>, argm: Box<Term> },
-  Let { name: String, expr: Box<Term>, body: Box<Term> },
-  Ann { expr: Box<Term>, tipo: Box<Term> },
-  Ctr { name: String, args: Vec<Box<Term>> },
-  Fun { name: String, args: Vec<Box<Term>> },
+  Typ { orig: u64 },
+  Var { orig: u64, name: String },
+  All { orig: u64, name: String, tipo: Box<Term>, body: Box<Term> },
+  Lam { orig: u64, name: String, body: Box<Term> },
+  App { orig: u64, func: Box<Term>, argm: Box<Term> },
+  Let { orig: u64, name: String, expr: Box<Term>, body: Box<Term> },
+  Ann { orig: u64, expr: Box<Term>, tipo: Box<Term> },
+  Ctr { orig: u64, name: String, args: Vec<Box<Term>> },
+  Fun { orig: u64, name: String, args: Vec<Box<Term>> },
 }
 
 // Adjuster
@@ -91,52 +91,59 @@ pub fn adjust_rule(file: &File, rule: &Rule) -> Rule {
 // TODO: prevent defining the same name twice
 pub fn adjust_term(file: &File, term: &Term) -> Term {
   match *term {
-    Term::Typ => {
-      Term::Typ
+    Term::Typ { orig } => {
+      Term::Typ { orig }
     },
-    Term::Var { ref name } => {
-      Term::Var { name: name.clone() }
+    Term::Var { ref orig, ref name } => {
+      let orig = *orig;
+      Term::Var { orig, name: name.clone() }
     },
-    Term::Let { ref name, ref expr, ref body } => {
+    Term::Let { ref orig, ref name, ref expr, ref body } => {
+      let orig = *orig;
       let expr = Box::new(adjust_term(file, &*expr));
       let body = Box::new(adjust_term(file, &*body));
-      Term::Let { name: name.clone(), expr, body }
+      Term::Let { orig, name: name.clone(), expr, body }
     },
-    Term::Ann { ref expr, ref tipo } => {
+    Term::Ann { ref orig, ref expr, ref tipo } => {
+      let orig = *orig;
       let expr = Box::new(adjust_term(file, &*expr));
       let tipo = Box::new(adjust_term(file, &*tipo));
-      Term::Ann { expr, tipo }
+      Term::Ann { orig, expr, tipo }
     },
-    Term::All { ref name, ref tipo, ref body } => {
+    Term::All { ref orig, ref name, ref tipo, ref body } => {
+      let orig = *orig;
       let tipo = Box::new(adjust_term(file, &*tipo));
       let body = Box::new(adjust_term(file, &*body));
-      Term::All { name: name.clone(), tipo, body }
+      Term::All { orig, name: name.clone(), tipo, body }
     },
-    Term::Lam { ref name, ref body } => {
+    Term::Lam { ref orig, ref name, ref body } => {
+      let orig = *orig;
       let body = Box::new(adjust_term(file, &*body));
-      Term::Lam { name: name.clone(), body }
+      Term::Lam { orig, name: name.clone(), body }
     },
-    Term::App { ref func, ref argm } => {
+    Term::App { ref orig, ref func, ref argm } => {
+      let orig = *orig;
       let func = Box::new(adjust_term(file, &*func));
       let argm = Box::new(adjust_term(file, &*argm));
-      Term::App { func, argm }
+      Term::App { orig, func, argm }
     },
-    Term::Ctr { ref name, ref args } => {
+    Term::Ctr { ref orig, ref name, ref args } => {
+      let orig = *orig;
       if let Some(entry) = file.entries.get(name) {
         let mut new_args = Vec::new();
         for arg in args {
           new_args.push(Box::new(adjust_term(file, &*arg)));
         }
         if entry.rules.len() > 0 {
-          Term::Fun { name: name.clone(), args: new_args }
+          Term::Fun { orig, name: name.clone(), args: new_args }
         } else {
-          Term::Ctr { name: name.clone(), args: new_args }
+          Term::Ctr { orig, name: name.clone(), args: new_args }
         }
       } else {
         panic!("Missing declaration for: '{}'.", name);
       }
     },
-    Term::Fun { ref name, ref args } => {
+    Term::Fun { ref orig, ref name, ref args } => {
       panic!("Internal error."); // shouldn't happen since we can't parse Fun{}
     },
   }
@@ -144,6 +151,19 @@ pub fn adjust_term(file: &File, term: &Term) -> Term {
 
 // Parser
 // ======
+
+pub fn origin(init: usize, last: usize) -> u64 {
+  ((init as u64) & 0xFFFFFF) | (((last as u64) & 0xFFFFFF) << 24)
+}
+
+pub fn get_init_index(state: parser::State) -> parser::Answer<usize> {
+  let (state, _) = parser::skip(state)?;
+  Ok((state, state.index))
+}
+
+pub fn get_last_index(state: parser::State) -> parser::Answer<usize> {
+  Ok((state, state.index))
+}
 
 pub fn is_var_head(head: char) -> bool {
   ('a'..='z').contains(&head) || head == '_' || head == '$'
@@ -180,8 +200,11 @@ pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       Ok((state, is_var_head(head)))
     }),
     Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
       let (state, name) = parse_var_name(state)?;
-      Ok((state, Box::new(Term::Var { name })))
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Var { orig, name })))
     }),
     state,
   )
@@ -191,10 +214,13 @@ pub fn parse_lam(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
     parser::text_parser("@"),
     Box::new(move |state| {
+      let (state, init) = get_init_index(state)?;
       let (state, _)    = parser::consume("@", state)?;
       let (state, name) = parse_var_name(state)?;
       let (state, body) = parse_term(state)?;
-      Ok((state, Box::new(Term::Lam { name, body })))
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Lam { orig, name, body })))
     }),
     state,
   )
@@ -209,13 +235,16 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       Ok((state, all0 && all1 && name.len() > 0 && is_var_head(name.chars().nth(0).unwrap_or(' '))))
     }),
     Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
       let (state, _)    = parser::consume("(", state)?;
       let (state, name) = parse_var_name(state)?;
       let (state, _)    = parser::consume(":", state)?;
       let (state, tipo) = parse_term(state)?;
       let (state, _)    = parser::consume(")", state)?;
       let (state, body) = parse_term(state)?;
-      Ok((state, Box::new(Term::All { name, tipo, body })))
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::All { orig, name, tipo, body })))
     }),
     state,
   )
@@ -225,16 +254,36 @@ pub fn parse_app(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   return parser::guard(
     parser::text_parser("("),
     Box::new(|state| {
-      parser::list(
+      let (state, init_index) = get_init_index(state)?;
+      parser::list::<(usize, usize, Box<Term>),Box<Term>> (
         parser::text_parser("("),
         parser::text_parser(""),
         parser::text_parser(")"),
-        Box::new(parse_term),
+        Box::new(|state| {
+          let (state, init) = get_init_index(state)?;
+          let (state, term) = parse_term(state)?;
+          let (state, last) = get_last_index(state)?;
+          return Ok((state, (init, last, term)));
+        }),
         Box::new(|args| {
           if !args.is_empty() {
-            args.into_iter().reduce(|a, b| Box::new(Term::App { func: a, argm: b })).unwrap()
+            let (app_init_index, app_last_index, func) = &args[0];
+            let mut term = func.clone();
+            for i in 1 .. args.len() {
+              let (argm_init_index, argm_last_index, argm) = &args[i];
+              term = Box::new(Term::App {
+                orig: origin(*app_init_index, *argm_last_index),
+                func: term,
+                argm: argm.clone(),
+              });
+            }
+            return term;
           } else {
-            Box::new(Term::Var { name: "?".to_string() })
+            // TODO: "()" could make an Unit?
+            return Box::new(Term::Var {
+              orig: 0,
+              name: "?".to_string(),
+            });
           }
         }),
         state,
@@ -248,13 +297,16 @@ pub fn parse_let(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   return parser::guard(
     parser::text_parser("let "),
     Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
       let (state, _)    = parser::consume("let ", state)?;
       let (state, name) = parse_var_name(state)?;
       let (state, _)    = parser::consume("=", state)?;
       let (state, expr) = parse_term(state)?;
       let (state, _)    = parser::text(";", state)?;
       let (state, body) = parse_term(state)?;
-      Ok((state, Box::new(Term::Let { name, expr, body })))
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Let { orig, name, expr, body })))
     }),
     state,
   );
@@ -264,12 +316,15 @@ pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   return parser::guard(
     parser::text_parser("{"),
     Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
       let (state, _)    = parser::consume("{", state)?;
       let (state, expr) = parse_term(state)?;
       let (state, _)    = parser::text("::", state)?;
       let (state, tipo) = parse_term(state)?;
       let (state, _)    = parser::consume("}", state)?;
-      Ok((state, Box::new(Term::Ann { expr, tipo })))
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Ann { orig, expr, tipo })))
     }),
     state,
   );
@@ -283,17 +338,22 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       Ok((state, is_ctr_head(head)))
     }),
     Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
       let (state, open) = parser::text("(", state)?;
       let (state, name) = parse_ctr_name(state)?;
       if name == "Type" {
-        Ok((state, Box::new(Term::Typ)))
+        let (state, last) = get_last_index(state)?;
+        let orig          = origin(init, last);
+        Ok((state, Box::new(Term::Typ { orig })))
       } else {
         let (state, args) = if open {
           parser::until(parser::text_parser(")"), Box::new(parse_term), state)?
         } else {
           (state, Vec::new())
         };
-        Ok((state, Box::new(Term::Ctr { name, args })))
+        let (state, last) = get_last_index(state)?;
+        let orig          = origin(init, last);
+        Ok((state, Box::new(Term::Ctr { orig, name, args })))
       }
     }),
     state,
@@ -304,25 +364,30 @@ pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   return parser::guard(
     parser::text_parser("?"),
     Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
       let (state, _)    = parser::consume("?", state)?;
       let (state, name) = parser::name_here(state)?;
-      Ok((state, Box::new(Term::Typ))) // TODO: Help constructor
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Typ { orig }))) // TODO: Help constructor
     }),
     state,
   );
 }
 
-pub fn parse_arr(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(Box<Term>) -> Box<Term>>>> {
+pub fn parse_arr(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize, Box<Term>) -> Box<Term>>>> {
   return parser::guard(
     parser::text_parser("->"),
     Box::new(|state| {
       let (state, _)    = parser::consume("->", state)?;
       let (state, body) = parse_term(state)?;
-      Ok((state, Box::new(move |tipo| {
+      let (state, last) = get_last_index(state)?;
+      Ok((state, Box::new(move |init, tipo| {
+        let orig = origin(init, last);
         let name = "_".to_string();
         let tipo = tipo.clone();
         let body = body.clone();
-        Box::new(Term::All { name, tipo, body })
+        Box::new(Term::All { orig, name, tipo, body })
       })))
     }),
     state,
@@ -343,17 +408,18 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
   ], state)
 }
 
-pub fn parse_term_suffix(state: parser::State) -> parser::Answer<Box<dyn Fn(Box<Term>) -> Box<Term>>> {
+pub fn parse_term_suffix(state: parser::State) -> parser::Answer<Box<dyn Fn(usize,Box<Term>) -> Box<Term>>> {
   parser::grammar("Term", &[
     Box::new(parse_arr),
-    Box::new(|state| Ok((state, Some(Box::new(|term| term))))),
+    Box::new(|state| Ok((state, Some(Box::new(|init, term| term))))),
   ], state)
 }
 
 pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
+  let (state, init)   = get_init_index(state)?;
   let (state, prefix) = parse_term_prefix(state)?;
   let (state, suffix) = parse_term_suffix(state)?;
-  return Ok((state, suffix(prefix)));
+  return Ok((state, suffix(init, prefix)));
 }
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
@@ -368,7 +434,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
     let (state, anno) = parser::consume(":", state)?;
     parse_term(state)?
   } else {
-    (state, Box::new(Term::Typ)) // TODO: return a hole
+    (state, Box::new(Term::Typ { orig: 0 })) // TODO: return a hole, set orig
   };
   let (state, head) = parser::peek_char(state)?;
   if head == '{' {
@@ -377,7 +443,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
     let (state, _)    = parser::consume("}", state)?;
     let mut pats = vec![];
     for arg in &args {
-      pats.push(Box::new(Term::Var { name: arg.name.clone() }));
+      pats.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() })); // TODO: set orig
     }
     let rules = vec![Box::new(Rule { name: name.clone(), pats, body })];
     return Ok((state, Box::new(Entry { name, args, tipo, rules })));
@@ -429,44 +495,44 @@ pub fn parse_file(state: parser::State) -> parser::Answer<Box<File>> {
 
 pub fn show_term(term: &Term) -> String {
   match term {
-    Term::Typ => {
+    Term::Typ { .. } => {
       format!("Type")
     }
-    Term::Var { name } => {
+    Term::Var { orig: _, name } => {
       format!("{}", name)
     }
-    Term::Lam { name, body } => {
+    Term::Lam { orig: _, name, body } => {
       let body = show_term(body);
       format!("@{}({})", name, body)
     }
-    Term::App { func, argm } => {
+    Term::App { orig: _, func, argm } => {
       let mut args = vec![argm];
       let mut expr = func;
-      while let Term::App { func, argm } = &**expr {
+      while let Term::App { orig: _, func, argm } = &**expr {
         args.push(argm);
         expr = func;
       }
       args.reverse();
       format!("({} {})", show_term(expr), args.iter().map(|x| show_term(x)).collect::<Vec<String>>().join(" "))
     }
-    Term::All { name, tipo, body } => {
+    Term::All { orig: _, name, tipo, body } => {
       let body = show_term(body);
       format!("({}: {}) {}", name, show_term(tipo), body)
     }
-    Term::Let { name, expr, body } => {
+    Term::Let { orig: _, name, expr, body } => {
       let expr = show_term(expr);
       let body = show_term(body);
       format!("let {} = {}; {}", name, expr, body)
     }
-    Term::Ann { expr, tipo } => {
+    Term::Ann { orig: _, expr, tipo } => {
       let expr = show_term(expr);
       let tipo = show_term(tipo);
       format!("{{{} :: {}}}", expr, tipo)
     }
-    Term::Ctr { name, args } => {
+    Term::Ctr { orig: _, name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
     }
-    Term::Fun { name, args } => {
+    Term::Fun { orig: _, name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
     }
   }
@@ -528,42 +594,57 @@ pub fn read_file(code: &str) -> Result<Box<File>, String> {
   //Ctr { name: String, args: Vec<Box<Term>> },
   //Fun { name: String, args: Vec<Box<Term>> },
 //}
-pub fn compile_term(term: &Term, quote: bool) -> String { 
+pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String { 
+  fn hide(orig: &u64, lhs: bool) -> String {
+    if lhs {
+      "orig".to_string()
+    } else {
+      format!("{}", orig)
+    }
+  }
   match term {
-    Term::Typ => {
-      format!("Typ")
+    Term::Typ { orig } => {
+      format!("(Typ {})", hide(orig,lhs))
     }
-    Term::Var { name } => {
-      name.clone()
+    Term::Var { orig, name } => {
+      if lhs {
+        format!("{}", name)
+      } else {
+        if quote {
+          format!("(SO {} {})", orig, name.clone())
+        } else {
+          format!("(   {} {})", " ".repeat(format!("{}",orig).len()), name.clone()) // spaces to align with quoted version
+        }
+      }
     }
-    Term::All { name, tipo, body } => {
-      format!("(All {} {} λ{} {})", name_to_u64(name), compile_term(tipo, quote), name, compile_term(body, quote))
+    Term::All { orig, name, tipo, body } => {
+      format!("(All {} {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), compile_term(tipo, quote, lhs), name, compile_term(body, quote, lhs))
     }
-    Term::Lam { name, body } => {
-      format!("(Lam {} λ{} {})", name_to_u64(name), name, compile_term(body, quote))
+    Term::Lam { orig, name, body } => {
+      format!("(Lam {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), name, compile_term(body, quote, lhs))
     }
-    Term::App { func, argm } => {
-      format!("({} {} {})", if quote { "App" } else { "APP" }, compile_term(func, quote), compile_term(argm, quote))
+    Term::App { orig, func, argm } => {
+      format!("({} {} {} {})", if quote { "App" } else { "APP" }, hide(orig,lhs), compile_term(func, quote, lhs), compile_term(argm, quote, lhs))
     }
-    Term::Let { name, expr, body } => {
-      format!("({} {} {} λ{} {})", if quote { "Let" } else { "LET" }, name_to_u64(name), compile_term(expr, quote), name, compile_term(body, quote))
+    Term::Let { orig, name, expr, body } => {
+      format!("({} {} {} {} λ{} {})", if quote { "Let" } else { "LET" }, hide(orig,lhs), name_to_u64(name), compile_term(expr, quote, lhs), name, compile_term(body, quote, lhs))
     }
-    Term::Ann { expr, tipo } => {
-      format!("({} {} {})", if quote { "Ann" } else { "ANN" }, compile_term(expr, quote), compile_term(tipo, quote))
+    Term::Ann { orig, expr, tipo } => {
+      format!("({} {} {} {})", if quote { "Ann" } else { "ANN" }, hide(orig,lhs), compile_term(expr, quote, lhs), compile_term(tipo, quote, lhs))
     }
-    Term::Ctr { name, args } => {
+    Term::Ctr { orig, name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
       for arg in args {
-        args_strs.push(format!(" {}", compile_term(arg, quote)));
+        args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
-      format!("(Ct{} {}.{})", args.len(), name, args_strs.join(""))
+      format!("(Ct{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
     }
-    Term::Fun { name, args } => {
+    Term::Fun { orig, name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
       for arg in args {
-        args_strs.push(format!(" {}", compile_term(arg, quote)));
+        args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
-      format!("({}{} {}.{})", if quote { "Fn" } else { "FN" }, args.len(), name, args_strs.join(""))
+      format!("({}{} {}. {}{})", if quote { "Fn" } else { "FN" }, args.len(), name, hide(orig,lhs), args_strs.join(""))
     }
   }
 }
@@ -572,22 +653,22 @@ pub fn compile_entry(entry: &Entry) -> String {
   fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
     if index < args.len() {
       let arg = &args[index];
-      format!("(All {} {} λ{} {})", name_to_u64(&arg.name), compile_term(&arg.tipo, false), arg.name, compile_type(args, tipo, index + 1))
+      format!("(All {} {} {} λ{} {})", 0, name_to_u64(&arg.name), compile_term(&arg.tipo, false, false), arg.name, compile_type(args, tipo, index + 1))
     } else {
-      compile_term(tipo, false)
+      compile_term(tipo, false, false)
     }
   }
 
   fn compile_rule(rule: &Rule) -> String {
     let mut pats = vec![];
     for pat in &rule.pats {
-      pats.push(format!(" {}", compile_term(pat, false)));
+      pats.push(format!(" {}", compile_term(pat, false, true)));
     }
-    let body_rhs = compile_term(&rule.body, true);
-    let rule_rhs = compile_term(&rule.body, false);
+    let body_rhs = compile_term(&rule.body, true, false);
+    let rule_rhs = compile_term(&rule.body, false, false);
     let mut text = String::new();
-    text.push_str(&format!("(QT{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_rhs));
-    text.push_str(&format!("(FN{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), rule_rhs));
+    text.push_str(&format!("(QT{} {}. orig{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_rhs));
+    text.push_str(&format!("(FN{} {}. orig{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), rule_rhs));
     return text;
   }
 
@@ -597,8 +678,8 @@ pub fn compile_entry(entry: &Entry) -> String {
       vars.push(format!(" x{}", idx));
     }
     let mut text = String::new();
-    text.push_str(&format!("(QT{} {}.{}) = (Fn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
-    text.push_str(&format!("(FN{} {}.{}) = (Fn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
+    text.push_str(&format!("(QT{} {}. orig{}) = (Fn{} {}. orig{})\n", size, name, vars.join(""), size, name, vars.join("")));
+    text.push_str(&format!("(FN{} {}. orig{}) = (Fn{} {}. orig{})\n", size, name, vars.join(""), size, name, vars.join("")));
     return text;
   }
 
@@ -610,20 +691,20 @@ pub fn compile_entry(entry: &Entry) -> String {
       let tail = compile_rule_chk(rule, index + 1, vars, args);
       return format!("(LHS {} {})", head, tail);
     } else {
-      return format!("(RHS (QT{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
+      return format!("(RHS (QT{} {}. 0{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
     }
   }
 
   fn compile_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
     // FIXME: remove redundancy
     match patt {
-      Term::Var { name } => {
-        let inp = format!("(Var {} {})", name_to_u64(name), vars);
-        let var = format!("(Var {} {})", name_to_u64(name), vars);
+      Term::Var { orig, name } => {
+        let inp = format!("(Var {} {} {})", orig, name_to_u64(name), vars);
+        let var = format!("(Var {} {} {})", orig, name_to_u64(name), vars);
         *vars += 1;
         return (inp, var);
       }
-      Term::Ctr { name, args } => {
+      Term::Ctr { orig, name, args } => {
         let mut inp_args_str = String::new();
         let mut var_args_str = String::new();
         for arg in args {
@@ -631,8 +712,8 @@ pub fn compile_entry(entry: &Entry) -> String {
           inp_args_str.push_str(&format!(" {}", inp_arg_str));
           var_args_str.push_str(&format!(" {}", var_arg_str));
         }
-        let inp_str = format!("(Ct{} {}.{})", args.len(), name, inp_args_str);
-        let var_str = format!("(Ct{} {}.{})", args.len(), name, var_args_str);
+        let inp_str = format!("(Ct{} {}. {}{})", args.len(), name, orig, inp_args_str);
+        let var_str = format!("(Ct{} {}. {}{})", args.len(), name, orig, var_args_str);
         return (inp_str, var_str);
       }
       _ => {

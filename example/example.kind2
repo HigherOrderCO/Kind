@@ -51,7 +51,9 @@ Equal.apply t u a b f (Refl v k) = (Refl v (f k))
 Equal.rewrite (t: Type) (a: t) (b: t) (e: (Equal t a b)) (p: t -> Type) (x: (p a)) : (p b)
 Equal.rewrite t a b (Refl u k) p x = {x :: (p k)}
 
-Main : Nat {
-  let f = {(@x @y y) :: Nat -> Nat -> Nat}
-  (f Zero (Nat.double (Succ (Succ (Succ Zero)))))
-}
+Foo (f: Bool -> Bool) (x: Bool) : Nat
+Foo f x = x
+
+//Main : Nat {
+  //(Succ True)
+//}
