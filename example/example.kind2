@@ -23,8 +23,9 @@ Bool.and True  False = False
 Bool.and False True  = False
 Bool.and False False = False
 
-Bool.theo (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
-Bool.theo a = ?a
+Bool.not_not_theorem (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
+Bool.not_not_theorem True  = (Refl Bool True)
+Bool.not_not_theorem False = (Refl Bool False)
 
 Nat.double (x: Nat) : Nat
 Nat.double (Succ x) = (Succ (Succ (Nat.double x)))

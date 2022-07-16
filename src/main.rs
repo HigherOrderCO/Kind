@@ -28,11 +28,11 @@ fn run_cli() -> Result<(), String> {
 
   match cli_matches.command {
     Command::Run { file: path, params } => {
-      kind2(&path, "Api.run_main")
+      kind2(&path, "API.run_main")
     }
 
     Command::Check { file: path, params } => {
-      kind2(&path, "Api.check_all")
+      kind2(&path, "API.check_all")
     }
   }
 }

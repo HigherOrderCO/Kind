@@ -543,13 +543,13 @@ pub fn compile_term(term: &Term, quote: bool) -> String {
       format!("(Lam {} λ{} {})", name_to_u64(name), name, compile_term(body, quote))
     }
     Term::App { func, argm } => {
-      format!("({} {} {})", if quote { "App" } else { "Apply" }, compile_term(func, quote), compile_term(argm, quote))
+      format!("({} {} {})", if quote { "App" } else { "APP" }, compile_term(func, quote), compile_term(argm, quote))
     }
     Term::Let { name, expr, body } => {
-      format!("({} {} {} λ{} {})", if quote { "Let" } else { "Lets" }, name_to_u64(name), compile_term(expr, quote), name, compile_term(body, quote))
+      format!("({} {} {} λ{} {})", if quote { "Let" } else { "LET" }, name_to_u64(name), compile_term(expr, quote), name, compile_term(body, quote))
     }
     Term::Ann { expr, tipo } => {
-      format!("({} {} {})", if quote { "Ann" } else { "Annotate" }, compile_term(expr, quote), compile_term(tipo, quote))
+      format!("({} {} {})", if quote { "Ann" } else { "ANN" }, compile_term(expr, quote), compile_term(tipo, quote))
     }
     Term::Ctr { name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
@@ -563,7 +563,7 @@ pub fn compile_term(term: &Term, quote: bool) -> String {
       for arg in args {
         args_strs.push(format!(" {}", compile_term(arg, quote)));
       }
-      format!("({}{} {}.{})", if quote { "NewFn" } else { "Rule_" }, args.len(), name, args_strs.join(""))
+      format!("({}{} {}.{})", if quote { "Fn" } else { "FN" }, args.len(), name, args_strs.join(""))
     }
   }
 }
@@ -586,8 +586,8 @@ pub fn compile_entry(entry: &Entry) -> String {
     let body_rhs = compile_term(&rule.body, true);
     let rule_rhs = compile_term(&rule.body, false);
     let mut text = String::new();
-    text.push_str(&format!("    (Body_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_rhs));
-    text.push_str(&format!("    (Rule_{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), rule_rhs));
+    text.push_str(&format!("(QT{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_rhs));
+    text.push_str(&format!("(FN{} {}.{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), rule_rhs));
     return text;
   }
 
@@ -597,8 +597,8 @@ pub fn compile_entry(entry: &Entry) -> String {
       vars.push(format!(" x{}", idx));
     }
     let mut text = String::new();
-    text.push_str(&format!("    (Body_{} {}.{}) = (NewFn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
-    text.push_str(&format!("    (Rule_{} {}.{}) = (NewFn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
+    text.push_str(&format!("(QT{} {}.{}) = (Fn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
+    text.push_str(&format!("(FN{} {}.{}) = (Fn{} {}.{})\n", size, name, vars.join(""), size, name, vars.join("")));
     return text;
   }
 
@@ -610,7 +610,7 @@ pub fn compile_entry(entry: &Entry) -> String {
       let tail = compile_rule_chk(rule, index + 1, vars, args);
       return format!("(LHS {} {})", head, tail);
     } else {
-      return format!("(RHS (Body_{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
+      return format!("(RHS (QT{} {}.{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
     }
   }
 
@@ -642,36 +642,36 @@ pub fn compile_entry(entry: &Entry) -> String {
   }
 
   let mut result = String::new();
-  result.push_str(&format!("    (NameOf {}.) = \"{}\"\n", entry.name, entry.name));
-  result.push_str(&format!("    (HashOf {}.) = %{}\n", entry.name, entry.name));
-  result.push_str(&format!("    (TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
+  result.push_str(&format!("(NameOf {}.) = \"{}\"\n", entry.name, entry.name));
+  result.push_str(&format!("(HashOf {}.) = %{}\n", entry.name, entry.name));
+  result.push_str(&format!("(TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
   for rule in &entry.rules {
     result.push_str(&compile_rule(&rule));
   }
   if entry.rules.len() > 0 {
     result.push_str(&compile_rule_end(&entry.name, entry.rules[0].pats.len() as u64));
   }
-  result.push_str(&format!("    (Verify {}.) =\n", entry.name));
+  result.push_str(&format!("(Verify {}.) =\n", entry.name));
   for rule in &entry.rules {
-    result.push_str(&format!("      (Cons {}\n", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
+    result.push_str(&format!("  (Cons {}\n", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
   }
-  result.push_str(&format!("      Nil{}\n", ")".repeat(entry.rules.len())));
+  result.push_str(&format!("  Nil{}\n", ")".repeat(entry.rules.len())));
   return result;
 }
 
 pub fn compile_file(file: &File) -> String {
   let mut result = String::new();
-  result.push_str(&format!("\n  Functions =\n"));
-  result.push_str(&format!("    let fns = Nil\n"));
+  result.push_str(&format!("\nFunctions =\n"));
+  result.push_str(&format!("  let fns = Nil\n"));
   for name in &file.names {
     let entry = file.entries.get(name).unwrap();
-    result.push_str(&format!("    let fns = (Cons {}. fns)\n", entry.    name));
+    result.push_str(&format!("  let fns = (Cons {}. fns)\n", entry.    name));
   }
-  result.push_str(&format!("    fns\n\n"));
+  result.push_str(&format!("  fns\n\n"));
   for name in &file.names {
     let entry = file.entries.get(name).unwrap();
-    result.push_str(&format!("  // {}\n", name));
-    result.push_str(&format!("  // {}\n", "-".repeat(name.len())));
+    result.push_str(&format!("// {}\n", name));
+    result.push_str(&format!("// {}\n", "-".repeat(name.len())));
     result.push_str(&format!("\n"));
     result.push_str(&compile_entry(&entry));
     result.push_str(&format!("\n"));
