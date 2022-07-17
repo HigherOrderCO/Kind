@@ -1,14 +1,35 @@
 #![allow(dead_code)] 
 #![allow(unused_variables)] 
 
-mod cli;
 mod language;
 
-use cli::{Cli, Parser, Command};
 use language::{*};
-use hvm::parser as parser;
+use clap::{Parser, Subcommand};
 
 const CHECKER_HVM: &str = include_str!("checker.hvm");
+
+#[derive(Parser)]
+#[clap(author, version, about, long_about = None)]
+#[clap(propagate_version = true)]
+pub struct Cli {
+  #[clap(subcommand)]
+  pub command: Command,
+}
+
+#[derive(Subcommand)]
+pub enum Command {
+  /// Run a file interpreted
+  #[clap(aliases = &["r"])]
+  Run { file: String, params: Vec<String> },
+
+  /// Check a file
+  #[clap(aliases = &["c"])]
+  Check { file: String, params: Vec<String> },
+
+  /// Generates a .hvm checker for a .kind2 file
+  #[clap(aliases = &["c"])]
+  GenChecker { file: String, params: Vec<String> },
+}
 
 fn main() {
   match run_cli() {
@@ -19,82 +40,105 @@ fn main() {
   };
 }
 
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-
 fn run_cli() -> Result<(), String> {
   let cli_matches = Cli::parse();
 
   match cli_matches.command {
     Command::Run { file: path, params } => {
-      kind2(&path, "API.run_main")
+      run_main(&path)
     }
 
     Command::Check { file: path, params } => {
-      kind2(&path, "API.check_all")
+      check_all(&path)
+    }
+
+    Command::GenChecker { file: path, params } => {
+      gen_checker(&path)
     }
   }
 }
 
-fn kind2(path: &str, main_function: &str) -> Result<(), String> {
-  // Reads definitions from file
+// Checks all definitions of a Kind2 file
+fn check_all(path: &str) -> Result<(), String> {
+  let loaded = load_file(path)?;
+  let result = run_with_hvm(&loaded.check_code, "API.check_all")?;
+  std::fs::write(format!("{}.hvm", path.replace(".kind2",".check")), loaded.check_code.clone()).ok();
+  print!("{}", inject_highlights(&loaded.kind2_code, &result.output));
+  println!("Rewrites: {}", result.rewrites);
+  Ok(())
+}
+
+// Runs the Main function of a Kind2 file
+fn run_main(path: &str) -> Result<(), String> {
+  let loaded = load_file(path)?;
+  let result = run_with_hvm(&loaded.check_code, "API.run_main")?;
+  print!("{}", result.output);
+  println!("Rewrites: {}", result.rewrites);
+  Ok(())
+}
+
+// Generates the checker file (`file.kind2` -> `file.checker.hvm`)
+fn gen_checker(path: &str) -> Result<(), String> {
+  let loaded = load_file(path)?;
+  std::fs::write(format!("{}.hvm", path.replace(".kind2",".check")), loaded.check_code.clone()).ok();
+  Ok(())
+}
+
+pub struct LoadedFile {
+  kind2_code: String, // user-defined file.kind2 code
+  kind2_book: Book,   // object with all the parsed definitions
+  check_code: String, // HVM code that type-checks this file
+}
+
+pub struct RunResult {
+  output: String,
+  rewrites: u64,
+}
+
+pub fn load_file(path: &str) -> Result<LoadedFile, String> {
+  // Reads definitions from Kind2 file
   let kind2_code = match std::fs::read_to_string(path) {
     Ok(code) => code,
     Err(msg) => {
-      println!("File not found: {}", path);
-      return Ok(());
+      return Err(format!("File not found: {}", path));
     },
   };
 
   // Prints errors if parsing failed
-  let file = match read_file(&kind2_code) {
-    Ok(file) => file,
+  let kind2_book = match read_book(&kind2_code) {
+    Ok(kind2_book) => kind2_book,
     Err(msg) => {
-      println!("{}", msg);
-      return Ok(());
+      return Err(format!("{}", msg));
     }
   };
 
-  // Adjusts the file
-  let file = match adjust_file(&file) {
-    Ok(file) => file,
+  // Adjusts the Kind2 book
+  let kind2_book = match adjust_book(&kind2_book) {
+    Ok(kind2_book) => kind2_book,
     Err(err) => match err {
       AdjustError::IncorrectArity { orig, term } => {
         let (init, last) = get_origin_range(orig);
-        println!("Incorrect arity.\n{}", highlight_error::highlight_error(init, last, &kind2_code));
-        return Ok(());
+        return Err(format!("Incorrect arity.\n{}", highlight_error::highlight_error(init, last, &kind2_code)));
       }
     }
   };
 
-  //for (name, entry) in &file.entries {
-    //println!("[{}]\n{}\n", name, show_entry(entry));
-  //}
+  // Compile the Kind2 file to HVM checker
+  let base_check_code = compile_book(&kind2_book);
+  let mut check_code = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
+  check_code.push_str(&base_check_code);
 
-  let code = compile_file(&file);
-  let mut checker = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
-  checker.push_str(&code);
-
-  // Writes the checker file.kind2.hvm
-  std::fs::write(format!("{}.hvm", path), checker.clone()).ok();
-
-  // Runs with the interpreter 
-  let mut rt = hvm::Runtime::from_code(&checker)?;
-  let main = rt.alloc_code(main_function)?;
-  rt.normalize(main);
-  print!("{}", replace_ranges_by_code(&kind2_code, &readback_string(&rt, main)));
-
-
-  // Display stats
-  println!("Rewrites: {}", rt.get_rewrites());
-
-  Ok(())
+  return Ok(LoadedFile {
+    kind2_code,
+    kind2_book,
+    check_code,
+  });
 }
 
-fn replace_ranges_by_code(file_code: &str, checker_output: &str) -> String {
+// Replaces line ranges `{{123:456}}` on `target` by slices of `file_code`
+fn inject_highlights(file_code: &str, target: &str) -> String {
   let mut code = String::new();
-  let mut cout = checker_output;
+  let mut cout = target;
   while let (Some(init_range_index), Some(last_range_index)) = (cout.find("{{#"), cout.find("#}}")) {
     let range_text = &cout[init_range_index + 3 .. last_range_index];
     let range_text = range_text.split(":").map(|x| x.parse::<u64>().unwrap()).collect::<Vec<u64>>();
@@ -108,41 +152,13 @@ fn replace_ranges_by_code(file_code: &str, checker_output: &str) -> String {
   return code;
 }
 
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-
-fn debug_print_parser_state(txt: &str, state: &parser::State) {
-  println!("{} ||{}", txt, &state.code[state.index..state.index+32].replace("\n"," || "));
+// Given an HVM source, runs an expression
+fn run_with_hvm(code: &str, main: &str) -> Result<RunResult, String> {
+  let mut rt = hvm::Runtime::from_code(code)?;
+  let main = rt.alloc_code(main)?;
+  rt.normalize(main);
+  return Ok(RunResult {
+    output: readback_string(&rt, main),
+    rewrites: rt.get_rewrites(),
+  });
 }
-
-fn gen_debug_file() {
-  let file = match read_file(&DEBUG_CODE) {
-    Ok(file) => file,
-    Err(msg) => {
-      println!("{}", msg);
-      return;
-    }
-  };
-  let code = compile_file(&file);
-  let mut checker = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
-  checker.push_str(&code);
-  std::fs::write("debug.hvm", checker.clone()).ok(); // writes checker to the checker.hvm file
-}
-
-const DEBUG_CODE: &str = "
-Bool : Type
-True : Bool
-False : Bool
-
-Nat : Type
-Zero : Nat
-Succ (pred: Nat) : Nat
-
-List (a: Type) : Type
-Nil  (a: Type) : (List a)
-Cons (a: Type) (x: a) (xs: (List a)) : (List a)
-
-Not (a: Bool) : Bool
-Not True  = False
-";

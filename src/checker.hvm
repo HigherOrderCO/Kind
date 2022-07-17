@@ -1085,7 +1085,6 @@ API.run_main = (Text [
     "{{#"(Show.u60 (& orig 16777215))":"(Show.u60 (>> orig 24))"#}}" Line
   ])
   
-
 // User-Defined Functions
 // ----------------------
 ////INJECT////
