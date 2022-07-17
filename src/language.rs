@@ -536,12 +536,46 @@ pub fn parse_arr(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize
   );
 }
 
+pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    Box::new(|state| {
+      let (state, head) = parser::get_char(state)?;
+      Ok((state, head == '['))
+    }),
+    Box::new(|state| {
+      let (state, init)  = get_init_index(state)?;
+      let (state, _head) = parser::text("[", state)?;
+      let state = state;
+      let (state, elems) = parser::until(
+        Box::new(|x| parser::text("]", x)),
+        Box::new(|x| {
+          let (state, term) = parse_term(x)?;
+          let (state, _) = parser::maybe(Box::new(|x| parser::text(",", x)), state)?;
+          Ok((state, term))
+        }),
+        state,
+      )?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      let empty = Term::Ctr { orig, name: "List.nil".to_string(), args: Vec::new() };
+      let list = Box::new(elems.iter().rfold(empty, |t, h| Term::Ctr {
+        orig,
+        name: "List.cons".to_string(),
+        args: vec![h.clone(), Box::new(t)],
+      }));
+      Ok((state, list))
+    }),
+    state,
+  )
+}
+
 pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
   parser::grammar("Term", &[
     Box::new(parse_all), // `(name:`
     Box::new(parse_ctr), // `(Name`
     Box::new(parse_op2), // `(+`
     Box::new(parse_app), // `(`
+    Box::new(parse_lst), // `[`
     Box::new(parse_lam), // `@`
     Box::new(parse_let), // `let `
     Box::new(parse_ann), // `{x::`
@@ -750,7 +784,7 @@ pub fn read_book(code: &str) -> Result<Box<Book>, String> {
 // Compiler
 // ========
 
-pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String { 
+pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
   fn hide(orig: &u64, lhs: bool) -> String {
     if lhs {
       "orig".to_string()
@@ -951,6 +985,7 @@ pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
     }
     panic!("Invalid output: {} {}", hvm::get_tag(term), rt.show(host));
   }
+
   return text;
 }
 
