@@ -264,6 +264,10 @@ Line = (String.cons 10 String.nil)
 (Term.get_origin (Fn6 name orig a b c d e f))     = orig
 (Term.get_origin (Fn7 name orig a b c d e f g))   = orig
 (Term.get_origin (Fn8 name orig a b c d e f g h)) = orig
+(Term.get_origin (Hlp orig))                      = orig
+(Term.get_origin (U60 orig))                      = orig
+(Term.get_origin (Num orig numb))                 = orig
+(Term.get_origin (Op2 orig val0 val1))            = orig
 
 // Term.set_origin
 (Term.set_origin new_orig (Typ orig))                      = (Typ new_orig)
@@ -292,6 +296,10 @@ Line = (String.cons 10 String.nil)
 (Term.set_origin new_orig (Fn6 name orig a b c d e f))     = (Fn6 name new_orig a b c d e f)
 (Term.set_origin new_orig (Fn7 name orig a b c d e f g))   = (Fn7 name new_orig a b c d e f g)
 (Term.set_origin new_orig (Fn8 name orig a b c d e f g h)) = (Fn8 name new_orig a b c d e f g h)
+(Term.set_origin new_orig (Hlp orig))                      = (Hlp new_orig)
+(Term.set_origin new_orig (U60 orig))                      = (U60 new_orig)
+(Term.set_origin new_orig (Num orig numb))                 = (Num new_orig numb)
+(Term.set_origin new_orig (Op2 orig val0 val1))            = (Op2 new_orig val0 val1)
 
 // SO = Term.set_origin
 (SO new_orig term) = (Term.set_origin new_orig term)
@@ -323,11 +331,14 @@ Line = (String.cons 10 String.nil)
 (Term.fill (Fn6 name orig a b c d e f) sub)     = (Fn6 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub))
 (Term.fill (Fn7 name orig a b c d e f g) sub)   = (Fn7 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub))
 (Term.fill (Fn8 name orig a b c d e f g h) sub) = (Fn8 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub) (Term.fill h sub))
+(Term.fill (Hlp orig) sub)                      = (Hlp orig)
+(Term.fill (U60 orig) sub)                      = (U60 orig)
+(Term.fill (Num orig numb) sub)                 = (Num orig numb)
+(Term.fill (Op2 orig val0 val1) sub)            = (Op2 orig (Term.fill val0 sub) (Term.fill val1 sub))
 (Term.fill (Hol orig numb) sub)                 = (Maybe.case (Subst.look sub numb) (Hol orig numb) λval (Term.fill val sub))
 
 // Eval Term (List Term) : Term
 // ----------------------------
-
 
   // Eval Typ
   (Eval (Typ orig)) =
@@ -432,6 +443,22 @@ Line = (String.cons 10 String.nil)
   // Eval Fn8
   (Eval (Fn8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
     (FN8 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+
+  // Eval Hlp
+  (Eval (Hlp orig)) =
+    (Hlp orig)
+
+  // Eval U60
+  (Eval (U60 orig)) =
+    (U60 orig)
+
+  // Eval Num
+  (Eval (Num orig numb)) =
+    (Num orig numb)
+
+  // Eval Op2
+  (Eval (Op2 orig val0 val1)) =
+    (OP2 orig (Eval val0) (Eval val1))
 
 // Equal Term Term : (Checker Bool)
 // --------------------------------
@@ -634,6 +661,24 @@ Line = (String.cons 10 String.nil)
   ask x7   = (Checker.bind (Equal a.x7 b.x7))
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 (Bool.and x6 x7)))))))))
 
+// Hlp equality
+(Equal (Hlp a.orig) (Hlp b.orig)) =
+  (Checker.done True)
+
+// U60 equality
+(Equal (U60 a.orig) (U60 b.orig)) =
+  (Checker.done True)
+
+// Num equality
+(Equal (Num a.orig a.numb) (Num b.orig b.numb)) =
+  (Checker.done (U60.equal a.numb b.numb))
+
+// Op2 equality
+(Equal (Op2 a.orig a.val0 a.val1) (Op2 b.orig b.val0 b.val1)) =
+  ask val0 = (Checker.bind (Equal a.val0 b.val0))
+  ask val1 = (Checker.bind (Equal a.val1 b.val1))
+  (Checker.done (Bool.and val0 val1))
+
 // Hol equality #0
 (Equal (Hol a.orig a.numb) b) =
   (Equal.hol a.orig a.numb b)
@@ -690,12 +735,6 @@ Line = (String.cons 10 String.nil)
 
 // Equal.hol (origin: U60) (numb: U60) (b: Term) : (Checker bool)
 // --------------------------------------------------------------
-
-//hole_0 == A
-//- se hole_0 não tiver um valor...
-  //- seta o valor de hole_0 como A
-//- se hole_0 tiver um valor...
-  //- checa se esse valor é igual a A
 
 // Hole checker
 (Equal.hol a.orig a.numb b) =
@@ -836,6 +875,24 @@ Line = (String.cons 10 String.nil)
 (Infer (Fn8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) =
   (Infer (App orig (App orig (App orig (App orig (App orig (App orig (App orig (App orig (Fn0 ctid orig) x0) x1) x2) x3) x4) x5) x6) x7))
 
+// Infers Hlp
+(Infer (Hlp orig)) =
+  (Checker.done (Hlp 0))
+
+// Infers U60
+(Infer (U60 orig)) =
+  (Checker.done (Typ 0))
+
+// Infers Num
+(Infer (Num orig numb)) =
+  (Checker.done (U60 0))
+
+// Infers Op2
+(Infer (Op2 orig val0 val1)) =
+  ask val0_chk = (Checker.bind (Check val0 (U60 0)))
+  ask val1_chk = (Checker.bind (Check val1 (U60 0)))
+  (Checker.done (U60 0))
+
 // Check Term Term : (Checker Unit)
 // --------------------------------
 
@@ -889,21 +946,27 @@ Line = (String.cons 10 String.nil)
   ask expr_chk = (Checker.bind (Check expr type))
   (Checker.done Unit)
 
-// APP Term Term : Term
-// ----------------------
+// APP U60 Term Term : Term
+// ------------------------
 
 (APP orig (Lam orig name fbody) argm) = (fbody argm)
 (APP orig func                  argm) = (App orig func argm)
 
-// LET Name Term Term : Term
-// --------------------------
+// LET U60 Name Term Term : Term
+// -----------------------------
 
 (LET orig name expr body) = (body expr)
 
-// ANN Term Term : Term
-// --------------------------
+// ANN U60 Term Term : Term
+// -------------------------
 
 (ANN orig expr type) = expr
+
+// OP2 U60 Term Term : Term
+// ------------------------
+
+(OP2 oper (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (+ a.numb b.numb))
+(OP2 oper val0                val1)                = (Op2 oper val0 val1)
 
 // Stringification
 // ---------------
@@ -1129,6 +1192,26 @@ Line = (String.cons 10 String.nil)
   (Show x7)
   ")"
 ])
+
+(Show (Hlp orig)) =
+  (Text [
+    "?"
+  ])
+
+(Show (U60 orig)) =
+  (Text [
+    "U60"
+  ])
+
+(Show (Num orig numb)) =
+  (Text [
+    (Show.u60 numb)
+  ])
+
+(Show (Op2 orig val0 val1)) =
+  (Text [
+    "(+" (Show val0) " " (Show val1) ")"
+  ])
 
 (Show.context ctx sub) =
   (Show.context.go ctx sub (Context.max_name_length ctx))

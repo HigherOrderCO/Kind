@@ -95,6 +95,13 @@ Example.hole : (List Bool) {
   (Cons True (Cons False (Cons True Nil)))
 }
 
-Main : Nat {
-  (Nat.double (Nat.double (Succ (Succ Zero))))
+U60.add (a: U60) (b: U60) : U60 {
+  (+ a b)
 }
+
+Main : U60 {
+  let a = #123
+  let b = #100
+  (+ a b)
+}
+

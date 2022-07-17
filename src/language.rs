@@ -42,6 +42,10 @@ pub enum Term {
   Ann { orig: u64, expr: Box<Term>, tipo: Box<Term> },
   Ctr { orig: u64, name: String, args: Vec<Box<Term>> },
   Fun { orig: u64, name: String, args: Vec<Box<Term>> },
+  Hlp { orig: u64 },
+  U60 { orig: u64 },
+  Num { orig: u64, numb: u64 },
+  Op2 { orig: u64, val0: Box<Term>, val1: Box<Term> },
   Hol { orig: u64, numb: u64 },
 }
 
@@ -187,6 +191,25 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
       *holes = *holes + 1;
       Ok(Term::Hol { orig, numb })
     },
+    Term::Hlp { ref orig } => {
+      let orig = *orig;
+      Ok(Term::Hlp { orig })
+    },
+    Term::U60 { ref orig } => {
+      let orig = *orig;
+      Ok(Term::U60 { orig })
+    },
+    Term::Num { ref orig, ref numb } => {
+      let orig = *orig;
+      let numb = *numb;
+      Ok(Term::Num { orig, numb })
+    },
+    Term::Op2 { ref orig, ref val0, ref val1 } => {
+      let orig = *orig;
+      let val0 = Box::new(adjust_term(book, &*val0, holes)?);
+      let val1 = Box::new(adjust_term(book, &*val1, holes)?);
+      Ok(Term::Op2 { orig, val0, val1 })
+    },
   }
 }
 
@@ -255,15 +278,21 @@ pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   )
 }
 
-pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+
+pub fn parse_num(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
-    parser::text_parser("_"),
+    parser::text_parser("#"),
     Box::new(|state| {
       let (state, init) = get_init_index(state)?;
-      let (state, _)    = parser::consume("_", state)?;
+      let (state, _)    = parser::consume("#", state)?;
+      let (state, name) = parser::name1(state)?;
       let (state, last) = get_last_index(state)?;
       let orig          = origin(init, last);
-      Ok((state, Box::new(Term::Hol { orig, numb: 0 })))
+      if let Ok(numb) = name.parse::<u64>() {
+        Ok((state, Box::new(Term::Num { orig, numb })))
+      } else {
+        return parser::expected("number literal", name.len(), state);
+      }
     }),
     state,
   )
@@ -389,6 +418,26 @@ pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   );
 }
 
+pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    Box::new(|state| {
+      let (state, isop) = parser::text("(+", state)?;
+      Ok((state, isop))
+    }),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, open) = parser::consume("(+", state)?; // TODO: parse other operators
+      let (state, val0) = parse_term(state)?;
+      let (state, val1) = parse_term(state)?;
+      let (state, open) = parser::consume(")", state)?; // TODO: parse other operators
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Op2 { orig, val0, val1 })))
+    }),
+    state,
+  )
+}
+
 pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
     Box::new(|state| {
@@ -404,6 +453,10 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
         let (state, last) = get_last_index(state)?;
         let orig          = origin(init, last);
         Ok((state, Box::new(Term::Typ { orig })))
+      } else if name == "U60" {
+        let (state, last) = get_last_index(state)?;
+        let orig          = origin(init, last);
+        Ok((state, Box::new(Term::U60 { orig })))
       } else {
         let (state, args) = if open {
           parser::until(parser::text_parser(")"), Box::new(parse_term), state)?
@@ -419,6 +472,36 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   )
 }
 
+pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    parser::text_parser("_"),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("_", state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Hol { orig, numb: 0 })))
+    }),
+    state,
+  )
+}
+
+//pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  //parser::guard(
+    //parser::text_parser("_"),
+    //Box::new(|state| {
+      //let (state, init) = get_init_index(state)?;
+      //let (state, _)    = parser::consume("_", state)?;
+      //let (state, last) = get_last_index(state)?;
+      //let orig          = origin(init, last);
+      //Ok((state, Box::new(Term::Hol { orig, numb: 0 })))
+    //}),
+    //state,
+  //)
+//}
+
+
+
 pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   return parser::guard(
     parser::text_parser("?"),
@@ -428,7 +511,7 @@ pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, name) = parser::name_here(state)?;
       let (state, last) = get_last_index(state)?;
       let orig          = origin(init, last);
-      Ok((state, Box::new(Term::Typ { orig }))) // TODO: Help constructor
+      Ok((state, Box::new(Term::Hlp { orig })))
     }),
     state,
   );
@@ -457,12 +540,14 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
   parser::grammar("Term", &[
     Box::new(parse_all), // `(name:`
     Box::new(parse_ctr), // `(Name`
+    Box::new(parse_op2), // `(+`
     Box::new(parse_app), // `(`
     Box::new(parse_lam), // `@`
     Box::new(parse_let), // `let `
     Box::new(parse_ann), // `{x::`
     Box::new(parse_hlp), // `?`
     Box::new(parse_hol), // `_`
+    Box::new(parse_num), // `#`
     Box::new(parse_var), // 
     Box::new(|state| Ok((state, None))),
   ], state)
@@ -599,6 +684,20 @@ pub fn show_term(term: &Term) -> String {
     Term::Fun { orig: _, name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
     }
+    Term::Hlp { orig: _ } => {
+      format!("?")
+    }
+    Term::U60 { orig: _ } => {
+      format!("U60")
+    }
+    Term::Num { orig: _, numb } => {
+      format!("{}", numb)
+    }
+    Term::Op2 { orig: _, val0, val1 } => {
+      let val0 = show_term(val0);
+      let val1 = show_term(val1);
+      format!("(+ {} {})", val0, val1)
+    }
     Term::Hol { orig: _, numb } => {
       format!("_")
     }
@@ -702,6 +801,18 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
         args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
       format!("({}{} {}. {}{})", if quote { "Fn" } else { "FN" }, args.len(), name, hide(orig,lhs), args_strs.join(""))
+    }
+    Term::Hlp { orig } => {
+      format!("(Hlp {})", hide(orig,lhs))
+    }
+    Term::U60 { orig } => {
+      format!("(U60 {})", hide(orig,lhs))
+    }
+    Term::Num { orig, numb } => {
+      format!("(Num {} {})", hide(orig,lhs), numb)
+    }
+    Term::Op2 { orig, val0, val1 } => {
+      format!("({} {} {} {})", if quote { "Op2" } else { "OP2" }, hide(orig,lhs), compile_term(val0, quote, lhs), compile_term(val1, quote, lhs))
     }
     Term::Hol { orig, numb } => {
       format!("(Hol {} {})", orig, numb)
