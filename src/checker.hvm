@@ -812,10 +812,11 @@ Line = (String.cons 10 String.nil)
   "Type"
 ])
 
+// TODO: omit unecessary parenthesis
 (Show (All orig name type body)) =
   (U60.if (== name 63) // underscore
     (Text [
-      (Show type) " -> " (Show (body (Var orig name 0)))
+      "(" (Show type) " -> " (Show (body (Var orig name 0))) ")"
     ])
     (Text [
       "(" (Show.name name) ": " (Show type) ") "
@@ -836,6 +837,7 @@ Line = (String.cons 10 String.nil)
   "{" (Show expr) " :: " (Show type) "}"
 ])
 
+// TODO: omit unecessary parenthesis
 (Show (App orig func argm)) = (Text [
   "("
   (Show func) " "
