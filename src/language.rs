@@ -4,7 +4,8 @@ use hvm::parser as parser;
 #[derive(Clone, Debug)]
 pub struct File {
   names: Vec<String>,
-  entries: HashMap<String, Box<Entry>>
+  entrs: HashMap<String, Box<Entry>>,
+  holes: u64,
 }
 
 #[derive(Clone, Debug)]
@@ -40,6 +41,7 @@ pub enum Term {
   Ann { orig: u64, expr: Box<Term>, tipo: Box<Term> },
   Ctr { orig: u64, name: String, args: Vec<Box<Term>> },
   Fun { orig: u64, name: String, args: Vec<Box<Term>> },
+  Hol { orig: u64, numb: u64 },
 }
 
 // Adjuster
@@ -47,49 +49,50 @@ pub enum Term {
 
 pub fn adjust_file(file: &File) -> File {
   let mut names = Vec::new();
-  let mut entries = HashMap::new(); 
+  let mut entrs = HashMap::new(); 
+  let mut holes = 0;
   for name in &file.names {
-    let entry = file.entries.get(name).unwrap();
+    let entry = file.entrs.get(name).unwrap();
     names.push(name.clone());
-    entries.insert(name.clone(), Box::new(adjust_entry(file, &entry)));
+    entrs.insert(name.clone(), Box::new(adjust_entry(file, &entry, &mut holes)));
   }
-  return File { names, entries };
+  return File { names, entrs, holes };
 }
 
-pub fn adjust_entry(file: &File, entry: &Entry) -> Entry {
+pub fn adjust_entry(file: &File, entry: &Entry, holes: &mut u64) -> Entry {
   let name = entry.name.clone();
   let mut args = Vec::new();
   for arg in &entry.args {
-    args.push(Box::new(adjust_argument(file, arg)));
+    args.push(Box::new(adjust_argument(file, arg, holes)));
   }
-  let tipo = Box::new(adjust_term(file, &*entry.tipo));
+  let tipo = Box::new(adjust_term(file, &*entry.tipo, holes));
   let mut rules = Vec::new();
   for rule in &entry.rules {
-    rules.push(Box::new(adjust_rule(file, &*rule)));
+    rules.push(Box::new(adjust_rule(file, &*rule, holes)));
   }
   return Entry { name, args, tipo, rules };
 }
 
-pub fn adjust_argument(file: &File, arg: &Argument) -> Argument {
+pub fn adjust_argument(file: &File, arg: &Argument, holes: &mut u64) -> Argument {
   let eras = arg.eras;
   let name = arg.name.clone();
-  let tipo = Box::new(adjust_term(file, &*arg.tipo));
+  let tipo = Box::new(adjust_term(file, &*arg.tipo, holes));
   return Argument { eras, name, tipo };
 }
 
-pub fn adjust_rule(file: &File, rule: &Rule) -> Rule {
+pub fn adjust_rule(file: &File, rule: &Rule, holes: &mut u64) -> Rule {
   let name = rule.name.clone();
   let mut pats = Vec::new();
   for pat in &rule.pats {
-    pats.push(Box::new(adjust_term(file, &*pat)));
+    pats.push(Box::new(adjust_term(file, &*pat, holes)));
   }
-  let body = Box::new(adjust_term(file, &*rule.body));
+  let body = Box::new(adjust_term(file, &*rule.body, holes));
   return Rule { name, pats, body };
 }
 
 // TODO: check unbound variables
 // TODO: prevent defining the same name twice
-pub fn adjust_term(file: &File, term: &Term) -> Term {
+pub fn adjust_term(file: &File, term: &Term, holes: &mut u64) -> Term {
   match *term {
     Term::Typ { orig } => {
       Term::Typ { orig }
@@ -100,39 +103,39 @@ pub fn adjust_term(file: &File, term: &Term) -> Term {
     },
     Term::Let { ref orig, ref name, ref expr, ref body } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(file, &*expr));
-      let body = Box::new(adjust_term(file, &*body));
+      let expr = Box::new(adjust_term(file, &*expr, holes));
+      let body = Box::new(adjust_term(file, &*body, holes));
       Term::Let { orig, name: name.clone(), expr, body }
     },
     Term::Ann { ref orig, ref expr, ref tipo } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(file, &*expr));
-      let tipo = Box::new(adjust_term(file, &*tipo));
+      let expr = Box::new(adjust_term(file, &*expr, holes));
+      let tipo = Box::new(adjust_term(file, &*tipo, holes));
       Term::Ann { orig, expr, tipo }
     },
     Term::All { ref orig, ref name, ref tipo, ref body } => {
       let orig = *orig;
-      let tipo = Box::new(adjust_term(file, &*tipo));
-      let body = Box::new(adjust_term(file, &*body));
+      let tipo = Box::new(adjust_term(file, &*tipo, holes));
+      let body = Box::new(adjust_term(file, &*body, holes));
       Term::All { orig, name: name.clone(), tipo, body }
     },
     Term::Lam { ref orig, ref name, ref body } => {
       let orig = *orig;
-      let body = Box::new(adjust_term(file, &*body));
+      let body = Box::new(adjust_term(file, &*body, holes));
       Term::Lam { orig, name: name.clone(), body }
     },
     Term::App { ref orig, ref func, ref argm } => {
       let orig = *orig;
-      let func = Box::new(adjust_term(file, &*func));
-      let argm = Box::new(adjust_term(file, &*argm));
+      let func = Box::new(adjust_term(file, &*func, holes));
+      let argm = Box::new(adjust_term(file, &*argm, holes));
       Term::App { orig, func, argm }
     },
     Term::Ctr { ref orig, ref name, ref args } => {
       let orig = *orig;
-      if let Some(entry) = file.entries.get(name) {
+      if let Some(entry) = file.entrs.get(name) {
         let mut new_args = Vec::new();
         for arg in args {
-          new_args.push(Box::new(adjust_term(file, &*arg)));
+          new_args.push(Box::new(adjust_term(file, &*arg, holes)));
         }
         if entry.rules.len() > 0 {
           Term::Fun { orig, name: name.clone(), args: new_args }
@@ -145,6 +148,12 @@ pub fn adjust_term(file: &File, term: &Term) -> Term {
     },
     Term::Fun { ref orig, ref name, ref args } => {
       panic!("Internal error."); // shouldn't happen since we can't parse Fun{}
+    },
+    Term::Hol { ref orig, numb: _ } => {
+      let orig = *orig;
+      let numb = *holes;
+      *holes = *holes + 1;
+      Term::Hol { orig, numb }
     },
   }
 }
@@ -205,6 +214,20 @@ pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, last) = get_last_index(state)?;
       let orig          = origin(init, last);
       Ok((state, Box::new(Term::Var { orig, name })))
+    }),
+    state,
+  )
+}
+
+pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    parser::text_parser("_"),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("_", state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(Term::Hol { orig, numb: 0 })))
     }),
     state,
   )
@@ -403,6 +426,7 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_let), // `let `
     Box::new(parse_ann), // `{x::`
     Box::new(parse_hlp), // `?`
+    Box::new(parse_hol), // `_`
     Box::new(parse_var), // 
     Box::new(|state| Ok((state, None))),
   ], state)
@@ -485,12 +509,12 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
 pub fn parse_file(state: parser::State) -> parser::Answer<Box<File>> {
   let (state, entry_vec) = parser::until(Box::new(parser::done), Box::new(parse_entry), state)?;
   let mut names = Vec::new();
-  let mut entries = HashMap::new();
+  let mut entrs = HashMap::new();
   for entry in entry_vec {
     names.push(entry.name.clone());
-    entries.insert(entry.name.clone(), entry);
+    entrs.insert(entry.name.clone(), entry);
   }
-  return Ok((state, Box::new(File { names, entries })));
+  return Ok((state, Box::new(File { holes: 0, names, entrs })));
 }
 
 pub fn show_term(term: &Term) -> String {
@@ -535,6 +559,9 @@ pub fn show_term(term: &Term) -> String {
     Term::Fun { orig: _, name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
     }
+    Term::Hol { orig: _, numb } => {
+      format!("_")
+    }
   }
 }
 
@@ -568,7 +595,7 @@ pub fn show_entry(entry: &Entry) -> String {
 pub fn show_file(file: &File) -> String {
   let mut lines = vec![];
   for name in &file.names {
-    lines.push(show_entry(file.entries.get(name).unwrap()));
+    lines.push(show_entry(file.entrs.get(name).unwrap()));
   }
   lines.join("\n")
 }
@@ -645,6 +672,9 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
         args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
       format!("({}{} {}. {}{})", if quote { "Fn" } else { "FN" }, args.len(), name, hide(orig,lhs), args_strs.join(""))
+    }
+    Term::Hol { orig, numb } => {
+      format!("(Hol {} {})", orig, numb)
     }
   }
 }
@@ -745,12 +775,12 @@ pub fn compile_file(file: &File) -> String {
   result.push_str(&format!("\nFunctions =\n"));
   result.push_str(&format!("  let fns = Nil\n"));
   for name in &file.names {
-    let entry = file.entries.get(name).unwrap();
+    let entry = file.entrs.get(name).unwrap();
     result.push_str(&format!("  let fns = (Cons {}. fns)\n", entry.    name));
   }
   result.push_str(&format!("  fns\n\n"));
   for name in &file.names {
-    let entry = file.entries.get(name).unwrap();
+    let entry = file.entrs.get(name).unwrap();
     result.push_str(&format!("// {}\n", name));
     result.push_str(&format!("// {}\n", "-".repeat(name.len())));
     result.push_str(&format!("\n"));

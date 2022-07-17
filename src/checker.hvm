@@ -80,6 +80,31 @@ Main = API.check_all
 // Line : String
 Line = (String.cons 10 String.nil)
 
+// Subst
+// -----
+
+// type Subst {
+//    (End)                            // end of subst list
+//    (Unf (rest: Subst))              // unfilled hole
+//    (Sub (term: Term) (rest: Subst)) // subst hole
+// }
+
+// Subst.look Subst U60 : (Maybe Term)
+(Subst.look End             0) = None
+(Subst.look (Unf rest)      0) = None
+(Subst.look (Sub term rest) 0) = (Some term)
+(Subst.look End             n) = None
+(Subst.look (Unf rest)      n) = (Subst.look rest (- n 1))
+(Subst.look (Sub term rest) n) = (Subst.look rest (- n 1))
+
+// Subst.fill Subst U60 Term : Subst
+(Subst.fill End             0 term) = (Sub term End)
+(Subst.fill (Unf rest)      0 term) = (Sub term rest)
+(Subst.fill (Sub lost rest) 0 term) = (Sub term rest)
+(Subst.fill End             n term) = (Unf (Subst.fill End  (- n 1) term))
+(Subst.fill (Unf rest)      n term) = (Unf (Subst.fill rest (- n 1) term))
+(Subst.fill (Sub keep rest) n term) = (Sub keep (Subst.fill rest (- n 1) term))
+
 // Context
 // -------
 
@@ -119,48 +144,61 @@ Line = (String.cons 10 String.nil)
 // -------------
 
 // type Result (a : Type) {
-//   (Checked (ctx: Context) (dep: U60) (rhs: Bool) (ret: a))
-//   (Errored (ctx: Context) Error)
+//   (Checked (ctx: Context) (dep: U60) (rhs: Bool) (sub: Subst) (ret: a))
+//   (Errored (ctx: Context) (sub: Subst) (err: Error))
 // }
 
-// type Checker (a : Type) = (context: (List Term)) (depth: U60) (rhs: Bool) (Result a)
-  
+// Checker (a : Type) : Type {
+//   (context         : Context)
+//   (depth           : U60)
+//   (right_hand_side : Bool)
+//   (substitutions   : Subst)
+//   (Result a)
+// }
+
 // Checker.bind -(a: Type) -(b: Type) (Checker a) : (a -> Checker b) (Checker b)
-(Checker.bind checker) = λnext λctx λdep λrhs ((Checker.bind.result (checker ctx dep rhs)) next)
+(Checker.bind checker) = λnext λctx λdep λrhs λsub ((Checker.bind.result (checker ctx dep rhs sub)) next)
 
 // Checker.bind.result -(a: Type) -(b: Type) (Result a) : (a -> Checker b) (Result b)
-(Checker.bind.result (Checked ctx dep rhs val)) = λnext (next val ctx dep rhs)
-(Checker.bind.result (Errored ctx err))         = λnext (Errored ctx err)
+(Checker.bind.result (Checked ctx dep rhs sub val)) = λnext (next val ctx dep rhs sub)
+(Checker.bind.result (Errored ctx sub err))         = λnext (Errored ctx sub err)
 
 // Checker.done -(a: Type) (x: a) : (Checker a)
-(Checker.done val) = λctx λdep λrhs (Checked ctx dep rhs val)
+(Checker.done val) = λctx λdep λrhs λsub (Checked ctx dep rhs sub val)
 
-// Checker.fail -(a: Type) (err: (List Term) -> U60 -> Error) : (Checker a)
-(Checker.fail err) = λctx λdep λrhs (Errored ctx err)
+// Checker.fail -(a: Type) (err: Error) : (Checker a)
+(Checker.fail err) = λctx λdep λrhs λsub (Errored ctx sub err)
 
-// Checker.get_context -(a: Type) : (Checker Context)
-(Checker.get_context) = λctx λdep λrhs
-  (Checked ctx dep rhs ctx)
+// Checker.run -(a: Type) (Checker a) : (Result a)
+(Checker.run chk) = (chk Empty 0 False End)
 
-// Checker.get_depth -(a: Type) : (Checker U60)
-(Checker.get_depth) = λctx λdep λrhs
-  (Checked ctx dep rhs dep)
+// Checker.get_context : (Checker Context)
+(Checker.get_context) = λctx λdep λrhs λsub
+  (Checked ctx dep rhs sub ctx)
 
-// Checker.get_right_hand_side -(a: Type) : (Checker U60)
-(Checker.get_right_hand_side) = λctx λdep λrhs
-  (Checked ctx dep rhs rhs)
+// Checker.get_depth : (Checker U60)
+(Checker.get_depth) = λctx λdep λrhs λsub
+  (Checked ctx dep rhs sub dep)
 
-// Checker.set_right_hand_side -(a: Type) Bool : (Checker Unit)
-(Checker.set_right_hand_side rhs) = λctx λdep λold_rhs
-  (Checked ctx dep rhs Unit)
+// Checker.get_subst : (Checker Subst)
+(Checker.get_subst) = λctx λdep λrhs λsub
+  (Checked ctx dep rhs sub sub)
+
+// Checker.get_right_hand_side : (Checker U60)
+(Checker.get_right_hand_side) = λctx λdep λrhs λsub
+  (Checked ctx dep rhs sub rhs)
+
+// Checker.set_right_hand_side Bool : (Checker Unit)
+(Checker.set_right_hand_side rhs) = λctx λdep λold_rhs λsub
+  (Checked ctx dep rhs sub Unit)
 
 // Checker.extend U60 Term (List Term) : (Checker Unit)
-(Checker.extend name type vals) = λctx λdep λrhs
-  (Checked (Context.extend ctx name type vals) (+ dep 1) rhs Unit)
+(Checker.extend name type vals) = λctx λdep λrhs λsub
+  (Checked (Context.extend ctx name type vals) (+ dep 1) rhs sub Unit)
 
-// Checker.shrink -(a: Term) : (Checker Unit)
-(Checker.shrink) = λctx λdep λrhs
-  (Checked (Context.tail ctx) (- dep 1) rhs Unit)
+// Checker.shrink : (Checker Unit)
+(Checker.shrink) = λctx λdep λrhs λsub
+  (Checked (Context.tail ctx) (- dep 1) rhs sub Unit)
 
 // Checker.extended -(a: Type) (Checker a) U60 Term Term : (Checker a)
 (Checker.extended checker name type vals) = 
@@ -169,13 +207,27 @@ Line = (String.cons 10 String.nil)
   ask (Checker.bind Checker.shrink)
   (Checker.done got)
 
-// Checker.get_type_of -(r: Type) U60 r (U60 -> Term -> (List Term) -> r) : (Checker r)
-(Checker.find idx d f) = λctx λdep λrhs
-  (Checked ctx dep rhs (Context.find ctx idx d f))
+// Checker.find -(r: Type) U60 r (U60 -> Term -> (List Term) -> r) : (Checker r)
+(Checker.find idx d f) = λctx λdep λrhs λsub
+  (Checked ctx dep rhs sub (Context.find ctx idx d f))
 
-// Checker.add_value -(a: Type) (idx: U60) (val: Term) : (Checker Unit)
-(Checker.add_value idx val) = λctx λdep λrhs
-  (Checked (Context.add_value ctx idx val) dep rhs Unit)
+// Checker.add_value (idx: U60) (val: Term) : (Checker Unit)
+(Checker.add_value idx val) = λctx λdep λrhs λsub
+  (Checked (Context.add_value ctx idx val) dep rhs sub Unit)
+
+// Checker.find -(r: Type) U60 r (U60 -> Term -> (List Term) -> r) : (Checker r)
+(Checker.find idx d f) = λctx λdep λrhs λsub
+  (Checked ctx dep rhs sub (Context.find ctx idx d f))
+
+// Checker.fill (idx: U60) (val: Term) : (Checker Unit)
+(Checker.fill idx val) = λctx λdep λrhs λsub
+  //(HVM.log (FILL idx (Show val))
+  (Checked ctx dep rhs (Subst.fill sub idx val) Unit)
+  //)
+
+// Checker.look (idx: U60) : (Checker (Maybe Term))
+(Checker.look idx) = λctx λdep λrhs λsub
+  (Checked ctx dep rhs sub (Subst.look sub idx))
 
 // Term utils
 // ----------
@@ -185,61 +237,92 @@ Line = (String.cons 10 String.nil)
 (Term.if_all other                     then else) = else
 
 // Term.orig
-(Term.get_origin (Typ orig)) = orig
-(Term.get_origin (Var orig name index)) = orig
-(Term.get_origin (All orig name type body)) = orig
-(Term.get_origin (Lam orig name body)) = orig
-(Term.get_origin (App orig func argm)) = orig
-(Term.get_origin (Let orig name expr body)) = orig
-(Term.get_origin (Ann orig expr type)) = orig
-(Term.get_origin (Ct0 name orig)) = orig
-(Term.get_origin (Ct1 name orig a)) = orig
-(Term.get_origin (Ct2 name orig a b)) = orig
-(Term.get_origin (Ct3 name orig a b c)) = orig
-(Term.get_origin (Ct4 name orig a b c d)) = orig
-(Term.get_origin (Ct5 name orig a b c d e)) = orig
-(Term.get_origin (Ct6 name orig a b c d e f)) = orig
-(Term.get_origin (Ct7 name orig a b c d e f g)) = orig
+(Term.get_origin (Typ orig))                      = orig
+(Term.get_origin (Var orig name index))           = orig
+(Term.get_origin (Hol orig numb))                 = orig
+(Term.get_origin (All orig name type body))       = orig
+(Term.get_origin (Lam orig name body))            = orig
+(Term.get_origin (App orig func argm))            = orig
+(Term.get_origin (Let orig name expr body))       = orig
+(Term.get_origin (Ann orig expr type))            = orig
+(Term.get_origin (Ct0 name orig))                 = orig
+(Term.get_origin (Ct1 name orig a))               = orig
+(Term.get_origin (Ct2 name orig a b))             = orig
+(Term.get_origin (Ct3 name orig a b c))           = orig
+(Term.get_origin (Ct4 name orig a b c d))         = orig
+(Term.get_origin (Ct5 name orig a b c d e))       = orig
+(Term.get_origin (Ct6 name orig a b c d e f))     = orig
+(Term.get_origin (Ct7 name orig a b c d e f g))   = orig
 (Term.get_origin (Ct8 name orig a b c d e f g h)) = orig
-(Term.get_origin (Fn0 name orig)) = orig
-(Term.get_origin (Fn1 name orig a)) = orig
-(Term.get_origin (Fn2 name orig a b)) = orig
-(Term.get_origin (Fn3 name orig a b c)) = orig
-(Term.get_origin (Fn4 name orig a b c d)) = orig
-(Term.get_origin (Fn5 name orig a b c d e)) = orig
-(Term.get_origin (Fn6 name orig a b c d e f)) = orig
-(Term.get_origin (Fn7 name orig a b c d e f g)) = orig
+(Term.get_origin (Fn0 name orig))                 = orig
+(Term.get_origin (Fn1 name orig a))               = orig
+(Term.get_origin (Fn2 name orig a b))             = orig
+(Term.get_origin (Fn3 name orig a b c))           = orig
+(Term.get_origin (Fn4 name orig a b c d))         = orig
+(Term.get_origin (Fn5 name orig a b c d e))       = orig
+(Term.get_origin (Fn6 name orig a b c d e f))     = orig
+(Term.get_origin (Fn7 name orig a b c d e f g))   = orig
 (Term.get_origin (Fn8 name orig a b c d e f g h)) = orig
 
 // Term.set_origin
-(Term.set_origin new_orig (Typ orig)) = (Typ new_orig)
-(Term.set_origin new_orig (Var orig name index)) = (Var new_orig name index)
-(Term.set_origin new_orig (All orig name type body)) = (All new_orig name type body)
-(Term.set_origin new_orig (Lam orig name body)) = (Lam new_orig name body)
-(Term.set_origin new_orig (App orig func argm)) = (App new_orig func argm)
-(Term.set_origin new_orig (Let orig name expr body)) = (Let new_orig name expr body)
-(Term.set_origin new_orig (Ann orig expr type)) = (Ann new_orig expr type)
-(Term.set_origin new_orig (Ct0 name orig)) = (Ct0 name new_orig)
-(Term.set_origin new_orig (Ct1 name orig a)) = (Ct1 name new_orig a)
-(Term.set_origin new_orig (Ct2 name orig a b)) = (Ct2 name new_orig a b)
-(Term.set_origin new_orig (Ct3 name orig a b c)) = (Ct3 name new_orig a b c)
-(Term.set_origin new_orig (Ct4 name orig a b c d)) = (Ct4 name new_orig a b c d)
-(Term.set_origin new_orig (Ct5 name orig a b c d e)) = (Ct5 name new_orig a b c d e)
-(Term.set_origin new_orig (Ct6 name orig a b c d e f)) = (Ct6 name new_orig a b c d e f)
-(Term.set_origin new_orig (Ct7 name orig a b c d e f g)) = (Ct7 name new_orig a b c d e f g)
+(Term.set_origin new_orig (Typ orig))                      = (Typ new_orig)
+(Term.set_origin new_orig (Var orig name index))           = (Var new_orig name index)
+(Term.set_origin new_orig (Hol orig numb))                 = (Hol new_orig numb)
+(Term.set_origin new_orig (All orig name type body))       = (All new_orig name type body)
+(Term.set_origin new_orig (Lam orig name body))            = (Lam new_orig name body)
+(Term.set_origin new_orig (App orig func argm))            = (App new_orig func argm)
+(Term.set_origin new_orig (Let orig name expr body))       = (Let new_orig name expr body)
+(Term.set_origin new_orig (Ann orig expr type))            = (Ann new_orig expr type)
+(Term.set_origin new_orig (Ct0 name orig))                 = (Ct0 name new_orig)
+(Term.set_origin new_orig (Ct1 name orig a))               = (Ct1 name new_orig a)
+(Term.set_origin new_orig (Ct2 name orig a b))             = (Ct2 name new_orig a b)
+(Term.set_origin new_orig (Ct3 name orig a b c))           = (Ct3 name new_orig a b c)
+(Term.set_origin new_orig (Ct4 name orig a b c d))         = (Ct4 name new_orig a b c d)
+(Term.set_origin new_orig (Ct5 name orig a b c d e))       = (Ct5 name new_orig a b c d e)
+(Term.set_origin new_orig (Ct6 name orig a b c d e f))     = (Ct6 name new_orig a b c d e f)
+(Term.set_origin new_orig (Ct7 name orig a b c d e f g))   = (Ct7 name new_orig a b c d e f g)
 (Term.set_origin new_orig (Ct8 name orig a b c d e f g h)) = (Ct8 name new_orig a b c d e f g h)
-(Term.set_origin new_orig (Fn0 name orig)) = (Fn0 name new_orig)
-(Term.set_origin new_orig (Fn1 name orig a)) = (Fn1 name new_orig a)
-(Term.set_origin new_orig (Fn2 name orig a b)) = (Fn2 name new_orig a b)
-(Term.set_origin new_orig (Fn3 name orig a b c)) = (Fn3 name new_orig a b c)
-(Term.set_origin new_orig (Fn4 name orig a b c d)) = (Fn4 name new_orig a b c d)
-(Term.set_origin new_orig (Fn5 name orig a b c d e)) = (Fn5 name new_orig a b c d e)
-(Term.set_origin new_orig (Fn6 name orig a b c d e f)) = (Fn6 name new_orig a b c d e f)
-(Term.set_origin new_orig (Fn7 name orig a b c d e f g)) = (Fn7 name new_orig a b c d e f g)
+(Term.set_origin new_orig (Fn0 name orig))                 = (Fn0 name new_orig)
+(Term.set_origin new_orig (Fn1 name orig a))               = (Fn1 name new_orig a)
+(Term.set_origin new_orig (Fn2 name orig a b))             = (Fn2 name new_orig a b)
+(Term.set_origin new_orig (Fn3 name orig a b c))           = (Fn3 name new_orig a b c)
+(Term.set_origin new_orig (Fn4 name orig a b c d))         = (Fn4 name new_orig a b c d)
+(Term.set_origin new_orig (Fn5 name orig a b c d e))       = (Fn5 name new_orig a b c d e)
+(Term.set_origin new_orig (Fn6 name orig a b c d e f))     = (Fn6 name new_orig a b c d e f)
+(Term.set_origin new_orig (Fn7 name orig a b c d e f g))   = (Fn7 name new_orig a b c d e f g)
 (Term.set_origin new_orig (Fn8 name orig a b c d e f g h)) = (Fn8 name new_orig a b c d e f g h)
 
 // SO = Term.set_origin
 (SO new_orig term) = (Term.set_origin new_orig term)
+
+// TODO
+// Term.fill Term (List Term) : Term
+(Term.fill (Typ orig) sub)                      = (Typ orig)
+(Term.fill (Var orig name index) sub)           = (Var orig name index)
+(Term.fill (All orig name type body) sub)       = (All orig name (Term.fill type sub) (Term.fill body sub))
+(Term.fill (Lam orig name body) sub)            = (Lam orig (Term.fill name sub) (Term.fill body sub))
+(Term.fill (App orig func argm) sub)            = (App orig (Term.fill func sub) (Term.fill argm sub))
+(Term.fill (Let orig name expr body) sub)       = (Let orig name (Term.fill expr sub) (Term.fill body sub))
+(Term.fill (Ann orig expr type) sub)            = (Ann orig (Term.fill expr sub) (Term.fill type sub))
+(Term.fill (Ct0 name orig) sub)                 = (Ct0 name orig)
+(Term.fill (Ct1 name orig a) sub)               = (Ct1 name orig (Term.fill a sub))
+(Term.fill (Ct2 name orig a b) sub)             = (Ct2 name orig (Term.fill a sub) (Term.fill b sub))
+(Term.fill (Ct3 name orig a b c) sub)           = (Ct3 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub))
+(Term.fill (Ct4 name orig a b c d) sub)         = (Ct4 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub))
+(Term.fill (Ct5 name orig a b c d e) sub)       = (Ct5 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub))
+(Term.fill (Ct6 name orig a b c d e f) sub)     = (Ct6 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub))
+(Term.fill (Ct7 name orig a b c d e f g) sub)   = (Ct7 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub))
+(Term.fill (Ct8 name orig a b c d e f g h) sub) = (Ct8 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub) (Term.fill h sub))
+(Term.fill (Fn0 name orig) sub)                 = (Fn0 name orig)
+(Term.fill (Fn1 name orig a) sub)               = (Fn1 name orig (Term.fill a sub))
+(Term.fill (Fn2 name orig a b) sub)             = (Fn2 name orig (Term.fill a sub) (Term.fill b sub))
+(Term.fill (Fn3 name orig a b c) sub)           = (Fn3 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub))
+(Term.fill (Fn4 name orig a b c d) sub)         = (Fn4 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub))
+(Term.fill (Fn5 name orig a b c d e) sub)       = (Fn5 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub))
+(Term.fill (Fn6 name orig a b c d e f) sub)     = (Fn6 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub))
+(Term.fill (Fn7 name orig a b c d e f g) sub)   = (Fn7 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub))
+(Term.fill (Fn8 name orig a b c d e f g h) sub) = (Fn8 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub) (Term.fill h sub))
+(Term.fill (Hol orig numb) sub)                 = (Maybe.case (Subst.look sub numb) (Hol orig numb) λval (Term.fill val sub))
 
 // Equal Term Term : (Checker Bool)
 // --------------------------------
@@ -361,6 +444,14 @@ Line = (String.cons 10 String.nil)
   ask x7   = (Checker.bind (Equal a.x7 b.x7))
   (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 (Bool.and x6 x7)))))))))
 
+// Hol equality #0
+(Equal (Hol a.orig a.numb) b) =
+  (Equal.hol a.orig a.numb b)
+
+// Hol equality #1
+(Equal a (Hol b.orig b.numb)) =
+  (Equal.hol b.orig b.numb a)
+
 // Var equality #0
 (Equal (Var a.orig a.name a.index) b) =
   ask rhs = (Checker.bind (Checker.get_right_hand_side))
@@ -375,14 +466,14 @@ Line = (String.cons 10 String.nil)
 (Equal a b) =
   (Checker.done False)
 
-// Equal.var (rhs : Bool) (index : U60) (b: Term) : (Checker bool)
-// ---------------------------------------------------------------
+// Equal.var (rhs: Bool) (origin: U60) (index: U60) (b: Term) : (Checker bool)
+// ---------------------------------------------------------------------------
 // A variable is equal to a term when any of its reductions is
 
 // If on LHS, extend the variable's equality list
 // If on RHS, check if a and b are equal
 
-// Var-Var checker
+// Variable checker
 (Equal.var False a.orig a.name a.index b) =
   ask (Checker.bind (Checker.add_value a.index b))
   (Checker.done True)
@@ -407,6 +498,30 @@ Line = (String.cons 10 String.nil)
 (Equal.var.try_values Nil b) =
   (Checker.done False)
 
+// Equal.hol (origin: U60) (numb: U60) (b: Term) : (Checker bool)
+// --------------------------------------------------------------
+
+//hole_0 == A
+//- se hole_0 não tiver um valor...
+  //- seta o valor de hole_0 como A
+//- se hole_0 tiver um valor...
+  //- checa se esse valor é igual a A
+
+// Hole checker
+(Equal.hol a.orig a.numb b) =
+  ask sub = (Checker.bind (Checker.get_subst))
+  ask got = (Checker.bind (Checker.look a.numb))
+  (Equal.hol.val got a.orig a.numb b)
+
+// Hole has no value yet, so we set it
+(Equal.hol.val None a.orig a.numb b) =
+  ask (Checker.bind (Checker.fill a.numb b))
+  (Checker.done True)
+
+// Hole has a value, so we compare it
+(Equal.hol.val (Some a.val) a.orig a.numb b) =
+  (Equal a.val b)
+
 // Infer Term : (Checker Term)
 // ---------------------------
 
@@ -416,6 +531,10 @@ Line = (String.cons 10 String.nil)
   (Maybe.case got_type
     (Checker.fail (UnboundVariable (Var orig name index)))
     λvar_type (Checker.done var_type))
+
+// Infers Hol
+(Infer (Hol orig numb)) =
+  (Checker.fail (CantInferHole (Hol orig numb)))
 
 // Infers Typ
 (Infer (Typ orig)) =
@@ -550,6 +669,10 @@ Line = (String.cons 10 String.nil)
     (Check.compare (Var orig name index) type)
     (Checker.extend name type Nil))
 
+// Checks Hol
+(Check (Hol orig numb) type) =
+  (Checker.done Unit)
+
 // Checks others
 (Check term type) =
   (Check.compare term type)
@@ -597,6 +720,10 @@ Line = (String.cons 10 String.nil)
 
 (Show (Var orig name index)) = (Text [
   (Show.name name)
+])
+
+(Show (Hol orig numb)) = (Text [
+  "_" (Show.u60 numb)
 ])
 
 (Show (Typ orig)) = (Text [
@@ -830,6 +957,16 @@ Line = (String.cons 10 String.nil)
   (Show.context.vals name vals pad)
 ])
 
+(Show.subst End) = "|"
+(Show.subst (Unf rest)) = (Text [
+  "~ ?" Line
+  (Show.subst rest)
+])
+(Show.subst (Sub expr rest)) = (Text [
+  "~ " (Show expr) Line
+  (Show.subst rest)
+])
+
 // Show.u60 U60 : String
 (Show.u60 n) = (Show.u60.build n String.nil)
   (Show.u60.build n str) = 
@@ -878,7 +1015,7 @@ API.run_main = (Text [
 
 (API.check_function.verifiers Nil type) = Nil
 (API.check_function.verifiers (Cons verifier verifiers) type) =
-  let head = ((Check.verify verifier type) Empty 0 False)
+  let head = (Checker.run (Check.verify verifier type))
   let tail = (API.check_function.verifiers verifiers type)
   (Cons head tail)
 
@@ -892,40 +1029,49 @@ API.run_main = (Text [
 
 (API.output.function fnid Nil) =
   String.nil
-(API.output.function fnid (Cons (Checked ctx dep rhs val) checks)) =
-  (API.output.function fnid checks)
-(API.output.function fnid (Cons (Errored ctx err) checks)) =
+(API.output.function fnid (Cons (Checked ctx dep rhs sub val) checks)) =
+  (Text [
+    //(NameOf fnid) Line
+    //(Show.subst sub) Line
+    (API.output.function fnid checks)
+  ])
+(API.output.function fnid (Cons (Errored ctx sub err) checks)) =
   (Text [
     (Color "1") "[" (NameOf fnid) "] " (Color "0") Line
-    (API.output.error err ctx) Line
+    (API.output.error err ctx sub) Line
     (API.output.function fnid checks)
   ])
 
-(API.output.error (UnboundVariable term) ctx) =
+(API.output.error (UnboundVariable term) ctx sub) =
   (Text [
     (Color "4") "Unbound Variable." (Color "0") Line
     (API.output.error.details ctx term)
   ])
-(API.output.error (CantInferLambda term) ctx) =
+(API.output.error (CantInferLambda term) ctx sub) =
   (Text [
     (Color "4") "Can't infer lambda." (Color "0") Line
     (API.output.error.details ctx term)
   ])
-(API.output.error (TooManyArguments term) ctx) =
+(API.output.error (CantInferHole term) ctx sub) =
+  (Text [
+    (Color "4") "Can't infer hole." (Color "0") Line
+    (API.output.error.details ctx term)
+  ])
+(API.output.error (TooManyArguments term) ctx sub) =
   (Text [
     (Color "4") "Too many arguments." (Color "0") Line
     (API.output.error.details ctx term)
   ])
-(API.output.error (InvalidCall term) ctx) =
+(API.output.error (InvalidCall term) ctx sub) =
   (Text [
     (Color "4") "Invalid call." (Color "0") Line
     (API.output.error.details ctx term)
   ])
-(API.output.error (TypeMismatch term expected detected) ctx) =
+(API.output.error (TypeMismatch term expected detected) ctx sub) =
   (Text [
     (Color "4") "Type mismatch." (Color "0") Line
-    "- Expected: " (Show expected) Line
-    "- Detected: " (Show detected) Line
+    "- Expected: " (Show (Term.fill expected sub)) Line
+    "- Detected: " (Show (Term.fill detected sub)) Line
     (API.output.error.details ctx term)
   ])
 

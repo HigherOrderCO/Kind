@@ -11,7 +11,6 @@ use hvm::parser as parser;
 const CHECKER_HVM: &str = include_str!("checker.hvm");
 
 fn main() {
-  println!("{}", name_to_u64("_"));
   match run_cli() {
     Ok(..) => {}
     Err(err) => {
