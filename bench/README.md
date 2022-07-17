@@ -37,9 +37,9 @@ time kind2 check file.kind2
 ### Kind2-C
 
 ```
-kind2 check file.kind2
-hvm compile file.kind2.hvm
-clang file.kind2.c -O3 -o check
+kind2 gen-checker file.kind2
+hvm compile file.check.hvm
+clang file.check.c -O3 -o check
 time ./check
 ```
 

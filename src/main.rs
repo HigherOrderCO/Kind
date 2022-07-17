@@ -80,7 +80,9 @@ fn run_main(path: &str) -> Result<(), String> {
 // Generates the checker file (`file.kind2` -> `file.checker.hvm`)
 fn gen_checker(path: &str) -> Result<(), String> {
   let loaded = load_file(path)?;
-  std::fs::write(format!("{}.hvm", path.replace(".kind2",".check")), loaded.check_code.clone()).ok();
+  let gen_path = format!("{}.hvm", path.replace(".kind2",".check"));
+  println!("Generated '{}'.", gen_path);
+  std::fs::write(gen_path, loaded.check_code.clone()).ok();
   Ok(())
 }
 

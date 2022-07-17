@@ -21,6 +21,6 @@ Nul (n: Nat) : Nat
 Nul (S a) = (Nul a)
 Nul (Z)   = (Z)
 
-Work : (The (Nul (Exp (S (S (S Z))) (S (S (S (S (S (S (S (S Z))))))))))) {
+Work : (The (Nul (Exp (S (S (S Z))) (S (S (S (S (S (S (S (S (S (S Z))))))))))))) {
   (Val Z)
 }
