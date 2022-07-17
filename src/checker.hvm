@@ -127,9 +127,10 @@ Line = (String.cons 10 String.nil)
 (Context.find (Entry name type vals rest) i d f) = (Context.find rest (- i 1) d f)
 (Context.find Empty                       i d f) = d
 
-// Context.tail Context : Context
-(Context.tail (Entry name type vals rest)) = rest
-(Context.tail Empty)                       = Empty
+// Context.shrink Context : Context
+(Context.shrink Empty)                        = Empty // FIXME: can't move to last line; investigate
+(Context.shrink (Entry name type vals Empty)) = Empty
+(Context.shrink (Entry name type vals rest))  = (Entry name type vals (Context.shrink rest))
 
 // Context.is_empty Context : Context
 (Context.is_empty (Entry name type vals rest)) = False
@@ -198,7 +199,7 @@ Line = (String.cons 10 String.nil)
 
 // Checker.shrink : (Checker Unit)
 (Checker.shrink) = λctx λdep λrhs λsub
-  (Checked (Context.tail ctx) (- dep 1) rhs sub Unit)
+  (Checked (Context.shrink ctx) (- dep 1) rhs sub Unit)
 
 // Checker.extended -(a: Type) (Checker a) U60 Term Term : (Checker a)
 (Checker.extended checker name type vals) = 
@@ -433,6 +434,87 @@ Line = (String.cons 10 String.nil)
 
 // Ct8 equality
 (Equal (Ct8 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6 a.x7) (Ct8 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6 b.x7)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  ask x1   = (Checker.bind (Equal a.x1 b.x1))
+  ask x2   = (Checker.bind (Equal a.x2 b.x2))
+  ask x3   = (Checker.bind (Equal a.x3 b.x3))
+  ask x4   = (Checker.bind (Equal a.x4 b.x4))
+  ask x5   = (Checker.bind (Equal a.x5 b.x5))
+  ask x6   = (Checker.bind (Equal a.x6 b.x6))
+  ask x7   = (Checker.bind (Equal a.x7 b.x7))
+  (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 (Bool.and x6 x7)))))))))
+
+// Fn0 equality
+(Equal (Fn0 a.ctid a.orig) (Fn0 b.ctid b.orig)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  (Checker.done ctid)
+
+// Fn1 equality
+(Equal (Fn1 a.ctid a.orig a.x0) (Fn1 b.ctid b.orig b.x0)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  (Checker.done (Bool.and ctid x0))
+
+// Fn2 equality
+(Equal (Fn2 a.ctid a.orig a.x0 a.x1) (Fn2 b.ctid b.orig b.x0 b.x1)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  ask x1   = (Checker.bind (Equal a.x1 b.x1))
+  (Checker.done (Bool.and ctid (Bool.and x0 x1)))
+
+// Fn3 equality
+(Equal (Fn3 a.ctid a.orig a.x0 a.x1 a.x2) (Fn3 b.ctid b.orig b.x0 b.x1 b.x2)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  ask x1   = (Checker.bind (Equal a.x1 b.x1))
+  ask x2   = (Checker.bind (Equal a.x2 b.x2))
+  (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 x2))))
+
+// Fn4 equality
+(Equal (Fn4 a.ctid a.orig a.x0 a.x1 a.x2 a.x3) (Fn4 b.ctid b.orig b.x0 b.x1 b.x2 b.x3)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  ask x1   = (Checker.bind (Equal a.x1 b.x1))
+  ask x2   = (Checker.bind (Equal a.x2 b.x2))
+  ask x3   = (Checker.bind (Equal a.x3 b.x3))
+  (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 x3)))))
+
+// Fn5 equality
+(Equal (Fn5 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4) (Fn5 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  ask x1   = (Checker.bind (Equal a.x1 b.x1))
+  ask x2   = (Checker.bind (Equal a.x2 b.x2))
+  ask x3   = (Checker.bind (Equal a.x3 b.x3))
+  ask x4   = (Checker.bind (Equal a.x4 b.x4))
+  (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 x4))))))
+
+// Fn6 equality
+(Equal (Fn6 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4 a.x5) (Fn6 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4 b.x5)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  ask x1   = (Checker.bind (Equal a.x1 b.x1))
+  ask x2   = (Checker.bind (Equal a.x2 b.x2))
+  ask x3   = (Checker.bind (Equal a.x3 b.x3))
+  ask x4   = (Checker.bind (Equal a.x4 b.x4))
+  ask x5   = (Checker.bind (Equal a.x5 b.x5))
+  (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 x5)))))))
+
+// Fn7 equality
+(Equal (Fn7 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6) (Fn7 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6)) =
+  let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
+  ask x0   = (Checker.bind (Equal a.x0 b.x0))
+  ask x1   = (Checker.bind (Equal a.x1 b.x1))
+  ask x2   = (Checker.bind (Equal a.x2 b.x2))
+  ask x3   = (Checker.bind (Equal a.x3 b.x3))
+  ask x4   = (Checker.bind (Equal a.x4 b.x4))
+  ask x5   = (Checker.bind (Equal a.x5 b.x5))
+  ask x6   = (Checker.bind (Equal a.x6 b.x6))
+  (Checker.done (Bool.and ctid (Bool.and x0 (Bool.and x1 (Bool.and x2 (Bool.and x3 (Bool.and x4 (Bool.and x5 x6))))))))
+
+// Fn8 equality
+(Equal (Fn8 a.ctid a.orig a.x0 a.x1 a.x2 a.x3 a.x4 a.x5 a.x6 a.x7) (Fn8 b.ctid b.orig b.x0 b.x1 b.x2 b.x3 b.x4 b.x5 b.x6 b.x7)) =
   let ctid = (U60.equal (HashOf a.ctid) (HashOf b.ctid))
   ask x0   = (Checker.bind (Equal a.x0 b.x0))
   ask x1   = (Checker.bind (Equal a.x1 b.x1))
@@ -937,24 +1019,24 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show.context ctx) =
-  (Show.context.go ctx (Context.max_name_length ctx))
+(Show.context ctx sub) =
+  (Show.context.go ctx sub (Context.max_name_length ctx))
 
-(Show.context.go Empty pad) = String.nil
-(Show.context.go (Entry name type vals rest) pad) = (Text [
-  (Show.context.type name type pad)
-  (Show.context.vals name vals pad)
-  (Show.context.go rest pad)
+(Show.context.go Empty sub pad) = String.nil
+(Show.context.go (Entry name type vals rest) sub pad) = (Text [
+  (Show.context.type name type sub pad)
+  (Show.context.vals name vals sub pad)
+  (Show.context.go rest sub pad)
 ])
 
-(Show.context.type name type pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " : " (Show type) Line
+(Show.context.type name type sub pad) = (Text [
+  "- " (String.pad_right (Show.name name) ' ' pad) " : " (Show (Term.fill type sub)) Line
 ])
 
-(Show.context.vals name Nil pad) = String.nil
-(Show.context.vals name (Cons val vals) pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " = " (Show val) Line
-  (Show.context.vals name vals pad)
+(Show.context.vals name Nil sub pad) = String.nil
+(Show.context.vals name (Cons val vals) sub pad) = (Text [
+  "- " (String.pad_right (Show.name name) ' ' pad) " = " (Show (Term.fill val sub)) Line
+  (Show.context.vals name vals sub pad)
 ])
 
 (Show.subst End) = "|"
@@ -1044,42 +1126,42 @@ API.run_main = (Text [
 (API.output.error fnid (UnboundVariable term) ctx sub) =
   (Text [
     (Color "4") "Unbound Variable." (Color "0") Line
-    (API.output.error.details fnid ctx term)
+    (API.output.error.details fnid ctx sub term)
   ])
 (API.output.error fnid (CantInferLambda term) ctx sub) =
   (Text [
     (Color "4") "Can't infer lambda." (Color "0") Line
-    (API.output.error.details fnid ctx term)
+    (API.output.error.details fnid ctx sub term)
   ])
 (API.output.error fnid (CantInferHole term) ctx sub) =
   (Text [
     (Color "4") "Can't infer hole." (Color "0") Line
-    (API.output.error.details fnid ctx term)
+    (API.output.error.details fnid ctx sub term)
   ])
 (API.output.error fnid (TooManyArguments term) ctx sub) =
   (Text [
     (Color "4") "Too many arguments." (Color "0") Line
-    (API.output.error.details fnid ctx term)
+    (API.output.error.details fnid ctx sub term)
   ])
 (API.output.error fnid (InvalidCall term) ctx sub) =
   (Text [
     (Color "4") "Invalid call." (Color "0") Line
-    (API.output.error.details fnid ctx term)
+    (API.output.error.details fnid ctx sub term)
   ])
 (API.output.error fnid (TypeMismatch term expected detected) ctx sub) =
   (Text [
     (Color "4") "Type mismatch." (Color "0") Line
     "- Expected: " (Show (Term.fill expected sub)) Line
     "- Detected: " (Show (Term.fill detected sub)) Line
-    (API.output.error.details fnid ctx term)
+    (API.output.error.details fnid ctx sub term)
   ])
 
-(API.output.error.details fnid ctx term) =
+(API.output.error.details fnid ctx sub term) =
   let orig = (Term.get_origin term)
   (Text [
     (If (Context.is_empty ctx) "" (Text [
       (Color "4") "Context:" (Color "0") Line
-      (Show.context ctx)
+      (Show.context ctx sub)
     ]))
     (Color "4") "Inside '" (NameOf fnid) "':" (Color "0") Line
     "{{#"(Show.u60 (& orig 16777215))":"(Show.u60 (>> orig 24))"#}}" Line
