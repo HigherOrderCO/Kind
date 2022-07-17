@@ -18,6 +18,7 @@ pub struct Entry {
 
 #[derive(Clone, Debug)]
 pub struct Argument {
+  hide: bool,
   eras: bool,
   name: String,
   tipo: Box<Term>,
@@ -47,103 +48,134 @@ pub enum Term {
 // Adjuster
 // ========
 
-pub fn adjust_file(file: &File) -> File {
+#[derive(Clone, Debug)]
+pub enum AdjustError {
+  IncorrectArity { orig: u64, term: Box<Term> }
+}
+
+pub fn adjust_file(file: &File) -> Result<File, AdjustError> {
   let mut names = Vec::new();
   let mut entrs = HashMap::new(); 
   let mut holes = 0;
   for name in &file.names {
     let entry = file.entrs.get(name).unwrap();
     names.push(name.clone());
-    entrs.insert(name.clone(), Box::new(adjust_entry(file, &entry, &mut holes)));
+    entrs.insert(name.clone(), Box::new(adjust_entry(file, &entry, &mut holes)?));
   }
-  return File { names, entrs, holes };
+  return Ok(File { names, entrs, holes });
 }
 
-pub fn adjust_entry(file: &File, entry: &Entry, holes: &mut u64) -> Entry {
+pub fn adjust_entry(file: &File, entry: &Entry, holes: &mut u64) -> Result<Entry, AdjustError> {
   let name = entry.name.clone();
   let mut args = Vec::new();
   for arg in &entry.args {
-    args.push(Box::new(adjust_argument(file, arg, holes)));
+    args.push(Box::new(adjust_argument(file, arg, holes)?));
   }
-  let tipo = Box::new(adjust_term(file, &*entry.tipo, holes));
+  let tipo = Box::new(adjust_term(file, &*entry.tipo, holes)?);
   let mut rules = Vec::new();
   for rule in &entry.rules {
-    rules.push(Box::new(adjust_rule(file, &*rule, holes)));
+    rules.push(Box::new(adjust_rule(file, &*rule, holes)?));
   }
-  return Entry { name, args, tipo, rules };
+  return Ok(Entry { name, args, tipo, rules });
 }
 
-pub fn adjust_argument(file: &File, arg: &Argument, holes: &mut u64) -> Argument {
+pub fn adjust_argument(file: &File, arg: &Argument, holes: &mut u64) -> Result<Argument, AdjustError> {
+  let hide = arg.hide;
   let eras = arg.eras;
   let name = arg.name.clone();
-  let tipo = Box::new(adjust_term(file, &*arg.tipo, holes));
-  return Argument { eras, name, tipo };
+  let tipo = Box::new(adjust_term(file, &*arg.tipo, holes)?);
+  return Ok(Argument { hide, eras, name, tipo });
 }
 
-pub fn adjust_rule(file: &File, rule: &Rule, holes: &mut u64) -> Rule {
+pub fn adjust_rule(file: &File, rule: &Rule, holes: &mut u64) -> Result<Rule, AdjustError> {
   let name = rule.name.clone();
   let mut pats = Vec::new();
   for pat in &rule.pats {
-    pats.push(Box::new(adjust_term(file, &*pat, holes)));
+    pats.push(Box::new(adjust_term(file, &*pat, holes)?));
   }
-  let body = Box::new(adjust_term(file, &*rule.body, holes));
-  return Rule { name, pats, body };
+  let body = Box::new(adjust_term(file, &*rule.body, holes)?);
+  return Ok(Rule { name, pats, body });
 }
 
 // TODO: check unbound variables
 // TODO: prevent defining the same name twice
-pub fn adjust_term(file: &File, term: &Term, holes: &mut u64) -> Term {
+pub fn adjust_term(file: &File, term: &Term, holes: &mut u64) -> Result<Term, AdjustError> {
   match *term {
     Term::Typ { orig } => {
-      Term::Typ { orig }
+      Ok(Term::Typ { orig })
     },
     Term::Var { ref orig, ref name } => {
       let orig = *orig;
-      Term::Var { orig, name: name.clone() }
+      Ok(Term::Var { orig, name: name.clone() })
     },
     Term::Let { ref orig, ref name, ref expr, ref body } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(file, &*expr, holes));
-      let body = Box::new(adjust_term(file, &*body, holes));
-      Term::Let { orig, name: name.clone(), expr, body }
+      let expr = Box::new(adjust_term(file, &*expr, holes)?);
+      let body = Box::new(adjust_term(file, &*body, holes)?);
+      Ok(Term::Let { orig, name: name.clone(), expr, body })
     },
     Term::Ann { ref orig, ref expr, ref tipo } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(file, &*expr, holes));
-      let tipo = Box::new(adjust_term(file, &*tipo, holes));
-      Term::Ann { orig, expr, tipo }
+      let expr = Box::new(adjust_term(file, &*expr, holes)?);
+      let tipo = Box::new(adjust_term(file, &*tipo, holes)?);
+      Ok(Term::Ann { orig, expr, tipo })
     },
     Term::All { ref orig, ref name, ref tipo, ref body } => {
       let orig = *orig;
-      let tipo = Box::new(adjust_term(file, &*tipo, holes));
-      let body = Box::new(adjust_term(file, &*body, holes));
-      Term::All { orig, name: name.clone(), tipo, body }
+      let tipo = Box::new(adjust_term(file, &*tipo, holes)?);
+      let body = Box::new(adjust_term(file, &*body, holes)?);
+      Ok(Term::All { orig, name: name.clone(), tipo, body })
     },
     Term::Lam { ref orig, ref name, ref body } => {
       let orig = *orig;
-      let body = Box::new(adjust_term(file, &*body, holes));
-      Term::Lam { orig, name: name.clone(), body }
+      let body = Box::new(adjust_term(file, &*body, holes)?);
+      Ok(Term::Lam { orig, name: name.clone(), body })
     },
     Term::App { ref orig, ref func, ref argm } => {
       let orig = *orig;
-      let func = Box::new(adjust_term(file, &*func, holes));
-      let argm = Box::new(adjust_term(file, &*argm, holes));
-      Term::App { orig, func, argm }
+      let func = Box::new(adjust_term(file, &*func, holes)?);
+      let argm = Box::new(adjust_term(file, &*argm, holes)?);
+      Ok(Term::App { orig, func, argm })
     },
     Term::Ctr { ref orig, ref name, ref args } => {
       let orig = *orig;
       if let Some(entry) = file.entrs.get(name) {
         let mut new_args = Vec::new();
         for arg in args {
-          new_args.push(Box::new(adjust_term(file, &*arg, holes)));
+          new_args.push(Box::new(adjust_term(file, &*arg, holes)?));
         }
-        if entry.rules.len() > 0 {
-          Term::Fun { orig, name: name.clone(), args: new_args }
+        // Count implicit arguments
+        let mut implicits = 0;
+        for arg in &entry.args {
+          if arg.hide {
+            implicits = implicits + 1;
+          }
+        }
+        // Fill implicit arguments
+        if args.len() == entry.args.len() - implicits {
+          new_args.reverse();
+          let mut aux_args = Vec::new();
+          for arg in &entry.args {
+            if arg.hide {
+              let numb = *holes;
+              *holes = *holes + 1;
+              aux_args.push(Box::new(Term::Hol { orig, numb }));
+            } else {
+              aux_args.push(new_args.pop().unwrap());
+            }
+          }
+          new_args = aux_args;
+        }
+        if new_args.len() != entry.args.len()  {
+          Err(AdjustError::IncorrectArity { orig, term: Box::new(term.clone()) })
+        } else if entry.rules.len() > 0 {
+          Ok(Term::Fun { orig, name: name.clone(), args: new_args })
         } else {
-          Term::Ctr { orig, name: name.clone(), args: new_args }
+          Ok(Term::Ctr { orig, name: name.clone(), args: new_args })
         }
       } else {
-        panic!("Missing declaration for: '{}'.", name);
+        println!("Missing declaration for: '{}'.", name);
+        std::process::exit(0);
       }
     },
     Term::Fun { ref orig, ref name, ref args } => {
@@ -153,7 +185,7 @@ pub fn adjust_term(file: &File, term: &Term, holes: &mut u64) -> Term {
       let orig = *orig;
       let numb = *holes;
       *holes = *holes + 1;
-      Term::Hol { orig, numb }
+      Ok(Term::Hol { orig, numb })
     },
   }
 }
@@ -163,6 +195,10 @@ pub fn adjust_term(file: &File, term: &Term, holes: &mut u64) -> Term {
 
 pub fn origin(init: usize, last: usize) -> u64 {
   ((init as u64) & 0xFFFFFF) | (((last as u64) & 0xFFFFFF) << 24)
+}
+
+pub fn get_origin_range(origin: u64) -> (usize, usize) {
+  ((origin & 0xFFFFFF) as usize, ((origin >> 24) & 0xFFFFFF) as usize)
 }
 
 pub fn get_init_index(state: parser::State) -> parser::Answer<usize> {
@@ -498,12 +534,16 @@ pub fn parse_rule(state: parser::State, name: String) -> parser::Answer<Box<Rule
 }
 
 pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
-  let (state, _)    = parser::consume("(", state)?;
+  let (state, next) = parser::peek_char(state)?;
+  let (state, eras) = parser::text("-", state)?;
+  let (open, close) = if next == '(' { ("(",")") } else { ("<",">") };
+  let (state, _)    = parser::consume(open, state)?;
   let (state, name) = parse_var_name(state)?;
-  let (state, _)    = parser::consume(":", state)?;
-  let (state, tipo) = parse_term(state)?;
-  let (state, _)    = parser::consume(")", state)?;
-  return Ok((state, Box::new(Argument { eras: false, name, tipo })));
+  let (state, anno) = parser::text(":", state)?;
+  let (state, tipo) = if anno { parse_term(state)? } else { (state, Box::new(Term::Typ { orig: 0 })) };
+  let (state, _)    = parser::consume(close, state)?;
+  let hide          = open == "<";
+  return Ok((state, Box::new(Argument { hide, eras, name, tipo })));
 }
 
 pub fn parse_file(state: parser::State) -> parser::Answer<Box<File>> {

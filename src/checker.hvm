@@ -1037,52 +1037,51 @@ API.run_main = (Text [
   ])
 (API.output.function fnid (Cons (Errored ctx sub err) checks)) =
   (Text [
-    (Color "1") "[" (NameOf fnid) "] " (Color "0") Line
-    (API.output.error err ctx sub) Line
+    (API.output.error fnid err ctx sub) Line
     (API.output.function fnid checks)
   ])
 
-(API.output.error (UnboundVariable term) ctx sub) =
+(API.output.error fnid (UnboundVariable term) ctx sub) =
   (Text [
     (Color "4") "Unbound Variable." (Color "0") Line
-    (API.output.error.details ctx term)
+    (API.output.error.details fnid ctx term)
   ])
-(API.output.error (CantInferLambda term) ctx sub) =
+(API.output.error fnid (CantInferLambda term) ctx sub) =
   (Text [
     (Color "4") "Can't infer lambda." (Color "0") Line
-    (API.output.error.details ctx term)
+    (API.output.error.details fnid ctx term)
   ])
-(API.output.error (CantInferHole term) ctx sub) =
+(API.output.error fnid (CantInferHole term) ctx sub) =
   (Text [
     (Color "4") "Can't infer hole." (Color "0") Line
-    (API.output.error.details ctx term)
+    (API.output.error.details fnid ctx term)
   ])
-(API.output.error (TooManyArguments term) ctx sub) =
+(API.output.error fnid (TooManyArguments term) ctx sub) =
   (Text [
     (Color "4") "Too many arguments." (Color "0") Line
-    (API.output.error.details ctx term)
+    (API.output.error.details fnid ctx term)
   ])
-(API.output.error (InvalidCall term) ctx sub) =
+(API.output.error fnid (InvalidCall term) ctx sub) =
   (Text [
     (Color "4") "Invalid call." (Color "0") Line
-    (API.output.error.details ctx term)
+    (API.output.error.details fnid ctx term)
   ])
-(API.output.error (TypeMismatch term expected detected) ctx sub) =
+(API.output.error fnid (TypeMismatch term expected detected) ctx sub) =
   (Text [
     (Color "4") "Type mismatch." (Color "0") Line
     "- Expected: " (Show (Term.fill expected sub)) Line
     "- Detected: " (Show (Term.fill detected sub)) Line
-    (API.output.error.details ctx term)
+    (API.output.error.details fnid ctx term)
   ])
 
-(API.output.error.details ctx term) =
+(API.output.error.details fnid ctx term) =
   let orig = (Term.get_origin term)
   (Text [
     (If (Context.is_empty ctx) "" (Text [
       (Color "4") "Context:" (Color "0") Line
       (Show.context ctx)
     ]))
-    (Color "4") "Source:" (Color "0") Line
+    (Color "4") "Inside '" (NameOf fnid) "':" (Color "0") Line
     "{{#"(Show.u60 (& orig 16777215))":"(Show.u60 (>> orig 24))"#}}" Line
   ])
   

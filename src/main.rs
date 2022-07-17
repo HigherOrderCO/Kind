@@ -57,7 +57,16 @@ fn kind2(path: &str, main_function: &str) -> Result<(), String> {
   };
 
   // Adjusts the file
-  let file = adjust_file(&file);
+  let file = match adjust_file(&file) {
+    Ok(file) => file,
+    Err(err) => match err {
+      AdjustError::IncorrectArity { orig, term } => {
+        let (init, last) = get_origin_range(orig);
+        println!("Incorrect arity.\n{}", highlight_error::highlight_error(init, last, &kind2_code));
+        return Ok(());
+      }
+    }
+  };
 
   //for (name, entry) in &file.entries {
     //println!("[{}]\n{}\n", name, show_entry(entry));
