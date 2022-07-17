@@ -1,18 +1,9 @@
+// Bool
+// ----
+
 Bool : Type
 True : Bool
 False : Bool
-
-Nat : Type
-Zero : Nat
-Succ (pred: Nat) : Nat
-
-List (a: Type) : Type
-Nil <a> : (List a)
-Cons <a> (x: a) (xs: (List a)) : (List a)
-
-Equal <t> (a: t) (b: t) : Type
-Refl <t> (a: t) : (Equal t a a)
-
 Bool.not (a: Bool) : Bool
 Bool.not True  = False
 Bool.not False = True
@@ -27,10 +18,24 @@ Bool.not_not_theorem (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
 Bool.not_not_theorem True  = (Refl Bool True)
 Bool.not_not_theorem False = (Refl Bool False)
 
+// Nat
+// ---
+
+Nat : Type
+Zero : Nat
+Succ (pred: Nat) : Nat
+
 Nat.double (x: Nat) : Nat
 Nat.double (Succ x) = (Succ (Succ (Nat.double x)))
 Nat.double (Zero)   = (Zero)
   
+// List
+// ----
+
+List (a: Type) : Type
+Nil <a> : (List a)
+Cons <a> (x: a) (xs: (List a)) : (List a)
+
 List.negate (xs: (List Bool)) : (List Bool)
 List.negate (Cons Bool x xs) = (Cons Bool (Bool.not x) (List.negate xs))
 List.negate (Nil Bool)       = (Nil Bool)
@@ -42,6 +47,12 @@ List.map <a> <b> (x: (List a)) (f: (x: a) b) : (List b)
 List.map a b (Nil t)       f = (Nil b)
 List.map a b (Cons t x xs) f = (Cons b (f x) (List.map a b xs f))
 
+// Equal
+// -----
+
+Equal <t> (a: t) (b: t) : Type
+Refl <t> (a: t) : (Equal t a a)
+
 Equal.mirror <t> (a: t) (b: t) (e: (Equal t a b)) : (Equal t b a)
 Equal.mirror t a b (Refl u k) = (Refl u k)
 
@@ -51,12 +62,15 @@ Equal.apply t u a b f (Refl v k) = (Refl v (f k))
 Equal.rewrite <t> (a: t) (b: t) (e: (Equal t a b)) (p: t -> Type) (x: (p a)) : (p b)
 Equal.rewrite t a b (Refl u k) p x = {x :: (p k)}
 
-Example.hole : (List Bool) {
-  (Cons _ True (Cons _ False (Cons _ True (Nil _))))
-}
+// Examples
+// --------
 
 Id <t> (x: t) : t
 Id t x = x
+
+Example.hole : (List Bool) {
+  (Cons True (Cons False (Cons True Nil)))
+}
 
 Main : Nat {
   (Nat.double (Nat.double (Succ (Succ Zero))))
