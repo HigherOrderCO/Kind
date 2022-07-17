@@ -651,16 +651,6 @@ pub fn read_book(code: &str) -> Result<Box<Book>, String> {
 // Compiler
 // ========
 
-//pub enum Term {
-  //Typ,
-  //Var { name: String },
-  //Let { name: String, expr: Box<Term>, body: Box<Term> },
-  //App { func: Box<Term>, argm: Box<Term> },
-  //Lam { name: String, body: Box<Term> },
-  //All { name: String, tipo: Box<Term>, body: Box<Term> },
-  //Ctr { name: String, args: Vec<Box<Term>> },
-  //Fun { name: String, args: Vec<Box<Term>> },
-//}
 pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String { 
   fn hide(orig: &u64, lhs: bool) -> String {
     if lhs {
@@ -680,7 +670,7 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
         if quote {
           format!("(SO {} {})", orig, name.clone())
         } else {
-          format!("(   {} {})", " ".repeat(format!("{}",orig).len()), name.clone()) // spaces to align with quoted version
+          format!("{}", name.clone()) // spaces to align with quoted version
         }
       }
     }
@@ -742,17 +732,6 @@ pub fn compile_entry(entry: &Entry) -> String {
     return text;
   }
 
-  fn compile_rule_end(name: &str, size: u64) -> String {
-    let mut vars = vec![];
-    for idx in 0 .. size {
-      vars.push(format!(" x{}", idx));
-    }
-    let mut text = String::new();
-    text.push_str(&format!("(QT{} {}. orig{}) = (Fn{} {}. orig{})\n", size, name, vars.join(""), size, name, vars.join("")));
-    text.push_str(&format!("(FN{} {}. orig{}) = (Fn{} {}. orig{})\n", size, name, vars.join(""), size, name, vars.join("")));
-    return text;
-  }
-
   fn compile_rule_chk(rule: &Rule, index: usize, vars: &mut u64, args: &mut Vec<String>) -> String {
     if index < rule.pats.len() {
       let (inp_patt_str, var_patt_str) = compile_patt_chk(&rule.pats[index], vars);
@@ -799,14 +778,11 @@ pub fn compile_entry(entry: &Entry) -> String {
   for rule in &entry.rules {
     result.push_str(&compile_rule(&rule));
   }
-  if entry.rules.len() > 0 {
-    result.push_str(&compile_rule_end(&entry.name, entry.rules[0].pats.len() as u64));
-  }
-  result.push_str(&format!("(Verify {}.) =\n", entry.name));
+  result.push_str(&format!("(Verify {}.) =", entry.name));
   for rule in &entry.rules {
-    result.push_str(&format!("  (Cons {}\n", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
+    result.push_str(&format!(" (Cons {}", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
   }
-  result.push_str(&format!("  Nil{}\n", ")".repeat(entry.rules.len())));
+  result.push_str(&format!(" Nil{}", ")".repeat(entry.rules.len())));
   return result;
 }
 
@@ -821,12 +797,23 @@ pub fn compile_book(book: &Book) -> String {
   result.push_str(&format!("  fns\n\n"));
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
-    result.push_str(&format!("// {}\n", name));
-    result.push_str(&format!("// {}\n", "-".repeat(name.len())));
+    result.push_str(&format!("\n// {}", name));
+    result.push_str(&format!("\n// {}\n", "-".repeat(name.len())));
     result.push_str(&format!("\n"));
     result.push_str(&compile_entry(&entry));
     result.push_str(&format!("\n"));
   }
+  result.push_str(&format!("\n// Default Cases"));
+  result.push_str(&format!("\n// -------------\n\n"));
+  for size in 0 .. 9 {
+    let mut vars = vec![];
+    for idx in 0 .. size {
+      vars.push(format!(" x{}", idx));
+    }
+    result.push_str(&format!("(QT{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
+    result.push_str(&format!("(FN{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
+  }
+
   return result;
 }
 
