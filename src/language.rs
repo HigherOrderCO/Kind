@@ -675,31 +675,31 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
       }
     }
     Term::All { orig, name, tipo, body } => {
-      format!("(All {} {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), compile_term(tipo, false, lhs), name, compile_term(body, false, lhs))
+      format!("(All {} {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), compile_term(tipo, quote, lhs), name, compile_term(body, quote, lhs))
     }
     Term::Lam { orig, name, body } => {
-      format!("(Lam {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), name, compile_term(body, false, lhs))
+      format!("(Lam {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), name, compile_term(body, quote, lhs))
     }
     Term::App { orig, func, argm } => {
-      format!("({} {} {} {})", if quote { "App" } else { "APP" }, hide(orig,lhs), compile_term(func, false, lhs), compile_term(argm, false, lhs))
+      format!("({} {} {} {})", if quote { "App" } else { "APP" }, hide(orig,lhs), compile_term(func, quote, lhs), compile_term(argm, quote, lhs))
     }
     Term::Let { orig, name, expr, body } => {
-      format!("({} {} {} {} λ{} {})", if quote { "Let" } else { "LET" }, hide(orig,lhs), name_to_u64(name), compile_term(expr, false, lhs), name, compile_term(body, false, lhs))
+      format!("({} {} {} {} λ{} {})", if quote { "Let" } else { "LET" }, hide(orig,lhs), name_to_u64(name), compile_term(expr, quote, lhs), name, compile_term(body, quote, lhs))
     }
     Term::Ann { orig, expr, tipo } => {
-      format!("({} {} {} {})", if quote { "Ann" } else { "ANN" }, hide(orig,lhs), compile_term(expr, false, lhs), compile_term(tipo, false, lhs))
+      format!("({} {} {} {})", if quote { "Ann" } else { "ANN" }, hide(orig,lhs), compile_term(expr, quote, lhs), compile_term(tipo, quote, lhs))
     }
     Term::Ctr { orig, name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
       for arg in args {
-        args_strs.push(format!(" {}", compile_term(arg, false, lhs)));
+        args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
       format!("(Ct{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
     }
     Term::Fun { orig, name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
       for arg in args {
-        args_strs.push(format!(" {}", compile_term(arg, false, lhs)));
+        args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
       format!("({}{} {}. {}{})", if quote { "Fn" } else { "FN" }, args.len(), name, hide(orig,lhs), args_strs.join(""))
     }

@@ -301,7 +301,7 @@ Line = (String.cons 10 String.nil)
 (Term.fill (Typ orig) sub)                      = (Typ orig)
 (Term.fill (Var orig name index) sub)           = (Var orig name index)
 (Term.fill (All orig name type body) sub)       = (All orig name (Term.fill type sub) λx (Term.fill (body x) sub))
-(Term.fill (Lam orig name body) sub)            = (Lam orig (Term.fill name sub) λx (Term.fill (body x) sub))
+(Term.fill (Lam orig name body) sub)            = (Lam orig name λx (Term.fill (body x) sub))
 (Term.fill (App orig func argm) sub)            = (App orig (Term.fill func sub) (Term.fill argm sub))
 (Term.fill (Let orig name expr body) sub)       = (Let orig name (Term.fill expr sub) λx (Term.fill (body x) sub))
 (Term.fill (Ann orig expr type) sub)            = (Ann orig (Term.fill expr sub) (Term.fill type sub))
@@ -325,6 +325,114 @@ Line = (String.cons 10 String.nil)
 (Term.fill (Fn8 name orig a b c d e f g h) sub) = (Fn8 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub) (Term.fill h sub))
 (Term.fill (Hol orig numb) sub)                 = (Maybe.case (Subst.look sub numb) (Hol orig numb) λval (Term.fill val sub))
 
+// Eval Term (List Term) : Term
+// ----------------------------
+
+
+  // Eval Typ
+  (Eval (Typ orig)) =
+    (Typ orig)
+
+  // Eval Var
+  (Eval (Var orig name index)) =
+    (Var orig name index)
+
+  // Eval Var
+  (Eval (Hol orig numb)) =
+    (Hol orig numb)
+
+  // Eval All
+  (Eval (All orig name type body)) =
+    (All orig name (Eval type) λx (Eval (body x)))
+
+  // Eval Lam
+  (Eval (Lam orig name body)) =
+    (Lam orig name λx (Eval (body x)))
+
+  // Eval Let
+  (Eval (Let orig name expr body)) =
+    (LET orig name (Eval expr) λx (Eval (body x)))
+
+  // Eval Ann
+  (Eval (Ann orig expr typ)) =
+    (ANN orig (Eval expr) (Eval typ))
+
+  // Eval App
+  (Eval (App orig func argm)) =
+    (APP orig (Eval func) (Eval argm))
+
+  // Eval Ct0
+  (Eval (Ct0 orig ctid)) =
+    (Ct0 orig ctid)
+
+  // Eval Ct1
+  (Eval (Ct1 orig ctid x0)) =
+    (Ct1 orig ctid (Eval x0))
+
+  // Eval Ct2
+  (Eval (Ct2 orig ctid x0 x1)) =
+    (Ct2 orig ctid (Eval x0) (Eval x1))
+
+  // Eval Ct3
+  (Eval (Ct3 orig ctid x0 x1 x2)) =
+    (Ct3 orig ctid (Eval x0) (Eval x1) (Eval x2))
+
+  // Eval Ct4
+  (Eval (Ct4 orig ctid x0 x1 x2 x3)) =
+    (Ct4 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+
+  // Eval Ct5
+  (Eval (Ct5 orig ctid x0 x1 x2 x3 x4)) =
+    (Ct5 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+
+  // Eval Ct6
+  (Eval (Ct6 orig ctid x0 x1 x2 x3 x4 x5)) =
+    (Ct6 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+
+  // Eval Ct7
+  (Eval (Ct7 orig ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Ct7 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+
+  // Eval Ct8
+  (Eval (Ct8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Ct8 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+
+  // Eval Fn0
+  (Eval (Fn0 orig ctid)) =
+    (FN0 orig ctid)
+
+  // Eval Fn1
+  (Eval (Fn1 orig ctid x0)) =
+    (FN1 orig ctid (Eval x0))
+
+  // Eval Fn2
+  (Eval (Fn2 orig ctid x0 x1)) =
+    (FN2 orig ctid (Eval x0) (Eval x1))
+
+  // Eval Fn3
+  (Eval (Fn3 orig ctid x0 x1 x2)) =
+    (FN3 orig ctid (Eval x0) (Eval x1) (Eval x2))
+
+  // Eval Fn4
+  (Eval (Fn4 orig ctid x0 x1 x2 x3)) =
+    (FN4 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+
+  // Eval Fn5
+  (Eval (Fn5 orig ctid x0 x1 x2 x3 x4)) =
+    (FN5 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+
+  // Eval Fn6
+  (Eval (Fn6 orig ctid x0 x1 x2 x3 x4 x5)) =
+    (FN6 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+
+  // Eval Fn7
+  (Eval (Fn7 orig ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (FN7 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+
+  // Eval Fn8
+  (Eval (Fn8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (FN8 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+
 // Equal Term Term : (Checker Bool)
 // --------------------------------
 
@@ -343,7 +451,7 @@ Line = (String.cons 10 String.nil)
 (Equal (Lam a.orig a.name a.body) (Lam b.orig b.name b.body)) =
   ask dep  = (Checker.bind Checker.get_depth)
   ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null Null))
-  body
+  (Checker.done body)
 
 // App equality
 (Equal (App a.orig a.func a.argm) (App b.orig b.func b.argm)) =
@@ -734,7 +842,7 @@ Line = (String.cons 10 String.nil)
 // Checks Lam 
 (Check (Lam orig name body) (All t_orig t_name t_type t_body)) =
   ask dep      = (Checker.bind Checker.get_depth)
-  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (t_body (Var orig t_name dep))) t_name t_type []))
+  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (t_body (Var t_orig t_name dep))) name t_type []))
   (Checker.done Unit)
 
 // Checks Let
@@ -762,7 +870,7 @@ Line = (String.cons 10 String.nil)
 // Compares two terms for equality
 (Check.compare term type) =
   ask term_typ = (Checker.bind (Infer term))
-  ask is_equal = (Checker.bind (Equal term_typ type))
+  ask is_equal = (Checker.bind (Equal (Eval term_typ) (Eval type)))
   (If is_equal
     (Checker.done Unit)
     (Checker.fail (TypeMismatch term type term_typ)))
@@ -823,10 +931,11 @@ Line = (String.cons 10 String.nil)
       (Show (body (Var orig name 0)))
     ]))
 
-(Show (Lam orig name body)) = (Text [
-  "@" (Show.name name) " "
-  (Show (body (Var orig name 0)))
-])
+(Show (Lam orig name body)) =
+  (Text [
+    "@" (Show.name name) " "
+    (Show (body (Var orig name 0)))
+  ])
 
 (Show (Let orig name expr body)) = (Text [
   "let " (Show.name name) " = " (Show (expr (Var orig name 0))) "; "
@@ -1032,12 +1141,12 @@ Line = (String.cons 10 String.nil)
 ])
 
 (Show.context.type name type sub pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " : " (Show (Term.fill type sub)) Line
+  "- " (String.pad_right (Show.name name) ' ' pad) " : " (Show (Eval (Term.fill type sub))) Line
 ])
 
 (Show.context.vals name Nil sub pad) = String.nil
 (Show.context.vals name (Cons val vals) sub pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " = " (Show (Term.fill val sub)) Line
+  "- " (String.pad_right (Show.name name) ' ' pad) " = " (Show (Eval (Term.fill val sub))) Line
   (Show.context.vals name vals sub pad)
 ])
 
