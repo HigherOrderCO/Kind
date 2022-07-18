@@ -31,6 +31,14 @@ pub struct Rule {
   body: Box<Term>,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum Oper {
+  Add,
+  Sub,
+  Mul,
+  Div,
+}
+
 #[derive(Clone, Debug)]
 pub enum Term {
   Typ { orig: u64 },
@@ -45,7 +53,7 @@ pub enum Term {
   Hlp { orig: u64 },
   U60 { orig: u64 },
   Num { orig: u64, numb: u64 },
-  Op2 { orig: u64, val0: Box<Term>, val1: Box<Term> },
+  Op2 { orig: u64, oper: Oper, val0: Box<Term>, val1: Box<Term> },
   Hol { orig: u64, numb: u64 },
 }
 
@@ -204,11 +212,11 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
       let numb = *numb;
       Ok(Term::Num { orig, numb })
     },
-    Term::Op2 { ref orig, ref val0, ref val1 } => {
+    Term::Op2 { ref orig, oper, ref val0, ref val1 } => {
       let orig = *orig;
       let val0 = Box::new(adjust_term(book, &*val0, holes)?);
       let val1 = Box::new(adjust_term(book, &*val1, holes)?);
-      Ok(Term::Op2 { orig, val0, val1 })
+      Ok(Term::Op2 { orig, oper, val0, val1 })
     },
   }
 }
@@ -419,20 +427,46 @@ pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
 }
 
 pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  fn is_op_char(chr: char) -> bool {
+    matches!(chr, '+' | '-' | '*' | '/')
+  }
+
+  fn parse_oper(state: parser::State) -> parser::Answer<Oper> {
+    fn op<'a>(symbol: &'static str, oper: Oper) -> parser::Parser<'a, Option<Oper>> {
+      Box::new(move |state| {
+        let (state, done) = parser::text(symbol, state)?;
+        Ok((state, if done { Some(oper) } else { None }))
+      })
+    }
+
+    parser::grammar(
+      "Oper",
+      &[
+        op("+", Oper::Add),
+        op("-", Oper::Sub),
+        op("*", Oper::Mul),
+        op("/", Oper::Div),
+      ],
+      state,
+    )
+  }
+
   parser::guard(
     Box::new(|state| {
-      let (state, isop) = parser::text("(+", state)?;
-      Ok((state, isop))
+      let (state, open) = parser::text("(", state)?;
+      let (state, head) = parser::get_char(state)?;
+      Ok((state, open && is_op_char(head)))
     }),
     Box::new(|state| {
       let (state, init) = get_init_index(state)?;
-      let (state, open) = parser::consume("(+", state)?; // TODO: parse other operators
+      let (state, open) = parser::consume("(", state)?;
+      let (state, oper) = parse_oper(state)?;
       let (state, val0) = parse_term(state)?;
       let (state, val1) = parse_term(state)?;
-      let (state, open) = parser::consume(")", state)?; // TODO: parse other operators
+      let (state, open) = parser::consume(")", state)?;
       let (state, last) = get_last_index(state)?;
       let orig          = origin(init, last);
-      Ok((state, Box::new(Term::Op2 { orig, val0, val1 })))
+      Ok((state, Box::new(Term::Op2 { orig, oper, val0, val1 })))
     }),
     state,
   )
@@ -676,6 +710,15 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
   return Ok((state, Box::new(Book { holes: 0, names, entrs })));
 }
 
+pub fn show_oper(oper: &Oper) -> String {
+  match oper {
+    Oper::Add => format!("+"),
+    Oper::Sub => format!("-"),
+    Oper::Mul => format!("*"),
+    Oper::Div => format!("/"),
+  }
+}
+
 pub fn show_term(term: &Term) -> String {
   match term {
     Term::Typ { .. } => {
@@ -727,10 +770,11 @@ pub fn show_term(term: &Term) -> String {
     Term::Num { orig: _, numb } => {
       format!("{}", numb)
     }
-    Term::Op2 { orig: _, val0, val1 } => {
+    Term::Op2 { orig: _, oper, val0, val1 } => {
+      let oper = show_oper(oper);
       let val0 = show_term(val0);
       let val1 = show_term(val1);
-      format!("(+ {} {})", val0, val1)
+      format!("({} {} {})", oper, val0, val1)
     }
     Term::Hol { orig: _, numb } => {
       format!("_")
@@ -845,7 +889,8 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
     Term::Num { orig, numb } => {
       format!("(Num {} {})", hide(orig,lhs), numb)
     }
-    Term::Op2 { orig, val0, val1 } => {
+    Term::Op2 { orig, oper, val0, val1 } => {
+      // TODO: Add operator
       format!("({} {} {} {})", if quote { "Op2" } else { "OP2" }, hide(orig,lhs), compile_term(val0, quote, lhs), compile_term(val1, quote, lhs))
     }
     Term::Hol { orig, numb } => {
