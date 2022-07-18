@@ -67,6 +67,17 @@ List.map <a> <b> (x: (List a)) (f: (x: a) b) : (List b)
 List.map a b (Nil t)       f = (Nil b)
 List.map a b (Cons t x xs) f = (Cons b (f x) (List.map a b xs f))
 
+List.concat <a> (xs: (List a)) (ys: (List a)) : (List a)
+List.concat a (Cons u x xs) ys = (Cons u x (List.concat a xs ys))
+List.concat a (Nil u)       ys = ys
+
+List.flatten <a> (xs: (List (List a))) : (List a)
+List.flatten a (Cons u x xs) = (List.concat x (List.flatten xs))
+List.flatten a (Nil u)       = Nil
+
+List.bind <a: Type> <b: Type> (xs: (List a)) (f: a -> (List b)) : (List b)
+List.bind a b xs f = (List.flatten b (List.map xs f))
+
 // Equal
 // -----
 
@@ -85,6 +96,15 @@ Equal.rewrite t a b (Refl u k) p x = {x :: (p k)}
 Equal.chain <t> <a: t> <b: t> <c: t> (e0: (Equal t a b)) (e1: (Equal t b c)) : (Equal t a c)
 Equal.chain t a b c e0 (Refl u x) = {e0 :: (Equal t a x)}
 
+// Monad
+// -----
+
+Monad (f: Type -> Type) : Type
+Monad.new (f: Type -> Type)
+  (pure: (a: Type) (x: a) (Monad (f a)))
+  (bind: (a: Type) (b: Type) (x: (Monad a)) (y: a -> (Monad b)) (Monad b))
+  : (Monad f)
+
 // Examples
 // --------
 
@@ -99,9 +119,13 @@ U60.add (a: U60) (b: U60) : U60 {
   (+ a b)
 }
 
-Main : U60 {
-  let a = #123
-  let b = #100
-  (+ a b)
+// Generates combinations!
+// - Run   with : `kind2 run   example.kind2`
+// - Check with : `kind2 check example.kind2
+Main : (List U60) {
+  (List.bind (Cons #1 (Cons #2 (Cons #3 Nil))) @x
+  (List.bind (Cons #10 (Cons #20 (Cons #30 Nil))) @y
+  (List.bind (Cons #100 (Cons #200 (Cons #300 Nil))) @z
+  (Cons (+ x (+ y z)) Nil))))
 }
 
