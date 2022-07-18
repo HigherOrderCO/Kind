@@ -53,8 +53,15 @@ pub enum Term {
 // ========
 
 #[derive(Clone, Debug)]
-pub enum AdjustError {
-  IncorrectArity { orig: u64, term: Box<Term> }
+pub struct AdjustError {
+  pub orig: u64,
+  pub kind: AdjustErrorKind,
+}
+
+#[derive(Clone, Debug)]
+pub enum AdjustErrorKind {
+  IncorrectArity,
+  UnboundVariable,
 }
 
 pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
@@ -72,73 +79,89 @@ pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
 pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64) -> Result<Entry, AdjustError> {
   let name = entry.name.clone();
   let mut args = Vec::new();
+  // Adjust the type arguments, return type
+  let mut vars = Vec::new();
   for arg in &entry.args {
-    args.push(Box::new(adjust_argument(book, arg, holes)?));
+    vars.push(arg.name.clone());
+    args.push(Box::new(adjust_argument(book, arg, holes, &mut vars)?));
   }
-  let tipo = Box::new(adjust_term(book, &*entry.tipo, holes)?);
+  let tipo = Box::new(adjust_term(book, &*entry.tipo, true, holes, &mut vars)?);
+  // Adjusts each rule
   let mut rules = Vec::new();
   for rule in &entry.rules {
-    rules.push(Box::new(adjust_rule(book, &*rule, holes)?));
+    let mut vars = Vec::new();
+    rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars)?));
   }
   return Ok(Entry { name, args, tipo, rules });
 }
 
-pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64) -> Result<Argument, AdjustError> {
+pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>) -> Result<Argument, AdjustError> {
   let hide = arg.hide;
   let eras = arg.eras;
   let name = arg.name.clone();
-  let tipo = Box::new(adjust_term(book, &*arg.tipo, holes)?);
+  let tipo = Box::new(adjust_term(book, &*arg.tipo, false, holes, vars)?);
   return Ok(Argument { hide, eras, name, tipo });
 }
 
-pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64) -> Result<Rule, AdjustError> {
+pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64, vars: &mut Vec<String>) -> Result<Rule, AdjustError> {
   let name = rule.name.clone();
   let mut pats = Vec::new();
   for pat in &rule.pats {
-    pats.push(Box::new(adjust_term(book, &*pat, holes)?));
+    pats.push(Box::new(adjust_term(book, &*pat, false, holes, vars)?));
   }
-  let body = Box::new(adjust_term(book, &*rule.body, holes)?);
+  let body = Box::new(adjust_term(book, &*rule.body, true, holes, vars)?);
   return Ok(Rule { name, pats, body });
 }
 
 // TODO: check unbound variables
 // TODO: prevent defining the same name twice
-pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, AdjustError> {
+pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &mut Vec<String>) -> Result<Term, AdjustError> {
   match *term {
     Term::Typ { orig } => {
       Ok(Term::Typ { orig })
     },
     Term::Var { ref orig, ref name } => {
       let orig = *orig;
+      if rhs && vars.iter().find(|&x| x == name).is_none() {
+        return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable });
+      } else {
+        vars.push(name.clone());
+      }
       Ok(Term::Var { orig, name: name.clone() })
     },
     Term::Let { ref orig, ref name, ref expr, ref body } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, holes)?);
-      let body = Box::new(adjust_term(book, &*body, holes)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars)?);
+      vars.push(name.clone());
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      vars.pop();
       Ok(Term::Let { orig, name: name.clone(), expr, body })
     },
     Term::Ann { ref orig, ref expr, ref tipo } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, holes)?);
-      let tipo = Box::new(adjust_term(book, &*tipo, holes)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars)?);
       Ok(Term::Ann { orig, expr, tipo })
     },
     Term::All { ref orig, ref name, ref tipo, ref body } => {
       let orig = *orig;
-      let tipo = Box::new(adjust_term(book, &*tipo, holes)?);
-      let body = Box::new(adjust_term(book, &*body, holes)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars)?);
+      vars.push(name.clone());
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      vars.pop();
       Ok(Term::All { orig, name: name.clone(), tipo, body })
     },
     Term::Lam { ref orig, ref name, ref body } => {
       let orig = *orig;
-      let body = Box::new(adjust_term(book, &*body, holes)?);
+      vars.push(name.clone());
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      vars.pop();
       Ok(Term::Lam { orig, name: name.clone(), body })
     },
     Term::App { ref orig, ref func, ref argm } => {
       let orig = *orig;
-      let func = Box::new(adjust_term(book, &*func, holes)?);
-      let argm = Box::new(adjust_term(book, &*argm, holes)?);
+      let func = Box::new(adjust_term(book, &*func, rhs, holes, vars)?);
+      let argm = Box::new(adjust_term(book, &*argm, rhs, holes, vars)?);
       Ok(Term::App { orig, func, argm })
     },
     Term::Ctr { ref orig, ref name, ref args } => {
@@ -146,7 +169,7 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
       if let Some(entry) = book.entrs.get(name) {
         let mut new_args = Vec::new();
         for arg in args {
-          new_args.push(Box::new(adjust_term(book, &*arg, holes)?));
+          new_args.push(Box::new(adjust_term(book, &*arg, rhs, holes, vars)?));
         }
         // Count implicit arguments
         let mut implicits = 0;
@@ -171,7 +194,7 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
           new_args = aux_args;
         }
         if new_args.len() != entry.args.len()  {
-          Err(AdjustError::IncorrectArity { orig, term: Box::new(term.clone()) })
+          Err(AdjustError { orig, kind: AdjustErrorKind::IncorrectArity })
         } else if entry.rules.len() > 0 {
           Ok(Term::Fun { orig, name: name.clone(), args: new_args })
         } else {
@@ -206,8 +229,8 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
     },
     Term::Op2 { ref orig, ref val0, ref val1 } => {
       let orig = *orig;
-      let val0 = Box::new(adjust_term(book, &*val0, holes)?);
-      let val1 = Box::new(adjust_term(book, &*val1, holes)?);
+      let val0 = Box::new(adjust_term(book, &*val0, rhs, holes, vars)?);
+      let val1 = Box::new(adjust_term(book, &*val1, rhs, holes, vars)?);
       Ok(Term::Op2 { orig, val0, val1 })
     },
   }

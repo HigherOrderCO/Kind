@@ -108,17 +108,6 @@ Monad.new (f: Type -> Type)
 // Examples
 // --------
 
-Id <t> (x: t) : t
-Id t x = x
-
-Example.hole : (List Bool) {
-  (Cons True (Cons False (Cons True Nil)))
-}
-
-U60.add (a: U60) (b: U60) : U60 {
-  (+ a b)
-}
-
 // Generates combinations!
 // - Run   with : `kind2 run   example.kind2`
 // - Check with : `kind2 check example.kind2
@@ -128,4 +117,3 @@ Main : (List U60) {
   (List.bind (Cons #100 (Cons #200 (Cons #300 Nil))) @z
   (Cons (+ x (+ y z)) Nil))))
 }
-

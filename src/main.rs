@@ -117,10 +117,15 @@ pub fn load_file(path: &str) -> Result<LoadedFile, String> {
   // Adjusts the Kind2 book
   let kind2_book = match adjust_book(&kind2_book) {
     Ok(kind2_book) => kind2_book,
-    Err(err) => match err {
-      AdjustError::IncorrectArity { orig, term } => {
-        let (init, last) = get_origin_range(orig);
-        return Err(format!("Incorrect arity.\n{}", highlight_error::highlight_error(init, last, &kind2_code)));
+    Err(err) => {
+      let (init, last) = get_origin_range(err.orig);
+      match err.kind {
+        AdjustErrorKind::IncorrectArity => {
+          return Err(format!("Incorrect arity.\n{}", highlight_error::highlight_error(init, last, &kind2_code)));
+        }
+        AdjustErrorKind::UnboundVariable => {
+          return Err(format!("Unbound variable.\n{}", highlight_error::highlight_error(init, last, &kind2_code)));
+        }
       }
     }
   };
