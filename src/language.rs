@@ -3,32 +3,33 @@ use hvm::parser as parser;
 
 #[derive(Clone, Debug)]
 pub struct Book {
-  names: Vec<String>,
-  entrs: HashMap<String, Box<Entry>>,
-  holes: u64,
+  pub names: Vec<String>,
+  pub entrs: HashMap<String, Box<Entry>>,
+  pub holes: u64,
 }
 
 #[derive(Clone, Debug)]
 pub struct Entry {
-  name: String,
-  args: Vec<Box<Argument>>,
-  tipo: Box<Term>,
-  rules: Vec<Box<Rule>>
+  pub name: String,
+  pub args: Vec<Box<Argument>>,
+  pub tipo: Box<Term>,
+  pub rules: Vec<Box<Rule>>
 }
 
 #[derive(Clone, Debug)]
 pub struct Argument {
-  hide: bool,
-  eras: bool,
-  name: String,
-  tipo: Box<Term>,
+  pub hide: bool,
+  pub eras: bool,
+  pub name: String,
+  pub tipo: Box<Term>,
 }
 
 #[derive(Clone, Debug)]
 pub struct Rule {
-  name: String,
-  pats: Vec<Box<Term>>,
-  body: Box<Term>,
+  pub orig: u64,
+  pub name: String,
+  pub pats: Vec<Box<Term>>,
+  pub body: Box<Term>,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -37,6 +38,18 @@ pub enum Oper {
   Sub,
   Mul,
   Div,
+  Mod,
+  And,
+  Or,
+  Xor,
+  Shl,
+  Shr,
+  Lte,
+  Ltn,
+  Eql,
+  Gte,
+  Gtn,
+  Neq,
 }
 
 #[derive(Clone, Debug)]
@@ -61,8 +74,15 @@ pub enum Term {
 // ========
 
 #[derive(Clone, Debug)]
-pub enum AdjustError {
-  IncorrectArity { orig: u64, term: Box<Term> }
+pub struct AdjustError {
+  pub orig: u64,
+  pub kind: AdjustErrorKind,
+}
+
+#[derive(Clone, Debug)]
+pub enum AdjustErrorKind {
+  IncorrectArity,
+  UnboundVariable,
 }
 
 pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
@@ -80,73 +100,100 @@ pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
 pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64) -> Result<Entry, AdjustError> {
   let name = entry.name.clone();
   let mut args = Vec::new();
+  // Adjust the type arguments, return type
+  let mut vars = Vec::new();
   for arg in &entry.args {
-    args.push(Box::new(adjust_argument(book, arg, holes)?));
+    vars.push(arg.name.clone());
+    args.push(Box::new(adjust_argument(book, arg, holes, &mut vars)?));
   }
-  let tipo = Box::new(adjust_term(book, &*entry.tipo, holes)?);
+  let tipo = Box::new(adjust_term(book, &*entry.tipo, true, holes, &mut vars)?);
+  // Adjusts each rule
   let mut rules = Vec::new();
   for rule in &entry.rules {
-    rules.push(Box::new(adjust_rule(book, &*rule, holes)?));
+    let mut vars = Vec::new();
+    rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars)?));
   }
   return Ok(Entry { name, args, tipo, rules });
 }
 
-pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64) -> Result<Argument, AdjustError> {
+pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>) -> Result<Argument, AdjustError> {
   let hide = arg.hide;
   let eras = arg.eras;
   let name = arg.name.clone();
-  let tipo = Box::new(adjust_term(book, &*arg.tipo, holes)?);
+  let tipo = Box::new(adjust_term(book, &*arg.tipo, false, holes, vars)?);
   return Ok(Argument { hide, eras, name, tipo });
 }
 
-pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64) -> Result<Rule, AdjustError> {
+pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64, vars: &mut Vec<String>) -> Result<Rule, AdjustError> {
   let name = rule.name.clone();
+  let orig = rule.orig;
+  let arity = match book.entrs.get(&rule.name) {
+    Some(entry) => {
+      if rule.pats.len() != entry.args.len() {
+        return Err(AdjustError { orig, kind: AdjustErrorKind::IncorrectArity });
+      }
+    }
+    // shouldn't happen, because we only parse rules after the type annotation
+    None => {
+      panic!("Untyped rule.");
+    }
+  };
   let mut pats = Vec::new();
   for pat in &rule.pats {
-    pats.push(Box::new(adjust_term(book, &*pat, holes)?));
+    pats.push(Box::new(adjust_term(book, &*pat, false, holes, vars)?));
   }
-  let body = Box::new(adjust_term(book, &*rule.body, holes)?);
-  return Ok(Rule { name, pats, body });
+  let body = Box::new(adjust_term(book, &*rule.body, true, holes, vars)?);
+  return Ok(Rule { orig, name, pats, body });
 }
 
-// TODO: check unbound variables
 // TODO: prevent defining the same name twice
-pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, AdjustError> {
+pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &mut Vec<String>) -> Result<Term, AdjustError> {
   match *term {
     Term::Typ { orig } => {
       Ok(Term::Typ { orig })
     },
     Term::Var { ref orig, ref name } => {
       let orig = *orig;
+      if rhs && vars.iter().find(|&x| x == name).is_none() {
+        return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable });
+      } else {
+        vars.push(name.clone());
+      }
       Ok(Term::Var { orig, name: name.clone() })
     },
     Term::Let { ref orig, ref name, ref expr, ref body } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, holes)?);
-      let body = Box::new(adjust_term(book, &*body, holes)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars)?);
+      vars.push(name.clone());
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      vars.pop();
       Ok(Term::Let { orig, name: name.clone(), expr, body })
     },
     Term::Ann { ref orig, ref expr, ref tipo } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, holes)?);
-      let tipo = Box::new(adjust_term(book, &*tipo, holes)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars)?);
       Ok(Term::Ann { orig, expr, tipo })
     },
     Term::All { ref orig, ref name, ref tipo, ref body } => {
       let orig = *orig;
-      let tipo = Box::new(adjust_term(book, &*tipo, holes)?);
-      let body = Box::new(adjust_term(book, &*body, holes)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars)?);
+      vars.push(name.clone());
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      vars.pop();
       Ok(Term::All { orig, name: name.clone(), tipo, body })
     },
     Term::Lam { ref orig, ref name, ref body } => {
       let orig = *orig;
-      let body = Box::new(adjust_term(book, &*body, holes)?);
+      vars.push(name.clone());
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      vars.pop();
       Ok(Term::Lam { orig, name: name.clone(), body })
     },
     Term::App { ref orig, ref func, ref argm } => {
       let orig = *orig;
-      let func = Box::new(adjust_term(book, &*func, holes)?);
-      let argm = Box::new(adjust_term(book, &*argm, holes)?);
+      let func = Box::new(adjust_term(book, &*func, rhs, holes, vars)?);
+      let argm = Box::new(adjust_term(book, &*argm, rhs, holes, vars)?);
       Ok(Term::App { orig, func, argm })
     },
     Term::Ctr { ref orig, ref name, ref args } => {
@@ -154,7 +201,7 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
       if let Some(entry) = book.entrs.get(name) {
         let mut new_args = Vec::new();
         for arg in args {
-          new_args.push(Box::new(adjust_term(book, &*arg, holes)?));
+          new_args.push(Box::new(adjust_term(book, &*arg, rhs, holes, vars)?));
         }
         // Count implicit arguments
         let mut implicits = 0;
@@ -164,7 +211,7 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
           }
         }
         // Fill implicit arguments
-        if args.len() == entry.args.len() - implicits {
+        if rhs && args.len() == entry.args.len() - implicits {
           new_args.reverse();
           let mut aux_args = Vec::new();
           for arg in &entry.args {
@@ -179,7 +226,7 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
           new_args = aux_args;
         }
         if new_args.len() != entry.args.len()  {
-          Err(AdjustError::IncorrectArity { orig, term: Box::new(term.clone()) })
+          Err(AdjustError { orig, kind: AdjustErrorKind::IncorrectArity })
         } else if entry.rules.len() > 0 {
           Ok(Term::Fun { orig, name: name.clone(), args: new_args })
         } else {
@@ -212,10 +259,11 @@ pub fn adjust_term(book: &Book, term: &Term, holes: &mut u64) -> Result<Term, Ad
       let numb = *numb;
       Ok(Term::Num { orig, numb })
     },
-    Term::Op2 { ref orig, oper, ref val0, ref val1 } => {
+    Term::Op2 { ref orig, ref oper, ref val0, ref val1 } => {
       let orig = *orig;
-      let val0 = Box::new(adjust_term(book, &*val0, holes)?);
-      let val1 = Box::new(adjust_term(book, &*val1, holes)?);
+      let oper = *oper;
+      let val0 = Box::new(adjust_term(book, &*val0, rhs, holes, vars)?);
+      let val1 = Box::new(adjust_term(book, &*val1, rhs, holes, vars)?);
       Ok(Term::Op2 { orig, oper, val0, val1 })
     },
   }
@@ -285,7 +333,6 @@ pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     state,
   )
 }
-
 
 pub fn parse_num(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
@@ -428,9 +475,8 @@ pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
 
 pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   fn is_op_char(chr: char) -> bool {
-    matches!(chr, '+' | '-' | '*' | '/')
+    matches!(chr, '+' | '-' | '*' | '/' | '%' | '&' | '|' | '^' | '<' | '>' | '=' | '!')
   }
-
   fn parse_oper(state: parser::State) -> parser::Answer<Oper> {
     fn op<'a>(symbol: &'static str, oper: Oper) -> parser::Parser<'a, Option<Oper>> {
       Box::new(move |state| {
@@ -438,19 +484,29 @@ pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
         Ok((state, if done { Some(oper) } else { None }))
       })
     }
-
     parser::grammar(
       "Oper",
       &[
-        op("+", Oper::Add),
-        op("-", Oper::Sub),
-        op("*", Oper::Mul),
-        op("/", Oper::Div),
+        op("+"  , Oper::Add),
+        op("-"  , Oper::Sub),
+        op("*"  , Oper::Mul),
+        op("/"  , Oper::Div),
+        op("%"  , Oper::Mod),
+        op("&"  , Oper::And),
+        op("|"  , Oper::Or ),
+        op("^"  , Oper::Xor),
+        op("<<" , Oper::Shl),
+        op(">>" , Oper::Shr),
+        op("<=" , Oper::Lte),
+        op("<"  , Oper::Ltn),
+        op("==" , Oper::Eql),
+        op(">=" , Oper::Gte),
+        op(">"  , Oper::Gtn),
+        op("!=" , Oper::Neq),
       ],
       state,
     )
   }
-
   parser::guard(
     Box::new(|state| {
       let (state, open) = parser::text("(", state)?;
@@ -519,22 +575,6 @@ pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     state,
   )
 }
-
-//pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
-  //parser::guard(
-    //parser::text_parser("_"),
-    //Box::new(|state| {
-      //let (state, init) = get_init_index(state)?;
-      //let (state, _)    = parser::consume("_", state)?;
-      //let (state, last) = get_last_index(state)?;
-      //let orig          = origin(init, last);
-      //Ok((state, Box::new(Term::Hol { orig, numb: 0 })))
-    //}),
-    //state,
-  //)
-//}
-
-
 
 pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   return parser::guard(
@@ -658,7 +698,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
     for arg in &args {
       pats.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() })); // TODO: set orig
     }
-    let rules = vec![Box::new(Rule { name: name.clone(), pats, body })];
+    let rules = vec![Box::new(Rule { orig: 0, name: name.clone(), pats, body })];
     return Ok((state, Box::new(Entry { name, args, tipo, rules })));
   } else {
     let mut rules = Vec::new();
@@ -666,9 +706,10 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
     let mut state = state;
     loop {
       let loop_state = state;
+      let (loop_state, init) = get_init_index(state)?;
       let (loop_state, cont) = parser::text(&rule_prefix, loop_state)?;
       if cont {
-        let (loop_state, rule) = parse_rule(loop_state, name.clone())?;
+        let (loop_state, rule) = parse_rule(loop_state, name.clone(), init)?;
         rules.push(rule);
         state = loop_state;
       } else {
@@ -680,15 +721,18 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
   }
 }
 
-pub fn parse_rule(state: parser::State, name: String) -> parser::Answer<Box<Rule>> {
+pub fn parse_rule(state: parser::State, name: String, init: usize) -> parser::Answer<Box<Rule>> {
   let (state, pats) = parser::until(parser::text_parser("="), Box::new(parse_term), state)?;
+  let (state, last) = get_last_index(state)?;
+  let orig          = origin(init, last);
   let (state, body) = parse_term(state)?;
-  return Ok((state, Box::new(Rule { name, pats, body })));
+  return Ok((state, Box::new(Rule { orig, name, pats, body })));
 }
 
 pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
-  let (state, next) = parser::peek_char(state)?;
   let (state, eras) = parser::text("-", state)?;
+  let (state, keep) = parser::text("+", state)?;
+  let (state, next) = parser::peek_char(state)?;
   let (open, close) = if next == '(' { ("(",")") } else { ("<",">") };
   let (state, _)    = parser::consume(open, state)?;
   let (state, name) = parse_var_name(state)?;
@@ -696,6 +740,7 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
   let (state, tipo) = if anno { parse_term(state)? } else { (state, Box::new(Term::Typ { orig: 0 })) };
   let (state, _)    = parser::consume(close, state)?;
   let hide          = open == "<";
+  let eras          = if hide { !keep } else { eras };
   return Ok((state, Box::new(Argument { hide, eras, name, tipo })));
 }
 
@@ -708,113 +753,6 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
     entrs.insert(entry.name.clone(), entry);
   }
   return Ok((state, Box::new(Book { holes: 0, names, entrs })));
-}
-
-pub fn show_oper(oper: &Oper) -> String {
-  match oper {
-    Oper::Add => format!("+"),
-    Oper::Sub => format!("-"),
-    Oper::Mul => format!("*"),
-    Oper::Div => format!("/"),
-  }
-}
-
-pub fn show_term(term: &Term) -> String {
-  match term {
-    Term::Typ { .. } => {
-      format!("Type")
-    }
-    Term::Var { orig: _, name } => {
-      format!("{}", name)
-    }
-    Term::Lam { orig: _, name, body } => {
-      let body = show_term(body);
-      format!("@{}({})", name, body)
-    }
-    Term::App { orig: _, func, argm } => {
-      let mut args = vec![argm];
-      let mut expr = func;
-      while let Term::App { orig: _, func, argm } = &**expr {
-        args.push(argm);
-        expr = func;
-      }
-      args.reverse();
-      format!("({} {})", show_term(expr), args.iter().map(|x| show_term(x)).collect::<Vec<String>>().join(" "))
-    }
-    Term::All { orig: _, name, tipo, body } => {
-      let body = show_term(body);
-      format!("({}: {}) {}", name, show_term(tipo), body)
-    }
-    Term::Let { orig: _, name, expr, body } => {
-      let expr = show_term(expr);
-      let body = show_term(body);
-      format!("let {} = {}; {}", name, expr, body)
-    }
-    Term::Ann { orig: _, expr, tipo } => {
-      let expr = show_term(expr);
-      let tipo = show_term(tipo);
-      format!("{{{} :: {}}}", expr, tipo)
-    }
-    Term::Ctr { orig: _, name, args } => {
-      format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
-    }
-    Term::Fun { orig: _, name, args } => {
-      format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
-    }
-    Term::Hlp { orig: _ } => {
-      format!("?")
-    }
-    Term::U60 { orig: _ } => {
-      format!("U60")
-    }
-    Term::Num { orig: _, numb } => {
-      format!("{}", numb)
-    }
-    Term::Op2 { orig: _, oper, val0, val1 } => {
-      let oper = show_oper(oper);
-      let val0 = show_term(val0);
-      let val1 = show_term(val1);
-      format!("({} {} {})", oper, val0, val1)
-    }
-    Term::Hol { orig: _, numb } => {
-      format!("_")
-    }
-  }
-}
-
-pub fn show_rule(rule: &Rule) -> String {
-  let name = &rule.name;
-  let mut pats = vec![];
-  for pat in &rule.pats {
-    pats.push(show_term(pat));
-  }
-  let body = show_term(&rule.body);
-  format!("{} {} => {}", name, pats.join(" "), body)
-}
-
-pub fn show_entry(entry: &Entry) -> String {
-  let name = &entry.name;
-  let mut args = vec![];
-  for arg in &entry.args {
-    args.push(format!(" ({}: {})", arg.name, show_term(&arg.tipo)));
-  }
-  if entry.rules.len() == 0 {
-    format!("{}{} : {}", name, args.join(""), show_term(&entry.tipo))
-  } else {
-    let mut rules = vec![];
-    for rule in &entry.rules {
-      rules.push(format!("\n  {}", show_rule(rule)));
-    }
-    format!("{}{} : {} {{{}\n}}", name, args.join(""), show_term(&entry.tipo), rules.join(""))
-  }
-}
-
-pub fn show_book(book: &Book) -> String {
-  let mut lines = vec![];
-  for name in &book.names {
-    lines.push(show_entry(book.entrs.get(name).unwrap()));
-  }
-  lines.join("\n")
 }
 
 pub fn read_term(code: &str) -> Result<Box<Term>, String> {
@@ -1007,34 +945,131 @@ pub fn compile_book(book: &Book) -> String {
   return result;
 }
 
-pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
-  let str_cons = rt.get_id("String.cons");
-  let str_nil  = rt.get_id("String.nil");
-  let mut term = rt.ptr(host);
-  let mut text = String::new();
-  loop {
-    if hvm::get_tag(term) == hvm::CTR {
-      let fid = hvm::get_ext(term);
-      if fid == str_cons {
-        let head = rt.ptr(hvm::get_loc(term, 0));
-        let tail = rt.ptr(hvm::get_loc(term, 1));
-        if hvm::get_tag(head) == hvm::NUM {
-          text.push(std::char::from_u32(hvm::get_num(head) as u32).unwrap_or('?'));
-          term = tail;
-          continue;
-        }
-      }
-      if fid == str_nil {
-        break;
-      }
-    }
-    panic!("Invalid output: {} {}", hvm::get_tag(term), rt.show(host));
-  }
+// Stringification
+// ===============
 
-  return text;
+pub fn show_term(term: &Term) -> String {
+  match term {
+    Term::Typ { .. } => {
+      format!("Type")
+    }
+    Term::Var { orig: _, name } => {
+      format!("{}", name)
+    }
+    Term::Lam { orig: _, name, body } => {
+      let body = show_term(body);
+      format!("@{}({})", name, body)
+    }
+    Term::App { orig: _, func, argm } => {
+      let mut args = vec![argm];
+      let mut expr = func;
+      while let Term::App { orig: _, func, argm } = &**expr {
+        args.push(argm);
+        expr = func;
+      }
+      args.reverse();
+      format!("({} {})", show_term(expr), args.iter().map(|x| show_term(x)).collect::<Vec<String>>().join(" "))
+    }
+    Term::All { orig: _, name, tipo, body } => {
+      let body = show_term(body);
+      format!("({}: {}) {}", name, show_term(tipo), body)
+    }
+    Term::Let { orig: _, name, expr, body } => {
+      let expr = show_term(expr);
+      let body = show_term(body);
+      format!("let {} = {}; {}", name, expr, body)
+    }
+    Term::Ann { orig: _, expr, tipo } => {
+      let expr = show_term(expr);
+      let tipo = show_term(tipo);
+      format!("{{{} :: {}}}", expr, tipo)
+    }
+    Term::Ctr { orig: _, name, args } => {
+      format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
+    }
+    Term::Fun { orig: _, name, args } => {
+      format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
+    }
+    Term::Hlp { orig: _ } => {
+      format!("?")
+    }
+    Term::U60 { orig: _ } => {
+      format!("U60")
+    }
+    Term::Num { orig: _, numb } => {
+      format!("{}", numb)
+    }
+    Term::Op2 { orig: _, oper, val0, val1 } => {
+      let oper = show_oper(oper);
+      let val0 = show_term(val0);
+      let val1 = show_term(val1);
+      format!("({} {} {})", oper, val0, val1)
+    }
+    Term::Hol { orig: _, numb } => {
+      format!("_")
+    }
+  }
 }
 
-// Name <-> Number
+pub fn show_oper(oper: &Oper) -> String {
+  match oper {
+    Oper::Add => format!("+"),
+    Oper::Sub => format!("-"),
+    Oper::Mul => format!("*"),
+    Oper::Div => format!("/"),
+    Oper::Mod => format!("%"),
+    Oper::And => format!("&"),
+    Oper::Or  => format!("|"),
+    Oper::Xor => format!("^"),
+    Oper::Shl => format!("<<"),
+    Oper::Shr => format!(">>"),
+    Oper::Lte => format!("<="),
+    Oper::Ltn => format!("<"),
+    Oper::Eql => format!("=="),
+    Oper::Gte => format!(">="),
+    Oper::Gtn => format!(">"),
+    Oper::Neq => format!("!="),
+  }
+}
+
+pub fn show_rule(rule: &Rule) -> String {
+  let name = &rule.name;
+  let mut pats = vec![];
+  for pat in &rule.pats {
+    pats.push(" ".to_string());
+    pats.push(show_term(pat));
+  }
+  let body = show_term(&rule.body);
+  format!("{}{} => {}", name, pats.join(""), body)
+}
+
+pub fn show_entry(entry: &Entry) -> String {
+  let name = &entry.name;
+  let mut args = vec![];
+  for arg in &entry.args {
+    args.push(format!(" {}({}: {})", if arg.eras { "-" } else { "" }, arg.name, show_term(&arg.tipo)));
+  }
+  if entry.rules.len() == 0 {
+    format!("{}{} : {}", name, args.join(""), show_term(&entry.tipo))
+  } else {
+    let mut rules = vec![];
+    for rule in &entry.rules {
+      rules.push(format!("\n  {}", show_rule(rule)));
+    }
+    format!("{}{} : {} {{{}\n}}", name, args.join(""), show_term(&entry.tipo), rules.join(""))
+  }
+}
+
+pub fn show_book(book: &Book) -> String {
+  let mut lines = vec![];
+  for name in &book.names {
+    lines.push(show_entry(book.entrs.get(name).unwrap()));
+  }
+  lines.join("\n\n")
+}
+
+// Utils
+// =====
 
 /// Converts a name to a number, using the following table:
 pub fn name_to_u64(name: &str) -> u64 {

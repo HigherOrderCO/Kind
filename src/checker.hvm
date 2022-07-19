@@ -1273,7 +1273,7 @@ API.check_all =
     (Text [ "All terms check." Line Line ])
     output)
 
-API.run_main = (Text [
+API.eval_main = (Text [
   (Show (FN0 Main. 0))
   Line Line
 ])
