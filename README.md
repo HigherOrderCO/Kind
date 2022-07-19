@@ -7,7 +7,7 @@ features a blazingly fast type-checker that runs on the
 [HVM](https://github.com/kindelia/hvm) via
 [NbE](https://en.wikipedia.org/wiki/Normalisation_by_evaluation). It can also
 compile programs to HVM and [Kindelia](https://github.com/kindelia/kindelia),
-and can be prove and verify mathematical theorems.
+and can be used to prove and verify mathematical theorems.
 
 Example
 -------
