@@ -33,20 +33,20 @@ Main = API.check_all
 (Maybe.case (Some val) none some) = (some val)
 
 // List.at -(a: Type) (List a) U60 : (Maybe a)
-(List.at (Cons x xs) 0) = (Some x)
-(List.at (Cons x xs) n) = (List.at xs (- n 1))
-(List.at Nil         n) = None
+(List.at (List.cons x xs) 0) = (Some x)
+(List.at (List.cons x xs) n) = (List.at xs (- n 1))
+(List.at List.nil         n) = None
 
 // List.tail -(a: Type) (List a) : (List a)
-(List.tail (Cons x xs)) = xs
-(List.tail Nil)         = Nil
+(List.tail (List.cons x xs)) = xs
+(List.tail List.nil)         = List.nil
 
 // List.reverse -(a: Type) (List a) : (List a)
 (List.reverse xs) = (List.reverse.go xs [])
 
 // List.reverse.go -(a: Type) (List a) (List a) : (List a)
-(List.reverse.go Nil         res) = res
-(List.reverse.go (Cons x xs) res) = (List.reverse.go xs (Cons x res))
+(List.reverse.go List.nil         res) = res
+(List.reverse.go (List.cons x xs) res) = (List.reverse.go xs (List.cons x res))
 
 // String.concat String String : String
 (String.concat String.nil         ys) = ys
@@ -71,8 +71,8 @@ Main = API.check_all
 //(String.equal as                 bs)                 = False
 
 // Text (List String) : String
-(Text Nil)         = String.nil
-(Text (Cons x xs)) = (String.concat x (Text xs))
+(Text List.nil)         = String.nil
+(Text (List.cons x xs)) = (String.concat x (Text xs))
 
 // Color String : String
 (Color x) = (Text [ (String.cons 27 String.nil) "[" x "m" ])
@@ -118,7 +118,7 @@ Line = (String.cons 10 String.nil)
 (Context.extend Empty                       n t v) = (Entry n t v Empty)
 
 // Context.add_value Context U60 Term : Context
-(Context.add_value (Entry name type vals rest) 0 val) = (Entry name type (Cons val vals) rest)
+(Context.add_value (Entry name type vals rest) 0 val) = (Entry name type (List.cons val vals) rest)
 (Context.add_value (Entry name type vals rest) n val) = (Entry name type vals (Context.add_value rest (- n 1) val))
 (Context.add_value Empty                       n val) = Empty
 
@@ -725,12 +725,12 @@ Line = (String.cons 10 String.nil)
   (Equal.var.try_values a.val b)
 
 // Checks if any of a set of reductions is equal
-(Equal.var.try_values (Cons a as) b) =
+(Equal.var.try_values (List.cons a as) b) =
   ask head = (Checker.bind (Equal a b))
   (If head
     (Checker.done True)
     (Equal.var.try_values as b))
-(Equal.var.try_values Nil b) =
+(Equal.var.try_values List.nil b) =
   (Checker.done False)
 
 // Equal.hol (origin: U60) (numb: U60) (b: Term) : (Checker bool)
@@ -914,7 +914,7 @@ Line = (String.cons 10 String.nil)
   ask rhs = (Checker.bind Checker.get_right_hand_side)
   (If rhs
     (Check.compare (Var orig name index) type)
-    (Checker.extend name type Nil))
+    (Checker.extend name type List.nil))
 
 // Checks Hol
 (Check (Hol orig numb) type) =
@@ -1260,8 +1260,8 @@ Line = (String.cons 10 String.nil)
   "- " (String.pad_right (Show.name name) ' ' pad) " : " (Show (Eval (Term.fill type sub))) Line
 ])
 
-(Show.context.vals name Nil sub pad) = String.nil
-(Show.context.vals name (Cons val vals) sub pad) = (Text [
+(Show.context.vals name List.nil sub pad) = String.nil
+(Show.context.vals name (List.cons val vals) sub pad) = (Text [
   "- " (String.pad_right (Show.name name) ' ' pad) " = " (Show (Eval (Term.fill val sub))) Line
   (Show.context.vals name vals sub pad)
 ])
@@ -1311,40 +1311,40 @@ API.eval_main = (Text [
   Line Line
 ])
 
-(API.check_functions Nil) = Nil
-(API.check_functions (Cons f fs)) =
+(API.check_functions List.nil) = List.nil
+(API.check_functions (List.cons f fs)) =
   let head = (Result f (API.check_function f))
   let tail = (API.check_functions fs)
-  (Cons head tail)
+  (List.cons head tail)
 
 (API.check_function func) =
   let vers = (Verify func)
   let type = (TypeOf func)
   (API.check_function.verifiers vers type)
 
-(API.check_function.verifiers Nil type) = Nil
-(API.check_function.verifiers (Cons verifier verifiers) type) =
+(API.check_function.verifiers List.nil type) = List.nil
+(API.check_function.verifiers (List.cons verifier verifiers) type) =
   let head = (Checker.run (Check.verify verifier type))
   let tail = (API.check_function.verifiers verifiers type)
-  (Cons head tail)
+  (List.cons head tail)
 
-(API.output Nil) =
+(API.output List.nil) =
   String.nil
-(API.output (Cons (Result fnid checks) rest)) =
+(API.output (List.cons (Result fnid checks) rest)) =
   (Text [
     (API.output.function fnid checks)
     (API.output rest)
   ])
 
-(API.output.function fnid Nil) =
+(API.output.function fnid List.nil) =
   String.nil
-(API.output.function fnid (Cons (Checked ctx dep rhs sub val) checks)) =
+(API.output.function fnid (List.cons (Checked ctx dep rhs sub val) checks)) =
   (Text [
     //(NameOf fnid) Line
     //(Show.subst sub) Line
     (API.output.function fnid checks)
   ])
-(API.output.function fnid (Cons (Errored ctx sub err) checks)) =
+(API.output.function fnid (List.cons (Errored ctx sub err) checks)) =
   (Text [
     (API.output.error fnid err ctx sub) Line
     (API.output.function fnid checks)

@@ -484,28 +484,24 @@ pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
         Ok((state, if done { Some(oper) } else { None }))
       })
     }
-    parser::grammar(
-      "Oper",
-      &[
-        op("+"  , Oper::Add),
-        op("-"  , Oper::Sub),
-        op("*"  , Oper::Mul),
-        op("/"  , Oper::Div),
-        op("%"  , Oper::Mod),
-        op("&"  , Oper::And),
-        op("|"  , Oper::Or ),
-        op("^"  , Oper::Xor),
-        op("<<" , Oper::Shl),
-        op(">>" , Oper::Shr),
-        op("<"  , Oper::Ltn),
-        op("<=" , Oper::Lte),
-        op("==" , Oper::Eql),
-        op(">=" , Oper::Gte),
-        op(">"  , Oper::Gtn),
-        op("!=" , Oper::Neq),
-      ],
-      state,
-    )
+    parser::grammar("Oper", &[
+      op("+"  , Oper::Add),
+      op("-"  , Oper::Sub),
+      op("*"  , Oper::Mul),
+      op("/"  , Oper::Div),
+      op("%"  , Oper::Mod),
+      op("&"  , Oper::And),
+      op("|"  , Oper::Or ),
+      op("^"  , Oper::Xor),
+      op("<<" , Oper::Shl),
+      op(">>" , Oper::Shr),
+      op("<"  , Oper::Ltn),
+      op("<=" , Oper::Lte),
+      op("==" , Oper::Eql),
+      op(">=" , Oper::Gte),
+      op(">"  , Oper::Gtn),
+      op("!=" , Oper::Neq),
+    ], state)
   }
   parser::guard(
     Box::new(|state| {
@@ -643,6 +639,121 @@ pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   )
 }
 
+// do List {
+//   ask x = Action
+//   ask Action
+//   if x {
+//    ...
+//   } else {
+//    ...
+//   }
+//   for x in list {
+//    ...
+//   }
+//   return Action;
+// }
+// ------------------
+// List.bind(Action, @x
+// List.bind(Action, @~
+// List.done(Action)))
+pub fn parse_doo(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    parser::text_parser("do "),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::text("do", state)?;
+      let (state, name) = parser::name1(state)?;
+      let (state, _)    = parser::text("{", state)?;
+      let (state, term) = parse_do_statements(state, name)?;
+      let (state, _)    = parser::text("}", state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig = origin(init, last);
+      Ok((state, term))
+    }),
+    state,
+  )
+}
+
+// FIXME: can we avoid cloning "monad" repeatedly here?
+pub fn parse_do_statements(state: parser::State, monad: String) -> parser::Answer<Box<Term>> {
+  let monad_0 = monad.clone();
+  let monad_1 = monad.clone();
+  let monad_2 = monad.clone();
+  parser::grammar("Statement", &[
+    Box::new(move |state| parse_do_statement_return(state, monad_0.clone())),
+    Box::new(move |state| parse_do_statement_ask_named(state, monad_1.clone())),
+    Box::new(move |state| parse_do_statement_ask_anon(state, monad_2.clone())),
+    Box::new(move |state| Ok((state, None)))
+  ], state)
+}
+
+pub fn parse_do_statement_return(state: parser::State, monad: String) -> parser::Answer<Option<Box<Term>>> {
+  return parser::guard(
+    parser::text_parser("return "),
+    Box::new(move |state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("return ", state)?;
+      let (state, term) = parse_term(state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      let term = Term::Ctr {
+        orig: orig,
+        name: format!("{}.pure", monad),
+        args: vec![term],
+      };
+      return Ok((state, Box::new(term)));
+    }),
+    state);
+}
+
+pub fn parse_do_statement_ask_named(state: parser::State, monad: String) -> parser::Answer<Option<Box<Term>>> {
+  return parser::guard(
+    Box::new(|state| {
+      let (state, all0) = parser::text("ask", state)?;
+      let (state, name) = parse_var_name(state)?;
+      let (state, all1) = parser::text("=", state)?;
+      Ok((state, all0 && all1))
+    }),
+    Box::new(move |state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("ask", state)?;
+      let (state, name) = parser::name(state)?;
+      let (state, _)    = parser::consume("=", state)?;
+      let (state, acti) = parse_term(state)?;
+      let (state, body) = parse_do_statements(state, monad.clone())?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      let term = Term::Ctr {
+        orig: orig,
+        name: format!("{}.bind", monad),
+        args: vec![acti, Box::new(Term::Lam { orig, name, body })],
+      };
+      return Ok((state, Box::new(term)));
+    }),
+    state);
+}
+
+pub fn parse_do_statement_ask_anon(state: parser::State, monad: String) -> parser::Answer<Option<Box<Term>>> {
+  return parser::guard(
+    parser::text_parser("ask "),
+    Box::new(move |state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("ask", state)?;
+      let (state, acti) = parse_term(state)?;
+      let (state, body) = parse_do_statements(state, monad.clone())?;
+      let (state, last) = get_last_index(state)?;
+      let name          = "_".to_string();
+      let orig          = origin(init, last);
+      let term = Term::Ctr {
+        orig: orig,
+        name: format!("{}.bind", monad),
+        args: vec![acti, Box::new(Term::Lam { orig, name, body })],
+      };
+      return Ok((state, Box::new(term)));
+    }),
+    state);
+}
+
 pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
   parser::grammar("Term", &[
     Box::new(parse_all), // `(name:`
@@ -653,6 +764,7 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_lam), // `@`
     Box::new(parse_let), // `let `
     Box::new(parse_ann), // `{x::`
+    Box::new(parse_doo), // `do `
     Box::new(parse_hlp), // `?`
     Box::new(parse_hol), // `_`
     Box::new(parse_num), // `#`
@@ -935,19 +1047,19 @@ pub fn compile_entry(entry: &Entry) -> String {
   }
   result.push_str(&format!("(Verify {}.) =", entry.name));
   for rule in &entry.rules {
-    result.push_str(&format!(" (Cons {}", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
+    result.push_str(&format!(" (List.cons {}", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
   }
-  result.push_str(&format!(" Nil{}", ")".repeat(entry.rules.len())));
+  result.push_str(&format!(" List.nil{}", ")".repeat(entry.rules.len())));
   return result;
 }
 
 pub fn compile_book(book: &Book) -> String {
   let mut result = String::new();
   result.push_str(&format!("\nFunctions =\n"));
-  result.push_str(&format!("  let fns = Nil\n"));
+  result.push_str(&format!("  let fns = List.nil\n"));
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
-    result.push_str(&format!("  let fns = (Cons {}. fns)\n", entry.    name));
+    result.push_str(&format!("  let fns = (List.cons {}. fns)\n", entry.    name));
   }
   result.push_str(&format!("  fns\n\n"));
   for name in &book.names {

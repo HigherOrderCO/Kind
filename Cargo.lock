@@ -108,9 +108,9 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "0.1.46"
+version = "0.1.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84f23d4946577c57c853be8c7b56ea22562f31ee94f375eebd201686900051cd"
+checksum = "76b49024722982a26f6c297640d6e6744d4aeffea903602871cfb8365c9f9391"
 dependencies = [
  "clap",
  "highlight_error",

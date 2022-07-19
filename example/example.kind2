@@ -57,38 +57,41 @@ Nat.to_u60 (Succ n) = (+ #1 (Nat.to_u60 n))
 // ----
 
 List (a: Type) : Type
-Nil <a> : (List a)
-Cons <a> (x: a) (xs: (List a)) : (List a)
+List.nil <a> : (List a)
+List.cons <a> (x: a) (xs: (List a)) : (List a)
 
 List.negate (xs: (List Bool)) : (List Bool)
-List.negate (Cons Bool x xs) = (Cons Bool (Bool.not x) (List.negate xs))
-List.negate (Nil Bool)       = (Nil Bool)
+List.negate (List.cons Bool x xs) = (List.cons Bool (Bool.not x) (List.negate xs))
+List.negate (List.nil Bool)       = (List.nil Bool)
 
 List.tail <a> (xs: (List a)) : (List a)
-List.tail a (Cons t x xs) = xs
+List.tail a (List.cons t x xs) = xs
 
 List.map <a> <b> (x: (List a)) (f: (x: a) b) : (List b)
-List.map a b (Nil t)       f = Nil
-List.map a b (Cons t x xs) f = (Cons (f x) (List.map xs f))
+List.map a b (List.nil t)       f = List.nil
+List.map a b (List.cons t x xs) f = (List.cons (f x) (List.map xs f))
 
 List.concat <a> (xs: (List a)) (ys: (List a)) : (List a)
-List.concat a (Cons u x xs) ys = (Cons u x (List.concat a xs ys))
-List.concat a (Nil u)       ys = ys
+List.concat a (List.cons u x xs) ys = (List.cons u x (List.concat a xs ys))
+List.concat a (List.nil u)       ys = ys
 
 List.flatten <a> (xs: (List (List a))) : (List a)
-List.flatten a (Cons u x xs) = (List.concat x (List.flatten xs))
-List.flatten a (Nil u)       = Nil
+List.flatten a (List.cons u x xs) = (List.concat x (List.flatten xs))
+List.flatten a (List.nil u)       = List.nil
 
 List.bind <a: Type> <b: Type> (xs: (List a)) (f: a -> (List b)) : (List b)
 List.bind a b xs f = (List.flatten b (List.map xs f))
 
+List.pure <t: Type> (x: t) : (List t)
+List.pure t x = (List.cons t x (List.nil t))
+
 List.range.go (lim: Nat) (res: (List Nat)) : (List Nat)
 List.range.go Zero     res = res
-List.range.go (Succ n) res = (List.range.go n (Cons n res))
+List.range.go (Succ n) res = (List.range.go n (List.cons n res))
 
 List.sum (xs: (List Nat)) : Nat
-List.sum (Nil t)       = Zero
-List.sum (Cons t x xs) = (Nat.add x (List.sum xs))
+List.sum (List.nil t)       = Zero
+List.sum (List.cons t x xs) = (Nat.add x (List.sum xs))
 
 // Equal
 // -----
@@ -128,6 +131,10 @@ U60.to_nat (x: U60) : Nat
 U60.to_nat #0 = Zero
 U60.to_nat n  = (Succ (U60.to_nat (- n #1)))
 
-Main : Nat {
-  (Nat.double (Nat.succ (Nat.succ Zero)))
+Main : (List (List U60)) {
+  do List {
+    ask x = [ #1,  #2,  #3]
+    ask y = [#10, #20, #30]
+    return [x, y]
+  }
 }
