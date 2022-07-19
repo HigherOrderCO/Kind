@@ -68,8 +68,8 @@ List.tail <a> (xs: (List a)) : (List a)
 List.tail a (Cons t x xs) = xs
 
 List.map <a> <b> (x: (List a)) (f: (x: a) b) : (List b)
-List.map a b (Nil t)       f = (Nil b)
-List.map a b (Cons t x xs) f = (Cons b (f x) (List.map a b xs f))
+List.map a b (Nil t)       f = Nil
+List.map a b (Cons t x xs) f = (Cons (f x) (List.map xs f))
 
 List.concat <a> (xs: (List a)) (ys: (List a)) : (List a)
 List.concat a (Cons u x xs) ys = (Cons u x (List.concat a xs ys))
