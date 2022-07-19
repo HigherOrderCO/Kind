@@ -436,6 +436,8 @@ pub fn parse_app(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   );
 }
 
+// TODO: can we avoid this duplicated logic by using macros or high-order functions?
+
 pub fn parse_let(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   return parser::guard(
     parser::text_parser("let "),
@@ -451,8 +453,58 @@ pub fn parse_let(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let orig          = origin(init, last);
       Ok((state, Box::new(Term::Let { orig, name, expr, body })))
     }),
-    state,
-  );
+    state);
+}
+
+pub fn parse_let_st(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
+  return parser::guard(
+    parser::text_parser("let "),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("let ", state)?;
+      let (state, name) = parse_var_name(state)?;
+      let (state, _)    = parser::consume("=", state)?;
+      let (state, expr) = parse_term(state)?;
+      let (state, _)    = parser::text(";", state)?;
+      let (state, body) = parse_term_st(state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(init, last);
+      Ok((state, Box::new(move |monad| {
+        Box::new(Term::Let {
+          orig,
+          name: name.clone(),
+          expr: expr.clone(),
+          body: body(monad),
+        })
+      })))
+    }),
+    state);
+}
+
+pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  return parser::guard(
+    parser::text_parser("if "),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("if ", state)?;
+      let (state, cond) = parse_term(state)?;
+      let (state, _)    = parser::consume("{", state)?;
+      let (state, if_t) = parse_term(state)?;
+      let (state, _)    = parser::text("}", state)?;
+      let (state, _)    = parser::text("else", state)?;
+      let (state, _)    = parser::text("{", state)?;
+      let (state, if_f) = parse_term(state)?;
+      let (state, _)    = parser::text("}", state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig = origin(init, last);
+      let moti = Box::new(Term::Hol { orig, numb: 0 });
+      Ok((state, Box::new(Term::Ctr {
+        orig,
+        name: "Bool.if".to_string(),
+        args: vec![moti, cond, if_t, if_f],
+      })))
+    }),
+    state);
 }
 
 pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
@@ -656,7 +708,7 @@ pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
 // List.bind(Action, @x
 // List.bind(Action, @~
 // List.done(Action)))
-pub fn parse_doo(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_do(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
     parser::text_parser("do "),
     Box::new(|state| {
@@ -664,30 +716,30 @@ pub fn parse_doo(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, _)    = parser::text("do", state)?;
       let (state, name) = parser::name1(state)?;
       let (state, _)    = parser::text("{", state)?;
-      let (state, term) = parse_do_statements(state, name)?;
+      let (state, term) = parse_term_st(state)?;
       let (state, _)    = parser::text("}", state)?;
       let (state, last) = get_last_index(state)?;
       let orig = origin(init, last);
-      Ok((state, term))
+      Ok((state, term(&name)))
     }),
     state,
   )
 }
 
+//Box<dyn Fn(State<'a>) -> Answer<'a, A>>
+
 // FIXME: can we avoid cloning "monad" repeatedly here?
-pub fn parse_do_statements(state: parser::State, monad: String) -> parser::Answer<Box<Term>> {
-  let monad_0 = monad.clone();
-  let monad_1 = monad.clone();
-  let monad_2 = monad.clone();
+pub fn parse_term_st(state: parser::State) -> parser::Answer<Box<dyn Fn(&str) -> Box<Term>>> {
   parser::grammar("Statement", &[
-    Box::new(move |state| parse_do_statement_return(state, monad_0.clone())),
-    Box::new(move |state| parse_do_statement_ask_named(state, monad_1.clone())),
-    Box::new(move |state| parse_do_statement_ask_anon(state, monad_2.clone())),
-    Box::new(move |state| Ok((state, None)))
+    Box::new(parse_return_st),
+    Box::new(parse_ask_named_st),
+    Box::new(parse_ask_anon_st),
+    Box::new(parse_let_st),
+    Box::new(|state| Ok((state, None)))
   ], state)
 }
 
-pub fn parse_do_statement_return(state: parser::State, monad: String) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_return_st(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
   return parser::guard(
     parser::text_parser("return "),
     Box::new(move |state| {
@@ -696,23 +748,22 @@ pub fn parse_do_statement_return(state: parser::State, monad: String) -> parser:
       let (state, term) = parse_term(state)?;
       let (state, last) = get_last_index(state)?;
       let orig          = origin(init, last);
-      let term = Term::Ctr {
+      return Ok((state, Box::new(move |monad| Box::new(Term::Ctr {
         orig: orig,
         name: format!("{}.pure", monad),
-        args: vec![term],
-      };
-      return Ok((state, Box::new(term)));
+        args: vec![term.clone()],
+      }))));
     }),
     state);
 }
 
-pub fn parse_do_statement_ask_named(state: parser::State, monad: String) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_ask_named_st(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
   return parser::guard(
     Box::new(|state| {
-      let (state, all0) = parser::text("ask", state)?;
-      let (state, name) = parse_var_name(state)?;
+      let (state, all0) = parser::text("ask ", state)?;
+      let (state, name) = parser::name(state)?;
       let (state, all1) = parser::text("=", state)?;
-      Ok((state, all0 && all1))
+      Ok((state, all0 && name.len() > 0 && all1))
     }),
     Box::new(move |state| {
       let (state, init) = get_init_index(state)?;
@@ -720,36 +771,50 @@ pub fn parse_do_statement_ask_named(state: parser::State, monad: String) -> pars
       let (state, name) = parser::name(state)?;
       let (state, _)    = parser::consume("=", state)?;
       let (state, acti) = parse_term(state)?;
-      let (state, body) = parse_do_statements(state, monad.clone())?;
+      let (state, body) = parse_term_st(state)?;
       let (state, last) = get_last_index(state)?;
       let orig          = origin(init, last);
-      let term = Term::Ctr {
+      return Ok((state, Box::new(move |monad| Box::new(Term::Ctr {
         orig: orig,
         name: format!("{}.bind", monad),
-        args: vec![acti, Box::new(Term::Lam { orig, name, body })],
-      };
-      return Ok((state, Box::new(term)));
+        args: vec![
+          acti.clone(),
+          Box::new(Term::Lam {
+            orig,
+            name: name.clone(),
+            body: body(monad),
+          })
+        ],
+      }))));
     }),
     state);
 }
 
-pub fn parse_do_statement_ask_anon(state: parser::State, monad: String) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_ask_anon_st(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
   return parser::guard(
     parser::text_parser("ask "),
     Box::new(move |state| {
       let (state, init) = get_init_index(state)?;
       let (state, _)    = parser::consume("ask", state)?;
       let (state, acti) = parse_term(state)?;
-      let (state, body) = parse_do_statements(state, monad.clone())?;
+      let (state, body) = parse_term_st(state)?;
       let (state, last) = get_last_index(state)?;
       let name          = "_".to_string();
       let orig          = origin(init, last);
-      let term = Term::Ctr {
-        orig: orig,
-        name: format!("{}.bind", monad),
-        args: vec![acti, Box::new(Term::Lam { orig, name, body })],
-      };
-      return Ok((state, Box::new(term)));
+      return Ok((state, Box::new(move |monad| {
+        Box::new(Term::Ctr {
+          orig: orig,
+          name: format!("{}.bind", monad),
+          args: vec![
+            acti.clone(),
+            Box::new(Term::Lam {
+              orig,
+              name: name.clone(),
+              body: body(monad),
+            })
+          ],
+        })
+      })));
     }),
     state);
 }
@@ -764,7 +829,8 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_lam), // `@`
     Box::new(parse_let), // `let `
     Box::new(parse_ann), // `{x::`
-    Box::new(parse_doo), // `do `
+    Box::new(parse_if),  // `if `
+    Box::new(parse_do),  // `do `
     Box::new(parse_hlp), // `?`
     Box::new(parse_hol), // `_`
     Box::new(parse_num), // `#`

@@ -2,56 +2,60 @@
 // ----
 
 Bool : Type
-True : Bool
-False : Bool
+Bool.true : Bool
+Bool.false : Bool
 
 Bool.not (a: Bool) : Bool
-Bool.not True  = False
-Bool.not False = True
+Bool.not Bool.true  = Bool.false
+Bool.not Bool.false = Bool.true
 
 Bool.and (a: Bool) (b: Bool) : Bool
-Bool.and True  True  = True
-Bool.and True  False = False
-Bool.and False True  = False
-Bool.and False False = False
+Bool.and Bool.true  Bool.true  = Bool.true
+Bool.and Bool.true  Bool.false = Bool.false
+Bool.and Bool.false Bool.true  = Bool.false
+Bool.and Bool.false Bool.false = Bool.false
 
 Bool.not_not_theorem (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
-Bool.not_not_theorem True  = (Refl Bool True)
-Bool.not_not_theorem False = (Refl Bool False)
+Bool.not_not_theorem Bool.true  = (Refl Bool Bool.true)
+Bool.not_not_theorem Bool.false = (Refl Bool Bool.false)
+
+Bool.if <r: Type> (b: Bool) (if_t: r) (if_f: r) : r
+Bool.if r Bool.true  if_t if_f = if_t
+Bool.if r Bool.false if_t if_f = if_f
 
 // Nat
 // ---
 
 Nat : Type
-Zero : Nat
-Succ (pred: Nat) : Nat
+Nat.zero : Nat
+Nat.succ (pred: Nat) : Nat
 
 Nat.double (x: Nat) : Nat
-Nat.double (Succ x) = (Succ (Succ (Nat.double x)))
-Nat.double (Zero)   = (Zero)
+Nat.double (Nat.succ x) = (Nat.succ (Nat.succ (Nat.double x)))
+Nat.double (Nat.zero)   = (Nat.zero)
 
 Nat.add (a: Nat) (b: Nat) : Nat
-Nat.add (Succ a) b = (Succ (Nat.add a b))
-Nat.add Zero     b = b
+Nat.add (Nat.succ a) b = (Nat.succ (Nat.add a b))
+Nat.add Nat.zero     b = b
 
-Nat.comm.a (a: Nat) : (Equal Nat a (Nat.add a Zero))
-Nat.comm.a Zero     = Refl
-Nat.comm.a (Succ a) = (Equal.apply @x(Succ x) (Nat.comm.a a))
+Nat.comm.a (a: Nat) : (Equal Nat a (Nat.add a Nat.zero))
+Nat.comm.a Nat.zero     = Refl
+Nat.comm.a (Nat.succ a) = (Equal.apply @x(Nat.succ x) (Nat.comm.a a))
 
-Nat.comm.b (a: Nat) (b: Nat): (Equal Nat (Nat.add a (Succ b)) (Succ (Nat.add a b)))
-Nat.comm.b Zero     b = Refl
-Nat.comm.b (Succ a) b = (Equal.apply @x(Succ x) (Nat.comm.b a b))
+Nat.comm.b (a: Nat) (b: Nat): (Equal Nat (Nat.add a (Nat.succ b)) (Nat.succ (Nat.add a b)))
+Nat.comm.b Nat.zero     b = Refl
+Nat.comm.b (Nat.succ a) b = (Equal.apply @x(Nat.succ x) (Nat.comm.b a b))
 
 Nat.comm (a: Nat) (b: Nat) : (Equal Nat (Nat.add a b) (Nat.add b a))
-Nat.comm Zero     b = (Nat.comm.a b)
-Nat.comm (Succ a) b =
-  let e0 = (Equal.apply @x(Succ x) (Nat.comm a b))
+Nat.comm Nat.zero     b = (Nat.comm.a b)
+Nat.comm (Nat.succ a) b =
+  let e0 = (Equal.apply @x(Nat.succ x) (Nat.comm a b))
   let e1 = (Equal.mirror (Nat.comm.b b a))
   (Equal.chain e0 e1)
 
 Nat.to_u60 (n: Nat) : U60
-Nat.to_u60 Zero     = #0
-Nat.to_u60 (Succ n) = (+ #1 (Nat.to_u60 n))
+Nat.to_u60 Nat.zero     = #0
+Nat.to_u60 (Nat.succ n) = (+ #1 (Nat.to_u60 n))
   
 // List
 // ----
@@ -86,11 +90,11 @@ List.pure <t: Type> (x: t) : (List t)
 List.pure t x = (List.cons t x (List.nil t))
 
 List.range.go (lim: Nat) (res: (List Nat)) : (List Nat)
-List.range.go Zero     res = res
-List.range.go (Succ n) res = (List.range.go n (List.cons n res))
+List.range.go Nat.zero     res = res
+List.range.go (Nat.succ n) res = (List.range.go n (List.cons n res))
 
 List.sum (xs: (List Nat)) : Nat
-List.sum (List.nil t)       = Zero
+List.sum (List.nil t)       = Nat.zero
 List.sum (List.cons t x xs) = (Nat.add x (List.sum xs))
 
 // Equal
@@ -126,15 +130,15 @@ Monad.new (f: Type -> Type)
 The (x: U60) : Type
 Val (x: U60) : (The x)
 
-// FIXME: won't work til HVM's flattening update
 U60.to_nat (x: U60) : Nat
-U60.to_nat #0 = Zero
-U60.to_nat n  = (Succ (U60.to_nat (- n #1)))
+U60.to_nat #0 = Nat.zero
+U60.to_nat n  = (Nat.succ (U60.to_nat (- n #1)))
 
 Main : (List (List U60)) {
   do List {
     ask x = [ #1,  #2,  #3]
     ask y = [#10, #20, #30]
-    return [x, y]
+    let z = #42
+    return [x, y, z]
   }
 }
