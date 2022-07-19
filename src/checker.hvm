@@ -267,7 +267,7 @@ Line = (String.cons 10 String.nil)
 (Term.get_origin (Hlp orig))                      = orig
 (Term.get_origin (U60 orig))                      = orig
 (Term.get_origin (Num orig numb))                 = orig
-(Term.get_origin (Op2 orig val0 val1))            = orig
+(Term.get_origin (Op2 orig oper val0 val1))       = orig
 
 // Term.set_origin
 (Term.set_origin new_orig (Typ orig))                      = (Typ new_orig)
@@ -299,7 +299,7 @@ Line = (String.cons 10 String.nil)
 (Term.set_origin new_orig (Hlp orig))                      = (Hlp new_orig)
 (Term.set_origin new_orig (U60 orig))                      = (U60 new_orig)
 (Term.set_origin new_orig (Num orig numb))                 = (Num new_orig numb)
-(Term.set_origin new_orig (Op2 orig val0 val1))            = (Op2 new_orig val0 val1)
+(Term.set_origin new_orig (Op2 orig oper val0 val1))       = (Op2 new_orig oper val0 val1)
 
 // SO = Term.set_origin
 (SO new_orig term) = (Term.set_origin new_orig term)
@@ -334,7 +334,7 @@ Line = (String.cons 10 String.nil)
 (Term.fill (Hlp orig) sub)                      = (Hlp orig)
 (Term.fill (U60 orig) sub)                      = (U60 orig)
 (Term.fill (Num orig numb) sub)                 = (Num orig numb)
-(Term.fill (Op2 orig val0 val1) sub)            = (Op2 orig (Term.fill val0 sub) (Term.fill val1 sub))
+(Term.fill (Op2 orig oper val0 val1) sub)       = (Op2 orig oper (Term.fill val0 sub) (Term.fill val1 sub))
 (Term.fill (Hol orig numb) sub)                 = (Maybe.case (Subst.look sub numb) (Hol orig numb) λval (Term.fill val sub))
 
 // Eval Term (List Term) : Term
@@ -457,8 +457,8 @@ Line = (String.cons 10 String.nil)
     (Num orig numb)
 
   // Eval Op2
-  (Eval (Op2 orig val0 val1)) =
-    (OP2 orig (Eval val0) (Eval val1))
+  (Eval (Op2 orig oper val0 val1)) =
+    (OP2 orig oper (Eval val0) (Eval val1))
 
 // Equal Term Term : (Checker Bool)
 // --------------------------------
@@ -674,7 +674,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done (U60.equal a.numb b.numb))
 
 // Op2 equality
-(Equal (Op2 a.orig a.val0 a.val1) (Op2 b.orig b.val0 b.val1)) =
+(Equal (Op2 a.orig a.oper a.val0 a.val1) (Op2 b.orig b.oper b.val0 b.val1)) =
   ask val0 = (Checker.bind (Equal a.val0 b.val0))
   ask val1 = (Checker.bind (Equal a.val1 b.val1))
   (Checker.done (Bool.and val0 val1))
@@ -888,7 +888,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done (U60 0))
 
 // Infers Op2
-(Infer (Op2 orig val0 val1)) =
+(Infer (Op2 orig oper val0 val1)) =
   ask val0_chk = (Checker.bind (Check val0 (U60 0)))
   ask val1_chk = (Checker.bind (Check val1 (U60 0)))
   (Checker.done (U60 0))
@@ -965,8 +965,23 @@ Line = (String.cons 10 String.nil)
 // OP2 U60 Term Term : Term
 // ------------------------
 
-(OP2 oper (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (+ a.numb b.numb))
-(OP2 oper val0                val1)                = (Op2 oper val0 val1)
+(OP2 orig ADD  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (+  a.numb b.numb))
+(OP2 orig SUB  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (-  a.numb b.numb))
+(OP2 orig MUL  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (*  a.numb b.numb))
+(OP2 orig DIV  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (/  a.numb b.numb))
+(OP2 orig MOD  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (%  a.numb b.numb))
+(OP2 orig AND  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (&  a.numb b.numb))
+(OP2 orig OR   (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (|  a.numb b.numb))
+(OP2 orig XOR  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (^  a.numb b.numb))
+(OP2 orig SHL  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (<< a.numb b.numb))
+(OP2 orig SHR  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (>> a.numb b.numb))
+(OP2 orig LTN  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (<  a.numb b.numb))
+(OP2 orig LTE  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (<= a.numb b.numb))
+(OP2 orig EQL  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (== a.numb b.numb))
+(OP2 orig GTE  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (>= a.numb b.numb))
+(OP2 orig GTN  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (>  a.numb b.numb))
+(OP2 orig NEQ  (Num a.orig a.numb) (Num b.orig b.numb)) = (Num 0 (!= a.numb b.numb))
+(OP2 orig oper val0                val1)                = (Op2 orig oper val0 val1)
 
 // Stringification
 // ---------------
@@ -1208,10 +1223,28 @@ Line = (String.cons 10 String.nil)
     (Show.u60 numb)
   ])
 
-(Show (Op2 orig val0 val1)) =
+(Show (Op2 orig oper val0 val1)) =
   (Text [
-    "(+" (Show val0) " " (Show val1) ")"
+    "(" (Show.oper oper) " " (Show val0) " " (Show val1) ")"
   ])
+
+(Show.oper ADD) = "+"
+(Show.oper SUB) = "-"
+(Show.oper MUL) = "*"
+(Show.oper DIV) = "/"
+(Show.oper MOD) = "%"
+(Show.oper AND) = "&"
+(Show.oper OR)  = "|"
+(Show.oper XOR) = "^"
+(Show.oper SHL) = "<<"
+(Show.oper SHR) = ">>"
+(Show.oper LNT) = "<"
+(Show.oper LTE) = "<="
+(Show.oper EQL) = "=="
+(Show.oper GTE) = ">="
+(Show.oper GTN) = ">"
+(Show.oper NEQ) = "!="
+(Show.oper op)  = "?"
 
 (Show.context ctx sub) =
   (Show.context.go ctx sub (Context.max_name_length ctx))

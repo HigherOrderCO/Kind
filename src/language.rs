@@ -44,8 +44,8 @@ pub enum Oper {
   Xor,
   Shl,
   Shr,
-  Lte,
   Ltn,
+  Lte,
   Eql,
   Gte,
   Gtn,
@@ -497,8 +497,8 @@ pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
         op("^"  , Oper::Xor),
         op("<<" , Oper::Shl),
         op(">>" , Oper::Shr),
-        op("<=" , Oper::Lte),
         op("<"  , Oper::Ltn),
+        op("<=" , Oper::Lte),
         op("==" , Oper::Eql),
         op(">=" , Oper::Gte),
         op(">"  , Oper::Gtn),
@@ -829,11 +829,32 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
     }
     Term::Op2 { orig, oper, val0, val1 } => {
       // TODO: Add operator
-      format!("({} {} {} {})", if quote { "Op2" } else { "OP2" }, hide(orig,lhs), compile_term(val0, quote, lhs), compile_term(val1, quote, lhs))
+      format!("({} {} {} {} {})", if quote { "Op2" } else { "OP2" }, hide(orig,lhs), compile_oper(oper), compile_term(val0, quote, lhs), compile_term(val1, quote, lhs))
     }
     Term::Hol { orig, numb } => {
       format!("(Hol {} {})", orig, numb)
     }
+  }
+}
+
+pub fn compile_oper(oper: &Oper) -> String {
+  match oper {
+    Oper::Add => "ADD".to_string(),
+    Oper::Sub => "SUB".to_string(),
+    Oper::Mul => "MUL".to_string(),
+    Oper::Div => "DIV".to_string(),
+    Oper::Mod => "MOD".to_string(),
+    Oper::And => "AND".to_string(),
+    Oper::Or  => "OR" .to_string(),
+    Oper::Xor => "XOR".to_string(),
+    Oper::Shl => "SHL".to_string(),
+    Oper::Shr => "SHR".to_string(),
+    Oper::Ltn => "LTN".to_string(),
+    Oper::Lte => "LTE".to_string(),
+    Oper::Eql => "EQL".to_string(),
+    Oper::Gte => "GTE".to_string(),
+    Oper::Gtn => "GTN".to_string(),
+    Oper::Neq => "NEQ".to_string(),
   }
 }
 
@@ -1023,8 +1044,8 @@ pub fn show_oper(oper: &Oper) -> String {
     Oper::Xor => format!("^"),
     Oper::Shl => format!("<<"),
     Oper::Shr => format!(">>"),
-    Oper::Lte => format!("<="),
     Oper::Ltn => format!("<"),
+    Oper::Lte => format!("<="),
     Oper::Eql => format!("=="),
     Oper::Gte => format!(">="),
     Oper::Gtn => format!(">"),

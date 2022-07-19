@@ -120,20 +120,12 @@ Monad.new (f: Type -> Type)
 // Examples
 // --------
 
+The (x: U60) : Type
+Val (x: U60) : (The x)
+
 // Generates combinations!
 // - Run   with : `kind2 run   example.kind2`
 // - Check with : `kind2 check example.kind2
-Main : U60 {
-  let f = {@x (Succ (Succ x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let f = {@x (f (f x)) :: Nat -> Nat}
-  let n = (f Zero)
-  let list = (List.range.go n Nil)
-  (Nat.to_u60 (List.sum list))
+Main (x: U60) : (The (+ x #1)) {
+  ?
 }
