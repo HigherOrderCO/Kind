@@ -48,6 +48,10 @@ Nat.comm (Succ a) b =
   let e0 = (Equal.apply @x(Succ x) (Nat.comm a b))
   let e1 = (Equal.mirror (Nat.comm.b b a))
   (Equal.chain e0 e1)
+
+Nat.to_u60 (n: Nat) : U60
+Nat.to_u60 Zero     = #0
+Nat.to_u60 (Succ n) = (+ #1 (Nat.to_u60 n))
   
 // List
 // ----
@@ -77,6 +81,14 @@ List.flatten a (Nil u)       = Nil
 
 List.bind <a: Type> <b: Type> (xs: (List a)) (f: a -> (List b)) : (List b)
 List.bind a b xs f = (List.flatten b (List.map xs f))
+
+List.range.go (lim: Nat) (res: (List Nat)) : (List Nat)
+List.range.go Zero     res = res
+List.range.go (Succ n) res = (List.range.go n (Cons n res))
+
+List.sum (xs: (List Nat)) : Nat
+List.sum (Nil t)       = Zero
+List.sum (Cons t x xs) = (Nat.add x (List.sum xs))
 
 // Equal
 // -----
@@ -111,9 +123,17 @@ Monad.new (f: Type -> Type)
 // Generates combinations!
 // - Run   with : `kind2 run   example.kind2`
 // - Check with : `kind2 check example.kind2
-Main : (List U60) {
-  (List.bind (Cons #1 (Cons #2 (Cons #3 Nil))) @x
-  (List.bind (Cons #10 (Cons #20 (Cons #30 Nil))) @y
-  (List.bind (Cons #100 (Cons #200 (Cons #300 Nil))) @z
-  (Cons (+ x (+ y z)) Nil))))
+Main : U60 {
+  let f = {@x (Succ (Succ x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let f = {@x (f (f x)) :: Nat -> Nat}
+  let n = (f Zero)
+  let list = (List.range.go n Nil)
+  (Nat.to_u60 (List.sum list))
 }

@@ -2,6 +2,8 @@
 #![allow(unused_variables)] 
 
 mod language;
+mod to_kdl;
+mod to_hvm;
 
 use language::{*};
 use clap::{Parser, Subcommand};
@@ -18,17 +20,33 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-  /// Run a file interpreted
-  #[clap(aliases = &["r"])]
-  Run { file: String, params: Vec<String> },
-
   /// Check a file
   #[clap(aliases = &["c"])]
-  Check { file: String, params: Vec<String> },
+  Check { file: String },
 
-  /// Generates a .hvm checker for a .kind2 file
+  /// Evaluates Main on Kind2
+  #[clap(aliases = &["r"])]
+  Eval { file: String },
+
+  /// Runs Main on the HVM
+  #[clap(aliases = &["r"])]
+  Run { file: String },
+
+  /// Generates a checker (.hvm) for a file
   #[clap(aliases = &["c"])]
-  GenChecker { file: String, params: Vec<String> },
+  GenChecker { file: String },
+
+  /// Stringifies a file
+  #[clap(aliases = &["c"])]
+  Show { file: String },
+
+  /// Compiles a file to Kindelia (.kdl)
+  #[clap(aliases = &["c"])]
+  ToKDL { file: String },
+
+  /// Compiles a file to HVM (.hvm)
+  #[clap(aliases = &["c"])]
+  ToHVM { file: String },
 }
 
 fn main() {
@@ -44,47 +62,104 @@ fn run_cli() -> Result<(), String> {
   let cli_matches = Cli::parse();
 
   match cli_matches.command {
-    Command::Run { file: path, params } => {
-      run_main(&path)
+    Command::Eval { file: path } => {
+      cmd_eval_main(&path)
     }
 
-    Command::Check { file: path, params } => {
-      check_all(&path)
+    Command::Run { file: path } => {
+      cmd_run_main(&path)
     }
 
-    Command::GenChecker { file: path, params } => {
-      gen_checker(&path)
+    Command::Check { file: path } => {
+      cmd_check_all(&path)
+    }
+
+    Command::GenChecker { file: path } => {
+      cmd_gen_checker(&path)
+    }
+
+    Command::Show { file: path } => {
+      cmd_show(&path)
+    }
+
+    Command::ToKDL { file: path } => {
+      cmd_to_kdl(&path)
+    }
+
+    Command::ToHVM { file: path } => {
+      cmd_to_hvm(&path)
     }
   }
 }
 
+// Commands
+// --------
+
 // Checks all definitions of a Kind2 file
-fn check_all(path: &str) -> Result<(), String> {
+fn cmd_check_all(path: &str) -> Result<(), String> {
   let loaded = load_file(path)?;
-  let result = run_with_hvm(&loaded.check_code, "API.check_all")?;
+  let result = run_with_hvm(&loaded.check_code, "API.check_all", true)?;
   std::fs::write(format!("{}.hvm", path.replace(".kind2",".check")), loaded.check_code.clone()).ok();
   print!("{}", inject_highlights(&loaded.kind2_code, &result.output));
   println!("Rewrites: {}", result.rewrites);
   Ok(())
 }
 
-// Runs the Main function of a Kind2 file
-fn run_main(path: &str) -> Result<(), String> {
+
+// Evaluates Main on Kind2
+fn cmd_eval_main(path: &str) -> Result<(), String> {
   let loaded = load_file(path)?;
-  let result = run_with_hvm(&loaded.check_code, "API.run_main")?;
+  let result = run_with_hvm(&loaded.check_code, "API.eval_main", true)?;
   print!("{}", result.output);
   println!("Rewrites: {}", result.rewrites);
   Ok(())
 }
 
+// Runs Main on HVM
+fn cmd_run_main(path: &str) -> Result<(), String> {
+  let loaded = load_file(path)?;
+  let result = to_hvm::to_hvm_book(&loaded.kind2_book);
+  let result = run_with_hvm(&result, "Main", false)?;
+  println!("{}", result.output);
+  println!("Rewrites: {}", result.rewrites);
+  Ok(())
+}
+
 // Generates the checker file (`file.kind2` -> `file.checker.hvm`)
-fn gen_checker(path: &str) -> Result<(), String> {
+fn cmd_gen_checker(path: &str) -> Result<(), String> {
   let loaded = load_file(path)?;
   let gen_path = format!("{}.hvm", path.replace(".kind2",".check"));
   println!("Generated '{}'.", gen_path);
   std::fs::write(gen_path, loaded.check_code.clone()).ok();
   Ok(())
 }
+
+// Stringifies a file
+fn cmd_show(path: &str) -> Result<(), String> {
+  let loaded = load_file(path)?;
+  let result = show_book(&loaded.kind2_book);
+  println!("{}", result);
+  Ok(())
+}
+
+// Compiles a file to Kindelia (.kdl)
+fn cmd_to_kdl(path: &str) -> Result<(), String> {
+  let loaded = load_file(path)?;
+  let result = to_kdl::to_kdl_book(&loaded.kind2_book);
+  print!("{}", result);
+  Ok(())
+}
+
+// Compiles a file to Kindelia (.kdl)
+fn cmd_to_hvm(path: &str) -> Result<(), String> {
+  let loaded = load_file(path)?;
+  let result = to_hvm::to_hvm_book(&loaded.kind2_book);
+  print!("{}", result);
+  Ok(())
+}
+
+// Utils
+// -----
 
 pub struct LoadedFile {
   kind2_code: String, // user-defined file.kind2 code
@@ -160,12 +235,40 @@ fn inject_highlights(file_code: &str, target: &str) -> String {
 }
 
 // Given an HVM source, runs an expression
-fn run_with_hvm(code: &str, main: &str) -> Result<RunResult, String> {
+fn run_with_hvm(code: &str, main: &str, read_string: bool) -> Result<RunResult, String> {
   let mut rt = hvm::Runtime::from_code(code)?;
   let main = rt.alloc_code(main)?;
   rt.normalize(main);
   return Ok(RunResult {
-    output: readback_string(&rt, main),
+    output: if read_string { readback_string(&rt, main) } else { rt.show(main) },
     rewrites: rt.get_rewrites(),
   });
+}
+
+// Converts a HVM string to a Rust string
+pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
+  let str_cons = rt.get_id("String.cons");
+  let str_nil  = rt.get_id("String.nil");
+  let mut term = rt.ptr(host);
+  let mut text = String::new();
+  loop {
+    if hvm::get_tag(term) == hvm::CTR {
+      let fid = hvm::get_ext(term);
+      if fid == str_cons {
+        let head = rt.ptr(hvm::get_loc(term, 0));
+        let tail = rt.ptr(hvm::get_loc(term, 1));
+        if hvm::get_tag(head) == hvm::NUM {
+          text.push(std::char::from_u32(hvm::get_num(head) as u32).unwrap_or('?'));
+          term = tail;
+          continue;
+        }
+      }
+      if fid == str_nil {
+        break;
+      }
+    }
+    panic!("Invalid output: {} {}", hvm::get_tag(term), rt.show(host));
+  }
+
+  return text;
 }
