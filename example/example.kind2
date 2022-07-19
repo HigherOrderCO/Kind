@@ -123,9 +123,11 @@ Monad.new (f: Type -> Type)
 The (x: U60) : Type
 Val (x: U60) : (The x)
 
-// Generates combinations!
-// - Run   with : `kind2 run   example.kind2`
-// - Check with : `kind2 check example.kind2
-Main (x: U60) : (The (+ x #1)) {
-  ?
+// FIXME: won't work til HVM's flattening update
+U60.to_nat (x: U60) : Nat
+U60.to_nat #0 = Zero
+U60.to_nat n  = (Succ (U60.to_nat (- n #1)))
+
+Main : Nat {
+  (Nat.double (Nat.succ (Nat.succ Zero)))
 }

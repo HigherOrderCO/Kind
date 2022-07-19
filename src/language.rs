@@ -914,6 +914,12 @@ pub fn compile_entry(entry: &Entry) -> String {
         let var_str = format!("(Ct{} {}. {}{})", args.len(), name, orig, var_args_str);
         return (inp_str, var_str);
       }
+      Term::Num { orig, numb } => {
+        let inp = format!("(Num {} {})", orig, numb);
+        let var = format!("(Num {} {})", orig, numb);
+        *vars += 1;
+        return (inp, var);
+      }
       _ => {
         panic!("Invalid left-hand side pattern: {}", show_term(patt));
       }
