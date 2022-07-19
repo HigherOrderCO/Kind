@@ -99,7 +99,6 @@ fn run_cli() -> Result<(), String> {
 fn cmd_check_all(path: &str) -> Result<(), String> {
   let loaded = load_file(path)?;
   let result = run_with_hvm(&loaded.check_code, "API.check_all", true)?;
-  std::fs::write(format!("{}.hvm", path.replace(".kind2",".check")), loaded.check_code.clone()).ok();
   print!("{}", inject_highlights(&loaded.kind2_code, &result.output));
   println!("Rewrites: {}", result.rewrites);
   Ok(())
