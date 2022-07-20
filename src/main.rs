@@ -6,6 +6,7 @@ mod to_kdl;
 mod to_hvm;
 
 use language::{*};
+use std::collections::HashMap;
 use clap::{Parser, Subcommand};
 
 const CHECKER_HVM: &str = include_str!("checker.hvm");
@@ -97,9 +98,9 @@ fn run_cli() -> Result<(), String> {
 
 // Checks all definitions of a Kind2 file
 fn cmd_check_all(path: &str) -> Result<(), String> {
-  let loaded = load_file(path)?;
-  let result = run_with_hvm(&loaded.check_code, "API.check_all", true)?;
-  print!("{}", inject_highlights(&loaded.kind2_code, &result.output));
+  let loaded = load(path)?;
+  let result = run_with_hvm(&gen_checker(&loaded.book), "API.check_all", true)?;
+  print!("{}", inject_highlights(&loaded.file, &result.output));
   println!("Rewrites: {}", result.rewrites);
   Ok(())
 }
@@ -107,8 +108,8 @@ fn cmd_check_all(path: &str) -> Result<(), String> {
 
 // Evaluates Main on Kind2
 fn cmd_eval_main(path: &str) -> Result<(), String> {
-  let loaded = load_file(path)?;
-  let result = run_with_hvm(&loaded.check_code, "API.eval_main", true)?;
+  let loaded = load(path)?;
+  let result = run_with_hvm(&gen_checker(&loaded.book), "API.eval_main", true)?;
   print!("{}", result.output);
   println!("Rewrites: {}", result.rewrites);
   Ok(())
@@ -116,8 +117,8 @@ fn cmd_eval_main(path: &str) -> Result<(), String> {
 
 // Runs Main on HVM
 fn cmd_run_main(path: &str) -> Result<(), String> {
-  let loaded = load_file(path)?;
-  let result = to_hvm::to_hvm_book(&loaded.kind2_book);
+  let loaded = load(path)?;
+  let result = to_hvm::to_hvm_book(&loaded.book);
   let result = run_with_hvm(&result, "Main", false)?;
   println!("{}", result.output);
   println!("Rewrites: {}", result.rewrites);
@@ -126,33 +127,33 @@ fn cmd_run_main(path: &str) -> Result<(), String> {
 
 // Generates the checker file (`file.kind2` -> `file.checker.hvm`)
 fn cmd_gen_checker(path: &str) -> Result<(), String> {
-  let loaded = load_file(path)?;
+  let loaded = load(path)?;
   let gen_path = format!("{}.hvm", path.replace(".kind2",".check"));
   println!("Generated '{}'.", gen_path);
-  std::fs::write(gen_path, loaded.check_code.clone()).ok();
+  std::fs::write(gen_path, gen_checker(&loaded.book)).ok();
   Ok(())
 }
 
 // Stringifies a file
 fn cmd_show(path: &str) -> Result<(), String> {
-  let loaded = load_file(path)?;
-  let result = show_book(&loaded.kind2_book);
+  let loaded = load(path)?;
+  let result = show_book(&loaded.book);
   println!("{}", result);
   Ok(())
 }
 
 // Compiles a file to Kindelia (.kdl)
 fn cmd_to_kdl(path: &str) -> Result<(), String> {
-  let loaded = load_file(path)?;
-  let result = to_kdl::to_kdl_book(&loaded.kind2_book);
+  let loaded = load(path)?;
+  let result = to_kdl::to_kdl_book(&loaded.book);
   print!("{}", result);
   Ok(())
 }
 
 // Compiles a file to Kindelia (.kdl)
 fn cmd_to_hvm(path: &str) -> Result<(), String> {
-  let loaded = load_file(path)?;
-  let result = to_hvm::to_hvm_book(&loaded.kind2_book);
+  let loaded = load(path)?;
+  let result = to_hvm::to_hvm_book(&loaded.book);
   print!("{}", result);
   Ok(())
 }
@@ -160,74 +161,33 @@ fn cmd_to_hvm(path: &str) -> Result<(), String> {
 // Utils
 // -----
 
-pub struct LoadedFile {
-  kind2_code: String, // user-defined file.kind2 code
-  kind2_book: Book,   // object with all the parsed definitions
-  check_code: String, // HVM code that type-checks this file
-}
-
 pub struct RunResult {
   output: String,
   rewrites: u64,
 }
 
-pub fn load_file(path: &str) -> Result<LoadedFile, String> {
-  // Reads definitions from Kind2 file
-  let kind2_code = match std::fs::read_to_string(path) {
-    Ok(code) => code,
-    Err(msg) => {
-      return Err(format!("File not found: {}", path));
-    },
-  };
-
-  // Prints errors if parsing failed
-  let kind2_book = match read_book(&kind2_code) {
-    Ok(kind2_book) => kind2_book,
-    Err(msg) => {
-      return Err(format!("{}", msg));
-    }
-  };
-
-  // Adjusts the Kind2 book
-  let kind2_book = match adjust_book(&kind2_book) {
-    Ok(kind2_book) => kind2_book,
-    Err(err) => {
-      let (init, last) = get_origin_range(err.orig);
-      match err.kind {
-        AdjustErrorKind::IncorrectArity => {
-          return Err(format!("Incorrect arity.\n{}", highlight_error::highlight_error(init, last, &kind2_code)));
-        }
-        AdjustErrorKind::UnboundVariable => {
-          return Err(format!("Unbound variable.\n{}", highlight_error::highlight_error(init, last, &kind2_code)));
-        }
-      }
-    }
-  };
-
-  // Compile the Kind2 file to HVM checker
-  let base_check_code = compile_book(&kind2_book);
-  let mut check_code = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
-  check_code.push_str(&base_check_code);
-
-  return Ok(LoadedFile {
-    kind2_code,
-    kind2_book,
-    check_code,
-  });
-}
-
 // Replaces line ranges `{{123:456}}` on `target` by slices of `file_code`
-fn inject_highlights(file_code: &str, target: &str) -> String {
+fn inject_highlights(file: &Vec<File>, target: &str) -> String {
   let mut code = String::new();
   let mut cout = target;
-  while let (Some(init_range_index), Some(last_range_index)) = (cout.find("{{#"), cout.find("#}}")) {
-    let range_text = &cout[init_range_index + 3 .. last_range_index];
+  // Replaces file ids by names
+  while let (Some(init_file_index), Some(last_file_index)) = (cout.find("{{#F"), cout.find("F#}}")) {
+    let file_text = &cout[init_file_index + 4 .. last_file_index];
+    let file_numb = file_text.parse::<u64>().unwrap() as usize;
+    code.push_str(&cout[0 .. init_file_index]);
+    code.push_str(&file[file_numb].path);
+    cout = &cout[last_file_index + 4 ..];
+  }
+  // Replaces code ranges by snippets
+  while let (Some(init_range_index), Some(last_range_index)) = (cout.find("{{#R"), cout.find("R#}}")) {
+    let range_text = &cout[init_range_index + 4 .. last_range_index];
     let range_text = range_text.split(":").map(|x| x.parse::<u64>().unwrap()).collect::<Vec<u64>>();
-    let range_init = range_text[0] as usize;
-    let range_last = range_text[1] as usize;
+    let range_file = range_text[0] as usize;
+    let range_init = range_text[1] as usize;
+    let range_last = range_text[2] as usize;
     code.push_str(&cout[0 .. init_range_index]);
-    code.push_str(&highlight_error::highlight_error(range_init, range_last, file_code));
-    cout = &cout[last_range_index + 3 ..];
+    code.push_str(&highlight_error::highlight_error(range_init, range_last, &file[range_file].code));
+    cout = &cout[last_range_index + 4 ..];
   }
   code.push_str(cout);
   return code;
@@ -270,4 +230,96 @@ pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
   }
 
   return text;
+}
+
+// Generates a .hvm checker for a Book
+fn gen_checker(book: &Book) -> String {
+  // Compile the Kind2 file to HVM checker
+  let base_check_code = compile_book(&book);
+  let mut check_code = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
+  check_code.push_str(&base_check_code);
+  return check_code;
+}
+
+// Loader
+// ======
+
+pub struct File {
+  path: String,
+  code: String,
+}
+
+pub struct Load {
+  file: Vec<File>,
+  book: Book,
+}
+
+pub fn load(name: &str) -> Result<Load, String> {
+  let mut load = Load {
+    file: Vec::new(),
+    book: Book {
+      names: vec![],
+      entrs: HashMap::new(),
+      holes: 0,
+    }
+  };
+
+  load_entry(name, &mut load)?;
+
+  // Adjusts the Kind2 book
+  match adjust_book(&load.book) {
+    Ok(book) => {
+      load.book = book;
+    }
+    Err(err) => {
+      let (file, init, last) = get_origin_range(err.orig);
+      let high_line = highlight_error::highlight_error(init, last, &load.file[file].code);
+      match err.kind {
+        AdjustErrorKind::IncorrectArity => {
+          return Err(format!("Incorrect arity.\n{}", high_line));
+        }
+        AdjustErrorKind::UnboundVariable => {
+          return Err(format!("Unbound variable.\n{}", high_line));
+        }
+      }
+    }
+  };
+
+  return Ok(load);
+}
+
+pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
+  if !load.book.entrs.contains_key(name) {
+
+    let path : String;
+    if name.ends_with(".kind2") {
+      path = name.to_string();
+    } else {
+      path = format!("{}.kind2", &name.replace(".","/"));
+    };
+
+    let new_code = match std::fs::read_to_string(&path) {
+      Err(err) => { return Ok(()); }
+      Ok(code) => { code }
+    };
+
+    let mut new_book = match read_book(&new_code) {
+      Err(err) => { return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path, err)); }
+      Ok(book) => { book }
+    };
+    book_set_origin_file(&mut new_book, load.file.len());
+
+    load.file.push(File { path: path.clone(), code: new_code });
+    for (name, entr) in &new_book.entrs {
+      load.book.names.push(name.clone());
+      load.book.entrs.insert(name.clone(), entr.clone());
+    }
+
+    for unbound in book_get_unbounds(&new_book) {
+      load_entry(&unbound, load)?;
+    }
+
+  }
+
+  return Ok(());
 }

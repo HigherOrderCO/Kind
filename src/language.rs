@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use hvm::parser as parser;
 
 #[derive(Clone, Debug)]
@@ -233,8 +234,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
           Ok(Term::Ctr { orig, name: name.clone(), args: new_args })
         }
       } else {
-        println!("Missing declaration for: '{}'.", name);
-        std::process::exit(0);
+        return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable });
       }
     },
     Term::Fun { ref orig, ref name, ref args } => {
@@ -269,15 +269,207 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
   }
 }
 
+// Find unbound variables
+// ======================
+
+pub fn book_get_unbounds(book: &Book) -> HashSet<String> {
+  let mut names = Vec::new();
+  let mut unbound = HashSet::new(); 
+  for name in &book.names {
+    let entry = book.entrs.get(name).unwrap();
+    names.push(name.clone());
+    entry_get_unbounds(book, &entry, &mut unbound);
+  }
+  return unbound;
+}
+
+pub fn entry_get_unbounds(book: &Book, entry: &Entry, unbound: &mut HashSet<String>) {
+  let name = entry.name.clone();
+  let mut vars = Vec::new();
+  for arg in &entry.args {
+    vars.push(arg.name.clone());
+    argument_get_unbounds(book, arg, &mut vars, unbound);
+  }
+  term_get_unbounds(book, &*entry.tipo, true, &mut vars, unbound);
+  for rule in &entry.rules {
+    rule_get_unbounds(book, &*rule, &mut Vec::new(), unbound);
+  }
+}
+
+pub fn argument_get_unbounds(book: &Book, arg: &Argument, vars: &mut Vec<String>, unbound: &mut HashSet<String>) {
+  term_get_unbounds(book, &*arg.tipo, false, vars, unbound);
+}
+
+pub fn rule_get_unbounds(book: &Book, rule: &Rule, vars: &mut Vec<String>, unbound: &mut HashSet<String>) {
+  for pat in &rule.pats {
+    term_get_unbounds(book, &*pat, false, vars, unbound);
+  }
+  term_get_unbounds(book, &*rule.body, true, vars, unbound);
+}
+
+pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<String>, unbound: &mut HashSet<String>) {
+  match term {
+    Term::Typ { .. } => {},
+    Term::Var { ref name, .. } => {
+      if rhs && vars.iter().find(|&x| x == name).is_none() {
+        unbound.insert(name.clone());
+      }
+    },
+    Term::Let { ref name, ref expr, ref body, .. } => {
+      term_get_unbounds(book, &*expr, rhs, vars, unbound);
+      vars.push(name.clone());
+      term_get_unbounds(book, &*body, rhs, vars, unbound);
+      vars.pop();
+    },
+    Term::Ann { ref expr, ref tipo, .. } => {
+      term_get_unbounds(book, &*expr, rhs, vars, unbound);
+      term_get_unbounds(book, &*tipo, rhs, vars, unbound);
+    },
+    Term::All { ref name, ref tipo, ref body, .. } => {
+      term_get_unbounds(book, &*tipo, rhs, vars, unbound);
+      vars.push(name.clone());
+      term_get_unbounds(book, &*body, rhs, vars, unbound);
+      vars.pop();
+    },
+    Term::Lam { ref name, ref body, .. } => {
+      vars.push(name.clone());
+      term_get_unbounds(book, &*body, rhs, vars, unbound);
+      vars.pop();
+    },
+    Term::App { ref func, ref argm, .. } => {
+      term_get_unbounds(book, &*func, rhs, vars, unbound);
+      term_get_unbounds(book, &*argm, rhs, vars, unbound);
+    },
+    Term::Ctr { ref name, ref args, .. } => {
+      unbound.insert(name.clone());
+      for arg in args {
+        term_get_unbounds(book, &*arg, rhs, vars, unbound);
+      }
+    },
+    Term::Fun { ref name, ref args, .. } => {
+      unbound.insert(name.clone());
+      for arg in args {
+        term_get_unbounds(book, &*arg, rhs, vars, unbound);
+      }
+    },
+    Term::Op2 { ref val0, ref val1, .. } => {
+      term_get_unbounds(book, &*val0, rhs, vars, unbound);
+      term_get_unbounds(book, &*val1, rhs, vars, unbound);
+    },
+    Term::Hlp { .. } => {},
+    Term::U60 { .. } => {},
+    Term::Num { .. } => {},
+    Term::Hol { .. } => {},
+  }
+}
+
+// File Origin Injection
+// =====================
+
+
+pub fn book_set_origin_file(book: &mut Book, file: usize) {
+  for entr in book.entrs.values_mut() {
+    entry_set_origin_file(entr, file);
+  }
+}
+
+pub fn entry_set_origin_file(entry: &mut Entry, file: usize) {
+  for arg in &mut entry.args {
+    term_set_origin_file(&mut *arg.tipo, file);
+  }
+  term_set_origin_file(&mut entry.tipo, file);
+  for rule in &mut entry.rules {
+    rule_set_origin_file(rule, file);
+  }
+}
+
+pub fn rule_set_origin_file(rule: &mut Rule, file: usize) {
+  for pat in &mut rule.pats {
+    term_set_origin_file(pat, file);
+  }
+  term_set_origin_file(&mut rule.body, file);
+}
+
+pub fn term_set_origin_file(term: &mut Term, file: usize) {
+  match term {
+    Term::Typ { ref mut orig } => {
+      *orig = set_origin_file(*orig, file);
+    }
+    Term::Var { ref mut orig, .. } => {
+      *orig = set_origin_file(*orig, file);
+    },
+    Term::All { ref mut orig, ref mut name, ref mut tipo, ref mut body, .. } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(tipo, file);
+      term_set_origin_file(body, file);
+    },
+    Term::Lam { ref mut orig, ref mut name, ref mut body, .. } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(body, file);
+    },
+    Term::App { ref mut orig, ref mut func, ref mut argm, .. } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(func, file);
+      term_set_origin_file(argm, file);
+    },
+    Term::Let { ref mut orig, ref mut name, ref mut expr, ref mut body, .. } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(expr, file);
+      term_set_origin_file(body, file);
+    },
+    Term::Ann { ref mut orig, ref mut expr, ref mut tipo } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(expr, file);
+      term_set_origin_file(tipo, file);
+    },
+    Term::Ctr { ref mut orig, ref mut args, .. } => {
+      *orig = set_origin_file(*orig, file);
+      for arg in args {
+        term_set_origin_file(&mut *arg, file);
+      }
+    },
+    Term::Fun { ref mut orig, ref mut args, .. } => {
+      *orig = set_origin_file(*orig, file);
+      for arg in args {
+        term_set_origin_file(&mut *arg, file);
+      }
+    },
+    Term::Hlp { ref mut orig } => {
+      *orig = set_origin_file(*orig, file);
+    }
+    Term::U60 { ref mut orig } => {
+      *orig = set_origin_file(*orig, file);
+    }
+    Term::Num { ref mut orig, .. } => {
+      *orig = set_origin_file(*orig, file);
+    }
+    Term::Op2 { ref mut orig, ref mut val0, ref mut val1, .. } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(val0, file);
+      term_set_origin_file(val1, file);
+    },
+    Term::Hol { ref mut orig, .. } => {
+      *orig = set_origin_file(*orig, file);
+    }
+  }
+}
+
 // Parser
 // ======
 
-pub fn origin(init: usize, last: usize) -> u64 {
-  ((init as u64) & 0xFFFFFF) | (((last as u64) & 0xFFFFFF) << 24)
+pub fn origin(file: usize, init: usize, last: usize) -> u64 {
+  ((file as u64) << 48) | ((init as u64) & 0xFFFFFF) | (((last as u64) & 0xFFFFFF) << 24)
 }
 
-pub fn get_origin_range(origin: u64) -> (usize, usize) {
-  ((origin & 0xFFFFFF) as usize, ((origin >> 24) & 0xFFFFFF) as usize)
+pub fn set_origin_file(origin: u64, file: usize) -> u64 {
+  (origin & 0xFFFFFFFFFFFF) | (((file as u64) & 0xFFF) << 48)
+}
+
+pub fn get_origin_range(origin: u64) -> (usize, usize, usize) {
+  let file = (origin >> 48) as usize;
+  let init = (origin & 0xFFFFFF) as usize;
+  let last = ((origin >> 24) & 0xFFFFFF) as usize;
+  (file, init, last)
 }
 
 pub fn get_init_index(state: parser::State) -> parser::Answer<usize> {
@@ -327,7 +519,7 @@ pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, init) = get_init_index(state)?;
       let (state, name) = parse_var_name(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::Var { orig, name })))
     }),
     state,
@@ -342,7 +534,7 @@ pub fn parse_num(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, _)    = parser::consume("#", state)?;
       let (state, name) = parser::name1(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       if let Ok(numb) = name.parse::<u64>() {
         Ok((state, Box::new(Term::Num { orig, numb })))
       } else {
@@ -362,7 +554,7 @@ pub fn parse_lam(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, name) = parse_var_name(state)?;
       let (state, body) = parse_term(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::Lam { orig, name, body })))
     }),
     state,
@@ -386,7 +578,7 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, _)    = parser::consume(")", state)?;
       let (state, body) = parse_term(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::All { orig, name, tipo, body })))
     }),
     state,
@@ -415,7 +607,7 @@ pub fn parse_app(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             for i in 1 .. args.len() {
               let (argm_init_index, argm_last_index, argm) = &args[i];
               term = Box::new(Term::App {
-                orig: origin(*app_init_index, *argm_last_index),
+                orig: origin(0, *app_init_index, *argm_last_index),
                 func: term,
                 argm: argm.clone(),
               });
@@ -450,7 +642,7 @@ pub fn parse_let(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, _)    = parser::text(";", state)?;
       let (state, body) = parse_term(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::Let { orig, name, expr, body })))
     }),
     state);
@@ -468,7 +660,7 @@ pub fn parse_let_st(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(&s
       let (state, _)    = parser::text(";", state)?;
       let (state, body) = parse_term_st(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(move |monad| {
         Box::new(Term::Let {
           orig,
@@ -496,7 +688,7 @@ pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, if_f) = parse_term(state)?;
       let (state, _)    = parser::text("}", state)?;
       let (state, last) = get_last_index(state)?;
-      let orig = origin(init, last);
+      let orig = origin(0, init, last);
       let moti = Box::new(Term::Hol { orig, numb: 0 });
       Ok((state, Box::new(Term::Ctr {
         orig,
@@ -505,24 +697,6 @@ pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       })))
     }),
     state);
-}
-
-pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
-  return parser::guard(
-    parser::text_parser("{"),
-    Box::new(|state| {
-      let (state, init) = get_init_index(state)?;
-      let (state, _)    = parser::consume("{", state)?;
-      let (state, expr) = parse_term(state)?;
-      let (state, _)    = parser::text("::", state)?;
-      let (state, tipo) = parse_term(state)?;
-      let (state, _)    = parser::consume("}", state)?;
-      let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
-      Ok((state, Box::new(Term::Ann { orig, expr, tipo })))
-    }),
-    state,
-  );
 }
 
 pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
@@ -569,7 +743,7 @@ pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, val1) = parse_term(state)?;
       let (state, open) = parser::consume(")", state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::Op2 { orig, oper, val0, val1 })))
     }),
     state,
@@ -589,11 +763,11 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, name) = parse_ctr_name(state)?;
       if name == "Type" {
         let (state, last) = get_last_index(state)?;
-        let orig          = origin(init, last);
+        let orig          = origin(0, init, last);
         Ok((state, Box::new(Term::Typ { orig })))
       } else if name == "U60" {
         let (state, last) = get_last_index(state)?;
-        let orig          = origin(init, last);
+        let orig          = origin(0, init, last);
         Ok((state, Box::new(Term::U60 { orig })))
       } else {
         let (state, args) = if open {
@@ -602,7 +776,7 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
           (state, Vec::new())
         };
         let (state, last) = get_last_index(state)?;
-        let orig          = origin(init, last);
+        let orig          = origin(0, init, last);
         Ok((state, Box::new(Term::Ctr { orig, name, args })))
       }
     }),
@@ -617,7 +791,7 @@ pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, init) = get_init_index(state)?;
       let (state, _)    = parser::consume("_", state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::Hol { orig, numb: 0 })))
     }),
     state,
@@ -632,7 +806,7 @@ pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, _)    = parser::consume("?", state)?;
       let (state, name) = parser::name_here(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::Hlp { orig })))
     }),
     state,
@@ -647,7 +821,7 @@ pub fn parse_arr(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize
       let (state, body) = parse_term(state)?;
       let (state, last) = get_last_index(state)?;
       Ok((state, Box::new(move |init, tipo| {
-        let orig = origin(init, last);
+        let orig = origin(0, init, last);
         let name = "_".to_string();
         let tipo = tipo.clone();
         let body = body.clone();
@@ -656,6 +830,23 @@ pub fn parse_arr(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize
     }),
     state,
   );
+}
+
+pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize, Box<Term>) -> Box<Term>>>> {
+  return parser::guard(
+    parser::text_parser("::"),
+    Box::new(|state| {
+      let (state, _)    = parser::consume("::", state)?;
+      let (state, tipo) = parse_term(state)?;
+      let (state, last) = get_last_index(state)?;
+      Ok((state, Box::new(move |init, expr| {
+        let orig = origin(0, init, last);
+        let expr = expr.clone();
+        let tipo = tipo.clone();
+        Box::new(Term::Ann { orig, expr, tipo })
+      })))
+    }),
+    state);
 }
 
 pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
@@ -678,7 +869,7 @@ pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
         state,
       )?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       let empty = Term::Ctr { orig, name: "List.nil".to_string(), args: Vec::new() };
       let list = Box::new(elems.iter().rfold(empty, |t, h| Term::Ctr {
         orig,
@@ -719,7 +910,7 @@ pub fn parse_do(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, term) = parse_term_st(state)?;
       let (state, _)    = parser::text("}", state)?;
       let (state, last) = get_last_index(state)?;
-      let orig = origin(init, last);
+      let orig = origin(0, init, last);
       Ok((state, term(&name)))
     }),
     state,
@@ -747,7 +938,7 @@ pub fn parse_return_st(state: parser::State) -> parser::Answer<Option<Box<dyn Fn
       let (state, _)    = parser::consume("return ", state)?;
       let (state, term) = parse_term(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       return Ok((state, Box::new(move |monad| Box::new(Term::Ctr {
         orig: orig,
         name: format!("{}.pure", monad),
@@ -773,7 +964,7 @@ pub fn parse_ask_named_st(state: parser::State) -> parser::Answer<Option<Box<dyn
       let (state, acti) = parse_term(state)?;
       let (state, body) = parse_term_st(state)?;
       let (state, last) = get_last_index(state)?;
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       return Ok((state, Box::new(move |monad| Box::new(Term::Ctr {
         orig: orig,
         name: format!("{}.bind", monad),
@@ -800,7 +991,7 @@ pub fn parse_ask_anon_st(state: parser::State) -> parser::Answer<Option<Box<dyn 
       let (state, body) = parse_term_st(state)?;
       let (state, last) = get_last_index(state)?;
       let name          = "_".to_string();
-      let orig          = origin(init, last);
+      let orig          = origin(0, init, last);
       return Ok((state, Box::new(move |monad| {
         Box::new(Term::Ctr {
           orig: orig,
@@ -828,7 +1019,6 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_lst), // `[`
     Box::new(parse_lam), // `@`
     Box::new(parse_let), // `let `
-    Box::new(parse_ann), // `{x::`
     Box::new(parse_if),  // `if `
     Box::new(parse_do),  // `do `
     Box::new(parse_hlp), // `?`
@@ -841,7 +1031,8 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
 
 pub fn parse_term_suffix(state: parser::State) -> parser::Answer<Box<dyn Fn(usize,Box<Term>) -> Box<Term>>> {
   parser::grammar("Term", &[
-    Box::new(parse_arr),
+    Box::new(parse_arr), // `->`
+    Box::new(parse_ann), // `::`
     Box::new(|state| Ok((state, Some(Box::new(|init, term| term))))),
   ], state)
 }
@@ -902,7 +1093,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
 pub fn parse_rule(state: parser::State, name: String, init: usize) -> parser::Answer<Box<Rule>> {
   let (state, pats) = parser::until(parser::text_parser("="), Box::new(parse_term), state)?;
   let (state, last) = get_last_index(state)?;
-  let orig          = origin(init, last);
+  let orig          = origin(0, init, last);
   let (state, body) = parse_term(state)?;
   return Ok((state, Box::new(Rule { orig, name, pats, body })));
 }
@@ -927,8 +1118,12 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
   let mut names = Vec::new();
   let mut entrs = HashMap::new();
   for entry in entry_vec {
-    names.push(entry.name.clone());
-    entrs.insert(entry.name.clone(), entry);
+    if !entrs.contains_key(&entry.name) {
+      names.push(entry.name.clone());
+      entrs.insert(entry.name.clone(), entry);
+    } else {
+      println!("\x1b[33mwarning\x1b[0m: ignored redefinition of '{}'.", entry.name);
+    }
   }
   return Ok((state, Box::new(Book { holes: 0, names, entrs })));
 }

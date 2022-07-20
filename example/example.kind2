@@ -1,3 +1,10 @@
+// U60
+// ---
+
+U60.to_nat (x: U60) : Nat
+U60.to_nat #0 = Nat.zero
+U60.to_nat n  = (Nat.succ (U60.to_nat (- n #1)))
+
 // Bool
 // ----
 
@@ -110,10 +117,10 @@ Equal.apply <t> <u> <a: t> <b: t> (f: t -> t) (e: (Equal t a b)) : (Equal t (f a
 Equal.apply t u a b f (Refl v k) = (Refl v (f k))
 
 Equal.rewrite <t> (a: t) (b: t) (e: (Equal t a b)) (p: t -> Type) (x: (p a)) : (p b)
-Equal.rewrite t a b (Refl u k) p x = {x :: (p k)}
+Equal.rewrite t a b (Refl u k) p x = x :: (p k)
 
 Equal.chain <t> <a: t> <b: t> <c: t> (e0: (Equal t a b)) (e1: (Equal t b c)) : (Equal t a c)
-Equal.chain t a b c e0 (Refl u x) = {e0 :: (Equal t a x)}
+Equal.chain t a b c e0 (Refl u x) = e0 :: (Equal t a x)
 
 // Monad
 // -----
@@ -124,21 +131,25 @@ Monad.new (f: Type -> Type)
   (bind: (a: Type) (b: Type) (x: (Monad a)) (y: a -> (Monad b)) (Monad b))
   : (Monad f)
 
+// Variadic
+// --------
+
+Variadic (r: Type) (n: Nat) : Type
+Variadic r Nat.zero     = r
+Variadic r (Nat.succ n) = r -> (Variadic r n)
+
 // Examples
 // --------
 
-The (x: U60) : Type
-Val (x: U60) : (The x)
-
-U60.to_nat (x: U60) : Nat
-U60.to_nat #0 = Nat.zero
-U60.to_nat n  = (Nat.succ (U60.to_nat (- n #1)))
-
-Main : (List (List U60)) {
+Example.monad : (List (List U60)) {
   do List {
     ask x = [ #1,  #2,  #3]
     ask y = [#10, #20, #30]
     let z = #42
     return [x, y, z]
   }
+}
+
+Example.variadic : (Variadic Nat (Nat.succ (Nat.succ Nat.zero))) {
+  @a @b a
 }

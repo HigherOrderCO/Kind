@@ -233,8 +233,8 @@ Line = (String.cons 10 String.nil)
 // Term utils
 // ----------
 
-// Term.if_all -(r: Type) Term (Term -> (Term -> Term) -> r) r : r
-(Term.if_all (All orig name type body) then else) = (then type body)
+// Term.if_all -(r: Type) Term (U60 U60 -> Term -> (Term -> Term) -> r) r : r
+(Term.if_all (All orig name type body) then else) = (then orig name type body)
 (Term.if_all other                     then else) = else
 
 // Term.orig
@@ -459,6 +459,129 @@ Line = (String.cons 10 String.nil)
   // Eval Op2
   (Eval (Op2 orig oper val0 val1)) =
     (OP2 orig oper (Eval val0) (Eval val1))
+
+// Weak Term (List Term) : Term
+// ----------------------------
+
+  // Eval Typ
+  (Weak (Typ orig)) =
+    (Typ orig)
+
+  // Eval Var
+  (Weak (Var orig name index)) =
+    (Var orig name index)
+
+  // Eval Var
+  (Weak (Hol orig numb)) =
+    (Hol orig numb)
+
+  // Eval All
+  (Weak (All orig name type body)) =
+    (All orig name type body)
+
+  // Eval Lam
+  (Weak (Lam orig name body)) =
+    (Lam orig name body)
+
+  // Eval Let
+  (Weak (Let orig name expr body)) =
+    (Weak (LET orig name expr λx (body x)))
+
+  // Eval Ann
+  (Weak (Ann orig expr type)) =
+    (Weak (ANN orig expr type))
+
+  // Eval App
+  (Weak (App orig func argm)) =
+    (Weak (APP orig func argm))
+
+  // Eval Ct0
+  (Weak (Ct0 orig ctid)) =
+    (Ct0 orig ctid)
+
+  // Eval Ct1
+  (Weak (Ct1 orig ctid x0)) =
+    (Ct1 orig ctid (Weak x0))
+
+  // Eval Ct2
+  (Weak (Ct2 orig ctid x0 x1)) =
+    (Ct2 orig ctid (Weak x0) (Weak x1))
+
+  // Eval Ct3
+  (Weak (Ct3 orig ctid x0 x1 x2)) =
+    (Ct3 orig ctid (Weak x0) (Weak x1) (Weak x2))
+
+  // Eval Ct4
+  (Weak (Ct4 orig ctid x0 x1 x2 x3)) =
+    (Ct4 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3))
+
+  // Eval Ct5
+  (Weak (Ct5 orig ctid x0 x1 x2 x3 x4)) =
+    (Ct5 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4))
+
+  // Eval Ct6
+  (Weak (Ct6 orig ctid x0 x1 x2 x3 x4 x5)) =
+    (Ct6 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4) (Weak x5))
+
+  // Eval Ct7
+  (Weak (Ct7 orig ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Ct7 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4) (Weak x5) (Weak x6))
+
+  // Eval Ct8
+  (Weak (Ct8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Ct8 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4) (Weak x5) (Weak x6) (Weak x7))
+
+  // Eval Fn0
+  (Weak (Fn0 orig ctid)) =
+    (Weak (FN0 orig ctid))
+
+  // Eval Fn1
+  (Weak (Fn1 orig ctid x0)) =
+    (Weak (FN1 orig ctid (Weak x0)))
+
+  // Eval Fn2
+  (Weak (Fn2 orig ctid x0 x1)) =
+    (Weak (FN2 orig ctid (Weak x0) (Weak x1)))
+
+  // Eval Fn3
+  (Weak (Fn3 orig ctid x0 x1 x2)) =
+    (Weak (FN3 orig ctid (Weak x0) (Weak x1) (Weak x2)))
+
+  // Eval Fn4
+  (Weak (Fn4 orig ctid x0 x1 x2 x3)) =
+    (Weak (FN4 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3)))
+
+  // Eval Fn5
+  (Weak (Fn5 orig ctid x0 x1 x2 x3 x4)) =
+    (Weak (FN5 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4)))
+
+  // Eval Fn6
+  (Weak (Fn6 orig ctid x0 x1 x2 x3 x4 x5)) =
+    (Weak (FN6 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4) (Weak x5)))
+
+  // Eval Fn7
+  (Weak (Fn7 orig ctid x0 x1 x2 x3 x4 x5 x6)) =
+    (Weak (FN7 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4) (Weak x5) (Weak x6)))
+
+  // Eval Fn8
+  (Weak (Fn8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) =
+    (Weak (FN8 orig ctid (Weak x0) (Weak x1) (Weak x2) (Weak x3) (Weak x4) (Weak x5) (Weak x6) (Weak x7)))
+
+  // Eval Hlp
+  (Weak (Hlp orig)) =
+    (Hlp orig)
+
+  // Eval U60
+  (Weak (U60 orig)) =
+    (U60 orig)
+
+  // Eval Num
+  (Weak (Num orig numb)) =
+    (Num orig numb)
+
+  // Eval Op2
+  (Weak (Op2 orig oper val0 val1)) =
+    (OP2 orig oper (Weak val0) (Weak val1))
 
 // Equal Term Term : (Checker Bool)
 // --------------------------------
@@ -783,9 +906,9 @@ Line = (String.cons 10 String.nil)
 // Infers App
 (Infer (App orig func argm)) =
   ask func_typ = (Checker.bind (Infer func))
-  (Term.if_all func_typ
+  (Term.if_all (Weak func_typ)
     // then
-    λfunc_typ_type λfunc_typ_body
+    λfunc_typ_orig λfunc_typ_name λfunc_typ_type λfunc_typ_body
       ask argm_ok = (Checker.bind (Check argm func_typ_type))
       (Checker.done (func_typ_body argm))
     // else
@@ -897,10 +1020,15 @@ Line = (String.cons 10 String.nil)
 // --------------------------------
 
 // Checks Lam 
-(Check (Lam orig name body) (All t_orig t_name t_type t_body)) =
-  ask dep      = (Checker.bind Checker.get_depth)
-  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (t_body (Var t_orig t_name dep))) name t_type []))
-  (Checker.done Unit)
+(Check (Lam orig name body) type) =
+  ((Term.if_all (Weak type)
+    λt_orig λt_name λt_type λt_body λorig λname λbody
+      ask dep      = (Checker.bind Checker.get_depth)
+      ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (t_body (Var t_orig t_name dep))) name t_type []))
+      (Checker.done Unit)
+    λorig λname λbody
+      (Checker.fail (CantInferLambda (Lam orig name body))))
+    orig name body)
 
 // Checks Let
 (Check (Let orig name expr body) type) =
@@ -1378,8 +1506,8 @@ API.eval_main = (Text [
 (API.output.error fnid (TypeMismatch term expected detected) ctx sub) =
   (Text [
     (Color "4") "Type mismatch." (Color "0") Line
-    "- Expected: " (Show (Term.fill expected sub)) Line
-    "- Detected: " (Show (Term.fill detected sub)) Line
+    "- Expected: " (Show (Eval (Term.fill expected sub))) Line
+    "- Detected: " (Show (Eval (Term.fill detected sub))) Line
     (API.output.error.details fnid ctx sub term)
   ])
 
@@ -1390,8 +1518,8 @@ API.eval_main = (Text [
       (Color "4") "Context:" (Color "0") Line
       (Show.context ctx sub)
     ]))
-    (Color "4") "Inside '" (NameOf fnid) "':" (Color "0") Line
-    "{{#"(Show.u60 (& orig 16777215))":"(Show.u60 (>> orig 24))"#}}" Line
+    (Color "4") "On '{{#F"(Show.u60 (>> orig 48))"F#}}', inside '" (NameOf fnid) "':" (Color "0") Line
+    "{{#R"(Show.u60 (>> orig 48))":"(Show.u60 (& orig 16777215))":"(Show.u60 (& (>> orig 24) 16777215))"R#}}" Line
   ])
   
 // User-Defined Functions
