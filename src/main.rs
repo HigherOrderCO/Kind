@@ -264,6 +264,10 @@ pub fn load(name: &str) -> Result<Load, String> {
     }
   };
 
+  if !std::path::Path::new(name).is_file() {
+    return Err(format!("File not found: '{}'", name));
+  }
+
   load_entry(name, &mut load)?;
 
   // Adjusts the Kind2 book
