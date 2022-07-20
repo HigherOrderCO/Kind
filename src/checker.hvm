@@ -1520,7 +1520,7 @@ API.eval_main = (Text [
       (Color "4") "Context:" (Color "0") Line
       (Show.context ctx sub)
     ]))
-    (Color "4") "On '{{#F"(Show.u60 (>> orig 48))"F#}}', inside '" (NameOf fnid) "':" (Color "0") Line
+    (Color "4") "On '{{#F"(Show.u60 (>> orig 48))"F#}}':" (Color "0") Line
     "{{#R"(Show.u60 (>> orig 48))":"(Show.u60 (& orig 16777215))":"(Show.u60 (& (>> orig 24) 16777215))"R#}}" Line
   ])
   
