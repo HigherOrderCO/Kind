@@ -48,7 +48,7 @@ Nat.commutes (Succ a) b =
   (Equal.chain e0 e1)
 ```
 
-For more examples, check [/example](/example).
+For more examples, check the [Wikind](https://github.com/kindelia/wikind).
 
 Usage
 -----
