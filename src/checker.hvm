@@ -1114,6 +1114,8 @@ Line = (String.cons 10 String.nil)
 // Stringification
 // ---------------
 
+// FIXME: show is quadratic; must improve
+
 (Show (Var orig name index)) = (Text [
   (Show.name name)
 ])
