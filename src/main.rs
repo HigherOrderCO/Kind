@@ -299,7 +299,16 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
     if name.ends_with(".kind2") {
       path = name.to_string();
     } else {
-      path = format!("{}.kind2", &name.replace(".","/"));
+      let inside_path = format!("{}/_.kind2", &name.replace(".","/")); // path ending with 'Name/_.kind'
+      let normal_path = format!("{}.kind2", &name.replace(".","/")); // path ending with 'Name.kind'
+      if std::path::Path::new(&inside_path).is_file() {
+        if std::path::Path::new(&normal_path).is_file() {
+          return Err(format!("The following files can't exist simultaneously:\n- {}\n- {}\nPlease delete one and try again.", inside_path, normal_path));
+        }
+        path = inside_path;
+      } else {
+        path = normal_path;
+      }
     };
 
     let new_code = match std::fs::read_to_string(&path) {
