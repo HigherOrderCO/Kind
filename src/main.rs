@@ -314,9 +314,9 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
     book_set_origin_file(&mut new_book, load.file.len());
 
     load.file.push(File { path: path.clone(), code: new_code });
-    for (name, entr) in &new_book.entrs {
+    for name in &new_book.names {
       load.book.names.push(name.clone());
-      load.book.entrs.insert(name.clone(), entr.clone());
+      load.book.entrs.insert(name.clone(), new_book.entrs.get(name).unwrap().clone());
     }
 
     for unbound in book_get_unbounds(&new_book) {
