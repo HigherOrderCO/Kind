@@ -5,6 +5,17 @@ U60.to_nat (x: U60) : Nat
 U60.to_nat #0 = Nat.zero
 U60.to_nat n  = (Nat.succ (U60.to_nat (- n #1)))
 
+// Empty
+// -----
+
+Empty : Type
+
+// Unit
+// ----
+
+Unit : Type
+Unit.new : Unit
+
 // Bool
 // ----
 
@@ -22,13 +33,16 @@ Bool.and Bool.true  Bool.false = Bool.false
 Bool.and Bool.false Bool.true  = Bool.false
 Bool.and Bool.false Bool.false = Bool.false
 
-Bool.not_not_theorem (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
-Bool.not_not_theorem Bool.true  = (Refl Bool Bool.true)
-Bool.not_not_theorem Bool.false = (Refl Bool Bool.false)
-
 Bool.if <r: Type> (b: Bool) (if_t: r) (if_f: r) : r
 Bool.if r Bool.true  if_t if_f = if_t
 Bool.if r Bool.false if_t if_f = if_f
+
+Bool.not_not_theorem (a: Bool) : (Equal Bool a (Bool.not (Bool.not a)))
+Bool.not_not_theorem Bool.true  = (Equal.refl Bool Bool.true)
+Bool.not_not_theorem Bool.false = (Equal.refl Bool Bool.false)
+
+Bool.true_not_false (e: (Equal Bool Bool.true Bool.false)) : Empty
+Bool.true_not_false e = (Equal.rewrite e @x (Bool.if Type x Unit Empty) Unit.new)
 
 // Nat
 // ---
@@ -46,11 +60,11 @@ Nat.add (Nat.succ a) b = (Nat.succ (Nat.add a b))
 Nat.add Nat.zero     b = b
 
 Nat.comm.a (a: Nat) : (Equal Nat a (Nat.add a Nat.zero))
-Nat.comm.a Nat.zero     = Refl
+Nat.comm.a Nat.zero     = Equal.refl
 Nat.comm.a (Nat.succ a) = (Equal.apply @x(Nat.succ x) (Nat.comm.a a))
 
 Nat.comm.b (a: Nat) (b: Nat): (Equal Nat (Nat.add a (Nat.succ b)) (Nat.succ (Nat.add a b)))
-Nat.comm.b Nat.zero     b = Refl
+Nat.comm.b Nat.zero     b = Equal.refl
 Nat.comm.b (Nat.succ a) b = (Equal.apply @x(Nat.succ x) (Nat.comm.b a b))
 
 Nat.comm (a: Nat) (b: Nat) : (Equal Nat (Nat.add a b) (Nat.add b a))
@@ -64,6 +78,17 @@ Nat.to_u60 (n: Nat) : U60
 Nat.to_u60 Nat.zero     = #0
 Nat.to_u60 (Nat.succ n) = (+ #1 (Nat.to_u60 n))
   
+Nat.mul (a: Nat) (b: Nat) : Nat
+Nat.mul (Nat.succ a) b = (Nat.add (Nat.mul a b) b) // (a + 1) * b = a*b + b
+Nat.mul Nat.zero     b = Nat.zero                  // 0b = 0
+ 
+Nat.mul.comm.a (x: Nat): (Equal (Nat.mul x Nat.zero) Nat.zero)
+Nat.mul.comm.a Nat.zero = Equal.refl
+Nat.mul.comm.a (Nat.succ x) =
+  let e0 = (Nat.mul.comm.a x)
+  let e1 = (Equal.apply @y(Nat.add y Nat.zero) e0)
+  e1
+
 // List
 // ----
 
@@ -108,19 +133,19 @@ List.sum (List.cons t x xs) = (Nat.add x (List.sum xs))
 // -----
 
 Equal <t> (a: t) (b: t) : Type
-Refl <t> <a: t> : (Equal t a a)
+Equal.refl <t> <a: t> : (Equal t a a)
 
 Equal.mirror <t> <a: t> <b: t> (e: (Equal t a b)) : (Equal t b a)
-Equal.mirror t a b (Refl u k) = (Refl u k)
+Equal.mirror t a b (Equal.refl u k) = (Equal.refl u k)
 
 Equal.apply <t> <u> <a: t> <b: t> (f: t -> t) (e: (Equal t a b)) : (Equal t (f a) (f b))
-Equal.apply t u a b f (Refl v k) = (Refl v (f k))
+Equal.apply t u a b f (Equal.refl v k) = (Equal.refl v (f k))
 
-Equal.rewrite <t> (a: t) (b: t) (e: (Equal t a b)) (p: t -> Type) (x: (p a)) : (p b)
-Equal.rewrite t a b (Refl u k) p x = x :: (p k)
+Equal.rewrite <t> <a: t> <b: t> (e: (Equal t a b)) (p: t -> Type) (x: (p a)) : (p b)
+Equal.rewrite t a b (Equal.refl u k) p x = x :: (p k)
 
 Equal.chain <t> <a: t> <b: t> <c: t> (e0: (Equal t a b)) (e1: (Equal t b c)) : (Equal t a c)
-Equal.chain t a b c e0 (Refl u x) = e0 :: (Equal t a x)
+Equal.chain t a b c e0 (Equal.refl u x) = e0 :: (Equal t a x)
 
 // Monad
 // -----
@@ -148,8 +173,4 @@ Example.monad : (List (List U60)) {
     let z = #42
     return [x, y, z]
   }
-}
-
-Example.variadic : (Variadic Nat (Nat.succ (Nat.succ Nat.zero))) {
-  @a @b a
 }

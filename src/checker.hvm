@@ -32,6 +32,15 @@ Main = API.check_all
 (Maybe.case None       none some) = none
 (Maybe.case (Some val) none some) = (some val)
 
+// Pair.get -(a: Type) -(b: Type) -(r: Type) (Pair a b) (a -> b -> r) : r
+(Pair.get (Pair.new a b) f) = (f a b)
+
+// Pair.fst -(a: Type) -(b: Type) (Pair a b) : a
+(Pair.fst (Pair.new a b)) = a
+
+// Pair.snd -(a: Type) -(b: Type) (Pair a b) : b
+(Pair.snd (Pair.new a b)) = b
+
 // List.at -(a: Type) (List a) U60 : (Maybe a)
 (List.at (List.cons x xs) 0) = (Some x)
 (List.at (List.cons x xs) n) = (List.at xs (- n 1))
@@ -72,11 +81,6 @@ Main = API.check_all
 (String.pad_right str                chr 0)   = String.nil
 (String.pad_right (String.cons x xs) chr len) = (String.cons x   (String.pad_right xs         chr (- len 1)))
 (String.pad_right String.nil         chr len) = (String.cons chr (String.pad_right String.nil chr (- len 1)))
-
-// String.equal (a: String) (b: String) : Bool
-//(String.equal (String.cons a as) (String.cons b bs)) = (If (U60.equal a b) (String.equal as bs) False) 
-//(String.equal String.nil         String.nil)         = True
-//(String.equal as                 bs)                 = False
 
 // Text (List String) : String
 (Text List.nil)         = String.nil
@@ -230,9 +234,7 @@ Line = (String.cons 10 String.nil)
 
 // Checker.fill (idx: U60) (val: Term) : (Checker Unit)
 (Checker.fill idx val) = λctx λdep λrhs λsub
-  //(HVM.log (FILL idx (Show val))
   (Checked ctx dep rhs (Subst.fill sub idx val) Unit)
-  //)
 
 // Checker.look (idx: U60) : (Checker (Maybe Term))
 (Checker.look idx) = λctx λdep λrhs λsub
@@ -312,73 +314,219 @@ Line = (String.cons 10 String.nil)
 // SO = Term.set_origin
 (SO new_orig term) = (Term.set_origin new_orig term)
 
+// Term.fill Term Subst : (Pair Term Bool)
+// ---------------------------------------
+
+(Term.fill (Typ orig) sub) =
+  (Pair.new (Typ orig) False)
+
+(Term.fill (Var orig name index) sub) =
+  (Pair.new (Var orig name index) False)
+
+(Term.fill (All orig name type body) sub) =
+  (Pair.get (Term.fill type      sub) λtype_val λtype_mod
+  (Pair.get (Term.fill (body $x) sub) λbody_val λbody_mod
+  (Pair.new (All orig name type_val λ$x body_val) (Bool.or type_mod body_mod))))
+
+(Term.fill (Lam orig name body) sub) =
+  (Pair.get (Term.fill (body $x) sub) λbody_val λbody_mod
+  (Pair.new (Lam orig name λ$x body_val) body_mod))
+
+(Term.fill (App orig func argm) sub) =
+  (Pair.get (Term.fill func sub) λfunc_val λfunc_mod
+  (Pair.get (Term.fill argm sub) λargm_val λargm_mod
+  (Pair.new (APP orig func_val argm_val) (Bool.or func_mod argm_mod))))
+
+(Term.fill (Let orig name expr body) sub) =
+  (Pair.get (Term.fill expr sub)      λexpr_val λexpr_mod
+  (Pair.get (Term.fill (body $x) sub) λbody_val λbody_mod
+  (Pair.new (LET orig name expr_val λ$x body_val) (Bool.or expr_mod body_mod))))
+
+(Term.fill (Ann orig expr type) sub) =
+  (Pair.get (Term.fill expr sub)  λexpr_val λexpr_mod
+  (Pair.get (Term.fill type sub) λtype_val λtype_mod
+  (Pair.new (ANN orig expr_val type_val) (Bool.or expr_mod type_mod))))
+
+(Term.fill (Ct0 name orig) sub) =
+  (Pair.new (Ct0 name orig) False)
+
+(Term.fill (Ct1 name orig a) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.new (Ct1 name orig a_val) a_mod))
+
+(Term.fill (Ct2 name orig a b) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.new (Ct2 name orig a_val b_val) (Bool.or a_mod b_mod))))
+
+(Term.fill (Ct3 name orig a b c) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.new (Ct3 name orig a_val b_val c_val) (Bool.or a_mod (Bool.or b_mod c_mod))))))
+
+(Term.fill (Ct4 name orig a b c d) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.new (Ct4 name orig a_val b_val c_val d_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod d_mod))))))))
+
+(Term.fill (Ct5 name orig a b c d e) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.new (Ct5 name orig a_val b_val c_val d_val e_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod e_mod))))))))))
+
+(Term.fill (Ct6 name orig a b c d e f) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.get (Term.fill f sub) λf_val λf_mod
+  (Pair.new (Ct6 name orig a_val b_val c_val d_val e_val f_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod f_mod))))))))))))
+
+(Term.fill (Ct7 name orig a b c d e f g) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.get (Term.fill f sub) λf_val λf_mod
+  (Pair.get (Term.fill g sub) λg_val λg_mod
+  (Pair.new (Ct7 name orig a_val b_val c_val d_val e_val f_val g_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod g_mod))))))))))))))
+
+(Term.fill (Ct8 name orig a b c d e f g h) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.get (Term.fill f sub) λf_val λf_mod
+  (Pair.get (Term.fill g sub) λg_val λg_mod
+  (Pair.get (Term.fill h sub) λh_val λh_mod
+  (Pair.new (Ct8 name orig a_val b_val c_val d_val e_val f_val g_val h_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod (Bool.or g_mod h_mod))))))))))))))))
+
+(Term.fill (Fn0 name orig) sub) =
+  (Pair.new (FN0 name orig) False)
+
+(Term.fill (Fn1 name orig a) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.new (FN1 name orig a_val) a_mod))
+
+(Term.fill (Fn2 name orig a b) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.new (FN2 name orig a_val b_val) (Bool.or a_mod b_mod))))
+
+(Term.fill (Fn3 name orig a b c) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.new (FN3 name orig a_val b_val c_val) (Bool.or a_mod (Bool.or b_mod c_mod))))))
+
+(Term.fill (Fn4 name orig a b c d) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.new (FN4 name orig a_val b_val c_val d_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod d_mod))))))))
+
+(Term.fill (Fn5 name orig a b c d e) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.new (FN5 name orig a_val b_val c_val d_val e_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod e_mod))))))))))
+
+(Term.fill (Fn6 name orig a b c d e f) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.get (Term.fill f sub) λf_val λf_mod
+  (Pair.new (FN6 name orig a_val b_val c_val d_val e_val f_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod f_mod))))))))))))
+
+(Term.fill (Fn7 name orig a b c d e f g) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.get (Term.fill f sub) λf_val λf_mod
+  (Pair.get (Term.fill g sub) λg_val λg_mod
+  (Pair.new (FN7 name orig a_val b_val c_val d_val e_val f_val g_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod g_mod))))))))))))))
+
+(Term.fill (Fn8 name orig a b c d e f g h) sub) =
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (Pair.get (Term.fill c sub) λc_val λc_mod
+  (Pair.get (Term.fill d sub) λd_val λd_mod
+  (Pair.get (Term.fill e sub) λe_val λe_mod
+  (Pair.get (Term.fill f sub) λf_val λf_mod
+  (Pair.get (Term.fill g sub) λg_val λg_mod
+  (Pair.get (Term.fill h sub) λh_val λh_mod
+  (Pair.new (FN8 name orig a_val b_val c_val d_val e_val f_val g_val h_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod (Bool.or g_mod h_mod))))))))))))))))
+
+(Term.fill (Hlp orig) sub) =
+  (Pair.new (Hlp orig) False)
+
+(Term.fill (U60 orig) sub) =
+  (Pair.new (U60 orig) False)
+
+(Term.fill (Num orig numb) sub) =
+  (Pair.new (Num orig numb) False)
+
+(Term.fill (Op2 orig oper val0 val1) sub) =
+  (Pair.get (Term.fill val0 sub) λval0_val λval0_mod
+  (Pair.get (Term.fill val1 sub) λval1_val λval1_mod
+  (Pair.new (OP2 orig oper val0_val val1_val) (Bool.or val0_mod val1_mod))))
+
+(Term.fill (Hol orig numb) sub) =
+  (Maybe.case (Subst.look sub numb)
+    (Pair.new (Hol orig numb) False)
+    λval
+      (Pair.get (Term.fill val sub) λval_val λval_mod
+      (Pair.new val_val True)))
+
 // Eval Term (List Term) : Term
 // ----------------------------
 
-(Eval (Typ orig) sub)                              = (Typ orig)
-(Eval (Var orig name index) sub)                   = (Var orig name index)
-(Eval (Hol orig numb) sub)                         = (Maybe.case (Subst.look sub numb) (Hol orig numb) λval (Eval val sub))
-(Eval (All orig name type body) sub)               = (All orig name (Eval type sub) λx (Eval (body x) sub))
-(Eval (Lam orig name body) sub)                    = (Lam orig name λx (Eval (body x) sub))
-(Eval (Let orig name expr body) sub)               = (LET orig name (Eval expr sub) λx (Eval (body x) sub))
-(Eval (Ann orig expr typ) sub)                     = (ANN orig (Eval expr sub) (Eval typ sub))
-(Eval (App orig func argm) sub)                    = (APP orig (Eval func sub) (Eval argm sub))
-(Eval (Ct0 orig ctid) sub)                         = (Ct0 orig ctid)
-(Eval (Ct1 orig ctid x0) sub)                      = (Ct1 orig ctid (Eval x0 sub))
-(Eval (Ct2 orig ctid x0 x1) sub)                   = (Ct2 orig ctid (Eval x0 sub) (Eval x1 sub))
-(Eval (Ct3 orig ctid x0 x1 x2) sub)                = (Ct3 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub))
-(Eval (Ct4 orig ctid x0 x1 x2 x3) sub)             = (Ct4 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub))
-(Eval (Ct5 orig ctid x0 x1 x2 x3 x4) sub)          = (Ct5 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub))
-(Eval (Ct6 orig ctid x0 x1 x2 x3 x4 x5) sub)       = (Ct6 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub) (Eval x5 sub))
-(Eval (Ct7 orig ctid x0 x1 x2 x3 x4 x5 x6) sub)    = (Ct7 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub) (Eval x5 sub) (Eval x6 sub))
-(Eval (Ct8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7) sub) = (Ct8 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub) (Eval x5 sub) (Eval x6 sub) (Eval x7 sub))
-(Eval (Fn0 orig ctid) sub)                         = (FN0 orig ctid)
-(Eval (Fn1 orig ctid x0) sub)                      = (FN1 orig ctid (Eval x0 sub))
-(Eval (Fn2 orig ctid x0 x1) sub)                   = (FN2 orig ctid (Eval x0 sub) (Eval x1 sub))
-(Eval (Fn3 orig ctid x0 x1 x2) sub)                = (FN3 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub))
-(Eval (Fn4 orig ctid x0 x1 x2 x3) sub)             = (FN4 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub))
-(Eval (Fn5 orig ctid x0 x1 x2 x3 x4) sub)          = (FN5 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub))
-(Eval (Fn6 orig ctid x0 x1 x2 x3 x4 x5) sub)       = (FN6 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub) (Eval x5 sub))
-(Eval (Fn7 orig ctid x0 x1 x2 x3 x4 x5 x6) sub)    = (FN7 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub) (Eval x5 sub) (Eval x6 sub))
-(Eval (Fn8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7) sub) = (FN8 orig ctid (Eval x0 sub) (Eval x1 sub) (Eval x2 sub) (Eval x3 sub) (Eval x4 sub) (Eval x5 sub) (Eval x6 sub) (Eval x7 sub))
-(Eval (Hlp orig) sub)                              = (Hlp orig)
-(Eval (U60 orig) sub)                              = (U60 orig)
-(Eval (Num orig numb) sub)                         = (Num orig numb)
-(Eval (Op2 orig oper val0 val1) sub)               = (OP2 orig oper (Eval val0 sub) (Eval val1 sub))
-
-// Weak Term (List Term) : Term
-// ----------------------------
-
-(Weak (Typ orig) sub)                              = (Typ orig)
-(Weak (Var orig name index) sub)                   = (Var orig name index)
-(Weak (Hol orig numb) sub)                         = (Maybe.case (Subst.look sub numb) (Hol orig numb) λval (Weak val sub))
-(Weak (All orig name type body) sub)               = (All orig name type body)
-(Weak (Lam orig name body) sub)                    = (Lam orig name body)
-(Weak (Let orig name expr body) sub)               = (Weak (LET orig name expr λx (body x)) sub)
-(Weak (Ann orig expr type) sub)                    = (Weak (ANN orig expr type) sub)
-(Weak (App orig func argm) sub)                    = (Weak (APP orig func argm) sub)
-(Weak (Ct0 orig ctid) sub)                         = (Ct0 orig ctid)
-(Weak (Ct1 orig ctid x0) sub)                      = (Ct1 orig ctid x0)
-(Weak (Ct2 orig ctid x0 x1) sub)                   = (Ct2 orig ctid x0 x1)
-(Weak (Ct3 orig ctid x0 x1 x2) sub)                = (Ct3 orig ctid x0 x1 x2)
-(Weak (Ct4 orig ctid x0 x1 x2 x3) sub)             = (Ct4 orig ctid x0 x1 x2 x3)
-(Weak (Ct5 orig ctid x0 x1 x2 x3 x4) sub)          = (Ct5 orig ctid x0 x1 x2 x3 x4)
-(Weak (Ct6 orig ctid x0 x1 x2 x3 x4 x5) sub)       = (Ct6 orig ctid x0 x1 x2 x3 x4 x5)
-(Weak (Ct7 orig ctid x0 x1 x2 x3 x4 x5 x6) sub)    = (Ct7 orig ctid x0 x1 x2 x3 x4 x5 x6)
-(Weak (Ct8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7) sub) = (Ct8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)
-(Weak (Fn0 orig ctid) sub)                         = (Weak (FN0 orig ctid) sub)
-(Weak (Fn1 orig ctid x0) sub)                      = (Weak (FN1 orig ctid x0) sub)
-(Weak (Fn2 orig ctid x0 x1) sub)                   = (Weak (FN2 orig ctid x0 x1) sub)
-(Weak (Fn3 orig ctid x0 x1 x2) sub)                = (Weak (FN3 orig ctid x0 x1 x2) sub)
-(Weak (Fn4 orig ctid x0 x1 x2 x3) sub)             = (Weak (FN4 orig ctid x0 x1 x2 x3) sub)
-(Weak (Fn5 orig ctid x0 x1 x2 x3 x4) sub)          = (Weak (FN5 orig ctid x0 x1 x2 x3 x4) sub)
-(Weak (Fn6 orig ctid x0 x1 x2 x3 x4 x5) sub)       = (Weak (FN6 orig ctid x0 x1 x2 x3 x4 x5) sub)
-(Weak (Fn7 orig ctid x0 x1 x2 x3 x4 x5 x6) sub)    = (Weak (FN7 orig ctid x0 x1 x2 x3 x4 x5 x6) sub)
-(Weak (Fn8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7) sub) = (Weak (FN8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7) sub)
-(Weak (Hlp orig) sub)                              = (Hlp orig)
-(Weak (U60 orig) sub)                              = (U60 orig)
-(Weak (Num orig numb) sub)                         = (Num orig numb)
-(Weak (Op2 orig oper val0 val1) sub)               = (Weak (OP2 orig oper val0 val1) sub)
+(Eval (Typ orig))                              = (Typ orig)
+(Eval (Var orig name index))                   = (Var orig name index)
+(Eval (Hol orig numb))                         = (Hol orig numb)
+(Eval (All orig name type body))               = (All orig name (Eval type) λx (Eval (body x)))
+(Eval (Lam orig name body))                    = (Lam orig name λx (Eval (body x)))
+(Eval (Let orig name expr body))               = (LET orig name (Eval expr) λx (Eval (body x)))
+(Eval (Ann orig expr typ))                     = (ANN orig (Eval expr) (Eval typ))
+(Eval (App orig func argm))                    = (APP orig (Eval func) (Eval argm))
+(Eval (Ct0 orig ctid))                         = (Ct0 orig ctid)
+(Eval (Ct1 orig ctid x0))                      = (Ct1 orig ctid (Eval x0))
+(Eval (Ct2 orig ctid x0 x1))                   = (Ct2 orig ctid (Eval x0) (Eval x1))
+(Eval (Ct3 orig ctid x0 x1 x2))                = (Ct3 orig ctid (Eval x0) (Eval x1) (Eval x2))
+(Eval (Ct4 orig ctid x0 x1 x2 x3))             = (Ct4 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+(Eval (Ct5 orig ctid x0 x1 x2 x3 x4))          = (Ct5 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+(Eval (Ct6 orig ctid x0 x1 x2 x3 x4 x5))       = (Ct6 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+(Eval (Ct7 orig ctid x0 x1 x2 x3 x4 x5 x6))    = (Ct7 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+(Eval (Ct8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) = (Ct8 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+(Eval (Fn0 orig ctid))                         = (FN0 orig ctid)
+(Eval (Fn1 orig ctid x0))                      = (FN1 orig ctid (Eval x0))
+(Eval (Fn2 orig ctid x0 x1))                   = (FN2 orig ctid (Eval x0) (Eval x1))
+(Eval (Fn3 orig ctid x0 x1 x2))                = (FN3 orig ctid (Eval x0) (Eval x1) (Eval x2))
+(Eval (Fn4 orig ctid x0 x1 x2 x3))             = (FN4 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+(Eval (Fn5 orig ctid x0 x1 x2 x3 x4))          = (FN5 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+(Eval (Fn6 orig ctid x0 x1 x2 x3 x4 x5))       = (FN6 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+(Eval (Fn7 orig ctid x0 x1 x2 x3 x4 x5 x6))    = (FN7 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+(Eval (Fn8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) = (FN8 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+(Eval (Hlp orig))                              = (Hlp orig)
+(Eval (U60 orig))                              = (U60 orig)
+(Eval (Num orig numb))                         = (Num orig numb)
+(Eval (Op2 orig oper val0 val1))               = (OP2 orig oper (Eval val0) (Eval val1))
 
 // Equal Term Term : (Checker Bool)
 // --------------------------------
@@ -619,7 +767,12 @@ Line = (String.cons 10 String.nil)
 
 // Not equal
 (Equal a b) =
-  (Checker.done False)
+  ask sub = (Checker.bind Checker.get_subst)
+  (Pair.get (Term.fill a sub) λa_val λa_mod
+  (Pair.get (Term.fill b sub) λb_val λb_mod
+  (If (Bool.or a_mod b_mod)
+    (Equal a_val b_val)
+    (Checker.done False))))
 
 // Equal.var (rhs: Bool) (origin: U60) (index: U60) (b: Term) : (Checker bool)
 // ---------------------------------------------------------------------------
@@ -650,15 +803,13 @@ Line = (String.cons 10 String.nil)
   (If head
     (Checker.done True)
     (Equal.var.try_values as b))
-(Equal.var.try_values List.nil b) =
-  (Checker.done False)
+(Equal.var.try_values List.nil b) = (Checker.done False)
 
 // Equal.hol (origin: U60) (numb: U60) (b: Term) : (Checker bool)
 // --------------------------------------------------------------
 
 // Hole checker
 (Equal.hol a.orig a.numb b) =
-  ask sub = (Checker.bind (Checker.get_subst))
   ask got = (Checker.bind (Checker.look a.numb))
   (Equal.hol.val got a.orig a.numb b)
 
@@ -704,11 +855,11 @@ Line = (String.cons 10 String.nil)
 (Infer (App orig func argm)) =
   ask sub      = (Checker.bind Checker.get_subst)
   ask func_typ = (Checker.bind (Infer func))
-  (Term.if_all (Weak func_typ sub)
+  (Term.if_all func_typ
     // then
     λfunc_typ_orig λfunc_typ_name λfunc_typ_type λfunc_typ_body
       ask argm_ok = (Checker.bind (Check argm func_typ_type))
-      (Checker.done (func_typ_body argm))
+      (Checker.done (func_typ_body (Eval argm)))
     // else
     (Checker.fail (InvalidCall (App orig func argm))))
 
@@ -721,7 +872,7 @@ Line = (String.cons 10 String.nil)
 
 // Infers Ann
 (Infer (Ann orig expr type)) =
-  ask expr_chk = (Checker.bind (Check expr type))
+  ask expr_chk = (Checker.bind (Check expr (Eval type)))
   (Checker.done type)
 
 // Infers Ct0
@@ -820,7 +971,7 @@ Line = (String.cons 10 String.nil)
 // Checks Lam 
 (Check (Lam orig name body) type) =
   ask sub = (Checker.bind Checker.get_subst)
-  ((Term.if_all (Weak type sub)
+  ((Term.if_all type
     λt_orig λt_name λt_type λt_body λorig λname λbody
       ask dep      = (Checker.bind Checker.get_depth)
       ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (t_body (Var t_orig t_name dep))) name t_type []))
@@ -853,9 +1004,8 @@ Line = (String.cons 10 String.nil)
 
 // Compares two terms for equality
 (Check.compare term type) =
-  ask sub      = (Checker.bind Checker.get_subst)
   ask term_typ = (Checker.bind (Infer term))
-  ask is_equal = (Checker.bind (Equal (Eval term_typ sub) (Eval type sub)))
+  ask is_equal = (Checker.bind (Equal term_typ type))
   (If is_equal
     (Checker.done Unit)
     (Checker.fail (TypeMismatch term type term_typ)))
@@ -1187,12 +1337,12 @@ Line = (String.cons 10 String.nil)
 ])
 
 (Show.context.type name type sub pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " : " (String.cut (Show (Eval type sub))) Line
+  "- " (String.pad_right (Show.name name) ' ' pad) " : " (String.cut (Show (Pair.fst (Term.fill type sub)))) Line
 ])
 
 (Show.context.vals name List.nil sub pad) = String.nil
 (Show.context.vals name (List.cons val vals) sub pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " = " (String.cut (Show (Eval val sub))) Line
+  "- " (String.pad_right (Show.name name) ' ' pad) " = " (String.cut (Show (Pair.fst (Term.fill val sub)))) Line
   (Show.context.vals name vals sub pad)
 ])
 
@@ -1308,8 +1458,8 @@ API.eval_main = (Text [
 (API.output.error fnid (TypeMismatch term expected detected) ctx sub) =
   (Text [
     (Color "4") "Type mismatch." (Color "0") Line
-    "- Expected: " (String.cut (Show (Eval expected sub))) Line
-    "- Detected: " (String.cut (Show (Eval detected sub))) Line
+    "- Expected: " (String.cut (Show (Pair.fst (Term.fill expected sub)))) Line
+    "- Detected: " (String.cut (Show (Pair.fst (Term.fill detected sub)))) Line
     (API.output.error.details fnid ctx sub term)
   ])
 
