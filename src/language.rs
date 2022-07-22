@@ -71,6 +71,20 @@ pub enum Term {
   Hol { orig: u64, numb: u64 },
 }
 
+// TODO: indexed types
+#[derive(Clone, Debug)]
+pub struct Type {
+  name: String,
+  pars: Vec<Argument>,
+  ctrs: Vec<Constructor>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Constructor {
+  name: String,
+  args: Vec<Argument>,
+}
+
 // Adjuster
 // ========
 

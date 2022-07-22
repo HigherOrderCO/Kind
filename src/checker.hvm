@@ -17,8 +17,8 @@ Main = API.check_all
 (Name.length name) = (String.length (Show.name name))
 
 // If -(r: Type) Bool r r : r
-(If False then else) = else
-(If True  then else) = then
+(Bool.if False then else) = else
+(Bool.if True  then else) = then
 
 // Bool.and Bool Bool : Bool
 (Bool.and True  b) = b
@@ -31,15 +31,6 @@ Main = API.check_all
 // Maybe.case -(a: Type) -(r: Type) (Maybe a) r (a -> r) : r
 (Maybe.case None       none some) = none
 (Maybe.case (Some val) none some) = (some val)
-
-// Pair.get -(a: Type) -(b: Type) -(r: Type) (Pair a b) (a -> b -> r) : r
-(Pair.get (Pair.new a b) f) = (f a b)
-
-// Pair.fst -(a: Type) -(b: Type) (Pair a b) : a
-(Pair.fst (Pair.new a b)) = a
-
-// Pair.snd -(a: Type) -(b: Type) (Pair a b) : b
-(Pair.snd (Pair.new a b)) = b
 
 // List.at -(a: Type) (List a) U60 : (Maybe a)
 (List.at (List.cons x xs) 0) = (Some x)
@@ -314,185 +305,215 @@ Line = (String.cons 10 String.nil)
 // SO = Term.set_origin
 (SO new_orig term) = (Term.set_origin new_orig term)
 
+// Term.fillable Term Subst : Bool
+// -------------------------------
+
+(Term.fillable (Typ orig) sub) =
+  False
+
+(Term.fillable (Var orig name index) sub) =
+  False
+
+(Term.fillable (All orig name type body) sub) =
+  let type = (Term.fillable type           sub)
+  let body = (Term.fillable (body (Hlp 0)) sub)
+  (Bool.or type body)
+
+(Term.fillable (Lam orig name body) sub) =
+  let body = (Term.fillable (body (Hlp 0)) sub)
+  body
+
+(Term.fillable (App orig func argm) sub) =
+  let func = (Term.fillable func sub)
+  let argm = (Term.fillable argm sub)
+  (Bool.or func argm)
+
+(Term.fillable (Let orig name expr body) sub) =
+  let expr = (Term.fillable expr sub)
+  let body = (Term.fillable (body (Hlp 0)) sub)
+  (Bool.or expr body)
+
+(Term.fillable (Ann orig expr type) sub) =
+  let expr = (Term.fillable expr sub)
+  let type = (Term.fillable type sub)
+  (Bool.or expr type)
+
+(Term.fillable (Ct0 name orig) sub) =
+  False
+
+(Term.fillable (Ct1 name orig a) sub) =
+  let a = (Term.fillable a sub)
+  a
+
+(Term.fillable (Ct2 name orig a b) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  (Bool.or a b)
+
+(Term.fillable (Ct3 name orig a b c) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  (Bool.or a (Bool.or b c))
+
+(Term.fillable (Ct4 name orig a b c d) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  (Bool.or a (Bool.or b (Bool.or c d)))
+
+(Term.fillable (Ct5 name orig a b c d e) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d e))))
+
+(Term.fillable (Ct6 name orig a b c d e f) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  let f = (Term.fillable f sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e f)))))
+
+(Term.fillable (Ct7 name orig a b c d e f g) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  let f = (Term.fillable f sub)
+  let g = (Term.fillable g sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f g))))))
+
+(Term.fillable (Ct8 name orig a b c d e f g h) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  let f = (Term.fillable f sub)
+  let g = (Term.fillable g sub)
+  let h = (Term.fillable h sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f (Bool.or g h)))))))
+
+(Term.fillable (Fn0 name orig) sub) =
+  False
+
+(Term.fillable (Fn1 name orig a) sub) =
+  let a = (Term.fillable a sub)
+  a
+
+(Term.fillable (Fn2 name orig a b) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  (Bool.or a b)
+
+(Term.fillable (Fn3 name orig a b c) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  (Bool.or a (Bool.or b c))
+
+(Term.fillable (Fn4 name orig a b c d) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  (Bool.or a (Bool.or b (Bool.or c d)))
+
+(Term.fillable (Fn5 name orig a b c d e) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d e))))
+
+(Term.fillable (Fn6 name orig a b c d e f) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  let f = (Term.fillable f sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e f)))))
+
+(Term.fillable (Fn7 name orig a b c d e f g) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  let f = (Term.fillable f sub)
+  let g = (Term.fillable g sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f g))))))
+
+(Term.fillable (Fn8 name orig a b c d e f g h) sub) =
+  let a = (Term.fillable a sub)
+  let b = (Term.fillable b sub)
+  let c = (Term.fillable c sub)
+  let d = (Term.fillable d sub)
+  let e = (Term.fillable e sub)
+  let f = (Term.fillable f sub)
+  let g = (Term.fillable g sub)
+  let h = (Term.fillable h sub)
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f (Bool.or g h)))))))
+
+(Term.fillable (Hlp orig) sub) =
+  False
+
+(Term.fillable (U60 orig) sub) =
+  False
+
+(Term.fillable (Num orig numb) sub) =
+  False
+
+(Term.fillable (Op2 orig oper val0 val1) sub) =
+  let val0 = (Term.fillable val0 sub)
+  let val1 = (Term.fillable val1 sub)
+  (Bool.or val0 val1)
+
+(Term.fillable (Hol orig numb) sub) =
+  (Maybe.case (Subst.look sub numb) False λval(True))
+
 // Term.fill Term Subst : (Pair Term Bool)
 // ---------------------------------------
 
-(Term.fill (Typ orig) sub) =
-  (Pair.new (Typ orig) False)
-
-(Term.fill (Var orig name index) sub) =
-  (Pair.new (Var orig name index) False)
-
-(Term.fill (All orig name type body) sub) =
-  (Pair.get (Term.fill type      sub) λtype_val λtype_mod
-  (Pair.get (Term.fill (body $x) sub) λbody_val λbody_mod
-  (Pair.new (All orig name type_val λ$x body_val) (Bool.or type_mod body_mod))))
-
-(Term.fill (Lam orig name body) sub) =
-  (Pair.get (Term.fill (body $x) sub) λbody_val λbody_mod
-  (Pair.new (Lam orig name λ$x body_val) body_mod))
-
-(Term.fill (App orig func argm) sub) =
-  (Pair.get (Term.fill func sub) λfunc_val λfunc_mod
-  (Pair.get (Term.fill argm sub) λargm_val λargm_mod
-  (Pair.new (APP orig func_val argm_val) (Bool.or func_mod argm_mod))))
-
-(Term.fill (Let orig name expr body) sub) =
-  (Pair.get (Term.fill expr sub)      λexpr_val λexpr_mod
-  (Pair.get (Term.fill (body $x) sub) λbody_val λbody_mod
-  (Pair.new (LET orig name expr_val λ$x body_val) (Bool.or expr_mod body_mod))))
-
-(Term.fill (Ann orig expr type) sub) =
-  (Pair.get (Term.fill expr sub)  λexpr_val λexpr_mod
-  (Pair.get (Term.fill type sub) λtype_val λtype_mod
-  (Pair.new (ANN orig expr_val type_val) (Bool.or expr_mod type_mod))))
-
-(Term.fill (Ct0 name orig) sub) =
-  (Pair.new (Ct0 name orig) False)
-
-(Term.fill (Ct1 name orig a) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.new (Ct1 name orig a_val) a_mod))
-
-(Term.fill (Ct2 name orig a b) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.new (Ct2 name orig a_val b_val) (Bool.or a_mod b_mod))))
-
-(Term.fill (Ct3 name orig a b c) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.new (Ct3 name orig a_val b_val c_val) (Bool.or a_mod (Bool.or b_mod c_mod))))))
-
-(Term.fill (Ct4 name orig a b c d) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.new (Ct4 name orig a_val b_val c_val d_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod d_mod))))))))
-
-(Term.fill (Ct5 name orig a b c d e) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.new (Ct5 name orig a_val b_val c_val d_val e_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod e_mod))))))))))
-
-(Term.fill (Ct6 name orig a b c d e f) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.get (Term.fill f sub) λf_val λf_mod
-  (Pair.new (Ct6 name orig a_val b_val c_val d_val e_val f_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod f_mod))))))))))))
-
-(Term.fill (Ct7 name orig a b c d e f g) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.get (Term.fill f sub) λf_val λf_mod
-  (Pair.get (Term.fill g sub) λg_val λg_mod
-  (Pair.new (Ct7 name orig a_val b_val c_val d_val e_val f_val g_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod g_mod))))))))))))))
-
-(Term.fill (Ct8 name orig a b c d e f g h) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.get (Term.fill f sub) λf_val λf_mod
-  (Pair.get (Term.fill g sub) λg_val λg_mod
-  (Pair.get (Term.fill h sub) λh_val λh_mod
-  (Pair.new (Ct8 name orig a_val b_val c_val d_val e_val f_val g_val h_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod (Bool.or g_mod h_mod))))))))))))))))
-
-(Term.fill (Fn0 name orig) sub) =
-  (Pair.new (FN0 name orig) False)
-
-(Term.fill (Fn1 name orig a) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.new (FN1 name orig a_val) a_mod))
-
-(Term.fill (Fn2 name orig a b) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.new (FN2 name orig a_val b_val) (Bool.or a_mod b_mod))))
-
-(Term.fill (Fn3 name orig a b c) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.new (FN3 name orig a_val b_val c_val) (Bool.or a_mod (Bool.or b_mod c_mod))))))
-
-(Term.fill (Fn4 name orig a b c d) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.new (FN4 name orig a_val b_val c_val d_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod d_mod))))))))
-
-(Term.fill (Fn5 name orig a b c d e) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.new (FN5 name orig a_val b_val c_val d_val e_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod e_mod))))))))))
-
-(Term.fill (Fn6 name orig a b c d e f) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.get (Term.fill f sub) λf_val λf_mod
-  (Pair.new (FN6 name orig a_val b_val c_val d_val e_val f_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod f_mod))))))))))))
-
-(Term.fill (Fn7 name orig a b c d e f g) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.get (Term.fill f sub) λf_val λf_mod
-  (Pair.get (Term.fill g sub) λg_val λg_mod
-  (Pair.new (FN7 name orig a_val b_val c_val d_val e_val f_val g_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod g_mod))))))))))))))
-
-(Term.fill (Fn8 name orig a b c d e f g h) sub) =
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (Pair.get (Term.fill c sub) λc_val λc_mod
-  (Pair.get (Term.fill d sub) λd_val λd_mod
-  (Pair.get (Term.fill e sub) λe_val λe_mod
-  (Pair.get (Term.fill f sub) λf_val λf_mod
-  (Pair.get (Term.fill g sub) λg_val λg_mod
-  (Pair.get (Term.fill h sub) λh_val λh_mod
-  (Pair.new (FN8 name orig a_val b_val c_val d_val e_val f_val g_val h_val) (Bool.or a_mod (Bool.or b_mod (Bool.or c_mod (Bool.or d_mod (Bool.or e_mod (Bool.or f_mod (Bool.or g_mod h_mod))))))))))))))))
-
-(Term.fill (Hlp orig) sub) =
-  (Pair.new (Hlp orig) False)
-
-(Term.fill (U60 orig) sub) =
-  (Pair.new (U60 orig) False)
-
-(Term.fill (Num orig numb) sub) =
-  (Pair.new (Num orig numb) False)
-
-(Term.fill (Op2 orig oper val0 val1) sub) =
-  (Pair.get (Term.fill val0 sub) λval0_val λval0_mod
-  (Pair.get (Term.fill val1 sub) λval1_val λval1_mod
-  (Pair.new (OP2 orig oper val0_val val1_val) (Bool.or val0_mod val1_mod))))
-
-(Term.fill (Hol orig numb) sub) =
-  (Maybe.case (Subst.look sub numb)
-    (Pair.new (Hol orig numb) False)
-    λval
-      (Pair.get (Term.fill val sub) λval_val λval_mod
-      (Pair.new val_val True)))
+(Term.fill (Typ orig) sub)                      = (Typ orig)
+(Term.fill (Var orig name index) sub)           = (Var orig name index)
+(Term.fill (All orig name type body) sub)       = (All orig name (Term.fill type sub) λx (Term.fill (body x) sub))
+(Term.fill (Lam orig name body) sub)            = (Lam orig name λx (Term.fill (body x) sub))
+(Term.fill (App orig func argm) sub)            = (APP orig (Term.fill func sub) (Term.fill argm sub))
+(Term.fill (Let orig name expr body) sub)       = (LET orig name (Term.fill expr sub) λx (Term.fill (body x) sub))
+(Term.fill (Ann orig expr type) sub)            = (ANN orig (Term.fill expr sub) (Term.fill type sub))
+(Term.fill (Ct0 name orig) sub)                 = (Ct0 name orig)
+(Term.fill (Ct1 name orig a) sub)               = (Ct1 name orig (Term.fill a sub))
+(Term.fill (Ct2 name orig a b) sub)             = (Ct2 name orig (Term.fill a sub) (Term.fill b sub))
+(Term.fill (Ct3 name orig a b c) sub)           = (Ct3 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub))
+(Term.fill (Ct4 name orig a b c d) sub)         = (Ct4 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub))
+(Term.fill (Ct5 name orig a b c d e) sub)       = (Ct5 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub))
+(Term.fill (Ct6 name orig a b c d e f) sub)     = (Ct6 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub))
+(Term.fill (Ct7 name orig a b c d e f g) sub)   = (Ct7 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub))
+(Term.fill (Ct8 name orig a b c d e f g h) sub) = (Ct8 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub) (Term.fill h sub))
+(Term.fill (Fn0 name orig) sub)                 = (FN0 name orig)
+(Term.fill (Fn1 name orig a) sub)               = (FN1 name orig (Term.fill a sub))
+(Term.fill (Fn2 name orig a b) sub)             = (FN2 name orig (Term.fill a sub) (Term.fill b sub))
+(Term.fill (Fn3 name orig a b c) sub)           = (FN3 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub))
+(Term.fill (Fn4 name orig a b c d) sub)         = (FN4 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub))
+(Term.fill (Fn5 name orig a b c d e) sub)       = (FN5 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub))
+(Term.fill (Fn6 name orig a b c d e f) sub)     = (FN6 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub))
+(Term.fill (Fn7 name orig a b c d e f g) sub)   = (FN7 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub))
+(Term.fill (Fn8 name orig a b c d e f g h) sub) = (FN8 name orig (Term.fill a sub) (Term.fill b sub) (Term.fill c sub) (Term.fill d sub) (Term.fill e sub) (Term.fill f sub) (Term.fill g sub) (Term.fill h sub))
+(Term.fill (Hlp orig) sub)                      = (Hlp orig)
+(Term.fill (U60 orig) sub)                      = (U60 orig)
+(Term.fill (Num orig numb) sub)                 = (Num orig numb)
+(Term.fill (Op2 orig oper val0 val1) sub)       = (OP2 orig oper (Term.fill val0 sub) (Term.fill val1 sub))
+(Term.fill (Hol orig numb) sub)                 = (Maybe.case (Subst.look sub numb) (Hol orig numb) λval (Term.fill val sub))
 
 // Eval Term (List Term) : Term
 // ----------------------------
@@ -768,11 +789,9 @@ Line = (String.cons 10 String.nil)
 // Not equal
 (Equal a b) =
   ask sub = (Checker.bind Checker.get_subst)
-  (Pair.get (Term.fill a sub) λa_val λa_mod
-  (Pair.get (Term.fill b sub) λb_val λb_mod
-  (If (Bool.or a_mod b_mod)
-    (Equal a_val b_val)
-    (Checker.done False))))
+  (Bool.if (Bool.or (Term.fillable a sub) (Term.fillable b sub))
+    (Equal (Term.fill a sub) (Term.fill b sub))
+    (Checker.done False))
 
 // Equal.var (rhs: Bool) (origin: U60) (index: U60) (b: Term) : (Checker bool)
 // ---------------------------------------------------------------------------
@@ -786,7 +805,7 @@ Line = (String.cons 10 String.nil)
   ask (Checker.bind (Checker.add_value a.index b))
   (Checker.done True)
 (Equal.var True a.orig a.name a.index (Var b.orig b.name b.index)) =
-  (If (U60.equal a.index b.index)
+  (Bool.if (U60.equal a.index b.index)
     (Checker.done True)
     ask a.val = (Checker.bind (Checker.find a.index [] λnλtλv(v)))
     ask b.val = (Checker.bind (Checker.find b.index [] λnλtλv(v)))
@@ -800,7 +819,7 @@ Line = (String.cons 10 String.nil)
 // Checks if any of a set of reductions is equal
 (Equal.var.try_values (List.cons a as) b) =
   ask head = (Checker.bind (Equal a b))
-  (If head
+  (Bool.if head
     (Checker.done True)
     (Equal.var.try_values as b))
 (Equal.var.try_values List.nil b) = (Checker.done False)
@@ -990,7 +1009,7 @@ Line = (String.cons 10 String.nil)
 // Checks Var
 (Check (Var orig name index) type) =
   ask rhs = (Checker.bind Checker.get_right_hand_side)
-  (If rhs
+  (Bool.if rhs
     (Check.compare (Var orig name index) type)
     (Checker.extend name type List.nil))
 
@@ -1006,7 +1025,7 @@ Line = (String.cons 10 String.nil)
 (Check.compare term type) =
   ask term_typ = (Checker.bind (Infer term))
   ask is_equal = (Checker.bind (Equal term_typ type))
-  (If is_equal
+  (Bool.if is_equal
     (Checker.done Unit)
     (Checker.fail (TypeMismatch term type term_typ)))
 
@@ -1337,12 +1356,12 @@ Line = (String.cons 10 String.nil)
 ])
 
 (Show.context.type name type sub pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " : " (String.cut (Show (Pair.fst (Term.fill type sub)))) Line
+  "- " (String.pad_right (Show.name name) ' ' pad) " : " (String.cut (Show (Term.fill type sub))) Line
 ])
 
 (Show.context.vals name List.nil sub pad) = String.nil
 (Show.context.vals name (List.cons val vals) sub pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " = " (String.cut (Show (Pair.fst (Term.fill val sub)))) Line
+  "- " (String.pad_right (Show.name name) ' ' pad) " = " (String.cut (Show (Term.fill val sub))) Line
   (Show.context.vals name vals sub pad)
 ])
 
@@ -1382,7 +1401,7 @@ Line = (String.cons 10 String.nil)
 
 API.check_all =
   let output = (API.output (List.reverse (API.check_functions Functions)))
-  (If (String.is_empty output)
+  (Bool.if (String.is_empty output)
     (Text [ "All terms check." Line Line ])
     output)
 
@@ -1458,15 +1477,15 @@ API.eval_main = (Text [
 (API.output.error fnid (TypeMismatch term expected detected) ctx sub) =
   (Text [
     (Color "4") "Type mismatch." (Color "0") Line
-    "- Expected: " (String.cut (Show (Pair.fst (Term.fill expected sub)))) Line
-    "- Detected: " (String.cut (Show (Pair.fst (Term.fill detected sub)))) Line
+    "- Expected: " (String.cut (Show (Term.fill expected sub))) Line
+    "- Detected: " (String.cut (Show (Term.fill detected sub))) Line
     (API.output.error.details fnid ctx sub term)
   ])
 
 (API.output.error.details fnid ctx sub term) =
   let orig = (Term.get_origin term)
   (Text [
-    (If (Context.is_empty ctx) "" (Text [
+    (Bool.if (Context.is_empty ctx) "" (Text [
       (Color "4") "Context:" (Color "0") Line
       (Show.context ctx sub)
     ]))
