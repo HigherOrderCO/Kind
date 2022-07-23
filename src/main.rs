@@ -206,23 +206,30 @@ fn inject_highlights(file: &Vec<File>, target: &str) -> String {
   let mut code = String::new();
   let mut cout = target;
   // Replaces file ids by names
-  while let (Some(init_file_index), Some(last_file_index)) = (cout.find("{{#F"), cout.find("F#}}")) {
-    let file_text = &cout[init_file_index + 4 .. last_file_index];
-    let file_numb = file_text.parse::<u64>().unwrap() as usize;
-    code.push_str(&cout[0 .. init_file_index]);
-    code.push_str(&file[file_numb].path);
-    cout = &cout[last_file_index + 4 ..];
-  }
-  // Replaces code ranges by snippets
-  while let (Some(init_range_index), Some(last_range_index)) = (cout.find("{{#R"), cout.find("R#}}")) {
-    let range_text = &cout[init_range_index + 4 .. last_range_index];
-    let range_text = range_text.split(":").map(|x| x.parse::<u64>().unwrap()).collect::<Vec<u64>>();
-    let range_file = range_text[0] as usize;
-    let range_init = range_text[1] as usize;
-    let range_last = range_text[2] as usize;
-    code.push_str(&cout[0 .. init_range_index]);
-    code.push_str(&highlight_error::highlight_error(range_init, range_last, &file[range_file].code));
-    cout = &cout[last_range_index + 4 ..];
+  loop {
+    let mut injected = false;
+    if let (Some(init_file_index), Some(last_file_index)) = (cout.find("{{#F"), cout.find("F#}}")) {
+      let file_text = &cout[init_file_index + 4 .. last_file_index];
+      let file_numb = file_text.parse::<u64>().unwrap() as usize;
+      code.push_str(&cout[0 .. init_file_index]);
+      code.push_str(&file[file_numb].path);
+      cout = &cout[last_file_index + 4 ..];
+      injected = true;
+    }
+    if let (Some(init_range_index), Some(last_range_index)) = (cout.find("{{#R"), cout.find("R#}}")) {
+      let range_text = &cout[init_range_index + 4 .. last_range_index];
+      let range_text = range_text.split(":").map(|x| x.parse::<u64>().unwrap()).collect::<Vec<u64>>();
+      let range_file = range_text[0] as usize;
+      let range_init = range_text[1] as usize;
+      let range_last = range_text[2] as usize;
+      code.push_str(&cout[0 .. init_range_index]);
+      code.push_str(&highlight_error::highlight_error(range_init, range_last, &file[range_file].code));
+      cout = &cout[last_range_index + 4 ..];
+      injected = true;
+    }
+    if !injected {
+      break;
+    }
   }
   code.push_str(cout);
   return code;
