@@ -894,7 +894,7 @@ Line = (String.cons 10 String.nil)
 (Infer (Let orig name expr body)) =
   ask dep      = (Checker.bind Checker.get_depth)
   ask expr_typ = (Checker.bind (Infer expr))
-  ask body_typ = (Checker.bind (Checker.extended (Infer (body (Var orig name dep))) name expr_typ []))
+  ask body_typ = (Checker.bind (Checker.extended (Infer (body (Var orig name dep))) name expr_typ [(Eval expr)]))
   (Checker.done body_typ)
 
 // Infers Ann
@@ -1011,7 +1011,7 @@ Line = (String.cons 10 String.nil)
 (Check (Let orig name expr body) type) =
   ask dep      = (Checker.bind Checker.get_depth)
   ask expr_typ = (Checker.bind (Infer expr))
-  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) type) name expr_typ []))
+  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) type) name expr_typ [(Eval expr)]))
   (Checker.done Unit)
 
 // Checks Var
