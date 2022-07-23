@@ -28,6 +28,12 @@ Main = API.check_all
 (Bool.or True  b) = True
 (Bool.or False b) = b
 
+// Bool.sor Bool Bool : Bool
+(Bool.sor False False) = False
+(Bool.sor False True)  = True
+(Bool.sor True  False) = True
+(Bool.sor True  True)  = True
+
 // Maybe.case -(a: Type) -(r: Type) (Maybe a) r (a -> r) : r
 (Maybe.case None       none some) = none
 (Maybe.case (Some val) none some) = (some val)
@@ -308,6 +314,9 @@ Line = (String.cons 10 String.nil)
 // Term.fillable Term Subst : Bool
 // -------------------------------
 
+(Term.fillable a End) =
+  False
+
 (Term.fillable (Typ orig) sub) =
   False
 
@@ -317,7 +326,7 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (All orig name type body) sub) =
   let type = (Term.fillable type           sub)
   let body = (Term.fillable (body (Hlp 0)) sub)
-  (Bool.or type body)
+  (Bool.sor type body)
 
 (Term.fillable (Lam orig name body) sub) =
   let body = (Term.fillable (body (Hlp 0)) sub)
@@ -326,17 +335,17 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (App orig func argm) sub) =
   let func = (Term.fillable func sub)
   let argm = (Term.fillable argm sub)
-  (Bool.or func argm)
+  (Bool.sor func argm)
 
 (Term.fillable (Let orig name expr body) sub) =
   let expr = (Term.fillable expr sub)
   let body = (Term.fillable (body (Hlp 0)) sub)
-  (Bool.or expr body)
+  (Bool.sor expr body)
 
 (Term.fillable (Ann orig expr type) sub) =
   let expr = (Term.fillable expr sub)
   let type = (Term.fillable type sub)
-  (Bool.or expr type)
+  (Bool.sor expr type)
 
 (Term.fillable (Ct0 name orig) sub) =
   False
@@ -348,20 +357,20 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (Ct2 name orig a b) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
-  (Bool.or a b)
+  (Bool.sor a b)
 
 (Term.fillable (Ct3 name orig a b c) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
-  (Bool.or a (Bool.or b c))
+  (Bool.sor a (Bool.sor b c))
 
 (Term.fillable (Ct4 name orig a b c d) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
-  (Bool.or a (Bool.or b (Bool.or c d)))
+  (Bool.sor a (Bool.sor b (Bool.sor c d)))
 
 (Term.fillable (Ct5 name orig a b c d e) sub) =
   let a = (Term.fillable a sub)
@@ -369,7 +378,7 @@ Line = (String.cons 10 String.nil)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d e))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d e))))
 
 (Term.fillable (Ct6 name orig a b c d e f) sub) =
   let a = (Term.fillable a sub)
@@ -378,7 +387,7 @@ Line = (String.cons 10 String.nil)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e f)))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e f)))))
 
 (Term.fillable (Ct7 name orig a b c d e f g) sub) =
   let a = (Term.fillable a sub)
@@ -388,7 +397,7 @@ Line = (String.cons 10 String.nil)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f g))))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f g))))))
 
 (Term.fillable (Ct8 name orig a b c d e f g h) sub) =
   let a = (Term.fillable a sub)
@@ -399,7 +408,7 @@ Line = (String.cons 10 String.nil)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
   let h = (Term.fillable h sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f (Bool.or g h)))))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f (Bool.sor g h)))))))
 
 (Term.fillable (Fn0 name orig) sub) =
   False
@@ -411,20 +420,20 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (Fn2 name orig a b) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
-  (Bool.or a b)
+  (Bool.sor a b)
 
 (Term.fillable (Fn3 name orig a b c) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
-  (Bool.or a (Bool.or b c))
+  (Bool.sor a (Bool.sor b c))
 
 (Term.fillable (Fn4 name orig a b c d) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
-  (Bool.or a (Bool.or b (Bool.or c d)))
+  (Bool.sor a (Bool.sor b (Bool.sor c d)))
 
 (Term.fillable (Fn5 name orig a b c d e) sub) =
   let a = (Term.fillable a sub)
@@ -432,7 +441,7 @@ Line = (String.cons 10 String.nil)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d e))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d e))))
 
 (Term.fillable (Fn6 name orig a b c d e f) sub) =
   let a = (Term.fillable a sub)
@@ -441,7 +450,7 @@ Line = (String.cons 10 String.nil)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e f)))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e f)))))
 
 (Term.fillable (Fn7 name orig a b c d e f g) sub) =
   let a = (Term.fillable a sub)
@@ -451,7 +460,7 @@ Line = (String.cons 10 String.nil)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f g))))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f g))))))
 
 (Term.fillable (Fn8 name orig a b c d e f g h) sub) =
   let a = (Term.fillable a sub)
@@ -462,7 +471,7 @@ Line = (String.cons 10 String.nil)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
   let h = (Term.fillable h sub)
-  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f (Bool.or g h)))))))
+  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f (Bool.sor g h)))))))
 
 (Term.fillable (Hlp orig) sub) =
   False
@@ -476,7 +485,7 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (Op2 orig oper val0 val1) sub) =
   let val0 = (Term.fillable val0 sub)
   let val1 = (Term.fillable val1 sub)
-  (Bool.or val0 val1)
+  (Bool.sor val0 val1)
 
 (Term.fillable (Hol orig numb) sub) =
   (Maybe.case (Subst.look sub numb) False λval(True))
@@ -484,6 +493,7 @@ Line = (String.cons 10 String.nil)
 // Term.fill Term Subst : (Pair Term Bool)
 // ---------------------------------------
 
+(Term.fill term End)                            = term
 (Term.fill (Typ orig) sub)                      = (Typ orig)
 (Term.fill (Var orig name index) sub)           = (Var orig name index)
 (Term.fill (All orig name type body) sub)       = (All orig name (Term.fill type sub) λx (Term.fill (body x) sub))
@@ -526,24 +536,24 @@ Line = (String.cons 10 String.nil)
 (Eval (Let orig name expr body))               = (LET orig name (Eval expr) λx (Eval (body x)))
 (Eval (Ann orig expr typ))                     = (ANN orig (Eval expr) (Eval typ))
 (Eval (App orig func argm))                    = (APP orig (Eval func) (Eval argm))
-(Eval (Ct0 orig ctid))                         = (Ct0 orig ctid)
-(Eval (Ct1 orig ctid x0))                      = (Ct1 orig ctid (Eval x0))
-(Eval (Ct2 orig ctid x0 x1))                   = (Ct2 orig ctid (Eval x0) (Eval x1))
-(Eval (Ct3 orig ctid x0 x1 x2))                = (Ct3 orig ctid (Eval x0) (Eval x1) (Eval x2))
-(Eval (Ct4 orig ctid x0 x1 x2 x3))             = (Ct4 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
-(Eval (Ct5 orig ctid x0 x1 x2 x3 x4))          = (Ct5 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
-(Eval (Ct6 orig ctid x0 x1 x2 x3 x4 x5))       = (Ct6 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
-(Eval (Ct7 orig ctid x0 x1 x2 x3 x4 x5 x6))    = (Ct7 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
-(Eval (Ct8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) = (Ct8 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
-(Eval (Fn0 orig ctid))                         = (FN0 orig ctid)
-(Eval (Fn1 orig ctid x0))                      = (FN1 orig ctid (Eval x0))
-(Eval (Fn2 orig ctid x0 x1))                   = (FN2 orig ctid (Eval x0) (Eval x1))
-(Eval (Fn3 orig ctid x0 x1 x2))                = (FN3 orig ctid (Eval x0) (Eval x1) (Eval x2))
-(Eval (Fn4 orig ctid x0 x1 x2 x3))             = (FN4 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3))
-(Eval (Fn5 orig ctid x0 x1 x2 x3 x4))          = (FN5 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
-(Eval (Fn6 orig ctid x0 x1 x2 x3 x4 x5))       = (FN6 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
-(Eval (Fn7 orig ctid x0 x1 x2 x3 x4 x5 x6))    = (FN7 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
-(Eval (Fn8 orig ctid x0 x1 x2 x3 x4 x5 x6 x7)) = (FN8 orig ctid (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+(Eval (Ct0 ctid orig))                         = (Ct0 ctid orig)
+(Eval (Ct1 ctid orig x0))                      = (Ct1 ctid orig (Eval x0))
+(Eval (Ct2 ctid orig x0 x1))                   = (Ct2 ctid orig (Eval x0) (Eval x1))
+(Eval (Ct3 ctid orig x0 x1 x2))                = (Ct3 ctid orig (Eval x0) (Eval x1) (Eval x2))
+(Eval (Ct4 ctid orig x0 x1 x2 x3))             = (Ct4 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+(Eval (Ct5 ctid orig x0 x1 x2 x3 x4))          = (Ct5 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+(Eval (Ct6 ctid orig x0 x1 x2 x3 x4 x5))       = (Ct6 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+(Eval (Ct7 ctid orig x0 x1 x2 x3 x4 x5 x6))    = (Ct7 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+(Eval (Ct8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (Ct8 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
+(Eval (Fn0 ctid orig))                         = (FN0 ctid orig)
+(Eval (Fn1 ctid orig x0))                      = (FN1 ctid orig (Eval x0))
+(Eval (Fn2 ctid orig x0 x1))                   = (FN2 ctid orig (Eval x0) (Eval x1))
+(Eval (Fn3 ctid orig x0 x1 x2))                = (FN3 ctid orig (Eval x0) (Eval x1) (Eval x2))
+(Eval (Fn4 ctid orig x0 x1 x2 x3))             = (FN4 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3))
+(Eval (Fn5 ctid orig x0 x1 x2 x3 x4))          = (FN5 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4))
+(Eval (Fn6 ctid orig x0 x1 x2 x3 x4 x5))       = (FN6 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5))
+(Eval (Fn7 ctid orig x0 x1 x2 x3 x4 x5 x6))    = (FN7 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6))
+(Eval (Fn8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (FN8 ctid orig (Eval x0) (Eval x1) (Eval x2) (Eval x3) (Eval x4) (Eval x5) (Eval x6) (Eval x7))
 (Eval (Hlp orig))                              = (Hlp orig)
 (Eval (U60 orig))                              = (U60 orig)
 (Eval (Num orig numb))                         = (Num orig numb)
@@ -789,7 +799,7 @@ Line = (String.cons 10 String.nil)
 // Not equal
 (Equal a b) =
   ask sub = (Checker.bind Checker.get_subst)
-  (Bool.if (Bool.or (Term.fillable a sub) (Term.fillable b sub))
+  (Bool.if (Bool.sor (Term.fillable a sub) (Term.fillable b sub))
     (Equal (Term.fill a sub) (Term.fill b sub))
     (Checker.done False))
 
