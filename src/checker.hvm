@@ -28,12 +28,6 @@ Main = API.check_all
 (Bool.or True  b) = True
 (Bool.or False b) = b
 
-// Bool.sor Bool Bool : Bool
-(Bool.sor False False) = False
-(Bool.sor False True)  = True
-(Bool.sor True  False) = True
-(Bool.sor True  True)  = True
-
 // Maybe.case -(a: Type) -(r: Type) (Maybe a) r (a -> r) : r
 (Maybe.case None       none some) = none
 (Maybe.case (Some val) none some) = (some val)
@@ -314,7 +308,7 @@ Line = (String.cons 10 String.nil)
 // Term.fillable Term Subst : Bool
 // -------------------------------
 
-(Term.fillable a End) =
+(Term.fillable term End) =
   False
 
 (Term.fillable (Typ orig) sub) =
@@ -326,7 +320,7 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (All orig name type body) sub) =
   let type = (Term.fillable type           sub)
   let body = (Term.fillable (body (Hlp 0)) sub)
-  (Bool.sor type body)
+  (Bool.or type body)
 
 (Term.fillable (Lam orig name body) sub) =
   let body = (Term.fillable (body (Hlp 0)) sub)
@@ -335,17 +329,17 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (App orig func argm) sub) =
   let func = (Term.fillable func sub)
   let argm = (Term.fillable argm sub)
-  (Bool.sor func argm)
+  (Bool.or func argm)
 
 (Term.fillable (Let orig name expr body) sub) =
   let expr = (Term.fillable expr sub)
   let body = (Term.fillable (body (Hlp 0)) sub)
-  (Bool.sor expr body)
+  (Bool.or expr body)
 
 (Term.fillable (Ann orig expr type) sub) =
   let expr = (Term.fillable expr sub)
   let type = (Term.fillable type sub)
-  (Bool.sor expr type)
+  (Bool.or expr type)
 
 (Term.fillable (Ct0 name orig) sub) =
   False
@@ -357,20 +351,20 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (Ct2 name orig a b) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
-  (Bool.sor a b)
+  (Bool.or a b)
 
 (Term.fillable (Ct3 name orig a b c) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
-  (Bool.sor a (Bool.sor b c))
+  (Bool.or a (Bool.or b c))
 
 (Term.fillable (Ct4 name orig a b c d) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c d)))
+  (Bool.or a (Bool.or b (Bool.or c d)))
 
 (Term.fillable (Ct5 name orig a b c d e) sub) =
   let a = (Term.fillable a sub)
@@ -378,7 +372,7 @@ Line = (String.cons 10 String.nil)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d e))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d e))))
 
 (Term.fillable (Ct6 name orig a b c d e f) sub) =
   let a = (Term.fillable a sub)
@@ -387,7 +381,7 @@ Line = (String.cons 10 String.nil)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e f)))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e f)))))
 
 (Term.fillable (Ct7 name orig a b c d e f g) sub) =
   let a = (Term.fillable a sub)
@@ -397,7 +391,7 @@ Line = (String.cons 10 String.nil)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f g))))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f g))))))
 
 (Term.fillable (Ct8 name orig a b c d e f g h) sub) =
   let a = (Term.fillable a sub)
@@ -408,7 +402,7 @@ Line = (String.cons 10 String.nil)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
   let h = (Term.fillable h sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f (Bool.sor g h)))))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f (Bool.or g h)))))))
 
 (Term.fillable (Fn0 name orig) sub) =
   False
@@ -420,20 +414,20 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (Fn2 name orig a b) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
-  (Bool.sor a b)
+  (Bool.or a b)
 
 (Term.fillable (Fn3 name orig a b c) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
-  (Bool.sor a (Bool.sor b c))
+  (Bool.or a (Bool.or b c))
 
 (Term.fillable (Fn4 name orig a b c d) sub) =
   let a = (Term.fillable a sub)
   let b = (Term.fillable b sub)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c d)))
+  (Bool.or a (Bool.or b (Bool.or c d)))
 
 (Term.fillable (Fn5 name orig a b c d e) sub) =
   let a = (Term.fillable a sub)
@@ -441,7 +435,7 @@ Line = (String.cons 10 String.nil)
   let c = (Term.fillable c sub)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d e))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d e))))
 
 (Term.fillable (Fn6 name orig a b c d e f) sub) =
   let a = (Term.fillable a sub)
@@ -450,7 +444,7 @@ Line = (String.cons 10 String.nil)
   let d = (Term.fillable d sub)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e f)))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e f)))))
 
 (Term.fillable (Fn7 name orig a b c d e f g) sub) =
   let a = (Term.fillable a sub)
@@ -460,7 +454,7 @@ Line = (String.cons 10 String.nil)
   let e = (Term.fillable e sub)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f g))))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f g))))))
 
 (Term.fillable (Fn8 name orig a b c d e f g h) sub) =
   let a = (Term.fillable a sub)
@@ -471,7 +465,7 @@ Line = (String.cons 10 String.nil)
   let f = (Term.fillable f sub)
   let g = (Term.fillable g sub)
   let h = (Term.fillable h sub)
-  (Bool.sor a (Bool.sor b (Bool.sor c (Bool.sor d (Bool.sor e (Bool.sor f (Bool.sor g h)))))))
+  (Bool.or a (Bool.or b (Bool.or c (Bool.or d (Bool.or e (Bool.or f (Bool.or g h)))))))
 
 (Term.fillable (Hlp orig) sub) =
   False
@@ -485,7 +479,7 @@ Line = (String.cons 10 String.nil)
 (Term.fillable (Op2 orig oper val0 val1) sub) =
   let val0 = (Term.fillable val0 sub)
   let val1 = (Term.fillable val1 sub)
-  (Bool.sor val0 val1)
+  (Bool.or val0 val1)
 
 (Term.fillable (Hol orig numb) sub) =
   (Maybe.case (Subst.look sub numb) False λval(True))
@@ -799,7 +793,7 @@ Line = (String.cons 10 String.nil)
 // Not equal
 (Equal a b) =
   ask sub = (Checker.bind Checker.get_subst)
-  (Bool.if (Bool.sor (Term.fillable a sub) (Term.fillable b sub))
+  (Bool.if (Bool.or (Term.fillable a sub) (Term.fillable b sub))
     (Equal (Term.fill a sub) (Term.fill b sub))
     (Checker.done False))
 

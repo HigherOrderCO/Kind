@@ -104,6 +104,7 @@ pub struct AdjustError {
 pub enum AdjustErrorKind {
   IncorrectArity,
   UnboundVariable,
+  RepeatedVariable,
 }
 
 pub fn new_book() -> Book {
@@ -149,7 +150,7 @@ pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut 
   let hide = arg.hide;
   let eras = arg.eras;
   let name = arg.name.clone();
-  let tipo = Box::new(adjust_term(book, &*arg.tipo, false, holes, vars)?);
+  let tipo = Box::new(adjust_term(book, &*arg.tipo, true, holes, vars)?);
   return Ok(Argument { hide, eras, name, tipo });
 }
 
@@ -185,6 +186,8 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
       let orig = *orig;
       if rhs && vars.iter().find(|&x| x == name).is_none() {
         return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable });
+      } else if !rhs && vars.iter().find(|&x| x == name).is_some() {
+        return Err(AdjustError { orig, kind: AdjustErrorKind::RepeatedVariable });
       } else {
         vars.push(name.clone());
       }
