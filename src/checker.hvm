@@ -817,8 +817,11 @@ Line = (String.cons 10 String.nil)
     ask b.chk = (Checker.bind (Equal.var.try_values b.val (Var a.orig a.name a.index)))
     (Checker.done (Bool.or a.chk b.chk)))
 (Equal.var True a.orig a.name a.index b) =
-  ask a.val = (Checker.bind (Checker.find a.index [] λnλtλv(v)))
-  (Equal.var.try_values a.val b)
+  ask sub = (Checker.bind Checker.get_subst)
+  (Bool.if (Term.fillable b sub)
+    (Equal (Var a.orig a.name a.index) (Term.fill b sub))
+    ask a.val = (Checker.bind (Checker.find a.index [] λnλtλv(v)))
+    (Equal.var.try_values a.val b))
 
 // Checks if any of a set of reductions is equal
 (Equal.var.try_values (List.cons a as) b) =
@@ -826,7 +829,8 @@ Line = (String.cons 10 String.nil)
   (Bool.if head
     (Checker.done True)
     (Equal.var.try_values as b))
-(Equal.var.try_values List.nil b) = (Checker.done False)
+(Equal.var.try_values List.nil b) =
+  (Checker.done False)
 
 // Equal.hol (origin: U60) (numb: U60) (b: Term) : (Checker bool)
 // --------------------------------------------------------------
