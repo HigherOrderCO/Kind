@@ -1427,9 +1427,10 @@ API.eval_main = (Text [
 (API.check_function func) =
   let vers = (Verify func)
   let type = (TypeOf func)
-  let type_check = (Checker.run (Check type (Typ 0)))
+  //let type_check = (Checker.run (Check type (Typ 0)))
   let rule_check = (API.check_function.verifiers vers type)
-  (List.cons type_check rule_check)
+  rule_check
+  //(List.cons type_check rule_check)
 
 (API.check_function.verifiers List.nil type) = List.nil
 (API.check_function.verifiers (List.cons verifier verifiers) type) =
