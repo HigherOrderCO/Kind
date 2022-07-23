@@ -73,16 +73,22 @@ pub enum Term {
 
 // TODO: indexed types
 #[derive(Clone, Debug)]
-pub struct Type {
-  name: String,
-  pars: Vec<Argument>,
-  ctrs: Vec<Constructor>,
+pub struct NewType {
+  pub name: String,
+  pub pars: Vec<Box<Argument>>,
+  pub ctrs: Vec<Box<Constructor>>,
 }
 
 #[derive(Clone, Debug)]
 pub struct Constructor {
-  name: String,
-  args: Vec<Argument>,
+  pub name: String,
+  pub args: Vec<Box<Argument>>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Derived {
+  pub path: String,
+  pub entr: Entry,
 }
 
 // Adjuster
@@ -98,6 +104,14 @@ pub struct AdjustError {
 pub enum AdjustErrorKind {
   IncorrectArity,
   UnboundVariable,
+}
+
+pub fn new_book() -> Book {
+  Book {
+    names: vec![],
+    entrs: HashMap::new(),
+    holes: 0,
+  }
 }
 
 pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
@@ -1142,6 +1156,40 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
   return Ok((state, Box::new(Book { holes: 0, names, entrs })));
 }
 
+pub fn parse_new_type(state: parser::State) -> parser::Answer<Box<NewType>> {
+  let (state, _)    = parser::consume("type", state)?;
+  let (state, name) = parser::name1(state)?;
+  let (state, pars) = parser::until(parser::text_parser("{"), Box::new(parse_argument), state)?;
+  let mut ctrs = vec![];
+  let mut state = state;
+  loop {
+    let state_i = state;
+    let (state_i, ctr_name) = parser::name(state_i)?;
+    if ctr_name.len() == 0 {
+      break;
+    }
+    let mut ctr_args = vec![];
+    let mut state_i = state_i;
+    loop {
+      let state_j = state_i;
+      let (state_j, head) = parser::peek_char(state_j)?;
+      if head != '(' {
+        break;
+      }
+      let (state_j, ctr_arg) = parse_argument(state_j)?;
+      ctr_args.push(ctr_arg);
+      state_i = state_j;
+    }
+    ctrs.push(Box::new(Constructor { name: ctr_name, args: ctr_args }));
+    state = state_i;
+  }
+  return Ok((state, Box::new(NewType { name, pars, ctrs })));
+}
+
+pub fn read_new_type(code: &str) -> Result<Box<NewType>, String> {
+  parser::read(Box::new(parse_new_type), code)
+}
+
 pub fn read_term(code: &str) -> Result<Box<Term>, String> {
   parser::read(Box::new(parse_term), code)
 }
@@ -1454,23 +1502,29 @@ pub fn show_rule(rule: &Rule) -> String {
     pats.push(show_term(pat));
   }
   let body = show_term(&rule.body);
-  format!("{}{} => {}", name, pats.join(""), body)
+  format!("{}{} = {}", name, pats.join(""), body)
 }
 
 pub fn show_entry(entry: &Entry) -> String {
   let name = &entry.name;
   let mut args = vec![];
   for arg in &entry.args {
-    args.push(format!(" {}({}: {})", if arg.eras { "-" } else { "" }, arg.name, show_term(&arg.tipo)));
+    let (open, close) = match (arg.eras, arg.hide) {
+      (false, false) => ("(", ")"),
+      (false, true ) => ("-(", ")"),
+      (true , false) => ("+<", ">"),
+      (true , true ) => ("<", ">"),
+    };
+    args.push(format!(" {}{}: {}{}", open, arg.name, show_term(&arg.tipo), close));
   }
   if entry.rules.len() == 0 {
     format!("{}{} : {}", name, args.join(""), show_term(&entry.tipo))
   } else {
     let mut rules = vec![];
     for rule in &entry.rules {
-      rules.push(format!("\n  {}", show_rule(rule)));
+      rules.push(format!("\n{}", show_rule(rule)));
     }
-    format!("{}{} : {} {{{}\n}}", name, args.join(""), show_term(&entry.tipo), rules.join(""))
+    format!("{}{} : {}{}\n", name, args.join(""), show_term(&entry.tipo), rules.join(""))
   }
 }
 
@@ -1527,3 +1581,207 @@ pub fn u64_to_name(num: u64) -> String {
   }
   name.chars().rev().collect()
 }
+
+// Derivers
+// ========
+
+pub fn derive_type(tipo: &NewType) -> Derived {
+  let path = format!("{}/_.kind2", tipo.name);
+  let name = format!("{}", tipo.name);
+  let mut args = vec![];
+  for par in &tipo.pars {
+    args.push(Box::new(Argument {
+      hide: false,
+      eras: false,
+      name: par.name.clone(),
+      tipo: par.tipo.clone(),
+    }));
+  }
+  let tipo = Box::new(Term::Typ { orig: 0 });
+  let rules = vec![];
+  let entr = Entry { name, args, tipo, rules };
+  return Derived { path, entr };
+}
+
+pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
+  if let Some(ctr) = tipo.ctrs.get(index) {
+    let path = format!("{}/{}.kind2", tipo.name, ctr.name);
+    let name = format!("{}.{}", tipo.name, ctr.name);
+    let mut args = vec![];
+    for arg in &tipo.pars {
+      args.push(arg.clone());
+    }
+    for arg in &ctr.args {
+      args.push(arg.clone());
+    }
+    let tipo = Box::new(Term::Ctr {
+      orig: 0,
+      name: tipo.name.clone(),
+      args: tipo.pars.iter().map(|x| Box::new(Term::Var { orig: 0, name: x.name.clone() })).collect(),
+    });
+    let rules = vec![];
+    let entr = Entry { name, args, tipo, rules };
+    return Derived { path, entr };
+  } else {
+    panic!("Constructor out of bounds.");
+  }
+}
+
+pub fn derive_match(ntyp: &NewType) -> Derived {
+  // type List <t: Type> { nil cons (head: t) (tail: (List t)) }
+  // -----------------------------------------------------------
+  // List.match <t: Type> (x: (List t)) <p: (List t) -> Type> (nil: (p (List.nil t))) (cons: (head: t) (tail: (List t)) (p (List.cons t head tail))) : (p x)
+  // List.match t (List.nil t)            p nil cons = nil
+  // List.match t (List.cons t head tail) p nil cons = (cons head tail)
+
+  let path = format!("{}/match.kind2", ntyp.name);
+
+  fn gen_type_ctr(ntyp: &NewType) -> Box<Term> {
+    Box::new(Term::Ctr {
+      orig: 0,
+      name: ntyp.name.clone(),
+      args: ntyp.pars.iter().map(|x| Box::new(Term::Var { orig: 0, name: x.name.clone() })).collect(),
+    })
+  }
+
+  fn gen_ctr_value(ntyp: &NewType, ctr: &Box<Constructor>, index: usize) -> Box<Term> {
+    let mut ctr_value_args = vec![];
+    for par in &ntyp.pars {
+      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: par.name.clone() }));
+    }
+    for fld in &ctr.args {
+      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: fld.name.clone() }));
+    }
+    let ctr_value = Box::new(Term::Ctr {
+      orig: 0,
+      name: format!("{}.{}", ntyp.name, ctr.name),
+      args: ctr_value_args,
+    });
+    return ctr_value;
+  }
+
+  // List.match
+  let name = format!("{}.match", ntyp.name);
+
+  let mut args = vec![];
+
+  //  <t: Type>
+  for par in &ntyp.pars {
+    args.push(Box::new(Argument {
+      hide: true,
+      eras: true,
+      name: par.name.clone(),
+      tipo: par.tipo.clone(),
+    }));
+  }
+
+  // (x: (List t))
+  args.push(Box::new(Argument {
+    eras: false,
+    hide: false,
+    name: "x".to_string(),
+    tipo: gen_type_ctr(ntyp),
+  }));
+
+  // <p: (List t) -> Type>
+  args.push(Box::new(Argument {
+    eras: true,
+    hide: true,
+    name: "p".to_string(),
+    tipo: Box::new(Term::All {
+      orig: 0,
+      name: "x".to_string(),
+      tipo: gen_type_ctr(ntyp),
+      body: Box::new(Term::Typ { orig: 0 }),
+    })
+  }));
+
+  // (nil: (p (List.nil t)))
+  // (cons: (head t) (tail: (List t)) (p (List.cons t head tail)))
+  for ctr in &ntyp.ctrs {
+    fn ctr_case_type(ntyp: &NewType, ctr: &Box<Constructor>, index: usize) -> Box<Term> {
+      if index < ctr.args.len() {
+        // for nil  = ...
+        // for cons = (head: t) (tail: (List t))
+        let arg = ctr.args.get(index).unwrap();
+        return Box::new(Term::All {
+          orig: 0,
+          name: arg.name.clone(),
+          tipo: arg.tipo.clone(),
+          body: ctr_case_type(ntyp, ctr, index + 1),
+        });
+      } else {
+        // for nil  = (p (List.nil t))
+        // for cons = (p (List.cons t head tail))
+        return Box::new(Term::App {
+          orig: 0,
+          func: Box::new(Term::Var { orig: 0, name: "p".to_string() }),
+          argm: gen_ctr_value(ntyp, ctr, index),
+        });
+      }
+    }
+    args.push(Box::new(Argument {
+      eras: false,
+      hide: false,
+      name: ctr.name.clone(),
+      tipo: ctr_case_type(ntyp, &ctr, 0),
+    }));
+  }
+
+  // : (p x)
+  let tipo = Box::new(Term::App {
+    orig: 0,
+    func: Box::new(Term::Var { orig: 0, name: "p".to_string() }),
+    argm: Box::new(Term::Var { orig: 0, name: "x".to_string() }),
+  });
+
+  // List.match t (List.nil t)            p nil cons = nil
+  // List.match t (List.cons t head tail) p nil cons = (cons head tail)
+  let mut rules = vec![];
+
+  for idx in 0 .. ntyp.ctrs.len() {
+    let ctr  = &ntyp.ctrs[idx];
+    let orig = 0;
+    let name = format!("{}.match", ntyp.name);
+    let mut pats = vec![];
+    for par in &ntyp.pars {
+      pats.push(Box::new(Term::Var { orig: 0, name: par.name.clone() }));
+    }
+    pats.push(gen_ctr_value(ntyp, &ctr, idx));
+    pats.push(Box::new(Term::Var { orig: 0, name: "p".to_string() }));
+    for ctr in &ntyp.ctrs {
+      pats.push(Box::new(Term::Var { orig: 0, name: ctr.name.clone() }));
+    }
+    let mut body_args = vec![];
+    for arg in &ctr.args {
+      body_args.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() }));
+    }
+    let body = Box::new(Term::Ctr {
+      orig: 0,
+      name: ctr.name.clone(),
+      args: body_args,
+    });
+    rules.push(Box::new(Rule { orig, name, pats, body }));
+  }
+
+  let entr = Entry { name, args, tipo, rules };
+
+  return Derived { path, entr };
+}
+
+//type List <t: Type> { nil cons (head: t) (tail: (List t)) }
+//pub struct Type { name: String, pars: Vec<Argument>, ctrs: Vec<Constructor> }
+//pub struct Constructor { name: String, args: Vec<Argument> }
+//pub struct Entry { pub name: String, pub args: Vec<Box<Argument>>, pub tipo: Box<Term>, pub rules: Vec<Box<Rule>> }
+//pub struct Argument { pub hide: bool, pub eras: bool, pub name: String, pub tipo: Box<Term> }
+//pub struct Rule { pub orig: u64, pub name: String, pub pats: Vec<Box<Term>>, pub body: Box<Term> }
+// List (t: Type) : Type
+// List.nil (t: Type) : (List t)
+// List.cons (t: Type) (head: t) (tail: (List t)) : (List t)
+// List.match <t: Type> (x: (List t))
+//   <p: (List t) -> Type>
+//   (nil: (p (List.nil t)))
+//   (cons: (head: t) (tail: (List t)) (p (List.cons t head tail)))
+// : (p x)
+// List.match t (List.nil t)            p nil cons = nil
+// List.match t (List.cons t head tail) p nil cons = (cons head tail)

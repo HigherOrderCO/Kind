@@ -33,6 +33,10 @@ pub enum Command {
   #[clap(aliases = &["r"])]
   Run { file: String },
 
+  /// Derives .kind2 files from a .type file
+  #[clap(aliases = &["c"])]
+  Derive { file: String },
+
   /// Generates a checker (.hvm) for a file
   #[clap(aliases = &["c"])]
   GenChecker { file: String },
@@ -73,6 +77,10 @@ fn run_cli() -> Result<(), String> {
 
     Command::Check { file: path } => {
       cmd_check_all(&path)
+    }
+
+    Command::Derive { file: path } => {
+      cmd_derive(&path)
     }
 
     Command::GenChecker { file: path } => {
@@ -156,6 +164,33 @@ fn cmd_to_hvm(path: &str) -> Result<(), String> {
   let result = to_hvm::to_hvm_book(&loaded.book);
   print!("{}", result);
   Ok(())
+}
+
+// Derives generic functions
+fn cmd_derive(path: &str) -> Result<(), String> {
+  let new_code = match std::fs::read_to_string(&path) {
+    Err(err) => { return Ok(()); }
+    Ok(code) => { code }
+  };
+  let new_type = match read_new_type(&new_code) {
+    Err(err) => { return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path, err)); }
+    Ok(book) => { book }
+  };
+  fn save_derived(path: &str, derived: &Derived) {
+    let dir = std::path::Path::new(&derived.path);
+    let txt = show_entry(&derived.entr);
+    let txt = format!("// Automatically derived from {}\n{}", path, txt);
+    println!("\x1b[4m\x1b[1mDerived '{}':\x1b[0m", derived.path);
+    println!("{}\n", txt);
+    std::fs::create_dir_all(dir.parent().unwrap()).unwrap();
+    std::fs::write(dir, txt).ok();
+  }
+  save_derived(path, &derive_type(&new_type));
+  for i in 0 .. new_type.ctrs.len() {
+    save_derived(path, &derive_ctr(&new_type, i));
+  }
+  save_derived(path, &derive_match(&new_type));
+  return Ok(());
 }
 
 // Utils
