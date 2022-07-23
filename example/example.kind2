@@ -152,8 +152,8 @@ Equal.chain t a b c e0 (Equal.refl u x) = e0 :: (Equal t a x)
 
 Monad (f: Type -> Type) : Type
 Monad.new (f: Type -> Type)
-  (pure: (a: Type) (x: a) (Monad (f a)))
-  (bind: (a: Type) (b: Type) (x: (Monad a)) (y: a -> (Monad b)) (Monad b))
+  (pure: (a: Type) (x: a) (f a))
+  (bind: (a: Type) (b: Type) (x: (f a)) (y: a -> (f b)) (f b))
   : (Monad f)
 
 // Variadic

@@ -173,8 +173,8 @@ Line = (String.cons 10 String.nil)
 // Checker.fail -(a: Type) (err: Error) : (Checker a)
 (Checker.fail err) = λctx λdep λrhs λsub (Errored ctx sub err)
 
-// Checker.run -(a: Type) (Checker a) : (Result a)
-(Checker.run chk) = (chk Empty 0 False End)
+// Checker.run -(a: Type) (Checker a) (rhs: Bool) : (Result a)
+(Checker.run chk rhs) = (chk Empty 0 rhs End)
 
 // Checker.get_context : (Checker Context)
 (Checker.get_context) = λctx λdep λrhs λsub
@@ -1427,14 +1427,13 @@ API.eval_main = (Text [
 (API.check_function func) =
   let vers = (Verify func)
   let type = (TypeOf func)
-  //let type_check = (Checker.run (Check type (Typ 0)))
+  let type_check = (Checker.run (Check type (Typ 0)) True)
   let rule_check = (API.check_function.verifiers vers type)
-  rule_check
-  //(List.cons type_check rule_check)
+  (List.cons type_check rule_check)
 
 (API.check_function.verifiers List.nil type) = List.nil
 (API.check_function.verifiers (List.cons verifier verifiers) type) =
-  let head = (Checker.run (Check.verify verifier type))
+  let head = (Checker.run (Check.verify verifier type) False)
   let tail = (API.check_function.verifiers verifiers type)
   (List.cons head tail)
 
