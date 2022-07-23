@@ -85,10 +85,4 @@ kind2 to-kdl example.kind2
 Benchmarks
 ----------
 
-### Type-Checker
-
-TODO
-
-### Runtime
-
-TODO
+In preliminary [benchmarks](/bench), Kind2's type-checker has outperformed Agda, Idris by 90x to 900x, which is an expressive difference. That said, we only tested a few small programs, so there isn't enough data to draw a conclusion yet. We're working on a more extensive benchmark suite. 
