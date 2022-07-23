@@ -3,9 +3,8 @@ Kind2
 
 Kind2 is a pure functional, lazy, non-garbage-collected, general-purpose,
 dependently typed programming language focusing on performance and usability. It
-features a blazingly fast type-checker that runs on the
-[HVM](https://github.com/kindelia/hvm) via
-[NbE](https://en.wikipedia.org/wiki/Normalisation_by_evaluation). It can also
+features a blazingly fast type-checker based on **optimal
+[normalization-by-evaluation](https://en.wikipedia.org/wiki/Normalisation_by_evaluation)**. It can also
 compile programs to HVM and [Kindelia](https://github.com/kindelia/kindelia),
 and can be used to prove and verify mathematical theorems.
 
