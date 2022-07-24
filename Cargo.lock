@@ -108,9 +108,9 @@ checksum = "809e18805660d7b6b2e2b9f316a5099521b5998d5cba4dda11b5157a21aaef03"
 
 [[package]]
 name = "hvm"
-version = "0.1.48"
+version = "0.1.52"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76b49024722982a26f6c297640d6e6744d4aeffea903602871cfb8365c9f9391"
+checksum = "2556a9b4560966be6909f2b997fe4d9b0ec239704368b2c1ae7c08f4c7fbf7e5"
 dependencies = [
  "clap",
  "highlight_error",
@@ -140,7 +140,7 @@ dependencies = [
 
 [[package]]
 name = "kind2"
-version = "0.2.15"
+version = "0.2.21"
 dependencies = [
  "clap",
  "highlight_error",

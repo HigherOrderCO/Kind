@@ -1087,7 +1087,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
     let (state, anno) = parser::consume(":", state)?;
     parse_term(state)?
   } else {
-    (state, Box::new(Term::Typ { orig: 0 })) // TODO: return a hole, set orig
+    (state, Box::new(Term::Hol { orig: 0, numb: u64::MAX })) // TODO: set orig
   };
   let (state, head) = parser::peek_char(state)?;
   if head == '{' {

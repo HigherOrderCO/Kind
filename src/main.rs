@@ -239,6 +239,7 @@ fn inject_highlights(file: &Vec<File>, target: &str) -> String {
 fn run_with_hvm(code: &str, main: &str, read_string: bool) -> Result<RunResult, String> {
   let mut rt = hvm::Runtime::from_code(code)?;
   let main = rt.alloc_code(main)?;
+  rt.run_io(main);
   rt.normalize(main);
   return Ok(RunResult {
     output: if read_string { readback_string(&rt, main) } else { rt.show(main) },

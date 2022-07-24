@@ -1,6 +1,6 @@
 [package]
 name = "kind2"
-version = "0.2.20"
+version = "0.2.21"
 edition = "2021"
 description = "A pure functional functional language that uses the HVM."
 repository = "https://github.com/Kindelia/Kind2"
@@ -10,6 +10,6 @@ keywords = ["functional", "language", "type-theory", "proof-assistant"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-hvm = "0.1.49"
+hvm = "0.1.52"
 highlight_error = "0.1.1"
 clap = { version = "3.1.8", features = ["derive"] }
