@@ -65,6 +65,9 @@ pub fn to_kdl_term(book: &Book, term: &Term) -> String {
     Term::Hol { orig: _, numb } => {
       format!("_")
     }
+    Term::Mat { .. } => {
+      panic!("Internal error."); // removed after adjust()
+    }
   }
 }
 

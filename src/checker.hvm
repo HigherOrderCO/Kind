@@ -1327,7 +1327,7 @@ Line = (String.cons 10 String.nil)
 
 (Show (Num orig numb)) =
   (Text [
-    (Show.u60 numb)
+    "#" (Show.u60 numb)
   ])
 
 (Show (Op2 orig oper val0 val1)) =
@@ -1369,7 +1369,7 @@ Line = (String.cons 10 String.nil)
 
 (Show.context.vals name List.nil sub pad) = String.nil
 (Show.context.vals name (List.cons val vals) sub pad) = (Text [
-  "- " (String.pad_right (Show.name name) ' ' pad) " = " (String.cut (Show (Term.fill val sub))) Line
+  (Color "2") "- " (String.pad_right (Show.name name) ' ' pad) " = " (String.cut (Show (Term.fill val sub))) (Color "0") Line
   (Show.context.vals name vals sub pad)
 ])
 

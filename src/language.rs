@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use hvm::parser as parser;
+use std::rc::Rc;
 
 #[derive(Clone, Debug)]
 pub struct Book {
@@ -69,6 +70,7 @@ pub enum Term {
   Num { orig: u64, numb: u64 },
   Op2 { orig: u64, oper: Oper, val0: Box<Term>, val1: Box<Term> },
   Hol { orig: u64, numb: u64 },
+  Mat { orig: u64, tipo: String, name: String, expr: Box<Term>, cses: Vec<(String,Box<Term>)>, moti: Box<Term> },
 }
 
 // TODO: indexed types
@@ -105,6 +107,8 @@ pub enum AdjustErrorKind {
   IncorrectArity,
   UnboundVariable,
   RepeatedVariable,
+  CantLoadType,
+  NoCoverage,
 }
 
 pub fn new_book() -> Book {
@@ -118,43 +122,44 @@ pub fn new_book() -> Book {
 pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
   let mut names = Vec::new();
   let mut entrs = HashMap::new(); 
+  let mut types = HashMap::new();
   let mut holes = 0;
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
     names.push(name.clone());
-    entrs.insert(name.clone(), Box::new(adjust_entry(book, &entry, &mut holes)?));
+    entrs.insert(name.clone(), Box::new(adjust_entry(book, &entry, &mut holes, &mut types)?));
   }
   return Ok(Book { names, entrs, holes });
 }
 
-pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64) -> Result<Entry, AdjustError> {
+pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut HashMap<String, Rc<NewType>>) -> Result<Entry, AdjustError> {
   let name = entry.name.clone();
   let mut args = Vec::new();
   // Adjust the type arguments, return type
   let mut vars = Vec::new();
   for arg in &entry.args {
     vars.push(arg.name.clone());
-    args.push(Box::new(adjust_argument(book, arg, holes, &mut vars)?));
+    args.push(Box::new(adjust_argument(book, arg, holes, &mut vars, types)?));
   }
-  let tipo = Box::new(adjust_term(book, &*entry.tipo, true, holes, &mut vars)?);
+  let tipo = Box::new(adjust_term(book, &*entry.tipo, true, holes, &mut vars, types)?);
   // Adjusts each rule
   let mut rules = Vec::new();
   for rule in &entry.rules {
     let mut vars = Vec::new();
-    rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars)?));
+    rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars, types)?));
   }
   return Ok(Entry { name, args, tipo, rules });
 }
 
-pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>) -> Result<Argument, AdjustError> {
+pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Argument, AdjustError> {
   let hide = arg.hide;
   let eras = arg.eras;
   let name = arg.name.clone();
-  let tipo = Box::new(adjust_term(book, &*arg.tipo, true, holes, vars)?);
+  let tipo = Box::new(adjust_term(book, &*arg.tipo, true, holes, vars, types)?);
   return Ok(Argument { hide, eras, name, tipo });
 }
 
-pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64, vars: &mut Vec<String>) -> Result<Rule, AdjustError> {
+pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Rule, AdjustError> {
   let name = rule.name.clone();
   let orig = rule.orig;
   let arity = match book.entrs.get(&rule.name) {
@@ -170,14 +175,14 @@ pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64, vars: &mut Vec<Str
   };
   let mut pats = Vec::new();
   for pat in &rule.pats {
-    pats.push(Box::new(adjust_term(book, &*pat, false, holes, vars)?));
+    pats.push(Box::new(adjust_term(book, &*pat, false, holes, vars, types)?));
   }
-  let body = Box::new(adjust_term(book, &*rule.body, true, holes, vars)?);
+  let body = Box::new(adjust_term(book, &*rule.body, true, holes, vars, types)?);
   return Ok(Rule { orig, name, pats, body });
 }
 
 // TODO: prevent defining the same name twice
-pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &mut Vec<String>) -> Result<Term, AdjustError> {
+pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Term, AdjustError> {
   match *term {
     Term::Typ { orig } => {
       Ok(Term::Typ { orig })
@@ -195,37 +200,37 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
     },
     Term::Let { ref orig, ref name, ref expr, ref body } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars, types)?);
       vars.push(name.clone());
-      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars, types)?);
       vars.pop();
       Ok(Term::Let { orig, name: name.clone(), expr, body })
     },
     Term::Ann { ref orig, ref expr, ref tipo } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars)?);
-      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars, types)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars, types)?);
       Ok(Term::Ann { orig, expr, tipo })
     },
     Term::All { ref orig, ref name, ref tipo, ref body } => {
       let orig = *orig;
-      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars, types)?);
       vars.push(name.clone());
-      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars, types)?);
       vars.pop();
       Ok(Term::All { orig, name: name.clone(), tipo, body })
     },
     Term::Lam { ref orig, ref name, ref body } => {
       let orig = *orig;
       vars.push(name.clone());
-      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars)?);
+      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars, types)?);
       vars.pop();
       Ok(Term::Lam { orig, name: name.clone(), body })
     },
     Term::App { ref orig, ref func, ref argm } => {
       let orig = *orig;
-      let func = Box::new(adjust_term(book, &*func, rhs, holes, vars)?);
-      let argm = Box::new(adjust_term(book, &*argm, rhs, holes, vars)?);
+      let func = Box::new(adjust_term(book, &*func, rhs, holes, vars, types)?);
+      let argm = Box::new(adjust_term(book, &*argm, rhs, holes, vars, types)?);
       Ok(Term::App { orig, func, argm })
     },
     Term::Ctr { ref orig, ref name, ref args } => {
@@ -233,7 +238,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
       if let Some(entry) = book.entrs.get(name) {
         let mut new_args = Vec::new();
         for arg in args {
-          new_args.push(Box::new(adjust_term(book, &*arg, rhs, holes, vars)?));
+          new_args.push(Box::new(adjust_term(book, &*arg, rhs, holes, vars, types)?));
         }
         // Count implicit arguments
         let mut implicits = 0;
@@ -293,9 +298,60 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
     Term::Op2 { ref orig, ref oper, ref val0, ref val1 } => {
       let orig = *orig;
       let oper = *oper;
-      let val0 = Box::new(adjust_term(book, &*val0, rhs, holes, vars)?);
-      let val1 = Box::new(adjust_term(book, &*val1, rhs, holes, vars)?);
+      let val0 = Box::new(adjust_term(book, &*val0, rhs, holes, vars, types)?);
+      let val1 = Box::new(adjust_term(book, &*val1, rhs, holes, vars, types)?);
       Ok(Term::Op2 { orig, oper, val0, val1 })
+    },
+    Term::Mat { ref orig, ref name, ref tipo, ref expr, ref cses, ref moti } => {
+      // pub struct NewType { pub name: String, pub pars: Vec<Box<Argument>>, pub ctrs: Vec<Box<Constructor>>, }
+      // pub struct Constructor { pub name: String, pub args: Vec<Box<Argument>>, }
+      // pub struct Argument { pub hide: bool, pub eras: bool, pub name: String, pub tipo: Box<Term>, }
+      // pub struct Derived { pub path: String, pub entr: Entry, }
+      // Mat { orig: u64, tipo: String, name: String, expr: Box<Term>, cses: Vec<(String,Box<Term>)>, moti: Option<Box<Term>> },
+      // match List xs { nil  => A cons => B } : R
+      // type List <a: Type> { nil cons (head: a) (tail: (List a)) }
+      // (List.match (@xs R) (A) (@xs.head @xs.tail B))
+      let orig = *orig;
+      if let Ok(newtype) = load_newtype_cached(types, tipo) {
+        let mut args = vec![];
+
+        // Builds expr
+        args.push(expr.clone());
+
+        // Builds Motive
+        args.push(Box::new(Term::Lam {
+          orig: get_term_origin(moti),
+          name: name.clone(),
+          body: moti.clone(),
+        }));
+
+        // Builds Cases
+        if newtype.ctrs.len() != cses.len() {
+          return Err(AdjustError { orig, kind: AdjustErrorKind::NoCoverage });
+        }
+        for ctr in &newtype.ctrs {
+          if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
+            let mut case_term = cse.1.clone();
+            for arg in ctr.args.iter().rev() {
+              case_term = Box::new(Term::Lam {
+                orig: get_term_origin(&case_term),
+                name: format!("{}.{}", name, arg.name),
+                body: case_term,
+              });
+            }
+            args.push(case_term);
+          } else {
+            return Err(AdjustError { orig, kind: AdjustErrorKind::NoCoverage });
+          }
+        }
+
+        let result = Term::Ctr { orig, name: "List.match".to_string(), args };
+        //println!("-- match desugar: {}", show_term(&result));
+        return adjust_term(book, &result, rhs, holes, vars, types);
+
+      } else {
+        return Err(AdjustError { orig, kind: AdjustErrorKind::CantLoadType });
+      }
     },
   }
 }
@@ -305,40 +361,41 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
 
 pub fn book_get_unbounds(book: &Book) -> HashSet<String> {
   let mut names = Vec::new();
+  let mut types = HashMap::new();
   let mut unbound = HashSet::new(); 
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
     names.push(name.clone());
-    entry_get_unbounds(book, &entry, &mut unbound);
+    entry_get_unbounds(book, &entry, &mut unbound, &mut types);
   }
   return unbound;
 }
 
-pub fn entry_get_unbounds(book: &Book, entry: &Entry, unbound: &mut HashSet<String>) {
+pub fn entry_get_unbounds(book: &Book, entry: &Entry, unbound: &mut HashSet<String>, types: &mut HashMap<String, Rc<NewType>>) {
   let name = entry.name.clone();
   let mut vars = Vec::new();
   for arg in &entry.args {
     vars.push(arg.name.clone());
-    argument_get_unbounds(book, arg, &mut vars, unbound);
+    argument_get_unbounds(book, arg, &mut vars, unbound, types);
   }
-  term_get_unbounds(book, &*entry.tipo, true, &mut vars, unbound);
+  term_get_unbounds(book, &*entry.tipo, true, &mut vars, unbound, types);
   for rule in &entry.rules {
-    rule_get_unbounds(book, &*rule, &mut Vec::new(), unbound);
+    rule_get_unbounds(book, &*rule, &mut Vec::new(), unbound, types);
   }
 }
 
-pub fn argument_get_unbounds(book: &Book, arg: &Argument, vars: &mut Vec<String>, unbound: &mut HashSet<String>) {
-  term_get_unbounds(book, &*arg.tipo, false, vars, unbound);
+pub fn argument_get_unbounds(book: &Book, arg: &Argument, vars: &mut Vec<String>, unbound: &mut HashSet<String>, types: &mut HashMap<String, Rc<NewType>>) {
+  term_get_unbounds(book, &*arg.tipo, false, vars, unbound, types);
 }
 
-pub fn rule_get_unbounds(book: &Book, rule: &Rule, vars: &mut Vec<String>, unbound: &mut HashSet<String>) {
+pub fn rule_get_unbounds(book: &Book, rule: &Rule, vars: &mut Vec<String>, unbound: &mut HashSet<String>, types: &mut HashMap<String, Rc<NewType>>) {
   for pat in &rule.pats {
-    term_get_unbounds(book, &*pat, false, vars, unbound);
+    term_get_unbounds(book, &*pat, false, vars, unbound, types);
   }
-  term_get_unbounds(book, &*rule.body, true, vars, unbound);
+  term_get_unbounds(book, &*rule.body, true, vars, unbound, types);
 }
 
-pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<String>, unbound: &mut HashSet<String>) {
+pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<String>, unbound: &mut HashSet<String>, types: &mut HashMap<String, Rc<NewType>>) {
   match term {
     Term::Typ { .. } => {},
     Term::Var { ref name, .. } => {
@@ -347,50 +404,74 @@ pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<Str
       }
     },
     Term::Let { ref name, ref expr, ref body, .. } => {
-      term_get_unbounds(book, &*expr, rhs, vars, unbound);
+      term_get_unbounds(book, &*expr, rhs, vars, unbound, types);
       vars.push(name.clone());
-      term_get_unbounds(book, &*body, rhs, vars, unbound);
+      term_get_unbounds(book, &*body, rhs, vars, unbound, types);
       vars.pop();
     },
     Term::Ann { ref expr, ref tipo, .. } => {
-      term_get_unbounds(book, &*expr, rhs, vars, unbound);
-      term_get_unbounds(book, &*tipo, rhs, vars, unbound);
+      term_get_unbounds(book, &*expr, rhs, vars, unbound, types);
+      term_get_unbounds(book, &*tipo, rhs, vars, unbound, types);
     },
     Term::All { ref name, ref tipo, ref body, .. } => {
-      term_get_unbounds(book, &*tipo, rhs, vars, unbound);
+      term_get_unbounds(book, &*tipo, rhs, vars, unbound, types);
       vars.push(name.clone());
-      term_get_unbounds(book, &*body, rhs, vars, unbound);
+      term_get_unbounds(book, &*body, rhs, vars, unbound, types);
       vars.pop();
     },
     Term::Lam { ref name, ref body, .. } => {
       vars.push(name.clone());
-      term_get_unbounds(book, &*body, rhs, vars, unbound);
+      term_get_unbounds(book, &*body, rhs, vars, unbound, types);
       vars.pop();
     },
     Term::App { ref func, ref argm, .. } => {
-      term_get_unbounds(book, &*func, rhs, vars, unbound);
-      term_get_unbounds(book, &*argm, rhs, vars, unbound);
+      term_get_unbounds(book, &*func, rhs, vars, unbound, types);
+      term_get_unbounds(book, &*argm, rhs, vars, unbound, types);
     },
     Term::Ctr { ref name, ref args, .. } => {
       unbound.insert(name.clone());
       for arg in args {
-        term_get_unbounds(book, &*arg, rhs, vars, unbound);
+        term_get_unbounds(book, &*arg, rhs, vars, unbound, types);
       }
     },
     Term::Fun { ref name, ref args, .. } => {
       unbound.insert(name.clone());
       for arg in args {
-        term_get_unbounds(book, &*arg, rhs, vars, unbound);
+        term_get_unbounds(book, &*arg, rhs, vars, unbound, types);
       }
     },
     Term::Op2 { ref val0, ref val1, .. } => {
-      term_get_unbounds(book, &*val0, rhs, vars, unbound);
-      term_get_unbounds(book, &*val1, rhs, vars, unbound);
+      term_get_unbounds(book, &*val0, rhs, vars, unbound, types);
+      term_get_unbounds(book, &*val1, rhs, vars, unbound, types);
     },
     Term::Hlp { .. } => {},
     Term::U60 { .. } => {},
     Term::Num { .. } => {},
     Term::Hol { .. } => {},
+    Term::Mat { ref tipo, ref name, ref expr, ref cses, ref moti, .. } => {
+      //println!("finding unbounds of match {} {}", tipo, name);
+      if let Ok(newtype) = load_newtype_cached(types, tipo) {
+        unbound.insert(format!("{}.match", tipo.clone()));
+        // Expr
+        term_get_unbounds(book, &*expr, rhs, vars, unbound, types);
+        // Motive
+        vars.push(name.clone());
+        term_get_unbounds(book, &*moti, rhs, vars, unbound, types);
+        vars.pop();
+        // Cases
+        for ctr in &newtype.ctrs {
+          if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
+            for arg in ctr.args.iter().rev() {
+              vars.push(arg.name.clone());
+            }
+            term_get_unbounds(book, &*cse.1, rhs, vars, unbound, types);
+            for _ in ctr.args.iter().rev() {
+              vars.pop();
+            }
+          }
+        }
+      }
+    },
   }
 }
 
@@ -481,7 +562,35 @@ pub fn term_set_origin_file(term: &mut Term, file: usize) {
     },
     Term::Hol { ref mut orig, .. } => {
       *orig = set_origin_file(*orig, file);
-    }
+    },
+    Term::Mat { ref mut orig, ref mut expr, ref mut cses, ref mut moti, .. } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(expr, file);
+      for cse in cses {
+        term_set_origin_file(&mut *cse.1, file);
+      }
+      term_set_origin_file(moti, file);
+    },
+  }
+}
+
+pub fn get_term_origin(term: &Term) -> u64 {
+  match term {
+    Term::Typ { orig, .. } => *orig,
+    Term::Var { orig, .. } => *orig,
+    Term::All { orig, .. } => *orig,
+    Term::Lam { orig, .. } => *orig,
+    Term::App { orig, .. } => *orig,
+    Term::Let { orig, .. } => *orig,
+    Term::Ann { orig, .. } => *orig,
+    Term::Ctr { orig, .. } => *orig,
+    Term::Fun { orig, .. } => *orig,
+    Term::Hlp { orig, .. } => *orig,
+    Term::U60 { orig, .. } => *orig,
+    Term::Num { orig, .. } => *orig,
+    Term::Op2 { orig, .. } => *orig,
+    Term::Hol { orig, .. } => *orig,
+    Term::Mat { orig, .. } => *orig,
   }
 }
 
@@ -726,6 +835,50 @@ pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
         name: "Bool.if".to_string(),
         args: vec![moti, cond, if_t, if_f],
       })))
+    }),
+    state);
+}
+
+//match List foo {
+  //cons => ...
+  //nil  => ...
+//} : ...
+pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  return parser::guard(
+    parser::text_parser("match "),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("match ", state)?;
+      let (state, tipo) = parser::name1(state)?;
+      let (state, nm_i) = get_init_index(state)?;
+      let (state, name) = parser::name1(state)?;
+      let (state, next) = parser::peek_char(state)?;
+      let (state, expr) = if next == '=' {
+        let (state, _)    = parser::consume("=", state)?;
+        let (state, expr) = parse_term(state)?;
+        (state, expr)
+      } else {
+        let (state, nm_j) = get_last_index(state)?;
+        (state, Box::new(Term::Var { orig: origin(0, nm_i, nm_j), name: name.clone() }))
+      };
+      let (state, _)    = parser::consume("{", state)?;
+      let (state, cses) = parser::until(parser::text_parser("}"), Box::new(|state| {
+        let (state, name) = parser::name1(state)?;
+        let (state, _)    = parser::consume("=>", state)?;
+        let (state, body) = parse_term(state)?;
+        return Ok((state, (name, body)));
+      }), state)?;
+      let (state, next) = parser::peek_char(state)?;
+      let (state, moti) = if next == ':' {
+        let (state, _)    = parser::consume(":", state)?;
+        let (state, moti) = parse_term(state)?;
+        (state, moti)
+      } else {
+        (state, Box::new(Term::Hol { orig: 0, numb: 0 }))
+      };
+      let (state, last) = get_last_index(state)?;
+      let orig = origin(0, init, last);
+      return Ok((state, Box::new(Term::Mat { orig, tipo, name, expr, cses, moti })));
     }),
     state);
 }
@@ -1051,6 +1204,7 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_lam), // `@`
     Box::new(parse_let), // `let `
     Box::new(parse_if),  // `if `
+    Box::new(parse_mat), // `match `
     Box::new(parse_do),  // `do `
     Box::new(parse_hlp), // `?`
     Box::new(parse_hol), // `_`
@@ -1159,7 +1313,7 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
   return Ok((state, Box::new(Book { holes: 0, names, entrs })));
 }
 
-pub fn parse_new_type(state: parser::State) -> parser::Answer<Box<NewType>> {
+pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
   let (state, _)    = parser::consume("type", state)?;
   let (state, name) = parser::name1(state)?;
   let (state, pars) = parser::until(parser::text_parser("{"), Box::new(parse_argument), state)?;
@@ -1189,8 +1343,8 @@ pub fn parse_new_type(state: parser::State) -> parser::Answer<Box<NewType>> {
   return Ok((state, Box::new(NewType { name, pars, ctrs })));
 }
 
-pub fn read_new_type(code: &str) -> Result<Box<NewType>, String> {
-  parser::read(Box::new(parse_new_type), code)
+pub fn read_newtype(code: &str) -> Result<Box<NewType>, String> {
+  parser::read(Box::new(parse_newtype), code)
 }
 
 pub fn read_term(code: &str) -> Result<Box<Term>, String> {
@@ -1199,6 +1353,27 @@ pub fn read_term(code: &str) -> Result<Box<Term>, String> {
 
 pub fn read_book(code: &str) -> Result<Box<Book>, String> {
   parser::read(Box::new(parse_book), code)
+}
+
+fn load_newtype(name: &str) -> Result<Box<NewType>, String> {
+  let path = format!("{}/_.type", name.replace(".","/"));
+  let newcode = match std::fs::read_to_string(&path) {
+    Err(err) => { return Err(format!("File not found: '{}'.", path)); }
+    Ok(code) => { code }
+  };
+  let newtype = match read_newtype(&newcode) {
+    Err(err) => { return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path, err)); }
+    Ok(book) => { book }
+  };
+  return Ok(newtype);
+}
+
+pub fn load_newtype_cached(cache: &mut HashMap<String, Rc<NewType>>, name: &str) -> Result<Rc<NewType>, String> {
+  if !cache.contains_key(name) {
+    let newtype = Rc::new(*load_newtype(name)?);
+    cache.insert(name.to_string(), newtype);
+  }
+  return Ok(cache.get(name).unwrap().clone());
 }
 
 // Compiler
@@ -1271,6 +1446,9 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
     }
     Term::Hol { orig, numb } => {
       format!("(Hol {} {})", orig, numb)
+    }
+    Term::Mat { .. } => {
+      panic!("Internal error."); // removed after adjust()
     }
   }
 }
@@ -1462,7 +1640,7 @@ pub fn show_term(term: &Term) -> String {
       format!("U60")
     }
     Term::Num { orig: _, numb } => {
-      format!("{}", numb)
+      format!("#{}", numb)
     }
     Term::Op2 { orig: _, oper, val0, val1 } => {
       let oper = show_oper(oper);
@@ -1472,6 +1650,9 @@ pub fn show_term(term: &Term) -> String {
     }
     Term::Hol { orig: _, numb } => {
       format!("_")
+    }
+    Term::Mat { .. } => {
+      panic!("Internal error."); // removed after adjust()
     }
   }
 }
@@ -1514,8 +1695,8 @@ pub fn show_entry(entry: &Entry) -> String {
   for arg in &entry.args {
     let (open, close) = match (arg.eras, arg.hide) {
       (false, false) => ("(", ")"),
-      (false, true ) => ("-(", ")"),
-      (true , false) => ("+<", ">"),
+      (false, true ) => ("+<", ">"),
+      (true , false) => ("-(", ")"),
       (true , true ) => ("<", ">"),
     };
     args.push(format!(" {}{}: {}{}", open, arg.name, show_term(&arg.tipo), close));
@@ -1633,7 +1814,7 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
 pub fn derive_match(ntyp: &NewType) -> Derived {
   // type List <t: Type> { nil cons (head: t) (tail: (List t)) }
   // -----------------------------------------------------------
-  // List.match <t: Type> (x: (List t)) <p: (List t) -> Type> (nil: (p (List.nil t))) (cons: (head: t) (tail: (List t)) (p (List.cons t head tail))) : (p x)
+  // List.match <t: Type> (x: (List t)) -(p: (List t) -> Type) (nil: (p (List.nil t))) (cons: (head: t) (tail: (List t)) (p (List.cons t head tail))) : (p x)
   // List.match t (List.nil t)            p nil cons = nil
   // List.match t (List.cons t head tail) p nil cons = (cons head tail)
 
@@ -1647,13 +1828,13 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     })
   }
 
-  fn gen_ctr_value(ntyp: &NewType, ctr: &Box<Constructor>, index: usize) -> Box<Term> {
+  fn gen_ctr_value(ntyp: &NewType, ctr: &Box<Constructor>, index: usize, prefix: &str) -> Box<Term> {
     let mut ctr_value_args = vec![];
     for par in &ntyp.pars {
-      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: par.name.clone() }));
+      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: format!("{}{}", prefix, par.name) }));
     }
     for fld in &ctr.args {
-      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: fld.name.clone() }));
+      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: format!("{}{}", prefix, fld.name) }));
     }
     let ctr_value = Box::new(Term::Ctr {
       orig: 0,
@@ -1686,10 +1867,10 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     tipo: gen_type_ctr(ntyp),
   }));
 
-  // <p: (List t) -> Type>
+  // -(p: (List t) -> Type)
   args.push(Box::new(Argument {
     eras: true,
-    hide: true,
+    hide: false,
     name: "p".to_string(),
     tipo: Box::new(Term::All {
       orig: 0,
@@ -1719,7 +1900,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
         return Box::new(Term::App {
           orig: 0,
           func: Box::new(Term::Var { orig: 0, name: "p".to_string() }),
-          argm: gen_ctr_value(ntyp, ctr, index),
+          argm: gen_ctr_value(ntyp, ctr, index, ""),
         });
       }
     }
@@ -1750,14 +1931,14 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     for par in &ntyp.pars {
       pats.push(Box::new(Term::Var { orig: 0, name: par.name.clone() }));
     }
-    pats.push(gen_ctr_value(ntyp, &ctr, idx));
+    pats.push(gen_ctr_value(ntyp, &ctr, idx, "x."));
     pats.push(Box::new(Term::Var { orig: 0, name: "p".to_string() }));
     for ctr in &ntyp.ctrs {
       pats.push(Box::new(Term::Var { orig: 0, name: ctr.name.clone() }));
     }
     let mut body_args = vec![];
     for arg in &ctr.args {
-      body_args.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() }));
+      body_args.push(Box::new(Term::Var { orig: 0, name: format!("x.{}", arg.name) }));
     }
     let body = Box::new(Term::Ctr {
       orig: 0,

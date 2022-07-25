@@ -168,11 +168,11 @@ fn cmd_to_hvm(path: &str) -> Result<(), String> {
 
 // Derives generic functions
 fn cmd_derive(path: &str) -> Result<(), String> {
-  let new_code = match std::fs::read_to_string(&path) {
-    Err(err) => { return Ok(()); }
+  let newcode = match std::fs::read_to_string(&path) {
+    Err(err) => { return Err(format!("File not found: '{}'.", path)); }
     Ok(code) => { code }
   };
-  let new_type = match read_new_type(&new_code) {
+  let newtype = match read_newtype(&newcode) {
     Err(err) => { return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path, err)); }
     Ok(book) => { book }
   };
@@ -185,11 +185,11 @@ fn cmd_derive(path: &str) -> Result<(), String> {
     std::fs::create_dir_all(dir.parent().unwrap()).unwrap();
     std::fs::write(dir, txt).ok();
   }
-  save_derived(path, &derive_type(&new_type));
-  for i in 0 .. new_type.ctrs.len() {
-    save_derived(path, &derive_ctr(&new_type, i));
+  save_derived(path, &derive_type(&newtype));
+  for i in 0 .. newtype.ctrs.len() {
+    save_derived(path, &derive_ctr(&newtype, i));
   }
-  save_derived(path, &derive_match(&new_type));
+  save_derived(path, &derive_match(&newtype));
   return Ok(());
 }
 
@@ -325,6 +325,8 @@ pub fn load(name: &str) -> Result<Load, String> {
         AdjustErrorKind::IncorrectArity   => Err(format!("Incorrect arity.\n{}", high_line)),
         AdjustErrorKind::UnboundVariable  => Err(format!("Unbound variable.\n{}", high_line)),
         AdjustErrorKind::RepeatedVariable => Err(format!("Repeated variable.\n{}", high_line)),
+        AdjustErrorKind::CantLoadType     => Err(format!("Can't load type.\n{}", high_line)),
+        AdjustErrorKind::NoCoverage       => Err(format!("Incomplete constructor coverage.\n{}", high_line)),
       };
     }
   };
@@ -351,18 +353,18 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
       }
     };
 
-    let new_code = match std::fs::read_to_string(&path) {
+    let newcode = match std::fs::read_to_string(&path) {
       Err(err) => { return Ok(()); }
       Ok(code) => { code }
     };
 
-    let mut new_book = match read_book(&new_code) {
+    let mut new_book = match read_book(&newcode) {
       Err(err) => { return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path, err)); }
       Ok(book) => { book }
     };
     book_set_origin_file(&mut new_book, load.file.len());
 
-    load.file.push(File { path: path.clone(), code: new_code });
+    load.file.push(File { path: path.clone(), code: newcode });
     for name in &new_book.names {
       load.book.names.push(name.clone());
       load.book.entrs.insert(name.clone(), new_book.entrs.get(name).unwrap().clone());
