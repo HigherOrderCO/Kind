@@ -140,7 +140,7 @@ dependencies = [
 
 [[package]]
 name = "kind2"
-version = "0.2.22"
+version = "0.2.23"
 dependencies = [
  "clap",
  "highlight_error",

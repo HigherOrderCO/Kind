@@ -16,14 +16,9 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
       format!("@{} {}", name, body)
     }
     Term::App { orig: _, func, argm } => {
-      let mut args = vec![argm];
-      let mut expr = func;
-      while let Term::App { orig: _, func, argm } = &**expr {
-        args.push(argm);
-        expr = func;
-      }
-      args.reverse();
-      format!("({} {})", to_hvm_term(book, expr), args.iter().map(|x| to_hvm_term(book, x)).collect::<Vec<String>>().join(" "))
+      let func = to_hvm_term(book, func);
+      let argm = to_hvm_term(book, argm);
+      format!("({} {})", func, argm)
     }
     Term::All { orig: _, name, tipo, body } => {
       let body = to_hvm_term(book, body);

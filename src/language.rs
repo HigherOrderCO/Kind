@@ -1766,6 +1766,280 @@ pub fn u64_to_name(num: u64) -> String {
   name.chars().rev().collect()
 }
 
+// Returns true if a ctor's argument is erased
+#[derive(Clone, Debug)]
+pub enum Comp {
+  Var { name: String },
+  Lam { name: String, body: Box<Comp> },
+  App { func: Box<Comp>, argm: Box<Comp> },
+  Dup { nam0: String, nam1: String, expr: Box<Comp>, body: Box<Comp> },
+  Let { name: String, expr: Box<Comp>, body: Box<Comp> },
+  Ctr { name: String, args: Vec<Box<Comp>> },
+  Fun { name: String, args: Vec<Box<Comp>> },
+  Num { numb: u64 },
+  Op2 { oper: Oper, val0: Box<Comp>, val1: Box<Comp> },
+  Nil
+}
+
+// Removes proof-irrelevant parts of the term
+pub fn erase(book: &Book, term: &Term) -> Box<Comp> {
+  match term {
+    Term::Typ { .. } => {
+      return Box::new(Comp::Nil);
+    }
+    Term::Var { orig: _, name } => {
+      let name = name.clone();
+      return Box::new(Comp::Var { name });
+    }
+    Term::Lam { orig: _, name, body } => {
+      let name = name.clone();
+      let body = erase(book, body);
+      return Box::new(Comp::Lam { name, body });
+    }
+    Term::App { orig: _, func, argm } => {
+      let func = erase(book, func);
+      let argm = erase(book, argm);
+      return Box::new(Comp::App { func, argm });
+    }
+    Term::All { orig: _, name, tipo, body } => {
+      return Box::new(Comp::Nil);
+    }
+    Term::Let { orig: _, name, expr, body } => {
+      let name = name.clone();
+      let expr = erase(book, expr);
+      let body = erase(book, body);
+      return Box::new(Comp::Let { name, expr, body });
+    }
+    Term::Ann { orig: _, expr, tipo: _ } => {
+      return erase(book, expr);
+    }
+    Term::Ctr { orig: _, name, args: term_args } => {
+      let name = name.clone();
+      let entr = book.entrs.get(&name).unwrap();
+      let mut args = vec![];
+      for (idx, arg) in term_args.iter().enumerate() {
+        if !entr.args[idx].eras {
+          args.push(erase(book, arg));
+        }
+      }
+      return Box::new(Comp::Ctr { name, args });
+    }
+    Term::Fun { orig: _, name, args: term_args } => {
+      let name = name.clone();
+      let entr = book.entrs.get(&name).unwrap();
+      let mut args = vec![];
+      for (idx, arg) in term_args.iter().enumerate() {
+        if !entr.args[idx].eras {
+          args.push(erase(book, arg));
+        }
+      }
+      return Box::new(Comp::Ctr { name, args });
+    }
+    Term::Hlp { orig: _ } => {
+      return Box::new(Comp::Nil);
+    }
+    Term::U60 { orig: _ } => {
+      return Box::new(Comp::Nil);
+    }
+    Term::Num { orig: _, numb } => {
+      let numb = *numb;
+      return Box::new(Comp::Num { numb });
+    }
+    Term::Op2 { orig: _, oper, val0, val1 } => {
+      let oper = oper.clone();
+      let val0 = erase(book, val0);
+      let val1 = erase(book, val1);
+      return Box::new(Comp::Op2 { oper, val0, val1 });
+    }
+    Term::Hol { orig: _, numb } => {
+      return Box::new(Comp::Nil);
+    }
+    Term::Mat { .. } => {
+      return Box::new(Comp::Nil);
+    }
+  }
+}
+
+// Counts usages of a name in an erased term
+pub fn count_uses(term: &Comp, count_name: &str) -> usize {
+  match term {
+    Comp::Var { name } => {
+      if name == count_name { 1 } else { 0 }
+    }
+    Comp::Lam { name, body } => {
+      if name == count_name {
+        0
+      } else {
+        count_uses(body, count_name)
+      }
+    }
+    Comp::App { func, argm } => {
+      count_uses( func, count_name) + count_uses(argm, count_name)
+    }
+    Comp::Dup { nam0, nam1, expr, body } => {
+      count_uses(expr, count_name) + (if nam0 == count_name || nam1 == count_name { 0 } else { count_uses(body, count_name) })
+    }
+    Comp::Let { name, expr, body } => {
+      count_uses(expr, count_name) + (if name == count_name { 0 } else { count_uses(body, count_name) })
+    }
+    Comp::Ctr { name, args } => {
+      let mut sum = 0;
+      for arg in args {
+        sum += count_uses(arg, count_name);
+      }
+      return sum;
+    }
+    Comp::Fun { name, args } => {
+      let mut sum = 0;
+      for arg in args {
+        sum += count_uses(arg, count_name);
+      }
+      return sum;
+    }
+    Comp::Op2 { oper: _, val0, val1 } => {
+      count_uses(val0, count_name) + count_uses(val1, count_name)
+    }
+    Comp::Num { .. } => {
+      0
+    }
+    Comp::Nil => {
+      0
+    }
+  }
+}
+
+// Renames a target variable using the fresh names in a vector
+pub fn rename_clones(term: &mut Comp, target: &str, names: &mut Vec<String>) {
+  match term {
+    Comp::Var { name } => {
+      if name == target {
+        *name = names.pop().unwrap();
+      }
+    }
+    Comp::Lam { name, body } => {
+      if name != target {
+        rename_clones(body, target, names);
+      }
+    }
+    Comp::App { func, argm } => {
+      rename_clones(func, target, names);
+      rename_clones(argm, target, names);
+    }
+    Comp::Dup { nam0, nam1, expr, body } => {
+      rename_clones(expr, target, names);
+      if nam0 != target && nam1 != target {
+        rename_clones(body, target, names);
+      }
+    }
+    Comp::Let { name, expr, body } => {
+      rename_clones(expr, target, names);
+      if name != target {
+        rename_clones(body, target, names);
+      }
+    }
+    Comp::Ctr { name, args } => {
+      for arg in args {
+        rename_clones(arg, target, names);
+      }
+    }
+    Comp::Fun { name, args } => {
+      for arg in args {
+        rename_clones(arg, target, names);
+      }
+    }
+    Comp::Op2 { oper: _, val0, val1 } => {
+      rename_clones(val0, target, names);
+      rename_clones(val1, target, names);
+    }
+    Comp::Num { .. } => {}
+    Comp::Nil => {}
+  }
+}
+
+// linearize_name (Foo x x x x) 'x' 0
+// ----------------------------------------------------------------
+// dup x0 x1 = x; dup x2 x3 = x0; dup x4 x5 = x1; (Foo x2 x3 x4 x5)
+pub fn linearize_name(body: &mut Comp, name: &str, fresh: &mut u64) {
+  fn fresh_name(fresh: &mut u64) -> String {
+    let name = format!("_{}", fresh);
+    *fresh += 1;
+    return name;
+  }
+  let uses = count_uses(&body, name);
+  if uses > 1 {
+    let mut names = vec![];
+    for _ in 0 .. (uses - 1) * 2 {
+      names.push(fresh_name(fresh));
+    }
+    //println!("-> uses is {}, names is {:?}", uses, names);
+    let mut renames = vec![];
+    for rename in names[names.len() - uses ..].iter().rev() {
+      renames.push(rename.clone());
+    }
+    rename_clones(body, name, &mut renames);
+    for i in (0 .. uses - 1).rev() {
+      let nam0 = names[i * 2 + 0].clone();
+      let nam1 = names[i * 2 + 1].clone();
+      let expr = Box::new(Comp::Var {
+        name: if i == 0 {
+          name.to_string()
+        } else {
+          names[i - 1].clone()
+        }
+      });
+      let new_body = Comp::Dup { nam0, nam1, expr, body: Box::new(Comp::Nil) };
+      let old_body = std::mem::replace(body, new_body);
+      if let Comp::Dup { ref mut body, .. } = body {
+        let _ = std::mem::replace(body, Box::new(old_body));
+      }
+    }
+  }
+}
+
+// Linearies an erased term, replacing cloned variables by dups
+pub fn linearize(term: &mut Comp, fresh: &mut u64) {
+  //println!("Linearizing: {:?}", term);
+  match term {
+    Comp::Var { name } => {}
+    Comp::Lam { name, body } => {
+      linearize(body, fresh);
+      linearize_name(body, name, fresh);
+    }
+    Comp::App { func, argm } => {
+      linearize(func, fresh);
+      linearize(argm, fresh);
+    }
+    Comp::Let { name, expr, body } => {
+      linearize(expr, fresh);
+      linearize(body, fresh);
+      linearize_name(body, name, fresh);
+    }
+    Comp::Ctr { name, args } => {
+      for arg in args {
+        linearize(arg, fresh);
+      }
+    }
+    Comp::Fun { name, args } => {
+      for arg in args {
+        linearize(arg, fresh);
+      }
+    }
+    Comp::Op2 { oper: _, val0, val1 } => {
+      linearize(val0, fresh);
+      linearize(val1, fresh);
+    }
+    Comp::Dup { nam0, nam1, expr, body, .. } => {
+      // should be unreachable under normal usage, but I made it anyway
+      linearize(expr, fresh);
+      linearize(body, fresh);
+      linearize_name(body, nam0, fresh);
+      linearize_name(body, nam1, fresh);
+    }
+    Comp::Num { .. } => {}
+    Comp::Nil => {}
+  }
+}
+
 // Derivers
 // ========
 
@@ -1931,14 +2205,14 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     for par in &ntyp.pars {
       pats.push(Box::new(Term::Var { orig: 0, name: par.name.clone() }));
     }
-    pats.push(gen_ctr_value(ntyp, &ctr, idx, "x."));
+    pats.push(gen_ctr_value(ntyp, &ctr, idx, "_"));
     pats.push(Box::new(Term::Var { orig: 0, name: "p".to_string() }));
     for ctr in &ntyp.ctrs {
       pats.push(Box::new(Term::Var { orig: 0, name: ctr.name.clone() }));
     }
     let mut body_args = vec![];
     for arg in &ctr.args {
-      body_args.push(Box::new(Term::Var { orig: 0, name: format!("x.{}", arg.name) }));
+      body_args.push(Box::new(Term::Var { orig: 0, name: format!("_{}", arg.name) }));
     }
     let body = Box::new(Term::Ctr {
       orig: 0,

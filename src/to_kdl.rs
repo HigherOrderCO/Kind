@@ -2,71 +2,49 @@
 // TODO: U120?
 
 use crate::language::{*};
+use std::collections::HashSet;
 
-pub fn to_kdl_term(book: &Book, term: &Term) -> String {
+pub fn to_kdl_term(term: &Comp) -> String {
   match term {
-    Term::Typ { .. } => {
-      format!("Type")
-    }
-    Term::Var { orig: _, name } => {
+    Comp::Var { name } => {
       format!("{}", name)
     }
-    Term::Lam { orig: _, name, body } => {
-      let body = to_kdl_term(book, body);
+    Comp::Lam { name, body } => {
+      let body = to_kdl_term(body);
       format!("@{} {}", name, body)
     }
-    Term::App { orig: _, func, argm } => {
-      let mut args = vec![argm];
-      let mut expr = func;
-      while let Term::App { orig: _, func, argm } = &**expr {
-        args.push(argm);
-        expr = func;
-      }
-      args.reverse();
-      format!("({} {})", to_kdl_term(book, expr), args.iter().map(|x| to_kdl_term(book, x)).collect::<Vec<String>>().join(" "))
+    Comp::App { func, argm } => {
+      let func = to_kdl_term(func);
+      let argm = to_kdl_term(argm);
+      format!("({} {})", func, argm)
     }
-    Term::All { orig: _, name, tipo, body } => {
-      let body = to_kdl_term(book, body);
-      format!("#0")
+    Comp::Dup { nam0, nam1, expr, body } => {
+      let expr = to_kdl_term(expr);
+      let body = to_kdl_term(body);
+      format!("dup {} {} = {}; {}", nam0, nam1, expr, body)
     }
-    Term::Let { orig: _, name, expr, body } => {
-      let expr = to_kdl_term(book, expr);
-      let body = to_kdl_term(book, body);
+    Comp::Let { name, expr, body } => {
+      let expr = to_kdl_term(expr);
+      let body = to_kdl_term(body);
       format!("let {} = {}; {}", name, expr, body)
     }
-    Term::Ann { orig: _, expr, tipo: _ } => {
-      let expr = to_kdl_term(book, expr);
-      format!("{}", expr)
+    Comp::Ctr { name, args } => {
+      format!("({}{})", name, args.iter().map(|x| format!(" {}", to_kdl_term(x))).collect::<String>())
     }
-    Term::Ctr { orig: _, name, args } => {
-      let entr = book.entrs.get(name).unwrap();
-      let args = args.iter().enumerate().filter(|(i,x)| !entr.args[*i].eras).map(|x| &**x.1).collect::<Vec<&Term>>();
-      format!("({}{})", name, args.iter().map(|x| format!(" {}", to_kdl_term(book, x))).collect::<String>())
+    Comp::Fun { name, args } => {
+      format!("({}{})", name, args.iter().map(|x| format!(" {}", to_kdl_term(x))).collect::<String>())
     }
-    Term::Fun { orig: _, name, args } => {
-      let entr = book.entrs.get(name).unwrap();
-      let args = args.iter().enumerate().filter(|(i,x)| !entr.args[*i].eras).map(|x| &**x.1).collect::<Vec<&Term>>();
-      format!("({}{})", name, args.iter().map(|x| format!(" {}", to_kdl_term(book, x))).collect::<String>())
-    }
-    Term::Hlp { orig: _ } => {
-      format!("#0")
-    }
-    Term::U60 { orig: _ } => {
-      format!("#0")
-    }
-    Term::Num { orig: _, numb } => {
+    Comp::Num { numb } => {
       format!("#{}", numb)
     }
-    Term::Op2 { orig: _, oper, val0, val1 } => {
-      let val0 = to_kdl_term(book, val0);
-      let val1 = to_kdl_term(book, val1);
-      format!("({} {} {})", show_oper(&oper), val0, val1)
+    Comp::Op2 { oper, val0, val1 } => {
+      let oper = show_oper(&oper);
+      let val0 = to_kdl_term(val0);
+      let val1 = to_kdl_term(val1);
+      format!("({} {} {})", oper, val0, val1)
     }
-    Term::Hol { orig: _, numb } => {
-      format!("_")
-    }
-    Term::Mat { .. } => {
-      panic!("Internal error."); // removed after adjust()
+    Comp::Nil => {
+      format!("#0")
     }
   }
 }
@@ -95,15 +73,23 @@ pub fn to_kdl_oper(oper: &Oper) -> String {
 pub fn to_kdl_rule(book: &Book, rule: &Rule) -> String {
   let name = &rule.name;
   let entry = book.entrs.get(name).unwrap();
-  let mut pats = vec![];
-  for (arg,pat) in entry.args.iter().zip(rule.pats.iter()) {
+  let mut pats = vec![]; // stringified pattern args
+  let mut vars = HashSet::new(); // rule pattern vars
+  for (arg, pat) in entry.args.iter().zip(rule.pats.iter()) {
     if !arg.eras {
+      let pat = erase(book, pat);
       pats.push(" ".to_string());
-      pats.push(to_kdl_term(book, pat));
+      pats.push(to_kdl_term(&pat));
+      collect_lhs_vars(&pat, &mut vars);
     }
   }
-  let body = to_kdl_term(book, &rule.body);
-  format!("({}{}) = {}", name, pats.join(""), body)
+  let mut body = erase(book, &rule.body);
+  let mut fresh = 0;
+  for var in vars {
+    linearize_name(&mut body, &var, &mut fresh); // linearizes rule pattern vars
+  }
+  linearize(&mut body, &mut fresh); // linearizes internal bound vars
+  format!("({}{}) = {}", name, pats.join(""), to_kdl_term(&body))
 }
 
 pub fn to_kdl_entry(book: &Book, entry: &Entry) -> String {
@@ -130,4 +116,27 @@ pub fn to_kdl_book(book: &Book) -> String {
     lines.push(to_kdl_entry(book, book.entrs.get(name).unwrap()));
   }
   lines.join("")
+}
+
+// Utils
+// -----
+
+// Returns left-hand side variables
+pub fn collect_lhs_vars(term: &Comp, vars: &mut HashSet<String>) {
+  match term {
+    Comp::Var { name } => {
+      vars.insert(name.clone());
+    }
+    Comp::App { func, argm } => {
+      collect_lhs_vars(func, vars);
+      collect_lhs_vars(argm, vars);
+    }
+    Comp::Ctr { args, .. } => {
+      for arg in args {
+        collect_lhs_vars(arg, vars);
+      }
+    }
+    Comp::Num { .. } => {}
+    _ => { panic!("Invalid left-hand side."); }
+  }
 }
