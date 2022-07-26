@@ -1959,7 +1959,8 @@ pub fn rename_clones(term: &mut Comp, target: &str, names: &mut Vec<String>) {
 // linearize_name (Foo x x x x) 'x' 0
 // ----------------------------------------------------------------
 // dup x0 x1 = x; dup x2 x3 = x0; dup x4 x5 = x1; (Foo x2 x3 x4 x5)
-pub fn linearize_name(body: &mut Comp, name: &str, fresh: &mut u64) {
+// Returns the number of times the variable was used in the body.
+pub fn linearize_name(body: &mut Comp, name: &mut String, fresh: &mut u64) -> usize {
   fn fresh_name(fresh: &mut u64) -> String {
     let name = format!("_{}", fresh);
     *fresh += 1;
@@ -1993,7 +1994,10 @@ pub fn linearize_name(body: &mut Comp, name: &str, fresh: &mut u64) {
         let _ = std::mem::replace(body, Box::new(old_body));
       }
     }
+  } else if uses == 0 {
+    *name = String::from("~")
   }
+  return uses;
 }
 
 // Linearies an erased term, replacing cloned variables by dups
@@ -2001,7 +2005,7 @@ pub fn linearize(term: &mut Comp, fresh: &mut u64) {
   //println!("Linearizing: {:?}", term);
   match term {
     Comp::Var { name } => {}
-    Comp::Lam { name, body } => {
+    Comp::Lam { ref mut name, body } => {
       linearize(body, fresh);
       linearize_name(body, name, fresh);
     }
@@ -2009,7 +2013,7 @@ pub fn linearize(term: &mut Comp, fresh: &mut u64) {
       linearize(func, fresh);
       linearize(argm, fresh);
     }
-    Comp::Let { name, expr, body } => {
+    Comp::Let { ref mut name, expr, body } => {
       linearize(expr, fresh);
       linearize(body, fresh);
       linearize_name(body, name, fresh);
@@ -2028,7 +2032,7 @@ pub fn linearize(term: &mut Comp, fresh: &mut u64) {
       linearize(val0, fresh);
       linearize(val1, fresh);
     }
-    Comp::Dup { nam0, nam1, expr, body, .. } => {
+    Comp::Dup { ref mut nam0, ref mut nam1, expr, body, .. } => {
       // should be unreachable under normal usage, but I made it anyway
       linearize(expr, fresh);
       linearize(body, fresh);

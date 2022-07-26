@@ -85,8 +85,28 @@ pub fn to_kdl_rule(book: &Book, rule: &Rule) -> String {
   }
   let mut body = erase(book, &rule.body);
   let mut fresh = 0;
-  for var in vars {
-    linearize_name(&mut body, &var, &mut fresh); // linearizes rule pattern vars
+  for mut var in vars.drain() {
+    let original_var = var.clone();
+    let uses = linearize_name(&mut body, &mut var, &mut fresh); // linearizes rule pattern vars
+    // The &mut here doesn't do anything because
+    // we're dropping var immediately afterwards.
+    // To linearize rule variables, we'll have to replace all LHS occurrences by ~
+    // if the amount of uses is zero
+    if uses == 0 {
+      for name in pats.iter_mut() {
+        if &*name == &original_var {
+          *name = String::from("~");
+        }
+      }
+    }
+    // The reason why we don't simply pass a real mutable reference to our variable
+    // (instead of a mutable reference of a clone) 
+    // to linearize_name is because since `var` is in `body`, we would 
+    // be borrowing `var` mutably twice, which is not allowed.
+    
+    // The reason why linearize_name takes in a mutable reference is
+    // to replace unused vars by ~. This is useful, for example, in 
+    // lambdas. (@x0 #0 should be linearized to @~ #0)
   }
   linearize(&mut body, &mut fresh); // linearizes internal bound vars
   format!("({}{}) = {}", name, pats.join(""), to_kdl_term(&body))
