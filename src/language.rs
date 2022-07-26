@@ -1429,7 +1429,11 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
       for arg in args {
         args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
-      format!("({}{} {}. {}{})", if quote { "Fn" } else { "FN" }, args.len(), name, hide(orig,lhs), args_strs.join(""))
+      if quote {
+        format!("(Fn{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
+      } else {
+        format!("(F${} {}{})", name, hide(orig,lhs), args_strs.join(""))
+      }
     }
     Term::Hlp { orig } => {
       format!("(Hlp {})", hide(orig,lhs))
@@ -1484,6 +1488,17 @@ pub fn compile_entry(entry: &Entry) -> String {
     }
   }
 
+  fn compile_rule_end(name: &str, size: u64) -> String {
+    let mut vars = vec![];
+    for idx in 0 .. size {
+      vars.push(format!(" x{}", idx));
+    }
+    let mut text = String::new();
+    text.push_str(&format!("(Q${} orig{}) = (Fn{} {}. orig{})\n", name, vars.join(""), size, name, vars.join("")));
+    text.push_str(&format!("(F${} orig{}) = (Fn{} {}. orig{})\n", name, vars.join(""), size, name, vars.join("")));
+    return text;
+  }
+
   fn compile_rule(rule: &Rule) -> String {
     let mut pats = vec![];
     for pat in &rule.pats {
@@ -1492,8 +1507,19 @@ pub fn compile_entry(entry: &Entry) -> String {
     let body_rhs = compile_term(&rule.body, true, false);
     let rule_rhs = compile_term(&rule.body, false, false);
     let mut text = String::new();
-    text.push_str(&format!("(QT{} {}. orig{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), body_rhs));
-    text.push_str(&format!("(FN{} {}. orig{}) = {}\n", rule.pats.len(), rule.name, pats.join(""), rule_rhs));
+    text.push_str(&format!("(Q${} orig{}) = {}\n", rule.name, pats.join(""), body_rhs));
+    text.push_str(&format!("(F${} orig{}) = {}\n", rule.name, pats.join(""), rule_rhs));
+
+  //for size in 0 .. 9 {
+    //let mut vars = vec![];
+    //for idx in 0 .. size {
+      //vars.push(format!(" x{}", idx));
+    //}
+    //result.push_str(&format!("(QT{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
+    //result.push_str(&format!("(FN{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
+  //}
+
+
     return text;
   }
 
@@ -1546,8 +1572,16 @@ pub fn compile_entry(entry: &Entry) -> String {
   result.push_str(&format!("(NameOf {}.) = \"{}\"\n", entry.name, entry.name));
   result.push_str(&format!("(HashOf {}.) = %{}\n", entry.name, entry.name));
   result.push_str(&format!("(TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
+
+  let base_vars = (0 .. entry.args.len()).map(|x| format!(" x{}", x)).collect::<Vec<String>>().join("");
+  result.push_str(&format!("(FN{} {}. orig{}) = (F${} orig{})\n", entry.args.len(), entry.name, base_vars, entry.name, base_vars));
+  result.push_str(&format!("(QT{} {}. orig{}) = (Q${} orig{})\n", entry.args.len(), entry.name, base_vars, entry.name, base_vars));
+
   for rule in &entry.rules {
     result.push_str(&compile_rule(&rule));
+  }
+  if entry.rules.len() > 0 {
+    result.push_str(&compile_rule_end(&entry.name, entry.rules[0].pats.len() as u64));
   }
   result.push_str(&format!("(Verify {}.) =", entry.name));
   for rule in &entry.rules {
@@ -1574,16 +1608,16 @@ pub fn compile_book(book: &Book) -> String {
     result.push_str(&compile_entry(&entry));
     result.push_str(&format!("\n"));
   }
-  result.push_str(&format!("\n// Default Cases"));
-  result.push_str(&format!("\n// -------------\n\n"));
-  for size in 0 .. 9 {
-    let mut vars = vec![];
-    for idx in 0 .. size {
-      vars.push(format!(" x{}", idx));
-    }
-    result.push_str(&format!("(QT{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
-    result.push_str(&format!("(FN{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
-  }
+  //result.push_str(&format!("\n// Default Cases"));
+  //result.push_str(&format!("\n// -------------\n\n"));
+  //for size in 0 .. 9 {
+    //let mut vars = vec![];
+    //for idx in 0 .. size {
+      //vars.push(format!(" x{}", idx));
+    //}
+    //result.push_str(&format!("(QT{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
+    //result.push_str(&format!("(FN{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
+  //}
 
   return result;
 }

@@ -174,3 +174,7 @@ Example.monad : (List (List U60)) {
     return [x, y, z]
   }
 }
+
+Main {
+  Example.monad
+}
