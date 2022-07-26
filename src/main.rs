@@ -322,11 +322,11 @@ pub fn load(name: &str) -> Result<Load, String> {
       let (file, init, last) = get_origin_range(err.orig);
       let high_line = highlight_error::highlight_error(init, last, &load.file[file].code);
       return match err.kind {
-        AdjustErrorKind::IncorrectArity   => Err(format!("Incorrect arity.\n{}", high_line)),
-        AdjustErrorKind::UnboundVariable  => Err(format!("Unbound variable.\n{}", high_line)),
-        AdjustErrorKind::RepeatedVariable => Err(format!("Repeated variable.\n{}", high_line)),
-        AdjustErrorKind::CantLoadType     => Err(format!("Can't load type.\n{}", high_line)),
-        AdjustErrorKind::NoCoverage       => Err(format!("Incomplete constructor coverage.\n{}", high_line)),
+        AdjustErrorKind::IncorrectArity           => Err(format!("Incorrect arity.\n{}", high_line)),
+        AdjustErrorKind::UnboundVariable { name } => Err(format!("Unbound variable '{}'.\n{}", name, high_line)),
+        AdjustErrorKind::RepeatedVariable         => Err(format!("Repeated variable.\n{}", high_line)),
+        AdjustErrorKind::CantLoadType             => Err(format!("Can't load type.\n{}", high_line)),
+        AdjustErrorKind::NoCoverage               => Err(format!("Incomplete constructor coverage.\n{}", high_line)),
       };
     }
   };

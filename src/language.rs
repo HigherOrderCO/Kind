@@ -105,7 +105,7 @@ pub struct AdjustError {
 #[derive(Clone, Debug)]
 pub enum AdjustErrorKind {
   IncorrectArity,
-  UnboundVariable,
+  UnboundVariable { name: String },
   RepeatedVariable,
   CantLoadType,
   NoCoverage,
@@ -190,7 +190,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
     Term::Var { ref orig, ref name } => {
       let orig = *orig;
       if rhs && vars.iter().find(|&x| x == name).is_none() {
-        return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable });
+        return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable { name: name.clone() } });
       } else if !rhs && vars.iter().find(|&x| x == name).is_some() {
         return Err(AdjustError { orig, kind: AdjustErrorKind::RepeatedVariable });
       } else {
@@ -270,7 +270,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
           Ok(Term::Ctr { orig, name: name.clone(), args: new_args })
         }
       } else {
-        return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable });
+        return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable { name: name.clone() } });
       }
     },
     Term::Fun { ref orig, ref name, ref args } => {
