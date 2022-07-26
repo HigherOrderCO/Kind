@@ -345,7 +345,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
           }
         }
 
-        let result = Term::Ctr { orig, name: "List.match".to_string(), args };
+        let result = Term::Ctr { orig, name: format!("{}.match", tipo), args };
         //println!("-- match desugar: {}", show_term(&result));
         return adjust_term(book, &result, rhs, holes, vars, types);
 
