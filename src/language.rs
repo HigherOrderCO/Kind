@@ -1066,6 +1066,66 @@ pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   )
 }
 
+pub fn parse_chr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    Box::new(|state| {
+      let (state, head) = parser::get_char(state)?;
+      Ok((state, head == '\''))
+    }),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state,    _) = parser::text("'", state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(0, init, last);
+      if let Some(c) = parser::head(state) {
+        let state = parser::tail(state);
+        let (state, _) = parser::text("'", state)?;
+        Ok((state, Box::new(Term::Num { orig, numb: c as u64 })))
+      } else {
+        parser::expected("character", 1, state)
+      }
+    }),
+    state,
+  )
+}
+
+pub fn parse_str(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    Box::new(|state| {
+      let (state, head) = parser::get_char(state)?;
+      Ok((state, head == '"' || head == '`'))
+    }),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let delim = parser::head(state).unwrap_or('\0');
+      let state = parser::tail(state);
+      let mut chars: Vec<char> = Vec::new();
+      let mut state = state;
+      loop {
+        if let Some(next) = parser::head(state) {
+          if next == delim || next == '\0' {
+            state = parser::tail(state);
+            break;
+          } else {
+            chars.push(next);
+            state = parser::tail(state);
+          }
+        }
+      }
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(0, init, last);
+      let empty = Term::Ctr { orig, name: "String.nil".to_string(), args: Vec::new() };
+      let list = Box::new(chars.iter().rfold(empty, |t, h| Term::Ctr {
+        orig,
+        name: "String.cons".to_string(),
+        args: vec![Box::new(Term::Num { orig, numb: *h as u64 }), Box::new(t)],
+      }));
+      Ok((state, list))
+    }),
+    state,
+  )
+}
+
 // do List {
 //   ask x = Action
 //   ask Action
@@ -1201,6 +1261,8 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_op2), // `(+`
     Box::new(parse_app), // `(`
     Box::new(parse_lst), // `[`
+    Box::new(parse_str), // `"`
+    Box::new(parse_chr), // `'`
     Box::new(parse_lam), // `@`
     Box::new(parse_let), // `let `
     Box::new(parse_if),  // `if `
