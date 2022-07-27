@@ -1374,11 +1374,11 @@ Line = (String.cons 10 String.nil)
   let vals = (List.join vals " ")
   let clos = "]"
   (Some (Text [open vals clos]))
-(Show.sugar.list.go (Ct2 List.cons. orig head tail)) =
+(Show.sugar.list.go (Ct3 List.cons. orig t head tail)) =
   let head = (Show head)
   ask tail = (Maybe.bind (Show.sugar.list.go tail))
   (Some (List.cons head tail))
-(Show.sugar.list.go (Ct0 List.nil. orig)) =
+(Show.sugar.list.go (Ct1 List.nil. orig t)) =
   (Some List.nil)
 (Show.sugar.list.go other) =
   None

@@ -2202,13 +2202,13 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     })
   }
 
-  fn gen_ctr_value(ntyp: &NewType, ctr: &Box<Constructor>, index: usize, prefix: &str) -> Box<Term> {
+  fn gen_ctr_value(ntyp: &NewType, ctr: &Box<Constructor>, index: usize, suffix: &str) -> Box<Term> {
     let mut ctr_value_args = vec![];
     for par in &ntyp.pars {
-      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: format!("{}{}", prefix, par.name) }));
+      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: format!("{}{}", par.name, suffix) }));
     }
     for fld in &ctr.args {
-      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: format!("{}{}", prefix, fld.name) }));
+      ctr_value_args.push(Box::new(Term::Var { orig: 0, name: format!("{}{}", fld.name, suffix) }));
     }
     let ctr_value = Box::new(Term::Ctr {
       orig: 0,
@@ -2312,7 +2312,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     }
     let mut body_args = vec![];
     for arg in &ctr.args {
-      body_args.push(Box::new(Term::Var { orig: 0, name: format!("_{}", arg.name) }));
+      body_args.push(Box::new(Term::Var { orig: 0, name: format!("{}", arg.name) }));
     }
     let body = Box::new(Term::Ctr {
       orig: 0,
