@@ -1621,7 +1621,6 @@ pub fn compile_entry(entry: &Entry) -> String {
       Term::Num { orig, numb } => {
         let inp = format!("(Num {} {})", orig, numb);
         let var = format!("(Num {} {})", orig, numb);
-        *vars += 1;
         return (inp, var);
       }
       _ => {
