@@ -1,4 +1,4 @@
-Main = API.check_all
+(Main n) = API.check_all
 
 // Prelude
 // -------
@@ -32,6 +32,15 @@ Main = API.check_all
 (Maybe.case None       none some) = none
 (Maybe.case (Some val) none some) = (some val)
 
+// Maybe.bind -(a: Type) -(b: Type) (Maybe a) : (a -> (Maybe b)) (Maybe b)
+(Maybe.bind None)     = @cont None
+(Maybe.bind (Some x)) = @cont (cont x)
+
+// Maybe.try
+(Maybe.try List.nil                  df) = df
+(Maybe.try (List.cons (Some x) rest) df) = x
+(Maybe.try (List.cons None     rest) df) = (Maybe.try rest df)
+
 // List.at -(a: Type) (List a) U60 : (Maybe a)
 (List.at (List.cons x xs) 0) = (Some x)
 (List.at (List.cons x xs) n) = (List.at xs (- n 1))
@@ -47,6 +56,13 @@ Main = API.check_all
 // List.reverse.go -(a: Type) (List a) (List a) : (List a)
 (List.reverse.go List.nil         res) = res
 (List.reverse.go (List.cons x xs) res) = (List.reverse.go xs (List.cons x res))
+
+// List.join (str: (List String)) (sep: String) : String
+(List.join list sep) = (List.join.go list sep True)
+
+// List.join.go (str: (List String)) (sep: String) (fst: Bool) : String
+(List.join.go (List.cons head tail) sep fst) = (Text [(Bool.if fst "" sep) head (List.join.go tail sep False)])
+(List.join.go List.nil              sep fst) = String.nil
 
 // String.cut String : String
 (String.cut str) = (String.cut.go str "(...)" 2048)
@@ -1093,20 +1109,27 @@ Line = (String.cons 10 String.nil)
 
 // FIXME: show is quadratic; must improve
 
-(Show (Var orig name index)) = (Text [
+(Show term) =
+  let sugars = [
+    (Show.sugar.string term)
+    (Show.sugar.list term)
+  ]
+  (Maybe.try sugars (Show.go term))
+
+(Show.go (Var orig name index)) = (Text [
   (Show.name name)
 ])
 
-(Show (Hol orig numb)) = (Text [
+(Show.go (Hol orig numb)) = (Text [
   "_" (Show.u60 numb)
 ])
 
-(Show (Typ orig)) = (Text [
+(Show.go (Typ orig)) = (Text [
   "Type"
 ])
 
 // TODO: omit unecessary parenthesis
-(Show (All orig name type body)) =
+(Show.go (All orig name type body)) =
   (U60.if (== name 63) // underscore
     (Text [
       "(" (Show type) " -> " (Show (body (Var orig name 0))) ")"
@@ -1116,41 +1139,41 @@ Line = (String.cons 10 String.nil)
       (Show (body (Var orig name 0)))
     ]))
 
-(Show (Lam orig name body)) =
+(Show.go (Lam orig name body)) =
   (Text [
     "@" (Show.name name) " "
     (Show (body (Var orig name 0)))
   ])
 
-(Show (Let orig name expr body)) = (Text [
+(Show.go (Let orig name expr body)) = (Text [
   "let " (Show.name name) " = " (Show (expr (Var orig name 0))) "; "
   (Show (body (Var orig name 0)))
 ])
 
-(Show (Ann orig expr type)) = (Text [
+(Show.go (Ann orig expr type)) = (Text [
   "{" (Show expr) " :: " (Show type) "}"
 ])
 
 // TODO: omit unecessary parenthesis
-(Show (App orig func argm)) = (Text [
+(Show.go (App orig func argm)) = (Text [
   "("
   (Show func) " "
   (Show argm)
   ")"
 ])
 
-(Show (Ct0 ctid orig)) = (Text [
+(Show.go (Ct0 ctid orig)) = (Text [
   (NameOf ctid)
 ])
 
-(Show (Ct1 ctid orig x0)) = (Text [
+(Show.go (Ct1 ctid orig x0)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0)
   ")"
 ])
 
-(Show (Ct2 ctid orig x0 x1)) = (Text [
+(Show.go (Ct2 ctid orig x0 x1)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1158,7 +1181,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct3 ctid orig x0 x1 x2)) = (Text [
+(Show.go (Ct3 ctid orig x0 x1 x2)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1167,7 +1190,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct4 ctid orig x0 x1 x2 x3)) = (Text [
+(Show.go (Ct4 ctid orig x0 x1 x2 x3)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1177,7 +1200,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct5 ctid orig x0 x1 x2 x3 x4)) = (Text [
+(Show.go (Ct5 ctid orig x0 x1 x2 x3 x4)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1188,7 +1211,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct6 ctid orig x0 x1 x2 x3 x4 x5)) = (Text [
+(Show.go (Ct6 ctid orig x0 x1 x2 x3 x4 x5)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1200,7 +1223,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct7 ctid orig x0 x1 x2 x3 x4 x5 x6)) = (Text [
+(Show.go (Ct7 ctid orig x0 x1 x2 x3 x4 x5 x6)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1213,7 +1236,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Ct8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
+(Show.go (Ct8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1227,18 +1250,18 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn0 ctid orig)) = (Text [
+(Show.go (Fn0 ctid orig)) = (Text [
   (NameOf ctid)
 ])
 
-(Show (Fn1 ctid orig x0)) = (Text [
+(Show.go (Fn1 ctid orig x0)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0)
   ")"
 ])
 
-(Show (Fn2 ctid orig x0 x1)) = (Text [
+(Show.go (Fn2 ctid orig x0 x1)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1246,7 +1269,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn3 ctid orig x0 x1 x2)) = (Text [
+(Show.go (Fn3 ctid orig x0 x1 x2)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1255,7 +1278,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn4 ctid orig x0 x1 x2 x3)) = (Text [
+(Show.go (Fn4 ctid orig x0 x1 x2 x3)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1265,7 +1288,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn5 ctid orig x0 x1 x2 x3 x4)) = (Text [
+(Show.go (Fn5 ctid orig x0 x1 x2 x3 x4)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1276,7 +1299,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn6 ctid orig x0 x1 x2 x3 x4 x5)) = (Text [
+(Show.go (Fn6 ctid orig x0 x1 x2 x3 x4 x5)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1288,7 +1311,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn7 ctid orig x0 x1 x2 x3 x4 x5 x6)) = (Text [
+(Show.go (Fn7 ctid orig x0 x1 x2 x3 x4 x5 x6)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1301,7 +1324,7 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Fn8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
+(Show.go (Fn8 ctid orig x0 x1 x2 x3 x4 x5 x6 x7)) = (Text [
   "("
   (NameOf ctid) " "
   (Show x0) " "
@@ -1315,25 +1338,54 @@ Line = (String.cons 10 String.nil)
   ")"
 ])
 
-(Show (Hlp orig)) =
+(Show.go (Hlp orig)) =
   (Text [
     "?"
   ])
 
-(Show (U60 orig)) =
+(Show.go (U60 orig)) =
   (Text [
     "U60"
   ])
 
-(Show (Num orig numb)) =
+(Show.go (Num orig numb)) =
   (Text [
     "#" (Show.u60 numb)
   ])
 
-(Show (Op2 orig oper val0 val1)) =
+(Show.go (Op2 orig oper val0 val1)) =
   (Text [
     "(" (Show.oper oper) " " (Show val0) " " (Show val1) ")"
   ])
+
+(Show.sugar.string term) =
+  ask text = (Maybe.bind (Show.sugar.string.go term))
+  let quot = (String.cons '"' String.nil)
+  (Some (Text [quot text quot]))
+(Show.sugar.string.go (Ct2 String.cons. orig (Num n.orig n.numb) tail)) = 
+  ask tail = (Maybe.bind (Show.sugar.string.go tail))
+  (Some (String.cons n.numb tail))
+(Show.sugar.string.go (Ct0 String.nil. orig)) = (Some (String.nil))
+(Show.sugar.string.go rest) = None
+
+(Show.sugar.list term) =
+  ask vals = (Maybe.bind (Show.sugar.list.go term))
+  let open = "["
+  let vals = (List.join vals " ")
+  let clos = "]"
+  (Some (Text [open vals clos]))
+(Show.sugar.list.go (Ct2 List.cons. orig head tail)) =
+  let head = (Show head)
+  ask tail = (Maybe.bind (Show.sugar.list.go tail))
+  (Some (List.cons head tail))
+(Show.sugar.list.go (Ct0 List.nil. orig)) =
+  (Some List.nil)
+(Show.sugar.list.go other) =
+  None
+
+//(Show.sugar.list (Ct2 List.cons. 
+
+//(Show.sugar.
 
 (Show.oper ADD) = "+"
 (Show.oper SUB) = "-"

@@ -117,20 +117,28 @@ fn cmd_check_all(path: &str) -> Result<(), String> {
 // Evaluates Main on Kind2
 fn cmd_eval_main(path: &str) -> Result<(), String> {
   let loaded = load(path)?;
-  let result = run_with_hvm(&gen_checker(&loaded.book), "API.eval_main", true)?;
-  print!("{}", result.output);
-  println!("Rewrites: {}", result.rewrites);
-  Ok(())
+  if loaded.book.entrs.contains_key("Main") {
+    let result = run_with_hvm(&gen_checker(&loaded.book), "API.eval_main", true)?;
+    print!("{}", result.output);
+    println!("Rewrites: {}", result.rewrites);
+    Ok(())
+  } else {
+    Err("Main not found.".to_string())
+  }
 }
 
 // Runs Main on HVM
 fn cmd_run_main(path: &str) -> Result<(), String> {
   let loaded = load(path)?;
-  let result = to_hvm::to_hvm_book(&loaded.book);
-  let result = run_with_hvm(&result, "Main", false)?;
-  println!("{}", result.output);
-  println!("Rewrites: {}", result.rewrites);
-  Ok(())
+  if loaded.book.entrs.contains_key("Main") {
+    let result = to_hvm::to_hvm_book(&loaded.book);
+    let result = run_with_hvm(&result, "Main", false)?;
+    println!("{}", result.output);
+    println!("Rewrites: {}", result.rewrites);
+    Ok(())
+  } else {
+    Err("Main not found.".to_string())
+  }
 }
 
 // Generates the checker file (`file.kind2` -> `file.checker.hvm`)
