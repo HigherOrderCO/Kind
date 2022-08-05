@@ -1,0 +1,40 @@
+Pair (a: Type) (b: Type) : Type
+Pair a b = (p: Type) (a -> b -> p) -> p
+
+Dup <t: Type> (a: t) : (Pair t t)
+Dup t a = @p @pp (pp a a)
+
+PairTest : _
+PairTest =
+  let x0  = (Dup Type);
+  let x1  = (Dup x0);
+  let x2  = (Dup x1);
+  let x3  = (Dup x2);
+  let x4  = (Dup x3);
+  let x5  = (Dup x4);
+  let x6  = (Dup x5);
+  let x7  = (Dup x6);
+  let x8  = (Dup x7);
+  let x9  = (Dup x8);
+  let x10 = (Dup x9);
+  let x11 = (Dup x10);
+  let x12 = (Dup x11);
+  let x13 = (Dup x12);
+  let x14 = (Dup x13);
+  let x15 = (Dup x14);
+  let x16 = (Dup x15);
+  let x17 = (Dup x16);
+  let x18 = (Dup x17);
+  let x19 = (Dup x18);
+  let x20 = (Dup x19);
+  let x21 = (Dup x20);
+  let x22 = (Dup x21);
+  let x23 = (Dup x22);
+  let x24 = (Dup x23);
+  let x25 = (Dup x24);
+  let x26 = (Dup x25);
+  let x27 = (Dup x26);
+  let x28 = (Dup x27);
+  let x29 = (Dup x28);
+  let x30 = (Dup x29);
+  x30
