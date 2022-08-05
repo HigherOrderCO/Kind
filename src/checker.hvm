@@ -1,4 +1,4 @@
-(Main n) = API.check_all
+Main = API.check_all
 
 // Prelude
 // -------
