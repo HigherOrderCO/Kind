@@ -29,7 +29,7 @@ pub fn to_kdl_term(term: &Comp) -> String {
       format!("let {} = {}; {}", name, expr, body)
     }
     Comp::Ctr { name, args } => {
-      format!("({}{})", name, args.iter().map(|x| format!(" {}", to_kdl_term(x))).collect::<String>())
+      format!("{{{}{}}}", name, args.iter().map(|x| format!(" {}", to_kdl_term(x))).collect::<String>())
     }
     Comp::Fun { name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}", to_kdl_term(x))).collect::<String>())
