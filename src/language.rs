@@ -1255,7 +1255,10 @@ pub fn parse_term_st(state: parser::State) -> parser::Answer<Box<dyn Fn(&str) ->
     Box::new(parse_ask_named_st),
     Box::new(parse_ask_anon_st),
     Box::new(parse_let_st),
-    Box::new(|state| Ok((state, None)))
+    Box::new(|state| {
+      let (state, term) = parse_term(state)?;
+      Ok((state, Some(Box::new(move |monad| { term.clone() }))))
+    })
   ], state)
 }
 
