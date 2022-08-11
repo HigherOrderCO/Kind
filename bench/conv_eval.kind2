@@ -9,46 +9,46 @@ CBool.to_bool (x : CBool) : Bool
 CBool.to_bool x = (x Bool True False)
 
 CTrue : CBool
-CTrue = @p @t @f t
+CTrue = p => t => f => t
 
 CFalse : CBool
-CFalse = @p @t @f f
+CFalse = p => t => f => f
 
 And (a: CBool) (b: CBool) : CBool
-And a b = @p @t @f (a p (b p t f) f)
+And a b = p => t => f => (a p (b p t f) f)
 
 CNat : Type
 CNat = (n: Type) (n -> n) -> n -> n
 
 Add (a: CNat) (b: CNat) : CNat
-Add a b = @n @s @z (a n s (b n s z))
+Add a b = n => s => z => (a n s (b n s z))
 
 CMul (a: CNat) (b: CNat) : CNat
-CMul a b = @n @s (a n (b n s))
+CMul a b = n => s => (a n (b n s))
 
 Suc (a: CNat) : CNat
-Suc a = @n @s @z (s (a n s z))
+Suc a = n => s => z => (s (a n s z))
 
 CEqual (t: Type) (a: t) (b: t) : Type
 CEqual t a b = (p: t -> Type) (p a) -> (p b)
 
 CRefl (t: Type) (x: t) : (CEqual t x x)
-CRefl t x = @p @px px
+CRefl t x = p => px => px
 
 N0 : CNat
-N0 = @n @s @z z
+N0 = n => s => z => z
 
 N2 : CNat
-N2 = @n @s @z (s (s z))
+N2 = n => s => z => (s (s z))
 
 N3 : CNat
-N3 = @n @s @z (s (s (s z)))
+N3 = n => s => z => (s (s (s z)))
 
 N4 : CNat
-N4 = @n @s @z (s (s (s (s z))))
+N4 = n => s => z => (s (s (s (s z))))
 
 N5 : CNat
-N5 = @n @s @z (s (s (s (s (s z)))))
+N5 = n => s => z => (s (s (s (s (s z)))))
 
 N10 : CNat
 N10 = (CMul N2 N5)
@@ -138,19 +138,19 @@ CTree : Type
 CTree = (t: Type) (t -> t -> t) -> t -> t
 
 CLeaf : CTree
-CLeaf = @t @n @l l
+CLeaf = t => n => l => l
 
 CNode (t1: CTree) (t2: CTree) : CTree
-CNode t1 t2 = @t @n @l (n (t1 t n l) (t2 t n l))
+CNode t1 t2 = t => n => l => (n (t1 t n l) (t2 t n l))
 
 FullCTree (n: CNat) : CTree
-FullCTree n = (n CTree @t(CNode t t) CLeaf)
+FullCTree n = (n CTree (t => CNode t t) CLeaf)
 
 Num : CNat
 Num = N2
 
 Force (n: CNat) : Bool
-Force n = (n Bool @x(x) True)
+Force n = (n Bool (x => x) True)
 
 Main : (CEqual CNat N1M N1Mb)
 Main = (CRefl CNat N1M)
