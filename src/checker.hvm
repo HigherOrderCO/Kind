@@ -1048,7 +1048,7 @@ Line = (String.cons 10 String.nil)
 // Compares two terms for equality
 (Check.compare term type) =
   ask term_typ = (Checker.bind (Infer term))
-  ask is_equal = (Checker.bind (Equal term_typ type))
+  ask is_equal = (Checker.bind (Equal (Eval term_typ) (Eval type)))
   (Bool.if is_equal
     (Checker.done Unit)
     (Checker.fail (TypeMismatch term type term_typ)))
