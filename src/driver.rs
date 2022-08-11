@@ -157,11 +157,19 @@ pub fn cmd_derive(config: &Config, path: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub fn cmd_check_all(config: &Config, path: &str) -> Result<(), String> {
-    let loaded = load(config, path)?;
-    let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.check_all", true)?;
-    print!("{}", inject_highlights(&loaded.file, &result.output));
-    println!("Rewrites: {}", result.rewrites);
+// Checks all definitions of multiple Kind2 files
+pub fn cmd_check_all(config: &Config, paths: Vec<String>) -> Result<(), String> {
+    fn check_file (config: &Config, path: &str) -> Result<(), String> {
+        println!("\x1b[1mFile: {}\x1b[0m", &path);
+        let loaded = load(config, path)?;
+        let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.check_all", true)?;
+        print!("{}", inject_highlights(&loaded.file, &result.output));
+        println!("Rewrites: {}\n", result.rewrites);
+        Ok(())
+    }
+    for path in paths {
+        check_file(config, &path)?;
+    }
     Ok(())
 }
 

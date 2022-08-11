@@ -30,7 +30,7 @@ pub struct Cli {
 pub enum Command {
     /// Check a file
     #[clap(aliases = &["c"])]
-    Check { file: String },
+    Check { files: Vec<String> },
 
     /// Evaluates Main on Kind2
     #[clap(aliases = &["r"])]
@@ -74,7 +74,7 @@ fn run_cli() -> Result<(), String> {
     match cli_matches.command {
         Command::Eval { file: path } => cmd_eval_main(&config, &path),
         Command::Run { file: path } => cmd_run_main(&config, &path),
-        Command::Check { file: path } => cmd_check_all(&config, &path),
+        Command::Check { files: paths } => cmd_check_all(&config, paths),
         Command::Derive { file: path } => cmd_derive(&config, &path),
         Command::GenChecker { file: path } => cmd_gen_checker(&config, &path),
         Command::Show { file: path } => cmd_show(&config, &path),
