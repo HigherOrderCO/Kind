@@ -1,4 +1,4 @@
-(Main n) = API.check_all
+Main = API.check_all
 
 // Prelude
 // -------
@@ -234,10 +234,6 @@ Line = (String.cons 10 String.nil)
 // Checker.add_value (idx: U60) (val: Term) : (Checker Unit)
 (Checker.add_value idx val) = λctx λdep λrhs λsub
   (Checked (Context.add_value ctx idx val) dep rhs sub Unit)
-
-// Checker.find -(r: Type) U60 r (U60 -> Term -> (List Term) -> r) : (Checker r)
-(Checker.find idx d f) = λctx λdep λrhs λsub
-  (Checked ctx dep rhs sub (Context.find ctx idx d f))
 
 // Checker.fill (idx: U60) (val: Term) : (Checker Unit)
 (Checker.fill idx val) = λctx λdep λrhs λsub
