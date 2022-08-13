@@ -1128,17 +1128,17 @@ Line = (String.cons 10 String.nil)
 (Show.go (All orig name type body)) =
   (U60.if (== name 63) // underscore
     (Text [
-      "(" (Show type) " -> " (Show (body (Var orig name 0))) ")"
+      "((" (Show type) ") -> " (Show (body (Var orig name 0))) ")"
     ])
     (Text [
-      "(" (Show.name name) ": " (Show type) ") "
+      "(" (Show.name name) ": " (Show type) ") -> "
       (Show (body (Var orig name 0)))
     ]))
 
 (Show.go (Lam orig name body)) =
   (Text [
-    "@" (Show.name name) " "
-    (Show (body (Var orig name 0)))
+    "(" (Show.name name) " => "
+    (Show (body (Var orig name 0))) ")"
   ])
 
 (Show.go (Let orig name expr body)) = (Text [
@@ -1346,7 +1346,7 @@ Line = (String.cons 10 String.nil)
 
 (Show.go (Num orig numb)) =
   (Text [
-    "#" (Show.u60 numb)
+    (Show.u60 numb)
   ])
 
 (Show.go (Op2 orig oper val0 val1)) =
