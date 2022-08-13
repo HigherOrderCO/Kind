@@ -803,6 +803,43 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   )
 }
 
+pub fn parse_sig(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    Box::new(|state| {
+      let (state, all0) = parser::text("[", state)?;
+      let (state, name) = parser::name(state)?;
+      let (state, all1) = parser::text(":", state)?;
+      Ok((state, all0 && all1 && name.len() > 0))
+      //Ok((state, all0 && all1 && name.len() > 0 && is_var_head(name.chars().nth(0).unwrap_or(' '))))
+    }),
+    Box::new(|state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("[", state)?;
+      let (state, name) = parser::name1(state)?;
+      let (state, _)    = parser::consume(":", state)?;
+      let (state, tipo) = parse_apps(state)?;
+      let (state, _)    = parser::consume("]", state)?;
+      let (state, _)    = parser::text("->", state)?;
+      let (state, body) = parse_apps(state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(0, init, last);
+      Ok((state, Box::new(Term::Ctr {
+        orig,
+        name: "Sigma".to_string(),
+        args: vec![
+          tipo,
+          Box::new(Term::Lam {
+            orig,
+            name,
+            body,
+          })
+        ]
+      })))
+    }),
+    state,
+  )
+}
+
 pub fn parse_grp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
     parser::text_parser("("),
@@ -1350,6 +1387,7 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_op2), // `(+`
     Box::new(parse_grp), // `(`
     //Box::new(parse_app), // `(`
+    Box::new(parse_sig), // `[name:`
     Box::new(parse_lst), // `[`
     Box::new(parse_str), // `"`
     Box::new(parse_chr), // `'`
