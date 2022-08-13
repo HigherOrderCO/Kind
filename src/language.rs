@@ -1760,7 +1760,7 @@ pub fn compile_entry(entry: &Entry) -> String {
   if entry.rules.len() > 0 {
     result.push_str(&compile_rule_end(&entry.name, entry.rules[0].pats.len() as u64));
   }
-  result.push_str(&format!("(Verify {}.) =", entry.name));
+  result.push_str(&format!("(RuleOf {}.) =", entry.name));
   for rule in &entry.rules {
     result.push_str(&format!(" (List.cons {}", compile_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
   }
