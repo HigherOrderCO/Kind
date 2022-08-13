@@ -1131,8 +1131,8 @@ Line = (String.cons 10 String.nil)
       "((" (Show type) ") -> " (Show (body (Var orig name 0))) ")"
     ])
     (Text [
-      "(" (Show.name name) ": " (Show type) ") -> "
-      (Show (body (Var orig name 0)))
+      "((" (Show.name name) ": " (Show type) ") -> "
+      (Show (body (Var orig name 0))) ")"
     ]))
 
 (Show.go (Lam orig name body)) =
