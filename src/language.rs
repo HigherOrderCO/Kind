@@ -918,7 +918,7 @@ pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, if_t) = parse_apps(state)?;
       let (state, _)    = parser::text("}", state)?;
       let (state, _)    = parser::text("else", state)?;
-      let (state, _)    = parser::text("{", state)?;
+      let (state, _)    = parser::consume("{", state)?;
       let (state, if_f) = parse_apps(state)?;
       let (state, _)    = parser::text("}", state)?;
       let (state, last) = get_last_index(state)?;
