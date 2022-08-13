@@ -215,7 +215,7 @@ Line = (String.cons 10 String.nil)
 
 // Checker.new_equation (orig: U60) (a: Term) (b: Term) : (Checker Unit)
 (Checker.new_equation orig a b) = λctx λdep λrhs λsub λeqt λerr
-  (Checked ctx dep rhs sub (List.cons (Equation orig a b) eqt) err Unit.new)
+  (Checked ctx dep rhs sub (List.append eqt (Equation ctx orig a b)) err Unit.new)
 
 // Checker.get_equations : (Checker (List (Pair Term Term)))
 (Checker.get_equations) = λctx λdep λrhs λsub λeqt λerr
@@ -589,8 +589,6 @@ Line = (String.cons 10 String.nil)
 // Equal Term Term : (Checker Bool)
 // --------------------------------
 
-//(Equal a b) = (HVM.log (EQUAL (Show a) (Show b)) (Equal a b))
-
 // Typ equality
 (Equal (Typ orig) (Typ orig)) =
   (Checker.done True)
@@ -895,12 +893,14 @@ Line = (String.cons 10 String.nil)
 (Infer (Var orig name index)) =
   ask got_type = (Checker.bind (Checker.find index None λnλtλv(Some t)))
   (Maybe.case got_type
-    (Checker.fail (UnboundVariable orig))
+    ask ctx = (Checker.bind Checker.get_context)
+    (Checker.fail (UnboundVariable ctx orig))
     λvar_type (Checker.done var_type))
 
 // Infers Hol
 (Infer (Hol orig numb)) =
-  (Checker.fail (CantInferHole (Hol orig numb)))
+  ask ctx = (Checker.bind Checker.get_context)
+  (Checker.fail (CantInferHole ctx (Hol orig numb)))
 
 // Infers Typ
 (Infer (Typ orig)) =
@@ -915,7 +915,8 @@ Line = (String.cons 10 String.nil)
 
 // Infers Lam
 (Infer (Lam orig name body)) =
-  (Checker.fail (CantInferLambda (Lam orig name body)))
+  ask ctx = (Checker.bind Checker.get_context)
+  (Checker.fail (CantInferLambda ctx (Lam orig name body)))
 
 // Infers App
 (Infer (App orig func argm)) =
@@ -927,7 +928,8 @@ Line = (String.cons 10 String.nil)
       ask argm_ok = (Checker.bind (Check argm func_typ_type))
       (Checker.done (func_typ_body (Eval argm)))
     // else
-    (Checker.fail (InvalidCall (App orig func argm))))
+    ask ctx = (Checker.bind Checker.get_context)
+    (Checker.fail (InvalidCall ctx (App orig func argm))))
 
 // Infers Let
 (Infer (Let orig name expr body)) =
@@ -1015,7 +1017,8 @@ Line = (String.cons 10 String.nil)
 
 // Infers Hlp
 (Infer (Hlp orig)) =
-  (Checker.fail (Inspection (Hlp orig) (Hlp 0)))
+  ask ctx = (Checker.bind (Checker.get_context))
+  (Checker.fail (Inspection ctx (Hlp orig) (Hlp 0)))
 
 // Infers U60
 (Infer (U60 orig)) =
@@ -1043,7 +1046,8 @@ Line = (String.cons 10 String.nil)
       ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (t_body (Var t_orig t_name dep))) name t_type []))
       (Checker.done Unit.new)
     λorig λname λbody
-      (Checker.fail (CantInferLambda (Lam orig name body))))
+      ask ctx = (Checker.bind Checker.get_context)
+      (Checker.fail (CantInferLambda ctx (Lam orig name body))))
     orig name body)
 
 // Checks Let
@@ -1055,7 +1059,8 @@ Line = (String.cons 10 String.nil)
 
 // Infers Hlp
 (Check (Hlp orig) type) =
-  ask (Checker.bind (Checker.error Unit.new (Inspection orig type)))
+  ask ctx = (Checker.bind (Checker.get_context))
+  ask (Checker.bind (Checker.error Unit.new (Inspection ctx orig type)))
   (Checker.done type)
 
 // Checks Var
@@ -1085,7 +1090,8 @@ Line = (String.cons 10 String.nil)
         ask is_equal = (Checker.bind (Equal (Eval term_typ) (Eval type)))
         (Bool.if is_equal
           (Checker.done Unit.new)
-          (Checker.fail (ImpossibleCase orig type term_typ)))) // impossible case
+          ask ctx = (Checker.bind Checker.get_context)
+          (Checker.fail (ImpossibleCase ctx orig type term_typ)))) // impossible case
       term_typ type))
 
 // Check.rule Rule (List Term) : (Checker Unit)
@@ -1096,7 +1102,8 @@ Line = (String.cons 10 String.nil)
   ask args_chk = (Checker.bind (Check.rule args (body arg)))
   (Checker.done Unit.new)
 (Check.rule (LHS arg args) other) =
-  (Checker.fail (TooManyArguments arg))
+  ask ctx = (Checker.bind Checker.get_context)
+  (Checker.fail (TooManyArguments ctx arg))
 (Check.rule (RHS expr) type) =
   ask (Checker.bind (Checker.set_right_hand_side True))
   ask expr_chk = (Checker.bind (Check expr type))
@@ -1116,18 +1123,18 @@ Line = (String.cons 10 String.nil)
 (Unify.go List.nil List.nil changed) = (Checker.done Unit.new)
 (Unify.go List.nil unsolved True)    = (Unify.go unsolved List.nil False)
 (Unify.go List.nil unsolved False)   = (Unify.go.fail unsolved)
-(Unify.go (List.cons (Equation o a b) equations) unsolved changed) =
+(Unify.go (List.cons (Equation ctx orig a b) equations) unsolved changed) =
   ask is_equal = (Checker.bind (Equal (Eval a) (Eval b)))
   ((Bool.if is_equal
     @eqt @uns (Unify.go eqt uns True)
-    @eqt @uns (Unify.go eqt (List.cons (Equation o a b) uns) changed)
+    @eqt @uns (Unify.go eqt (List.cons (Equation ctx orig a b) uns) changed)
   ) equations unsolved)
 
 // Throws a TypeMismatch error for every equation in a list
 // Unify.fail (eqts: List Equations) : (Checker Unit)
 (Unify.go.fail List.nil) = (Checker.done Unit.new)
-(Unify.go.fail (List.cons (Equation orig a b) eqts)) =
-  ask (Checker.bind (Checker.error Unit.new (TypeMismatch orig a b)))
+(Unify.go.fail (List.cons (Equation ctx orig a b) eqts)) =
+  ask (Checker.bind (Checker.error Unit.new (TypeMismatch ctx orig a b)))
   (Unify.go.fail eqts)
 
 // APP U60 Term Term : Term
@@ -1571,52 +1578,52 @@ API.eval_main = (Text [
 // Converts a list of check results to a string
 // API.output.function (fnid: FnId) (List (Result Unit)) : String
 (API.output.function fnid List.nil)                                                 = String.nil
-(API.output.function fnid (List.cons (Checked ctx dep rhs sub eqt err val) checks)) = (API.output.function.show_errors err ctx sub fnid checks)
-(API.output.function fnid (List.cons (Errored ctx sub err) checks))                 = (API.output.function.show_errors err ctx sub fnid checks)
+(API.output.function fnid (List.cons (Checked ctx dep rhs sub eqt err val) checks)) = (API.output.function.show_errors err sub fnid checks)
+(API.output.function fnid (List.cons (Errored ctx sub err) checks))                 = (API.output.function.show_errors err sub fnid checks)
 
 // Shows the errors returned by a function check
 // API.output (List Error) FnId (List (Result Unit)) : String
-(API.output.function.show_errors List.nil             ctx sub fnid checks) = (API.output.function fnid checks)
-(API.output.function.show_errors (List.cons err errs) ctx sub fnid checks) = (Text [
-  (API.output.error fnid err ctx sub) Line
-  (API.output.function.show_errors errs ctx sub fnid checks)
+(API.output.function.show_errors List.nil             sub fnid checks) = (API.output.function fnid checks)
+(API.output.function.show_errors (List.cons err errs) sub fnid checks) = (Text [
+  (API.output.error fnid err sub) Line
+  (API.output.function.show_errors errs sub fnid checks)
 ])
 
 // Shows a specific error
-// API.output.error (fnid: FnId) (err: Error) (ctx: Context) (sub: Subst) : String
-(API.output.error fnid (UnboundVariable orig) ctx sub) = (Text [
+// API.output.error (fnid: FnId) (err: Error) (sub: Subst) : String
+(API.output.error fnid (UnboundVariable ctx orig) sub) = (Text [
   (Color "4") "Unbound Variable." (Color "0") Line
   (API.output.error.details fnid ctx sub orig)
 ])
-(API.output.error fnid (CantInferLambda orig) ctx sub) = (Text [
+(API.output.error fnid (CantInferLambda ctx orig) sub) = (Text [
   (Color "4") "Can't infer lambda." (Color "0") Line
   (API.output.error.details fnid ctx sub orig)
 ])
-(API.output.error fnid (CantInferHole orig) ctx sub) = (Text [
+(API.output.error fnid (CantInferHole ctx orig) sub) = (Text [
   (Color "4") "Can't infer hole." (Color "0") Line
   (API.output.error.details fnid ctx sub orig)
 ])
-(API.output.error fnid (TooManyArguments orig) ctx sub) = (Text [
+(API.output.error fnid (TooManyArguments ctx orig) sub) = (Text [
   (Color "4") "Too many arguments." (Color "0") Line
   (API.output.error.details fnid ctx sub orig)
 ])
-(API.output.error fnid (InvalidCall orig) ctx sub) = (Text [
+(API.output.error fnid (InvalidCall ctx orig) sub) = (Text [
   (Color "4") "Invalid call." (Color "0") Line
   (API.output.error.details fnid ctx sub orig)
 ])
-(API.output.error fnid (TypeMismatch orig expected detected) ctx sub) = (Text [
+(API.output.error fnid (TypeMismatch ctx orig expected detected) sub) = (Text [
   (Color "4") "Type mismatch." (Color "0") Line
   "- Expected: " (String.cut (Show (Term.fill expected sub))) Line
   "- Detected: " (String.cut (Show (Term.fill detected sub))) Line
   (API.output.error.details fnid ctx sub orig)
 ])
-(API.output.error fnid (ImpossibleCase orig expected detected) ctx sub) = (Text [
+(API.output.error fnid (ImpossibleCase ctx orig expected detected) sub) = (Text [
   (Color "4") "Impossible case. You can remove it." (Color "0") Line
   //"- Expected: " (String.cut (Show (Term.fill expected sub))) Line
   //"- Detected: " (String.cut (Show (Term.fill detected sub))) Line
   (API.output.error.details fnid ctx sub orig)
 ])
-(API.output.error fnid (Inspection orig expected) ctx sub) = (Text [
+(API.output.error fnid (Inspection ctx orig expected) sub) = (Text [
   (Color "4") "Inspection." (Color "0") Line
   "- Goal: " (String.cut (Show (Term.fill expected sub))) Line
   (API.output.error.details fnid ctx sub orig)
