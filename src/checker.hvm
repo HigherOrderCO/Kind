@@ -1458,7 +1458,7 @@ Line = (String.cons 10 String.nil)
   (Some (Text [
     "["
     (Show.name name)
-    ":"
+    ": "
     (Show type)
     "] -> "
     (Show (body (Var orig_ name 0)))
