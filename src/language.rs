@@ -794,7 +794,7 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, tipo) = parse_apps(state)?;
       let (state, _)    = parser::consume(")", state)?;
       let (state, _)    = parser::text("->", state)?;
-      let (state, body) = parse_term(state)?;
+      let (state, body) = parse_apps(state)?;
       let (state, last) = get_last_index(state)?;
       let orig          = origin(0, init, last);
       Ok((state, Box::new(Term::All { orig, name, tipo, body })))
