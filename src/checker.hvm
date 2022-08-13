@@ -900,7 +900,7 @@ Line = (String.cons 10 String.nil)
 // Infers Hol
 (Infer (Hol orig numb)) =
   ask ctx = (Checker.bind Checker.get_context)
-  (Checker.fail (CantInferHole ctx (Hol orig numb)))
+  (Checker.fail (CantInferHole ctx orig))
 
 // Infers Typ
 (Infer (Typ orig)) =
@@ -916,7 +916,7 @@ Line = (String.cons 10 String.nil)
 // Infers Lam
 (Infer (Lam orig name body)) =
   ask ctx = (Checker.bind Checker.get_context)
-  (Checker.fail (CantInferLambda ctx (Lam orig name body)))
+  (Checker.fail (CantInferLambda ctx orig))
 
 // Infers App
 (Infer (App orig func argm)) =
@@ -929,7 +929,7 @@ Line = (String.cons 10 String.nil)
       (Checker.done (func_typ_body (Eval argm)))
     // else
     ask ctx = (Checker.bind Checker.get_context)
-    (Checker.fail (InvalidCall ctx (App orig func argm))))
+    (Checker.fail (InvalidCall ctx orig)))
 
 // Infers Let
 (Infer (Let orig name expr body)) =
@@ -1018,7 +1018,7 @@ Line = (String.cons 10 String.nil)
 // Infers Hlp
 (Infer (Hlp orig)) =
   ask ctx = (Checker.bind (Checker.get_context))
-  (Checker.fail (Inspection ctx (Hlp orig) (Hlp 0)))
+  (Checker.fail (Inspection ctx orig (Hlp 0)))
 
 // Infers U60
 (Infer (U60 orig)) =
@@ -1047,7 +1047,7 @@ Line = (String.cons 10 String.nil)
       (Checker.done Unit.new)
     λorig λname λbody
       ask ctx = (Checker.bind Checker.get_context)
-      (Checker.fail (CantInferLambda ctx (Lam orig name body))))
+      (Checker.fail (CantInferLambda ctx orig)))
     orig name body)
 
 // Checks Let
@@ -1103,7 +1103,7 @@ Line = (String.cons 10 String.nil)
   (Checker.done Unit.new)
 (Check.rule (LHS arg args) other) =
   ask ctx = (Checker.bind Checker.get_context)
-  (Checker.fail (TooManyArguments ctx arg))
+  (Checker.fail (TooManyArguments ctx (Term.get_origin arg (@orig @term orig))))
 (Check.rule (RHS expr) type) =
   ask (Checker.bind (Checker.set_right_hand_side True))
   ask expr_chk = (Checker.bind (Check expr type))
