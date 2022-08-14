@@ -793,11 +793,23 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
       let (state, _)    = parser::consume(":", state)?;
       let (state, tipo) = parse_apps(state)?;
       let (state, _)    = parser::consume(")", state)?;
-      let (state, _)    = parser::text("->", state)?;
-      let (state, body) = parse_apps(state)?;
-      let (state, last) = get_last_index(state)?;
-      let orig          = origin(0, init, last);
-      Ok((state, Box::new(Term::All { orig, name, tipo, body })))
+      let (state, isfn) = parser::text("=>", state)?;
+      if isfn {
+        let (state, body) = parse_apps(state)?;
+        let (state, last) = get_last_index(state)?;
+        let orig          = origin(0, init, last);
+        Ok((state, Box::new(Term::Ann {
+          orig,
+          expr: Box::new(Term::Lam { orig, name: name.clone(), body }),
+          tipo: Box::new(Term::All { orig, name: name.clone(), tipo, body: Box::new(Term::Hol { orig, numb: 0 }) }),
+        })))
+      } else {
+        let (state, _)    = parser::text("->", state)?;
+        let (state, body) = parse_apps(state)?;
+        let (state, last) = get_last_index(state)?;
+        let orig          = origin(0, init, last);
+        Ok((state, Box::new(Term::All { orig, name, tipo, body })))
+      }
     }),
     state,
   )
