@@ -852,6 +852,32 @@ pub fn parse_sig(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   )
 }
 
+pub fn parse_new(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+  parser::guard(
+    parser::text_parser("$"),
+    Box::new(move |state| {
+      let (state, init) = get_init_index(state)?;
+      let (state, _)    = parser::consume("$", state)?;
+      let (state, val0) = parse_term(state)?;
+      let (state, val1) = parse_term(state)?;
+      let (state, last) = get_last_index(state)?;
+      let orig          = origin(0, init, last);
+      Ok((state, Box::new(Term::Ctr {
+        orig,
+        name: "Sigma.new".to_string(),
+        args: vec![
+          Box::new(Term::Hol { orig, numb: 0 }),
+          Box::new(Term::Hol { orig, numb: 0 }),
+          val0,
+          val1
+        ]
+      })))
+    }),
+    state,
+  )
+}
+
+
 pub fn parse_grp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
     parser::text_parser("("),
@@ -1400,6 +1426,7 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     Box::new(parse_grp), // `(`
     //Box::new(parse_app), // `(`
     Box::new(parse_sig), // `[name:`
+    Box::new(parse_new), // `$`
     Box::new(parse_lst), // `[`
     Box::new(parse_str), // `"`
     Box::new(parse_chr), // `'`
