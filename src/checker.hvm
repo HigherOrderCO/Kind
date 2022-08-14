@@ -1456,12 +1456,13 @@ Line = (String.cons 10 String.nil)
 
 (Show.sugar.sigma (Ct2 Sigma. orig type (Lam orig_ name body))) =
   (Some (Text [
-    "["
+    "(["
     (Show.name name)
     ": "
     (Show type)
     "] -> "
     (Show (body (Var orig_ name 0)))
+    ")"
   ]))
 (Show.sugar.sigma other) =
   None
