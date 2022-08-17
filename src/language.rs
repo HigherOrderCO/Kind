@@ -1763,7 +1763,11 @@ pub fn compile_entry(entry: &Entry) -> String {
     let rule_rhs = compile_term(&rule.body, false, false);
     let mut text = String::new();
     text.push_str(&format!("(Q${} orig{}) = {}\n", rule.name, pats.join(""), body_rhs));
-    text.push_str(&format!("(F${} orig{}) = {}\n", rule.name, pats.join(""), rule_rhs));
+    if rule.name == "HVM.log" {
+      text.push_str(&format!("(F$HVM.log orig a r log ret) = (HVM.put (Show log) ret)"));
+    } else {
+      text.push_str(&format!("(F${} orig{}) = {}\n", rule.name, pats.join(""), rule_rhs));
+    }
 
   //for size in 0 .. 9 {
     //let mut vars = vec![];

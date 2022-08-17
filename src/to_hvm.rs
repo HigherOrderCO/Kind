@@ -103,6 +103,9 @@ pub fn to_hvm_rule(book: &Book, rule: &Rule) -> String {
 
 pub fn to_hvm_entry(book: &Book, entry: &Entry) -> String {
   let name = &entry.name;
+  if name == "HVM.log" {
+    return "".to_string();
+  }
   let mut args = vec![];
   for arg in &entry.args {
     args.push(format!(" {}({}: {})", if arg.eras { "-" } else { "" }, arg.name, show_term(&arg.tipo)));

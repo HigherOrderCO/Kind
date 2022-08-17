@@ -259,14 +259,14 @@ fn run_with_hvm(code: &str, main: &str, read_string: bool) -> Result<RunResult, 
 pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
   let str_cons = rt.get_id("String.cons");
   let str_nil  = rt.get_id("String.nil");
-  let mut term = rt.ptr(host);
+  let mut term = rt.at(host);
   let mut text = String::new();
   loop {
     if hvm::get_tag(term) == hvm::CTR {
       let fid = hvm::get_ext(term);
       if fid == str_cons {
-        let head = rt.ptr(hvm::get_loc(term, 0));
-        let tail = rt.ptr(hvm::get_loc(term, 1));
+        let head = rt.at(hvm::get_loc(term, 0));
+        let tail = rt.at(hvm::get_loc(term, 1));
         if hvm::get_tag(head) == hvm::NUM {
           text.push(std::char::from_u32(hvm::get_num(head) as u32).unwrap_or('?'));
           term = tail;
