@@ -1192,7 +1192,7 @@ Line = (String.cons 10 String.nil)
 ])
 
 (Show.go (Hol orig numb)) = (Text [
-  "_" (Show.u60 numb)
+  "_"
 ])
 
 (Show.go (Typ orig)) = (Text [
