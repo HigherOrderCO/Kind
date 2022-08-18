@@ -1885,7 +1885,30 @@ pub fn compile_book(book: &Book) -> String {
 // Stringification
 // ===============
 
+pub fn interpret_as_string(term: &Term) -> Option<String> {
+  let mut text = String::new();
+  let mut term = term;
+  loop {
+    if let Term::Ctr { name, args, .. } = term {
+      if name == "String.cons" && args.len() == 2 {
+        if let Term::Num { numb, .. } = *args[0] {
+          text.push(char::from_u32(numb as u32).unwrap_or('\0'));
+          term = &*args[1];
+        }
+        continue;
+      }
+      if name == "String.nil" && args.len() == 0 {
+        return Some(text);
+      }
+    }
+    return None;
+  }
+}
+
 pub fn show_term(term: &Term) -> String {
+  if let Some(as_string) = interpret_as_string(term) {
+    return format!("\"{}\"", as_string);
+  }
   match term {
     Term::Typ { .. } => {
       format!("Type")

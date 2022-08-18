@@ -4,6 +4,9 @@
 use crate::language::{*};
 
 pub fn to_hvm_term(book: &Book, term: &Term) -> String {
+  if let Some(as_string) = interpret_as_string(term) {
+    return format!("\"{}\"", as_string);
+  }
   match term {
     Term::Typ { .. } => {
       format!("Type")
