@@ -1085,7 +1085,7 @@ Line = (String.cons 10 String.nil)
     ask term_typ = (Checker.bind (Infer term))
     ((Bool.if rhs
       @term_typ @type
-        (Checker.new_equation orig term_typ type)
+        (Checker.new_equation orig type term_typ)
       @term_typ @type
         ask is_equal = (Checker.bind (Equal (Eval term_typ) (Eval type)))
         (Bool.if is_equal
