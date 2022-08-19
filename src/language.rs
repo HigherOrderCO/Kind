@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use hvm::parser as parser;
 use std::rc::Rc;
+use std::ascii;
 
 #[derive(Clone, Debug)]
 pub struct Book {
@@ -1892,8 +1893,11 @@ pub fn interpret_as_string(term: &Term) -> Option<String> {
     if let Term::Ctr { name, args, .. } = term {
       if name == "String.cons" && args.len() == 2 {
         if let Term::Num { numb, .. } = *args[0] {
-          text.push(char::from_u32(numb as u32).unwrap_or('\0'));
+          let chr = ascii::escape_default(numb as u8).to_string();
+          text.push_str(&chr);
           term = &*args[1];
+        } else {
+          return None;
         }
         continue;
       }
