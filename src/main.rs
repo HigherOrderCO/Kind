@@ -107,7 +107,7 @@ fn run_cli() -> Result<(), String> {
 // Checks all definitions of a Kind2 file
 fn cmd_check_all(path: &str) -> Result<(), String> {
   let loaded = load(path)?;
-  let result = run_with_hvm(&gen_checker(&loaded.book), "API.check_all", true)?;
+  let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.check_all", true)?;
   print!("{}", inject_highlights(&loaded.file, &result.output));
   println!("Rewrites: {}", result.rewrites);
   Ok(())
@@ -118,7 +118,7 @@ fn cmd_check_all(path: &str) -> Result<(), String> {
 fn cmd_eval_main(path: &str) -> Result<(), String> {
   let loaded = load(path)?;
   if loaded.book.entrs.contains_key("Main") {
-    let result = run_with_hvm(&gen_checker(&loaded.book), "API.eval_main", true)?;
+    let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.eval_main", true)?;
     print!("{}", result.output);
     println!("Rewrites: {}", result.rewrites);
     Ok(())

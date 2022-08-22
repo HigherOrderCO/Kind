@@ -122,7 +122,7 @@ pub fn new_book() -> Book {
 
 pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
   let mut names = Vec::new();
-  let mut entrs = HashMap::new(); 
+  let mut entrs = HashMap::new();
   let mut types = HashMap::new();
   let mut holes = 0;
   for name in &book.names {
@@ -413,7 +413,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
 pub fn book_get_unbounds(book: &Book) -> HashSet<String> {
   let mut names = Vec::new();
   let mut types = HashMap::new();
-  let mut unbound = HashSet::new(); 
+  let mut unbound = HashSet::new();
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
     names.push(name.clone());
@@ -1645,40 +1645,44 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
   }
   match term {
     Term::Typ { orig } => {
-      format!("(Typ {})", hide(orig,lhs))
+      format!("(Kind.Term.typ {})", hide(orig,lhs))
     }
     Term::Var { orig, name } => {
       if lhs {
         format!("{}", name)
       } else {
         if quote {
-          format!("(SO {} {})", orig, name.clone())
+          format!("(Kind.Term.set_origin {} {})", orig, name.clone())
         } else {
           format!("{}", name.clone()) // spaces to align with quoted version
         }
       }
     }
     Term::All { orig, name, tipo, body } => {
-      format!("(All {} {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), compile_term(tipo, quote, lhs), name, compile_term(body, quote, lhs))
+      format!("(Kind.Term.all {} {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), compile_term(tipo, quote, lhs), name, compile_term(body, quote, lhs))
     }
     Term::Lam { orig, name, body } => {
-      format!("(Lam {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), name, compile_term(body, quote, lhs))
+      format!("(Kind.Term.lam {} {} λ{} {})", hide(orig,lhs), name_to_u64(name), name, compile_term(body, quote, lhs))
     }
     Term::App { orig, func, argm } => {
-      format!("({} {} {} {})", if quote { "App" } else { "APP" }, hide(orig,lhs), compile_term(func, quote, lhs), compile_term(argm, quote, lhs))
+      format!("({} {} {} {})", if quote { "Kind.Term.app" } else { "Kind.Term.eval_app" }, hide(orig,lhs), compile_term(func, quote, lhs), compile_term(argm, quote, lhs))
     }
     Term::Let { orig, name, expr, body } => {
-      format!("({} {} {} {} λ{} {})", if quote { "Let" } else { "LET" }, hide(orig,lhs), name_to_u64(name), compile_term(expr, quote, lhs), name, compile_term(body, quote, lhs))
+      format!("({} {} {} {} λ{} {})", if quote { "Kind.Term.let" } else { "Kind.Term.eval_let" }, hide(orig,lhs), name_to_u64(name), compile_term(expr, quote, lhs), name, compile_term(body, quote, lhs))
     }
     Term::Ann { orig, expr, tipo } => {
-      format!("({} {} {} {})", if quote { "Ann" } else { "ANN" }, hide(orig,lhs), compile_term(expr, quote, lhs), compile_term(tipo, quote, lhs))
+      format!("({} {} {} {})", if quote { "Kind.Term.ann" } else { "Kind.Term.eval_ann" }, hide(orig,lhs), compile_term(expr, quote, lhs), compile_term(tipo, quote, lhs))
     }
     Term::Ctr { orig, name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
       for arg in args {
         args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
-      format!("(Ct{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
+      if args.len() >= 7 {
+        format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, hide(orig,lhs), args.len(), args_strs.join(""))
+      } else {
+        format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
+      }
     }
     Term::Fun { orig, name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
@@ -1686,26 +1690,30 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
         args_strs.push(format!(" {}", compile_term(arg, quote, lhs)));
       }
       if quote {
-        format!("(Fn{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
+        if args.len() >= 7 {
+          format!("(Kind.Term.fn{} {}. {}(Kind.Term.args{} {}))", args.len(), name, hide(orig,lhs), args.len(), args_strs.join(""))
+        } else {
+          format!("(Kind.Term.fn{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
+        }
       } else {
         format!("(F${} {}{})", name, hide(orig,lhs), args_strs.join(""))
       }
     }
     Term::Hlp { orig } => {
-      format!("(Hlp {})", hide(orig,lhs))
+      format!("(Kind.Term.hlp {})", hide(orig,lhs))
     }
     Term::U60 { orig } => {
-      format!("(U60 {})", hide(orig,lhs))
+      format!("(Kind.Term.u60 {})", hide(orig,lhs))
     }
     Term::Num { orig, numb } => {
-      format!("(Num {} {})", hide(orig,lhs), numb)
+      format!("(Kind.Term.num {} {})", hide(orig,lhs), numb)
     }
     Term::Op2 { orig, oper, val0, val1 } => {
       // TODO: Add operator
-      format!("({} {} {} {} {})", if quote { "Op2" } else { "OP2" }, hide(orig,lhs), compile_oper(oper), compile_term(val0, quote, lhs), compile_term(val1, quote, lhs))
+      format!("({} {} {} {} {})", if quote { "Kind.Term.op2" } else { "Kind.Term.eval_op" }, hide(orig,lhs), compile_oper(oper), compile_term(val0, quote, lhs), compile_term(val1, quote, lhs))
     }
     Term::Hol { orig, numb } => {
-      format!("(Hol {} {})", orig, numb)
+      format!("(Kind.Term.hol {} {})", orig, numb)
     }
     Term::Mat { .. } => {
       panic!("Internal error."); // removed after adjust()
@@ -1715,22 +1723,22 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
 
 pub fn compile_oper(oper: &Oper) -> String {
   match oper {
-    Oper::Add => "ADD".to_string(),
-    Oper::Sub => "SUB".to_string(),
-    Oper::Mul => "MUL".to_string(),
-    Oper::Div => "DIV".to_string(),
-    Oper::Mod => "MOD".to_string(),
-    Oper::And => "AND".to_string(),
-    Oper::Or  => "OR" .to_string(),
-    Oper::Xor => "XOR".to_string(),
-    Oper::Shl => "SHL".to_string(),
-    Oper::Shr => "SHR".to_string(),
-    Oper::Ltn => "LTN".to_string(),
-    Oper::Lte => "LTE".to_string(),
-    Oper::Eql => "EQL".to_string(),
-    Oper::Gte => "GTE".to_string(),
-    Oper::Gtn => "GTN".to_string(),
-    Oper::Neq => "NEQ".to_string(),
+    Oper::Add => "Kind.Operator.add".to_string(),
+    Oper::Sub => "Kind.Operator.sub".to_string(),
+    Oper::Mul => "Kind.Operator.mul".to_string(),
+    Oper::Div => "Kind.Operator.div".to_string(),
+    Oper::Mod => "Kind.Operator.mod".to_string(),
+    Oper::And => "Kind.Operator.and".to_string(),
+    Oper::Or  => "Kind.Operator.or" .to_string(),
+    Oper::Xor => "Kind.Operator.xor".to_string(),
+    Oper::Shl => "Kind.Operator.shl".to_string(),
+    Oper::Shr => "Kind.Operator.shr".to_string(),
+    Oper::Ltn => "Kind.Operator.ltn".to_string(),
+    Oper::Lte => "Kind.Operator.lte".to_string(),
+    Oper::Eql => "Kind.Operator.eql".to_string(),
+    Oper::Gte => "Kind.Operator.gte".to_string(),
+    Oper::Gtn => "Kind.Operator.gtn".to_string(),
+    Oper::Neq => "Kind.Operator.neq".to_string(),
   }
 }
 
@@ -1738,7 +1746,7 @@ pub fn compile_entry(entry: &Entry) -> String {
   fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
     if index < args.len() {
       let arg = &args[index];
-      format!("(All {} {} {} λ{} {})", 0, name_to_u64(&arg.name), compile_term(&arg.tipo, false, false), arg.name, compile_type(args, tipo, index + 1))
+      format!("(Kind.Term.all {} {} {} λ{} {})", 0, name_to_u64(&arg.name), compile_term(&arg.tipo, false, false), arg.name, compile_type(args, tipo, index + 1))
     } else {
       compile_term(tipo, false, false)
     }
@@ -1750,8 +1758,15 @@ pub fn compile_entry(entry: &Entry) -> String {
       vars.push(format!(" x{}", idx));
     }
     let mut text = String::new();
-    text.push_str(&format!("(Q${} orig{}) = (Fn{} {}. orig{})\n", name, vars.join(""), size, name, vars.join("")));
-    text.push_str(&format!("(F${} orig{}) = (Fn{} {}. orig{})\n", name, vars.join(""), size, name, vars.join("")));
+
+    if size >= 7 {
+      text.push_str(&format!("(Q${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))\n", name, vars.join(""), size, name, size, vars.join("")));
+      text.push_str(&format!("(F${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))\n", name, vars.join(""), size, name, size, vars.join("")));
+    } else {
+      text.push_str(&format!("(Q${} orig{}) = (Kind.Term.fn{} {}. orig{})\n", name, vars.join(""), size, name, vars.join("")));
+      text.push_str(&format!("(F${} orig{}) = (Kind.Term.fn{} {}. orig{})\n", name, vars.join(""), size, name, vars.join("")));
+    }
+
     return text;
   }
 
@@ -1765,7 +1780,7 @@ pub fn compile_entry(entry: &Entry) -> String {
     let mut text = String::new();
     text.push_str(&format!("(Q${} orig{}) = {}\n", rule.name, pats.join(""), body_rhs));
     if rule.name == "HVM.log" {
-      text.push_str(&format!("(F$HVM.log orig a r log ret) = (HVM.put (Show log) ret)"));
+      text.push_str(&format!("(F$HVM.log orig a r log ret) = (HVM.put (Kind.Term.show log) ret)"));
     } else {
       text.push_str(&format!("(F${} orig{}) = {}\n", rule.name, pats.join(""), rule_rhs));
     }
@@ -1789,9 +1804,9 @@ pub fn compile_entry(entry: &Entry) -> String {
       args.push(var_patt_str);
       let head = inp_patt_str;
       let tail = compile_rule_chk(rule, index + 1, vars, args);
-      return format!("(LHS {} {})", head, tail);
+      return format!("(Kind.Rule.lhs {} {})", head, tail);
     } else {
-      return format!("(RHS (QT{} {}. 0{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
+      return format!("(Kind.Rule.rhs (QT{} {}. 0{}))", index, rule.name, args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join(""));
     }
   }
 
@@ -1799,8 +1814,8 @@ pub fn compile_entry(entry: &Entry) -> String {
     // FIXME: remove redundancy
     match patt {
       Term::Var { orig, name } => {
-        let inp = format!("(Var {} {} {})", orig, name_to_u64(name), vars);
-        let var = format!("(Var {} {} {})", orig, name_to_u64(name), vars);
+        let inp = format!("(Kind.Term.var {} {} {})", orig, name_to_u64(name), vars);
+        let var = format!("(Kind.Term.var {} {} {})", orig, name_to_u64(name), vars);
         *vars += 1;
         return (inp, var);
       }
@@ -1812,13 +1827,19 @@ pub fn compile_entry(entry: &Entry) -> String {
           inp_args_str.push_str(&format!(" {}", inp_arg_str));
           var_args_str.push_str(&format!(" {}", var_arg_str));
         }
-        let inp_str = format!("(Ct{} {}. {}{})", args.len(), name, orig, inp_args_str);
-        let var_str = format!("(Ct{} {}. {}{})", args.len(), name, orig, var_args_str);
-        return (inp_str, var_str);
+        if args.len() >= 7 {
+          let inp_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), inp_args_str);
+          let var_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), var_args_str);
+          return (inp_str, var_str);
+        } else {
+          let inp_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig, inp_args_str);
+          let var_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig, var_args_str);
+          return (inp_str, var_str);
+        }
       }
       Term::Num { orig, numb } => {
-        let inp = format!("(Num {} {})", orig, numb);
-        let var = format!("(Num {} {})", orig, numb);
+        let inp = format!("(Kind.Term.num {} {})", orig, numb);
+        let var = format!("(Kind.Term.num {} {})", orig, numb);
         return (inp, var);
       }
       _ => {
@@ -1833,9 +1854,15 @@ pub fn compile_entry(entry: &Entry) -> String {
   result.push_str(&format!("(TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
 
   let base_vars = (0 .. entry.args.len()).map(|x| format!(" x{}", x)).collect::<Vec<String>>().join("");
-  result.push_str(&format!("(FN{} {}. orig{}) = (F${} orig{})\n", entry.args.len(), entry.name, base_vars, entry.name, base_vars));
-  result.push_str(&format!("(QT{} {}. orig{}) = (Q${} orig{})\n", entry.args.len(), entry.name, base_vars, entry.name, base_vars));
 
+  if entry.args.len() >= 7 {
+    result.push_str(&format!("(Kind.Term.FN{} {}. orig (Kind.Term.args{}{})) = (F${} orig{})\n", entry.args.len(), entry.name, entry.args.len(), base_vars, entry.name, base_vars));
+  } else {
+    result.push_str(&format!("(Kind.Term.FN{} {}. orig{}) = (F${} orig{})\n", entry.args.len(), entry.name, base_vars, entry.name, base_vars));
+  }
+  
+  result.push_str(&format!("(QT{} {}. orig{}) = (Q${} orig{})\n", entry.args.len(), entry.name, base_vars, entry.name, base_vars));
+  
   for rule in &entry.rules {
     result.push_str(&compile_rule(&rule));
   }
