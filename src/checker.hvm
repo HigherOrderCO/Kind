@@ -809,11 +809,17 @@ Line = (String.cons 10 String.nil)
 (Equal a (Hlp b.orig)) =
   (Checker.done True)
 
-// Hol equality #0
+// Hole equality #0
+(Equal (Hol a.orig a.numb) (Hol b.orig b.numb)) =
+  (U60.if (== a.numb b.numb)
+          (Checker.done True)
+          (Equal.hol a.orig a.numb (Hol b.orig b.numb)))
+
+// Hol equality #1
 (Equal (Hol a.orig a.numb) b) =
   (Equal.hol a.orig a.numb b)
 
-// Hol equality #1
+// Hol equality #2
 (Equal a (Hol b.orig b.numb)) =
   (Equal.hol b.orig b.numb a)
 
