@@ -910,7 +910,7 @@ Line = (String.cons 10 String.nil)
 (Infer (All orig name type body)) =
   ask dep      = (Checker.bind Checker.get_depth)
   ask type_chk = (Checker.bind (Check type (Typ orig)))
-  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (Typ orig)) name type []))
+  ask body_chk = (Checker.bind (Checker.extended (Check (body (Var orig name dep)) (Typ orig)) name (Eval type) []))
   (Checker.done (Typ orig))
 
 // Infers Lam
@@ -945,7 +945,7 @@ Line = (String.cons 10 String.nil)
 
 // Infers Ct0
 (Infer (Ct0 ctid orig)) =
-  (Checker.done (TypeOf ctid))
+  (Checker.done (Eval (TypeOf ctid)))
 
 // Infers Ct1
 (Infer (Ct1 ctid orig x0)) =
@@ -981,7 +981,7 @@ Line = (String.cons 10 String.nil)
 
 // Infers Fn0
 (Infer (Fn0 ctid orig)) =
-  (Checker.done (TypeOf ctid))
+  (Checker.done (Eval (TypeOf ctid)))
 
 // Infers Fn1
 (Infer (Fn1 ctid orig x0)) =
@@ -1566,7 +1566,7 @@ API.eval_main = (Text [
   let ruls = (RuleOf func)
   let type = (TypeOf func)
   let type_check = (Checker.run (Unify (Check type (Typ 0))) True)
-  let rule_check = (API.check_function.rules ruls type)
+  let rule_check = (API.check_function.rules ruls (Eval type))
   (List.cons type_check rule_check)
 
 // Checks a function's rules

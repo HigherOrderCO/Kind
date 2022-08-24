@@ -1738,9 +1738,9 @@ pub fn compile_entry(entry: &Entry) -> String {
   fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
     if index < args.len() {
       let arg = &args[index];
-      format!("(All {} {} {} λ{} {})", 0, name_to_u64(&arg.name), compile_term(&arg.tipo, false, false), arg.name, compile_type(args, tipo, index + 1))
+      format!("(All {} {} {} λ{} {})", 0, name_to_u64(&arg.name), compile_term(&arg.tipo, true, false), arg.name, compile_type(args, tipo, index + 1))
     } else {
-      compile_term(tipo, false, false)
+      compile_term(tipo, true, false)
     }
   }
 
