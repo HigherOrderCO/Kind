@@ -597,13 +597,13 @@ Line = (String.cons 10 String.nil)
 (Equal (All a.orig a.name a.type a.body) (All b.orig b.name b.type b.body)) =
   ask dep  = (Checker.bind Checker.get_depth)
   ask type = (Checker.bind (Equal a.type b.type))
-  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null Null))
+  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null []))
   (Checker.done (Bool.and type body))
 
 // Lam equality
 (Equal (Lam a.orig a.name a.body) (Lam b.orig b.name b.body)) =
   ask dep  = (Checker.bind Checker.get_depth)
-  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null Null))
+  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null []))
   (Checker.done body)
 
 // App equality
@@ -616,7 +616,7 @@ Line = (String.cons 10 String.nil)
 (Equal (Let a.orig a.name a.expr a.body) (Let b.orig b.name b.expr b.body)) =
   ask dep  = (Checker.bind Checker.get_depth)
   ask expr = (Checker.bind (Equal a.expr b.expr))
-  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null Null))
+  ask body = (Checker.bind (Checker.extended (Equal (a.body (Var a.orig a.name dep)) (b.body (Var b.orig b.name dep))) Null Null []))
   (Checker.done (Bool.and expr body))
 
 // Ann equality
