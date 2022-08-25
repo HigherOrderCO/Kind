@@ -1,40 +1,166 @@
 // Main : (String)
 (Main) = let imports = (List.cons (Dynamic.new @a @b (Kind.Term.set_origin a b)) (List.cons (Dynamic.new (Kind.API.check_all)) (List.cons (Dynamic.new (Kind.API.eval_main)) (List.nil)))); (Kind.API.check_all)
 
-// Kind.Term.set_origin (new_orig: U60) (term: (Kind.Term)) : (Kind.Term)
-(Kind.Term.set_origin new_origin (Kind.Term.typ old_orig)) = (Kind.Term.typ new_origin)
-(Kind.Term.set_origin new_origin (Kind.Term.var old_orig name idx)) = (Kind.Term.var new_origin name idx)
-(Kind.Term.set_origin new_origin (Kind.Term.hol old_orig numb)) = (Kind.Term.hol new_origin numb)
-(Kind.Term.set_origin new_origin (Kind.Term.all old_orig name typ body)) = (Kind.Term.all new_origin name typ body)
-(Kind.Term.set_origin new_origin (Kind.Term.lam old_orig name body)) = (Kind.Term.lam new_origin name body)
-(Kind.Term.set_origin new_origin (Kind.Term.let old_orig name expr body)) = (Kind.Term.let new_origin name expr body)
-(Kind.Term.set_origin new_origin (Kind.Term.ann old_orig expr typ)) = (Kind.Term.ann new_origin expr typ)
-(Kind.Term.set_origin new_origin (Kind.Term.app old_orig func arg)) = (Kind.Term.app new_origin func arg)
-(Kind.Term.set_origin new_origin (Kind.Term.hlp old_orig)) = (Kind.Term.hlp new_origin)
-(Kind.Term.set_origin new_origin (Kind.Term.u60 old_orig)) = (Kind.Term.u60 new_origin)
-(Kind.Term.set_origin new_origin (Kind.Term.num old_orig num)) = (Kind.Term.num new_origin num)
-(Kind.Term.set_origin new_origin (Kind.Term.op2 old_orig op left right)) = (Kind.Term.op2 new_origin op left right)
-(Kind.Term.set_origin new_origin (Kind.Term.ct0 ctid old_orig)) = (Kind.Term.ct0 ctid new_origin)
-(Kind.Term.set_origin new_origin (Kind.Term.ct1 ctid old_orig x0)) = (Kind.Term.ct1 ctid new_origin x0)
-(Kind.Term.set_origin new_origin (Kind.Term.ct2 ctid old_orig x0 x1)) = (Kind.Term.ct2 ctid new_origin x0 x1)
-(Kind.Term.set_origin new_origin (Kind.Term.ct3 ctid old_orig x0 x1 x2)) = (Kind.Term.ct3 ctid new_origin x0 x1 x2)
-(Kind.Term.set_origin new_origin (Kind.Term.ct4 ctid old_orig x0 x1 x2 x3)) = (Kind.Term.ct4 ctid new_origin x0 x1 x2 x3)
-(Kind.Term.set_origin new_origin (Kind.Term.ct5 ctid old_orig x0 x1 x2 x3 x4)) = (Kind.Term.ct5 ctid new_origin x0 x1 x2 x3 x4)
-(Kind.Term.set_origin new_origin (Kind.Term.ct6 ctid old_orig x0 x1 x2 x3 x4 x5)) = (Kind.Term.ct6 ctid new_origin x0 x1 x2 x3 x4 x5)
-(Kind.Term.set_origin new_origin (Kind.Term.ct7 ctid old_orig args)) = (Kind.Term.ct7 ctid new_origin args)
-(Kind.Term.set_origin new_origin (Kind.Term.ct8 ctid old_orig args)) = (Kind.Term.ct8 ctid new_origin args)
-(Kind.Term.set_origin new_origin (Kind.Term.fn0 fnid old_orig)) = (Kind.Term.fn0 fnid new_origin)
-(Kind.Term.set_origin new_origin (Kind.Term.fn1 fnid old_orig x0)) = (Kind.Term.fn1 fnid new_origin x0)
-(Kind.Term.set_origin new_origin (Kind.Term.fn2 fnid old_orig x0 x1)) = (Kind.Term.fn2 fnid new_origin x0 x1)
-(Kind.Term.set_origin new_origin (Kind.Term.fn3 fnid old_orig x0 x1 x2)) = (Kind.Term.fn3 fnid new_origin x0 x1 x2)
-(Kind.Term.set_origin new_origin (Kind.Term.fn4 fnid old_orig x0 x1 x2 x3)) = (Kind.Term.fn4 fnid new_origin x0 x1 x2 x3)
-(Kind.Term.set_origin new_origin (Kind.Term.fn5 fnid old_orig x0 x1 x2 x3 x4)) = (Kind.Term.fn5 fnid new_origin x0 x1 x2 x3 x4)
-(Kind.Term.set_origin new_origin (Kind.Term.fn6 fnid old_orig x0 x1 x2 x3 x4 x5)) = (Kind.Term.fn6 fnid new_origin x0 x1 x2 x3 x4 x5)
-(Kind.Term.set_origin new_origin (Kind.Term.fn7 ctid old_orig args)) = (Kind.Term.ct7 ctid new_origin args)
-(Kind.Term.set_origin new_origin (Kind.Term.fn8 ctid old_orig args)) = (Kind.Term.ct8 ctid new_origin args)
+// Kind.API.eval_main : (String)
+(Kind.API.eval_main) = (Kind.Printer.text (List.cons (Kind.Term.show (Kind.Term.FN0 (Main.) 0)) (List.cons (String.new_line) (List.cons (String.new_line) (List.nil)))))
+
+// Kind.Term.show.forall (orig: U60) (name: U60) (type: (Kind.Term)) (body: (_: (Kind.Term)) (Kind.Term)) : (String)
+(Kind.Term.show.forall orig name type body) = (U60.if (== name 63) (Kind.Printer.text (List.cons "(" (List.cons (Kind.Term.show type) (List.cons " -> " (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.cons ")" (List.nil))))))) (Kind.Printer.text (List.cons "((" (List.cons (Kind.Name.show name) (List.cons ": " (List.cons (Kind.Term.show type) (List.cons ") -> " (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.cons ")" (List.nil))))))))))
+
+// Kind.Term.show (term: (Kind.Term)) : (String)
+(Kind.Term.show term) = let sugars = (List.cons (Kind.Term.show.sugar.string term) (List.cons (Kind.Term.show.sugar.list term) (List.cons (Kind.Term.show.sugar.sigma term) (List.nil)))); (Maybe.try sugars (Kind.Term.show.go term))
+
+// Kind.Term.show.go (term: (Kind.Term)) : (String)
+(Kind.Term.show.go (Kind.Term.typ orig)) = "Type"
+(Kind.Term.show.go (Kind.Term.var orig name index)) = (Kind.Printer.text (List.cons (Kind.Name.show name) (List.nil)))
+(Kind.Term.show.go (Kind.Term.hol orig numb)) = (Kind.Printer.text (List.cons "_" (List.nil)))
+(Kind.Term.show.go (Kind.Term.all orig name type body)) = (Kind.Term.show.forall orig name type body)
+(Kind.Term.show.go (Kind.Term.lam orig name body)) = (Kind.Printer.text (List.cons "(" (List.cons (Kind.Name.show name) (List.cons "=>" (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.let orig name exp body)) = (Kind.Printer.text (List.cons "let " (List.cons (Kind.Name.show name) (List.cons " = " (List.cons (Kind.Term.show exp) (List.cons "; " (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.nil))))))))
+(Kind.Term.show.go (Kind.Term.ann orig expr type)) = (Kind.Printer.text (List.cons "{" (List.cons (Kind.Term.show expr) (List.cons " :: " (List.cons (Kind.Term.show type) (List.cons "}" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.app orig func argm)) = (Kind.Printer.text (List.cons "(" (List.cons (Kind.Term.show func) (List.cons " " (List.cons (Kind.Term.show argm) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.ct0 ctid orig)) = (NameOf ctid)
+(Kind.Term.show.go (Kind.Term.ct1 ctid orig x0)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.ct2 ctid orig x0 x1)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons ")" (List.nil)))))))))
+(Kind.Term.show.go (Kind.Term.ct3 ctid orig x0 x1 x2)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons ")" (List.nil)))))))))))
+(Kind.Term.show.go (Kind.Term.ct4 ctid orig x0 x1 x2 x3)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons ")" (List.nil)))))))))))))
+(Kind.Term.show.go (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons ")" (List.nil)))))))))))))))
+(Kind.Term.show.go (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons ")" (List.nil)))))))))))))))))
+(Kind.Term.show.go (Kind.Term.ct7 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.ct8 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.fn0 ctid orig)) = (NameOf ctid)
+(Kind.Term.show.go (Kind.Term.fn1 ctid orig x0)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.fn2 ctid orig x0 x1)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons ")" (List.nil)))))))))
+(Kind.Term.show.go (Kind.Term.fn3 ctid orig x0 x1 x2)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons ")" (List.nil)))))))))))
+(Kind.Term.show.go (Kind.Term.fn4 ctid orig x0 x1 x2 x3)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons ")" (List.nil)))))))))))))
+(Kind.Term.show.go (Kind.Term.fn5 ctid orig x0 x1 x2 x3 x4)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons ")" (List.nil)))))))))))))))
+(Kind.Term.show.go (Kind.Term.fn6 ctid orig x0 x1 x2 x3 x4 x5)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons ")" (List.nil)))))))))))))))))
+(Kind.Term.show.go (Kind.Term.fn7 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.fn8 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
+(Kind.Term.show.go (Kind.Term.args7 x0 x1 x2 x3 x4 x5 x6)) = (Kind.Printer.text (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons " " (List.cons (Kind.Term.show x6) (List.nil)))))))))))))))
+(Kind.Term.show.go (Kind.Term.args8 x0 x1 x2 x3 x4 x5 x6 x7)) = (Kind.Printer.text (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons " " (List.cons (Kind.Term.show x6) (List.cons " " (List.cons (Kind.Term.show x7) (List.nil)))))))))))))))))
+(Kind.Term.show.go (Kind.Term.hlp orig)) = "?"
+(Kind.Term.show.go (Kind.Term.u60 orig)) = "U60"
+(Kind.Term.show.go (Kind.Term.num orig numb)) = (Show.to_string (U60.show numb))
+(Kind.Term.show.go (Kind.Term.op2 orig operator left right)) = (Kind.Printer.text (List.cons "(" (List.cons (Kind.Operator.show operator) (List.cons " " (List.cons (Kind.Term.show left) (List.cons " " (List.cons (Kind.Term.show right) (List.cons ")" (List.nil)))))))))
+
+// Kind.Term.show.sugar.list.go (term: (Kind.Term)) : (Maybe (List (String)))
+(Kind.Term.show.sugar.list.go (Kind.Term.ct0 (List.nil.) orig)) = (Maybe.some (List.nil))
+(Kind.Term.show.sugar.list.go (Kind.Term.ct2 (List.cons.) orig x0 x1)) = (Maybe.bind (Kind.Term.show.sugar.list.go x1) @tail (Maybe.pure (List.cons (Kind.Term.show x0) tail)))
+(Kind.Term.show.sugar.list.go other) = (Maybe.none)
+
+// Kind.Term.show.sugar.list (term: (Kind.Term)) : (Maybe (String))
+(Kind.Term.show.sugar.list term) = (Maybe.bind (Kind.Term.show.sugar.list.go term) @res (Maybe.pure (Kind.Printer.text (List.cons "[" (List.cons (String.join " " res) (List.cons "]" (List.nil)))))))
+
+// Maybe.pure -(a: Type) (x: a) : (Maybe a)
+(Maybe.pure x) = (Maybe.some x)
+
+// Kind.Printer.text (ls: (List (String))) : (String)
+(Kind.Printer.text (List.nil)) = ""
+(Kind.Printer.text (List.cons x xs)) = (String.concat x (Kind.Printer.text xs))
+
+// String.concat (xs: (String)) (ys: (String)) : (String)
+(String.concat (String.cons x xs) ys) = (String.cons x (String.concat xs ys))
+(String.concat "" ys) = ys
+
+// String.join (sep: (String)) (list: (List (String))) : (String)
+(String.join sep list) = (String.intercalate sep list)
+
+// String.intercalate (sep: (String)) (xs: (List (String))) : (String)
+(String.intercalate sep xs) = (String.flatten (List.intersperse sep xs))
+
+// List.intersperse -(a: Type) (sep: a) (xs: (List a)) : (List a)
+(List.intersperse sep (List.nil)) = (List.nil)
+(List.intersperse sep (List.cons xh (List.nil))) = (List.pure xh)
+(List.intersperse sep (List.cons xh xt)) = (List.cons xh (List.cons sep (List.intersperse sep xt)))
+
+// List.pure -(t: Type) (x: t) : (List t)
+(List.pure x) = (List.cons x (List.nil))
+
+// String.flatten (xs: (List (String))) : (String)
+(String.flatten (List.nil)) = ""
+(String.flatten (List.cons head tail)) = (String.concat head (String.flatten tail))
+
+// Maybe.bind -(a: Type) -(b: Type) (ma: (Maybe a)) (mb: (_: a) (Maybe b)) : (Maybe b)
+(Maybe.bind (Maybe.none) mb) = (Maybe.none)
+(Maybe.bind (Maybe.some val) mb) = (mb val)
+
+// U60.show (n: U60) : (Show)
+(U60.show 0) = @str (String.cons 48 str)
+(U60.show n) = @str let next = (String.cons (+ 48 (% n 10)) str); let func = (U60.if (< n 10) @h h @h ((U60.show (/ n 10)) h)); (func next)
+
+// Show : Type
+(Show) = 0
+
+// U60.if -(r: Type) (n: U60) (t: r) (f: r) : r
+(U60.if 0 t f) = f
+(U60.if x t f) = t
+
+// Kind.Term.show.sugar.string.go (term: (Kind.Term)) : (Maybe (String))
+(Kind.Term.show.sugar.string.go (Kind.Term.ct0 (String.nil.) orig)) = (Maybe.some "")
+(Kind.Term.show.sugar.string.go (Kind.Term.ct2 (String.cons.) orig (Kind.Term.num orig1 x0) x1)) = (Maybe.bind (Kind.Term.show.sugar.string.go x1) @tail (Maybe.pure (String.cons x0 tail)))
+(Kind.Term.show.sugar.string.go other) = (Maybe.none)
+
+// Kind.Term.show.sugar.string (term: (Kind.Term)) : (Maybe (String))
+(Kind.Term.show.sugar.string term) = (Maybe.bind (Kind.Term.show.sugar.string.go term) @res let quot = (String.cons 39 ""); (Maybe.pure (Kind.Printer.text (List.cons quot (List.cons res (List.cons quot (List.nil)))))))
+
+// Kind.Name.show.go (name: U60) (chrs: (String)) : (String)
+(Kind.Name.show.go name chrs) = (U60.if (== name 0) chrs let val = (% name 64); let chr = (U60.if (== val 0) 46 (U60.if (& (<= 1 val) (<= val 10)) (+ (- val 1) 48) (U60.if (& (<= 11 val) (<= val 36)) (+ (- val 11) 65) (U60.if (& (<= 37 val) (<= val 62)) (+ (- val 37) 97) (U60.if (== val 63) 95 63))))); (Kind.Name.show.go (/ name 64) (String.cons chr chrs)))
+
+// Kind.Name.show (name: U60) : (String)
+(Kind.Name.show name) = (Kind.Name.show.go name "")
+
+// Maybe.try -(a: Type) (ls: (List (Maybe a))) (alt: a) : a
+(Maybe.try (List.nil) alt) = alt
+(Maybe.try (List.cons maybe xs) alt) = (Maybe.match maybe (Maybe.try xs alt) @maybe.value maybe.value)
+
+// Maybe.match -(t: Type) (x: (Maybe t)) -(p: (x: (Maybe t)) Type) (none: (p (Maybe.none t))) (some: (value: t) (p (Maybe.some t value))) : (p x)
+(Maybe.match (Maybe.none) none some) = none
+(Maybe.match (Maybe.some value_) none some) = (some value_)
+
+// Kind.Operator.show (op: (Kind.Operator)) : (String)
+(Kind.Operator.show (Kind.Operator.add)) = "+"
+(Kind.Operator.show (Kind.Operator.sub)) = "-"
+(Kind.Operator.show (Kind.Operator.mul)) = "*"
+(Kind.Operator.show (Kind.Operator.div)) = "/"
+(Kind.Operator.show (Kind.Operator.mod)) = "%"
+(Kind.Operator.show (Kind.Operator.and)) = "&"
+(Kind.Operator.show (Kind.Operator.or)) = "|"
+(Kind.Operator.show (Kind.Operator.xor)) = "^"
+(Kind.Operator.show (Kind.Operator.shl)) = "<<"
+(Kind.Operator.show (Kind.Operator.shr)) = ">>"
+(Kind.Operator.show (Kind.Operator.ltn)) = "<"
+(Kind.Operator.show (Kind.Operator.lte)) = "<="
+(Kind.Operator.show (Kind.Operator.eql)) = "=="
+(Kind.Operator.show (Kind.Operator.gte)) = ">="
+(Kind.Operator.show (Kind.Operator.gtn)) = ">"
+(Kind.Operator.show (Kind.Operator.neq)) = "!="
+
+// Kind.Term.show.sugar.sigma (term: (Kind.Term)) : (Maybe (String))
+(Kind.Term.show.sugar.sigma (Kind.Term.ct2 (Sigma.) orig typ (Kind.Term.lam orig_ name body))) = (Maybe.some (Kind.Printer.text (List.cons "([" (List.cons (Kind.Name.show name) (List.cons ": " (List.cons (Kind.Term.show typ) (List.cons "] -> " (List.cons (Kind.Term.show (body (Kind.Term.var orig_ name 0))) (List.cons ")" (List.nil))))))))))
+(Kind.Term.show.sugar.sigma term) = (Maybe.none)
+
+// Show.to_string (show: (Show)) : (String)
+(Show.to_string show) = (show "")
+
+// String.new_line : (String)
+(String.new_line) = (String.pure (Char.newline))
+
+// String.pure (x: (Char)) : (String)
+(String.pure x) = (String.cons x "")
+
+// Char : Type
+(Char) = 0
+
+// Char.newline : (Char)
+(Char.newline) = 10
 
 // Kind.API.check_all : (String)
 (Kind.API.check_all) = let output = (Kind.API.output (List.reverse (Kind.API.check_functions (Functions)))); (Bool.if (String.is_nil output) (Kind.Printer.text (List.cons "All terms check." (List.cons (String.new_line) (List.cons (String.new_line) (List.nil))))) output)
+
+// Bool.if -(a: Type) (b: (Bool)) (t: a) (f: a) : a
+(Bool.if (Bool.true) t f) = t
+(Bool.if (Bool.false) t f) = f
 
 // Kind.API.check_functions (fnid: (List U60)) : (List (Pair U60 (List (Kind.Result (Unit)))))
 (Kind.API.check_functions (List.nil)) = (List.nil)
@@ -47,18 +173,34 @@
 (Kind.API.check_function.rules (List.nil) type) = (List.nil)
 (Kind.API.check_function.rules (List.cons rule rules) type) = let head = (Kind.Checker.run (Kind.Checker.unify (Kind.Checker.rule rule type)) (Bool.false)); let tail = (Kind.API.check_function.rules rules type); (List.cons head tail)
 
-// Kind.Checker.unify (checker: (Kind.Checker (Unit))) : (Kind.Checker (Unit))
-(Kind.Checker.unify checker) = (Kind.Checker.bind checker @_ (Kind.Checker.bind (Kind.Checker.get_equations) @equations (Kind.Checker.unify.go equations (List.nil) (Bool.false))))
+// Kind.Checker.rule (rule: (Kind.Rule)) (term: (Kind.Term)) : (Kind.Checker (Unit))
+(Kind.Checker.rule (Kind.Rule.lhs arg args) (Kind.Term.all orig name type body)) = (Kind.Checker.bind (Kind.Checker.check arg type) @_ (Kind.Checker.bind (Kind.Checker.rule args (body arg)) @_ (Kind.Checker.pure (Unit.new))))
+(Kind.Checker.rule (Kind.Rule.lhs arg args) other) = (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.fail (Kind.Error.too_many_arguments ctx (Kind.Term.get_origin arg @orig @term orig))))
+(Kind.Checker.rule (Kind.Rule.rhs expr) type) = (Kind.Checker.bind (Kind.Checker.set_right_hand_side (Bool.true)) @_ (Kind.Checker.bind (Kind.Checker.check expr type) @_ (Kind.Checker.pure (Unit.new))))
 
-// Kind.Checker.unify.go (equations: (List (Kind.Equation))) (unsolved: (List (Kind.Equation))) (changed: (Bool)) : (Kind.Checker (Unit))
-(Kind.Checker.unify.go (List.nil) (List.nil) changed) = (Kind.Checker.pure (Unit.new))
-(Kind.Checker.unify.go (List.nil) unsolved (Bool.true)) = (Kind.Checker.unify.go unsolved (List.nil) (Bool.false))
-(Kind.Checker.unify.go (List.nil) unsolved (Bool.false)) = (Kind.Checker.unify.go.fail unsolved)
-(Kind.Checker.unify.go (List.cons (Kind.Equation.new ctx orig left right) equations) unsolved changed) = (Kind.Checker.bind (Kind.Checker.equal (Kind.Term.eval left) (Kind.Term.eval right)) @is_equal let unify = (Bool.if is_equal @equations @unsolved (Kind.Checker.unify.go equations unsolved (Bool.true)) @equations @unsolved let eqt = (Kind.Equation.new ctx orig left right); (Kind.Checker.unify.go equations (List.cons eqt unsolved) changed)); ((unify equations) unsolved))
+// Kind.Checker (a: Type) : Type
+(Kind.Checker a) = 0
 
-// Kind.Checker.unify.go.fail (equations: (List (Kind.Equation))) : (Kind.Checker (Unit))
-(Kind.Checker.unify.go.fail (List.nil)) = (Kind.Checker.pure (Unit.new))
-(Kind.Checker.unify.go.fail (List.cons (Kind.Equation.new ctx orig left right) eqts)) = (Kind.Checker.bind (Kind.Checker.error (Kind.Error.type_mismatch ctx orig left right) (Unit.new)) @_ (Kind.Checker.unify.go.fail eqts))
+// Kind.Checker.bind.result -(a: Type) -(b: Type) (result: (Kind.Result a)) (then: (_: a) (Kind.Checker b)) : (Kind.Result b)
+(Kind.Checker.bind.result (Kind.Result.checked context depth rhs sub equations errs ret) then) = (((((((then ret) context) depth) rhs) sub) equations) errs)
+(Kind.Checker.bind.result (Kind.Result.errored context sub errs) then) = (Kind.Result.errored context sub errs)
+
+// Kind.Checker.bind -(a: Type) -(b: Type) (checker: (Kind.Checker a)) (then: (_: a) (Kind.Checker b)) : (Kind.Checker b)
+(Kind.Checker.bind checker then) = @context @depth @rhs @subst @eqts @errs (Kind.Checker.bind.result ((((((checker context) depth) rhs) subst) eqts) errs) then)
+
+// Kind.Checker.check (term: (Kind.Term)) (type: (Kind.Term)) : (Kind.Checker (Unit))
+(Kind.Checker.check (Kind.Term.lam orig name body) type) = (Kind.Checker.bind (Kind.Checker.get_subst) @subst let fun = (Kind.Term.if_all type @t_orig @t_name @t_type @t_body @orig @name @body (Kind.Checker.bind (Kind.Checker.get_depth) @dep (Kind.Checker.bind (Kind.Checker.extended (Kind.Checker.check (body (Kind.Term.var orig name dep)) (t_body (Kind.Term.var t_orig t_name dep))) name t_type (List.nil)) @chk (Kind.Checker.pure (Unit.new)))) @orig @name @body (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.fail (Kind.Error.cant_infer_lambda ctx orig)))); (((fun orig) name) body))
+(Kind.Checker.check (Kind.Term.let orig name expr body) type) = (Kind.Checker.bind (Kind.Checker.get_depth) @dep (Kind.Checker.bind (Kind.Checker.infer expr) @expr_typ (Kind.Checker.bind (Kind.Checker.extended (Kind.Checker.check (body (Kind.Term.var orig name dep)) type) name expr_typ (List.cons (Kind.Term.eval expr) (List.nil))) @body_chk (Kind.Checker.pure (Unit.new)))))
+(Kind.Checker.check (Kind.Term.hlp orig) type) = (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.bind (Kind.Checker.error (Kind.Error.inspection ctx orig type) (Unit.new)) @_ (Kind.Checker.pure (Unit.new))))
+(Kind.Checker.check (Kind.Term.var orig name idx) type) = (Kind.Checker.bind (Kind.Checker.get_right_hand_side) @rhs (Bool.if rhs (Kind.Checker.compare rhs (Kind.Term.var orig name idx) type) (Kind.Checker.extend name type (List.nil))))
+(Kind.Checker.check (Kind.Term.hol orig numb) type) = (Kind.Checker.pure (Unit.new))
+(Kind.Checker.check term type) = (Kind.Checker.bind (Kind.Checker.get_right_hand_side) @rhs (Kind.Checker.compare rhs term type))
+
+// Kind.Checker.compare (rhs: (Bool)) (term: (Kind.Term)) (type: (Kind.Term)) : (Kind.Checker (Unit))
+(Kind.Checker.compare rhs term type) = (Kind.Term.get_origin term @orig @term (Kind.Checker.bind (Kind.Checker.infer term) @term_typ let fun = (Bool.if rhs @term_typ @type (Kind.Checker.new_equation orig type term_typ) @term_typ @type (Kind.Checker.bind (Kind.Checker.equal (Kind.Term.eval term_typ) (Kind.Term.eval type)) @is_equal (Bool.if is_equal (Kind.Checker.pure (Unit.new)) (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.fail (Kind.Error.impossible_case ctx orig type term_typ)))))); ((fun term_typ) type)))
+
+// Kind.Checker.get_context : (Kind.Checker (Kind.Context))
+(Kind.Checker.get_context) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs context)
 
 // Kind.Term.eval (term: (Kind.Term)) : (Kind.Term)
 (Kind.Term.eval (Kind.Term.typ orig)) = (Kind.Term.typ orig)
@@ -94,15 +236,15 @@
 (Kind.Term.eval (Kind.Term.args7 x0 x1 x2 x3 x4 x5 x6)) = (Kind.Term.args7 (Kind.Term.eval x0) (Kind.Term.eval x1) (Kind.Term.eval x2) (Kind.Term.eval x3) (Kind.Term.eval x4) (Kind.Term.eval x5) (Kind.Term.eval x6))
 (Kind.Term.eval (Kind.Term.args8 x0 x1 x2 x3 x4 x5 x6 x7)) = (Kind.Term.args8 (Kind.Term.eval x0) (Kind.Term.eval x1) (Kind.Term.eval x2) (Kind.Term.eval x3) (Kind.Term.eval x4) (Kind.Term.eval x5) (Kind.Term.eval x6) (Kind.Term.eval x7))
 
-// Kind.Term.eval_let (orig: U60) (name: U60) (expr: (Kind.Term)) (body: (_: (Kind.Term)) (Kind.Term)) : (Kind.Term)
-(Kind.Term.eval_let orig name expr body) = (body expr)
-
 // Kind.Term.eval_app (orig: U60) (left: (Kind.Term)) (right: (Kind.Term)) : (Kind.Term)
 (Kind.Term.eval_app orig (Kind.Term.lam orig1 name body) arg) = (body arg)
 (Kind.Term.eval_app orig func arg) = (Kind.Term.app orig func arg)
 
 // Kind.Term.eval_ann (orig: U60) (expr: (Kind.Term)) (type: (Kind.Term)) : (Kind.Term)
 (Kind.Term.eval_ann orig expr type) = expr
+
+// Kind.Term.eval_let (orig: U60) (name: U60) (expr: (Kind.Term)) (body: (_: (Kind.Term)) (Kind.Term)) : (Kind.Term)
+(Kind.Term.eval_let orig name expr body) = (body expr)
 
 // Kind.Term.eval_op (orig: U60) (op: (Kind.Operator)) (left: (Kind.Term)) (right: (Kind.Term)) : (Kind.Term)
 (Kind.Term.eval_op orig (Kind.Operator.add) (Kind.Term.num a.orig a.num) (Kind.Term.num b.orig b.num)) = (Kind.Term.num 0 (+ a.num b.num))
@@ -123,25 +265,71 @@
 (Kind.Term.eval_op orig (Kind.Operator.neq) (Kind.Term.num a.orig a.num) (Kind.Term.num b.orig b.num)) = (Kind.Term.num 0 (!= a.num b.num))
 (Kind.Term.eval_op orig op left right) = (Kind.Term.op2 orig op left right)
 
-// Kind.Checker.bind.result -(a: Type) -(b: Type) (result: (Kind.Result a)) (then: (_: a) (Kind.Checker b)) : (Kind.Result b)
-(Kind.Checker.bind.result (Kind.Result.checked context depth rhs sub equations errs ret) then) = (((((((then ret) context) depth) rhs) sub) equations) errs)
-(Kind.Checker.bind.result (Kind.Result.errored context sub errs) then) = (Kind.Result.errored context sub errs)
+// Kind.Checker.get_right_hand_side : (Kind.Checker (Bool))
+(Kind.Checker.get_right_hand_side) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs rhs)
 
-// Kind.Checker.bind -(a: Type) -(b: Type) (checker: (Kind.Checker a)) (then: (_: a) (Kind.Checker b)) : (Kind.Checker b)
-(Kind.Checker.bind checker then) = @context @depth @rhs @subst @eqts @errs (Kind.Checker.bind.result ((((((checker context) depth) rhs) subst) eqts) errs) then)
+// Kind.Checker.new_equation (orig: U60) (left: (Kind.Term)) (right: (Kind.Term)) : (Kind.Checker (Unit))
+(Kind.Checker.new_equation orig left right) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst (List.append eqts (Kind.Equation.new context orig left right)) errs (Unit.new))
 
-// Kind.Checker (a: Type) : Type
-(Kind.Checker a) = 0
+// List.append -(a: Type) (xs: (List a)) (x: a) : (List a)
+(List.append (List.nil) x) = (List.pure x)
+(List.append (List.cons xs.h xs.t) x) = (List.cons xs.h (List.append xs.t x))
 
-// Bool.if -(a: Type) (b: (Bool)) (t: a) (f: a) : a
-(Bool.if (Bool.true) t f) = t
-(Bool.if (Bool.false) t f) = f
+// Kind.Checker.get_depth : (Kind.Checker U60)
+(Kind.Checker.get_depth) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs depth)
 
 // Kind.Checker.pure -(t: Type) (a: t) : (Kind.Checker t)
 (Kind.Checker.pure res) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs res)
 
-// Kind.Checker.error -(t: Type) (err: (Kind.Error)) (ret: t) : (Kind.Checker t)
-(Kind.Checker.error err ret) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts (List.cons err errs) ret)
+// Kind.Checker.extend (name: U60) (type: (Kind.Term)) (vals: (List (Kind.Term))) : (Kind.Checker (Unit))
+(Kind.Checker.extend name type vals) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked (Kind.Context.extend context name type vals) (+ depth 1) rhs subst eqts errs (Unit.new))
+
+// Kind.Context.extend (prev: (Kind.Context)) (name: U60) (term: (Kind.Term)) (ls: (List (Kind.Term))) : (Kind.Context)
+(Kind.Context.extend (Kind.Context.empty) name type values) = (Kind.Context.entry name type values (Kind.Context.empty))
+(Kind.Context.extend (Kind.Context.entry n t v rest) name type values) = (Kind.Context.entry n t v (Kind.Context.extend rest name type values))
+
+// Kind.Term.get_origin -(r: Type) (term: (Kind.Term)) (got: (_: U60) (_: (Kind.Term)) r) : r
+(Kind.Term.get_origin (Kind.Term.typ orig) got) = ((got orig) (Kind.Term.typ orig))
+(Kind.Term.get_origin (Kind.Term.var orig name index) got) = ((got orig) (Kind.Term.var orig name index))
+(Kind.Term.get_origin (Kind.Term.hol orig numb) got) = ((got orig) (Kind.Term.hol orig numb))
+(Kind.Term.get_origin (Kind.Term.all orig name typ body) got) = ((got orig) (Kind.Term.all orig name typ body))
+(Kind.Term.get_origin (Kind.Term.lam orig name body) got) = ((got orig) (Kind.Term.lam orig name body))
+(Kind.Term.get_origin (Kind.Term.let orig name expr body) got) = ((got orig) (Kind.Term.let orig name expr body))
+(Kind.Term.get_origin (Kind.Term.ann orig expr typ) got) = ((got orig) (Kind.Term.ann orig expr typ))
+(Kind.Term.get_origin (Kind.Term.app orig func arg) got) = ((got orig) (Kind.Term.app orig func arg))
+(Kind.Term.get_origin (Kind.Term.hlp orig) got) = ((got orig) (Kind.Term.hlp orig))
+(Kind.Term.get_origin (Kind.Term.u60 orig) got) = ((got orig) (Kind.Term.u60 orig))
+(Kind.Term.get_origin (Kind.Term.num orig num) got) = ((got orig) (Kind.Term.num orig num))
+(Kind.Term.get_origin (Kind.Term.op2 orig op left right) got) = ((got orig) (Kind.Term.op2 orig op left right))
+(Kind.Term.get_origin (Kind.Term.ct0 ctid orig) got) = ((got orig) (Kind.Term.ct0 ctid orig))
+(Kind.Term.get_origin (Kind.Term.ct1 ctid orig x0) got) = ((got orig) (Kind.Term.ct1 ctid orig x0))
+(Kind.Term.get_origin (Kind.Term.ct2 ctid orig x0 x1) got) = ((got orig) (Kind.Term.ct2 ctid orig x0 x1))
+(Kind.Term.get_origin (Kind.Term.ct3 ctid orig x0 x1 x2) got) = ((got orig) (Kind.Term.ct3 ctid orig x0 x1 x2))
+(Kind.Term.get_origin (Kind.Term.ct4 ctid orig x0 x1 x2 x3) got) = ((got orig) (Kind.Term.ct4 ctid orig x0 x1 x2 x3))
+(Kind.Term.get_origin (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4) got) = ((got orig) (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4))
+(Kind.Term.get_origin (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5) got) = ((got orig) (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5))
+(Kind.Term.get_origin (Kind.Term.ct7 ctid orig args) got) = ((got orig) (Kind.Term.ct7 ctid orig args))
+(Kind.Term.get_origin (Kind.Term.ct8 ctid orig args) got) = ((got orig) (Kind.Term.ct8 ctid orig args))
+(Kind.Term.get_origin (Kind.Term.fn0 fnid orig) got) = ((got orig) (Kind.Term.fn0 fnid orig))
+(Kind.Term.get_origin (Kind.Term.fn1 fnid orig x0) got) = ((got orig) (Kind.Term.fn1 fnid orig x0))
+(Kind.Term.get_origin (Kind.Term.fn2 fnid orig x0 x1) got) = ((got orig) (Kind.Term.fn2 fnid orig x0 x1))
+(Kind.Term.get_origin (Kind.Term.fn3 fnid orig x0 x1 x2) got) = ((got orig) (Kind.Term.fn3 fnid orig x0 x1 x2))
+(Kind.Term.get_origin (Kind.Term.fn4 fnid orig x0 x1 x2 x3) got) = ((got orig) (Kind.Term.fn4 fnid orig x0 x1 x2 x3))
+(Kind.Term.get_origin (Kind.Term.fn5 fnid orig x0 x1 x2 x3 x4) got) = ((got orig) (Kind.Term.fn5 fnid orig x0 x1 x2 x3 x4))
+(Kind.Term.get_origin (Kind.Term.fn6 fnid orig x0 x1 x2 x3 x4 x5) got) = ((got orig) (Kind.Term.fn6 fnid orig x0 x1 x2 x3 x4 x5))
+(Kind.Term.get_origin (Kind.Term.fn7 fnid orig args) got) = ((got orig) (Kind.Term.fn7 fnid orig args))
+(Kind.Term.get_origin (Kind.Term.fn8 fnid orig args) got) = ((got orig) (Kind.Term.fn8 fnid orig args))
+
+// Kind.Checker.extended -(a: Type) (checker: (Kind.Checker a)) (name: U60) (type: (Kind.Term)) (vals: (List (Kind.Term))) : (Kind.Checker a)
+(Kind.Checker.extended checker name type vals) = (Kind.Checker.bind (Kind.Checker.extend name type vals) @_ (Kind.Checker.bind checker @got (Kind.Checker.bind (Kind.Checker.shrink) @_ (Kind.Checker.pure got))))
+
+// Kind.Checker.shrink : (Kind.Checker (Unit))
+(Kind.Checker.shrink) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked (Kind.Context.shrink context) (- depth 1) rhs subst eqts errs (Unit.new))
+
+// Kind.Context.shrink (ctx: (Kind.Context)) : (Kind.Context)
+(Kind.Context.shrink (Kind.Context.empty)) = (Kind.Context.empty)
+(Kind.Context.shrink (Kind.Context.entry name type vals (Kind.Context.empty))) = (Kind.Context.empty)
+(Kind.Context.shrink (Kind.Context.entry name type vals rest)) = (Kind.Context.entry name type vals (Kind.Context.shrink rest))
 
 // Kind.Checker.equal (left: (Kind.Term)) (right: (Kind.Term)) : (Kind.Checker (Bool))
 (Kind.Checker.equal (Kind.Term.typ orig) (Kind.Term.typ orig1)) = (Kind.Checker.pure (Bool.true))
@@ -196,112 +384,6 @@
 (Kind.Checker.equal.hol.val (Maybe.none) orig numb b) = (Kind.Checker.bind (Kind.Checker.fill numb b) @_ (Kind.Checker.pure (Bool.true)))
 (Kind.Checker.equal.hol.val (Maybe.some val) orig numb b) = (Kind.Checker.equal val b)
 
-// Kind.Term.fillable (term: (Kind.Term)) (sub: (Kind.Subst)) : (Bool)
-(Kind.Term.fillable term (Kind.Subst.end)) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.typ orig) sub) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.var orig name index) sub) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.hlp orig) sub) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.u60 orig) sub) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.num orig num) sub) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.all orig name typ body) sub) = (Bool.or (Kind.Term.fillable typ sub) (Kind.Term.fillable (body (Kind.Term.hlp 0)) sub))
-(Kind.Term.fillable (Kind.Term.lam orig name body) sub) = (Kind.Term.fillable (body (Kind.Term.hlp 0)) sub)
-(Kind.Term.fillable (Kind.Term.app orig expr typ) sub) = (Bool.or (Kind.Term.fillable expr sub) (Kind.Term.fillable typ sub))
-(Kind.Term.fillable (Kind.Term.let orig name expr body) sub) = (Bool.or (Kind.Term.fillable expr sub) (Kind.Term.fillable (body (Kind.Term.hlp 0)) sub))
-(Kind.Term.fillable (Kind.Term.ann orig expr typ) sub) = (Bool.or (Kind.Term.fillable expr sub) (Kind.Term.fillable typ sub))
-(Kind.Term.fillable (Kind.Term.op2 orig op left right) sub) = (Bool.or (Kind.Term.fillable left sub) (Kind.Term.fillable right sub))
-(Kind.Term.fillable (Kind.Term.hol orig numb) sub) = (Maybe.is_some (Kind.Subst.look sub numb))
-(Kind.Term.fillable (Kind.Term.ct0 ctid orig) sub) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.ct1 ctid orig x0) sub) = (Kind.Term.fillable x0 sub)
-(Kind.Term.fillable (Kind.Term.ct2 ctid orig x0 x1) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Kind.Term.fillable x1 sub))
-(Kind.Term.fillable (Kind.Term.ct3 ctid orig x0 x1 x2) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Kind.Term.fillable x2 sub)))
-(Kind.Term.fillable (Kind.Term.ct4 ctid orig x0 x1 x2 x3) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Kind.Term.fillable x3 sub))))
-(Kind.Term.fillable (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Kind.Term.fillable x4 sub)))))
-(Kind.Term.fillable (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Kind.Term.fillable x5 sub))))))
-(Kind.Term.fillable (Kind.Term.ct7 fnid orig args) sub) = (Kind.Term.fillable args sub)
-(Kind.Term.fillable (Kind.Term.ct8 fnid orig args) sub) = (Kind.Term.fillable args sub)
-(Kind.Term.fillable (Kind.Term.fn0 fnid orig) sub) = (Bool.false)
-(Kind.Term.fillable (Kind.Term.fn1 fnid orig x0) sub) = (Kind.Term.fillable x0 sub)
-(Kind.Term.fillable (Kind.Term.fn2 fnid orig x0 x1) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Kind.Term.fillable x1 sub))
-(Kind.Term.fillable (Kind.Term.fn3 fnid orig x0 x1 x2) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Kind.Term.fillable x2 sub)))
-(Kind.Term.fillable (Kind.Term.fn4 fnid orig x0 x1 x2 x3) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Kind.Term.fillable x3 sub))))
-(Kind.Term.fillable (Kind.Term.fn5 fnid orig x0 x1 x2 x3 x4) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Kind.Term.fillable x4 sub)))))
-(Kind.Term.fillable (Kind.Term.fn6 fnid orig x0 x1 x2 x3 x4 x5) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Kind.Term.fillable x5 sub))))))
-(Kind.Term.fillable (Kind.Term.fn7 fnid orig args) sub) = (Kind.Term.fillable args sub)
-(Kind.Term.fillable (Kind.Term.fn8 fnid orig args) sub) = (Kind.Term.fillable args sub)
-(Kind.Term.fillable (Kind.Term.args7 x0 x1 x2 x3 x4 x5 x6) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Bool.or (Kind.Term.fillable x5 sub) (Kind.Term.fillable x6 sub)))))))
-(Kind.Term.fillable (Kind.Term.args8 x0 x1 x2 x3 x4 x5 x6 x7) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Bool.or (Kind.Term.fillable x5 sub) (Bool.or (Kind.Term.fillable x6 sub) (Kind.Term.fillable x7 sub))))))))
-
-// Kind.Subst.look (subst: (Kind.Subst)) (depth: U60) : (Maybe (Kind.Term))
-(Kind.Subst.look (Kind.Subst.end) 0) = (Maybe.none)
-(Kind.Subst.look (Kind.Subst.unfilled rest) 0) = (Maybe.none)
-(Kind.Subst.look (Kind.Subst.sub term rest) 0) = (Maybe.some term)
-(Kind.Subst.look (Kind.Subst.end) n) = (Maybe.none)
-(Kind.Subst.look (Kind.Subst.unfilled rest) n) = (Kind.Subst.look rest (- n 1))
-(Kind.Subst.look (Kind.Subst.sub term rest) n) = (Kind.Subst.look rest (- n 1))
-
-// Bool.or (a: (Bool)) (b: (Bool)) : (Bool)
-(Bool.or (Bool.true) b) = (Bool.true)
-(Bool.or (Bool.false) b) = b
-
-// Maybe.is_some -(a: Type) (m: (Maybe a)) : (Bool)
-(Maybe.is_some (Maybe.none)) = (Bool.false)
-(Maybe.is_some (Maybe.some v)) = (Bool.true)
-
-// Kind.Checker.fill (index: U60) (val: (Kind.Term)) : (Kind.Checker (Unit))
-(Kind.Checker.fill index val) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs (Kind.Subst.fill subst index val) eqts errs (Unit.new))
-
-// Kind.Subst.fill (subst: (Kind.Subst)) (depth: U60) (term: (Kind.Term)) : (Kind.Subst)
-(Kind.Subst.fill (Kind.Subst.end) 0 term) = (Kind.Subst.sub term (Kind.Subst.end))
-(Kind.Subst.fill (Kind.Subst.unfilled rest) 0 term) = (Kind.Subst.sub term rest)
-(Kind.Subst.fill (Kind.Subst.sub lost rest) 0 term) = (Kind.Subst.sub term rest)
-(Kind.Subst.fill (Kind.Subst.end) n term) = (Kind.Subst.unfilled (Kind.Subst.fill (Kind.Subst.end) (- n 1) term))
-(Kind.Subst.fill (Kind.Subst.unfilled rest) n term) = (Kind.Subst.unfilled (Kind.Subst.fill rest (- n 1) term))
-(Kind.Subst.fill (Kind.Subst.sub keep rest) n term) = (Kind.Subst.sub keep (Kind.Subst.fill rest (- n 1) term))
-
-// U60.equal (a: U60) (b: U60) : (Bool)
-(U60.equal a b) = (U60.to_bool (== a b))
-
-// U60.to_bool (n: U60) : (Bool)
-(U60.to_bool 0) = (Bool.false)
-(U60.to_bool n) = (Bool.true)
-
-// Kind.Checker.get_subst : (Kind.Checker (Kind.Subst))
-(Kind.Checker.get_subst) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs subst)
-
-// Kind.Checker.add_value (idx: U60) (val: (Kind.Term)) : (Kind.Checker (Unit))
-(Kind.Checker.add_value idx val) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked (Kind.Context.add_value context idx val) depth rhs subst eqts errs (Unit.new))
-
-// Kind.Context.add_value (prev: (Kind.Context)) (name: U60) (term: (Kind.Term)) : (Kind.Context)
-(Kind.Context.add_value (Kind.Context.entry name type vals rest) 0 val) = (Kind.Context.entry name type (List.cons val vals) rest)
-(Kind.Context.add_value (Kind.Context.entry name type vals rest) n val) = (Kind.Context.entry name type vals (Kind.Context.add_value rest (- n 1) val))
-(Kind.Context.add_value (Kind.Context.empty) n val) = (Kind.Context.empty)
-
-// Kind.Operator.equal (left: (Kind.Operator)) (right: (Kind.Operator)) : (Bool)
-(Kind.Operator.equal (Kind.Operator.and) (Kind.Operator.and)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.sub) (Kind.Operator.sub)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.mul) (Kind.Operator.mul)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.div) (Kind.Operator.div)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.mod) (Kind.Operator.mod)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.and) (Kind.Operator.and)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.or) (Kind.Operator.or)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.xor) (Kind.Operator.xor)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.shl) (Kind.Operator.shl)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.shr) (Kind.Operator.shr)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.ltn) (Kind.Operator.ltn)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.lte) (Kind.Operator.lte)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.eql) (Kind.Operator.eql)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.gte) (Kind.Operator.gte)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.gtn) (Kind.Operator.gtn)) = (Bool.true)
-(Kind.Operator.equal (Kind.Operator.neq) (Kind.Operator.neq)) = (Bool.true)
-(Kind.Operator.equal a b) = (Bool.false)
-
-// Bool.and (a: (Bool)) (b: (Bool)) : (Bool)
-(Bool.and (Bool.true) b) = b
-(Bool.and (Bool.false) b) = (Bool.false)
-
-// Kind.Checker.look (index: U60) : (Kind.Checker (Maybe (Kind.Term)))
-(Kind.Checker.look index) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs (Kind.Subst.look subst index))
-
 // Kind.Term.fill (term: (Kind.Term)) (subst: (Kind.Subst)) : (Kind.Term)
 (Kind.Term.fill term (Kind.Subst.end)) = term
 (Kind.Term.fill (Kind.Term.typ orig) sub) = (Kind.Term.typ orig)
@@ -337,12 +419,13 @@
 (Kind.Term.fill (Kind.Term.args8 x0 x1 x2 x3 x4 x5 x6 x7) sub) = (Kind.Term.args8 (Kind.Term.fill x0 sub) (Kind.Term.fill x1 sub) (Kind.Term.fill x2 sub) (Kind.Term.fill x3 sub) (Kind.Term.fill x4 sub) (Kind.Term.fill x5 sub) (Kind.Term.fill x6 sub) (Kind.Term.fill x7 sub))
 (Kind.Term.fill (Kind.Term.hol orig numb) sub) = let substRes = (Kind.Subst.look sub numb); (Maybe.match substRes (Kind.Term.hol orig numb) @substRes.value (Kind.Term.fill substRes.value sub))
 
-// Maybe.match -(t: Type) (x: (Maybe t)) -(p: (x: (Maybe t)) Type) (none: (p (Maybe.none t))) (some: (value: t) (p (Maybe.some t value))) : (p x)
-(Maybe.match (Maybe.none) none some) = none
-(Maybe.match (Maybe.some value_) none some) = (some value_)
-
-// Kind.Checker.get_right_hand_side : (Kind.Checker (Bool))
-(Kind.Checker.get_right_hand_side) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs rhs)
+// Kind.Subst.look (subst: (Kind.Subst)) (depth: U60) : (Maybe (Kind.Term))
+(Kind.Subst.look (Kind.Subst.end) 0) = (Maybe.none)
+(Kind.Subst.look (Kind.Subst.unfilled rest) 0) = (Maybe.none)
+(Kind.Subst.look (Kind.Subst.sub term rest) 0) = (Maybe.some term)
+(Kind.Subst.look (Kind.Subst.end) n) = (Maybe.none)
+(Kind.Subst.look (Kind.Subst.unfilled rest) n) = (Kind.Subst.look rest (- n 1))
+(Kind.Subst.look (Kind.Subst.sub term rest) n) = (Kind.Subst.look rest (- n 1))
 
 // Kind.Checker.find -(r: Type) (index: U60) (alt: r) (fun: (_: U60) (_: (Kind.Term)) (_: (List (Kind.Term))) r) : (Kind.Checker r)
 (Kind.Checker.find index alt fun) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs (Kind.Context.find context index alt fun))
@@ -352,53 +435,106 @@
 (Kind.Context.find (Kind.Context.entry name type vals rest) n alt fun) = (Kind.Context.find rest (- n 1) alt fun)
 (Kind.Context.find (Kind.Context.empty) n alt fun) = alt
 
-// Kind.Checker.extended -(a: Type) (checker: (Kind.Checker a)) (name: U60) (type: (Kind.Term)) (vals: (List (Kind.Term))) : (Kind.Checker a)
-(Kind.Checker.extended checker name type vals) = (Kind.Checker.bind (Kind.Checker.extend name type vals) @_ (Kind.Checker.bind checker @got (Kind.Checker.bind (Kind.Checker.shrink) @_ (Kind.Checker.pure got))))
+// Bool.and (a: (Bool)) (b: (Bool)) : (Bool)
+(Bool.and (Bool.true) b) = b
+(Bool.and (Bool.false) b) = (Bool.false)
 
-// Kind.Checker.extend (name: U60) (type: (Kind.Term)) (vals: (List (Kind.Term))) : (Kind.Checker (Unit))
-(Kind.Checker.extend name type vals) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked (Kind.Context.extend context name type vals) (+ depth 1) rhs subst eqts errs (Unit.new))
+// Kind.Checker.look (index: U60) : (Kind.Checker (Maybe (Kind.Term)))
+(Kind.Checker.look index) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs (Kind.Subst.look subst index))
 
-// Kind.Context.extend (prev: (Kind.Context)) (name: U60) (term: (Kind.Term)) (ls: (List (Kind.Term))) : (Kind.Context)
-(Kind.Context.extend (Kind.Context.empty) name type values) = (Kind.Context.entry name type values (Kind.Context.empty))
-(Kind.Context.extend (Kind.Context.entry n t v rest) name type values) = (Kind.Context.entry n t v (Kind.Context.extend rest name type values))
+// Bool.or (a: (Bool)) (b: (Bool)) : (Bool)
+(Bool.or (Bool.true) b) = (Bool.true)
+(Bool.or (Bool.false) b) = b
 
-// Kind.Checker.shrink : (Kind.Checker (Unit))
-(Kind.Checker.shrink) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked (Kind.Context.shrink context) (- depth 1) rhs subst eqts errs (Unit.new))
+// Kind.Checker.add_value (idx: U60) (val: (Kind.Term)) : (Kind.Checker (Unit))
+(Kind.Checker.add_value idx val) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked (Kind.Context.add_value context idx val) depth rhs subst eqts errs (Unit.new))
 
-// Kind.Context.shrink (ctx: (Kind.Context)) : (Kind.Context)
-(Kind.Context.shrink (Kind.Context.empty)) = (Kind.Context.empty)
-(Kind.Context.shrink (Kind.Context.entry name type vals (Kind.Context.empty))) = (Kind.Context.empty)
-(Kind.Context.shrink (Kind.Context.entry name type vals rest)) = (Kind.Context.entry name type vals (Kind.Context.shrink rest))
+// Kind.Context.add_value (prev: (Kind.Context)) (name: U60) (term: (Kind.Term)) : (Kind.Context)
+(Kind.Context.add_value (Kind.Context.entry name type vals rest) 0 val) = (Kind.Context.entry name type (List.cons val vals) rest)
+(Kind.Context.add_value (Kind.Context.entry name type vals rest) n val) = (Kind.Context.entry name type vals (Kind.Context.add_value rest (- n 1) val))
+(Kind.Context.add_value (Kind.Context.empty) n val) = (Kind.Context.empty)
 
-// Kind.Checker.get_depth : (Kind.Checker U60)
-(Kind.Checker.get_depth) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs depth)
+// U60.equal (a: U60) (b: U60) : (Bool)
+(U60.equal a b) = (U60.to_bool (== a b))
 
-// Kind.Checker.get_equations : (Kind.Checker (List (Kind.Equation)))
-(Kind.Checker.get_equations) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs eqts)
+// U60.to_bool (n: U60) : (Bool)
+(U60.to_bool 0) = (Bool.false)
+(U60.to_bool n) = (Bool.true)
 
-// Kind.Checker.run -(t: Type) (checker: (Kind.Checker t)) (rhs: (Bool)) : (Kind.Result t)
-(Kind.Checker.run checker rhs) = ((((((checker (Kind.Context.empty)) 0) rhs) (Kind.Subst.end)) (List.nil)) (List.nil))
+// Kind.Term.fillable (term: (Kind.Term)) (sub: (Kind.Subst)) : (Bool)
+(Kind.Term.fillable term (Kind.Subst.end)) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.typ orig) sub) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.var orig name index) sub) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.hlp orig) sub) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.u60 orig) sub) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.num orig num) sub) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.all orig name typ body) sub) = (Bool.or (Kind.Term.fillable typ sub) (Kind.Term.fillable (body (Kind.Term.hlp 0)) sub))
+(Kind.Term.fillable (Kind.Term.lam orig name body) sub) = (Kind.Term.fillable (body (Kind.Term.hlp 0)) sub)
+(Kind.Term.fillable (Kind.Term.app orig expr typ) sub) = (Bool.or (Kind.Term.fillable expr sub) (Kind.Term.fillable typ sub))
+(Kind.Term.fillable (Kind.Term.let orig name expr body) sub) = (Bool.or (Kind.Term.fillable expr sub) (Kind.Term.fillable (body (Kind.Term.hlp 0)) sub))
+(Kind.Term.fillable (Kind.Term.ann orig expr typ) sub) = (Bool.or (Kind.Term.fillable expr sub) (Kind.Term.fillable typ sub))
+(Kind.Term.fillable (Kind.Term.op2 orig op left right) sub) = (Bool.or (Kind.Term.fillable left sub) (Kind.Term.fillable right sub))
+(Kind.Term.fillable (Kind.Term.hol orig numb) sub) = (Maybe.is_some (Kind.Subst.look sub numb))
+(Kind.Term.fillable (Kind.Term.ct0 ctid orig) sub) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.ct1 ctid orig x0) sub) = (Kind.Term.fillable x0 sub)
+(Kind.Term.fillable (Kind.Term.ct2 ctid orig x0 x1) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Kind.Term.fillable x1 sub))
+(Kind.Term.fillable (Kind.Term.ct3 ctid orig x0 x1 x2) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Kind.Term.fillable x2 sub)))
+(Kind.Term.fillable (Kind.Term.ct4 ctid orig x0 x1 x2 x3) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Kind.Term.fillable x3 sub))))
+(Kind.Term.fillable (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Kind.Term.fillable x4 sub)))))
+(Kind.Term.fillable (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Kind.Term.fillable x5 sub))))))
+(Kind.Term.fillable (Kind.Term.ct7 fnid orig args) sub) = (Kind.Term.fillable args sub)
+(Kind.Term.fillable (Kind.Term.ct8 fnid orig args) sub) = (Kind.Term.fillable args sub)
+(Kind.Term.fillable (Kind.Term.fn0 fnid orig) sub) = (Bool.false)
+(Kind.Term.fillable (Kind.Term.fn1 fnid orig x0) sub) = (Kind.Term.fillable x0 sub)
+(Kind.Term.fillable (Kind.Term.fn2 fnid orig x0 x1) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Kind.Term.fillable x1 sub))
+(Kind.Term.fillable (Kind.Term.fn3 fnid orig x0 x1 x2) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Kind.Term.fillable x2 sub)))
+(Kind.Term.fillable (Kind.Term.fn4 fnid orig x0 x1 x2 x3) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Kind.Term.fillable x3 sub))))
+(Kind.Term.fillable (Kind.Term.fn5 fnid orig x0 x1 x2 x3 x4) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Kind.Term.fillable x4 sub)))))
+(Kind.Term.fillable (Kind.Term.fn6 fnid orig x0 x1 x2 x3 x4 x5) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Kind.Term.fillable x5 sub))))))
+(Kind.Term.fillable (Kind.Term.fn7 fnid orig args) sub) = (Kind.Term.fillable args sub)
+(Kind.Term.fillable (Kind.Term.fn8 fnid orig args) sub) = (Kind.Term.fillable args sub)
+(Kind.Term.fillable (Kind.Term.args7 x0 x1 x2 x3 x4 x5 x6) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Bool.or (Kind.Term.fillable x5 sub) (Kind.Term.fillable x6 sub)))))))
+(Kind.Term.fillable (Kind.Term.args8 x0 x1 x2 x3 x4 x5 x6 x7) sub) = (Bool.or (Kind.Term.fillable x0 sub) (Bool.or (Kind.Term.fillable x1 sub) (Bool.or (Kind.Term.fillable x2 sub) (Bool.or (Kind.Term.fillable x3 sub) (Bool.or (Kind.Term.fillable x4 sub) (Bool.or (Kind.Term.fillable x5 sub) (Bool.or (Kind.Term.fillable x6 sub) (Kind.Term.fillable x7 sub))))))))
 
-// Kind.Checker.check (term: (Kind.Term)) (type: (Kind.Term)) : (Kind.Checker (Unit))
-(Kind.Checker.check (Kind.Term.lam orig name body) type) = (Kind.Checker.bind (Kind.Checker.get_subst) @subst let fun = (Kind.Term.if_all type @t_orig @t_name @t_type @t_body @orig @name @body (Kind.Checker.bind (Kind.Checker.get_depth) @dep (Kind.Checker.bind (Kind.Checker.extended (Kind.Checker.check (body (Kind.Term.var orig name dep)) (t_body (Kind.Term.var t_orig t_name dep))) name t_type (List.nil)) @chk (Kind.Checker.pure (Unit.new)))) @orig @name @body (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.fail (Kind.Error.cant_infer_lambda ctx orig)))); (((fun orig) name) body))
-(Kind.Checker.check (Kind.Term.let orig name expr body) type) = (Kind.Checker.bind (Kind.Checker.get_depth) @dep (Kind.Checker.bind (Kind.Checker.infer expr) @expr_typ (Kind.Checker.bind (Kind.Checker.extended (Kind.Checker.check (body (Kind.Term.var orig name dep)) type) name expr_typ (List.cons (Kind.Term.eval expr) (List.nil))) @body_chk (Kind.Checker.pure (Unit.new)))))
-(Kind.Checker.check (Kind.Term.hlp orig) type) = (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.bind (Kind.Checker.error (Kind.Error.inspection ctx orig type) (Unit.new)) @_ (Kind.Checker.pure (Unit.new))))
-(Kind.Checker.check (Kind.Term.var orig name idx) type) = (Kind.Checker.bind (Kind.Checker.get_right_hand_side) @rhs (Bool.if rhs (Kind.Checker.compare rhs (Kind.Term.var orig name idx) type) (Kind.Checker.extend name type (List.nil))))
-(Kind.Checker.check (Kind.Term.hol orig numb) type) = (Kind.Checker.pure (Unit.new))
-(Kind.Checker.check term type) = (Kind.Checker.bind (Kind.Checker.get_right_hand_side) @rhs (Kind.Checker.compare rhs term type))
+// Maybe.is_some -(a: Type) (m: (Maybe a)) : (Bool)
+(Maybe.is_some (Maybe.none)) = (Bool.false)
+(Maybe.is_some (Maybe.some v)) = (Bool.true)
 
-// Kind.Checker.compare (rhs: (Bool)) (term: (Kind.Term)) (type: (Kind.Term)) : (Kind.Checker (Unit))
-(Kind.Checker.compare rhs term type) = (Kind.Term.get_origin term @orig @term (Kind.Checker.bind (Kind.Checker.infer term) @term_typ let fun = (Bool.if rhs @term_typ @type (Kind.Checker.new_equation orig type term_typ) @term_typ @type (Kind.Checker.bind (Kind.Checker.equal (Kind.Term.eval term_typ) (Kind.Term.eval type)) @is_equal (Bool.if is_equal (Kind.Checker.pure (Unit.new)) (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.fail (Kind.Error.impossible_case ctx orig type term_typ)))))); ((fun term_typ) type)))
+// Kind.Checker.fill (index: U60) (val: (Kind.Term)) : (Kind.Checker (Unit))
+(Kind.Checker.fill index val) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs (Kind.Subst.fill subst index val) eqts errs (Unit.new))
 
-// Kind.Term.if_all -(res: Type) (term: (Kind.Term)) (if: (_: U60) (_: U60) (_: (Kind.Term)) (_: (_: (Kind.Term)) (Kind.Term)) res) (else: res) : res
-(Kind.Term.if_all (Kind.Term.all orig name typ body) func_if else) = ((((func_if orig) name) typ) body)
-(Kind.Term.if_all other func_if else) = else
+// Kind.Subst.fill (subst: (Kind.Subst)) (depth: U60) (term: (Kind.Term)) : (Kind.Subst)
+(Kind.Subst.fill (Kind.Subst.end) 0 term) = (Kind.Subst.sub term (Kind.Subst.end))
+(Kind.Subst.fill (Kind.Subst.unfilled rest) 0 term) = (Kind.Subst.sub term rest)
+(Kind.Subst.fill (Kind.Subst.sub lost rest) 0 term) = (Kind.Subst.sub term rest)
+(Kind.Subst.fill (Kind.Subst.end) n term) = (Kind.Subst.unfilled (Kind.Subst.fill (Kind.Subst.end) (- n 1) term))
+(Kind.Subst.fill (Kind.Subst.unfilled rest) n term) = (Kind.Subst.unfilled (Kind.Subst.fill rest (- n 1) term))
+(Kind.Subst.fill (Kind.Subst.sub keep rest) n term) = (Kind.Subst.sub keep (Kind.Subst.fill rest (- n 1) term))
+
+// Kind.Operator.equal (left: (Kind.Operator)) (right: (Kind.Operator)) : (Bool)
+(Kind.Operator.equal (Kind.Operator.and) (Kind.Operator.and)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.sub) (Kind.Operator.sub)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.mul) (Kind.Operator.mul)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.div) (Kind.Operator.div)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.mod) (Kind.Operator.mod)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.and) (Kind.Operator.and)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.or) (Kind.Operator.or)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.xor) (Kind.Operator.xor)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.shl) (Kind.Operator.shl)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.shr) (Kind.Operator.shr)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.ltn) (Kind.Operator.ltn)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.lte) (Kind.Operator.lte)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.eql) (Kind.Operator.eql)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.gte) (Kind.Operator.gte)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.gtn) (Kind.Operator.gtn)) = (Bool.true)
+(Kind.Operator.equal (Kind.Operator.neq) (Kind.Operator.neq)) = (Bool.true)
+(Kind.Operator.equal a b) = (Bool.false)
+
+// Kind.Checker.get_subst : (Kind.Checker (Kind.Subst))
+(Kind.Checker.get_subst) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs subst)
 
 // Kind.Checker.fail -(t: Type) (err: (Kind.Error)) : (Kind.Checker t)
 (Kind.Checker.fail err) = @context @depth @rhs @subst @eqts @errs (Kind.Result.errored context subst (List.cons err errs))
-
-// Kind.Checker.get_context : (Kind.Checker (Kind.Context))
-(Kind.Checker.get_context) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs context)
 
 // Kind.Checker.infer_args (args: (Kind.Term)) : (_: U60) (_: U60) (Kind.Term)
 (Kind.Checker.infer_args (Kind.Term.args7 x0 x1 x2 x3 x4 x5 x6)) = @ctid @orig (Kind.Term.app orig (Kind.Term.app orig (Kind.Term.app orig (Kind.Term.app orig (Kind.Term.app orig (Kind.Term.app orig (Kind.Term.app orig (Kind.Term.fn0 ctid orig) x0) x1) x2) x3) x4) x5) x6)
@@ -436,66 +572,38 @@
 (Kind.Checker.infer (Kind.Term.num orig numb)) = (Kind.Checker.pure (Kind.Term.u60 0))
 (Kind.Checker.infer (Kind.Term.op2 orig oper left right)) = (Kind.Checker.bind (Kind.Checker.check left (Kind.Term.u60 0)) @_ (Kind.Checker.bind (Kind.Checker.check right (Kind.Term.u60 0)) @_ (Kind.Checker.pure (Kind.Term.u60 0))))
 
-// Kind.Checker.new_equation (orig: U60) (left: (Kind.Term)) (right: (Kind.Term)) : (Kind.Checker (Unit))
-(Kind.Checker.new_equation orig left right) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst (List.append eqts (Kind.Equation.new context orig left right)) errs (Unit.new))
+// Kind.Term.if_all -(res: Type) (term: (Kind.Term)) (if: (_: U60) (_: U60) (_: (Kind.Term)) (_: (_: (Kind.Term)) (Kind.Term)) res) (else: res) : res
+(Kind.Term.if_all (Kind.Term.all orig name typ body) func_if else) = ((((func_if orig) name) typ) body)
+(Kind.Term.if_all other func_if else) = else
 
-// List.append -(a: Type) (xs: (List a)) (x: a) : (List a)
-(List.append (List.nil) x) = (List.pure x)
-(List.append (List.cons xs.h xs.t) x) = (List.cons xs.h (List.append xs.t x))
-
-// List.pure -(t: Type) (x: t) : (List t)
-(List.pure x) = (List.cons x (List.nil))
-
-// Kind.Term.get_origin -(r: Type) (term: (Kind.Term)) (got: (_: U60) (_: (Kind.Term)) r) : r
-(Kind.Term.get_origin (Kind.Term.typ orig) got) = ((got orig) (Kind.Term.typ orig))
-(Kind.Term.get_origin (Kind.Term.var orig name index) got) = ((got orig) (Kind.Term.var orig name index))
-(Kind.Term.get_origin (Kind.Term.hol orig numb) got) = ((got orig) (Kind.Term.hol orig numb))
-(Kind.Term.get_origin (Kind.Term.all orig name typ body) got) = ((got orig) (Kind.Term.all orig name typ body))
-(Kind.Term.get_origin (Kind.Term.lam orig name body) got) = ((got orig) (Kind.Term.lam orig name body))
-(Kind.Term.get_origin (Kind.Term.let orig name expr body) got) = ((got orig) (Kind.Term.let orig name expr body))
-(Kind.Term.get_origin (Kind.Term.ann orig expr typ) got) = ((got orig) (Kind.Term.ann orig expr typ))
-(Kind.Term.get_origin (Kind.Term.app orig func arg) got) = ((got orig) (Kind.Term.app orig func arg))
-(Kind.Term.get_origin (Kind.Term.hlp orig) got) = ((got orig) (Kind.Term.hlp orig))
-(Kind.Term.get_origin (Kind.Term.u60 orig) got) = ((got orig) (Kind.Term.u60 orig))
-(Kind.Term.get_origin (Kind.Term.num orig num) got) = ((got orig) (Kind.Term.num orig num))
-(Kind.Term.get_origin (Kind.Term.op2 orig op left right) got) = ((got orig) (Kind.Term.op2 orig op left right))
-(Kind.Term.get_origin (Kind.Term.ct0 ctid orig) got) = ((got orig) (Kind.Term.ct0 ctid orig))
-(Kind.Term.get_origin (Kind.Term.ct1 ctid orig x0) got) = ((got orig) (Kind.Term.ct1 ctid orig x0))
-(Kind.Term.get_origin (Kind.Term.ct2 ctid orig x0 x1) got) = ((got orig) (Kind.Term.ct2 ctid orig x0 x1))
-(Kind.Term.get_origin (Kind.Term.ct3 ctid orig x0 x1 x2) got) = ((got orig) (Kind.Term.ct3 ctid orig x0 x1 x2))
-(Kind.Term.get_origin (Kind.Term.ct4 ctid orig x0 x1 x2 x3) got) = ((got orig) (Kind.Term.ct4 ctid orig x0 x1 x2 x3))
-(Kind.Term.get_origin (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4) got) = ((got orig) (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4))
-(Kind.Term.get_origin (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5) got) = ((got orig) (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5))
-(Kind.Term.get_origin (Kind.Term.ct7 ctid orig args) got) = ((got orig) (Kind.Term.ct7 ctid orig args))
-(Kind.Term.get_origin (Kind.Term.ct8 ctid orig args) got) = ((got orig) (Kind.Term.ct8 ctid orig args))
-(Kind.Term.get_origin (Kind.Term.fn0 fnid orig) got) = ((got orig) (Kind.Term.fn0 fnid orig))
-(Kind.Term.get_origin (Kind.Term.fn1 fnid orig x0) got) = ((got orig) (Kind.Term.fn1 fnid orig x0))
-(Kind.Term.get_origin (Kind.Term.fn2 fnid orig x0 x1) got) = ((got orig) (Kind.Term.fn2 fnid orig x0 x1))
-(Kind.Term.get_origin (Kind.Term.fn3 fnid orig x0 x1 x2) got) = ((got orig) (Kind.Term.fn3 fnid orig x0 x1 x2))
-(Kind.Term.get_origin (Kind.Term.fn4 fnid orig x0 x1 x2 x3) got) = ((got orig) (Kind.Term.fn4 fnid orig x0 x1 x2 x3))
-(Kind.Term.get_origin (Kind.Term.fn5 fnid orig x0 x1 x2 x3 x4) got) = ((got orig) (Kind.Term.fn5 fnid orig x0 x1 x2 x3 x4))
-(Kind.Term.get_origin (Kind.Term.fn6 fnid orig x0 x1 x2 x3 x4 x5) got) = ((got orig) (Kind.Term.fn6 fnid orig x0 x1 x2 x3 x4 x5))
-(Kind.Term.get_origin (Kind.Term.fn7 fnid orig args) got) = ((got orig) (Kind.Term.fn7 fnid orig args))
-(Kind.Term.get_origin (Kind.Term.fn8 fnid orig args) got) = ((got orig) (Kind.Term.fn8 fnid orig args))
-
-// Kind.Checker.rule (rule: (Kind.Rule)) (term: (Kind.Term)) : (Kind.Checker (Unit))
-(Kind.Checker.rule (Kind.Rule.lhs arg args) (Kind.Term.all orig name type body)) = (Kind.Checker.bind (Kind.Checker.check arg type) @_ (Kind.Checker.bind (Kind.Checker.rule args (body arg)) @_ (Kind.Checker.pure (Unit.new))))
-(Kind.Checker.rule (Kind.Rule.lhs arg args) other) = (Kind.Checker.bind (Kind.Checker.get_context) @ctx (Kind.Checker.fail (Kind.Error.too_many_arguments ctx (Kind.Term.get_origin arg @orig @term orig))))
-(Kind.Checker.rule (Kind.Rule.rhs expr) type) = (Kind.Checker.bind (Kind.Checker.set_right_hand_side (Bool.true)) @_ (Kind.Checker.bind (Kind.Checker.check expr type) @_ (Kind.Checker.pure (Unit.new))))
+// Kind.Checker.error -(t: Type) (err: (Kind.Error)) (ret: t) : (Kind.Checker t)
+(Kind.Checker.error err ret) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts (List.cons err errs) ret)
 
 // Kind.Checker.set_right_hand_side (rhs: (Bool)) : (Kind.Checker (Unit))
 (Kind.Checker.set_right_hand_side to_rhs) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth to_rhs subst eqts errs (Unit.new))
 
+// Kind.Checker.unify (checker: (Kind.Checker (Unit))) : (Kind.Checker (Unit))
+(Kind.Checker.unify checker) = (Kind.Checker.bind checker @_ (Kind.Checker.bind (Kind.Checker.get_equations) @equations (Kind.Checker.unify.go equations (List.nil) (Bool.false))))
+
+// Kind.Checker.unify.go (equations: (List (Kind.Equation))) (unsolved: (List (Kind.Equation))) (changed: (Bool)) : (Kind.Checker (Unit))
+(Kind.Checker.unify.go (List.nil) (List.nil) changed) = (Kind.Checker.pure (Unit.new))
+(Kind.Checker.unify.go (List.nil) unsolved (Bool.true)) = (Kind.Checker.unify.go unsolved (List.nil) (Bool.false))
+(Kind.Checker.unify.go (List.nil) unsolved (Bool.false)) = (Kind.Checker.unify.go.fail unsolved)
+(Kind.Checker.unify.go (List.cons (Kind.Equation.new ctx orig left right) equations) unsolved changed) = (Kind.Checker.bind (Kind.Checker.equal (Kind.Term.eval left) (Kind.Term.eval right)) @is_equal let unify = (Bool.if is_equal @equations @unsolved (Kind.Checker.unify.go equations unsolved (Bool.true)) @equations @unsolved let eqt = (Kind.Equation.new ctx orig left right); (Kind.Checker.unify.go equations (List.cons eqt unsolved) changed)); ((unify equations) unsolved))
+
+// Kind.Checker.unify.go.fail (equations: (List (Kind.Equation))) : (Kind.Checker (Unit))
+(Kind.Checker.unify.go.fail (List.nil)) = (Kind.Checker.pure (Unit.new))
+(Kind.Checker.unify.go.fail (List.cons (Kind.Equation.new ctx orig left right) eqts)) = (Kind.Checker.bind (Kind.Checker.error (Kind.Error.type_mismatch ctx orig left right) (Unit.new)) @_ (Kind.Checker.unify.go.fail eqts))
+
+// Kind.Checker.get_equations : (Kind.Checker (List (Kind.Equation)))
+(Kind.Checker.get_equations) = @context @depth @rhs @subst @eqts @errs (Kind.Result.checked context depth rhs subst eqts errs eqts)
+
+// Kind.Checker.run -(t: Type) (checker: (Kind.Checker t)) (rhs: (Bool)) : (Kind.Result t)
+(Kind.Checker.run checker rhs) = ((((((checker (Kind.Context.empty)) 0) rhs) (Kind.Subst.end)) (List.nil)) (List.nil))
+
 // String.is_nil (xs: (String)) : (Bool)
 (String.is_nil "") = (Bool.true)
 (String.is_nil (String.cons x xs)) = (Bool.false)
-
-// List.reverse -(a: Type) (xs: (List a)) : (List a)
-(List.reverse xs) = (List.reverse.go xs (List.nil))
-
-// List.reverse.go -(a: Type) (xs: (List a)) (ys: (List a)) : (List a)
-(List.reverse.go (List.nil) ys) = ys
-(List.reverse.go (List.cons x xs) ys) = (List.reverse.go xs (List.cons x ys))
 
 // Kind.API.output (res: (List (Pair U60 (List (Kind.Result (Unit)))))) : (String)
 (Kind.API.output (List.nil)) = ""
@@ -523,6 +631,9 @@
 // Kind.API.output.error.details (fnid: U60) (ctx: (Kind.Context)) (sub: (Kind.Subst)) (origin: U60) : (String)
 (Kind.API.output.error.details fnid ctx sub orig) = (Kind.Printer.text (List.cons (Bool.if (Kind.Context.is_empty ctx) "" (Kind.Printer.text (List.cons (Kind.Printer.color "4") (List.cons "Kind.Context:" (List.cons (Kind.Printer.color "0") (List.cons (String.new_line) (List.cons (Kind.Context.show ctx sub) (List.nil)))))))) (List.cons (Kind.Printer.color "4") (List.cons (String.cons 79 (String.cons 110 (String.cons 32 (String.cons 39 "{{#F")))) (List.cons (Show.to_string (U60.show (>> orig 48))) (List.cons (String.cons 70 (String.cons 35 (String.cons 125 (String.cons 125 (String.cons 39 ":"))))) (List.cons (Kind.Printer.color "0") (List.cons (String.new_line) (List.cons "{{#R" (List.cons (Show.to_string (U60.show (>> orig 48))) (List.cons ":" (List.cons (Show.to_string (U60.show (& orig 16777215))) (List.cons ":" (List.cons (Show.to_string (U60.show (& (>> orig 24) 16777215))) (List.cons "R#}}" (List.cons (String.new_line) (List.nil)))))))))))))))))
 
+// Kind.Printer.color (color_code: (String)) : (String)
+(Kind.Printer.color color_code) = (Kind.Printer.text (List.cons (String.cons 27 "") (List.cons "[" (List.cons color_code (List.cons "m" (List.nil))))))
+
 // Pair.match -(a: Type) -(b: Type) (x: (Pair a b)) -(p: (x: (Pair a b)) Type) (new: (fst: a) (snd: b) (p (Pair.new a b fst snd))) : (p x)
 (Pair.match (Pair.new fst_ snd_) new) = ((new fst_) snd_)
 
@@ -533,12 +644,6 @@
 
 // String.cut (str: (String)) : (String)
 (String.cut str) = (String.cut.go str "(...)" 2048)
-
-// Show.to_string (show: (Show)) : (String)
-(Show.to_string show) = (show "")
-
-// Show : Type
-(Show) = 0
 
 // Kind.Context.show.type (name: U60) (type: (Kind.Term)) (sub: (Kind.Subst)) (pad: U60) : (String)
 (Kind.Context.show.type name type sub pad) = (Kind.Printer.text (List.cons "- " (List.cons (String.pad_right (U60.to_nat pad) 32 (Kind.Name.show name)) (List.cons " : " (List.cons (String.cut (Kind.Term.show (Kind.Term.fill type sub))) (List.cons (String.new_line) (List.nil)))))))
@@ -554,30 +659,14 @@
 // Kind.Context.show (ctx: (Kind.Context)) (subst: (Kind.Subst)) : (String)
 (Kind.Context.show ctx subst) = (Kind.Context.show.go ctx subst (Kind.Context.max_name_length ctx))
 
-// Kind.Printer.text (ls: (List (String))) : (String)
-(Kind.Printer.text (List.nil)) = ""
-(Kind.Printer.text (List.cons x xs)) = (String.concat x (Kind.Printer.text xs))
-
-// String.concat (xs: (String)) (ys: (String)) : (String)
-(String.concat (String.cons x xs) ys) = (String.cons x (String.concat xs ys))
-(String.concat "" ys) = ys
-
 // String.pad_right (size: (Nat)) (chr: (Char)) (str: (String)) : (String)
 (String.pad_right (Nat.zero) chr str) = str
 (String.pad_right (Nat.succ sp) chr "") = (String.cons chr (String.pad_right sp chr ""))
 (String.pad_right (Nat.succ sp) chr (String.cons x xs)) = (String.cons x (String.pad_right sp chr xs))
 
-// Char : Type
-(Char) = 0
-
-// String.new_line : (String)
-(String.new_line) = (String.pure (Char.newline))
-
-// String.pure (x: (Char)) : (String)
-(String.pure x) = (String.cons x "")
-
-// Char.newline : (Char)
-(Char.newline) = 10
+// U60.to_nat (x: U60) : (Nat)
+(U60.to_nat 0) = (Nat.zero)
+(U60.to_nat n) = (Nat.succ (U60.to_nat (- n 1)))
 
 // Kind.Context.max_name_length.aux (ctx: (Kind.Context)) (acc: U60) : U60
 (Kind.Context.max_name_length.aux (Kind.Context.empty) acc) = acc
@@ -586,20 +675,6 @@
 // Kind.Context.max_name_length (ctx: (Kind.Context)) : U60
 (Kind.Context.max_name_length ctx) = (Kind.Context.max_name_length.aux ctx 0)
 
-// Nat.to_u60 (n: (Nat)) : U60
-(Nat.to_u60 (Nat.zero)) = 0
-(Nat.to_u60 (Nat.succ n)) = (+ 1 (Nat.to_u60 n))
-
-// Kind.Name.show.go (name: U60) (chrs: (String)) : (String)
-(Kind.Name.show.go name chrs) = (U60.if (== name 0) chrs let val = (% name 64); let chr = (U60.if (== val 0) 46 (U60.if (& (<= 1 val) (<= val 10)) (+ (- val 1) 48) (U60.if (& (<= 11 val) (<= val 36)) (+ (- val 11) 65) (U60.if (& (<= 37 val) (<= val 62)) (+ (- val 37) 97) (U60.if (== val 63) 95 63))))); (Kind.Name.show.go (/ name 64) (String.cons chr chrs)))
-
-// Kind.Name.show (name: U60) : (String)
-(Kind.Name.show name) = (Kind.Name.show.go name "")
-
-// U60.if -(r: Type) (n: U60) (t: r) (f: r) : r
-(U60.if 0 t f) = f
-(U60.if x t f) = t
-
 // U60.max (fst: U60) (snd: U60) : U60
 (U60.max fst snd) = (U60.if (> fst snd) fst snd)
 
@@ -607,125 +682,50 @@
 (String.length "") = (Nat.zero)
 (String.length (String.cons x xs)) = (Nat.succ (String.length xs))
 
-// Kind.Term.show.forall (orig: U60) (name: U60) (type: (Kind.Term)) (body: (_: (Kind.Term)) (Kind.Term)) : (String)
-(Kind.Term.show.forall orig name type body) = (U60.if (== name 63) (Kind.Printer.text (List.cons "(" (List.cons (Kind.Term.show type) (List.cons " -> " (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.cons ")" (List.nil))))))) (Kind.Printer.text (List.cons "((" (List.cons (Kind.Name.show name) (List.cons ": " (List.cons (Kind.Term.show type) (List.cons ") -> " (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.cons ")" (List.nil))))))))))
-
-// Kind.Term.show (term: (Kind.Term)) : (String)
-(Kind.Term.show term) = let sugars = (List.cons (Kind.Term.show.sugar.string term) (List.cons (Kind.Term.show.sugar.list term) (List.cons (Kind.Term.show.sugar.sigma term) (List.nil)))); (Maybe.try sugars (Kind.Term.show.go term))
-
-// Kind.Term.show.go (term: (Kind.Term)) : (String)
-(Kind.Term.show.go (Kind.Term.typ orig)) = "Type"
-(Kind.Term.show.go (Kind.Term.var orig name index)) = (Kind.Printer.text (List.cons (Kind.Name.show name) (List.nil)))
-(Kind.Term.show.go (Kind.Term.hol orig numb)) = (Kind.Printer.text (List.cons "_" (List.nil)))
-(Kind.Term.show.go (Kind.Term.all orig name type body)) = (Kind.Term.show.forall orig name type body)
-(Kind.Term.show.go (Kind.Term.lam orig name body)) = (Kind.Printer.text (List.cons "(" (List.cons (Kind.Name.show name) (List.cons "=>" (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.let orig name exp body)) = (Kind.Printer.text (List.cons "let " (List.cons (Kind.Name.show name) (List.cons " = " (List.cons (Kind.Term.show exp) (List.cons "; " (List.cons (Kind.Term.show (body (Kind.Term.var orig name 0))) (List.nil))))))))
-(Kind.Term.show.go (Kind.Term.ann orig expr type)) = (Kind.Printer.text (List.cons "{" (List.cons (Kind.Term.show expr) (List.cons " :: " (List.cons (Kind.Term.show type) (List.cons "}" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.app orig func argm)) = (Kind.Printer.text (List.cons "(" (List.cons (Kind.Term.show func) (List.cons " " (List.cons (Kind.Term.show argm) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.ct0 ctid orig)) = (NameOf ctid)
-(Kind.Term.show.go (Kind.Term.ct1 ctid orig x0)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.ct2 ctid orig x0 x1)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons ")" (List.nil)))))))))
-(Kind.Term.show.go (Kind.Term.ct3 ctid orig x0 x1 x2)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons ")" (List.nil)))))))))))
-(Kind.Term.show.go (Kind.Term.ct4 ctid orig x0 x1 x2 x3)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons ")" (List.nil)))))))))))))
-(Kind.Term.show.go (Kind.Term.ct5 ctid orig x0 x1 x2 x3 x4)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons ")" (List.nil)))))))))))))))
-(Kind.Term.show.go (Kind.Term.ct6 ctid orig x0 x1 x2 x3 x4 x5)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons ")" (List.nil)))))))))))))))))
-(Kind.Term.show.go (Kind.Term.ct7 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.ct8 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.fn0 ctid orig)) = (NameOf ctid)
-(Kind.Term.show.go (Kind.Term.fn1 ctid orig x0)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.fn2 ctid orig x0 x1)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons ")" (List.nil)))))))))
-(Kind.Term.show.go (Kind.Term.fn3 ctid orig x0 x1 x2)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons ")" (List.nil)))))))))))
-(Kind.Term.show.go (Kind.Term.fn4 ctid orig x0 x1 x2 x3)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons ")" (List.nil)))))))))))))
-(Kind.Term.show.go (Kind.Term.fn5 ctid orig x0 x1 x2 x3 x4)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons ")" (List.nil)))))))))))))))
-(Kind.Term.show.go (Kind.Term.fn6 ctid orig x0 x1 x2 x3 x4 x5)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons ")" (List.nil)))))))))))))))))
-(Kind.Term.show.go (Kind.Term.fn7 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.fn8 ctid orig args)) = (Kind.Printer.text (List.cons "(" (List.cons (NameOf ctid) (List.cons " " (List.cons (Kind.Term.show args) (List.cons ")" (List.nil)))))))
-(Kind.Term.show.go (Kind.Term.args7 x0 x1 x2 x3 x4 x5 x6)) = (Kind.Printer.text (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons " " (List.cons (Kind.Term.show x6) (List.nil)))))))))))))))
-(Kind.Term.show.go (Kind.Term.args8 x0 x1 x2 x3 x4 x5 x6 x7)) = (Kind.Printer.text (List.cons (Kind.Term.show x0) (List.cons " " (List.cons (Kind.Term.show x1) (List.cons " " (List.cons (Kind.Term.show x2) (List.cons " " (List.cons (Kind.Term.show x3) (List.cons " " (List.cons (Kind.Term.show x4) (List.cons " " (List.cons (Kind.Term.show x5) (List.cons " " (List.cons (Kind.Term.show x6) (List.cons " " (List.cons (Kind.Term.show x7) (List.nil)))))))))))))))))
-(Kind.Term.show.go (Kind.Term.hlp orig)) = "?"
-(Kind.Term.show.go (Kind.Term.u60 orig)) = "U60"
-(Kind.Term.show.go (Kind.Term.num orig numb)) = (Show.to_string (U60.show numb))
-(Kind.Term.show.go (Kind.Term.op2 orig operator left right)) = (Kind.Printer.text (List.cons "(" (List.cons (Kind.Operator.show operator) (List.cons " " (List.cons (Kind.Term.show left) (List.cons " " (List.cons (Kind.Term.show right) (List.cons ")" (List.nil)))))))))
-
-// Maybe.try -(a: Type) (ls: (List (Maybe a))) (alt: a) : a
-(Maybe.try (List.nil) alt) = alt
-(Maybe.try (List.cons maybe xs) alt) = (Maybe.match maybe (Maybe.try xs alt) @maybe.value maybe.value)
-
-// Kind.Term.show.sugar.list.go (term: (Kind.Term)) : (Maybe (List (String)))
-(Kind.Term.show.sugar.list.go (Kind.Term.ct0 (List.nil.) orig)) = (Maybe.some (List.nil))
-(Kind.Term.show.sugar.list.go (Kind.Term.ct2 (List.cons.) orig x0 x1)) = (Maybe.bind (Kind.Term.show.sugar.list.go x1) @tail (Maybe.pure (List.cons (Kind.Term.show x0) tail)))
-(Kind.Term.show.sugar.list.go other) = (Maybe.none)
-
-// Kind.Term.show.sugar.list (term: (Kind.Term)) : (Maybe (String))
-(Kind.Term.show.sugar.list term) = (Maybe.bind (Kind.Term.show.sugar.list.go term) @res (Maybe.pure (Kind.Printer.text (List.cons "[" (List.cons (String.join " " res) (List.cons "]" (List.nil)))))))
-
-// Maybe.bind -(a: Type) -(b: Type) (ma: (Maybe a)) (mb: (_: a) (Maybe b)) : (Maybe b)
-(Maybe.bind (Maybe.none) mb) = (Maybe.none)
-(Maybe.bind (Maybe.some val) mb) = (mb val)
-
-// String.join (sep: (String)) (list: (List (String))) : (String)
-(String.join sep list) = (String.intercalate sep list)
-
-// String.intercalate (sep: (String)) (xs: (List (String))) : (String)
-(String.intercalate sep xs) = (String.flatten (List.intersperse sep xs))
-
-// String.flatten (xs: (List (String))) : (String)
-(String.flatten (List.nil)) = ""
-(String.flatten (List.cons head tail)) = (String.concat head (String.flatten tail))
-
-// List.intersperse -(a: Type) (sep: a) (xs: (List a)) : (List a)
-(List.intersperse sep (List.nil)) = (List.nil)
-(List.intersperse sep (List.cons xh (List.nil))) = (List.pure xh)
-(List.intersperse sep (List.cons xh xt)) = (List.cons xh (List.cons sep (List.intersperse sep xt)))
-
-// Maybe.pure -(a: Type) (x: a) : (Maybe a)
-(Maybe.pure x) = (Maybe.some x)
-
-// Kind.Operator.show (op: (Kind.Operator)) : (String)
-(Kind.Operator.show (Kind.Operator.add)) = "+"
-(Kind.Operator.show (Kind.Operator.sub)) = "-"
-(Kind.Operator.show (Kind.Operator.mul)) = "*"
-(Kind.Operator.show (Kind.Operator.div)) = "/"
-(Kind.Operator.show (Kind.Operator.mod)) = "%"
-(Kind.Operator.show (Kind.Operator.and)) = "&"
-(Kind.Operator.show (Kind.Operator.or)) = "|"
-(Kind.Operator.show (Kind.Operator.xor)) = "^"
-(Kind.Operator.show (Kind.Operator.shl)) = "<<"
-(Kind.Operator.show (Kind.Operator.shr)) = ">>"
-(Kind.Operator.show (Kind.Operator.ltn)) = "<"
-(Kind.Operator.show (Kind.Operator.lte)) = "<="
-(Kind.Operator.show (Kind.Operator.eql)) = "=="
-(Kind.Operator.show (Kind.Operator.gte)) = ">="
-(Kind.Operator.show (Kind.Operator.gtn)) = ">"
-(Kind.Operator.show (Kind.Operator.neq)) = "!="
-
-// Kind.Term.show.sugar.sigma (term: (Kind.Term)) : (Maybe (String))
-(Kind.Term.show.sugar.sigma (Kind.Term.ct2 (Sigma.) orig typ (Kind.Term.lam orig_ name body))) = (Maybe.some (Kind.Printer.text (List.cons "([" (List.cons (Kind.Name.show name) (List.cons ": " (List.cons (Kind.Term.show typ) (List.cons "] -> " (List.cons (Kind.Term.show (body (Kind.Term.var orig_ name 0))) (List.cons ")" (List.nil))))))))))
-(Kind.Term.show.sugar.sigma term) = (Maybe.none)
-
-// U60.show (n: U60) : (Show)
-(U60.show 0) = @str (String.cons 48 str)
-(U60.show n) = @str let next = (String.cons (+ 48 (% n 10)) str); let func = (U60.if (< n 10) @h h @h ((U60.show (/ n 10)) h)); (func next)
-
-// Kind.Term.show.sugar.string.go (term: (Kind.Term)) : (Maybe (String))
-(Kind.Term.show.sugar.string.go (Kind.Term.ct0 (String.nil.) orig)) = (Maybe.some "")
-(Kind.Term.show.sugar.string.go (Kind.Term.ct2 (String.cons.) orig (Kind.Term.num orig1 x0) x1)) = (Maybe.bind (Kind.Term.show.sugar.string.go x1) @tail (Maybe.pure (String.cons x0 tail)))
-(Kind.Term.show.sugar.string.go other) = (Maybe.none)
-
-// Kind.Term.show.sugar.string (term: (Kind.Term)) : (Maybe (String))
-(Kind.Term.show.sugar.string term) = (Maybe.bind (Kind.Term.show.sugar.string.go term) @res let quot = (String.cons 39 ""); (Maybe.pure (Kind.Printer.text (List.cons quot (List.cons res (List.cons quot (List.nil)))))))
-
-// U60.to_nat (x: U60) : (Nat)
-(U60.to_nat 0) = (Nat.zero)
-(U60.to_nat n) = (Nat.succ (U60.to_nat (- n 1)))
-
-// Kind.Printer.color (color_code: (String)) : (String)
-(Kind.Printer.color color_code) = (Kind.Printer.text (List.cons (String.cons 27 "") (List.cons "[" (List.cons color_code (List.cons "m" (List.nil))))))
+// Nat.to_u60 (n: (Nat)) : U60
+(Nat.to_u60 (Nat.zero)) = 0
+(Nat.to_u60 (Nat.succ n)) = (+ 1 (Nat.to_u60 n))
 
 // Kind.Context.is_empty (ctx: (Kind.Context)) : (Bool)
 (Kind.Context.is_empty (Kind.Context.empty)) = (Bool.true)
 (Kind.Context.is_empty (Kind.Context.entry name type vals rest)) = (Bool.false)
 
-// Kind.API.eval_main : (String)
-(Kind.API.eval_main) = (Kind.Printer.text (List.cons (Kind.Term.show (Kind.Term.FN0 (Main.) 0)) (List.cons (String.new_line) (List.cons (String.new_line) (List.nil)))))
+// List.reverse -(a: Type) (xs: (List a)) : (List a)
+(List.reverse xs) = (List.reverse.go xs (List.nil))
+
+// List.reverse.go -(a: Type) (xs: (List a)) (ys: (List a)) : (List a)
+(List.reverse.go (List.nil) ys) = ys
+(List.reverse.go (List.cons x xs) ys) = (List.reverse.go xs (List.cons x ys))
+
+// Kind.Term.set_origin (new_orig: U60) (term: (Kind.Term)) : (Kind.Term)
+(Kind.Term.set_origin new_origin (Kind.Term.typ old_orig)) = (Kind.Term.typ new_origin)
+(Kind.Term.set_origin new_origin (Kind.Term.var old_orig name idx)) = (Kind.Term.var new_origin name idx)
+(Kind.Term.set_origin new_origin (Kind.Term.hol old_orig numb)) = (Kind.Term.hol new_origin numb)
+(Kind.Term.set_origin new_origin (Kind.Term.all old_orig name typ body)) = (Kind.Term.all new_origin name typ body)
+(Kind.Term.set_origin new_origin (Kind.Term.lam old_orig name body)) = (Kind.Term.lam new_origin name body)
+(Kind.Term.set_origin new_origin (Kind.Term.let old_orig name expr body)) = (Kind.Term.let new_origin name expr body)
+(Kind.Term.set_origin new_origin (Kind.Term.ann old_orig expr typ)) = (Kind.Term.ann new_origin expr typ)
+(Kind.Term.set_origin new_origin (Kind.Term.app old_orig func arg)) = (Kind.Term.app new_origin func arg)
+(Kind.Term.set_origin new_origin (Kind.Term.hlp old_orig)) = (Kind.Term.hlp new_origin)
+(Kind.Term.set_origin new_origin (Kind.Term.u60 old_orig)) = (Kind.Term.u60 new_origin)
+(Kind.Term.set_origin new_origin (Kind.Term.num old_orig num)) = (Kind.Term.num new_origin num)
+(Kind.Term.set_origin new_origin (Kind.Term.op2 old_orig op left right)) = (Kind.Term.op2 new_origin op left right)
+(Kind.Term.set_origin new_origin (Kind.Term.ct0 ctid old_orig)) = (Kind.Term.ct0 ctid new_origin)
+(Kind.Term.set_origin new_origin (Kind.Term.ct1 ctid old_orig x0)) = (Kind.Term.ct1 ctid new_origin x0)
+(Kind.Term.set_origin new_origin (Kind.Term.ct2 ctid old_orig x0 x1)) = (Kind.Term.ct2 ctid new_origin x0 x1)
+(Kind.Term.set_origin new_origin (Kind.Term.ct3 ctid old_orig x0 x1 x2)) = (Kind.Term.ct3 ctid new_origin x0 x1 x2)
+(Kind.Term.set_origin new_origin (Kind.Term.ct4 ctid old_orig x0 x1 x2 x3)) = (Kind.Term.ct4 ctid new_origin x0 x1 x2 x3)
+(Kind.Term.set_origin new_origin (Kind.Term.ct5 ctid old_orig x0 x1 x2 x3 x4)) = (Kind.Term.ct5 ctid new_origin x0 x1 x2 x3 x4)
+(Kind.Term.set_origin new_origin (Kind.Term.ct6 ctid old_orig x0 x1 x2 x3 x4 x5)) = (Kind.Term.ct6 ctid new_origin x0 x1 x2 x3 x4 x5)
+(Kind.Term.set_origin new_origin (Kind.Term.ct7 ctid old_orig args)) = (Kind.Term.ct7 ctid new_origin args)
+(Kind.Term.set_origin new_origin (Kind.Term.ct8 ctid old_orig args)) = (Kind.Term.ct8 ctid new_origin args)
+(Kind.Term.set_origin new_origin (Kind.Term.fn0 fnid old_orig)) = (Kind.Term.fn0 fnid new_origin)
+(Kind.Term.set_origin new_origin (Kind.Term.fn1 fnid old_orig x0)) = (Kind.Term.fn1 fnid new_origin x0)
+(Kind.Term.set_origin new_origin (Kind.Term.fn2 fnid old_orig x0 x1)) = (Kind.Term.fn2 fnid new_origin x0 x1)
+(Kind.Term.set_origin new_origin (Kind.Term.fn3 fnid old_orig x0 x1 x2)) = (Kind.Term.fn3 fnid new_origin x0 x1 x2)
+(Kind.Term.set_origin new_origin (Kind.Term.fn4 fnid old_orig x0 x1 x2 x3)) = (Kind.Term.fn4 fnid new_origin x0 x1 x2 x3)
+(Kind.Term.set_origin new_origin (Kind.Term.fn5 fnid old_orig x0 x1 x2 x3 x4)) = (Kind.Term.fn5 fnid new_origin x0 x1 x2 x3 x4)
+(Kind.Term.set_origin new_origin (Kind.Term.fn6 fnid old_orig x0 x1 x2 x3 x4 x5)) = (Kind.Term.fn6 fnid new_origin x0 x1 x2 x3 x4 x5)
+(Kind.Term.set_origin new_origin (Kind.Term.fn7 ctid old_orig args)) = (Kind.Term.ct7 ctid new_origin args)
+(Kind.Term.set_origin new_origin (Kind.Term.fn8 ctid old_orig args)) = (Kind.Term.ct8 ctid new_origin args)
 
