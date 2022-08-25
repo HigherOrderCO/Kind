@@ -107,7 +107,7 @@ fn run_cli() -> Result<(), String> {
 // Checks all definitions of a Kind2 file
 fn cmd_check_all(path: &str) -> Result<(), String> {
   let loaded = load(path)?;
-  let result = run_with_hvm(&gen_checker(&loaded.book), "API.check_all", true)?;
+  let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.check_all", true)?;
   print!("{}", inject_highlights(&loaded.file, &result.output));
   println!("Rewrites: {}", result.rewrites);
   Ok(())
@@ -118,7 +118,7 @@ fn cmd_check_all(path: &str) -> Result<(), String> {
 fn cmd_eval_main(path: &str) -> Result<(), String> {
   let loaded = load(path)?;
   if loaded.book.entrs.contains_key("Main") {
-    let result = run_with_hvm(&gen_checker(&loaded.book), "API.eval_main", true)?;
+    let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.eval_main", true)?;
     print!("{}", result.output);
     println!("Rewrites: {}", result.rewrites);
     Ok(())
@@ -287,7 +287,7 @@ pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
 fn gen_checker(book: &Book) -> String {
   // Compile the Kind2 file to HVM checker
   let base_check_code = compile_book(&book);
-  let mut check_code = (&CHECKER_HVM[0 .. CHECKER_HVM.find("////INJECT////").unwrap()]).to_string(); 
+  let mut check_code = CHECKER_HVM.to_string();
   check_code.push_str(&base_check_code);
   return check_code;
 }
