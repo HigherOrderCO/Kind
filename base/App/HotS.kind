@@ -10,14 +10,16 @@ App.HotS.State: App.State
 App.HotS.init: App.Init<App.HotS.State>
   let bids = {} :: Map<App.HotS.Bid>
   let teams = {
-    "Simon": "db486282027730d54913ae9887f4c2c77900f3b8640842140afd7e3c50176615"
-    "Exorr": "430b700c0ed14291e123337d9e601dbd0318d7096aaa90e77e8bb7a2c93ad75c"
-    "Linharees": "dee7591ec0c54ba2e1df48a247b398064c8a036555ced9b986a22870f80a6ae9"
-    "Rooxyz": "5eee30cf88b6a7556459ebd45406ae502f6ada1214ced55909ec434521beb978"
-    "Dasij": "b8efd18f1503fae789e235dba4b7f7d0ffd5c109265db827f78d0259f5a81646"
+    "Predator": "dabbeb3d080e1c3d18d3a8ec0cd279b0fbd9173d2c4d77968294e1875ff3f5d4"
+    "Motta": "d234023b01f324eff106068900c9db970f753efaa03f73a10bf8b008d4d1c8f2"
+    "Tuts": "327a19d4eae47426e0bd32925ee13767c0aa009bb6cd120af4af853204658830"
+    "Kaira": "aa59ef0ac84e7012b63d305b45a1e7c002b5d57d916b551336dc36a2357934fc"
+    "Lean": "39e8adc36f210a892423dc933fc13ec2a1adb89de356a75c462847c65d981a41"
+    "Monthoros": "279e6de8c25c80d678505bb6f5a7c630c58342b8a5a2f932270bb894ef42c76a"
+    "Sião": "3ee88336dcadefa5425f5f50298fbc6b26c239ee210802d6d403e05b8acae74b"
   }
   let cash = Map.new<Nat>
-  let sort = ["Name", "Tank", "Dps", "Healer", "Bruiser", "Price"]
+  let sort = ["Name", "Tank", "Flex", "Dps", "Healer", "Bruiser", "Price", "BR", "ES"]
   let history = []
   for team:hash in teams with cash:
     Map.set<Nat>(team, 25, cash)
@@ -35,7 +37,33 @@ App.HotS.sort(bids: Map<App.HotS.Bid> cmp: Cmp, sorts: List<String>, a: Pair<Str
   }
 
 App.HotS.sort.name(a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
-  Cmp.inv(String.cmp(a@fst, b@fst))
+  Cmp.inv(String.cmp(String.to_lower(a@fst), String.to_lower(b@fst)))
+
+App.HotS.is_br(x: List<String>): Bool
+  case x {
+    nil: true
+    cons:
+      switch String.eql(x.head) {
+        "BR": true
+        "ES": false
+      }default App.HotS.is_br(x.tail)
+  }
+
+App.HotS.sort.br(a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
+  let a = a@snd@br
+  let b = b@snd@br
+  case a b {
+    true false:  Cmp.gtn
+    false true:  Cmp.ltn
+  }default Cmp.eql
+
+App.HotS.sort.es(a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
+  let a = a@snd@br
+  let b = b@snd@br
+  case a b {
+    true false:  Cmp.ltn
+    false true:  Cmp.gtn
+  }default Cmp.eql
 
 App.HotS.sort.price(bids: Map<App.HotS.Bid> a: Pair<String, App.HotS.Player> b: Pair<String, App.HotS.Player>): Cmp
   let a = bids{a@fst} <> App.HotS.Bid.new(0, "")
@@ -71,12 +99,15 @@ App.HotS.sort.role(role: App.HotS.Role, a: Pair<String, App.HotS.Player> b: Pair
 
 App.HotS.sort.get(bids: Map<App.HotS.Bid>, sort: String): Pair<String, App.HotS.Player> -> Pair<String, App.HotS.Player> -> Cmp 
   switch String.eql(sort) {
-    "Name": App.HotS.sort.name
-    "Price": App.HotS.sort.price(bids)
-    "Tank": App.HotS.sort.role(App.HotS.Role.tank)
-    "Dps": App.HotS.sort.role(App.HotS.Role.dps)
-    "Bruiser": App.HotS.sort.role(App.HotS.Role.bruiser)
-    "Healer": App.HotS.sort.role(App.HotS.Role.healer)
+    "Name"    : App.HotS.sort.name
+    "Price"   : App.HotS.sort.price(bids)
+    "Tank"    : App.HotS.sort.role(App.HotS.Role.tank)
+    "Dps"     : App.HotS.sort.role(App.HotS.Role.dps)
+    "Flex"    : App.HotS.sort.role(App.HotS.Role.flex)
+    "Bruiser" : App.HotS.sort.role(App.HotS.Role.bruiser)
+    "Healer"  : App.HotS.sort.role(App.HotS.Role.healer)
+    "BR"      : App.HotS.sort.br
+    "ES"      : App.HotS.sort.es
   }default App.HotS.sort.name
 
 type App.HotS.State.Local {
@@ -112,12 +143,15 @@ type App.HotS.Player {
   new(
     role_1: App.HotS.Role
     role_2: App.HotS.Role
+    br    : Bool
+    lang  : Bool
   )
 }
 
 type App.HotS.Role {
   tank
   dps
+  flex
   bruiser
   healer
   no
@@ -130,6 +164,7 @@ App.HotS.Role.show(role: App.HotS.Role): String
     dps     : "Dps"
     healer  : "Healer"
     bruiser : "Bruiser"
+    flex    : "Flex"
     no      : ""
   }
 
@@ -137,6 +172,7 @@ App.HotS.Role.list: List<App.HotS.Role>
   [
     App.HotS.Role.tank
     App.HotS.Role.dps
+    App.HotS.Role.flex
     App.HotS.Role.healer
     App.HotS.Role.bruiser
     App.HotS.Role.no
@@ -157,6 +193,7 @@ App.HotS.Role.eql(a: App.HotS.Role, b: App.HotS.Role): Bool
     dps     dps    : true
     bruiser bruiser: true
     healer  healer : true
+    flex    flex   : true
     no      no     : true
   }default false
 
@@ -166,9 +203,10 @@ App.HotS.Role.cmp(a: App.HotS.Role, b: App.HotS.Role): Cmp
       case role {
         tank: 0
         dps: 1
-        healer: 2
-        bruiser: 3
-        no: 4
+        flex: 2
+        healer: 3
+        bruiser: 4
+        no: 5
       }
   Nat.cmp(f(a), f(b))
 
@@ -176,6 +214,7 @@ App.HotS.Role.img(role: App.HotS.Role): String
   case role {
     tank    : "data:image/png;base64,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 "
     dps     : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAABYRJREFUWEetmFuIHUUQhr+SoATFl0RUFBXiBV1BIgFFYrKrwXsELxsEUdE8aBQUI2IEddeIKCJ4QZKAqAHFwC7EO96QXRIkXljxxXghAaMBlUR88cEblNRMzUxPT/ecs2LDsuec7q76+6+/qmtGsCGAFp+yY4glvvf/XWnW6tFnuj2XW9lvQdBeHlK7pZ++zJbSzTgwPWQAWuuHjpSj64+tIxDtqGBGYJMK04Pk4Ye5HRgb7Ky9ogyxsADln86Uo4p59O8zwCiwpmIyw6YxPQXMgoz1ib3yE/hbFoRY1glsblQyUOwVQMuxNerhjhiqwBkLs6ANg4H5jKeNIA/VSSKwUOE9YGWsy9pA29IZzsyIg2oxWYZVppyxfcA1AnN1sTBqatl0ID7ltneFAE1K6xGuRzkX+Lt03MtkG6SwBmUaYRxlynf+ClxbhniIITwvyiEKawvvkfsjgV1eFc8Hfhtg0sJ8R4JJ05yNv4CrgZtcq5G5yLuwDeW6MorsqOgJOCp434DyGPAVyKWgP6ZBFsYN4FEOMsXQJGASMC22am4rNiVOO5StewW4ofKZqoOLET5HOclBjoN+HWwIq8oMwihqhymAxMPqpDmtyeguKdBV4Gx6FfBR6C9F0IPARp8w52dmpBgmQp9ejcmHM3IpwZUsvuaSqJd2aPezHovyA7Cg7/SuoKCUNBCCzJ9E2+CKuUZ+dblCWI3ydpiYDcAq7RvLB0EXeXQkLLCRtKcob5MqMZqAKsacjRx7NtcAhFOAPSHTaQZLvm3hEgfTOkghwpAB4QAqptU4igbQ/jJ+iuUVwD+AhW0pSe/GOeBs97gMmMvUxJCBjMx6/RwAFgPfAafFBnIaDNPe9ljRfDHj3Q6xHTgxZVzhRuDlzOFOBb71udeBq9o2xAp106VF2rKCuc03bAHWtTa3FssK0O0Ci6IgWxHfVBeZblN8G7DZ7d4NPB3fW8FV12knjwF+csWbPpaCfpPI00qQlzuTh9oagfsUnsjFHDgC+ARkxLW7UmBHW9794jXbbwKr3cnjwP1ph14CLCGUCYRZlLGKjZCV4PMGKG4sG/uB04HfwxJg8JqbJNkTyBWgb7mRn4ELgd0FQ75e67QrfrCMnfDGoG6tEqYtGey2OM5trwesg+mMvvSvFocs2q1ibVUBshoBgCTAyKtl7BvAef67NSfV50EAkzRa8bQSUI0kSJ+cBJkAtcah3d43BfUdhcsCeyOI7EbjDCo3JB+aoqvoBGBf9Nv3fjtsje7oLoPNme3xwMJv/8Nh5cmu1bb8gq+p0Ie/XQS8n1m0FXgV+LBhsKPBpcCVfqOkzFwMfBDjCxNsEMA7gWeC4xl71orFRx7z1itMktTrgGJ/IKa7gGf/E4NuxArtOcAL/vcncAtgLVkAtNBcFcZKg2XTUhoyYI/4jXQYyFpQu6E+BeyRNDnK2zhxziq9tWwY9iaWWDZaq2Wl5wLv4zoAgXf9z26lgwkUS4C9eYDxTKq69omgXH+0F9rRKItPFthTHC5nN0NQKKB+DWaugcymYepga2ttPgU09epjEJ4BB54UmFB7xBQZC2ubwPEK++vqltBVaq73JhkAxpiw55bPwNr0YtSFWrxQa5Fgcg+o3UDzHnmAEZWJl0eVM5OYPfX94j9YooSPoPY98DPEsYNjDHMXpzXTVMGzFL7sVMUmL54E7h1IXYA7DHUhw7JWdd+vzeOsz/nDe3R23SmwYsDL2x7s/c8k2dKZKJyHN71cvc1Cbk3BF7lKlkfWUNOE2Bq8oqMYjrfEqlsFtgRsPQo80AExnPkaxrw1mMdfeN4JLAf5GHR5Da71qq2Pgi76+QPsYVhglZadzSU9HdDQUaouoCgKforeUPROvgTcHBpNrs6ZiH7/F7vpt3P6DTOkAAAAAElFTkSuQmCC "
+    flex    : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGkAAABpCAYAAAA5gg06AAABN2lDQ1BBZG9iZSBSR0IgKDE5OTgpAAAokZWPv0rDUBSHvxtFxaFWCOLgcCdRUGzVwYxJW4ogWKtDkq1JQ5ViEm6uf/oQjm4dXNx9AidHwUHxCXwDxamDQ4QMBYvf9J3fORzOAaNi152GUYbzWKt205Gu58vZF2aYAoBOmKV2q3UAECdxxBjf7wiA10277jTG+38yH6ZKAyNguxtlIYgK0L/SqQYxBMygn2oQD4CpTto1EE9AqZf7G1AKcv8ASsr1fBBfgNlzPR+MOcAMcl8BTB1da4Bakg7UWe9Uy6plWdLuJkEkjweZjs4zuR+HiUoT1dFRF8jvA2AxH2w3HblWtay99X/+PRHX82Vun0cIQCw9F1lBeKEuf1UYO5PrYsdwGQ7vYXpUZLs3cLcBC7dFtlqF8hY8Dn8AwMZP/fNTP8gAAAAJcEhZcwAACxMAAAsTAQCanBgAAAbJaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjYtYzE0NSA3OS4xNjM0OTksIDIwMTgvMDgvMTMtMTY6NDA6MjIgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjItMDgtMjRUMjE6NTY6MjktMDM6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDgtMjRUMjI6MjU6MzEtMDM6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIyLTA4LTI0VDIyOjI1OjMxLTAzOjAwIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjU3ZGVhNTYwLTFlOWItNzU0YS05Y2JlLWMyMmQ4Zjg3OTRkYiIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjk3YzY2YWZlLWQ0YzgtYWQ0Ni04Njg2LTFiZDc4NGU2ZDZjOCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOmZjMDcyYWJhLTU2ODItMDE0Yy1hMDVhLTM0NGIzMWJlNzcxOCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJBZG9iZSBSR0IgKDE5OTgpIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpmYzA3MmFiYS01NjgyLTAxNGMtYTA1YS0zNDRiMzFiZTc3MTgiIHN0RXZ0OndoZW49IjIwMjItMDgtMjRUMjE6NTY6MjktMDM6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6ZDc1NzE5YmUtY2NlZi02MTQ4LTg1OTMtMzE3ZmQ5MmY5N2MyIiBzdEV2dDp3aGVuPSIyMDIyLTA4LTI0VDIxOjU2OjI5LTAzOjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93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"
     healer  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAuxJREFUWEelWNt1KyEMHHW220VSzU03SRd2Z9zD8lgEerH2TxwjYDSSRgChfQhAqv+M37uB8mWwLV/tyXyUQEh9W7ZDNcx/4KzpQWReEQGpORqcKZt1d3fompb6YKoYOQFp5vgOrWhgDj/jaINm2o3vunYLxZBNzelAXov8THktY/RmShktFZzLsRLCViTrsOS+vQsBh1EX73V2PHlLFX/2+QHwTyOUgL8EfD/d4lOABwGvlT2efIR0JkBg0oe9AmTsu6E4ALxUHaPUJOAEA+iuy1TId0MXcx1gc73QOwF0c3poanFnJMksAKe6moNACWcivOWeZnWyItOWYHh9kDOoO8sY5OTy8MxLuEItTBiJWEKsYNwK8chYdWYjzpxwMwfvGuE56O92W0RkJoOwPlcVO5tmBnWrIT/XiHHJumRh+GkV4VjNL1aOA39QxHxgcFmihm8nIBWXoKWBA4yYp0aI6QCSIsISkBZE9Yw8q9HM8oka6jmoWtCMLiFMyRTl/EgK46Ic1B/Ln8ogN7SK5AIobjcJc6BI7CrKYpfFvLZDh8E+fAD08m5So4fmnctP5YtBiWjWmIeTyV6IBRpN9tcsGYqk3PYy7VOI2ZIiQJ+IUMAHeH3FtYprn7Py4xeEL97km0/O3TLmidDVuKRbRdIm904iaHq2YVIk4SJcBbBo01Brb83dAtDzVhsnHEgF4GLCK/0k0Ft5Q9BFtWfho5eAC0G0kFgB7Ny0hxB7NM7pcnkVbYcd4LrL8IsAoQNUQ6QeDmIM1nU/PQ8+PKJ0BpVDgnRp2glU10Fjkj4kMKgb94NAiAoedU3XbisD/wHCS70M3WicEJcdRInyGA/A/AXwJa/eX84qC4qSLjrFd739FF2wn+eKAuZqVrVqeFFQytSQuUFmBrX1aNUSic0LLuKYFYDdyHgzDmW30FJMAPPganwBDPo6dfHyGN3mRtbYsWmhdS/ua4uPUjnbaWphrFfQeRx4fj8fnxVCWuk/NhQeP6NUMUYAAAAASUVORK5CYII= "
     bruiser : "data:image/png;base64,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 "
     no      : "" 
@@ -186,6 +225,7 @@ App.HotS.Role.title(role: App.HotS.Role): Map<String>
     case role {
       tank    : {"Blue"    "LightBlue"   }
       dps     : {"DarkRed" "LightCoral"  }
+      flex    : {"Orange"  "DarkYellow"  }
       healer  : {"Green"   "LightGreen"  }
       bruiser : {"Purple"  "Plum"        }
       no      : {""  ""                  }
@@ -220,89 +260,60 @@ type App.HotS.Action {
   )
 } deriving (serializer, deserializer)
 
+ 
+
 App.HotS.players: Map<App.HotS.Player>
-  {
-    "Psycho": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
-    "Josuecs": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.tank)
-    "Sirkou": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
-    "Adones": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-    "SorteSim": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-    "Zator": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-    "PREDATOR": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
-    "Drau": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
-    "Focofi": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
-    "OnlyDBreeze": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
-    "Jujuba": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.bruiser)
-    "Escondidinho": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.bruiser)
-    // "Toros": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.bruiser)
-    "JohnMirolha": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
-    "Parasita300": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
-    "Theuw": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.healer)
-    "ChazKendal": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.tank)
-    "Rolamen ": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.tank)
-    "Astrovildo": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-    "Leumas": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.dps)
-    "MrNewVegas": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-    "Zaryanova": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
-    "Motta": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.tank)
-    "RAMONBR": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.tank)
-    "Pikeu": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-    "Sunstrider ": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
-    "Katson": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-    "Yuki": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-    "XragonFlame": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-    "Tuts": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
-    "Sandrogado": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.tank)
-    "Kuroudo": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
-    "MajorasMask": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
-    "Toph": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.healer)
-    // "Reiafonso": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-  }
-//   {
-//     "Adones": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "AnneO": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "Arluki": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "ChampofHorde": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "Crono": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Dashblue": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "Derenash": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Drau": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "Dugalle": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Entropy": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.bruiser)
-//     "Escondidinho": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Exorr": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "FFJujubaKid": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Focofi": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "GiantAxe": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Goddan": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "Josuecs": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Juzehlito": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "Katson": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "KchoXs": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "Korhal": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Kristrex": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "MacSF": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Malvadah": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "MatadorFivee": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Monthoros": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "Moonlight": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Motta": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "MrNewVegas": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Patoshin": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "Pitchulinha": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Player": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "Predator": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Psycho": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "RamonBR": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Rooxyz": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "Simon": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Sipher": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "SpyGames": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-//     "Talicwolf": App.HotS.Player.new(App.HotS.Role.healer, App.HotS.Role.no)
-//     "Thunder": App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
-//     "Zaryanova": App.HotS.Player.new(App.HotS.Role.tank, App.HotS.Role.no)
-//     "Zuiurac": App.HotS.Player.new(App.HotS.Role.bruiser, App.HotS.Role.no)
-// }
+{
+  "Adones":       App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.healer   Bool.true	 Bool.true)
+  "Aguusio":      App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.bruiser  Bool.false  Bool.true)
+  "BETANOOB42":   App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "Cheroilis":    App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "Cheroilis":    App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "Chinox":       App.HotS.Player.new(App.HotS.Role.tank  	App.HotS.Role.bruiser  Bool.false  Bool.true)
+  "ClauStrife":   App.HotS.Player.new(App.HotS.Role.dps     App.HotS.Role.healer   Bool.false  Bool.true)
+  "Crono":        App.HotS.Player.new(App.HotS.Role.tank  	App.HotS.Role.no       Bool.true	 Bool.true)
+  "DefSoul":      App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.dps      Bool.true	 Bool.false)
+  "Dmh":          App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.dps      Bool.true	 Bool.false)
+  "Duff":         App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.flex     Bool.true	 Bool.true)
+  "Escondidinho": App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.dps      Bool.true	 Bool.true)
+  "exorr":        App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "focofi":       App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "FooFighter":   App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "GluGluIêIé":   App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "Groppeta":     App.HotS.Player.new(App.HotS.Role.flex    App.HotS.Role.bruiser  Bool.false  Bool.true)
+  "Hyerte":       App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.dps      Bool.false  Bool.true)
+  "Jaidres23":    App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.flex     Bool.false  Bool.true)
+  "kaD":          App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "Kenshiro":     App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.flex     Bool.true	 Bool.false)
+  "Klaus12247":   App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.tank     Bool.false  Bool.true)
+  "Lawthyx":      App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "LedZepp":      App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.dps      Bool.false  Bool.true)
+  "LGDAGardo":    App.HotS.Player.new(App.HotS.Role.tank  	App.HotS.Role.flex     Bool.false  Bool.false)
+  "Liint":        App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.healer   Bool.true	 Bool.true)
+  "Lobo":         App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.healer   Bool.true	 Bool.true)
+  "Matadorfive":  App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.dps      Bool.true	 Bool.false)
+  "MatheusR98":   App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.flex     Bool.true	 Bool.true)
+  "Matuê":        App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "OnlyDBreeze":  App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.flex     Bool.true	 Bool.true)
+  "pudimfarts":   App.HotS.Player.new(App.HotS.Role.tank  	App.HotS.Role.healer   Bool.true	 Bool.true)
+  "RAMONBR":      App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.tank     Bool.true	 Bool.false)
+  "reiafonso":    App.HotS.Player.new(App.HotS.Role.flex    App.HotS.Role.tank     Bool.true   Bool.true)
+  "rheo":         App.HotS.Player.new(App.HotS.Role.healer	App.HotS.Role.bruiser  Bool.true	 Bool.false)
+  "Ryan":         App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.tank     Bool.true	 Bool.true)
+  "ScarletCindr": App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.healer   Bool.true	 Bool.true)
+  "Simonstruo":   App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.healer   Bool.false  Bool.true)
+  "SirKou":       App.HotS.Player.new(App.HotS.Role.dps     App.HotS.Role.healer   Bool.true   Bool.true)
+  "Spawn1221":    App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.flex     Bool.false  Bool.true)
+  "SrWicked":     App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.tank     Bool.true	 Bool.false)
+  "Sunstrider":   App.HotS.Player.new(App.HotS.Role.dps   	App.HotS.Role.healer   Bool.true	 Bool.false)
+  "Thorin":       App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.flex     Bool.false  Bool.true)
+  "Unamesh":      App.HotS.Player.new(App.HotS.Role.flex  	App.HotS.Role.bruiser  Bool.true	 Bool.true)
+  "vitruvius":    App.HotS.Player.new(App.HotS.Role.tank  	App.HotS.Role.dps      Bool.true	 Bool.true)
+  "XragonFlame":  App.HotS.Player.new(App.HotS.Role.bruiser	App.HotS.Role.dps      Bool.true	 Bool.true)
+  "Zator":        App.HotS.Player.new(App.HotS.Role.tank  	App.HotS.Role.tank     Bool.true	 Bool.true)
+  "Zuiurac":      App.HotS.Player.new(App.HotS.Role.healer  App.HotS.Role.tank     Bool.true   Bool.true)
+}
+
 
 // Render function
 App.HotS.draw: App.Draw<App.HotS.State>
@@ -327,37 +338,37 @@ App.HotS.draw: App.Draw<App.HotS.State>
       "margin": "10px"
     }
   if Bool.not(joined) then
-    <div style = {"height": "500px", "display": "flex", "flex-direction": "column", "align-items": "center", "justify-content": "center"}>
+    <div style = {"height": "800px", "display": "flex", "flex-direction": "column", "align-items": "center", "justify-content": "center"}>
       <div style = {"display":"flex", "flex-direction": "column", "align-items": "center"}>
         <div style = {"margin": "5px"}>
           <div>
-            <div>"Room:"</div>
-            <input id="_room_" value = state.local.room></input>
+            <div style = {"margin-bottom": "5px" "font-size": "24px" "text-align": "center"}>"Room:"</div>
+            <input style = {"height": "70px" "font-size": "40px" "text-align": "center"} id="_room_" value = state.local.room></input>
             // " "
             // <button id="_enter_">"Enter"</button>
           </div>
         </div>
         <div style = {"margin": "5px"}>
           <div>
-            <div>"Login: "</div>
-            <input id="_team_"></input>
+            <div style = {"margin-bottom": "5px" "font-size": "24px" "text-align": "center"}>"Login: "</div>
+            <input style = {"height": "70px" "font-size": "40px" "text-align": "center"} id="_team_"></input>
             // " "
             // <button id="_enter_">"Enter"</button>
           </div>
         </div>
         <div style = {"margin": "5px"}>
           <div>
-            <div>"Password: "</div>
-            <input id="_pass_" type="password"></input>
+            <div style = {"margin-bottom": "5px" "font-size": "24px" "text-align": "center"}>"Password: "</div>
+            <input style = {"height": "70px" "font-size": "40px" "text-align": "center"} id="_pass_" type="password"></input>
             // " "
             // <button id="_enter_">"Enter"</button>
           </div>
         </div>
         <div style = {"margin-top": "5px"}>
-          <button id="_enter_" style = button_style>"Enter"</button>
+          <button id="_enter_" style = {"height": "60px" "width": "250px" "font-size": "42px" "margin": "15px"}>"Enter"</button>
         </div>
         <div style = {"margin-top": "5px"}>
-          <button id="_spectate_" style = button_style>"Spectate"</button>
+          <button id="_spectate_" style = {"height": "60px" "width": "250px" "font-size": "42px" "margin": "15px"}>"Spectate"</button>
         </div>
       </div>
     </div>
@@ -453,7 +464,7 @@ App.HotS.draw: App.Draw<App.HotS.State>
               "background": "#FAFAFA"
               "margin": "4px"
               "padding": "2px 5px"
-              "width": "32%"
+              "width": "24%"
               "display": "flex"
               "align-items": "center"
               "justify-content": "center"
@@ -478,12 +489,30 @@ App.HotS.draw: App.Draw<App.HotS.State>
                       <div style = {"align-self": "center", "opacity": "0.4", "margin": "20px"}>
                       </div>
                 }
+                <div style = {
+                  "height": "32px"
+                  "width" : "10%"
+                  "background" :
+                    if player@lang then "LightGreen" else
+                      if Bool.eql(App.HotS.is_br(state.local.sort), player@br) then
+                        "LightGreen"
+                      else
+                        "LightCoral"
+                  "margin": "0 1%" 
+                  "border-radius": "4px"
+                  "text-align": "center"
+                  "font-size": "24px"
+                  "line-height": "32px"
+                  "font-weight":"bold"
+                }>
+                  if player@br then "BR" else "ES"
+                </div>
                 <button style ={
                   "border-radius": "2px"
                   "height": "32px"
                   "border": "1px solid #A0A0A0"
                   "background": "#FAFAFA"
-                  "margin": "0 5%"
+                  "margin": "0 1%"
                   "width": "15%"
                 }>
                   "$"|Nat.show(bid.value)
@@ -504,7 +533,7 @@ App.HotS.draw: App.Draw<App.HotS.State>
                       else
                         "LightGray"
                   "margin": "2px 0 2px 2px"
-                  "width": "15%"
+                  "width": "12%"
                   "cursor":"pointer"
                 }>"buy"
                 </button>
@@ -522,7 +551,7 @@ App.HotS.draw: App.Draw<App.HotS.State>
           let players = List.filter!((x: Pair<String, App.HotS.Bid>) String.eql(team, x@snd@team), Map.to_list!(bids))
           let player_cmp = 
             (a: String, b: String)
-              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no, Bool.false, Bool.false)
               let {a, b} = {data(a), data(b)}
               App.HotS.Role.cmp(a@role_1, b@role_1)
           let players = List.sort!((x, y) player_cmp(x@fst, y@fst), players)
@@ -562,7 +591,7 @@ App.HotS.draw: App.Draw<App.HotS.State>
             </div>
             for pair in players:
               let {player, bid} = pair
-              let player_data = App.HotS.players{player} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+              let player_data = App.HotS.players{player} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no, Bool.false, Bool.false)
               <div style =
                 {
                   "height": "50px"
@@ -604,7 +633,7 @@ App.HotS.draw: App.Draw<App.HotS.State>
             let players = List.filter!((x: Pair<String, App.HotS.Bid>) String.eql(team, x@snd@team), Map.to_list!(bids))
             let player_cmp = 
             (a: String, b: String)
-              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+              let data = (name: String) App.HotS.players{name} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no, Bool.false, Bool.false)
               let {a, b} = {data(a), data(b)}
               App.HotS.Role.cmp(a@role_1, b@role_1)
             let players = List.sort!((x, y) player_cmp(x@fst, y@fst), players)
@@ -644,7 +673,7 @@ App.HotS.draw: App.Draw<App.HotS.State>
               </div>
               for pair in players:
                 let {player, bid} = pair
-                let player_data = App.HotS.players{player} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no)
+                let player_data = App.HotS.players{player} <> App.HotS.Player.new(App.HotS.Role.dps, App.HotS.Role.no, Bool.false, Bool.false)
                 <div style =
                   {
                     "height": "50px"
