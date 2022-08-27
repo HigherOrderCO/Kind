@@ -19,6 +19,7 @@ var server_apps = [
   'AirShooter.kind',
   'Browser.kind',   
   'Hello.kind',
+  'HotS.kind',
   'Kind.kind',
   'KL.kind',
   'Ludo.kind',
