@@ -142,7 +142,7 @@ pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut Has
     args.push(Box::new(adjust_argument(book, arg, holes, &mut vars, types)?));
     vars.push(arg.name.clone());
   }
-  let tipo = Box::new(adjust_term(book, &*entry.tipo, true, holes, &mut vars, types)?);
+  let tipo = Box::new(adjust_term(book, &*entry.tipo, true, &mut 0, holes, &mut vars, types)?);
   // Adjusts each rule
   let mut rules = Vec::new();
   for rule in &entry.rules {
@@ -156,34 +156,56 @@ pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut 
   let hide = arg.hide;
   let eras = arg.eras;
   let name = arg.name.clone();
-  let tipo = Box::new(adjust_term(book, &*arg.tipo, true, holes, vars, types)?);
+  let tipo = Box::new(adjust_term(book, &*arg.tipo, true, &mut 0, holes, vars, types)?);
   return Ok(Argument { hide, eras, name, tipo });
 }
 
 pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Rule, AdjustError> {
   let name = rule.name.clone();
   let orig = rule.orig;
-  let arity = match book.entrs.get(&rule.name) {
-    Some(entry) => {
-      if rule.pats.len() != entry.args.len() {
-        return Err(AdjustError { orig, kind: AdjustErrorKind::IncorrectArity });
-      }
-    }
-    // shouldn't happen, because we only parse rules after the type annotation
-    None => {
-      panic!("Untyped rule.");
-    }
-  };
+  // shouldn't panic, because we only parse rules after the type annotation
+  let entry = book.entrs.get(&rule.name).expect("Untyped rule.");
+  let mut eras = 0;
   let mut pats = Vec::new();
   for pat in &rule.pats {
-    pats.push(Box::new(adjust_term(book, &*pat, false, holes, vars, types)?));
+    if let Term::Hol {orig, numb} = &**pat {
+      // On lhs, switch holes for vars
+      // TODO: This duplicates of adjust_term because the lhs of a rule is not a term
+      let name = format!("x{}_", eras);
+      eras = eras + 1;
+      let pat = Term::Var { orig: *orig, name };
+      pats.push(Box::new(adjust_term(book, &pat, false, &mut eras, holes, vars, types)?));
+    } else {
+      pats.push(Box::new(adjust_term(book, pat, false, &mut eras, holes, vars, types)?));
+    }
   }
-  let body = Box::new(adjust_term(book, &*rule.body, true, holes, vars, types)?);
+  // Fill erased arguments
+  let (_, eraseds) = count_implicits(entry);
+  if rule.pats.len() == entry.args.len() - eraseds {
+    pats.reverse();
+    let mut aux_pats = Vec::new();
+    for arg in &entry.args {
+      if arg.eras {
+        let name = format!("{}{}_", arg.name, eras);
+        eras = eras + 1;
+        let pat = Box::new(Term::Var { orig, name });
+        aux_pats.push(Box::new(adjust_term(book, &*pat, false, &mut eras, holes, vars, types)?));
+      } else {
+        aux_pats.push(pats.pop().unwrap());
+      }
+    }
+    pats = aux_pats;
+  }
+  if pats.len() != entry.args.len() {
+    return Err(AdjustError { orig, kind: AdjustErrorKind::IncorrectArity });
+  }
+  let body = Box::new(adjust_term(book, &*rule.body, true, &mut eras, holes, vars, types)?);
   return Ok(Rule { orig, name, pats, body });
 }
 
 // TODO: prevent defining the same name twice
-pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Term, AdjustError> {
+pub fn adjust_term(book: &Book, term: &Term, rhs: bool, eras: &mut u64, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Term, AdjustError> {
+
   fn convert_apps_to_ctr(term: &Term) -> Option<Term> {
     //println!("converting {} to ctr", show_term(term));
     let mut term = term;
@@ -230,7 +252,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
   }
 
   if let Some(new_term) = convert_apps_to_ctr(term) {
-    return adjust_term(book, &new_term, rhs, holes, vars, types);
+    return adjust_term(book, &new_term, rhs, eras, holes, vars, types);
   }
 
   match *term {
@@ -250,37 +272,37 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
     },
     Term::Let { ref orig, ref name, ref expr, ref body } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars, types)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, eras, holes, vars, types)?);
       vars.push(name.clone());
-      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars, types)?);
+      let body = Box::new(adjust_term(book, &*body, rhs, eras, holes, vars, types)?);
       vars.pop();
       Ok(Term::Let { orig, name: name.clone(), expr, body })
     },
     Term::Ann { ref orig, ref expr, ref tipo } => {
       let orig = *orig;
-      let expr = Box::new(adjust_term(book, &*expr, rhs, holes, vars, types)?);
-      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars, types)?);
+      let expr = Box::new(adjust_term(book, &*expr, rhs, eras, holes, vars, types)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, eras, holes, vars, types)?);
       Ok(Term::Ann { orig, expr, tipo })
     },
     Term::All { ref orig, ref name, ref tipo, ref body } => {
       let orig = *orig;
-      let tipo = Box::new(adjust_term(book, &*tipo, rhs, holes, vars, types)?);
+      let tipo = Box::new(adjust_term(book, &*tipo, rhs, eras, holes, vars, types)?);
       vars.push(name.clone());
-      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars, types)?);
+      let body = Box::new(adjust_term(book, &*body, rhs, eras, holes, vars, types)?);
       vars.pop();
       Ok(Term::All { orig, name: name.clone(), tipo, body })
     },
     Term::Lam { ref orig, ref name, ref body } => {
       let orig = *orig;
       vars.push(name.clone());
-      let body = Box::new(adjust_term(book, &*body, rhs, holes, vars, types)?);
+      let body = Box::new(adjust_term(book, &*body, rhs, eras, holes, vars, types)?);
       vars.pop();
       Ok(Term::Lam { orig, name: name.clone(), body })
     },
     Term::App { ref orig, ref func, ref argm } => {
       let orig = *orig;
-      let func = Box::new(adjust_term(book, &*func, rhs, holes, vars, types)?);
-      let argm = Box::new(adjust_term(book, &*argm, rhs, holes, vars, types)?);
+      let func = Box::new(adjust_term(book, &*func, rhs, eras, holes, vars, types)?);
+      let argm = Box::new(adjust_term(book, &*argm, rhs, eras, holes, vars, types)?);
       Ok(Term::App { orig, func, argm })
     },
     Term::Ctr { ref orig, ref name, ref args } => {
@@ -288,17 +310,19 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
       if let Some(entry) = book.entrs.get(name) {
         let mut new_args = Vec::new();
         for arg in args {
-          new_args.push(Box::new(adjust_term(book, &*arg, rhs, holes, vars, types)?));
-        }
-        // Count implicit arguments
-        let mut implicits = 0;
-        for arg in &entry.args {
-          if arg.hide {
-            implicits = implicits + 1;
+          // On lhs, switch holes for vars
+          if let (false, Term::Hol {orig, numb}) = (rhs, &**arg) {
+            let name = format!("x{}_", eras);
+            *eras = *eras + 1;
+            let arg = Box::new(Term::Var { orig: *orig, name });
+            new_args.push(Box::new(adjust_term(book, &*arg, rhs, eras, holes, vars, types)?));
+          } else {
+            new_args.push(Box::new(adjust_term(book, arg, rhs, eras, holes, vars, types)?));
           }
         }
-        // Fill implicit arguments
-        if rhs && args.len() == entry.args.len() - implicits {
+        let (hiddens, eraseds) = count_implicits(entry);
+        // Fill implicit arguments (on rhs)
+        if rhs && args.len() == entry.args.len() - hiddens {
           new_args.reverse();
           let mut aux_args = Vec::new();
           for arg in &entry.args {
@@ -306,6 +330,22 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
               let numb = *holes;
               *holes = *holes + 1;
               aux_args.push(Box::new(Term::Hol { orig, numb }));
+            } else {
+              aux_args.push(new_args.pop().unwrap());
+            }
+          }
+          new_args = aux_args;
+        }
+        // Fill erased arguments (on lhs)
+        if !rhs && args.len() == entry.args.len() - eraseds {
+          new_args.reverse();
+          let mut aux_args = Vec::new();
+          for arg in &entry.args {
+            if arg.eras {
+              let name = format!("{}{}_", arg.name, eras);
+              *eras = *eras + 1;
+              let arg = Term::Var { orig: orig, name };
+              aux_args.push(Box::new(adjust_term(book, &arg, rhs, eras, holes, vars, types)?));
             } else {
               aux_args.push(new_args.pop().unwrap());
             }
@@ -348,8 +388,8 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
     Term::Op2 { ref orig, ref oper, ref val0, ref val1 } => {
       let orig = *orig;
       let oper = *oper;
-      let val0 = Box::new(adjust_term(book, &*val0, rhs, holes, vars, types)?);
-      let val1 = Box::new(adjust_term(book, &*val1, rhs, holes, vars, types)?);
+      let val0 = Box::new(adjust_term(book, &*val0, rhs, eras, holes, vars, types)?);
+      let val1 = Box::new(adjust_term(book, &*val1, rhs, eras, holes, vars, types)?);
       Ok(Term::Op2 { orig, oper, val0, val1 })
     },
     Term::Mat { ref orig, ref name, ref tipo, ref expr, ref cses, ref moti } => {
@@ -397,7 +437,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
 
         let result = Term::Ctr { orig, name: format!("{}.match", tipo), args };
         //println!("-- match desugar: {}", show_term(&result));
-        return adjust_term(book, &result, rhs, holes, vars, types);
+        return adjust_term(book, &result, rhs, eras, holes, vars, types);
 
       } else {
         return Err(AdjustError { orig, kind: AdjustErrorKind::CantLoadType });
@@ -1842,6 +1882,7 @@ pub fn compile_entry(entry: &Entry) -> String {
         return (inp, var);
       }
       _ => {
+        // TODO: This should return a proper error instead of panicking
         panic!("Invalid left-hand side pattern: {}", show_term(patt));
       }
     }
@@ -2116,6 +2157,21 @@ pub fn u64_to_name(num: u64) -> String {
     num = num / 64;
   }
   name.chars().rev().collect()
+}
+
+/// Return the number of hidden and erased arguments in an entry
+pub fn count_implicits(entry: &Entry) -> (usize, usize) {
+  let mut hiddens = 0;
+  let mut eraseds = 0;
+  for arg in &entry.args {
+    if arg.hide {
+      hiddens = hiddens + 1;
+    }
+    if arg.eras {
+      eraseds = eraseds + 1;
+    }
+  }
+  (hiddens, eraseds)
 }
 
 // Returns true if a ctor's argument is erased
