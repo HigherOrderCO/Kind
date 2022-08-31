@@ -139,8 +139,8 @@ pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut Has
   // Adjust the type arguments, return type
   let mut vars = Vec::new();
   for arg in &entry.args {
-    vars.push(arg.name.clone());
     args.push(Box::new(adjust_argument(book, arg, holes, &mut vars, types)?));
+    vars.push(arg.name.clone());
   }
   let tipo = Box::new(adjust_term(book, &*entry.tipo, true, holes, &mut vars, types)?);
   // Adjusts each rule
@@ -184,7 +184,6 @@ pub fn adjust_rule(book: &Book, rule: &Rule, holes: &mut u64, vars: &mut Vec<Str
 
 // TODO: prevent defining the same name twice
 pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Term, AdjustError> {
-
   fn convert_apps_to_ctr(term: &Term) -> Option<Term> {
     //println!("converting {} to ctr", show_term(term));
     let mut term = term;
@@ -244,7 +243,7 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, holes: &mut u64, vars: &
         return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable { name: name.clone() } });
       } else if !rhs && vars.iter().find(|&x| x == name).is_some() {
         return Err(AdjustError { orig, kind: AdjustErrorKind::RepeatedVariable });
-      } else {
+      } else if !rhs {
         vars.push(name.clone());
       }
       Ok(Term::Var { orig, name: name.clone() })
@@ -426,8 +425,8 @@ pub fn entry_get_unbounds(book: &Book, entry: &Entry, unbound: &mut HashSet<Stri
   let name = entry.name.clone();
   let mut vars = Vec::new();
   for arg in &entry.args {
-    vars.push(arg.name.clone());
     argument_get_unbounds(book, arg, &mut vars, unbound, types);
+    vars.push(arg.name.clone());
   }
   term_get_unbounds(book, &*entry.tipo, true, &mut vars, unbound, types);
   for rule in &entry.rules {
@@ -436,7 +435,7 @@ pub fn entry_get_unbounds(book: &Book, entry: &Entry, unbound: &mut HashSet<Stri
 }
 
 pub fn argument_get_unbounds(book: &Book, arg: &Argument, vars: &mut Vec<String>, unbound: &mut HashSet<String>, types: &mut HashMap<String, Rc<NewType>>) {
-  term_get_unbounds(book, &*arg.tipo, false, vars, unbound, types);
+  term_get_unbounds(book, &*arg.tipo, true, vars, unbound, types);
 }
 
 pub fn rule_get_unbounds(book: &Book, rule: &Rule, vars: &mut Vec<String>, unbound: &mut HashSet<String>, types: &mut HashMap<String, Rc<NewType>>) {
