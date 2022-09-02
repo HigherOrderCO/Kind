@@ -1,6 +1,6 @@
 [package]
 name = "kind2"
-version = "0.2.69"
+version = "0.2.70"
 edition = "2021"
 description = "A pure functional functional language that uses the HVM."
 repository = "https://github.com/Kindelia/Kind2"
