@@ -14,3 +14,4 @@ hvm = "0.1.80"
 #hvm = { path = "../hvm" }
 highlight_error = "0.1.1"
 clap = { version = "3.1.8", features = ["derive"] }
+rand = "0.8.5"
