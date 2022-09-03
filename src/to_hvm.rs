@@ -36,6 +36,10 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
       let expr = to_hvm_term(book, expr);
       format!("{}", expr)
     }
+    Term::Sub { orig: _, expr, name: _, indx: _, redx: _ } => {
+      let expr = to_hvm_term(book, expr);
+      format!("{}", expr)
+    }
     Term::Ctr { orig: _, name, args } => {
       let entr = book.entrs.get(name).unwrap();
       let args = args.iter().enumerate().filter(|(i,x)| !entr.args[*i].eras).map(|x| &**x.1).collect::<Vec<&Term>>();

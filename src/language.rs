@@ -64,6 +64,7 @@ pub enum Term {
   App { orig: u64, func: Box<Term>, argm: Box<Term> },
   Let { orig: u64, name: String, expr: Box<Term>, body: Box<Term> },
   Ann { orig: u64, expr: Box<Term>, tipo: Box<Term> },
+  Sub { orig: u64, name: String, indx: u64, redx: u64, expr: Box<Term> },
   Ctr { orig: u64, name: String, args: Vec<Box<Term>> },
   Fun { orig: u64, name: String, args: Vec<Box<Term>> },
   Hlp { orig: u64 },
@@ -283,6 +284,21 @@ pub fn adjust_term(book: &Book, term: &Term, rhs: bool, eras: &mut u64, holes: &
       let expr = Box::new(adjust_term(book, &*expr, rhs, eras, holes, vars, types)?);
       let tipo = Box::new(adjust_term(book, &*tipo, rhs, eras, holes, vars, types)?);
       Ok(Term::Ann { orig, expr, tipo })
+    },
+    Term::Sub { ref orig, ref name, ref indx, ref redx, ref expr } => {
+      let orig = *orig;
+      let expr = Box::new(adjust_term(book, &*expr, rhs, eras, holes, vars, types)?);
+      match vars.iter().position(|x| x == name) {
+        None => {
+          return Err(AdjustError { orig, kind: AdjustErrorKind::UnboundVariable { name: name.clone() } });
+        }
+        Some(indx) => {
+          let name = name.clone();
+          let indx = indx as u64;
+          let redx = *redx;
+          Ok(Term::Sub { orig, name, indx, redx, expr })
+        }
+      }
     },
     Term::All { ref orig, ref name, ref tipo, ref body } => {
       let orig = *orig;
@@ -507,6 +523,9 @@ pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<Str
       term_get_unbounds(book, &*expr, rhs, vars, unbound, types);
       term_get_unbounds(book, &*tipo, rhs, vars, unbound, types);
     },
+    Term::Sub { ref name, ref expr, .. } => {
+      term_get_unbounds(book, &*expr, rhs, vars, unbound, types);
+    },
     Term::All { ref name, ref tipo, ref body, .. } => {
       term_get_unbounds(book, &*tipo, rhs, vars, unbound, types);
       vars.push(name.clone());
@@ -630,6 +649,10 @@ pub fn term_set_origin_file(term: &mut Term, file: usize) {
       term_set_origin_file(expr, file);
       term_set_origin_file(tipo, file);
     },
+    Term::Sub { ref mut orig, ref mut expr, .. } => {
+      *orig = set_origin_file(*orig, file);
+      term_set_origin_file(expr, file);
+    },
     Term::Ctr { ref mut orig, ref mut args, .. } => {
       *orig = set_origin_file(*orig, file);
       for arg in args {
@@ -679,6 +702,7 @@ pub fn get_term_origin(term: &Term) -> u64 {
     Term::App { orig, .. } => *orig,
     Term::Let { orig, .. } => *orig,
     Term::Ann { orig, .. } => *orig,
+    Term::Sub { orig, .. } => *orig,
     Term::Ctr { orig, .. } => *orig,
     Term::Fun { orig, .. } => *orig,
     Term::Hlp { orig, .. } => *orig,
@@ -1233,6 +1257,31 @@ pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize
     state);
 }
 
+pub fn parse_sub(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize, Box<Term>) -> Box<Term>>>> {
+  return parser::guard(
+    parser::text_parser("#"),
+    Box::new(|state| {
+      let (state, _)    = parser::consume("#", state)?;
+      let (state, name) = parser::name1(state)?;
+      let (state, _)    = parser::consume("/", state)?;
+      let (state, redx) = parser::name1(state)?;
+      if let Ok(redx) = redx.parse::<u64>() {
+        let (state, last) = get_last_index(state)?;
+        Ok((state, Box::new(move |init, expr| {
+          let orig = origin(0, init, last);
+          let name = name.clone();
+          let indx = 0;
+          let expr = expr.clone();
+          Box::new(Term::Sub { orig, name, indx, redx, expr })
+        })))
+      } else {
+        parser::expected("number", name.len(), state)
+      }
+    }),
+    state);
+}
+
+
 pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
   parser::guard(
     Box::new(|state| {
@@ -1485,6 +1534,7 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
 pub fn parse_term_suffix(state: parser::State) -> parser::Answer<Box<dyn Fn(usize,Box<Term>) -> Box<Term>>> {
   parser::grammar("Term", &[
     Box::new(parse_arr), // `->`
+    Box::new(parse_sub), // `# `
     Box::new(parse_ann), // `::`
     Box::new(|state| Ok((state, Some(Box::new(|init, term| term))))),
   ], state)
@@ -1711,6 +1761,9 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
     }
     Term::Ann { orig, expr, tipo } => {
       format!("({} {} {} {})", if quote { "Kind.Term.ann" } else { "Kind.Term.eval_ann" }, hide(orig,lhs), compile_term(expr, quote, lhs), compile_term(tipo, quote, lhs))
+    }
+    Term::Sub { orig, expr, name, indx, redx } => {
+      format!("({} {} {} {} {} {})", if quote { "Kind.Term.sub" } else { "Kind.Term.eval_sub" }, hide(orig,lhs), name_to_u64(name), indx, redx, compile_term(expr, quote, lhs))
     }
     Term::Ctr { orig, name, args } => {
       let mut args_strs : Vec<String> = Vec::new();
@@ -2018,7 +2071,11 @@ pub fn show_term(term: &Term) -> String {
     Term::Ann { orig: _, expr, tipo } => {
       let expr = show_term(expr);
       let tipo = show_term(tipo);
-      format!("{{{} :: {}}}", expr, tipo)
+      format!("({} :: {})", expr, tipo)
+    }
+    Term::Sub { orig: _, name, indx, redx, expr } => {
+      let expr = show_term(expr);
+      format!("{} # {}/{}", expr, name, redx)
     }
     Term::Ctr { orig: _, name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
@@ -2219,6 +2276,9 @@ pub fn erase(book: &Book, term: &Term) -> Box<Comp> {
       return Box::new(Comp::Let { name, expr, body });
     }
     Term::Ann { orig: _, expr, tipo: _ } => {
+      return erase(book, expr);
+    }
+    Term::Sub { orig: _, expr, name: _, indx: _, redx: _ } => {
       return erase(book, expr);
     }
     Term::Ctr { orig: _, name, args: term_args } => {
