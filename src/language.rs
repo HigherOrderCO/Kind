@@ -1259,9 +1259,9 @@ pub fn parse_ann(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize
 
 pub fn parse_sub(state: parser::State) -> parser::Answer<Option<Box<dyn Fn(usize, Box<Term>) -> Box<Term>>>> {
   return parser::guard(
-    parser::text_parser("#"),
+    parser::text_parser("##"),
     Box::new(|state| {
-      let (state, _)    = parser::consume("#", state)?;
+      let (state, _)    = parser::consume("##", state)?;
       let (state, name) = parser::name1(state)?;
       let (state, _)    = parser::consume("/", state)?;
       let (state, redx) = parser::name1(state)?;
@@ -2075,7 +2075,7 @@ pub fn show_term(term: &Term) -> String {
     }
     Term::Sub { orig: _, name, indx, redx, expr } => {
       let expr = show_term(expr);
-      format!("{} # {}/{}", expr, name, redx)
+      format!("{} ## {}/{}", expr, name, redx)
     }
     Term::Ctr { orig: _, name, args } => {
       format!("({}{})", name, args.iter().map(|x| format!(" {}",show_term(x))).collect::<String>())
