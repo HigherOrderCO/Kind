@@ -510,7 +510,7 @@ pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<Str
         unbound.insert(name.clone());
       // Is unbound variable
       } else if vars.iter().find(|&x| x == name).is_none() {
-        if (rhs) {
+        if rhs {
           unbound.insert(name.clone());
         } else {
           vars.push(name.clone());
