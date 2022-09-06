@@ -511,6 +511,8 @@ pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<Str
       // Is unbound variable
       } else if rhs && vars.iter().find(|&x| x == name).is_none() {
         unbound.insert(name.clone());
+      } else {
+        vars.push(name.clone());
       }
     },
     Term::Let { ref name, ref expr, ref body, .. } => {
