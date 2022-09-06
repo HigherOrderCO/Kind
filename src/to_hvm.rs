@@ -109,8 +109,13 @@ pub fn to_hvm_rule(book: &Book, rule: &Rule) -> String {
 }
 
 pub fn to_hvm_entry(book: &Book, entry: &Entry) -> String {
-  let name = &entry.name;
-  if name == "HVM.log" {
+  let kind_name = if let Some(kdln) = &entry.kdln {
+    format!("{} #{}", entry.name, kdln)
+  } else {
+    entry.name.clone()
+  };
+  let hvm_name = &entry.name;
+  if hvm_name == "HVM.log" {
     return "".to_string();
   }
   let mut args = vec![];
@@ -122,7 +127,7 @@ pub fn to_hvm_entry(book: &Book, entry: &Entry) -> String {
     for rule in &entry.rules {
       rules.push(format!("\n{}", to_hvm_rule(book, rule)));
     }
-    return format!("// {}{} : {}{}\n\n", name, args.join(""), show_term(&entry.tipo), rules.join(""))
+    return format!("// {}{} : {}{}\n\n", kind_name, args.join(""), show_term(&entry.tipo), rules.join(""))
   }
   return "".to_string();
 }

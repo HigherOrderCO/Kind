@@ -14,6 +14,7 @@ pub struct Book {
 #[derive(Clone, Debug)]
 pub struct Entry {
   pub name: String,
+  pub kdln: Option<String>,
   pub args: Vec<Box<Argument>>,
   pub tipo: Box<Term>,
   pub rules: Vec<Box<Rule>>
@@ -136,6 +137,7 @@ pub fn adjust_book(book: &Book) -> Result<Book, AdjustError> {
 
 pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut HashMap<String, Rc<NewType>>) -> Result<Entry, AdjustError> {
   let name = entry.name.clone();
+  let kdln = entry.kdln.clone();
   let mut args = Vec::new();
   // Adjust the type arguments, return type
   let mut vars = Vec::new();
@@ -150,7 +152,7 @@ pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut Has
     let mut vars = Vec::new();
     rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars, types)?));
   }
-  return Ok(Entry { name, args, tipo, rules });
+  return Ok(Entry { name, kdln, args, tipo, rules });
 }
 
 pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Argument, AdjustError> {
@@ -509,8 +511,12 @@ pub fn term_get_unbounds(book: &Book, term: &Term, rhs: bool, vars: &mut Vec<Str
       if ('A'..='Z').contains(&name.chars().nth(0).unwrap_or(' ')) {
         unbound.insert(name.clone());
       // Is unbound variable
-      } else if rhs && vars.iter().find(|&x| x == name).is_none() {
-        unbound.insert(name.clone());
+      } else if vars.iter().find(|&x| x == name).is_none() {
+        if rhs {
+          unbound.insert(name.clone());
+        } else {
+          vars.push(name.clone());
+        }
       }
     },
     Term::Let { ref name, ref expr, ref body, .. } => {
@@ -1576,6 +1582,13 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
   let (state, name) = parser::name1(state)?;
+  let (state, kdl)  = parser::text("#", state)?;
+  let (state, kdln) = if kdl {
+    let (state, name) = parser::name1(state)?;
+    (state, Some(name))
+  } else {
+    (state, None)
+  };
   let (state, args) = parser::until(Box::new(|state| {
     let (state, end_0) = parser::dry(Box::new(|state| parser::text(":", state)), state)?;
     let (state, end_1) = parser::dry(Box::new(|state| parser::text("{", state)), state)?;
@@ -1598,7 +1611,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
       pats.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() })); // TODO: set orig
     }
     let rules = vec![Box::new(Rule { orig: 0, name: name.clone(), pats, body })];
-    return Ok((state, Box::new(Entry { name, args, tipo, rules })));
+    return Ok((state, Box::new(Entry { name, kdln, args, tipo, rules })));
   } else {
     let mut rules = Vec::new();
     let rule_prefix = &format!("{} ", name); 
@@ -1616,7 +1629,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         break;
       }
     }
-    return Ok((state, Box::new(Entry { name, args, tipo, rules })));
+    return Ok((state, Box::new(Entry { name, kdln, args, tipo, rules })));
   }
 }
 
@@ -2140,7 +2153,11 @@ pub fn show_rule(rule: &Rule) -> String {
 }
 
 pub fn show_entry(entry: &Entry) -> String {
-  let name = &entry.name;
+  let name = if let Some(kdln) = &entry.kdln {
+    format!("{} #{}", entry.name, kdln)
+  } else {
+    entry.name.clone()
+  };
   let mut args = vec![];
   for arg in &entry.args {
     let (open, close) = match (arg.eras, arg.hide) {
@@ -2301,7 +2318,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<Comp> {
           args.push(erase(book, arg));
         }
       }
-      return Box::new(Comp::Ctr { name, args });
+      return Box::new(Comp::Fun { name, args });
     }
     Term::Hlp { orig: _ } => {
       return Box::new(Comp::Nil);
@@ -2518,6 +2535,7 @@ pub fn linearize(term: &mut Comp, fresh: &mut u64) {
 pub fn derive_type(tipo: &NewType) -> Derived {
   let path = format!("{}/_.kind2", tipo.name.replace(".","/"));
   let name = format!("{}", tipo.name);
+  let kdln = None;
   let mut args = vec![];
   for par in &tipo.pars {
     args.push(Box::new(Argument {
@@ -2529,7 +2547,7 @@ pub fn derive_type(tipo: &NewType) -> Derived {
   }
   let tipo = Box::new(Term::Typ { orig: 0 });
   let rules = vec![];
-  let entr = Entry { name, args, tipo, rules };
+  let entr = Entry { name, kdln, args, tipo, rules };
   return Derived { path, entr };
 }
 
@@ -2537,6 +2555,7 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
   if let Some(ctr) = tipo.ctrs.get(index) {
     let path = format!("{}/{}.kind2", tipo.name.replace(".","/"), ctr.name);
     let name = format!("{}.{}", tipo.name, ctr.name);
+    let kdln = None;
     let mut args = vec![];
     for arg in &tipo.pars {
       args.push(arg.clone());
@@ -2550,7 +2569,7 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
       args: tipo.pars.iter().map(|x| Box::new(Term::Var { orig: 0, name: x.name.clone() })).collect(),
     });
     let rules = vec![];
-    let entr = Entry { name, args, tipo, rules };
+    let entr  = Entry { name, kdln, args, tipo, rules };
     return Derived { path, entr };
   } else {
     panic!("Constructor out of bounds.");
@@ -2592,6 +2611,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
 
   // List.match
   let name = format!("{}.match", ntyp.name);
+  let kdln = None;
 
   let mut args = vec![];
 
@@ -2694,7 +2714,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     rules.push(Box::new(Rule { orig, name, pats, body }));
   }
 
-  let entr = Entry { name, args, tipo, rules };
+  let entr = Entry { name, kdln, args, tipo, rules };
 
   return Derived { path, entr };
 }
@@ -2702,7 +2722,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
 //type List <t: Type> { nil cons (head: t) (tail: (List t)) }
 //pub struct Type { name: String, pars: Vec<Argument>, ctrs: Vec<Constructor> }
 //pub struct Constructor { name: String, args: Vec<Argument> }
-//pub struct Entry { pub name: String, pub args: Vec<Box<Argument>>, pub tipo: Box<Term>, pub rules: Vec<Box<Rule>> }
+//pub struct Entry { pub name: String, pub kdln: Option<String>, pub args: Vec<Box<Argument>>, pub tipo: Box<Term>, pub rules: Vec<Box<Rule>> }
 //pub struct Argument { pub hide: bool, pub eras: bool, pub name: String, pub tipo: Box<Term> }
 //pub struct Rule { pub orig: u64, pub name: String, pub pats: Vec<Box<Term>>, pub body: Box<Term> }
 // List (t: Type) : Type

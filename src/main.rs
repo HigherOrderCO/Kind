@@ -160,8 +160,9 @@ fn cmd_show(path: &str) -> Result<(), String> {
 
 // Compiles a file to Kindelia (.kdl)
 fn cmd_to_kdl(path: &str) -> Result<(), String> {
-  let loaded = load(path)?;
-  let result = to_kdl::to_kdl_book(&loaded.book);
+  let loaded    = load(path)?;
+  let kdl_names = to_kdl::get_kdl_names(&loaded.book)?;
+  let result    = to_kdl::to_kdl_book(&loaded.book, &kdl_names)?;
   print!("{}", result);
   Ok(())
 }
