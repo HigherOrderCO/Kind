@@ -161,8 +161,9 @@ fn cmd_show(path: &str) -> Result<(), String> {
 // Compiles a file to Kindelia (.kdl)
 fn cmd_to_kdl(path: &str) -> Result<(), String> {
   let loaded    = load(path)?;
-  let kdl_names = to_kdl::get_kdl_names(&loaded.book)?;
-  let result    = to_kdl::to_kdl_book(&loaded.book, &kdl_names)?;
+  let comp_book = language::compile_book(&loaded.book);
+  let kdl_names = to_kdl::get_kdl_names(&comp_book)?;
+  let result    = to_kdl::to_kdl_book(&loaded.book, &kdl_names, &comp_book);
   print!("{}", result);
   Ok(())
 }
@@ -287,7 +288,7 @@ pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
 // Generates a .hvm checker for a Book
 fn gen_checker(book: &Book) -> String {
   // Compile the Kind2 file to HVM checker
-  let base_check_code = compile_book(&book);
+  let base_check_code = to_checker_book(&book);
   let mut check_code = CHECKER_HVM.to_string();
   check_code.push_str(&base_check_code);
   return check_code;
