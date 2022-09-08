@@ -115,8 +115,7 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: 
   let mut lines = vec![];
   for name in &comp_book.names {
     let entry = comp_book.entrs.get(name).unwrap();
-    let entry = to_kdl_entry(book, kdl_names, entry)?;
-    lines.push(entry);
+    lines.push(to_kdl_entry(book, kdl_names, entry)?);
   }
   Ok(lines.join(""))
 }

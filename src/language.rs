@@ -2306,16 +2306,7 @@ pub fn compile_book(book: &Book) -> Result<CompBook, String> {
     else if let Term::Typ {orig: _} = &*entry.tipo {
       continue;
     } else {
-      let entrs = match compile_entry(book, entry) {
-        Ok(entrs) => { entrs },
-        Err(err)  => {
-          // TODO: U120 functions bring some functions that won't be used to the book. (eg: U60.mul.carrying for U120.mul)
-          //       We should check if no other functions use them and remove them if needed.
-          //       Or maybe not, since they'll all already be deployed to the chain.
-          eprintln!("\x1b[33mwarning\x1b[0m: Failed to compile entry '{}', skipping.", entry.name);
-          continue;
-        }
-      };
+      let entrs = compile_entry(book, entry)?;
       for entry in entrs {
         comp_book.names.push(entry.name.clone());
         comp_book.entrs.insert(entry.name.clone(), entry);
@@ -2375,57 +2366,9 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
     }
   }
 
-  fn make_u120_low() -> CompEntry {
-    // U120.low n = (>> (<< n 60) 60))
-    CompEntry {
-      name: "U120.low".to_string(),
-      kdln: None,
-      args: vec!["n".to_string()],
-      rules: vec![CompRule {
-        name: "U120.low".to_string(),
-        pats: vec![
-          Box::new(CompTerm::Var { name: "n".to_string() }),
-        ],
-        body: Box::new(CompTerm::Op2 {
-          oper: Oper::Shr,
-          val0: Box::new(CompTerm::Op2 {
-            oper: Oper::Shl,
-            val0: Box::new(CompTerm::Var { name: "n".to_string() }),
-            val1: Box::new(CompTerm::Num { numb: 60 }),
-          }),
-          val1: Box::new(CompTerm::Num { numb: 60 }),
-        }),
-      }],
-      orig: true,
-    }
-  }
-
-  fn make_u120_high() -> CompEntry {
-    // U120.high n = (>> n 60)
-    CompEntry {
-      name: "U120.high".to_string(),
-      kdln: None,
-      args: vec!["n".to_string()],
-      rules: vec![CompRule {
-        name: "U120.high".to_string(),
-        pats: vec![
-          Box::new(CompTerm::Var { name: "n".to_string() }),
-        ],
-        body: Box::new(CompTerm::Op2 {
-          oper: Oper::Shr,
-          val0: Box::new(CompTerm::Var { name: "n".to_string() }),
-          val1: Box::new(CompTerm::Num { numb: 60 }),
-        }),
-      }],
-      orig: true,
-    }
-  }
-
   match entry.name.as_str() {
-    // Some U120 functions should have a special compilation
+    // U120.new becomes a special function that joins two numbers as if they were U60s
     "U120.new"  => Ok(vec![make_u120_new()]),
-    "U120.high" => Ok(vec![make_u120_high()]),  // high and low are needed for type compatibility with u60
-    "U120.low"  => Ok(vec![make_u120_low()]),
     _ => {
       let new_entry = CompEntry {
         name : entry.name.clone(),
