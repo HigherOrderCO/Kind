@@ -1,44 +1,44 @@
-// TODO: U120
-// TODO: Kindelia.IO
-
 use crate::language::{*};
 use std::collections::HashMap;
 use rand::Rng;
 
 pub const KDL_NAME_LEN: usize = 12;
 
-pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> String {
-  match term {
+
+pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Result<String, String> {
+  let term = match term {
     CompTerm::Var { name } => {
       format!("{}", name)
     }
     CompTerm::Lam { name, body } => {
-      let body = to_kdl_term(kdl_names, body);
+      let body = to_kdl_term(kdl_names, body)?;
       format!("@{} {}", name, body)
     }
     CompTerm::App { func, argm } => {
-      let func = to_kdl_term(kdl_names, func);
-      let argm = to_kdl_term(kdl_names, argm);
+      let func = to_kdl_term(kdl_names, func)?;
+      let argm = to_kdl_term(kdl_names, argm)?;
       format!("({} {})", func, argm)
     }
     CompTerm::Dup { nam0, nam1, expr, body } => {
-      let expr = to_kdl_term(kdl_names, expr);
-      let body = to_kdl_term(kdl_names, body);
+      let expr = to_kdl_term(kdl_names, expr)?;
+      let body = to_kdl_term(kdl_names, body)?;
       format!("dup {} {} = {}; {}", nam0, nam1, expr, body)
     }
     CompTerm::Let { name, expr, body } => {
-      let expr = to_kdl_term(kdl_names, expr);
-      let body = to_kdl_term(kdl_names, body);
+      let expr = to_kdl_term(kdl_names, expr)?;
+      let body = to_kdl_term(kdl_names, body)?;
       format!("let {} = {}; {}", name, expr, body)
     }
     CompTerm::Ctr { name, args } => {
       let kdl_name = kdl_names.get(name).expect(&format!("{}", name));
-      let args = args.iter().map(|x| format!(" {}", to_kdl_term(kdl_names, x))).collect::<String>();
+      let args = args.iter().map(|x| to_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
+      let args = args.iter().map(|x| format!(" {}", x)).collect::<String>();
       format!("{{{}{}}}", kdl_name, args)
     }
     CompTerm::Fun { name, args } => {
       let kdl_name = kdl_names.get(name).expect(&format!("{}", name));
-      let args = args.iter().map(|x| format!(" {}", to_kdl_term(kdl_names, x))).collect::<String>();
+      let args = args.iter().map(|x| to_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
+      let args = args.iter().map(|x| format!(" {}", x)).collect::<String>();
       format!("({}{})", kdl_name, args)
     }
     CompTerm::Num { numb } => {
@@ -46,75 +46,79 @@ pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Stri
     }
     CompTerm::Op2 { oper, val0, val1 } => {
       let oper = show_oper(&oper);
-      let val0 = to_kdl_term(kdl_names, val0);
-      let val1 = to_kdl_term(kdl_names, val1);
+      let val0 = to_kdl_term(kdl_names, val0)?;
+      let val1 = to_kdl_term(kdl_names, val1)?;
       format!("({} {} {})", oper, val0, val1)
     }
     CompTerm::Nil => {
-      panic!("Found nil term in compiled term while converting to kindelia");
+      return Err("Found nil term in compiled term while converting to kindelia".to_string());
     }
-  }
+  };
+  Ok(term)
 }
 
-pub fn to_kdl_rule(book: &Book, kdl_names: &HashMap<String, String>, rule: &CompRule) -> String {
+pub fn to_kdl_rule(book: &Book, kdl_names: &HashMap<String, String>, rule: &CompRule) -> Result<String, String> {
   let name = &rule.name;
   let kdl_name = kdl_names.get(name).unwrap();
   let mut pats = vec![]; // stringified pattern args
   for pat in rule.pats.iter() {
-    let pat = to_kdl_term(kdl_names, &pat);
+    let pat = to_kdl_term(kdl_names, &pat)?;
     pats.push(" ".to_string());
     pats.push(pat);
   }
-  let body = to_kdl_term(kdl_names, &rule.body);
+  let body = to_kdl_term(kdl_names, &rule.body)?;
   let rule = format!("({}{}) = {}", kdl_name, pats.join(""), body);
-  rule
+  Ok(rule)
 }
 
-pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<String, String>, entry: &CompEntry) -> String {
-  // Main is compiled to a run block
-  // TODO: Maybe we should have run blocks come from a specific type of function instead
-  if entry.name == "Main" {
-    let body = to_kdl_term(kdl_names, &*entry.rules[0].body);
-    format!("run {{\n  {}\n}}\n\n", body)
-  } else {
-    let kdl_name      = kdl_names.get(&entry.name).unwrap();
-    let args_names    = entry.args.iter().map(|arg| format!(" {}", arg)).collect::<String>();
-    // If this entry existed in the original kind code, add some annotations as comments
-    let kind_entry    = book.entrs.get(&entry.name);
-    let is_kind_entry = matches!(kind_entry, Some(_));
-    let cmnt = if is_kind_entry {
-      let kind_entry = kind_entry.unwrap();
-      let args_typed = kind_entry.args.iter().map(|arg|
-        format!(" {}({}: {})", if arg.eras { "-" } else { "" }, arg.name, show_term(&arg.tipo))
-      ).collect::<String>();
-      let kind_name  = format!("{} #{}", entry.name, kdl_name);
-      format!("// {}{} : {}\n", kind_name, args_typed, show_term(&kind_entry.tipo))
-    } else {
-      String::new()
-    };
-    // Entries with no rules become constructors
-    // Entries with rules become functions
-    let fun = if entry.rules.is_empty() {
-      format!("ctr {{{}{}}}\n\n", kdl_name, args_names)
-    } else {
-      let mut rules = vec![];
-      for rule in &entry.rules {
-        rules.push(format!("\n  {}", to_kdl_rule(book, kdl_names, rule)));
-      }
-      format!("fun ({}{}) {{{}\n}}\n\n", kdl_name, args_names, rules.join(""))
-    };
-    let entry = cmnt + &fun;
-    entry
-  }
+pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<String, String>, entry: &CompEntry) -> Result<String, String> {
+  let entry = match entry.name.as_str() {
+    // Main is compiled to a run block
+    // TODO: Maybe we should have run blocks come from a specific type of function instead
+    // TODO: run statements should always come last in the block
+    "Main" => format!("run {{\n  {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?),
+
+    _ => {
+      let kdl_name   = kdl_names.get(&entry.name).unwrap();
+      let args_names = entry.args.iter().map(|arg| format!(" {}", arg)).collect::<String>();
+      // If this entry existed in the original kind code, add some annotations as comments
+      let kind_entry = book.entrs.get(&entry.name);
+      let is_knd_ent = matches!(kind_entry, Some(_));
+      let cmnt       = if is_knd_ent {
+        let kind_entry = kind_entry.unwrap();
+        let args_typed = kind_entry.args.iter().map(|arg|
+          format!(" {}({}: {})", if arg.eras { "-" } else { "" }, arg.name, show_term(&arg.tipo))
+        ).collect::<String>();
+        let kind_name  = format!("{} #{}", entry.name, kdl_name);
+        format!("// {}{} : {}\n", kind_name, args_typed, show_term(&kind_entry.tipo))
+      } else {
+        String::new()
+      };
+      // Entries with no rules become constructors
+      // Entries with rules become functions
+      let fun = if entry.rules.is_empty() {
+        format!("ctr {{{}{}}}\n\n", kdl_name, args_names)
+      } else {
+        let mut rules = vec![];
+        for rule in &entry.rules {
+          rules.push(format!("\n  {}", to_kdl_rule(book, kdl_names, rule)?));
+        }
+        format!("fun ({}{}) {{{}\n}}\n\n", kdl_name, args_names, rules.join(""))
+      };
+      cmnt + &fun
+    }
+  };
+  Ok(entry)
 }
 
-pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: &CompBook) -> String {
+pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: &CompBook) -> Result<String, String> {
   let mut lines = vec![];
   for name in &comp_book.names {
     let entry = comp_book.entrs.get(name).unwrap();
-    lines.push(to_kdl_entry(book, kdl_names, entry));
+    let entry = to_kdl_entry(book, kdl_names, entry)?;
+    lines.push(entry);
   }
-  lines.join("")
+  Ok(lines.join(""))
 }
 
 // Utils

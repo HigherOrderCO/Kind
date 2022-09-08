@@ -2263,7 +2263,7 @@ pub enum CompTerm {
   Let { name: String, expr: Box<CompTerm>, body: Box<CompTerm> },
   Ctr { name: String, args: Vec<Box<CompTerm>> },
   Fun { name: String, args: Vec<Box<CompTerm>> },
-  Num { numb: u64 },
+  Num { numb: u128 },
   Op2 { oper: Oper, val0: Box<CompTerm>, val1: Box<CompTerm> },
   Nil
 }
@@ -2290,29 +2290,43 @@ pub struct CompBook {
   pub entrs: HashMap<String, CompEntry>,
 }
 
-// TODO: Add possible fail result to the compilation
-pub fn compile_book(book: &Book) -> CompBook {
+pub fn compile_book(book: &Book) -> Result<CompBook, String> {
   let mut comp_book = CompBook { names: Vec::new(), entrs: HashMap::new() };
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
+    // Don't compile primitive U120 operations
+    // TODO: If this compiler eventually gets used for other targets (like HVM), this will need to be separated.
+    //       We could do passes of compiler features (like flattening, linearizing, etc) also separately.
+    if u120_to_oper(&entry.name).is_some() {
+      continue;
+    }
     // Skip over useless entries
     // TODO: This doesn't cover all cases. We need something like `erase` but for a Book.
     //       Also maybe there are functions of type Type that should be compiled?
-    if let Term::Typ {orig: _} = &*entry.tipo {
+    else if let Term::Typ {orig: _} = &*entry.tipo {
       continue;
     } else {
-      let entrs = compile_entry(book, entry);
+      let entrs = match compile_entry(book, entry) {
+        Ok(entrs) => { entrs },
+        Err(err)  => {
+          // TODO: U120 functions bring some functions that won't be used to the book. (eg: U60.mul.carrying for U120.mul)
+          //       We should check if no other functions use them and remove them if needed.
+          //       Or maybe not, since they'll all already be deployed to the chain.
+          eprintln!("\x1b[33mwarning\x1b[0m: Failed to compile entry '{}', skipping.", entry.name);
+          continue;
+        }
+      };
       for entry in entrs {
         comp_book.names.push(entry.name.clone());
         comp_book.entrs.insert(entry.name.clone(), entry);
       }
     }
   }
-  comp_book
+  Ok(comp_book)
 }
 
 // Can become multiple entries after flatenning
-pub fn compile_entry(book: &Book, entry: &Entry) -> Vec<CompEntry> {
+pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, String> {
   fn compile_rule(book: &Book, entry: &Entry, rule: &Rule) -> CompRule {
     let name = rule.name.clone();
     let mut pats = Vec::new();
@@ -2327,20 +2341,112 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Vec<CompEntry> {
     CompRule {name, pats, body}
   }
 
-  let entry = CompEntry {
-    name : entry.name.clone(),
-    kdln : entry.kdln.clone(),
-    args : entry.args.iter().filter(|x| !x.eras).map(|x| x.name.clone()).collect(),
-    rules: entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect(),
-    orig : true,
-  };
-  let mut new_entrs = flatten(entry);
-  for entry in &mut new_entrs {
-    for rule in &mut entry.rules {
-      linearize_rule(rule);
+  fn make_u120_new() -> CompEntry {
+    // U120.new hi lo = (+ (<< hi 60) (>> (<< lo 60) 60))
+    CompEntry {
+      name: "U120.new".to_string(),
+      kdln: None,
+      args: vec!["hi".to_string(), "lo".to_string()],
+      rules: vec![CompRule {
+        name: "U120.new".to_string(),
+        pats: vec![
+          Box::new(CompTerm::Var { name: "hi".to_string() }),
+          Box::new(CompTerm::Var { name: "lo".to_string() })
+        ],
+        body: Box::new(CompTerm::Op2 {
+          oper: Oper::Add,
+          val0: Box::new(CompTerm::Op2 {
+            oper: Oper::Shl,
+            val0: Box::new(CompTerm::Var { name: "hi".to_string() }),
+            val1: Box::new(CompTerm::Num { numb: 60 }),
+          }),
+          val1: Box::new(CompTerm::Op2 {
+            oper: Oper::Shr,
+            val0: Box::new(CompTerm::Op2 {
+              oper: Oper::Shl,
+              val0: Box::new(CompTerm::Var { name: "lo".to_string() }),
+              val1: Box::new(CompTerm::Num { numb: 60 }),
+            }),
+            val1: Box::new(CompTerm::Num { numb: 60 }),
+          }),
+        })
+      }],
+      orig: true,
     }
   }
-  new_entrs
+
+  fn make_u120_low() -> CompEntry {
+    // U120.low n = (>> (<< n 60) 60))
+    CompEntry {
+      name: "U120.low".to_string(),
+      kdln: None,
+      args: vec!["n".to_string()],
+      rules: vec![CompRule {
+        name: "U120.low".to_string(),
+        pats: vec![
+          Box::new(CompTerm::Var { name: "n".to_string() }),
+        ],
+        body: Box::new(CompTerm::Op2 {
+          oper: Oper::Shr,
+          val0: Box::new(CompTerm::Op2 {
+            oper: Oper::Shl,
+            val0: Box::new(CompTerm::Var { name: "n".to_string() }),
+            val1: Box::new(CompTerm::Num { numb: 60 }),
+          }),
+          val1: Box::new(CompTerm::Num { numb: 60 }),
+        }),
+      }],
+      orig: true,
+    }
+  }
+
+  fn make_u120_high() -> CompEntry {
+    // U120.high n = (>> n 60)
+    CompEntry {
+      name: "U120.high".to_string(),
+      kdln: None,
+      args: vec!["n".to_string()],
+      rules: vec![CompRule {
+        name: "U120.high".to_string(),
+        pats: vec![
+          Box::new(CompTerm::Var { name: "n".to_string() }),
+        ],
+        body: Box::new(CompTerm::Op2 {
+          oper: Oper::Shr,
+          val0: Box::new(CompTerm::Var { name: "n".to_string() }),
+          val1: Box::new(CompTerm::Num { numb: 60 }),
+        }),
+      }],
+      orig: true,
+    }
+  }
+
+  match entry.name.as_str() {
+    // Some U120 functions should have a special compilation
+    "U120.new"  => Ok(vec![make_u120_new()]),
+    "U120.high" => Ok(vec![make_u120_high()]),  // high and low are needed for type compatibility with u60
+    "U120.low"  => Ok(vec![make_u120_low()]),
+    _ => {
+      let new_entry = CompEntry {
+        name : entry.name.clone(),
+        kdln : entry.kdln.clone(),
+        args : entry.args.iter().filter(|x| !x.eras).map(|x| x.name.clone()).collect(),
+        rules: entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect(),
+        orig : true,
+      };
+      // TODO: We probably need to handle U60 separately as well.
+      //       Since they compile to U120, it wont overflow as expected and conversion to signed will fail.
+      let new_entry = convert_u120_entry(new_entry)?;
+      let mut new_entrs = flatten(new_entry);
+      for entry in &mut new_entrs {
+        for rule in &mut entry.rules {
+          linearize_rule(rule);
+        }
+      }
+      Ok(new_entrs)
+    }
+  }
+
 }
 
 // Splits an entry with rules with nested cases into multiple entries with flattened rules.
@@ -2383,7 +2489,6 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
         (CompTerm::Num { .. }, CompTerm::Ctr { .. }) => { return (false, false); },
         (CompTerm::Ctr { .. }, CompTerm::Var { .. }) => { same_shape = false; },
         (CompTerm::Num { .. }, CompTerm::Var { .. }) => { same_shape = false; },
-        // TODO: Shouldn't this also include (var{}, _) ?
         _ => {},
       }
     }
@@ -2441,7 +2546,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
               old_rule_pats.push(Box::new(*pat.clone()));
               old_rule_body_args.push(Box::new(CompTerm::Var { name: name.clone() }));
             }
-            // TODO: Shouldn't it also check for Num?
+            // TODO: It'd be better to check for Num and panic on other (invalid) options
             _ => {}
           }
         }
@@ -2653,7 +2758,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
       return Box::new(CompTerm::Nil);
     }
     Term::Num { orig: _, numb } => {
-      let numb = *numb;
+      let numb = *numb as u128;
       return Box::new(CompTerm::Num { numb });
     }
     Term::Op2 { orig: _, oper, val0, val1 } => {
@@ -2902,6 +3007,112 @@ pub fn linearize_rule(rule: &mut CompRule) {
     // lambdas. (@x0 #0 should be linearized to @~ #0)
   }
   linearize_term(&mut rule.body, &mut fresh); // linearizes internal bound vars
+}
+
+// Swaps u120 numbers and functions for primitive operations for kindelia compilation
+pub fn convert_u120_entry(entry: CompEntry) -> Result<CompEntry, String> {
+  let CompEntry {name, kdln, args, rules, orig } = entry;
+  let mut new_rules = Vec::new();
+  for CompRule { name, pats, body } in rules {
+    let body = convert_u120_term(&body, true)?;
+    let mut new_pats = Vec::new();
+    for pat in pats {
+      new_pats.push(convert_u120_term(&pat, false)?);
+    }
+    new_rules.push(CompRule { name, pats: new_pats, body });
+  }
+  Ok(CompEntry { name, kdln, args, rules: new_rules, orig })
+}
+
+pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, String> {
+  let term = Box::new(match term { 
+    // Swap U120.new by a number
+    CompTerm::Ctr { name, args } => {
+      if name == "U120.new" {
+        if let (CompTerm::Num { numb: num1 }, CompTerm::Num { numb: num2 }) = (&*args[0], &*args[1]) {
+          CompTerm::Num { numb: (num1 << 60) + num2 }
+        } else if rhs {
+          let args = args.iter().map(|x| convert_u120_term(x, rhs)).collect::<Result<Vec<Box<CompTerm>>, String>>()?;
+          CompTerm::Fun { name: name.clone(), args }
+        } else {
+          let err = format!("Can't compile pattern match on U120 to kindelia");
+          return Err(err);
+        }
+      } else {
+        let args = args.iter().map(|x| convert_u120_term(x, rhs)).collect::<Result<Vec<Box<CompTerm>>, String>>()?;
+        CompTerm::Ctr { name: name.clone(), args }
+      }
+    }
+    // Swap U120 functions by primitive operations
+    CompTerm::Fun { name, args } => {
+      if let Some(oper) = u120_to_oper(name) {
+        let val0 = convert_u120_term(&*args[0], rhs)?;
+        let val1 = convert_u120_term(&*args[1], rhs)?;
+        CompTerm::Op2 { oper, val0, val1 }
+      } else {
+        let args = args.iter().map(|x| convert_u120_term(x, rhs)).collect::<Result<Vec<Box<CompTerm>>, String>>()?;
+        CompTerm::Fun { name: name.clone(), args }
+      }
+    }
+    CompTerm::Var { name } => {
+      term.clone()
+    }
+    CompTerm::Lam { name, body } => {
+      let body = convert_u120_term(body, rhs)?;
+      CompTerm::Lam { name: name.clone(), body }
+    }
+    CompTerm::App { func, argm } => {
+      let func = convert_u120_term(func, rhs)?;
+      let argm = convert_u120_term(argm, rhs)?;
+      CompTerm::App { func, argm }
+    }
+    CompTerm::Dup { nam0, nam1, expr, body } => {
+      let expr = convert_u120_term(expr, rhs)?;
+      let body = convert_u120_term(body, rhs)?;
+      CompTerm::Dup { nam0: nam0.clone(), nam1: nam1.clone(), expr, body }
+    }
+    CompTerm::Let { name, expr, body } => {
+      let expr = convert_u120_term(expr, rhs)?;
+      let body = convert_u120_term(body, rhs)?;
+      CompTerm::Let { name: name.clone(), expr, body }
+    }
+    CompTerm::Num { numb } => {
+      term.clone()
+    }
+    CompTerm::Op2 { oper, val0, val1 } => {
+      let val0 = convert_u120_term(val0, rhs)?;
+      let val1 = convert_u120_term(val1, rhs)?;
+      CompTerm::Op2 { oper: oper.clone(), val0, val1 }
+    }
+    CompTerm::Nil => {
+      return Err("Found nil term during compilation".to_string());
+    }
+  });
+  Ok(term)
+}
+
+// Converts a U120 function name to the corresponding primitive operation
+// None if the name is not of an operation
+pub fn u120_to_oper(name: &String) -> Option<Oper> {
+  match name.as_str() {
+    "U120.add"               => Some(Oper::Add),
+    "U120.sub"               => Some(Oper::Sub),
+    "U120.mul"               => Some(Oper::Mul),
+    "U120.div"               => Some(Oper::Div),
+    "U120.mod"               => Some(Oper::Mod),
+    "U120.bitwise_and"       => Some(Oper::And),
+    "U120.bitwise_or"        => Some(Oper::Or ),
+    "U120.bitwise_xor"       => Some(Oper::Xor),
+    "U120.shift_left"        => Some(Oper::Shl),
+    "U120.shift_right"       => Some(Oper::Shr),
+    "U120.num_less_than"     => Some(Oper::Ltn),
+    "U120.num_less_equal"    => Some(Oper::Lte),
+    "U120.num_greater_than"  => Some(Oper::Gtn),
+    "U120.num_greater_equal" => Some(Oper::Gte),
+    "U120.num_equal"         => Some(Oper::Eql),
+    "U120.num_not_equal"     => Some(Oper::Neq),
+    _ => None
+  }
 }
 
 // Derivers
