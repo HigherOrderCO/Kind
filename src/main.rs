@@ -322,6 +322,7 @@ pub fn load(name: &str) -> Result<Load, String> {
   }
 
   load_entry(name, &mut load)?;
+  load.book.names.sort_unstable();
 
   // Adjusts the Kind2 book
   match adjust_book(&load.book) {

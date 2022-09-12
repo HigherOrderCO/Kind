@@ -1992,7 +1992,7 @@ pub fn to_checker_book(book: &Book) -> String {
   result.push_str(&format!("  let fns = List.nil\n"));
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
-    result.push_str(&format!("  let fns = (List.cons {}. fns)\n", entry.    name));
+    result.push_str(&format!("  let fns = (List.cons {}. fns)\n", entry.name));
   }
   result.push_str(&format!("  fns\n\n"));
   for name in &book.names {
