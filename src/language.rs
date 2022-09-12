@@ -14,6 +14,7 @@ pub struct Book {
 #[derive(Clone, Debug)]
 pub struct Entry {
   pub name: String,
+  pub name_orig: u64,
   pub kdln: Option<String>,
   pub args: Vec<Box<Argument>>,
   pub tipo: Box<Term>,
@@ -152,7 +153,7 @@ pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut Has
     let mut vars = Vec::new();
     rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars, types)?));
   }
-  return Ok(Entry { name, kdln, args, tipo, rules });
+  return Ok(Entry { name, name_orig: entry.name_orig, kdln, args, tipo, rules });
 }
 
 pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Argument, AdjustError> {
@@ -1581,6 +1582,7 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
 }
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
+  let (state, init) = get_last_index(state)?;
   let (state, name) = parser::name1(state)?;
   let (state, kdl)  = parser::text("#", state)?;
   let (state, kdln) = if kdl {
@@ -1611,7 +1613,9 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
       pats.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() })); // TODO: set orig
     }
     let rules = vec![Box::new(Rule { orig: 0, name: name.clone(), pats, body })];
-    return Ok((state, Box::new(Entry { name, kdln, args, tipo, rules })));
+    let (state, last) = get_last_index(state)?;
+    let orig          = origin(0, init, last);
+    return Ok((state, Box::new(Entry { name, name_orig: orig, kdln, args, tipo, rules })));
   } else {
     let mut rules = Vec::new();
     let rule_prefix = &format!("{} ", name); 
@@ -1629,7 +1633,9 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         break;
       }
     }
-    return Ok((state, Box::new(Entry { name, kdln, args, tipo, rules })));
+    let (state, last) = get_last_index(state)?;
+    let name_orig     = origin(0, init, last);
+    return Ok((state, Box::new(Entry { name, name_orig, kdln, args, tipo, rules })));
   }
 }
 
@@ -1753,11 +1759,11 @@ pub fn compile_term(term: &Term, quote: bool, lhs: bool) -> String {
       if lhs {
         format!("{}", name)
       } else {
-        if quote {
-          format!("(Kind.Term.set_origin {} {})", orig, name.clone())
-        } else {
+        //if quote {
+        //  format!("(Kind.Term.set_origin {} {})", orig, name.clone())
+        //} else {
           format!("{}", name.clone()) // spaces to align with quoted version
-        }
+        //}
       }
     }
     Term::All { orig, name, tipo, body } => {
@@ -1847,16 +1853,55 @@ pub fn compile_oper(oper: &Oper) -> String {
   }
 }
 
-pub fn compile_entry(entry: &Entry) -> String {
-  fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
-    if index < args.len() {
-      let arg = &args[index];
-      format!("(Kind.Term.all {} {} {} λ{} {})", 0, name_to_u64(&arg.name), compile_term(&arg.tipo, true, false), arg.name, compile_type(args, tipo, index + 1))
-    } else {
-      compile_term(tipo, true, false)
+pub fn compile_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
+  if index < args.len() {
+    let arg = &args[index];
+    format!("(Kind.Term.all {} {} {} λ{} {})", 0, name_to_u64(&arg.name), compile_term(&arg.tipo, true, false), arg.name, compile_type(args, tipo, index + 1))
+  } else {
+    compile_term(tipo, true, false)
+  }
+}
+
+pub fn compile_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
+  // FIXME: remove redundancy
+  match patt {
+    Term::Var { orig, name } => {
+      let inp = format!("(Kind.Term.var {} {} {})", orig, name_to_u64(name), vars);
+      let var = format!("(Kind.Term.var {} {} {})", orig, name_to_u64(name), vars);
+      *vars += 1;
+      return (inp, var);
+    }
+    Term::Ctr { orig, name, args } => {
+      let mut inp_args_str = String::new();
+      let mut var_args_str = String::new();
+      for arg in args {
+        let (inp_arg_str, var_arg_str) = compile_patt_chk(arg, vars);
+        inp_args_str.push_str(&format!(" {}", inp_arg_str));
+        var_args_str.push_str(&format!(" {}", var_arg_str));
+      }
+      if args.len() >= 7 {
+        let inp_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), inp_args_str);
+        let var_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), var_args_str);
+        return (inp_str, var_str);
+      } else {
+        let inp_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig, inp_args_str);
+        let var_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig, var_args_str);
+        return (inp_str, var_str);
+      }
+    }
+    Term::Num { orig, numb } => {
+      let inp = format!("(Kind.Term.num {} {})", orig, numb);
+      let var = format!("(Kind.Term.num {} {})", orig, numb);
+      return (inp, var);
+    }
+    _ => {
+      // TODO: This should return a proper error instead of panicking
+      panic!("Invalid left-hand side pattern: {}", show_term(patt));
     }
   }
+}
 
+pub fn compile_entry(entry: &Entry) -> String {
   fn compile_rule_end(name: &str, size: u64) -> String {
     let mut vars = vec![];
     for idx in 0 .. size {
@@ -1915,49 +1960,11 @@ pub fn compile_entry(entry: &Entry) -> String {
     }
   }
 
-  fn compile_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
-    // FIXME: remove redundancy
-    match patt {
-      Term::Var { orig, name } => {
-        let inp = format!("(Kind.Term.var {} {} {})", orig, name_to_u64(name), vars);
-        let var = format!("(Kind.Term.var {} {} {})", orig, name_to_u64(name), vars);
-        *vars += 1;
-        return (inp, var);
-      }
-      Term::Ctr { orig, name, args } => {
-        let mut inp_args_str = String::new();
-        let mut var_args_str = String::new();
-        for arg in args {
-          let (inp_arg_str, var_arg_str) = compile_patt_chk(arg, vars);
-          inp_args_str.push_str(&format!(" {}", inp_arg_str));
-          var_args_str.push_str(&format!(" {}", var_arg_str));
-        }
-        if args.len() >= 7 {
-          let inp_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), inp_args_str);
-          let var_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), var_args_str);
-          return (inp_str, var_str);
-        } else {
-          let inp_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig, inp_args_str);
-          let var_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig, var_args_str);
-          return (inp_str, var_str);
-        }
-      }
-      Term::Num { orig, numb } => {
-        let inp = format!("(Kind.Term.num {} {})", orig, numb);
-        let var = format!("(Kind.Term.num {} {})", orig, numb);
-        return (inp, var);
-      }
-      _ => {
-        // TODO: This should return a proper error instead of panicking
-        panic!("Invalid left-hand side pattern: {}", show_term(patt));
-      }
-    }
-  }
-
   let mut result = String::new();
   result.push_str(&format!("(NameOf {}.) = \"{}\"\n", entry.name, entry.name));
   result.push_str(&format!("(HashOf {}.) = %{}\n", entry.name, entry.name));
   result.push_str(&format!("(TypeOf {}.) = {}\n", entry.name, compile_type(&entry.args, &entry.tipo, 0)));
+  result.push_str(&format!("(OrigOf {}.) = {}\n", entry.name, entry.name_orig));
 
   let base_vars = (0 .. entry.args.len()).map(|x| format!(" x{}", x)).collect::<Vec<String>>().join("");
 
@@ -2547,7 +2554,7 @@ pub fn derive_type(tipo: &NewType) -> Derived {
   }
   let tipo = Box::new(Term::Typ { orig: 0 });
   let rules = vec![];
-  let entr = Entry { name, kdln, args, tipo, rules };
+  let entr = Entry { name, name_orig: 0, kdln, args, tipo, rules };
   return Derived { path, entr };
 }
 
@@ -2569,7 +2576,7 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
       args: tipo.pars.iter().map(|x| Box::new(Term::Var { orig: 0, name: x.name.clone() })).collect(),
     });
     let rules = vec![];
-    let entr  = Entry { name, kdln, args, tipo, rules };
+    let entr  = Entry { name, name_orig: 0, kdln, args, tipo, rules };
     return Derived { path, entr };
   } else {
     panic!("Constructor out of bounds.");
@@ -2714,7 +2721,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     rules.push(Box::new(Rule { orig, name, pats, body }));
   }
 
-  let entr = Entry { name, kdln, args, tipo, rules };
+  let entr = Entry { name, name_orig: 0, kdln, args, tipo, rules };
 
   return Derived { path, entr };
 }
