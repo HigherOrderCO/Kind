@@ -2332,11 +2332,11 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
     CompRule {name, pats, body}
   }
 
-  fn make_u120_new() -> CompEntry {
+  fn make_u120_new(kdln: &Option<String>) -> CompEntry {
     // U120.new hi lo = (+ (<< hi 60) (>> (<< lo 60) 60))
     CompEntry {
       name: "U120.new".to_string(),
-      kdln: None,
+      kdln: kdln.clone(),
       args: vec!["hi".to_string(), "lo".to_string()],
       rules: vec![CompRule {
         name: "U120.new".to_string(),
@@ -2366,11 +2366,11 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
     }
   }
 
-  fn make_u120_low() -> CompEntry {
+  fn make_u120_low(kdln: &Option<String>) -> CompEntry {
     // U120.low n = (>> (<< n 60) 60))
     CompEntry {
       name: "U120.low".to_string(),
-      kdln: None,
+      kdln: kdln.clone(),
       args: vec!["n".to_string()],
       rules: vec![CompRule {
         name: "U120.low".to_string(),
@@ -2391,11 +2391,11 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
     }
   }
 
-  fn make_u120_high() -> CompEntry {
+  fn make_u120_high(kdln: &Option<String>) -> CompEntry {
     // U120.high n = (>> n 60)
     CompEntry {
       name: "U120.high".to_string(),
-      kdln: None,
+      kdln: kdln.clone(),
       args: vec!["n".to_string()],
       rules: vec![CompRule {
         name: "U120.high".to_string(),
@@ -2414,10 +2414,10 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
 
   match entry.name.as_str() {
     // Some U120 functions should have a special compilation
-    "U120.new"  => Ok(vec![make_u120_new() ]),  // U120.new becomes a special function that joins two numbers as if they were U60s
+    "U120.new"  => Ok(vec![make_u120_new(&entry.kdln) ]),  // U120.new becomes a special function that joins two numbers as if they were U60s
     // TODO: We could rewrite these both to not need this workaround, but it would become rather slow on normal HVM (~100 rewrites instead of 1)
-    "U120.high" => Ok(vec![make_u120_high()]),  // high and low are used for type compatibility with u60
-    "U120.low"  => Ok(vec![make_u120_low() ]),
+    "U120.high" => Ok(vec![make_u120_high(&entry.kdln)]),  // high and low are used for type compatibility with u60
+    "U120.low"  => Ok(vec![make_u120_low(&entry.kdln) ]),
     _ => {
       let new_entry = CompEntry {
         name : entry.name.clone(),
