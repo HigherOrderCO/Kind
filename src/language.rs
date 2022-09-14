@@ -1997,7 +1997,7 @@ pub fn to_checker_book(book: &Book) -> String {
   let mut result = String::new();
   result.push_str(&format!("// NOTE: functions with names starting with 'F$' are evaluated differently by the\n"));
   result.push_str(&format!("// HVM, as a specific optimization targetting Kind2. See 'HOAS_OPT' on HVM's code.\n\n"));
-  result.push_str(&format!("Functions =\n"));
+  result.push_str(&format!("Kind.Axiom.functions =\n"));
   result.push_str(&format!("  let fns = List.nil\n"));
   for name in &book.names {
     let entry = book.entrs.get(name).unwrap();
