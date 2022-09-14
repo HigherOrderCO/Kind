@@ -157,9 +157,9 @@ pub fn compile_definition_map(definitions: DefinitionMap) -> String {
   result.push_str("\n// Type Families\n\n");
 
   for (name, type_family) in &definitions.type_families {
-    result.push_str(&format!("(Family.NameOf {}.) = \"{}\"\n", name, name));
-    result.push_str(&format!("(Family.TypeOf {}.) = {}\n", name, to_checker_type(&type_family.type_constructor.args, &type_family.type_constructor.tipo, 0)));
-    result.push_str(&format!("(Family.ConstructorsOf {}.) =\n  let const = List.nil\n", name));
+    result.push_str(&format!("(Kind.Axiom.name_of {}.) = \"{}\"\n", name, name));
+    result.push_str(&format!("(Kind.Axiom.type_of {}.) = {}\n", name, to_checker_type(&type_family.type_constructor.args, &type_family.type_constructor.tipo, 0)));
+    result.push_str(&format!("(Kind.Axiom.constructors_of {}.) =\n  let const = List.nil\n", name));
     for (data_name, data_cons) in &type_family.constructors {
       let compiled_ty = to_checker_type(&data_cons.args, &data_cons.tipo, 0);
       result.push_str(&format!("  let const = (List.cons ({}.) const)\n", data_name));
@@ -167,19 +167,15 @@ pub fn compile_definition_map(definitions: DefinitionMap) -> String {
     result.push_str("  const\n\n");
     for (data_name, data_cons) in &type_family.constructors {
       let constructor = Term::Ctr { orig:0, name: data_name.to_string(), args: data_cons.args.iter().map(|x| Box::new(Term::Var { name: x.name.clone(), orig: 0 })).collect() };
-      result.push_str(&format!("(Constructor.CreatorOf {}.) = {}\n\n", data_name, to_checker_term_creator(&data_cons.args, &constructor, 0)));
+      result.push_str(&format!("(Kind.Axiom.creator_of {}.) = {}\n\n", data_name, to_checker_term_creator(&data_cons.args, &constructor, 0)));
     }
   }
 
-  result.push_str("(Constructor.Compare x y) = Bool.false\n");
-
-  result.push_str("// Definitions\n\n");
-
   for (name, entry) in &definitions.entries {
-    result.push_str(&format!("(Definition.ShouldCheck {}.) = Bool.true\n", name));
+    result.push_str(&format!("(Kind.Axiom.should_check {}.) = Bool.true\n", name));
   }
 
-  result.push_str("(Definition.ShouldCheck x) = Bool.false\n");
+  result.push_str("(Kind.Axiom.should_check x) = Bool.false\n");
 
   result
 }

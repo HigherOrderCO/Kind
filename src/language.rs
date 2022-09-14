@@ -1964,10 +1964,10 @@ pub fn to_checker_entry(entry: &Entry) -> String {
   }
 
   let mut result = String::new();
-  result.push_str(&format!("(NameOf {}.) = \"{}\"\n", entry.name, entry.name));
-  result.push_str(&format!("(HashOf {}.) = %{}\n", entry.name, entry.name));
-  result.push_str(&format!("(TypeOf {}.) = {}\n", entry.name, to_checker_type(&entry.args, &entry.tipo, 0)));
-  result.push_str(&format!("(OrigOf {}.) = {}\n", entry.name, entry.orig));
+  result.push_str(&format!("(Kind.Axiom.name_of {}.) = \"{}\"\n", entry.name, entry.name));
+  result.push_str(&format!("(Kind.Axiom.hash_of {}.) = %{}\n", entry.name, entry.name));
+  result.push_str(&format!("(Kind.Axiom.type_of {}.) = {}\n", entry.name, to_checker_type(&entry.args, &entry.tipo, 0)));
+  result.push_str(&format!("(Kind.Axiom.orig_of {}.) = {}\n", entry.name, entry.orig));
 
   let base_vars = (0 .. entry.args.len()).map(|x| format!(" x{}", x)).collect::<Vec<String>>().join("");
 
@@ -1985,7 +1985,7 @@ pub fn to_checker_entry(entry: &Entry) -> String {
   if entry.rules.len() > 0 {
     result.push_str(&to_checker_rule_end(&entry.name, entry.rules[0].pats.len() as u64));
   }
-  result.push_str(&format!("(RuleOf {}.) =", entry.name));
+  result.push_str(&format!("(Kind.Axiom.rule_of {}.) =", entry.name));
   for rule in &entry.rules {
     result.push_str(&format!(" (List.cons {}", to_checker_rule_chk(&rule, 0, &mut 0, &mut vec![]))); 
   }
