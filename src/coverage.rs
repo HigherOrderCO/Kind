@@ -164,34 +164,19 @@ pub fn compile_definition_map(definitions: DefinitionMap) -> String {
     result.push_str("  const\n\n");
     for (data_name, data_cons) in &type_family.constructors {
       let constructor = Term::Ctr { orig:0, name: data_name.to_string(), args: data_cons.args.iter().map(|x| Box::new(Term::Var { name: x.name.clone(), orig: 0 })).collect() };
-      result.push_str(&format!("(Constructor.NameOf {}.) = \"{}\"\n", data_name, data_name));
-      result.push_str(&format!("(Constructor.TypeOf {}.) = {}\n", data_name, compile_type(&data_cons.args, &data_cons.tipo, 0)));
-      result.push_str(&format!("(Constructor.Compare {}. {}.) = Bool.true\n", data_name, data_name));
       result.push_str(&format!("(Constructor.CreatorOf {}.) = {}\n\n", data_name, compile_creator(&data_cons.args, &constructor, 0)));
     }
   }
 
+  result.push_str("(Constructor.Compare x y) = Bool.false\n");
+
   result.push_str("// Definitions\n\n");
 
   for (name, entry) in &definitions.entries {
-    result.push_str(&format!("(Definition.NameOf {}.) = \"{}\"\n", name, name));
-    result.push_str(&format!("(Definition.TypeOf {}.) = {}\n", name,  compile_type(&entry.args, &entry.tipo, 0)));
-    result.push_str(&format!("(Definition.RulesOf {}.) =\n  let rules = List.nil\n", name));
-    for rule in &entry.rules {
-      result.push_str(&format!("  let rules = (List.cons {} rules) \n", &compile_rhs(&rule, 0, &mut 0, &mut vec![])));
-    }
-    result.push_str("  rules\n\n");
+    result.push_str(&format!("(Definition.ShouldCheck {}.) = Bool.true\n", name));
   }
 
-
-  result.push_str(&format!("(Coverage) =\n  let rules = List.nil\n"));
-  for (name, entry) in &definitions.entries {
-    result.push_str(&format!("  let rules = (List.cons ({}.) rules)\n", name));
-  }
-
-  result.push_str("  rules\n\n");
-
-  result.push_str("(Constructor.Compare x y) = Bool.false\n");
+  result.push_str("(Definition.ShouldCheck x) = Bool.false\n");
 
   result
 }

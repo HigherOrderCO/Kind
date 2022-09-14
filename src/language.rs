@@ -608,6 +608,7 @@ pub fn book_set_origin_file(book: &mut Book, file: usize) {
 }
 
 pub fn entry_set_origin_file(entry: &mut Entry, file: usize) {
+  entry.name_orig = set_origin_file(entry.name_orig, file);
   for arg in &mut entry.args {
     term_set_origin_file(&mut *arg.tipo, file);
   }
@@ -1584,6 +1585,8 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
   let (state, init) = get_last_index(state)?;
   let (state, name) = parser::name1(state)?;
+  let (state, last) = get_last_index(state)?;
+  let name_orig     = origin(0, init, last);
   let (state, kdl)  = parser::text("#", state)?;
   let (state, kdln) = if kdl {
     let (state, name) = parser::name1(state)?;
@@ -1613,9 +1616,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
       pats.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() })); // TODO: set orig
     }
     let rules = vec![Box::new(Rule { orig: 0, name: name.clone(), pats, body })];
-    let (state, last) = get_last_index(state)?;
-    let orig          = origin(0, init, last);
-    return Ok((state, Box::new(Entry { name, name_orig: orig, kdln, args, tipo, rules })));
+    return Ok((state, Box::new(Entry { name, name_orig, kdln, args, tipo, rules })));
   } else {
     let mut rules = Vec::new();
     let rule_prefix = &format!("{} ", name); 
@@ -1633,8 +1634,6 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         break;
       }
     }
-    let (state, last) = get_last_index(state)?;
-    let name_orig     = origin(0, init, last);
     return Ok((state, Box::new(Entry { name, name_orig, kdln, args, tipo, rules })));
   }
 }

@@ -11,7 +11,6 @@ use std::collections::HashMap;
 use clap::{Parser, Subcommand};
 
 const CHECKER_HVM: &str = include_str!("checker.hvm");
-const COVERAGE_HVM: &str = include_str!("coverage.hvm");
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -26,12 +25,6 @@ pub enum Command {
   /// Check a file
   #[clap(aliases = &["c"])]
   Check { file: String },
-
-  #[clap(aliases = &["co"])]
-  Coverage { file: String },
-
-  #[clap(aliases = &["cco"])]
-  CheckCoverage { file: String },
 
   /// Evaluates Main on Kind2
   #[clap(aliases = &["r"])]
@@ -86,15 +79,6 @@ fn run_cli() -> Result<(), String> {
     Command::Check { file: path } => {
       cmd_check_all(&path)
     }
-
-    Command::Coverage { file: path } => {
-      cmd_coverage(&path)
-    }
-
-    Command::CheckCoverage { file: path } => {
-      cmd_check_coverage(&path)
-    }
-
     Command::Derive { file: path } => {
       cmd_derive(&path)
     }
@@ -126,26 +110,6 @@ fn cmd_check_all(path: &str) -> Result<(), String> {
   let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.check_all", true)?;
   print!("{}", inject_highlights(&loaded.file, &result.output));
   println!("Rewrites: {}", result.rewrites);
-  Ok(())
-}
-
-// Checks all definitions of a Kind2 file
-fn cmd_check_coverage(path: &str) -> Result<(), String> {
-  let loaded = load(path)?;
-  let result = run_with_hvm(&gen_coverage(&loaded.book), "Kind.API.check_coverage", true)?;
-  print!("{}", inject_highlights(&loaded.file, &result.output));
-  println!("Rewrites: {}", result.rewrites);
-  Ok(())
-}
-
-// Checks all definitions of a Kind2 file
-fn cmd_coverage(path: &str) -> Result<(), String> {
-  let loaded = load(path)?;
-
-  let gen_path = format!("{}.hvm", path.replace(".kind2",".check"));
-  println!("Generated '{}'.", gen_path);
-  std::fs::write(gen_path, gen_coverage(&loaded.book)).ok();
-
   Ok(())
 }
 
@@ -322,25 +286,14 @@ pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
 // Generates a .hvm checker for a Book
 fn gen_checker(book: &Book) -> String {
   // Compile the Kind2 file to HVM checker
-  let base_check_code = compile_book(&book);
-  let mut check_code = CHECKER_HVM.to_string();
-  check_code.push_str(&base_check_code);
-  return check_code;
-}
-
-// Generates a .hvm coverage for a Book
-fn gen_coverage(book: &Book) -> String {
-  // Compile the Kind2 file to HVM checker
-
   let defs = coverage::build_definition_map(book);
   let res  = coverage::compile_definition_map(defs);
 
-  let base_coverage_code = compile_book(&book);
-
-  let mut coverage_code = COVERAGE_HVM.to_string();
-  coverage_code.push_str(&base_coverage_code);
-  coverage_code.push_str(&res);
-  return coverage_code;
+  let base_check_code = compile_book(&book);
+  let mut check_code = CHECKER_HVM.to_string();
+  check_code.push_str(&base_check_code);
+  check_code.push_str(&res);
+  return check_code;
 }
 
 // Loader
