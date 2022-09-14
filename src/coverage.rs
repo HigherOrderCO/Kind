@@ -89,7 +89,7 @@ pub fn build_definition_map(book: &Book) -> DefinitionMap {
 
 fn compile_rhs(rule: &Rule, index: usize, vars: &mut u64, args: &mut Vec<String>) -> String {
   if index < rule.pats.len() {
-    let (inp_patt_str, var_patt_str) = compile_patt_chk(&rule.pats[index], vars);
+    let (inp_patt_str, var_patt_str) = to_checker_patt_chk(&rule.pats[index], vars);
     args.push(var_patt_str);
     let head = inp_patt_str;
     let tail = compile_rhs(rule, index + 1, vars, args);
@@ -99,14 +99,14 @@ fn compile_rhs(rule: &Rule, index: usize, vars: &mut u64, args: &mut Vec<String>
   }
 }
 
-pub fn compile_creator(args: &Vec<Box<Argument>>, tipo: &Term, index: usize) -> String {
+pub fn to_checker_term_creator(args: &Vec<Box<Argument>>, tipo: &Term, index: usize) -> String {
   if index < args.len() {
     let arg = &args[index];
     format!("(Kind.Coverage.Creator.cons {} λ{} {})",
-      compile_term(&arg.tipo, true, false), arg.name,
-      compile_creator(args, tipo, index + 1))
+      to_checker_term(&arg.tipo, true, false), arg.name,
+      to_checker_term_creator(args, tipo, index + 1))
   } else {
-    format!("(Kind.Coverage.Creator.end {})", compile_term(tipo, true, false))
+    format!("(Kind.Coverage.Creator.end {})", to_checker_term(tipo, true, false))
   }
 }
 
@@ -155,16 +155,16 @@ pub fn compile_definition_map(definitions: DefinitionMap) -> String {
 
   for (name, type_family) in &definitions.type_families {
     result.push_str(&format!("(Family.NameOf {}.) = \"{}\"\n", name, name));
-    result.push_str(&format!("(Family.TypeOf {}.) = {}\n", name, compile_type(&type_family.type_constructor.args, &type_family.type_constructor.tipo, 0)));
+    result.push_str(&format!("(Family.TypeOf {}.) = {}\n", name, to_checker_type(&type_family.type_constructor.args, &type_family.type_constructor.tipo, 0)));
     result.push_str(&format!("(Family.ConstructorsOf {}.) =\n  let const = List.nil\n", name));
     for (data_name, data_cons) in &type_family.constructors {
-      let compiled_ty = compile_type(&data_cons.args, &data_cons.tipo, 0);
+      let compiled_ty = to_checker_type(&data_cons.args, &data_cons.tipo, 0);
       result.push_str(&format!("  let const = (List.cons ({}.) const)\n", data_name));
     }
     result.push_str("  const\n\n");
     for (data_name, data_cons) in &type_family.constructors {
       let constructor = Term::Ctr { orig:0, name: data_name.to_string(), args: data_cons.args.iter().map(|x| Box::new(Term::Var { name: x.name.clone(), orig: 0 })).collect() };
-      result.push_str(&format!("(Constructor.CreatorOf {}.) = {}\n\n", data_name, compile_creator(&data_cons.args, &constructor, 0)));
+      result.push_str(&format!("(Constructor.CreatorOf {}.) = {}\n\n", data_name, to_checker_term_creator(&data_cons.args, &constructor, 0)));
     }
   }
 
