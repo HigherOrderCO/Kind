@@ -18,7 +18,8 @@ pub struct Entry {
   pub kdln: Option<String>,
   pub args: Vec<Box<Argument>>,
   pub tipo: Box<Term>,
-  pub rules: Vec<Box<Rule>>
+  pub rules: Vec<Box<Rule>>,
+  pub is_axiom : bool,
 }
 
 #[derive(Clone, Debug)]
@@ -153,7 +154,7 @@ pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut Has
     let mut vars = Vec::new();
     rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars, types)?));
   }
-  return Ok(Entry { name, orig: entry.orig, kdln, args, tipo, rules });
+  return Ok(Entry { name, orig: entry.orig, kdln, args, tipo, rules, is_axiom: entry.is_axiom });
 }
 
 pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Argument, AdjustError> {
@@ -622,6 +623,7 @@ pub fn rule_set_origin_file(rule: &mut Rule, file: usize) {
   for pat in &mut rule.pats {
     term_set_origin_file(pat, file);
   }
+  rule.orig = set_origin_file(rule.orig, file);
   term_set_origin_file(&mut rule.body, file);
 }
 
@@ -1584,6 +1586,7 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
   let (state, init) = get_init_index(state)?;
+  let (state, is_axiom) = parser::text("[axiom] ", state)?;
   let (state, name) = parser::name1(state)?;
   let (state, kdl)  = parser::text("#", state)?;
   let (state, kdln) = if kdl {
@@ -1616,10 +1619,10 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
       pats.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() })); // TODO: set orig
     }
     let rules = vec![Box::new(Rule { orig: 0, name: name.clone(), pats, body })];
-    return Ok((state, Box::new(Entry { name, orig, kdln, args, tipo, rules })));
+    return Ok((state, Box::new(Entry { name, orig, kdln, args, tipo, rules, is_axiom })));
   } else {
     let mut rules = Vec::new();
-    let rule_prefix = &format!("{} ", name); 
+    let rule_prefix = &format!("{} ", name);
     let mut state = state;
     loop {
       let loop_state = state;
@@ -1634,7 +1637,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         break;
       }
     }
-    let entry = Box::new(Entry { name, orig, kdln, args, tipo, rules });
+    let entry = Box::new(Entry { name, orig, kdln, args, tipo, rules, is_axiom });
     return Ok((state, entry));
   }
 }
@@ -3131,7 +3134,7 @@ pub fn derive_type(tipo: &NewType) -> Derived {
   }
   let tipo = Box::new(Term::Typ { orig: 0 });
   let rules = vec![];
-  let entr = Entry { name, orig: 0, kdln, args, tipo, rules };
+  let entr = Entry { name, orig: 0, kdln, args, tipo, rules, is_axiom: false };
   return Derived { path, entr };
 }
 
@@ -3153,7 +3156,7 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
       args: tipo.pars.iter().map(|x| Box::new(Term::Var { orig: 0, name: x.name.clone() })).collect(),
     });
     let rules = vec![];
-    let entr  = Entry { name, orig: 0, kdln, args, tipo, rules };
+    let entr  = Entry { name, orig: 0, kdln, args, tipo, rules, is_axiom: false };
     return Derived { path, entr };
   } else {
     panic!("Constructor out of bounds.");
@@ -3298,7 +3301,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     rules.push(Box::new(Rule { orig, name, pats, body }));
   }
 
-  let entr = Entry { name, orig: 0, kdln, args, tipo, rules };
+  let entr = Entry { name, orig: 0, kdln, args, tipo, rules, is_axiom: false };
 
   return Derived { path, entr };
 }

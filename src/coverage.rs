@@ -50,6 +50,9 @@ pub fn build_definition_map(book: &Book) -> DefinitionMap {
   for (_, entry) in &book.entrs {
     if entry.rules.len() == 0 {
       if let Some(constr) = get_type_constructor(&entry.tipo) {
+        if entry.is_axiom {
+        continue;
+        }
         if let Some(cons) = data_constructors.get_mut(&constr) {
           cons.insert(entry.name.clone(), entry.clone());
         } else {
