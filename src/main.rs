@@ -79,6 +79,7 @@ fn run_cli() -> Result<(), String> {
     Command::Check { file: path } => {
       cmd_check_all(&path)
     }
+
     Command::Derive { file: path } => {
       cmd_derive(&path)
     }
@@ -112,6 +113,7 @@ fn cmd_check_all(path: &str) -> Result<(), String> {
   println!("Rewrites: {}", result.rewrites);
   Ok(())
 }
+
 
 // Evaluates Main on Kind2
 fn cmd_eval_main(path: &str) -> Result<(), String> {
