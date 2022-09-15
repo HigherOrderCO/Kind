@@ -1792,7 +1792,7 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
       for arg in args {
         args_strs.push(format!(" {}", to_checker_term(arg, quote, lhs)));
       }
-      if args.len() >= 7 {
+      if args.len() >= 15 {
         format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, hide(orig,lhs), args.len(), args_strs.join(""))
       } else {
         format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
@@ -1804,7 +1804,7 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
         args_strs.push(format!(" {}", to_checker_term(arg, quote, lhs)));
       }
       if quote {
-        if args.len() >= 7 {
+        if args.len() >= 15 {
           format!("(Kind.Term.fn{} {}. {}(Kind.Term.args{} {}))", args.len(), name, hide(orig,lhs), args.len(), args_strs.join(""))
         } else {
           format!("(Kind.Term.fn{} {}. {}{})", args.len(), name, hide(orig,lhs), args_strs.join(""))
@@ -1882,7 +1882,7 @@ pub fn to_checker_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
         inp_args_str.push_str(&format!(" {}", inp_arg_str));
         var_args_str.push_str(&format!(" {}", var_arg_str));
       }
-      if args.len() >= 7 {
+      if args.len() >= 15 {
         let inp_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), inp_args_str);
         let var_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig, args.len(), var_args_str);
         return (inp_str, var_str);
@@ -1912,7 +1912,7 @@ pub fn to_checker_entry(entry: &Entry) -> String {
     }
     let mut text = String::new();
 
-    if size >= 7 {
+    if size >= 15 {
       text.push_str(&format!("(Q${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))\n", name, vars.join(""), size, name, size, vars.join("")));
       text.push_str(&format!("(F${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))\n", name, vars.join(""), size, name, size, vars.join("")));
     } else {
@@ -1971,7 +1971,7 @@ pub fn to_checker_entry(entry: &Entry) -> String {
 
   let base_vars = (0 .. entry.args.len()).map(|x| format!(" x{}", x)).collect::<Vec<String>>().join("");
 
-  if entry.args.len() >= 7 {
+  if entry.args.len() >= 15 {
     result.push_str(&format!("(Kind.Term.FN{} {}. orig (Kind.Term.args{}{})) = (F${} orig{})\n", entry.args.len(), entry.name, entry.args.len(), base_vars, entry.name, base_vars));
   } else {
     result.push_str(&format!("(Kind.Term.FN{} {}. orig{}) = (F${} orig{})\n", entry.args.len(), entry.name, base_vars, entry.name, base_vars));
