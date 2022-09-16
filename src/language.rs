@@ -14,6 +14,7 @@ pub struct Book {
 #[derive(Clone, Debug)]
 pub struct Entry {
   pub name: String,
+  pub orig: u64,
   pub kdln: Option<String>,
   pub args: Vec<Box<Argument>>,
   pub tipo: Box<Term>,
@@ -152,7 +153,7 @@ pub fn adjust_entry(book: &Book, entry: &Entry, holes: &mut u64, types: &mut Has
     let mut vars = Vec::new();
     rules.push(Box::new(adjust_rule(book, &*rule, holes, &mut vars, types)?));
   }
-  return Ok(Entry { name, kdln, args, tipo, rules });
+  return Ok(Entry { name, kdln, orig: entry.orig, args, tipo, rules });
 }
 
 pub fn adjust_argument(book: &Book, arg: &Argument, holes: &mut u64, vars: &mut Vec<String>, types: &mut HashMap<String, Rc<NewType>>) -> Result<Argument, AdjustError> {
@@ -607,6 +608,7 @@ pub fn book_set_origin_file(book: &mut Book, file: usize) {
 }
 
 pub fn entry_set_origin_file(entry: &mut Entry, file: usize) {
+  entry.orig = set_origin_file(entry.orig, file);
   for arg in &mut entry.args {
     term_set_origin_file(&mut *arg.tipo, file);
   }
@@ -1582,6 +1584,7 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
 }
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
+  let (state, init) = get_init_index(state)?;
   let (state, name) = parser::name1(state)?;
   let (state, kdl)  = parser::text("#", state)?;
   let (state, kdln) = if kdl {
@@ -1590,6 +1593,8 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
   } else {
     (state, None)
   };
+  let (state, last) = get_init_index(state)?;
+  let entry_orig    = origin(0, init, last);
   let (state, args) = parser::until(Box::new(|state| {
     let (state, end_0) = parser::dry(Box::new(|state| parser::text(":", state)), state)?;
     let (state, end_1) = parser::dry(Box::new(|state| parser::text("{", state)), state)?;
@@ -1612,7 +1617,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
       pats.push(Box::new(Term::Var { orig: 0, name: arg.name.clone() })); // TODO: set orig
     }
     let rules = vec![Box::new(Rule { orig: 0, name: name.clone(), pats, body })];
-    return Ok((state, Box::new(Entry { name, kdln, args, tipo, rules })));
+    return Ok((state, Box::new(Entry { name, orig: entry_orig, kdln, args, tipo, rules })));
   } else {
     let mut rules = Vec::new();
     let rule_prefix = &format!("{} ", name); 
@@ -1630,7 +1635,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         break;
       }
     }
-    let entry = Box::new(Entry { name, kdln, args, tipo, rules });
+    let entry = Box::new(Entry { name, orig: entry_orig, kdln, args, tipo, rules });
     return Ok((state, entry));
   }
 }
@@ -1960,6 +1965,7 @@ pub fn to_checker_entry(entry: &Entry) -> String {
   result.push_str(&format!("(NameOf {}.) = \"{}\"\n", entry.name, entry.name));
   result.push_str(&format!("(HashOf {}.) = %{}\n", entry.name, entry.name));
   result.push_str(&format!("(TypeOf {}.) = {}\n", entry.name, to_checker_type(&entry.args, &entry.tipo, 0)));
+  result.push_str(&format!("(OrigOf {}.) = {}\n", entry.name, entry.orig));
 
   let base_vars = (0 .. entry.args.len()).map(|x| format!(" x{}", x)).collect::<Vec<String>>().join("");
 
@@ -3126,7 +3132,7 @@ pub fn derive_type(tipo: &NewType) -> Derived {
   }
   let tipo = Box::new(Term::Typ { orig: 0 });
   let rules = vec![];
-  let entr = Entry { name, kdln, args, tipo, rules };
+  let entr = Entry { name, orig: 0, kdln, args, tipo, rules };
   return Derived { path, entr };
 }
 
@@ -3148,7 +3154,7 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
       args: tipo.pars.iter().map(|x| Box::new(Term::Var { orig: 0, name: x.name.clone() })).collect(),
     });
     let rules = vec![];
-    let entr  = Entry { name, kdln, args, tipo, rules };
+    let entr  = Entry { name, orig: 0, kdln, args, tipo, rules };
     return Derived { path, entr };
   } else {
     panic!("Constructor out of bounds.");
@@ -3293,7 +3299,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     rules.push(Box::new(Rule { orig, name, pats, body }));
   }
 
-  let entr = Entry { name, kdln, args, tipo, rules };
+  let entr = Entry { name, orig: 0, kdln, args, tipo, rules };
 
   return Derived { path, entr };
 }
