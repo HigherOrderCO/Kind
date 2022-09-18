@@ -1,21 +1,9 @@
 use hvm::parser;
 
-use kind2_book::name::{Ident, Qualified};
-use kind2_book::span::{ByteOffset, Span};
-use kind2_book::term::{Operator, Term};
-
-pub fn is_ctr_head(head: char) -> bool {
-    ('A'..='Z').contains(&head)
-}
-
-pub fn get_init_index(state: parser::State) -> parser::Answer<ByteOffset> {
-    let (state, _) = parser::skip(state)?;
-    Ok((state, ByteOffset(state.index as u32)))
-}
-
-pub fn get_last_index(state: parser::State) -> parser::Answer<ByteOffset> {
-    Ok((state, ByteOffset(state.index as u32)))
-}
+use crate::book::name::{Ident, Qualified};
+use crate::book::span::{ByteOffset, Span};
+use crate::book::term::{Operator, Term};
+use crate::parser::utils::{get_init_index, get_last_index, is_ctr_head};
 
 pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     parser::guard(

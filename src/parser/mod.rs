@@ -1,14 +1,18 @@
-use hvm::parser;
-use std::collections::HashMap;
-
-use kind2_book::name::{Ident, Qualified};
-use kind2_book::span::{ByteOffset, Span};
-use kind2_book::term::Term;
-use kind2_book::{Argument, Book, Entry, Rule};
-
 pub mod term;
 
-use crate::term::*;
+pub mod new_type;
+
+pub mod utils;
+
+use crate::book::name::{Ident, Qualified};
+use crate::book::span::{ByteOffset, Span};
+use crate::book::term::Term;
+use crate::book::{Argument, Book, Entry, Rule};
+use crate::parser::term::{parse_apps, parse_term};
+use crate::parser::utils::{get_init_index, get_last_index};
+
+use hvm::parser;
+use std::collections::HashMap;
 
 pub fn parse_rule(
     state: parser::State,
@@ -72,7 +76,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         for arg in &args {
             pats.push(Box::new(Term::Var {
                 orig: Span::Generated,
-                name: Ident(arg.name.clone()),
+                name: arg.name.clone(),
             })); // TODO: set orig
         }
         let rules = vec![Box::new(Rule {
@@ -121,6 +125,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
 }
 
 pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
+    let (state, init) = get_init_index(state)?;
     let (state, eras) = parser::text("-", state)?;
     let (state, keep) = parser::text("+", state)?;
     let (state, next) = parser::peek_char(state)?;
@@ -141,12 +146,15 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
     let (state, _) = parser::consume(close, state)?;
     let hide = open == "<";
     let eras = if hide { !keep } else { eras };
+    let (state, last) = get_last_index(state)?;
+    let orig = Span::new_off(init, last);
     return Ok((
         state,
         Box::new(Argument {
             hide,
+            orig,
             eras,
-            name,
+            name: Ident(name),
             tipo,
         }),
     ));
