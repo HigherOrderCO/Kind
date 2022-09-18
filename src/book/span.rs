@@ -26,9 +26,24 @@ impl Span {
         Span::Localized(SpanData { start, end, file })
     }
 
-	#[inline]
+    #[inline]
     pub fn new_off(start: ByteOffset, end: ByteOffset) -> Span {
-        Span::Localized(SpanData { start, end, file: FileOffset(0) })
+        Span::Localized(SpanData {
+            start,
+            end,
+            file: FileOffset(0),
+        })
+    }
+
+    pub fn set_file(&self, new_file: FileOffset) -> Span {
+        match self {
+            Span::Generated => Span::Generated,
+            Span::Localized(SpanData { start, end, .. }) => Span::Localized(SpanData {
+                start: *start,
+                end: *end,
+                file: new_file,
+            }),
+        }
     }
 
     #[inline]
@@ -46,4 +61,9 @@ impl Span {
             }
         }
     }
+}
+
+pub trait Localized {
+    fn get_origin(&self) -> Span;
+    fn set_origin_file(&mut self, file: FileOffset);
 }
