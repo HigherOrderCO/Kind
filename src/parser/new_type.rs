@@ -1,5 +1,4 @@
 use crate::book::name::Ident;
-use crate::book::name::Qualified;
 use crate::book::new_type::{Constructor, Derived, NewType};
 use crate::book::span::Span;
 use crate::book::term::Term;
@@ -25,14 +24,17 @@ pub fn derive_type(tipo: &NewType) -> Derived {
     });
     let rules = vec![];
     let entr = Entry {
-        name: Qualified::from_str(&name),
+        name: Ident(name),
         orig: Span::Generated,
         kdln,
         args,
         tipo,
         rules,
     };
-    return Derived { path: Ident(path), entr };
+    return Derived {
+        path: Ident(path),
+        entr,
+    };
 }
 
 pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
@@ -49,7 +51,7 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
         }
         let tipo = Box::new(Term::Ctr {
             orig: Span::Generated,
-            name: Qualified::from_str(&tipo.name.0),
+            name: tipo.name.clone(),
             args: tipo
                 .pars
                 .iter()
@@ -63,14 +65,17 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
         });
         let rules = vec![];
         let entr = Entry {
-            name: Qualified::from_str(&name),
+            name: Ident(name),
             orig: Span::Generated,
             kdln,
             args,
             tipo,
             rules,
         };
-        return Derived { path: Ident(path), entr };
+        return Derived {
+            path: Ident(path),
+            entr,
+        };
     } else {
         panic!("Constructor out of bounds.");
     }
@@ -88,7 +93,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     fn gen_type_ctr(ntyp: &NewType) -> Box<Term> {
         Box::new(Term::Ctr {
             orig: Span::Generated,
-            name: Qualified::from_str(&ntyp.name.0),
+            name: ntyp.name.clone(),
             args: ntyp
                 .pars
                 .iter()
@@ -118,14 +123,14 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
         }
         let ctr_value = Box::new(Term::Ctr {
             orig: Span::Generated,
-            name: Qualified::new_raw(&ntyp.name.0, &ctr.name.0),
+            name: Ident::new_path(&ntyp.name.0, &ctr.name.0),
             args: ctr_value_args,
         });
         return ctr_value;
     }
 
     // List.match
-    let name = Qualified::new_raw(&ntyp.name.0, "match");
+    let name = Ident::new_path(&ntyp.name.0, "match");
     let kdln = None;
 
     let mut args = vec![];
@@ -250,12 +255,12 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
         }
         let body = Box::new(Term::Ctr {
             orig: Span::Generated,
-            name: Qualified::from_str(&ctr.name.0),
+            name: ctr.name.clone(),
             args: body_args,
         });
         rules.push(Box::new(Rule {
             orig,
-            name: Qualified::from_str(&name),
+            name: Ident(name),
             pats,
             body,
         }));
@@ -270,7 +275,10 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
         rules,
     };
 
-    return Derived { path: Ident(path), entr };
+    return Derived {
+        path: Ident(path),
+        entr,
+    };
 }
 
 pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
@@ -303,7 +311,14 @@ pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
         }));
         state = state_i;
     }
-    return Ok((state, Box::new(NewType { name: Ident(name), pars, ctrs })));
+    return Ok((
+        state,
+        Box::new(NewType {
+            name: Ident(name),
+            pars,
+            ctrs,
+        }),
+    ));
 }
 
 pub fn read_newtype(code: &str) -> Result<Box<NewType>, String> {

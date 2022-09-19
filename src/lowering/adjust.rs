@@ -1,10 +1,9 @@
-use crate::book::name::{Ident, Qualified};
+use crate::book::name::Ident;
 use crate::book::new_type::NewType;
 use crate::book::span::{Localized, Span};
 use crate::book::term::Term;
-use crate::book::Book;
-
-use crate::parser::new_type::read_newtype;
+use crate::book::{Argument, Book, Entry, Rule};
+use crate::lowering::load::load_newtype_cached;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -28,21 +27,34 @@ pub enum AdjustErrorKind {
 pub struct AdjustState<'a> {
     // The book that we are adjusting now.
     book: &'a Book,
-    // If we are in the right hand side of a rule.
-    rhs: bool,
+
     // TODO:
     eras: u64,
+
     // How much holes we created
     holes: u64,
+
     // All the vars that are bound in the context.
     vars: Vec<Ident>,
     // Definitions of types that are useful to the
     // "match" expression.
-    types: HashMap<Qualified, Rc<NewType>>,
+    types: HashMap<Ident, Rc<NewType>>,
 }
 
-trait Adjust {
-    fn adjust<'a>(&self, state: &mut AdjustState<'a>) -> Result<Self, AdjustError>
+impl<'a> AdjustState<'a> {
+    pub fn new(book: &'a Book) -> AdjustState<'a> {
+        AdjustState {
+            book,
+            eras: 0,
+            holes: 0,
+            vars: Vec::new(),
+            types: HashMap::new(),
+        }
+    }
+}
+
+pub trait Adjust {
+    fn adjust<'a>(&self, rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError>
     where
         Self: Sized;
 
@@ -50,9 +62,8 @@ trait Adjust {
     where
         Self: Sized,
     {
-        self.adjust(&mut AdjustState {
+        self.adjust(false, &mut AdjustState {
             book,
-            rhs: false,
             eras: 0,
             holes: 0,
             vars: Vec::new(),
@@ -61,55 +72,73 @@ trait Adjust {
     }
 }
 
-// TODO: Remove this from the adjust layer. I think that we need to move it
-// to the driver.
-fn load_newtype(name: &Qualified) -> Result<Box<NewType>, String> {
-    let path = format!("{}/_.type", name.to_string().replace(".", "/"));
-    let newcode = match std::fs::read_to_string(&path) {
-        Err(_) => {
-            return Err(format!("File not found: '{}'.", path));
+fn convert_apps_to_ctr(term: &Term) -> Option<Term> {
+    let mut term = term;
+    let ctr_name;
+    let mut ctr_orig = term.get_origin();
+    let mut ctr_args = vec![];
+    loop {
+        match term {
+            Term::App {
+                ref orig,
+                ref func,
+                ref argm,
+            } => {
+                ctr_args.push(argm);
+                if ctr_orig == Span::Generated {
+                    ctr_orig = *orig;
+                }
+                term = func;
+            }
+            Term::Var { ref name, .. } => {
+                if !name.0.chars().nth(0).unwrap_or(' ').is_uppercase() {
+                    return None;
+                } else {
+                    ctr_name = name.clone();
+                    break;
+                }
+            }
+            _ => {
+                return None;
+            }
         }
-        Ok(code) => code,
-    };
-    let newtype = match read_newtype(&newcode) {
-        Err(err) => {
-            return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path, err));
-        }
-        Ok(book) => book,
-    };
-    return Ok(newtype);
-}
-
-pub fn load_newtype_cached(
-    cache: &mut HashMap<Qualified, Rc<NewType>>,
-    name: &Qualified,
-) -> Result<Rc<NewType>, String> {
-    if !cache.contains_key(name) {
-        let newtype = Rc::new(*load_newtype(name)?);
-        cache.insert(name.clone(), newtype);
     }
-    return Ok(cache.get(name).unwrap().clone());
+    if ctr_name.0 == "Type" {
+        return Some(Term::Typ { orig: ctr_orig });
+    } else if ctr_name.0 == "U60" {
+        return Some(Term::U60 { orig: ctr_orig });
+    } else {
+        return Some(Term::Ctr {
+            orig: ctr_orig,
+            name: ctr_name,
+            args: ctr_args.iter().rev().map(|x| (*x).clone()).collect(),
+        });
+    }
 }
 
 impl Adjust for Term {
-    fn adjust<'a>(&self, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
+    fn adjust<'a>(&self, rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
+        if let Some(new_term) = convert_apps_to_ctr(self) {
+            return new_term.adjust(rhs, state);
+        }
+
         match *self {
             Term::Typ { orig } => Ok(Term::Typ { orig }),
             Term::Var { ref orig, ref name } => {
                 let orig = *orig;
-                if state.rhs && state.vars.iter().find(|&x| x == name).is_none() {
+                if rhs && state.vars.iter().find(|&x| x == name).is_none() {
                     return Err(AdjustError {
                         orig,
                         kind: AdjustErrorKind::UnboundVariable {
                             name: name.to_string(),
                         },
                     });
-                } else if !state.rhs && state.vars.iter().find(|&x| x == name).is_some() {
+                } else if !rhs && state.vars.iter().find(|&x| x == name).is_some() {
                     return Err(AdjustError {
                         orig,
                         kind: AdjustErrorKind::RepeatedVariable,
                     });
-                } else if !state.rhs {
+                } else if !rhs {
                     state.vars.push(name.clone());
                 }
                 Ok(Term::Var {
@@ -124,9 +153,9 @@ impl Adjust for Term {
                 ref body,
             } => {
                 let orig = *orig;
-                let expr = Box::new(expr.adjust(state)?);
+                let expr = Box::new(expr.adjust(rhs, state)?);
                 state.vars.push(name.clone());
-                let body = Box::new(body.adjust(state)?);
+                let body = Box::new(body.adjust(rhs, state)?);
                 state.vars.pop();
                 Ok(Term::Let {
                     orig,
@@ -141,8 +170,8 @@ impl Adjust for Term {
                 ref tipo,
             } => {
                 let orig = *orig;
-                let expr = Box::new(expr.adjust(state)?);
-                let tipo = Box::new(tipo.adjust(state)?);
+                let expr = Box::new(expr.adjust(rhs, state)?);
+                let tipo = Box::new(tipo.adjust(rhs, state)?);
                 Ok(Term::Ann { orig, expr, tipo })
             }
             Term::Sub {
@@ -153,7 +182,7 @@ impl Adjust for Term {
                 ref expr,
             } => {
                 let orig = *orig;
-                let expr = Box::new(expr.adjust(state)?);
+                let expr = Box::new(expr.adjust(rhs, state)?);
                 match state.vars.iter().position(|x| x == name) {
                     None => {
                         return Err(AdjustError {
@@ -184,9 +213,9 @@ impl Adjust for Term {
                 ref body,
             } => {
                 let orig = *orig;
-                let tipo = Box::new(tipo.adjust(state)?);
+                let tipo = Box::new(tipo.adjust(rhs, state)?);
                 state.vars.push(name.clone());
-                let body = Box::new(body.adjust(state)?);
+                let body = Box::new(body.adjust(rhs, state)?);
                 state.vars.pop();
                 Ok(Term::All {
                     orig,
@@ -202,7 +231,7 @@ impl Adjust for Term {
             } => {
                 let orig = *orig;
                 state.vars.push(name.clone());
-                let body = Box::new(body.adjust(state)?);
+                let body = Box::new(body.adjust(rhs, state)?);
                 state.vars.pop();
                 Ok(Term::Lam {
                     orig,
@@ -216,8 +245,8 @@ impl Adjust for Term {
                 ref argm,
             } => {
                 let orig = *orig;
-                let func = Box::new(func.adjust(state)?);
-                let argm = Box::new(argm.adjust(state)?);
+                let func = Box::new(func.adjust(rhs, state)?);
+                let argm = Box::new(argm.adjust(rhs, state)?);
                 Ok(Term::App { orig, func, argm })
             }
             Term::Ctr {
@@ -230,21 +259,21 @@ impl Adjust for Term {
                     let mut new_args = Vec::new();
                     for arg in args {
                         // On lhs, switch holes for vars
-                        if let (false, Term::Hol { orig, numb: _ }) = (state.rhs, &**arg) {
+                        if let (false, Term::Hol { orig, numb: _ }) = (rhs, &**arg) {
                             let name = format!("x{}_", state.eras);
                             state.eras = state.eras + 1;
                             let arg = Box::new(Term::Var {
                                 orig: *orig,
                                 name: Ident(name),
                             });
-                            new_args.push(Box::new(arg.adjust(state)?));
+                            new_args.push(Box::new(arg.adjust(rhs, state)?));
                         } else {
-                            new_args.push(Box::new(arg.adjust(state)?));
+                            new_args.push(Box::new(arg.adjust(rhs, state)?));
                         }
                     }
                     let (hiddens, eraseds) = entry.count_implicits();
                     // Fill implicit arguments (on rhs)
-                    if state.rhs && args.len() == entry.args.len() - hiddens {
+                    if rhs && args.len() == entry.args.len() - hiddens {
                         new_args.reverse();
                         let mut aux_args = Vec::new();
                         for arg in &entry.args {
@@ -259,7 +288,7 @@ impl Adjust for Term {
                         new_args = aux_args;
                     }
                     // Fill erased arguments (on lhs)
-                    if !state.rhs && args.len() == entry.args.len() - eraseds {
+                    if !rhs && args.len() == entry.args.len() - eraseds {
                         new_args.reverse();
                         let mut aux_args = Vec::new();
                         for arg in &entry.args {
@@ -270,7 +299,7 @@ impl Adjust for Term {
                                     orig: orig,
                                     name: Ident(name),
                                 };
-                                aux_args.push(Box::new(arg.adjust(state)?));
+                                aux_args.push(Box::new(arg.adjust(rhs, state)?));
                             } else {
                                 aux_args.push(new_args.pop().unwrap());
                             }
@@ -334,8 +363,8 @@ impl Adjust for Term {
             } => {
                 let orig = *orig;
                 let oper = *oper;
-                let val0 = Box::new(val0.adjust(state)?);
-                let val1 = Box::new(val1.adjust(state)?);
+                let val0 = Box::new(val0.adjust(rhs, state)?);
+                let val1 = Box::new(val1.adjust(rhs, state)?);
                 Ok(Term::Op2 {
                     orig,
                     oper,
@@ -387,13 +416,143 @@ impl Adjust for Term {
                         }
                     }
 
-                    let result = Term::Ctr { orig, name: Qualified::new_raw(&tipo.to_string(), "match"), args };
+                    let result = Term::Ctr {
+                        orig,
+                        name: Ident::new_path(&tipo.to_string(), "match"),
+                        args,
+                    };
 
-                    result.adjust(state)
+                    result.adjust(rhs, state)
                 } else {
-                    Err(AdjustError { orig, kind: AdjustErrorKind::CantLoadType })
+                    Err(AdjustError {
+                        orig,
+                        kind: AdjustErrorKind::CantLoadType,
+                    })
                 }
             }
         }
+    }
+}
+
+impl Adjust for Rule {
+    fn adjust<'a>(&self, _rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
+        let name = self.name.clone();
+        let orig = self.orig;
+
+        // shouldn't panic, because we only parse rules after the type annotation
+        let entry = state.book.entrs.get(&self.name).expect("Untyped rule.");
+        let mut pats = Vec::new();
+
+        for pat in &self.pats {
+            if let Term::Hol { orig, numb: _ } = &**pat {
+                // On lhs, switch holes for vars
+                // TODO: This duplicates of adjust_term because the lhs of a rule is not a term
+                let name = Ident(format!("x{}_", state.eras));
+                state.eras = state.eras + 1;
+                let pat = Term::Var { orig: *orig, name };
+                pats.push(Box::new(pat.adjust(false, state)?));
+            } else {
+                pats.push(Box::new(pat.adjust(false, state)?));
+            }
+        }
+        // Fill erased arguments
+        let (_, eraseds) = entry.count_implicits();
+        if self.pats.len() == entry.args.len() - eraseds {
+            pats.reverse();
+            let mut aux_pats = Vec::new();
+            for arg in &entry.args {
+                if arg.eras {
+                    let name = Ident(format!("{}{}_", arg.name, state.eras));
+                    state.eras = state.eras + 1;
+                    let pat = Box::new(Term::Var { orig, name });
+                    aux_pats.push(Box::new(pat.adjust(false, state)?));
+                } else {
+                    aux_pats.push(pats.pop().unwrap());
+                }
+            }
+            pats = aux_pats;
+        }
+        if pats.len() != entry.args.len() {
+            return Err(AdjustError {
+                orig,
+                kind: AdjustErrorKind::IncorrectArity,
+            });
+        }
+        let body = Box::new(self.body.adjust(true, state)?);
+        return Ok(Rule {
+            orig,
+            name,
+            pats,
+            body,
+        });
+    }
+}
+
+impl Adjust for Argument {
+    fn adjust<'a>(&self, _rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
+        state.eras = 0;
+        let tipo = Box::new(self.tipo.adjust(true, state)?);
+        return Ok(Argument {
+            orig: self.orig,
+            hide: self.hide,
+            eras: self.eras,
+            name: self.name.clone(),
+            tipo,
+        });
+    }
+}
+
+impl Adjust for Entry {
+    fn adjust<'a>(&self, rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
+        let name = self.name.clone();
+        let kdln = self.kdln.clone();
+
+        let mut args = Vec::new();
+
+        state.vars = Vec::new();
+
+        for arg in &self.args {
+            args.push(Box::new(arg.adjust(rhs, state)?));
+            state.vars.push(arg.name.clone());
+        }
+
+        state.eras = 0;
+        let tipo = Box::new(self.tipo.adjust(true, state)?);
+
+        let mut rules = Vec::new();
+
+        for rule in &self.rules {
+            state.vars = Vec::new();
+            rules.push(Box::new(rule.adjust(rhs, state)?));
+        }
+        return Ok(Entry {
+            name,
+            kdln,
+            orig: self.orig,
+            args,
+            tipo,
+            rules,
+        });
+    }
+}
+
+impl Book {
+    pub fn adjust(&mut self) -> Result<Self, AdjustError> {
+        let mut names = Vec::new();
+        let mut entrs = HashMap::new();
+        let mut state = AdjustState::new(&self);
+
+        for name in &self.names {
+            let ident = Ident(name.clone());
+            let entry = self.entrs.get(&ident).unwrap();
+            names.push(name.clone());
+            entrs.insert(ident, Box::new(entry.adjust(false, &mut state)?));
+        }
+
+        return Ok(Book {
+            names,
+            entrs,
+            holes: state.holes,
+        });
     }
 }
