@@ -10,7 +10,7 @@ pub mod name;
 // Types of names.
 pub mod new_type;
 
-use crate::book::name::{Ident, Qualified};
+use crate::book::name::Ident;
 use crate::book::span::{FileOffset, Localized, Span};
 use crate::book::term::Term;
 
@@ -21,7 +21,7 @@ use std::fmt::{Display, Error, Formatter};
 #[derive(Clone, Debug)]
 pub struct Book {
     pub names: Vec<String>,
-    pub entrs: HashMap<Qualified, Box<Entry>>,
+    pub entrs: HashMap<Ident, Box<Entry>>,
     pub holes: u64,
 }
 
@@ -29,7 +29,7 @@ pub struct Book {
 // rules and a type.
 #[derive(Clone, Debug)]
 pub struct Entry {
-    pub name: Qualified,
+    pub name: Ident,
     pub orig: Span,
     pub kdln: Option<String>,
     pub args: Vec<Box<Argument>>,
@@ -40,7 +40,7 @@ pub struct Entry {
 #[derive(Clone, Debug)]
 pub struct Rule {
     pub orig: Span,
-    pub name: Qualified,
+    pub name: Ident,
     pub pats: Vec<Box<Term>>,
     pub body: Box<Term>,
 }
@@ -55,8 +55,8 @@ pub struct Argument {
 }
 
 impl Book {
-    pub fn set_origin_file(book: &mut Book, file: FileOffset) {
-        for entr in book.entrs.values_mut() {
+    pub fn set_origin_file(&mut self, file: FileOffset) {
+        for entr in self.entrs.values_mut() {
             entr.set_origin_file(file);
         }
     }
@@ -133,11 +133,7 @@ impl Display for Entry {
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for name in &self.names {
-            write!(
-                f,
-                "{}\n",
-                self.entrs.get(&Qualified::from_str(name)).unwrap()
-            )?;
+            write!(f, "{}\n", self.entrs.get(&Ident(name.clone())).unwrap())?;
         }
         Ok(())
     }

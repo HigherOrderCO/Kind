@@ -1,5 +1,5 @@
-use crate::book::{Argument, Entry};
 use crate::book::name::Ident;
+use crate::book::{Argument, Entry};
 
 // TODO: indexed types
 #[derive(Clone, Debug)]

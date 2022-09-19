@@ -4,7 +4,7 @@ pub mod new_type;
 
 pub mod utils;
 
-use crate::book::name::{Ident, Qualified};
+use crate::book::name::Ident;
 use crate::book::span::{ByteOffset, Span};
 use crate::book::term::Term;
 use crate::book::{Argument, Book, Entry, Rule};
@@ -27,7 +27,7 @@ pub fn parse_rule(
         state,
         Box::new(Rule {
             orig,
-            name: Qualified::from_str(&name),
+            name: Ident(name),
             pats,
             body,
         }),
@@ -81,14 +81,14 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         }
         let rules = vec![Box::new(Rule {
             orig: Span::Generated,
-            name: Qualified::from_str(&name.clone()),
+            name: Ident(name.clone()),
             pats,
             body,
         })];
         return Ok((
             state,
             Box::new(Entry {
-                name: Qualified::from_str(&name),
+                name: Ident(name),
                 kdln,
                 args,
                 tipo,
@@ -113,7 +113,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             }
         }
         let entry = Box::new(Entry {
-            name: Qualified::from_str(&name),
+            name: Ident(name),
             kdln,
             args,
             tipo,

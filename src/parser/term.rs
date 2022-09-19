@@ -1,6 +1,6 @@
 use hvm::parser;
 
-use crate::book::name::{Ident, Qualified};
+use crate::book::name::Ident;
 use crate::book::span::{ByteOffset, Span};
 use crate::book::term::{Operator, Term};
 use crate::parser::utils::{get_init_index, get_last_index, is_ctr_head};
@@ -87,13 +87,13 @@ pub fn parse_str(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             let orig = Span::new_off(init, last);
             let empty = Term::Ctr {
                 orig,
-                name: Qualified::new_raw("String", "nil"),
+                name: Ident::new_path("String", "nil"),
                 args: Vec::new(),
             };
 
             let list = Box::new(chars.iter().rfold(empty, |t, h| Term::Ctr {
                 orig,
-                name: Qualified::new_raw("String", "cons"),
+                name: Ident::new_path("String", "cons"),
                 args: vec![
                     Box::new(Term::Num {
                         orig,
@@ -329,7 +329,7 @@ pub fn parse_return_st(
                 Box::new(move |monad| {
                     Box::new(Term::Ctr {
                         orig: orig,
-                        name: Qualified::new_raw(monad, "pure"),
+                        name: Ident::new_path(monad, "pure"),
                         args: vec![term.clone()],
                     })
                 }),
@@ -363,7 +363,7 @@ pub fn parse_ask_named_st(
                 Box::new(move |monad| {
                     Box::new(Term::Ctr {
                         orig: orig,
-                        name: Qualified::new_raw(monad, "bind"),
+                        name: Ident::new_path(monad, "bind"),
                         args: vec![
                             acti.clone(),
                             Box::new(Term::Lam {
@@ -398,7 +398,7 @@ pub fn parse_ask_anon_st(
                 Box::new(move |monad| {
                     Box::new(Term::Ctr {
                         orig: orig,
-                        name: Qualified::new_raw(monad, "bind"),
+                        name: Ident::new_path(monad, "bind"),
                         args: vec![
                             acti.clone(),
                             Box::new(Term::Lam {
@@ -510,7 +510,7 @@ pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 state,
                 Box::new(Term::Mat {
                     orig,
-                    tipo: Qualified::from_str(&tipo),
+                    tipo: Ident(tipo),
                     name: Ident(name),
                     expr,
                     cses,
@@ -610,7 +610,7 @@ pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 state,
                 Box::new(Term::Ctr {
                     orig,
-                    name: Qualified::new_raw("Bool", "if"),
+                    name: Ident::new_path("Bool", "if"),
                     args: vec![moti, cond, if_t, if_f],
                 }),
             ))
@@ -697,12 +697,12 @@ pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             let orig = Span::new_off(init, last);
             let empty = Term::Ctr {
                 orig,
-                name: Qualified::new_raw("List", "nil"),
+                name: Ident::new_path("List", "nil"),
                 args: Vec::new(),
             };
             let list = Box::new(elems.iter().rfold(empty, |t, h| Term::Ctr {
                 orig,
-                name: Qualified::new_raw("List", "cons"),
+                name: Ident::new_path("List", "cons"),
                 args: vec![h.clone(), Box::new(t)],
             }));
             Ok((state, list))
@@ -725,7 +725,7 @@ pub fn parse_new(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 state,
                 Box::new(Term::Ctr {
                     orig,
-                    name: Qualified::new_raw("Sigma", "new"),
+                    name: Ident::new_path("Sigma", "new"),
                     args: vec![
                         Box::new(Term::Hol { orig, numb: 0 }),
                         Box::new(Term::Hol { orig, numb: 0 }),
@@ -762,7 +762,7 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 state,
                 Box::new(Term::Ctr {
                     orig,
-                    name: Qualified::from_str(&name),
+                    name: Ident(name),
                     args,
                 }),
             ))
@@ -890,7 +890,7 @@ pub fn parse_sig(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 state,
                 Box::new(Term::Ctr {
                     orig,
-                    name: Qualified::new_raw("", "Sigma"),
+                    name: Ident("Sigma".to_string()),
                     args: vec![
                         tipo,
                         Box::new(Term::Lam {

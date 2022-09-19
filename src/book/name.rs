@@ -6,12 +6,6 @@ pub struct EncodedName(u64);
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Ident(pub String);
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct Qualified {
-    pub path: Ident,
-    pub name: Ident,
-}
-
 impl EncodedName {
     pub fn u64_to_name(&self) -> String {
         let mut name = String::new();
@@ -32,7 +26,7 @@ impl EncodedName {
         name.chars().rev().collect()
     }
 
-    pub fn encode(name: &str) -> EncodedName {
+    pub fn from_string(name: &str) -> EncodedName {
         fn char_to_u64(chr: char) -> u64 {
             match chr {
                 '.' => 0,
@@ -55,58 +49,23 @@ impl EncodedName {
     }
 }
 
-impl Qualified {
-    #[inline]
-    pub fn new(path: String, name: String) -> Qualified {
-        Qualified {
-            path: Ident(path),
-            name: Ident(name),
-        }
-    }
-
-    #[inline]
-    pub fn new_raw(path: &str, name: &str) -> Qualified {
-        Qualified {
-            path: Ident(path.to_string()),
-            name: Ident(name.to_string()),
-        }
-    }
-
-    #[inline]
-    pub fn from_str(str: &str) -> Qualified {
-        let mut path = str
-            .split(".")
-            .map(|x| x.to_string())
-            .collect::<Vec<String>>();
-        let name = path.pop().unwrap_or("".to_string());
-        Qualified {
-            path: Ident(path.join(".")),
-            name: Ident(name),
-        }
-    }
-
-    pub fn to_string(&self) -> String {
-        format!("{}.{}", self.path, self.name)
-    }
-
-    pub fn encode(&self) -> EncodedName {
-        EncodedName::encode(&self.to_string())
-    }
-}
-
 impl Ident {
     pub fn encode(&self) -> EncodedName {
-        EncodedName::encode(&self.0)
+        EncodedName::from_string(&self.0)
     }
-}
 
-impl Display for Qualified {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{}.{}", self.path, self.name)
+    pub fn new_path(path: &str, name: &str) -> Ident {
+        Ident(format!("{}.{}", path, name))
     }
 }
 
 impl Display for Ident {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Display for EncodedName {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "{}", self.0)
     }

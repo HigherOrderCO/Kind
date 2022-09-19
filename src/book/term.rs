@@ -1,7 +1,7 @@
 // Module that describes terms and operators
 // of the language
 
-use crate::book::name::{Ident, Qualified};
+use crate::book::name::Ident;
 use crate::book::span::{Span, Localized, FileOffset};
 
 use std::ascii;
@@ -37,14 +37,14 @@ pub enum Term {
     Let { orig: Span, name: Ident, expr: Box<Term>, body: Box<Term> },
     Ann { orig: Span, expr: Box<Term>, tipo: Box<Term> },
     Sub { orig: Span, name: Ident, indx: u64, redx: u64, expr: Box<Term> },
-    Ctr { orig: Span, name: Qualified, args: Vec<Box<Term>> },
-    Fun { orig: Span, name: Qualified, args: Vec<Box<Term>> },
+    Ctr { orig: Span, name: Ident, args: Vec<Box<Term>> },
+    Fun { orig: Span, name: Ident, args: Vec<Box<Term>> },
     Hlp { orig: Span },
     U60 { orig: Span },
     Num { orig: Span, numb: u64 },
     Op2 { orig: Span, oper: Operator, val0: Box<Term>, val1: Box<Term> },
     Hol { orig: Span, numb: u64 },
-    Mat { orig: Span, tipo: Qualified, name: Ident, expr: Box<Term>, cses: Vec<(Ident,Box<Term>)>, moti: Box<Term> },
+    Mat { orig: Span, tipo: Ident, name: Ident, expr: Box<Term>, cses: Vec<(Ident,Box<Term>)>, moti: Box<Term> },
 }
 
 impl Term {
@@ -52,8 +52,8 @@ impl Term {
         let mut text = String::new();
         let mut term = self;
 
-        let string_nil = Qualified::from_str("String.nil");
-        let string_cons = Qualified::from_str("String.cons");
+        let string_nil = Ident::new_path("String", "nil");
+        let string_cons = Ident::new_path("String", "cons");
 
         loop {
             if let Term::Ctr { name, args, .. } = term {
