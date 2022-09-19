@@ -319,7 +319,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                 let new_entry_kdln = entry
                     .kdln
                     .clone()
-                    .and_then(|kdln| Some(format!("{}{}_", kdln, n)));
+                    .map(|kdln| format!("{}{}_", kdln, n));
                 let mut new_entry_rules: Vec<CompRule> = Vec::new();
                 // Rewrite the old rule to be flat and point to the new entry
                 let mut old_rule_pats: Vec<Box<CompTerm>> = Vec::new();
@@ -396,7 +396,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                 // For each unique matching rule, creates a new flattening rule for the entry.
                 // Ex: (Fun (Ctr1 (Ctr2))) and (Fun (Ctr1 (Ctr3))) will both flatten to (Fun (Ctr1 .0)) and can be merged
                 for (j, other) in entry.rules.iter().enumerate().skip(i) {
-                    let (compatible, same_shape) = matches_together(&rule, &other);
+                    let (compatible, same_shape) = matches_together(rule, other);
                     if compatible {
                         // (Foo a     (B x P) (C y0 y1)) = F
                         // (Foo (A k) (B x Q) y        ) = G
@@ -471,7 +471,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                                         name: other_pat_name,
                                     },
                                 ) => {
-                                    subst(&mut new_rule_body, other_pat_name, &rule_pat);
+                                    subst(&mut new_rule_body, other_pat_name, rule_pat);
                                 }
                                 _ => {
                                     panic!("Internal error. Please report."); // not possible since it matches
@@ -486,7 +486,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                         new_entry_rules.push(new_rule);
                     }
                 }
-                assert!(new_entry_rules.len() > 0); // There's at least one rule, since rules always match with themselves
+                assert!(!new_entry_rules.is_empty()); // There's at least one rule, since rules always match with themselves
                 let new_entry_args = (0..new_entry_rules[0].pats.len())
                     .map(|n| format!("x{}", n))
                     .collect();
@@ -572,11 +572,11 @@ pub fn subst(term: &mut CompTerm, sub_name: &str, value: &CompTerm) {
 pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
     match term {
         Term::Typ { .. } => {
-            return Box::new(CompTerm::Nil);
+            Box::new(CompTerm::Nil)
         }
         Term::Var { orig: _, name } => {
             let name = name.0.clone();
-            return Box::new(CompTerm::Var { name });
+            Box::new(CompTerm::Var { name })
         }
         Term::Lam {
             orig: _,
@@ -585,7 +585,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
         } => {
             let name = name.0.clone();
             let body = erase(book, body);
-            return Box::new(CompTerm::Lam { name, body });
+            Box::new(CompTerm::Lam { name, body })
         }
         Term::App {
             orig: _,
@@ -594,7 +594,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
         } => {
             let func = erase(book, func);
             let argm = erase(book, argm);
-            return Box::new(CompTerm::App { func, argm });
+            Box::new(CompTerm::App { func, argm })
         }
         Term::All {
             orig: _,
@@ -602,7 +602,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             tipo: _,
             body: _,
         } => {
-            return Box::new(CompTerm::Nil);
+            Box::new(CompTerm::Nil)
         }
         Term::Let {
             orig: _,
@@ -613,14 +613,14 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             let name = name.0.clone();
             let expr = erase(book, expr);
             let body = erase(book, body);
-            return Box::new(CompTerm::Let { name, expr, body });
+            Box::new(CompTerm::Let { name, expr, body })
         }
         Term::Ann {
             orig: _,
             expr,
             tipo: _,
         } => {
-            return erase(book, expr);
+            erase(book, expr)
         }
         Term::Sub {
             orig: _,
@@ -629,7 +629,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             indx: _,
             redx: _,
         } => {
-            return erase(book, expr);
+            erase(book, expr)
         }
         Term::Ctr {
             orig: _,
@@ -644,7 +644,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
                     args.push(erase(book, arg));
                 }
             }
-            return Box::new(CompTerm::Ctr { name, args });
+            Box::new(CompTerm::Ctr { name, args })
         }
         Term::Fun {
             orig: _,
@@ -659,17 +659,17 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
                     args.push(erase(book, arg));
                 }
             }
-            return Box::new(CompTerm::Fun { name, args });
+            Box::new(CompTerm::Fun { name, args })
         }
         Term::Hlp { orig: _ } => {
-            return Box::new(CompTerm::Nil);
+            Box::new(CompTerm::Nil)
         }
         Term::U60 { orig: _ } => {
-            return Box::new(CompTerm::Nil);
+            Box::new(CompTerm::Nil)
         }
         Term::Num { orig: _, numb } => {
             let numb = *numb as u128;
-            return Box::new(CompTerm::Num { numb });
+            Box::new(CompTerm::Num { numb })
         }
         Term::Op2 {
             orig: _,
@@ -677,16 +677,16 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             val0,
             val1,
         } => {
-            let oper = oper.clone();
+            let oper = *oper;
             let val0 = erase(book, val0);
             let val1 = erase(book, val1);
-            return Box::new(CompTerm::Op2 { oper, val0, val1 });
+            Box::new(CompTerm::Op2 { oper, val0, val1 })
         }
         Term::Hol { orig: _, numb: _ } => {
-            return Box::new(CompTerm::Nil);
+            Box::new(CompTerm::Nil)
         }
         Term::Mat { .. } => {
-            return Box::new(CompTerm::Nil);
+            Box::new(CompTerm::Nil)
         }
     }
 }
@@ -735,14 +735,14 @@ pub fn count_uses(term: &CompTerm, count_name: &str) -> usize {
             for arg in args {
                 sum += count_uses(arg, count_name);
             }
-            return sum;
+            sum
         }
         CompTerm::Fun { name: _, args } => {
             let mut sum = 0;
             for arg in args {
                 sum += count_uses(arg, count_name);
             }
-            return sum;
+            sum
         }
         CompTerm::Op2 {
             oper: _,
@@ -842,9 +842,9 @@ pub fn linearize_rule(rule: &mut CompRule) {
         fn fresh_name(fresh: &mut u64) -> String {
             let name = format!("_{}", fresh);
             *fresh += 1;
-            return name;
+            name
         }
-        let uses = count_uses(&body, name);
+        let uses = count_uses(body, name);
         if uses > 1 {
             let mut names = vec![];
             for _ in 0..(uses - 1) * 2 {
@@ -857,7 +857,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
             }
             rename_clones(body, name, &mut renames);
             for i in (0..uses - 1).rev() {
-                let nam0 = names[i * 2 + 0].clone();
+                let nam0 = names[i * 2].clone();
                 let nam1 = names[i * 2 + 1].clone();
                 let expr = Box::new(CompTerm::Var {
                     name: if i == 0 {
@@ -880,7 +880,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
         } else if uses == 0 {
             *name = String::from("~")
         }
-        return uses;
+        uses
     }
 
     // Linearies an erased term, replacing cloned variables by dups
@@ -1021,8 +1021,7 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
                         args,
                     }
                 } else {
-                    let err = format!("Can't compile pattern match on U120 to kindelia");
-                    return Err(err);
+                    return Err("Can't compile pattern match on U120 to kindelia".to_string());
                 }
             } else {
                 let args = args
@@ -1094,7 +1093,7 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
             let val0 = convert_u120_term(val0, rhs)?;
             let val1 = convert_u120_term(val1, rhs)?;
             CompTerm::Op2 {
-                oper: oper.clone(),
+                oper: *oper,
                 val0,
                 val1,
             }
@@ -1108,8 +1107,8 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
 
 // Converts a U120 function name to the corresponding primitive operation
 // None if the name is not of an operation
-pub fn u120_to_oper(name: &String) -> Option<Operator> {
-    match name.as_str() {
+pub fn u120_to_oper(name: &str) -> Option<Operator> {
+    match name {
         "U120.add" => Some(Operator::Add),
         "U120.sub" => Some(Operator::Sub),
         "U120.mul" => Some(Operator::Mul),

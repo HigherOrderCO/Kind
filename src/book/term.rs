@@ -69,7 +69,7 @@ impl Term {
                     } else {
                         return None;
                     }
-                } else if *name == string_nil && args.len() == 0 {
+                } else if *name == string_nil && args.is_empty() {
                     return Some(text);
                 }
             }

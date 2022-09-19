@@ -8,7 +8,7 @@ use std::rc::Rc;
 // TODO: Remove this from the adjust layer. I think that we need to move it
 // to the driver.
 fn load_newtype(name: &Ident) -> Result<Box<NewType>, String> {
-    let path = format!("{}/_.type", name.to_string().replace(".", "/"));
+    let path = format!("{}/_.type", name.to_string().replace('.', "/"));
     let newcode = match std::fs::read_to_string(&path) {
         Err(_) => {
             return Err(format!("File not found: '{}'.", path));
@@ -21,7 +21,7 @@ fn load_newtype(name: &Ident) -> Result<Box<NewType>, String> {
         }
         Ok(book) => book,
     };
-    return Ok(newtype);
+    Ok(newtype)
 }
 
 pub fn load_newtype_cached(
