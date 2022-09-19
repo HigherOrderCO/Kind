@@ -23,7 +23,7 @@ pub fn parse_rule(
     let (state, last) = get_last_index(state)?;
     let orig = Span::new_off(init, last);
     let (state, body) = parse_apps(state)?;
-    return Ok((
+    Ok((
         state,
         Box::new(Rule {
             orig,
@@ -31,7 +31,7 @@ pub fn parse_rule(
             pats,
             body,
         }),
-    ));
+    ))
 }
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
@@ -48,7 +48,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         Box::new(|state| {
             let (state, end_0) = parser::dry(Box::new(|state| parser::text(":", state)), state)?;
             let (state, end_1) = parser::dry(Box::new(|state| parser::text("{", state)), state)?;
-            return Ok((state, end_0 || end_1));
+            Ok((state, end_0 || end_1))
         }),
         Box::new(parse_argument),
         state,
@@ -85,7 +85,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             pats,
             body,
         })];
-        return Ok((
+        Ok((
             state,
             Box::new(Entry {
                 name: Ident(name),
@@ -95,14 +95,14 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
                 rules,
                 orig: Span::Generated,
             }),
-        ));
+        ))
     } else {
         let mut rules = Vec::new();
         let rule_prefix = &format!("{} ", name);
         let mut state = state;
         loop {
             let (loop_state, init) = get_init_index(state)?;
-            let (loop_state, cont) = parser::text(&rule_prefix, loop_state)?;
+            let (loop_state, cont) = parser::text(rule_prefix, loop_state)?;
             if cont {
                 let (loop_state, rule) = parse_rule(loop_state, name.clone(), init)?;
                 rules.push(rule);
@@ -120,7 +120,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             rules,
             orig: Span::Generated,
         });
-        return Ok((state, entry));
+        Ok((state, entry))
     }
 }
 
@@ -148,7 +148,7 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
     let eras = if hide { !keep } else { eras };
     let (state, last) = get_last_index(state)?;
     let orig = Span::new_off(init, last);
-    return Ok((
+    Ok((
         state,
         Box::new(Argument {
             hide,
@@ -157,7 +157,7 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
             name: Ident(name),
             tipo,
         }),
-    ));
+    ))
 }
 
 pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
@@ -175,14 +175,14 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
             );
         }
     }
-    return Ok((
+    Ok((
         state,
         Box::new(Book {
             holes: 0,
             names,
             entrs,
         }),
-    ));
+    ))
 }
 
 pub fn read_book(code: &str) -> Result<Box<Book>, String> {

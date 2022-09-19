@@ -12,7 +12,7 @@ pub const KDL_NAME_LEN: usize = 12;
 pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Result<String, String> {
     let term = match term {
         CompTerm::Var { name } => {
-            format!("{}", name)
+            name.clone()
         }
         CompTerm::Lam { name, body } => {
             let body = to_kdl_term(kdl_names, body)?;
@@ -39,7 +39,7 @@ pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Resu
             format!("let {} = {}; {}", name, expr, body)
         }
         CompTerm::Ctr { name, args } => {
-            let kdl_name = kdl_names.get(name).expect(&format!("{}", name));
+            let kdl_name = kdl_names.get(name).unwrap_or_else(|| panic!("{}", name));
             let args = args
                 .iter()
                 .map(|x| to_kdl_term(kdl_names, x))
@@ -48,7 +48,7 @@ pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Resu
             format!("{{{}{}}}", kdl_name, args)
         }
         CompTerm::Fun { name, args } => {
-            let kdl_name = kdl_names.get(name).expect(&format!("{}", name));
+            let kdl_name = kdl_names.get(name).unwrap_or_else(|| panic!("{}", name));
             let args = args
                 .iter()
                 .map(|x| to_kdl_term(kdl_names, x))
@@ -80,7 +80,7 @@ pub fn to_kdl_rule(
     let kdl_name = kdl_names.get(name).unwrap();
     let mut pats = vec![]; // stringified pattern args
     for pat in rule.pats.iter() {
-        let pat = to_kdl_term(kdl_names, &pat)?;
+        let pat = to_kdl_term(kdl_names, pat)?;
         pats.push(" ".to_string());
         pats.push(pat);
     }
@@ -199,7 +199,7 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
             let mut rng = rand::thread_rng();
             let rnd_chrs = (0..n_rnd_chrs)
                 .map(|_| rng.gen_range(0..63))
-                .map(|n| encode_base64(n))
+                .map(encode_base64)
                 .collect::<String>();
             format!("{}{}", fun_cut, rnd_chrs)
         } else {

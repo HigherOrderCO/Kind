@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Error, Formatter};
 
 // A book is a collection of entries.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Book {
     pub names: Vec<String>,
     pub entrs: HashMap<Ident, Box<Entry>>,
@@ -60,14 +60,6 @@ impl Book {
             entr.set_origin_file(file);
         }
     }
-
-    pub fn new() -> Book {
-        Book {
-            names: vec![],
-            entrs: HashMap::new(),
-            holes: 0,
-        }
-    }
 }
 
 impl Entry {
@@ -76,10 +68,10 @@ impl Entry {
         let mut eraseds = 0;
         for arg in &self.args {
             if arg.hide {
-                hiddens = hiddens + 1;
+                hiddens += 1;
             }
             if arg.eras {
-                eraseds = eraseds + 1;
+                eraseds += 1;
             }
         }
         (hiddens, eraseds)
@@ -133,7 +125,7 @@ impl Display for Entry {
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for name in &self.names {
-            write!(f, "{}\n", self.entrs.get(&Ident(name.clone())).unwrap())?;
+            writeln!(f, "{}", self.entrs.get(&Ident(name.clone())).unwrap())?;
         }
         Ok(())
     }

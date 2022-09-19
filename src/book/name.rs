@@ -21,7 +21,7 @@ impl EncodedName {
                 64.. => panic!("impossible character value"),
             };
             name.push(chr);
-            num = num / 64;
+            num /= 64;
         }
         name.chars().rev().collect()
     }
@@ -45,7 +45,7 @@ impl EncodedName {
             }
         }
 
-        return EncodedName(num);
+        EncodedName(num)
     }
 }
 

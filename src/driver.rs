@@ -41,10 +41,10 @@ pub fn readback_string(rt: &hvm::Runtime, host: u64) -> String {
         panic!("Invalid output: {} {}", hvm::get_tag(term), rt.show(host));
     }
 
-    return text;
+    text
 }
 
-fn inject_highlights(file: &Vec<File>, target: &str) -> String {
+fn inject_highlights(file: &[File], target: &str) -> String {
     let mut code = String::new();
     let mut cout = target;
     // Replaces file ids by names
@@ -65,7 +65,7 @@ fn inject_highlights(file: &Vec<File>, target: &str) -> String {
         {
             let range_text = &cout[init_range_index + 4..last_range_index];
             let range_text = range_text
-                .split(":")
+                .split(':')
                 .map(|x| x.parse::<u64>().unwrap())
                 .collect::<Vec<u64>>();
             let range_file = range_text[0] as usize;
@@ -85,16 +85,16 @@ fn inject_highlights(file: &Vec<File>, target: &str) -> String {
         }
     }
     code.push_str(cout);
-    return code;
+    code
 }
 
 // Generates a .hvm checker for a Book
 pub fn gen_checker(book: &Book) -> String {
     // Compile the Kind2 file to HVM checker
-    let base_check_code = to_checker_book(&book);
+    let base_check_code = to_checker_book(book);
     let mut check_code = CHECKER_HVM.to_string();
     check_code.push_str(&base_check_code);
-    return check_code;
+    check_code
 }
 
 pub fn run_with_hvm(code: &str, main: &str, read_string: bool) -> Result<RunResult, String> {
@@ -102,14 +102,14 @@ pub fn run_with_hvm(code: &str, main: &str, read_string: bool) -> Result<RunResu
     let main = rt.alloc_code(main)?;
     rt.run_io(main);
     rt.normalize(main);
-    return Ok(RunResult {
+    Ok(RunResult {
         output: if read_string {
             readback_string(&rt, main)
         } else {
             rt.show(main)
         },
         rewrites: rt.get_rewrites(),
-    });
+    })
 }
 
 pub fn cmd_to_hvm(path: &str) -> Result<(), String> {
@@ -159,7 +159,7 @@ pub fn cmd_derive(path: &str) -> Result<(), String> {
         save_derived(path, &new_type::derive_ctr(&newtype, i));
     }
     save_derived(path, &new_type::derive_match(&newtype));
-    return Ok(());
+    Ok(())
 }
 
 pub fn cmd_check_all(path: &str) -> Result<(), String> {

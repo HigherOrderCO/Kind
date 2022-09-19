@@ -19,7 +19,7 @@ impl Load {
     pub fn new_empty() -> Load {
         Load {
             file: Vec::new(),
-            book: Book::new(),
+            book: Book::default(),
         }
     }
 }
@@ -30,8 +30,8 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
         if name.ends_with(".kind2") {
             path = name.to_string();
         } else {
-            let inside_path = format!("{}/_.kind2", &name.replace(".", "/")); // path ending with 'Name/_.kind'
-            let normal_path = format!("{}.kind2", &name.replace(".", "/")); // path ending with 'Name.kind'
+            let inside_path = format!("{}/_.kind2", &name.replace('.', "/")); // path ending with 'Name/_.kind'
+            let normal_path = format!("{}.kind2", &name.replace('.', "/")); // path ending with 'Name.kind'
             if std::path::Path::new(&inside_path).is_file() {
                 if std::path::Path::new(&normal_path).is_file() {
                     return Err(format!("The following files can't exist simultaneously:\n- {}\n- {}\nPlease delete one and try again.", inside_path, normal_path));
@@ -59,7 +59,7 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
         new_book.set_origin_file(FileOffset(load.file.len() as u32));
 
         load.file.push(File {
-            path: path.clone(),
+            path,
             code: newcode,
         });
         for name in &new_book.names {
@@ -78,7 +78,7 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
             load_entry(&unbound.0, load)?;
         }
     }
-    return Ok(());
+    Ok(())
 }
 
 pub fn load(name: &str) -> Result<Load, String> {
@@ -120,5 +120,5 @@ pub fn load(name: &str) -> Result<Load, String> {
         }
     };
 
-    return Ok(load);
+    Ok(load)
 }

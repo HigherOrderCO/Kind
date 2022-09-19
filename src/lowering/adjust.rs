@@ -58,7 +58,7 @@ pub trait Adjust {
     where
         Self: Sized;
 
-    fn adjust_with_book<'a>(&self, book: &'a Book) -> Result<Self, AdjustError>
+    fn adjust_with_book(&self, book: &Book) -> Result<Self, AdjustError>
     where
         Self: Sized,
     {
@@ -94,7 +94,7 @@ fn convert_apps_to_ctr(term: &Term) -> Option<Term> {
                 term = func;
             }
             Term::Var { ref name, .. } => {
-                if !name.0.chars().nth(0).unwrap_or(' ').is_uppercase() {
+                if !name.0.chars().next().unwrap_or(' ').is_uppercase() {
                     return None;
                 } else {
                     ctr_name = name.clone();
@@ -107,15 +107,15 @@ fn convert_apps_to_ctr(term: &Term) -> Option<Term> {
         }
     }
     if ctr_name.0 == "Type" {
-        return Some(Term::Typ { orig: ctr_orig });
+        Some(Term::Typ { orig: ctr_orig })
     } else if ctr_name.0 == "U60" {
-        return Some(Term::U60 { orig: ctr_orig });
+        Some(Term::U60 { orig: ctr_orig })
     } else {
-        return Some(Term::Ctr {
+        Some(Term::Ctr {
             orig: ctr_orig,
             name: ctr_name,
             args: ctr_args.iter().rev().map(|x| (*x).clone()).collect(),
-        });
+        })
     }
 }
 
@@ -129,14 +129,14 @@ impl Adjust for Term {
             Term::Typ { orig } => Ok(Term::Typ { orig }),
             Term::Var { ref orig, ref name } => {
                 let orig = *orig;
-                if rhs && state.vars.iter().find(|&x| x == name).is_none() {
+                if rhs && !state.vars.iter().any(|x| x == name) {
                     return Err(AdjustError {
                         orig,
                         kind: AdjustErrorKind::UnboundVariable {
                             name: name.to_string(),
                         },
                     });
-                } else if !rhs && state.vars.iter().find(|&x| x == name).is_some() {
+                } else if !rhs && state.vars.iter().any(|x| x == name) {
                     return Err(AdjustError {
                         orig,
                         kind: AdjustErrorKind::RepeatedVariable,
@@ -188,12 +188,12 @@ impl Adjust for Term {
                 let expr = Box::new(expr.adjust(rhs, state)?);
                 match state.vars.iter().position(|x| x == name) {
                     None => {
-                        return Err(AdjustError {
+                        Err(AdjustError {
                             orig,
                             kind: AdjustErrorKind::UnboundVariable {
                                 name: name.to_string(),
                             },
-                        });
+                        })
                     }
                     Some(indx) => {
                         let name = name.clone();
@@ -264,7 +264,7 @@ impl Adjust for Term {
                         // On lhs, switch holes for vars
                         if let (false, Term::Hol { orig, numb: _ }) = (rhs, &**arg) {
                             let name = format!("x{}_", state.eras);
-                            state.eras = state.eras + 1;
+                            state.eras += 1;
                             let arg = Box::new(Term::Var {
                                 orig: *orig,
                                 name: Ident(name),
@@ -282,7 +282,7 @@ impl Adjust for Term {
                         for arg in &entry.args {
                             if arg.hide {
                                 let numb = state.holes;
-                                state.holes = state.holes + 1;
+                                state.holes += 1;
                                 aux_args.push(Box::new(Term::Hol { orig, numb }));
                             } else {
                                 aux_args.push(new_args.pop().unwrap());
@@ -297,9 +297,9 @@ impl Adjust for Term {
                         for arg in &entry.args {
                             if arg.eras {
                                 let name = format!("{}{}_", arg.name, state.eras);
-                                state.eras = state.eras + 1;
+                                state.eras += 1;
                                 let arg = Term::Var {
-                                    orig: orig,
+                                    orig,
                                     name: Ident(name),
                                 };
                                 aux_args.push(Box::new(arg.adjust(rhs, state)?));
@@ -314,7 +314,7 @@ impl Adjust for Term {
                             orig,
                             kind: AdjustErrorKind::IncorrectArity,
                         })
-                    } else if entry.rules.len() > 0 {
+                    } else if !entry.rules.is_empty() {
                         Ok(Term::Fun {
                             orig,
                             name: name.clone(),
@@ -328,12 +328,12 @@ impl Adjust for Term {
                         })
                     }
                 } else {
-                    return Err(AdjustError {
+                    Err(AdjustError {
                         orig,
                         kind: AdjustErrorKind::UnboundVariable {
                             name: name.to_string(),
                         },
-                    });
+                    })
                 }
             }
             Term::Fun { .. } => {
@@ -342,7 +342,7 @@ impl Adjust for Term {
             Term::Hol { ref orig, numb: _ } => {
                 let orig = *orig;
                 let numb = state.holes;
-                state.holes = state.holes + 1;
+                state.holes += 1;
                 Ok(Term::Hol { orig, numb })
             }
             Term::Hlp { ref orig } => {
@@ -451,7 +451,7 @@ impl Adjust for Rule {
                 // On lhs, switch holes for vars
                 // TODO: This duplicates of adjust_term because the lhs of a rule is not a term
                 let name = Ident(format!("x{}_", state.eras));
-                state.eras = state.eras + 1;
+                state.eras += 1;
                 let pat = Term::Var { orig: *orig, name };
                 pats.push(Box::new(pat.adjust(false, state)?));
             } else {
@@ -466,7 +466,7 @@ impl Adjust for Rule {
             for arg in &entry.args {
                 if arg.eras {
                     let name = Ident(format!("{}{}_", arg.name, state.eras));
-                    state.eras = state.eras + 1;
+                    state.eras += 1;
                     let pat = Box::new(Term::Var { orig, name });
                     aux_pats.push(Box::new(pat.adjust(false, state)?));
                 } else {
@@ -482,12 +482,12 @@ impl Adjust for Rule {
             });
         }
         let body = Box::new(self.body.adjust(true, state)?);
-        return Ok(Rule {
+        Ok(Rule {
             orig,
             name,
             pats,
             body,
-        });
+        })
     }
 }
 
@@ -495,13 +495,13 @@ impl Adjust for Argument {
     fn adjust<'a>(&self, _rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
         state.eras = 0;
         let tipo = Box::new(self.tipo.adjust(true, state)?);
-        return Ok(Argument {
+        Ok(Argument {
             orig: self.orig,
             hide: self.hide,
             eras: self.eras,
             name: self.name.clone(),
             tipo,
-        });
+        })
     }
 }
 
@@ -528,14 +528,14 @@ impl Adjust for Entry {
             state.vars = Vec::new();
             rules.push(Box::new(rule.adjust(rhs, state)?));
         }
-        return Ok(Entry {
+        Ok(Entry {
             name,
             kdln,
             orig: self.orig,
             args,
             tipo,
             rules,
-        });
+        })
     }
 }
 
@@ -543,7 +543,7 @@ impl Book {
     pub fn adjust(&mut self) -> Result<Self, AdjustError> {
         let mut names = Vec::new();
         let mut entrs = HashMap::new();
-        let mut state = AdjustState::new(&self);
+        let mut state = AdjustState::new(self);
 
         for name in &self.names {
             let ident = Ident(name.clone());
@@ -552,10 +552,10 @@ impl Book {
             entrs.insert(ident, Box::new(entry.adjust(false, &mut state)?));
         }
 
-        return Ok(Book {
+        Ok(Book {
             names,
             entrs,
             holes: state.holes,
-        });
+        })
     }
 }

@@ -10,10 +10,10 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
     }
     match term {
         Term::Typ { .. } => {
-            format!("Type")
+            "Type".to_string()
         }
         Term::Var { orig: _, name } => {
-            format!("{}", name)
+            name.to_string()
         }
         Term::Lam {
             orig: _,
@@ -39,7 +39,7 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             body,
         } => {
             let _body = to_hvm_term(book, body);
-            format!("0")
+            "0".to_string()
         }
         Term::Let {
             orig: _,
@@ -56,8 +56,7 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             expr,
             tipo: _,
         } => {
-            let expr = to_hvm_term(book, expr);
-            format!("{}", expr)
+            to_hvm_term(book, expr)
         }
         Term::Sub {
             orig: _,
@@ -66,8 +65,7 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             indx: _,
             redx: _,
         } => {
-            let expr = to_hvm_term(book, expr);
-            format!("{}", expr)
+            to_hvm_term(book, expr)
         }
         Term::Ctr {
             orig: _,
@@ -110,10 +108,10 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             )
         }
         Term::Hlp { orig: _ } => {
-            format!("0")
+            "0".to_string()
         }
         Term::U60 { orig: _ } => {
-            format!("0")
+            "0".to_string()
         }
         Term::Num { orig: _, numb } => {
             format!("{}", numb)
@@ -129,7 +127,7 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             format!("({} {} {})", oper, val0, val1)
         }
         Term::Hol { orig: _, numb: _ } => {
-            format!("_")
+            "_".to_string()
         }
         Term::Mat { .. } => {
             panic!("Internal error."); // removed after adjust()
@@ -139,22 +137,22 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
 
 pub fn to_hvm_oper(oper: &Operator) -> String {
     match oper {
-        Operator::Add => format!("+"),
-        Operator::Sub => format!("-"),
-        Operator::Mul => format!("*"),
-        Operator::Div => format!("/"),
-        Operator::Mod => format!("%"),
-        Operator::And => format!("&"),
-        Operator::Or => format!("|"),
-        Operator::Xor => format!("^"),
-        Operator::Shl => format!("<<"),
-        Operator::Shr => format!(">>"),
-        Operator::Ltn => format!("<"),
-        Operator::Lte => format!("<="),
-        Operator::Eql => format!("=="),
-        Operator::Gte => format!(">="),
-        Operator::Gtn => format!(">"),
-        Operator::Neq => format!("!="),
+        Operator::Add => "+".to_string(),
+        Operator::Sub => "-".to_string(),
+        Operator::Mul => "*".to_string(),
+        Operator::Div => "/".to_string(),
+        Operator::Mod => "%".to_string(),
+        Operator::And => "&".to_string(),
+        Operator::Or =>  "|".to_string(),
+        Operator::Xor => "^".to_string(),
+        Operator::Shl => "<<".to_string(),
+        Operator::Shr => ">>".to_string(),
+        Operator::Ltn => "<".to_string(),
+        Operator::Lte => "<=".to_string(),
+        Operator::Eql => "==".to_string(),
+        Operator::Gte => ">=".to_string(),
+        Operator::Gtn => ">".to_string(),
+        Operator::Neq => "!=".to_string(),
     }
 }
 
@@ -191,7 +189,7 @@ pub fn to_hvm_entry(book: &Book, entry: &Entry) -> String {
             &arg.tipo
         ));
     }
-    if entry.rules.len() > 0 {
+    if !entry.rules.is_empty() {
         let mut rules = vec![];
         for rule in &entry.rules {
             rules.push(format!("\n{}", to_hvm_rule(book, rule)));
@@ -204,7 +202,7 @@ pub fn to_hvm_entry(book: &Book, entry: &Entry) -> String {
             rules.join("")
         );
     }
-    return "".to_string();
+    "".to_string()
 }
 
 pub fn to_hvm_book(book: &Book) -> String {

@@ -149,7 +149,7 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
             break;
         }
     }
-    return Ok((state, term));
+    Ok((state, term))
 }
 
 pub fn parse_ann(
@@ -165,7 +165,7 @@ pub fn parse_ann(
                 state,
                 Box::new(move |init, expr| {
                     let orig = Span::new_off(init, last);
-                    let expr = expr.clone();
+                    let expr = expr;
                     let tipo = tipo.clone();
                     Box::new(Term::Ann { orig, expr, tipo })
                 }),
@@ -264,7 +264,7 @@ pub fn parse_sub(
                         let orig = Span::new_off(init, last);
                         let name = name.clone();
                         let indx = 0;
-                        let expr = expr.clone();
+                        let expr = expr;
                         Box::new(Term::Sub {
                             orig,
                             name: Ident(name),
@@ -324,16 +324,16 @@ pub fn parse_return_st(
             let (state, term) = parse_apps(state)?;
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
-            return Ok((
+            Ok((
                 state,
                 Box::new(move |monad| {
                     Box::new(Term::Ctr {
-                        orig: orig,
+                        orig,
                         name: Ident::new_path(monad, "pure"),
                         args: vec![term.clone()],
                     })
                 }),
-            ));
+            ))
         }),
         state,
     );
@@ -342,12 +342,12 @@ pub fn parse_return_st(
 pub fn parse_ask_named_st(
     state: parser::State,
 ) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
-    return parser::guard(
+    parser::guard(
         Box::new(|state| {
             let (state, all0) = parser::text("ask ", state)?;
             let (state, name) = parser::name(state)?;
             let (state, all1) = parser::text("=", state)?;
-            Ok((state, all0 && name.len() > 0 && all1))
+            Ok((state, all0 && !name.is_empty() && all1))
         }),
         Box::new(move |state| {
             let (state, init) = get_init_index(state)?;
@@ -358,11 +358,11 @@ pub fn parse_ask_named_st(
             let (state, body) = parse_term_st(state)?;
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
-            return Ok((
+            Ok((
                 state,
                 Box::new(move |monad| {
                     Box::new(Term::Ctr {
-                        orig: orig,
+                        orig,
                         name: Ident::new_path(monad, "bind"),
                         args: vec![
                             acti.clone(),
@@ -374,16 +374,16 @@ pub fn parse_ask_named_st(
                         ],
                     })
                 }),
-            ));
+            ))
         }),
         state,
-    );
+    )
 }
 
 pub fn parse_ask_anon_st(
     state: parser::State,
 ) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
-    return parser::guard(
+    parser::guard(
         parser::text_parser("ask "),
         Box::new(move |state| {
             let (state, init) = get_init_index(state)?;
@@ -393,11 +393,11 @@ pub fn parse_ask_anon_st(
             let (state, last) = get_last_index(state)?;
             let name = "_".to_string();
             let orig = Span::new_off(init, last);
-            return Ok((
+            Ok((
                 state,
                 Box::new(move |monad| {
                     Box::new(Term::Ctr {
-                        orig: orig,
+                        orig,
                         name: Ident::new_path(monad, "bind"),
                         args: vec![
                             acti.clone(),
@@ -409,10 +409,10 @@ pub fn parse_ask_anon_st(
                         ],
                     })
                 }),
-            ));
+            ))
         }),
         state,
-    );
+    )
 }
 
 pub fn parse_term_st(state: parser::State) -> parser::Answer<Box<dyn Fn(&str) -> Box<Term>>> {
@@ -436,7 +436,7 @@ pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
     let (state, init) = get_init_index(state)?;
     let (state, prefix) = parse_term_prefix(state)?;
     let (state, suffix) = parse_term_suffix(state)?;
-    return Ok((state, suffix(init, prefix)));
+    Ok((state, suffix(init, prefix)))
 }
 
 pub fn parse_do(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
@@ -486,7 +486,7 @@ pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                     let (state, _) = parser::consume("=>", state)?;
                     let (state, body) = parse_apps(state)?;
                     let (state, _) = parser::text(";", state)?;
-                    return Ok((state, (Ident(name), body)));
+                    Ok((state, (Ident(name), body)))
                 }),
                 state,
             )?;
@@ -506,7 +506,7 @@ pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             };
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
-            return Ok((
+            Ok((
                 state,
                 Box::new(Term::Mat {
                     orig,
@@ -516,7 +516,7 @@ pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                     cses,
                     moti,
                 }),
-            ));
+            ))
         }),
         state,
     );
@@ -525,9 +525,9 @@ pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
 pub fn peek_char_local(state: parser::State) -> parser::Answer<char> {
     let (state, _) = parser::skip_while(state, Box::new(|x| *x == ' '))?;
     if let Some(got) = parser::head(state) {
-        return Ok((state, got));
+        Ok((state, got))
     } else {
-        return Ok((state, '\0'));
+        Ok((state, '\0'))
     }
 }
 
@@ -537,7 +537,7 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             let (state, all0) = parser::text("(", state)?;
             let (state, name) = parser::name(state)?;
             let (state, all1) = parser::text(":", state)?;
-            Ok((state, all0 && all1 && name.len() > 0))
+            Ok((state, all0 && all1 && !name.is_empty()))
             //Ok((state, all0 && all1 && name.len() > 0 && is_var_head(name.chars().nth(0).unwrap_or(' '))))
         }),
         Box::new(|state| {
@@ -563,7 +563,7 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                         }),
                         tipo: Box::new(Term::All {
                             orig,
-                            name: Ident(name.clone()),
+                            name: Ident(name),
                             tipo,
                             body: Box::new(Term::Hol { orig, numb: 0 }),
                         }),
@@ -651,7 +651,7 @@ pub fn parse_lam(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
         Box::new(|state| {
             let (state, name) = parser::name(state)?;
             let (state, arro) = parser::text("=>", state)?;
-            Ok((state, name.len() > 0 && arro))
+            Ok((state, !name.is_empty() && arro))
             //Ok((state, all0 && all1 && name.len() > 0 && is_var_head(name.chars().nth(0).unwrap_or(' '))))
         }),
         Box::new(move |state| {
@@ -872,7 +872,7 @@ pub fn parse_sig(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             let (state, all0) = parser::text("[", state)?;
             let (state, name) = parser::name(state)?;
             let (state, all1) = parser::text(":", state)?;
-            Ok((state, all0 && all1 && name.len() > 0))
+            Ok((state, all0 && all1 && !name.is_empty()))
             //Ok((state, all0 && all1 && name.len() > 0 && is_var_head(name.chars().nth(0).unwrap_or(' '))))
         }),
         Box::new(|state| {

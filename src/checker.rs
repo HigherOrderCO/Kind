@@ -3,6 +3,8 @@ use crate::book::span::Span;
 use crate::book::term::{Operator, Term};
 use crate::book::{Argument, Book, Entry, Rule};
 
+use std::fmt::Write;
+
 pub fn to_checker_oper(oper: &Operator) -> String {
     match oper {
         Operator::Add => "Kind.Operator.add".to_string(),
@@ -40,12 +42,10 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
         Term::Var { orig, name } => {
             if lhs {
                 format!("{}", name)
+            } else if quote {
+                format!("(Kind.Term.set_origin {} {})", orig.encode(), name.clone())
             } else {
-                if quote {
-                    format!("(Kind.Term.set_origin {} {})", orig.encode(), name.clone())
-                } else {
-                    format!("{}", name.clone()) // spaces to align with quoted version
-                }
+                format!("{}", name.clone()) // spaces to align with quoted version
             }
         }
         Term::All {
@@ -244,9 +244,9 @@ fn to_checker_rule_chk(
         args.push(var_patt_str);
         let head = inp_patt_str;
         let tail = to_checker_rule_chk(rule, index + 1, vars, args);
-        return format!("(Kind.Rule.lhs {} {})", head, tail);
+        format!("(Kind.Rule.lhs {} {})", head, tail)
     } else {
-        return format!(
+        format!(
             "(Kind.Rule.rhs (QT{} {}. 0{}))",
             index,
             rule.name,
@@ -254,7 +254,7 @@ fn to_checker_rule_chk(
                 .map(|x| format!(" {}", x))
                 .collect::<Vec<String>>()
                 .join("")
-        );
+        )
     }
 }
 
@@ -275,15 +275,15 @@ fn to_checker_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
                 vars
             );
             *vars += 1;
-            return (inp, var);
+            (inp, var)
         }
         Term::Ctr { orig, name, args } => {
             let mut inp_args_str = String::new();
             let mut var_args_str = String::new();
             for arg in args {
                 let (inp_arg_str, var_arg_str) = to_checker_patt_chk(arg, vars);
-                inp_args_str.push_str(&format!(" {}", inp_arg_str));
-                var_args_str.push_str(&format!(" {}", var_arg_str));
+                write!(inp_args_str, " {}", inp_arg_str).ok();
+                write!(var_args_str, " {}", var_arg_str).ok();
             }
             if args.len() >= 15 {
                 let inp_str = format!(
@@ -302,7 +302,7 @@ fn to_checker_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
                     args.len(),
                     var_args_str
                 );
-                return (inp_str, var_str);
+                (inp_str, var_str)
             } else {
                 let inp_str = format!(
                     "(Kind.Term.ct{} {}. {}{})",
@@ -318,13 +318,13 @@ fn to_checker_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
                     orig.encode(),
                     var_args_str
                 );
-                return (inp_str, var_str);
+                (inp_str, var_str)
             }
         }
         Term::Num { orig, numb } => {
             let inp = format!("(Kind.Term.num {} {})", orig.encode(), numb);
             let var = format!("(Kind.Term.num {} {})", orig.encode(), numb);
-            return (inp, var);
+            (inp, var)
         }
         _ => {
             // TODO: This should return a proper error instead of panicking
@@ -341,47 +341,47 @@ fn to_checker_rule_end(name: &Ident, size: u64) -> String {
     let mut text = String::new();
 
     if size >= 15 {
-        text.push_str(&format!(
-            "(Q${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))\n",
+        writeln!(text,
+            "(Q${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))",
             name,
             vars.join(""),
             size,
             name,
             size,
             vars.join("")
-        ));
-        text.push_str(&format!(
-            "(F${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))\n",
+        ).ok();
+        writeln!(text,
+            "(F${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))",
             name,
             vars.join(""),
             size,
             name,
             size,
             vars.join("")
-        ));
+        ).ok();
     } else {
-        text.push_str(&format!(
-            "(Q${} orig{}) = (Kind.Term.fn{} {}. orig{})\n",
+        writeln!(text,
+            "(Q${} orig{}) = (Kind.Term.fn{} {}. orig{})",
             name,
             vars.join(""),
             size,
             name,
             vars.join("")
-        ));
-        text.push_str(&format!(
-            "(F${} orig{}) = (Kind.Term.fn{} {}. orig{})\n",
+        ).ok();
+        writeln!(text,
+            "(F${} orig{}) = (Kind.Term.fn{} {}. orig{})",
             name,
             vars.join(""),
             size,
             name,
             vars.join("")
-        ));
+        ).ok();
     }
 
-    return text;
+    text
 }
 
-fn to_checker_type(args: &Vec<Box<Argument>>, tipo: &Box<Term>, index: usize) -> String {
+fn to_checker_type(args: &Vec<Box<Argument>>, tipo: &Term, index: usize) -> String {
     if index < args.len() {
         let arg = &args[index];
         format!(
@@ -405,23 +405,21 @@ fn to_checker_rule(rule: &Rule) -> String {
     let body_rhs = to_checker_term(&rule.body, true, false);
     let rule_rhs = to_checker_term(&rule.body, false, false);
     let mut text = String::new();
-    text.push_str(&format!(
-        "(Q${} orig{}) = {}\n",
+    writeln!(text,
+        "(Q${} orig{}) = {}",
         rule.name,
         pats.join(""),
         body_rhs
-    ));
+    ).ok();
     if rule.name.0 == "HVM.log" {
-        text.push_str(&format!(
-            "(F$HVM.log orig a r log ret) = (HVM.put (Kind.Term.show log) ret)"
-        ));
+        write!(text,"(F$HVM.log orig a r log ret) = (HVM.put (Kind.Term.show log) ret)").ok();
     } else {
-        text.push_str(&format!(
-            "(F${} orig{}) = {}\n",
+        writeln!(text,
+            "(F${} orig{}) = {}",
             rule.name,
             pats.join(""),
             rule_rhs
-        ));
+        ).ok();
     }
 
     //for size in 0 .. 9 {
@@ -429,22 +427,22 @@ fn to_checker_rule(rule: &Rule) -> String {
     //for idx in 0 .. size {
     //vars.push(format!(" x{}", idx));
     //}
-    //result.push_str(&format!("(QT{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
-    //result.push_str(&format!("(FN{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join("")));
+    //write!(result,"(QT{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join(""));
+    //write!(result,"(FN{} name orig{}) = (Fn{} name orig{})\n", size, vars.join(""), size, vars.join(""));
     //}
 
-    return text;
+    text
 }
 
 pub fn to_checker_entry(entry: &Entry) -> String {
     let mut result = String::new();
-    result.push_str(&format!("(NameOf {}.) = \"{}\"\n", entry.name, entry.name));
-    result.push_str(&format!("(HashOf {}.) = %{}\n", entry.name, entry.name));
-    result.push_str(&format!(
-        "(TypeOf {}.) = {}\n",
+    writeln!(result,"(NameOf {}.) = \"{}\"", entry.name, entry.name).ok();
+    writeln!(result,"(HashOf {}.) = %{}", entry.name, entry.name).ok();
+    writeln!(result,
+        "(TypeOf {}.) = {}",
         entry.name,
         to_checker_type(&entry.args, &entry.tipo, 0)
-    ));
+    ).ok();
 
     let base_vars = (0..entry.args.len())
         .map(|x| format!(" x{}", x))
@@ -452,77 +450,75 @@ pub fn to_checker_entry(entry: &Entry) -> String {
         .join("");
 
     if entry.args.len() >= 15 {
-        result.push_str(&format!(
-            "(Kind.Term.FN{} {}. orig (Kind.Term.args{}{})) = (F${} orig{})\n",
+        writeln!(result,
+            "(Kind.Term.FN{} {}. orig (Kind.Term.args{}{})) = (F${} orig{})",
             entry.args.len(),
             entry.name,
             entry.args.len(),
             base_vars,
             entry.name,
             base_vars
-        ));
+        ).ok();
     } else {
-        result.push_str(&format!(
-            "(Kind.Term.FN{} {}. orig{}) = (F${} orig{})\n",
+        writeln!(result,
+            "(Kind.Term.FN{} {}. orig{}) = (F${} orig{})",
             entry.args.len(),
             entry.name,
             base_vars,
             entry.name,
             base_vars
-        ));
+        ).ok();
     }
 
-    result.push_str(&format!(
-        "(QT{} {}. orig{}) = (Q${} orig{})\n",
+    writeln!(result,
+        "(QT{} {}. orig{}) = (Q${} orig{})",
         entry.args.len(),
         entry.name,
         base_vars,
         entry.name,
         base_vars
-    ));
+    ).ok();
 
     for rule in &entry.rules {
-        result.push_str(&to_checker_rule(&rule));
+        write!(result, "{}", &to_checker_rule(rule)).ok();
     }
-    if entry.rules.len() > 0 {
-        result.push_str(&to_checker_rule_end(
+    if !entry.rules.is_empty() {
+        write!(result, "{}", &to_checker_rule_end(
             &entry.name,
             entry.rules[0].pats.len() as u64,
-        ));
+        )).ok();
     }
-    result.push_str(&format!("(RuleOf {}.) =", entry.name));
+    write!(result,"(RuleOf {}.) =", entry.name).ok();
     for rule in &entry.rules {
-        result.push_str(&format!(
+        write!(result,
             " (List.cons {}",
-            to_checker_rule_chk(&rule, 0, &mut 0, &mut vec![])
-        ));
+            to_checker_rule_chk(rule, 0, &mut 0, &mut vec![])
+        ).ok();
     }
-    result.push_str(&format!(" List.nil{}", ")".repeat(entry.rules.len())));
-    return result;
+    write!(result," List.nil{}", ")".repeat(entry.rules.len())).ok();
+    result
 }
 
+
+// Vendo oq da pra fazer pra
 pub fn to_checker_book(book: &Book) -> String {
     let mut result = String::new();
-    result.push_str(&format!(
-        "// NOTE: functions with names starting with 'F$' are evaluated differently by the\n"
-    ));
-    result.push_str(&format!(
-        "// HVM, as a specific optimization targetting Kind2. See 'HOAS_OPT' on HVM's code.\n\n"
-    ));
-    result.push_str(&format!("Functions =\n"));
-    result.push_str(&format!("  let fns = List.nil\n"));
+    writeln!(result, "// NOTE: functions with names starting with 'F$' are evaluated differently by the").ok();
+    writeln!(result, "// HVM, as a specific optimization targetting Kind2. See 'HOAS_OPT' on HVM's code.\n").ok();
+    writeln!(result, "Functions =").ok();
+    writeln!(result, "  let fns = List.nil").ok();
     for name in &book.names {
         let entry = book.entrs.get(&Ident(name.to_string())).unwrap();
-        result.push_str(&format!("  let fns = (List.cons {}. fns)\n", entry.name));
+        writeln!(result,"  let fns = (List.cons {}. fns)", entry.name).ok();
     }
-    result.push_str(&format!("  fns\n\n"));
+    result.push_str("  fns\n\n");
     for name in &book.names {
         let entry = book.entrs.get(&Ident(name.to_string())).unwrap();
-        result.push_str(&format!("\n// {}", name));
-        result.push_str(&format!("\n// {}\n", "-".repeat(name.len())));
-        result.push_str(&format!("\n"));
-        result.push_str(&to_checker_entry(&entry));
-        result.push_str(&format!("\n"));
+        write!(result, "\n// {}", name).ok();
+        writeln!(result, "\n// {}", "-".repeat(name.len())).ok();
+        writeln!(result).ok();
+        write!(result, "{}", &to_checker_entry(entry)).ok();
+        writeln!(result).ok();
     }
-    return result;
+    result
 }

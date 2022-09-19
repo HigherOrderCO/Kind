@@ -45,10 +45,10 @@ impl Unbound for Term {
             Term::Typ { .. } => {}
             Term::Var { ref name, .. } => {
                 // Is constructor name
-                if ('A'..='Z').contains(&name.0.chars().nth(0).unwrap_or(' ')) {
+                if ('A'..='Z').contains(&name.0.chars().next().unwrap_or(' ')) {
                     state.unbound.insert(name.clone());
                 // Is unbound variable
-                } else if state.vars.iter().find(|&x| x == name).is_none() {
+                } else if !state.vars.iter().any(|x| x == name) {
                     if rhs {
                         state.unbound.insert(name.clone());
                     } else {

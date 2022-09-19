@@ -6,7 +6,7 @@ use crate::book::{Argument, Entry, Rule};
 use crate::parser::*;
 
 pub fn derive_type(tipo: &NewType) -> Derived {
-    let path = format!("{}/_.kind2", tipo.name.0.replace(".", "/"));
+    let path = format!("{}/_.kind2", tipo.name.0.replace('.', "/"));
     let name = format!("{}", tipo.name);
     let kdln = None;
     let mut args = vec![];
@@ -31,15 +31,15 @@ pub fn derive_type(tipo: &NewType) -> Derived {
         tipo,
         rules,
     };
-    return Derived {
+    Derived {
         path: Ident(path),
         entr,
-    };
+    }
 }
 
 pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
     if let Some(ctr) = tipo.ctrs.get(index) {
-        let path = format!("{}/{}.kind2", tipo.name.0.replace(".", "/"), ctr.name);
+        let path = format!("{}/{}.kind2", tipo.name.0.replace('.', "/"), ctr.name);
         let name = format!("{}.{}", tipo.name, ctr.name);
         let kdln = None;
         let mut args = vec![];
@@ -72,10 +72,10 @@ pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
             tipo,
             rules,
         };
-        return Derived {
+        Derived {
             path: Ident(path),
             entr,
-        };
+        }
     } else {
         panic!("Constructor out of bounds.");
     }
@@ -88,7 +88,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     // List.match t (List.nil t)            p nil cons = nil
     // List.match t (List.cons t head tail) p nil cons = (cons head tail)
 
-    let path = format!("{}/match.kind2", ntyp.name.0.replace(".", "/"));
+    let path = format!("{}/match.kind2", ntyp.name.0.replace('.', "/"));
 
     fn gen_type_ctr(ntyp: &NewType) -> Box<Term> {
         Box::new(Term::Ctr {
@@ -107,7 +107,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
         })
     }
 
-    fn gen_ctr_value(ntyp: &NewType, ctr: &Box<Constructor>, _: usize, suffix: &str) -> Box<Term> {
+    fn gen_ctr_value(ntyp: &NewType, ctr: &Constructor, _: usize, suffix: &str) -> Box<Term> {
         let mut ctr_value_args = vec![];
         for par in &ntyp.pars {
             ctr_value_args.push(Box::new(Term::Var {
@@ -121,12 +121,11 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
                 name: Ident(format!("{}{}", fld.name, suffix)),
             }));
         }
-        let ctr_value = Box::new(Term::Ctr {
+        Box::new(Term::Ctr {
             orig: Span::Generated,
             name: Ident::new_path(&ntyp.name.0, &ctr.name.0),
             args: ctr_value_args,
-        });
-        return ctr_value;
+        })
     }
 
     // List.match
@@ -174,28 +173,28 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
     // (nil: (p (List.nil t)))
     // (cons: (head t) (tail: (List t)) (p (List.cons t head tail)))
     for ctr in &ntyp.ctrs {
-        fn ctr_case_type(ntyp: &NewType, ctr: &Box<Constructor>, index: usize) -> Box<Term> {
+        fn ctr_case_type(ntyp: &NewType, ctr: &Constructor, index: usize) -> Box<Term> {
             if index < ctr.args.len() {
                 // for nil  = ...
                 // for cons = (head: t) (tail: (List t))
                 let arg = ctr.args.get(index).unwrap();
-                return Box::new(Term::All {
+                Box::new(Term::All {
                     orig: Span::Generated,
                     name: arg.name.clone(),
                     tipo: arg.tipo.clone(),
                     body: ctr_case_type(ntyp, ctr, index + 1),
-                });
+                })
             } else {
                 // for nil  = (p (List.nil t))
                 // for cons = (p (List.cons t head tail))
-                return Box::new(Term::App {
+                Box::new(Term::App {
                     orig: Span::Generated,
                     func: Box::new(Term::Var {
                         orig: Span::Generated,
                         name: Ident("p".to_string()),
                     }),
                     argm: gen_ctr_value(ntyp, ctr, index, ""),
-                });
+                })
             }
         }
         args.push(Box::new(Argument {
@@ -203,7 +202,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
             orig: Span::Generated,
             hide: false,
             name: ctr.name.clone(),
-            tipo: ctr_case_type(ntyp, &ctr, 0),
+            tipo: ctr_case_type(ntyp, ctr, 0),
         }));
     }
 
@@ -235,7 +234,7 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
                 name: par.name.clone(),
             }));
         }
-        pats.push(gen_ctr_value(ntyp, &ctr, idx, "_"));
+        pats.push(gen_ctr_value(ntyp, ctr, idx, "_"));
         pats.push(Box::new(Term::Var {
             orig: Span::Generated,
             name: Ident("p".to_string()),
@@ -275,10 +274,10 @@ pub fn derive_match(ntyp: &NewType) -> Derived {
         rules,
     };
 
-    return Derived {
+    Derived {
         path: Ident(path),
         entr,
-    };
+    }
 }
 
 pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
@@ -290,7 +289,7 @@ pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
     loop {
         let state_i = state;
         let (state_i, ctr_name) = parser::name(state_i)?;
-        if ctr_name.len() == 0 {
+        if ctr_name.is_empty() {
             break;
         }
         let mut ctr_args = vec![];
@@ -311,14 +310,14 @@ pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
         }));
         state = state_i;
     }
-    return Ok((
+    Ok((
         state,
         Box::new(NewType {
             name: Ident(name),
             pars,
             ctrs,
         }),
-    ));
+    ))
 }
 
 pub fn read_newtype(code: &str) -> Result<Box<NewType>, String> {
