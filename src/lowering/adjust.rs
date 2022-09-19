@@ -62,13 +62,16 @@ pub trait Adjust {
     where
         Self: Sized,
     {
-        self.adjust(false, &mut AdjustState {
-            book,
-            eras: 0,
-            holes: 0,
-            vars: Vec::new(),
-            types: HashMap::new(),
-        })
+        self.adjust(
+            false,
+            &mut AdjustState {
+                book,
+                eras: 0,
+                holes: 0,
+                vars: Vec::new(),
+                types: HashMap::new(),
+            },
+        )
     }
 }
 
