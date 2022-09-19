@@ -9,12 +9,8 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
         return format!("\"{}\"", as_string);
     }
     match term {
-        Term::Typ { .. } => {
-            "Type".to_string()
-        }
-        Term::Var { orig: _, name } => {
-            name.to_string()
-        }
+        Term::Typ { .. } => "Type".to_string(),
+        Term::Var { orig: _, name } => name.to_string(),
         Term::Lam {
             orig: _,
             name,
@@ -55,18 +51,14 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             orig: _,
             expr,
             tipo: _,
-        } => {
-            to_hvm_term(book, expr)
-        }
+        } => to_hvm_term(book, expr),
         Term::Sub {
             orig: _,
             expr,
             name: _,
             indx: _,
             redx: _,
-        } => {
-            to_hvm_term(book, expr)
-        }
+        } => to_hvm_term(book, expr),
         Term::Ctr {
             orig: _,
             name,
@@ -107,12 +99,8 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
                     .collect::<String>()
             )
         }
-        Term::Hlp { orig: _ } => {
-            "0".to_string()
-        }
-        Term::U60 { orig: _ } => {
-            "0".to_string()
-        }
+        Term::Hlp { orig: _ } => "0".to_string(),
+        Term::U60 { orig: _ } => "0".to_string(),
         Term::Num { orig: _, numb } => {
             format!("{}", numb)
         }
@@ -126,9 +114,7 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             let val1 = to_hvm_term(book, val1);
             format!("({} {} {})", oper, val0, val1)
         }
-        Term::Hol { orig: _, numb: _ } => {
-            "_".to_string()
-        }
+        Term::Hol { orig: _, numb: _ } => "_".to_string(),
         Term::Mat { .. } => {
             panic!("Internal error."); // removed after adjust()
         }
@@ -143,7 +129,7 @@ pub fn to_hvm_oper(oper: &Operator) -> String {
         Operator::Div => "/".to_string(),
         Operator::Mod => "%".to_string(),
         Operator::And => "&".to_string(),
-        Operator::Or =>  "|".to_string(),
+        Operator::Or => "|".to_string(),
         Operator::Xor => "^".to_string(),
         Operator::Shl => "<<".to_string(),
         Operator::Shr => ">>".to_string(),

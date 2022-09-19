@@ -11,46 +11,18 @@ use std::collections::HashSet;
 // Returns true if a ctor's argument is erased
 #[derive(Clone, Debug)]
 pub enum CompTerm {
-    Var {
-        name: String,
-    },
-    Lam {
-        name: String,
-        body: Box<CompTerm>,
-    },
-    App {
-        func: Box<CompTerm>,
-        argm: Box<CompTerm>,
-    },
-    Dup {
-        nam0: String,
-        nam1: String,
-        expr: Box<CompTerm>,
-        body: Box<CompTerm>,
-    },
-    Let {
-        name: String,
-        expr: Box<CompTerm>,
-        body: Box<CompTerm>,
-    },
-    Ctr {
-        name: String,
-        args: Vec<Box<CompTerm>>,
-    },
-    Fun {
-        name: String,
-        args: Vec<Box<CompTerm>>,
-    },
-    Num {
-        numb: u128,
-    },
-    Op2 {
-        oper: Operator,
-        val0: Box<CompTerm>,
-        val1: Box<CompTerm>,
-    },
-    Nil,
-}
+    Var { name: String },
+    Lam { name: String, body: Box<CompTerm> },
+    App { func: Box<CompTerm>, argm: Box<CompTerm> },
+    Dup { nam0: String, nam1: String, expr: Box<CompTerm>, body: Box<CompTerm> },
+    Let { name: String, expr: Box<CompTerm>, body: Box<CompTerm> },
+    Ctr { name: String, args: Vec<Box<CompTerm>> },
+    Fun { name: String, args: Vec<Box<CompTerm>> },
+    Num { numb: u128 },
+    Op2 { oper: Oper, val0: Box<CompTerm>, val1: Box<CompTerm> },
+    Nil
+  }
+  
 
 #[derive(Clone, Debug)]
 pub struct CompRule {
@@ -316,10 +288,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                 // The old rule is rewritten to be flat and call the new entry
                 let n = post_inc(&mut name_count);
                 let new_entry_name = format!("{}{}_", entry.name, n);
-                let new_entry_kdln = entry
-                    .kdln
-                    .clone()
-                    .map(|kdln| format!("{}{}_", kdln, n));
+                let new_entry_kdln = entry.kdln.clone().map(|kdln| format!("{}{}_", kdln, n));
                 let mut new_entry_rules: Vec<CompRule> = Vec::new();
                 // Rewrite the old rule to be flat and point to the new entry
                 let mut old_rule_pats: Vec<Box<CompTerm>> = Vec::new();
@@ -571,9 +540,7 @@ pub fn subst(term: &mut CompTerm, sub_name: &str, value: &CompTerm) {
 // Removes proof-irrelevant parts of the term
 pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
     match term {
-        Term::Typ { .. } => {
-            Box::new(CompTerm::Nil)
-        }
+        Term::Typ { .. } => Box::new(CompTerm::Nil),
         Term::Var { orig: _, name } => {
             let name = name.0.clone();
             Box::new(CompTerm::Var { name })
@@ -601,9 +568,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             name: _,
             tipo: _,
             body: _,
-        } => {
-            Box::new(CompTerm::Nil)
-        }
+        } => Box::new(CompTerm::Nil),
         Term::Let {
             orig: _,
             name,
@@ -619,18 +584,14 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             orig: _,
             expr,
             tipo: _,
-        } => {
-            erase(book, expr)
-        }
+        } => erase(book, expr),
         Term::Sub {
             orig: _,
             expr,
             name: _,
             indx: _,
             redx: _,
-        } => {
-            erase(book, expr)
-        }
+        } => erase(book, expr),
         Term::Ctr {
             orig: _,
             name,
@@ -661,12 +622,8 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             }
             Box::new(CompTerm::Fun { name, args })
         }
-        Term::Hlp { orig: _ } => {
-            Box::new(CompTerm::Nil)
-        }
-        Term::U60 { orig: _ } => {
-            Box::new(CompTerm::Nil)
-        }
+        Term::Hlp { orig: _ } => Box::new(CompTerm::Nil),
+        Term::U60 { orig: _ } => Box::new(CompTerm::Nil),
         Term::Num { orig: _, numb } => {
             let numb = *numb as u128;
             Box::new(CompTerm::Num { numb })
@@ -682,12 +639,8 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             let val1 = erase(book, val1);
             Box::new(CompTerm::Op2 { oper, val0, val1 })
         }
-        Term::Hol { orig: _, numb: _ } => {
-            Box::new(CompTerm::Nil)
-        }
-        Term::Mat { .. } => {
-            Box::new(CompTerm::Nil)
-        }
+        Term::Hol { orig: _, numb: _ } => Box::new(CompTerm::Nil),
+        Term::Mat { .. } => Box::new(CompTerm::Nil),
     }
 }
 

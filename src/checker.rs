@@ -341,7 +341,8 @@ fn to_checker_rule_end(name: &Ident, size: u64) -> String {
     let mut text = String::new();
 
     if size >= 15 {
-        writeln!(text,
+        writeln!(
+            text,
             "(Q${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))",
             name,
             vars.join(""),
@@ -349,8 +350,10 @@ fn to_checker_rule_end(name: &Ident, size: u64) -> String {
             name,
             size,
             vars.join("")
-        ).ok();
-        writeln!(text,
+        )
+        .ok();
+        writeln!(
+            text,
             "(F${} orig{}) = (Kind.Term.fn{} {}. orig (Kind.Term.args{}{}))",
             name,
             vars.join(""),
@@ -358,24 +361,29 @@ fn to_checker_rule_end(name: &Ident, size: u64) -> String {
             name,
             size,
             vars.join("")
-        ).ok();
+        )
+        .ok();
     } else {
-        writeln!(text,
+        writeln!(
+            text,
             "(Q${} orig{}) = (Kind.Term.fn{} {}. orig{})",
             name,
             vars.join(""),
             size,
             name,
             vars.join("")
-        ).ok();
-        writeln!(text,
+        )
+        .ok();
+        writeln!(
+            text,
             "(F${} orig{}) = (Kind.Term.fn{} {}. orig{})",
             name,
             vars.join(""),
             size,
             name,
             vars.join("")
-        ).ok();
+        )
+        .ok();
     }
 
     text
@@ -405,21 +413,29 @@ fn to_checker_rule(rule: &Rule) -> String {
     let body_rhs = to_checker_term(&rule.body, true, false);
     let rule_rhs = to_checker_term(&rule.body, false, false);
     let mut text = String::new();
-    writeln!(text,
+    writeln!(
+        text,
         "(Q${} orig{}) = {}",
         rule.name,
         pats.join(""),
         body_rhs
-    ).ok();
+    )
+    .ok();
     if rule.name.0 == "HVM.log" {
-        write!(text,"(F$HVM.log orig a r log ret) = (HVM.put (Kind.Term.show log) ret)").ok();
+        write!(
+            text,
+            "(F$HVM.log orig a r log ret) = (HVM.put (Kind.Term.show log) ret)"
+        )
+        .ok();
     } else {
-        writeln!(text,
+        writeln!(
+            text,
             "(F${} orig{}) = {}",
             rule.name,
             pats.join(""),
             rule_rhs
-        ).ok();
+        )
+        .ok();
     }
 
     //for size in 0 .. 9 {
@@ -436,13 +452,15 @@ fn to_checker_rule(rule: &Rule) -> String {
 
 pub fn to_checker_entry(entry: &Entry) -> String {
     let mut result = String::new();
-    writeln!(result,"(NameOf {}.) = \"{}\"", entry.name, entry.name).ok();
-    writeln!(result,"(HashOf {}.) = %{}", entry.name, entry.name).ok();
-    writeln!(result,
+    writeln!(result, "(NameOf {}.) = \"{}\"", entry.name, entry.name).ok();
+    writeln!(result, "(HashOf {}.) = %{}", entry.name, entry.name).ok();
+    writeln!(
+        result,
         "(TypeOf {}.) = {}",
         entry.name,
         to_checker_type(&entry.args, &entry.tipo, 0)
-    ).ok();
+    )
+    .ok();
 
     let base_vars = (0..entry.args.len())
         .map(|x| format!(" x{}", x))
@@ -450,7 +468,8 @@ pub fn to_checker_entry(entry: &Entry) -> String {
         .join("");
 
     if entry.args.len() >= 15 {
-        writeln!(result,
+        writeln!(
+            result,
             "(Kind.Term.FN{} {}. orig (Kind.Term.args{}{})) = (F${} orig{})",
             entry.args.len(),
             entry.name,
@@ -458,58 +477,74 @@ pub fn to_checker_entry(entry: &Entry) -> String {
             base_vars,
             entry.name,
             base_vars
-        ).ok();
+        )
+        .ok();
     } else {
-        writeln!(result,
+        writeln!(
+            result,
             "(Kind.Term.FN{} {}. orig{}) = (F${} orig{})",
             entry.args.len(),
             entry.name,
             base_vars,
             entry.name,
             base_vars
-        ).ok();
+        )
+        .ok();
     }
 
-    writeln!(result,
+    writeln!(
+        result,
         "(QT{} {}. orig{}) = (Q${} orig{})",
         entry.args.len(),
         entry.name,
         base_vars,
         entry.name,
         base_vars
-    ).ok();
+    )
+    .ok();
 
     for rule in &entry.rules {
         write!(result, "{}", &to_checker_rule(rule)).ok();
     }
     if !entry.rules.is_empty() {
-        write!(result, "{}", &to_checker_rule_end(
-            &entry.name,
-            entry.rules[0].pats.len() as u64,
-        )).ok();
+        write!(
+            result,
+            "{}",
+            &to_checker_rule_end(&entry.name, entry.rules[0].pats.len() as u64,)
+        )
+        .ok();
     }
-    write!(result,"(RuleOf {}.) =", entry.name).ok();
+    write!(result, "(RuleOf {}.) =", entry.name).ok();
     for rule in &entry.rules {
-        write!(result,
+        write!(
+            result,
             " (List.cons {}",
             to_checker_rule_chk(rule, 0, &mut 0, &mut vec![])
-        ).ok();
+        )
+        .ok();
     }
-    write!(result," List.nil{}", ")".repeat(entry.rules.len())).ok();
+    write!(result, " List.nil{}", ")".repeat(entry.rules.len())).ok();
     result
 }
-
 
 // Vendo oq da pra fazer pra
 pub fn to_checker_book(book: &Book) -> String {
     let mut result = String::new();
-    writeln!(result, "// NOTE: functions with names starting with 'F$' are evaluated differently by the").ok();
-    writeln!(result, "// HVM, as a specific optimization targetting Kind2. See 'HOAS_OPT' on HVM's code.\n").ok();
+    writeln!(
+        result,
+        "// NOTE: functions with names starting with 'F$' are evaluated differently by the"
+    )
+    .ok();
+    writeln!(
+        result,
+        "// HVM, as a specific optimization targetting Kind2. See 'HOAS_OPT' on HVM's code.\n"
+    )
+    .ok();
     writeln!(result, "Functions =").ok();
     writeln!(result, "  let fns = List.nil").ok();
     for name in &book.names {
         let entry = book.entrs.get(&Ident(name.to_string())).unwrap();
-        writeln!(result,"  let fns = (List.cons {}. fns)", entry.name).ok();
+        writeln!(result, "  let fns = (List.cons {}. fns)", entry.name).ok();
     }
     result.push_str("  fns\n\n");
     for name in &book.names {
