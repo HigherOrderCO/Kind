@@ -10,7 +10,7 @@ use crate::driver::loader::File;
 use crate::codegen;
 use crate::parser::new_type;
 
-const CHECKER_HVM: &str = include_str!("../checker.hvm");
+const CHECKER_HVM: &str = include_str!("checker.hvm");
 
 pub struct RunResult {
     output: String,
@@ -194,4 +194,13 @@ pub fn cmd_run_main(path: &str) -> Result<(), String> {
     } else {
         Err("Main not found.".to_string())
     }
+}
+
+pub fn cmd_to_kdl(path: &str) -> Result<(), String> {
+    let loaded = load(path)?;
+    let comp_book = codegen::kdl::book::compile_book(&loaded.book)?;
+    let kdl_names = codegen::kdl::get_kdl_names(&comp_book)?;
+    let result = codegen::kdl::to_kdl_book(&loaded.book, &kdl_names, &comp_book)?;
+    print!("{}", result);
+    Ok(())
 }

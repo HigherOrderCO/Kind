@@ -82,7 +82,6 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
 }
 
 pub fn load(name: &str) -> Result<Load, String> {
-
     let mut load = Load::new_empty();
 
     if !std::path::Path::new(name).is_file() {

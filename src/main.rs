@@ -1,9 +1,10 @@
 pub mod book;
 pub mod checker;
-pub mod codegen;
 pub mod driver;
 pub mod lowering;
 pub mod parser;
+
+pub mod codegen;
 
 use crate::driver::*;
 
@@ -62,7 +63,7 @@ fn run_cli() -> Result<(), String> {
         Command::Derive { file: path } => cmd_derive(&path),
         Command::GenChecker { file: path } => cmd_gen_checker(&path),
         Command::Show { file: path } => cmd_show(&path),
-        Command::ToKDL { file: _ } => todo!(),
+        Command::ToKDL { file: path } => cmd_to_kdl(&path),
         Command::ToHVM { file: path } => cmd_to_hvm(&path),
     }
 }
