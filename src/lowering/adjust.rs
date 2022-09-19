@@ -187,14 +187,12 @@ impl Adjust for Term {
                 let orig = *orig;
                 let expr = Box::new(expr.adjust(rhs, state)?);
                 match state.vars.iter().position(|x| x == name) {
-                    None => {
-                        Err(AdjustError {
-                            orig,
-                            kind: AdjustErrorKind::UnboundVariable {
-                                name: name.to_string(),
-                            },
-                        })
-                    }
+                    None => Err(AdjustError {
+                        orig,
+                        kind: AdjustErrorKind::UnboundVariable {
+                            name: name.to_string(),
+                        },
+                    }),
                     Some(indx) => {
                         let name = name.clone();
                         let indx = indx as u64;

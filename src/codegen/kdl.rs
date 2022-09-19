@@ -11,9 +11,7 @@ pub const KDL_NAME_LEN: usize = 12;
 
 pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Result<String, String> {
     let term = match term {
-        CompTerm::Var { name } => {
-            name.clone()
-        }
+        CompTerm::Var { name } => name.clone(),
         CompTerm::Lam { name, body } => {
             let body = to_kdl_term(kdl_names, body)?;
             format!("@{} {}", name, body)
