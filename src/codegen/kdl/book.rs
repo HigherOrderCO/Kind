@@ -1,28 +1,53 @@
 use crate::book::name::Ident;
-use crate::book::term::Operator;
-use crate::book::term::Term;
-use crate::book::Entry;
-use crate::book::Rule;
+use crate::book::term::{Term, Operator};
+use crate::book::{Entry, Rule}
 use crate::codegen::kdl::Book;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-// Returns true if a ctor's argument is erased
 #[derive(Clone, Debug)]
 pub enum CompTerm {
-    Var { name: String },
-    Lam { name: String, body: Box<CompTerm> },
-    App { func: Box<CompTerm>, argm: Box<CompTerm> },
-    Dup { nam0: String, nam1: String, expr: Box<CompTerm>, body: Box<CompTerm> },
-    Let { name: String, expr: Box<CompTerm>, body: Box<CompTerm> },
-    Ctr { name: String, args: Vec<Box<CompTerm>> },
-    Fun { name: String, args: Vec<Box<CompTerm>> },
-    Num { numb: u128 },
-    Op2 { oper: Oper, val0: Box<CompTerm>, val1: Box<CompTerm> },
-    Nil
-  }
-  
+    Var {
+        name: String,
+    },
+    Lam {
+        name: String,
+        body: Box<CompTerm>,
+    },
+    App {
+        func: Box<CompTerm>,
+        argm: Box<CompTerm>,
+    },
+    Dup {
+        nam0: String,
+        nam1: String,
+        expr: Box<CompTerm>,
+        body: Box<CompTerm>,
+    },
+    Let {
+        name: String,
+        expr: Box<CompTerm>,
+        body: Box<CompTerm>,
+    },
+    Ctr {
+        name: String,
+        args: Vec<Box<CompTerm>>,
+    },
+    Fun {
+        name: String,
+        args: Vec<Box<CompTerm>>,
+    },
+    Num {
+        numb: u128,
+    },
+    Op2 {
+        oper: Operator,
+        val0: Box<CompTerm>,
+        val1: Box<CompTerm>,
+    },
+    Nil,
+}
 
 #[derive(Clone, Debug)]
 pub struct CompRule {
@@ -99,30 +124,19 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
             args: vec!["hi".to_string(), "lo".to_string()],
             rules: vec![CompRule {
                 name: "U120.new".to_string(),
-                pats: vec![
-                    Box::new(CompTerm::Var {
-                        name: "hi".to_string(),
-                    }),
-                    Box::new(CompTerm::Var {
-                        name: "lo".to_string(),
-                    }),
-                ],
+                pats: vec![Box::new(CompTerm::Var { name: "hi".to_string() }), Box::new(CompTerm::Var { name: "lo".to_string() })],
                 body: Box::new(CompTerm::Op2 {
                     oper: Operator::Add,
                     val0: Box::new(CompTerm::Op2 {
                         oper: Operator::Shl,
-                        val0: Box::new(CompTerm::Var {
-                            name: "hi".to_string(),
-                        }),
+                        val0: Box::new(CompTerm::Var { name: "hi".to_string() }),
                         val1: Box::new(CompTerm::Num { numb: 60 }),
                     }),
                     val1: Box::new(CompTerm::Op2 {
                         oper: Operator::Shr,
                         val0: Box::new(CompTerm::Op2 {
                             oper: Operator::Shl,
-                            val0: Box::new(CompTerm::Var {
-                                name: "lo".to_string(),
-                            }),
+                            val0: Box::new(CompTerm::Var { name: "lo".to_string() }),
                             val1: Box::new(CompTerm::Num { numb: 60 }),
                         }),
                         val1: Box::new(CompTerm::Num { numb: 60 }),
@@ -141,16 +155,12 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
             args: vec!["n".to_string()],
             rules: vec![CompRule {
                 name: "U120.low".to_string(),
-                pats: vec![Box::new(CompTerm::Var {
-                    name: "n".to_string(),
-                })],
+                pats: vec![Box::new(CompTerm::Var { name: "n".to_string() })],
                 body: Box::new(CompTerm::Op2 {
                     oper: Operator::Shr,
                     val0: Box::new(CompTerm::Op2 {
                         oper: Operator::Shl,
-                        val0: Box::new(CompTerm::Var {
-                            name: "n".to_string(),
-                        }),
+                        val0: Box::new(CompTerm::Var { name: "n".to_string() }),
                         val1: Box::new(CompTerm::Num { numb: 60 }),
                     }),
                     val1: Box::new(CompTerm::Num { numb: 60 }),
@@ -168,14 +178,10 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
             args: vec!["n".to_string()],
             rules: vec![CompRule {
                 name: "U120.high".to_string(),
-                pats: vec![Box::new(CompTerm::Var {
-                    name: "n".to_string(),
-                })],
+                pats: vec![Box::new(CompTerm::Var { name: "n".to_string() })],
                 body: Box::new(CompTerm::Op2 {
                     oper: Operator::Shr,
-                    val0: Box::new(CompTerm::Var {
-                        name: "n".to_string(),
-                    }),
+                    val0: Box::new(CompTerm::Var { name: "n".to_string() }),
                     val1: Box::new(CompTerm::Num { numb: 60 }),
                 }),
             }],
@@ -185,25 +191,18 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
 
     match entry.name.0.as_str() {
         // Some U120 functions should have a special compilation
-        "U120.new" => Ok(vec![make_u120_new()]), // U120.new becomes a special function that joins two numbers as if they were U60s
+        "U120.new" => Ok(vec![make_u120_new()]),
+        // U120.new becomes a special function that joins two numbers as if they were U60s
         // TODO: We could rewrite these both to not need this workaround, but it would become rather slow on normal HVM (~100 rewrites instead of 1)
-        "U120.high" => Ok(vec![make_u120_high()]), // high and low are used for type compatibility with u60
+        "U120.high" => Ok(vec![make_u120_high()]),
+        // high and low are used for type compatibility with u60
         "U120.low" => Ok(vec![make_u120_low()]),
         _ => {
             let new_entry = CompEntry {
                 name: entry.name.0.clone(),
                 kdln: entry.kdln.clone(),
-                args: entry
-                    .args
-                    .iter()
-                    .filter(|x| !x.eras)
-                    .map(|x| x.name.0.clone())
-                    .collect(),
-                rules: entry
-                    .rules
-                    .iter()
-                    .map(|rule| compile_rule(book, entry, rule))
-                    .collect(),
+                args: entry.args.iter().filter(|x| !x.eras).map(|x| x.name.0.clone()).collect(),
+                rules: entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect(),
                 orig: true,
             };
             // TODO: We probably need to handle U60 separately as well.
@@ -296,30 +295,19 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                 let mut var_count = 0;
                 for pat in &rule.pats {
                     match &**pat {
-                        CompTerm::Ctr {
-                            name: pat_name,
-                            args: pat_args,
-                        } => {
+                        CompTerm::Ctr { name: pat_name, args: pat_args } => {
                             let mut new_pat_args = Vec::new();
                             for field in pat_args {
                                 match &**field {
                                     CompTerm::Ctr { .. } => {
                                         let var_name = format!(".{}", post_inc(&mut var_count));
-                                        new_pat_args.push(Box::new(CompTerm::Var {
-                                            name: var_name.clone(),
-                                        }));
-                                        old_rule_body_args.push(Box::new(CompTerm::Var {
-                                            name: var_name.clone(),
-                                        }));
+                                        new_pat_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
+                                        old_rule_body_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
                                     }
                                     CompTerm::Num { .. } => {
                                         let var_name = format!(".{}", post_inc(&mut var_count));
-                                        new_pat_args.push(Box::new(CompTerm::Var {
-                                            name: var_name.clone(),
-                                        }));
-                                        old_rule_body_args.push(Box::new(CompTerm::Var {
-                                            name: var_name.clone(),
-                                        }));
+                                        new_pat_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
+                                        old_rule_body_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
                                     }
                                     CompTerm::Var { name: _ } => {
                                         new_pat_args.push(field.clone());
@@ -382,13 +370,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                         let mut new_rule_body = other.body.clone();
                         for (rule_pat, other_pat) in rule.pats.iter().zip(&other.pats) {
                             match (&**rule_pat, &**other_pat) {
-                                (
-                                    CompTerm::Ctr { name: _, args: _ },
-                                    CompTerm::Ctr {
-                                        name: _,
-                                        args: other_pat_args,
-                                    },
-                                ) => {
+                                (CompTerm::Ctr { name: _, args: _ }, CompTerm::Ctr { name: _, args: other_pat_args }) => {
                                     for other_field in other_pat_args {
                                         new_rule_pats.push(other_field.clone());
                                     }
@@ -398,9 +380,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                                         name: rule_pat_name,
                                         args: rule_pat_args,
                                     },
-                                    CompTerm::Var {
-                                        name: other_pat_name,
-                                    },
+                                    CompTerm::Var { name: other_pat_name },
                                 ) => {
                                     let mut new_ctr_args = vec![];
                                     for _ in 0..rule_pat_args.len() {
@@ -419,14 +399,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                                 (CompTerm::Var { .. }, _) => {
                                     new_rule_pats.push(other_pat.clone());
                                 }
-                                (
-                                    CompTerm::Num {
-                                        numb: rule_pat_numb,
-                                    },
-                                    CompTerm::Num {
-                                        numb: other_pat_numb,
-                                    },
-                                ) => {
+                                (CompTerm::Num { numb: rule_pat_numb }, CompTerm::Num { numb: other_pat_numb }) => {
                                     if rule_pat_numb == other_pat_numb {
                                         new_rule_pats.push(Box::new(*other_pat.clone()));
                                     } else {
@@ -434,12 +407,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                                         // not possible since it matches
                                     }
                                 }
-                                (
-                                    CompTerm::Num { numb: _ },
-                                    CompTerm::Var {
-                                        name: other_pat_name,
-                                    },
-                                ) => {
+                                (CompTerm::Num { numb: _ }, CompTerm::Var { name: other_pat_name }) => {
                                     subst(&mut new_rule_body, other_pat_name, rule_pat);
                                 }
                                 _ => {
@@ -456,9 +424,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                     }
                 }
                 assert!(!new_entry_rules.is_empty()); // There's at least one rule, since rules always match with themselves
-                let new_entry_args = (0..new_entry_rules[0].pats.len())
-                    .map(|n| format!("x{}", n))
-                    .collect();
+                let new_entry_args = (0..new_entry_rules[0].pats.len()).map(|n| format!("x{}", n)).collect();
                 let new_entry = CompEntry {
                     name: new_entry_name,
                     kdln: new_entry_kdln,
@@ -492,12 +458,7 @@ pub fn subst(term: &mut CompTerm, sub_name: &str, value: &CompTerm) {
                 *term = value.clone();
             }
         }
-        CompTerm::Dup {
-            nam0,
-            nam1,
-            expr,
-            body,
-        } => {
+        CompTerm::Dup { nam0, nam1, expr, body } => {
             subst(&mut *expr, sub_name, value);
             if nam0 != sub_name && nam1 != sub_name {
                 subst(&mut *body, sub_name, value);
@@ -545,20 +506,12 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             let name = name.0.clone();
             Box::new(CompTerm::Var { name })
         }
-        Term::Lam {
-            orig: _,
-            name,
-            body,
-        } => {
+        Term::Lam { orig: _, name, body } => {
             let name = name.0.clone();
             let body = erase(book, body);
             Box::new(CompTerm::Lam { name, body })
         }
-        Term::App {
-            orig: _,
-            func,
-            argm,
-        } => {
+        Term::App { orig: _, func, argm } => {
             let func = erase(book, func);
             let argm = erase(book, argm);
             Box::new(CompTerm::App { func, argm })
@@ -569,22 +522,13 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             tipo: _,
             body: _,
         } => Box::new(CompTerm::Nil),
-        Term::Let {
-            orig: _,
-            name,
-            expr,
-            body,
-        } => {
+        Term::Let { orig: _, name, expr, body } => {
             let name = name.0.clone();
             let expr = erase(book, expr);
             let body = erase(book, body);
             Box::new(CompTerm::Let { name, expr, body })
         }
-        Term::Ann {
-            orig: _,
-            expr,
-            tipo: _,
-        } => erase(book, expr),
+        Term::Ann { orig: _, expr, tipo: _ } => erase(book, expr),
         Term::Sub {
             orig: _,
             expr,
@@ -592,11 +536,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             indx: _,
             redx: _,
         } => erase(book, expr),
-        Term::Ctr {
-            orig: _,
-            name,
-            args: term_args,
-        } => {
+        Term::Ctr { orig: _, name, args: term_args } => {
             let name = name.0.clone();
             let entr = book.entrs.get(&Ident(name.clone())).unwrap();
             let mut args = vec![];
@@ -607,11 +547,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             }
             Box::new(CompTerm::Ctr { name, args })
         }
-        Term::Fun {
-            orig: _,
-            name,
-            args: term_args,
-        } => {
+        Term::Fun { orig: _, name, args: term_args } => {
             let name = name.0.clone();
             let entr = book.entrs.get(&Ident(name.clone())).unwrap();
             let mut args = vec![];
@@ -628,12 +564,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             let numb = *numb as u128;
             Box::new(CompTerm::Num { numb })
         }
-        Term::Op2 {
-            orig: _,
-            oper,
-            val0,
-            val1,
-        } => {
+        Term::Op2 { orig: _, oper, val0, val1 } => {
             let oper = *oper;
             let val0 = erase(book, val0);
             let val1 = erase(book, val1);
@@ -662,27 +593,8 @@ pub fn count_uses(term: &CompTerm, count_name: &str) -> usize {
             }
         }
         CompTerm::App { func, argm } => count_uses(func, count_name) + count_uses(argm, count_name),
-        CompTerm::Dup {
-            nam0,
-            nam1,
-            expr,
-            body,
-        } => {
-            count_uses(expr, count_name)
-                + (if nam0 == count_name || nam1 == count_name {
-                    0
-                } else {
-                    count_uses(body, count_name)
-                })
-        }
-        CompTerm::Let { name, expr, body } => {
-            count_uses(expr, count_name)
-                + (if name == count_name {
-                    0
-                } else {
-                    count_uses(body, count_name)
-                })
-        }
+        CompTerm::Dup { nam0, nam1, expr, body } => count_uses(expr, count_name) + (if nam0 == count_name || nam1 == count_name { 0 } else { count_uses(body, count_name) }),
+        CompTerm::Let { name, expr, body } => count_uses(expr, count_name) + (if name == count_name { 0 } else { count_uses(body, count_name) }),
         CompTerm::Ctr { name: _, args } => {
             let mut sum = 0;
             for arg in args {
@@ -697,11 +609,7 @@ pub fn count_uses(term: &CompTerm, count_name: &str) -> usize {
             }
             sum
         }
-        CompTerm::Op2 {
-            oper: _,
-            val0,
-            val1,
-        } => count_uses(val0, count_name) + count_uses(val1, count_name),
+        CompTerm::Op2 { oper: _, val0, val1 } => count_uses(val0, count_name) + count_uses(val1, count_name),
         CompTerm::Num { .. } => 0,
         CompTerm::Nil => 0,
     }
@@ -724,12 +632,7 @@ pub fn rename_clones(term: &mut CompTerm, target: &str, names: &mut Vec<String>)
             rename_clones(func, target, names);
             rename_clones(argm, target, names);
         }
-        CompTerm::Dup {
-            nam0,
-            nam1,
-            expr,
-            body,
-        } => {
+        CompTerm::Dup { nam0, nam1, expr, body } => {
             rename_clones(expr, target, names);
             if nam0 != target && nam1 != target {
                 rename_clones(body, target, names);
@@ -751,11 +654,7 @@ pub fn rename_clones(term: &mut CompTerm, target: &str, names: &mut Vec<String>)
                 rename_clones(arg, target, names);
             }
         }
-        CompTerm::Op2 {
-            oper: _,
-            val0,
-            val1,
-        } => {
+        CompTerm::Op2 { oper: _, val0, val1 } => {
             rename_clones(val0, target, names);
             rename_clones(val1, target, names);
         }
@@ -813,11 +712,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
                 let nam0 = names[i * 2].clone();
                 let nam1 = names[i * 2 + 1].clone();
                 let expr = Box::new(CompTerm::Var {
-                    name: if i == 0 {
-                        name.to_string()
-                    } else {
-                        names[i - 1].clone()
-                    },
+                    name: if i == 0 { name.to_string() } else { names[i - 1].clone() },
                 });
                 let new_body = CompTerm::Dup {
                     nam0,
@@ -849,11 +744,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
                 linearize_term(func, fresh);
                 linearize_term(argm, fresh);
             }
-            CompTerm::Let {
-                ref mut name,
-                expr,
-                body,
-            } => {
+            CompTerm::Let { ref mut name, expr, body } => {
                 linearize_term(expr, fresh);
                 linearize_term(body, fresh);
                 linearize_name(body, name, fresh);
@@ -868,11 +759,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
                     linearize_term(arg, fresh);
                 }
             }
-            CompTerm::Op2 {
-                oper: _,
-                val0,
-                val1,
-            } => {
+            CompTerm::Op2 { oper: _, val0, val1 } => {
                 linearize_term(val0, fresh);
                 linearize_term(val1, fresh);
             }
@@ -924,13 +811,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
 
 // Swaps u120 numbers and functions for primitive operations for kindelia compilation
 pub fn convert_u120_entry(entry: CompEntry) -> Result<CompEntry, String> {
-    let CompEntry {
-        name,
-        kdln,
-        args,
-        rules,
-        orig,
-    } = entry;
+    let CompEntry { name, kdln, args, rules, orig } = entry;
     let mut new_rules = Vec::new();
     for CompRule { name, pats, body } in rules {
         let body = convert_u120_term(&body, true)?;
@@ -938,11 +819,7 @@ pub fn convert_u120_entry(entry: CompEntry) -> Result<CompEntry, String> {
         for pat in pats {
             new_pats.push(convert_u120_term(&pat, false)?);
         }
-        new_rules.push(CompRule {
-            name,
-            pats: new_pats,
-            body,
-        });
+        new_rules.push(CompRule { name, pats: new_pats, body });
     }
     Ok(CompEntry {
         name,
@@ -958,33 +835,17 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
         // Swap U120.new by a number
         CompTerm::Ctr { name, args } => {
             if name == "U120.new" {
-                if let (CompTerm::Num { numb: num1 }, CompTerm::Num { numb: num2 }) =
-                    (&*args[0], &*args[1])
-                {
-                    CompTerm::Num {
-                        numb: (num1 << 60) + num2,
-                    }
+                if let (CompTerm::Num { numb: num1 }, CompTerm::Num { numb: num2 }) = (&*args[0], &*args[1]) {
+                    CompTerm::Num { numb: (num1 << 60) + num2 }
                 } else if rhs {
-                    let args = args
-                        .iter()
-                        .map(|x| convert_u120_term(x, rhs))
-                        .collect::<Result<Vec<Box<CompTerm>>, String>>()?;
-                    CompTerm::Fun {
-                        name: name.clone(),
-                        args,
-                    }
+                    let args = args.iter().map(|x| convert_u120_term(x, rhs)).collect::<Result<Vec<Box<CompTerm>>, String>>()?;
+                    CompTerm::Fun { name: name.clone(), args }
                 } else {
                     return Err("Can't compile pattern match on U120 to kindelia".to_string());
                 }
             } else {
-                let args = args
-                    .iter()
-                    .map(|x| convert_u120_term(x, rhs))
-                    .collect::<Result<Vec<Box<CompTerm>>, String>>()?;
-                CompTerm::Ctr {
-                    name: name.clone(),
-                    args,
-                }
+                let args = args.iter().map(|x| convert_u120_term(x, rhs)).collect::<Result<Vec<Box<CompTerm>>, String>>()?;
+                CompTerm::Ctr { name: name.clone(), args }
             }
         }
         // Swap U120 functions by primitive operations
@@ -994,35 +855,21 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
                 let val1 = convert_u120_term(&*args[1], rhs)?;
                 CompTerm::Op2 { oper, val0, val1 }
             } else {
-                let args = args
-                    .iter()
-                    .map(|x| convert_u120_term(x, rhs))
-                    .collect::<Result<Vec<Box<CompTerm>>, String>>()?;
-                CompTerm::Fun {
-                    name: name.clone(),
-                    args,
-                }
+                let args = args.iter().map(|x| convert_u120_term(x, rhs)).collect::<Result<Vec<Box<CompTerm>>, String>>()?;
+                CompTerm::Fun { name: name.clone(), args }
             }
         }
         CompTerm::Var { name: _ } => term.clone(),
         CompTerm::Lam { name, body } => {
             let body = convert_u120_term(body, rhs)?;
-            CompTerm::Lam {
-                name: name.clone(),
-                body,
-            }
+            CompTerm::Lam { name: name.clone(), body }
         }
         CompTerm::App { func, argm } => {
             let func = convert_u120_term(func, rhs)?;
             let argm = convert_u120_term(argm, rhs)?;
             CompTerm::App { func, argm }
         }
-        CompTerm::Dup {
-            nam0,
-            nam1,
-            expr,
-            body,
-        } => {
+        CompTerm::Dup { nam0, nam1, expr, body } => {
             let expr = convert_u120_term(expr, rhs)?;
             let body = convert_u120_term(body, rhs)?;
             CompTerm::Dup {
@@ -1035,21 +882,13 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
         CompTerm::Let { name, expr, body } => {
             let expr = convert_u120_term(expr, rhs)?;
             let body = convert_u120_term(body, rhs)?;
-            CompTerm::Let {
-                name: name.clone(),
-                expr,
-                body,
-            }
+            CompTerm::Let { name: name.clone(), expr, body }
         }
         CompTerm::Num { numb: _ } => term.clone(),
         CompTerm::Op2 { oper, val0, val1 } => {
             let val0 = convert_u120_term(val0, rhs)?;
             let val1 = convert_u120_term(val1, rhs)?;
-            CompTerm::Op2 {
-                oper: *oper,
-                val0,
-                val1,
-            }
+            CompTerm::Op2 { oper: *oper, val0, val1 }
         }
         CompTerm::Nil => {
             return Err("Found nil term during compilation".to_string());

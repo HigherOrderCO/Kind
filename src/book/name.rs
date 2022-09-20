@@ -3,6 +3,7 @@ use std::fmt::{Display, Error, Formatter};
 #[derive(Clone, Debug)]
 pub struct EncodedName(u64);
 
+/// Describes an identifier of the language.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Ident(pub String);
 
@@ -56,6 +57,10 @@ impl Ident {
 
     pub fn new_path(path: &str, name: &str) -> Ident {
         Ident(format!("{}.{}", path, name))
+    }
+
+    pub fn to_path(&self) -> String {
+        self.0.replace('.', "/")
     }
 }
 

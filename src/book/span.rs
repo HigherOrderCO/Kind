@@ -1,6 +1,3 @@
-// Module to describe exact location of things inside
-// a file.
-
 #[derive(Clone, PartialEq, Eq, Copy, Debug)]
 pub struct ByteOffset(pub u32);
 
@@ -28,11 +25,7 @@ impl Span {
 
     #[inline]
     pub fn new_off(start: ByteOffset, end: ByteOffset) -> Span {
-        Span::Localized(SpanData {
-            start,
-            end,
-            file: FileOffset(0),
-        })
+        Span::Localized(SpanData { start, end, file: FileOffset(0) })
     }
 
     pub fn set_file(&self, new_file: FileOffset) -> Span {
@@ -54,11 +47,7 @@ impl Span {
     pub fn encode(&self) -> u64 {
         match self {
             Span::Generated => 0,
-            Span::Localized(data) => {
-                ((data.file.0 as u64) << 48)
-                    | ((data.start.0 as u64) & 0xFFFFFF)
-                    | (((data.end.0 as u64) & 0xFFFFFF) << 24)
-            }
+            Span::Localized(data) => ((data.file.0 as u64) << 48) | ((data.start.0 as u64) & 0xFFFFFF) | (((data.end.0 as u64) & 0xFFFFFF) << 24),
         }
     }
 }

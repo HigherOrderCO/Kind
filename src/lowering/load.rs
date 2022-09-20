@@ -24,10 +24,7 @@ fn load_newtype(name: &Ident) -> Result<Box<NewType>, String> {
     Ok(newtype)
 }
 
-pub fn load_newtype_cached(
-    cache: &mut HashMap<Ident, Rc<NewType>>,
-    name: &Ident,
-) -> Result<Rc<NewType>, String> {
+pub fn load_newtype_cached(cache: &mut HashMap<Ident, Rc<NewType>>, name: &Ident) -> Result<Rc<NewType>, String> {
     if !cache.contains_key(name) {
         let newtype = Rc::new(*load_newtype(name)?);
         cache.insert(name.clone(), newtype);

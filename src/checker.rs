@@ -1,7 +1,7 @@
+use crate::book::{Argument, Book, Entry, Rule};
+use crate::book::term::{Operator, Term};
 use crate::book::name::Ident;
 use crate::book::span::Span;
-use crate::book::term::{Operator, Term};
-use crate::book::{Argument, Book, Entry, Rule};
 
 use std::fmt::Write;
 
@@ -13,7 +13,7 @@ pub fn to_checker_oper(oper: &Operator) -> String {
         Operator::Div => "Kind.Operator.div".to_string(),
         Operator::Mod => "Kind.Operator.mod".to_string(),
         Operator::And => "Kind.Operator.and".to_string(),
-        Operator::Or => "Kind.Operator.or".to_string(),
+        Operator::Or  => "Kind.Operator.or".to_string(),
         Operator::Xor => "Kind.Operator.xor".to_string(),
         Operator::Shl => "Kind.Operator.shl".to_string(),
         Operator::Shr => "Kind.Operator.shr".to_string(),
@@ -48,12 +48,7 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
                 format!("{}", name.clone()) // spaces to align with quoted version
             }
         }
-        Term::All {
-            orig,
-            name,
-            tipo,
-            body,
-        } => {
+        Term::All { orig, name, tipo, body } => {
             format!(
                 "(Kind.Term.all {} {} {} λ{} {})",
                 hide_orig(orig, lhs),
@@ -64,40 +59,21 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
             )
         }
         Term::Lam { orig, name, body } => {
-            format!(
-                "(Kind.Term.lam {} {} λ{} {})",
-                hide_orig(orig, lhs),
-                name.encode(),
-                name,
-                to_checker_term(body, quote, lhs)
-            )
+            format!("(Kind.Term.lam {} {} λ{} {})", hide_orig(orig, lhs), name.encode(), name, to_checker_term(body, quote, lhs))
         }
         Term::App { orig, func, argm } => {
             format!(
                 "({} {} {} {})",
-                if quote {
-                    "Kind.Term.app"
-                } else {
-                    "Kind.Term.eval_app"
-                },
+                if quote { "Kind.Term.app" } else { "Kind.Term.eval_app" },
                 hide_orig(orig, lhs),
                 to_checker_term(func, quote, lhs),
                 to_checker_term(argm, quote, lhs)
             )
         }
-        Term::Let {
-            orig,
-            name,
-            expr,
-            body,
-        } => {
+        Term::Let { orig, name, expr, body } => {
             format!(
                 "({} {} {} {} λ{} {})",
-                if quote {
-                    "Kind.Term.let"
-                } else {
-                    "Kind.Term.eval_let"
-                },
+                if quote { "Kind.Term.let" } else { "Kind.Term.eval_let" },
                 hide_orig(orig, lhs),
                 name.encode(),
                 to_checker_term(expr, quote, lhs),
@@ -108,30 +84,16 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
         Term::Ann { orig, expr, tipo } => {
             format!(
                 "({} {} {} {})",
-                if quote {
-                    "Kind.Term.ann"
-                } else {
-                    "Kind.Term.eval_ann"
-                },
+                if quote { "Kind.Term.ann" } else { "Kind.Term.eval_ann" },
                 hide_orig(orig, lhs),
                 to_checker_term(expr, quote, lhs),
                 to_checker_term(tipo, quote, lhs)
             )
         }
-        Term::Sub {
-            orig,
-            expr,
-            name,
-            indx,
-            redx,
-        } => {
+        Term::Sub { orig, expr, name, indx, redx } => {
             format!(
                 "({} {} {} {} {} {})",
-                if quote {
-                    "Kind.Term.sub"
-                } else {
-                    "Kind.Term.eval_sub"
-                },
+                if quote { "Kind.Term.sub" } else { "Kind.Term.eval_sub" },
                 hide_orig(orig, lhs),
                 name.encode(),
                 indx,
@@ -154,13 +116,7 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
                     args_strs.join("")
                 )
             } else {
-                format!(
-                    "(Kind.Term.ct{} {}. {}{})",
-                    args.len(),
-                    name,
-                    hide_orig(orig, lhs),
-                    args_strs.join("")
-                )
+                format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, hide_orig(orig, lhs), args_strs.join(""))
             }
         }
         Term::Fun { orig, name, args } => {
@@ -179,21 +135,10 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
                         args_strs.join("")
                     )
                 } else {
-                    format!(
-                        "(Kind.Term.fn{} {}. {}{})",
-                        args.len(),
-                        name,
-                        hide_orig(orig, lhs),
-                        args_strs.join("")
-                    )
+                    format!("(Kind.Term.fn{} {}. {}{})", args.len(), name, hide_orig(orig, lhs), args_strs.join(""))
                 }
             } else {
-                format!(
-                    "(F${} {}{})",
-                    name,
-                    hide_orig(orig, lhs),
-                    args_strs.join("")
-                )
+                format!("(F${} {}{})", name, hide_orig(orig, lhs), args_strs.join(""))
             }
         }
         Term::Hlp { orig } => {
@@ -205,19 +150,10 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
         Term::Num { orig, numb } => {
             format!("(Kind.Term.num {} {})", hide_orig(orig, lhs), numb)
         }
-        Term::Op2 {
-            orig,
-            oper,
-            val0,
-            val1,
-        } => {
+        Term::Op2 { orig, oper, val0, val1 } => {
             format!(
                 "({} {} {} {} {})",
-                if quote {
-                    "Kind.Term.op2"
-                } else {
-                    "Kind.Term.eval_op"
-                },
+                if quote { "Kind.Term.op2" } else { "Kind.Term.eval_op" },
                 hide_orig(orig, lhs),
                 to_checker_oper(oper),
                 to_checker_term(val0, quote, lhs),
@@ -233,12 +169,7 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
     }
 }
 
-fn to_checker_rule_chk(
-    rule: &Rule,
-    index: usize,
-    vars: &mut u64,
-    args: &mut Vec<String>,
-) -> String {
+fn to_checker_rule_chk(rule: &Rule, index: usize, vars: &mut u64, args: &mut Vec<String>) -> String {
     if index < rule.pats.len() {
         let (inp_patt_str, var_patt_str) = to_checker_patt_chk(&rule.pats[index], vars);
         args.push(var_patt_str);
@@ -250,10 +181,7 @@ fn to_checker_rule_chk(
             "(Kind.Rule.rhs (QT{} {}. 0{}))",
             index,
             rule.name,
-            args.iter()
-                .map(|x| format!(" {}", x))
-                .collect::<Vec<String>>()
-                .join("")
+            args.iter().map(|x| format!(" {}", x)).collect::<Vec<String>>().join("")
         )
     }
 }
@@ -262,18 +190,8 @@ fn to_checker_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
     // FIXME: remove redundancy
     match patt {
         Term::Var { orig, name } => {
-            let inp = format!(
-                "(Kind.Term.var {} {} {})",
-                orig.encode(),
-                name.encode(),
-                vars
-            );
-            let var = format!(
-                "(Kind.Term.var {} {} {})",
-                orig.encode(),
-                name.encode(),
-                vars
-            );
+            let inp = format!("(Kind.Term.var {} {} {})", orig.encode(), name.encode(), vars);
+            let var = format!("(Kind.Term.var {} {} {})", orig.encode(), name.encode(), vars);
             *vars += 1;
             (inp, var)
         }
@@ -286,38 +204,12 @@ fn to_checker_patt_chk(patt: &Term, vars: &mut u64) -> (String, String) {
                 write!(var_args_str, " {}", var_arg_str).ok();
             }
             if args.len() >= 15 {
-                let inp_str = format!(
-                    "(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))",
-                    args.len(),
-                    name,
-                    orig.encode(),
-                    args.len(),
-                    inp_args_str
-                );
-                let var_str = format!(
-                    "(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))",
-                    args.len(),
-                    name,
-                    orig.encode(),
-                    args.len(),
-                    var_args_str
-                );
+                let inp_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig.encode(), args.len(), inp_args_str);
+                let var_str = format!("(Kind.Term.ct{} {}. {} (Kind.Term.args{}{}))", args.len(), name, orig.encode(), args.len(), var_args_str);
                 (inp_str, var_str)
             } else {
-                let inp_str = format!(
-                    "(Kind.Term.ct{} {}. {}{})",
-                    args.len(),
-                    name,
-                    orig.encode(),
-                    inp_args_str
-                );
-                let var_str = format!(
-                    "(Kind.Term.ct{} {}. {}{})",
-                    args.len(),
-                    name,
-                    orig.encode(),
-                    var_args_str
-                );
+                let inp_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig.encode(), inp_args_str);
+                let var_str = format!("(Kind.Term.ct{} {}. {}{})", args.len(), name, orig.encode(), var_args_str);
                 (inp_str, var_str)
             }
         }
@@ -364,26 +256,8 @@ fn to_checker_rule_end(name: &Ident, size: u64) -> String {
         )
         .ok();
     } else {
-        writeln!(
-            text,
-            "(Q${} orig{}) = (Kind.Term.fn{} {}. orig{})",
-            name,
-            vars.join(""),
-            size,
-            name,
-            vars.join("")
-        )
-        .ok();
-        writeln!(
-            text,
-            "(F${} orig{}) = (Kind.Term.fn{} {}. orig{})",
-            name,
-            vars.join(""),
-            size,
-            name,
-            vars.join("")
-        )
-        .ok();
+        writeln!(text, "(Q${} orig{}) = (Kind.Term.fn{} {}. orig{})", name, vars.join(""), size, name, vars.join("")).ok();
+        writeln!(text, "(F${} orig{}) = (Kind.Term.fn{} {}. orig{})", name, vars.join(""), size, name, vars.join("")).ok();
     }
 
     text
@@ -413,29 +287,11 @@ fn to_checker_rule(rule: &Rule) -> String {
     let body_rhs = to_checker_term(&rule.body, true, false);
     let rule_rhs = to_checker_term(&rule.body, false, false);
     let mut text = String::new();
-    writeln!(
-        text,
-        "(Q${} orig{}) = {}",
-        rule.name,
-        pats.join(""),
-        body_rhs
-    )
-    .ok();
+    writeln!(text, "(Q${} orig{}) = {}", rule.name, pats.join(""), body_rhs).ok();
     if rule.name.0 == "HVM.log" {
-        write!(
-            text,
-            "(F$HVM.log orig a r log ret) = (HVM.put (Kind.Term.show log) ret)"
-        )
-        .ok();
+        write!(text, "(F$HVM.log orig a r log ret) = (HVM.put (Kind.Term.show log) ret)").ok();
     } else {
-        writeln!(
-            text,
-            "(F${} orig{}) = {}",
-            rule.name,
-            pats.join(""),
-            rule_rhs
-        )
-        .ok();
+        writeln!(text, "(F${} orig{}) = {}", rule.name, pats.join(""), rule_rhs).ok();
     }
 
     //for size in 0 .. 9 {
@@ -454,18 +310,9 @@ pub fn to_checker_entry(entry: &Entry) -> String {
     let mut result = String::new();
     writeln!(result, "(NameOf {}.) = \"{}\"", entry.name, entry.name).ok();
     writeln!(result, "(HashOf {}.) = %{}", entry.name, entry.name).ok();
-    writeln!(
-        result,
-        "(TypeOf {}.) = {}",
-        entry.name,
-        to_checker_type(&entry.args, &entry.tipo, 0)
-    )
-    .ok();
+    writeln!(result, "(TypeOf {}.) = {}", entry.name, to_checker_type(&entry.args, &entry.tipo, 0)).ok();
 
-    let base_vars = (0..entry.args.len())
-        .map(|x| format!(" x{}", x))
-        .collect::<Vec<String>>()
-        .join("");
+    let base_vars = (0..entry.args.len()).map(|x| format!(" x{}", x)).collect::<Vec<String>>().join("");
 
     if entry.args.len() >= 15 {
         writeln!(
@@ -492,36 +339,17 @@ pub fn to_checker_entry(entry: &Entry) -> String {
         .ok();
     }
 
-    writeln!(
-        result,
-        "(QT{} {}. orig{}) = (Q${} orig{})",
-        entry.args.len(),
-        entry.name,
-        base_vars,
-        entry.name,
-        base_vars
-    )
-    .ok();
+    writeln!(result, "(QT{} {}. orig{}) = (Q${} orig{})", entry.args.len(), entry.name, base_vars, entry.name, base_vars).ok();
 
     for rule in &entry.rules {
         write!(result, "{}", &to_checker_rule(rule)).ok();
     }
     if !entry.rules.is_empty() {
-        write!(
-            result,
-            "{}",
-            &to_checker_rule_end(&entry.name, entry.rules[0].pats.len() as u64,)
-        )
-        .ok();
+        write!(result, "{}", &to_checker_rule_end(&entry.name, entry.rules[0].pats.len() as u64,)).ok();
     }
     write!(result, "(RuleOf {}.) =", entry.name).ok();
     for rule in &entry.rules {
-        write!(
-            result,
-            " (List.cons {}",
-            to_checker_rule_chk(rule, 0, &mut 0, &mut vec![])
-        )
-        .ok();
+        write!(result, " (List.cons {}", to_checker_rule_chk(rule, 0, &mut 0, &mut vec![])).ok();
     }
     write!(result, " List.nil{}", ")".repeat(entry.rules.len())).ok();
     result
@@ -530,16 +358,8 @@ pub fn to_checker_entry(entry: &Entry) -> String {
 // Vendo oq da pra fazer pra
 pub fn to_checker_book(book: &Book) -> String {
     let mut result = String::new();
-    writeln!(
-        result,
-        "// NOTE: functions with names starting with 'F$' are evaluated differently by the"
-    )
-    .ok();
-    writeln!(
-        result,
-        "// HVM, as a specific optimization targetting Kind2. See 'HOAS_OPT' on HVM's code.\n"
-    )
-    .ok();
+    writeln!(result, "// NOTE: functions with names starting with 'F$' are evaluated differently by the").ok();
+    writeln!(result, "// HVM, as a specific optimization targetting Kind2. See 'HOAS_OPT' on HVM's code.\n").ok();
     writeln!(result, "Functions =").ok();
     writeln!(result, "  let fns = List.nil").ok();
     for name in &book.names {

@@ -1,14 +1,12 @@
 mod loader;
 
-use crate::book::name::Ident;
-use crate::book::new_type::Derived;
-use crate::book::Book;
+use crate::driver::loader::{load, file};
 use crate::checker::to_checker_book;
-use crate::driver::loader::load;
-use crate::driver::loader::File;
-
-use crate::codegen;
 use crate::parser::new_type;
+use crate::book::new_type::Derived;
+use crate::book::name::Ident;
+use crate::book::Book;
+use crate::codegen;
 
 const CHECKER_HVM: &str = include_str!("checker.hvm");
 
@@ -50,9 +48,7 @@ fn inject_highlights(file: &[File], target: &str) -> String {
     // Replaces file ids by names
     loop {
         let mut injected = false;
-        if let (Some(init_file_index), Some(last_file_index)) =
-            (cout.find("{{#F"), cout.find("F#}}"))
-        {
+        if let (Some(init_file_index), Some(last_file_index)) = (cout.find("{{#F"), cout.find("F#}}")) {
             let file_text = &cout[init_file_index + 4..last_file_index];
             let file_numb = file_text.parse::<u64>().unwrap() as usize;
             code.push_str(&cout[0..init_file_index]);
@@ -60,23 +56,14 @@ fn inject_highlights(file: &[File], target: &str) -> String {
             cout = &cout[last_file_index + 4..];
             injected = true;
         }
-        if let (Some(init_range_index), Some(last_range_index)) =
-            (cout.find("{{#R"), cout.find("R#}}"))
-        {
+        if let (Some(init_range_index), Some(last_range_index)) = (cout.find("{{#R"), cout.find("R#}}")) {
             let range_text = &cout[init_range_index + 4..last_range_index];
-            let range_text = range_text
-                .split(':')
-                .map(|x| x.parse::<u64>().unwrap())
-                .collect::<Vec<u64>>();
+            let range_text = range_text.split(':').map(|x| x.parse::<u64>().unwrap()).collect::<Vec<u64>>();
             let range_file = range_text[0] as usize;
             let range_init = range_text[1] as usize;
             let range_last = range_text[2] as usize;
             code.push_str(&cout[0..init_range_index]);
-            code.push_str(&highlight_error::highlight_error(
-                range_init,
-                range_last,
-                &file[range_file].code,
-            ));
+            code.push_str(&highlight_error::highlight_error(range_init, range_last, &file[range_file].code));
             cout = &cout[last_range_index + 4..];
             injected = true;
         }
@@ -103,11 +90,7 @@ pub fn run_with_hvm(code: &str, main: &str, read_string: bool) -> Result<RunResu
     rt.run_io(main);
     rt.normalize(main);
     Ok(RunResult {
-        output: if read_string {
-            readback_string(&rt, main)
-        } else {
-            rt.show(main)
-        },
+        output: if read_string { readback_string(&rt, main) } else { rt.show(main) },
         rewrites: rt.get_rewrites(),
     })
 }
@@ -198,7 +181,7 @@ pub fn cmd_run_main(path: &str) -> Result<(), String> {
 
 pub fn cmd_to_kdl(path: &str) -> Result<(), String> {
     let loaded = load(path)?;
-    let comp_book = codegen::kdl::book::compile_book(&loaded.book)?;
+    let comp_book = codegen::kdl::compile_book(&loaded.book)?;
     let kdl_names = codegen::kdl::get_kdl_names(&comp_book)?;
     let result = codegen::kdl::to_kdl_book(&loaded.book, &kdl_names, &comp_book)?;
     print!("{}", result);

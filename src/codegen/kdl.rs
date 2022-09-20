@@ -1,8 +1,8 @@
-pub mod book;
+mod book;
 
+pub use crate::codegen::kdl::book::*;
 use crate::book::name::Ident;
 use crate::book::Book;
-use crate::codegen::kdl::book::{CompBook, CompEntry, CompRule, CompTerm};
 
 use rand::Rng;
 use std::collections::HashMap;
@@ -21,12 +21,7 @@ pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Resu
             let argm = to_kdl_term(kdl_names, argm)?;
             format!("({} {})", func, argm)
         }
-        CompTerm::Dup {
-            nam0,
-            nam1,
-            expr,
-            body,
-        } => {
+        CompTerm::Dup { nam0, nam1, expr, body } => {
             let expr = to_kdl_term(kdl_names, expr)?;
             let body = to_kdl_term(kdl_names, body)?;
             format!("dup {} {} = {}; {}", nam0, nam1, expr, body)
@@ -38,19 +33,13 @@ pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Resu
         }
         CompTerm::Ctr { name, args } => {
             let kdl_name = kdl_names.get(name).unwrap_or_else(|| panic!("{}", name));
-            let args = args
-                .iter()
-                .map(|x| to_kdl_term(kdl_names, x))
-                .collect::<Result<Vec<String>, String>>()?;
+            let args = args.iter().map(|x| to_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
             let args = args.iter().map(|x| format!(" {}", x)).collect::<String>();
             format!("{{{}{}}}", kdl_name, args)
         }
         CompTerm::Fun { name, args } => {
             let kdl_name = kdl_names.get(name).unwrap_or_else(|| panic!("{}", name));
-            let args = args
-                .iter()
-                .map(|x| to_kdl_term(kdl_names, x))
-                .collect::<Result<Vec<String>, String>>()?;
+            let args = args.iter().map(|x| to_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
             let args = args.iter().map(|x| format!(" {}", x)).collect::<String>();
             format!("({}{})", kdl_name, args)
         }
@@ -69,11 +58,7 @@ pub fn to_kdl_term(kdl_names: &HashMap<String, String>, term: &CompTerm) -> Resu
     Ok(term)
 }
 
-pub fn to_kdl_rule(
-    _book: &Book,
-    kdl_names: &HashMap<String, String>,
-    rule: &CompRule,
-) -> Result<String, String> {
+pub fn to_kdl_rule(_book: &Book, kdl_names: &HashMap<String, String>, rule: &CompRule) -> Result<String, String> {
     let name = &rule.name;
     let kdl_name = kdl_names.get(name).unwrap();
     let mut pats = vec![]; // stringified pattern args
@@ -87,27 +72,16 @@ pub fn to_kdl_rule(
     Ok(rule)
 }
 
-pub fn to_kdl_entry(
-    book: &Book,
-    kdl_names: &HashMap<String, String>,
-    entry: &CompEntry,
-) -> Result<String, String> {
+pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<String, String>, entry: &CompEntry) -> Result<String, String> {
     let entry = match entry.name.as_str() {
         // Main is compiled to a run block
         // TODO: Maybe we should have run blocks come from a specific type of function instead
         // TODO: run statements should always come last in the block
-        "Main" => format!(
-            "run {{\n  {}\n}}\n\n",
-            to_kdl_term(kdl_names, &*entry.rules[0].body)?
-        ),
+        "Main" => format!("run {{\n  {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?),
 
         _ => {
             let kdl_name = kdl_names.get(&entry.name).unwrap();
-            let args_names = entry
-                .args
-                .iter()
-                .map(|arg| format!(" {}", arg))
-                .collect::<String>();
+            let args_names = entry.args.iter().map(|arg| format!(" {}", arg)).collect::<String>();
             // If this entry existed in the original kind code, add some annotations as comments
             let kind_entry = book.entrs.get(&Ident(entry.name.clone()));
             let is_knd_ent = matches!(kind_entry, Some(_));
@@ -116,14 +90,7 @@ pub fn to_kdl_entry(
                 let args_typed = kind_entry
                     .args
                     .iter()
-                    .map(|arg| {
-                        format!(
-                            " {}({}: {})",
-                            if arg.eras { "-" } else { "" },
-                            arg.name,
-                            &arg.tipo
-                        )
-                    })
+                    .map(|arg| format!(" {}({}: {})", if arg.eras { "-" } else { "" }, arg.name, &arg.tipo))
                     .collect::<String>();
                 let kind_name = format!("{} #{}", entry.name, kdl_name);
                 format!("// {}{} : {}\n", kind_name, args_typed, &kind_entry.tipo)
@@ -139,12 +106,7 @@ pub fn to_kdl_entry(
                 for rule in &entry.rules {
                     rules.push(format!("\n  {}", to_kdl_rule(book, kdl_names, rule)?));
                 }
-                format!(
-                    "fun ({}{}) {{{}\n}}\n\n",
-                    kdl_name,
-                    args_names,
-                    rules.join("")
-                )
+                format!("fun ({}{}) {{{}\n}}\n\n", kdl_name, args_names, rules.join(""))
             };
             cmnt + &fun
         }
@@ -152,11 +114,7 @@ pub fn to_kdl_entry(
     Ok(entry)
 }
 
-pub fn to_kdl_book(
-    book: &Book,
-    kdl_names: &HashMap<String, String>,
-    comp_book: &CompBook,
-) -> Result<String, String> {
+pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: &CompBook) -> Result<String, String> {
     let mut lines = vec![];
     for name in &comp_book.names {
         let entry = comp_book.entrs.get(name).unwrap();
@@ -176,17 +134,9 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
     // Fails if the namespace is too large.
     fn rand_shorten(name: &String) -> Result<String, String> {
         let (ns, fun) = name.rsplit_once('.').unwrap_or(("", name));
-        let ns = if !ns.is_empty() {
-            format!("{}.", ns)
-        } else {
-            ns.to_string()
-        };
+        let ns = if !ns.is_empty() { format!("{}.", ns) } else { ns.to_string() };
         if ns.len() > KDL_NAME_LEN - 1 {
-            let err = format!(
-                "Namespace for \"{}\" has more than {} characters.",
-                name,
-                KDL_NAME_LEN - 1
-            );
+            let err = format!("Namespace for \"{}\" has more than {} characters.", name, KDL_NAME_LEN - 1);
             return Err(err);
         }
         let max_fn_name = KDL_NAME_LEN - ns.len();
@@ -195,10 +145,7 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
             let n_rnd_chrs = usize::min(3, max_fn_name);
             let fun_cut = fun[..max_fn_name - n_rnd_chrs].to_string();
             let mut rng = rand::thread_rng();
-            let rnd_chrs = (0..n_rnd_chrs)
-                .map(|_| rng.gen_range(0..63))
-                .map(encode_base64)
-                .collect::<String>();
+            let rnd_chrs = (0..n_rnd_chrs).map(|_| rng.gen_range(0..63)).map(encode_base64).collect::<String>();
             format!("{}{}", fun_cut, rnd_chrs)
         } else {
             fun.to_string()
@@ -212,20 +159,12 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
             Some(kdln) => {
                 // If the entry uses a kindelia name, use it
                 if !kdln.chars().next().unwrap().is_uppercase() {
-                    let err = format!(
-                        "Kindelia name \"{}\" doesn't start with an uppercase letter.",
-                        kdln
-                    );
+                    let err = format!("Kindelia name \"{}\" doesn't start with an uppercase letter.", kdln);
                     return Err(err);
                 }
                 if entry.orig {
                     if kdln.len() > KDL_NAME_LEN {
-                        let err = format!(
-                            "Kindelia name \"{}\" for \"{}\" has more than {} characters.",
-                            kdln,
-                            kind_name,
-                            KDL_NAME_LEN - 1
-                        );
+                        let err = format!("Kindelia name \"{}\" for \"{}\" has more than {} characters.", kdln, kind_name, KDL_NAME_LEN - 1);
                         return Err(err);
                     }
                     kdln.clone()
