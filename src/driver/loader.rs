@@ -5,6 +5,8 @@ use crate::book::Book;
 use crate::lowering::adjust::AdjustErrorKind;
 use crate::parser::read_book;
 
+use super::config::Config;
+
 pub struct File {
     pub path: String,
     pub code: String,
@@ -74,7 +76,7 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
     Ok(())
 }
 
-pub fn load(name: &str) -> Result<Load, String> {
+pub fn load(config: Config, name: &str) -> Result<Load, String> {
     let mut load = Load::new_empty();
 
     if !std::path::Path::new(name).is_file() {
@@ -88,11 +90,12 @@ pub fn load(name: &str) -> Result<Load, String> {
             load.book = book;
         }
         Err(err) => {
-            let high_line = if let Span::Localized(SpanData { file, start, end }) = err.orig {
-                highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code)
-            } else {
-                "".to_string()
-            };
+            let high_line =
+                match err.orig {
+                    Span::Localized(SpanData { file, start, end }) if !config.no_high_line =>
+                        highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code),
+                    _ =>  "".to_string()
+                };
             return match err.kind {
                 AdjustErrorKind::IncorrectArity => Err(format!("Incorrect arity.\n{}", high_line)),
                 AdjustErrorKind::UnboundVariable { name } => Err(format!("Unbound variable '{}'.\n{}", name, high_line)),
