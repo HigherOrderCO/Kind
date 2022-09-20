@@ -1,6 +1,6 @@
 use crate::book::name::Ident;
 use crate::book::term::{Term, Operator};
-use crate::book::{Entry, Rule}
+use crate::book::{Entry, Rule};
 use crate::codegen::kdl::Book;
 
 use std::collections::HashMap;

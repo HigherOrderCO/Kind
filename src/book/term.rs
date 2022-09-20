@@ -232,7 +232,7 @@ impl Localized for Term {
                 func.set_origin_file(file);
                 argm.set_origin_file(file);
             }
-            Mat { orig, expr, cses, moti } => {
+            Mat { orig, expr, cses, moti, .. } => {
                 *orig = orig.set_file(file);
                 expr.set_origin_file(file);
                 for cse in cses {
