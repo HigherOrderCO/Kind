@@ -1,6 +1,6 @@
-use hvm::parser;
-
 use crate::book::span::ByteOffset;
+
+use hvm::parser;
 
 pub fn is_ctr_head(head: char) -> bool {
     ('A'..='Z').contains(&head)

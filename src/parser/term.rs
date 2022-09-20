@@ -1,11 +1,16 @@
-use hvm::parser;
-
-use crate::book::name::Ident;
+use crate::parser::utils::{get_init_index, get_last_index, is_ctr_head};
 use crate::book::span::{ByteOffset, Span};
 use crate::book::term::{Operator, Term};
-use crate::parser::utils::{get_init_index, get_last_index, is_ctr_head};
+use crate::book::name::Ident;
 
-pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+use hvm::parser::{Answer, State};
+use hvm::parser;
+
+type TermPrefix = Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>;
+
+type TermComplete = Box<dyn Fn(&str) -> Box<Term>>;
+
+pub fn parse_var(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| Ok((state, true))),
         Box::new(|state| {
@@ -16,20 +21,14 @@ pub fn parse_var(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             if let Ok(numb) = name.parse::<u64>() {
                 Ok((state, Box::new(Term::Num { orig, numb })))
             } else {
-                Ok((
-                    state,
-                    Box::new(Term::Var {
-                        orig,
-                        name: Ident(name),
-                    }),
-                ))
+                Ok((state, Box::new(Term::Var { orig, name: Ident(name) })))
             }
         }),
         state,
     )
 }
 
-pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_hol(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         parser::text_parser("_"),
         Box::new(|state| {
@@ -43,7 +42,7 @@ pub fn parse_hol(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_hlp(state: State) -> Answer<Option<Box<Term>>> {
     return parser::guard(
         parser::text_parser("?"),
         Box::new(|state| {
@@ -58,7 +57,7 @@ pub fn parse_hlp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     );
 }
 
-pub fn parse_str(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_str(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| {
             let (state, head) = parser::get_char(state)?;
@@ -94,13 +93,7 @@ pub fn parse_str(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             let list = Box::new(chars.iter().rfold(empty, |t, h| Term::Ctr {
                 orig,
                 name: Ident::new_path("String", "cons"),
-                args: vec![
-                    Box::new(Term::Num {
-                        orig,
-                        numb: *h as u64,
-                    }),
-                    Box::new(t),
-                ],
+                args: vec![Box::new(Term::Num { orig, numb: *h as u64 }), Box::new(t)],
             }));
 
             Ok((state, list))
@@ -109,7 +102,7 @@ pub fn parse_str(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_grp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_grp(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         parser::text_parser("("),
         Box::new(|state| {
@@ -122,7 +115,7 @@ pub fn parse_grp(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
+pub fn parse_apps(state: State) -> Answer<Box<Term>> {
     let (state, init) = get_init_index(state)?;
     let (mut state, mut term) = parse_term(state)?;
     loop {
@@ -138,11 +131,7 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
             let (loop_state, argm) = parse_term(loop_state)?;
             let (loop_state, last) = get_last_index(loop_state)?;
             let orig = Span::new_off(init, last);
-            term = Box::new(Term::App {
-                orig,
-                func: term,
-                argm,
-            });
+            term = Box::new(Term::App { orig, func: term, argm });
             state = loop_state;
         } else {
             state = loop_state;
@@ -152,9 +141,7 @@ pub fn parse_apps(state: parser::State) -> parser::Answer<Box<Term>> {
     Ok((state, term))
 }
 
-pub fn parse_ann(
-    state: parser::State,
-) -> parser::Answer<Option<Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>>> {
+pub fn parse_ann(state: State) -> Answer<Option<TermPrefix>> {
     return parser::guard(
         parser::text_parser("::"),
         Box::new(|state| {
@@ -175,7 +162,7 @@ pub fn parse_ann(
     );
 }
 
-pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
+pub fn parse_term_prefix(state: State) -> Answer<Box<Term>> {
     // NOTE: all characters that can start a term must be listed on `parse_term_applys()`
     parser::grammar(
         "Term",
@@ -203,9 +190,7 @@ pub fn parse_term_prefix(state: parser::State) -> parser::Answer<Box<Term>> {
     )
 }
 
-pub fn parse_term_suffix(
-    state: parser::State,
-) -> parser::Answer<Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>> {
+pub fn parse_term_suffix(state: State) -> Answer<TermPrefix> {
     parser::grammar(
         "Term",
         &[
@@ -218,9 +203,7 @@ pub fn parse_term_suffix(
     )
 }
 
-pub fn parse_arr(
-    state: parser::State,
-) -> parser::Answer<Option<Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>>> {
+pub fn parse_arr(state: State) -> Answer<Option<TermPrefix>> {
     return parser::guard(
         parser::text_parser("->"),
         Box::new(|state| {
@@ -246,9 +229,7 @@ pub fn parse_arr(
     );
 }
 
-pub fn parse_sub(
-    state: parser::State,
-) -> parser::Answer<Option<Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>>> {
+pub fn parse_sub(state: State) -> Answer<Option<TermPrefix>> {
     return parser::guard(
         parser::text_parser("##"),
         Box::new(|state| {
@@ -282,9 +263,7 @@ pub fn parse_sub(
     );
 }
 
-pub fn parse_let_st(
-    state: parser::State,
-) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
+pub fn parse_let_st(state: State) -> Answer<Option<TermComplete>> {
     return parser::guard(
         parser::text_parser("let "),
         Box::new(|state| {
@@ -313,9 +292,7 @@ pub fn parse_let_st(
     );
 }
 
-pub fn parse_return_st(
-    state: parser::State,
-) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
+pub fn parse_return_st(state: State) -> Answer<Option<TermComplete>> {
     return parser::guard(
         parser::text_parser("return "),
         Box::new(move |state| {
@@ -339,9 +316,7 @@ pub fn parse_return_st(
     );
 }
 
-pub fn parse_ask_named_st(
-    state: parser::State,
-) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
+pub fn parse_ask_named_st(state: State) -> Answer<Option<TermComplete>> {
     parser::guard(
         Box::new(|state| {
             let (state, all0) = parser::text("ask ", state)?;
@@ -380,9 +355,7 @@ pub fn parse_ask_named_st(
     )
 }
 
-pub fn parse_ask_anon_st(
-    state: parser::State,
-) -> parser::Answer<Option<Box<dyn Fn(&str) -> Box<Term>>>> {
+pub fn parse_ask_anon_st(state: State) -> Answer<Option<TermComplete>> {
     parser::guard(
         parser::text_parser("ask "),
         Box::new(move |state| {
@@ -415,7 +388,7 @@ pub fn parse_ask_anon_st(
     )
 }
 
-pub fn parse_term_st(state: parser::State) -> parser::Answer<Box<dyn Fn(&str) -> Box<Term>>> {
+pub fn parse_term_st(state: State) -> Answer<TermComplete> {
     parser::grammar(
         "Statement",
         &[
@@ -432,14 +405,14 @@ pub fn parse_term_st(state: parser::State) -> parser::Answer<Box<dyn Fn(&str) ->
     )
 }
 
-pub fn parse_term(state: parser::State) -> parser::Answer<Box<Term>> {
+pub fn parse_term(state: State) -> Answer<Box<Term>> {
     let (state, init) = get_init_index(state)?;
     let (state, prefix) = parse_term_prefix(state)?;
     let (state, suffix) = parse_term_suffix(state)?;
     Ok((state, suffix(init, prefix)))
 }
 
-pub fn parse_do(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_do(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         parser::text_parser("do "),
         Box::new(|state| {
@@ -454,7 +427,7 @@ pub fn parse_do(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_mat(state: State) -> Answer<Option<Box<Term>>> {
     return parser::guard(
         parser::text_parser("match "),
         Box::new(|state| {
@@ -496,13 +469,7 @@ pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 let (state, moti) = parse_apps(state)?;
                 (state, moti)
             } else {
-                (
-                    state,
-                    Box::new(Term::Hol {
-                        orig: Span::generated(),
-                        numb: 0,
-                    }),
-                )
+                (state, Box::new(Term::Hol { orig: Span::generated(), numb: 0 }))
             };
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
@@ -522,7 +489,7 @@ pub fn parse_mat(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     );
 }
 
-pub fn peek_char_local(state: parser::State) -> parser::Answer<char> {
+pub fn peek_char_local(state: State) -> Answer<char> {
     let (state, _) = parser::skip_while(state, Box::new(|x| *x == ' '))?;
     if let Some(got) = parser::head(state) {
         Ok((state, got))
@@ -531,7 +498,7 @@ pub fn peek_char_local(state: parser::State) -> parser::Answer<char> {
     }
 }
 
-pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_all(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| {
             let (state, all0) = parser::text("(", state)?;
@@ -589,7 +556,7 @@ pub fn parse_all(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_if(state: State) -> Answer<Option<Box<Term>>> {
     return parser::guard(
         parser::text_parser("if "),
         Box::new(|state| {
@@ -619,7 +586,7 @@ pub fn parse_if(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     );
 }
 
-pub fn parse_let(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_let(state: State) -> Answer<Option<Box<Term>>> {
     return parser::guard(
         parser::text_parser("let "),
         Box::new(|state| {
@@ -646,7 +613,7 @@ pub fn parse_let(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     );
 }
 
-pub fn parse_lam(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_lam(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| {
             let (state, name) = parser::name(state)?;
@@ -661,20 +628,13 @@ pub fn parse_lam(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             let (state, body) = parse_apps(state)?;
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
-            Ok((
-                state,
-                Box::new(Term::Lam {
-                    orig,
-                    name: Ident(name),
-                    body,
-                }),
-            ))
+            Ok((state, Box::new(Term::Lam { orig, name: Ident(name), body })))
         }),
         state,
     )
 }
 
-pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_lst(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| {
             let (state, head) = parser::get_char(state)?;
@@ -711,7 +671,7 @@ pub fn parse_lst(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_new(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_new(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         parser::text_parser("$"),
         Box::new(move |state| {
@@ -726,12 +686,7 @@ pub fn parse_new(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 Box::new(Term::Ctr {
                     orig,
                     name: Ident::new_path("Sigma", "new"),
-                    args: vec![
-                        Box::new(Term::Hol { orig, numb: 0 }),
-                        Box::new(Term::Hol { orig, numb: 0 }),
-                        val0,
-                        val1,
-                    ],
+                    args: vec![Box::new(Term::Hol { orig, numb: 0 }), Box::new(Term::Hol { orig, numb: 0 }), val0, val1],
                 }),
             ))
         }),
@@ -739,7 +694,7 @@ pub fn parse_new(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_ctr(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| {
             let (state, open) = parser::text("(", state)?;
@@ -758,20 +713,13 @@ pub fn parse_ctr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             };
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
-            Ok((
-                state,
-                Box::new(Term::Ctr {
-                    orig,
-                    name: Ident(name),
-                    args,
-                }),
-            ))
+            Ok((state, Box::new(Term::Ctr { orig, name: Ident(name), args })))
         }),
         state,
     )
 }
 
-pub fn parse_chr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_chr(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| {
             let (state, head) = parser::get_char(state)?;
@@ -785,13 +733,7 @@ pub fn parse_chr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             if let Some(c) = parser::head(state) {
                 let state = parser::tail(state);
                 let (state, _) = parser::text("'", state)?;
-                Ok((
-                    state,
-                    Box::new(Term::Num {
-                        orig,
-                        numb: c as u64,
-                    }),
-                ))
+                Ok((state, Box::new(Term::Num { orig, numb: c as u64 })))
             } else {
                 parser::expected("character", 1, state)
             }
@@ -800,14 +742,11 @@ pub fn parse_chr(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
     )
 }
 
-pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_op2(state: State) -> Answer<Option<Box<Term>>> {
     fn is_op_char(chr: char) -> bool {
-        matches!(
-            chr,
-            '+' | '-' | '*' | '/' | '%' | '&' | '|' | '^' | '<' | '>' | '=' | '!'
-        )
+        matches!(chr, '+' | '-' | '*' | '/' | '%' | '&' | '|' | '^' | '<' | '>' | '=' | '!')
     }
-    fn parse_oper(state: parser::State) -> parser::Answer<Operator> {
+    fn parse_oper(state: State) -> Answer<Operator> {
         fn op<'a>(symbol: &'static str, oper: Operator) -> parser::Parser<'a, Option<Operator>> {
             Box::new(move |state| {
                 let (state, done) = parser::text(symbol, state)?;
@@ -852,21 +791,13 @@ pub fn parse_op2(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
             let (state, _) = parser::consume(")", state)?;
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
-            Ok((
-                state,
-                Box::new(Term::Op2 {
-                    orig,
-                    oper,
-                    val0,
-                    val1,
-                }),
-            ))
+            Ok((state, Box::new(Term::Op2 { orig, oper, val0, val1 })))
         }),
         state,
     )
 }
 
-pub fn parse_sig(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
+pub fn parse_sig(state: State) -> Answer<Option<Box<Term>>> {
     parser::guard(
         Box::new(|state| {
             let (state, all0) = parser::text("[", state)?;
@@ -891,14 +822,7 @@ pub fn parse_sig(state: parser::State) -> parser::Answer<Option<Box<Term>>> {
                 Box::new(Term::Ctr {
                     orig,
                     name: Ident("Sigma".to_string()),
-                    args: vec![
-                        tipo,
-                        Box::new(Term::Lam {
-                            orig,
-                            name: Ident(name),
-                            body,
-                        }),
-                    ],
+                    args: vec![tipo, Box::new(Term::Lam { orig, name: Ident(name), body })],
                 }),
             ))
         }),

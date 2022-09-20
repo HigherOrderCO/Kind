@@ -82,11 +82,7 @@ fn convert_apps_to_ctr(term: &Term) -> Option<Term> {
     let mut ctr_args = vec![];
     loop {
         match term {
-            Term::App {
-                ref orig,
-                ref func,
-                ref argm,
-            } => {
+            Term::App { ref orig, ref func, ref argm } => {
                 ctr_args.push(argm);
                 if ctr_orig == Span::Generated {
                     ctr_orig = *orig;
@@ -132,9 +128,7 @@ impl Adjust for Term {
                 if rhs && !state.vars.iter().any(|x| x == name) {
                     return Err(AdjustError {
                         orig,
-                        kind: AdjustErrorKind::UnboundVariable {
-                            name: name.to_string(),
-                        },
+                        kind: AdjustErrorKind::UnboundVariable { name: name.to_string() },
                     });
                 } else if !rhs && state.vars.iter().any(|x| x == name) {
                     return Err(AdjustError {
@@ -144,10 +138,7 @@ impl Adjust for Term {
                 } else if !rhs {
                     state.vars.push(name.clone());
                 }
-                Ok(Term::Var {
-                    orig,
-                    name: name.clone(),
-                })
+                Ok(Term::Var { orig, name: name.clone() })
             }
             Term::Let {
                 ref orig,
@@ -167,11 +158,7 @@ impl Adjust for Term {
                     body,
                 })
             }
-            Term::Ann {
-                ref orig,
-                ref expr,
-                ref tipo,
-            } => {
+            Term::Ann { ref orig, ref expr, ref tipo } => {
                 let orig = *orig;
                 let expr = Box::new(expr.adjust(rhs, state)?);
                 let tipo = Box::new(tipo.adjust(rhs, state)?);
@@ -189,21 +176,13 @@ impl Adjust for Term {
                 match state.vars.iter().position(|x| x == name) {
                     None => Err(AdjustError {
                         orig,
-                        kind: AdjustErrorKind::UnboundVariable {
-                            name: name.to_string(),
-                        },
+                        kind: AdjustErrorKind::UnboundVariable { name: name.to_string() },
                     }),
                     Some(indx) => {
                         let name = name.clone();
                         let indx = indx as u64;
                         let redx = *redx;
-                        Ok(Term::Sub {
-                            orig,
-                            name,
-                            indx,
-                            redx,
-                            expr,
-                        })
+                        Ok(Term::Sub { orig, name, indx, redx, expr })
                     }
                 }
             }
@@ -225,36 +204,20 @@ impl Adjust for Term {
                     body,
                 })
             }
-            Term::Lam {
-                ref orig,
-                ref name,
-                ref body,
-            } => {
+            Term::Lam { ref orig, ref name, ref body } => {
                 let orig = *orig;
                 state.vars.push(name.clone());
                 let body = Box::new(body.adjust(rhs, state)?);
                 state.vars.pop();
-                Ok(Term::Lam {
-                    orig,
-                    name: name.clone(),
-                    body,
-                })
+                Ok(Term::Lam { orig, name: name.clone(), body })
             }
-            Term::App {
-                ref orig,
-                ref func,
-                ref argm,
-            } => {
+            Term::App { ref orig, ref func, ref argm } => {
                 let orig = *orig;
                 let func = Box::new(func.adjust(rhs, state)?);
                 let argm = Box::new(argm.adjust(rhs, state)?);
                 Ok(Term::App { orig, func, argm })
             }
-            Term::Ctr {
-                ref orig,
-                ref name,
-                ref args,
-            } => {
+            Term::Ctr { ref orig, ref name, ref args } => {
                 let orig = *orig;
                 if let Some(entry) = state.book.entrs.get(name) {
                     let mut new_args = Vec::new();
@@ -263,10 +226,7 @@ impl Adjust for Term {
                         if let (false, Term::Hol { orig, numb: _ }) = (rhs, &**arg) {
                             let name = format!("x{}_", state.eras);
                             state.eras += 1;
-                            let arg = Box::new(Term::Var {
-                                orig: *orig,
-                                name: Ident(name),
-                            });
+                            let arg = Box::new(Term::Var { orig: *orig, name: Ident(name) });
                             new_args.push(Box::new(arg.adjust(rhs, state)?));
                         } else {
                             new_args.push(Box::new(arg.adjust(rhs, state)?));
@@ -296,10 +256,7 @@ impl Adjust for Term {
                             if arg.eras {
                                 let name = format!("{}{}_", arg.name, state.eras);
                                 state.eras += 1;
-                                let arg = Term::Var {
-                                    orig,
-                                    name: Ident(name),
-                                };
+                                let arg = Term::Var { orig, name: Ident(name) };
                                 aux_args.push(Box::new(arg.adjust(rhs, state)?));
                             } else {
                                 aux_args.push(new_args.pop().unwrap());
@@ -328,9 +285,7 @@ impl Adjust for Term {
                 } else {
                     Err(AdjustError {
                         orig,
-                        kind: AdjustErrorKind::UnboundVariable {
-                            name: name.to_string(),
-                        },
+                        kind: AdjustErrorKind::UnboundVariable { name: name.to_string() },
                     })
                 }
             }
@@ -366,12 +321,7 @@ impl Adjust for Term {
                 let oper = *oper;
                 let val0 = Box::new(val0.adjust(rhs, state)?);
                 let val1 = Box::new(val1.adjust(rhs, state)?);
-                Ok(Term::Op2 {
-                    orig,
-                    oper,
-                    val0,
-                    val1,
-                })
+                Ok(Term::Op2 { orig, oper, val0, val1 })
             }
             Term::Mat {
                 ref orig,
@@ -480,12 +430,7 @@ impl Adjust for Rule {
             });
         }
         let body = Box::new(self.body.adjust(true, state)?);
-        Ok(Rule {
-            orig,
-            name,
-            pats,
-            body,
-        })
+        Ok(Rule { orig, name, pats, body })
     }
 }
 
@@ -550,10 +495,6 @@ impl Book {
             entrs.insert(ident, Box::new(entry.adjust(false, &mut state)?));
         }
 
-        Ok(Book {
-            names,
-            entrs,
-            holes: state.holes,
-        })
+        Ok(Book { names, entrs, holes: state.holes })
     }
 }

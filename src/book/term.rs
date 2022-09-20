@@ -1,8 +1,5 @@
-// Module that describes terms and operators
-// of the language
-
 use crate::book::name::Ident;
-use crate::book::span::{Span, Localized, FileOffset};
+use crate::book::span::{FileOffset, Localized, Span};
 
 use std::ascii;
 use std::fmt::{Display, Error, Formatter};
@@ -44,7 +41,7 @@ pub enum Term {
     Num { orig: Span, numb: u64 },
     Op2 { orig: Span, oper: Operator, val0: Box<Term>, val1: Box<Term> },
     Hol { orig: Span, numb: u64 },
-    Mat { orig: Span, tipo: Ident, name: Ident, expr: Box<Term>, cses: Vec<(Ident,Box<Term>)>, moti: Box<Term> },
+    Mat { orig: Span, tipo: Ident, name: Ident, expr: Box<Term>, cses: Vec<(Ident, Box<Term>)>, moti: Box<Term> },
 }
 
 impl Term {
@@ -80,7 +77,7 @@ impl Term {
 
 impl Display for Operator {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-		use Operator::*;
+        use Operator::*;
 
         match self {
             Add => write!(f, "*"),
@@ -103,42 +100,27 @@ impl Display for Operator {
     }
 }
 
-
 impl Display for Term {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         if let Some(str) = self.interpret_as_string() {
             write!(f, "\"{}\"", str)
         } else {
-			use Term::*;
+            use Term::*;
             match self {
-                Typ { orig: _ } =>
-					write!(f, "Type"),
-                Hlp { orig: _ } =>
-					write!(f, "?"),
-                U60 { orig: _ } =>
-					write!(f, "U60"),
-                Hol { orig: _, .. } =>
-					write!(f, "_"),
-                Var { orig: _, name } =>
-					write!(f, "{}", name),
-                Num { orig: _, numb } =>
-					write!(f, "{}", numb),
-                Lam { orig: _, name, body } =>
-					write!(f, "({} => {})", name, body),
-				Ann { orig: _, expr, tipo } =>
-					write!(f, "({} :: {})", expr, tipo),
-                Op2 { orig: _, oper, val0, val1 } =>
-					write!(f, "({} {} {})", oper, val0, val1),
-				All { orig: _, name, tipo, body } =>
-					write!(f, "(({}: {}) {})", name, tipo, body),
-				Let { orig: _, name, expr, body } =>
-					write!(f, "(let {} = {}; {})", name, expr, body),
-				Sub { orig: _, name, indx: _, redx, expr } =>
-					write!(f, "({} ## {}/{})", expr, name, redx),
-				Ctr { orig: _, name, args } =>
-					write!(f, "({}{})", name, args.iter().map(|x| format!(" {}", x)).collect::<String>()),
-				Fun { orig: _, name, args } =>
-					write!(f, "({}{})", name, args.iter().map(|x| format!(" {}", x)).collect::<String>()),
+                Typ { orig: _ } => write!(f, "Type"),
+                Hlp { orig: _ } => write!(f, "?"),
+                U60 { orig: _ } => write!(f, "U60"),
+                Hol { orig: _, .. } => write!(f, "_"),
+                Var { orig: _, name } => write!(f, "{}", name),
+                Num { orig: _, numb } => write!(f, "{}", numb),
+                Lam { orig: _, name, body } => write!(f, "({} => {})", name, body),
+                Ann { orig: _, expr, tipo } => write!(f, "({} :: {})", expr, tipo),
+                Op2 { orig: _, oper, val0, val1 } => write!(f, "({} {} {})", oper, val0, val1),
+                All { orig: _, name, tipo, body } => write!(f, "(({}: {}) {})", name, tipo, body),
+                Let { orig: _, name, expr, body } => write!(f, "(let {} = {}; {})", name, expr, body),
+                Sub { name, redx, expr, .. } => write!(f, "({} ## {}/{})", expr, name, redx),
+                Ctr { orig: _, name, args } => write!(f, "({}{})", name, args.iter().map(|x| format!(" {}", x)).collect::<String>()),
+                Fun { orig: _, name, args } => write!(f, "({}{})", name, args.iter().map(|x| format!(" {}", x)).collect::<String>()),
                 App { func, argm, .. } => {
                     let mut args = vec![argm];
                     let mut expr = func;
@@ -149,7 +131,7 @@ impl Display for Term {
                     args.reverse();
                     write!(f, "({} {})", expr, args.iter().map(|x| format!("{}", x)).collect::<Vec<String>>().join(" "))
                 }
-				Mat { .. } => panic!("Internal Error: Cannot display a Term::Mat because it's removed after adjust.")
+                Mat { .. } => panic!("Internal Error: Cannot display a Term::Mat because it's removed after adjust."),
             }
         }
     }
@@ -174,7 +156,7 @@ impl Localized for Term {
             Ctr { orig, .. } => *orig,
             Fun { orig, .. } => *orig,
             App { orig, .. } => *orig,
-            Mat { orig, .. } => *orig
+            Mat { orig, .. } => *orig,
         }
     }
 
@@ -208,32 +190,38 @@ impl Localized for Term {
                 expr.set_origin_file(file);
                 tipo.set_origin_file(file);
             }
-            Op2 { orig, oper:_, val0, val1 } => {
+            Op2 { orig, oper: _, val0, val1 } => {
                 *orig = orig.set_file(file);
                 val0.set_origin_file(file);
                 val1.set_origin_file(file);
             }
-            All { orig, name:_, tipo, body } => {
+            All { orig, name: _, tipo, body } => {
                 *orig = orig.set_file(file);
                 tipo.set_origin_file(file);
                 body.set_origin_file(file);
             }
-            Let { orig, name:_, expr, body } => {
+            Let { orig, name: _, expr, body } => {
                 *orig = orig.set_file(file);
                 expr.set_origin_file(file);
                 body.set_origin_file(file);
             }
-            Sub { orig, name:_, indx:_, redx:_, expr } => {
+            Sub {
+                orig,
+                name: _,
+                indx: _,
+                redx: _,
+                expr,
+            } => {
                 *orig = orig.set_file(file);
                 expr.set_origin_file(file);
             }
-            Ctr { orig, name:_, args } => {
+            Ctr { orig, name: _, args } => {
                 *orig = orig.set_file(file);
                 for arg in args {
                     arg.set_origin_file(file);
                 }
             }
-            Fun { orig, name:_, args } => {
+            Fun { orig, name: _, args } => {
                 *orig = orig.set_file(file);
                 for arg in args {
                     arg.set_origin_file(file);
@@ -244,7 +232,7 @@ impl Localized for Term {
                 func.set_origin_file(file);
                 argm.set_origin_file(file);
             }
-            Mat { orig, tipo:_, name:_, expr, cses, moti } => {
+            Mat { orig, expr, cses, moti } => {
                 *orig = orig.set_file(file);
                 expr.set_origin_file(file);
                 for cse in cses {

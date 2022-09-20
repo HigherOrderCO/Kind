@@ -1,24 +1,18 @@
-pub mod term;
-
 pub mod new_type;
-
+pub mod term;
 pub mod utils;
 
-use crate::book::name::Ident;
-use crate::book::span::{ByteOffset, Span};
-use crate::book::term::Term;
-use crate::book::{Argument, Book, Entry, Rule};
 use crate::parser::term::{parse_apps, parse_term};
 use crate::parser::utils::{get_init_index, get_last_index};
+use crate::book::{Argument, Book, Entry, Rule};
+use crate::book::span::{ByteOffset, Span};
+use crate::book::term::Term;
+use crate::book::name::Ident;
 
-use hvm::parser;
 use std::collections::HashMap;
+use hvm::parser;
 
-pub fn parse_rule(
-    state: parser::State,
-    name: String,
-    init: ByteOffset,
-) -> parser::Answer<Box<Rule>> {
+pub fn parse_rule(state: parser::State, name: String, init: ByteOffset) -> parser::Answer<Box<Rule>> {
     let (state, pats) = parser::until(parser::text_parser("="), Box::new(parse_term), state)?;
     let (state, last) = get_last_index(state)?;
     let orig = Span::new_off(init, last);
@@ -77,7 +71,8 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             pats.push(Box::new(Term::Var {
                 orig: Span::Generated,
                 name: arg.name.clone(),
-            })); // TODO: set orig
+            }));
+            // TODO: set orig
         }
         let rules = vec![Box::new(Rule {
             orig: Span::Generated,
@@ -136,12 +131,7 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
     let (state, tipo) = if anno {
         parse_apps(state)?
     } else {
-        (
-            state,
-            Box::new(Term::Typ {
-                orig: Span::Generated,
-            }),
-        )
+        (state, Box::new(Term::Typ { orig: Span::Generated }))
     };
     let (state, _) = parser::consume(close, state)?;
     let hide = open == "<";
@@ -169,20 +159,10 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
             names.push(entry.name.to_string().clone());
             entrs.insert(entry.name.clone(), entry);
         } else {
-            println!(
-                "\x1b[33mwarning\x1b[0m: ignored redefinition of '{}'.",
-                entry.name
-            );
+            println!("\x1b[33mwarning\x1b[0m: ignored redefinition of '{}'.", entry.name);
         }
     }
-    Ok((
-        state,
-        Box::new(Book {
-            holes: 0,
-            names,
-            entrs,
-        }),
-    ))
+    Ok((state, Box::new(Book { holes: 0, names, entrs })))
 }
 
 pub fn read_book(code: &str) -> Result<Box<Book>, String> {
