@@ -617,6 +617,7 @@ pub fn entry_set_origin_file(entry: &mut Entry, file: usize) {
 }
 
 pub fn rule_set_origin_file(rule: &mut Rule, file: usize) {
+  rule.orig = set_origin_file(rule.orig, file);
   for pat in &mut rule.pats {
     term_set_origin_file(pat, file);
   }
