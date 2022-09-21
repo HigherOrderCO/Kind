@@ -118,7 +118,7 @@ impl Display for Entry {
             write!(f, "\n{}", rule)?
         }
 
-        Ok(())
+        writeln!(f, "")
     }
 }
 

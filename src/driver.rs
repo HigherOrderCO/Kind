@@ -106,20 +106,20 @@ pub fn run_with_hvm(code: &str, main: &str, read_string: bool) -> Result<RunResu
     })
 }
 
-pub fn cmd_to_hvm(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_to_hvm(config: &Config, path: &str) -> Result<(), String> {
     let loaded = load(config, path)?;
     let result = codegen::hvm::to_hvm_book(&loaded.book);
     print!("{}", result);
     Ok(())
 }
 
-pub fn cmd_show(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_show(config: &Config, path: &str) -> Result<(), String> {
     let loaded = load(config, path)?;
     println!("{}", loaded.book);
     Ok(())
 }
 
-pub fn cmd_gen_checker(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_gen_checker(config: &Config, path: &str) -> Result<(), String> {
     let loaded = load(config, path)?;
     let gen_path = format!("{}.hvm", path.replace(".kind2", ".check"));
     println!("Generated '{}'.", gen_path);
@@ -127,7 +127,7 @@ pub fn cmd_gen_checker(config: Config, path: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub fn cmd_derive(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_derive(config: &Config, path: &str) -> Result<(), String> {
     let color = config.color_output;
     let newcode = match std::fs::read_to_string(&path) {
         Err(_) => {
@@ -149,7 +149,7 @@ pub fn cmd_derive(config: Config, path: &str) -> Result<(), String> {
         std::fs::create_dir_all(dir.parent().unwrap()).unwrap();
         std::fs::write(dir, txt).ok();
     }
-    save_derived(color, path, &new_type::derive_type(&newtype));
+    save_derived(color, path, &new_type::derive_type(&config.kind2_path, &newtype));
     for i in 0..newtype.ctrs.len() {
         save_derived(color, path, &new_type::derive_ctr(&newtype, i));
     }
@@ -157,7 +157,7 @@ pub fn cmd_derive(config: Config, path: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub fn cmd_check_all(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_check_all(config: &Config, path: &str) -> Result<(), String> {
     let loaded = load(config, path)?;
     let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.check_all", true)?;
     print!("{}", inject_highlights(&loaded.file, &result.output));
@@ -166,7 +166,7 @@ pub fn cmd_check_all(config: Config, path: &str) -> Result<(), String> {
 }
 
 // Evaluates Main on Kind2
-pub fn cmd_eval_main(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_eval_main(config: &Config, path: &str) -> Result<(), String> {
     let loaded = load(config, path)?;
     if loaded.book.entrs.contains_key(&Ident("Main".to_string())) {
         let result = run_with_hvm(&gen_checker(&loaded.book), "Kind.API.eval_main", true)?;
@@ -178,7 +178,7 @@ pub fn cmd_eval_main(config: Config, path: &str) -> Result<(), String> {
     }
 }
 
-pub fn cmd_run_main(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_run_main(config: &Config, path: &str) -> Result<(), String> {
     let loaded = load(config, path)?;
     if loaded.book.entrs.contains_key(&Ident("Main".to_string())) {
         let result = codegen::hvm::to_hvm_book(&loaded.book);
@@ -191,7 +191,7 @@ pub fn cmd_run_main(config: Config, path: &str) -> Result<(), String> {
     }
 }
 
-pub fn cmd_to_kdl(config: Config, path: &str) -> Result<(), String> {
+pub fn cmd_to_kdl(config: &Config, path: &str) -> Result<(), String> {
     let loaded = load(config, path)?;
     let comp_book = codegen::kdl::compile_book(&loaded.book)?;
     let kdl_names = codegen::kdl::get_kdl_names(&comp_book)?;
