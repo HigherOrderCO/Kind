@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use crate::book::name::Ident;
 use crate::book::span::{FileOffset, Span, SpanData};
 use crate::book::Book;
@@ -26,19 +28,22 @@ impl Load {
     }
 }
 
-pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
+pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), String> {
     if !load.book.entrs.contains_key(&Ident(name.to_string())) {
-        let path: String;
+        let path: PathBuf;
         if name.ends_with(".kind2") {
-            path = name.to_string();
+            path = PathBuf::from(&name.to_string());
         } else {
-            let inside_path = format!("{}/_.kind2", &name.replace('.', "/")); // path ending with 'Name/_.kind'
-            let normal_path = format!("{}.kind2", &name.replace('.', "/")); // path ending with 'Name.kind'
-            if std::path::Path::new(&inside_path).is_file() {
-                if std::path::Path::new(&normal_path).is_file() {
+            let root = Path::new(&config.kind2_path).join(&name.replace('.', "/"));
+            let inside_path = root.clone().join("_.kind2"); // path ending with 'Name/_.kind'
+            let mut normal_path = root.clone(); // path ending with 'Name.kind'
+            normal_path.set_extension("kind2");
+
+            if inside_path.is_file() {
+                if normal_path.is_file() {
                     return Err(format!(
                         "The following files can't exist simultaneously:\n- {}\n- {}\nPlease delete one and try again.",
-                        inside_path, normal_path
+                        inside_path.display(), normal_path.display()
                     ));
                 }
                 path = inside_path;
@@ -56,34 +61,34 @@ pub fn load_entry(name: &str, load: &mut Load) -> Result<(), String> {
 
         let mut new_book = match read_book(&newcode) {
             Err(err) => {
-                return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path, err));
+                return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path.display(), err));
             }
             Ok(book) => book,
         };
 
         new_book.set_origin_file(FileOffset(load.file.len() as u32));
 
-        load.file.push(File { path, code: newcode });
+        load.file.push(File { path: path.to_str().unwrap().into(), code: newcode });
         for name in &new_book.names {
             load.book.names.push(name.clone());
             load.book.entrs.insert(Ident(name.clone()), new_book.entrs.get(&Ident(name.to_string())).unwrap().clone());
         }
 
         for unbound in &new_book.get_unbounds() {
-            load_entry(&unbound.0, load)?;
+            load_entry(config, &unbound.0, load)?;
         }
     }
     Ok(())
 }
 
-pub fn load(config: Config, name: &str) -> Result<Load, String> {
+pub fn load(config: &Config, name: &str) -> Result<Load, String> {
     let mut load = Load::new_empty();
 
     if !std::path::Path::new(name).is_file() {
         return Err(format!("File not found: '{}'", name));
     }
 
-    load_entry(name, &mut load)?;
+    load_entry(config, name, &mut load)?;
 
     match load.book.adjust() {
         Ok(book) => {
