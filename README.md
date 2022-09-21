@@ -28,7 +28,7 @@ map a b (Cons head tail) f = Cons (f x) (map tail f)
 Side-effective programs are written via monadic monads, resembling [Rust](https://www.rust-lang.org/) and [TypeScript](https://www.typescriptlang.org/):
 
 ```javascript
-// Prints the double of every numbet up to a limit
+// Prints the double of every number up to a limit
 Main : IO (Result () String) {
   ask limit = IO.prompt "Enter limit:"
   for x in (List.range limit) {
