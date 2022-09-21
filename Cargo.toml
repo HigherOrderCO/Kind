@@ -15,7 +15,9 @@ hvm = "0.1.81"
 highlight_error = "0.1.1"
 clap = { version = "3.1.8", features = ["derive"] }
 rand = "0.8.5"
-walkdir = "2"
+
+[profile.dev.package.hvm]
+opt-level = 3
 
 [[test]]
 name = "kind2-tests"
@@ -23,3 +25,4 @@ path = "tests/mod.rs"
 
 [dev-dependencies]
 pretty_assertions = "1.3.0"
+walkdir = "2"
