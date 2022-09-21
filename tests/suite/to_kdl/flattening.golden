@@ -1,0 +1,30 @@
+// List.nil #List.nil -(a: Type) : (List _)
+ctr {List.nil}
+
+// List.cons #List.cons -(a: Type) (head: a) (tail: (List a)) : (List _)
+ctr {List.cons head tail}
+
+// Ora.Ora.ora #Ora.Ora.ora -(a: Type) (h: (List a)) : (List a)
+fun (Ora.Ora.ora h) {
+  (Ora.Ora.ora {List.nil}) = {List.nil}
+  (Ora.Ora.ora {List.cons x xs}) = {List.cons x xs}
+}
+
+fun (Null0_0_ x0 x1 x2 x3) {
+  (Null0_0_ ~ ~ ~ {List.cons ~ ~}) = {List.nil}
+}
+
+fun (Null0_1_ x0 x1) {
+  (Null0_1_ {List.cons ~ ~} ~) = {List.nil}
+}
+
+fun (Null0_ x0 x1) {
+  (Null0_ {List.cons y ys} {List.cons x .0}) = (Null0_0_ y ys x .0)
+  (Null0_ {List.nil} {List.cons .0 xs}) = (Null0_1_ .0 xs)
+}
+
+// Null #Null -(a: Type) (h: (List (List a))) : (List a)
+fun (Null h) {
+  (Null {List.cons .0 .1}) = (Null0_ .0 .1)
+}
+

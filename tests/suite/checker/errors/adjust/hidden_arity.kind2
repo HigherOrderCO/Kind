@@ -1,0 +1,2 @@
+Arity <a> <b> <c> (d: U60) : U60
+Arity a b d = d
