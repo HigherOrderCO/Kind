@@ -80,7 +80,7 @@ impl Display for Operator {
         use Operator::*;
 
         match self {
-            Add => write!(f, "*"),
+            Add => write!(f, "+"),
             Sub => write!(f, "-"),
             Mul => write!(f, "*"),
             Div => write!(f, "/"),
@@ -116,7 +116,7 @@ impl Display for Term {
                 Lam { orig: _, name, body } => write!(f, "({} => {})", name, body),
                 Ann { orig: _, expr, tipo } => write!(f, "({} :: {})", expr, tipo),
                 Op2 { orig: _, oper, val0, val1 } => write!(f, "({} {} {})", oper, val0, val1),
-                All { orig: _, name, tipo, body } => write!(f, "(({}: {}) {})", name, tipo, body),
+                All { orig: _, name, tipo, body } => write!(f, "({}: {}) {}", name, tipo, body),
                 Let { orig: _, name, expr, body } => write!(f, "(let {} = {}; {})", name, expr, body),
                 Sub { name, redx, expr, .. } => write!(f, "({} ## {}/{})", expr, name, redx),
                 Ctr { orig: _, name, args } => write!(f, "({}{})", name, args.iter().map(|x| format!(" {}", x)).collect::<String>()),

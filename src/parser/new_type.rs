@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::book::new_type::{Constructor, Derived, NewType};
 use crate::book::{Argument, Entry, Rule};
 use crate::book::name::Ident;
@@ -5,8 +7,9 @@ use crate::book::span::Span;
 use crate::book::term::Term;
 use crate::parser::*;
 
-pub fn derive_type(tipo: &NewType) -> Derived {
-    let path = format!("{}/_.kind2", tipo.name.to_path());
+pub fn derive_type(path: &str, tipo: &NewType) -> Derived {
+    let root = Path::new(path).join(tipo.name.to_path());
+    let path = root.clone().join("_.kind2");
     let name = format!("{}", tipo.name);
     let kdln = None;
     let mut args = vec![];
@@ -29,7 +32,7 @@ pub fn derive_type(tipo: &NewType) -> Derived {
         tipo,
         rules,
     };
-    Derived { path: Ident(path), entr }
+    Derived { path: Ident(path.to_str().unwrap().to_string()), entr }
 }
 
 pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
