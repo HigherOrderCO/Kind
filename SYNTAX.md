@@ -55,11 +55,11 @@ MyName = "Victor"
 Creates a top-level definition called `MyName`, of type `String` and value `"Victor"`. And:
 
 ```
-get_first (fst: String) (snd: String): String
-get_first fst snd = fst
+GetFirst (fst: String) (snd: String): String
+GetFirst fst snd = fst
 ```
 
-Creates a top-level function called `get_first`, which receives two arguments, `fst` and `snd` of type `String`, and returns a `String`, which is the first argument.
+Creates a top-level function called `GetFirst`, which receives two arguments, `fst` and `snd` of type `String`, and returns a `String`, which is the first argument.
 
 Every rule must pattern match on each argument and they may match on a specific type constructor or match everything on a variable. For example, given the type:
 
@@ -624,7 +624,7 @@ In the same way that forall (aka Pi, aka the dependent function type) can be rea
 
 ```
 ThereIsEvenNat : [x: Nat] (Equal (Nat.mod x Nat.two) Nat.zero)
-  0 ~ refl
+  $Nat.zero Equal.refl
 ```
 
 Can be read as `there exists an (x: Nat) such that x mod 2 is equal to zero`. Sigmas can also be used to create subset types:
