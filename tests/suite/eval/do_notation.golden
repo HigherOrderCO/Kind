@@ -1,3 +1,2 @@
-[1m[./tests/suite/eval/do_notation.kind2][0m
-Expected `name`:
-[0m   7 |   [4m[31m}[0m
+(Maybe.some _ 5)
+
