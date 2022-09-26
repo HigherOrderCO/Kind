@@ -5,7 +5,7 @@ use crate::book::name::Ident;
 use crate::book::Book;
 
 use rand::Rng;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub const KDL_NAME_LEN: usize = 12;
 
@@ -116,8 +116,17 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<String, String>, entry: &Co
 
 pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: &CompBook) -> Result<String, String> {
     let mut lines = vec![];
+    let gen_blk_names: HashSet<String> = HashSet::from_iter([
+        "Unit.new", "Pair.new", "U60.if",
+        "Kindelia.IO.done", "Kindelia.IO.do_save", "Kindelia.IO.do_take",
+    ].map(String::from));
     for name in &comp_book.names {
         let entry = comp_book.entrs.get(name).unwrap();
+        // Skip names in the genesis block
+        // TODO: Do this through some entry attribute, like how kdl names are done
+        if gen_blk_names.contains(&entry.name) {
+            continue;
+        }
         lines.push(to_kdl_entry(book, kdl_names, entry)?);
     }
     Ok(lines.join(""))
