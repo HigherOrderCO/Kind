@@ -1,0 +1,2 @@
+// Automatically derived from Maybe/_.type
+Maybe (t: Type) : Type
