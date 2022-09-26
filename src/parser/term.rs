@@ -397,7 +397,7 @@ pub fn parse_term_st(state: State) -> Answer<TermComplete> {
             Box::new(parse_ask_anon_st),
             Box::new(parse_let_st),
             Box::new(|state| {
-                let (state, term) = parse_term(state)?;
+                let (state, term) = parse_apps(state)?;
                 Ok((state, Some(Box::new(move |_| term.clone()))))
             }),
         ],
