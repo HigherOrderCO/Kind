@@ -165,29 +165,29 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
 
     fn get_kdl_name(entry: &CompEntry) -> Result<String, String> {
         let kind_name = &entry.name;
-        let kdln = match &entry.kdln {
-            Some(kdln) => {
-                // If the entry uses a kindelia name, use it
-                if !kdln.chars().next().unwrap().is_uppercase() {
-                    let err = format!("Kindelia name \"{}\" doesn't start with an uppercase letter.", kdln);
+        // If the entry uses a kindelia name, use it
+        let kdln = if let Some(kdln) = &entry.kdln {
+            if !kdln.chars().next().unwrap().is_uppercase() {
+                let err = format!("Kindelia name \"{}\" doesn't start with an uppercase letter.", kdln);
+                return Err(err);
+            }
+            if entry.orig {
+                if kdln.len() > KDL_NAME_LEN {
+                    let err = format!("Kindelia name \"{}\" for \"{}\" has more than {} characters.", kdln, kind_name, KDL_NAME_LEN - 1);
                     return Err(err);
                 }
-                if entry.orig {
-                    if kdln.len() > KDL_NAME_LEN {
-                        let err = format!("Kindelia name \"{}\" for \"{}\" has more than {} characters.", kdln, kind_name, KDL_NAME_LEN - 1);
-                        return Err(err);
-                    }
-                    kdln.clone()
-                } else {
-                    // For entries created by the flattener, we shorten even the kindelia name
-                    // TODO: Since these rules can come first,
-                    //       if the kdln is too large the err will happen in the generated function,
-                    //       potentially confusing the user.
-                    rand_shorten(kdln)?
-                }
+                kdln.clone()
+            } else {
+                // For entries created by the flattener, we shorten even the kindelia name
+                // TODO: Since these rules can come first,
+                //       if the kdln is too large the err will happen in the generated function,
+                //       potentially confusing the user.
+                rand_shorten(kdln)?
             }
-            // Otherwise, try to fit the normal kind name
-            None => rand_shorten(kind_name)?,
+        }
+        // Otherwise, try to fit the normal kind name
+        else {
+            rand_shorten(&kind_name.replace(".", "_"))?
         };
         Ok(kdln)
     }
