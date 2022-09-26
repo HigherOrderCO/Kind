@@ -118,14 +118,14 @@ impl Display for Entry {
             write!(f, "\n{}", rule)?
         }
 
-        writeln!(f, "")
+        Ok(())
     }
 }
 
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for name in &self.names {
-            writeln!(f, "{}", self.entrs.get(&Ident(name.clone())).unwrap())?;
+            writeln!(f, "{}\n", self.entrs.get(&Ident(name.clone())).unwrap())?;
         }
         Ok(())
     }

@@ -99,7 +99,8 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
                 match err.orig {
                     Span::Localized(SpanData { file, start, end }) if !config.no_high_line =>
                         highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code),
-                    _ =>  "".to_string()
+                    _ if !config.no_high_line => "Cannot find the source of the error.".to_string(),
+                    _ => "".to_string()
                 };
             return match err.kind {
                 AdjustErrorKind::IncorrectArity => Err(format!("Incorrect arity.\n{}", high_line)),
