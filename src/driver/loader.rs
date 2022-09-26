@@ -74,7 +74,7 @@ pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), St
             load.book.entrs.insert(Ident(name.clone()), new_book.entrs.get(&Ident(name.to_string())).unwrap().clone());
         }
 
-        for unbound in &new_book.get_unbounds() {
+        for unbound in &new_book.get_unbounds(config) {
             load_entry(config, &unbound.0, load)?;
         }
     }
@@ -90,7 +90,7 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
 
     load_entry(config, name, &mut load)?;
 
-    match load.book.adjust() {
+    match load.book.adjust(config) {
         Ok(book) => {
             load.book = book;
         }

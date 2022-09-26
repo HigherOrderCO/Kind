@@ -3,6 +3,7 @@ use crate::book::new_type::NewType;
 use crate::book::span::{Localized, Span};
 use crate::book::term::Term;
 use crate::book::{Argument, Book, Entry, Rule};
+use crate::driver::config::Config;
 use crate::lowering::load::load_newtype_cached;
 
 use std::collections::HashMap;
@@ -39,16 +40,21 @@ pub struct AdjustState<'a> {
     // Definitions of types that are useful to the
     // "match" expression.
     types: HashMap<Ident, Rc<NewType>>,
+
+    // Configuration provided by the user. It's useful
+    // to load paths correctly.
+    config: &'a Config
 }
 
 impl<'a> AdjustState<'a> {
-    pub fn new(book: &'a Book) -> AdjustState<'a> {
+    pub fn new(book: &'a Book, config: &'a Config) -> AdjustState<'a> {
         AdjustState {
             book,
             eras: 0,
             holes: 0,
             vars: Vec::new(),
             types: HashMap::new(),
+            config,
         }
     }
 }
@@ -58,7 +64,7 @@ pub trait Adjust {
     where
         Self: Sized;
 
-    fn adjust_with_book(&self, book: &Book) -> Result<Self, AdjustError>
+    fn adjust_with_book(&self, book: &Book, config: &Config) -> Result<Self, AdjustError>
     where
         Self: Sized,
     {
@@ -70,6 +76,7 @@ pub trait Adjust {
                 holes: 0,
                 vars: Vec::new(),
                 types: HashMap::new(),
+                config
             },
         )
     }
@@ -332,7 +339,7 @@ impl Adjust for Term {
                 ref moti,
             } => {
                 let orig = *orig;
-                if let Ok(newtype) = load_newtype_cached(&mut state.types, tipo) {
+                if let Ok(newtype) = load_newtype_cached(state.config, &mut state.types, tipo) {
                     let mut args = vec![];
                     args.push(expr.clone());
                     args.push(Box::new(Term::Lam {
@@ -483,10 +490,10 @@ impl Adjust for Entry {
 }
 
 impl Book {
-    pub fn adjust(&mut self) -> Result<Self, AdjustError> {
+    pub fn adjust(&mut self, config: &Config) -> Result<Self, AdjustError> {
         let mut names = Vec::new();
         let mut entrs = HashMap::new();
-        let mut state = AdjustState::new(self);
+        let mut state = AdjustState::new(self, config);
 
         for name in &self.names {
             let ident = Ident(name.clone());

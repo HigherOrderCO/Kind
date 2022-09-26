@@ -68,7 +68,7 @@ fn run_cli() -> Result<(), String> {
     let config = Config {
         no_high_line: cli_matches.no_high_line,
         color_output: cli_matches.color_output,
-        kind2_path: env::var_os("KIND2_PATH").map(|x| x.into_string().unwrap()).unwrap_or("".to_string())
+        kind2_path: env::var_os("KIND2_PATH").map(|x| x.into_string().unwrap()).unwrap_or_else(|| "".to_string())
     };
 
     match cli_matches.command {

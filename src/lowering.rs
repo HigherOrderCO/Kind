@@ -1,6 +1,7 @@
 pub mod adjust;
 pub mod load;
 
+use crate::driver::config::Config;
 use crate::lowering::load::load_newtype_cached;
 use crate::book::{Argument, Book, Entry, Rule};
 use crate::book::name::Ident;
@@ -11,7 +12,7 @@ use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
 // The state that adjusts uses and update a term, book, rule or entry.
-pub struct UnboundState {
+pub struct UnboundState<'a> {
     // All the vars that are bound in the context.
     vars: Vec<Ident>,
     // TODO: Describe
@@ -19,14 +20,17 @@ pub struct UnboundState {
     // Definitions of types that are useful to the
     // "match" expression.
     types: HashMap<Ident, Rc<NewType>>,
+
+    config: &'a Config
 }
 
-impl UnboundState {
-    pub fn new(types: HashMap<Ident, Rc<NewType>>) -> UnboundState {
+impl<'a> UnboundState<'a> {
+    pub fn new(types: HashMap<Ident, Rc<NewType>>, config: &'a Config) -> UnboundState<'a> {
         UnboundState {
             vars: Vec::new(),
             unbound: HashSet::new(),
             types,
+            config
         }
     }
 }
@@ -34,8 +38,8 @@ impl UnboundState {
 pub trait Unbound {
     fn fill_unbound(&self, rhs: bool, state: &mut UnboundState);
 
-    fn get_unbounds(&self, types: HashMap<Ident, Rc<NewType>>) -> HashSet<Ident> {
-        let mut state = UnboundState::new(types);
+    fn get_unbounds(&self, types: HashMap<Ident, Rc<NewType>>, config: &Config) -> HashSet<Ident> {
+        let mut state = UnboundState::new(types, config);
         self.fill_unbound(false, &mut state);
         state.unbound
     }
@@ -117,7 +121,7 @@ impl Unbound for Term {
                 ..
             } => {
                 //println!("finding unbounds of match {} {}", tipo, name);
-                if let Ok(newtype) = load_newtype_cached(&mut state.types, tipo) {
+                if let Ok(newtype) = load_newtype_cached(state.config, &mut state.types, tipo) {
                     state.unbound.insert(Ident(format!("{}.match", tipo.clone())));
                     // Expr
                     expr.fill_unbound(rhs, state);
@@ -177,8 +181,8 @@ impl Unbound for Argument {
 }
 
 impl Book {
-    pub fn get_unbounds(&self) -> HashSet<Ident> {
-        let mut state = UnboundState::new(HashMap::new());
+    pub fn get_unbounds(&self, config: &Config) -> HashSet<Ident> {
+        let mut state = UnboundState::new(HashMap::new(), config);
         for name in &self.names {
             let entry = self.entrs.get(&Ident(name.clone())).unwrap();
             entry.fill_unbound(false, &mut state);
