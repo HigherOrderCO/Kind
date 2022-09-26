@@ -8,6 +8,5 @@ on:
 
 jobs:
   cargo:
-    timeout-minutes: 5
     if: github.event.pull_request.draft == false
     uses: ./.github/workflows/cargo.yml
