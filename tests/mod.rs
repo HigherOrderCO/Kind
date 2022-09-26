@@ -1,6 +1,7 @@
 use std::{fs::{self, File}, path::{Path}, io::Write};
 use walkdir::{WalkDir, Error};
 use pretty_assertions::{assert_eq};
+use ntest::timeout;
 
 use kind2::driver::{self, config::Config};
 use kind2::codegen;
@@ -37,6 +38,7 @@ fn compile_kdl(config: &Config, path: &str) -> Result<String, String> {
 }
 
 #[test]
+#[timeout(15000)]
 fn test_checker() -> Result<(), Error> {
     test_kind2(Path::new("./tests/suite/checker"), | path | {
         let config = Config {
@@ -52,12 +54,13 @@ fn test_checker() -> Result<(), Error> {
 }
 
 #[test]
+#[timeout(10000)]
 fn test_to_hvm() -> Result<(), Error> {
     test_kind2(Path::new("./tests/suite/to_hvm"), | path | {
         let config = Config {
             no_high_line: true,
             color_output: false,
-            kind2_path: ".".to_string()
+            kind2_path: "./tests/suite/lib".to_string()
         };
         let result = driver::loader::load(&config, path.to_str().unwrap());
         let result = result.map(|loaded| codegen::hvm::to_hvm_book(&loaded.book));
@@ -67,6 +70,7 @@ fn test_to_hvm() -> Result<(), Error> {
 }
 
 #[test]
+#[timeout(10000)]
 fn test_to_kdl() -> Result<(), Error> {
     test_kind2(Path::new("./tests/suite/to_kdl"), | path | {
         let config = Config {
@@ -82,12 +86,13 @@ fn test_to_kdl() -> Result<(), Error> {
 }
 
 #[test]
+#[timeout(10000)]
 fn test_run_hvm() -> Result<(), Error> {
     test_kind2(Path::new("./tests/suite/eval"), | path | {
         let config = Config {
             no_high_line: true,
             color_output: false,
-            kind2_path: ".".to_string()
+            kind2_path: "./tests/suite/lib".to_string()
         };
         let result = driver::loader::load(&config, path.to_str().unwrap());
         let result = result.and_then(| x | driver::run_with_hvm(&driver::gen_checker(&x.book), "Kind.API.eval_main", true));
