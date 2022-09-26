@@ -87,14 +87,13 @@ pub fn compile_book(book: &Book) -> Result<CompBook, String> {
         // Skip over useless entries
         // TODO: This doesn't cover all cases. We need something like `erase` but for a Book.
         //       Also maybe there are functions of type Type that should be compiled?
-        else if let Term::Typ { orig: _ } = &*entry.tipo {
+        if let Term::Typ { orig: _ } = &*entry.tipo {
             continue;
-        } else {
-            let entrs = compile_entry(book, entry)?;
-            for entry in entrs {
-                comp_book.names.push(entry.name.clone());
-                comp_book.entrs.insert(entry.name.clone(), entry);
-            }
+        }
+        let entrs = compile_entry(book, entry)?;
+        for entry in entrs {
+            comp_book.names.push(entry.name.clone());
+            comp_book.entrs.insert(entry.name.clone(), entry);
         }
     }
     Ok(comp_book)
@@ -273,167 +272,162 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
         (true, same_shape)
     }
 
+    fn split_rule(rule: &CompRule, entry: &CompEntry, i: usize, name_count: &mut u64, skip: &mut HashSet<usize>) -> (CompRule, Vec<CompEntry>) {
+        // Each rule that must be split creates a new entry that inspects one layer of Ctrs
+        // The old rule is rewritten to be flat and call the new entry
+        let n = post_inc(name_count);
+        let new_entry_name = format!("{}{}_", entry.name, n);
+        let new_entry_kdln = entry.kdln.clone().map(|kdln| format!("{}{}_", kdln, n));
+        let mut new_entry_rules: Vec<CompRule> = Vec::new();
+        // Rewrite the old rule to be flat and point to the new entry
+        let mut old_rule_pats: Vec<Box<CompTerm>> = Vec::new();
+        let mut old_rule_body_args: Vec<Box<CompTerm>> = Vec::new();
+        let mut var_count = 0;
+        for pat in &rule.pats {
+            match &**pat {
+                CompTerm::Ctr { name: pat_name, args: pat_args } => {
+                    let mut new_pat_args = Vec::new();
+                    for field in pat_args {
+                        let arg = match &**field {
+                            CompTerm::Ctr { .. } | CompTerm::Num { .. } => {
+                                let name = format!(".{}", post_inc(&mut var_count));
+                                Box::new(CompTerm::Var { name })
+                            }
+                            CompTerm::Var { .. } => field.clone(),
+                            _ => { panic!("?"); }
+                        };
+                        new_pat_args.push(arg.clone());
+                        old_rule_body_args.push(arg);
+                    }
+                    old_rule_pats.push(Box::new(CompTerm::Ctr {
+                        name: pat_name.clone(),
+                        args: new_pat_args,
+                    }));
+                }
+                CompTerm::Var { name } => {
+                    old_rule_pats.push(Box::new(*pat.clone()));
+                    old_rule_body_args.push(Box::new(CompTerm::Var { name: name.clone() }));
+                }
+                // TODO: It'd be better to check for Num and handle other (invalid) options
+                _ => {}
+            }
+        }
+        let old_rule_body = Box::new(CompTerm::Fun {
+            name: new_entry_name.clone(),
+            args: old_rule_body_args,
+        });
+        let old_rule = CompRule {
+            name: entry.name.clone(),
+            pats: old_rule_pats,
+            body: old_rule_body,
+        };
+        //(Foo Tic (Bar a b) (Haz c d)) = A
+        //(Foo Tic x         y)         = B
+        //---------------------------------
+        //(Foo Tic (Bar a b) (Haz c d)) = B[x <- (Bar a b), y <- (Haz c d)]
+        //
+        //(Foo.0 a b c d) = ...
+
+        // Check the rules to see if there's any that will be covered by the new entry, including the rule itself.
+        // Skips previously checked rules to avoid duplication.
+        // For each unique matching rule, creates a new flattening rule for the entry.
+        // Ex: (Fun (Ctr1 (Ctr2))) and (Fun (Ctr1 (Ctr3))) will both flatten to (Fun (Ctr1 .0)) and can be merged
+        for (j, other) in entry.rules.iter().enumerate().skip(i) {
+            let (compatible, same_shape) = matches_together(rule, other);
+            if compatible {
+                // (Foo a     (B x P) (C y0 y1)) = F
+                // (Foo (A k) (B x Q) y        ) = G
+                // -----------------------------
+                // (Foo a (B x u) (C y0 y1)) = (Foo.0 a x u y0 y1)
+                //   (Foo.0 a     x P y0 y1) = F
+                //   (Foo.0 (A k) x Q f0 f1) = G [y <- (C f0 f1)] // f0 and f1 are fresh
+
+                // Skip identical rules
+                if same_shape {
+                    skip.insert(j);
+                }
+                let mut new_rule_pats = Vec::new();
+                let mut new_rule_body = other.body.clone();
+                for (rule_pat, other_pat) in rule.pats.iter().zip(&other.pats) {
+                    match (&**rule_pat, &**other_pat) {
+                        (CompTerm::Ctr { .. }, CompTerm::Ctr { args: other_pat_args, .. }) => {
+                            // Bring the arguments of a constructor outside
+                            new_rule_pats.extend(other_pat_args.clone());
+                        }
+                        (
+                            CompTerm::Ctr {
+                                name: rule_pat_name,
+                                args: rule_pat_args,
+                            },
+                            CompTerm::Var { name: other_pat_name },
+                        ) => {
+                            let mut new_ctr_args = vec![];
+                            for _ in 0..rule_pat_args.len() {
+                                let new_arg = CompTerm::Var {
+                                    name: format!(".{}", post_inc(&mut var_count)),
+                                };
+                                new_ctr_args.push(Box::new(new_arg.clone()));
+                                new_rule_pats.push(Box::new(new_arg));
+                            }
+                            let new_ctr = CompTerm::Ctr {
+                                name: rule_pat_name.clone(),
+                                args: new_ctr_args,
+                            };
+                            subst(&mut new_rule_body, other_pat_name, &new_ctr);
+                        }
+                        (CompTerm::Var { .. }, _) => {
+                            new_rule_pats.push(other_pat.clone());
+                        }
+                        (CompTerm::Num { numb: rule_pat_numb }, CompTerm::Num { numb: other_pat_numb }) => {
+                            if rule_pat_numb == other_pat_numb {
+                                new_rule_pats.push(Box::new(*other_pat.clone()));
+                            } else {
+                                panic!("Internal error. Please report.");
+                                // not possible since it matches
+                            }
+                        }
+                        (CompTerm::Num { .. }, CompTerm::Var { name: other_pat_name }) => {
+                            subst(&mut new_rule_body, other_pat_name, rule_pat);
+                        }
+                        _ => {
+                            panic!("Internal error. Please report."); // not possible since it matches
+                        }
+                    }
+                }
+                let new_rule = CompRule {
+                    name: new_entry_name.clone(),
+                    pats: new_rule_pats,
+                    body: new_rule_body,
+                };
+                new_entry_rules.push(new_rule);
+            }
+        }
+        assert!(!new_entry_rules.is_empty()); // There's at least one rule, since rules always match with themselves
+        let new_entry_args = (0..new_entry_rules[0].pats.len()).map(|n| format!("x{}", n)).collect();
+        let new_entry = CompEntry {
+            name: new_entry_name,
+            kdln: new_entry_kdln,
+            args: new_entry_args,
+            rules: new_entry_rules,
+            orig: false,
+        };
+        let new_split_entries = flatten(new_entry);
+        (old_rule, new_split_entries)
+    }
+
     let mut name_count = 0;
 
     let mut skip: HashSet<usize> = HashSet::new();
     let mut new_entries: Vec<CompEntry> = Vec::new();
     let mut old_entry_rules: Vec<CompRule> = Vec::new();
-    let old_entry_args: Vec<String> = entry.args;
+    let old_entry_args: Vec<String> = entry.args.clone();
     for i in 0..entry.rules.len() {
         if !skip.contains(&i) {
             let rule = &entry.rules[i];
             if must_split(rule) {
-                // Each rule that must be split creates a new entry that inspects one layer of Ctrs
-                // The old rule is rewritten to be flat and call the new entry
-                let n = post_inc(&mut name_count);
-                let new_entry_name = format!("{}{}_", entry.name, n);
-                let new_entry_kdln = entry.kdln.clone().map(|kdln| format!("{}{}_", kdln, n));
-                let mut new_entry_rules: Vec<CompRule> = Vec::new();
-                // Rewrite the old rule to be flat and point to the new entry
-                let mut old_rule_pats: Vec<Box<CompTerm>> = Vec::new();
-                let mut old_rule_body_args: Vec<Box<CompTerm>> = Vec::new();
-                let mut var_count = 0;
-                for pat in &rule.pats {
-                    match &**pat {
-                        CompTerm::Ctr { name: pat_name, args: pat_args } => {
-                            let mut new_pat_args = Vec::new();
-                            for field in pat_args {
-                                match &**field {
-                                    CompTerm::Ctr { .. } => {
-                                        let var_name = format!(".{}", post_inc(&mut var_count));
-                                        new_pat_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
-                                        old_rule_body_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
-                                    }
-                                    CompTerm::Num { .. } => {
-                                        let var_name = format!(".{}", post_inc(&mut var_count));
-                                        new_pat_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
-                                        old_rule_body_args.push(Box::new(CompTerm::Var { name: var_name.clone() }));
-                                    }
-                                    CompTerm::Var { name: _ } => {
-                                        new_pat_args.push(field.clone());
-                                        old_rule_body_args.push(field.clone());
-                                    }
-                                    _ => {
-                                        panic!("?");
-                                    }
-                                }
-                            }
-                            old_rule_pats.push(Box::new(CompTerm::Ctr {
-                                name: pat_name.clone(),
-                                args: new_pat_args,
-                            }));
-                        }
-                        CompTerm::Var { name } => {
-                            old_rule_pats.push(Box::new(*pat.clone()));
-                            old_rule_body_args.push(Box::new(CompTerm::Var { name: name.clone() }));
-                        }
-                        // TODO: It'd be better to check for Num and panic on other (invalid) options
-                        _ => {}
-                    }
-                }
-                let old_rule_body = Box::new(CompTerm::Fun {
-                    name: new_entry_name.clone(),
-                    args: old_rule_body_args,
-                });
-                let old_rule = CompRule {
-                    name: entry.name.clone(),
-                    pats: old_rule_pats,
-                    body: old_rule_body,
-                };
+                let (old_rule, split_entries) = split_rule(rule, &entry, i, &mut name_count, &mut skip);
                 old_entry_rules.push(old_rule);
-                //(Foo Tic (Bar a b) (Haz c d)) = A
-                //(Foo Tic x         y)         = B
-                //---------------------------------
-                //(Foo Tic (Bar a b) (Haz c d)) = B[x <- (Bar a b), y <- (Haz c d)]
-                //
-                //(Foo.0 a b c d) = ...
-
-                // Check the rules to see if there's any that will be covered by the new entry, including the rule itself.
-                // Skips previously checked rules to avoid duplication.
-                // For each unique matching rule, creates a new flattening rule for the entry.
-                // Ex: (Fun (Ctr1 (Ctr2))) and (Fun (Ctr1 (Ctr3))) will both flatten to (Fun (Ctr1 .0)) and can be merged
-                for (j, other) in entry.rules.iter().enumerate().skip(i) {
-                    let (compatible, same_shape) = matches_together(rule, other);
-                    if compatible {
-                        // (Foo a     (B x P) (C y0 y1)) = F
-                        // (Foo (A k) (B x Q) y        ) = G
-                        // -----------------------------
-                        // (Foo a (B x u) (C y0 y1)) = (Foo.0 a x u y0 y1)
-                        //   (Foo.0 a     x P y0 y1) = F
-                        //   (Foo.0 (A k) x Q f0 f1) = G [y <- (C f0 f1)] // f0 and f1 are fresh
-
-                        // Skip identical rules
-                        if same_shape {
-                            skip.insert(j);
-                        }
-                        let mut new_rule_pats = Vec::new();
-                        let mut new_rule_body = other.body.clone();
-                        for (rule_pat, other_pat) in rule.pats.iter().zip(&other.pats) {
-                            match (&**rule_pat, &**other_pat) {
-                                (CompTerm::Ctr { name: _, args: _ }, CompTerm::Ctr { name: _, args: other_pat_args }) => {
-                                    for other_field in other_pat_args {
-                                        new_rule_pats.push(other_field.clone());
-                                    }
-                                }
-                                (
-                                    CompTerm::Ctr {
-                                        name: rule_pat_name,
-                                        args: rule_pat_args,
-                                    },
-                                    CompTerm::Var { name: other_pat_name },
-                                ) => {
-                                    let mut new_ctr_args = vec![];
-                                    for _ in 0..rule_pat_args.len() {
-                                        let new_arg = CompTerm::Var {
-                                            name: format!(".{}", post_inc(&mut var_count)),
-                                        };
-                                        new_ctr_args.push(Box::new(new_arg.clone()));
-                                        new_rule_pats.push(Box::new(new_arg));
-                                    }
-                                    let new_ctr = CompTerm::Ctr {
-                                        name: rule_pat_name.clone(),
-                                        args: new_ctr_args,
-                                    };
-                                    subst(&mut new_rule_body, other_pat_name, &new_ctr);
-                                }
-                                (CompTerm::Var { .. }, _) => {
-                                    new_rule_pats.push(other_pat.clone());
-                                }
-                                (CompTerm::Num { numb: rule_pat_numb }, CompTerm::Num { numb: other_pat_numb }) => {
-                                    if rule_pat_numb == other_pat_numb {
-                                        new_rule_pats.push(Box::new(*other_pat.clone()));
-                                    } else {
-                                        panic!("Internal error. Please report.");
-                                        // not possible since it matches
-                                    }
-                                }
-                                (CompTerm::Num { numb: _ }, CompTerm::Var { name: other_pat_name }) => {
-                                    subst(&mut new_rule_body, other_pat_name, rule_pat);
-                                }
-                                _ => {
-                                    panic!("Internal error. Please report."); // not possible since it matches
-                                }
-                            }
-                        }
-                        let new_rule = CompRule {
-                            name: new_entry_name.clone(),
-                            pats: new_rule_pats,
-                            body: new_rule_body,
-                        };
-                        new_entry_rules.push(new_rule);
-                    }
-                }
-                assert!(!new_entry_rules.is_empty()); // There's at least one rule, since rules always match with themselves
-                let new_entry_args = (0..new_entry_rules[0].pats.len()).map(|n| format!("x{}", n)).collect();
-                let new_entry = CompEntry {
-                    name: new_entry_name,
-                    kdln: new_entry_kdln,
-                    args: new_entry_args,
-                    rules: new_entry_rules,
-                    orig: false,
-                };
-                let new_split_entries = flatten(new_entry);
-                new_entries.extend(new_split_entries);
+                new_entries.extend(split_entries);
             } else {
                 old_entry_rules.push(entry.rules[i].clone());
             }
@@ -593,8 +587,16 @@ pub fn count_uses(term: &CompTerm, count_name: &str) -> usize {
             }
         }
         CompTerm::App { func, argm } => count_uses(func, count_name) + count_uses(argm, count_name),
-        CompTerm::Dup { nam0, nam1, expr, body } => count_uses(expr, count_name) + (if nam0 == count_name || nam1 == count_name { 0 } else { count_uses(body, count_name) }),
-        CompTerm::Let { name, expr, body } => count_uses(expr, count_name) + (if name == count_name { 0 } else { count_uses(body, count_name) }),
+        CompTerm::Dup { nam0, nam1, expr, body } => {
+            let expr_count = count_uses(expr, count_name);
+            let body_count = if nam0 == count_name || nam1 == count_name { 0 } else { count_uses(body, count_name) };
+            expr_count + body_count
+        }
+        CompTerm::Let { name, expr, body } => {
+            let expr_count = count_uses(expr, count_name);
+            let body_count = if name == count_name { 0 } else { count_uses(body, count_name) };
+            expr_count + body_count
+        }
         CompTerm::Ctr { name: _, args } => {
             let mut sum = 0;
             for arg in args {
@@ -787,11 +789,10 @@ pub fn linearize_rule(rule: &mut CompRule) {
     }
     let mut fresh = 0;
     for (mut name, var) in vars.drain() {
-        let uses = linearize_name(&mut rule.body, &mut name, &mut fresh); // linearizes rule pattern vars
-                                                                          // The &mut here doesn't do anything because
-                                                                          // we're dropping var immediately afterwards.
-                                                                          // To linearize rule variables, we'll have to replace all LHS occurrences by ~
-                                                                          // if the amount of uses is zero
+        // linearizes rule pattern vars
+        // The &mut here doesn't do anything because we're dropping var immediately afterwards.
+        // To linearize rule variables, we'll have to replace all LHS occurrences by ~ if the amount of uses is zero
+        let uses = linearize_name(&mut rule.body, &mut name, &mut fresh); 
         if uses == 0 {
             if let CompTerm::Var { name } = var {
                 *name = String::from("~");
