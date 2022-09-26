@@ -74,11 +74,6 @@ pub fn to_kdl_rule(_book: &Book, kdl_names: &HashMap<String, String>, rule: &Com
 
 pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<String, String>, entry: &CompEntry) -> Result<String, String> {
     let entry = match entry.name.as_str() {
-        // Main is compiled to a run block
-        // TODO: Maybe we should have run blocks come from a specific type of function instead
-        // TODO: run statements should always come last in the block
-        "Main" => format!("run {{\n  {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?),
-
         _ => {
             let kdl_name = kdl_names.get(&entry.name).unwrap();
             let args_names = entry.args.iter().map(|arg| format!(" {}", arg)).collect::<String>();
@@ -116,10 +111,11 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<String, String>, entry: &Co
 
 pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: &CompBook) -> Result<String, String> {
     let mut lines = vec![];
+    let mut run = String::new();
     let gen_blk_names: HashSet<String> = HashSet::from_iter([
         "Unit.new", "Pair.new", "U60.if",
         "Kindelia.IO.done", "Kindelia.IO.do_save", "Kindelia.IO.do_take",
-    ].map(String::from));
+        ].map(String::from));
     for name in &comp_book.names {
         let entry = comp_book.entrs.get(name).unwrap();
         // Skip names in the genesis block
@@ -127,9 +123,16 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: 
         if gen_blk_names.contains(&entry.name) {
             continue;
         }
+        // Main is compiled to a run block, which goes at the end
+        // TODO: Maybe we should have run blocks come from a specific type of function instead
+        if name == "Main" {
+            let stmnt = format!("run {{\n  {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?);
+            run.push_str(&stmnt);
+            continue;
+        }
         lines.push(to_kdl_entry(book, kdl_names, entry)?);
     }
-    Ok(lines.join(""))
+    Ok(lines.join("") + &run)
 }
 
 // Utils
