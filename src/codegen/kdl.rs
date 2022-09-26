@@ -129,6 +129,7 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: 
 // Returns a map of kind names to kindelia names
 // Returns an err if any of the names can't be converted
 pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String> {
+    let mut errors = Vec::new();
     // Fits a name to the max size allowed by kindelia.
     // If the name is too large, truncates and replaces the last characters by random chars.
     // Fails if the namespace is too large.
@@ -193,8 +194,16 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
 
     let mut kdl_names = HashMap::new();
     for name in &book.names {
-        let kdln = get_kdl_name(book.entrs.get(name).unwrap())?;
-        kdl_names.insert(name.clone(), kdln);
+        let kdln = get_kdl_name(book.entrs.get(name).unwrap());
+        match kdln {
+            Ok(kdln) => kdl_names.insert(name.clone(), kdln).map(|_| ()).unwrap_or(()),
+            Err(err) => errors.push(err)
+        }
     }
-    Ok(kdl_names)
+
+    if errors.is_empty() {
+        Ok(kdl_names)
+    } else {
+        Err(errors.join("\n"))
+    }
 }
