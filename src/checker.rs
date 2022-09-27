@@ -375,5 +375,6 @@ pub fn to_checker_book(book: &Book) -> String {
         write!(result, "{}", &to_checker_entry(entry)).ok();
         writeln!(result).ok();
     }
+    write!(result, "HoleInit = {}", book.holes).ok();
     result
 }
