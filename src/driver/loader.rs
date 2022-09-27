@@ -97,8 +97,12 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
         Err(err) => {
             let high_line =
                 match err.orig {
-                    Span::Localized(SpanData { file, start, end }) if !config.no_high_line =>
-                        highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code),
+                    Span::Localized(SpanData { file, start, end }) if !config.no_high_line => 
+                        format!(
+                            "On '{}'\n{}",
+                            &load.file[file.0 as usize].path,
+                            highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code)
+                        ),
                     _ if !config.no_high_line => "Cannot find the source of the error.".to_string(),
                     _ => "".to_string()
                 };
