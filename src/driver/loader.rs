@@ -74,7 +74,7 @@ pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), St
             load.book.entrs.insert(Ident(name.clone()), new_book.entrs.get(&Ident(name.to_string())).unwrap().clone());
         }
 
-        for unbound in &new_book.get_unbounds() {
+        for unbound in &new_book.get_unbounds(config) {
             load_entry(config, &unbound.0, load)?;
         }
     }
@@ -90,16 +90,21 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
 
     load_entry(config, name, &mut load)?;
 
-    match load.book.adjust() {
+    match load.book.adjust(config) {
         Ok(book) => {
             load.book = book;
         }
         Err(err) => {
             let high_line =
                 match err.orig {
-                    Span::Localized(SpanData { file, start, end }) if !config.no_high_line =>
-                        highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code),
-                    _ =>  "".to_string()
+                    Span::Localized(SpanData { file, start, end }) if !config.no_high_line => 
+                        format!(
+                            "On '{}'\n{}",
+                            &load.file[file.0 as usize].path,
+                            highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code)
+                        ),
+                    _ if !config.no_high_line => "Cannot find the source of the error.".to_string(),
+                    _ => "".to_string()
                 };
             return match err.kind {
                 AdjustErrorKind::IncorrectArity => Err(format!("Incorrect arity.\n{}", high_line)),

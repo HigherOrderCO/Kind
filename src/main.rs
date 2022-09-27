@@ -17,13 +17,7 @@ use clap::{Parser, Subcommand};
 #[clap(propagate_version = true)]
 pub struct Cli {
     #[clap(subcommand)]
-    pub command: Command,
-
-    #[clap(aliases=&["nhl"], long, value_parser, default_value_t = false)]
-    pub no_high_line: bool,
-
-    #[clap(aliases=&["co"], long, value_parser, default_value_t = true)]
-    pub color_output: bool
+    pub command: Command
 }
 
 #[derive(Subcommand)]
@@ -33,7 +27,7 @@ pub enum Command {
     Check { file: String },
 
     /// Evaluates Main on Kind2
-    #[clap(aliases = &["r"])]
+    #[clap(aliases = &["e"])]
     Eval { file: String },
 
     /// Runs Main on the HVM
@@ -41,23 +35,23 @@ pub enum Command {
     Run { file: String },
 
     /// Derives .kind2 files from a .type file
-    #[clap(aliases = &["c"])]
+    #[clap(aliases = &["der"])]
     Derive { file: String },
 
     /// Generates a checker (.hvm) for a file
-    #[clap(aliases = &["c"])]
+    #[clap(aliases = &["gc"])]
     GenChecker { file: String },
 
     /// Stringifies a file
-    #[clap(aliases = &["c"])]
+    #[clap(aliases = &["show"])]
     Show { file: String },
 
     /// Compiles a file to Kindelia (.kdl)
-    #[clap(aliases = &["c"])]
+    #[clap(aliases = &["kdl"])]
     ToKDL { file: String },
 
     /// Compiles a file to HVM (.hvm)
-    #[clap(aliases = &["c"])]
+    #[clap(aliases = &["hvm"])]
     ToHVM { file: String },
 }
 
@@ -66,8 +60,8 @@ fn run_cli() -> Result<(), String> {
 
 
     let config = Config {
-        no_high_line: cli_matches.no_high_line,
-        color_output: cli_matches.color_output,
+        no_high_line: false,
+        color_output: true,
         kind2_path: env::var_os("KIND2_PATH").map(|x| x.into_string().unwrap()).unwrap_or("".to_string())
     };
 

@@ -29,7 +29,10 @@ pub fn parse_rule(state: parser::State, name: String, init: ByteOffset) -> parse
 }
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
+    let (state, init) = get_init_index(state)?;
     let (state, name) = parser::name1(state)?;
+    let (state, last) = get_last_index(state)?;
+    let name_orig = Span::new_off(init, last);
     let (state, kdl) = parser::text("#", state)?;
     let (state, kdln) = if kdl {
         let (state, name) = parser::name1(state)?;
@@ -69,13 +72,13 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         let mut pats = vec![];
         for arg in &args {
             pats.push(Box::new(Term::Var {
-                orig: Span::Generated,
+                orig: arg.orig,
                 name: arg.name.clone(),
             }));
             // TODO: set orig
         }
         let rules = vec![Box::new(Rule {
-            orig: Span::Generated,
+            orig: name_orig,
             name: Ident(name.clone()),
             pats,
             body,
@@ -88,7 +91,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
                 args,
                 tipo,
                 rules,
-                orig: Span::Generated,
+                orig: name_orig,
             }),
         ))
     } else {
@@ -113,7 +116,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             args,
             tipo,
             rules,
-            orig: Span::Generated,
+            orig: name_orig,
         });
         Ok((state, entry))
     }
@@ -127,11 +130,12 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
     let (open, close) = if next == '(' { ("(", ")") } else { ("<", ">") };
     let (state, _) = parser::consume(open, state)?;
     let (state, name) = parser::name1(state)?;
+    let (state, last) = get_last_index(state)?;
     let (state, anno) = parser::text(":", state)?;
     let (state, tipo) = if anno {
         parse_apps(state)?
     } else {
-        (state, Box::new(Term::Typ { orig: Span::Generated }))
+        (state, Box::new(Term::Typ { orig: Span::new_off(init, last) }))
     };
     let (state, _) = parser::consume(close, state)?;
     let hide = open == "<";
