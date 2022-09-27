@@ -9,10 +9,10 @@ use std::rc::Rc;
 
 // TODO: Remove this from the adjust layer. I think that we need to move it
 // to the driver.
-fn load_newtype(config: &Config,name: &Ident) -> Result<Box<NewType>, String> {
+fn load_newtype(config: &Config, name: &Ident) -> Result<Box<NewType>, String> {
     let path = config.kind2_path.clone();
     let root = Path::new(&path).join(name.to_string().replace('.', "/"));
-    let path = root.clone().join("_.type");
+    let path = root.join("_.type");
 
     let newcode = match std::fs::read_to_string(&path) {
         Err(_) => {

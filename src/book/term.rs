@@ -26,22 +26,85 @@ pub enum Operator {
 
 #[derive(Clone, Debug)]
 pub enum Term {
-    Typ { orig: Span },
-    Var { orig: Span, name: Ident },
-    All { orig: Span, name: Ident, tipo: Box<Term>, body: Box<Term> },
-    Lam { orig: Span, name: Ident, body: Box<Term> },
-    App { orig: Span, func: Box<Term>, argm: Box<Term> },
-    Let { orig: Span, name: Ident, expr: Box<Term>, body: Box<Term> },
-    Ann { orig: Span, expr: Box<Term>, tipo: Box<Term> },
-    Sub { orig: Span, name: Ident, indx: u64, redx: u64, expr: Box<Term> },
-    Ctr { orig: Span, name: Ident, args: Vec<Box<Term>> },
-    Fun { orig: Span, name: Ident, args: Vec<Box<Term>> },
-    Hlp { orig: Span },
-    U60 { orig: Span },
-    Num { orig: Span, numb: u64 },
-    Op2 { orig: Span, oper: Operator, val0: Box<Term>, val1: Box<Term> },
-    Hol { orig: Span, numb: u64 },
-    Mat { orig: Span, tipo: Ident, name: Ident, expr: Box<Term>, cses: Vec<(Ident, Box<Term>)>, moti: Box<Term> },
+    Typ {
+        orig: Span,
+    },
+    Var {
+        orig: Span,
+        name: Ident,
+    },
+    All {
+        orig: Span,
+        name: Ident,
+        tipo: Box<Term>,
+        body: Box<Term>,
+    },
+    Lam {
+        orig: Span,
+        name: Ident,
+        body: Box<Term>,
+    },
+    App {
+        orig: Span,
+        func: Box<Term>,
+        argm: Box<Term>,
+    },
+    Let {
+        orig: Span,
+        name: Ident,
+        expr: Box<Term>,
+        body: Box<Term>,
+    },
+    Ann {
+        orig: Span,
+        expr: Box<Term>,
+        tipo: Box<Term>,
+    },
+    Sub {
+        orig: Span,
+        name: Ident,
+        indx: u64,
+        redx: u64,
+        expr: Box<Term>,
+    },
+    Ctr {
+        orig: Span,
+        name: Ident,
+        args: Vec<Box<Term>>,
+    },
+    Fun {
+        orig: Span,
+        name: Ident,
+        args: Vec<Box<Term>>,
+    },
+    Hlp {
+        orig: Span,
+    },
+    U60 {
+        orig: Span,
+    },
+    Num {
+        orig: Span,
+        numb: u64,
+    },
+    Op2 {
+        orig: Span,
+        oper: Operator,
+        val0: Box<Term>,
+        val1: Box<Term>,
+    },
+    Hol {
+        orig: Span,
+        numb: u64,
+    },
+    Mat {
+        orig: Span,
+        tipo: Ident,
+        name: Ident,
+        expr: Box<Term>,
+        cses: Vec<(Ident, Box<Term>)>,
+        moti: Box<Term>,
+    },
 }
 
 impl Term {

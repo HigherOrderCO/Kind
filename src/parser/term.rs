@@ -1,10 +1,10 @@
-use crate::parser::utils::{get_init_index, get_last_index, is_ctr_head};
+use crate::book::name::Ident;
 use crate::book::span::{ByteOffset, Span};
 use crate::book::term::{Operator, Term};
-use crate::book::name::Ident;
+use crate::parser::utils::{get_init_index, get_last_index, is_ctr_head};
 
-use hvm::parser::{Answer, State};
 use hvm::parser;
+use hvm::parser::{Answer, State};
 
 type TermPrefix = Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>;
 

@@ -2,15 +2,15 @@ pub mod new_type;
 pub mod term;
 pub mod utils;
 
-use crate::parser::term::{parse_apps, parse_term};
-use crate::parser::utils::{get_init_index, get_last_index};
-use crate::book::{Argument, Book, Entry, Rule};
+use crate::book::name::Ident;
 use crate::book::span::{ByteOffset, Span};
 use crate::book::term::Term;
-use crate::book::name::Ident;
+use crate::book::{Argument, Book, Entry, Rule};
+use crate::parser::term::{parse_apps, parse_term};
+use crate::parser::utils::{get_init_index, get_last_index};
 
-use std::collections::HashMap;
 use hvm::parser;
+use std::collections::HashMap;
 
 pub fn parse_rule(state: parser::State, name: String, init: ByteOffset) -> parser::Answer<Box<Rule>> {
     let (state, pats) = parser::until(parser::text_parser("="), Box::new(parse_term), state)?;

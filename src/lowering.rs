@@ -1,12 +1,12 @@
 pub mod adjust;
 pub mod load;
 
+use crate::book::name::Ident;
+use crate::book::new_type::{NewType, SumType};
+use crate::book::term::Term;
+use crate::book::{Argument, Book, Entry, Rule};
 use crate::driver::config::Config;
 use crate::lowering::load::load_newtype_cached;
-use crate::book::{Argument, Book, Entry, Rule};
-use crate::book::name::Ident;
-use crate::book::new_type::NewType;
-use crate::book::term::Term;
 
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
@@ -21,7 +21,7 @@ pub struct UnboundState<'a> {
     // "match" expression.
     types: HashMap<Ident, Rc<NewType>>,
 
-    config: &'a Config
+    config: &'a Config,
 }
 
 impl<'a> UnboundState<'a> {
@@ -30,7 +30,7 @@ impl<'a> UnboundState<'a> {
             vars: Vec::new(),
             unbound: HashSet::new(),
             types,
-            config
+            config,
         }
     }
 }
@@ -130,14 +130,18 @@ impl Unbound for Term {
                     moti.fill_unbound(rhs, state);
                     state.vars.pop();
                     // Cases
-                    for ctr in &newtype.ctrs {
-                        if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
-                            for arg in ctr.args.iter().rev() {
-                                state.vars.push(arg.name.clone());
-                            }
-                            cse.1.fill_unbound(rhs, state);
-                            for _ in ctr.args.iter().rev() {
-                                state.vars.pop();
+                    match &*newtype {
+                        NewType::Sum(SumType { name: _, ctrs, pars: _ }) => {
+                            for ctr in ctrs {
+                                if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
+                                    for arg in ctr.args.iter().rev() {
+                                        state.vars.push(arg.name.clone());
+                                    }
+                                    cse.1.fill_unbound(rhs, state);
+                                    for _ in ctr.args.iter().rev() {
+                                        state.vars.pop();
+                                    }
+                                }
                             }
                         }
                     }

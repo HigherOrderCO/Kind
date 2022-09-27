@@ -2,7 +2,12 @@ use crate::book::name::Ident;
 use crate::book::{Argument, Entry};
 
 #[derive(Clone, Debug)]
-pub struct NewType {
+pub enum NewType {
+    Sum(SumType),
+}
+
+#[derive(Clone, Debug)]
+pub struct SumType {
     pub name: Ident,
     pub pars: Vec<Box<Argument>>,
     pub ctrs: Vec<Box<Constructor>>,

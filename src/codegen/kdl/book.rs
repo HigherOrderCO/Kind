@@ -1,5 +1,5 @@
 use crate::book::name::Ident;
-use crate::book::term::{Term, Operator};
+use crate::book::term::{Operator, Term};
 use crate::book::{Entry, Rule};
 use crate::codegen::kdl::Book;
 
@@ -294,7 +294,9 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                                 Box::new(CompTerm::Var { name })
                             }
                             CompTerm::Var { .. } => field.clone(),
-                            _ => { panic!("?"); }
+                            _ => {
+                                panic!("?");
+                            }
                         };
                         new_pat_args.push(arg.clone());
                         old_rule_body_args.push(arg);
@@ -792,7 +794,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
         // linearizes rule pattern vars
         // The &mut here doesn't do anything because we're dropping var immediately afterwards.
         // To linearize rule variables, we'll have to replace all LHS occurrences by ~ if the amount of uses is zero
-        let uses = linearize_name(&mut rule.body, &mut name, &mut fresh); 
+        let uses = linearize_name(&mut rule.body, &mut name, &mut fresh);
         if uses == 0 {
             if let CompTerm::Var { name } = var {
                 *name = String::from("~");

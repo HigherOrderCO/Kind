@@ -1,7 +1,7 @@
-use crate::book::{Argument, Book, Entry, Rule};
-use crate::book::term::{Operator, Term};
 use crate::book::name::Ident;
 use crate::book::span::Span;
+use crate::book::term::{Operator, Term};
+use crate::book::{Argument, Book, Entry, Rule};
 
 use std::fmt::Write;
 
@@ -13,7 +13,7 @@ pub fn to_checker_oper(oper: &Operator) -> String {
         Operator::Div => "Kind.Operator.div".to_string(),
         Operator::Mod => "Kind.Operator.mod".to_string(),
         Operator::And => "Kind.Operator.and".to_string(),
-        Operator::Or  => "Kind.Operator.or".to_string(),
+        Operator::Or => "Kind.Operator.or".to_string(),
         Operator::Xor => "Kind.Operator.xor".to_string(),
         Operator::Shl => "Kind.Operator.shl".to_string(),
         Operator::Shr => "Kind.Operator.shr".to_string(),
