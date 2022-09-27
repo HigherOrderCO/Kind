@@ -145,9 +145,9 @@ pub fn cmd_derive(config: &Config, path: &str) -> Result<(), String> {
     };
 
     fn save_derived(color: bool, path: &str, derived: &Derived) {
-        let dir = std::path::Path::new(&derived.path.0);
+        let dir = &derived.path;
         let txt = format!("// Automatically derived from {}\n{}", path, derived.entr);
-        println!("[1mDerived '{}':", highlight(color, &derived.path.0));
+        println!("[1mDerived '{}':", highlight(color, derived.path.to_str().unwrap()));
         println!("{}\n", txt);
         std::fs::create_dir_all(dir.parent().unwrap()).unwrap();
         std::fs::write(dir, txt).ok();
@@ -155,11 +155,25 @@ pub fn cmd_derive(config: &Config, path: &str) -> Result<(), String> {
 
     match *newtype {
         NewType::Sum(sum) => {
+            // TODO: Remove this kind2_path because it's wrong.
             save_derived(color, path, &derive::derive_sum_type(&config.kind2_path, &sum));
             for i in 0..sum.ctrs.len() {
                 save_derived(color, path, &derive::derive_ctr(&sum, i));
             }
             save_derived(color, path, &derive::derive_match(&sum));
+        },
+        NewType::Prod(prod) => {
+            save_derived(color, path, &derive::derive_prod_type(&config.kind2_path, &prod));
+            save_derived(color, path, &derive::derive_prod_constructor(&prod));
+            let getters = derive::derive_getters(&prod);
+            for getter in getters {
+                save_derived(color, path, &getter);
+            }
+
+            let setters = derive::derive_setters(&prod);
+            for setter in setters {
+                save_derived(color, path, &setter);
+            }
         }
     }
 

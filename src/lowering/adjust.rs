@@ -19,6 +19,7 @@ pub struct AdjustError {
 pub enum AdjustErrorKind {
     IncorrectArity,
     UnboundVariable { name: String },
+    UseOpenInstead,
     RepeatedVariable,
     CantLoadType,
     NoCoverage,
@@ -383,7 +384,11 @@ impl Adjust for Term {
                             };
 
                             result.adjust(rhs, state)
-                        }
+                        },
+                        _ => Err(AdjustError {
+                            orig,
+                            kind: AdjustErrorKind::UseOpenInstead,
+                        })
                     }
                 } else {
                     Err(AdjustError {

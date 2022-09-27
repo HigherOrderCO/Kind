@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::book::name::Ident;
 use crate::book::new_type::{Constructor, Derived, SumType};
@@ -9,8 +9,6 @@ use crate::book::{Argument, Entry, Rule};
 pub fn derive_sum_type(path: &str, tipo: &SumType) -> Derived {
     let root = Path::new(path).join(tipo.name.to_path());
     let path = root.join("_.kind2");
-    let name = format!("{}", tipo.name);
-    let kdln = None;
     let mut args = vec![];
     for par in &tipo.pars {
         args.push(Box::new(Argument {
@@ -21,18 +19,9 @@ pub fn derive_sum_type(path: &str, tipo: &SumType) -> Derived {
             tipo: par.tipo.clone(),
         }));
     }
-    let tipo = Box::new(Term::Typ { orig: Span::Generated });
-    let rules = vec![];
-    let entr = Entry {
-        name: Ident(name),
-        orig: Span::Generated,
-        kdln,
-        args,
-        tipo,
-        rules,
-    };
+    let entr = Entry::new_type_signature(tipo.name.clone(), args);
     Derived {
-        path: Ident(path.to_str().unwrap().to_string()),
+        path,
         entr,
     }
 }
@@ -72,7 +61,7 @@ pub fn derive_ctr(tipo: &SumType, index: usize) -> Derived {
             tipo,
             rules,
         };
-        Derived { path: Ident(path), entr }
+        Derived { path: Path::new(&path).to_owned(), entr }
     } else {
         panic!("Constructor out of bounds.");
     }
@@ -262,6 +251,5 @@ pub fn derive_match(ntyp: &SumType) -> Derived {
         tipo,
         rules,
     };
-
-    Derived { path: Ident(path), entr }
+    Derived { path: PathBuf::from(path), entr }
 }

@@ -130,17 +130,15 @@ impl Unbound for Term {
                     moti.fill_unbound(rhs, state);
                     state.vars.pop();
                     // Cases
-                    match &*newtype {
-                        NewType::Sum(SumType { name: _, ctrs, pars: _ }) => {
-                            for ctr in ctrs {
-                                if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
-                                    for arg in ctr.args.iter().rev() {
-                                        state.vars.push(arg.name.clone());
-                                    }
-                                    cse.1.fill_unbound(rhs, state);
-                                    for _ in ctr.args.iter().rev() {
-                                        state.vars.pop();
-                                    }
+                    if let NewType::Sum(SumType { name: _, ctrs, pars: _ }) = &*newtype {
+                        for ctr in ctrs {
+                            if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
+                                for arg in ctr.args.iter().rev() {
+                                    state.vars.push(arg.name.clone());
+                                }
+                                cse.1.fill_unbound(rhs, state);
+                                for _ in ctr.args.iter().rev() {
+                                    state.vars.pop();
                                 }
                             }
                         }
