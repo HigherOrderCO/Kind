@@ -1,6 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use crate::book::{Entry, new_type::{ProdType, Derived}, Argument, name::Ident, term::Term, span::Span, Rule};
+use crate::book::{Entry, new_type::{ProdType, Derived, SumType, Constructor}, Argument, name::Ident, term::Term, span::Span, Rule};
+
+use super::derive_match;
+
 
 fn args_to_vars(vec: &Vec<Box<Argument>>) -> Vec<Box<Term>> {
   vec
@@ -64,13 +67,7 @@ pub fn derive_getters(prod: &ProdType) -> Vec<Derived> {
     args: args_to_vars(&prod.pars)
   });
 
-  args.push(Box::new(Argument {
-    hide: false,
-    orig: Span::Generated,
-    name: Ident(name_lower),
-    eras: false,
-    tipo
-  }));
+  args.push(Box::new(Argument::new_hidden(Ident(name_lower), tipo)));
 
   let mut derived = Vec::new();
 
@@ -166,4 +163,19 @@ pub fn derive_setters(prod: &ProdType) -> Vec<Derived> {
   }
 
   derived
+}
+
+pub fn derive_prod_match(prod: &ProdType) -> Derived {
+
+  // We just use the same generator as the sum type.
+  let sum_type = SumType {
+    name: prod.name.clone(),
+    pars: prod.pars.clone(),
+    ctrs: vec![Box::new(Constructor {
+      name: Ident("new".to_string()),
+      args: prod.fields.clone()
+    })],
+  };
+
+  derive_match(&sum_type)
 }

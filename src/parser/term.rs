@@ -180,6 +180,7 @@ pub fn parse_term_prefix(state: State) -> Answer<Box<Term>> {
             Box::new(parse_let), // `let `
             Box::new(parse_if),  // `if `
             Box::new(parse_mat), // `match `
+            Box::new(parse_open), // `match `
             Box::new(parse_do),  // `do `
             Box::new(parse_hlp), // `?`
             Box::new(parse_hol), // `_`
@@ -482,6 +483,58 @@ pub fn parse_mat(state: State) -> Answer<Option<Box<Term>>> {
                     expr,
                     cses,
                     moti,
+                }),
+            ))
+        }),
+        state,
+    );
+}
+
+
+pub fn parse_open(state: State) -> Answer<Option<Box<Term>>> {
+    return parser::guard(
+        parser::text_parser("open "),
+        Box::new(|state| {
+            let (state, init) = get_init_index(state)?;
+            let (state, _) = parser::consume("open ", state)?;
+            let (state, tipo) = parser::name1(state)?;
+            let (state, nm_i) = get_init_index(state)?;
+            let (state, name) = parser::name1(state)?;
+            let (state, next) = parser::peek_char(state)?;
+            let (state, expr) = if next == '=' {
+                let (state, _) = parser::consume("=", state)?;
+                let (state, expr) = parse_apps(state)?;
+                (state, expr)
+            } else {
+                let (state, nm_j) = get_last_index(state)?;
+                (
+                    state,
+                    Box::new(Term::Var {
+                        orig: Span::new_off(nm_i, nm_j),
+                        name: Ident(name.clone()),
+                    }),
+                )
+            };
+            let (state, next) = peek_char_local(state)?;
+            let (state, moti) = if next == ':' {
+                let (state, _) = parser::consume(":", state)?;
+                let (state, moti) = parse_apps(state)?;
+                (state, moti)
+            } else {
+                (state, Box::new(Term::Hol { orig: Span::generated(), numb: 0 }))
+            };
+            let (state, last) = get_last_index(state)?;
+            let orig = Span::new_off(init, last);
+            let (state, body) = parse_apps(state)?;
+            Ok((
+                state,
+                Box::new(Term::Open {
+                    orig,
+                    tipo: Ident(tipo),
+                    name: Ident(name),
+                    expr,
+                    moti,
+                    body,
                 }),
             ))
         }),

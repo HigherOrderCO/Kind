@@ -166,6 +166,9 @@ pub fn to_checker_term(term: &Term, quote: bool, lhs: bool) -> String {
         Term::Mat { .. } => {
             panic!("Internal error: Mat cannot be compiled to a checker because it should be removed in the adjust phase!");
         }
+        Term::Open { .. } => {
+            panic!("Internal error: Open cannot be compiled to a checker because it should be removed in the adjust phase!");
+        }
     }
 }
 

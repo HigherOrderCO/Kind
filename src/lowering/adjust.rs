@@ -20,6 +20,7 @@ pub enum AdjustErrorKind {
     IncorrectArity,
     UnboundVariable { name: String },
     UseOpenInstead,
+    UseMatchInstead,
     RepeatedVariable,
     CantLoadType,
     NoCoverage,
@@ -388,6 +389,58 @@ impl Adjust for Term {
                         _ => Err(AdjustError {
                             orig,
                             kind: AdjustErrorKind::UseOpenInstead,
+                        })
+                    }
+                } else {
+                    Err(AdjustError {
+                        orig,
+                        kind: AdjustErrorKind::CantLoadType,
+                    })
+                }
+            },
+            Term::Open {
+                ref orig,
+                ref name,
+                ref tipo,
+                ref expr,
+                ref body,
+                ref moti
+            } => {
+                let orig = *orig;
+                if let Ok(res) = load_newtype_cached(state.config, &mut state.types, tipo) {
+                    match &*res {
+                        NewType::Prod(prod) => {
+                            let mut args = vec![];
+                            args.push(expr.clone());
+
+                            let mut case_term = body.clone();
+                            for arg in prod.fields.iter().rev() {
+                                case_term = Box::new(Term::Lam {
+                                    orig: case_term.get_origin(),
+                                    name: Ident(format!("{}.{}", name, arg.name)),
+                                    body: case_term,
+                                });
+                            }
+
+                            args.push(case_term);
+
+                            args.push(Box::new(Term::Lam {
+                                orig: moti.get_origin(),
+                                name: name.clone(),
+                                body: moti.clone(),
+                            }));
+
+                            let result = Term::Ctr {
+                                orig,
+                                name: Ident::new_path(&tipo.to_string(), "match"),
+                                args,
+                            };
+
+                            result.adjust(rhs, state)
+                        },
+                        _ =>  Err(AdjustError {
+                            orig,
+                            kind: AdjustErrorKind::UseMatchInstead,
                         })
                     }
                 } else {

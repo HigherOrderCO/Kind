@@ -568,6 +568,7 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
         }
         Term::Hol { orig: _, numb: _ } => Box::new(CompTerm::Nil),
         Term::Mat { .. } => Box::new(CompTerm::Nil),
+        Term::Open { .. } => Box::new(CompTerm::Nil),
     }
 }
 

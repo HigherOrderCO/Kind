@@ -26,6 +26,18 @@ pub fn derive_sum_type(path: &str, tipo: &SumType) -> Derived {
     }
 }
 
+fn args_to_vars(vec: &Vec<Box<Argument>>) -> Vec<Box<Term>> {
+    vec
+      .iter()
+      .map(|x| {
+          Box::new(Term::Var {
+              orig: Span::Generated,
+              name: x.name.clone(),
+          })
+      })
+      .collect()
+}
+
 pub fn derive_ctr(tipo: &SumType, index: usize) -> Derived {
     if let Some(ctr) = tipo.ctrs.get(index) {
         let path = format!("{}/{}.kind2", tipo.name.to_path(), ctr.name);
@@ -74,33 +86,21 @@ pub fn derive_match(ntyp: &SumType) -> Derived {
         Box::new(Term::Ctr {
             orig: Span::Generated,
             name: ntyp.name.clone(),
-            args: ntyp
-                .pars
-                .iter()
-                .map(|x| {
-                    Box::new(Term::Var {
-                        orig: Span::Generated,
-                        name: x.name.clone(),
-                    })
-                })
-                .collect(),
+            args: args_to_vars(&ntyp.pars),
         })
     }
 
     fn gen_ctr_value(ntyp: &SumType, ctr: &Constructor, _: usize, suffix: &str) -> Box<Term> {
         let mut ctr_value_args = vec![];
+
         for par in &ntyp.pars {
-            ctr_value_args.push(Box::new(Term::Var {
-                orig: Span::Generated,
-                name: Ident(format!("{}{}", par.name, suffix)),
-            }));
+            ctr_value_args.push(Box::new(Term::new_var(Ident(format!("{}{}", par.name, suffix)))));
         }
+
         for fld in &ctr.args {
-            ctr_value_args.push(Box::new(Term::Var {
-                orig: Span::Generated,
-                name: Ident(format!("{}{}", fld.name, suffix)),
-            }));
+            ctr_value_args.push(Box::new(Term::new_var(Ident(format!("{}{}", fld.name, suffix)))));
         }
+
         Box::new(Term::Ctr {
             orig: Span::Generated,
             name: Ident::new_path(&ntyp.name.0, &ctr.name.0),
@@ -116,37 +116,21 @@ pub fn derive_match(ntyp: &SumType) -> Derived {
 
     //  <t: Type>
     for par in &ntyp.pars {
-        args.push(Box::new(Argument {
-            hide: true,
-            orig: Span::Generated,
-            eras: true,
-            name: par.name.clone(),
-            tipo: par.tipo.clone(),
-        }));
+        args.push(Box::new(Argument::new_hidden(par.name.clone(), par.tipo.clone())));
     }
 
     // (x: (List t))
-    args.push(Box::new(Argument {
-        eras: false,
+    args.push(Box::new(Argument::new_accessible(Ident("x".to_string()), gen_type_ctr(ntyp))));
+
+    let motive_type = Box::new(Term::All {
         orig: Span::Generated,
-        hide: false,
         name: Ident("x".to_string()),
         tipo: gen_type_ctr(ntyp),
-    }));
+        body: Box::new(Term::Typ { orig: Span::Generated }),
+    });
 
     // -(p: (List t) -> Type)
-    args.push(Box::new(Argument {
-        eras: true,
-        orig: Span::Generated,
-        hide: false,
-        name: Ident("p".to_string()),
-        tipo: Box::new(Term::All {
-            orig: Span::Generated,
-            name: Ident("x".to_string()),
-            tipo: gen_type_ctr(ntyp),
-            body: Box::new(Term::Typ { orig: Span::Generated }),
-        }),
-    }));
+    args.push(Box::new(Argument::new_erased(Ident("p".to_string()), motive_type)));
 
     // (nil: (p (List.nil t)))
     // (cons: (head t) (tail: (List t)) (p (List.cons t head tail)))

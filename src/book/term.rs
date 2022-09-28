@@ -105,9 +105,24 @@ pub enum Term {
         cses: Vec<(Ident, Box<Term>)>,
         moti: Box<Term>,
     },
+    Open {
+        orig: Span,
+        tipo: Ident,
+        name: Ident,
+        expr: Box<Term>,
+        moti: Box<Term>,
+        body: Box<Term>
+    }
 }
 
 impl Term {
+    pub fn new_var(name: Ident) -> Term {
+        Term::Var {
+            orig: Span::Generated,
+            name
+        }
+    }
+
     pub fn interpret_as_string(&self) -> Option<String> {
         let mut text = String::new();
         let mut term = self;
@@ -195,6 +210,7 @@ impl Display for Term {
                     write!(f, "({} {})", expr, args.iter().map(|x| format!("{}", x)).collect::<Vec<String>>().join(" "))
                 }
                 Mat { .. } => panic!("Internal Error: Cannot display a Term::Mat because it's removed after adjust."),
+                Open { .. } => panic!("Internal Error: Cannot display a Term::Open because it's removed after adjust."),
             }
         }
     }
@@ -220,6 +236,7 @@ impl Localized for Term {
             Fun { orig, .. } => *orig,
             App { orig, .. } => *orig,
             Mat { orig, .. } => *orig,
+            Open { orig, .. } => *orig,
         }
     }
 
@@ -302,6 +319,10 @@ impl Localized for Term {
                     cse.1.set_origin_file(file);
                 }
                 moti.set_origin_file(file);
+            }
+            Open { orig, expr, .. } => {
+                *orig = orig.set_file(file);
+                expr.set_origin_file(file);
             }
         }
     }

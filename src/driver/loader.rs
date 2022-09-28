@@ -114,6 +114,7 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
                 AdjustErrorKind::CantLoadType => Err(format!("Can't load type.\n{}", high_line)),
                 AdjustErrorKind::NoCoverage => Err(format!("Incomplete constructor coverage.\n{}", high_line)),
                 AdjustErrorKind::UseOpenInstead => Err(format!("You should use `open` instead of `match` on record types.\n{}", high_line)),
+                AdjustErrorKind::UseMatchInstead => Err(format!("You should use `match` instead of `open` on sum types.\n{}", high_line)),
             };
         }
     };

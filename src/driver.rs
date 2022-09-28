@@ -21,7 +21,7 @@ pub struct RunResult {
 
 pub fn highlight(should: bool, text: &str) -> String {
     if should {
-        format!("\x1b[4m\x1b{}\x1b[4m\x1b", text)
+        format!("\x1b[4m{}\x1b[0m", text)
     } else {
         text.to_string()
     }
@@ -147,7 +147,7 @@ pub fn cmd_derive(config: &Config, path: &str) -> Result<(), String> {
     fn save_derived(color: bool, path: &str, derived: &Derived) {
         let dir = &derived.path;
         let txt = format!("// Automatically derived from {}\n{}", path, derived.entr);
-        println!("[1mDerived '{}':", highlight(color, derived.path.to_str().unwrap()));
+        println!("Derived '{}':", highlight(color, derived.path.to_str().unwrap()));
         println!("{}\n", txt);
         std::fs::create_dir_all(dir.parent().unwrap()).unwrap();
         std::fs::write(dir, txt).ok();
@@ -165,6 +165,7 @@ pub fn cmd_derive(config: &Config, path: &str) -> Result<(), String> {
         NewType::Prod(prod) => {
             save_derived(color, path, &derive::derive_prod_type(&config.kind2_path, &prod));
             save_derived(color, path, &derive::derive_prod_constructor(&prod));
+            save_derived(color, path, &derive::derive_prod_match(&prod));
             let getters = derive::derive_getters(&prod);
             for getter in getters {
                 save_derived(color, path, &getter);

@@ -2,7 +2,7 @@ pub mod adjust;
 pub mod load;
 
 use crate::book::name::Ident;
-use crate::book::new_type::{NewType, SumType};
+use crate::book::new_type::{NewType, SumType, ProdType};
 use crate::book::term::Term;
 use crate::book::{Argument, Book, Entry, Rule};
 use crate::driver::config::Config;
@@ -141,6 +141,24 @@ impl Unbound for Term {
                                     state.vars.pop();
                                 }
                             }
+                        }
+                    }
+                }
+            },
+            Term::Open { orig: _, tipo, name, expr, moti, body } => {
+                if let Ok(newtype) = load_newtype_cached(state.config, &mut state.types, tipo) {
+                    state.unbound.insert(Ident(format!("{}.match", tipo.clone())));
+                    expr.fill_unbound(rhs, state);
+                    state.vars.push(name.clone());
+                    moti.fill_unbound(rhs, state);
+                    state.vars.pop();
+                    if let NewType::Prod(ProdType { name: _, fields, .. }) = &*newtype {
+                        for arg in fields.iter().rev() {
+                            state.vars.push(arg.name.clone());
+                        }
+                        body.fill_unbound(rhs, state);
+                        for _ in fields.iter().rev() {
+                            state.vars.pop();
                         }
                     }
                 }
