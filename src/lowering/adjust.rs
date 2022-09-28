@@ -412,6 +412,11 @@ impl Adjust for Term {
                         NewType::Prod(prod) => {
                             let mut args = vec![];
                             args.push(expr.clone());
+                            args.push(Box::new(Term::Lam {
+                                orig: moti.get_origin(),
+                                name: name.clone(),
+                                body: moti.clone(),
+                            }));
 
                             let mut case_term = body.clone();
                             for arg in prod.fields.iter().rev() {
@@ -420,15 +425,10 @@ impl Adjust for Term {
                                     name: Ident(format!("{}.{}", name, arg.name)),
                                     body: case_term,
                                 });
+
                             }
 
                             args.push(case_term);
-
-                            args.push(Box::new(Term::Lam {
-                                orig: moti.get_origin(),
-                                name: name.clone(),
-                                body: moti.clone(),
-                            }));
 
                             let result = Term::Ctr {
                                 orig,
