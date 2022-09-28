@@ -67,7 +67,7 @@ pub fn derive_getters(prod: &ProdType) -> Vec<Derived> {
     args: args_to_vars(&prod.pars)
   });
 
-  args.push(Box::new(Argument::new_hidden(Ident(name_lower), tipo)));
+  args.push(Box::new(Argument::new_accessible(Ident(name_lower), tipo)));
 
   let mut derived = Vec::new();
 
