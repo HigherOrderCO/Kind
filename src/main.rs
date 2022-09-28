@@ -49,7 +49,12 @@ pub enum Command {
 
     /// Compiles a file to Kindelia (.kdl)
     #[clap(aliases = &["kdl"])]
-    ToKDL { file: String },
+    ToKDL {
+        file: String,
+        /// If given, a namespace that goes before each compiled name. Can be at most 10 charaters long.
+        #[clap(long, aliases = &["ns"])]
+        namespace: Option<String>,
+    },
 
     /// Compiles a file to HVM (.hvm)
     #[clap(aliases = &["hvm"])]
@@ -72,7 +77,7 @@ fn run_cli() -> Result<(), String> {
         Command::Derive { file: path } => cmd_derive(&config, &path),
         Command::GenChecker { file: path } => cmd_gen_checker(&config, &path),
         Command::Show { file: path } => cmd_show(&config, &path),
-        Command::ToKDL { file: path } => cmd_to_kdl(&config, &path),
+        Command::ToKDL { file: path, namespace } => cmd_to_kdl(&config, &path, &namespace),
         Command::ToHVM { file: path } => cmd_to_hvm(&config, &path),
     }
 }

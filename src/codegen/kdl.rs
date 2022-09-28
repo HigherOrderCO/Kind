@@ -137,33 +137,25 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: 
 
 // Returns a map of kind names to kindelia names
 // Returns an err if any of the names can't be converted
-pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String> {
-    let mut errors = Vec::new();
+pub fn get_kdl_names(book: &CompBook, namespace: &Option<String>) -> Result<HashMap<String, String>, String> {
     // Fits a name to the max size allowed by kindelia.
     // If the name is too large, truncates and replaces the last characters by random chars.
-    // Fails if the namespace is too large.
-    fn rand_shorten(name: &String) -> Result<String, String> {
-        let (ns, fun) = name.rsplit_once('.').unwrap_or(("", name));
-        let ns = if !ns.is_empty() { format!("{}.", ns) } else { ns.to_string() };
-        if ns.len() > KDL_NAME_LEN - 1 {
-            let err = format!("Namespace for \"{}\" has more than {} characters.", name, KDL_NAME_LEN - 1);
-            return Err(err);
-        }
+    fn rand_shorten(name: &String, ns: &str) -> Result<String, String> {
         let max_fn_name = KDL_NAME_LEN - ns.len();
         // If the name doesn't fit, truncate and insert some random characters at the end
-        let fun = if fun.len() > max_fn_name {
+        let name = if name.len() > max_fn_name {
             let n_rnd_chrs = usize::min(3, max_fn_name);
-            let fun_cut = fun[..max_fn_name - n_rnd_chrs].to_string();
+            let name_cut = name[..max_fn_name - n_rnd_chrs].to_string();
             let mut rng = rand::thread_rng();
             let rnd_chrs = (0..n_rnd_chrs).map(|_| rng.gen_range(0..63)).map(encode_base64).collect::<String>();
-            format!("{}{}", fun_cut, rnd_chrs)
+            format!("{}{}", name_cut, rnd_chrs)
         } else {
-            fun.to_string()
+            name.clone()
         };
-        Ok(format!("{}{}", ns, fun))
+        Ok(format!("{}{}", ns, name))
     }
 
-    fn get_kdl_name(entry: &CompEntry) -> Result<String, String> {
+    fn get_kdl_name(entry: &CompEntry, ns: &str) -> Result<String, String> {
         let kind_name = &entry.name;
         // If the entry uses a kindelia name, use it
         let kdln = if let Some(kdln) = &entry.kdln {
@@ -172,22 +164,26 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
                 return Err(err);
             }
             if entry.orig {
-                if kdln.len() > KDL_NAME_LEN {
-                    let err = format!("Kindelia name \"{}\" for \"{}\" has more than {} characters.", kdln, kind_name, KDL_NAME_LEN - 1);
+                let max_len = KDL_NAME_LEN - ns.len();
+                if kdln.len() > max_len {
+                    let mut err = format!("Kindelia name \"{}\" for \"{}\" has more than {} characters.", kdln, kind_name, max_len);
+                    if ns.len() > 0 {
+                        err = format!("{} (Namespace \"{}\" has {})", err, ns, ns.len());
+                    }
                     return Err(err);
                 }
-                kdln.clone()
+                format!("{}{}", ns, kdln)
             } else {
                 // For entries created by the flattener, we shorten even the kindelia name
                 // TODO: Since these rules can come first,
                 //       if the kdln is too large the err will happen in the generated function,
                 //       potentially confusing the user.
-                rand_shorten(kdln)?
+                rand_shorten(kdln, ns)?
             }
         }
         // Otherwise, try to fit the normal kind name
         else {
-            rand_shorten(&kind_name.replace('.', "_"))?
+            rand_shorten(&kind_name.replace('.', "_"), ns)?
         };
         Ok(kdln)
     }
@@ -201,9 +197,12 @@ pub fn get_kdl_names(book: &CompBook) -> Result<HashMap<String, String>, String>
         }
     }
 
+    let mut errors = Vec::new();
     let mut kdl_names = HashMap::new();
+    let ns = namespace.as_ref().map_or(String::new(), |ns| format!("{}.", ns));
     for name in &book.names {
-        let kdln = get_kdl_name(book.entrs.get(name).unwrap());
+        let entry = book.entrs.get(name).unwrap();
+        let kdln = get_kdl_name(entry, &ns);
         match kdln {
             Ok(kdln) => kdl_names.insert(name.clone(), kdln).map(|_| ()).unwrap_or(()),
             Err(err) => errors.push(err),
