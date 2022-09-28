@@ -33,7 +33,7 @@ pub fn check_entry_attributes(entry: &Entry) -> Result<(), AdjustError> {
 }
 
 pub fn check_attributes(book: &Book) -> Result<(), AdjustError> {
-  for (_, entry) in &book.entrs {
+  for entry in book.entrs.values() {
     check_entry_attributes(entry)?;
   }
   Ok(())

@@ -5,7 +5,7 @@ use crate::book::{Entry, new_type::{ProdType, Derived, SumType, Constructor}, Ar
 use super::derive_match;
 
 
-fn args_to_vars(vec: &Vec<Box<Argument>>) -> Vec<Box<Term>> {
+fn args_to_vars(vec: &[Box<Argument>]) -> Vec<Box<Term>> {
   vec
     .iter()
     .map(|x| {

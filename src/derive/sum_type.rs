@@ -26,7 +26,7 @@ pub fn derive_sum_type(path: &str, tipo: &SumType) -> Derived {
     }
 }
 
-fn args_to_vars(vec: &Vec<Box<Argument>>) -> Vec<Box<Term>> {
+fn args_to_vars(vec: &[Box<Argument>]) -> Vec<Box<Term>> {
     vec
       .iter()
       .map(|x| {
