@@ -19,6 +19,8 @@ pub struct AdjustError {
 pub enum AdjustErrorKind {
     IncorrectArity,
     UnboundVariable { name: String },
+    UseOpenInstead,
+    UseMatchInstead,
     RepeatedVariable,
     CantLoadType,
     NoCoverage,
@@ -43,7 +45,7 @@ pub struct AdjustState<'a> {
 
     // Configuration provided by the user. It's useful
     // to load paths correctly.
-    config: &'a Config
+    config: &'a Config,
 }
 
 impl<'a> AdjustState<'a> {
@@ -76,7 +78,7 @@ pub trait Adjust {
                 holes: 0,
                 vars: Vec::new(),
                 types: HashMap::new(),
-                config
+                config,
             },
         )
     }
@@ -339,48 +341,108 @@ impl Adjust for Term {
                 ref moti,
             } => {
                 let orig = *orig;
-                if let Ok(newtype) = load_newtype_cached(state.config, &mut state.types, tipo) {
-                    let mut args = vec![];
-                    args.push(expr.clone());
-                    args.push(Box::new(Term::Lam {
-                        orig: moti.get_origin(),
-                        name: name.clone(),
-                        body: moti.clone(),
-                    }));
+                if let Ok(res) = load_newtype_cached(state.config, &mut state.types, tipo) {
+                    match &*res {
+                        NewType::Sum(newtype) => {
+                            let mut args = vec![];
+                            args.push(expr.clone());
+                            args.push(Box::new(Term::Lam {
+                                orig: moti.get_origin(),
+                                name: name.clone(),
+                                body: moti.clone(),
+                            }));
 
-                    if newtype.ctrs.len() != cses.len() {
-                        return Err(AdjustError {
+                            if newtype.ctrs.len() != cses.len() {
+                                return Err(AdjustError {
+                                    orig,
+                                    kind: AdjustErrorKind::NoCoverage,
+                                });
+                            }
+
+                            for ctr in &newtype.ctrs {
+                                if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
+                                    let mut case_term = cse.1.clone();
+                                    for arg in ctr.args.iter().rev() {
+                                        case_term = Box::new(Term::Lam {
+                                            orig: case_term.get_origin(),
+                                            name: Ident(format!("{}.{}", name, arg.name)),
+                                            body: case_term,
+                                        });
+                                    }
+                                    args.push(case_term);
+                                } else {
+                                    return Err(AdjustError {
+                                        orig,
+                                        kind: AdjustErrorKind::NoCoverage,
+                                    });
+                                }
+                            }
+
+                            let result = Term::Ctr {
+                                orig,
+                                name: Ident::new_path(&tipo.to_string(), "match"),
+                                args,
+                            };
+
+                            result.adjust(rhs, state)
+                        },
+                        _ => Err(AdjustError {
                             orig,
-                            kind: AdjustErrorKind::NoCoverage,
-                        });
+                            kind: AdjustErrorKind::UseOpenInstead,
+                        })
                     }
+                } else {
+                    Err(AdjustError {
+                        orig,
+                        kind: AdjustErrorKind::CantLoadType,
+                    })
+                }
+            },
+            Term::Open {
+                ref orig,
+                ref name,
+                ref tipo,
+                ref expr,
+                ref body,
+                ref moti
+            } => {
+                let orig = *orig;
+                if let Ok(res) = load_newtype_cached(state.config, &mut state.types, tipo) {
+                    match &*res {
+                        NewType::Prod(prod) => {
+                            let mut args = vec![];
+                            args.push(expr.clone());
+                            args.push(Box::new(Term::Lam {
+                                orig: moti.get_origin(),
+                                name: name.clone(),
+                                body: moti.clone(),
+                            }));
 
-                    for ctr in &newtype.ctrs {
-                        if let Some(cse) = cses.iter().find(|x| x.0 == ctr.name) {
-                            let mut case_term = cse.1.clone();
-                            for arg in ctr.args.iter().rev() {
+                            let mut case_term = body.clone();
+                            for arg in prod.fields.iter().rev() {
                                 case_term = Box::new(Term::Lam {
                                     orig: case_term.get_origin(),
                                     name: Ident(format!("{}.{}", name, arg.name)),
                                     body: case_term,
                                 });
+
                             }
+
                             args.push(case_term);
-                        } else {
-                            return Err(AdjustError {
+
+                            let result = Term::Ctr {
                                 orig,
-                                kind: AdjustErrorKind::NoCoverage,
-                            });
-                        }
+                                name: Ident::new_path(&tipo.to_string(), "match"),
+                                args,
+                            };
+
+                            result.adjust(rhs, state)
+                        },
+                        _ =>  Err(AdjustError {
+                            orig,
+                            kind: AdjustErrorKind::UseMatchInstead,
+                        })
                     }
-
-                    let result = Term::Ctr {
-                        orig,
-                        name: Ident::new_path(&tipo.to_string(), "match"),
-                        args,
-                    };
-
-                    result.adjust(rhs, state)
                 } else {
                     Err(AdjustError {
                         orig,

@@ -56,9 +56,8 @@ pub fn to_hvm_term(book: &Book, term: &Term) -> String {
             format!("({} {} {})", oper, val0, val1)
         }
         Term::Hol { orig: _, numb: _ } => "_".to_string(),
-        Term::Mat { .. } => {
-            panic!("Internal error."); // removed after adjust()
-        }
+        Term::Mat { .. } => panic!("Internal error: Term::Mat is removed after adjust"),
+        Term::Open { .. } => panic!("Internal error: Term::Open is removed after adjust")
     }
 }
 

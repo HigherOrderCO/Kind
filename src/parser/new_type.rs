@@ -1,300 +1,100 @@
-use std::path::Path;
-
-use crate::book::new_type::{Constructor, Derived, NewType};
-use crate::book::{Argument, Entry, Rule};
 use crate::book::name::Ident;
-use crate::book::span::Span;
-use crate::book::term::Term;
+use crate::book::new_type::{Constructor, NewType, SumType, ProdType};
 use crate::parser::*;
 
-pub fn derive_type(path: &str, tipo: &NewType) -> Derived {
-    let root = Path::new(path).join(tipo.name.to_path());
-    let path = root.clone().join("_.kind2");
-    let name = format!("{}", tipo.name);
-    let kdln = None;
-    let mut args = vec![];
-    for par in &tipo.pars {
-        args.push(Box::new(Argument {
-            hide: false,
-            orig: Span::Generated,
-            eras: false,
-            name: par.name.clone(),
-            tipo: par.tipo.clone(),
-        }));
-    }
-    let tipo = Box::new(Term::Typ { orig: Span::Generated });
-    let rules = vec![];
-    let entr = Entry {
-        name: Ident(name),
-        orig: Span::Generated,
-        kdln,
-        args,
-        tipo,
-        rules,
-    };
-    Derived { path: Ident(path.to_str().unwrap().to_string()), entr }
-}
-
-pub fn derive_ctr(tipo: &NewType, index: usize) -> Derived {
-    if let Some(ctr) = tipo.ctrs.get(index) {
-        let path = format!("{}/{}.kind2", tipo.name.to_path(), ctr.name);
-        let name = format!("{}.{}", tipo.name, ctr.name);
-        let kdln = None;
-        let mut args = vec![];
-        for arg in &tipo.pars {
-            args.push(arg.clone());
-        }
-        for arg in &ctr.args {
-            args.push(arg.clone());
-        }
-        let tipo = Box::new(Term::Ctr {
-            orig: Span::Generated,
-            name: tipo.name.clone(),
-            args: tipo
-                .pars
-                .iter()
-                .map(|x| {
-                    Box::new(Term::Var {
-                        orig: Span::Generated,
-                        name: x.name.clone(),
-                    })
-                })
-                .collect(),
-        });
-        let rules = vec![];
-        let entr = Entry {
-            name: Ident(name),
-            orig: Span::Generated,
-            kdln,
-            args,
-            tipo,
-            rules,
-        };
-        Derived { path: Ident(path), entr }
-    } else {
-        panic!("Constructor out of bounds.");
-    }
-}
-
-pub fn derive_match(ntyp: &NewType) -> Derived {
-    let path = format!("{}/match.kind2", ntyp.name.0.replace('.', "/"));
-
-    fn gen_type_ctr(ntyp: &NewType) -> Box<Term> {
-        Box::new(Term::Ctr {
-            orig: Span::Generated,
-            name: ntyp.name.clone(),
-            args: ntyp
-                .pars
-                .iter()
-                .map(|x| {
-                    Box::new(Term::Var {
-                        orig: Span::Generated,
-                        name: x.name.clone(),
-                    })
-                })
-                .collect(),
-        })
-    }
-
-    fn gen_ctr_value(ntyp: &NewType, ctr: &Constructor, _: usize, suffix: &str) -> Box<Term> {
-        let mut ctr_value_args = vec![];
-        for par in &ntyp.pars {
-            ctr_value_args.push(Box::new(Term::Var {
-                orig: Span::Generated,
-                name: Ident(format!("{}{}", par.name, suffix)),
-            }));
-        }
-        for fld in &ctr.args {
-            ctr_value_args.push(Box::new(Term::Var {
-                orig: Span::Generated,
-                name: Ident(format!("{}{}", fld.name, suffix)),
-            }));
-        }
-        Box::new(Term::Ctr {
-            orig: Span::Generated,
-            name: Ident::new_path(&ntyp.name.0, &ctr.name.0),
-            args: ctr_value_args,
-        })
-    }
-
-    // List.match
-    let name = Ident::new_path(&ntyp.name.0, "match");
-    let kdln = None;
-
-    let mut args = vec![];
-
-    //  <t: Type>
-    for par in &ntyp.pars {
-        args.push(Box::new(Argument {
-            hide: true,
-            orig: Span::Generated,
-            eras: true,
-            name: par.name.clone(),
-            tipo: par.tipo.clone(),
-        }));
-    }
-
-    // (x: (List t))
-    args.push(Box::new(Argument {
-        eras: false,
-        orig: Span::Generated,
-        hide: false,
-        name: Ident("x".to_string()),
-        tipo: gen_type_ctr(ntyp),
-    }));
-
-    // -(p: (List t) -> Type)
-    args.push(Box::new(Argument {
-        eras: true,
-        orig: Span::Generated,
-        hide: false,
-        name: Ident("p".to_string()),
-        tipo: Box::new(Term::All {
-            orig: Span::Generated,
-            name: Ident("x".to_string()),
-            tipo: gen_type_ctr(ntyp),
-            body: Box::new(Term::Typ { orig: Span::Generated }),
-        }),
-    }));
-
-    // (nil: (p (List.nil t)))
-    // (cons: (head t) (tail: (List t)) (p (List.cons t head tail)))
-    for ctr in &ntyp.ctrs {
-        fn ctr_case_type(ntyp: &NewType, ctr: &Constructor, index: usize) -> Box<Term> {
-            if index < ctr.args.len() {
-                // for nil  = ...
-                // for cons = (head: t) (tail: (List t))
-                let arg = ctr.args.get(index).unwrap();
-                Box::new(Term::All {
-                    orig: Span::Generated,
-                    name: arg.name.clone(),
-                    tipo: arg.tipo.clone(),
-                    body: ctr_case_type(ntyp, ctr, index + 1),
-                })
-            } else {
-                // for nil  = (p (List.nil t))
-                // for cons = (p (List.cons t head tail))
-                Box::new(Term::App {
-                    orig: Span::Generated,
-                    func: Box::new(Term::Var {
-                        orig: Span::Generated,
-                        name: Ident("p".to_string()),
-                    }),
-                    argm: gen_ctr_value(ntyp, ctr, index, ""),
-                })
+pub fn parse_sum_type(state: parser::State) -> parser::Answer<Option<Box<NewType>>> {
+    parser::guard(
+        parser::text_parser("type "),
+        Box::new(|state| {
+            let (state, _) = parser::consume("type", state)?;
+            let (state, name) = parser::name1(state)?;
+            let (state, pars) = parser::until(parser::text_parser("{"), Box::new(parse_argument), state)?;
+            let mut ctrs = vec![];
+            let mut state = state;
+            loop {
+                let state_i = state;
+                let (state_i, ctr_name) = parser::name(state_i)?;
+                if ctr_name.is_empty() {
+                    break;
+                }
+                let mut ctr_args = vec![];
+                let mut state_i = state_i;
+                loop {
+                    let state_j = state_i;
+                    let (state_j, head) = parser::peek_char(state_j)?;
+                    if head != '(' {
+                        break;
+                    }
+                    let (state_j, ctr_arg) = parse_argument(state_j)?;
+                    ctr_args.push(ctr_arg);
+                    state_i = state_j;
+                }
+                ctrs.push(Box::new(Constructor {
+                    name: Ident(ctr_name),
+                    args: ctr_args,
+                }));
+                state = state_i;
             }
-        }
-        args.push(Box::new(Argument {
-            eras: false,
-            orig: Span::Generated,
-            hide: false,
-            name: ctr.name.clone(),
-            tipo: ctr_case_type(ntyp, ctr, 0),
-        }));
-    }
-
-    // : (p x)
-    let tipo = Box::new(Term::App {
-        orig: Span::Generated,
-        func: Box::new(Term::Var {
-            orig: Span::Generated,
-            name: Ident("p".to_string()),
+            Ok((state, Box::new(NewType::Sum(SumType { name: Ident(name), pars, ctrs }))))
         }),
-        argm: Box::new(Term::Var {
-            orig: Span::Generated,
-            name: Ident("x".to_string()),
+        state,
+    )
+}
+
+pub fn parse_prod_type(state: parser::State) -> parser::Answer<Option<Box<NewType>>> {
+    parser::guard(
+        parser::text_parser("record "),
+        Box::new(|state| {
+            let (state, _) = parser::consume("record", state)?;
+            let (state, name) = parser::name1(state)?;
+            let (state, pars) = parser::until(parser::text_parser("{"), Box::new(parse_argument), state)?;
+            let mut state = state;
+            let mut fields = Vec::new();
+
+            loop {
+                let state_i = state;
+                let (state_i, init) = get_init_index(state_i)?;
+                let (state_i, ctr_name) = parser::name(state_i)?;
+                let (state_i, _) = parser::consume(":", state_i)?;
+                let (state_i, tipo) = parse_apps(state_i)?;
+                let (state_i, last) = get_last_index(state_i)?;
+                let orig = Span::new_off(init, last);
+                fields.push(Box::new(Argument {
+                    hide: false,
+                    eras: false,
+                    orig,
+                    name: Ident(ctr_name),
+                    tipo,
+                }));
+
+                let (state_i, head) = parser::peek_char(state_i)?;
+                state = state_i;
+
+                if head == '}' {
+                    break;
+                }
+            }
+
+            Ok((state, Box::new(NewType::Prod(ProdType {
+                name: Ident(name),
+                pars,
+                fields
+            }))))
         }),
-    });
-
-    // List.match t (List.nil t)            p nil cons = nil
-    // List.match t (List.cons t head tail) p nil cons = (cons head tail)
-    let mut rules = vec![];
-
-    for idx in 0..ntyp.ctrs.len() {
-        let ctr = &ntyp.ctrs[idx];
-        let orig = Span::Generated;
-        let name = format!("{}.match", ntyp.name);
-        let mut pats = vec![];
-        for par in &ntyp.pars {
-            pats.push(Box::new(Term::Var {
-                orig: Span::Generated,
-                name: par.name.clone(),
-            }));
-        }
-        pats.push(gen_ctr_value(ntyp, ctr, idx, "_"));
-        pats.push(Box::new(Term::Var {
-            orig: Span::Generated,
-            name: Ident("p".to_string()),
-        }));
-        for ctr in &ntyp.ctrs {
-            pats.push(Box::new(Term::Var {
-                orig: Span::Generated,
-                name: ctr.name.clone(),
-            }));
-        }
-        let mut body_args = vec![];
-        for arg in &ctr.args {
-            body_args.push(Box::new(Term::Var {
-                orig: Span::Generated,
-                name: Ident(format!("{}_", arg.name)),
-            }));
-        }
-        let body = Box::new(Term::Ctr {
-            orig: Span::Generated,
-            name: ctr.name.clone(),
-            args: body_args,
-        });
-        rules.push(Box::new(Rule {
-            orig,
-            name: Ident(name),
-            pats,
-            body,
-        }));
-    }
-
-    let entr = Entry {
-        name,
-        orig: Span::Generated,
-        kdln,
-        args,
-        tipo,
-        rules,
-    };
-
-    Derived { path: Ident(path), entr }
+        state,
+    )
 }
 
 pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
-    let (state, _) = parser::consume("type", state)?;
-    let (state, name) = parser::name1(state)?;
-    let (state, pars) = parser::until(parser::text_parser("{"), Box::new(parse_argument), state)?;
-    let mut ctrs = vec![];
-    let mut state = state;
-    loop {
-        let state_i = state;
-        let (state_i, ctr_name) = parser::name(state_i)?;
-        if ctr_name.is_empty() {
-            break;
-        }
-        let mut ctr_args = vec![];
-        let mut state_i = state_i;
-        loop {
-            let state_j = state_i;
-            let (state_j, head) = parser::peek_char(state_j)?;
-            if head != '(' {
-                break;
-            }
-            let (state_j, ctr_arg) = parse_argument(state_j)?;
-            ctr_args.push(ctr_arg);
-            state_i = state_j;
-        }
-        ctrs.push(Box::new(Constructor {
-            name: Ident(ctr_name),
-            args: ctr_args,
-        }));
-        state = state_i;
-    }
-    Ok((state, Box::new(NewType { name: Ident(name), pars, ctrs })))
+    parser::grammar(
+        "Newtype",
+        &[
+            Box::new(parse_sum_type), // `type `
+            Box::new(parse_prod_type), // `record `
+            Box::new(|state| Ok((state, None))),
+        ],
+        state,
+    )
 }
 
 pub fn read_newtype(code: &str) -> Result<Box<NewType>, String> {

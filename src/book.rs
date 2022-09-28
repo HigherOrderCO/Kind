@@ -62,6 +62,39 @@ impl Book {
     }
 }
 
+// Some constructors that are really useful.
+impl Argument {
+    pub fn new_hidden(name: Ident, tipo: Box<Term>) -> Argument {
+        Argument {
+            hide: true,
+            orig: Span::Generated,
+            eras: true,
+            name,
+            tipo
+        }
+    }
+
+    pub fn new_accessible(name: Ident, tipo: Box<Term>) -> Argument {
+        Argument {
+          hide: false,
+          orig: Span::Generated,
+          eras: false,
+          name,
+          tipo
+        }
+    }
+
+    pub fn new_erased(name: Ident, tipo: Box<Term>) -> Argument {
+        Argument {
+          hide: false,
+          orig: Span::Generated,
+          eras: true,
+          name,
+          tipo
+        }
+    }
+}
+
 impl Entry {
     pub fn count_implicits(&self) -> (usize, usize) {
         let mut hiddens = 0;
@@ -75,6 +108,17 @@ impl Entry {
             }
         }
         (hiddens, eraseds)
+    }
+
+    pub fn new_type_signature(name: Ident, args: Vec<Box<Argument>>) -> Entry {
+        Entry {
+            name,
+            orig: Span::Generated,
+            kdln: None,
+            args,
+            tipo: Box::new(Term::Typ { orig: Span::Generated }),
+            rules: Vec::new(),
+        }
     }
 }
 

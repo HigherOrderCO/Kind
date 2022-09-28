@@ -34,16 +34,16 @@ pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), St
         if name.ends_with(".kind2") {
             path = PathBuf::from(&name.to_string());
         } else {
-            let root = Path::new(&config.kind2_path).join(&name.replace('.', "/"));
-            let inside_path = root.clone().join("_.kind2"); // path ending with 'Name/_.kind'
-            let mut normal_path = root.clone(); // path ending with 'Name.kind'
+            let mut normal_path = Path::new(&config.kind2_path).join(&name.replace('.', "/"));
+            let inside_path = normal_path.clone().join("_.kind2"); // path ending with 'Name/_.kind'
             normal_path.set_extension("kind2");
 
             if inside_path.is_file() {
                 if normal_path.is_file() {
                     return Err(format!(
                         "The following files can't exist simultaneously:\n- {}\n- {}\nPlease delete one and try again.",
-                        inside_path.display(), normal_path.display()
+                        inside_path.display(),
+                        normal_path.display()
                     ));
                 }
                 path = inside_path;
@@ -68,7 +68,10 @@ pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), St
 
         new_book.set_origin_file(FileOffset(load.file.len() as u32));
 
-        load.file.push(File { path: path.to_str().unwrap().into(), code: newcode });
+        load.file.push(File {
+            path: path.to_str().unwrap().into(),
+            code: newcode,
+        });
         for name in &new_book.names {
             load.book.names.push(name.clone());
             load.book.entrs.insert(Ident(name.clone()), new_book.entrs.get(&Ident(name.to_string())).unwrap().clone());
@@ -95,23 +98,23 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
             load.book = book;
         }
         Err(err) => {
-            let high_line =
-                match err.orig {
-                    Span::Localized(SpanData { file, start, end }) if !config.no_high_line => 
-                        format!(
-                            "On '{}'\n{}",
-                            &load.file[file.0 as usize].path,
-                            highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code)
-                        ),
-                    _ if !config.no_high_line => "Cannot find the source of the error.".to_string(),
-                    _ => "".to_string()
-                };
+            let high_line = match err.orig {
+                Span::Localized(SpanData { file, start, end }) if !config.no_high_line => format!(
+                    "On '{}'\n{}",
+                    &load.file[file.0 as usize].path,
+                    highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code)
+                ),
+                _ if !config.no_high_line => "Cannot find the source of the error.".to_string(),
+                _ => "".to_string(),
+            };
             return match err.kind {
                 AdjustErrorKind::IncorrectArity => Err(format!("Incorrect arity.\n{}", high_line)),
                 AdjustErrorKind::UnboundVariable { name } => Err(format!("Unbound variable '{}'.\n{}", name, high_line)),
                 AdjustErrorKind::RepeatedVariable => Err(format!("Repeated variable.\n{}", high_line)),
                 AdjustErrorKind::CantLoadType => Err(format!("Can't load type.\n{}", high_line)),
                 AdjustErrorKind::NoCoverage => Err(format!("Incomplete constructor coverage.\n{}", high_line)),
+                AdjustErrorKind::UseOpenInstead => Err(format!("You should use `open` instead of `match` on record types.\n{}", high_line)),
+                AdjustErrorKind::UseMatchInstead => Err(format!("You should use `match` instead of `open` on sum types.\n{}", high_line)),
             };
         }
     };

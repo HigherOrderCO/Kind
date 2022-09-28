@@ -1,13 +1,14 @@
-pub mod loader;
 pub mod config;
+pub mod loader;
 
-use crate::driver::loader::{load, File};
-use crate::checker::to_checker_book;
-use crate::parser::new_type;
-use crate::book::new_type::Derived;
 use crate::book::name::Ident;
+use crate::book::new_type::{Derived, NewType};
 use crate::book::Book;
+use crate::checker::to_checker_book;
 use crate::codegen;
+use crate::derive;
+use crate::driver::loader::{load, File};
+use crate::parser::new_type;
 use crate::codegen::kdl::KDL_NAME_LEN;
 
 use crate::driver::config::Config;
@@ -21,7 +22,7 @@ pub struct RunResult {
 
 pub fn highlight(should: bool, text: &str) -> String {
     if should {
-        format!("\x1b[4m\x1b{}\x1b[4m\x1b", text)
+        format!("\x1b[4m{}\x1b[0m", text)
     } else {
         text.to_string()
     }
@@ -136,25 +137,48 @@ pub fn cmd_derive(config: &Config, path: &str) -> Result<(), String> {
         }
         Ok(code) => code,
     };
+
     let newtype = match new_type::read_newtype(&newcode) {
         Err(err) => {
             return Err(format!("[{}]\n{}", highlight(color, path), err));
         }
         Ok(book) => book,
     };
+
     fn save_derived(color: bool, path: &str, derived: &Derived) {
-        let dir = std::path::Path::new(&derived.path.0);
+        let dir = &derived.path;
         let txt = format!("// Automatically derived from {}\n{}", path, derived.entr);
-        println!("[1mDerived '{}':", highlight(color, &derived.path.0));
+        println!("Derived '{}':", highlight(color, derived.path.to_str().unwrap()));
         println!("{}\n", txt);
         std::fs::create_dir_all(dir.parent().unwrap()).unwrap();
         std::fs::write(dir, txt).ok();
     }
-    save_derived(color, path, &new_type::derive_type(&config.kind2_path, &newtype));
-    for i in 0..newtype.ctrs.len() {
-        save_derived(color, path, &new_type::derive_ctr(&newtype, i));
+
+    match *newtype {
+        NewType::Sum(sum) => {
+            // TODO: Remove this kind2_path because it's wrong.
+            save_derived(color, path, &derive::derive_sum_type(&config.kind2_path, &sum));
+            for i in 0..sum.ctrs.len() {
+                save_derived(color, path, &derive::derive_ctr(&sum, i));
+            }
+            save_derived(color, path, &derive::derive_match(&sum));
+        },
+        NewType::Prod(prod) => {
+            save_derived(color, path, &derive::derive_prod_type(&config.kind2_path, &prod));
+            save_derived(color, path, &derive::derive_prod_constructor(&prod));
+            save_derived(color, path, &derive::derive_prod_match(&prod));
+            let getters = derive::derive_getters(&prod);
+            for getter in getters {
+                save_derived(color, path, &getter);
+            }
+
+            let setters = derive::derive_setters(&prod);
+            for setter in setters {
+                save_derived(color, path, &setter);
+            }
+        }
     }
-    save_derived(color, path, &new_type::derive_match(&newtype));
+
     Ok(())
 }
 

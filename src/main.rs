@@ -1,14 +1,15 @@
 pub mod book;
 pub mod checker;
+pub mod codegen;
+pub mod derive;
 pub mod driver;
 pub mod lowering;
 pub mod parser;
-pub mod codegen;
 
 use std::env;
 
-use crate::driver::*;
 use crate::driver::config::Config;
+use crate::driver::*;
 
 use clap::{Parser, Subcommand};
 
@@ -17,7 +18,7 @@ use clap::{Parser, Subcommand};
 #[clap(propagate_version = true)]
 pub struct Cli {
     #[clap(subcommand)]
-    pub command: Command
+    pub command: Command,
 }
 
 #[derive(Subcommand)]
@@ -63,11 +64,10 @@ pub enum Command {
 fn run_cli() -> Result<(), String> {
     let cli_matches = Cli::parse();
 
-
     let config = Config {
         no_high_line: false,
         color_output: true,
-        kind2_path: env::var_os("KIND2_PATH").map(|x| x.into_string().unwrap()).unwrap_or("".to_string())
+        kind2_path: env::var_os("KIND2_PATH").map(|x| x.into_string().unwrap()).unwrap_or_else(|| "".to_string()),
     };
 
     match cli_matches.command {

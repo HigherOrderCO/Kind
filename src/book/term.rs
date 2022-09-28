@@ -26,25 +26,103 @@ pub enum Operator {
 
 #[derive(Clone, Debug)]
 pub enum Term {
-    Typ { orig: Span },
-    Var { orig: Span, name: Ident },
-    All { orig: Span, name: Ident, tipo: Box<Term>, body: Box<Term> },
-    Lam { orig: Span, name: Ident, body: Box<Term> },
-    App { orig: Span, func: Box<Term>, argm: Box<Term> },
-    Let { orig: Span, name: Ident, expr: Box<Term>, body: Box<Term> },
-    Ann { orig: Span, expr: Box<Term>, tipo: Box<Term> },
-    Sub { orig: Span, name: Ident, indx: u64, redx: u64, expr: Box<Term> },
-    Ctr { orig: Span, name: Ident, args: Vec<Box<Term>> },
-    Fun { orig: Span, name: Ident, args: Vec<Box<Term>> },
-    Hlp { orig: Span },
-    U60 { orig: Span },
-    Num { orig: Span, numb: u64 },
-    Op2 { orig: Span, oper: Operator, val0: Box<Term>, val1: Box<Term> },
-    Hol { orig: Span, numb: u64 },
-    Mat { orig: Span, tipo: Ident, name: Ident, expr: Box<Term>, cses: Vec<(Ident, Box<Term>)>, moti: Box<Term> },
+    Typ {
+        orig: Span,
+    },
+    Var {
+        orig: Span,
+        name: Ident,
+    },
+    All {
+        orig: Span,
+        name: Ident,
+        tipo: Box<Term>,
+        body: Box<Term>,
+    },
+    Lam {
+        orig: Span,
+        name: Ident,
+        body: Box<Term>,
+    },
+    App {
+        orig: Span,
+        func: Box<Term>,
+        argm: Box<Term>,
+    },
+    Let {
+        orig: Span,
+        name: Ident,
+        expr: Box<Term>,
+        body: Box<Term>,
+    },
+    Ann {
+        orig: Span,
+        expr: Box<Term>,
+        tipo: Box<Term>,
+    },
+    Sub {
+        orig: Span,
+        name: Ident,
+        indx: u64,
+        redx: u64,
+        expr: Box<Term>,
+    },
+    Ctr {
+        orig: Span,
+        name: Ident,
+        args: Vec<Box<Term>>,
+    },
+    Fun {
+        orig: Span,
+        name: Ident,
+        args: Vec<Box<Term>>,
+    },
+    Hlp {
+        orig: Span,
+    },
+    U60 {
+        orig: Span,
+    },
+    Num {
+        orig: Span,
+        numb: u64,
+    },
+    Op2 {
+        orig: Span,
+        oper: Operator,
+        val0: Box<Term>,
+        val1: Box<Term>,
+    },
+    Hol {
+        orig: Span,
+        numb: u64,
+    },
+    Mat {
+        orig: Span,
+        tipo: Ident,
+        name: Ident,
+        expr: Box<Term>,
+        cses: Vec<(Ident, Box<Term>)>,
+        moti: Box<Term>,
+    },
+    Open {
+        orig: Span,
+        tipo: Ident,
+        name: Ident,
+        expr: Box<Term>,
+        moti: Box<Term>,
+        body: Box<Term>
+    }
 }
 
 impl Term {
+    pub fn new_var(name: Ident) -> Term {
+        Term::Var {
+            orig: Span::Generated,
+            name
+        }
+    }
+
     pub fn interpret_as_string(&self) -> Option<String> {
         let mut text = String::new();
         let mut term = self;
@@ -132,6 +210,7 @@ impl Display for Term {
                     write!(f, "({} {})", expr, args.iter().map(|x| format!("{}", x)).collect::<Vec<String>>().join(" "))
                 }
                 Mat { .. } => panic!("Internal Error: Cannot display a Term::Mat because it's removed after adjust."),
+                Open { .. } => panic!("Internal Error: Cannot display a Term::Open because it's removed after adjust."),
             }
         }
     }
@@ -157,6 +236,7 @@ impl Localized for Term {
             Fun { orig, .. } => *orig,
             App { orig, .. } => *orig,
             Mat { orig, .. } => *orig,
+            Open { orig, .. } => *orig,
         }
     }
 
@@ -239,6 +319,10 @@ impl Localized for Term {
                     cse.1.set_origin_file(file);
                 }
                 moti.set_origin_file(file);
+            }
+            Open { orig, expr, .. } => {
+                *orig = orig.set_file(file);
+                expr.set_origin_file(file);
             }
         }
     }
