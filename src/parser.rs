@@ -1,6 +1,7 @@
 pub mod new_type;
 pub mod term;
 pub mod utils;
+pub mod name;
 
 use crate::book::name::Ident;
 use crate::book::span::{ByteOffset, Span};
@@ -11,6 +12,31 @@ use crate::parser::utils::{get_init_index, get_last_index};
 
 use hvm::parser;
 use std::collections::HashMap;
+
+use self::name::parse_path_str;
+
+pub fn parse_use<'a>(state: parser::State<'a>, map: &mut HashMap<String, String>) -> Result<parser::State<'a>, String> {
+    let (state, name) = parser::name1(state)?;
+    let (state, _) = parser::consume("as", state)?;
+    let (state, val) = parser::name1(state)?;
+    map.insert(name, val);
+    Ok(state)
+}
+
+pub fn parse_uses<'a>(state: parser::State<'a>, map: &mut HashMap<String, String>) ->  Result<parser::State<'a>, String> {
+    let mut vec = Vec::new();
+    let mut state = state;
+    loop {
+        let (state_i, attr) = parser::text("use ", state)?;
+        if attr {
+            let state_i = parse_use(state_i, map)?;
+            vec.push(attr);
+            state = state_i;
+        } else {
+            return Ok(state);
+        }
+    }
+}
 
 pub fn parse_rule(state: parser::State, name: String, init: ByteOffset) -> parser::Answer<Box<Rule>> {
     let (state, pats) = parser::until(parser::text_parser("="), Box::new(parse_term), state)?;
@@ -30,7 +56,7 @@ pub fn parse_rule(state: parser::State, name: String, init: ByteOffset) -> parse
 
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
     let (state, init) = get_init_index(state)?;
-    let (state, name) = parser::name1(state)?;
+    let (state, name) = parse_path_str(state)?;
     let (state, last) = get_last_index(state)?;
     let name_orig = Span::new_off(init, last);
     let (state, kdl) = parser::text("#", state)?;
@@ -154,7 +180,9 @@ pub fn parse_argument(state: parser::State) -> parser::Answer<Box<Argument>> {
     ))
 }
 
-pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
+pub fn parse_book(state: parser::State) -> parser::Answer<(Box<Book>, HashMap<String, String>)> {
+    let mut map = HashMap::new();
+    let state = parse_uses(state, &mut map)?;
     let (state, entry_vec) = parser::until(Box::new(parser::done), Box::new(parse_entry), state)?;
     let mut names = Vec::new();
     let mut entrs = HashMap::new();
@@ -166,9 +194,9 @@ pub fn parse_book(state: parser::State) -> parser::Answer<Box<Book>> {
             println!("\x1b[33mwarning\x1b[0m: ignored redefinition of '{}'.", entry.name);
         }
     }
-    Ok((state, Box::new(Book { holes: 0, names, entrs })))
+    Ok((state, (Box::new(Book { holes: 0, names, entrs }), map)))
 }
 
-pub fn read_book(code: &str) -> Result<Box<Book>, String> {
+pub fn read_book(code: &str) -> Result<(Box<Book>, HashMap<String, String>), String> {
     parser::read(Box::new(parse_book), code)
 }

@@ -6,6 +6,8 @@ use crate::parser::utils::{get_init_index, get_last_index, is_ctr_head};
 use hvm::parser;
 use hvm::parser::{Answer, State};
 
+use super::name::parse_path_str;
+
 type TermPrefix = Box<dyn Fn(ByteOffset, Box<Term>) -> Box<Term>>;
 
 type TermComplete = Box<dyn Fn(&str) -> Box<Term>>;
@@ -15,7 +17,7 @@ pub fn parse_var(state: State) -> Answer<Option<Box<Term>>> {
         Box::new(|state| Ok((state, true))),
         Box::new(|state| {
             let (state, init) = get_init_index(state)?;
-            let (state, name) = parser::name1(state)?;
+            let (state, name) = parse_path_str(state)?;
             let (state, last) = get_last_index(state)?;
             let orig = Span::new_off(init, last);
             if let Ok(numb) = name.parse::<u64>() {
@@ -418,7 +420,7 @@ pub fn parse_do(state: State) -> Answer<Option<Box<Term>>> {
         parser::text_parser("do "),
         Box::new(|state| {
             let (state, _) = parser::text("do", state)?;
-            let (state, name) = parser::name1(state)?;
+            let (state, name) = parse_path_str(state)?;
             let (state, _) = parser::text("{", state)?;
             let (state, term) = parse_term_st(state)?;
             let (state, _) = parser::text("}", state)?;
@@ -434,7 +436,7 @@ pub fn parse_mat(state: State) -> Answer<Option<Box<Term>>> {
         Box::new(|state| {
             let (state, init) = get_init_index(state)?;
             let (state, _) = parser::consume("match ", state)?;
-            let (state, tipo) = parser::name1(state)?;
+            let (state, tipo) = parse_path_str(state)?;
             let (state, nm_i) = get_init_index(state)?;
             let (state, name) = parser::name1(state)?;
             let (state, next) = parser::peek_char(state)?;
@@ -497,7 +499,7 @@ pub fn parse_open(state: State) -> Answer<Option<Box<Term>>> {
         Box::new(|state| {
             let (state, init) = get_init_index(state)?;
             let (state, _) = parser::consume("open ", state)?;
-            let (state, tipo) = parser::name1(state)?;
+            let (state, tipo) = parse_path_str(state)?;
             let (state, nm_i) = get_init_index(state)?;
             let (state, name) = parser::name1(state)?;
             let (state, next) = parser::peek_char(state)?;
@@ -758,7 +760,7 @@ pub fn parse_ctr(state: State) -> Answer<Option<Box<Term>>> {
         Box::new(|state| {
             let (state, init) = get_init_index(state)?;
             let (state, open) = parser::text("(", state)?;
-            let (state, name) = parser::name1(state)?;
+            let (state, name) = parse_path_str(state)?;
             let (state, args) = if open {
                 parser::until(parser::text_parser(")"), Box::new(parse_term), state)?
             } else {

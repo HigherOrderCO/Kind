@@ -7,6 +7,12 @@ pub struct EncodedName(u64);
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Ident(pub String);
 
+#[derive(Clone)]
+pub enum Path {
+    Qualified(String, String),
+    Local(String)
+}
+
 impl EncodedName {
     pub fn u64_to_name(&self) -> String {
         let mut name = String::new();
@@ -62,11 +68,39 @@ impl Ident {
     pub fn to_path(&self) -> String {
         self.0.replace('.', "/")
     }
+
+    pub fn is_ctr(&self) -> bool {
+        if !self.0.is_empty() {
+            let chr = self.0.chars().next().unwrap();
+            chr == '/' || ('A'..='Z').contains(&chr)
+        } else {
+            false
+        }
+    }
+}
+
+impl Path {
+    pub fn encode(&self) -> EncodedName {
+        EncodedName::from_string(&format!("{}", self))
+    }
+
+    pub fn new_path(path: &str, name: &str) -> Path {
+        Path::Qualified(path.to_string(), name.to_string())
+    }
 }
 
 impl Display for Ident {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "{}", self.0)
+    }
+}
+
+impl Display for Path {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        match self {
+            Path::Qualified(p, e) => write!(f, "{}.{}", p, e),
+            Path::Local(e) => write!(f, "{}", e)
+        }
     }
 }
 
