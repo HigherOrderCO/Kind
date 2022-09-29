@@ -59,7 +59,6 @@ pub struct CompRule {
 #[derive(Clone, Debug)]
 pub struct CompEntry {
     pub name: String,
-    pub kdln: Option<String>,
     pub args: Vec<String>,
     pub rules: Vec<CompRule>,
     pub attrs: Vec<Attribute>,
@@ -127,11 +126,10 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
         CompRule { name, pats, body }
     }
 
-    fn make_u120_new() -> CompEntry {
+    fn make_u120_new(old_entry: &Entry) -> CompEntry {
         // U120.new hi lo = (+ (<< hi 60) (>> (<< lo 60) 60))
         CompEntry {
             name: "U120.new".to_string(),
-            kdln: None,
             args: vec!["hi".to_string(), "lo".to_string()],
             rules: vec![CompRule {
                 name: "U120.new".to_string(),
@@ -155,15 +153,14 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
                 }),
             }],
             orig: true,
-            attrs: vec![],
+            attrs: old_entry.attrs.clone(),
         }
     }
 
-    fn make_u120_low() -> CompEntry {
+    fn make_u120_low(old_entry: &Entry) -> CompEntry {
         // U120.low n = (>> (<< n 60) 60))
         CompEntry {
             name: "U120.low".to_string(),
-            kdln: None,
             args: vec!["n".to_string()],
             rules: vec![CompRule {
                 name: "U120.low".to_string(),
@@ -179,15 +176,14 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
                 }),
             }],
             orig: true,
-            attrs: vec![],
+            attrs: old_entry.attrs.clone(),
         }
     }
 
-    fn make_u120_high() -> CompEntry {
+    fn make_u120_high(old_entry: &Entry) -> CompEntry {
         // U120.high n = (>> n 60)
         CompEntry {
             name: "U120.high".to_string(),
-            kdln: None,
             args: vec!["n".to_string()],
             rules: vec![CompRule {
                 name: "U120.high".to_string(),
@@ -199,22 +195,21 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
                 }),
             }],
             orig: true,
-            attrs: vec![],
+            attrs: old_entry.attrs.clone(),
         }
     }
 
     match entry.name.0.as_str() {
         // Some U120 functions should have a special compilation
-        "U120.new" => Ok(vec![make_u120_new()]),
+        "U120.new" => Ok(vec![make_u120_new(&entry)]),
         // U120.new becomes a special function that joins two numbers as if they were U60s
         // TODO: We could rewrite these both to not need this workaround, but it would become rather slow on normal HVM (~100 rewrites instead of 1)
-        "U120.high" => Ok(vec![make_u120_high()]),
+        "U120.high" => Ok(vec![make_u120_high(&entry)]),
         // high and low are used for type compatibility with u60
-        "U120.low" => Ok(vec![make_u120_low()]),
+        "U120.low" => Ok(vec![make_u120_low(&entry)]),
         _ => {
             let new_entry = CompEntry {
                 name: entry.name.0.clone(),
-                kdln: entry.kdln.clone(),
                 args: entry.args.iter().filter(|x| !x.eras).map(|x| x.name.0.clone()).collect(),
                 rules: entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect(),
                 attrs: entry.attrs.clone(),
@@ -293,7 +288,16 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
         // The old rule is rewritten to be flat and call the new entry
         let n = post_inc(name_count);
         let new_entry_name = format!("{}{}_", entry.name, n);
-        let new_entry_kdln = entry.kdln.clone().map(|kdln| format!("{}{}_", kdln, n));
+        let mut new_entry_attrs = entry.attrs.clone();
+        // If the old rule had a kdl name, create a new kdl name for the split entry
+        for attr in &mut new_entry_attrs {
+            if attr.name.0 == "kdl_name" {
+                let old_kdln = attr.value.as_ref().unwrap();  // Checked before in adjust step
+                let new_kdln = Ident(format!("{}{}_", old_kdln, n));
+                attr.value = Some(new_kdln);
+                break;
+            }
+        }
         let mut new_entry_rules: Vec<CompRule> = Vec::new();
         // Rewrite the old rule to be flat and point to the new entry
         let mut old_rule_pats: Vec<Box<CompTerm>> = Vec::new();
@@ -424,10 +428,9 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
         let new_entry_args = (0..new_entry_rules[0].pats.len()).map(|n| format!("x{}", n)).collect();
         let new_entry = CompEntry {
             name: new_entry_name,
-            kdln: new_entry_kdln,
             args: new_entry_args,
             rules: new_entry_rules,
-            attrs: entry.attrs.clone(),
+            attrs: new_entry_attrs,
             orig: false,
         };
         let new_split_entries = flatten(new_entry);
@@ -454,11 +457,10 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
     }
     let old_entry = CompEntry {
         name: entry.name,
-        kdln: entry.kdln,
         args: old_entry_args,
         rules: old_entry_rules,
         orig: entry.orig,
-        attrs: entry.attrs.clone(),
+        attrs: entry.attrs,
     };
     new_entries.push(old_entry);
     new_entries
@@ -833,16 +835,8 @@ pub fn linearize_rule(rule: &mut CompRule) {
 
 // Swaps u120 numbers and functions for primitive operations for kindelia compilation
 pub fn convert_u120_entry(entry: CompEntry) -> Result<CompEntry, String> {
-    let CompEntry {
-        name,
-        kdln,
-        args,
-        rules,
-        orig,
-        attrs,
-    } = entry;
     let mut new_rules = Vec::new();
-    for CompRule { name, pats, body } in rules {
+    for CompRule { name, pats, body } in entry.rules {
         let body = convert_u120_term(&body, true)?;
         let mut new_pats = Vec::new();
         for pat in pats {
@@ -850,14 +844,7 @@ pub fn convert_u120_entry(entry: CompEntry) -> Result<CompEntry, String> {
         }
         new_rules.push(CompRule { name, pats: new_pats, body });
     }
-    Ok(CompEntry {
-        name,
-        kdln,
-        args,
-        rules: new_rules,
-        orig,
-        attrs,
-    })
+    Ok(CompEntry { rules: new_rules, ..entry })
 }
 
 pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, String> {

@@ -48,7 +48,6 @@ pub fn derive_prod_constructor(prod: &ProdType) -> Derived {
     entr: Entry {
       name,
       orig: Span::Generated,
-      kdln: None,
       args: args.clone(),
       tipo,
       rules: vec![],
@@ -92,7 +91,6 @@ pub fn derive_getters(prod: &ProdType) -> Vec<Derived> {
       entr: Entry {
         name: name.clone(),
         orig: Span::Generated,
-        kdln: None,
         args: args.clone(),
         tipo: field.tipo.clone(),
         rules: vec![Box::new(Rule { orig: Span::Generated, name, pats: vec![pat], body })],
@@ -156,7 +154,6 @@ pub fn derive_setters(prod: &ProdType) -> Vec<Derived> {
       entr: Entry {
         name: name.clone(),
         orig: Span::Generated,
-        kdln: None,
         args: args.clone(),
         tipo: tipo.clone(),
         rules: vec![Box::new(Rule { orig: Span::Generated, name, pats: vec![pat, new_pat], body })],

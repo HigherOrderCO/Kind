@@ -90,13 +90,6 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
     let (state, name) = parse_path_str(state)?;
     let (state, last) = get_last_index(state)?;
     let name_orig = Span::new_off(init, last);
-    let (state, kdl) = parser::text("#", state)?;
-    let (state, kdln) = if kdl {
-        let (state, name) = parser::name1(state)?;
-        (state, Some(name))
-    } else {
-        (state, None)
-    };
 
     let (state, args) = parser::until(
         Box::new(|state| {
@@ -144,7 +137,6 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             state,
             Box::new(Entry {
                 name: Ident(name),
-                kdln,
                 args,
                 tipo,
                 rules,
@@ -170,7 +162,6 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
         }
         let entry = Box::new(Entry {
             name: Ident(name),
-            kdln,
             args,
             tipo,
             rules,

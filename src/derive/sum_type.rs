@@ -42,7 +42,6 @@ pub fn derive_ctr(tipo: &SumType, index: usize) -> Derived {
     if let Some(ctr) = tipo.ctrs.get(index) {
         let path = format!("{}/{}.kind2", tipo.name.to_path(), ctr.name);
         let name = format!("{}.{}", tipo.name, ctr.name);
-        let kdln = None;
         let mut args = vec![];
         for arg in &tipo.pars {
             args.push(arg.clone());
@@ -68,7 +67,6 @@ pub fn derive_ctr(tipo: &SumType, index: usize) -> Derived {
         let entr = Entry {
             name: Ident(name),
             orig: Span::Generated,
-            kdln,
             args,
             tipo,
             rules,
@@ -111,7 +109,6 @@ pub fn derive_match(ntyp: &SumType) -> Derived {
 
     // List.match
     let name = Ident::new_path(&ntyp.name.0, "match");
-    let kdln = None;
 
     let mut args = vec![];
 
@@ -231,7 +228,6 @@ pub fn derive_match(ntyp: &SumType) -> Derived {
     let entr = Entry {
         name,
         orig: Span::Generated,
-        kdln,
         args,
         tipo,
         rules,

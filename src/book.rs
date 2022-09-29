@@ -38,7 +38,6 @@ pub struct Book {
 pub struct Entry {
     pub name: Ident,
     pub orig: Span,
-    pub kdln: Option<String>,
     pub args: Vec<Box<Argument>>,
     pub tipo: Box<Term>,
     pub rules: Vec<Box<Rule>>,
@@ -118,7 +117,7 @@ impl Entry {
         (hiddens, eraseds)
     }
 
-    pub fn get_attribute(&self, name: String) -> Option<Attribute> {
+    pub fn get_attribute(&self, name: &str) -> Option<Attribute> {
         for attr in &self.attrs {
             if attr.name.0 == name {
                 return Some(attr.clone())
@@ -131,7 +130,6 @@ impl Entry {
         Entry {
             name,
             orig: Span::Generated,
-            kdln: None,
             args,
             tipo: Box::new(Term::Typ { orig: Span::Generated }),
             rules: Vec::new(),
@@ -164,11 +162,7 @@ impl Display for Argument {
 
 impl Display for Entry {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        if let Some(kdln) = &self.kdln {
-            write!(f, "{} #{}", self.name, kdln)?
-        } else {
-            write!(f, "{}", self.name.clone())?
-        };
+        write!(f, "{}", self.name.clone())?;
 
         for arg in &self.args {
             write!(f, " {}", arg)?;

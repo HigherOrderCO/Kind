@@ -51,6 +51,7 @@ pub fn render_error(config: &Config, files: &[File], err: AdjustError) -> String
         AdjustErrorKind::CannotFindAlias { name } => format!("Cannot find alias '{}' try to add an 'use' statement.\n{}", name,high_line),
         AdjustErrorKind::InvalidAttribute { name } => format!("You cannot use the attribute '{}'.\n{}", name, high_line),
         AdjustErrorKind::AttributeWithoutArgs { name } => format!("You should not put arguments on the attribute '{}'.\n{}", name, high_line),
+        AdjustErrorKind::AttributeMissingArg { name } => format!("Attribute '{}' needs to be given a value.\n{}", name, high_line),
         AdjustErrorKind::WrongTargetAttribute { name, target } => format!("The attribute '{}' only works in the target '{}'.\n{}", name, target, high_line),
     };
 }

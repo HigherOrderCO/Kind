@@ -3,11 +3,10 @@ Ata : U60
 Ata = 2
 
 #kdl_name = B
-#kdl_run
+#kdl_erase
 Be : U60
 Be = 3
 
 #kdl_name = C
-#kdl_run
 Ce : U60
 Ce = 4

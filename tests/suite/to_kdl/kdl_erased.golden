@@ -1,9 +1,9 @@
-// Ata #A : U60
+// Ata : U60
 fun (A) {
   (A) = #2
 }
 
-// Ce #C : U60
+// Ce : U60
 fun (C) {
   (C) = #4
 }

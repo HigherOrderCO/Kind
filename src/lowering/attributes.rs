@@ -16,6 +16,13 @@ pub fn without_args(attr: &Attribute) -> Result<(), AdjustError> {
     }
 }
 
+pub fn with_args(attr: &Attribute) -> Result<(), AdjustError> {
+    match &attr.value {
+        Some(_) => Ok(()),
+        None => adjust_err(attr.orig, AdjustErrorKind::AttributeMissingArg { name: attr.name.0.clone() }),
+    }
+}
+
 pub fn only_target(config: &Config, attr: &Attribute, target: Target) -> Result<(), AdjustError> {
     if config.target == target || config.target == Target::All {
         Ok(())
@@ -35,6 +42,7 @@ pub fn check_attribute(config: &Config, attr: &Attribute) -> Result<(), AdjustEr
             without_args(attr)?;
             only_target(config, attr, Target::Kdl)
         }
+        "kdl_name" => with_args(attr),
         _ => adjust_err(attr.orig, AdjustErrorKind::InvalidAttribute { name: attr.name.0.clone() }),
     }
 }

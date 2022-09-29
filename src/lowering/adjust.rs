@@ -22,6 +22,7 @@ pub enum AdjustErrorKind {
     CannotFindAlias { name: String },
     InvalidAttribute { name: String },
     AttributeWithoutArgs { name: String },
+    AttributeMissingArg { name: String },
     WrongTargetAttribute { name: String, target: Target },
     UseOpenInstead,
     UseMatchInstead,
@@ -523,7 +524,6 @@ impl Adjust for Argument {
 impl Adjust for Entry {
     fn adjust<'a>(&self, rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
         let name = self.name.clone();
-        let kdln = self.kdln.clone();
 
         let mut args = Vec::new();
 
@@ -545,7 +545,6 @@ impl Adjust for Entry {
         }
         Ok(Entry {
             name,
-            kdln,
             orig: self.orig,
             args,
             tipo,

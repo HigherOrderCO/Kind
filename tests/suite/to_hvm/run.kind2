@@ -1,10 +1,13 @@
-Ata #A : U60
+#kdl_name = A
+Ata : U60
 Ata = 2
 
+#kdl_name = A
 #kdl_run
-Be #B : U60
+Be : U60
 Be = 3
 
+#kdl_name = C
 #kdl_run
-Ce #C : U60
+Ce : U60
 Ce = 4
