@@ -1,0 +1,10 @@
+Ata #A : U60
+Ata = 2
+
+#kdl_run
+Be #B : U60
+Be = 3
+
+#kdl_run
+Ce #C : U60
+Ce = 4

@@ -20,7 +20,7 @@ pub fn only_target(config: &Config, attr: &Attribute, target: Target) -> Result<
     if config.target == target || config.target == Target::All {
         Ok(())
     } else {
-        adjust_err(attr.orig, AdjustErrorKind::AttributeWithoutArgs { name: attr.name.0.clone() })
+        adjust_err(attr.orig, AdjustErrorKind::WrongTargetAttribute { name: attr.name.0.clone(), target })
     }
 }
 
