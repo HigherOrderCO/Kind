@@ -1,0 +1,8 @@
+FnA #A {
+  (+ FnB 1)
+}
+
+#kdl_erase
+FnB #B {
+  2
+}
