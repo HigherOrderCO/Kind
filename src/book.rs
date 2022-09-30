@@ -84,21 +84,21 @@ impl Argument {
 
     pub fn new_accessible(name: Ident, tipo: Box<Term>) -> Argument {
         Argument {
-          hide: false,
-          orig: Span::Generated,
-          eras: false,
-          name,
-          tipo
+            hide: false,
+            orig: Span::Generated,
+            eras: false,
+            name,
+            tipo
         }
     }
 
     pub fn new_erased(name: Ident, tipo: Box<Term>) -> Argument {
         Argument {
-          hide: false,
-          orig: Span::Generated,
-          eras: true,
-          name,
-          tipo
+            hide: false,
+            orig: Span::Generated,
+            eras: true,
+            name,
+            tipo
         }
     }
 }

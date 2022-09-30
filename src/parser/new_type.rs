@@ -1,5 +1,5 @@
 use crate::book::name::Ident;
-use crate::book::new_type::{Constructor, NewType, SumType, ProdType};
+use crate::book::new_type::{Constructor, NewType, ProdType, SumType};
 use crate::parser::*;
 
 pub fn parse_sum_type(state: parser::State) -> parser::Answer<Option<Box<NewType>>> {
@@ -75,11 +75,7 @@ pub fn parse_prod_type(state: parser::State) -> parser::Answer<Option<Box<NewTyp
                 }
             }
 
-            Ok((state, Box::new(NewType::Prod(ProdType {
-                name: Ident(name),
-                pars,
-                fields
-            }))))
+            Ok((state, Box::new(NewType::Prod(ProdType { name: Ident(name), pars, fields }))))
         }),
         state,
     )
@@ -89,7 +85,7 @@ pub fn parse_newtype(state: parser::State) -> parser::Answer<Box<NewType>> {
     parser::grammar(
         "Newtype",
         &[
-            Box::new(parse_sum_type), // `type `
+            Box::new(parse_sum_type),  // `type `
             Box::new(parse_prod_type), // `record `
             Box::new(|state| Ok((state, None))),
         ],

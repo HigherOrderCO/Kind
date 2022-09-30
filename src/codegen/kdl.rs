@@ -5,7 +5,7 @@ use crate::book::Book;
 pub use crate::codegen::kdl::book::*;
 
 use rand::Rng;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 pub const KDL_NAME_LEN: usize = 12;
 
@@ -116,12 +116,12 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<String, String>, comp_book: 
         let entry = comp_book.entrs.get(name).unwrap();
         // Skip names in the genesis block
         // TODO: Do this through some entry attribute, like how kdl names are done
-        if entry.get_attribute("erase_kdl").is_some() {
+        if entry.get_attribute("kdl_erase").is_some() {
             continue;
         }
         // Main is compiled to a run block, which goes at the end
         // TODO: Maybe we should have run blocks come from a specific type of function instead
-        if name == "Main" {
+        if entry.get_attribute("kdl_run").is_some() || name == "Main" {
             let stmnt = format!("run {{\n  {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?);
             run.push_str(&stmnt);
             continue;

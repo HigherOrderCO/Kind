@@ -1,0 +1,9 @@
+Ata #A : U60
+Ata = 2
+
+#kdl_erase
+Be #B : U60
+Be = 3
+
+Ce #C : U60
+Ce = 4

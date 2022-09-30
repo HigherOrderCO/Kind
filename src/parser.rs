@@ -6,7 +6,7 @@ pub mod name;
 use crate::book::name::Ident;
 use crate::book::span::{ByteOffset, Span};
 use crate::book::term::Term;
-use crate::book::{Argument, Book, Entry, Rule, Attribute};
+use crate::book::{Argument, Attribute, Book, Entry, Rule};
 use crate::parser::term::{parse_apps, parse_term};
 use crate::parser::utils::{get_init_index, get_last_index};
 
@@ -66,14 +66,7 @@ pub fn parse_attr(state: parser::State) -> parser::Answer<Attribute> {
     };
     let (state, last) = get_last_index(state)?;
     let orig = Span::new_off(init, last);
-    Ok((
-        state,
-        Attribute {
-            name: Ident(name),
-            value,
-            orig
-        },
-    ))
+    Ok((state, Attribute { name: Ident(name), value, orig }))
 }
 
 pub fn parse_attrs(state: parser::State) -> parser::Answer<Vec<Attribute>> {
@@ -156,7 +149,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
                 tipo,
                 rules,
                 orig: name_orig,
-                attrs
+                attrs,
             }),
         ))
     } else {
@@ -182,7 +175,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             tipo,
             rules,
             orig: name_orig,
-            attrs
+            attrs,
         });
         Ok((state, entry))
     }

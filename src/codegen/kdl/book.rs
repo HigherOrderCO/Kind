@@ -1,6 +1,6 @@
 use crate::book::name::Ident;
 use crate::book::term::{Operator, Term};
-use crate::book::{Entry, Rule, Attribute};
+use crate::book::{Attribute, Entry, Rule};
 use crate::codegen::kdl::Book;
 
 use std::collections::HashMap;
@@ -76,7 +76,7 @@ impl CompEntry {
     pub fn get_attribute(&self, name: &str) -> Option<Attribute> {
         for attr in &self.attrs {
             if attr.name.0 == name {
-                return Some(attr.clone())
+                return Some(attr.clone());
             }
         }
         None
@@ -155,7 +155,7 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
                 }),
             }],
             orig: true,
-            attrs: vec![]
+            attrs: vec![],
         }
     }
 
@@ -179,7 +179,7 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
                 }),
             }],
             orig: true,
-            attrs: vec![]
+            attrs: vec![],
         }
     }
 
@@ -199,7 +199,7 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
                 }),
             }],
             orig: true,
-            attrs: vec![]
+            attrs: vec![],
         }
     }
 
@@ -458,7 +458,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
         args: old_entry_args,
         rules: old_entry_rules,
         orig: entry.orig,
-        attrs: entry.attrs.clone()
+        attrs: entry.attrs.clone(),
     };
     new_entries.push(old_entry);
     new_entries
@@ -833,7 +833,14 @@ pub fn linearize_rule(rule: &mut CompRule) {
 
 // Swaps u120 numbers and functions for primitive operations for kindelia compilation
 pub fn convert_u120_entry(entry: CompEntry) -> Result<CompEntry, String> {
-    let CompEntry { name, kdln, args, rules, orig, attrs } = entry;
+    let CompEntry {
+        name,
+        kdln,
+        args,
+        rules,
+        orig,
+        attrs,
+    } = entry;
     let mut new_rules = Vec::new();
     for CompRule { name, pats, body } in rules {
         let body = convert_u120_term(&body, true)?;
@@ -849,7 +856,7 @@ pub fn convert_u120_entry(entry: CompEntry) -> Result<CompEntry, String> {
         args,
         rules: new_rules,
         orig,
-        attrs
+        attrs,
     })
 }
 

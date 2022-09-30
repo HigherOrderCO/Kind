@@ -51,6 +51,7 @@ pub fn render_error(config: &Config, files: &[File], err: AdjustError) -> String
         AdjustErrorKind::CannotFindAlias { name } => format!("Cannot find alias '{}' try to add an 'use' statement.\n{}", name,high_line),
         AdjustErrorKind::InvalidAttribute { name } => format!("You cannot use the attribute '{}'.\n{}", name, high_line),
         AdjustErrorKind::AttributeWithoutArgs { name } => format!("You should not put arguments on the attribute '{}'.\n{}", name, high_line),
+        AdjustErrorKind::WrongTargetAttribute { name, target } => format!("The attribute '{}' only works in the target '{}'.\n{}", name, target, high_line),
     };
 }
 
@@ -136,9 +137,7 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
 
     load_entry(config, name, &mut load)?;
 
-    let res = check_attributes(&load.book).and_then(|_| {
-        load.book.adjust(config)
-    });
+    let res = check_attributes(config, &load.book).and_then(|_| load.book.adjust(config));
 
     match res {
         Ok(book) => {
