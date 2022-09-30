@@ -1,0 +1,12 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    types: [opened, review_requested, ready_for_review]
+
+jobs:
+  cargo:
+    if: github.event.pull_request.draft == false
+    uses: ./.github/workflows/cargo.yml

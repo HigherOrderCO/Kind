@@ -1,0 +1,6 @@
+Main : U60
+Main = 
+  let k = 2
+  match U60 k {
+    s => ?
+  }
