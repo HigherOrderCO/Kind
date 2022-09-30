@@ -20,6 +20,8 @@ pub enum AdjustErrorKind {
     IncorrectArity,
     UnboundVariable { name: String },
     CannotFindAlias { name: String },
+    InvalidAttribute { name: String },
+    AttributeWithoutArgs { name: String },
     UseOpenInstead,
     UseMatchInstead,
     RepeatedVariable,
@@ -548,6 +550,7 @@ impl Adjust for Entry {
             args,
             tipo,
             rules,
+            attrs: self.attrs.clone()
         })
     }
 }

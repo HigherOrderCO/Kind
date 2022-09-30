@@ -17,6 +17,13 @@ use crate::book::term::Term;
 use std::collections::HashMap;
 use std::fmt::{Display, Error, Formatter};
 
+#[derive(Clone, Debug)]
+pub struct Attribute {
+    pub name: Ident,
+    pub value: Option<Ident>,
+    pub orig: Span
+}
+
 // A book is a collection of entries.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
@@ -35,6 +42,7 @@ pub struct Entry {
     pub args: Vec<Box<Argument>>,
     pub tipo: Box<Term>,
     pub rules: Vec<Box<Rule>>,
+    pub attrs: Vec<Attribute>
 }
 
 #[derive(Clone, Debug)]
@@ -110,6 +118,15 @@ impl Entry {
         (hiddens, eraseds)
     }
 
+    pub fn get_attribute(&self, name: String) -> Option<Attribute> {
+        for attr in &self.attrs {
+            if attr.name.0 == name {
+                return Some(attr.clone())
+            }
+        }
+        None
+    }
+
     pub fn new_type_signature(name: Ident, args: Vec<Box<Argument>>) -> Entry {
         Entry {
             name,
@@ -118,6 +135,7 @@ impl Entry {
             args,
             tipo: Box::new(Term::Typ { orig: Span::Generated }),
             rules: Vec::new(),
+            attrs: vec![]
         }
     }
 }

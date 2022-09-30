@@ -72,6 +72,7 @@ pub fn derive_ctr(tipo: &SumType, index: usize) -> Derived {
             args,
             tipo,
             rules,
+            attrs: vec![]
         };
         Derived { path: Path::new(&path).to_owned(), entr }
     } else {
@@ -234,6 +235,7 @@ pub fn derive_match(ntyp: &SumType) -> Derived {
         args,
         tipo,
         rules,
+        attrs: vec![]
     };
     Derived { path: PathBuf::from(path), entr }
 }

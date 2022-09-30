@@ -6,7 +6,7 @@ pub mod name;
 use crate::book::name::Ident;
 use crate::book::span::{ByteOffset, Span};
 use crate::book::term::Term;
-use crate::book::{Argument, Book, Entry, Rule};
+use crate::book::{Argument, Book, Entry, Rule, Attribute};
 use crate::parser::term::{parse_apps, parse_term};
 use crate::parser::utils::{get_init_index, get_last_index};
 
@@ -54,7 +54,45 @@ pub fn parse_rule(state: parser::State, name: String, init: ByteOffset) -> parse
     ))
 }
 
+pub fn parse_attr(state: parser::State) -> parser::Answer<Attribute> {
+    let (state, init) = get_init_index(state)?;
+    let (state, name) = parser::name1(state)?;
+    let (state, has_value) = parser::text("=", state)?;
+    let (state, value) = if has_value {
+        let (state, name) = parser::name1(state)?;
+        (state, Some(Ident(name)))
+    } else {
+        (state, None)
+    };
+    let (state, last) = get_last_index(state)?;
+    let orig = Span::new_off(init, last);
+    Ok((
+        state,
+        Attribute {
+            name: Ident(name),
+            value,
+            orig
+        },
+    ))
+}
+
+pub fn parse_attrs(state: parser::State) -> parser::Answer<Vec<Attribute>> {
+    let mut vec = Vec::new();
+    let mut state = state;
+    loop {
+        let (state_i, attr) = parser::text("#", state)?;
+        if attr {
+            let (state_i, attr) = parse_attr(state_i)?;
+            vec.push(attr);
+            state = state_i;
+        } else {
+            return Ok((state, vec));
+        }
+    }
+}
+
 pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
+    let (state, attrs) = parse_attrs(state)?;
     let (state, init) = get_init_index(state)?;
     let (state, name) = parse_path_str(state)?;
     let (state, last) = get_last_index(state)?;
@@ -118,6 +156,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
                 tipo,
                 rules,
                 orig: name_orig,
+                attrs
             }),
         ))
     } else {
@@ -143,6 +182,7 @@ pub fn parse_entry(state: parser::State) -> parser::Answer<Box<Entry>> {
             tipo,
             rules,
             orig: name_orig,
+            attrs
         });
         Ok((state, entry))
     }

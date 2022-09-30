@@ -1,6 +1,7 @@
 pub mod resolve;
 pub mod adjust;
 pub mod load;
+pub mod attributes;
 
 use crate::book::name::Ident;
 use crate::book::new_type::{NewType, SumType, ProdType};
