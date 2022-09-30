@@ -4,11 +4,12 @@ use crate::book::name::Ident;
 use crate::book::span::{FileOffset, Span, SpanData};
 use crate::book::Book;
 
-use crate::lowering::adjust::AdjustErrorKind;
+use crate::lowering::adjust::{AdjustErrorKind, AdjustError};
+use crate::lowering::resolve::Resolve;
 use crate::parser::read_book;
-
 use super::config::Config;
 
+#[derive(Debug, Clone)]
 pub struct File {
     pub path: String,
     pub code: String,
@@ -28,13 +29,48 @@ impl Load {
     }
 }
 
+pub fn render_error(config: &Config, files: &[File], err: AdjustError) -> String {
+    let high_line = match err.orig {
+        Span::Localized(SpanData { file, start, end }) if !config.no_high_line => format!(
+            "On '{}'\n{}",
+            files[file.0 as usize].path,
+            highlight_error::highlight_error(start.0 as usize, end.0 as usize, &files[file.0 as usize].code)
+        ),
+        _ if !config.no_high_line => "Cannot find the source of the error.".to_string(),
+        _ => "".to_string(),
+    };
+    return match err.kind {
+        AdjustErrorKind::IncorrectArity => format!("Incorrect arity.\n{}", high_line),
+        AdjustErrorKind::UnboundVariable { name } => format!("Unbound variable '{}'.\n{}", name, high_line),
+        AdjustErrorKind::RepeatedVariable => format!("Repeated variable.\n{}", high_line),
+        AdjustErrorKind::CantLoadType => format!("Can't load type.\n{}", high_line),
+        AdjustErrorKind::NoCoverage => format!("Incomplete constructor coverage.\n{}", high_line),
+        AdjustErrorKind::UseOpenInstead => format!("You should use `open` instead of `match` on record types.\n{}", high_line),
+        AdjustErrorKind::UseMatchInstead => format!("You should use `match` instead of `open` on sum types.\n{}", high_line),
+        AdjustErrorKind::CannotFindAlias { name } => format!("Cannot find alias '{}' try to add an 'use' statement.\n{}", name,high_line),
+    };
+}
+
+pub fn to_current_namespace(config: &Config, path: &PathBuf) -> String {
+    let base = Path::new(&config.kind2_path);
+    let mut cur = path.clone();
+    cur.set_extension("");
+    let cur_path = cur.strip_prefix(base);
+    cur_path.map(| x | {
+        let mut arr = x.into_iter().map(|x| x.to_str().unwrap()).collect::<Vec<&str>>();
+        arr.pop();
+        arr.join(".")
+    }).unwrap_or("".to_string())
+}
+
 pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), String> {
     if !load.book.entrs.contains_key(&Ident(name.to_string())) {
         let path: PathBuf;
+        let base = Path::new(&config.kind2_path);
         if name.ends_with(".kind2") {
             path = PathBuf::from(&name.to_string());
         } else {
-            let mut normal_path = Path::new(&config.kind2_path).join(&name.replace('.', "/"));
+            let mut normal_path = base.join(&name.replace('.', "/"));
             let inside_path = normal_path.clone().join("_.kind2"); // path ending with 'Name/_.kind'
             normal_path.set_extension("kind2");
 
@@ -59,19 +95,23 @@ pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), St
             Ok(code) => code,
         };
 
-        let mut new_book = match read_book(&newcode) {
+        let (mut new_book, uses) = match read_book(&newcode) {
             Err(err) => {
                 return Err(format!("\x1b[1m[{}]\x1b[0m\n{}", path.display(), err));
             }
             Ok(book) => book,
         };
 
-        new_book.set_origin_file(FileOffset(load.file.len() as u32));
-
-        load.file.push(File {
+        let file = File {
             path: path.to_str().unwrap().into(),
             code: newcode,
-        });
+        };
+
+        let cur_mod = to_current_namespace(config, &path.clone());
+        new_book.resolve(&cur_mod, &uses).map_err(|err| render_error(config, &vec![file.clone()], err))?;
+        new_book.set_origin_file(FileOffset(load.file.len() as u32));
+
+        load.file.push(file);
         for name in &new_book.names {
             load.book.names.push(name.clone());
             load.book.entrs.insert(Ident(name.clone()), new_book.entrs.get(&Ident(name.to_string())).unwrap().clone());
@@ -96,28 +136,8 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
     match load.book.adjust(config) {
         Ok(book) => {
             load.book = book;
+            Ok(load)
         }
-        Err(err) => {
-            let high_line = match err.orig {
-                Span::Localized(SpanData { file, start, end }) if !config.no_high_line => format!(
-                    "On '{}'\n{}",
-                    &load.file[file.0 as usize].path,
-                    highlight_error::highlight_error(start.0 as usize, end.0 as usize, &load.file[file.0 as usize].code)
-                ),
-                _ if !config.no_high_line => "Cannot find the source of the error.".to_string(),
-                _ => "".to_string(),
-            };
-            return match err.kind {
-                AdjustErrorKind::IncorrectArity => Err(format!("Incorrect arity.\n{}", high_line)),
-                AdjustErrorKind::UnboundVariable { name } => Err(format!("Unbound variable '{}'.\n{}", name, high_line)),
-                AdjustErrorKind::RepeatedVariable => Err(format!("Repeated variable.\n{}", high_line)),
-                AdjustErrorKind::CantLoadType => Err(format!("Can't load type.\n{}", high_line)),
-                AdjustErrorKind::NoCoverage => Err(format!("Incomplete constructor coverage.\n{}", high_line)),
-                AdjustErrorKind::UseOpenInstead => Err(format!("You should use `open` instead of `match` on record types.\n{}", high_line)),
-                AdjustErrorKind::UseMatchInstead => Err(format!("You should use `match` instead of `open` on sum types.\n{}", high_line)),
-            };
-        }
-    };
-
-    Ok(load)
+        Err(err) => Err(render_error(config, &load.file, err))
+    }
 }

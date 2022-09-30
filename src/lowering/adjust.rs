@@ -19,6 +19,7 @@ pub struct AdjustError {
 pub enum AdjustErrorKind {
     IncorrectArity,
     UnboundVariable { name: String },
+    CannotFindAlias { name: String },
     UseOpenInstead,
     UseMatchInstead,
     RepeatedVariable,
@@ -111,7 +112,7 @@ fn convert_apps_to_ctr(term: &Term) -> Option<Term> {
             }
         }
     }
-    if ctr_name.0 == "Type" {
+    if ctr_name.to_string() == "Type" {
         Some(Term::Typ { orig: ctr_orig })
     } else if ctr_name.0 == "U60" {
         Some(Term::U60 { orig: ctr_orig })
