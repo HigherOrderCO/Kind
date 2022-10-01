@@ -5,7 +5,7 @@ use crate::book::{Entry, new_type::{ProdType, Derived, SumType, Constructor}, Ar
 use super::derive_match;
 
 
-fn args_to_vars(vec: &Vec<Box<Argument>>) -> Vec<Box<Term>> {
+fn args_to_vars(vec: &[Box<Argument>]) -> Vec<Box<Term>> {
   vec
     .iter()
     .map(|x| {
@@ -48,10 +48,10 @@ pub fn derive_prod_constructor(prod: &ProdType) -> Derived {
     entr: Entry {
       name,
       orig: Span::Generated,
-      kdln: None,
       args: args.clone(),
       tipo,
       rules: vec![],
+      attrs: vec![]
     }
   }
 }
@@ -91,10 +91,10 @@ pub fn derive_getters(prod: &ProdType) -> Vec<Derived> {
       entr: Entry {
         name: name.clone(),
         orig: Span::Generated,
-        kdln: None,
         args: args.clone(),
         tipo: field.tipo.clone(),
         rules: vec![Box::new(Rule { orig: Span::Generated, name, pats: vec![pat], body })],
+        attrs: vec![]
       }
     })
   }
@@ -154,10 +154,10 @@ pub fn derive_setters(prod: &ProdType) -> Vec<Derived> {
       entr: Entry {
         name: name.clone(),
         orig: Span::Generated,
-        kdln: None,
         args: args.clone(),
         tipo: tipo.clone(),
         rules: vec![Box::new(Rule { orig: Span::Generated, name, pats: vec![pat, new_pat], body })],
+        attrs: vec![]
       }
     })
   }

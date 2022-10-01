@@ -169,24 +169,24 @@ pub fn parse_term_prefix(state: State) -> Answer<Box<Term>> {
     parser::grammar(
         "Term",
         &[
-            Box::new(parse_all), // `(name:`
-            Box::new(parse_ctr), // `(Name`
-            Box::new(parse_op2), // `(+`
-            Box::new(parse_grp), // `(`
-            Box::new(parse_sig), // `[name:`
-            Box::new(parse_new), // `$`
-            Box::new(parse_lst), // `[`
-            Box::new(parse_str), // `"`
-            Box::new(parse_chr), // `'`
-            Box::new(parse_lam), // `@`
-            Box::new(parse_let), // `let `
-            Box::new(parse_if),  // `if `
-            Box::new(parse_mat), // `match `
+            Box::new(parse_all),  // `(name:`
+            Box::new(parse_ctr),  // `(Name`
+            Box::new(parse_op2),  // `(+`
+            Box::new(parse_grp),  // `(`
+            Box::new(parse_sig),  // `[name:`
+            Box::new(parse_new),  // `$`
+            Box::new(parse_lst),  // `[`
+            Box::new(parse_str),  // `"`
+            Box::new(parse_chr),  // `'`
+            Box::new(parse_lam),  // `@`
+            Box::new(parse_let),  // `let `
+            Box::new(parse_if),   // `if `
+            Box::new(parse_mat),  // `match `
             Box::new(parse_open), // `match `
-            Box::new(parse_do),  // `do `
-            Box::new(parse_hlp), // `?`
-            Box::new(parse_hol), // `_`
-            Box::new(parse_var), // x
+            Box::new(parse_do),   // `do `
+            Box::new(parse_hlp),  // `?`
+            Box::new(parse_hol),  // `_`
+            Box::new(parse_var),  // x
             Box::new(|state| Ok((state, None))),
         ],
         state,
@@ -491,7 +491,6 @@ pub fn parse_mat(state: State) -> Answer<Option<Box<Term>>> {
         state,
     );
 }
-
 
 pub fn parse_open(state: State) -> Answer<Option<Box<Term>>> {
     return parser::guard(

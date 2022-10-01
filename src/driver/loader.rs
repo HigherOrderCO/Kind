@@ -1,12 +1,13 @@
 use std::path::{Path, PathBuf};
 
+use crate::lowering::adjust::{AdjustErrorKind, AdjustError};
+use crate::lowering::attributes::check_attributes;
+use crate::lowering::resolve::Resolve;
+use crate::parser::read_book;
 use crate::book::name::Ident;
 use crate::book::span::{FileOffset, Span, SpanData};
 use crate::book::Book;
 
-use crate::lowering::adjust::{AdjustErrorKind, AdjustError};
-use crate::lowering::resolve::Resolve;
-use crate::parser::read_book;
 use super::config::Config;
 
 #[derive(Debug, Clone)]
@@ -48,6 +49,10 @@ pub fn render_error(config: &Config, files: &[File], err: AdjustError) -> String
         AdjustErrorKind::UseOpenInstead => format!("You should use `open` instead of `match` on record types.\n{}", high_line),
         AdjustErrorKind::UseMatchInstead => format!("You should use `match` instead of `open` on sum types.\n{}", high_line),
         AdjustErrorKind::CannotFindAlias { name } => format!("Cannot find alias '{}' try to add an 'use' statement.\n{}", name,high_line),
+        AdjustErrorKind::InvalidAttribute { name } => format!("You cannot use the attribute '{}'.\n{}", name, high_line),
+        AdjustErrorKind::AttributeWithoutArgs { name } => format!("You should not put arguments on the attribute '{}'.\n{}", name, high_line),
+        AdjustErrorKind::AttributeMissingArg { name } => format!("Attribute '{}' needs to be given a value.\n{}", name, high_line),
+        AdjustErrorKind::WrongTargetAttribute { name, target } => format!("The attribute '{}' only works in the target '{}'.\n{}", name, target, high_line),
     };
 }
 
@@ -133,7 +138,9 @@ pub fn load(config: &Config, name: &str) -> Result<Load, String> {
 
     load_entry(config, name, &mut load)?;
 
-    match load.book.adjust(config) {
+    let res = check_attributes(config, &load.book).and_then(|_| load.book.adjust(config));
+
+    match res {
         Ok(book) => {
             load.book = book;
             Ok(load)

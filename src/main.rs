@@ -8,7 +8,7 @@ pub mod parser;
 
 use std::env;
 
-use crate::driver::config::Config;
+use crate::driver::config::{Config, Target};
 use crate::driver::*;
 
 use clap::{Parser, Subcommand};
@@ -64,10 +64,11 @@ pub enum Command {
 fn run_cli() -> Result<(), String> {
     let cli_matches = Cli::parse();
 
-    let config = Config {
+    let mut config = Config {
         no_high_line: false,
         color_output: true,
         kind2_path: env::var_os("KIND2_PATH").map(|x| x.into_string().unwrap()).unwrap_or_else(|| "".to_string()),
+        target: Target::All
     };
 
     match cli_matches.command {
@@ -77,8 +78,14 @@ fn run_cli() -> Result<(), String> {
         Command::Derive { file: path } => cmd_derive(&config, &path),
         Command::GenChecker { file: path } => cmd_gen_checker(&config, &path),
         Command::Show { file: path } => cmd_show(&config, &path),
-        Command::ToKDL { file: path, namespace } => cmd_to_kdl(&config, &path, &namespace),
-        Command::ToHVM { file: path } => cmd_to_hvm(&config, &path),
+        Command::ToKDL { file: path, namespace } => {
+            config.target = Target::Kdl;
+            cmd_to_kdl(&config, &path, &namespace)
+        },
+        Command::ToHVM { file: path } => {
+            config.target = Target::Hvm;
+            cmd_to_hvm(&config, &path)
+        }
     }
 }
 

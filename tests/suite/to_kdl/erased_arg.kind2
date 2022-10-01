@@ -6,6 +6,7 @@ Arity3 e f g h i d = d
 ArityB -(e: U60) <g> (d: U60) -(f: U60) <h> -(h: U60) <i> : U60
 ArityB e g d f h i j = d
 
+#kdl_run
 Main : U60
 Main =
   let a = (+ (+ (Arity3 1 2 3) (Arity3 1 2 3 4 5 6)) 5)

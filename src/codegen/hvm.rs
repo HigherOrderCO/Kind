@@ -97,11 +97,7 @@ pub fn to_hvm_rule(book: &Book, rule: &Rule) -> String {
 }
 
 pub fn to_hvm_entry(book: &Book, entry: &Entry) -> String {
-    let kind_name = if let Some(kdln) = &entry.kdln {
-        Ident(format!("{} #{}", entry.name, kdln))
-    } else {
-        entry.name.clone()
-    };
+    let kind_name = entry.name.clone();
     let hvm_name = &entry.name;
     if hvm_name.0 == "HVM.log" {
         return "".to_string();

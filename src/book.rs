@@ -17,6 +17,13 @@ use crate::book::term::Term;
 use std::collections::HashMap;
 use std::fmt::{Display, Error, Formatter};
 
+#[derive(Clone, Debug)]
+pub struct Attribute {
+    pub name: Ident,
+    pub value: Option<Ident>,
+    pub orig: Span
+}
+
 // A book is a collection of entries.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
@@ -31,10 +38,10 @@ pub struct Book {
 pub struct Entry {
     pub name: Ident,
     pub orig: Span,
-    pub kdln: Option<String>,
     pub args: Vec<Box<Argument>>,
     pub tipo: Box<Term>,
     pub rules: Vec<Box<Rule>>,
+    pub attrs: Vec<Attribute>
 }
 
 #[derive(Clone, Debug)]
@@ -76,21 +83,21 @@ impl Argument {
 
     pub fn new_accessible(name: Ident, tipo: Box<Term>) -> Argument {
         Argument {
-          hide: false,
-          orig: Span::Generated,
-          eras: false,
-          name,
-          tipo
+            hide: false,
+            orig: Span::Generated,
+            eras: false,
+            name,
+            tipo
         }
     }
 
     pub fn new_erased(name: Ident, tipo: Box<Term>) -> Argument {
         Argument {
-          hide: false,
-          orig: Span::Generated,
-          eras: true,
-          name,
-          tipo
+            hide: false,
+            orig: Span::Generated,
+            eras: true,
+            name,
+            tipo
         }
     }
 }
@@ -110,14 +117,23 @@ impl Entry {
         (hiddens, eraseds)
     }
 
+    pub fn get_attribute(&self, name: &str) -> Option<Attribute> {
+        for attr in &self.attrs {
+            if attr.name.0 == name {
+                return Some(attr.clone())
+            }
+        }
+        None
+    }
+
     pub fn new_type_signature(name: Ident, args: Vec<Box<Argument>>) -> Entry {
         Entry {
             name,
             orig: Span::Generated,
-            kdln: None,
             args,
             tipo: Box::new(Term::Typ { orig: Span::Generated }),
             rules: Vec::new(),
+            attrs: vec![]
         }
     }
 }
@@ -146,11 +162,7 @@ impl Display for Argument {
 
 impl Display for Entry {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        if let Some(kdln) = &self.kdln {
-            write!(f, "{} #{}", self.name, kdln)?
-        } else {
-            write!(f, "{}", self.name.clone())?
-        };
+        write!(f, "{}", self.name.clone())?;
 
         for arg in &self.args {
             write!(f, " {}", arg)?;

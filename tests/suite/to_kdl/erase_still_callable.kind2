@@ -1,0 +1,10 @@
+#kdl_name = A
+FnA {
+  (+ FnB 1)
+}
+
+#kdl_name = B
+#kdl_erase
+FnB {
+  2
+}

@@ -3,7 +3,7 @@ use crate::book::new_type::NewType;
 use crate::book::span::{Localized, Span};
 use crate::book::term::Term;
 use crate::book::{Argument, Book, Entry, Rule};
-use crate::driver::config::Config;
+use crate::driver::config::{Config, Target};
 use crate::lowering::load::load_newtype_cached;
 
 use std::collections::HashMap;
@@ -20,6 +20,10 @@ pub enum AdjustErrorKind {
     IncorrectArity,
     UnboundVariable { name: String },
     CannotFindAlias { name: String },
+    InvalidAttribute { name: String },
+    AttributeWithoutArgs { name: String },
+    AttributeMissingArg { name: String },
+    WrongTargetAttribute { name: String, target: Target },
     UseOpenInstead,
     UseMatchInstead,
     RepeatedVariable,
@@ -386,11 +390,11 @@ impl Adjust for Term {
                             };
 
                             result.adjust(rhs, state)
-                        },
+                        }
                         _ => Err(AdjustError {
                             orig,
                             kind: AdjustErrorKind::UseOpenInstead,
-                        })
+                        }),
                     }
                 } else {
                     Err(AdjustError {
@@ -398,14 +402,14 @@ impl Adjust for Term {
                         kind: AdjustErrorKind::CantLoadType,
                     })
                 }
-            },
+            }
             Term::Open {
                 ref orig,
                 ref name,
                 ref tipo,
                 ref expr,
                 ref body,
-                ref moti
+                ref moti,
             } => {
                 let orig = *orig;
                 if let Ok(res) = load_newtype_cached(state.config, &mut state.types, tipo) {
@@ -426,7 +430,6 @@ impl Adjust for Term {
                                     name: Ident(format!("{}.{}", name, arg.name)),
                                     body: case_term,
                                 });
-
                             }
 
                             args.push(case_term);
@@ -438,11 +441,11 @@ impl Adjust for Term {
                             };
 
                             result.adjust(rhs, state)
-                        },
-                        _ =>  Err(AdjustError {
+                        }
+                        _ => Err(AdjustError {
                             orig,
                             kind: AdjustErrorKind::UseMatchInstead,
-                        })
+                        }),
                     }
                 } else {
                     Err(AdjustError {
@@ -521,7 +524,6 @@ impl Adjust for Argument {
 impl Adjust for Entry {
     fn adjust<'a>(&self, rhs: bool, state: &mut AdjustState<'a>) -> Result<Self, AdjustError> {
         let name = self.name.clone();
-        let kdln = self.kdln.clone();
 
         let mut args = Vec::new();
 
@@ -543,11 +545,11 @@ impl Adjust for Entry {
         }
         Ok(Entry {
             name,
-            kdln,
             orig: self.orig,
             args,
             tipo,
             rules,
+            attrs: self.attrs.clone(),
         })
     }
 }
