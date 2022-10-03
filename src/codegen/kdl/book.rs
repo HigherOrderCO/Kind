@@ -327,11 +327,15 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                     }));
                 }
                 CompTerm::Var { name } => {
-                    old_rule_pats.push(Box::new(*pat.clone()));
+                    old_rule_pats.push(pat.clone());
                     old_rule_body_args.push(Box::new(CompTerm::Var { name: name.clone() }));
                 }
-                // TODO: It'd be better to check for Num and handle other (invalid) options
-                _ => {}
+                CompTerm::Num { .. } => {
+                    old_rule_pats.push(pat.clone());
+                }
+                _ => {
+                    panic!("Found invalid pattern \"{:?}\" while flattening entry \"{}\".", pat, entry.name);
+                }
             }
         }
         let old_rule_body = Box::new(CompTerm::Fun {
@@ -400,14 +404,8 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                         (CompTerm::Var { .. }, _) => {
                             new_rule_pats.push(other_pat.clone());
                         }
-                        (CompTerm::Num { numb: rule_pat_numb }, CompTerm::Num { numb: other_pat_numb }) => {
-                            if rule_pat_numb == other_pat_numb {
-                                new_rule_pats.push(Box::new(*other_pat.clone()));
-                            } else {
-                                panic!("Internal error. Please report.");
-                                // not possible since it matches
-                            }
-                        }
+                        // Nums are like Ctr with no args, so nothing to bring out
+                        (CompTerm::Num { .. }, CompTerm::Num { .. }) => (),
                         (CompTerm::Num { .. }, CompTerm::Var { name: other_pat_name }) => {
                             subst(&mut new_rule_body, other_pat_name, rule_pat);
                         }
