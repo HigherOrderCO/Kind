@@ -16,9 +16,9 @@ use std::collections::HashMap;
 use self::name::parse_path_str;
 
 pub fn parse_use<'a>(state: parser::State<'a>, map: &mut HashMap<String, String>) -> Result<parser::State<'a>, String> {
-    let (state, name) = parser::name1(state)?;
-    let (state, _) = parser::consume("as", state)?;
     let (state, val) = parser::name1(state)?;
+    let (state, _) = parser::consume("as", state)?;
+    let (state, name) = parser::name1(state)?;
     map.insert(name, val);
     Ok(state)
 }
