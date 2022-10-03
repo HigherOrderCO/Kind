@@ -101,6 +101,7 @@ pub fn compile_book(book: &Book) -> Result<CompBook, String> {
         if let Term::Typ { orig: _ } = &*entry.tipo {
             continue;
         }
+        // TODO: Group errors for all entries
         let entrs = compile_entry(book, entry)?;
         for entry in entrs {
             comp_book.names.push(entry.name.clone());
@@ -112,18 +113,26 @@ pub fn compile_book(book: &Book) -> Result<CompBook, String> {
 
 // Can become multiple entries after flatenning
 pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, String> {
-    fn compile_rule(book: &Book, entry: &Entry, rule: &Rule) -> CompRule {
+    fn compile_rule(book: &Book, entry: &Entry, rule: &Rule) -> Result<CompRule, String> {
         let name = rule.name.0.clone();
         let mut pats = Vec::new();
         for (arg, pat) in entry.args.iter().zip(rule.pats.iter()) {
             if !arg.eras {
                 let pat = erase(book, pat);
-                // TODO: Check if the pattern has some invalid term (anything other than num, ctr or var)
-                pats.push(pat);
+                match is_valid_pattern(&*pat) {
+                    Ok(()) => {
+                        pats.push(pat);
+                    }
+                    Err(err_term) => {
+                        // TODO: Add Display trait for compterms
+                        // TODO: Tell the user exactly why this term is incorrect
+                        return Err(format!("Found invalid term \"{:?}\" in rule pattern matching for entry \"{}\".", err_term, entry.name));
+                    }
+                }
             }
         }
         let body = erase(book, &rule.body);
-        CompRule { name, pats, body }
+        Ok(CompRule { name, pats, body })
     }
 
     fn make_u120_new(old_entry: &Entry) -> CompEntry {
@@ -208,13 +217,12 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
         // high and low are used for type compatibility with u60
         "U120.low" => Ok(vec![make_u120_low(&entry)]),
         _ => {
-            let new_entry = CompEntry {
-                name: entry.name.0.clone(),
-                args: entry.args.iter().filter(|x| !x.eras).map(|x| x.name.0.clone()).collect(),
-                rules: entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect(),
-                attrs: entry.attrs.clone(),
-                orig: true,
-            };
+            let name = entry.name.0.clone();
+            let args = entry.args.iter().filter(|x| !x.eras).map(|x| x.name.0.clone()).collect();
+            // TODO: Group all errs together instead of failing on the first one
+            let rules = entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect::<Result<Vec<CompRule>, String>>()?;
+            let attrs = entry.attrs.clone();
+            let new_entry = CompEntry { name, args, rules, attrs, orig: true };
             // TODO: We probably need to handle U60 separately as well.
             //       Since they compile to U120, it wont overflow as expected and conversion to signed will fail.
             let new_entry = convert_u120_entry(new_entry)?;
@@ -227,6 +235,32 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
             Ok(new_entrs)
         }
     }
+}
+
+// True if the compiled term is a valid rule pattern.
+// Rule patterns must be normalized terms with only Ctrs, Nums and Vars (no Lams, Dups or Lets)
+pub fn is_valid_pattern(pat: &CompTerm) -> Result<(), &CompTerm> {
+    let mut check_stack: Vec<&CompTerm> = vec![pat];
+    while !check_stack.is_empty() {
+        let term = check_stack.pop().unwrap();
+        match term {
+            CompTerm::Ctr { args, .. } => {
+                for arg in args {
+                    check_stack.push(arg);
+                }
+            },
+            CompTerm::Var { .. } => (),
+            CompTerm::Num { .. } => (),
+            CompTerm::Lam { .. } => { return Err(term) }
+            CompTerm::App { .. } => { return Err(term) }
+            CompTerm::Dup { .. } => { return Err(term) }
+            CompTerm::Let { .. } => { return Err(term) }
+            CompTerm::Fun { .. } => { return Err(term) }
+            CompTerm::Op2 { .. } => { return Err(term) }
+            CompTerm::Nil { .. } => { return Err(term) }
+        };
+    }
+    Ok(())
 }
 
 // Splits an entry with rules with nested cases into multiple entries with flattened rules.

@@ -1,0 +1,6 @@
+// Fails on the internal (A ...) since function application is not allowed in pattern
+A (b : B) (n : U60) : U60
+A (B.new (A (B.new 1) 1)) 1 = 9
+
+B : Type
+B.new (n : U60) : B
