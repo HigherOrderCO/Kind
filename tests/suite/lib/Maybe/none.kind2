@@ -1,2 +1,0 @@
-// Automatically derived from Maybe/_.type
-Maybe.none <t: Type> : (Maybe t)

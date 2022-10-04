@@ -1,4 +1,0 @@
-use A as Maybe
-
-/Test : A/ U60
-/Test = A/pure 2

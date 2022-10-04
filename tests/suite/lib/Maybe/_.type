@@ -1,4 +1,0 @@
-type Maybe <t: Type> {
-  none
-  some (value: t)
-}

@@ -1,7 +1,0 @@
-// We should open an issue for this?
-
-Arity3 -(e: U60) -(f: U60) <g> <h> <i> (d: U60) : U60
-Arity3 e f g h i d = d
-
-Main : U60
-Main = Arity3 1 2 3

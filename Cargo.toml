@@ -1,29 +1,16 @@
-[package]
-name = "kind2"
-version = "0.2.79"
-edition = "2021"
-description = "A pure functional functional language that uses the HVM."
-repository = "https://github.com/Kindelia/Kind2"
-license = "MIT"
-keywords = ["functional", "language", "type-theory", "proof-assistant"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-hvm = "0.1.81"
-#hvm = { path = "../hvm" }
-highlight_error = "0.1.1"
-clap = { version = "3.1.8", features = ["derive"] }
-rand = "0.8.5"
-
-[dev-dependencies]
-pretty_assertions = "1.3.0"
-ntest = "0.8.1"
-walkdir = "2"
-
-[profile.dev.package.hvm]
-opt-level = 3
-
-[[test]]
-name = "kind2-tests"
-path = "tests/mod.rs"
+[workspace]
+members = [
+  "src/kind-cli",
+  "src/kind-query",
+  "src/kind-tree",
+  "src/kind-span",
+  "src/kind-parser",
+  "src/kind-pass",
+  "src/kind-report",
+  "src/kind-checker",
+  "src/kind-target-kdl",
+  "src/kind-target-hvm",
+  "src/kind-optimization",
+  "src/kind-derive",
+  "src/kind-lint",
+]

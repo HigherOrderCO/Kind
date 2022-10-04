@@ -1,6 +1,0 @@
-String : Type
-  String.cons (head: U60) (tail: String) : String
-  String.nil : String
-
-Main.hello : String
-Main.hello = "Hello, World"
