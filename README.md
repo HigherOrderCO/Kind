@@ -22,7 +22,7 @@ Pure functions are defined via equations, as in [Haskell](https://www.haskell.or
 // Applies a function to every element of a list
 map <a> <b> (list: List a) (f: a -> b) : List b
 map a b Nil              f = Nil
-map a b (Cons head tail) f = Cons (f x) (map tail f)
+map a b (Cons head tail) f = Cons (f head) (map tail f)
 ```
 
 Side-effective programs are written via monadic monads, resembling [Rust](https://www.rust-lang.org/) and [TypeScript](https://www.typescriptlang.org/):
