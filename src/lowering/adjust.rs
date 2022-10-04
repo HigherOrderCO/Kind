@@ -561,10 +561,9 @@ impl Book {
         let mut state = AdjustState::new(self, config);
 
         for name in &self.names {
-            let ident = Ident(name.clone());
-            let entry = self.entrs.get(&ident).unwrap();
+            let entry = self.entrs.get(&name).unwrap();
             names.push(name.clone());
-            entrs.insert(ident, Box::new(entry.adjust(false, &mut state)?));
+            entrs.insert(name.clone(), Box::new(entry.adjust(false, &mut state)?));
         }
 
         Ok(Book { names, entrs, holes: state.holes })

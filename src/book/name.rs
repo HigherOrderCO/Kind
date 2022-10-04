@@ -57,6 +57,10 @@ impl EncodedName {
 }
 
 impl Ident {
+    pub fn new(name: &str) -> Ident {
+        Ident(name.to_string())
+    }
+
     pub fn encode(&self) -> EncodedName {
         EncodedName::from_string(&self.0)
     }
@@ -76,6 +80,10 @@ impl Ident {
         } else {
             false
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 }
 

@@ -27,7 +27,7 @@ pub struct Attribute {
 // A book is a collection of entries.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
-    pub names: Vec<String>,
+    pub names: Vec<Ident>,
     pub entrs: HashMap<Ident, Box<Entry>>,
     pub holes: u64,
 }
@@ -181,7 +181,7 @@ impl Display for Entry {
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for name in &self.names {
-            writeln!(f, "{}\n", self.entrs.get(&Ident(name.clone())).unwrap())?;
+            writeln!(f, "{}\n", self.entrs.get(&name).unwrap())?;
         }
         Ok(())
     }

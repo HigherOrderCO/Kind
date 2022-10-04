@@ -119,7 +119,7 @@ pub fn load_entry(config: &Config, name: &str, load: &mut Load) -> Result<(), St
         load.file.push(file);
         for name in &new_book.names {
             load.book.names.push(name.clone());
-            load.book.entrs.insert(Ident(name.clone()), new_book.entrs.get(&Ident(name.to_string())).unwrap().clone());
+            load.book.entrs.insert(name.clone(), new_book.entrs.get(&name).unwrap().clone());
         }
 
         for unbound in &new_book.get_unbounds(config) {

@@ -212,7 +212,7 @@ pub fn parse_book(state: parser::State) -> parser::Answer<(Box<Book>, HashMap<St
     let mut entrs = HashMap::new();
     for entry in entry_vec {
         if !entrs.contains_key(&entry.name) {
-            names.push(entry.name.to_string().clone());
+            names.push(entry.name.clone());
             entrs.insert(entry.name.clone(), entry);
         } else {
             println!("\x1b[33mwarning\x1b[0m: ignored redefinition of '{}'.", entry.name);
