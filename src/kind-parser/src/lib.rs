@@ -1,14 +1,9 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+mod errors;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod state;
+pub mod expr;
+pub mod top_level;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+
+pub mod lexer;
+pub use lexer::state::*;

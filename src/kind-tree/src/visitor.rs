@@ -1,6 +1,6 @@
 use kind_span::Span;
 
-use crate::expr::{ExprKind, Literal, Open, Substution, Match};
+use crate::expr::{ExprKind, Literal, Match, Open, Substution};
 use crate::symbol::*;
 use crate::*;
 
@@ -13,13 +13,13 @@ use crate::*;
 /// All of these functions are implemented so we can easily
 /// change these default implementations.
 pub trait Visitor {
-    fn visit_span(&mut self, _: &mut Span) { }
+    fn visit_span(&mut self, _: &mut Span) {}
 
-    fn visit_syntax_ctx(&mut self, _: &mut SyntaxCtxIndex) { }
+    fn visit_syntax_ctx(&mut self, _: &mut SyntaxCtxIndex) {}
 
-    fn visit_operator(&mut self, _: &mut expr::Operator) { }
+    fn visit_operator(&mut self, _: &mut expr::Operator) {}
 
-    fn visit_literal(&mut self, _: &mut Literal) { }
+    fn visit_literal(&mut self, _: &mut Literal) {}
 
     fn visit_ident(&mut self, ident: &mut Ident) {
         self.visit_span(&mut ident.span);
@@ -99,62 +99,43 @@ pub trait Visitor {
             ExprKind::All(None, typ, body) => {
                 self.visit_expr(typ);
                 self.visit_expr(body);
-            },
+            }
             ExprKind::All(Some(ident), typ, body) => {
                 self.visit_ident(ident);
                 self.visit_expr(typ);
                 self.visit_expr(body);
-            },
+            }
             ExprKind::Lambda(ident, body) => {
                 self.visit_ident(ident);
                 self.visit_expr(body);
-            },
+            }
             ExprKind::App(expr, spine) => {
                 self.visit_expr(expr);
                 for arg in spine {
                     self.visit_expr(arg);
                 }
-            },
+            }
             ExprKind::Let(ident, val, body) => {
                 self.visit_ident(ident);
                 self.visit_expr(val);
                 self.visit_expr(body);
-
-            },
+            }
             ExprKind::Ann(val, ty) => {
                 self.visit_expr(val);
                 self.visit_expr(ty);
-            },
-            ExprKind::Ctr(ident, spine) => {
-                self.visit_ident(ident);
-                for arg in spine {
-                    self.visit_expr(arg);
-                }
-            },
-            ExprKind::Fun(ident, spine) => {
-                self.visit_ident(ident);
-                for arg in spine {
-                    self.visit_expr(arg);
-                }
-            },
+            }
             ExprKind::Lit(lit) => {
                 self.visit_literal(lit);
-            },
+            }
             ExprKind::Binary(op, a, b) => {
                 self.visit_operator(op);
                 self.visit_expr(a);
                 self.visit_expr(b);
-            },
-            ExprKind::Hole(_) => { },
-            ExprKind::Subst(subst) => {
-                self.visit_substitution(subst)
-            },
-            ExprKind::Match(matcher) => {
-                self.visit_match(matcher)
-            },
-            ExprKind::Open(open) => {
-                self.visit_open(open)
-            },
+            }
+            ExprKind::Hole(_) => {}
+            ExprKind::Subst(subst) => self.visit_substitution(subst),
+            ExprKind::Match(matcher) => self.visit_match(matcher),
+            ExprKind::Open(open) => self.visit_open(open),
         }
     }
 }

@@ -54,7 +54,7 @@ impl Range {
         Range {
             start: self.start,
             end: self.end,
-            ctx: ctx,
+            ctx,
         }
     }
 
@@ -90,9 +90,7 @@ impl Span {
     pub fn set_ctx(&mut self, ctx: SyntaxCtxIndex) {
         match self {
             Span::Generated => (),
-            Span::Locatable(span) => {
-                *span = span.set_ctx(ctx)
-            },
+            Span::Locatable(span) => *span = span.set_ctx(ctx),
         }
     }
 

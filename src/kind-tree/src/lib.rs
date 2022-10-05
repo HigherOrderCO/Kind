@@ -1,4 +1,5 @@
-use std::{collections::HashMap, fmt::{Formatter, Display, Error}};
+use std::collections::HashMap;
+use std::fmt::{Display, Error, Formatter};
 
 use expr::Expr;
 use kind_span::{Span, SyntaxCtxIndex};
@@ -14,7 +15,7 @@ pub mod visitor;
 pub enum AttributeStyle {
     Ident(Ident),
     String(String),
-    Number(Span, u64)
+    Number(Span, u64),
 }
 
 /// A attribute is a kind of declaration
@@ -25,7 +26,7 @@ pub enum AttributeStyle {
 pub struct Attribute {
     pub name: Ident,
     pub value: Option<AttributeStyle>,
-    pub span: Span
+    pub span: Span,
 }
 
 /// An argument is a 'binding' of a name to a type
@@ -61,6 +62,7 @@ pub struct Rule {
 #[derive(Clone, Debug)]
 pub struct Entry {
     pub name: Ident,
+    pub docs: Option<String>,
     pub args: Vec<Box<Argument>>,
     pub tipo: Box<Expr>,
     pub rules: Vec<Box<Rule>>,
@@ -92,6 +94,8 @@ impl Book {
     }
 }
 
+// Display
+
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for name in &self.names {
@@ -100,8 +104,6 @@ impl Display for Book {
         Ok(())
     }
 }
-
-// Display
 
 impl Display for Argument {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
