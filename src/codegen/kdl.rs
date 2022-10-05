@@ -5,7 +5,7 @@ use crate::book::Book;
 pub use crate::codegen::kdl::book::*;
 
 use rand::Rng;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub const KDL_NAME_LEN: usize = 12;
 
@@ -58,7 +58,7 @@ pub fn to_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) -> Result
     Ok(term)
 }
 
-pub fn to_kdl_rule(_book: &Book, kdl_names: &HashMap<Ident, Ident>, rule: &CompRule) -> Result<String, String> {
+pub fn to_kdl_rule(kdl_names: &HashMap<Ident, Ident>, rule: &CompRule) -> Result<String, String> {
     let name = &rule.name;
     let kdl_name = kdl_names.get(name).unwrap();
     let mut pats = vec![]; // stringified pattern args
@@ -72,7 +72,7 @@ pub fn to_kdl_rule(_book: &Book, kdl_names: &HashMap<Ident, Ident>, rule: &CompR
     Ok(rule)
 }
 
-pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, entry: &CompEntry) -> Result<String, String> {
+pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &CompBook, entry: &CompEntry) -> Result<String, String> {
     let kdl_name = kdl_names.get(&entry.name).unwrap();
     let args_names = entry.args.iter().map(|arg| format!(" {}", arg)).collect::<String>();
     // If this entry existed in the original kind code, add some annotations as comments
@@ -93,9 +93,22 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, entry: &Comp
     } else {
         let mut rules = vec![];
         for rule in &entry.rules {
-            rules.push(format!("\n  {}", to_kdl_rule(book, kdl_names, rule)?));
+            rules.push(format!("\n  {}", to_kdl_rule(kdl_names, rule)?));
         }
-        format!("fun ({}{}) {{{}\n}}\n\n", kdl_name, args_names, rules.join(""))
+        match entry.get_attribute("kdl_state") {
+            // If the function has an initial state, compile the state together with it
+            Some(attr) => {
+                let state_fn_name = attr.value.unwrap();
+                let state_fn = comp_book.entrs.get(&state_fn_name).ok_or(format!("Initial state function \"{}\" for function \"{}\" not found.", state_fn_name, entry.name))?;
+                let state_term = state_fn.rules[0].body.clone();  // This is checked when validating the attributes
+                let init_state = to_kdl_term(kdl_names, &*state_term)?;
+                format!("fun ({}{}) {{{}\n}} with {{\n  {}\n}}\n\n", kdl_name, args_names, rules.join(""), init_state)
+            }
+            // Otherwise just compile the function as normal
+            None => {
+                format!("fun ({}{}) {{{}\n}}\n\n", kdl_name, args_names, rules.join(""))
+            }
+        }
     };
     let entry = cmnt + &fun;
     Ok(entry)
@@ -104,6 +117,13 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, entry: &Comp
 pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &CompBook) -> Result<String, String> {
     let mut lines = vec![];
     let mut run = String::new();
+    let mut init_funs: HashSet<Ident> = HashSet::new(); // Functions that are the initial state to some other function
+    for name in &comp_book.names {
+        let entry = comp_book.entrs.get(name).unwrap();
+        if let Some(attr) = entry.get_attribute("kdl_state") {
+            init_funs.insert(attr.value.unwrap());
+        }
+    }
     for name in &comp_book.names {
         let entry = comp_book.entrs.get(name).unwrap();
         // Functions with attribute "kdl_erase" are not compiled
@@ -116,7 +136,11 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &C
             run.push_str(&stmnt);
             continue;
         }
-        lines.push(to_kdl_entry(book, kdl_names, entry)?);
+        // Initial state for functions is compiled by the function itself
+        if init_funs.contains(name) {
+            continue;
+        }
+        lines.push(to_kdl_entry(book, kdl_names, comp_book, entry)?);
     }
     Ok(lines.join("") + &run)
 }

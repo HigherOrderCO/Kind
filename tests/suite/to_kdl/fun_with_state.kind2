@@ -1,0 +1,8 @@
+#kdl_state = MyFn.state
+MyFn : U60 {
+  1
+}
+
+MyFn.state : U60 {
+  2
+}

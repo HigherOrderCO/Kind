@@ -53,6 +53,10 @@ pub fn render_error(config: &Config, files: &[File], err: AdjustError) -> String
         AdjustErrorKind::AttributeWithoutArgs { name } => format!("You should not put arguments on the attribute '{}'.\n{}", name, high_line),
         AdjustErrorKind::AttributeMissingArg { name } => format!("Attribute '{}' needs to be given a value.\n{}", name, high_line),
         AdjustErrorKind::WrongTargetAttribute { name, target } => format!("The attribute '{}' only works in the target '{}'.\n{}", name, target, high_line),
+        AdjustErrorKind::NotInlineable { fn_name, attr_name } => format!("Function '{}' must have exactly one rule with only variable patterns to be '{}'.\n{}", fn_name, attr_name, high_line),
+        AdjustErrorKind::FunctionHasArgs { fn_name, attr_name } => format!("Function '{}' must not have any arguments to be '{}'.\n{}", fn_name, attr_name, high_line),
+        AdjustErrorKind::FunctionNotFound { name } => format!("Function '{}' was not found.\n{}", name, high_line),
+        AdjustErrorKind::HasKdlAttrs { name } => format!("Function '{}' must not have any kdl attributes.\n{}", name, high_line),
     };
 }
 
