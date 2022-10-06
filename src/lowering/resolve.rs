@@ -168,9 +168,9 @@ impl Resolve for Book {
         }
         // Just to change the order of each name.
         for name in &self.names {
-            let mut new_name = Ident(name.clone());
+            let mut new_name = name.clone();
             new_name.resolve(current, Span::Generated, map)?;
-            new_names.push(new_name.0);
+            new_names.push(new_name);
         }
         self.entrs = new_entrs;
         self.names = new_names;

@@ -9,10 +9,10 @@ use std::collections::HashSet;
 #[derive(Clone, Debug)]
 pub enum CompTerm {
     Var {
-        name: String,
+        name: Ident,
     },
     Lam {
-        name: String,
+        name: Ident,
         body: Box<CompTerm>,
     },
     App {
@@ -20,22 +20,22 @@ pub enum CompTerm {
         argm: Box<CompTerm>,
     },
     Dup {
-        nam0: String,
-        nam1: String,
+        nam0: Ident,
+        nam1: Ident,
         expr: Box<CompTerm>,
         body: Box<CompTerm>,
     },
     Let {
-        name: String,
+        name: Ident,
         expr: Box<CompTerm>,
         body: Box<CompTerm>,
     },
     Ctr {
-        name: String,
+        name: Ident,
         args: Vec<Box<CompTerm>>,
     },
     Fun {
-        name: String,
+        name: Ident,
         args: Vec<Box<CompTerm>>,
     },
     Num {
@@ -51,15 +51,15 @@ pub enum CompTerm {
 
 #[derive(Clone, Debug)]
 pub struct CompRule {
-    pub name: String,
+    pub name: Ident,
     pub pats: Vec<Box<CompTerm>>,
     pub body: Box<CompTerm>,
 }
 
 #[derive(Clone, Debug)]
 pub struct CompEntry {
-    pub name: String,
-    pub args: Vec<String>,
+    pub name: Ident,
+    pub args: Vec<Ident>,
     pub rules: Vec<CompRule>,
     pub attrs: Vec<Attribute>,
     pub orig: bool,
@@ -67,8 +67,8 @@ pub struct CompEntry {
 
 #[derive(Clone, Debug)]
 pub struct CompBook {
-    pub names: Vec<String>,
-    pub entrs: HashMap<String, CompEntry>,
+    pub names: Vec<Ident>,
+    pub entrs: HashMap<Ident, CompEntry>,
 }
 
 impl CompEntry {
@@ -88,19 +88,20 @@ pub fn compile_book(book: &Book) -> Result<CompBook, String> {
         entrs: HashMap::new(),
     };
     for name in &book.names {
-        let entry = book.entrs.get(&Ident(name.clone())).unwrap();
+        let entry = book.entrs.get(name).unwrap();
         // Don't compile primitive U120 operations
         // TODO: If this compiler eventually gets used for other targets (like HVM), this will need to be separated.
         //       We could do passes of compiler features (like flattening, linearizing, etc) also separately.
-        if u120_to_oper(&entry.name.0).is_some() {
+        if u120_to_oper(&entry.name).is_some() {
             continue;
         }
         // Skip over useless entries
         // TODO: This doesn't cover all cases. We need something like `erase` but for a Book.
         //       Also maybe there are functions of type Type that should be compiled?
-        if let Term::Typ { orig: _ } = &*entry.tipo {
+        if let Term::Typ { .. } = &*entry.tipo {
             continue;
         }
+        // TODO: Group errors for all entries
         let entrs = compile_entry(book, entry)?;
         for entry in entrs {
             comp_book.names.push(entry.name.clone());
@@ -112,40 +113,51 @@ pub fn compile_book(book: &Book) -> Result<CompBook, String> {
 
 // Can become multiple entries after flatenning
 pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, String> {
-    fn compile_rule(book: &Book, entry: &Entry, rule: &Rule) -> CompRule {
-        let name = rule.name.0.clone();
+    fn compile_rule(book: &Book, entry: &Entry, rule: &Rule) -> Result<CompRule, String> {
+        let name = rule.name.clone();
         let mut pats = Vec::new();
         for (arg, pat) in entry.args.iter().zip(rule.pats.iter()) {
             if !arg.eras {
                 let pat = erase(book, pat);
-                // TODO: Check if the pattern has some invalid term (anything other than num, ctr or var)
-                pats.push(pat);
+                match is_valid_pattern(&*pat) {
+                    Ok(()) => {
+                        pats.push(pat);
+                    }
+                    Err(err_term) => {
+                        // TODO: Add Display trait for compterms
+                        // TODO: Tell the user exactly why this term is incorrect
+                        return Err(format!("Found invalid term \"{:?}\" in rule pattern matching for entry \"{}\".", err_term, entry.name));
+                    }
+                }
             }
         }
         let body = erase(book, &rule.body);
-        CompRule { name, pats, body }
+        Ok(CompRule { name, pats, body })
     }
 
     fn make_u120_new(old_entry: &Entry) -> CompEntry {
         // U120.new hi lo = (+ (<< hi 60) (>> (<< lo 60) 60))
         CompEntry {
-            name: "U120.new".to_string(),
-            args: vec!["hi".to_string(), "lo".to_string()],
+            name: Ident::new("U120.new"),
+            args: vec![Ident::new("hi"), Ident::new("lo")],
             rules: vec![CompRule {
-                name: "U120.new".to_string(),
-                pats: vec![Box::new(CompTerm::Var { name: "hi".to_string() }), Box::new(CompTerm::Var { name: "lo".to_string() })],
+                name: Ident::new("U120.new"),
+                pats: vec![
+                    Box::new(CompTerm::Var { name: Ident::new("hi") }),
+                    Box::new(CompTerm::Var { name: Ident::new("lo") })
+                ],
                 body: Box::new(CompTerm::Op2 {
                     oper: Operator::Add,
                     val0: Box::new(CompTerm::Op2 {
                         oper: Operator::Shl,
-                        val0: Box::new(CompTerm::Var { name: "hi".to_string() }),
+                        val0: Box::new(CompTerm::Var { name: Ident::new("hi") }),
                         val1: Box::new(CompTerm::Num { numb: 60 }),
                     }),
                     val1: Box::new(CompTerm::Op2 {
                         oper: Operator::Shr,
                         val0: Box::new(CompTerm::Op2 {
                             oper: Operator::Shl,
-                            val0: Box::new(CompTerm::Var { name: "lo".to_string() }),
+                            val0: Box::new(CompTerm::Var { name: Ident::new("lo") }),
                             val1: Box::new(CompTerm::Num { numb: 60 }),
                         }),
                         val1: Box::new(CompTerm::Num { numb: 60 }),
@@ -160,16 +172,16 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
     fn make_u120_low(old_entry: &Entry) -> CompEntry {
         // U120.low n = (>> (<< n 60) 60))
         CompEntry {
-            name: "U120.low".to_string(),
-            args: vec!["n".to_string()],
+            name: Ident::new("U120.low"),
+            args: vec![Ident::new("n")],
             rules: vec![CompRule {
-                name: "U120.low".to_string(),
-                pats: vec![Box::new(CompTerm::Var { name: "n".to_string() })],
+                name: Ident::new("U120.low"),
+                pats: vec![Box::new(CompTerm::Var { name: Ident::new("n") })],
                 body: Box::new(CompTerm::Op2 {
                     oper: Operator::Shr,
                     val0: Box::new(CompTerm::Op2 {
                         oper: Operator::Shl,
-                        val0: Box::new(CompTerm::Var { name: "n".to_string() }),
+                        val0: Box::new(CompTerm::Var { name: Ident::new("n") }),
                         val1: Box::new(CompTerm::Num { numb: 60 }),
                     }),
                     val1: Box::new(CompTerm::Num { numb: 60 }),
@@ -183,14 +195,14 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
     fn make_u120_high(old_entry: &Entry) -> CompEntry {
         // U120.high n = (>> n 60)
         CompEntry {
-            name: "U120.high".to_string(),
-            args: vec!["n".to_string()],
+            name: Ident::new("U120.high"),
+            args: vec![Ident::new("n")],
             rules: vec![CompRule {
-                name: "U120.high".to_string(),
-                pats: vec![Box::new(CompTerm::Var { name: "n".to_string() })],
+                name: Ident::new("U120.high"),
+                pats: vec![Box::new(CompTerm::Var { name: Ident::new("n") })],
                 body: Box::new(CompTerm::Op2 {
                     oper: Operator::Shr,
-                    val0: Box::new(CompTerm::Var { name: "n".to_string() }),
+                    val0: Box::new(CompTerm::Var { name: Ident::new("n") }),
                     val1: Box::new(CompTerm::Num { numb: 60 }),
                 }),
             }],
@@ -208,13 +220,12 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
         // high and low are used for type compatibility with u60
         "U120.low" => Ok(vec![make_u120_low(&entry)]),
         _ => {
-            let new_entry = CompEntry {
-                name: entry.name.0.clone(),
-                args: entry.args.iter().filter(|x| !x.eras).map(|x| x.name.0.clone()).collect(),
-                rules: entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect(),
-                attrs: entry.attrs.clone(),
-                orig: true,
-            };
+            let name = entry.name.clone();
+            let args = entry.args.iter().filter(|x| !x.eras).map(|x| x.name.clone()).collect();
+            // TODO: Group all errs together instead of failing on the first one
+            let rules = entry.rules.iter().map(|rule| compile_rule(book, entry, rule)).collect::<Result<Vec<CompRule>, String>>()?;
+            let attrs = entry.attrs.clone();
+            let new_entry = CompEntry { name, args, rules, attrs, orig: true };
             // TODO: We probably need to handle U60 separately as well.
             //       Since they compile to U120, it wont overflow as expected and conversion to signed will fail.
             let new_entry = convert_u120_entry(new_entry)?;
@@ -227,6 +238,32 @@ pub fn compile_entry(book: &Book, entry: &Entry) -> Result<Vec<CompEntry>, Strin
             Ok(new_entrs)
         }
     }
+}
+
+// True if the compiled term is a valid rule pattern.
+// Rule patterns must be normalized terms with only Ctrs, Nums and Vars (no Lams, Dups or Lets)
+pub fn is_valid_pattern(pat: &CompTerm) -> Result<(), &CompTerm> {
+    let mut check_stack: Vec<&CompTerm> = vec![pat];
+    while !check_stack.is_empty() {
+        let term = check_stack.pop().unwrap();
+        match term {
+            CompTerm::Ctr { args, .. } => {
+                for arg in args {
+                    check_stack.push(arg);
+                }
+            },
+            CompTerm::Var { .. } => (),
+            CompTerm::Num { .. } => (),
+            CompTerm::Lam { .. } => { return Err(term) }
+            CompTerm::App { .. } => { return Err(term) }
+            CompTerm::Dup { .. } => { return Err(term) }
+            CompTerm::Let { .. } => { return Err(term) }
+            CompTerm::Fun { .. } => { return Err(term) }
+            CompTerm::Op2 { .. } => { return Err(term) }
+            CompTerm::Nil { .. } => { return Err(term) }
+        };
+    }
+    Ok(())
 }
 
 // Splits an entry with rules with nested cases into multiple entries with flattened rules.
@@ -287,7 +324,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
         // Each rule that must be split creates a new entry that inspects one layer of Ctrs
         // The old rule is rewritten to be flat and call the new entry
         let n = post_inc(name_count);
-        let new_entry_name = format!("{}{}_", entry.name, n);
+        let new_entry_name = Ident(format!("{}{}_", entry.name, n));
         let mut new_entry_attrs = entry.attrs.clone();
         // If the old rule had a kdl name, create a new kdl name for the split entry
         for attr in &mut new_entry_attrs {
@@ -310,7 +347,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                     for field in pat_args {
                         let arg = match &**field {
                             CompTerm::Ctr { .. } | CompTerm::Num { .. } => {
-                                let name = format!(".{}", post_inc(&mut var_count));
+                                let name = Ident(format!(".{}", post_inc(&mut var_count)));
                                 Box::new(CompTerm::Var { name })
                             }
                             CompTerm::Var { .. } => field.clone(),
@@ -390,7 +427,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
                             let mut new_ctr_args = vec![];
                             for _ in 0..rule_pat_args.len() {
                                 let new_arg = CompTerm::Var {
-                                    name: format!(".{}", post_inc(&mut var_count)),
+                                    name: Ident(format!(".{}", post_inc(&mut var_count))),
                                 };
                                 new_ctr_args.push(Box::new(new_arg.clone()));
                                 new_rule_pats.push(Box::new(new_arg));
@@ -423,7 +460,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
             }
         }
         assert!(!new_entry_rules.is_empty()); // There's at least one rule, since rules always match with themselves
-        let new_entry_args = (0..new_entry_rules[0].pats.len()).map(|n| format!("x{}", n)).collect();
+        let new_entry_args = (0..new_entry_rules[0].pats.len()).map(|n| Ident(format!("x{}", n))).collect();
         let new_entry = CompEntry {
             name: new_entry_name,
             args: new_entry_args,
@@ -440,7 +477,6 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
     let mut skip: HashSet<usize> = HashSet::new();
     let mut new_entries: Vec<CompEntry> = Vec::new();
     let mut old_entry_rules: Vec<CompRule> = Vec::new();
-    let old_entry_args: Vec<String> = entry.args.clone();
     for i in 0..entry.rules.len() {
         if !skip.contains(&i) {
             let rule = &entry.rules[i];
@@ -455,7 +491,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
     }
     let old_entry = CompEntry {
         name: entry.name,
-        args: old_entry_args,
+        args: entry.args,
         rules: old_entry_rules,
         orig: entry.orig,
         attrs: entry.attrs,
@@ -465,7 +501,7 @@ pub fn flatten(entry: CompEntry) -> Vec<CompEntry> {
 }
 
 // Substitute all instances of a variable in a term with another term
-pub fn subst(term: &mut CompTerm, sub_name: &str, value: &CompTerm) {
+pub fn subst(term: &mut CompTerm, sub_name: &Ident, value: &CompTerm) {
     match term {
         CompTerm::Var { name } => {
             if sub_name == name {
@@ -516,16 +552,16 @@ pub fn subst(term: &mut CompTerm, sub_name: &str, value: &CompTerm) {
 pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
     match term {
         Term::Typ { .. } => Box::new(CompTerm::Nil),
-        Term::Var { orig: _, name } => {
-            let name = name.0.clone();
+        Term::Var { name, .. } => {
+            let name = name.clone();
             Box::new(CompTerm::Var { name })
         }
-        Term::Lam { orig: _, name, body } => {
-            let name = name.0.clone();
+        Term::Lam { name, body, .. } => {
+            let name = name.clone();
             let body = erase(book, body);
             Box::new(CompTerm::Lam { name, body })
         }
-        Term::App { orig: _, func, argm } => {
+        Term::App { func, argm, .. } => {
             let func = erase(book, func);
             let argm = erase(book, argm);
             Box::new(CompTerm::App { func, argm })
@@ -536,23 +572,17 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             tipo: _,
             body: _,
         } => Box::new(CompTerm::Nil),
-        Term::Let { orig: _, name, expr, body } => {
-            let name = name.0.clone();
+        Term::Let { name, expr, body, .. } => {
+            let name = name.clone();
             let expr = erase(book, expr);
             let body = erase(book, body);
             Box::new(CompTerm::Let { name, expr, body })
         }
-        Term::Ann { orig: _, expr, tipo: _ } => erase(book, expr),
-        Term::Sub {
-            orig: _,
-            expr,
-            name: _,
-            indx: _,
-            redx: _,
-        } => erase(book, expr),
-        Term::Ctr { orig: _, name, args: term_args } => {
-            let name = name.0.clone();
-            let entr = book.entrs.get(&Ident(name.clone())).unwrap();
+        Term::Ann { expr, .. } => erase(book, expr),
+        Term::Sub { expr, .. } => erase(book, expr),
+        Term::Ctr { name, args: term_args, .. } => {
+            let name = name.clone();
+            let entr = book.entrs.get(&name).unwrap();
             let mut args = vec![];
             for (idx, arg) in term_args.iter().enumerate() {
                 if !entr.args[idx].eras {
@@ -561,9 +591,9 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             }
             Box::new(CompTerm::Ctr { name, args })
         }
-        Term::Fun { orig: _, name, args: term_args } => {
-            let name = name.0.clone();
-            let entr = book.entrs.get(&Ident(name.clone())).unwrap();
+        Term::Fun { name, args: term_args, .. } => {
+            let name = name.clone();
+            let entr = book.entrs.get(&name).unwrap();
             let mut args = vec![];
             for (idx, arg) in term_args.iter().enumerate() {
                 if !entr.args[idx].eras {
@@ -572,26 +602,26 @@ pub fn erase(book: &Book, term: &Term) -> Box<CompTerm> {
             }
             Box::new(CompTerm::Fun { name, args })
         }
-        Term::Hlp { orig: _ } => Box::new(CompTerm::Nil),
-        Term::U60 { orig: _ } => Box::new(CompTerm::Nil),
-        Term::Num { orig: _, numb } => {
+        Term::Hlp { .. } => Box::new(CompTerm::Nil),
+        Term::U60 { .. } => Box::new(CompTerm::Nil),
+        Term::Num { numb, .. } => {
             let numb = *numb as u128;
             Box::new(CompTerm::Num { numb })
         }
-        Term::Op2 { orig: _, oper, val0, val1 } => {
+        Term::Op2 { oper, val0, val1, .. } => {
             let oper = *oper;
             let val0 = erase(book, val0);
             let val1 = erase(book, val1);
             Box::new(CompTerm::Op2 { oper, val0, val1 })
         }
-        Term::Hol { orig: _, numb: _ } => Box::new(CompTerm::Nil),
+        Term::Hol { .. } => Box::new(CompTerm::Nil),
         Term::Mat { .. } => Box::new(CompTerm::Nil),
         Term::Open { .. } => Box::new(CompTerm::Nil),
     }
 }
 
 // Counts usages of a name in an erased term
-pub fn count_uses(term: &CompTerm, count_name: &str) -> usize {
+pub fn count_uses(term: &CompTerm, count_name: &Ident) -> usize {
     match term {
         CompTerm::Var { name } => {
             if name == count_name {
@@ -618,28 +648,28 @@ pub fn count_uses(term: &CompTerm, count_name: &str) -> usize {
             let body_count = if name == count_name { 0 } else { count_uses(body, count_name) };
             expr_count + body_count
         }
-        CompTerm::Ctr { name: _, args } => {
+        CompTerm::Ctr { args, .. } => {
             let mut sum = 0;
             for arg in args {
                 sum += count_uses(arg, count_name);
             }
             sum
         }
-        CompTerm::Fun { name: _, args } => {
+        CompTerm::Fun { args, .. } => {
             let mut sum = 0;
             for arg in args {
                 sum += count_uses(arg, count_name);
             }
             sum
         }
-        CompTerm::Op2 { oper: _, val0, val1 } => count_uses(val0, count_name) + count_uses(val1, count_name),
+        CompTerm::Op2 { val0, val1, .. } => count_uses(val0, count_name) + count_uses(val1, count_name),
         CompTerm::Num { .. } => 0,
         CompTerm::Nil => 0,
     }
 }
 
 // Renames a target variable using the fresh names in a vector
-pub fn rename_clones(term: &mut CompTerm, target: &str, names: &mut Vec<String>) {
+pub fn rename_clones(term: &mut CompTerm, target: &Ident, names: &mut Vec<Ident>) {
     match term {
         CompTerm::Var { name } => {
             if name == target {
@@ -667,17 +697,17 @@ pub fn rename_clones(term: &mut CompTerm, target: &str, names: &mut Vec<String>)
                 rename_clones(body, target, names);
             }
         }
-        CompTerm::Ctr { name: _, args } => {
+        CompTerm::Ctr { args, .. } => {
             for arg in args {
                 rename_clones(arg, target, names);
             }
         }
-        CompTerm::Fun { name: _, args } => {
+        CompTerm::Fun { args, .. } => {
             for arg in args {
                 rename_clones(arg, target, names);
             }
         }
-        CompTerm::Op2 { oper: _, val0, val1 } => {
+        CompTerm::Op2 { val0, val1, .. } => {
             rename_clones(val0, target, names);
             rename_clones(val1, target, names);
         }
@@ -688,7 +718,7 @@ pub fn rename_clones(term: &mut CompTerm, target: &str, names: &mut Vec<String>)
 
 pub fn linearize_rule(rule: &mut CompRule) {
     // Returns left-hand side variables
-    fn collect_lhs_vars<'a>(term: &'a mut CompTerm, vars: &mut HashMap<String, &'a mut CompTerm>) {
+    fn collect_lhs_vars<'a>(term: &'a mut CompTerm, vars: &mut HashMap<Ident, &'a mut CompTerm>) {
         match term {
             CompTerm::Var { name } => {
                 vars.insert(name.clone(), term);
@@ -713,11 +743,11 @@ pub fn linearize_rule(rule: &mut CompRule) {
     // ----------------------------------------------------------------
     // dup x0 x1 = x; dup x2 x3 = x0; dup x4 x5 = x1; (Foo x2 x3 x4 x5)
     // Returns the number of times the variable was used in the body.
-    pub fn linearize_name(body: &mut CompTerm, name: &mut String, fresh: &mut u64) -> usize {
-        fn fresh_name(fresh: &mut u64) -> String {
+    pub fn linearize_name(body: &mut CompTerm, name: &mut Ident, fresh: &mut u64) -> usize {
+        fn fresh_name(fresh: &mut u64) -> Ident {
             let name = format!("_{}", fresh);
             *fresh += 1;
-            name
+            Ident(name)
         }
         let uses = count_uses(body, name);
         if uses > 1 {
@@ -735,7 +765,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
                 let nam0 = names[i * 2].clone();
                 let nam1 = names[i * 2 + 1].clone();
                 let expr = Box::new(CompTerm::Var {
-                    name: if i == 0 { name.to_string() } else { names[i - 1].clone() },
+                    name: if i == 0 { name.clone() } else { names[i - 1].clone() },
                 });
                 let new_body = CompTerm::Dup {
                     nam0,
@@ -749,7 +779,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
                 }
             }
         } else if uses == 0 {
-            *name = String::from("~")
+            *name = Ident::new("~");
         }
         uses
     }
@@ -816,7 +846,7 @@ pub fn linearize_rule(rule: &mut CompRule) {
         let uses = linearize_name(&mut rule.body, &mut name, &mut fresh);
         if uses == 0 {
             if let CompTerm::Var { name } = var {
-                *name = String::from("~");
+                *name = Ident::new("~");
             }
         }
         // The reason why we don't simply pass a real mutable reference to our variable
@@ -849,7 +879,7 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
     let term = Box::new(match term {
         // Swap U120.new by a number
         CompTerm::Ctr { name, args } => {
-            if name == "U120.new" {
+            if name.0 == "U120.new" {
                 if let (CompTerm::Num { numb: num1 }, CompTerm::Num { numb: num2 }) = (&*args[0], &*args[1]) {
                     CompTerm::Num { numb: (num1 << 60) + num2 }
                 } else if rhs {
@@ -914,8 +944,8 @@ pub fn convert_u120_term(term: &CompTerm, rhs: bool) -> Result<Box<CompTerm>, St
 
 // Converts a U120 function name to the corresponding primitive operation
 // None if the name is not of an operation
-pub fn u120_to_oper(name: &str) -> Option<Operator> {
-    match name {
+pub fn u120_to_oper(name: &Ident) -> Option<Operator> {
+    match name.0.as_str() {
         "U120.add" => Some(Operator::Add),
         "U120.sub" => Some(Operator::Sub),
         "U120.mul" => Some(Operator::Mul),

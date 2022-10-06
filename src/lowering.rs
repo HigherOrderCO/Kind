@@ -206,7 +206,7 @@ impl Book {
     pub fn get_unbounds(&self, config: &Config) -> HashSet<Ident> {
         let mut state = UnboundState::new(HashMap::new(), config);
         for name in &self.names {
-            let entry = self.entrs.get(&Ident(name.clone())).unwrap();
+            let entry = self.entrs.get(&name).unwrap();
             entry.fill_unbound(false, &mut state);
         }
         state.unbound
