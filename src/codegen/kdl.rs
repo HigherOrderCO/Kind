@@ -29,7 +29,7 @@ pub fn to_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) -> Result
         CompTerm::Let { name, expr, body } => {
             let expr = to_kdl_term(kdl_names, expr)?;
             let body = to_kdl_term(kdl_names, body)?;
-            format!("let {} = {}; {}", name, expr, body)
+            format!("let {} = {};\n    {}", name, expr, body)
         }
         CompTerm::Ctr { name, args } => {
             let kdl_name = kdl_names.get(name).unwrap_or_else(|| panic!("{}", name));
@@ -68,7 +68,7 @@ pub fn to_kdl_rule(kdl_names: &HashMap<Ident, Ident>, rule: &CompRule) -> Result
         pats.push(pat);
     }
     let body = to_kdl_term(kdl_names, &rule.body)?;
-    let rule = format!("({}{}) = {}", kdl_name, pats.join(""), body);
+    let rule = format!("({}{}) =\n    {}", kdl_name, pats.join(""), body);
     Ok(rule)
 }
 
@@ -132,7 +132,7 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &C
             continue;
         }
         if entry.get_attribute("kdl_run").is_some() {
-            let stmnt = format!("run {{\n  {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?);
+            let stmnt = format!("run {{\n    {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?);
             run.push_str(&stmnt);
             continue;
         }
