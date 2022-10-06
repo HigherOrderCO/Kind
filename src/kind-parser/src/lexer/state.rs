@@ -2,7 +2,7 @@ use std::{iter::Peekable, str::Chars};
 
 use kind_span::{Pos, Range, Span, SyntaxCtxIndex};
 
-use crate::{lexer::tokens::Token, errors::SyntaxError};
+use crate::{errors::SyntaxError, lexer::tokens::Token};
 
 /// The lexer state.
 pub struct Lexer<'a> {
@@ -28,7 +28,7 @@ impl<'a> Lexer<'a> {
             semis: 0,
             comment_depth: 0,
             errs: Vec::new(),
-            emit_comment: false
+            emit_comment: false,
         }
     }
 

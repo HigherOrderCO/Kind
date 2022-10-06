@@ -55,7 +55,8 @@ pub enum Token {
     EqEq,
     GreaterEq,
     Greater,
-    NotEq,
+    BangEq,
+    Bang,
 
     HashHash,
     Hash,

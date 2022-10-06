@@ -23,7 +23,7 @@ impl<'a> Lexer<'a> {
         let mut size = 0;
         self.next_char();
 
-        let mut next = | p: &mut Lexer<'a>, x: char |  {
+        let mut next = |p: &mut Lexer<'a>, x: char| {
             size += x.len_utf8();
             p.peekable.next();
         };

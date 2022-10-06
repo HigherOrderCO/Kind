@@ -17,5 +17,5 @@ pub enum SyntaxError {
     InvalidEscapeSequence(EncodeSequence, Span),
     InvalidNumberRepresentation(EncodeSequence, Span),
     UnexpectedChar(char, Span),
-    UnexpectedToken(Token, Span, Option<Token>)
+    UnexpectedToken(Token, Span, Vec<Token>),
 }

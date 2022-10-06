@@ -52,7 +52,10 @@ impl<'a> Lexer<'a> {
         if let Ok(res) = u64::from_str_radix(num, base) {
             (Token::Num(res), self.mk_span(start))
         } else {
-            (Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(err, self.mk_span(start)))), self.mk_span(start))
+            (
+                Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(err, self.mk_span(start)))),
+                self.mk_span(start),
+            )
         }
     }
 

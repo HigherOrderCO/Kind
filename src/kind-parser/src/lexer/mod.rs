@@ -1,12 +1,12 @@
 use kind_span::Span;
 
-use crate::{errors::SyntaxError};
+use crate::errors::SyntaxError;
 
 use self::{state::Lexer, tokens::Token};
 
+pub mod comments;
 pub mod literals;
 pub mod state;
-pub mod comments;
 pub mod tokens;
 
 fn is_whitespace(chr: char) -> bool {
@@ -45,7 +45,7 @@ impl<'a> Lexer<'a> {
             "let" => Token::Let,
             "open" => Token::Open,
             "return" => Token::Return,
-            _ => Token::Id(str.to_string())
+            _ => Token::Id(str.to_string()),
         }
     }
 
@@ -55,13 +55,13 @@ impl<'a> Lexer<'a> {
             match token {
                 Token::Error(x) => {
                     vec.push(x);
-                    continue
-                },
+                    continue;
+                }
                 Token::Comment(false, _) => continue,
                 Token::Comment(true, _) if !self.emit_comment => continue,
-                _ => ()
+                _ => (),
             }
-            return (token, span)
+            return (token, span);
         }
     }
 
@@ -131,7 +131,7 @@ impl<'a> Lexer<'a> {
                 ':' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some(':') => (Token::ColonColon, self.mk_span(start)),
+                        Some(':') => self.single_token(Token::ColonColon),
                         _ => (Token::Colon, self.mk_span(start)),
                     }
                 }
@@ -152,6 +152,18 @@ impl<'a> Lexer<'a> {
                 '|' => self.single_token(Token::Bar),
                 '^' => self.single_token(Token::Hat),
                 '"' => self.lex_string(),
+                '?' => {
+                    self.next_char();
+                    let str = self.accumulate_while(&is_valid_id);
+                    (Token::Help(str.to_string()), self.mk_span(start))
+                }
+                '!' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some('=') => self.single_token(Token::BangEq),
+                        _ => (Token::Bang, self.mk_span(start)),
+                    }
+                }
                 &c => {
                     self.next_char();
                     (Token::Error(Box::new(SyntaxError::UnexpectedChar(c, self.mk_span(start)))), self.mk_span(start))

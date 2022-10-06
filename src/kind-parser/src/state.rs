@@ -1,6 +1,6 @@
 use kind_span::{Span, SyntaxCtxIndex};
 
-use crate::{lexer::tokens::Token, Lexer, errors::SyntaxError};
+use crate::{errors::SyntaxError, lexer::tokens::Token, Lexer};
 
 /// The parser state. it current have some parameters
 /// that makes the behaviour change
@@ -16,7 +16,7 @@ pub struct Parser<'a> {
     pub breaks: [bool; 3],
     pub errs: Vec<Box<SyntaxError>>,
     pub eaten: u32,
-    pub ctx: SyntaxCtxIndex
+    pub ctx: SyntaxCtxIndex,
 }
 
 impl<'a> Parser<'a> {
@@ -28,14 +28,21 @@ impl<'a> Parser<'a> {
             breaks[i] = lexer.is_linebreak();
             queue[i] = lexer.get_next_no_error(&mut errs);
         }
-        Parser { lexer, queue, breaks, errs, eaten: 0, ctx }
+        Parser {
+            lexer,
+            queue,
+            breaks,
+            errs,
+            eaten: 0,
+            ctx,
+        }
     }
 
     pub fn advance(&mut self) -> (Token, Span) {
         let cur = self.queue[0].clone();
         for i in 0..2 {
-            self.breaks[i] = self.breaks[i+1];
-            self.queue[i] = self.queue[i+1].clone();
+            self.breaks[i] = self.breaks[i + 1];
+            self.queue[i] = self.queue[i + 1].clone();
         }
         self.breaks[2] = self.lexer.is_linebreak();
         self.queue[2] = self.lexer.get_next_no_error(&mut self.errs);
@@ -49,7 +56,7 @@ impl<'a> Parser<'a> {
     }
 
     #[inline]
-    pub fn fail<T>(&mut self, expect: Option<Token>) -> Result<T, SyntaxError> {
+    pub fn fail<T>(&mut self, expect: Vec<Token>) -> Result<T, SyntaxError> {
         Err(SyntaxError::UnexpectedToken(self.queue[0].0.clone(), self.queue[0].1, expect))
     }
 
@@ -57,13 +64,13 @@ impl<'a> Parser<'a> {
         if self.queue[0].0.same_variant(expect.clone()) {
             Ok(self.advance())
         } else {
-            self.fail(Some(expect))
+            self.fail(vec![expect])
         }
     }
 
     pub fn eat<T>(&mut self, expect: fn(&Token) -> Option<T>) -> Result<T, SyntaxError> {
         match expect(&self.queue[0].0) {
-            None => self.fail(None),
+            None => self.fail(vec![]),
             Some(res) => {
                 self.advance();
                 Ok(res)
@@ -81,11 +88,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn check_actual(&mut self, expect: Token) -> bool {
-        if self.queue[0].0.same_variant(expect) {
-            true
-        } else {
-            false
-        }
+        self.queue[0].0.same_variant(expect)
     }
 
     #[inline]
@@ -103,7 +106,7 @@ impl<'a> Parser<'a> {
         self.queue[0].1
     }
 
-    pub fn try_single<T>(&mut self, fun: fn(&mut Parser<'a>) -> Result<T, SyntaxError>) -> Result<Option<T>, SyntaxError> {
+    pub fn try_single<T>(&mut self, fun: &dyn Fn(&mut Parser<'a>) -> Result<T, SyntaxError>) -> Result<Option<T>, SyntaxError> {
         let current = self.eaten;
         match fun(self) {
             Err(_) if current == self.eaten => Ok(None),
@@ -111,5 +114,4 @@ impl<'a> Parser<'a> {
             Ok(res) => Ok(Some(res)),
         }
     }
-
 }
