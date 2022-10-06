@@ -19,7 +19,7 @@ pub fn to_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) -> Result
         CompTerm::App { func, argm } => {
             let func = to_kdl_term(kdl_names, func)?;
             let argm = to_kdl_term(kdl_names, argm)?;
-            format!("({} {})", func, argm)
+            format!("(!{} {})", func, argm)
         }
         CompTerm::Dup { nam0, nam1, expr, body } => {
             let expr = to_kdl_term(kdl_names, expr)?;
