@@ -2,7 +2,7 @@ use std::{iter::Peekable, str::Chars};
 
 use kind_span::{Pos, Range, Span, SyntaxCtxIndex};
 
-use crate::lexer::tokens::Token;
+use crate::{lexer::tokens::Token, errors::SyntaxError};
 
 /// The lexer state.
 pub struct Lexer<'a> {
@@ -14,7 +14,8 @@ pub struct Lexer<'a> {
     // Modes
     pub semis: u16,
     pub comment_depth: u16,
-    pub column: u16,
+    pub errs: Vec<Box<SyntaxError>>,
+    pub emit_comment: bool,
 }
 
 impl<'a> Lexer<'a> {
@@ -26,7 +27,8 @@ impl<'a> Lexer<'a> {
             peekable,
             semis: 0,
             comment_depth: 0,
-            column: 0,
+            errs: Vec::new(),
+            emit_comment: false
         }
     }
 
@@ -34,17 +36,11 @@ impl<'a> Lexer<'a> {
         Span::new(Range::new(Pos(start as u32), Pos(self.pos as u32), self.ctx))
     }
 
-    #[inline]
-    pub fn adv_col(&mut self, chr: char) {
-        self.column = if chr == '\n' { 0 } else { self.column + 1 };
-    }
-
     pub fn next_char(&mut self) -> Option<char> {
         match self.peekable.next() {
             Some(chr) if !self.input.is_empty() => {
                 self.input = &self.input[chr.len_utf8()..];
                 self.pos += chr.len_utf8();
-                self.adv_col(chr);
                 Some(chr)
             }
             _ => None,
@@ -58,7 +54,6 @@ impl<'a> Lexer<'a> {
                 break;
             }
             size += x.len_utf8();
-            self.adv_col(x);
             self.peekable.next();
         }
         self.pos += size;
@@ -73,7 +68,6 @@ impl<'a> Lexer<'a> {
             if let Some(&x) = self.peekable.peek() {
                 self.pos += x.len_utf8();
                 self.peekable.next();
-                self.adv_col(x);
             } else {
                 return None;
             }

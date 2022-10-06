@@ -28,9 +28,10 @@ impl<'a> Lexer<'a> {
         (token, self.mk_span(start))
     }
 
-    pub fn is_breakline(&mut self) -> bool {
+    pub fn is_linebreak(&mut self) -> bool {
         self.accumulate_while(&is_whitespace);
         let count = self.accumulate_while(&|x| x == '\n').len();
+        self.accumulate_while(&is_whitespace);
         count > 0
     }
 
@@ -43,6 +44,7 @@ impl<'a> Lexer<'a> {
             "match" => Token::Match,
             "let" => Token::Let,
             "open" => Token::Open,
+            "return" => Token::Return,
             _ => Token::Id(str.to_string())
         }
     }
@@ -55,6 +57,8 @@ impl<'a> Lexer<'a> {
                     vec.push(x);
                     continue
                 },
+                Token::Comment(false, _) => continue,
+                Token::Comment(true, _) if !self.emit_comment => continue,
                 _ => ()
             }
             return (token, span)
@@ -72,12 +76,7 @@ impl<'a> Lexer<'a> {
                 }
                 '\n' => {
                     self.accumulate_while(&|x| x == '\n' || x == '\r');
-                    if self.semis > 0 {
-                        self.semis -= 1;
-                        (Token::Semi, self.mk_span(start))
-                    } else {
-                        self.lex_next()
-                    }
+                    self.lex_next()
                 }
                 c if c.is_ascii_digit() => self.lex_number(),
                 c if is_valid_id_start(*c) => {
@@ -90,6 +89,13 @@ impl<'a> Lexer<'a> {
                 ']' => self.single_token(Token::RBracket),
                 '{' => self.single_token(Token::LBrace),
                 '}' => self.single_token(Token::RBrace),
+                '#' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some('#') => self.single_token(Token::HashHash),
+                        _ => (Token::Hash, self.mk_span(start)),
+                    }
+                }
                 '=' => {
                     self.next_char();
                     match self.peekable.peek() {
@@ -122,12 +128,24 @@ impl<'a> Lexer<'a> {
                         _ => (Token::Slash, self.mk_span(start)),
                     }
                 }
-                ':' => self.single_token(Token::Colon),
+                ':' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some(':') => (Token::ColonColon, self.mk_span(start)),
+                        _ => (Token::Colon, self.mk_span(start)),
+                    }
+                }
                 ';' => self.single_token(Token::Semi),
                 '$' => self.single_token(Token::Dollar),
                 ',' => self.single_token(Token::Comma),
                 '+' => self.single_token(Token::Plus),
-                '-' => self.single_token(Token::Minus),
+                '-' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some('>') => self.single_token(Token::RightArrow),
+                        _ => (Token::Minus, self.mk_span(start)),
+                    }
+                }
                 '*' => self.single_token(Token::Star),
                 '%' => self.single_token(Token::Percent),
                 '&' => self.single_token(Token::Ampersand),

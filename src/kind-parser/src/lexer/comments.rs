@@ -26,7 +26,6 @@ impl<'a> Lexer<'a> {
         let mut next = | p: &mut Lexer<'a>, x: char |  {
             size += x.len_utf8();
             p.peekable.next();
-            p.adv_col(x);
         };
 
         self.comment_depth += 1;

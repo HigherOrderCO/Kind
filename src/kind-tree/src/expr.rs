@@ -36,9 +36,9 @@ pub type Spine = Vec<Box<Expr>>;
 pub struct Match {
     pub tipo: Ident,
     pub name: Ident,
-    pub expr: Box<Expr>,
+    pub expr: Option<Box<Expr>>,
     pub cases: Vec<(Ident, Box<Expr>)>,
-    pub motive: Box<Expr>,
+    pub motive: Option<Box<Expr>>,
 }
 
 /// A open statement that will be trnaslated
@@ -47,14 +47,13 @@ pub struct Match {
 pub struct Open {
     pub tipo: Ident,
     pub name: Ident,
-    pub expr: Box<Expr>,
+    pub expr: Option<Box<Expr>>,
     pub body: Box<Expr>,
-    pub motive: Box<Expr>,
 }
 
 /// Substitution
 #[derive(Clone, Debug)]
-pub struct Substution {
+pub struct Substitution {
     pub name: Ident,
     pub redx: u64,
     pub indx: u64,
@@ -70,10 +69,27 @@ pub enum Literal {
     Help,
     /// The type of 60 bits numberss (e.g. 2 : U60)
     U60,
+    // Char literal
+    Char(char),
     /// A number literal of 60 bits (e.g 32132)
     Number(u64),
     // A String literal
     String(String),
+}
+
+#[derive(Clone, Debug)]
+pub enum SttmKind {
+    Expr(Box<Expr>, Box<Sttm>),
+    Ask(Option<Ident>, Box<Expr>, Box<Sttm>),
+    Let(Ident, Box<Expr>, Box<Sttm>),
+    Open(Ident, Ident, Option<Box<Expr>>, Box<Sttm>),
+    Return(Box<Expr>)
+}
+
+#[derive(Clone, Debug)]
+pub struct Sttm {
+    pub data: SttmKind,
+    pub span: Span
 }
 
 #[derive(Clone, Debug)]
@@ -82,6 +98,8 @@ pub enum ExprKind {
     Var(Ident),
     /// The dependent function space (e.g. (x : Int) -> y)
     All(Option<Ident>, Box<Expr>, Box<Expr>),
+    /// The dependent product space (e.g. [x : Int] -> y)
+    Sigma(Option<Ident>, Box<Expr>, Box<Expr>),
     /// A anonymous function that receives one argument
     Lambda(Ident, Box<Expr>),
     /// Application of a expression to a spine of expressions
@@ -97,13 +115,21 @@ pub enum ExprKind {
     /// A expression open to unification (e.g. _)
     Hole(u64),
     /// Substituion
-    Subst(Substution),
+    Subst(Substitution),
     /// A match block that will be translated
     /// into an eliminator of a datatype.
-    Match(Match),
+    Match(Box<Match>),
     /// A open statement that will be trnaslated
     /// into the eliminator of a record datatype.
-    Open(Open),
+    Open(Box<Open>),
+    /// Do notation
+    Do(Box<Sttm>),
+    /// If else statement
+    If(Box<Expr>,Box<Expr>,Box<Expr>),
+    /// If else statement
+    Pair(Box<Expr>,Box<Expr>),
+    /// Array
+    List(Vec<Expr>)
 }
 
 #[derive(Clone, Debug)]
@@ -151,6 +177,10 @@ impl Expr {
                 None => format!("{} -> {}", typ, body.traverse_pi_types()),
                 Some(binder) => format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types()),
             },
+            ExprKind::Sigma(binder, typ, body) => match binder {
+                None => format!("{} -> {}", typ, body.traverse_pi_types()),
+                Some(binder) => format!("[{} : {}] -> {}", binder, typ, body.traverse_pi_types()),
+            },
             _ => format!("{}", self),
         }
     }
@@ -162,9 +192,81 @@ impl Display for Literal {
             Literal::Help => write!(f, "?"),
             Literal::Type => write!(f, "Type"),
             Literal::U60 => write!(f, "U60"),
+            Literal::Char(c) => write!(f, "'{}'", c),
             Literal::Number(numb) => write!(f, "{}", numb),
             Literal::String(str) => write!(f, "\"{}\"", str),
         }
+    }
+}
+
+impl Display for SttmKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        match self {
+            SttmKind::Ask(Some(name), block, next) => {
+                write!(f, "ask {} = {}; {}", name, block, next)
+            }
+            SttmKind::Let(name, block, next) => {
+                write!(f, "let {} = {}; {}", name, block, next)
+            }
+            SttmKind::Ask(None, block, next) => {
+                write!(f, "ask {}; {}", block, next)
+            }
+            SttmKind::Open(tipo, ident, Some(val), next) => {
+                write!(f, "open {} {} = {}; {}", tipo, ident, val, next)
+            }
+            SttmKind::Open(tipo, ident, None, next) => {
+                write!(f, "open {} {}; {}", tipo, ident, next)
+            }
+            SttmKind::Expr(expr, next) => {
+                write!(f, "{};{}", expr, next)
+            }
+            SttmKind::Return(ret) => {
+                write!(f, "return {}", ret)
+            }
+        }
+    }
+}
+
+impl Display for Sttm {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "{}", self.data)
+    }
+}
+
+impl Display for Match {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "match {} {}", self.tipo, self.name)?;
+        match &self.expr {
+            None => Ok(()),
+            Some(res) => write!(f, " = {}", res)
+        }?;
+        match &self.motive {
+            None => Ok(()),
+            Some(res) => write!(f, " : {}", res)
+        }?;
+        write!(f," {{ ")?;
+        for (case, expr) in &self.cases {
+            write!(f, "{} => {}; ", case, expr)?
+        }
+        write!(f,"}}")
+    }
+}
+
+impl Display for Open {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "open {} {}", self.tipo, self.name)?;
+        match &self.expr {
+            None => Ok(()),
+            Some(res) => write!(f, " = {}", res)
+        }?;
+        write!(f, " {}", self.body)
+    }
+}
+
+
+impl Display for Substitution {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "## {} / {} {}", self.name, self.redx, self.expr)
     }
 }
 
@@ -172,18 +274,23 @@ impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
         match &self.data {
-            All(_, _, _) => write!(f, "({}", self.traverse_pi_types()),
+            Do(sttms) => write!(f, "({})", sttms),
+            All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
+            Sigma(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Lit(lit) => write!(f, "{}", lit),
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body) => write!(f, "({} => {})", binder, body),
+            Pair(fst, snd) => write!(f, "($ {} {})", fst, snd),
             App(head, spine) => write!(f, "({}{})", head, spine.iter().map(|x| format!(" {}", x)).collect::<String>()),
             Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
+            If(cond, if_, else_) => write!(f, "(if {} {{{}}} else {{{}}})", cond, if_, else_),
+            List(vec) => write!(f, "[{}]", vec.iter().map(|x| format!("{}", x)).collect::<Vec<String>>().join(" ")),
             Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
-            Subst(Substution { name, redx, expr, .. }) => write!(f, "({} ## {}/{})", expr, name, redx),
-            Hole(_) => todo!(),
-            Match(_) => todo!(),
-            Open(_) => todo!(),
+            Hole(_) => write!(f, "_"),
+            Match(matcher) => write!(f, "({})", matcher),
+            Open(open) => write!(f, "({})", open),
+            Subst(subst) =>  write!(f, "({})", subst),
         }
     }
 }

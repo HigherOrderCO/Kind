@@ -78,22 +78,6 @@ pub struct Book {
     pub holes: u64,
 }
 
-// Set the syntax context of a file
-
-struct SetCtxFileVisitor(SyntaxCtxIndex);
-
-impl Visitor for SetCtxFileVisitor {
-    fn visit_span(&mut self, span: &mut Span) {
-        span.set_ctx(self.0)
-    }
-}
-
-impl Book {
-    pub fn set_ctx_file(&mut self, ctx: SyntaxCtxIndex) {
-        SetCtxFileVisitor(ctx).visit_book(self)
-    }
-}
-
 // Display
 
 impl Display for Book {

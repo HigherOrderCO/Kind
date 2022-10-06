@@ -2,18 +2,20 @@ use crate::errors::SyntaxError;
 
 #[derive(Debug, Clone)]
 pub enum Token {
-    LPar,     // (
-    RPar,     // )
-    LBracket, // [
-    RBracket, // ]
-    LBrace,   // {
-    RBrace,   // }
-    Eq,       // =
-    Colon,    // :
-    Semi,     // ;
-    FatArrow, // =>
-    Dollar,   // $
-    Comma,    // ,
+    LPar,       // (
+    RPar,       // )
+    LBracket,   // [
+    RBracket,   // ]
+    LBrace,     // {
+    RBrace,     // }
+    Eq,         // =
+    Colon,      // :
+    Semi,       // ;
+    FatArrow,   // =>
+    Dollar,     // $
+    Comma,      // ,
+    RightArrow, // ->
+    ColonColon, // ::
 
     Help(String),
     Id(String),
@@ -24,6 +26,7 @@ pub enum Token {
     Else,
     Match,
     Ask,
+    Return,
     Let,
     Open,
 
@@ -54,6 +57,9 @@ pub enum Token {
     Greater,
     NotEq,
 
+    HashHash,
+    Hash,
+
     Comment(bool, String),
 
     Eof,
@@ -63,7 +69,11 @@ pub enum Token {
 }
 
 impl Token {
-    pub fn same_variant(&self, b: &Token) -> bool {
-        std::mem::discriminant(self) == std::mem::discriminant(b)
+    pub fn same_variant(&self, b: Token) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(&b)
+    }
+
+    pub fn is_id(&self) -> bool {
+        matches!(self, Token::Id(_))
     }
 }

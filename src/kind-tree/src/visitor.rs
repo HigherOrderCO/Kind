@@ -1,6 +1,6 @@
 use kind_span::Span;
 
-use crate::expr::{ExprKind, Literal, Match, Open, Substution};
+use crate::expr::{ExprKind, Literal, Match, Open, Sttm, SttmKind, Substitution};
 use crate::symbol::*;
 use crate::*;
 
@@ -28,15 +28,23 @@ pub trait Visitor {
 
     fn visit_open(&mut self, open: &mut Open) {
         self.visit_expr(&mut open.body);
-        self.visit_expr(&mut open.expr);
-        self.visit_expr(&mut open.motive);
+        match &mut open.expr {
+            Some(expr) => self.visit_expr(expr),
+            None => (),
+        }
         self.visit_ident(&mut open.tipo);
         self.visit_ident(&mut open.name);
     }
 
     fn visit_match(&mut self, matcher: &mut Match) {
-        self.visit_expr(&mut matcher.expr);
-        self.visit_expr(&mut matcher.motive);
+        match &mut matcher.expr {
+            Some(expr) => self.visit_expr(expr),
+            None => (),
+        }
+        match &mut matcher.motive {
+            Some(expr) => self.visit_expr(expr),
+            None => (),
+        }
         self.visit_ident(&mut matcher.tipo);
         self.visit_ident(&mut matcher.name);
         for (name, body) in &mut matcher.cases {
@@ -87,9 +95,45 @@ pub trait Visitor {
         }
     }
 
-    fn visit_substitution(&mut self, subst: &mut Substution) {
+    fn visit_substitution(&mut self, subst: &mut Substitution) {
         self.visit_expr(&mut subst.expr);
         self.visit_ident(&mut subst.name);
+    }
+
+    fn visit_sttm(&mut self, sttm: &mut Sttm) {
+        self.visit_span(&mut sttm.span);
+        match &mut sttm.data {
+            SttmKind::Ask(Some(ident), val, next) => {
+                self.visit_ident(ident);
+                self.visit_expr(val);
+                self.visit_sttm(next);
+            }
+            SttmKind::Let(ident, val, next) => {
+                self.visit_ident(ident);
+                self.visit_expr(val);
+                self.visit_sttm(next);
+            }
+            SttmKind::Open(tipo, ident, val, next) => {
+                self.visit_ident(tipo);
+                self.visit_ident(ident);
+                match val {
+                    Some(val) => self.visit_expr(val),
+                    None => (),
+                }
+                self.visit_sttm(next);
+            }
+            SttmKind::Ask(None, val, next) => {
+                self.visit_expr(val);
+                self.visit_sttm(next);
+            }
+            SttmKind::Expr(expr, next) => {
+                self.visit_expr(expr);
+                self.visit_sttm(next);
+            }
+            SttmKind::Return(expr) => {
+                self.visit_expr(expr);
+            }
+        }
     }
 
     fn visit_expr(&mut self, expr: &mut Expr) {
@@ -100,17 +144,41 @@ pub trait Visitor {
                 self.visit_expr(typ);
                 self.visit_expr(body);
             }
+            ExprKind::Pair(fst, snd) => {
+                self.visit_expr(fst);
+                self.visit_expr(snd);
+            }
             ExprKind::All(Some(ident), typ, body) => {
                 self.visit_ident(ident);
                 self.visit_expr(typ);
                 self.visit_expr(body);
             }
+            ExprKind::Sigma(None, typ, body) => {
+                self.visit_expr(typ);
+                self.visit_expr(body);
+            }
+            ExprKind::If(cond, if_, else_) => {
+                self.visit_expr(cond);
+                self.visit_expr(if_);
+                self.visit_expr(else_);
+            }
+            ExprKind::Sigma(Some(ident), typ, body) => {
+                self.visit_ident(ident);
+                self.visit_expr(typ);
+                self.visit_expr(body);
+            }
+            ExprKind::Do(sttm) => self.visit_sttm(sttm),
             ExprKind::Lambda(ident, body) => {
                 self.visit_ident(ident);
                 self.visit_expr(body);
             }
             ExprKind::App(expr, spine) => {
                 self.visit_expr(expr);
+                for arg in spine {
+                    self.visit_expr(arg);
+                }
+            }
+            ExprKind::List(spine) => {
                 for arg in spine {
                     self.visit_expr(arg);
                 }
