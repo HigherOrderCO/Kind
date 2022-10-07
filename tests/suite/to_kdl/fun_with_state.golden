@@ -1,7 +1,8 @@
 // MyFn : U60
 fun (MyFn) {
-  (MyFn) = #1
+  (MyFn) =
+    #1
 } with {
-  #2
+    #2
 }
 

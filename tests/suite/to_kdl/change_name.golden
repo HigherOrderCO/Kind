@@ -1,5 +1,6 @@
 // Jonathan.Joestar : U60
 fun (JOJO) {
-  (JOJO) = #42
+  (JOJO) =
+    #42
 }
 
