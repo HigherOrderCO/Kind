@@ -102,7 +102,7 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &
                 let state_fn = comp_book.entrs.get(&state_fn_name).ok_or(format!("Initial state function \"{}\" for function \"{}\" not found.", state_fn_name, entry.name))?;
                 let state_term = state_fn.rules[0].body.clone();  // This is checked when validating the attributes
                 let init_state = to_kdl_term(kdl_names, &*state_term)?;
-                format!("fun ({}{}) {{{}\n}} with {{\n  {}\n}}\n\n", kdl_name, args_names, rules.join(""), init_state)
+                format!("fun ({}{}) {{{}\n}} with {{\n    {}\n}}\n\n", kdl_name, args_names, rules.join(""), init_state)
             }
             // Otherwise just compile the function as normal
             None => {
