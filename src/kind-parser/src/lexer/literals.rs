@@ -1,4 +1,4 @@
-use kind_span::Span;
+use kind_span::Range;
 
 use crate::errors::{EncodeSequence, SyntaxError};
 use crate::lexer::tokens::Token;
@@ -13,13 +13,13 @@ impl<'a> Lexer<'a> {
         if let Some(chr) = to_chr.and_then(char::from_u32) {
             return Ok(chr);
         }
-        Err(SyntaxError::InvalidEscapeSequence(err, self.mk_span(start)))
+        Err(SyntaxError::InvalidEscapeSequence(err, self.mk_range(start)))
     }
 
     /// Turns a escaped char into a normal char.
     fn lex_escaped_char(&mut self, start: usize) -> Result<char, SyntaxError> {
         match self.peekable.peek() {
-            None => Err(SyntaxError::UnfinishedString(self.mk_span(start))),
+            None => Err(SyntaxError::UnfinishedString(self.mk_range(start))),
             Some(&x) => {
                 self.next_char();
                 match x {
@@ -39,31 +39,31 @@ impl<'a> Lexer<'a> {
     }
 
     /// Lex a base-10 digit.
-    fn lex_digit(&mut self, start: usize) -> (Token, Span) {
+    fn lex_digit(&mut self, start: usize) -> (Token, Range) {
         let num = self.accumulate_while(&|x| x.is_ascii_digit());
-        (Token::Num(num.parse::<u64>().unwrap()), self.mk_span(start))
+        (Token::Num(num.parse::<u64>().unwrap()), self.mk_range(start))
     }
 
     /// Lexes a number of base @base@ removing the first
     /// character that indicates the encoding
-    fn lex_base(&mut self, start: usize, base: u32, err: EncodeSequence) -> (Token, Span) {
+    fn lex_base(&mut self, start: usize, base: u32, err: EncodeSequence) -> (Token, Range) {
         self.next_char();
         let num = self.accumulate_while(&|x| x.is_digit(base));
         if let Ok(res) = u64::from_str_radix(num, base) {
-            (Token::Num(res), self.mk_span(start))
+            (Token::Num(res), self.mk_range(start))
         } else {
             (
-                Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(err, self.mk_span(start)))),
-                self.mk_span(start),
+                Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(err, self.mk_range(start)))),
+                self.mk_range(start),
             )
         }
     }
 
     /// Lex numbers with decimal, hexadecimal, binary or octal.
-    pub fn lex_number(&mut self) -> (Token, Span) {
+    pub fn lex_number(&mut self) -> (Token, Range) {
         let start = self.span();
         match self.peekable.peek() {
-            None => (Token::Eof, self.mk_span(start)),
+            None => (Token::Eof, self.mk_range(start)),
             Some('0') => {
                 self.next_char();
                 match self.peekable.peek() {
@@ -71,12 +71,12 @@ impl<'a> Lexer<'a> {
                     Some('o') => self.lex_base(start, 8, EncodeSequence::Octal),
                     Some('b') => self.lex_base(start, 2, EncodeSequence::Binary),
                     Some('0'..='9') => self.lex_digit(start),
-                    Some(_) => (Token::Num(0), self.mk_span(start)),
-                    None => (Token::Num(0), self.mk_span(start)),
+                    Some(_) => (Token::Num(0), self.mk_range(start)),
+                    None => (Token::Num(0), self.mk_range(start)),
                 }
             }
             Some('0'..='9') => self.lex_digit(start),
-            Some(_) => (Token::Num(0), self.mk_span(start)),
+            Some(_) => (Token::Num(0), self.mk_range(start)),
         }
     }
 
@@ -85,13 +85,13 @@ impl<'a> Lexer<'a> {
     /// and if the esaped char is not well-formed then it will
     /// acummulate the error until the end of the string.
     /// TODO: Accumulate multiple encoding errors?
-    pub fn lex_string(&mut self) -> (Token, Span) {
+    pub fn lex_string(&mut self) -> (Token, Range) {
         let start = self.span();
 
         self.next_char();
 
         let mut string = String::new();
-        let mut error: Option<(Token, Span)> = None;
+        let mut error: Option<(Token, Range)> = None;
 
         while let Some(&x) = self.peekable.peek() {
             let chr_start = self.span();
@@ -103,7 +103,7 @@ impl<'a> Lexer<'a> {
                         Ok(x) => string.push(x),
                         Err(t) => {
                             self.accumulate_while(&|x| x != '"');
-                            error = Some((Token::Error(Box::new(t)), self.mk_span(start)));
+                            error = Some((Token::Error(Box::new(t)), self.mk_range(start)));
                         }
                     }
                 }
@@ -114,8 +114,8 @@ impl<'a> Lexer<'a> {
 
         match (self.next_char(), error) {
             (_, Some(err)) => err,
-            (Some('"'), _) => (Token::Str(string), self.mk_span(start)),
-            _ => (Token::Error(Box::new(SyntaxError::UnfinishedString(self.mk_span(start)))), self.mk_span(start)),
+            (Some('"'), _) => (Token::Str(string), self.mk_range(start)),
+            _ => (Token::Error(Box::new(SyntaxError::UnfinishedString(self.mk_range(start)))), self.mk_range(start)),
         }
     }
 }

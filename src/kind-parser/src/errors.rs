@@ -1,4 +1,5 @@
-use kind_span::Span;
+use kind_report::data::DiagnosticFrame;
+use kind_span::Range;
 
 use crate::lexer::tokens::Token;
 
@@ -12,10 +13,16 @@ pub enum EncodeSequence {
 
 #[derive(Debug, Clone)]
 pub enum SyntaxError {
-    UnfinishedString(Span),
-    UnfinishedComment(Span),
-    InvalidEscapeSequence(EncodeSequence, Span),
-    InvalidNumberRepresentation(EncodeSequence, Span),
-    UnexpectedChar(char, Span),
-    UnexpectedToken(Token, Span, Vec<Token>),
+    UnfinishedString(Range),
+    UnfinishedComment(Range),
+    InvalidEscapeSequence(EncodeSequence, Range),
+    InvalidNumberRepresentation(EncodeSequence, Range),
+    UnexpectedChar(char, Range),
+    UnexpectedToken(Token, Range, Vec<Token>),
+}
+
+impl Into<DiagnosticFrame> for SyntaxError {
+    fn into(self) -> DiagnosticFrame {
+        todo!()
+    }
 }

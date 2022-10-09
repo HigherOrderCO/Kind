@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use kind_span::{Span, SyntaxCtxIndex};
+use kind_span::{Range, Span, SyntaxCtxIndex};
 
 // Stores the name of a variable or constructor
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -11,30 +11,22 @@ pub struct Symbol(pub String);
 pub struct Ident {
     pub data: Symbol,
     pub ctx: SyntaxCtxIndex,
-    pub span: Span,
+    pub range: Range,
 }
 
 impl Ident {
-    pub fn new(data: Symbol, ctx: SyntaxCtxIndex, span: Span) -> Ident {
-        Ident { data, ctx, span }
+    pub fn new(data: Symbol, ctx: SyntaxCtxIndex, range: Range) -> Ident {
+        Ident { data, ctx, range }
     }
 
-    pub fn new_path(data: &str, id: &str) -> Ident {
-        Ident {
-            data: Symbol(format!("{}.{}", data, id)),
-            ctx: SyntaxCtxIndex(0),
-            span: Span::Generated,
-        }
-    }
-
-    /// Changes the syntax context of the span and of the ident
+    /// Changes the syntax context of the range and of the ident
     pub fn set_ctx(&self, ctx: SyntaxCtxIndex) -> Ident {
-        let mut span = self.span;
-        span.set_ctx(ctx);
+        let mut range = self.range;
+        range.set_ctx(ctx);
         Ident {
             data: self.data.clone(),
             ctx,
-            span,
+            range,
         }
     }
 }

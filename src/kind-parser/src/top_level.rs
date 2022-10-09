@@ -22,7 +22,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_argument(&mut self) -> Result<Box<Argument>, SyntaxError> {
-        let start = self.span();
+        let start = self.range();
 
         let erased = self.eat_keyword(Token::Minus);
         let keep = self.eat_keyword(Token::Plus);
@@ -40,12 +40,18 @@ impl<'a> Parser<'a> {
         let erased = if hidden { !keep } else { erased };
 
         let res = self.eat_variant(complement.unwrap())?.1;
-        let span = res.mix(start);
-        Ok(Box::new(Argument { hidden, erased, name, tipo, span }))
+        let range = res.mix(start);
+        Ok(Box::new(Argument {
+            hidden,
+            erased,
+            name,
+            tipo,
+            range,
+        }))
     }
 
     pub fn parse_rule(&mut self, name: String) -> Result<Box<Rule>, SyntaxError> {
-        let start = self.span();
+        let start = self.range();
         let ident;
         if let Token::Id(name_id) = self.get() {
             if *name_id == name {
@@ -62,17 +68,17 @@ impl<'a> Parser<'a> {
         }
         self.eat_variant(Token::Eq)?;
         let body = self.parse_expr(false)?;
-        let end = start.mix(body.span);
+        let end = start.mix(body.range);
         Ok(Box::new(Rule {
             name: ident,
             pats,
             body,
-            span: end,
+            range: end,
         }))
     }
 
     pub fn parse_entry(&mut self) -> Result<Box<Entry>, SyntaxError> {
-        let start = self.span();
+        let start = self.range();
         let ident = self.parse_id()?;
         let docs = None;
         let mut args = Vec::new();
@@ -92,7 +98,7 @@ impl<'a> Parser<'a> {
                 None => break,
             }
         }
-        let end = rules.last().as_ref().map(|x| x.span).unwrap_or(tipo.span);
+        let end = rules.last().as_ref().map(|x| x.range).unwrap_or(tipo.range);
         Ok(Box::new(Entry {
             name: ident,
             docs,
@@ -100,7 +106,7 @@ impl<'a> Parser<'a> {
             tipo,
             rules,
             attrs: Vec::new(),
-            span: start.mix(end),
+            range: start.mix(end),
         }))
     }
 

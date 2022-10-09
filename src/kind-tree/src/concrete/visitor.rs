@@ -1,4 +1,4 @@
-use kind_span::{Span, SyntaxCtxIndex};
+use kind_span::{Range, Span, SyntaxCtxIndex};
 
 use crate::concrete::expr::*;
 use crate::symbol::*;
@@ -19,8 +19,8 @@ use super::{
 /// change these default implementations.
 
 pub trait Visitor: Sized {
-    fn visit_span(&mut self, x: &mut Span) {
-        walk_span(self, x);
+    fn visit_range(&mut self, x: &mut Range) {
+        walk_range(self, x);
     }
 
     fn visit_syntax_ctx(&mut self, synt: &mut SyntaxCtxIndex) {
@@ -84,20 +84,20 @@ pub trait Visitor: Sized {
     }
 }
 
-fn walk_span<T: Visitor>(_: &mut T, _: &mut Span) {}
+pub fn walk_range<T: Visitor>(_: &mut T, _: &mut Range) {}
 
-fn walk_syntax_ctx<T: Visitor>(_: &mut T, _: &mut SyntaxCtxIndex) {}
+pub fn walk_syntax_ctx<T: Visitor>(_: &mut T, _: &mut SyntaxCtxIndex) {}
 
-fn walk_operator<T: Visitor>(_: &mut T, _: &mut expr::Operator) {}
+pub fn walk_operator<T: Visitor>(_: &mut T, _: &mut expr::Operator) {}
 
-fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
+pub fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
 
-fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
-    ctx.visit_span(&mut ident.span);
+pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
+    ctx.visit_range(&mut ident.range);
     ctx.visit_syntax_ctx(&mut ident.ctx);
 }
 
-fn walk_open<T: Visitor>(ctx: &mut T, open: &mut Open) {
+pub fn walk_open<T: Visitor>(ctx: &mut T, open: &mut Open) {
     ctx.visit_expr(&mut open.body);
     match &mut open.expr {
         Some(expr) => ctx.visit_expr(expr),
@@ -107,7 +107,7 @@ fn walk_open<T: Visitor>(ctx: &mut T, open: &mut Open) {
     ctx.visit_ident(&mut open.name);
 }
 
-fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
+pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
     match &mut matcher.expr {
         Some(expr) => ctx.visit_expr(expr),
         None => (),
@@ -124,16 +124,16 @@ fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
     }
 }
 
-fn walk_argument<T: Visitor>(ctx: &mut T, argument: &mut Argument) {
+pub fn walk_argument<T: Visitor>(ctx: &mut T, argument: &mut Argument) {
     ctx.visit_ident(&mut argument.name);
     match &mut argument.tipo {
         Some(tipo) => ctx.visit_expr(tipo),
         None => (),
     }
-    ctx.visit_span(&mut argument.span);
+    ctx.visit_range(&mut argument.range);
 }
 
-fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
+pub fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
     ctx.visit_ident(&mut entry.name);
     for arg in &mut entry.args {
         ctx.visit_argument(arg)
@@ -145,17 +145,17 @@ fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
     for attr in &mut entry.attrs {
         ctx.visit_attr(attr);
     }
-    ctx.visit_span(&mut entry.span);
+    ctx.visit_range(&mut entry.range);
 }
 
-fn walk_attr<T: Visitor>(ctx: &mut T, attr: &mut Attribute) {
+pub fn walk_attr<T: Visitor>(ctx: &mut T, attr: &mut Attribute) {
     ctx.visit_ident(&mut attr.name);
-    ctx.visit_span(&mut attr.span);
+    ctx.visit_range(&mut attr.range);
     // TODO: Visit inner side of the attribute
 }
 
-fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
-    ctx.visit_span(&mut pat.span);
+pub fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
+    ctx.visit_range(&mut pat.range);
     match &mut pat.data {
         PatKind::Var(ident) => ctx.visit_ident(ident),
         PatKind::Str(_) => (),
@@ -179,28 +179,28 @@ fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
     }
 }
 
-fn walk_rule<T: Visitor>(ctx: &mut T, rule: &mut Rule) {
+pub fn walk_rule<T: Visitor>(ctx: &mut T, rule: &mut Rule) {
     ctx.visit_ident(&mut rule.name);
     for pat in &mut rule.pats {
         ctx.visit_pat(pat);
     }
     ctx.visit_expr(&mut rule.body);
-    ctx.visit_span(&mut rule.span);
+    ctx.visit_range(&mut rule.range);
 }
 
-fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
+pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
     for entr in book.entrs.values_mut() {
         ctx.visit_entry(entr);
     }
 }
 
-fn walk_substitution<T: Visitor>(ctx: &mut T, subst: &mut Substitution) {
+pub fn walk_substitution<T: Visitor>(ctx: &mut T, subst: &mut Substitution) {
     ctx.visit_expr(&mut subst.expr);
     ctx.visit_ident(&mut subst.name);
 }
 
-fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
-    ctx.visit_span(&mut sttm.span);
+pub fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
+    ctx.visit_range(&mut sttm.range);
     match &mut sttm.data {
         SttmKind::Ask(Some(ident), val, next) => {
             ctx.visit_ident(ident);
@@ -235,8 +235,8 @@ fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
     }
 }
 
-fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
-    ctx.visit_span(&mut expr.span);
+pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
+    ctx.visit_range(&mut expr.range);
     match &mut expr.data {
         ExprKind::Var(ident) => ctx.visit_ident(ident),
         ExprKind::All(None, typ, body) => {

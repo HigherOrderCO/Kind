@@ -1,6 +1,6 @@
 use std::{iter::Peekable, str::Chars};
 
-use kind_span::{Pos, Range, Span, SyntaxCtxIndex};
+use kind_span::{Pos, Range, SyntaxCtxIndex};
 
 use crate::{errors::SyntaxError, lexer::tokens::Token};
 
@@ -34,8 +34,8 @@ impl<'a> Lexer<'a> {
         self.pos
     }
 
-    pub fn mk_span(&self, start: usize) -> Span {
-        Span::new(Range::new(Pos { index: start as u32 }, Pos { index: self.pos as u32 }, self.ctx))
+    pub fn mk_range(&self, start: usize) -> Range {
+        Range::new(Pos { index: start as u32 }, Pos { index: self.pos as u32 }, self.ctx)
     }
 
     pub fn next_char(&mut self) -> Option<char> {
@@ -82,7 +82,7 @@ impl<'a> Lexer<'a> {
 
     #[inline]
     /// Useful as entrypoint
-    pub fn lex_next(&mut self) -> (Token, Span) {
+    pub fn lex_next(&mut self) -> (Token, Range) {
         self.lex_token()
     }
 }

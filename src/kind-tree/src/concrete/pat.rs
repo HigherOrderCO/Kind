@@ -1,6 +1,6 @@
 use std::fmt::{Display, Error, Formatter};
 
-use kind_span::Span;
+use kind_span::Range;
 
 use crate::symbol::Ident;
 
@@ -24,7 +24,7 @@ pub enum PatKind {
 #[derive(Clone, Debug)]
 pub struct Pat {
     pub data: PatKind,
-    pub span: Span,
+    pub range: Range,
 }
 
 impl Display for Pat {

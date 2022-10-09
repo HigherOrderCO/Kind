@@ -2,7 +2,7 @@
 /// without parenthesis. It helps when it comes to
 /// a static analysis of the tree with the syntax sugars
 /// and it makes it easier to split phases.
-use kind_span::Span;
+use kind_span::Range;
 use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::Ident;
@@ -89,7 +89,7 @@ pub enum SttmKind {
 #[derive(Clone, Debug)]
 pub struct Sttm {
     pub data: SttmKind,
-    pub span: Span,
+    pub range: Range,
 }
 
 #[derive(Clone, Debug)]
@@ -137,7 +137,7 @@ pub enum ExprKind {
 #[derive(Clone, Debug)]
 pub struct Expr {
     pub data: ExprKind,
-    pub span: Span,
+    pub range: Range,
 }
 
 impl Display for Operator {
@@ -166,13 +166,6 @@ impl Display for Operator {
 }
 
 impl Expr {
-    pub fn new_var(name: Ident) -> Expr {
-        Expr {
-            span: Span::Generated,
-            data: ExprKind::Var(name),
-        }
-    }
-
     pub fn traverse_pi_types(&self) -> String {
         match &self.data {
             ExprKind::All(binder, typ, body) => match binder {

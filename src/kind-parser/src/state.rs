@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::sync::mpsc::Sender;
 
-use kind_span::{Span, SyntaxCtxIndex};
+use kind_span::{Range, SyntaxCtxIndex};
 
 use crate::{errors::SyntaxError, lexer::tokens::Token, Lexer};
 
@@ -15,7 +15,7 @@ pub struct Parser<'a> {
     // We have to shift these things one position
     // to the left so idk what i should use it here
     // probably the movement will not affect it so much.
-    pub queue: VecDeque<(Token, Span)>,
+    pub queue: VecDeque<(Token, Range)>,
     pub breaks: VecDeque<bool>,
     pub errs: &'a Sender<Box<SyntaxError>>,
     pub eaten: u32,
@@ -40,7 +40,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn advance(&mut self) -> (Token, Span) {
+    pub fn advance(&mut self) -> (Token, Range) {
         let cur = self.queue.pop_front().unwrap();
         self.breaks.pop_front();
         self.breaks.push_back(self.lexer.is_linebreak());
@@ -64,7 +64,7 @@ impl<'a> Parser<'a> {
     }
 
     #[inline]
-    pub fn span(&self) -> Span {
+    pub fn range(&self) -> Range {
         self.queue[0].1
     }
 
@@ -75,10 +75,10 @@ impl<'a> Parser<'a> {
 
     #[inline]
     pub fn fail<T>(&mut self, expect: Vec<Token>) -> Result<T, SyntaxError> {
-        Err(SyntaxError::UnexpectedToken(self.get().clone(), self.span(), expect))
+        Err(SyntaxError::UnexpectedToken(self.get().clone(), self.range(), expect))
     }
 
-    pub fn eat_variant(&mut self, expect: Token) -> Result<(Token, Span), SyntaxError> {
+    pub fn eat_variant(&mut self, expect: Token) -> Result<(Token, Range), SyntaxError> {
         if self.get().same_variant(expect.clone()) {
             Ok(self.advance())
         } else {

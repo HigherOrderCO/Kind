@@ -3,7 +3,7 @@ use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::Ident;
 use expr::Expr;
-use kind_span::Span;
+use kind_span::Range;
 
 use self::pat::Pat;
 
@@ -16,7 +16,7 @@ pub mod visitor;
 pub enum AttributeStyle {
     Ident(Ident),
     String(String),
-    Number(Span, u64),
+    Number(Range, u64),
 }
 
 /// A attribute is a kind of declaration
@@ -27,7 +27,7 @@ pub enum AttributeStyle {
 pub struct Attribute {
     pub name: Ident,
     pub value: Option<AttributeStyle>,
-    pub span: Span,
+    pub range: Range,
 }
 
 /// An argument is a 'binding' of a name to a type
@@ -42,7 +42,7 @@ pub struct Argument {
     pub erased: bool,
     pub name: Ident,
     pub tipo: Option<Box<Expr>>,
-    pub span: Span,
+    pub range: Range,
 }
 
 /// A rule is a equation that in the left-hand-side
@@ -53,7 +53,7 @@ pub struct Rule {
     pub name: Ident,
     pub pats: Vec<Box<Pat>>,
     pub body: Box<Expr>,
-    pub span: Span,
+    pub range: Range,
 }
 
 /// An entry describes a function that is typed
@@ -68,7 +68,7 @@ pub struct Entry {
     pub tipo: Box<Expr>,
     pub rules: Vec<Box<Rule>>,
     pub attrs: Vec<Attribute>,
-    pub span: Span,
+    pub range: Range,
 }
 
 // A book is a collection of entries.

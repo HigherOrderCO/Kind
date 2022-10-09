@@ -11,7 +11,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_pat_constructor(&mut self) -> Result<Box<Pat>, SyntaxError> {
-        let start = self.span();
+        let start = self.range();
         self.bump(); // '('
         let name = self.parse_id()?;
         let mut pats = Vec::new();
@@ -20,54 +20,54 @@ impl<'a> Parser<'a> {
         }
         let end = self.eat_variant(Token::RPar)?.1;
         Ok(Box::new(Pat {
-            span: start.mix(end),
+            range: start.mix(end),
             data: PatKind::App(name, pats),
         }))
     }
 
     pub fn parse_pat_num(&mut self) -> Result<Box<Pat>, SyntaxError> {
-        let start = self.span();
+        let start = self.range();
         let num = eat_single!(self, Token::Num(n) => *n)?;
         Ok(Box::new(Pat {
-            span: start,
+            range: start,
             data: PatKind::Num(num),
         }))
     }
 
     pub fn parse_pat_str(&mut self) -> Result<Box<Pat>, SyntaxError> {
-        let start = self.span();
+        let start = self.range();
         let string = eat_single!(self, Token::Str(str) => str.clone())?;
         Ok(Box::new(Pat {
-            span: start,
+            range: start,
             data: PatKind::Str(string),
         }))
     }
 
     pub fn parse_pat_group(&mut self) -> Result<Box<Pat>, SyntaxError> {
-        let start = self.span();
+        let start = self.range();
         self.bump(); // '('
         let mut pat = self.parse_pat()?;
         let end = self.eat_variant(Token::RPar)?.1;
-        pat.span = start.mix(end);
+        pat.range = start.mix(end);
         Ok(pat)
     }
 
     pub fn parse_pat_var(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let id = self.parse_id()?;
         Ok(Box::new(Pat {
-            span: id.span,
+            range: id.range,
             data: PatKind::Var(id),
         }))
     }
 
     fn parse_pat_list(&mut self) -> Result<Box<Pat>, SyntaxError> {
-        let span = self.span();
+        let range = self.range();
         self.bump(); // '['
         let mut vec = Vec::new();
 
         if self.check_actual(Token::RBracket) {
-            let span = self.advance().1.mix(span);
-            return Ok(Box::new(Pat { span, data: PatKind::List(vec) }));
+            let range = self.advance().1.mix(range);
+            return Ok(Box::new(Pat { range, data: PatKind::List(vec) }));
         }
 
         vec.push(*self.parse_pat()?);
@@ -89,9 +89,9 @@ impl<'a> Parser<'a> {
             }
         }
 
-        let span = self.eat_variant(Token::RBracket)?.1.mix(span);
+        let range = self.eat_variant(Token::RBracket)?.1.mix(range);
 
-        Ok(Box::new(Pat { span, data: PatKind::List(vec) }))
+        Ok(Box::new(Pat { range, data: PatKind::List(vec) }))
     }
 
     pub fn parse_pat(&mut self) -> Result<Box<Pat>, SyntaxError> {
