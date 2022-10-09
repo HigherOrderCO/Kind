@@ -1,14 +1,31 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+/// Data structures
+pub mod data;
+/// Render
+pub mod render;
+
+pub struct Chars {
+    pub vbar: char,
+    pub hbar: char,
+    pub dbar: char,
+    pub trline: char,
+    pub bxline: char,
+    pub brline: char,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+impl Chars {
+    pub fn unicode() -> &'static Chars {
+        &Chars {
+            vbar: '│',
+            hbar: '─',
+            dbar: '┆',
+            trline: '└',
+            bxline: '┬',
+            brline: '┌',
+        }
     }
+}
+
+pub struct RenderConfig<'a> {
+    pub chars: &'a Chars,
+    pub indent: usize,
 }
