@@ -1,6 +1,8 @@
+/// Parses all of the top level structures
+/// like Book, Entry, Rule and Argument.
 use std::collections::HashMap;
 
-use kind_tree::{Argument, Entry, Rule, Book};
+use kind_tree::concrete::{Argument, Book, Entry, Rule};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -23,7 +25,7 @@ impl<'a> Parser<'a> {
         let start = self.span();
 
         let erased = self.eat_keyword(Token::Minus);
-        let keep   = self.eat_keyword(Token::Plus);
+        let keep = self.eat_keyword(Token::Plus);
 
         let complement = self.complement_binding_op();
         match &complement {
@@ -34,7 +36,7 @@ impl<'a> Parser<'a> {
         let hidden = is_hidden_arg(complement.as_ref().unwrap());
         let name = self.parse_id()?;
 
-        let tipo = if self.eat_keyword(Token::Colon) { Some(self.parse_expr()?) } else { None };
+        let tipo = if self.eat_keyword(Token::Colon) { Some(self.parse_expr(false)?) } else { None };
         let erased = if hidden { !keep } else { erased };
 
         let res = self.eat_variant(complement.unwrap())?.1;
@@ -56,10 +58,10 @@ impl<'a> Parser<'a> {
         }
         let mut pats = Vec::new();
         while !self.get().same_variant(Token::Eq) && !self.get().same_variant(Token::Eof) {
-            pats.push(self.parse_atom()?);
+            pats.push(self.parse_pat()?);
         }
         self.eat_variant(Token::Eq)?;
-        let body = self.parse_expr()?;
+        let body = self.parse_expr(false)?;
         let end = start.mix(body.span);
         Ok(Box::new(Rule {
             name: ident,
@@ -81,7 +83,7 @@ impl<'a> Parser<'a> {
             args.push(self.parse_argument()?);
         }
         self.eat_variant(Token::Colon)?;
-        let tipo = self.parse_expr()?;
+        let tipo = self.parse_expr(false)?;
         let mut rules = Vec::new();
         loop {
             let res = self.try_single(&|parser| parser.parse_rule(ident.data.0.clone()))?;
@@ -90,7 +92,7 @@ impl<'a> Parser<'a> {
                 None => break,
             }
         }
-        let end = rules.last().as_ref().map(|x| x.span.clone()).unwrap_or(tipo.span);
+        let end = rules.last().as_ref().map(|x| x.span).unwrap_or(tipo.span);
         Ok(Box::new(Entry {
             name: ident,
             docs,
@@ -110,14 +112,12 @@ impl<'a> Parser<'a> {
                 break;
             }
             let entry = self.parse_entry()?;
-            if let Some(_) = entrs.get(&entry.name.data.0) {
-                
-            } else {
+            if entrs.get(&entry.name.data.0).is_none() {
                 names.push(entry.name.clone());
                 entrs.insert(entry.name.data.0.clone(), entry);
             }
         }
         self.eat_variant(Token::Eof)?;
-        Ok(Book { names, entrs, holes: 0 })
+        Ok(Book { names, entrs })
     }
 }

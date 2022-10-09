@@ -12,7 +12,6 @@ pub struct Lexer<'a> {
     pub ctx: SyntaxCtxIndex,
 
     // Modes
-    pub semis: u16,
     pub comment_depth: u16,
     pub errs: Vec<Box<SyntaxError>>,
     pub emit_comment: bool,
@@ -25,15 +24,18 @@ impl<'a> Lexer<'a> {
             pos: 0,
             ctx,
             peekable,
-            semis: 0,
             comment_depth: 0,
             errs: Vec::new(),
             emit_comment: false,
         }
     }
 
+    pub fn span(&self) -> usize {
+        self.pos
+    }
+
     pub fn mk_span(&self, start: usize) -> Span {
-        Span::new(Range::new(Pos(start as u32), Pos(self.pos as u32), self.ctx))
+        Span::new(Range::new(Pos { index: start as u32 }, Pos { index: self.pos as u32 }, self.ctx))
     }
 
     pub fn next_char(&mut self) -> Option<char> {

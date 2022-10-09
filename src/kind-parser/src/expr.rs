@@ -1,4 +1,4 @@
-use kind_tree::expr::{Expr, ExprKind, Literal, Match, Open, Operator, Sttm, SttmKind, Substitution};
+use kind_tree::concrete::expr::*;
 use kind_tree::symbol::{Ident, Symbol};
 
 use crate::errors::SyntaxError;
@@ -75,7 +75,7 @@ impl<'a> Parser<'a> {
         let name = self.parse_id()?;
         self.eat_variant(Token::Slash)?;
         let redx = self.parse_num_lit()?;
-        let expr = self.parse_expr()?;
+        let expr = self.parse_expr(false)?;
         let span = start.mix(expr.span);
         Ok(Box::new(Expr {
             data: ExprKind::Subst(Substitution { name, redx, indx: 0, expr }),
@@ -96,31 +96,38 @@ impl<'a> Parser<'a> {
         let ident = self.parse_id()?;
         self.bump(); // '=>'
 
-        let expr = self.parse_expr()?;
+        let expr = self.parse_expr(false)?;
         let end_range = expr.span;
 
         Ok(Box::new(Expr {
-            data: ExprKind::Lambda(ident, expr),
+            data: ExprKind::Lambda(ident, None, expr),
             span: name_span.mix(end_range),
         }))
     }
 
-    fn parse_pi(&mut self) -> Result<Box<Expr>, SyntaxError> {
+    fn parse_pi_or_lambda(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let span = self.span();
         self.bump(); // '('
         let ident = self.parse_id()?;
         self.bump(); // ':'
-        let typ = self.parse_expr()?;
+        let typ = self.parse_expr(false)?;
 
         let _ = self.eat_variant(Token::RPar)?;
-        self.eat_keyword(Token::RightArrow);
 
-        let body = self.parse_expr()?;
-
-        Ok(Box::new(Expr {
-            span: span.mix(body.span),
-            data: ExprKind::All(Some(ident), typ, body),
-        }))
+        if self.eat_keyword(Token::FatArrow) {
+            let body = self.parse_expr(false)?;
+            Ok(Box::new(Expr {
+                span: span.mix(body.span),
+                data: ExprKind::Lambda(ident, Some(typ), body),
+            }))
+        } else {
+            self.eat_keyword(Token::RightArrow);
+            let body = self.parse_expr(false)?;
+            Ok(Box::new(Expr {
+                span: span.mix(body.span),
+                data: ExprKind::All(Some(ident), typ, body),
+            }))
+        }
     }
 
     fn parse_sigma_type(&mut self) -> Result<Box<Expr>, SyntaxError> {
@@ -128,12 +135,12 @@ impl<'a> Parser<'a> {
         self.bump(); // '['
         let ident = self.parse_id()?;
         self.bump(); // ':'
-        let typ = self.parse_expr()?;
+        let typ = self.parse_expr(false)?;
 
         self.eat_variant(Token::RPar)?;
         let end = self.eat_variant(Token::RightArrow)?.1;
 
-        let body = self.parse_expr()?;
+        let body = self.parse_expr(false)?;
 
         Ok(Box::new(Expr {
             span: span.mix(end),
@@ -194,7 +201,7 @@ impl<'a> Parser<'a> {
             return Ok(Box::new(Expr { span, data: ExprKind::List(vec) }));
         }
 
-        vec.push(*self.parse_expr()?);
+        vec.push(*self.parse_expr(false)?);
         let mut initialized = false;
         let mut with_comma = false;
         loop {
@@ -205,7 +212,7 @@ impl<'a> Parser<'a> {
             }
             if with_comma {
                 self.eat_keyword(Token::Comma);
-                match self.try_single(&|x| x.parse_expr())? {
+                match self.try_single(&|x| x.parse_expr(false))? {
                     Some(res) => vec.push(*res),
                     None => break,
                 }
@@ -229,10 +236,10 @@ impl<'a> Parser<'a> {
         } else {
             let span = self.span();
             self.bump(); // '('
-            let mut expr = self.parse_expr()?;
+            let mut expr = self.parse_expr(true)?;
             if self.get().same_variant(Token::ColonColon) {
                 self.bump(); // '::'
-                let typ = self.parse_expr()?;
+                let typ = self.parse_expr(false)?;
                 let span = span.mix(self.eat_variant(Token::RPar)?.1);
                 Ok(Box::new(Expr {
                     data: ExprKind::Ann(expr, typ),
@@ -254,7 +261,7 @@ impl<'a> Parser<'a> {
             data: ExprKind::Help(Ident {
                 data: Symbol(str),
                 ctx: self.ctx,
-                span
+                span,
             }),
         }))
     }
@@ -282,12 +289,12 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_call(&mut self) -> Result<Box<Expr>, SyntaxError> {
+    fn parse_call(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
         let head = self.parse_atom()?;
         let start = head.span;
         let mut spine = Vec::new();
         let mut end = head.span;
-        while !self.breaks[0] && !self.get().same_variant(Token::Eof) {
+        while (!self.is_linebreak() || multiline) && !self.get().same_variant(Token::Eof) {
             let res = self.try_single(&|parser| parser.parse_atom())?;
             match res {
                 Some(atom) => {
@@ -307,10 +314,10 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_arrow(&mut self) -> Result<Box<Expr>, SyntaxError> {
-        let mut head = self.parse_call()?;
+    fn parse_arrow(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
+        let mut head = self.parse_call(multiline)?;
         while self.eat_keyword(Token::RightArrow) {
-            let next = self.parse_expr()?;
+            let next = self.parse_expr(false)?;
             let span = head.span.mix(next.span);
             head = Box::new(Expr {
                 data: ExprKind::All(None, head, next),
@@ -318,12 +325,12 @@ impl<'a> Parser<'a> {
             });
         }
         if self.eat_keyword(Token::ColonColon) {
-            let expr = self.parse_expr()?;
+            let expr = self.parse_expr(false)?;
             Ok(Box::new(Expr {
                 span: head.span.mix(expr.span),
                 data: ExprKind::Ann(head, expr),
             }))
-        }else {
+        } else {
             Ok(head)
         }
     }
@@ -340,7 +347,7 @@ impl<'a> Parser<'a> {
             None
         };
 
-        let expr = self.parse_expr()?;
+        let expr = self.parse_expr(false)?;
         self.eat_keyword(Token::Semi);
         let next = self.parse_sttm()?;
         let end = expr.span;
@@ -355,7 +362,7 @@ impl<'a> Parser<'a> {
         self.bump(); // 'let'
         let name = self.parse_id()?;
         self.eat_variant(Token::Eq)?;
-        let expr = self.parse_expr()?;
+        let expr = self.parse_expr(false)?;
         self.eat_keyword(Token::Semi);
         let next = self.parse_sttm()?;
         let end = expr.span;
@@ -368,7 +375,7 @@ impl<'a> Parser<'a> {
     pub fn parse_return(&mut self) -> Result<Box<Sttm>, SyntaxError> {
         let start = self.span();
         self.bump(); // 'return'
-        let expr = self.parse_expr()?;
+        let expr = self.parse_expr(false)?;
         let end = expr.span;
         Ok(Box::new(Sttm {
             data: SttmKind::Return(expr),
@@ -385,7 +392,7 @@ impl<'a> Parser<'a> {
         } else if self.check_actual(Token::Let) {
             self.parse_monadic_let()
         } else {
-            let expr = self.parse_expr()?;
+            let expr = self.parse_expr(false)?;
             if self.get().same_variant(Token::RBrace) {
                 let end = expr.span;
                 Ok(Box::new(Sttm {
@@ -406,11 +413,12 @@ impl<'a> Parser<'a> {
     pub fn parse_do(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let start = self.span();
         self.bump(); // 'do'
+        let typ = self.parse_id()?;
         self.eat_variant(Token::LBrace)?;
         let sttm = self.parse_sttm()?;
         let end = self.eat_variant(Token::RBrace)?.1;
         Ok(Box::new(Expr {
-            data: ExprKind::Do(sttm),
+            data: ExprKind::Do(typ, sttm),
             span: start.mix(end),
         }))
     }
@@ -421,7 +429,7 @@ impl<'a> Parser<'a> {
         let tipo = self.parse_id()?;
         let name = self.parse_id()?;
 
-        let expr = if self.eat_keyword(Token::Eq) { Some(self.parse_expr()?) } else { None };
+        let expr = if self.eat_keyword(Token::Eq) { Some(self.parse_expr(false)?) } else { None };
 
         self.eat_variant(Token::LBrace)?;
 
@@ -429,16 +437,16 @@ impl<'a> Parser<'a> {
         while !self.get().same_variant(Token::RBrace) {
             let case = self.parse_id()?;
             self.eat_variant(Token::FatArrow)?;
-            let expr = self.parse_expr()?;
+            let expr = self.parse_expr(false)?;
             cases.push((case, expr))
         }
 
         let mut end = self.eat_variant(Token::RBrace)?.1;
 
         let motive = if self.eat_keyword(Token::Colon) {
-            let expr = self.parse_expr()?;
+            let expr = self.parse_expr(false)?;
             end = expr.span;
-            Some(self.parse_expr()?)
+            Some(self.parse_expr(false)?)
         } else {
             None
         };
@@ -457,9 +465,9 @@ impl<'a> Parser<'a> {
         let tipo = self.parse_id()?;
         let name = self.parse_id()?;
 
-        let expr = if self.eat_keyword(Token::Eq) { Some(self.parse_expr()?) } else { None };
+        let expr = if self.eat_keyword(Token::Eq) { Some(self.parse_expr(false)?) } else { None };
 
-        let body = self.parse_expr()?;
+        let body = self.parse_expr(false)?;
         let end = body.span;
 
         let open = Box::new(Open { tipo, name, expr, body });
@@ -475,9 +483,9 @@ impl<'a> Parser<'a> {
         self.bump(); // 'let'
         let name = self.parse_id()?;
         self.eat_variant(Token::Eq)?;
-        let expr = self.parse_expr()?;
+        let expr = self.parse_expr(false)?;
         self.eat_keyword(Token::Semi);
-        let next = self.parse_expr()?;
+        let next = self.parse_expr(false)?;
         let end = next.span;
         Ok(Box::new(Expr {
             data: ExprKind::Let(name, expr, next),
@@ -500,13 +508,13 @@ impl<'a> Parser<'a> {
     fn parse_if(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let start = self.span();
         self.bump(); // 'if'
-        let cond = self.parse_expr()?;
+        let cond = self.parse_expr(false)?;
         self.eat_variant(Token::LBrace)?;
-        let if_ = self.parse_expr()?;
+        let if_ = self.parse_expr(false)?;
         self.eat_variant(Token::RBrace)?;
         self.eat_variant(Token::Else)?;
         self.eat_variant(Token::LBrace)?;
-        let els_ = self.parse_expr()?;
+        let els_ = self.parse_expr(false)?;
         let end = self.eat_variant(Token::RBrace)?.1;
         let span = start.mix(end);
         Ok(Box::new(Expr {
@@ -518,7 +526,7 @@ impl<'a> Parser<'a> {
     /// The infinite hell of else ifs. But it's the most readable way
     /// to check if the queue of tokens match a pattern as we need
     /// some looakhead tokens.
-    pub fn parse_expr(&mut self) -> Result<Box<Expr>, SyntaxError> {
+    pub fn parse_expr(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
         if self.check_actual(Token::Do) {
             self.parse_do()
         } else if self.check_actual(Token::Match) {
@@ -534,13 +542,13 @@ impl<'a> Parser<'a> {
         } else if self.is_lambda() {
             self.parse_lambda()
         } else if self.is_pi_type() {
-            self.parse_pi()
+            self.parse_pi_or_lambda()
         } else if self.is_sigma_type() {
             self.parse_sigma_type()
         } else if self.is_substitution() {
             self.parse_substitution()
         } else {
-            self.parse_arrow()
+            self.parse_arrow(multiline)
         }
     }
 }

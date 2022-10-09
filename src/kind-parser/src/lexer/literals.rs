@@ -61,7 +61,7 @@ impl<'a> Lexer<'a> {
 
     /// Lex numbers with decimal, hexadecimal, binary or octal.
     pub fn lex_number(&mut self) -> (Token, Span) {
-        let start = self.pos;
+        let start = self.span();
         match self.peekable.peek() {
             None => (Token::Eof, self.mk_span(start)),
             Some('0') => {
@@ -86,7 +86,7 @@ impl<'a> Lexer<'a> {
     /// acummulate the error until the end of the string.
     /// TODO: Accumulate multiple encoding errors?
     pub fn lex_string(&mut self) -> (Token, Span) {
-        let start = self.pos;
+        let start = self.span();
 
         self.next_char();
 
@@ -94,7 +94,7 @@ impl<'a> Lexer<'a> {
         let mut error: Option<(Token, Span)> = None;
 
         while let Some(&x) = self.peekable.peek() {
-            let chr_start = self.pos;
+            let chr_start = self.span();
             match x {
                 '\"' => break,
                 '\\' => {

@@ -2,10 +2,10 @@
 /// without parenthesis. It helps when it comes to
 /// a static analysis of the tree with the syntax sugars
 /// and it makes it easier to split phases.
-
-use crate::symbol::Ident;
 use kind_span::Span;
 use std::fmt::{Display, Error, Formatter};
+
+use crate::symbol::Ident;
 
 /// Enum of binary operators.
 #[derive(Copy, Clone, Debug)]
@@ -83,13 +83,13 @@ pub enum SttmKind {
     Ask(Option<Ident>, Box<Expr>, Box<Sttm>),
     Let(Ident, Box<Expr>, Box<Sttm>),
     Open(Ident, Ident, Option<Box<Expr>>, Box<Sttm>),
-    Return(Box<Expr>)
+    Return(Box<Expr>),
 }
 
 #[derive(Clone, Debug)]
 pub struct Sttm {
     pub data: SttmKind,
-    pub span: Span
+    pub span: Span,
 }
 
 #[derive(Clone, Debug)]
@@ -101,7 +101,7 @@ pub enum ExprKind {
     /// The dependent product space (e.g. [x : Int] -> y)
     Sigma(Option<Ident>, Box<Expr>, Box<Expr>),
     /// A anonymous function that receives one argument
-    Lambda(Ident, Box<Expr>),
+    Lambda(Ident, Option<Box<Expr>>, Box<Expr>),
     /// Application of a expression to a spine of expressions
     App(Box<Expr>, Spine),
     /// Declaration of a local variable
@@ -113,7 +113,7 @@ pub enum ExprKind {
     /// Binary operation (e.g. 2 + 3)
     Binary(Operator, Box<Expr>, Box<Expr>),
     /// A expression open to unification (e.g. _)
-    Hole(u64),
+    Hole,
     /// Substituion
     Subst(Substitution),
     /// A match block that will be translated
@@ -123,13 +123,15 @@ pub enum ExprKind {
     /// into the eliminator of a record datatype.
     Open(Box<Open>),
     /// Do notation
-    Do(Box<Sttm>),
+    Do(Ident, Box<Sttm>),
     /// If else statement
-    If(Box<Expr>,Box<Expr>,Box<Expr>),
+    If(Box<Expr>, Box<Expr>, Box<Expr>),
     /// If else statement
-    Pair(Box<Expr>,Box<Expr>),
+    Pair(Box<Expr>, Box<Expr>),
     /// Array
-    List(Vec<Expr>)
+    List(Vec<Expr>),
+    /// Help
+    Help(Ident),
 }
 
 #[derive(Clone, Debug)]
@@ -238,17 +240,17 @@ impl Display for Match {
         write!(f, "match {} {}", self.tipo, self.name)?;
         match &self.expr {
             None => Ok(()),
-            Some(res) => write!(f, " = {}", res)
+            Some(res) => write!(f, " = {}", res),
         }?;
         match &self.motive {
             None => Ok(()),
-            Some(res) => write!(f, " : {}", res)
+            Some(res) => write!(f, " : {}", res),
         }?;
-        write!(f," {{ ")?;
+        write!(f, " {{ ")?;
         for (case, expr) in &self.cases {
             write!(f, "{} => {}; ", case, expr)?
         }
-        write!(f,"}}")
+        write!(f, "}}")
     }
 }
 
@@ -257,12 +259,11 @@ impl Display for Open {
         write!(f, "open {} {}", self.tipo, self.name)?;
         match &self.expr {
             None => Ok(()),
-            Some(res) => write!(f, " = {}", res)
+            Some(res) => write!(f, " = {}", res),
         }?;
         write!(f, " {}", self.body)
     }
 }
-
 
 impl Display for Substitution {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
@@ -274,12 +275,13 @@ impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
         match &self.data {
-            Do(sttms) => write!(f, "({})", sttms),
+            Do(id, sttms) => write!(f, "do {} ({})", id, sttms),
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Sigma(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Lit(lit) => write!(f, "{}", lit),
             Var(name) => write!(f, "{}", name),
-            Lambda(binder, body) => write!(f, "({} => {})", binder, body),
+            Lambda(binder, None, body) => write!(f, "({} => {})", binder, body),
+            Lambda(binder, Some(typ), body) => write!(f, "(({} : {}) => {})", binder, typ, body),
             Pair(fst, snd) => write!(f, "($ {} {})", fst, snd),
             App(head, spine) => write!(f, "({}{})", head, spine.iter().map(|x| format!(" {}", x)).collect::<String>()),
             Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
@@ -287,10 +289,11 @@ impl Display for Expr {
             List(vec) => write!(f, "[{}]", vec.iter().map(|x| format!("{}", x)).collect::<Vec<String>>().join(" ")),
             Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
-            Hole(_) => write!(f, "_"),
+            Hole => write!(f, "_"),
             Match(matcher) => write!(f, "({})", matcher),
             Open(open) => write!(f, "({})", open),
-            Subst(subst) =>  write!(f, "({})", subst),
+            Subst(subst) => write!(f, "({})", subst),
+            Help(name) => write!(f, "?{}", name),
         }
     }
 }

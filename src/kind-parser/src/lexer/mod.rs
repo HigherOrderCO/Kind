@@ -1,3 +1,5 @@
+use std::sync::mpsc::Sender;
+
 use kind_span::Span;
 
 use crate::errors::SyntaxError;
@@ -22,8 +24,7 @@ fn is_valid_id_start(chr: char) -> bool {
 }
 
 impl<'a> Lexer<'a> {
-    pub fn single_token(&mut self, token: Token) -> (Token, Span) {
-        let start = self.pos;
+    pub fn single_token(&mut self, token: Token, start: usize) -> (Token, Span) {
         self.next_char();
         (token, self.mk_span(start))
     }
@@ -49,12 +50,12 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn get_next_no_error(&mut self, vec: &mut Vec<Box<SyntaxError>>) -> (Token, Span) {
+    pub fn get_next_no_error(&mut self, vec: &Sender<Box<SyntaxError>>) -> (Token, Span) {
         loop {
             let (token, span) = self.lex_token();
             match token {
                 Token::Error(x) => {
-                    vec.push(x);
+                    let _ = vec.send(x);
                     continue;
                 }
                 Token::Comment(false, _) => continue,
@@ -66,7 +67,7 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn lex_token(&mut self) -> (Token, Span) {
-        let start = self.pos;
+        let start = self.span();
         match self.peekable.peek() {
             None => (Token::Eof, self.mk_span(start)),
             Some(chr) => match chr {
@@ -83,40 +84,40 @@ impl<'a> Lexer<'a> {
                     let str = self.accumulate_while(&is_valid_id);
                     (Lexer::to_keyword(str), self.mk_span(start))
                 }
-                '(' => self.single_token(Token::LPar),
-                ')' => self.single_token(Token::RPar),
-                '[' => self.single_token(Token::LBracket),
-                ']' => self.single_token(Token::RBracket),
-                '{' => self.single_token(Token::LBrace),
-                '}' => self.single_token(Token::RBrace),
+                '(' => self.single_token(Token::LPar, start),
+                ')' => self.single_token(Token::RPar, start),
+                '[' => self.single_token(Token::LBracket, start),
+                ']' => self.single_token(Token::RBracket, start),
+                '{' => self.single_token(Token::LBrace, start),
+                '}' => self.single_token(Token::RBrace, start),
                 '#' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some('#') => self.single_token(Token::HashHash),
+                        Some('#') => self.single_token(Token::HashHash, start),
                         _ => (Token::Hash, self.mk_span(start)),
                     }
                 }
                 '=' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some('>') => self.single_token(Token::FatArrow),
-                        Some('=') => self.single_token(Token::EqEq),
+                        Some('>') => self.single_token(Token::FatArrow, start),
+                        Some('=') => self.single_token(Token::EqEq, start),
                         _ => (Token::Eq, self.mk_span(start)),
                     }
                 }
                 '>' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some('>') => self.single_token(Token::GreaterGreater),
-                        Some('=') => self.single_token(Token::GreaterEq),
+                        Some('>') => self.single_token(Token::GreaterGreater, start),
+                        Some('=') => self.single_token(Token::GreaterEq, start),
                         _ => (Token::Greater, self.mk_span(start)),
                     }
                 }
                 '<' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some('<') => self.single_token(Token::LessLess),
-                        Some('=') => self.single_token(Token::LessEq),
+                        Some('<') => self.single_token(Token::LessLess, start),
+                        Some('=') => self.single_token(Token::LessEq, start),
                         _ => (Token::Less, self.mk_span(start)),
                     }
                 }
@@ -131,26 +132,26 @@ impl<'a> Lexer<'a> {
                 ':' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some(':') => self.single_token(Token::ColonColon),
+                        Some(':') => self.single_token(Token::ColonColon, start),
                         _ => (Token::Colon, self.mk_span(start)),
                     }
                 }
-                ';' => self.single_token(Token::Semi),
-                '$' => self.single_token(Token::Dollar),
-                ',' => self.single_token(Token::Comma),
-                '+' => self.single_token(Token::Plus),
+                ';' => self.single_token(Token::Semi, start),
+                '$' => self.single_token(Token::Dollar, start),
+                ',' => self.single_token(Token::Comma, start),
+                '+' => self.single_token(Token::Plus, start),
                 '-' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some('>') => self.single_token(Token::RightArrow),
+                        Some('>') => self.single_token(Token::RightArrow, start),
                         _ => (Token::Minus, self.mk_span(start)),
                     }
                 }
-                '*' => self.single_token(Token::Star),
-                '%' => self.single_token(Token::Percent),
-                '&' => self.single_token(Token::Ampersand),
-                '|' => self.single_token(Token::Bar),
-                '^' => self.single_token(Token::Hat),
+                '*' => self.single_token(Token::Star, start),
+                '%' => self.single_token(Token::Percent, start),
+                '&' => self.single_token(Token::Ampersand, start),
+                '|' => self.single_token(Token::Bar, start),
+                '^' => self.single_token(Token::Hat, start),
                 '"' => self.lex_string(),
                 '?' => {
                     self.next_char();
@@ -160,7 +161,7 @@ impl<'a> Lexer<'a> {
                 '!' => {
                     self.next_char();
                     match self.peekable.peek() {
-                        Some('=') => self.single_token(Token::BangEq),
+                        Some('=') => self.single_token(Token::BangEq, start),
                         _ => (Token::Bang, self.mk_span(start)),
                     }
                 }

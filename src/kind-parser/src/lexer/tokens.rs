@@ -77,4 +77,12 @@ impl Token {
     pub fn is_id(&self) -> bool {
         matches!(self, Token::Id(_))
     }
+
+    pub fn is_str(&self) -> bool {
+        matches!(self, Token::Str(_))
+    }
+
+    pub fn is_num(&self) -> bool {
+        matches!(self, Token::Num(_))
+    }
 }

@@ -1,10 +1,12 @@
 // Position in a syntax context.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
-pub struct Pos(pub u32);
+pub struct Pos {
+    pub index: u32,
+}
 
 // A syntax context index.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
-pub struct SyntaxCtxIndex(pub u32);
+pub struct SyntaxCtxIndex(pub usize);
 
 // A span in the encoded format that is required by
 // kind2.
@@ -60,7 +62,7 @@ impl Range {
 
     #[inline]
     pub fn encode(&self) -> EncodedSpan {
-        EncodedSpan(((self.ctx.0 as u64) << 48) | ((self.start.0 as u64) & 0xFFFFFF) | (((self.end.0 as u64) & 0xFFFFFF) << 24))
+        EncodedSpan(((self.ctx.0 as u64) << 48) | ((self.start.index as u64) & 0xFFFFFF) | (((self.end.index as u64) & 0xFFFFFF) << 24))
     }
 }
 
@@ -107,9 +109,13 @@ impl EncodedSpan {
     /// Transforms a encoded span back into a range.
     pub fn to_range(&self) -> Range {
         Range {
-            ctx: SyntaxCtxIndex((self.0 >> 48) as u32),
-            start: Pos((self.0 & 0xFFFFFF) as u32),
-            end: Pos(((self.0 >> 24) & 0xFFFFFF) as u32),
+            ctx: SyntaxCtxIndex((self.0 >> 48) as usize),
+            start: Pos {
+                index: (self.0 & 0xFFFFFF) as u32,
+            },
+            end: Pos {
+                index: ((self.0 >> 24) & 0xFFFFFF) as u32,
+            },
         }
     }
 
