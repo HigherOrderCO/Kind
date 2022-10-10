@@ -1,7 +1,6 @@
 use std::collections::VecDeque;
-use std::sync::mpsc::Sender;
 
-use kind_span::{Range, SyntaxCtxIndex};
+use kind_span::{Range};
 
 use crate::{errors::SyntaxError, lexer::tokens::Token, Lexer};
 
@@ -17,13 +16,12 @@ pub struct Parser<'a> {
     // probably the movement will not affect it so much.
     pub queue: VecDeque<(Token, Range)>,
     pub breaks: VecDeque<bool>,
-    pub errs: &'a Sender<Box<SyntaxError>>,
+    pub errs: &'a mut Vec<Box<SyntaxError>>,
     pub eaten: u32,
-    pub ctx: SyntaxCtxIndex,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(mut lexer: Lexer<'a>, ctx: SyntaxCtxIndex, sender: &'a Sender<Box<SyntaxError>>) -> Parser<'a> {
+    pub fn new(mut lexer: Lexer<'a>, sender: &'a mut Vec<Box<SyntaxError>>) -> Parser<'a> {
         let mut queue = VecDeque::with_capacity(3);
         let mut breaks = VecDeque::with_capacity(3);
         for _ in 0..3 {
@@ -36,7 +34,6 @@ impl<'a> Parser<'a> {
             breaks,
             errs: sender,
             eaten: 0,
-            ctx,
         }
     }
 

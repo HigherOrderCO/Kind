@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use kind_span::{Range, Span, SyntaxCtxIndex};
+use kind_span::{Range, SyntaxCtxIndex};
 
 // Stores the name of a variable or constructor
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -21,7 +21,7 @@ impl Ident {
 
     /// Changes the syntax context of the range and of the ident
     pub fn set_ctx(&self, ctx: SyntaxCtxIndex) -> Ident {
-        let mut range = self.range;
+        let range = self.range;
         range.set_ctx(ctx);
         Ident {
             data: self.data.clone(),

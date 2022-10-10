@@ -7,13 +7,13 @@ use crate::state::Parser;
 
 impl<'a> Parser<'a> {
     pub fn is_pat_cons(&self) -> bool {
-        self.get().same_variant(Token::LPar) && self.peek(1).is_id()
+        self.get().same_variant(Token::LPar) && self.peek(1).is_upper_id()
     }
 
     pub fn parse_pat_constructor(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let start = self.range();
         self.bump(); // '('
-        let name = self.parse_id()?;
+        let name = self.parse_upper_id()?;
         let mut pats = Vec::new();
         while let Some(res) = self.try_single(&|s| s.parse_pat())? {
             pats.push(res)
@@ -60,6 +60,15 @@ impl<'a> Parser<'a> {
         }))
     }
 
+    pub fn parse_pat_single_cons(&mut self) -> Result<Box<Pat>, SyntaxError> {
+        let id = self.parse_upper_id()?;
+        Ok(Box::new(Pat {
+            range: id.range,
+            data: PatKind::App(id, vec![]),
+        }))
+    }
+
+
     fn parse_pat_list(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let range = self.range();
         self.bump(); // '['
@@ -103,8 +112,10 @@ impl<'a> Parser<'a> {
             self.parse_pat_num()
         } else if self.check_actual(Token::LPar) {
             self.parse_pat_group()
-        } else if self.get().is_id() {
+        } else if self.get().is_lower_id() {
             self.parse_pat_var()
+        } else if self.get().is_upper_id() {
+            self.parse_pat_single_cons()
         } else if self.check_actual(Token::LBrace) {
             self.parse_pat_list()
         } else {

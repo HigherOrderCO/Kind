@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use kind_span::{Range, SyntaxCtxIndex};
+use kind_span::Range;
 
 #[derive(Debug, Clone)]
 pub enum Severity {
@@ -35,7 +35,6 @@ pub struct Marking {
     pub position: Range,
     pub color: Color,
     pub text: String,
-    pub ctx: SyntaxCtxIndex,
 }
 
 #[derive(Debug, Clone)]
@@ -48,9 +47,14 @@ pub struct DiagnosticFrame {
     pub positions: Vec<Marking>,
 }
 
+impl DiagnosticFrame {
+    pub fn to_diagnostic(self, file_name: PathBuf) -> Diagnostic {
+        Diagnostic { file_name, frame: self }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Diagnostic {
     pub file_name: PathBuf,
-    pub position: Range,
     pub frame: DiagnosticFrame,
 }

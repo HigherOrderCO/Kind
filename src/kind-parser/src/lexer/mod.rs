@@ -1,5 +1,3 @@
-use std::sync::mpsc::Sender;
-
 use kind_span::Range;
 
 use crate::errors::SyntaxError;
@@ -36,8 +34,8 @@ impl<'a> Lexer<'a> {
         count > 0
     }
 
-    pub fn to_keyword(str: &str) -> Token {
-        match str {
+    pub fn to_keyword(data: &str) -> Token {
+        match data {
             "ask" => Token::Ask,
             "do" => Token::Do,
             "if" => Token::If,
@@ -46,16 +44,22 @@ impl<'a> Lexer<'a> {
             "let" => Token::Let,
             "open" => Token::Open,
             "return" => Token::Return,
-            _ => Token::Id(str.to_string()),
+            _ => {
+               if data.bytes().next().map(|x| x.is_ascii_uppercase()).unwrap_or(false) {
+                Token::UpperId(data.to_string())
+               }else {
+                Token::LowerId(data.to_string())
+               }
+            },
         }
     }
 
-    pub fn get_next_no_error(&mut self, vec: &Sender<Box<SyntaxError>>) -> (Token, Range) {
+    pub fn get_next_no_error(&mut self, vec: &mut Vec<Box<SyntaxError>>) -> (Token, Range) {
         loop {
             let (token, span) = self.lex_token();
             match token {
                 Token::Error(x) => {
-                    let _ = vec.send(x);
+                    vec.push(x);
                     continue;
                 }
                 Token::Comment(false, _) => continue,

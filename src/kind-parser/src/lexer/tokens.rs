@@ -18,7 +18,8 @@ pub enum Token {
     ColonColon, // ::
 
     Help(String),
-    Id(String),
+    LowerId(String),
+    UpperId(String),
 
     // Keywords
     Do,
@@ -74,8 +75,12 @@ impl Token {
         std::mem::discriminant(self) == std::mem::discriminant(&b)
     }
 
-    pub fn is_id(&self) -> bool {
-        matches!(self, Token::Id(_))
+    pub fn is_lower_id(&self) -> bool {
+        matches!(self, Token::LowerId(_))
+    }
+
+    pub fn is_upper_id(&self) -> bool {
+        matches!(self, Token::UpperId(_))
     }
 
     pub fn is_str(&self) -> bool {

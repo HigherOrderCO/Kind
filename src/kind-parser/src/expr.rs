@@ -54,15 +54,15 @@ impl<'a> Parser<'a> {
     }
 
     pub fn is_pi_type(&self) -> bool {
-        self.get().same_variant(Token::LPar) && self.peek(1).is_id() && self.peek(2).same_variant(Token::Colon)
+        self.get().same_variant(Token::LPar) && self.peek(1).is_lower_id() && self.peek(2).same_variant(Token::Colon)
     }
 
     pub fn is_lambda(&self) -> bool {
-        self.get().is_id() && self.peek(1).same_variant(Token::FatArrow)
+        self.get().is_lower_id() && self.peek(1).same_variant(Token::FatArrow)
     }
 
     pub fn is_sigma_type(&self) -> bool {
-        self.get().same_variant(Token::LBracket) && self.peek(1).is_id() && self.peek(2).same_variant(Token::Colon)
+        self.get().same_variant(Token::LBracket) && self.peek(1).is_lower_id() && self.peek(2).same_variant(Token::Colon)
     }
 
     pub fn is_substitution(&self) -> bool {
@@ -85,10 +85,18 @@ impl<'a> Parser<'a> {
 
     pub fn parse_id(&mut self) -> Result<Ident, SyntaxError> {
         let range = self.range();
-        let id = eat_single!(self, Token::Id(x) => x.clone())?;
-        let ident = Ident::new(Symbol(id), self.ctx, range);
+        let id = eat_single!(self, Token::LowerId(x) => x.clone())?;
+        let ident = Ident::new(Symbol(id), self.lexer.ctx, range);
         Ok(ident)
     }
+
+    pub fn parse_upper_id(&mut self) -> Result<Ident, SyntaxError> {
+        let range = self.range();
+        let id = eat_single!(self, Token::UpperId(x) => x.clone())?;
+        let ident = Ident::new(Symbol(id), self.lexer.ctx, range);
+        Ok(ident)
+    }
+
 
     fn parse_lambda(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let name_span = self.range();
@@ -153,6 +161,14 @@ impl<'a> Parser<'a> {
         Ok(Box::new(Expr {
             range: id.range,
             data: ExprKind::Var(id),
+        }))
+    }
+
+    fn parse_data(&mut self) -> Result<Box<Expr>, SyntaxError> {
+        let id = self.parse_upper_id()?;
+        Ok(Box::new(Expr {
+            range: id.range,
+            data: ExprKind::Data(id),
         }))
     }
 
@@ -260,7 +276,7 @@ impl<'a> Parser<'a> {
             range,
             data: ExprKind::Help(Ident {
                 data: Symbol(str),
-                ctx: self.ctx,
+                ctx: self.lexer.ctx,
                 range,
             }),
         }))
@@ -277,7 +293,8 @@ impl<'a> Parser<'a> {
 
     pub fn parse_atom(&mut self) -> Result<Box<Expr>, SyntaxError> {
         match self.get().clone() {
-            Token::Id(_) => self.parse_var(),
+            Token::LowerId(_) => self.parse_var(),
+            Token::UpperId(_) => self.parse_data(),
             Token::Num(num) => self.parse_num(num),
             Token::Char(chr) => self.parse_char(chr),
             Token::Str(str) => self.parse_str(str),
@@ -285,7 +302,7 @@ impl<'a> Parser<'a> {
             Token::Help(str) => self.parse_help(str),
             Token::LBracket => self.parse_array(),
             Token::LPar => self.parse_paren(),
-            _ => self.fail(vec![Token::Id("".to_string())]),
+            _ => self.fail(vec![Token::LowerId("".to_string())]),
         }
     }
 

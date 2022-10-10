@@ -18,7 +18,7 @@ pub struct Point {
 }
 
 pub trait FileCache {
-    fn fetch(&mut self, ctx: SyntaxCtxIndex) -> Option<&(PathBuf, String)>;
+    fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<&(PathBuf, String)>;
 }
 
 impl Display for Point {
@@ -30,7 +30,7 @@ impl Display for Point {
 fn group_markers(markers: &[Marking]) -> SortedMarkers {
     let mut file_group = SortedMarkers::new();
     for marker in markers {
-        let group = file_group.entry(marker.ctx).or_insert_with(Vec::new);
+        let group = file_group.entry(marker.position.ctx).or_insert_with(Vec::new);
         group.push(marker.clone())
     }
     for group in file_group.values_mut() {
@@ -269,7 +269,7 @@ pub fn render_tag<T: Write + Sized>(severity: &Severity, fmt: &mut T) -> std::fm
 }
 
 impl Diagnostic {
-    pub fn render<T: Write + Sized, C: FileCache>(&self, cache: &mut C, config: &RenderConfig, fmt: &mut T) -> std::fmt::Result {
+    pub fn render<T: Write + Sized, C: FileCache>(&self, cache: &C, config: &RenderConfig, fmt: &mut T) -> std::fmt::Result {
         writeln!(fmt)?;
 
         write!(fmt, " ")?;
