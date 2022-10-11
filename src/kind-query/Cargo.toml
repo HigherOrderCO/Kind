@@ -6,6 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dashmap = "5.4.0"
+fxhash = "0.2.1"
+rayon = "1.5.3"
+
 kind-parser = { path = "../kind-parser" }
 kind-span = { path = "../kind-span" }
+kind-report = { path = "../kind-report" }
 kind-tree = { path = "../kind-tree" }
+kind-pass = { path = "../kind-pass" }
+kind-macros = { path = "../kind-macros" }
