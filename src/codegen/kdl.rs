@@ -1,4 +1,5 @@
 mod book;
+pub mod passes;
 
 use crate::book::name::Ident;
 use crate::book::Book;
@@ -9,37 +10,37 @@ use std::collections::{HashMap, HashSet};
 
 pub const KDL_NAME_LEN: usize = 12;
 
-pub fn to_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) -> Result<String, String> {
+pub fn stringify_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) -> Result<String, String> {
     let term = match term {
         CompTerm::Var { name } => name.to_string(),
         CompTerm::Lam { name, body } => {
-            let body = to_kdl_term(kdl_names, body)?;
+            let body = stringify_kdl_term(kdl_names, body)?;
             format!("@{} {}", name, body)
         }
         CompTerm::App { func, argm } => {
-            let func = to_kdl_term(kdl_names, func)?;
-            let argm = to_kdl_term(kdl_names, argm)?;
+            let func = stringify_kdl_term(kdl_names, func)?;
+            let argm = stringify_kdl_term(kdl_names, argm)?;
             format!("(!{} {})", func, argm)
         }
         CompTerm::Dup { nam0, nam1, expr, body } => {
-            let expr = to_kdl_term(kdl_names, expr)?;
-            let body = to_kdl_term(kdl_names, body)?;
+            let expr = stringify_kdl_term(kdl_names, expr)?;
+            let body = stringify_kdl_term(kdl_names, body)?;
             format!("dup {} {} = {}; {}", nam0, nam1, expr, body)
         }
         CompTerm::Let { name, expr, body } => {
-            let expr = to_kdl_term(kdl_names, expr)?;
-            let body = to_kdl_term(kdl_names, body)?;
+            let expr = stringify_kdl_term(kdl_names, expr)?;
+            let body = stringify_kdl_term(kdl_names, body)?;
             format!("let {} = {};\n    {}", name, expr, body)
         }
         CompTerm::Ctr { name, args } => {
             let kdl_name = kdl_names.get(name).unwrap_or_else(|| panic!("{}", name));
-            let args = args.iter().map(|x| to_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
+            let args = args.iter().map(|x| stringify_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
             let args = args.iter().map(|x| format!(" {}", x)).collect::<String>();
             format!("{{{}{}}}", kdl_name, args)
         }
         CompTerm::Fun { name, args } => {
             let kdl_name = kdl_names.get(name).unwrap_or_else(|| panic!("{}", name));
-            let args = args.iter().map(|x| to_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
+            let args = args.iter().map(|x| stringify_kdl_term(kdl_names, x)).collect::<Result<Vec<String>, String>>()?;
             let args = args.iter().map(|x| format!(" {}", x)).collect::<String>();
             format!("({}{})", kdl_name, args)
         }
@@ -47,8 +48,8 @@ pub fn to_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) -> Result
             format!("#{}", numb)
         }
         CompTerm::Op2 { oper, val0, val1 } => {
-            let val0 = to_kdl_term(kdl_names, val0)?;
-            let val1 = to_kdl_term(kdl_names, val1)?;
+            let val0 = stringify_kdl_term(kdl_names, val0)?;
+            let val1 = stringify_kdl_term(kdl_names, val1)?;
             format!("({} {} {})", oper, val0, val1)
         }
         CompTerm::Nil => {
@@ -58,21 +59,21 @@ pub fn to_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) -> Result
     Ok(term)
 }
 
-pub fn to_kdl_rule(kdl_names: &HashMap<Ident, Ident>, rule: &CompRule) -> Result<String, String> {
+pub fn stringify_kdl_rule(kdl_names: &HashMap<Ident, Ident>, rule: &CompRule) -> Result<String, String> {
     let name = &rule.name;
     let kdl_name = kdl_names.get(name).unwrap();
     let mut pats = vec![]; // stringified pattern args
     for pat in rule.pats.iter() {
-        let pat = to_kdl_term(kdl_names, pat)?;
+        let pat = stringify_kdl_term(kdl_names, pat)?;
         pats.push(" ".to_string());
         pats.push(pat);
     }
-    let body = to_kdl_term(kdl_names, &rule.body)?;
+    let body = stringify_kdl_term(kdl_names, &rule.body)?;
     let rule = format!("({}{}) =\n    {}", kdl_name, pats.join(""), body);
     Ok(rule)
 }
 
-pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &CompBook, entry: &CompEntry) -> Result<String, String> {
+pub fn stringify_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &CompBook, entry: &CompEntry) -> Result<String, String> {
     let kdl_name = kdl_names.get(&entry.name).unwrap();
     let args_names = entry.args.iter().map(|arg| format!(" {}", arg)).collect::<String>();
     // If this entry existed in the original kind code, add some annotations as comments
@@ -93,7 +94,7 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &
     } else {
         let mut rules = vec![];
         for rule in &entry.rules {
-            rules.push(format!("\n  {}", to_kdl_rule(kdl_names, rule)?));
+            rules.push(format!("\n  {}", stringify_kdl_rule(kdl_names, rule)?));
         }
         match entry.get_attribute("kdl_state") {
             // If the function has an initial state, compile the state together with it
@@ -101,7 +102,7 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &
                 let state_fn_name = attr.value.unwrap();
                 let state_fn = comp_book.entrs.get(&state_fn_name).ok_or(format!("Initial state function \"{}\" for function \"{}\" not found.", state_fn_name, entry.name))?;
                 let state_term = state_fn.rules[0].body.clone();  // This is checked when validating the attributes
-                let init_state = to_kdl_term(kdl_names, &*state_term)?;
+                let init_state = stringify_kdl_term(kdl_names, &*state_term)?;
                 format!("fun ({}{}) {{{}\n}} with {{\n    {}\n}}\n\n", kdl_name, args_names, rules.join(""), init_state)
             }
             // Otherwise just compile the function as normal
@@ -114,7 +115,7 @@ pub fn to_kdl_entry(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &
     Ok(entry)
 }
 
-pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &CompBook) -> Result<String, String> {
+pub fn stringify_kdl_book(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &CompBook) -> Result<String, String> {
     let mut lines = vec![];
     let mut run = String::new();
     let mut init_funs: HashSet<Ident> = HashSet::new(); // Functions that are the initial state to some other function
@@ -132,7 +133,7 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &C
             continue;
         }
         if entry.get_attribute("kdl_run").is_some() {
-            let stmnt = format!("run {{\n    {}\n}}\n\n", to_kdl_term(kdl_names, &*entry.rules[0].body)?);
+            let stmnt = format!("run {{\n    {}\n}}\n\n", stringify_kdl_term(kdl_names, &*entry.rules[0].body)?);
             run.push_str(&stmnt);
             continue;
         }
@@ -140,9 +141,21 @@ pub fn to_kdl_book(book: &Book, kdl_names: &HashMap<Ident, Ident>, comp_book: &C
         if init_funs.contains(name) {
             continue;
         }
-        lines.push(to_kdl_entry(book, kdl_names, comp_book, entry)?);
+        lines.push(stringify_kdl_entry(book, kdl_names, comp_book, entry)?);
     }
     Ok(lines.join("") + &run)
+}
+
+pub fn to_kdl_book(book: Book, namespace: &Option<String>) -> Result<String, String> {
+    let book = passes::erase_funs(book)?;
+    let comp_book = passes::erase_terms(&book)
+                    .and_then(passes::inline)
+                    .and_then(passes::remove_u120_opers)
+                    .and_then(passes::convert_u120_uses)
+                    .and_then(passes::flatten)
+                    .and_then(passes::linearize_rules)?;
+    let kdl_names = get_kdl_names(&comp_book, namespace)?;
+    stringify_kdl_book(&book, &kdl_names, &comp_book)
 }
 
 // Utils

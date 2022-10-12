@@ -36,9 +36,7 @@ fn test_kind2(path: &Path, run: fn(&Path) -> String) -> Result<(), Error> {
 
 fn compile_kdl(config: &Config, path: &str) -> Result<String, String> {
     let loaded = driver::loader::load(&config, path)?;
-    let comp_book = codegen::kdl::compile_book(&loaded.book)?;
-    let kdl_names = codegen::kdl::get_kdl_names(&comp_book, &None)?;
-    let result = codegen::kdl::to_kdl_book(&loaded.book, &kdl_names, &comp_book)?;
+    let result = codegen::kdl::to_kdl_book(loaded.book, &None)?;
     Ok(result)
 }
 

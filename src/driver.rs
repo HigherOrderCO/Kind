@@ -9,7 +9,6 @@ use crate::codegen;
 use crate::derive;
 use crate::driver::loader::{load, File};
 use crate::parser::new_type;
-use crate::codegen::kdl::KDL_NAME_LEN;
 
 use crate::driver::config::Config;
 
@@ -218,14 +217,13 @@ pub fn cmd_run_main(config: &Config, path: &str) -> Result<(), String> {
 
 pub fn cmd_to_kdl(config: &Config, path: &str, namespace: &Option<String>) -> Result<(), String> {
     if let Some(ns) = namespace {
-        if ns.len() > KDL_NAME_LEN - 2 {
-            return Err(format!("Given namespace \"{}\"has more than {} characters.", ns, KDL_NAME_LEN - 2));
+        const MAX_NS_LEN: usize = codegen::kdl::KDL_NAME_LEN - 2;
+        if ns.len() > MAX_NS_LEN {
+            return Err(format!("Given namespace \"{}\"has more than {} characters.", ns, MAX_NS_LEN));
         }
     }
     let loaded = load(config, path)?;
-    let comp_book = codegen::kdl::compile_book(&loaded.book)?;
-    let kdl_names = codegen::kdl::get_kdl_names(&comp_book, namespace)?;
-    let result = codegen::kdl::to_kdl_book(&loaded.book, &kdl_names, &comp_book)?;
+    let result = codegen::kdl::to_kdl_book(loaded.book, namespace)?;
     print!("{}", result);
     Ok(())
 }

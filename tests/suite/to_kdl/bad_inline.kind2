@@ -1,0 +1,17 @@
+NormalFn (a: U60) : U60
+NormalFn a = (+ a a)
+
+#inline
+InlineFn (a: U60) : U60
+InlineFn 0 = (- 0 1)
+InlineFn 1 = (+ 2 2)
+InlineFn n = n
+
+BadInline : U60 {
+  let bad_arg = 1
+  let a = InlineFn 1
+  let b = InlineFn ((x => x) 1)
+  let c = InlineFn (NormalFn 0)
+  let d = InlineFn (- 2 1)
+  (+ a (+ b (+ c d)))
+}
