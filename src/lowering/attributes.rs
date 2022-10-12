@@ -1,4 +1,4 @@
-use crate::book::{span::{Span, Localized}, Attribute, Book, Entry, term::Term, name::Ident};
+use crate::book::{span::Span, Attribute, Book, Entry, name::Ident};
 use crate::driver::config::{Config, Target};
 
 use super::adjust::{AdjustError, AdjustErrorKind};
@@ -30,26 +30,8 @@ pub fn only_target(config: &Config, attr: &Attribute, target: Target) -> Result<
     if config.target == target || config.target == Target::All {
         Ok(())
     } else {
-        adjust_err(attr.orig, AdjustErrorKind::WrongTargetAttribute { name: attr.name.0.clone(), target })
-    }
-}
-
-// Checks that the function can be inlined
-// A function is inlineable if it has only one rule and all its patterns are variables
-pub fn is_inlineable(entry: &Entry, attr: &Attribute) -> Result<(), AdjustError> {
-    if entry.rules.len() != 1 {
-        let fn_name = entry.name.0.clone();
-        let attr_name = attr.name.0.clone();
-        adjust_err(entry.orig, AdjustErrorKind::NotInlineable { fn_name, attr_name } )
-    } else {
-        for pat in &entry.rules[0].pats {
-            if !matches!(&**pat, Term::Var { .. }) {
-                let fn_name = entry.name.0.clone();
-                let attr_name = attr.name.0.clone();
-                return adjust_err((&**pat).get_origin(), AdjustErrorKind::NotInlineable { fn_name, attr_name } );
-            } 
-        }
-        Ok(())
+        let name = attr.name.0.clone();
+        adjust_err(attr.orig, AdjustErrorKind::WrongTargetAttribute { name, target })
     }
 }
 
@@ -68,15 +50,27 @@ pub fn fn_exists<'a>(book: &'a Book, attr: &Attribute, entry_name: &Ident) -> Re
     if let Some(entry) = book.entrs.get(entry_name) {
         Ok(entry)
     } else {
-        adjust_err(attr.orig, AdjustErrorKind::FunctionNotFound { name: entry_name.0.clone() })
+        let name = entry_name.0.clone();
+        adjust_err(attr.orig, AdjustErrorKind::FunctionNotFound { name })
     }
 } 
+
+pub fn has_rules(entry: &Entry, attr: &Attribute) -> Result<(), AdjustError> {
+    if !entry.rules.is_empty() {
+        Ok(())
+    } else {
+        let fn_name = entry.name.0.clone();
+        let attr_name = attr.name.0.clone();
+        adjust_err(entry.orig, AdjustErrorKind::NeedsRules { fn_name, attr_name })
+    }
+}
 
 pub fn no_kdl_attrs(entry: &Entry) -> Result<(), AdjustError> {
     let kdl_attrs = ["kdl_erase", "kdl_run", "kdl_name", "kdl_state"];
     for attr_name in kdl_attrs {
         if let Some(attr) = entry.get_attribute(attr_name) {
-            return adjust_err(attr.orig, AdjustErrorKind::HasKdlAttrs { name: entry.name.0.clone() });
+            let name = entry.name.0.clone();
+            return adjust_err(attr.orig, AdjustErrorKind::HasKdlAttrs { name });
         }
     }
     Ok(())
@@ -88,12 +82,19 @@ pub fn no_kdl_attrs(entry: &Entry) -> Result<(), AdjustError> {
 // they have no specification so we should check then.
 pub fn check_attribute(config: &Config, book: &Book, attr: &Attribute) -> Result<(), AdjustError> {
     match attr.name.0.as_str() {
-        "kdl_erase" => without_args(attr),
+        "inline" => {
+            without_args(attr)
+        }
+        "kdl_erase" => {
+            without_args(attr)
+        }
         "kdl_run" => {
             without_args(attr)?;
             only_target(config, attr, Target::Kdl)
         }
-        "kdl_name" => with_args(attr),
+        "kdl_name" => {
+            with_args(attr)
+        }
         "kdl_state" => {
             with_args(attr)?;
             // TODO: The state function shouldnt be called anywhere
@@ -101,9 +102,13 @@ pub fn check_attribute(config: &Config, book: &Book, attr: &Attribute) -> Result
             let state_fn = fn_exists(book, attr, attr.value.as_ref().unwrap())?;
             no_kdl_attrs(state_fn)?;
             no_fn_args(state_fn, attr)?;
-            is_inlineable(state_fn, attr)
+            has_rules(state_fn, attr)
         }
-        _ => adjust_err(attr.orig, AdjustErrorKind::InvalidAttribute { name: attr.name.0.clone() }),
+        _ => {
+            let name = attr.name.0.clone();
+            let err = AdjustErrorKind::InvalidAttribute { name };
+            adjust_err(attr.orig, err)
+        }
     }
 }
 

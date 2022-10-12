@@ -24,7 +24,7 @@ pub enum AdjustErrorKind {
     AttributeWithoutArgs { name: String },
     AttributeMissingArg { name: String },
     WrongTargetAttribute { name: String, target: Target },
-    NotInlineable { fn_name: String, attr_name: String },
+    NeedsRules { fn_name: String, attr_name: String },
     FunctionHasArgs { fn_name: String, attr_name: String },
     FunctionNotFound { name: String },
     HasKdlAttrs { name: String },
