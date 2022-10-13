@@ -83,6 +83,13 @@ impl<'a> Lexer<'a> {
                     self.accumulate_while(&|x| x == '\n' || x == '\r');
                     self.lex_next()
                 }
+                '.' => {
+                    self.next_char();
+                    match self.peekable.peek() {
+                        Some('.') => self.single_token(Token::DotDot, start),
+                        _ => (Token::Dot, self.mk_range(start)),
+                    }
+                }
                 c if c.is_ascii_digit() => self.lex_number(),
                 c if is_valid_id_start(*c) => {
                     let str = self.accumulate_while(&is_valid_id);

@@ -75,6 +75,14 @@ impl<'a> Parser<'a> {
         Err(SyntaxError::UnexpectedToken(self.get().clone(), self.range(), expect))
     }
 
+    pub fn eat_closing_keyword(&mut self, expect: Token, range: Range) -> Result<(), SyntaxError> {
+        if !self.eat_keyword(expect) {
+            return Err(SyntaxError::Unclosed(range));
+        } else {
+            Ok(())
+        }
+    }
+
     pub fn eat_variant(&mut self, expect: Token) -> Result<(Token, Range), SyntaxError> {
         if self.get().same_variant(expect.clone()) {
             Ok(self.advance())

@@ -1,4 +1,4 @@
-use kind_tree::concrete::pat::{Pat, PatKind, PatIdent};
+use kind_tree::concrete::pat::{Pat, PatIdent, PatKind};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;

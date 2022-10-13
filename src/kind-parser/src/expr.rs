@@ -1,4 +1,5 @@
 use kind_tree::concrete::expr::*;
+use kind_tree::concrete::pat::PatIdent;
 use kind_tree::symbol::{Ident, Symbol};
 
 use crate::errors::SyntaxError;
@@ -119,7 +120,7 @@ impl<'a> Parser<'a> {
         self.bump(); // ':'
         let typ = self.parse_expr(false)?;
 
-        let _ = self.eat_variant(Token::RPar)?;
+        self.eat_closing_keyword(Token::RPar, range)?;
 
         if self.eat_keyword(Token::FatArrow) {
             let body = self.parse_expr(false)?;
@@ -144,7 +145,8 @@ impl<'a> Parser<'a> {
         self.bump(); // ':'
         let typ = self.parse_expr(false)?;
 
-        self.eat_variant(Token::RPar)?;
+        self.eat_closing_keyword(Token::RPar, range)?;
+
         let end = self.eat_variant(Token::RightArrow)?.1;
 
         let body = self.parse_expr(false)?;
@@ -201,7 +203,10 @@ impl<'a> Parser<'a> {
         let op = self.eat_operator()?;
         let fst = self.parse_atom()?;
         let snd = self.parse_atom()?;
-        let end = self.eat_variant(Token::RPar)?.1;
+        let end = self.range();
+
+        self.eat_closing_keyword(Token::RPar, range)?;
+
         Ok(Box::new(Expr {
             range: range.mix(end),
             data: ExprKind::Binary(op, fst, snd),
@@ -258,10 +263,8 @@ impl<'a> Parser<'a> {
                 self.bump(); // '::'
                 let typ = self.parse_expr(false)?;
                 let range = range.mix(self.range());
-                
-                if !self.eat_keyword(Token::RPar) {
-                    return Err(SyntaxError::Unclosed(range))
-                }
+
+                self.eat_closing_keyword(Token::RPar, range)?;
 
                 Ok(Box::new(Expr {
                     data: ExprKind::Ann(expr, typ),
@@ -269,9 +272,7 @@ impl<'a> Parser<'a> {
                 }))
             } else {
                 let end = self.range();
-                if !self.eat_keyword(Token::RPar) {
-                    return Err(SyntaxError::Unclosed(range))
-                }
+                self.eat_closing_keyword(Token::RPar, range)?;
                 expr.range = range.mix(end);
                 Ok(expr)
             }
@@ -452,19 +453,56 @@ impl<'a> Parser<'a> {
     pub fn parse_match(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let start = self.range();
         self.bump(); // 'match'
-        let tipo = self.parse_id()?;
-        let name = self.parse_id()?;
 
-        let expr = if self.eat_keyword(Token::Eq) { Some(self.parse_expr(false)?) } else { None };
+        let tipo = self.parse_upper_id()?;
+        let scrutinizer = self.parse_expr(false)?;
 
         self.eat_variant(Token::LBrace)?;
 
         let mut cases = Vec::new();
+
         while !self.get().same_variant(Token::RBrace) {
-            let case = self.parse_id()?;
+            let constructor = self.parse_id()?;
+
+            let mut ignore_rest_range = None;
+            let mut bindings = Vec::new();
+
+            loop {
+                match self.get() {
+                    Token::LowerId(_) => {
+                        let name = self.parse_id()?;
+                        bindings.push(CaseBinding::Field(PatIdent(name)));
+                    }
+                    Token::LPar => {
+                        let start = self.range();
+                        self.bump();
+                        let name = self.parse_id()?;
+                        self.eat_variant(Token::Colon)?;
+                        let renamed = self.parse_id()?;
+                        self.eat_closing_keyword(Token::RPar, start)?;
+                        bindings.push(CaseBinding::Renamed(name, PatIdent(renamed)));
+                    }
+                    Token::DotDot => {
+                        ignore_rest_range = Some(self.range());
+                        self.bump();
+                        continue;
+                    }
+                    _ => break,
+                }
+                if let Some(range) = ignore_rest_range {
+                    return Err(SyntaxError::IgnoreRestShouldBeOnTheEnd(range));
+                }
+            }
+
             self.eat_variant(Token::FatArrow)?;
-            let expr = self.parse_expr(false)?;
-            cases.push((case, expr))
+            let value = self.parse_expr(false)?;
+
+            cases.push(Case {
+                constructor: constructor,
+                bindings,
+                value,
+                ignore_rest: ignore_rest_range.is_some(),
+            })
         }
 
         let mut end = self.eat_variant(Token::RBrace)?.1;
@@ -477,29 +515,10 @@ impl<'a> Parser<'a> {
             None
         };
 
-        let match_ = Box::new(Match { tipo, name, expr, cases, motive });
+        let match_ = Box::new(Match { tipo, scrutinizer, cases, motive });
 
         Ok(Box::new(Expr {
             data: ExprKind::Match(match_),
-            range: start.mix(end),
-        }))
-    }
-
-    pub fn parse_open(&mut self) -> Result<Box<Expr>, SyntaxError> {
-        let start = self.range();
-        self.bump(); // 'open'
-        let tipo = self.parse_id()?;
-        let name = self.parse_id()?;
-
-        let expr = if self.eat_keyword(Token::Eq) { Some(self.parse_expr(false)?) } else { None };
-
-        let body = self.parse_expr(false)?;
-        let end = body.range;
-
-        let open = Box::new(Open { tipo, name, expr, body });
-
-        Ok(Box::new(Expr {
-            data: ExprKind::Open(open),
             range: start.mix(end),
         }))
     }
@@ -559,8 +578,6 @@ impl<'a> Parser<'a> {
             self.parse_match()
         } else if self.check_actual(Token::Let) {
             self.parse_let()
-        } else if self.check_actual(Token::Open) {
-            self.parse_open()
         } else if self.check_actual(Token::If) {
             self.parse_if()
         } else if self.check_actual(Token::Dollar) {

@@ -5,7 +5,7 @@ use crate::symbol::*;
 
 use super::{
     expr,
-    pat::{Pat, PatKind, PatIdent},
+    pat::{Pat, PatIdent, PatKind},
     Argument, Attribute, Book, Entry, Rule,
 };
 
@@ -39,13 +39,8 @@ pub trait Visitor: Sized {
         walk_pat_ident(self, ident);
     }
 
-
     fn visit_ident(&mut self, ident: &mut Ident) {
         walk_ident(self, ident);
-    }
-
-    fn visit_open(&mut self, open: &mut Open) {
-        walk_open(self, open);
     }
 
     fn visit_match(&mut self, matcher: &mut Match) {
@@ -80,6 +75,14 @@ pub trait Visitor: Sized {
         walk_substitution(self, subst);
     }
 
+    fn visit_case_binding(&mut self, case_binding: &mut CaseBinding) {
+        walk_case_binding(self, case_binding);
+    }
+
+    fn visit_case(&mut self, case: &mut Case) {
+        walk_case(self, case);
+    }
+
     fn visit_sttm(&mut self, sttm: &mut Sttm) {
         walk_sttm(self, sttm);
     }
@@ -107,30 +110,35 @@ pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
     ctx.visit_syntax_ctx(&mut ident.ctx);
 }
 
-pub fn walk_open<T: Visitor>(ctx: &mut T, open: &mut Open) {
-    ctx.visit_expr(&mut open.body);
-    match &mut open.expr {
-        Some(expr) => ctx.visit_expr(expr),
-        None => (),
+pub fn walk_case_binding<T: Visitor>(ctx: &mut T, binding: &mut CaseBinding) {
+    match binding {
+        CaseBinding::Field(ident) => ctx.visit_pat_ident(ident),
+        CaseBinding::Renamed(ident, rename) => {
+            ctx.visit_ident(ident);
+            ctx.visit_pat_ident(rename);
+        }
     }
-    ctx.visit_ident(&mut open.tipo);
-    ctx.visit_ident(&mut open.name);
+}
+
+pub fn walk_case<T: Visitor>(ctx: &mut T, case: &mut Case) {
+    ctx.visit_ident(&mut case.constructor);
+    for binding in &mut case.bindings {
+        ctx.visit_case_binding(binding);
+    }
+    ctx.visit_expr(&mut case.value)
 }
 
 pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
-    match &mut matcher.expr {
-        Some(expr) => ctx.visit_expr(expr),
-        None => (),
-    }
+    ctx.visit_ident(&mut matcher.tipo);
+    ctx.visit_expr(&mut matcher.scrutinizer);
+
     match &mut matcher.motive {
         Some(expr) => ctx.visit_expr(expr),
         None => (),
     }
-    ctx.visit_ident(&mut matcher.tipo);
-    ctx.visit_ident(&mut matcher.name);
-    for (name, body) in &mut matcher.cases {
-        ctx.visit_expr(body);
-        ctx.visit_ident(name);
+
+    for case in &mut matcher.cases {
+        ctx.visit_case(case)
     }
 }
 
@@ -220,15 +228,6 @@ pub fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
         SttmKind::Let(ident, val, next) => {
             ctx.visit_ident(ident);
             ctx.visit_expr(val);
-            ctx.visit_sttm(next);
-        }
-        SttmKind::Open(tipo, ident, val, next) => {
-            ctx.visit_ident(tipo);
-            ctx.visit_ident(ident);
-            match val {
-                Some(val) => ctx.visit_expr(val),
-                None => (),
-            }
             ctx.visit_sttm(next);
         }
         SttmKind::Ask(None, val, next) => {
@@ -321,6 +320,5 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
         ExprKind::Hole => {}
         ExprKind::Subst(subst) => ctx.visit_substitution(subst),
         ExprKind::Match(matcher) => ctx.visit_match(matcher),
-        ExprKind::Open(open) => ctx.visit_open(open),
     }
 }

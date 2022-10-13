@@ -1,12 +1,14 @@
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 use kind_tree::concrete::{Argument, Book, Entry, Rule};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
 use crate::state::Parser;
+
+pub mod type_decl;
 
 fn is_hidden_arg(token: &Token) -> bool {
     matches!(token, Token::Greater)

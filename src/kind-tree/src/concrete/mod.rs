@@ -1,4 +1,7 @@
-use std::{fmt::{Display, Error, Formatter}, collections::HashMap};
+use std::{
+    collections::HashMap,
+    fmt::{Display, Error, Formatter},
+};
 
 use crate::symbol::Ident;
 use expr::Expr;

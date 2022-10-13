@@ -7,6 +7,8 @@ use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::Ident;
 
+use super::pat::PatIdent;
+
 /// Enum of binary operators.
 #[derive(Copy, Clone, Debug)]
 pub enum Operator {
@@ -30,25 +32,28 @@ pub enum Operator {
 
 pub type Spine = Vec<Box<Expr>>;
 
+#[derive(Clone, Debug)]
+pub enum CaseBinding {
+    Field(PatIdent),
+    Renamed(Ident, PatIdent),
+}
+
+#[derive(Clone, Debug)]
+pub struct Case {
+    pub constructor: Ident,
+    pub bindings: Vec<CaseBinding>,
+    pub value: Box<Expr>,
+    pub ignore_rest: bool,
+}
+
 /// A match block that will be translated
 /// into an eliminator of a datatype.
 #[derive(Clone, Debug)]
 pub struct Match {
     pub tipo: Ident,
-    pub name: Ident,
-    pub expr: Option<Box<Expr>>,
-    pub cases: Vec<(Ident, Box<Expr>)>,
+    pub scrutinizer: Box<Expr>,
+    pub cases: Vec<Case>,
     pub motive: Option<Box<Expr>>,
-}
-
-/// A open statement that will be trnaslated
-/// into the eliminator of a record datatype.
-#[derive(Clone, Debug)]
-pub struct Open {
-    pub tipo: Ident,
-    pub name: Ident,
-    pub expr: Option<Box<Expr>>,
-    pub body: Box<Expr>,
 }
 
 /// Substitution
@@ -82,7 +87,6 @@ pub enum SttmKind {
     Expr(Box<Expr>, Box<Sttm>),
     Ask(Option<Ident>, Box<Expr>, Box<Sttm>),
     Let(Ident, Box<Expr>, Box<Sttm>),
-    Open(Ident, Ident, Option<Box<Expr>>, Box<Sttm>),
     Return(Box<Expr>),
 }
 
@@ -121,9 +125,6 @@ pub enum ExprKind {
     /// A match block that will be translated
     /// into an eliminator of a datatype.
     Match(Box<Match>),
-    /// A open statement that will be trnaslated
-    /// into the eliminator of a record datatype.
-    Open(Box<Open>),
     /// Do notation
     Do(Ident, Box<Sttm>),
     /// If else statement
@@ -208,12 +209,6 @@ impl Display for SttmKind {
             SttmKind::Ask(None, block, next) => {
                 write!(f, "ask {}; {}", block, next)
             }
-            SttmKind::Open(tipo, ident, Some(val), next) => {
-                write!(f, "open {} {} = {}; {}", tipo, ident, val, next)
-            }
-            SttmKind::Open(tipo, ident, None, next) => {
-                write!(f, "open {} {}; {}", tipo, ident, next)
-            }
             SttmKind::Expr(expr, next) => {
                 write!(f, "{};{}", expr, next)
             }
@@ -230,33 +225,42 @@ impl Display for Sttm {
     }
 }
 
+impl Display for CaseBinding {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        match self {
+            CaseBinding::Field(n) => write!(f, "{}", n.0),
+            CaseBinding::Renamed(m, n) => write!(f, "({}: {})", m, n.0),
+        }
+    }
+}
+
+impl Display for Case {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "{}", self.constructor)?;
+        for bind in &self.bindings {
+            write!(f, " {}", bind)?
+        }
+        if self.ignore_rest {
+            write!(f, " ..")?;
+        }
+        write!(f, " => {}; ", self.value)
+    }
+}
+
 impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "match {} {}", self.tipo, self.name)?;
-        match &self.expr {
-            None => Ok(()),
-            Some(res) => write!(f, " = {}", res),
-        }?;
+        write!(f, "match {} {}", self.tipo, self.scrutinizer)?;
+
         match &self.motive {
             None => Ok(()),
             Some(res) => write!(f, " : {}", res),
         }?;
         write!(f, " {{ ")?;
-        for (case, expr) in &self.cases {
-            write!(f, "{} => {}; ", case, expr)?
+
+        for case in &self.cases {
+            write!(f, "{}; ", case)?
         }
         write!(f, "}}")
-    }
-}
-
-impl Display for Open {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "open {} {}", self.tipo, self.name)?;
-        match &self.expr {
-            None => Ok(()),
-            Some(res) => write!(f, " = {}", res),
-        }?;
-        write!(f, " {}", self.body)
     }
 }
 
@@ -287,7 +291,6 @@ impl Display for Expr {
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
             Hole => write!(f, "_"),
             Match(matcher) => write!(f, "({})", matcher),
-            Open(open) => write!(f, "({})", open),
             Subst(subst) => write!(f, "({})", subst),
             Help(name) => write!(f, "?{}", name),
         }

@@ -22,7 +22,8 @@ pub enum SyntaxError {
     UnexpectedToken(Token, Range, Vec<Token>),
     LowerCasedDefinition(String, Range),
     NotAClauseOfDef(Range, Range),
-    Unclosed(Range)
+    Unclosed(Range),
+    IgnoreRestShouldBeOnTheEnd(Range),
 }
 
 fn encode_name(encode: EncodeSequence) -> &'static str {
@@ -47,6 +48,19 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
                     position: range,
                     color: Color::Fst,
                     text: "The string starts in this position!".to_string(),
+                    no_code: false,
+                }],
+            },
+            SyntaxError::IgnoreRestShouldBeOnTheEnd(range) => DiagnosticFrame {
+                code: 0,
+                severity: Severity::Error,
+                title: "Invalid position of the '..' operator".to_string(),
+                subtitles: vec![],
+                hints: vec!["Put it on the end of the clause or remove it.".to_string()],
+                positions: vec![Marking {
+                    position: range,
+                    color: Color::Fst,
+                    text: "It should not be in the middle of this!".to_string(),
                     no_code: false,
                 }],
             },
@@ -86,17 +100,20 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
                 title: "Unexpected Upper id that does not refer to the definition".to_string(),
                 subtitles: vec![],
                 hints: vec!["If you indend to make another clause, use the same name.".to_string()],
-                positions: vec![Marking {
-                    position: snd,
-                    color: Color::Fst,
-                    text: "This is the unexpected token".to_string(),
-                    no_code: false,
-                },Marking {
-                    position: fst,
-                    color: Color::Snd,
-                    text: "This is the definition. All clauses should use the same name.".to_string(),
-                    no_code: false,
-                }],
+                positions: vec![
+                    Marking {
+                        position: snd,
+                        color: Color::Fst,
+                        text: "This is the unexpected token".to_string(),
+                        no_code: false,
+                    },
+                    Marking {
+                        position: fst,
+                        color: Color::Snd,
+                        text: "This is the definition. All clauses should use the same name.".to_string(),
+                        no_code: false,
+                    },
+                ],
             },
             SyntaxError::UnfinishedComment(range) => DiagnosticFrame {
                 code: 0,

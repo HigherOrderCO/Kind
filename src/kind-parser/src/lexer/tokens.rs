@@ -16,6 +16,8 @@ pub enum Token {
     Comma,      // ,
     RightArrow, // ->
     ColonColon, // ::
+    DotDot,     // ..
+    Dot,        // .
 
     Help(String),
     LowerId(String),

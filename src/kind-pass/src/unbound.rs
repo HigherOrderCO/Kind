@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use kind_tree::concrete::expr::{Case, CaseBinding};
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::visitor::walk_book;
 use kind_tree::symbol::Ident;
@@ -32,6 +33,8 @@ impl Visitor for UnboundCollector {
     fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
         if let Some(fst) = self.context_vars.iter().find(|x| x.data == ident.0.data) {
             self.errors.push(PassError::RepeatedVariable(fst.range, ident.0.range))
+        } else {
+            self.context_vars.push(ident.0.clone())
         }
     }
 
@@ -85,9 +88,6 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(val);
                 self.visit_sttm(next);
             }
-            SttmKind::Open(_, _, _, _) => {
-                todo!()
-            }
             SttmKind::Ask(None, val, next) => {
                 self.visit_expr(val);
                 self.visit_sttm(next);
@@ -126,6 +126,22 @@ impl Visitor for UnboundCollector {
                 }
             }
         }
+    }
+
+    fn visit_case_binding(&mut self, case_binding: &mut CaseBinding) {
+        match case_binding {
+            CaseBinding::Field(pat) => self.visit_pat_ident(pat),
+            CaseBinding::Renamed(_, pat) => self.visit_pat_ident(pat),
+        }
+    }
+
+    fn visit_case(&mut self, case: &mut Case) {
+        let vars = self.context_vars.clone();
+        for binding in &mut case.bindings {
+            self.visit_case_binding(binding);
+        }
+        self.visit_expr(&mut case.value);
+        self.context_vars = vars;
     }
 
     fn visit_expr(&mut self, expr: &mut Expr) {
@@ -208,9 +224,22 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(a);
                 self.visit_expr(b);
             }
+            ExprKind::Match(matcher) => {
+                self.visit_expr(&mut matcher.scrutinizer);
+                for case in &mut matcher.cases {
+                    // TODO: Better error for not found constructors like this one.
+                    let mut name = case.constructor.clone();
+                    name.data.0 = format!("{}.{}", matcher.tipo.data.0.clone(), name.data.0);
+                    self.visit_ident(&mut name);
+
+                    self.visit_case(case);
+                }
+                match &mut matcher.motive {
+                    Some(x) => self.visit_expr(x),
+                    None => (),
+                }
+            }
             ExprKind::Subst(_subst) => todo!(),
-            ExprKind::Match(_matcher) => todo!(),
-            ExprKind::Open(_open) => todo!(),
             ExprKind::Help(_) => {}
             ExprKind::Hole => {}
         }
