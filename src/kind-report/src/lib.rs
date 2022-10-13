@@ -11,6 +11,7 @@ pub struct Chars {
     pub trline: char,
     pub bxline: char,
     pub brline: char,
+    pub ylline: char,
 }
 
 impl Chars {
@@ -22,6 +23,7 @@ impl Chars {
             trline: '└',
             bxline: '┬',
             brline: '┌',
+            ylline: '├',
         }
     }
 }

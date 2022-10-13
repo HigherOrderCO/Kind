@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 kind-span = { path = "../kind-span" }
+unicode-width = "0.1.10"
 yansi = "0.5.1"

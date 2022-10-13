@@ -6,6 +6,7 @@ use std::rc::Rc;
 use std::str;
 
 use kind_span::{Pos, SyntaxCtxIndex};
+use unicode_width::UnicodeWidthStr;
 use yansi::Paint;
 
 use crate::{data::*, RenderConfig};
@@ -62,9 +63,10 @@ fn find_in_line_guide(pos: Pos, guide: &Vec<usize>) -> Point {
             };
         }
     }
+    let line = guide.len() - 1;
     Point {
-        line: guide.len(),
-        column: pos.index as usize,
+        line,
+        column: pos.index as usize - (if line == 0 { 0 } else { guide[line - 1] }),
     }
 }
 
@@ -110,7 +112,7 @@ pub fn paint_line<T>(data: T) -> Paint<T> {
     Paint::new(data).fg(yansi::Color::Cyan).dimmed()
 }
 
-pub fn mark_inlined<T: Write + Sized>(prefix: &str, config: &RenderConfig, inline_markers: &mut [&(Point, Point, &Marking)], fmt: &mut T) -> std::fmt::Result {
+pub fn mark_inlined<T: Write + Sized>(prefix: &str, code: &str, config: &RenderConfig, inline_markers: &mut [&(Point, Point, &Marking)], fmt: &mut T) -> std::fmt::Result {
     inline_markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
     let mut start = 0;
 
@@ -118,13 +120,15 @@ pub fn mark_inlined<T: Write + Sized>(prefix: &str, config: &RenderConfig, inlin
 
     for marker in inline_markers.iter_mut() {
         if start < marker.0.column {
-            write!(fmt, "{:pad$}", "", pad = marker.0.column - start)?;
+            let pad = UnicodeWidthStr::width(&code[start..marker.0.column]);
+            write!(fmt, "{:pad$}", "", pad = pad)?;
             start = marker.0.column;
         }
         if start < marker.1.column {
+            let pad = UnicodeWidthStr::width(&code[start..marker.1.column]);
             let colorizer = get_colorizer(&marker.2.color);
             write!(fmt, "{}", colorizer(config.chars.bxline.to_string()))?;
-            write!(fmt, "{}", colorizer(config.chars.hbar.to_string().repeat((marker.1.column - start).saturating_sub(1))))?;
+            write!(fmt, "{}", colorizer(config.chars.hbar.to_string().repeat(pad.saturating_sub(1))))?;
             start = marker.1.column;
         }
     }
@@ -135,7 +139,8 @@ pub fn mark_inlined<T: Write + Sized>(prefix: &str, config: &RenderConfig, inlin
         for j in 0..(inline_markers.len() - i) {
             let marker = inline_markers[j];
             if start < marker.0.column {
-                write!(fmt, "{:pad$}", "", pad = marker.0.column - start)?;
+                let pad = UnicodeWidthStr::width(&code[start..marker.0.column]);
+                write!(fmt, "{:pad$}", "", pad = pad)?;
                 start = marker.0.column;
             }
             if start < marker.1.column {
@@ -158,16 +163,22 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
 
     let point = find_in_line_guide(markers[0].position.start, &guide);
 
+    let no_code = markers.iter().all(|x| x.no_code);
+
     let header = format!(
         "{:>5} {}{}[{}:{}]",
         "",
-        config.chars.brline,
+        if no_code { config.chars.hbar } else { config.chars.brline },
         config.chars.hbar.to_string().repeat(2),
         file_name.to_str().unwrap(),
         point
     );
 
     writeln!(fmt, "{}", paint_line(header))?;
+
+    if no_code {
+        return Ok(())
+    }
 
     writeln!(fmt, "{:>5} {}", "", paint_line(config.chars.vbar))?;
 
@@ -233,7 +244,10 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
 
         if !inline_markers.is_empty() {
             colorize_code(&mut inline_markers, code_lines[*line], fmt)?;
-            mark_inlined(&prefix, config, &mut inline_markers, fmt)?;
+            mark_inlined(&prefix, code_lines[*line], config, &mut inline_markers, fmt)?;
+            if markers_by_line.contains_key(&(line + 1)) {
+                writeln!(fmt, "{:>5} {} {} ", "", paint_line(config.chars.dbar), prefix)?;
+            }
         } else {
             writeln!(fmt, "{}", code_lines[*line])?;
         }
