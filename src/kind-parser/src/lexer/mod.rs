@@ -14,11 +14,11 @@ fn is_whitespace(chr: char) -> bool {
 }
 
 fn is_valid_id(chr: char) -> bool {
-    chr.is_alphanumeric() || matches!(chr, '_' | '$' | '.')
+    chr.is_ascii_alphanumeric() || matches!(chr, '_' | '$' | '.')
 }
 
 fn is_valid_id_start(chr: char) -> bool {
-    chr.is_alphabetic() || matches!(chr, '_')
+    chr.is_ascii_alphanumeric() || matches!(chr, '_')
 }
 
 impl<'a> Lexer<'a> {
