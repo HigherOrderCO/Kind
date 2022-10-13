@@ -21,6 +21,7 @@ impl From<&DriverError> for DiagnosticFrame {
                         position: ident.range,
                         color: Color::Fst,
                         text: "Here!".to_string(),
+                        no_code: false
                     },
                 ],
             },
