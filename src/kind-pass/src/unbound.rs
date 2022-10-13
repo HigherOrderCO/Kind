@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use kind_tree::concrete::pat::PatIdent;
 use kind_tree::symbol::Ident;
 
 use kind_tree::concrete::{
@@ -21,19 +22,15 @@ pub struct UnboundCollector {
 
 impl Visitor for UnboundCollector {
     fn visit_ident(&mut self, ident: &mut Ident) {
-        if let Some(fst) = self.context_vars.iter().find(|x| x.data == ident.data) {
-            if self.is_on_pat {
-                self.errors.push(PassError::RepeatedVariable(fst.range, ident.range))
-            } else {
-                self.context_vars.push(ident.clone());
-            }
-        } else {
-            if !self.is_on_pat {
-                let entry = self.unbound.entry(ident.data.0.clone()).or_default();
-                entry.push(ident.clone());
-            } else {
-                self.context_vars.push(ident.clone());
-            }
+        if !self.context_vars.iter().any(|x| x.data == ident.data) {
+            let entry = self.unbound.entry(ident.data.0.clone()).or_default();
+            entry.push(ident.clone());
+        }
+    }
+
+    fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
+        if let Some(fst) = self.context_vars.iter().find(|x| x.data == ident.0.data) {
+            self.errors.push(PassError::RepeatedVariable(fst.range, ident.0.range))
         }
     }
 
@@ -103,7 +100,7 @@ impl Visitor for UnboundCollector {
 
     fn visit_pat(&mut self, pat: &mut Pat) {
         match &mut pat.data {
-            PatKind::Var(ident) => self.visit_ident(ident),
+            PatKind::Var(ident) => self.visit_pat_ident(ident),
             PatKind::Str(_) => (),
             PatKind::Num(_) => (),
             PatKind::Hole => (),
@@ -131,7 +128,7 @@ impl Visitor for UnboundCollector {
         match &mut expr.data {
             ExprKind::Var(ident) => self.visit_ident(ident),
             ExprKind::Data(ident) => {
-                if self.context_vars.iter().find(|x| x.data == ident.data).is_none() {
+                if !self.context_vars.iter().any(|x| x.data == ident.data) {
                     let entry = self.unbound.entry(ident.data.0.clone()).or_default();
                     entry.push(ident.clone());
                 }
@@ -207,9 +204,9 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(a);
                 self.visit_expr(b);
             }
-            ExprKind::Subst(subst) => todo!(),
-            ExprKind::Match(matcher) => todo!(),
-            ExprKind::Open(open) => todo!(),
+            ExprKind::Subst(_subst) => todo!(),
+            ExprKind::Match(_matcher) => todo!(),
+            ExprKind::Open(_open) => todo!(),
             ExprKind::Help(_) => {}
             ExprKind::Hole => {}
         }

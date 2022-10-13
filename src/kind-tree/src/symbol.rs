@@ -7,7 +7,7 @@ use kind_span::{Range, SyntaxCtxIndex};
 pub struct Symbol(pub String);
 
 // Identifier inside a syntax context.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash)]
 pub struct Ident {
     pub data: Symbol,
     pub ctx: SyntaxCtxIndex,

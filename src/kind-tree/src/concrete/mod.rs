@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-use std::fmt::{Display, Error, Formatter};
+use std::{fmt::{Display, Error, Formatter}, collections::HashMap};
 
 use crate::symbol::Ident;
 use expr::Expr;
@@ -75,15 +74,15 @@ pub struct Entry {
 #[derive(Clone, Debug, Default)]
 pub struct Book {
     pub names: Vec<Ident>,
-    pub entrs: HashMap<String, Box<Entry>>,
+    pub entries: HashMap<String, Entry>,
 }
 
 // Display
 
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        for name in &self.names {
-            writeln!(f, "{}\n", self.entrs.get(&name.data.0).unwrap())?;
+        for entr in self.entries.values() {
+            writeln!(f, "{}\n", entr)?;
         }
         Ok(())
     }

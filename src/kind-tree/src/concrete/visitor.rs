@@ -5,7 +5,7 @@ use crate::symbol::*;
 
 use super::{
     expr,
-    pat::{Pat, PatKind},
+    pat::{Pat, PatKind, PatIdent},
     Argument, Attribute, Book, Entry, Rule,
 };
 
@@ -34,6 +34,11 @@ pub trait Visitor: Sized {
     fn visit_literal(&mut self, lit: &mut Literal) {
         walk_literal(self, lit);
     }
+
+    fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
+        walk_pat_ident(self, ident);
+    }
+
 
     fn visit_ident(&mut self, ident: &mut Ident) {
         walk_ident(self, ident);
@@ -91,6 +96,11 @@ pub fn walk_syntax_ctx<T: Visitor>(_: &mut T, _: &mut SyntaxCtxIndex) {}
 pub fn walk_operator<T: Visitor>(_: &mut T, _: &mut expr::Operator) {}
 
 pub fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
+
+pub fn walk_pat_ident<T: Visitor>(ctx: &mut T, ident: &mut PatIdent) {
+    ctx.visit_range(&mut ident.0.range);
+    ctx.visit_syntax_ctx(&mut ident.0.ctx);
+}
 
 pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
     ctx.visit_range(&mut ident.range);
@@ -157,7 +167,7 @@ pub fn walk_attr<T: Visitor>(ctx: &mut T, attr: &mut Attribute) {
 pub fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
     ctx.visit_range(&mut pat.range);
     match &mut pat.data {
-        PatKind::Var(ident) => ctx.visit_ident(ident),
+        PatKind::Var(ident) => ctx.visit_pat_ident(ident),
         PatKind::Str(_) => (),
         PatKind::Num(_) => (),
         PatKind::Hole => (),
@@ -189,7 +199,7 @@ pub fn walk_rule<T: Visitor>(ctx: &mut T, rule: &mut Rule) {
 }
 
 pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
-    for entr in book.entrs.values_mut() {
+    for entr in book.entries.values_mut() {
         ctx.visit_entry(entr);
     }
 }

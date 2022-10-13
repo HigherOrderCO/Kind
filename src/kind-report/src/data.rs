@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use kind_span::Range;
 
 #[derive(Debug, Clone)]
@@ -48,13 +46,12 @@ pub struct DiagnosticFrame {
 }
 
 impl DiagnosticFrame {
-    pub fn to_diagnostic(self, file_name: PathBuf) -> Diagnostic {
-        Diagnostic { file_name, frame: self }
+    pub fn to_diagnostic(self) -> Diagnostic {
+        Diagnostic { frame: self }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Diagnostic {
-    pub file_name: PathBuf,
     pub frame: DiagnosticFrame,
 }

@@ -15,7 +15,7 @@ pub struct EncodedSpan(pub u64);
 
 /// Describes a position in a source code (syntax context). It's useful
 /// to generate error messages.
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, Hash)]
 pub struct Range {
     pub start: Pos,
     pub end: Pos,

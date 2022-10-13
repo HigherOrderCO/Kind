@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use std::fmt::{Display, Write};
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::str;
 
 use kind_span::{Pos, SyntaxCtxIndex};
@@ -18,7 +19,7 @@ pub struct Point {
 }
 
 pub trait FileCache {
-    fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<&(PathBuf, String)>;
+    fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(Rc<PathBuf>, Rc<String>)>;
 }
 
 impl Display for Point {
@@ -308,7 +309,7 @@ impl Diagnostic {
         for (ctx, group) in groups {
             writeln!(fmt)?;
             let (file, code) = cache.fetch(ctx).unwrap();
-            write_code_block(file, config, &group, code, fmt)?;
+            write_code_block(&*file.clone(), config, &group, &*code, fmt)?;
         }
 
         writeln!(fmt)?;

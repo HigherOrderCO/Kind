@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 kind-span = {path = "../kind-span"}
+fxhash = "0.2.1"
