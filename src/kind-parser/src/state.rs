@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use kind_span::{Range};
+use kind_span::Range;
 
 use crate::{errors::SyntaxError, lexer::tokens::Token, Lexer};
 

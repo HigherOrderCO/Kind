@@ -2,7 +2,7 @@ use std::{iter::Peekable, str::Chars};
 
 use kind_span::{Pos, Range, SyntaxCtxIndex};
 
-use crate::{lexer::tokens::Token};
+use crate::lexer::tokens::Token;
 
 /// The lexer state.
 pub struct Lexer<'a> {

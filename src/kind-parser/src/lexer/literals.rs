@@ -1,4 +1,4 @@
-use kind_span::{Range};
+use kind_span::Range;
 
 use crate::errors::{EncodeSequence, SyntaxError};
 use crate::lexer::tokens::Token;

@@ -97,7 +97,6 @@ impl<'a> Parser<'a> {
         Ok(ident)
     }
 
-
     fn parse_lambda(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let name_span = self.range();
 

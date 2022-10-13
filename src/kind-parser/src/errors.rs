@@ -1,4 +1,4 @@
-use kind_report::data::{DiagnosticFrame, Marking, Severity, Color};
+use kind_report::data::{Color, DiagnosticFrame, Marking, Severity};
 use kind_span::Range;
 
 use crate::lexer::tokens::Token;
@@ -49,12 +49,12 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
             SyntaxError::LowerCasedDefinition(name, range) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
-                title: "The definition name should be upper cased.".to_string(),
+                title: "The definition name must be capitalized.".to_string(),
                 subtitles: vec![],
                 hints: vec![{
                     let mut c = name.chars();
                     let fst = c.next().unwrap().to_uppercase();
-                    format!("Change it to '{}{}'", fst, c.as_str()).to_string()
+                    format!("Change it to '{}{}'", fst, c.as_str())
                 }],
                 positions: vec![Marking {
                     position: range,
@@ -74,20 +74,18 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
                     text: "The comment starts in this position!".to_string(),
                 }],
             },
-            SyntaxError::InvalidEscapeSequence(kind, range) => {
-                DiagnosticFrame {
-                    code: 0,
-                    severity: Severity::Error,
-                    title: format!("The {} character sequence is invalid!", encode_name(kind)),
-                    subtitles: vec![],
-                    hints: vec![],
-                    positions: vec![Marking {
-                        position: range,
-                        color: Color::Fst,
-                        text: "Here!".to_string(),
-                    }],
-                }
-            }
+            SyntaxError::InvalidEscapeSequence(kind, range) => DiagnosticFrame {
+                code: 0,
+                severity: Severity::Error,
+                title: format!("The {} character sequence is invalid!", encode_name(kind)),
+                subtitles: vec![],
+                hints: vec![],
+                positions: vec![Marking {
+                    position: range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                }],
+            },
             SyntaxError::InvalidNumberRepresentation(repr, range) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,

@@ -1,4 +1,4 @@
-use kind_tree::concrete::pat::{Pat, PatKind};
+use kind_tree::concrete::pat::{Pat, PatKind, PatIdent};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -56,7 +56,7 @@ impl<'a> Parser<'a> {
         let id = self.parse_id()?;
         Ok(Box::new(Pat {
             range: id.range,
-            data: PatKind::Var(id),
+            data: PatKind::Var(PatIdent(id)),
         }))
     }
 
@@ -67,7 +67,6 @@ impl<'a> Parser<'a> {
             data: PatKind::App(id, vec![]),
         }))
     }
-
 
     fn parse_pat_list(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let range = self.range();

@@ -45,12 +45,12 @@ impl<'a> Lexer<'a> {
             "open" => Token::Open,
             "return" => Token::Return,
             _ => {
-               if data.bytes().next().map(|x| x.is_ascii_uppercase()).unwrap_or(false) {
-                Token::UpperId(data.to_string())
-               }else {
-                Token::LowerId(data.to_string())
-               }
-            },
+                if data.bytes().next().map(|x| x.is_ascii_uppercase()).unwrap_or(false) {
+                    Token::UpperId(data.to_string())
+                } else {
+                    Token::LowerId(data.to_string())
+                }
+            }
         }
     }
 

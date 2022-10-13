@@ -1,6 +1,6 @@
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
-use std::collections::HashMap;
+use std::collections::{HashMap};
 
 use kind_tree::concrete::{Argument, Book, Entry, Rule};
 
@@ -13,16 +13,17 @@ fn is_hidden_arg(token: &Token) -> bool {
 }
 
 impl<'a> Parser<'a> {
-    pub fn is_top_level_entry(&self) -> bool {
-        self.get().is_upper_id() && (
-              self.peek(1).same_variant(Token::Colon) // ':'
+    pub fn is_top_level_entry_continuation(&self) -> bool {
+        self.peek(1).same_variant(Token::Colon) // ':'
             | self.peek(1).same_variant(Token::LPar) // '('
             | self.peek(1).same_variant(Token::Less) // '<'
             | self.peek(1).same_variant(Token::Minus)  // '-'
             | self.peek(1).same_variant(Token::Plus) // '+'
-        )
     }
 
+    pub fn is_top_level_entry(&self) -> bool {
+        self.get().is_upper_id() && self.is_top_level_entry_continuation()
+    }
 
     pub fn complement_binding_op(&self) -> Option<Token> {
         match self.get() {
@@ -88,17 +89,16 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_entry(&mut self) -> Result<Box<Entry>, SyntaxError> {
+    pub fn parse_entry(&mut self) -> Result<Entry, SyntaxError> {
         let start = self.range();
 
-        if self.get().is_lower_id() {
+        if self.get().is_lower_id() && self.is_top_level_entry_continuation() {
             let ident = self.parse_id()?;
             return Err(SyntaxError::LowerCasedDefinition(ident.data.0, ident.range));
         }
 
         // Just to make errors more localized
         if !self.is_top_level_entry() {
-            println!("{:?} {:?}", self.get(), self.peek(1));
             self.fail(vec![])?
         }
 
@@ -122,7 +122,7 @@ impl<'a> Parser<'a> {
             }
         }
         let end = rules.last().as_ref().map(|x| x.range).unwrap_or(tipo.range);
-        Ok(Box::new(Entry {
+        Ok(Entry {
             name: ident,
             docs,
             args,
@@ -130,18 +130,18 @@ impl<'a> Parser<'a> {
             rules,
             attrs: Vec::new(),
             range: start.mix(end),
-        }))
+        })
     }
 
     pub fn parse_book(&mut self) -> Book {
-        let mut entrs = HashMap::new();
+        let mut entries = HashMap::new();
         let mut names = Vec::new();
         while !self.get().same_variant(Token::Eof) {
             match self.parse_entry() {
                 Ok(entry) => {
-                    if entrs.get(&entry.name.data.0).is_none() {
+                    if entries.get(&entry.name.data.0).is_none() {
                         names.push(entry.name.clone());
-                        entrs.insert(entry.name.data.0.clone(), entry);
+                        entries.insert(entry.name.data.0.clone(), entry);
                     }
                 }
                 Err(err) => {
@@ -156,9 +156,9 @@ impl<'a> Parser<'a> {
 
         match res {
             Ok(_) => (),
-            Err(err) => self.errs.push(Box::new(err))
+            Err(err) => self.errs.push(Box::new(err)),
         }
 
-        Book { names, entrs }
+        Book { entries, names }
     }
 }
