@@ -55,7 +55,7 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
                 severity: Severity::Error,
                 title: "Unfinished Char".to_string(),
                 subtitles: vec![],
-                hints: vec!["You need to close the character with another quote, take a look at the beggining".to_string()],
+                hints: vec!["You need to close the character with another quote, take a look at the beginning".to_string()],
                 positions: vec![Marking {
                     position: range,
                     color: Color::Fst,
