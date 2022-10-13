@@ -89,7 +89,7 @@ impl DepGraph {
                 parents = node.parents.clone();
             });
 
-            if dangling && parents.len() != 0 {
+            if dangling && !parents.is_empty() {
                 return vec![];
             }
 
@@ -105,7 +105,7 @@ impl DepGraph {
                 edges.entry(child_id).and_modify(|child| {
                     let mut child = child.write().unwrap();
                     child.parents.remove(&node_id);
-                    if child.parents.len() == 0 {
+                    if child.parents.is_empty() {
                         to_delete.push(child_id);
                     }
                 });

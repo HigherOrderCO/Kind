@@ -49,7 +49,7 @@ pub trait Session: Clone {
 
         if let Some(res) = db.get(&child_hash).map(|x| x.clone()) {
             if !graph.updated(child_hash) {
-                return (res.clone(), true);
+                return (res, true);
             }
         }
 

@@ -14,4 +14,6 @@ path = "src/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+kind-driver = { path = "../kind-driver" }
+kind-report = { path = "../kind-report" }
 clap = { version = "4.0.10", features = ["derive"] }

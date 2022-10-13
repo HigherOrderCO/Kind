@@ -1,6 +1,8 @@
-use std::path::PathBuf;
+use std::path::{PathBuf};
 
 use clap::{Parser, Subcommand};
+use kind_driver::{session::Session, parse_and_store_book_by_path};
+use kind_report::RenderConfig;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -75,5 +77,8 @@ enum Command {
 }
 
 fn main() {
-    let _ = Cli::parse();
+    //let _ = Cli::parse();
+    let config = RenderConfig::unicode(2);
+    let mut session = Session::new(PathBuf::from("."), &config);
+    let _ = parse_and_store_book_by_path(&mut session, "A", &PathBuf::from("teste.kind2"));
 }
