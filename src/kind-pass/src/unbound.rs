@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use kind_tree::concrete::pat::PatIdent;
+use kind_tree::concrete::visitor::walk_book;
 use kind_tree::symbol::Ident;
 
 use kind_tree::concrete::{
@@ -54,8 +55,6 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_entry(&mut self, entry: &mut Entry) {
-        self.context_vars.push(entry.name.clone());
-
         let vars = self.context_vars.clone();
         for arg in &mut entry.args {
             self.visit_argument(arg)
@@ -67,6 +66,11 @@ impl Visitor for UnboundCollector {
         for rule in &mut entry.rules {
             self.visit_rule(rule)
         }
+    }
+
+    fn visit_book(&mut self, book: &mut kind_tree::concrete::Book) {
+        self.context_vars = book.names.clone();
+        walk_book(self, book);
     }
 
     fn visit_sttm(&mut self, sttm: &mut kind_tree::concrete::expr::Sttm) {

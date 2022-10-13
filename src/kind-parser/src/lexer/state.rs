@@ -36,6 +36,10 @@ impl<'a> Lexer<'a> {
         Range::new(Pos { index: start as u32 }, Pos { index: self.pos as u32 }, self.ctx)
     }
 
+    pub fn mk_one_column_range(&self, start: usize) -> Range {
+        Range::new(Pos { index: start as u32 }, Pos { index: (start + 1) as u32 }, self.ctx)
+    }
+
     pub fn next_char(&mut self) -> Option<char> {
         match self.peekable.next() {
             Some(chr) if !self.input.is_empty() => {

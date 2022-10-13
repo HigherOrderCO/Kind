@@ -21,11 +21,13 @@ impl From<&PassError> for DiagnosticFrame {
                         position: last_decl,
                         color: Color::Fst,
                         text: "Second occurence".to_string(),
+                        no_code: false,
                     },
                     Marking {
                         position: first_decl,
                         color: Color::Snd,
                         text: "First occurence".to_string(),
+                        no_code: false,
                     },
                 ],
             },

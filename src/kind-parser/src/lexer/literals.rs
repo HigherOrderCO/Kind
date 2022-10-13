@@ -19,7 +19,7 @@ impl<'a> Lexer<'a> {
     /// Turns a escaped char into a normal char.
     fn lex_escaped_char(&mut self, start: usize) -> Result<char, SyntaxError> {
         match self.peekable.peek() {
-            None => Err(SyntaxError::UnfinishedString(self.mk_range(start))),
+            None => Err(SyntaxError::UnfinishedString(self.mk_one_column_range(start))),
             Some(&x) => {
                 self.next_char();
                 match x {
@@ -115,7 +115,7 @@ impl<'a> Lexer<'a> {
         match (self.next_char(), error) {
             (_, Some(err)) => err,
             (Some('"'), _) => (Token::Str(string), self.mk_range(start)),
-            _ => (Token::Error(Box::new(SyntaxError::UnfinishedString(self.mk_range(start)))), self.mk_range(start)),
+            _ => (Token::Error(Box::new(SyntaxError::UnfinishedString(self.mk_one_column_range(start)))), self.mk_range(start)),
         }
     }
 }

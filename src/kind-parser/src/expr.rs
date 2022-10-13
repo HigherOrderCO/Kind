@@ -165,10 +165,12 @@ impl<'a> Parser<'a> {
 
     fn parse_data(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let id = self.parse_upper_id()?;
-        Ok(Box::new(Expr {
-            range: id.range,
-            data: ExprKind::Data(id),
-        }))
+        let data = match id.data.0.as_str() {
+            "Type" => ExprKind::Lit(Literal::Type),
+            "U60" => ExprKind::Lit(Literal::U60),
+            _ => ExprKind::Data(id.clone()),
+        };
+        Ok(Box::new(Expr { range: id.range, data }))
     }
 
     fn parse_num(&mut self, num: u64) -> Result<Box<Expr>, SyntaxError> {
@@ -255,13 +257,21 @@ impl<'a> Parser<'a> {
             if self.get().same_variant(Token::ColonColon) {
                 self.bump(); // '::'
                 let typ = self.parse_expr(false)?;
-                let range = range.mix(self.eat_variant(Token::RPar)?.1);
+                let range = range.mix(self.range());
+                
+                if !self.eat_keyword(Token::RPar) {
+                    return Err(SyntaxError::Unclosed(range))
+                }
+
                 Ok(Box::new(Expr {
                     data: ExprKind::Ann(expr, typ),
                     range,
                 }))
             } else {
-                let end = self.eat_variant(Token::RPar)?.1;
+                let end = self.range();
+                if !self.eat_keyword(Token::RPar) {
+                    return Err(SyntaxError::Unclosed(range))
+                }
                 expr.range = range.mix(end);
                 Ok(expr)
             }

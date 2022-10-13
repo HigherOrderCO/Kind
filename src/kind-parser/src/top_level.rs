@@ -122,6 +122,12 @@ impl<'a> Parser<'a> {
             }
         }
         let end = rules.last().as_ref().map(|x| x.range).unwrap_or(tipo.range);
+
+        // Better error message when you have change the name of the function
+        if self.get().is_upper_id() && !self.is_top_level_entry_continuation() {
+            return Err(SyntaxError::NotAClauseOfDef(ident.range.clone(), self.range()));
+        }
+
         Ok(Entry {
             name: ident,
             docs,
