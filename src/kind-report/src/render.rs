@@ -32,7 +32,9 @@ impl Display for Point {
 fn group_markers(markers: &[Marking]) -> SortedMarkers {
     let mut file_group = SortedMarkers::new();
     for marker in markers {
-        let group = file_group.entry(marker.position.ctx).or_insert_with(Vec::new);
+        let group = file_group
+            .entry(marker.position.ctx)
+            .or_insert_with(Vec::new);
         group.push(marker.clone())
     }
     for group in file_group.values_mut() {
@@ -83,7 +85,11 @@ pub fn get_colorizer<T>(color: &Color) -> &dyn Fn(T) -> Paint<T> {
 
 // TODO: Remove common indentation.
 // TODO: Prioritize inline marcations.
-pub fn colorize_code<'a, T: Write + Sized>(markers: &mut [&(Point, Point, &Marking)], code_line: &'a str, fmt: &mut T) -> std::fmt::Result {
+pub fn colorize_code<'a, T: Write + Sized>(
+    markers: &mut [&(Point, Point, &Marking)],
+    code_line: &'a str,
+    fmt: &mut T,
+) -> std::fmt::Result {
     markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
     let mut start = 0;
     for marker in markers {
@@ -92,7 +98,11 @@ pub fn colorize_code<'a, T: Write + Sized>(markers: &mut [&(Point, Point, &Marki
             start = marker.0.column;
         }
 
-        let end = if marker.0.line == marker.1.line { marker.1.column } else { code_line.len() };
+        let end = if marker.0.line == marker.1.line {
+            marker.1.column
+        } else {
+            code_line.len()
+        };
 
         if start < end {
             let colorizer = get_colorizer(&marker.2.color);
@@ -112,11 +122,23 @@ pub fn paint_line<T>(data: T) -> Paint<T> {
     Paint::new(data).fg(yansi::Color::Cyan).dimmed()
 }
 
-pub fn mark_inlined<T: Write + Sized>(prefix: &str, code: &str, config: &RenderConfig, inline_markers: &mut [&(Point, Point, &Marking)], fmt: &mut T) -> std::fmt::Result {
+pub fn mark_inlined<T: Write + Sized>(
+    prefix: &str,
+    code: &str,
+    config: &RenderConfig,
+    inline_markers: &mut [&(Point, Point, &Marking)],
+    fmt: &mut T,
+) -> std::fmt::Result {
     inline_markers.sort_by(|x, y| x.0.column.cmp(&y.0.column));
     let mut start = 0;
 
-    write!(fmt, "{:>5} {} {}", "", paint_line(config.chars.vbar), prefix)?;
+    write!(
+        fmt,
+        "{:>5} {} {}",
+        "",
+        paint_line(config.chars.vbar),
+        prefix
+    )?;
 
     for marker in inline_markers.iter_mut() {
         if start < marker.0.column {
@@ -128,13 +150,23 @@ pub fn mark_inlined<T: Write + Sized>(prefix: &str, code: &str, config: &RenderC
             let pad = UnicodeWidthStr::width(&code[start..marker.1.column]);
             let colorizer = get_colorizer(&marker.2.color);
             write!(fmt, "{}", colorizer(config.chars.bxline.to_string()))?;
-            write!(fmt, "{}", colorizer(config.chars.hbar.to_string().repeat(pad.saturating_sub(1))))?;
+            write!(
+                fmt,
+                "{}",
+                colorizer(config.chars.hbar.to_string().repeat(pad.saturating_sub(1)))
+            )?;
             start = marker.1.column;
         }
     }
     writeln!(fmt)?;
     for i in 0..inline_markers.len() {
-        write!(fmt, "{:>5} {} {}", "", paint_line(config.chars.vbar), prefix)?;
+        write!(
+            fmt,
+            "{:>5} {} {}",
+            "",
+            paint_line(config.chars.vbar),
+            prefix
+        )?;
         let mut start = 0;
         for j in 0..(inline_markers.len() - i) {
             let marker = inline_markers[j];
@@ -146,7 +178,11 @@ pub fn mark_inlined<T: Write + Sized>(prefix: &str, code: &str, config: &RenderC
             if start < marker.1.column {
                 let colorizer = get_colorizer(&marker.2.color);
                 if j == (inline_markers.len() - i).saturating_sub(1) {
-                    write!(fmt, "{}", colorizer(format!("{} {}", config.chars.trline, marker.2.text)))?;
+                    write!(
+                        fmt,
+                        "{}",
+                        colorizer(format!("{} {}", config.chars.trline, marker.2.text))
+                    )?;
                 } else {
                     write!(fmt, "{}", colorizer(config.chars.vbar.to_string()))?;
                 }
@@ -158,7 +194,13 @@ pub fn mark_inlined<T: Write + Sized>(prefix: &str, code: &str, config: &RenderC
     Ok(())
 }
 
-pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderConfig, markers: &[Marking], group_code: &'a str, fmt: &mut T) -> std::fmt::Result {
+pub fn write_code_block<'a, T: Write + Sized>(
+    file_name: &Path,
+    config: &RenderConfig,
+    markers: &[Marking],
+    group_code: &'a str,
+    fmt: &mut T,
+) -> std::fmt::Result {
     let guide = get_code_line_guide(group_code);
 
     let point = find_in_line_guide(markers[0].position.start, &guide);
@@ -168,7 +210,11 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
     let header = format!(
         "{:>5} {}{}[{}:{}]",
         "",
-        if no_code { config.chars.hbar } else { config.chars.brline },
+        if no_code {
+            config.chars.hbar
+        } else {
+            config.chars.brline
+        },
         config.chars.hbar.to_string().repeat(2),
         file_name.to_str().unwrap(),
         point
@@ -177,7 +223,7 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
     writeln!(fmt, "{}", paint_line(header))?;
 
     if no_code {
-        return Ok(())
+        return Ok(());
     }
 
     writeln!(fmt, "{:>5} {}", "", paint_line(config.chars.vbar))?;
@@ -221,7 +267,8 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
         let mut prefix = "   ".to_string();
         let mut empty_vec = Vec::new();
         let row = markers_by_line.get_mut(line).unwrap_or(&mut empty_vec);
-        let mut inline_markers: Vec<&(Point, Point, &Marking)> = row.iter().filter(|x| x.0.line == x.1.line).collect();
+        let mut inline_markers: Vec<&(Point, Point, &Marking)> =
+            row.iter().filter(|x| x.0.line == x.1.line).collect();
         let mut current = None;
 
         for marker in &multi_line_markers {
@@ -236,7 +283,13 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
             }
         }
 
-        write!(fmt, "{:>5} {} {}", line + 1, paint_line(config.chars.vbar), prefix,)?;
+        write!(
+            fmt,
+            "{:>5} {} {}",
+            line + 1,
+            paint_line(config.chars.vbar),
+            prefix,
+        )?;
 
         if let Some(marker) = current {
             prefix = format!(" {} ", get_colorizer(&marker.2.color)(config.chars.vbar));
@@ -246,7 +299,13 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
             colorize_code(&mut inline_markers, code_lines[*line], fmt)?;
             mark_inlined(&prefix, code_lines[*line], config, &mut inline_markers, fmt)?;
             if markers_by_line.contains_key(&(line + 1)) {
-                writeln!(fmt, "{:>5} {} {} ", "", paint_line(config.chars.dbar), prefix)?;
+                writeln!(
+                    fmt,
+                    "{:>5} {} {} ",
+                    "",
+                    paint_line(config.chars.dbar),
+                    prefix
+                )?;
             }
         } else {
             writeln!(fmt, "{}", code_lines[*line])?;
@@ -255,7 +314,13 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
         if let Some(marker) = current {
             if marker.1.line == *line {
                 let col = get_colorizer(&marker.2.color);
-                writeln!(fmt, "{:>5} {} {} ", "", paint_line(config.chars.dbar), prefix)?;
+                writeln!(
+                    fmt,
+                    "{:>5} {} {} ",
+                    "",
+                    paint_line(config.chars.dbar),
+                    prefix
+                )?;
                 writeln!(
                     fmt,
                     "{:>5} {} {} ",
@@ -268,7 +333,13 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
         }
 
         if i < lines.len() - 1 && lines[i + 1] - line > 1 {
-            writeln!(fmt, "{:>5} {} {} ", "", paint_line(config.chars.dbar), prefix)?;
+            writeln!(
+                fmt,
+                "{:>5} {} {} ",
+                "",
+                paint_line(config.chars.dbar),
+                prefix
+            )?;
         }
     }
 
@@ -277,14 +348,31 @@ pub fn write_code_block<'a, T: Write + Sized>(file_name: &Path, config: &RenderC
 
 pub fn render_tag<T: Write + Sized>(severity: &Severity, fmt: &mut T) -> std::fmt::Result {
     match severity {
-        Severity::Error => write!(fmt, " {} ", Paint::new(" ERROR ").bg(yansi::Color::Red).bold()),
-        Severity::Warning => write!(fmt, " {} ", Paint::new(" WARN ").bg(yansi::Color::Yellow).bold()),
-        Severity::Info => write!(fmt, " {} ", Paint::new(" INFO ").bg(yansi::Color::Blue).bold()),
+        Severity::Error => write!(
+            fmt,
+            " {} ",
+            Paint::new(" ERROR ").bg(yansi::Color::Red).bold()
+        ),
+        Severity::Warning => write!(
+            fmt,
+            " {} ",
+            Paint::new(" WARN ").bg(yansi::Color::Yellow).bold()
+        ),
+        Severity::Info => write!(
+            fmt,
+            " {} ",
+            Paint::new(" INFO ").bg(yansi::Color::Blue).bold()
+        ),
     }
 }
 
 impl Diagnostic {
-    pub fn render<T: Write + Sized, C: FileCache>(&self, cache: &C, config: &RenderConfig, fmt: &mut T) -> std::fmt::Result {
+    pub fn render<T: Write + Sized, C: FileCache>(
+        &self,
+        cache: &C,
+        config: &RenderConfig,
+        fmt: &mut T,
+    ) -> std::fmt::Result {
         writeln!(fmt)?;
 
         write!(fmt, " ")?;
@@ -299,7 +387,13 @@ impl Diagnostic {
             match subtitle {
                 Subtitle::Normal(color, phr) => {
                     let colorizer = get_colorizer(color);
-                    writeln!(fmt, "{:>5} {} {}", "", colorizer("•"), Paint::new(phr).bold())?;
+                    writeln!(
+                        fmt,
+                        "{:>5} {} {}",
+                        "",
+                        colorizer("•"),
+                        Paint::new(phr).bold()
+                    )?;
                 }
                 Subtitle::Phrase(color, words) => {
                     let colorizer = get_colorizer(color);

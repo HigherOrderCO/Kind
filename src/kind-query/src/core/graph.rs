@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashSet},
+    collections::HashSet,
     sync::{Arc, RwLock},
 };
 
@@ -74,7 +74,6 @@ impl DepGraph {
         }
         children
     }
-
 
     pub fn remove(&self, node_id: u64, dangling: bool) -> Vec<u64> {
         let mut to_delete = Vec::new();

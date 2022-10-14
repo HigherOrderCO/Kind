@@ -36,6 +36,9 @@ pub struct RenderConfig<'a> {
 
 impl<'a> RenderConfig<'a> {
     pub fn unicode(indent: usize) -> RenderConfig<'a> {
-        RenderConfig { chars: Chars::unicode(), indent }
+        RenderConfig {
+            chars: Chars::unicode(),
+            indent,
+        }
     }
 }

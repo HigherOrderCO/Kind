@@ -110,9 +110,9 @@ fn make_cache_struct(pat: &TraitPat, ident_cache: &syn::Ident) -> syn::Result<Tk
     for Method { ret, memoizable, name, .. } in &pat.methods {
         if let syn::ReturnType::Type(_, ty) = ret {
             if *memoizable {
-                    defs.push(quote! {
-                        pub #name: std::sync::Arc<dashmap::DashMap<u64, #ty>>,
-                    });
+                defs.push(quote! {
+                    pub #name: std::sync::Arc<dashmap::DashMap<u64, #ty>>,
+                });
             }
         }
     }

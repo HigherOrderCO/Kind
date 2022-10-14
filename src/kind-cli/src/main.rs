@@ -1,7 +1,7 @@
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use kind_driver::{session::Session, parse_and_store_book_by_path};
+use kind_driver::{parse_and_store_book_by_path, session::Session};
 use kind_report::RenderConfig;
 
 #[derive(Parser)]
@@ -40,10 +40,6 @@ enum Command {
     #[clap(aliases = &["r"])]
     Run { file: String },
 
-    /// Derives .kind2 files from a .type file
-    #[clap(aliases = &["der"])]
-    Derive { file: String },
-
     /// Generates a checker (.hvm) for a file
     #[clap(aliases = &["gc"])]
     GenChecker { file: String },
@@ -69,7 +65,6 @@ enum Command {
     /// check when some file change.
     #[clap(aliases = &["w"])]
     Watch { file: String },
-
 
     /// Read eval print loop
     #[clap(aliases = &["re"])]

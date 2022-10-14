@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 dashmap = "5.4.0"
 fxhash = "0.2.1"
-rayon = "1.5.3"
 
 kind-parser = { path = "../kind-parser" }
 kind-span = { path = "../kind-span" }

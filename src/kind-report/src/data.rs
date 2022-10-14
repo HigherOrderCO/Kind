@@ -33,7 +33,7 @@ pub struct Marking {
     pub position: Range,
     pub color: Color,
     pub text: String,
-    pub no_code: bool
+    pub no_code: bool,
 }
 
 #[derive(Debug, Clone)]

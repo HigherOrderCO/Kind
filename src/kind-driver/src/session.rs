@@ -30,7 +30,13 @@ impl<'a> Session<'a> {
             book_counter: 0,
         }
     }
-    pub fn add_book(&mut self, ident: String, path: Rc<PathBuf>, code: Rc<String>, book: Rc<Book>) -> usize {
+    pub fn add_book(
+        &mut self,
+        ident: String,
+        path: Rc<PathBuf>,
+        code: Rc<String>,
+        book: Rc<Book>,
+    ) -> usize {
         let id = self.book_counter;
         self.book_counter += 1;
         self.loaded_idents.insert(ident, id);

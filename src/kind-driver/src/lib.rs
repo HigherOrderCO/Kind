@@ -3,19 +3,20 @@ pub mod session;
 
 use core::fmt;
 use std::collections::HashMap;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::{fs, io};
 
 use errors::DriverError;
-use kind_parser::Lexer;
 use kind_parser::state::Parser;
+use kind_parser::Lexer;
 use kind_pass::unbound::UnboundCollector;
 use kind_report::data::{Diagnostic, DiagnosticFrame};
-use kind_report::render::{FileCache};
-use kind_span::{SyntaxCtxIndex};
-use kind_tree::symbol::Ident;
+use kind_report::render::FileCache;
+use kind_span::SyntaxCtxIndex;
 use kind_tree::concrete::visitor::Visitor;
+use kind_tree::concrete::Book;
+use kind_tree::symbol::Ident;
 use session::Session;
 
 #[derive(Debug)]
@@ -32,7 +33,10 @@ pub struct SessionCache<'a> {
 
 impl<'a> FileCache for Session<'a> {
     fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(Rc<PathBuf>, Rc<String>)> {
-        Some((self.loaded_paths[ctx.0].clone(), self.loaded_sources[ctx.0].clone()))
+        Some((
+            self.loaded_paths[ctx.0].clone(),
+            self.loaded_sources[ctx.0].clone(),
+        ))
     }
 }
 
@@ -49,7 +53,13 @@ where
 }
 
 pub fn render_error_to_stderr<T: Into<DiagnosticFrame>>(session: &Session, err: T) {
-    Diagnostic::render(&Diagnostic { frame: err.into() }, session, session.render_config, &mut ToWriteFmt(std::io::stderr())).unwrap();
+    Diagnostic::render(
+        &Diagnostic { frame: err.into() },
+        session,
+        session.render_config,
+        &mut ToWriteFmt(std::io::stderr()),
+    )
+    .unwrap();
 }
 
 pub fn search_neighbour_paths(raw_path: &Path) -> CompResult<PathBuf> {
@@ -85,7 +95,6 @@ pub fn ident_to_path(root: &Path, ident: &Ident, search_on_parent: bool) -> Comp
     }
 }
 
-
 pub fn parse_and_store_book_by_identifier(session: &mut Session, ident: &Ident) -> CompResult {
     if session.loaded_idents.contains_key(&ident.data.0) {
         return Ok(());
@@ -96,12 +105,12 @@ pub fn parse_and_store_book_by_identifier(session: &mut Session, ident: &Ident) 
         err
     })?;
 
-    parse_and_store_book_by_path(session, &ident.data.0, &path)?;
+    let _ = parse_and_store_book_by_path(session, &ident.data.0, &path)?;
 
     Ok(())
 }
 
-pub fn throw_errors<'a, T : 'a>(session: &Session, errs: &'a [T]) -> CompResult
+pub fn throw_errors<'a, T: 'a>(session: &Session, errs: &'a [T]) -> CompResult
 where
     DiagnosticFrame: From<&'a T>,
 {
@@ -115,7 +124,11 @@ where
     }
 }
 
-pub fn parse_and_store_book_by_path(session: &mut Session, ident: &str, path: &PathBuf) -> CompResult {
+pub fn parse_and_store_book_by_path(
+    session: &mut Session,
+    ident: &str,
+    path: &PathBuf,
+) -> CompResult<Rc<Book>> {
     let input = fs::read_to_string(path).unwrap();
 
     let ctx_id = session.book_counter;
@@ -126,8 +139,14 @@ pub fn parse_and_store_book_by_path(session: &mut Session, ident: &str, path: &P
     let lexer = Lexer::new(&input, &mut peekable, SyntaxCtxIndex(ctx_id));
     let mut parser = Parser::new(lexer, &mut syntax_errs);
     let mut book = parser.parse_book();
+    let rc = Rc::new(book.clone());
 
-    session.add_book(ident.to_string(), Rc::new(path.to_path_buf()), Rc::new(input.clone()), Rc::new(book.clone()));
+    session.add_book(
+        ident.to_string(),
+        Rc::new(path.to_path_buf()),
+        Rc::new(input.clone()),
+        rc.clone(),
+    );
 
     let _ = throw_errors(session, &syntax_errs);
 
@@ -136,9 +155,11 @@ pub fn parse_and_store_book_by_path(session: &mut Session, ident: &str, path: &P
 
     let _ = throw_errors(session, &collector.errors);
 
-    for (_, idents) in  collector.unbound {
-        parse_and_store_book_by_identifier(session, &idents[0])?;
+    for (_, idents) in collector.unbound {
+        let _ = parse_and_store_book_by_identifier(session, &idents[0]);
     }
 
-    Ok(())
+    println!("\n{}", book);
+
+    Ok(rc)
 }

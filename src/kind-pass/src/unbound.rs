@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-use kind_tree::concrete::expr::{Case, CaseBinding};
+use kind_tree::concrete::expr::{Binding, Case, CaseBinding};
 use kind_tree::concrete::pat::PatIdent;
-use kind_tree::concrete::visitor::walk_book;
+use kind_tree::concrete::visitor::walk_expr;
+use kind_tree::concrete::TopLevel;
 use kind_tree::symbol::Ident;
 
 use kind_tree::concrete::{
@@ -11,6 +12,7 @@ use kind_tree::concrete::{
     visitor::Visitor,
     Argument, Entry, Rule,
 };
+use kind_tree::{visit_opt, visit_vec};
 
 use crate::errors::PassError;
 
@@ -23,6 +25,8 @@ pub struct UnboundCollector {
 }
 
 impl Visitor for UnboundCollector {
+    fn visit_attr(&mut self, _: &mut kind_tree::concrete::Attribute) {}
+
     fn visit_ident(&mut self, ident: &mut Ident) {
         if !self.context_vars.iter().any(|x| x.data == ident.data) {
             let entry = self.unbound.entry(ident.data.0.clone()).or_default();
@@ -32,7 +36,8 @@ impl Visitor for UnboundCollector {
 
     fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
         if let Some(fst) = self.context_vars.iter().find(|x| x.data == ident.0.data) {
-            self.errors.push(PassError::RepeatedVariable(fst.range, ident.0.range))
+            self.errors
+                .push(PassError::RepeatedVariable(fst.range, ident.0.range))
         } else {
             self.context_vars.push(ident.0.clone())
         }
@@ -72,8 +77,41 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_book(&mut self, book: &mut kind_tree::concrete::Book) {
-        self.context_vars = book.names.clone();
-        walk_book(self, book);
+        for entr in &mut book.entries {
+            match entr {
+                TopLevel::SumType(entr) => {
+                    self.context_vars.push(entr.name.clone());
+                    for cons in &entr.constructors {
+                        let mut name_cons = cons.name.clone();
+                        name_cons.data.0 = format!("{}.{}", name_cons.data.0, cons.name.data.0);
+                        self.context_vars.push(name_cons);
+                    }
+                    visit_vec!(entr.parameters, arg => self.visit_argument(arg));
+                    visit_vec!(entr.indices, arg => self.visit_argument(arg));
+                    visit_vec!(entr.constructors, cons => {
+                        visit_vec!(cons.args, arg => self.visit_argument(arg));
+                        visit_opt!(&mut cons.typ, arg => self.visit_expr(arg))
+                    });
+                }
+                TopLevel::RecordType(entr) => {
+                    self.context_vars.push(entr.name.clone());
+
+                    let mut name_cons = entr.name.clone();
+                    name_cons.data.0 = format!("{}.{}", name_cons.data.0, entr.constructor.data.0);
+                    self.context_vars.push(name_cons);
+
+                    visit_vec!(entr.parameters, arg => self.visit_argument(arg));
+                    visit_vec!(entr.indices, arg => self.visit_argument(arg));
+                    visit_vec!(entr.fields, (_, _, typ) => {
+                        self.visit_expr(typ);
+                    });
+                }
+                TopLevel::Entry(entr) => {
+                    self.context_vars.push(entr.name.clone());
+                    self.visit_entry(entr)
+                }
+            }
+        }
     }
 
     fn visit_sttm(&mut self, sttm: &mut kind_tree::concrete::expr::Sttm) {
@@ -144,22 +182,37 @@ impl Visitor for UnboundCollector {
         self.context_vars = vars;
     }
 
+    fn visit_match(&mut self, matcher: &mut kind_tree::concrete::expr::Match) {
+        self.visit_expr(&mut matcher.scrutinizer);
+        for case in &mut matcher.cases {
+            // TODO: Better error for not found constructors like this one.
+            let mut name = case.constructor.clone();
+            name.data.0 = format!("{}.{}", matcher.tipo.data.0.clone(), name.data.0);
+            self.visit_ident(&mut name);
+
+            self.visit_case(case);
+        }
+        match &mut matcher.motive {
+            Some(x) => self.visit_expr(x),
+            None => (),
+        }
+    }
+
+    fn visit_binding(&mut self, binding: &mut Binding) {
+        match binding {
+            Binding::Positional(e) => self.visit_expr(e),
+            Binding::Named(_, _, e) => self.visit_expr(e),
+        }
+    }
+
     fn visit_expr(&mut self, expr: &mut Expr) {
         match &mut expr.data {
             ExprKind::Var(ident) => self.visit_ident(ident),
-            ExprKind::Data(ident) => {
+            ExprKind::Constr(ident) => {
                 if !self.context_vars.iter().any(|x| x.data == ident.data) {
                     let entry = self.unbound.entry(ident.data.0.clone()).or_default();
                     entry.push(ident.clone());
                 }
-            }
-            ExprKind::All(None, typ, body) => {
-                self.visit_expr(typ);
-                self.visit_expr(body);
-            }
-            ExprKind::Pair(fst, snd) => {
-                self.visit_expr(fst);
-                self.visit_expr(snd);
             }
             ExprKind::All(Some(ident), typ, body) => {
                 self.visit_expr(typ);
@@ -182,66 +235,16 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
-            ExprKind::Sigma(None, typ, body) => {
-                self.visit_expr(typ);
-                self.visit_expr(body);
-            }
-            ExprKind::If(cond, if_, else_) => {
-                self.visit_expr(cond);
-                self.visit_expr(if_);
-                self.visit_expr(else_);
-            }
-            ExprKind::Do(ident, sttm) => {
-                self.visit_ident(ident);
-                self.visit_sttm(sttm)
-            }
-            ExprKind::App(expr, spine) => {
-                self.visit_expr(expr);
-                for arg in spine {
-                    self.visit_expr(arg);
-                }
-            }
-            ExprKind::List(spine) => {
-                for arg in spine {
-                    self.visit_expr(arg);
-                }
-            }
             ExprKind::Let(ident, val, body) => {
                 self.context_vars.push(ident.clone());
                 self.visit_expr(val);
                 self.context_vars.pop();
                 self.visit_expr(body);
             }
-            ExprKind::Ann(val, ty) => {
-                self.visit_expr(val);
-                self.visit_expr(ty);
-            }
-            ExprKind::Lit(lit) => {
-                self.visit_literal(lit);
-            }
-            ExprKind::Binary(op, a, b) => {
-                self.visit_operator(op);
-                self.visit_expr(a);
-                self.visit_expr(b);
-            }
-            ExprKind::Match(matcher) => {
-                self.visit_expr(&mut matcher.scrutinizer);
-                for case in &mut matcher.cases {
-                    // TODO: Better error for not found constructors like this one.
-                    let mut name = case.constructor.clone();
-                    name.data.0 = format!("{}.{}", matcher.tipo.data.0.clone(), name.data.0);
-                    self.visit_ident(&mut name);
-
-                    self.visit_case(case);
-                }
-                match &mut matcher.motive {
-                    Some(x) => self.visit_expr(x),
-                    None => (),
-                }
-            }
+            ExprKind::Match(matcher) => self.visit_match(matcher),
             ExprKind::Subst(_subst) => todo!(),
-            ExprKind::Help(_) => {}
-            ExprKind::Hole => {}
+            ExprKind::Help(_) => (),
+            _ => walk_expr(self, expr),
         }
     }
 }
