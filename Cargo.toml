@@ -1,7 +1,6 @@
 [workspace]
 members = [
   "src/kind-cli",
-  "src/kind-query",
   "src/kind-tree",
   "src/kind-span",
   "src/kind-parser",
@@ -10,10 +9,11 @@ members = [
   "src/kind-checker",
   "src/kind-driver",
   "src/kind-report",
-  "src/kind-macros",
   "src/kind-target-kdl",
   "src/kind-target-hvm",
-  "src/kind-optimization",
   "src/kind-derive",
-  "src/kind-lint",
+  # "src/kind-optimization",
+  # "src/kind-lint",
+  # "src/kind-query",
+  # "src/kind-macros",
 ]
