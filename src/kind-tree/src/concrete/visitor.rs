@@ -12,7 +12,7 @@ use super::{
 #[macro_export]
 macro_rules! visit_vec {
     ($args:expr, $pat:pat => $fun:expr) => {
-        for $pat in &mut $args {
+        for $pat in $args {
             $fun
         }
     };
@@ -70,6 +70,10 @@ pub trait Visitor: Sized {
 
     fn visit_ident(&mut self, ident: &mut Ident) {
         walk_ident(self, ident);
+    }
+
+    fn visit_destruct(&mut self, ident: &mut Destruct) {
+        walk_destruct(self, ident);
     }
 
     fn visit_match(&mut self, matcher: &mut Match) {
@@ -135,7 +139,7 @@ pub fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
 
 pub fn walk_constructor<T: Visitor>(ctx: &mut T, cons: &mut Constructor) {
     ctx.visit_ident(&mut cons.name);
-    visit_vec!(cons.args, arg => ctx.visit_argument(arg));
+    visit_vec!(&mut cons.args, arg => ctx.visit_argument(arg));
     visit_opt!(&mut cons.typ, arg => ctx.visit_expr(arg))
 }
 
@@ -147,6 +151,18 @@ pub fn walk_pat_ident<T: Visitor>(ctx: &mut T, ident: &mut PatIdent) {
 pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
     ctx.visit_range(&mut ident.range);
     ctx.visit_syntax_ctx(&mut ident.ctx);
+}
+
+pub fn walk_destruct<T: Visitor>(ctx: &mut T, destruct: &mut Destruct) {
+    match destruct {
+        Destruct::Destruct(i, e, _) => {
+            ctx.visit_ident(i);
+            visit_vec!(e, e => ctx.visit_case_binding(e))
+        },
+        Destruct::Ident(i) => {
+            ctx.visit_ident(i)
+        },
+    }
 }
 
 pub fn walk_binding<T: Visitor>(ctx: &mut T, binding: &mut Binding) {
@@ -279,17 +295,17 @@ pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
         match entr {
             super::TopLevel::SumType(sum) => {
                 ctx.visit_ident(&mut sum.name);
-                visit_vec!(sum.attrs, arg => ctx.visit_attr(arg));
-                visit_vec!(sum.parameters, arg => ctx.visit_argument(arg));
-                visit_vec!(sum.indices, arg => ctx.visit_argument(arg));
-                visit_vec!(sum.constructors, arg => ctx.visit_constructor(arg));
+                visit_vec!(&mut sum.attrs, arg => ctx.visit_attr(arg));
+                visit_vec!(&mut sum.parameters, arg => ctx.visit_argument(arg));
+                visit_vec!(&mut sum.indices, arg => ctx.visit_argument(arg));
+                visit_vec!(&mut sum.constructors, arg => ctx.visit_constructor(arg));
             }
             super::TopLevel::RecordType(rec) => {
                 ctx.visit_ident(&mut rec.name);
-                visit_vec!(rec.attrs, arg => ctx.visit_attr(arg));
-                visit_vec!(rec.parameters, arg => ctx.visit_argument(arg));
-                visit_vec!(rec.indices, arg => ctx.visit_argument(arg));
-                visit_vec!(rec.fields, (name, _docs, typ) => {
+                visit_vec!(&mut rec.attrs, arg => ctx.visit_attr(arg));
+                visit_vec!(&mut rec.parameters, arg => ctx.visit_argument(arg));
+                visit_vec!(&mut rec.indices, arg => ctx.visit_argument(arg));
+                visit_vec!(&mut rec.fields, (name, _docs, typ) => {
                     ctx.visit_ident(name);
                     ctx.visit_expr(typ);
                 });
@@ -314,8 +330,8 @@ pub fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
             ctx.visit_expr(val);
             ctx.visit_sttm(next);
         }
-        SttmKind::Let(ident, val, next) => {
-            ctx.visit_ident(ident);
+        SttmKind::Let(destrut, val, next) => {
+            ctx.visit_destruct(destrut);
             ctx.visit_expr(val);
             ctx.visit_sttm(next);
         }
@@ -388,8 +404,8 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
                 ctx.visit_expr(arg);
             }
         }
-        ExprKind::Let(ident, val, body) => {
-            ctx.visit_ident(ident);
+        ExprKind::Let(destruct, val, body) => {
+            ctx.visit_destruct(destruct);
             ctx.visit_expr(val);
             ctx.visit_expr(body);
         }

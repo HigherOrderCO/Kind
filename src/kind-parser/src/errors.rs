@@ -68,13 +68,13 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
             SyntaxError::UnusedDocString(range) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Warning,
-                title: "This entire documentation string is in a invalid position".to_string(),
+                title: "This entire documentation comment is in a invalid position".to_string(),
                 subtitles: vec![],
-                hints: vec!["Take a look at the rules for documentation strings at https://kind.kindelia.org/hints/documentation-strings".to_string()],
+                hints: vec!["Take a look at the rules for doc comments at https://kind.kindelia.org/hints/documentation-strings".to_string()],
                 positions: vec![Marking {
                     position: range,
                     color: Color::For,
-                    text: "Remove it. In future releases it will be considered an error".to_string(),
+                    text: "Remove the entire comment or transform it in a simple comment with '//'".to_string(),
                     no_code: false,
                 }],
             },

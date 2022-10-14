@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use kind_tree::concrete::expr::{Binding, Case, CaseBinding};
+use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::visitor::walk_expr;
 use kind_tree::concrete::TopLevel;
@@ -18,7 +18,6 @@ use crate::errors::PassError;
 
 #[derive(Default)]
 pub struct UnboundCollector {
-    pub is_on_pat: bool,
     pub errors: Vec<PassError>,
     pub context_vars: Vec<Ident>,
     pub unbound: HashMap<String, Vec<Ident>>,
@@ -53,11 +52,9 @@ impl Visitor for UnboundCollector {
 
     fn visit_rule(&mut self, rule: &mut Rule) {
         let vars = self.context_vars.clone();
-        self.is_on_pat = true;
         for pat in &mut rule.pats {
             self.visit_pat(pat);
         }
-        self.is_on_pat = false;
         self.visit_expr(&mut rule.body);
         self.context_vars = vars;
     }
@@ -86,10 +83,10 @@ impl Visitor for UnboundCollector {
                         name_cons.data.0 = format!("{}.{}", name_cons.data.0, cons.name.data.0);
                         self.context_vars.push(name_cons);
                     }
-                    visit_vec!(entr.parameters, arg => self.visit_argument(arg));
-                    visit_vec!(entr.indices, arg => self.visit_argument(arg));
-                    visit_vec!(entr.constructors, cons => {
-                        visit_vec!(cons.args, arg => self.visit_argument(arg));
+                    visit_vec!(&mut entr.parameters, arg => self.visit_argument(arg));
+                    visit_vec!(&mut entr.indices, arg => self.visit_argument(arg));
+                    visit_vec!(&mut entr.constructors, cons => {
+                        visit_vec!(&mut cons.args, arg => self.visit_argument(arg));
                         visit_opt!(&mut cons.typ, arg => self.visit_expr(arg))
                     });
                 }
@@ -100,9 +97,9 @@ impl Visitor for UnboundCollector {
                     name_cons.data.0 = format!("{}.{}", name_cons.data.0, entr.constructor.data.0);
                     self.context_vars.push(name_cons);
 
-                    visit_vec!(entr.parameters, arg => self.visit_argument(arg));
-                    visit_vec!(entr.indices, arg => self.visit_argument(arg));
-                    visit_vec!(entr.fields, (_, _, typ) => {
+                    visit_vec!(&mut entr.parameters, arg => self.visit_argument(arg));
+                    visit_vec!(&mut entr.indices, arg => self.visit_argument(arg));
+                    visit_vec!(&mut entr.fields, (_, _, typ) => {
                         self.visit_expr(typ);
                     });
                 }
@@ -114,16 +111,28 @@ impl Visitor for UnboundCollector {
         }
     }
 
+    fn visit_destruct(&mut self, destruct: &mut Destruct) {
+        match destruct {
+            Destruct::Destruct(ty, bindings, _) => {
+                self.visit_ident(ty);
+                for bind in bindings {
+                    self.visit_case_binding(bind)
+                }
+            },
+            Destruct::Ident(ident) => self.context_vars.push(ident.clone()),
+        }
+    }
+
     fn visit_sttm(&mut self, sttm: &mut kind_tree::concrete::expr::Sttm) {
         match &mut sttm.data {
             SttmKind::Ask(Some(ident), val, next) => {
-                self.context_vars.push(ident.clone());
                 self.visit_expr(val);
+                self.context_vars.push(ident.clone());
                 self.visit_sttm(next);
             }
             SttmKind::Let(ident, val, next) => {
-                self.context_vars.push(ident.clone());
                 self.visit_expr(val);
+                self.visit_destruct(ident);
                 self.visit_sttm(next);
             }
             SttmKind::Ask(None, val, next) => {
@@ -156,9 +165,7 @@ impl Visitor for UnboundCollector {
                 self.visit_pat(snd);
             }
             PatKind::App(t, ls) => {
-                self.is_on_pat = false;
                 self.visit_ident(t);
-                self.is_on_pat = true;
                 for pat in ls {
                     self.visit_pat(pat)
                 }
@@ -236,10 +243,11 @@ impl Visitor for UnboundCollector {
                 self.context_vars.pop();
             }
             ExprKind::Let(ident, val, body) => {
-                self.context_vars.push(ident.clone());
                 self.visit_expr(val);
-                self.context_vars.pop();
+                let vars = self.context_vars.clone();
+                self.visit_destruct(ident);
                 self.visit_expr(body);
+                self.context_vars = vars;
             }
             ExprKind::Match(matcher) => self.visit_match(matcher),
             ExprKind::Subst(_subst) => todo!(),

@@ -357,7 +357,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_call_atom(&mut self) -> Result<Binding, SyntaxError> {
+    fn parse_binding(&mut self) -> Result<Binding, SyntaxError> {
         self.ignore_docs();
         if self.is_named() {
             let start = self.range();
@@ -379,7 +379,7 @@ impl<'a> Parser<'a> {
         let mut spine = Vec::new();
         let mut end = head.range;
         while (!self.is_linebreak() || multiline) && !self.get().same_variant(&Token::Eof) {
-            let res = self.try_single(&|parser| parser.parse_call_atom())?;
+            let res = self.try_single(&|parser| parser.parse_binding())?;
             match res {
                 Some(atom) => {
                     end = atom.locate();
@@ -441,17 +441,28 @@ impl<'a> Parser<'a> {
         }))
     }
 
+    pub fn parse_destruct(&mut self) -> Result<Destruct, SyntaxError> {
+        if self.get().is_upper_id() {
+            let upper = self.parse_upper_id()?;
+            let (bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
+            Ok(Destruct::Destruct(upper, bindings, ignore_rest))
+        } else {
+            let name = self.parse_id()?;
+            Ok(Destruct::Ident(name))
+        }
+    }
+
     pub fn parse_monadic_let(&mut self) -> Result<Box<Sttm>, SyntaxError> {
         let start = self.range();
         self.bump(); // 'let'
-        let name = self.parse_id()?;
+        let destruct = self.parse_destruct()?;
         self.eat_variant(Token::Eq)?;
-        let expr = self.parse_expr(false)?;
+        let val = self.parse_expr(false)?;
         self.eat_keyword(Token::Semi);
         let next = self.parse_sttm()?;
-        let end = expr.range;
+        let end = destruct.locate();
         Ok(Box::new(Sttm {
-            data: SttmKind::Let(name, expr, next),
+            data: SttmKind::Let(destruct, val, next),
             range: start.mix(end),
         }))
     }
@@ -507,6 +518,38 @@ impl<'a> Parser<'a> {
         }))
     }
 
+    pub fn parse_pat_destruct_bindings(&mut self) -> Result<(Vec<CaseBinding>, bool), SyntaxError> {
+        let mut ignore_rest_range = None;
+        let mut bindings = Vec::new();
+        loop {
+            match self.get() {
+                Token::LowerId(_) => {
+                    let name = self.parse_id()?;
+                    bindings.push(CaseBinding::Field(PatIdent(name)));
+                }
+                Token::LPar => {
+                    let start = self.range();
+                    self.bump();
+                    let name = self.parse_id()?;
+                    self.eat_variant(Token::Eq)?;
+                    let renamed = self.parse_id()?;
+                    self.eat_closing_keyword(Token::RPar, start)?;
+                    bindings.push(CaseBinding::Renamed(name, PatIdent(renamed)));
+                }
+                Token::DotDot => {
+                    ignore_rest_range = Some(self.range());
+                    self.bump();
+                    continue;
+                }
+                _ => break,
+            }
+            if let Some(range) = ignore_rest_range {
+                return Err(SyntaxError::IgnoreRestShouldBeOnTheEnd(range));
+            }
+        }
+        Ok((bindings, ignore_rest_range.is_some()))
+    }
+
     pub fn parse_match(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let start = self.range();
         self.bump(); // 'match'
@@ -521,44 +564,16 @@ impl<'a> Parser<'a> {
         while !self.get().same_variant(&Token::RBrace) {
             let constructor = self.parse_id()?;
 
-            let mut ignore_rest_range = None;
-            let mut bindings = Vec::new();
-
-            loop {
-                match self.get() {
-                    Token::LowerId(_) => {
-                        let name = self.parse_id()?;
-                        bindings.push(CaseBinding::Field(PatIdent(name)));
-                    }
-                    Token::LPar => {
-                        let start = self.range();
-                        self.bump();
-                        let name = self.parse_id()?;
-                        self.eat_variant(Token::Colon)?;
-                        let renamed = self.parse_id()?;
-                        self.eat_closing_keyword(Token::RPar, start)?;
-                        bindings.push(CaseBinding::Renamed(name, PatIdent(renamed)));
-                    }
-                    Token::DotDot => {
-                        ignore_rest_range = Some(self.range());
-                        self.bump();
-                        continue;
-                    }
-                    _ => break,
-                }
-                if let Some(range) = ignore_rest_range {
-                    return Err(SyntaxError::IgnoreRestShouldBeOnTheEnd(range));
-                }
-            }
-
             self.eat_variant(Token::FatArrow)?;
             let value = self.parse_expr(false)?;
+
+            let (bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
 
             cases.push(Case {
                 constructor: constructor,
                 bindings,
                 value,
-                ignore_rest: ignore_rest_range.is_some(),
+                ignore_rest
             })
         }
 
@@ -588,7 +603,7 @@ impl<'a> Parser<'a> {
     pub fn parse_let(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let start = self.range();
         self.bump(); // 'let'
-        let name = self.parse_id()?;
+        let name = self.parse_destruct()?;
         self.eat_variant(Token::Eq)?;
         let expr = self.parse_expr(false)?;
         self.eat_keyword(Token::Semi);

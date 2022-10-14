@@ -89,10 +89,16 @@ pub enum Literal {
 }
 
 #[derive(Clone, Debug)]
+pub enum Destruct {
+    Destruct(Ident, Vec<CaseBinding>, bool),
+    Ident(Ident),
+}
+
+#[derive(Clone, Debug)]
 pub enum SttmKind {
     Expr(Box<Expr>, Box<Sttm>),
     Ask(Option<Ident>, Box<Expr>, Box<Sttm>),
-    Let(Ident, Box<Expr>, Box<Sttm>),
+    Let(Destruct, Box<Expr>, Box<Sttm>),
     Return(Box<Expr>),
 }
 
@@ -117,7 +123,7 @@ pub enum ExprKind {
     /// Application of a expression to a spine of expressions
     App(Box<Expr>, Spine),
     /// Declaration of a local variable
-    Let(Ident, Box<Expr>, Box<Expr>),
+    Let(Destruct, Box<Expr>, Box<Expr>),
     /// Type ascription (x : y)
     Ann(Box<Expr>, Box<Expr>),
     /// Literal
@@ -205,6 +211,38 @@ impl Locatable for Expr {
     }
 }
 
+impl Locatable for Ident {
+    fn locate(&self) -> Range {
+        self.range
+    }
+}
+
+impl Locatable for PatIdent {
+    fn locate(&self) -> Range {
+        self.0.range
+    }
+}
+
+impl Locatable for CaseBinding {
+    fn locate(&self) -> Range {
+        match self {
+            CaseBinding::Field(i) => i.locate(),
+            CaseBinding::Renamed(i, renamed) => i.locate().mix(renamed.locate()),
+        }
+    }
+}
+
+impl Locatable for Destruct {
+    fn locate(&self) -> Range {
+        match self {
+            Destruct::Destruct(s, bindings, _) => s
+                .locate()
+                .mix(bindings.get(0).map(|x| x.locate()).unwrap_or(s.locate())),
+            Destruct::Ident(i) => i.locate(),
+        }
+    }
+}
+
 impl Display for Literal {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
@@ -214,6 +252,24 @@ impl Display for Literal {
             Literal::Char(c) => write!(f, "'{}'", c),
             Literal::Number(numb) => write!(f, "{}", numb),
             Literal::String(str) => write!(f, "\"{}\"", str),
+        }
+    }
+}
+
+impl Display for Destruct {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Destruct::Destruct(i, bindings, ignore) => {
+                write!(f, "{}", i)?;
+                for binding in bindings {
+                    write!(f, " {}", binding)?;
+                }
+                if *ignore {
+                    write!(f, " ..")?;
+                }
+                Ok(())
+            }
+            Destruct::Ident(ident) => write!(f, "{}", ident),
         }
     }
 }
