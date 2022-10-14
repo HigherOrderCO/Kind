@@ -699,20 +699,32 @@ pub fn inline(book: CompBook) -> Result<CompBook, String> {
     fn replace_inlines(book: &CompBook, term: &CompTerm) -> Result<Box<CompTerm>, String> {
         let new_term = match term {
             CompTerm::Fun { name, args } => {
-                // First we substitute nested inline applications
-                // This expands the number of inline functions we can accept
-                // This is also inefficient since we are going over the tree more times than needed
-                let mut new_args = Vec::new();
-                for arg in args {
-                    new_args.push(replace_inlines(book, arg)?);
-                }
-                let fn_entry = book.entrs.get(name).unwrap();
-                if fn_entry.get_attribute("inline").is_some() {
-                    // Substitute an inlined function application directly by the rewrite on compilation
-                    let new_term = subst_inline_term(fn_entry, &name, &new_args)?;
+                let inlined_fn = book.entrs.get(name).unwrap();
+                if inlined_fn.get_attribute("inline").is_some() {
+                    let new_term = if is_simple_fun(inlined_fn) {
+                        // For simple functions, we know we can just subst all vars directly.
+                        // "Simple" here means 1 rule and only vars as patterns
+                        // TODO: Maybe also consider functions that just destructure a record
+                        let rule = &inlined_fn.rules[0];
+                        subst_inline_term(rule, &args)
+                    } else {
+                        // For functions that need to do some pattern matching,
+                        //   we first try to resolve nested inlines.
+                        // With this we can increase the number of inlineable functions
+                        //   without having to do complete rule rewriting.
+                        let mut new_args = Vec::new();
+                        for arg in args {
+                            new_args.push(replace_inlines(book, arg)?);
+                        }
+                        match_and_subst_inline_term(inlined_fn, &name, &new_args)?
+                    };
                     // The substituted term could still have nested inline functions, so continue recursing
                     replace_inlines(book, &*new_term)?
                 } else {
+                    let mut new_args = Vec::new();
+                    for arg in args {
+                        new_args.push(replace_inlines(book, arg)?);
+                    }
                     // Non inlined functions are just copied like other terms
                     Box::new(CompTerm::Fun { name: name.clone(), args: new_args })
                 }
@@ -758,36 +770,46 @@ pub fn inline(book: CompBook) -> Result<CompBook, String> {
         Ok(new_term)
     }
 
-    fn subst_inline_term(entry: &CompEntry, name: &Ident, args: &[Box<CompTerm>]) -> Result<Box<CompTerm>, String> {
-        let mut new_term = Box::new(CompTerm::Nil);  // ugly
+    // Substitute a function application by the body of the given rule
+    // This doesn't check if the rule chosen is actually the correct one.
+    fn subst_inline_term(rule: &CompRule, args: &[Box<CompTerm>]) -> Box<CompTerm> {
+        // Clone the rule body and for each variable in the pats, subst in the body
+        // This is the new inlined term
+        let mut new_term = rule.body.clone();
+        let mut subst_stack: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
+            args.iter().zip(rule.pats.iter()).collect();
+        while !subst_stack.is_empty() {
+            let (arg, pat) = subst_stack.pop().unwrap();
+            match (&**arg, &**pat) {
+                (CompTerm::Ctr { args: arg_args, .. }, CompTerm::Ctr { args: pat_args, ..}) => {
+                    let to_sub: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
+                        arg_args.iter().zip(pat_args.iter()).collect();
+                    subst_stack.extend(to_sub);
+                }
+                (arg, CompTerm::Var { name }) => {
+                    subst(&mut *new_term, &name, arg);
+                }
+                _ => ()
+            }
+        }
+        new_term
+    }
+
+    // TODO: We should do actual rewriting subst_inline_termwith the HVM here to cover all possible cases.
+    //       Right now, we can only inline very simple things.
+    // Substitute an inlined function application directly by the rewrite on compilation
+    fn match_and_subst_inline_term(entry: &CompEntry, name: &Ident, args: &[Box<CompTerm>]) -> Result<Box<CompTerm>, String> {
+        let mut new_term = None;
         let mut found_match = false;
         for rule in &entry.rules {
             if fun_matches_rule(args, rule) {
-                // Clone the rule body and for each variable in the pats, subst in the body
-                // This is the new inlined term
-                new_term = rule.body.clone();
-                let mut subst_stack: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
-                    args.iter().zip(rule.pats.iter()).collect();
-                while !subst_stack.is_empty() {
-                    let (arg, pat) = subst_stack.pop().unwrap();
-                    match (&**arg, &**pat) {
-                        (CompTerm::Ctr { args: arg_args, .. }, CompTerm::Ctr { args: pat_args, ..}) => {
-                            let to_sub: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
-                                arg_args.iter().zip(pat_args.iter()).collect();
-                            subst_stack.extend(to_sub);
-                        }
-                        (arg, CompTerm::Var { name }) => {
-                            subst(&mut *new_term, &name, arg);
-                        }
-                        _ => ()
-                    }
-                }
+                new_term = Some(subst_inline_term(rule, args));
                 found_match = true;
                 break;
             }
         }
         if found_match {
-            Ok(new_term)
+            Ok(new_term.unwrap())
         } else {
             let term = CompTerm::Fun { name: name.clone(), args: args.to_vec() };
             Err(format!("Unable to match term {:?} to any of the function's rules", term))
@@ -1155,4 +1177,15 @@ pub fn term_matches_pattern (term: &CompTerm, pat: &CompTerm) -> bool {
         }
     }
     true
+}
+
+// A function is considered "simple" when it has only one rule and all patterns are variables
+pub fn is_simple_fun(entry: &CompEntry) -> bool {
+    let has_1_rule = entry.rules.len() == 1;
+    if has_1_rule {
+        let all_vars = entry.rules[0].pats.iter().all(|x| matches!(&**x, CompTerm::Var { .. }));
+        all_vars
+    } else {
+        false
+    }
 }
