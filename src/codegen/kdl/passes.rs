@@ -172,12 +172,16 @@ pub fn erase_terms(book: &Book) -> Result<CompBook, String> {
     }
 }
 
+// Removes functions that shouldn't exist on runtime from the book
+// These are any functions that return type information, like type declarations
 pub fn erase_funs(book: Book) -> Result<Book, String> {
     let mut book = book;
     let mut names = Vec::new();
     let mut entrs = HashMap::new();
     for name in book.names {
         let entry = book.entrs.remove(&name).unwrap();
+        // TODO: Do a better job of finding functions that return types
+        //       We need a more general algorithm to get things like (Type -> MyType) or (MyType -> Type)
         if matches!(&*entry.tipo, Term::Typ { .. }) {
             continue;
         }
@@ -437,6 +441,7 @@ pub fn flatten(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Unbinds any unused variables and inserts dups for vars used more than once
 pub fn linearize_rules(book: CompBook) -> Result<CompBook, String> {
     // Returns left-hand side variables
     fn collect_lhs_vars<'a>(term: &'a mut CompTerm, vars: &mut HashMap<Ident, &'a mut CompTerm>) {
@@ -689,6 +694,7 @@ pub fn linearize_rules(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Substitute all inlined function applications in the Book
 pub fn inline(book: CompBook) -> Result<CompBook, String> {
     fn replace_inlines(book: &CompBook, term: &CompTerm) -> Result<Box<CompTerm>, String> {
         let new_term = match term {
@@ -813,6 +819,7 @@ pub fn inline(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Remove entries corresponding to primitive U120 operations from the book
 pub fn remove_u120_opers(book: CompBook) -> Result<CompBook, String> {
     // opers and new/high/low
     fn make_u120_new(old_entry: &CompEntry) -> CompEntry {
@@ -922,6 +929,8 @@ pub fn remove_u120_opers(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Substitute U120.new by a Num term
+//   and functions that correspond to a primitive U120 operation by an Op2.
 // TODO: We probably need to handle U60 separately as well.
 //       Since they compile to U120, it wont overflow as expected and conversion to signed will fail.
 pub fn convert_u120_uses(book: CompBook) -> Result<CompBook, String> {
@@ -1106,6 +1115,7 @@ pub fn subst(term: &mut CompTerm, sub_name: &Ident, value: &CompTerm) {
     }
 }
 
+// Return true if a function call matches with a rule of said function without reducing any subterm
 pub fn fun_matches_rule (args: &[Box<CompTerm>], rule: &CompRule) -> bool {
     for (arg, pat) in args.iter().zip(rule.pats.iter()) {
         let matches = term_matches_pattern(arg, pat);
@@ -1116,6 +1126,7 @@ pub fn fun_matches_rule (args: &[Box<CompTerm>], rule: &CompRule) -> bool {
     true
 }
 
+// Return true if we can match a term to a pattern without reducing anything
 pub fn term_matches_pattern (term: &CompTerm, pat: &CompTerm) -> bool {
     let mut check_stack = vec![(term, pat)];
     while !check_stack.is_empty() {
