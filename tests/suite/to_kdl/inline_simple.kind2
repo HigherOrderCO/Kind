@@ -1,0 +1,22 @@
+MyType (t: Type) (u: Type) : Type
+MyType.new <t> <u> (a: U60) (b: U60) (c: t) (d: u) : MyType t u
+
+MyType.swap <t> <u> (a: MyType t u) : MyType u t
+MyType.swap (MyType.new a b c d) = MyType.new b a d c
+
+MyType.mix <t> <u> (a: MyType t u) (b: MyType t u) : MyType t u
+MyType.mix (MyType.new aa ab ac ad) (MyType.new ba bb bc bd) =
+  MyType.new aa bb ac bd
+
+MyType.get_c <t> <u> (a: MyType t u) : t
+MyType.get_c (MyType.new a b c d) = c
+
+#inline
+SimpleFn <t> <u> (a: MyType t u) (b: MyType u t) : t {
+  MyType.get_c (MyType.mix a (MyType.swap b))
+}
+
+Main {
+  let a = (MyType.new 0 1 2 3)
+  SimpleFn a ((x => MyType.new x 5 6 7) 4)
+}

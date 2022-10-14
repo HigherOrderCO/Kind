@@ -172,12 +172,16 @@ pub fn erase_terms(book: &Book) -> Result<CompBook, String> {
     }
 }
 
+// Removes functions that shouldn't exist on runtime from the book
+// These are any functions that return type information, like type declarations
 pub fn erase_funs(book: Book) -> Result<Book, String> {
     let mut book = book;
     let mut names = Vec::new();
     let mut entrs = HashMap::new();
     for name in book.names {
         let entry = book.entrs.remove(&name).unwrap();
+        // TODO: Do a better job of finding functions that return types
+        //       We need a more general algorithm to get things like (Type -> MyType) or (MyType -> Type)
         if matches!(&*entry.tipo, Term::Typ { .. }) {
             continue;
         }
@@ -437,6 +441,7 @@ pub fn flatten(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Unbinds any unused variables and inserts dups for vars used more than once
 pub fn linearize_rules(book: CompBook) -> Result<CompBook, String> {
     // Returns left-hand side variables
     fn collect_lhs_vars<'a>(term: &'a mut CompTerm, vars: &mut HashMap<Ident, &'a mut CompTerm>) {
@@ -689,24 +694,37 @@ pub fn linearize_rules(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Substitute all inlined function applications in the Book
 pub fn inline(book: CompBook) -> Result<CompBook, String> {
     fn replace_inlines(book: &CompBook, term: &CompTerm) -> Result<Box<CompTerm>, String> {
         let new_term = match term {
             CompTerm::Fun { name, args } => {
-                // First we substitute nested inline applications
-                // This expands the number of inline functions we can accept
-                // This is also inefficient since we are going over the tree more times than needed
-                let mut new_args = Vec::new();
-                for arg in args {
-                    new_args.push(replace_inlines(book, arg)?);
-                }
-                let fn_entry = book.entrs.get(name).unwrap();
-                if fn_entry.get_attribute("inline").is_some() {
-                    // Substitute an inlined function application directly by the rewrite on compilation
-                    let new_term = subst_inline_term(fn_entry, &name, &new_args)?;
+                let inlined_fn = book.entrs.get(name).unwrap();
+                if inlined_fn.get_attribute("inline").is_some() {
+                    let new_term = if is_simple_fun(inlined_fn) {
+                        // For simple functions, we know we can just subst all vars directly.
+                        // "Simple" here means 1 rule and only vars as patterns
+                        // TODO: Maybe also consider functions that just destructure a record
+                        let rule = &inlined_fn.rules[0];
+                        subst_inline_term(rule, &args)
+                    } else {
+                        // For functions that need to do some pattern matching,
+                        //   we first try to resolve nested inlines.
+                        // With this we can increase the number of inlineable functions
+                        //   without having to do complete rule rewriting.
+                        let mut new_args = Vec::new();
+                        for arg in args {
+                            new_args.push(replace_inlines(book, arg)?);
+                        }
+                        match_and_subst_inline_term(inlined_fn, &name, &new_args)?
+                    };
                     // The substituted term could still have nested inline functions, so continue recursing
                     replace_inlines(book, &*new_term)?
                 } else {
+                    let mut new_args = Vec::new();
+                    for arg in args {
+                        new_args.push(replace_inlines(book, arg)?);
+                    }
                     // Non inlined functions are just copied like other terms
                     Box::new(CompTerm::Fun { name: name.clone(), args: new_args })
                 }
@@ -752,36 +770,46 @@ pub fn inline(book: CompBook) -> Result<CompBook, String> {
         Ok(new_term)
     }
 
-    fn subst_inline_term(entry: &CompEntry, name: &Ident, args: &[Box<CompTerm>]) -> Result<Box<CompTerm>, String> {
-        let mut new_term = Box::new(CompTerm::Nil);  // ugly
+    // Substitute a function application by the body of the given rule
+    // This doesn't check if the rule chosen is actually the correct one.
+    fn subst_inline_term(rule: &CompRule, args: &[Box<CompTerm>]) -> Box<CompTerm> {
+        // Clone the rule body and for each variable in the pats, subst in the body
+        // This is the new inlined term
+        let mut new_term = rule.body.clone();
+        let mut subst_stack: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
+            args.iter().zip(rule.pats.iter()).collect();
+        while !subst_stack.is_empty() {
+            let (arg, pat) = subst_stack.pop().unwrap();
+            match (&**arg, &**pat) {
+                (CompTerm::Ctr { args: arg_args, .. }, CompTerm::Ctr { args: pat_args, ..}) => {
+                    let to_sub: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
+                        arg_args.iter().zip(pat_args.iter()).collect();
+                    subst_stack.extend(to_sub);
+                }
+                (arg, CompTerm::Var { name }) => {
+                    subst(&mut *new_term, &name, arg);
+                }
+                _ => ()
+            }
+        }
+        new_term
+    }
+
+    // TODO: We should do actual rewriting subst_inline_termwith the HVM here to cover all possible cases.
+    //       Right now, we can only inline very simple things.
+    // Substitute an inlined function application directly by the rewrite on compilation
+    fn match_and_subst_inline_term(entry: &CompEntry, name: &Ident, args: &[Box<CompTerm>]) -> Result<Box<CompTerm>, String> {
+        let mut new_term = None;
         let mut found_match = false;
         for rule in &entry.rules {
             if fun_matches_rule(args, rule) {
-                // Clone the rule body and for each variable in the pats, subst in the body
-                // This is the new inlined term
-                new_term = rule.body.clone();
-                let mut subst_stack: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
-                    args.iter().zip(rule.pats.iter()).collect();
-                while !subst_stack.is_empty() {
-                    let (arg, pat) = subst_stack.pop().unwrap();
-                    match (&**arg, &**pat) {
-                        (CompTerm::Ctr { args: arg_args, .. }, CompTerm::Ctr { args: pat_args, ..}) => {
-                            let to_sub: Vec<(&Box<CompTerm>, &Box<CompTerm>)> =
-                                arg_args.iter().zip(pat_args.iter()).collect();
-                            subst_stack.extend(to_sub);
-                        }
-                        (arg, CompTerm::Var { name }) => {
-                            subst(&mut *new_term, &name, arg);
-                        }
-                        _ => ()
-                    }
-                }
+                new_term = Some(subst_inline_term(rule, args));
                 found_match = true;
                 break;
             }
         }
         if found_match {
-            Ok(new_term)
+            Ok(new_term.unwrap())
         } else {
             let term = CompTerm::Fun { name: name.clone(), args: args.to_vec() };
             Err(format!("Unable to match term {:?} to any of the function's rules", term))
@@ -813,6 +841,7 @@ pub fn inline(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Remove entries corresponding to primitive U120 operations from the book
 pub fn remove_u120_opers(book: CompBook) -> Result<CompBook, String> {
     // opers and new/high/low
     fn make_u120_new(old_entry: &CompEntry) -> CompEntry {
@@ -922,6 +951,8 @@ pub fn remove_u120_opers(book: CompBook) -> Result<CompBook, String> {
     Ok(book)
 }
 
+// Substitute U120.new by a Num term
+//   and functions that correspond to a primitive U120 operation by an Op2.
 // TODO: We probably need to handle U60 separately as well.
 //       Since they compile to U120, it wont overflow as expected and conversion to signed will fail.
 pub fn convert_u120_uses(book: CompBook) -> Result<CompBook, String> {
@@ -1106,6 +1137,7 @@ pub fn subst(term: &mut CompTerm, sub_name: &Ident, value: &CompTerm) {
     }
 }
 
+// Return true if a function call matches with a rule of said function without reducing any subterm
 pub fn fun_matches_rule (args: &[Box<CompTerm>], rule: &CompRule) -> bool {
     for (arg, pat) in args.iter().zip(rule.pats.iter()) {
         let matches = term_matches_pattern(arg, pat);
@@ -1116,6 +1148,7 @@ pub fn fun_matches_rule (args: &[Box<CompTerm>], rule: &CompRule) -> bool {
     true
 }
 
+// Return true if we can match a term to a pattern without reducing anything
 pub fn term_matches_pattern (term: &CompTerm, pat: &CompTerm) -> bool {
     let mut check_stack = vec![(term, pat)];
     while !check_stack.is_empty() {
@@ -1144,4 +1177,15 @@ pub fn term_matches_pattern (term: &CompTerm, pat: &CompTerm) -> bool {
         }
     }
     true
+}
+
+// A function is considered "simple" when it has only one rule and all patterns are variables
+pub fn is_simple_fun(entry: &CompEntry) -> bool {
+    let has_1_rule = entry.rules.len() == 1;
+    if has_1_rule {
+        let all_vars = entry.rules[0].pats.iter().all(|x| matches!(&**x, CompTerm::Var { .. }));
+        all_vars
+    } else {
+        false
+    }
 }
