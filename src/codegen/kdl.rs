@@ -25,7 +25,7 @@ pub fn stringify_kdl_term(kdl_names: &HashMap<Ident, Ident>, term: &CompTerm) ->
         CompTerm::Dup { nam0, nam1, expr, body } => {
             let expr = stringify_kdl_term(kdl_names, expr)?;
             let body = stringify_kdl_term(kdl_names, body)?;
-            format!("dup {} {} = {}; {}", nam0, nam1, expr, body)
+            format!("dup {} {} = {};\n    {}", nam0, nam1, expr, body)
         }
         CompTerm::Let { name, expr, body } => {
             let expr = stringify_kdl_term(kdl_names, expr)?;
