@@ -1,3 +1,4 @@
+use kind_span::Locatable;
 use kind_tree::concrete::expr::*;
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::symbol::{Ident, Symbol};
@@ -54,20 +55,45 @@ impl<'a> Parser<'a> {
         })
     }
 
+    pub fn ignore_docs(&mut self) {
+        let start = self.range();
+        let mut last = self.range();
+        let mut unused = false;
+        while let Token::Comment(_, _) = &self.get() {
+            last = self.range();
+            self.bump();
+            unused = true;
+        }
+        if unused {
+            self.errs
+                .push(Box::new(SyntaxError::UnusedDocString(start.mix(last))))
+        }
+    }
+
     pub fn is_pi_type(&self) -> bool {
-        self.get().same_variant(Token::LPar) && self.peek(1).is_lower_id() && self.peek(2).same_variant(Token::Colon)
+        self.get().same_variant(&Token::LPar)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).same_variant(&Token::Colon)
+    }
+
+    pub fn is_named(&self) -> bool {
+        self.get().same_variant(&Token::LPar)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).same_variant(&Token::Eq)
     }
 
     pub fn is_lambda(&self) -> bool {
-        self.get().is_lower_id() && self.peek(1).same_variant(Token::FatArrow)
+        self.get().is_lower_id() && self.peek(1).same_variant(&Token::FatArrow)
     }
 
     pub fn is_sigma_type(&self) -> bool {
-        self.get().same_variant(Token::LBracket) && self.peek(1).is_lower_id() && self.peek(2).same_variant(Token::Colon)
+        self.get().same_variant(&Token::LBracket)
+            && self.peek(1).is_lower_id()
+            && self.peek(2).same_variant(&Token::Colon)
     }
 
     pub fn is_substitution(&self) -> bool {
-        self.get().same_variant(Token::HashHash)
+        self.get().same_variant(&Token::HashHash)
     }
 
     pub fn parse_substitution(&mut self) -> Result<Box<Expr>, SyntaxError> {
@@ -79,7 +105,12 @@ impl<'a> Parser<'a> {
         let expr = self.parse_expr(false)?;
         let range = start.mix(expr.range);
         Ok(Box::new(Expr {
-            data: ExprKind::Subst(Substitution { name, redx, indx: 0, expr }),
+            data: ExprKind::Subst(Substitution {
+                name,
+                redx,
+                indx: 0,
+                expr,
+            }),
             range,
         }))
     }
@@ -170,9 +201,12 @@ impl<'a> Parser<'a> {
         let data = match id.data.0.as_str() {
             "Type" => ExprKind::Lit(Literal::Type),
             "U60" => ExprKind::Lit(Literal::U60),
-            _ => ExprKind::Data(id.clone()),
+            _ => ExprKind::Constr(id.clone()),
         };
-        Ok(Box::new(Expr { range: id.range, data }))
+        Ok(Box::new(Expr {
+            range: id.range,
+            data,
+        }))
     }
 
     fn parse_num(&mut self, num: u64) -> Result<Box<Expr>, SyntaxError> {
@@ -220,7 +254,10 @@ impl<'a> Parser<'a> {
 
         if self.check_actual(Token::RBracket) {
             let range = self.advance().1.mix(range);
-            return Ok(Box::new(Expr { range, data: ExprKind::List(vec) }));
+            return Ok(Box::new(Expr {
+                range,
+                data: ExprKind::List(vec),
+            }));
         }
 
         vec.push(*self.parse_expr(false)?);
@@ -249,7 +286,10 @@ impl<'a> Parser<'a> {
 
         let range = self.eat_variant(Token::RBracket)?.1.mix(range);
 
-        Ok(Box::new(Expr { range, data: ExprKind::List(vec) }))
+        Ok(Box::new(Expr {
+            range,
+            data: ExprKind::List(vec),
+        }))
     }
 
     fn parse_paren(&mut self) -> Result<Box<Expr>, SyntaxError> {
@@ -259,7 +299,7 @@ impl<'a> Parser<'a> {
             let range = self.range();
             self.bump(); // '('
             let mut expr = self.parse_expr(true)?;
-            if self.get().same_variant(Token::ColonColon) {
+            if self.get().same_variant(&Token::ColonColon) {
                 self.bump(); // '::'
                 let typ = self.parse_expr(false)?;
                 let range = range.mix(self.range());
@@ -302,6 +342,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_atom(&mut self) -> Result<Box<Expr>, SyntaxError> {
+        self.ignore_docs();
         match self.get().clone() {
             Token::LowerId(_) => self.parse_var(),
             Token::UpperId(_) => self.parse_data(),
@@ -316,16 +357,32 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_call_atom(&mut self) -> Result<Binding, SyntaxError> {
+        self.ignore_docs();
+        if self.is_named() {
+            let start = self.range();
+            self.bump(); // '('
+            let name = self.parse_id()?;
+            self.bump(); // '='
+            let expr = self.parse_expr(true)?;
+            let end = self.range();
+            self.eat_closing_keyword(Token::RPar, start)?;
+            Ok(Binding::Named(end.mix(start), name, expr))
+        } else {
+            Ok(Binding::Positional(self.parse_atom()?))
+        }
+    }
+
     fn parse_call(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
         let head = self.parse_atom()?;
         let start = head.range;
         let mut spine = Vec::new();
         let mut end = head.range;
-        while (!self.is_linebreak() || multiline) && !self.get().same_variant(Token::Eof) {
-            let res = self.try_single(&|parser| parser.parse_atom())?;
+        while (!self.is_linebreak() || multiline) && !self.get().same_variant(&Token::Eof) {
+            let res = self.try_single(&|parser| parser.parse_call_atom())?;
             match res {
                 Some(atom) => {
-                    end = atom.range;
+                    end = atom.locate();
                     spine.push(atom)
                 }
                 None => break,
@@ -366,7 +423,7 @@ impl<'a> Parser<'a> {
         let start = self.range();
         self.bump(); // 'ask'
                      // Parses the name for Ask that is optional
-        let name = if self.peek(1).same_variant(Token::Eq) {
+        let name = if self.peek(1).same_variant(&Token::Eq) {
             let name = self.parse_id()?;
             self.bump(); // '='
             Some(name)
@@ -420,7 +477,7 @@ impl<'a> Parser<'a> {
             self.parse_monadic_let()
         } else {
             let expr = self.parse_expr(false)?;
-            if self.get().same_variant(Token::RBrace) {
+            if self.get().same_variant(&Token::RBrace) {
                 let end = expr.range;
                 Ok(Box::new(Sttm {
                     data: SttmKind::Return(expr),
@@ -461,7 +518,7 @@ impl<'a> Parser<'a> {
 
         let mut cases = Vec::new();
 
-        while !self.get().same_variant(Token::RBrace) {
+        while !self.get().same_variant(&Token::RBrace) {
             let constructor = self.parse_id()?;
 
             let mut ignore_rest_range = None;
@@ -515,7 +572,12 @@ impl<'a> Parser<'a> {
             None
         };
 
-        let match_ = Box::new(Match { tipo, scrutinizer, cases, motive });
+        let match_ = Box::new(Match {
+            tipo,
+            scrutinizer,
+            cases,
+            motive,
+        });
 
         Ok(Box::new(Expr {
             data: ExprKind::Match(match_),
@@ -572,6 +634,7 @@ impl<'a> Parser<'a> {
     /// to check if the queue of tokens match a pattern as we need
     /// some looakhead tokens.
     pub fn parse_expr(&mut self, multiline: bool) -> Result<Box<Expr>, SyntaxError> {
+        self.ignore_docs();
         if self.check_actual(Token::Do) {
             self.parse_do()
         } else if self.check_actual(Token::Match) {

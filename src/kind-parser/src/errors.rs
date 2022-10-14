@@ -24,6 +24,7 @@ pub enum SyntaxError {
     NotAClauseOfDef(Range, Range),
     Unclosed(Range),
     IgnoreRestShouldBeOnTheEnd(Range),
+    UnusedDocString(Range),
 }
 
 fn encode_name(encode: EncodeSequence) -> &'static str {
@@ -64,6 +65,19 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
                     no_code: false,
                 }],
             },
+            SyntaxError::UnusedDocString(range) => DiagnosticFrame {
+                code: 0,
+                severity: Severity::Warning,
+                title: "This entire documentation string is in a invalid position".to_string(),
+                subtitles: vec![],
+                hints: vec!["Take a look at the rules for documentation strings at https://kind.kindelia.org/hints/documentation-strings".to_string()],
+                positions: vec![Marking {
+                    position: range,
+                    color: Color::For,
+                    text: "Remove it. In future releases it will be considered an error".to_string(),
+                    no_code: false,
+                }],
+            },
             SyntaxError::UnfinishedChar(range) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
@@ -97,9 +111,9 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
             SyntaxError::NotAClauseOfDef(fst, snd) => DiagnosticFrame {
                 code: 2,
                 severity: Severity::Error,
-                title: "Unexpected Upper id that does not refer to the definition".to_string(),
+                title: "Unexpected capitalized name that does not refer to the definition".to_string(),
                 subtitles: vec![],
-                hints: vec!["If you indend to make another clause, use the same name.".to_string()],
+                hints: vec!["If you indend to make another clause, just replace the name in red.".to_string()],
                 positions: vec![
                     Marking {
                         position: snd,
@@ -180,10 +194,23 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
                     no_code: true,
                 }],
             },
-            SyntaxError::UnexpectedToken(token, range, _expect) => DiagnosticFrame {
+            SyntaxError::UnexpectedToken(Token::Comment(_, _), range, _expect) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
-                title: format!("Unexpected token {:?}.", token),
+                title: format!("Unexpected documentation comment."),
+                subtitles: vec![],
+                hints: vec!["Remove this documentation comment or place it in a correct place.".to_string()],
+                positions: vec![Marking {
+                    position: range,
+                    color: Color::Fst,
+                    text: "Here!".to_string(),
+                    no_code: false,
+                }],
+            },
+            SyntaxError::UnexpectedToken(_token, range, _expect) => DiagnosticFrame {
+                code: 0,
+                severity: Severity::Error,
+                title: format!("Unexpected token."),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marking {

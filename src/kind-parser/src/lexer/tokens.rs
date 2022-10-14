@@ -18,6 +18,7 @@ pub enum Token {
     ColonColon, // ::
     DotDot,     // ..
     Dot,        // .
+    Tilde,      // ~
 
     Help(String),
     LowerId(String),
@@ -32,6 +33,9 @@ pub enum Token {
     Return,
     Let,
     Open,
+    Type,
+    Record,
+    Constructor,
 
     // Literals
     Char(char),
@@ -73,12 +77,16 @@ pub enum Token {
 }
 
 impl Token {
-    pub fn same_variant(&self, b: Token) -> bool {
+    pub fn same_variant(&self, b: &Token) -> bool {
         std::mem::discriminant(self) == std::mem::discriminant(&b)
     }
 
     pub fn is_lower_id(&self) -> bool {
         matches!(self, Token::LowerId(_))
+    }
+
+    pub fn is_doc(&self) -> bool {
+        matches!(self, Token::Comment(true, _))
     }
 
     pub fn is_upper_id(&self) -> bool {

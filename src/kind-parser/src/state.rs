@@ -41,7 +41,8 @@ impl<'a> Parser<'a> {
         let cur = self.queue.pop_front().unwrap();
         self.breaks.pop_front();
         self.breaks.push_back(self.lexer.is_linebreak());
-        self.queue.push_back(self.lexer.get_next_no_error(self.errs));
+        self.queue
+            .push_back(self.lexer.get_next_no_error(self.errs));
         self.eaten += 1;
         cur
     }
@@ -72,7 +73,11 @@ impl<'a> Parser<'a> {
 
     #[inline]
     pub fn fail<T>(&mut self, expect: Vec<Token>) -> Result<T, SyntaxError> {
-        Err(SyntaxError::UnexpectedToken(self.get().clone(), self.range(), expect))
+        Err(SyntaxError::UnexpectedToken(
+            self.get().clone(),
+            self.range(),
+            expect,
+        ))
     }
 
     pub fn eat_closing_keyword(&mut self, expect: Token, range: Range) -> Result<(), SyntaxError> {
@@ -84,7 +89,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn eat_variant(&mut self, expect: Token) -> Result<(Token, Range), SyntaxError> {
-        if self.get().same_variant(expect.clone()) {
+        if self.get().same_variant(&expect.clone()) {
             Ok(self.advance())
         } else {
             self.fail(vec![expect])
@@ -102,7 +107,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn eat_keyword(&mut self, expect: Token) -> bool {
-        if self.get().same_variant(expect) {
+        if self.get().same_variant(&expect) {
             self.advance();
             true
         } else {
@@ -111,10 +116,13 @@ impl<'a> Parser<'a> {
     }
 
     pub fn check_actual(&mut self, expect: Token) -> bool {
-        self.get().same_variant(expect)
+        self.get().same_variant(&expect)
     }
 
-    pub fn try_single<T>(&mut self, fun: &dyn Fn(&mut Parser<'a>) -> Result<T, SyntaxError>) -> Result<Option<T>, SyntaxError> {
+    pub fn try_single<T>(
+        &mut self,
+        fun: &dyn Fn(&mut Parser<'a>) -> Result<T, SyntaxError>,
+    ) -> Result<Option<T>, SyntaxError> {
         let current = self.eaten;
         match fun(self) {
             Err(_) if current == self.eaten => Ok(None),

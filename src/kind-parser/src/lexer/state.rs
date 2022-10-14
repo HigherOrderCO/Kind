@@ -13,18 +13,20 @@ pub struct Lexer<'a> {
 
     // Modes
     pub comment_depth: u16,
-    pub emit_comment: bool,
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(input: &'a str, peekable: &'a mut Peekable<Chars<'a>>, ctx: SyntaxCtxIndex) -> Lexer<'a> {
+    pub fn new(
+        input: &'a str,
+        peekable: &'a mut Peekable<Chars<'a>>,
+        ctx: SyntaxCtxIndex,
+    ) -> Lexer<'a> {
         Lexer {
             input,
             pos: 0,
             ctx,
             peekable,
             comment_depth: 0,
-            emit_comment: false,
         }
     }
 
@@ -33,11 +35,27 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn mk_range(&self, start: usize) -> Range {
-        Range::new(Pos { index: start as u32 }, Pos { index: self.pos as u32 }, self.ctx)
+        Range::new(
+            Pos {
+                index: start as u32,
+            },
+            Pos {
+                index: self.pos as u32,
+            },
+            self.ctx,
+        )
     }
 
     pub fn mk_one_column_range(&self, start: usize) -> Range {
-        Range::new(Pos { index: start as u32 }, Pos { index: (start + 1) as u32 }, self.ctx)
+        Range::new(
+            Pos {
+                index: start as u32,
+            },
+            Pos {
+                index: (start + 1) as u32,
+            },
+            self.ctx,
+        )
     }
 
     pub fn next_char(&mut self) -> Option<char> {

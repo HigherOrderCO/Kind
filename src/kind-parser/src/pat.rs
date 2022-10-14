@@ -7,7 +7,7 @@ use crate::state::Parser;
 
 impl<'a> Parser<'a> {
     pub fn is_pat_cons(&self) -> bool {
-        self.get().same_variant(Token::LPar) && self.peek(1).is_upper_id()
+        self.get().same_variant(&Token::LPar) && self.peek(1).is_upper_id()
     }
 
     pub fn parse_pat_constructor(&mut self) -> Result<Box<Pat>, SyntaxError> {
@@ -75,7 +75,10 @@ impl<'a> Parser<'a> {
 
         if self.check_actual(Token::RBracket) {
             let range = self.advance().1.mix(range);
-            return Ok(Box::new(Pat { range, data: PatKind::List(vec) }));
+            return Ok(Box::new(Pat {
+                range,
+                data: PatKind::List(vec),
+            }));
         }
 
         vec.push(*self.parse_pat()?);
@@ -99,7 +102,10 @@ impl<'a> Parser<'a> {
 
         let range = self.eat_variant(Token::RBracket)?.1.mix(range);
 
-        Ok(Box::new(Pat { range, data: PatKind::List(vec) }))
+        Ok(Box::new(Pat {
+            range,
+            data: PatKind::List(vec),
+        }))
     }
 
     pub fn parse_pat(&mut self) -> Result<Box<Pat>, SyntaxError> {

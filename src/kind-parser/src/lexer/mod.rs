@@ -44,8 +44,16 @@ impl<'a> Lexer<'a> {
             "let" => Token::Let,
             "open" => Token::Open,
             "return" => Token::Return,
+            "type" => Token::Type,
+            "record" => Token::Record,
+            "constructor" => Token::Constructor,
             _ => {
-                if data.bytes().next().map(|x| x.is_ascii_uppercase()).unwrap_or(false) {
+                if data
+                    .bytes()
+                    .next()
+                    .map(|x| x.is_ascii_uppercase())
+                    .unwrap_or(false)
+                {
                     Token::UpperId(data.to_string())
                 } else {
                     Token::LowerId(data.to_string())
@@ -63,7 +71,6 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 Token::Comment(false, _) => continue,
-                Token::Comment(true, _) if !self.emit_comment => continue,
                 _ => (),
             }
             return (token, span);
@@ -99,6 +106,7 @@ impl<'a> Lexer<'a> {
                 ')' => self.single_token(Token::RPar, start),
                 '[' => self.single_token(Token::LBracket, start),
                 ']' => self.single_token(Token::RBracket, start),
+                '~' => self.single_token(Token::Tilde, start),
                 '{' => self.single_token(Token::LBrace, start),
                 '}' => self.single_token(Token::RBrace, start),
                 '#' => {
@@ -178,7 +186,13 @@ impl<'a> Lexer<'a> {
                 }
                 &c => {
                     self.next_char();
-                    (Token::Error(Box::new(SyntaxError::UnexpectedChar(c, self.mk_range(start)))), self.mk_range(start))
+                    (
+                        Token::Error(Box::new(SyntaxError::UnexpectedChar(
+                            c,
+                            self.mk_range(start),
+                        ))),
+                        self.mk_range(start),
+                    )
                 }
             },
         }

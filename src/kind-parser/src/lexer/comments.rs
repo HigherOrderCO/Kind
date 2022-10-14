@@ -14,7 +14,10 @@ impl<'a> Lexer<'a> {
             is_doc = true;
         }
         let cmt = self.accumulate_while(&|x| x != '\n');
-        (Token::Comment(is_doc, cmt.to_string()), self.mk_range(start))
+        (
+            Token::Comment(is_doc, cmt.to_string()),
+            self.mk_range(start),
+        )
     }
 
     /// Parses multi line comments with nested comments
@@ -54,7 +57,12 @@ impl<'a> Lexer<'a> {
         }
         self.pos += size;
         if self.comment_depth != 0 {
-            (Token::Error(Box::new(SyntaxError::UnfinishedComment(self.mk_range(start)))), self.mk_range(start))
+            (
+                Token::Error(Box::new(SyntaxError::UnfinishedComment(
+                    self.mk_range(start),
+                ))),
+                self.mk_range(start),
+            )
         } else {
             let str = &self.input[..size - 2];
             self.input = &self.input[size..];

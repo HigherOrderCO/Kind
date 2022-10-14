@@ -37,8 +37,20 @@ impl Display for Pat {
         use PatKind::*;
         match &self.data {
             Var(name) => write!(f, "{}", name.0),
-            App(head, spine) => write!(f, "({}{})", head, spine.iter().map(|x| format!(" {}", x)).collect::<String>()),
-            List(vec) => write!(f, "[{}]", vec.iter().map(|x| format!("{}", x)).collect::<Vec<String>>().join(" ")),
+            App(head, spine) => write!(
+                f,
+                "({}{})",
+                head,
+                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+            ),
+            List(vec) => write!(
+                f,
+                "[{}]",
+                vec.iter()
+                    .map(|x| format!("{}", x))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
             Str(str) => write!(f, "\"{}\"", str),
             Num(num) => write!(f, "{}", num),
             Pair(fst, snd) => write!(f, "({}, {})", fst, snd),

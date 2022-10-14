@@ -6,8 +6,30 @@ use crate::symbol::*;
 use super::{
     expr,
     pat::{Pat, PatIdent, PatKind},
-    Argument, Attribute, Book, Entry, Rule,
+    Argument, Attribute, AttributeStyle, Book, Constructor, Entry, Rule,
 };
+
+#[macro_export]
+macro_rules! visit_vec {
+    ($args:expr, $pat:pat => $fun:expr) => {
+        for $pat in &mut $args {
+            $fun
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! visit_opt {
+    ($args:expr, $pat:pat => $fun:expr) => {
+        match $args {
+            Some($pat) => $fun,
+            None => (),
+        }
+    };
+}
+
+pub(crate) use visit_opt;
+pub(crate) use visit_vec;
 
 /// A visitor trait following the visitor pattern
 /// because it's easier to walk the entire tree
@@ -17,10 +39,17 @@ use super::{
 ///
 /// All of these functions are implemented so we can easily
 /// change these default implementations.
-
 pub trait Visitor: Sized {
     fn visit_range(&mut self, x: &mut Range) {
         walk_range(self, x);
+    }
+
+    fn visit_attr_style(&mut self, attr: &mut AttributeStyle) {
+        walk_attr_style(self, attr);
+    }
+
+    fn visit_attr(&mut self, attr: &mut Attribute) {
+        walk_attr(self, attr);
     }
 
     fn visit_syntax_ctx(&mut self, synt: &mut SyntaxCtxIndex) {
@@ -47,6 +76,10 @@ pub trait Visitor: Sized {
         walk_match(self, matcher);
     }
 
+    fn visit_constructor(&mut self, construtor: &mut Constructor) {
+        walk_constructor(self, construtor);
+    }
+
     fn visit_argument(&mut self, argument: &mut Argument) {
         walk_argument(self, argument);
     }
@@ -55,12 +88,12 @@ pub trait Visitor: Sized {
         walk_entry(self, entry);
     }
 
-    fn visit_attr(&mut self, attr: &mut Attribute) {
-        walk_attr(self, attr);
-    }
-
     fn visit_pat(&mut self, pat: &mut Pat) {
         walk_pat(self, pat);
+    }
+
+    fn visit_binding(&mut self, binding: &mut Binding) {
+        walk_binding(self, binding);
     }
 
     fn visit_rule(&mut self, rule: &mut Rule) {
@@ -100,6 +133,12 @@ pub fn walk_operator<T: Visitor>(_: &mut T, _: &mut expr::Operator) {}
 
 pub fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
 
+pub fn walk_constructor<T: Visitor>(ctx: &mut T, cons: &mut Constructor) {
+    ctx.visit_ident(&mut cons.name);
+    visit_vec!(cons.args, arg => ctx.visit_argument(arg));
+    visit_opt!(&mut cons.typ, arg => ctx.visit_expr(arg))
+}
+
 pub fn walk_pat_ident<T: Visitor>(ctx: &mut T, ident: &mut PatIdent) {
     ctx.visit_range(&mut ident.0.range);
     ctx.visit_syntax_ctx(&mut ident.0.ctx);
@@ -108,6 +147,17 @@ pub fn walk_pat_ident<T: Visitor>(ctx: &mut T, ident: &mut PatIdent) {
 pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
     ctx.visit_range(&mut ident.range);
     ctx.visit_syntax_ctx(&mut ident.ctx);
+}
+
+pub fn walk_binding<T: Visitor>(ctx: &mut T, binding: &mut Binding) {
+    match binding {
+        Binding::Positional(e) => ctx.visit_expr(e),
+        Binding::Named(span, ident, e) => {
+            ctx.visit_range(span);
+            ctx.visit_ident(ident);
+            ctx.visit_expr(e);
+        }
+    }
 }
 
 pub fn walk_case_binding<T: Visitor>(ctx: &mut T, binding: &mut CaseBinding) {
@@ -169,7 +219,25 @@ pub fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
 pub fn walk_attr<T: Visitor>(ctx: &mut T, attr: &mut Attribute) {
     ctx.visit_ident(&mut attr.name);
     ctx.visit_range(&mut attr.range);
-    // TODO: Visit inner side of the attribute
+    visit_opt!(&mut attr.value, x => ctx.visit_attr_style(x))
+}
+
+pub fn walk_attr_style<T: Visitor>(ctx: &mut T, attr: &mut AttributeStyle) {
+    match attr {
+        AttributeStyle::Ident(r, _) => {
+            ctx.visit_range(r);
+        }
+        AttributeStyle::String(r, _) => {
+            ctx.visit_range(r);
+        }
+        AttributeStyle::Number(r, _) => {
+            ctx.visit_range(r);
+        }
+        AttributeStyle::List(r, l) => {
+            ctx.visit_range(r);
+            visit_vec!(l.iter_mut(), attr => ctx.visit_attr_style(attr))
+        }
+    }
 }
 
 pub fn walk_pat<T: Visitor>(ctx: &mut T, pat: &mut Pat) {
@@ -207,8 +275,29 @@ pub fn walk_rule<T: Visitor>(ctx: &mut T, rule: &mut Rule) {
 }
 
 pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
-    for entr in book.entries.values_mut() {
-        ctx.visit_entry(entr);
+    for entr in &mut book.entries {
+        match entr {
+            super::TopLevel::SumType(sum) => {
+                ctx.visit_ident(&mut sum.name);
+                visit_vec!(sum.attrs, arg => ctx.visit_attr(arg));
+                visit_vec!(sum.parameters, arg => ctx.visit_argument(arg));
+                visit_vec!(sum.indices, arg => ctx.visit_argument(arg));
+                visit_vec!(sum.constructors, arg => ctx.visit_constructor(arg));
+            }
+            super::TopLevel::RecordType(rec) => {
+                ctx.visit_ident(&mut rec.name);
+                visit_vec!(rec.attrs, arg => ctx.visit_attr(arg));
+                visit_vec!(rec.parameters, arg => ctx.visit_argument(arg));
+                visit_vec!(rec.indices, arg => ctx.visit_argument(arg));
+                visit_vec!(rec.fields, (name, _docs, typ) => {
+                    ctx.visit_ident(name);
+                    ctx.visit_expr(typ);
+                });
+            }
+            super::TopLevel::Entry(entry) => {
+                ctx.visit_entry(entry);
+            }
+        }
     }
 }
 
@@ -248,7 +337,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
     ctx.visit_range(&mut expr.range);
     match &mut expr.data {
         ExprKind::Var(ident) => ctx.visit_ident(ident),
-        ExprKind::Data(ident) => ctx.visit_ident(ident),
+        ExprKind::Constr(ident) => ctx.visit_ident(ident),
         ExprKind::All(None, typ, body) => {
             ctx.visit_expr(typ);
             ctx.visit_expr(body);
@@ -291,7 +380,7 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
         ExprKind::App(expr, spine) => {
             ctx.visit_expr(expr);
             for arg in spine {
-                ctx.visit_expr(arg);
+                ctx.visit_binding(arg);
             }
         }
         ExprKind::List(spine) => {
@@ -316,8 +405,8 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
             ctx.visit_expr(a);
             ctx.visit_expr(b);
         }
-        ExprKind::Help(id) => ctx.visit_ident(id),
         ExprKind::Hole => {}
+        ExprKind::Help(_) => {}
         ExprKind::Subst(subst) => ctx.visit_substitution(subst),
         ExprKind::Match(matcher) => ctx.visit_match(matcher),
     }

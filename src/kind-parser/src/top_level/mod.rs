@@ -1,13 +1,12 @@
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
-use std::collections::HashMap;
-
-use kind_tree::concrete::{Argument, Book, Entry, Rule};
+use kind_tree::concrete::{Argument, Attribute, Book, Entry, Rule, TopLevel};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
 use crate::state::Parser;
 
+pub mod attributes;
 pub mod type_decl;
 
 fn is_hidden_arg(token: &Token) -> bool {
@@ -16,15 +15,23 @@ fn is_hidden_arg(token: &Token) -> bool {
 
 impl<'a> Parser<'a> {
     pub fn is_top_level_entry_continuation(&self) -> bool {
-        self.peek(1).same_variant(Token::Colon) // ':'
-            | self.peek(1).same_variant(Token::LPar) // '('
-            | self.peek(1).same_variant(Token::Less) // '<'
-            | self.peek(1).same_variant(Token::Minus)  // '-'
-            | self.peek(1).same_variant(Token::Plus) // '+'
+        self.peek(1).same_variant(&Token::Colon) // ':'
+            || self.peek(1).same_variant(&Token::LPar) // '('
+            || self.peek(1).same_variant(&Token::Less) // '<'
+            || self.peek(1).same_variant(&Token::Minus)  // '-'
+            || self.peek(1).same_variant(&Token::Plus) // '+'
     }
 
     pub fn is_top_level_entry(&self) -> bool {
         self.get().is_upper_id() && self.is_top_level_entry_continuation()
+    }
+
+    pub fn is_top_level_start(&self) -> bool {
+        self.is_top_level_entry()
+            || self.get().same_variant(&Token::Type)
+            || self.get().same_variant(&Token::Record)
+            || self.get().same_variant(&Token::Hash)
+            || self.get().is_doc()
     }
 
     pub fn complement_binding_op(&self) -> Option<Token> {
@@ -35,7 +42,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_argument(&mut self) -> Result<Box<Argument>, SyntaxError> {
+    pub fn parse_argument(&mut self) -> Result<Argument, SyntaxError> {
         let start = self.range();
 
         let erased = self.eat_keyword(Token::Minus);
@@ -50,18 +57,22 @@ impl<'a> Parser<'a> {
         let hidden = is_hidden_arg(complement.as_ref().unwrap());
         let name = self.parse_id()?;
 
-        let tipo = if self.eat_keyword(Token::Colon) { Some(self.parse_expr(false)?) } else { None };
+        let tipo = if self.eat_keyword(Token::Colon) {
+            Some(self.parse_expr(false)?)
+        } else {
+            None
+        };
         let erased = if hidden { !keep } else { erased };
 
         let res = self.eat_variant(complement.unwrap())?.1;
         let range = res.mix(start);
-        Ok(Box::new(Argument {
+        Ok(Argument {
             hidden,
             erased,
             name,
             tipo,
             range,
-        }))
+        })
     }
 
     pub fn parse_rule(&mut self, name: String) -> Result<Box<Rule>, SyntaxError> {
@@ -77,7 +88,7 @@ impl<'a> Parser<'a> {
             return self.fail(vec![Token::UpperId(name)]);
         }
         let mut pats = Vec::new();
-        while !self.get().same_variant(Token::Eq) && !self.get().same_variant(Token::Eof) {
+        while !self.get().same_variant(&Token::Eq) && !self.get().same_variant(&Token::Eof) {
             pats.push(self.parse_pat()?);
         }
         self.eat_variant(Token::Eq)?;
@@ -91,7 +102,28 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_entry(&mut self) -> Result<Entry, SyntaxError> {
+    pub fn parse_arguments(&mut self) -> Result<Vec<Argument>, SyntaxError> {
+        let mut args = Vec::new();
+        while let Some(res) = self.try_single(&|fun| fun.parse_argument())? {
+            args.push(res);
+        }
+        Ok(args)
+    }
+
+    pub fn parse_docs(&mut self) -> Result<Vec<String>, SyntaxError> {
+        let mut docs = Vec::new();
+        while let Token::Comment(_, str) = &self.get() {
+            docs.push(str.clone());
+            self.bump();
+        }
+        Ok(docs)
+    }
+
+    pub fn parse_entry(
+        &mut self,
+        docs: Vec<String>,
+        attrs: Vec<Attribute>,
+    ) -> Result<Entry, SyntaxError> {
         let start = self.range();
 
         if self.get().is_lower_id() && self.is_top_level_entry_continuation() {
@@ -105,14 +137,9 @@ impl<'a> Parser<'a> {
         }
 
         let ident = self.parse_upper_id()?;
-        let docs = None;
-        let mut args = Vec::new();
-        loop {
-            if let Token::Colon | Token::Eof = self.get() {
-                break;
-            }
-            args.push(self.parse_argument()?);
-        }
+
+        let args = self.parse_arguments()?;
+
         self.eat_variant(Token::Colon)?;
         let tipo = self.parse_expr(false)?;
         let mut rules = Vec::new();
@@ -127,7 +154,10 @@ impl<'a> Parser<'a> {
 
         // Better error message when you have change the name of the function
         if self.get().is_upper_id() && !self.is_top_level_entry_continuation() {
-            return Err(SyntaxError::NotAClauseOfDef(ident.range.clone(), self.range()));
+            return Err(SyntaxError::NotAClauseOfDef(
+                ident.range.clone(),
+                self.range(),
+            ));
         }
 
         Ok(Entry {
@@ -136,30 +166,42 @@ impl<'a> Parser<'a> {
             args,
             tipo,
             rules,
-            attrs: Vec::new(),
+            attrs,
             range: start.mix(end),
         })
     }
 
+    pub fn parse_top_level(&mut self) -> Result<TopLevel, SyntaxError> {
+        let docs = self.parse_docs()?;
+        let attrs = self.parse_attrs()?;
+
+        if self.check_actual(Token::Type) {
+            Ok(TopLevel::SumType(self.parse_sum_type_def(docs, attrs)?))
+        } else if self.check_actual(Token::Record) {
+            Ok(TopLevel::RecordType(self.parse_record_def(docs, attrs)?))
+        } else if self.get().is_upper_id() {
+            Ok(TopLevel::Entry(self.parse_entry(docs, attrs)?))
+        } else {
+            self.fail(vec![])
+        }
+    }
+
     pub fn parse_book(&mut self) -> Book {
-        let mut entries = HashMap::new();
-        let mut names = Vec::new();
-        while !self.get().same_variant(Token::Eof) {
-            match self.parse_entry() {
-                Ok(entry) => {
-                    if entries.get(&entry.name.data.0).is_none() {
-                        names.push(entry.name.clone());
-                        entries.insert(entry.name.data.0.clone(), entry);
-                    }
-                }
+        let mut entries: Vec<TopLevel> = Vec::new();
+
+        while !self.get().same_variant(&Token::Eof) {
+            match self.parse_top_level() {
+                Ok(entry) => entries.push(entry),
                 Err(err) => {
+                    self.advance();
                     self.errs.push(Box::new(err));
-                    while !self.get().same_variant(Token::Eof) && !self.is_top_level_entry() {
+                    while !self.is_top_level_start() && !self.get().same_variant(&Token::Eof) {
                         self.advance();
                     }
                 }
             }
         }
+
         let res = self.eat_variant(Token::Eof);
 
         match res {
@@ -167,6 +209,6 @@ impl<'a> Parser<'a> {
             Err(err) => self.errs.push(Box::new(err)),
         }
 
-        Book { entries, names }
+        Book { entries }
     }
 }

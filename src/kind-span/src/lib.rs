@@ -29,8 +29,7 @@ pub enum Span {
 }
 
 pub trait Locatable {
-    fn locate(&self) -> Span;
-    fn set_location(&mut self, location: Span);
+    fn locate(&self) -> Range;
 }
 
 impl Range {
@@ -62,7 +61,11 @@ impl Range {
 
     #[inline]
     pub fn encode(&self) -> EncodedSpan {
-        EncodedSpan(((self.ctx.0 as u64) << 48) | ((self.start.index as u64) & 0xFFFFFF) | (((self.end.index as u64) & 0xFFFFFF) << 24))
+        EncodedSpan(
+            ((self.ctx.0 as u64) << 48)
+                | ((self.start.index as u64) & 0xFFFFFF)
+                | (((self.end.index as u64) & 0xFFFFFF) << 24),
+        )
     }
 }
 

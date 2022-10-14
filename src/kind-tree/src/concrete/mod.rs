@@ -1,11 +1,8 @@
-use std::{
-    collections::HashMap,
-    fmt::{Display, Error, Formatter},
-};
+use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::Ident;
 use expr::Expr;
-use kind_span::Range;
+use kind_span::{Locatable, Range};
 
 use self::pat::Pat;
 
@@ -16,9 +13,10 @@ pub mod visitor;
 /// A value of a attribute
 #[derive(Clone, Debug)]
 pub enum AttributeStyle {
-    Ident(Ident),
-    String(String),
+    Ident(Range, Ident),
+    String(Range, String),
     Number(Range, u64),
+    List(Range, Vec<AttributeStyle>),
 }
 
 /// A attribute is a kind of declaration
@@ -65,27 +63,131 @@ pub struct Rule {
 #[derive(Clone, Debug)]
 pub struct Entry {
     pub name: Ident,
-    pub docs: Option<String>,
-    pub args: Vec<Box<Argument>>,
+    pub docs: Vec<String>,
+    pub args: Vec<Argument>,
     pub tipo: Box<Expr>,
     pub rules: Vec<Box<Rule>>,
-    pub attrs: Vec<Attribute>,
     pub range: Range,
+    pub attrs: Vec<Attribute>,
+}
+
+/// Type declaration that can be either a record or a sum type
+
+#[derive(Clone, Debug)]
+pub struct Constructor {
+    pub name: Ident,
+    pub docs: Vec<String>,
+    pub args: Vec<Argument>,
+    pub typ: Option<Box<Expr>>,
+}
+
+#[derive(Clone, Debug)]
+pub struct SumTypeDecl {
+    pub name: Ident,
+    pub docs: Vec<String>,
+    pub parameters: Vec<Argument>,
+    pub indices: Vec<Argument>,
+    pub constructors: Vec<Constructor>,
+    pub attrs: Vec<Attribute>,
+}
+
+#[derive(Clone, Debug)]
+pub struct RecordDecl {
+    pub name: Ident,
+    pub docs: Vec<String>,
+    pub constructor: Ident,
+    pub parameters: Vec<Argument>,
+    pub indices: Vec<Argument>,
+    pub fields: Vec<(Ident, Vec<String>, Box<Expr>)>,
+    pub attrs: Vec<Attribute>,
+}
+
+#[derive(Clone, Debug)]
+pub enum TopLevel {
+    SumType(SumTypeDecl),
+    RecordType(RecordDecl),
+    Entry(Entry),
 }
 
 // A book is a collection of entries.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
-    pub names: Vec<Ident>,
-    pub entries: HashMap<String, Entry>,
+    pub entries: Vec<TopLevel>,
 }
 
 // Display
 
+impl Display for Constructor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        for doc in &self.docs {
+            writeln!(f, "  /// {}", doc)?;
+        }
+        write!(f, "{}", self.name)?;
+        for arg in &self.args {
+            write!(f, " {}", arg)?;
+        }
+        if let Some(res) = &self.typ {
+            write!(f, " : {}", res)?;
+        }
+        Ok(())
+    }
+}
+
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        for entr in self.entries.values() {
-            writeln!(f, "{}\n", entr)?;
+        for entr in &self.entries {
+            match entr {
+                TopLevel::SumType(sum) => {
+                    for doc in &sum.docs {
+                        writeln!(f, "/// {}", doc)?;
+                    }
+                    for attr in &sum.attrs {
+                        writeln!(f, "{}", attr)?;
+                    }
+                    write!(f, "type {}", sum.name)?;
+                    for arg in &sum.parameters {
+                        write!(f, " {}", arg)?;
+                    }
+                    if sum.indices.len() > 0 {
+                        write!(f, " ~")?;
+                    }
+                    for arg in &sum.indices {
+                        write!(f, " {}", arg)?;
+                    }
+                    writeln!(f, " {{")?;
+                    for cons in &sum.constructors {
+                        writeln!(f, "  {},", cons)?;
+                    }
+                    writeln!(f, "}}\n")?;
+                }
+                TopLevel::RecordType(rec) => {
+                    for doc in &rec.docs {
+                        writeln!(f, "/// {}", doc)?;
+                    }
+                    for attr in &rec.attrs {
+                        writeln!(f, "{}", attr)?;
+                    }
+                    write!(f, "record {}", rec.name)?;
+                    for arg in &rec.parameters {
+                        write!(f, " {}", arg)?;
+                    }
+                    if rec.indices.len() > 0 {
+                        write!(f, " ~")?;
+                    }
+                    for arg in &rec.indices {
+                        write!(f, " {}", arg)?;
+                    }
+                    writeln!(f, " {{")?;
+                    for (name, docs, cons) in &rec.fields {
+                        for doc in docs {
+                            writeln!(f, "  /// {}", doc)?;
+                        }
+                        writeln!(f, "  {}: {}, ", name, cons)?;
+                    }
+                    writeln!(f, "}}\n")?;
+                }
+                TopLevel::Entry(entr) => writeln!(f, "{}\n", entr)?,
+            }
         }
         Ok(())
     }
@@ -101,13 +203,21 @@ impl Display for Argument {
         };
         match &self.tipo {
             Some(tipo) => write!(f, "{}{}: {}{}", open, self.name, tipo, close),
-            None => write!(f, "{}{}:{}", open, self.name, close),
+            None => write!(f, "{}{}{}", open, self.name, close),
         }
     }
 }
 
 impl Display for Entry {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        for doc in &self.docs {
+            writeln!(f, "/// {}", doc)?;
+        }
+
+        for attr in &self.attrs {
+            writeln!(f, "{}", attr)?;
+        }
+
         write!(f, "{}", self.name.clone())?;
 
         for arg in &self.args {
@@ -124,6 +234,34 @@ impl Display for Entry {
     }
 }
 
+impl Display for AttributeStyle {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        match self {
+            AttributeStyle::Ident(_, i) => write!(f, "{}", i),
+            AttributeStyle::String(_, s) => write!(f, "{:?}", s),
+            AttributeStyle::Number(_, n) => write!(f, "{}", n),
+            AttributeStyle::List(_, l) => write!(
+                f,
+                "[{}]",
+                l.iter()
+                    .map(|x| format!("{}", x))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            ),
+        }
+    }
+}
+
+impl Display for Attribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "#{}", self.name)?;
+        if let Some(res) = &self.value {
+            write!(f, " = {}", res)?;
+        }
+        Ok(())
+    }
+}
+
 impl Display for Rule {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "{}", self.name)?;
@@ -131,5 +269,16 @@ impl Display for Rule {
             write!(f, " {}", pat)?;
         }
         write!(f, " = {}", self.body)
+    }
+}
+
+impl Locatable for AttributeStyle {
+    fn locate(&self) -> Range {
+        match self {
+            AttributeStyle::Ident(r, _) => r.clone(),
+            AttributeStyle::String(r, _) => r.clone(),
+            AttributeStyle::Number(r, _) => r.clone(),
+            AttributeStyle::List(r, _) => r.clone(),
+        }
     }
 }

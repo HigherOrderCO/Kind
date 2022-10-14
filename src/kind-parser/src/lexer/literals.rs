@@ -7,19 +7,30 @@ use crate::Lexer;
 impl<'a> Lexer<'a> {
     /// Lex a sequence of digits of the base @base@ with
     /// maximum length of @size@ and turns it into a char.
-    fn lex_char_encoded(&mut self, start: usize, size: usize, base: u32, err: EncodeSequence) -> Result<char, SyntaxError> {
+    fn lex_char_encoded(
+        &mut self,
+        start: usize,
+        size: usize,
+        base: u32,
+        err: EncodeSequence,
+    ) -> Result<char, SyntaxError> {
         let string = self.next_chars(size);
         let to_chr = string.and_then(|x| u32::from_str_radix(x, base).ok());
         if let Some(chr) = to_chr.and_then(char::from_u32) {
             return Ok(chr);
         }
-        Err(SyntaxError::InvalidEscapeSequence(err, self.mk_range(start)))
+        Err(SyntaxError::InvalidEscapeSequence(
+            err,
+            self.mk_range(start),
+        ))
     }
 
     /// Turns a escaped char into a normal char.
     fn lex_escaped_char(&mut self, start: usize) -> Result<char, SyntaxError> {
         match self.peekable.peek() {
-            None => Err(SyntaxError::UnfinishedString(self.mk_one_column_range(start))),
+            None => Err(SyntaxError::UnfinishedString(
+                self.mk_one_column_range(start),
+            )),
             Some(&x) => {
                 self.next_char();
                 match x {
@@ -41,7 +52,10 @@ impl<'a> Lexer<'a> {
     /// Lex a base-10 digit.
     fn lex_digit(&mut self, start: usize) -> (Token, Range) {
         let num = self.accumulate_while(&|x| x.is_ascii_digit());
-        (Token::Num(num.parse::<u64>().unwrap()), self.mk_range(start))
+        (
+            Token::Num(num.parse::<u64>().unwrap()),
+            self.mk_range(start),
+        )
     }
 
     /// Lexes a number of base @base@ removing the first
@@ -53,7 +67,10 @@ impl<'a> Lexer<'a> {
             (Token::Num(res), self.mk_range(start))
         } else {
             (
-                Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(err, self.mk_range(start)))),
+                Token::Error(Box::new(SyntaxError::InvalidNumberRepresentation(
+                    err,
+                    self.mk_range(start),
+                ))),
                 self.mk_range(start),
             )
         }
@@ -115,7 +132,12 @@ impl<'a> Lexer<'a> {
         match (self.next_char(), error) {
             (_, Some(err)) => err,
             (Some('"'), _) => (Token::Str(string), self.mk_range(start)),
-            _ => (Token::Error(Box::new(SyntaxError::UnfinishedString(self.mk_one_column_range(start)))), self.mk_range(start)),
+            _ => (
+                Token::Error(Box::new(SyntaxError::UnfinishedString(
+                    self.mk_one_column_range(start),
+                ))),
+                self.mk_range(start),
+            ),
         }
     }
 }

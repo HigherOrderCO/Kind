@@ -167,7 +167,12 @@ impl Display for Expr {
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body) => write!(f, "({} => {})", binder, body),
-            App(head, spine) => write!(f, "({}{})", head, spine.iter().map(|x| format!(" {}", x)).collect::<String>()),
+            App(head, spine) => write!(
+                f,
+                "({}{})",
+                head,
+                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+            ),
             Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
             Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),

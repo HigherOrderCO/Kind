@@ -2,7 +2,7 @@
 /// without parenthesis. It helps when it comes to
 /// a static analysis of the tree with the syntax sugars
 /// and it makes it easier to split phases.
-use kind_span::Range;
+use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::Ident;
@@ -30,7 +30,13 @@ pub enum Operator {
     Neq,
 }
 
-pub type Spine = Vec<Box<Expr>>;
+#[derive(Clone, Debug)]
+pub enum Binding {
+    Positional(Box<Expr>),
+    Named(Range, Ident, Box<Expr>),
+}
+
+pub type Spine = Vec<Binding>;
 
 #[derive(Clone, Debug)]
 pub enum CaseBinding {
@@ -101,7 +107,7 @@ pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
     /// Name of a function/constructor
-    Data(Ident),
+    Constr(Ident),
     /// The dependent function space (e.g. (x : Int) -> y)
     All(Option<Ident>, Box<Expr>, Box<Expr>),
     /// The dependent product space (e.g. [x : Int] -> y)
@@ -184,6 +190,21 @@ impl Expr {
     }
 }
 
+impl Locatable for Binding {
+    fn locate(&self) -> kind_span::Range {
+        match self {
+            Binding::Positional(e) => e.locate(),
+            Binding::Named(s, _, _) => s.clone(),
+        }
+    }
+}
+
+impl Locatable for Expr {
+    fn locate(&self) -> Range {
+        self.range
+    }
+}
+
 impl Display for Literal {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
@@ -229,7 +250,7 @@ impl Display for CaseBinding {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
             CaseBinding::Field(n) => write!(f, "{}", n.0),
-            CaseBinding::Renamed(m, n) => write!(f, "({}: {})", m, n.0),
+            CaseBinding::Renamed(m, n) => write!(f, "({} = {})", m, n.0),
         }
     }
 }
@@ -270,6 +291,15 @@ impl Display for Substitution {
     }
 }
 
+impl Display for Binding {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        match self {
+            Binding::Positional(e) => write!(f, "{}", e),
+            Binding::Named(_, i, e) => write!(f, "({} : {})", i, e),
+        }
+    }
+}
+
 impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         use ExprKind::*;
@@ -279,14 +309,26 @@ impl Display for Expr {
             Sigma(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Lit(lit) => write!(f, "{}", lit),
             Var(name) => write!(f, "{}", name),
-            Data(name) => write!(f, "{}", name),
+            Constr(name) => write!(f, "{}", name),
             Lambda(binder, None, body) => write!(f, "({} => {})", binder, body),
             Lambda(binder, Some(typ), body) => write!(f, "(({} : {}) => {})", binder, typ, body),
             Pair(fst, snd) => write!(f, "($ {} {})", fst, snd),
-            App(head, spine) => write!(f, "({}{})", head, spine.iter().map(|x| format!(" {}", x)).collect::<String>()),
+            App(head, spine) => write!(
+                f,
+                "({}{})",
+                head,
+                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+            ),
             Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
             If(cond, if_, else_) => write!(f, "(if {} {{{}}} else {{{}}})", cond, if_, else_),
-            List(vec) => write!(f, "[{}]", vec.iter().map(|x| format!("{}", x)).collect::<Vec<String>>().join(" ")),
+            List(vec) => write!(
+                f,
+                "[{}]",
+                vec.iter()
+                    .map(|x| format!("{}", x))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
             Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
             Hole => write!(f, "_"),
