@@ -1,5 +1,8 @@
-use std::collections::VecDeque;
+//! Describes the state of the parser.
 
+use std::{collections::VecDeque, sync::mpsc::Sender};
+
+use kind_report::data::DiagnosticFrame;
 use kind_span::Range;
 
 use crate::{errors::SyntaxError, lexer::tokens::Token, Lexer};
@@ -11,22 +14,27 @@ use crate::{errors::SyntaxError, lexer::tokens::Token, Lexer};
 /// and similar functions
 pub struct Parser<'a> {
     pub lexer: Lexer<'a>,
-    // We have to shift these things one position
-    // to the left so idk what i should use it here
-    // probably the movement will not affect it so much.
+    /// We have to shift these things one position
+    /// to the left so idk what i should use it here
+    /// probably the movement will not affect it so much
+    /// because it's a ring buffer.
     pub queue: VecDeque<(Token, Range)>,
     pub breaks: VecDeque<bool>,
-    pub errs: &'a mut Vec<Box<SyntaxError>>,
+    pub errs: Sender<DiagnosticFrame>,
+    /// It's useful when we have to try to parse something
+    /// that fails in the first token. as the parser ignores some
+    /// tokens, we cannot rely on the count provided by the
+    /// lexer.
     pub eaten: u32,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(mut lexer: Lexer<'a>, sender: &'a mut Vec<Box<SyntaxError>>) -> Parser<'a> {
+    pub fn new(mut lexer: Lexer<'a>, sender: Sender<DiagnosticFrame>) -> Parser<'a> {
         let mut queue = VecDeque::with_capacity(3);
         let mut breaks = VecDeque::with_capacity(3);
         for _ in 0..3 {
             breaks.push_back(lexer.is_linebreak());
-            queue.push_back(lexer.get_next_no_error(sender));
+            queue.push_back(lexer.get_next_no_error(sender.clone()));
         }
         Parser {
             lexer,
@@ -42,7 +50,7 @@ impl<'a> Parser<'a> {
         self.breaks.pop_front();
         self.breaks.push_back(self.lexer.is_linebreak());
         self.queue
-            .push_back(self.lexer.get_next_no_error(self.errs));
+            .push_back(self.lexer.get_next_no_error(self.errs.clone()));
         self.eaten += 1;
         cur
     }
@@ -67,11 +75,6 @@ impl<'a> Parser<'a> {
     }
 
     #[inline]
-    pub fn bump(&mut self) {
-        self.advance();
-    }
-
-    #[inline]
     pub fn fail<T>(&mut self, expect: Vec<Token>) -> Result<T, SyntaxError> {
         Err(SyntaxError::UnexpectedToken(
             self.get().clone(),
@@ -81,7 +84,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn eat_closing_keyword(&mut self, expect: Token, range: Range) -> Result<(), SyntaxError> {
-        if !self.eat_keyword(expect) {
+        if !self.check_and_eat(expect) {
             return Err(SyntaxError::Unclosed(range));
         } else {
             Ok(())
@@ -106,7 +109,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn eat_keyword(&mut self, expect: Token) -> bool {
+    pub fn check_and_eat(&mut self, expect: Token) -> bool {
         if self.get().same_variant(&expect) {
             self.advance();
             true

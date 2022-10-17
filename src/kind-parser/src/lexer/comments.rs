@@ -1,3 +1,6 @@
+//! Lexes single line and multi line comments
+//! including documentation strings (only in single line mode).
+
 use kind_span::Range;
 
 use crate::errors::SyntaxError;

@@ -1,3 +1,8 @@
+//! Lexes some types of literals. It's a isolated
+//! module because it requires a lot of code to
+//! parse some specific things like escaped characters
+//! inside of strings.
+
 use kind_span::Range;
 
 use crate::errors::{EncodeSequence, SyntaxError};
@@ -123,6 +128,7 @@ impl<'a> Lexer<'a> {
                             error = Some((Token::Error(Box::new(t)), self.mk_range(start)));
                         }
                     }
+                    continue;
                 }
                 x => string.push(x),
             }

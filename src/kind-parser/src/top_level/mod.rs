@@ -45,8 +45,8 @@ impl<'a> Parser<'a> {
     pub fn parse_argument(&mut self) -> Result<Argument, SyntaxError> {
         let start = self.range();
 
-        let erased = self.eat_keyword(Token::Minus);
-        let keep = self.eat_keyword(Token::Plus);
+        let erased = self.check_and_eat(Token::Minus);
+        let keep = self.check_and_eat(Token::Plus);
 
         let complement = self.complement_binding_op();
         match &complement {
@@ -57,7 +57,7 @@ impl<'a> Parser<'a> {
         let hidden = is_hidden_arg(complement.as_ref().unwrap());
         let name = self.parse_id()?;
 
-        let tipo = if self.eat_keyword(Token::Colon) {
+        let tipo = if self.check_and_eat(Token::Colon) {
             Some(self.parse_expr(false)?)
         } else {
             None
@@ -114,7 +114,7 @@ impl<'a> Parser<'a> {
         let mut docs = Vec::new();
         while let Token::Comment(_, str) = &self.get() {
             docs.push(str.clone());
-            self.bump();
+            self.advance();
         }
         Ok(docs)
     }
@@ -194,7 +194,7 @@ impl<'a> Parser<'a> {
                 Ok(entry) => entries.push(entry),
                 Err(err) => {
                     self.advance();
-                    self.errs.push(Box::new(err));
+                    self.errs.send(err.into()).unwrap();
                     while !self.is_top_level_start() && !self.get().same_variant(&Token::Eof) {
                         self.advance();
                     }
@@ -206,7 +206,7 @@ impl<'a> Parser<'a> {
 
         match res {
             Ok(_) => (),
-            Err(err) => self.errs.push(Box::new(err)),
+            Err(err) => self.errs.send(err.into()).unwrap(),
         }
 
         Book { entries }

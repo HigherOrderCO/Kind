@@ -1,3 +1,5 @@
+//! Describes the lexer mutable state.
+
 use std::{iter::Peekable, str::Chars};
 
 use kind_span::{Pos, Range, SyntaxCtxIndex};
@@ -85,7 +87,6 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn next_chars(&mut self, size: usize) -> Option<&str> {
-        let start = self.pos;
         for _ in 0..size {
             if let Some(&x) = self.peekable.peek() {
                 self.pos += x.len_utf8();
@@ -94,9 +95,8 @@ impl<'a> Lexer<'a> {
                 return None;
             }
         }
-        let len = self.pos - start;
-        let str = &self.input[..len];
-        self.input = &self.input[len..];
+        let str = &self.input[..size];
+        self.input = &self.input[size..];
         Some(str)
     }
 

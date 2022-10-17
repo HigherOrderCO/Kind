@@ -36,9 +36,9 @@ fn encode_name(encode: EncodeSequence) -> &'static str {
     }
 }
 
-impl From<Box<SyntaxError>> for DiagnosticFrame {
-    fn from(err: Box<SyntaxError>) -> Self {
-        match *err {
+impl From<SyntaxError> for DiagnosticFrame {
+    fn from(err: SyntaxError) -> Self {
+        match err {
             SyntaxError::UnfinishedString(range) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
@@ -237,8 +237,8 @@ impl From<Box<SyntaxError>> for DiagnosticFrame {
     }
 }
 
-impl From<&Box<SyntaxError>> for DiagnosticFrame {
-    fn from(err: &Box<SyntaxError>) -> Self {
-        (err.clone()).into()
+impl From<Box<SyntaxError>> for DiagnosticFrame {
+    fn from(err: Box<SyntaxError>) -> Self {
+        (*err).into()
     }
 }

@@ -1,3 +1,14 @@
+//! The entry point for the parsing. it parses all of the
+//! trivial tokens like ponctuations or identifiers. Some
+//! other construtions like [comments] and [literals] are
+//! stored in other modules for better mantenaiblity.
+//!
+//! [comments]: crate::lexer::literals
+//! [literals]: crate::lexer::literals
+
+use std::sync::mpsc::Sender;
+
+use kind_report::data::DiagnosticFrame;
 use kind_span::Range;
 
 use crate::errors::SyntaxError;
@@ -62,12 +73,12 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn get_next_no_error(&mut self, vec: &mut Vec<Box<SyntaxError>>) -> (Token, Range) {
+    pub fn get_next_no_error(&mut self, vec: Sender<DiagnosticFrame>) -> (Token, Range) {
         loop {
             let (token, span) = self.lex_token();
             match token {
                 Token::Error(x) => {
-                    vec.push(x);
+                    vec.send(x.into()).unwrap();
                     continue;
                 }
                 Token::Comment(false, _) => continue,

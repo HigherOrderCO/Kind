@@ -12,7 +12,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_pat_constructor(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let start = self.range();
-        self.bump(); // '('
+        self.advance(); // '('
         let name = self.parse_upper_id()?;
         let mut pats = Vec::new();
         while let Some(res) = self.try_single(&|s| s.parse_pat())? {
@@ -45,7 +45,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_pat_group(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let start = self.range();
-        self.bump(); // '('
+        self.advance(); // '('
         let mut pat = self.parse_pat()?;
         let end = self.eat_variant(Token::RPar)?.1;
         pat.range = start.mix(end);
@@ -70,7 +70,7 @@ impl<'a> Parser<'a> {
 
     fn parse_pat_list(&mut self) -> Result<Box<Pat>, SyntaxError> {
         let range = self.range();
-        self.bump(); // '['
+        self.advance(); // '['
         let mut vec = Vec::new();
 
         if self.check_actual(Token::RBracket) {
@@ -85,13 +85,13 @@ impl<'a> Parser<'a> {
         let mut initialized = false;
         let mut with_comma = false;
         loop {
-            let ate_comma = self.eat_keyword(Token::Comma);
+            let ate_comma = self.check_and_eat(Token::Comma);
             if !initialized {
                 initialized = true;
                 with_comma = ate_comma;
             }
             if with_comma {
-                self.eat_keyword(Token::Comma);
+                self.check_and_eat(Token::Comma);
             }
 
             match self.try_single(&|x| x.parse_pat())? {

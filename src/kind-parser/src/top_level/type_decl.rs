@@ -10,7 +10,7 @@ impl<'a> Parser<'a> {
         let name = self.parse_id()?;
         let args = self.parse_arguments()?;
 
-        let typ = if self.eat_keyword(Token::Colon) {
+        let typ = if self.check_and_eat(Token::Colon) {
             Some(self.parse_expr(false)?)
         } else {
             None
@@ -34,7 +34,7 @@ impl<'a> Parser<'a> {
 
         let parameters = self.parse_arguments()?;
 
-        let indices = if self.eat_keyword(Token::Tilde) {
+        let indices = if self.check_and_eat(Token::Tilde) {
             self.parse_arguments()?
         } else {
             Vec::new()
@@ -45,11 +45,8 @@ impl<'a> Parser<'a> {
 
         let mut constructors = vec![];
 
-        while let Some(res) = self.try_single(&|cons| cons.parse_constructor())? {
-            constructors.push(res);
-            if !self.eat_keyword(Token::Comma) {
-                break;
-            }
+        while !self.get().same_variant(&Token::RBrace) && !self.get().same_variant(&Token::Eof) {
+            constructors.push(self.parse_constructor()?);
         }
 
         self.eat_closing_keyword(Token::RBrace, range)?;
@@ -74,7 +71,7 @@ impl<'a> Parser<'a> {
 
         let parameters = self.parse_arguments()?;
 
-        let indices = if self.eat_keyword(Token::Tilde) {
+        let indices = if self.check_and_eat(Token::Tilde) {
             self.parse_arguments()?
         } else {
             Vec::new()
@@ -87,19 +84,16 @@ impl<'a> Parser<'a> {
 
         let constructor = self.parse_id()?;
 
-        self.eat_keyword(Token::Comma);
+        self.check_and_eat(Token::Comma);
 
         let mut fields = vec![];
 
-        loop {
+        while !self.get().same_variant(&Token::RBrace) && !self.get().same_variant(&Token::Eof) {
             let docs = self.parse_docs()?;
             let name = self.parse_id()?;
             self.eat_variant(Token::Colon)?;
             let typ = self.parse_expr(false)?;
-            fields.push((name, docs, typ));
-            if !self.eat_keyword(Token::Comma) {
-                break;
-            }
+            fields.push((name, docs, typ))
         }
 
         self.eat_closing_keyword(Token::RBrace, range)?;

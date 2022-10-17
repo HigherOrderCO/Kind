@@ -15,22 +15,22 @@ impl<'a> Parser<'a> {
             }
             Token::Num(num) => {
                 let range = self.range();
-                self.bump();
+                self.advance();
                 Ok(AttributeStyle::Number(range, num))
             }
             Token::Str(str) => {
                 let range = self.range();
-                self.bump();
+                self.advance();
                 Ok(AttributeStyle::String(range, str))
             }
             Token::LBracket => {
                 let range = self.range();
-                self.bump();
+                self.advance();
 
                 let mut attrs = Vec::new();
                 while let Some(res) = self.try_single(&|fun| fun.parse_attr_style())? {
                     attrs.push(res);
-                    if !self.eat_keyword(Token::Comma) {
+                    if !self.check_and_eat(Token::Comma) {
                         break;
                     }
                 }
@@ -47,7 +47,7 @@ impl<'a> Parser<'a> {
         let start = self.range();
         self.eat_variant(Token::Hash)?;
         let name = self.parse_id()?;
-        let style = if self.eat_keyword(Token::Eq) {
+        let style = if self.check_and_eat(Token::Eq) {
             Some(self.parse_attr_style()?)
         } else {
             None

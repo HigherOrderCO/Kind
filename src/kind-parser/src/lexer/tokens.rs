@@ -1,3 +1,6 @@
+//! Describes all of the tokens required
+//! to parse kind2 after version 0.2.8.
+
 use crate::errors::SyntaxError;
 
 #[derive(Debug, Clone)]
@@ -43,8 +46,6 @@ pub enum Token {
     Num(u64),
     Float(u64, u64),
     Hole,
-
-    // TO Interpolation
 
     // Operators
     Plus,
