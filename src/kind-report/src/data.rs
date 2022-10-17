@@ -46,13 +46,13 @@ pub struct DiagnosticFrame {
     pub positions: Vec<Marking>,
 }
 
-impl DiagnosticFrame {
-    pub fn to_diagnostic(self) -> Diagnostic {
-        Diagnostic { frame: self }
+impl<'a> DiagnosticFrame {
+    pub fn to_diagnostic(&'a self) -> Diagnostic<'a> {
+        Diagnostic { frame: &self }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct Diagnostic {
-    pub frame: DiagnosticFrame,
+pub struct Diagnostic<'a> {
+    pub frame: &'a DiagnosticFrame,
 }

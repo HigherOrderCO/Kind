@@ -158,10 +158,8 @@ pub fn walk_destruct<T: Visitor>(ctx: &mut T, destruct: &mut Destruct) {
         Destruct::Destruct(i, e, _) => {
             ctx.visit_ident(i);
             visit_vec!(e, e => ctx.visit_case_binding(e))
-        },
-        Destruct::Ident(i) => {
-            ctx.visit_ident(i)
-        },
+        }
+        Destruct::Ident(i) => ctx.visit_ident(i),
     }
 }
 

@@ -2,6 +2,7 @@ use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::Ident;
 use expr::Expr;
+use fxhash::FxHashMap;
 use kind_span::{Locatable, Range};
 
 use self::pat::Pat;
@@ -109,10 +110,28 @@ pub enum TopLevel {
     Entry(Entry),
 }
 
-// A book is a collection of entries.
+/// A book is a collection of entries.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
     pub entries: Vec<TopLevel>,
+}
+
+#[derive(Clone, Debug)]
+pub enum GlossaryEntry {
+    SumDef(SumTypeDecl),
+    RecDef(RecordDecl),
+
+    /// A constructor definition is also
+    /// an entry but without any rules.
+    ConstDef(Entry),
+    FnDef(Entry),
+}
+
+/// A glossary stores definitions by name. It's generated
+/// by joining a bunch of books that are already resolved.
+#[derive(Clone, Debug, Default)]
+pub struct Glossary {
+    pub entries: FxHashMap<String, GlossaryEntry>,
 }
 
 // Display

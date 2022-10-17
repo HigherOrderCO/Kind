@@ -366,7 +366,7 @@ pub fn render_tag<T: Write + Sized>(severity: &Severity, fmt: &mut T) -> std::fm
     }
 }
 
-impl Diagnostic {
+impl<'a> Diagnostic<'a> {
     pub fn render<T: Write + Sized, C: FileCache>(
         &self,
         cache: &C,

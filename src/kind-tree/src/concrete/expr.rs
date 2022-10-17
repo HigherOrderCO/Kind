@@ -251,7 +251,9 @@ impl Display for Literal {
             Literal::U60 => write!(f, "U60"),
             Literal::Char(c) => write!(f, "'{}'", c),
             Literal::Number(numb) => write!(f, "{}", numb),
-            Literal::String(str) => write!(f, "\"{}\"", str),
+            Literal::String(str) => {
+                write!(f, "{:?}", str)
+            }
         }
     }
 }
@@ -387,10 +389,10 @@ impl Display for Expr {
             ),
             Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
-            Hole => write!(f, "_"),
             Match(matcher) => write!(f, "({})", matcher),
             Subst(subst) => write!(f, "({})", subst),
             Help(name) => write!(f, "?{}", name),
+            Hole => write!(f, "_"),
         }
     }
 }

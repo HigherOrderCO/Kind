@@ -7,9 +7,9 @@ pub enum PassError {
     RepeatedVariable(Range, Range),
 }
 
-impl From<&PassError> for DiagnosticFrame {
-    fn from(err: &PassError) -> Self {
-        match *err {
+impl From<PassError> for DiagnosticFrame {
+    fn from(err: PassError) -> Self {
+        match err {
             PassError::RepeatedVariable(first_decl, last_decl) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,

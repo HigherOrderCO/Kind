@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::sync::mpsc::Sender;
 
+use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::visitor::walk_expr;
@@ -16,11 +18,20 @@ use kind_tree::{visit_opt, visit_vec};
 
 use crate::errors::PassError;
 
-#[derive(Default)]
 pub struct UnboundCollector {
-    pub errors: Vec<PassError>,
+    pub errors: Sender<DiagnosticFrame>,
     pub context_vars: Vec<Ident>,
     pub unbound: HashMap<String, Vec<Ident>>,
+}
+
+impl UnboundCollector {
+    pub fn new(diagnostic_sender: Sender<DiagnosticFrame>) -> UnboundCollector {
+        Self {
+            errors: diagnostic_sender,
+            context_vars: Default::default(),
+            unbound: Default::default(),
+        }
+    }
 }
 
 impl Visitor for UnboundCollector {
@@ -36,7 +47,8 @@ impl Visitor for UnboundCollector {
     fn visit_pat_ident(&mut self, ident: &mut PatIdent) {
         if let Some(fst) = self.context_vars.iter().find(|x| x.data == ident.0.data) {
             self.errors
-                .push(PassError::RepeatedVariable(fst.range, ident.0.range))
+                .send(PassError::RepeatedVariable(fst.range, ident.0.range).into())
+                .unwrap()
         } else {
             self.context_vars.push(ident.0.clone())
         }
@@ -118,7 +130,7 @@ impl Visitor for UnboundCollector {
                 for bind in bindings {
                     self.visit_case_binding(bind)
                 }
-            },
+            }
             Destruct::Ident(ident) => self.context_vars.push(ident.clone()),
         }
     }

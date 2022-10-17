@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::sync::mpsc::Sender;
 
+use kind_report::data::DiagnosticFrame;
 use kind_report::RenderConfig;
 use kind_tree::concrete::Book;
 
@@ -12,6 +14,7 @@ pub struct Session<'a> {
     pub loaded_sources: Vec<Rc<String>>,
     pub parsed_books: Vec<Rc<Book>>,
 
+    pub diagnostic_sender: Sender<DiagnosticFrame>,
     pub root: PathBuf,
     pub render_config: &'a RenderConfig<'a>,
 
@@ -19,7 +22,11 @@ pub struct Session<'a> {
 }
 
 impl<'a> Session<'a> {
-    pub fn new(root: PathBuf, render_config: &'a RenderConfig<'a>) -> Session<'a> {
+    pub fn new(
+        root: PathBuf,
+        render_config: &'a RenderConfig<'a>,
+        sender: Sender<DiagnosticFrame>,
+    ) -> Session<'a> {
         Session {
             loaded_idents: HashMap::new(),
             loaded_paths: Vec::new(),
@@ -28,6 +35,7 @@ impl<'a> Session<'a> {
             root,
             render_config,
             book_counter: 0,
+            diagnostic_sender: sender,
         }
     }
     pub fn add_book(
