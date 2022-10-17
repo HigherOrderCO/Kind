@@ -1,4 +1,12 @@
-use kind_span::{Range, SyntaxCtxIndex};
+//! Specifies a visitor trait following the visitor pattern
+//! because it's easier to walk the entire tree
+//! just by some nodes without writing some functions
+//! to walk through everything (yeah i really hate
+//! OOP patterns but this time it's really useful.)
+//!
+//! All of these functions are implemented so we can easily
+//! change these default implementations.
+//! use kind_span::{Range, SyntaxCtxIndex};
 
 use crate::concrete::expr::*;
 use crate::symbol::*;
@@ -28,17 +36,10 @@ macro_rules! visit_opt {
     };
 }
 
+use kind_span::{Range, SyntaxCtxIndex};
 pub(crate) use visit_opt;
 pub(crate) use visit_vec;
 
-/// A visitor trait following the visitor pattern
-/// because it's easier to walk the entire tree
-/// just by some nodes without writing some functions
-/// to walk through everything (yeah i really hate
-/// OOP patterns but this time it's really useful.)
-///
-/// All of these functions are implemented so we can easily
-/// change these default implementations.
 pub trait Visitor: Sized {
     fn visit_range(&mut self, x: &mut Range) {
         walk_range(self, x);

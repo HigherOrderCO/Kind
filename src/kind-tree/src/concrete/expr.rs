@@ -1,7 +1,7 @@
-/// This module describes a CONCRETE SYNTAX TREE
-/// without parenthesis. It helps when it comes to
-/// a static analysis of the tree with the syntax sugars
-/// and it makes it easier to split phases.
+//! This module describes a CONCRETE SYNTAX TREE
+//! without parenthesis. It helps when it comes to
+//! a static analysis of the tree with the syntax sugars
+//! and it makes it easier to split phases.
 use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
 
@@ -200,7 +200,7 @@ impl Locatable for Binding {
     fn locate(&self) -> kind_span::Range {
         match self {
             Binding::Positional(e) => e.locate(),
-            Binding::Named(s, _, _) => s.clone(),
+            Binding::Named(s, _, _) => *s,
         }
     }
 }
@@ -237,7 +237,7 @@ impl Locatable for Destruct {
         match self {
             Destruct::Destruct(s, bindings, _) => s
                 .locate()
-                .mix(bindings.get(0).map(|x| x.locate()).unwrap_or(s.locate())),
+                .mix(bindings.get(0).map(|x| x.locate()).unwrap_or_else(|| s.locate())),
             Destruct::Ident(i) => i.locate(),
         }
     }

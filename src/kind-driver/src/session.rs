@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
@@ -12,6 +12,7 @@ pub struct Session<'a> {
     pub loaded_idents: HashMap<String, usize>,
     pub loaded_paths: Vec<Rc<PathBuf>>,
     pub loaded_sources: Vec<Rc<String>>,
+    pub public_names: HashMap<PathBuf, HashSet<String>>,
     pub parsed_books: Vec<Rc<Book>>,
 
     pub diagnostic_sender: Sender<DiagnosticFrame>,
@@ -32,6 +33,7 @@ impl<'a> Session<'a> {
             loaded_paths: Vec::new(),
             loaded_sources: Vec::new(),
             parsed_books: Vec::new(),
+            public_names: HashMap::new(),
             root,
             render_config,
             book_counter: 0,

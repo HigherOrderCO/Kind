@@ -1,9 +1,14 @@
+//! Describes the concrete AST with all of the sugars.
+//! It's useful to pretty printing and resugarization
+//! from the type checker.
+
 use std::fmt::{Display, Error, Formatter};
 
 use crate::symbol::Ident;
 use expr::Expr;
 use fxhash::FxHashMap;
 use kind_span::{Locatable, Range};
+use linked_hash_map::LinkedHashMap;
 
 use self::pat::Pat;
 
@@ -116,22 +121,12 @@ pub struct Book {
     pub entries: Vec<TopLevel>,
 }
 
-#[derive(Clone, Debug)]
-pub enum GlossaryEntry {
-    SumDef(SumTypeDecl),
-    RecDef(RecordDecl),
-
-    /// A constructor definition is also
-    /// an entry but without any rules.
-    ConstDef(Entry),
-    FnDef(Entry),
-}
-
 /// A glossary stores definitions by name. It's generated
 /// by joining a bunch of books that are already resolved.
 #[derive(Clone, Debug, Default)]
 pub struct Glossary {
-    pub entries: FxHashMap<String, GlossaryEntry>,
+    pub names: LinkedHashMap<String, Ident>, // Ordered hashset
+    pub entries: FxHashMap<String, TopLevel>, // Probably deterministic order everytime
 }
 
 // Display
@@ -167,7 +162,7 @@ impl Display for Book {
                     for arg in &sum.parameters {
                         write!(f, " {}", arg)?;
                     }
-                    if sum.indices.len() > 0 {
+                    if !sum.indices.is_empty() {
                         write!(f, " ~")?;
                     }
                     for arg in &sum.indices {
@@ -190,7 +185,7 @@ impl Display for Book {
                     for arg in &rec.parameters {
                         write!(f, " {}", arg)?;
                     }
-                    if rec.indices.len() > 0 {
+                    if !rec.indices.is_empty() {
                         write!(f, " ~")?;
                     }
                     for arg in &rec.indices {
@@ -294,10 +289,10 @@ impl Display for Rule {
 impl Locatable for AttributeStyle {
     fn locate(&self) -> Range {
         match self {
-            AttributeStyle::Ident(r, _) => r.clone(),
-            AttributeStyle::String(r, _) => r.clone(),
-            AttributeStyle::Number(r, _) => r.clone(),
-            AttributeStyle::List(r, _) => r.clone(),
+            AttributeStyle::Ident(r, _) => *r,
+            AttributeStyle::String(r, _) => *r,
+            AttributeStyle::Number(r, _) => *r,
+            AttributeStyle::List(r, _) => *r,
         }
     }
 }

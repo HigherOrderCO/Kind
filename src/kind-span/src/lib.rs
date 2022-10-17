@@ -38,6 +38,10 @@ impl Range {
         Range { start, end, ctx }
     }
 
+    pub fn ghost_range() -> Range {
+        Range::new(Pos { index: 0 }, Pos { index: 0 }, SyntaxCtxIndex(0))
+    }
+
     /// Joins two ranges. It keeps the syntax context
     /// of the first one.
     #[inline]

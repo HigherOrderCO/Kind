@@ -8,6 +8,7 @@ use kind_tree::symbol::Ident;
 pub enum DriverError {
     UnboundVariable(Ident),
     MultiplePaths(Ident, Vec<PathBuf>),
+    DefinedMultipleTimes(Ident, Ident),
 }
 
 impl From<DriverError> for DiagnosticFrame {
@@ -29,8 +30,8 @@ impl From<DriverError> for DiagnosticFrame {
             DriverError::MultiplePaths(ident, paths) => DiagnosticFrame {
                 code: 1,
                 severity: Severity::Error,
-                title: "Multiple paths for the same name".to_string(),
-                subtitles: paths.iter().map(|path| 
+                title: "Multiple definitions for the same name".to_string(),
+                subtitles: paths.iter().map(|path|
                     Subtitle::Phrase(Color::Fst, vec![Word::White(path.display().to_string())])).collect(),
                 hints: vec![
                     "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string(),
@@ -39,6 +40,26 @@ impl From<DriverError> for DiagnosticFrame {
                     position: ident.range,
                     color: Color::Fst,
                     text: "Here!".to_string(),
+                    no_code: false,
+                }],
+            },
+            DriverError::DefinedMultipleTimes(fst, snd) => DiagnosticFrame {
+                code: 1,
+                severity: Severity::Error,
+                title: "Multiple paths for the same name".to_string(),
+                subtitles: vec![],
+                hints: vec![
+                    "Rename one of the definitions or remove and look at how names work in Kind at https://kind.kindelia.org/hints/names".to_string()
+                ],
+                positions: vec![Marking {
+                    position: fst.range,
+                    color: Color::Fst,
+                    text: "The first ocorrence".to_string(),
+                    no_code: false,
+                },Marking {
+                    position: snd.range,
+                    color: Color::Snd,
+                    text: "Second occorrence here!".to_string(),
                     no_code: false,
                 }],
             },
