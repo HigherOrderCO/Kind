@@ -79,7 +79,7 @@ pub enum Token {
 
 impl Token {
     pub fn same_variant(&self, b: &Token) -> bool {
-        std::mem::discriminant(self) == std::mem::discriminant(&b)
+        std::mem::discriminant(self) == std::mem::discriminant(b)
     }
 
     pub fn is_lower_id(&self) -> bool {

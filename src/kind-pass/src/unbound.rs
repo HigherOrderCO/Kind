@@ -35,6 +35,7 @@ impl UnboundCollector {
 }
 
 impl Visitor for UnboundCollector {
+
     fn visit_attr(&mut self, _: &mut kind_tree::concrete::Attribute) {}
 
     fn visit_ident(&mut self, ident: &mut Ident) {

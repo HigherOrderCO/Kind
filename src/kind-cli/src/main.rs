@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
 use kind_report::{RenderConfig, data::DiagnosticFrame};
@@ -77,7 +77,7 @@ fn main() {
 
     let (rx, tx) = std::sync::mpsc::channel();
 
-    let mut session = Session::new(PathBuf::from("."), &config, rx.clone());
+    let mut session = Session::new(PathBuf::from("."), &config, rx);
     let _ = parse_and_store_glossary(&mut session, "A", &PathBuf::from("teste.kind2"));
 
     let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
@@ -88,5 +88,8 @@ fn main() {
 
     if !errs.is_empty() {
         eprintln!();
+        exit(1);
+    } else {
+        exit(0);
     }
 }

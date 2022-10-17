@@ -48,7 +48,7 @@ pub struct DiagnosticFrame {
 
 impl<'a> DiagnosticFrame {
     pub fn to_diagnostic(&'a self) -> Diagnostic<'a> {
-        Diagnostic { frame: &self }
+        Diagnostic { frame: self }
     }
 }
 

@@ -85,14 +85,14 @@ impl<'a> Parser<'a> {
 
     pub fn eat_closing_keyword(&mut self, expect: Token, range: Range) -> Result<(), SyntaxError> {
         if !self.check_and_eat(expect) {
-            return Err(SyntaxError::Unclosed(range));
+            Err(SyntaxError::Unclosed(range))
         } else {
             Ok(())
         }
     }
 
     pub fn eat_variant(&mut self, expect: Token) -> Result<(Token, Range), SyntaxError> {
-        if self.get().same_variant(&expect.clone()) {
+        if self.get().same_variant(&expect) {
             Ok(self.advance())
         } else {
             self.fail(vec![expect])

@@ -571,7 +571,7 @@ impl<'a> Parser<'a> {
             let (bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
 
             cases.push(Case {
-                constructor: constructor,
+                constructor,
                 bindings,
                 value,
                 ignore_rest,

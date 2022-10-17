@@ -184,7 +184,7 @@ impl From<SyntaxError> for DiagnosticFrame {
             SyntaxError::UnexpectedToken(Token::Eof, range, _expect) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
-                title: format!("Unexpected end of file."),
+                title: "Unexpected end of file.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marking {
@@ -197,7 +197,7 @@ impl From<SyntaxError> for DiagnosticFrame {
             SyntaxError::UnexpectedToken(Token::Comment(_, _), range, _expect) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
-                title: format!("Unexpected documentation comment."),
+                title: "Unexpected documentation comment.".to_string(),
                 subtitles: vec![],
                 hints: vec!["Remove this documentation comment or place it in a correct place.".to_string()],
                 positions: vec![Marking {
@@ -210,7 +210,7 @@ impl From<SyntaxError> for DiagnosticFrame {
             SyntaxError::UnexpectedToken(_token, range, _expect) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
-                title: format!("Unexpected token."),
+                title: "Unexpected token.".to_string(),
                 subtitles: vec![],
                 hints: vec![],
                 positions: vec![Marking {
