@@ -16,6 +16,21 @@ pub mod expr;
 pub mod pat;
 pub mod visitor;
 
+pub use expr::*;
+
+#[derive(Debug, Clone, Default)]
+pub struct Telescope<A>(pub Vec<A>);
+
+impl<A> Telescope<A> {
+    pub fn new() -> Telescope<A> {
+        Telescope(Vec::new())
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
 /// A value of a attribute
 #[derive(Clone, Debug)]
 pub enum AttributeStyle {
@@ -70,7 +85,7 @@ pub struct Rule {
 pub struct Entry {
     pub name: Ident,
     pub docs: Vec<String>,
-    pub args: Vec<Argument>,
+    pub args: Telescope<Argument>,
     pub tipo: Box<Expr>,
     pub rules: Vec<Box<Rule>>,
     pub range: Range,
@@ -83,16 +98,16 @@ pub struct Entry {
 pub struct Constructor {
     pub name: Ident,
     pub docs: Vec<String>,
-    pub args: Vec<Argument>,
-    pub typ: Option<Box<Expr>>,
+    pub args: Telescope<Argument>,
+    pub tipo: Option<Box<Expr>>,
 }
 
 #[derive(Clone, Debug)]
 pub struct SumTypeDecl {
     pub name: Ident,
     pub docs: Vec<String>,
-    pub parameters: Vec<Argument>,
-    pub indices: Vec<Argument>,
+    pub parameters: Telescope<Argument>,
+    pub indices: Telescope<Argument>,
     pub constructors: Vec<Constructor>,
     pub attrs: Vec<Attribute>,
 }
@@ -102,8 +117,7 @@ pub struct RecordDecl {
     pub name: Ident,
     pub docs: Vec<String>,
     pub constructor: Ident,
-    pub parameters: Vec<Argument>,
-    pub indices: Vec<Argument>,
+    pub parameters: Telescope<Argument>,
     pub fields: Vec<(Ident, Vec<String>, Box<Expr>)>,
     pub attrs: Vec<Attribute>,
 }
@@ -115,18 +129,41 @@ pub enum TopLevel {
     Entry(Entry),
 }
 
+impl TopLevel {
+    pub fn is_record(&self) -> bool {
+        matches!(self, TopLevel::RecordType(_))
+    }
+
+    pub fn is_sum_type(&self) -> bool {
+        matches!(self, TopLevel::SumType(_))
+    }
+
+    pub fn is_definition(&self) -> bool {
+        matches!(self, TopLevel::Entry(_))
+    }
+}
+
 /// A book is a collection of entries.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
     pub entries: Vec<TopLevel>,
 }
 
+#[derive(Debug, Clone)]
+pub struct GlossaryEntry {
+    pub hiddens: usize,
+    pub erased: usize,
+    pub arguments: Telescope<Argument>,
+    pub is_ctr: bool,
+}
+
 /// A glossary stores definitions by name. It's generated
 /// by joining a bunch of books that are already resolved.
 #[derive(Clone, Debug, Default)]
 pub struct Glossary {
-    pub names: LinkedHashMap<String, Ident>, // Ordered hashset
+    pub names: LinkedHashMap<String, Ident>,  // Ordered hashset
     pub entries: FxHashMap<String, TopLevel>, // Probably deterministic order everytime
+    pub count: FxHashMap<String, GlossaryEntry>, // Stores some important information in order to desugarize
 }
 
 // Display
@@ -137,10 +174,10 @@ impl Display for Constructor {
             writeln!(f, "  /// {}", doc)?;
         }
         write!(f, "{}", self.name)?;
-        for arg in &self.args {
+        for arg in &self.args.0 {
             write!(f, " {}", arg)?;
         }
-        if let Some(res) = &self.typ {
+        if let Some(res) = &self.tipo {
             write!(f, " : {}", res)?;
         }
         Ok(())
@@ -159,13 +196,13 @@ impl Display for Book {
                         writeln!(f, "{}", attr)?;
                     }
                     write!(f, "type {}", sum.name)?;
-                    for arg in &sum.parameters {
+                    for arg in &sum.parameters.0 {
                         write!(f, " {}", arg)?;
                     }
                     if !sum.indices.is_empty() {
                         write!(f, " ~")?;
                     }
-                    for arg in &sum.indices {
+                    for arg in &sum.indices.0 {
                         write!(f, " {}", arg)?;
                     }
                     writeln!(f, " {{")?;
@@ -182,13 +219,7 @@ impl Display for Book {
                         writeln!(f, "{}", attr)?;
                     }
                     write!(f, "record {}", rec.name)?;
-                    for arg in &rec.parameters {
-                        write!(f, " {}", arg)?;
-                    }
-                    if !rec.indices.is_empty() {
-                        write!(f, " ~")?;
-                    }
-                    for arg in &rec.indices {
+                    for arg in &rec.parameters.0 {
                         write!(f, " {}", arg)?;
                     }
                     writeln!(f, " {{")?;
@@ -234,7 +265,7 @@ impl Display for Entry {
 
         write!(f, "{}", self.name.clone())?;
 
-        for arg in &self.args {
+        for arg in &self.args.0 {
             write!(f, " {}", arg)?;
         }
 
@@ -294,5 +325,232 @@ impl Locatable for AttributeStyle {
             AttributeStyle::Number(r, _) => *r,
             AttributeStyle::List(r, _) => *r,
         }
+    }
+}
+
+impl<A> Telescope<A> {
+    pub fn extend(&self, other: &Telescope<A>) -> Telescope<A>
+    where
+        A: Clone,
+    {
+        Telescope([self.0.as_slice(), other.0.as_slice()].concat())
+    }
+
+    pub fn map<B, F>(&self, f: F) -> Telescope<B>
+    where
+        F: FnMut(&A) -> B,
+    {
+        Telescope(self.0.iter().map(f).collect())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+impl<A> IntoIterator for Telescope<A> {
+    type Item = A;
+
+    type IntoIter = std::vec::IntoIter<A>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl Telescope<Argument> {
+    pub fn count_implicits(&self) -> (usize, usize) {
+        let mut hiddens = 0;
+        let mut erased = 0;
+        for arg in &self.0 {
+            if arg.hidden {
+                hiddens += 1;
+            }
+            if arg.erased {
+                erased += 1;
+            }
+        }
+        (hiddens, erased)
+    }
+}
+
+impl SumTypeDecl {
+    pub fn extract_glossary_info(&self) -> GlossaryEntry {
+        let mut arguments = Telescope::new();
+        let mut hiddens = 0;
+        let mut erased = 0;
+
+        let (hiddens_, erased_) = self.parameters.count_implicits();
+        hiddens += hiddens_;
+        erased += erased_;
+
+        arguments = arguments.extend(&self.parameters);
+
+        let (hiddens_, erased_) = self.indices.count_implicits();
+        hiddens += hiddens_;
+        erased += erased_;
+
+        arguments = arguments.extend(&self.indices);
+
+        GlossaryEntry {
+            hiddens,
+            erased,
+            arguments,
+            is_ctr: true,
+        }
+    }
+}
+
+impl Constructor {
+    pub fn extract_glossary_info(&self, def: &SumTypeDecl) -> GlossaryEntry {
+        let mut arguments = Telescope::new();
+        let mut hiddens = 0;
+        let mut erased = 0;
+
+        hiddens += def.parameters.0.len();
+        erased += def.parameters.0.len();
+
+        arguments = arguments.extend(&def.parameters.map(|x| x.to_implicit()));
+
+        // It tries to use all of the indices if no type
+        // is specified.
+        if self.tipo.is_none() {
+            hiddens += def.indices.0.len();
+            erased += def.indices.0.len();
+            arguments = arguments.extend(&def.indices.map(|x| x.to_implicit()));
+        }
+
+        for arg in &self.args.0 {
+            if arg.erased {
+                erased += 1;
+            }
+            if arg.hidden {
+                hiddens += 1;
+            }
+        }
+
+        arguments = arguments.extend(&self.args.clone());
+
+        GlossaryEntry {
+            hiddens,
+            erased,
+            arguments,
+            is_ctr: true,
+        }
+    }
+}
+
+impl RecordDecl {
+    pub fn fields_to_arguments(&self) -> Telescope<Argument> {
+        Telescope(
+            self.fields
+                .iter()
+                .map(|(name, _docs, typ)| {
+                    Argument::new_explicit(
+                        name.clone(),
+                        typ.clone(),
+                        name.locate().mix(typ.locate()),
+                    )
+                })
+                .collect(),
+        )
+    }
+
+    pub fn extract_glossary_info(&self) -> GlossaryEntry {
+        let mut arguments = Telescope::new();
+        let mut hiddens = 0;
+        let mut erased = 0;
+
+        let (hiddens_, erased_) = self.parameters.count_implicits();
+        hiddens += hiddens_;
+        erased += erased_;
+
+        arguments = arguments.extend(&self.parameters);
+        arguments = arguments.extend(&self.fields_to_arguments());
+
+        GlossaryEntry {
+            hiddens,
+            erased,
+            arguments,
+            is_ctr: true,
+        }
+    }
+
+    pub fn extract_glossary_info_of_constructor(&self) -> GlossaryEntry {
+        let mut arguments = Telescope::new();
+        let mut hiddens = 0;
+        let mut erased = 0;
+
+        hiddens += self.parameters.0.len();
+        erased += self.parameters.0.len();
+        arguments = arguments.extend(&self.parameters);
+
+        let field_args: Vec<Argument> = self
+            .fields
+            .iter()
+            .map(|(name, _docs, typ)| {
+                Argument::new_explicit(name.clone(), typ.clone(), name.locate().mix(typ.locate()))
+            })
+            .collect();
+
+        arguments = arguments.extend(&Telescope(field_args));
+
+        GlossaryEntry {
+            hiddens,
+            erased,
+            arguments,
+            is_ctr: true,
+        }
+    }
+}
+
+impl Entry {
+    pub fn extract_glossary_info(&self) -> GlossaryEntry {
+        let mut arguments = Telescope::new();
+        let mut hiddens = 0;
+        let mut erased = 0;
+
+        let (hiddens_, erased_) = self.args.count_implicits();
+        hiddens += hiddens_;
+        erased += erased_;
+
+        arguments = arguments.extend(&self.args);
+
+        GlossaryEntry {
+            hiddens,
+            erased,
+            arguments,
+            is_ctr: false,
+        }
+    }
+}
+
+impl Argument {
+    pub fn new_explicit(name: Ident, tipo: Box<Expr>, range: Range) -> Argument {
+        Argument {
+            hidden: false,
+            erased: false,
+            name,
+            tipo: Some(tipo),
+            range,
+        }
+    }
+
+    pub fn to_implicit(&self) -> Argument {
+        Argument {
+            hidden: true,
+            erased: true,
+            name: self.name.clone(),
+            tipo: self.tipo.clone(),
+            range: self.range,
+        }
+    }
+}
+
+impl<A> std::ops::Index<usize> for Telescope<A> {
+    type Output = A;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
     }
 }

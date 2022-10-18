@@ -7,9 +7,10 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use kind_parser::{state::Parser, Lexer};
+use kind_pass::desugar::DesugarState;
 use kind_pass::unbound::UnboundCollector;
 use kind_report::data::DiagnosticFrame;
-use kind_span::{Pos, Range, SyntaxCtxIndex};
+use kind_span::{Range, SyntaxCtxIndex};
 use kind_tree::concrete::Glossary;
 use kind_tree::concrete::TopLevel;
 use kind_tree::symbol::Symbol;
@@ -46,7 +47,7 @@ fn ident_to_path(
     root: &Path,
     ident: &Ident,
     search_on_parent: bool,
-) -> Result<PathBuf, DiagnosticFrame> {
+) -> Result<Option<PathBuf>, DiagnosticFrame> {
     let segments = ident.data.0.split('.').collect::<Vec<&str>>();
     let mut raw_path = root.to_path_buf();
     raw_path.push(PathBuf::from(segments.join("/")));
@@ -61,9 +62,9 @@ fn ident_to_path(
     }
 
     if paths.len() == 1 {
-        Ok(paths[0].clone())
+        Ok(Some(paths[0].clone()))
     } else if paths.is_empty() {
-        Err(DriverError::UnboundVariable(ident.clone()).into())
+        Ok(None)
     } else {
         Err(DriverError::MultiplePaths(ident.clone(), paths).into())
     }
@@ -92,6 +93,9 @@ fn book_to_glossary<'a>(
             TopLevel::SumType(sum) => {
                 public_names.insert(sum.name.data.0.clone());
                 try_to_insert_new_name(session, sum.name.clone(), glossary);
+                glossary
+                    .count
+                    .insert(sum.name.data.0.clone(), sum.extract_glossary_info());
 
                 glossary
                     .entries
@@ -100,11 +104,17 @@ fn book_to_glossary<'a>(
                 for cons in &sum.constructors {
                     let cons_ident = cons.name.add_base_ident(&sum.name.data.0);
                     public_names.insert(cons_ident.data.0.clone());
+                    glossary
+                        .count
+                        .insert(cons_ident.data.0.clone(), cons.extract_glossary_info(sum));
                     try_to_insert_new_name(session, cons_ident, glossary);
                 }
             }
             TopLevel::RecordType(rec) => {
                 public_names.insert(rec.name.data.0.clone());
+                glossary
+                    .count
+                    .insert(rec.name.data.0.clone(), rec.extract_glossary_info());
                 try_to_insert_new_name(session, rec.name.clone(), glossary);
 
                 glossary
@@ -113,11 +123,18 @@ fn book_to_glossary<'a>(
 
                 let cons_ident = rec.constructor.add_base_ident(&rec.name.data.0);
                 public_names.insert(cons_ident.data.0.clone());
+                glossary.count.insert(
+                    cons_ident.data.0.clone(),
+                    rec.extract_glossary_info_of_constructor(),
+                );
                 try_to_insert_new_name(session, cons_ident, glossary);
             }
             TopLevel::Entry(entr) => {
                 try_to_insert_new_name(session, entr.name.clone(), glossary);
                 public_names.insert(entr.name.data.0.clone());
+                glossary
+                    .count
+                    .insert(entr.name.data.0.clone(), entr.extract_glossary_info());
                 glossary
                     .entries
                     .insert(entr.name.data.0.clone(), entry.clone());
@@ -137,27 +154,16 @@ fn parse_and_store_book_by_identifier<'a>(
         return Ok(());
     }
 
-    let path = match ident_to_path(&session.root, ident, true) {
-        Ok(res) => res,
+    match ident_to_path(&session.root, ident, true) {
+        Ok(None) => Ok(()),
+        Ok(Some(path)) => {
+            parse_and_store_book_by_path(session, ident, &path, glossary, false).map(|_| ())
+        }
         Err(err) => {
             session.diagnostic_sender.send(err).unwrap();
-            return Err(CompileError);
-        }
-    };
-
-    if let Some(res) = session.public_names.get(&path) {
-        if !res.contains(&ident.data.0) {
-            session
-                .diagnostic_sender
-                .send(DriverError::UnboundVariable(ident.clone()).into())
-                .unwrap();
-            return Ok(());
+            Err(CompileError)
         }
     }
-
-    let book = parse_and_store_book_by_path(session, ident, &path, glossary)?;
-
-    Ok(())
 }
 
 fn parse_and_store_book_by_path<'a>(
@@ -165,6 +171,7 @@ fn parse_and_store_book_by_path<'a>(
     ident: &Ident,
     path: &PathBuf,
     glossary: &'a mut Glossary,
+    dont_search: bool,
 ) -> CompResult<Rc<Book>> {
     let input = fs::read_to_string(path).unwrap();
 
@@ -193,7 +200,7 @@ fn parse_and_store_book_by_path<'a>(
 
     let names = book_to_glossary(session, rc.clone(), glossary);
 
-    if !names.contains(&ident.data.0) {
+    if !names.contains(&ident.data.0) && !dont_search {
         session
             .diagnostic_sender
             .send(DriverError::UnboundVariable(ident.clone()).into())
@@ -216,6 +223,30 @@ pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathB
         ),
         path,
         &mut glossary,
+        true,
     );
+
+    let mut collector = UnboundCollector::new(session.diagnostic_sender.clone());
+    collector.visit_glossary(&mut glossary);
+
+    for idents in collector.unbound.values() {
+        for ident in idents {
+            session
+                .diagnostic_sender
+                .send(DriverError::UnboundVariable(ident.clone()).into())
+                .unwrap();
+        }
+    }
+
+    if collector.unbound.len() > 0 {
+        return glossary
+    }
+
+
+    let mut state = DesugarState::new(session.diagnostic_sender.clone(), &glossary);
+    state.desugar_glossary(&glossary);
+
+    println!("{}", state.new_glossary);
+
     glossary
 }

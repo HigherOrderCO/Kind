@@ -1,8 +1,8 @@
 use std::{path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
-use kind_report::{RenderConfig, data::DiagnosticFrame};
-use kind_driver::{render_error_to_stderr, session::Session, glossary::parse_and_store_glossary};
+use kind_driver::{resolution::parse_and_store_glossary, render_error_to_stderr, session::Session};
+use kind_report::{data::DiagnosticFrame, RenderConfig};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

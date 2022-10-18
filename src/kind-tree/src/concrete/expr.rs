@@ -1,34 +1,14 @@
-//! This module describes a CONCRETE SYNTAX TREE
-//! without parenthesis. It helps when it comes to
-//! a static analysis of the tree with the syntax sugars
-//! and it makes it easier to split phases.
+//! This module describes a abstract syntax tree
+//! that is almost like a concrete tree. It helps when it
+//! we have to statically analyse the tree with better
+//! error messages.
+
 use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
 
-use crate::symbol::Ident;
+use crate::{symbol::Ident, Operator};
 
 use super::pat::PatIdent;
-
-/// Enum of binary operators.
-#[derive(Copy, Clone, Debug)]
-pub enum Operator {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Mod,
-    And,
-    Or,
-    Xor,
-    Shl,
-    Shr,
-    Ltn,
-    Lte,
-    Eql,
-    Gte,
-    Gtn,
-    Neq,
-}
 
 #[derive(Clone, Debug)]
 pub enum Binding {
@@ -77,7 +57,7 @@ pub enum Literal {
     Type,
     /// The help operator that prints the context
     /// and the goal (e.g. ?)
-    Help,
+    Help(Ident),
     /// The type of 60 bits numberss (e.g. 2 : U60)
     U60,
     // Char literal
@@ -145,8 +125,6 @@ pub enum ExprKind {
     Pair(Box<Expr>, Box<Expr>),
     /// Array
     List(Vec<Expr>),
-    /// Help
-    Help(Ident),
 }
 
 #[derive(Clone, Debug)]
@@ -235,9 +213,12 @@ impl Locatable for CaseBinding {
 impl Locatable for Destruct {
     fn locate(&self) -> Range {
         match self {
-            Destruct::Destruct(s, bindings, _) => s
-                .locate()
-                .mix(bindings.get(0).map(|x| x.locate()).unwrap_or_else(|| s.locate())),
+            Destruct::Destruct(s, bindings, _) => s.locate().mix(
+                bindings
+                    .get(0)
+                    .map(|x| x.locate())
+                    .unwrap_or_else(|| s.locate()),
+            ),
             Destruct::Ident(i) => i.locate(),
         }
     }
@@ -246,7 +227,7 @@ impl Locatable for Destruct {
 impl Display for Literal {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
-            Literal::Help => write!(f, "?"),
+            Literal::Help(s) => write!(f, "?{}", s),
             Literal::Type => write!(f, "Type"),
             Literal::U60 => write!(f, "U60"),
             Literal::Char(c) => write!(f, "'{}'", c),
@@ -391,7 +372,6 @@ impl Display for Expr {
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
             Match(matcher) => write!(f, "({})", matcher),
             Subst(subst) => write!(f, "({})", subst),
-            Help(name) => write!(f, "?{}", name),
             Hole => write!(f, "_"),
         }
     }

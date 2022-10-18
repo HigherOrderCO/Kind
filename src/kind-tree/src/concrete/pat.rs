@@ -13,16 +13,17 @@ pub struct PatIdent(pub Ident);
 pub enum PatKind {
     /// Name of a variable
     Var(PatIdent),
-    // Application of a constructor
+    /// Application of a constructor
     App(Ident, Vec<Box<Pat>>),
-    // Hole
+    /// Hole
     Num(u64),
-    // Pair
+    /// Pair
     Pair(Box<Pat>, Box<Pat>),
-    // List
+    /// List
     List(Vec<Pat>),
-    // Str
+    /// Str
     Str(String),
+    /// Wildcard
     Hole,
 }
 

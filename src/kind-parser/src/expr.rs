@@ -1,4 +1,5 @@
 use kind_span::Locatable;
+use kind_tree::Operator;
 use kind_tree::concrete::expr::*;
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::symbol::{Ident, Symbol};
@@ -325,11 +326,11 @@ impl<'a> Parser<'a> {
         self.advance();
         Ok(Box::new(Expr {
             range,
-            data: ExprKind::Help(Ident {
+            data: ExprKind::Lit(Literal::Help(Ident {
                 data: Symbol(str),
                 ctx: self.lexer.ctx,
                 range,
-            }),
+            })),
         }))
     }
 
@@ -368,7 +369,7 @@ impl<'a> Parser<'a> {
             let expr = self.parse_expr(true)?;
             let end = self.range();
             self.eat_closing_keyword(Token::RPar, start)?;
-            Ok(Binding::Named(end.mix(start), name, expr))
+            Ok(Binding::Named(start.mix(end), name, expr))
         } else {
             Ok(Binding::Positional(self.parse_atom()?))
         }
@@ -423,7 +424,7 @@ impl<'a> Parser<'a> {
     pub fn parse_ask(&mut self) -> Result<Box<Sttm>, SyntaxError> {
         let start = self.range();
         self.advance(); // 'ask'
-                     // Parses the name for Ask that is optional
+                        // Parses the name for Ask that is optional
         let name = if self.peek(1).same_variant(&Token::Eq) {
             let name = self.parse_id()?;
             self.advance(); // '='

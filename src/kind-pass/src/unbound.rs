@@ -5,7 +5,7 @@ use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::visitor::walk_expr;
-use kind_tree::concrete::TopLevel;
+use kind_tree::concrete::{Glossary, TopLevel};
 use kind_tree::symbol::Ident;
 
 use kind_tree::concrete::{
@@ -35,7 +35,6 @@ impl UnboundCollector {
 }
 
 impl Visitor for UnboundCollector {
-
     fn visit_attr(&mut self, _: &mut kind_tree::concrete::Attribute) {}
 
     fn visit_ident(&mut self, ident: &mut Ident) {
@@ -56,11 +55,11 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_argument(&mut self, argument: &mut Argument) {
-        self.context_vars.push(argument.name.clone());
         match &mut argument.tipo {
             Some(res) => self.visit_expr(res),
             None => (),
         }
+        self.context_vars.push(argument.name.clone());
     }
 
     fn visit_rule(&mut self, rule: &mut Rule) {
@@ -74,7 +73,8 @@ impl Visitor for UnboundCollector {
 
     fn visit_entry(&mut self, entry: &mut Entry) {
         let vars = self.context_vars.clone();
-        for arg in &mut entry.args {
+
+        for arg in &mut entry.args.0 {
             self.visit_argument(arg)
         }
 
@@ -86,41 +86,65 @@ impl Visitor for UnboundCollector {
         }
     }
 
+    fn visit_top_level(&mut self, toplevel: &mut TopLevel) {
+        match toplevel {
+            TopLevel::SumType(entr) => {
+                self.context_vars.push(entr.name.clone());
+                for cons in &entr.constructors {
+                    let mut name_cons = cons.name.clone();
+                    name_cons.data.0 = format!("{}.{}", name_cons.data.0, cons.name.data.0);
+                    self.context_vars.push(name_cons);
+                }
+
+                let vars = self.context_vars.clone();
+
+                visit_vec!(&mut entr.parameters.0, arg => self.visit_argument(arg));
+
+                let inside_vars = self.context_vars.clone();
+
+                visit_vec!(&mut entr.indices.0, arg => self.visit_argument(arg));
+
+                visit_vec!(&mut entr.constructors, cons => {
+                    self.context_vars = inside_vars.clone();
+                    visit_vec!(&mut cons.args.0, arg => self.visit_argument(arg));
+                    visit_opt!(&mut cons.tipo, arg => self.visit_expr(arg));
+                });
+
+                self.context_vars = vars;
+            }
+            TopLevel::RecordType(entr) => {
+                self.context_vars.push(entr.name.clone());
+
+                let mut name_cons = entr.name.clone();
+                name_cons.data.0 = format!("{}.{}", name_cons.data.0, entr.constructor.data.0);
+                self.context_vars.push(name_cons);
+
+                let inside_vars = self.context_vars.clone();
+
+                visit_vec!(&mut entr.parameters.0, arg => self.visit_argument(arg));
+                visit_vec!(&mut entr.fields, (_, _, typ) => {
+                    self.visit_expr(typ);
+                });
+
+                self.context_vars = inside_vars;
+            }
+            TopLevel::Entry(entr) => {
+                self.context_vars.push(entr.name.clone());
+                self.visit_entry(entr)
+            }
+        }
+    }
+
     fn visit_book(&mut self, book: &mut kind_tree::concrete::Book) {
         for entr in &mut book.entries {
-            match entr {
-                TopLevel::SumType(entr) => {
-                    self.context_vars.push(entr.name.clone());
-                    for cons in &entr.constructors {
-                        let mut name_cons = cons.name.clone();
-                        name_cons.data.0 = format!("{}.{}", name_cons.data.0, cons.name.data.0);
-                        self.context_vars.push(name_cons);
-                    }
-                    visit_vec!(&mut entr.parameters, arg => self.visit_argument(arg));
-                    visit_vec!(&mut entr.indices, arg => self.visit_argument(arg));
-                    visit_vec!(&mut entr.constructors, cons => {
-                        visit_vec!(&mut cons.args, arg => self.visit_argument(arg));
-                        visit_opt!(&mut cons.typ, arg => self.visit_expr(arg))
-                    });
-                }
-                TopLevel::RecordType(entr) => {
-                    self.context_vars.push(entr.name.clone());
+            self.visit_top_level(entr)
+        }
+    }
 
-                    let mut name_cons = entr.name.clone();
-                    name_cons.data.0 = format!("{}.{}", name_cons.data.0, entr.constructor.data.0);
-                    self.context_vars.push(name_cons);
-
-                    visit_vec!(&mut entr.parameters, arg => self.visit_argument(arg));
-                    visit_vec!(&mut entr.indices, arg => self.visit_argument(arg));
-                    visit_vec!(&mut entr.fields, (_, _, typ) => {
-                        self.visit_expr(typ);
-                    });
-                }
-                TopLevel::Entry(entr) => {
-                    self.context_vars.push(entr.name.clone());
-                    self.visit_entry(entr)
-                }
-            }
+    fn visit_glossary(&mut self, glossary: &mut Glossary) {
+        self.context_vars = glossary.names.values().cloned().collect();
+        for entr in glossary.entries.values_mut() {
+            self.visit_top_level(entr)
         }
     }
 
@@ -145,7 +169,9 @@ impl Visitor for UnboundCollector {
             }
             SttmKind::Let(ident, val, next) => {
                 self.visit_expr(val);
+                let vars = self.context_vars.clone();
                 self.visit_destruct(ident);
+                self.context_vars = vars;
                 self.visit_sttm(next);
             }
             SttmKind::Ask(None, val, next) => {
@@ -264,7 +290,6 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Match(matcher) => self.visit_match(matcher),
             ExprKind::Subst(_subst) => todo!(),
-            ExprKind::Help(_) => (),
             _ => walk_expr(self, expr),
         }
     }

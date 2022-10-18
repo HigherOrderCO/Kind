@@ -10,3 +10,24 @@ pub mod desugared;
 /// be really useful when we change the Symbol to take a number
 /// instead of a string due to optimizations.
 pub mod symbol;
+
+/// Enum of binary operators.
+#[derive(Copy, Clone, Debug)]
+pub enum Operator {
+    Add,
+    Sub,
+    Mul,
+    Div,
+    Mod,
+    And,
+    Or,
+    Xor,
+    Shl,
+    Shr,
+    Ltn,
+    Lte,
+    Eql,
+    Gte,
+    Gtn,
+    Neq,
+}

@@ -8,14 +8,12 @@
 //! change these default implementations.
 //! use kind_span::{Range, SyntaxCtxIndex};
 
-use crate::concrete::expr::*;
 use crate::symbol::*;
+use crate::{concrete::expr::*, concrete::Glossary};
 
-use super::{
-    expr,
-    pat::{Pat, PatIdent, PatKind},
-    Argument, Attribute, AttributeStyle, Book, Constructor, Entry, Rule,
-};
+use super::pat::{Pat, PatIdent, PatKind};
+use super::TopLevel;
+use super::{Argument, Attribute, AttributeStyle, Book, Constructor, Entry, Rule};
 
 #[macro_export]
 macro_rules! visit_vec {
@@ -57,10 +55,6 @@ pub trait Visitor: Sized {
         walk_syntax_ctx(self, synt);
     }
 
-    fn visit_operator(&mut self, op: &mut expr::Operator) {
-        walk_operator(self, op);
-    }
-
     fn visit_literal(&mut self, lit: &mut Literal) {
         walk_literal(self, lit);
     }
@@ -89,6 +83,10 @@ pub trait Visitor: Sized {
         walk_argument(self, argument);
     }
 
+    fn visit_glossary(&mut self, glossary: &mut Glossary) {
+        walk_glossary(self, glossary)
+    }
+
     fn visit_entry(&mut self, entry: &mut Entry) {
         walk_entry(self, entry);
     }
@@ -99,6 +97,10 @@ pub trait Visitor: Sized {
 
     fn visit_binding(&mut self, binding: &mut Binding) {
         walk_binding(self, binding);
+    }
+
+    fn visit_top_level(&mut self, toplevel: &mut TopLevel) {
+        walk_top_level(self, toplevel)
     }
 
     fn visit_rule(&mut self, rule: &mut Rule) {
@@ -134,14 +136,16 @@ pub fn walk_range<T: Visitor>(_: &mut T, _: &mut Range) {}
 
 pub fn walk_syntax_ctx<T: Visitor>(_: &mut T, _: &mut SyntaxCtxIndex) {}
 
-pub fn walk_operator<T: Visitor>(_: &mut T, _: &mut expr::Operator) {}
-
 pub fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
 
 pub fn walk_constructor<T: Visitor>(ctx: &mut T, cons: &mut Constructor) {
     ctx.visit_ident(&mut cons.name);
-    visit_vec!(&mut cons.args, arg => ctx.visit_argument(arg));
-    visit_opt!(&mut cons.typ, arg => ctx.visit_expr(arg))
+    visit_vec!(&mut cons.args.0, arg => ctx.visit_argument(arg));
+    visit_opt!(&mut cons.tipo, arg => ctx.visit_expr(arg))
+}
+
+pub fn walk_glossary<T: Visitor>(ctx: &mut T, glossary: &mut Glossary) {
+    visit_vec!(&mut glossary.entries, (_, arg) => ctx.visit_top_level(arg));
 }
 
 pub fn walk_pat_ident<T: Visitor>(ctx: &mut T, ident: &mut PatIdent) {
@@ -218,7 +222,7 @@ pub fn walk_argument<T: Visitor>(ctx: &mut T, argument: &mut Argument) {
 
 pub fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
     ctx.visit_ident(&mut entry.name);
-    for arg in &mut entry.args {
+    for arg in &mut entry.args.0 {
         ctx.visit_argument(arg)
     }
     ctx.visit_expr(&mut entry.tipo);
@@ -289,30 +293,33 @@ pub fn walk_rule<T: Visitor>(ctx: &mut T, rule: &mut Rule) {
     ctx.visit_range(&mut rule.range);
 }
 
-pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
-    for entr in &mut book.entries {
-        match entr {
-            super::TopLevel::SumType(sum) => {
-                ctx.visit_ident(&mut sum.name);
-                visit_vec!(&mut sum.attrs, arg => ctx.visit_attr(arg));
-                visit_vec!(&mut sum.parameters, arg => ctx.visit_argument(arg));
-                visit_vec!(&mut sum.indices, arg => ctx.visit_argument(arg));
-                visit_vec!(&mut sum.constructors, arg => ctx.visit_constructor(arg));
-            }
-            super::TopLevel::RecordType(rec) => {
-                ctx.visit_ident(&mut rec.name);
-                visit_vec!(&mut rec.attrs, arg => ctx.visit_attr(arg));
-                visit_vec!(&mut rec.parameters, arg => ctx.visit_argument(arg));
-                visit_vec!(&mut rec.indices, arg => ctx.visit_argument(arg));
-                visit_vec!(&mut rec.fields, (name, _docs, typ) => {
-                    ctx.visit_ident(name);
-                    ctx.visit_expr(typ);
-                });
-            }
-            super::TopLevel::Entry(entry) => {
-                ctx.visit_entry(entry);
-            }
+pub fn walk_top_level<T: Visitor>(ctx: &mut T, toplevel: &mut TopLevel) {
+    match toplevel {
+        super::TopLevel::SumType(sum) => {
+            ctx.visit_ident(&mut sum.name);
+            visit_vec!(&mut sum.attrs, arg => ctx.visit_attr(arg));
+            visit_vec!(&mut sum.parameters.0, arg => ctx.visit_argument(arg));
+            visit_vec!(&mut sum.indices.0, arg => ctx.visit_argument(arg));
+            visit_vec!(&mut sum.constructors, arg => ctx.visit_constructor(arg));
         }
+        super::TopLevel::RecordType(rec) => {
+            ctx.visit_ident(&mut rec.name);
+            visit_vec!(&mut rec.attrs, arg => ctx.visit_attr(arg));
+            visit_vec!(&mut rec.parameters.0, arg => ctx.visit_argument(arg));
+            visit_vec!(&mut rec.fields, (name, _docs, typ) => {
+                ctx.visit_ident(name);
+                ctx.visit_expr(typ);
+            });
+        }
+        super::TopLevel::Entry(entry) => {
+            ctx.visit_entry(entry);
+        }
+    }
+}
+
+pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
+    for toplevel in &mut book.entries {
+        walk_top_level(ctx, toplevel)
     }
 }
 
@@ -415,13 +422,11 @@ pub fn walk_expr<T: Visitor>(ctx: &mut T, expr: &mut Expr) {
         ExprKind::Lit(lit) => {
             ctx.visit_literal(lit);
         }
-        ExprKind::Binary(op, a, b) => {
-            ctx.visit_operator(op);
+        ExprKind::Binary(_op, a, b) => {
             ctx.visit_expr(a);
             ctx.visit_expr(b);
         }
         ExprKind::Hole => {}
-        ExprKind::Help(_) => {}
         ExprKind::Subst(subst) => ctx.visit_substitution(subst),
         ExprKind::Match(matcher) => ctx.visit_match(matcher),
     }

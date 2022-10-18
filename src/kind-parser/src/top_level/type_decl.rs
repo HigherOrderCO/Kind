@@ -1,4 +1,4 @@
-use kind_tree::concrete::{Attribute, Constructor, RecordDecl, SumTypeDecl};
+use kind_tree::concrete::{Attribute, Constructor, RecordDecl, SumTypeDecl, Telescope};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -19,8 +19,8 @@ impl<'a> Parser<'a> {
         Ok(Constructor {
             name,
             docs,
-            args,
-            typ,
+            args: Telescope(args),
+            tipo: typ,
         })
     }
 
@@ -54,8 +54,8 @@ impl<'a> Parser<'a> {
         Ok(SumTypeDecl {
             name,
             docs,
-            parameters,
-            indices,
+            parameters: Telescope(parameters),
+            indices: Telescope(indices),
             constructors,
             attrs,
         })
@@ -70,12 +70,6 @@ impl<'a> Parser<'a> {
         let name = self.parse_upper_id()?;
 
         let parameters = self.parse_arguments()?;
-
-        let indices = if self.check_and_eat(Token::Tilde) {
-            self.parse_arguments()?
-        } else {
-            Vec::new()
-        };
 
         let range = self.range();
 
@@ -102,8 +96,7 @@ impl<'a> Parser<'a> {
             name,
             docs,
             constructor,
-            parameters,
-            indices,
+            parameters: Telescope(parameters),
             fields,
             attrs,
         })

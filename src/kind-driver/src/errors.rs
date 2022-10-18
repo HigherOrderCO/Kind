@@ -17,7 +17,7 @@ impl From<DriverError> for DiagnosticFrame {
             DriverError::UnboundVariable(ident) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
-                title: "Cannot find the definition.".to_string(),
+                title: format!("Cannot find the definition '{}'.", ident.data.0),
                 subtitles: vec![],
                 hints: vec!["Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()],
                 positions: vec![Marking {

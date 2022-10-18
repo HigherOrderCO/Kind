@@ -1,6 +1,6 @@
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
-use kind_tree::concrete::{Argument, Attribute, Book, Entry, Rule, TopLevel};
+use kind_tree::concrete::{Argument, Attribute, Book, Entry, Rule, Telescope, TopLevel};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -154,16 +154,13 @@ impl<'a> Parser<'a> {
 
         // Better error message when you have change the name of the function
         if self.get().is_upper_id() && !self.is_top_level_entry_continuation() {
-            return Err(SyntaxError::NotAClauseOfDef(
-                ident.range,
-                self.range(),
-            ));
+            return Err(SyntaxError::NotAClauseOfDef(ident.range, self.range()));
         }
 
         Ok(Entry {
             name: ident,
             docs,
-            args,
+            args: Telescope(args),
             tipo,
             rules,
             attrs,

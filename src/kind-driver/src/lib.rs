@@ -1,5 +1,5 @@
 pub mod errors;
-pub mod glossary;
+pub mod resolution;
 pub mod session;
 
 use core::fmt;

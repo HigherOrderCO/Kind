@@ -3,30 +3,9 @@ use std::{
     fmt::{Display, Error, Formatter},
 };
 
-use kind_span::Span;
+use kind_span::{Span, Range};
 
-use crate::symbol::Ident;
-
-/// Enum of binary operators.
-#[derive(Copy, Clone, Debug)]
-pub enum Operator {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Mod,
-    And,
-    Or,
-    Xor,
-    Shl,
-    Shr,
-    Ltn,
-    Lte,
-    Eql,
-    Gte,
-    Gtn,
-    Neq,
-}
+use crate::{symbol::Ident, Operator};
 
 pub type Spine = Vec<Box<Expr>>;
 
@@ -40,6 +19,10 @@ pub enum ExprKind {
     Lambda(Ident, Box<Expr>),
     /// Application of a expression to a spine of expressions
     App(Box<Expr>, Spine),
+    /// Application of a function
+    Fun(Ident, Spine),
+    /// Application of a Construtor
+    Ctr(Ident, Spine),
     /// Declaration of a local variable
     Let(Ident, Box<Expr>, Box<Expr>),
     /// Type ascription (x : y)
@@ -53,15 +36,26 @@ pub enum ExprKind {
     /// Binary operation (e.g. 2 + 3)
     Binary(Operator, Box<Expr>, Box<Expr>),
     /// A expression open to unification (e.g. _)
-    Hole,
+    Hole(u64),
     /// Help
-    Help(Ident),
+    Hlp(Ident),
+    /// Error node
+    Err,
 }
 
 #[derive(Clone, Debug)]
 pub struct Expr {
     pub data: ExprKind,
     pub span: Span,
+}
+
+impl Expr {
+    pub fn generate_expr(data: ExprKind) -> Expr {
+        Expr {
+            data,
+            span: Span::Generated,
+        }
+    }
 }
 
 /// An argument is a 'binding' of a name to a type
@@ -97,46 +91,21 @@ pub struct Rule {
 #[derive(Clone, Debug)]
 pub struct Entry {
     pub name: Ident,
-    pub args: Vec<Box<Argument>>,
+    pub args: Vec<Argument>,
     pub tipo: Box<Expr>,
-    pub rules: Vec<Box<Rule>>,
+    pub rules: Vec<Rule>,
     pub span: Span,
 }
 
 // A book is a collection of entries.
 #[derive(Clone, Debug, Default)]
-pub struct Book {
+pub struct Glossary {
     pub names: Vec<Ident>,
     pub entrs: HashMap<String, Box<Entry>>,
     pub holes: u64,
 }
 
 // Display
-
-impl Display for Operator {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        use Operator::*;
-
-        match self {
-            Add => write!(f, "+"),
-            Sub => write!(f, "-"),
-            Mul => write!(f, "*"),
-            Div => write!(f, "/"),
-            Mod => write!(f, "%"),
-            And => write!(f, "&"),
-            Or => write!(f, "|"),
-            Xor => write!(f, "^"),
-            Shl => write!(f, "<<"),
-            Shr => write!(f, ">>"),
-            Ltn => write!(f, "<"),
-            Lte => write!(f, "<="),
-            Eql => write!(f, "=="),
-            Gte => write!(f, ">="),
-            Gtn => write!(f, ">"),
-            Neq => write!(f, "!="),
-        }
-    }
-}
 
 impl Expr {
     pub fn new_var(name: Ident) -> Expr {
@@ -173,19 +142,26 @@ impl Display for Expr {
                 head,
                 spine.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
+            Fun(head, spine) | Ctr(head, spine) => write!(
+                f,
+                "({}{})",
+                head,
+                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+            ),
             Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
             Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),
-            Hole => write!(f, "_"),
-            Help(name) => write!(f, "?{}", name),
+            Hole(_) => write!(f, "_"),
+            Hlp(name) => write!(f, "?{}", name),
+            Err => write!(f, "ERR"),
         }
     }
 }
 
-impl Display for Book {
+impl Display for Glossary {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for name in &self.names {
-            writeln!(f, "{}\n", self.entrs.get(&name.data.0).unwrap())?;
+            writeln!(f, "{}\n", self.entrs.get(&name.data.0).expect(&name.data.0))?;
         }
         Ok(())
     }
@@ -228,5 +204,27 @@ impl Display for Rule {
             write!(f, " {}", pat)?;
         }
         write!(f, " = {}", self.body)
+    }
+}
+
+impl Argument {
+    pub fn to_irrelevant(&self) -> Argument {
+        Argument {
+            hidden: true,
+            erased: true,
+            name: self.name.clone(),
+            tipo: self.tipo.clone(),
+            span: self.span,
+        }
+    }
+
+    pub fn from_field(name: &Ident, tipo: Box<Expr>, range: Range) -> Argument {
+        Argument {
+            hidden: false,
+            erased: false,
+            name: name.clone(),
+            tipo,
+            span: Span::Locatable(range),
+        }
     }
 }
