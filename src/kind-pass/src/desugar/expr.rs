@@ -58,18 +58,27 @@ impl<'a> DesugarState<'a> {
                     self.desugar_sttm(bind_ident, pure_ident, next),
                 )
             },
-            concrete::SttmKind::Ask(destruct, val, next) => {
-                self.desugar_destruct(destruct, val, &|this| this.desugar_sttm(bind_ident, pure_ident, next), &|this, ident| {
-                    bind(
-                        sttm.range.clone(),
-                        ident.clone(),
-                        this.desugar_expr(val),
-                        this.desugar_sttm(bind_ident, pure_ident, next),
-                    )
-                })
+            concrete::SttmKind::Ask(concrete::Destruct::Destruct(a, b, c, d), val, next) => {
+                bind(
+                    sttm.range.clone(),
+                    Ident::generate("$"),
+                    self.desugar_expr(val),
+                    self.desugar_destruct(&concrete::Destruct::Destruct(*a, b.to_owned(), c.to_owned(), *d), desugared::Expr::var(Ident::generate("$")), &|this| this.desugar_sttm(bind_ident, pure_ident, next), &|_, _| {
+                        unreachable!()
+                    })
+                )
+            }
+            concrete::SttmKind::Ask(concrete::Destruct::Ident(name), val, next) => {
+                bind(
+                    sttm.range.clone(),
+                    name.clone(),
+                    self.desugar_expr(val),
+                    self.desugar_sttm(bind_ident, pure_ident, next)
+                )
             }
             concrete::SttmKind::Let(destruct, val, next) => {
-                self.desugar_destruct(destruct, val, &|this| this.desugar_sttm(bind_ident, pure_ident, next), &|this, ident| {
+                let res_val = self.desugar_expr(&val.clone());
+                self.desugar_destruct(destruct, res_val, &|this| this.desugar_sttm(bind_ident, pure_ident, next), &|this, ident| {
                     desugared::Expr::let_(
                         destruct.locate(),
                         ident.clone(),

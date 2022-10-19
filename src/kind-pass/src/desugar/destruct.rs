@@ -63,7 +63,7 @@ impl<'a> DesugarState<'a> {
     pub fn desugar_destruct(
         &mut self,
         binding: &expr::Destruct,
-        val: &expr::Expr,
+        val: Box<desugared::Expr>,
         next: &dyn Fn(&mut Self) -> Box<desugared::Expr>,
         on_ident: &dyn Fn(&mut Self, &Ident) -> Box<desugared::Expr>,
     ) -> Box<desugared::Expr> {
@@ -106,7 +106,7 @@ impl<'a> DesugarState<'a> {
                     destruct_range.clone(),
                     desugared::Expr::var(match_id),
                     vec![
-                        self.desugar_expr(val),
+                        val,
                         desugared::Expr::unfold_lambda(destruct_range.clone(), &arguments, next(self)),
                     ],
                 )
@@ -122,9 +122,10 @@ impl<'a> DesugarState<'a> {
         val: &expr::Expr,
         next: &expr::Expr,
     ) -> Box<desugared::Expr> {
+        let res_val = self.desugar_expr(val);
         self.desugar_destruct(
             binding,
-            val,
+            res_val,
             &|this| this.desugar_expr(next),
             &|this, name| {
                 desugared::Expr::let_(
