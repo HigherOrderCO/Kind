@@ -150,7 +150,8 @@ impl Visitor for UnboundCollector {
 
     fn visit_destruct(&mut self, destruct: &mut Destruct) {
         match destruct {
-            Destruct::Destruct(ty, bindings, _) => {
+            Destruct::Destruct(range, ty, bindings, _) => {
+                self.visit_range(range);
                 self.visit_ident(ty);
                 for bind in bindings {
                     self.visit_case_binding(bind)
@@ -162,9 +163,11 @@ impl Visitor for UnboundCollector {
 
     fn visit_sttm(&mut self, sttm: &mut kind_tree::concrete::expr::Sttm) {
         match &mut sttm.data {
-            SttmKind::Ask(Some(ident), val, next) => {
+            SttmKind::Ask(ident, val, next) => {
                 self.visit_expr(val);
-                self.context_vars.push(ident.clone());
+                let vars = self.context_vars.clone();
+                self.visit_destruct(ident);
+                self.context_vars = vars;
                 self.visit_sttm(next);
             }
             SttmKind::Let(ident, val, next) => {
@@ -174,15 +177,14 @@ impl Visitor for UnboundCollector {
                 self.context_vars = vars;
                 self.visit_sttm(next);
             }
-            SttmKind::Ask(None, val, next) => {
-                self.visit_expr(val);
-                self.visit_sttm(next);
-            }
             SttmKind::Expr(expr, next) => {
                 self.visit_expr(expr);
                 self.visit_sttm(next);
             }
             SttmKind::Return(expr) => {
+                self.visit_expr(expr);
+            }
+            SttmKind::RetExpr(expr) => {
                 self.visit_expr(expr);
             }
         }
@@ -232,9 +234,9 @@ impl Visitor for UnboundCollector {
         self.visit_expr(&mut matcher.scrutinizer);
         for case in &mut matcher.cases {
             // TODO: Better error for not found constructors like this one.
-            let mut name = case.constructor.clone();
-            name.data.0 = format!("{}.{}", matcher.tipo.data.0.clone(), name.data.0);
-            self.visit_ident(&mut name);
+            // let mut name = case.constructor.clone();
+            // name.data.0 = format!("{}.{}", matcher.tipo.data.0.clone(), name.data.0);
+            // self.visit_ident(&mut name);
 
             self.visit_case(case);
         }

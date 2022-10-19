@@ -1,6 +1,7 @@
-use kind_span::Span;
-use kind_tree::concrete::{self, Argument};
+use kind_span::{Range, Span};
+use kind_tree::concrete::{self, Telescope};
 use kind_tree::desugared;
+use kind_tree::symbol::Ident;
 
 use crate::errors::PassError;
 
@@ -57,7 +58,7 @@ impl<'a> DesugarState<'a> {
         let type_constructor = desugared::Entry {
             name: sum_type.name.clone(),
             args: desugared_params.extend(&desugared_indices).0.clone(),
-            tipo: Box::new(desugared::Expr::generate_expr(desugared::ExprKind::Typ)),
+            tipo: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(sum_type.name.range),
         };
@@ -139,7 +140,7 @@ impl<'a> DesugarState<'a> {
         let type_constructor = desugared::Entry {
             name: rec_type.name.clone(),
             args: desugared_params.0.clone(),
-            tipo: Box::new(desugared::Expr::generate_expr(desugared::ExprKind::Typ)),
+            tipo: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(rec_type.name.range),
         };
@@ -237,12 +238,11 @@ impl<'a> DesugarState<'a> {
                         }
                     }
                 } else if entry.arguments.len() != spine.len() {
-                    self.errors
-                        .send(
-                            PassError::IncorrectArity(head.range, entry.arguments.len(), hidden)
-                                .into(),
-                        )
-                        .unwrap();
+                    self.send_err(PassError::IncorrectArity(
+                        head.range,
+                        entry.arguments.len(),
+                        hidden,
+                    ));
 
                     return Box::new(desugared::Expr {
                         data: desugared::ExprKind::Err,
@@ -276,13 +276,56 @@ impl<'a> DesugarState<'a> {
         }
     }
 
-    pub fn desugar_rule(&mut self, rule: &concrete::Rule) -> desugared::Rule {
-        let pats = rule.pats.iter().map(|x| self.desugar_pat(x)).collect();
-        desugared::Rule {
-            name: rule.name.clone(),
-            pats,
-            body: self.desugar_expr(&rule.body),
-            span: Span::Locatable(rule.range),
+    pub fn desugar_rule(
+        &mut self,
+        args: &Telescope<concrete::Argument>,
+        rule: &concrete::Rule,
+    ) -> desugared::Rule {
+        let pats = rule
+            .pats
+            .iter()
+            .map(|x| self.desugar_pat(x))
+            .collect::<Vec<Box<desugared::Expr>>>();
+
+        let (hidden, _) = args.count_implicits();
+
+        if pats.len() == args.len() {
+            desugared::Rule {
+                name: rule.name.clone(),
+                pats,
+                body: self.desugar_expr(&rule.body),
+                span: Span::Locatable(rule.range),
+            }
+        } else if pats.len() == args.len() - hidden {
+            let mut res_pats = Vec::new();
+            let mut pat_iter = pats.iter();
+            for arg in args.0.iter() {
+                if arg.hidden {
+                    res_pats.push(desugared::Expr::var(Ident::generate("~")))
+                } else {
+                    res_pats.push(pat_iter.next().unwrap().to_owned());
+                }
+            }
+            desugared::Rule {
+                name: rule.name.clone(),
+                pats: res_pats,
+                body: self.desugar_expr(&rule.body),
+                span: Span::Locatable(rule.range),
+            }
+        } else {
+            self.send_err(PassError::RuleWithIncorrectArity(
+                rule.range,
+                pats.len(),
+                args.len(),
+                hidden,
+            ));
+            // TODO: Probably we should just a sentinel rule?
+            desugared::Rule {
+                name: rule.name.clone(),
+                pats,
+                body: self.desugar_expr(&rule.body),
+                span: Span::Locatable(rule.range),
+            }
         }
     }
 
@@ -290,10 +333,10 @@ impl<'a> DesugarState<'a> {
         let rules = entry
             .rules
             .iter()
-            .map(|x| self.desugar_rule(x))
+            .map(|x| self.desugar_rule(&entry.args, x))
             .collect::<Vec<desugared::Rule>>();
 
-        let entry = desugared::Entry {
+        let res_entry = desugared::Entry {
             name: entry.name.clone(),
             args: entry.args.map(|x| self.desugar_argument(x)).0,
             tipo: self.desugar_expr(&entry.tipo),
@@ -301,10 +344,22 @@ impl<'a> DesugarState<'a> {
             span: Span::Locatable(entry.range),
         };
 
-        self.new_glossary.names.push(entry.name.clone());
+        let rule_numbers = entry
+            .rules
+            .iter()
+            .map(|x| (x.range, x.pats.len()))
+            .collect::<Vec<(Range, usize)>>();
+
+        let diff = rule_numbers.iter().filter(|x| rule_numbers[0].1 != x.1);
+
+        if rule_numbers.len() > 0 && diff.clone().count() >= 1 {
+            self.send_err(PassError::RulesWithInconsistentArity(diff.cloned().collect()));
+        }
+
+        self.new_glossary.names.push(res_entry.name.clone());
         self.new_glossary
             .entrs
-            .insert(entry.name.data.0.clone(), Box::new(entry));
+            .insert(res_entry.name.data.0.clone(), Box::new(res_entry));
     }
 
     pub fn desugar_top_level(&mut self, top_level: &concrete::TopLevel) {

@@ -166,6 +166,16 @@ pub struct Glossary {
     pub count: FxHashMap<String, GlossaryEntry>, // Stores some important information in order to desugarize
 }
 
+impl Glossary {
+    pub fn get_count_garanteed(&self, name: &String) -> &GlossaryEntry {
+        self.count.get(name).expect(&format!("Internal Error: Garanteed count {:?} failed", name))
+    }
+
+    pub fn get_entry_garanteed(&self, name: &String) -> &TopLevel {
+        self.entries.get(name).expect(&format!("Internal Error: Garanteed entry {:?} failed", name))
+    }
+}
+
 // Display
 
 impl Display for Constructor {
@@ -184,55 +194,61 @@ impl Display for Constructor {
     }
 }
 
+impl Display for TopLevel {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TopLevel::SumType(sum) => {
+                for doc in &sum.docs {
+                    writeln!(f, "/// {}", doc)?;
+                }
+                for attr in &sum.attrs {
+                    writeln!(f, "{}", attr)?;
+                }
+                write!(f, "type {}", sum.name)?;
+                for arg in &sum.parameters.0 {
+                    write!(f, " {}", arg)?;
+                }
+                if !sum.indices.is_empty() {
+                    write!(f, " ~")?;
+                }
+                for arg in &sum.indices.0 {
+                    write!(f, " {}", arg)?;
+                }
+                writeln!(f, " {{")?;
+                for cons in &sum.constructors {
+                    writeln!(f, "  {},", cons)?;
+                }
+                writeln!(f, "}}\n")
+            }
+            TopLevel::RecordType(rec) => {
+                for doc in &rec.docs {
+                    writeln!(f, "/// {}", doc)?;
+                }
+                for attr in &rec.attrs {
+                    writeln!(f, "{}", attr)?;
+                }
+                write!(f, "record {}", rec.name)?;
+                for arg in &rec.parameters.0 {
+                    write!(f, " {}", arg)?;
+                }
+                writeln!(f, " {{")?;
+                for (name, docs, cons) in &rec.fields {
+                    for doc in docs {
+                        writeln!(f, "  /// {}", doc)?;
+                    }
+                    writeln!(f, "  {}: {}, ", name, cons)?;
+                }
+                writeln!(f, "}}\n")
+            }
+            TopLevel::Entry(entr) => writeln!(f, "{}\n", entr),
+        }
+    }
+}
+
 impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in &self.entries {
-            match entr {
-                TopLevel::SumType(sum) => {
-                    for doc in &sum.docs {
-                        writeln!(f, "/// {}", doc)?;
-                    }
-                    for attr in &sum.attrs {
-                        writeln!(f, "{}", attr)?;
-                    }
-                    write!(f, "type {}", sum.name)?;
-                    for arg in &sum.parameters.0 {
-                        write!(f, " {}", arg)?;
-                    }
-                    if !sum.indices.is_empty() {
-                        write!(f, " ~")?;
-                    }
-                    for arg in &sum.indices.0 {
-                        write!(f, " {}", arg)?;
-                    }
-                    writeln!(f, " {{")?;
-                    for cons in &sum.constructors {
-                        writeln!(f, "  {},", cons)?;
-                    }
-                    writeln!(f, "}}\n")?;
-                }
-                TopLevel::RecordType(rec) => {
-                    for doc in &rec.docs {
-                        writeln!(f, "/// {}", doc)?;
-                    }
-                    for attr in &rec.attrs {
-                        writeln!(f, "{}", attr)?;
-                    }
-                    write!(f, "record {}", rec.name)?;
-                    for arg in &rec.parameters.0 {
-                        write!(f, " {}", arg)?;
-                    }
-                    writeln!(f, " {{")?;
-                    for (name, docs, cons) in &rec.fields {
-                        for doc in docs {
-                            writeln!(f, "  /// {}", doc)?;
-                        }
-                        writeln!(f, "  {}: {}, ", name, cons)?;
-                    }
-                    writeln!(f, "}}\n")?;
-                }
-                TopLevel::Entry(entr) => writeln!(f, "{}\n", entr)?,
-            }
+            writeln!(f, "{}", entr)?;
         }
         Ok(())
     }
@@ -466,7 +482,6 @@ impl RecordDecl {
         erased += erased_;
 
         arguments = arguments.extend(&self.parameters);
-        arguments = arguments.extend(&self.fields_to_arguments());
 
         GlossaryEntry {
             hiddens,

@@ -70,16 +70,17 @@ pub enum Literal {
 
 #[derive(Clone, Debug)]
 pub enum Destruct {
-    Destruct(Ident, Vec<CaseBinding>, bool),
+    Destruct(Range, Ident, Vec<CaseBinding>, bool),
     Ident(Ident),
 }
 
 #[derive(Clone, Debug)]
 pub enum SttmKind {
     Expr(Box<Expr>, Box<Sttm>),
-    Ask(Option<Ident>, Box<Expr>, Box<Sttm>),
+    Ask(Destruct, Box<Expr>, Box<Sttm>),
     Let(Destruct, Box<Expr>, Box<Sttm>),
     Return(Box<Expr>),
+    RetExpr(Box<Expr>),
 }
 
 #[derive(Clone, Debug)]
@@ -189,6 +190,12 @@ impl Locatable for Expr {
     }
 }
 
+impl Locatable for Sttm {
+    fn locate(&self) -> Range {
+        self.range
+    }
+}
+
 impl Locatable for Ident {
     fn locate(&self) -> Range {
         self.range
@@ -213,12 +220,7 @@ impl Locatable for CaseBinding {
 impl Locatable for Destruct {
     fn locate(&self) -> Range {
         match self {
-            Destruct::Destruct(s, bindings, _) => s.locate().mix(
-                bindings
-                    .get(0)
-                    .map(|x| x.locate())
-                    .unwrap_or_else(|| s.locate()),
-            ),
+            Destruct::Destruct(range, _, _, _) => range.clone(),
             Destruct::Ident(i) => i.locate(),
         }
     }
@@ -242,7 +244,7 @@ impl Display for Literal {
 impl Display for Destruct {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Destruct::Destruct(i, bindings, ignore) => {
+            Destruct::Destruct(_range, i, bindings, ignore) => {
                 write!(f, "{}", i)?;
                 for binding in bindings {
                     write!(f, " {}", binding)?;
@@ -260,20 +262,21 @@ impl Display for Destruct {
 impl Display for SttmKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
-            SttmKind::Ask(Some(name), block, next) => {
+            SttmKind::Ask(name, block, next) => {
                 write!(f, "ask {} = {}; {}", name, block, next)
             }
             SttmKind::Let(name, block, next) => {
                 write!(f, "let {} = {}; {}", name, block, next)
-            }
-            SttmKind::Ask(None, block, next) => {
-                write!(f, "ask {}; {}", block, next)
             }
             SttmKind::Expr(expr, next) => {
                 write!(f, "{};{}", expr, next)
             }
             SttmKind::Return(ret) => {
                 write!(f, "return {}", ret)
+            }
+
+            SttmKind::RetExpr(ret) => {
+                write!(f, "{}", ret)
             }
         }
     }

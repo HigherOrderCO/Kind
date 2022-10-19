@@ -160,8 +160,9 @@ pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
 
 pub fn walk_destruct<T: Visitor>(ctx: &mut T, destruct: &mut Destruct) {
     match destruct {
-        Destruct::Destruct(i, e, _) => {
+        Destruct::Destruct(range, i, e, _) => {
             ctx.visit_ident(i);
+            ctx.visit_range(range);
             visit_vec!(e, e => ctx.visit_case_binding(e))
         }
         Destruct::Ident(i) => ctx.visit_ident(i),
@@ -331,8 +332,8 @@ pub fn walk_substitution<T: Visitor>(ctx: &mut T, subst: &mut Substitution) {
 pub fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
     ctx.visit_range(&mut sttm.range);
     match &mut sttm.data {
-        SttmKind::Ask(Some(ident), val, next) => {
-            ctx.visit_ident(ident);
+        SttmKind::Ask(ident, val, next) => {
+            ctx.visit_destruct(ident);
             ctx.visit_expr(val);
             ctx.visit_sttm(next);
         }
@@ -341,15 +342,14 @@ pub fn walk_sttm<T: Visitor>(ctx: &mut T, sttm: &mut Sttm) {
             ctx.visit_expr(val);
             ctx.visit_sttm(next);
         }
-        SttmKind::Ask(None, val, next) => {
-            ctx.visit_expr(val);
-            ctx.visit_sttm(next);
-        }
         SttmKind::Expr(expr, next) => {
             ctx.visit_expr(expr);
             ctx.visit_sttm(next);
         }
         SttmKind::Return(expr) => {
+            ctx.visit_expr(expr);
+        }
+        SttmKind::RetExpr(expr) => {
             ctx.visit_expr(expr);
         }
     }

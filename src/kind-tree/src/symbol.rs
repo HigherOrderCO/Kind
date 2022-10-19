@@ -22,6 +22,10 @@ impl Ident {
         Ident { data, ctx, range }
     }
 
+    pub fn to_string(&self) -> &String {
+        &self.data.0
+    }
+
     /// Changes the syntax context of the range and of the ident
     pub fn set_ctx(&self, ctx: SyntaxCtxIndex) -> Ident {
         let range = self.range;
@@ -30,6 +34,22 @@ impl Ident {
             data: self.data.clone(),
             ctx,
             range,
+        }
+    }
+
+    pub fn add_segment(&self, name: &str) -> Ident {
+        Ident {
+            data: Symbol(format!("{}.{}", self.data.0, name)),
+            ctx: self.ctx,
+            range: self.range,
+        }
+    }
+
+    pub fn generate(data: &str) -> Ident {
+        Ident {
+            data: Symbol(data.to_string()),
+            ctx: SyntaxCtxIndex(0),
+            range: Range::ghost_range(),
         }
     }
 

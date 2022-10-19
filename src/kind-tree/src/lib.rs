@@ -1,6 +1,6 @@
-/// The concrete tree with all of the sugars. it's useful to
-/// generate documentation or related without thinking about
-/// the generated code.
+//! The concrete tree with all of the sugars. it's useful to
+//! generate documentation or related without thinking about
+//! the generated code.
 #[macro_use]
 pub mod concrete;
 

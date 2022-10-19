@@ -185,7 +185,7 @@ fn parse_and_store_book_by_path<'a>(
     let rc = Rc::new(book.clone());
 
     session.add_book(
-        ident.to_string(),
+        ident.to_string().clone(),
         Rc::new(path.to_path_buf()),
         Rc::new(input.clone()),
         rc.clone(),
@@ -242,6 +242,12 @@ pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathB
         return glossary
     }
 
+    for (name, entry) in &glossary.count {
+
+        println!("{} : {}", name, entry.arguments.map(|x| format!("{}", x)).0.join(" "));
+    }
+
+    println!("---------");
 
     let mut state = DesugarState::new(session.diagnostic_sender.clone(), &glossary);
     state.desugar_glossary(&glossary);

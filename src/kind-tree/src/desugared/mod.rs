@@ -1,3 +1,6 @@
+//! This module describes an unsugared tree that
+//! is used by the type checker.
+
 use std::{
     collections::HashMap,
     fmt::{Display, Error, Formatter},
@@ -27,6 +30,8 @@ pub enum ExprKind {
     Let(Ident, Box<Expr>, Box<Expr>),
     /// Type ascription (x : y)
     Ann(Box<Expr>, Box<Expr>),
+    /// Substitution
+    Sub(Ident, u64, u64, Box<Expr>),
     /// Type Literal
     Typ,
     ///  U60 Type
@@ -50,11 +55,138 @@ pub struct Expr {
 }
 
 impl Expr {
-    pub fn generate_expr(data: ExprKind) -> Expr {
-        Expr {
+    pub fn generate_expr(data: ExprKind) -> Box<Expr> {
+        Box::new(Expr {
             data,
             span: Span::Generated,
-        }
+        })
+    }
+
+    pub fn var(ident: Ident) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(ident.range.clone()),
+            data: ExprKind::Var(ident),
+        })
+    }
+
+    pub fn all(range: Range, ident: Option<Ident>, typ: Box<Expr>, body: Box<Expr>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::All(ident, typ, body),
+        })
+    }
+
+
+    pub fn sub(range: Range, ident: Ident, idx: u64, rdx: u64, body: Box<Expr>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::Sub(ident, idx, rdx, body),
+        })
+    }
+
+    pub fn lambda(range: Range, ident: Ident, body: Box<Expr>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::Lambda(ident, body),
+        })
+    }
+
+    pub fn identity_lambda(ident: Ident) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Generated,
+            data: ExprKind::Lambda(ident.clone(), Self::var(ident)),
+        })
+    }
+
+    pub fn unfold_lambda(range: Range, idents: &[Ident], body: Box<Expr>) -> Box<Expr> {
+        idents.iter().rev().fold(body, |body, ident| {
+            Expr::lambda(range, ident.clone(), body)
+        })
+    }
+
+    pub fn app(range: Range, ident: Box<Expr>, spine: Vec<Box<Expr>>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::App(ident, spine),
+        })
+    }
+
+    pub fn fun(range: Range, head: Ident, spine: Vec<Box<Expr>>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::Fun(head, spine),
+        })
+    }
+
+    pub fn ctr(range: Range, head: Ident, spine: Vec<Box<Expr>>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::Ctr(head, spine),
+        })
+    }
+
+    pub fn let_(range: Range, ident: Ident, val: Box<Expr>, body: Box<Expr>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::Let(ident, val, body),
+        })
+    }
+
+    pub fn ann(range: Range, val: Box<Expr>, typ: Box<Expr>) -> Box<Expr> {
+        Box::new(Expr {
+            span: Span::Locatable(range),
+            data: ExprKind::Ann(val, typ),
+        })
+    }
+
+    pub fn typ(range: Range) -> Box<Expr> {
+        Box::new(Expr{
+            span: Span::Locatable(range),
+            data: ExprKind::Typ,
+        })
+    }
+
+    pub fn u60(range: Range) -> Box<Expr> {
+        Box::new(Expr{
+            span: Span::Locatable(range),
+            data: ExprKind::U60,
+        })
+    }
+
+    pub fn num(range: Range, num: u64) -> Box<Expr> {
+        Box::new(Expr{
+            span: Span::Locatable(range),
+            data: ExprKind::Num(num),
+        })
+    }
+
+    pub fn binary(range: Range, op: Operator, left: Box<Expr>, right: Box<Expr>) -> Box<Expr> {
+        Box::new(Expr{
+            span: Span::Locatable(range),
+            data: ExprKind::Binary(op, left, right),
+        })
+    }
+
+    pub fn hole(range: Range, num: u64) -> Box<Expr> {
+        Box::new(Expr{
+            span: Span::Locatable(range),
+            data: ExprKind::Hole(num),
+        })
+    }
+
+    pub fn hlp(range: Range, hlp: Ident) -> Box<Expr> {
+        Box::new(Expr{
+            span: Span::Locatable(range),
+            data: ExprKind::Hlp(hlp),
+        })
+    }
+
+
+    pub fn err(range: Range) -> Box<Expr> {
+        Box::new(Expr {
+            data: ExprKind::Err,
+            span: Span::Locatable(range),
+        })
     }
 }
 
@@ -136,6 +268,7 @@ impl Display for Expr {
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Var(name) => write!(f, "{}", name),
             Lambda(binder, body) => write!(f, "({} => {})", binder, body),
+            Sub(name, _, redx, expr) => write!(f, "({} ## {}/{})", expr, name, redx),
             App(head, spine) => write!(
                 f,
                 "({}{})",
@@ -228,3 +361,4 @@ impl Argument {
         }
     }
 }
+

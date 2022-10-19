@@ -7,10 +7,18 @@
 use std::sync::mpsc::Sender;
 
 use kind_report::data::DiagnosticFrame;
-use kind_tree::{concrete, desugared};
+use kind_span::{Range, Span};
+use kind_tree::{
+    concrete::{self},
+    desugared,
+};
+
+use crate::errors::PassError;
 
 pub mod expr;
 pub mod top_level;
+pub mod destruct;
+pub mod app;
 
 pub struct DesugarState<'a> {
     pub errors: Sender<DiagnosticFrame>,
@@ -37,6 +45,17 @@ impl<'a> DesugarState<'a> {
     pub fn gen_hole(&mut self) -> u64 {
         self.holes += 1;
         self.holes - 1
+    }
+
+    pub fn gen_hole_expr(&mut self) -> Box<desugared::Expr> {
+        Box::new(desugared::Expr {
+            data: desugared::ExprKind::Hole(self.gen_hole()),
+            span: Span::Generated,
+        })
+    }
+
+    pub fn send_err(&self, err: PassError) {
+        self.errors.send(err.into()).unwrap()
     }
 
     pub fn desugar_glossary(&mut self, glossary: &concrete::Glossary) {
