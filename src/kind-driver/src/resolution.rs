@@ -14,6 +14,7 @@ use kind_span::{Range, SyntaxCtxIndex};
 use kind_tree::concrete::Glossary;
 use kind_tree::concrete::TopLevel;
 use kind_tree::{concrete::Book, symbol::Ident};
+use strsim::jaro;
 
 use crate::{errors::DriverError, session::Session};
 use kind_tree::concrete::visitor::Visitor;
@@ -199,12 +200,14 @@ fn parse_and_store_book_by_path<'a>(
 
     let names = book_to_glossary(session, rc.clone(), glossary);
 
-    if !names.contains(&ident.data.0) && !dont_search {
+    /*if !names.contains(&ident.data.0) && !dont_search {
+        let names : Vec<String> = glossary.names.keys().filter(|x| jaro(x, &ident.data.0).abs() > 0.5).cloned().collect();
+        println!("Result: {:?} {:?}", names, glossary.names.keys().map(|x| jaro(x, &ident.data.0).abs()).collect::<Vec<f64>>());
         session
             .diagnostic_sender
-            .send(DriverError::UnboundVariable(ident.clone()).into())
+            .send(DriverError::UnboundVariable(ident.clone(), names).into())
             .unwrap();
-    }
+    }*/
 
     session.public_names.insert(path.clone(), names);
 
@@ -231,9 +234,10 @@ pub fn parse_and_store_glossary(
 
     for (_, idents) in &unbounds {
         for ident in idents {
+            let names : Vec<String> = glossary.names.keys().filter(|x| jaro(x, &ident.data.0).abs() > 0.5).cloned().collect();
             session
                 .diagnostic_sender
-                .send(DriverError::UnboundVariable(ident.clone()).into())
+                .send(DriverError::UnboundVariable(ident.clone(), names).into())
                 .unwrap();
         }
     }

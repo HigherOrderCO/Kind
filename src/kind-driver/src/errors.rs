@@ -6,7 +6,7 @@ use kind_tree::symbol::Ident;
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
 pub enum DriverError {
-    UnboundVariable(Ident),
+    UnboundVariable(Ident, Vec<String>),
     MultiplePaths(Ident, Vec<PathBuf>),
     DefinedMultipleTimes(Ident, Ident),
 }
@@ -14,12 +14,18 @@ pub enum DriverError {
 impl From<DriverError> for DiagnosticFrame {
     fn from(err: DriverError) -> Self {
         match err {
-            DriverError::UnboundVariable(ident) => DiagnosticFrame {
+            DriverError::UnboundVariable(ident, suggestions) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
                 title: format!("Cannot find the definition '{}'.", ident.data.0),
                 subtitles: vec![],
-                hints: vec!["Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()],
+                hints: vec![
+                    if !suggestions.is_empty() {
+                        format!("Maybe you're looking for {}", suggestions.iter().map(|x| format!("'{}'", x)).collect::<Vec<String>>().join(", "))
+                    } else {
+                        "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()
+                    }
+                ],
                 positions: vec![Marking {
                     position: ident.range,
                     color: Color::Fst,
