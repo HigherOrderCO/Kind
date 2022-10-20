@@ -6,18 +6,15 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
-use kind_parser::{state::Parser, Lexer};
-use kind_pass::desugar::{desugar};
-use kind_pass::unbound::{self, UnboundCollector};
+use kind_pass::unbound::{self};
 use kind_report::data::DiagnosticFrame;
-use kind_span::{Range, SyntaxCtxIndex};
+use kind_span::Range;
 use kind_tree::concrete::Glossary;
 use kind_tree::concrete::TopLevel;
 use kind_tree::{concrete::Book, symbol::Ident};
 use strsim::jaro;
 
 use crate::{errors::DriverError, session::Session};
-use kind_tree::concrete::visitor::Visitor;
 
 const EXT: &str = "kind2";
 
@@ -149,20 +146,15 @@ fn parse_and_store_book_by_identifier<'a>(
     session: &mut Session,
     ident: &Ident,
     glossary: &'a mut Glossary,
-) -> CompResult {
+) {
     if session.loaded_idents.contains_key(&ident.data.0) {
-        return Ok(());
+        return;
     }
 
     match ident_to_path(&session.root, ident, true) {
-        Ok(None) => Ok(()),
-        Ok(Some(path)) => {
-            parse_and_store_book_by_path(session, ident, &path, glossary, false).map(|_| ())
-        }
-        Err(err) => {
-            session.diagnostic_sender.send(err).unwrap();
-            Err(CompileError)
-        }
+        Ok(None) => (),
+        Ok(Some(path)) => parse_and_store_book_by_path(session, ident, &path, glossary),
+        Err(err) => session.diagnostic_sender.send(err).unwrap(),
     }
 }
 
@@ -171,82 +163,65 @@ fn parse_and_store_book_by_path<'a>(
     ident: &Ident,
     path: &PathBuf,
     glossary: &'a mut Glossary,
-    dont_search: bool,
-) -> CompResult<Rc<Book>> {
+) {
     let input = fs::read_to_string(path).unwrap();
-
     let ctx_id = session.book_counter;
 
-    let mut peekable = input.chars().peekable();
-
-    let lexer = Lexer::new(&input, &mut peekable, SyntaxCtxIndex(ctx_id));
-    let mut parser = Parser::new(lexer, session.diagnostic_sender.clone());
-    let mut book = parser.parse_book();
+    let mut book = kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
     let rc = Rc::new(book.clone());
 
     session.add_book(
         ident.to_string().clone(),
         Rc::new(path.to_path_buf()),
-        Rc::new(input.clone()),
+        Rc::new(input),
         rc.clone(),
     );
 
-    let mut collector = UnboundCollector::new(session.diagnostic_sender.clone());
-    collector.visit_book(&mut book);
+    let unbound = unbound::get_book_unbound(session.diagnostic_sender.clone(), &mut book);
 
-    for (_, idents) in collector.unbound {
-        let _ = parse_and_store_book_by_identifier(session, &idents[0], glossary);
+    for idents in unbound.values() {
+        parse_and_store_book_by_identifier(session, &idents[0], glossary);
     }
 
-    let names = book_to_glossary(session, rc.clone(), glossary);
-
-    /*if !names.contains(&ident.data.0) && !dont_search {
-        let names : Vec<String> = glossary.names.keys().filter(|x| jaro(x, &ident.data.0).abs() > 0.5).cloned().collect();
-        println!("Result: {:?} {:?}", names, glossary.names.keys().map(|x| jaro(x, &ident.data.0).abs()).collect::<Vec<f64>>());
-        session
-            .diagnostic_sender
-            .send(DriverError::UnboundVariable(ident.clone(), names).into())
-            .unwrap();
-    }*/
-
-    session.public_names.insert(path.clone(), names);
-
-    Ok(rc)
+    book_to_glossary(session, rc, glossary);
 }
 
-pub fn parse_and_store_glossary(
-    session: &mut Session,
-    ident: &str,
-    path: &PathBuf,
-    dont_search_main: bool,
-) {
+pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathBuf) {
     let mut glossary = Glossary::default();
 
-    let _ = parse_and_store_book_by_path(
+    parse_and_store_book_by_path(
         session,
         &Ident::new_static(ident, Range::ghost_range()),
         path,
         &mut glossary,
-        dont_search_main,
     );
 
     let unbounds = unbound::get_glossary_unbound(session.diagnostic_sender.clone(), &mut glossary);
 
     for (_, idents) in &unbounds {
         for ident in idents {
-            let names : Vec<String> = glossary.names.keys().filter(|x| jaro(x, &ident.data.0).abs() > 0.5).cloned().collect();
             session
                 .diagnostic_sender
-                .send(DriverError::UnboundVariable(ident.clone(), names).into())
+                .send(
+                    DriverError::UnboundVariable(
+                        ident.clone(),
+                        glossary
+                            .names
+                            .keys()
+                            .filter(|x| jaro(x, &ident.data.0).abs() > 0.5)
+                            .cloned()
+                            .collect(),
+                    )
+                    .into(),
+                )
                 .unwrap();
         }
     }
 
     if !unbounds.is_empty() {
-        return ;
+        return;
     }
 
-    let _glossary = desugar(session.diagnostic_sender.clone(), &glossary);
-
-    
+    let _glossary =
+        kind_pass::desugar::desugar_glossary(session.diagnostic_sender.clone(), &glossary);
 }

@@ -53,18 +53,11 @@ impl<'a> DesugarState<'a> {
             )
         };
 
-        // TODO: Better generation of identifiers (to remove "_")
         match &sttm.data {
             concrete::SttmKind::Expr(expr, next) => {
                 let res_expr = self.desugar_expr(expr);
                 let res_sttm = self.desugar_sttm(bind_ident, pure_ident, next);
-                bind(
-                    self,
-                    sttm.range,
-                    Ident::generate("_"),
-                    res_expr,
-                    res_sttm,
-                )
+                bind(self, sttm.range, Ident::generate("~"), res_expr, res_sttm)
             }
             concrete::SttmKind::Ask(concrete::Destruct::Destruct(a, b, c, d), val, next) => {
                 let res_val = self.desugar_expr(val);
@@ -86,13 +79,7 @@ impl<'a> DesugarState<'a> {
             concrete::SttmKind::Ask(concrete::Destruct::Ident(name), val, next) => {
                 let res_expr = self.desugar_expr(val);
                 let res_sttm = self.desugar_sttm(bind_ident, pure_ident, next);
-                bind(
-                    self,
-                    sttm.range,
-                    name.clone(),
-                    res_expr,
-                    res_sttm,
-                )
+                bind(self, sttm.range, name.clone(), res_expr, res_sttm)
             }
             concrete::SttmKind::Let(destruct, val, next) => {
                 let res_val = self.desugar_expr(&val.clone());
@@ -112,12 +99,8 @@ impl<'a> DesugarState<'a> {
             }
             concrete::SttmKind::Return(expr) => {
                 let res_expr = self.desugar_expr(expr);
-                self.mk_desugared_fun(
-                    expr.locate(),
-                    pure_ident.clone(),
-                    vec![res_expr],
-                )
-            },
+                self.mk_desugared_fun(expr.locate(), pure_ident.clone(), vec![res_expr])
+            }
             concrete::SttmKind::RetExpr(expr) => self.desugar_expr(expr),
         }
     }
@@ -136,7 +119,7 @@ impl<'a> DesugarState<'a> {
 
         if bind.is_none() || pure.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::DoNotation));
-            return desugared::Expr::err(range)
+            return desugared::Expr::err(range);
         }
 
         self.desugar_sttm(&bind_ident, &pure_ident, sttm)
@@ -149,15 +132,12 @@ impl<'a> DesugarState<'a> {
         typ: &expr::Expr,
         body: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let sigma = Ident::new(
-            Symbol("Sigma".to_string()),
-            range,
-        );
+        let sigma = Ident::new(Symbol("Sigma".to_string()), range);
 
         let entry = self.old_glossary.entries.get(sigma.to_string());
         if entry.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::Sigma));
-            return desugared::Expr::err(range)
+            return desugared::Expr::err(range);
         }
 
         let name = match name {
@@ -174,14 +154,8 @@ impl<'a> DesugarState<'a> {
     }
 
     pub fn desugar_list(&mut self, range: Range, expr: &[expr::Expr]) -> Box<desugared::Expr> {
-        let cons_ident = Ident::new(
-            Symbol("List.cons".to_string()),
-            range,
-        );
-        let nil_ident = Ident::new(
-            Symbol("List.nil".to_string()),
-            range,
-        );
+        let cons_ident = Ident::new(Symbol("List.cons".to_string()), range);
+        let nil_ident = Ident::new(Symbol("List.nil".to_string()), range);
         let list_ident = Ident::new(Symbol("List".to_string()), range);
 
         let list = self.old_glossary.entries.get(list_ident.to_string());
@@ -190,18 +164,14 @@ impl<'a> DesugarState<'a> {
 
         if list.is_none() || nil.is_none() || cons.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
-            return desugared::Expr::err(range)
+            return desugared::Expr::err(range);
         }
 
         expr.iter().rfold(
             self.mk_desugared_ctr(range, nil_ident, Vec::new()),
             |res, elem| {
                 let spine = vec![self.desugar_expr(elem), res];
-                self.mk_desugared_ctr(
-                    range,
-                    cons_ident.clone(),
-                    spine,
-                )
+                self.mk_desugared_ctr(range, cons_ident.clone(), spine)
             },
         )
     }
@@ -213,16 +183,13 @@ impl<'a> DesugarState<'a> {
         if_: &expr::Expr,
         else_: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let bool_ident = Ident::new(
-            Symbol("Bool.if".to_string()),
-            range,
-        );
+        let bool_ident = Ident::new(Symbol("Bool.if".to_string()), range);
 
         let bool_if = self.old_glossary.entries.get(bool_ident.to_string());
 
         if bool_if.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::BoolIf));
-            return desugared::Expr::err(range)
+            return desugared::Expr::err(range);
         }
 
         let spine = vec![
@@ -231,30 +198,25 @@ impl<'a> DesugarState<'a> {
             self.desugar_expr(else_),
         ];
 
-        self.mk_desugared_fun(
-            range,
-            bool_ident,
-            spine
-        )
+        self.mk_desugared_fun(range, bool_ident, spine)
     }
 
-    pub fn desugar_pair(&mut self, range: Range, fst: &expr::Expr, snd: &expr::Expr) -> Box<desugared::Expr> {
-        let sigma_new = Ident::new(
-            Symbol("Sigma.new".to_string()),
-            range,
-        );
+    pub fn desugar_pair(
+        &mut self,
+        range: Range,
+        fst: &expr::Expr,
+        snd: &expr::Expr,
+    ) -> Box<desugared::Expr> {
+        let sigma_new = Ident::new(Symbol("Sigma.new".to_string()), range);
 
         let entry = self.old_glossary.entries.get(sigma_new.to_string());
         if entry.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
-            return desugared::Expr::err(range)
+            return desugared::Expr::err(range);
         }
 
-        let spine = vec![
-            self.desugar_expr(fst),
-            self.desugar_expr(snd),
-        ];
-        
+        let spine = vec![self.desugar_expr(fst), self.desugar_expr(snd)];
+
         self.mk_desugared_ctr(range, sigma_new, spine)
     }
 

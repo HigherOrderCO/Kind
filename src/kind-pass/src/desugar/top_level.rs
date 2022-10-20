@@ -288,7 +288,9 @@ impl<'a> DesugarState<'a> {
             concrete::pat::PatKind::Hole => desugared::Expr::hole(pat.range, self.gen_hole()),
             concrete::pat::PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
             concrete::pat::PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
-            concrete::pat::PatKind::Str(string) => desugared::Expr::str(pat.range, string.to_owned()),
+            concrete::pat::PatKind::Str(string) => {
+                desugared::Expr::str(pat.range, string.to_owned())
+            }
         }
     }
 

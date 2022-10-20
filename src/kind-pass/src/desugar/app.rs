@@ -12,7 +12,7 @@ use crate::errors::PassError;
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
-    pub fn mk_desugared_spine(
+    pub fn make_desugared_spine(
         &mut self,
         range: Range,
         head: Ident,
@@ -35,7 +35,11 @@ impl<'a> DesugarState<'a> {
             }
         } else if spine.len() != entry.arguments.len() {
             // The expected size is the one provided by the desugar.
-            self.send_err(PassError::SugarIsBadlyImplemented(entry.range, range, spine.len()));
+            self.send_err(PassError::SugarIsBadlyImplemented(
+                entry.range,
+                range,
+                spine.len(),
+            ));
         }
 
         Some(arguments)
@@ -47,7 +51,7 @@ impl<'a> DesugarState<'a> {
         head: Ident,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Box<desugared::Expr> {
-        match self.mk_desugared_spine(range, head.clone(), spine) {
+        match self.make_desugared_spine(range, head.clone(), spine) {
             Some(spine) => desugared::Expr::ctr(range, head, spine),
             None => desugared::Expr::err(range),
         }
@@ -59,7 +63,7 @@ impl<'a> DesugarState<'a> {
         head: Ident,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Box<desugared::Expr> {
-        match self.mk_desugared_spine(range, head.clone(), spine) {
+        match self.make_desugared_spine(range, head.clone(), spine) {
             Some(spine) => desugared::Expr::fun(range, head, spine),
             None => desugared::Expr::err(range),
         }

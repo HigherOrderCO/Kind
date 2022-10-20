@@ -21,7 +21,6 @@ impl<'a> DesugarState<'a> {
         let mut ordered_fields = vec![None; fields.len()];
         let mut names = HashMap::new();
 
-
         for i in 0..fields.len() {
             names.insert(fields[i].clone().0, (i, fields[i].clone().1));
         }
@@ -100,18 +99,14 @@ impl<'a> DesugarState<'a> {
                     }
                 }
 
-                let open_id = tipo.add_segment("$open");
+                let open_id = tipo.add_segment("open");
 
                 let spine = vec![
                     val,
                     desugared::Expr::unfold_lambda(*destruct_range, &arguments, next(self)),
                 ];
 
-                self.mk_desugared_fun(
-                    *destruct_range,
-                    open_id,
-                    spine
-                )
+                self.mk_desugared_fun(*destruct_range, open_id, spine)
             }
             Destruct::Ident(name) => on_ident(self, name),
         }
@@ -196,10 +191,7 @@ impl<'a> DesugarState<'a> {
                         arguments.push(name.0)
                     } else {
                         // TODO: Generate name
-                        arguments.push(Ident::new(
-                            Symbol("~".to_string()),
-                            match_.tipo.range,
-                        ))
+                        arguments.push(Ident::new(Symbol("~".to_string()), match_.tipo.range))
                     }
                 }
                 cases_args[index] = Some((case.constructor.range, arguments, &case.value));
@@ -233,26 +225,23 @@ impl<'a> DesugarState<'a> {
             self.send_err(PassError::NoCoverage(range, unbound))
         }
 
-        let match_id = match_.tipo.add_segment("$match");
+        let match_id = match_.tipo.add_segment("match");
 
-        let spine = [
-            [
-                self.desugar_expr(&match_.scrutinizer),
-                // TODO: Add motive
-                if let Some(res) = &match_.motive {
-                    self.desugar_expr(res)
-                } else {
-                    desugared::Expr::identity_lambda(Ident::generate("p"))
-                },
-            ]
-            .as_slice(),
-            lambdas.as_slice(),
-        ].concat();
+        let motive = if let Some(res) = &match_.motive {
+            self.desugar_expr(res)
+        } else {
+            desugared::Expr::identity_lambda(Ident::generate("p"))
+        };
+
+        let prefix = [
+            self.desugar_expr(&match_.scrutinizer),
+            motive
+        ];
 
         self.mk_desugared_fun(
             match_.tipo.range,
             match_id,
-            spine,
+            [prefix.as_slice(), lambdas.as_slice()].concat(),
         )
     }
 }

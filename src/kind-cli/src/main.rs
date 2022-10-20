@@ -1,8 +1,6 @@
-use std::{path::PathBuf, process::exit};
+use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use kind_driver::{resolution::parse_and_store_glossary, render_error_to_stderr, session::Session};
-use kind_report::{data::DiagnosticFrame, RenderConfig};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -73,12 +71,15 @@ enum Command {
 
 fn main() {
     //let _ = Cli::parse();
-    let config = RenderConfig::unicode(2);
+
+    kind_checker::test();
+
+    /*let config = RenderConfig::unicode(2);
 
     let (rx, tx) = std::sync::mpsc::channel();
 
     let mut session = Session::new(PathBuf::from("."), &config, rx);
-    parse_and_store_glossary(&mut session, "Main", &PathBuf::from("teste.kind2"), false);
+    parse_and_store_glossary(&mut session, "Main", &PathBuf::from("teste.kind2"));
 
     let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
 
@@ -91,5 +92,5 @@ fn main() {
         exit(1);
     } else {
         exit(0);
-    }
+    }*/
 }

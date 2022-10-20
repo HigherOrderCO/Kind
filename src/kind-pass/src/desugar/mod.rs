@@ -27,7 +27,7 @@ pub struct DesugarState<'a> {
     pub holes: u64,
 }
 
-pub fn desugar(
+pub fn desugar_glossary(
     errors: Sender<DiagnosticFrame>,
     glossary: &concrete::Glossary,
 ) -> desugared::Glossary {
@@ -40,7 +40,6 @@ pub fn desugar(
     state.desugar_glossary(glossary);
     state.new_glossary
 }
-
 
 impl<'a> DesugarState<'a> {
     pub fn gen_hole(&mut self) -> u64 {

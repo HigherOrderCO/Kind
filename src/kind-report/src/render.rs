@@ -422,7 +422,7 @@ impl<'a> Diagnostic<'a> {
         for (ctx, group) in groups {
             writeln!(fmt)?;
             let (file, code) = cache.fetch(ctx).unwrap();
-            write_code_block(&*file.clone(), config, &group, &*code, fmt)?;
+            write_code_block(&file.clone(), config, &group, &code, fmt)?;
         }
 
         writeln!(fmt)?;

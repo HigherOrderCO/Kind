@@ -1,8 +1,8 @@
 use kind_span::{Locatable, Range};
-use kind_tree::Operator;
 use kind_tree::concrete::expr::*;
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::symbol::{Ident, Symbol};
+use kind_tree::Operator;
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -330,7 +330,7 @@ impl<'a> Parser<'a> {
             data: ExprKind::Lit(Literal::Help(Ident {
                 data: Symbol(str),
                 range,
-                used_by_sugar: false
+                used_by_sugar: false,
             })),
         }))
     }
@@ -442,7 +442,12 @@ impl<'a> Parser<'a> {
         if self.get().is_upper_id() {
             let upper = self.parse_upper_id()?;
             let (range, bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
-            Ok(Destruct::Destruct(upper.range.mix(range.unwrap_or(upper.range)), upper, bindings, ignore_rest))
+            Ok(Destruct::Destruct(
+                upper.range.mix(range.unwrap_or(upper.range)),
+                upper,
+                bindings,
+                ignore_rest,
+            ))
         } else {
             let name = self.parse_id()?;
             Ok(Destruct::Ident(name))
@@ -515,7 +520,9 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    pub fn parse_pat_destruct_bindings(&mut self) -> Result<(Option<Range>, Vec<CaseBinding>, bool), SyntaxError> {
+    pub fn parse_pat_destruct_bindings(
+        &mut self,
+    ) -> Result<(Option<Range>, Vec<CaseBinding>, bool), SyntaxError> {
         let mut ignore_rest_range = None;
         let mut bindings = Vec::new();
         let mut range = None;
@@ -567,7 +574,6 @@ impl<'a> Parser<'a> {
             let (_range, bindings, ignore_rest) = self.parse_pat_destruct_bindings()?;
             self.eat_variant(Token::FatArrow)?;
             let value = self.parse_expr(false)?;
-
 
             cases.push(Case {
                 constructor,

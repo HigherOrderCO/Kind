@@ -6,7 +6,7 @@ pub enum Sugar {
     List,
     Sigma,
     Pair,
-    BoolIf
+    BoolIf,
 }
 
 /// Describes all of the possible errors inside each
@@ -195,7 +195,7 @@ impl From<PassError> for DiagnosticFrame {
                 positions: vec![Marking {
                     position: head_range,
                     color: Color::Fst,
-                    text: 
+                    text:
                         if expected == 0 {
                             "This rule expects no arguments".to_string()
                         } else {

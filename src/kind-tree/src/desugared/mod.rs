@@ -6,7 +6,7 @@ use std::{
     fmt::{Display, Error, Formatter},
 };
 
-use kind_span::{Span, Range};
+use kind_span::{Range, Span};
 
 use crate::{symbol::Ident, Operator};
 
@@ -78,7 +78,6 @@ impl Expr {
         })
     }
 
-
     pub fn sub(range: Range, ident: Ident, idx: u64, rdx: u64, body: Box<Expr>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
@@ -101,9 +100,10 @@ impl Expr {
     }
 
     pub fn unfold_lambda(range: Range, idents: &[Ident], body: Box<Expr>) -> Box<Expr> {
-        idents.iter().rev().fold(body, |body, ident| {
-            Expr::lambda(range, ident.clone(), body)
-        })
+        idents
+            .iter()
+            .rev()
+            .fold(body, |body, ident| Expr::lambda(range, ident.clone(), body))
     }
 
     pub fn app(range: Range, ident: Box<Expr>, spine: Vec<Box<Expr>>) -> Box<Expr> {
@@ -142,54 +142,53 @@ impl Expr {
     }
 
     pub fn typ(range: Range) -> Box<Expr> {
-        Box::new(Expr{
+        Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Typ,
         })
     }
 
     pub fn u60(range: Range) -> Box<Expr> {
-        Box::new(Expr{
+        Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::U60,
         })
     }
 
     pub fn num(range: Range, num: u64) -> Box<Expr> {
-        Box::new(Expr{
+        Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Num(num),
         })
     }
 
     pub fn binary(range: Range, op: Operator, left: Box<Expr>, right: Box<Expr>) -> Box<Expr> {
-        Box::new(Expr{
+        Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Binary(op, left, right),
         })
     }
 
     pub fn hole(range: Range, num: u64) -> Box<Expr> {
-        Box::new(Expr{
+        Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Hole(num),
         })
     }
 
     pub fn str(range: Range, str: String) -> Box<Expr> {
-        Box::new(Expr{
+        Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Str(str),
         })
     }
 
     pub fn hlp(range: Range, hlp: Ident) -> Box<Expr> {
-        Box::new(Expr{
+        Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Hlp(hlp),
         })
     }
-
 
     pub fn err(range: Range) -> Box<Expr> {
         Box::new(Expr {
@@ -371,4 +370,3 @@ impl Argument {
         }
     }
 }
-

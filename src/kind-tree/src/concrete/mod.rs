@@ -155,7 +155,7 @@ pub struct GlossaryEntry {
     pub erased: usize,
     pub arguments: Telescope<Argument>,
     pub is_ctr: bool,
-    pub range: Range
+    pub range: Range,
 }
 
 /// A glossary stores definitions by name. It's generated
@@ -170,11 +170,15 @@ pub struct Glossary {
 impl Glossary {
     pub fn get_count_garanteed(&self, name: &String) -> &GlossaryEntry {
         println!("{:?}", self.count.keys());
-        self.count.get(name).unwrap_or_else(|| panic!("Internal Error: Garanteed count {:?} failed", name))
+        self.count
+            .get(name)
+            .unwrap_or_else(|| panic!("Internal Error: Garanteed count {:?} failed", name))
     }
 
     pub fn get_entry_garanteed(&self, name: &String) -> &TopLevel {
-        self.entries.get(name).unwrap_or_else(|| panic!("Internal Error: Garanteed entry {:?} failed", name))
+        self.entries
+            .get(name)
+            .unwrap_or_else(|| panic!("Internal Error: Garanteed entry {:?} failed", name))
     }
 }
 
@@ -415,7 +419,7 @@ impl SumTypeDecl {
             erased,
             arguments,
             is_ctr: true,
-            range: self.name.range
+            range: self.name.range,
         }
     }
 }
@@ -455,7 +459,7 @@ impl Constructor {
             erased,
             arguments,
             is_ctr: true,
-            range: self.name.range
+            range: self.name.range,
         }
     }
 }
@@ -492,7 +496,7 @@ impl RecordDecl {
             erased,
             arguments,
             is_ctr: true,
-            range: self.name.range
+            range: self.name.range,
         }
     }
 
@@ -520,7 +524,7 @@ impl RecordDecl {
             erased,
             arguments,
             is_ctr: true,
-            range: self.name.range
+            range: self.name.range,
         }
     }
 }
@@ -542,7 +546,7 @@ impl Entry {
             erased,
             arguments,
             is_ctr: false,
-            range: self.name.range
+            range: self.name.range,
         }
     }
 }

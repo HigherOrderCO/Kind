@@ -9,34 +9,36 @@ use kind_span::{Range, SyntaxCtxIndex};
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Symbol(pub String);
 
-
-
 /// Identifier inside a syntax context.
 #[derive(Clone, Debug, Hash)]
 pub struct Ident {
     pub data: Symbol,
     pub range: Range,
-    pub used_by_sugar: bool
+    pub used_by_sugar: bool,
 }
 
 impl Ident {
     pub fn new(data: Symbol, range: Range) -> Ident {
-        Ident { data, range, used_by_sugar: false }
-    }
-
-    pub fn new_static(data: & str, range: Range) -> Ident {
         Ident {
-            data: Symbol(data.to_string()),
+            data,
             range,
-            used_by_sugar: false
+            used_by_sugar: false,
         }
     }
 
-    pub fn new_by_sugar(data: & str, range: Range) -> Ident {
+    pub fn new_static(data: &str, range: Range) -> Ident {
         Ident {
             data: Symbol(data.to_string()),
             range,
-            used_by_sugar: true
+            used_by_sugar: false,
+        }
+    }
+
+    pub fn new_by_sugar(data: &str, range: Range) -> Ident {
+        Ident {
+            data: Symbol(data.to_string()),
+            range,
+            used_by_sugar: true,
         }
     }
 
@@ -51,7 +53,7 @@ impl Ident {
         Ident {
             data: self.data.clone(),
             range,
-            used_by_sugar: self.used_by_sugar
+            used_by_sugar: self.used_by_sugar,
         }
     }
 
@@ -59,7 +61,7 @@ impl Ident {
         Ident {
             data: Symbol(format!("{}.{}", self.data.0, name)),
             range: self.range,
-            used_by_sugar: self.used_by_sugar
+            used_by_sugar: self.used_by_sugar,
         }
     }
 
@@ -67,7 +69,7 @@ impl Ident {
         Ident {
             data: Symbol(data.to_string()),
             range: Range::ghost_range(),
-            used_by_sugar: false
+            used_by_sugar: false,
         }
     }
 
@@ -78,7 +80,7 @@ impl Ident {
         Ident {
             data: Symbol(format!("{}.{}", base, self.data.0)),
             range: self.range,
-            used_by_sugar: self.used_by_sugar
+            used_by_sugar: self.used_by_sugar,
         }
     }
 }
