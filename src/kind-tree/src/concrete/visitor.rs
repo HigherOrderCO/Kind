@@ -150,12 +150,10 @@ pub fn walk_glossary<T: Visitor>(ctx: &mut T, glossary: &mut Glossary) {
 
 pub fn walk_pat_ident<T: Visitor>(ctx: &mut T, ident: &mut PatIdent) {
     ctx.visit_range(&mut ident.0.range);
-    ctx.visit_syntax_ctx(&mut ident.0.ctx);
 }
 
 pub fn walk_ident<T: Visitor>(ctx: &mut T, ident: &mut Ident) {
     ctx.visit_range(&mut ident.range);
-    ctx.visit_syntax_ctx(&mut ident.ctx);
 }
 
 pub fn walk_destruct<T: Visitor>(ctx: &mut T, destruct: &mut Destruct) {

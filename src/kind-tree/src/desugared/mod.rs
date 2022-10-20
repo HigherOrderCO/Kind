@@ -38,6 +38,8 @@ pub enum ExprKind {
     U60,
     /// Number literal
     Num(u64),
+    /// Very special constructor :)
+    Str(String),
     /// Binary operation (e.g. 2 + 3)
     Binary(Operator, Box<Expr>, Box<Expr>),
     /// A expression open to unification (e.g. _)
@@ -174,6 +176,13 @@ impl Expr {
         })
     }
 
+    pub fn str(range: Range, str: String) -> Box<Expr> {
+        Box::new(Expr{
+            span: Span::Locatable(range),
+            data: ExprKind::Str(str),
+        })
+    }
+
     pub fn hlp(range: Range, hlp: Ident) -> Box<Expr> {
         Box::new(Expr{
             span: Span::Locatable(range),
@@ -264,6 +273,7 @@ impl Display for Expr {
         match &self.data {
             Typ => write!(f, "Type"),
             U60 => write!(f, "U60"),
+            Str(n) => write!(f, "\"{}\"", n),
             Num(n) => write!(f, "{}", n),
             All(_, _, _) => write!(f, "({})", self.traverse_pi_types()),
             Var(name) => write!(f, "{}", name),

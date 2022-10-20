@@ -9,17 +9,35 @@ use kind_span::{Range, SyntaxCtxIndex};
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Symbol(pub String);
 
+
+
 /// Identifier inside a syntax context.
 #[derive(Clone, Debug, Hash)]
 pub struct Ident {
     pub data: Symbol,
-    pub ctx: SyntaxCtxIndex,
     pub range: Range,
+    pub used_by_sugar: bool
 }
 
 impl Ident {
-    pub fn new(data: Symbol, ctx: SyntaxCtxIndex, range: Range) -> Ident {
-        Ident { data, ctx, range }
+    pub fn new(data: Symbol, range: Range) -> Ident {
+        Ident { data, range, used_by_sugar: false }
+    }
+
+    pub fn new_static(data: & str, range: Range) -> Ident {
+        Ident {
+            data: Symbol(data.to_string()),
+            range,
+            used_by_sugar: false
+        }
+    }
+
+    pub fn new_by_sugar(data: & str, range: Range) -> Ident {
+        Ident {
+            data: Symbol(data.to_string()),
+            range,
+            used_by_sugar: true
+        }
     }
 
     pub fn to_string(&self) -> &String {
@@ -32,24 +50,24 @@ impl Ident {
         range.set_ctx(ctx);
         Ident {
             data: self.data.clone(),
-            ctx,
             range,
+            used_by_sugar: self.used_by_sugar
         }
     }
 
     pub fn add_segment(&self, name: &str) -> Ident {
         Ident {
             data: Symbol(format!("{}.{}", self.data.0, name)),
-            ctx: self.ctx,
             range: self.range,
+            used_by_sugar: self.used_by_sugar
         }
     }
 
     pub fn generate(data: &str) -> Ident {
         Ident {
             data: Symbol(data.to_string()),
-            ctx: SyntaxCtxIndex(0),
             range: Range::ghost_range(),
+            used_by_sugar: false
         }
     }
 
@@ -59,8 +77,8 @@ impl Ident {
     pub fn add_base_ident(&self, base: &str) -> Ident {
         Ident {
             data: Symbol(format!("{}.{}", base, self.data.0)),
-            ctx: self.ctx,
             range: self.range,
+            used_by_sugar: self.used_by_sugar
         }
     }
 }

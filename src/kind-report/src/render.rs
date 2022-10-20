@@ -273,10 +273,15 @@ pub fn write_code_block<'a, T: Write + Sized>(
 
         for marker in &multi_line_markers {
             if marker.0.line == *line {
-                prefix = format!(" {} ", get_colorizer(&marker.2.color)(config.chars.brline));
-                current = Some(marker);
-                break;
-            } else if marker.1.line == *line || *line > marker.0.line && *line < marker.1.line {
+                writeln!(
+                    fmt,
+                    "{:>5} {} {}",
+                    "",
+                    paint_line(config.chars.vbar),
+                    format!(" {} ", get_colorizer(&marker.2.color)(config.chars.brline))
+                )?;
+            }
+            if *line >= marker.0.line && *line <= marker.1.line {
                 prefix = format!(" {} ", get_colorizer(&marker.2.color)(config.chars.vbar));
                 current = Some(marker);
                 break;

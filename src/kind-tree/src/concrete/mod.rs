@@ -155,6 +155,7 @@ pub struct GlossaryEntry {
     pub erased: usize,
     pub arguments: Telescope<Argument>,
     pub is_ctr: bool,
+    pub range: Range
 }
 
 /// A glossary stores definitions by name. It's generated
@@ -168,6 +169,7 @@ pub struct Glossary {
 
 impl Glossary {
     pub fn get_count_garanteed(&self, name: &String) -> &GlossaryEntry {
+        println!("{:?}", self.count.keys());
         self.count.get(name).expect(&format!("Internal Error: Garanteed count {:?} failed", name))
     }
 
@@ -413,6 +415,7 @@ impl SumTypeDecl {
             erased,
             arguments,
             is_ctr: true,
+            range: self.name.range
         }
     }
 }
@@ -452,6 +455,7 @@ impl Constructor {
             erased,
             arguments,
             is_ctr: true,
+            range: self.name.range
         }
     }
 }
@@ -488,6 +492,7 @@ impl RecordDecl {
             erased,
             arguments,
             is_ctr: true,
+            range: self.name.range
         }
     }
 
@@ -515,6 +520,7 @@ impl RecordDecl {
             erased,
             arguments,
             is_ctr: true,
+            range: self.name.range
         }
     }
 }
@@ -536,6 +542,7 @@ impl Entry {
             erased,
             arguments,
             is_ctr: false,
+            range: self.name.range
         }
     }
 }

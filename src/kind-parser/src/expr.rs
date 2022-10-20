@@ -120,14 +120,14 @@ impl<'a> Parser<'a> {
     pub fn parse_id(&mut self) -> Result<Ident, SyntaxError> {
         let range = self.range();
         let id = eat_single!(self, Token::LowerId(x) => x.clone())?;
-        let ident = Ident::new(Symbol(id), self.lexer.ctx, range);
+        let ident = Ident::new(Symbol(id), range);
         Ok(ident)
     }
 
     pub fn parse_upper_id(&mut self) -> Result<Ident, SyntaxError> {
         let range = self.range();
         let id = eat_single!(self, Token::UpperId(x) => x.clone())?;
-        let ident = Ident::new(Symbol(id), self.lexer.ctx, range);
+        let ident = Ident::new(Symbol(id), range);
         Ok(ident)
     }
 
@@ -178,14 +178,14 @@ impl<'a> Parser<'a> {
         self.advance(); // ':'
         let typ = self.parse_expr(false)?;
 
-        self.eat_closing_keyword(Token::RPar, range)?;
+        self.eat_closing_keyword(Token::RBracket, range)?;
 
-        let end = self.eat_variant(Token::RightArrow)?.1;
+        self.eat_variant(Token::RightArrow)?;
 
         let body = self.parse_expr(false)?;
 
         Ok(Box::new(Expr {
-            range: range.mix(end),
+            range: range.mix(body.locate()),
             data: ExprKind::Sigma(Some(ident), typ, body),
         }))
     }
@@ -329,8 +329,8 @@ impl<'a> Parser<'a> {
             range,
             data: ExprKind::Lit(Literal::Help(Ident {
                 data: Symbol(str),
-                ctx: self.lexer.ctx,
                 range,
+                used_by_sugar: false
             })),
         }))
     }
@@ -352,10 +352,10 @@ impl<'a> Parser<'a> {
             Token::Num(num) => self.parse_num(num),
             Token::Char(chr) => self.parse_char(chr),
             Token::Str(str) => self.parse_str(str),
-            Token::Float(_, _) => todo!(),
             Token::Help(str) => self.parse_help(str),
             Token::LBracket => self.parse_list(),
             Token::LPar => self.parse_paren(),
+            Token::Float(_, _) => todo!(),
             _ => self.fail(vec![Token::LowerId("".to_string())]),
         }
     }

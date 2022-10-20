@@ -5,7 +5,8 @@ pub enum Sugar {
     DoNotation,
     List,
     Sigma,
-    Pair
+    Pair,
+    BoolIf
 }
 
 /// Describes all of the possible errors inside each
@@ -22,7 +23,8 @@ pub enum PassError {
     CannotFindConstructor(Range, Range, String),
     NeedToImplementMethods(Range, Sugar),
     RuleWithIncorrectArity(Range, usize, usize, usize),
-    RulesWithInconsistentArity(Vec<(Range, usize)>)
+    RulesWithInconsistentArity(Vec<(Range, usize)>),
+    SugarIsBadlyImplemented(Range, Range, usize),
 }
 
 // TODO: A way to build an error message with methods
@@ -89,6 +91,7 @@ impl From<PassError> for DiagnosticFrame {
                         Sugar::List => "You must implement 'List', 'List.cons' and 'List.nil' for this type in order to use the list notation.".to_string(),
                         Sugar::Sigma => "You must implement 'Sigma' in order to use the sigma notation.".to_string(),
                         Sugar::Pair => "You must implement 'Sigma' and 'Sigma.new' in order to use the sigma notation.".to_string(),
+                        Sugar::BoolIf => "You must implement 'Bool.if' in order to use the if notation.".to_string(),
                     }
                 ],
                 positions: vec![Marking {
@@ -160,20 +163,50 @@ impl From<PassError> for DiagnosticFrame {
                     no_code: false,
                 }],
             },
-            PassError::IncorrectArity(head_range, arguments, hiddens) => DiagnosticFrame {
+            PassError::IncorrectArity(head_range, expected, hidden) => DiagnosticFrame {
                 code: 0,
                 severity: Severity::Error,
                 title: "Incorrect arity".to_string(),
                 subtitles: vec![],
-                hints: vec![format!(
-                    "Just complete the function to use {} (without hidden) or {} arguments",
-                    arguments - hiddens,
-                    arguments
-                )],
+                hints: vec![
+                    if expected == 0 {
+                        format!("This function expects no arguments")
+                    } else if hidden == 0 {
+                        format!("This function expects {} arguments", expected)
+                    } else {
+                        format!("This function expects {} arguments or {} (without hidden ones)", expected, expected - hidden)
+                    }
+                ],
                 positions: vec![Marking {
                     position: head_range,
                     color: Color::Fst,
                     text: "This function requires a fixed number of arguments".to_string(),
+                    no_code: false,
+                }],
+            },
+            PassError::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
+                code: 0,
+                severity: Severity::Error,
+                title: "Incorrect arity in the sugar definition".to_string(),
+                subtitles: vec![],
+                hints: vec![format!(
+                    "Take a look at how sugar functions should be implemented at https://kind2.kindelia.com/hints/sugars."
+                )],
+                positions: vec![Marking {
+                    position: head_range,
+                    color: Color::Fst,
+                    text: 
+                        if expected == 0 {
+                            format!("This rule expects no arguments")
+                        } else {
+                            format!("This rule expects {} explicit arguments", expected)
+                        }
+                    ,
+                    no_code: false,
+                },Marking {
+                    position: place_range,
+                    color: Color::Snd,
+                    text: "This is what triggers the sugar".to_string(),
                     no_code: false,
                 }],
             },

@@ -5,12 +5,66 @@ use kind_tree::concrete::expr::Expr;
 
 use kind_tree::concrete::{Binding, ExprKind};
 use kind_tree::desugared;
+use kind_tree::symbol::Ident;
 
 use crate::errors::PassError;
 
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
+    pub fn mk_desugared_spine(
+        &mut self,
+        range: Range,
+        head: Ident,
+        spine: Vec<Box<desugared::Expr>>,
+    ) -> Option<Vec<Box<desugared::Expr>>> {
+        let entry = self.old_glossary.get_count_garanteed(&head.data.0);
+
+        let mut arguments = Vec::new();
+
+        let (hidden, _erased) = entry.arguments.count_implicits();
+
+        if spine.len() == entry.arguments.len() - hidden {
+            let mut spine_iter = spine.iter();
+            for arg in &entry.arguments.0 {
+                if arg.hidden {
+                    arguments.push(self.gen_hole_expr())
+                } else {
+                    arguments.push(spine_iter.next().unwrap().to_owned())
+                }
+            }
+        } else if spine.len() != entry.arguments.len() {
+            // The expected size is the one provided by the desugar.
+            self.send_err(PassError::SugarIsBadlyImplemented(entry.range, range, spine.len()));
+        }
+
+        Some(arguments)
+    }
+
+    pub fn mk_desugared_ctr(
+        &mut self,
+        range: Range,
+        head: Ident,
+        spine: Vec<Box<desugared::Expr>>,
+    ) -> Box<desugared::Expr> {
+        match self.mk_desugared_spine(range.clone(), head.clone(), spine) {
+            Some(spine) => desugared::Expr::ctr(range, head, spine),
+            None => desugared::Expr::err(range),
+        }
+    }
+
+    pub fn mk_desugared_fun(
+        &mut self,
+        range: Range,
+        head: Ident,
+        spine: Vec<Box<desugared::Expr>>,
+    ) -> Box<desugared::Expr> {
+        match self.mk_desugared_spine(range.clone(), head.clone(), spine) {
+            Some(spine) => desugared::Expr::fun(range, head, spine),
+            None => desugared::Expr::err(range),
+        }
+    }
+
     pub fn desugar_app(
         &mut self,
         range: Range,

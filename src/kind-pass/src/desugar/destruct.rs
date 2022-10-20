@@ -96,7 +96,7 @@ impl<'a> DesugarState<'a> {
                         arguments.push(name.0)
                     } else {
                         // TODO: Generate name
-                        arguments.push(Ident::new(Symbol("~".to_string()), tipo.ctx, tipo.range))
+                        arguments.push(Ident::new(Symbol("~".to_string()), tipo.range))
                     }
                 }
 
@@ -196,7 +196,6 @@ impl<'a> DesugarState<'a> {
                         // TODO: Generate name
                         arguments.push(Ident::new(
                             Symbol("~".to_string()),
-                            match_.tipo.ctx,
                             match_.tipo.range,
                         ))
                     }

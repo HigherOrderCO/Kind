@@ -78,7 +78,7 @@ fn main() {
     let (rx, tx) = std::sync::mpsc::channel();
 
     let mut session = Session::new(PathBuf::from("."), &config, rx);
-    let _ = parse_and_store_glossary(&mut session, "A", &PathBuf::from("teste.kind2"));
+    let _ = parse_and_store_glossary(&mut session, "Main", &PathBuf::from("teste.kind2"), false);
 
     let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
 

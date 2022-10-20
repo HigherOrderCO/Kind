@@ -7,13 +7,12 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use kind_parser::{state::Parser, Lexer};
-use kind_pass::desugar::DesugarState;
-use kind_pass::unbound::UnboundCollector;
+use kind_pass::desugar::{desugar};
+use kind_pass::unbound::{self, UnboundCollector};
 use kind_report::data::DiagnosticFrame;
 use kind_span::{Range, SyntaxCtxIndex};
 use kind_tree::concrete::Glossary;
 use kind_tree::concrete::TopLevel;
-use kind_tree::symbol::Symbol;
 use kind_tree::{concrete::Book, symbol::Ident};
 
 use crate::{errors::DriverError, session::Session};
@@ -212,24 +211,25 @@ fn parse_and_store_book_by_path<'a>(
     Ok(rc)
 }
 
-pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathBuf) -> Glossary {
+pub fn parse_and_store_glossary(
+    session: &mut Session,
+    ident: &str,
+    path: &PathBuf,
+    dont_search_main: bool,
+) -> () {
     let mut glossary = Glossary::default();
+
     let _ = parse_and_store_book_by_path(
         session,
-        &Ident::new(
-            Symbol(ident.to_string()),
-            SyntaxCtxIndex(0),
-            Range::ghost_range(),
-        ),
+        &Ident::new_static(ident, Range::ghost_range()),
         path,
         &mut glossary,
-        true,
+        dont_search_main,
     );
 
-    let mut collector = UnboundCollector::new(session.diagnostic_sender.clone());
-    collector.visit_glossary(&mut glossary);
+    let unbounds = unbound::get_glossary_unbound(session.diagnostic_sender.clone(), &mut glossary);
 
-    for idents in collector.unbound.values() {
+    for (_, idents) in &unbounds {
         for ident in idents {
             session
                 .diagnostic_sender
@@ -238,21 +238,11 @@ pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathB
         }
     }
 
-    if collector.unbound.len() > 0 {
-        return glossary
+    if unbounds.len() > 0 {
+        return ();
     }
 
-    for (name, entry) in &glossary.count {
+    let _glossary = desugar(session.diagnostic_sender.clone(), &glossary);
 
-        println!("{} : {}", name, entry.arguments.map(|x| format!("{}", x)).0.join(" "));
-    }
-
-    println!("---------");
-
-    let mut state = DesugarState::new(session.diagnostic_sender.clone(), &glossary);
-    state.desugar_glossary(&glossary);
-
-    println!("{}", state.new_glossary);
-
-    glossary
+    ()
 }

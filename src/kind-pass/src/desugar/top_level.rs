@@ -1,9 +1,9 @@
 use kind_span::{Range, Span};
 use kind_tree::concrete::{self, Telescope};
 use kind_tree::desugared;
-use kind_tree::symbol::Ident;
+use kind_tree::symbol::{Ident, Symbol};
 
-use crate::errors::PassError;
+use crate::errors::{PassError, Sugar};
 
 use super::DesugarState;
 
@@ -32,10 +32,7 @@ pub fn is_data_constructor_of(expr: concrete::expr::Expr, type_name: &str) -> bo
 impl<'a> DesugarState<'a> {
     pub fn desugar_argument(&mut self, argument: &concrete::Argument) -> desugared::Argument {
         let tipo = match &argument.tipo {
-            None => Box::new(desugared::Expr {
-                data: desugared::ExprKind::Typ,
-                span: Span::Locatable(argument.range),
-            }),
+            None => desugared::Expr::typ(argument.range),
             Some(ty) => self.desugar_expr(ty),
         };
 
@@ -90,24 +87,14 @@ impl<'a> DesugarState<'a> {
                     let args = [irrelevant_params.as_slice(), pre_indices]
                         .concat()
                         .iter()
-                        .map(|x| {
-                            Box::new(desugared::Expr {
-                                data: desugared::ExprKind::Var(x.name.clone()),
-                                span: Span::Generated,
-                            })
-                        })
+                        .map(|x| desugared::Expr::var(x.name.clone()))
                         .collect::<Vec<Box<desugared::Expr>>>();
 
-                    Box::new(desugared::Expr {
-                        data: desugared::ExprKind::App(
-                            Box::new(desugared::Expr {
-                                data: desugared::ExprKind::Var(sum_type.name.clone()),
-                                span: Span::Generated,
-                            }),
-                            args,
-                        ),
-                        span: Span::Generated,
-                    })
+                    desugared::Expr::app(
+                        sum_type.name.range.clone(),
+                        desugared::Expr::var(sum_type.name.clone()),
+                        args,
+                    )
                 }
             };
 
@@ -205,6 +192,52 @@ impl<'a> DesugarState<'a> {
             .insert(cons_ident.data.0.clone(), Box::new(data_constructor));
     }
 
+    pub fn desugar_pair_pat(
+        &mut self,
+        range: Range,
+        fst: &Box<concrete::pat::Pat>,
+        snd: &Box<concrete::pat::Pat>,
+    ) -> Box<desugared::Expr> {
+        let sigma_new = Ident::new(Symbol("Sigma.new".to_string()), range.clone());
+
+        let entry = self.old_glossary.entries.get(sigma_new.to_string());
+        if entry.is_none() {
+            self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
+            return desugared::Expr::err(range);
+        }
+
+        let spine = vec![self.desugar_pat(fst), self.desugar_pat(snd)];
+
+        self.mk_desugared_ctr(range, sigma_new, spine)
+    }
+
+    pub fn desugar_list_pat(
+        &mut self,
+        range: Range,
+        expr: &[concrete::pat::Pat],
+    ) -> Box<desugared::Expr> {
+        let cons_ident = Ident::new(Symbol("List.cons".to_string()), range.clone());
+        let nil_ident = Ident::new(Symbol("List.nil".to_string()), range.clone());
+        let list_ident = Ident::new(Symbol("List".to_string()), range.clone());
+
+        let list = self.old_glossary.entries.get(list_ident.to_string());
+        let nil = self.old_glossary.entries.get(cons_ident.to_string());
+        let cons = self.old_glossary.entries.get(nil_ident.to_string());
+
+        if list.is_none() || nil.is_none() || cons.is_none() {
+            self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
+            return desugared::Expr::err(range);
+        }
+
+        expr.iter().rfold(
+            self.mk_desugared_ctr(range, nil_ident, Vec::new()),
+            |res, elem| {
+                let spine = vec![self.desugar_pat(elem), res];
+                self.mk_desugared_ctr(range, cons_ident.clone(), spine)
+            },
+        )
+    }
+
     pub fn desugar_pat(&mut self, pat: &concrete::pat::Pat) -> Box<desugared::Expr> {
         match &pat.data {
             concrete::pat::PatKind::App(head, spine) => {
@@ -215,7 +248,9 @@ impl<'a> DesugarState<'a> {
                     .expect("Cannot find definition");
 
                 if !entry.is_ctr {
-                    todo!()
+                    // TODO: Not sure if i should just throw an error?
+                    // We are not requiring that the thing is specifically a constructor
+                    panic!("Incomplete Design: Oh no!")
                 }
 
                 let (hidden, _erased) = entry.arguments.count_implicits();
@@ -228,10 +263,7 @@ impl<'a> DesugarState<'a> {
                     let mut count = 0;
                     for i in 0..entry.arguments.len() {
                         if entry.arguments[i].hidden {
-                            new_spine.push(Box::new(desugared::Expr {
-                                data: desugared::ExprKind::Hole(self.gen_hole()),
-                                span: Span::Generated,
-                            }))
+                            new_spine.push(self.gen_hole_expr())
                         } else {
                             new_spine.push(self.desugar_pat(&spine[count]));
                             count += 1;
@@ -243,36 +275,20 @@ impl<'a> DesugarState<'a> {
                         entry.arguments.len(),
                         hidden,
                     ));
-
-                    return Box::new(desugared::Expr {
-                        data: desugared::ExprKind::Err,
-                        span: Span::Locatable(pat.range),
-                    });
+                    return desugared::Expr::err(pat.range);
                 } else {
                     for arg in spine {
                         new_spine.push(self.desugar_pat(arg));
                     }
                 }
-                Box::new(desugared::Expr {
-                    data: desugared::ExprKind::Ctr(head.clone(), new_spine),
-                    span: Span::Locatable(pat.range),
-                })
+                desugared::Expr::ctr(pat.range, head.clone(), new_spine)
             }
-            concrete::pat::PatKind::Var(ident) => Box::new(desugared::Expr {
-                data: desugared::ExprKind::Var(ident.0.clone()),
-                span: Span::Locatable(pat.range),
-            }),
-            concrete::pat::PatKind::Num(n) => Box::new(desugared::Expr {
-                data: desugared::ExprKind::Num(*n),
-                span: Span::Locatable(pat.range),
-            }),
-            concrete::pat::PatKind::Hole => Box::new(desugared::Expr {
-                data: desugared::ExprKind::Hole(self.gen_hole()),
-                span: Span::Locatable(pat.range),
-            }),
-            concrete::pat::PatKind::Pair(_, _) => todo!(),
-            concrete::pat::PatKind::List(_) => todo!(),
-            concrete::pat::PatKind::Str(_) => todo!(),
+            concrete::pat::PatKind::Var(ident) => desugared::Expr::var(ident.0.clone()),
+            concrete::pat::PatKind::Num(n) => desugared::Expr::num(pat.range, *n),
+            concrete::pat::PatKind::Hole => desugared::Expr::hole(pat.range, self.gen_hole()),
+            concrete::pat::PatKind::Pair(fst, snd) => self.desugar_pair_pat(pat.range, fst, snd),
+            concrete::pat::PatKind::List(ls) => self.desugar_list_pat(pat.range, ls),
+            concrete::pat::PatKind::Str(string) => desugared::Expr::str(pat.range, string.to_owned()),
         }
     }
 
@@ -353,7 +369,9 @@ impl<'a> DesugarState<'a> {
         let diff = rule_numbers.iter().filter(|x| rule_numbers[0].1 != x.1);
 
         if rule_numbers.len() > 0 && diff.clone().count() >= 1 {
-            self.send_err(PassError::RulesWithInconsistentArity(diff.cloned().collect()));
+            self.send_err(PassError::RulesWithInconsistentArity(
+                diff.cloned().collect(),
+            ));
         }
 
         self.new_glossary.names.push(res_entry.name.clone());

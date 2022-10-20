@@ -1,12 +1,18 @@
+//! Collects all the unbound variables and
+//! check if patterns are linear.
+//! 
+//! It also gets all of the identifiers used
+//! by sugars because it's useful to name resolution
+//! phase.
+
 use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
-use kind_tree::concrete::visitor::walk_expr;
-use kind_tree::concrete::{Glossary, TopLevel};
-use kind_tree::symbol::Ident;
+use kind_tree::concrete::{Glossary, TopLevel, Book};
+use kind_tree::symbol::{Ident};
 
 use kind_tree::concrete::{
     expr::{Expr, ExprKind, SttmKind},
@@ -34,11 +40,23 @@ impl UnboundCollector {
     }
 }
 
+pub fn get_glossary_unbound(diagnostic_sender: Sender<DiagnosticFrame>, glossary: &mut Glossary) -> HashMap<String, Vec<Ident>> {
+    let mut state = UnboundCollector::new(diagnostic_sender);
+    state.visit_glossary(glossary);
+    state.unbound
+}
+
+pub fn get_book_unbound(diagnostic_sender: Sender<DiagnosticFrame>, glossary: &mut Book) -> HashMap<String, Vec<Ident>> {
+    let mut state = UnboundCollector::new(diagnostic_sender);
+    state.visit_book(glossary);
+    state.unbound
+}
+
 impl Visitor for UnboundCollector {
     fn visit_attr(&mut self, _: &mut kind_tree::concrete::Attribute) {}
 
     fn visit_ident(&mut self, ident: &mut Ident) {
-        if !self.context_vars.iter().any(|x| x.data == ident.data) {
+        if self.context_vars.iter().all(|x| x.data != ident.data) && !ident.used_by_sugar {
             let entry = self.unbound.entry(ident.data.0.clone()).or_default();
             entry.push(ident.clone());
         }
@@ -151,6 +169,7 @@ impl Visitor for UnboundCollector {
     fn visit_destruct(&mut self, destruct: &mut Destruct) {
         match destruct {
             Destruct::Destruct(range, ty, bindings, _) => {
+                self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.open", ty.to_string()), range.clone()));
                 self.visit_range(range);
                 self.visit_ident(ty);
                 for bind in bindings {
@@ -262,13 +281,11 @@ impl Visitor for UnboundCollector {
                     entry.push(ident.clone());
                 }
             }
-            ExprKind::All(Some(ident), typ, body) => {
+            ExprKind::All(None, typ, body) => {
                 self.visit_expr(typ);
-                self.context_vars.push(ident.clone());
                 self.visit_expr(body);
-                self.context_vars.pop();
             }
-            ExprKind::Sigma(Some(ident), typ, body) => {
+            ExprKind::All(Some(ident), typ, body) => {
                 self.visit_expr(typ);
                 self.context_vars.push(ident.clone());
                 self.visit_expr(body);
@@ -283,6 +300,19 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(body);
                 self.context_vars.pop();
             }
+            ExprKind::App(head, spine) => {
+                self.visit_expr(head);
+                visit_vec!(spine.iter_mut(), arg => self.visit_binding(arg));
+            },
+            ExprKind::Ann(val, ty) => {
+                self.visit_expr(val);
+                self.visit_expr(ty);
+            }
+            ExprKind::Lit(lit) => self.visit_literal(lit),
+            ExprKind::Binary(_, l, r) => {
+                self.visit_expr(l);
+                self.visit_expr(r);
+            },
             ExprKind::Let(ident, val, body) => {
                 self.visit_expr(val);
                 let vars = self.context_vars.clone();
@@ -290,9 +320,49 @@ impl Visitor for UnboundCollector {
                 self.visit_expr(body);
                 self.context_vars = vars;
             }
-            ExprKind::Match(matcher) => self.visit_match(matcher),
-            ExprKind::Subst(_subst) => todo!(),
-            _ => walk_expr(self, expr),
+            ExprKind::Sigma(None, typ, body) => {
+                self.visit_ident(&mut Ident::new_by_sugar("Sigma", expr.range));
+                self.visit_expr(typ);
+                self.visit_expr(body);
+            }
+            ExprKind::Sigma(Some(ident), typ, body) => {
+                self.visit_ident(&mut Ident::new_by_sugar("Sigma", expr.range));
+                self.visit_expr(typ);
+                self.context_vars.push(ident.clone());
+                self.visit_expr(body);
+                self.context_vars.pop();
+            }
+            ExprKind::Match(matcher) => {
+                self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.match", matcher.tipo.to_string()), expr.range));
+                self.visit_match(matcher)
+            },
+            ExprKind::Subst(_subst) => {
+                // TODO: Not sure
+                self.visit_ident(&mut _subst.name);
+                self.visit_expr(&mut _subst.expr)
+            },
+            ExprKind::Hole => {},
+            ExprKind::Do(typ, sttm) => {
+                self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.pure", typ), expr.range));
+                self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.bind", typ), expr.range));
+                self.visit_sttm(sttm)
+            },
+            ExprKind::If(cond, if_, else_) => {
+                self.visit_ident(&mut Ident::new_by_sugar("Bool.if", expr.range));
+                self.visit_expr(cond);
+                self.visit_expr(if_);
+                self.visit_expr(else_);
+            },
+            ExprKind::Pair(l, r) => {
+                self.visit_ident(&mut Ident::new_by_sugar("Pair.new", expr.range));
+                self.visit_expr(l);
+                self.visit_expr(r);
+            },
+            ExprKind::List(spine) => {
+                self.visit_ident(&mut Ident::new_by_sugar("List.nil", expr.range));
+                self.visit_ident(&mut Ident::new_by_sugar("List.cons", expr.range));
+                visit_vec!(spine.iter_mut(), arg => self.visit_expr(arg));
+            },
         }
     }
 }
