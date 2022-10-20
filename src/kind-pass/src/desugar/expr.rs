@@ -60,7 +60,7 @@ impl<'a> DesugarState<'a> {
                 let res_sttm = self.desugar_sttm(bind_ident, pure_ident, next);
                 bind(
                     self,
-                    sttm.range.clone(),
+                    sttm.range,
                     Ident::generate("_"),
                     res_expr,
                     res_sttm,
@@ -77,7 +77,7 @@ impl<'a> DesugarState<'a> {
 
                 bind(
                     self,
-                    sttm.range.clone(),
+                    sttm.range,
                     Ident::generate("$"),
                     res_val,
                     res_destruct,
@@ -88,7 +88,7 @@ impl<'a> DesugarState<'a> {
                 let res_sttm = self.desugar_sttm(bind_ident, pure_ident, next);
                 bind(
                     self,
-                    sttm.range.clone(),
+                    sttm.range,
                     name.clone(),
                     res_expr,
                     res_sttm,
@@ -151,7 +151,7 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         let sigma = Ident::new(
             Symbol("Sigma".to_string()),
-            range.clone(),
+            range,
         );
 
         let entry = self.old_glossary.entries.get(sigma.to_string());
@@ -176,13 +176,13 @@ impl<'a> DesugarState<'a> {
     pub fn desugar_list(&mut self, range: Range, expr: &[expr::Expr]) -> Box<desugared::Expr> {
         let cons_ident = Ident::new(
             Symbol("List.cons".to_string()),
-            range.clone(),
+            range,
         );
         let nil_ident = Ident::new(
             Symbol("List.nil".to_string()),
-            range.clone(),
+            range,
         );
-        let list_ident = Ident::new(Symbol("List".to_string()), range.clone());
+        let list_ident = Ident::new(Symbol("List".to_string()), range);
 
         let list = self.old_glossary.entries.get(list_ident.to_string());
         let nil = self.old_glossary.entries.get(cons_ident.to_string());
@@ -215,7 +215,7 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         let bool_ident = Ident::new(
             Symbol("Bool.if".to_string()),
-            range.clone(),
+            range,
         );
 
         let bool_if = self.old_glossary.entries.get(bool_ident.to_string());
@@ -241,7 +241,7 @@ impl<'a> DesugarState<'a> {
     pub fn desugar_pair(&mut self, range: Range, fst: &expr::Expr, snd: &expr::Expr) -> Box<desugared::Expr> {
         let sigma_new = Ident::new(
             Symbol("Sigma.new".to_string()),
-            range.clone(),
+            range,
         );
 
         let entry = self.old_glossary.entries.get(sigma_new.to_string());

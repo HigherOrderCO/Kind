@@ -47,7 +47,7 @@ impl<'a> DesugarState<'a> {
         head: Ident,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Box<desugared::Expr> {
-        match self.mk_desugared_spine(range.clone(), head.clone(), spine) {
+        match self.mk_desugared_spine(range, head.clone(), spine) {
             Some(spine) => desugared::Expr::ctr(range, head, spine),
             None => desugared::Expr::err(range),
         }
@@ -59,7 +59,7 @@ impl<'a> DesugarState<'a> {
         head: Ident,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Box<desugared::Expr> {
-        match self.mk_desugared_spine(range.clone(), head.clone(), spine) {
+        match self.mk_desugared_spine(range, head.clone(), spine) {
             Some(spine) => desugared::Expr::fun(range, head, spine),
             None => desugared::Expr::err(range),
         }

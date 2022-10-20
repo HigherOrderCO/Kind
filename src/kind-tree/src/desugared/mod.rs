@@ -66,7 +66,7 @@ impl Expr {
 
     pub fn var(ident: Ident) -> Box<Expr> {
         Box::new(Expr {
-            span: Span::Locatable(ident.range.clone()),
+            span: Span::Locatable(ident.range),
             data: ExprKind::Var(ident),
         })
     }

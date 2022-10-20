@@ -169,7 +169,7 @@ impl Visitor for UnboundCollector {
     fn visit_destruct(&mut self, destruct: &mut Destruct) {
         match destruct {
             Destruct::Destruct(range, ty, bindings, _) => {
-                self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.open", ty.to_string()), range.clone()));
+                self.visit_ident(&mut Ident::new_by_sugar(&format!("{}.open", ty), *range));
                 self.visit_range(range);
                 self.visit_ident(ty);
                 for bind in bindings {

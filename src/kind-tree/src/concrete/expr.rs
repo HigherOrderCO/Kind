@@ -220,7 +220,7 @@ impl Locatable for CaseBinding {
 impl Locatable for Destruct {
     fn locate(&self) -> Range {
         match self {
-            Destruct::Destruct(range, _, _, _) => range.clone(),
+            Destruct::Destruct(range, _, _, _) => *range,
             Destruct::Ident(i) => i.locate(),
         }
     }

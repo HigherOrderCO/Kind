@@ -54,7 +54,7 @@ impl<'a> DesugarState<'a> {
 
         let type_constructor = desugared::Entry {
             name: sum_type.name.clone(),
-            args: desugared_params.extend(&desugared_indices).0.clone(),
+            args: desugared_params.extend(&desugared_indices).0,
             tipo: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(sum_type.name.range),
@@ -91,7 +91,7 @@ impl<'a> DesugarState<'a> {
                         .collect::<Vec<Box<desugared::Expr>>>();
 
                     desugared::Expr::app(
-                        sum_type.name.range.clone(),
+                        sum_type.name.range,
                         desugared::Expr::var(sum_type.name.clone()),
                         args,
                     )
@@ -189,7 +189,7 @@ impl<'a> DesugarState<'a> {
 
         self.new_glossary
             .entrs
-            .insert(cons_ident.data.0.clone(), Box::new(data_constructor));
+            .insert(cons_ident.data.0, Box::new(data_constructor));
     }
 
     pub fn desugar_pair_pat(
@@ -198,7 +198,7 @@ impl<'a> DesugarState<'a> {
         fst: &Box<concrete::pat::Pat>,
         snd: &Box<concrete::pat::Pat>,
     ) -> Box<desugared::Expr> {
-        let sigma_new = Ident::new(Symbol("Sigma.new".to_string()), range.clone());
+        let sigma_new = Ident::new(Symbol("Sigma.new".to_string()), range);
 
         let entry = self.old_glossary.entries.get(sigma_new.to_string());
         if entry.is_none() {
@@ -216,9 +216,9 @@ impl<'a> DesugarState<'a> {
         range: Range,
         expr: &[concrete::pat::Pat],
     ) -> Box<desugared::Expr> {
-        let cons_ident = Ident::new(Symbol("List.cons".to_string()), range.clone());
-        let nil_ident = Ident::new(Symbol("List.nil".to_string()), range.clone());
-        let list_ident = Ident::new(Symbol("List".to_string()), range.clone());
+        let cons_ident = Ident::new(Symbol("List.cons".to_string()), range);
+        let nil_ident = Ident::new(Symbol("List.nil".to_string()), range);
+        let list_ident = Ident::new(Symbol("List".to_string()), range);
 
         let list = self.old_glossary.entries.get(list_ident.to_string());
         let nil = self.old_glossary.entries.get(cons_ident.to_string());
@@ -368,7 +368,7 @@ impl<'a> DesugarState<'a> {
 
         let diff = rule_numbers.iter().filter(|x| rule_numbers[0].1 != x.1);
 
-        if rule_numbers.len() > 0 && diff.clone().count() >= 1 {
+        if !rule_numbers.is_empty() && diff.clone().count() >= 1 {
             self.send_err(PassError::RulesWithInconsistentArity(
                 diff.cloned().collect(),
             ));

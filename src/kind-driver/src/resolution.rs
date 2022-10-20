@@ -216,7 +216,7 @@ pub fn parse_and_store_glossary(
     ident: &str,
     path: &PathBuf,
     dont_search_main: bool,
-) -> () {
+) {
     let mut glossary = Glossary::default();
 
     let _ = parse_and_store_book_by_path(
@@ -238,11 +238,11 @@ pub fn parse_and_store_glossary(
         }
     }
 
-    if unbounds.len() > 0 {
-        return ();
+    if !unbounds.is_empty() {
+        return ;
     }
 
     let _glossary = desugar(session.diagnostic_sender.clone(), &glossary);
 
-    ()
+    
 }

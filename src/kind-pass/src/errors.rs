@@ -52,7 +52,7 @@ impl From<PassError> for DiagnosticFrame {
                 hints: vec![],
                 positions: arities.iter().map(|(range, size)| {
                     Marking {
-                        position: range.clone(),
+                        position: *range,
                         color: Color::Fst,
                         text: format!("This rule contains {} patterns", size),
                         no_code: false,
@@ -66,7 +66,7 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![
                     if expected == 0 {
-                        format!("This rule expects no arguments")
+                        "This rule expects no arguments".to_string()
                     } else if hidden == 0 {
                         format!("This rule expects {} arguments", expected)
                     } else {
@@ -170,7 +170,7 @@ impl From<PassError> for DiagnosticFrame {
                 subtitles: vec![],
                 hints: vec![
                     if expected == 0 {
-                        format!("This function expects no arguments")
+                        "This function expects no arguments".to_string()
                     } else if hidden == 0 {
                         format!("This function expects {} arguments", expected)
                     } else {
@@ -197,7 +197,7 @@ impl From<PassError> for DiagnosticFrame {
                     color: Color::Fst,
                     text: 
                         if expected == 0 {
-                            format!("This rule expects no arguments")
+                            "This rule expects no arguments".to_string()
                         } else {
                             format!("This rule expects {} explicit arguments", expected)
                         }

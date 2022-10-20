@@ -41,7 +41,7 @@ impl<'a> DesugarState<'a> {
             } else {
                 self.send_err(PassError::CannotFindField(
                     name.range,
-                    type_info.0.clone(),
+                    *type_info.0,
                     type_info.1.data.0.clone(),
                 ))
             }
@@ -53,7 +53,7 @@ impl<'a> DesugarState<'a> {
             .map(|(name, _)| name.clone())
             .collect();
 
-        if !jump_rest && names.len() != 0 {
+        if !jump_rest && !names.is_empty() {
             self.send_err(PassError::NoCoverage(type_info.1.locate(), names))
         }
 
@@ -74,7 +74,7 @@ impl<'a> DesugarState<'a> {
                 let record = if let TopLevel::RecordType(record) = entry {
                     record
                 } else {
-                    self.send_err(PassError::LetDestructOnlyForRecord(tipo.range).into());
+                    self.send_err(PassError::LetDestructOnlyForRecord(tipo.range));
                     return desugared::Expr::err(tipo.range);
                 };
 
@@ -100,15 +100,17 @@ impl<'a> DesugarState<'a> {
                     }
                 }
 
-                let match_id = tipo.add_segment("$open");
+                let open_id = tipo.add_segment("$open");
 
-                desugared::Expr::app(
-                    destruct_range.clone(),
-                    desugared::Expr::var(match_id),
-                    vec![
-                        val,
-                        desugared::Expr::unfold_lambda(destruct_range.clone(), &arguments, next(self)),
-                    ],
+                let spine = vec![
+                    val,
+                    desugared::Expr::unfold_lambda(*destruct_range, &arguments, next(self)),
+                ];
+
+                self.mk_desugared_fun(
+                    *destruct_range,
+                    open_id,
+                    spine
                 )
             }
             Destruct::Ident(name) => on_ident(self, name),
@@ -146,7 +148,7 @@ impl<'a> DesugarState<'a> {
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
         } else {
-            self.send_err(PassError::LetDestructOnlyForSum(match_.tipo.range).into());
+            self.send_err(PassError::LetDestructOnlyForSum(match_.tipo.range));
             return desugared::Expr::err(match_.tipo.range);
         };
 
@@ -164,7 +166,7 @@ impl<'a> DesugarState<'a> {
                 None => {
                     self.send_err(PassError::CannotFindConstructor(
                         case.constructor.range,
-                        match_.tipo.range.clone(),
+                        match_.tipo.range,
                         match_.tipo.to_string().clone(),
                     ));
                     continue;
@@ -218,9 +220,9 @@ impl<'a> DesugarState<'a> {
                         .collect::<Vec<&String>>()
                 );
                 lambdas.push(desugared::Expr::unfold_lambda(
-                    range.clone(),
+                    *range,
                     arguments,
-                    self.desugar_expr(&val),
+                    self.desugar_expr(val),
                 ))
             } else {
                 unbound.push(case.name.to_string().clone())
@@ -233,18 +235,24 @@ impl<'a> DesugarState<'a> {
 
         let match_id = match_.tipo.add_segment("$match");
 
-        desugared::Expr::app(
-            match_.tipo.range.clone(),
-            desugared::Expr::var(match_id),
+        let spine = [
             [
-                [
-                    self.desugar_expr(&match_.scrutinizer),
-                    desugared::Expr::identity_lambda(Ident::generate("p")),
-                ]
-                .as_slice(),
-                lambdas.as_slice(),
+                self.desugar_expr(&match_.scrutinizer),
+                // TODO: Add motive
+                if let Some(res) = &match_.motive {
+                    self.desugar_expr(res)
+                } else {
+                    desugared::Expr::identity_lambda(Ident::generate("p"))
+                },
             ]
-            .concat(),
+            .as_slice(),
+            lambdas.as_slice(),
+        ].concat();
+
+        self.mk_desugared_fun(
+            match_.tipo.range,
+            match_id,
+            spine,
         )
     }
 }

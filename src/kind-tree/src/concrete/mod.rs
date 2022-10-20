@@ -170,11 +170,11 @@ pub struct Glossary {
 impl Glossary {
     pub fn get_count_garanteed(&self, name: &String) -> &GlossaryEntry {
         println!("{:?}", self.count.keys());
-        self.count.get(name).expect(&format!("Internal Error: Garanteed count {:?} failed", name))
+        self.count.get(name).unwrap_or_else(|| panic!("Internal Error: Garanteed count {:?} failed", name))
     }
 
     pub fn get_entry_garanteed(&self, name: &String) -> &TopLevel {
-        self.entries.get(name).expect(&format!("Internal Error: Garanteed entry {:?} failed", name))
+        self.entries.get(name).unwrap_or_else(|| panic!("Internal Error: Garanteed entry {:?} failed", name))
     }
 }
 
