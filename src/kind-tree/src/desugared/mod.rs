@@ -31,7 +31,7 @@ pub enum ExprKind {
     /// Type ascription (x : y)
     Ann(Box<Expr>, Box<Expr>),
     /// Substitution
-    Sub(Ident, u64, u64, Box<Expr>),
+    Sub(Ident, usize, usize, Box<Expr>),
     /// Type Literal
     Typ,
     ///  U60 Type
@@ -78,7 +78,7 @@ impl Expr {
         })
     }
 
-    pub fn sub(range: Range, ident: Ident, idx: u64, rdx: u64, body: Box<Expr>) -> Box<Expr> {
+    pub fn sub(range: Range, ident: Ident, idx: usize, rdx: usize, body: Box<Expr>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::Sub(ident, idx, rdx, body),

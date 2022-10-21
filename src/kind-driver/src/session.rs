@@ -1,14 +1,17 @@
+//! Describes a compilation session. It's not the finished
+//! model because I want to change it to a query based compiler
+//! later.
+
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
 
 use kind_report::data::DiagnosticFrame;
-use kind_report::RenderConfig;
 use kind_tree::concrete::Book;
 
 #[derive(Debug, Clone)]
-pub struct Session<'a> {
+pub struct Session {
     pub loaded_idents: HashMap<String, usize>,
     pub loaded_paths: Vec<Rc<PathBuf>>,
     pub loaded_sources: Vec<Rc<String>>,
@@ -17,17 +20,15 @@ pub struct Session<'a> {
 
     pub diagnostic_sender: Sender<DiagnosticFrame>,
     pub root: PathBuf,
-    pub render_config: &'a RenderConfig<'a>,
 
     pub book_counter: usize,
 }
 
-impl<'a> Session<'a> {
+impl Session {
     pub fn new(
         root: PathBuf,
-        render_config: &'a RenderConfig<'a>,
         sender: Sender<DiagnosticFrame>,
-    ) -> Session<'a> {
+    ) -> Session {
         Session {
             loaded_idents: HashMap::new(),
             loaded_paths: Vec::new(),
@@ -35,7 +36,6 @@ impl<'a> Session<'a> {
             parsed_books: Vec::new(),
             public_names: HashMap::new(),
             root,
-            render_config,
             book_counter: 0,
             diagnostic_sender: sender,
         }

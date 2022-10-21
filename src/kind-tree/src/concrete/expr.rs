@@ -46,8 +46,8 @@ pub struct Match {
 #[derive(Clone, Debug)]
 pub struct Substitution {
     pub name: Ident,
-    pub redx: u64,
-    pub indx: u64,
+    pub redx: usize,
+    pub indx: usize,
     pub expr: Box<Expr>,
 }
 

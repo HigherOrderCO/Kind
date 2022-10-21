@@ -109,7 +109,7 @@ impl<'a> Parser<'a> {
         Ok(Box::new(Expr {
             data: ExprKind::Subst(Substitution {
                 name,
-                redx,
+                redx: redx as usize,
                 indx: 0,
                 expr,
             }),

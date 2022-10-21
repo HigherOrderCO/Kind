@@ -275,10 +275,10 @@ pub fn write_code_block<'a, T: Write + Sized>(
             if marker.0.line == *line {
                 writeln!(
                     fmt,
-                    "{:>5} {} {}",
+                    "{:>5} {}  {} ",
                     "",
                     paint_line(config.chars.vbar),
-                    format!(" {} ", get_colorizer(&marker.2.color)(config.chars.brline))
+                    get_colorizer(&marker.2.color)(config.chars.brline)
                 )?;
             }
             if *line >= marker.0.line && *line <= marker.1.line {

@@ -3,22 +3,17 @@ pub mod resolution;
 pub mod session;
 
 use core::fmt;
-use std::collections::HashMap;
 use std::io;
 use std::path::PathBuf;
 use std::rc::Rc;
 
+use kind_report::RenderConfig;
 use kind_report::data::{Diagnostic, DiagnosticFrame};
 use kind_report::render::FileCache;
 use kind_span::SyntaxCtxIndex;
 use session::Session;
 
-pub struct SessionCache<'a> {
-    pub loaded_paths: &'a HashMap<PathBuf, usize>,
-    pub loaded_files: &'a Vec<(PathBuf, String)>,
-}
-
-impl<'a> FileCache for Session<'a> {
+impl FileCache for Session {
     fn fetch(&self, ctx: SyntaxCtxIndex) -> Option<(Rc<PathBuf>, Rc<String>)> {
         Some((
             self.loaded_paths[ctx.0].clone(),
@@ -28,7 +23,7 @@ impl<'a> FileCache for Session<'a> {
 }
 
 /// Helper structure to use stderr as fmt::Write
-pub struct ToWriteFmt<T>(pub T);
+struct ToWriteFmt<T>(pub T);
 
 impl<T> fmt::Write for ToWriteFmt<T>
 where
@@ -39,11 +34,11 @@ where
     }
 }
 
-pub fn render_error_to_stderr(session: &Session, err: &DiagnosticFrame) {
+pub fn render_error_to_stderr(session: &Session, render_config: &RenderConfig, err: &DiagnosticFrame) {
     Diagnostic::render(
         &Diagnostic { frame: err },
         session,
-        session.render_config,
+        render_config,
         &mut ToWriteFmt(std::io::stderr()),
     )
     .unwrap();

@@ -42,8 +42,31 @@ impl Ident {
         }
     }
 
-    pub fn to_string(&self) -> &String {
+    pub fn to_str(&self) -> &String {
         &self.data.0
+    }
+
+    pub fn encode(&self) -> u64 {
+        fn char_to_u64(chr: char) -> u64 {
+            match chr {
+                '.' => 0,
+                '0'..='9' => 1 + chr as u64 - '0' as u64,
+                'A'..='Z' => 11 + chr as u64 - 'A' as u64,
+                'a'..='z' => 37 + chr as u64 - 'a' as u64,
+                '_' => 63,
+                _ => panic!("Invalid name character."),
+            }
+        }
+
+        let mut num: u64 = 0;
+
+        for (i, chr) in self.to_str().chars().enumerate() {
+            if i < 10 {
+                num = (num << 6) + char_to_u64(chr);
+            }
+        }
+
+        num
     }
 
     /// Changes the syntax context of the range and of the ident

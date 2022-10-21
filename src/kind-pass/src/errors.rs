@@ -1,3 +1,4 @@
+
 use kind_report::data::{Color, DiagnosticFrame, Marking, Severity};
 use kind_span::Range;
 
@@ -32,7 +33,7 @@ impl From<PassError> for DiagnosticFrame {
     fn from(err: PassError) -> Self {
         match err {
             PassError::LetDestructOnlyForRecord(place) => DiagnosticFrame {
-                code: 0,
+                code: 200,
                 severity: Severity::Error,
                 title: "Can only destruct record types.".to_string(),
                 subtitles: vec![],
@@ -45,7 +46,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::RulesWithInconsistentArity(arities) => DiagnosticFrame {
-                code: 0,
+                code: 201,
                 severity: Severity::Error,
                 title: "All of the rules of a entry should have the same number of patterns.".to_string(),
                 subtitles: vec![],
@@ -60,7 +61,7 @@ impl From<PassError> for DiagnosticFrame {
                 }).collect(),
             },
             PassError::RuleWithIncorrectArity(place, _got, expected, hidden) => DiagnosticFrame {
-                code: 0,
+                code: 203,
                 severity: Severity::Error,
                 title: "This rule is with the incorrect arity.".to_string(),
                 subtitles: vec![],
@@ -81,7 +82,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::NeedToImplementMethods(expr_place, sugar) => DiagnosticFrame {
-                code: 0,
+                code: 204,
                 severity: Severity::Error,
                 title: "Required functions are not implemented for this type.".to_string(),
                 subtitles: vec![],
@@ -102,7 +103,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::LetDestructOnlyForSum(place) => DiagnosticFrame {
-                code: 0,
+                code: 206,
                 severity: Severity::Error,
                 title: "Can only use match on sum types.".to_string(),
                 subtitles: vec![],
@@ -115,7 +116,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::CannotFindField(place, def_name, ty) => DiagnosticFrame {
-                code: 0,
+                code: 207,
                 severity: Severity::Error,
                 title: format!("Cannot find this field in the definition '{}'.", ty),
                 subtitles: vec![],
@@ -133,7 +134,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::CannotFindConstructor(place, def_name, ty) => DiagnosticFrame {
-                code: 0,
+                code: 208,
                 severity: Severity::Error,
                 title: format!("Cannot find this constructor in the type definition '{}'.", ty),
                 subtitles: vec![],
@@ -151,7 +152,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::NoCoverage(place, other) => DiagnosticFrame {
-                code: 0,
+                code: 209,
                 severity: Severity::Error,
                 title: "The match is not covering all of the possibilities!".to_string(),
                 subtitles: vec![],
@@ -164,7 +165,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::IncorrectArity(head_range, expected, hidden) => DiagnosticFrame {
-                code: 0,
+                code: 210,
                 severity: Severity::Error,
                 title: "Incorrect arity".to_string(),
                 subtitles: vec![],
@@ -185,7 +186,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::SugarIsBadlyImplemented(head_range, place_range, expected) => DiagnosticFrame {
-                code: 0,
+                code: 211,
                 severity: Severity::Error,
                 title: "Incorrect arity in the sugar definition".to_string(),
                 subtitles: vec![],
@@ -211,7 +212,7 @@ impl From<PassError> for DiagnosticFrame {
                 }],
             },
             PassError::DuplicatedNamed(first_decl, last_decl) => DiagnosticFrame {
-                code: 0,
+                code: 212,
                 severity: Severity::Error,
                 title: "Repeated named variable".to_string(),
                 subtitles: vec![],
@@ -232,7 +233,7 @@ impl From<PassError> for DiagnosticFrame {
                 ],
             },
             PassError::CannotUseNamed(fun_range, binding_range) => DiagnosticFrame {
-                code: 0,
+                code: 213,
                 severity: Severity::Error,
                 title: "Cannot use named parameters in this type of function application"
                     .to_string(),
@@ -254,7 +255,7 @@ impl From<PassError> for DiagnosticFrame {
                 ],
             },
             PassError::RepeatedVariable(first_decl, last_decl) => DiagnosticFrame {
-                code: 0,
+                code: 214,
                 severity: Severity::Error,
                 title: "Repeated variable".to_string(),
                 subtitles: vec![],

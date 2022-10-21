@@ -1,3 +1,6 @@
+//! All of the sintatic erros both from the
+//! lexer and the parser.
+
 use kind_report::data::{Color, DiagnosticFrame, Marking, Severity};
 use kind_span::Range;
 
@@ -40,7 +43,7 @@ impl From<SyntaxError> for DiagnosticFrame {
     fn from(err: SyntaxError) -> Self {
         match err {
             SyntaxError::UnfinishedString(range) => DiagnosticFrame {
-                code: 0,
+                code: 1,
                 severity: Severity::Error,
                 title: "Unfinished String".to_string(),
                 subtitles: vec![],
@@ -53,7 +56,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::IgnoreRestShouldBeOnTheEnd(range) => DiagnosticFrame {
-                code: 0,
+                code: 2,
                 severity: Severity::Error,
                 title: "Invalid position of the '..' operator".to_string(),
                 subtitles: vec![],
@@ -66,7 +69,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::UnusedDocString(range) => DiagnosticFrame {
-                code: 0,
+                code: 3,
                 severity: Severity::Warning,
                 title: "This entire documentation comment is in a invalid position".to_string(),
                 subtitles: vec![],
@@ -79,7 +82,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::UnfinishedChar(range) => DiagnosticFrame {
-                code: 0,
+                code: 4,
                 severity: Severity::Error,
                 title: "Unfinished Char".to_string(),
                 subtitles: vec![],
@@ -92,7 +95,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::LowerCasedDefinition(name, range) => DiagnosticFrame {
-                code: 1,
+                code: 5,
                 severity: Severity::Error,
                 title: "The definition name must be capitalized.".to_string(),
                 subtitles: vec![],
@@ -109,7 +112,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::NotAClauseOfDef(fst, snd) => DiagnosticFrame {
-                code: 2,
+                code: 6,
                 severity: Severity::Error,
                 title: "Unexpected capitalized name that does not refer to the definition".to_string(),
                 subtitles: vec![],
@@ -130,7 +133,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 ],
             },
             SyntaxError::UnfinishedComment(range) => DiagnosticFrame {
-                code: 0,
+                code: 7,
                 severity: Severity::Error,
                 title: "Unfinished Comment".to_string(),
                 subtitles: vec![],
@@ -143,7 +146,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::InvalidEscapeSequence(kind, range) => DiagnosticFrame {
-                code: 0,
+                code: 8,
                 severity: Severity::Error,
                 title: format!("The {} character sequence is invalid!", encode_name(kind)),
                 subtitles: vec![],
@@ -156,7 +159,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::InvalidNumberRepresentation(repr, range) => DiagnosticFrame {
-                code: 0,
+                code: 9,
                 severity: Severity::Error,
                 title: format!("The {} number sequence is invalid!", encode_name(repr)),
                 subtitles: vec![],
@@ -169,7 +172,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::UnexpectedChar(chr, range) => DiagnosticFrame {
-                code: 0,
+                code: 10,
                 severity: Severity::Error,
                 title: format!("The char '{}' is invalid", chr),
                 subtitles: vec![],
@@ -182,7 +185,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::UnexpectedToken(Token::Eof, range, _expect) => DiagnosticFrame {
-                code: 0,
+                code: 11,
                 severity: Severity::Error,
                 title: "Unexpected end of file.".to_string(),
                 subtitles: vec![],
@@ -195,7 +198,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::UnexpectedToken(Token::Comment(_, _), range, _expect) => DiagnosticFrame {
-                code: 0,
+                code: 12,
                 severity: Severity::Error,
                 title: "Unexpected documentation comment.".to_string(),
                 subtitles: vec![],
@@ -208,7 +211,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::UnexpectedToken(_token, range, _expect) => DiagnosticFrame {
-                code: 0,
+                code: 13,
                 severity: Severity::Error,
                 title: "Unexpected token.".to_string(),
                 subtitles: vec![],
@@ -221,7 +224,7 @@ impl From<SyntaxError> for DiagnosticFrame {
                 }],
             },
             SyntaxError::Unclosed(range) => DiagnosticFrame {
-                code: 0,
+                code: 14,
                 severity: Severity::Error,
                 title: "Unclosed parenthesis.".to_string(),
                 subtitles: vec![],

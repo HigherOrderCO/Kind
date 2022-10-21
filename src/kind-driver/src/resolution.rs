@@ -1,11 +1,14 @@
 //! Transforms a single book into a glossary by
-//! reading it and it's dependencies.
+//! reading it and it's dependencies. In the end
+//! it returns a desugared glossary of all of the
+//! depedencies.
 
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
+use kind_pass::desugar;
 use kind_pass::unbound::{self};
 use kind_report::data::DiagnosticFrame;
 use kind_span::Range;
@@ -16,14 +19,14 @@ use strsim::jaro;
 
 use crate::{errors::DriverError, session::Session};
 
+use kind_checker::to_hvm as checker;
+
 const EXT: &str = "kind2";
 
-pub type CompResult<T = ()> = Result<T, CompileError>;
-
-#[derive(Debug)]
-pub struct CompileError;
-
-pub fn accumulate_neighbour_paths(raw_path: &Path, other: &mut Vec<PathBuf>) {
+/// Tries to accumulate on a buffer all of the
+/// paths that exists (so we can just throw an
+/// error about ambiguous resolution to the user)
+fn accumulate_neighbour_paths(raw_path: &Path, other: &mut Vec<PathBuf>) {
     let mut canon_path = raw_path.to_path_buf();
     canon_path.set_extension(EXT);
 
@@ -40,12 +43,16 @@ pub fn accumulate_neighbour_paths(raw_path: &Path, other: &mut Vec<PathBuf>) {
     }
 }
 
+/// Gets an identifier and tries to get all of the
+/// paths that it can refer into a single path. If
+/// multiple paths are found then we just throw an
+/// error abotu ambiguous paths.
 fn ident_to_path(
     root: &Path,
     ident: &Ident,
     search_on_parent: bool,
 ) -> Result<Option<PathBuf>, DiagnosticFrame> {
-    let segments = ident.data.0.split('.').collect::<Vec<&str>>();
+    let segments = ident.to_str().split('.').collect::<Vec<&str>>();
     let mut raw_path = root.to_path_buf();
     raw_path.push(PathBuf::from(segments.join("/")));
 
@@ -58,23 +65,23 @@ fn ident_to_path(
         accumulate_neighbour_paths(&raw_path, &mut paths);
     }
 
-    if paths.len() == 1 {
-        Ok(Some(paths[0].clone()))
-    } else if paths.is_empty() {
+    if paths.is_empty() {
         Ok(None)
+    } else if paths.len() == 1 {
+        Ok(Some(paths[0].clone()))
     } else {
         Err(DriverError::MultiplePaths(ident.clone(), paths).into())
     }
 }
 
 fn try_to_insert_new_name<'a>(session: &'a Session, ident: Ident, glossary: &'a mut Glossary) {
-    if let Some(first_occorence) = glossary.names.get(&ident.data.0) {
+    if let Some(first_occorence) = glossary.names.get(ident.to_str()) {
         session
             .diagnostic_sender
             .send(DriverError::DefinedMultipleTimes(first_occorence.clone(), ident).into())
             .unwrap();
     } else {
-        glossary.names.insert(ident.data.0.clone(), ident);
+        glossary.names.insert(ident.to_str().clone(), ident);
     }
 }
 
@@ -88,53 +95,53 @@ fn book_to_glossary<'a>(
     for entry in &book.entries {
         match &entry {
             TopLevel::SumType(sum) => {
-                public_names.insert(sum.name.data.0.clone());
+                public_names.insert(sum.name.to_str().clone());
                 try_to_insert_new_name(session, sum.name.clone(), glossary);
                 glossary
                     .count
-                    .insert(sum.name.data.0.clone(), sum.extract_glossary_info());
+                    .insert(sum.name.to_str().clone(), sum.extract_glossary_info());
 
                 glossary
                     .entries
-                    .insert(sum.name.data.0.clone(), entry.clone());
+                    .insert(sum.name.to_str().clone(), entry.clone());
 
                 for cons in &sum.constructors {
-                    let cons_ident = cons.name.add_base_ident(&sum.name.data.0);
-                    public_names.insert(cons_ident.data.0.clone());
+                    let cons_ident = cons.name.add_base_ident(sum.name.to_str());
+                    public_names.insert(cons_ident.to_str().clone());
                     glossary
                         .count
-                        .insert(cons_ident.data.0.clone(), cons.extract_glossary_info(sum));
+                        .insert(cons_ident.to_str().clone(), cons.extract_glossary_info(sum));
                     try_to_insert_new_name(session, cons_ident, glossary);
                 }
             }
             TopLevel::RecordType(rec) => {
-                public_names.insert(rec.name.data.0.clone());
+                public_names.insert(rec.name.to_str().clone());
                 glossary
                     .count
-                    .insert(rec.name.data.0.clone(), rec.extract_glossary_info());
+                    .insert(rec.name.to_str().clone(), rec.extract_glossary_info());
                 try_to_insert_new_name(session, rec.name.clone(), glossary);
 
                 glossary
                     .entries
-                    .insert(rec.name.data.0.clone(), entry.clone());
+                    .insert(rec.name.to_str().clone(), entry.clone());
 
-                let cons_ident = rec.constructor.add_base_ident(&rec.name.data.0);
-                public_names.insert(cons_ident.data.0.clone());
+                let cons_ident = rec.constructor.add_base_ident(rec.name.to_str());
+                public_names.insert(cons_ident.to_str().clone());
                 glossary.count.insert(
-                    cons_ident.data.0.clone(),
+                    cons_ident.to_str().clone(),
                     rec.extract_glossary_info_of_constructor(),
                 );
                 try_to_insert_new_name(session, cons_ident, glossary);
             }
             TopLevel::Entry(entr) => {
                 try_to_insert_new_name(session, entr.name.clone(), glossary);
-                public_names.insert(entr.name.data.0.clone());
+                public_names.insert(entr.name.to_str().clone());
                 glossary
                     .count
-                    .insert(entr.name.data.0.clone(), entr.extract_glossary_info());
+                    .insert(entr.name.to_str().clone(), entr.extract_glossary_info());
                 glossary
                     .entries
-                    .insert(entr.name.data.0.clone(), entry.clone());
+                    .insert(entr.name.to_str().clone(), entry.clone());
             }
         }
     }
@@ -147,7 +154,7 @@ fn parse_and_store_book_by_identifier<'a>(
     ident: &Ident,
     glossary: &'a mut Glossary,
 ) {
-    if session.loaded_idents.contains_key(&ident.data.0) {
+    if session.loaded_idents.contains_key(ident.to_str()) {
         return;
     }
 
@@ -171,7 +178,7 @@ fn parse_and_store_book_by_path<'a>(
     let rc = Rc::new(book.clone());
 
     session.add_book(
-        ident.to_string().clone(),
+        ident.to_str().clone(),
         Rc::new(path.to_path_buf()),
         Rc::new(input),
         rc.clone(),
@@ -198,30 +205,27 @@ pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathB
 
     let unbounds = unbound::get_glossary_unbound(session.diagnostic_sender.clone(), &mut glossary);
 
-    for (_, idents) in &unbounds {
-        for ident in idents {
-            session
-                .diagnostic_sender
-                .send(
-                    DriverError::UnboundVariable(
-                        ident.clone(),
-                        glossary
-                            .names
-                            .keys()
-                            .filter(|x| jaro(x, &ident.data.0).abs() > 0.5)
-                            .cloned()
-                            .collect(),
-                    )
-                    .into(),
-                )
-                .unwrap();
-        }
+    for idents in unbounds.values() {
+        // Collects all of the similar names using jaro distance.
+        let similar_names = glossary
+            .names
+            .keys()
+            .filter(|x| jaro(x, idents[0].to_str()).abs() > 0.8)
+            .cloned()
+            .collect();
+        session
+            .diagnostic_sender
+            .send(DriverError::UnboundVariable(idents.clone(), similar_names).into())
+            .unwrap();
     }
 
     if !unbounds.is_empty() {
         return;
     }
 
-    let _glossary =
-        kind_pass::desugar::desugar_glossary(session.diagnostic_sender.clone(), &glossary);
+    let glossary = desugar::desugar_glossary(session.diagnostic_sender.clone(), &glossary);
+    let file = checker::codegen_glossary(&glossary);
+
+    println!("{}", file);
+
 }

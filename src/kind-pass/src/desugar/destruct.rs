@@ -21,8 +21,8 @@ impl<'a> DesugarState<'a> {
         let mut ordered_fields = vec![None; fields.len()];
         let mut names = HashMap::new();
 
-        for i in 0..fields.len() {
-            names.insert(fields[i].clone().0, (i, fields[i].clone().1));
+        for (i, field) in fields.iter().enumerate() {
+            names.insert(fields[i].clone().0, (i, field.clone().1));
         }
 
         for arg in cases {
@@ -138,7 +138,7 @@ impl<'a> DesugarState<'a> {
     pub fn desugar_match(&mut self, range: Range, match_: &expr::Match) -> Box<desugared::Expr> {
         let entry = self
             .old_glossary
-            .get_entry_garanteed(match_.tipo.to_string());
+            .get_entry_garanteed(match_.tipo.to_str());
 
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
@@ -151,18 +151,18 @@ impl<'a> DesugarState<'a> {
         let mut positions = HashMap::new();
 
         for case in &sum.constructors {
-            positions.insert(case.name.to_string(), cases_args.len());
+            positions.insert(case.name.to_str(), cases_args.len());
             cases_args.push(None)
         }
 
         for case in &match_.cases {
-            let index = match positions.get(case.constructor.to_string()) {
+            let index = match positions.get(case.constructor.to_str()) {
                 Some(pos) => *pos,
                 None => {
                     self.send_err(PassError::CannotFindConstructor(
                         case.constructor.range,
                         match_.tipo.range,
-                        match_.tipo.to_string().clone(),
+                        match_.tipo.to_str().clone(),
                     ));
                     continue;
                 }
@@ -178,7 +178,7 @@ impl<'a> DesugarState<'a> {
                         .args
                         .0
                         .iter()
-                        .map(|x| (x.name.to_string().clone(), x.hidden))
+                        .map(|x| (x.name.to_str().clone(), x.hidden))
                         .collect::<Vec<(String, bool)>>(),
                     &case.bindings,
                     case.ignore_rest,
@@ -201,14 +201,14 @@ impl<'a> DesugarState<'a> {
         let mut unbound = Vec::new();
         let mut lambdas = Vec::new();
 
-        for i in 0..cases_args.len() {
+        for (i, case_arg) in cases_args.iter().enumerate() {
             let case = &sum.constructors[i];
-            if let Some((range, arguments, val)) = &cases_args[i] {
+            if let Some((range, arguments, val)) = &case_arg {
                 println!(
                     "Args: {:?}",
                     arguments
                         .iter()
-                        .map(|x| x.to_string())
+                        .map(|x| x.to_str())
                         .collect::<Vec<&String>>()
                 );
                 lambdas.push(desugared::Expr::unfold_lambda(
@@ -217,7 +217,7 @@ impl<'a> DesugarState<'a> {
                     self.desugar_expr(val),
                 ))
             } else {
-                unbound.push(case.name.to_string().clone())
+                unbound.push(case.name.to_str().clone())
             }
         }
 

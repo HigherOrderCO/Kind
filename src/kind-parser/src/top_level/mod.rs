@@ -176,7 +176,7 @@ impl<'a> Parser<'a> {
             Ok(TopLevel::SumType(self.parse_sum_type_def(docs, attrs)?))
         } else if self.check_actual(Token::Record) {
             Ok(TopLevel::RecordType(self.parse_record_def(docs, attrs)?))
-        } else if self.get().is_upper_id() {
+        } else if self.is_top_level_entry_continuation() {
             Ok(TopLevel::Entry(self.parse_entry(docs, attrs)?))
         } else {
             self.fail(vec![])

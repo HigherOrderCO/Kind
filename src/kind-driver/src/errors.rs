@@ -1,3 +1,6 @@
+//! Errors created by the driver. All of them
+//! are related with paths and unbounded variables.
+
 use std::path::PathBuf;
 
 use kind_report::data::{Color, DiagnosticFrame, Marking, Severity, Subtitle, Word};
@@ -6,7 +9,7 @@ use kind_tree::symbol::Ident;
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
 pub enum DriverError {
-    UnboundVariable(Ident, Vec<String>),
+    UnboundVariable(Vec<Ident>, Vec<String>),
     MultiplePaths(Ident, Vec<PathBuf>),
     DefinedMultipleTimes(Ident, Ident),
 }
@@ -14,10 +17,10 @@ pub enum DriverError {
 impl From<DriverError> for DiagnosticFrame {
     fn from(err: DriverError) -> Self {
         match err {
-            DriverError::UnboundVariable(ident, suggestions) => DiagnosticFrame {
-                code: 0,
+            DriverError::UnboundVariable(idents, suggestions) => DiagnosticFrame {
+                code: 100,
                 severity: Severity::Error,
-                title: format!("Cannot find the definition '{}'.", ident.data.0),
+                title: format!("Cannot find the definition '{}'.", idents[0].data.0),
                 subtitles: vec![],
                 hints: vec![
                     if !suggestions.is_empty() {
@@ -26,15 +29,18 @@ impl From<DriverError> for DiagnosticFrame {
                         "Take a look at the rules for name searching at https://kind.kindelia.org/hints/name-search".to_string()
                     }
                 ],
-                positions: vec![Marking {
-                    position: ident.range,
-                    color: Color::Fst,
-                    text: "Here!".to_string(),
-                    no_code: false,
-                }],
+                positions:
+                    idents.iter().map(|ident| {
+                        Marking {
+                            position: ident.range,
+                            color: Color::Fst,
+                            text: "Here!".to_string(),
+                            no_code: false,
+                        }
+                    }).collect(),
             },
             DriverError::MultiplePaths(ident, paths) => DiagnosticFrame {
-                code: 1,
+                code: 101,
                 severity: Severity::Error,
                 title: "Multiple definitions for the same name".to_string(),
                 subtitles: paths.iter().map(|path|
@@ -50,7 +56,7 @@ impl From<DriverError> for DiagnosticFrame {
                 }],
             },
             DriverError::DefinedMultipleTimes(fst, snd) => DiagnosticFrame {
-                code: 1,
+                code: 102,
                 severity: Severity::Error,
                 title: "Multiple paths for the same name".to_string(),
                 subtitles: vec![],

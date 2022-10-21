@@ -340,15 +340,19 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Match(matcher) => {
                 self.visit_ident(&mut Ident::new_by_sugar(
-                    &format!("{}.match", matcher.tipo.to_string()),
+                    &format!("{}.match", matcher.tipo.to_str()),
                     expr.range,
                 ));
                 self.visit_match(matcher)
             }
-            ExprKind::Subst(_subst) => {
-                // TODO: Not sure
-                self.visit_ident(&mut _subst.name);
-                self.visit_expr(&mut _subst.expr)
+            ExprKind::Subst(subst) => {
+                self.visit_ident(&mut subst.name);
+
+                if let Some(pos) = self.context_vars.iter().position(|x| x.to_str() == subst.name.to_str()) {
+                    subst.indx = pos;
+                }
+
+                self.visit_expr(&mut subst.expr)
             }
             ExprKind::Hole => {}
             ExprKind::Do(typ, sttm) => {

@@ -10,6 +10,7 @@ kind-parser = { path = "../kind-parser" }
 kind-tree = { path = "../kind-tree" }
 kind-span = { path = "../kind-span" }
 kind-report = { path = "../kind-report" }
+kind-checker = { path = "../kind-checker" }
 kind-pass = { path = "../kind-pass" }
 
 strsim = "0.10.0"

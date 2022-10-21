@@ -195,12 +195,12 @@ impl<'a> DesugarState<'a> {
     pub fn desugar_pair_pat(
         &mut self,
         range: Range,
-        fst: &Box<concrete::pat::Pat>,
-        snd: &Box<concrete::pat::Pat>,
+        fst: &concrete::pat::Pat,
+        snd: &concrete::pat::Pat,
     ) -> Box<desugared::Expr> {
         let sigma_new = Ident::new(Symbol("Sigma.new".to_string()), range);
 
-        let entry = self.old_glossary.entries.get(sigma_new.to_string());
+        let entry = self.old_glossary.entries.get(sigma_new.to_str());
         if entry.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
             return desugared::Expr::err(range);
@@ -220,9 +220,9 @@ impl<'a> DesugarState<'a> {
         let nil_ident = Ident::new(Symbol("List.nil".to_string()), range);
         let list_ident = Ident::new(Symbol("List".to_string()), range);
 
-        let list = self.old_glossary.entries.get(list_ident.to_string());
-        let nil = self.old_glossary.entries.get(cons_ident.to_string());
-        let cons = self.old_glossary.entries.get(nil_ident.to_string());
+        let list = self.old_glossary.entries.get(list_ident.to_str());
+        let nil = self.old_glossary.entries.get(cons_ident.to_str());
+        let cons = self.old_glossary.entries.get(nil_ident.to_str());
 
         if list.is_none() || nil.is_none() || cons.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
