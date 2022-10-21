@@ -2,20 +2,21 @@
 //! model because I want to change it to a query based compiler
 //! later.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::mpsc::Sender;
 
+use fxhash::FxHashMap;
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::Book;
 
 #[derive(Debug, Clone)]
 pub struct Session {
-    pub loaded_idents: HashMap<String, usize>,
+    pub loaded_idents: FxHashMap<String, usize>,
     pub loaded_paths: Vec<Rc<PathBuf>>,
     pub loaded_sources: Vec<Rc<String>>,
-    pub public_names: HashMap<PathBuf, HashSet<String>>,
+    pub public_names: FxHashMap<PathBuf, HashSet<String>>,
     pub parsed_books: Vec<Rc<Book>>,
 
     pub diagnostic_sender: Sender<DiagnosticFrame>,
@@ -25,16 +26,13 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn new(
-        root: PathBuf,
-        sender: Sender<DiagnosticFrame>,
-    ) -> Session {
+    pub fn new(root: PathBuf, sender: Sender<DiagnosticFrame>) -> Session {
         Session {
-            loaded_idents: HashMap::new(),
+            loaded_idents: FxHashMap::default(),
             loaded_paths: Vec::new(),
             loaded_sources: Vec::new(),
             parsed_books: Vec::new(),
-            public_names: HashMap::new(),
+            public_names: FxHashMap::default(),
             root,
             book_counter: 0,
             diagnostic_sender: sender,

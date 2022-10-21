@@ -1,3 +1,9 @@
+//! This module compiles all of the code to a format
+//! that can run on the HVM. in order to run the type
+//! checker fast we dont rely on elaboration, instead
+//! we just remove all the types and this is the function
+//! that will run when requested by a type during type checking.
+
 use core::fmt;
 
 use kind_span::Span;
@@ -15,6 +21,10 @@ macro_rules! vec_preppend {
     };
 }
 
+/// Tags for each one of the terms inside
+/// HVM. It's useful to split the code between
+/// the representation and the actual name of each
+/// node.
 #[derive(Debug)]
 pub enum TermTag {
     Var,
@@ -38,6 +48,9 @@ pub enum TermTag {
     HoasQ(String),
 }
 
+/// Some of the tags can be directly translated
+/// to a function that evaluates them so it's the name
+/// of each function.
 pub enum EvalTag {
     EvalOp,
     EvalApp,
@@ -82,8 +95,8 @@ impl fmt::Display for EvalTag {
     }
 }
 
-// Codegen
-
+/// Translates the operator to the tag that is used internally
+/// by the checker.
 pub fn operator_to_constructor<'a>(operator: Operator) -> &'a str {
     match operator {
         Operator::Add => "Kind.Operator.add",

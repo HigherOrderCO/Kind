@@ -5,9 +5,9 @@
 //! by sugars because it's useful to name resolution
 //! phase.
 
-use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
+use fxhash::FxHashMap;
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
@@ -27,7 +27,7 @@ use crate::errors::PassError;
 pub struct UnboundCollector {
     pub errors: Sender<DiagnosticFrame>,
     pub context_vars: Vec<Ident>,
-    pub unbound: HashMap<String, Vec<Ident>>,
+    pub unbound: FxHashMap<String, Vec<Ident>>,
 }
 
 impl UnboundCollector {
@@ -43,7 +43,7 @@ impl UnboundCollector {
 pub fn get_glossary_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     glossary: &mut Glossary,
-) -> HashMap<String, Vec<Ident>> {
+) -> FxHashMap<String, Vec<Ident>> {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_glossary(glossary);
     state.unbound
@@ -52,7 +52,7 @@ pub fn get_glossary_unbound(
 pub fn get_book_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
     glossary: &mut Book,
-) -> HashMap<String, Vec<Ident>> {
+) -> FxHashMap<String, Vec<Ident>> {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_book(glossary);
     state.unbound
@@ -348,7 +348,11 @@ impl Visitor for UnboundCollector {
             ExprKind::Subst(subst) => {
                 self.visit_ident(&mut subst.name);
 
-                if let Some(pos) = self.context_vars.iter().position(|x| x.to_str() == subst.name.to_str()) {
+                if let Some(pos) = self
+                    .context_vars
+                    .iter()
+                    .position(|x| x.to_str() == subst.name.to_str())
+                {
                     subst.indx = pos;
                 }
 

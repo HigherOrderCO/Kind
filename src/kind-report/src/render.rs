@@ -1,17 +1,18 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet};
 
 use std::fmt::{Display, Write};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::str;
 
+use fxhash::FxHashMap;
 use kind_span::{Pos, SyntaxCtxIndex};
 use unicode_width::UnicodeWidthStr;
 use yansi::Paint;
 
 use crate::{data::*, RenderConfig};
 
-type SortedMarkers = HashMap<SyntaxCtxIndex, Vec<Marking>>;
+type SortedMarkers = FxHashMap<SyntaxCtxIndex, Vec<Marking>>;
 
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -30,7 +31,7 @@ impl Display for Point {
 }
 
 fn group_markers(markers: &[Marking]) -> SortedMarkers {
-    let mut file_group = SortedMarkers::new();
+    let mut file_group = SortedMarkers::default();
     for marker in markers {
         let group = file_group
             .entry(marker.position.ctx)
@@ -230,7 +231,7 @@ pub fn write_code_block<'a, T: Write + Sized>(
 
     let mut lines_set = HashSet::new();
 
-    let mut markers_by_line: HashMap<usize, Vec<(Point, Point, &Marking)>> = HashMap::new();
+    let mut markers_by_line: FxHashMap<usize, Vec<(Point, Point, &Marking)>> = FxHashMap::default();
 
     let mut multi_line_markers: Vec<(Point, Point, &Marking)> = Vec::new();
 

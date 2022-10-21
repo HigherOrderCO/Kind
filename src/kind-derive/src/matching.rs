@@ -1,3 +1,1 @@
-pub fn derive_match() {
-    
-}
+pub fn derive_match() {}

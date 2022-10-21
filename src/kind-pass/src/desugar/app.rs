@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use fxhash::FxHashMap;
 use kind_span::{Locatable, Range, Span};
 use kind_tree::concrete::expr::Expr;
 
@@ -79,7 +78,7 @@ impl<'a> DesugarState<'a> {
             ExprKind::Constr(entry_name) => {
                 let entry = self.old_glossary.get_count_garanteed(&entry_name.data.0);
 
-                let mut positions = HashMap::new();
+                let mut positions = FxHashMap::default();
                 let mut arguments = vec![None; entry.arguments.0.len()];
 
                 let (hidden, _erased) = entry.arguments.count_implicits();

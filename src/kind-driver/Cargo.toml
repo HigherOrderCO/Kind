@@ -14,3 +14,4 @@ kind-checker = { path = "../kind-checker" }
 kind-pass = { path = "../kind-pass" }
 
 strsim = "0.10.0"
+fxhash = "0.2.1"

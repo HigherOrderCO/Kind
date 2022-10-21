@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use fxhash::FxHashMap;
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::{expr, CaseBinding, Destruct, TopLevel};
@@ -19,7 +18,7 @@ impl<'a> DesugarState<'a> {
         jump_rest: bool,
     ) -> Vec<Option<(Range, PatIdent)>> {
         let mut ordered_fields = vec![None; fields.len()];
-        let mut names = HashMap::new();
+        let mut names = FxHashMap::default();
 
         for (i, field) in fields.iter().enumerate() {
             names.insert(fields[i].clone().0, (i, field.clone().1));
@@ -136,9 +135,7 @@ impl<'a> DesugarState<'a> {
     }
 
     pub fn desugar_match(&mut self, range: Range, match_: &expr::Match) -> Box<desugared::Expr> {
-        let entry = self
-            .old_glossary
-            .get_entry_garanteed(match_.tipo.to_str());
+        let entry = self.old_glossary.get_entry_garanteed(match_.tipo.to_str());
 
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
@@ -148,7 +145,7 @@ impl<'a> DesugarState<'a> {
         };
 
         let mut cases_args = Vec::new();
-        let mut positions = HashMap::new();
+        let mut positions = FxHashMap::default();
 
         for case in &sum.constructors {
             positions.insert(case.name.to_str(), cases_args.len());
@@ -233,10 +230,7 @@ impl<'a> DesugarState<'a> {
             desugared::Expr::identity_lambda(Ident::generate("p"))
         };
 
-        let prefix = [
-            self.desugar_expr(&match_.scrutinizer),
-            motive
-        ];
+        let prefix = [self.desugar_expr(&match_.scrutinizer), motive];
 
         self.mk_desugared_fun(
             match_.tipo.range,

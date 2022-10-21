@@ -1,11 +1,9 @@
 //! This module describes an unsugared tree that
 //! is used by the type checker.
 
-use std::{
-    collections::HashMap,
-    fmt::{Display, Error, Formatter},
-};
+use std::fmt::{Display, Error, Formatter};
 
+use fxhash::FxHashMap;
 use kind_span::{Range, Span};
 
 use crate::{symbol::Ident, Operator};
@@ -241,7 +239,7 @@ pub struct Entry {
 #[derive(Clone, Debug, Default)]
 pub struct Glossary {
     pub names: Vec<Ident>,
-    pub entrs: HashMap<String, Box<Entry>>,
+    pub entrs: FxHashMap<String, Box<Entry>>,
     pub holes: u64,
 }
 

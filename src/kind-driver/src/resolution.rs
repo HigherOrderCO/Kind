@@ -19,7 +19,7 @@ use strsim::jaro;
 
 use crate::{errors::DriverError, session::Session};
 
-use kind_checker::to_hvm as checker;
+use kind_checker::{type_check};
 
 const EXT: &str = "kind2";
 
@@ -46,7 +46,7 @@ fn accumulate_neighbour_paths(raw_path: &Path, other: &mut Vec<PathBuf>) {
 /// Gets an identifier and tries to get all of the
 /// paths that it can refer into a single path. If
 /// multiple paths are found then we just throw an
-/// error abotu ambiguous paths.
+/// error about ambiguous paths.
 fn ident_to_path(
     root: &Path,
     ident: &Ident,
@@ -193,7 +193,11 @@ fn parse_and_store_book_by_path<'a>(
     book_to_glossary(session, rc, glossary);
 }
 
-pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathBuf) {
+pub fn parse_and_store_glossary(
+    session: &mut Session,
+    ident: &str,
+    path: &PathBuf,
+) -> Option<Glossary> {
     let mut glossary = Glossary::default();
 
     parse_and_store_book_by_path(
@@ -220,12 +224,16 @@ pub fn parse_and_store_glossary(session: &mut Session, ident: &str, path: &PathB
     }
 
     if !unbounds.is_empty() {
-        return;
+        None
+    } else {
+        Some(glossary)
     }
+}
 
-    let glossary = desugar::desugar_glossary(session.diagnostic_sender.clone(), &glossary);
-    let file = checker::codegen_glossary(&glossary);
-
-    println!("{}", file);
-
+pub fn type_check_glossary(session: &mut Session, ident: &str, path: &PathBuf) -> Option<()> {
+    let concrete_glossary = parse_and_store_glossary(session, ident, path)?;
+    let desugared_glossary =
+        desugar::desugar_glossary(session.diagnostic_sender.clone(), &concrete_glossary);
+    type_check(&desugared_glossary);
+    todo!()
 }

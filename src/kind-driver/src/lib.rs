@@ -7,9 +7,9 @@ use std::io;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use kind_report::RenderConfig;
 use kind_report::data::{Diagnostic, DiagnosticFrame};
 use kind_report::render::FileCache;
+use kind_report::RenderConfig;
 use kind_span::SyntaxCtxIndex;
 use session::Session;
 
@@ -34,7 +34,11 @@ where
     }
 }
 
-pub fn render_error_to_stderr(session: &Session, render_config: &RenderConfig, err: &DiagnosticFrame) {
+pub fn render_error_to_stderr(
+    session: &Session,
+    render_config: &RenderConfig,
+    err: &DiagnosticFrame,
+) {
     Diagnostic::render(
         &Diagnostic { frame: err },
         session,

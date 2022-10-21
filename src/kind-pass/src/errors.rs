@@ -1,4 +1,3 @@
-
 use kind_report::data::{Color, DiagnosticFrame, Marking, Severity};
 use kind_span::Range;
 

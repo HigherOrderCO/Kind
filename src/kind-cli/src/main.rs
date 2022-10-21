@@ -1,8 +1,11 @@
 use std::{path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
-use kind_driver::{session::Session, resolution::parse_and_store_glossary};
-use kind_report::{RenderConfig, data::DiagnosticFrame};
+use kind_driver::{
+    resolution::{parse_and_store_glossary, type_check_glossary},
+    session::Session,
+};
+use kind_report::{data::DiagnosticFrame, RenderConfig};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -79,7 +82,7 @@ fn main() {
     let (rx, tx) = std::sync::mpsc::channel();
 
     let mut session = Session::new(PathBuf::from("."), rx);
-    parse_and_store_glossary(&mut session, "Main", &PathBuf::from("teste.kind2"));
+    type_check_glossary(&mut session, "Main", &PathBuf::from("teste.kind2"));
 
     let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
 
