@@ -1,11 +1,15 @@
+//! All of the definitons of patterns are described
+//! here. It's really useful to split between patterns
+//! and expressions in order to restrict even more because
+//! not all of the expressions can be turned into patterns.
+
 use std::fmt::{Display, Error, Formatter};
 
 use kind_span::Range;
 
 use crate::symbol::Ident;
 
-// Really useful thin layer of ident.
-
+// Really useful thin layer on ident.
 #[derive(Clone, Debug, Hash)]
 pub struct PatIdent(pub Ident);
 
@@ -27,6 +31,7 @@ pub enum PatKind {
     Hole,
 }
 
+/// Describes a single `pattern`
 #[derive(Clone, Debug, Hash)]
 pub struct Pat {
     pub data: PatKind,

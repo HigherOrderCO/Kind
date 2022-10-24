@@ -8,7 +8,7 @@ use kind_tree::symbol::Ident;
 
 /// Describes all of the possible errors inside each
 /// of the passes inside this crate.
-pub enum DriverError {
+pub(crate) enum DriverError {
     UnboundVariable(Vec<Ident>, Vec<String>),
     MultiplePaths(Ident, Vec<PathBuf>),
     DefinedMultipleTimes(Ident, Ident),

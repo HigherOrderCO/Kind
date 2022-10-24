@@ -1,10 +1,7 @@
 use std::{path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
-use kind_driver::{
-    resolution::{parse_and_store_glossary, type_check_glossary},
-    session::Session,
-};
+use kind_driver::{resolution::type_check_glossary, session::Session};
 use kind_report::{data::DiagnosticFrame, RenderConfig};
 
 #[derive(Parser)]

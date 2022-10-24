@@ -11,7 +11,7 @@ use crate::errors::PassError;
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
-    pub fn make_desugared_spine(
+    pub(crate) fn make_desugared_spine(
         &mut self,
         range: Range,
         head: Ident,
@@ -44,7 +44,7 @@ impl<'a> DesugarState<'a> {
         Some(arguments)
     }
 
-    pub fn mk_desugared_ctr(
+    pub(crate) fn mk_desugared_ctr(
         &mut self,
         range: Range,
         head: Ident,
@@ -56,7 +56,7 @@ impl<'a> DesugarState<'a> {
         }
     }
 
-    pub fn mk_desugared_fun(
+    pub(crate) fn mk_desugared_fun(
         &mut self,
         range: Range,
         head: Ident,
@@ -68,7 +68,7 @@ impl<'a> DesugarState<'a> {
         }
     }
 
-    pub fn desugar_app(
+    pub(crate) fn desugar_app(
         &mut self,
         range: Range,
         head: &Expr,

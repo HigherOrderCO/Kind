@@ -1,4 +1,4 @@
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 use std::fmt::{Display, Write};
 use std::path::{Path, PathBuf};
@@ -15,7 +15,7 @@ use crate::{data::*, RenderConfig};
 type SortedMarkers = FxHashMap<SyntaxCtxIndex, Vec<Marking>>;
 
 #[derive(Debug, Clone)]
-pub struct Point {
+struct Point {
     pub line: usize,
     pub column: usize,
 }
@@ -44,7 +44,7 @@ fn group_markers(markers: &[Marking]) -> SortedMarkers {
     file_group
 }
 
-pub fn get_code_line_guide(code: &str) -> Vec<usize> {
+fn get_code_line_guide(code: &str) -> Vec<usize> {
     let mut guide = Vec::new();
     let mut size = 0;
     for chr in code.chars() {
@@ -74,7 +74,7 @@ fn find_in_line_guide(pos: Pos, guide: &Vec<usize>) -> Point {
 }
 
 // Get color
-pub fn get_colorizer<T>(color: &Color) -> &dyn Fn(T) -> Paint<T> {
+fn get_colorizer<T>(color: &Color) -> &dyn Fn(T) -> Paint<T> {
     match color {
         Color::Fst => &|str| yansi::Paint::red(str).bold(),
         Color::Snd => &|str| yansi::Paint::blue(str).bold(),
@@ -86,7 +86,7 @@ pub fn get_colorizer<T>(color: &Color) -> &dyn Fn(T) -> Paint<T> {
 
 // TODO: Remove common indentation.
 // TODO: Prioritize inline marcations.
-pub fn colorize_code<'a, T: Write + Sized>(
+fn colorize_code<'a, T: Write + Sized>(
     markers: &mut [&(Point, Point, &Marking)],
     code_line: &'a str,
     fmt: &mut T,
@@ -119,11 +119,11 @@ pub fn colorize_code<'a, T: Write + Sized>(
     Ok(())
 }
 
-pub fn paint_line<T>(data: T) -> Paint<T> {
+fn paint_line<T>(data: T) -> Paint<T> {
     Paint::new(data).fg(yansi::Color::Cyan).dimmed()
 }
 
-pub fn mark_inlined<T: Write + Sized>(
+fn mark_inlined<T: Write + Sized>(
     prefix: &str,
     code: &str,
     config: &RenderConfig,
@@ -195,7 +195,7 @@ pub fn mark_inlined<T: Write + Sized>(
     Ok(())
 }
 
-pub fn write_code_block<'a, T: Write + Sized>(
+fn write_code_block<'a, T: Write + Sized>(
     file_name: &Path,
     config: &RenderConfig,
     markers: &[Marking],
@@ -352,7 +352,7 @@ pub fn write_code_block<'a, T: Write + Sized>(
     Ok(())
 }
 
-pub fn render_tag<T: Write + Sized>(severity: &Severity, fmt: &mut T) -> std::fmt::Result {
+fn render_tag<T: Write + Sized>(severity: &Severity, fmt: &mut T) -> std::fmt::Result {
     match severity {
         Severity::Error => write!(
             fmt,

@@ -10,20 +10,30 @@ use crate::{symbol::Ident, Operator};
 
 use super::pat::PatIdent;
 
+/// A binding express the positional or named argument of
+/// a constructor or function.
 #[derive(Clone, Debug)]
 pub enum Binding {
     Positional(Box<Expr>),
     Named(Range, Ident, Box<Expr>),
 }
 
+/// Vector of bindings
 pub type Spine = Vec<Binding>;
 
+/// A case binding is a field or a rename of some field
+/// inside a match expression.
 #[derive(Clone, Debug)]
 pub enum CaseBinding {
     Field(PatIdent),
     Renamed(Ident, PatIdent),
 }
 
+/// A match case with a constructor that will matches the
+/// strutinizer, bindings to the names of each of arguments
+/// of the telescope of the constructor and a right-hand side
+/// value. The ignore_rest flag useful to just fill all of the
+/// case bindings that are not used with a default name.
 #[derive(Clone, Debug)]
 pub struct Case {
     pub constructor: Ident,
@@ -68,11 +78,15 @@ pub enum Literal {
     String(String),
 }
 
+/// A destruct of a single constructor. It's a flat destruct
+/// and just translates into a eliminator for records.
 #[derive(Clone, Debug)]
 pub enum Destruct {
     Destruct(Range, Ident, Vec<CaseBinding>, bool),
     Ident(Ident),
 }
+
+
 
 #[derive(Clone, Debug)]
 pub enum SttmKind {
@@ -83,11 +97,14 @@ pub enum SttmKind {
     RetExpr(Box<Expr>),
 }
 
+/// A statement is expression inside of the `do` notation. It
+/// describes the idea of `sequence` inside a monad.
 #[derive(Clone, Debug)]
 pub struct Sttm {
     pub data: SttmKind,
     pub range: Range,
 }
+
 
 #[derive(Clone, Debug)]
 pub enum ExprKind {
@@ -128,6 +145,7 @@ pub enum ExprKind {
     List(Vec<Expr>),
 }
 
+/// Describes a single expression inside Kind2.
 #[derive(Clone, Debug)]
 pub struct Expr {
     pub data: ExprKind,

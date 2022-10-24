@@ -42,6 +42,12 @@ impl Ident {
         }
     }
 
+    pub fn with_name(&self, f: fn(String) -> String) -> Ident {
+        let mut new = self.clone();
+        new.data = Symbol(f(new.data.0));
+        new
+    }
+
     pub fn to_str(&self) -> &String {
         &self.data.0
     }

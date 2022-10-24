@@ -8,7 +8,7 @@ use crate::errors::{PassError, Sugar};
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
-    pub fn desugar_literal(
+    pub(crate) fn desugar_literal(
         &mut self,
         range: Range,
         literal: &expr::Literal,
@@ -23,7 +23,7 @@ impl<'a> DesugarState<'a> {
         }
     }
 
-    pub fn desugar_sub(&mut self, range: Range, sub: &expr::Substitution) -> Box<desugared::Expr> {
+    pub(crate) fn desugar_sub(&mut self, range: Range, sub: &expr::Substitution) -> Box<desugared::Expr> {
         desugared::Expr::sub(
             range,
             sub.name.clone(),
@@ -33,7 +33,7 @@ impl<'a> DesugarState<'a> {
         )
     }
 
-    pub fn desugar_sttm(
+    pub(crate) fn desugar_sttm(
         &mut self,
         bind_ident: &Ident,
         pure_ident: &Ident,
@@ -54,15 +54,17 @@ impl<'a> DesugarState<'a> {
             concrete::SttmKind::Expr(expr, next) => {
                 let res_expr = self.desugar_expr(expr);
                 let res_sttm = self.desugar_sttm(bind_ident, pure_ident, next);
-                bind(self, sttm.range, Ident::generate("~"), res_expr, res_sttm)
+                let name = self.gen_name(sttm.range);
+                bind(self, sttm.range, name, res_expr, res_sttm)
             }
             concrete::SttmKind::Ask(concrete::Destruct::Destruct(a, b, c, d), val, next) => {
                 let res_val = self.desugar_expr(val);
 
-                // TODO: Generate name for binding
+                let name = self.gen_name(sttm.range);
+
                 let res_destruct = self.desugar_destruct(
                     &concrete::Destruct::Destruct(*a, b.to_owned(), c.to_owned(), *d),
-                    desugared::Expr::var(Ident::generate("~?")),
+                    desugared::Expr::var(name.clone()),
                     &|this| this.desugar_sttm(bind_ident, pure_ident, next),
                     &|_, _| unreachable!(),
                 );
@@ -70,7 +72,7 @@ impl<'a> DesugarState<'a> {
                 bind(
                     self,
                     sttm.range,
-                    Ident::generate("~?"),
+                    name,
                     res_val,
                     res_destruct,
                 )
@@ -104,7 +106,7 @@ impl<'a> DesugarState<'a> {
         }
     }
 
-    pub fn desugar_do(
+    pub(crate) fn desugar_do(
         &mut self,
         range: Range,
         typ: &Ident,
@@ -124,7 +126,7 @@ impl<'a> DesugarState<'a> {
         self.desugar_sttm(&bind_ident, &pure_ident, sttm)
     }
 
-    pub fn desugar_sigma(
+    pub(crate) fn desugar_sigma(
         &mut self,
         range: Range,
         name: &Option<Ident>,
@@ -152,7 +154,7 @@ impl<'a> DesugarState<'a> {
         self.mk_desugared_ctr(range, sigma, spine)
     }
 
-    pub fn desugar_list(&mut self, range: Range, expr: &[expr::Expr]) -> Box<desugared::Expr> {
+    pub(crate) fn desugar_list(&mut self, range: Range, expr: &[expr::Expr]) -> Box<desugared::Expr> {
         let cons_ident = Ident::new(Symbol("List.cons".to_string()), range);
         let nil_ident = Ident::new(Symbol("List.nil".to_string()), range);
         let list_ident = Ident::new(Symbol("List".to_string()), range);
@@ -175,7 +177,7 @@ impl<'a> DesugarState<'a> {
         )
     }
 
-    pub fn desugar_if(
+    pub(crate) fn desugar_if(
         &mut self,
         range: Range,
         cond: &expr::Expr,
@@ -200,7 +202,7 @@ impl<'a> DesugarState<'a> {
         self.mk_desugared_fun(range, bool_ident, spine)
     }
 
-    pub fn desugar_pair(
+    pub(crate) fn desugar_pair(
         &mut self,
         range: Range,
         fst: &expr::Expr,
@@ -219,13 +221,13 @@ impl<'a> DesugarState<'a> {
         self.mk_desugared_ctr(range, sigma_new, spine)
     }
 
-    pub fn desugar_expr(&mut self, expr: &expr::Expr) -> Box<desugared::Expr> {
+    pub(crate) fn desugar_expr(&mut self, expr: &expr::Expr) -> Box<desugared::Expr> {
         use expr::ExprKind::*;
         match &expr.data {
             Constr(_) => self.desugar_app(expr.range, expr, &[]),
             All(ident, typ, body) => desugared::Expr::all(
                 expr.range,
-                ident.clone(),
+                ident.clone().unwrap_or_else(|| self.gen_name(expr.range)),
                 self.desugar_expr(typ),
                 self.desugar_expr(body),
             ),

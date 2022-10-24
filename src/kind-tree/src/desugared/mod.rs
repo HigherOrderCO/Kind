@@ -15,7 +15,7 @@ pub enum ExprKind {
     /// Name of a variable
     Var(Ident),
     /// The dependent function space (e.g. (x : Int) -> y)
-    All(Option<Ident>, Box<Expr>, Box<Expr>),
+    All(Ident, Box<Expr>, Box<Expr>),
     /// A anonymous function that receives one argument
     Lambda(Ident, Box<Expr>),
     /// Application of a expression to a spine of expressions
@@ -69,7 +69,7 @@ impl Expr {
         })
     }
 
-    pub fn all(range: Range, ident: Option<Ident>, typ: Box<Expr>, body: Box<Expr>) -> Box<Expr> {
+    pub fn all(range: Range, ident: Ident, typ: Box<Expr>, body: Box<Expr>) -> Box<Expr> {
         Box::new(Expr {
             span: Span::Locatable(range),
             data: ExprKind::All(ident, typ, body),
@@ -222,6 +222,12 @@ pub struct Rule {
     pub span: Span,
 }
 
+
+#[derive(Clone, Debug)]
+pub enum Attribute {
+
+}
+
 /// An entry describes a function that is typed
 /// and has rules. The type of the function
 /// consists of the arguments @args@ and the
@@ -232,6 +238,7 @@ pub struct Entry {
     pub args: Vec<Argument>,
     pub tipo: Box<Expr>,
     pub rules: Vec<Rule>,
+    pub attrs: Vec<Attribute>,
     pub span: Span,
 }
 
@@ -255,10 +262,11 @@ impl Expr {
 
     pub fn traverse_pi_types(&self) -> String {
         match &self.data {
-            ExprKind::All(binder, typ, body) => match binder {
-                None => format!("{} -> {}", typ, body.traverse_pi_types()),
-                Some(binder) => format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types()),
-            },
+            ExprKind::All(binder, typ, body) => if binder.to_string().starts_with(".") {
+                format!("{} -> {}", typ, body.traverse_pi_types())
+            } else {
+                format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types())
+            }
             _ => format!("{}", self),
         }
     }
@@ -282,12 +290,18 @@ impl Display for Expr {
                 head,
                 spine.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
-            Fun(head, spine) | Ctr(head, spine) => write!(
-                f,
-                "({}{})",
-                head,
-                spine.iter().map(|x| format!(" {}", x)).collect::<String>()
-            ),
+            Fun(head, spine) | Ctr(head, spine) => {
+                if spine.len() == 0 {
+                    write!(f, "{}", head)
+                } else {
+                    write!(
+                        f,
+                        "({}{})",
+                        head,
+                        spine.iter().map(|x| format!(" {}", x)).collect::<String>()
+                    )
+                }
+            }
             Let(name, expr, body) => write!(f, "(let {} = {}; {})", name, expr, body),
             Ann(expr, typ) => write!(f, "({} : {})", expr, typ),
             Binary(op, expr, typ) => write!(f, "({} {} {})", op, expr, typ),

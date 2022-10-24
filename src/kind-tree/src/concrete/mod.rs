@@ -18,6 +18,8 @@ pub mod visitor;
 
 pub use expr::*;
 
+/// A sequence of arguments that depends on the previous sequence
+/// it's similar to a iterated sigma type.
 #[derive(Debug, Clone, Default)]
 pub struct Telescope<A>(pub Vec<A>);
 
@@ -28,6 +30,10 @@ impl<A> Telescope<A> {
 
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn push(&mut self, el: A) {
+        self.0.push(el)
     }
 }
 
@@ -92,8 +98,8 @@ pub struct Entry {
     pub attrs: Vec<Attribute>,
 }
 
-/// Type declaration that can be either a record or a sum type
-
+/// A single cosntructor inside the algebraic data
+/// type definition.
 #[derive(Clone, Debug)]
 pub struct Constructor {
     pub name: Ident,
@@ -102,6 +108,8 @@ pub struct Constructor {
     pub tipo: Option<Box<Expr>>,
 }
 
+/// An algebraic data type definition that supports
+/// parametric and indexed data type definitions.
 #[derive(Clone, Debug)]
 pub struct SumTypeDecl {
     pub name: Ident,
@@ -112,6 +120,7 @@ pub struct SumTypeDecl {
     pub attrs: Vec<Attribute>,
 }
 
+/// A single constructor data type.
 #[derive(Clone, Debug)]
 pub struct RecordDecl {
     pub name: Ident,
@@ -122,6 +131,7 @@ pub struct RecordDecl {
     pub attrs: Vec<Attribute>,
 }
 
+/// All of the structures
 #[derive(Clone, Debug)]
 pub enum TopLevel {
     SumType(SumTypeDecl),

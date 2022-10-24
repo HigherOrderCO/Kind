@@ -58,6 +58,7 @@ impl<'a> DesugarState<'a> {
             tipo: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(sum_type.name.range),
+            attrs: self.desugar_attributes(&sum_type.attrs),
         };
 
         self.new_glossary
@@ -90,9 +91,9 @@ impl<'a> DesugarState<'a> {
                         .map(|x| desugared::Expr::var(x.name.clone()))
                         .collect::<Vec<Box<desugared::Expr>>>();
 
-                    desugared::Expr::app(
+                    desugared::Expr::ctr(
                         sum_type.name.range,
-                        desugared::Expr::var(sum_type.name.clone()),
+                        sum_type.name.clone(),
                         args,
                     )
                 }
@@ -108,6 +109,7 @@ impl<'a> DesugarState<'a> {
                 .concat(),
                 tipo,
                 rules: Vec::new(),
+                attrs: Vec::new(),
                 span: Span::Locatable(sum_type.name.range),
             };
 
@@ -130,6 +132,7 @@ impl<'a> DesugarState<'a> {
             tipo: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(rec_type.name.range),
+            attrs: self.desugar_attributes(&rec_type.attrs),
         };
 
         self.new_glossary
@@ -185,6 +188,7 @@ impl<'a> DesugarState<'a> {
             tipo,
             rules: Vec::new(),
             span: Span::Locatable(rec_type.constructor.range),
+            attrs: Vec::new(),
         };
 
         self.new_glossary
@@ -319,7 +323,7 @@ impl<'a> DesugarState<'a> {
             let mut pat_iter = pats.iter();
             for arg in args.0.iter() {
                 if arg.hidden {
-                    res_pats.push(desugared::Expr::var(Ident::generate("~")))
+                    res_pats.push(desugared::Expr::var(self.gen_name(arg.range)))
                 } else {
                     res_pats.push(pat_iter.next().unwrap().to_owned());
                 }
@@ -360,6 +364,7 @@ impl<'a> DesugarState<'a> {
             tipo: self.desugar_expr(&entry.tipo),
             rules,
             span: Span::Locatable(entry.range),
+            attrs: self.desugar_attributes(&entry.attrs),
         };
 
         let rule_numbers = entry

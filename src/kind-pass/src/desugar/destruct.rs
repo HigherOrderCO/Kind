@@ -10,7 +10,7 @@ use crate::errors::PassError;
 use super::DesugarState;
 
 impl<'a> DesugarState<'a> {
-    pub fn order_case_arguments(
+    pub(crate) fn order_case_arguments(
         &mut self,
         type_info: (&Range, &Ident),
         fields: &[(String, bool)],
@@ -58,7 +58,7 @@ impl<'a> DesugarState<'a> {
         ordered_fields
     }
 
-    pub fn desugar_destruct(
+    pub(crate) fn desugar_destruct(
         &mut self,
         binding: &expr::Destruct,
         val: Box<desugared::Expr>,
@@ -94,7 +94,7 @@ impl<'a> DesugarState<'a> {
                         arguments.push(name.0)
                     } else {
                         // TODO: Generate name
-                        arguments.push(Ident::new(Symbol("~".to_string()), tipo.range))
+                        arguments.push(Ident::new(Symbol(self.gen_name(tipo.range).to_string()), tipo.range))
                     }
                 }
 
@@ -111,7 +111,7 @@ impl<'a> DesugarState<'a> {
         }
     }
 
-    pub fn desugar_let(
+    pub(crate) fn desugar_let(
         &mut self,
         range: Range,
         binding: &expr::Destruct,
@@ -134,7 +134,7 @@ impl<'a> DesugarState<'a> {
         )
     }
 
-    pub fn desugar_match(&mut self, range: Range, match_: &expr::Match) -> Box<desugared::Expr> {
+    pub(crate) fn desugar_match(&mut self, range: Range, match_: &expr::Match) -> Box<desugared::Expr> {
         let entry = self.old_glossary.get_entry_garanteed(match_.tipo.to_str());
 
         let sum = if let TopLevel::SumType(sum) = entry {
@@ -188,7 +188,7 @@ impl<'a> DesugarState<'a> {
                         arguments.push(name.0)
                     } else {
                         // TODO: Generate name
-                        arguments.push(Ident::new(Symbol("~".to_string()), match_.tipo.range))
+                        arguments.push(Ident::new(Symbol(self.gen_name(match_.tipo.range).to_string()), match_.tipo.range))
                     }
                 }
                 cases_args[index] = Some((case.constructor.range, arguments, &case.value));
@@ -227,7 +227,11 @@ impl<'a> DesugarState<'a> {
         let motive = if let Some(res) = &match_.motive {
             self.desugar_expr(res)
         } else {
-            desugared::Expr::identity_lambda(Ident::generate("p"))
+            let mut idx: Vec<Ident> = sum.indices.0.iter().map(|x| x.name.clone()).collect();
+            idx.push(Ident::generate("_val"));
+            idx.iter().rfold(self.gen_hole_expr(), |expr, l| {
+                desugared::Expr::lambda(l.range, l.clone(), expr)
+            })
         };
 
         let prefix = [self.desugar_expr(&match_.scrutinizer), motive];
