@@ -11,7 +11,7 @@ use fxhash::FxHashMap;
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
-use kind_tree::concrete::{Book, Glossary, TopLevel};
+use kind_tree::concrete::{Module, Book, TopLevel};
 use kind_tree::symbol::Ident;
 
 use kind_tree::concrete::{
@@ -42,7 +42,7 @@ impl UnboundCollector {
 
 pub fn get_glossary_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
-    glossary: &mut Glossary,
+    glossary: &mut Book,
 ) -> FxHashMap<String, Vec<Ident>> {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_glossary(glossary);
@@ -51,7 +51,7 @@ pub fn get_glossary_unbound(
 
 pub fn get_book_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
-    glossary: &mut Book,
+    glossary: &mut Module,
 ) -> FxHashMap<String, Vec<Ident>> {
     let mut state = UnboundCollector::new(diagnostic_sender);
     state.visit_book(glossary);
@@ -79,7 +79,7 @@ impl Visitor for UnboundCollector {
     }
 
     fn visit_argument(&mut self, argument: &mut Argument) {
-        match &mut argument.tipo {
+        match &mut argument.typ {
             Some(res) => self.visit_expr(res),
             None => (),
         }
@@ -102,7 +102,7 @@ impl Visitor for UnboundCollector {
             self.visit_argument(arg)
         }
 
-        self.visit_expr(&mut entry.tipo);
+        self.visit_expr(&mut entry.typ);
         self.context_vars = vars;
 
         for rule in &mut entry.rules {
@@ -131,7 +131,7 @@ impl Visitor for UnboundCollector {
                 visit_vec!(&mut entr.constructors, cons => {
                     self.context_vars = inside_vars.clone();
                     visit_vec!(&mut cons.args.0, arg => self.visit_argument(arg));
-                    visit_opt!(&mut cons.tipo, arg => self.visit_expr(arg));
+                    visit_opt!(&mut cons.typ, arg => self.visit_expr(arg));
                 });
 
                 self.context_vars = vars;
@@ -159,13 +159,13 @@ impl Visitor for UnboundCollector {
         }
     }
 
-    fn visit_book(&mut self, book: &mut kind_tree::concrete::Book) {
+    fn visit_book(&mut self, book: &mut kind_tree::concrete::Module) {
         for entr in &mut book.entries {
             self.visit_top_level(entr)
         }
     }
 
-    fn visit_glossary(&mut self, glossary: &mut Glossary) {
+    fn visit_glossary(&mut self, glossary: &mut Book) {
         self.context_vars = glossary.names.values().cloned().collect();
         for entr in glossary.entries.values_mut() {
             self.visit_top_level(entr)
@@ -260,7 +260,7 @@ impl Visitor for UnboundCollector {
         for case in &mut matcher.cases {
             // TODO: Better error for not found constructors like this one.
             // let mut name = case.constructor.clone();
-            // name.data.0 = format!("{}.{}", matcher.tipo.data.0.clone(), name.data.0);
+            // name.data.0 = format!("{}.{}", matcher.typ.data.0.clone(), name.data.0);
             // self.visit_ident(&mut name);
 
             self.visit_case(case);
@@ -340,7 +340,7 @@ impl Visitor for UnboundCollector {
             }
             ExprKind::Match(matcher) => {
                 self.visit_ident(&mut Ident::new_by_sugar(
-                    &format!("{}.match", matcher.tipo.to_str()),
+                    &format!("{}.match", matcher.typ.to_str()),
                     expr.range,
                 ));
                 self.visit_match(matcher)

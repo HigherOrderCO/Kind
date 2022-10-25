@@ -1,9 +1,14 @@
-//! The concrete tree with all of the sugars. it's useful to
-//! generate documentation or related without thinking about
-//! the generated code.
+//! This crate describes two types of abstract syntax trees.
+//! one for sugared trees (that are useful to create documentation),
+//! to format and to locate "phisically" all of the nodes so we can
+//! generate a lot of error messages. The other one that is desugured
+//! is useful to interface with HVM and KDL.
+
+/// The concrete AST.
 #[macro_use]
 pub mod concrete;
 
+/// The desugared AST.
 pub mod desugared;
 
 /// Describes symbols (identifiers) on the language. It will

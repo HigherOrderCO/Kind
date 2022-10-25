@@ -31,7 +31,7 @@ pub fn is_data_constructor_of(expr: concrete::expr::Expr, type_name: &str) -> bo
 
 impl<'a> DesugarState<'a> {
     pub fn desugar_argument(&mut self, argument: &concrete::Argument) -> desugared::Argument {
-        let tipo = match &argument.tipo {
+        let typ = match &argument.typ {
             None => desugared::Expr::typ(argument.range),
             Some(ty) => self.desugar_expr(ty),
         };
@@ -40,7 +40,7 @@ impl<'a> DesugarState<'a> {
             hidden: argument.hidden,
             erased: argument.erased,
             name: argument.name.clone(),
-            tipo,
+            typ,
             span: Span::Locatable(argument.range),
         }
     }
@@ -55,7 +55,7 @@ impl<'a> DesugarState<'a> {
         let type_constructor = desugared::Entry {
             name: sum_type.name.clone(),
             args: desugared_params.extend(&desugared_indices).0,
-            tipo: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
+            typ: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(sum_type.name.range),
             attrs: self.desugar_attributes(&sum_type.attrs),
@@ -64,7 +64,6 @@ impl<'a> DesugarState<'a> {
         self.new_glossary
             .entrs
             .insert(sum_type.name.data.0.clone(), Box::new(type_constructor));
-        self.new_glossary.names.push(sum_type.name.clone());
 
         let irrelevant_params: Vec<desugared::Argument> =
             desugared_params.map(|x| x.to_irrelevant()).0;
@@ -76,13 +75,13 @@ impl<'a> DesugarState<'a> {
         for cons in &sum_type.constructors {
             let cons_ident = cons.name.add_base_ident(&sum_type.name.data.0);
 
-            let pre_indices = if cons.tipo.is_none() {
+            let pre_indices = if cons.typ.is_none() {
                 irelevant_indices.as_slice()
             } else {
                 &[]
             };
 
-            let tipo = match cons.tipo.clone() {
+            let typ = match cons.typ.clone() {
                 Some(expr) => self.desugar_expr(&expr),
                 None => {
                     let args = [irrelevant_params.as_slice(), pre_indices]
@@ -91,11 +90,7 @@ impl<'a> DesugarState<'a> {
                         .map(|x| desugared::Expr::var(x.name.clone()))
                         .collect::<Vec<Box<desugared::Expr>>>();
 
-                    desugared::Expr::ctr(
-                        sum_type.name.range,
-                        sum_type.name.clone(),
-                        args,
-                    )
+                    desugared::Expr::ctr(sum_type.name.range, sum_type.name.clone(), args)
                 }
             };
 
@@ -107,7 +102,7 @@ impl<'a> DesugarState<'a> {
                     cons.args.map(|arg| self.desugar_argument(arg)).0.as_slice(),
                 ]
                 .concat(),
-                tipo,
+                typ,
                 rules: Vec::new(),
                 attrs: Vec::new(),
                 span: Span::Locatable(sum_type.name.range),
@@ -116,8 +111,6 @@ impl<'a> DesugarState<'a> {
             self.new_glossary
                 .entrs
                 .insert(cons_ident.data.0.clone(), Box::new(data_constructor));
-
-            self.new_glossary.names.push(cons_ident);
         }
     }
 
@@ -129,7 +122,7 @@ impl<'a> DesugarState<'a> {
         let type_constructor = desugared::Entry {
             name: rec_type.name.clone(),
             args: desugared_params.0.clone(),
-            tipo: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
+            typ: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(rec_type.name.range),
             attrs: self.desugar_attributes(&rec_type.attrs),
@@ -138,7 +131,6 @@ impl<'a> DesugarState<'a> {
         self.new_glossary
             .entrs
             .insert(rec_type.name.data.0.clone(), Box::new(type_constructor));
-        self.new_glossary.names.push(rec_type.name.clone());
 
         let irrelevant_params: Vec<desugared::Argument> =
             desugared_params.map(|x| x.to_irrelevant()).0;
@@ -154,7 +146,7 @@ impl<'a> DesugarState<'a> {
             })
             .collect::<Vec<Box<desugared::Expr>>>();
 
-        let tipo = Box::new(desugared::Expr {
+        let typ = Box::new(desugared::Expr {
             data: desugared::ExprKind::App(
                 Box::new(desugared::Expr {
                     data: desugared::ExprKind::Var(rec_type.name.clone()),
@@ -185,7 +177,7 @@ impl<'a> DesugarState<'a> {
                     .as_slice(),
             ]
             .concat(),
-            tipo,
+            typ,
             rules: Vec::new(),
             span: Span::Locatable(rec_type.constructor.range),
             attrs: Vec::new(),
@@ -356,15 +348,15 @@ impl<'a> DesugarState<'a> {
             .rules
             .iter()
             .map(|x| self.desugar_rule(&entry.args, x))
-            .collect::<Vec<desugared::Rule>>();
+            .collect();
 
         let res_entry = desugared::Entry {
             name: entry.name.clone(),
-            args: entry.args.map(|x| self.desugar_argument(x)).0,
-            tipo: self.desugar_expr(&entry.tipo),
-            rules,
-            span: Span::Locatable(entry.range),
+            args: entry.args.map(|x| self.desugar_argument(x)).to_vec(),
+            typ: self.desugar_expr(&entry.typ),
+            span: entry.range.to_span(),
             attrs: self.desugar_attributes(&entry.attrs),
+            rules,
         };
 
         let rule_numbers = entry
@@ -381,7 +373,6 @@ impl<'a> DesugarState<'a> {
             ));
         }
 
-        self.new_glossary.names.push(res_entry.name.clone());
         self.new_glossary
             .entrs
             .insert(res_entry.name.data.0.clone(), Box::new(res_entry));

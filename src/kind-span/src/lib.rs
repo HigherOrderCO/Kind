@@ -1,15 +1,15 @@
-// Position in a syntax context.
+/// Position in a syntax context.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
 pub struct Pos {
     pub index: u32,
 }
 
-// A syntax context index.
+/// A syntax context index.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
 pub struct SyntaxCtxIndex(pub usize);
 
-// A span in the encoded format that is required by
-// kind2.
+/// A span in the encoded format that is required by
+/// kind2.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
 pub struct EncodedSpan(pub u64);
 
@@ -22,6 +22,7 @@ pub struct Range {
     pub ctx: SyntaxCtxIndex,
 }
 
+/// Range that can be generated.
 #[derive(Clone, Debug, Copy)]
 pub enum Span {
     Generated,
@@ -40,6 +41,10 @@ impl Range {
 
     pub fn ghost_range() -> Range {
         Range::new(Pos { index: 0 }, Pos { index: 0 }, SyntaxCtxIndex(0))
+    }
+
+    pub fn to_span(self) -> Span {
+        Span::Locatable(self)
     }
 
     /// Joins two ranges. It keeps the syntax context

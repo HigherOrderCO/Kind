@@ -10,11 +10,11 @@ use std::sync::mpsc::Sender;
 
 use kind_report::data::DiagnosticFrame;
 use kind_span::SyntaxCtxIndex;
-use kind_tree::concrete::Book;
+use kind_tree::concrete::Module;
 pub use lexer::state::*;
 use state::Parser;
 
-pub fn parse_book(errs: Sender<DiagnosticFrame>, ctx_id: usize, input: &str) -> Book {
+pub fn parse_book(errs: Sender<DiagnosticFrame>, ctx_id: usize, input: &str) -> Module {
     let mut peekable = input.chars().peekable();
     let lexer = Lexer::new(input, &mut peekable, SyntaxCtxIndex(ctx_id));
     let mut parser = Parser::new(lexer, errs);

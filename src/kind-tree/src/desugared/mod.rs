@@ -1,13 +1,16 @@
 //! This module describes an unsugared tree that
-//! is used by the type checker.
+//! is used by the type checker and by the targets.
 
 use std::fmt::{Display, Error, Formatter};
 
-use fxhash::FxHashMap;
 use kind_span::{Range, Span};
+use linked_hash_map::LinkedHashMap;
 
 use crate::{symbol::Ident, Operator};
 
+/// Just a vector of expressions. It is called spine because
+/// it is usually in a form like (a b c d e) that can be interpret
+/// as ((((a b) c) d) e) that looks like a spine.
 pub type Spine = Vec<Box<Expr>>;
 
 #[derive(Clone, Debug)]
@@ -207,7 +210,7 @@ pub struct Argument {
     pub hidden: bool,
     pub erased: bool,
     pub name: Ident,
-    pub tipo: Box<Expr>,
+    pub typ: Box<Expr>,
     pub span: Span,
 }
 
@@ -222,7 +225,8 @@ pub struct Rule {
     pub span: Span,
 }
 
-
+/// Attributes describes some compiler specific aspects
+/// like inlining and derivations.
 #[derive(Clone, Debug)]
 pub enum Attribute {
 
@@ -231,22 +235,21 @@ pub enum Attribute {
 /// An entry describes a function that is typed
 /// and has rules. The type of the function
 /// consists of the arguments @args@ and the
-/// return type @tipo@.
+/// return type @typ@.
 #[derive(Clone, Debug)]
 pub struct Entry {
     pub name: Ident,
     pub args: Vec<Argument>,
-    pub tipo: Box<Expr>,
+    pub typ: Box<Expr>,
     pub rules: Vec<Rule>,
     pub attrs: Vec<Attribute>,
     pub span: Span,
 }
 
-// A book is a collection of entries.
+/// A book is a collection of desugared entries.
 #[derive(Clone, Debug, Default)]
-pub struct Glossary {
-    pub names: Vec<Ident>,
-    pub entrs: FxHashMap<String, Box<Entry>>,
+pub struct Book {
+    pub entrs: LinkedHashMap<String, Box<Entry>>,
     pub holes: u64,
 }
 
@@ -312,10 +315,10 @@ impl Display for Expr {
     }
 }
 
-impl Display for Glossary {
+impl Display for Book {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        for name in &self.names {
-            writeln!(f, "{}\n", self.entrs.get(&name.data.0).expect(&name.data.0))?;
+        for entr in self.entrs.values() {
+            writeln!(f, "{}\n", entr)?;
         }
         Ok(())
     }
@@ -329,7 +332,7 @@ impl Display for Argument {
             (true, false) => ("-(", ")"),
             (true, true) => ("<", ">"),
         };
-        write!(f, "{}{}: {}{}", open, self.name, self.tipo, close)
+        write!(f, "{}{}: {}{}", open, self.name, self.typ, close)
     }
 }
 
@@ -341,7 +344,7 @@ impl Display for Entry {
             write!(f, " {}", arg)?;
         }
 
-        write!(f, " : {}", &self.tipo)?;
+        write!(f, " : {}", &self.typ)?;
 
         for rule in &self.rules {
             write!(f, "\n{}", rule)?
@@ -367,17 +370,17 @@ impl Argument {
             hidden: true,
             erased: true,
             name: self.name.clone(),
-            tipo: self.tipo.clone(),
+            typ: self.typ.clone(),
             span: self.span,
         }
     }
 
-    pub fn from_field(name: &Ident, tipo: Box<Expr>, range: Range) -> Argument {
+    pub fn from_field(name: &Ident, typ: Box<Expr>, range: Range) -> Argument {
         Argument {
             hidden: false,
             erased: false,
             name: name.clone(),
-            tipo,
+            typ,
             span: Span::Locatable(range),
         }
     }

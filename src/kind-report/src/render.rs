@@ -1,3 +1,5 @@
+//! Renders error messages.
+
 use std::collections::HashSet;
 
 use std::fmt::{Display, Write};

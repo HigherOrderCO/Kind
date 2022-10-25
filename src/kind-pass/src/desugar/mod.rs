@@ -24,16 +24,16 @@ pub mod top_level;
 
 pub struct DesugarState<'a> {
     pub errors: Sender<DiagnosticFrame>,
-    pub old_glossary: &'a concrete::Glossary,
-    pub new_glossary: desugared::Glossary,
+    pub old_glossary: &'a concrete::Book,
+    pub new_glossary: desugared::Book,
     pub name_count: u64,
     pub holes: u64,
 }
 
 pub fn desugar_glossary(
     errors: Sender<DiagnosticFrame>,
-    glossary: &concrete::Glossary,
-) -> desugared::Glossary {
+    glossary: &concrete::Book,
+) -> desugared::Book {
     let mut state = DesugarState {
         errors,
         old_glossary: glossary,
@@ -71,7 +71,7 @@ impl<'a> DesugarState<'a> {
         self.errors.send(err.into()).unwrap()
     }
 
-    pub fn desugar_glossary(&mut self, glossary: &concrete::Glossary) {
+    pub fn desugar_glossary(&mut self, glossary: &concrete::Book) {
         for top_level in glossary.entries.values() {
             self.desugar_top_level(top_level)
         }

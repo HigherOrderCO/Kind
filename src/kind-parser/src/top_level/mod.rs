@@ -1,6 +1,6 @@
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
-use kind_tree::concrete::{Argument, Attribute, Book, Entry, Rule, Telescope, TopLevel};
+use kind_tree::concrete::{Argument, Attribute, Module, Entry, Rule, Telescope, TopLevel};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -57,7 +57,7 @@ impl<'a> Parser<'a> {
         let hidden = is_hidden_arg(complement.as_ref().unwrap());
         let name = self.parse_id()?;
 
-        let tipo = if self.check_and_eat(Token::Colon) {
+        let typ = if self.check_and_eat(Token::Colon) {
             Some(self.parse_expr(false)?)
         } else {
             None
@@ -70,7 +70,7 @@ impl<'a> Parser<'a> {
             hidden,
             erased,
             name,
-            tipo,
+            typ,
             range,
         })
     }
@@ -141,7 +141,7 @@ impl<'a> Parser<'a> {
         let args = self.parse_arguments()?;
 
         self.eat_variant(Token::Colon)?;
-        let tipo = self.parse_expr(false)?;
+        let typ = self.parse_expr(false)?;
         let mut rules = Vec::new();
         loop {
             let res = self.try_single(&|parser| parser.parse_rule(ident.data.0.clone()))?;
@@ -150,7 +150,7 @@ impl<'a> Parser<'a> {
                 None => break,
             }
         }
-        let end = rules.last().as_ref().map(|x| x.range).unwrap_or(tipo.range);
+        let end = rules.last().as_ref().map(|x| x.range).unwrap_or(typ.range);
 
         // Better error message when you have change the name of the function
         if self.get().is_upper_id() && !self.is_top_level_entry_continuation() {
@@ -161,7 +161,7 @@ impl<'a> Parser<'a> {
             name: ident,
             docs,
             args: Telescope(args),
-            tipo,
+            typ,
             rules,
             attrs,
             range: start.mix(end),
@@ -183,7 +183,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_book(&mut self) -> Book {
+    pub fn parse_book(&mut self) -> Module {
         let mut entries: Vec<TopLevel> = Vec::new();
 
         while !self.get().same_variant(&Token::Eof) {
@@ -206,6 +206,6 @@ impl<'a> Parser<'a> {
             Err(err) => self.errs.send(err.into()).unwrap(),
         }
 
-        Book { entries }
+        Module { entries }
     }
 }

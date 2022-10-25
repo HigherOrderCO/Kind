@@ -9,11 +9,11 @@
 //! use kind_span::{Range, SyntaxCtxIndex};
 
 use crate::symbol::*;
-use crate::{concrete::expr::*, concrete::Glossary};
+use crate::{concrete::expr::*, concrete::Book};
 
 use super::pat::{Pat, PatIdent, PatKind};
 use super::TopLevel;
-use super::{Argument, Attribute, AttributeStyle, Book, Constructor, Entry, Rule};
+use super::{Argument, Attribute, AttributeStyle, Module, Constructor, Entry, Rule};
 
 #[macro_export]
 macro_rules! visit_vec {
@@ -83,7 +83,7 @@ pub trait Visitor: Sized {
         walk_argument(self, argument);
     }
 
-    fn visit_glossary(&mut self, glossary: &mut Glossary) {
+    fn visit_glossary(&mut self, glossary: &mut Book) {
         walk_glossary(self, glossary)
     }
 
@@ -107,7 +107,7 @@ pub trait Visitor: Sized {
         walk_rule(self, rule);
     }
 
-    fn visit_book(&mut self, book: &mut Book) {
+    fn visit_book(&mut self, book: &mut Module) {
         walk_book(self, book);
     }
 
@@ -141,10 +141,10 @@ pub fn walk_literal<T: Visitor>(_: &mut T, _: &mut Literal) {}
 pub fn walk_constructor<T: Visitor>(ctx: &mut T, cons: &mut Constructor) {
     ctx.visit_ident(&mut cons.name);
     visit_vec!(&mut cons.args.0, arg => ctx.visit_argument(arg));
-    visit_opt!(&mut cons.tipo, arg => ctx.visit_expr(arg))
+    visit_opt!(&mut cons.typ, arg => ctx.visit_expr(arg))
 }
 
-pub fn walk_glossary<T: Visitor>(ctx: &mut T, glossary: &mut Glossary) {
+pub fn walk_glossary<T: Visitor>(ctx: &mut T, glossary: &mut Book) {
     visit_vec!(&mut glossary.entries, (_, arg) => ctx.visit_top_level(arg));
 }
 
@@ -197,7 +197,7 @@ pub fn walk_case<T: Visitor>(ctx: &mut T, case: &mut Case) {
 }
 
 pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
-    ctx.visit_ident(&mut matcher.tipo);
+    ctx.visit_ident(&mut matcher.typ);
     ctx.visit_expr(&mut matcher.scrutinizer);
 
     match &mut matcher.motive {
@@ -212,8 +212,8 @@ pub fn walk_match<T: Visitor>(ctx: &mut T, matcher: &mut Match) {
 
 pub fn walk_argument<T: Visitor>(ctx: &mut T, argument: &mut Argument) {
     ctx.visit_ident(&mut argument.name);
-    match &mut argument.tipo {
-        Some(tipo) => ctx.visit_expr(tipo),
+    match &mut argument.typ {
+        Some(typ) => ctx.visit_expr(typ),
         None => (),
     }
     ctx.visit_range(&mut argument.range);
@@ -224,7 +224,7 @@ pub fn walk_entry<T: Visitor>(ctx: &mut T, entry: &mut Entry) {
     for arg in &mut entry.args.0 {
         ctx.visit_argument(arg)
     }
-    ctx.visit_expr(&mut entry.tipo);
+    ctx.visit_expr(&mut entry.typ);
     for rule in &mut entry.rules {
         ctx.visit_rule(rule)
     }
@@ -316,7 +316,7 @@ pub fn walk_top_level<T: Visitor>(ctx: &mut T, toplevel: &mut TopLevel) {
     }
 }
 
-pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
+pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Module) {
     for toplevel in &mut book.entries {
         walk_top_level(ctx, toplevel)
     }

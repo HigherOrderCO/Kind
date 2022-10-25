@@ -4,19 +4,16 @@
 //! we just remove all the types and this is the function
 //! that will run when requested by a type during type checking.
 
-use kind_span::Span;
-use kind_tree::desugared::{self, Expr, Glossary};
-
+use self::tags::EvalTag;
+use self::tags::{operator_to_constructor, TermTag};
 use hvm::Term;
+use kind_span::Span;
+use kind_tree::desugared::{self, Expr, Book};
 use kind_tree::symbol::Ident;
 
 use hvm::language as lang;
 
 mod tags;
-
-use crate::compiler::tags::{operator_to_constructor, TermTag};
-
-use self::tags::EvalTag;
 
 macro_rules! vec_preppend {
     ($($f:expr),*; $e:expr) => {
@@ -34,6 +31,7 @@ fn eval_ctr(quote: bool, head: TermTag) -> String {
             TermTag::Let => EvalTag::EvalLet.to_string(),
             TermTag::Ann => EvalTag::EvalAnn.to_string(),
             TermTag::Sub => EvalTag::EvalSub.to_string(),
+            TermTag::App => EvalTag::EvalApp.to_string(),
             other => other.to_string(),
         }
     }
@@ -41,7 +39,9 @@ fn eval_ctr(quote: bool, head: TermTag) -> String {
 
 // Helpers
 
-pub fn lift_spine(spine: Vec<Box<Term>>) -> Vec<Box<Term>> {
+/// Just lifts the spine into an `args` constructor that is useful
+/// to avoid the arity limit of the type checker.
+fn lift_spine(spine: Vec<Box<Term>>) -> Vec<Box<Term>> {
     if spine.len() >= 14 {
         vec![Box::new(Term::Ctr {
             name: format!("Kind.Term.args{}", spine.len()),
@@ -121,7 +121,13 @@ fn codegen_str(input: &str) -> Box<Term> {
     )
 }
 
-fn codegen_all_expr(lhs_rule: bool, lhs: bool, num: &mut usize, quote: bool, expr: &Expr) -> Box<Term> {
+fn codegen_all_expr(
+    lhs_rule: bool,
+    lhs: bool,
+    num: &mut usize,
+    quote: bool,
+    expr: &Expr,
+) -> Box<Term> {
     use kind_tree::desugared::ExprKind::*;
 
     match &expr.data {
@@ -129,13 +135,7 @@ fn codegen_all_expr(lhs_rule: bool, lhs: bool, num: &mut usize, quote: bool, exp
         U60 => mk_quoted_ctr(eval_ctr(quote, TermTag::U60), vec![span_to_num(expr.span)]),
         Var(ident) => {
             if quote && !lhs {
-                mk_quoted_ctr(
-                    "Kind.Term.set_origin".to_string(),
-                    vec![
-                        span_to_num(expr.span),
-                        mk_var(ident.to_str()),
-                    ],
-                )
+                set_origin(ident)
             } else if lhs_rule {
                 *num += 1;
                 mk_quoted_ctr(
@@ -150,17 +150,15 @@ fn codegen_all_expr(lhs_rule: bool, lhs: bool, num: &mut usize, quote: bool, exp
                 mk_var(ident.to_str())
             }
         }
-        All(name, typ, body) => {
-            mk_quoted_ctr(
-                eval_ctr(quote, TermTag::All),
-                vec![
-                    span_to_num(expr.span),
-                    mk_u60(name.encode()),
-                    codegen_all_expr(lhs_rule, lhs, num, quote, typ),
-                    lam(&name, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
-                ],
-            )
-        }
+        All(name, typ, body) => mk_quoted_ctr(
+            eval_ctr(quote, TermTag::All),
+            vec![
+                span_to_num(expr.span),
+                mk_u60(name.encode()),
+                codegen_all_expr(lhs_rule, lhs, num, quote, typ),
+                lam(&name, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
+            ],
+        ),
         Lambda(name, body) => mk_quoted_ctr(
             eval_ctr(quote, TermTag::Lambda),
             vec![
@@ -169,20 +167,19 @@ fn codegen_all_expr(lhs_rule: bool, lhs: bool, num: &mut usize, quote: bool, exp
                 lam(name, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
             ],
         ),
-        App(head, spine) => {
-            spine
-                .iter()
-                .fold(codegen_all_expr(lhs_rule, lhs, num, quote, head), |left, right| {
-                    mk_quoted_ctr(
-                        eval_ctr(quote, TermTag::App),
-                        vec![
-                            span_to_num(expr.span),
-                            left,
-                            codegen_all_expr(lhs_rule, lhs, num, quote, &right.clone())
-                        ],
-                    )
-                })
-        }
+        App(head, spine) => spine.iter().fold(
+            codegen_all_expr(lhs_rule, lhs, num, quote, head),
+            |left, right| {
+                mk_quoted_ctr(
+                    eval_ctr(quote, TermTag::App),
+                    vec![
+                        span_to_num(expr.span),
+                        left,
+                        codegen_all_expr(lhs_rule, lhs, num, quote, &right.clone()),
+                    ],
+                )
+            },
+        ),
         Ctr(name, spine) => mk_quoted_ctr(
             eval_ctr(quote, TermTag::Ctr(spine.len())),
             vec_preppend![
@@ -285,7 +282,7 @@ fn codegen_type(args: &[desugared::Argument], typ: &desugared::Expr) -> Box<lang
             vec![
                 span_to_num(arg.span),
                 mk_u60(arg.name.encode()),
-                codegen_expr(true, &arg.tipo),
+                codegen_expr(true, &arg.typ),
                 lam(&arg.name, codegen_type(&args[1..], typ)),
             ],
         )
@@ -447,7 +444,7 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
 
     file.rules.push(lang::Rule {
         lhs: mk_ctr("TypeOf".to_owned(), vec![mk_ctr_name(&entry.name)]),
-        rhs: codegen_type(&entry.args, &entry.tipo),
+        rhs: codegen_type(&entry.args, &entry.typ),
     });
 
     let base_vars = (0..entry.args.len())
@@ -509,15 +506,17 @@ fn codegen_entry(file: &mut lang::File, entry: &desugared::Entry) {
     });
 }
 
-pub(crate) fn codegen_glossary(glossary: &Glossary) -> lang::File {
+/// Compiles a book into an format that is executed by the
+/// type checker in HVM.
+pub fn codegen_book(book: &Book) -> lang::File {
     let mut file = lang::File { rules: vec![] };
 
     let functions_entry = lang::Rule {
         lhs: mk_ctr("Functions".to_owned(), vec![]),
-        rhs: codegen_vec(glossary.entrs.values().map(|x| mk_ctr_name(&x.name))),
+        rhs: codegen_vec(book.entrs.values().map(|x| mk_ctr_name(&x.name))),
     };
 
-    for entry in glossary.entrs.values() {
+    for entry in book.entrs.values() {
         codegen_entry(&mut file, entry)
     }
 

@@ -1,10 +1,10 @@
 use std::{path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
-use kind_driver::{resolution::type_check_glossary, session::Session};
+use kind_driver::{session::Session, resolution::type_check_glossary};
 use kind_report::{data::DiagnosticFrame, RenderConfig};
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 #[clap(propagate_version = true)]
 struct Cli {
@@ -26,7 +26,7 @@ struct Cli {
     command: Command,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 enum Command {
     /// Check a file
     #[clap(aliases = &["c"])]
@@ -72,25 +72,29 @@ enum Command {
 }
 
 fn main() {
-    //let _ = Cli::parse();
+    let config = Cli::parse();
 
-    let config = RenderConfig::unicode(2);
-
+    let render_config = RenderConfig::unicode(2);
     let (rx, tx) = std::sync::mpsc::channel();
 
-    let mut session = Session::new(PathBuf::from("."), rx);
-    type_check_glossary(&mut session, "Main", &PathBuf::from("teste.kind2"));
+    match config.command {
+        Command::Check { file } => {
+            let mut session = Session::new(PathBuf::from("."), rx);
+            type_check_glossary(&mut session, &PathBuf::from(file));
 
-    let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
+            let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
 
-    for err in &errs {
-        kind_driver::render_error_to_stderr(&session, &config, err);
-    }
+            for err in &errs {
+                kind_driver::render_error_to_stderr(&session, &render_config, err);
+            }
 
-    if !errs.is_empty() {
-        eprintln!();
-        exit(1);
-    } else {
-        exit(0);
+            if !errs.is_empty() {
+                eprintln!();
+                exit(1);
+            } else {
+                exit(0);
+            }
+        },
+        _ => todo!()
     }
 }

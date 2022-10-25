@@ -3,12 +3,10 @@
 //! we have to statically analyse the tree with better
 //! error messages.
 
+use super::pat::PatIdent;
+use crate::{symbol::Ident, Operator};
 use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
-
-use crate::{symbol::Ident, Operator};
-
-use super::pat::PatIdent;
 
 /// A binding express the positional or named argument of
 /// a constructor or function.
@@ -42,11 +40,11 @@ pub struct Case {
     pub ignore_rest: bool,
 }
 
-/// A match block that will be translated
+/// A match block that will be desugared
 /// into an eliminator of a datatype.
 #[derive(Clone, Debug)]
 pub struct Match {
-    pub tipo: Ident,
+    pub typ: Ident,
     pub scrutinizer: Box<Expr>,
     pub cases: Vec<Case>,
     pub motive: Option<Box<Expr>>,
@@ -86,8 +84,6 @@ pub enum Destruct {
     Ident(Ident),
 }
 
-
-
 #[derive(Clone, Debug)]
 pub enum SttmKind {
     Expr(Box<Expr>, Box<Sttm>),
@@ -97,14 +93,15 @@ pub enum SttmKind {
     RetExpr(Box<Expr>),
 }
 
-/// A statement is expression inside of the `do` notation. It
-/// describes the idea of `sequence` inside a monad.
+/// Structure of the insides of the `do` notation. It
+/// describes the idea of `sequence` inside a monad
+/// each monadic action contains a `next` element that is
+/// desugared into a 'monadic bind'.
 #[derive(Clone, Debug)]
 pub struct Sttm {
     pub data: SttmKind,
     pub range: Range,
 }
-
 
 #[derive(Clone, Debug)]
 pub enum ExprKind {
@@ -330,7 +327,7 @@ impl Display for Case {
 
 impl Display for Match {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "match {} {}", self.tipo, self.scrutinizer)?;
+        write!(f, "match {} {}", self.typ, self.scrutinizer)?;
 
         match &self.motive {
             None => Ok(()),

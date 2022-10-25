@@ -561,7 +561,7 @@ impl<'a> Parser<'a> {
         let start = self.range();
         self.advance(); // 'match'
 
-        let tipo = self.parse_upper_id()?;
+        let typ = self.parse_upper_id()?;
         let scrutinizer = self.parse_expr(false)?;
 
         self.eat_variant(Token::LBrace)?;
@@ -593,7 +593,7 @@ impl<'a> Parser<'a> {
         };
 
         let match_ = Box::new(Match {
-            tipo,
+            typ,
             scrutinizer,
             cases,
             motive,

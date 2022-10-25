@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use kind_derive::matching::derive_match;
-use kind_tree::concrete::{Glossary, TopLevel};
+use kind_tree::concrete::{Book, TopLevel};
 
-pub fn expand_glossary(glossary: &mut Glossary) {
+pub fn expand_glossary(glossary: &mut Book) {
     let mut entries = HashMap::new();
     for entry in glossary.entries.values_mut() {
         match entry {

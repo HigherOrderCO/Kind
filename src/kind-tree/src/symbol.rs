@@ -1,3 +1,5 @@
+//! Describes identifiers and symbols inside the language.
+
 use std::fmt::Display;
 
 use kind_span::{Range, SyntaxCtxIndex};
@@ -14,6 +16,9 @@ pub struct Symbol(pub String);
 pub struct Ident {
     pub data: Symbol,
     pub range: Range,
+    /// Flag that is useful to avoid unbound errors while
+    /// trying to collect names created by each of the sintatic
+    /// sugars.
     pub used_by_sugar: bool,
 }
 

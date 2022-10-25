@@ -1,14 +1,14 @@
+///! Module to derive a dependent
+/// eliminator out of a sum type declaration.
 use kind_span::Range;
-use kind_tree::{
-    concrete::{
-        self,
-        expr::Expr,
-        pat::{Pat, PatIdent},
-        Argument, Binding, Entry, ExprKind, Literal, Rule, SumTypeDecl, Telescope,
-    },
-    symbol::Ident,
-};
 
+use kind_tree::concrete::expr::Expr;
+use kind_tree::concrete::pat::{Pat, PatIdent};
+use kind_tree::concrete::*;
+use kind_tree::concrete::{self};
+use kind_tree::symbol::Ident;
+
+/// Derives an eliminator from a sum type declaration.
 pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     let mk_var = |name: Ident| -> Box<Expr> {
         Box::new(Expr {
@@ -81,7 +81,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         hidden: false,
         erased: false,
         name: Ident::generate("scrutinizer"),
-        tipo: Some(res_motive_ty.clone()),
+        typ: Some(res_motive_ty.clone()),
         range,
     });
 
@@ -95,14 +95,14 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
             res_motive_ty.clone(),
             mk_typ(),
         ),
-        |out, arg| mk_pi(arg.name.clone(), arg.tipo.clone().unwrap_or(mk_typ()), out),
+        |out, arg| mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or(mk_typ()), out),
     );
 
     types.push(Argument {
         hidden: false,
         erased: true,
         name: motive_ident.clone(),
-        tipo: Some(motive_type),
+        typ: Some(motive_type),
         range,
     });
 
@@ -117,7 +117,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
         let cons_inst = mk_app(mk_cons(sum.name.add_segment(cons.name.to_str())), vars);
 
-        let mut indices_of_cons = match cons.tipo.clone().map(|x| x.data) {
+        let mut indices_of_cons = match cons.typ.clone().map(|x| x.data) {
             Some(ExprKind::App(_, spine)) => spine[sum.parameters.len()..].to_vec(),
             _ => indice_names.clone(),
         };
@@ -126,14 +126,14 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let cons_tipo = mk_app(mk_var(motive_ident.clone()), indices_of_cons);
 
         let cons_type = cons.args.0.iter().rfold(cons_tipo, |out, arg| {
-            mk_pi(arg.name.clone(), arg.tipo.clone().unwrap_or(mk_typ()), out)
+            mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or(mk_typ()), out)
         });
 
         types.push(Argument {
             hidden: false,
             erased: false,
             name: Ident::new_static("_", range),
-            tipo: Some(cons_type),
+            typ: Some(cons_type),
             range,
         });
     }
@@ -148,7 +148,12 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         let cons_ident = sum.name.add_segment(cons.name.to_str());
         let mut pats: Vec<Box<Pat>> = Vec::new();
 
-        let spine: Vec<Ident> = cons.args.0.iter().map(|x| x.name.with_name(|f| format!("{}_", f))).collect();
+        let spine: Vec<Ident> = cons
+            .args
+            .0
+            .iter()
+            .map(|x| x.name.with_name(|f| format!("{}_", f)))
+            .collect();
 
         pats.push(Box::new(Pat {
             data: concrete::pat::PatKind::App(
@@ -181,7 +186,9 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
         let body = mk_app(
             mk_var(cons.name.clone()),
-            spine.iter().cloned()
+            spine
+                .iter()
+                .cloned()
                 .map(|arg| Binding::Positional(mk_var(arg)))
                 .collect(),
         );
@@ -199,7 +206,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         name,
         docs: Vec::new(),
         args: types,
-        tipo: ret_ty,
+        typ: ret_ty,
         rules,
         range,
         attrs: Vec::new(),

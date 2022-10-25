@@ -20,7 +20,7 @@ impl<'a> Parser<'a> {
             name,
             docs,
             args: Telescope(args),
-            tipo: typ,
+            typ: typ,
         })
     }
 

@@ -21,10 +21,10 @@ pub use expr::*;
 /// A sequence of arguments that depends on the previous sequence
 /// it's similar to a iterated sigma type.
 #[derive(Debug, Clone, Default)]
-pub struct Telescope<A>(pub Vec<A>);
+pub struct Telescope<T>(pub Vec<T>);
 
-impl<A> Telescope<A> {
-    pub fn new() -> Telescope<A> {
+impl<T> Telescope<T> {
+    pub fn new() -> Telescope<T> {
         Telescope(Vec::new())
     }
 
@@ -32,8 +32,16 @@ impl<A> Telescope<A> {
         self.0.len()
     }
 
-    pub fn push(&mut self, el: A) {
+    pub fn push(&mut self, el: T) {
         self.0.push(el)
+    }
+
+    pub fn as_slice(&self) -> &[T] {
+        self.0.as_slice()
+    }
+
+    pub fn to_vec(self) -> Vec<T> {
+        self.0
     }
 }
 
@@ -68,7 +76,7 @@ pub struct Argument {
     pub hidden: bool,
     pub erased: bool,
     pub name: Ident,
-    pub tipo: Option<Box<Expr>>,
+    pub typ: Option<Box<Expr>>,
     pub range: Range,
 }
 
@@ -86,13 +94,13 @@ pub struct Rule {
 /// An entry describes a function that is typed
 /// and has rules. The type of the function
 /// consists of the arguments @args@ and the
-/// return type @tipo@.
+/// return type @typ@.
 #[derive(Clone, Debug)]
 pub struct Entry {
     pub name: Ident,
     pub docs: Vec<String>,
     pub args: Telescope<Argument>,
-    pub tipo: Box<Expr>,
+    pub typ: Box<Expr>,
     pub rules: Vec<Box<Rule>>,
     pub range: Range,
     pub attrs: Vec<Attribute>,
@@ -105,7 +113,7 @@ pub struct Constructor {
     pub name: Ident,
     pub docs: Vec<String>,
     pub args: Telescope<Argument>,
-    pub tipo: Option<Box<Expr>>,
+    pub typ: Option<Box<Expr>>,
 }
 
 /// An algebraic data type definition that supports
@@ -153,14 +161,20 @@ impl TopLevel {
     }
 }
 
-/// A book is a collection of entries.
+/// A module is a collection of top level entries
+/// that contains syntatic sugars. In the future
+/// it will contain a HashMap to local renames.
 #[derive(Clone, Debug, Default)]
-pub struct Book {
+pub struct Module {
     pub entries: Vec<TopLevel>,
 }
 
+/// Metadata about entries, it's really useful when we
+/// are trying to desugar something that does not contains
+/// a lot of information like a record definition or a sum
+/// type definition.
 #[derive(Debug, Clone)]
-pub struct GlossaryEntry {
+pub struct EntryMeta {
     pub hiddens: usize,
     pub erased: usize,
     pub arguments: Telescope<Argument>,
@@ -171,14 +185,14 @@ pub struct GlossaryEntry {
 /// A glossary stores definitions by name. It's generated
 /// by joining a bunch of books that are already resolved.
 #[derive(Clone, Debug, Default)]
-pub struct Glossary {
+pub struct Book {
     pub names: LinkedHashMap<String, Ident>,  // Ordered hashset
     pub entries: FxHashMap<String, TopLevel>, // Probably deterministic order everytime
-    pub count: FxHashMap<String, GlossaryEntry>, // Stores some important information in order to desugarize
+    pub count: FxHashMap<String, EntryMeta>, // Stores some important information in order to desugarize
 }
 
-impl Glossary {
-    pub fn get_count_garanteed(&self, name: &String) -> &GlossaryEntry {
+impl Book {
+    pub fn get_count_garanteed(&self, name: &String) -> &EntryMeta {
         self.count
             .get(name)
             .unwrap_or_else(|| panic!("Internal Error: Garanteed count {:?} failed", name))
@@ -202,7 +216,7 @@ impl Display for Constructor {
         for arg in &self.args.0 {
             write!(f, " {}", arg)?;
         }
-        if let Some(res) = &self.tipo {
+        if let Some(res) = &self.typ {
             write!(f, " : {}", res)?;
         }
         Ok(())
@@ -260,7 +274,7 @@ impl Display for TopLevel {
     }
 }
 
-impl Display for Book {
+impl Display for Module {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         for entr in &self.entries {
             writeln!(f, "{}", entr)?;
@@ -277,8 +291,8 @@ impl Display for Argument {
             (true, false) => ("-(", ")"),
             (true, true) => ("<", ">"),
         };
-        match &self.tipo {
-            Some(tipo) => write!(f, "{}{}: {}{}", open, self.name, tipo, close),
+        match &self.typ {
+            Some(typ) => write!(f, "{}{}: {}{}", open, self.name, typ, close),
             None => write!(f, "{}{}{}", open, self.name, close),
         }
     }
@@ -300,7 +314,7 @@ impl Display for Entry {
             write!(f, " {}", arg)?;
         }
 
-        write!(f, " : {}", &self.tipo)?;
+        write!(f, " : {}", &self.typ)?;
 
         for rule in &self.rules {
             write!(f, "\n{}", rule)?
@@ -406,7 +420,7 @@ impl Telescope<Argument> {
 }
 
 impl SumTypeDecl {
-    pub fn extract_glossary_info(&self) -> GlossaryEntry {
+    pub fn extract_glossary_info(&self) -> EntryMeta {
         let mut arguments = Telescope::new();
         let mut hiddens = 0;
         let mut erased = 0;
@@ -423,7 +437,7 @@ impl SumTypeDecl {
 
         arguments = arguments.extend(&self.indices);
 
-        GlossaryEntry {
+        EntryMeta {
             hiddens,
             erased,
             arguments,
@@ -434,7 +448,7 @@ impl SumTypeDecl {
 }
 
 impl Constructor {
-    pub fn extract_glossary_info(&self, def: &SumTypeDecl) -> GlossaryEntry {
+    pub fn extract_glossary_info(&self, def: &SumTypeDecl) -> EntryMeta {
         let mut arguments = Telescope::new();
         let mut hiddens = 0;
         let mut erased = 0;
@@ -446,7 +460,7 @@ impl Constructor {
 
         // It tries to use all of the indices if no type
         // is specified.
-        if self.tipo.is_none() {
+        if self.typ.is_none() {
             hiddens += def.indices.0.len();
             erased += def.indices.0.len();
             arguments = arguments.extend(&def.indices.map(|x| x.to_implicit()));
@@ -463,7 +477,7 @@ impl Constructor {
 
         arguments = arguments.extend(&self.args.clone());
 
-        GlossaryEntry {
+        EntryMeta {
             hiddens,
             erased,
             arguments,
@@ -489,7 +503,7 @@ impl RecordDecl {
         )
     }
 
-    pub fn extract_glossary_info(&self) -> GlossaryEntry {
+    pub fn extract_glossary_info(&self) -> EntryMeta {
         let mut arguments = Telescope::new();
         let mut hiddens = 0;
         let mut erased = 0;
@@ -500,7 +514,7 @@ impl RecordDecl {
 
         arguments = arguments.extend(&self.parameters);
 
-        GlossaryEntry {
+        EntryMeta {
             hiddens,
             erased,
             arguments,
@@ -509,7 +523,7 @@ impl RecordDecl {
         }
     }
 
-    pub fn extract_glossary_info_of_constructor(&self) -> GlossaryEntry {
+    pub fn extract_glossary_info_of_constructor(&self) -> EntryMeta {
         let mut arguments = Telescope::new();
         let mut hiddens = 0;
         let mut erased = 0;
@@ -528,7 +542,7 @@ impl RecordDecl {
 
         arguments = arguments.extend(&Telescope(field_args));
 
-        GlossaryEntry {
+        EntryMeta {
             hiddens,
             erased,
             arguments,
@@ -539,7 +553,7 @@ impl RecordDecl {
 }
 
 impl Entry {
-    pub fn extract_glossary_info(&self) -> GlossaryEntry {
+    pub fn extract_glossary_info(&self) -> EntryMeta {
         let mut arguments = Telescope::new();
         let mut hiddens = 0;
         let mut erased = 0;
@@ -550,7 +564,7 @@ impl Entry {
 
         arguments = arguments.extend(&self.args);
 
-        GlossaryEntry {
+        EntryMeta {
             hiddens,
             erased,
             arguments,
@@ -561,12 +575,12 @@ impl Entry {
 }
 
 impl Argument {
-    pub fn new_explicit(name: Ident, tipo: Box<Expr>, range: Range) -> Argument {
+    pub fn new_explicit(name: Ident, typ: Box<Expr>, range: Range) -> Argument {
         Argument {
             hidden: false,
             erased: false,
             name,
-            tipo: Some(tipo),
+            typ: Some(typ),
             range,
         }
     }
@@ -576,7 +590,7 @@ impl Argument {
             hidden: true,
             erased: true,
             name: self.name.clone(),
-            tipo: self.tipo.clone(),
+            typ: self.typ.clone(),
             range: self.range,
         }
     }

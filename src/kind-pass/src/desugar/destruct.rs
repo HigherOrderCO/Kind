@@ -66,18 +66,18 @@ impl<'a> DesugarState<'a> {
         on_ident: &dyn Fn(&mut Self, &Ident) -> Box<desugared::Expr>,
     ) -> Box<desugared::Expr> {
         match binding {
-            Destruct::Destruct(destruct_range, tipo, case, jump_rest) => {
-                let entry = self.old_glossary.get_entry_garanteed(&tipo.data.0);
+            Destruct::Destruct(destruct_range, typ, case, jump_rest) => {
+                let entry = self.old_glossary.get_entry_garanteed(&typ.data.0);
 
                 let record = if let TopLevel::RecordType(record) = entry {
                     record
                 } else {
-                    self.send_err(PassError::LetDestructOnlyForRecord(tipo.range));
-                    return desugared::Expr::err(tipo.range);
+                    self.send_err(PassError::LetDestructOnlyForRecord(typ.range));
+                    return desugared::Expr::err(typ.range);
                 };
 
                 let ordered_fields = self.order_case_arguments(
-                    (&tipo.range, tipo),
+                    (&typ.range, typ),
                     &record
                         .fields
                         .iter()
@@ -94,11 +94,11 @@ impl<'a> DesugarState<'a> {
                         arguments.push(name.0)
                     } else {
                         // TODO: Generate name
-                        arguments.push(Ident::new(Symbol(self.gen_name(tipo.range).to_string()), tipo.range))
+                        arguments.push(Ident::new(Symbol(self.gen_name(typ.range).to_string()), typ.range))
                     }
                 }
 
-                let open_id = tipo.add_segment("open");
+                let open_id = typ.add_segment("open");
 
                 let spine = vec![
                     val,
@@ -135,13 +135,13 @@ impl<'a> DesugarState<'a> {
     }
 
     pub(crate) fn desugar_match(&mut self, range: Range, match_: &expr::Match) -> Box<desugared::Expr> {
-        let entry = self.old_glossary.get_entry_garanteed(match_.tipo.to_str());
+        let entry = self.old_glossary.get_entry_garanteed(match_.typ.to_str());
 
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
         } else {
-            self.send_err(PassError::LetDestructOnlyForSum(match_.tipo.range));
-            return desugared::Expr::err(match_.tipo.range);
+            self.send_err(PassError::LetDestructOnlyForSum(match_.typ.range));
+            return desugared::Expr::err(match_.typ.range);
         };
 
         let mut cases_args = Vec::new();
@@ -158,8 +158,8 @@ impl<'a> DesugarState<'a> {
                 None => {
                     self.send_err(PassError::CannotFindConstructor(
                         case.constructor.range,
-                        match_.tipo.range,
-                        match_.tipo.to_str().clone(),
+                        match_.typ.range,
+                        match_.typ.to_str().clone(),
                     ));
                     continue;
                 }
@@ -188,7 +188,7 @@ impl<'a> DesugarState<'a> {
                         arguments.push(name.0)
                     } else {
                         // TODO: Generate name
-                        arguments.push(Ident::new(Symbol(self.gen_name(match_.tipo.range).to_string()), match_.tipo.range))
+                        arguments.push(Ident::new(Symbol(self.gen_name(match_.typ.range).to_string()), match_.typ.range))
                     }
                 }
                 cases_args[index] = Some((case.constructor.range, arguments, &case.value));
@@ -201,13 +201,6 @@ impl<'a> DesugarState<'a> {
         for (i, case_arg) in cases_args.iter().enumerate() {
             let case = &sum.constructors[i];
             if let Some((range, arguments, val)) = &case_arg {
-                println!(
-                    "Args: {:?}",
-                    arguments
-                        .iter()
-                        .map(|x| x.to_str())
-                        .collect::<Vec<&String>>()
-                );
                 lambdas.push(desugared::Expr::unfold_lambda(
                     *range,
                     arguments,
@@ -222,7 +215,7 @@ impl<'a> DesugarState<'a> {
             self.send_err(PassError::NoCoverage(range, unbound))
         }
 
-        let match_id = match_.tipo.add_segment("match");
+        let match_id = match_.typ.add_segment("match");
 
         let motive = if let Some(res) = &match_.motive {
             self.desugar_expr(res)
@@ -237,7 +230,7 @@ impl<'a> DesugarState<'a> {
         let prefix = [self.desugar_expr(&match_.scrutinizer), motive];
 
         self.mk_desugared_fun(
-            match_.tipo.range,
+            match_.typ.range,
             match_id,
             [prefix.as_slice(), lambdas.as_slice()].concat(),
         )
