@@ -9,7 +9,7 @@ use kind_span::{Range, SyntaxCtxIndex};
 /// to store all the names and only reference them with
 /// a u64.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct Symbol(pub String);
+pub struct Symbol(String);
 
 /// Identifier inside a syntax context.
 #[derive(Clone, Debug, Hash)]
@@ -23,9 +23,9 @@ pub struct Ident {
 }
 
 impl Ident {
-    pub fn new(data: Symbol, range: Range) -> Ident {
+    pub fn new(data: String, range: Range) -> Ident {
         Ident {
-            data,
+            data: Symbol(data),
             range,
             used_by_sugar: false,
         }
@@ -53,7 +53,7 @@ impl Ident {
         new
     }
 
-    pub fn to_str(&self) -> &String {
+    pub fn to_str(&self) -> &str {
         &self.data.0
     }
 

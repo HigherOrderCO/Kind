@@ -1,7 +1,7 @@
 use std::{path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
-use kind_driver::{session::Session, resolution::type_check_glossary};
+use kind_driver::{resolution::type_check_book, session::Session};
 use kind_report::{data::DiagnosticFrame, RenderConfig};
 
 #[derive(Parser, Debug)]
@@ -80,7 +80,7 @@ fn main() {
     match config.command {
         Command::Check { file } => {
             let mut session = Session::new(PathBuf::from("."), rx);
-            type_check_glossary(&mut session, &PathBuf::from(file));
+            type_check_book(&mut session, &PathBuf::from(file));
 
             let errs = tx.try_iter().collect::<Vec<DiagnosticFrame>>();
 
@@ -94,7 +94,7 @@ fn main() {
             } else {
                 exit(0);
             }
-        },
-        _ => todo!()
+        }
+        _ => todo!(),
     }
 }

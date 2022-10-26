@@ -8,6 +8,8 @@ use crate::{symbol::Ident, Operator};
 use kind_span::{Locatable, Range};
 use std::fmt::{Display, Error, Formatter};
 
+pub struct ConsIdent(pub Ident);
+
 /// A binding express the positional or named argument of
 /// a constructor or function.
 #[derive(Clone, Debug)]

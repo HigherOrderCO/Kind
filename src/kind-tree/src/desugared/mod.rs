@@ -47,7 +47,9 @@ pub enum ExprKind {
     Hole(u64),
     /// Help
     Hlp(Ident),
-    /// Error node
+    /// Error node (It's useful as a sentinel value
+    /// to be able to continue compilation even with
+    /// parts of the tree with problems)
     Err,
 }
 
@@ -228,9 +230,7 @@ pub struct Rule {
 /// Attributes describes some compiler specific aspects
 /// like inlining and derivations.
 #[derive(Clone, Debug)]
-pub enum Attribute {
-
-}
+pub enum Attribute {}
 
 /// An entry describes a function that is typed
 /// and has rules. The type of the function
@@ -253,8 +253,6 @@ pub struct Book {
     pub holes: u64,
 }
 
-// Display
-
 impl Expr {
     pub fn new_var(name: Ident) -> Expr {
         Expr {
@@ -265,10 +263,12 @@ impl Expr {
 
     pub fn traverse_pi_types(&self) -> String {
         match &self.data {
-            ExprKind::All(binder, typ, body) => if binder.to_string().starts_with(".") {
-                format!("{} -> {}", typ, body.traverse_pi_types())
-            } else {
-                format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types())
+            ExprKind::All(binder, typ, body) => {
+                if binder.to_string().starts_with('.') {
+                    format!("{} -> {}", typ, body.traverse_pi_types())
+                } else {
+                    format!("({} : {}) -> {}", binder, typ, body.traverse_pi_types())
+                }
             }
             _ => format!("{}", self),
         }
@@ -294,7 +294,7 @@ impl Display for Expr {
                 spine.iter().map(|x| format!(" {}", x)).collect::<String>()
             ),
             Fun(head, spine) | Ctr(head, spine) => {
-                if spine.len() == 0 {
+                if spine.is_empty() {
                     write!(f, "{}", head)
                 } else {
                     write!(

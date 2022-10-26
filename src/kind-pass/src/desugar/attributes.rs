@@ -1,4 +1,4 @@
-use kind_tree::{desugared, concrete};
+use kind_tree::{concrete, desugared};
 
 use super::DesugarState;
 

@@ -20,7 +20,7 @@ impl From<DriverError> for DiagnosticFrame {
             DriverError::UnboundVariable(idents, suggestions) => DiagnosticFrame {
                 code: 100,
                 severity: Severity::Error,
-                title: format!("Cannot find the definition '{}'.", idents[0].data.0),
+                title: format!("Cannot find the definition '{}'.", idents[0].to_str()),
                 subtitles: vec![],
                 hints: vec![
                     if !suggestions.is_empty() {

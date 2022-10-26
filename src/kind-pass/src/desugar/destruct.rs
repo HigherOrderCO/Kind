@@ -3,7 +3,7 @@ use kind_span::{Locatable, Range};
 use kind_tree::concrete::pat::PatIdent;
 use kind_tree::concrete::{expr, CaseBinding, Destruct, TopLevel};
 use kind_tree::desugared;
-use kind_tree::symbol::{Ident, Symbol};
+use kind_tree::symbol::Ident;
 
 use crate::errors::PassError;
 
@@ -30,7 +30,7 @@ impl<'a> DesugarState<'a> {
                 CaseBinding::Renamed(name, alias) => (name.clone(), alias.clone()),
             };
 
-            if let Some((idx, _)) = names.get(&name.data.0) {
+            if let Some((idx, _)) = names.get(name.to_str()) {
                 if let Some((range, _)) = ordered_fields[*idx] {
                     self.send_err(PassError::DuplicatedNamed(range, name.range));
                 } else {
@@ -40,7 +40,7 @@ impl<'a> DesugarState<'a> {
                 self.send_err(PassError::CannotFindField(
                     name.range,
                     *type_info.0,
-                    type_info.1.data.0.clone(),
+                    type_info.1.to_string(),
                 ))
             }
         }
@@ -67,7 +67,7 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         match binding {
             Destruct::Destruct(destruct_range, typ, case, jump_rest) => {
-                let entry = self.old_glossary.get_entry_garanteed(&typ.data.0);
+                let entry = self.old_book.get_entry_garanteed(&typ.to_string());
 
                 let record = if let TopLevel::RecordType(record) = entry {
                     record
@@ -81,7 +81,7 @@ impl<'a> DesugarState<'a> {
                     &record
                         .fields
                         .iter()
-                        .map(|x| (x.0.data.0.clone(), false))
+                        .map(|x| (x.0.to_string(), false))
                         .collect::<Vec<(String, bool)>>(),
                     case,
                     *jump_rest,
@@ -93,8 +93,7 @@ impl<'a> DesugarState<'a> {
                     if let Some((_, name)) = arg {
                         arguments.push(name.0)
                     } else {
-                        // TODO: Generate name
-                        arguments.push(Ident::new(Symbol(self.gen_name(typ.range).to_string()), typ.range))
+                        arguments.push(self.gen_name(typ.range))
                     }
                 }
 
@@ -134,8 +133,12 @@ impl<'a> DesugarState<'a> {
         )
     }
 
-    pub(crate) fn desugar_match(&mut self, range: Range, match_: &expr::Match) -> Box<desugared::Expr> {
-        let entry = self.old_glossary.get_entry_garanteed(match_.typ.to_str());
+    pub(crate) fn desugar_match(
+        &mut self,
+        range: Range,
+        match_: &expr::Match,
+    ) -> Box<desugared::Expr> {
+        let entry = self.old_book.get_entry_garanteed(&match_.typ.to_string());
 
         let sum = if let TopLevel::SumType(sum) = entry {
             sum
@@ -159,7 +162,7 @@ impl<'a> DesugarState<'a> {
                     self.send_err(PassError::CannotFindConstructor(
                         case.constructor.range,
                         match_.typ.range,
-                        match_.typ.to_str().clone(),
+                        match_.typ.to_string(),
                     ));
                     continue;
                 }
@@ -173,9 +176,8 @@ impl<'a> DesugarState<'a> {
                     (&case.constructor.range, &case.constructor),
                     &sum_c
                         .args
-                        .0
                         .iter()
-                        .map(|x| (x.name.to_str().clone(), x.hidden))
+                        .map(|x| (x.name.to_string(), x.hidden))
                         .collect::<Vec<(String, bool)>>(),
                     &case.bindings,
                     case.ignore_rest,
@@ -187,8 +189,7 @@ impl<'a> DesugarState<'a> {
                     if let Some((_, name)) = arg {
                         arguments.push(name.0)
                     } else {
-                        // TODO: Generate name
-                        arguments.push(Ident::new(Symbol(self.gen_name(match_.typ.range).to_string()), match_.typ.range))
+                        arguments.push(self.gen_name(match_.typ.range));
                     }
                 }
                 cases_args[index] = Some((case.constructor.range, arguments, &case.value));
@@ -207,7 +208,7 @@ impl<'a> DesugarState<'a> {
                     self.desugar_expr(val),
                 ))
             } else {
-                unbound.push(case.name.to_str().clone())
+                unbound.push(case.name.to_string())
             }
         }
 
@@ -220,7 +221,7 @@ impl<'a> DesugarState<'a> {
         let motive = if let Some(res) = &match_.motive {
             self.desugar_expr(res)
         } else {
-            let mut idx: Vec<Ident> = sum.indices.0.iter().map(|x| x.name.clone()).collect();
+            let mut idx: Vec<Ident> = sum.indices.iter().map(|x| x.name.clone()).collect();
             idx.push(Ident::generate("_val"));
             idx.iter().rfold(self.gen_hole_expr(), |expr, l| {
                 desugared::Expr::lambda(l.range, l.clone(), expr)

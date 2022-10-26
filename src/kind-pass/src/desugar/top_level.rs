@@ -1,7 +1,7 @@
 use kind_span::{Range, Span};
 use kind_tree::concrete::{self, Telescope};
 use kind_tree::desugared;
-use kind_tree::symbol::{Ident, Symbol};
+use kind_tree::symbol::Ident;
 
 use crate::errors::{PassError, Sugar};
 
@@ -13,14 +13,14 @@ use super::DesugarState;
 /// NOTE: Does not work with Pi types.
 pub fn is_data_constructor_of(expr: concrete::expr::Expr, type_name: &str) -> bool {
     match expr.data {
-        concrete::ExprKind::Var(name) => name.data.0 == type_name,
+        concrete::ExprKind::Var(name) => name.to_str() == type_name,
         concrete::ExprKind::App(head, _) => {
             if let concrete::expr::Expr {
                 data: concrete::ExprKind::Var(name),
                 ..
             } = *head
             {
-                name.data.0 == type_name
+                name.to_str() == type_name
             } else {
                 false
             }
@@ -54,26 +54,26 @@ impl<'a> DesugarState<'a> {
 
         let type_constructor = desugared::Entry {
             name: sum_type.name.clone(),
-            args: desugared_params.extend(&desugared_indices).0,
+            args: desugared_params.extend(&desugared_indices).to_vec(),
             typ: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(sum_type.name.range),
             attrs: self.desugar_attributes(&sum_type.attrs),
         };
 
-        self.new_glossary
+        self.new_book
             .entrs
-            .insert(sum_type.name.data.0.clone(), Box::new(type_constructor));
+            .insert(sum_type.name.to_string(), Box::new(type_constructor));
 
         let irrelevant_params: Vec<desugared::Argument> =
-            desugared_params.map(|x| x.to_irrelevant()).0;
+            desugared_params.map(|x| x.to_irrelevant()).to_vec();
 
         let irelevant_indices: Vec<desugared::Argument> = indices
             .map(|arg| self.desugar_argument(arg).to_irrelevant())
-            .0;
+            .to_vec();
 
         for cons in &sum_type.constructors {
-            let cons_ident = cons.name.add_base_ident(&sum_type.name.data.0);
+            let cons_ident = cons.name.add_base_ident(&sum_type.name.to_str());
 
             let pre_indices = if cons.typ.is_none() {
                 irelevant_indices.as_slice()
@@ -99,7 +99,7 @@ impl<'a> DesugarState<'a> {
                 args: [
                     irrelevant_params.as_slice(),
                     pre_indices,
-                    cons.args.map(|arg| self.desugar_argument(arg)).0.as_slice(),
+                    cons.args.map(|arg| self.desugar_argument(arg)).as_slice(),
                 ]
                 .concat(),
                 typ,
@@ -108,9 +108,9 @@ impl<'a> DesugarState<'a> {
                 span: Span::Locatable(sum_type.name.range),
             };
 
-            self.new_glossary
+            self.new_book
                 .entrs
-                .insert(cons_ident.data.0.clone(), Box::new(data_constructor));
+                .insert(cons_ident.to_string(), Box::new(data_constructor));
         }
     }
 
@@ -121,19 +121,18 @@ impl<'a> DesugarState<'a> {
 
         let type_constructor = desugared::Entry {
             name: rec_type.name.clone(),
-            args: desugared_params.0.clone(),
+            args: desugared_params.clone().to_vec(),
             typ: desugared::Expr::generate_expr(desugared::ExprKind::Typ),
             rules: Vec::new(),
             span: Span::Locatable(rec_type.name.range),
             attrs: self.desugar_attributes(&rec_type.attrs),
         };
 
-        self.new_glossary
+        self.new_book
             .entrs
-            .insert(rec_type.name.data.0.clone(), Box::new(type_constructor));
+            .insert(rec_type.name.to_string(), Box::new(type_constructor));
 
-        let irrelevant_params: Vec<desugared::Argument> =
-            desugared_params.map(|x| x.to_irrelevant()).0;
+        let irrelevant_params = desugared_params.map(|x| x.to_irrelevant());
 
         let args = [irrelevant_params.as_slice()]
             .concat()
@@ -157,7 +156,7 @@ impl<'a> DesugarState<'a> {
             span: Span::Generated,
         });
 
-        let cons_ident = rec_type.constructor.add_base_ident(&rec_type.name.data.0);
+        let cons_ident = rec_type.constructor.add_base_ident(&rec_type.name.to_str());
 
         let data_constructor = desugared::Entry {
             name: cons_ident.clone(),
@@ -183,9 +182,9 @@ impl<'a> DesugarState<'a> {
             attrs: Vec::new(),
         };
 
-        self.new_glossary
+        self.new_book
             .entrs
-            .insert(cons_ident.data.0, Box::new(data_constructor));
+            .insert(cons_ident.to_string(), Box::new(data_constructor));
     }
 
     pub fn desugar_pair_pat(
@@ -194,9 +193,9 @@ impl<'a> DesugarState<'a> {
         fst: &concrete::pat::Pat,
         snd: &concrete::pat::Pat,
     ) -> Box<desugared::Expr> {
-        let sigma_new = Ident::new(Symbol("Sigma.new".to_string()), range);
+        let sigma_new = Ident::new_static("Sigma.new", range);
 
-        let entry = self.old_glossary.entries.get(sigma_new.to_str());
+        let entry = self.old_book.entries.get(sigma_new.to_str());
         if entry.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
             return desugared::Expr::err(range);
@@ -212,13 +211,13 @@ impl<'a> DesugarState<'a> {
         range: Range,
         expr: &[concrete::pat::Pat],
     ) -> Box<desugared::Expr> {
-        let cons_ident = Ident::new(Symbol("List.cons".to_string()), range);
-        let nil_ident = Ident::new(Symbol("List.nil".to_string()), range);
-        let list_ident = Ident::new(Symbol("List".to_string()), range);
+        let cons_ident = Ident::new_static("List.cons", range);
+        let nil_ident = Ident::new_static("List.nil", range);
+        let list_ident = Ident::new_static("List", range);
 
-        let list = self.old_glossary.entries.get(list_ident.to_str());
-        let nil = self.old_glossary.entries.get(cons_ident.to_str());
-        let cons = self.old_glossary.entries.get(nil_ident.to_str());
+        let list = self.old_book.entries.get(list_ident.to_str());
+        let nil = self.old_book.entries.get(cons_ident.to_str());
+        let cons = self.old_book.entries.get(nil_ident.to_str());
 
         if list.is_none() || nil.is_none() || cons.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
@@ -238,9 +237,9 @@ impl<'a> DesugarState<'a> {
         match &pat.data {
             concrete::pat::PatKind::App(head, spine) => {
                 let entry = self
-                    .old_glossary
+                    .old_book
                     .count
-                    .get(&head.data.0)
+                    .get(head.to_str())
                     .expect("Cannot find definition");
 
                 if !entry.is_ctr {
@@ -313,7 +312,7 @@ impl<'a> DesugarState<'a> {
         } else if pats.len() == args.len() - hidden {
             let mut res_pats = Vec::new();
             let mut pat_iter = pats.iter();
-            for arg in args.0.iter() {
+            for arg in args.iter() {
                 if arg.hidden {
                     res_pats.push(desugared::Expr::var(self.gen_name(arg.range)))
                 } else {
@@ -373,9 +372,9 @@ impl<'a> DesugarState<'a> {
             ));
         }
 
-        self.new_glossary
+        self.new_book
             .entrs
-            .insert(res_entry.name.data.0.clone(), Box::new(res_entry));
+            .insert(res_entry.name.to_string(), Box::new(res_entry));
     }
 
     pub fn desugar_top_level(&mut self, top_level: &concrete::TopLevel) {

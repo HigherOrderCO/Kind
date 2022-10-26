@@ -11,7 +11,7 @@ use fxhash::FxHashMap;
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::expr::{Binding, Case, CaseBinding, Destruct};
 use kind_tree::concrete::pat::PatIdent;
-use kind_tree::concrete::{Module, Book, TopLevel};
+use kind_tree::concrete::{Book, Module, TopLevel};
 use kind_tree::symbol::Ident;
 
 use kind_tree::concrete::{
@@ -40,21 +40,21 @@ impl UnboundCollector {
     }
 }
 
-pub fn get_glossary_unbound(
+pub fn get_module_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
-    glossary: &mut Book,
+    book: &mut Module,
 ) -> FxHashMap<String, Vec<Ident>> {
     let mut state = UnboundCollector::new(diagnostic_sender);
-    state.visit_glossary(glossary);
+    state.visit_module(book);
     state.unbound
 }
 
 pub fn get_book_unbound(
     diagnostic_sender: Sender<DiagnosticFrame>,
-    glossary: &mut Module,
+    book: &mut Book,
 ) -> FxHashMap<String, Vec<Ident>> {
     let mut state = UnboundCollector::new(diagnostic_sender);
-    state.visit_book(glossary);
+    state.visit_book(book);
     state.unbound
 }
 
@@ -63,7 +63,7 @@ impl Visitor for UnboundCollector {
 
     fn visit_ident(&mut self, ident: &mut Ident) {
         if self.context_vars.iter().all(|x| x.data != ident.data) && !ident.used_by_sugar {
-            let entry = self.unbound.entry(ident.data.0.clone()).or_default();
+            let entry = self.unbound.entry(ident.to_string()).or_default();
             entry.push(ident.clone());
         }
     }
@@ -98,7 +98,7 @@ impl Visitor for UnboundCollector {
     fn visit_entry(&mut self, entry: &mut Entry) {
         let vars = self.context_vars.clone();
 
-        for arg in &mut entry.args.0 {
+        for arg in entry.args.iter_mut() {
             self.visit_argument(arg)
         }
 
@@ -115,22 +115,21 @@ impl Visitor for UnboundCollector {
             TopLevel::SumType(entr) => {
                 self.context_vars.push(entr.name.clone());
                 for cons in &entr.constructors {
-                    let mut name_cons = cons.name.clone();
-                    name_cons.data.0 = format!("{}.{}", name_cons.data.0, cons.name.data.0);
+                    let name_cons = cons.name.add_base_ident(cons.name.to_str());
                     self.context_vars.push(name_cons);
                 }
 
                 let vars = self.context_vars.clone();
 
-                visit_vec!(&mut entr.parameters.0, arg => self.visit_argument(arg));
+                visit_vec!(entr.parameters.iter_mut(), arg => self.visit_argument(arg));
 
                 let inside_vars = self.context_vars.clone();
 
-                visit_vec!(&mut entr.indices.0, arg => self.visit_argument(arg));
+                visit_vec!(entr.indices.iter_mut(), arg => self.visit_argument(arg));
 
-                visit_vec!(&mut entr.constructors, cons => {
+                visit_vec!(entr.constructors.iter_mut(), cons => {
                     self.context_vars = inside_vars.clone();
-                    visit_vec!(&mut cons.args.0, arg => self.visit_argument(arg));
+                    visit_vec!(cons.args.iter_mut(), arg => self.visit_argument(arg));
                     visit_opt!(&mut cons.typ, arg => self.visit_expr(arg));
                 });
 
@@ -139,14 +138,13 @@ impl Visitor for UnboundCollector {
             TopLevel::RecordType(entr) => {
                 self.context_vars.push(entr.name.clone());
 
-                let mut name_cons = entr.name.clone();
-                name_cons.data.0 = format!("{}.{}", name_cons.data.0, entr.constructor.data.0);
+                let name_cons = entr.constructor.add_base_ident(entr.name.to_str());
                 self.context_vars.push(name_cons);
 
                 let inside_vars = self.context_vars.clone();
 
-                visit_vec!(&mut entr.parameters.0, arg => self.visit_argument(arg));
-                visit_vec!(&mut entr.fields, (_, _, typ) => {
+                visit_vec!(entr.parameters.iter_mut(), arg => self.visit_argument(arg));
+                visit_vec!(entr.fields.iter_mut(), (_, _, typ) => {
                     self.visit_expr(typ);
                 });
 
@@ -159,15 +157,15 @@ impl Visitor for UnboundCollector {
         }
     }
 
-    fn visit_book(&mut self, book: &mut kind_tree::concrete::Module) {
+    fn visit_module(&mut self, book: &mut kind_tree::concrete::Module) {
         for entr in &mut book.entries {
             self.visit_top_level(entr)
         }
     }
 
-    fn visit_glossary(&mut self, glossary: &mut Book) {
-        self.context_vars = glossary.names.values().cloned().collect();
-        for entr in glossary.entries.values_mut() {
+    fn visit_book(&mut self, book: &mut Book) {
+        self.context_vars = book.names.values().cloned().collect();
+        for entr in book.entries.values_mut() {
             self.visit_top_level(entr)
         }
     }
@@ -283,7 +281,7 @@ impl Visitor for UnboundCollector {
             ExprKind::Var(ident) => self.visit_ident(ident),
             ExprKind::Constr(ident) => {
                 if !self.context_vars.iter().any(|x| x.data == ident.data) {
-                    let entry = self.unbound.entry(ident.data.0.clone()).or_default();
+                    let entry = self.unbound.entry(ident.to_string()).or_default();
                     entry.push(ident.clone());
                 }
             }

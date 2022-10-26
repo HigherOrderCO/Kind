@@ -47,13 +47,13 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
     let name = sum.name.add_segment("match");
 
-    let mut types = Telescope::new();
+    let mut types = Telescope::default();
 
-    for arg in &sum.parameters.0 {
+    for arg in sum.parameters.iter() {
         types.push(arg.to_implicit())
     }
 
-    for arg in &sum.indices.0 {
+    for arg in sum.indices.iter() {
         types.push(arg.to_implicit())
     }
 
@@ -63,14 +63,14 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     let res_motive_ty = mk_app(
         mk_cons(sum.name.clone()),
         all_args
-            .into_iter()
+            .iter()
+            .cloned()
             .map(|x| Binding::Positional(mk_var(x.name)))
             .collect(),
     );
 
     let indice_names: Vec<Binding> = sum
         .indices
-        .0
         .iter()
         .map(|x| Binding::Positional(mk_var(x.name.clone())))
         .collect();
@@ -89,12 +89,8 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
     let motive_ident = Ident::new_static("motive", range);
 
-    let motive_type = sum.indices.0.iter().rfold(
-        mk_pi(
-            Ident::new_static("_val", range),
-            res_motive_ty.clone(),
-            mk_typ(),
-        ),
+    let motive_type = sum.indices.iter().rfold(
+        mk_pi(Ident::new_static("_val", range), res_motive_ty, mk_typ()),
         |out, arg| mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or(mk_typ()), out),
     );
 
@@ -110,7 +106,6 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
     for cons in &sum.constructors {
         let vars = cons
             .args
-            .0
             .iter()
             .map(|x| Binding::Positional(mk_var(x.name.clone())))
             .collect();
@@ -125,7 +120,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         indices_of_cons.push(Binding::Positional(cons_inst));
         let cons_tipo = mk_app(mk_var(motive_ident.clone()), indices_of_cons);
 
-        let cons_type = cons.args.0.iter().rfold(cons_tipo, |out, arg| {
+        let cons_type = cons.args.iter().rfold(cons_tipo, |out, arg| {
             mk_pi(arg.name.clone(), arg.typ.clone().unwrap_or(mk_typ()), out)
         });
 
@@ -138,7 +133,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
         });
     }
 
-    let mut res: Vec<Binding> = indice_names.clone();
+    let mut res: Vec<Binding> = indice_names;
     res.push(Binding::Positional(mk_var(Ident::generate("scrutinizer"))));
     let ret_ty = mk_app(mk_var(motive_ident), res);
 
@@ -150,7 +145,6 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
 
         let spine: Vec<Ident> = cons
             .args
-            .0
             .iter()
             .map(|x| x.name.with_name(|f| format!("{}_", f)))
             .collect();
@@ -159,11 +153,11 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
             data: concrete::pat::PatKind::App(
                 cons_ident.clone(),
                 spine
-                    .clone()
                     .iter()
+                    .cloned()
                     .map(|x| {
                         Box::new(Pat {
-                            data: concrete::pat::PatKind::Var(PatIdent(x.clone())),
+                            data: concrete::pat::PatKind::Var(PatIdent(x)),
                             range,
                         })
                     })
@@ -188,8 +182,7 @@ pub fn derive_match(range: Range, sum: &SumTypeDecl) -> concrete::Entry {
             mk_var(cons.name.clone()),
             spine
                 .iter()
-                .cloned()
-                .map(|arg| Binding::Positional(mk_var(arg)))
+                .map(|arg| Binding::Positional(mk_var(arg.clone())))
                 .collect(),
         );
 

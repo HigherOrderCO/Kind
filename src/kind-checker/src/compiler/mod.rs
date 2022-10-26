@@ -8,7 +8,7 @@ use self::tags::EvalTag;
 use self::tags::{operator_to_constructor, TermTag};
 use hvm::Term;
 use kind_span::Span;
-use kind_tree::desugared::{self, Expr, Book};
+use kind_tree::desugared::{self, Book, Expr};
 use kind_tree::symbol::Ident;
 
 use hvm::language as lang;
@@ -156,7 +156,7 @@ fn codegen_all_expr(
                 span_to_num(expr.span),
                 mk_u60(name.encode()),
                 codegen_all_expr(lhs_rule, lhs, num, quote, typ),
-                lam(&name, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
+                lam(name, codegen_all_expr(lhs_rule, lhs, num, quote, body)),
             ],
         ),
         Lambda(name, body) => mk_quoted_ctr(
@@ -364,7 +364,7 @@ fn codegen_rule(file: &mut lang::File, rule: &desugared::Rule) {
         rhs: codegen_expr(true, &rule.body),
     });
 
-    if rule.name.data.0 == "HVM.log" {
+    if rule.name.to_str() == "HVM.log" {
         file.rules.push(lang::Rule {
             lhs: mk_ctr(
                 TermTag::HoasF(rule.name.to_string()).to_string(),

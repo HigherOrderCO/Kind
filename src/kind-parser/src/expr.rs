@@ -1,7 +1,7 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::expr::*;
 use kind_tree::concrete::pat::PatIdent;
-use kind_tree::symbol::{Ident, Symbol};
+use kind_tree::symbol::Ident;
 use kind_tree::Operator;
 
 use crate::errors::SyntaxError;
@@ -120,14 +120,14 @@ impl<'a> Parser<'a> {
     pub fn parse_id(&mut self) -> Result<Ident, SyntaxError> {
         let range = self.range();
         let id = eat_single!(self, Token::LowerId(x) => x.clone())?;
-        let ident = Ident::new(Symbol(id), range);
+        let ident = Ident::new_static(&id, range);
         Ok(ident)
     }
 
     pub fn parse_upper_id(&mut self) -> Result<Ident, SyntaxError> {
         let range = self.range();
         let id = eat_single!(self, Token::UpperId(x) => x.clone())?;
-        let ident = Ident::new(Symbol(id), range);
+        let ident = Ident::new_static(&id, range);
         Ok(ident)
     }
 
@@ -200,7 +200,7 @@ impl<'a> Parser<'a> {
 
     fn parse_data(&mut self) -> Result<Box<Expr>, SyntaxError> {
         let id = self.parse_upper_id()?;
-        let data = match id.data.0.as_str() {
+        let data = match id.to_str() {
             "Type" => ExprKind::Lit(Literal::Type),
             "U60" => ExprKind::Lit(Literal::U60),
             _ => ExprKind::Constr(id.clone()),
@@ -327,11 +327,7 @@ impl<'a> Parser<'a> {
         self.advance();
         Ok(Box::new(Expr {
             range,
-            data: ExprKind::Lit(Literal::Help(Ident {
-                data: Symbol(str),
-                range,
-                used_by_sugar: false,
-            })),
+            data: ExprKind::Lit(Literal::Help(Ident::new(str, range))),
         }))
     }
 

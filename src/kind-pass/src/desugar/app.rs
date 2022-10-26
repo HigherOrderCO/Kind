@@ -17,7 +17,7 @@ impl<'a> DesugarState<'a> {
         head: Ident,
         spine: Vec<Box<desugared::Expr>>,
     ) -> Option<Vec<Box<desugared::Expr>>> {
-        let entry = self.old_glossary.get_count_garanteed(&head.data.0);
+        let entry = self.old_book.get_count_garanteed(head.to_str());
 
         let mut arguments = Vec::new();
 
@@ -25,7 +25,7 @@ impl<'a> DesugarState<'a> {
 
         if spine.len() == entry.arguments.len() - hidden {
             let mut spine_iter = spine.iter();
-            for arg in &entry.arguments.0 {
+            for arg in entry.arguments.iter() {
                 if arg.hidden {
                     arguments.push(self.gen_hole_expr())
                 } else {
@@ -76,10 +76,10 @@ impl<'a> DesugarState<'a> {
     ) -> Box<desugared::Expr> {
         match &head.data {
             ExprKind::Constr(entry_name) => {
-                let entry = self.old_glossary.get_count_garanteed(&entry_name.data.0);
+                let entry = self.old_book.get_count_garanteed(entry_name.to_str());
 
                 let mut positions = FxHashMap::default();
-                let mut arguments = vec![None; entry.arguments.0.len()];
+                let mut arguments = vec![None; entry.arguments.len()];
 
                 let (hidden, _erased) = entry.arguments.count_implicits();
 
@@ -104,20 +104,20 @@ impl<'a> DesugarState<'a> {
                 }
 
                 for i in 0..entry.arguments.len() {
-                    positions.insert(entry.arguments[i].name.data.0.clone(), i);
+                    positions.insert(entry.arguments[i].name.to_str(), i);
                 }
 
                 for arg in spine {
                     match arg {
                         Binding::Positional(_) => (),
                         Binding::Named(r, name, v) => {
-                            let pos = match positions.get(&name.data.0) {
+                            let pos = match positions.get(name.to_str()) {
                                 Some(pos) => *pos,
                                 None => {
                                     self.send_err(PassError::CannotFindField(
                                         name.range,
                                         entry_name.range,
-                                        entry_name.data.0.clone(),
+                                        entry_name.to_string(),
                                     ));
                                     continue;
                                 }

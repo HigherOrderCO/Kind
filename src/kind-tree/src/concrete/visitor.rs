@@ -13,7 +13,7 @@ use crate::{concrete::expr::*, concrete::Book};
 
 use super::pat::{Pat, PatIdent, PatKind};
 use super::TopLevel;
-use super::{Argument, Attribute, AttributeStyle, Module, Constructor, Entry, Rule};
+use super::{Argument, Attribute, AttributeStyle, Constructor, Entry, Module, Rule};
 
 #[macro_export]
 macro_rules! visit_vec {
@@ -83,8 +83,8 @@ pub trait Visitor: Sized {
         walk_argument(self, argument);
     }
 
-    fn visit_glossary(&mut self, glossary: &mut Book) {
-        walk_glossary(self, glossary)
+    fn visit_book(&mut self, book: &mut Book) {
+        walk_book(self, book)
     }
 
     fn visit_entry(&mut self, entry: &mut Entry) {
@@ -107,8 +107,8 @@ pub trait Visitor: Sized {
         walk_rule(self, rule);
     }
 
-    fn visit_book(&mut self, book: &mut Module) {
-        walk_book(self, book);
+    fn visit_module(&mut self, book: &mut Module) {
+        walk_module(self, book);
     }
 
     fn visit_substitution(&mut self, subst: &mut Substitution) {
@@ -144,8 +144,8 @@ pub fn walk_constructor<T: Visitor>(ctx: &mut T, cons: &mut Constructor) {
     visit_opt!(&mut cons.typ, arg => ctx.visit_expr(arg))
 }
 
-pub fn walk_glossary<T: Visitor>(ctx: &mut T, glossary: &mut Book) {
-    visit_vec!(&mut glossary.entries, (_, arg) => ctx.visit_top_level(arg));
+pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Book) {
+    visit_vec!(&mut book.entries, (_, arg) => ctx.visit_top_level(arg));
 }
 
 pub fn walk_pat_ident<T: Visitor>(ctx: &mut T, ident: &mut PatIdent) {
@@ -316,7 +316,7 @@ pub fn walk_top_level<T: Visitor>(ctx: &mut T, toplevel: &mut TopLevel) {
     }
 }
 
-pub fn walk_book<T: Visitor>(ctx: &mut T, book: &mut Module) {
+pub fn walk_module<T: Visitor>(ctx: &mut T, book: &mut Module) {
     for toplevel in &mut book.entries {
         walk_top_level(ctx, toplevel)
     }

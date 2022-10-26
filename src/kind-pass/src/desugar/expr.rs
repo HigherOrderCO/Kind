@@ -1,7 +1,7 @@
 use kind_span::{Locatable, Range};
 use kind_tree::concrete::{self, expr, Literal};
 use kind_tree::desugared;
-use kind_tree::symbol::{Ident, Symbol};
+use kind_tree::symbol::Ident;
 
 use crate::errors::{PassError, Sugar};
 
@@ -23,7 +23,11 @@ impl<'a> DesugarState<'a> {
         }
     }
 
-    pub(crate) fn desugar_sub(&mut self, range: Range, sub: &expr::Substitution) -> Box<desugared::Expr> {
+    pub(crate) fn desugar_sub(
+        &mut self,
+        range: Range,
+        sub: &expr::Substitution,
+    ) -> Box<desugared::Expr> {
         desugared::Expr::sub(
             range,
             sub.name.clone(),
@@ -69,13 +73,7 @@ impl<'a> DesugarState<'a> {
                     &|_, _| unreachable!(),
                 );
 
-                bind(
-                    self,
-                    sttm.range,
-                    name,
-                    res_val,
-                    res_destruct,
-                )
+                bind(self, sttm.range, name, res_val, res_destruct)
             }
             concrete::SttmKind::Ask(concrete::Destruct::Ident(name), val, next) => {
                 let res_expr = self.desugar_expr(val);
@@ -115,8 +113,8 @@ impl<'a> DesugarState<'a> {
         let bind_ident = typ.add_segment("bind");
         let pure_ident = typ.add_segment("pure");
 
-        let bind = self.old_glossary.entries.get(bind_ident.to_str());
-        let pure = self.old_glossary.entries.get(pure_ident.to_str());
+        let bind = self.old_book.entries.get(bind_ident.to_str());
+        let pure = self.old_book.entries.get(pure_ident.to_str());
 
         if bind.is_none() || pure.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::DoNotation));
@@ -133,9 +131,9 @@ impl<'a> DesugarState<'a> {
         typ: &expr::Expr,
         body: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let sigma = Ident::new(Symbol("Sigma".to_string()), range);
+        let sigma = Ident::new_static("Sigma", range);
 
-        let entry = self.old_glossary.entries.get(sigma.to_str());
+        let entry = self.old_book.entries.get(sigma.to_str());
         if entry.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::Sigma));
             return desugared::Expr::err(range);
@@ -154,14 +152,18 @@ impl<'a> DesugarState<'a> {
         self.mk_desugared_ctr(range, sigma, spine)
     }
 
-    pub(crate) fn desugar_list(&mut self, range: Range, expr: &[expr::Expr]) -> Box<desugared::Expr> {
-        let cons_ident = Ident::new(Symbol("List.cons".to_string()), range);
-        let nil_ident = Ident::new(Symbol("List.nil".to_string()), range);
-        let list_ident = Ident::new(Symbol("List".to_string()), range);
+    pub(crate) fn desugar_list(
+        &mut self,
+        range: Range,
+        expr: &[expr::Expr],
+    ) -> Box<desugared::Expr> {
+        let cons_ident = Ident::new_static("List.cons", range);
+        let nil_ident = Ident::new_static("List.nil", range);
+        let list_ident = Ident::new_static("List", range);
 
-        let list = self.old_glossary.entries.get(list_ident.to_str());
-        let nil = self.old_glossary.entries.get(cons_ident.to_str());
-        let cons = self.old_glossary.entries.get(nil_ident.to_str());
+        let list = self.old_book.entries.get(list_ident.to_str());
+        let nil = self.old_book.entries.get(cons_ident.to_str());
+        let cons = self.old_book.entries.get(nil_ident.to_str());
 
         if list.is_none() || nil.is_none() || cons.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::List));
@@ -184,9 +186,9 @@ impl<'a> DesugarState<'a> {
         if_: &expr::Expr,
         else_: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let bool_ident = Ident::new(Symbol("Bool.if".to_string()), range);
+        let bool_ident = Ident::new_static("Bool.if", range);
 
-        let bool_if = self.old_glossary.entries.get(bool_ident.to_str());
+        let bool_if = self.old_book.entries.get(bool_ident.to_str());
 
         if bool_if.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::BoolIf));
@@ -208,9 +210,9 @@ impl<'a> DesugarState<'a> {
         fst: &expr::Expr,
         snd: &expr::Expr,
     ) -> Box<desugared::Expr> {
-        let sigma_new = Ident::new(Symbol("Sigma.new".to_string()), range);
+        let sigma_new = Ident::new_static("Sigma.new", range);
 
-        let entry = self.old_glossary.entries.get(sigma_new.to_str());
+        let entry = self.old_book.entries.get(sigma_new.to_str());
         if entry.is_none() {
             self.send_err(PassError::NeedToImplementMethods(range, Sugar::Pair));
             return desugared::Expr::err(range);

@@ -20,12 +20,18 @@ pub use expr::*;
 
 /// A sequence of arguments that depends on the previous sequence
 /// it's similar to a iterated sigma type.
-#[derive(Debug, Clone, Default)]
-pub struct Telescope<T>(pub Vec<T>);
+#[derive(Debug, Clone)]
+pub struct Telescope<T>(Vec<T>);
+
+impl<T> Default for Telescope<T> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
 
 impl<T> Telescope<T> {
-    pub fn new() -> Telescope<T> {
-        Telescope(Vec::new())
+    pub fn new(vec: Vec<T>) -> Telescope<T> {
+        Telescope(vec)
     }
 
     pub fn len(&self) -> usize {
@@ -182,7 +188,7 @@ pub struct EntryMeta {
     pub range: Range,
 }
 
-/// A glossary stores definitions by name. It's generated
+/// A book stores definitions by name. It's generated
 /// by joining a bunch of books that are already resolved.
 #[derive(Clone, Debug, Default)]
 pub struct Book {
@@ -192,13 +198,13 @@ pub struct Book {
 }
 
 impl Book {
-    pub fn get_count_garanteed(&self, name: &String) -> &EntryMeta {
+    pub fn get_count_garanteed(&self, name: &str) -> &EntryMeta {
         self.count
             .get(name)
             .unwrap_or_else(|| panic!("Internal Error: Garanteed count {:?} failed", name))
     }
 
-    pub fn get_entry_garanteed(&self, name: &String) -> &TopLevel {
+    pub fn get_entry_garanteed(&self, name: &str) -> &TopLevel {
         self.entries
             .get(name)
             .unwrap_or_else(|| panic!("Internal Error: Garanteed entry {:?} failed", name))
@@ -391,6 +397,14 @@ impl<A> Telescope<A> {
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
+
+    pub fn iter(&self) -> std::slice::Iter<A> {
+        self.0.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<A> {
+        self.0.iter_mut()
+    }
 }
 
 impl<A> IntoIterator for Telescope<A> {
@@ -420,8 +434,8 @@ impl Telescope<Argument> {
 }
 
 impl SumTypeDecl {
-    pub fn extract_glossary_info(&self) -> EntryMeta {
-        let mut arguments = Telescope::new();
+    pub fn extract_book_info(&self) -> EntryMeta {
+        let mut arguments = Telescope::default();
         let mut hiddens = 0;
         let mut erased = 0;
 
@@ -448,8 +462,8 @@ impl SumTypeDecl {
 }
 
 impl Constructor {
-    pub fn extract_glossary_info(&self, def: &SumTypeDecl) -> EntryMeta {
-        let mut arguments = Telescope::new();
+    pub fn extract_book_info(&self, def: &SumTypeDecl) -> EntryMeta {
+        let mut arguments = Telescope::default();
         let mut hiddens = 0;
         let mut erased = 0;
 
@@ -503,8 +517,8 @@ impl RecordDecl {
         )
     }
 
-    pub fn extract_glossary_info(&self) -> EntryMeta {
-        let mut arguments = Telescope::new();
+    pub fn extract_book_info(&self) -> EntryMeta {
+        let mut arguments = Telescope::default();
         let mut hiddens = 0;
         let mut erased = 0;
 
@@ -523,8 +537,8 @@ impl RecordDecl {
         }
     }
 
-    pub fn extract_glossary_info_of_constructor(&self) -> EntryMeta {
-        let mut arguments = Telescope::new();
+    pub fn extract_book_info_of_constructor(&self) -> EntryMeta {
+        let mut arguments = Telescope::default();
         let mut hiddens = 0;
         let mut erased = 0;
 
@@ -553,8 +567,8 @@ impl RecordDecl {
 }
 
 impl Entry {
-    pub fn extract_glossary_info(&self) -> EntryMeta {
-        let mut arguments = Telescope::new();
+    pub fn extract_book_info(&self) -> EntryMeta {
+        let mut arguments = Telescope::default();
         let mut hiddens = 0;
         let mut erased = 0;
 

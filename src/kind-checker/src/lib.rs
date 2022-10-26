@@ -8,7 +8,7 @@ const CHECKER_HVM: &str = include_str!("checker.hvm");
 #[derive(Debug)]
 enum Report {
     Succeded,
-    Failed
+    Failed,
 }
 
 fn parse_report(term: Box<Term>) -> Report {

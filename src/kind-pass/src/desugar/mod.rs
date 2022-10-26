@@ -11,7 +11,7 @@ use kind_span::{Range, Span};
 use kind_tree::{
     concrete::{self},
     desugared,
-    symbol::{Ident, Symbol},
+    symbol::Ident,
 };
 
 use crate::errors::PassError;
@@ -24,25 +24,22 @@ pub mod top_level;
 
 pub struct DesugarState<'a> {
     pub errors: Sender<DiagnosticFrame>,
-    pub old_glossary: &'a concrete::Book,
-    pub new_glossary: desugared::Book,
+    pub old_book: &'a concrete::Book,
+    pub new_book: desugared::Book,
     pub name_count: u64,
     pub holes: u64,
 }
 
-pub fn desugar_glossary(
-    errors: Sender<DiagnosticFrame>,
-    glossary: &concrete::Book,
-) -> desugared::Book {
+pub fn desugar_book(errors: Sender<DiagnosticFrame>, book: &concrete::Book) -> desugared::Book {
     let mut state = DesugarState {
         errors,
-        old_glossary: glossary,
-        new_glossary: Default::default(),
+        old_book: book,
+        new_book: Default::default(),
         name_count: 0,
         holes: 0,
     };
-    state.desugar_glossary(glossary);
-    state.new_glossary
+    state.desugar_book(book);
+    state.new_book
 }
 
 impl<'a> DesugarState<'a> {
@@ -53,11 +50,7 @@ impl<'a> DesugarState<'a> {
 
     fn gen_name(&mut self, range: Range) -> Ident {
         self.name_count += 1;
-        Ident {
-            data: Symbol(format!("_x{}", self.name_count)),
-            range,
-            used_by_sugar: false,
-        }
+        Ident::new(format!("_x{}", self.name_count), range)
     }
 
     fn gen_hole_expr(&mut self) -> Box<desugared::Expr> {
@@ -71,8 +64,8 @@ impl<'a> DesugarState<'a> {
         self.errors.send(err.into()).unwrap()
     }
 
-    pub fn desugar_glossary(&mut self, glossary: &concrete::Book) {
-        for top_level in glossary.entries.values() {
+    pub fn desugar_book(&mut self, book: &concrete::Book) {
+        for top_level in book.entries.values() {
             self.desugar_top_level(top_level)
         }
     }

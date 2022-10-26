@@ -13,3 +13,4 @@ kind-derive = { path = "../kind-derive" }
 
 linked-hash-map = "0.5.6"
 fxhash = "0.2.1"
+im = "15.1.0"

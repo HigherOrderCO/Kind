@@ -19,8 +19,8 @@ impl<'a> Parser<'a> {
         Ok(Constructor {
             name,
             docs,
-            args: Telescope(args),
-            typ: typ,
+            args: Telescope::new(args),
+            typ,
         })
     }
 
@@ -54,8 +54,8 @@ impl<'a> Parser<'a> {
         Ok(SumTypeDecl {
             name,
             docs,
-            parameters: Telescope(parameters),
-            indices: Telescope(indices),
+            parameters: Telescope::new(parameters),
+            indices: Telescope::new(indices),
             constructors,
             attrs,
         })
@@ -96,7 +96,7 @@ impl<'a> Parser<'a> {
             name,
             docs,
             constructor,
-            parameters: Telescope(parameters),
+            parameters: Telescope::new(parameters),
             fields,
             attrs,
         })

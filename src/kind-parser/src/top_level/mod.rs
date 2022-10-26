@@ -1,6 +1,6 @@
 /// Parses all of the top level structures
 /// like Book, Entry, Rule and Argument.
-use kind_tree::concrete::{Argument, Attribute, Module, Entry, Rule, Telescope, TopLevel};
+use kind_tree::concrete::{Argument, Attribute, Entry, Module, Rule, Telescope, TopLevel};
 
 use crate::errors::SyntaxError;
 use crate::lexer::tokens::Token;
@@ -128,7 +128,10 @@ impl<'a> Parser<'a> {
 
         if self.get().is_lower_id() && self.is_top_level_entry_continuation() {
             let ident = self.parse_id()?;
-            return Err(SyntaxError::LowerCasedDefinition(ident.data.0, ident.range));
+            return Err(SyntaxError::LowerCasedDefinition(
+                ident.to_string(),
+                ident.range,
+            ));
         }
 
         // Just to make errors more localized
@@ -144,7 +147,7 @@ impl<'a> Parser<'a> {
         let typ = self.parse_expr(false)?;
         let mut rules = Vec::new();
         loop {
-            let res = self.try_single(&|parser| parser.parse_rule(ident.data.0.clone()))?;
+            let res = self.try_single(&|parser| parser.parse_rule(ident.to_string()))?;
             match res {
                 Some(res) => rules.push(res),
                 None => break,
@@ -160,7 +163,7 @@ impl<'a> Parser<'a> {
         Ok(Entry {
             name: ident,
             docs,
-            args: Telescope(args),
+            args: Telescope::new(args),
             typ,
             rules,
             attrs,

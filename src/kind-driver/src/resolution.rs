@@ -1,6 +1,6 @@
-//! Transforms a single book into a glossary by
+//! Transforms a single book into a book by
 //! reading it and it's dependencies. In the end
-//! it returns a desugared glossary of all of the
+//! it returns a desugared book of all of the
 //! depedencies.
 
 use std::collections::HashSet;
@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use kind_pass::desugar;
-use kind_pass::expand::expand_glossary;
+use kind_pass::expand::expand_book;
 use kind_pass::unbound::{self};
 use kind_report::data::DiagnosticFrame;
 use kind_tree::concrete::Book;
@@ -75,74 +75,64 @@ fn ident_to_path(
     }
 }
 
-fn try_to_insert_new_name<'a>(session: &'a Session, ident: Ident, glossary: &'a mut Book) {
-    if let Some(first_occorence) = glossary.names.get(ident.to_str()) {
+fn try_to_insert_new_name<'a>(session: &'a Session, ident: Ident, book: &'a mut Book) {
+    if let Some(first_occorence) = book.names.get(ident.to_str()) {
         session
             .diagnostic_sender
             .send(DriverError::DefinedMultipleTimes(first_occorence.clone(), ident).into())
             .unwrap();
     } else {
-        glossary.names.insert(ident.to_str().clone(), ident);
+        book.names.insert(ident.to_string(), ident);
     }
 }
 
-fn book_to_glossary<'a>(
+fn module_to_book<'a>(
     session: &'a Session,
-    book: &Module,
-    glossary: &'a mut Book,
+    module: &Module,
+    book: &'a mut Book,
 ) -> HashSet<String> {
     let mut public_names = HashSet::new();
 
-    for entry in &book.entries {
+    for entry in &module.entries {
         match &entry {
             TopLevel::SumType(sum) => {
-                public_names.insert(sum.name.to_str().clone());
-                try_to_insert_new_name(session, sum.name.clone(), glossary);
-                glossary
-                    .count
-                    .insert(sum.name.to_str().clone(), sum.extract_glossary_info());
+                public_names.insert(sum.name.to_string());
+                try_to_insert_new_name(session, sum.name.clone(), book);
+                book.count
+                    .insert(sum.name.to_string(), sum.extract_book_info());
 
-                glossary
-                    .entries
-                    .insert(sum.name.to_str().clone(), entry.clone());
+                book.entries.insert(sum.name.to_string(), entry.clone());
 
                 for cons in &sum.constructors {
                     let cons_ident = cons.name.add_base_ident(sum.name.to_str());
-                    public_names.insert(cons_ident.to_str().clone());
-                    glossary
-                        .count
-                        .insert(cons_ident.to_str().clone(), cons.extract_glossary_info(sum));
-                    try_to_insert_new_name(session, cons_ident, glossary);
+                    public_names.insert(cons_ident.to_string());
+                    book.count
+                        .insert(cons_ident.to_string(), cons.extract_book_info(sum));
+                    try_to_insert_new_name(session, cons_ident, book);
                 }
             }
             TopLevel::RecordType(rec) => {
-                public_names.insert(rec.name.to_str().clone());
-                glossary
-                    .count
-                    .insert(rec.name.to_str().clone(), rec.extract_glossary_info());
-                try_to_insert_new_name(session, rec.name.clone(), glossary);
+                public_names.insert(rec.name.to_string());
+                book.count
+                    .insert(rec.name.to_string(), rec.extract_book_info());
+                try_to_insert_new_name(session, rec.name.clone(), book);
 
-                glossary
-                    .entries
-                    .insert(rec.name.to_str().clone(), entry.clone());
+                book.entries.insert(rec.name.to_string(), entry.clone());
 
                 let cons_ident = rec.constructor.add_base_ident(rec.name.to_str());
-                public_names.insert(cons_ident.to_str().clone());
-                glossary.count.insert(
-                    cons_ident.to_str().clone(),
-                    rec.extract_glossary_info_of_constructor(),
+                public_names.insert(cons_ident.to_string());
+                book.count.insert(
+                    cons_ident.to_string(),
+                    rec.extract_book_info_of_constructor(),
                 );
-                try_to_insert_new_name(session, cons_ident, glossary);
+                try_to_insert_new_name(session, cons_ident, book);
             }
             TopLevel::Entry(entr) => {
-                try_to_insert_new_name(session, entr.name.clone(), glossary);
-                public_names.insert(entr.name.to_str().clone());
-                glossary
-                    .count
-                    .insert(entr.name.to_str().clone(), entr.extract_glossary_info());
-                glossary
-                    .entries
-                    .insert(entr.name.to_str().clone(), entry.clone());
+                try_to_insert_new_name(session, entr.name.clone(), book);
+                public_names.insert(entr.name.to_string());
+                book.count
+                    .insert(entr.name.to_string(), entr.extract_book_info());
+                book.entries.insert(entr.name.to_string(), entry.clone());
             }
         }
     }
@@ -153,50 +143,46 @@ fn book_to_glossary<'a>(
 fn parse_and_store_book_by_identifier<'a>(
     session: &mut Session,
     ident: &Ident,
-    glossary: &'a mut Book,
+    book: &'a mut Book,
 ) {
-    if glossary.entries.contains_key(ident.to_str()) {
+    if book.entries.contains_key(ident.to_str()) {
         return;
     }
 
     match ident_to_path(&session.root, ident, true) {
         Ok(None) => (),
-        Ok(Some(path)) => parse_and_store_book_by_path(session, &path, glossary),
+        Ok(Some(path)) => parse_and_store_book_by_path(session, &path, book),
         Err(err) => session.diagnostic_sender.send(err).unwrap(),
     }
 }
 
-fn parse_and_store_book_by_path<'a>(
-    session: &mut Session,
-    path: &PathBuf,
-    glossary: &'a mut Book,
-) {
+fn parse_and_store_book_by_path<'a>(session: &mut Session, path: &PathBuf, book: &'a mut Book) {
     let input = fs::read_to_string(path).unwrap();
     let ctx_id = session.book_counter;
 
-    let mut book = kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
+    let mut module = kind_parser::parse_book(session.diagnostic_sender.clone(), ctx_id, &input);
 
     session.add_path(Rc::new(path.to_path_buf()), Rc::new(input));
 
-    let unbound = unbound::get_book_unbound(session.diagnostic_sender.clone(), &mut book);
+    let unbound = unbound::get_module_unbound(session.diagnostic_sender.clone(), &mut module);
 
     for idents in unbound.values() {
-        parse_and_store_book_by_identifier(session, &idents[0], glossary);
+        parse_and_store_book_by_identifier(session, &idents[0], book);
     }
 
-    book_to_glossary(session, &book, glossary);
+    module_to_book(session, &module, book);
 }
 
-pub fn parse_and_store_glossary(session: &mut Session, path: &PathBuf) -> Option<Book> {
-    let mut glossary = Book::default();
+pub fn parse_and_store_book(session: &mut Session, path: &PathBuf) -> Option<Book> {
+    let mut book = Book::default();
 
-    parse_and_store_book_by_path(session, path, &mut glossary);
+    parse_and_store_book_by_path(session, path, &mut book);
 
-    let unbounds = unbound::get_glossary_unbound(session.diagnostic_sender.clone(), &mut glossary);
+    let unbounds = unbound::get_book_unbound(session.diagnostic_sender.clone(), &mut book);
 
     for idents in unbounds.values() {
         // Collects all of the similar names using jaro distance.
-        let similar_names = glossary
+        let similar_names = book
             .names
             .keys()
             .filter(|x| jaro(x, idents[0].to_str()).abs() > 0.8)
@@ -211,19 +197,18 @@ pub fn parse_and_store_glossary(session: &mut Session, path: &PathBuf) -> Option
     if !unbounds.is_empty() {
         None
     } else {
-        Some(glossary)
+        Some(book)
     }
 }
 
-pub fn type_check_glossary(session: &mut Session, path: &PathBuf) -> Option<()> {
-    let mut concrete_glossary = parse_and_store_glossary(session, path)?;
-    expand_glossary(&mut concrete_glossary);
+pub fn type_check_book(session: &mut Session, path: &PathBuf) -> Option<()> {
+    let mut concrete_book = parse_and_store_book(session, path)?;
+    expand_book(&mut concrete_book);
 
-    let desugared_glossary =
-        desugar::desugar_glossary(session.diagnostic_sender.clone(), &concrete_glossary);
+    let desugared_book = desugar::desugar_book(session.diagnostic_sender.clone(), &concrete_book);
 
-    println!("{}", desugared_glossary);
-    type_check(&desugared_glossary);
+    println!("{}", desugared_book);
+    type_check(&desugared_book);
 
     Some(())
 }
