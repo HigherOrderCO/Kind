@@ -5,8 +5,8 @@ use crate::book::name::Ident;
 use crate::book::Book;
 pub use crate::codegen::kdl::book::*;
 
-use rand::Rng;
 use std::collections::{HashMap, HashSet};
+use tiny_keccak::Hasher;
 
 pub const KDL_NAME_LEN: usize = 12;
 
@@ -165,21 +165,27 @@ pub fn to_kdl_book(book: Book, namespace: &Option<String>) -> Result<String, Str
 // Returns an err if any of the names can't be converted
 pub fn get_kdl_names(book: &CompBook, namespace: &Option<String>) -> Result<HashMap<Ident, Ident>, String> {
     // Fits a name to the max size allowed by kindelia.
-    // If the name is too large, truncates and replaces the last characters by random chars.
-    fn rand_shorten(name: &Ident, ns: &str) -> Ident {
+    // If the name is too large, uses the hash of the name instead
+    fn hash_shorten(name: &Ident, ns: &str) -> Ident {
         let max_fn_name = KDL_NAME_LEN - ns.len();
-        // If the name doesn't fit, truncate and insert some random characters at the end
         let name = if name.len() > max_fn_name {
-            let n_rnd_chrs = usize::min(3, max_fn_name);
-            let name_cut = name.0[..max_fn_name - n_rnd_chrs].to_string();
-            let mut rng = rand::thread_rng();
-            let rnd_chrs = (0..n_rnd_chrs).map(|_| rng.gen_range(0..63)).map(encode_base64).collect::<String>();
-            Ident(format!("{}{}", name_cut, rnd_chrs))
+            let name_hash = keccak128(name.0.as_bytes());
+            let name_hash = u128::from_le_bytes(name_hash);
+            let name_hash = u128_to_kdl_name(name_hash);
+            name_hash[..max_fn_name].to_string()
         } else {
-            name.clone()
+            name.0.clone()
         };
         Ident(format!("{}{}", ns, name))
     }
+
+    fn keccak128(data: &[u8]) -> [u8; 16] {
+        let mut hasher = tiny_keccak::Keccak::v256();
+        let mut output = [0u8; 16];
+        hasher.update(data);
+        hasher.finalize(&mut output);
+        output
+      }
 
     fn get_kdl_name(entry: &CompEntry, ns: &str) -> Result<Ident, String> {
         let kind_name = &entry.name;
@@ -202,24 +208,33 @@ pub fn get_kdl_names(book: &CompBook, namespace: &Option<String>) -> Result<Hash
                 Ident(format!("{}{}", ns, kdln))
             } else {
                 // For entries created by the flattener, we shorten even the kindelia name
-                rand_shorten(&kdln, ns)
+                hash_shorten(&kdln, ns)
             }
         }
         // Otherwise, try to fit the normal kind name
         else {
             let fixed_name = Ident(kind_name.0.replace('.', "_"));
-            rand_shorten(&fixed_name, ns)
+            hash_shorten(&fixed_name, ns)
         };
         Ok(kdln)
     }
 
-    fn encode_base64(num: u8) -> char {
+    fn encode_base64_u8(num: u8) -> char {
         match num {
             0..=9 => (num + b'0') as char,
             10..=35 => (num - 10 + b'A') as char,
             36..=61 => (num - 36 + b'a') as char,
             62.. => '_',
         }
+    }
+
+    fn u128_to_kdl_name(mut num: u128) -> String {
+        let mut encoded = [0 as char; 12];
+        for i in 0..12 {
+            encoded[i] = encode_base64_u8((num & 0x3f) as u8);
+            num >>= 6;
+        }
+        encoded.into_iter().collect()
     }
 
     let mut errors = Vec::new();
